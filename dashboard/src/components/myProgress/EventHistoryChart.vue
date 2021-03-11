@@ -157,7 +157,7 @@ limitations under the License.
       const numProjectsToSelect = Math.min(this.availableProjects.length, 4);
       const availableSortedByMostPoints = this.projects.available.sort((a, b) => b.points - a.points);
       this.projects.selected = availableSortedByMostPoints.slice(0, numProjectsToSelect);
-      // loadData() is called here because of the watch on `projects.selected`, which is triggered by the assignment above
+      // loadData() is not called here because of the watch on `projects.selected`, which is triggered by the assignment above
 
       // add listener for window resize events
       window.addEventListener('resize', this.updateToolbarOffset);
@@ -178,7 +178,10 @@ limitations under the License.
         if (!this.enoughOverallProjects) {
           return 'There are no projects available.';
         }
-        return 'Please select at least one project from the list above.';
+        if (!this.enoughProjectsSelected) {
+          return 'Please select at least one project from the list above.';
+        }
+        return 'There are no events for the selected project(s) and time period.';
       },
     },
     watch: {
@@ -205,7 +208,7 @@ limitations under the License.
         if (this.enoughOverallProjects && this.enoughProjectsSelected) {
           MetricsService.loadMyMetrics('allProjectsSkillEventsOverTimeMetricsBuilder', this.props)
             .then((response) => {
-              if (response && response.length > 0) {
+              if (response && response.length > 0 && this.notAllZeros(response)) {
                 this.hasData = true;
                 this.series = response.map((item) => {
                   const ret = {};
@@ -233,6 +236,9 @@ limitations under the License.
           this.hasData = false;
           this.loading = false;
         }
+      },
+      notAllZeros(data) {
+        return data.filter((item) => item.countsByDay.find((it) => it.num > 0)).length > 0;
       },
       updateToolbarOffset() {
         const toolbarElem = document.getElementsByClassName('apexcharts-toolbar')[0];
