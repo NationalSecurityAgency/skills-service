@@ -47,21 +47,18 @@ class UserAttrsService {
         if (!userAttrs) {
             userAttrs = new UserAttrs(userId: userId?.toLowerCase(), userIdForDisplay: userId)
         } else {
-            doSave = (userInfo.firstName && userAttrs.firstName != userInfo.firstName) ||
-                    (userInfo.lastName && userAttrs.lastName != userInfo.lastName) ||
-                    (userInfo.email && userAttrs.email != userInfo.email) ||
-                    (userInfo.userDn && userAttrs.dn != userInfo.userDn) ||
-                    (userInfo.nickname !=null && userAttrs.nickname != (userInfo.nickname ?: "")) ||
-                    (userInfo.usernameForDisplay && userAttrs.userIdForDisplay != userInfo.usernameForDisplay)
+            doSave = shouldUpdate(userInfo, userAttrs)
 
-            log.trace('UserInfo/UserAttrs: \n\tfirstName [{}/{}]\n\tlastName [{}]/[{}]\n\temail [{}]/[{}]\n\tuserDn [{}]/[{}]\n\tnickname [{}]/[{}]\n\tusernameForDisplay [{}]/[{}]\n\tlandingPage [{}]/[{}]',
-                    userInfo.firstName, userAttrs.firstName,
-                    userInfo.lastName, userAttrs.lastName,
-                    userInfo.email, userAttrs.email,
-                    userInfo.userDn, userAttrs.dn,
-                    userInfo.nickname, userAttrs.nickname,
-                    userInfo.usernameForDisplay, userAttrs.userIdForDisplay,
-            )
+            if (log.isTraceEnabled()) {
+                log.trace('UserInfo/UserAttrs: \n\tfirstName [{}/{}]\n\tlastName [{}]/[{}]\n\temail [{}]/[{}]\n\tuserDn [{}]/[{}]\n\tnickname [{}]/[{}]\n\tusernameForDisplay [{}]/[{}]\n\tlandingPage [{}]/[{}]',
+                        userInfo.firstName, userAttrs.firstName,
+                        userInfo.lastName, userAttrs.lastName,
+                        userInfo.email, userAttrs.email,
+                        userInfo.userDn, userAttrs.dn,
+                        userInfo.nickname, userAttrs.nickname,
+                        userInfo.usernameForDisplay, userAttrs.userIdForDisplay,
+                )
+            }
         }
         if (doSave) {
             populate(userAttrs, userInfo)
@@ -74,11 +71,22 @@ class UserAttrsService {
                     log.error(dataIntegrityViolationException.getMessage())
                     throw new SkillException("Received DataIntegrityViolation when attempting to insert UserAttrs for [${userId}] but entry does not exist")
                 }
-                populate(userAttrs, userInfo)
-                saveUserAttrsInLocalDb(userAttrs)
+                if (shouldUpdate(userInfo, userAttrs)) {
+                    populate(userAttrs, userInfo)
+                    saveUserAttrsInLocalDb(userAttrs)
+                }
             }
         }
         return userAttrs
+    }
+
+    private boolean shouldUpdate(UserInfo userInfo, UserAttrs userAttrs) {
+        return (userInfo.firstName && userAttrs.firstName != userInfo.firstName) ||
+                (userInfo.lastName && userAttrs.lastName != userInfo.lastName) ||
+                (userInfo.email && userAttrs.email != userInfo.email) ||
+                (userInfo.userDn && userAttrs.dn != userInfo.userDn) ||
+                (userInfo.nickname !=null && userAttrs.nickname != (userInfo.nickname ?: "")) ||
+                (userInfo.usernameForDisplay && userAttrs.userIdForDisplay != userInfo.usernameForDisplay)
     }
 
     private void populate(UserAttrs userAttrs, UserInfo userInfo) {
