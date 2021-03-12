@@ -180,12 +180,12 @@ class EmailNotifierSpecs extends DefaultIntSpec {
 
         greenMail.start()
 
-        assert WaitFor.wait { greenMail.getReceivedMessages().size() > 1 }
+        assert WaitFor.wait { greenMail.getReceivedMessages().length > 1 }
+        assert WaitFor.wait { loggerHelper.logEvents.find { it.message.startsWith("Retry: Dispatched [2] notification(s) with [0] error(s)") } }
 
         then:
         greenMail.getReceivedMessages().length == 2
         EmailUtils.getEmails(greenMail).collect { it.subj } == ["Test Subject", "Test Subject"]
-        loggerHelper.logEvents.find { it.message.startsWith("Retry: Dispatched [2] notification(s) with [0] error(s)") }
 
         notificationsRepo.count() == 0
 
