@@ -54,6 +54,24 @@ export default {
       selector: 'body #app .text-muted, body #app .text-secondary, body #app .text-secondary a',
       styleName: 'color',
     },
+    pageTitleFontSize: {
+      selector: 'body #app .skills-page-title-text-color .skills-title',
+      styleName: 'font-size',
+    },
+    backButton: {
+      padding: {
+        selector: 'body #app .skills-page-title-text-color .skills-theme-btn',
+        styleName: 'padding',
+      },
+      fontSize: {
+        selector: 'body #app .skills-page-title-text-color .skills-theme-btn',
+        styleName: 'font-size',
+      },
+      lineHeight: {
+        selector: 'body #app .skills-page-title-text-color .skills-theme-btn',
+        styleName: 'line-height',
+      },
+    },
     tiles: {
       backgroundColor: [{
         selector: 'body #app .card, body #app .card-header, body #app .card-body, body #app .card-footer',
