@@ -293,7 +293,7 @@ class SkillsLoader {
     @Profile
     UserPointHistorySummary loadPointHistorySummary(String projectId, String userId, int showHistoryForNumDays, String skillId = null, Integer version = Integer.MAX_VALUE) {
         List<SkillHistoryPoints> historyPoints = pointsHistoryBuilder.buildHistory(projectId, userId, showHistoryForNumDays, skillId, version)
-        List<Achievement> achievements = loadLevelAchievements(userId, projectId, skillId, historyPoints)
+        List<Achievement> achievements = loadLevelAchievements(userId, projectId, skillId, historyPoints, showHistoryForNumDays)
 
         return new UserPointHistorySummary (
                 pointsHistory: historyPoints,
@@ -302,9 +302,14 @@ class SkillsLoader {
     }
 
     @Profile
-    private List<Achievement> loadLevelAchievements(String userId, String projectId, String skillId, List<SkillHistoryPoints> historyPoints) {
+    private List<Achievement> loadLevelAchievements(String userId, String projectId, String skillId, List<SkillHistoryPoints> historyPoints, Integer numDaysBack=365) {
         List<Achievement> achievements
-        List<UserAchievement> userAchievements = achievedLevelRepository.findAllByUserIdAndProjectIdAndSkillIdAndLevelNotNull(userId, projectId, skillId)
+
+        List<UserAchievement> userAchievements = achievedLevelRepository.findAllByUserIdAndProjectIdAndSkillIdAndLevelNotNullAndAchievedOnAfter(userId,
+                projectId,
+                skillId,
+                new Date().minus(numDaysBack).clearTime())
+
         if (userAchievements) {
             // must sort levels in tje ascending order since multiple level achievements are joined in the name attribute
             userAchievements = userAchievements.sort({it.level})
