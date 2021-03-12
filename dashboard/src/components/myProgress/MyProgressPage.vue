@@ -43,16 +43,16 @@ limitations under the License.
                   </div>
                   <div>
                     <b-badge class="mr-1">1.</b-badge> click on the <img src="/static/img/screenshot_settingsButton.png"
-                                     alt="Screenshot Prod Mode settings nav"/> button on the top right and select <img
-                    src="/static/img/screenshot_projAdminNav.png" alt="Screenshot Prod Mode settings nav"/>
+                                     alt="Settings button screenshot"/> button on the top right and select <img
+                    src="/static/img/screenshot_projAdminNav.png" alt="Admin navigation button screenshot"/>
                   </div>
                   <div class="mt-2">
                     <b-badge class="mr-1">2.</b-badge> Create or edit a project and then navigate to the <img
-                    src="/static/img/screenshot_settingsTab.png" alt="Screenshot Prod Mode switch"/> tab
+                    src="/static/img/screenshot_settingsTab.png" alt="Settings tab screenshot"/> tab
                   </div>
                   <div class="mt-2">
                     <b-badge class="mr-1">3.</b-badge> Enable the <img class="border rounded"
-                    src="/static/img/screenshot_prodMode.png" alt="Screenshot Prod Mode switch"/> setting
+                    src="/static/img/screenshot_prodMode.png" alt="Production Mode switch screenshot"/> setting
                   </div>
                 </div>
               </b-card>
