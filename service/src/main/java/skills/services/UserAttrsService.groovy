@@ -18,6 +18,7 @@ package skills.services
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfo
@@ -42,35 +43,59 @@ class UserAttrsService {
 
         UserAttrs userAttrs = loadUserAttrsFromLocalDb(userId)
         boolean doSave = true
+
         if (!userAttrs) {
             userAttrs = new UserAttrs(userId: userId?.toLowerCase(), userIdForDisplay: userId)
         } else {
-            doSave = (userInfo.firstName && userAttrs.firstName != userInfo.firstName) ||
-                    (userInfo.lastName && userAttrs.lastName != userInfo.lastName) ||
-                    (userInfo.email && userAttrs.email != userInfo.email) ||
-                    (userInfo.userDn && userAttrs.dn != userInfo.userDn) ||
-                    (userInfo.nickname !=null && userAttrs.nickname != (userInfo.nickname ?: "")) ||
-                    (userInfo.usernameForDisplay && userAttrs.userIdForDisplay != userInfo.usernameForDisplay)
+            doSave = shouldUpdate(userInfo, userAttrs)
 
-            log.trace('UserInfo/UserAttrs: \n\tfirstName [{}/{}]\n\tlastName [{}]/[{}]\n\temail [{}]/[{}]\n\tuserDn [{}]/[{}]\n\tnickname [{}]/[{}]\n\tusernameForDisplay [{}]/[{}]\n\tlandingPage [{}]/[{}]',
-                    userInfo.firstName, userAttrs.firstName,
-                    userInfo.lastName, userAttrs.lastName,
-                    userInfo.email, userAttrs.email,
-                    userInfo.userDn, userAttrs.dn,
-                    userInfo.nickname, userAttrs.nickname,
-                    userInfo.usernameForDisplay, userAttrs.userIdForDisplay,
-            )
+            if (log.isTraceEnabled()) {
+                log.trace('UserInfo/UserAttrs: \n\tfirstName [{}/{}]\n\tlastName [{}]/[{}]\n\temail [{}]/[{}]\n\tuserDn [{}]/[{}]\n\tnickname [{}]/[{}]\n\tusernameForDisplay [{}]/[{}]\n\tlandingPage [{}]/[{}]',
+                        userInfo.firstName, userAttrs.firstName,
+                        userInfo.lastName, userAttrs.lastName,
+                        userInfo.email, userAttrs.email,
+                        userInfo.userDn, userAttrs.dn,
+                        userInfo.nickname, userAttrs.nickname,
+                        userInfo.usernameForDisplay, userAttrs.userIdForDisplay,
+                )
+            }
         }
         if (doSave) {
-            userAttrs.firstName = userInfo.firstName ?: userAttrs.firstName
-            userAttrs.lastName = userInfo.lastName ?: userAttrs.lastName
-            userAttrs.email = userInfo.email ?: userAttrs.email
-            userAttrs.dn = userInfo.userDn ?: userAttrs.dn
-            userAttrs.nickname = (userInfo.nickname != null ? userInfo.nickname : userAttrs.nickname) ?: ""
-            userAttrs.userIdForDisplay = userInfo.usernameForDisplay ?: userAttrs.userIdForDisplay
-            saveUserAttrsInLocalDb(userAttrs)
+            populate(userAttrs, userInfo)
+            try {
+                saveUserAttrsInLocalDb(userAttrs)
+            } catch (DataIntegrityViolationException dataIntegrityViolationException) {
+                log.warn("${dataIntegrityViolationException.getMessage()} received when trying to save userAttrs for [${userId}], fetching and retrying")
+                userAttrs = loadUserAttrsFromLocalDb(userId)
+                if (!userAttrs) {
+                    log.error(dataIntegrityViolationException.getMessage())
+                    throw new SkillException("Received DataIntegrityViolation when attempting to insert UserAttrs for [${userId}] but entry does not exist")
+                }
+                if (shouldUpdate(userInfo, userAttrs)) {
+                    populate(userAttrs, userInfo)
+                    saveUserAttrsInLocalDb(userAttrs)
+                }
+            }
         }
         return userAttrs
+    }
+
+    private boolean shouldUpdate(UserInfo userInfo, UserAttrs userAttrs) {
+        return (userInfo.firstName && userAttrs.firstName != userInfo.firstName) ||
+                (userInfo.lastName && userAttrs.lastName != userInfo.lastName) ||
+                (userInfo.email && userAttrs.email != userInfo.email) ||
+                (userInfo.userDn && userAttrs.dn != userInfo.userDn) ||
+                (userInfo.nickname !=null && userAttrs.nickname != (userInfo.nickname ?: "")) ||
+                (userInfo.usernameForDisplay && userAttrs.userIdForDisplay != userInfo.usernameForDisplay)
+    }
+
+    private void populate(UserAttrs userAttrs, UserInfo userInfo) {
+        userAttrs.firstName = userInfo.firstName ?: userAttrs.firstName
+        userAttrs.lastName = userInfo.lastName ?: userAttrs.lastName
+        userAttrs.email = userInfo.email ?: userAttrs.email
+        userAttrs.dn = userInfo.userDn ?: userAttrs.dn
+        userAttrs.nickname = (userInfo.nickname != null ? userInfo.nickname : userAttrs.nickname) ?: ""
+        userAttrs.userIdForDisplay = userInfo.usernameForDisplay ?: userAttrs.userIdForDisplay
     }
 
     private void validateUserId(String userId) {
