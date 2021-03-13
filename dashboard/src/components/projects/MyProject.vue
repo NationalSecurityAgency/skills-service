@@ -69,7 +69,6 @@ limitations under the License.
     mounted() {
       this.pinned = this.projectInternal.pinned;
       this.createCardOptions();
-      // this.checkIfProjectBelongsToGlobalBadge();
     },
     computed: {
       minimumPoints() {
@@ -94,7 +93,6 @@ limitations under the License.
       },
       createCardOptions() {
         this.cardOptions = {
-          // icon: this.project.iconClass,
           title: this.projectInternal.name,
           subTitle: `ID: ${this.projectInternal.projectId}`,
           stats: [{

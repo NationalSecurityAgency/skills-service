@@ -120,9 +120,11 @@ limitations under the License.
       changePassword() {
         this.resetInProgress = true;
         const reset = { resetToken: this.resetToken, userId: this.resetFields.email, password: this.resetFields.password };
+
         this.resetFailed = false;
         this.resetSuccessful = false;
         this.remoteError = null;
+
         AccessService.resetPassword(reset).then(() => {
           this.resetInProgress = false;
           this.$router.push({ name: 'ResetConfirmation', params: { countDown: 10 } });

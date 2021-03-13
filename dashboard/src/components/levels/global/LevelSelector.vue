@@ -96,6 +96,5 @@ limitations under the License.
   #skills-selector .multiselect__tag {
     background-color: lightblue;
     color: black;
-    /*margin: 10px;*/
   }
 </style>

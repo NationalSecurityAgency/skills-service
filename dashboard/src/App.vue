@@ -148,15 +148,6 @@ limitations under the License.
     min-height: calc(100vh - 50px);
   }
 
-  .container-fluid{
-    /*overflow: hidden;*/
-    /*padding: 0px !important;*/
-  }
-
-  /*.noPadding {*/
-  /*  padding: 0 !important;*/
-  /*}*/
-
   /* vue-table-2s bug? - "Filter:" label is not left aligned, this is a workaround */
   .vue-table-2 .form-inline label {
     justify-content: left !important;

@@ -17,10 +17,8 @@ import axios from 'axios';
 import store from '../store/store';
 
 function handleFunction(config) {
-  if (config && config.headers && config.headers['skills-client-lib-version']) {
-    const incomingVersion = config.headers['skills-client-lib-version'];
-    store.dispatch('updateLibVersionIfDifferent', incomingVersion);
-  }
+    const incomingVersion = config?.headers['skills-client-lib-version'];
+    if(incomingVersion) store.dispatch('updateLibVersionIfDifferent', incomingVersion);
 }
 
 // apply interceptor on response

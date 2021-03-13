@@ -159,7 +159,6 @@ limitations under the License.
           series.push([x, y]);
 
           baseXVal += 86400000;
-          // console.log(`${xValStartGrowing} <> ${x}`);
           i += 1;
         }
         return series;

@@ -150,8 +150,8 @@ limitations under the License.
             this.loadBadges();
           });
       },
-      handleHidden(e) {
-        if (!e || !e.update) {
+      handleHidden(event) {
+        if (!event || !event.update) {
           this.handleFocus();
         }
       },
