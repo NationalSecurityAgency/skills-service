@@ -18,7 +18,9 @@ import store from '../store/store';
 
 function handleFunction(config) {
     const incomingVersion = config?.headers['skills-client-lib-version'];
-    if(incomingVersion) store.dispatch('updateLibVersionIfDifferent', incomingVersion);
+    if (incomingVersion) {
+      store.dispatch('updateLibVersionIfDifferent', incomingVersion);
+    }
 }
 
 // apply interceptor on response

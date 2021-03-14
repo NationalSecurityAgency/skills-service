@@ -24,12 +24,12 @@ const devConfigPromise = require('../../build/webpack.dev.conf');
 
 let server;
 
-devConfigPromise.then(devConfig => {
+devConfigPromise.then((devConfig) => {
   const devServerOptions = devConfig.devServer;
   const compiler = webpack(webpackConfig);
   server = new DevServer(compiler, devServerOptions);
-  const port = devServerOptions.port;
-  const host = devServerOptions.host;
+  const { port } = devServerOptions;
+  const { host } = devServerOptions;
   return server.listen(port, host);
 })
 .then(() => {
@@ -51,13 +51,13 @@ devConfigPromise.then(devConfig => {
   const spawn = require('cross-spawn');
   const runner = spawn('./node_modules/.bin/nightwatch', opts, { stdio: 'inherit' });
 
-  runner.on('exit', function (code) {
+  runner.on('exit', (code) => {
     server.close();
     process.exit(code);
-  })
+  });
 
-  runner.on('error', function (err) {
+  runner.on('error', (err) => {
     server.close();
     throw err;
-  })
-})
+  });
+});

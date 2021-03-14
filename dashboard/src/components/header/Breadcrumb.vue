@@ -135,11 +135,8 @@ limitations under the License.
 
 <style scoped>
   .breadcrumb {
-
     /* 1*/
     background: linear-gradient(87deg, #264653, #2d8779);
-
-
     border-radius: 0px;
     margin: 0px;
     padding-left: 1.5rem;
