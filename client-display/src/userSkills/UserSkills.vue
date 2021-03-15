@@ -14,11 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="container">
+  <div>
     <skills-spinner :loading="loading.userSkills"/>
 
     <div v-if="!loading.userSkills">
-      <skills-title :back-button="false">User Skills</skills-title>
+      <skills-title :back-button="false">{{ pageTitle }}</skills-title>
 
       <user-skills-header :display-data="displayData" class="mb-3"/>
       <subjects-container v-if="!isSummaryOnly" :subjects="displayData.userSkills.subjects" />
@@ -71,6 +71,12 @@ limitations under the License.
       },
       isSummaryOnly() {
         return this.$store.state.isSummaryOnly;
+      },
+      pageTitle() {
+        if (this.$store.state.themeModule.landingPageTitle) {
+          return this.$store.state.themeModule.landingPageTitle;
+        }
+        return 'User Skills';
       },
     },
     mounted() {

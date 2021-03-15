@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="card mt-2 mb-3 p-0">
-    <div class="card-body skills-page-title-text-color bg-white text-info text-uppercase m-0 py-2">
+  <div class="card mb-3">
+    <div class="card-body skills-page-title-text-color text-info text-uppercase m-0 py-2">
       <div class="row position-absolute" v-if="backButton">
         <div class="col">
           <div>

@@ -21,7 +21,7 @@ limitations under the License.
                      title="Subjects have not been added yet." sub-title="Please contact this project's administrator."/>
       </div>
     </div>
-    <div v-else class="row pb-3">
+    <div v-else class="row">
       <div v-for="(subject, index) in subjects" :key="`unique-subject-${index}`"
         class="btn user-skill-subject-tile col-md-4"
         @click="openUserSkillSubject(subject, index)" >

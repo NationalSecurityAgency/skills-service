@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 export default {
-  nonCSSConfig: ['progressIndicators', 'charts'],
+  nonCSSConfig: ['progressIndicators', 'charts', 'landingPageTitle'],
   selectorKey: {
+    maxWidth: {
+      selector: 'body #app.skills-display-container',
+      styleName: 'max-width',
+    },
     backgroundColor: [{
       selector: 'body #app',
       styleName: 'background-color',

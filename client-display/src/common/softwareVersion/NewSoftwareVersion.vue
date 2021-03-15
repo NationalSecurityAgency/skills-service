@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-    <div class="container">
+    <div>
         <div v-if="showNewVersionAlert" class="mt-2 mb-3 card-body skills-page-title-text-color card rounded bg-white text-info">
             <h5>
                 <i class="fas fa-exclamation-circle"></i> New Skills Software Version is Available!! Please refresh the page.

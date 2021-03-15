@@ -79,6 +79,32 @@ describe('ThemeHelper', () => {
         expect(charts.axisLabelColor).toEqual('#f9f1f1');
     });
 
+    it('test theme generation - pageTitleFontSize prop', () => {
+        const theme = {
+            pageTitleFontSize: '2rem',
+        };
+        const res = ThemeHelper.build(theme);
+        const expected = 'body #app .skills-page-title-text-color .skills-title { font-size: 2rem !important } '
+            + 'body #app .apexcharts-menu.open { color: black !important; } body #app .apexcharts-tooltip { color: black !important; }';
+        expect(res.css).toEqual(expected);
+    });
+
+    it('test theme generation - backButton prop', () => {
+        const theme = {
+            backButton: {
+                padding: '5px 10px',
+                fontSize: '12px',
+                lineHeight: '1.5',
+            },
+        };
+        const res = ThemeHelper.build(theme);
+        const expected = 'body #app .skills-page-title-text-color .skills-theme-btn { padding: 5px 10px !important } '
+            + 'body #app .skills-page-title-text-color .skills-theme-btn { font-size: 12px !important } '
+            + 'body #app .skills-page-title-text-color .skills-theme-btn { line-height: 1.5 !important } '
+            + 'body #app .apexcharts-menu.open { color: black !important; } body #app .apexcharts-tooltip { color: black !important; }';
+        expect(res.css).toEqual(expected);
+    });
+
     it('bad theme - misspelled key', () => {
         const theme = {
             backgroundColor: '#626d7d',

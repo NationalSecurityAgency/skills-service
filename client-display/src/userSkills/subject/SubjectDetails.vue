@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-    <section class="container">
+    <section>
         <skills-spinner :loading="loading.userSkills"></skills-spinner>
 
         <div v-if="!loading.userSkills"
