@@ -51,7 +51,6 @@ limitations under the License.
     methods: {
       selectIcon() {
         this.$emit('select-icon');
-        /* this.$bvModal.show('icons'); */
       },
       onSelectedIcon(selectedIcon) {
         this.selectedIconClass = `${selectedIcon.css}`;

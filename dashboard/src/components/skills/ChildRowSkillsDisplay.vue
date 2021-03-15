@@ -196,8 +196,6 @@ limitations under the License.
   }
 
   .skill-url {
-    /*white-space: pre-line;*/
-    /*word-break: break-word;*/
     height: 1.5em;
     overflow: hidden;
     display: block;

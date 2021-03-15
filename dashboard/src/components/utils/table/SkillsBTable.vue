@@ -88,9 +88,6 @@ limitations under the License.
           <b-form-select :id="`pagination_select_${uid}`" v-model="pageSizeInternal" :options="options.pagination.possiblePageSizes"
                          size="sm" class="mx-2" style="width: 4rem;" :disabled="disabledPaging"
                          data-cy="skillsBTablePageSize" />
-  <!--        <b-button size="sm" v-b-tooltip.hover title="Download CSV" variant="outline-info" :disabled="disabled">-->
-  <!--          <i class="fas fa-download"></i>-->
-  <!--        </b-button>-->
         </span>
       </div>
     </div>

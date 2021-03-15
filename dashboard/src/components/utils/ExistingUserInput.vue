@@ -241,7 +241,6 @@ limitations under the License.
 <style>
   .existingUserInput .multiselect__content-wrapper {
     background: #f8f9fa;
-    /*border-width: 2px;*/
     border-color: #b1b1b1;
   }
 </style>

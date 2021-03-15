@@ -75,12 +75,6 @@ limitations under the License.
               enabled: true,
               sortMethod: 'directed',
               nodeSpacing: 350,
-              // treeSpacing: 1000,
-              // blockShifting: false,
-              // edgeMinimization: false,
-              // parentCentralization: false,
-              // levelSeparation: 1000,
-              // direction: 'UP',
             },
           },
           interaction: {

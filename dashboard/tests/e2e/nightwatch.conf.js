@@ -1,5 +1,5 @@
-require('babel-register')
-var config = require('../../config')
+require('babel-register');
+const config = require('../../config');
 
 // http://nightwatchjs.org/gettingstarted#settings-file
 module.exports = {
@@ -13,8 +13,8 @@ module.exports = {
     host: '127.0.0.1',
     port: 4444,
     cli_args: {
-      'webdriver.chrome.driver': require('chromedriver').path
-    }
+      'webdriver.chrome.driver': require('chromedriver').path,
+    },
   },
 
   test_settings: {
@@ -23,24 +23,24 @@ module.exports = {
       selenium_host: 'localhost',
       silent: true,
       globals: {
-        devServerURL: 'http://localhost:' + (process.env.PORT || config.dev.port)
-      }
+        devServerURL: `http://localhost:${process.env.PORT || config.dev.port}`,
+      },
     },
 
     chrome: {
       desiredCapabilities: {
         browserName: 'chrome',
         javascriptEnabled: true,
-        acceptSslCerts: true
-      }
+        acceptSslCerts: true,
+      },
     },
 
     firefox: {
       desiredCapabilities: {
         browserName: 'firefox',
         javascriptEnabled: true,
-        acceptSslCerts: true
-      }
-    }
-  }
-}
+        acceptSslCerts: true,
+      },
+    },
+  },
+};

@@ -45,7 +45,6 @@ limitations under the License.
   top: 5px;
 }
 .second {
-  /*top: -5px;*/
   color: #e9c369ff;
 }
 .third {

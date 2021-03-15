@@ -366,5 +366,4 @@ describe('SkillsUsageHelper', () => {
       .sort())
       .toEqual(['skill16', 'skill19', 'skill24', 'skill31', 'skill6']);
   });
-
 });

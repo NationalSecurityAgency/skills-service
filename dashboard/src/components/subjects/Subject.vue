@@ -167,8 +167,6 @@ limitations under the License.
     padding: 10px;
     border: 1px dotted #ddd;
     border-radius: 5px;
-    /*box-shadow: 0 22px 35px -16px rgba(0,0,0,0.1);*/
-    /*margin-bottom: 2rem;*/
   }
 
 </style>

@@ -99,7 +99,6 @@ limitations under the License.
   import IconPicker from '../utils/iconPicker/IconPicker';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import IdInput from '../utils/inputForm/IdInput';
-  // import IconManager from '../utils/iconPicker/IconManager';
   import InputSanitizer from '../utils/InputSanitizer';
   import InlineHelp from '../utils/InlineHelp';
 
