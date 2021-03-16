@@ -16,6 +16,7 @@
 package skills.controller.exceptions
 
 import groovy.util.logging.Slf4j
+import org.apache.commons.collections4.MapUtils
 import org.springframework.core.annotation.AnnotatedElementUtils
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.HttpHeaders
@@ -27,8 +28,10 @@ import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
+import org.springframework.web.context.request.ServletWebRequest
 import org.springframework.web.context.request.WebRequest
 import org.springframework.web.server.ResponseStatusException
+import org.springframework.web.servlet.function.ServerRequest
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 import skills.auth.SkillsAuthorizationException
 import skills.controller.exceptions.SkillException.SkillExceptionLogLevel
@@ -57,7 +60,7 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
         HttpStatus status = HttpStatus.BAD_REQUEST
         if (ex instanceof SkillException) {
             body = new DomainSpecificErrBody(userId: ex.userId, projectId: ex.projectId, skillId: ex.skillId, explanation: ex.message, errorCode: ex.errorCode.name())
-            String msg = "Exception for: projectId=[${ex.projectId}], skillId=${ex.skillId}"
+            String msg = "Exception for: projectId=[${ex.projectId}], skillId=${ex.skillId}, ${buildRequestInfo(webRequest)}"
             if (ex.userId) {
                 msg = "${msg}, userId=[${ex.userId}]"
             }
@@ -87,7 +90,7 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
             }
 
         } else {
-            log.error("Unexpected exception type [${ex?.class?.simpleName}]", ex)
+            log.error("Unexpected exception type [${ex?.class?.simpleName}], ${buildRequestInfo(webRequest)}", ex)
         }
         return new ResponseEntity(body, status)
     }
@@ -95,7 +98,7 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException)
     protected ResponseEntity<Object> handleDataIntegrityViolation(DataIntegrityViolationException violationException, WebRequest webRequest) {
         String msg = "Data Integrity Violation"
-        log.error(msg, violationException)
+        log.error("${buildRequestInfo(webRequest)} msg", violationException)
         BasicErrBody body = new BasicErrBody(explanation: msg, errorCode: ErrorCode.ConstraintViolation)
         return new ResponseEntity(body, HttpStatus.BAD_REQUEST)
     }
@@ -120,8 +123,8 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @Override
     ResponseEntity<Object> handleHttpMessageNotReadable(
             HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-        log.error("HttpMessageNotReadableException", ex)
-        String msg = ex.message
+        log.error("${buildRequestInfo(request)}, HttpMessageNotReadableException", ex)
+        String msg = "${ex.message}"
         BasicErrBody body = new BasicErrBody(explanation: msg, errorCode: ErrorCode.BadParam)
         return new ResponseEntity(body, HttpStatus.BAD_REQUEST)
     }
@@ -132,7 +135,7 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ResponseStatusException)
     protected ResponseEntity<Object> handleResponseStatusException(ResponseStatusException ex, WebRequest webRequest) {
         BasicErrBody body = new BasicErrBody(explanation: ex.message)
-        log.error(ex.message, ex)
+        log.error("${buildRequestInfo(webRequest)} ${ex.message}", ex)
         return new ResponseEntity(body, ex.status);
     }
 
@@ -157,15 +160,36 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
             message = 'Unexpected Error'
             body = new BasicErrBody(explanation: message)
         }
-        log.error(message, ex)
+        log.error("${buildRequestInfo(webRequest)}, $message", ex)
         // when calling handleExceptionInternal stack trace and err is added the response
         return new ResponseEntity(body, httpStatus);
     }
 
     @Override
     protected ResponseEntity<Object> handleExceptionInternal(Exception ex, @Nullable Object body, HttpHeaders headers, HttpStatus status, WebRequest request) {
-        log.error("Handling exception", ex)
+        log.error("${buildRequestInfo(request)} Handling exception", ex)
         return new ResponseEntity(body, headers, status);
+    }
+
+    private String buildRequestInfo(WebRequest request) {
+        String uriInfoFrag = request.getDescription(false)
+
+        String requestMethodFrag = ""
+        if (request instanceof ServletWebRequest) {
+            requestMethodFrag = "${request.getHttpMethod().toString()} "
+        }
+
+        List<String> params = []
+        Map<String, String[]> parameterMap = request.getParameterMap()
+        String paramsFrag = ""
+        if (parameterMap) {
+            parameterMap.each { String key, String[] value ->
+                params.add("${key}=${value.join(',')}")
+            }
+            paramsFrag = ", params=[${params.join(", ")}]"
+        }
+
+        return "${requestMethodFrag}${uriInfoFrag}$paramsFrag"
     }
 
 }
