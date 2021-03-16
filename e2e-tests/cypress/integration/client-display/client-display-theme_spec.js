@@ -203,9 +203,10 @@ describe('Client Display Tests', () => {
             cy.get('[data-cy=back]').should('have.css', 'color')
                 .and('equal', 'rgb(253, 251, 251)');
 
-            // wait for the bar (on the bar chart) to render
-            cy.wait(1000);
+
             cy.contains('You are Level 2!');
+            // wait for the bar (on the bar chart) to render
+            cy.get('[data-cy="levelBreakdownChart-animationEnded"]')
             cy.matchImageSnapshot(snapshotOptions);
         });
 

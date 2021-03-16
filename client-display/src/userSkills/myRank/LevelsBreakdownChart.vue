@@ -36,6 +36,7 @@ limitations under the License.
         :options="chartOptions"
         :series="chartSeries"
         height="330" type="bar"/>
+      <span v-if="animationEnded" data-cy="levelBreakdownChart-animationEnded"></span>
     </div>
   </div>
 </template>
@@ -44,9 +45,11 @@ limitations under the License.
   import VueApexCharts from 'vue-apexcharts';
   import Spinner from 'vue-simple-spinner';
   import numberFormatter from '../../common/filter/NumberFilter';
+  import ChartAnimEndedMixin from '../../common/utilities/ChartAnimEndedMixin';
 
   export default {
     name: 'LevelsBreakdownChart',
+    mixins: [ChartAnimEndedMixin],
     components: {
       apexchart: VueApexCharts,
       'vue-simple-spinner': Spinner,
