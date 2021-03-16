@@ -14,11 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-    <div class="container text-primary">
+    <div class="text-primary">
         <div v-if="!loading.dependencies && !loading.skill">
             <skills-title>Skill Overview</skills-title>
-            <skill-overview class="my-2" :skill="skill"></skill-overview>
-            <skill-dependencies v-if="dependencies && dependencies.length > 0" :dependencies="dependencies"
+            <skill-overview class="mt-2" :skill="skill"></skill-overview>
+            <skill-dependencies class="mt-2" v-if="dependencies && dependencies.length > 0" :dependencies="dependencies"
                                 :skill-id="$route.params.skillId"></skill-dependencies>
         </div>
         <div v-else>

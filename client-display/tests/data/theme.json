@@ -1,6 +1,14 @@
 {
+  "maxWidth": "100%",
   "backgroundColor": "#626d7d",
+  "landingPageTitle": "Themed User Skills",
   "pageTitleTextColor": "#fdfbfb",
+  "pageTitleFontSize": "1.5rem",
+  "backButton": {
+    "padding": "5px 10px",
+    "fontSize": "12px",
+    "lineHeight": "1.5"
+  },
   "textSecondaryColor": "#fdfdff",
   "textPrimaryColor": "#fdf9f9",
   "stars": {

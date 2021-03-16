@@ -14,20 +14,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-    <div class="py-2 mt-2 mb-3 card-body skills-page-title-text-color card rounded bg-white text-info text-uppercase">
-        <div v-if="backButton" class="position-absolute">
-            <h2>
-              <button @click="navigateBack" type="button" class="h2 btn btn-outline-info skills-theme-btn" data-cy="back" aria-label="navigate back">
-                <i class="fas fa-arrow-left"></i>
-                <span class="sr-only">Navigate back</span>
-              </button>
-            </h2>
+  <div class="card mb-3">
+    <div class="card-body skills-page-title-text-color text-info text-uppercase m-0 py-2">
+      <div class="row position-absolute" v-if="backButton">
+        <div class="col">
+          <div>
+            <button @click="navigateBack" type="button" class="btn btn-outline-info skills-theme-btn m-0" data-cy="back" aria-label="navigate back">
+              <i class="fas fa-arrow-left"></i>
+              <span class="sr-only">Navigate back</span>
+            </button>
+          </div>
         </div>
+      </div>
 
-        <h1 :class="{'ml-5': backButton}" data-cy="title" >
+        <h1 :class="{'ml-5': backButton}" data-cy="title" class="skills-title m-0" >
             <slot/>
         </h1>
     </div>
+  </div>
 </template>
 
 <script>

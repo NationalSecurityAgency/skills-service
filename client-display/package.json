@@ -13,14 +13,14 @@
     "licenseCheck": "npm run licenseHeaderCheck && npm run licenseDepCheck",
     "build": "npm run licenseCheck && npm run test:unit && vue-cli-service build",
     "build-lib": "NODE_ENV='production' && rm -rfv dist && vue-cli-service build --target lib --name userSkills './src/index.js'",
-    "deploy": "npm run build && rm -rf ../service/src/main/resources/public/static/clientPortal && cp -rT dist ../service/src/main/resources/public/static/clientPortal && cp -rT dist ../service/target/classes/public/static/clientPortal ",
+    "deploy": "npm run build && mkdir -p ../service/src/main/resources/public/static/ && mkdir -p ../service/target/classes/public/static && rm -rf ../service/src/main/resources/public/static/clientPortal && cp -rT dist ../service/src/main/resources/public/static/clientPortal && cp -rT dist ../service/target/classes/public/static/clientPortal ",
     "lint": "vue-cli-service lint",
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "5.14.0",
     "animate.css": "4.1.1",
-    "apexcharts": "3.25.0",
+    "apexcharts": "3.26.0",
     "axios": "0.21.1",
     "axios-auth-refresh": "3.0.0",
     "bootstrap": "4.5.2",

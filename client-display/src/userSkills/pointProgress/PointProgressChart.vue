@@ -33,6 +33,7 @@ limitations under the License.
     <div class="card-body m-0 mr-1 p-0 apex-chart-container">
       <apexchart ref="ptChart" id="points-chart" v-if="!loading.inProgress && hasData" :options="chartOptions"
                  :series="chartSeries" height="200" type="area" />
+      <span v-if="animationEnded" data-cy="pointHistoryChart-animationEnded"></span>
       <point-history-chart-placeholder v-if="loading.inProgress || !hasData" />
     </div>
     <button v-if="chartWasZoomed" @click="resetZoom"
@@ -47,8 +48,10 @@ limitations under the License.
   import PointProgressHelper from '@/userSkills/pointProgress/PointProgressHelper';
   import PointHistoryChartPlaceholder from '@/userSkills/pointProgress/PointHistoryChartPlaceholder';
   import numberFormatter from '../../common/filter/NumberFilter';
+  import ChartAnimEndedMixin from '../../common/utilities/ChartAnimEndedMixin';
 
   export default {
+    mixins: [ChartAnimEndedMixin],
     components: {
       PointHistoryChartPlaceholder,
       apexchart: VueApexCharts,

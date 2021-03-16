@@ -14,20 +14,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <apexchart :options="chartOption" :series="series" height="200" type="area"/>
+  <div>
+    <apexchart :options="chartOptions" :series="series" height="200" type="area"/>
+    <span v-if="animationEnded" data-cy="pointHistoryChartPlaceholder-animationEnded"></span>
+  </div>
 </template>
 
 <script>
   import VueApexCharts from 'vue-apexcharts';
+  import ChartAnimEndedMixin from '../../common/utilities/ChartAnimEndedMixin';
 
   export default {
     name: 'PointHistoryChartPlaceholder',
+    mixins: [ChartAnimEndedMixin],
     components: {
       apexchart: VueApexCharts,
     },
     data() {
       return {
-        chartOption: {
+        chartOptions: {
           chart: {
             type: 'area',
             toolbar: {

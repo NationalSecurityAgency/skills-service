@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-    <div class="flex-fill card mb-5">
+    <div class="flex-fill card">
         <div class="card-header">
             <h6 class="card-title mb-0 float-left text-uppercase">
                 Badges Catalog

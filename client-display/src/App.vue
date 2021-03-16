@@ -16,6 +16,7 @@ limitations under the License.
 <template>
   <div
     id="app"
+    class="container-fluid skills-display-container py-2"
     :style="appStyleObject" role="main" aria-label="SkillTree Client Display">
     <new-software-version-component/>
     <router-view />
@@ -118,7 +119,11 @@ limitations under the License.
           // populate store so JS can subscribe to those values and update styles
           const self = this;
           themeResArtifacts.themeModule.forEach((value, key) => {
-            self.$store.state.themeModule[key] = { ...self.$store.state.themeModule[key], ...value };
+            if (typeof value === 'object') {
+              self.$store.state.themeModule[key] = { ...self.$store.state.themeModule[key], ...value };
+            } else {
+              self.$store.state.themeModule[key] = value;
+            }
           });
 
           const style = document.createElement('style');
@@ -143,6 +148,10 @@ limitations under the License.
   @import '../node_modules/material-icons/iconfont/material-icons.css';
   @import '../node_modules/material-icons/css/material-icons.css';
   @import '../node_modules/@fortawesome/fontawesome-free/css/all.css';
+
+  .skills-display-container {
+    max-width: 1140px;
+  }
 
   #app {
     /*max-width: 1100px;*/

@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 export default {
-  nonCSSConfig: ['progressIndicators', 'charts'],
+  nonCSSConfig: ['progressIndicators', 'charts', 'landingPageTitle'],
   selectorKey: {
+    maxWidth: {
+      selector: 'body #app.skills-display-container',
+      styleName: 'max-width',
+    },
     backgroundColor: [{
       selector: 'body #app',
       styleName: 'background-color',
@@ -53,6 +57,24 @@ export default {
     textSecondaryColor: {
       selector: 'body #app .text-muted, body #app .text-secondary, body #app .text-secondary a',
       styleName: 'color',
+    },
+    pageTitleFontSize: {
+      selector: 'body #app .skills-page-title-text-color .skills-title',
+      styleName: 'font-size',
+    },
+    backButton: {
+      padding: {
+        selector: 'body #app .skills-page-title-text-color .skills-theme-btn',
+        styleName: 'padding',
+      },
+      fontSize: {
+        selector: 'body #app .skills-page-title-text-color .skills-theme-btn',
+        styleName: 'font-size',
+      },
+      lineHeight: {
+        selector: 'body #app .skills-page-title-text-color .skills-theme-btn',
+        styleName: 'line-height',
+      },
     },
     tiles: {
       backgroundColor: [{

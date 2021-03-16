@@ -193,6 +193,22 @@ describe('Client Display Tests', () => {
 
             cy.cdInitProjWithSkills();
 
+            const m = moment.utc('2020-09-12 11', 'YYYY-MM-DD HH');
+            for (let i = 0; i < 5; i += 1) {
+                cy.request('POST', `/api/projects/proj1/skills/skill1`, {
+                    userId: `user${i}`,
+                    timestamp: m.clone()
+                        .add(1, 'day')
+                        .format('x')
+                });
+                cy.request('POST', `/api/projects/proj1/skills/skill1`, {
+                    userId: `user${i}`,
+                    timestamp: m.clone()
+                        .add(2, 'day')
+                        .format('x')
+                });
+            }
+
             cy.cdVisit('/?enableTheme=true')
 
             // back button - border color
@@ -203,9 +219,10 @@ describe('Client Display Tests', () => {
             cy.get('[data-cy=back]').should('have.css', 'color')
                 .and('equal', 'rgb(253, 251, 251)');
 
-            // wait for the bar (on the bar chart) to render
-            cy.wait(1000);
+
             cy.contains('You are Level 2!');
+            // wait for the bar (on the bar chart) to render
+            cy.get('[data-cy="levelBreakdownChart-animationEnded"]');
             cy.matchImageSnapshot(snapshotOptions);
         });
 

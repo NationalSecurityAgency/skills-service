@@ -37,7 +37,15 @@ limitations under the License.
         projectId: this.$route.params.projectId,
         skillsVersion: 0,
         theme: {
-          pageTitleTextColor: '#264653ff',
+          landingPageTitle: `PROJECT: ${this.$route.params.projectId}`,
+          maxWidth: '100%',
+          pageTitleTextColor: '#212529',
+          pageTitleFontSize: '1.5rem',
+          backButton: {
+            padding: '5px 10px',
+            fontSize: '12px',
+            lineHeight: '1.5',
+          },
         },
       };
     },

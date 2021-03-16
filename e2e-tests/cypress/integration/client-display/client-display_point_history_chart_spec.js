@@ -17,8 +17,6 @@ var moment = require('moment-timezone');
 
 describe('Client Display Tests', () => {
 
-    const waitForAnimation = 3000;
-
     beforeEach(() => {
         Cypress.env('disabledUILoginProp', true);
         cy.request('POST', '/app/projects/proj1', {
@@ -110,8 +108,7 @@ describe('Client Display Tests', () => {
         cy.wait('@getPointHistory');
 
         // let's wait for animation to complete
-        cy.wait(waitForAnimation);
-
+        cy.get('[data-cy="pointHistoryChart-animationEnded"]')
         cy.get('[data-cy=pointHistoryChart]').matchImageSnapshot();
         cy.customA11y();
     });
@@ -238,8 +235,7 @@ describe('Client Display Tests', () => {
         cy.wait('@getPointHistory');
 
         // let's wait for animation to complete
-        cy.wait(waitForAnimation);
-
+        cy.get('[data-cy="pointHistoryChart-animationEnded"]')
         cy.get('[data-cy=pointHistoryChart]').matchImageSnapshot();
     });
 
@@ -292,8 +288,7 @@ describe('Client Display Tests', () => {
         cy.wait('@getPointHistory');
 
         // let's wait for animation to complete
-        cy.wait(waitForAnimation);
-
+        cy.get('[data-cy="pointHistoryChart-animationEnded"]')
         cy.get('[data-cy=pointHistoryChart]').matchImageSnapshot();
     });
 
@@ -346,8 +341,7 @@ describe('Client Display Tests', () => {
         cy.wait('@getPointHistory');
 
         // let's wait for animation to complete
-        cy.wait(waitForAnimation);
-
+        cy.get('[data-cy="pointHistoryChart-animationEnded"]')
         cy.get('[data-cy=pointHistoryChart]').matchImageSnapshot();
     });
 
@@ -400,8 +394,7 @@ describe('Client Display Tests', () => {
         cy.wait('@getPointHistory');
 
         // let's wait for animation to complete
-        cy.wait(waitForAnimation);
-
+        cy.get('[data-cy="pointHistoryChart-animationEnded"]')
         cy.get('[data-cy=pointHistoryChart]').matchImageSnapshot();
     });
 
@@ -472,8 +465,7 @@ describe('Client Display Tests', () => {
         cy.wait('@getPointHistory');
 
         // let's wait for animation to complete
-        cy.wait(waitForAnimation);
-
+        cy.get('[data-cy="pointHistoryChart-animationEnded"]')
         cy.get('[data-cy=pointHistoryChart]').matchImageSnapshot();
         cy.customA11y();
     });
@@ -543,8 +535,7 @@ describe('Client Display Tests', () => {
         cy.wait('@getPointHistory');
 
         // let's wait for animation to complete
-        cy.wait(waitForAnimation);
-
+        cy.get('[data-cy="pointHistoryChart-animationEnded"]')
         cy.get('[data-cy=pointHistoryChart]').matchImageSnapshot();
     });
 
@@ -588,8 +579,7 @@ describe('Client Display Tests', () => {
         cy.wait('@getPointHistory');
 
         // let's wait for animation to complete
-        cy.wait(waitForAnimation);
-
+        cy.get('[data-cy="pointHistoryChart-animationEnded"]')
         cy.get('[data-cy=pointHistoryChart]').matchImageSnapshot();
     });
 
@@ -627,12 +617,12 @@ describe('Client Display Tests', () => {
         cy.wait('@getPointHistory');
 
         // let's wait for animation to complete
-        cy.wait(waitForAnimation);
-
+        cy.get('[data-cy="pointHistoryChart-animationEnded"]')
         cy.get('[data-cy=pointHistoryChart]').matchImageSnapshot();
 
         cy.contains('Reset Zoom').click();
-        cy.wait(waitForAnimation);
+        // unfortunately just have to wait for animation to end by guessing max time
+        cy.wait(7000)
         cy.get('[data-cy=pointHistoryChart]').matchImageSnapshot('PointHistoryChart-Reset');
     });
 
@@ -673,8 +663,7 @@ describe('Client Display Tests', () => {
         cy.wait('@getPointHistorySubject');
 
         // let's wait for animation to complete
-        cy.wait(waitForAnimation);
-
+        cy.get('[data-cy="pointHistoryChart-animationEnded"]')
         cy.get('[data-cy=pointHistoryChart]').matchImageSnapshot();
     });
 
@@ -683,8 +672,7 @@ describe('Client Display Tests', () => {
         cy.intercept('/api/projects/proj1/pointHistory').as('getPointHistory');
         cy.wait('@getPointHistory')
         // let's wait for animation to complete
-        cy.wait(waitForAnimation);
-
+        cy.get('[data-cy="pointHistoryChartPlaceholder-animationEnded"]')
         cy.get('[data-cy=pointHistoryChart]').matchImageSnapshot();
     });
 
@@ -743,7 +731,7 @@ describe('Client Display Tests', () => {
         cy.wait('@getPointHistory');
 
         // let's wait for animation to complete
-        cy.wait(waitForAnimation);
+        cy.get('[data-cy="pointHistoryChart-animationEnded"]')
         cy.get('[data-cy=pointHistoryChart]').matchImageSnapshot();
     });
 
