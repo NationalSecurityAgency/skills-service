@@ -83,7 +83,7 @@ limitations under the License.
           plotOptions: {
             bar: {
               columnWidth: '50%',
-              endingShape: 'rounded',
+              borderRadius: 5,
             },
           },
           dataLabels: {

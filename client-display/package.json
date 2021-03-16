@@ -20,7 +20,7 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "5.14.0",
     "animate.css": "4.1.1",
-    "apexcharts": "3.25.0",
+    "apexcharts": "3.26.0",
     "axios": "0.21.1",
     "axios-auth-refresh": "3.0.0",
     "bootstrap": "4.5.2",
