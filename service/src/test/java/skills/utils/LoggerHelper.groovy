@@ -15,6 +15,7 @@
  */
 package skills.utils
 
+import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
@@ -35,11 +36,17 @@ class LoggerHelper {
     }
 
     List<ILoggingEvent> getLogEvents() {
-        return listAppender.list.findAll { it.timeStamp > start }
+        return listAppender.list.findAll {
+            return it.timeStamp > start
+        }
     }
 
     boolean hasLogMsgStartsWith(String str) {
         return getLogEvents().find { it.message.startsWith(str) }
+    }
+
+    boolean hasError() {
+        return getLogEvents().find {it.level == Level.ERROR }
     }
 
     void stop() {
