@@ -212,7 +212,7 @@ describe('Cross-project Skills Tests', () => {
         cy.validateTable(sharedWithOtherTableSelector, [
             [{ colIndex: 0,  value: 'Very Great Skill # 1' }, { colIndex: 1,  value: 'Project 2' }],
             [{ colIndex: 0,  value: 'Very Great Skill # 2' }, { colIndex: 1,  value: 'Project 2' }],
-        ], 5, true, null, false);
+        ], 5, true, null, false, 'Shared Skill');
 
         cy.get(`${sharedWithOtherTableSelector} [data-cy="sharedSkillsTable-removeBtn"]`).first().click();
         cy.validateTable(sharedWithOtherTableSelector, [
