@@ -136,13 +136,9 @@ class SkillsLoader {
     @Transactional(readOnly = true)
     MyProgressSummary loadMyProgressSummary(String userId, Integer version = -1) {
         MyProgressSummary myProgressSummary = new MyProgressSummary()
-        List<ProjDef> allProjectDefs = projDefRepo.findAll()
-        myProgressSummary.totalProjects = allProjectDefs.size()
-        // filter out projects that do not have "production mode" enabled
-        allProjectDefs = allProjectDefs.grep({ProjDef projDef ->
-            settingsService.getProjectSetting(projDef.projectId, Settings.PRODUCTION_MODE.settingName)?.value == 'true'
-        })
-        for (ProjDef projDef : allProjectDefs) {
+        List<ProjDef> prodProjectDefs = projDefRepo.getProjectsInProduction()
+        myProgressSummary.totalProjects = projDefRepo.count()?.intValue()
+        for (ProjDef projDef : prodProjectDefs) {
             ProjectSummary summary = new ProjectSummary(projectId: projDef.projectId, projectName: projDef.name)
             SkillsRanking ranking = rankingLoader.getUserSkillsRanking(projDef.projectId, userId);
             summary.totalUsers = ranking.numUsers

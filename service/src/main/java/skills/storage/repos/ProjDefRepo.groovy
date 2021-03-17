@@ -53,4 +53,7 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
 
     @Query("select p from ProjDef p where lower(p.name) LIKE %?1% and p.projectId<>?2" )
     List<ProjDef> queryProjectsByNameQueryAndNotProjectId(String nameQuery, String notProjectId, Pageable pageable)
+
+    @Query("select p from ProjDef p, Setting s where p.projectId = s.projectId and s.setting = 'production.mode.enabled' and s.value = 'true' order by p.projectId")
+    List<ProjDef> getProjectsInProduction()
 }
