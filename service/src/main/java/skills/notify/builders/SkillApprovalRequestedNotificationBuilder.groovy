@@ -36,11 +36,11 @@ class SkillApprovalRequestedNotificationBuilder implements NotificationEmailBuil
     }
 
     @Override
-    Res build(Notification notification) {
+    Res build(Notification notification, Formatting formatting) {
         def parsed = jsonSlurper.parseText(notification.encodedParams)
-        Context context = buildThymeleafContext(parsed)
+        Context context = buildThymeleafContext(parsed, formatting)
         String htmlBody = thymeleafTemplateEngine.process("skill_approval_request.html", context)
-        String plainText = buildPlainText(parsed)
+        String plainText = buildPlainText(parsed, formatting)
         return new Res(
                 subject: "SkillTree Points Requested",
                 html: htmlBody,
@@ -48,7 +48,7 @@ class SkillApprovalRequestedNotificationBuilder implements NotificationEmailBuil
         )
     }
 
-    private Context buildThymeleafContext(parsed) {
+    private Context buildThymeleafContext(Object parsed, Formatting formatting) {
         Context templateContext = new Context()
         templateContext.setVariable("userRequesting", parsed.userRequesting)
         templateContext.setVariable("numPoints", String.format("%,d", parsed.numPoints))
@@ -59,12 +59,14 @@ class SkillApprovalRequestedNotificationBuilder implements NotificationEmailBuil
         templateContext.setVariable("projectId", parsed.projectId)
         templateContext.setVariable("publicUrl", parsed.publicUrl)
         templateContext.setVariable("projectName", parsed.projectName)
+        templateContext.setVariable("header", formatting.htmlHeader)
+        templateContext.setVariable("footer", formatting.htmlFooter)
 
         return templateContext
     }
 
-    private String buildPlainText(parsed) {
-        return "User ${parsed.userRequesting} requested points.\n" +
+    private String buildPlainText(Object parsed, Formatting formatting) {
+        String pt = "User ${parsed.userRequesting} requested points.\n" +
                 "\n   Approval URL: ${parsed.approveUrl}" +
                 "\n   User Requested: ${parsed.userRequesting}" +
                 "\n   Project: ${parsed.projectName}" +
@@ -76,6 +78,15 @@ class SkillApprovalRequestedNotificationBuilder implements NotificationEmailBuil
                 "\n\n" +
                 "\nAlways yours," +
                 "\nSkillTree Bot"
+
+        if (formatting.plaintextHeader) {
+            pt = "${formatting.plaintextHeader}\n${pt}"
+        }
+        if (formatting.plaintextFooter) {
+            pt = "${pt}\n${formatting.plaintextFooter}"
+        }
+
+        return pt
 
     }
 

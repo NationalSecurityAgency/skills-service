@@ -47,10 +47,10 @@ class NotificationEmailBuilderManager {
         log.info("Loaded [${lookup.size()}] builders: ${lookup.keySet().toList()}")
     }
 
-    NotificationEmailBuilder.Res build(Notification notification) {
+    NotificationEmailBuilder.Res build(Notification notification, Formatting formatting) {
         NotificationEmailBuilder builder = lookup.get(notification.type)
         assert builder
-        return builder.build(notification)
+        return builder.build(notification, formatting)
     }
 
 }

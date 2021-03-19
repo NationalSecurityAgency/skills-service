@@ -19,7 +19,10 @@ import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.web.bind.annotation.*
@@ -38,18 +41,14 @@ import skills.profile.EnableCallStackProf
 import skills.services.AccessSettingsStorageService
 import skills.services.SystemSettingsService
 import skills.services.admin.ProjAdminService
-import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.settings.EmailConfigurationResult
 import skills.settings.EmailConnectionInfo
 import skills.settings.EmailSettingsService
 import skills.settings.SystemSettings
-import skills.storage.model.Setting
 import skills.storage.model.auth.RoleName
 
 import java.security.Principal
-import java.time.Duration
-import java.time.format.DateTimeParseException
 
 @RestController
 @RequestMapping('/root')
@@ -214,6 +213,29 @@ class RootController {
 
         settingsService.saveSetting(settingRequest)
         return new RequestResult(success: true)
+    }
+
+    @RequestMapping(value = "/global/settings", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
+    RequestResult saveGlobalSettings(@RequestBody List<GlobalSettingsRequest> values){
+        SkillsValidator.isNotNull(values, "Settings")
+
+        List<GlobalSettingsRequest> toDelete = values.findAll { StringUtils.isBlank(it.value)}
+        if (toDelete) {
+            settingsService.deleteGlobalSettings(toDelete)
+        }
+
+        List<GlobalSettingsRequest> toSave = values.findAll { !StringUtils.isBlank(it.value)}
+        if (toSave) {
+            settingsService.saveSettings(toSave)
+        }
+
+        return new RequestResult(success: true)
+    }
+
+    @RequestMapping(value = "/global/settings/{settingGroup}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    List<SettingsResult> getGlobalSettings(@PathVariable("settingGroup") String settingsGroup) {
+        SkillsValidator.isNotBlank(settingsGroup, "Settings Group")
+        return settingsService.getGlobalSettingsByGroup(settingsGroup)
     }
 
     @GetMapping('/projects')

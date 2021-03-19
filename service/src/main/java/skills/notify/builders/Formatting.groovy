@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 SkillTree
+ * Copyright 2021 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,9 @@
  */
 package skills.notify.builders
 
-
-import skills.storage.model.Notification
-
-interface NotificationEmailBuilder {
-
-    static class Res {
-        String subject
-        String plainText
-        String html
-    }
-
-    String getId()
-
-    Res build(Notification notification, Formatting formatParams)
-
-
+class Formatting {
+    String htmlHeader
+    String plaintextHeader
+    String htmlFooter
+    String plaintextFooter
 }

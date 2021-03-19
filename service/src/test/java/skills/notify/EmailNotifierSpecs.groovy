@@ -20,9 +20,13 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
 import org.thymeleaf.context.Context
+import skills.controller.request.model.GlobalSettingsRequest
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.EmailUtils
+import skills.services.settings.SettingsService
+import skills.settings.EmailSettingsService
 import skills.storage.model.Notification
+import skills.storage.model.Setting
 import skills.storage.repos.NotificationsRepo
 import skills.storage.repos.SettingRepo
 import skills.storage.repos.UserAttrsRepo
@@ -33,7 +37,8 @@ import spock.lang.IgnoreRest
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
+import ch.qos.logback.core.read.ListAppender
+import spock.mock.AutoAttach;
 
 class EmailNotifierSpecs extends DefaultIntSpec {
 
@@ -97,6 +102,82 @@ class EmailNotifierSpecs extends DefaultIntSpec {
 </head>
 <body class="overall-container">
 <h1>Test Template param value</h1>
+</body>
+</head>
+</html>
+''')
+
+        notificationsRepo.count() == 0
+    }
+
+    def "send email with headers and footers configured"() {
+        settingRepo.save(new Setting(
+                settingGroup: EmailSettingsService.settingsGroup,
+                setting: EmailSettingsService.htmlHeader,
+                value: '<div class="header">i\'m a header</div>',
+                type: Setting.SettingType.Global
+        ))
+        settingRepo.save(new Setting(
+                settingGroup: EmailSettingsService.settingsGroup,
+                setting: EmailSettingsService.htmlFooter,
+                value: '<div class="footer">i\'m a footer</div>',
+                type: Setting.SettingType.Global
+        ))
+        settingRepo.save(new Setting(
+                settingGroup: EmailSettingsService.settingsGroup,
+                setting: EmailSettingsService.plaintextHeader,
+                value: 'HEADERHEADERHEADER',
+                type: Setting.SettingType.Global
+        ))
+        settingRepo.save(new Setting(
+                settingGroup: EmailSettingsService.settingsGroup,
+                setting: EmailSettingsService.plaintextFooter,
+                value: 'FOOTERFOOTERFOOTER',
+                type: Setting.SettingType.Global
+        ))
+
+        when:
+        emailNotifier.sendNotification(new Notifier.NotificationRequest(
+                userIds: [skillsService.userName],
+                type: "ForTestNotificationBuilder",
+                keyValParams: [simpleParam: 'param value']
+        ))
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() > 0 }
+
+        then:
+        greenMail.getReceivedMessages().length == 1
+        EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail)
+        emailRes.subj == "Test Subject"
+        emailRes.recipients == [email]
+        emailRes.plainText == """HEADERHEADERHEADER\r\nAs plain as day\r\nFOOTERFOOTERFOOTER"""
+        EmailUtils.prepBodyForComparison(emailRes.html) == EmailUtils.prepBodyForComparison('''<!--
+
+    Copyright 2020 SkillTree
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        https://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.thymeleaf.org http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body class="overall-container">
+<div class="header">i'm a header</div>
+<h1>Test Template param value</h1>
+<div class="footer">i'm a footer</div>
 </body>
 </head>
 </html>
@@ -212,7 +293,7 @@ class EmailNotifierSpecs extends DefaultIntSpec {
                 keyValParams: [simpleParam: 'param value']
         ))
 
-        WaitFor.wait { loggerHelper.logEvents.findAll { it.message.startsWith("Removed notification because it failed and exceeded max retention of [30] seconds") }.size() == 2 }
+        WaitFor.wait(120) { loggerHelper.logEvents.findAll { it.message.startsWith("Removed notification because it failed and exceeded max retention of [30] seconds") }.size() == 2 }
 
 
         then:

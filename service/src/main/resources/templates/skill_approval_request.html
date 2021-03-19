@@ -42,6 +42,7 @@ limitations under the License.
     </style>
 </head>
 <body class="overall-container">
+<div th:remove="tag" th:utext="${htmlHeader}" th:if= "${htmlHeader != null}">[[${htmlHeader}]]</div>
 <h1>SkillTree Points Requested!</h1>
 <p>User <b>[[${userRequesting}]]</b> requested points. As an approver for the <b>[[${projectName}]]</b> project, you can approve or reject this request.</p>
 
@@ -59,13 +60,6 @@ limitations under the License.
 <p>
 Always yours, <br/> -SkillTree Bot
 </p>
-
+<div th:remove="tag" th:utext="${htmlFooter}" th:if= "${htmlFooter != null}">[[${htmlFooter}]]</div>
 </body>
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <title>SkillTree Points Requested</title>
-    <style>
-
-    </style>
-</head>
 </html>

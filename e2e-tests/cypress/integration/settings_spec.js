@@ -663,5 +663,73 @@ describe('Settings Tests', () => {
         cy.contains('Official Docs');
     })
 
+    it.only('email header/footer settings', () => {
+        cy.intercept({
+            method: 'GET',
+            url: '/app/projects'
+        }).as('loadProjects');
+        cy.intercept({method: 'GET', url: '/root/isRoot'}).as('checkRoot');
+        cy.intercept({method: 'GET', url: '/root/global/settings/GLOBAL.EMAIL'}).as('loadTemplateSettings');
+
+        cy.visit('/');
+
+        cy.navToSettings();
+        cy.contains('Email').click();
+        cy.wait('@loadTemplateSettings');
+        cy.get('[data-cy=emailTemplateSettings]').matchImageSnapshot();
+
+        cy.get('[data-cy=htmlEmailHeader]').click().type("aaaaa");
+        cy.get('[data-cy=ptHeaderTitle] span.text-danger').should('be.visible');
+        cy.get('[data-cy=emailTemplateSettingsSave]').should('be.disabled');
+
+        cy.get('[data-cy=ptHeaderTitle]').click();
+        cy.get('[data-cy=plaintextEmailHeaderRequired]').should('be.visible');
+        cy.get('[data-cy=plaintextEmailHeaderRequired]').should('have.text', "Plaintext Header is required");
+        cy.get('[data-cy=htmlHeaderTitle]').click();
+        cy.get('[data-cy=htmlEmailHeader]').clear();
+        cy.get('[data-cy=ptHeaderTitle]').click();
+        cy.get('[data-cy=plaintextEmailHeader]').click().type('aaaa');
+        cy.get('[data-cy=plaintextEmailHeaderRequired]').should('not.be.visible');
+        cy.get('[data-cy=htmlHeaderTitle] .text-danger').should('be.visible');
+        cy.get('[data-cy=emailTemplateSettingsSave]').should('be.disabled');
+
+        cy.get('[data-cy=htmlHeaderTitle]').click();
+        cy.get('[data-cy=htmlEmailHeaderError]').should('be.visible');
+        cy.get('[data-cy=htmlEmailHeaderError]').should('have.text', 'HTML Header is required');
+        cy.get('[data-cy=htmlEmailHeader]').click().type("aaaaa");
+        cy.get('[data-cy=htmlEmailHeaderError]').should('not.be.visible');
+        cy.get('[data-cy=emailTemplateSettingsSave]').should('be.enabled');
+
+        cy.get('[data-cy=htmlEmailFooter]').click().type("aaaaa");
+        cy.get('[data-cy=ptFooterTitle] .text-danger').should('be.visible');
+        cy.get('[data-cy=emailTemplateSettingsSave]').should('be.disabled');
+        cy.get('[data-cy=ptFooterTitle]').click();
+        cy.get('[data-cy=plaintextEmailFooterRequired]').should('be.visible');
+        cy.get('[data-cy=plaintextEmailFooterRequired]').should('have.text', 'Plaintext Footer is required');
+        cy.get('[data-cy=htmlFooterTitle]').click();
+        cy.get('[data-cy=htmlEmailFooter]').clear();
+        cy.get('[data-cy=ptFooterTitle]').click();
+        cy.get('[data-cy=plaintextEmailFooter]').click().type('aaaa');
+        cy.get('[data-cy=plaintextEmailFooterRequired]').should('not.be.visible');
+        cy.get('[data-cy=htmlFooterTitle] .text-danger').should('be.visible');
+        cy.get('[data-cy=emailTemplateSettingsSave]').should('be.disabled');
+        cy.get('[data-cy=htmlFooterTitle]').click();
+        cy.get('[data-cy=htmlEmailFooterError]').should('be.visible');
+        cy.get('[data-cy=htmlEmailFooterError]').should('have.text', 'HTML Footer is required');
+        cy.get('[data-cy=htmlEmailFooter]').click().type("aaaaa");
+        cy.get('[data-cy=htmlEmailFooterError]').should('not.be.visible');
+        cy.get('[data-cy=emailTemplateSettingsSave]').should('be.enabled');
+
+        cy.get('[data-cy=emailTemplateSettingsSave]').click();
+        cy.contains('Security').click();
+        cy.contains('Email').click();
+        cy.wait('@loadTemplateSettings');
+        cy.get('[data-cy=htmlEmailHeader]').should('have.value', 'aaaaa');
+        cy.get('[data-cy=plaintextEmailHeader]').should('have.value','aaaa');
+        cy.get('[data-cy=htmlEmailFooter]').should('have.value', 'aaaaa');
+        cy.get('[data-cy=plaintextEmailFooter]').should('have.value','aaaa');
+
+    });
+
 });
 

@@ -252,6 +252,13 @@ class SettingsService {
         settingsDataAccessor.deleteGlobalSetting(setting)
     }
 
+    @Transactional
+    void deleteGlobalSettings(List<GlobalSettingsRequest> request) {
+        request.each {
+            deleteGlobalSetting(it.setting)
+        }
+    }
+
     @Transactional()
     void deleteRootUserSetting(String setting, String value) {
         settingsDataAccessor.deleteRootUserSetting(setting, value)
