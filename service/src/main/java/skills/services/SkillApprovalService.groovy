@@ -19,18 +19,24 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
+import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.result.model.LabelCountItem
+import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.SkillApprovalResult
 import skills.controller.result.model.TableResult
+import skills.notify.EmailNotifier
+import skills.notify.Notifier
 import skills.services.events.SkillEventResult
 import skills.services.events.SkillEventsService
-import skills.storage.model.SkillApproval
-import skills.storage.model.SkillDef
-import skills.storage.model.SkillDefWithExtra
+import skills.services.settings.Settings
+import skills.services.settings.SettingsService
+import skills.storage.model.*
+import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.SkillDefRepo
+import skills.storage.repos.UserAttrsRepo
 
 import java.util.stream.Stream
 
@@ -46,6 +52,21 @@ class SkillApprovalService {
 
     @Autowired
     SkillDefRepo skillDefRepo
+
+    @Autowired
+    ProjDefRepo projDefRepo
+
+    @Autowired
+    UserAttrsRepo userAttrsRepo
+
+    @Autowired
+    SettingsService settingsService
+
+    @Autowired
+    UserInfoService userInfoService
+
+    @Autowired
+    EmailNotifier notifier
 
     TableResult getApprovals(String projectId, PageRequest pageRequest) {
         List<SkillApprovalRepo.SimpleSkillApproval> approvalsFromDB = skillApprovalRepo.findToApproveByProjectIdAndNotRejected(projectId, pageRequest)
@@ -92,18 +113,26 @@ class SkillApprovalService {
             }
 
             skillApprovalRepo.delete(it)
+
+            // send email
+            sentNotifications(it, skillDef, true)
         }
     }
 
     void reject(String projectId, List<Integer> approvalRequestIds, String rejectionMsg) {
-        List<SkillApproval> toApprove = skillApprovalRepo.findAllById(approvalRequestIds)
-        toApprove.each {
+        List<SkillApproval> toReject = skillApprovalRepo.findAllById(approvalRequestIds)
+        toReject.each {
             validateProjId(it, projectId)
 
             it.rejectionMsg = rejectionMsg
             it.rejectedOn = new Date()
 
             skillApprovalRepo.save(it)
+
+            // send email
+            Optional<SkillDef> optional = skillDefRepo.findById(it.skillRefId)
+            SkillDef skillDef = optional.get()
+            sentNotifications(it, skillDef, false, rejectionMsg)
         }
     }
 
@@ -152,4 +181,46 @@ class SkillApprovalService {
         }
     }
 
+    private void sentNotifications(SkillApproval skillApproval, SkillDef skillDefinition, boolean approved, String rejectionMsg=null) {
+        String publicUrl = getPublicUrl()
+        if(!publicUrl) {
+            return
+        }
+
+        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillApproval.userId)
+        if (!userAttrs.email) {
+            return
+        }
+
+        ProjDef projDef = projDefRepo.findByProjectId(skillDefinition.projectId)
+        Notifier.NotificationRequest request = new Notifier.NotificationRequest(
+                userIds: [skillApproval.userId],
+                type: Notification.Type.SkillApprovalResponse.toString(),
+                keyValParams: [
+                        approver     : userInfoService.currentUser.usernameForDisplay,
+                        approved     : approved,
+                        skillName    : skillDefinition.name,
+                        skillId      : skillDefinition.skillId,
+                        projectName  : projDef.name,
+                        projectId    : skillDefinition.projectId,
+                        rejectionMsg : rejectionMsg,
+                        publicUrl    : publicUrl,
+                ],
+        )
+        notifier.sendNotification(request)
+    }
+
+    private String getPublicUrl() {
+        SettingsResult publicUrlSetting = settingsService.getGlobalSetting(Settings.GLOBAL_PUBLIC_URL.settingName)
+        if (!publicUrlSetting) {
+            log.warn("Skill approval notifications are disabled since global setting [${Settings.GLOBAL_PUBLIC_URL}] is NOT set")
+            return null
+        }
+
+        String publicUrl = publicUrlSetting.value
+        if (!publicUrl.endsWith("/")){
+            publicUrl += "/"
+        }
+        return publicUrl
+    }
 }

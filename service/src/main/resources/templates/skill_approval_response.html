@@ -1,0 +1,55 @@
+<!--
+Copyright 2020 SkillTree
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<!DOCTYPE html>
+<html   lang="en"
+        xmlns:th="http://www.thymeleaf.org"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.thymeleaf.org http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <style>
+        .label {
+            color: #525252;
+        }
+    </style>
+</head>
+<body class="overall-container">
+<h1>SkillTree Points <span th:text="${approved} ? 'Approved!' : 'Denied'"></span></h1>
+<p th:if="${approved}">Congratulations! Your request for the <b>[[${skillName}]]</b> skill in the <b>[[${projectName}]]</b> project has been approved!</p>
+<p th:if="${!approved}">Your request for the <b>[[${skillName}]]</b> skill in the <b>[[${projectName}]]</b> project has been denied.</p>
+
+<ul>
+    <li><span class="label">Project</span>: [[${projectName}]]</li>
+    <li><span class="label">Skill</span>: [[${skillName}]]</li>
+    <li><span class="label">Approver</span>: [[${approver}]]</li>
+    <li th:if="${!approved}"><span class="label">Message</span>: [[${rejectionMsg}]]</li>
+</ul>
+
+<p>You can view your progress for the <a th:href="@{${publicUrl}+'progress-and-rankings/projects/'+${projectId}}">[[${projectName}]]</a> project in the SkillTree dashboard.</p>
+
+<p>
+Always yours, <br/> -SkillTree Bot
+</p>
+
+</body>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>SkillTree Points <span th:text="${approved} ? 'Approved!' : 'Denied'"></span></title>
+    <style>
+
+    </style>
+</head>
+</html>

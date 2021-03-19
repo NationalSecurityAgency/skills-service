@@ -29,7 +29,7 @@ import javax.persistence.*
 class Notification {
 
     static enum Type {
-        SkillApprovalRequested,
+        SkillApprovalRequested, SkillApprovalResponse
     }
 
     static class KeyValParam {
