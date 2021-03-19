@@ -50,7 +50,7 @@ limitations under the License.
               </div>
             </template>
             <div class="mt-2 content-height">
-              <ValidationProvider :rules="{'noscript':true,'max':3000, 'required':plaintextHeaderRequired}" vid="plaintextHeader" name="Custom HTML Header" v-slot="{ errors }">
+              <ValidationProvider :rules="{'noscript':true,'max':3000, 'required':plaintextHeaderRequired}" vid="plaintextHeader" name="Plaintext Header" v-slot="{ errors }">
                 <textarea class="form-control" name="plaintextEmailHeader" data-cy="plaintextEmailHeader" rows="3" v-model="plainTextHeader"
                           id="plaintextEmailHeader"
                           :aria-invalid="errors && errors.length > 0"
