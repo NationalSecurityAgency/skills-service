@@ -663,7 +663,7 @@ describe('Settings Tests', () => {
         cy.contains('Official Docs');
     })
 
-    it('email header/footer settings', () => {
+    it.only('email header/footer settings', () => {
         cy.intercept({
             method: 'GET',
             url: '/app/projects'
@@ -684,6 +684,7 @@ describe('Settings Tests', () => {
 
         cy.get('[data-cy=ptHeaderTitle]').click();
         cy.get('[data-cy=plaintextEmailHeaderRequired]').should('be.visible');
+        cy.get('[data-cy=plaintextEmailHeaderRequired]').should('have.text', "Plaintext Header is required");
         cy.get('[data-cy=htmlHeaderTitle]').click();
         cy.get('[data-cy=htmlEmailHeader]').clear();
         cy.get('[data-cy=ptHeaderTitle]').click();
@@ -694,6 +695,7 @@ describe('Settings Tests', () => {
 
         cy.get('[data-cy=htmlHeaderTitle]').click();
         cy.get('[data-cy=htmlEmailHeaderError]').should('be.visible');
+        cy.get('[data-cy=htmlEmailHeaderError]').should('have.text', 'HTML Header is required');
         cy.get('[data-cy=htmlEmailHeader]').click().type("aaaaa");
         cy.get('[data-cy=htmlEmailHeaderError]').should('not.be.visible');
         cy.get('[data-cy=emailTemplateSettingsSave]').should('be.enabled');
@@ -703,6 +705,7 @@ describe('Settings Tests', () => {
         cy.get('[data-cy=emailTemplateSettingsSave]').should('be.disabled');
         cy.get('[data-cy=ptFooterTitle]').click();
         cy.get('[data-cy=plaintextEmailFooterRequired]').should('be.visible');
+        cy.get('[data-cy=plaintextEmailFooterRequired]').should('have.text', 'Plaintext Footer is required');
         cy.get('[data-cy=htmlFooterTitle]').click();
         cy.get('[data-cy=htmlEmailFooter]').clear();
         cy.get('[data-cy=ptFooterTitle]').click();
@@ -712,6 +715,7 @@ describe('Settings Tests', () => {
         cy.get('[data-cy=emailTemplateSettingsSave]').should('be.disabled');
         cy.get('[data-cy=htmlFooterTitle]').click();
         cy.get('[data-cy=htmlEmailFooterError]').should('be.visible');
+        cy.get('[data-cy=htmlEmailFooterError]').should('have.text', 'HTML Footer is required');
         cy.get('[data-cy=htmlEmailFooter]').click().type("aaaaa");
         cy.get('[data-cy=htmlEmailFooterError]').should('not.be.visible');
         cy.get('[data-cy=emailTemplateSettingsSave]').should('be.enabled');

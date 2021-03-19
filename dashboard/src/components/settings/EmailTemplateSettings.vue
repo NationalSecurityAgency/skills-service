@@ -36,7 +36,7 @@ limitations under the License.
                   <p class="text-danger" v-show="errors[0]" data-cy="htmlEmailHeaderError" id="htmlEmailHeaderError">{{errors[0]}}</p>
                   <p class="text-danger"
                      v-show="!errors[0] && htmlHeaderRequired && !htmlHeader"
-                     data-cy="htmlEmailHeaderRequired">HTML Header is required if Plaintext is configured</p>
+                     data-cy="htmlEmailHeaderRequired">HTML Header is required</p>
               </ValidationProvider>
             </div>
           </b-tab>
@@ -58,7 +58,7 @@ limitations under the License.
                   <p class="text-danger" v-show="errors[0]" data-cy="plaintextEmailHeaderError" id="plaintextEmailHeaderError">{{errors[0]}}</p>
                   <p class="text-danger"
                      v-show="!errors[0] && plaintextHeaderRequired && !plainTextHeader"
-                     data-cy="plaintextEmailHeaderRequired">Plaintext Header is required if HTML is configured</p>
+                     data-cy="plaintextEmailHeaderRequired">Plaintext Header is required</p>
               </ValidationProvider>
             </div>
           </b-tab>
@@ -85,7 +85,7 @@ limitations under the License.
                 <p class="text-danger" v-show="errors[0]" data-cy="htmlEmailFooterError" id="htmlEmailFooterError">{{errors[0]}}</p>
                 <p class="text-danger"
                    v-show="!errors[0] && htmlFooterRequired && !htmlFooter"
-                   data-cy="htmlEmailFooterRequired">HTML Footer is required if Plaintext is configured</p>
+                   data-cy="htmlEmailFooterRequired">HTML Footer is required</p>
               </ValidationProvider>
             </div>
           </b-tab>
@@ -107,7 +107,7 @@ limitations under the License.
                 <p class="text-danger" v-show="errors[0]" data-cy="plaintextEmailFooterError" id="plaintextEmailFooterError">{{errors[0]}}</p>
                 <p class="text-danger"
                    v-show="!errors[0] && plaintextFooterRequired && !plainTextFooter"
-                   data-cy="plaintextEmailFooterRequired">Plaintext Footer is required if HTML is configured</p>
+                   data-cy="plaintextEmailFooterRequired">Plaintext Footer is required</p>
               </ValidationProvider>
             </div>
           </b-tab>
