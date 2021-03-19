@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import org.thymeleaf.context.Context
 import org.thymeleaf.spring5.SpringTemplateEngine
-import skills.notify.builders.NotificationEmailBuilder
+import skills.notify.builders.Formatting
 import skills.notify.builders.SkillApprovalRequestedNotificationBuilder
 import skills.storage.model.Notification
 
@@ -38,11 +38,11 @@ class ForTestNotificationBuilder extends SkillApprovalRequestedNotificationBuild
     }
 
     @Override
-    Res build(Notification notification) {
+    Res build(Notification notification, Formatting formatting) {
         def parsed = jsonSlurper.parseText(notification.encodedParams)
-        Context context = buildThymeleafContext(parsed)
+        Context context = buildThymeleafContext(parsed, formatting)
         String htmlBody = thymeleafTemplateEngine.process("test-email-template.html", context)
-        String plainText = buildPlainText()
+        String plainText = buildPlainText(formatting)
         return new Res(
                 subject: "Test Subject",
                 html: htmlBody,
@@ -50,14 +50,24 @@ class ForTestNotificationBuilder extends SkillApprovalRequestedNotificationBuild
         )
     }
 
-    private Context buildThymeleafContext(parsed) {
+    private Context buildThymeleafContext(parsed, Formatting formatting) {
         Context templateContext = new Context()
         templateContext.setVariable("simpleParam", parsed.simpleParam)
+        templateContext.setVariable("htmlHeader", formatting.htmlHeader)
+        templateContext.setVariable("htmlFooter", formatting.htmlFooter)
         return templateContext
     }
 
-    private String buildPlainText() {
-        return "As plain as day"
+    private String buildPlainText(Formatting formatting) {
+        String pt =  "As plain as day"
+        if (formatting.plaintextHeader) {
+            pt = "${formatting.plaintextHeader}\n${pt}"
+        }
+        if (formatting.plaintextFooter) {
+            pt = "${pt}\n${formatting.plaintextFooter}"
+        }
+
+        return pt
     }
 
     static class Request implements Serializable{

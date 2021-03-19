@@ -22,18 +22,22 @@ import groovy.lang.Closure
 import groovy.transform.ToString
 import groovy.time.TimeCategory
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.time.StopWatch
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import skills.controller.result.model.SettingsResult
+import skills.notify.builders.Formatting
 import skills.notify.builders.NotificationEmailBuilder
 import skills.notify.builders.NotificationEmailBuilderManager
 import skills.services.EmailSendingService
 import skills.services.FeatureService
 import skills.services.LockingService
 import skills.services.settings.SettingsService
+import skills.settings.EmailSettingsService
 import skills.storage.model.Notification
 import skills.storage.model.UserAttrs
 import skills.storage.repos.NotificationsRepo
@@ -49,7 +53,7 @@ class EmailNotifier implements Notifier {
     int retainFailedNotificationsForNumSecs
 
     @Autowired
-    EmailSendingService emailSettings
+    EmailSendingService sendingService
 
     @Autowired
     UserAttrsRepo userAttrs
@@ -111,6 +115,14 @@ class EmailNotifier implements Notifier {
 
     private void doDispatchNotifications(String prependToLogs = "", Closure streamCreator) {
         lockingService.lockForNotifying()
+        List<SettingsResult> emailSettings = settingsService.getGlobalSettingsByGroup(EmailSettingsService.settingsGroup);
+
+        Formatting formatting = new Formatting(
+                htmlHeader: emailSettings.find {it.setting == EmailSettingsService.htmlHeader }?.value ?: null,
+                plaintextHeader: emailSettings.find { it.setting == EmailSettingsService.plaintextHeader }?.value ?: null,
+                htmlFooter: emailSettings.find { it.setting == EmailSettingsService.htmlFooter }?.value ?: null,
+                plaintextFooter: emailSettings.find { it.setting == EmailSettingsService.plaintextFooter }?.value ?:null
+        )
         StopWatch stopWatch = new StopWatch()
         stopWatch.start()
 
@@ -118,11 +130,11 @@ class EmailNotifier implements Notifier {
         int errCount = 0
         String lastErrMsg
         streamCreator.call().forEach({ Notification notification ->
-            NotificationEmailBuilder.Res emailRes = notificationEmailBuilderManager.build(notification)
+            NotificationEmailBuilder.Res emailRes = notificationEmailBuilderManager.build(notification, formatting)
             UserAttrs userAttrs = userAttrs.findByUserId(notification.userId)
             boolean failed = false;
             try {
-                emailSettings.sendEmail(emailRes.subject, userAttrs.email, emailRes.html, emailRes.plainText, notification.requestedOn)
+                sendingService.sendEmail(emailRes.subject, userAttrs.email, emailRes.html, emailRes.plainText, notification.requestedOn)
             } catch (Throwable t) {
                 // don't print the same message over and over again
                 if (!lastErrMsg?.equalsIgnoreCase(t.message)) {

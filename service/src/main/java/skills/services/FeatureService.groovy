@@ -17,14 +17,11 @@ package skills.services
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.mail.javamail.JavaMailSender
-import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.springframework.stereotype.Component
 import org.thymeleaf.util.StringUtils
 import skills.controller.result.model.SettingsResult
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
-import skills.settings.EmailConnectionInfo
 import skills.settings.EmailSettingsService
 
 @Slf4j

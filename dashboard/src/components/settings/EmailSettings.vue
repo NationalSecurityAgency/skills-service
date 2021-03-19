@@ -16,10 +16,16 @@ limitations under the License.
 <template>
   <div>
     <sub-page-header title="Email Settings"/>
-    <div class="card">
+    <div class="card mb-3">
       <div class="card-header">Email Connection Settings</div>
       <div class="card-body">
-        <email-server-settings />
+        <email-server-settings data-cy="emailConnectionSettings"/>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">Email Template Settings</div>
+      <div class="card-body">
+        <email-template-settings data-cy="emailTemplateSettings"/>
       </div>
     </div>
   </div>
@@ -27,11 +33,12 @@ limitations under the License.
 
 <script>
   import EmailServerSettings from './EmailServerSettings';
+  import EmailTemplateSettings from './EmailTemplateSettings';
   import SubPageHeader from '../utils/pages/SubPageHeader';
 
   export default {
     name: 'EmailSettings',
-    components: { SubPageHeader, EmailServerSettings },
+    components: { EmailTemplateSettings, SubPageHeader, EmailServerSettings },
   };
 </script>
 

@@ -24,7 +24,9 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 </head>
 <body class="overall-container">
+<div th:remove="tag" th:utext="${htmlHeader}" th:if= "${htmlHeader != null}">[[${htmlHeader}]]</div>
 <h1>Test Template [[${simpleParam}]]</h1>
+<div th:remove="tag" th:utext="${htmlFooter}" th:if= "${htmlFooter != null}">[[${htmlFooter}]]</div>
 </body>
 </head>
 </html>

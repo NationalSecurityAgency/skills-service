@@ -15,20 +15,18 @@
  */
 package skills.settings
 
-import groovy.transform.WithWriteLock
+
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.springframework.stereotype.Service
-import skills.controller.exceptions.SkillException
 import skills.controller.request.model.GlobalSettingsRequest
 import skills.controller.request.model.SettingsRequest
 import skills.controller.result.model.SettingsResult
 import skills.services.settings.SettingsService
 
-import javax.annotation.PostConstruct
 import javax.mail.MessagingException
 import java.util.concurrent.TimeUnit
 
@@ -50,6 +48,11 @@ class EmailSettingsService {
     static final String passwordSetting = 'email.password'
     static final String authSetting = 'email.auth'
     static final String tlsEnableSetting = 'email.tls.enable'
+
+    static final String htmlHeader = 'email.htmlHeader'
+    static final String htmlFooter = 'email.htmlFooter'
+    static final String plaintextHeader = 'email.plaintextHeader'
+    static final String plaintextFooter = 'email.plaintextFooter'
 
     @Autowired
     SettingsService settingsService

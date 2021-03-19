@@ -23,6 +23,12 @@ export default {
   saveSettings(projectId, settings) {
     return axios.post(`/admin/projects/${projectId}/settings`, settings).then((response) => response.data);
   },
+  saveGlobalSettings(settings) {
+    return axios.post('/root/global/settings', settings).then((response) => response.data);
+  },
+  getGlobalSettings(settingGroup) {
+    return axios.get(`/root/global/settings/${settingGroup}`).then((response) => response.data);
+  },
   checkSettingsValidity(projectId, settings) {
     return axios.post(`/admin/projects/${projectId}/settings/checkValidity`, settings).then((response) => response.data);
   },
