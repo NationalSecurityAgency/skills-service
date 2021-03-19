@@ -293,7 +293,7 @@ class EmailNotifierSpecs extends DefaultIntSpec {
                 keyValParams: [simpleParam: 'param value']
         ))
 
-        WaitFor.wait { loggerHelper.logEvents.findAll { it.message.startsWith("Removed notification because it failed and exceeded max retention of [30] seconds") }.size() == 2 }
+        WaitFor.wait(120) { loggerHelper.logEvents.findAll { it.message.startsWith("Removed notification because it failed and exceeded max retention of [30] seconds") }.size() == 2 }
 
 
         then:
