@@ -43,7 +43,7 @@ class PkiUserDetailsService implements UserDetailsService, AuthenticationUserDet
     @Override
     @Transactional
     UserDetails loadUserByUsername(String dn) throws UsernameNotFoundException {
-        return RetryUtil.withRetry(3, {
+        return RetryUtil.withRetry(2, {
             this.doLoadUserByUsername(dn)
         })
     }
@@ -67,7 +67,6 @@ class PkiUserDetailsService implements UserDetailsService, AuthenticationUserDet
                 throw new SkillsAuthorizationException("Unknown user [$dn]")
             }
         } catch (Exception e) {
-            log.error("Error occurred looking up user info for DN [${dn}]", e)
             String msg = "Unable to retrieve user info for [${dn}] - ${e.getMessage()}"
             if (e.getCause() instanceof HttpClientErrorException) {
                 msg = ((HttpClientErrorException)e.getCause()).getResponseBodyAsString()
