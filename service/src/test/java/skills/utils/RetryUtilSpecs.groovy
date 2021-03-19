@@ -135,7 +135,7 @@ class RetryUtilSpecs extends Specification {
 
         then:
         thrown(RuntimeException)
-        loggerHelper.getLogEvents()[0].message.count("java.lang.RuntimeException") == 1
+        loggerHelper.getLogEvents()[0].message.count("java.lang.RuntimeException: always the same") == 1
         loggerHelper.getLogEvents()[0].message.count("---same exception as previous retry---") == 2
 
         cleanup:

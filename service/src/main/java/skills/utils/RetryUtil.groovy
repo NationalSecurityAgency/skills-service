@@ -78,12 +78,13 @@ class RetryUtil {
             errMsBuilder.append("\n")
         }
         errMsBuilder.append(msg)
-        if (!uniqueErrorMessages.contains(t.getMessage())) {
-            uniqueErrorMessages.add(t.getMessage())
+        final String exceptionMsg = "${t.getClass().getName()}: ${t.getMessage()}"
+        if (!uniqueErrorMessages.contains(exceptionMsg)) {
+            uniqueErrorMessages.add(exceptionMsg)
             if (log.isDebugEnabled()) {
                 errMsBuilder.append(ExceptionUtils.getStackTrace(t))
             } else {
-                errMsBuilder.append(t.getMessage())
+                errMsBuilder.append(exceptionMsg)
             }
         } else {
             errMsBuilder.append("---same exception as previous retry---")
