@@ -49,16 +49,7 @@ class InceptionSpecs extends DefaultIntSpec {
     SettingsService settingsService
 
     def setup() {
-        rootSkillsService = createService(ultimateRoot, 'aaaaaaaa')
-        nonRootSkillsService = createService(nonRootUserId)
-
-        if (!rootSkillsService.isRoot()) {
-            rootSkillsService.grantRoot()
-        }
-        if (nonRootSkillsService.isRoot()) {
-            rootSkillsService.removeRootRole(nonRootUserId)
-            assert !nonRootSkillsService.isRoot()
-        }
+        inceptionProjectService.createInceptionAndAssignUser(skillsService.userName)
     }
 
     def 'get hash'() {
@@ -70,7 +61,7 @@ class InceptionSpecs extends DefaultIntSpec {
         hash1 == hash2
     }
 
-    def 'update is hash is different'() {
+    def 'update if hash is different'() {
 
         List<SkillDef> skills = skillDefRepo.findAllByProjectIdAndType(InceptionProjectService.inceptionProjectId, SkillDef.ContainerType.Skill)
         SkillDef skillToEdit = skills.get(0)
@@ -86,6 +77,7 @@ class InceptionSpecs extends DefaultIntSpec {
         ProjectSettingsRequest skillsMd5Setting = new ProjectSettingsRequest(
                 projectId: InceptionProjectService.inceptionProjectId,
                 setting: CommonSettings.INCEPTION_SKILLS_MD5_HASH,
+                settingGroup: CommonSettings.INCEPTION_SETTING_GROUP,
                 value: "-1"
         )
         settingsService.saveSetting(skillsMd5Setting)
@@ -103,4 +95,29 @@ class InceptionSpecs extends DefaultIntSpec {
         fromDBAfter.pointIncrement == orig.pointIncrement
     }
 
+    def 'do not update if hash is the same'() {
+        List<SkillDef> skills = skillDefRepo.findAllByProjectIdAndType(InceptionProjectService.inceptionProjectId, SkillDef.ContainerType.Skill)
+        SkillDef skillToEdit = skills.get(0)
+
+        SkillDef orig = new SkillDef()
+        Props.copy(skillToEdit, orig, "childSkills", 'version', 'selfReportType')
+
+        skillToEdit.name = "some other name"
+        skillToEdit.pointIncrement = 123
+
+        skillDefRepo.save(skillToEdit)
+
+        when:
+        SkillDef fromDBBefore =  skillDefRepo.findById(skillToEdit.id).get()
+        assert fromDBBefore.name == "some other name"
+        assert fromDBBefore.name != orig.name
+        assert fromDBBefore.pointIncrement != orig.pointIncrement
+        inceptionProjectService.init()
+
+        SkillDef fromDBAfter = skillDefRepo.findById(skillToEdit.id).get()
+        then:
+        // should have not changed
+        fromDBAfter.name =="some other name"
+        fromDBAfter.pointIncrement == 123
+    }
 }

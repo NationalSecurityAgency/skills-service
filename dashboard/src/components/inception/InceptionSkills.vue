@@ -14,10 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="inception-container">
+  <div class="inception-container pb-4">
     <skills-display
       :options="options"
-      :version="skillsVersion"/>
+      :version="skillsVersion"
+      :theme="theme"/>
   </div>
 </template>
 
@@ -35,6 +36,18 @@ limitations under the License.
       return {
         projectId: 'Inception',
         skillsVersion: 0,
+        theme: {
+          backgroundColor: '#f6f8fa',
+          landingPageTitle: 'Dashboard Skills',
+          maxWidth: '100%',
+          pageTitleTextColor: '#212529',
+          pageTitleFontSize: '1.5rem',
+          backButton: {
+            padding: '5px 10px',
+            fontSize: '12px',
+            lineHeight: '1.5',
+          },
+        },
       };
     },
   };
@@ -42,6 +55,7 @@ limitations under the License.
 
 <style scoped>
 .inception-container {
-  min-height: calc(100vh - 80px);;
+  min-height: calc(100vh - 80px);
+  background-color: #f6f8fa;
 }
 </style>

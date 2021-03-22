@@ -127,6 +127,7 @@ class InceptionProjectService {
             ProjectSettingsRequest docRootRequest = new ProjectSettingsRequest()
             docRootRequest.projectId = inceptionProjectId
             docRootRequest.setting = CommonSettings.HELP_URL_ROOT
+            docRootRequest.settingGroup = CommonSettings.INCEPTION_SETTING_GROUP
             docRootRequest.value = docsRootHost
             settingsService.saveSetting(docRootRequest)
         }
@@ -152,8 +153,7 @@ class InceptionProjectService {
             skillsAdminService.saveSkill(it.skillId, it, false)
         }
 
-        String newHash = inceptionSkills.getHash()
-        saveSkillsMd5Setting(newHash)
+        saveSkillsMd5Setting()
     }
 
     private void updateSkillsIfNeeded() {
@@ -161,19 +161,20 @@ class InceptionProjectService {
 
         if (projDef) {
             String newHash = inceptionSkills.getHash()
-            SettingsResult settingsResult = settingsService.getProjectSetting(inceptionProjectId, CommonSettings.INCEPTION_SKILLS_MD5_HASH)
+            SettingsResult settingsResult = settingsService.getProjectSetting(inceptionProjectId, CommonSettings.INCEPTION_SKILLS_MD5_HASH, CommonSettings.INCEPTION_SETTING_GROUP)
             if (!settingsResult || settingsResult.value != newHash) {
                 log.info("Skills' MD5 Hash difference was detected (old <> new: [${settingsResult?.value}] <> [${newHash}]. Will update ALL skills")
-                saveSkillsMd5Setting(newHash)
-
                 saveSkills()
             }
         }
     }
 
-    private void saveSkillsMd5Setting(String newHash) {
+    private void saveSkillsMd5Setting() {
+        String newHash = inceptionSkills.getHash()
+        assert newHash
         ProjectSettingsRequest skillsMd5Setting = new ProjectSettingsRequest(
                 projectId: InceptionProjectService.inceptionProjectId,
+                settingGroup: CommonSettings.INCEPTION_SETTING_GROUP,
                 setting: CommonSettings.INCEPTION_SKILLS_MD5_HASH,
                 value: newHash
         )
