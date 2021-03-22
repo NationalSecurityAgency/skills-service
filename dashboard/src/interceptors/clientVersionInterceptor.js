@@ -17,7 +17,7 @@ import axios from 'axios';
 import store from '../store/store';
 
 function handleFunction(response) {
-    const incomingVersion = response?.headers['skills-client-lib-version'];
+    const incomingVersion = response?.headers?.['skills-client-lib-version'];
     if (incomingVersion) {
       store.dispatch('updateLibVersionIfDifferent', incomingVersion);
     }
