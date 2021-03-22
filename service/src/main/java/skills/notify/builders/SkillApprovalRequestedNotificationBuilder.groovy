@@ -59,8 +59,8 @@ class SkillApprovalRequestedNotificationBuilder implements NotificationEmailBuil
         templateContext.setVariable("projectId", parsed.projectId)
         templateContext.setVariable("publicUrl", parsed.publicUrl)
         templateContext.setVariable("projectName", parsed.projectName)
-        templateContext.setVariable("header", formatting.htmlHeader)
-        templateContext.setVariable("footer", formatting.htmlFooter)
+        templateContext.setVariable("htmlHeader", formatting.htmlHeader)
+        templateContext.setVariable("htmlFooter", formatting.htmlFooter)
 
         return templateContext
     }
