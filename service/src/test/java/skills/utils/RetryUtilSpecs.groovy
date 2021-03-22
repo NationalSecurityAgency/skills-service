@@ -17,6 +17,7 @@ package skills.utils
 
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillExceptionBuilder
+import spock.lang.IgnoreRest
 import spock.lang.Specification
 
 class RetryUtilSpecs extends Specification {
@@ -120,6 +121,25 @@ class RetryUtilSpecs extends Specification {
         then:
         IllegalArgumentException e = thrown(IllegalArgumentException)
         e.message == "numRetries >= 0"
+    }
+
+    def "only logs unique stacktraces if logOnlyOnFailure is true"() {
+        LoggerHelper loggerHelper = new LoggerHelper(RetryUtil.class)
+
+        when:
+        RetryUtil.withRetry(3, true) {
+            throw new RuntimeException("always the same")
+        }
+
+        WaitFor.wait {loggerHelper.hasError()}
+
+        then:
+        thrown(RuntimeException)
+        loggerHelper.getLogEvents()[0].message.count("java.lang.RuntimeException: always the same") == 1
+        loggerHelper.getLogEvents()[0].message.count("---same exception as previous retry---") == 2
+
+        cleanup:
+        loggerHelper.stop()
     }
 
 }

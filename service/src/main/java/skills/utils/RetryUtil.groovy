@@ -15,6 +15,7 @@
  */
 package skills.utils
 
+import com.google.common.collect.Sets
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.Validate
@@ -33,11 +34,12 @@ class RetryUtil {
         Validate.isTrue(numRetries >= 0, "numRetries >= 0")
         String attemptsId = null;
         StringBuilder errMsBuilder
+        Set<String> uniqueErrorMessages = Sets.newHashSetWithExpectedSize(numRetries)
         for (int i = 0; (i <= numRetries); i++) {
             try {
                 Object res = closure.call()
                 if (attemptsId && !logOnlyOnCompleteFailure) {
-                    log.error("Retry [${attemptsId}] succeeded!!")
+                    log.info("Retry [${attemptsId}] succeeded after [${i+1}] attempts!!")
                 }
                 return res
             } catch (Throwable t) {
@@ -54,7 +56,7 @@ class RetryUtil {
                     if (logOnlyOnCompleteFailure) {
                         if(!errMsBuilder) { //this happens if numRetries is 0
                             String msg = "Retry [${attemptsId}] - attempt ${i + 1}/${numRetries}:\n"
-                            errMsBuilder = appendMsg(errMsBuilder, msg, t)
+                            errMsBuilder = appendMsg(errMsBuilder, msg, t, uniqueErrorMessages)
                         }
                         log.error(errMsBuilder.toString())
                     }
@@ -64,19 +66,29 @@ class RetryUtil {
                     log.error("Retry [${attemptsId}] - attempt ${i + 1}/${numRetries}", t)
                 } else {
                     String msg = "Retry [${attemptsId}] - attempt ${i + 1}/${numRetries}:\n"
-                    errMsBuilder = appendMsg(errMsBuilder, msg, t)
+                    errMsBuilder = appendMsg(errMsBuilder, msg, t, uniqueErrorMessages)
                 }
             }
         }
     }
 
-    private static StringBuilder appendMsg(StringBuilder errMsBuilder, String msg, Throwable t) {
+    private static StringBuilder appendMsg(StringBuilder errMsBuilder, String msg, Throwable t, Set<String> uniqueErrorMessages) {
         if (!errMsBuilder) {
             errMsBuilder = new StringBuilder()
             errMsBuilder.append("\n")
         }
         errMsBuilder.append(msg)
-        errMsBuilder.append(ExceptionUtils.getStackTrace(t))
+        final String exceptionMsg = "${t.getClass().getName()}: ${t.getMessage()}"
+        if (!uniqueErrorMessages.contains(exceptionMsg)) {
+            uniqueErrorMessages.add(exceptionMsg)
+            if (log.isDebugEnabled()) {
+                errMsBuilder.append(ExceptionUtils.getStackTrace(t))
+            } else {
+                errMsBuilder.append(exceptionMsg)
+            }
+        } else {
+            errMsBuilder.append("---same exception as previous retry---")
+        }
         errMsBuilder.append("\n")
 
         return errMsBuilder

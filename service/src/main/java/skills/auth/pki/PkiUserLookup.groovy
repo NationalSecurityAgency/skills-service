@@ -119,15 +119,22 @@ class PkiUserLookup {
     }
 
     private void validate(UserInfo userInfo, String requestValue) {
+        String errMsg = null
         if (!userInfo) {
-            throw new SkillException("User info service does not have key [${requestValue}]")
+            errMsg = "User info service does not have key [${requestValue}]"
         }
 
         if (!userInfo?.username) {
-            throw new SkillException("User info service result must contain username. request value=[${requestValue}]")
+            errMsg = "User info service result must contain username. request value=[${requestValue}]"
         }
         if (!userInfo?.usernameForDisplay) {
-            throw new SkillException("User info service result must contain usernameForDisplay. request value=[${requestValue}]")
+            errMsg = "User info service result must contain usernameForDisplay. request value=[${requestValue}]"
+        }
+
+        if (errMsg != null) {
+            def e = new SkillException(errMsg)
+            e.doNotRetry = true
+            throw e
         }
     }
 

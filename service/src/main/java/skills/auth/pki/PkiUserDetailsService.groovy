@@ -43,40 +43,40 @@ class PkiUserDetailsService implements UserDetailsService, AuthenticationUserDet
     @Override
     @Transactional
     UserDetails loadUserByUsername(String dn) throws UsernameNotFoundException {
-        return RetryUtil.withRetry(3, {
-            this.doLoadUserByUsername(dn)
-        })
+        this.doLoadUserByUsername(dn)
     }
 
     private UserDetails  doLoadUserByUsername(String dn) throws UsernameNotFoundException {
-        skills.auth.UserInfo userInfo
         try {
-            userInfo = pkiUserLookup.lookupUserDn(dn)
-            if (userInfo) {
-                UserInfo existingUserInfo = userAuthService.loadByUserId(userInfo.username?.toLowerCase())
-                if (existingUserInfo) {
-                    userInfo.password = existingUserInfo.password
-                    userInfo.nickname = existingUserInfo.nickname
+            return (UserInfo)RetryUtil.withRetry(3) {
+                UserInfo userInfo
+                userInfo = pkiUserLookup.lookupUserDn(dn)
+                if (userInfo) {
+                    UserInfo existingUserInfo = userAuthService.loadByUserId(userInfo.username?.toLowerCase())
+                    if (existingUserInfo) {
+                        userInfo.password = existingUserInfo.password
+                        userInfo.nickname = existingUserInfo.nickname
+                    } else {
+                        userInfo.password = 'PKI_AUTHENTICATED'
+                    }
+
+                    // update user properties and load user roles, or create the account if this is the first time the user has connected
+                    userInfo = userAuthService.createOrUpdateUser(userInfo)
                 } else {
-                    userInfo.password = 'PKI_AUTHENTICATED'
+                    throw new SkillsAuthorizationException("Unknown user [$dn]")
                 }
 
-                // update user properties and load user roles, or create the account if this is the first time the user has connected
-                userInfo = userAuthService.createOrUpdateUser(userInfo)
-            } else {
-                throw new SkillsAuthorizationException("Unknown user [$dn]")
+                return userInfo
             }
         } catch (Exception e) {
-            log.error("Error occurred looking up user info for DN [${dn}]", e)
             String msg = "Unable to retrieve user info for [${dn}] - ${e.getMessage()}"
             if (e.getCause() instanceof HttpClientErrorException) {
-                msg = ((HttpClientErrorException)e.getCause()).getResponseBodyAsString()
-            } else if (e instanceof  HttpClientErrorException) {
-                msg = ((HttpClientErrorException)e).getResponseBodyAsString()
+                msg = ((HttpClientErrorException) e.getCause()).getResponseBodyAsString()
+            } else if (e instanceof HttpClientErrorException) {
+                msg = ((HttpClientErrorException) e).getResponseBodyAsString()
             }
             throw new BadCredentialsException(msg, e)
         }
-        return userInfo
     }
 
     @Override

@@ -98,7 +98,7 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException)
     protected ResponseEntity<Object> handleDataIntegrityViolation(DataIntegrityViolationException violationException, WebRequest webRequest) {
         String msg = "Data Integrity Violation"
-        log.error("${buildRequestInfo(webRequest)} msg", violationException)
+        log.error("${buildRequestInfo(webRequest)} $msg", violationException)
         BasicErrBody body = new BasicErrBody(explanation: msg, errorCode: ErrorCode.ConstraintViolation)
         return new ResponseEntity(body, HttpStatus.BAD_REQUEST)
     }
