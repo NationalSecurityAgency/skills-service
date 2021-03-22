@@ -28,6 +28,7 @@ import org.thymeleaf.spring5.SpringTemplateEngine
 import skills.auth.SecurityMode
 import skills.controller.exceptions.SkillException
 import skills.controller.result.model.SettingsResult
+import skills.notify.builders.Formatting
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.settings.EmailSettingsService
@@ -100,6 +101,15 @@ class PasswordResetService {
 
         SettingsResult settingsResult = settingsService.getGlobalSetting(Settings.GLOBAL_PUBLIC_URL.settingName)
 
+        List<SettingsResult> emailSettings = settingsService.getGlobalSettingsByGroup(EmailSettingsService.settingsGroup);
+
+        Formatting formatting = new Formatting(
+                htmlHeader: emailSettings.find {it.setting == EmailSettingsService.htmlHeader }?.value ?: null,
+                plaintextHeader: emailSettings.find { it.setting == EmailSettingsService.plaintextHeader }?.value ?: null,
+                htmlFooter: emailSettings.find { it.setting == EmailSettingsService.htmlFooter }?.value ?: null,
+                plaintextFooter: emailSettings.find { it.setting == EmailSettingsService.plaintextFooter }?.value ?:null
+        )
+
         if (!settingsResult) {
             throw new SkillException("No public URL is configured for the system, unable to send password reset email")
         }
@@ -117,6 +127,8 @@ class PasswordResetService {
         templateContext.setVariable("validTime", validFor)
         templateContext.setVariable("publicUrl", url)
         templateContext.setVariable("resetToken", token.token)
+        templateContext.setVariable("htmlHeader", formatting.htmlHeader)
+        templateContext.setVariable("htmlFooter", formatting.htmlFooter)
 
         emailService.sendEmailWithThymeleafTemplate("SkillTree Password Reset", email, "password_reset.html", templateContext)
     }
