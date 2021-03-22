@@ -179,7 +179,7 @@ class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
         List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
         then:
         emails.size() == 2
-        emails.collect {it.recipients[0] } == ["skills@skills.org", otherUser]
+        emails.collect {it.recipients[0] }.sort() == ["skills@skills.org", otherUser].sort()
 
         !res.body.skillApplied
         res.body.explanation == "Skill was submitted for approval"
