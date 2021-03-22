@@ -15,9 +15,7 @@
  */
 package skills.intTests.reportSkills
 
-
 import groovy.util.logging.Slf4j
-import org.apache.commons.lang3.ThreadUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
@@ -31,11 +29,9 @@ import skills.storage.repos.NotificationsRepo
 import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.SkillDefRepo
 import skills.utils.WaitFor
-import spock.lang.IgnoreIf
-import spock.lang.IgnoreRest
 
 @Slf4j
-class ReportSkills_SelfReporting extends DefaultIntSpec {
+class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
 
     @Autowired
     SkillApprovalRepo skillApprovalRepo
@@ -183,7 +179,7 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
         then:
         emails.size() == 2
-        emails.collect {it.recipients[0] } == ["skills@skills.org", otherUser]
+        emails.collect {it.recipients[0] }.sort() == ["skills@skills.org", otherUser].sort()
 
         !res.body.skillApplied
         res.body.explanation == "Skill was submitted for approval"
@@ -268,13 +264,6 @@ Always yours, <br/> -SkillTree Bot
 </p>
 
 </body>
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <title>SkillTree Points Requested</title>
-    <style>
-
-    </style>
-</head>
 </html>'''
 
         String expectedPlain = '''User user0 requested points.
@@ -327,7 +316,7 @@ SkillTree Bot'''
     }
 
     def "report via approval"() {
-        String user = "user0"
+        String user = "skills@skills.org"
 
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
@@ -349,7 +338,77 @@ SkillTree Bot'''
         def approvalsEndpointResAfter = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
         def skillEvents = skillsService.getPerformedSkills(user, proj.projectId)
 
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() == 2 }
+        int approvalEmailIdx = greenMail.getReceivedMessages().findIndexOf {it.subject.contains('Approved') }
+        EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail, approvalEmailIdx)
+
+        String expectedPlainText = '''
+Congratulations! Your request for the Test Skill 1 skill in the Test Project#1 project has been approved.
+   Project: Test Project#1
+   Skill: Test Skill 1
+   Approver: skills@skills.org for display
+   
+
+Always yours,
+SkillTree Bot
+'''
+        String expectedHtml = '''
+<!--
+Copyright 2020 SkillTree
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<!DOCTYPE html>
+<html   lang="en"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.thymeleaf.org http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <style>
+        .label {
+            color: #525252;
+        }
+    </style>
+</head>
+<body class="overall-container">
+<h1>SkillTree Points <span>Approved!</span></h1>
+<p>Congratulations! Your request for the <b>Test Skill 1</b> skill in the <b>Test Project#1</b> project has been approved!</p>
+
+
+<ul>
+    <li><span class="label">Project</span>: Test Project#1</li>
+    <li><span class="label">Skill</span>: Test Skill 1</li>
+    <li><span class="label">Approver</span>: skills@skills.org for display</li>
+    
+</ul>
+
+<p>You can view your progress for the <a href="http://localhost:{{port}}/progress-and-rankings/projects/TestProject1">Test Project#1</a> project in the SkillTree dashboard.</p>
+
+<p>
+Always yours, <br/> -SkillTree Bot
+</p>
+
+</body>
+</html>
+'''
         then:
+        emailRes.subj == "SkillTree Points Approved"
+        emailRes.recipients == ['skills@skills.org']
+
+        // ignore new lines
+        EmailUtils.prepBodyForComparison(emailRes.html, localPort) == EmailUtils.prepBodyForComparison(expectedHtml, localPort)
+        EmailUtils.prepBodyForComparison(emailRes.plainText, localPort) == EmailUtils.prepBodyForComparison(expectedPlainText, localPort)
+
         !res.body.skillApplied
         approvalsEndpointRes.count == 1
         approvalsEndpointRes.data.size() == 1
@@ -394,7 +453,7 @@ SkillTree Bot'''
     }
 
     def "ability to override submission for a rejected approval"() {
-        String user = "user0"
+        String user = "skills@skills.org"
 
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
@@ -418,7 +477,78 @@ SkillTree Bot'''
         def res1 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date1, "Please approve this again!")
         def approvalsEndpointResAfter = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
 
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() == 3 }
+        int deniedEmailIdx = greenMail.getReceivedMessages().findIndexOf {it.subject.contains('Denied') }
+        EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail, deniedEmailIdx)
+
+        String expectedPlainText = '''
+Your request for the Test Skill 1 skill in the Test Project#1 project has been denied.
+   Project: Test Project#1
+   Skill: Test Skill 1
+   Approver: skills@skills.org for display
+   Message: Just felt like it
+
+
+Always yours,
+SkillTree Bot
+'''
+        String expectedHtml = '''
+<!--
+Copyright 2020 SkillTree
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<!DOCTYPE html>
+<html   lang="en"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.thymeleaf.org http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <style>
+        .label {
+            color: #525252;
+        }
+    </style>
+</head>
+<body class="overall-container">
+<h1>SkillTree Points <span>Denied</span></h1>
+
+<p>Your request for the <b>Test Skill 1</b> skill in the <b>Test Project#1</b> project has been denied.</p>
+
+<ul>
+    <li><span class="label">Project</span>: Test Project#1</li>
+    <li><span class="label">Skill</span>: Test Skill 1</li>
+    <li><span class="label">Approver</span>: skills@skills.org for display</li>
+    <li><span class="label">Message</span>: Just felt like it</li>
+</ul>
+
+<p>You can view your progress for the <a href="http://localhost:{{port}}/progress-and-rankings/projects/TestProject1">Test Project#1</a> project in the SkillTree dashboard.</p>
+
+<p>
+Always yours, <br/> -SkillTree Bot
+</p>
+
+</body>
+</html>
+'''
         then:
+        emailRes.subj == "SkillTree Points Denied"
+        emailRes.recipients == ['skills@skills.org']
+
+        // ignore new lines
+        EmailUtils.prepBodyForComparison(emailRes.html, localPort) == EmailUtils.prepBodyForComparison(expectedHtml, localPort)
+        EmailUtils.prepBodyForComparison(emailRes.plainText, localPort) == EmailUtils.prepBodyForComparison(expectedPlainText, localPort)
+
         !res.body.skillApplied
         res.body.pointsEarned == 0
         res.body.explanation == "Skill was submitted for approval"
@@ -461,4 +591,108 @@ SkillTree Bot'''
         e.httpStatus == HttpStatus.BAD_REQUEST
         e.message.contains("Custom validation failed: msg=[paragraphs may not contain jabberwocky], type=[selfReportApprovalMsg], requestMsg=[Please approve jabberwocky this!], userId=user0")
     }
+
+    def "reject self reported skill without message"() {
+        String user = "skills@skills.org"
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Date date = new Date() - 60
+        Date date1 = new Date() - 30
+        when:
+        def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date, "Please approve this!")
+        def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
+
+        List<Integer> ids = approvalsEndpointRes.data.collect { it.id }
+        skillsService.rejectSkillApprovals(proj.projectId, ids)
+
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() == 2 }
+        int deniedEmailIdx = greenMail.getReceivedMessages().findIndexOf {it.subject.contains('Denied') }
+        EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail, deniedEmailIdx)
+
+        String expectedPlainText = '''
+Your request for the Test Skill 1 skill in the Test Project#1 project has been denied.
+   Project: Test Project#1
+   Skill: Test Skill 1
+   Approver: skills@skills.org for display
+   Message: 
+
+
+Always yours,
+SkillTree Bot
+'''
+        String expectedHtml = '''
+<!--
+Copyright 2020 SkillTree
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<!DOCTYPE html>
+<html   lang="en"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.thymeleaf.org http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <style>
+        .label {
+            color: #525252;
+        }
+    </style>
+</head>
+<body class="overall-container">
+<h1>SkillTree Points <span>Denied</span></h1>
+
+<p>Your request for the <b>Test Skill 1</b> skill in the <b>Test Project#1</b> project has been denied.</p>
+
+<ul>
+    <li><span class="label">Project</span>: Test Project#1</li>
+    <li><span class="label">Skill</span>: Test Skill 1</li>
+    <li><span class="label">Approver</span>: skills@skills.org for display</li>
+    <li><span class="label">Message</span>: </li>
+</ul>
+
+<p>You can view your progress for the <a href="http://localhost:{{port}}/progress-and-rankings/projects/TestProject1">Test Project#1</a> project in the SkillTree dashboard.</p>
+
+<p>
+Always yours, <br/> -SkillTree Bot
+</p>
+
+</body>
+</html>
+'''
+        then:
+        emailRes.subj == "SkillTree Points Denied"
+        emailRes.recipients == ['skills@skills.org']
+
+        // ignore new lines
+        EmailUtils.prepBodyForComparison(emailRes.html, localPort) == EmailUtils.prepBodyForComparison(expectedHtml, localPort)
+        EmailUtils.prepBodyForComparison(emailRes.plainText, localPort) == EmailUtils.prepBodyForComparison(expectedPlainText, localPort)
+
+        !res.body.skillApplied
+        res.body.pointsEarned == 0
+        res.body.explanation == "Skill was submitted for approval"
+
+        approvalsEndpointRes.count == 1
+        approvalsEndpointRes.data.size() == 1
+        approvalsEndpointRes.data[0].requestMsg == "Please approve this!"
+    }
+
 }
