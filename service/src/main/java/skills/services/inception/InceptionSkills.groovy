@@ -13,142 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.services
+package skills.services.inception
 
-import groovy.util.logging.Slf4j
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.stereotype.Service
-import skills.auth.UserInfo
-import skills.controller.request.model.ProjectRequest
-import skills.controller.request.model.ProjectSettingsRequest
-import skills.controller.request.model.SettingsRequest
+
+import org.springframework.stereotype.Component
 import skills.controller.request.model.SkillRequest
-import skills.controller.request.model.SubjectRequest
-import skills.controller.result.model.UserRoleRes
-import skills.services.admin.ProjAdminService
-import skills.services.admin.SkillsAdminService
-import skills.services.admin.SubjAdminService
-import skills.services.settings.SettingsService
-import skills.settings.CommonSettings
-import skills.storage.model.ProjDef
-import skills.storage.model.auth.RoleName
-import skills.storage.model.auth.UserRole
-import skills.storage.repos.ProjDefRepo
 
-import javax.transaction.Transactional
+import static skills.services.inception.InceptionProjectService.*
 
-@Service
-@Slf4j
-class InceptionProjectService {
+@Component
+class InceptionSkills {
 
-    @Autowired
-    SkillsAdminService skillsAdminService
+    List<SkillRequest> getAllSkills() {
+        List<SkillRequest> res = []
+        res.addAll(getProjectSubjectSkills())
+        res.addAll(getDashboardSubjectSkills())
+        res.addAll(getSkillsSubjectSkills())
 
-    @Autowired
-    SubjAdminService subjAdminService
-
-    @Autowired
-    AccessSettingsStorageService accessSettingsStorageService
-
-    @Autowired
-    SettingsService settingsService
-
-    @Autowired
-    ProjDefRepo projDefRepo
-
-    @Autowired
-    ProjAdminService projAdminService
-
-    @Value('#{"${skills.config.ui.docsHost}"}')
-    String docsRootHost = ""
-
-    static final String inceptionProjectId = "Inception"
-
-    /**
-     * If inception project exist then user will simply be assigned as an admin
-     */
-    @Transactional
-    void createInceptionAndAssignUser(String userId) {
-        doCreateAndAssign(userId)
+        return res
     }
 
-    /**
-     * If inception project exist then user will simply be assigned as an admin
-     */
-    @Transactional
-    void createInceptionAndAssignUser(UserInfo userInfo) {
-        doCreateAndAssign(userInfo.username?.toLowerCase())
+    String getHash() {
+        String allSkills = getAllSkills().collect {it.toString() }.join("\n")
+        return allSkills.md5()
     }
 
-    @Transactional
-    void removeUser(String userId) {
-        accessSettingsStorageService.deleteUserRole(userId, inceptionProjectId, RoleName.ROLE_PROJECT_ADMIN)
-    }
-
-    private void doCreateAndAssign(String userId) {
-        createInceptionProjectIfNeeded(userId)
-        assignAllRootUsersToInception();
-    }
-
-    private assignAllRootUsersToInception(){
-        List<UserRoleRes> rootUsers = accessSettingsStorageService.getRootUsers()
-
-        rootUsers.each {
-            List<UserRoleRes> inceptionRoles = accessSettingsStorageService.getUserRolesForProjectIdAndUserId(inceptionProjectId, it.userId)
-            if (!inceptionRoles.find({it.roleName == RoleName.ROLE_PROJECT_ADMIN})) {
-                log.info("Making [{}] project admin of [{}]", it.userId, inceptionProjectId)
-                accessSettingsStorageService.addUserRole(it.userId, inceptionProjectId, RoleName.ROLE_PROJECT_ADMIN)
-            }
-        }
-    }
-
-
-
-    private boolean createInceptionProjectIfNeeded(String userId) {
-        ProjDef projDef = projDefRepo.findByProjectId(inceptionProjectId)
-        if (!projDef) {
-            log.info("Creating {} project", inceptionProjectId)
-            createProject(userId)
-            return true
-        }
-
-        return false
-    }
-
-    private void createProject(String userId) {
-        projAdminService.saveProject(inceptionProjectId, new ProjectRequest(projectId: inceptionProjectId, name: inceptionProjectId), userId)
-
-        if (docsRootHost) {
-            log.info("setting Inception setting ${CommonSettings.HELP_URL_ROOT} to $docsRootHost")
-            ProjectSettingsRequest docRootRequest = new ProjectSettingsRequest()
-            docRootRequest.projectId = inceptionProjectId
-            docRootRequest.setting = CommonSettings.HELP_URL_ROOT
-            docRootRequest.value = docsRootHost
-            settingsService.saveSetting(docRootRequest)
-        }
-
-        String subjectProjectId = "Projects"
-        String subjectSkillsId = "Skills"
-        String subjectDashboardId = "Dashboard"
-
-        List<SubjectRequest> subs = [
-                new SubjectRequest(name: "Projects", subjectId: subjectProjectId, iconClass: "fas fa-project-diagram",
-                        description: "Project creation and management. Includes CRUD of subjects, badges as well as configuration of levels and project settings."),
-                new SubjectRequest(name: "Skills", subjectId: subjectSkillsId, iconClass: "fas fa-user-ninja",
-                        description: "Creation and management of skills including dependency and cross-project skills."),
-                new SubjectRequest(name: "Dashboard", subjectId: subjectDashboardId, iconClass: "fas fa-cubes",
-                        description: "Number of ancillary dashboard features including user management."),
-        ]
-        subs.each {
-            subjAdminService.saveSubject(inceptionProjectId, it.subjectId, it, false)
-        }
-
-        List<SkillRequest> skills = [
-                // ********************************************************************
-                // SUBJECT: Project
-                // ********************************************************************
-
+    private List<SkillRequest> getProjectSubjectSkills() {
+        return [
                 new SkillRequest(name: "Create Project", skillId: "CreateProject", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 20, numPerformToCompletion: 2,
                         description: "Project is an overall container that represents skills' ruleset for a single application with gamified training. " +
@@ -315,11 +206,11 @@ class InceptionProjectService {
                         numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         description: "Navigate to ``Project -> Settings``",
                 ),
+        ]
+    }
 
-                // ********************************************************************
-                // SUBJECT: Dashboard
-                // ********************************************************************
-
+    private List<SkillRequest> getDashboardSubjectSkills() {
+        return [
                 new SkillRequest(name: "Visit Dashboard Skills", skillId: "VisitDashboardSkills", subjectId: subjectDashboardId, projectId: inceptionProjectId,
                         pointIncrement: 5,
                         pointIncrementInterval: 60*12,
@@ -388,12 +279,11 @@ We suggest to often visit Skills Display view while building skill profile to be
                         numPerformToCompletion: 2,
                         description: "Descriptions support markdown for subjects and skills. When creating a subject or a skill description field has a link to the markdown documentation.",
                 ),
+        ]
+    }
 
-
-                // ********************************************************************
-                // SUBJECT: Skills
-                // *******************************************************************
-
+    private List<SkillRequest> getSkillsSubjectSkills() {
+        return  [
                 new SkillRequest(name: "Create Skill", skillId: "CreateSkill", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 10,
                         pointIncrementInterval: 60 * 12, // 1 work day
@@ -493,12 +383,6 @@ To create skill navigate to a subject and then click ``Skill +`` button.''',
                         numPerformToCompletion: 5,
                         description: "On the Skills Page click on ``+`` to expand a single row. ",
                 ),
-
         ]
-
-        skills.each {
-            skillsAdminService.saveSkill(it.skillId, it, false)
-        }
-
     }
 }

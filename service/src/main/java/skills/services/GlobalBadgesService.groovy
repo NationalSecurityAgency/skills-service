@@ -32,6 +32,7 @@ import skills.services.admin.DataIntegrityExceptionHandlers
 import skills.services.admin.DisplayOrderService
 import skills.services.admin.SkillsAdminService
 import skills.services.admin.SkillsDepsService
+import skills.services.inception.InceptionProjectService
 import skills.services.settings.SettingsService
 import skills.storage.model.*
 import skills.storage.model.SkillRelDef.RelationshipType

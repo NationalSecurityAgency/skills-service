@@ -29,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import skills.services.AccessSettingsStorageService
-import skills.services.InceptionProjectService
+import skills.services.inception.InceptionProjectService
 import skills.services.settings.SettingsService
 import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName

@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.*
 import skills.auth.SecurityMode
 import skills.auth.UserInfoService
 import skills.auth.form.jwt.JwtHelper
-import skills.services.InceptionProjectService
+import skills.services.inception.InceptionProjectService
 
 @Conditional(SecurityMode.FormAuth)
 @RestController
