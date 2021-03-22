@@ -27,6 +27,7 @@ limitations under the License.
     </style>
 </head>
 <body class="overall-container">
+<div th:remove="tag" th:utext="${htmlHeader}" th:if= "${htmlHeader != null}">[[${htmlHeader}]]</div>
 <h1>SkillTree Points <span th:text="${approved} ? 'Approved!' : 'Denied'"></span></h1>
 <p th:if="${approved}">Congratulations! Your request for the <b>[[${skillName}]]</b> skill in the <b>[[${projectName}]]</b> project has been approved!</p>
 <p th:if="${!approved}">Your request for the <b>[[${skillName}]]</b> skill in the <b>[[${projectName}]]</b> project has been denied.</p>
@@ -44,12 +45,6 @@ limitations under the License.
 Always yours, <br/> -SkillTree Bot
 </p>
 
+<div th:remove="tag" th:utext="${htmlFooter}" th:if= "${htmlFooter != null}">[[${htmlFooter}]]</div>
 </body>
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <title>SkillTree Points <span th:text="${approved} ? 'Approved!' : 'Denied'"></span></title>
-    <style>
-
-    </style>
-</head>
 </html>

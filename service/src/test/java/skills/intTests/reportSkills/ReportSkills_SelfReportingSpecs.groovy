@@ -15,9 +15,7 @@
  */
 package skills.intTests.reportSkills
 
-
 import groovy.util.logging.Slf4j
-import org.apache.commons.lang3.ThreadUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
@@ -31,11 +29,9 @@ import skills.storage.repos.NotificationsRepo
 import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.SkillDefRepo
 import skills.utils.WaitFor
-import spock.lang.IgnoreIf
-import spock.lang.IgnoreRest
 
 @Slf4j
-class ReportSkills_SelfReporting extends DefaultIntSpec {
+class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
 
     @Autowired
     SkillApprovalRepo skillApprovalRepo
@@ -268,13 +264,6 @@ Always yours, <br/> -SkillTree Bot
 </p>
 
 </body>
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <title>SkillTree Points Requested</title>
-    <style>
-
-    </style>
-</head>
 </html>'''
 
         String expectedPlain = '''User user0 requested points.
@@ -410,13 +399,6 @@ Always yours, <br/> -SkillTree Bot
 </p>
 
 </body>
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <title>SkillTree Points <span>Approved!</span></title>
-    <style>
-
-    </style>
-</head>
 </html>
 '''
         then:
@@ -557,13 +539,6 @@ Always yours, <br/> -SkillTree Bot
 </p>
 
 </body>
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <title>SkillTree Points <span>Denied</span></title>
-    <style>
-
-    </style>
-</head>
 </html>
 '''
         then:
@@ -701,13 +676,6 @@ Always yours, <br/> -SkillTree Bot
 </p>
 
 </body>
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <title>SkillTree Points <span>Denied</span></title>
-    <style>
-
-    </style>
-</head>
 </html>
 '''
         then:

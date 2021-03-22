@@ -36,11 +36,11 @@ class SkillApprovalResponseNotificationBuilder implements NotificationEmailBuild
     }
 
     @Override
-    Res build(Notification notification) {
+    Res build(Notification notification, Formatting formatting) {
         def parsed = jsonSlurper.parseText(notification.encodedParams)
-        Context context = buildThymeleafContext(parsed)
+        Context context = buildThymeleafContext(parsed, formatting)
         String htmlBody = thymeleafTemplateEngine.process("skill_approval_response.html", context)
-        String plainText = buildPlainText(parsed)
+        String plainText = buildPlainText(parsed, formatting)
         return new Res(
                 subject: "SkillTree Points ${parsed.approved ? 'Approved' : 'Denied'}",
                 html: htmlBody,
@@ -48,7 +48,7 @@ class SkillApprovalResponseNotificationBuilder implements NotificationEmailBuild
         )
     }
 
-    private Context buildThymeleafContext(parsed) {
+    private Context buildThymeleafContext(parsed, Formatting formatting) {
         Context templateContext = new Context()
         templateContext.setVariable("approver", parsed.approver)
         templateContext.setVariable("approved", parsed.approved)
@@ -58,18 +58,20 @@ class SkillApprovalResponseNotificationBuilder implements NotificationEmailBuild
         templateContext.setVariable("projectId", parsed.projectId)
         templateContext.setVariable("rejectionMsg", parsed.rejectionMsg ?: '')
         templateContext.setVariable("publicUrl", parsed.publicUrl)
+        templateContext.setVariable("htmlHeader", formatting.htmlHeader)
+        templateContext.setVariable("htmlFooter", formatting.htmlFooter)
 
         return templateContext
     }
 
-    private String buildPlainText(parsed) {
+    private String buildPlainText(parsed, Formatting formatting) {
         String message
         if (parsed.approved) {
             message = "Congratulations! Your request for the ${parsed.skillName} skill in the ${parsed.projectName} project has been approved."
         } else {
             message = "Your request for the ${parsed.skillName} skill in the ${parsed.projectName} project has been denied."
         }
-        return "${message}" +
+        String pt = "${message}" +
                 "\n   Project: ${parsed.projectName}" +
                 "\n   Skill: ${parsed.skillName}" +
                 "\n   Approver: ${parsed.approver}" +
@@ -78,6 +80,14 @@ class SkillApprovalResponseNotificationBuilder implements NotificationEmailBuild
                 "\nAlways yours," +
                 "\nSkillTree Bot"
 
+        if (formatting.plaintextHeader) {
+            pt = "${formatting.plaintextHeader}\n${pt}"
+        }
+        if (formatting.plaintextFooter) {
+            pt = "${pt}\n${formatting.plaintextFooter}"
+        }
+
+        return pt
     }
 
 }
