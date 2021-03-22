@@ -45,20 +45,20 @@ class InceptionSkills {
                         pointIncrement: 20, numPerformToCompletion: 2,
                         description: "Project is an overall container that represents skills' ruleset for a single application with gamified training. " +
                                 "Project's administrator(s) manage training skills definitions, subjects, levels, dependencies and other attributes " +
-                                "that make up application's training profile. To create project click 'Project +' button.",
+                                "that make up an application's training profile. To create a project click the 'Project +' button.",
                         helpUrl: "/dashboard/user-guide/projects.html"
                 ),
                 new SkillRequest(name: "Create Subject", skillId: "CreateSubject", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 20,
                         pointIncrementInterval: 0, // disable Time Window
                         numPerformToCompletion: 3,
-                        description: "Subjects are a way to group and organize skill definitions and skill training profile. To create a subject navigate to ``Project -> Subjects`` and then click ``Subject +`` button.",
+                        description: "Subjects are a way to group and organize skill definitions within a training profile. To create a subject navigate to ``Project -> Subjects`` and then click the ``Subject +`` button.",
                         helpUrl: "/dashboard/user-guide/subjects.html"
                 ),
                 new SkillRequest(name: "Configure Root Help Url", skillId: "ConfigureProjectRootHelpUrl", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 50, pointIncrementInterval: 8, numPerformToCompletion: 1,
                         description: "Configure project's 'Root Help Url' by navigating to ``Project -> Settings```. " +
-                                "Skill definition's `Help Url/Path` will be treated relative to this `Root Help Url`.",
+                                "Skill definition's `Help Url/Path` will be treated as relative to this `Root Help Url`.",
                         helpUrl: "/dashboard/user-guide/projects.html#settings"
                 ),
                 new SkillRequest(name: "Add Project Administrator", skillId: "AddAdmin", subjectId: subjectProjectId, projectId: inceptionProjectId,
@@ -70,7 +70,7 @@ class InceptionSkills {
                         pointIncrement: 20,
                         pointIncrementInterval: 0, // disable Time Window
                         numPerformToCompletion: 5,
-                        description: "Badges add another facet to the overall gamificaiton profile and allows to further reward your users by providing these prestigious symbols. " +
+                        description: "Badges add another facet to the overall gamificaiton profile and provide a mechanism to further reward your users by awarding these prestigious symbols. " +
                                 "Badges are a collection of skills and when all of the skills are accomplished that badge is earned. " +
                                 "To create a badge navigate to ``Project -> Badges`` and then click  ``Badge +`` button.",
                         helpUrl: "/dashboard/user-guide/badges.html"
@@ -80,9 +80,9 @@ class InceptionSkills {
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         numPerformToCompletion: 2,
-                        description: "Gems are special badges that are only available within configure time window. Users must complete all of the gem's skills within that window in order to earn this precious stone! " +
+                        description: "Gems are special badges that are only available within a configured time window. Users must complete all of the gem's skills within that window in order to earn this precious stone! " +
                                 "To create a gem navigate to ``Project -> Badges`` and then click  ``Badge +`` button. " +
-                                "You can then enable and configure a gem within badge edit modal by selecting Enable Gem Feature",
+                                "You can then enable and configure a gem within the badge edit modal by selecting the ``Enable Gem Feature``",
                         helpUrl: "/dashboard/user-guide/badges.html#gem"
                 ),
                 new SkillRequest(name: "Assign Badge or Gem Skills", skillId: "AssignGemOrBadgeSkills", subjectId: subjectProjectId, projectId: inceptionProjectId,
@@ -99,7 +99,7 @@ class InceptionSkills {
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 4, // up-to 4 per day
                         numPerformToCompletion: 20,
-                        description: "A Project is composed of Subjects which are made of Skills and a single skill defines a training unit within the gamification framework. Subjects are a way to group and organize skill definitions within a gameified training profile. " +
+                        description: "A Project is composed of Subjects which are made of Skills and a single skill defines a training unit within the gamification framework. Subjects are a way to group and organize skill definitions within a gamified training profile. " +
                                 "\n\nNavigate to ``Project -> Subjects``",
                 ),
                 new SkillRequest(name: "Visit Subject's Skills", skillId: "VisitSkillsForASubject", subjectId: subjectProjectId, projectId: inceptionProjectId,
@@ -136,7 +136,7 @@ class InceptionSkills {
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 4, // up-to 4 per day
                         numPerformToCompletion: 20,
-                        description: "Badges add another facet to the overall gamification profile and allows you to further reward your users by providing these prestigious symbols. Badges are a collection of skills and when all of the skills are accomplished that badge is earned." +
+                        description: "Badges add another facet to the overall gamification profile and allow you to further reward your users by awarding these prestigious symbols. Badges are a collection of skills and when all of the skills are accomplished that badge is earned." +
                                 "\n\nNavigate to ``Project -> Badges``",
                 ),
                 new SkillRequest(name: "Visit Badge Page", skillId: "VisitSingleBadgePage", subjectId: subjectProjectId, projectId: inceptionProjectId,
@@ -181,7 +181,7 @@ class InceptionSkills {
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         numPerformToCompletion: 2,
-                        description: '''Levels are users' achievement path - the overall goal of the gameified training profile is to encourage users to achieve the highest level. Levels are tracked for the entire project as well as for each subject which provides users many ways to progress forward.
+                        description: '''Levels are users' achievement path - the overall goal of the gamified training profile is to encourage users to achieve the highest level. Levels are tracked for the entire project as well as for each subject which provides users many ways to progress forward.
 
 The Skills dashboard supports two flexible ways to manage levels:
 
@@ -247,16 +247,16 @@ To achieve these points navigate to ``Project -> Levels``''',
                         numPerformToCompletion: 1,
                         description: '''Project administrators can enable self-reporting when creating or editing a skill. Self reporting can be configured as either:
 - `Honor System`: Points are awarded immediately
-- `Approval`: Approval is required - project admin can either approve or reject point requests
+- `Approval`: Approval is required - a project admin can either approve or reject point requests
                         
-Approval requests can be located at the ``Self Report`` page, navigate to ``Project -> Self Report`` ''',
+Approval requests can be located on the ``Self Report`` page, navigate to ``Project -> Self Report`` ''',
                 ),
                 new SkillRequest(name: "Visit Project Issues Page", skillId: "VisitProjectErrors", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 15,
                         numPerformToCompletion: 2,
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
-                        description: '''Issues page documents any errors or warnings that require project administrator's attention. Navigate to ``Project -> Issues`` ''',
+                        description: '''Issues page documents any errors or warnings that require a project administrator's attention. Navigate to ``Project -> Issues`` ''',
                 ),
 
         ]
@@ -269,19 +269,19 @@ Approval requests can be located at the ``Self Report`` page, navigate to ``Proj
                         pointIncrementInterval: 60*12,
                         numMaxOccurrencesIncrementInterval: 5,
                         numPerformToCompletion: 20,
-                        description: "SkillTree dashboard gamifies training for the dashboard itself and we call it **Inception**. " +
+                        description: "The SkillTree dashboard gamifies training for the dashboard itself and we call it **Inception**. " +
                                 "All the dashboard users will have a button on the top right of the application which navigates to your skills profile. " +
                                 "This button will also display your current level standing.",
                         helpUrl: "/dashboard/user-guide/inception.html"
                 ),
                 new SkillRequest(name: "Add or Modify Levels", skillId: "AddOrModifyLevels", subjectId: subjectDashboardId, projectId: inceptionProjectId,
                         pointIncrement: 50, numPerformToCompletion: 1,
-                        description: '''Levels are users' achievement path - the overall goal of the application usage is to achieve the highest level. Levels are tracked for the entire project as well as for each subject which provides users many ways to progress forward.
+                        description: '''Levels are users' achievement path - the overall goal of application usage is to achieve the highest level. Levels are tracked for the entire project as well as for each subject which provides users many ways to progress forward.
 Skills dashboard supports two flexible ways to manage levels:
 * `Percentage Based (default)`: Each level is defined as a percentage of overall points and the actual level's point range is calculated based on the percentage.
 * `Point based`: Level's from and to points are configured explicitly.
 
-To achieve this skill simply  please study available percentage based and point-based strategy and make several modifications to levels as needed.'''.toString(),
+To achieve this skill simply study the available percentage based and point-based strategy and make modifications to levels as needed.'''.toString(),
                         helpUrl: "/dashboard/user-guide/levels.html",
                 ),
                 new SkillRequest(name: "Visit User Settings", skillId: "VisitUserSettings", subjectId: subjectDashboardId, projectId: inceptionProjectId,
@@ -293,10 +293,10 @@ To achieve this skill simply  please study available percentage based and point-
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 25, // up-to 25 per day
                         numPerformToCompletion: 50,
-                        description: '''You can see what user's skills profile and progress display would like for a particular user by navigating to a specific user page ``Project -> Users -> Select a User -> Client Display``. 
-This is the same exact plugable Skills Display that you would be embedding into your application so it can serve as a preview, an ability to look through that user's point of view.  
+                        description: '''You can see what the skills profile and progress display would like for a particular user by navigating to a specific user page ``Project -> Users -> Select a User -> Client Display``. 
+This is the same exact pluggable Skills Display that you would be embedding into your application so it can serve as a preview of what the user will see.  
 
-Client display will depict project skills profile and users points at that exact moment. We suggest to often visit Skills Display view while building skill profile to better understand how your users will view gamificaiton profile and their progress. 
+Client display will depict project skills profile and users points at that exact moment. We suggest you often visit the Skills Display view while building a skill profile to better understand what the gamificaiton profile and progress will look like to your users. 
 '''.toString(),
                         helpUrl: "/dashboard/user-guide/users.html#skills-display-client-display"
                 ),
@@ -313,7 +313,7 @@ Client display will depict project skills profile and users points at that exact
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 25 per day
                         numPerformToCompletion: 2,
-                        description: "To see a history of user's performed skill events please visit ``Project -> Users -> Select a User -> Performed Skills``. Furthermore you have an ability to remove a single skill event if needed.",
+                        description: "To see a history of user's performed skill events please visit ``Project -> Users -> Select a User -> Performed Skills``. Furthermore you have the ability to remove individual skill events if needed.",
                         helpUrl: "/dashboard/user-guide/users.html#performed-skills"
                 ),
                 new SkillRequest(name: "Visit User Metrics", skillId: "VisitUserStats", subjectId: subjectDashboardId, projectId: inceptionProjectId,
@@ -321,7 +321,7 @@ Client display will depict project skills profile and users points at that exact
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 25 per day
                         numPerformToCompletion: 2,
-                        description: "Almost every page on the skill's dashboard exposes metrics and statistics about that particular entity/concept. These metrics are very much context aware so as an example graphs and charts you see on a subject page will be for that specific subject and metrics on the project page will be for the entire project.",
+                        description: "Almost every page on the skill's dashboard exposes metrics and statistics about that particular entity/concept. These metrics are very much context aware. As an example, graphs and charts you see on a subject page will be for that specific subject and metrics on the project page will be for the entire project.",
                         helpUrl: "/dashboard/user-guide/metrics.html",
                 ),
                 new SkillRequest(name: "Visit Markdown Documentation", skillId: "VisitMarkdownDocs", subjectId: subjectDashboardId, projectId: inceptionProjectId,
@@ -329,7 +329,7 @@ Client display will depict project skills profile and users points at that exact
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 25 per day
                         numPerformToCompletion: 2,
-                        description: "Descriptions support markdown for subjects and skills. When creating a subject or a skill description field has a link to the markdown documentation.",
+                        description: "Descriptions support markdown for subjects and skills. When creating a subject or a skill, the description field has a link to the markdown documentation.",
                 ),
                 new SkillRequest(name: "Visit My Preferences Page", skillId: "VisitMyPreferences", subjectId: subjectDashboardId, projectId: inceptionProjectId,
                         pointIncrement: 10,
@@ -349,7 +349,7 @@ Client display will depict project skills profile and users points at that exact
                         description: '''Projects are composed of Subjects which are made of Skills and a single skill defines a training unit within the gamification framework. 
 To complete a skill users may need to perform the same action multiple times - repetition is important for retention after all. 
 A Skill definition specifies how many times a skill has to be performed and each occurrence is called a Skill Event. 
-To create skill navigate to a subject and then click ``Skill +`` button.''',
+To create a skill, navigate to a subject and then click the ``Skill +`` button.''',
                         helpUrl: "/dashboard/user-guide/skills.html"
                 ),
                 new SkillRequest(name: "Create Skill with disabled Time Window", skillId: "CreateSkillDisabledTimeWindow", subjectId: subjectSkillsId, projectId: inceptionProjectId,
@@ -369,13 +369,13 @@ To create skill navigate to a subject and then click ``Skill +`` button.''',
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 5, // up-to 1 per day
                         numPerformToCompletion: 10,
-                        description: "URL pointing to a help article further depicting information about this skill or capability. Please note that this property works in conjunction with the Root Help Url project setting.",
+                        description: "URL pointing to a help article providing further information about this skill or capability. Please note that this property works in conjunction with the Root Help Url project setting.",
                         helpUrl: "/dashboard/user-guide/skills.html"
                 ),
                 new SkillRequest(name: "Create Skills with multiple versions", skillId: "CreateSkillVersion", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 25,
                         numPerformToCompletion: 1,
-                        description: "Skill versioning is a mechanism that allows addition of the new skills without affecting existing software running with an older skill profile. Versioning is mostly pertinent to the Display Libraries that visualize the skill profile for the version they were declared with.",
+                        description: "Skill versioning is a mechanism that allows the addition of new skills without affecting existing software running with an older skill profile. Versioning is mostly pertinent to the Display Libraries that visualize the skill profile for the version they were declared with.",
                         helpUrl: "/dashboard/user-guide/skills.html#skills-versioning"
                 ),
                 new SkillRequest(name: "Visit Skill Overview", skillId: "VisitSkillOverview", subjectId: subjectSkillsId, projectId: inceptionProjectId,
@@ -391,7 +391,7 @@ To create skill navigate to a subject and then click ``Skill +`` button.''',
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 2, // up-to 1 per day
                         numPerformToCompletion: 6,
-                        description: "Dependencies add another facet to the overall gamification profile which forces users to complete skills in the specified order. If you set up Skill A to depend on the completion of Skill B then no points will be awarded toward Skill A until Skill B is fully accomplished.Keep in mind that Skill B must be fully completed first before any points will be awarded toward Skill A. Navigate to ``Project -> Subject -> Skill -> Dependencies``",
+                        description: "Dependencies add another facet to the overall gamification profile which forces users to complete skills in the specified order. If you set up Skill A to depend on the completion of Skill B then no points will be awarded toward Skill A until Skill B is fully accomplished. Keep in mind that Skill B must be fully completed first before any points will be awarded toward Skill A. Navigate to ``Project -> Subject -> Skill -> Dependencies``",
                         helpUrl: "/dashboard/user-guide/dependencies.html"
                 ),
                 new SkillRequest(name: "Visit Skill Users", skillId: "VisitSkillUsers", subjectId: subjectSkillsId, projectId: inceptionProjectId,
@@ -445,7 +445,7 @@ To create skill navigate to a subject and then click ``Skill +`` button.''',
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         numPerformToCompletion: 3,
-                        description: "This Skill is an example of the `Self Reporting` feature. Click **I did** button below to receive points. The skill is configured under the 'Honor' system and the points will be awarded immediately. Enjoy!",
+                        description: "This Skill is an example of the `Self Reporting` feature. Click the **I did it** button below to receive points. The skill is configured under the 'Honor' system and the points will be awarded immediately. Enjoy!",
                         selfReportingType: SkillDef.SelfReportingType.HonorSystem.toString(),
                 ),
                 new SkillRequest(name: "Self Reporting with Approval", skillId: "SelfReportApprovalExample", subjectId: subjectSkillsId, projectId: inceptionProjectId,
@@ -453,7 +453,7 @@ To create skill navigate to a subject and then click ``Skill +`` button.''',
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         numPerformToCompletion: 3,
-                        description: "This Skill is an example of the `Self Reporting` feature. Click **I did** button below to request points. The skill is configured under the 'Approval' system and request will be placed into project administrators Approval Queue.!",
+                        description: "This Skill is an example of the `Self Reporting` feature. Click **I did it** button below to request points. The skill is configured under the 'Approval' system and a request will be placed into the project administrators Approval Queue.!",
                         selfReportingType: SkillDef.SelfReportingType.Approval.toString(),
                 ),
         ]
