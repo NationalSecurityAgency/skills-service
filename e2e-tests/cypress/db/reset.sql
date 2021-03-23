@@ -19,4 +19,4 @@ delete from USER_ROLES where USER_ID = 'root@skills.org' and ROLE_NAME = 'ROLE_S
 delete from GLOBAL_BADGE_LEVEL_DEFINITION;
 delete from SKILL_DEFINITION where PROJECT_ID is null;
 delete from user_achievement;
-delete from SETTINGS where setting_group <> 'project.inception';
+delete from SETTINGS where setting_group <> 'project.inception' or setting_group is null;
