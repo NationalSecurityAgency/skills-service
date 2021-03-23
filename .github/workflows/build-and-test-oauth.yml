@@ -127,3 +127,5 @@ jobs:
           ./service/target/*.jar
           ./service/target/*.log
           ./e2e-tests/logs
+          ./e2e-tests/cypress/snapshots/**/**/__diff_output__/*.png
+          ./e2e-tests/cypress/snapshots/**/__diff_output__/*.png
