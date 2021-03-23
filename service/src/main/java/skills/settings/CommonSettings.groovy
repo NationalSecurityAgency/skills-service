@@ -18,4 +18,6 @@ package skills.settings
 class CommonSettings {
 
     public static final String HELP_URL_ROOT = "help.url.root"
+    public static final String INCEPTION_SKILLS_MD5_HASH = "skills.md5"
+    public static final String INCEPTION_SETTING_GROUP = "project.inception"
 }

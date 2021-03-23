@@ -15,6 +15,11 @@
  */
 package skills.controller.request.model
 
+import groovy.transform.Canonical
+import groovy.transform.ToString
+
+@Canonical
+@ToString(includeSuper = true)
 class ProjectSettingsRequest extends SettingsRequest{
     String projectId
 }

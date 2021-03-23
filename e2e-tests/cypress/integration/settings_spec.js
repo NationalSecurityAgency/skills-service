@@ -663,7 +663,7 @@ describe('Settings Tests', () => {
         cy.contains('Official Docs');
     })
 
-    it.only('email header/footer settings', () => {
+    it('email header/footer settings', () => {
         cy.intercept({
             method: 'GET',
             url: '/app/projects'

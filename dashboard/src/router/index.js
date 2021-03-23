@@ -260,7 +260,7 @@ const router = new Router({
         name: 'SelfReport',
         path: 'self-report',
         component: SelfReportStatusPage,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, reportSkillId: 'VisitSelfReport' },
       }, {
         name: 'ProjectAccess',
         path: 'access',
@@ -275,7 +275,7 @@ const router = new Router({
         name: 'ProjectErrorsPage',
         path: 'issues',
         component: ProjectErrorsPage,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, reportSkillId: 'VisitProjectErrors' },
       }, {
         path: '/projects/:projectId/metrics',
         component: MetricsPageNav,
@@ -289,17 +289,17 @@ const router = new Router({
           name: 'UsersAndLevelsMetrics',
           path: 'achievements',
           component: UsersAchievementsMetricPage,
-          meta: { requiresAuth: true },
+          meta: { requiresAuth: true, reportSkillId: 'VisitProjectUserAchievementMetrics' },
         }, {
           name: 'SubjectMetricsPage',
           path: 'subjects',
           component: SubjectMetricsPage,
-          meta: { requiresAuth: true },
+          meta: { requiresAuth: true, reportSkillId: 'VisitProjectSubjectMetrics' },
         }, {
           name: 'SkillsMetricsPage',
           path: 'skills',
           component: SkillsMetricsPage,
-          meta: { requiresAuth: true },
+          meta: { requiresAuth: true, reportSkillId: 'VisitProjectSkillMetrics' },
         }],
       }],
     },
@@ -456,7 +456,7 @@ const router = new Router({
         name: 'Preferences',
         path: 'preferences',
         component: Preferences,
-        meta: { requiresAuth: true, nonAdmin: true },
+        meta: { requiresAuth: true, nonAdmin: true, reportSkillId: 'VisitMyPreferences' },
       }, {
         name: 'SecuritySettings',
         path: 'security',

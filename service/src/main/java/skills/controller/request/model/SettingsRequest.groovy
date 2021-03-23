@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 package skills.controller.request.model
-
 import groovy.transform.Canonical
 
 @Canonical
@@ -32,3 +31,5 @@ abstract class SettingsRequest {
         return Boolean.valueOf(value) || value.toLowerCase() == "enabled" || value.toLowerCase() == "enable" || value.toLowerCase() == "on"
     }
 }
+
+
