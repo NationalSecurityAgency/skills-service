@@ -63,6 +63,9 @@ class SelfReportingService {
     @Autowired
     SettingsService settingsService
 
+    @Autowired
+    FeatureService featureService
+
     SkillEventsService.AppliedCheckRes requestApproval(String userId, SkillEventsSupportRepo.SkillDefMin skillDefinition, Date performedOn, String requestMsg) {
 
         if (StringUtils.isNotBlank(requestMsg)) {
@@ -115,7 +118,7 @@ class SelfReportingService {
     }
 
     private void sentNotifications(SkillEventsSupportRepo.SkillDefMin skillDefinition, String userId, String requestMsg) {
-        String publicUrl = getPublicUrl()
+        String publicUrl = featureService.getPublicUrl()
         if(!publicUrl) {
             return
         }
@@ -140,19 +143,6 @@ class SelfReportingService {
                 ],
         )
         notifier.sendNotification(request)
-    }
-    private String getPublicUrl() {
-        SettingsResult publicUrlSetting = settingsService.getGlobalSetting(Settings.GLOBAL_PUBLIC_URL.settingName)
-        if (!publicUrlSetting) {
-            log.warn("Skill approval notifications are disabled since global setting [${Settings.GLOBAL_PUBLIC_URL}] is NOT set")
-            return null
-        }
-
-        String publicUrl = publicUrlSetting.value
-        if (!publicUrl.endsWith("/")){
-            publicUrl += "/"
-        }
-        return publicUrl
     }
 
     void removeRejection(String projectId, String userId, Integer approvalId) {
