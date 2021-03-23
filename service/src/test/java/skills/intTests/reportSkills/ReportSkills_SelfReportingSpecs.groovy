@@ -25,10 +25,13 @@ import skills.intTests.utils.SkillsFactory
 import skills.services.settings.SettingsService
 import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
+import skills.storage.model.UserAttrs
 import skills.storage.repos.NotificationsRepo
 import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.SkillDefRepo
+import skills.storage.repos.UserAttrsRepo
 import skills.utils.WaitFor
+import spock.lang.IgnoreRest
 
 @Slf4j
 class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
@@ -44,6 +47,9 @@ class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
 
     @Autowired
     NotificationsRepo notificationsRepo
+
+    @Autowired
+    UserAttrsRepo  userAttrsRepo
 
     def setup() {
         startEmailServer()
@@ -68,12 +74,15 @@ class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
         assert WaitFor.wait { greenMail.getReceivedMessages().size() > 0 }
         EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail)
 
+        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserId(skillsService.userName)
+        UserAttrs userRequestingPtsAttrs = userAttrsRepo.findByUserId("user0")
+
         then:
         greenMail.getReceivedMessages().length == 1
         emailRes.subj == "SkillTree Points Requested"
-        emailRes.recipients == ["skills@skills.org"]
-        emailRes.plainText.contains("User user0 requested points.")
-        emailRes.html.contains("User <b>user0</b> requested points")
+        emailRes.recipients == [projectAdminUserAttrs.email]
+        emailRes.plainText.contains("User ${userRequestingPtsAttrs.userIdForDisplay} requested points.")
+        emailRes.html.contains("User <b>${userRequestingPtsAttrs.userIdForDisplay}</b> requested points")
 
         assert WaitFor.wait { notificationsRepo.count() == 0 }
 
@@ -122,12 +131,15 @@ class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
         assert WaitFor.wait { greenMail.getReceivedMessages().size() > 0 }
         EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail)
 
+        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserId(skillsService.userName)
+        UserAttrs userRequestingPtsAttrs = userAttrsRepo.findByUserId("user0")
+
         then:
         greenMail.getReceivedMessages().length == 1
         emailRes.subj == "SkillTree Points Requested"
-        emailRes.recipients == ["skills@skills.org"]
-        emailRes.plainText.contains("User user0 requested points.")
-        emailRes.html.contains("User <b>user0</b> requested points")
+        emailRes.recipients == [projectAdminUserAttrs.email]
+        emailRes.plainText.contains("User ${userRequestingPtsAttrs.userIdForDisplay} requested points.")
+        emailRes.html.contains("User <b>${userRequestingPtsAttrs.userIdForDisplay}</b> requested points")
 
         !res.body.skillApplied
         res.body.pointsEarned == 0
@@ -166,10 +178,13 @@ class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj)
         skillsService.createSkills(skills)
 
-        String otherUser = "other@email.com"
+        String otherUser = getRandomUsers(1).first()
+
         createService(otherUser)
         skillsService.addProjectAdmin(proj.projectId, otherUser)
 
+        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserId(skillsService.userName)
+        UserAttrs otherProjectAdminUserAttrs = userAttrsRepo.findByUserId(otherUser)
 
         Date date = new Date() - 60
         when:
@@ -177,9 +192,10 @@ class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
 
         assert WaitFor.wait { greenMail.getReceivedMessages().size() > 1 }
         List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
+
         then:
         emails.size() == 2
-        emails.collect {it.recipients[0] }.sort() == ["skills@skills.org", otherUser].sort()
+        emails.collect {it.recipients[0] }.sort() == [projectAdminUserAttrs.email, otherProjectAdminUserAttrs.email].sort()
 
         !res.body.skillApplied
         res.body.explanation == "Skill was submitted for approval"
@@ -199,6 +215,10 @@ class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
         Date date = new Date() - 60
         when:
         skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "user0", date, "Please approve this!")
+
+        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserId(skillsService.userName)
+        UserAttrs userRequestingPtsAttrs = userAttrsRepo.findByUserId("user0")
+
 
         assert WaitFor.wait { greenMail.getReceivedMessages().size() > 0 }
         EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail)
@@ -246,7 +266,7 @@ limitations under the License.
 </head>
 <body class="overall-container">
 <h1>SkillTree Points Requested!</h1>
-<p>User <b>user0</b> requested points. As an approver for the <b>Test Project#1</b> project, you can approve or reject this request.</p>
+<p>User <b>''' + userRequestingPtsAttrs.userIdForDisplay + '''</b> requested points. As an approver for the <b>Test Project#1</b> project, you can approve or reject this request.</p>
 
 <p style="font-weight: bold">
     <a href="http://localhost:{{port}}/administrator/projects/TestProject1/self-report" class="button">Approve or Reject</a>
@@ -266,9 +286,9 @@ Always yours, <br/> -SkillTree Bot
 </body>
 </html>'''
 
-        String expectedPlain = '''User user0 requested points.
+        String expectedPlain = '''User ''' + userRequestingPtsAttrs.userIdForDisplay + ''' requested points.
    Approval URL: http://localhost:{{port}}/administrator/projects/TestProject1/self-report
-   User Requested: user0
+   User Requested: ''' + userRequestingPtsAttrs.userIdForDisplay + '''
    Project: Test Project#1
    Skill: Test Skill 1 (skill1)
    Number of Points: 2,000
@@ -282,8 +302,8 @@ SkillTree Bot'''
         then:
         greenMail.getReceivedMessages().length == 1
         emailRes.subj == "SkillTree Points Requested"
-        emailRes.recipients == ["skills@skills.org"]
-        emailRes.plainText.contains("User user0 requested points.")
+        emailRes.recipients == [projectAdminUserAttrs.email]
+        emailRes.plainText.contains("User ${userRequestingPtsAttrs.userIdForDisplay} requested points.")
         // ignore new lines
         EmailUtils.prepBodyForComparison(emailRes.html, localPort) == EmailUtils.prepBodyForComparison(expectedHtml, localPort)
         EmailUtils.prepBodyForComparison(emailRes.plainText, localPort) == EmailUtils.prepBodyForComparison(expectedPlain, localPort)
@@ -329,6 +349,10 @@ SkillTree Bot'''
         skillsService.createSkills(skills)
 
         Date date = new Date() - 60
+
+        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserId(skillsService.userName)
+        UserAttrs userRequestingPtsAttrs = userAttrsRepo.findByUserId(user)
+
         when:
         def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date, "Please approve this!")
         def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
@@ -346,7 +370,7 @@ SkillTree Bot'''
 Congratulations! Your request for the Test Skill 1 skill in the Test Project#1 project has been approved.
    Project: Test Project#1
    Skill: Test Skill 1
-   Approver: skills@skills.org for display
+   Approver: ''' + projectAdminUserAttrs.userIdForDisplay + '''
    
 
 Always yours,
@@ -388,7 +412,7 @@ limitations under the License.
 <ul>
     <li><span class="label">Project</span>: Test Project#1</li>
     <li><span class="label">Skill</span>: Test Skill 1</li>
-    <li><span class="label">Approver</span>: skills@skills.org for display</li>
+    <li><span class="label">Approver</span>: '''+ projectAdminUserAttrs.userIdForDisplay + '''</li>
     
 </ul>
 
@@ -403,7 +427,7 @@ Always yours, <br/> -SkillTree Bot
 '''
         then:
         emailRes.subj == "SkillTree Points Approved"
-        emailRes.recipients == ['skills@skills.org']
+        emailRes.recipients == [userRequestingPtsAttrs.email]
 
         // ignore new lines
         EmailUtils.prepBodyForComparison(emailRes.html, localPort) == EmailUtils.prepBodyForComparison(expectedHtml, localPort)
@@ -481,11 +505,14 @@ Always yours, <br/> -SkillTree Bot
         int deniedEmailIdx = greenMail.getReceivedMessages().findIndexOf {it.subject.contains('Denied') }
         EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail, deniedEmailIdx)
 
+        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserId(skillsService.userName)
+        UserAttrs userRequestingPtsAttrs = userAttrsRepo.findByUserId(user)
+
         String expectedPlainText = '''
 Your request for the Test Skill 1 skill in the Test Project#1 project has been denied.
    Project: Test Project#1
    Skill: Test Skill 1
-   Approver: skills@skills.org for display
+   Approver: '''+projectAdminUserAttrs.userIdForDisplay+'''
    Message: Just felt like it
 
 
@@ -528,7 +555,7 @@ limitations under the License.
 <ul>
     <li><span class="label">Project</span>: Test Project#1</li>
     <li><span class="label">Skill</span>: Test Skill 1</li>
-    <li><span class="label">Approver</span>: skills@skills.org for display</li>
+    <li><span class="label">Approver</span>: '''+projectAdminUserAttrs.userIdForDisplay+'''</li>
     <li><span class="label">Message</span>: Just felt like it</li>
 </ul>
 
@@ -543,7 +570,7 @@ Always yours, <br/> -SkillTree Bot
 '''
         then:
         emailRes.subj == "SkillTree Points Denied"
-        emailRes.recipients == ['skills@skills.org']
+        emailRes.recipients == [userRequestingPtsAttrs.email]
 
         // ignore new lines
         EmailUtils.prepBodyForComparison(emailRes.html, localPort) == EmailUtils.prepBodyForComparison(expectedHtml, localPort)
@@ -618,11 +645,14 @@ Always yours, <br/> -SkillTree Bot
         int deniedEmailIdx = greenMail.getReceivedMessages().findIndexOf {it.subject.contains('Denied') }
         EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail, deniedEmailIdx)
 
+        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserId(skillsService.userName)
+        UserAttrs userRequestingPtsAttrs = userAttrsRepo.findByUserId(user)
+
         String expectedPlainText = '''
 Your request for the Test Skill 1 skill in the Test Project#1 project has been denied.
    Project: Test Project#1
    Skill: Test Skill 1
-   Approver: skills@skills.org for display
+   Approver: '''+projectAdminUserAttrs.userIdForDisplay+'''
    Message: 
 
 
@@ -665,7 +695,7 @@ limitations under the License.
 <ul>
     <li><span class="label">Project</span>: Test Project#1</li>
     <li><span class="label">Skill</span>: Test Skill 1</li>
-    <li><span class="label">Approver</span>: skills@skills.org for display</li>
+    <li><span class="label">Approver</span>: '''+projectAdminUserAttrs.userIdForDisplay+'''</li>
     <li><span class="label">Message</span>: </li>
 </ul>
 
@@ -680,7 +710,7 @@ Always yours, <br/> -SkillTree Bot
 '''
         then:
         emailRes.subj == "SkillTree Points Denied"
-        emailRes.recipients == ['skills@skills.org']
+        emailRes.recipients == [userRequestingPtsAttrs.email]
 
         // ignore new lines
         EmailUtils.prepBodyForComparison(emailRes.html, localPort) == EmailUtils.prepBodyForComparison(expectedHtml, localPort)
