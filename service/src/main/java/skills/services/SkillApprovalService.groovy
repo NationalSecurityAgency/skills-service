@@ -68,6 +68,9 @@ class SkillApprovalService {
     @Autowired
     EmailNotifier notifier
 
+    @Autowired
+    FeatureService featureService
+
     TableResult getApprovals(String projectId, PageRequest pageRequest) {
         List<SkillApprovalRepo.SimpleSkillApproval> approvalsFromDB = skillApprovalRepo.findToApproveByProjectIdAndNotRejected(projectId, pageRequest)
          List<SkillApprovalResult> approvals = approvalsFromDB.collect { SkillApprovalRepo.SimpleSkillApproval simpleSkillApproval ->
@@ -182,7 +185,7 @@ class SkillApprovalService {
     }
 
     private void sentNotifications(SkillApproval skillApproval, SkillDef skillDefinition, boolean approved, String rejectionMsg=null) {
-        String publicUrl = getPublicUrl()
+        String publicUrl = featureService.getPublicUrl()
         if(!publicUrl) {
             return
         }
@@ -208,19 +211,5 @@ class SkillApprovalService {
                 ],
         )
         notifier.sendNotification(request)
-    }
-
-    private String getPublicUrl() {
-        SettingsResult publicUrlSetting = settingsService.getGlobalSetting(Settings.GLOBAL_PUBLIC_URL.settingName)
-        if (!publicUrlSetting) {
-            log.warn("Skill approval notifications are disabled since global setting [${Settings.GLOBAL_PUBLIC_URL}] is NOT set")
-            return null
-        }
-
-        String publicUrl = publicUrlSetting.value
-        if (!publicUrl.endsWith("/")){
-            publicUrl += "/"
-        }
-        return publicUrl
     }
 }

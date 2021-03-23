@@ -56,4 +56,17 @@ class FeatureService {
         return true
     }
 
+    String getPublicUrl() {
+        SettingsResult publicUrlSetting = settingsService.getGlobalSetting(Settings.GLOBAL_PUBLIC_URL.settingName)
+        if (!publicUrlSetting) {
+            log.warn("Skill approval notifications are disabled since global setting [${Settings.GLOBAL_PUBLIC_URL}] is NOT set")
+            return null
+        }
+
+        String publicUrl = publicUrlSetting.value
+        if (!publicUrl.endsWith("/")){
+            publicUrl += "/"
+        }
+        return publicUrl
+    }
 }
