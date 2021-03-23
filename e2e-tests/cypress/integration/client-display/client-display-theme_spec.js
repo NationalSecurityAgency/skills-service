@@ -389,5 +389,35 @@ describe('Client Display Tests', () => {
     });
 
 
+    it('Point History\'s open menu must respect tiles.background option', () => {
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: 'Subject 1',
+        });
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: 'skill1',
+            name: `This is 1`,
+            type: 'Skill',
+            pointIncrement: 100,
+            numPerformToCompletion: 5,
+            pointIncrementInterval: 0,
+            numMaxOccurrencesIncrementInterval: -1,
+            version: 0,
+        });
+        const m = moment('2020-09-12 11', 'YYYY-MM-DD HH');
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: Cypress.env('proxyUser'), timestamp: m.format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: Cypress.env('proxyUser'), timestamp: m.subtract(4, 'day').format('x')})
+
+
+        cy.cdVisit('/?enableTheme=true')
+        cy.contains('Point History');
+        cy.get('[data-cy="pointHistoryChart-animationEnded"]')
+        cy.get('[title="Menu"]').click()
+        cy.contains('Download SVG')
+        cy.get('[data-cy=pointHistoryChart]').matchImageSnapshot();
+    });
 
 });
