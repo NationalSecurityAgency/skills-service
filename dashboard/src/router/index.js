@@ -277,7 +277,7 @@ const router = new Router({
         component: ProjectErrorsPage,
         meta: { requiresAuth: true, reportSkillId: 'VisitProjectErrors' },
       }, {
-        path: '/projects/:projectId/metrics',
+        path: '/administrator/projects/:projectId/metrics',
         component: MetricsPageNav,
         meta: { requiresAuth: true },
         children: [{
