@@ -100,9 +100,11 @@ describe('Breadcrumb Navigation Tests', () => {
         cy.get('[data-cy=errorPage]').should('not.exist');
 
         //skill users
+        cy.intercept('/admin/projects/movies/token/**').as('userToken');
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/users');
         cy.wait('@loadSkillUsers');
         cy.get('[data-cy=usersTable_viewDetailsBtn]').click();
+        cy.get('.client-display-iframe-1').should('be.visible');
         cy.get('[data-cy=breadcrumb-Users]').click();
         cy.get('[data-cy=errorPage]').should('not.exist');
         cy.get('[data-cy=breadcrumb-skill1]').click();
