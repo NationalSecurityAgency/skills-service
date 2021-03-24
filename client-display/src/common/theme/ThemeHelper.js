@@ -78,10 +78,10 @@ export default {
     },
     tiles: {
       backgroundColor: [{
-        selector: 'body #app .card, body #app .card-header, body #app .card-body, body #app .card-footer',
+        selector: 'body #app .card, body #app .card-header, body #app .card-body, body #app .card-footer, body #app .apexcharts-menu.apexcharts-menu-open',
         styleName: 'background-color',
       }, {
-        selector: 'body #app .skills-no-data-yet .fa-inverse',
+        selector: 'body #app .skills-no-data-yet .fa-inverse, body #app .apexcharts-menu.apexcharts-menu-open .apexcharts-menu-item:hover',
         styleName: 'color',
       }],
       watermarkIconColor: {
