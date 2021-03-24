@@ -27,14 +27,11 @@ import skills.settings.CommonSettings
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillDefRepo
 import skills.utils.Props
+import spock.lang.IgnoreIf
 import spock.lang.IgnoreRest
 
+@IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
 class InceptionSpecs extends DefaultIntSpec {
-
-    String ultimateRoot = 'jh@dojo.com'
-    SkillsService rootSkillsService
-    String nonRootUserId = 'foo@bar.com'
-    SkillsService nonRootSkillsService
 
     @Autowired
     InceptionSkills inceptionSkills
@@ -49,7 +46,9 @@ class InceptionSpecs extends DefaultIntSpec {
     SettingsService settingsService
 
     def setup() {
-        inceptionProjectService.createInceptionAndAssignUser(skillsService.userName)
+        String userName = getRandomUsers(1).first()
+        createService(userName)
+        inceptionProjectService.createInceptionAndAssignUser(userName)
     }
 
     def 'get hash'() {
