@@ -16,9 +16,9 @@
 package skills.utils
 
 import ch.qos.logback.classic.Level
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
+import ch.qos.logback.classic.Logger
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.read.ListAppender
 import org.slf4j.LoggerFactory
 
 class LoggerHelper {
@@ -36,7 +36,8 @@ class LoggerHelper {
     }
 
     List<ILoggingEvent> getLogEvents() {
-        return listAppender.list.findAll {
+        List<ILoggingEvent> copy = new ArrayList<>(listAppender.list)
+        return copy.findAll {
             return it.timeStamp > start
         }
     }
