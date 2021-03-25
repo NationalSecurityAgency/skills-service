@@ -11,7 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
+@import '../../node_modules/bootstrap/scss/_functions.scss';
+@import '../../node_modules/bootstrap/scss/_variables.scss';
 // Variable overrides
 $theme-colors: (
         //"info": #2d8779,
@@ -30,6 +31,18 @@ $text-muted: #6b6b6b;
 
 //** Background color used for table stripping
 $table-accent-bg: #f9fafa;
+
+//add bootstrap 5 xxl breakpoint and additional xxxl
+$grid-breakpoints: (
+    xs: 0,
+    sm: 576px,
+    md: 768px,
+    lg: 992px,
+    xl: 1200px,
+    xxl: 1400px,
+    xxxl: 1600px
+);
+
 
 // Bootstrap and its default variables
 @import '../../node_modules/bootstrap/scss/bootstrap';

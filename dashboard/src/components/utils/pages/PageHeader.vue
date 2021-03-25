@@ -19,13 +19,13 @@ limitations under the License.
       <loading-container :is-loading="loading">
         <div class="container-fluid">
           <div class="row">
-            <div class="col-lg-5 text-center text-lg-left">
+            <div class="pageHeaderTitle col-lg-5 text-center text-lg-left">
               <h3><i v-if="options.icon" class="has-text-link" :class="options.icon"/> {{ options.title }}<slot name="right-of-header"></slot></h3>
               <div class="h5 text-muted">{{ options.subTitle }}</div>
             </div>
             <div class="col-lg-7">
               <div class="row text-center mt-4 mt-lg-0 justify-content-center justify-content-lg-end">
-                <div v-for="(stat) in options.stats" :key="stat.label" class="col-md-6 col-xl-auto mt-2">
+                <div v-for="(stat) in options.stats" :key="stat.label" class="col-md-6 col-xl-3 mt-2">
                   <div class="card h-100" >
                     <div class="card-body">
                       <div class="row">
@@ -85,4 +85,9 @@ limitations under the License.
 </script>
 
 <style scoped>
+
+.pageHeaderTitle {
+  overflow-wrap: break-word;
+}
+
 </style>
