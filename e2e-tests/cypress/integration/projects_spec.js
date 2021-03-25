@@ -633,5 +633,24 @@ describe('Projects Tests', () => {
     cy.contains('Project Administrators').should('exist');
     cy.get('[data-cy="trusted-client-props-panel"]').should('exist')
   });
+
+  it('Project stats should all be the same size when they wrap', () => {
+    cy.request('POST', '/app/projects/abcdeghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxy', {
+      projectId: 'abcdeghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxy',
+      name: "abcdeghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxy"
+    });
+    cy.intercept('GET', '/admin/projects/abcdeghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxy').as('loadProj');
+    cy.visit('/administrator/projects/abcdeghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxy/');
+    cy.wait('@loadProj');
+    cy.setResolution([1440, 900]); //original issue presented when stat cards wrapped to another row
+    cy.get('[data-cy=pageHeaderStat]').first().invoke('width').then((val)=>{
+      cy.get('[data-cy=pageHeaderStat]').eq(1).invoke('width').should('eq', val);
+      cy.get('[data-cy=pageHeaderStat]').eq(2).invoke('width').should('eq', val);
+      cy.get('[data-cy=pageHeaderStat]').eq(3).invoke('width').should('eq', val);
+      cy.get('[data-cy=pageHeaderStat]').eq(4).invoke('width').should('eq', val);
+    });
+    cy.matchImageSnapshot();
+
+  });
 });
 

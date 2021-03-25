@@ -25,7 +25,7 @@ limitations under the License.
             </div>
             <div class="col-lg-7">
               <div class="row text-center mt-4 mt-lg-0 justify-content-center justify-content-lg-end">
-                <div v-for="(stat) in options.stats" :key="stat.label" class="col-md-6 col-xl-3 mt-2">
+                <div v-for="(stat) in options.stats" :key="stat.label" class="col-md-6 col-xl-3 mt-2" data-cy="pageHeaderStat">
                   <div class="card h-100" >
                     <div class="card-body">
                       <div class="row">
