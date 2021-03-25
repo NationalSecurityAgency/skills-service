@@ -51,6 +51,27 @@ describe('Users Tests', () => {
         cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Users');
 
+        // default sort order is 'Last Reported Skill' desc
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'user5@skills.org' }, { colIndex: 2,  value: dateFormatter(m.clone().add(7, 'day')) }],
+            [{ colIndex: 0,  value: 'user4@skills.org' }, { colIndex: 2,  value: dateFormatter(m.clone().add(6, 'day')) }],
+            [{ colIndex: 0,  value: 'user3@skills.org' }, { colIndex: 2,  value: dateFormatter(m.clone().add(5, 'day')) }],
+            [{ colIndex: 0,  value: 'user2@skills.org' }, { colIndex: 2,  value: dateFormatter(m.clone().add(4, 'day')) }],
+            [{ colIndex: 0,  value: 'user1@skills.org' }, { colIndex: 2,  value: dateFormatter(m.clone().add(3, 'day')) }],
+            [{ colIndex: 0,  value: 'user0@skills.org' }, { colIndex: 2,  value: dateFormatter(m.clone().add(2, 'day')) }],
+        ], 5);
+
+        cy.get(`${tableSelector}`).contains('Last Reported Skill').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'user0@skills.org' }, { colIndex: 2,  value: dateFormatter(m.clone().add(2, 'day')) }],
+            [{ colIndex: 0,  value: 'user1@skills.org' }, { colIndex: 2,  value: dateFormatter(m.clone().add(3, 'day')) }],
+            [{ colIndex: 0,  value: 'user2@skills.org' }, { colIndex: 2,  value: dateFormatter(m.clone().add(4, 'day')) }],
+            [{ colIndex: 0,  value: 'user3@skills.org' }, { colIndex: 2,  value: dateFormatter(m.clone().add(5, 'day')) }],
+            [{ colIndex: 0,  value: 'user4@skills.org' }, { colIndex: 2,  value: dateFormatter(m.clone().add(6, 'day')) }],
+            [{ colIndex: 0,  value: 'user5@skills.org' }, { colIndex: 2,  value: dateFormatter(m.clone().add(7, 'day')) }],
+        ], 5);
+
+        cy.get(`${tableSelector}`).contains('User Id').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'user0@skills.org' }, { colIndex: 1,  value: '4,500' }],
             [{ colIndex: 0,  value: 'user1@skills.org' }, { colIndex: 1,  value: '6,000' }],
@@ -89,26 +110,6 @@ describe('Users Tests', () => {
             [{ colIndex: 0,  value: 'user1@skills.org' }, { colIndex: 1,  value: '6,000' }],
             [{ colIndex: 0,  value: 'user0@skills.org' }, { colIndex: 1,  value: '4,500' }],
         ], 5);
-
-        cy.get(`${tableSelector}`).contains('Last Reported Skill').click();
-        cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'user0@skills.org' }, { colIndex: 2,  value: dateFormatter(m.clone().add(2, 'day')) }],
-            [{ colIndex: 0,  value: 'user1@skills.org' }, { colIndex: 2,  value: dateFormatter(m.clone().add(3, 'day')) }],
-            [{ colIndex: 0,  value: 'user2@skills.org' }, { colIndex: 2,  value: dateFormatter(m.clone().add(4, 'day')) }],
-            [{ colIndex: 0,  value: 'user3@skills.org' }, { colIndex: 2,  value: dateFormatter(m.clone().add(5, 'day')) }],
-            [{ colIndex: 0,  value: 'user4@skills.org' }, { colIndex: 2,  value: dateFormatter(m.clone().add(6, 'day')) }],
-            [{ colIndex: 0,  value: 'user5@skills.org' }, { colIndex: 2,  value: dateFormatter(m.clone().add(7, 'day')) }],
-        ], 5);
-
-        cy.get(`${tableSelector}`).contains('Last Reported Skill').click();
-        cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'user5@skills.org' }, { colIndex: 2,  value: dateFormatter(m.clone().add(7, 'day')) }],
-            [{ colIndex: 0,  value: 'user4@skills.org' }, { colIndex: 2,  value: dateFormatter(m.clone().add(6, 'day')) }],
-            [{ colIndex: 0,  value: 'user3@skills.org' }, { colIndex: 2,  value: dateFormatter(m.clone().add(5, 'day')) }],
-            [{ colIndex: 0,  value: 'user2@skills.org' }, { colIndex: 2,  value: dateFormatter(m.clone().add(4, 'day')) }],
-            [{ colIndex: 0,  value: 'user1@skills.org' }, { colIndex: 2,  value: dateFormatter(m.clone().add(3, 'day')) }],
-            [{ colIndex: 0,  value: 'user0@skills.org' }, { colIndex: 2,  value: dateFormatter(m.clone().add(2, 'day')) }],
-        ], 5);
     });
 
     it('different page sizes', () => {
@@ -123,6 +124,7 @@ describe('Users Tests', () => {
         cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Users');
 
+        cy.get(`${tableSelector}`).contains('User Id').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'usera@skills.org' }],
             [{ colIndex: 0,  value: 'userb@skills.org' }],
@@ -177,6 +179,7 @@ describe('Users Tests', () => {
         cy.clickNav('Users');
         cy.wait('@getUsers')
 
+        cy.get(`${tableSelector}`).contains('User Id').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'usera0@skills.org' }],
             [{ colIndex: 0,  value: 'usera1@skills.org' }],
@@ -248,6 +251,7 @@ describe('Users Tests', () => {
         cy.clickNav('Users');
         cy.wait('@getUsers')
 
+        cy.get(`${tableSelector}`).contains('User Id').click();
         const rowSelector = `${tableSelector} tbody tr`
         cy.get(rowSelector).should('have.length', 2).as('cyRows');
 
@@ -306,6 +310,7 @@ describe('Users Tests', () => {
         cy.visit('/administrator/projects/proj1/users');
         cy.wait('@getUsers')
 
+        cy.get(`${tableSelector}`).contains('User Id').click();
         cy.get('[data-cy="skillsBTablePaging"]').contains('2').click();
         cy.wait('@getUsers')
 
@@ -350,6 +355,12 @@ describe('Users Tests', () => {
         cy.visit('/administrator/projects/proj1/users');
         cy.wait('@getProjectUsers')
 
+        cy.get(`${tableSelector}`).contains('User Id').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'usera@skills.org' }],
+            [{ colIndex: 0,  value: 'userb@skills.org' }],
+        ], 5, true);
+
         cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsBtn"]`).first().click();
         cy.contains("Client Display");
         cy.contains("ID: usera@skills.org");
@@ -359,7 +370,12 @@ describe('Users Tests', () => {
           .as('getSubjectUsers');
         cy.visit('/administrator/projects/proj1/subjects/subj1/users');
         cy.wait('@getSubjectUsers')
-        cy.contains('usera@skills.org');
+
+        cy.get(`${tableSelector}`).contains('User Id').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'usera@skills.org' }],
+            [{ colIndex: 0,  value: 'userb@skills.org' }],
+        ], 5, true);
 
         cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsBtn"]`).first().click();
         cy.contains("Client Display");
@@ -370,7 +386,12 @@ describe('Users Tests', () => {
           .as('getSkillsUsers');
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/users');
         cy.wait('@getSkillsUsers')
-        cy.contains('usera@skills.org');
+
+        cy.get(`${tableSelector}`).contains('User Id').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'usera@skills.org' }],
+            [{ colIndex: 0,  value: 'userb@skills.org' }],
+        ], 5, true);
 
         cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsBtn"]`).first().click();
         cy.contains("Client Display");
@@ -381,7 +402,12 @@ describe('Users Tests', () => {
           .as('getBadgeUsers');
         cy.visit('/administrator/projects/proj1/badges/badge1/users');
         cy.wait('@getBadgeUsers')
-        cy.contains('usera@skills.org');
+
+        cy.get(`${tableSelector}`).contains('User Id').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'usera@skills.org' }],
+            [{ colIndex: 0,  value: 'userb@skills.org' }],
+        ], 5, true);
 
         cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsBtn"]`).first().click();
         cy.contains("Client Display");
@@ -435,8 +461,8 @@ describe('Users Tests', () => {
         cy.wait('@getUsers')
 
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'usera@skills.org' }],
             [{ colIndex: 0,  value: 'userb@skills.org' }],
+            [{ colIndex: 0,  value: 'usera@skills.org' }],
         ], 5);
 
 
@@ -445,16 +471,16 @@ describe('Users Tests', () => {
         cy.wait('@getUsers')
 
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'usera@skills.org' }],
             [{ colIndex: 0,  value: 'userb@skills.org' }],
+            [{ colIndex: 0,  value: 'usera@skills.org' }],
         ], 5);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill2/users');
         cy.wait('@getUsers')
 
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'userd@skills.org' }],
             [{ colIndex: 0,  value: 'usere@skills.org' }],
+            [{ colIndex: 0,  value: 'userd@skills.org' }],
         ], 5);
     });
 
@@ -503,16 +529,16 @@ describe('Users Tests', () => {
         cy.wait('@getUsers')
 
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'usera@skills.org' }],
             [{ colIndex: 0,  value: 'userb@skills.org' }],
+            [{ colIndex: 0,  value: 'usera@skills.org' }],
         ], 5);
 
         cy.visit('/administrator/projects/proj1/subjects/subj2/users');
         cy.wait('@getUsers')
 
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'userd@skills.org' }],
             [{ colIndex: 0,  value: 'usere@skills.org' }],
+            [{ colIndex: 0,  value: 'userd@skills.org' }],
         ], 5);
     });
 
