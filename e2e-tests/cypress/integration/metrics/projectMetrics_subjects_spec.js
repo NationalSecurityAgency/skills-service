@@ -40,6 +40,7 @@ describe('Metrics Tests', () => {
 
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').contains('Generate').should('be.disabled');
 
+        cy.closeToasts();
         cy.wait(waitForSnap);
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').matchImageSnapshot();
     });

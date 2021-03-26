@@ -514,3 +514,11 @@ Cypress.Commands.add('wrapIframe', () => {
       .then(cy.wrap)
 });
 
+Cypress.Commands.add('closeToasts', () => {
+    cy.get('body').then((body) => {
+        if (body.find('header.toast-header').length > 0) {
+            cy.get('button.close').click({ multiple: true });
+        }
+    });
+});
+
