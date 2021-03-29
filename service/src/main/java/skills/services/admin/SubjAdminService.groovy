@@ -196,7 +196,7 @@ class SubjAdminService {
                 displayOrder: skillDef.displayOrder,
                 totalPoints: skillDef.totalPoints,
                 iconClass: skillDef.iconClass,
-                helpUrl: skillDef.helpUrl
+                helpUrl: InputSanitizer.unsanitizeUrl(skillDef.helpUrl)
         )
 
         res.numSkills = calculateNumChildSkills(skillDef)

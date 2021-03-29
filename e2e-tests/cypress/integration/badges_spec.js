@@ -104,7 +104,7 @@ describe('Badges Tests', () => {
         cy.contains('ID: Lotsofspecial')
     });
 
-    if('Close badge dialog', () => {
+    it('Close badge dialog', () => {
         cy.intercept('GET', '/admin/projects/proj1/badges').as('loadBadges');
 
         cy.get('@createProject').should((response) => {
@@ -115,7 +115,9 @@ describe('Badges Tests', () => {
         cy.wait('@loadBadges');
         cy.clickButton('Badge');
         cy.get('[data-cy=closeBadgeButton]').click();
-        cy.get('[data-cy=closeBadgeButton]').should('not.be.visible');
+        //have to wait for dialog to close
+        cy.wait(500);
+        cy.get('[data-cy=closeBadgeButton]').should('not.exist');
     });
 
     it('cannot publish badge with no skills', () => {
@@ -290,7 +292,22 @@ describe('Badges Tests', () => {
         cy.get('#markdown-editor').type('a');
         cy.get('[data-cy=badgeDescriptionError]').contains(msg).should('be.visible');
         cy.get('#markdown-editor').type('{backspace}');
-        cy.get('[data-cy=badgeDescriptionError]').should('not.be.visible')
+        cy.get('[data-cy=badgeDescriptionError]').should('not.be.visible');
+
+        //helpUrl
+        cy.get('[data-cy=badgeHelpUrl]').clear().type('javascript:alert("uh oh");');
+        cy.get('[data-cy=badgeHelpUrlError]').should('be.visible');
+        cy.get('[data-cy=badgeHelpUrlError]').should('have.text', 'Help URL/Path must use http, https, or be a relative url.');
+        cy.get('[data-cy=saveBadgeButton]').should('be.disabled');
+        cy.get('[data-cy=badgeHelpUrl]').clear().type('/foo?p1=v1&p2=v2');
+        cy.get('[data-cy=badgeHelpUrlError]').should('not.be.visible');
+        cy.get('[data-cy=saveBadgeButton]').should('be.enabled');
+        cy.get('[data-cy=badgeHelpUrl]').clear().type('http://foo.bar?p1=v1&p2=v2');
+        cy.get('[data-cy=badgeHelpUrlError]').should('not.be.visible');
+        cy.get('[data-cy=saveBadgeButton]').should('be.enabled');
+        cy.get('[data-cy=badgeHelpUrl]').clear().type('https://foo.bar?p1=v1&p2=v2');
+        cy.get('[data-cy=badgeHelpUrlError]').should('not.be.visible');
+        cy.get('[data-cy=saveBadgeButton]').should('be.enabled');
 
         // finally let's save
         cy.clickSave();
