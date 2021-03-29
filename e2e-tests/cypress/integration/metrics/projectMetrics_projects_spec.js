@@ -118,7 +118,7 @@ describe('Metrics Tests', () => {
         cy.wait('@distinctUsersOverTimeForProject');
 
         cy.wait(waitForSnap);
-        cy.get('[data-cy=distinctNumUsersOverTime]').matchSnapshotImage();
+        cy.matchSnapshotImageForElement('[data-cy=distinctNumUsersOverTime]');
     })
 
     it('projects - Distinct number of users over time - empty project', {
@@ -200,7 +200,7 @@ describe('Metrics Tests', () => {
         cy.wait('@distinctUsersOverTimeForProject');
 
         cy.wait(waitForSnap);
-        cy.get('[data-cy=distinctNumUsersOverTime]').matchSnapshotImage();
+        cy.matchSnapshotImageForElement('[data-cy=distinctNumUsersOverTime]');
     })
 
     it('projects - Distinct number of users over time - one days', {
@@ -224,7 +224,7 @@ describe('Metrics Tests', () => {
         cy.get('[data-cy=distinctNumUsersOverTime]').contains('This chart needs at least 2 days of user activity.');
 
         cy.wait(waitForSnap);
-        cy.get('[data-cy=distinctNumUsersOverTime]').matchSnapshotImage();
+        cy.matchSnapshotImageForElement('[data-cy=distinctNumUsersOverTime]');
     })
 
 })

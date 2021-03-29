@@ -152,7 +152,7 @@ describe('Client Display Self Report Skills Tests', () => {
     cy.get('[data-cy="pointsPerOccurrenceCard"] [data-cy="progressInfoCardTitle"]').contains('50');
     cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('50 / 100 Points')
 
-    cy.get('[data-cy="skillProgressBar"]').matchSnapshotImage('Halfway_Progress');
+    cy.matchSnapshotImageForElement('[data-cy="skillProgressBar"]', 'Halfway_Progress');
 
     cy.get('[data-cy="selfReportBtn"]').click();
     cy.get('[data-cy="selfReportSkillMsg"]').contains('This skill can be submitted under the Honor System and 50 points will be awarded right away')
@@ -165,7 +165,7 @@ describe('Client Display Self Report Skills Tests', () => {
     cy.get('[data-cy="pointsPerOccurrenceCard"] [data-cy="progressInfoCardTitle"]').contains('50');
     cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 100 Points')
 
-    cy.get('[data-cy="skillProgressBar"]').matchSnapshotImage('Full_Progress');
+    cy.matchSnapshotImageForElement('[data-cy="skillProgressBar"]', 'Full_Progress');
 
     cy.contains('Achieved on ')
   });
@@ -190,7 +190,7 @@ describe('Client Display Self Report Skills Tests', () => {
     cy.get('[data-cy="skillProgress_index-1"] [data-cy="pointsPerOccurrenceCard"] [data-cy="progressInfoCardTitle"]').contains('50');
     cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('50 / 100 Points')
 
-    cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgressBar"]').matchSnapshotImage('Halfway_Progress_On_Subj_Page');
+    cy.matchSnapshotImageForElement('[data-cy="skillProgress_index-1"] [data-cy="skillProgressBar"]', 'Halfway_Progress_On_Subj_Page');
 
     cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportBtn"]').click();
     cy.get('[data-cy="selfReportSkillMsg"]').contains('This skill can be submitted under the Honor System and 50 points will be awarded right away')
@@ -203,7 +203,7 @@ describe('Client Display Self Report Skills Tests', () => {
     cy.get('[data-cy="skillProgress_index-1"] [data-cy="pointsPerOccurrenceCard"] [data-cy="progressInfoCardTitle"]').contains('50');
     cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 100 Points')
 
-    cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgressBar"]').matchSnapshotImage('Full_Progress_On_Subj_Page');
+    cy.matchSnapshotImageForElement('[data-cy="skillProgress_index-1"] [data-cy="skillProgressBar"]', 'Full_Progress_On_Subj_Page');
 
     cy.get('[data-cy="skillProgress_index-1"]').contains('Achieved on ')
   });

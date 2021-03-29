@@ -417,7 +417,7 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy="pointHistoryChart-animationEnded"]')
         cy.get('[title="Menu"]').click()
         cy.contains('Download SVG')
-        cy.get('[data-cy=pointHistoryChart]').matchSnapshotImage();
+        cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]');
     });
 
 });

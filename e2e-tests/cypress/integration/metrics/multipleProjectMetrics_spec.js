@@ -194,10 +194,10 @@ describe('Multiple Project Metrics', () => {
         cy.trainingProf('[data-cy=numOfBadgesChart]').contains('Grand Project 2');
 
         cy.wait(waitForSnap);
-        cy.get(`${trainingProfSel} [data-cy=numOfSkillsChart]`).matchSnapshotImage('Project definitions comparison - Number of Skills chart');
-        cy.get(`${trainingProfSel} [data-cy=totalAvailablePointsChart]`).matchSnapshotImage('Project definitions comparison - Total Available Points');
-        cy.get(`${trainingProfSel} [data-cy=numOfSubjChart]`).matchSnapshotImage('Project definitions comparison - Number of Subjects chart');
-        cy.get(`${trainingProfSel} [data-cy=numOfBadgesChart]`).matchSnapshotImage('Project definitions comparison - Number of Badges chart');
+        cy.matchSnapshotImageForElement(`${trainingProfSel} [data-cy=numOfSkillsChart]`, 'Project definitions comparison - Number of Skills chart');
+        cy.matchSnapshotImageForElement(`${trainingProfSel} [data-cy=totalAvailablePointsChart]`, 'Project definitions comparison - Total Available Points');
+        cy.matchSnapshotImageForElement(`${trainingProfSel} [data-cy=numOfSubjChart]`, 'Project definitions comparison - Number of Subjects chart');
+        cy.matchSnapshotImageForElement(`${trainingProfSel} [data-cy=numOfBadgesChart]`, 'Project definitions comparison - Number of Badges chart');
     });
 
     it('Project definitions comparison generates charts only after 2 projects are selected', () => {

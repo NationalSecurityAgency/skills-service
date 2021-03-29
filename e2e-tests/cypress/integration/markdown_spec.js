@@ -53,7 +53,7 @@ describe('Markdown Tests', () => {
             if (expectedText) {
                 cy.contains(expectedText);
             }
-            cy.get('[data-cy="markdownEditor-preview"]').matchSnapshotImage(snapshotName);
+            cy.matchSnapshotImageForElement('[data-cy="markdownEditor-preview"]', snapshotName);
         }
         validateMarkdown('# Title1\n## Title2\n### Title 3\n#### Title 4\n##### Title 5\nTitle 6\n\n', 'Markdown-Titles',  null,false);
 
@@ -159,7 +159,7 @@ describe('Markdown Tests', () => {
         cy.contains('Level');
         cy.contains('Emojis')
         cy.contains('⭐ ⭐ ⭐ ⭐');
-        cy.get('[data-cy="childRowDisplay_skill1"]').matchSnapshotImage('Markdown-SkillsPage-Overview', snapshotOptions);
+        cy.matchSnapshotImageForElement('[data-cy="childRowDisplay_skill1"]', 'Markdown-SkillsPage-Overview', snapshotOptions);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.wait('@inceptionLevel');
@@ -169,7 +169,7 @@ describe('Markdown Tests', () => {
         cy.contains('Description');
         cy.contains('Emojis')
         cy.contains('⭐ ⭐ ⭐ ⭐');
-        cy.get('[data-cy="childRowDisplay_skill1"]').matchSnapshotImage('Markdown-SubjectPage-SkillPreview', snapshotOptions);
+        cy.matchSnapshotImageForElement('[data-cy="childRowDisplay_skill1"]', 'Markdown-SubjectPage-SkillPreview', snapshotOptions);
     });
 
 })
