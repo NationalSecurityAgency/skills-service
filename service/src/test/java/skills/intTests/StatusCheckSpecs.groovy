@@ -25,4 +25,11 @@ class StatusCheckSpecs extends DefaultIntSpec {
         then:
         res.status == 'OK'
     }
+
+    def "check if the service isAlive"() {
+        when:
+        def res = skillsService.getServiceIsAlive()
+        then:
+        res.status == 'OK'
+    }
 }

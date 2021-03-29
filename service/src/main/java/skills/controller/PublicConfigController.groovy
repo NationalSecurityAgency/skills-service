@@ -96,4 +96,12 @@ class PublicConfigController {
         }
         return res
     }
+
+    @RequestMapping(value = "/isAlive", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    def isAlive() {
+        healthChecker.checkRequiredServices(false)
+        Map<String,String> res = new HashMap<>(statusRes)
+        return res
+    }
 }
