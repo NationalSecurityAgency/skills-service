@@ -234,7 +234,7 @@ describe('Client Display Features Tests', () => {
     cy.cdClickSubj(0, 'Subject 1');
 
     cy.wait(4000);
-    cy.matchImageSnapshot(`Subject-WithLockedSkills-ThatWerePartiallyAchieved`, snapshotOptions);
+    cy.matchSnapshotImage(`Subject-WithLockedSkills-ThatWerePartiallyAchieved`, snapshotOptions);
 
     cy.cdClickSkill(0);
     cy.contains('This is 1');
@@ -244,7 +244,7 @@ describe('Client Display Features Tests', () => {
     cy.contains('Dependencies');
 
     cy.wait(4000);
-    cy.matchImageSnapshot(`LockedSkill-ThatWasPartiallyAchieved`, snapshotOptions);
+    cy.matchSnapshotImage(`LockedSkill-ThatWasPartiallyAchieved`, snapshotOptions);
 
     // make sure the other locked skill doesn't contain the same message
     cy.cdBack('Subject 1');
@@ -275,7 +275,7 @@ describe('Client Display Features Tests', () => {
     cy.cdVisit('/');
     cy.cdClickSubj(0, 'Subject 1');
 
-    cy.matchImageSnapshot(`Subject-WithLockedSkills-ThatWereFullyAchieved`, snapshotOptions);
+    cy.matchSnapshotImage(`Subject-WithLockedSkills-ThatWereFullyAchieved`, snapshotOptions);
 
     cy.cdClickSkill(0);
     cy.contains('This is 1');
@@ -283,7 +283,7 @@ describe('Client Display Features Tests', () => {
     cy.contains(msg);
 
     cy.wait(4000);
-    cy.matchImageSnapshot(`LockedSkill-ThatWasFullyAchieved`, snapshotOptions);
+    cy.matchSnapshotImage(`LockedSkill-ThatWasFullyAchieved`, snapshotOptions);
 
     // other skill should not have the message
     cy.cdBack('Subject 1');

@@ -109,7 +109,7 @@ describe('Client Display Tests', () => {
 
         // let's wait for animation to complete
         cy.get('[data-cy="pointHistoryChart-animationEnded"]')
-        cy.get('[data-cy=pointHistoryChart]').matchImageSnapshot();
+        cy.get('[data-cy=pointHistoryChart]').matchSnapshotImage();
         cy.customA11y();
     });
 
@@ -236,7 +236,7 @@ describe('Client Display Tests', () => {
 
         // let's wait for animation to complete
         cy.get('[data-cy="pointHistoryChart-animationEnded"]')
-        cy.get('[data-cy=pointHistoryChart]').matchImageSnapshot();
+        cy.get('[data-cy=pointHistoryChart]').matchSnapshotImage();
     });
 
     it('multiple achievements on first date', () => {
@@ -289,7 +289,7 @@ describe('Client Display Tests', () => {
 
         // let's wait for animation to complete
         cy.get('[data-cy="pointHistoryChart-animationEnded"]')
-        cy.get('[data-cy=pointHistoryChart]').matchImageSnapshot();
+        cy.get('[data-cy=pointHistoryChart]').matchSnapshotImage();
     });
 
     it('single achievements on the first date', () => {
@@ -342,7 +342,7 @@ describe('Client Display Tests', () => {
 
         // let's wait for animation to complete
         cy.get('[data-cy="pointHistoryChart-animationEnded"]')
-        cy.get('[data-cy=pointHistoryChart]').matchImageSnapshot();
+        cy.get('[data-cy=pointHistoryChart]').matchSnapshotImage();
     });
 
     it('single achievement on the last date', () => {
@@ -395,7 +395,7 @@ describe('Client Display Tests', () => {
 
         // let's wait for animation to complete
         cy.get('[data-cy="pointHistoryChart-animationEnded"]')
-        cy.get('[data-cy=pointHistoryChart]').matchImageSnapshot();
+        cy.get('[data-cy=pointHistoryChart]').matchSnapshotImage();
     });
 
 
@@ -466,7 +466,7 @@ describe('Client Display Tests', () => {
 
         // let's wait for animation to complete
         cy.get('[data-cy="pointHistoryChart-animationEnded"]')
-        cy.get('[data-cy=pointHistoryChart]').matchImageSnapshot();
+        cy.get('[data-cy=pointHistoryChart]').matchSnapshotImage();
         cy.customA11y();
     });
 
@@ -536,7 +536,7 @@ describe('Client Display Tests', () => {
 
         // let's wait for animation to complete
         cy.get('[data-cy="pointHistoryChart-animationEnded"]')
-        cy.get('[data-cy=pointHistoryChart]').matchImageSnapshot();
+        cy.get('[data-cy=pointHistoryChart]').matchSnapshotImage();
     });
 
 
@@ -580,7 +580,7 @@ describe('Client Display Tests', () => {
 
         // let's wait for animation to complete
         cy.get('[data-cy="pointHistoryChart-animationEnded"]')
-        cy.get('[data-cy=pointHistoryChart]').matchImageSnapshot();
+        cy.get('[data-cy=pointHistoryChart]').matchSnapshotImage();
     });
 
     it('rapid growth of points af start followed by no activity', () => {
@@ -618,12 +618,12 @@ describe('Client Display Tests', () => {
 
         // let's wait for animation to complete
         cy.get('[data-cy="pointHistoryChart-animationEnded"]')
-        cy.get('[data-cy=pointHistoryChart]').matchImageSnapshot();
+        cy.get('[data-cy=pointHistoryChart]').matchSnapshotImage();
 
         cy.contains('Reset Zoom').click();
         // unfortunately just have to wait for animation to end by guessing max time
         cy.wait(7000)
-        cy.get('[data-cy=pointHistoryChart]').matchImageSnapshot('PointHistoryChart-Reset');
+        cy.get('[data-cy=pointHistoryChart]').matchSnapshotImage('PointHistoryChart-Reset');
     });
 
 
@@ -664,7 +664,7 @@ describe('Client Display Tests', () => {
 
         // let's wait for animation to complete
         cy.get('[data-cy="pointHistoryChart-animationEnded"]')
-        cy.get('[data-cy=pointHistoryChart]').matchImageSnapshot();
+        cy.get('[data-cy=pointHistoryChart]').matchSnapshotImage();
     });
 
     it('empty point history', () => {
@@ -673,7 +673,7 @@ describe('Client Display Tests', () => {
         cy.wait('@getPointHistory')
         // let's wait for animation to complete
         cy.get('[data-cy="pointHistoryChartPlaceholder-animationEnded"]')
-        cy.get('[data-cy=pointHistoryChart]').matchImageSnapshot();
+        cy.get('[data-cy=pointHistoryChart]').matchSnapshotImage();
     });
 
     it('achievement after initial rapid growth and then flat-line', () => {
@@ -732,7 +732,7 @@ describe('Client Display Tests', () => {
 
         // let's wait for animation to complete
         cy.get('[data-cy="pointHistoryChart-animationEnded"]')
-        cy.get('[data-cy=pointHistoryChart]').matchImageSnapshot();
+        cy.get('[data-cy=pointHistoryChart]').matchSnapshotImage();
     });
 
 

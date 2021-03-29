@@ -676,7 +676,7 @@ describe('Settings Tests', () => {
         cy.navToSettings();
         cy.contains('Email').click();
         cy.wait('@loadTemplateSettings');
-        cy.get('[data-cy=emailTemplateSettings]').matchImageSnapshot();
+        cy.get('[data-cy=emailTemplateSettings]').matchSnapshotImage();
 
         cy.get('[data-cy=htmlEmailHeader]').click().type("aaaaa");
         cy.get('[data-cy=ptHeaderTitle] span.text-danger').should('be.visible');

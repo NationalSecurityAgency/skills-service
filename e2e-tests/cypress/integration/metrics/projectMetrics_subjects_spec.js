@@ -42,7 +42,7 @@ describe('Metrics Tests', () => {
 
         cy.closeToasts();
         cy.wait(waitForSnap);
-        cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').matchImageSnapshot();
+        cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').matchSnapshotImage();
     });
 
     it('subjects - num users per level over time - subject has no data', {
@@ -70,7 +70,7 @@ describe('Metrics Tests', () => {
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').contains('Zero users achieved levels for this subject!');
 
         cy.wait(waitForSnap);
-        cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').matchImageSnapshot();
+        cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').matchSnapshotImage();
     });
 
     it('subjects - num users per level over time - subject has little data', {
@@ -116,7 +116,7 @@ describe('Metrics Tests', () => {
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').contains('Level 1');
 
         cy.wait(waitForSnap);
-        cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').matchImageSnapshot();
+        cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').matchSnapshotImage();
     });
 
     function generateDayWiseTimeSeries(xValStart, count, increaseBy) {
@@ -184,7 +184,7 @@ describe('Metrics Tests', () => {
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').contains('Level 1');
 
         cy.wait(waitForSnap);
-        cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').matchImageSnapshot();
+        cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').matchSnapshotImage();
     });
 
 
@@ -245,7 +245,7 @@ describe('Metrics Tests', () => {
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').contains('Level 1');
 
         cy.wait(waitForSnap);
-        cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').matchImageSnapshot();
+        cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').matchSnapshotImage();
     });
 
     it('subjects - num users per level over time - long history', {
@@ -300,7 +300,7 @@ describe('Metrics Tests', () => {
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').contains('Level 1');
 
         cy.wait(waitForSnap);
-        cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').matchImageSnapshot();
+        cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').matchSnapshotImage();
     });
 
     it('subjects - num users per level over time - many levels', {
@@ -350,7 +350,7 @@ describe('Metrics Tests', () => {
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').contains('Level 1');
 
         cy.wait(waitForSnap);
-        cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').matchImageSnapshot();
+        cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').matchSnapshotImage();
     });
 
     it('subjects - num users per level over time - higher levels have more users than lower', {
@@ -400,7 +400,7 @@ describe('Metrics Tests', () => {
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').contains('Level 1');
 
         cy.wait(waitForSnap);
-        cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').matchImageSnapshot();
+        cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').matchSnapshotImage();
     });
 
     it('subjects - num users per level', {
@@ -467,7 +467,7 @@ describe('Metrics Tests', () => {
         cy.wait('@getChartData');
 
         cy.wait(waitForSnap);
-        cy.get('[data-cy=userCountsBySubjectMetric]').matchImageSnapshot();
+        cy.get('[data-cy=userCountsBySubjectMetric]').matchSnapshotImage();
     })
 
     function createSubjectObj(name, numUsers) {
@@ -509,7 +509,7 @@ describe('Metrics Tests', () => {
         cy.wait('@getChartData');
 
         cy.wait(waitForSnap);
-        cy.get('[data-cy=userCountsBySubjectMetric]').matchImageSnapshot();
+        cy.get('[data-cy=userCountsBySubjectMetric]').matchSnapshotImage();
     })
 
     it('subjects - num users per level - many subjects', {
@@ -535,7 +535,7 @@ describe('Metrics Tests', () => {
         cy.wait('@getChartData');
 
         cy.wait(waitForSnap);
-        cy.get('[data-cy=userCountsBySubjectMetric]').matchImageSnapshot();
+        cy.get('[data-cy=userCountsBySubjectMetric]').matchSnapshotImage();
     })
 
     it('subjects - num users per level - many levels', {
@@ -562,7 +562,7 @@ describe('Metrics Tests', () => {
 
         cy.contains("Subject # 5")
         cy.wait(waitForSnap);
-        cy.get('[data-cy=userCountsBySubjectMetric]').matchImageSnapshot();
+        cy.get('[data-cy=userCountsBySubjectMetric]').matchSnapshotImage();
     })
 
     it('subjects - num users per level - empty', {
@@ -584,7 +584,7 @@ describe('Metrics Tests', () => {
         cy.wait('@getChartData');
 
         cy.wait(waitForSnap);
-        cy.get('[data-cy=userCountsBySubjectMetric]').matchImageSnapshot();
+        cy.get('[data-cy=userCountsBySubjectMetric]').matchSnapshotImage();
     })
 
 

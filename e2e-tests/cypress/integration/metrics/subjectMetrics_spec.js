@@ -85,7 +85,7 @@ describe('Metrics Tests - Subject', () => {
         cy.wait('@numUsersPerLevelChartBuilderSubj1');
 
         cy.wait(waitForSnap);
-        cy.get('[data-cy=levelsChart]').matchImageSnapshot();
+        cy.get('[data-cy=levelsChart]').matchSnapshotImage();
 
         cy.visit('/administrator/projects/proj1/subjects/subj2');
         cy.clickNav('Metrics');
@@ -316,7 +316,7 @@ describe('Metrics Tests - Subject', () => {
         cy.wait('@distinctUsersOverTimeForProject');
 
         cy.wait(waitForSnap);
-        cy.get('[data-cy=distinctNumUsersOverTime]').matchImageSnapshot();
+        cy.get('[data-cy=distinctNumUsersOverTime]').matchSnapshotImage();
     });
 
 
