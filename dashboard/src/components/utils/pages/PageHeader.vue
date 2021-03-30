@@ -19,24 +19,24 @@ limitations under the License.
       <loading-container :is-loading="loading">
         <div class="container-fluid">
           <div class="row">
-            <div class="pageHeaderTitle col-lg-5 text-center text-lg-left">
+            <div class="pageHeaderTitle col-lg-5 col-xxxl-3 text-center text-lg-left">
               <h3><i v-if="options.icon" class="has-text-link" :class="options.icon"/> {{ options.title }}<slot name="right-of-header"></slot></h3>
               <div class="h5 text-muted">{{ options.subTitle }}</div>
             </div>
-            <div class="col-lg-7">
+            <div class="col-lg-7 col-xxxl-9">
               <div class="row text-center mt-4 mt-lg-0 justify-content-center justify-content-lg-end">
-                <div v-for="(stat) in options.stats" :key="stat.label" class="col-md-6 col-xl-3 mt-2" data-cy="pageHeaderStat">
+                <div v-for="(stat) in options.stats" :key="stat.label" class="col-md-6 col-xl-4 col-xxxl-2 mt-2" data-cy="pageHeaderStat">
                   <div class="card h-100" >
                     <div class="card-body">
-                      <div class="row">
-                        <div class="col text-left" :data-cy="`pageHeaderStat_${stat.label}`">
+                      <div class="d-flex flex-row">
+                        <div class="text-left mr-auto" :data-cy="`pageHeaderStat_${stat.label}`">
                           <div class="h5 card-title text-uppercase text-muted mb-0 small">{{stat.label}}</div>
                           <span class="h5 font-weight-bold mb-0">{{ stat.count | number}}</span>
                           <span v-if="stat.warnMsg" class="ml-1">
                             <i class="fa fa-exclamation-circle text-warning" v-b-tooltip.hover="stat.warnMsg"/>
                           </span>
                         </div>
-                        <div class="col-auto">
+                        <div class="">
                           <i :class="stat.icon" style="font-size: 2.2rem;"></i>
                         </div>
                       </div>
