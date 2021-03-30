@@ -171,7 +171,7 @@ class AdminController {
         subjectRequest.description = InputSanitizer.sanitize(subjectRequest.description)
         subjectRequest.name = InputSanitizer.sanitize(subjectRequest.name)
         subjectRequest.iconClass = InputSanitizer.sanitize(subjectRequest.iconClass)
-        subjectRequest.helpUrl = InputSanitizer.sanitize(subjectRequest.helpUrl)
+        subjectRequest.helpUrl = InputSanitizer.sanitizeUrl(subjectRequest.helpUrl)
 
         subjAdminService.saveSubject(InputSanitizer.sanitize(projectId), subjectId, subjectRequest)
         return new RequestResult(success: true)
@@ -281,7 +281,7 @@ class AdminController {
         badgeRequest.name = InputSanitizer.sanitize(badgeRequest.name)
         badgeRequest.badgeId = InputSanitizer.sanitize(badgeRequest.badgeId)
         badgeRequest.description = InputSanitizer.sanitize(badgeRequest.description)
-        badgeRequest.helpUrl = InputSanitizer.sanitize(badgeRequest.helpUrl)
+        badgeRequest.helpUrl = InputSanitizer.sanitizeUrl(badgeRequest.helpUrl)
 
         badgeAdminService.saveBadge(projectId, badgeId, badgeRequest)
         return new RequestResult(success: true)
@@ -422,7 +422,7 @@ class AdminController {
         skillRequest.skillId = InputSanitizer.sanitize(skillRequest.skillId)
         skillRequest.description = InputSanitizer.sanitize(skillRequest.description)
         skillRequest.subjectId = InputSanitizer.sanitize(skillRequest.subjectId)
-        skillRequest.helpUrl = InputSanitizer.sanitize(skillRequest.helpUrl)
+        skillRequest.helpUrl = InputSanitizer.sanitizeUrl(skillRequest.helpUrl)
 
         skillsAdminService.saveSkill(skillId, skillRequest)
         return new RequestResult(success: true)

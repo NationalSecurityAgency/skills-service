@@ -61,7 +61,57 @@ class AdminEditSpecs extends DefaultIntSpec {
         assert updatedResult.subjectId == "TestSubject47"
         !shouldBeNull
         shouldFail
+    }
 
+    def "subject helpUrl should not contain entity encoded ampersands"() {
+        def aurl = "http://fake.url?p1=v1&p2=v2&p3=v3"
+        Map proj = SkillsFactory.createProject()
+        Map subject = SkillsFactory.createSubject()
+        subject.helpUrl = aurl
+        skillsService.createProject(proj)
+        skillsService.createSubject(subject)
+
+        when:
+        def subj = skillsService.getSubject(subject)
+
+        then:
+        subj.helpUrl == aurl
+    }
+
+    def "skill helpUrl should not contain entity encoded ampersands"() {
+        def aurl = "http://fake.url?p1=v1&p2=v2&p3=v3"
+        Map proj = SkillsFactory.createProject()
+        Map subject = SkillsFactory.createSubject()
+        Map skill = SkillsFactory.createSkill()
+        skill.helpUrl = aurl
+        skillsService.createProject(proj)
+        skillsService.createSubject(subject)
+        skillsService.createSkill(skill)
+
+        when:
+        def sk = skillsService.getSkill(skill)
+
+        then:
+        sk.helpUrl == aurl
+    }
+
+    def "badge helpUrl should not contain entity encoded ampersands"() {
+        def aurl = "http://fake.url?p1=v1&p2=v2&p3=v3"
+        Map proj = SkillsFactory.createProject()
+        Map subj = SkillsFactory.createSubject()
+        Map skill = SkillsFactory.createSkill()
+        Map badge = SkillsFactory.createBadge()
+        badge.helpUrl = aurl
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skill)
+        skillsService.createBadge(badge)
+
+        when:
+        def b = skillsService.getBadge(badge)
+
+        then:
+        b.helpUrl == aurl
     }
 
     def "only project admin should bea ble to edit subject id"(){

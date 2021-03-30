@@ -303,6 +303,12 @@
             <artifactId>groovy</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.owasp.encoder</groupId>
+            <artifactId>encoder</artifactId>
+            <version>${owasp.encoder.version}</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -527,7 +533,7 @@
                                 <licenseMerge>CC0 1.0 Universal|CC0</licenseMerge>
                                 <licenseMerge>CC0 1.0 Universal|Public Domain, per Creative Commons CC0</licenseMerge>
                                 <licenseMerge>The 2-Clause BSD License|BSD-2-Clause</licenseMerge>
-                                <licenseMerge>The 3-Clause BSD License|BSD 3-clause New License</licenseMerge>
+                                <licenseMerge>The 3-Clause BSD License|BSD 3-clause New License|The BSD 3-Clause License</licenseMerge>
                                 <licenseMerge>Common Development and Distribution License 1.0 (CDDL-1.0)|Common Development and Distribution License (CDDL) v1.0</licenseMerge>
                                 <licenseMerge>The GNU General Public License (GPL) Version 2.1|GNU Lesser General Public License v2.1 or later</licenseMerge>
                                 <licenseMerge>The GNU General Public License (GPL) Version 2.1|GNU Library General Public License v2.1 or later</licenseMerge>

@@ -59,8 +59,15 @@ limitations under the License.
               <inline-help
                 msg="If project level 'Root Help Url' is specified then this path will be relative to 'Root Help Url'"/>
             </label>
-            <input class="form-control" type="text" v-model="badgeInternal.helpUrl" data-vv-name="helpUrl"
-                   v-on:keyup.enter="handleSubmit(updateBadge)" id="badgeHelpUrl"/>
+            <ValidationProvider rules="help_url" v-slot="{errors}" name="Help URL/Path">
+              <input class="form-control" type="text" v-model="badgeInternal.helpUrl" data-vv-name="helpUrl"
+                     v-on:keyup.enter="handleSubmit(updateBadge)" data-cy="badgeHelpUrl" id="badgeHelpUrl"
+                     aria-describedby="badgeHelpUrlError"
+                     aria-errormessage="badgeHelpUrlError"
+                     :aria-invalid="errors && errors.length > 0"
+              />
+              <small class="form-text text-danger" id="badgeHelpUrlError" data-cy="badgeHelpUrlError">{{ errors[0] }}</small>
+            </ValidationProvider>
           </div>
 
           <div v-if="!global" data-cy="gemEditContainer">
@@ -271,6 +278,16 @@ limitations under the License.
               return GlobalBadgeService.badgeWithIdExists(value);
             }
             return BadgesService.badgeWithIdExists(self.badgeInternal.projectId, value);
+          },
+        });
+
+        extend('help_url', {
+          message: (field) => `${field} must use http, https, or be a relative url.`,
+          validate(value) {
+            if (!value) {
+              return true;
+            }
+            return value.startsWith('http') || value.startsWith('https') || value.startsWith('/');
           },
         });
 

@@ -45,6 +45,7 @@
 
         <greenmail.version>1.6.0</greenmail.version>
         <wiremock.version>2.27.2</wiremock.version>
+        <owasp.encoder.version>1.2.3</owasp.encoder.version>
     </properties>
 
     <parent>

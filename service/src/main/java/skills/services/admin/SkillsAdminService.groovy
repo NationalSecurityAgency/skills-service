@@ -390,6 +390,7 @@ class SkillsAdminService {
         SkillDefRes res = new SkillDefRes()
         Props.copy(skillDef, res)
         res.description = InputSanitizer.unsanitizeForMarkdown(res.description)
+        res.helpUrl = InputSanitizer.unsanitizeUrl(res.helpUrl)
         res.numPerformToCompletion = skillDef.totalPoints / res.pointIncrement
 
         return res

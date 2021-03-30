@@ -264,7 +264,7 @@ class BadgeAdminService {
                 iconClass: skillDef.iconClass,
                 startDate: skillDef.startDate,
                 endDate: skillDef.endDate,
-                helpUrl: skillDef.helpUrl,
+                helpUrl: InputSanitizer.unsanitizeUrl(skillDef.helpUrl),
                 enabled: skillDef.enabled,
         )
 

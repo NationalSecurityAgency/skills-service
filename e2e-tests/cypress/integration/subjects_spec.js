@@ -116,6 +116,26 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy=saveSubjectButton]').should('be.enabled');
     });
 
+    it('helpUrl must be valid', () => {
+        cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+        cy.intercept('POST', '/admin/projects/proj1/subjectNameExists').as('nameExists');
+
+        cy.visit('/administrator/projects/proj1');
+        cy.wait('@loadSubjects');
+        cy.clickButton('Subject');
+        //helpUrl
+        cy.get('[data-cy=subjectHelpUrl]').clear().type('javascript:alert("uh oh");');
+        cy.get('[data-cy=subjectHelpUrlError]').should('be.visible');
+        cy.get('[data-cy=subjectHelpUrlError]').should('have.text', 'Help URL/Path must use http, https, or be a relative url.');
+        cy.get('[data-cy=saveSubjectButton]').should('be.disabled');
+        cy.get('[data-cy=subjectHelpUrl]').clear().type('/foo?p1=v1&p2=v2');
+        cy.get('[data-cy=subjectHelpUrlError]').should('not.be.visible');
+        cy.get('[data-cy=subjectHelpUrl]').clear().type('http://foo.bar?p1=v1&p2=v2');
+        cy.get('[data-cy=subjectHelpUrlError]').should('not.be.visible');
+        cy.get('[data-cy=subjectHelpUrl]').clear().type('https://foo.bar?p1=v1&p2=v2');
+        cy.get('[data-cy=subjectHelpUrlError]').should('not.be.visible');
+    });
+
     it('select font awesome icon', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',

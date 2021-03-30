@@ -174,6 +174,23 @@ describe('Skills Tests', () => {
       cy.get('[data-cy=skillMinutesError').contains('Minutes must be 59 or less');
       cy.get('[data-cy=skillHoursError]').should('not.be.visible');
       cy.get('[data-cy=saveSkillButton]').should('be.disabled');
+      cy.get('[data-cy=timeWindowMinutes]').type('{selectall}59');
+
+      //helpUrl
+      cy.get('[data-cy=skillHelpUrl]').clear().type('javascript:alert("uh oh");');
+      cy.get('[data-cy=skillHelpUrlError]').should('be.visible');
+      cy.get('[data-cy=skillHelpUrlError]').should('have.text', 'Help URL/Path must use http, https, or be a relative url.');
+      cy.get('[data-cy=saveSkillButton]').should('be.disabled');
+      cy.get('[data-cy=skillHelpUrl]').clear().type('/foo?p1=v1&p2=v2');
+      cy.get('[data-cy=skillHelpUrlError]').should('not.be.visible');
+      cy.get('[data-cy=saveSkillButton]').should('be.enabled');
+      cy.get('[data-cy=skillHelpUrl]').clear().type('http://foo.bar?p1=v1&p2=v2');
+      cy.get('[data-cy=skillHelpUrlError]').should('not.be.visible');
+      cy.get('[data-cy=saveSkillButton]').should('be.enabled');
+      cy.get('[data-cy=skillHelpUrl]').clear().type('https://foo.bar?p1=v1&p2=v2');
+      cy.get('[data-cy=skillHelpUrlError]').should('not.be.visible');
+      cy.get('[data-cy=saveSkillButton]').should('be.enabled');
+
     });
 
     it('edit number of occurrences', () => {

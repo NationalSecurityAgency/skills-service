@@ -60,8 +60,15 @@ limitations under the License.
                   <inline-help
                     msg="If project level 'Root Help Url' is specified then this path will be relative to 'Root Help Url'"/>
                 </label>
-                <input class="form-control" type="text" v-model="subjectInternal.helpUrl" v-on:keyup.enter="handleSubmit(updateSubject)"
-                       id="subjectHelpUrl"/>
+                <ValidationProvider rules="help_url" v-slot="{errors}" name="Help URL/Path">
+                  <input class="form-control" type="text" v-model="subjectInternal.helpUrl" v-on:keyup.enter="handleSubmit(updateSubject)"
+                         id="subjectHelpUrl"
+                         data-cy="subjectHelpUrl"
+                         aria-describedby="subjectHelpUrlError"
+                         aria-errormessage="subjectHelpUrlError"
+                         :aria-invalid="errors && errors.length > 0"/>
+                  <small class="form-text text-danger" id="subjectHelpUrlError" data-cy="subjectHelpUrlError">{{ errors[0] }}</small>
+                </ValidationProvider>
               </div>
 
               <p v-if="invalid && overallErrMsg" class="text-center text-danger" role="alert">***{{ overallErrMsg }}***</p>
@@ -199,6 +206,16 @@ limitations under the License.
               return true;
             }
             return SubjectsService.subjectWithIdExists(self.subjectInternal.projectId, value);
+          },
+        });
+
+        extend('help_url', {
+          message: (field) => `${field} must use http, https, or be a relative url.`,
+          validate(value) {
+            if (!value) {
+              return true;
+            }
+            return value.startsWith('http') || value.startsWith('https') || value.startsWith('/');
           },
         });
       },

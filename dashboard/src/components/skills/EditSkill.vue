@@ -194,8 +194,15 @@ limitations under the License.
               <inline-help
                 msg="If project level 'Root Help Url' is specified then this path will be relative to 'Root Help Url'"/>
             </label>
-            <input class="form-control" type="text" v-model="skillInternal.helpUrl"
-                   v-on:keyup.enter="handleSubmit(saveSkill)" id="skillHelpUrl"/>
+            <ValidationProvider rules="help_url" v-slot="{errors}" name="Help URL/Path">
+              <input class="form-control" type="text" v-model="skillInternal.helpUrl"
+                     v-on:keyup.enter="handleSubmit(saveSkill)" id="skillHelpUrl" data-cy="skillHelpUrl"
+                     aria-describedby="skillHelpUrlError"
+                     aria-errormessage="skillHelpUrlError"
+                     :aria-invalid="errors && errors.length > 0"
+              />
+              <small class="form-text text-danger" id="skillHelpUrlError" data-cy="skillHelpUrlError">{{ errors[0] }}</small>
+            </ValidationProvider>
           </div>
 
           <p v-if="invalid && overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
@@ -237,6 +244,15 @@ limitations under the License.
     // eslint-disable-next-line camelcase
     ...max_value,
     message: (fieldname, placeholders) => `${fieldname} must be ${placeholders.max} or less`,
+  });
+  extend('help_url', {
+    message: (field) => `${field} must use http, https, or be a relative url.`,
+    validate(value) {
+      if (!value) {
+        return true;
+      }
+      return value.startsWith('http') || value.startsWith('https') || value.startsWith('/');
+    },
   });
 
   export default {
