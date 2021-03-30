@@ -101,15 +101,17 @@ class EmailNotifier implements Notifier {
 
     }
 
-    @Scheduled(cron = '#{"${skills.config.notifications.dispatchSchedule:* * * * * ?}"}')
+    @Scheduled(cron = '#{"${skills.config.notifications.dispatchSchedule:0 * * * * *}"}')
     @Transactional
     void dispatchNotifications() {
+        log.debug("Checking notifications to dispatch.")
         doDispatchNotifications { notificationsRepo.streamNewNotifications() }
     }
 
-    @Scheduled(cron = '#{"${skills.config.notifications.dispatchRetrySchedule:0 0 * * * ?}"}')
+    @Scheduled(cron = '#{"${skills.config.notifications.dispatchRetrySchedule:0 0 * * * *}"}')
     @Transactional
     void attemptToDispatchErroredNotifications() {
+        log.debug("Checking for errored notifications.")
         doDispatchNotifications("Retry: ") { notificationsRepo.streamFailedNotifications() }
     }
 
