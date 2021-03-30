@@ -506,8 +506,7 @@ const router = new Router({
       path: '*',
       name: '404',
       redirect: {
-        name: 'ErrorPage',
-        query: { errorMessage: '404 - Page Not Found' },
+        name: 'NotFoundPage',
       },
       meta: { requiresAuth: false },
     },
