@@ -268,7 +268,7 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy=achievementDate]').contains(`${orig.fromNow()}`);
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').contains('500');
 
-        cy.matchImageSnapshot(`Skill-Overview-Achieved`, snapshotOptions);
+        cy.matchSnapshotImage(`Skill-Overview-Achieved`, snapshotOptions);
 
         cy.cdVisit('/?enableTheme=true');
         cy.cdClickSubj(0);
@@ -278,7 +278,7 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy=achievementDate]').contains(`${orig.fromNow()}`);
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').contains('500');
 
-        cy.matchImageSnapshot(`Skill-Overview-Achieved-Themed`, snapshotOptions);
+        cy.matchSnapshotImage(`Skill-Overview-Achieved-Themed`, snapshotOptions);
 
         cy.setResolution('iphone-6');
 
@@ -290,7 +290,7 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy=achievementDate]').contains(`${orig.fromNow()}`);
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').contains('500');
 
-        cy.matchImageSnapshot(`Skill-Overview-Achieved-iphone6`, snapshotOptions);
+        cy.matchSnapshotImage(`Skill-Overview-Achieved-iphone6`, snapshotOptions);
 
         cy.setResolution('ipad-2');
 
@@ -302,7 +302,7 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy=achievementDate]').contains(`${orig.fromNow()}`);
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').contains('500');
 
-        cy.matchImageSnapshot(`Skill-Overview-Achieved-ipad2`, snapshotOptions);
+        cy.matchSnapshotImage(`Skill-Overview-Achieved-ipad2`, snapshotOptions);
 
     });
 
@@ -329,7 +329,7 @@ describe('Client Display Tests', () => {
         cy.get('.locked-background').click();
 
         cy.wait(4000);
-        cy.matchImageSnapshot('Skill-Dependency', snapshotOptions);
+        cy.matchSnapshotImage('Skill-Dependency', snapshotOptions);
     });
 
 });

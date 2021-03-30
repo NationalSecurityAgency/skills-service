@@ -124,19 +124,19 @@ describe('Client Display Markdown Tests', () => {
         // check subject
         cy.cdClickSubj(0, 'Subject 1');
         cy.contains('Emphasis');
-        cy.matchImageSnapshot(`Markdown-subject`, snapshotOptions);
+        cy.matchSnapshotImage(`Markdown-subject`, snapshotOptions);
 
         // check skill
         cy.cdClickSkill(0);
         cy.contains('This is 1');
         cy.contains('Emphasis');
-        cy.matchImageSnapshot(`Markdown-skill`, snapshotOptions);
+        cy.matchSnapshotImage(`Markdown-skill`, snapshotOptions);
 
         // check expanded skill
         cy.cdBack('Subject 1');
         cy.get('[data-cy=toggleSkillDetails]').click()
         cy.contains('Overall Points Earned');
-        cy.matchImageSnapshot(`Markdown-Skill-Preview`, snapshotOptions);
+        cy.matchSnapshotImage(`Markdown-Skill-Preview`, snapshotOptions);
 
         cy.cdVisit('/');
         cy.contains('Overall Points');
@@ -145,6 +145,6 @@ describe('Client Display Markdown Tests', () => {
         cy.cdClickBadges();
         cy.contains('Badges');
         cy.contains('Emphasis');
-        cy.matchImageSnapshot(`Markdown-Badge`, snapshotOptions);
+        cy.matchSnapshotImage(`Markdown-Badge`, snapshotOptions);
     });
 });

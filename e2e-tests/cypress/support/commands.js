@@ -73,6 +73,16 @@ function terminalLog(violations) {
 
 addMatchImageSnapshotCommand();
 
+Cypress.Commands.add("matchSnapshotImageForElement", (selector, subject, maybeName, commandOptions) => {
+    cy.closeToasts();
+    cy.get(selector).matchImageSnapshot(subject, maybeName, commandOptions);
+})
+
+Cypress.Commands.add("matchSnapshotImage", (subject, maybeName, commandOptions) => {
+    cy.closeToasts();
+    cy.matchImageSnapshot(subject, maybeName, commandOptions);
+})
+
 Cypress.Commands.add("register", (user, pass, grantRoot) => {
     return cy.request(`/app/users/validExistingDashboardUserId/${user}`)
         .then((response) => {

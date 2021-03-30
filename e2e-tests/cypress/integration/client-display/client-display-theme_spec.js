@@ -185,7 +185,7 @@ describe('Client Display Tests', () => {
             cy.get('.user-skill-subject-tile:nth-child(1)').contains('Subject 1');
             cy.get('[data-cy=myRank]').contains('1');
             cy.get('[data-cy=myBadges]').contains('1 Badge')
-            cy.matchImageSnapshot(snapshotOptions);
+            cy.matchSnapshotImage(snapshotOptions);
         });
 
         it(`test theming - project rank - ${size}`, () => {
@@ -223,7 +223,7 @@ describe('Client Display Tests', () => {
             cy.contains('You are Level 2!');
             // wait for the bar (on the bar chart) to render
             cy.get('[data-cy="levelBreakdownChart-animationEnded"]');
-            cy.matchImageSnapshot(snapshotOptions);
+            cy.matchSnapshotImage(snapshotOptions);
         });
 
         it(`test theming - badge - ${size}`, () => {
@@ -235,7 +235,7 @@ describe('Client Display Tests', () => {
 
             cy.cdClickBadges();
             cy.contains('Badge 3')
-            cy.matchImageSnapshot(snapshotOptions);
+            cy.matchSnapshotImage(snapshotOptions);
 
         });
 
@@ -252,7 +252,7 @@ describe('Client Display Tests', () => {
             cy.contains('View Details').click()
             cy.contains('Badge 1');
             cy.contains('This is 3');
-            cy.matchImageSnapshot(snapshotOptions);
+            cy.matchSnapshotImage(snapshotOptions);
         });
 
         it(`test theming - subject overview - ${size}`, () => {
@@ -267,7 +267,7 @@ describe('Client Display Tests', () => {
             cy.get('[data-cy=myRank]').contains('1');
             cy.contains('This is 4');
             cy.contains('Earn up to 1,400 points');
-            cy.matchImageSnapshot(snapshotOptions);
+            cy.matchSnapshotImage(snapshotOptions);
         });
 
         it(`test theming - subject overview with skill details - ${size}`, () => {
@@ -290,7 +290,7 @@ describe('Client Display Tests', () => {
             cy.contains('Earn up to 1,400 points');
             cy.contains('Description');
 
-            cy.matchImageSnapshot(snapshotOptions);
+            cy.matchSnapshotImage(snapshotOptions);
         });
 
         it(`test theming - skill details - ${size}`, () => {
@@ -307,7 +307,7 @@ describe('Client Display Tests', () => {
             cy.contains('Skill Overview')
             cy.contains('This is 1');
             cy.contains('Lorem ipsum dolor sit amet');
-            cy.matchImageSnapshot(snapshotOptions);
+            cy.matchSnapshotImage(snapshotOptions);
         });
 
         it(`test theming - skill details with deps - ${size}`, () => {
@@ -326,7 +326,7 @@ describe('Client Display Tests', () => {
             cy.contains('Lorem ipsum dolor sit amet');
             cy.contains('Achieved Dependencies');
             cy.wait(4000);
-            cy.matchImageSnapshot(snapshotOptions);
+            cy.matchSnapshotImage(snapshotOptions);
         });
 
         it(`test theming - new version notification  - ${size}`, () => {
@@ -350,7 +350,7 @@ describe('Client Display Tests', () => {
             cy.wait('@getRank');
             cy.wait(renderWait);
 
-            cy.matchImageSnapshot(snapshotOptions);
+            cy.matchSnapshotImage(snapshotOptions);
         });
 
     });
@@ -361,7 +361,7 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy=myRank]').contains('1');
         cy.contains('0 Points earned Today');
         cy.contains('Subjects have not been added yet.');
-        cy.matchImageSnapshot(snapshotOptions);
+        cy.matchSnapshotImage(snapshotOptions);
     });
 
 
@@ -385,7 +385,7 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy=myRank]').contains('1');
         cy.contains('0 Points earned Today');
         cy.contains('Description');
-        cy.matchImageSnapshot(snapshotOptions);
+        cy.matchSnapshotImage(snapshotOptions);
     });
 
 
@@ -417,7 +417,7 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy="pointHistoryChart-animationEnded"]')
         cy.get('[title="Menu"]').click()
         cy.contains('Download SVG')
-        cy.get('[data-cy=pointHistoryChart]').matchImageSnapshot();
+        cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]');
     });
 
 });

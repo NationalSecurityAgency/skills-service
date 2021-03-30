@@ -214,7 +214,7 @@ describe('Metrics Tests - Skills', () => {
         cy.wait('@singleSkillCountsChartBuilder');
 
         cy.wait(waitForSnap);
-        cy.get('[data-cy=numUsersAchievedOverTimeMetric]').matchImageSnapshot();
+        cy.matchSnapshotImageForElement('[data-cy=numUsersAchievedOverTimeMetric]');
     });
 
     it('skill metrics - empty', () => {
@@ -290,7 +290,7 @@ describe('Metrics Tests - Skills', () => {
         cy.wait('@singleSkillCountsChartBuilder');
 
         cy.wait(waitForSnap);
-        cy.get('[data-cy=numUsersAchievedOverTimeMetric]').matchImageSnapshot();
+        cy.matchSnapshotImageForElement('[data-cy=numUsersAchievedOverTimeMetric]');
     });
 
     it('applied skill events over time', {
@@ -341,7 +341,7 @@ describe('Metrics Tests - Skills', () => {
         cy.wait('@skillEventsOverTimeChartBuilder');
 
         cy.wait(waitForSnap);
-        cy.get('[data-cy=appliedSkillEventsOverTimeMetric]').matchImageSnapshot();
+        cy.matchSnapshotImageForElement('[data-cy=appliedSkillEventsOverTimeMetric]');
     });
 
     it('applied skill events over time - 1 skill', () => {
@@ -441,8 +441,8 @@ describe('Metrics Tests - Skills', () => {
         cy.wait('@usagePostAchievementMetricsBuilder');
 
         cy.wait(8000);
-        cy.get('[data-cy=numUsersPostAchievement]').matchImageSnapshot('numUsersPostAchievement');
-        cy.get('[data-cy=binnedNumUsersPostAchievement]').matchImageSnapshot('binnedNumUsersPostAchievement');
+        cy.matchSnapshotImageForElement('[data-cy=numUsersPostAchievement]', 'numUsersPostAchievement');
+        cy.matchSnapshotImageForElement('[data-cy=binnedNumUsersPostAchievement]', 'binnedNumUsersPostAchievement');
     });
 
 })
