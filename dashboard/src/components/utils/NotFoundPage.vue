@@ -88,6 +88,8 @@ limitations under the License.
           }, 1000);
         } else {
           this.$router.replace(this.newLinkValue).catch((error) => {
+            // eslint-disable-next-line
+            console.error(error);
             this.$router.push('/error');
           });
         }
