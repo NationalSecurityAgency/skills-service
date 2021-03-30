@@ -150,6 +150,10 @@ describe('Client Display Accessibility tests', () => {
     cy.wait(500) //need to wait on the pointHistoryChart to complete rendering before running a11y
     cy.customA11y();
     cy.customLighthouse();
+
+    cy.cdVisit('/');
+    cy.contains('Overall Points');
+    cy.contains('New Skills Software Version is Available').should('not.exist')
   });
 
   it('skill with self reporting', () => {

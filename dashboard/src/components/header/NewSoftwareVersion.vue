@@ -45,9 +45,9 @@ limitations under the License.
     },
     watch: {
       libVersion() {
-        if (localStorage.skillsDashboardLibVersion !== undefined
+        if (this.currentLibVersion !== undefined
           && this.libVersion !== undefined
-          && this.libVersion.localeCompare(localStorage.skillsDashboardLibVersion) > 0) {
+          && this.libVersion.localeCompare(this.currentLibVersion) > 0) {
           this.showNewVersionAlert = true;
         }
         this.updateStorageIfNeeded();
@@ -58,10 +58,10 @@ limitations under the License.
         window.location.reload();
       },
       updateStorageIfNeeded() {
-        const storedVal = localStorage.skillsDashboardLibVersion;
+        const storedVal = this.currentLibVersion;
         const currentVersion = this.libVersion;
         if (currentVersion !== undefined && (storedVal === undefined || currentVersion.localeCompare(storedVal) > 0)) {
-          localStorage.skillsDashboardLibVersion = currentVersion;
+          this.currentLibVersion = currentVersion;
         }
       },
     },
