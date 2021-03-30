@@ -106,15 +106,11 @@ class SkillEventsService {
     @Transactional
     @Profile
     SkillEventResult reportSkill(String projectId, String skillId, String userId, Boolean notifyIfNotApplied, Date incomingSkillDate, SkillApprovalParams skillApprovalParams = defaultSkillApprovalParams) {
-        try {
-            SkillEventResult result = reportSkillInternal(projectId, skillId, userId, incomingSkillDate, skillApprovalParams)
-            if (notifyIfNotApplied || result.skillApplied) {
-                skillEventPublisher.publishSkillUpdate(result, userId)
-            }
-            return result
-        } catch (Throwable t) {
-            throw new SkillException("Failed to report skill. projectId=[${projectId}], skillId=[${skillId}], userId=[${userId}], incomingSkillDate=[${incomingSkillDate}]", t)
+        SkillEventResult result = reportSkillInternal(projectId, skillId, userId, incomingSkillDate, skillApprovalParams)
+        if (notifyIfNotApplied || result.skillApplied) {
+            skillEventPublisher.publishSkillUpdate(result, userId)
         }
+        return result
     }
 
     @Transactional
