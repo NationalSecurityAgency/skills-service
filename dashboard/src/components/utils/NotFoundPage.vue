@@ -88,7 +88,6 @@ limitations under the License.
           }, 1000);
         } else {
           this.$router.replace(this.newLinkValue).catch((error) => {
-            console.error(`unable to navigate to ${this.newLinkValue}`, error);
             this.$router.push('/error');
           });
         }
