@@ -14,8 +14,26 @@
  * limitations under the License.
  */
 import axios from 'axios';
+import VueRouter from 'vue-router';
 import router from '../router';
 import store from '../store/store';
+
+const { NavigationFailureType, isNavigationFailure } = VueRouter;
+
+const handlPush = (page) => {
+  router.push(page).catch((error) => {
+    if (isNavigationFailure(error, NavigationFailureType.redirected)
+      || isNavigationFailure(error, NavigationFailureType.duplicated)) {
+      // squash, vue-router made changes in version 3 that
+      // causes a redirect to trigger an error. router-link squashes these and in previous
+      // versions of vue-router they were ignored. Because we trigger redirects in a navigation guard
+      // to handle landing/home page display preferences, we receive this benign error
+    } else {
+      // eslint-disable-next-line
+      console.error(error);
+    }
+  });
+};
 
 function errorResponseHandler(error) {
   // check if the caller wants to handle the error with displaying the errorPage/dialog
@@ -45,7 +63,7 @@ function errorResponseHandler(error) {
     if (error.response && error.response.data && error.response.data.explanation) {
       ({ explanation } = error.response.data);
     }
-    router.push({ name: 'NotFoundPage', params: { explanation } });
+    handlPush({ name: 'NotFoundPage', params: { explanation } });
   } else {
     router.push({ name: 'ErrorPage' });
   }

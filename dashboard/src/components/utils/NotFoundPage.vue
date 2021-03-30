@@ -31,10 +31,17 @@ limitations under the License.
           <p v-if="explanation">
             {{ explanation }}
           </p>
-          <p v-else>
+          <p v-else-if="isOldLink" data-cy="oldLinkRedirect" class="text-muted">
+            It looks like you may have followed an old link. You will be forwarded to <router-link :to="newLinkValue" data-cy="newLink">
+            {{ newLinkValue }}</router-link> in {{ timer }} seconds.
+          </p>
+          <p v-else data-cy="notFoundDefaultExplanation">
             The resource you requested cannot be located.
           </p>
         </div>
+      </div>
+      <div class="text-center">
+        <b-button href="/" variant="outline-primary" class="p-2" data-cy="takeMeHome"><i class="fas fa-home mr-1"/>Take Me Home</b-button>
       </div>
     </div>
 
@@ -47,6 +54,46 @@ limitations under the License.
     name: 'NotFound',
     props: {
       explanation: String,
+    },
+    data() {
+      return {
+        timer: -1,
+        isOldLink: false,
+        newLinkValue: '',
+      };
+    },
+    mounted() {
+      if (this.$route && this.$route.redirectedFrom) {
+        const { redirectedFrom } = this.$route;
+        if (redirectedFrom.startsWith('/projects') || redirectedFrom.startsWith('/metrics') || redirectedFrom.startsWith('/globalBadges')) {
+          if (redirectedFrom === '/projects/' || redirectedFrom === '/projects') {
+            this.newLinkValue = '/administrator/';
+          } else {
+            this.newLinkValue = `/administrator${redirectedFrom}`;
+          }
+          this.isOldLink = true;
+        }
+      }
+    },
+    watch: {
+      isOldLink(val) {
+        if (val === true) {
+          this.timer = 10;
+        }
+      },
+      timer(value) {
+        if (value > 0) {
+          setTimeout(() => {
+            this.timer -= 1;
+          }, 1000);
+        } else {
+          this.$router.replace(this.newLinkValue).catch((error) => {
+            // eslint-disable-next-line
+            console.error(error);
+            this.$router.push('/error');
+          });
+        }
+      },
     },
   };
 </script>
