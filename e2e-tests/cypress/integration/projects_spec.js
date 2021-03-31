@@ -640,16 +640,19 @@ describe('Projects Tests', () => {
       name: "abcdeghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxy"
     });
     cy.intercept('GET', '/admin/projects/abcdeghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxy').as('loadProj');
+    cy.intercept('GET', '/api/projects/Inception/level').as('loadInception');
     cy.visit('/administrator/projects/abcdeghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxy/');
     cy.wait('@loadProj');
+    cy.wait('@loadInception');
     cy.setResolution([1440, 900]); //original issue presented when stat cards wrapped to another row
+    cy.wait(200);
     cy.get('[data-cy=pageHeaderStat]').first().invoke('width').then((val)=>{
       cy.get('[data-cy=pageHeaderStat]').eq(1).invoke('width').should('eq', val);
       cy.get('[data-cy=pageHeaderStat]').eq(2).invoke('width').should('eq', val);
       cy.get('[data-cy=pageHeaderStat]').eq(3).invoke('width').should('eq', val);
       cy.get('[data-cy=pageHeaderStat]').eq(4).invoke('width').should('eq', val);
     });
-    cy.matchImageSnapshot();
+    cy.get('[data-cy=pageHeader]').matchImageSnapshot();
 
   });
 });
