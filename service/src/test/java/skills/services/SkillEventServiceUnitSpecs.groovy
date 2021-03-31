@@ -22,6 +22,7 @@ import skills.storage.repos.SkillEventsSupportRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPerformedSkillRepo
 import skills.utils.MetricsLogger
+import spock.lang.IgnoreRest
 import spock.lang.Specification
 
 import static skills.storage.repos.SkillEventsSupportRepo.SkillDefMin
@@ -103,6 +104,7 @@ class SkillEventServiceUnitSpecs extends Specification {
         SkillDefMin skillDefMin = Mock()
         skillDefMin.getPointIncrement() >> 100
         skillDefMin.getTotalPoints() >> 50
+        skillDefMin.getProjectId() >> projId
         skillDefMin.getSelfReportingType() >> SkillDef.SelfReportingType.HonorSystem
         mockSkillEventsSupportRepo.findByProjectIdAndSkillIdAndType(projId, skillId, SkillDef.ContainerType.Skill) >> skillDefMin
         mockPerformedSkillRepository.countByUserIdAndProjectIdAndSkillId(userId, projId, skillId) >> 1
@@ -136,6 +138,7 @@ class SkillEventServiceUnitSpecs extends Specification {
         SkillDefMin skillDefMin = Mock()
         skillDefMin.getPointIncrement() >> 100
         skillDefMin.getTotalPoints() >> 50
+        skillDefMin.getProjectId() >> projId
         skillDefMin.getSelfReportingType() >> SkillDef.SelfReportingType.Approval
         mockSkillEventsSupportRepo.findByProjectIdAndSkillIdAndType(projId, skillId, SkillDef.ContainerType.Skill) >> skillDefMin
         mockPerformedSkillRepository.countByUserIdAndProjectIdAndSkillId(userId, projId, skillId) >> 1

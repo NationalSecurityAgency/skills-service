@@ -102,9 +102,15 @@ limitations under the License.
       loadAvailableBadgeSkills(query) {
         GlobalBadgeService.suggestProjectSkills(this.badgeId, query)
           .then((res) => {
-            const badgeSkillIds = this.badgeSkills.map((item) => `${item.projectId}${item.skillId}`);
-            this.availableSkills = res.suggestedSkills.filter((item) => !badgeSkillIds.includes(`${item.projectId}${item.skillId}`));
-            if (res.totalAvailable > res.suggestedSkills.length) {
+            let badgeSkillIds = [];
+            if (this.badgeSkills) {
+              badgeSkillIds = this.badgeSkills.map((item) => `${item.projectId}${item.skillId}`);
+            }
+            this.availableSkills = [];
+            if (res && res.suggestedSkills) {
+              this.availableSkills = res.suggestedSkills.filter((item) => !badgeSkillIds.includes(`${item.projectId}${item.skillId}`));
+            }
+            if (res?.totalAvailable > res?.suggestedSkills?.length) {
               this.afterListSlotText = `Showing ${res.suggestedSkills.length} of ${res.totalAvailable} results.  Use search to narrow results.`;
             } else {
               this.afterListSlotText = '';

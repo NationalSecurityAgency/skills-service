@@ -11,7 +11,6 @@ These pages provide in-depth guidance on installation, usage and contribution.
 
 [![CI Badge](https://github.com/NationalSecurityAgency/skills-service/workflows/Continuous%20Integration/badge.svg)](https://github.com/NationalSecurityAgency/skills-service/actions?query=workflow%3A%22Continuous+Integration%22)
 
-
 [![DB Test Badge](https://github.com/NationalSecurityAgency/skills-service/workflows/Test%20against%20PostgreSQL/badge.svg)](https://github.com/NationalSecurityAgency/skills-service/actions?query=workflow%3A%22Test+against+PostgreSQL%22)
 
 [![Test storing HttpSession in Redis](https://github.com/NationalSecurityAgency/skills-service/workflows/Test%20storing%20HttpSession%20in%20Redis/badge.svg)](https://github.com/NationalSecurityAgency/skills-service/actions?query=workflow%3A%22Test+storing+HttpSession+in+Redis%22)
@@ -19,6 +18,8 @@ These pages provide in-depth guidance on installation, usage and contribution.
 [![Test Web Sockets over STOMP using RabbitMQ](https://github.com/NationalSecurityAgency/skills-service/workflows/Test%20Web%20Sockets%20over%20STOMP%20using%20RabbitMQ/badge.svg)](https://github.com/NationalSecurityAgency/skills-service/actions?query=workflow%3A%22Test+Web+Sockets+over+STOMP+using+RabbitMQ%22)
 
 [![Run integration tests using two way ssl](https://github.com/NationalSecurityAgency/skills-service/workflows/Run%20integration%20tests%20using%20two%20way%20ssl/badge.svg)](https://github.com/NationalSecurityAgency/skills-service/actions?query=workflow%3A%22Run+integration+tests+using+two+way+ssl%22)
+
+[![Run integration tests using OAuth](https://github.com/NationalSecurityAgency/skills-service/workflows/Continuous%20Integration%20with%20OAuth/badge.svg)](https://github.com/NationalSecurityAgency/skills-service/actions/workflows/build-and-test-oauth.yml?query=workflow%3A%22Continuous+Integration+with+OAuth%22)
 
 [![Publish Docker Image Snapshot](https://github.com/NationalSecurityAgency/skills-service/workflows/Publish%20Docker%20Image%20Snapshot/badge.svg)](https://github.com/NationalSecurityAgency/skills-service/actions?query=workflow%3A%22Publish+Docker+Image+Snapshot%22)
 

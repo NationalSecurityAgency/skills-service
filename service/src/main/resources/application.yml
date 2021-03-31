@@ -85,9 +85,9 @@ skills:
     compactDailyEventsOlderThan: 30
     notifications:
       # run every minute
-      dispatchSchedule: "* * * * * ?"
+      dispatchSchedule: "0 * * * * *"
       # run every hour - retries failed notifications
-      dispatchRetrySchedule: "0 0 * * * ?"
+      dispatchRetrySchedule: "0 0 * * * *"
       # remove failed notifications after 2 days
       retainFailedNotificationsForNumSecs: 172800
     ui:
