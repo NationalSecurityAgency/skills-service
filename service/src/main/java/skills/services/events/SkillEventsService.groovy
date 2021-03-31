@@ -187,7 +187,7 @@ class SkillEventsService {
 
         SkillEventResult res = new SkillEventResult(projectId: projectId, skillId: skillId, name: skillDefinition.name)
 
-        userEventService.recordEvent(projectId, skillDefinition.id, userId, skillDate.date)
+
         metricsLogger.log([
                 'skillId': skillId,
                 'projectId': projectId,
@@ -199,6 +199,11 @@ class SkillEventsService {
         long numExistingSkills = getNumExistingSkills(userId, projectId, skillId)
         AppliedCheckRes checkRes = checkIfSkillApplied(userId, numExistingSkills, skillDate.date, skillDefinition)
         if (!checkRes.skillApplied) {
+            // record event should happen AFTER the lock OR if it does not need the lock;
+            // otherwise there is a chance of a deadlock (although unlikely); this can happen because record event
+            // mutates the row - so that row is locked in addition to the explicit lock
+            recordEvent(skillDefinition, userId, skillDate)
+
             res.skillApplied = checkRes.skillApplied
             res.explanation = checkRes.explanation
             return res
@@ -208,7 +213,11 @@ class SkillEventsService {
          * Check if skill needs to be applied, if so then we'll need to db-lock to enforce cross-service lock;
          * once transaction is locked must redo all of the checks
          */
-        lockTransaction(projectId, userId)
+        lockTransaction(userId)
+        // record event should happen AFTER the lock OR if it does not need the lock;
+        // otherwise there is a chance of a deadlock (although unlikely); this can happen because record event
+        // mutates the row - so that row is locked in addition to the explicit lock
+        recordEvent(skillDefinition, userId, skillDate)
         numExistingSkills = getNumExistingSkills(userId, projectId, skillId)
         checkRes = checkIfSkillApplied(userId, numExistingSkills, skillDate.date, skillDefinition)
         if (!checkRes.skillApplied) {
@@ -251,11 +260,14 @@ class SkillEventsService {
     }
 
     @Profile
-    private void lockTransaction(String projectId, String userId) {
-        UserPoints userPoints = lockingService.lockUserPoints(projectId, userId)
-        if (!userPoints) {
-            lockingService.lockUser(userId)
-        }
+    private void recordEvent(SkillEventsSupportRepo.SkillDefMin skillDefinition, String userId, SkillDate skillDate) {
+        userEventService.recordEvent(skillDefinition.projectId, skillDefinition.id, userId, skillDate.date)
+    }
+
+    @Profile
+    private void lockTransaction(String userId) {
+        log.debug("locking user [{}]", userId)
+        lockingService.lockUser(userId)
     }
 
     static class AppliedCheckRes {

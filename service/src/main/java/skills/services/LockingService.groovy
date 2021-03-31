@@ -56,17 +56,13 @@ class LockingService {
         return skillsDBLockRepo.findByProjectIdIgnoreCase(projectId)
     }
 
-    UserAttrs lockUser(String userId) {
+    /**
+     * PESSIMISTIC_WRITE Lock - returns user's db id
+     */
+    Integer lockUser(String userId) {
         assert userId
         return skillsDBLockRepo.findUserAttrsByUserId(userId?.toLowerCase())
     }
-
-    UserPoints lockUserPoints(String projectId, String userId) {
-        assert projectId
-        assert userId
-        return skillsDBLockRepo.findUserPointsByProjectIdAndUserId(projectId, userId)
-    }
-
 
 
 }

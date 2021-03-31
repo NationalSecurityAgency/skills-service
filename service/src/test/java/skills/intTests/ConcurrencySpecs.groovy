@@ -719,4 +719,44 @@ class ConcurrencySpecs extends DefaultIntSpec {
         exceptionCount.get() == 0
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
+    def "add skill concurrently for the same user"() {
+        def proj = SkillsFactory.createProject()
+        def subject = SkillsFactory.createSubject()
+        List<Map> skills = SkillsFactory.createSkills(2)
+        skills.each {
+            it.numPerformToCompletion = 10000
+            it.pointIncrementInterval = 0
+        }
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subject)
+        skillsService.createSkills(skills)
+
+        int numThreads = 5
+        int timesToAdd = 100
+        AtomicInteger exceptionCount = new AtomicInteger()
+        String user = "user1"
+        Date sameDate = new Date()
+        when:
+        List<Thread> threads = (1..numThreads).collect {
+            Thread.start {
+                timesToAdd.times {
+                    try {
+                        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, sameDate)
+                    } catch (SkillsClientException e) {
+                        exceptionCount.incrementAndGet()
+                        log.error("failed", e)
+                    }
+                }
+            }
+        }
+        threads.each {
+            it.join(10000)
+        }
+
+        then:
+        exceptionCount.get() == 0
+    }
+
 }
