@@ -32,7 +32,8 @@ limitations under the License.
     <skills-display
       :options="configuration"
       :version="selectedVersion"
-      :user-id="userId" />
+      :user-id="userId"
+      :theme="theme"/>
   </div>
 
 </template>
@@ -60,6 +61,15 @@ limitations under the License.
         },
         selectedVersion: 0,
         versionOptions: [],
+        theme: {
+          maxWidth: '100%',
+          pageTitleFontSize: '1.5rem',
+          backButton: {
+            padding: '5px 10px',
+            fontSize: '12px',
+            lineHeight: '1.5',
+          },
+        },
       };
     },
     created() {
