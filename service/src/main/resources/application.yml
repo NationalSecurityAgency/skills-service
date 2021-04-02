@@ -15,7 +15,7 @@
 #
 
 server:
-#  port: 8443
+  #  port: 8443
 #  ssl:
 #    enabled: true
 #    client-auth:  want
@@ -32,7 +32,11 @@ server:
     enabled: true
     min-response-size: 2048
     mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,images/x-icon
+  shutdown: graceful
+
 spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 1m
   #logging:
   resources:
     cache:
@@ -72,8 +76,6 @@ spring:
 #            redirectUriTemplate: 'http://localhost:8080/{action}/oauth2/code/{registrationId}'
 #            iconClass: fab fa-github
 skills:
-  gracefulShutdown:
-    timeoutSecs: 80
   artificialDelay:
     enabled: false
   clientLibVersion: @maven.build.timestamp@
