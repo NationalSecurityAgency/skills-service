@@ -9,4 +9,4 @@ DOCKER_PASS=${3:-"${docker_password}"}
 ./build-docker-image.sh $IMG_NAME
 
 docker login --username "${DOCKER_USER}" --password "${DOCKER_PASS}"
-docker push $IMG_NAME
+docker push --all-tags $IMG_NAME
