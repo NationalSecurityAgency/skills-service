@@ -19,6 +19,13 @@ pid=0
 term_handler() {
   echo "SIGTERM handler was called"
   if [ $pid -ne 0 ]; then
+    # if provided will wait before issuing the kill command,
+    # this wait is useful in the distributed deployment when the new requests are stopped, this will
+    # then allow some time for the service to honor existing requests before killing it
+    if [ -n "${SIGTERM_HANDLER_SLEEP_BEFORE_KILL}" ]; then
+	    echo "SIGTERM handler: Sleep [${SIGTERM_HANDLER_SLEEP_BEFORE_KILL}] seconds before killing"
+      sleep ${SIGTERM_HANDLER_SLEEP_BEFORE_KILL}
+    fi
     echo "exec: kill -SIGTERM $pid"
     kill -SIGTERM "$pid"
     echo "exec: wait $pid"
