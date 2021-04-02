@@ -18,11 +18,11 @@ package skills.services.inception
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.event.ContextRefreshedEvent
+import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
-import skills.auth.UserInfo
 import skills.controller.request.model.ProjectRequest
 import skills.controller.request.model.ProjectSettingsRequest
-import skills.controller.request.model.SettingsRequest
 import skills.controller.request.model.SkillRequest
 import skills.controller.request.model.SubjectRequest
 import skills.controller.result.model.SettingsResult
@@ -35,10 +35,8 @@ import skills.services.settings.SettingsService
 import skills.settings.CommonSettings
 import skills.storage.model.ProjDef
 import skills.storage.model.auth.RoleName
-import skills.storage.model.auth.UserRole
 import skills.storage.repos.ProjDefRepo
 
-import javax.annotation.PostConstruct
 import javax.transaction.Transactional
 
 @Service
@@ -74,11 +72,11 @@ class InceptionProjectService {
     static final String subjectSkillsId = "Skills"
     static final String subjectDashboardId = "Dashboard"
 
-    @PostConstruct
-    void init() {
+    @EventListener
+    void init(ContextRefreshedEvent event) {
+        log.info("Context initialized [${event}], checking if Inception skills need to be updated")
         updateSkillsIfNeeded()
     }
-
 
     /**
      * If inception project exist then user will simply be assigned as an admin
