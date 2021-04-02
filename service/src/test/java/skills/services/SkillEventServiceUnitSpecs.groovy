@@ -15,14 +15,16 @@
  */
 package skills.services
 
+import org.springframework.messaging.simp.SimpMessagingTemplate
+import org.springframework.messaging.simp.broker.BrokerAvailabilityEvent
 import skills.services.events.*
 import skills.services.events.pointsAndAchievements.PointsAndAchievementsHandler
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillEventsSupportRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPerformedSkillRepo
+import skills.utils.LoggerHelper
 import skills.utils.MetricsLogger
-import spock.lang.IgnoreRest
 import spock.lang.Specification
 
 import static skills.storage.repos.SkillEventsSupportRepo.SkillDefMin
@@ -151,5 +153,32 @@ class SkillEventServiceUnitSpecs extends Specification {
         1 * mockSkillEventPublisher.publishSkillUpdate(_, userId)
         1 * mockUserEventService.recordEvent(projId, _, userId, _)
         1 * mockMetricsLogger.log({ it['selfReported'] == 'true' && it['selfReportType'] == 'Approval' })
+    }
+
+    def "test SkillEventPublisher will not publish messages unless brokerAvailable == true"() {
+
+        LoggerHelper loggerHelper = new LoggerHelper(SkillEventPublisher.class)
+        SimpMessagingTemplate mockMessagingTemplate = Mock()
+        BrokerAvailabilityEvent brokerAvailable = new BrokerAvailabilityEvent(true, this)
+        BrokerAvailabilityEvent brokerUnavailable = new BrokerAvailabilityEvent(false, this)
+        SkillEventPublisher skillEventPublisher = new SkillEventPublisher(messagingTemplate: mockMessagingTemplate)
+        SkillEventResult result = new SkillEventResult(projectId: 'project1')
+
+        when:
+        skillEventPublisher.publishSkillUpdate(result, 'user1')
+        skillEventPublisher.handleBrokerAvailabilityEvent(brokerAvailable)
+        skillEventPublisher.publishSkillUpdate(result, 'user2')
+        skillEventPublisher.handleBrokerAvailabilityEvent(brokerUnavailable)
+        skillEventPublisher.publishSkillUpdate(result, 'user3')
+
+        then:
+        0 * mockMessagingTemplate.convertAndSendToUser('user1', '/queue/project1-skill-updates', result)
+        1 * mockMessagingTemplate.convertAndSendToUser('user2', '/queue/project1-skill-updates', result)
+        0 * mockMessagingTemplate.convertAndSendToUser('user3', '/queue/project1-skill-updates', result)
+        loggerHelper.getLogEvents().find() { it.message.contains ("Failed to publish skill update since the broker is unavailable. user [user1], result [${result}]")}
+        loggerHelper.getLogEvents().find() { it.message.contains ("Failed to publish skill update since the broker is unavailable. user [user3], result [${result}]")}
+
+        cleanup:
+        loggerHelper.stop()
     }
 }
