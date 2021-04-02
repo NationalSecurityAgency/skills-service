@@ -17,7 +17,9 @@ package skills.services.events
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.event.EventListener
 import org.springframework.messaging.simp.SimpMessagingTemplate
+import org.springframework.messaging.simp.broker.BrokerAvailabilityEvent
 import org.springframework.stereotype.Component
 import skills.websocket.SubscribedDestinationRegistry
 
@@ -25,26 +27,38 @@ import skills.websocket.SubscribedDestinationRegistry
 @Slf4j
 class SkillEventPublisher {
 
+    private brokerAvailable = false
+
     @Autowired
     SubscribedDestinationRegistry destinationRegistry
 
     @Autowired
-    final SimpMessagingTemplate messagingTemplate;
+    SimpMessagingTemplate messagingTemplate;
 
     void publishSkillUpdate(SkillEventResult result, String userId) {
         log.debug("Reporting user skill for user [{}}], result [{}}]", userId, result)
-        if (result.projectId) {
-            messagingTemplate.convertAndSendToUser(userId, "/queue/${result.projectId}-skill-updates", result)
+        if (brokerAvailable) {
+            if (result.projectId) {
+                messagingTemplate.convertAndSendToUser(userId, "/queue/${result.projectId}-skill-updates", result)
+            } else {
+                List<String> destinations = destinationRegistry.getAllDestinationsForUser(userId)
+                if (log.isDebugEnabled()) {
+                    log.debug("got [${destinations?.size()}] subscribed destinations for user [$userId]")
+                }
+                destinations = destinations?.unique()
+                destinations?.each {
+                    it = it.replace("/user", "")
+                    messagingTemplate.convertAndSendToUser(userId, it, result)
+                }
+            }
         } else {
-            List<String> destinations = destinationRegistry.getAllDestinationsForUser(userId)
-            if (log.isDebugEnabled()) {
-                log.debug("got [${destinations?.size()}] subscribed destinations for user [$userId]")
-            }
-            destinations = destinations?.unique()
-            destinations?.each {
-                it = it.replace("/user", "")
-                messagingTemplate.convertAndSendToUser(userId, it, result)
-            }
+            log.warn("Failed to publish skill update since the broker is unavailable. user [${userId}], result [${result}]")
         }
+    }
+
+    @EventListener
+    void handleBrokerAvailabilityEvent(BrokerAvailabilityEvent event) {
+        log.info("BrokerAvailabilityEvent ["+event+"]")
+        this.brokerAvailable = event.brokerAvailable
     }
 }
