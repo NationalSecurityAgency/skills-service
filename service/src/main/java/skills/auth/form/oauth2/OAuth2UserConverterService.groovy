@@ -206,4 +206,34 @@ class OAuth2UserConverterService {
             )
         }
     }
+
+    static class KeycloakUserConverter implements OAuth2UserConverter {
+        static final String USERNAME = 'preferred_username'
+        static final String NAME = 'name'
+        static final String FIRST_NAME = 'given_name'
+        static final String LAST_NAME = 'family_name'
+        static final String EMAIL = 'email'
+
+        String providerId = 'keycloak'
+
+        @Override
+        UserInfo convert(String providerId, OAuth2User oAuth2User) {
+            String username = oAuth2User.getName()
+            assert username, "Error getting name attribute of oAuth2User [${oAuth2User}] from providerId [$providerId]"
+
+            String firstName =  oAuth2User.attributes.get(FIRST_NAME)
+            String lastName =  oAuth2User.attributes.get(LAST_NAME)
+            String email =  oAuth2User.attributes.get(EMAIL)
+            if (!(firstName && lastName && email)) {
+                throw new SkillsAuthorizationException("First Name [$firstName], Last Name [$lastName], and email [$email] must be configured in Keycloak")
+            }
+
+            return new UserInfo(
+                    username: "${username}-${providerId}",
+                    email: email,
+                    firstName: firstName,
+                    lastName: lastName,
+            )
+        }
+    }
 }
