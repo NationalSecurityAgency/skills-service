@@ -389,7 +389,7 @@ describe('Accessibility Tests', () => {
     cy.route('GET', '/admin/projects/MyNewtestProject/subjects/subj1/skills').as('getSkills');
     cy.route('GET', '/admin/projects/MyNewtestProject/subjects/subj1/levels').as('getLevels');
     cy.route('GET', '/admin/projects/MyNewtestProject/subjects/subj1/users?**').as('getUsers');
-    cy.route('GET', '/admin/projects/MyNewtestProject/performedSkills/u1?**').as('getPerformedSkills');
+    cy.route('GET', '/admin/projects/MyNewtestProject/performedSkills/u8?**').as('getPerformedSkills');
 
     cy.visit('/administrator/');
     cy.injectAxe()
@@ -430,7 +430,7 @@ describe('Accessibility Tests', () => {
     cy.get('[data-cy=cancelLevel]').click();
 
     cy.clickNav('Users').click();
-    cy.contains('u1');
+    cy.contains('u8');
     cy.wait('@getUsers');
     cy.customLighthouse();
     cy.customA11y();
@@ -443,7 +443,7 @@ describe('Accessibility Tests', () => {
     // cy.customA11y();
     cy.get('[data-cy="nav-Performed Skills"]').click()
     cy.wait('@getPerformedSkills');
-    cy.contains('skill1');
+    cy.contains('skill4');
     cy.customLighthouse();
     cy.customA11y();
 
