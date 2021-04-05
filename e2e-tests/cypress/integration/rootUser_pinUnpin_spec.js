@@ -425,5 +425,41 @@ describe('Root Pin and Unpin Tests', () => {
 
   });
 
+  it('View project from Pin Projects modal', () => {
+    cy.request('POST', '/app/projects/proj1', {
+      projectId: 'proj1',
+      name: "one"
+    });
+    cy.logout();
+
+    cy.fixture('vars.json').then((vars) => {
+      cy.login(vars.rootUser, vars.defaultPass);
+      cy.intercept('GET', '/app/projects').as('default');
+      cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+
+      cy.visit('/administrator/');
+      cy.wait('@default');
+
+      const rowSelector = '[data-cy=pinProjectsSearchResults] tbody tr'
+
+      // view project from "Pin" dialog
+      cy.get('[data-cy=subPageHeaderControls]').contains('Pin').click();
+      cy.contains('Search Project Catalog');
+      cy.get('[data-cy=pinProjectsLoadAllButton]').click();
+      cy.get(rowSelector).should('have.length', 2).as('cyRows');
+      cy.get('@cyRows')
+        .eq(1)
+        .find('td')
+        .as('row1');
+      cy.get('@row1').contains('one')
+      cy.get('@row1')
+        .eq(0)
+        .find('[data-cy=viewProjectButton]')
+        .invoke('removeAttr', 'target').click();
+
+      cy.url().should('eq', `${Cypress.config().baseUrl}/administrator/projects/proj1`)
+    });
+  });
+
 });
 
