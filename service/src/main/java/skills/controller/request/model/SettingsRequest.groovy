@@ -15,8 +15,10 @@
  */
 package skills.controller.request.model
 import groovy.transform.Canonical
+import groovy.transform.ToString
 
 @Canonical
+@ToString(excludes = 'enabled', includePackage = false, includeNames = true)
 abstract class SettingsRequest {
 
     //nullable
@@ -27,7 +29,10 @@ abstract class SettingsRequest {
     String value
 
     //convenience method for settings that are in an either on or off state as opposed to containing a meaningful value
-    boolean isEnabled(){
+    boolean isEnabled() {
+        if (value == null) {
+            return false;
+        }
         return Boolean.valueOf(value) || value.toLowerCase() == "enabled" || value.toLowerCase() == "enable" || value.toLowerCase() == "on"
     }
 }
