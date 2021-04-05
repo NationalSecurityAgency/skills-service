@@ -79,7 +79,7 @@ limitations under the License.
                           <i class="fas fa-ban" style="font-size: 1rem;" aria-hidden="true"/>
                         </b-button>
                         <b-button variant="outline-primary"
-                                  :to="`/projects/${data.item.projectId}`" target="_blank"
+                                  :to="`/administrator/projects/${data.item.projectId}`" target="_blank"
                                   size="sm"
                                   v-b-tooltip.hover="'View Project'"
                                   data-cy="viewProjectButton"
