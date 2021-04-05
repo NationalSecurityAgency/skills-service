@@ -52,6 +52,7 @@ class EmailNotifierSpecs extends DefaultIntSpec {
     UserAttrsRepo userAttrsRepo
 
     String email
+
     def setup() {
         startEmailServer()
 
@@ -262,7 +263,13 @@ class EmailNotifierSpecs extends DefaultIntSpec {
         greenMail.start()
 
         assert WaitFor.wait { greenMail.getReceivedMessages().length > 1 }
-        assert WaitFor.wait { loggerHelper.logEvents.find { it.message.startsWith("Retry: Dispatched [2] notification(s) with [0] error(s)") } }
+        assert WaitFor.wait {
+            // there is a race condition - can either handle both failures in one run OR handle with in 2 consecutive runs
+            loggerHelper.logEvents.find { it.message.startsWith("Retry: Dispatched [2] notification(s) with [0] error(s)") } || (
+                    loggerHelper.logEvents.find { it.message.startsWith("Retry: Dispatched [1] notification(s) with [1] error(s)") } &&
+                    loggerHelper.logEvents.find { it.message.startsWith("Retry: Dispatched [1] notification(s) with [0] error(s)") }
+            )
+        }
 
         then:
         greenMail.getReceivedMessages().length == 2
