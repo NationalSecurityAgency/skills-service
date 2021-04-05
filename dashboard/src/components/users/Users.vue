@@ -91,8 +91,8 @@ limitations under the License.
             bordered: true,
             outlined: true,
             stacked: 'md',
-            sortBy: 'userId',
-            sortDesc: false,
+            sortBy: 'lastUpdated',
+            sortDesc: true,
             fields: [
               {
                 key: 'userId',
