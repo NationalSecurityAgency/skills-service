@@ -65,7 +65,12 @@ limitations under the License.
             type: 'line',
             id: 'areachart-2',
             toolbar: {
-              show: false,
+              show: true,
+              offsetY: -52,
+              autoSelected: 'zoom',
+              tools: {
+                pan: false,
+              },
             },
           },
           colors: ['#28a745', '#008ffb'],
