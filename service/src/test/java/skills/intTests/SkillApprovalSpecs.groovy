@@ -719,8 +719,6 @@ class SkillApprovalSpecs extends DefaultIntSpec {
 
         def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 50, 1, 'requestedOn', false)
         List approvalItems = approvalsEndpointRes.data.sort({ it.userId })
-        println "rejected ${approvalItems[1]}"
-        println "rejected ${approvalItems[2]}"
         skillsService.rejectSkillApprovals(proj.projectId, [approvalItems[1].id], 'Just felt like it')
         skillsService.rejectSkillApprovals(proj.projectId, [approvalItems[2].id], 'Just felt like it')
 
@@ -745,14 +743,6 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         List<String> expectedIds = (0..5).collect {
             "TestProject1-skill1_${users[it]}"
         }.sort()
-//        [
-//                "TestProject1-skill1_${users[0]}",
-//                "TestProject1-skill1_${users[1]}",
-//                "TestProject1-skill1_${users[2]}",
-//                "TestProject1-skill1_${users[3]}",
-//                "TestProject1-skill1_${users[4]}",
-//                "TestProject1-skill1_${users[5]}",
-//        ].sort()
 
         then:
         approvalBefore.sort() == expectedIds
