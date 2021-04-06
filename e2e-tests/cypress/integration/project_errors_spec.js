@@ -29,6 +29,26 @@ describe('Project Errors Tests', () => {
     })
   });
 
+  it('issues card should be update when Project Issues page is loaded', () => {
+    cy.visit('/administrator/projects/proj1/');
+    // cy.wait('@getProject');
+    cy.get('[data-cy=pageHeaderStat_Issues]').contains('0');
+    cy.get('[data-cy=nav-Issues]').click();
+    cy.get('[data-cy=projectErrorsTable]').contains('There are no records to show')
+
+    cy.reportSkill(1,42, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill(1,75, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.clickNav('Access').click();
+    cy.clickNav('Issues').click();
+    const expected = [
+      [{ colIndex: 0, value: ' SkillNotFound' }],
+      [{ colIndex: 0, value: ' SkillNotFound' }],
+    ];
+    const tableSelector = '[data-cy=projectErrorsTable]';
+    cy.validateTable(tableSelector, expected);
+    cy.get('[data-cy=pageHeaderStat_Issues]').contains('2');
+  });
+
   it('displays errors associated with project', () => {
     cy.reportSkill(1,42, 'user@skills.org', '2021-02-24 10:00', false);
     cy.reportSkill(1,75, 'user@skills.org', '2021-02-24 10:00', false);
