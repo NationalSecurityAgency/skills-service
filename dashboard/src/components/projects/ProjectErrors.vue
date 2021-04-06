@@ -184,6 +184,7 @@ limitations under the License.
         ProjectService.getProjectErrors(this.$route.params.projectId, pageParams).then((res) => {
           this.errors = res.data;
           this.table.options.pagination.totalRows = res.totalCount;
+          this.loadProjectDetailsState({ projectId: this.$route.params.projectId });
         }).finally(() => {
           this.loading = false;
           this.table.options.busy = false;
