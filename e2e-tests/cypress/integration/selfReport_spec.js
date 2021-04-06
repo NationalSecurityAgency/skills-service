@@ -384,7 +384,7 @@ describe('Self Report Skills Management Tests', () => {
         cy.get('[data-cy="selfReportMediaCard"] [data-cy="mediaInfoCardSubTitle"]').contains('Self reporting is disabled for this skill');
     });
 
-    it.only('show how many points are requested', () => {
+    it('show how many points are requested', () => {
         cy.createSkill(1, 1, 1, { selfReportingType: 'Approval', pointIncrement: '100' });
         cy.createSkill(1, 1, 2, { selfReportingType: 'Approval', pointIncrement: '220' });
         cy.createSkill(1, 1, 3, { selfReportingType: 'Approval', pointIncrement: '180' });
