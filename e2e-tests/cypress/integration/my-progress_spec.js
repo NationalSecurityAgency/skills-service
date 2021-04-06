@@ -19,7 +19,7 @@ import relativeTimePlugin from 'dayjs/plugin/relativeTime';
 dayjs.extend(relativeTimePlugin);
 
 const dateFormatter = value => moment.utc(value).format('YYYY-MM-DD[T]HH:mm:ss[Z]');
-const timeFromNowFormatter = (value) => dayjs(value).startOf('hour').fromNow();
+const timeFromNowFormatter = (value) => dayjs(value).startOf('seconds').fromNow();
 
 
 const now = new Date().getTime()
