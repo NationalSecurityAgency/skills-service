@@ -16,7 +16,7 @@
 import Vue from 'vue';
 import dayjs from '../DayJsCustomizer';
 
-const timeFromNowFormatter = (value) => dayjs(value).startOf('hour').fromNow();
+const timeFromNowFormatter = (value) => dayjs(value).startOf('seconds').fromNow();
 Vue.filter('timeFromNow', timeFromNowFormatter);
 
 // this allows to call this function from an js code; to learn more about that read about javascript modules

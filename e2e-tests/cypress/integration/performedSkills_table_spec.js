@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import moment from 'moment';
+var moment = require('moment-timezone');
 
 describe('Performed Skills Table Tests', () => {
     const tableSelector = '[data-cy=performedSkillsTable]'
@@ -74,6 +74,49 @@ describe('Performed Skills Table Tests', () => {
             [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-16' }],
             [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-17' }],
             [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-18' }],
+        ], 5);
+    });
+
+    it('validate relative time', () => {
+        cy.createSkill(1, 1, 1, {numPerformToCompletion: 10, pointIncrementInterval: 0});
+
+
+        const m = moment.utc();
+        let proj = '';
+        cy.request({
+            method: 'POST',
+            url: `/api/projects/proj1/skills/skill1`,
+            failOnStatusCode: true,
+            body: {userId: 'user1@skills.org', timestamp: m.clone().format('x')}});
+        cy.request({
+            method: 'POST',
+            url: `/api/projects/proj1/skills/skill1`,
+            failOnStatusCode: true,
+            body: {userId: 'user1@skills.org', timestamp: m.clone().subtract(10, 'minutes').format('x')}});
+        cy.request({
+            method: 'POST',
+            url: `/api/projects/proj1/skills/skill1`,
+            failOnStatusCode: true,
+            body: {userId: 'user1@skills.org', timestamp: m.clone().subtract(2, 'hours').format('x')}});
+        cy.request({
+            method: 'POST',
+            url: `/api/projects/proj1/skills/skill1`,
+            failOnStatusCode: true,
+            body: {userId: 'user1@skills.org', timestamp: m.clone().subtract(3, 'days').format('x')}});
+        cy.request({
+            method: 'POST',
+            url: `/api/projects/proj1/skills/skill1`,
+            failOnStatusCode: true,
+            body: {userId: 'user1@skills.org', timestamp: m.clone().subtract(5, 'months').format('x')}});
+
+        cy.visit('/administrator/projects/proj1/users/user1@skills.org/skillEvents');
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 1,  value: 'a few seconds ago' }],
+            [{ colIndex: 1,  value: 'minutes ago' }],
+            [{ colIndex: 1,  value: 'hours ago' }],
+            [{ colIndex: 1,  value: 'days ago' }],
+            [{ colIndex: 1,  value: 'months ago' }],
         ], 5);
     });
 
