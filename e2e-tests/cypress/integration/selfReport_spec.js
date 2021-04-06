@@ -384,6 +384,25 @@ describe('Self Report Skills Management Tests', () => {
         cy.get('[data-cy="selfReportMediaCard"] [data-cy="mediaInfoCardSubTitle"]').contains('Self reporting is disabled for this skill');
     });
 
+    it.only('show how many points are requested', () => {
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval', pointIncrement: '100' });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval', pointIncrement: '220' });
+        cy.createSkill(1, 1, 3, { selfReportingType: 'Approval', pointIncrement: '180' });
+        cy.reportSkill(1, 1, 'user1Good@skills.org', '2020-09-12 11:00')
+        cy.reportSkill(1, 2, 'user2Good@skills.org', '2020-09-13 11:00')
+        cy.reportSkill(1, 3, 'user3Good@skills.org', '2020-09-14 11:00')
+
+        cy.visit('/administrator/projects/proj1/self-report');
+
+        const tableSelector = '[data-cy="skillsReportApprovalTable"]';
+        const expected = [
+            [{ colIndex: 0,  value: 'user3Good@skills.org ' }, { colIndex: 1,  value: '180' }],
+            [{ colIndex: 0,  value: 'user2Good@skills.org ' }, { colIndex: 1,  value: '220' }],
+            [{ colIndex: 0,  value: 'user1Good@skills.org ' }, { colIndex: 1,  value: '100' }],
+        ]
+        cy.validateTable(tableSelector, expected);
+    })
+
     it('sorting and paging of the approval table', () => {
         cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
         cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
@@ -400,13 +419,13 @@ describe('Self Report Skills Management Tests', () => {
 
         const tableSelector = '[data-cy="skillsReportApprovalTable"]';
         const expected = [
-            [{ colIndex: 0,  value: 'user0good@skills.org ' }, { colIndex: 2,  value: '2020-09-18 11:00' }],
-            [{ colIndex: 0,  value: 'user1good@skills.org ' }, { colIndex: 2,  value: '2020-09-17 11:00' }],
-            [{ colIndex: 0,  value: 'user2good@skills.org ' }, { colIndex: 2,  value: '2020-09-16 11:00' }],
-            [{ colIndex: 0,  value: 'user3good@skills.org ' }, { colIndex: 2,  value: '2020-09-15 11:00' }],
-            [{ colIndex: 0,  value: 'user4good@skills.org ' }, { colIndex: 2,  value: '2020-09-14 11:00' }],
-            [{ colIndex: 0,  value: 'user5good@skills.org ' }, { colIndex: 2,  value: '2020-09-13 11:00' }],
-            [{ colIndex: 0,  value: 'user6good@skills.org ' }, { colIndex: 2,  value: '2020-09-12 11:00' }],
+            [{ colIndex: 0,  value: 'user0Good@skills.org ' }, { colIndex: 2,  value: '2020-09-18 11:00' }],
+            [{ colIndex: 0,  value: 'user1Good@skills.org ' }, { colIndex: 2,  value: '2020-09-17 11:00' }],
+            [{ colIndex: 0,  value: 'user2Good@skills.org ' }, { colIndex: 2,  value: '2020-09-16 11:00' }],
+            [{ colIndex: 0,  value: 'user3Good@skills.org ' }, { colIndex: 2,  value: '2020-09-15 11:00' }],
+            [{ colIndex: 0,  value: 'user4Good@skills.org ' }, { colIndex: 2,  value: '2020-09-14 11:00' }],
+            [{ colIndex: 0,  value: 'user5Good@skills.org ' }, { colIndex: 2,  value: '2020-09-13 11:00' }],
+            [{ colIndex: 0,  value: 'user6Good@skills.org ' }, { colIndex: 2,  value: '2020-09-12 11:00' }],
         ]
         const expectedReversed = [...expected].reverse();
 

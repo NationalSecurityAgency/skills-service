@@ -24,10 +24,13 @@ import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
+import skills.storage.model.UserAttrs
 import skills.storage.model.UserPerformedSkill
 import skills.storage.repos.SkillApprovalRepo
+import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserPerformedSkillRepo
 import spock.lang.IgnoreIf
+import spock.lang.IgnoreRest
 
 class SkillApprovalSpecs extends DefaultIntSpec {
 
@@ -36,6 +39,13 @@ class SkillApprovalSpecs extends DefaultIntSpec {
 
     @Autowired
     UserPerformedSkillRepo userPerformedSkillRepo
+
+    @Autowired
+    UserAttrsRepo userAttrsRepo
+
+    private getUserIdForDisplay(String userId) {
+        userAttrsRepo.findByUserId(userId).userIdForDisplay
+    }
 
     void "getApprovals paging"() {
         def proj = SkillsFactory.createProject()
@@ -69,6 +79,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         (0..4).each {Integer index ->
             assert tableResultPg1.data[index].id
             assert tableResultPg1.data[index].userId == users[index]
+            assert tableResultPg1.data[index].userIdForDisplay == getUserIdForDisplay(users[index])
             assert tableResultPg1.data[index].skillId == "skill1"
             assert tableResultPg1.data[index].skillName == "Test Skill 1"
             assert tableResultPg1.data[index].requestedOn == dates[index].time
@@ -81,6 +92,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         (0..1).each {Integer index ->
             assert tableResultPg2.data[index].id
             assert tableResultPg2.data[index].userId == users[index+5]
+            assert tableResultPg2.data[index].userIdForDisplay == getUserIdForDisplay(users[index+5])
             assert tableResultPg2.data[index].skillId == "skill1"
             assert tableResultPg2.data[index].skillName == "Test Skill 1"
             assert tableResultPg2.data[index].requestedOn == dates[index+5].time
@@ -230,6 +242,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         (0..6).each {Integer index ->
             assert proj1Res.data[index].id
             assert proj1Res.data[index].userId == users[index]
+            assert proj1Res.data[index].userIdForDisplay == getUserIdForDisplay(users[index])
             assert proj1Res.data[index].skillId == "skill1"
             assert proj1Res.data[index].skillName == "Test Skill 1"
             assert proj1Res.data[index].requestMsg == "Please approve this ${index}!"
@@ -239,6 +252,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         (0..2).each {Integer index ->
             assert proj2Res.data[index].id
             assert proj2Res.data[index].userId == users[index]
+            assert proj2Res.data[index].userIdForDisplay == getUserIdForDisplay(users[index])
             assert proj2Res.data[index].skillId == "skill2"
             assert proj2Res.data[index].skillName == "Test Skill 2"
             assert proj2Res.data[index].requestMsg == "Other reason ${index}!"
@@ -705,6 +719,8 @@ class SkillApprovalSpecs extends DefaultIntSpec {
 
         def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 50, 1, 'requestedOn', false)
         List approvalItems = approvalsEndpointRes.data.sort({ it.userId })
+        println "rejected ${approvalItems[1]}"
+        println "rejected ${approvalItems[2]}"
         skillsService.rejectSkillApprovals(proj.projectId, [approvalItems[1].id], 'Just felt like it')
         skillsService.rejectSkillApprovals(proj.projectId, [approvalItems[2].id], 'Just felt like it')
 
@@ -726,14 +742,17 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         List<String> performedAfter = userPerformedSkillRepo.findAll().collect { "${it.projectId}-${it.skillId}_${it.userId}" }
 
 
-        List<String> expectedIds = [
-                "TestProject1-skill1_${users[0]}",
-                "TestProject1-skill1_${users[1]}",
-                "TestProject1-skill1_${users[2]}",
-                "TestProject1-skill1_${users[3]}",
-                "TestProject1-skill1_${users[4]}",
-                "TestProject1-skill1_${users[5]}",
-        ].sort()
+        List<String> expectedIds = (0..5).collect {
+            "TestProject1-skill1_${users[it]}"
+        }.sort()
+//        [
+//                "TestProject1-skill1_${users[0]}",
+//                "TestProject1-skill1_${users[1]}",
+//                "TestProject1-skill1_${users[2]}",
+//                "TestProject1-skill1_${users[3]}",
+//                "TestProject1-skill1_${users[4]}",
+//                "TestProject1-skill1_${users[5]}",
+//        ].sort()
 
         then:
         approvalBefore.sort() == expectedIds

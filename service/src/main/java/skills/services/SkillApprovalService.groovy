@@ -77,10 +77,12 @@ class SkillApprovalService {
             new SkillApprovalResult(
                     id: simpleSkillApproval.getApprovalId(),
                     userId: simpleSkillApproval.getUserId(),
+                    userIdForDisplay: simpleSkillApproval.getUserIdForDisplay(),
                     skillId: simpleSkillApproval.getSkillId(),
                     skillName: simpleSkillApproval.getSkillName(),
                     requestedOn: simpleSkillApproval.getRequestedOn().time,
-                    requestMsg: simpleSkillApproval.getRequestMsg()
+                    requestMsg: simpleSkillApproval.getRequestMsg(),
+                    points: simpleSkillApproval.getPoints(),
             )
         }
 
