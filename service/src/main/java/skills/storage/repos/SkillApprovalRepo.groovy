@@ -31,10 +31,12 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
     interface SimpleSkillApproval {
         Integer getApprovalId()
         String getUserId()
+        String getUserIdForDisplay()
         String getSkillId()
         String getSkillName()
         Date getRequestedOn()
         String getRequestMsg()
+        Integer getPoints()
     }
 
     @Query('''SELECT
@@ -42,10 +44,16 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
         sd.skillId as skillId,
         sd.name as skillName,
         s.userId as userId,
+        uAttrs.userIdForDisplay as userIdForDisplay,
         s.requestedOn as requestedOn,
-        s.requestMsg as requestMsg
-        from SkillApproval s, SkillDef sd 
-        where s.projectId = ?1 and s.skillRefId = sd.id and s.rejectedOn is null''')
+        s.requestMsg as requestMsg,
+        sd.pointIncrement as points
+        from SkillApproval s, SkillDef sd, UserAttrs uAttrs
+        where 
+            s.projectId = ?1 and 
+            s.skillRefId = sd.id and 
+            s.userId = uAttrs.userId and
+            s.rejectedOn is null''')
     List<SimpleSkillApproval> findToApproveByProjectIdAndNotRejected(String projectId, Pageable pageable)
 
     long countByProjectIdAndRejectedOnIsNull(String projectId)

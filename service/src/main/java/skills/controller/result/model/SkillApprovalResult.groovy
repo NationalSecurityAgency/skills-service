@@ -19,8 +19,10 @@ class SkillApprovalResult {
 
     Integer id
     String userId
+    String userIdForDisplay
     String skillId
     String skillName
     Long requestedOn
     String requestMsg
+    Integer points
 }

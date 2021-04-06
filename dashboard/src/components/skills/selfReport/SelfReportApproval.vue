@@ -49,13 +49,12 @@ limitations under the License.
           :inline="true"
           v-on:input="updateActionsDisableStatus"
           :data-cy="`approvalSelect_${data.item.userId}-${data.item.skillId}`"
-        >
-          {{ data.value }}
+        >{{ data.item.userIdForDisplay }}
         </b-form-checkbox>
       </template>
 
       <template v-slot:cell(request)="data">
-        <div>{{ data.item.skillName }}</div>
+        <div>{{ data.item.skillName }} <b-badge>+ {{ data.item.points }} Points</b-badge></div>
         <div class="small text-muted">ID: {{ data.item.skillId }}</div>
         <div class="mt-2" style="font-size: 0.9rem;"><span class="text-muted">Note:</span>
           <span v-if="data.item.requestMsg && data.item.requestMsg.length > 0"> {{ data.item.requestMsg }}</span>
