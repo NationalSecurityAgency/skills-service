@@ -39,7 +39,12 @@ limitations under the License.
             height: 250,
             type: 'area',
             toolbar: {
-              show: false,
+              show: true,
+              offsetY: -52,
+              autoSelected: 'zoom',
+              tools: {
+                pan: false,
+              },
             },
           },
           dataLabels: {

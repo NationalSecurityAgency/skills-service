@@ -293,14 +293,8 @@ describe('Metrics Tests - Skills', () => {
         cy.matchSnapshotImageForElement('[data-cy=numUsersAchievedOverTimeMetric]');
     });
 
-    it('applied skill events over time', {
-        retries: {
-            runMode: 0,
-            openMode: 0
-        }
-    },() => {
-        cy
-            .intercept('/admin/projects/proj1/metrics/numUserAchievedOverTimeChartBuilder**')
+    it('applied skill events over time', () => {
+        cy.intercept('/admin/projects/proj1/metrics/numUserAchievedOverTimeChartBuilder**')
             .as('skillEventsOverTimeChartBuilder');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -309,17 +303,10 @@ describe('Metrics Tests - Skills', () => {
             name: 'Interesting Subject 1',
         });
 
-        const numSkills = 1;
-        for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
-            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
-                projectId: 'proj1',
-                subjectId: 'subj1',
-                skillId: `skill${skillsCounter}`,
-                name: `Very Great Skill # ${skillsCounter}`,
-                pointIncrement: '1000',
-                numPerformToCompletion: '1',
-            });
-        }
+        cy.createSkill(1,1,1)
+        cy.reportSkill(1, 1, 'user5Good@skills.org', '2020-09-13 11:00')
+        cy.reportSkill(1, 1, 'user6Good@skills.org', '2020-09-13 11:00')
+        cy.reportSkill(1, 1, 'user7Good@skills.org', '2020-09-13 11:00')
 
         const m = moment.utc('2020-09-02 11', 'YYYY-MM-DD HH');
         const numDays = 3;
