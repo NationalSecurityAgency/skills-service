@@ -217,7 +217,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
             ue.skill_ref_id = :skillRefId 
             AND ue.user_id = achievements.user_id 
             AND ue.event_time > achievements.achieved_on 
-        GROUP BY ue.user_id HAVING SUM(ue.count) > :minEventCountThreshold LIMIT 1;
+        GROUP BY ue.user_id HAVING SUM(ue.count) >= :minEventCountThreshold LIMIT 1;
     ''', nativeQuery = true)
     public Long countOfUsersUsingSkillAfterAchievement(@Param("skillRefId") Integer skillRefId, @Param("minEventCountThreshold") Integer minEventCountThreshold)
 
