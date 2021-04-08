@@ -18,6 +18,7 @@ package skills.services
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.stereotype.Service
@@ -76,6 +77,9 @@ class AccessSettingsStorageService {
 
     @Autowired
     UserAttrsService userAttrsService
+
+    @Value('#{"${skills.config.defaultLandingPage:progress}"}')
+    String defaultLandingPage
 
     @Transactional(readOnly = true)
     List<UserRoleRes> getUserRolesForProjectId(String projectId) {
@@ -283,7 +287,7 @@ class AccessSettingsStorageService {
         settingsService.saveSetting(new UserSettingsRequest(
                 settingGroup: USER_PREFS_GROUP,
                 setting: HOME_PAGE_PREF,
-                value: 'progress'
+                value: defaultLandingPage
         ), user)
         return user
     }
