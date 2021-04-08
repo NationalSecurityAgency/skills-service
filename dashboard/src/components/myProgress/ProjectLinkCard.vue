@@ -24,7 +24,7 @@ limitations under the License.
           <div class="h4 text-uppercase text-truncate" data-cy="project-card-project-name">{{ proj.projectName }}</div>
           <div class="h5 text-secondary" data-cy="project-card-project-level">Level {{ proj.level }}</div>
           <div data-cy="project-card-project-rank">
-            <b-badge :variant="rankVariant">Rank: {{ proj.rank }} / {{ proj.totalUsers | number}}</b-badge>
+            <b-badge :variant="rankVariant">Rank: {{ proj.rank | number }} / {{ proj.totalUsers | number}}</b-badge>
           </div>
         </b-col>
       </b-row>
