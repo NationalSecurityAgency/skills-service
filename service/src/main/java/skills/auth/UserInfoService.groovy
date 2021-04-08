@@ -102,6 +102,7 @@ class UserInfoService {
                     SkillException ske = new SkillException(msg)
                     ske.errorCode = ErrorCode.UserNotFound
                     ske.doNotRetry = !retry
+                    ske.printStackTrace = false
                     throw ske
                 }
 

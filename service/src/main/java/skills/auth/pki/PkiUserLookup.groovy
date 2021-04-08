@@ -122,12 +122,9 @@ class PkiUserLookup {
         String errMsg = null
         if (!userInfo) {
             errMsg = "User info service does not have key [${requestValue}]"
-        }
-
-        if (!userInfo?.username) {
+        } else if (!userInfo?.username) {
             errMsg = "User info service result must contain username. request value=[${requestValue}]"
-        }
-        if (!userInfo?.usernameForDisplay) {
+        } else if (!userInfo?.usernameForDisplay) {
             errMsg = "User info service result must contain usernameForDisplay. request value=[${requestValue}]"
         }
 
