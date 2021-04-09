@@ -61,7 +61,7 @@ limitations under the License.
       title: {
         type: String,
         required: false,
-        default: 'Events per day',
+        default: 'Your Daily Usage History',
       },
     },
     data() {
@@ -125,7 +125,7 @@ limitations under the License.
               },
             },
             title: {
-              text: 'Events Reported',
+              text: 'Skill Events Reported',
             },
           },
           xaxis: {
