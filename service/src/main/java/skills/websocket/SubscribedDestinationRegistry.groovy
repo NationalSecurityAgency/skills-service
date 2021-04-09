@@ -90,7 +90,7 @@ class SubscribedDestinationRegistry implements ApplicationListener<AbstractSubPr
         } else if (event instanceof SessionSubscribeEvent) {
             StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.message)
             Principal user = accessor.getUser()
-            if(((Authentication)user).isAuthenticated()){
+            if(user && ((Authentication)user).isAuthenticated()){
                 add(user.getName(), accessor.getSessionId(), accessor.getDestination())
             }
         }
