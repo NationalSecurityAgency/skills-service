@@ -31,6 +31,9 @@ class MyProgressSummary {
     Date mostRecentAchievedSkill
 
     Integer totalBadges = 0
+    Integer gemCount = 0;
+    Integer globalBadgeCount = 0;
+
     Integer numAchievedBadges = 0
     Integer numAchievedGemBadges = 0
     Integer numAchievedGlobalBadges = 0

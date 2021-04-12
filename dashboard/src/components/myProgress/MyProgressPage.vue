@@ -74,6 +74,8 @@ limitations under the License.
                              :num-achieved-badges="myProgressSummary.numAchievedBadges"
                              :num-achieved-gem-badges="myProgressSummary.numAchievedGemBadges"
                              :num-achieved-global-badges="myProgressSummary.numAchievedGlobalBadges"
+                             :total-gems="myProgressSummary.gemCount"
+                             :total-global-badges="myProgressSummary.globalBadgeCount"
                              class="flex-grow-1 my-summary-card"/>
           </b-col>
         </b-row>

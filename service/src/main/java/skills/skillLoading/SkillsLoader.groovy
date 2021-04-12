@@ -31,7 +31,6 @@ import skills.services.BadgeUtils
 import skills.services.DependencyValidator
 import skills.services.GlobalBadgesService
 import skills.services.LevelDefinitionStorageService
-import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.settings.CommonSettings
 import skills.skillLoading.model.*
@@ -150,8 +149,13 @@ class SkillsLoader {
             myProgressSummary.numProjectsContributed += summary.points > 0 ? 1 : 0
         }
 
-        myProgressSummary.totalBadges = skillDefRepo.countTotalProductionBadges()
-        AchievedBadgeCount achievedBadgeCounts = achievedLevelRepository.countAchievedProductionBadgesForUser(userId)
+        Integer numBadges = skillDefRepo.countTotalProductionBadges()
+        BadgeCount badgeCount = skillDefRepo.getProductionBadgesCount()
+        myProgressSummary.totalBadges = badgeCount.totalCount ?: 0
+        myProgressSummary.globalBadgeCount = badgeCount.globalCount ?: 0
+        myProgressSummary.gemCount = badgeCount.gemCount ?: 0
+
+        BadgeCount achievedBadgeCounts = achievedLevelRepository.countAchievedProductionBadgesForUser(userId)
         myProgressSummary.numAchievedBadges = achievedBadgeCounts.totalCount ?: 0
         myProgressSummary.numAchievedGemBadges = achievedBadgeCounts.gemCount ?: 0
         myProgressSummary.numAchievedGlobalBadges = achievedBadgeCounts.globalCount ?: 0
