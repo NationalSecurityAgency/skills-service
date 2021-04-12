@@ -22,7 +22,7 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
-import skills.storage.model.AchievedBadgeCount
+import skills.storage.model.BadgeCount
 import skills.storage.model.AchievedSkillsCount
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
@@ -185,7 +185,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
                 (skillDef.projectId is null and ua.projectId is null)
             ) and
             (skillDef.type='Badge' OR skillDef.type='GlobalBadge')''')
-    AchievedBadgeCount countAchievedProductionBadgesForUser(@Param('userId') String userId)
+    BadgeCount countAchievedProductionBadgesForUser(@Param('userId') String userId)
 
     @Query(value = '''select EXTRACT(MONTH FROM ua.created) as label, count(*) countRes
       from skill_definition skillDef, user_achievement ua 

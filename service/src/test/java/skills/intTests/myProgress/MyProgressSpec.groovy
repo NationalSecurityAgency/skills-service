@@ -22,6 +22,7 @@ import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.intTests.utils.TestUtils
 import skills.services.settings.Settings
+import spock.lang.IgnoreRest
 
 @Slf4j
 class MyProgressSpec extends DefaultIntSpec {
@@ -42,6 +43,177 @@ class MyProgressSpec extends DefaultIntSpec {
 
         // delete Inception so it doesn't affect our test numbers
         rootSkillsService.deleteProject('Inception')
+    }
+
+    def "my progress summary - badge count"() {
+        def proj1 = SkillsFactory.createProject()
+        def subj1 = SkillsFactory.createSubject()
+        def badge1 = SkillsFactory.createBadge()
+        badge1.enabled = false;
+        def badge2 = SkillsFactory.createBadge(1, 2)
+        badge2.enabled = false;
+        def badge3 = SkillsFactory.createBadge(1, 3)
+        badge3.enabled = false;
+
+        Date oneWeekAgo = new Date()-7
+        Date twoWeeksAgo = new Date()-14
+        def gem1 = SkillsFactory.createBadge(1, 4)
+        gem1.enabled = false;
+        gem1.startDate = twoWeeksAgo
+        gem1.endDate = oneWeekAgo
+        def gem2 = SkillsFactory.createBadge(1, 5)
+        gem2.enabled = false;
+        gem2.startDate = twoWeeksAgo
+        gem2.endDate = oneWeekAgo
+
+        def globalBadge = [badgeId: "globalBadge", name: 'Test Global Badge 1', enabled: 'false']
+        def globalBadge2 = [badgeId: "globalBadge2", name: 'Test Global Badge 2', enabled: 'false']
+        def globalBadge3 = [badgeId: "globalBadge3", name: 'Test Global Badge 3', enabled: 'false']
+
+        def skills = SkillsFactory.createSkills(3, )
+        skillsService.createProject(proj1)
+        skillsService.createSubject(subj1)
+        skillsService.createSkills(skills)
+        skillsService.createBadge(badge1)
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1.badgeId, skillId: skills[0].skillId])
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge2.badgeId, skillId: skills[1].skillId])
+        skillsService.createBadge(badge3)
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge3.badgeId, skillId: skills[2].skillId])
+
+        skillsService.createBadge(gem1)
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: gem1.badgeId, skillId: skills[2].skillId])
+
+        skillsService.createBadge(gem2)
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: gem2.badgeId, skillId: skills[2].skillId])
+
+        supervisorService.createGlobalBadge(globalBadge)
+        supervisorService.assignSkillToGlobalBadge(projectId: proj1.projectId, badgeId: globalBadge.badgeId, skillId: skills[2].skillId)
+        supervisorService.createGlobalBadge(globalBadge2)
+        supervisorService.assignSkillToGlobalBadge(projectId: proj1.projectId, badgeId: globalBadge2.badgeId, skillId: skills[2].skillId)
+        supervisorService.createGlobalBadge(globalBadge3)
+        supervisorService.assignSkillToGlobalBadge(projectId: proj1.projectId, badgeId: globalBadge3.badgeId, skillId: skills[2].skillId)
+
+        when:
+        def res = skillsService.getMyProgressSummary()
+
+        badge1.enabled = 'true'
+        skillsService.createBadge(badge1)
+
+        def res1 = skillsService.getMyProgressSummary()
+
+        // enable "production mode"
+        skillsService.changeSetting(proj1.projectId, PROD_MODE, [projectId: proj1.projectId, setting: PROD_MODE, value: "true"])
+
+        def res2 = skillsService.getMyProgressSummary()
+
+        badge2.enabled = 'true'
+        skillsService.createBadge(badge2)
+        badge3.enabled = 'true'
+        skillsService.createBadge(badge3)
+
+        def res3 = skillsService.getMyProgressSummary()
+
+        gem1.enabled = 'true'
+        skillsService.createBadge(gem1)
+
+        def res4 = skillsService.getMyProgressSummary()
+
+        gem2.enabled = 'true'
+        skillsService.createBadge(gem2)
+
+        def res5 = skillsService.getMyProgressSummary()
+
+        globalBadge.enabled = 'true'
+        supervisorService.createGlobalBadge(globalBadge)
+
+        def res6 = skillsService.getMyProgressSummary()
+
+        globalBadge2.enabled = 'true'
+        supervisorService.createGlobalBadge(globalBadge2)
+
+        def res7 = skillsService.getMyProgressSummary()
+
+        globalBadge3.enabled = 'true'
+        supervisorService.createGlobalBadge(globalBadge3)
+
+        def res8 = skillsService.getMyProgressSummary()
+
+        then:
+        res.totalBadges == 0
+        res.gemCount == 0
+        res.globalBadgeCount == 0
+
+        res1.totalBadges == 0
+        res1.gemCount == 0
+        res1.globalBadgeCount == 0
+
+        res2.totalBadges == 1
+        res2.gemCount == 0
+        res2.globalBadgeCount == 0
+
+        res3.totalBadges == 3
+        res3.gemCount == 0
+        res3.globalBadgeCount == 0
+
+        res4.totalBadges == 4
+        res4.gemCount == 1
+        res4.globalBadgeCount == 0
+
+        res5.totalBadges == 5
+        res5.gemCount == 2
+        res5.globalBadgeCount == 0
+
+        res6.totalBadges == 6
+        res6.gemCount == 2
+        res6.globalBadgeCount == 1
+
+        res7.totalBadges == 7
+        res7.gemCount == 2
+        res7.globalBadgeCount == 2
+
+        res8.totalBadges == 8
+        res8.gemCount == 2
+        res8.globalBadgeCount == 3
+    }
+
+    def "my progress summary - global badge achieved count"() {
+        def proj1 = SkillsFactory.createProject()
+        def subj1 = SkillsFactory.createSubject()
+
+        def skills = SkillsFactory.createSkills(3, )
+        skills.each { it.pointIncrement = 100 }
+        skillsService.createProject(proj1)
+        skillsService.createSubject(subj1)
+        skillsService.createSkills(skills)
+
+        def globalBadge = [badgeId: "globalBadge", name: 'Test Global Badge 1', enabled: 'false']
+        def globalBadge2 = [badgeId: "globalBadge2", name: 'Test Global Badge 2', enabled: 'false']
+        def globalBadge3 = [badgeId: "globalBadge3", name: 'Test Global Badge 3', enabled: 'false']
+
+        supervisorService.createGlobalBadge(globalBadge)
+        supervisorService.assignSkillToGlobalBadge(projectId: proj1.projectId, badgeId: globalBadge.badgeId, skillId: skills[0].skillId)
+        supervisorService.createGlobalBadge(globalBadge2)
+        supervisorService.assignSkillToGlobalBadge(projectId: proj1.projectId, badgeId: globalBadge2.badgeId, skillId: skills[1].skillId)
+        supervisorService.createGlobalBadge(globalBadge3)
+        supervisorService.assignSkillToGlobalBadge(projectId: proj1.projectId, badgeId: globalBadge3.badgeId, skillId: skills[2].skillId)
+
+        globalBadge.enabled = 'true'
+        supervisorService.createGlobalBadge(globalBadge)
+
+        globalBadge2.enabled = 'true'
+        supervisorService.createGlobalBadge(globalBadge2)
+
+        globalBadge3.enabled = 'true'
+        supervisorService.createGlobalBadge(globalBadge3)
+
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skills.get(1).skillId])
+        when:
+        def res = skillsService.getMyProgressSummary()
+
+        then:
+        res.globalBadgeCount == 3
+        res.numAchievedGlobalBadges == 1
     }
 
     def "my progress summary - no skills have been created"() {

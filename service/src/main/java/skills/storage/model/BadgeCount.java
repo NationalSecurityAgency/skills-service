@@ -15,7 +15,7 @@
  */
 package skills.storage.model;
 
-public interface AchievedBadgeCount {
+public interface BadgeCount {
     Integer getTotalCount();
     Integer getGemCount();
     Integer getGlobalCount();

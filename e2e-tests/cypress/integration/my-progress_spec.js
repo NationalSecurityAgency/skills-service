@@ -196,6 +196,62 @@ describe('Navigation Tests', () => {
     cy.intercept('/api/metrics/allProjectsSkillEventsOverTimeMetricsBuilder**').as('allSkillEventsForUser');
   })
 
+  it('badges card - gems and not global badges', function () {
+    cy.visit('/');
+    cy.wait('@allSkillEventsForUser');
+
+    cy.get('[data-cy=numAchievedGlobalBadges]').should('not.exist')
+    cy.get('[data-cy=numAchievedGemBadges]').contains('Gems: 0 / 1')
+  })
+
+  it('badges card - global badges and not gems', function () {
+    cy.intercept({
+      method: 'GET',
+      path: '/api/myProgressSummary',
+    }, {
+      statusCode: 200,
+      body: {"projectSummaries":[{"projectId":"Inception","projectName":"Inception","points":0,"totalPoints":2695,"level":0,"totalUsers":1,"rank":1},{"projectId":"proj1","projectName":"Project 1","points":0,"totalPoints":1400,"level":0,"totalUsers":2,"rank":2}],"totalProjects":2,"numProjectsContributed":0,"totalSkills":56,"numAchievedSkills":0,"numAchievedSkillsLastMonth":0,"numAchievedSkillsLastWeek":0,"mostRecentAchievedSkill":null,"totalBadges":2,"gemCount":0,"globalBadgeCount":2,"numAchievedBadges":0,"numAchievedGemBadges":0,"numAchievedGlobalBadges":1}
+    }).as('getMyProgress');
+
+    cy.visit('/');
+    cy.wait('@getMyProgress');
+
+    cy.get('[data-cy=numAchievedGlobalBadges]').contains('Global Badges: 1 / 2')
+    cy.get('[data-cy=numAchievedGemBadges]').should('not.exist')
+  })
+
+
+  it('badges card - global badges and gems', function () {
+    cy.intercept({
+      method: 'GET',
+      path: '/api/myProgressSummary',
+    }, {
+      statusCode: 200,
+      body: {"projectSummaries":[{"projectId":"Inception","projectName":"Inception","points":0,"totalPoints":2695,"level":0,"totalUsers":1,"rank":1},{"projectId":"proj1","projectName":"Project 1","points":0,"totalPoints":1400,"level":0,"totalUsers":2,"rank":2}],"totalProjects":2,"numProjectsContributed":0,"totalSkills":56,"numAchievedSkills":0,"numAchievedSkillsLastMonth":0,"numAchievedSkillsLastWeek":0,"mostRecentAchievedSkill":null,"totalBadges":2,"gemCount":5,"globalBadgeCount":2,"numAchievedBadges":0,"numAchievedGemBadges":2,"numAchievedGlobalBadges":1}
+    }).as('getMyProgress');
+
+    cy.visit('/');
+    cy.wait('@getMyProgress');
+
+    cy.get('[data-cy=numAchievedGlobalBadges]').contains('Global Badges: 1 / 2')
+    cy.get('[data-cy=numAchievedGemBadges]').contains('Gems: 2 / 5')
+  })
+
+  it('badges card - no global badges and no gems', function () {
+    cy.intercept({
+      method: 'GET',
+      path: '/api/myProgressSummary',
+    }, {
+      statusCode: 200,
+      body: {"projectSummaries":[{"projectId":"Inception","projectName":"Inception","points":0,"totalPoints":2695,"level":0,"totalUsers":1,"rank":1},{"projectId":"proj1","projectName":"Project 1","points":0,"totalPoints":1400,"level":0,"totalUsers":2,"rank":2}],"totalProjects":2,"numProjectsContributed":0,"totalSkills":56,"numAchievedSkills":0,"numAchievedSkillsLastMonth":0,"numAchievedSkillsLastWeek":0,"mostRecentAchievedSkill":null,"totalBadges":2,"gemCount":0,"globalBadgeCount":0,"numAchievedBadges":0,"numAchievedGemBadges":0,"numAchievedGlobalBadges":0}
+    }).as('getMyProgress');
+
+    cy.visit('/');
+    cy.wait('@getMyProgress');
+
+    cy.get('[data-cy=numAchievedGlobalBadges]').should('not.exist')
+    cy.get('[data-cy=numAchievedGemBadges]').should('not.exist')
+  })
 
   it('visit My Progress page', function () {
     cy.visit('/');
@@ -220,7 +276,7 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=badges-num-footer]').contains('Be proud to earn those badges!!');
     cy.get('[data-cy=numAchievedBadges]').contains(new RegExp(/^0$/));
     cy.get('[data-cy=numBadgesAvailable]').contains(new RegExp(/^\/ 2$/));
-    cy.get('[data-cy=numAchievedGlobalBadges]').contains('Global Badges: 0');
+    cy.get('[data-cy=numAchievedGlobalBadges]').should('not.exist')
     cy.get('[data-cy=numAchievedGemBadges]').contains('Gems: 0');
 
     cy.get('[data-cy=project-link-Inception]').should('be.visible');
@@ -415,7 +471,7 @@ describe('Navigation Tests', () => {
       path: '/api/myProgressSummary',
     }, {
       statusCode: 200,
-      body: {"projectSummaries":[],"totalProjects":0,"numProjectsContributed":0,"totalSkills":0,"numAchievedSkills":0,"numAchievedSkillsLastMonth":0,"numAchievedSkillsLastWeek":0,"mostRecentAchievedSkill":null,"totalBadges":0,"numAchievedBadges":0,"numAchievedGemBadges":0,"numAchievedGlobalBadges":0}
+      body: {"projectSummaries":[],"totalProjects":0,"numProjectsContributed":0,"totalSkills":0,"numAchievedSkills":0,"numAchievedSkillsLastMonth":0,"numAchievedSkillsLastWeek":0,"mostRecentAchievedSkill":null,"totalBadges":0,"gemCount":0,"globalBadgeCount":0,"numAchievedBadges":0,"numAchievedGemBadges":0,"numAchievedGlobalBadges":0}
     }).as('getMyProgress');
 
     cy.visit('/');

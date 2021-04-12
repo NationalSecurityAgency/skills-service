@@ -22,11 +22,10 @@ limitations under the License.
           <div class="mt-2 ml-1 text-dark">
             <span style="font-size: 2.5rem;" class="text-warning" data-cy="numAchievedBadges">{{ numAchievedBadges }}</span> <span class="text-secondary" style="font-size: 1.2rem;" data-cy="numBadgesAvailable">/ {{ totalBadges }}</span>
           </div>
-          <div><b-badge variant="info" data-cy="numAchievedGlobalBadges">Global Badges: {{ numAchievedGlobalBadges }}</b-badge></div>
-          <div><b-badge variant="info" data-cy="numAchievedGemBadges">Gems: {{ numAchievedGemBadges }}</b-badge></div>
+          <div v-if="totalGlobalBadges > 0"><b-badge variant="info" data-cy="numAchievedGlobalBadges">Global Badges: {{ numAchievedGlobalBadges }} / {{ totalGlobalBadges }}</b-badge></div>
+          <div v-if="totalGems > 0"><b-badge variant="info" data-cy="numAchievedGemBadges">Gems: {{ numAchievedGemBadges }} / {{ totalGems }}</b-badge></div>
         </b-col>
         <b-col cols="7" style="font-size: 4.4rem;" class="text-right mb-4">
-  <!--        <i class="fas fa-trophy"/>-->
           <span class="fa-stack">
             <i class="fas fa-circle fa-stack-2x text-header"></i>
             <i class="fas fa-trophy fa-stack-1x skills-color-points"></i>
@@ -47,6 +46,14 @@ limitations under the License.
     name: 'BadgesNumCard',
     props: {
       totalBadges: {
+        type: Number,
+        required: true,
+      },
+      totalGems: {
+        type: Number,
+        required: true,
+      },
+      totalGlobalBadges: {
         type: Number,
         required: true,
       },

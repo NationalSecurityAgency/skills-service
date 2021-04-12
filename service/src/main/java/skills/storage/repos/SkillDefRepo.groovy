@@ -20,6 +20,7 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
+import skills.storage.model.BadgeCount
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.SkillRelDef.RelationshipType
@@ -204,4 +205,21 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         sd.type='GlobalBadge') and
       (sd.enabled  = 'true' OR sd.enabled is null)''')
     Integer countTotalProductionBadges()
+
+
+    @Query(value='''SELECT count(sd) as totalCount,
+            sum(case when sd.startDate is not null and sd.endDate is not null then 1 end) as gemCount,
+            sum(case when sd.type='GlobalBadge' then 1 end) as globalCount
+        from SkillDef sd 
+        where (
+        (sd.type = 'Badge' and sd.projectId IN (
+            select s.projectId
+            from Setting s
+            where s.projectId = sd.projectId
+              and s.setting = 'production.mode.enabled'
+              and s.value = 'true')
+        ) OR 
+        sd.type='GlobalBadge') and
+      (sd.enabled  = 'true' OR sd.enabled is null)''')
+    BadgeCount getProductionBadgesCount()
 }
