@@ -76,6 +76,10 @@ class UserAchievementsMetricsBuilder implements ProjectMetricsBuilder {
         Integer minLevel = MetricsParams.getMinLevel(projectId, chartId, props)
 
         List<String> achievementTypes = MetricsParams.getAchievementTypes(projectId, chartId, props)
+        if (!achievementTypes) {
+            return new UserAchievementsRes(totalNumItems: 0, items: [])
+        }
+
         List<SkillDef.ContainerType> achievementTypesWithoutOverall = achievementTypes.findAll({ !it.equalsIgnoreCase(MetricsParams.ACHIEVEMENT_TYPE_OVERALL) }).collect { SkillDef.ContainerType.valueOf(it) }
         String allNonOverallTypes = achievementTypesWithoutOverall.size() < 3 ? "false" : "true"
         String includeOverallType = achievementTypes.contains(MetricsParams.ACHIEVEMENT_TYPE_OVERALL) ? "true" : "false"

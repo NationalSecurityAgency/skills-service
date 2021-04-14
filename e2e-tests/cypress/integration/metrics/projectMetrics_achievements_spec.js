@@ -523,6 +523,15 @@ describe('Metrics Tests - Achievements', () => {
         cy.validateTable(tableSelector, [
             [{ colIndex: 2,  value: 'Interesting Subject 1' }, { colIndex: 4,  value: '2020-09-19 11:00' }],
         ]);
+
+        // unchecking all types should not result in an error
+        cy.get('input[type=checkbox]').uncheck('Overall');
+        cy.get('input[type=checkbox]').uncheck('Skill');
+        cy.get('input[type=checkbox]').uncheck('Badge');
+        cy.get('input[type=checkbox]').uncheck('Subject');
+        cy.get('[data-cy=achievementsNavigator-filterBtn]').click();
+        cy.wait('@userAchievementsChartBuilder');
+        cy.get('[data-cy=emptyTable]').should('be.visible');
     });
 
 
