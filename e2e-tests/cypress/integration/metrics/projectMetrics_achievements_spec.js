@@ -525,10 +525,10 @@ describe('Metrics Tests - Achievements', () => {
         ]);
 
         // unchecking all types should not result in an error
-        cy.get('input[type=checkbox]').uncheck('Overall');
-        cy.get('input[type=checkbox]').uncheck('Skill');
-        cy.get('input[type=checkbox]').uncheck('Badge');
-        cy.get('input[type=checkbox]').uncheck('Subject');
+        cy.get('input[type=checkbox]').uncheck('Overall', {force: true});
+        cy.get('input[type=checkbox]').uncheck('Skill', {force: true});
+        cy.get('input[type=checkbox]').uncheck('Badge', {force: true});
+        cy.get('input[type=checkbox]').uncheck('Subject', {force: true});
         cy.get('[data-cy=achievementsNavigator-filterBtn]').click();
         cy.wait('@userAchievementsChartBuilder');
         cy.get('[data-cy=emptyTable]').should('be.visible');
