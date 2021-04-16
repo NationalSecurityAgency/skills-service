@@ -126,7 +126,6 @@ limitations under the License.
   import MetricsCard from '../utils/MetricsCard';
   import dayjs from '../../../DayJsCustomizer';
 
-  // need to incorporate validationobserver and validationproviders
   /*
    Provider's reset() method triggers an infinite loop if we use it in dateOrder
    we need to explicitly set the flags and manually clear errors

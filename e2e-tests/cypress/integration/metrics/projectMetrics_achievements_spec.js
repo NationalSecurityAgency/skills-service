@@ -313,7 +313,7 @@ describe('Metrics Tests - Achievements', () => {
         cy.validateTable(tableSelector, [...expectedUsers].reverse());
     });
 
-    it.only('achievements table - filtering', () => {
+    it('achievements table - filtering', () => {
         cy.intercept('/admin/projects/proj1/metrics/userAchievementsChartBuilder?**')
             .as('userAchievementsChartBuilder');
 
