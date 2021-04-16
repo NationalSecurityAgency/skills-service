@@ -75,8 +75,6 @@ limitations under the License.
 </template>
 
 <script>
-  import marked from 'marked';
-  import DOMPurify from 'dompurify';
   import LoadingContainer from '../utils/LoadingContainer';
   import SkillsService from './SkillsService';
   import MediaInfoCard from '../utils/cards/MediaInfoCard';
@@ -127,8 +125,7 @@ limitations under the License.
       },
       description: function markDownDescription() {
         if (this.skillInfo && this.skillInfo.description) {
-          const compiled = marked(this.skillInfo.description, { smartLists: true });
-          return DOMPurify.sanitize(compiled);
+          return this.skillInfo.description;
         }
         return null;
       },
