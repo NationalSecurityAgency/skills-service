@@ -382,6 +382,43 @@ describe('Metrics Tests - Achievements', () => {
         cy.get('[data-cy=metricsNav-Achievements]').click();
         cy.wait('@userAchievementsChartBuilder')
 
+        //from date must come before to date
+        cy.get('[data-cy=achievementsNavigator-filterBtn]').should('be.enabled');
+
+        const today = moment.utc();//.format('YYYY-MM-DD');
+        const todayStr = today.format('YYYY-MM-DD');
+
+        const future = today.add(1, 'M');
+        const futureStr = future.format('YYYY-MM-DD');
+        cy.get("[data-cy=achievementsNavigator-fromDateInput]").click();
+        cy.wait(200);
+        cy.get('[Title="Next month"]').click();
+        cy.wait(100);
+        cy.get(`[data-date="${futureStr}"]`).trigger('click');
+        cy.wait(500);
+        cy.get("[data-cy=achievementsNavigator-toDateInput]").click();
+        cy.wait(200);
+        cy.get(`[data-date="${todayStr}"]`).trigger('click');
+        cy.wait(100);
+        cy.get('[data-cy=toDateError]').should('be.visible');
+        cy.get('[data-cy=achievementsNavigator-filterBtn]').should('be.disabled');
+
+        cy.get("[data-cy=achievementsNavigator-fromDateInput]").click();
+        cy.wait(200);
+        cy.get('[Title="Previous month"]').click();
+        cy.get(`[data-date="${todayStr}"]`).trigger('click');
+        cy.wait(100);
+        cy.get("[data-cy=achievementsNavigator-toDateInput]").click();
+        cy.wait(200);
+        cy.get('[Title="Next month"]').click();
+        cy.get(`[data-date="${futureStr}"]`).trigger('click');
+        cy.wait(100);
+        cy.get('[data-cy=toDateError]').should('not.be.visible');
+        cy.get('[data-cy=achievementsNavigator-filterBtn]').should('be.enabled');
+
+        cy.get('[data-cy=achievementsNavigator-resetBtn]').click();
+        cy.wait('@userAchievementsChartBuilder');
+
         // default is descending by date
         const tableSelector = '[data-cy=achievementsNavigator-table]'
 
