@@ -16,6 +16,7 @@
 package skills.storage
 
 import org.h2.tools.Server
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Conditional
 import org.springframework.stereotype.Component
@@ -27,9 +28,12 @@ import java.sql.SQLException
 @Component
 class InMemoryH2 {
 
+    @Value('#{"${skills.h2.port:9090}"}')
+    String tcpPort
+
     @Bean(initMethod = "start", destroyMethod = "stop")
     Server inMemoryH2DatabaseServer() throws SQLException {
         return Server.createTcpServer(
-                "-tcp", "-tcpAllowOthers", "-tcpPort", "9090");
+                "-tcp", "-tcpAllowOthers", "-tcpPort", tcpPort);
     }
 }
