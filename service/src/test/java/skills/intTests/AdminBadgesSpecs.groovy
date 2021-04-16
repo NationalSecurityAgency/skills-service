@@ -18,9 +18,11 @@ package skills.intTests
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import spock.lang.IgnoreRest
 
 class AdminBadgesSpecs extends DefaultIntSpec {
 
+    @IgnoreRest
     void "get badge that have skills assigned"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
@@ -161,6 +163,7 @@ class AdminBadgesSpecs extends DefaultIntSpec {
         ex.getMessage().contains("Once a Badge has been published, the only allowable value for enabled is [true]")
     }
 
+    @IgnoreRest
     def "cannot enable badge with no skills"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()

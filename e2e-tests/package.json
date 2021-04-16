@@ -6,6 +6,7 @@
   "author": "SkillTree Team",
   "main": "index.js",
   "scripts": {
+    "postinstall": "stop-only --folder cypress/integration --folder cypress/client-display --folder cypress/metrics",
     "licenseDepCheck": "license-checker --production --onlyAllow='MIT;ISC;Apache-2.0' --summary",
     "licenseHeaderCheck": "license-check-and-add check -f '../license-add/license-add-config.json'",
     "licenseHeaderAdd": "license-check-and-add add -f ../license-add/license-add-config.json",
@@ -80,6 +81,7 @@
     "moment": "2.29.1",
     "moment-timezone": "0.5.33",
     "object-scan": "14.0.0",
-    "wait-on": "5.2.1"
+    "wait-on": "5.2.1",
+    "stop-only": "3.1.0"
   }
 }
