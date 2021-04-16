@@ -35,6 +35,18 @@ describe('Markdown Tests', () => {
         })
     });
 
+    it('URL in markdown must open in a new tab', () => {
+        cy.visit('/administrator/projects/proj1/subjects/subj1/');
+        cy.clickButton('Skill');
+        cy.get('[data-cy=skillName]').type('skill1');
+        cy.get('[data-cy=skillDescription]').type('[Google Home Page](https://google.com)');
+        cy.contains('Preview').click();
+        cy.get('a[href="https://google.com"]').should('have.attr', 'target', '_blank')
+        cy.clickSave()
+        cy.get('[data-cy="manageSkillBtn_skill1Skill"]').click()
+        cy.get('a[href="https://google.com"]').should('have.attr', 'target', '_blank')
+    })
+
     it('markdown features', () => {
         cy.visit('/administrator/projects/proj1/');
 
