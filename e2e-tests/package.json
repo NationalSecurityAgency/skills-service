@@ -6,7 +6,7 @@
   "author": "SkillTree Team",
   "main": "index.js",
   "scripts": {
-    "postinstall": "stop-only --folder cypress/integration --folder cypress/client-display --folder cypress/metrics",
+    "postinstall": "stop-only --folder cypress/integration --folder cypress/integration/client-display --folder cypress/integration/metrics",
     "licenseDepCheck": "license-checker --production --onlyAllow='MIT;ISC;Apache-2.0' --summary",
     "licenseHeaderCheck": "license-check-and-add check -f '../license-add/license-add-config.json'",
     "licenseHeaderAdd": "license-check-and-add add -f ../license-add/license-add-config.json",
