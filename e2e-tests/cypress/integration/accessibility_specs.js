@@ -127,7 +127,7 @@ describe('Accessibility Tests', () => {
     cy.request('POST', `/api/projects/MyNewtestProject/skills/skill4`, {userId: 'u8', timestamp: m.subtract(5, 'day').format('x')})
   });
 
-  it.only('"My Progress" landing page', () => {
+  it('"My Progress" landing page', () => {
     // setup a project for the landing page
     const dateFormatter = value => moment.utc(value).format('YYYY-MM-DD[T]HH:mm:ss[Z]');
     const timeFromNowFormatter = (value) => dayjs(value).startOf('hour').fromNow();
