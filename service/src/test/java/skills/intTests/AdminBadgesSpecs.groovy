@@ -22,7 +22,6 @@ import spock.lang.IgnoreRest
 
 class AdminBadgesSpecs extends DefaultIntSpec {
 
-    @IgnoreRest
     void "get badge that have skills assigned"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()

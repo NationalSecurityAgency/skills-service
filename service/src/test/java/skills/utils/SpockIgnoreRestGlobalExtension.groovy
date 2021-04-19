@@ -26,8 +26,8 @@ class SpockIgnoreRestGlobalExtension extends AbstractGlobalExtension {
         if (System.getenv("PREVENT_IGNOREREST") == "true") {
             spec.getFeatures().each {
                 if (it.getFeatureMethod().getReflection().isAnnotationPresent(IgnoreRest)) {
-                    System.err.println("!!!!!!!!!!!!!!! FOUND IGNOREREST ANNOTATION. THIS SHOULD FAIL !!!!!!!!!!!!!!!!!")
-                    throw new Error("@IgnoreRest cannot be used on [" + it.spec.name + "." + it.name + "]")
+                    System.err.println("!!!! @IgnoreRest cannot be used on [${it.spec.name}.${it.name}] !!!!")
+                    throw new Error("@IgnoreRest cannot be used on  [${it.spec.name}.${it.name}]")
                 }
             }
         }
