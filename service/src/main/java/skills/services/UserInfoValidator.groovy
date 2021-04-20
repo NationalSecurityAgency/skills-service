@@ -37,14 +37,14 @@ class UserInfoValidator {
 
     void validate(UserInfo userInfo) {
         if (!userInfo.firstName || userInfo.firstName.length() > maxFirstNameLength) {
-            throw new SkillException("First Name is required and can be no longer than ${maxFirstNameLength} characters", NA, NA, ErrorCode.BadParam)
+            throw new SkillException("First Name is required and can be no longer than ${maxFirstNameLength} characters; provided firstName=[${userInfo.firstName}]", NA, NA, ErrorCode.BadParam)
         }
         if (!userInfo.lastName || userInfo.lastName.length() > maxLastNameLength) {
-            throw new SkillException("Last Name is required and can be no longer than ${maxLastNameLength} characters", NA, NA, ErrorCode.BadParam)
+            throw new SkillException("Last Name is required and can be no longer than ${maxLastNameLength} characters; provided lastName=[${userInfo.lastName}]", NA, NA, ErrorCode.BadParam)
         }
         // nickname by default is "firstName lastName"
         if (userInfo.nickname && userInfo.nickname.length() > maxNicknameLength) {
-            throw new SkillException("Nickname cannot be over ${maxNicknameLength} characters", NA, NA, ErrorCode.BadParam)
+            throw new SkillException("Nickname cannot be over ${maxNicknameLength} characters; provided nickname=[${userInfo.nickname}]", NA, NA, ErrorCode.BadParam)
         }
     }
 
