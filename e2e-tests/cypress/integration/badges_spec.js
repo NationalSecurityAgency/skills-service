@@ -262,7 +262,7 @@ describe('Badges Tests', () => {
 
         cy.getIdField().clear().type('SomeId');
         // !L@o#t$s of %s^p&e*c(i)a_l++_|}{P/ c'ha'rs
-        let specialChars = [' ', '_', '!', '@', '#', '%', '^', '&', '*', '(', ')', '-', '+', '='];
+        let specialChars = [' ', '!', '@', '#', '%', '^', '&', '*', '(', ')', '-', '+', '='];
         specialChars.forEach((element) => {
             cy.getIdField().type(element);
             cy.get('[data-cy=idError]').contains(msg).should('be.visible');
