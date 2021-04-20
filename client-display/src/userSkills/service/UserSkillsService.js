@@ -18,6 +18,7 @@ import axios from 'axios';
 import store from '@/store';
 
 import 'url-search-params-polyfill';
+import SkillMetaEnricher from './SkillMetaEnricher';
 
 axios.defaults.withCredentials = true;
 
@@ -74,7 +75,11 @@ export default {
   getSubjectSummary(subjectId) {
     return axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/subjects/${subjectId}/summary`, {
       params: this.getUserIdAndVersionParams(),
-    }).then((result) => result.data);
+    }).then((result) => {
+      const res = result.data;
+      res.skills = res.skills.map((item) => SkillMetaEnricher(item));
+      return res;
+    });
   },
 
   getSkillDependencies(skillId) {
@@ -91,7 +96,7 @@ export default {
     return axios.get(url, {
       params: this.getUserIdParams(),
       withCredentials: true,
-    }).then((result) => result.data);
+    }).then((result) => SkillMetaEnricher(result.data));
   },
 
   getBadgeSkills(badgeId, global) {

@@ -17,7 +17,11 @@ limitations under the License.
     <div class="text-primary">
         <div v-if="!loading.dependencies && !loading.skill">
             <skills-title>Skill Overview</skills-title>
-            <skill-overview class="mt-2" :skill="skill"></skill-overview>
+            <div class="card">
+              <div class="card-body text-center text-sm-left">
+                <skill-progress2 :skill="skill" @points-earned="onPointsEarned"/>
+              </div>
+            </div>
             <skill-dependencies class="mt-2" v-if="dependencies && dependencies.length > 0" :dependencies="dependencies"
                                 :skill-id="$route.params.skillId"></skill-dependencies>
         </div>
@@ -29,17 +33,18 @@ limitations under the License.
 
 <script>
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
-  import SkillOverview from '@/userSkills/skill/SkillOverview';
   import SkillsSpinner from '@/common/utilities/SkillsSpinner';
   import SkillsTitle from '@/common/utilities/SkillsTitle';
+  import SkillProgress2 from '@/userSkills/skill/progress/SkillProgress2';
+  import SkillEnricherUtil from '../utils/SkillEnricherUtil';
 
   export default {
     name: 'SkillDetails',
     components: {
       SkillsTitle,
-      SkillOverview,
       'skill-dependencies': () => import(/* webpackChunkName: 'skillDependencies' */'@/userSkills/skill/dependencies/SkillDependencies'),
       SkillsSpinner,
+      SkillProgress2,
     },
     data() {
       return {
@@ -78,15 +83,14 @@ limitations under the License.
         }
       },
       loadSkillSummary() {
-        // const projectId = this.$route.params.crossProjectId ? this.$route.params.crossProjectId : this.$route.params.projectId;
-        // console.log(`loading skill summary using projectId [${projectId}`);
-        // console.log(this.$route.params);
-        // UserSkillsService.getSkillSummary(this.$route.params.skillId, projectId)
         UserSkillsService.getSkillSummary(this.$route.params.skillId, this.$route.params.crossProjectId)
           .then((res) => {
             this.skill = res;
             this.loading.skill = false;
           });
+      },
+      onPointsEarned(pts) {
+        this.skill = SkillEnricherUtil.addPts(this.skill, pts);
       },
     },
   };

@@ -16,11 +16,16 @@ limitations under the License.
 <template>
     <div class="card mt-2">
         <div class="card-header float-left">
-            <div class="row">
-                <div class="col">
-                    <h3 class="h6 card-title mb-0 float-left">Skills</h3>
+            <div class="row" v-if="skillsInternal && skillsInternal.length > 0">
+                <div class="col-md-auto text-left pr-md-0">
+                  <div class="d-flex">
+                    <b-form-input v-model="filters.searchString" placeholder="Search skills"></b-form-input>
+                  </div>
                 </div>
-                <div class="col text-right" v-if="skillsInternal && skillsInternal.length > 0">
+                <div class="col-md text-left my-2 my-md-0 ml-md-0 pl-md-0">
+                  <skills-filter :counts="metaCounts" @filter-selected="filterSkills" @clear-filter="clearFilters"/>
+                </div>
+                <div class="col-md-auto text-right" >
                     <span class="text-muted pr-1">Skill Details:</span>
                     <toggle-button class="" v-model="showDescriptionsInternal" @change="onDetailsToggle"
                                    :color="{ checked: '#007c49', unchecked: '#6b6b6b' }"
@@ -46,6 +51,7 @@ limitations under the License.
                           :enable-drill-down="true"
                           :show-description="showDescriptionsInternal"
                           :data-cy="`skillProgress_index-${index}`"
+                          @points-earned="onPointsEarned"
                       />
                     </div>
                   </div>
@@ -64,9 +70,12 @@ limitations under the License.
   import NoDataYet from '@/common/utilities/NoDataYet';
   import SkillsSpinner from '@/common/utilities/SkillsSpinner';
   import SkillProgress2 from './SkillProgress2';
+  import SkillsFilter from './SkillsFilter';
+  import SkillEnricherUtil from '../../utils/SkillEnricherUtil';
 
   export default {
     components: {
+      SkillsFilter,
       SkillProgress2,
       NoDataYet,
       ToggleButton,
@@ -88,18 +97,56 @@ limitations under the License.
     },
     data() {
       return {
+        filters: {
+          searchString: '',
+        },
+        metaCounts: {
+          complete: 0,
+          selfReported: 0,
+          withPointsToday: 0,
+          withoutProgress: 0,
+          canEarnPoints: 0,
+        },
         loading: false,
         showDescriptionsInternal: false,
         hasSkills: false,
         descriptionsLoaded: false,
         skillsInternal: [],
+        skillsInternalOrig: [],
       };
     },
     mounted() {
       this.showDescriptionsInternal = this.showDescriptions;
-      this.skillsInternal = this.subject.skills.map((item) => ({ ...item }));
+      this.skillsInternal = this.subject.skills.map((item) => {
+        this.updateMetaCounts(item.meta);
+        return { ...item };
+      });
+      this.skillsInternalOrig = this.skillsInternal.map((item) => ({ ...item }));
     },
     methods: {
+      updateMetaCounts(meta) {
+        if (meta.complete) {
+          this.metaCounts.complete += 1;
+        }
+        if (meta.selfReported) {
+          this.metaCounts.selfReported += 1;
+        }
+        if (meta.withPointsToday) {
+          this.metaCounts.withPointsToday += 1;
+        }
+        if (meta.withoutProgress) {
+          this.metaCounts.withoutProgress += 1;
+        }
+        if (meta.canEarnPoints) {
+          this.metaCounts.canEarnPoints += 1;
+        }
+      },
+      filterSkills(filterId) {
+        this.skillsInternal = this.skillsInternalOrig.filter((item) => item.meta[filterId] === true);
+      },
+      clearFilters() {
+        this.skillsInternal = this.skillsInternalOrig.map((item) => ({ ...item }));
+      },
       onDetailsToggle() {
         if (!this.descriptionsLoaded) {
           this.loading = true;
@@ -121,7 +168,23 @@ limitations under the License.
             });
         }
       },
+      onPointsEarned(pts, skillId) {
+        const updateSkill = (skills) => {
+          console.log(`skills=${JSON.stringify(skills)}`);
+          const index = skills.findIndex((item) => item.skillId === skillId);
+          console.log(`found index ${index}`);
+          const skill = skills[index];
+          console.log(`found skill ${JSON.stringify(skill)}`);
+          const updatedSkill = SkillEnricherUtil.addPts(skill, pts);
+          console.log(`updatedSkill skill ${JSON.stringify(updatedSkill)}`);
+          skills.splice(index, 1, updatedSkill);
+        };
+
+        updateSkill(this.skillsInternalOrig);
+        updateSkill(this.skillsInternal);
+      },
     },
+
   };
 </script>
 
