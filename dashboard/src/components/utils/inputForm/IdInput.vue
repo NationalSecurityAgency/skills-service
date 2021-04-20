@@ -20,7 +20,7 @@ limitations under the License.
         <div class="col">
           <label for="idInput">* {{ label }}</label>
         </div>
-        <div class="col text-right">
+        <div class="col text-right" data-cy="idInputEnableControl">
           <i class="fas fa-question-circle mr-1 text-secondary"
              v-b-tooltip.hover.left="'Enable to override auto-generated value.'"/>
           <b-link v-if="!canEdit" @click="toggle" aria-label="enable manual ID override">Enable</b-link>
@@ -31,7 +31,8 @@ limitations under the License.
               @input="dataChanged" aria-required="true"
               :aria-invalid="errors && errors.length > 0"
               aria-errormessage="idError"
-              aria-describedby="idError">
+              aria-describedby="idError"
+             data-cy="idInputValue">
       <small class="form-text text-danger" data-cy="idError" id="idError">{{ errors[0]}}</small>
     </div>
   </ValidationProvider>
@@ -57,7 +58,7 @@ limitations under the License.
     },
     data() {
       return {
-        rules: 'required|minIdLength|maxIdLength|alpha_num',
+        rules: 'required|minIdLength|maxIdLength|id_validator',
         canEdit: false,
         internalValue: this.value,
       };
