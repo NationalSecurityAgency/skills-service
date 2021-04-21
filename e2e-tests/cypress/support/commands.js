@@ -151,7 +151,13 @@ Cypress.Commands.add("createSkill", (projNum = 1, subjNum = 1, skillNum = 1, ove
 });
 
 Cypress.Commands.add("reportSkill", (project = 1, skillNum = 1, userId = 'user@skills.org', date = '2020-09-12 11:00', failOnError=true) => {
-    const m = moment.utc(date, 'YYYY-MM-DD HH:mm');
+    let m = moment.utc(date, 'YYYY-MM-DD HH:mm');
+    if (date === 'now') {
+        m = moment.utc()
+    }
+    if (date === 'yesterday') {
+        m = moment.utc().subtract(1, 'day')
+    }
     let proj = '';
     if (!isNaN(parseFloat(project))) {
         proj = `proj${project}`;

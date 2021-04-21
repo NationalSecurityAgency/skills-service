@@ -26,4 +26,17 @@ export default {
 
         return copy;
     },
+
+    addMeta(skill) {
+        const copy = { ...skill };
+        copy.meta = {
+            complete: skill.points >= skill.totalPoints,
+            selfReported: skill.selfReporting !== null,
+            withPointsToday: skill.todaysPoints > 0,
+            withoutProgress: skill.points === 0,
+            inProgress: skill.points > 0 && skill.points < skill.totalPoints,
+        };
+        return copy;
+    },
+
 };

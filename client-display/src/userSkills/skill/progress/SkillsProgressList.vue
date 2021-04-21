@@ -19,7 +19,9 @@ limitations under the License.
             <div class="row" v-if="skillsInternal && skillsInternal.length > 0">
                 <div class="col-md-auto text-left pr-md-0">
                   <div class="d-flex">
-                    <b-form-input v-model="filters.searchString" placeholder="Search skills"></b-form-input>
+                    <b-form-input v-model="filters.searchString"
+                                  placeholder="Search skills"
+                                  aria-label="Search skills"></b-form-input>
                   </div>
                 </div>
                 <div class="col-md text-left my-2 my-md-0 ml-md-0 pl-md-0">
@@ -105,7 +107,7 @@ limitations under the License.
           selfReported: 0,
           withPointsToday: 0,
           withoutProgress: 0,
-          canEarnPoints: 0,
+          inProgress: 0,
         },
         loading: false,
         showDescriptionsInternal: false,
@@ -137,8 +139,8 @@ limitations under the License.
         if (meta.withoutProgress) {
           this.metaCounts.withoutProgress += 1;
         }
-        if (meta.canEarnPoints) {
-          this.metaCounts.canEarnPoints += 1;
+        if (meta.inProgress) {
+          this.metaCounts.inProgress += 1;
         }
       },
       filterSkills(filterId) {
