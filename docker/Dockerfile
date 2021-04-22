@@ -1,4 +1,4 @@
-FROM openjdk:14.0.2-slim-buster
+FROM openjdk:16.0.1-slim-buster
 
 # install netcat so start script can use nc command to wait for DB to come up
 RUN apt-get update
