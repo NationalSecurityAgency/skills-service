@@ -41,6 +41,7 @@ Cypress.on('window:before:load', (win) => {
 });
 
 before(function () {
+    console.log('::::::::this::::::::', this.currentTest);
     cy.fixture('vars.json').then((vars) => {
         cy.register(vars.rootUser, vars.defaultPass, true);
         cy.register(vars.defaultUser, vars.defaultPass);
@@ -55,6 +56,11 @@ before(function () {
 
 beforeEach(function () {
     let disable = Cypress.env('disableResetDb');
+
+    const preventOnly = Cypress.env('preventOnly');
+
+    console.log(`::::::::: running test: ${this.currentTest.title} :::::::::::`);
+    console.log(this.currentTest);
 
     if (!disable) {
         cy.resetDb();
