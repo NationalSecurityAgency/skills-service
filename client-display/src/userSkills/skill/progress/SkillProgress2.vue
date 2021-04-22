@@ -47,7 +47,10 @@ limitations under the License.
 
     <div class="row">
       <div class="col text-md-left">
-        <div class="h4" @click="skillClicked" :class="{ 'skill-name-url' : enableDrillDown }" data-cy="skillProgressTitle">{{ skill.skill }}</div>
+        <div class="h4" @click="skillClicked" :class="{ 'skill-name-url' : enableDrillDown }" data-cy="skillProgressTitle">
+          <span v-if="skill.skillHtml" v-html="skill.skillHtml"></span>
+          <span v-else>{{ skill.skill }}</span>
+        </div>
       </div>
       <div class="col-auto text-right"
            :class="{ 'text-success' : isSkillComplete, 'text-primary': !isSkillComplete }"

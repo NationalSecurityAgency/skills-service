@@ -289,7 +289,284 @@ describe('Client Display Skills Filtering Tests', () => {
     cy.get('[data-cy="skillProgress_index-6"]').should('not.exist')
   })
 
+  it('search skills', () => {
+    cy.createSkill(1, 1, 1, {name: 'Search blah skill 1'});
+    cy.createSkill(1, 1, 2, {name: 'is a skill 2'});
+    cy.createSkill(1, 1, 3, {name: 'find Blah other skill 3'});
+    cy.createSkill(1, 1, 4, {name: 'Search nothing skill 4'});
+    cy.createSkill(1, 1, 5, {name: 'sEEk bLaH skill 5'});
+    cy.createSkill(1, 1, 6, {name: 'some other skill 6'});
+
+    cy.cdVisit('/');
+    cy.cdClickSubj(0);
+
+    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
+    cy.get('[data-cy="skillProgress_index-1"]').contains('skill 2')
+    cy.get('[data-cy="skillProgress_index-2"]').contains('skill 3')
+    cy.get('[data-cy="skillProgress_index-3"]').contains('skill 4')
+    cy.get('[data-cy="skillProgress_index-4"]').contains('skill 5')
+    cy.get('[data-cy="skillProgress_index-5"]').contains('skill 6')
+    cy.get('[data-cy="skillProgress_index-6"]').should('not.exist')
+
+    cy.get('[data-cy="skillsSearchInput"]').type('bLaH ');
+    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
+    cy.get('[data-cy="skillProgress_index-1"]').contains('skill 3')
+    cy.get('[data-cy="skillProgress_index-2"]').contains('skill 5')
+    cy.get('[data-cy="skillProgress_index-3"]').should('not.exist')
+
+    cy.get('[data-cy="skillsSearchInput"]').type('O');
+    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 3')
+    cy.get('[data-cy="skillProgress_index-1"]').should('not.exist')
+
+    cy.get('[data-cy="skillsSearchInput"]').clear().type('se');
+    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
+    cy.get('[data-cy="skillProgress_index-1"]').contains('skill 4')
+    cy.get('[data-cy="skillProgress_index-2"]').contains('skill 5')
+    cy.get('[data-cy="skillProgress_index-3"]').should('not.exist')
+
+    cy.get('[data-cy="skillsSearchInput"]').type('e');
+    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 5')
+    cy.get('[data-cy="skillProgress_index-1"]').should('not.exist')
+  })
 
 
+  it('ability to clear search string', () => {
+    cy.createSkill(1, 1, 1, {name: 'Search blah skill 1'});
+    cy.createSkill(1, 1, 2, {name: 'is a skill 2'});
+    cy.createSkill(1, 1, 3, {name: 'find Blah other skill 3'});
+    cy.createSkill(1, 1, 4, {name: 'Search nothing skill 4'});
+    cy.createSkill(1, 1, 5, {name: 'sEEk bLaH skill 5'});
+    cy.createSkill(1, 1, 6, {name: 'some other skill 6'});
+
+    cy.cdVisit('/');
+    cy.cdClickSubj(0);
+
+    cy.get('[data-cy="clearSkillsSearchInput"]').should('not.exist')
+    cy.get('[data-cy="skillsSearchInput"]').type('bLaH ');
+    cy.get('[data-cy="clearSkillsSearchInput"]').should('exist')
+
+    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
+    cy.get('[data-cy="skillProgress_index-1"]').contains('skill 3')
+    cy.get('[data-cy="skillProgress_index-2"]').contains('skill 5')
+    cy.get('[data-cy="skillProgress_index-3"]').should('not.exist')
+
+    cy.get('[data-cy="clearSkillsSearchInput"]').click();
+    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
+    cy.get('[data-cy="skillProgress_index-1"]').contains('skill 2')
+    cy.get('[data-cy="skillProgress_index-2"]').contains('skill 3')
+    cy.get('[data-cy="skillProgress_index-3"]').contains('skill 4')
+    cy.get('[data-cy="skillProgress_index-4"]').contains('skill 5')
+    cy.get('[data-cy="skillProgress_index-5"]').contains('skill 6')
+    cy.get('[data-cy="skillProgress_index-6"]').should('not.exist')
+  })
+
+  it('search produces no results', () => {
+    cy.createSkill(1, 1, 1, {name: 'Search blah skill 1'});
+    cy.createSkill(1, 1, 2, {name: 'is a skill 2'});
+
+    cy.cdVisit('/');
+    cy.cdClickSubj(0);
+
+    cy.get('[data-cy="skillsSearchInput"]').type('bLaH1 ');
+    cy.get('[data-cy="skillProgress_index-0"]').should('not.exist')
+
+    cy.get('[ data-cy="noDataYet"]').contains('No results');
+    cy.get('[ data-cy="noDataYet"]').contains('Please refine [bLaH1 ] search');
+  })
+
+  it('search and filter produces no results', () => {
+    cy.createSkill(1, 1, 1, {name: 'Search blah skill 1'});
+    cy.createSkill(1, 1, 2, {name: 'is a skill 2'});
+
+    cy.cdVisit('/');
+    cy.cdClickSubj(0);
+
+    cy.get('[data-cy="skillsSearchInput"]').type('bLaH1 ');
+
+    cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
+    cy.get('[data-cy="skillsFilter_withoutProgress"]').click();
+
+    cy.get('[data-cy="skillProgress_index-0"]').should('not.exist')
+    cy.get('[ data-cy="noDataYet"]').contains('No results');
+    cy.get('[ data-cy="noDataYet"]').contains('Please refine [bLaH1 ] search and/or clear the selected filter');
+  })
+
+  it('filter then search', () => {
+    cy.createSkill(1, 1, 1, {name: 'Search blah skill 1'});
+    cy.createSkill(1, 1, 2, {name: 'is a skill 2'});
+    cy.createSkill(1, 1, 3, {name: 'find Blah other skill 3'});
+    cy.createSkill(1, 1, 4, {name: 'Search nothing skill 4'});
+    cy.createSkill(1, 1, 5, {name: 'sEEk bLaH skill 5', selfReportingType: 'Approval'});
+    cy.createSkill(1, 1, 6, {name: 'some other skill 6', selfReportingType: 'HonorSystem'});
+
+    cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday')
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday')
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now')
+
+    cy.cdVisit('/');
+    cy.cdClickSubj(0);
+
+    cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
+    cy.get('[data-cy="skillsFilter_withPointsToday"]').click();
+    cy.get('[data-cy="selectedFilter"]').contains('Skills with points earned today')
+
+    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
+    cy.get('[data-cy="skillProgress_index-1"]').contains('skill 2')
+    cy.get('[data-cy="skillProgress_index-2"]').contains('skill 3')
+    cy.get('[data-cy="skillProgress_index-3"]').contains('skill 4')
+    cy.get('[data-cy="skillProgress_index-4"]').should('not.exist')
+
+    cy.get('[data-cy="skillsSearchInput"]').type('b');
+
+    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
+    cy.get('[data-cy="skillProgress_index-1"]').contains('skill 3')
+    cy.get('[data-cy="skillProgress_index-2"]').should('not.exist')
+  });
+
+  it('search then filter', () => {
+    cy.createSkill(1, 1, 1, {name: 'Search blah skill 1'});
+    cy.createSkill(1, 1, 2, {name: 'is a skill 2'});
+    cy.createSkill(1, 1, 3, {name: 'find Blah other skill 3'});
+    cy.createSkill(1, 1, 4, {name: 'Search nothing skill 4'});
+    cy.createSkill(1, 1, 5, {name: 'sEEk bLaH skill 5', selfReportingType: 'Approval'});
+    cy.createSkill(1, 1, 6, {name: 'some other skill 6', selfReportingType: 'HonorSystem'});
+
+    cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday')
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday')
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now')
+
+    cy.cdVisit('/');
+    cy.cdClickSubj(0);
+
+    cy.get('[data-cy="skillsSearchInput"]').type('b');
+
+    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
+    cy.get('[data-cy="skillProgress_index-1"]').contains('skill 3')
+    cy.get('[data-cy="skillProgress_index-2"]').contains('skill 5')
+    cy.get('[data-cy="skillProgress_index-3"]').should('not.exist')
+
+    cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
+    cy.get('[data-cy="skillsFilter_withPointsToday"]').click();
+    cy.get('[data-cy="selectedFilter"]').contains('Skills with points earned today')
+
+    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
+    cy.get('[data-cy="skillProgress_index-1"]').contains('skill 3')
+    cy.get('[data-cy="skillProgress_index-2"]').should('not.exist')
+  });
+
+
+  it('search should still apply after filter is cleared', () => {
+    cy.createSkill(1, 1, 1, {name: 'Search blah skill 1'});
+    cy.createSkill(1, 1, 2, {name: 'is a skill 2'});
+    cy.createSkill(1, 1, 3, {name: 'find Blah other skill 3'});
+    cy.createSkill(1, 1, 4, {name: 'Search nothing skill 4'});
+    cy.createSkill(1, 1, 5, {name: 'sEEk bLaH skill 5', selfReportingType: 'Approval'});
+    cy.createSkill(1, 1, 6, {name: 'some other skill 6', selfReportingType: 'HonorSystem'});
+
+    cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday')
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday')
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now')
+
+    cy.cdVisit('/');
+    cy.cdClickSubj(0);
+
+    cy.get('[data-cy="skillsSearchInput"]').type('b');
+    cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
+    cy.get('[data-cy="skillsFilter_withPointsToday"]').click();
+    cy.get('[data-cy="selectedFilter"]').contains('Skills with points earned today')
+
+    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
+    cy.get('[data-cy="skillProgress_index-1"]').contains('skill 3')
+    cy.get('[data-cy="skillProgress_index-2"]').should('not.exist')
+
+    cy.get('[data-cy="clearSelectedFilter"]').click()
+    cy.get('[data-cy="selectedFilter"]').should('not.exist')
+
+    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
+    cy.get('[data-cy="skillProgress_index-1"]').contains('skill 3')
+    cy.get('[data-cy="skillProgress_index-2"]').contains('skill 5')
+    cy.get('[data-cy="skillProgress_index-3"]').should('not.exist')
+  });
+
+
+  it('filter should still apply after search is cleared', () => {
+    cy.createSkill(1, 1, 1, {name: 'Search blah skill 1'});
+    cy.createSkill(1, 1, 2, {name: 'is a skill 2'});
+    cy.createSkill(1, 1, 3, {name: 'find Blah other skill 3'});
+    cy.createSkill(1, 1, 4, {name: 'Search nothing skill 4'});
+    cy.createSkill(1, 1, 5, {name: 'sEEk bLaH skill 5', selfReportingType: 'Approval'});
+    cy.createSkill(1, 1, 6, {name: 'some other skill 6', selfReportingType: 'HonorSystem'});
+
+    cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday')
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday')
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now')
+
+    cy.cdVisit('/');
+    cy.cdClickSubj(0);
+
+    cy.get('[data-cy="skillsSearchInput"]').type('b');
+    cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
+    cy.get('[data-cy="skillsFilter_withPointsToday"]').click();
+    cy.get('[data-cy="selectedFilter"]').contains('Skills with points earned today')
+
+    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
+    cy.get('[data-cy="skillProgress_index-1"]').contains('skill 3')
+    cy.get('[data-cy="skillProgress_index-2"]').should('not.exist')
+
+    cy.get('[data-cy="clearSkillsSearchInput"]').click();
+
+    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
+    cy.get('[data-cy="skillProgress_index-1"]').contains('skill 2')
+    cy.get('[data-cy="skillProgress_index-2"]').contains('skill 3')
+    cy.get('[data-cy="skillProgress_index-3"]').contains('skill 4')
+    cy.get('[data-cy="skillProgress_index-4"]').should('not.exist')
+  });
+
+
+  it.only('change filter with search', () => {
+    cy.createSkill(1, 1, 1, {name: 'Search blah skill 1'});
+    cy.createSkill(1, 1, 2, {name: 'is a skill 2'});
+    cy.createSkill(1, 1, 3, {name: 'find Blah other skill 3'});
+    cy.createSkill(1, 1, 4, {name: 'Search nothing skill 4'});
+    cy.createSkill(1, 1, 5, {name: 'sEEk bLaH skill 5', selfReportingType: 'Approval'});
+    cy.createSkill(1, 1, 6, {name: 'some other skill 6', selfReportingType: 'HonorSystem'});
+
+    cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday')
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday')
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now')
+
+    cy.cdVisit('/');
+    cy.cdClickSubj(0);
+
+    cy.get('[data-cy="skillsSearchInput"]').type('b');
+    cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
+    cy.get('[data-cy="skillsFilter_withPointsToday"]').click();
+    cy.get('[data-cy="selectedFilter"]').contains('Skills with points earned today')
+
+    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
+    cy.get('[data-cy="skillProgress_index-1"]').contains('skill 3')
+    cy.get('[data-cy="skillProgress_index-2"]').should('not.exist')
+
+    cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
+    cy.get('[data-cy="skillsFilter_selfReported"]').click();
+
+    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 5')
+    cy.get('[data-cy="skillProgress_index-1"]').should('not.exist')
+  });
 
 })

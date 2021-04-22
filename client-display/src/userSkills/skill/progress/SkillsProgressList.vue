@@ -16,12 +16,19 @@ limitations under the License.
 <template>
     <div class="card mt-2">
         <div class="card-header float-left">
-            <div class="row" v-if="skillsInternal && skillsInternal.length > 0">
+            <div class="row" v-if="skillsInternalOrig && skillsInternalOrig.length > 0">
                 <div class="col-md-auto text-left pr-md-0">
                   <div class="d-flex">
-                    <b-form-input v-model="filters.searchString"
+                    <b-form-input @input="searchSkills" style="padding-right: 2.3rem;"
+                                  v-model="searchString"
                                   placeholder="Search skills"
-                                  aria-label="Search skills"></b-form-input>
+                                  aria-label="Search skills"
+                                  data-cy="skillsSearchInput"></b-form-input>
+                    <b-button v-if="searchString && searchString.length > 0" @click="clearSearch"
+                              class="position-absolute" variant="outline-info" style="right: 0rem;"
+                              data-cy="clearSkillsSearchInput">
+                      <i class="fas fa-times"></i>
+                    </b-button>
                   </div>
                 </div>
                 <div class="col-md text-left my-2 my-md-0 ml-md-0 pl-md-0">
@@ -58,7 +65,11 @@ limitations under the License.
                     </div>
                   </div>
                 </div>
-                <no-data-yet v-if="!(skillsInternal && skillsInternal.length > 0)" class="my-2"
+                <no-data-yet v-if="!(skillsInternal && skillsInternal.length > 0) && searchString" class="my-5"
+                             icon="fas fa-search-minus fa-5x"
+                           title="No results" :sub-title="`Please refine [${searchString}] search${(this.filterId) ? ' and/or clear the selected filter' : ''}`"/>
+
+                <no-data-yet v-if="!(skillsInternalOrig && skillsInternalOrig.length > 0)" class="my-5"
                         title="Skills have not been added yet." sub-title="Please contact this project's administrator."/>
             </div>
         </div>
@@ -99,9 +110,8 @@ limitations under the License.
     },
     data() {
       return {
-        filters: {
-          searchString: '',
-        },
+        searchString: '',
+        filterId: '',
         metaCounts: {
           complete: 0,
           selfReported: 0,
@@ -143,12 +153,6 @@ limitations under the License.
           this.metaCounts.inProgress += 1;
         }
       },
-      filterSkills(filterId) {
-        this.skillsInternal = this.skillsInternalOrig.filter((item) => item.meta[filterId] === true);
-      },
-      clearFilters() {
-        this.skillsInternal = this.skillsInternalOrig.map((item) => ({ ...item }));
-      },
       onDetailsToggle() {
         if (!this.descriptionsLoaded) {
           this.loading = true;
@@ -172,21 +176,50 @@ limitations under the License.
       },
       onPointsEarned(pts, skillId) {
         const updateSkill = (skills) => {
-          console.log(`skills=${JSON.stringify(skills)}`);
           const index = skills.findIndex((item) => item.skillId === skillId);
-          console.log(`found index ${index}`);
           const skill = skills[index];
-          console.log(`found skill ${JSON.stringify(skill)}`);
           const updatedSkill = SkillEnricherUtil.addPts(skill, pts);
-          console.log(`updatedSkill skill ${JSON.stringify(updatedSkill)}`);
           skills.splice(index, 1, updatedSkill);
         };
 
         updateSkill(this.skillsInternalOrig);
         updateSkill(this.skillsInternal);
       },
-    },
+      filterSkills(filterId) {
+        this.filterId = filterId;
+        this.searchAndFilterSkills();
+      },
+      clearFilters() {
+        this.filterId = '';
+        this.searchAndFilterSkills();
+      },
+      searchSkills(searchString) {
+        this.searchString = searchString;
+        this.searchAndFilterSkills();
+      },
+      clearSearch() {
+        this.searchString = '';
+        this.searchAndFilterSkills();
+      },
+      searchAndFilterSkills() {
+        let resultSkills = this.skillsInternalOrig.map((item) => ({ ...item }));
+        if (this.searchString && this.searchString.trim().length > 0) {
+          const searchStrNormalized = this.searchString.trim().toLowerCase();
+          const foundItems = resultSkills.filter((item) => item.skill?.trim()?.toLowerCase().includes(searchStrNormalized));
+          resultSkills = foundItems.map((item) => {
+            const name = item.skill;
+            const index = name.toLowerCase().indexOf(searchStrNormalized);
+            const skillHtml = `${name.substring(0, index)}<mark>${name.substring(index, index + searchStrNormalized.length)}</mark>${name.substring(index + searchStrNormalized.length)}`;
+            return { skillHtml, ...item };
+          });
+        }
 
+        if (this.filterId && this.filterId.length > 0) {
+          resultSkills = resultSkills.filter((item) => item.meta[this.filterId] === true);
+        }
+        this.skillsInternal = resultSkills;
+      },
+    },
   };
 </script>
 
