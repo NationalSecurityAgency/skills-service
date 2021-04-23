@@ -83,6 +83,11 @@ limitations under the License.
                 <span class="d-none d-sm-inline">Manage </span> <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
               </router-link>
               <b-button-group size="sm" class="ml-1">
+                <b-button @click="copySkill(data.item)"
+                          variant="outline-primary" :data-cy="`copySkillButton_${data.item.skillId}`"
+                          :aria-label="'copy Skill '+data.item.name" :ref="'copy_'+data.item.skillId">
+                  <i class="fas fa-copy" aria-hidden="true" />
+                </b-button>
                 <b-button @click="editSkill(data.item)"
                           variant="outline-primary" :data-cy="`editSkillButton_${data.item.skillId}`"
                           :aria-label="'edit Skill '+data.item.name" :ref="'edit_'+data.item.skillId">
@@ -160,7 +165,7 @@ limitations under the License.
                  message="Projects are composed of Subjects which are made of Skills and a single skill defines a training unit within the gamification framework."/>
     </loading-container>
 
-    <edit-skill v-if="editSkillInfo.show" v-model="editSkillInfo.show" :skillId="editSkillInfo.skill.skillId" :is-edit="editSkillInfo.isEdit"
+    <edit-skill v-if="editSkillInfo.show" v-model="editSkillInfo.show" :skillId="editSkillInfo.skill.skillId" :is-copy="editSkillInfo.isCopy" :is-edit="editSkillInfo.isEdit"
                 :project-id="projectId" :subject-id="subjectId" @skill-saved="skillCreatedOrUpdated" @hidden="handleHide"/>
   </div>
 </template>
@@ -197,6 +202,7 @@ limitations under the License.
         currentlyFocusedSkillId: '',
         editSkillInfo: {
           isEdit: false,
+          isCopy: false,
           show: false,
           skill: {},
         },
@@ -342,11 +348,21 @@ limitations under the License.
           skill: {},
           show: true,
           isEdit: false,
+          isCopy: false,
         };
       },
       editSkill(skillToEdit) {
         this.currentlyFocusedSkillId = skillToEdit.skillId;
         this.editSkillInfo = { skill: skillToEdit, show: true, isEdit: true };
+      },
+      copySkill(skillToCopy) {
+        // deep copy skill to prevent any future conflicts
+        this.editSkillInfo = {
+          skill: skillToCopy,
+          show: true,
+          isCopy: true,
+          isEdit: false,
+        };
       },
       doneShowingLoading() {
         this.isLoading = false;

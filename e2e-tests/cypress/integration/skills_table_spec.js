@@ -46,6 +46,54 @@ describe('Skills Table Tests', () => {
         cy.contains('No Skills Yet');
     });
 
+    it('copy existing skill', () => {
+        cy.intercept('POST', '/admin/projects/proj1/subjects/subj1/skills/copy_of_skill2').as('saveSkill');
+        cy.intercept('POST', '/api/validation/description').as('validateDescription');
+
+        const numSkills = 3;
+        for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
+            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
+                projectId: 'proj1',
+                subjectId: 'subj1',
+                skillId: `skill${skillsCounter}`,
+                description: 'generic description',
+                name: `Very Great Skill # ${skillsCounter}`,
+                pointIncrement: '150',
+                numPerformToCompletion: skillsCounter < 3 ? '1' : '200',
+            });
+        };
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        // force the order
+        cy.contains('Display Order').click();
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Very Great Skill # 1' }, { colIndex: 1,  value: 1 }],
+            [{ colIndex: 0,  value: 'Very Great Skill # 2' }, { colIndex: 1,  value: 2 }],
+            [{ colIndex: 0,  value: 'Very Great Skill # 3' }, { colIndex: 1,  value: 3 }],
+        ], 10);
+
+        cy.get('[data-cy="copySkillButton_skill2"]').click();
+        cy.get('#markdown-editor textarea').should('have.value', 'generic description');
+        cy.get('[data-cy=skillName]').should('have.value', 'Copy of Very Great Skill # 2');
+        cy.get('#idInput').should('have.value', 'copy_of_skill2');
+        cy.get('[data-cy=numPerformToCompletion]').should('have.value', '1');
+        cy.get('[data-cy=skillPointIncrement]').should('have.value', '150');
+        cy.get('#markdown-editor textarea').type('{selectall}copy description edit');
+        cy.wait('@validateDescription');
+        cy.get('[data-cy=numPerformToCompletion]').type('5');
+        cy.clickSave();
+        cy.wait('@saveSkill');
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Copy of Very Great Skill # 1' }, { colIndex: 1,  value: 1 }],
+            [{ colIndex: 0,  value: 'Very Great Skill # 1' }, { colIndex: 1,  value: 2 }],
+            [{ colIndex: 0,  value: 'Very Great Skill # 2' }, { colIndex: 1,  value: 3 }],
+            [{ colIndex: 0,  value: 'Very Great Skill # 3' }, { colIndex: 1,  value: 4 }],
+        ], 10);
+    });
+
     it('edit existing skill', () => {
 
         cy.intercept('POST', '/admin/projects/proj1/subjects/subj1/skills/skill2').as('saveSkill');
