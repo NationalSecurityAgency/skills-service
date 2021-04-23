@@ -56,6 +56,7 @@ import {
 } from 'vee-validate';
 import en from 'vee-validate/dist/locale/en.json';
 import Vuex from 'vuex';
+import marked from 'marked';
 import InceptionConfigurer from './InceptionConfigurer';
 import 'babel-polyfill';
 import 'matchmedia-polyfill';
@@ -184,6 +185,21 @@ router.afterEach((to) => {
         SkillsReporter.reportSkill(to.meta.reportSkillId);
       });
   }
+});
+
+const renderer = new marked.Renderer();
+renderer.link = function markedLinkRenderer(href, title, text) {
+  let titleRes = title;
+  if (!title) {
+    titleRes = text;
+  }
+  const link = marked.Renderer.prototype.link.call(this, href, titleRes, text);
+  let resLink = link.replace('<a', "<a target='_blank' ");
+  resLink = resLink.replace('</a>', ' <i class="fas fa-external-link-alt" style="font-size: 0.8rem"></i></a>');
+  return resLink;
+};
+marked.setOptions({
+  renderer,
 });
 
 store.dispatch('loadConfigState').finally(() => {

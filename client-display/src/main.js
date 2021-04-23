@@ -17,6 +17,7 @@ import VueApexCharts from 'vue-apexcharts';
 
 import Vue from 'vue';
 import App from '@/App';
+import marked from 'marked';
 import router from '@/router';
 import store from '@/store';
 import 'apexcharts';
@@ -32,6 +33,21 @@ Vue.use(VueApexCharts);
 Vue.use(ModalPlugin);
 
 require('@/common/softwareVersion/softwareVersionInterceptor');
+
+const renderer = new marked.Renderer();
+renderer.link = function markedLinkRenderer(href, title, text) {
+  let titleRes = title;
+  if (!title) {
+    titleRes = text;
+  }
+  const link = marked.Renderer.prototype.link.call(this, href, titleRes, text);
+  let resLink = link.replace('<a', "<a target='_blank' ");
+  resLink = resLink.replace('</a>', ' <i class="fas fa-external-link-alt" style="font-size: 0.8rem"></i></a>');
+  return resLink;
+};
+marked.setOptions({
+  renderer,
+});
 
 new Vue({
   router,

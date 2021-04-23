@@ -100,7 +100,7 @@ class UserInfoSettingsSpecs extends DefaultIntSpec {
 
         then:
         SkillsClientException exception = thrown()
-        exception.message.contains("explanation:First Name is required and can be no longer than 30 characters")
+        exception.message.contains("explanation:First Name is required and can be no longer than 30 characters; provided firstName=[${nameOver30Chars}]")
         exception.message.contains("errorCode:BadParam")
     }
 
@@ -118,12 +118,11 @@ class UserInfoSettingsSpecs extends DefaultIntSpec {
 
         then:
         SkillsClientException exception = thrown()
-        exception.message.contains("explanation:Last Name is required and can be no longer than 30 characters")
+        exception.message.contains("explanation:Last Name is required and can be no longer than 30 characters; provided lastName=[${nameOver30Chars}]")
         exception.message.contains("errorCode:BadParam")
     }
 
     def 'user nick cannot exceed 70 characters'() {
-
         String nameOver70Chars = (0..71).collect({"a"}).join("")
         assert currentUser.nickname != nameOver70Chars
         currentUser.nickname = nameOver70Chars
@@ -135,7 +134,7 @@ class UserInfoSettingsSpecs extends DefaultIntSpec {
 
         then:
         SkillsClientException exception = thrown()
-        exception.message.contains("explanation:Nickname cannot be over 70 characters")
+        exception.message.contains("explanation:Nickname cannot be over 70 characters; provided nickname=[${nameOver70Chars}]")
         exception.message.contains("errorCode:BadParam")
     }
 

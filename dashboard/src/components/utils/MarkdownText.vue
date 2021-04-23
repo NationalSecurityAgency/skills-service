@@ -34,7 +34,7 @@ limitations under the License.
         const compiled = marked(text);
         const onMissing = (name) => name;
         const emojified = emoji.emojify(compiled, onMissing);
-        const sanitized = DOMPurify.sanitize(emojified);
+        const sanitized = DOMPurify.sanitize(emojified, { ADD_ATTR: ['target'] });
         return sanitized;
       },
     },

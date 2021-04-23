@@ -18,6 +18,7 @@ package skills.metrics.builders
 import groovy.time.TimeCategory
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
+import org.apache.commons.lang3.StringUtils
 import org.springframework.data.domain.PageRequest
 import skills.controller.exceptions.SkillException
 
@@ -86,8 +87,8 @@ class MetricsParams {
 
     static List<String> getAchievementTypes(String projectId, String chartId, Map<String, String> props) {
         String achievementTypesStr = props[P_ACHIEVEMENT_TYPES]
-        if (!achievementTypesStr) {
-            throw new SkillException("Metrics[${chartId}]: Must provide ${P_ACHIEVEMENT_TYPES} param", projectId)
+        if (StringUtils.isEmpty(achievementTypesStr)) {
+            return Collections.emptyList()
         }
         return achievementTypesStr.split(",").toList()
     }

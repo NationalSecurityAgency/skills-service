@@ -18,6 +18,7 @@ import { required } from 'vee-validate/dist/rules';
 import './OptionalNumericValidator';
 import './CustomDescriptionValidator';
 import './CustomNameValidator';
+import './IdValidator';
 import ValidatorFactory from './ValidatorFactory';
 import store from '../store/store';
 

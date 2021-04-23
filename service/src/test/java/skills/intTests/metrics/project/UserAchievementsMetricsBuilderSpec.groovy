@@ -44,6 +44,34 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         }
     }
 
+    def "no selected types results in empty result set"() {
+
+        def proj = SkillsFactory.createProject()
+        List<Map> skills = SkillsFactory.createSkills(1)
+        skills.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
+
+        def subj = SkillsFactory.createSubject()
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Map props = [:]
+        props[MetricsPagingParamsHelper.PROP_CURRENT_PAGE] = 1
+        props[MetricsPagingParamsHelper.PROP_PAGE_SIZE] = 5
+        props[MetricsPagingParamsHelper.PROP_SORT_DESC] = false
+        props[MetricsPagingParamsHelper.PROP_SORT_BY] = "userName"
+        props[MetricsParams.P_ACHIEVEMENT_TYPES] = ""
+
+        when:
+
+        def res = skillsService.getMetricsData(proj.projectId, metricsId, props)
+
+        then:
+        res.totalNumItems == 0
+        !res.items
+    }
+
     def "empty res"() {
         def proj = SkillsFactory.createProject()
         List<Map> skills = SkillsFactory.createSkills(1)

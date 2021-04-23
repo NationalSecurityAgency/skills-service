@@ -35,7 +35,7 @@ limitations under the License.
     data() {
       return {
         projectId: this.$route.params.projectId,
-        skillsVersion: 0,
+        skillsVersion: 2147483647, // max int
         theme: {
           landingPageTitle: `PROJECT: ${this.$route.params.projectId}`,
           maxWidth: '100%',
