@@ -33,6 +33,44 @@ describe('Client Display Markdown Tests', () => {
         });
     })
 
+
+    it('URL in markdown must open in a new tab', () => {
+        const markdown = '[Google Home Page](https://google.com)'
+
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: 'Subject 1',
+            helpUrl: 'http://doHelpOnThisSubject.com',
+            description: markdown
+        });
+
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: `skill1`,
+            name: `This is 1`,
+            type: 'Skill',
+            pointIncrement: 50,
+            numPerformToCompletion: 2,
+            pointIncrementInterval: 0,
+            numMaxOccurrencesIncrementInterval: -1,
+            description: markdown,
+            version: 0,
+            helpUrl: 'http://doHelpOnThisSkill.com'
+        });
+
+        cy.cdVisit('/');
+        cy.contains('Overall Points');
+
+        // check subject
+        cy.cdClickSubj(0, 'Subject 1');
+        cy.get('a[href="https://google.com"]').should('have.attr', 'target', '_blank')
+
+        cy.cdClickSkill(0);
+        cy.get('a[href="https://google.com"]').should('have.attr', 'target', '_blank')
+    })
+
     it('subject\'s markdown', () => {
         const markdown = "# Title1\n## Title2\n### Title 3\n#### Title 4\n##### Title 5\nTitle 6\n\n" +
             "---\n" +

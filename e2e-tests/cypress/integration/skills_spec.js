@@ -657,4 +657,41 @@ describe('Skills Tests', () => {
     });
 
 
+    it('skill id must only contain alpha number characters or underscore', () => {
+        cy.intercept('GET', '/admin/projects/proj1/subjects/subj1')
+            .as('loadSubject');
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.wait('@loadSubject');
+        cy.clickButton('Skill')
+
+        cy.get('[data-cy="skillName"]').type('Great Name 1 2 33');
+        cy.get('[data-cy="idInputEnableControl"]').contains('Enable').click();
+        cy.get('[data-cy="idInputEnableControl"]').contains('Enabled');
+
+        const errMsg = 'Skill ID may only contain alpha-numeric characters';
+
+        const invalidChars = '$!#$%^&*()+=-`~'
+        for (let i = 0; i < invalidChars.length; i++) {
+            const charToCheck = invalidChars.charAt(i);
+            cy.get('[data-cy="idError"]').contains(errMsg).should('not.exist')
+            cy.get('[data-cy="saveSkillButton"]').should('be.enabled');
+
+            cy.get('[data-cy="idInputValue"]').type(charToCheck);
+            cy.get('[data-cy="idError"]').contains(errMsg);
+            cy.get('[data-cy="saveSkillButton"]').should('be.disabled');
+
+            cy.get('[data-cy="idInputValue"]').type('{backspace}');
+        }
+
+        cy.get('[data-cy="idError"]').contains(errMsg).should('not.exist')
+        cy.get('[data-cy="saveSkillButton"]').should('be.enabled');
+        cy.get('[data-cy="idInputValue"]').type('_blah');
+        cy.get('[data-cy="idError"]').contains(errMsg).should('not.exist')
+        cy.get('[data-cy="saveSkillButton"]').should('be.enabled');
+
+        cy.get('[data-cy="saveSkillButton"]').click()
+        cy.contains('ID: GreatName1233Skill_blah')
+    })
+
 });

@@ -72,7 +72,7 @@ describe('Navigation Tests', () => {
       pointIncrementInterval: 0,
       numMaxOccurrencesIncrementInterval: -1,
       description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-      version: 0,
+      version: 1,
       helpUrl: 'http://doHelpOnThisSkill.com'
     });
 
@@ -215,6 +215,7 @@ describe('Navigation Tests', () => {
 
     cy.visit('/');
     cy.wait('@getMyProgress');
+    cy.wait('@allSkillEventsForUser');
 
     cy.get('[data-cy=numAchievedGlobalBadges]').contains('Global Badges: 1 / 2')
     cy.get('[data-cy=numAchievedGemBadges]').should('not.exist')
@@ -232,6 +233,7 @@ describe('Navigation Tests', () => {
 
     cy.visit('/');
     cy.wait('@getMyProgress');
+    cy.wait('@allSkillEventsForUser');
 
     cy.get('[data-cy=numAchievedGlobalBadges]').contains('Global Badges: 1 / 2')
     cy.get('[data-cy=numAchievedGemBadges]').contains('Gems: 2 / 5')
@@ -248,6 +250,7 @@ describe('Navigation Tests', () => {
 
     cy.visit('/');
     cy.wait('@getMyProgress');
+    cy.wait('@allSkillEventsForUser');
 
     cy.get('[data-cy=numAchievedGlobalBadges]').should('not.exist')
     cy.get('[data-cy=numAchievedGemBadges]').should('not.exist')
@@ -545,6 +548,24 @@ describe('Navigation Tests', () => {
     cy.visit('/');
     cy.wait('@allSkillEventsForUser');
     cy.get('[data-cy=project-link-proj3]').find('[data-cy=project-card-project-rank]').contains(new RegExp(/^Rank: 1,001 \/ 1,001$/));
+  });
+
+  it('All skill versions are included in the Client Display', function () {
+    cy.visit('/');
+    cy.wait('@allSkillEventsForUser');
+
+    cy.get('[data-cy=inception-button]').should('not.exist');
+
+    cy.get('[data-cy=project-link-proj1]').click()
+
+    cy.intercept('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
+    cy.wait('@pointHistoryChart');
+    cy.wrapIframe().contains('Overall Points');
+    cy.wrapIframe().contains('Earn up to 1,400 points');
+
+    cy.get('[data-cy="breadcrumb-Progress And Rankings"]').should('be.visible');
+    cy.get('[data-cy=breadcrumb-proj1]').should('be.visible');
+    cy.get('[data-cy=breadcrumb-projects]').should('not.exist');
   });
 
 });
