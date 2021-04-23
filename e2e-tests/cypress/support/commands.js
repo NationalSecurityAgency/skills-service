@@ -150,6 +150,35 @@ Cypress.Commands.add("createSkill", (projNum = 1, subjNum = 1, skillNum = 1, ove
     }, overrideProps));
 });
 
+
+Cypress.Commands.add("createBadge", (projNum = 1, badgeNum = 1, overrideProps = {}) => {
+    cy.request('POST', `/admin/projects/proj${projNum}/badges/badge${badgeNum}`, Object.assign({
+        projectId: `proj${projNum}`,
+        badgeId: `badge${badgeNum}`,
+        name: `Badge ${badgeNum}`,
+        "iconClass":"fas fa-ghost",
+        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+    }, overrideProps));
+});
+Cypress.Commands.add("assignSkillToBadge", (projNum = 1, badgeNum = 1, skillNum = 1) => {
+    cy.request('POST', `/admin/projects/proj${projNum}/badge/badge${badgeNum}/skills/skill${skillNum}`)
+});
+
+Cypress.Commands.add("createGlobalBadge", (badgeNum = 1, overrideProps = {}) => {
+    cy.request('PUT', `/supervisor/badges/globalBadge${badgeNum}`, Object.assign({
+        badgeId: `globalBadge${badgeNum}`,
+        isEdit: false,
+        name: `Global Badge ${badgeNum}`,
+        originalBadgeId: '',
+        iconClass: 'fas fa-award',
+        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+    }, overrideProps));
+});
+Cypress.Commands.add("assignSkillToGlobalBadge", (badgeNum = 1, skillNum = 1) => {
+    cy.request('POST', `/supervisor/badges/globalBadge${badgeNum}/projects/proj1/skills/skill${skillNum}`)
+});
+
+
 Cypress.Commands.add("reportSkill", (project = 1, skillNum = 1, userId = 'user@skills.org', date = '2020-09-12 11:00', failOnError=true) => {
     let m = moment.utc(date, 'YYYY-MM-DD HH:mm');
     if (date === 'now') {

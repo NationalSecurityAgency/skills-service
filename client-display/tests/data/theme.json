@@ -30,6 +30,11 @@
   },
   "buttons": {
     "backgroundColor": "#152E4d",
+    "foregroundColor": "#fdfbfb",
+    "disabledColor": "#989999"
+  },
+  "badges": {
+    "backgroundColor": "#6f42c1",
     "foregroundColor": "#fdfbfb"
   },
   "graphLegendBorderColor": "1px solid grey"

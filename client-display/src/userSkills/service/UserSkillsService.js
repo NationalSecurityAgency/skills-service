@@ -75,11 +75,7 @@ export default {
   getSubjectSummary(subjectId) {
     return axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/subjects/${subjectId}/summary`, {
       params: this.getUserIdAndVersionParams(),
-    }).then((result) => {
-      const res = result.data;
-      res.skills = res.skills.map((item) => SkillEnricherUtil.addMeta(item));
-      return res;
-    });
+    }).then((result) => SkillEnricherUtil.addMetaToSummary(result.data));
   },
 
   getSkillDependencies(skillId) {
@@ -104,13 +100,19 @@ export default {
     requestParams.global = global;
     return axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/badges/${badgeId}/summary`, {
       params: requestParams,
-    }).then((result) => result.data);
+    }).then((result) => {
+      const res = SkillEnricherUtil.addMetaToSummary(result.data);
+      if (res.projectLevelsAndSkillsSummaries) {
+        res.projectLevelsAndSkillsSummaries = res.projectLevelsAndSkillsSummaries.map((summary) => SkillEnricherUtil.addMetaToSummary(summary));
+      }
+      return res;
+    });
   },
 
   getBadgeSummaries() {
     return axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/badges/summary`, {
       params: this.getUserIdAndVersionParams(),
-    }).then((result) => result.data);
+    }).then((result) => result.data.map((summary) => SkillEnricherUtil.addMetaToSummary(summary)));
   },
 
   getPointsHistory(subjectId) {

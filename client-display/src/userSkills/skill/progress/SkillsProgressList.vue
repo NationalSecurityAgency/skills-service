@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-    <div class="card mt-2">
+    <div class="card mt-2" data-cy="skillsProgressList">
         <div class="card-header float-left">
             <div class="row" v-if="skillsInternalOrig && skillsInternalOrig.length > 0">
                 <div class="col-md-auto text-left pr-md-0">
@@ -25,7 +25,7 @@ limitations under the License.
                                   aria-label="Search skills"
                                   data-cy="skillsSearchInput"></b-form-input>
                     <b-button v-if="searchString && searchString.length > 0" @click="clearSearch"
-                              class="position-absolute" variant="outline-info" style="right: 0rem;"
+                              class="position-absolute skills-theme-btn" variant="outline-info" style="right: 0rem;"
                               data-cy="clearSkillsSearchInput">
                       <i class="fas fa-times"></i>
                     </b-button>

@@ -39,4 +39,10 @@ export default {
         return copy;
     },
 
+    addMetaToSummary(summary) {
+        const res = summary;
+        res.skills = res.skills.map((item) => this.addMeta(item));
+        return res;
+    },
+
 };

@@ -19,6 +19,14 @@ const dateFormatter = value => moment.utc(value).format('YYYY-MM-DD[T]HH:mm:ss[Z
 
 describe('Client Display Skills Filtering Tests', () => {
 
+  const snapshotOptions = {
+    blackout: ['[data-cy=pointHistoryChart]', '#dependent-skills-network', '[data-cy=achievementDate]'],
+    failureThreshold: 0.03, // threshold for entire image
+    failureThresholdType: 'percent', // percent of image or number of pixels
+    customDiffConfig: { threshold: 0.01 }, // threshold for each pixel
+    capture: 'fullPage', // When fullPage, the application under test is captured in its entirety from top to bottom.
+  };
+
   beforeEach(() => {
     Cypress.env('disabledUILoginProp', true);
     cy.request('POST', '/app/projects/proj1', {
@@ -32,10 +40,7 @@ describe('Client Display Skills Filtering Tests', () => {
       helpUrl: 'http://doHelpOnThisSubject.com',
       description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
     });
-  })
 
-
-  it('counts in the filter', () => {
     Cypress.Commands.add("validateCounts", (withoutProgress, withPointsToday, complete, selfReported, inProgress) => {
       cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
       cy.get('[data-cy="skillsFilter_withoutProgress"] [data-cy="filterCount"]').contains(withoutProgress)
@@ -44,7 +49,10 @@ describe('Client Display Skills Filtering Tests', () => {
       cy.get('[data-cy="skillsFilter_selfReported"] [data-cy="filterCount"]').contains(selfReported)
       cy.get('[data-cy="skillsFilter_inProgress"] [data-cy="filterCount"]').contains(inProgress)
     });
+  })
 
+
+  it('counts in the filter', () => {
     Cypress.Commands.add("refreshCounts", () => {
       cy.cdClickRank();
       cy.cdBack('Subject 1');
@@ -535,7 +543,7 @@ describe('Client Display Skills Filtering Tests', () => {
   });
 
 
-  it.only('change filter with search', () => {
+  it('change filter with search', () => {
     cy.createSkill(1, 1, 1, {name: 'Search blah skill 1'});
     cy.createSkill(1, 1, 2, {name: 'is a skill 2'});
     cy.createSkill(1, 1, 3, {name: 'find Blah other skill 3'});
@@ -567,6 +575,267 @@ describe('Client Display Skills Filtering Tests', () => {
 
     cy.get('[data-cy="skillProgress_index-0"]').contains('skill 5')
     cy.get('[data-cy="skillProgress_index-1"]').should('not.exist')
+  });
+
+
+  it('filter skills on badge catalog page', () => {
+    cy.createSkill(1, 1, 1, {name: 'Search blah skill 1'});
+    cy.createSkill(1, 1, 2, {name: 'is a skill 2'});
+    cy.createSkill(1, 1, 3, {name: 'find Blah other skill 3'});
+    cy.createSkill(1, 1, 4, {name: 'Search nothing skill 4'});
+    cy.createSkill(1, 1, 5, {name: 'sEEk bLaH skill 5', selfReportingType: 'Approval'});
+    cy.createSkill(1, 1, 6, {name: 'some other skill 6', selfReportingType: 'HonorSystem'});
+
+    cy.createBadge(1, 1)
+    cy.assignSkillToBadge(1, 1, 1)
+    cy.assignSkillToBadge(1, 1, 2)
+    cy.assignSkillToBadge(1, 1, 3)
+    cy.assignSkillToBadge(1, 1, 4)
+    cy.assignSkillToBadge(1, 1, 5)
+
+    cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday')
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday')
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now')
+
+    cy.cdVisit('/');
+    cy.cdClickBadges();
+    cy.contains('Badges');
+    cy.get('[data-cy="badgeDetailsLink_badge1"]').click();
+
+    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
+    cy.get('[data-cy="skillProgress_index-1"]').contains('skill 2')
+    cy.get('[data-cy="skillProgress_index-2"]').contains('skill 3')
+    cy.get('[data-cy="skillProgress_index-3"]').contains('skill 4')
+    cy.get('[data-cy="skillProgress_index-4"]').contains('skill 5')
+    cy.get('[data-cy="skillProgress_index-5"]').should('not.exist')
+
+    cy.validateCounts(1, 4, 2, 1, 2);
+
+    cy.get('[data-cy="skillsFilter_complete"]').click();
+    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
+    cy.get('[data-cy="skillProgress_index-1"]').contains('skill 3')
+    cy.get('[data-cy="skillProgress_index-2"]').should('not.exist')
+
+    cy.get('[data-cy="skillsSearchInput"]').type('other');
+    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 3')
+    cy.get('[data-cy="skillProgress_index-1"]').should('not.exist')
+  });
+
+  it('filter skills on completed badge page', () => {
+    cy.createSkill(1, 1, 1, {name: 'Search blah skill 1'});
+    cy.createSkill(1, 1, 2, {name: 'is a skill 2'});
+    cy.createSkill(1, 1, 3, {name: 'find Blah other skill 3'});
+    cy.createSkill(1, 1, 4, {name: 'Search nothing skill 4'});
+
+    cy.createBadge(1, 1)
+    cy.assignSkillToBadge(1, 1, 1)
+    cy.assignSkillToBadge(1, 1, 2)
+    cy.assignSkillToBadge(1, 1, 3)
+    cy.assignSkillToBadge(1, 1, 4)
+
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday')
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'yesterday')
+    cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday')
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'yesterday')
+    cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now')
+
+    cy.cdVisit('/');
+    cy.cdClickBadges();
+    cy.contains('Badges');
+    cy.get('[data-cy="earnedBadgeLink_badge1"]').click();
+
+    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
+    cy.get('[data-cy="skillProgress_index-1"]').contains('skill 2')
+    cy.get('[data-cy="skillProgress_index-2"]').contains('skill 3')
+    cy.get('[data-cy="skillProgress_index-3"]').contains('skill 4')
+
+    cy.validateCounts(0, 4, 4, 0, 0);
+
+    cy.get('[data-cy="skillsFilter_complete"]').click();
+
+    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
+    cy.get('[data-cy="skillProgress_index-1"]').contains('skill 2')
+    cy.get('[data-cy="skillProgress_index-2"]').contains('skill 3')
+    cy.get('[data-cy="skillProgress_index-3"]').contains('skill 4')
+
+    cy.get('[data-cy="skillsSearchInput"]').type('blah');
+    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
+    cy.get('[data-cy="skillProgress_index-1"]').contains('skill 3')
+    cy.get('[data-cy="skillProgress_index-2"]').should('not.exist')
+  });
+
+  it('filter skills on global badge page', () => {
+    cy.fixture('vars.json').then((vars) => {
+      cy.logout();
+
+      cy.login(vars.rootUser, vars.defaultPass);
+      cy.request('PUT', `/root/users/${vars.defaultUser}/roles/ROLE_SUPERVISOR`);
+
+      cy.logout();
+      cy.login(vars.defaultUser, vars.defaultPass);
+    });
+
+    cy.createSkill(1, 1, 1, {name: 'Search blah skill 1'});
+    cy.createSkill(1, 1, 2, {name: 'is a skill 2'});
+    cy.createSkill(1, 1, 3, {name: 'find Blah other skill 3'});
+    cy.createSkill(1, 1, 4, {name: 'Search nothing skill 4'});
+
+    cy.createGlobalBadge(1)
+    cy.assignSkillToGlobalBadge(1, 1)
+    cy.assignSkillToGlobalBadge(1, 2)
+    cy.assignSkillToGlobalBadge(1, 3)
+    cy.assignSkillToGlobalBadge(1, 4)
+
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday')
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'yesterday')
+    cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday')
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'yesterday')
+    cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now')
+
+    cy.cdVisit('/');
+    cy.cdClickBadges();
+    cy.get('[data-cy="badgeDetailsLink_globalBadge1"]').click();
+
+    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
+    cy.get('[data-cy="skillProgress_index-1"]').contains('skill 2')
+    cy.get('[data-cy="skillProgress_index-2"]').contains('skill 3')
+    cy.get('[data-cy="skillProgress_index-3"]').contains('skill 4')
+
+    cy.validateCounts(0, 4, 4, 0, 0);
+
+    cy.get('[data-cy="skillsFilter_complete"]').click();
+
+    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
+    cy.get('[data-cy="skillProgress_index-1"]').contains('skill 2')
+    cy.get('[data-cy="skillProgress_index-2"]').contains('skill 3')
+    cy.get('[data-cy="skillProgress_index-3"]').contains('skill 4')
+
+    cy.get('[data-cy="skillsSearchInput"]').type('blah');
+    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
+    cy.get('[data-cy="skillProgress_index-1"]').contains('skill 3')
+    cy.get('[data-cy="skillProgress_index-2"]').should('not.exist')
+
+    cy.cdVisit('/');
+    cy.cdClickBadges();
+    cy.get('[data-cy="earnedBadgeLink_globalBadge1"]').click();
+
+    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
+    cy.get('[data-cy="skillProgress_index-1"]').contains('skill 2')
+    cy.get('[data-cy="skillProgress_index-2"]').contains('skill 3')
+    cy.get('[data-cy="skillProgress_index-3"]').contains('skill 4')
+
+    cy.validateCounts(0, 4, 4, 0, 0);
+
+    cy.get('[data-cy="skillsFilter_complete"]').click();
+
+    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
+    cy.get('[data-cy="skillProgress_index-1"]').contains('skill 2')
+    cy.get('[data-cy="skillProgress_index-2"]').contains('skill 3')
+    cy.get('[data-cy="skillProgress_index-3"]').contains('skill 4')
+
+    cy.get('[data-cy="skillsSearchInput"]').type('blah');
+    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
+    cy.get('[data-cy="skillProgress_index-1"]').contains('skill 3')
+    cy.get('[data-cy="skillProgress_index-2"]').should('not.exist')
+  });
+
+  it('Visual Test: skills search and skills filter selected', () => {
+    cy.createProject(1);
+    cy.createSubject(1, 1);
+    cy.createSkill(1, 1, 1, {name: 'Search blah skill 1'});
+    cy.createSkill(1, 1, 2, {name: 'is a skill 2'});
+    cy.createSkill(1, 1, 3, {name: 'find Blah other skill 3'});
+    cy.createSkill(1, 1, 4, {name: 'Search nothing skill 4'});
+    cy.createSkill(1, 1, 5, {name: 'sEEk bLaH skill 5', selfReportingType: 'Approval'});
+    cy.createSkill(1, 1, 6, {name: 'some other skill 6', selfReportingType: 'HonorSystem'});
+
+    cy.createBadge(1, 1)
+    cy.assignSkillToBadge(1, 1, 1)
+    cy.assignSkillToBadge(1, 1, 2)
+    cy.assignSkillToBadge(1, 1, 3)
+    cy.assignSkillToBadge(1, 1, 4)
+    cy.assignSkillToBadge(1, 1, 5)
+
+    cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday')
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday')
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now')
+
+    cy.cdVisit('/');
+    cy.cdClickSubj(0);
+
+    cy.get('[data-cy="skillsSearchInput"]').type('blah');
+
+    cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
+    cy.get('[data-cy="skillsFilter_withPointsToday"]').click();
+    cy.get('[data-cy="selectedFilter"]').contains('Skills with points earned today')
+
+    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
+    cy.get('[data-cy="skillProgress_index-0"]').contains('200 / 200')
+    cy.get('[data-cy="skillProgress_index-1"]').contains('skill 3')
+    cy.get('[data-cy="skillProgress_index-1"]').contains('200 / 200')
+    cy.get('[data-cy="skillProgress_index-2"]').should('not.exist')
+
+    cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"]');
+  });
+
+  it('Visual Test: skills filter open', () => {
+    cy.createProject(1);
+    cy.createSubject(1, 1);
+    cy.createSkill(1, 1, 1, {name: 'Search blah skill 1'});
+    cy.createSkill(1, 1, 2, {name: 'is a skill 2'});
+    cy.createSkill(1, 1, 3, {name: 'find Blah other skill 3'});
+    cy.createSkill(1, 1, 4, {name: 'Search nothing skill 4'});
+    cy.createSkill(1, 1, 5, {name: 'sEEk bLaH skill 5', selfReportingType: 'Approval'});
+    cy.createSkill(1, 1, 6, {name: 'some other skill 6', selfReportingType: 'HonorSystem'});
+
+    cy.createBadge(1, 1)
+    cy.assignSkillToBadge(1, 1, 1)
+    cy.assignSkillToBadge(1, 1, 2)
+    cy.assignSkillToBadge(1, 1, 3)
+    cy.assignSkillToBadge(1, 1, 4)
+    cy.assignSkillToBadge(1, 1, 5)
+
+    cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday')
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday')
+
+    cy.cdVisit('/');
+    cy.cdClickSubj(0);
+    cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
+
+    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
+    cy.get('[data-cy="skillProgress_index-0"]').contains('200 / 200')
+
+    cy.get('[data-cy="skillProgress_index-1"]').contains('skill 2')
+    cy.get('[data-cy="skillProgress_index-1"]').contains('100 / 200')
+
+    cy.get('[data-cy="skillProgress_index-2"]').contains('skill 3')
+    cy.get('[data-cy="skillProgress_index-2"]').contains('100 / 200')
+
+    cy.get('[data-cy="skillProgress_index-3"]').contains('skill 4')
+    cy.get('[data-cy="skillProgress_index-3"]').contains('0 / 200')
+
+    cy.get('[data-cy="skillProgress_index-4"]').contains('skill 5')
+    cy.get('[data-cy="skillProgress_index-4"]').contains('0 / 200')
+
+    cy.get('[data-cy="skillProgress_index-5"]').contains('skill 6')
+    cy.get('[data-cy="skillProgress_index-5"]').contains('0 / 200')
+
+    cy.get('[data-cy="skillProgress_index-6"]').should('not.exist')
+    cy.matchSnapshotImage(snapshotOptions);
   });
 
 })

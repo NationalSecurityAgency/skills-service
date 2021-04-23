@@ -1,3 +1,18 @@
+/*
+Copyright 2020 SkillTree
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 <template>
   <div class="row" data-cy="skillsFilter">
     <div class="col-sm-auto pl-0 pl-md-3 pr-sm-0">
@@ -15,10 +30,10 @@
       </b-dropdown>
     </div>
     <div class="col-sm px-sm-0">
-      <span v-if="selectedFilter" class="border rounded py-1 px-2 border-info" data-cy="selectedFilter">
+      <span v-if="selectedFilter" class="border skills-card-theme-border rounded py-1 px-2 border-info" data-cy="selectedFilter">
         <i class="text-center" :class="selectedFilter.icon"></i> <span style="font-size: 0.8rem;" v-html="selectedFilter.html"></span>
-        <button type="button" class="btn btn-link px-0" @click="clearSelection" data-cy="clearSelectedFilter"><i
-            class="fas fa-times-circle text-info ml-1"></i></button>
+        <button type="button" class="btn btn-link px-0 text-info" @click="clearSelection" data-cy="clearSelectedFilter"><i
+            class="fas fa-times-circle ml-1"></i></button>
       </span>
     </div>
   </div>
@@ -33,31 +48,31 @@
         selectedFilter: null,
         filters: [
           {
-            icon: 'fas fa-battery-empty text-danger',
+            icon: 'fas fa-battery-empty',
             id: 'withoutProgress',
             html: 'Skills <b>without</b> progress',
             count: 0,
           },
           {
-            icon: 'far fa-calendar-check text-muted',
+            icon: 'far fa-calendar-check',
             id: 'withPointsToday',
             html: 'Skills with points earned <b>today</b>',
             count: 0,
           },
           {
-            icon: 'far fa-check-circle text-success',
+            icon: 'far fa-check-circle',
             id: 'complete',
             html: '<b>Completed</b> skills',
             count: 0,
           },
           {
-            icon: 'fas fa-laptop text-primary',
+            icon: 'fas fa-laptop',
             id: 'selfReported',
             html: '<b>Self</b> Reported Skills',
             count: 0,
           },
           {
-            icon: 'fas fa-running text-warning',
+            icon: 'fas fa-running',
             id: 'inProgress',
             html: 'Skills <b>in progress</b>',
             count: 0,

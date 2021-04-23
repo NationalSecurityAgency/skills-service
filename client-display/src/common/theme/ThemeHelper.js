@@ -78,7 +78,7 @@ export default {
     },
     tiles: {
       backgroundColor: [{
-        selector: 'body #app .card, body #app .card-header, body #app .card-body, body #app .card-footer, body #app .apexcharts-menu.apexcharts-menu-open',
+        selector: 'body #app .card, body #app .card-header, body #app .card-body, body #app .card-footer, body #app .apexcharts-menu.apexcharts-menu-open, body #app .dropdown-menu',
         styleName: 'background-color',
       }, {
         selector: 'body #app .skills-no-data-yet .fa-inverse, body #app .apexcharts-menu.apexcharts-menu-open .apexcharts-menu-item:hover',
@@ -108,21 +108,35 @@ export default {
         selector: 'body #app .skills-theme-btn',
         styleName: 'background-color',
       }, {
-        selector: 'body #app .skills-theme-btn:hover',
+        selector: 'body #app .skills-theme-btn:hover, body #app a:hover',
         styleName: 'color',
       }, {
         selector: 'body #app .skills-theme-btn:hover',
         styleName: 'border-color',
       }],
       foregroundColor: [{
-        selector: 'body #app .skills-theme-btn',
+        selector: 'body #app .skills-theme-btn, body #app .btn.btn-link, body #app a',
         styleName: 'color',
       }, {
         selector: 'body #app .skills-theme-btn',
         styleName: 'border-color',
       }, {
-        selector: 'body #app .skills-theme-btn:hover',
+        selector: 'body #app .skills-theme-btn:hover, body #app a:hover',
         styleName: 'background-color',
+      }],
+      disabledColor: [{
+        selector: 'body #app a.disabled',
+        styleName: 'color',
+      }],
+    },
+    badges: {
+      backgroundColor: [{
+        selector: 'body #app .badge',
+        styleName: 'background-color',
+      }],
+      foregroundColor: [{
+        selector: 'body #app .badge',
+        styleName: 'color',
       }],
     },
   },
