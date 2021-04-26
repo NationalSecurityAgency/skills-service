@@ -28,6 +28,7 @@ limitations under the License.
                               class="position-absolute skills-theme-btn" variant="outline-info" style="right: 0rem;"
                               data-cy="clearSkillsSearchInput">
                       <i class="fas fa-times"></i>
+                      <span class="sr-only">clear search</span>
                     </b-button>
                   </div>
                 </div>

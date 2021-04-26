@@ -178,6 +178,31 @@ describe('Client Display Accessibility tests', () => {
     // cy.customLighthouse();
   });
 
+  it('skills search and filter', () => {
+    cy.cdVisit('/');
+    cy.injectAxe();
+    cy.cdClickSubj(0, 'Subject 1');
+
+    // hit on all records
+    cy.get('[data-cy="skillsSearchInput"]').type('is');
+
+    // select a filter with results
+    cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
+    cy.get('[data-cy="skillsFilter_withoutProgress"]').click();
+    cy.get('[data-cy="selectedFilter"]').contains('Skills without progress')
+
+    // open filter
+    cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
+    cy.get('[data-cy="skillsFilter_withoutProgress"] [data-cy="filterCount"]').contains(2)
+    cy.get('[data-cy="skillsFilter_withPointsToday"] [data-cy="filterCount"]').contains(2)
+    cy.get('[data-cy="skillsFilter_complete"] [data-cy="filterCount"]').contains(1)
+    cy.get('[data-cy="skillsFilter_selfReported"] [data-cy="filterCount"]').contains(1)
+    cy.get('[data-cy="skillsFilter_inProgress"] [data-cy="filterCount"]').contains(1)
+
+    cy.customA11y();
+    cy.customLighthouse();
+  });
+
   it('Summary view', () => {
     cy.request('POST', '/admin/projects/proj1/badges/badge1', {
       projectId: 'proj1',

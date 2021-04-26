@@ -19,7 +19,7 @@ limitations under the License.
       <b-dropdown variant="link" class="dropdown-no-outline" dropup>
         <template slot="button-content"  class="noOutline">
           <i class="fas fa-filter" style="font-size: 1.1rem" aria-hidden="true" data-cy="skillsFilterBtn"/>
-          <span class="sr-only">skills filter</span>
+          <span class="sr-only">clear filter</span>
         </template>
         <b-dropdown-item href="#" v-for="filter in filters" :key="filter.id" @click="filterSelected(filter.id)" :disabled="filter.count === 0"
                          :data-cy="`skillsFilter_${filter.id}`">
@@ -32,8 +32,10 @@ limitations under the License.
     <div class="col-sm px-sm-0">
       <span v-if="selectedFilter" class="border skills-card-theme-border rounded py-1 px-2 border-info" data-cy="selectedFilter">
         <i class="text-center" :class="selectedFilter.icon"></i> <span style="font-size: 0.8rem;" v-html="selectedFilter.html"></span>
-        <button type="button" class="btn btn-link px-0 text-info" @click="clearSelection" data-cy="clearSelectedFilter"><i
-            class="fas fa-times-circle ml-1"></i></button>
+        <button type="button" class="btn btn-link px-0 text-info" @click="clearSelection" data-cy="clearSelectedFilter">
+          <i class="fas fa-times-circle ml-1"></i>
+          <span class="sr-only">clear filter</span>
+        </button>
       </span>
     </div>
   </div>
