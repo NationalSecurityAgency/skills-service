@@ -256,6 +256,12 @@ class WSHelper {
         return responseEntity.body.accessToken
     }
 
+    public ResponseEntity<String> rawGet(String endpoint, def params) {
+        String url = "${skillsService}/${endpoint}${getUrlFromParams(params)}"
+        ResponseEntity<String> responseEntity = restTemplateWrapper.getForEntity(url, String)
+        return responseEntity
+    }
+
     private def put(String endpoint, String type, def params, HttpStatus expectedStatus = HttpStatus.OK, boolean throwExceptionOnFailure = true) {
         String url = "${skillsService}/${type}${endpoint}"
         log.info("PUT: {}, params={}", url, params)
