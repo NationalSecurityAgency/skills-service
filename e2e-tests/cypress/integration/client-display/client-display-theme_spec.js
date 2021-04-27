@@ -420,4 +420,96 @@ describe('Client Display Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]');
     });
 
+    it('skills search and skills filter selected', () => {
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, {name: 'Search blah skill 1'});
+        cy.createSkill(1, 1, 2, {name: 'is a skill 2'});
+        cy.createSkill(1, 1, 3, {name: 'find Blah other skill 3'});
+        cy.createSkill(1, 1, 4, {name: 'Search nothing skill 4'});
+        cy.createSkill(1, 1, 5, {name: 'sEEk bLaH skill 5', selfReportingType: 'Approval'});
+        cy.createSkill(1, 1, 6, {name: 'some other skill 6', selfReportingType: 'HonorSystem'});
+
+        cy.createBadge(1, 1)
+        cy.assignSkillToBadge(1, 1, 1)
+        cy.assignSkillToBadge(1, 1, 2)
+        cy.assignSkillToBadge(1, 1, 3)
+        cy.assignSkillToBadge(1, 1, 4)
+        cy.assignSkillToBadge(1, 1, 5)
+
+        cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now')
+        cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday')
+        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now')
+        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday')
+        cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now')
+        cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now')
+
+        cy.cdVisit('/?enableTheme=true');
+        cy.cdClickSubj(0);
+
+        cy.get('[data-cy="skillsSearchInput"]').type('blah');
+
+        cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
+        cy.get('[data-cy="skillsFilter_withPointsToday"]').click();
+        cy.get('[data-cy="selectedFilter"]').contains('Skills with points earned today')
+
+        cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
+        cy.get('[data-cy="skillProgress_index-0"]').contains('200 / 200')
+        cy.get('[data-cy="skillProgress_index-1"]').contains('skill 3')
+        cy.get('[data-cy="skillProgress_index-1"]').contains('200 / 200')
+        cy.get('[data-cy="skillProgress_index-2"]').should('not.exist')
+
+        cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"]');
+    });
+
+    it('skills filter open', () => {
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, {name: 'Search blah skill 1'});
+        cy.createSkill(1, 1, 2, {name: 'is a skill 2'});
+        cy.createSkill(1, 1, 3, {name: 'find Blah other skill 3'});
+        cy.createSkill(1, 1, 4, {name: 'Search nothing skill 4'});
+        cy.createSkill(1, 1, 5, {name: 'sEEk bLaH skill 5', selfReportingType: 'Approval'});
+        cy.createSkill(1, 1, 6, {name: 'some other skill 6', selfReportingType: 'HonorSystem'});
+
+        cy.createBadge(1, 1)
+        cy.assignSkillToBadge(1, 1, 1)
+        cy.assignSkillToBadge(1, 1, 2)
+        cy.assignSkillToBadge(1, 1, 3)
+        cy.assignSkillToBadge(1, 1, 4)
+        cy.assignSkillToBadge(1, 1, 5)
+
+        cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now')
+        cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday')
+        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now')
+        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday')
+        cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now')
+        cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now')
+
+        cy.cdVisit('/?enableTheme=true');
+        cy.cdClickSubj(0);
+        cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
+
+        cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
+        cy.get('[data-cy="skillProgress_index-0"]').contains('200 / 200')
+
+        cy.get('[data-cy="skillProgress_index-1"]').contains('skill 2')
+        cy.get('[data-cy="skillProgress_index-1"]').contains('100 / 200')
+
+        cy.get('[data-cy="skillProgress_index-2"]').contains('skill 3')
+        cy.get('[data-cy="skillProgress_index-2"]').contains('200 / 200')
+
+        cy.get('[data-cy="skillProgress_index-3"]').contains('skill 4')
+        cy.get('[data-cy="skillProgress_index-3"]').contains('100 / 200')
+
+        cy.get('[data-cy="skillProgress_index-4"]').contains('skill 5')
+        cy.get('[data-cy="skillProgress_index-4"]').contains('0 / 200')
+
+        cy.get('[data-cy="skillProgress_index-5"]').contains('skill 6')
+        cy.get('[data-cy="skillProgress_index-5"]').contains('0 / 200')
+
+        cy.get('[data-cy="skillProgress_index-6"]').should('not.exist')
+        cy.matchSnapshotImage(snapshotOptions);
+    });
+
 });

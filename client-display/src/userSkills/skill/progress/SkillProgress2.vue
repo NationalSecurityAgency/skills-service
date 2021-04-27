@@ -30,58 +30,61 @@ limitations under the License.
 */
 <template>
   <div class="text-left" data-cy="skillProgress">
-    <div v-if="skillInternal.crossProject" class="row border-bottom mb-3 text-primary text-center">
+    <div v-if="skill.crossProject" class="row border-bottom mb-3 text-primary text-center">
       <div class="col-md-6 text-md-left">
-        <div class="h4"><span class="text-muted">Project:</span> {{ skillInternal.projectName }}</div>
+        <div class="h4"><span class="text-muted">Project:</span> {{ skill.projectName }}</div>
       </div>
       <div class="col-md-6 text-md-right text-success text-uppercase">
         <div class="h5"><i class="fa fa-vector-square"/> Cross-project Skill</div>
       </div>
     </div>
 
-    <div v-if="skillInternal.crossProject && !isSkillComplete" class="alert alert-primary text-center" role="alert">
+    <div v-if="skill.crossProject && !isSkillComplete" class="alert alert-primary text-center" role="alert">
       This is a cross-project skill! In order to complete this skill please visit <strong>{{
-        skillInternal.projectName
+        skill.projectName
       }}</strong> project! Happy playing!!
     </div>
 
     <div class="row">
       <div class="col text-md-left">
-        <div class="h4" @click="skillClicked" :class="{ 'skill-name-url' : enableDrillDown }" data-cy="skillProgressTitle">{{ skillInternal.skill }}</div>
+        <div class="h4" @click="skillClicked" :class="{ 'skill-name-url' : enableDrillDown }" data-cy="skillProgressTitle">
+          <span v-if="skill.skillHtml" v-html="skill.skillHtml"></span>
+          <span v-else>{{ skill.skill }}</span>
+        </div>
       </div>
       <div class="col-auto text-right"
            :class="{ 'text-success' : isSkillComplete, 'text-primary': !isSkillComplete }"
            data-cy="skillProgress-ptsOverProgressBard">
         <span v-if="isSkillComplete" class="pr-1"><i class="fa fa-check"/></span>
-        <animated-number :num="skillInternal.points"/>
-        / {{ skillInternal.totalPoints | number }} Points
+        <animated-number :num="skill.points"/>
+        / {{ skill.totalPoints | number }} Points
       </div>
     </div>
     <div class="row">
       <div class="col">
-        <progress-bar :skill="skillInternal" v-on:progressbar-clicked="skillClicked"
+        <progress-bar :skill="skill" v-on:progressbar-clicked="skillClicked"
                       :class="{ 'skills-navigable-item' : enableDrillDown }" data-cy="skillProgressBar"/>
       </div>
     </div>
     <div v-if="showDescription">
       <div v-if="locked" class="text-center text-muted locked-text">
-          *** Skill has <b>{{ skillInternal.dependencyInfo.numDirectDependents}}</b> direct dependent(s).
+          *** Skill has <b>{{ skill.dependencyInfo.numDirectDependents}}</b> direct dependent(s).
           <span v-if="enableDrillDown">Click <i class="fas fa-lock icon"></i> to see its dependencies.</span>
           <span v-else>Please see its dependencies below.</span>
         ***
       </div>
 
-      <achievement-date v-if="skillInternal.achievedOn" :date="skillInternal.achievedOn" class="mt-2"/>
+      <achievement-date v-if="skill.achievedOn" :date="skill.achievedOn" class="mt-2"/>
 
-      <partial-points-alert v-if="!enableDrillDown" :skill="skillInternal" :is-locked="locked"/>
-      <skill-summary-cards v-if="!locked" :skill="skillInternal" class="mt-3"></skill-summary-cards>
+      <partial-points-alert v-if="!enableDrillDown" :skill="skill" :is-locked="locked"/>
+      <skill-summary-cards v-if="!locked" :skill="skill" class="mt-3"></skill-summary-cards>
 
       <p class="skills-text-description text-primary mt-3">
         <markdown-text v-if="skill.description && skill.description.description" :text="skill.description.description"/>
       </p>
 
       <div>
-        <skill-overview-footer :skill="skillInternal" v-on:points-earned="pointsEarned"/>
+        <skill-overview-footer :skill="skill" v-on:points-earned="pointsEarned"/>
       </div>
     </div>
   </div>
@@ -120,29 +123,17 @@ limitations under the License.
         default: false,
       },
     },
-    data() {
-      return {
-        skillInternal: {},
-      };
-    },
-    created() {
-      this.skillInternal = { ...this.skill };
-    },
     computed: {
       locked() {
-        return this.skillInternal.dependencyInfo && !this.skillInternal.dependencyInfo.achieved;
+        return this.skill.dependencyInfo && !this.skill.dependencyInfo.achieved;
       },
       isSkillComplete() {
-        return this.skillInternal.points === this.skillInternal.totalPoints;
+        return this.skill.meta.complete;
       },
     },
     methods: {
       pointsEarned(pts) {
-        this.skillInternal.points += pts;
-        this.skillInternal.todaysPoints += pts;
-        if (this.skillInternal.points === this.skillInternal.totalPoints) {
-          this.skillInternal.achievedOn = new Date();
-        }
+        this.$emit('points-earned', pts, this.skill.skillId);
       },
       skillClicked() {
         if (this.enableDrillDown) {

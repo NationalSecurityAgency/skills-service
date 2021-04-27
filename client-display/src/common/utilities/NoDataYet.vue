@@ -14,13 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-    <div class="row skills-no-data-yet text-primary">
-        <div class="col text-secondary">
-                    <span class="fa-stack fa-3x " style="vertical-align: top;">
-                      <i class="fas fa-circle fa-stack-2x"></i>
-                      <i class="fas fa-battery-empty fa-stack-1x fa-inverse"></i>
-                    </span>
-        </div>
+    <div class="row skills-no-data-yet text-primary" data-cy="noDataYet">
+      <div class="col text-secondary">
+        <span v-if="icon"><i :class="icon"></i></span>
+        <span v-else class="fa-stack fa-3x" style="vertical-align: top;">
+          <i class="fas fa-circle fa-stack-2x"></i>
+          <i class="fas fa-battery-empty fa-stack-1x fa-inverse"></i>
+        </span>
+      </div>
         <div class="w-100"></div>
         <div class="col pt-2">
             <h3>{{ title }}</h3>
@@ -39,6 +40,7 @@ limitations under the License.
     props: {
       title: String,
       subTitle: String,
+      icon: String,
     },
   };
 </script>

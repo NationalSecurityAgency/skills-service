@@ -17,7 +17,8 @@ limitations under the License.
     <badge-details-overview :badge="badge" :icon-color="iconColor">
         <template slot="body-footer" slot-scope="{ props }">
             <router-link :to="{ name: badge.global ? 'globalBadgeDetails' : 'badgeDetails', params: { badgeId: props.badgeId }}" tag="button"
-                         class="btn btn-sm btn-outline-info skills-theme-btn mr-1 text-uppercase">
+                         class="btn btn-sm btn-outline-info skills-theme-btn mr-1 text-uppercase"
+                         :data-cy="`badgeDetailsLink_${props.badgeId}`">
                 View Details
             </router-link>
         </template>

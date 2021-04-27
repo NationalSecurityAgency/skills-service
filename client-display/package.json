@@ -8,8 +8,8 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "licenseDepCheck": "license-checker --production --onlyAllow='MIT;ISC;Apache-2.0;Custom: https://travis-ci.org/component/emitter.png' --summary",
-    "licenseHeaderCheck": "license-check-and-add check -f '../license-add/license-add-config.json'",
-    "licenseHeaderAdd": "license-check-and-add add -f ../license-add/license-add-config.json",
+    "licenseHeaderCheck": "license-check-and-add check -f '../license-add/license-add-config.json' -r 20",
+    "licenseHeaderAdd": "license-check-and-add add -f ../license-add/license-add-config.json -r 21",
     "licenseCheck": "npm run licenseHeaderCheck && npm run licenseDepCheck",
     "build": "npm run licenseCheck && npm run test:unit && vue-cli-service build",
     "build-lib": "NODE_ENV='production' && rm -rfv dist && vue-cli-service build --target lib --name userSkills './src/index.js'",

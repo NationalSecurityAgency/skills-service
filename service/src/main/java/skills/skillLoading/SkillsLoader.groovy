@@ -745,6 +745,7 @@ class SkillsLoader {
                     maxOccurrencesWithinIncrementInterval: skillDef.numMaxOccurrencesIncrementInterval,
                     totalPoints: skillDef.totalPoints,
                     dependencyInfo: skillDefAndUserPoints.dependencyInfo,
+                    selfReporting: skillDef.selfReportingType ? new SelfReportingInfo(enabled: true, type: skillDef.selfReportingType) : null,
             )
         }
 

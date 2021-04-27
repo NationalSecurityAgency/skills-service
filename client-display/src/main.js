@@ -24,13 +24,19 @@ import 'apexcharts';
 import '@/common/filter/DayJsFilters';
 
 import {
-  ModalPlugin,
+    ModalPlugin,
+    DropdownPlugin,
+    FormInputPlugin,
+    ButtonPlugin,
 } from 'bootstrap-vue';
 
 Vue.config.productionTip = false;
 
 Vue.use(VueApexCharts);
 Vue.use(ModalPlugin);
+Vue.use(DropdownPlugin);
+Vue.use(FormInputPlugin);
+Vue.use(ButtonPlugin);
 
 require('@/common/softwareVersion/softwareVersionInterceptor');
 
@@ -50,7 +56,7 @@ marked.setOptions({
 });
 
 new Vue({
-  router,
-  store,
-  render: (h) => h(App),
+    router,
+    store,
+    render: (h) => h(App),
 }).$mount('#app');
