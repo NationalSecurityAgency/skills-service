@@ -196,7 +196,9 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             LEFT JOIN (
                 SELECT user_id, 
                 max(performed_on) AS performedOn 
-                FROM user_performed_skill upa GROUP BY user_id
+                FROM user_performed_skill upa 
+                WHERE upa.project_id=?1 
+                GROUP BY user_id
                 ) upa ON upa.user_id = up.user_id
             LEFT JOIN (
                 SELECT 

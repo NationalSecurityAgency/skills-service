@@ -23,6 +23,7 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import spock.lang.IgnoreIf
+import spock.lang.IgnoreRest
 import spock.lang.Requires
 import spock.lang.Specification
 
@@ -346,34 +347,34 @@ class UserPointsSpecs extends DefaultIntSpec {
 
 
 
-    private List<List<String>> setupProjectWithSkills(List<String> subjects = ['testSubject1', 'testSubject2']) {
+    private List<List<String>> setupProjectWithSkills(List<String> subjects = ['testSubject1', 'testSubject2'], String projectId=projId, name="Test Project") {
         List<List<String>> skillIds = []
-        skillsService.createProject([projectId: projId, name: "Test Project"])
+        skillsService.createProject([projectId: projectId, name: name])
         subjects.eachWithIndex { String subject, int index ->
-            skillsService.createSubject([projectId: projId, subjectId: subject, name: "Test Subject $index".toString()])
-            skillIds << addDependentSkills(subject, 3)
+            skillsService.createSubject([projectId: projectId, subjectId: subject, name: "Test Subject $index".toString()])
+            skillIds << addDependentSkills(projectId,  subject, 3)
         }
         return skillIds
     }
 
-    private List<String> addDependentSkills(String subject, int dependencyLevels = 1, int skillsAtEachLevel = 1) {
+    private List<String> addDependentSkills(String projectId, String subject, int dependencyLevels = 1, int skillsAtEachLevel = 1) {
         List<String> parentSkillIds = []
         List<String> allSkillIds = []
 
         for (int i = 0; i < dependencyLevels; i++) {
-            parentSkillIds = addSkillsForSubject(subject, skillsAtEachLevel, parentSkillIds)
+            parentSkillIds = addSkillsForSubject(projectId, subject, skillsAtEachLevel, parentSkillIds)
             allSkillIds.addAll(parentSkillIds)
         }
         return allSkillIds
     }
 
-    private List<String> addSkillsForSubject(String subject, int numSkills = 1, List<String> dependentSkillIds = Collections.emptyList()) {
+    private List<String> addSkillsForSubject(String projectId, String subject, int numSkills = 1, List<String> dependentSkillIds = Collections.emptyList()) {
         List<String> skillIds = []
         for (int i = 0; i < numSkills; i++) {
             String skillId = 'skill' + RandomStringUtils.randomAlphabetic(5)
             skillsService.createSkill(
                     [
-                            projectId: projId,
+                            projectId: projectId,
                             subjectId: subject,
                             skillId: skillId,
                             name: 'Test Skill ' + RandomStringUtils.randomAlphabetic(8),
@@ -387,4 +388,47 @@ class UserPointsSpecs extends DefaultIntSpec {
         }
         return skillIds
     }
+
+
+    def 'get project users respects project id for lastUpdatedDate'() {
+        when:
+        // setup a second project
+        String projId2 = 'proj2'
+        skillsService.deleteProjectIfExist(projId2)
+
+        List<List<String>> proj2SkillIds = setupProjectWithSkills(['testSubject1', 'testSubject2', 'testSubject3'], projId2, 'Test Project 2')
+
+        def results = skillsService.getProjectUsers(projId)
+        String mostRecentDate1 = results.data.sort {a,b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated
+
+        // report a skill for project2
+        skillsService.addSkill(['projectId': projId2, skillId: proj2SkillIds.get(0).get(0)], sampleUserIds.get(0), new Date())
+
+        // results two show not be affected
+        def results2 = skillsService.getProjectUsers(projId)
+        String mostRecentDate2 = results2.data.sort {a,b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated
+
+        // now report another skill for project1
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(2), new Date())
+        def results3 = skillsService.getProjectUsers(projId)
+        String mostRecentDate3 = results3.data.sort {a,b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated
+
+        then:
+        results
+        results.count == 2
+        results.totalCount == 2
+        results.data.size() == 2
+
+        results2.count == 2
+        results2.totalCount == 2
+        results2.data.size() == 2
+
+        results3.count == 3
+        results3.totalCount == 3
+        results3.data.size() == 3
+
+        mostRecentDate1 == mostRecentDate2
+        mostRecentDate3 > mostRecentDate2
+    }
+
 }
