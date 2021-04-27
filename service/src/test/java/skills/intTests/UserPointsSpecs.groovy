@@ -22,10 +22,6 @@ import org.joda.time.format.DateTimeFormatter
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
-import spock.lang.IgnoreIf
-import spock.lang.IgnoreRest
-import spock.lang.Requires
-import spock.lang.Specification
 
 class UserPointsSpecs extends DefaultIntSpec {
 
