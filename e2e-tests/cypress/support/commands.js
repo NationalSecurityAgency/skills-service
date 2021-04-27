@@ -511,7 +511,6 @@ Cypress.Commands.add('validateTable', (tableSelector, expected, pageSize = 5, on
         cy.get('@cyRows').eq(rowIndex).find('td').as('row1');
         const toValidate = expected[i];
         toValidate.forEach((item) => {
-            console.log('cell value', cy.get)
             cy.get('@row1').eq(item.colIndex).should('contain.text', item.value);
         })
     }
