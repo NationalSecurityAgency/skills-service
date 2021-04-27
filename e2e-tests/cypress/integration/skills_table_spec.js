@@ -304,7 +304,7 @@ describe('Skills Table Tests', () => {
         ], 10);
     });
 
-    it.only('change display order', () => {
+    it('change display order', () => {
         const numSkills = 4;
         for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
             const skillName = `Skill # ${skillsCounter}`;
