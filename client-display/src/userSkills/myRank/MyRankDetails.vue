@@ -95,6 +95,8 @@ limitations under the License.
                 </div>
 
             </div>
+
+            <leaderboard class="mt-3"/>
         </div>
     </section>
 </template>
@@ -109,9 +111,11 @@ limitations under the License.
 
   import SkillsTitle from '@/common/utilities/SkillsTitle';
   import SkillsSpinner from '@/common/utilities/SkillsSpinner';
+  import Leaderboard from './Leaderboard';
 
   export default {
     components: {
+      Leaderboard,
       SkillsSpinner,
       SkillsTitle,
       MyRankDetailStatCard,

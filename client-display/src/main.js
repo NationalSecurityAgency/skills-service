@@ -28,6 +28,8 @@ import {
     DropdownPlugin,
     FormInputPlugin,
     ButtonPlugin,
+    TablePlugin,
+    BadgePlugin,
 } from 'bootstrap-vue';
 
 Vue.config.productionTip = false;
@@ -37,6 +39,8 @@ Vue.use(ModalPlugin);
 Vue.use(DropdownPlugin);
 Vue.use(FormInputPlugin);
 Vue.use(ButtonPlugin);
+Vue.use(TablePlugin);
+Vue.use(BadgePlugin);
 
 require('@/common/softwareVersion/softwareVersionInterceptor');
 

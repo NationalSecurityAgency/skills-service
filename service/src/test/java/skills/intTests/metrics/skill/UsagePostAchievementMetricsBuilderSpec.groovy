@@ -24,6 +24,7 @@ import skills.metrics.builders.skill.UsagePostAchievementMetricsBuilder
 import skills.services.LockingService
 import skills.services.UserEventService
 import skills.storage.repos.UserAchievedLevelRepo
+import spock.lang.IgnoreRest
 
 class UsagePostAchievementMetricsBuilderSpec extends DefaultIntSpec {
 
@@ -36,6 +37,7 @@ class UsagePostAchievementMetricsBuilderSpec extends DefaultIntSpec {
     @Autowired
     UserEventService userEventService
 
+    @IgnoreRest
     def "produces accurate post achievement usage counts"() {
         //simple case, not taking into account event compaction boundaries
         def proj = SkillsFactory.createProject()

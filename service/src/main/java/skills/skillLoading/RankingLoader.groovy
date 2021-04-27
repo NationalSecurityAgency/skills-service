@@ -46,22 +46,6 @@ class RankingLoader {
     LevelDefinitionStorageService levelDefinitionStorageService
 
     SkillsRanking getUserSkillsRanking(String projectId, String userId, String subjectId = null){
-        /*List<Object[]> userRankings = null
-        if(subjectId == null){
-            userRankings = userPointsRepository.getUserRankingsForProject(projectId)
-        } else {
-            userRankings = userPointsRepository.getUserRankingsForSubject(projectId, subjectId)
-        }
-
-        Integer myRankIdx = userRankings?.findIndexOf { it[0].toString().equalsIgnoreCase(userId) }
-        Object[] myRank = userRankings?.get(myRankIdx)
-
-        SkillsRanking skillsRanking = null
-        if (myRank) {
-            skillsRanking = new SkillsRanking(numUsers: userRankings.size(), position: (Integer)myRank[1])
-        }
-
-        return skillsRanking*/
         UserPoints usersPoints = findUserPoints(projectId, userId, subjectId)
         return doGetUserSkillsRanking(projectId, usersPoints, subjectId)
     }
