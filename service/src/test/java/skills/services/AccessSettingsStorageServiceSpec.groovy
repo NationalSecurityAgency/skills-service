@@ -45,7 +45,6 @@ class AccessSettingsStorageServiceSpec extends Specification {
                 settingsService: settingsService,
                 defaultLandingPage: landingPage,
         )
-
         accessSettingsStorageService.settingsService = settingsService
 
         when:
