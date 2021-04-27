@@ -38,15 +38,6 @@ spring:
   lifecycle:
     timeout-per-shutdown-phase: 1m
   #logging:
-  resources:
-    cache:
-      cachecontrol:
-        cache-private: true
-        #in seconds
-        max-age: 172800
-        no-cache: false
-        no-store: false
-        must-revalidate: true
   main:
     allow-bean-definition-overriding: true
   jpa:
