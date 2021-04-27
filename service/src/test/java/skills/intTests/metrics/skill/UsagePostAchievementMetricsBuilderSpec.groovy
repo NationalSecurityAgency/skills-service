@@ -46,7 +46,7 @@ class UsagePostAchievementMetricsBuilderSpec extends DefaultIntSpec {
         skillsService.createSubject(SkillsFactory.createSubject())
         skillsService.createSkill(skill)
 
-        def users = getRandomUsers(6)
+        def users = getRandomUsers(7)
 
         // user 1 - achieved and used after
         assert skillsService.addSkill(skill, users[0], new Date() - 4).body.skillApplied
