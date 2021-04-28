@@ -51,7 +51,7 @@ describe('Users Tests', () => {
         cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Users');
 
-        // default sort order is 'Last Reported Skill' desc
+        // default sort order is 'Points Last Earned' desc
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'user5@skills.org' }, { colIndex: 2,  value: dateFormatter(m.clone().add(7, 'day')) }],
             [{ colIndex: 0,  value: 'user4@skills.org' }, { colIndex: 2,  value: dateFormatter(m.clone().add(6, 'day')) }],
@@ -61,7 +61,7 @@ describe('Users Tests', () => {
             [{ colIndex: 0,  value: 'user0@skills.org' }, { colIndex: 2,  value: dateFormatter(m.clone().add(2, 'day')) }],
         ], 5);
 
-        cy.get(`${tableSelector}`).contains('Last Reported Skill').click();
+        cy.get(`${tableSelector}`).contains('Points Last Earned').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'user0@skills.org' }, { colIndex: 2,  value: dateFormatter(m.clone().add(2, 'day')) }],
             [{ colIndex: 0,  value: 'user1@skills.org' }, { colIndex: 2,  value: dateFormatter(m.clone().add(3, 'day')) }],
