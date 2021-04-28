@@ -95,7 +95,6 @@ limitations under the License.
   import LevelService from './LevelService';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
-  import NavigationErrorMixin from '../utils/NavigationErrorMixin';
 
   export default {
     name: 'Levels',
@@ -111,7 +110,7 @@ limitations under the License.
         default: 25,
       },
     },
-    mixins: [MsgBoxMixin, NavigationErrorMixin],
+    mixins: [MsgBoxMixin],
     data() {
       return {
         loading: true,
@@ -282,6 +281,7 @@ limitations under the License.
         });
       },
       doRemoveLastItem() {
+
         if (this.$route.params.subjectId) {
           return LevelService.deleteLastLevelForSubject(this.$route.params.projectId, this.$route.params.subjectId);
         }
