@@ -196,7 +196,9 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             LEFT JOIN (
                 SELECT user_id, 
                 max(performed_on) AS performedOn 
-                FROM user_performed_skill upa GROUP BY user_id
+                FROM user_performed_skill upa 
+                WHERE upa.project_id=?1 
+                GROUP BY user_id
                 ) upa ON upa.user_id = up.user_id
             LEFT JOIN (
                 SELECT 
@@ -239,18 +241,21 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
 
     @Query('''SELECT 
                 up.userId as userId, 
-                max(up.updated) as lastUpdated, 
+                max(upa.performedOn) as lastUpdated, 
                 sum(up.points) as totalPoints,
                 max(ua.firstName) as firstName,
                 max(ua.lastName) as lastName,
                 max(ua.dn) as dn,
                 max(ua.email) as email,
                 max(ua.userIdForDisplay) as userIdForDisplay  
-            from UserPoints up, UserAttrs ua 
+            from UserPoints up, UserAttrs ua, UserPerformedSkill upa
             where 
                 up.userId = ua.userId and
                 up.projectId=?1 and 
                 up.skillId in (?2) and
+                upa.userId = ua.userId and
+                upa.projectId=?1 and 
+                upa.skillId in (?2) and
                 (upper(CONCAT(ua.firstName, ' ', ua.lastName, ' (',  ua.userIdForDisplay, ')')) like UPPER(CONCAT('%', ?3, '%')) OR 
                  upper(ua.userIdForDisplay) like UPPER(CONCAT('%', ?3, '%'))) and 
                 up.day is null 
