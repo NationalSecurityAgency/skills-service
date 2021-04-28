@@ -106,7 +106,7 @@ limitations under the License.
               },
               {
                 key: 'lastUpdated',
-                label: 'Last Reported Skill',
+                label: 'Points Last Earned',
                 sortable: true,
               },
             ],
