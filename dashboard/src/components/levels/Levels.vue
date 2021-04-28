@@ -95,6 +95,7 @@ limitations under the License.
   import LevelService from './LevelService';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
+  import NavigationErrorMixin from '../utils/NavigationErrorMixin';
 
   export default {
     name: 'Levels',
@@ -110,7 +111,7 @@ limitations under the License.
         default: 25,
       },
     },
-    mixins: [MsgBoxMixin],
+    mixins: [MsgBoxMixin, NavigationErrorMixin],
     data() {
       return {
         loading: true,
@@ -265,23 +266,26 @@ limitations under the License.
         const msg = 'Are you absolutely sure you want to delete the highest Level?';
         this.msgConfirm(msg, 'WARNING: Delete Highest Level').then((res) => {
           if (res) {
-            this.doRemoveLastItem();
+            this.table.options.busy = true;
+            this.doRemoveLastItem().then(() => {
+              this.loadLevels();
+            }).catch((error) => {
+              if (error?.response?.data) {
+                this.msgOk(error.response.data.explanation, 'Unable to delete');
+              } else {
+                // eslint-disable-next-line
+                console.error(error);
+              }
+              this.table.options.busy = false;
+            });
           }
         });
       },
       doRemoveLastItem() {
-        this.table.options.busy = true;
         if (this.$route.params.subjectId) {
-          LevelService.deleteLastLevelForSubject(this.$route.params.projectId, this.$route.params.subjectId)
-            .then(() => {
-              this.loadLevels();
-            });
-        } else {
-          LevelService.deleteLastLevelForProject(this.$route.params.projectId)
-            .then(() => {
-              this.loadLevels();
-            });
+          return LevelService.deleteLastLevelForSubject(this.$route.params.projectId, this.$route.params.subjectId);
         }
+        return LevelService.deleteLastLevelForProject(this.$route.params.projectId);
       },
       getLastItemLevel() {
         const lastLevel = [...this.levels].sort((a, b) => {

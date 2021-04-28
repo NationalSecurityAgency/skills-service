@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 // const attachFiles = require('cypress-form-data-with-file-upload');
+import dayjs from 'dayjs';
+import relativeTimePlugin from 'dayjs/plugin/relativeTime';
+import advancedFormatPlugin from 'dayjs/plugin/advancedFormat';
+
+dayjs.extend(relativeTimePlugin);
+dayjs.extend(advancedFormatPlugin);
 
 describe('Levels Management Tests', () => {
 
@@ -318,6 +324,76 @@ describe('Levels Management Tests', () => {
 
         cy.get('[data-cy=removeLevel]').should('be.disabled');
     })
+
+    it('attempt to remove achieved subject levels', () => {
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: 'skill1',
+            name: `This is 1`,
+            type: 'Skill',
+            pointIncrement: 100,
+            numPerformToCompletion: 5,
+            pointIncrementInterval: 0,
+            numMaxOccurrencesIncrementInterval: -1,
+            version: 0,
+        });
+
+        const now = dayjs()
+        cy.reportSkill(1,1, 'user@skills.org', now.format('YYYY-MM-DD HH:mm'), false);
+        cy.reportSkill(1,1, 'user@skills.org', now.subtract(1, 'day').format('YYYY-MM-DD HH:mm'), false);
+        cy.reportSkill(1,1, 'user@skills.org', now.subtract(2, 'day').format('YYYY-MM-DD HH:mm'), false);
+        cy.reportSkill(1,1, 'user@skills.org', now.subtract(3, 'day').format('YYYY-MM-DD HH:mm'), false);
+        cy.reportSkill(1,1, 'user@skills.org', now.subtract(4, 'day').format('YYYY-MM-DD HH:mm'), false);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.clickNav('Levels');
+
+        cy.get('[data-cy=removeLevel]').click();
+        cy.contains('YES, Delete It').click();
+        cy.contains('Unable to delete').should('be.visible');
+        cy.contains('Unable to delete level 5, 1 user has achieved this level').should('be.visible');
+    });
+
+    it('attempt to remove achieved project levels', () => {
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: 'skill1',
+            name: `This is 1`,
+            type: 'Skill',
+            pointIncrement: 100,
+            numPerformToCompletion: 5,
+            pointIncrementInterval: 0,
+            numMaxOccurrencesIncrementInterval: -1,
+            version: 0,
+        });
+
+        const now = dayjs()
+        cy.reportSkill(1,1, 'user@skills.org', now.format('YYYY-MM-DD HH:mm'), false);
+        cy.reportSkill(1,1, 'user@skills.org', now.subtract(1, 'day').format('YYYY-MM-DD HH:mm'), false);
+        cy.reportSkill(1,1, 'user@skills.org', now.subtract(2, 'day').format('YYYY-MM-DD HH:mm'), false);
+        cy.reportSkill(1,1, 'user@skills.org', now.subtract(3, 'day').format('YYYY-MM-DD HH:mm'), false);
+        cy.reportSkill(1,1, 'user@skills.org', now.subtract(4, 'day').format('YYYY-MM-DD HH:mm'), false);
+
+        cy.visit('/administrator/projects/proj1/');
+        cy.clickNav('Levels');
+
+        cy.get('[data-cy=removeLevel]').click();
+        cy.contains('YES, Delete It').click();
+        cy.contains('Unable to delete').should('be.visible');
+        cy.contains('Unable to delete level 5, 1 user has achieved this level').should('be.visible');
+    });
 
 
     it('subject: remove levels', () => {

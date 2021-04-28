@@ -36,12 +36,29 @@ const handlPush = (page) => {
 };
 
 function errorResponseHandler(error) {
-  // check if the caller wants to handle the error with displaying the errorPage/dialog
+  // check if the caller wants to handle all errors
   if (Object.prototype.hasOwnProperty.call(error.config, 'handleError') && error.config.handleError === false) {
     return Promise.reject(error);
   }
 
   const errorCode = error.response ? error.response.status : undefined;
+
+  // check if the caller wants to handle a specific error status code
+  if (Object.prototype.hasOwnProperty.call(error.config, 'handleErrorCode')) {
+    if (Array.isArray(error.config.handleErrorCode)) {
+      if (error.config.handleErrorCode.find((el) => el === errorCode)) {
+        return Promise.reject(error);
+      }
+    } else if (typeof error.config.handleErrorCode === 'string' && error.config.handleErrorCode.contains(',')) {
+      const arr = error.config.handleErrorCode.split(',');
+      if (arr.find((el) => el === errorCode)) {
+        return Promise.reject(error);
+      }
+    } else if (error.config.handleErrorCode === errorCode) {
+      return Promise.reject(error);
+    }
+  }
+
   if (errorCode === 401) {
     store.commit('clearAuthData');
     const path = window.location.pathname;
