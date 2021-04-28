@@ -22,9 +22,6 @@ import org.joda.time.format.DateTimeFormatter
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
-import spock.lang.IgnoreIf
-import spock.lang.Requires
-import spock.lang.Specification
 
 class UserPointsSpecs extends DefaultIntSpec {
 
@@ -34,6 +31,9 @@ class UserPointsSpecs extends DefaultIntSpec {
     List<String> subjects
     List<List<String>> allSkillIds
     String badgeId
+    
+    Date threeDaysAgo = new Date()-3
+    DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").withZoneUTC()
 
     def setup(){
         skillsService.deleteProjectIfExist(projId)
@@ -42,9 +42,9 @@ class UserPointsSpecs extends DefaultIntSpec {
         allSkillIds = setupProjectWithSkills(subjects)
         badgeId = 'badge1'
 
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(0), new Date())
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(1).get(0)], sampleUserIds.get(0), new Date())
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(1).get(0)], sampleUserIds.get(1), new Date())
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(0), threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(1).get(0)], sampleUserIds.get(0), threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(1).get(0)], sampleUserIds.get(1), threeDaysAgo)
 
         skillsService.addBadge([projectId: projId, badgeId: badgeId, name: 'Badge 1'])
         skillsService.assignSkillToBadge([projectId: projId, badgeId: badgeId, skillId: allSkillIds.get(0).get(0)])
@@ -63,6 +63,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results.data.get(0).totalPoints == 70
         results.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
         results.data.get(1).totalPoints == 35
+        results.data.sort {a,b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == DTF.print(threeDaysAgo.time)
     }
 
     def 'get project users with paging'() {
@@ -118,6 +119,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.data.size() == 1
         results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
         results1.data.get(0).totalPoints == 35
+        results1.data.sort {a,b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == DTF.print(threeDaysAgo.time)
 
         results2
         results2.count == 2
@@ -127,6 +129,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results2.data.get(0).totalPoints == 35
         results2.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
         results2.data.get(1).totalPoints == 35
+        results2.data.sort {a,b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == DTF.print(threeDaysAgo.time)
 
         results3
         results3.count == 0
@@ -147,6 +150,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.data.size() == 1
         results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
         results1.data.get(0).totalPoints == 35
+        results2.data.sort {a,b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == DTF.print(threeDaysAgo.time)
 
         results2
         results2.count == 2
@@ -156,6 +160,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results2.data.get(0).totalPoints == 35
         results2.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
         results2.data.get(1).totalPoints == 35
+        results2.data.sort {a,b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == DTF.print(threeDaysAgo.time)
 
         results3
         results3.count == 0
@@ -234,9 +239,9 @@ class UserPointsSpecs extends DefaultIntSpec {
         createAcctService.createUser([firstName: "Jane", lastName: "Doe", email: "jadoe@email.foo", password: "password"])
         createAcctService.createUser([firstName: "Foo", lastName: "Bar", email: "fbar@email.foo", password: "password"])
 
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "jdoe@email.foo", new Date())
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "jadoe@email.foo", new Date())
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "fbar@email.foo", new Date())
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "jdoe@email.foo", threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "jadoe@email.foo", threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "fbar@email.foo", threeDaysAgo)
 
         when:
 
@@ -266,9 +271,9 @@ class UserPointsSpecs extends DefaultIntSpec {
         createAcctService.createUser([firstName: "Jane", lastName: "Doe", email: "jadoe@email.foo", password: "password"])
         createAcctService.createUser([firstName: "Foo", lastName: "Bar", email: "fbar@email.foo", password: "password"])
 
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "jdoe@email.foo", new Date())
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "jadoe@email.foo", new Date())
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "fbar@email.foo", new Date())
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "jdoe@email.foo", threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "jadoe@email.foo", threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "fbar@email.foo", threeDaysAgo)
 
         when:
         def allUsers = skillsService.getProjectUsers(projId)
@@ -317,14 +322,14 @@ class UserPointsSpecs extends DefaultIntSpec {
         createAcctService.createUser([firstName: "Ggg", lastName: "Ggg", email: "ggg@email.foo", password: "password"])
         createAcctService.createUser([firstName: "Hhh", lastName: "Hhh", email: "hhh@email.foo", password: "password"])
 
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "aaa@email.foo", new Date())
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "bbb@email.foo", new Date())
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "ccc@email.foo", new Date())
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "ddd@email.foo", new Date())
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "eee@email.foo", new Date())
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "fff@email.foo", new Date())
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "ggg@email.foo", new Date())
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "hhh@email.foo", new Date())
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "aaa@email.foo", threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "bbb@email.foo", threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "ccc@email.foo", threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "ddd@email.foo", threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "eee@email.foo", threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "fff@email.foo", threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "ggg@email.foo", threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "hhh@email.foo", threeDaysAgo)
 
         when:
         def firstPage = skillsService.getProjectUsers(projId, 5, 1, "userId", true, "foo")
@@ -346,34 +351,34 @@ class UserPointsSpecs extends DefaultIntSpec {
 
 
 
-    private List<List<String>> setupProjectWithSkills(List<String> subjects = ['testSubject1', 'testSubject2']) {
+    private List<List<String>> setupProjectWithSkills(List<String> subjects = ['testSubject1', 'testSubject2'], String projectId=projId, name="Test Project") {
         List<List<String>> skillIds = []
-        skillsService.createProject([projectId: projId, name: "Test Project"])
+        skillsService.createProject([projectId: projectId, name: name])
         subjects.eachWithIndex { String subject, int index ->
-            skillsService.createSubject([projectId: projId, subjectId: subject, name: "Test Subject $index".toString()])
-            skillIds << addDependentSkills(subject, 3)
+            skillsService.createSubject([projectId: projectId, subjectId: subject, name: "Test Subject $index".toString()])
+            skillIds << addDependentSkills(projectId,  subject, 3)
         }
         return skillIds
     }
 
-    private List<String> addDependentSkills(String subject, int dependencyLevels = 1, int skillsAtEachLevel = 1) {
+    private List<String> addDependentSkills(String projectId, String subject, int dependencyLevels = 1, int skillsAtEachLevel = 1) {
         List<String> parentSkillIds = []
         List<String> allSkillIds = []
 
         for (int i = 0; i < dependencyLevels; i++) {
-            parentSkillIds = addSkillsForSubject(subject, skillsAtEachLevel, parentSkillIds)
+            parentSkillIds = addSkillsForSubject(projectId, subject, skillsAtEachLevel, parentSkillIds)
             allSkillIds.addAll(parentSkillIds)
         }
         return allSkillIds
     }
 
-    private List<String> addSkillsForSubject(String subject, int numSkills = 1, List<String> dependentSkillIds = Collections.emptyList()) {
+    private List<String> addSkillsForSubject(String projectId, String subject, int numSkills = 1, List<String> dependentSkillIds = Collections.emptyList()) {
         List<String> skillIds = []
         for (int i = 0; i < numSkills; i++) {
             String skillId = 'skill' + RandomStringUtils.randomAlphabetic(5)
             skillsService.createSkill(
                     [
-                            projectId: projId,
+                            projectId: projectId,
                             subjectId: subject,
                             skillId: skillId,
                             name: 'Test Skill ' + RandomStringUtils.randomAlphabetic(8),
@@ -387,4 +392,47 @@ class UserPointsSpecs extends DefaultIntSpec {
         }
         return skillIds
     }
+
+
+    def 'get project users respects project id for lastUpdatedDate'() {
+        when:
+        // setup a second project
+        String projId2 = 'proj2'
+        skillsService.deleteProjectIfExist(projId2)
+
+        List<List<String>> proj2SkillIds = setupProjectWithSkills(['testSubject1', 'testSubject2', 'testSubject3'], projId2, 'Test Project 2')
+
+        def results = skillsService.getProjectUsers(projId)
+        String mostRecentDate1 = results.data.sort {a,b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated
+
+        // report a skill for project2
+        skillsService.addSkill(['projectId': projId2, skillId: proj2SkillIds.get(0).get(0)], sampleUserIds.get(0), new Date())
+
+        // results two show not be affected
+        def results2 = skillsService.getProjectUsers(projId)
+        String mostRecentDate2 = results2.data.sort {a,b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated
+
+        // now report another skill for project1
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(2), new Date())
+        def results3 = skillsService.getProjectUsers(projId)
+        String mostRecentDate3 = results3.data.sort {a,b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated
+
+        then:
+        results
+        results.count == 2
+        results.totalCount == 2
+        results.data.size() == 2
+
+        results2.count == 2
+        results2.totalCount == 2
+        results2.data.size() == 2
+
+        results3.count == 3
+        results3.totalCount == 3
+        results3.data.size() == 3
+
+        mostRecentDate1 == mostRecentDate2
+        mostRecentDate3 > mostRecentDate2
+    }
+
 }

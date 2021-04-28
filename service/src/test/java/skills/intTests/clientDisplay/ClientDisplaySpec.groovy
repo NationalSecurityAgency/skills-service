@@ -16,11 +16,22 @@
 package skills.intTests.clientDisplay
 
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import spock.lang.IgnoreRest
 
 class ClientDisplaySpec extends DefaultIntSpec {
+
+    def "clientPortal index page should not be cached"() {
+        when:
+        ResponseEntity<String> responseEntity = skillsService.wsHelper.rawGet("static/clientPortal/index.html", [:])
+
+        then:
+        responseEntity.statusCode.is2xxSuccessful()
+        responseEntity.headers.getCacheControl() == "no-store"
+    }
 
     def "summary for an empty subject"() {
         def proj1 = SkillsFactory.createProject()
