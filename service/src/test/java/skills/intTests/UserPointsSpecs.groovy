@@ -31,6 +31,9 @@ class UserPointsSpecs extends DefaultIntSpec {
     List<String> subjects
     List<List<String>> allSkillIds
     String badgeId
+    
+    Date threeDaysAgo = new Date()-3
+    DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").withZoneUTC()
 
     def setup(){
         skillsService.deleteProjectIfExist(projId)
@@ -39,9 +42,9 @@ class UserPointsSpecs extends DefaultIntSpec {
         allSkillIds = setupProjectWithSkills(subjects)
         badgeId = 'badge1'
 
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(0), new Date())
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(1).get(0)], sampleUserIds.get(0), new Date())
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(1).get(0)], sampleUserIds.get(1), new Date())
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(0), threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(1).get(0)], sampleUserIds.get(0), threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(1).get(0)], sampleUserIds.get(1), threeDaysAgo)
 
         skillsService.addBadge([projectId: projId, badgeId: badgeId, name: 'Badge 1'])
         skillsService.assignSkillToBadge([projectId: projId, badgeId: badgeId, skillId: allSkillIds.get(0).get(0)])
@@ -60,6 +63,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results.data.get(0).totalPoints == 70
         results.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
         results.data.get(1).totalPoints == 35
+        results.data.sort {a,b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == DTF.print(threeDaysAgo.time)
     }
 
     def 'get project users with paging'() {
@@ -115,6 +119,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.data.size() == 1
         results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
         results1.data.get(0).totalPoints == 35
+        results1.data.sort {a,b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == DTF.print(threeDaysAgo.time)
 
         results2
         results2.count == 2
@@ -124,6 +129,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results2.data.get(0).totalPoints == 35
         results2.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
         results2.data.get(1).totalPoints == 35
+        results2.data.sort {a,b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == DTF.print(threeDaysAgo.time)
 
         results3
         results3.count == 0
@@ -144,6 +150,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.data.size() == 1
         results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
         results1.data.get(0).totalPoints == 35
+        results2.data.sort {a,b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == DTF.print(threeDaysAgo.time)
 
         results2
         results2.count == 2
@@ -153,6 +160,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results2.data.get(0).totalPoints == 35
         results2.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
         results2.data.get(1).totalPoints == 35
+        results2.data.sort {a,b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == DTF.print(threeDaysAgo.time)
 
         results3
         results3.count == 0
@@ -231,9 +239,9 @@ class UserPointsSpecs extends DefaultIntSpec {
         createAcctService.createUser([firstName: "Jane", lastName: "Doe", email: "jadoe@email.foo", password: "password"])
         createAcctService.createUser([firstName: "Foo", lastName: "Bar", email: "fbar@email.foo", password: "password"])
 
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "jdoe@email.foo", new Date())
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "jadoe@email.foo", new Date())
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "fbar@email.foo", new Date())
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "jdoe@email.foo", threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "jadoe@email.foo", threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "fbar@email.foo", threeDaysAgo)
 
         when:
 
@@ -263,9 +271,9 @@ class UserPointsSpecs extends DefaultIntSpec {
         createAcctService.createUser([firstName: "Jane", lastName: "Doe", email: "jadoe@email.foo", password: "password"])
         createAcctService.createUser([firstName: "Foo", lastName: "Bar", email: "fbar@email.foo", password: "password"])
 
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "jdoe@email.foo", new Date())
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "jadoe@email.foo", new Date())
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "fbar@email.foo", new Date())
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "jdoe@email.foo", threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "jadoe@email.foo", threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "fbar@email.foo", threeDaysAgo)
 
         when:
         def allUsers = skillsService.getProjectUsers(projId)
@@ -314,14 +322,14 @@ class UserPointsSpecs extends DefaultIntSpec {
         createAcctService.createUser([firstName: "Ggg", lastName: "Ggg", email: "ggg@email.foo", password: "password"])
         createAcctService.createUser([firstName: "Hhh", lastName: "Hhh", email: "hhh@email.foo", password: "password"])
 
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "aaa@email.foo", new Date())
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "bbb@email.foo", new Date())
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "ccc@email.foo", new Date())
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "ddd@email.foo", new Date())
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "eee@email.foo", new Date())
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "fff@email.foo", new Date())
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "ggg@email.foo", new Date())
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "hhh@email.foo", new Date())
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "aaa@email.foo", threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "bbb@email.foo", threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "ccc@email.foo", threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "ddd@email.foo", threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "eee@email.foo", threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "fff@email.foo", threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "ggg@email.foo", threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "hhh@email.foo", threeDaysAgo)
 
         when:
         def firstPage = skillsService.getProjectUsers(projId, 5, 1, "userId", true, "foo")
