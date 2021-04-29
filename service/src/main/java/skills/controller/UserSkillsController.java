@@ -278,6 +278,7 @@ class UserSkillsController {
         String requestedUserId = skillEventRequest != null ? skillEventRequest.getUserId() : null;
         Long requestedTimestamp = skillEventRequest != null ? skillEventRequest.getTimestamp() : null;
         Boolean notifyIfSkillNotApplied = skillEventRequest != null ? skillEventRequest.getNotifyIfSkillNotApplied() : false;
+        Boolean isRetry = skillEventRequest != null ? skillEventRequest.getIsRetry() : false;
 
         Date incomingDate = null;
 
@@ -290,8 +291,8 @@ class UserSkillsController {
         SkillEventResult result;
         String userId = userInfoService.getUserName(requestedUserId, false);
         if (log.isInfoEnabled()) {
-            log.info("ReportSkill (ProjectId=[{}], SkillId=[{}], CurrentUser=[{}], RequestUser=[{}], RequestDate=[{}])",
-                    new String[]{projectId, skillId, userInfoService.getCurrentUserId(), requestedUserId, toDateString(requestedTimestamp)});
+            log.info("ReportSkill (ProjectId=[{}], SkillId=[{}], CurrentUser=[{}], RequestUser=[{}], RequestDate=[{}], IsRetry=[{}])",
+                    new String[]{projectId, skillId, userInfoService.getCurrentUserId(), requestedUserId, toDateString(requestedTimestamp), isRetry.toString()});
         }
 
         String prof = "retry-reportSkill";

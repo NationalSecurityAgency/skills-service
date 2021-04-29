@@ -19,6 +19,7 @@ class SkillEventRequest {
     String userId
     Long timestamp
     Boolean notifyIfSkillNotApplied = false
+    Boolean isRetry = false
 
     // this is an optional approval message
     // Note: only applicable in case of self reporting with approval
