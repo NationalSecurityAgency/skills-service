@@ -475,6 +475,34 @@ Cypress.Commands.add('loginBySingleSignOn', (projId = 'proj1') => {
     })
 });
 
+Cypress.Commands.add("loginAsRootUser", () => {
+    cy.fixture('vars.json').then((vars) => {
+        cy.request('POST', '/logout');
+        cy.login(vars.rootUser, vars.defaultPass);
+    });
+})
+
+Cypress.Commands.add("loginAsDefaultUser", () => {
+    cy.fixture('vars.json').then((vars) => {
+        cy.request('POST', '/logout');
+        cy.login(vars.defaultUser, vars.defaultPass);
+    });
+})
+
+Cypress.Commands.add("loginAsProxyUser", () => {
+    cy.fixture('vars.json')
+        .then((vars) => {
+            cy.request('POST', '/logout');
+            if (!Cypress.env('oauthMode')) {
+                cy.log('NOT in oauthMode, using form login')
+                cy.login(Cypress.env('proxyUser'), vars.defaultPass);
+            } else {
+                cy.log('oauthMode, using loginBySingleSignOn')
+                cy.loginBySingleSignOn()
+            }
+        })
+});
+
 Cypress.Commands.add('fill', {
     prevSubject: 'element',
 }, ($subject, value) => {
