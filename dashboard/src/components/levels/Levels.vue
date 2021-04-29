@@ -281,7 +281,6 @@ limitations under the License.
         });
       },
       doRemoveLastItem() {
-
         if (this.$route.params.subjectId) {
           return LevelService.deleteLastLevelForSubject(this.$route.params.projectId, this.$route.params.subjectId);
         }
