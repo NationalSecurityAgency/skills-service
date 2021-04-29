@@ -21,8 +21,6 @@ import skills.controller.request.model.SkillRequest
 import skills.storage.model.SkillDef
 
 import static skills.services.inception.InceptionProjectService.*
-import static skills.services.inception.InceptionProjectService.inceptionProjectId
-import static skills.services.inception.InceptionProjectService.subjectProjectId
 
 @Component
 class InceptionSkills {
