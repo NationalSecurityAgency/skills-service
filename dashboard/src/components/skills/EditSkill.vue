@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit}" slim>
+  <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit }" slim>
     <b-modal :id="skillInternal.skillId" size="xl" :title="title" v-model="show" :no-close-on-backdrop="true"
              header-bg-variant="info" header-text-variant="light" no-fade role="dialog" @hide="publishHidden"
              :aria-label="isEdit?'Edit Skill':'New Skill'">
@@ -24,7 +24,7 @@ limitations under the License.
             <div class="col-12 col-lg">
               <div class="form-group">
                 <label for="skillName">* Skill Name</label>
-                <ValidationProvider rules="required|minNameLength|maxSkillNameLength|uniqueName" v-slot="{errors}" name="Skill Name">
+                <ValidationProvider rules="required|minNameLength|maxSkillNameLength|uniqueName" v-slot="{errors}" name="Skill Name" ref="skillNameProvider">
                   <input type="text" class="form-control" id="skillName" @input="updateSkillId"
                          v-model="skillInternal.name" v-focus
                          aria-required="true"
@@ -278,6 +278,11 @@ limitations under the License.
         type: Boolean,
         required: true,
       },
+      isCopy: {
+        type: Boolean,
+        required: false,
+        default: false,
+      },
       value: {
         type: Boolean,
         required: true,
@@ -320,7 +325,10 @@ limitations under the License.
     },
     mounted() {
       if (this.isEdit) {
-        this.loadSkillDetails();
+        this.loadSkillDetails(false);
+        this.selfReport.loading = false;
+      } else if (this.isCopy) {
+        this.loadSkillDetails(true);
         this.selfReport.loading = false;
       } else {
         this.skillInternal = { version: 0, ...this.skillInternal };
@@ -478,10 +486,22 @@ limitations under the License.
             }
           });
       },
-      loadSkillDetails() {
+      loadSkillDetails(isCopy) {
         SkillsService.getSkillDetails(this.projectId, this.subjectId, this.skillId)
           .then((loadedSkill) => {
-            this.skillInternal = { originalSkillId: loadedSkill.skillId, isEdit: this.isEdit, ...loadedSkill };
+            if (!isCopy) {
+              this.skillInternal = { originalSkillId: loadedSkill.skillId, isEdit: this.isEdit, ...loadedSkill };
+            } else {
+              const copy = { ...loadedSkill };
+              copy.name = `Copy of ${loadedSkill.name}`;
+              copy.skillId = `copy_of_${loadedSkill.skillId}`;
+              this.skillInternal = { isEdit: false, ...copy };
+              const self = this;
+              setTimeout(() => {
+                // force validation so that form becomes valid, otherwise the save button never becomes enabled
+                self.$refs.observer.validate();
+              }, 0);
+            }
             this.initial.skillId = this.skillInternal.skillId;
             this.initial.skillName = this.skillInternal.name;
           })
