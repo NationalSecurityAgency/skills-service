@@ -38,7 +38,7 @@ class LoggerHelper {
     List<ILoggingEvent> getLogEvents() {
         List<ILoggingEvent> copy = new ArrayList<>(listAppender.list)
         return copy.findAll {
-            return it.timeStamp > start
+            return it.timeStamp >= start
         }
     }
 
