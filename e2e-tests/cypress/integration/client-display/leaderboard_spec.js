@@ -17,7 +17,7 @@ import moment from 'moment';
 
 const dateFormatter = value => moment.utc(value).format('YYYY-MM-DD[T]HH:mm:ss[Z]');
 
-describe('Client Display Features Tests', () => {
+describe('Client Display Leaderboard Tests', () => {
   const snapshotOptions = {
     blackout: ['[data-cy=pointHistoryChart]'],
     failureThreshold: 0.03, // threshold for entire image
@@ -33,11 +33,19 @@ describe('Client Display Features Tests', () => {
   it('display leaderboard', () => {
     cy.createProject(1)
     cy.createSubject(1,1)
-    cy.createSkill(1,1,1)
-    cy.reportSkill(1,1, 'user@skills.org', '2021-02-24 10:00');
-    cy.reportSkill(1,1, 'user@skills.org', '2021-02-25 10:00');
-    cy.reportSkill(1,1, 'user1@skills.org', '2021-02-24 10:00');
-    cy.reportSkill(1,1, 'user0', '2021-02-24 10:00');
+    cy.createSubject(1,2)
+    for (let i = 1; i <= 10; i += 1) {
+      cy.createSkill(1,1,i)
+    }
+    for (let i = 11; i <= 20; i += 1) {
+      cy.createSkill(1,2,i)
+    }
+
+    for (let i = 1; i <= 12; i += 1) {
+      for (let reportCounter = 1; reportCounter <= i; reportCounter += 1){
+        cy.reportSkill(1,reportCounter, `user${i}@skills.org1`, '2021-02-24 10:00');
+      }
+    }
     cy.cdVisit('/');
     cy.cdClickRank();
   });

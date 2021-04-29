@@ -30,6 +30,8 @@ import {
     ButtonPlugin,
     TablePlugin,
     BadgePlugin,
+    ProgressPlugin,
+    SpinnerPlugin,
 } from 'bootstrap-vue';
 
 Vue.config.productionTip = false;
@@ -41,6 +43,8 @@ Vue.use(FormInputPlugin);
 Vue.use(ButtonPlugin);
 Vue.use(TablePlugin);
 Vue.use(BadgePlugin);
+Vue.use(ProgressPlugin);
+Vue.use(SpinnerPlugin);
 
 require('@/common/softwareVersion/softwareVersionInterceptor');
 

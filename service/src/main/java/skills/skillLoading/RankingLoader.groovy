@@ -23,6 +23,10 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Component
 import skills.services.LevelDefinitionStorageService
+import skills.skillLoading.model.LeaderboardRes
+import skills.skillLoading.model.RankedUserRes
+import skills.storage.model.ProjDef
+import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPointsRepo
 import skills.storage.model.UserAchievement
@@ -45,9 +49,57 @@ class RankingLoader {
     @Autowired
     LevelDefinitionStorageService levelDefinitionStorageService
 
+    @Autowired
+    ProjDefRepo projDefRepo
+
     SkillsRanking getUserSkillsRanking(String projectId, String userId, String subjectId = null){
         UserPoints usersPoints = findUserPoints(projectId, userId, subjectId)
         return doGetUserSkillsRanking(projectId, usersPoints, subjectId)
+    }
+
+    LeaderboardRes getLeaderboard(String projectId, String userId, LeaderboardRes.Type type, String subjectId = null){
+        ProjDef projDef = projDefRepo.findByProjectId(projectId)
+
+        int count = 1;
+        List<UserPointsRepo.RankedUserRes> rankedUserRes
+
+        if (type == LeaderboardRes.Type.tenAroundMe) {
+            UserPoints myPoints = userPointsRepository.findByProjectIdAndUserIdAndSkillIdAndDay(projectId, userId, null, null)
+        } else {
+            boolean isBottom = type == LeaderboardRes.Type.bottomTen
+            int size = 10
+            Sort.Direction sort = isBottom ? Sort.Direction.ASC : Sort.Direction.DESC
+            PageRequest pageRequest = PageRequest.of(0, size, sort, "points")
+            rankedUserRes = subjectId ?
+                    userPointsRepository.findUsersForLeaderboard(projectId, subjectId, pageRequest) :
+                    userPointsRepository.findUsersForLeaderboard(projectId, pageRequest)
+            if (isBottom) {
+                int numUsers = findNumberOfUsers(projectId, subjectId) as int
+                count = numUsers - (size - 1)
+                rankedUserRes = rankedUserRes.reverse()
+            }
+        }
+
+        List<RankedUserRes> res = convertToRankedUserRes(rankedUserRes, count, userId)
+        return new LeaderboardRes(rankedUsers: res, totalProjPoints: projDef.totalPoints)
+    }
+
+    private
+
+    private List<RankedUserRes> convertToRankedUserRes(List<UserPointsRepo.RankedUserRes> rankedUserRes, int startRank, String userId) {
+        int count = startRank
+        List<RankedUserRes> res = rankedUserRes.collect {
+            new RankedUserRes(
+                    rank: count++,
+                    userId: it.getUserIdForDisplay(),
+                    firstName: it.getUserFirstName(),
+                    lastName: it.getUserLastName(),
+                    points: it.getPoints(),
+                    userFirstSeenTimestamp: it.getUserFirstSeenTimestamp()?.getTime(),
+                    isItMe: it.getUserId() == userId,
+            )
+        }
+        return res
     }
 
     @Profile

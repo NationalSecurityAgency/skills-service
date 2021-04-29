@@ -156,6 +156,18 @@ export default {
     return response;
   },
 
+  getLeaderboard(subjectId, type) {
+    let response = null;
+    let url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/subjects/${subjectId}/leaderboard?type=${type}`;
+    if (!subjectId) {
+      url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/leaderboard?type=${type}`;
+    }
+    response = axios.get(url, {
+      params: this.getUserIdParams(),
+    }).then((result) => result.data);
+    return response;
+  },
+
   getUserSkillsRankingDistribution(subjectId) {
     let response = null;
     let url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/subjects/${subjectId}/rankDistribution`;
