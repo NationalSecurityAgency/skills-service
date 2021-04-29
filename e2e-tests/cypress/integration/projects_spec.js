@@ -43,6 +43,18 @@ describe('Projects Tests', () => {
     cy.contains('ID: MyNewtestProject')
   });
 
+  it('Preview project training plan', function () {
+    cy.request('POST', '/app/projects/proj1', {
+      projectId: 'proj1',
+      name: "proj1"
+    })
+
+    cy.visit('/administrator/projects/proj1/');
+    cy.get('[data-cy=projectPreview]').should('be.visible');
+    cy.get('[data-cy=projectPreview]').click();
+    cy.contains('Client Display Preview').should('be.visible');
+  });
+
 
   it('Create new project using enter key', function () {
     cy.intercept('GET', '/app/projects').as('loadProjects');
