@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
+import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.EditLevelRequest
 import skills.controller.request.model.NextLevelRequest
@@ -289,11 +290,15 @@ class LevelDefinitionStorageService {
 
             int usersAtLevel = achievedLevelRepository.countByProjectIdAndSkillIdAndLevel(projectId, skillId, removed.level)
             if(usersAtLevel > 0){
-                throw new skills.controller.exceptions.SkillException("Unable to delete level ${removed.level}, $usersAtLevel ${usersAtLevel > 1 ? 'users have' : 'user has'} achieved this level")
+                SkillException ske = new SkillException("Unable to delete level ${removed.level}, $usersAtLevel ${usersAtLevel > 1 ? 'users have' : 'user has'} achieved this level")
+                ske.errorCode = ErrorCode.ConstraintViolation
+                throw ske
             }
 
             if (globalBadgesService.isProjectLevelUsedInGlobalBadge(projectId, removed.level)) {
-                throw new SkillException("Level [${removed.level}] for project with id [${projectId}] cannot be deleted as it is currently referenced by one or more global badges")
+                SkillException ske = new SkillException("Level [${removed.level}] for project with id [${projectId}] cannot be deleted as it is currently referenced by one or more global badges")
+                ske.errorCode = ErrorCode.ConstraintViolation
+                throw ske
             }
 
             levelDefinitionRepository.deleteById(removed.id)

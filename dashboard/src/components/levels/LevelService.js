@@ -26,11 +26,11 @@ export default {
   },
   deleteLastLevelForProject(projectId) {
     const url = `/admin/projects/${projectId}/levels/last`;
-    return axios.delete(url);
+    return axios.delete(url, { handleErrorCode: 400 }).then((resp) => resp.data);
   },
   deleteLastLevelForSubject(projectId, subjectId) {
     const url = `/admin/projects/${projectId}/subjects/${subjectId}/levels/last`;
-    return axios.delete(url);
+    return axios.delete(url, { handleErrorCode: 400 }).then((resp) => resp.data);
   },
   createNewLevelForProject(projectId, nextLevelObject) {
     const url = `/admin/projects/${projectId}/levels/next`;
