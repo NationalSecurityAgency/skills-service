@@ -420,7 +420,7 @@ describe('Client Display Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]');
     });
 
-    it.only('skills search and skills filter selected', () => {
+    it('skills search and skills filter selected', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, {name: 'Search blah skill 1'});
         cy.createSkill(1, 1, 2, {name: 'is a skill 2'});
