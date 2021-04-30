@@ -117,7 +117,7 @@ describe('Users Tests', () => {
             const charToAdd = String.fromCharCode(97 + i);
             cy.request('POST', `/api/projects/proj1/skills/skill1`, {
                 userId: `user${charToAdd}@skills.org`,
-                timestamp: m.clone().format('x')
+                timestamp: m.clone().add(i, 'day').format('x')
             });
         }
 
@@ -170,7 +170,7 @@ describe('Users Tests', () => {
         for (let i = 0; i < 7; i += 1) {
             cy.request('POST', `/api/projects/proj1/skills/skill1`, {
                 userId: `user${(i < 3) ? 'a' : 'b'}${i}@skills.org`,
-                timestamp: m.clone()
+                timestamp: m.clone().add(i, 'day')
                     .format('x')
             });
         }
@@ -304,7 +304,7 @@ describe('Users Tests', () => {
             const charToAdd = String.fromCharCode(97 + i);
             cy.request('POST', `/api/projects/proj1/skills/skill1`, {
                 userId: `user${charToAdd}@skills.org`,
-                timestamp: m.clone().format('x')
+                timestamp: m.clone().add(i, 'day').format('x')
             });
         }
         cy.visit('/administrator/projects/proj1/users');
@@ -338,7 +338,7 @@ describe('Users Tests', () => {
             const charToAdd = String.fromCharCode(97 + i);
             cy.request('POST', `/api/projects/proj1/skills/skill1`, {
                 userId: `user${charToAdd}@skills.org`,
-                timestamp: m.clone().format('x')
+                timestamp: m.clone().add(i, 'day').format('x')
             });
         }
 
@@ -442,7 +442,7 @@ describe('Users Tests', () => {
             const charToAdd = String.fromCharCode(97 + i);
             cy.request('POST', `/api/projects/proj1/skills/skill1`, {
                 userId: `user${charToAdd}@skills.org`,
-                timestamp: m.clone()
+                timestamp: m.clone().add(i, 'day')
                     .format('x')
             });
         }
@@ -452,7 +452,7 @@ describe('Users Tests', () => {
             const charToAdd = String.fromCharCode(97 + i);
             cy.request('POST', `/api/projects/proj1/skills/skill2`, {
                 userId: `user${charToAdd}@skills.org`,
-                timestamp: m.clone()
+                timestamp: m.clone().add(i, 'day')
                     .format('x')
             });
         }
@@ -509,7 +509,7 @@ describe('Users Tests', () => {
             const charToAdd = String.fromCharCode(97 + i);
             cy.request('POST', `/api/projects/proj1/skills/skill1`, {
                 userId: `user${charToAdd}@skills.org`,
-                timestamp: m.clone()
+                timestamp: m.clone().add(i, 'day')
                     .format('x')
             });
         }
@@ -519,7 +519,7 @@ describe('Users Tests', () => {
             const charToAdd = String.fromCharCode(97 + i);
             cy.request('POST', `/api/projects/proj1/skills/skill2`, {
                 userId: `user${charToAdd}@skills.org`,
-                timestamp: m.clone()
+                timestamp: m.clone().add(i, 'day')
                     .format('x')
             });
         }
