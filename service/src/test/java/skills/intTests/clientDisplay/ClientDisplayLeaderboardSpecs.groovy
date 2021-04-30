@@ -16,10 +16,13 @@
 package skills.intTests.clientDisplay
 
 import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.storage.repos.UserAttrsRepo
+import spock.lang.IgnoreRest
 
 class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
 
@@ -190,5 +193,24 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         subj2_leaderboard.rankedUsers.collect{ it.userId } == [userIdsForDisplay[2], userIdsForDisplay[1], userIdsForDisplay[0]]
         subj2_leaderboard.rankedUsers.collect{ it.rank } ==[1, 2, 3]
         subj2_leaderboard.rankedUsers.collect { it.points } == [30, 20, 10]
+    }
+
+    def "exception emitted for bad leaderboard type "(){
+        List<String> users = getRandomUsers(12)
+        List<Date> days = (0..20).collect { new Date() - it }
+
+        def proj = SkillsFactory.createProject(1)
+        def subj = SkillsFactory.createSubject(1, 1)
+        List<Map> skills = SkillsFactory.createSkills(20, 1, 1)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        when:
+        skillsService.getLeaderboard(users.get(3), proj.projectId, null , "badType")
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.toString().contains("BAD_REQUEST")
     }
 }

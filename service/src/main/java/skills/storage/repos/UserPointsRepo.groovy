@@ -104,12 +104,48 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 where
                     p.user_id = uAttrs.user_id and
                     p.project_id=?1 and 
+                    p.skill_id is null and
+                    p.user_id!=?3  
+                    p.points<=?2
+                    p.day is null
+            ''', nativeQuery = true )
+    List<RankedUserRes> findUsersForLeaderboardPointsLessOrEqual(String projectId, Integer points, String userId, Pageable pageable)
+
+    @Query(value = '''SELECT 
+                    p.user_id as userId, 
+                    p.points as points,
+                    uAttrs.user_id_for_display as userIdForDisplay,
+                    uAttrs.first_name as userFirstName,
+                    uAttrs.last_name as userLastName,
+                    uAttrs.created as userFirstSeenTimestamp
+                from user_points p, user_attrs uAttrs
+                where
+                    p.user_id = uAttrs.user_id and
+                    p.project_id=?1 and 
                     p.skill_id=?2 and
                     p.user_id!=?4  
                     p.points>=?3
                     p.day is null
             ''', nativeQuery = true )
-    List<RankedUserRes> findUsersForLeaderboardPointsMoreOrEqual(String projectId, String subjectId, Integer points, String userId, Page
+    List<RankedUserRes> findUsersForLeaderboardPointsMoreOrEqual(String projectId, String subjectId, Integer points, String userId, Pageable pageable)
+
+    @Query(value = '''SELECT 
+                    p.user_id as userId, 
+                    p.points as points,
+                    uAttrs.user_id_for_display as userIdForDisplay,
+                    uAttrs.first_name as userFirstName,
+                    uAttrs.last_name as userLastName,
+                    uAttrs.created as userFirstSeenTimestamp
+                from user_points p, user_attrs uAttrs
+                where
+                    p.user_id = uAttrs.user_id and
+                    p.project_id=?1 and 
+                    p.skill_id is null and
+                    p.user_id!=?3  
+                    p.points>=?2
+                    p.day is null
+            ''', nativeQuery = true )
+    List<RankedUserRes> findUsersForLeaderboardPointsMoreOrEqual(String projectId, Integer points, String userId, Pageable pageable)
 
     long countByProjectIdAndSkillIdAndDay(String projectId, @Nullable String skillId, @Nullable Date day)
 

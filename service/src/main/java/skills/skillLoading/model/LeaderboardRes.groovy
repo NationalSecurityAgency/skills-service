@@ -21,7 +21,7 @@ import groovy.transform.Canonical
 class LeaderboardRes {
 
     enum Type {
-        topTen, tenAroundMe, bottomTen
+        topTen, tenAroundMe
     }
 
     Type type

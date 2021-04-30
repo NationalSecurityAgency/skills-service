@@ -17,6 +17,7 @@ package skills.services
 
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
@@ -99,9 +100,14 @@ class UserAttrsService {
     }
 
     private void validateUserId(String userId) {
-        if (!userId) {
+        if (StringUtils.isBlank(userId)) {
             throw new SkillException("userId must be present", NA, NA, ErrorCode.BadParam)
         }
+
+        if (userId.equalsIgnoreCase("null")) {
+            throw new SkillException("userId must not have a value of 'null'", NA, NA, ErrorCode.BadParam)
+        }
+
 
         if (userId.contains(" ")) {
             throw new SkillException("Spaces are not allowed in user id. Provided [${userId}]", NA, NA, ErrorCode.BadParam)
@@ -119,6 +125,7 @@ class UserAttrsService {
 
     @Profile
     private UserAttrs loadUserAttrsFromLocalDb(String userId) {
+        assert userId
         return userAttrsRepo.findByUserId(userId?.toLowerCase())
     }
 

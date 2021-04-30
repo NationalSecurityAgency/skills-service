@@ -15,11 +15,14 @@
  */
 package skills.storage.model
 
+import org.springframework.data.annotation.CreatedDate
+import org.springframework.data.jpa.domain.support.AuditingEntityListener
 
 import javax.persistence.*
 
 @Entity
 @Table(name = 'user_attrs')
+@EntityListeners(AuditingEntityListener)
 class UserAttrs {
 
     @Id
@@ -34,4 +37,8 @@ class UserAttrs {
     String dn
     String nickname
     String userIdForDisplay
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @CreatedDate
+    Date created
 }
