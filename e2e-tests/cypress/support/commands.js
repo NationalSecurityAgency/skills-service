@@ -125,7 +125,7 @@ Cypress.Commands.add("resetEmail", () => {
 
 
 Cypress.Commands.add("createProject", (projNum = 1, overrideProps = {}) => {
-    cy.request('POST', `/admin/projects/proj${projNum}/`, Object.assign({
+    cy.request('POST', `/app/projects/proj${projNum}/`, Object.assign({
         projectId: `proj${projNum}`,
         name: `This is project ${projNum}`
     }, overrideProps));
@@ -174,8 +174,8 @@ Cypress.Commands.add("createGlobalBadge", (badgeNum = 1, overrideProps = {}) => 
         description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
     }, overrideProps));
 });
-Cypress.Commands.add("assignSkillToGlobalBadge", (badgeNum = 1, skillNum = 1) => {
-    cy.request('POST', `/supervisor/badges/globalBadge${badgeNum}/projects/proj1/skills/skill${skillNum}`)
+Cypress.Commands.add("assignSkillToGlobalBadge", (badgeNum = 1, skillNum = 1, projNum = 1) => {
+    cy.request('POST', `/supervisor/badges/globalBadge${badgeNum}/projects/proj${projNum}/skills/skill${skillNum}`)
 });
 
 

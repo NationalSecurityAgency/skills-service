@@ -671,6 +671,10 @@ describe('Client Display Skills Filtering Tests', () => {
   });
 
   it('filter skills on global badge page', () => {
+    cy.resetDb();
+    cy.loginAsProxyUser()
+    cy.createProject(1)
+    cy.createSubject(1, 1)
     cy.createSkill(1, 1, 1, {name: 'Search blah skill 1'});
     cy.createSkill(1, 1, 2, {name: 'is a skill 2'});
     cy.createSkill(1, 1, 3, {name: 'find Blah other skill 3'});
@@ -684,7 +688,7 @@ describe('Client Display Skills Filtering Tests', () => {
     cy.assignSkillToGlobalBadge(1, 3)
     cy.assignSkillToGlobalBadge(1, 4)
 
-    cy.loginAsDefaultUser();
+    cy.loginAsProxyUser();
 
     cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday')
     cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now')
