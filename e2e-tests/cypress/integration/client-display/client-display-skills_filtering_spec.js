@@ -672,6 +672,11 @@ describe('Client Display Skills Filtering Tests', () => {
 
   it('filter skills on global badge page', () => {
     cy.resetDb();
+    cy.fixture('vars.json').then((vars) => {
+      if (!Cypress.env('oauthMode')) {
+        cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);
+      }
+    })
     cy.loginAsProxyUser()
     cy.createProject(1)
     cy.createSubject(1, 1)
