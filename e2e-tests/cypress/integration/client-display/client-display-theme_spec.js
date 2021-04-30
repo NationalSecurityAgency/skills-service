@@ -16,7 +16,7 @@
 import moment from 'moment-timezone';
 const dateFormatter = value => moment.utc(value).format('YYYY-MM-DD[T]HH:mm:ss[Z]');
 
-describe('Client Display Tests', () => {
+describe('Client Display Theme Tests', () => {
 
     const snapshotOptions = {
         blackout: ['[data-cy=pointHistoryChart]', '#dependent-skills-network', '[data-cy=achievementDate]'],
@@ -462,7 +462,6 @@ describe('Client Display Tests', () => {
     });
 
     it('skills filter open', () => {
-        cy.createProject(1);
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, {name: 'Search blah skill 1'});
         cy.createSkill(1, 1, 2, {name: 'is a skill 2'});

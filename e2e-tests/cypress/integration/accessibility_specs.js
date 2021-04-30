@@ -332,6 +332,7 @@ describe('Accessibility Tests', () => {
     cy.contains('ID: MyNewtestProject');
     cy.get('[data-cy="usersTable"]').contains('u1');
     cy.contains('User Id Filter');
+    cy.contains('Total Rows: 6')
     cy.customLighthouse();
     cy.customA11y();
 

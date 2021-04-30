@@ -752,7 +752,6 @@ describe('Client Display Skills Filtering Tests', () => {
   });
 
   it('Visual Test: skills search and skills filter selected', () => {
-    cy.createProject(1);
     cy.createSubject(1, 1);
     cy.createSkill(1, 1, 1, {name: 'Search blah skill 1'});
     cy.createSkill(1, 1, 2, {name: 'is a skill 2'});
