@@ -35,7 +35,7 @@ class CachingConfiguration implements WebMvcConfigurer{
 
     @Override
     void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/static/*.ico")
+        registry.addResourceHandler("/*.ico")
                 .addResourceLocations("classpath:/public/")
                 .setCacheControl(CacheControl.maxAge(LONG_MAX_AGE).cachePrivate().mustRevalidate())
         registry.addResourceHandler("/static/js/**")
