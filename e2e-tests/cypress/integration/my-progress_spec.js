@@ -241,7 +241,7 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=info-snap-footer]').contains('You still have 1 project to explore.');
 
     cy.get('[data-cy=numAchievedSkills]').contains(new RegExp(/^1$/));
-    cy.get('[data-cy=numSkillsAvailable]').contains(new RegExp(/^Total: 56$/));
+    cy.get('[data-cy=numSkillsAvailable]').contains(new RegExp(/^Total: 57$/));
     cy.get('[data-cy=num-skills-footer]').contains('So many skills... so little time! Good luck!');
 
     // cy.get('[data-cy=mostRecentAchievedSkill]').contains(new RegExp(/^Last Achieved skill \d+ minute[s]? ago$/));
