@@ -70,34 +70,43 @@ class RankingLoader {
         List<RankedUserRes> res
         if (type == LeaderboardRes.Type.tenAroundMe) {
             UserPoints myPoints = userPointsRepository.findByProjectIdAndUserIdAndSkillIdAndDay(projectId, userId, subjectId, null)
-            UserAttrs userAttrs = userAttrsRepo.findByUserId(userId)
-            PageRequest pageRequestForBelow = PageRequest.of(0, 5, Sort.Direction.DESC, "points")
-            List<UserPointsRepo.RankedUserRes> below = subjectId ?
-                    userPointsRepository.findUsersForLeaderboardPointsLessOrEqual(projectId, subjectId, myPoints.points, userId, pageRequestForBelow) :
-                    userPointsRepository.findUsersForLeaderboardPointsLessOrEqual(projectId, myPoints.points, userId, pageRequestForBelow)
-
-            PageRequest pageRequestForAbove = PageRequest.of(0, 5, Sort.Direction.ASC, "points")
-            List<UserPointsRepo.RankedUserRes> above = subjectId ?
-                    userPointsRepository.findUsersForLeaderboardPointsMoreOrEqual(projectId, subjectId, myPoints.points, userId, pageRequestForAbove) :
-                    userPointsRepository.findUsersForLeaderboardPointsMoreOrEqual(projectId, myPoints.points, userId, pageRequestForAbove)
-
             SkillsRanking rank = doGetUserSkillsRanking(projectId, myPoints, subjectId)
-            if (rank.getPosition() <= 5){
-                throw new SkillException("Are not allowed to request type=[${LeaderboardRes.Type.tenAroundMe}] when user is ranked in top 5. userId=[${userId}], rank=[${rank.position}], subject=[${subjectId}]", projectId)
+            if (rank.position <= 5) {
+                res = getTop10Users(projectId, userId, subjectId )
+            } else {
+                UserAttrs userAttrs = userAttrsRepo.findByUserId(userId)
+                PageRequest pageRequestForBelow = PageRequest.of(0, 5, Sort.Direction.DESC, "points")
+                List<UserPointsRepo.RankedUserRes> below = subjectId ?
+                        userPointsRepository.findUsersForLeaderboardPointsLessOrEqual(projectId, subjectId, myPoints.points, userId, pageRequestForBelow) :
+                        userPointsRepository.findUsersForLeaderboardPointsLessOrEqual(projectId, myPoints.points, userId, pageRequestForBelow)
+
+                PageRequest pageRequestForAbove = PageRequest.of(0, 5, Sort.Direction.ASC, "points")
+                List<UserPointsRepo.RankedUserRes> above = subjectId ?
+                        userPointsRepository.findUsersForLeaderboardPointsMoreOrEqual(projectId, subjectId, myPoints.points, userId, pageRequestForAbove) :
+                        userPointsRepository.findUsersForLeaderboardPointsMoreOrEqual(projectId, myPoints.points, userId, pageRequestForAbove)
+
+
+                if (rank.getPosition() <= 5) {
+                    throw new SkillException("Are not allowed to request type=[${LeaderboardRes.Type.tenAroundMe}] when user is ranked in top 5. userId=[${userId}], rank=[${rank.position}], subject=[${subjectId}]", projectId)
+                }
+                res = []
+                res.addAll(convertToRankedUserRes(above.reverse(), rank.position - 5, userId))
+                res.add(new RankedUserRes(rank: rank.position, userId: userAttrs.userIdForDisplay, firstName: userAttrs.firstName, lastName: userAttrs.lastName, isItMe: true, points: myPoints.points, userFirstSeenTimestamp: userAttrs.created.time))
+                res.addAll(convertToRankedUserRes(below, rank.position + 1, userId))
             }
-            res = []
-            res.addAll(convertToRankedUserRes(above, rank.position-5, userId))
-            res.add(new RankedUserRes(rank: rank.position, userId: userAttrs.userIdForDisplay, firstName: userAttrs.firstName, lastName: userAttrs.lastName, isItMe: true, points:  myPoints.points, userFirstSeenTimestamp: userAttrs.created.time))
-            res.addAll(convertToRankedUserRes(below, rank.position+1, userId))
         } else {
-            PageRequest pageRequest = PageRequest.of(0, 10, Sort.Direction.DESC, "points")
-            List<UserPointsRepo.RankedUserRes> rankedUserRes = subjectId ?
-                    userPointsRepository.findUsersForLeaderboard(projectId, subjectId, pageRequest) :
-                    userPointsRepository.findUsersForLeaderboard(projectId, pageRequest)
-            res = convertToRankedUserRes(rankedUserRes, 1, userId)
+            res = getTop10Users(projectId, userId, subjectId )
         }
 
         return new LeaderboardRes(rankedUsers: res, totalProjPoints: projDef.totalPoints)
+    }
+
+    private List<RankedUserRes> getTop10Users(String projectId, String userId, String subjectId = null){
+        PageRequest pageRequest = PageRequest.of(0, 10, Sort.Direction.DESC, "points")
+        List<UserPointsRepo.RankedUserRes> rankedUserRes = subjectId ?
+                userPointsRepository.findUsersForLeaderboard(projectId, subjectId, pageRequest) :
+                userPointsRepository.findUsersForLeaderboard(projectId, pageRequest)
+        return convertToRankedUserRes(rankedUserRes, 1, userId)
     }
 
     private List<RankedUserRes> convertToRankedUserRes(List<UserPointsRepo.RankedUserRes> rankedUserRes, int startRank, String userId) {

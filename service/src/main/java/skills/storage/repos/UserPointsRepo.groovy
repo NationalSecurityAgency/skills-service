@@ -87,8 +87,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     p.user_id = uAttrs.user_id and
                     p.project_id=?1 and 
                     p.skill_id=?2 and
-                    p.user_id!=?4  
-                    p.points<=?3
+                    p.user_id!=?4 and  
+                    p.points<=?3 and
                     p.day is null
             ''', nativeQuery = true )
     List<RankedUserRes> findUsersForLeaderboardPointsLessOrEqual(String projectId, String subjectId, Integer points, String userId, Pageable pageable)
@@ -105,8 +105,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     p.user_id = uAttrs.user_id and
                     p.project_id=?1 and 
                     p.skill_id is null and
-                    p.user_id!=?3  
-                    p.points<=?2
+                    p.user_id!=?3 and
+                    p.points<=?2 and
                     p.day is null
             ''', nativeQuery = true )
     List<RankedUserRes> findUsersForLeaderboardPointsLessOrEqual(String projectId, Integer points, String userId, Pageable pageable)
@@ -123,8 +123,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     p.user_id = uAttrs.user_id and
                     p.project_id=?1 and 
                     p.skill_id=?2 and
-                    p.user_id!=?4  
-                    p.points>=?3
+                    p.user_id!=?4 and 
+                    p.points>=?3 and
                     p.day is null
             ''', nativeQuery = true )
     List<RankedUserRes> findUsersForLeaderboardPointsMoreOrEqual(String projectId, String subjectId, Integer points, String userId, Pageable pageable)
@@ -141,8 +141,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     p.user_id = uAttrs.user_id and
                     p.project_id=?1 and 
                     p.skill_id is null and
-                    p.user_id!=?3  
-                    p.points>=?2
+                    p.user_id!=?3 and
+                    p.points>=?2 and
                     p.day is null
             ''', nativeQuery = true )
     List<RankedUserRes> findUsersForLeaderboardPointsMoreOrEqual(String projectId, Integer points, String userId, Pageable pageable)
