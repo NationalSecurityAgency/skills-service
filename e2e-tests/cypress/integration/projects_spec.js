@@ -648,7 +648,7 @@ describe('Projects Tests', () => {
     cy.get('[data-cy="trusted-client-props-panel"]').should('exist')
   });
 
-  it('Project stats should all be the same size when they wrap', () => {
+  it.only('Project stats should all be the same size when they wrap', () => {
     cy.request('POST', '/app/projects/abcdeghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxy', {
       projectId: 'abcdeghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxy',
       name: "abcdeghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxy"

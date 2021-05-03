@@ -40,7 +40,7 @@ describe('Markdown Tests', () => {
         cy.clickButton('Skill');
         cy.get('[data-cy=skillName]').type('skill1');
         cy.get('[data-cy=skillDescription]').type('[Google Home Page](https://google.com)');
-        cy.contains('Preview').click();
+        cy.get('#markdown-editor').contains('Preview').click();
         cy.get('a[href="https://google.com"]').should('have.attr', 'target', '_blank')
         cy.clickSave()
         cy.get('[data-cy="manageSkillBtn_skill1Skill"]').click()
@@ -59,7 +59,7 @@ describe('Markdown Tests', () => {
                 cy.contains('Write').click();
             }
             cy.get(markdownInput).clear().type(markdown);
-            cy.contains('Preview').click();
+            cy.get('#markdown-editor').contains('Preview').click();
             // move focus away from Preview
             cy.contains('Description').click();
             if (expectedText) {
