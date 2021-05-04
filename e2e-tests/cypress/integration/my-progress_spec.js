@@ -35,6 +35,8 @@ describe('Navigation Tests', () => {
   // };
 
   beforeEach(() => {
+    cy.intercept('/api/metrics/allProjectsSkillEventsOverTimeMetricsBuilder**').as('allSkillEventsForUser');
+
     cy.request('POST', '/app/projects/proj1', {
       projectId: 'proj1',
       name: 'Project 1'
@@ -165,36 +167,8 @@ describe('Navigation Tests', () => {
       cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);
       cy.loginAsProxyUser()
     });
+    cy.loginAsProxyUser()
   });
-
-  Cypress.Commands.add("loginAsRootUser", (u) => {
-    cy.fixture('vars.json').then((vars) => {
-      cy.request('POST', '/logout');
-      cy.login(vars.rootUser, vars.defaultPass);
-    });
-  })
-
-  Cypress.Commands.add("loginAsDefaultUser", (u) => {
-    cy.fixture('vars.json').then((vars) => {
-      cy.request('POST', '/logout');
-      cy.login(vars.defaultUser, vars.defaultPass);
-    });
-  })
-
-  Cypress.Commands.add("loginAsProxyUser", (u) => {
-    cy.fixture('vars.json').then((vars) => {
-      cy.request('POST', '/logout');
-      if (!Cypress.env('oauthMode')) {
-        cy.log('NOT in oauthMode, using form login')
-        cy.login(Cypress.env('proxyUser'), vars.defaultPass);
-      } else {
-        cy.log('oauthMode, using loginBySingleSignOn')
-        cy.loginBySingleSignOn()
-      }
-    });
-
-    cy.intercept('/api/metrics/allProjectsSkillEventsOverTimeMetricsBuilder**').as('allSkillEventsForUser');
-  })
 
   it('badges card - gems and not global badges', function () {
     cy.visit('/');

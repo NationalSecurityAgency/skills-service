@@ -671,26 +671,29 @@ describe('Client Display Skills Filtering Tests', () => {
   });
 
   it('filter skills on global badge page', () => {
+    cy.resetDb();
     cy.fixture('vars.json').then((vars) => {
-      cy.logout();
-
-      cy.login(vars.rootUser, vars.defaultPass);
-      cy.request('PUT', `/root/users/${vars.defaultUser}/roles/ROLE_SUPERVISOR`);
-
-      cy.logout();
-      cy.login(vars.defaultUser, vars.defaultPass);
-    });
-
+      if (!Cypress.env('oauthMode')) {
+        cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);
+      }
+    })
+    cy.loginAsProxyUser()
+    cy.createProject(1)
+    cy.createSubject(1, 1)
     cy.createSkill(1, 1, 1, {name: 'Search blah skill 1'});
     cy.createSkill(1, 1, 2, {name: 'is a skill 2'});
     cy.createSkill(1, 1, 3, {name: 'find Blah other skill 3'});
     cy.createSkill(1, 1, 4, {name: 'Search nothing skill 4'});
+
+    cy.loginAsRootUser();
 
     cy.createGlobalBadge(1)
     cy.assignSkillToGlobalBadge(1, 1)
     cy.assignSkillToGlobalBadge(1, 2)
     cy.assignSkillToGlobalBadge(1, 3)
     cy.assignSkillToGlobalBadge(1, 4)
+
+    cy.loginAsProxyUser();
 
     cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday')
     cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now')
@@ -749,7 +752,6 @@ describe('Client Display Skills Filtering Tests', () => {
   });
 
   it('Visual Test: skills search and skills filter selected', () => {
-    cy.createProject(1);
     cy.createSubject(1, 1);
     cy.createSkill(1, 1, 1, {name: 'Search blah skill 1'});
     cy.createSkill(1, 1, 2, {name: 'is a skill 2'});
@@ -791,7 +793,6 @@ describe('Client Display Skills Filtering Tests', () => {
   });
 
   it('Visual Test: skills filter open', () => {
-    cy.createProject(1);
     cy.createSubject(1, 1);
     cy.createSkill(1, 1, 1, {name: 'Search blah skill 1'});
     cy.createSkill(1, 1, 2, {name: 'is a skill 2'});
