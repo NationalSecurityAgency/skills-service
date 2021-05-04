@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.storage.model.ProjDef
+import skills.storage.model.ProjSummaryResult
 import skills.storage.repos.ProjDefRepo
 
 @Service
@@ -32,6 +33,15 @@ class ProjDefAccessor {
     @Transactional()
     ProjDef getProjDef(String projectId) {
         ProjDef projDef = projDefRepo.findByProjectIdIgnoreCase(projectId)
+        if (!projDef) {
+            throw new SkillException("Failed to find project [$projectId]", projectId, null, ErrorCode.ProjectNotFound)
+        }
+        return projDef
+    }
+
+    @Transactional()
+    ProjSummaryResult getProjSummaryResult(String projectId) {
+        ProjSummaryResult projDef = projDefRepo.getSummaryByProjectIdIgnoreCase(projectId)
         if (!projDef) {
             throw new SkillException("Failed to find project [$projectId]", projectId, null, ErrorCode.ProjectNotFound)
         }
