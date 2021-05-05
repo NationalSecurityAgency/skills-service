@@ -34,6 +34,18 @@ limitations under the License.
                   variant="outline-primary" :data-cy="`projCard_${this.projectInternal.projectId}_manageBtn`" :aria-label="`manage project ${this.projectInternal.name}`">
           Manage <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
         </b-button>
+        <div class="text-right mt-2">
+          <div class="row">
+            <div class="col justify-content-end">
+              <span class="text-secondary small font-italic">Created: </span><slim-date-cell :value="projectInternal.created"/>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col justify-content-end">
+              <span class="text-secondary small font-italic">Last reported Skill: </span><slim-date-cell :value="projectInternal.lastReportedSkill"/>
+            </div>
+          </div>
+        </div>
       </div>
     </page-preview-card>
 
@@ -49,10 +61,16 @@ limitations under the License.
   import PagePreviewCard from '../utils/pages/PagePreviewCard';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
   import SettingsService from '../settings/SettingsService';
+  import SlimDateCell from '../utils/table/SlimDateCell';
 
   export default {
     name: 'MyProject',
-    components: { EditProject, PagePreviewCard, EditAndDeleteDropdown },
+    components: {
+      EditProject,
+      PagePreviewCard,
+      EditAndDeleteDropdown,
+      SlimDateCell,
+    },
     props: ['project'],
     mixins: [MsgBoxMixin],
     data() {

@@ -90,11 +90,14 @@ limitations under the License.
                     </b-col>
                   </b-row>
                 </template>
-                <template #cell(totalPoints)="data">
-                  {{ data.value | number }}
-                </template>
                 <template #cell(numSkills)="data">
                   {{ data.value | number }}
+                </template>
+                <template #cell(created)="data">
+                  <date-cell :value="data.value" />
+                </template>
+                <template #cell(lastReportedSkill)="data">
+                  <optional-date-cell :value="data.value" />
                 </template>
               </b-table>
               <b-row align-h="center" class="px-3">
@@ -151,10 +154,12 @@ limitations under the License.
   import ProjectService from './ProjectService';
   import SettingsService from '../settings/SettingsService';
   import SkillsSpinner from '../utils/SkillsSpinner';
+  import DateCell from '../utils/table/DateCell';
+  import OptionalDateCell from '../utils/table/OptionalDateCell';
 
   export default {
     name: 'PinProjects',
-    components: { SkillsSpinner },
+    components: { SkillsSpinner, OptionalDateCell, DateCell },
     props: {
       value: {
         type: Boolean,
@@ -181,24 +186,19 @@ limitations under the License.
                      sortable: true,
                    },
                    {
-                     key: 'numSubjects',
-                     label: 'Subjects',
-                     sortable: false,
-                   },
-                   {
                      key: 'numSkills',
                      label: 'Skills',
-                     sortable: false,
+                     sortable: true,
                    },
                    {
-                     key: 'numBadges',
-                     label: 'Badges',
-                     sortable: false,
+                     key: 'lastReportedSkill',
+                     label: 'Last Reported Skill',
+                     sortable: true,
                    },
                    {
-                     key: 'totalPoints',
-                     label: 'Points',
-                     sortable: false,
+                     key: 'created',
+                     label: 'Created',
+                     sortable: true,
                    }],
         },
       };

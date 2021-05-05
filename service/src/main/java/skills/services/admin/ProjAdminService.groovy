@@ -358,7 +358,7 @@ class ProjAdminService {
         res.numSkills = definition.numSkills
         res.numErrors = definition.numErrors
         res.levelsArePoints = definition.levelsArePoints
-        res.lastReportedSkill = RelativeTimeUtil.relativeTimeFromNow(definition.lastReportedSkill)
+        res.lastReportedSkill = definition.lastReportedSkill
 
         res
     }

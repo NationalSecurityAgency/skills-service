@@ -33,7 +33,4 @@ class ProjectResult extends SimpleProjectResult{
     boolean pinned
 
     int numErrors
-
-    Date created
-    String lastReportedSkill
 }

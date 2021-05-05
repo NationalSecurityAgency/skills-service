@@ -243,6 +243,7 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
             """, nativeQuery = true)
     @Nullable
     List<ProjSummaryResult> queryProjectSummariesByNameAndNotProjectId(String nameQuery, String notProjectId, Pageable pageable)
+    // query needs to be updated to handle paging and sorting
 
     @Query("select p from ProjDef p where lower(p.name) LIKE %?1% and p.projectId<>?2" )
     List<ProjDef> queryProjectsByNameQueryAndNotProjectId(String nameQuery, String notProjectId, Pageable pageable)

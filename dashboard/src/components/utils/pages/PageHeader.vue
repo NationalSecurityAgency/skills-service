@@ -22,6 +22,7 @@ limitations under the License.
             <div class="pageHeaderTitle col-lg-5 col-xxxl-3 text-center text-lg-left">
               <h3><i v-if="options.icon" class="has-text-link" :class="options.icon"/> {{ options.title }}<slot name="right-of-header"></slot></h3>
               <div class="h5 text-muted">{{ options.subTitle }}</div>
+              <slot name="subSubTitle"></slot>
             </div>
             <div class="col-lg-7 col-xxxl-9">
               <div class="row text-center mt-4 mt-lg-0 justify-content-center justify-content-lg-end">

@@ -20,5 +20,5 @@ class SimpleProjectResult {
     String projectId
     String name
     Date created
-    String lastReportedSkill
+    Date lastReportedSkill
 }

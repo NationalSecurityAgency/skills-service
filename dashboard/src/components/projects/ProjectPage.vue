@@ -15,7 +15,16 @@ limitations under the License.
 */
 <template>
   <div>
-    <page-header :loading="isLoading" :options="headerOptions"/>
+    <page-header :loading="isLoading" :options="headerOptions">
+      <div slot="subSubTitle">
+        <div>
+          <span class="text-secondary small font-italic">Created: </span><slim-date-cell :value="project.created"/>
+        </div>
+        <div>
+          <span class="text-secondary small font-italic">Last reported Skill: </span><slim-date-cell :value="project.lastReportedSkill"/>
+        </div>
+      </div>
+    </page-header>
 
     <navigation v-if="!isLoading" :nav-items="[
           {name: 'Subjects', iconClass: 'fa-cubes skills-color-subjects', page: 'Subjects'},
@@ -40,6 +49,7 @@ limitations under the License.
 
   import Navigation from '../utils/Navigation';
   import PageHeader from '../utils/pages/PageHeader';
+  import SlimDateCell from '../utils/table/SlimDateCell';
 
   const { mapActions, mapGetters, mapMutations } = createNamespacedHelpers('projects');
 
@@ -48,6 +58,7 @@ limitations under the License.
     components: {
       PageHeader,
       Navigation,
+      SlimDateCell,
     },
     data() {
       return {
