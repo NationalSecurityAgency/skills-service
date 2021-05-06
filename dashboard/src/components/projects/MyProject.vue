@@ -36,12 +36,12 @@ limitations under the License.
         </b-button>
         <div class="text-right mt-2">
           <div class="row">
-            <div class="col justify-content-end">
+            <div class="col justify-content-end" data-cy="projectCreated">
               <span class="text-secondary small font-italic">Created: </span><slim-date-cell :value="projectInternal.created"/>
             </div>
           </div>
           <div class="row">
-            <div class="col justify-content-end">
+            <div class="col justify-content-end" data-cy="projectLastReportedSkill">
               <span class="text-secondary small font-italic">Last reported Skill: </span><slim-date-cell :value="projectInternal.lastReportedSkill"/>
             </div>
           </div>

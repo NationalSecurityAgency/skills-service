@@ -17,11 +17,13 @@ limitations under the License.
   <div>
     <page-header :loading="isLoading" :options="headerOptions">
       <div slot="subSubTitle">
-        <div>
-          <span class="text-secondary small font-italic">Created: </span><slim-date-cell :value="project.created"/>
-        </div>
-        <div>
-          <span class="text-secondary small font-italic">Last reported Skill: </span><slim-date-cell :value="project.lastReportedSkill"/>
+        <div v-if="project">
+          <div data-cy="projectCreated">
+            <span class="text-secondary small font-italic">Created: </span><slim-date-cell :value="project.created"/>
+          </div>
+          <div data-cy="projectLastReportedSkill">
+            <span class="text-secondary small font-italic">Last reported Skill: </span><slim-date-cell :value="project.lastReportedSkill"/>
+          </div>
         </div>
       </div>
     </page-header>
