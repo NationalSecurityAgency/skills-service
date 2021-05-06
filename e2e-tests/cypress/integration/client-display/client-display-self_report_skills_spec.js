@@ -78,7 +78,7 @@ describe('Client Display Self Report Skills Tests', () => {
   })
 
 
-  it.only('only show self-report button if enabled', () => {
+  it('only show self-report button if enabled', () => {
     cy.createSkill(1, 'Approval');
     cy.createSkill(2, 'HonorSystem');
     cy.createSkill(3, null);
