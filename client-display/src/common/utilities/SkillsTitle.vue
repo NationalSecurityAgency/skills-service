@@ -16,7 +16,7 @@ limitations under the License.
 <template>
   <div class="card mb-3">
     <div class="card-body skills-page-title-text-color text-info text-uppercase m-0 py-2">
-      <div class="row position-absolute" v-if="backButton">
+      <div class="row position-absolute" v-if="showBackButton">
         <div class="col">
           <div>
             <button @click="navigateBack" type="button" class="btn btn-outline-info skills-theme-btn m-0" data-cy="back" aria-label="navigate back">
@@ -27,7 +27,7 @@ limitations under the License.
         </div>
       </div>
 
-        <h1 :class="{'ml-5': backButton}" data-cy="title" class="skills-title m-0" >
+        <h1 :class="{'ml-5': showBackButton}" data-cy="title" class="skills-title m-0" >
             <slot/>
         </h1>
     </div>
@@ -44,6 +44,11 @@ limitations under the License.
       navigateBack() {
         const previousRoute = this.$route.params.previousRoute || { name: 'home' };
         this.$router.push(previousRoute);
+      },
+    },
+    computed: {
+      showBackButton() {
+        return this.backButton && this.$store.state.internalBackButton;
       },
     },
   };
