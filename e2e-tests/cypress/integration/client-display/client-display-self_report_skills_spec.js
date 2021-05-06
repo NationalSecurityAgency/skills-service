@@ -78,12 +78,12 @@ describe('Client Display Self Report Skills Tests', () => {
   })
 
 
-  it('only show self-report button if enabled', () => {
+  it.only('only show self-report button if enabled', () => {
     cy.createSkill(1, 'Approval');
     cy.createSkill(2, 'HonorSystem');
     cy.createSkill(3, null);
 
-    cy.cdVisit('/');
+    cy.cdVisit('/?internalBackButton=true');
     cy.cdClickSubj(0);
     cy.get('[data-cy=toggleSkillDetails]').click()
 
