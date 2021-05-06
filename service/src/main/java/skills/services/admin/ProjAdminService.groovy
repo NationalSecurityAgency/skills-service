@@ -319,7 +319,7 @@ class ProjAdminService {
             new SimpleProjectResult(name: it.name,
                     projectId: it.projectId,
                     created: it.created,
-                    lastReportedSkill: RelativeTimeUtil.relativeTimeFromNow(it.lastReportedSkill))
+                    lastReportedSkill: it.lastReportedSkill)
         }
     }
 
