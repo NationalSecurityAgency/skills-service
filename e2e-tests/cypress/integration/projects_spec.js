@@ -43,7 +43,7 @@ describe('Projects Tests', () => {
     cy.contains('ID: MyNewtestProject')
   });
 
-  it.only('Preview project training plan', function () {
+  it('Preview project training plan', function () {
     cy.request('POST', '/app/projects/proj1', {
       projectId: 'proj1',
       name: "proj1"
