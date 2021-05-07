@@ -120,7 +120,7 @@ describe('Client Display Self Report Skills Tests', () => {
     cy.createSkill(1, 'HonorSystem');
     cy.createSkill(2, 'HonorSystem');
     cy.request('POST', `/admin/projects/proj1/skills/skill1/dependency/skill2`)
-    cy.cdVisit('/');
+    cy.cdVisit('/?internalBackButton=true');
     cy.cdClickSubj(0);
     cy.cdClickSkill(0);
 
