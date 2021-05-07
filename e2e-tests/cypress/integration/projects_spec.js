@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import dayjs from "dayjs";
+
 describe('Projects Tests', () => {
   beforeEach(() => {
     cy.intercept('GET', '/app/projects').as('getProjects')
@@ -653,7 +655,119 @@ describe('Projects Tests', () => {
       cy.get('[data-cy=pageHeaderStat]').eq(4).invoke('width').should('eq', val);
     });
     cy.get('[data-cy=pageHeader]').matchImageSnapshot();
+  });
 
+  it('Created and Last Reported Skill data should be visible on projects page', () => {
+    cy.request('POST', '/app/projects/my_project_123', {
+      projectId: 'my_project_123',
+      name: "My Project 123"
+    });
+
+    cy.request('POST', '/admin/projects/my_project_123/subjects/subj1', {
+      projectId: 'my_project_123',
+      subjectId: 'subj1',
+      name: "Subject 1"
+    });
+    cy.request('POST', `/admin/projects/my_project_123/subjects/subj1/skills/skill1`, {
+      projectId: 'my_project_123',
+      subjectId: 'subj1',
+      skillId: 'skill1',
+      name: `This is 1`,
+      type: 'Skill',
+      pointIncrement: 100,
+      numPerformToCompletion: 10,
+      pointIncrementInterval: 0,
+      numMaxOccurrencesIncrementInterval: -1,
+      version: 0,
+    });
+
+    cy.intercept('GET', '/api/projects/Inception/level').as('loadInception');
+    cy.visit('/administrator/');
+    cy.wait('@getProjects');
+    cy.wait('@loadInception');
+
+    cy.get('[data-cy=projectCreated]').should('be.visible').contains('today');
+    cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('never');
+
+    const now = dayjs()
+    cy.reportSkill('my_project_123', 1, 'user@skills.org', now.subtract(1, 'year').format('YYYY-MM-DD HH:mm'), false);
+
+    cy.visit('/administrator/');
+    cy.wait('@getProjects');
+    cy.wait('@loadInception');
+    cy.get('[data-cy=projectCreated]').should('be.visible').contains('today');
+    cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('a year ago');
+
+    cy.reportSkill('my_project_123', 1, 'user@skills.org', now.subtract(2, 'months').format('YYYY-MM-DD HH:mm'), false);
+    cy.visit('/administrator/');
+    cy.wait('@getProjects');
+    cy.wait('@loadInception');
+    cy.get('[data-cy=projectCreated]').should('be.visible').contains('today');
+    cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('2 months ago');
+
+    cy.reportSkill('my_project_123', 1, 'user@skills.org', now.subtract(6, 'days').format('YYYY-MM-DD HH:mm'), false);
+    cy.visit('/administrator/');
+    cy.wait('@getProjects');
+    cy.wait('@loadInception');
+    cy.get('[data-cy=projectCreated]').should('be.visible').contains('today');
+    cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('7 days ago');
+  });
+
+  it('Created and Last Reported Skill data should be visible on project page', () => {
+    cy.request('POST', '/app/projects/my_project_123', {
+      projectId: 'my_project_123',
+      name: "My Project 123"
+    });
+
+    cy.request('POST', '/admin/projects/my_project_123/subjects/subj1', {
+      projectId: 'my_project_123',
+      subjectId: 'subj1',
+      name: "Subject 1"
+    });
+    cy.request('POST', `/admin/projects/my_project_123/subjects/subj1/skills/skill1`, {
+      projectId: 'my_project_123',
+      subjectId: 'subj1',
+      skillId: 'skill1',
+      name: `This is 1`,
+      type: 'Skill',
+      pointIncrement: 100,
+      numPerformToCompletion: 10,
+      pointIncrementInterval: 0,
+      numMaxOccurrencesIncrementInterval: -1,
+      version: 0,
+    });
+
+    cy.intercept('GET', '/admin/projects/my_project_123').as('loadProj');
+    cy.intercept('GET', '/api/projects/Inception/level').as('loadInception');
+    cy.visit('/administrator/projects/my_project_123');
+    cy.wait('@loadProj');
+    cy.wait('@loadInception');
+
+    cy.get('[data-cy=projectCreated]').should('be.visible').contains('today');
+    cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('never');
+
+    const now = dayjs()
+    cy.reportSkill('my_project_123', 1, 'user@skills.org', now.subtract(1, 'year').format('YYYY-MM-DD HH:mm'), false);
+
+    cy.visit('/administrator/projects/my_project_123');
+    cy.wait('@loadProj');
+    cy.wait('@loadInception');
+    cy.get('[data-cy=projectCreated]').should('be.visible').contains('today');
+    cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('a year ago');
+
+    cy.reportSkill('my_project_123', 1, 'user@skills.org', now.subtract(2, 'months').format('YYYY-MM-DD HH:mm'), false);
+    cy.visit('/administrator/projects/my_project_123');
+    cy.wait('@loadProj');
+    cy.wait('@loadInception');
+    cy.get('[data-cy=projectCreated]').should('be.visible').contains('today');
+    cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('2 months ago');
+
+    cy.reportSkill('my_project_123', 1, 'user@skills.org', now.subtract(6, 'days').format('YYYY-MM-DD HH:mm'), false);
+    cy.visit('/administrator/projects/my_project_123');
+    cy.wait('@loadProj');
+    cy.wait('@loadInception');
+    cy.get('[data-cy=projectCreated]').should('be.visible').contains('today');
+    cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('7 days ago');
   });
 });
 
