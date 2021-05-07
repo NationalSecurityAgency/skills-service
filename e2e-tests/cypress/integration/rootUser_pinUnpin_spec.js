@@ -354,7 +354,7 @@ describe('Root Pin and Unpin Tests', () => {
       cy.get(headerSelector).contains('Name').click()
 
       // verify rows are in DESC order based on project name
-      const rowNameDesc = rowNamesAsc.reverse()
+      const rowNameDesc = rowNamesAsc.slice(0).reverse()
       for (let i = 0; i < 5; i += 1) {
         cy.get('@cyRows')
           .eq(i)
@@ -363,17 +363,40 @@ describe('Root Pin and Unpin Tests', () => {
         cy.get('@row-i').contains(rowNameDesc[i])
       }
 
-      // finally click a non-sortable column and sort order is reset and 'Name' column should still be visible
-      cy.get(headerSelector).contains('Subjects').click()
-      cy.get(headerSelector).contains('Name').should('be.visible')
-
-      // verify the order did not change
+      //row names in creation order
+      const rowNamesCreationOrderAsc = ['Inception', '000', '100', '200', '300'];
+      cy.get(headerSelector).contains('Created').click()
       for (let i = 0; i < 5; i += 1) {
         cy.get('@cyRows')
           .eq(i)
           .find('td')
           .as('row-i');
-        cy.get('@row-i').contains(rowNameDesc[i])
+        cy.get('@row-i').contains(rowNamesCreationOrderAsc[i])
+      }
+      cy.get(headerSelector).contains('Name').should('be.visible')
+
+
+      cy.log('sorting by Last Reported Skill asc');
+      cy.get(headerSelector).contains('Last Reported Skill').should('be.visible').click();
+      for (let i = 0; i < 5; i += 1) {
+        cy.get('@cyRows')
+          .eq(i)
+          .find('td')
+          .as('row-i');
+        cy.log(`row ${i} should contain ${rowNamesAsc[i]}`);
+        cy.get('@row-i').contains(rowNamesAsc[i])
+      }
+
+      cy.log('sorting by Last Reported Skill desc');
+      cy.log(`comparing results to ${rowNamesCreationOrderAsc}`);
+      cy.get(headerSelector).contains('Last Reported Skill').click()
+      for (let i = 0; i < 5; i += 1) {
+        cy.get('@cyRows')
+          .eq(i)
+          .find('td')
+          .as('row-i');
+        cy.log(`row ${i} should contain ${rowNamesCreationOrderAsc[i]}`);
+        cy.get('@row-i').contains(rowNamesCreationOrderAsc[i])
       }
 
       cy.get('[data-cy=modalDoneButton]').click();
