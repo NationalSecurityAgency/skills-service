@@ -25,7 +25,7 @@ limitations under the License.
             <span class="text-secondary small font-italic">Last reported Skill: </span><slim-date-cell :value="project.lastReportedSkill"/>
           </div>
         </div>
-        <b-button v-if="project" :to="{ name: 'Preview', params: { projectId: project.projectId } }"
+        <b-button target="_blank" v-if="project" :to="{ name:'MyProjectSkills', params: { projectId: project.projectId } }"
                   data-cy="projectPreview" size="sm"
                   variant="outline-primary" :aria-label="'preview client display for project'+project.name">
           <span class="d-sm-line">Preview</span> <i class="fas fa-eye" style="font-size:1rem;" aria-hidden="true"/>
