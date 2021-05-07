@@ -156,7 +156,7 @@ describe('Client Display Markdown Tests', () => {
             description: markdown,
         });
 
-        cy.cdVisit('/');
+        cy.cdVisit('/?internalBackButton=true');
         cy.contains('Overall Points');
 
         // check subject
@@ -176,7 +176,7 @@ describe('Client Display Markdown Tests', () => {
         cy.contains('Overall Points Earned');
         cy.matchSnapshotImage(`Markdown-Skill-Preview`, snapshotOptions);
 
-        cy.cdVisit('/');
+        cy.cdVisit('/?internalBackButton=true');
         cy.contains('Overall Points');
 
         // check badge
