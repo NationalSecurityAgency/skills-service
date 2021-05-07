@@ -272,7 +272,7 @@ describe('Client Display Features Tests', () => {
     cy.createSkill(2);
     cy.request('POST', `/admin/projects/proj1/skills/skill1/dependency/skill2`)
 
-    cy.cdVisit('/');
+    cy.cdVisit('/?internalBackButton=true');
     cy.cdClickSubj(0, 'Subject 1');
 
     cy.matchSnapshotImage(`Subject-WithLockedSkills-ThatWereFullyAchieved`, snapshotOptions);
