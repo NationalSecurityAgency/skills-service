@@ -48,7 +48,6 @@ limitations under the License.
     methods: {
       openMyRankDetails() {
         if (!this.isSummaryOnly) {
-          console.log(`subjectId: ${this.$route.params.subjectId}`);
           if (this.$route.params.subjectId) {
             this.handlePush({
               name: 'subjectRankDetails',

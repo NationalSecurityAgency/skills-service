@@ -14,12 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="card">
+  <div class="card leaderboard" data-cy="leaderboard">
     <div class="card-body p-0">
       <div class="row p-4">
         <div class="col-auto text-left" style="font-size: 1rem;">
           <span class="h4 text-uppercase">Leaderboard</span>
-          <span class="ml-2">|</span>
+          <br class="d-sm-none"/>
+          <span class="ml-2 d-none d-sm-inline">|</span>
           <badge-based-selector class="ml-2"
                                 :options="badgesSelector.options"
                                 @value-changed="loadData"
@@ -33,11 +34,18 @@ limitations under the License.
       <b-table :items="items" :fields="fields"
                stacked="sm"
                :busy="loading"
-               :tbody-tr-class="rowClass">
+               thead-tr-class="skills-theme-primary-color"
+               show-empty
+               class="leaderboardTable"
+               data-cy="leaderboardTable">
         <template #table-busy>
           <div class="text-center text-danger my-2">
             <skills-spinner :loading="true"/>
           </div>
+        </template>
+        <template #empty>
+          <no-data-yet class="my-5"
+              title="No Users" sub-title="Leaderboard is empty because there no users with points yet..." />
         </template>
 
         <template #head(rank)="data">
@@ -56,8 +64,9 @@ limitations under the License.
         </template>
         <template v-slot:cell(user)="data">
           <div class="text-left mt-2 bigger-text">
-            <i class="fas fa-user-circle" style="font-size: 1.8rem;"></i> <span class="align-text-bottom text-info">{{ data.item.userId }}</span>
+            <i class="fas fa-user-circle text-dark skills-theme-primary-color" style="font-size: 1.8rem;"></i> <span class="align-text-bottom text-info skills-theme-primary-color">{{ data.item.userId }}</span>
             <i v-if="data.item.rank <=3" class="fas fa-medal ml-2" :class="medalClass(data.item)"></i>
+            <span v-if="data.item.isItMe" class="align-text-bottom ml-2" ><span class="h5"><b-badge><i class="far fa-hand-point-left"></i> You!</b-badge></span></span>
           </div>
         </template>
 
@@ -68,12 +77,14 @@ limitations under the License.
           </div>
         </template>
         <template v-slot:cell(progress)="data">
-          <div class="text-left mt-1">
+          <div class="text-left mt-1 text-primary">
             <div>
-              <span style="width: 50rem;">
+              <span :id="`points_${data.item.userId}`" style="width: 50rem;">
                 <span class="h5">{{ data.item.points | number }}</span> <span class="font-italic">Points</span>
               </span>
-              <b-progress :value="data.item.points" :max="totalProjPoints" class="mb-3" height="4px" ></b-progress>
+              <b-progress :max="availablePoints" class="mb-3" height="6px" variant="primary">
+                <b-progress-bar :value="data.item.points"  :aria-labelledby="`points_${data.item.userId}`"></b-progress-bar>
+              </b-progress>
             </div>
           </div>
         </template>
@@ -82,12 +93,11 @@ limitations under the License.
           <i class="far fa-clock"></i> {{ data.label }}
         </template>
         <template v-slot:cell(firstVisit)="data">
-          <div class="mt-1 text-left text-sm-center">
-            <div>{{ data.item.userFirstSeenTimestamp | relativeTime }}</div>
-            <div class="text-secondary">{{ data.item.userFirstSeenTimestamp | formatDate('MM/DD/YYYY')}}</div>
+          <div class="mt-1 text-left text-sm-center" data-cy="userFirstSeen">
+            <div class="bigger-text text-primary">{{ data.item.userFirstSeenTimestamp | formatDate('MM/DD/YYYY')}}</div>
+            <div class="text-secondary">{{ data.item.userFirstSeenTimestamp | relativeTime }}</div>
           </div>
         </template>
-
       </b-table>
 
     </div>
@@ -98,14 +108,15 @@ limitations under the License.
   import UserSkillsService from '../service/UserSkillsService';
   import BadgeBasedSelector from '../../common/utilities/BadgeBasedSelector';
   import SkillsSpinner from '../../common/utilities/SkillsSpinner';
+  import NoDataYet from '../../common/utilities/NoDataYet';
 
   export default {
     name: 'Leaderboard',
-    components: { SkillsSpinner, BadgeBasedSelector },
+    components: { NoDataYet, SkillsSpinner, BadgeBasedSelector },
     data() {
       return {
         loading: true,
-        totalProjPoints: 0,
+        availablePoints: 0,
         items: [],
         fields: [
           {
@@ -137,9 +148,6 @@ limitations under the License.
           }, {
             value: 'tenAroundMe',
             label: '10 Around Me',
-          }, {
-            value: 'bottomTen',
-            label: 'Bottom 10',
           }],
         },
       };
@@ -152,7 +160,7 @@ limitations under the License.
         this.loading = true;
         UserSkillsService.getLeaderboard(this.$route.params.subjectId, type)
           .then((result) => {
-            this.totalProjPoints = result.totalProjPoints;
+            this.availablePoints = result.availablePoints;
             this.items = result.rankedUsers;
           })
           .finally(() => {
@@ -171,15 +179,6 @@ limitations under the License.
         }
         return null;
       },
-      rowClass(item, type) {
-        if (!item || type !== 'row') {
-          return;
-        }
-        if (item.isItYou) {
-          // eslint-disable-next-line consistent-return
-          return 'highlight-row';
-        }
-      },
     },
   };
 </script>
@@ -190,13 +189,5 @@ limitations under the License.
 }
 .fa-medal {
   font-size: 1.2rem;
-}
-</style>
-
-<style>
-.highlight-row {
-  border-style: solid;
-  border-width: 3px;
-  border-color: #007c49;
 }
 </style>

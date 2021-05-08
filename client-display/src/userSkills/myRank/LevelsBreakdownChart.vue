@@ -116,6 +116,9 @@ limitations under the License.
                 colors: [this.$store.state.themeModule.charts.axisLabelColor],
               },
               formatter: function format(val) {
+                if (val === Infinity) {
+                  return '0';
+                }
                 return numberFormatter(val);
               },
             },

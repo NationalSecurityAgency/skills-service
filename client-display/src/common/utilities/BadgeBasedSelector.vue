@@ -19,7 +19,8 @@ limitations under the License.
              class="mr-2"
              :variant="getVariant(item)"
              :class="{'click-me-cursor' : item.value !== value}"
-             @click="updateValue(item.value)">{{ item.label }}</b-badge>
+             @click="updateValue(item.value)"
+             data-cy="badge-selector">{{ item.label }}</b-badge>
   </span>
 </template>
 

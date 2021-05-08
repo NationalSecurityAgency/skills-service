@@ -178,6 +178,25 @@ describe('Client Display Accessibility tests', () => {
     // cy.customLighthouse();
   });
 
+  it('leaderboard', () => {
+    cy.reportSkill(1, 1, `user0@skills.org`, '2021-02-24 10:00');
+    cy.reportSkill(1, 1, `user1@skills.org`, '2021-02-24 10:00');
+
+    cy.cdVisit('/');
+    cy.injectAxe();
+    cy.contains('Overall Points');
+
+    cy.cdClickRank();
+
+    const tableSelector = '[data-cy="leaderboardTable"]';
+    const rowSelector = `${tableSelector} tbody tr`
+    cy.get(tableSelector).contains('Loading...').should('not.exist')
+    cy.get(rowSelector).should('have.length', 3).as('cyRows');
+
+    cy.customA11y();
+    cy.customLighthouse();
+  });
+
   it('skills search and filter', () => {
     cy.cdVisit('/');
     cy.injectAxe();

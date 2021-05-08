@@ -25,6 +25,6 @@ class LeaderboardRes {
     }
 
     Type type
-    Integer totalProjPoints
+    Integer availablePoints
     List<RankedUserRes> rankedUsers
 }

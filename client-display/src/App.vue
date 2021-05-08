@@ -165,14 +165,6 @@ limitations under the License.
     text-align: center;
     overflow: hidden;
   }
-
-  #app .text-primary {
-    color: #4f565d !important;
-  }
-
-  .card {
-    /*box-shadow: 0 0.75rem 1.5rem rgba(18,38,63,.5);*/
-  }
 </style>
 
 <style lang="scss">

@@ -75,77 +75,74 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             ''', nativeQuery = true )
     List<RankedUserRes> findUsersForLeaderboard(String projectId, String subjectId, Pageable pageable)
 
-    @Query(value = '''SELECT 
-                    p.user_id as userId, 
+    @Query('''SELECT 
+                    p.userId as userId, 
                     p.points as points,
-                    uAttrs.user_id_for_display as userIdForDisplay,
-                    uAttrs.first_name as userFirstName,
-                    uAttrs.last_name as userLastName,
+                    uAttrs.userIdForDisplay as userIdForDisplay,
+                    uAttrs.firstName as userFirstName,
+                    uAttrs.lastName as userLastName,
                     uAttrs.created as userFirstSeenTimestamp
-                from user_points p, user_attrs uAttrs
+                from UserPoints p, UserAttrs uAttrs
                 where
-                    p.user_id = uAttrs.user_id and
-                    p.project_id=?1 and 
-                    p.skill_id=?2 and
-                    p.user_id!=?4 and  
-                    p.points<=?3 and
+                    p.userId = uAttrs.userId and
+                    p.projectId=?1 and 
+                    p.skillId=?2 and
+                    (p.points<?3 OR (p.points=?3 and uAttrs.created>?4)) and
                     p.day is null
-            ''', nativeQuery = true )
-    List<RankedUserRes> findUsersForLeaderboardPointsLessOrEqual(String projectId, String subjectId, Integer points, String userId, Pageable pageable)
+            ''')
+    List<RankedUserRes> findUsersForLeaderboardPointsLessOrEqual(String projectId, String subjectId, Integer points, Date usrCreated, Pageable pageable)
 
-    @Query(value = '''SELECT 
-                    p.user_id as userId, 
+    @Query('''SELECT 
+                    p.userId as userId, 
                     p.points as points,
-                    uAttrs.user_id_for_display as userIdForDisplay,
-                    uAttrs.first_name as userFirstName,
-                    uAttrs.last_name as userLastName,
+                    uAttrs.userIdForDisplay as userIdForDisplay,
+                    uAttrs.firstName as userFirstName,
+                    uAttrs.lastName as userLastName,
                     uAttrs.created as userFirstSeenTimestamp
-                from user_points p, user_attrs uAttrs
+                from UserPoints p, UserAttrs uAttrs
                 where
-                    p.user_id = uAttrs.user_id and
-                    p.project_id=?1 and 
-                    p.skill_id is null and
-                    p.user_id!=?3 and
+                    p.userId = uAttrs.userId and
+                    p.projectId=?1 and 
+                    p.skillId is null and
                     p.points<=?2 and
+                    (p.points<?2 OR (p.points=?2 and uAttrs.created>?3)) and
                     p.day is null
-            ''', nativeQuery = true )
-    List<RankedUserRes> findUsersForLeaderboardPointsLessOrEqual(String projectId, Integer points, String userId, Pageable pageable)
+            ''')
+    List<RankedUserRes> findUsersForLeaderboardPointsLessOrEqual(String projectId, Integer points, Date usrCreated, Pageable pageable)
 
-    @Query(value = '''SELECT 
-                    p.user_id as userId, 
+    @Query('''SELECT 
+                    p.userId as userId, 
                     p.points as points,
-                    uAttrs.user_id_for_display as userIdForDisplay,
-                    uAttrs.first_name as userFirstName,
-                    uAttrs.last_name as userLastName,
+                    uAttrs.userIdForDisplay as userIdForDisplay,
+                    uAttrs.firstName as userFirstName,
+                    uAttrs.lastName as userLastName,
                     uAttrs.created as userFirstSeenTimestamp
-                from user_points p, user_attrs uAttrs
+                from UserPoints p, UserAttrs uAttrs
                 where
-                    p.user_id = uAttrs.user_id and
-                    p.project_id=?1 and 
-                    p.skill_id=?2 and
-                    p.user_id!=?4 and 
-                    p.points>=?3 and
+                    p.userId = uAttrs.userId and
+                    p.projectId=?1 and 
+                    p.skillId=?2 and
+                    (p.points>?3 OR (p.points=?3 and uAttrs.created<?4)) and
                     p.day is null
-            ''', nativeQuery = true )
-    List<RankedUserRes> findUsersForLeaderboardPointsMoreOrEqual(String projectId, String subjectId, Integer points, String userId, Pageable pageable)
+            ''')
+    List<RankedUserRes> findUsersForLeaderboardPointsMoreOrEqual(String projectId, String subjectId, Integer points, Date userCreateDate, Pageable pageable)
 
-    @Query(value = '''SELECT 
-                    p.user_id as userId, 
+    @Query('''SELECT 
+                    p.userId as userId, 
                     p.points as points,
-                    uAttrs.user_id_for_display as userIdForDisplay,
-                    uAttrs.first_name as userFirstName,
-                    uAttrs.last_name as userLastName,
+                    uAttrs.userIdForDisplay as userIdForDisplay,
+                    uAttrs.firstName as userFirstName,
+                    uAttrs.lastName as userLastName,
                     uAttrs.created as userFirstSeenTimestamp
-                from user_points p, user_attrs uAttrs
+                from UserPoints p, UserAttrs uAttrs
                 where
-                    p.user_id = uAttrs.user_id and
-                    p.project_id=?1 and 
-                    p.skill_id is null and
-                    p.user_id!=?3 and
-                    p.points>=?2 and
+                    p.userId = uAttrs.userId and
+                    p.projectId=?1 and 
+                    p.skillId is null and
+                    (p.points>?2 OR (p.points=?2 and uAttrs.created<?3)) and
                     p.day is null
-            ''', nativeQuery = true )
-    List<RankedUserRes> findUsersForLeaderboardPointsMoreOrEqual(String projectId, Integer points, String userId, Pageable pageable)
+            ''')
+    List<RankedUserRes> findUsersForLeaderboardPointsMoreOrEqual(String projectId, Integer points, Date createdDate, Pageable pageable)
 
     long countByProjectIdAndSkillIdAndDay(String projectId, @Nullable String skillId, @Nullable Date day)
 
@@ -156,6 +153,22 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
 
     @Query("SELECT count(p) from UserPoints p where p.projectId=?1 and p.skillId is null and p.points > ?2 and p.day is null" )
     Integer calculateNumUsersWithLessScore(String projectId, int points)
+
+    @Query('''SELECT count(p) from UserPoints p, UserAttrs ua where 
+            p.userId = ua.userId and 
+            p.projectId=?1 and 
+            p.skillId=?2 and 
+            (p.points > ?3 OR (p.points = ?3 and ua.created < ?4)) and 
+            p.day is null''' )
+    Integer calculateNumUsersWithHigherScoreAndIfScoreTheSameThenAfterUserCreateDate(String projectId, String skillId, int points, Date created)
+
+    @Query('''SELECT count(p) from UserPoints p, UserAttrs ua where
+            p.userId = ua.userId and 
+            p.projectId=?1 and 
+            p.skillId is null and 
+            (p.points > ?2 OR (p.points = ?2 and ua.created < ?3)) and 
+            p.day is null''')
+    Integer calculateNumUsersWithHigherScoreAndIfScoreTheSameThenAfterUserCreateDate(String projectId, int points, Date created)
 
     List<UserPoints> findByProjectIdAndSkillIdAndPointsGreaterThanAndDayIsNull(String projectId, @Nullable String skillId, int points, Pageable pageable)
     List<UserPoints> findByProjectIdAndSkillIdAndPointsLessThanAndDayIsNull(String projectId, @Nullable String skillId, int points, Pageable pageable)
