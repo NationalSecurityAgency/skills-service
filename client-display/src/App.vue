@@ -80,6 +80,9 @@ limitations under the License.
               name: 'home',
             });
           },
+          navigate(fullPath) {
+            vm.$router.replace(fullPath);
+          },
         });
 
         handshake.then((parent) => {
