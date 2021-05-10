@@ -73,7 +73,6 @@ const MyProgressPage = () => import(/* webpackChunkName: 'myProgressPage' */'@//
 const MyProgress = () => import(/* webpackChunkName: 'myProgress' */'@//components/myProgress/MyProgress');
 const MyProjectSkillsPage = () => import(/* webpackChunkName: 'myProjectSkillsPage' */'@//components/myProgress/MyProjectSkillsPage');
 const ProjectErrorsPage = () => import(/* webpackChunkName: 'projectErrorsPage' */'@//components/projects/ProjectErrors');
-const ProjectClientDisplayPreview = () => import(/* webpackChunkName: 'ProjectClientDisplayPreview' */'@//components/projects/ProjectClientDisplayPreview');
 
 Vue.use(Router);
 
@@ -302,11 +301,6 @@ const router = new Router({
           component: SkillsMetricsPage,
           meta: { requiresAuth: true, reportSkillId: 'VisitProjectSkillMetrics' },
         }],
-      }, {
-        name: 'Preview',
-        path: 'preview',
-        component: ProjectClientDisplayPreview,
-        meta: { requiresAuth: true, reportSkillId: 'PreviewProjectClientDisplay' },
       }],
     },
     {
