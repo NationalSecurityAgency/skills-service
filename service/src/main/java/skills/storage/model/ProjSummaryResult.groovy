@@ -1,5 +1,5 @@
-/*
- * Copyright 2020 SkillTree
+/**
+ * Copyright 2021 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import dayjs from 'dayjs';
-import localizedFormatPlugin from 'dayjs/plugin/localizedFormat';
-import relativeTimePlugin from 'dayjs/plugin/relativeTime';
-import utcPlugin from 'dayjs/plugin/utc';
+package skills.storage.model
 
-dayjs.extend(localizedFormatPlugin);
-dayjs.extend(relativeTimePlugin);
-dayjs.extend(utcPlugin);
+import groovy.transform.Canonical
 
-export default dayjs;
+interface ProjSummaryResult {
+    String getProjectId()
+    String getName()
+    int getTotalPoints()
+    int getNumSubjects()
+    int getNumSkills()
+    int getNumBadges()
+    boolean getLevelsArePoints()
+    int getNumErrors()
+    Date getCreated()
+    Date getLastReportedSkill()
+}

@@ -183,6 +183,9 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
     @Nullable
     Stream<UserEvent> findAllBySkillRefIdAndEventType(Integer skillRefId, EventType type)
 
+    @Nullable
+    UserEvent findTopByProjectIdOrderByEventTimeDesc(String projectId)
+
     @QueryHints(value = [
         @QueryHint(name = "org.hibernate.cacheable", value = "false"),
         @QueryHint(name = "org.hibernate.readOnly", value = "true")

@@ -51,4 +51,7 @@ class ProjDef implements Serializable {
     @OneToMany(fetch = FetchType.LAZY, cascade = [])
     @JoinColumn(name="projRefId", insertable = false, updatable = false)
     List<CustomIcon> customIcons
+
+    @Column(name="created", updatable = false, insertable = false)
+    Date created
 }

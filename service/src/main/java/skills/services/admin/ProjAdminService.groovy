@@ -29,27 +29,26 @@ import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.ProjectRequest
-import skills.controller.request.model.ProjectSettingsRequest
 import skills.controller.request.model.RootUserProjectSettingsRequest
-import skills.controller.request.model.SettingsRequest
 import skills.controller.result.model.CustomIconResult
-import skills.controller.result.model.NumUsersRes
 import skills.controller.result.model.ProjectResult
 import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.SimpleProjectResult
 import skills.icons.IconCssNameUtil
 import skills.services.*
-import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.storage.model.CustomIcon
 import skills.storage.model.ProjDef
+import skills.storage.model.ProjSummaryResult
 import skills.storage.model.SkillDef
 import skills.storage.model.auth.RoleName
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillDefRepo
+import skills.storage.repos.UserEventsRepo
 import skills.utils.ClientSecretGenerator
 import skills.utils.Props
+import skills.utils.RelativeTimeUtil
 
 @Service
 @Slf4j
@@ -95,6 +94,9 @@ class ProjAdminService {
 
     @Autowired
     ProjectErrorService errorService
+
+    @Autowired
+    UserEventsRepo eventsRepo
 
     @Transactional()
     void saveProject(String originalProjectId, ProjectRequest projectRequest, String userIdParam = null) {
@@ -195,7 +197,7 @@ class ProjAdminService {
         List<SettingsResult> pinnedProjectSettings = settingsService.getRootUserSettingsForGroup(rootUserPinnedProjectGroup)
         List<String> pinnedProjects = pinnedProjectSettings.collect { it.value }
 
-        List<ProjDef> projects = projDefRepo.findAllByProjectIdIn(pinnedProjects)
+        List<ProjSummaryResult> projects = projDefRepo.getAllSummariesByProjectIdIn(pinnedProjects)
         Set<String> pinnedProjectIds = pinnedProjects.toSet()
 
         List<ProjectResult> finalRes = projects?.unique({ it.projectId })?.collect({
@@ -209,18 +211,18 @@ class ProjAdminService {
     @Transactional(readOnly = true)
     List<ProjectResult> searchByProjectName(String search) {
         validateRootUser();
-        List<ProjDef> projects = projDefRepo.findByNameLike(search)
+        List<ProjSummaryResult> projects = projDefRepo.getSummariesByNameLike(search)
         return convertProjectsWithPinnedIndicator(projects)
     }
 
     @Transactional(readOnly = true)
     List<ProjectResult> getAllProjects() {
         validateRootUser();
-        List<ProjDef> projects = projDefRepo.findAll()
+        List<ProjSummaryResult> projects = projDefRepo.getAllSummaries()
         return convertProjectsWithPinnedIndicator(projects)
     }
 
-    private List<ProjectResult> convertProjectsWithPinnedIndicator(List<ProjDef> projects) {
+    private List<ProjectResult> convertProjectsWithPinnedIndicator(List<ProjSummaryResult> projects) {
         Map<String, Integer> projectIdSortOrder = [:]
         List<SettingsResult> pinnedProjectSettings = settingsService.getRootUserSettingsForGroup(rootUserPinnedProjectGroup)
         List<String> pinnedProjects = pinnedProjectSettings.collect { it.value }
@@ -253,7 +255,7 @@ class ProjAdminService {
             finalRes = loadProjectsForRoot(projectIdSortOrder)
         } else {
             // sql join with UserRoles and there is 1-many relationship that needs to be normalized
-            List<ProjDef> projects = projDefRepo.getProjectsByUser(userId)
+            List<ProjSummaryResult> projects = projDefRepo.getProjectSummariesByUser(userId)
             finalRes = projects?.unique({ it.projectId })?.collect({
                 ProjectResult res = convert(it, projectIdSortOrder)
                 return res
@@ -272,12 +274,11 @@ class ProjAdminService {
 
     @Transactional(readOnly = true)
     ProjectResult getProject(String projectId) {
-        ProjDef projectDefinition = projDefAccessor.getProjDef(projectId)
+        ProjSummaryResult projectDefinition = projDefAccessor.getProjSummaryResult(projectId)
         Integer order = sortingService.getProjectSortOrder(projectId)
         ProjectResult res = convert(projectDefinition, [(projectId): order])
         return res
     }
-
 
     @Transactional(readOnly = true)
     boolean existsByProjectId(String projectId) {
@@ -313,9 +314,12 @@ class ProjAdminService {
 
     @Transactional()
     List<SimpleProjectResult> searchProjects(String projectId, String nameQuery) {
-        List<ProjDef> projDefs = projDefRepo.queryProjectsByNameQueryAndNotProjectId(nameQuery.toLowerCase(), projectId, PageRequest.of(0, 5, Sort.Direction.ASC, "name"))
+        List<ProjSummaryResult> projDefs = projDefRepo.queryProjectSummariesByNameAndNotProjectId(nameQuery.toLowerCase(), projectId, PageRequest.of(0, 5, Sort.Direction.ASC, "name"))
         return projDefs.collect {
-            new SimpleProjectResult(name: it.name, projectId: it.projectId)
+            new SimpleProjectResult(name: it.name,
+                    projectId: it.projectId,
+                    created: it.created,
+                    lastReportedSkill: it.lastReportedSkill)
         }
     }
 
@@ -341,24 +345,20 @@ class ProjAdminService {
     }
 
     @Profile
-    private ProjectResult convert(ProjDef definition, Map<String, Integer> projectIdSortOrder, Set<String> pinnedProjectIds = []) {
+    private ProjectResult convert(ProjSummaryResult definition, Map<String, Integer> projectIdSortOrder, Set<String> pinnedProjectIds = []) {
         Integer order = projectIdSortOrder?.get(definition.projectId)
         ProjectResult res = new ProjectResult(
                 projectId: definition.projectId, name: definition.name, totalPoints: definition.totalPoints,
-                numSubjects: definition.subjects ? definition.subjects.size() : 0,
+                numSubjects: definition.numSubjects,
                 displayOrder: order != null ? order : 0,
                 pinned: pinnedProjectIds?.contains(definition.projectId),
+                created: definition.created
         )
-        res.numBadges = skillDefRepo.countByProjectIdAndType(definition.projectId, SkillDef.ContainerType.Badge)
-        res.numSkills = countNumSkillsForProject(definition)
-        res.numErrors = errorService.countOfErrorsForProject(definition.projectId)
-        SettingsResult result = settingsService.getProjectSetting(definition.projectId, Settings.LEVEL_AS_POINTS.settingName)
-
-        if (result == null || result.value == "false") {
-            res.levelsArePoints = false
-        } else if (result?.value == "true") {
-            res.levelsArePoints = true
-        }
+        res.numBadges = definition.numBadges
+        res.numSkills = definition.numSkills
+        res.numErrors = definition.numErrors
+        res.levelsArePoints = definition.levelsArePoints
+        res.lastReportedSkill = definition.lastReportedSkill
 
         res
     }

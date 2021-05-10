@@ -149,7 +149,6 @@ class SkillsLoader {
             myProgressSummary.numProjectsContributed += summary.points > 0 ? 1 : 0
         }
 
-        Integer numBadges = skillDefRepo.countTotalProductionBadges()
         BadgeCount badgeCount = skillDefRepo.getProductionBadgesCount()
         myProgressSummary.totalBadges = badgeCount.totalCount ?: 0
         myProgressSummary.globalBadgeCount = badgeCount.globalCount ?: 0
