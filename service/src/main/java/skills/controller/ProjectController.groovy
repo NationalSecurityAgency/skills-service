@@ -70,9 +70,6 @@ class ProjectController {
     @RequestMapping(value = "/projects", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     List<ProjectResult> getProjects() {
-        // need to include production mode state here?
-        // or somehow get it to an individual project view so that we can conditionally enable
-        // a preview button
         return projAdminService.getProjects()
     }
 
