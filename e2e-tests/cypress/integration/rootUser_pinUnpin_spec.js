@@ -325,6 +325,7 @@ describe('Root Pin and Unpin Tests', () => {
       cy.intercept('POST', '/root/pin/proj1').as('pinOne');
       cy.intercept('DELETE', '/root/pin/proj1').as('unpinOne');
       cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+      cy.reportSkill('Inception', 'CreateProject', 'user1@skills.org', 'now', false)
 
       cy.visit('/administrator/');
       //confirm that default project loading returns no projects for root user

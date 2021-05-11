@@ -179,7 +179,7 @@ Cypress.Commands.add("assignSkillToGlobalBadge", (badgeNum = 1, skillNum = 1, pr
 });
 
 
-Cypress.Commands.add("reportSkill", (project = 1, skillNum = 1, userId = 'user@skills.org', date = '2020-09-12 11:00', failOnError=true) => {
+Cypress.Commands.add("reportSkill", (project = 1, skill = 1, userId = 'user@skills.org', date = '2020-09-12 11:00', failOnError=true) => {
     let m = moment.utc(date, 'YYYY-MM-DD HH:mm');
     if (date === 'now') {
         m = moment.utc()
@@ -193,9 +193,15 @@ Cypress.Commands.add("reportSkill", (project = 1, skillNum = 1, userId = 'user@s
     } else {
         proj = project;
     }
+    let skillId = '';
+    if (!isNaN(parseFloat(skill))) {
+        skillId = `skill${skill}`;
+    } else {
+        skillId = skill;
+    }
     cy.request({
         method: 'POST',
-        url: `/api/projects/${proj}/skills/skill${skillNum}`,
+        url: `/api/projects/${proj}/skills/${skillId}`,
         failOnStatusCode: failOnError,
         body: {userId, timestamp: m.clone().format('x')}});
 });
