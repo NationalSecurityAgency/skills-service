@@ -21,7 +21,7 @@ limitations under the License.
       <div class="row px-3 pt-3">
         <div class="col-12">
           <b-form-group label="User Id Filter" label-class="text-muted">
-            <b-input v-model="filters.userId" data-cy="users-skillIdFilter" aria-label="user id filter"/>
+            <b-input v-model="filters.userId" v-on:keyup.enter="applyFilters" data-cy="users-skillIdFilter" aria-label="user id filter"/>
           </b-form-group>
         </div>
         <div class="col-md">
