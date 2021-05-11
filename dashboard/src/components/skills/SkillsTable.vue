@@ -75,7 +75,7 @@ limitations under the License.
 
               <div class="text-muted" style="font-size: 0.9rem;">ID: {{ data.item.skillId }}</div>
             </div>
-            <div class="col-auto">
+            <div class="col-auto ml-auto mr-0">
               <router-link :data-cy="`manageSkillBtn_${data.item.skillId}`" :to="{ name:'SkillOverview',
                                   params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
                            :aria-label="`Manage skill ${data.item.name}`"

@@ -537,5 +537,30 @@ describe('Skills Table Tests', () => {
         cy.contains('450 Points');
 
     });
+
+    it('long skill id row controls wrap to the right', () => {
+        cy.log('creating new skill');
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/MaximumWidthPainBreakingControlLayoutForReal1Skill', {
+            projectId: 'proj1',
+            subjectId: "subj1",
+            skillId: "MaximumWidthPainBreakingControlLayoutForReal1Skill",
+            name: "MaximumWidthPainBreakingControlLayoutForReal1 1",
+            pointIncrement: '50',
+            numPerformToCompletion: '5'
+        });
+        cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills').as('loadSkills');
+
+        cy.log('visiting subj1 page');
+        cy.viewport(1400, 900);
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.wait('@loadSkills');
+
+        //wait for loading
+        cy.log('matchSnapshot');
+        cy.matchSnapshotImageForElement('[data-cy=skillsTable]', 'skillsTableFullsize')
+        cy.viewport(1200, 900);
+        cy.wait(400);
+        cy.matchSnapshotImageForElement('[data-cy=skillsTable]', 'skillsTableSmaller')
+    });
 });
 
