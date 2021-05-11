@@ -258,6 +258,13 @@ Approval requests can be located on the ``Self Report`` page, navigate to ``Proj
                         numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         description: '''Issues page documents any errors or warnings that require a project administrator's attention. Navigate to ``Project -> Issues`` ''',
                 ),
+                new SkillRequest(name: "Preview Client Display for Project", skillId: "PreviewProjectClientDisplay", subjectId: subjectProjectId, projectId: inceptionProjectId,
+                        pointIncrement: 15,
+                        numPerformToCompletion: 4,
+                        pointIncrementInterval : 60 * 12,
+                        numMaxOccurrencesIncrementInterval: 1,
+                        description: '''The Project Client Display Preview allows a Project Administrator to preview what their training profile will look like to a user. The Project Client Display Preview button is located directly below the Project ID, on the top left when viewing a specific Project in the Dashboard.'''
+                )
 
         ]
     }
