@@ -60,14 +60,8 @@ describe('User Tests', () => {
     cy.get('.skills-b-table tbody tr').should('have.length', 2);
     cy.get('[data-cy=performedSkills-skillIdFilter]').type('mediocre{enter}');
     cy.wait('@loadUserSkills');
-    cy.get('.skills-b-table tbody tr').should('have.length', 2);
+    cy.get('.skills-b-table tbody tr').should('have.length', 1);
   });
 
 
 });
-
-
-
-/*
-https://ip-10-113-80-245.evoforge.org/administrator/projects/movies/users/user8/skillEvents
- */
