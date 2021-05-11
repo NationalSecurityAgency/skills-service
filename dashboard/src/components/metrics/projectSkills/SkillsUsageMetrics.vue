@@ -18,7 +18,7 @@ limitations under the License.
     <div class="row px-3 pt-3">
       <div class="col-12 col-md border-right">
         <b-form-group label="Skill Name Filter" label-class="text-muted">
-          <b-input v-model="filters.name" data-cy="skillsNavigator-skillNameFilter" aria-label="skill name filter"/>
+          <b-input v-model="filters.name" v-on:keyup.enter="applyFilters" data-cy="skillsNavigator-skillNameFilter" aria-label="skill name filter"/>
         </b-form-group>
       </div>
       <div class="col-md" data-cy="skillsNavigator-filters">

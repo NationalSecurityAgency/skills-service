@@ -784,5 +784,49 @@ describe('Projects Tests', () => {
     cy.get('[data-cy=projectCreated]').should('be.visible').contains('today');
     cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('7 days ago');
   });
+
+  it('project users input field submits on enter', () => {
+    cy.request('POST', '/app/projects/my_project_123', {
+      projectId: 'my_project_123',
+      name: "My Project 123"
+    });
+
+    cy.request('POST', '/admin/projects/my_project_123/subjects/subj1', {
+      projectId: 'my_project_123',
+      subjectId: 'subj1',
+      name: "Subject 1"
+    });
+    cy.request('POST', `/admin/projects/my_project_123/subjects/subj1/skills/skill1`, {
+      projectId: 'my_project_123',
+      subjectId: 'subj1',
+      skillId: 'skill1',
+      name: `This is 1`,
+      type: 'Skill',
+      pointIncrement: 100,
+      numPerformToCompletion: 10,
+      pointIncrementInterval: 0,
+      numMaxOccurrencesIncrementInterval: -1,
+      version: 0,
+    });
+
+    const now = dayjs()
+    cy.reportSkill('my_project_123', 1, 'user1@skills.org', now.subtract(1, 'year').format('YYYY-MM-DD HH:mm'), false);
+    cy.reportSkill('my_project_123', 1, 'user2@skills.org', now.subtract(1, 'year').format('YYYY-MM-DD HH:mm'), false);
+    cy.reportSkill('my_project_123', 1, 'user3@skills.org', now.subtract(1, 'year').format('YYYY-MM-DD HH:mm'), false);
+    cy.reportSkill('my_project_123', 1, 'user4@skills.org', now.subtract(1, 'year').format('YYYY-MM-DD HH:mm'), false);
+
+    cy.intercept('GET', '/admin/projects/my_project_123').as('loadProj');
+    cy.intercept('GET', '/api/projects/Inception/level').as('loadInception');
+    cy.intercept('GET', '/admin/projects/my_project_123/users**').as('loadUsers');
+    cy.visit('/administrator/projects/my_project_123');
+    cy.wait('@loadProj');
+    cy.wait('@loadInception');
+    cy.get('[data-cy=nav-Users]').click();
+    cy.wait('@loadUsers');
+    cy.get('[data-cy=usersTable_viewDetailsBtn]').should('have.length', 4);
+    cy.get('[data-cy=users-skillIdFilter]').type('user1{enter}');
+    cy.wait('@loadUsers');
+    cy.get('[data-cy=usersTable_viewDetailsBtn]').should('have.length', 1);
+  });
 });
 

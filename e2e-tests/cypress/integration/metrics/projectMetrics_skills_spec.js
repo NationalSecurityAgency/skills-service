@@ -387,4 +387,42 @@ describe('Metrics Tests - Skills', () => {
 
     });
 
+    it('skill name filter submit on enter', () => {
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Interesting Subject 1",
+        })
+
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/vgsk1`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: `vgsk1`,
+            name: `Very Great Skill # 1`,
+            pointIncrement: '50',
+            numPerformToCompletion: '1',
+        });
+
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/nsgsk1`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: `nsgsk1`,
+            name: `Not So Great Skill # 1`,
+            pointIncrement: '50',
+            numPerformToCompletion: '1',
+        });
+
+        cy.intercept('/admin/projects/proj1/metrics/skillUsageNavigatorChartBuilder')
+          .as('skillUsageNavigatorChartBuilder');
+
+        cy.visit('/administrator/projects/proj1/');
+        cy.clickNav('Metrics');
+        cy.get('[data-cy=metricsNav-Skills]').click();
+        cy.wait('@skillUsageNavigatorChartBuilder');
+
+        cy.get('.skills-b-table tbody tr').should('have.length', 2);
+        cy.get('[data-cy=skillsNavigator-skillNameFilter]').type('not so{enter}');
+        cy.get('.skills-b-table tbody tr').should('have.length', 1);
+    });
+
 })
