@@ -162,7 +162,7 @@ describe('Client Display Tests', () => {
 
         cy.intercept('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
 
-        cy.cdVisit('/');
+        cy.cdVisit('/?internalBackButton=true');
         cy.injectAxe();
         cy.contains('User Skills');
         cy.get('[data-cy=back]').should('not.exist');
@@ -186,7 +186,7 @@ describe('Client Display Tests', () => {
     });
 
     it('clearly represent navigable components', () => {
-        cy.cdVisit('/');
+        cy.cdVisit('?internalBackButton=true');
 
         cy.get('[data-cy=myRank]').should('have.class', 'skills-navigable-item');
         cy.get('[data-cy=myBadges]').should('have.class', 'skills-navigable-item');
@@ -260,7 +260,7 @@ describe('Client Display Tests', () => {
         cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: Cypress.env('proxyUser'), timestamp: m.subtract(3, 'day').format('x')})
         cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: Cypress.env('proxyUser'), timestamp: m.subtract(2, 'day').format('x')})
         cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: Cypress.env('proxyUser'), timestamp: m.subtract(1, 'day').format('x')})
-        cy.cdVisit('/');
+        cy.cdVisit('/?internalBackButton=true');
         cy.cdClickSubj(0);
         cy.cdClickSkill(1);
 

@@ -49,6 +49,7 @@ export default new Vuex.Store({
     projectId: null,
     serviceUrl: null,
     authenticator: null,
+    internalBackButton: false,
   },
   mutations: {
     authToken(state, authToken) {
@@ -75,6 +76,10 @@ export default new Vuex.Store({
     isSummaryOnly(state, isSummaryOnly) {
       // eslint-disable-next-line no-param-reassign
       state.isSummaryOnly = isSummaryOnly;
+    },
+    internalBackButton(state, internalBackButton) {
+      // eslint-disable-next-line no-param-reassign
+      state.internalBackButton = internalBackButton;
     },
     projectId(state, projectId) {
       // eslint-disable-next-line no-param-reassign

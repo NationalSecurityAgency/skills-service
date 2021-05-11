@@ -60,7 +60,7 @@ describe('Client Display Skills Filtering Tests', () => {
 
     cy.createSkill(1, 1, 1);
 
-    cy.cdVisit('/');
+    cy.cdVisit('/?internalBackButton=true');
     cy.cdClickSubj(0);
     cy.validateCounts(1, 0, 0, 0, 0)
 

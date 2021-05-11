@@ -95,7 +95,7 @@ const router = new VueRouter({
 const isWildcardMatch = (matched) => matched.filter((item) => item.path === '*').length > 0;
 
 router.beforeEach((to, from, next) => {
-  if (!to.params.previousRoute && to.meta.setPreviousRoute !== false && !isWildcardMatch(to.matched)) {
+  if (store.state.internalBackButton && !to.params.previousRoute && to.meta.setPreviousRoute !== false && !isWildcardMatch(to.matched)) {
     const previousRoute = { ...from };
     const params = { ...to.params, ...{ previousRoute } };
     const updatedTo = { ...to, ...{ params }, replace: true };
@@ -105,9 +105,9 @@ router.beforeEach((to, from, next) => {
   }
 });
 
-router.afterEach(debounce(() => {
+router.afterEach(debounce((to) => {
   if (process.env.NODE_ENV !== 'development' && store.state.parentFrame) {
-    store.state.parentFrame.emit('route-changed');
+    store.state.parentFrame.emit('route-changed', to.fullPath);
   }
 }, 250));
 

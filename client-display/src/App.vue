@@ -80,6 +80,9 @@ limitations under the License.
               name: 'home',
             });
           },
+          navigate(fullPath) {
+            vm.$router.replace(fullPath);
+          },
         });
 
         handshake.then((parent) => {
@@ -91,6 +94,9 @@ limitations under the License.
 
           // will only display summary and component will not be interactive
           this.$store.commit('isSummaryOnly', parent.model.isSummaryOnly ? parent.model.isSummaryOnly : false);
+
+          // whether or not to use an internal back button as opposed to the browser back button
+          this.$store.commit('internalBackButton', parent.model.internalBackButton ? parent.model.internalBackButton : false);
 
           this.$store.commit('projectId', parent.model.projectId);
           this.$store.commit('serviceUrl', parent.model.serviceUrl);

@@ -209,7 +209,7 @@ describe('Client Display Theme Tests', () => {
                 });
             }
 
-            cy.cdVisit('/?enableTheme=true')
+            cy.cdVisit('/?enableTheme=true&internalBackButton=true')
 
             // back button - border color
             cy.cdClickRank();
