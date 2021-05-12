@@ -557,10 +557,10 @@ describe('Skills Table Tests', () => {
 
         //wait for loading
         cy.log('matchSnapshot');
-        cy.matchSnapshotImageForElement('[data-cy=skillsTable]', 'skillsTableFullsize')
+        cy.matchSnapshotImageForElement('.skills-b-table tbody tr:first-of-type td:first-of-type', 'skillsTableFullsize')
         cy.viewport(1200, 900);
         cy.wait(400);
-        cy.matchSnapshotImageForElement('[data-cy=skillsTable]', 'skillsTableSmaller')
+        cy.matchSnapshotImageForElement('.skills-b-table tbody tr:first-of-type td:first-of-type', 'skillsTableSmaller')
     });
 });
 
