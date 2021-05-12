@@ -38,8 +38,6 @@ limitations under the License.
       <span v-if="animationEnded" data-cy="pointHistoryChart-animationEnded"></span>
       <point-history-chart-placeholder v-if="loading.inProgress || !hasData" />
     </div>
-<!--    <button v-if="chartWasZoomed" @click="resetZoom"-->
-<!--            class="reset-zoom-btn btn btn-secondary btn-sm skills-theme-btn"><i class="fas fa-search-minus"></i> Reset Zoom</button>-->
   </div>
 </template>
 
