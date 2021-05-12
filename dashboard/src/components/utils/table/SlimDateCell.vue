@@ -21,7 +21,7 @@ limitations under the License.
       today
     </span>
     <span v-else class="text-secondary small">
-      {{ value | timeFromNow }}
+      {{ fromNow }}
     </span>
 </template>
 
@@ -30,7 +30,21 @@ limitations under the License.
 
   export default {
     name: 'SlimDateCell',
-    props: ['value'],
+    props: {
+      value: String,
+      fromStartOfDay: {
+        type: Boolean,
+        default: false,
+      },
+    },
+    computed: {
+      fromNow() {
+        if (this.fromStartOfDay) {
+          return dayjs().startOf('day').to(dayjs(this.value));
+        }
+        return dayjs(this.value).startOf('seconds').fromNow();
+      },
+    },
     methods: {
       isToday(timestamp) {
         return dayjs().utc()

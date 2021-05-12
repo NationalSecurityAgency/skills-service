@@ -720,7 +720,8 @@ describe('Projects Tests', () => {
     cy.get('[data-cy=projectCreated]').should('be.visible').contains('today');
     cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('2 months ago');
 
-    cy.reportSkill('my_project_123', 1, 'user@skills.org', now.subtract(6, 'days').format('YYYY-MM-DD HH:mm'), false);
+    cy.reportSkill('my_project_123', 1, 'user@skills.org', now.subtract(7, 'days').utc().format('YYYY-MM-DD HH:mm'), false);
+
     cy.visit('/administrator/');
     cy.wait('@getProjects');
     cy.wait('@loadInception');
@@ -762,7 +763,7 @@ describe('Projects Tests', () => {
     cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('never');
 
     const now = dayjs().utc()
-    cy.reportSkill('my_project_123', 1, 'user@skills.org', now.subtract(1, 'year').format('YYYY-MM-DD HH:mm'), false);
+    cy.reportSkill('my_project_123', 1, 'user@skills.org', now.subtract(1, 'year').utc().format('YYYY-MM-DD HH:mm'), false);
 
     cy.visit('/administrator/projects/my_project_123');
     cy.wait('@loadProj');
@@ -770,14 +771,14 @@ describe('Projects Tests', () => {
     cy.get('[data-cy=projectCreated]').should('be.visible').contains('today');
     cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('a year ago');
 
-    cy.reportSkill('my_project_123', 1, 'user@skills.org', now.subtract(2, 'months').format('YYYY-MM-DD HH:mm'), false);
+    cy.reportSkill('my_project_123', 1, 'user@skills.org', now.subtract(2, 'months').utc().format('YYYY-MM-DD HH:mm'), false);
     cy.visit('/administrator/projects/my_project_123');
     cy.wait('@loadProj');
     cy.wait('@loadInception');
     cy.get('[data-cy=projectCreated]').should('be.visible').contains('today');
     cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('2 months ago');
 
-    cy.reportSkill('my_project_123', 1, 'user@skills.org', now.subtract(6, 'days').format('YYYY-MM-DD HH:mm'), false);
+    cy.reportSkill('my_project_123', 1, 'user@skills.org', now.subtract(7, 'days').utc().format('YYYY-MM-DD HH:mm'), false);
     cy.visit('/administrator/projects/my_project_123');
     cy.wait('@loadProj');
     cy.wait('@loadInception');
