@@ -37,7 +37,6 @@ class UsagePostAchievementMetricsBuilderSpec extends DefaultIntSpec {
     @Autowired
     UserEventService userEventService
 
-    @IgnoreRest
     def "produces accurate post achievement usage counts"() {
         //simple case, not taking into account event compaction boundaries
         def proj = SkillsFactory.createProject()
