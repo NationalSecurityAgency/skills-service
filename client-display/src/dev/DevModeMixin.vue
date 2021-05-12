@@ -52,7 +52,7 @@ limitations under the License.
           const isSummaryOnly = this.$route.query.isSummaryOnly ? this.$route.query.isSummaryOnly : false;
           this.$store.commit('isSummaryOnly', isSummaryOnly);
 
-          const internalBackButton = this.$route.query.internalBackButton ? this.$route.query.internalBackButton : false;
+          const internalBackButton = this.$route.query.internalBackButton ? this.$route.query.internalBackButton : true;
           this.$store.commit('internalBackButton', internalBackButton);
 
           const isThemeEnabled = this.$route.query.enableTheme ? this.$route.query.enableTheme : false;
