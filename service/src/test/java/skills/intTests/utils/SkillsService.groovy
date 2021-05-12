@@ -712,6 +712,13 @@ class SkillsService {
         return wsHelper.apiGet(endpoint)
     }
 
+    def getLeaderboard(String userId, String projectId, String subjectId = null, String type="topTen"){
+        userId = getUserId(userId)
+        String endpoint = subjectId ? "/projects/${projectId}/subjects/${subjectId}/leaderboard" : "/projects/${projectId}/leaderboard"
+        endpoint = "${endpoint}?type=${type}&userId=${userId}"
+        return wsHelper.apiGet(endpoint)
+    }
+
     def getRankDistribution(String userId, String projectId, String subjectId = null){
         userId = getUserId(userId)
         String endpoint = subjectId ? "/projects/${projectId}/subjects/${subjectId}/rankDistribution" : "/projects/${projectId}/rankDistribution"

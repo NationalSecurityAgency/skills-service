@@ -15,7 +15,7 @@
  */
 var moment = require('moment-timezone');
 
-describe('Client Display Tests', () => {
+describe('Client Display Point History Tests', () => {
 
     beforeEach(() => {
         Cypress.env('disabledUILoginProp', true);

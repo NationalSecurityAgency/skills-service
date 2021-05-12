@@ -53,7 +53,7 @@ limitations under the License.
                 </div>
 
                 <div class="col-lg-6">
-                    <my-rank-encouragement-card icon="fa fa-user-astronaut text-warning" class="mb-2">
+                    <my-rank-encouragement-card icon="fa fa-user-astronaut skills-color-orange" class="mb-2">
 
                         <span v-if="rankingDistribution.pointsToPassNextUser === -1">
                             <h4 class="mb-2">Wow!! You are in the lead!</h4>
@@ -66,7 +66,7 @@ limitations under the License.
 
                     </my-rank-encouragement-card>
 
-                    <my-rank-encouragement-card icon="fa fa-running text-danger" class="mb-2">
+                    <my-rank-encouragement-card icon="fa fa-running text-warning" class="mb-2">
                          <span v-if="rankingDistribution.pointsAnotherUserToPassMe === -1">
                             <h4 class="mb-2">You just got started!!</h4>
                             <div class="">Exciting times, enjoy gaining those points!</div>
@@ -77,7 +77,7 @@ limitations under the License.
                         </span>
                     </my-rank-encouragement-card>
 
-                    <my-rank-encouragement-card icon="fa fa-glass-cheers text-info">
+                    <my-rank-encouragement-card icon="fa fa-glass-cheers skills-color-bronze">
                         <span v-if="myRank">
                             <span v-if="numUsersBehindMe <= 0">
                                 <h4 class="mb-2">Earn those point riches!</h4>
@@ -95,6 +95,8 @@ limitations under the License.
                 </div>
 
             </div>
+
+            <leaderboard class="mt-3"/>
         </div>
     </section>
 </template>
@@ -109,9 +111,11 @@ limitations under the License.
 
   import SkillsTitle from '@/common/utilities/SkillsTitle';
   import SkillsSpinner from '@/common/utilities/SkillsSpinner';
+  import Leaderboard from './Leaderboard';
 
   export default {
     components: {
+      Leaderboard,
       SkillsSpinner,
       SkillsTitle,
       MyRankDetailStatCard,

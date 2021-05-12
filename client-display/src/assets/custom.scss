@@ -16,7 +16,8 @@
 $theme-colors: (
         //"info": #2d8779,
         "info":#146c75,
-        "primary": #264653ff,
+        "primary": #143740,
+        "secondary": #60737b,
         "warning": #ffc42b,
         "header": #f8e9cb,
         "success": #007c49,
@@ -50,5 +51,18 @@ $text-muted: #6b6b6b;
   width: 1px;
 }
 
+.skills-color-gold {
+ color: #fee101;
+}
 
+.skills-color-silver {
+  color: #a7a7ad;
+}
 
+.skills-color-bronze {
+  color: #a77044;
+}
+
+.skills-color-orange {
+  color: #e76f51fc;
+}

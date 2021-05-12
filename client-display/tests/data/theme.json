@@ -35,6 +35,7 @@
   },
   "badges": {
     "backgroundColor": "#6f42c1",
+    "backgroundColorSecondary": "#a37ee6",
     "foregroundColor": "#fdfbfb"
   },
   "graphLegendBorderColor": "1px solid grey"

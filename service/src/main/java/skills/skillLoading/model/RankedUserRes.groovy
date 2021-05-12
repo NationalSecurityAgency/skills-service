@@ -13,32 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.storage.model
+package skills.skillLoading.model
 
-import org.springframework.data.annotation.CreatedDate
-import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import groovy.transform.Canonical
 
-import javax.persistence.*
-
-@Entity
-@Table(name = 'user_attrs')
-@EntityListeners(AuditingEntityListener)
-class UserAttrs {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer id
-
+@Canonical
+class RankedUserRes {
+    Integer rank
     String userId
-
+    boolean isItMe = false
     String firstName
     String lastName
-    String email
-    String dn
-    String nickname
-    String userIdForDisplay
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @CreatedDate
-    Date created
+    Integer points
+    Long userFirstSeenTimestamp
 }

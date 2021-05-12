@@ -86,6 +86,12 @@ const router = new VueRouter({
       props: true,
     },
     {
+      path: '/subjects/:subjectId/rank',
+      component: MyRankDetails,
+      name: 'subjectRankDetails',
+      props: true,
+    },
+    {
       path: '*',
       component: SkillsEntry,
     },

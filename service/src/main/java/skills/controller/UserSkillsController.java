@@ -401,4 +401,25 @@ class UserSkillsController {
         return RequestResult.success();
     }
 
+    @RequestMapping(value = "/projects/{projectId}/leaderboard", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    public LeaderboardRes getLeaderboard(@PathVariable("projectId") String projectId,
+                                    @RequestParam(name = "userId", required = false) String userIdParam,
+                                    @RequestParam(name = "idType", required = false) String idType,
+                                    @RequestParam(name = "type", required = false) LeaderboardRes.Type type) {
+        String userId = userInfoService.getUserName(userIdParam, true, idType);
+        return rankingLoader.getLeaderboard(projectId, userId, type);
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/leaderboard", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    public LeaderboardRes getSubjectLeaderboard(@PathVariable("projectId") String projectId,
+                                                @PathVariable("subjectId") String subjectId,
+                                         @RequestParam(name = "userId", required = false) String userIdParam,
+                                         @RequestParam(name = "idType", required = false) String idType,
+                                         @RequestParam(name = "type", required = false) LeaderboardRes.Type type) {
+        String userId = userInfoService.getUserName(userIdParam, true, idType);
+        return rankingLoader.getLeaderboard(projectId, userId, type, subjectId);
+    }
+
 }

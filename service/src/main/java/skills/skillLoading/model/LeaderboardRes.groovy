@@ -13,32 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.storage.model
+package skills.skillLoading.model
 
-import org.springframework.data.annotation.CreatedDate
-import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import groovy.transform.Canonical
 
-import javax.persistence.*
+@Canonical
+class LeaderboardRes {
 
-@Entity
-@Table(name = 'user_attrs')
-@EntityListeners(AuditingEntityListener)
-class UserAttrs {
+    enum Type {
+        topTen, tenAroundMe
+    }
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer id
-
-    String userId
-
-    String firstName
-    String lastName
-    String email
-    String dn
-    String nickname
-    String userIdForDisplay
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @CreatedDate
-    Date created
+    Type type
+    Integer availablePoints
+    List<RankedUserRes> rankedUsers
 }

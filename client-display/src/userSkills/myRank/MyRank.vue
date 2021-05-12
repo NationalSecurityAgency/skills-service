@@ -48,12 +48,18 @@ limitations under the License.
     methods: {
       openMyRankDetails() {
         if (!this.isSummaryOnly) {
-          this.handlePush({
-            name: 'myRankDetails',
-            params: {
-              subjectId: this.displayData.userSkills.subjectId,
-            },
-          });
+          if (this.$route.params.subjectId) {
+            this.handlePush({
+              name: 'subjectRankDetails',
+              params: {
+                subjectId: this.$route.params.subjectId,
+              },
+            });
+          } else {
+            this.handlePush({
+              name: 'myRankDetails',
+            });
+          }
         }
       },
     },

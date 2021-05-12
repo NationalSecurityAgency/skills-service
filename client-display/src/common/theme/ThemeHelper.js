@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 export default {
-  nonCSSConfig: ['progressIndicators', 'charts', 'landingPageTitle'],
+  nonCSSConfig: ['charts', 'landingPageTitle', 'earnedTodayColor', 'beforeTodayColor'],
+  bothCssAndThemModule: ['progressIndicators'],
   selectorKey: {
     maxWidth: {
       selector: 'body #app.skills-display-container',
@@ -47,7 +48,7 @@ export default {
       styleName: 'color',
     },
     textPrimaryColor: {
-      selector: 'body #app .text-primary, body #app, body #app .skills-navigable-item',
+      selector: 'body #app .text-primary, body #app, body #app .skills-navigable-item, body #app .skills-theme-primary-color,  body #app .leaderboardTable tr td',
       styleName: 'color',
     },
     textPrimaryMutedColor: {
@@ -134,9 +135,23 @@ export default {
         selector: 'body #app .badge',
         styleName: 'background-color',
       }],
+      backgroundColorSecondary: [{
+        selector: 'body #app .badge.badge-secondary',
+        styleName: 'background-color',
+      }],
       foregroundColor: [{
         selector: 'body #app .badge',
         styleName: 'color',
+      }],
+    },
+    progressIndicators: {
+      completeColor: [{
+        selector: 'body #app .leaderboard .progress .progress-bar',
+        styleName: 'background-color',
+      }],
+      incompleteColor: [{
+        selector: 'body #app .leaderboard .progress',
+        styleName: 'background-color',
       }],
     },
   },
@@ -167,6 +182,7 @@ export default {
       Object.keys(inputTheme)
         .forEach((key) => {
           const isCSSConfig = !this.nonCSSConfig.includes(key);
+          const isThemeModule = !isCSSConfig || this.bothCssAndThemModule.includes(key);
           if (isCSSConfig) {
             const selectorKeyElement = selectorKey[key];
             validateInputElement(key, selectorKeyElement, 'is not supported (Is it misspelled?)');
@@ -183,7 +199,9 @@ export default {
             } else {
               populateResult(selectorKeyElement, inputThemeElement);
             }
-          } else {
+          }
+
+          if (isThemeModule) {
             res.themeModule.set(key, inputTheme[key]);
           }
         });

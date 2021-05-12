@@ -17,7 +17,7 @@ limitations under the License.
     <div class="card">
         <div class="card-body">
             <div class="media">
-                <div class="d-inline-block mt-2 mr-3 border p-3 rounded-circle">
+                <div class="d-inline-block mt-2 mr-3 border p-3 rounded-circle icon-bg">
                     <i class="fa-3x" :class="icon" style="min-width: 3.5rem;"/>
                 </div>
                 <div class="media-body text-left">
@@ -38,5 +38,7 @@ limitations under the License.
 </script>
 
 <style scoped>
-
+.icon-bg {
+  background-color: rgba(255,255,255,0.2) !important;
+}
 </style>

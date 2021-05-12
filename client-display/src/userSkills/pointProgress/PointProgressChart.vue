@@ -29,6 +29,8 @@ limitations under the License.
     </div>
     <div class="card-header">
       <h3 class="h6 card-title mb-0 float-left">Point History</h3>
+      <button v-if="chartWasZoomed" @click="resetZoom"
+              class="reset-zoom-btn btn btn-secondary btn-sm skills-theme-btn"><i class="fas fa-search-minus"></i> Reset Zoom</button>
     </div>
     <div class="card-body m-0 mr-1 p-0 apex-chart-container">
       <apexchart ref="ptChart" id="points-chart" v-if="!loading.inProgress && hasData" :options="chartOptions"
@@ -36,8 +38,6 @@ limitations under the License.
       <span v-if="animationEnded" data-cy="pointHistoryChart-animationEnded"></span>
       <point-history-chart-placeholder v-if="loading.inProgress || !hasData" />
     </div>
-    <button v-if="chartWasZoomed" @click="resetZoom"
-            class="reset-zoom-btn btn btn-outline-primary btn-sm"><i class="fas fa-search-minus"></i> Reset Zoom</button>
   </div>
 </template>
 
@@ -262,7 +262,9 @@ limitations under the License.
 
   .reset-zoom-btn {
     position: absolute;
-    bottom: 4rem;
-    right: 1rem;
+    /*top: 3.1rem;*/
+    top: 0.5rem;
+    left: 6.8rem;
+    font-size: 0.7rem !important;
   }
 </style>
