@@ -43,7 +43,7 @@ limitations under the License.
           </div>
           <div class="row">
             <div class="col justify-content-end" data-cy="projectLastReportedSkill">
-              <span class="text-secondary small font-italic">Last reported Skill: </span><slim-date-cell :value="projectInternal.lastReportedSkill"/>
+              <span class="text-secondary small font-italic">Last reported Skill: </span><slim-date-cell :value="projectInternal.lastReportedSkill" :fromStartOfDay="true"/>
             </div>
           </div>
         </div>

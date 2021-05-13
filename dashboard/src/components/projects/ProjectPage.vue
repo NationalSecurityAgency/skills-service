@@ -22,7 +22,7 @@ limitations under the License.
             <span class="text-secondary small font-italic">Created: </span><slim-date-cell :value="project.created"/>
           </div>
           <div data-cy="projectLastReportedSkill">
-            <span class="text-secondary small font-italic">Last reported Skill: </span><slim-date-cell :value="project.lastReportedSkill"/>
+            <span class="text-secondary small font-italic">Last reported Skill: </span><slim-date-cell :value="project.lastReportedSkill" :fromStartOfDay="true"/>
           </div>
         </div>
         <b-button target="_blank" v-if="project" :to="{ name:'MyProjectSkills', params: { projectId: project.projectId } }"
