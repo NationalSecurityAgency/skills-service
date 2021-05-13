@@ -35,10 +35,12 @@ limitations under the License.
     <b-dropdown-item href="#" :disabled="settingsLinkDisabled" @click="gotoSettings" data-cy="settingsButton-navToSettings">
       <span class="text-gray-700"> <i class="fas fa-cog skills-color-settings" aria-hidden="true"/><span class="link-name">Settings</span></span>
     </b-dropdown-item>
-    <b-dropdown-divider />
-    <b-dropdown-item v-if="isFormAuthenticatedUser" href="#" @click="signOut">
-      <span class="text-gray-700"> <i class="fas fa-sign-out-alt skills-color-loggedOut" aria-hidden="true"/><span class="link-name">Log Out</span></span>
-    </b-dropdown-item>
+    <template v-if="isFormAuthenticatedUser">
+      <b-dropdown-divider />
+      <b-dropdown-item href="#" @click="signOut">
+        <span class="text-gray-700"> <i class="fas fa-sign-out-alt skills-color-loggedOut" aria-hidden="true"/><span class="link-name">Log Out</span></span>
+      </b-dropdown-item>
+    </template>
   </b-dropdown>
 </template>
 
