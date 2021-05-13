@@ -49,7 +49,7 @@ export default new Vuex.Store({
     projectId: null,
     serviceUrl: null,
     authenticator: null,
-    internalBackButton: false,
+    internalBackButton: true,
   },
   mutations: {
     authToken(state, authToken) {

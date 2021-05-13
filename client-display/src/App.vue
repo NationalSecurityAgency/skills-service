@@ -96,7 +96,12 @@ limitations under the License.
           this.$store.commit('isSummaryOnly', parent.model.isSummaryOnly ? parent.model.isSummaryOnly : false);
 
           // whether or not to use an internal back button as opposed to the browser back button
-          this.$store.commit('internalBackButton', parent.model.internalBackButton ? parent.model.internalBackButton : true);
+          if (parent.model.internalBackButton == null) {
+            // default to true
+            this.$store.commit('internalBackButton', true);
+          } else {
+            this.$store.commit('internalBackButton', parent.model.internalBackButton);
+          }
 
           this.$store.commit('projectId', parent.model.projectId);
           this.$store.commit('serviceUrl', parent.model.serviceUrl);

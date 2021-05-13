@@ -52,8 +52,13 @@ limitations under the License.
           const isSummaryOnly = this.$route.query.isSummaryOnly ? this.$route.query.isSummaryOnly : false;
           this.$store.commit('isSummaryOnly', isSummaryOnly);
 
-          const internalBackButton = this.$route.query.internalBackButton ? this.$route.query.internalBackButton : true;
-          this.$store.commit('internalBackButton', internalBackButton);
+          // whether or not to use an internal back button as opposed to the browser back button
+          if (this.$route.query.internalBackButton == null) {
+            // default to true
+            this.$store.commit('internalBackButton', true);
+          } else {
+            this.$store.commit('internalBackButton', this.$route.query.internalBackButton);
+          }
 
           const isThemeEnabled = this.$route.query.enableTheme ? this.$route.query.enableTheme : false;
           if (isThemeEnabled) {
