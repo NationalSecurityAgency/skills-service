@@ -15,7 +15,13 @@ limitations under the License.
 */
 <template>
   <div>
-    <sub-page-header title="Overview"/>
+    <sub-page-header title="Overview">
+      <b-button @click="displayEdit"
+                variant="outline-primary" :data-cy="`editSkillButton_${this.$route.params.skillId}`"
+                :aria-label="'edit Skill '+skill.name" :ref="'edit_'+this.$route.params.skillId">
+        <span class="d-none d-sm-inline">Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
+      </b-button>
+    </sub-page-header>
     <loading-container :is-loading="isLoading">
       <div class="card">
         <div class="card-body">
@@ -23,6 +29,8 @@ limitations under the License.
         </div>
       </div>
     </loading-container>
+    <edit-skill v-if="showEdit" v-model="showEdit" :skillId="skill.skillId" :is-copy="false" :is-edit="true"
+                :project-id="this.$route.params.projectId" :subject-id="this.$route.params.subjectId" @skill-saved="skillEdited" @hidden="handleHide"/>
   </div>
 </template>
 
@@ -31,6 +39,7 @@ limitations under the License.
   import ChildRowSkillsDisplay from './ChildRowSkillsDisplay';
   import SkillsService from './SkillsService';
   import LoadingContainer from '../utils/LoadingContainer';
+  import EditSkill from './EditSkill';
 
   export default {
     name: 'SkillOverview',
@@ -38,11 +47,13 @@ limitations under the License.
       LoadingContainer,
       ChildRowSkillsDisplay,
       SubPageHeader,
+      EditSkill,
     },
     data() {
       return {
         isLoading: true,
         skill: {},
+        showEdit: false,
       };
     },
     mounted() {
@@ -53,6 +64,37 @@ limitations under the License.
         .finally(() => {
           this.isLoading = false;
         });
+    },
+    methods: {
+      displayEdit() {
+        // should only enable edit button if dirty, isn't currently
+        this.showEdit = true;
+      },
+      skillEdited(editedSkil) {
+        this.isLoading = true;
+        // the page title and breadcrumb aren't updated, how to propegate an update to the page header
+        // if the id changed then we'd need to update the route as well
+        SkillsService.saveSkill(editedSkil).then((res) => {
+          const origId = this.skill.skillId;
+          this.skill = Object.assign(res, { subjectId: this.$route.params.subjectId });
+          if (origId !== this.skill.skillId) {
+            this.$router.replace({ name: this.$route.name, params: { ...this.$route.params, skillId: this.skill.skillId } });
+          } else {
+            this.$emitter.emit('skillupdated', res);
+          }
+        }).finally(() => {
+          this.isLoading = false;
+        });
+      },
+      handleHide() {
+        this.showEdit = false;
+        const ref = this.$refs[`edit_${this.$route.params.skillId}`];
+        this.$nextTick(() => {
+          if (ref) {
+            ref.focus();
+          }
+        });
+      },
     },
   };
 </script>

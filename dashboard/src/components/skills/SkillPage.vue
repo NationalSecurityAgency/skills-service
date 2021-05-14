@@ -46,6 +46,10 @@ limitations under the License.
     },
     mounted() {
       this.loadData();
+      this.$emitter.on('skillupdated', this.handleSkillUpdated);
+    },
+    beforeDestroy() {
+      this.$emitter.off('skillupdated', this.handleSkillUpdated);
     },
     computed: {
       ...mapGetters([
@@ -101,6 +105,9 @@ limitations under the License.
               });
             }
           });
+      },
+      handleSkillUpdated(skill) {
+        this.headerOptions = this.buildHeaderOptions(skill);
       },
       buildHeaderOptions(skill) {
         return {

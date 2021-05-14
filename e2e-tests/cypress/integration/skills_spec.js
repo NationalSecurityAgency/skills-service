@@ -692,6 +692,52 @@ describe('Skills Tests', () => {
 
         cy.get('[data-cy="saveSkillButton"]').click()
         cy.contains('ID: GreatName1233Skill_blah')
-    })
+    });
+
+    it('edit skill on page', () => {
+      cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
+        projectId: 'proj1',
+        subjectId: 'subj1',
+        skillId: 'skill1',
+        name: `This is 1`,
+        type: 'Skill',
+        pointIncrement: 100,
+        numPerformToCompletion: 5,
+        pointIncrementInterval: 0,
+        numMaxOccurrencesIncrementInterval: 1,
+        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        version: 1,
+        helpUrl: 'http://doHelpOnThisSkill.com'
+      });
+      cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('loadSkill1');
+      cy.intercept('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('saveSkill1');
+      cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/entirelyNewId').as('afterIdEdit');
+
+      cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
+      cy.wait('@loadSkill1');
+
+      cy.contains('SKILL: This is 1').should('be.visible');
+      cy.get('[data-cy=editSkillButton_skill1]').click();
+      cy.get('input[data-cy=skillName]').type('{selectall}Edited Skill Name');
+      cy.get('input[data-cy=skillPointIncrement]').click();
+      cy.get('[data-cy=saveSkillButton]').click();
+      cy.wait('@saveSkill1');
+      cy.contains('SKILL: Edited Skill Name').should('be.visible');
+      cy.contains('SKILL: This is 1').should('not.exist');
+
+
+      cy.get('[data-cy=breadcrumb-skill1]').should('be.visible');
+      cy.get('[data-cy=editSkillButton_skill1]').click();
+      cy.get('[data-cy=idInputEnableControl] a').click();
+      cy.get('input[data-cy=idInputValue]').type('{selectall}entirelyNewId');
+      cy.get('input[data-cy=skillPointIncrement]').click();
+
+      cy.get('[data-cy=saveSkillButton]').click();
+      cy.wait('@afterIdEdit');
+      cy.get('[data-cy=breadcrumb-skill1]').should('not.exist');
+      cy.get('[data-cy=breadcrumb-entirelyNewId]').should('be.visible');
+      cy.get('[data-cy=editSkillButton_entirelyNewId]').should('be.visible');
+      cy.get('[data-cy=editSkillButton_skill1]').should('not.exist');
+    });
 
 });
