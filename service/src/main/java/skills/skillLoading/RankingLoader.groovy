@@ -18,13 +18,17 @@ package skills.skillLoading
 import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Component
+import skills.controller.UserInfoController
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.services.LevelDefinitionStorageService
+import skills.services.settings.SettingsDataAccessor
+import skills.services.settings.SettingsService
 import skills.skillLoading.model.LeaderboardRes
 import skills.skillLoading.model.RankedUserRes
 import skills.storage.accessors.ProjDefAccessor
@@ -65,9 +69,15 @@ class RankingLoader {
     @Autowired
     SkillDefRepo skillDefRepo
 
+    @Autowired
+    SettingsDataAccessor settingsDataAccessor
+
     SkillsRanking getUserSkillsRanking(String projectId, String userId, String subjectId = null){
-        UserPoints usersPoints = findUserPoints(projectId, userId, subjectId)
-        return doGetUserSkillsRanking(projectId, usersPoints, subjectId)
+        Integer points = subjectId ?
+                userPointsRepository.findPointsByProjectIdAndUserIdAndSkillId(projectId, userId, subjectId) :
+                userPointsRepository.findPointsByProjectIdAndUserId(projectId, userId)
+
+        return doGetUserSkillsRanking(userId, projectId, points, subjectId)
     }
 
     private Sort getPointsSort(boolean ptsAsc, boolean timestampAsc = true) {
@@ -80,16 +90,20 @@ class RankingLoader {
     LeaderboardRes getLeaderboard(String projectId, String userId, LeaderboardRes.Type type, String subjectId = null){
         UserAttrs userAttrs = userAttrsRepo.findByUserId(userId)
         Date userCreatedDate = new Date(userAttrs.created.time)
+        boolean optOut = isOptedOut(userId)
 
         List<RankedUserRes> res
         if (type == LeaderboardRes.Type.tenAroundMe) {
+            if (optOut) {
+                throw new SkillException("Leaderboard type of [${LeaderboardRes.Type.tenAroundMe}] is not supported for opted-out users. Requested user is [${userId}]", projectId)
+            }
             int myPoints = userPointsRepository.findByProjectIdAndUserIdAndSkillIdAndDay(projectId, userId, subjectId, null)?.points ?: 0
             int numWithHigherScore = subjectId ?
                     userPointsRepository.calculateNumUsersWithHigherScoreAndIfScoreTheSameThenAfterUserCreateDate(projectId, subjectId, myPoints, userAttrs.created) :
                     userPointsRepository.calculateNumUsersWithHigherScoreAndIfScoreTheSameThenAfterUserCreateDate(projectId, myPoints, userAttrs.created)
             int rank = numWithHigherScore + 1
             if (rank <= 5) {
-                res = getTop10Users(projectId, userAttrs, subjectId)
+                res = getTop10Users(projectId, userAttrs, optOut, subjectId)
             } else {
                 res = []
 
@@ -111,10 +125,10 @@ class RankingLoader {
                 res.addAll(convertToRankedUserRes(below, rank + 1, userId))
             }
         } else {
-            res = getTop10Users(projectId, userAttrs, subjectId)
+            res = getTop10Users(projectId, userAttrs, optOut, subjectId)
         }
 
-        return new LeaderboardRes(rankedUsers: res, availablePoints: getAvailablePoints(projectId, subjectId))
+        return new LeaderboardRes(rankedUsers: res, availablePoints: getAvailablePoints(projectId, subjectId), optedOut: optOut)
     }
 
     private RankedUserRes createRankedUserForThisUser(int rank, UserAttrs userAttrs, int myPoints) {
@@ -135,7 +149,7 @@ class RankingLoader {
         return projDef.totalPoints
     }
 
-    private List<RankedUserRes> getTop10Users(String projectId, UserAttrs userAttrs, String subjectId = null){
+    private List<RankedUserRes> getTop10Users(String projectId, UserAttrs userAttrs, boolean optOut, String subjectId = null){
         int size = 10
         PageRequest pageRequest = PageRequest.of(0, size, getPointsSort(false))
         List<UserPointsRepo.RankedUserRes> rankedUserRes = subjectId ?
@@ -145,7 +159,7 @@ class RankingLoader {
         List<RankedUserRes> res = convertToRankedUserRes(rankedUserRes, 1, userAttrs.userId)
 
         // if user is NOT in the top 10 then artificially add the user on the bottom
-        if (res.size() > 0  && res.size() < 10 && !res.find {it.isItMe}) {
+        if (!optOut && res.size() > 0  && res.size() < 10 && !res.find {it.isItMe}) {
             int myPoints = userPointsRepository.findByProjectIdAndUserIdAndSkillIdAndDay(projectId, userAttrs.userId, subjectId, null)?.points ?: 0
             res.add(createRankedUserForThisUser(res.size() + 1, userAttrs, myPoints))
         }
@@ -169,31 +183,36 @@ class RankingLoader {
     }
 
     @Profile
-    private UserPoints findUserPoints(String projectId, String userId, String subjectId) {
-        userPointsRepository.findByProjectIdAndUserIdAndSkillIdAndDay(projectId, userId, subjectId, null)
-    }
-
-    @Profile
-    private  SkillsRanking doGetUserSkillsRanking(String projectId, UserPoints usersPoints, String subjectId = null) {
-        int numUsers = findNumberOfUsers(projectId, subjectId) as int
+    private  SkillsRanking doGetUserSkillsRanking(String userId, String projectId, Integer points, String subjectId = null) {
         // always calculate total number of users
+        int numUsers = findNumberOfUsers(projectId, subjectId) as int
+
+        boolean optOut = isOptedOut(userId)
+
         SkillsRanking ranking
-        if (usersPoints) {
-            int numUsersWithMorePoints = calculateNumberOfUsersWithGreaterPoints(subjectId, projectId, usersPoints)
+        if (points) {
+            int numUsersWithMorePoints = calculateNumberOfUsersWithGreaterPoints(subjectId, projectId, points)
             int position = numUsersWithMorePoints+1
-            ranking = new SkillsRanking(numUsers: numUsers, position: position)
+            ranking = new SkillsRanking(numUsers: numUsers, position: position, optedOut: optOut)
         } else {
             // last one
-            ranking = new SkillsRanking(numUsers: numUsers+1, position: numUsers+1)
+            ranking = new SkillsRanking(numUsers: numUsers+1, position: numUsers+1, optedOut: optOut)
         }
 
         return ranking
     }
 
     @Profile
-    private int calculateNumberOfUsersWithGreaterPoints(String subjectId, String projectId, UserPoints usersPoints) {
-        subjectId ? userPointsRepository.calculateNumUsersWithLessScore(projectId, subjectId, usersPoints.points)
-                : userPointsRepository.calculateNumUsersWithLessScore(projectId, usersPoints.points)
+    private boolean isOptedOut(String userId) {
+        String optOutValue = settingsDataAccessor.getUserSettingValue(userId, UserInfoController.RANK_AND_LEADERBOARD_OPT_OUT_PREF)
+        Boolean optOut = StringUtils.isNotBlank(optOutValue) ? Boolean.valueOf(optOutValue) : false
+        return optOut
+    }
+
+    @Profile
+    private int calculateNumberOfUsersWithGreaterPoints(String subjectId, String projectId, Integer usersPoints) {
+        subjectId ? userPointsRepository.calculateNumUsersWithLessScore(projectId, subjectId, usersPoints)
+                : userPointsRepository.calculateNumUsersWithLessScore(projectId, usersPoints)
     }
 
     @Profile

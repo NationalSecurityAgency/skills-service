@@ -101,6 +101,13 @@ class SkillsService {
         wsHelper.appPost(getProjectUrl(originalProjectId ?: props.projectId), props)
     }
 
+    @Profile
+    def createProjectAndSubjectAndSkills(Map projProps, Map subjProps, List skills) {
+        createProject(projProps)
+        createSubject(subjProps)
+        createSkills(skills)
+    }
+
     def createUser(Map props){
         //props: firstName, lastName, email, password
         if (this.certificateRegistry == null) {
@@ -1013,7 +1020,6 @@ class SkillsService {
                               settingGroup: "user.prefs",
                               setting: setting,
                               value: value,
-                              userId: this.userName,
         ]
         return wsHelper.appPost("/userInfo/settings", [ params ])
     }

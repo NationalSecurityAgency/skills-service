@@ -45,6 +45,7 @@ class UserInfoController {
 
     static final String USER_PREFS_GROUP = 'user.prefs'
     static final String HOME_PAGE_PREF = 'home_page'
+    static final String RANK_AND_LEADERBOARD_OPT_OUT_PREF = 'rank_and_leaderboard_optOut'
 
     @Autowired
     UserInfoService userInfoService

@@ -18,6 +18,8 @@ package skills.intTests.clientDisplay
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
+import skills.controller.UserInfoController
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
@@ -54,7 +56,6 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         }.reverse()
         when:
         def leaderboard = skillsService.getLeaderboard(users.get(3), proj.projectId)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(leaderboard))
         then:
         leaderboard.availablePoints == 200
         leaderboard.rankedUsers.size() == 10
@@ -82,7 +83,6 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         when:
         def leaderboard = skillsService.getLeaderboard(users[users.size()-1], proj.projectId)
         def leaderboard1 = skillsService.getLeaderboard(users[0], proj.projectId)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(leaderboard))
 
         List<String> userIdsForDisplay = users.collect {
             userAttrsRepo.findByUserId(it)?.userIdForDisplay
@@ -354,7 +354,6 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         skillsService.createSkills(skills)
 
         users.each {
-            println "add skill for user [${it}]"
             skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(0).skillId], it, days.get(0))
             Thread.sleep(100)
         }
@@ -362,7 +361,6 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         int i = 1;
         List<String> userIdsForDisplay = users.collect {
             String res = userAttrsRepo.findByUserId(it)?.userIdForDisplay
-            println "[${users.size() - i}] => [${res}]=[${it}] ${(it == users.get(3)) ? '<------' : ''}"
             i++
             return res;
         }
@@ -370,10 +368,6 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         when:
         def leaderboard = skillsService.getLeaderboard(users.get(3), proj.projectId)
 
-//        println JsonOutput.prettyPrint(JsonOutput.toJson(leaderboard))
-        leaderboard.rankedUsers.each {
-            println "rank[${it.rank}]=>[${it.userId}]=>[${it.userFirstSeenTimestamp}]"
-        }
         then:
         leaderboard.rankedUsers.size() == 10
         leaderboard.rankedUsers.collect{ it.userId } == userIdsForDisplay.subList(0, 10)
@@ -399,7 +393,6 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         skillsService.createSkills(subj2_skills)
 
         users.each {
-            println "add skill for user [${it}]"
             skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(0).skillId], it, days.get(0))
             Thread.sleep(100)
         }
@@ -414,11 +407,9 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         List<String> userIdsForDisplay = users.collect {
             userAttrsRepo.findByUserId(it)?.userIdForDisplay
         }
-        println "leaderboard for: [${users.get(3)}]"
         when:
         def leaderboard = skillsService.getLeaderboard(users.get(3), proj.projectId, subj.subjectId)
 
-        println JsonOutput.prettyPrint(JsonOutput.toJson(leaderboard))
         then:
         leaderboard.rankedUsers.size() == 10
         leaderboard.rankedUsers.collect{ it.userId } == userIdsForDisplay.subList(0, 10)
@@ -463,7 +454,6 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
             (userNum + 1).times {Integer skillNum ->
                 skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(skillNum).skillId], userId, days.get(userNum))
             }
-            println "Finished [$userId]"
         }
         // sort users by rank
         users = users.reverse()
@@ -471,16 +461,11 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         List<String> userIdsForDisplay = users.collect {
             UserAttrs userAttrs = userAttrsRepo.findByUserId(it)
             String userId = userAttrs.userIdForDisplay
-            println "${i}: ${userId} [${new Date(userAttrs.created.time).format("hh:mm:ss.SSS")}] ${userId == users.get(8) ? '<--------' : ''}"
             i++
             return userId
         }
         when:
         def leaderboard = skillsService.getLeaderboard(users.get(8), proj.projectId, null, "tenAroundMe")
-        leaderboard.rankedUsers.each {
-            println "[${it.rank}] ${it.userId} [${new Date(it.userFirstSeenTimestamp).format("hh:mm:ss.SSS")}] [${it.points}] ${it.isItMe ? '<--------' : ''}"
-        }
-//        println JsonOutput.prettyPrint(JsonOutput.toJson(leaderboard))
         then:
         leaderboard.availablePoints == 200
         leaderboard.rankedUsers.size() == 9
@@ -508,20 +493,14 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
             (userNum + 1).times {Integer skillNum ->
                 skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(skillNum).skillId], userId, days.get(userNum))
             }
-            println "Finished [$userId]"
         }
         // sort users by rank
         users = users.reverse()
         List<String> userIdsForDisplay = users.collect {
             userAttrsRepo.findByUserId(it)?.userIdForDisplay
         }
-        users.eachWithIndex{ String entry, int i ->
-            println "${i+1}: ${entry}"
-        }
-        println "leaderboard for: [${users.get(15)}]"
         when:
         def leaderboard = skillsService.getLeaderboard(users.get(15), proj.projectId, null, "tenAroundMe")
-        println JsonOutput.prettyPrint(JsonOutput.toJson(leaderboard))
         then:
         leaderboard.rankedUsers.size() == 11
         leaderboard.rankedUsers.collect{ it.userId } == userIdsForDisplay.subList(10, 21)
@@ -549,7 +528,6 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
             numSkillsAdded.times { Integer skillNum ->
                 skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(skillNum).skillId], userId, days.get(userNum))
             }
-            println "Finished [$userId], numAdded=[${numSkillsAdded}]"
         }
         when:
         def leaderboard = skillsService.getLeaderboard(users[25], proj.projectId, null, "tenAroundMe")
@@ -557,11 +535,6 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         List<String> userIdsForDisplay = users.collect {
             userAttrsRepo.findByUserId(it)?.userIdForDisplay
         }
-        users.eachWithIndex{ String entry, int i ->
-            println "${i+1}: ${entry}"
-        }
-        println "leaderboard for: [${users.get(25)}]"
-        println JsonOutput.prettyPrint(JsonOutput.toJson(leaderboard))
         then:
         leaderboard.rankedUsers.size() == 6
         leaderboard.rankedUsers.collect{ it.userId } == [userIdsForDisplay.subList(20, 25), userIdsForDisplay[25]].flatten()
@@ -583,7 +556,6 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
 
         when:
         def leaderboard = skillsService.getLeaderboard("newuser", proj.projectId, null, "tenAroundMe")
-        println JsonOutput.prettyPrint(JsonOutput.toJson(leaderboard))
         then:
         leaderboard.rankedUsers.size() == 0
     }
@@ -625,7 +597,6 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         when:
         def leaderboard = skillsService.getLeaderboard("newuser", proj.projectId, subj.subjectId, "tenAroundMe")
         def leaderboard2 = skillsService.getLeaderboard("newuser", proj.projectId, subj2.subjectId, "tenAroundMe")
-        println JsonOutput.prettyPrint(JsonOutput.toJson(leaderboard))
         then:
         leaderboard.rankedUsers.size() > 0
         leaderboard2.rankedUsers.size() == 0
@@ -646,24 +617,17 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         users.each {String userId ->
             skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(0).skillId], userId, new Date())
             Thread.sleep(200) // important to produce unique timestamp
-            println "Finished [$userId]"
         }
         // sort users by rank
         int i = 1;
         List<String> userIdsForDisplay = users.collect {
             UserAttrs userAttrs = userAttrsRepo.findByUserId(it)
             String userId = userAttrs.userIdForDisplay
-            println "${i}: ${userId} [${new Date(userAttrs.created.time).format("hh:mm:ss.SSS")}]"
             i++
             return userId
         }
-        println "leaderboard for: [${users.get(15)}]"
         when:
         def leaderboard = skillsService.getLeaderboard(users.get(15), proj.projectId, null, "tenAroundMe")
-        leaderboard.rankedUsers.each {
-            println "[${it.rank}] ${it.userId} [${new Date(it.userFirstSeenTimestamp).format("hh:mm:ss.SSS")}] [${it.points}] ${it.isItMe ? '<--------' : ''}"
-        }
-//        println JsonOutput.prettyPrint(JsonOutput.toJson(leaderboard))
         then:
         leaderboard.rankedUsers.size() == 11
         leaderboard.rankedUsers.collect{ it.userId } == userIdsForDisplay.subList(10, 21)
@@ -687,24 +651,17 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         users.each {String userId ->
             skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(0).skillId], userId, new Date())
             Thread.sleep(200) // important to produce unique timestamp
-            println "Finished [$userId]"
         }
         // sort users by rank
         int i = 1;
         List<String> userIdsForDisplay = users.collect {
             UserAttrs userAttrs = userAttrsRepo.findByUserId(it)
             String userId = userAttrs.userIdForDisplay
-            println "${i}: ${userId} [${new Date(userAttrs.created.time).format("hh:mm:ss.SSS")}]"
             i++
             return userId
         }
-        println "leaderboard for: [${users.get(15)}]"
         when:
         def leaderboard = skillsService.getLeaderboard(users.get(15), proj.projectId, subj.subjectId, "tenAroundMe")
-        leaderboard.rankedUsers.each {
-            println "[${it.rank}] ${it.userId} [${new Date(it.userFirstSeenTimestamp).format("hh:mm:ss.SSS")}] [${it.points}] ${it.isItMe ? '<--------' : ''}"
-        }
-//        println JsonOutput.prettyPrint(JsonOutput.toJson(leaderboard))
         then:
         leaderboard.rankedUsers.size() == 11
         leaderboard.rankedUsers.collect{ it.userId } == userIdsForDisplay.subList(10, 21)
@@ -731,20 +688,14 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
             (userNum + 1).times {Integer skillNum ->
                 skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(skillNum).skillId], userId, days.get(userNum))
             }
-            println "Finished [$userId]"
         }
         // sort users by rank
         users = users.reverse()
         List<String> userIdsForDisplay = users.collect {
             userAttrsRepo.findByUserId(it)?.userIdForDisplay
         }
-        users.eachWithIndex{ String entry, int i ->
-            println "${i+1}: ${entry}"
-        }
-        println "leaderboard for: [${users.get(15)}]"
         when:
         def leaderboard = skillsService.getLeaderboard(users.get(15), proj.projectId, null, "tenAroundMe")
-        println JsonOutput.prettyPrint(JsonOutput.toJson(leaderboard))
         then:
         leaderboard.rankedUsers.size() == 11
         leaderboard.rankedUsers.collect{ it.userId } == userIdsForDisplay.subList(10, 21)
@@ -789,14 +740,9 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         List<String> userIdsForDisplay = users.collect {
             userAttrsRepo.findByUserId(it)?.userIdForDisplay
         }
-        users.eachWithIndex{ String entry, int i ->
-            println "${i+1}: ${entry}"
-        }
-        println "leaderboard for: [${users.get(15)}]"
         when:
         def leaderboard = skillsService.getLeaderboard(users.get(15), proj.projectId, subj.subjectId, "tenAroundMe")
         def leaderboard1 = skillsService.getLeaderboard(users.get(15), proj.projectId, subj2.subjectId, "tenAroundMe")
-        println JsonOutput.prettyPrint(JsonOutput.toJson(leaderboard1))
         then:
         leaderboard.rankedUsers.size() == 11
         leaderboard.rankedUsers.collect{ it.userId } == userIdsForDisplay.subList(10, 21)
@@ -827,21 +773,15 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
             (userNum + 1).times {Integer skillNum ->
                 skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(skillNum).skillId], userId, days.get(userNum))
             }
-            println "Finished [$userId]"
         }
         // sort users by rank
         users = users.reverse()
         List<String> userIdsForDisplay = users.collect {
             userAttrsRepo.findByUserId(it)?.userIdForDisplay
         }
-        users.eachWithIndex{ String entry, int i ->
-            println "${i+1}: ${entry}"
-        }
         int selectedUser = numUsers -1
-        println "leaderboard for: [${users.get(selectedUser)}]"
         when:
         def leaderboard = skillsService.getLeaderboard(users.get(selectedUser), proj.projectId, null, "tenAroundMe")
-        println JsonOutput.prettyPrint(JsonOutput.toJson(leaderboard))
         then:
         leaderboard.rankedUsers.size() == 6
         leaderboard.rankedUsers.collect{ it.userId } == userIdsForDisplay.subList(10, 16)
@@ -873,7 +813,6 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
             (userNum + 1).times {Integer skillNum ->
                 skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(skillNum).skillId], userId, days.get(userNum))
             }
-            println "Finished [$userId]"
         }
         (0..numUsers-1).reverse().each {Integer userNum ->
             String userId = users.get(userNum)
@@ -887,14 +826,9 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         List<String> userIdsForDisplay = users.collect {
             userAttrsRepo.findByUserId(it)?.userIdForDisplay
         }
-        users.eachWithIndex{ String entry, int i ->
-            println "${i+1}: ${entry}"
-        }
         int selectedUser = numUsers -1
-        println "leaderboard for: [${users.get(selectedUser)}]"
         when:
         def leaderboard = skillsService.getLeaderboard(users.get(selectedUser), proj.projectId, subj.subjectId, "tenAroundMe")
-        println JsonOutput.prettyPrint(JsonOutput.toJson(leaderboard))
         then:
         leaderboard.rankedUsers.size() == 6
         leaderboard.rankedUsers.collect{ it.userId } == userIdsForDisplay.subList(10, 16)
@@ -921,18 +855,13 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
             (userNum + 1).times {Integer skillNum ->
                 skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(skillNum).skillId], userId, days.get(userNum))
             }
-            println "Finished [$userId]"
         }
         // sort users by rank
         users = users.reverse()
         List<String> userIdsForDisplay = users.collect {
             userAttrsRepo.findByUserId(it)?.userIdForDisplay
         }
-        users.eachWithIndex{ String entry, int i ->
-            println "${i+1}: ${entry}"
-        }
         int selectedUser = 0
-        println "leaderboard for: [${users.get(selectedUser)}]"
         when:
         def leaderboard = skillsService.getLeaderboard(users.get(selectedUser), proj.projectId, null, "tenAroundMe")
         then:
@@ -961,18 +890,13 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
             (userNum + 1).times {Integer skillNum ->
                 skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(skillNum).skillId], userId, days.get(userNum))
             }
-            println "Finished [$userId]"
         }
         // sort users by rank
         users = users.reverse()
         List<String> userIdsForDisplay = users.collect {
             userAttrsRepo.findByUserId(it)?.userIdForDisplay
         }
-        users.eachWithIndex{ String entry, int i ->
-            println "${i+1}: ${entry}"
-        }
         int selectedUser = 4
-        println "leaderboard for: [${users.get(selectedUser)}]"
         when:
         def leaderboard = skillsService.getLeaderboard(users.get(selectedUser), proj.projectId, null, "tenAroundMe")
         then:
@@ -1006,7 +930,6 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
             (userNum + 1).times {Integer skillNum ->
                 skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(skillNum).skillId], userId, days.get(userNum))
             }
-            println "Finished [$userId]"
         }
         (0..numUsers-1).reverse().each {Integer userNum ->
             String userId = users.get(userNum)
@@ -1020,11 +943,7 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         List<String> userIdsForDisplay = users.collect {
             userAttrsRepo.findByUserId(it)?.userIdForDisplay
         }
-        users.eachWithIndex{ String entry, int i ->
-            println "${i+1}: ${entry}"
-        }
         int selectedUser = 4
-        println "leaderboard for: [${users.get(selectedUser)}]"
         when:
         def leaderboard = skillsService.getLeaderboard(users.get(selectedUser), proj.projectId, subj.subjectId, "tenAroundMe")
         then:
@@ -1053,18 +972,13 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
             (userNum + 1).times {Integer skillNum ->
                 skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(skillNum).skillId], userId, days.get(userNum))
             }
-            println "Finished [$userId]"
         }
         // sort users by rank
         users = users.reverse()
         List<String> userIdsForDisplay = users.collect {
             userAttrsRepo.findByUserId(it)?.userIdForDisplay
         }
-        users.eachWithIndex{ String entry, int i ->
-            println "${i+1}: ${entry}"
-        }
         int selectedUser = 5
-        println "leaderboard for: [${users.get(selectedUser)}]"
         when:
         def leaderboard = skillsService.getLeaderboard(users.get(selectedUser), proj.projectId, null, "tenAroundMe")
         then:
@@ -1098,7 +1012,6 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
             (userNum + 1).times {Integer skillNum ->
                 skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(skillNum).skillId], userId, days.get(userNum))
             }
-            println "Finished [$userId]"
         }
         (0..numUsers-1).reverse().each {Integer userNum ->
             String userId = users.get(userNum)
@@ -1112,11 +1025,7 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         List<String> userIdsForDisplay = users.collect {
             userAttrsRepo.findByUserId(it)?.userIdForDisplay
         }
-        users.eachWithIndex{ String entry, int i ->
-            println "${i+1}: ${entry}"
-        }
         int selectedUser = 5
-        println "leaderboard for: [${users.get(selectedUser)}]"
         when:
         def leaderboard = skillsService.getLeaderboard(users.get(selectedUser), proj.projectId, subj.subjectId, "tenAroundMe")
         then:
@@ -1174,5 +1083,163 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         leaderboard_proj2.availablePoints == 700
         leaderboard_proj2_subj1.availablePoints == 300
         leaderboard_proj2_subj2.availablePoints == 400
+    }
+
+    def "get top 10 - user opted out"(){
+        List<String> users = createUsers(12)
+        List<Date> days = (0..20).collect { new Date() - it }
+
+        def proj = SkillsFactory.createProject(1)
+        def subj = SkillsFactory.createSubject(1, 1)
+        List<Map> skills = SkillsFactory.createSkills(20, 1, 1)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        12.times {Integer userNum ->
+            String userId = users.get(userNum)
+            userNum.times {Integer skillNum ->
+                skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(skillNum).skillId], userId, days.get(userNum))
+            }
+        }
+
+        // user opt-out
+        createService(users.reverse()[2]).addOrUpdateUserSetting(UserInfoController.RANK_AND_LEADERBOARD_OPT_OUT_PREF, 'true')
+
+        List<String> userIdsForDisplay = users.collect {
+            userAttrsRepo.findByUserId(it)?.userIdForDisplay
+        }.reverse()
+
+        when:
+        def leaderboard = skillsService.getLeaderboard(users.get(3), proj.projectId)
+        then:
+        leaderboard.availablePoints == 200
+        leaderboard.rankedUsers.size() == 10
+        leaderboard.rankedUsers.collect{ it.userId } == [userIdsForDisplay.subList(0, 2), userIdsForDisplay.subList(3, 11)].flatten()
+        leaderboard.rankedUsers.collect{ it.rank } == (1..10).collect { it}
+        leaderboard.rankedUsers.collect { it.points } == [110, 100, 80, 70, 60, 50, 40, 30, 20, 10]
+        leaderboard.rankedUsers.each {assert (it.userId == userIdsForDisplay[8] ? it.isItMe : !it.isItMe) }
+    }
+
+    def "get top 10 - if less than 10 users and the requester opted-out then do NOT add that user artificially at the bottom"(){
+        List<String> users = createUsers(3)
+
+        def proj = SkillsFactory.createProject(1)
+        def subj = SkillsFactory.createSubject(1, 1)
+        List<Map> skills = SkillsFactory.createSkills(20, 1, 1)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(0).skillId], users[0], new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(1).skillId], users[0], new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(0).skillId], users[1], new Date())
+
+        String userIdWithNoPoints = users[users.size()-1]
+        createService(userIdWithNoPoints).addOrUpdateUserSetting(UserInfoController.RANK_AND_LEADERBOARD_OPT_OUT_PREF, 'true')
+
+        when:
+        def leaderboard = skillsService.getLeaderboard(userIdWithNoPoints, proj.projectId)
+        def leaderboard1 = skillsService.getLeaderboard(users[0], proj.projectId)
+
+        List<String> userIdsForDisplay = users.collect {
+            userAttrsRepo.findByUserId(it)?.userIdForDisplay
+        }
+        then:
+        leaderboard.rankedUsers.size() == 2
+        leaderboard.rankedUsers.collect{ it.userId } == [userIdsForDisplay[0], userIdsForDisplay[1]]
+        leaderboard.rankedUsers.collect{ it.isItMe } == [false, false]
+        leaderboard.rankedUsers.collect{ it.points } == [20, 10]
+
+        leaderboard1.rankedUsers.size() == 2
+        leaderboard1.rankedUsers.collect{ it.userId } == [userIdsForDisplay[0], userIdsForDisplay[1]]
+        leaderboard1.rankedUsers.collect{ it.isItMe } == [true, false]
+        leaderboard1.rankedUsers.collect{ it.points } == [20, 10]
+    }
+
+    def "get top 10 - user opted out - subject"() {
+        List<String> users = createUsers(12)
+        List<Date> days = (0..20).collect { new Date() - it }
+
+        def proj = SkillsFactory.createProject(1)
+        def subj = SkillsFactory.createSubject(1, 1)
+        List<Map> skills = SkillsFactory.createSkills(20, 1, 1)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        12.times {Integer userNum ->
+            String userId = users.get(userNum)
+            userNum.times {Integer skillNum ->
+                skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(skillNum).skillId], userId, days.get(userNum))
+            }
+        }
+
+        // user opt-out
+        createService(users.reverse()[2]).addOrUpdateUserSetting(UserInfoController.RANK_AND_LEADERBOARD_OPT_OUT_PREF, 'true')
+
+        List<String> userIdsForDisplay = users.collect {
+            userAttrsRepo.findByUserId(it)?.userIdForDisplay
+        }.reverse()
+
+        when:
+        def leaderboard = skillsService.getLeaderboard(users.get(3), proj.projectId, subj.subjectId)
+
+        then:
+        leaderboard.availablePoints == 200
+        leaderboard.rankedUsers.size() == 10
+        leaderboard.rankedUsers.collect{ it.userId } == [userIdsForDisplay.subList(0, 2), userIdsForDisplay.subList(3, 11)].flatten()
+        leaderboard.rankedUsers.collect{ it.rank } == (1..10).collect { it}
+        leaderboard.rankedUsers.collect { it.points } == [110, 100, 80, 70, 60, 50, 40, 30, 20, 10]
+        leaderboard.rankedUsers.each {assert (it.userId == userIdsForDisplay[8] ? it.isItMe : !it.isItMe) }
+    }
+
+    def "opt-out flag"() {
+        List<String> users = createUsers(12)
+        List<Date> days = (0..20).collect { new Date() - it }
+
+        def proj = SkillsFactory.createProject(1)
+        def subj = SkillsFactory.createSubject(1, 1)
+        List<Map> skills = SkillsFactory.createSkills(20, 1, 1)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        // user opt-out
+        createService(users[2]).addOrUpdateUserSetting(UserInfoController.RANK_AND_LEADERBOARD_OPT_OUT_PREF, 'true')
+
+        when:
+        def leaderboard = skillsService.getLeaderboard(users.get(2), proj.projectId, subj.subjectId)
+        def leaderboard1 = skillsService.getLeaderboard(users.get(3), proj.projectId, subj.subjectId)
+        then:
+        leaderboard.optedOut
+        !leaderboard1.optedOut
+    }
+
+    def "opt-out users are not allowed to requested type of 'tenAroundMe'"() {
+        List<String> users = createUsers(12)
+        List<Date> days = (0..20).collect { new Date() - it }
+
+        def proj = SkillsFactory.createProject(1)
+        def subj = SkillsFactory.createSubject(1, 1)
+        List<Map> skills = SkillsFactory.createSkills(20, 1, 1)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        // user opt-out
+        createService(users[2]).addOrUpdateUserSetting(UserInfoController.RANK_AND_LEADERBOARD_OPT_OUT_PREF, 'true')
+
+        when:
+        skillsService.getLeaderboard(users.get(2), proj.projectId, subj.subjectId, "tenAroundMe")
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.httpStatus == HttpStatus.BAD_REQUEST
+        e.resBody.contains("Leaderboard type of [tenAroundMe] is not supported for opted-out users")
     }
 }

@@ -98,6 +98,10 @@ class SettingsDataAccessor {
         settingRepo.findAllByTypeAndSettingGroupAndSettingAndProjectId(Setting.SettingType.RootUser, settingGroup, setting, projectId)
     }
 
+    String getUserSettingValue(String userId, String setting) {
+        return settingRepo.findUserSettingValueByUserIdAndSettingAndProjectIdIsNull(userId, setting)
+    }
+
     void save(Setting setting){
         settingRepo.save(setting)
     }

@@ -41,7 +41,11 @@ limitations under the License.
           this.$store.commit('projectId', process.env.VUE_APP_PROJECT_ID);
           this.$store.commit('serviceUrl', process.env.VUE_APP_SERVICE_URL);
           if (process.env.VUE_APP_AUTHENTICATION_URL !== 'hydra') {
-            this.$store.commit('authenticator', process.env.VUE_APP_AUTHENTICATION_URL);
+            let authenticator = process.env.VUE_APP_AUTHENTICATION_URL;
+            if (this.$route.query.loginAsUser && this.$route.query.loginAsUser.length > 0) {
+              authenticator = authenticator.replace('user0', this.$route.query.loginAsUser);
+            }
+            this.$store.commit('authenticator', authenticator);
           } else {
             this.$store.commit('authenticator', `${this.$store.state.serviceUrl}/api/projects/${this.$store.state.projectId}/token`);
             // eslint-disable-next-line

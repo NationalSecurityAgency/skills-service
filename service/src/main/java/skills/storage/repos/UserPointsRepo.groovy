@@ -33,6 +33,15 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     @Nullable
     UserPoints findByProjectIdAndUserIdAndSkillIdAndDay(String projectId, String userId, @Nullable String skillId, @Nullable Date day)
 
+    @Nullable
+    @Query('''SELECT p.points as points from UserPoints p where p.projectId=?1 and p.userId=?2 and p.day is null and p.skillId is null''')
+    Integer findPointsByProjectIdAndUserId(String projectId, String userId)
+
+    @Nullable
+    @Query('''SELECT p.points as points from UserPoints p where p.projectId=?1 and p.userId=?2 and p.skillId=?3 and p.day is null''')
+    Integer findPointsByProjectIdAndUserIdAndSkillId(String projectId, String userId, String skillId)
+
+
     static interface RankedUserRes {
         String getUserId()
         String getUserIdForDisplay()
@@ -43,36 +52,50 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     }
 
 
-    @Query(value = '''SELECT 
-                    p.user_id as userId, 
+    @Query('''SELECT 
+                    p.userId as userId, 
                     p.points as points,
-                    uAttrs.user_id_for_display as userIdForDisplay,
-                    uAttrs.first_name as userFirstName,
-                    uAttrs.last_name as userLastName,
+                    uAttrs.userIdForDisplay as userIdForDisplay,
+                    uAttrs.firstName as userFirstName,
+                    uAttrs.lastName as userLastName,
                     uAttrs.created as userFirstSeenTimestamp
-                from user_points p, user_attrs uAttrs
+                from UserPoints p, UserAttrs uAttrs
                 where
-                    p.user_id = uAttrs.user_id and
-                    p.project_id=?1 and 
-                    p.skill_id is null and 
-                    p.day is null
-            ''', nativeQuery = true )
+                    p.userId = uAttrs.userId and
+                    p.projectId=?1 and 
+                    p.skillId is null and 
+                    p.day is null and
+                    p.userId not in 
+                        (select u.userId from Setting s, User u where 
+                            s.userRefId=u.id and 
+                            s.settingGroup='user.prefs' and
+                            s.setting='rank_and_leaderboard_optOut' and
+                            s.value='true' and 
+                            s.projectId is null)
+            ''')
     List<RankedUserRes> findUsersForLeaderboard(String projectId, Pageable pageable)
 
-    @Query(value = '''SELECT 
-                    p.user_id as userId, 
+    @Query('''SELECT 
+                    p.userId as userId, 
                     p.points as points,
-                    uAttrs.user_id_for_display as userIdForDisplay,
-                    uAttrs.first_name as userFirstName,
-                    uAttrs.last_name as userLastName,
+                    uAttrs.userIdForDisplay as userIdForDisplay,
+                    uAttrs.firstName as userFirstName,
+                    uAttrs.lastName as userLastName,
                     uAttrs.created as userFirstSeenTimestamp
-                from user_points p, user_attrs uAttrs
+                from UserPoints p, UserAttrs uAttrs
                 where
-                    p.user_id = uAttrs.user_id and
-                    p.project_id=?1 and 
-                    p.skill_id=?2 and 
-                    p.day is null
-            ''', nativeQuery = true )
+                    p.userId = uAttrs.userId and
+                    p.projectId=?1 and 
+                    p.skillId=?2 and 
+                    p.day is null and 
+                    p.userId not in 
+                        (select u.userId from Setting s, User u where 
+                            s.userRefId=u.id and 
+                            s.settingGroup='user.prefs' and
+                            s.setting='rank_and_leaderboard_optOut' and
+                            s.value='true' and 
+                            s.projectId is null)
+            ''')
     List<RankedUserRes> findUsersForLeaderboard(String projectId, String subjectId, Pageable pageable)
 
     @Query('''SELECT 
@@ -148,10 +171,33 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
 
     void deleteByProjectIdAndSkillId(String projectId, String skillId)
 
-    @Query("SELECT count(p) from UserPoints p where p.projectId=?1 and p.skillId=?2 and p.points > ?3 and p.day is null" )
+
+    @Query('''SELECT count(p) from UserPoints p where 
+            p.projectId=?1 and 
+            p.skillId=?2 and 
+            p.points > ?3 and 
+            p.day is null and 
+            p.userId not in 
+                (select u.userId from Setting s, User u where 
+                    s.userRefId=u.id and 
+                    s.settingGroup='user.prefs' and
+                    s.setting='rank_and_leaderboard_optOut' and
+                    s.value='true' and 
+                    s.projectId is null)''' )
     Integer calculateNumUsersWithLessScore(String projectId, String skillId, int points)
 
-    @Query("SELECT count(p) from UserPoints p where p.projectId=?1 and p.skillId is null and p.points > ?2 and p.day is null" )
+    @Query('''SELECT count(p) from UserPoints p where 
+            p.projectId=?1 and 
+            p.skillId is null and 
+            p.points > ?2 and 
+            p.day is null and
+            p.userId not in 
+                (select u.userId from Setting s, User u where 
+                    s.userRefId=u.id and 
+                    s.settingGroup='user.prefs' and
+                    s.setting='rank_and_leaderboard_optOut' and
+                    s.value='true' and 
+                    s.projectId is null)''' )
     Integer calculateNumUsersWithLessScore(String projectId, int points)
 
     @Query('''SELECT count(p) from UserPoints p, UserAttrs ua where 

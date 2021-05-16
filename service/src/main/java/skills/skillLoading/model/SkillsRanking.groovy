@@ -22,4 +22,5 @@ class SkillsRanking {
 
     Integer numUsers
     Integer position
+    Boolean optedOut = false
 }
