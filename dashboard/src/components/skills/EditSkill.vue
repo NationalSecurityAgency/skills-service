@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit, errors, dirty, pristine, valid }" slim>
+  <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit}" slim>
     <b-modal :id="skillInternal.skillId" size="xl" :title="title" v-model="show" :no-close-on-backdrop="true"
              header-bg-variant="info" header-text-variant="light" no-fade role="dialog" @hide="publishHidden"
              :aria-label="isEdit?'Edit Skill':'New Skill'">
@@ -209,12 +209,6 @@ limitations under the License.
         </b-container>
 
       <div slot="modal-footer" class="w-100">
-        <div v-if="invalid">
-          invalid - {{ invalid }} :: {{ errors }}
-          dirty - {{ dirty }}
-          pristine - {{ pristine }}
-          valid - {{ valid }}
-        </div>
         <b-button variant="success" size="sm" class="float-right" @click="handleSubmit(saveSkill)"
                   :disabled="invalid || isLoading"
                   data-cy="saveSkillButton">

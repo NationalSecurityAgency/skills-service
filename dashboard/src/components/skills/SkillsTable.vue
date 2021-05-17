@@ -554,7 +554,7 @@ limitations under the License.
         }
       },
       handleFocus(e) {
-        let ref = this.$refs.subPageHeader.$refs.actionButton;
+        let ref = this.$refs.actionButton;
         if (e && e.updated && this.currentlyFocusedSkillId) {
           const refName = `edit_${this.currentlyFocusedSkillId}`;
           ref = this.$refs[refName];

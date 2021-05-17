@@ -735,7 +735,7 @@ describe('Skills Tests', () => {
 
       cy.get('[data-cy=saveSkillButton]').click();
       cy.wait('@afterIdEdit');
-      cy.get('[data-cy=editSkillButton_skill1]').should('have.focus');
+      cy.get('[data-cy=editSkillButton_entirelyNewId]').should('have.focus');
       cy.contains('ID: entirelyNewId').should('be.visible');
       cy.get('[data-cy=breadcrumb-skill1]').should('not.exist');
       cy.get('[data-cy=breadcrumb-entirelyNewId]').should('be.visible');
