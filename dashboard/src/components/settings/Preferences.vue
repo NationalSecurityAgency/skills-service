@@ -39,7 +39,7 @@ limitations under the License.
               </b-form-group>
             </div>
             <div >
-              <i class="fas fa-users-slash" aria-hidden="true"></i> Rank and Leaderboard Opt-Out:
+              <i class="fas fa-users-slash" aria-hidden="true"></i> <span id="rankAndLeaderboardOptOutLabel">Rank and Leaderboard Opt-Out:</span>
               <inline-help
                 msg="Change to true and you will not be shown on the Leaderboard or assigned a rank"/>
               <b-form-checkbox v-model="settings.rankAndLeaderboardOptOut.value"
