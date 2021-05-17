@@ -510,4 +510,44 @@ describe('Client Display Theme Tests', () => {
         cy.matchSnapshotImage(snapshotOptions);
     });
 
+
+    it('rank and leaderboard opt-out', () => {
+        cy.request('POST', '/app/userInfo/settings', [{
+            'settingGroup': 'user.prefs',
+            'value': true,
+            'setting': 'rank_and_leaderboard_optOut',
+            'lastLoadedValue': '',
+            'dirty': true
+        }]);
+
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2);
+        cy.createSkill(1, 1, 3);
+
+        cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now')
+        cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday')
+        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now')
+        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday')
+        cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now')
+
+        cy.cdVisit('/?enableTheme=true&loginAsUser=skills@skills.org');
+        cy.matchSnapshotImageForElement('[data-cy="myRank"]', 'my-rank-themed-opted-out', snapshotOptions);
+
+        cy.cdClickRank();
+
+        const tableSelector = '[data-cy="leaderboardTable"]';
+        const rowSelector = `${tableSelector} tbody tr`
+        cy.get(tableSelector).contains('Loading...').should('not.exist')
+        cy.get(rowSelector).should('have.length', 1).as('cyRows');
+
+        cy.get('[data-cy="myRankPositionStatCard"]').contains('Opted-Out')
+        cy.get('[data-cy="leaderboard"]').contains('You selected to opt-out form the leaderboard and ranking.');
+
+        cy.matchSnapshotImageForElement('[data-cy="myRankPositionStatCard"]', 'rank-overview-my-rank-themed-opted-out', snapshotOptions);
+        cy.matchSnapshotImageForElement('[data-cy="leaderboard"]', 'rank-overview-themed-leaderboard-opted-out', snapshotOptions);
+
+    })
+
+
 });
