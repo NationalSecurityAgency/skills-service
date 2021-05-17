@@ -83,6 +83,13 @@ limitations under the License.
       }
       this.loadAssignedBadgeSkills();
     },
+    watch: {
+      '$route.params.badgeId': function updateBadge() {
+        this.badgeId = this.$route.params.badgeId;
+        this.loadBadgeInfo();
+        this.loadAssignedBadgeSkills();
+      },
+    },
     methods: {
       ...mapActions([
         'loadBadgeDetailsState',

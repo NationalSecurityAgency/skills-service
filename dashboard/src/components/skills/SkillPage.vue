@@ -15,10 +15,21 @@ limitations under the License.
 */
 <template>
   <div>
-    <page-header :loading="isLoading" :options="headerOptions"/>
+    <page-header :loading="isLoading" :options="headerOptions">
+      <div slot="subSubTitle">
+        <b-button @click="displayEdit"
+                  size="sm"
+                  variant="outline-primary" :data-cy="`editSkillButton_${this.$route.params.skillId}`"
+                  :aria-label="'edit Skill '+skill.name" :ref="'edit_'+this.$route.params.skillId">
+          <span class="d-none d-sm-inline">Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
+        </b-button>
+      </div>
+    </page-header>
 
     <navigation :nav-items="navItems">
     </navigation>
+    <edit-skill v-if="showEdit" v-model="showEdit" :skillId="skill.skillId" :is-copy="false" :is-edit="true"
+                :project-id="this.$route.params.projectId" :subject-id="this.$route.params.subjectId" @skill-saved="skillEdited" @hidden="handleHide"/>
   </div>
 </template>
 
@@ -27,6 +38,7 @@ limitations under the License.
   import SkillsService from './SkillsService';
   import Navigation from '../utils/Navigation';
   import PageHeader from '../utils/pages/PageHeader';
+  import EditSkill from './EditSkill';
 
   const { mapGetters, mapActions } = createNamespacedHelpers('subjects');
 
@@ -35,6 +47,7 @@ limitations under the License.
     components: {
       PageHeader,
       Navigation,
+      EditSkill,
     },
     data() {
       return {
@@ -42,14 +55,11 @@ limitations under the License.
         skill: {},
         subjectId: '',
         headerOptions: {},
+        showEdit: false,
       };
     },
     mounted() {
       this.loadData();
-      this.$emitter.on('skillupdated', this.handleSkillUpdated);
-    },
-    beforeDestroy() {
-      this.$emitter.off('skillupdated', this.handleSkillUpdated);
     },
     computed: {
       ...mapGetters([
@@ -87,6 +97,10 @@ limitations under the License.
       ...mapActions([
         'loadSubjectDetailsState',
       ]),
+      displayEdit() {
+        // should only enable edit button if dirty, isn't currently
+        this.showEdit = true;
+      },
       loadData() {
         this.isLoading = true;
         const { projectId, subjectId } = this.$route.params;
@@ -106,8 +120,29 @@ limitations under the License.
             }
           });
       },
-      handleSkillUpdated(skill) {
-        this.headerOptions = this.buildHeaderOptions(skill);
+      skillEdited(editedSkil) {
+        this.isLoading = true;
+        // the page title and breadcrumb aren't updated, how to propegate an update to the page header
+        // if the id changed then we'd need to update the route as well
+        SkillsService.saveSkill(editedSkil).then((res) => {
+          const origId = this.skill.skillId;
+          this.skill = Object.assign(res, { subjectId: this.$route.params.subjectId });
+          this.headerOptions = this.buildHeaderOptions(res);
+          if (origId !== this.skill.skillId) {
+            this.$router.replace({ name: this.$route.name, params: { ...this.$route.params, skillId: this.skill.skillId } });
+          }
+        }).finally(() => {
+          this.isLoading = false;
+        });
+      },
+      handleHide() {
+        this.showEdit = false;
+        const ref = this.$refs[`edit_${this.$route.params.skillId}`];
+        this.$nextTick(() => {
+          if (ref) {
+            ref.focus();
+          }
+        });
       },
       buildHeaderOptions(skill) {
         return {

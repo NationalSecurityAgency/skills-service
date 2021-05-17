@@ -16,20 +16,29 @@ limitations under the License.
 <template>
   <div>
     <page-header :loading="isLoading" :options="headerOptions">
-      <div slot="subSubTitle">
-        <div v-if="project">
-          <div data-cy="projectCreated">
-            <span class="text-secondary small font-italic">Created: </span><slim-date-cell :value="project.created"/>
-          </div>
-          <div data-cy="projectLastReportedSkill">
-            <span class="text-secondary small font-italic">Last reported Skill: </span><slim-date-cell :value="project.lastReportedSkill" :fromStartOfDay="true"/>
-          </div>
+      <div slot="subSubTitle" v-if="project">
+        <div data-cy="projectCreated">
+          <span class="text-secondary small font-italic">Created: </span><slim-date-cell :value="project.created"/>
         </div>
-        <b-button target="_blank" v-if="project" :to="{ name:'MyProjectSkills', params: { projectId: project.projectId } }"
-                  data-cy="projectPreview" size="sm"
-                  variant="outline-primary" :aria-label="'preview client display for project'+project.name">
-          <span class="d-sm-line">Preview</span> <i class="fas fa-eye" style="font-size:1rem;" aria-hidden="true"/>
-        </b-button>
+        <div data-cy="projectLastReportedSkill">
+          <span class="text-secondary small font-italic">Last reported Skill: </span><slim-date-cell :value="project.lastReportedSkill" :fromStartOfDay="true"/>
+        </div>
+        <b-button-group>
+          <b-button @click="displayEditProject"
+                    ref="editProjectButton"
+                    class="btn btn-outline-primary mr-1"
+                    size="sm"
+                    variant="outline-primary"
+                    data-cy="btn_edit-project"
+                    :aria-label="'edit Project '+project.projectId">
+            <span class="d-none d-sm-inline">Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
+          </b-button>
+          <b-button target="_blank" v-if="project" :to="{ name:'MyProjectSkills', params: { projectId: project.projectId } }"
+                    data-cy="projectPreview" size="sm"
+                    variant="outline-primary" :aria-label="'preview client display for project'+project.name">
+            <span class="d-sm-line">Preview</span> <i class="fas fa-eye" style="font-size:1rem;" aria-hidden="true"/>
+          </b-button>
+        </b-button-group>
       </div>
     </page-header>
 
@@ -47,6 +56,9 @@ limitations under the License.
           {name: 'Settings', iconClass: 'fa-cogs skills-color-settings', page: 'ProjectSettings'},
         ]">
     </navigation>
+
+    <edit-project v-if="editProject" v-model="editProject" :project="project" :is-edit="true"
+                  @project-saved="projectSaved" @hidden="editProjectHidden"/>
   </div>
 
 </template>
@@ -57,6 +69,8 @@ limitations under the License.
   import Navigation from '../utils/Navigation';
   import PageHeader from '../utils/pages/PageHeader';
   import SlimDateCell from '../utils/table/SlimDateCell';
+  import EditProject from './EditProject';
+  import ProjectService from './ProjectService';
 
   const { mapActions, mapGetters, mapMutations } = createNamespacedHelpers('projects');
 
@@ -66,10 +80,12 @@ limitations under the License.
       PageHeader,
       Navigation,
       SlimDateCell,
+      EditProject,
     },
     data() {
       return {
         isLoading: true,
+        editProject: false,
       };
     },
     mounted() {
@@ -122,6 +138,9 @@ limitations under the License.
       ...mapMutations([
         'setProject',
       ]),
+      displayEditProject() {
+        this.editProject = true;
+      },
       loadProjects() {
         this.isLoading = true;
         if (this.$route.params.project) {
@@ -133,6 +152,25 @@ limitations under the License.
               this.isLoading = false;
             });
         }
+      },
+      editProjectHidden() {
+        this.editProject = false;
+        const ref = this.$refs.editProjectButton;
+        this.$nextTick(() => {
+          if (ref) {
+            ref.focus();
+          }
+        });
+      },
+      projectSaved(updatedProject) {
+        ProjectService.saveProject(updatedProject).then((resp) => {
+          const origProjId = this.project.projectId;
+          this.setProject(resp);
+          if (resp.projectId !== origProjId) {
+            this.$router.replace({ name: this.$route.name, params: { ...this.$route.params, projectId: resp.projectId } });
+            this.projectId = resp.projectId;
+          }
+        });
       },
     },
   };

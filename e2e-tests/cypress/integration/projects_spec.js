@@ -54,6 +54,7 @@ describe('Projects Tests', () => {
 
     cy.visit('/administrator/projects/proj1/');
     cy.get('[data-cy=projectPreview]').should('be.visible');
+    cy.get('a[data-cy=projectPreview]').should('have.attr', 'href').and('include', '/progress-and-rankings/projects/proj1');
     cy.get('[data-cy=projectPreview]').click();
     //opens in a new tab, cypress can't interact with those
   });
