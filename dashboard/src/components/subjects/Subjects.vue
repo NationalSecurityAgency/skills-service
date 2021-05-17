@@ -15,9 +15,24 @@ limitations under the License.
 */
 <template>
   <div>
-    <sub-page-header ref="subPageHeader" title="Subjects" action="Subject" @add-action="openNewSubjectModal"
-                     :disabled="addSubjectDisabled" :disabled-msg="addSubjectsDisabledMsg"
-                     :aria-label="'new subject'"/>
+    <sub-page-header ref="subPageHeader" title="Subjects">
+      <b-button @click="displayEditProject"
+                ref="editProjectButton"
+                class="btn btn-outline-primary mr-1"
+                size="sm"
+                variant="outline-primary"
+                data-cy="btn_edit-project"
+                :aria-label="'edit Project '+project.projectId">
+        <span class="d-none d-sm-inline">Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
+      </b-button>
+      <b-button ref="actionButton" type="button" size="sm" variant="outline-primary"
+                :class="{'btn':true, 'btn-outline-primary':true, 'disabled':addSubjectDisabled}"
+                v-on:click="openNewSubjectModal" :aria-label="'new subject'"
+                :data-cy="`btn_Subjects`">
+        <span class="d-none d-sm-inline">Skill </span> <i class="fas fa-plus-circle"/>
+      </b-button>
+      <i v-if="addSubjectDisabled" class="fas fa-exclamation-circle text-warning ml-1" style="pointer-events: all; font-size: 1.5rem;" v-b-tooltip.hover="addSubjectsDisabledMsg"/>
+    </sub-page-header>
     <loading-container v-bind:is-loading="isLoading">
       <div v-if="subjects && subjects.length" class="row justify-content-center">
         <div v-for="(subject) of subjects" :key="subject.subjectId" :id="subject.subjectId" class="col-lg-4 mb-3"
@@ -34,6 +49,10 @@ limitations under the License.
     <edit-subject v-if="displayNewSubjectModal" v-model="displayNewSubjectModal"
                   :subject="emptyNewSubject" @subject-saved="subjectAdded"
                   @hidden="handleHide"/>
+
+    <edit-project v-if="editProject" v-model="editProject" :project="project" :is-edit="true"
+                  @project-saved="projectSaved" @hidden="editProjectHidden"/>
+
   </div>
 </template>
 
@@ -46,8 +65,10 @@ limitations under the License.
   import SubjectsService from './SubjectsService';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import NoContent2 from '../utils/NoContent2';
+  import EditProject from '../projects/EditProject';
+  import ProjectService from '../projects/ProjectService';
 
-  const { mapActions } = createNamespacedHelpers('projects');
+  const { mapGetters, mapActions, mapMutations } = createNamespacedHelpers('projects');
 
   export default {
     name: 'Subjects',
@@ -57,6 +78,7 @@ limitations under the License.
       SubPageHeader,
       LoadingContainer,
       Subject,
+      EditProject,
     },
     data() {
       return {
@@ -64,6 +86,7 @@ limitations under the License.
         subjects: [],
         displayNewSubjectModal: false,
         projectId: null,
+        editProject: false,
       };
     },
     mounted() {
@@ -74,6 +97,10 @@ limitations under the License.
       ...mapActions([
         'loadProjectDetailsState',
       ]),
+      ...mapMutations(['setProject']),
+      displayEditProject() {
+        this.editProject = true;
+      },
       openNewSubjectModal() {
         this.displayNewSubjectModal = true;
       },
@@ -134,11 +161,32 @@ limitations under the License.
       },
       handleFocus() {
         this.$nextTick(() => {
-          this.$refs.subPageHeader.$refs.actionButton.focus();
+          this.$refs.actionButton.focus();
+        });
+      },
+      projectSaved(updatedProject) {
+        ProjectService.saveProject(updatedProject).then((resp) => {
+          const origProjId = this.project.projectId;
+          this.setProject(resp);
+          if (resp.projectId !== origProjId) {
+            this.$router.replace({ name: this.$route.name, params: { ...this.$route.params, projectId: resp.projectId } });
+            this.projectId = resp.projectId;
+            this.loadSubjects();
+          }
+        });
+      },
+      editProjectHidden() {
+        this.editProject = false;
+        const ref = this.$refs.editProjectButton;
+        this.$nextTick(() => {
+          if (ref) {
+            ref.focus();
+          }
         });
       },
     },
     computed: {
+      ...mapGetters(['project']),
       emptyNewSubject() {
         return {
           projectId: this.$route.params.projectId,
