@@ -115,7 +115,7 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
     cy.get(rowSelector).should('have.length', 10).as('cyRows');
 
     cy.get('[data-cy="myRankPositionStatCard"]').contains('Opted-Out')
-    cy.get('[data-cy="leaderboard"]').contains('You selected to opt-out form the leaderboard and ranking.');
+    cy.get('[data-cy="leaderboard"]').contains('You selected to opt-out');
 
     cy.matchSnapshotImageForElement('[data-cy="myRankPositionStatCard"]', 'rank-overview-my-rank-opted-out', snapshotOptions);
     cy.matchSnapshotImageForElement('[data-cy="leaderboard"]', 'rank-overview-leaderboard-opted-out', snapshotOptions);

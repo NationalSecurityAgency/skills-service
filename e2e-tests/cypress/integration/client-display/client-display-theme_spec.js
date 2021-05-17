@@ -16,7 +16,7 @@
 import moment from 'moment-timezone';
 const dateFormatter = value => moment.utc(value).format('YYYY-MM-DD[T]HH:mm:ss[Z]');
 
-describe('Client Display Theme Tests', () => {
+describe('Client Display Tests', () => {
 
     const snapshotOptions = {
         blackout: ['[data-cy=pointHistoryChart]', '#dependent-skills-network', '[data-cy=achievementDate]'],
@@ -532,7 +532,7 @@ describe('Client Display Theme Tests', () => {
         cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now')
 
         cy.cdVisit('/?enableTheme=true&loginAsUser=skills@skills.org');
-        cy.matchSnapshotImageForElement('[data-cy="myRank"]', 'my-rank-themed-opted-out', snapshotOptions);
+        cy.matchSnapshotImageForElement('[data-cy="myRank"]', 'Client Display Tests - My rank themed where user opted-out', snapshotOptions);
 
         cy.cdClickRank();
 
@@ -542,10 +542,10 @@ describe('Client Display Theme Tests', () => {
         cy.get(rowSelector).should('have.length', 1).as('cyRows');
 
         cy.get('[data-cy="myRankPositionStatCard"]').contains('Opted-Out')
-        cy.get('[data-cy="leaderboard"]').contains('You selected to opt-out form the leaderboard and ranking.');
+        cy.get('[data-cy="leaderboard"]').contains('You selected to opt-out');
 
-        cy.matchSnapshotImageForElement('[data-cy="myRankPositionStatCard"]', 'rank-overview-my-rank-themed-opted-out', snapshotOptions);
-        cy.matchSnapshotImageForElement('[data-cy="leaderboard"]', 'rank-overview-themed-leaderboard-opted-out', snapshotOptions);
+        cy.matchSnapshotImageForElement('[data-cy="myRankPositionStatCard"]', 'Client Display Tests - Rank Overview of My rank themed where user opted-out', snapshotOptions);
+        cy.matchSnapshotImageForElement('[data-cy="leaderboard"]', 'Client Display Tests - Rank Overview of themed Leaderboard where user opted-out', snapshotOptions);
 
     })
 

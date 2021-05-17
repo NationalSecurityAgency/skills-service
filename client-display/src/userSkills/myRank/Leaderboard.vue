@@ -36,8 +36,8 @@ limitations under the License.
 
       <div v-if="optedOut" class="mx-3">
         <div class="alert alert-danger">
-          <i class="fas fa-users-slash mr-2"></i>You selected to <b>opt-out</b> form the leaderboard and ranking. Your name will <b>not</b> appear in the leaderboard and you will not be ranked against other users.
-            If you want to re-enter leaderboard and ranking then please adjust your preferences the SkillTree dashboard.
+          <i class="fas fa-users-slash mr-2"></i>You selected to <b>opt-out</b> from ranking. Your name will <b>not</b> appear in the leaderboard and you will not be ranked against other users.
+            If you want to re-enter the leaderboard and ranking then please adjust your preferences in the SkillTree dashboard.
         </div>
       </div>
 

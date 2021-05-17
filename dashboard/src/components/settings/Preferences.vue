@@ -105,7 +105,7 @@ limitations under the License.
             settingGroup: 'user.prefs',
             value: false,
             setting: 'rank_and_leaderboard_optOut',
-            lastLoadedValue: '',
+            lastLoadedValue: false,
             dirty: false,
           },
         },
