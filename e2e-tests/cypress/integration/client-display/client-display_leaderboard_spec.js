@@ -59,7 +59,9 @@ describe('Client Display Leaderboard Tests', () => {
         cy.createProject(1);
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1);
-        cy.reportSkill(1, 1, Cypress.env('proxyUser'), '2021-02-24 10:00');
+        const user = Cypress.env('proxyUser');
+        cy.log(`user is: [${user}]`)
+        cy.reportSkill(1, 1, user, '2021-02-24 10:00');
 
         cy.cdVisit('/');
         cy.contains('Overall Points');
@@ -79,9 +81,10 @@ describe('Client Display Leaderboard Tests', () => {
         cy.get('@row')
             .eq(0)
             .should('contain.text', `1`);
+        const userToValidate = Cypress.env('oauthMode') ? 'foo' : user;
         cy.get('@row')
             .eq(1)
-            .should('contain.text', `${Cypress.env('proxyUser')}`);
+            .should('contain.text', userToValidate);
         cy.get('@row')
             .eq(2)
             .should('contain.text', '100 Points');

@@ -344,12 +344,16 @@ describe('Accessibility Tests', () => {
     cy.customA11y();
 
     cy.get('[data-cy="Achievements-metrics-link"]').click();
+    cy.contains("Level 2: 1 users")
+    cy.contains("Level 1: 0 users")
     cy.get('[data-cy=achievementsNavigator-table]').contains('u8');
+    cy.wait(2000) // wait for charts to finish loading
     cy.customLighthouse();
     cy.customA11y();
 
     cy.get('[data-cy="Subjects-metrics-link"]').click();
     cy.contains('Number of users for each level over time')
+    cy.wait(4000) // wait for charts to finish loading
     cy.customLighthouse();
     cy.customA11y();
 
