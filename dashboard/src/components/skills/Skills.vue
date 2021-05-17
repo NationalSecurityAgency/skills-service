@@ -28,7 +28,7 @@ limitations under the License.
   import SkillsService from './SkillsService';
   import dayjs from '../../DayJsCustomizer';
 
-  const { mapActions } = createNamespacedHelpers('subjects');
+  const { mapActions, mapGetters } = createNamespacedHelpers('subjects');
 
   export default {
     name: 'Skills',
@@ -45,6 +45,11 @@ limitations under the License.
       this.projectId = this.$route.params.projectId;
       this.subjectId = this.$route.params.subjectId;
       this.loadSkills();
+    },
+    computed: {
+      ...mapGetters([
+        'subject',
+      ]),
     },
     methods: {
       ...mapActions([
@@ -66,7 +71,7 @@ limitations under the License.
           });
       },
       skillsChanged(skillId) {
-        this.loadSubjectDetailsState({ projectId: this.projectId, subjectId: this.subjectId });
+        this.loadSubjectDetailsState({ projectId: this.projectId, subjectId: this.subject.subjectId });
         this.$emit('skills-change', skillId);
       },
     },

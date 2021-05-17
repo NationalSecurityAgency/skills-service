@@ -17,7 +17,24 @@ limitations under the License.
   <div id="skillsTable">
 
     <sub-page-header ref="subPageHeader" title="Skills" action="Skill" @add-action="newSkill"
-                     :disabled="addSkillDisabled" :disabled-msg="addSkillsDisabledMsg" aria-label="new skill"/>
+                     :disabled="addSkillDisabled" :disabled-msg="addSkillsDisabledMsg" aria-label="new skill">
+      <b-button @click="displayEditSubject"
+                ref="editSubjectButton"
+                class="btn btn-outline-primary mr-1"
+                size="sm"
+                variant="outline-primary"
+                data-cy="btn_edit-subject"
+                :aria-label="'edit Skill '+subject.subjectId">
+        <span class="d-none d-sm-inline">Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
+      </b-button>
+      <b-button ref="actionButton" type="button" size="sm" variant="outline-primary"
+                :class="{'btn':true, 'btn-outline-primary':true, 'disabled':addSkillDisabled}"
+                v-on:click="newSkill" :aria-label="'new skill'"
+                :data-cy="`btn_Skills`">
+        <span class="d-none d-sm-inline">Skill </span> <i class="fas fa-plus-circle"/>
+      </b-button>
+      <i v-if="addSkillDisabled" class="fas fa-exclamation-circle text-warning ml-1" style="pointer-events: all; font-size: 1.5rem;" v-b-tooltip.hover="addSkillsDisabledMsg"/>
+    </sub-page-header>
 
     <loading-container v-bind:is-loading="isLoading">
       <b-card v-if="this.skillsOriginal && this.skillsOriginal.length" body-class="p-0">
@@ -68,7 +85,7 @@ limitations under the License.
             </div>
             <div class="col pl-0">
               <router-link :data-cy="`manageSkillLink_${data.item.skillId}`" tag="a" :to="{ name:'SkillOverview',
-                                  params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
+                                  params: { projectId: data.item.projectId, subjectId: subject.subjectId, skillId: data.item.skillId }}"
                            :aria-label="`Manage skill ${data.item.name}  via link`">
                 <div class="h5">{{ data.item.name }}</div>
               </router-link>
@@ -77,7 +94,7 @@ limitations under the License.
             </div>
             <div class="col-auto ml-auto mr-0">
               <router-link :data-cy="`manageSkillBtn_${data.item.skillId}`" :to="{ name:'SkillOverview',
-                                  params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
+                                  params: { projectId: data.item.projectId, subjectId:  subject.subjectId, skillId: data.item.skillId }}"
                            :aria-label="`Manage skill ${data.item.name}`"
                            class="btn btn-outline-primary btn-sm">
                 <span class="d-none d-sm-inline">Manage </span> <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
@@ -153,7 +170,7 @@ limitations under the License.
          {{ getSelfReportingTypePretty(data.item.selfReportingType) }}
         </template>
         <template #row-details="row">
-            <ChildRowSkillsDisplay :project-id="projectId" :subject-id="subjectId" v-skills-onMount="'ExpandSkillDetailsSkillsPage'"
+            <ChildRowSkillsDisplay :project-id="projectId" :subject-id="subject.subjectId" v-skills-onMount="'ExpandSkillDetailsSkillsPage'"
                                    :parent-skill-id="row.item.skillId" :refresh-counter="row.item.refreshCounter"
                                    class="mr-3 ml-5 mb-3"></ChildRowSkillsDisplay>
         </template>
@@ -166,11 +183,17 @@ limitations under the License.
     </loading-container>
 
     <edit-skill v-if="editSkillInfo.show" v-model="editSkillInfo.show" :skillId="editSkillInfo.skill.skillId" :is-copy="editSkillInfo.isCopy" :is-edit="editSkillInfo.isEdit"
-                :project-id="projectId" :subject-id="subjectId" @skill-saved="skillCreatedOrUpdated" @hidden="handleHide"/>
+                :project-id="projectId" :subject-id="subject.subjectId" @skill-saved="skillCreatedOrUpdated" @hidden="handleHide"/>
+
+    <edit-subject v-if="showEditSubject" v-model="showEditSubject"
+                  :subject="subject" @subject-saved="subjectEdited"
+                  :is-edit="true"
+                  @hidden="handleHideSubjectEdit"/>
   </div>
 </template>
 
 <script>
+  import { createNamespacedHelpers } from 'vuex';
   import { SkillsReporter } from '@skilltree/skills-client-vue';
   import EditSkill from './EditSkill';
   import NoContent2 from '../utils/NoContent2';
@@ -183,6 +206,10 @@ limitations under the License.
   import SkillsBTable from '../utils/table/SkillsBTable';
   import dayjs from '../../DayJsCustomizer';
   import TimeWindowMixin from './TimeWindowMixin';
+  import SubjectsService from '../subjects/SubjectsService';
+  import EditSubject from '../subjects/EditSubject';
+
+  const { mapGetters, mapMutations } = createNamespacedHelpers('subjects');
 
   export default {
     name: 'SkillsTable',
@@ -195,10 +222,12 @@ limitations under the License.
       ChildRowSkillsDisplay,
       LoadingContainer,
       NoContent2,
+      EditSubject,
     },
     data() {
       return {
         isLoading: false,
+        showEditSubject: false,
         currentlyFocusedSkillId: '',
         editSkillInfo: {
           isEdit: false,
@@ -300,8 +329,9 @@ limitations under the License.
       },
     },
     mounted() {
+      const subjectId = this.subject ? this.subject.subjectId : this.subjectId;
       this.skills = this.skillsProp.map((item) => {
-        const withSubjId = { subjectId: this.subjectId, refreshCounter: 0, ...item };
+        const withSubjId = { subjectId, refreshCounter: 0, ...item };
         return SkillsService.enhanceWithTimeWindow(withSubjId);
       });
       this.skillsOriginal = this.skills.map((item) => item);
@@ -310,6 +340,9 @@ limitations under the License.
       this.table.options.busy = false;
     },
     computed: {
+      ...mapGetters([
+        'subject',
+      ]),
       addSkillDisabled() {
         return this.skills && this.$store.getters.config && this.skills.length >= this.$store.getters.config.maxSkillsPerSubject;
       },
@@ -321,6 +354,9 @@ limitations under the License.
       },
     },
     methods: {
+      ...mapMutations([
+        'setSubject',
+      ]),
       applyFilters() {
         if (this.table.filter.name && this.table.filter.name.length > 0) {
           this.skills = this.skillsOriginal.filter((item) => {
@@ -353,12 +389,12 @@ limitations under the License.
       },
       editSkill(skillToEdit) {
         this.currentlyFocusedSkillId = skillToEdit.skillId;
-        this.editSkillInfo = { skill: skillToEdit, show: true, isEdit: true };
+        this.editSkillInfo = { skill: { ...skillToEdit, subjectId: this.subject.subjectId }, show: true, isEdit: true };
       },
       copySkill(skillToCopy) {
         // deep copy skill to prevent any future conflicts
         this.editSkillInfo = {
-          skill: skillToCopy,
+          skill: { ...skillToCopy, subjectId: this.subject.subjectId },
           show: true,
           isCopy: true,
           isEdit: false,
@@ -381,7 +417,7 @@ limitations under the License.
         SkillsService.saveSkill(skill)
           .then((skillRes) => {
             let createdSkill = skillRes;
-            createdSkill = { subjectId: this.subjectId, ...createdSkill, created: new Date(createdSkill.created) };
+            createdSkill = { subjectId: this.subject.subjectId, ...createdSkill, created: new Date(createdSkill.created) };
             if (item1Index >= 0) {
               createdSkill.refreshCounter = this.skills[item1Index].refreshCounter + 1;
               this.skills.splice(item1Index, 1, createdSkill);
@@ -494,7 +530,7 @@ limitations under the License.
       moveDisplayOrder(row, actionToSubmit) {
         SkillsService.updateSkill(row, actionToSubmit)
           .then(() => {
-            SkillsService.getSubjectSkills(this.projectId, this.subjectId).then((data) => {
+            SkillsService.getSubjectSkills(this.projectId, this.subject.subjectId).then((data) => {
               this.skills = data;
               this.disableFirstAndLastButtons();
             });
@@ -532,6 +568,27 @@ limitations under the License.
       },
       getSelfReportingTypePretty(selfReportingType) {
         return (selfReportingType === 'HonorSystem') ? 'Honor System' : selfReportingType;
+      },
+      displayEditSubject() {
+        this.showEditSubject = true;
+      },
+      subjectEdited(subject) {
+        SubjectsService.saveSubject(subject).then((resp) => {
+          const origId = this.subject.subjectId;
+          this.setSubject(resp);
+          if (resp.subjectId !== origId) {
+            this.$router.replace({ name: this.$route.name, params: { ...this.$route.params, subjectId: resp.subjectId } });
+          }
+        });
+      },
+      handleHideSubjectEdit() {
+        this.showEditSubject = false;
+        const ref = this.$refs.editSubjectButton;
+        this.$nextTick(() => {
+          if (ref) {
+            ref.focus();
+          }
+        });
       },
     },
   };

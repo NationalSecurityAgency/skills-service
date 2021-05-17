@@ -17,6 +17,7 @@ limitations under the License.
   <div>
     <sub-page-header title="Overview">
       <b-button @click="displayEdit"
+                size="sm"
                 variant="outline-primary" :data-cy="`editSkillButton_${this.$route.params.skillId}`"
                 :aria-label="'edit Skill '+skill.name" :ref="'edit_'+this.$route.params.skillId">
         <span class="d-none d-sm-inline">Edit </span> <i class="fas fa-edit" aria-hidden="true"/>

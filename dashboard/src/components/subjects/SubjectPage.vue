@@ -84,6 +84,13 @@ limitations under the License.
         return this.$store.getters.config.minimumSubjectPoints;
       },
     },
+    watch: {
+      subject(newVal) {
+        if (newVal && newVal.subjectId !== this.subjectId) {
+          this.subjectId = newVal.subjectId;
+        }
+      },
+    },
     methods: {
       ...mapActions([
         'loadSubjectDetailsState',
@@ -91,6 +98,7 @@ limitations under the License.
       ...mapMutations([
         'setSubject',
       ]),
+
       loadSubject() {
         this.isLoading = true;
         if (this.$route.params.subject) {
