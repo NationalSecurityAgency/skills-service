@@ -148,9 +148,10 @@ class RankingLoader {
     private List<RankedUserRes> getTop10Users(String projectId, UserAttrs userAttrs, OptOutInfo optOut, String subjectId = null) {
         int size = 10
         PageRequest pageRequest = PageRequest.of(0, size, getPointsSort(false))
+        List<String> excludedIds = optOut.admins ?: ['$%^&*']
         List<UserPointsRepo.RankedUserRes> rankedUserRes = subjectId ?
-                userPointsRepository.findUsersForLeaderboard(projectId, subjectId, optOut.admins, pageRequest) :
-                userPointsRepository.findUsersForLeaderboard(projectId, optOut.admins, pageRequest)
+                userPointsRepository.findUsersForLeaderboard(projectId, subjectId, excludedIds, pageRequest) :
+                userPointsRepository.findUsersForLeaderboard(projectId, excludedIds, pageRequest)
 
         List<RankedUserRes> res = convertToRankedUserRes(rankedUserRes, 1, userAttrs.userId)
 
@@ -187,7 +188,8 @@ class RankingLoader {
 
         SkillsRanking ranking
         if (points) {
-            int numUsersWithMorePoints = calculateNumberOfUsersWithGreaterPoints(subjectId, projectId, points, optOut.admins)
+            List<String> excludedIds = optOut.admins ?: ['$%^&*']
+            int numUsersWithMorePoints = calculateNumberOfUsersWithGreaterPoints(subjectId, projectId, points, excludedIds)
             int position = numUsersWithMorePoints + 1
             ranking = new SkillsRanking(numUsers: numUsers, position: position, optedOut: optOut.isPersonalOptOut())
         } else {
