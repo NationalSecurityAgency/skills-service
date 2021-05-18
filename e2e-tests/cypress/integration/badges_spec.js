@@ -797,4 +797,58 @@ describe('Badges Tests', () => {
         cy.get('[data-cy="saveBadgeButton"]').should('be.enabled');
         cy.get('[data-cy="badgeDescriptionError"]').contains('Subject Description - paragraphs may not contain jabberwocky').should('not.exist');
     });
+
+    it('edit in place', () => {
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
+            projectId: 'proj1',
+            subjectId: "subj1",
+            skillId: "skill1",
+            name: "Skill 1",
+            pointIncrement: '50',
+            numPerformToCompletion: '5'
+        });
+        cy.request('POST', '/admin/projects/proj1/badges/badge1', {
+            projectId: 'proj1',
+            badgeId: 'badge1',
+            name: 'Badge 1'
+        });
+        cy.request('POST', '/admin/projects/proj1/badge/badge1/skills/skill1');
+        cy.intercept('GET', '/admin/projects/proj1/badges/badge1').as('loadBadge1');
+        cy.intercept('GET', '/admin/projects/proj1/badges/iwasedited/users**').as('loadBadgeUsers');
+
+        cy.visit('/administrator/projects/proj1/badges/badge1');
+        cy.wait('@loadBadge1');
+        cy.contains('BADGE: Badge 1').should('be.visible');
+        cy.contains('ID: badge1').should('be.visible');
+        cy.get('[data-cy=breadcrumb-badge1]').should('be.visible');
+        cy.get('button[data-cy=deleteSkill_skill1]').should('be.visible');
+        cy.get('[data-cy=btn_edit-badge]').should('be.visible').click();
+        cy.get('input[data-cy=badgeName]').type('{selectall}Updated Badge Name');
+        cy.get('button[data-cy=saveBadgeButton]').click();
+        cy.contains('BADGE: Badge 1').should('not.exist');
+        cy.contains('BADGE: Updated Badge Name').should('be.visible');
+
+        cy.get('[data-cy=btn_edit-badge]').click();
+        cy.get('[data-cy=idInputEnableControl] a').click();
+        cy.get('input[data-cy=idInputValue]').type('{selectall}iwasedited');
+        cy.get('button[data-cy=saveBadgeButton]').click();
+        cy.contains('ID: badge1').should('not.exist');
+        cy.contains('ID: iwasedited').should('be.visible');
+        cy.location().should((loc) => {
+            expect(loc.pathname).to.eq('/administrator/projects/proj1/badges/iwasedited/');
+        });
+        cy.get('[data-cy=breadcrumb-badge1]').should('not.exist');
+        cy.get('[data-cy=breadcrumb-iwasedited]').should('be.visible');
+        cy.get('button[data-cy=deleteSkill_skill1]').click();
+        cy.contains('YES, Delete It!').click();
+        cy.contains('No Skills Selected Yet...').should('be.visible');
+        cy.get('[data-cy=nav-Users]').click();
+        cy.wait('@loadBadgeUsers');
+
+    });
 });

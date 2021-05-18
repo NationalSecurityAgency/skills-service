@@ -25,8 +25,8 @@ limitations under the License.
                   class="btn btn-outline-primary mr-1"
                   size="sm"
                   variant="outline-primary"
-                  data-cy="btn_edit-subject"
-                  :aria-label="'edit Subject '+badge.badgeId">
+                  data-cy="btn_edit-badge"
+                  :aria-label="'edit Badge '+badge.badgeId">
           <span class="d-none d-sm-inline">Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
         </b-button>
       </div>
@@ -138,7 +138,10 @@ limitations under the License.
       },
       handleFocus() {
         this.$nextTick(() => {
-          this.$refs.editAndDeleteBadge.focus();
+          const ref = this.$refs.editAndDeleteBadge;
+          if (ref) {
+            ref.focus();
+          }
         });
       },
     },
