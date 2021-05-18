@@ -19,6 +19,7 @@ import skills.controller.UserInfoController
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import skills.skillLoading.RankingLoader
 import spock.lang.IgnoreRest
 
 class ClientDisplayRankSpecs extends DefaultIntSpec {
@@ -401,5 +402,53 @@ class ClientDisplayRankSpecs extends DefaultIntSpec {
         subjectRanks[2].position == 3 // this one opted-out
         subjectRanks[3].position == 3 // should skip opted-out user
         subjectRanks[4].position == 4
+    }
+
+    def "ability to opt-out all project admins from being ranked"() {
+        List<String> users = (1..7).collect { "user${it}"}
+
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(7, 1, 1, 100)
+
+        skillsService.createProjectAndSubjectAndSkills(proj1, proj1_subj, proj1_skills)
+
+
+        users.eachWithIndex { String user, int index ->
+            ((6-index)..0).each { Integer skillCount ->
+                skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(skillCount).skillId], user, new Date())
+            }
+        }
+
+        // make couple users admins
+        createService(users[2])
+        skillsService.addProjectAdmin(proj1.projectId, users[2])
+
+        createService(users[5])
+        skillsService.addProjectAdmin(proj1.projectId, users[5])
+        skillsService.addOrUpdateProjectSetting(proj1.projectId, RankingLoader.PROJ_ADMINS_RANK_AND_LEADERBOARD_OPT_OUT_PREF, true.toString())
+
+        when:
+        List subjectRanks = users.collect {skillsService.getRank(it, proj1.projectId, proj1_subj.subjectId) }
+        List ranks = users.collect {skillsService.getRank(it, proj1.projectId) }
+
+        then:
+        ranks.collect { it.optedOut } == [false, false, true, false, false, true, false]
+        ranks[0].position == 1
+        ranks[1].position == 2
+        ranks[2].position == 3 // this one opted-out
+        ranks[3].position == 3 // should skip opted-out user
+        ranks[4].position == 4
+        ranks[5].position == 5 // this one opted-out
+        ranks[6].position == 5 // should skip opted-out user
+
+        subjectRanks.collect { it.optedOut } == [false, false, true, false, false, true, false]
+        subjectRanks[0].position == 1
+        subjectRanks[1].position == 2
+        subjectRanks[2].position == 3 // this one opted-out
+        subjectRanks[3].position == 3 // should skip opted-out user
+        subjectRanks[4].position == 4
+        subjectRanks[5].position == 5 // this one opted-out
+        subjectRanks[6].position == 5 // should skip opted-out user
     }
 }

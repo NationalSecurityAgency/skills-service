@@ -927,6 +927,7 @@ class SkillsService {
         return wsHelper.rootPut("/global/settings/${setting}", value)
     }
 
+
     def changeSetting(String project, String setting, Map value){
         return wsHelper.adminPost(getSettingUrl(project, setting), value)
     }
@@ -1022,6 +1023,15 @@ class SkillsService {
                               value: value,
         ]
         return wsHelper.appPost("/userInfo/settings", [ params ])
+    }
+
+    def addOrUpdateProjectSetting(String projectId, String setting, String value) {
+        Map params = [
+                setting: setting,
+                value: value,
+                projectId: projectId,
+        ]
+        return wsHelper.adminPost("/projects/${projectId}/settings", [ params ])
     }
 
     def getEmailSettings() {

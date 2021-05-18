@@ -23,6 +23,7 @@ import skills.controller.UserInfoController
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import skills.skillLoading.RankingLoader
 import skills.storage.model.UserAttrs
 import skills.storage.repos.UserAttrsRepo
 import spock.lang.IgnoreIf
@@ -1241,5 +1242,151 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         SkillsClientException e = thrown(SkillsClientException)
         e.httpStatus == HttpStatus.BAD_REQUEST
         e.resBody.contains("Leaderboard type of [tenAroundMe] is not supported for opted-out users")
+    }
+
+    def "get top 10 - admins opted out"(){
+        List<String> users = createUsers(12)
+        List<Date> days = (0..20).collect { new Date() - it }
+
+        def proj = SkillsFactory.createProject(1)
+        def subj = SkillsFactory.createSubject(1, 1)
+        List<Map> skills = SkillsFactory.createSkills(20, 1, 1)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        12.times {Integer userNum ->
+            String userId = users.get(userNum)
+            userNum.times {Integer skillNum ->
+                skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(skillNum).skillId], userId, days.get(userNum))
+            }
+        }
+
+        // user opt-out
+        String optOutUser = users.reverse()[2];
+        createService(optOutUser)
+        skillsService.addProjectAdmin(proj.projectId, optOutUser)
+        skillsService.addOrUpdateProjectSetting(proj.projectId, RankingLoader.PROJ_ADMINS_RANK_AND_LEADERBOARD_OPT_OUT_PREF, true.toString())
+
+        List<String> userIdsForDisplay = users.collect {
+            userAttrsRepo.findByUserId(it)?.userIdForDisplay
+        }.reverse()
+
+        when:
+        def leaderboard = skillsService.getLeaderboard(users.get(3), proj.projectId)
+        then:
+        leaderboard.availablePoints == 200
+        leaderboard.rankedUsers.size() == 10
+        leaderboard.rankedUsers.collect{ it.userId } == [userIdsForDisplay.subList(0, 2), userIdsForDisplay.subList(3, 11)].flatten()
+        leaderboard.rankedUsers.collect{ it.rank } == (1..10).collect { it}
+        leaderboard.rankedUsers.collect { it.points } == [110, 100, 80, 70, 60, 50, 40, 30, 20, 10]
+        leaderboard.rankedUsers.each {assert (it.userId == userIdsForDisplay[8] ? it.isItMe : !it.isItMe) }
+    }
+
+    def "get top 10 - if less than 10 users and the requester opted-out ADMIN then do NOT add that user artificially at the bottom"(){
+        List<String> users = createUsers(3)
+
+        def proj = SkillsFactory.createProject(1)
+        def subj = SkillsFactory.createSubject(1, 1)
+        List<Map> skills = SkillsFactory.createSkills(20, 1, 1)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(0).skillId], users[0], new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(1).skillId], users[0], new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(0).skillId], users[1], new Date())
+
+        String userIdWithNoPoints = users[users.size()-1]
+        createService(userIdWithNoPoints)
+        skillsService.addProjectAdmin(proj.projectId, userIdWithNoPoints)
+        skillsService.addOrUpdateProjectSetting(proj.projectId, RankingLoader.PROJ_ADMINS_RANK_AND_LEADERBOARD_OPT_OUT_PREF, true.toString())
+
+        when:
+        def leaderboard = skillsService.getLeaderboard(userIdWithNoPoints, proj.projectId)
+        def leaderboard1 = skillsService.getLeaderboard(users[0], proj.projectId)
+
+        List<String> userIdsForDisplay = users.collect {
+            userAttrsRepo.findByUserId(it)?.userIdForDisplay
+        }
+        then:
+        leaderboard.rankedUsers.size() == 2
+        leaderboard.rankedUsers.collect{ it.userId } == [userIdsForDisplay[0], userIdsForDisplay[1]]
+        leaderboard.rankedUsers.collect{ it.isItMe } == [false, false]
+        leaderboard.rankedUsers.collect{ it.points } == [20, 10]
+
+        leaderboard1.rankedUsers.size() == 2
+        leaderboard1.rankedUsers.collect{ it.userId } == [userIdsForDisplay[0], userIdsForDisplay[1]]
+        leaderboard1.rankedUsers.collect{ it.isItMe } == [true, false]
+        leaderboard1.rankedUsers.collect{ it.points } == [20, 10]
+    }
+
+    def "get top 10 - admins opted out - subject"(){
+        List<String> users = createUsers(12)
+        List<Date> days = (0..20).collect { new Date() - it }
+
+        def proj = SkillsFactory.createProject(1)
+        def subj = SkillsFactory.createSubject(1, 1)
+        List<Map> skills = SkillsFactory.createSkills(20, 1, 1)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        12.times {Integer userNum ->
+            String userId = users.get(userNum)
+            userNum.times {Integer skillNum ->
+                skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(skillNum).skillId], userId, days.get(userNum))
+            }
+        }
+
+        // user opt-out
+        String optOutUser = users.reverse()[2];
+        createService(optOutUser)
+        skillsService.addProjectAdmin(proj.projectId, optOutUser)
+        skillsService.addOrUpdateProjectSetting(proj.projectId, RankingLoader.PROJ_ADMINS_RANK_AND_LEADERBOARD_OPT_OUT_PREF, true.toString())
+
+        List<String> userIdsForDisplay = users.collect {
+            userAttrsRepo.findByUserId(it)?.userIdForDisplay
+        }.reverse()
+
+        when:
+        def leaderboard = skillsService.getLeaderboard(users.get(3), proj.projectId, subj.subjectId)
+        then:
+        leaderboard.availablePoints == 200
+        leaderboard.rankedUsers.size() == 10
+        leaderboard.rankedUsers.collect{ it.userId } == [userIdsForDisplay.subList(0, 2), userIdsForDisplay.subList(3, 11)].flatten()
+        leaderboard.rankedUsers.collect{ it.rank } == (1..10).collect { it}
+        leaderboard.rankedUsers.collect { it.points } == [110, 100, 80, 70, 60, 50, 40, 30, 20, 10]
+        leaderboard.rankedUsers.each {assert (it.userId == userIdsForDisplay[8] ? it.isItMe : !it.isItMe) }
+    }
+
+    def "opt-out flag for admin-based opt-out"() {
+        List<String> users = createUsers(12)
+        List<Date> days = (0..20).collect { new Date() - it }
+
+        def proj = SkillsFactory.createProject(1)
+        def subj = SkillsFactory.createSubject(1, 1)
+        List<Map> skills = SkillsFactory.createSkills(20, 1, 1)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        // user opt-out
+//        createService(users[2]).addOrUpdateUserSetting(UserInfoController.RANK_AND_LEADERBOARD_OPT_OUT_PREF, 'true')
+        String optOutUser = users[2];
+        createService(optOutUser)
+        skillsService.addProjectAdmin(proj.projectId, optOutUser)
+        skillsService.addOrUpdateProjectSetting(proj.projectId, RankingLoader.PROJ_ADMINS_RANK_AND_LEADERBOARD_OPT_OUT_PREF, true.toString())
+
+        when:
+        def leaderboard = skillsService.getLeaderboard(users.get(2), proj.projectId, subj.subjectId)
+        def leaderboard1 = skillsService.getLeaderboard(users.get(3), proj.projectId, subj.subjectId)
+        then:
+        leaderboard.optedOut
+        !leaderboard1.optedOut
     }
 }

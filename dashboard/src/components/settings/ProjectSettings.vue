@@ -98,6 +98,24 @@ limitations under the License.
           </div>
         </div>
 
+        <div class="row mt-3">
+          <div class="col col-md-3 text-secondary" id="rankAndLeaderboardOptOutLabel">
+            Rank Opt-Out for ALL Admins:
+            <inline-help
+              msg="Change to true and all of the project's admins will not be shown on the Leaderboard or assigned a rank"/>
+          </div>
+          <div class="col">
+            <b-form-checkbox v-model="settings.rankAndLeaderboardOptOut.value"
+                             name="check-button"
+                             v-on:input="rankAndLeaderboardOptOutChanged"
+                             aria-labelledby="rankAndLeaderboardOptOutLabel"
+                             data-cy="rankAndLeaderboardOptOutSwitch"
+                             switch>
+              {{ settings.rankAndLeaderboardOptOut.value }}
+            </b-form-checkbox>
+          </div>
+        </div>
+
         <hr/>
 
         <p v-if="errMsg" class="text-center text-danger mt-3" role="alert">***{{ errMsg }}***</p>
@@ -182,6 +200,13 @@ limitations under the License.
             dirty: false,
             projectId: this.$route.params.projectId,
           },
+          rankAndLeaderboardOptOut: {
+            value: false,
+            setting: 'project-admins_rank_and_leaderboard_optOut',
+            lastLoadedValue: false,
+            dirty: false,
+            projectId: this.$route.params.projectId,
+          },
         },
         errMsg: null,
         showSavedMsg: false,
@@ -215,6 +240,9 @@ limitations under the License.
       },
       productionModeEnabledChanged(value) {
         this.settings.productionModeEnabled.dirty = `${value}` !== `${this.settings.productionModeEnabled.lastLoadedValue}`;
+      },
+      rankAndLeaderboardOptOutChanged(value) {
+        this.settings.rankAndLeaderboardOptOut.dirty = `${value}` !== `${this.settings.rankAndLeaderboardOptOut.lastLoadedValue}`;
       },
       selfReportingTypeChanged(value) {
         this.settings.selfReportType.value = value;
@@ -275,7 +303,7 @@ limitations under the License.
             entries.forEach((entry) => {
               const [key, value] = entry;
               this.settings[key] = Object.assign(value, { dirty: false, lastLoadedValue: value.value });
-              if (value.setting === this.settings.helpUrlHost.setting) {
+              if (value.setting === this.settings.helpUrlHost.setting && value.value && value.value.length > 0) {
                 SkillsReporter.reportSkill('ConfigureProjectRootHelpUrl');
               }
             });

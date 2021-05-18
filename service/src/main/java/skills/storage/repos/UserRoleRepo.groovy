@@ -17,6 +17,7 @@ package skills.storage.repos
 
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
+import org.springframework.lang.Nullable
 import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.UserRole
@@ -42,6 +43,24 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
             ur.projectId = ?1 and
             ur.userId = ?2''')
     List<UserRoleWithAttrs> findAllByProjectIdAndUserId(String projectId, String userId)
+
+    @Query('''SELECT ur.id as role, ua as attrs
+        from UserRole ur, UserAttrs ua 
+        where
+            ur.userId = ua.userId and 
+            ur.projectId = ?1 and
+            ur.userId = ?2 and
+            ur.roleName = ?3''')
+    @Nullable
+    Integer findIdByProjectIdAndUserIdRoleName(String projectId, String userId, RoleName roleName)
+
+    @Query('''SELECT ur.userId
+        from UserRole ur, UserAttrs ua 
+        where
+            ur.userId = ua.userId and 
+            ur.projectId = ?1 and
+            ur.roleName = ?2''')
+    List<String> findUserIdsByProjectIdAndRoleName(String projectId, RoleName roleName)
 
     boolean existsByRoleName(RoleName roleName)
 

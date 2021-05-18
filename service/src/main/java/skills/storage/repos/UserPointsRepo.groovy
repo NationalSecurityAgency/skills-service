@@ -65,6 +65,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     p.projectId=?1 and 
                     p.skillId is null and 
                     p.day is null and
+                    p.userId not in ?2 and
                     p.userId not in 
                         (select u.userId from Setting s, User u where 
                             s.userRefId=u.id and 
@@ -73,7 +74,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                             s.value='true' and 
                             s.projectId is null)
             ''')
-    List<RankedUserRes> findUsersForLeaderboard(String projectId, Pageable pageable)
+    List<RankedUserRes> findUsersForLeaderboard(String projectId, List<String> excludeUserIds, Pageable pageable)
 
     @Query('''SELECT 
                     p.userId as userId, 
@@ -88,6 +89,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     p.projectId=?1 and 
                     p.skillId=?2 and 
                     p.day is null and 
+                    p.userId not in ?3 and
                     p.userId not in 
                         (select u.userId from Setting s, User u where 
                             s.userRefId=u.id and 
@@ -96,7 +98,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                             s.value='true' and 
                             s.projectId is null)
             ''')
-    List<RankedUserRes> findUsersForLeaderboard(String projectId, String subjectId, Pageable pageable)
+    List<RankedUserRes> findUsersForLeaderboard(String projectId, String subjectId, List<String> excludeUserIds, Pageable pageable)
 
     @Query('''SELECT 
                     p.userId as userId, 
@@ -177,6 +179,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             p.skillId=?2 and 
             p.points > ?3 and 
             p.day is null and 
+            p.userId not in ?4 and 
             p.userId not in 
                 (select u.userId from Setting s, User u where 
                     s.userRefId=u.id and 
@@ -184,13 +187,14 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     s.setting='rank_and_leaderboard_optOut' and
                     s.value='true' and 
                     s.projectId is null)''' )
-    Integer calculateNumUsersWithLessScore(String projectId, String skillId, int points)
+    Integer calculateNumUsersWithLessScore(String projectId, String skillId, int points, List<String> excludeUserIds)
 
     @Query('''SELECT count(p) from UserPoints p where 
             p.projectId=?1 and 
             p.skillId is null and 
             p.points > ?2 and 
             p.day is null and
+            p.userId not in ?3 and 
             p.userId not in 
                 (select u.userId from Setting s, User u where 
                     s.userRefId=u.id and 
@@ -198,7 +202,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     s.setting='rank_and_leaderboard_optOut' and
                     s.value='true' and 
                     s.projectId is null)''' )
-    Integer calculateNumUsersWithLessScore(String projectId, int points)
+    Integer calculateNumUsersWithLessScore(String projectId, int points, List<String> excludeUserIds)
 
     @Query('''SELECT count(p) from UserPoints p, UserAttrs ua where 
             p.userId = ua.userId and 
