@@ -27,7 +27,7 @@
     "bootstrap-vue": "2.21.2",
     "dayjs": "1.9.6",
     "dompurify": "2.2.6",
-    "lodash": "4.17.20",
+    "lodash": "4.17.21",
     "marked": "2.0.1",
     "material-icons": "0.3.1",
     "node-emoji": "1.10.0",
