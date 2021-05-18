@@ -23,16 +23,21 @@ limitations under the License.
                     class="mr-2">
             <span class="d-none d-sm-inline">Pin</span> <i class="fas fa-thumbtack" aria-hidden="true"/>
           </b-button>
-          <b-button id="newProjectBtn" ref="newProjButton" @click="newProject.show=true" variant="outline-primary" size="sm"
+          <b-button id="newProjectBtn" ref="newProjButton" @click="editNewProject()" variant="outline-primary" size="sm"
                     data-cy="newProjectButton">
             <span class="d-none d-sm-inline">Project</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
           </b-button>
     </sub-page-header>
 
     <loading-container v-bind:is-loading="isLoading">
-      <div v-for="project of projects" :key="project.projectId" class="mb-3">
-        <my-project :project="project" v-on:project-deleted="projectRemoved" v-on:move-project-up="moveProjectUp"
-                    v-on:move-project-down="moveProjectDown" v-on:pin-removed="loadProjects" />
+      <div v-if="useTableView">
+        <projects-table :projects="projects" @project-deleted="projectRemoved" @edit-project="editProject"></projects-table>
+      </div>
+      <div v-else>
+        <div v-for="project of projects" :key="project.projectId" class="mb-3">
+          <my-project :project="project" v-on:project-deleted="projectRemoved" v-on:move-project-up="moveProjectUp"
+                      v-on:move-project-down="moveProjectDown" v-on:pin-removed="loadProjects" />
+        </div>
       </div>
 
       <no-content2 v-if="!projects || projects.length==0" icon="fas fa-hand-spock" class="mt-4"
@@ -49,7 +54,7 @@ limitations under the License.
     </loading-container>
 
     <edit-project v-if="newProject.show" v-model="newProject.show" :project="newProject.project"
-                  @project-saved="projectAdded" @hidden="handleHide"/>
+                  @project-saved="projectAdded" @hidden="handleHide" :is-edit="newProject.isEdit"/>
     <pin-projects v-if="showSearchProjectModal" v-model="showSearchProjectModal" @done="pinModalClosed"/>
 
   </div>
@@ -65,6 +70,7 @@ limitations under the License.
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import NoContent2 from '../utils/NoContent2';
   import PinProjects from './PinProjects';
+  import ProjectsTable from './ProjectsTable';
   import SettingsService from '../settings/SettingsService';
 
   export default {
@@ -75,6 +81,7 @@ limitations under the License.
         projects: [],
         newProject: {
           show: false,
+          isEdit: false,
           project: { name: '', projectId: '' },
         },
         showSearchProjectModal: false,
@@ -87,6 +94,7 @@ limitations under the License.
       LoadingContainer,
       MyProject,
       EditProject,
+      ProjectsTable,
     },
     mounted() {
       this.loadProjects();
@@ -103,6 +111,9 @@ limitations under the License.
       },
       isRootUser() {
         return this.$store.getters['access/isRoot'];
+      },
+      useTableView() {
+        return this.projects && this.$store.getters.config && this.projects.length >= this.$store.getters.config.numProjectsForTableView;
       },
     },
     methods: {
@@ -164,7 +175,20 @@ limitations under the License.
             this.loadProjects();
           });
       },
-
+      editNewProject() {
+        this.newProject = {
+          show: true,
+          isEdit: false,
+          project: { name: '', projectId: '' },
+        };
+      },
+      editProject(projectToEdit) {
+        this.newProject = {
+          show: true,
+          isEdit: true,
+          project: projectToEdit,
+        };
+      },
     },
   };
 </script>

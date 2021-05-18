@@ -95,6 +95,7 @@ skills:
       maxSubjectsPerProject: 25
       maxBadgesPerProject: 25
       maxSkillsPerSubject: 100
+      numProjectsForTableView: 10
       #it may be necessary to use the (?s) modifier for paragraph validation regexes, depending on the regex specified
       paragraphValidationRegex:
       paragraphValidationMessage:

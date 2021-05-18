@@ -33,7 +33,6 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                     COALESCE(skills.skillCount, 0) AS numSkills,
                     COALESCE(badges.badgeCount, 0) AS numBadges,
                     COALESCE(subjects.subjectCount, 0) AS numSubjects,
-                    COALESCE(setting.pointsEnabled, 'false') AS levelsArePoints,
                     events.latest AS lastReportedSkill,
                     pd.created
                 FROM project_definition pd
@@ -42,7 +41,6 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                 LEFT JOIN (SELECT project_id, COUNT(id) AS skillCount FROM skill_definition WHERE type = 'Skill' GROUP BY project_id) skills ON skills.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS badgeCount FROM skill_definition WHERE type = 'Badge' GROUP BY project_id) badges ON badges.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS subjectCount FROM skill_definition WHERE type = 'Subject' GROUP BY project_id) subjects ON subjects.project_id = pd.project_id
-                LEFT JOIN (SELECT project_id, value AS pointsEnabled FROM settings WHERE type = 'Project' AND setting = 'level.points.enabled') setting ON setting.project_id = pd.project_id
                 WHERE LOWER(pd.project_id) = LOWER(?1) 
             """, nativeQuery = true)
     @Nullable
@@ -60,7 +58,6 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                     COALESCE(skills.skillCount, 0) AS numSkills,
                     COALESCE(badges.badgeCount, 0) AS numBadges,
                     COALESCE(subjects.subjectCount, 0) AS numSubjects,
-                    COALESCE(setting.pointsEnabled, 'false') AS levelsArePoints,
                     events.latest AS lastReportedSkill,
                     pd.created
                 FROM project_definition pd
@@ -69,7 +66,6 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                 LEFT JOIN (SELECT project_id, COUNT(id) AS skillCount FROM skill_definition WHERE type = 'Skill' GROUP BY project_id) skills ON skills.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS badgeCount FROM skill_definition WHERE type = 'Badge' GROUP BY project_id) badges ON badges.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS subjectCount FROM skill_definition WHERE type = 'Subject' GROUP BY project_id) subjects ON subjects.project_id = pd.project_id
-                LEFT JOIN (SELECT project_id, value AS pointsEnabled FROM settings WHERE type = 'Project' AND setting = 'level.points.enabled') setting ON setting.project_id = pd.project_id
                 WHERE pd.project_id in ?1 
             """, nativeQuery = true)
     @Nullable
@@ -87,7 +83,6 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                     COALESCE(skills.skillCount, 0) AS numSkills,
                     COALESCE(badges.badgeCount, 0) AS numBadges,
                     COALESCE(subjects.subjectCount, 0) AS numSubjects,
-                    COALESCE(setting.pointsEnabled, 'false') AS levelsArePoints,
                     events.latest AS lastReportedSkill,
                     pd.created
                 FROM project_definition pd
@@ -96,7 +91,6 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                 LEFT JOIN (SELECT project_id, COUNT(id) AS skillCount FROM skill_definition WHERE type = 'Skill' GROUP BY project_id) skills ON skills.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS badgeCount FROM skill_definition WHERE type = 'Badge' GROUP BY project_id) badges ON badges.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS subjectCount FROM skill_definition WHERE type = 'Subject' GROUP BY project_id) subjects ON subjects.project_id = pd.project_id
-                LEFT JOIN (SELECT project_id, value AS pointsEnabled FROM settings WHERE type = 'Project' AND setting = 'level.points.enabled') setting ON setting.project_id = pd.project_id
             """, nativeQuery = true)
     @Nullable
     List<ProjSummaryResult> getAllSummaries()
@@ -114,7 +108,6 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                     COALESCE(skills.skillCount, 0) AS numSkills,
                     COALESCE(badges.badgeCount, 0) AS numBadges,
                     COALESCE(subjects.subjectCount, 0) AS numSubjects,
-                    COALESCE(setting.pointsEnabled, 'false') AS levelsArePoints,
                     events.latest AS lastReportedSkill,
                     pd.created
                 FROM project_definition pd
@@ -123,7 +116,6 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                 LEFT JOIN (SELECT project_id, COUNT(id) AS skillCount FROM skill_definition WHERE type = 'Skill' GROUP BY project_id) skills ON skills.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS badgeCount FROM skill_definition WHERE type = 'Badge' GROUP BY project_id) badges ON badges.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS subjectCount FROM skill_definition WHERE type = 'Subject' GROUP BY project_id) subjects ON subjects.project_id = pd.project_id
-                LEFT JOIN (SELECT project_id, value AS pointsEnabled FROM settings WHERE type = 'Project' AND setting = 'level.points.enabled') setting ON setting.project_id = pd.project_id
                 WHERE pd.project_id = ?1
             """, nativeQuery = true)
     @Nullable
@@ -141,7 +133,6 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                     COALESCE(skills.skillCount, 0) AS numSkills,
                     COALESCE(badges.badgeCount, 0) AS numBadges,
                     COALESCE(subjects.subjectCount, 0) AS numSubjects,
-                    COALESCE(setting.pointsEnabled, 'false') AS levelsArePoints,
                     events.latest AS lastReportedSkill,
                     pd.created
                 FROM project_definition pd
@@ -150,7 +141,6 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                 LEFT JOIN (SELECT project_id, COUNT(id) AS skillCount FROM skill_definition WHERE type = 'Skill' GROUP BY project_id) skills ON skills.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS badgeCount FROM skill_definition WHERE type = 'Badge' GROUP BY project_id) badges ON badges.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS subjectCount FROM skill_definition WHERE type = 'Subject' GROUP BY project_id) subjects ON subjects.project_id = pd.project_id
-                LEFT JOIN (SELECT project_id, value AS pointsEnabled FROM settings WHERE type = 'Project' AND setting = 'level.points.enabled') setting ON setting.project_id = pd.project_id
                 WHERE LOWER(pd.name) = LOWER(?1)
             """, nativeQuery = true)
     @Nullable
@@ -171,7 +161,6 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                     COALESCE(skills.skillCount, 0) AS numSkills,
                     COALESCE(badges.badgeCount, 0) AS numBadges,
                     COALESCE(subjects.subjectCount, 0) AS numSubjects,
-                    COALESCE(setting.pointsEnabled, 'false') AS levelsArePoints,
                     events.latest AS lastReportedSkill,
                     pd.created
                 FROM project_definition pd
@@ -180,7 +169,6 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                 LEFT JOIN (SELECT project_id, COUNT(id) AS skillCount FROM skill_definition WHERE type = 'Skill' GROUP BY project_id) skills ON skills.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS badgeCount FROM skill_definition WHERE type = 'Badge' GROUP BY project_id) badges ON badges.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS subjectCount FROM skill_definition WHERE type = 'Subject' GROUP BY project_id) subjects ON subjects.project_id = pd.project_id
-                LEFT JOIN (SELECT project_id, value AS pointsEnabled FROM settings WHERE type = 'Project' AND setting = 'level.points.enabled') setting ON setting.project_id = pd.project_id
                 JOIN user_roles ur on ur.project_id = pd.project_id
                 WHERE ur.user_id = ?1
             """, nativeQuery = true)
@@ -199,7 +187,6 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                     COALESCE(skills.skillCount, 0) AS numSkills,
                     COALESCE(badges.badgeCount, 0) AS numBadges,
                     COALESCE(subjects.subjectCount, 0) AS numSubjects,
-                    COALESCE(setting.pointsEnabled, 'false') AS levelsArePoints,
                     events.latest AS lastReportedSkill,
                     pd.created
                 FROM project_definition pd
@@ -208,7 +195,6 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                 LEFT JOIN (SELECT project_id, COUNT(id) AS skillCount FROM skill_definition WHERE type = 'Skill' GROUP BY project_id) skills ON skills.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS badgeCount FROM skill_definition WHERE type = 'Badge' GROUP BY project_id) badges ON badges.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS subjectCount FROM skill_definition WHERE type = 'Subject' GROUP BY project_id) subjects ON subjects.project_id = pd.project_id
-                LEFT JOIN (SELECT project_id, value AS pointsEnabled FROM settings WHERE type = 'Project' AND setting = 'level.points.enabled') setting ON setting.project_id = pd.project_id
                 WHERE LOWER(pd.name) LIKE LOWER(CONCAT('%',?1,'%'))
             """, nativeQuery = true)
     @Nullable
@@ -229,7 +215,6 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                     COALESCE(skills.skillCount, 0) AS numSkills,
                     COALESCE(badges.badgeCount, 0) AS numBadges,
                     COALESCE(subjects.subjectCount, 0) AS numSubjects,
-                    COALESCE(setting.pointsEnabled, 'false') AS levelsArePoints,
                     events.latest AS lastReportedSkill,
                     pd.created
                 FROM project_definition pd
@@ -238,7 +223,6 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                 LEFT JOIN (SELECT project_id, COUNT(id) AS skillCount FROM skill_definition WHERE type = 'Skill' GROUP BY project_id) skills ON skills.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS badgeCount FROM skill_definition WHERE type = 'Badge' GROUP BY project_id) badges ON badges.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS subjectCount FROM skill_definition WHERE type = 'Subject' GROUP BY project_id) subjects ON subjects.project_id = pd.project_id
-                LEFT JOIN (SELECT project_id, value AS pointsEnabled FROM settings WHERE type = 'Project' AND setting = 'level.points.enabled') setting ON setting.project_id = pd.project_id
                 WHERE pd.project_id <> ?2 AND LOWER(pd.name) LIKE %?1%
             """, nativeQuery = true)
     @Nullable
@@ -258,7 +242,6 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                     COALESCE(skills.skillCount, 0) AS numSkills,
                     COALESCE(badges.badgeCount, 0) AS numBadges,
                     COALESCE(subjects.subjectCount, 0) AS numSubjects,
-                    COALESCE(setting.pointsEnabled, 'false') AS levelsArePoints,
                     events.latest AS lastReportedSkill,
                     pd.created 
                 FROM project_definition pd 
@@ -268,7 +251,6 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                 LEFT JOIN (SELECT project_id, COUNT(id) AS skillCount FROM skill_definition WHERE type = 'Skill' GROUP BY project_id) skills ON skills.project_id = pd.project_id 
                 LEFT JOIN (SELECT project_id, COUNT(id) AS badgeCount FROM skill_definition WHERE type = 'Badge' GROUP BY project_id) badges ON badges.project_id = pd.project_id 
                 LEFT JOIN (SELECT project_id, COUNT(id) AS subjectCount FROM skill_definition WHERE type = 'Subject' GROUP BY project_id) subjects ON subjects.project_id = pd.project_id 
-                LEFT JOIN (SELECT project_id, value AS pointsEnabled FROM settings WHERE type = 'Project' AND setting = 'level.points.enabled') setting ON setting.project_id = pd.project_id 
                 WHERE s.setting = 'production.mode.enabled' and s.value = 'true'
             """, nativeQuery = true)
     @Nullable
