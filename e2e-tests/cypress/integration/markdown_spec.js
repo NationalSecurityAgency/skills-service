@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright 2020 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -52,7 +52,7 @@ describe('Markdown Tests', () => {
 
         const markdownInput = '[data-cy=markdownEditorInput]';
         cy.get('[data-cy=cardSettingsButton]').click();
-        cy.contains('Edit').click();
+        cy.get('a[data-cy=editMenuEditBtn]').click();
 
         const validateMarkdown = (markdown, snapshotName, expectedText = null, clickWrite = true) => {
             if (clickWrite) {

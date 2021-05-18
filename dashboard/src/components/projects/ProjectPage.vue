@@ -155,8 +155,8 @@ limitations under the License.
       },
       editProjectHidden() {
         this.editProject = false;
-        const ref = this.$refs.editProjectButton;
         this.$nextTick(() => {
+          const ref = this.$refs.editProjectButton;
           if (ref) {
             ref.focus();
           }

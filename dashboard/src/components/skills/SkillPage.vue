@@ -20,7 +20,7 @@ limitations under the License.
         <b-button @click="displayEdit"
                   size="sm"
                   variant="outline-primary" :data-cy="`editSkillButton_${this.$route.params.skillId}`"
-                  :aria-label="'edit Skill '+skill.name" :ref="'edit_'+this.$route.params.skillId">
+                  :aria-label="'edit Skill '+skill.name" ref="editSkillInPlaceBtn">
           <span class="d-none d-sm-inline">Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
         </b-button>
       </div>
@@ -122,23 +122,27 @@ limitations under the License.
       },
       skillEdited(editedSkil) {
         this.isLoading = true;
-        // the page title and breadcrumb aren't updated, how to propegate an update to the page header
-        // if the id changed then we'd need to update the route as well
         SkillsService.saveSkill(editedSkil).then((res) => {
           const origId = this.skill.skillId;
           this.skill = Object.assign(res, { subjectId: this.$route.params.subjectId });
-          this.headerOptions = this.buildHeaderOptions(res);
           if (origId !== this.skill.skillId) {
             this.$router.replace({ name: this.$route.name, params: { ...this.$route.params, skillId: this.skill.skillId } });
           }
+          this.headerOptions = this.buildHeaderOptions(res);
         }).finally(() => {
           this.isLoading = false;
+          this.handleFocus();
         });
       },
-      handleHide() {
+      handleHide(e) {
         this.showEdit = false;
-        const ref = this.$refs[`edit_${this.$route.params.skillId}`];
+        if (!e?.saved) {
+          this.handleFocus();
+        }
+      },
+      handleFocus() {
         this.$nextTick(() => {
+          const ref = this.$refs.editSkillInPlaceBtn;
           if (ref) {
             ref.focus();
           }

@@ -694,7 +694,7 @@ describe('Skills Tests', () => {
         cy.contains('ID: GreatName1233Skill_blah')
     });
 
-    it('edit skill on page', () => {
+    it.only('edit skill on page', () => {
       cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
         projectId: 'proj1',
         subjectId: 'subj1',
