@@ -38,6 +38,20 @@ limitations under the License.
                 ></b-form-radio-group>
               </b-form-group>
             </div>
+            <div >
+              <i class="fas fa-users-slash" aria-hidden="true"></i> <span id="rankAndLeaderboardOptOutLabel">Rank and Leaderboard Opt-Out:</span>
+              <inline-help
+                msg="Change to true and you will not be shown on the Leaderboard or assigned a rank"/>
+              <b-form-checkbox v-model="settings.rankAndLeaderboardOptOut.value"
+                               name="check-button"
+                               v-on:input="rankAndLeaderboardOptOutPrefChanged"
+                               aria-labelledby="rankAndLeaderboardOptOutLabel"
+                               data-cy="rankAndLeaderboardOptOutSwitch"
+                               class="ml-3"
+                               inline switch>
+                {{ settings.rankAndLeaderboardOptOut.value ? 'Yes' : 'No' }}
+              </b-form-checkbox>
+            </div>
 
             <hr/>
             <p v-if="errMsg" class="text-center text-danger mt-3" role="alert">***{{ errMsg }}***</p>
@@ -87,6 +101,13 @@ limitations under the License.
             lastLoadedValue: '',
             dirty: false,
           },
+          rankAndLeaderboardOptOut: {
+            settingGroup: 'user.prefs',
+            value: false,
+            setting: 'rank_and_leaderboard_optOut',
+            lastLoadedValue: false,
+            dirty: false,
+          },
         },
         errMsg: null,
         showSavedMsg: false,
@@ -98,6 +119,9 @@ limitations under the License.
     methods: {
       homePagePrefChanged(value) {
         this.settings.homePage.dirty = `${value}` !== `${this.settings.homePage.lastLoadedValue}`;
+      },
+      rankAndLeaderboardOptOutPrefChanged(value) {
+        this.settings.rankAndLeaderboardOptOut.dirty = `${value}` !== `${this.settings.rankAndLeaderboardOptOut.lastLoadedValue}`;
       },
       loadSettings() {
         SettingsService.getUserSettings()

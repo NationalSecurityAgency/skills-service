@@ -19,15 +19,25 @@ limitations under the License.
       <div class="row p-4">
         <div class="col-auto text-left" style="font-size: 1rem;">
           <span class="h4 text-uppercase">Leaderboard</span>
-          <br class="d-sm-none"/>
-          <span class="ml-2 d-none d-sm-inline">|</span>
-          <badge-based-selector class="ml-2"
+
+          <span v-if="!optedOut">
+            <br class="d-sm-none"/>
+            <span class="ml-2 d-none d-sm-inline">|</span>
+            <badge-based-selector class="ml-2"
                                 :options="badgesSelector.options"
                                 @value-changed="loadData"
                                 v-model="badgesSelector.selected"/>
+          </span>
         </div>
         <div class="col pl-0">
           <hr/>
+        </div>
+      </div>
+
+      <div v-if="optedOut" class="mx-3">
+        <div class="alert alert-danger">
+          <i class="fas fa-users-slash mr-2"></i>You selected to <b>opt-out</b> from ranking. Your name will <b>not</b> appear in the leaderboard and you will not be ranked against other users.
+            If you want to re-enter the leaderboard and ranking then please adjust your preferences in the SkillTree dashboard.
         </div>
       </div>
 
@@ -118,6 +128,7 @@ limitations under the License.
       return {
         loading: true,
         availablePoints: 0,
+        optedOut: false,
         items: [],
         fields: [
           {
@@ -163,6 +174,7 @@ limitations under the License.
           .then((result) => {
             this.availablePoints = result.availablePoints;
             this.items = result.rankedUsers;
+            this.optedOut = result.optedOut;
           })
           .finally(() => {
             this.loading = false;

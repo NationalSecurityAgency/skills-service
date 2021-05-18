@@ -16,7 +16,7 @@
 import moment from 'moment-timezone';
 const dateFormatter = value => moment.utc(value).format('YYYY-MM-DD[T]HH:mm:ss[Z]');
 
-describe('Client Display Theme Tests', () => {
+describe('Client Display Tests', () => {
 
     const snapshotOptions = {
         blackout: ['[data-cy=pointHistoryChart]', '#dependent-skills-network', '[data-cy=achievementDate]'],
@@ -509,5 +509,45 @@ describe('Client Display Theme Tests', () => {
         cy.get('[data-cy="skillProgress_index-6"]').should('not.exist')
         cy.matchSnapshotImage(snapshotOptions);
     });
+
+
+    it('rank and leaderboard opt-out', () => {
+        cy.request('POST', '/app/userInfo/settings', [{
+            'settingGroup': 'user.prefs',
+            'value': true,
+            'setting': 'rank_and_leaderboard_optOut',
+            'lastLoadedValue': '',
+            'dirty': true
+        }]);
+
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2);
+        cy.createSkill(1, 1, 3);
+
+        cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now')
+        cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday')
+        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now')
+        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday')
+        cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now')
+
+        cy.cdVisit('/?enableTheme=true&loginAsUser=skills@skills.org');
+        cy.matchSnapshotImageForElement('[data-cy="myRank"]', 'Client Display Tests - My rank themed where user opted-out', snapshotOptions);
+
+        cy.cdClickRank();
+
+        const tableSelector = '[data-cy="leaderboardTable"]';
+        const rowSelector = `${tableSelector} tbody tr`
+        cy.get(tableSelector).contains('Loading...').should('not.exist')
+        cy.get(rowSelector).should('have.length', 1).as('cyRows');
+
+        cy.get('[data-cy="myRankPositionStatCard"]').contains('Opted-Out')
+        cy.get('[data-cy="leaderboard"]').contains('You selected to opt-out');
+
+        cy.matchSnapshotImageForElement('[data-cy="myRankPositionStatCard"]', 'Client Display Tests - Rank Overview of My rank themed where user opted-out', snapshotOptions);
+        cy.matchSnapshotImageForElement('[data-cy="leaderboard"]', 'Client Display Tests - Rank Overview of themed Leaderboard where user opted-out', snapshotOptions);
+
+    })
+
 
 });

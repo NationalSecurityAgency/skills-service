@@ -101,6 +101,13 @@ class SkillsService {
         wsHelper.appPost(getProjectUrl(originalProjectId ?: props.projectId), props)
     }
 
+    @Profile
+    def createProjectAndSubjectAndSkills(Map projProps, Map subjProps, List skills) {
+        createProject(projProps)
+        createSubject(subjProps)
+        createSkills(skills)
+    }
+
     def createUser(Map props){
         //props: firstName, lastName, email, password
         if (this.certificateRegistry == null) {
@@ -920,6 +927,7 @@ class SkillsService {
         return wsHelper.rootPut("/global/settings/${setting}", value)
     }
 
+
     def changeSetting(String project, String setting, Map value){
         return wsHelper.adminPost(getSettingUrl(project, setting), value)
     }
@@ -1013,9 +1021,17 @@ class SkillsService {
                               settingGroup: "user.prefs",
                               setting: setting,
                               value: value,
-                              userId: this.userName,
         ]
         return wsHelper.appPost("/userInfo/settings", [ params ])
+    }
+
+    def addOrUpdateProjectSetting(String projectId, String setting, String value) {
+        Map params = [
+                setting: setting,
+                value: value,
+                projectId: projectId,
+        ]
+        return wsHelper.adminPost("/projects/${projectId}/settings", [ params ])
     }
 
     def getEmailSettings() {

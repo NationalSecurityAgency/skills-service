@@ -21,10 +21,17 @@ limitations under the License.
     </div>
     <div class="card-body">
       <span class="fa-stack skills-icon user-rank-stack">
-        <i class="fa fa-users fa-stack-2x watermark-icon"/>
+        <i class="fa fa-users fa-stack-2x watermark-icon" :class="{'text-danger': isOptedOut}"/>
         <strong class="fa-stack-1x text-primary user-rank-text">
           <span v-if="displayData.userSkillsRanking">
-            {{ displayData.userSkillsRanking.position | number }}
+            <div v-if="isOptedOut" class="text-danger">
+              <div>Opted-Out</div>
+              <div style="font-size: 0.8rem; line-height: 1rem;" class="mb-2">Your position would be <b style="font-size: 0.9rem;" class="badge badge-danger">{{ displayData.userSkillsRanking.position | number }}</b> if you opt-in!</div>
+            </div>
+
+            <span v-else>
+              {{ displayData.userSkillsRanking.position | number }}
+            </span>
           </span>
           <vue-simple-spinner v-else line-bg-color="#333" line-fg-color="#17a2b8"/>
         </strong>
@@ -66,6 +73,9 @@ limitations under the License.
     computed: {
       isSummaryOnly() {
         return this.$store.state.isSummaryOnly;
+      },
+      isOptedOut() {
+        return this.displayData.userSkillsRanking && this.displayData.userSkillsRanking.optedOut;
       },
     },
   };

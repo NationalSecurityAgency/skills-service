@@ -18,34 +18,31 @@ package skills.skillLoading
 import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Component
+import skills.controller.UserInfoController
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
+import skills.services.AccessSettingsStorageService
 import skills.services.LevelDefinitionStorageService
-import skills.skillLoading.model.LeaderboardRes
-import skills.skillLoading.model.RankedUserRes
+import skills.services.settings.SettingsDataAccessor
+import skills.skillLoading.model.*
 import skills.storage.accessors.ProjDefAccessor
-import skills.storage.model.ProjDef
-import skills.storage.model.SkillDef
-import skills.storage.model.UserAttrs
-import skills.storage.repos.ProjDefRepo
+import skills.storage.model.*
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserPointsRepo
-import skills.storage.model.UserAchievement
-import skills.storage.model.UserPoints
-import skills.skillLoading.model.UsersPerLevel
-import skills.skillLoading.model.SkillsRanking
-import skills.skillLoading.model.SkillsRankingDistribution
 
 @Component
 @Slf4j
 @CompileStatic
 class RankingLoader {
+
+    static final String PROJ_ADMINS_RANK_AND_LEADERBOARD_OPT_OUT_PREF = 'project-admins_rank_and_leaderboard_optOut'
 
     @Autowired
     UserPointsRepo userPointsRepository
@@ -65,9 +62,18 @@ class RankingLoader {
     @Autowired
     SkillDefRepo skillDefRepo
 
-    SkillsRanking getUserSkillsRanking(String projectId, String userId, String subjectId = null){
-        UserPoints usersPoints = findUserPoints(projectId, userId, subjectId)
-        return doGetUserSkillsRanking(projectId, usersPoints, subjectId)
+    @Autowired
+    SettingsDataAccessor settingsDataAccessor
+
+    @Autowired
+    AccessSettingsStorageService accessSettingsStorageService
+
+    SkillsRanking getUserSkillsRanking(String projectId, String userId, String subjectId = null) {
+        Integer points = subjectId ?
+                userPointsRepository.findPointsByProjectIdAndUserIdAndSkillId(projectId, userId, subjectId) :
+                userPointsRepository.findPointsByProjectIdAndUserId(projectId, userId)
+
+        return doGetUserSkillsRanking(userId, projectId, points, subjectId)
     }
 
     private Sort getPointsSort(boolean ptsAsc, boolean timestampAsc = true) {
@@ -77,19 +83,23 @@ class RankingLoader {
     }
 
     @Profile
-    LeaderboardRes getLeaderboard(String projectId, String userId, LeaderboardRes.Type type, String subjectId = null){
+    LeaderboardRes getLeaderboard(String projectId, String userId, LeaderboardRes.Type type, String subjectId = null) {
         UserAttrs userAttrs = userAttrsRepo.findByUserId(userId)
         Date userCreatedDate = new Date(userAttrs.created.time)
+        OptOutInfo optOutInfo = getOptOutInfo(userId, projectId)
 
         List<RankedUserRes> res
         if (type == LeaderboardRes.Type.tenAroundMe) {
+            if (optOutInfo.isOptOut()) {
+                throw new SkillException("Leaderboard type of [${LeaderboardRes.Type.tenAroundMe}] is not supported for opted-out users. Requested user is [${userId}]", projectId)
+            }
             int myPoints = userPointsRepository.findByProjectIdAndUserIdAndSkillIdAndDay(projectId, userId, subjectId, null)?.points ?: 0
             int numWithHigherScore = subjectId ?
                     userPointsRepository.calculateNumUsersWithHigherScoreAndIfScoreTheSameThenAfterUserCreateDate(projectId, subjectId, myPoints, userAttrs.created) :
                     userPointsRepository.calculateNumUsersWithHigherScoreAndIfScoreTheSameThenAfterUserCreateDate(projectId, myPoints, userAttrs.created)
             int rank = numWithHigherScore + 1
             if (rank <= 5) {
-                res = getTop10Users(projectId, userAttrs, subjectId)
+                res = getTop10Users(projectId, userAttrs, optOutInfo, subjectId)
             } else {
                 res = []
 
@@ -111,10 +121,10 @@ class RankingLoader {
                 res.addAll(convertToRankedUserRes(below, rank + 1, userId))
             }
         } else {
-            res = getTop10Users(projectId, userAttrs, subjectId)
+            res = getTop10Users(projectId, userAttrs, optOutInfo, subjectId)
         }
 
-        return new LeaderboardRes(rankedUsers: res, availablePoints: getAvailablePoints(projectId, subjectId))
+        return new LeaderboardRes(rankedUsers: res, availablePoints: getAvailablePoints(projectId, subjectId), optedOut: optOutInfo.isPersonalOptOut())
     }
 
     private RankedUserRes createRankedUserForThisUser(int rank, UserAttrs userAttrs, int myPoints) {
@@ -122,7 +132,7 @@ class RankingLoader {
                 isItMe: true, points: myPoints, userFirstSeenTimestamp: userAttrs.created.time)
     }
 
-    private Integer getAvailablePoints(String projectId, String subjectId){
+    private Integer getAvailablePoints(String projectId, String subjectId) {
         if (subjectId) {
             SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillId(projectId, subjectId)
             if (!skillDef) {
@@ -135,17 +145,18 @@ class RankingLoader {
         return projDef.totalPoints
     }
 
-    private List<RankedUserRes> getTop10Users(String projectId, UserAttrs userAttrs, String subjectId = null){
+    private List<RankedUserRes> getTop10Users(String projectId, UserAttrs userAttrs, OptOutInfo optOut, String subjectId = null) {
         int size = 10
         PageRequest pageRequest = PageRequest.of(0, size, getPointsSort(false))
+        List<String> excludedIds = optOut.admins ?: ['$%^&*']
         List<UserPointsRepo.RankedUserRes> rankedUserRes = subjectId ?
-                userPointsRepository.findUsersForLeaderboard(projectId, subjectId, pageRequest) :
-                userPointsRepository.findUsersForLeaderboard(projectId, pageRequest)
+                userPointsRepository.findUsersForLeaderboard(projectId, subjectId, excludedIds, pageRequest) :
+                userPointsRepository.findUsersForLeaderboard(projectId, excludedIds, pageRequest)
 
         List<RankedUserRes> res = convertToRankedUserRes(rankedUserRes, 1, userAttrs.userId)
 
         // if user is NOT in the top 10 then artificially add the user on the bottom
-        if (res.size() > 0  && res.size() < 10 && !res.find {it.isItMe}) {
+        if (!optOut.isPersonalOptOut() && res.size() > 0 && res.size() < 10 && !res.find { it.isItMe }) {
             int myPoints = userPointsRepository.findByProjectIdAndUserIdAndSkillIdAndDay(projectId, userAttrs.userId, subjectId, null)?.points ?: 0
             res.add(createRankedUserForThisUser(res.size() + 1, userAttrs, myPoints))
         }
@@ -169,31 +180,56 @@ class RankingLoader {
     }
 
     @Profile
-    private UserPoints findUserPoints(String projectId, String userId, String subjectId) {
-        userPointsRepository.findByProjectIdAndUserIdAndSkillIdAndDay(projectId, userId, subjectId, null)
-    }
-
-    @Profile
-    private  SkillsRanking doGetUserSkillsRanking(String projectId, UserPoints usersPoints, String subjectId = null) {
-        int numUsers = findNumberOfUsers(projectId, subjectId) as int
+    private SkillsRanking doGetUserSkillsRanking(String userId, String projectId, Integer points, String subjectId = null) {
         // always calculate total number of users
+        int numUsers = findNumberOfUsers(projectId, subjectId) as int
+
+        OptOutInfo optOut = getOptOutInfo(userId, projectId)
+
         SkillsRanking ranking
-        if (usersPoints) {
-            int numUsersWithMorePoints = calculateNumberOfUsersWithGreaterPoints(subjectId, projectId, usersPoints)
-            int position = numUsersWithMorePoints+1
-            ranking = new SkillsRanking(numUsers: numUsers, position: position)
+        if (points) {
+            List<String> excludedIds = optOut.admins ?: ['$%^&*']
+            int numUsersWithMorePoints = calculateNumberOfUsersWithGreaterPoints(subjectId, projectId, points, excludedIds)
+            int position = numUsersWithMorePoints + 1
+            ranking = new SkillsRanking(numUsers: numUsers, position: position, optedOut: optOut.isPersonalOptOut())
         } else {
             // last one
-            ranking = new SkillsRanking(numUsers: numUsers+1, position: numUsers+1)
+            ranking = new SkillsRanking(numUsers: numUsers + 1, position: numUsers + 1, optedOut: optOut.isPersonalOptOut())
         }
 
         return ranking
     }
 
+    static class OptOutInfo {
+        boolean personalOptOut
+        boolean allAdminOptOut
+        List<String> admins = []
+
+        boolean isOptOut() {
+            personalOptOut || allAdminOptOut
+        }
+    }
+
     @Profile
-    private int calculateNumberOfUsersWithGreaterPoints(String subjectId, String projectId, UserPoints usersPoints) {
-        subjectId ? userPointsRepository.calculateNumUsersWithLessScore(projectId, subjectId, usersPoints.points)
-                : userPointsRepository.calculateNumUsersWithLessScore(projectId, usersPoints.points)
+    private OptOutInfo getOptOutInfo(String userId, String projectId) {
+        OptOutInfo res = new OptOutInfo()
+        String optOutValue = settingsDataAccessor.getUserSettingValue(userId, UserInfoController.RANK_AND_LEADERBOARD_OPT_OUT_PREF)
+        res.personalOptOut = StringUtils.isNotBlank(optOutValue) ? Boolean.valueOf(optOutValue) : false
+        Setting adminOptOutSetting = settingsDataAccessor.getProjectSetting(projectId, PROJ_ADMINS_RANK_AND_LEADERBOARD_OPT_OUT_PREF)
+        res.allAdminOptOut = adminOptOutSetting && Boolean.valueOf(adminOptOutSetting.value)
+        if (res.allAdminOptOut) {
+            res.admins = accessSettingsStorageService.getProjectAdminIds(projectId)
+            if (res.admins.contains(userId)){
+                res.personalOptOut = true
+            }
+        }
+        return res
+    }
+
+    @Profile
+    private int calculateNumberOfUsersWithGreaterPoints(String subjectId, String projectId, Integer usersPoints, List<String> excludeUserIds) {
+        subjectId ? userPointsRepository.calculateNumUsersWithLessScore(projectId, subjectId, usersPoints, excludeUserIds)
+                : userPointsRepository.calculateNumUsersWithLessScore(projectId, usersPoints, excludeUserIds)
     }
 
     @Profile
@@ -205,14 +241,14 @@ class RankingLoader {
         UserPoints usersPoints = loadUserPoints(projectId, userId, subjectId)
 
         List<UserAchievement> myLevels = loadUserAchievements(userId, projectId, subjectId)
-        int myLevel = myLevels ? myLevels.collect({it.level}).max() : 0
+        int myLevel = myLevels ? myLevels.collect({ it.level }).max() : 0
 
         final int currentPts = usersPoints?.points ?: 0
         List<UserPoints> next = findHighestUserPoints(projectId, currentPts, subjectId)
         Integer pointsToPassNextUser = next ? next.first().points - currentPts : -1
 
         Integer pointsAnotherUserToPassMe = -1
-        if(currentPts){
+        if (currentPts) {
             List<UserPoints> previous = findLowestUserPoints(projectId, currentPts, subjectId)
             pointsAnotherUserToPassMe = previous ? currentPts - previous.first().points : -1
         }
@@ -269,7 +305,7 @@ class RankingLoader {
             }
         }
 
-        if(includeZeroLevel){
+        if (includeZeroLevel) {
             Integer numUsers = achievedLevelRepository.countByProjectIdAndSkillIdAndLevel(projectId, subjectId, 0)
             usersPerLevel.add(0, new UsersPerLevel(level: 0, numUsers: numUsers ?: 0))
         }

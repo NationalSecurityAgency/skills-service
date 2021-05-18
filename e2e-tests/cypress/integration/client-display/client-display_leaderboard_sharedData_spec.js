@@ -95,6 +95,32 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
     cy.matchSnapshotImageForElement('[data-cy="leaderboard"]', 'leaderboard', snapshotOptions);
   });
 
+  it('leaderboard top 10 - opt out', () => {
+    cy.request('POST', '/app/userInfo/settings', [{
+      'settingGroup': 'user.prefs',
+      'value': true,
+      'setting': 'rank_and_leaderboard_optOut',
+      'lastLoadedValue': '',
+      'dirty': true
+    }]);
+
+    cy.cdVisit('/?loginAsUser=skills@skills.org');
+    cy.get('[data-cy="myRank"]').contains('Opted-Out');
+    cy.get('[data-cy="myRank"]').contains('Your position would be 13 if you opt-in');
+    cy.matchSnapshotImageForElement('[data-cy="myRank"]', 'my-rank-opted-out', snapshotOptions);
+
+    cy.cdClickRank();
+
+    cy.get(tableSelector).contains('Loading...').should('not.exist')
+    cy.get(rowSelector).should('have.length', 10).as('cyRows');
+
+    cy.get('[data-cy="myRankPositionStatCard"]').contains('Opted-Out')
+    cy.get('[data-cy="leaderboard"]').contains('You selected to opt-out');
+
+    cy.matchSnapshotImageForElement('[data-cy="myRankPositionStatCard"]', 'rank-overview-my-rank-opted-out', snapshotOptions);
+    cy.matchSnapshotImageForElement('[data-cy="leaderboard"]', 'rank-overview-leaderboard-opted-out', snapshotOptions);
+  });
+
   if (!Cypress.env('oauthMode')) {
     it('leaderboard 10 Around Me', () => {
       cy.cdVisit('/');

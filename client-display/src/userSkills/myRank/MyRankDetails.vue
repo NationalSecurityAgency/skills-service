@@ -25,7 +25,8 @@ limitations under the License.
                         class="col-md-3 mb-2 mb-md-0"
                         icon-class="fas fa-users"
                         label="My Rank"
-                        :value="myRankPosition"/>
+                        :value="myRankPosition"
+                        data-cy="myRankPositionStatCard"/>
 
                 <my-rank-detail-stat-card
                         class="col-md-3 mb-2 mb-md-0"
@@ -163,7 +164,10 @@ limitations under the License.
         return this.myRank ? this.myRank.numUsers - this.myRank.position : -1;
       },
       myRankPosition() {
-        return this.myRank ? this.myRank.position : -1;
+        if (!this.myRank) {
+          return -1;
+        }
+        return this.myRank.optedOut ? -99 : this.myRank.position;
       },
       totalNumUsers() {
         return this.myRank ? this.myRank.numUsers : -1;

@@ -23,7 +23,10 @@ limitations under the License.
         <div class="rank-detail-card">
           <div style="height: 3rem;">
             <vue-simple-spinner v-if="loading" line-bg-color="#333" line-fg-color="#17a2b8"/>
-            <span v-else><h1>{{ valueWithChecks | number }}</h1></span>
+            <span v-else>
+                <div v-if="isOptedOut" class="h2">Opted-Out</div>
+                <h1 v-else>{{ valueWithChecks | number }}</h1>
+            </span>
           </div>
           <h2 class="h5">{{ label }}</h2>
         </div>
@@ -47,6 +50,9 @@ limitations under the License.
     computed: {
       loading() {
         return this.value === -1;
+      },
+      isOptedOut() {
+        return this.value === -99;
       },
       valueWithChecks() {
         if (this.value === undefined || this.value === null) {

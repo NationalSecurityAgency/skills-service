@@ -27,4 +27,5 @@ class LeaderboardRes {
     Type type
     Integer availablePoints
     List<RankedUserRes> rankedUsers
+    boolean optedOut
 }

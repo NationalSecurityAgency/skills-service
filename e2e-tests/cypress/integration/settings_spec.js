@@ -657,6 +657,53 @@ describe('Settings Tests', () => {
         cy.get('[data-cy="userPrefsSettingsSave"]').should('be.disabled');
     })
 
+    it('Rank and Leaderboard Opt-out', () => {
+        cy.intercept('POST', '/app/userInfo/settings').as('saveUserInfo');
+
+        cy.visit('/settings/preferences');
+
+        cy.get('[data-cy="userPrefsSettingsSave"]').should('be.disabled');
+        cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist');
+
+        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').click({force: true});
+
+        cy.get('[data-cy="userPrefsSettingsSave"]').should('be.enabled');
+        cy.get('[data-cy="unsavedChangesAlert"]').contains("Unsaved Changes");
+
+        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').click({force: true});
+
+        cy.get('[data-cy="userPrefsSettingsSave"]').should('be.disabled');
+        cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist');
+
+        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').click({force: true});
+
+        cy.get('[data-cy="userPrefsSettingsSave"]').should('be.enabled');
+        cy.get('[data-cy="unsavedChangesAlert"]').contains("Unsaved Changes");
+
+        cy.get('[data-cy="userPrefsSettingsSave"]').click()
+        cy.wait('@saveUserInfo');
+        cy.get('[data-cy="userPrefsSettingsSave"]').should('be.disabled');
+        cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist');
+
+        // refresh and make sure props is still set
+        cy.visit('/settings/preferences');
+        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').should('be.checked');
+        cy.get('[data-cy="userPrefsSettingsSave"]').should('be.disabled');
+        cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist');
+
+        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').click({force: true});
+
+        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').should('not.be.checked');
+        cy.get('[data-cy="userPrefsSettingsSave"]').should('be.enabled');
+        cy.get('[data-cy="unsavedChangesAlert"]').contains("Unsaved Changes");
+
+        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').click({force: true});
+
+        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').should('be.checked');
+        cy.get('[data-cy="userPrefsSettingsSave"]').should('be.disabled');
+        cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist');
+    })
+
     it('show links to docs', () => {
         cy.visit('/')
         cy.get('[data-cy="help-button"]').click();

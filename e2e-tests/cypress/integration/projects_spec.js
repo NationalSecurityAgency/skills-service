@@ -829,5 +829,61 @@ describe('Projects Tests', () => {
     cy.wait('@loadUsers');
     cy.get('[data-cy=usersTable_viewDetailsBtn]').should('have.length', 1);
   });
+
+  it('project-level settings: rank opt-out for all admins', () => {
+    cy.createProject(1);
+    cy.visit('/administrator/projects/proj1/settings')
+
+    cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').should('not.be.checked');
+    cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
+    cy.get('[data-cy="settingsSavedAlert"]').should('not.exist')
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+
+    cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').check({force: true});
+
+    cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').should('be.checked');
+    cy.get('[data-cy="unsavedChangesAlert"]').contains('Unsaved Changes')
+    cy.get('[data-cy="settingsSavedAlert"]').should('not.exist')
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
+
+    cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').uncheck({force: true});
+
+    cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').should('not.be.checked');
+    cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
+    cy.get('[data-cy="settingsSavedAlert"]').should('not.exist')
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+
+    cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').check({force: true});
+
+    cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').should('be.checked');
+    cy.get('[data-cy="unsavedChangesAlert"]').contains('Unsaved Changes')
+    cy.get('[data-cy="settingsSavedAlert"]').should('not.exist')
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
+
+    cy.get('[data-cy="saveSettingsBtn"]').click();
+    cy.get('[data-cy="settingsSavedAlert"]').contains('Settings Updated')
+    cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+
+    // refresh
+    cy.visit('/administrator/projects/proj1/settings')
+    cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').should('be.checked');
+    cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
+    cy.get('[data-cy="settingsSavedAlert"]').should('not.exist')
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+
+    cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').uncheck({force: true});
+
+    cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').should('not.be.checked');
+    cy.get('[data-cy="unsavedChangesAlert"]').contains('Unsaved Changes')
+    cy.get('[data-cy="settingsSavedAlert"]').should('not.exist')
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
+
+    cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').check({force: true});
+    cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').should('be.checked');
+    cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
+    cy.get('[data-cy="settingsSavedAlert"]').should('not.exist')
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+  });
 });
 
