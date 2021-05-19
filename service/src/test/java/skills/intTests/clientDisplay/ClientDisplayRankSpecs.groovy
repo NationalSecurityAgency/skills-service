@@ -20,12 +20,11 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.skillLoading.RankingLoader
-import spock.lang.IgnoreRest
 
 class ClientDisplayRankSpecs extends DefaultIntSpec {
 
     def "get rank - only 1 very lonely user"(){
-        String userId = "user1"
+        String userId = getRandomUsers(1).first()
 
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)
@@ -47,7 +46,7 @@ class ClientDisplayRankSpecs extends DefaultIntSpec {
     }
 
     def "get rank - just 2 users with same points"(){
-        List<String> users = (1..2).collect({ "user${it}".toString() })
+        List<String> users = getRandomUsers(2)
 
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)
@@ -84,7 +83,7 @@ class ClientDisplayRankSpecs extends DefaultIntSpec {
     }
 
     def "get rank - users with various ranks"(){
-        List<String> users = (1..5).collect({ "user${it}".toString() })
+        List<String> users = getRandomUsers(5)
         List<Date> days = (0..5).collect { new Date() - it }
 
         def proj1 = SkillsFactory.createProject(1)
@@ -162,7 +161,7 @@ class ClientDisplayRankSpecs extends DefaultIntSpec {
     }
 
     def "get rank - tie for first"(){
-        List<String> users = (1..5).collect({ "user${it}".toString() })
+        List<String> users = getRandomUsers(5)
         List<Date> days = (0..5).collect { new Date() - it }
 
         def proj1 = SkillsFactory.createProject(1)
@@ -238,7 +237,7 @@ class ClientDisplayRankSpecs extends DefaultIntSpec {
     }
 
     def "users from other projects should not affect each other"(){
-        List<String> users = (1..3).collect({ "user${it}".toString() })
+        List<String> users = getRandomUsers(3)
 
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)
@@ -326,7 +325,7 @@ class ClientDisplayRankSpecs extends DefaultIntSpec {
     }
 
     def "get rank - only 1 very lonely user opted out"(){
-        String userId = "user1"
+        String userId = getRandomUsers(1).first()
         SkillsService user1SkillService = createService(userId)
 
         def proj1 = SkillsFactory.createProject(1)
@@ -366,7 +365,7 @@ class ClientDisplayRankSpecs extends DefaultIntSpec {
     }
 
     def "opted out user should not be ranked"() {
-        List<String> users = (1..5).collect { "user${it}"}
+        List<String> users = getRandomUsers(5)
 
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)
@@ -405,7 +404,7 @@ class ClientDisplayRankSpecs extends DefaultIntSpec {
     }
 
     def "ability to opt-out all project admins from being ranked"() {
-        List<String> users = (1..7).collect { "user${it}"}
+        List<String> users = getRandomUsers(7)
 
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)
