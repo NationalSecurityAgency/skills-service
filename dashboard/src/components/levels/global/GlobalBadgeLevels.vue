@@ -97,6 +97,11 @@ limitations under the License.
       this.badgeId = this.$route.params.badgeId;
       this.loadBadgeLevels();
     },
+    watch: {
+      '$route.params.badgeId': function badgeIdParamChanged() {
+        this.badgeId = this.$route.params.badgeId;
+      },
+    },
     methods: {
       ...mapActions([
         'loadGlobalBadgeDetailsState',

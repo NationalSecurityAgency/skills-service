@@ -121,7 +121,6 @@ limitations under the License.
         }
       },
       badgeEdited(editedBadge) {
-        this.showEditBadge = false;
         BadgesService.saveBadge(editedBadge).then((resp) => {
           const origId = this.badge.badgeId;
           this.setBadge(resp);
@@ -132,6 +131,7 @@ limitations under the License.
         });
       },
       handleHidden(e) {
+        this.showEditBadge = false;
         if (!e || !e.updated) {
           this.handleFocus();
         }

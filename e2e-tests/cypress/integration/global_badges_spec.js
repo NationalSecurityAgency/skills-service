@@ -19,7 +19,6 @@ describe('Global Badges Tests', () => {
     const levelsTableSelector = '[data-cy="simpleLevelsTable"]'
 
     beforeEach(() => {
-
         cy.logout();
         const supervisorUser = 'supervisor@skills.org';
         cy.register(supervisorUser, 'password');
@@ -27,6 +26,7 @@ describe('Global Badges Tests', () => {
         cy.request('PUT', `/root/users/${supervisorUser}/roles/ROLE_SUPERVISOR`);
         cy.logout();
         cy.login(supervisorUser, 'password');
+        cy.log('completed supervisor user login');
     });
 
     it('Create badge with special chars', () => {
@@ -915,6 +915,116 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy="markdownEditorInput"]').type('{backspace}');
         cy.get('[data-cy="saveBadgeButton"]').should('be.enabled');
         cy.get('[data-cy="badgeDescriptionError"]').contains('Subject Description - paragraphs may not contain jabberwocky').should('not.exist');
+    });
+
+    it('edit in place', () => {
+        cy.request('POST', '/app/projects/proj1', {
+            projectId: 'proj1',
+            name: "Proj 1"
+        });
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: 'skill1',
+            name: `This is 1`,
+            type: 'Skill',
+            pointIncrement: 100,
+            numPerformToCompletion: 5,
+            pointIncrementInterval: 0,
+            numMaxOccurrencesIncrementInterval: -1,
+            version: 0,
+        });
+        //proj/subj/skill2
+        cy.request('POST', '/app/projects/proj2', {
+            projectId: 'proj2',
+            name: "proj2"
+        });
+        cy.request('POST', '/admin/projects/proj2/subjects/subj1', {
+            projectId: 'proj2',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+        cy.request('POST', `/admin/projects/proj2/subjects/subj1/skills/skill1`, {
+            projectId: 'proj2',
+            subjectId: 'subj1',
+            skillId: 'skill1',
+            name: `This is 1`,
+            type: 'Skill',
+            pointIncrement: 100,
+            numPerformToCompletion: 5,
+            pointIncrementInterval: 0,
+            numMaxOccurrencesIncrementInterval: -1,
+            version: 0,
+        });
+
+        const badgeId = 'a_badge';
+        cy.request('PUT', `/supervisor/badges/${badgeId}`, {
+            badgeId: badgeId,
+            description: "",
+            iconClass: 'fas fa-award',
+            isEdit: false,
+            name: 'A Badge',
+            originalBadgeId: ''
+        });
+
+        cy.intercept('GET', '/supervisor/badges').as('getBadges');
+        cy.intercept('GET', '/supervisor/projects/proj2/levels').as('getLevels');
+        cy.intercept('GET', '/supervisor/badges/a_new_id/projects/available').as('getAvailableLevels');
+        cy.intercept('DELETE', '/supervisor/badges/a_new_id/projects/proj2/level/5').as('removeLevel');
+
+        cy.visit('/administrator/globalBadges/a_badge/');
+
+        cy.contains('BADGE: A Badge').should('be.visible');
+        cy.contains('ID: a_badge').should('be.visible');
+        cy.get('[data-cy=breadcrumb-a_badge]').should('be.visible');
+
+        cy.get('button[data-cy=btn_edit-badge]').click();
+        cy.get('input[data-cy=badgeName]').type('{selectall}New Global Badge Name');
+        cy.get('button[data-cy=saveBadgeButton]').click();
+        cy.contains('BADGE: A Badge').should('not.exist');
+        cy.contains('BADGE: New Global Badge Name').should('be.visible');
+        cy.contains('ID: a_badge').should('be.visible');
+        cy.get('[data-cy=breadcrumb-a_badge]').should('be.visible');
+        cy.get('button[data-cy=btn_edit-badge]').should('have.focus');
+
+        cy.get('button[data-cy=btn_edit-badge]').click();
+        cy.get('[data-cy=idInputEnableControl] a').click();
+        cy.get('input[data-cy=idInputValue]').type('{selectall}a_new_id');
+        cy.get('button[data-cy=saveBadgeButton]').click();
+        cy.contains('ID: a_badge').should('not.exist');
+        cy.contains('ID: a_new_id').should('be.visible');
+        cy.get('[data-cy=breadcrumb-a_badge]').should('not.exist');
+        cy.get('[data-cy=breadcrumb-a_new_id]').should('be.visible');
+        cy.contains('BADGE: New Global Badge Name').should('be.visible');
+        cy.location().should((loc) => {
+            expect(loc.pathname).to.eq('/administrator/globalBadges/a_new_id/');
+        });
+
+        cy.get('.multiselect__tags').click();
+        cy.contains('Project ID: proj2').click();
+        cy.get('button[data-cy=deleteSkill_skill1]').click();
+        cy.contains('YES, Delete It!').click();
+
+        cy.clickNav('Levels');
+        cy.wait('@getAvailableLevels');
+        cy.get('.multiselect__select').eq(0).click({force:true});
+        cy.contains('ID: proj2').click();
+
+        cy.get('#level-selector').last().click();
+        cy.wait('@getLevels');
+        cy.get('.multiselect__tags input').last().type('5{enter}');
+
+        cy.contains('Add').click();
+        cy.get('[data-cy=deleteLevelBtn_proj2-5]').should('exist');
+        cy.get('[data-cy=deleteLevelBtn_proj2-5]').click();
+        cy.contains('YES, Delete It!').click();
+        cy.wait('@removeLevel');
+        cy.get('[data-cy=deleteLevelBtn_proj2-5]').should('not.exist');
     });
 
 });
