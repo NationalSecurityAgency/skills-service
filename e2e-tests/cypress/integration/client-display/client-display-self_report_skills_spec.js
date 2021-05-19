@@ -475,4 +475,46 @@ describe('Client Display Self Report Skills Tests', () => {
     cy.get('[data-cy="selfReportSubmitBtn"]').click();
     cy.wait('@reportSkill');
   });
+
+  it('clearly indicate which skills are self reportable', () => {
+    cy.createSkill(1, 'Approval');
+    cy.createSkill(2, null);
+    cy.createSkill(3, 'HonorSystem');
+
+    cy.cdVisit('/');
+    cy.cdClickSubj(0);
+
+    cy.get('[data-cy="skillProgress_index-0"]').contains('Self Reportable');
+    cy.get('[data-cy="skillProgress_index-1"]').contains('Self Reportable').should('not.exist');
+    cy.get('[data-cy="skillProgress_index-2"]').contains('Self Reportable');
+
+    cy.matchSnapshotImageForElement('[data-cy="skillProgress_index-0"]', 'Self_Reportable Label');
+
+    cy.cdVisit('/?enableTheme=true');
+    cy.cdClickSubj(0);
+    cy.matchSnapshotImageForElement('[data-cy="skillProgress_index-0"]', 'Self_Reportable Label - Themed');
+  });
+
+  it('clearly indicate on the skill overview whether skill is self reportable', () => {
+    cy.createSkill(1, 'Approval');
+    cy.createSkill(2, null);
+    cy.createSkill(3, 'HonorSystem');
+
+    cy.cdVisit('/');
+    cy.cdClickSubj(0);
+    cy.cdClickSkill(0);
+
+    cy.get('[data-cy="skillProgressTitle"]').contains('Self Reportable');
+    cy.matchSnapshotImageForElement('[data-cy="skillProgressTitle"]', 'Self_Reportable Label on Skill Overview');
+
+    cy.cdBack('Subject 1');
+    cy.cdClickSkill(1);
+
+    cy.get('[data-cy="skillProgressTitle"]').contains('Self Reportable').should('not.exist');
+
+    cy.cdVisit('/?enableTheme=true');
+    cy.cdClickSubj(0);
+    cy.cdClickSkill(0);
+    cy.matchSnapshotImageForElement('[data-cy="skillProgressTitle"]', 'Self_Reportable Label on Skill Overview - Themed');
+  });
 })

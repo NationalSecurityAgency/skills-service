@@ -50,6 +50,8 @@ limitations under the License.
         <div class="h4" @click="skillClicked" :class="{ 'skill-name-url' : enableDrillDown }" data-cy="skillProgressTitle">
           <span v-if="skill.skillHtml" v-html="skill.skillHtml"></span>
           <span v-else>{{ skill.skill }}</span>
+          <b-badge v-if="skill.selfReporting && skill.selfReporting.enabled"
+              variant="success" style="font-size: 0.8rem" class="ml-2"><i class="fas fa-check-circle"></i> Self Reportable</b-badge>
         </div>
       </div>
       <div class="col-auto text-right"
