@@ -525,13 +525,16 @@ describe('Client Display Tests', () => {
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
 
-        cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now')
-        cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday')
-        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now')
-        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday')
-        cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now')
+        const otherUser = 'user0'
 
-        cy.cdVisit('/?enableTheme=true&loginAsUser=skills@skills.org');
+        cy.reportSkill(1, 2, otherUser, 'now')
+        cy.reportSkill(1, 3, otherUser, 'yesterday')
+        cy.reportSkill(1, 1, otherUser, 'now')
+        cy.reportSkill(1, 1, otherUser, 'yesterday')
+        cy.reportSkill(1, 3, otherUser, 'now')
+
+        const loggedInUser = Cypress.env('proxyUser');
+        cy.cdVisit(`/?enableTheme=true&loginAsUser=${loggedInUser}`);
         cy.matchSnapshotImageForElement('[data-cy="myRank"]', 'Client Display Tests - My rank themed where user opted-out', snapshotOptions);
 
         cy.cdClickRank();
