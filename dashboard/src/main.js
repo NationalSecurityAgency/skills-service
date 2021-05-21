@@ -57,7 +57,6 @@ import {
 import en from 'vee-validate/dist/locale/en.json';
 import Vuex from 'vuex';
 import marked from 'marked';
-import mitt from 'mitt';
 import InceptionConfigurer from './InceptionConfigurer';
 import 'babel-polyfill';
 import 'matchmedia-polyfill';
@@ -203,13 +202,10 @@ marked.setOptions({
   renderer,
 });
 
-const emitter = mitt();
-
 store.dispatch('loadConfigState').finally(() => {
   RegisterValidators.init();
   store.dispatch('restoreSessionIfAvailable').finally(() => {
     InceptionConfigurer.configure();
-    Vue.prototype.$emitter = emitter;
     /* eslint-disable no-new */
     const vm = new Vue({
       el: '#app',
