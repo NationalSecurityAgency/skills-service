@@ -65,6 +65,11 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
     }
   })
 
+  beforeEach(() => {
+    // so we can see full leaderboard
+    cy.viewport(1200, 1600)
+  })
+
   it('leaderboard top 10', () => {
     cy.cdVisit('/');
     cy.cdClickRank();
@@ -160,103 +165,102 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
 
       cy.matchSnapshotImageForElement('[data-cy="leaderboard"]', 'leaderboard-10AroundMe', snapshotOptions);
     });
+
+    it('switch between "top 10" and "10 around me" ', () => {
+      cy.cdVisit('/');
+      cy.cdClickRank();
+
+      cy.get(tableSelector)
+          .contains('Loading...')
+          .should('not.exist')
+      cy.get(rowSelector)
+          .should('have.length', 10)
+          .as('cyRows');
+
+      cy.get('[data-cy="leaderboard"] [data-cy="badge-selector"]')
+          .contains('10 Around Me')
+          .click();
+      cy.get(tableSelector)
+          .contains('Loading...')
+          .should('not.exist')
+      cy.get(rowSelector)
+          .should('have.length', 6)
+          .as('cyRows');
+
+      cy.get('[data-cy="leaderboard"] [data-cy="badge-selector"]')
+          .contains('Top 10')
+          .click();
+      cy.get(tableSelector)
+          .contains('Loading...')
+          .should('not.exist')
+      cy.get(rowSelector)
+          .should('have.length', 10)
+          .as('cyRows');
+    })
+
+    it('leaderboard on subject\'s rank - subject # 1', () => {
+      cy.cdVisit('/');
+      cy.contains('Overall Points');
+      cy.cdClickSubj(0, 'Subject 1');
+      cy.cdClickRank();
+
+      cy.get(tableSelector)
+          .contains('Loading...')
+          .should('not.exist')
+      cy.get(rowSelector)
+          .should('have.length', 10)
+          .as('cyRows');
+
+      const date = moment.utc()
+          .format('MM/DD/YYYY')
+      const usersNums = [10, 11, 12, 9, 8, 7, 6, 5, 4, 3]
+      for (let i = 0; i < 10; i += 1) {
+        cy.get('@cyRows')
+            .eq(i)
+            .find('td')
+            .as('row');
+        cy.get('@row')
+            .eq(0)
+            .should('contain.text', `${i+1}`);
+        cy.get('@row')
+            .eq(1)
+            .should('contain.text', `user${usersNums[i]}@skills.org`);
+      }
+    })
+
+    it('leaderboard on subject\'s rank - subject # 2', () => {
+      cy.cdVisit('/');
+      cy.contains('Overall Points');
+      cy.cdClickSubj(1, 'Subject 2');
+      cy.cdClickRank();
+
+      cy.get(tableSelector)
+          .contains('Loading...')
+          .should('not.exist')
+      cy.get(rowSelector)
+          .should('have.length', 3)
+          .as('cyRows');
+
+      const date = moment.utc()
+          .format('MM/DD/YYYY')
+      for (let i = 0; i < 2; i += 1) {
+        cy.get('@cyRows')
+            .eq(i)
+            .find('td')
+            .as('row');
+        cy.get('@row')
+            .eq(0)
+            .should('contain.text', `${i+1}`);
+        cy.get('@row')
+            .eq(1)
+            .should('contain.text', i === 5 ? `${Cypress.env('proxyUser')}` : `user${12 - i}@skills.org`);
+        cy.get('@row')
+            .eq(2)
+            .should('contain.text', `${format('#,##0.', 200 - (i * 100))} Points`);
+        cy.get('@row')
+            .eq(3)
+            .should('contain.text', `${date}`);
+      }
+    })
   }
-
-  it('switch between "top 10" and "10 around me" ', () => {
-    cy.cdVisit('/');
-    cy.cdClickRank();
-
-    cy.get(tableSelector)
-        .contains('Loading...')
-        .should('not.exist')
-    cy.get(rowSelector)
-        .should('have.length', 10)
-        .as('cyRows');
-
-    cy.get('[data-cy="leaderboard"] [data-cy="badge-selector"]')
-        .contains('10 Around Me')
-        .click();
-    cy.get(tableSelector)
-        .contains('Loading...')
-        .should('not.exist')
-    cy.get(rowSelector)
-        .should('have.length', 6)
-        .as('cyRows');
-
-    cy.get('[data-cy="leaderboard"] [data-cy="badge-selector"]')
-        .contains('Top 10')
-        .click();
-    cy.get(tableSelector)
-        .contains('Loading...')
-        .should('not.exist')
-    cy.get(rowSelector)
-        .should('have.length', 10)
-        .as('cyRows');
-  })
-
-  it('leaderboard on subject\'s rank - subject # 1', () => {
-    cy.cdVisit('/');
-    cy.contains('Overall Points');
-    cy.cdClickSubj(0, 'Subject 1');
-    cy.cdClickRank();
-
-    cy.get(tableSelector)
-        .contains('Loading...')
-        .should('not.exist')
-    cy.get(rowSelector)
-        .should('have.length', 10)
-        .as('cyRows');
-
-    const date = moment.utc()
-        .format('MM/DD/YYYY')
-    const usersNums = [10, 11, 12, 9, 8, 7, 6, 5, 4, 3]
-    for (let i = 0; i < 10; i += 1) {
-      cy.get('@cyRows')
-          .eq(i)
-          .find('td')
-          .as('row');
-      cy.get('@row')
-          .eq(0)
-          .should('contain.text', `${i+1}`);
-      cy.get('@row')
-          .eq(1)
-          .should('contain.text', `user${usersNums[i]}@skills.org`);
-    }
-  })
-
-  it('leaderboard on subject\'s rank - subject # 2', () => {
-    cy.cdVisit('/');
-    cy.contains('Overall Points');
-    cy.cdClickSubj(1, 'Subject 2');
-    cy.cdClickRank();
-
-    cy.get(tableSelector)
-        .contains('Loading...')
-        .should('not.exist')
-    cy.get(rowSelector)
-        .should('have.length', 3)
-        .as('cyRows');
-
-    const date = moment.utc()
-        .format('MM/DD/YYYY')
-    for (let i = 0; i < 2; i += 1) {
-      cy.get('@cyRows')
-          .eq(i)
-          .find('td')
-          .as('row');
-      cy.get('@row')
-          .eq(0)
-          .should('contain.text', `${i+1}`);
-      cy.get('@row')
-          .eq(1)
-          .should('contain.text', i === 5 ? `${Cypress.env('proxyUser')}` : `user${12 - i}@skills.org`);
-      cy.get('@row')
-          .eq(2)
-          .should('contain.text', `${format('#,##0.', 200 - (i * 100))} Points`);
-      cy.get('@row')
-          .eq(3)
-          .should('contain.text', `${date}`);
-    }
-  })
-
 })
