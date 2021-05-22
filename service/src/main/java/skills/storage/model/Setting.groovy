@@ -16,6 +16,8 @@
 package skills.storage.model
 
 import groovy.transform.ToString
+import org.springframework.data.annotation.CreatedDate
+import org.springframework.data.annotation.LastModifiedDate
 
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -25,6 +27,8 @@ import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
 import javax.persistence.Table
+import javax.persistence.Temporal
+import javax.persistence.TemporalType
 
 @Entity
 @Table(name = 'settings')
@@ -55,6 +59,14 @@ class Setting {
     // reliably differentiate between different setting types
     @Enumerated(EnumType.STRING)
     SettingType type
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @CreatedDate
+    Date created
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @LastModifiedDate
+    Date updated
 
     //convenience method for settings that are in an either on or off state as opposed to containing a meaningful value
     boolean isEnabled(){
