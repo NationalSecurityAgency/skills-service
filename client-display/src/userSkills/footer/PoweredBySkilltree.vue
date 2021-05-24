@@ -14,21 +14,33 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="p-1 poweredByContainer text-lowercase">
-    <div class="poweredByLabel pb-2">powered by</div>
-    <img src="img/skilltree_logo.png" class="logo" alt="SkillTree"/>
+  <div class="p-1 poweredByContainer text-lowercase"
+       @mouseover="isHovering = true"
+       @mouseout="isHovering = false">
+    <div class="poweredByLabel pb-2 animate__animated animate__bounce">powered by</div>
+    <skill-tree-svg-icon class="float-right" :is-hovering="isHovering"/>
+
   </div>
 </template>
 
 <script>
+  import SkillTreeSvgIcon from './SkillTreeSvgIcon';
+
   export default {
     name: 'PoweredBySkilltree',
+    components: { SkillTreeSvgIcon },
+    data() {
+      return {
+        isHovering: false,
+      };
+    },
   };
 </script>
 
 <style scoped>
 .poweredByContainer {
   width: 7.6rem !important;
+  cursor: pointer;
 }
 .poweredByContainer .poweredByLabel {
   font-size: 0.8rem !important;
