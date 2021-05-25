@@ -522,4 +522,75 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="saveSubjectButton"]').should('be.enabled');
     });
 
+    it('edit in place', () => {
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
+            projectId: 'proj1',
+            subjectId: "subj1",
+            skillId: "skill1",
+            name: "Skill 1",
+            pointIncrement: '50',
+            numPerformToCompletion: '5'
+        });
+
+        cy.intercept('GET', '/admin/projects/proj1/subjects/subj1').as('loadSubject1');
+        cy.intercept('POST', '/admin/projects/proj1/subjects/subj1').as('saveSubject1');
+        cy.intercept('POST', '/admin/projects/proj1/subjects/entirelyNewId/skills/skill1').as('saveSkill');
+        cy.intercept('GET', '/admin/projects/proj1/subjects/entirelyNewId').as('loadSubject2');
+        cy.intercept('POST', '/admin/projects/proj1/subjects/entirelyNewId/skills/copy_of_skill1').as('saveSkill2');
+        cy.intercept('DELETE', '/admin/projects/proj1/subjects/entirelyNewId/skills/skill1').as('deleteSkill');
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.wait('@loadSubject1');
+        cy.contains('SUBJECT: Subject 1').should('be.visible');
+        cy.get('[data-cy=btn_edit-subject]').click();
+        cy.get('input[data-cy=subjectNameInput]').type('{selectall}Edited Subject Name');
+        cy.get('[data-cy=saveSubjectButton]').click();
+        cy.wait('@saveSubject1');
+        cy.get('[data-cy=btn_edit-subject]').should('have.focus');
+        cy.contains('SUBJECT: Subject 1').should('not.exist');
+        cy.contains('SUBJECT: Edited Subject Name').should('be.visible');
+        cy.contains('ID: subj1').should('be.visible');
+        cy.get('[data-cy=breadcrumb-subj1]').should('be.visible');
+
+        cy.get('[data-cy=btn_edit-subject]').click();
+        cy.get('[data-cy=idInputEnableControl] a').click();
+        cy.get('input[data-cy=idInputValue]').type('{selectall}entirelyNewId');
+        cy.get('[data-cy=saveSubjectButton]').click();
+        cy.wait('@saveSubject1');
+        cy.get('[data-cy=btn_edit-subject]').should('have.focus');
+        cy.contains('SUBJECT: Edited Subject Name').should('be.visible');
+        cy.contains('ID: subj1').should('not.exist');
+        cy.get('[data-cy=breadcrumb-subj1]').should('not.exist');
+        cy.contains('ID: entirelyNewId').should('be.visible');
+        cy.get('[data-cy=breadcrumb-entirelyNewId]').should('be.visible');
+
+        cy.get('[data-cy=editSkillButton_skill1]').click();
+        cy.get('input[data-cy=skillName]').type('{selectall}Edited Skill Name');
+        cy.get('[data-cy=saveSkillButton]').click();
+        cy.wait('@saveSkill');
+        cy.contains('Edited Skill Name').should('be.visible');
+
+        cy.get('[data-cy=manageSkillBtn_skill1]').click();
+        cy.get('[data-cy=breadcrumb-entirelyNewId]').should('be.visible');
+        cy.get('[data-cy=breadcrumb-entirelyNewId]').click();
+        cy.wait('@loadSubject2');
+        cy.contains('SUBJECT: Edited Subject Name').should('be.visible');
+
+        cy.get('[data-cy=copySkillButton_skill1]').click();
+        cy.get('[data-cy=saveSkillButton]').click();
+        cy.wait('@saveSkill2');
+        cy.contains('Copy of Edited Skill Name').should('be.visible');
+
+        cy.get('[data-cy=deleteSkillButton_skill1]').click();
+        cy.contains('YES, Delete It!').click();
+        cy.wait('@deleteSkill');
+        cy.contains('ID: skill1').should('not.exist');
+    });
+
 });

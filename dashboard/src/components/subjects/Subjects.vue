@@ -70,6 +70,12 @@ limitations under the License.
       this.projectId = this.$route.params.projectId;
       this.loadSubjects();
     },
+    watch: {
+      '$route.params.projectId': function projectIdParamUpdated() {
+        this.projectId = this.$route.params.projectId;
+        this.loadSubjects();
+      },
+    },
     methods: {
       ...mapActions([
         'loadProjectDetailsState',

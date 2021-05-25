@@ -54,8 +54,60 @@ describe('Projects Tests', () => {
 
     cy.visit('/administrator/projects/proj1/');
     cy.get('[data-cy=projectPreview]').should('be.visible');
+    cy.get('a[data-cy=projectPreview]').should('have.attr', 'href').and('include', '/progress-and-rankings/projects/proj1');
     cy.get('[data-cy=projectPreview]').click();
     //opens in a new tab, cypress can't interact with those
+  });
+
+  it('Edit in place', () => {
+    cy.request('POST', '/app/projects/proj1', {
+      projectId: 'proj1',
+      name: "Proj 1"
+    });
+    cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+      projectId: 'proj1',
+      subjectId: 'subj1',
+      name: "Subject 1"
+    });
+    cy.intercept('GET', '/admin/projects/editedProjectId/subjects').as('newIdSubjects');
+
+    cy.visit('/administrator/projects/proj1/');
+    cy.contains('PROJECT: Proj 1').should('be.visible');
+    cy.contains('ID: proj1').should('be.visible');
+    cy.get('[data-cy=breadcrumb-proj1]').should('be.visible');
+    cy.get('[data-cy=btn_edit-project]').click();
+    cy.get('input[data-cy=projectName]').type('{selectall}Edited Name');
+    cy.get('button[data-cy=saveProjectButton]').click();
+    cy.contains('PROJECT: Proj 1').should('not.exist');
+    cy.contains('PROJECT: Edited Name').should('be.visible');
+
+    cy.get('[data-cy=btn_edit-project]').click();
+    cy.get('[data-cy=idInputEnableControl] a').click();
+    cy.get('input[data-cy=idInputValue]').type('{selectall}editedProjectId');
+    cy.get('button[data-cy=saveProjectButton]').click();
+    cy.wait('@newIdSubjects');
+    cy.contains('ID: proj1').should('not.exist');
+    cy.get('[data-cy=breadcrumb-proj1]').should('not.exist');
+    cy.contains('ID: editedProjectId').should('be.visible');
+    cy.get('[data-cy=breadcrumb-editedProjectId]').should('be.visible');
+    cy.get('a[data-cy=projectPreview]').should('have.attr', 'href').and('include', '/projects/editedProjectId');
+
+    cy.location().should((loc) => {
+      expect(loc.pathname).to.eq('/administrator/projects/editedProjectId/');
+    });
+    cy.contains('Subject 1').should('be.visible');
+    cy.get('a[data-cy=subjCard_subj1_manageBtn').click();
+    cy.contains('SUBJECT: Subject 1').should('be.visible');
+    cy.get('[data-cy=breadcrumb-editedProjectId]').click();
+    cy.get('[data-cy=cardSettingsButton]').click();
+    cy.get('[data-cy=editMenuEditBtn]').click();
+    cy.get('input[data-cy=subjectNameInput]').type('{selectall}I Am A Changed Subject');
+    cy.get('button[data-cy=saveSubjectButton]').click();
+    cy.contains('I Am A Changed Subject').should('be.visible');
+    cy.get('button[data-cy=btn_Subjects]').click();
+    cy.get('input[data-cy=subjectNameInput]').type('A new subject');
+    cy.get('button[data-cy=saveSubjectButton]').click();
+    cy.contains('A new subject').should('be.visible');
   });
 
 

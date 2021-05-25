@@ -15,7 +15,19 @@ limitations under the License.
 */
 <template>
   <div>
-    <page-header :loading="isLoading" :options="headerOptions"/>
+    <page-header :loading="isLoading" :options="headerOptions">
+      <div slot="subSubTitle" v-if="subject">
+        <b-button @click="displayEditSubject"
+                  ref="editSubjectButton"
+                  class="btn btn-outline-primary mr-1"
+                  size="sm"
+                  variant="outline-primary"
+                  data-cy="btn_edit-subject"
+                  :aria-label="'edit Subject '+subject.subjectId">
+          <span class="d-none d-sm-inline">Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
+        </b-button>
+      </div>
+    </page-header>
 
     <navigation v-if="!isLoading" :nav-items="[
           {name: 'Skills', iconClass: 'fa-graduation-cap skills-color-skills', page: 'SubjectSkills'},
@@ -24,14 +36,20 @@ limitations under the License.
           {name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'SubjectMetrics'},
         ]">
     </navigation>
+
+    <edit-subject v-if="showEditSubject" v-model="showEditSubject"
+                  :subject="subject" @subject-saved="subjectEdited"
+                  :is-edit="true"
+                  @hidden="handleHideSubjectEdit"/>
   </div>
 </template>
 
 <script>
   import { createNamespacedHelpers } from 'vuex';
-
   import Navigation from '../utils/Navigation';
   import PageHeader from '../utils/pages/PageHeader';
+  import EditSubject from './EditSubject';
+  import SubjectsService from './SubjectsService';
 
   const { mapActions, mapGetters, mapMutations } = createNamespacedHelpers('subjects');
 
@@ -40,12 +58,14 @@ limitations under the License.
     components: {
       PageHeader,
       Navigation,
+      EditSubject,
     },
     data() {
       return {
         isLoading: true,
         projectId: '',
         subjectId: '',
+        showEditSubject: false,
       };
     },
     created() {
@@ -84,6 +104,13 @@ limitations under the License.
         return this.$store.getters.config.minimumSubjectPoints;
       },
     },
+    watch: {
+      subject(newVal) {
+        if (newVal && newVal.subjectId !== this.subjectId) {
+          this.subjectId = newVal.subjectId;
+        }
+      },
+    },
     methods: {
       ...mapActions([
         'loadSubjectDetailsState',
@@ -102,6 +129,27 @@ limitations under the License.
               this.isLoading = false;
             });
         }
+      },
+      displayEditSubject() {
+        this.showEditSubject = true;
+      },
+      subjectEdited(subject) {
+        SubjectsService.saveSubject(subject).then((resp) => {
+          const origId = this.subject.subjectId;
+          this.setSubject(resp);
+          if (resp.subjectId !== origId) {
+            this.$router.replace({ name: this.$route.name, params: { ...this.$route.params, subjectId: resp.subjectId } });
+          }
+        });
+      },
+      handleHideSubjectEdit() {
+        this.showEditSubject = false;
+        this.$nextTick(() => {
+          const ref = this.$refs.editSubjectButton;
+          if (ref) {
+            ref.focus();
+          }
+        });
       },
     },
   };

@@ -19,6 +19,17 @@ limitations under the License.
       <span slot="right-of-header">
         <i v-if="badge && badge.endDate" class="fas fa-gem ml-2" style="font-size: 1.6rem; color: purple;"></i>
       </span>
+      <div slot="subSubTitle" v-if="badge">
+        <b-button @click="displayEditBadge"
+                  ref="editBadgeButton"
+                  class="btn btn-outline-primary mr-1"
+                  size="sm"
+                  variant="outline-primary"
+                  data-cy="btn_edit-badge"
+                  :aria-label="'edit Badge '+badge.badgeId">
+          <span class="d-none d-sm-inline">Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
+        </b-button>
+      </div>
     </page-header>
 
     <navigation :nav-items="[
@@ -26,6 +37,8 @@ limitations under the License.
           {name: 'Users', iconClass: 'fa-users skills-color-users', page: 'BadgeUsers'},
         ]">
     </navigation>
+    <edit-badge v-if="showEditBadge" v-model="showEditBadge" :id="badge.badgeId" :badge="badge" :is-edit="true"
+                :global="false" @badge-updated="badgeEdited" @hidden="handleHidden"></edit-badge>
   </div>
 </template>
 
@@ -34,6 +47,8 @@ limitations under the License.
 
   import Navigation from '../utils/Navigation';
   import PageHeader from '../utils/pages/PageHeader';
+  import EditBadge from './EditBadge';
+  import BadgesService from './BadgesService';
 
   const { mapActions, mapGetters, mapMutations } = createNamespacedHelpers('badges');
 
@@ -42,12 +57,14 @@ limitations under the License.
     components: {
       PageHeader,
       Navigation,
+      EditBadge,
     },
     data() {
       return {
         isLoading: true,
         projectId: '',
         badgeId: '',
+        showEditBadge: false,
       };
     },
     created() {
@@ -88,6 +105,9 @@ limitations under the License.
       ...mapMutations([
         'setBadge',
       ]),
+      displayEditBadge() {
+        this.showEditBadge = true;
+      },
       loadBadge() {
         this.isLoading = false;
         if (this.$route.params.badge) {
@@ -99,6 +119,30 @@ limitations under the License.
               this.isLoading = false;
             });
         }
+      },
+      badgeEdited(editedBadge) {
+        BadgesService.saveBadge(editedBadge).then((resp) => {
+          const origId = this.badge.badgeId;
+          this.setBadge(resp);
+          if (origId !== resp.badgeId) {
+            this.$router.replace({ name: this.$route.name, params: { ...this.$route.params, badgeId: resp.badgeId } });
+            this.badgeId = resp.badgeId;
+          }
+        });
+      },
+      handleHidden(e) {
+        this.showEditBadge = false;
+        if (!e || !e.updated) {
+          this.handleFocus();
+        }
+      },
+      handleFocus() {
+        this.$nextTick(() => {
+          const ref = this.$refs.editAndDeleteBadge;
+          if (ref) {
+            ref.focus();
+          }
+        });
       },
     },
   };
