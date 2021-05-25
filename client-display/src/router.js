@@ -31,7 +31,7 @@ import store from '@/store/store';
 Vue.use(VueRouter);
 
 const router = new VueRouter({
-  mode: 'history',
+  mode: 'abstract',
   routes: [
     {
       path: '/',
@@ -113,7 +113,16 @@ router.beforeEach((to, from, next) => {
 
 router.afterEach(debounce((to) => {
   if (process.env.NODE_ENV !== 'development' && store.state.parentFrame) {
-    store.state.parentFrame.emit('route-changed', to.fullPath);
+    const params = {
+     path: to.path,
+     fullPath: to.fullPath,
+     name: to.name,
+     params: to.params,
+     query: to.query,
+     currentLocation: window.location.toString(),
+     historySize: window.history.length,
+    };
+    store.state.parentFrame.emit('route-changed', params);
   }
 }, 250));
 

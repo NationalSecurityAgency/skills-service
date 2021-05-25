@@ -84,8 +84,8 @@ limitations under the License.
               name: 'home',
             });
           },
-          navigate(fullPath) {
-            vm.$router.replace(fullPath);
+          navigate(route) {
+            vm.$router.push(route);
           },
         });
 
