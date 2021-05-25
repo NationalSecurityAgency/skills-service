@@ -15,7 +15,7 @@
  */
 export default {
   nonCSSConfig: ['charts', 'landingPageTitle', 'earnedTodayColor', 'beforeTodayColor'],
-  bothCssAndThemModule: ['progressIndicators'],
+  bothCssAndThemModule: ['progressIndicators', 'pageTitleTextColor'],
   selectorKey: {
     maxWidth: {
       selector: 'body #app.skills-display-container',

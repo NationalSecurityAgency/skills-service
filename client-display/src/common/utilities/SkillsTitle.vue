@@ -33,7 +33,7 @@ limitations under the License.
 
       <div class="row powered-by-row" style="top:0.4rem; right: .5rem;">
         <div class="col">
-          <powered-by-skilltree class="float-right" />
+          <powered-by-skilltree class="float-right" :animate-power-by-label="animatePowerByLabel"/>
         </div>
       </div>
 
@@ -49,6 +49,7 @@ limitations under the License.
     components: { PoweredBySkilltree },
     props: {
       backButton: { type: Boolean, default: true },
+      animatePowerByLabel: Boolean,
     },
     methods: {
       navigateBack() {
@@ -65,8 +66,8 @@ limitations under the License.
 </script>
 
 <style>
-. titleBody {
-  min-height: 3rem;
+.titleBody {
+  min-height: 3.5rem !important;
 }
 .powered-by-row {
   position: absolute !important;

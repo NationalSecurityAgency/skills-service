@@ -8,17 +8,17 @@
       <g i:extraneous="self">
     <g id="Layer_1">
       <g>
-        <path class="st0 animate__animated anim-arr4"
-              :class="{'logo-anim': isHovering}" d="M324.9,70.5l58.4-42.4l58.4,42.4c1.3,0.9,2.8,1.4,4.2,1.4c2.2,0,4.4-1,5.8-3c2.3-3.2,1.6-7.7-1.6-10
+        <path class="st0"
+              :class="{'logo-anim animate__animated anim-arr4': isHovering}" d="M324.9,70.5l58.4-42.4l58.4,42.4c1.3,0.9,2.8,1.4,4.2,1.4c2.2,0,4.4-1,5.8-3c2.3-3.2,1.6-7.7-1.6-10
           l-62.6-45.5c-2.5-1.8-5.9-1.8-8.4,0l-62.6,45.5c-3.2,2.3-3.9,6.8-1.6,10C317.2,72.1,321.7,72.8,324.9,70.5z"/>
-        <path class="st1 animate__animated anim-arr3"
-              :class="{'logo-anim': isHovering}" d="M450.1,99.2l-62.6-45.5c-2.5-1.8-5.9-1.8-8.4,0l-62.6,45.5c-3.2,2.3-3.9,6.8-1.6,10c2.3,3.2,6.8,3.9,10,1.6
+        <path class="st1"
+              :class="{'logo-anim animate__animated anim-arr3': isHovering}" d="M450.1,99.2l-62.6-45.5c-2.5-1.8-5.9-1.8-8.4,0l-62.6,45.5c-3.2,2.3-3.9,6.8-1.6,10c2.3,3.2,6.8,3.9,10,1.6
           l58.4-42.4l58.4,42.4c1.3,0.9,2.8,1.4,4.2,1.4c2.2,0,4.4-1,5.8-3C454,106.1,453.3,101.6,450.1,99.2z"/>
-        <path class="st2 animate__animated anim-arr2 "
-              :class="{'logo-anim': isHovering}" d="M450.1,139.6l-62.6-45.5c-2.5-1.8-5.9-1.8-8.4,0l-62.6,45.5c-3.2,2.3-3.9,6.8-1.6,10
+        <path class="st2"
+              :class="{'logo-anim animate__animated anim-arr2': isHovering}" d="M450.1,139.6l-62.6-45.5c-2.5-1.8-5.9-1.8-8.4,0l-62.6,45.5c-3.2,2.3-3.9,6.8-1.6,10
           c2.3,3.2,6.8,3.9,10,1.6l58.4-42.4l58.4,42.4c1.3,0.9,2.8,1.4,4.2,1.4c2.2,0,4.4-1,5.8-3C454,146.5,453.3,142,450.1,139.6z"/>
-        <path class="st3 animate__animated  anim-arr1 "
-              :class="{'logo-anim': isHovering}" d="M450.1,180l-62.6-45.5c-2.5-1.8-5.9-1.8-8.4,0L316.5,180c-3.2,2.3-3.9,6.8-1.6,10c2.3,3.2,6.8,3.9,10,1.6
+        <path class="st3"
+              :class="{'logo-anim animate__animated  anim-arr1': isHovering}" d="M450.1,180l-62.6-45.5c-2.5-1.8-5.9-1.8-8.4,0L316.5,180c-3.2,2.3-3.9,6.8-1.6,10c2.3,3.2,6.8,3.9,10,1.6
           l58.4-42.4l58.4,42.4c1.3,0.9,2.8,1.4,4.2,1.4c2.2,0,4.4-1,5.8-3C454,186.9,453.3,182.4,450.1,180z"/>
         <g>
           <path class="st4" d="M71.4,316.8c-12.4-3.8-23.9-7.2-23.9-16v-0.4c0-7.7,7-13.5,18-13.5c7.9,0,16.4,2.7,24.3,7.2
@@ -66,6 +66,15 @@
     name: 'SkillTreeSvgIcon',
     props: {
       isHovering: Boolean,
+      logoFill: String,
+    },
+    mounted() {
+      if (this.logoFill && this.logoFill) {
+        const skilltreeItems = document.querySelectorAll('.skilltree-svg-logo .st4');
+        for (let i = 0; i < skilltreeItems.length; i += 1) {
+          skilltreeItems[i].style.fill = this.logoFill;
+        }
+      }
     },
   };
 </script>
@@ -100,7 +109,7 @@
     fill: #E76F51;
   }
   80% {
-    fill: black;
+    fill: #264653;
   }
   96% {
     fill: #E76F51;
@@ -115,7 +124,7 @@
     fill: #F4A261;
   }
   60% {
-    fill: black;
+    fill: #264653;
   }
   96% {
     fill: #F4A261;
@@ -130,7 +139,7 @@
     fill: #E9C369;
   }
   40% {
-    fill: black;
+    fill: #264653;
   }
   96% {
     fill: #E9C369;
@@ -142,7 +151,7 @@
     fill: #2A9D8F;
   }
   20% {
-    fill: black;
+    fill: #264653;
   }
   96% {
     fill: #2A9D8F;

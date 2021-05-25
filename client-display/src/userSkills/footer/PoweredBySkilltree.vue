@@ -17,9 +17,8 @@ limitations under the License.
   <div class="p-1 poweredByContainer text-lowercase"
        @mouseover="isHovering = true"
        @mouseout="isHovering = false">
-    <div class="poweredByLabel pb-2 animate__animated animate__bounce">powered by</div>
-    <skill-tree-svg-icon class="float-right" :is-hovering="isHovering"/>
-
+    <div class="poweredByLabel pb-2" :class="{'animate__animated':animatePowerByLabel, 'animate__backInUp' : animatePowerByLabel}">powered by</div>
+    <skill-tree-svg-icon class="float-right" :is-hovering="isHovering" :logo-fill="logoFillThemeColor"/>
   </div>
 </template>
 
@@ -29,10 +28,18 @@ limitations under the License.
   export default {
     name: 'PoweredBySkilltree',
     components: { SkillTreeSvgIcon },
+    props: {
+      animatePowerByLabel: Boolean,
+    },
     data() {
       return {
         isHovering: false,
       };
+    },
+    computed: {
+      logoFillThemeColor() {
+        return this.$store.state.themeModule.pageTitleTextColor;
+      },
     },
   };
 </script>
