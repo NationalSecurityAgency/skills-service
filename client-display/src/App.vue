@@ -64,7 +64,7 @@ limitations under the License.
     data() {
       return {
         appStyleObject: {},
-        loadingConfig: true,
+        loadingConfig: false,
       };
     },
     created() {
@@ -123,10 +123,10 @@ limitations under the License.
           document.body.style['overflow-y'] = 'hidden';
         });
       }
-
-      store.dispatch('loadConfigState').finally(() => {
-        this.loadingConfig = false;
-      });
+      //
+      // store.dispatch('loadConfigState').finally(() => {
+      //   this.loadingConfig = false;
+      // });
     },
     methods: {
       handleTheming(theme) {

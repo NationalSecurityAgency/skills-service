@@ -71,6 +71,7 @@
     "cypress": "6.6.0",
     "cypress-audit": "0.3.0",
     "cypress-axe": "0.12.2",
+    "cypress-failed-log": "2.9.1",
     "cypress-file-upload": "5.0.2",
     "cypress-image-snapshot": "4.0.1",
     "dayjs": "1.10.4",

@@ -45,7 +45,7 @@ limitations under the License.
         return this.$store.state.themeModule.pageTitleTextColor;
       },
       docsHost() {
-        return this.$store.getters.config.docsHost;
+        return this.$store.getters.config ? this.$store.getters.config.docsHost : 'http://somedocs.com';
       },
     },
   };
