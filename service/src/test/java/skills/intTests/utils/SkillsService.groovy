@@ -846,6 +846,10 @@ class SkillsService {
         wsHelper.get("/public/config", "", [:])
     }
 
+    def getPublicClientDisplayConfigs() {
+        wsHelper.get("/public/clientDisplay/config", "", [:])
+    }
+
     def getPublicSetting(String setting, String settingGroup){
         return wsHelper.appGet("/public/settings/${setting}/group/${settingGroup}")
     }

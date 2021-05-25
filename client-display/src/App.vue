@@ -123,7 +123,7 @@ limitations under the License.
           document.body.style['overflow-y'] = 'hidden';
         });
       }
-      console.log('loading config state');
+
       store.dispatch('loadConfigState').finally(() => {
         this.loadingConfig = false;
       });

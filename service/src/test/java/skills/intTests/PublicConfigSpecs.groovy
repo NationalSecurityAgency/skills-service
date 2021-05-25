@@ -70,4 +70,12 @@ class PublicConfigSpecs extends DefaultIntSpec {
         configs.customHeader == "<div>header</div>"
         configs.customFooter == "<div>footer</div>"
     }
+
+    def "retrieve public Client Display configs"() {
+        when:
+        def config = skillsService.getPublicClientDisplayConfigs()
+        then:
+        config
+        config.docsHost == "https://code.nsa.gov/skills-docs"
+    }
 }
