@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import axios from 'axios';
-import store from '../../store';
+import store from '../../store/store';
 
 function handleFunction(config) {
   const incomingVersion = config.headers['skills-client-lib-version'];

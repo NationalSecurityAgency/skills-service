@@ -26,7 +26,7 @@ import BadgesDetails from '@/userSkills/badge/BadgesDetails';
 import GlobalBadgeDetails from '@/userSkills/badge/GlobalBadgeDetails';
 import BadgeDetails from '@/userSkills/badge/BadgeDetails';
 import ErrorPage from '@/userSkills/ErrorPage';
-import store from '@/store';
+import store from '@/store/store';
 
 Vue.use(VueRouter);
 

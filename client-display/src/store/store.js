@@ -17,6 +17,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import axios from 'axios';
 import UniqueIdGenerator from '@/common/utilities/UniqueIdGenerator';
+import config from './config';
 
 Vue.use(Vuex);
 
@@ -37,6 +38,7 @@ const themeModule = {
 export default new Vuex.Store({
   modules: {
     themeModule,
+    config,
   },
   state: {
     authToken: null,

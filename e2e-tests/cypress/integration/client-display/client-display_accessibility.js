@@ -232,7 +232,7 @@ describe('Client Display Accessibility tests', () => {
     cy.injectAxe();
 
     cy.get('[data-cy=myBadges]').contains("0 Badges")
-    cy.wait(500) //need to wait on the pointHistoryChart to complete rendering before running a11y
+    cy.wait(4000) //need to wait on the pointHistoryChart to complete rendering before running a11y
 
     cy.customA11y();
     cy.customLighthouse();

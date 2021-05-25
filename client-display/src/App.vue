@@ -15,6 +15,7 @@ limitations under the License.
 */
 <template>
   <div
+    v-if="!loadingConfig"
     id="app"
     class="container-fluid skills-display-container py-2"
     :style="appStyleObject" role="main" aria-label="SkillTree Client Display">
@@ -31,7 +32,7 @@ limitations under the License.
   import debounce from 'lodash/debounce';
 
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
-  import store from '@/store';
+  import store from '@/store/store';
   import NewSoftwareVersionComponent from '@/common/softwareVersion/NewSoftwareVersion';
   import DevModeMixin from '@/dev/DevModeMixin';
   import ThemeHelper from './common/theme/ThemeHelper';
@@ -63,6 +64,7 @@ limitations under the License.
     data() {
       return {
         appStyleObject: {},
+        loadingConfig: true,
       };
     },
     created() {
@@ -121,6 +123,10 @@ limitations under the License.
           document.body.style['overflow-y'] = 'hidden';
         });
       }
+      console.log('loading config state');
+      store.dispatch('loadConfigState').finally(() => {
+        this.loadingConfig = false;
+      });
     },
     methods: {
       handleTheming(theme) {

@@ -668,8 +668,8 @@ describe('Client Display Point History Tests', () => {
     });
 
     it('empty point history', () => {
-        cy.cdVisit('/');
         cy.intercept('/api/projects/proj1/pointHistory').as('getPointHistory');
+        cy.cdVisit('/');
         cy.wait('@getPointHistory')
         // let's wait for animation to complete
         cy.get('[data-cy="pointHistoryChartPlaceholder-animationEnded"]')

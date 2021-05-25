@@ -15,7 +15,7 @@
  */
 import axios from 'axios';
 
-import store from '@/store';
+import store from '@/store/store';
 
 import 'url-search-params-polyfill';
 import SkillEnricherUtil from '../utils/SkillEnricherUtil';
