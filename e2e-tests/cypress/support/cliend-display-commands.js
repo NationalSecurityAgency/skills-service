@@ -16,10 +16,12 @@
 
 Cypress.Commands.add("cdVisit", (url) => {
     cy.visit(`http://localhost:8083${url}`);
+    cy.get('.titleBody').contains('powered by');
 });
 
 Cypress.Commands.add("cdBack", (expectedTitle = 'User Skills') => {
     cy.get('[data-cy=back]').click()
+    cy.get('.titleBody').contains('powered by');
     cy.contains(expectedTitle);
 
     // back button should not exist on the home page, whose title is the default value
@@ -30,6 +32,7 @@ Cypress.Commands.add("cdBack", (expectedTitle = 'User Skills') => {
 
 Cypress.Commands.add("cdClickSubj", (subjIndex, expectedTitle) => {
     cy.get(`.user-skill-subject-tile:nth-child(${subjIndex+1})`).first().click();
+    cy.get('.titleBody').contains('powered by');
     if (expectedTitle){
         cy.contains(expectedTitle);
     }
@@ -42,16 +45,19 @@ Cypress.Commands.add("cdClickSkill", (skillIndex, useProgressBar = true) => {
         cy.get(`[data-cy="skillProgress_index-${skillIndex}"] [data-cy="skillProgressTitle"]`).click();
     }
     cy.contains('Skill Overview')
+    cy.get('.titleBody').contains('powered by');
 });
 
 Cypress.Commands.add("cdClickRank", () => {
     cy.get('[data-cy=myRank]').click();
     cy.contains('Rank Overview');
+    cy.get('.titleBody').contains('powered by');
 });
 
 Cypress.Commands.add("cdClickBadges", () => {
     cy.get('[data-cy=myBadges]').click()
     cy.contains('Badges');
+    cy.get('.titleBody').contains('powered by');
 });
 
 

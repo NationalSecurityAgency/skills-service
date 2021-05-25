@@ -27,7 +27,7 @@ limitations under the License.
         </div>
       </div>
 
-      <h1 :class="{'ml-5': showBackButton}" data-cy="title" class="skills-title m-0" >
+      <h1 :class="{'mx-5': showBackButton}" data-cy="title" class="skills-title m-0" >
         <slot/>
       </h1>
 
