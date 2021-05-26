@@ -125,7 +125,9 @@ limitations under the License.
         });
       }
 
+      console.log('before loading configs');
       store.dispatch('loadConfigState').then(() => {
+      console.log('configs loaded');
         this.loadingConfig = false;
       });
     },
