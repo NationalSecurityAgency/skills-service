@@ -91,6 +91,10 @@ module.exports = (on, config) => {
 
     on("before:browser:launch", (browser = {}, launchOptions) => {
         prepareAudit(launchOptions);
+        if (browser.name === 'electron') {
+            // Cypress-specific option (state)
+            launchOptions.devTools = true;
+        }
     });
 
     if (config.experimentalRunEvents) {
