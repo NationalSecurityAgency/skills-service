@@ -15,12 +15,12 @@ limitations under the License.
 */
 <template>
   <div
-    v-if="!loadingConfig"
     id="app"
     class="container-fluid skills-display-container py-2"
     :style="appStyleObject" role="main" aria-label="SkillTree Client Display">
     <new-software-version-component/>
-    <router-view />
+    <skills-spinner :loading="loadingConfig" />
+    <router-view v-if="!loadingConfig"/>
   </div>
 </template>
 
@@ -36,6 +36,7 @@ limitations under the License.
   import NewSoftwareVersionComponent from '@/common/softwareVersion/NewSoftwareVersion';
   import DevModeMixin from '@/dev/DevModeMixin';
   import ThemeHelper from './common/theme/ThemeHelper';
+  import SkillsSpinner from './common/utilities/SkillsSpinner';
 
   const getDocumentHeight = () => {
     const { body } = document;
@@ -60,11 +61,11 @@ limitations under the License.
 
   export default {
     mixins: [DevModeMixin],
-    components: { NewSoftwareVersionComponent },
+    components: { SkillsSpinner, NewSoftwareVersionComponent },
     data() {
       return {
         appStyleObject: {},
-        loadingConfig: false,
+        loadingConfig: true,
       };
     },
     created() {
@@ -123,10 +124,10 @@ limitations under the License.
           document.body.style['overflow-y'] = 'hidden';
         });
       }
-      //
-      // store.dispatch('loadConfigState').finally(() => {
-      //   this.loadingConfig = false;
-      // });
+
+      store.dispatch('loadConfigState').then(() => {
+        this.loadingConfig = false;
+      });
     },
     methods: {
       handleTheming(theme) {

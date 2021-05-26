@@ -169,6 +169,7 @@ describe('Client Display Accessibility tests', () => {
 
     cy.get('[data-cy="selfReportBtn"]').click();
     cy.get('[data-cy="selfReportSkillMsg"]').contains('This skill requires approval. Submit with an optional message and it will enter an approval queue.')
+    cy.wait(500); // sometimes modal takes a bit to render
     cy.customA11y();
     cy.customLighthouse();
 
