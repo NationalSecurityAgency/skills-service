@@ -124,12 +124,13 @@ limitations under the License.
           document.body.style['overflow-y'] = 'hidden';
         });
       }
-
+    },
+    mounted() {
       // eslint-disable-next-line no-console
       console.log('before loading configs');
       store.dispatch('loadConfigState').then(() => {
         // eslint-disable-next-line no-console
-        console.log('before loading configs');
+        console.log('loaded configs');
         this.loadingConfig = false;
       });
     },
