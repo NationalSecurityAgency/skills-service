@@ -72,6 +72,9 @@ limitations under the License.
       const vm = this;
       if (this.isDevelopmentMode()) {
         this.configureDevelopmentMode();
+        const path = window.location.pathname;
+        const route = path.endsWith('index.html') ? '/' : path;
+        vm.$router.replace(route).catch(() => {});
         this.loadConfigs();
       } else {
         const handshake = new Postmate.Model({
