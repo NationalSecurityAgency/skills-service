@@ -175,6 +175,7 @@ jobs:
         parallel: true
         group: 'skills-service tests'
         tag: "${{ github.workflow }}"
+        env: TZ='UTC',DEBUG='cypress:electron'
       env:
         # pass the Dashboard record key as an environment variable
         CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
