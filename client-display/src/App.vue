@@ -125,9 +125,11 @@ limitations under the License.
         });
       }
 
+      // eslint-disable-next-line no-console
       console.log('before loading configs');
       store.dispatch('loadConfigState').then(() => {
-      console.log('configs loaded');
+        // eslint-disable-next-line no-console
+        console.log('before loading configs');
         this.loadingConfig = false;
       });
     },
