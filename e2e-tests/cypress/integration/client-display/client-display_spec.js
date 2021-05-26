@@ -332,7 +332,7 @@ describe('Client Display Tests', () => {
         cy.matchSnapshotImage('Skill-Dependency', snapshotOptions);
     });
 
-    it.only('skilltree brand should link to docs', () => {
+    it('skilltree brand should link to docs', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1);
 
