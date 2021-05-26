@@ -28,10 +28,10 @@ const mutations = {
 };
 
 const actions = {
-  loadConfigState({ commit }) {
-    const serviceUrl = 'http://localhost:8082';
+  loadConfigState({ commit, rootState }) {
+    const url = rootState.serviceUrl;
     return new Promise((resolve, reject) => {
-      axios.get(`${serviceUrl}/public/clientDisplay/config`, {
+      axios.get(`${url}/public/clientDisplay/config`, {
         withCredentials: false,
       }).then((result) => {
         commit('setConfig', result.data);

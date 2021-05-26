@@ -178,15 +178,11 @@ jobs:
         parallel: true
         group: 'skills-service tests'
         tag: "${{ github.workflow }}"
-        env: TZ='UTC',DEBUG='cypress:electron'
-        browser: chrome
       env:
         # pass the Dashboard record key as an environment variable
         CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
         # pass GitHub token to allow accurately detecting a build vs a re-run build
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        TZ: 'UTC'
-        DEBUG: 'cypress:electron'
 
     - name: upload result artifacts
       if: ${{ always() }}

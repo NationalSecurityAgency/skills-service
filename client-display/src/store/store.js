@@ -36,10 +36,6 @@ const themeModule = {
 };
 
 export default new Vuex.Store({
-  modules: {
-    themeModule,
-    config,
-  },
   state: {
     authToken: null,
     isAuthenticating: false,
@@ -52,6 +48,10 @@ export default new Vuex.Store({
     serviceUrl: null,
     authenticator: null,
     internalBackButton: true,
+  },
+  modules: {
+    themeModule,
+    config,
   },
   mutations: {
     authToken(state, authToken) {
@@ -88,6 +88,7 @@ export default new Vuex.Store({
       state.projectId = projectId;
     },
     serviceUrl(state, serviceUrl) {
+      console.log(`setting serviceUrl: ${serviceUrl}`);
       // eslint-disable-next-line no-param-reassign
       state.serviceUrl = serviceUrl;
     },
