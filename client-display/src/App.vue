@@ -72,6 +72,7 @@ limitations under the License.
       const vm = this;
       if (this.isDevelopmentMode()) {
         this.configureDevelopmentMode();
+        this.loadConfigs();
       } else {
         const handshake = new Postmate.Model({
           updateAuthenticationToken(authToken) {
@@ -122,14 +123,17 @@ limitations under the License.
 
           // No scroll bars for iframe.
           document.body.style['overflow-y'] = 'hidden';
+
+          this.loadConfigs();
         });
       }
-
-      store.dispatch('loadConfigState').finally(() => {
-        this.loadingConfig = false;
-      });
     },
     methods: {
+      loadConfigs() {
+        store.dispatch('loadConfigState').finally(() => {
+          this.loadingConfig = false;
+        });
+      },
       handleTheming(theme) {
         if (theme) {
           const themeResArtifacts = ThemeHelper.build(theme);
