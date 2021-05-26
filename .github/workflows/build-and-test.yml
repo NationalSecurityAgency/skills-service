@@ -125,9 +125,6 @@ jobs:
 
   ui-tests-against-h2:
     runs-on: ubuntu-latest
-    # Cypress Docker image with Chrome v78
-    # and Firefox v70 pre-installed
-    container: cypress/browsers:node12.13.0-chrome78-ff70
     needs: [build-skills-service-for-ui-tests]
     strategy:
       # when one test fails, DO NOT cancel the other
