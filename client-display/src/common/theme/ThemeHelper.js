@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 export default {
-  nonCSSConfig: ['charts', 'landingPageTitle', 'earnedTodayColor', 'beforeTodayColor'],
+  nonCSSConfig: ['charts', 'landingPageTitle', 'earnedTodayColor', 'beforeTodayColor', 'disableSkillTreeBrand'],
   bothCssAndThemModule: ['progressIndicators', 'pageTitleTextColor'],
   selectorKey: {
     maxWidth: {

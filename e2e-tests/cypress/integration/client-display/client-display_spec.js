@@ -332,5 +332,15 @@ describe('Client Display Tests', () => {
         cy.matchSnapshotImage('Skill-Dependency', snapshotOptions);
     });
 
+    it.only('skilltree brand should link to docs', () => {
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+
+        // ensure brand exist
+        cy.cdVisit('/');
+        cy.get('[data-cy="skillTreePoweredBy"]').contains('powered by');
+        cy.get('[data-cy="skillTreePoweredBy"] a').should("have.attr", "href", "https://code.nsa.gov/skills-docs");
+    });
+
 });
 

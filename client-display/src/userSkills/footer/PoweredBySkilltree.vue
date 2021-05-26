@@ -14,9 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="p-1 poweredByContainer text-lowercase"
+  <div v-if="!disabled"
+       class="p-1 poweredByContainer text-lowercase"
        @mouseover="isHovering = true"
-       @mouseout="isHovering = false">
+       @mouseout="isHovering = false"
+       data-cy="skillTreePoweredBy">
     <a :href="docsHost" target="_blank">
       <div class="poweredByLabel pb-2 skills-page-title-text-color"
            :class="{'animate__animated':animatePowerByLabel, 'animate__backInUp' : animatePowerByLabel}">powered by
@@ -46,6 +48,9 @@ limitations under the License.
       },
       docsHost() {
         return this.$store.getters.config ? this.$store.getters.config.docsHost : 'http://somedocs.com';
+      },
+      disabled() {
+        return this.$store.state.themeModule.disableSkillTreeBrand;
       },
     },
   };
