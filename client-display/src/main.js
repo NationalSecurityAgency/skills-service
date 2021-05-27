@@ -63,8 +63,6 @@ marked.setOptions({
   renderer,
 });
 
-// eslint-ignore-next-line
-console.log('Creating main.js...');
 new Vue({
     router,
     store,
