@@ -117,7 +117,6 @@ router.afterEach(debounce((to) => {
      path: to.path,
      fullPath: to.fullPath,
      name: to.name,
-     params: to.params,
      query: to.query,
      currentLocation: window.location.toString(),
      historySize: window.history.length,

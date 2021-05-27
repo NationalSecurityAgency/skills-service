@@ -33,6 +33,7 @@ limitations under the License.
 
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
   import store from '@/store/store';
+  import NavigationErrorMixin from '@/common/utilities/NavigationErrorMixin';
   import NewSoftwareVersionComponent from '@/common/softwareVersion/NewSoftwareVersion';
   import DevModeMixin from '@/dev/DevModeMixin';
   import ThemeHelper from './common/theme/ThemeHelper';
@@ -60,7 +61,7 @@ limitations under the License.
   });
 
   export default {
-    mixins: [DevModeMixin],
+    mixins: [DevModeMixin, NavigationErrorMixin],
     components: { SkillsSpinner, NewSoftwareVersionComponent },
     data() {
       return {
@@ -70,11 +71,12 @@ limitations under the License.
     },
     created() {
       const vm = this;
+      const path = window.location.pathname;
+      const initialRoute = path.endsWith('index.html') ? '/' : path;
+      vm.handlePush(initialRoute);
+
       if (this.isDevelopmentMode()) {
         this.configureDevelopmentMode();
-        const path = window.location.pathname;
-        const route = path.endsWith('index.html') ? '/' : path;
-        vm.$router.replace(route).catch(() => {});
         this.loadConfigs();
       } else {
         const handshake = new Postmate.Model({
@@ -83,12 +85,12 @@ limitations under the License.
           },
           updateVersion(newVersion) {
             UserSkillsService.setVersion(newVersion);
-            vm.$router.push({
+            vm.handlePush({
               name: 'home',
             });
           },
           navigate(route) {
-            vm.$router.push(route);
+            vm.handlePush(route);
           },
         });
 
