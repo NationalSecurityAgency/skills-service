@@ -210,7 +210,6 @@ limitations under the License.
       },
       keepIt() {
         this.cancellingExpiration = true;
-        console.log('user elected to keep this project, clear flag and reload the project');
         ProjectService.cancelUnusedProjectDeletion(this.projectInternal.projectId).then(() => {
           this.projectInternal.expiring = false;
         }).finally(() => {
