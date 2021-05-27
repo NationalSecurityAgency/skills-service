@@ -19,7 +19,8 @@ limitations under the License.
     class="container-fluid skills-display-container py-2"
     :style="appStyleObject" role="main" aria-label="SkillTree Client Display">
     <new-software-version-component/>
-    <router-view />
+    <skills-spinner :loading="loadingConfig" />
+    <router-view v-if="!loadingConfig"/>
   </div>
 </template>
 
@@ -31,10 +32,11 @@ limitations under the License.
   import debounce from 'lodash/debounce';
 
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
-  import store from '@/store';
+  import store from '@/store/store';
   import NewSoftwareVersionComponent from '@/common/softwareVersion/NewSoftwareVersion';
   import DevModeMixin from '@/dev/DevModeMixin';
   import ThemeHelper from './common/theme/ThemeHelper';
+  import SkillsSpinner from './common/utilities/SkillsSpinner';
 
   const getDocumentHeight = () => {
     const { body } = document;
@@ -59,16 +61,18 @@ limitations under the License.
 
   export default {
     mixins: [DevModeMixin],
-    components: { NewSoftwareVersionComponent },
+    components: { SkillsSpinner, NewSoftwareVersionComponent },
     data() {
       return {
         appStyleObject: {},
+        loadingConfig: true,
       };
     },
     created() {
       const vm = this;
       if (this.isDevelopmentMode()) {
         this.configureDevelopmentMode();
+        this.loadConfigs();
       } else {
         const handshake = new Postmate.Model({
           updateAuthenticationToken(authToken) {
@@ -119,10 +123,17 @@ limitations under the License.
 
           // No scroll bars for iframe.
           document.body.style['overflow-y'] = 'hidden';
+
+          this.loadConfigs();
         });
       }
     },
     methods: {
+      loadConfigs() {
+        store.dispatch('loadConfigState').finally(() => {
+          this.loadingConfig = false;
+        });
+      },
       handleTheming(theme) {
         if (theme) {
           const themeResArtifacts = ThemeHelper.build(theme);

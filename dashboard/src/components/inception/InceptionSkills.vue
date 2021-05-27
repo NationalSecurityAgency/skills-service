@@ -37,6 +37,7 @@ limitations under the License.
         projectId: 'Inception',
         skillsVersion: 0,
         theme: {
+          disableSkillTreeBrand: true,
           backgroundColor: '#f6f8fa',
           landingPageTitle: 'Dashboard Skills',
           maxWidth: '100%',

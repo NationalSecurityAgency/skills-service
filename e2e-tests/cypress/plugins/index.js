@@ -142,6 +142,7 @@ module.exports = (on, config) => {
             console.table(message)
 
             return null;
-        }
+        },
     });
 };
+

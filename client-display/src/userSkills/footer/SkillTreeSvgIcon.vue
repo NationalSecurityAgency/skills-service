@@ -1,0 +1,195 @@
+/*
+Copyright 2020 SkillTree
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+<template>
+  <div class="skilltree-svg-logo">
+    <svg version="1.1" xmlns:x="&ns_extend;" xmlns:i="&ns_ai;" xmlns:graph="&ns_graphs;"
+         xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+         viewBox="0 0 716 384"
+         style="enable-background:new 0 0 716 384;" xml:space="preserve" height="2.5rem">
+    <switch>
+      <g i:extraneous="self">
+    <g id="Layer_1">
+      <g>
+        <path class="st0"
+              :class="{'logo-anim animate__animated anim-arr4': isHovering}" d="M324.9,70.5l58.4-42.4l58.4,42.4c1.3,0.9,2.8,1.4,4.2,1.4c2.2,0,4.4-1,5.8-3c2.3-3.2,1.6-7.7-1.6-10
+          l-62.6-45.5c-2.5-1.8-5.9-1.8-8.4,0l-62.6,45.5c-3.2,2.3-3.9,6.8-1.6,10C317.2,72.1,321.7,72.8,324.9,70.5z"/>
+        <path class="st1"
+              :class="{'logo-anim animate__animated anim-arr3': isHovering}" d="M450.1,99.2l-62.6-45.5c-2.5-1.8-5.9-1.8-8.4,0l-62.6,45.5c-3.2,2.3-3.9,6.8-1.6,10c2.3,3.2,6.8,3.9,10,1.6
+          l58.4-42.4l58.4,42.4c1.3,0.9,2.8,1.4,4.2,1.4c2.2,0,4.4-1,5.8-3C454,106.1,453.3,101.6,450.1,99.2z"/>
+        <path class="st2"
+              :class="{'logo-anim animate__animated anim-arr2': isHovering}" d="M450.1,139.6l-62.6-45.5c-2.5-1.8-5.9-1.8-8.4,0l-62.6,45.5c-3.2,2.3-3.9,6.8-1.6,10
+          c2.3,3.2,6.8,3.9,10,1.6l58.4-42.4l58.4,42.4c1.3,0.9,2.8,1.4,4.2,1.4c2.2,0,4.4-1,5.8-3C454,146.5,453.3,142,450.1,139.6z"/>
+        <path class="st3"
+              :class="{'logo-anim animate__animated  anim-arr1': isHovering}" d="M450.1,180l-62.6-45.5c-2.5-1.8-5.9-1.8-8.4,0L316.5,180c-3.2,2.3-3.9,6.8-1.6,10c2.3,3.2,6.8,3.9,10,1.6
+          l58.4-42.4l58.4,42.4c1.3,0.9,2.8,1.4,4.2,1.4c2.2,0,4.4-1,5.8-3C454,186.9,453.3,182.4,450.1,180z"/>
+        <g>
+          <path class="st4" d="M71.4,316.8c-12.4-3.8-23.9-7.2-23.9-16v-0.4c0-7.7,7-13.5,18-13.5c7.9,0,16.4,2.7,24.3,7.2
+            c0.7,0.4,1.8,0.7,3.1,0.7c3.4,0,6.1-2.7,6.1-5.9c0-2.7-1.6-4.7-3.4-5.7c-9-4.9-19.8-7.9-29.6-7.9c-18.3,0-31.6,10.6-31.6,26.6
+            v0.4c0,17.1,16.2,22.1,30.7,26.2c12.2,3.4,23.2,7,23.2,16.4v0.4c0,9-8.1,14.7-19.2,14.7c-10.1,0-19.9-3.4-29.5-9.9
+            c-0.9-0.7-2.2-1.1-3.4-1.1c-3.4,0-6.1,2.7-6.1,5.9c0,2.3,1.3,4.1,2.5,5c10.1,7.2,23.5,11.7,35.8,11.7
+            c18.5,0,33.1-10.2,33.1-27.8v-0.4C101.3,326.7,85.8,321.2,71.4,316.8z"/>
+          <path class="st4" d="M169.7,317.7l30.4-29.8c1.8-1.8,2.7-3.2,2.7-5.4c0-3.4-2.5-6.5-6.3-6.5c-2.2,0-3.8,0.9-5.4,2.7L140.8,330
+            v-85.2c0-3.8-3.1-7-7-7c-3.8,0-6.8,3.2-6.8,7v118.9c0,4,3.1,7,7,7c4,0,6.8-3.1,6.8-7v-17.8l19.2-19l32.2,40.6
+            c1.8,2.3,3.4,3.2,5.9,3.2c3.8,0,6.6-2.7,6.6-6.5c0-1.8-0.5-3.1-1.8-4.7L169.7,317.7z"/>
+          <path class="st4" d="M237.1,276.1c-3.8,0-6.8,3.2-6.8,7v80.7c0,4,3.1,7,7,7s6.8-3.1,6.8-7v-80.7
+            C244.1,279.1,241,276.1,237.1,276.1z"/>
+          <path class="st4" d="M237.1,240.5c-4.5,0-8.1,2.9-8.1,7.4v2.3c0,4.3,3.6,7.4,8.1,7.4c4.7,0,8.3-3.1,8.3-7.4v-2.3
+            C245.4,243.4,241.8,240.5,237.1,240.5z"/>
+          <path class="st4" d="M284.3,250.4c-3.8,0-6.8,3.2-6.8,7v106.4c0,4,3.1,7,7,7c4,0,6.8-3.1,6.8-7V257.4
+            C291.3,253.6,288.3,250.4,284.3,250.4z"/>
+          <path class="st4" d="M331.6,250.4c-3.8,0-6.8,3.2-6.8,7v106.4c0,4,3.1,7,7,7c4,0,6.8-3.1,6.8-7V257.4
+            C338.6,253.6,335.6,250.4,331.6,250.4z"/>
+          <path class="st4" d="M390.3,363.7c0,4-3,7-7,7c-4.1,0-7.2-3.1-7.2-7V195l-51.1,37.1c-3.2,2.3-7.7,1.6-10-1.6
+            c-2.3-3.2-1.6-7.7,1.6-10l62.6-45.5c2.5-1.8,5.9-1.8,8.4,0l62.6,45.5c3.2,2.3,3.9,6.8,1.6,10c-1.4,1.9-3.6,3-5.8,3
+            c-1.5,0-2.9-0.4-4.2-1.4l-51.2-37.2L390.3,363.7z"/>
+          <path class="st4" d="M474.8,275.7c-11.7,0-25.2,9.3-32,24.8v-17.4c0-4-3.1-7-7-7c-3.8,0-6.8,3.2-6.8,7v80.7c0,4,3.1,7,7,7
+            s6.8-3.2,6.8-7v-31.6c0-26.8,14.7-40.2,32.7-42.4c3.6-0.5,6.1-3.2,6.1-7C481.6,278.8,478.9,275.7,474.8,275.7z"/>
+          <path class="st4" d="M536.6,275c-25.7,0-44.6,21.6-44.6,48.3v0.4c0,28.7,20.8,48.3,46.4,48.3c15.8,0,26.2-5.6,35-14
+            c1.4-1.3,2.2-2.9,2.2-4.5c0-3.2-2.7-5.9-6.1-5.9c-1.6,0-2.9,0.7-4,1.6c-6.8,6.3-15.3,10.8-26.8,10.8
+            c-16.5,0-30.7-11.3-32.7-31.4h67.2c3.4,0,6.5-2.7,6.5-6.5C579.7,297.4,564.1,275,536.6,275z M506,318.3
+            c1.8-18.1,14-31.6,30.2-31.6c18.5,0,28.2,14.7,29.6,31.6H506z"/>
+          <path class="st4" d="M686.1,322.1c0-24.6-15.6-47.1-43.1-47.1c-25.7,0-44.6,21.6-44.6,48.3v0.4c0,28.7,20.8,48.3,46.4,48.3
+            c15.8,0,26.2-5.6,35-14c1.4-1.3,2.2-2.9,2.2-4.5c0-3.2-2.7-5.9-6.1-5.9c-1.6,0-2.9,0.7-4,1.6c-6.8,6.3-15.3,10.8-26.8,10.8
+            c-16.5,0-30.7-11.3-32.7-31.4h67.2C683,328.5,686.1,325.8,686.1,322.1z M612.4,318.3c1.8-18.1,14-31.6,30.2-31.6
+            c18.5,0,28.2,14.7,29.6,31.6H612.4z"/>
+        </g>
+      </g>
+    </g>
+        <g id="Screen_x5F_Lines">
+    </g>
+  </g>
+</switch>
+</svg>
+  </div>
+</template>
+
+<script>
+  export default {
+    name: 'SkillTreeSvgIcon',
+    props: {
+      isHovering: Boolean,
+      logoFill: String,
+    },
+    mounted() {
+      if (this.logoFill && this.logoFill) {
+        const skilltreeItems = document.querySelectorAll('.skilltree-svg-logo .st4');
+        for (let i = 0; i < skilltreeItems.length; i += 1) {
+          skilltreeItems[i].style.fill = this.logoFill;
+        }
+      }
+    },
+  };
+</script>
+
+<style scoped>
+.logo-anim {
+  animation-duration: 1s;
+  animation-iteration-count: infinite;
+}
+
+.anim-arr4 {
+  animation-name: colorArr4;
+}
+
+.anim-arr3 {
+  animation-name: colorArr3;
+}
+
+.anim-arr2 {
+  animation-name: colorArr2;
+}
+
+.anim-arr1 {
+  animation-name: colorArr1;
+}
+
+@keyframes colorArr4 {
+  0% {
+    fill: #E76F51;
+  }
+  60% {
+    fill: #E76F51;
+  }
+  80% {
+    fill: #264653;
+  }
+  96% {
+    fill: #E76F51;
+  }
+}
+
+@keyframes colorArr3 {
+  0% {
+    fill: #F4A261;
+  }
+  40% {
+    fill: #F4A261;
+  }
+  60% {
+    fill: #264653;
+  }
+  96% {
+    fill: #F4A261;
+  }
+}
+
+@keyframes colorArr2 {
+  0% {
+    fill: #E9C369;
+  }
+  20% {
+    fill: #E9C369;
+  }
+  40% {
+    fill: #264653;
+  }
+  96% {
+    fill: #E9C369;
+  }
+}
+
+@keyframes colorArr1 {
+  0% {
+    fill: #2A9D8F;
+  }
+  20% {
+    fill: #264653;
+  }
+  96% {
+    fill: #2A9D8F;
+  }
+}
+
+.st0 {
+  fill: #E76F51;
+}
+
+.st1 {
+  fill: #F4A261;
+}
+
+.st2 {
+  fill: #E9C369;
+}
+
+.st3 {
+  fill: #2A9D8F;
+}
+
+.st4 {
+  fill: #264653;
+}
+</style>

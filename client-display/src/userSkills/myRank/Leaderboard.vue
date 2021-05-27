@@ -115,7 +115,7 @@ limitations under the License.
 </template>
 
 <script>
-  import store from '@/store';
+  import store from '@/store/store';
   import UserSkillsService from '../service/UserSkillsService';
   import BadgeBasedSelector from '../../common/utilities/BadgeBasedSelector';
   import SkillsSpinner from '../../common/utilities/SkillsSpinner';

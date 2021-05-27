@@ -125,20 +125,20 @@ describe('Navigation Tests', () => {
 
     cy.request('POST', `/api/projects/proj1/skills/skill1`, {
       userId: Cypress.env('proxyUser'),
-      timestamp: new Date().getTime()
+      timestamp: now
     })
     cy.request('POST', `/api/projects/proj1/skills/skill1`, {
       userId: Cypress.env('proxyUser'),
-      timestamp: new Date().getTime() - 1000 * 60 * 60 * 24
+      timestamp: yesterday
     })
 
     cy.request('POST', `/api/projects/proj1/skills/skill3`, {
       userId: Cypress.env('proxyUser'),
-      timestamp: new Date().getTime()
+      timestamp: now
     })
     cy.request('POST', `/api/projects/proj1/skills/skill3`, {
       userId: Cypress.env('proxyUser'),
-      timestamp: new Date().getTime() - 1000 * 60 * 60 * 24
+      timestamp: yesterday
     })
 
     cy.request('POST', '/admin/projects/proj1/badges/badge1', {
@@ -525,14 +525,14 @@ describe('Navigation Tests', () => {
   });
 
   it('All skill versions are included in the Client Display', function () {
+    cy.intercept('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
+
     cy.visit('/');
     cy.wait('@allSkillEventsForUser');
 
     cy.get('[data-cy=inception-button]').should('not.exist');
 
     cy.get('[data-cy=project-link-proj1]').click()
-
-    cy.intercept('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
     cy.wait('@pointHistoryChart');
     cy.wrapIframe().contains('Overall Points');
     cy.wrapIframe().contains('Earn up to 1,400 points');

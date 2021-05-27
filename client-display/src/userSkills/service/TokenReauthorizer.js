@@ -16,7 +16,7 @@
 import axios from 'axios';
 import createAuthRefreshInterceptor from 'axios-auth-refresh';
 import router from '@/router';
-import store from '@/store';
+import store from '@/store/store';
 
 // eslint-disable-next-line
 let service = {};

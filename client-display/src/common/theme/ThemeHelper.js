@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 export default {
-  nonCSSConfig: ['charts', 'landingPageTitle', 'earnedTodayColor', 'beforeTodayColor'],
-  bothCssAndThemModule: ['progressIndicators'],
+  nonCSSConfig: ['charts', 'landingPageTitle', 'earnedTodayColor', 'beforeTodayColor', 'disableSkillTreeBrand'],
+  bothCssAndThemModule: ['progressIndicators', 'pageTitleTextColor'],
   selectorKey: {
     maxWidth: {
       selector: 'body #app.skills-display-container',

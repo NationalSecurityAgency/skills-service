@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <div class="card mb-3">
-    <div class="card-body skills-page-title-text-color text-info text-uppercase m-0 py-2">
+    <div class="titleBody card-body skills-page-title-text-color text-info text-uppercase m-0 py-2">
       <div class="row position-absolute" v-if="showBackButton">
         <div class="col">
           <div>
@@ -27,18 +27,29 @@ limitations under the License.
         </div>
       </div>
 
-        <h1 :class="{'ml-5': showBackButton}" data-cy="title" class="skills-title m-0" >
-            <slot/>
-        </h1>
+      <h1 :class="{'mx-5': showBackButton}" data-cy="title" class="skills-title m-0" >
+        <slot/>
+      </h1>
+
+      <div class="row powered-by-row" style="top:0.4rem; right: .5rem;">
+        <div class="col">
+          <powered-by-skilltree class="float-right" :animate-power-by-label="animatePowerByLabel"/>
+        </div>
+      </div>
+
     </div>
   </div>
 </template>
 
 <script>
+  import PoweredBySkilltree from '../../userSkills/footer/PoweredBySkilltree';
+
   export default {
     name: 'SkillsTitle',
+    components: { PoweredBySkilltree },
     props: {
       backButton: { type: Boolean, default: true },
+      animatePowerByLabel: Boolean,
     },
     methods: {
       navigateBack() {
@@ -55,4 +66,16 @@ limitations under the License.
 </script>
 
 <style>
+.titleBody {
+  min-height: 3.5rem !important;
+}
+.powered-by-row {
+  position: absolute !important;
+}
+
+@media (max-width: 675px) {
+  .powered-by-row {
+    position: relative !important;
+  }
+}
 </style>

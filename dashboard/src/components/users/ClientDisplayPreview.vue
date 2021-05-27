@@ -62,6 +62,7 @@ limitations under the License.
         selectedVersion: 0,
         versionOptions: [],
         theme: {
+          disableSkillTreeBrand: true,
           maxWidth: '100%',
           pageTitleFontSize: '1.5rem',
           backButton: {

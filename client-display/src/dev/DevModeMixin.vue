@@ -68,6 +68,14 @@ limitations under the License.
           if (isThemeEnabled) {
             // eslint-disable-next-line global-require
             const theme = require('../../tests/data/theme.json');
+
+            const themeParamProvided = this.$route.query.themeParam;
+            if (themeParamProvided) {
+              const split = themeParamProvided.split('|');
+              const key = split[0];
+              const val = split[1];
+              theme[key] = val;
+            }
             this.handleTheming(theme);
           }
         }

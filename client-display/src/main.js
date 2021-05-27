@@ -19,7 +19,7 @@ import Vue from 'vue';
 import App from '@/App';
 import marked from 'marked';
 import router from '@/router';
-import store from '@/store';
+import store from '@/store/store';
 import 'apexcharts';
 import '@/common/filter/DayJsFilters';
 

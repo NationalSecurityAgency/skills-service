@@ -18,7 +18,7 @@ limitations under the License.
     <skills-spinner :loading="loading.userSkills"/>
 
     <div v-if="!loading.userSkills">
-      <skills-title :back-button="false">{{ pageTitle }}</skills-title>
+      <skills-title :back-button="false" :animate-power-by-label="true">{{ pageTitle }}</skills-title>
 
       <user-skills-header :display-data="displayData" class="mb-3"/>
       <subjects-container v-if="!isSummaryOnly" :subjects="displayData.userSkills.subjects" />

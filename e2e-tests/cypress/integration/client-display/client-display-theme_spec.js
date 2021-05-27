@@ -558,4 +558,17 @@ describe('Client Display Tests', () => {
         })
     }
 
+    it('ability to disable skilltree brand', () => {
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+
+        // ensure brand exist
+        cy.cdVisit('/?enableTheme=true');
+        cy.get('[data-cy="skillTreePoweredBy"]').contains('powered by');
+
+        cy.cdVisit('/?enableTheme=true&themeParam=disableSkillTreeBrand|true');
+        cy.get('[data-cy="skillTreePoweredBy"]').should('not.exist');
+    });
+
+
 });

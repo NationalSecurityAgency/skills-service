@@ -14,12 +14,23 @@
  * limitations under the License.
  */
 
+Cypress.Commands.add("validatePoweredBy", () => {
+    cy.url().then(url => {
+        cy.log(`url: ${url}`);
+        if (!url.includes('disableSkillTreeBrand|true') && !url.includes('disableSkillTreeBrand%7Ctrue')) {
+            cy.get('.titleBody').contains('powered by');
+        }
+    });
+});
+
 Cypress.Commands.add("cdVisit", (url) => {
     cy.visit(`http://localhost:8083${url}`);
+    cy.validatePoweredBy();
 });
 
 Cypress.Commands.add("cdBack", (expectedTitle = 'User Skills') => {
     cy.get('[data-cy=back]').click()
+    cy.validatePoweredBy();
     cy.contains(expectedTitle);
 
     // back button should not exist on the home page, whose title is the default value
@@ -30,6 +41,7 @@ Cypress.Commands.add("cdBack", (expectedTitle = 'User Skills') => {
 
 Cypress.Commands.add("cdClickSubj", (subjIndex, expectedTitle) => {
     cy.get(`.user-skill-subject-tile:nth-child(${subjIndex+1})`).first().click();
+    cy.validatePoweredBy();
     if (expectedTitle){
         cy.contains(expectedTitle);
     }
@@ -42,16 +54,19 @@ Cypress.Commands.add("cdClickSkill", (skillIndex, useProgressBar = true) => {
         cy.get(`[data-cy="skillProgress_index-${skillIndex}"] [data-cy="skillProgressTitle"]`).click();
     }
     cy.contains('Skill Overview')
+    cy.validatePoweredBy();
 });
 
 Cypress.Commands.add("cdClickRank", () => {
     cy.get('[data-cy=myRank]').click();
     cy.contains('Rank Overview');
+    cy.validatePoweredBy();
 });
 
 Cypress.Commands.add("cdClickBadges", () => {
     cy.get('[data-cy=myBadges]').click()
     cy.contains('Badges');
+    cy.validatePoweredBy();
 });
 
 

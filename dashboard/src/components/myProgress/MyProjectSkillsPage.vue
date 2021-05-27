@@ -37,6 +37,7 @@ limitations under the License.
         projectId: this.$route.params.projectId,
         skillsVersion: 2147483647, // max int
         theme: {
+          disableSkillTreeBrand: true,
           landingPageTitle: `PROJECT: ${this.$route.params.projectId}`,
           maxWidth: '100%',
           pageTitleTextColor: '#212529',
