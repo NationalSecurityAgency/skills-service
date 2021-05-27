@@ -127,7 +127,7 @@ describe('Project Errors Tests', () => {
     cy.get('[data-cy=pageHeaderStat_Issues]').contains('2');
   });
 
-  it.only('issues count on administrator home page is correct', () => {
+  it('issues count on administrator home page is correct', () => {
     cy.intercept('GET', '/admin/projects').as('getProjects');
 
     cy.visit('/administrator');
