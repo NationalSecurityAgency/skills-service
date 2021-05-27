@@ -26,24 +26,20 @@ limitations under the License.
           </b-button>
       </div>
       <div slot="subSubTitle" v-if="project">
-          <div data-cy="projectCreated">
-            <span class="text-secondary small font-italic">Created: </span><slim-date-cell :value="project.created"/>
-          </div>
-          <div data-cy="projectLastReportedSkill">
-            <span class="text-secondary small font-italic">Last reported Skill: </span><slim-date-cell :value="project.lastReportedSkill" :fromStartOfDay="true"/>
-          </div>
-        <b-button-group>
+        <div data-cy="projectCreated">
+          <project-dates :created="project.created" :last-reported-skill="project.lastReportedSkill" />
+        </div>
+        <b-button-group class="mt-3" size="sm">
           <b-button @click="displayEditProject"
                     ref="editProjectButton"
-                    class="btn btn-outline-primary mr-1"
-                    size="sm"
+                    class="btn btn-outline-primary"
                     variant="outline-primary"
                     data-cy="btn_edit-project"
                     :aria-label="'edit Project '+project.projectId">
             <span class="d-none d-sm-inline">Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
           </b-button>
           <b-button target="_blank" v-if="project" :to="{ name:'MyProjectSkills', params: { projectId: project.projectId } }"
-                    data-cy="projectPreview" size="sm"
+                    data-cy="projectPreview"
                     variant="outline-primary" :aria-label="'preview client display for project'+project.name">
             <span class="d-sm-line">Preview</span> <i class="fas fa-eye" style="font-size:1rem;" aria-hidden="true"/>
           </b-button>
@@ -75,21 +71,21 @@ limitations under the License.
 <script>
   import { createNamespacedHelpers } from 'vuex';
 
+  import ProjectDates from '@/components/projects/ProjectDates';
   import Navigation from '../utils/Navigation';
   import PageHeader from '../utils/pages/PageHeader';
-  import SlimDateCell from '../utils/table/SlimDateCell';
   import dayjs from '../../DayJsCustomizer';
-  import ProjectService from './ProjectService';
   import EditProject from './EditProject';
+  import ProjectService from './ProjectService';
 
   const { mapActions, mapGetters, mapMutations } = createNamespacedHelpers('projects');
 
   export default {
     name: 'ProjectPage',
     components: {
+      ProjectDates,
       PageHeader,
       Navigation,
-      SlimDateCell,
       EditProject,
     },
     data() {

@@ -558,50 +558,45 @@ describe('Projects Tests', () => {
       name: "proj2"
     });
     cy.visit('/administrator/');
-    cy.get('[data-cy="projOptions_proj1"]').click();
-    cy.get('[data-cy="projOptions_proj1"] [data-cy=editMenuEditBtn]').click();
+    const proj1EditBtn = '[data-cy="projectCard_proj1"] [data-cy="editProjBtn"]';
+    const proj2EditBtn = '[data-cy="projectCard_proj2"] [data-cy="editProjBtn"]';
+
+    cy.get(proj1EditBtn).click();
     cy.get('[data-cy=projectName]').should('be.visible');
     cy.get('body').type('{esc}{esc}');
-    cy.get('[data-cy="projectCard_proj1"] div.project-settings .dropdown-toggle').should('have.focus');
+    cy.get(proj1EditBtn).should('have.focus');
 
-    cy.get('[data-cy="projOptions_proj1"]').click();
-    cy.get('[data-cy="projOptions_proj1"] [data-cy=editMenuEditBtn]').click();
+    cy.get(proj1EditBtn).click();
     cy.get('[data-cy=closeProjectButton]').click();
-    cy.get('[data-cy="projectCard_proj1"] div.project-settings .dropdown-toggle').should('have.focus');
+    cy.get(proj1EditBtn).should('have.focus');
 
-    cy.get('[data-cy="projOptions_proj1"]').click();
-    cy.get('[data-cy="projOptions_proj1"] [data-cy=editMenuEditBtn]').click();
+    cy.get(proj1EditBtn).click();
     cy.get('[data-cy=projectName]').type('test 123');
     cy.get('[data-cy=saveProjectButton]').click();
-    cy.get('[data-cy="projectCard_proj1"] div.project-settings .dropdown-toggle').should('have.focus');
+    cy.get(proj1EditBtn).should('have.focus');
 
-    cy.get('[data-cy="projOptions_proj1"]').click();
-    cy.get('[data-cy="projOptions_proj1"] [data-cy=editMenuEditBtn]').click();
+    cy.get(proj1EditBtn).click();
     cy.get('[aria-label=Close]').click();
-    cy.get('[data-cy="projectCard_proj1"] div.project-settings .dropdown-toggle').should('have.focus');
+    cy.get(proj1EditBtn).should('have.focus');
 
     //project 2
-    cy.get('[data-cy="projOptions_proj2"]').click();
-    cy.get('[data-cy="projOptions_proj2"] [data-cy=editMenuEditBtn]').click();
+    cy.get(proj2EditBtn).click();
     cy.get('[data-cy=projectName]').should('be.visible');
     cy.get('body').type('{esc}{esc}');
-    cy.get('[data-cy="projectCard_proj2"] div.project-settings .dropdown-toggle').should('have.focus');
+    cy.get(proj2EditBtn).should('have.focus');
 
-    cy.get('[data-cy="projOptions_proj2"]').click();
-    cy.get('[data-cy="projOptions_proj2"] [data-cy=editMenuEditBtn]').click();
+    cy.get(proj2EditBtn).click();
     cy.get('[data-cy=closeProjectButton]').click();
-    cy.get('[data-cy="projectCard_proj2"] div.project-settings .dropdown-toggle').should('have.focus');
+    cy.get(proj2EditBtn).should('have.focus');
 
-    cy.get('[data-cy="projOptions_proj2"]').click();
-    cy.get('[data-cy="projOptions_proj2"] [data-cy=editMenuEditBtn]').click();
+    cy.get(proj2EditBtn).click();
     cy.get('[data-cy=projectName]').type('test 123');
     cy.get('[data-cy=saveProjectButton]').click();
-    cy.get('[data-cy="projectCard_proj2"] div.project-settings .dropdown-toggle').should('have.focus');
+    cy.get(proj2EditBtn).should('have.focus');
 
-    cy.get('[data-cy="projOptions_proj2"]').click();
-    cy.get('[data-cy="projOptions_proj2"] [data-cy=editMenuEditBtn]').click();
+    cy.get(proj2EditBtn).click();
     cy.get('[aria-label=Close]').click();
-    cy.get('[data-cy="projectCard_proj2"] div.project-settings .dropdown-toggle').should('have.focus');
+    cy.get(proj2EditBtn).should('have.focus');
   });
 
   it('new level dialog should return focus to new level button', () => {
@@ -753,8 +748,8 @@ describe('Projects Tests', () => {
     cy.wait('@getProjects');
     cy.wait('@loadInception');
 
-    cy.get('[data-cy=projectCreated]').should('be.visible').contains('today');
-    cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('never');
+    cy.get('[data-cy=projectCreated]').should('be.visible').contains('Today');
+    cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('Never');
 
     const now = dayjs().utc();
     cy.reportSkill('my_project_123', 1, 'user@skills.org', now.subtract(1, 'year').format('YYYY-MM-DD HH:mm'), false);
@@ -762,14 +757,14 @@ describe('Projects Tests', () => {
     cy.visit('/administrator/');
     cy.wait('@getProjects');
     cy.wait('@loadInception');
-    cy.get('[data-cy=projectCreated]').should('be.visible').contains('today');
+    cy.get('[data-cy=projectCreated]').should('be.visible').contains('Today');
     cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('a year ago');
 
     cy.reportSkill('my_project_123', 1, 'user@skills.org', now.subtract(2, 'months').format('YYYY-MM-DD HH:mm'), false);
     cy.visit('/administrator/');
     cy.wait('@getProjects');
     cy.wait('@loadInception');
-    cy.get('[data-cy=projectCreated]').should('be.visible').contains('today');
+    cy.get('[data-cy=projectCreated]').should('be.visible').contains('Today');
     cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('2 months ago');
 
     cy.reportSkill('my_project_123', 1, 'user@skills.org', now.subtract(7, 'days').utc().format('YYYY-MM-DD HH:mm'), false);
@@ -777,7 +772,7 @@ describe('Projects Tests', () => {
     cy.visit('/administrator/');
     cy.wait('@getProjects');
     cy.wait('@loadInception');
-    cy.get('[data-cy=projectCreated]').should('be.visible').contains('today');
+    cy.get('[data-cy=projectCreated]').should('be.visible').contains('Today');
     cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('7 days ago');
   });
 
@@ -811,8 +806,8 @@ describe('Projects Tests', () => {
     cy.wait('@loadProj');
     cy.wait('@loadInception');
 
-    cy.get('[data-cy=projectCreated]').should('be.visible').contains('today');
-    cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('never');
+    cy.get('[data-cy=projectCreated]').should('be.visible').contains('Today');
+    cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('Never');
 
     const now = dayjs().utc()
     cy.reportSkill('my_project_123', 1, 'user@skills.org', now.subtract(1, 'year').utc().format('YYYY-MM-DD HH:mm'), false);
@@ -820,21 +815,21 @@ describe('Projects Tests', () => {
     cy.visit('/administrator/projects/my_project_123');
     cy.wait('@loadProj');
     cy.wait('@loadInception');
-    cy.get('[data-cy=projectCreated]').should('be.visible').contains('today');
+    cy.get('[data-cy=projectCreated]').should('be.visible').contains('Today');
     cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('a year ago');
 
     cy.reportSkill('my_project_123', 1, 'user@skills.org', now.subtract(2, 'months').utc().format('YYYY-MM-DD HH:mm'), false);
     cy.visit('/administrator/projects/my_project_123');
     cy.wait('@loadProj');
     cy.wait('@loadInception');
-    cy.get('[data-cy=projectCreated]').should('be.visible').contains('today');
+    cy.get('[data-cy=projectCreated]').should('be.visible').contains('Today');
     cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('2 months ago');
 
     cy.reportSkill('my_project_123', 1, 'user@skills.org', now.subtract(7, 'days').utc().format('YYYY-MM-DD HH:mm'), false);
     cy.visit('/administrator/projects/my_project_123');
     cy.wait('@loadProj');
     cy.wait('@loadInception');
-    cy.get('[data-cy=projectCreated]').should('be.visible').contains('today');
+    cy.get('[data-cy=projectCreated]').should('be.visible').contains('Today');
     cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('7 days ago');
   });
 
@@ -938,23 +933,32 @@ describe('Projects Tests', () => {
     cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
   });
 
-  it('When more than 10 projects then projects should be displayed in a table', () => {
-    for (let i = 1; i <= 20; i += 1) {
-      cy.request('POST', `/app/projects/MyNewtestProject${i}`, {
-        projectId: `MyNewtestProject${i}`,
-        name: `My New test Project ${i}`
-      })
-    }
-
-    cy.intercept('GET', '/app/projects').as('loadProjects');
-    cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
-
-    cy.visit('/administrator/');
-    cy.wait('@loadUserInfo');
-    cy.wait('@loadProjects');
-
-    cy.get('[data-cy="projectsTable"]').should('exist')
-    cy.get('[data-cy=skillsBTableTotalRows]').contains(20);
+  it('navigate to subjects by click on project name', () => {
+    cy.createProject(1);
+    cy.visit('/administrator')
+    cy.get('[data-cy="projCard_proj1_manageBtn"]');
+    cy.get('[data-cy="projCard_proj1_manageLink"]').click();
+    cy.contains('No Subjects Yet');
   });
+
+    it('When more than 10 projects then projects should be displayed in a table', () => {
+        for (let i = 1; i <= 20; i += 1) {
+            cy.request('POST', `/app/projects/MyNewtestProject${i}`, {
+                projectId: `MyNewtestProject${i}`,
+                name: `My New test Project ${i}`
+            })
+        }
+
+        cy.intercept('GET', '/app/projects').as('loadProjects');
+        cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
+
+        cy.visit('/administrator/');
+        cy.wait('@loadUserInfo');
+        cy.wait('@loadProjects');
+
+        cy.get('[data-cy="projectsTable"]').should('exist')
+        cy.get('[data-cy=skillsBTableTotalRows]').contains(20);
+    });
+
 });
 

@@ -14,13 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-    <span v-if="!value" :class="cssClass">
-      never
+    <span v-if="!value" class="text-primary">
+      <b-badge variant="warning">Never</b-badge>
     </span>
-    <span v-else-if="isToday(value)" :class="cssClass">
-      today
+    <span v-else-if="isToday(value)" class="text-primary">
+      <b-badge variant="info">Today</b-badge>
     </span>
-    <span v-else :class="cssClass">
+    <span v-else class="text-primary small">
       {{ fromNow }}
     </span>
 </template>
