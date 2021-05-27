@@ -118,6 +118,14 @@ class AdminController {
         return new RequestResult(success: true)
     }
 
+    @RequestMapping(value="/projects/{id}/cancelExpiration")
+    RequestResult cancelExpiration(@PathVariable("id") String projectId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        projAdminService.cancelProjectExpiration(projectId)
+        return new RequestResult(success: true)
+    }
+
+
     @RequestMapping(value = "/projects/{id}", method = RequestMethod.DELETE)
     void deleteProject(@PathVariable("id") String projectId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")

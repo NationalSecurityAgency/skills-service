@@ -18,6 +18,7 @@ limitations under the License.
     <div class="card-body px-1">
       <loading-container :is-loading="loading">
         <div class="container-fluid">
+          <slot name="banner"></slot>
           <div class="row">
             <div class="pageHeaderTitle col-lg-5 col-xxxl-3 text-center text-lg-left">
               <h3><i v-if="options.icon" class="has-text-link" :class="options.icon"/> {{ options.title }}<slot name="right-of-header"></slot></h3>

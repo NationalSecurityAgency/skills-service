@@ -31,4 +31,7 @@ class ProjectResult extends SimpleProjectResult{
     boolean pinned
 
     int numErrors
+
+    boolean expiring
+    Date expirationTriggered
 }

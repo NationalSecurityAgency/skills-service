@@ -17,11 +17,14 @@ package skills.storage.model
 
 import groovy.transform.ToString
 import org.hibernate.annotations.Where
+import org.springframework.data.annotation.LastModifiedDate
+import org.springframework.data.jpa.domain.support.AuditingEntityListener
 
 import javax.persistence.*
 
 @Entity
 @Table(name = 'project_definition')
+@EntityListeners(AuditingEntityListener)
 @ToString(includeNames = true, excludes = ['subjects', 'badges', 'customIcons'])
 class ProjDef implements Serializable {
 
@@ -54,4 +57,8 @@ class ProjDef implements Serializable {
 
     @Column(name="created", updatable = false, insertable = false)
     Date created
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @LastModifiedDate
+    Date updated
 }

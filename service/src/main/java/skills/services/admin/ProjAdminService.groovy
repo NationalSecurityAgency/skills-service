@@ -98,6 +98,9 @@ class ProjAdminService {
     @Autowired
     UserEventsRepo eventsRepo
 
+    @Autowired
+    ProjectExpirationService projectExpirationService
+
     @Transactional()
     void saveProject(String originalProjectId, ProjectRequest projectRequest, String userIdParam = null) {
         assert projectRequest?.projectId
@@ -344,6 +347,11 @@ class ProjAdminService {
         }
     }
 
+    @Transactional
+    void cancelProjectExpiration(String projectId) {
+        projectExpirationService.cancelExpiration(projectId)
+    }
+
     @Profile
     private ProjectResult convert(ProjSummaryResult definition, Map<String, Integer> projectIdSortOrder, Set<String> pinnedProjectIds = []) {
         Integer order = projectIdSortOrder?.get(definition.projectId)
@@ -352,7 +360,9 @@ class ProjAdminService {
                 numSubjects: definition.numSubjects,
                 displayOrder: order != null ? order : 0,
                 pinned: pinnedProjectIds?.contains(definition.projectId),
-                created: definition.created
+                created: definition.created,
+                expiring: definition.expiring,
+                expirationTriggered: definition.expirationTriggered
         )
         res.numBadges = definition.numBadges
         res.numSkills = definition.numSkills

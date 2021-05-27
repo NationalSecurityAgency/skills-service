@@ -19,7 +19,6 @@ public enum Settings {
     LEVEL_AS_POINTS("level.points.enabled"),
     PRODUCTION_MODE("production.mode.enabled"),
     EXPIRING_UNUSED("expiration.expiring.unused"),
-    EXPIRATION_CANCELLED("expiration.cancelled"),
     GLOBAL_PUBLIC_URL("public_url"),
     GLOBAL_RESET_TOKEN_EXPIRATION("password_reset_token_expiration"),
     GLOBAL_FROM_EMAIL("from_email"),

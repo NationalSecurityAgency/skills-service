@@ -85,6 +85,9 @@ skills:
       retainFailedNotificationsForNumSecs: 172800
     expireUnusedProjectsOlderThan: 180
     expirationGracePeriod: 7
+    projectExpirationSchedule: "* 4 0 * * *"
+    expiringProjectNotificationSchedule: "* 15 0 * * *"
+    deleteUnusedProjectSchedule: "* 55 23 * * *"
     ui:
       dashboardVersion: @pom.version@
       buildTimestamp: @maven.build.timestamp@

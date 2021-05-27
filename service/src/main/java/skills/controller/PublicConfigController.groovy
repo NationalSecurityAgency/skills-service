@@ -51,6 +51,12 @@ class PublicConfigController {
     @Value('#{"${skills.authorization.oAuthOnly:false}"}')
     Boolean oAuthOnly
 
+    @Value('#{"${skills.config.expirationGracePeriod:7}"}')
+    int expirationGracePeriod
+
+    @Value('#{"${skills.config.expireUnusedProjectsOlderThan:180}"}')
+    int expireUnusedProjectsOlderThan
+
     @Autowired
     SettingsService settingsService
 
@@ -64,6 +70,8 @@ class PublicConfigController {
         res["authMode"] = authMode.name()
         res["needToBootstrap"] = !accessSettingsStorageService.rootAdminExists()
         res["oAuthOnly"] = authMode == AuthMode.FORM && oAuthOnly
+        res["expirationGracePeriod"] = expirationGracePeriod
+        res["expireUnusedProjectsOlderThan"] = expireUnusedProjectsOlderThan
         List<SettingsResult> customizationSettings = settingsService.getGlobalSettingsByGroup(SystemSettingsService.CUSTOMIZATION)
         customizationSettings?.each {
             if (Settings.GLOBAL_CUSTOM_HEADER.settingName == it.setting) {
