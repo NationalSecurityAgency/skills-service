@@ -196,13 +196,12 @@ class UnusedProjectExpirationSpecs extends DefaultIntSpec{
         assert WaitFor.wait { greenMail.getReceivedMessages().size() > 2 }
         List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
 
-        Pattern plaintTextMatch = ~/(?s)Your SkillTree Project Inception, created on \d{4}-\d{2}-\d{2} hasn't been used in at least \d+ days?.*If you take no action, Project Inception will be deleted in \d+ days? \(\d{4}-\d{2}-\d{2}\).*To keep your Project, visit http:\/\/localhost:\d+\/administrator\/projects\/Inception in the SkillTree dashboard and click the 'Keep' button.*/
-        Pattern htmlTextMatch = ~/(?s)<h1>Your SkillTree Project Isn't Being Used!<\/h1>.+?<p>Your SkillTree Project Inception, created on \d{4}-\d{2}-\d{2} hasn't been used in at least \d+ days?.<\/p>.+?<p>If you take no action, Project Inception will be deleted in \d+ days? (\d{4}-\d{2}-\d{2}).<\/p>.+?<p>To keep your project, visit <a href="http:\/\/localhost:\d+\/administrator\/projects\/Inception">Inception<\/a> in the SkillTree dashboard and click the 'Keep' button.<\/p>.*/
+        Pattern plaintTextMatch = ~/(?s)Your SkillTree Project Inception, created on \d{4}-\d{2}-\d{2} hasn't been used in at least \d+ days?.*If you take no action, Project Inception will be deleted in \d+ days? \(\d{4}-\d{2}-\d{2}\).*If you wish to stop receiving these emails, visit http:\/\/localhost:\d+\/administrator\/projects\/Inception in the SkillTree dashboard and click the 'Keep' button or delete your Project.*/
 
         Pattern h1 = ~/(?s)<h1>Your SkillTree Project Isn't Being Used!<\/h1>.+?/
         Pattern p1 = ~/(?s)<p>Your SkillTree Project Test Project#1, created on \d{4}-\d{2}-\d{2} hasn't been used in at least \d+ days?.<\/p>.+?/
         Pattern p2 = ~/(?s)<p>If you take no action, Project Test Project#1 will be deleted in \d+ days? \(\d{4}-\d{2}-\d{2}\).<\/p>.+?/
-        Pattern p3 = ~/(?s)<p>To keep your project, visit <a href="http:\/\/localhost:\d+\/administrator\/projects\/TestProject1">Test Project#1<\/a> in the SkillTree dashboard and click the 'Keep' button.<\/p>.*/
+        Pattern p3 = ~/(?s)<p>If you wish to stop receiving these emails, visit <a href="http:\/\/localhost:\d+\/administrator\/projects\/TestProject1">Test Project#1<\/a> in the SkillTree dashboard and click the 'Keep' button or delete your Project.<\/p>.*/
 
         then:
         emails.size() == 3
@@ -215,4 +214,5 @@ class UnusedProjectExpirationSpecs extends DefaultIntSpec{
         p2.matcher(emails[1].html).find()
         p3.matcher(emails[1].html).find()
     }
+
 }

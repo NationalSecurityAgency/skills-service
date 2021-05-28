@@ -108,6 +108,7 @@ class ProjectExpirationService {
         List<ProjDef> expiringProjects = projDefRepo.getExpiringProjects(cutoff)
         log.info("identified [${expiringProjects?.size()}] Projects flagged for expiration on or before [${cutoff}], deleting now")
         expiringProjects.each {
+            log.info("Project [${it.name} (${it.projectId}) is being deleted as it appears to no longer be used and no action was taken to retain it")
             projDefRepo.delete(it)
         }
         log.info("removed [${expiringProjects.size()}] expired projects")

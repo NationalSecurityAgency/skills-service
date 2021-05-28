@@ -28,6 +28,12 @@ class ScheduledProjectExpiration {
     @Autowired
     ProjectExpirationService projectExpirationService
 
+    @Autowired
+    FeatureService featureService
+
+    @Value('#{"${skills.config.unusedProjectDeletionEnabled:true}"}')
+    Boolean unusedProjectDeletionEnabled = true
+
     @Value('#{"${skills.config.expireUnusedProjectsOlderThan:180}"}')
     int unusedProjectExpirationInDays
 
@@ -36,21 +42,21 @@ class ScheduledProjectExpiration {
 
     @Scheduled(cron='#{"${skills.config.projectExpirationSchedule:* 4 0 * * *}"}')
     public void flagUnusedProjectsForDeletion(){
-        log.info("running scheduled project expiration")
+        if (!unusedProjectDeletionEnabled) {
+            log.debug("skills.config.unusedProjectDeletionEnabled is set to false, unused project deletion will not occur")
+            return
+        }
+        if (!featureService.isEmailServiceFeatureEnabled()) {
+            log.debug("Email Settings have not configured for this instance, unused project deletion will not occur")
+            return
+        }
+        log.info("identifying projects that haven't been used in [${unusedProjectExpirationInDays}] days")
         Date expireOlderThan = new Date().minus(unusedProjectExpirationInDays)
         projectExpirationService.flagOldProjects(expireOlderThan)
-    }
-
-    @Scheduled(cron='#{"${skills.config.deleteUnusedProjectSchedule:* 55 23 * * *}"}')
-    public void deleteUnusedProjects() {
-        log.info("deleting projects that have been flagged for expiration where the grace period has expired")
+        log.info("deleting projects whose grace period has expired")
         Date cutoff = new Date().minus(unusedProjectExpirationGracePeriodInDays)
         projectExpirationService.deleteUnusedProjects(cutoff)
-    }
-
-    @Scheduled(cron='#{"${skills.config.expiringProjectNotificationSchedule:* 15 0 * * *}"}')
-    public void sendNofifications() {
-        Date cutoff = new Date().minus(unusedProjectExpirationGracePeriodInDays)
+        log.info("sending pending deletion notifications to Project Administrators")
         projectExpirationService.notifyGracePeriodProjectAdmins(cutoff)
     }
 
