@@ -941,6 +941,121 @@ describe('Projects Tests', () => {
     cy.contains('No Subjects Yet');
   });
 
+  it('delete project', () => {
+    cy.createProject(1);
+    cy.createProject(2);
+    cy.createProject(3);
+    cy.visit('/administrator')
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="deleteProjBtn"]').click();
+    cy.contains('Project ID [proj1]. Delete Action')
+    cy.contains('YES, Delete It').click();
+    cy.get('[data-cy="projectCard_proj1"]').should('not.exist');
+    cy.get('[data-cy="projectCard_proj2"]').should('exist');
+    cy.get('[data-cy="projectCard_proj3"]').should('exist');
+
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="deleteProjBtn"]').click();
+    cy.contains('Project ID [proj2]. Delete Action')
+    cy.contains('Cancel').click();
+    cy.get('[data-cy="projectCard_proj2"]').should('exist');
+    cy.get('[data-cy="projectCard_proj3"]').should('exist');
+  });
+
+  it('project sort management', () => {
+    cy.createProject(1);
+    cy.createProject(2);
+    cy.createProject(3);
+    cy.visit('/administrator')
+    cy.get('[data-cy="projectCard"]').should('have.length', 3).as('projects');
+    cy.get('@projects').eq(0).should('contain.text', 'This is project 1');
+    cy.get('@projects').eq(1).should('contain.text', 'This is project 2');
+    cy.get('@projects').eq(2).should('contain.text', 'This is project 3');
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjUpBtn"]').should('be.disabled');
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjDownBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="moveProjUpBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="moveProjDownBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj3"] [data-cy="moveProjUpBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj3"] [data-cy="moveProjDownBtn"]').should('be.disabled');
+
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjDownBtn"]').click();
+    cy.get('[data-cy="projectCard"]').should('have.length', 3).as('projects');
+    cy.get('@projects').eq(0).should('contain.text', 'This is project 2');
+    cy.get('@projects').eq(1).should('contain.text', 'This is project 1');
+    cy.get('@projects').eq(2).should('contain.text', 'This is project 3');
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="moveProjUpBtn"]').should('be.disabled');
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="moveProjDownBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjUpBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjDownBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj3"] [data-cy="moveProjUpBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj3"] [data-cy="moveProjDownBtn"]').should('be.disabled');
+
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjDownBtn"]').click();
+    cy.get('[data-cy="projectCard"]').should('have.length', 3).as('projects');
+    cy.get('@projects').eq(0).should('contain.text', 'This is project 2');
+    cy.get('@projects').eq(1).should('contain.text', 'This is project 3');
+    cy.get('@projects').eq(2).should('contain.text', 'This is project 1');
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="moveProjUpBtn"]').should('be.disabled');
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="moveProjDownBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj3"] [data-cy="moveProjUpBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj3"] [data-cy="moveProjDownBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjUpBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjDownBtn"]').should('be.disabled');
+
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjUpBtn"]').click();
+    cy.get('[data-cy="projectCard"]').should('have.length', 3).as('projects');
+    cy.get('@projects').eq(0).should('contain.text', 'This is project 2');
+    cy.get('@projects').eq(1).should('contain.text', 'This is project 1');
+    cy.get('@projects').eq(2).should('contain.text', 'This is project 3');
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="moveProjUpBtn"]').should('be.disabled');
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="moveProjDownBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjUpBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjDownBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj3"] [data-cy="moveProjUpBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj3"] [data-cy="moveProjDownBtn"]').should('be.disabled');
+
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjUpBtn"]').click();
+    cy.get('[data-cy="projectCard"]').should('have.length', 3).as('projects');
+    cy.get('@projects').eq(0).should('contain.text', 'This is project 1');
+    cy.get('@projects').eq(1).should('contain.text', 'This is project 2');
+    cy.get('@projects').eq(2).should('contain.text', 'This is project 3');
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjUpBtn"]').should('be.disabled');
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjDownBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="moveProjUpBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="moveProjDownBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj3"] [data-cy="moveProjUpBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj3"] [data-cy="moveProjDownBtn"]').should('be.disabled');
+  });
+
+  it('project card stats', () => {
+    cy.createProject(1);
+    cy.createSubject(1, 1);
+    cy.createSubject(1, 2);
+
+    cy.createSkill(1, 1, 1);
+    cy.createSkill(1, 1, 2);
+    cy.createSkill(1, 2, 3);
+
+    cy.createBadge(1, 1);
+    cy.createProject(2);
+    cy.createProject(3);
+    cy.visit('/administrator');
+
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="pagePreviewCardStat_Subjects"] [data-cy="statNum"]').contains(2);
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="pagePreviewCardStat_Skills"] [data-cy="statNum"]').contains(3);
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="pagePreviewCardStat_Points"] [data-cy="statNum"]').contains(600);
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="pagePreviewCardStat_Badges"] [data-cy="statNum"]').contains(1);
+
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="pagePreviewCardStat_Subjects"] [data-cy="statNum"]').contains(0);
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="pagePreviewCardStat_Skills"] [data-cy="statNum"]').contains(0);
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="pagePreviewCardStat_Points"] [data-cy="statNum"]').contains(0);
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="pagePreviewCardStat_Badges"] [data-cy="statNum"]').contains(0);
+
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="pagePreviewCardStat_Subjects"] [data-cy="warning"]').should('not.exist');
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="pagePreviewCardStat_Skills"] [data-cy="warning"]').should('not.exist');
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="pagePreviewCardStat_Points"] [data-cy="warning"]').should('exist');
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="pagePreviewCardStat_Badges"] [data-cy="warning"]').should('not.exist');
+
+  });
+
     it('When more than 10 projects then projects should be displayed in a table', () => {
         for (let i = 1; i <= 20; i += 1) {
             cy.request('POST', `/app/projects/MyNewtestProject${i}`, {
@@ -959,6 +1074,7 @@ describe('Projects Tests', () => {
         cy.get('[data-cy="projectsTable"]').should('exist')
         cy.get('[data-cy=skillsBTableTotalRows]').contains(20);
     });
+
 
 });
 

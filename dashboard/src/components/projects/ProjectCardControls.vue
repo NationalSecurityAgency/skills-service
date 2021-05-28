@@ -41,7 +41,8 @@ limitations under the License.
                   size="sm"
                   @click="$emit('delete-project')"
                   :disabled="isDeleteDisabled"
-                  title="Delete Project"><i class="text-warning fas fa-trash" aria-hidden="true"/></b-button>
+                  title="Delete Project"
+                  data-cy="deleteProjBtn"><i class="text-warning fas fa-trash" aria-hidden="true"/></b-button>
       </span>
     </b-button-group>
 
@@ -49,11 +50,13 @@ limitations under the License.
       <b-button variant="outline-primary"
                 @click="$emit('move-up-project')"
                 :disabled="project.isFirst"
-                title="Sort Order - Move up"><i class="fas fa-arrow-circle-up text-info" aria-hidden="true"/></b-button>
+                title="Sort Order - Move up"
+                data-cy="moveProjUpBtn"><i class="fas fa-arrow-circle-up text-info" aria-hidden="true"/></b-button>
       <b-button variant="outline-primary"
                 @click="$emit('move-down-project')"
                 :disabled="project.isLast"
-                title="Sort Order - Move down"><i class="fas fa-arrow-circle-down text-info" aria-hidden="true"/>
+                title="Sort Order - Move down"
+                data-cy="moveProjDownBtn"><i class="fas fa-arrow-circle-down text-info" aria-hidden="true"/>
       </b-button>
     </b-button-group>
   </div>
