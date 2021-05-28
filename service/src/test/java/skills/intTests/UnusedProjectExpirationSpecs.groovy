@@ -203,16 +203,17 @@ class UnusedProjectExpirationSpecs extends DefaultIntSpec{
         Pattern p2 = ~/(?s)<p>If you take no action, Project Test Project#1 will be deleted in \d+ days? \(\d{4}-\d{2}-\d{2}\).<\/p>.+?/
         Pattern p3 = ~/(?s)<p>If you wish to stop receiving these emails, visit <a href="http:\/\/localhost:\d+\/administrator\/projects\/TestProject1">Test Project#1<\/a> in the SkillTree dashboard and click the 'Keep' button or delete your Project.<\/p>.*/
 
+
         then:
         emails.size() == 3
         emails.collect {it.recipients[0] }.sort() == ["rootUser", projectAdminUserAttrs.email, otherProjectAdminUserAttrs.email].sort()
-        emails[1].subj == "SkillTree Project is expiring!"
-        emails[1].recipients == ["skills@skills.org"]
-        plaintTextMatch.matcher(emails[0].plainText).find()
-        h1.matcher(emails[1].html).find()
-        p1.matcher(emails[1].html).find()
-        p2.matcher(emails[1].html).find()
-        p3.matcher(emails[1].html).find()
+        emails.find { it.subj == "SkillTree Project is expiring!" }
+        emails.find {it.recipients == ["skills@skills.org"]}
+        emails.find { plaintTextMatch.matcher(it.plainText).find() }
+        emails.findAll {h1.matcher(it.html).find() }?.size() == 3
+        emails.find { p1.matcher(it.html).find() }
+        emails.find { p2.matcher(it.html).find() }
+        emails.find { p3.matcher(it.html).find() }
     }
 
 }
