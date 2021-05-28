@@ -28,8 +28,6 @@ class ProjectResult extends SimpleProjectResult{
     boolean isFirst
     boolean isLast
 
-    boolean levelsArePoints
-
     boolean pinned
 
     int numErrors

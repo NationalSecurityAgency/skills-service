@@ -33,6 +33,7 @@ limitations under the License.
 
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
   import store from '@/store/store';
+  import NavigationErrorMixin from '@/common/utilities/NavigationErrorMixin';
   import NewSoftwareVersionComponent from '@/common/softwareVersion/NewSoftwareVersion';
   import DevModeMixin from '@/dev/DevModeMixin';
   import ThemeHelper from './common/theme/ThemeHelper';
@@ -60,7 +61,7 @@ limitations under the License.
   });
 
   export default {
-    mixins: [DevModeMixin],
+    mixins: [DevModeMixin, NavigationErrorMixin],
     components: { SkillsSpinner, NewSoftwareVersionComponent },
     data() {
       return {
@@ -70,6 +71,12 @@ limitations under the License.
     },
     created() {
       const vm = this;
+      const path = window.location.pathname;
+      const initialRoute = path.endsWith('index.html') ? '/' : path;
+      const queryParams = new URLSearchParams(window.location.search);
+      queryParams.set('skipParentHistory', 'true');
+      vm.handleReplace(`${initialRoute}?${queryParams.toString()}${window.location.hash}`);
+
       if (this.isDevelopmentMode()) {
         this.configureDevelopmentMode();
         this.loadConfigs();
@@ -80,12 +87,12 @@ limitations under the License.
           },
           updateVersion(newVersion) {
             UserSkillsService.setVersion(newVersion);
-            vm.$router.push({
+            vm.handlePush({
               name: 'home',
             });
           },
-          navigate(fullPath) {
-            vm.$router.replace(fullPath);
+          navigate(route) {
+            vm.handlePush(route);
           },
         });
 

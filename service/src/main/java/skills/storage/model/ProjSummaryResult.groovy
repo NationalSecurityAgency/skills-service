@@ -24,7 +24,6 @@ interface ProjSummaryResult {
     int getNumSubjects()
     int getNumSkills()
     int getNumBadges()
-    boolean getLevelsArePoints()
     int getNumErrors()
     Date getCreated()
     Date getLastReportedSkill()

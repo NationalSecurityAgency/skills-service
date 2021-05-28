@@ -30,6 +30,7 @@ class PublicProps {
         maxSubjectsPerProject,
         maxBadgesPerProject,
         maxSkillsPerSubject,
+        numProjectsForTableView,
         paragraphValidationRegex,
         paragraphValidationMessage,
         nameValidationRegex,
