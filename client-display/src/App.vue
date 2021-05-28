@@ -74,7 +74,8 @@ limitations under the License.
       const path = window.location.pathname;
       const initialRoute = path.endsWith('index.html') ? '/' : path;
       const queryParams = new URLSearchParams(window.location.search);
-      vm.handlePush(`${initialRoute}?${queryParams.toString()}${window.location.hash}`);
+      queryParams.set('skipParentHistory', 'true');
+      vm.handleReplace(`${initialRoute}?${queryParams.toString()}${window.location.hash}`);
 
       if (this.isDevelopmentMode()) {
         this.configureDevelopmentMode();
