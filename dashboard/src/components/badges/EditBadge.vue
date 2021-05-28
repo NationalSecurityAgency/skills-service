@@ -59,7 +59,7 @@ limitations under the License.
               <inline-help
                 msg="If project level 'Root Help Url' is specified then this path will be relative to 'Root Help Url'"/>
             </label>
-            <ValidationProvider rules="help_url" v-slot="{errors}" name="Help URL/Path">
+            <ValidationProvider rules="help_url|customUrlValidator" v-slot="{errors}" name="Help URL/Path">
               <input class="form-control" type="text" v-model="badgeInternal.helpUrl" data-vv-name="helpUrl"
                      v-on:keyup.enter="handleSubmit(updateBadge)" data-cy="badgeHelpUrl" id="badgeHelpUrl"
                      aria-describedby="badgeHelpUrlError"
