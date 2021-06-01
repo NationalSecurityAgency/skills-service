@@ -714,4 +714,50 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="moveSubjDownBtn"]').should('be.disabled');
     })
 
+    it('subject card stats', () => {
+        cy.createSubject(1, 1)
+        cy.createSubject(1, 2)
+
+        cy.visit('/administrator/projects/proj1');
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="pagePreviewCardStat_# Skills"] [data-cy="statNum"]').contains(0);
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="pagePreviewCardStat_Points"] [data-cy="statNum"]').contains(0);
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="pagePreviewCardStat_# Skills"] [data-cy="statNum"]').contains(0);
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="pagePreviewCardStat_Points"] [data-cy="statNum"]').contains(0);
+
+        cy.createSkill(1, 1, 1)
+        cy.createSkill(1, 1, 2)
+        cy.visit('/administrator/projects/proj1');
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="pagePreviewCardStat_# Skills"] [data-cy="statNum"]').contains(2);
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="pagePreviewCardStat_Points"] [data-cy="statNum"]').contains(400);
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="pagePreviewCardStat_# Skills"] [data-cy="statNum"]').contains(0);
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="pagePreviewCardStat_Points"] [data-cy="statNum"]').contains(0);
+    });
+
+    it('subject card ponts %', () => {
+        cy.createSubject(1, 1)
+        cy.createSubject(1, 2)
+        cy.createSubject(1, 3)
+
+        cy.visit('/administrator/projects/proj1');
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="pointsPercent"]').contains('0');
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="pointsPercent"]').contains('0');
+        cy.get('[data-cy="subjectCard-subj3"] [data-cy="pointsPercent"]').contains('0');
+
+        cy.createSkill(1, 1, 1)
+        cy.createSkill(1, 1, 2)
+
+        cy.visit('/administrator/projects/proj1');
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="pointsPercent"]').contains('100');
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="pointsPercent"]').contains('0');
+        cy.get('[data-cy="subjectCard-subj3"] [data-cy="pointsPercent"]').contains('0');
+
+        cy.createSkill(1, 2, 3)
+
+        cy.visit('/administrator/projects/proj1');
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="pointsPercent"]').contains('66');
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="pointsPercent"]').contains('34');
+        cy.get('[data-cy="subjectCard-subj3"] [data-cy="pointsPercent"]').contains('0');
+
+    });
+
 });

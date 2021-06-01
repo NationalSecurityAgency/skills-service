@@ -28,7 +28,7 @@ limitations under the License.
                                :delete-disabled-text="deleteSubjectToolTip"/>
       </div>
       <div slot="footer" class="text-right">
-        <span class="small"><b-badge style="font-size: 0.8rem;" variant="primary">{{ this.subjectInternal.pointsPercentage }}%</b-badge> of the total points</span>
+        <span class="small"><b-badge style="font-size: 0.8rem;" variant="primary" data-cy="pointsPercent">{{ this.subjectInternal.pointsPercentage }}%</b-badge> of the total points</span>
       </div>
     </subject-card>
 
@@ -91,11 +91,13 @@ limitations under the License.
           stats: [{
             label: '# Skills',
             count: this.subjectInternal.numSkills,
+            icon: 'fas fa-graduation-cap skills-color-skills',
           }, {
             label: 'Points',
             count: this.subjectInternal.totalPoints,
             warn: this.subjectInternal.totalPoints < this.minimumPoints,
             warnMsg: this.subjectInternal.totalPoints < this.minimumPoints ? `Subject has insufficient points assigned. Skills cannot be achieved until subject has at least ${this.minimumPoints} points.` : null,
+            icon: 'far fa-arrow-alt-circle-up skills-color-points',
           }],
         };
       },

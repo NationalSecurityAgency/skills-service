@@ -19,6 +19,7 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.intTests.utils.TestUtils
+import spock.lang.IgnoreRest
 import spock.lang.Specification
 
 class RuleSetManagementSpecs extends DefaultIntSpec {
@@ -96,6 +97,72 @@ class RuleSetManagementSpecs extends DefaultIntSpec {
         subjects.get(2).numSkills == 5
         subjects.get(2).totalPoints == 150
         subjects.get(2).pointsPercentage == 49
+    }
+
+    def "verify stats that are produced by subjects - remainder points must be added to subject with points"() {
+        def proj1 = SkillsFactory.createProject(1, )
+        def subj1 = SkillsFactory.createSubject(1, 1)
+        def subj2 = SkillsFactory.createSubject(1, 2)
+        def subj3 = SkillsFactory.createSubject(1, 3)
+
+        def skills = SkillsFactory.createSkills(2, 1, 1)
+        def skills1 = SkillsFactory.createSkills(1, 1, 2)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(subj1)
+        skillsService.createSubject(subj2)
+        skillsService.createSubject(subj3)
+        skillsService.createSkills(skills)
+        skillsService.createSkills(skills1)
+
+        when:
+
+        def subjects = skillsService.getSubjects(projId)
+
+        then:
+        subjects.collect { it.pointsPercentage } == [66, 34, 0]
+    }
+
+    def "verify stats that are produced by subjects - single subject with skills should display 100"() {
+        def proj1 = SkillsFactory.createProject(1, )
+        def subj1 = SkillsFactory.createSubject(1, 1)
+        def subj2 = SkillsFactory.createSubject(1, 2)
+        def subj3 = SkillsFactory.createSubject(1, 3)
+
+        def skills = SkillsFactory.createSkills(2, 1, 1)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(subj1)
+        skillsService.createSubject(subj2)
+        skillsService.createSubject(subj3)
+        skillsService.createSkills(skills)
+
+        when:
+
+        def subjects = skillsService.getSubjects(projId)
+
+        then:
+        subjects.collect { it.pointsPercentage } == [100, 0, 0]
+    }
+
+
+    def "verify stats that are produced by subjects - when there are no skills declared then zeros all around"() {
+        def proj1 = SkillsFactory.createProject(1, )
+        def subj1 = SkillsFactory.createSubject(1, 1)
+        def subj2 = SkillsFactory.createSubject(1, 2)
+        def subj3 = SkillsFactory.createSubject(1, 3)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(subj1)
+        skillsService.createSubject(subj2)
+        skillsService.createSubject(subj3)
+
+        when:
+
+        def subjects = skillsService.getSubjects(projId)
+
+        then:
+        subjects.collect { it.pointsPercentage } == [0, 0, 0]
     }
 
     def "project can have badge, subject and skill with the same name"(){

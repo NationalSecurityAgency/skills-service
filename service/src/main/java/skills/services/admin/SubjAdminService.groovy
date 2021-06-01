@@ -232,18 +232,29 @@ class SubjAdminService {
             if (copy.size() == 1) {
                 copy.first().pointsPercentage =  copy.first().totalPoints > 0 ? 100 : 0;
             } else {
-                int overallPoints = copy.collect({ it.totalPoints }).sum()
-                if (overallPoints == 0) {
-                    copy.each {
-                        it.pointsPercentage = 0
-                    }
-                } else {
-                    List<SubjectResult> withoutLastOne = copy[0..copy.size() - 2]
+                // init it all to 0
+                copy.each {
+                    it.pointsPercentage = 0
+                }
 
-                    withoutLastOne.each {
-                        it.pointsPercentage = (int) ((it.totalPoints / overallPoints) * 100)
+                // then only consider subjects with points
+                List<SubjectResult> withPoints = copy.findAll { it.totalPoints > 0 }
+                if (withPoints) {
+                    if (withPoints.size() == 1) {
+                        // 100% since it has points
+                        withPoints.first().pointsPercentage = 100;
+                    } else {
+                        int overallPoints = withPoints.collect({ it.totalPoints }).sum()
+                        List<SubjectResult> withoutLastOne = withPoints[0..withPoints.size() - 2]
+
+                        withoutLastOne.each {
+                            it.pointsPercentage = (int) ((it.totalPoints / overallPoints) * 100)
+                        }
+
+                        withPoints.last().pointsPercentage = 100 - (withoutLastOne.collect({
+                            it.pointsPercentage
+                        }).sum())
                     }
-                    copy.last().pointsPercentage = 100 - (withoutLastOne.collect({ it.pointsPercentage }).sum())
                 }
             }
         }

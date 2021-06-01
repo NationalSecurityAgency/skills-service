@@ -90,13 +90,13 @@ limitations under the License.
   }
 
   i {
-    font-size: 2.5rem;
+    font-size: 1.8rem;
     display: inline-block;
   }
 
   .stat-card {
     background-color: #f8f9fa;
-    padding-bottom: 1rem;
+    padding: 1rem;
   }
 
   .icon-link:hover {
