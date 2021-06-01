@@ -32,7 +32,7 @@ limitations under the License.
                   variant="outline-primary"
                   @click="$emit('edit-subject')"
                   title="Edit Project"
-                  data-cy="editProjBtn"><i class="fas fa-edit" aria-hidden="true"/></b-button>
+                  data-cy="editSubjBtn"><i class="fas fa-edit" aria-hidden="true"/></b-button>
 
         <span v-b-tooltip.hover="deleteDisabledText">
           <b-button variant="outline-primary"
@@ -41,7 +41,7 @@ limitations under the License.
                     @click="$emit('delete-subject')"
                     :disabled="isDeleteDisabled"
                     title="Delete Project"
-                    data-cy="deleteProjBtn"><i class="text-warning fas fa-trash" aria-hidden="true"/></b-button>
+                    data-cy="deleteSubjBtn"><i class="text-warning fas fa-trash" aria-hidden="true"/></b-button>
         </span>
       </b-button-group>
 
@@ -50,12 +50,12 @@ limitations under the License.
                   @click="$emit('move-up-subject')"
                   :disabled="subject.isFirst"
                   title="Sort Order - Move up"
-                  data-cy="moveProjUpBtn"><i class="fas fa-arrow-circle-up text-info" aria-hidden="true"/></b-button>
+                  data-cy="moveSubjUpBtn"><i class="fas fa-arrow-circle-up text-info" aria-hidden="true"/></b-button>
         <b-button variant="outline-primary"
                   @click="$emit('move-down-subject')"
                   :disabled="subject.isLast"
                   title="Sort Order - Move down"
-                  data-cy="moveProjDownBtn"><i class="fas fa-arrow-circle-down text-info" aria-hidden="true"/>
+                  data-cy="moveSubjDownBtn"><i class="fas fa-arrow-circle-down text-info" aria-hidden="true"/>
         </b-button>
       </b-button-group>
     </div>

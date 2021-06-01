@@ -51,8 +51,7 @@ describe('Markdown Tests', () => {
         cy.visit('/administrator/projects/proj1/');
 
         const markdownInput = '[data-cy=markdownEditorInput]';
-        cy.get('[data-cy=cardSettingsButton]').click();
-        cy.get('a[data-cy=editMenuEditBtn]').click();
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editSubjBtn"]').click();
 
         const validateMarkdown = (markdown, snapshotName, expectedText = null, clickWrite = true) => {
             if (clickWrite) {

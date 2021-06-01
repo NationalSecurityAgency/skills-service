@@ -99,8 +99,7 @@ describe('Projects Tests', () => {
     cy.get('a[data-cy=subjCard_subj1_manageBtn').click();
     cy.contains('SUBJECT: Subject 1').should('be.visible');
     cy.get('[data-cy=breadcrumb-editedProjectId]').click();
-    cy.get('[data-cy=cardSettingsButton]').click();
-    cy.get('[data-cy=editMenuEditBtn]').click();
+    cy.get('[data-cy="subjectCard-subj1"] [data-cy="editSubjBtn"]').click();
     cy.get('input[data-cy=subjectNameInput]').type('{selectall}I Am A Changed Subject');
     cy.get('button[data-cy=saveSubjectButton]').click();
     cy.contains('I Am A Changed Subject').should('be.visible');
