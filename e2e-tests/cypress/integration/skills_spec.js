@@ -66,7 +66,7 @@ describe('Skills Tests', () => {
       cy.get('[data-cy=closeSkillButton]').should('not.exist');
     });
 
-    it.only('validation', () => {
+    it('validation', () => {
       cy.intercept('POST', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('postNewSkill');
       cy.intercept('GET', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('getSkill');
       cy.intercept('POST', '/api/validation/url').as('customUrlValidation');
