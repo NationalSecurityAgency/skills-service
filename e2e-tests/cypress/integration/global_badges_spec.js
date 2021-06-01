@@ -83,6 +83,7 @@ describe('Global Badges Tests', () => {
         cy.intercept('GET', `/supervisor/badges`).as('getGlobalBadges');
         cy.intercept('POST', '/supervisor/badges/name/exists').as('nameExists');
         cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('checkSupervisorRole');
+        cy.intercept('POST', '/api/validation/url').as('customUrlValidation');
 
         cy.visit('/administrator/globalBadges');
         cy.wait('@getGlobalBadges');

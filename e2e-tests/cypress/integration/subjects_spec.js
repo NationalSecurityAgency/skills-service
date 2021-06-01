@@ -125,6 +125,7 @@ describe('Subjects Tests', () => {
         cy.wait('@loadSubjects');
         cy.clickButton('Subject');
         //helpUrl
+        cy.get('[data-cy=subjectNameInput]').type('A Subject');
         cy.get('[data-cy=subjectHelpUrl]').clear().type('javascript:alert("uh oh");');
         cy.get('[data-cy=subjectHelpUrlError]').should('be.visible');
         cy.get('[data-cy=subjectHelpUrlError]').should('have.text', 'Help URL/Path must use http, https, or be a relative url.');
