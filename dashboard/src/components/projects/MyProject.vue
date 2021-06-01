@@ -24,7 +24,7 @@ limitations under the License.
                 <router-link
                   :to="{ name:'Subjects', params: { projectId: this.projectInternal.projectId, project: this.projectInternal }}"
                   class="text-truncate text-info mb-0 pb-0 preview-card-title"
-                  data-cy="projCard_proj1_manageLink"><b-avatar variant="info" icon="people-fill" class="text-uppercase"> {{ projectInternal.name.substring(0,2) }}</b-avatar> {{ projectInternal.name }}
+                  data-cy="projCard_proj1_manageLink"><b-avatar variant="info" icon="people-fill" class="text-uppercase avatar-link"> {{ projectInternal.name.substring(0,2) }}</b-avatar> {{ projectInternal.name }}
                 </router-link>
                 <div class="text-truncate text-secondary preview-card-subTitle mt-1 ml-1">ID: {{ projectInternal.projectId }}</div>
               </div>
@@ -46,7 +46,7 @@ limitations under the License.
 
         <div class="row text-center justify-content-center">
           <div v-for="(stat) in stats" :key="stat.label" class="col my-3" style="min-width: 10rem;">
-            <div :data-cy="`pagePreviewCardStat_${stat.label}`" class="border rounded" style="background-color: #f8f9fa; padding: 1rem;">
+            <div :data-cy="`pagePreviewCardStat_${stat.label}`" class="border rounded stat-card">
               <i :class="stat.icon"></i>
               <p class="text-uppercase text-muted count-label">{{ stat.label }}</p>
               <strong class="h4" data-cy="statNum">{{ stat.count | number }}</strong>
@@ -246,4 +246,10 @@ limitations under the License.
     font-size: 2.5rem;
     display: inline-block;
   }
+
+  .stat-card {
+    background-color: #f8f9fa;
+    padding: 1rem;
+  }
+
 </style>

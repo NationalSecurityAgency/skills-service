@@ -144,8 +144,8 @@ describe('Subjects Tests', () => {
         });
 
         cy.visit('/administrator/projects/proj1/');
-        cy.get('.subject-settings .dropdown-toggle').click();
-        cy.get('a.dropdown-item').contains('Edit').click({force:true});
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editProjBtn"]').click();
+
         cy.get('div.modal-content .text-primary i.fa-question-circle').click();
         cy.get('a.nav-link').contains('Font Awesome Free').click();
         cy.wait(1500);
@@ -171,8 +171,7 @@ describe('Subjects Tests', () => {
         });
 
         cy.visit('/administrator/projects/proj1/');
-        cy.get('.subject-settings .dropdown-toggle').click();
-        cy.get('a.dropdown-item').contains('Edit').click();
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editProjBtn"]').click();
         cy.get('div.modal-content .text-primary i.fa-question-circle').click();
         cy.get('a.nav-link').contains('Material').click();
         cy.wait(2500);
@@ -198,8 +197,7 @@ describe('Subjects Tests', () => {
         });
 
         cy.visit('/administrator/projects/proj1/');
-        cy.get('.subject-settings .dropdown-toggle').click();
-        cy.get('a.dropdown-item').contains('Edit').click();
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editProjBtn"]').click();
         cy.get('div.modal-content .text-primary i.fa-question-circle').click();
         cy.get('[data-cy=icon-search]').type('run');
         cy.get('.fas.fa-running').should('be.visible');
@@ -238,9 +236,7 @@ describe('Subjects Tests', () => {
 
         cy.visit('/administrator/projects/proj1/');
 
-        cy.get('.subject-settings .dropdown-toggle').click();
-
-        cy.get('a.dropdown-item').contains('Edit').click();
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editProjBtn"]').click();
 
         cy.get('div.modal-content .text-primary i.fa-question-circle').click();
 
@@ -263,9 +259,7 @@ describe('Subjects Tests', () => {
 
         cy.visit('/administrator/projects/proj1/');
 
-        cy.get('.subject-settings .dropdown-toggle').click();
-
-        cy.get('a.dropdown-item').contains('Edit').click();
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editProjBtn"]').click();
 
         cy.get('div.modal-content .text-primary i.fa-question-circle').click();
 
@@ -291,9 +285,7 @@ describe('Subjects Tests', () => {
 
         cy.visit('/administrator/projects/proj1/');
 
-        cy.get('.subject-settings .dropdown-toggle').click();
-
-        cy.get('a.dropdown-item').contains('Edit').click();
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editProjBtn"]').click();
 
         cy.get('div.modal-content .text-primary i.fa-question-circle').click();
 
@@ -363,54 +355,47 @@ describe('Subjects Tests', () => {
         }).as('loadSubject2');
 
         cy.visit('/administrator/projects/proj1');
-        cy.get('div.subject-settings').first().click();
-        cy.get('[data-cy=editMenuEditBtn]').first().click();
+
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editProjBtn"]').click();
         cy.get('[data-cy=subjectNameInput]').should('be.visible');
         cy.get('body').type('{esc}{esc}');
-        cy.get('div.subject-settings').eq(0).children().first().should('have.focus');
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editProjBtn"]').should('have.focus');
 
-        cy.get('div.subject-settings').first().click();
-        cy.get('[data-cy=editMenuEditBtn]').first().click();
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editProjBtn"]').click();
         cy.get('[data-cy=closeSubjectButton]').click();
-        cy.get('div.subject-settings').eq(0).children().first().should('have.focus');
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editProjBtn"]').should('have.focus');
 
-        cy.get('div.subject-settings').first().click();
-        cy.get('[data-cy=editMenuEditBtn]').first().click();
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editProjBtn"]').click();
         cy.get('[data-cy=subjectNameInput]').type('test 123');
         cy.get('[data-cy=saveSubjectButton]').click();
         cy.wait('@saveSubject');
         cy.wait('@loadSubject');
-        cy.get('div.subject-settings').eq(0).children().first().should('have.focus');
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editProjBtn"]').should('have.focus');
 
-        cy.get('div.subject-settings').first().click();
-        cy.get('[data-cy=editMenuEditBtn]').first().click();
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editProjBtn"]').click();
         cy.get('[aria-label=Close]').click();
-        cy.get('div.subject-settings').eq(0).children().first().should('have.focus');
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editProjBtn"]').should('have.focus');
 
         //subject 2
-        cy.get('div.subject-settings').eq(1).click();
-        cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="editProjBtn"]').click();
         cy.get('[data-cy=subjectNameInput]').should('be.visible');
         cy.get('body').type('{esc}{esc}');
-        cy.get('div.subject-settings').eq(1).children().first().should('have.focus');
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="editProjBtn"]').should('have.focus');
 
-        cy.get('div.subject-settings').eq(1).click();
-        cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="editProjBtn"]').click();
         cy.get('[data-cy=closeSubjectButton]').click();
-        cy.get('div.subject-settings').eq(1).children().first().should('have.focus');
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="editProjBtn"]').should('have.focus');
 
-        cy.get('div.subject-settings').eq(1).click();
-        cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="editProjBtn"]').click();
         cy.get('[data-cy=subjectNameInput]').type('test 123');
         cy.get('[data-cy=saveSubjectButton]').click();
         cy.wait('@saveSubject2');
         cy.wait('@loadSubject2');
-        cy.get('div.subject-settings').eq(1).children().first().should('have.focus');
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="editProjBtn"]').should('have.focus');
 
-        cy.get('div.subject-settings').eq(1).click();
-        cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="editProjBtn"]').click();
         cy.get('[aria-label=Close]').click();
-        cy.get('div.subject-settings').eq(1).children().first().should('have.focus');
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="editProjBtn"]').should('have.focus');
     });
 
     it('new level dialog should return focus to new level button', () => {

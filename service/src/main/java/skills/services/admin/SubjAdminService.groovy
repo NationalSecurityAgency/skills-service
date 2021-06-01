@@ -230,7 +230,7 @@ class SubjAdminService {
         if (copy) {
             // calculate percentage
             if (copy.size() == 1) {
-                copy.first().pointsPercentage = 100
+                copy.first().pointsPercentage =  copy.first().totalPoints > 0 ? 100 : 0;
             } else {
                 int overallPoints = copy.collect({ it.totalPoints }).sum()
                 if (overallPoints == 0) {
