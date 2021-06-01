@@ -46,6 +46,13 @@ limitations under the License.
               <span class="text-secondary small font-italic">Last reported Skill: </span><slim-date-cell :value="projectInternal.lastReportedSkill" :fromStartOfDay="true"/>
             </div>
           </div>
+          <div v-if="projectInternal.expiring" data-cy="projectExpiration" class="w-100 text-center alert-danger p-2">
+              <span class="" v-b-tooltip.hover="'This Project has not been used recently, ' +
+               'it will  be deleted unless you explicitly retain it'">Project has not been used in over {{this.$store.getters.config.expireUnusedProjectsOlderThan}} days and will be deleted </span><slim-date-cell cssClass="alert-danger"  :value="expirationDate" :fromStartOfDay="true"/>
+              <b-button @click="keepIt" data-cy="keepIt" size="sm" variant="alert" :aria-label="'Keep Project '+ projectInternal.name">
+                <span class="d-none d-sm-inline">Keep It</span> <b-spinner v-if="cancellingExpiration" small style="font-size:1rem"/><i v-if="!cancellingExpiration" :class="'fas fa-shield-alt'" style="font-size: 1rem;" aria-hidden="true"/>
+              </b-button>
+          </div>
         </div>
       </div>
     </page-preview-card>
@@ -63,6 +70,7 @@ limitations under the License.
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
   import SettingsService from '../settings/SettingsService';
   import SlimDateCell from '../utils/table/SlimDateCell';
+  import dayjs from '../../DayJsCustomizer';
 
   export default {
     name: 'MyProject',
@@ -83,6 +91,7 @@ limitations under the License.
         showEditProjectModal: false,
         deleteProjectDisabled: false,
         deleteProjectToolTip: '',
+        cancellingExpiration: false,
       };
     },
     mounted() {
@@ -95,6 +104,14 @@ limitations under the License.
       },
       isRootUser() {
         return this.$store.getters['access/isRoot'];
+      },
+      expirationDate() {
+        if (!this.projectInternal.expiring) {
+          return '';
+        }
+        const gracePeriodInDays = this.$store.getters.config.expirationGracePeriod;
+        const expires = dayjs(this.projectInternal.expirationTriggered).add(gracePeriodInDays, 'day').startOf('day');
+        return expires.format('YYYY-MM-DD HH:mm');
       },
     },
     watch: {
@@ -190,6 +207,14 @@ limitations under the License.
             this.pinned = false;
             this.$emit('pin-removed', this.projectInternal);
           });
+      },
+      keepIt() {
+        this.cancellingExpiration = true;
+        ProjectService.cancelUnusedProjectDeletion(this.projectInternal.projectId).then(() => {
+          this.projectInternal.expiring = false;
+        }).finally(() => {
+          this.cancellingExpiration = false;
+        });
       },
     },
   };

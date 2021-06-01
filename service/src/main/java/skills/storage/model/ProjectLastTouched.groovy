@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 SkillTree
+ * Copyright 2021 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,27 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.controller.result.model
+package skills.storage.model
 
-import groovy.transform.Canonical
-
-@Canonical
-class SettingsResult {
-    //nullable
-    String settingGroup
-    //nullable
-    String projectId
-    //non-null
-    String setting
-    //non-null
-    String value
-    //nullable
-    String userId
-
-    Date created
-    Date updated
-
-    boolean isEnabled(){
-        return Boolean.valueOf(value) || value.toLowerCase() == "enabled" || value.toLowerCase() == "enable" || value.toLowerCase() == "on"
-    }
+interface ProjectLastTouched {
+    String getProjectId()
+    Date getLastTouched()
 }

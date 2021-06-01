@@ -16,13 +16,22 @@ limitations under the License.
 <template>
   <div>
     <page-header :loading="isLoading" :options="headerOptions">
+      <div slot="banner" v-if="project && project.expiring" data-cy="projectExpiration" class="w-100 text-center alert-danger p-2 mb-3">
+          <span class="" v-b-tooltip.hover="'This Project has not been used recently, it will  be deleted unless you explicitly retain it'">
+            Project has not been used in over {{this.$store.getters.config.expireUnusedProjectsOlderThan}} days and will be deleted
+          </span><slim-date-cell cssClass="alert-danger"  :value="expirationDate" :fromStartOfDay="true"/>
+          <b-button @click="keepIt" data-cy="keepIt" size="sm" variant="alert"
+                    :aria-label="'Keep Project '+ project.name">
+            <span class="d-none d-sm-inline">Keep It</span> <b-spinner v-if="cancellingExpiration" small style="font-size:1rem"/><i v-if="!cancellingExpiration" :class="'fas fa-shield-alt'" style="font-size: 1rem;" aria-hidden="true"/>
+          </b-button>
+      </div>
       <div slot="subSubTitle" v-if="project">
-        <div data-cy="projectCreated">
-          <span class="text-secondary small font-italic">Created: </span><slim-date-cell :value="project.created"/>
-        </div>
-        <div data-cy="projectLastReportedSkill">
-          <span class="text-secondary small font-italic">Last reported Skill: </span><slim-date-cell :value="project.lastReportedSkill" :fromStartOfDay="true"/>
-        </div>
+          <div data-cy="projectCreated">
+            <span class="text-secondary small font-italic">Created: </span><slim-date-cell :value="project.created"/>
+          </div>
+          <div data-cy="projectLastReportedSkill">
+            <span class="text-secondary small font-italic">Last reported Skill: </span><slim-date-cell :value="project.lastReportedSkill" :fromStartOfDay="true"/>
+          </div>
         <b-button-group>
           <b-button @click="displayEditProject"
                     ref="editProjectButton"
@@ -69,8 +78,9 @@ limitations under the License.
   import Navigation from '../utils/Navigation';
   import PageHeader from '../utils/pages/PageHeader';
   import SlimDateCell from '../utils/table/SlimDateCell';
-  import EditProject from './EditProject';
+  import dayjs from '../../DayJsCustomizer';
   import ProjectService from './ProjectService';
+  import EditProject from './EditProject';
 
   const { mapActions, mapGetters, mapMutations } = createNamespacedHelpers('projects');
 
@@ -85,6 +95,7 @@ limitations under the License.
     data() {
       return {
         isLoading: true,
+        cancellingExpiration: false,
         editProject: false,
       };
     },
@@ -130,6 +141,14 @@ limitations under the License.
       minimumPoints() {
         return this.$store.getters.config.minimumProjectPoints;
       },
+      expirationDate() {
+        if (!this.project.expiring) {
+          return '';
+        }
+        const gracePeriodInDays = this.$store.getters.config.expirationGracePeriod;
+        const expires = dayjs(this.project.expirationTriggered).add(gracePeriodInDays, 'day').startOf('day');
+        return expires.format('YYYY-MM-DD HH:mm');
+      },
     },
     methods: {
       ...mapActions([
@@ -170,6 +189,14 @@ limitations under the License.
             this.$router.replace({ name: this.$route.name, params: { ...this.$route.params, projectId: resp.projectId } });
             this.projectId = resp.projectId;
           }
+        });
+      },
+      keepIt() {
+        this.cancellingExpiration = true;
+        ProjectService.cancelUnusedProjectDeletion(this.$route.params.projectId).then(() => {
+          this.loadProjects();
+        }).finally(() => {
+          this.cancellingExpiration = false;
         });
       },
     },

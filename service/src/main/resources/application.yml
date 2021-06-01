@@ -83,6 +83,10 @@ skills:
       dispatchRetrySchedule: "0 0 * * * *"
       # remove failed notifications after 2 days
       retainFailedNotificationsForNumSecs: 172800
+    unusedProjectDeletionEnabled: true
+    expireUnusedProjectsOlderThan: 180
+    expirationGracePeriod: 7
+    projectExpirationSchedule: "* 4 0 * * *"
     ui:
       dashboardVersion: @pom.version@
       buildTimestamp: @maven.build.timestamp@

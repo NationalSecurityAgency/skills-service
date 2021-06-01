@@ -1,0 +1,38 @@
+<!--
+Copyright 2020 SkillTree
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<!DOCTYPE html>
+<html   lang="en"
+        xmlns:th="http://www.thymeleaf.org"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.thymeleaf.org http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body class="overall-container">
+<div th:remove="tag" th:utext="${htmlHeader}" th:if= "${htmlHeader != null}">[[${htmlHeader}]]</div>
+<h1>Your SkillTree Project Isn't Being Used!</h1>
+<p>Your SkillTree Project [[${projectName}]], created on [[${createdOn}]] hasn't been used in at least [[${unusedProjectExpirationInDays}]] days.</p>
+<p>If you take no action, Project [[${projectName}]] will be deleted in [[${expiringIn}]] ([[${expiresOn}]]).</p>
+
+<p>If you wish to stop receiving these emails, visit <a th:href="@{${publicUrl}+'administrator/projects/'+${projectId}}">[[${projectName}]]</a> in the SkillTree dashboard and click the 'Keep' button or delete your Project.</p>
+
+<p>
+Always yours, <br/> -SkillTree Bot
+</p>
+
+<div th:remove="tag" th:utext="${htmlFooter}" th:if= "${htmlFooter != null}">[[${htmlFooter}]]</div>
+</body>
+</html>

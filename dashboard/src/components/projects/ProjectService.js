@@ -80,4 +80,7 @@ export default {
     return axios.get(`/admin/projects/${projectId}/globalBadge/exists`)
       .then((response) => response.data);
   },
+  cancelUnusedProjectDeletion(projectId) {
+    return axios.post(`/admin/projects/${projectId}/cancelExpiration`).then((response) => response.data);
+  },
 };

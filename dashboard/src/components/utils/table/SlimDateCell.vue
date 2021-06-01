@@ -14,13 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-    <span v-if="!value" class="text-secondary small">
+    <span v-if="!value" :class="cssClass">
       never
     </span>
-    <span v-else-if="isToday(value)" class="text-secondary small">
+    <span v-else-if="isToday(value)" :class="cssClass">
       today
     </span>
-    <span v-else class="text-secondary small">
+    <span v-else :class="cssClass">
       {{ fromNow }}
     </span>
 </template>
@@ -35,6 +35,10 @@ limitations under the License.
       fromStartOfDay: {
         type: Boolean,
         default: false,
+      },
+      cssClass: {
+        type: String,
+        default: 'text-secondary small',
       },
     },
     computed: {

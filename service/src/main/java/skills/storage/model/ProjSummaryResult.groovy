@@ -27,4 +27,7 @@ interface ProjSummaryResult {
     int getNumErrors()
     Date getCreated()
     Date getLastReportedSkill()
+
+    Date getExpirationTriggered()
+    Boolean getExpiring()
 }

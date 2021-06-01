@@ -29,7 +29,7 @@ import javax.persistence.*
 class Notification {
 
     static enum Type {
-        SkillApprovalRequested, SkillApprovalResponse
+        SkillApprovalRequested, SkillApprovalResponse, ProjectExpiration
     }
 
     static class KeyValParam {
@@ -67,5 +67,4 @@ class Notification {
     @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
     Date updated
-
 }
