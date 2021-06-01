@@ -207,7 +207,9 @@ describe('Badges Tests', () => {
             projectId: 'proj1',
             name: "Badge Exist",
             badgeId: 'badgeExist'
-        })
+        });
+
+        cy.intercept('POST', '/api/validation/url').as('customUrlValidation');
 
         cy.visit('/administrator/projects/proj1/badges');
         cy.clickButton('Badge');
@@ -308,6 +310,22 @@ describe('Badges Tests', () => {
         cy.get('[data-cy=badgeHelpUrl]').clear().type('https://foo.bar?p1=v1&p2=v2');
         cy.get('[data-cy=badgeHelpUrlError]').should('not.be.visible');
         cy.get('[data-cy=saveBadgeButton]').should('be.enabled');
+
+        cy.get('[data-cy=badgeHelpUrl]').clear().type('https://');
+        cy.wait('@customUrlValidation');
+        cy.get('[data-cy=badgeHelpUrlError]').should('be.visible');
+        cy.get('[data-cy=saveBadgeButton]').should('be.disabled');
+
+        cy.get('[data-cy=badgeHelpUrl]').clear().type('https://---??..??##');
+        cy.wait('@customUrlValidation');
+        cy.get('[data-cy=badgeHelpUrlError]').should('be.visible');
+        cy.get('[data-cy=saveBadgeButton]').should('be.disabled');
+        // trailing space should work now
+        cy.get('[data-cy=badgeHelpUrl]').clear().type('https://foo.bar?p1=v1&p2=v2 ');
+        cy.wait('@customUrlValidation');
+        cy.get('[data-cy=badgeHelpUrlError]').should('not.be.visible');
+        cy.get('[data-cy=saveBadgeButton]').should('be.enabled');
+
 
         // finally let's save
         cy.clickSave();

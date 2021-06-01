@@ -119,6 +119,7 @@ describe('Subjects Tests', () => {
     it('helpUrl must be valid', () => {
         cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
         cy.intercept('POST', '/admin/projects/proj1/subjectNameExists').as('nameExists');
+        cy.intercept('POST', '/api/validation/url').as('customUrlValidation');
 
         cy.visit('/administrator/projects/proj1');
         cy.wait('@loadSubjects');
@@ -134,6 +135,21 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy=subjectHelpUrlError]').should('not.be.visible');
         cy.get('[data-cy=subjectHelpUrl]').clear().type('https://foo.bar?p1=v1&p2=v2');
         cy.get('[data-cy=subjectHelpUrlError]').should('not.be.visible');
+
+        cy.get('[data-cy=subjectHelpUrl]').clear().type('https://');
+        cy.wait('@customUrlValidation');
+        cy.get('[data-cy=subjectHelpUrlError]').should('be.visible');
+        cy.get('[data-cy=saveSubjectButton]').should('be.disabled');
+
+        cy.get('[data-cy=subjectHelpUrl]').clear().type('https://---??..??##');
+        cy.wait('@customUrlValidation');
+        cy.get('[data-cy=subjectHelpUrlError]').should('be.visible');
+        cy.get('[data-cy=saveSubjectButton]').should('be.disabled');
+        // trailing space should work now
+        cy.get('[data-cy=subjectHelpUrl]').clear().type('https://foo.bar?p1=v1&p2=v2 ');
+        cy.wait('@customUrlValidation');
+        cy.get('[data-cy=subjectHelpUrlError]').should('not.be.visible');
+        cy.get('[data-cy=saveSubjectButton]').should('be.enabled');
     });
 
     it('select font awesome icon', () => {
