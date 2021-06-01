@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-https://www.apache.org/licenses/LICENSE-2.0
+    https://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,14 +20,14 @@ limitations under the License.
         <div class="col">
           <div class="media">
             <router-link v-if="options.icon" tag="a"
-                         :to="options.navTo" aria-label="Navigate to Skills">
+                         :to="options.navTo" aria-label="Navigate to Skills" cy-data="subjIcon-link">
               <div class="d-inline-block mr-2 border rounded text-info text-center icon-link" style="min-width: 3.2rem;">
                 <i :class="[`${options.icon}`]" class="m-1"/>
               </div>
             </router-link>
             <div class="media-body" style="min-width: 0px;">
               <div class="text-truncate text-info mb-0 pb-0 preview-card-title">
-                <router-link v-if="options.icon" tag="a" :to="options.navTo">{{ options.title }}</router-link>
+                <router-link v-if="options.icon" tag="a" :to="options.navTo" cy-data="subjTitle-link">{{ options.title }}</router-link>
                 <i v-if="options.warn" class="fas fa-exclamation-circle text-warning ml-1" style="font-size: 1.5rem;" v-b-tooltip.hover="options.warnMsg"/>
               </div>
               <div class="text-truncate text-secondary preview-card-subTitle">{{ options.subTitle }}</div>

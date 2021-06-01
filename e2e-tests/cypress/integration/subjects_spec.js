@@ -578,4 +578,67 @@ describe('Subjects Tests', () => {
         cy.contains('ID: skill1').should('not.exist');
     });
 
+    it('navigate to skills by click on subject name and subject icon', () => {
+        cy.createSubject(1, 1)
+        cy.createSubject(1, 2)
+
+        cy.visit('/administrator/projects/proj1');
+        cy.get('[data-cy="subjectCard-subj1"] [cy-data="subjTitle-link"]').click();
+        cy.contains('No Skills Yet');
+        cy.contains('ID: subj1')
+
+        cy.visit('/administrator/projects/proj1');
+        cy.get('[data-cy="subjectCard-subj2"] [cy-data="subjTitle-link"]').click();
+        cy.contains('No Skills Yet');
+        cy.contains('ID: subj2')
+
+        cy.visit('/administrator/projects/proj1');
+        cy.get('[data-cy="subjectCard-subj1"] [cy-data="subjIcon-link"]').click();
+        cy.contains('No Skills Yet');
+        cy.contains('ID: subj1')
+
+        cy.visit('/administrator/projects/proj1');
+        cy.get('[data-cy="subjectCard-subj2"] [cy-data="subjIcon-link"]').click();
+        cy.contains('No Skills Yet');
+        cy.contains('ID: subj2')
+    });
+
+    it('delete subject', () => {
+        cy.createSubject(1, 1)
+        cy.createSubject(1, 2)
+        cy.createSubject(1, 3)
+
+        cy.visit('/administrator/projects/proj1');
+
+        cy.get('[data-cy="subjectCard-subj1"]').should('exist');
+        cy.get('[data-cy="subjectCard-subj2"]').should('exist');
+        cy.get('[data-cy="subjectCard-subj3"]').should('exist');
+
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="deleteProjBtn"]').click();
+        cy.contains('Subject with id [subj2] will be removed.');
+        cy.contains('YES, Delete It').click();
+
+        cy.get('[data-cy="subjectCard-subj1"]').should('exist');
+        cy.get('[data-cy="subjectCard-subj2"]').should('not.exist');
+        cy.get('[data-cy="subjectCard-subj3"]').should('exist');
+
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="deleteProjBtn"]').click();
+        cy.contains('Subject with id [subj1] will be removed.');
+        cy.contains('YES, Delete It').click();
+
+        cy.get('[data-cy="subjectCard-subj1"]').should('not.exist');
+        cy.get('[data-cy="subjectCard-subj2"]').should('not.exist');
+        cy.get('[data-cy="subjectCard-subj3"]').should('exist');
+
+        cy.get('[data-cy="subjectCard-subj3"] [data-cy="deleteProjBtn"]').click();
+        cy.contains('Subject with id [subj3] will be removed.');
+        cy.contains('YES, Delete It').click();
+
+        cy.get('[data-cy="subjectCard-subj1"]').should('not.exist');
+        cy.get('[data-cy="subjectCard-subj2"]').should('not.exist');
+        cy.get('[data-cy="subjectCard-subj3"]').should('not.exist');
+
+        cy.contains('No Subjects Yet');
+    });
+
 });
