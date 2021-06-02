@@ -17,33 +17,29 @@ limitations under the License.
   <div>
     <page-header :loading="isLoading" :options="headerOptions">
       <div slot="banner" v-if="project && project.expiring" data-cy="projectExpiration" class="w-100 text-center alert-danger p-2 mb-3">
-          <span class="" v-b-tooltip.hover="'This Project has not been used recently, it will  be deleted unless you explicitly retain it'">
-            Project has not been used in over {{this.$store.getters.config.expireUnusedProjectsOlderThan}} days and will be deleted
-          </span><slim-date-cell cssClass="alert-danger"  :value="expirationDate" :fromStartOfDay="true"/>
+          <span class="mr-2" v-b-tooltip.hover="'This Project has not been used recently, it will  be deleted unless you explicitly retain it'">
+            Project has not been used in over <b>{{this.$store.getters.config.expireUnusedProjectsOlderThan}} days</b> and will be deleted <b>{{ fromExpirationDate() }}</b>.
+          </span>
           <b-button @click="keepIt" data-cy="keepIt" size="sm" variant="alert"
                     :aria-label="'Keep Project '+ project.name">
             <span class="d-none d-sm-inline">Keep It</span> <b-spinner v-if="cancellingExpiration" small style="font-size:1rem"/><i v-if="!cancellingExpiration" :class="'fas fa-shield-alt'" style="font-size: 1rem;" aria-hidden="true"/>
           </b-button>
       </div>
       <div slot="subSubTitle" v-if="project">
-          <div data-cy="projectCreated">
-            <span class="text-secondary small font-italic">Created: </span><slim-date-cell :value="project.created"/>
-          </div>
-          <div data-cy="projectLastReportedSkill">
-            <span class="text-secondary small font-italic">Last reported Skill: </span><slim-date-cell :value="project.lastReportedSkill" :fromStartOfDay="true"/>
-          </div>
-        <b-button-group>
+        <div data-cy="projectCreated">
+          <project-dates :created="project.created" :last-reported-skill="project.lastReportedSkill" />
+        </div>
+        <b-button-group class="mt-3" size="sm">
           <b-button @click="displayEditProject"
                     ref="editProjectButton"
-                    class="btn btn-outline-primary mr-1"
-                    size="sm"
+                    class="btn btn-outline-primary"
                     variant="outline-primary"
                     data-cy="btn_edit-project"
                     :aria-label="'edit Project '+project.projectId">
             <span class="d-none d-sm-inline">Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
           </b-button>
           <b-button target="_blank" v-if="project" :to="{ name:'MyProjectSkills', params: { projectId: project.projectId } }"
-                    data-cy="projectPreview" size="sm"
+                    data-cy="projectPreview"
                     variant="outline-primary" :aria-label="'preview client display for project'+project.name">
             <span class="d-sm-line">Preview</span> <i class="fas fa-eye" style="font-size:1rem;" aria-hidden="true"/>
           </b-button>
@@ -75,21 +71,21 @@ limitations under the License.
 <script>
   import { createNamespacedHelpers } from 'vuex';
 
+  import ProjectDates from '@/components/projects/ProjectDates';
   import Navigation from '../utils/Navigation';
   import PageHeader from '../utils/pages/PageHeader';
-  import SlimDateCell from '../utils/table/SlimDateCell';
   import dayjs from '../../DayJsCustomizer';
-  import ProjectService from './ProjectService';
   import EditProject from './EditProject';
+  import ProjectService from './ProjectService';
 
   const { mapActions, mapGetters, mapMutations } = createNamespacedHelpers('projects');
 
   export default {
     name: 'ProjectPage',
     components: {
+      ProjectDates,
       PageHeader,
       Navigation,
-      SlimDateCell,
       EditProject,
     },
     data() {
@@ -157,6 +153,9 @@ limitations under the License.
       ...mapMutations([
         'setProject',
       ]),
+      fromExpirationDate() {
+        return dayjs().startOf('day').to(dayjs(this.expirationDate));
+      },
       displayEditProject() {
         this.editProject = true;
       },

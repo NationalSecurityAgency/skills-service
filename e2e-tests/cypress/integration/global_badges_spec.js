@@ -1073,4 +1073,19 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy=deleteLevelBtn_proj2-5]').should('not.exist');
     });
 
+    it('project can not be deleted when it belongs to a global badge', () => {
+        cy.createProject(1);
+        cy.createProject(2);
+        cy.createGlobalBadge(1);
+        cy.assignProjectToGlobalBadge(1, 1, 2);
+
+        cy.visit('/administrator/');
+        cy.get('[data-cy="projectCard_proj1"] [data-cy="deleteProjBtn"]').click();
+        cy.contains('Cannot delete this project as it belongs to one or more global badges');
+        cy.contains('Ok').click();
+
+        cy.get('[data-cy="projectCard_proj2"] [data-cy="deleteProjBtn"]').click();
+        cy.contains('Project ID [proj2]. Delete Action can not be undone');
+    });
+
 });

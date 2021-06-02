@@ -177,6 +177,11 @@ Cypress.Commands.add("createGlobalBadge", (badgeNum = 1, overrideProps = {}) => 
 Cypress.Commands.add("assignSkillToGlobalBadge", (badgeNum = 1, skillNum = 1, projNum = 1) => {
     cy.request('POST', `/supervisor/badges/globalBadge${badgeNum}/projects/proj${projNum}/skills/skill${skillNum}`)
 });
+Cypress.Commands.add("assignProjectToGlobalBadge", (badgeNum = 1, projNum = 1, level = 1) => {
+    cy.request('POST', `/supervisor/badges/globalBadge${badgeNum}/projects/proj${projNum}/level/${level}`)
+});
+
+
 
 
 Cypress.Commands.add("reportSkill", (project = 1, skill = 1, userId = 'user@skills.org', date = '2020-09-12 11:00', failOnError=true) => {

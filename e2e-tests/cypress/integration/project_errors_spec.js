@@ -128,17 +128,21 @@ describe('Project Errors Tests', () => {
   });
 
   it('issues count on administrator home page is correct', () => {
+    cy.intercept('GET', '/admin/projects').as('getProjects');
+
+    cy.visit('/administrator');
+    cy.wait('@getProjects');
+    cy.get('[data-cy="ProjectCardFooter_issues"]').contains('No Issues');
+
     cy.reportSkill(1,42, 'user@skills.org', '2021-02-24 10:00', false);
     cy.reportSkill(1,75, 'user@skills.org', '2021-02-24 10:00', false);
     cy.reportSkill(1,75, 'user@skills.org', '2021-02-24 10:00', false);
     cy.reportSkill(1,75, 'user@skills.org', '2021-02-24 10:00', false);
     cy.reportSkill(1,13, 'user@skills.org', '2021-02-24 10:00', false);
 
-    cy.intercept('GET', '/admin/projects').as('getProjects');
-
     cy.visit('/administrator');
     cy.wait('@getProjects');
-    cy.get('[data-cy=pagePreviewCardStat_Issues]').contains('3');
+    cy.get('[data-cy="ProjectCardFooter_issues"]').contains('There are 3 issues to address');
   });
 
   it('validate table', () => {

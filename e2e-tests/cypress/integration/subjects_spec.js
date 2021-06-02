@@ -161,8 +161,8 @@ describe('Subjects Tests', () => {
         });
 
         cy.visit('/administrator/projects/proj1/');
-        cy.get('.subject-settings .dropdown-toggle').click();
-        cy.get('a.dropdown-item').contains('Edit').click({force:true});
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editSubjBtn"]').click();
+
         cy.get('div.modal-content .text-primary i.fa-question-circle').click();
         cy.get('a.nav-link').contains('Font Awesome Free').click();
         cy.wait(1500);
@@ -188,8 +188,7 @@ describe('Subjects Tests', () => {
         });
 
         cy.visit('/administrator/projects/proj1/');
-        cy.get('.subject-settings .dropdown-toggle').click();
-        cy.get('a.dropdown-item').contains('Edit').click();
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editSubjBtn"]').click();
         cy.get('div.modal-content .text-primary i.fa-question-circle').click();
         cy.get('a.nav-link').contains('Material').click();
         cy.wait(2500);
@@ -215,8 +214,7 @@ describe('Subjects Tests', () => {
         });
 
         cy.visit('/administrator/projects/proj1/');
-        cy.get('.subject-settings .dropdown-toggle').click();
-        cy.get('a.dropdown-item').contains('Edit').click();
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editSubjBtn"]').click();
         cy.get('div.modal-content .text-primary i.fa-question-circle').click();
         cy.get('[data-cy=icon-search]').type('run');
         cy.get('.fas.fa-running').should('be.visible');
@@ -255,9 +253,7 @@ describe('Subjects Tests', () => {
 
         cy.visit('/administrator/projects/proj1/');
 
-        cy.get('.subject-settings .dropdown-toggle').click();
-
-        cy.get('a.dropdown-item').contains('Edit').click();
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editSubjBtn"]').click();
 
         cy.get('div.modal-content .text-primary i.fa-question-circle').click();
 
@@ -280,9 +276,7 @@ describe('Subjects Tests', () => {
 
         cy.visit('/administrator/projects/proj1/');
 
-        cy.get('.subject-settings .dropdown-toggle').click();
-
-        cy.get('a.dropdown-item').contains('Edit').click();
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editSubjBtn"]').click();
 
         cy.get('div.modal-content .text-primary i.fa-question-circle').click();
 
@@ -308,9 +302,7 @@ describe('Subjects Tests', () => {
 
         cy.visit('/administrator/projects/proj1/');
 
-        cy.get('.subject-settings .dropdown-toggle').click();
-
-        cy.get('a.dropdown-item').contains('Edit').click();
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editSubjBtn"]').click();
 
         cy.get('div.modal-content .text-primary i.fa-question-circle').click();
 
@@ -380,54 +372,47 @@ describe('Subjects Tests', () => {
         }).as('loadSubject2');
 
         cy.visit('/administrator/projects/proj1');
-        cy.get('div.subject-settings').first().click();
-        cy.get('[data-cy=editMenuEditBtn]').first().click();
+
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editSubjBtn"]').click();
         cy.get('[data-cy=subjectNameInput]').should('be.visible');
         cy.get('body').type('{esc}{esc}');
-        cy.get('div.subject-settings').eq(0).children().first().should('have.focus');
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editSubjBtn"]').should('have.focus');
 
-        cy.get('div.subject-settings').first().click();
-        cy.get('[data-cy=editMenuEditBtn]').first().click();
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editSubjBtn"]').click();
         cy.get('[data-cy=closeSubjectButton]').click();
-        cy.get('div.subject-settings').eq(0).children().first().should('have.focus');
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editSubjBtn"]').should('have.focus');
 
-        cy.get('div.subject-settings').first().click();
-        cy.get('[data-cy=editMenuEditBtn]').first().click();
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editSubjBtn"]').click();
         cy.get('[data-cy=subjectNameInput]').type('test 123');
         cy.get('[data-cy=saveSubjectButton]').click();
         cy.wait('@saveSubject');
         cy.wait('@loadSubject');
-        cy.get('div.subject-settings').eq(0).children().first().should('have.focus');
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editSubjBtn"]').should('have.focus');
 
-        cy.get('div.subject-settings').first().click();
-        cy.get('[data-cy=editMenuEditBtn]').first().click();
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editSubjBtn"]').click();
         cy.get('[aria-label=Close]').click();
-        cy.get('div.subject-settings').eq(0).children().first().should('have.focus');
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editSubjBtn"]').should('have.focus');
 
         //subject 2
-        cy.get('div.subject-settings').eq(1).click();
-        cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="editSubjBtn"]').click();
         cy.get('[data-cy=subjectNameInput]').should('be.visible');
         cy.get('body').type('{esc}{esc}');
-        cy.get('div.subject-settings').eq(1).children().first().should('have.focus');
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="editSubjBtn"]').should('have.focus');
 
-        cy.get('div.subject-settings').eq(1).click();
-        cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="editSubjBtn"]').click();
         cy.get('[data-cy=closeSubjectButton]').click();
-        cy.get('div.subject-settings').eq(1).children().first().should('have.focus');
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="editSubjBtn"]').should('have.focus');
 
-        cy.get('div.subject-settings').eq(1).click();
-        cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="editSubjBtn"]').click();
         cy.get('[data-cy=subjectNameInput]').type('test 123');
         cy.get('[data-cy=saveSubjectButton]').click();
         cy.wait('@saveSubject2');
         cy.wait('@loadSubject2');
-        cy.get('div.subject-settings').eq(1).children().first().should('have.focus');
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="editSubjBtn"]').should('have.focus');
 
-        cy.get('div.subject-settings').eq(1).click();
-        cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="editSubjBtn"]').click();
         cy.get('[aria-label=Close]').click();
-        cy.get('div.subject-settings').eq(1).children().first().should('have.focus');
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="editSubjBtn"]').should('have.focus');
     });
 
     it('new level dialog should return focus to new level button', () => {
@@ -608,6 +593,188 @@ describe('Subjects Tests', () => {
         cy.contains('YES, Delete It!').click();
         cy.wait('@deleteSkill');
         cy.contains('ID: skill1').should('not.exist');
+    });
+
+    it('navigate to skills by click on subject name and subject icon', () => {
+        cy.createSubject(1, 1)
+        cy.createSubject(1, 2)
+
+        cy.visit('/administrator/projects/proj1');
+        cy.get('[data-cy="subjectCard-subj1"] [cy-data="subjTitle-link"]').click();
+        cy.contains('No Skills Yet');
+        cy.contains('ID: subj1')
+
+        cy.visit('/administrator/projects/proj1');
+        cy.get('[data-cy="subjectCard-subj2"] [cy-data="subjTitle-link"]').click();
+        cy.contains('No Skills Yet');
+        cy.contains('ID: subj2')
+
+        cy.visit('/administrator/projects/proj1');
+        cy.get('[data-cy="subjectCard-subj1"] [cy-data="subjIcon-link"]').click();
+        cy.contains('No Skills Yet');
+        cy.contains('ID: subj1')
+
+        cy.visit('/administrator/projects/proj1');
+        cy.get('[data-cy="subjectCard-subj2"] [cy-data="subjIcon-link"]').click();
+        cy.contains('No Skills Yet');
+        cy.contains('ID: subj2')
+    });
+
+    it('delete subject', () => {
+        cy.createSubject(1, 1)
+        cy.createSubject(1, 2)
+        cy.createSubject(1, 3)
+
+        cy.visit('/administrator/projects/proj1');
+
+        cy.get('[data-cy="subjectCard-subj1"]').should('exist');
+        cy.get('[data-cy="subjectCard-subj2"]').should('exist');
+        cy.get('[data-cy="subjectCard-subj3"]').should('exist');
+
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="deleteSubjBtn"]').click();
+        cy.contains('Subject with id [subj2] will be removed.');
+        cy.contains('YES, Delete It').click();
+
+        cy.get('[data-cy="subjectCard-subj1"]').should('exist');
+        cy.get('[data-cy="subjectCard-subj2"]').should('not.exist');
+        cy.get('[data-cy="subjectCard-subj3"]').should('exist');
+
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="deleteSubjBtn"]').click();
+        cy.contains('Subject with id [subj1] will be removed.');
+        cy.contains('YES, Delete It').click();
+
+        cy.get('[data-cy="subjectCard-subj1"]').should('not.exist');
+        cy.get('[data-cy="subjectCard-subj2"]').should('not.exist');
+        cy.get('[data-cy="subjectCard-subj3"]').should('exist');
+
+        cy.get('[data-cy="subjectCard-subj3"] [data-cy="deleteSubjBtn"]').click();
+        cy.contains('Subject with id [subj3] will be removed.');
+        cy.contains('YES, Delete It').click();
+
+        cy.get('[data-cy="subjectCard-subj1"]').should('not.exist');
+        cy.get('[data-cy="subjectCard-subj2"]').should('not.exist');
+        cy.get('[data-cy="subjectCard-subj3"]').should('not.exist');
+
+        cy.contains('No Subjects Yet');
+    });
+
+    it('sort management', () => {
+        cy.createSubject(1, 1)
+        cy.createSubject(1, 2)
+        cy.createSubject(1, 3)
+
+        cy.visit('/administrator/projects/proj1');
+        cy.get('[data-cy="subjectCard"]').should('have.length', 3).as('subjects');
+        cy.get('@subjects').eq(0).should('contain.text', 'Subject 1');
+        cy.get('@subjects').eq(1).should('contain.text', 'Subject 2');
+        cy.get('@subjects').eq(2).should('contain.text', 'Subject 3');
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="moveSubjUpBtn"]').should('be.disabled');
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="moveSubjDownBtn"]').should('be.enabled');
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="moveSubjUpBtn"]').should('be.enabled');
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="moveSubjDownBtn"]').should('be.enabled');
+        cy.get('[data-cy="subjectCard-subj3"] [data-cy="moveSubjUpBtn"]').should('be.enabled');
+        cy.get('[data-cy="subjectCard-subj3"] [data-cy="moveSubjDownBtn"]').should('be.disabled');
+
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="moveSubjDownBtn"]').click();
+        cy.get('@subjects').eq(0).should('contain.text', 'Subject 2');
+        cy.get('@subjects').eq(1).should('contain.text', 'Subject 1');
+        cy.get('@subjects').eq(2).should('contain.text', 'Subject 3');
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="moveSubjUpBtn"]').should('be.disabled');
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="moveSubjDownBtn"]').should('be.enabled');
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="moveSubjUpBtn"]').should('be.enabled');
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="moveSubjDownBtn"]').should('be.enabled');
+        cy.get('[data-cy="subjectCard-subj3"] [data-cy="moveSubjUpBtn"]').should('be.enabled');
+        cy.get('[data-cy="subjectCard-subj3"] [data-cy="moveSubjDownBtn"]').should('be.disabled');
+
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="moveSubjDownBtn"]').click();
+        cy.get('@subjects').eq(0).should('contain.text', 'Subject 2');
+        cy.get('@subjects').eq(1).should('contain.text', 'Subject 3');
+        cy.get('@subjects').eq(2).should('contain.text', 'Subject 1');
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="moveSubjUpBtn"]').should('be.disabled');
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="moveSubjDownBtn"]').should('be.enabled');
+        cy.get('[data-cy="subjectCard-subj3"] [data-cy="moveSubjUpBtn"]').should('be.enabled');
+        cy.get('[data-cy="subjectCard-subj3"] [data-cy="moveSubjDownBtn"]').should('be.enabled');
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="moveSubjUpBtn"]').should('be.enabled');
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="moveSubjDownBtn"]').should('be.disabled');
+
+        cy.visit('/administrator/projects/proj1');
+        cy.get('@subjects').eq(0).should('contain.text', 'Subject 2');
+        cy.get('@subjects').eq(1).should('contain.text', 'Subject 3');
+        cy.get('@subjects').eq(2).should('contain.text', 'Subject 1');
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="moveSubjUpBtn"]').should('be.disabled');
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="moveSubjDownBtn"]').should('be.enabled');
+        cy.get('[data-cy="subjectCard-subj3"] [data-cy="moveSubjUpBtn"]').should('be.enabled');
+        cy.get('[data-cy="subjectCard-subj3"] [data-cy="moveSubjDownBtn"]').should('be.enabled');
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="moveSubjUpBtn"]').should('be.enabled');
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="moveSubjDownBtn"]').should('be.disabled');
+
+        cy.get('[data-cy="subjectCard-subj3"] [data-cy="moveSubjUpBtn"]').click();
+        cy.get('@subjects').eq(0).should('contain.text', 'Subject 3');
+        cy.get('@subjects').eq(1).should('contain.text', 'Subject 2');
+        cy.get('@subjects').eq(2).should('contain.text', 'Subject 1');
+        cy.get('[data-cy="subjectCard-subj3"] [data-cy="moveSubjUpBtn"]').should('be.disabled');
+        cy.get('[data-cy="subjectCard-subj3"] [data-cy="moveSubjDownBtn"]').should('be.enabled');
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="moveSubjUpBtn"]').should('be.enabled');
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="moveSubjDownBtn"]').should('be.enabled');
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="moveSubjUpBtn"]').should('be.enabled');
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="moveSubjDownBtn"]').should('be.disabled');
+
+        cy.visit('/administrator/projects/proj1');
+        cy.get('@subjects').eq(0).should('contain.text', 'Subject 3');
+        cy.get('@subjects').eq(1).should('contain.text', 'Subject 2');
+        cy.get('@subjects').eq(2).should('contain.text', 'Subject 1');
+        cy.get('[data-cy="subjectCard-subj3"] [data-cy="moveSubjUpBtn"]').should('be.disabled');
+        cy.get('[data-cy="subjectCard-subj3"] [data-cy="moveSubjDownBtn"]').should('be.enabled');
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="moveSubjUpBtn"]').should('be.enabled');
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="moveSubjDownBtn"]').should('be.enabled');
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="moveSubjUpBtn"]').should('be.enabled');
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="moveSubjDownBtn"]').should('be.disabled');
+    })
+
+    it('subject card stats', () => {
+        cy.createSubject(1, 1)
+        cy.createSubject(1, 2)
+
+        cy.visit('/administrator/projects/proj1');
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="pagePreviewCardStat_# Skills"] [data-cy="statNum"]').contains(0);
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="pagePreviewCardStat_Points"] [data-cy="statNum"]').contains(0);
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="pagePreviewCardStat_# Skills"] [data-cy="statNum"]').contains(0);
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="pagePreviewCardStat_Points"] [data-cy="statNum"]').contains(0);
+
+        cy.createSkill(1, 1, 1)
+        cy.createSkill(1, 1, 2)
+        cy.visit('/administrator/projects/proj1');
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="pagePreviewCardStat_# Skills"] [data-cy="statNum"]').contains(2);
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="pagePreviewCardStat_Points"] [data-cy="statNum"]').contains(400);
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="pagePreviewCardStat_# Skills"] [data-cy="statNum"]').contains(0);
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="pagePreviewCardStat_Points"] [data-cy="statNum"]').contains(0);
+    });
+
+    it('subject card ponts %', () => {
+        cy.createSubject(1, 1)
+        cy.createSubject(1, 2)
+        cy.createSubject(1, 3)
+
+        cy.visit('/administrator/projects/proj1');
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="pointsPercent"]').contains('0');
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="pointsPercent"]').contains('0');
+        cy.get('[data-cy="subjectCard-subj3"] [data-cy="pointsPercent"]').contains('0');
+
+        cy.createSkill(1, 1, 1)
+        cy.createSkill(1, 1, 2)
+
+        cy.visit('/administrator/projects/proj1');
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="pointsPercent"]').contains('100');
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="pointsPercent"]').contains('0');
+        cy.get('[data-cy="subjectCard-subj3"] [data-cy="pointsPercent"]').contains('0');
+
+        cy.createSkill(1, 2, 3)
+
+        cy.visit('/administrator/projects/proj1');
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="pointsPercent"]').contains('66');
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="pointsPercent"]').contains('34');
+        cy.get('[data-cy="subjectCard-subj3"] [data-cy="pointsPercent"]').contains('0');
+
     });
 
 });

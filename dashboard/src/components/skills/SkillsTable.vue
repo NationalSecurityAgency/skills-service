@@ -85,17 +85,20 @@ limitations under the License.
               <b-button-group size="sm" class="ml-1">
                 <b-button @click="copySkill(data.item)"
                           variant="outline-primary" :data-cy="`copySkillButton_${data.item.skillId}`"
-                          :aria-label="'copy Skill '+data.item.name" :ref="'copy_'+data.item.skillId">
+                          :aria-label="'copy Skill '+data.item.name" :ref="'copy_'+data.item.skillId"
+                          title="Copy Skill">
                   <i class="fas fa-copy" aria-hidden="true" />
                 </b-button>
                 <b-button @click="editSkill(data.item)"
                           variant="outline-primary" :data-cy="`editSkillButton_${data.item.skillId}`"
-                          :aria-label="'edit Skill '+data.item.name" :ref="'edit_'+data.item.skillId">
+                          :aria-label="'edit Skill '+data.item.name" :ref="'edit_'+data.item.skillId"
+                          title="Edit Skill">
                   <i class="fas fa-edit" aria-hidden="true"/>
                 </b-button>
                 <b-button @click="deleteSkill(data.item)" variant="outline-primary"
                           :data-cy="`deleteSkillButton_${data.item.skillId}`"
-                          :aria-label="'delete Skill '+data.item.name">
+                          :aria-label="'delete Skill '+data.item.name"
+                          title="Delete Skill">
                   <i class="text-warning fas fa-trash" aria-hidden="true"/>
                 </b-button>
               </b-button-group>
