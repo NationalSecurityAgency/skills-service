@@ -1055,25 +1055,5 @@ describe('Projects Tests', () => {
 
   });
 
-    it('When more than 10 projects then projects should be displayed in a table', () => {
-        for (let i = 1; i <= 20; i += 1) {
-            cy.request('POST', `/app/projects/MyNewtestProject${i}`, {
-                projectId: `MyNewtestProject${i}`,
-                name: `My New test Project ${i}`
-            })
-        }
-
-        cy.intercept('GET', '/app/projects').as('loadProjects');
-        cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
-
-        cy.visit('/administrator/');
-        cy.wait('@loadUserInfo');
-        cy.wait('@loadProjects');
-
-        cy.get('[data-cy="projectsTable"]').should('exist')
-        cy.get('[data-cy=skillsBTableTotalRows]').contains(20);
-    });
-
-
 });
 

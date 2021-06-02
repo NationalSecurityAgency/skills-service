@@ -28,8 +28,8 @@ limitations under the License.
 
       <div class="row pl-3 mb-3">
         <div class="col">
-          <b-button variant="outline-info" @click="applyFilters" data-cy="project-filterBtn"><i class="fa fa-filter"/> Filter</b-button>
-          <b-button variant="outline-info" @click="reset" class="ml-1" data-cy="project-resetBtn"><i class="fa fa-times"/> Reset</b-button>
+          <b-button variant="outline-info" @click="applyFilters" data-cy="projectsTable-filterBtn"><i class="fa fa-filter"/> Filter</b-button>
+          <b-button variant="outline-info" @click="reset" class="ml-1" data-cy="projectsTable-resetBtn"><i class="fa fa-times"/> Reset</b-button>
         </div>
       </div>
 
@@ -166,6 +166,8 @@ limitations under the License.
               pageSize: 10,
               possiblePageSizes: [10, 15, 25],
             },
+            sortBy: 'created',
+            sortDesc: true,
           },
           filter: {
             name: '',
