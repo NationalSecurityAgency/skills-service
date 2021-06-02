@@ -96,7 +96,6 @@ describe('Markdown Tests', () => {
 
         validateMarkdown('Separate me\n\n___\n\nSeparate me\n\n---\n\nSeparate me\n\n***', 'Markdown-Separator')
 
-        validateMarkdown(':star: :star: :star: :star:', 'Markdown-emoji', '⭐ ⭐ ⭐ ⭐')
     });
 
     it('on skills pages', () => {
@@ -151,7 +150,7 @@ describe('Markdown Tests', () => {
             "Separate me\n\n" +
             "***\n\n" +
             "# Emojis\n" +
-            ":star: :star: :star: :star:\n" +
+            ":+1: :+1: :+1: :+1:\n" +
             "";
         cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
             projectId: 'proj1',
@@ -169,7 +168,7 @@ describe('Markdown Tests', () => {
         cy.wait('@inceptionLevel');
         cy.contains('Level');
         cy.contains('Emojis')
-        cy.contains('⭐ ⭐ ⭐ ⭐');
+        cy.contains('👍 👍 👍 👍');
         cy.matchSnapshotImageForElement('[data-cy="childRowDisplay_skill1"]', 'Markdown-SkillsPage-Overview', snapshotOptions);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
@@ -179,7 +178,7 @@ describe('Markdown Tests', () => {
         cy.get(selectorSkillsRowToggle).click();
         cy.contains('Description');
         cy.contains('Emojis')
-        cy.contains('⭐ ⭐ ⭐ ⭐');
+        cy.contains('👍 👍 👍 👍');
         cy.matchSnapshotImageForElement('[data-cy="childRowDisplay_skill1"]', 'Markdown-SubjectPage-SkillPreview', snapshotOptions);
     });
 
