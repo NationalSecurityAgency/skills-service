@@ -17,9 +17,9 @@ limitations under the License.
   <div>
     <page-header :loading="isLoading" :options="headerOptions">
       <div slot="banner" v-if="project && project.expiring" data-cy="projectExpiration" class="w-100 text-center alert-danger p-2 mb-3">
-          <span class="" v-b-tooltip.hover="'This Project has not been used recently, it will  be deleted unless you explicitly retain it'">
-            Project has not been used in over {{this.$store.getters.config.expireUnusedProjectsOlderThan}} days and will be deleted
-          </span><slim-date-cell cssClass="alert-danger"  :value="expirationDate" :fromStartOfDay="true"/>
+          <span class="mr-2" v-b-tooltip.hover="'This Project has not been used recently, it will  be deleted unless you explicitly retain it'">
+            Project has not been used in over <b>{{this.$store.getters.config.expireUnusedProjectsOlderThan}} days</b> and will be deleted <b>{{ fromExpirationDate() }}</b>.
+          </span>
           <b-button @click="keepIt" data-cy="keepIt" size="sm" variant="alert"
                     :aria-label="'Keep Project '+ project.name">
             <span class="d-none d-sm-inline">Keep It</span> <b-spinner v-if="cancellingExpiration" small style="font-size:1rem"/><i v-if="!cancellingExpiration" :class="'fas fa-shield-alt'" style="font-size: 1rem;" aria-hidden="true"/>
@@ -153,6 +153,9 @@ limitations under the License.
       ...mapMutations([
         'setProject',
       ]),
+      fromExpirationDate() {
+        return dayjs().startOf('day').to(dayjs(this.expirationDate));
+      },
       displayEditProject() {
         this.editProject = true;
       },
