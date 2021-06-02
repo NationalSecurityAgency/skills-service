@@ -99,8 +99,7 @@ describe('Projects Tests', () => {
     cy.get('a[data-cy=subjCard_subj1_manageBtn').click();
     cy.contains('SUBJECT: Subject 1').should('be.visible');
     cy.get('[data-cy=breadcrumb-editedProjectId]').click();
-    cy.get('[data-cy=cardSettingsButton]').click();
-    cy.get('[data-cy=editMenuEditBtn]').click();
+    cy.get('[data-cy="subjectCard-subj1"] [data-cy="editSubjBtn"]').click();
     cy.get('input[data-cy=subjectNameInput]').type('{selectall}I Am A Changed Subject');
     cy.get('button[data-cy=saveSubjectButton]').click();
     cy.contains('I Am A Changed Subject').should('be.visible');
@@ -558,50 +557,45 @@ describe('Projects Tests', () => {
       name: "proj2"
     });
     cy.visit('/administrator/');
-    cy.get('[data-cy="projOptions_proj1"]').click();
-    cy.get('[data-cy="projOptions_proj1"] [data-cy=editMenuEditBtn]').click();
+    const proj1EditBtn = '[data-cy="projectCard_proj1"] [data-cy="editProjBtn"]';
+    const proj2EditBtn = '[data-cy="projectCard_proj2"] [data-cy="editProjBtn"]';
+
+    cy.get(proj1EditBtn).click();
     cy.get('[data-cy=projectName]').should('be.visible');
     cy.get('body').type('{esc}{esc}');
-    cy.get('[data-cy="projectCard_proj1"] div.project-settings .dropdown-toggle').should('have.focus');
+    cy.get(proj1EditBtn).should('have.focus');
 
-    cy.get('[data-cy="projOptions_proj1"]').click();
-    cy.get('[data-cy="projOptions_proj1"] [data-cy=editMenuEditBtn]').click();
+    cy.get(proj1EditBtn).click();
     cy.get('[data-cy=closeProjectButton]').click();
-    cy.get('[data-cy="projectCard_proj1"] div.project-settings .dropdown-toggle').should('have.focus');
+    cy.get(proj1EditBtn).should('have.focus');
 
-    cy.get('[data-cy="projOptions_proj1"]').click();
-    cy.get('[data-cy="projOptions_proj1"] [data-cy=editMenuEditBtn]').click();
+    cy.get(proj1EditBtn).click();
     cy.get('[data-cy=projectName]').type('test 123');
     cy.get('[data-cy=saveProjectButton]').click();
-    cy.get('[data-cy="projectCard_proj1"] div.project-settings .dropdown-toggle').should('have.focus');
+    cy.get(proj1EditBtn).should('have.focus');
 
-    cy.get('[data-cy="projOptions_proj1"]').click();
-    cy.get('[data-cy="projOptions_proj1"] [data-cy=editMenuEditBtn]').click();
+    cy.get(proj1EditBtn).click();
     cy.get('[aria-label=Close]').click();
-    cy.get('[data-cy="projectCard_proj1"] div.project-settings .dropdown-toggle').should('have.focus');
+    cy.get(proj1EditBtn).should('have.focus');
 
     //project 2
-    cy.get('[data-cy="projOptions_proj2"]').click();
-    cy.get('[data-cy="projOptions_proj2"] [data-cy=editMenuEditBtn]').click();
+    cy.get(proj2EditBtn).click();
     cy.get('[data-cy=projectName]').should('be.visible');
     cy.get('body').type('{esc}{esc}');
-    cy.get('[data-cy="projectCard_proj2"] div.project-settings .dropdown-toggle').should('have.focus');
+    cy.get(proj2EditBtn).should('have.focus');
 
-    cy.get('[data-cy="projOptions_proj2"]').click();
-    cy.get('[data-cy="projOptions_proj2"] [data-cy=editMenuEditBtn]').click();
+    cy.get(proj2EditBtn).click();
     cy.get('[data-cy=closeProjectButton]').click();
-    cy.get('[data-cy="projectCard_proj2"] div.project-settings .dropdown-toggle').should('have.focus');
+    cy.get(proj2EditBtn).should('have.focus');
 
-    cy.get('[data-cy="projOptions_proj2"]').click();
-    cy.get('[data-cy="projOptions_proj2"] [data-cy=editMenuEditBtn]').click();
+    cy.get(proj2EditBtn).click();
     cy.get('[data-cy=projectName]').type('test 123');
     cy.get('[data-cy=saveProjectButton]').click();
-    cy.get('[data-cy="projectCard_proj2"] div.project-settings .dropdown-toggle').should('have.focus');
+    cy.get(proj2EditBtn).should('have.focus');
 
-    cy.get('[data-cy="projOptions_proj2"]').click();
-    cy.get('[data-cy="projOptions_proj2"] [data-cy=editMenuEditBtn]').click();
+    cy.get(proj2EditBtn).click();
     cy.get('[aria-label=Close]').click();
-    cy.get('[data-cy="projectCard_proj2"] div.project-settings .dropdown-toggle').should('have.focus');
+    cy.get(proj2EditBtn).should('have.focus');
   });
 
   it('new level dialog should return focus to new level button', () => {
@@ -753,8 +747,8 @@ describe('Projects Tests', () => {
     cy.wait('@getProjects');
     cy.wait('@loadInception');
 
-    cy.get('[data-cy=projectCreated]').should('be.visible').contains('today');
-    cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('never');
+    cy.get('[data-cy=projectCreated]').should('be.visible').contains('Today');
+    cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('Never');
 
     const now = dayjs().utc();
     cy.reportSkill('my_project_123', 1, 'user@skills.org', now.subtract(1, 'year').format('YYYY-MM-DD HH:mm'), false);
@@ -762,14 +756,14 @@ describe('Projects Tests', () => {
     cy.visit('/administrator/');
     cy.wait('@getProjects');
     cy.wait('@loadInception');
-    cy.get('[data-cy=projectCreated]').should('be.visible').contains('today');
+    cy.get('[data-cy=projectCreated]').should('be.visible').contains('Today');
     cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('a year ago');
 
     cy.reportSkill('my_project_123', 1, 'user@skills.org', now.subtract(2, 'months').format('YYYY-MM-DD HH:mm'), false);
     cy.visit('/administrator/');
     cy.wait('@getProjects');
     cy.wait('@loadInception');
-    cy.get('[data-cy=projectCreated]').should('be.visible').contains('today');
+    cy.get('[data-cy=projectCreated]').should('be.visible').contains('Today');
     cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('2 months ago');
 
     cy.reportSkill('my_project_123', 1, 'user@skills.org', now.subtract(7, 'days').utc().format('YYYY-MM-DD HH:mm'), false);
@@ -777,7 +771,7 @@ describe('Projects Tests', () => {
     cy.visit('/administrator/');
     cy.wait('@getProjects');
     cy.wait('@loadInception');
-    cy.get('[data-cy=projectCreated]').should('be.visible').contains('today');
+    cy.get('[data-cy=projectCreated]').should('be.visible').contains('Today');
     cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('7 days ago');
   });
 
@@ -811,8 +805,8 @@ describe('Projects Tests', () => {
     cy.wait('@loadProj');
     cy.wait('@loadInception');
 
-    cy.get('[data-cy=projectCreated]').should('be.visible').contains('today');
-    cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('never');
+    cy.get('[data-cy=projectCreated]').should('be.visible').contains('Today');
+    cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('Never');
 
     const now = dayjs().utc()
     cy.reportSkill('my_project_123', 1, 'user@skills.org', now.subtract(1, 'year').utc().format('YYYY-MM-DD HH:mm'), false);
@@ -820,21 +814,21 @@ describe('Projects Tests', () => {
     cy.visit('/administrator/projects/my_project_123');
     cy.wait('@loadProj');
     cy.wait('@loadInception');
-    cy.get('[data-cy=projectCreated]').should('be.visible').contains('today');
+    cy.get('[data-cy=projectCreated]').should('be.visible').contains('Today');
     cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('a year ago');
 
     cy.reportSkill('my_project_123', 1, 'user@skills.org', now.subtract(2, 'months').utc().format('YYYY-MM-DD HH:mm'), false);
     cy.visit('/administrator/projects/my_project_123');
     cy.wait('@loadProj');
     cy.wait('@loadInception');
-    cy.get('[data-cy=projectCreated]').should('be.visible').contains('today');
+    cy.get('[data-cy=projectCreated]').should('be.visible').contains('Today');
     cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('2 months ago');
 
     cy.reportSkill('my_project_123', 1, 'user@skills.org', now.subtract(7, 'days').utc().format('YYYY-MM-DD HH:mm'), false);
     cy.visit('/administrator/projects/my_project_123');
     cy.wait('@loadProj');
     cy.wait('@loadInception');
-    cy.get('[data-cy=projectCreated]').should('be.visible').contains('today');
+    cy.get('[data-cy=projectCreated]').should('be.visible').contains('Today');
     cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('7 days ago');
   });
 
@@ -936,6 +930,129 @@ describe('Projects Tests', () => {
     cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
     cy.get('[data-cy="settingsSavedAlert"]').should('not.exist')
     cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+  });
+
+  it('navigate to subjects by click on project name', () => {
+    cy.createProject(1);
+    cy.visit('/administrator')
+    cy.get('[data-cy="projCard_proj1_manageBtn"]');
+    cy.get('[data-cy="projCard_proj1_manageLink"]').click();
+    cy.contains('No Subjects Yet');
+  });
+
+  it('delete project', () => {
+    cy.createProject(1);
+    cy.createProject(2);
+    cy.createProject(3);
+    cy.visit('/administrator')
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="deleteProjBtn"]').click();
+    cy.contains('Project ID [proj1]. Delete Action')
+    cy.contains('YES, Delete It').click();
+    cy.get('[data-cy="projectCard_proj1"]').should('not.exist');
+    cy.get('[data-cy="projectCard_proj2"]').should('exist');
+    cy.get('[data-cy="projectCard_proj3"]').should('exist');
+
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="deleteProjBtn"]').click();
+    cy.contains('Project ID [proj2]. Delete Action')
+    cy.contains('Cancel').click();
+    cy.get('[data-cy="projectCard_proj2"]').should('exist');
+    cy.get('[data-cy="projectCard_proj3"]').should('exist');
+  });
+
+  it('project sort management', () => {
+    cy.createProject(1);
+    cy.createProject(2);
+    cy.createProject(3);
+    cy.visit('/administrator')
+    cy.get('[data-cy="projectCard"]').should('have.length', 3).as('projects');
+    cy.get('@projects').eq(0).should('contain.text', 'This is project 1');
+    cy.get('@projects').eq(1).should('contain.text', 'This is project 2');
+    cy.get('@projects').eq(2).should('contain.text', 'This is project 3');
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjUpBtn"]').should('be.disabled');
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjDownBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="moveProjUpBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="moveProjDownBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj3"] [data-cy="moveProjUpBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj3"] [data-cy="moveProjDownBtn"]').should('be.disabled');
+
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjDownBtn"]').click();
+    cy.get('[data-cy="projectCard"]').should('have.length', 3).as('projects');
+    cy.get('@projects').eq(0).should('contain.text', 'This is project 2');
+    cy.get('@projects').eq(1).should('contain.text', 'This is project 1');
+    cy.get('@projects').eq(2).should('contain.text', 'This is project 3');
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="moveProjUpBtn"]').should('be.disabled');
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="moveProjDownBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjUpBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjDownBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj3"] [data-cy="moveProjUpBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj3"] [data-cy="moveProjDownBtn"]').should('be.disabled');
+
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjDownBtn"]').click();
+    cy.get('[data-cy="projectCard"]').should('have.length', 3).as('projects');
+    cy.get('@projects').eq(0).should('contain.text', 'This is project 2');
+    cy.get('@projects').eq(1).should('contain.text', 'This is project 3');
+    cy.get('@projects').eq(2).should('contain.text', 'This is project 1');
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="moveProjUpBtn"]').should('be.disabled');
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="moveProjDownBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj3"] [data-cy="moveProjUpBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj3"] [data-cy="moveProjDownBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjUpBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjDownBtn"]').should('be.disabled');
+
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjUpBtn"]').click();
+    cy.get('[data-cy="projectCard"]').should('have.length', 3).as('projects');
+    cy.get('@projects').eq(0).should('contain.text', 'This is project 2');
+    cy.get('@projects').eq(1).should('contain.text', 'This is project 1');
+    cy.get('@projects').eq(2).should('contain.text', 'This is project 3');
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="moveProjUpBtn"]').should('be.disabled');
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="moveProjDownBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjUpBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjDownBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj3"] [data-cy="moveProjUpBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj3"] [data-cy="moveProjDownBtn"]').should('be.disabled');
+
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjUpBtn"]').click();
+    cy.get('[data-cy="projectCard"]').should('have.length', 3).as('projects');
+    cy.get('@projects').eq(0).should('contain.text', 'This is project 1');
+    cy.get('@projects').eq(1).should('contain.text', 'This is project 2');
+    cy.get('@projects').eq(2).should('contain.text', 'This is project 3');
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjUpBtn"]').should('be.disabled');
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjDownBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="moveProjUpBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="moveProjDownBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj3"] [data-cy="moveProjUpBtn"]').should('be.enabled');
+    cy.get('[data-cy="projectCard_proj3"] [data-cy="moveProjDownBtn"]').should('be.disabled');
+  });
+
+  it('project card stats', () => {
+    cy.createProject(1);
+    cy.createSubject(1, 1);
+    cy.createSubject(1, 2);
+
+    cy.createSkill(1, 1, 1);
+    cy.createSkill(1, 1, 2);
+    cy.createSkill(1, 2, 3);
+
+    cy.createBadge(1, 1);
+    cy.createProject(2);
+    cy.createProject(3);
+    cy.visit('/administrator');
+
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="pagePreviewCardStat_Subjects"] [data-cy="statNum"]').contains(2);
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="pagePreviewCardStat_Skills"] [data-cy="statNum"]').contains(3);
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="pagePreviewCardStat_Points"] [data-cy="statNum"]').contains(600);
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="pagePreviewCardStat_Badges"] [data-cy="statNum"]').contains(1);
+
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="pagePreviewCardStat_Subjects"] [data-cy="statNum"]').contains(0);
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="pagePreviewCardStat_Skills"] [data-cy="statNum"]').contains(0);
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="pagePreviewCardStat_Points"] [data-cy="statNum"]').contains(0);
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="pagePreviewCardStat_Badges"] [data-cy="statNum"]').contains(0);
+
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="pagePreviewCardStat_Subjects"] [data-cy="warning"]').should('not.exist');
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="pagePreviewCardStat_Skills"] [data-cy="warning"]').should('not.exist');
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="pagePreviewCardStat_Points"] [data-cy="warning"]').should('exist');
+    cy.get('[data-cy="projectCard_proj2"] [data-cy="pagePreviewCardStat_Badges"] [data-cy="warning"]').should('not.exist');
+
   });
 
 });

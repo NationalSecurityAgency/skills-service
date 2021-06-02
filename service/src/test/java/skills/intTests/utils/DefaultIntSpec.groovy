@@ -34,6 +34,7 @@ import javax.annotation.PostConstruct
 @SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
 class DefaultIntSpec extends Specification {
 
+    public static String DEFAULT_ROOT_USER_ID = "rootUser"
 
     static {
         // must call in the main method and not in @PostConstruct method as H2 jdbc driver will cache timezone prior @PostConstruct method is called
@@ -111,7 +112,7 @@ class DefaultIntSpec extends Specification {
         log.info(msg)
     }
 
-    SkillsService createRootSkillService(String username = "rootUser", String password = 'aaaaaaaa') {
+    SkillsService createRootSkillService(String username = DEFAULT_ROOT_USER_ID, String password = 'aaaaaaaa') {
         SkillsService rootSkillsService = createService(username, password)
         if (!rootSkillsService.isRoot()) {
             rootSkillsService.grantRoot()

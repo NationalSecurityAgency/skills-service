@@ -79,6 +79,52 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy=saveBadgeButton]').should('be.enabled');
     });
 
+    it('help url validation', () => {
+        cy.intercept('GET', `/supervisor/badges`).as('getGlobalBadges');
+        cy.intercept('POST', '/supervisor/badges/name/exists').as('nameExists');
+        cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('checkSupervisorRole');
+        cy.intercept('POST', '/api/validation/url').as('customUrlValidation');
+
+        cy.visit('/administrator/globalBadges');
+        cy.wait('@getGlobalBadges');
+        cy.wait('@checkSupervisorRole');
+
+        cy.clickButton('Badge');
+
+        // name causes id to be too long
+        cy.get('[data-cy=badgeName]').click();
+        cy.get('[data-cy=badgeName]').type('Global Badge');
+        cy.get('[data-cy=saveBadgeButton]').should('be.enabled');
+
+        cy.get('[data-cy=badgeHelpUrl]').clear().type('javascript:alert("uh oh");');
+        cy.get('[data-cy=badgeHelpUrlError]').should('be.visible');
+        cy.get('[data-cy=badgeHelpUrlError]').should('have.text', 'Help URL/Path must use http, https, or be a relative url.');
+        cy.get('[data-cy=saveBadgeButton]').should('be.disabled');
+        cy.get('[data-cy=badgeHelpUrl]').clear().type('/foo?p1=v1&p2=v2');
+        cy.get('[data-cy=badgeHelpUrlError]').should('not.be.visible');
+        cy.get('[data-cy=saveBadgeButton]').should('be.enabled');
+        cy.get('[data-cy=badgeHelpUrl]').clear().type('http://foo.bar?p1=v1&p2=v2');
+        cy.get('[data-cy=badgeHelpUrlError]').should('not.be.visible');
+        cy.get('[data-cy=saveBadgeButton]').should('be.enabled');
+        cy.get('[data-cy=badgeHelpUrl]').clear().type('https://foo.bar?p1=v1&p2=v2');
+        cy.get('[data-cy=badgeHelpUrlError]').should('not.be.visible');
+        cy.get('[data-cy=saveBadgeButton]').should('be.enabled');
+
+        cy.get('[data-cy=badgeHelpUrl]').clear().type('https://');
+        cy.wait('@customUrlValidation');
+        cy.get('[data-cy=badgeHelpUrlError]').should('be.visible');
+        cy.get('[data-cy=saveBadgeButton]').should('be.disabled');
+
+        cy.get('[data-cy=badgeHelpUrl]').clear().type('https://---??..??##');
+        cy.wait('@customUrlValidation');
+        cy.get('[data-cy=badgeHelpUrlError]').should('be.visible');
+        cy.get('[data-cy=saveBadgeButton]').should('be.disabled');
+        // trailing space should work now
+        cy.get('[data-cy=badgeHelpUrl]').clear().type('https://foo.bar?p1=v1&p2=v2 ');
+        cy.wait('@customUrlValidation');
+        cy.get('[data-cy=badgeHelpUrlError]').should('not.be.visible');
+        cy.get('[data-cy=saveBadgeButton]').should('be.enabled');
+    });
 
 
     it('Delete badge', () => {
@@ -1025,6 +1071,21 @@ describe('Global Badges Tests', () => {
         cy.contains('YES, Delete It!').click();
         cy.wait('@removeLevel');
         cy.get('[data-cy=deleteLevelBtn_proj2-5]').should('not.exist');
+    });
+
+    it('project can not be deleted when it belongs to a global badge', () => {
+        cy.createProject(1);
+        cy.createProject(2);
+        cy.createGlobalBadge(1);
+        cy.assignProjectToGlobalBadge(1, 1, 2);
+
+        cy.visit('/administrator/');
+        cy.get('[data-cy="projectCard_proj1"] [data-cy="deleteProjBtn"]').click();
+        cy.contains('Cannot delete this project as it belongs to one or more global badges');
+        cy.contains('Ok').click();
+
+        cy.get('[data-cy="projectCard_proj2"] [data-cy="deleteProjBtn"]').click();
+        cy.contains('Project ID [proj2]. Delete Action can not be undone');
     });
 
 });

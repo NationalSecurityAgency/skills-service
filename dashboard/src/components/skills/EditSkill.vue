@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit}" slim>
+  <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit }" slim>
     <b-modal :id="skillInternal.skillId" size="xl" :title="title" v-model="show" :no-close-on-backdrop="true"
              header-bg-variant="info" header-text-variant="light" no-fade role="dialog" @hide="publishHidden"
              :aria-label="isEdit?'Edit Skill':'New Skill'">
@@ -194,7 +194,7 @@ limitations under the License.
               <inline-help
                 msg="If project level 'Root Help Url' is specified then this path will be relative to 'Root Help Url'"/>
             </label>
-            <ValidationProvider rules="help_url" v-slot="{errors}" name="Help URL/Path">
+            <ValidationProvider rules="help_url|customUrlValidator" v-slot="{errors}" name="Help URL/Path">
               <input class="form-control" type="text" v-model="skillInternal.helpUrl"
                      v-on:keyup.enter="handleSubmit(saveSkill)" id="skillHelpUrl" data-cy="skillHelpUrl"
                      aria-describedby="skillHelpUrlError"

@@ -14,27 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="h-100">
+  <div class="h-100" data-cy="subjectCard">
     <loading-card :loading="isLoading"/>
-    <page-preview-card v-if="!isLoading" :options="cardOptions">
-      <div slot="header-top-right">
-        <edit-and-delete-dropdown ref="subjectEditDelete" v-on:deleted="deleteSubject" v-on:edited="showEditSubject=true"
-                                  v-on:move-up="moveUp"
-                                  v-on:move-down="moveDown"
-                                  :isFirst="subjectInternal.isFirst" :isLast="subjectInternal.isLast" :isLoading="isLoading"
-                                  :is-delete-disabled="deleteSubjectDisabled" :delete-disabled-text="deleteSubjectToolTip"
-                                  class="subject-settings" data-cy="cardSettingsButton"></edit-and-delete-dropdown>
+    <subject-card v-if="!isLoading" :options="cardOptions" :data-cy="`subjectCard-${subjectInternal.subjectId}`">
+      <div slot="underTitle">
+        <subject-card-controls ref="subjectCardControls" class="mt-2"
+                               :subject="subjectInternal"
+                               @edit-subject="showEditSubject=true"
+                               @delete-subject="deleteSubject"
+                               @move-up-subject="moveUp"
+                               @move-down-subject="moveDown"
+                               :is-delete-disabled="deleteSubjectDisabled"
+                               :delete-disabled-text="deleteSubjectToolTip"/>
       </div>
-      <div slot="footer">
-        <router-link
-          :to="{ name:'SubjectSkills', params: { projectId: this.subjectInternal.projectId, subjectId: this.subjectInternal.subjectId, subject: this.subjectInternal}}"
-          class="btn btn-outline-primary btn-sm"
-          :aria-label="`Manage subject ${subjectInternal.name}`"
-          :data-cy="`subjCard_${subjectInternal.subjectId}_manageBtn`">
-          Manage <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
-        </router-link>
+      <div slot="footer" class="text-right">
+        <span class="small"><b-badge style="font-size: 0.8rem;" variant="primary" data-cy="pointsPercent">{{ this.subjectInternal.pointsPercentage }}%</b-badge> of the total points</span>
       </div>
-    </page-preview-card>
+    </subject-card>
 
     <edit-subject v-if="showEditSubject" v-model="showEditSubject" :id="subjectInternal.subjectId"
                   :subject="subjectInternal" :is-edit="true" @subject-saved="subjectSaved" @hidden="hiddenEventHandler"/>
@@ -42,21 +38,21 @@ limitations under the License.
 </template>
 
 <script>
-  import EditAndDeleteDropdown from '@/components/utils/EditAndDeleteDropdown';
   import EditSubject from './EditSubject';
   import SubjectsService from './SubjectsService';
-  import PagePreviewCard from '../utils/pages/PagePreviewCard';
   import LoadingCard from '../utils/LoadingCard';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
+  import SubjectCard from './SubjectCard';
+  import SubjectCardControls from './SubjectCardControls';
 
   export default {
     name: 'Subject',
     mixins: [MsgBoxMixin],
     components: {
+      SubjectCardControls,
+      SubjectCard,
       LoadingCard,
       EditSubject,
-      PagePreviewCard,
-      EditAndDeleteDropdown,
     },
     props: ['subject'],
     data() {
@@ -88,20 +84,20 @@ limitations under the License.
     methods: {
       buildCardOptions() {
         this.cardOptions = {
+          navTo: { name: 'SubjectSkills', params: { projectId: this.subjectInternal.projectId, subjectId: this.subjectInternal.subjectId, subject: this.subjectInternal } },
           icon: this.subjectInternal.iconClass,
           title: this.subjectInternal.name,
           subTitle: `ID: ${this.subjectInternal.subjectId}`,
           stats: [{
-            label: 'Number Skills',
+            label: '# Skills',
             count: this.subjectInternal.numSkills,
+            icon: 'fas fa-graduation-cap skills-color-skills',
           }, {
-            label: 'Total Points',
+            label: 'Points',
             count: this.subjectInternal.totalPoints,
             warn: this.subjectInternal.totalPoints < this.minimumPoints,
             warnMsg: this.subjectInternal.totalPoints < this.minimumPoints ? `Subject has insufficient points assigned. Skills cannot be achieved until subject has at least ${this.minimumPoints} points.` : null,
-          }, {
-            label: 'Points %',
-            count: this.subjectInternal.pointsPercentage,
+            icon: 'far fa-arrow-alt-circle-up skills-color-points',
           }],
         };
       },
@@ -148,7 +144,7 @@ limitations under the License.
       },
       handleFocus() {
         this.$nextTick(() => {
-          this.$refs.subjectEditDelete.focus();
+          this.$refs.subjectCardControls.focusOnEdit();
         });
       },
     },

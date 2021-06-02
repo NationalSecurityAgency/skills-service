@@ -69,6 +69,7 @@ describe('Skills Tests', () => {
     it('validation', () => {
       cy.intercept('POST', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('postNewSkill');
       cy.intercept('GET', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('getSkill');
+      cy.intercept('POST', '/api/validation/url').as('customUrlValidation');
       cy.intercept({
         method: 'GET',
         url: '/admin/projects/proj1/subjects/subj1'
@@ -188,6 +189,21 @@ describe('Skills Tests', () => {
       cy.get('[data-cy=skillHelpUrlError]').should('not.be.visible');
       cy.get('[data-cy=saveSkillButton]').should('be.enabled');
       cy.get('[data-cy=skillHelpUrl]').clear().type('https://foo.bar?p1=v1&p2=v2');
+      cy.get('[data-cy=skillHelpUrlError]').should('not.be.visible');
+      cy.get('[data-cy=saveSkillButton]').should('be.enabled');
+
+      cy.get('[data-cy=skillHelpUrl]').clear().type('https://');
+      cy.wait('@customUrlValidation');
+      cy.get('[data-cy=skillHelpUrlError]').should('be.visible');
+      cy.get('[data-cy=saveSkillButton]').should('be.disabled');
+
+      cy.get('[data-cy=skillHelpUrl]').clear().type('https://---??..??##');
+      cy.wait('@customUrlValidation');
+      cy.get('[data-cy=skillHelpUrlError]').should('be.visible');
+      cy.get('[data-cy=saveSkillButton]').should('be.disabled');
+      // trailing space should work now
+      cy.get('[data-cy=skillHelpUrl]').clear().type('https://foo.bar?p1=v1&p2=v2 ');
+      cy.wait('@customUrlValidation');
       cy.get('[data-cy=skillHelpUrlError]').should('not.be.visible');
       cy.get('[data-cy=saveSkillButton]').should('be.enabled');
 

@@ -13,25 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import axios from 'axios';
+import { extend } from 'vee-validate';
+import CustomValidatorService from './CustomValidatorsService';
 
-export default {
-  validateDescription(description) {
-    const body = {
-      value: description,
-    };
-    return axios.post('/api/validation/description', body).then((result) => result.data);
-  },
-  validateName(name) {
-    const body = {
-      value: name,
-    };
-    return axios.post('/api/validation/name', body).then((result) => result.data);
-  },
-  validateUrl(url) {
-    const body = {
-      value: url,
-    };
-    return axios.post('/api/validation/url', body).then((result) => result.data);
+const validator = {
+  getMessage: (field, params, data) => `${field} - ${data.msg}.`,
+  validate(value) {
+    return CustomValidatorService.validateUrl(value).then((result) => result.valid);
   },
 };
+
+extend('customUrlValidator', validator);
+
+export default validator;

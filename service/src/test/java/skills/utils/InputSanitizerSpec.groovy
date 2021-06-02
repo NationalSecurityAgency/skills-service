@@ -50,6 +50,22 @@ class InputSanitizerSpec extends Specification{
         sanitized == "https://foo.bar?p=1&pp=2&ppp=3"
     }
 
+    def "Sanitize url with trailing space"() {
+        when:
+        def sanitized = InputSanitizer.sanitizeUrl("https://foo.bar?p=1&pp=2&ppp=3 ")
+
+        then:
+        sanitized == "https://foo.bar?p=1&pp=2&ppp=3"
+    }
+
+    def "Sanitize url with leading space"() {
+        when:
+        def sanitized = InputSanitizer.sanitizeUrl(" https://foo.bar?p=1&pp=2&ppp=3 ")
+
+        then:
+        sanitized == "https://foo.bar?p=1&pp=2&ppp=3"
+    }
+
     def "Sanitize local url"() {
         when:
         def sanitized = InputSanitizer.sanitizeUrl("/foo?p=1&pp=2&ppp=3")

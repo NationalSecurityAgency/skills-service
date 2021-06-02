@@ -15,47 +15,59 @@ limitations under the License.
 */
 <template>
   <div data-cy="projectCard">
-    <page-preview-card :options="cardOptions" :data-cy="`projectCard_${projectInternal.projectId}`">
-
-      <div slot="header-top-right">
-        <b-button v-if="isRootUser" class="mr-2" @click="unpin" data-cy="unpin" size="sm"
-                  variant="outline-primary" :aria-label="'remove pin for project '+ projectInternal.name"
-                  :aria-pressed="pinned">
-          <span class="d-none d-sm-inline">Unpin</span> <i class="fas fa-ban" style="font-size: 1rem;" aria-hidden="true"/>
-        </b-button>
-        <edit-and-delete-dropdown ref="projectEditDeleteBtn" v-on:deleted="deleteProject" v-on:edited="editProject" v-on:move-up="moveUp"
-                                  v-on:move-down="moveDown"
-                                  :is-first="projectInternal.isFirst" :is-last="projectInternal.isLast"
-                                  :is-loading="isLoading" :is-delete-disabled="deleteProjectDisabled" :delete-disabled-text="deleteProjectToolTip"
-                                  :data-cy="`projOptions_${projectInternal.projectId}`"
-                                  class="project-settings"></edit-and-delete-dropdown>
-      </div>
-      <div slot="footer">
-        <b-button :to="{ name:'Subjects', params: { projectId: this.projectInternal.projectId, project: this.projectInternal }}"
-                  variant="outline-primary" :data-cy="`projCard_${this.projectInternal.projectId}_manageBtn`" :aria-label="`manage project ${this.projectInternal.name}`">
-          Manage <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
-        </b-button>
-        <div class="text-right mt-2">
-          <div class="row">
-            <div class="col justify-content-end" data-cy="projectCreated">
-              <span class="text-secondary small font-italic">Created: </span><slim-date-cell :value="projectInternal.created"/>
+    <div class="card h-100" :data-cy="`projectCard_${projectInternal.projectId}`">
+      <div class="card-body">
+        <div class="row mb-2">
+          <div class="col">
+            <div class="media">
+              <div class="media-body" style="min-width: 0px;">
+                <router-link
+                  :to="{ name:'Subjects', params: { projectId: this.projectInternal.projectId, project: this.projectInternal }}"
+                  class="text-truncate text-info mb-0 pb-0 preview-card-title"
+                  data-cy="projCard_proj1_manageLink"><b-avatar variant="info" icon="people-fill" class="text-uppercase avatar-link"> {{ projectInternal.name.substring(0,2) }}</b-avatar> {{ projectInternal.name }}
+                </router-link>
+                <div class="text-truncate text-secondary preview-card-subTitle mt-1 ml-1">ID: {{ projectInternal.projectId }}</div>
+              </div>
+              <div class="col-auto text-center text-sm-right p-0">
+                <project-card-controls
+                  ref="cardControls"
+                  :project="projectInternal"
+                  @edit-project="editProject"
+                  @delete-project="deleteProject"
+                  @move-up-project="moveUp"
+                  @move-down-project="moveDown"
+                  @unpin-project="unpin"
+                  :is-delete-disabled="deleteProjectDisabled"
+                  :delete-disabled-text="deleteProjectToolTip"/>
+              </div>
             </div>
-          </div>
-          <div class="row">
-            <div class="col justify-content-end" data-cy="projectLastReportedSkill">
-              <span class="text-secondary small font-italic">Last reported Skill: </span><slim-date-cell :value="projectInternal.lastReportedSkill" :fromStartOfDay="true"/>
-            </div>
-          </div>
-          <div v-if="projectInternal.expiring" data-cy="projectExpiration" class="w-100 text-center alert-danger p-2">
-              <span class="" v-b-tooltip.hover="'This Project has not been used recently, ' +
-               'it will  be deleted unless you explicitly retain it'">Project has not been used in over {{this.$store.getters.config.expireUnusedProjectsOlderThan}} days and will be deleted </span><slim-date-cell cssClass="alert-danger"  :value="expirationDate" :fromStartOfDay="true"/>
-              <b-button @click="keepIt" data-cy="keepIt" size="sm" variant="alert" :aria-label="'Keep Project '+ projectInternal.name">
-                <span class="d-none d-sm-inline">Keep It</span> <b-spinner v-if="cancellingExpiration" small style="font-size:1rem"/><i v-if="!cancellingExpiration" :class="'fas fa-shield-alt'" style="font-size: 1rem;" aria-hidden="true"/>
-              </b-button>
           </div>
         </div>
+
+        <div class="row text-center justify-content-center">
+          <div v-for="(stat) in stats" :key="stat.label" class="col my-3" style="min-width: 10rem;">
+            <div :data-cy="`pagePreviewCardStat_${stat.label}`" class="border rounded stat-card">
+              <i :class="stat.icon"></i>
+              <p class="text-uppercase text-muted count-label">{{ stat.label }}</p>
+              <strong class="h4" data-cy="statNum">{{ stat.count | number }}</strong>
+              <i v-if="stat.warn" class="fas fa-exclamation-circle text-warning ml-1" style="font-size: 1.5rem;" v-b-tooltip.hover="stat.warnMsg" data-cy="warning"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-center mt-1">
+          <project-card-footer class="mt-4" :project="projectInternal"/>
+        </div>
+
+        <div v-if="projectInternal.expiring" data-cy="projectExpiration" class="w-100 text-center alert-danger p-2 mt-2">
+              <span class="mr-2" v-b-tooltip.hover="'This Project has not been used recently, ' +
+               'it will  be deleted unless you explicitly retain it'">Project has not been used in over <b>{{this.$store.getters.config.expireUnusedProjectsOlderThan}} days</b> and will be deleted <b>{{ fromExpirationDate() }}</b>.</span>
+          <b-button @click="keepIt" data-cy="keepIt" size="sm" variant="alert" :aria-label="'Keep Project '+ projectInternal.name">
+            <span class="d-none d-sm-inline">Keep It</span> <b-spinner v-if="cancellingExpiration" small style="font-size:1rem"/><i v-if="!cancellingExpiration" :class="'fas fa-shield-alt'" style="font-size: 1rem;" aria-hidden="true"/>
+          </b-button>
+        </div>
       </div>
-    </page-preview-card>
+    </div>
 
     <edit-project v-if="showEditProjectModal" v-model="showEditProjectModal" :project="projectInternal" :is-edit="true"
       @project-saved="projectSaved" @hidden="handleHidden"/>
@@ -63,22 +75,20 @@ limitations under the License.
 </template>
 
 <script>
-  import EditAndDeleteDropdown from '../utils/EditAndDeleteDropdown';
+  import ProjectCardControls from '@/components/projects/ProjectCardControls';
+  import ProjectCardFooter from '@/components/projects/ProjectCardFooter';
   import EditProject from './EditProject';
   import ProjectService from './ProjectService';
-  import PagePreviewCard from '../utils/pages/PagePreviewCard';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
   import SettingsService from '../settings/SettingsService';
-  import SlimDateCell from '../utils/table/SlimDateCell';
   import dayjs from '../../DayJsCustomizer';
 
   export default {
     name: 'MyProject',
     components: {
+      ProjectCardFooter,
+      ProjectCardControls,
       EditProject,
-      PagePreviewCard,
-      EditAndDeleteDropdown,
-      SlimDateCell,
     },
     props: ['project'],
     mixins: [MsgBoxMixin],
@@ -87,7 +97,7 @@ limitations under the License.
         isLoading: false,
         pinned: false,
         projectInternal: { ...this.project },
-        cardOptions: {},
+        stats: [],
         showEditProjectModal: false,
         deleteProjectDisabled: false,
         deleteProjectToolTip: '',
@@ -114,44 +124,35 @@ limitations under the License.
         return expires.format('YYYY-MM-DD HH:mm');
       },
     },
-    watch: {
-      isRootUser(newVal) {
-        if (newVal) {
-          this.enableSearch = true;
-        }
-      },
-    },
     methods: {
+      fromExpirationDate() {
+        return dayjs().startOf('day').to(dayjs(this.expirationDate));
+      },
       handleHidden() {
         this.$nextTick(() => {
-          this.$refs.projectEditDeleteBtn.focus();
+          this.$refs.cardControls.focusOnEdit();
         });
       },
       createCardOptions() {
-        this.cardOptions = {
-          title: this.projectInternal.name,
-          subTitle: `ID: ${this.projectInternal.projectId}`,
-          stats: [{
-            label: 'Subjects',
-            count: this.projectInternal.numSubjects,
-          }, {
-            label: 'Skills',
-            count: this.projectInternal.numSkills,
-          }, {
-            label: 'Points',
-            count: this.projectInternal.totalPoints,
-            warn: this.projectInternal.totalPoints < this.minimumPoints,
-            warnMsg: 'Project has insufficient points assigned. Skills cannot be achieved until project has at least 100 points.',
-          }, {
-            label: 'Badges',
-            count: this.projectInternal.numBadges,
-          }, {
-            label: 'Issues',
-            count: this.projectInternal.numErrors,
-            warn: this.projectInternal.numErrors > 0,
-            warnMsg: 'Project has issues that may need to be addressed',
-          }],
-        };
+        this.stats = [{
+          label: 'Subjects',
+          count: this.projectInternal.numSubjects,
+          icon: 'fas fa-cubes skills-color-subjects',
+        }, {
+          label: 'Skills',
+          count: this.projectInternal.numSkills,
+          icon: 'fas fa-graduation-cap skills-color-skills',
+        }, {
+          label: 'Points',
+          count: this.projectInternal.totalPoints,
+          warn: this.projectInternal.totalPoints < this.minimumPoints,
+          warnMsg: 'Project has insufficient points assigned. Skills cannot be achieved until project has at least 100 points.',
+          icon: 'far fa-arrow-alt-circle-up skills-color-points',
+        }, {
+          label: 'Badges',
+          count: this.projectInternal.numBadges,
+          icon: 'fas fa-award skills-color-badges',
+        }];
       },
       checkIfProjectBelongsToGlobalBadge() {
         ProjectService.checkIfProjectBelongsToGlobalBadge(this.projectInternal.projectId)
@@ -226,4 +227,32 @@ limitations under the License.
     display: inline-block;
     float: right;
   }
+  .buttons i {
+    font-size: 0.9rem;
+  }
+
+  .preview-card-title {
+    font-size: 1.4rem;
+    font-weight: bold;
+  }
+
+  .preview-card-subTitle {
+    max-width: 12rem;
+    font-size: 0.8rem;
+  }
+
+  .count-label {
+    font-size: 0.9rem;
+  }
+
+  i {
+    font-size: 2.5rem;
+    display: inline-block;
+  }
+
+  .stat-card {
+    background-color: #f8f9fa;
+    padding: 1rem;
+  }
+
 </style>
