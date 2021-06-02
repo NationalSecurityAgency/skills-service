@@ -97,7 +97,6 @@ describe('Markdown Tests', () => {
 
         validateMarkdown('Separate me\n\n___\n\nSeparate me\n\n---\n\nSeparate me\n\n***', 'Markdown-Separator')
 
-        validateMarkdown(':+1: :+1: :+1: :+1:', 'Markdown-emoji', '👍 👍 👍 👍')
     });
 
     it('on skills pages', () => {
