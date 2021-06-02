@@ -30,6 +30,7 @@ import skills.services.settings.SettingsService
 import skills.storage.model.UserAttrs
 import skills.storage.repos.SkillDefRepo
 import skills.utils.WaitFor
+import spock.lang.IgnoreRest
 
 import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
@@ -190,6 +191,7 @@ class UnusedProjectExpirationSpecs extends DefaultIntSpec{
 
         UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserId(skillsService.userName)
         UserAttrs otherProjectAdminUserAttrs = userAttrsRepo.findByUserId(otherUser)
+        UserAttrs rootUserUserAttrs = userAttrsRepo.findByUserId(DEFAULT_ROOT_USER_ID.toLowerCase())
 
         when:
         expirationService.notifyGracePeriodProjectAdmins(flagForExpiration.minus(1))
@@ -206,7 +208,7 @@ class UnusedProjectExpirationSpecs extends DefaultIntSpec{
 
         then:
         emails.size() == 3
-        emails.collect {it.recipients[0] }.sort() == ["rootUser", projectAdminUserAttrs.email, otherProjectAdminUserAttrs.email].sort()
+        emails.collect {it.recipients[0] }.sort() == [rootUserUserAttrs.email, projectAdminUserAttrs.email, otherProjectAdminUserAttrs.email].sort()
         emails.find { it.subj == "SkillTree Project is expiring!" }
         emails.find {it.recipients == ["skills@skills.org"]}
         emails.find { plaintTextMatch.matcher(it.plainText).find() }
