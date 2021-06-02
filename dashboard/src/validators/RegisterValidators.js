@@ -19,6 +19,7 @@ import './OptionalNumericValidator';
 import './CustomDescriptionValidator';
 import './CustomNameValidator';
 import './IdValidator';
+import './UrlValidator';
 import ValidatorFactory from './ValidatorFactory';
 import store from '../store/store';
 

@@ -48,6 +48,7 @@ class InputSanitizer {
         if (!uri) {
             return uri;
         }
+        uri = uri.trim()
         Matcher m = ALLOWED_PROTOCOLS.matcher(uri)
         if (!m.matches()) {
             SkillException ske = new SkillException("only local urls or http/https protocols are allowed")

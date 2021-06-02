@@ -27,6 +27,7 @@ import skills.controller.result.model.ValidationResult
 import skills.profile.EnableCallStackProf
 import skills.services.CustomValidationResult
 import skills.services.CustomValidator
+import skills.utils.InputSanitizer
 
 @CrossOrigin(allowCredentials = "true")
 @RestController
@@ -51,6 +52,21 @@ class CustomValidationController {
     ValidationResult validateName(@RequestBody Map<String,String> body){
         CustomValidationResult vr = customValidator.validateName(body.value)
         ValidationResult validationResult = new ValidationResult(vr.valid, vr.msg)
+        return validationResult
+    }
+
+    @RequestMapping(value="/url", method = RequestMethod.POST, produces = "application/json")
+    @ResponseBody
+    ValidationResult validateUrl(@RequestBody Map<String, String> body) {
+        ValidationResult validationResult = new ValidationResult()
+        try {
+            InputSanitizer.sanitizeUrl(body.value)
+            validationResult.valid = true
+        } catch (Exception e) {
+            validationResult.msg = e.getMessage();
+            validationResult.valid = false
+        }
+
         return validationResult
     }
 
