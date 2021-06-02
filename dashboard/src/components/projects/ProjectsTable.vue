@@ -166,6 +166,8 @@ limitations under the License.
               pageSize: 10,
               possiblePageSizes: [10, 15, 25],
             },
+            sortBy: 'created',
+            sortDesc: true,
           },
           filter: {
             name: '',
