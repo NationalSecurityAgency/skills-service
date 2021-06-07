@@ -198,7 +198,7 @@ class ProjAdminService {
 
     private  List<ProjectResult> loadProjectsForRoot(Map<String, Integer> projectIdSortOrder) {
         List<SettingsResult> pinnedProjectSettings = settingsService.getRootUserSettingsForGroup(rootUserPinnedProjectGroup)
-        List<String> pinnedProjects = pinnedProjectSettings.collect { it.value }
+        List<String> pinnedProjects = pinnedProjectSettings.collect { it.projectId }
 
         List<ProjSummaryResult> projects = projDefRepo.getAllSummariesByProjectIdIn(pinnedProjects)
         Set<String> pinnedProjectIds = pinnedProjects.toSet()
