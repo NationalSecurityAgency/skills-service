@@ -20,7 +20,10 @@ import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import skills.auth.*
 import skills.auth.pki.PkiUserLookup
@@ -32,6 +35,8 @@ import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.UserInfoRes
 import skills.services.AccessSettingsStorageService
 import skills.services.UserAdminService
+import skills.services.UserAgreementResult
+import skills.services.UserAgreementService
 import skills.services.settings.SettingsService
 import skills.services.settings.listeners.ValidationRes
 import skills.storage.repos.UserAttrsRepo
@@ -46,6 +51,8 @@ class UserInfoController {
     static final String USER_PREFS_GROUP = 'user.prefs'
     static final String HOME_PAGE_PREF = 'home_page'
     static final String RANK_AND_LEADERBOARD_OPT_OUT_PREF = 'rank_and_leaderboard_optOut'
+
+    static final String DISPLAY_UA_HEADER = "skills-display-ua"
 
     @Autowired
     UserInfoService userInfoService
@@ -71,17 +78,26 @@ class UserInfoController {
     @Autowired
     SettingsService settingsService
 
-    @RequestMapping(value = "/userInfo", method = RequestMethod.GET, produces = "application/json")
-    @ResponseBody
+    @Autowired
+    UserAgreementService userAgreementService
+
+
+    @RequestMapping(value = "/userInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @CrossOrigin(allowCredentials = 'true')
-    def getUserInfo() {
-        def res = 'null'
+    ResponseEntity<UserInfoRes> getUserInfo() {
+        UserInfoRes res = null;
         UserInfo currentUser = loadCurrentUser()
+        HttpHeaders headers = new HttpHeaders()
         if (currentUser) {
             res = new UserInfoRes(currentUser)
             res.landingPage = settingsService.getUserSetting(currentUser.username, HOME_PAGE_PREF, USER_PREFS_GROUP)?.value
+            UserAgreementResult uar = userAgreementService.getUserAgreementStatus(currentUser.getUsername())
+            if (uar.userAgreement && uar.lastViewedVersion != uar.currentVersion) {
+                headers.set(DISPLAY_UA_HEADER, "true")
+                headers.set("Access-Control-Expose-Headers", DISPLAY_UA_HEADER)
+            }
         }
-        return res
+        return new ResponseEntity<>(res, headers, HttpStatus.OK)
     }
 
     @RequestMapping(value = "/userInfo", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
@@ -202,6 +218,12 @@ class UserInfoController {
             query = "a"
         }
         return pkiUserLookup?.suggestUsers(query, userSuggestOption)?.take(5)?.collect { new UserInfoRes(it) }
+    }
+
+    @RequestMapping(value="/userAgreement", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    def getUserAgreement() {
+        return  userAgreementService.getUserAgreementStatus(loadCurrentUser(true).username)
     }
 
     private UserInfo loadCurrentUser(boolean failIfNoCurrentUser=false) {

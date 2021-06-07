@@ -79,6 +79,15 @@ limitations under the License.
             </ValidationProvider>
           </div>
 
+          <div class="form-group">
+            <label>User Agreement</label>
+            <ValidationProvider rules="noscript" v-slot="{errors}"
+                                name="User Agreement">
+              <markdown-editor v-model="userAgreement" @input="updateUserAgreement"></markdown-editor>
+              <small class="form-text text-danger mb-3" data-cy="userAgreement">{{ errors[0] }}</small>
+            </ValidationProvider>
+          </div>
+
           <p v-if="invalid && overallErrMsg" class="text-center text-danger" role="alert">***{{ overallErrMsg }}***</p>
           <div>
             <button class="btn btn-outline-success" type="button" v-on:click="saveSystemSettings" :disabled="invalid || (pristine===true)"
@@ -101,6 +110,7 @@ limitations under the License.
   import SettingsService from './SettingsService';
   import ToastSupport from '../utils/ToastSupport';
   import InlineHelp from '../utils/InlineHelp';
+  import MarkdownEditor from '../utils/MarkdownEditor';
 
   extend('email', email);
   extend('max', max);
@@ -111,6 +121,7 @@ limitations under the License.
     components: {
       SubPageHeader,
       InlineHelp,
+      MarkdownEditor,
     },
     data() {
       return {
@@ -121,6 +132,7 @@ limitations under the License.
         overallErrMsg: '',
         customHeader: '',
         customFooter: '',
+        userAgreement: '',
       };
     },
     mounted() {
@@ -137,6 +149,7 @@ limitations under the License.
               fromEmail,
               customHeader,
               customFooter,
+              userAgreement,
             } = this;
             let { resetTokenExpiration } = this;
             if (!resetTokenExpiration.toLowerCase().startsWith('pt')) {
@@ -149,6 +162,7 @@ limitations under the License.
               fromEmail,
               customHeader,
               customFooter,
+              userAgreement,
             }).then(() => {
               this.successToast('Saved', 'System Settings Successful!');
               this.$store.dispatch('loadConfigState');
@@ -178,8 +192,14 @@ limitations under the License.
             if (resp.customFooter) {
               this.customFooter = resp.customFooter;
             }
+            if (resp.userAgreement) {
+              this.userAgreement = resp.userAgreement;
+            }
           }
         });
+      },
+      updateUserAgreement(event) {
+        this.userAgreement = event;
       },
     },
   };

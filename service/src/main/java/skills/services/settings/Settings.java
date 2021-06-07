@@ -23,7 +23,10 @@ public enum Settings {
     GLOBAL_RESET_TOKEN_EXPIRATION("password_reset_token_expiration"),
     GLOBAL_FROM_EMAIL("from_email"),
     GLOBAL_CUSTOM_HEADER("custom_header"),
-    GLOBAL_CUSTOM_FOOTER("custom_footer");
+    GLOBAL_CUSTOM_FOOTER("custom_footer"),
+    GLOBAL_USER_AGREEMENT("user_agreement"),
+    GLOBAL_USER_AGREEMENT_VERSION("user_agreement_version"),
+    USER_VIEWED_USER_AGREEMENT("viewed_user_agreement");
 
 
     private String settingName;

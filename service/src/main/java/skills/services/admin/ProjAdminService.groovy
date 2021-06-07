@@ -354,15 +354,15 @@ class ProjAdminService {
 
     @Profile
     private ProjectResult convert(ProjSummaryResult definition, Map<String, Integer> projectIdSortOrder, Set<String> pinnedProjectIds = []) {
-        Integer order = projectIdSortOrder?.get(definition.projectId)
+        Integer order = projectIdSortOrder?.get(definition.getProjectId())
         ProjectResult res = new ProjectResult(
-                projectId: definition.projectId, name: definition.name, totalPoints: definition.totalPoints,
-                numSubjects: definition.numSubjects,
+                projectId: definition.getProjectId(), name: definition.getName(), totalPoints: definition.getTotalPoints(),
+                numSubjects: definition.getNumSubjects(),
                 displayOrder: order != null ? order : 0,
-                pinned: pinnedProjectIds?.contains(definition.projectId),
-                created: definition.created,
-                expiring: definition.expiring,
-                expirationTriggered: definition.expirationTriggered
+                pinned: pinnedProjectIds?.contains(definition.getProjectId()),
+                created: definition.getCreated(),
+                expiring: definition.getExpiring(),
+                expirationTriggered: definition.getExpirationTriggered()
         )
         res.numBadges = definition.numBadges
         res.numSkills = definition.numSkills

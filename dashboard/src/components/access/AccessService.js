@@ -85,4 +85,7 @@ export default {
   isResetSupported() {
     return axios.get('/public/isFeatureSupported?feature=passwordreset').then((response) => response.data);
   },
+  getUserAgreement() {
+    return axios.get('/app/userAgreement').then((response) => response.data);
+  },
 };

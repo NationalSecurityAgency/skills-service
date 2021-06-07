@@ -31,6 +31,7 @@ export default new Vuex.Store({
     projectId: '',
     previousUrl: '',
     projectSearch: '',
+    showUa: false,
   },
   mutations: {
     currentProjectId(state, projectId) {
@@ -41,6 +42,9 @@ export default new Vuex.Store({
     },
     projectSearch(state, projectSearch) {
       state.projectSearch = projectSearch;
+    },
+    showUa(state, showUa) {
+      state.showUa = showUa;
     },
   },
   modules: {
