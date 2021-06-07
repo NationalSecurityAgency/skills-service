@@ -210,7 +210,7 @@ class UnusedProjectExpirationSpecs extends DefaultIntSpec{
         emails.size() == 3
         emails.collect {it.recipients[0] }.sort() == [rootUserUserAttrs.email, projectAdminUserAttrs.email, otherProjectAdminUserAttrs.email].sort()
         emails.find { it.subj == "SkillTree Project is expiring!" }
-        emails.find {it.recipients == ["skills@skills.org"]}
+        emails.find {it.recipients == [otherProjectAdminUserAttrs.email]}
         emails.find { plaintTextMatch.matcher(it.plainText).find() }
         emails.findAll {h1.matcher(it.html).find() }?.size() == 3
         emails.find { p1.matcher(it.html).find() }
