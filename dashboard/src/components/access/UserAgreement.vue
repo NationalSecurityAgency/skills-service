@@ -46,7 +46,6 @@ limitations under the License.
   import LoadingContainer from '../utils/LoadingContainer';
   import NavigationErrorMixin from '../utils/NavigationErrorMixin';
 
-
   export default {
     name: 'UserAgreement',
     components: { MarkdownText, LoadingContainer },
