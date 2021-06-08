@@ -323,7 +323,7 @@ class RootAccessSpec extends DefaultIntSpec {
         projects.find { it.projectId == proj3.projectId }
     }
 
-    def 'only root users can searcj all projects'() {
+    def 'only root users can search all projects'() {
         def proj = SkillsFactory.createProject(1)
         def proj2 = SkillsFactory.createProject(2)
         def proj3 = SkillsFactory.createProject(3)
@@ -383,6 +383,32 @@ class RootAccessSpec extends DefaultIntSpec {
 
         then:
         thrown(Exception)
+    }
+
+    def 'edit id of pinned project'() {
+        def proj = SkillsFactory.createProject(1)
+        def proj2 = SkillsFactory.createProject(2)
+        def proj3 = SkillsFactory.createProject(3)
+        rootSkillsService.createProject(proj)
+        rootSkillsService.createProject(proj2)
+        rootSkillsService.createProject(proj3)
+        rootSkillsService.pinProject(proj.projectId)
+        rootSkillsService.pinProject(proj2.projectId)
+
+
+        def res = rootSkillsService.getProject(proj.projectId)
+        def originalProjectId = res.projectId
+        res.projectId = "ShinyNewProjectId"
+        res.name = "NewNewNew"
+        rootSkillsService.updateProject(res, originalProjectId)
+
+        when:
+        def projects = rootSkillsService.getProjects()
+
+        then:
+        projects.size() == 2
+        projects.find { it.projectId == res.projectId }
+        projects.find { it.projectId == proj2.projectId }
     }
 
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
