@@ -40,17 +40,17 @@ limitations under the License.
 </template>
 
 <script>
-  import VueRouter from 'vue-router';
   import MarkdownText from '../utils/MarkdownText';
   import AccessService from './AccessService';
   import SettingsService from '../settings/SettingsService';
   import LoadingContainer from '../utils/LoadingContainer';
+  import NavigationErrorMixin from '../utils/NavigationErrorMixin';
 
-  const { NavigationFailureType, isNavigationFailure } = VueRouter;
 
   export default {
     name: 'UserAgreement',
     components: { MarkdownText, LoadingContainer },
+    mixins: [NavigationErrorMixin],
     data() {
       return {
         userAgreement: '',
@@ -80,18 +80,7 @@ limitations under the License.
         SettingsService.saveUserSettings([ack]).then(() => {
           // redirect to original page
           this.$store.commit('showUa', false);
-          this.$router.push(this.$route.query.redirect || '/').catch((error) => {
-            if (isNavigationFailure(error, NavigationFailureType.redirected)
-              || isNavigationFailure(error, NavigationFailureType.duplicated)) {
-              // squash, vue-router made changes in version 3 that
-              // causes a redirect to trigger an error. router-link squashes these and in previous
-              // versions of vue-router they were ignored. Because we trigger redirects in a navigation guard
-              // to handle landing/home page display preferences, we receive this benign error
-            } else {
-              // eslint-disable-next-line
-              console.error(error);
-            }
-          });
+          this.handlePush(this.$route.query.redirect || '/');
         }).finally(() => {
           this.isSaving = false;
         });
