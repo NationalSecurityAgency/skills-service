@@ -759,7 +759,7 @@ describe('Skills Tests', () => {
       cy.get('[data-cy=editSkillButton_skill1]').should('not.exist');
     });
 
-    it.only('skill name should not wrap prematurely', () => {
+    it('skill name should not wrap prematurely', () => {
         cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/areallylongsubjectnamethatmaywraptoosoonSkill`, {
             projectId: 'proj1',
             subjectId: 'subj1',
