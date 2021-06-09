@@ -85,7 +85,7 @@ limitations under the License.
     },
     computed: {
       titleCss() {
-        const statCount = this.options.stats.length;
+        const statCount = this.options?.stats ? this.options.stats.length : 0;
         return {
           pageHeaderTitle: true,
           'text-center': true,
@@ -100,7 +100,7 @@ limitations under the License.
         };
       },
       statcsCss() {
-        const statCount = this.options.stats.length;
+        const statCount = this.options?.stats ? this.options.stats.length : 0;
         return {
           'col-lg-7': statCount > 2,
           'col-xxxl-9': statCount > 2,
@@ -113,7 +113,7 @@ limitations under the License.
         };
       },
       individualStatCss() {
-        const statCount = this.options.stats.length;
+        const statCount = this.options?.stats ? this.options.stats.length : 0;
         return {
           'col-md-6': statCount >= 2,
           'col-xl-4': statCount >= 2,
