@@ -1,5 +1,5 @@
-/**
- * Copyright 2021 SkillTree
+/*
+ * Copyright 2020 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,21 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.storage.model
+import axios from 'axios';
+import store from '../store/store';
 
-import groovy.transform.Canonical
-
-interface ProjSummaryResult {
-    String getProjectId()
-    String getName()
-    int getTotalPoints()
-    int getNumSubjects()
-    int getNumSkills()
-    int getNumBadges()
-    int getNumErrors()
-    Date getCreated()
-    Date getLastReportedSkill()
-
-    Date getExpirationTriggered()
-    Boolean getExpiring()
+function handleFunction(response) {
+  const uaHeader = response?.headers?.['skills-display-ua'];
+  if (uaHeader) {
+    store.commit('showUa', true);
+  }
 }
+
+// apply interceptor on response
+axios.interceptors.response.use(
+  (response) => {
+    handleFunction(response);
+    return response;
+  },
+);

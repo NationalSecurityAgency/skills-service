@@ -30,4 +30,8 @@ class SystemSettings {
     String customHeader
     //html and in-line css to display a custom footer in the dashboard application
     String customFooter
+    //markdown user agreement that will be displayed to Dashboard users on their first access of the Dashboard
+    String userAgreement
+    //hash of the userAgreement to trigger redisplay to users on change
+    String userAgreemmentVersion
 }

@@ -26,10 +26,10 @@ limitations under the License.
       </div>
     </b-dropdown-text>
     <b-dropdown-divider />
-    <b-dropdown-item href="#" :disabled="myProgressLinkDisabled"  @click="gotoMyProgress">
+    <b-dropdown-item href="#" :disabled="myProgressLinkDisabled"  @click="gotoMyProgress" data-cy="settingsButton-navToMyProgress">
       <span class="text-gray-700"> <i class="fas fa-chart-bar skills-color-progressAndRanking" aria-hidden="true"/><span class="link-name">Progress and Rankings</span></span>
     </b-dropdown-item>
-    <b-dropdown-item href="#" :disabled="adminLinkDisabled"  @click="gotoAdmin">
+    <b-dropdown-item href="#" :disabled="adminLinkDisabled"  @click="gotoAdmin" data-cy="settingsButton-navToProjectAdmin">
       <span class="text-gray-700"> <i class="fas fa-tasks skills-color-projectAdmin" aria-hidden="true"/><span class="link-name">Project Admin</span></span>
     </b-dropdown-item>
     <b-dropdown-item href="#" :disabled="settingsLinkDisabled" @click="gotoSettings" data-cy="settingsButton-navToSettings">

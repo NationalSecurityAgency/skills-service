@@ -127,6 +127,7 @@ window.dayjs = dayjs;
 window.axios = require('axios');
 require('./interceptors/errorHandler');
 require('./interceptors/clientVersionInterceptor');
+require('./interceptors/userAgreementInterceptor');
 require('vue-multiselect/dist/vue-multiselect.min.css');
 
 const isActiveProjectIdChange = (to, from) => to.params.projectId !== from.params.projectId;
@@ -149,31 +150,43 @@ router.beforeEach((to, from, next) => {
   } else if (!isPki() && to.path === requestAccountPath && !store.getters.config.needToBootstrap) {
     next({ name: getLandingPage() });
   } else {
-    if (to.path === '/') {
-      const landingPageRoute = { name: getLandingPage() };
-      next(landingPageRoute);
-    }
-    if (from.path !== '/error') {
-      store.commit('previousUrl', from.fullPath);
-    }
-    if (isActiveProjectIdChange(to, from)) {
-      store.commit('currentProjectId', to.params.projectId);
-    }
-    if (to.matched.some((record) => record.meta.requiresAuth)) {
-      // this route requires auth, check if logged in if not, redirect to login page.
-      if (!isLoggedIn()) {
-        const newRoute = { query: { redirect: to.fullPath } };
-        if (isPki()) {
-          newRoute.name = getLandingPage();
+    /* eslint-disable no-lonely-if */
+    if (store.state.showUa && (to.path !== '/user-agreement' && to.path !== '/skills-login')) {
+      let p = '';
+      if (to.query?.redirect) {
+        p = to.query.redirect;
+      } else {
+        p = to.fullPath;
+      }
+      const ua = p !== '/' ? { name: 'UserAgreement', query: { redirect: p } } : { name: 'UserAgreement' };
+      next(ua);
+    } else {
+      if (to.path === '/') {
+        const landingPageRoute = { name: getLandingPage() };
+        next(landingPageRoute);
+      }
+      if (from.path !== '/error') {
+        store.commit('previousUrl', from.fullPath);
+      }
+      if (isActiveProjectIdChange(to, from)) {
+        store.commit('currentProjectId', to.params.projectId);
+      }
+      if (to.matched.some((record) => record.meta.requiresAuth)) {
+        // this route requires auth, check if logged in if not, redirect to login page.
+        if (!isLoggedIn()) {
+          const newRoute = { query: { redirect: to.fullPath } };
+          if (isPki()) {
+            newRoute.name = getLandingPage();
+          } else {
+            newRoute.name = 'Login';
+          }
+          next(newRoute);
         } else {
-          newRoute.name = 'Login';
+          next();
         }
-        next(newRoute);
       } else {
         next();
       }
-    } else {
-      next();
     }
   }
 });

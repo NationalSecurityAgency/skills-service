@@ -48,6 +48,8 @@ import skills.settings.EmailSettingsService
 import skills.settings.SystemSettings
 import skills.storage.model.auth.RoleName
 
+import javax.xml.bind.DatatypeConverter
+import java.security.MessageDigest
 import java.security.Principal
 
 @RestController
@@ -197,6 +199,14 @@ class RootController {
 
     @PostMapping('/saveSystemSettings')
     RequestResult saveSystemSettings(@RequestBody SystemSettings settings){
+        if (settings.userAgreement) {
+            MessageDigest md = MessageDigest.getInstance("MD5")
+            md.update(settings.userAgreement.getBytes())
+            byte[] digest = md.digest()
+            String agreementVersion = DatatypeConverter
+                    .printHexBinary(digest).toUpperCase()
+            settings.userAgreemmentVersion = agreementVersion
+        }
         systemSettingsService.save(settings)
         return RequestResult.success()
     }

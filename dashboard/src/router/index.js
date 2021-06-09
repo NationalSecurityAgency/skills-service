@@ -47,6 +47,7 @@ import RequestResetConfirmation from '@//components/access/RequestResetConfirmat
 import ResetConfirmation from '@//components/access/ResetConfirmation';
 import ResetNotSupportedPage from '@//components/access/ResetNotSupportedPage';
 import SelfReportStatusPage from '@//components/skills/selfReport/SelfReportStatusPage';
+import UserAgreement from '@//components/access/UserAgreement';
 
 const GlobalBadgePage = () => import(/* webpackChunkName: 'globalBadgePage' */'@/components/badges/global/GlobalBadgePage');
 const GlobalBadgeSkills = () => import(/* webpackChunkName: 'globalBadgeSkills' */'@//components/badges/global/GlobalBadgeSkills');
@@ -218,6 +219,12 @@ const router = new Router({
       path: '/',
       component: MyProgress,
       meta: { requiresAuth: true, nonAdmin: true },
+    },
+    {
+      path: '/user-agreement',
+      component: UserAgreement,
+      name: 'UserAgreement',
+      meta: { requiresAuth: true },
     },
     {
       path: '/administrator/projects/:projectId',
