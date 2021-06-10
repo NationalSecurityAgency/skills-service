@@ -45,8 +45,8 @@ describe('Projects Table Tests', () => {
     cy.wait('@loadUserInfo');
     cy.wait('@loadProjects');
 
-    cy.get('[data-cy="projectsTable"]').should('exist')
-    cy.get('[data-cy=skillsBTableTotalRows]').contains(11);
+    cy.get('[data-cy="projectsTable"]').should('be.visible');
+    cy.get('[data-cy=skillsBTableTotalRows]').should('have.text', '11');
 
     // validate the projects are sorted in desc create date order
     cy.validateTable(tableSelector, [
@@ -91,7 +91,7 @@ describe('Projects Table Tests', () => {
     cy.wait('@loadProjects');
 
     cy.get('[data-cy="projectsTable"]').should('exist')
-    cy.get('[data-cy=skillsBTableTotalRows]').contains(10);
+    cy.get('[data-cy=skillsBTableTotalRows]').should('have.text', 10);
 
     cy.clickButton('Project');
     cy.get('[data-cy="projectName"]').type("My Brand New test Project")
@@ -99,7 +99,7 @@ describe('Projects Table Tests', () => {
 
     cy.wait('@postNewProject');
 
-    cy.get('[data-cy=skillsBTableTotalRows]').contains(11);
+    cy.get('[data-cy=skillsBTableTotalRows]').should('have.text', 11);
     cy.get('[data-cy="projectsTable-projectFilter"]').type('Brand');
     cy.get('[data-cy="projectsTable-filterBtn"]').click();
     cy.validateTable(tableSelector, [
@@ -110,7 +110,7 @@ describe('Projects Table Tests', () => {
     cy.contains('ID: MyBrandNewtestProject')
 
     cy.get('[data-cy="projectsTable-resetBtn"]').click();
-    cy.get('[data-cy=skillsBTableTotalRows]').contains(11);
+    cy.get('[data-cy=skillsBTableTotalRows]').should('have.text','11');
   });
 
   it('Delete an existing project', function () {
@@ -127,8 +127,8 @@ describe('Projects Table Tests', () => {
     cy.wait('@loadProjects');
 
     cy.get('[data-cy="projectsTable"]').should('exist')
-    cy.get('[data-cy=skillsBTableTotalRows]').contains(11);
-        
+    cy.get('[data-cy=skillsBTableTotalRows]').should('have.text', '11');
+
     cy.get('[data-cy="projectsTable-projectFilter"]').type('proj10');
     cy.get('[data-cy="projectsTable-filterBtn"]').click();
     cy.validateTable(tableSelector, [
@@ -141,7 +141,7 @@ describe('Projects Table Tests', () => {
     cy.wait('@deleteProject');
 
     cy.get('[data-cy="projectsTable-resetBtn"]').click();
-    cy.get('[data-cy=skillsBTableTotalRows]').contains(10);
+    cy.get('[data-cy=skillsBTableTotalRows]').should('have.text','10');
 
     cy.get('[data-cy="projectsTable-projectFilter"]').type('proj10');
     cy.get('[data-cy="projectsTable-filterBtn"]').click();
@@ -157,12 +157,12 @@ describe('Projects Table Tests', () => {
     cy.wait('@loadProjects');
 
     cy.get('[data-cy="projectsTable"]').should('exist')
-    cy.get('[data-cy=skillsBTableTotalRows]').contains(10);
+    cy.get('[data-cy=skillsBTableTotalRows]').should('have.text', '10');
 
     cy.get('[data-cy=editProjectIdproj1]').click();
     cy.get('input[data-cy=projectName]').type('{selectall}I Am A Changed Project Name');
     cy.get('button[data-cy=saveProjectButton]').click();
-    
+
     cy.get('[data-cy="projectsTable-projectFilter"]').type('Changed');
     cy.get('[data-cy="projectsTable-filterBtn"]').click();
     cy.validateTable(tableSelector, [
@@ -183,7 +183,7 @@ describe('Projects Table Tests', () => {
     cy.wait('@loadProjects');
 
     cy.get('[data-cy="projectsTable"]').should('exist')
-    cy.get('[data-cy=skillsBTableTotalRows]').contains(10);
+    cy.get('[data-cy=skillsBTableTotalRows]').should('have.text', '10');
 
     cy.get('[data-cy=manageProjBtn_proj1]').click();
 
@@ -200,7 +200,7 @@ describe('Projects Table Tests', () => {
     cy.wait('@loadProjects');
 
     cy.get('[data-cy="projectsTable"]').should('exist')
-    cy.get('[data-cy=skillsBTableTotalRows]').contains(10);
+    cy.get('[data-cy=skillsBTableTotalRows]').should('have.text', '10');
 
     cy.get('[data-cy=manageProjLink_proj1]').click();
 
@@ -217,7 +217,7 @@ describe('Projects Table Tests', () => {
     cy.wait('@loadProjects');
 
     cy.get('[data-cy="projectsTable"]').should('exist')
-    cy.get('[data-cy=skillsBTableTotalRows]').contains(10);
+    cy.get('[data-cy=skillsBTableTotalRows]').should('have.text','10');
 
     cy.get(`${tableSelector}`).contains('Project').click();
     cy.validateTable(tableSelector, [
@@ -264,7 +264,7 @@ describe('Projects Table Tests', () => {
     cy.wait('@loadProjects');
 
     cy.get('[data-cy="projectsTable"]').should('exist')
-    cy.get('[data-cy=skillsBTableTotalRows]').contains(11);
+    cy.get('[data-cy=skillsBTableTotalRows]').should('have.text', '11');
 
     cy.get('[data-cy="projectsTable-projectFilter"]').type('project 11');
     cy.get('[data-cy="projectsTable-filterBtn"]').click();
