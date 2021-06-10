@@ -396,7 +396,10 @@ describe('Projects Tests', () => {
 
     cy.contains('Enter user id').type('bar');
     cy.wait('@suggest');
-    cy.get('.multiselect__input').type('{enter}');
+    //cy.pause();
+    //cy.get('.multiselect__input').type('{enter}');
+    // cy.get('.multiselect__option multiselect__option--highlight').click();
+    cy.get('.multiselect__element').click();
     cy.clickButton('Add');
     cy.wait('@addAdmin');
     cy.get('.alert-danger').contains('User was not found');

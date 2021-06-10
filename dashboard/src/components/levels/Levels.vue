@@ -73,7 +73,7 @@ limitations under the License.
 
       </skills-b-table>
     </b-card>
-    <new-level v-if="displayLevelModal"
+    <new-level v-if="displayLevelModal && this.levels"
                v-model="displayLevelModal"
                @new-level="doCreateNewLevel"
                @edited-level="doEditLevel"
@@ -186,33 +186,35 @@ limitations under the License.
           next: null,
         };
 
-        if (this.isEdit) {
-          const existingIdx = this.levels.findIndex((level) => this.levelToEdit.level === level.level);
-          const byIndex = new Map(this.levels.map((level, index) => [index, level]));
+        if (this.levels) {
+          if (this.isEdit) {
+            const existingIdx = this.levels.findIndex((level) => this.levelToEdit.level === level.level);
+            const byIndex = new Map(this.levels.map((level, index) => [index, level]));
 
-          const previous = byIndex.get(existingIdx - 1);
-          const next = byIndex.get(existingIdx + 1);
+            const previous = byIndex.get(existingIdx - 1);
+            const next = byIndex.get(existingIdx + 1);
 
-          if (previous) {
-            if (this.levelsAsPoints) {
-              bounds.previous = previous.pointsTo;
-            } else {
-              bounds.previous = previous.percent;
+            if (previous) {
+              if (this.levelsAsPoints) {
+                bounds.previous = previous.pointsTo;
+              } else {
+                bounds.previous = previous.percent;
+              }
             }
-          }
-          if (next) {
-            if (this.levelsAsPoints) {
-              bounds.next = next.pointsFrom;
-            } else {
-              bounds.next = next.percent;
+            if (next) {
+              if (this.levelsAsPoints) {
+                bounds.next = next.pointsFrom;
+              } else {
+                bounds.next = next.percent;
+              }
             }
-          }
-        } else {
-          const last = this.levels[this.levels.length - 1];
-          if (this.levelsAsPoints) {
-            bounds.previous = last.pointsFrom;
           } else {
-            bounds.previous = last.percent;
+            const last = this.levels[this.levels.length - 1];
+            if (this.levelsAsPoints) {
+              bounds.previous = last?.pointsFrom;
+            } else {
+              bounds.previous = last?.percent;
+            }
           }
         }
 
