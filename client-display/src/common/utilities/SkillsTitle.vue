@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <div class="card mb-3">
-    <div class="titleBody card-body skills-page-title-text-color text-info text-uppercase m-0 py-2">
+    <div class="titleBody card-body skills-page-title-text-color text-info m-0 py-2">
       <div class="row position-absolute" v-if="showBackButton">
         <div class="col">
           <div>
@@ -27,9 +27,12 @@ limitations under the License.
         </div>
       </div>
 
-      <h1 :class="{'mx-5': showBackButton}" data-cy="title" class="skills-title m-0" >
-        <slot/>
-      </h1>
+      <div :class="{'mx-5': showBackButton}">
+        <breadcrumb></breadcrumb>
+        <h1 data-cy="title" class="skills-title m-0 text-uppercase">
+          <slot/>
+        </h1>
+      </div>
 
       <div class="row powered-by-row" style="top:0.4rem; right: .5rem;">
         <div class="col">
@@ -42,11 +45,12 @@ limitations under the License.
 </template>
 
 <script>
-  import PoweredBySkilltree from '../../userSkills/footer/PoweredBySkilltree';
+  import PoweredBySkilltree from '../../userSkills/header/PoweredBySkilltree';
+  import Breadcrumb from '../../userSkills/header/Breadcrumb';
 
   export default {
     name: 'SkillsTitle',
-    components: { PoweredBySkilltree },
+    components: { PoweredBySkilltree, Breadcrumb },
     props: {
       backButton: { type: Boolean, default: true },
       animatePowerByLabel: Boolean,
@@ -73,7 +77,7 @@ limitations under the License.
   position: absolute !important;
 }
 
-@media (max-width: 675px) {
+@media (max-width: 825px) {
   .powered-by-row {
     position: relative !important;
   }

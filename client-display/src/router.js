@@ -70,14 +70,19 @@ const router = new VueRouter({
       props: true,
     },
     {
-      path: '/skills/:skillId',
+      path: '/subjects/:subjectId/skills/:skillId',
       component: SkillDetails,
       name: 'skillDetails',
     },
     {
-      path: '/skills/crossProject/:crossProjectId/:skillId',
+      path: '/subjects/:subjectId/skills/:skillId/crossProject/:crossProjectId/:dependentSkillId',
       component: SkillDetails,
       name: 'crossProjectSkillDetails',
+    },
+    {
+      path: '/subjects/:subjectId/skills/:skillId/dependency/:dependentSkillId',
+      component: SkillDetails,
+      name: 'dependentSkillDetails',
     },
     {
       path: '/rank',

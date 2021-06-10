@@ -46,7 +46,7 @@ limitations under the License.
 </template>
 
 <script>
-  import UserSkillsHeader from '@/userSkills/UserSkillsHeader';
+  import UserSkillsHeader from '@/userSkills/header/UserSkillsHeader';
   import SkillDisplayDataLoadingMixin from '@/userSkills/SkillDisplayDataLoadingMixin';
   import SkillsTitle from '@/common/utilities/SkillsTitle';
   import SkillsProgressList from '@/userSkills/skill/progress/SkillsProgressList';

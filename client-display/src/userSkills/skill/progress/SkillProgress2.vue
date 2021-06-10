@@ -124,6 +124,10 @@ limitations under the License.
         type: Boolean,
         default: false,
       },
+      subjectId: {
+        type: String,
+        required: false,
+      },
     },
     computed: {
       locked() {
@@ -139,7 +143,7 @@ limitations under the License.
       },
       skillClicked() {
         if (this.enableDrillDown) {
-          const params = { skillId: this.skill.skillId };
+          const params = { skillId: this.skill.skillId, subjectId: this.subjectId };
           if (this.skill.crossProject && this.skill.projectId) {
             params.crossProjectId = this.skill.projectId;
           }

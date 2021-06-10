@@ -58,6 +58,7 @@ limitations under the License.
                     <div class="p-3 pt-4">
                       <skill-progress2
                           :skill="skill"
+                          :subjectId="subject.subjectId"
                           :enable-drill-down="true"
                           :show-description="showDescriptionsInternal"
                           :data-cy="`skillProgress_index-${index}`"
@@ -129,10 +130,11 @@ limitations under the License.
       };
     },
     mounted() {
+      const theSubject = this.subject;
       this.showDescriptionsInternal = this.showDescriptions;
       this.skillsInternal = this.subject.skills.map((item) => {
         this.updateMetaCounts(item.meta);
-        return { ...item };
+        return { ...item, subject: theSubject };
       });
       this.skillsInternalOrig = this.skillsInternal.map((item) => ({ ...item }));
     },
