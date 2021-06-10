@@ -803,8 +803,8 @@ describe('Skills Tests', () => {
         cy.wait('@validateDescription');
         cy.wait('@validateUrl');
         cy.wait('@afterIdEdit');
-        cy.wait(200);
-        cy.contains('Editing Existing Skill').should('not.be.visible');
+        cy.wait(750);
+        cy.contains('Editing Existing Skill').should('not.exist');
         cy.get('.markdown:visible').contains('LOREM');
         cy.get('[data-cy=editSkillButton_entirelyNewId]').click();
         cy.get('[data-cy=skillHelpUrl]').type('{selectall}http://fake/fake/fake.fake');
