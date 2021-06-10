@@ -17,7 +17,7 @@ limitations under the License.
   <div>
     <page-header :loading="isLoading" :options="headerOptions">
       <div slot="subSubTitle">
-        <b-button @click="displayEdit"
+        <b-button v-if="skill" @click="displayEdit"
                   size="sm"
                   variant="outline-primary" :data-cy="`editSkillButton_${this.$route.params.skillId}`"
                   :aria-label="'edit Skill '+skill.name" ref="editSkillInPlaceBtn">
@@ -40,7 +40,8 @@ limitations under the License.
   import PageHeader from '../utils/pages/PageHeader';
   import EditSkill from './EditSkill';
 
-  const { mapGetters, mapActions } = createNamespacedHelpers('subjects');
+  const subjects = createNamespacedHelpers('subjects');
+  const skills = createNamespacedHelpers('skills');
 
   export default {
     name: 'SkillPage',
@@ -52,7 +53,6 @@ limitations under the License.
     data() {
       return {
         isLoading: true,
-        skill: {},
         subjectId: '',
         headerOptions: {},
         showEdit: false,
@@ -61,9 +61,15 @@ limitations under the License.
     mounted() {
       this.loadData();
     },
+    beforeDestroy() {
+
+    },
     computed: {
-      ...mapGetters([
+      ...subjects.mapGetters([
         'subject',
+      ]),
+      ...skills.mapGetters([
+        'skill',
       ]),
       navItems() {
         if (this.isLoading) {
@@ -94,8 +100,14 @@ limitations under the License.
       },
     },
     methods: {
-      ...mapActions([
+      ...subjects.mapActions([
         'loadSubjectDetailsState',
+      ]),
+      ...skills.mapActions([
+        'loadSkill',
+      ]),
+      ...skills.mapMutations([
+        'setSkill',
       ]),
       displayEdit() {
         // should only enable edit button if dirty, isn't currently
@@ -104,27 +116,30 @@ limitations under the License.
       loadData() {
         this.isLoading = true;
         const { projectId, subjectId } = this.$route.params;
-        SkillsService.getSkillDetails(this.$route.params.projectId, this.$route.params.subjectId, this.$route.params.skillId)
-          .then((response) => {
-            this.skill = Object.assign(response, { subjectId });
-            this.headerOptions = this.buildHeaderOptions(this.skill);
-            if (this.subject) {
+        this.loadSkill({
+          projectId: this.$route.params.projectId,
+          subjectId: this.$route.params.subjectId,
+          skillId: this.$route.params.skillId,
+        }).then(() => {
+          this.headerOptions = this.buildHeaderOptions(this.skill);
+          if (this.subject) {
+            this.isLoading = false;
+          } else {
+            this.loadSubjectDetailsState({
+              projectId,
+              subjectId,
+            }).then(() => {
               this.isLoading = false;
-            } else {
-              this.loadSubjectDetailsState({
-                projectId,
-                subjectId,
-              }).then(() => {
-                this.isLoading = false;
-              });
-            }
-          });
+            });
+          }
+        });
       },
       skillEdited(editedSkil) {
         this.isLoading = true;
         SkillsService.saveSkill(editedSkil).then((res) => {
           const origId = this.skill.skillId;
-          this.skill = Object.assign(res, { subjectId: this.$route.params.subjectId });
+          const edited = Object.assign(res, { subjectId: this.$route.params.subjectId });
+          this.setSkill(edited);
           if (origId !== this.skill.skillId) {
             this.$router.replace({ name: this.$route.name, params: { ...this.$route.params, skillId: this.skill.skillId } });
           }

@@ -19,29 +19,42 @@ const getters = {
   skill(state) {
     return state.skill;
   },
+  loadingSkill(state) {
+    return state.loadingSkill;
+  },
 };
 
 const mutations = {
   setSkill(state, value) {
     state.skill = value;
   },
+  setLoadingSkill(state, value) {
+    state.loadingSkill = value;
+  },
 };
 
 const actions = {
-  loadSkillDetails({ commit }, payload) {
+  loadSkill({ commit }, payload) {
+    commit('setLoadingSkill', true);
     return new Promise((resolve, reject) => {
       SkillsService.getSkillDetails(payload.projectId, payload.subjectId, payload.skillId)
         .then((response) => {
-          commit('setSkill', response);
+          const subjectId = { payload };
+          const withSubjId = Object.assign(response, { subjectId });
+          commit('setSkill', withSubjId);
           resolve(response);
         })
-        .catch((error) => reject(error));
+        .catch((error) => reject(error))
+        .finally(() => {
+          commit('setLoadingSkill', false);
+        });
     });
   },
 };
 
 const state = {
   skill: null,
+  loadingSkill: false,
 };
 
 export default {

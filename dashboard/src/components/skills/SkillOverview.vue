@@ -16,10 +16,10 @@ limitations under the License.
 <template>
   <div>
     <sub-page-header title="Overview"/>
-    <loading-container :is-loading="isLoading">
+    <loading-container :is-loading="loadingSkill">
       <div class="card">
         <div class="card-body">
-          <child-row-skills-display v-if="skill.skillId" :skill="skill"></child-row-skills-display>
+          <child-row-skills-display v-if="skill && skill.skillId" :skill="skill"></child-row-skills-display>
         </div>
       </div>
     </loading-container>
@@ -27,11 +27,14 @@ limitations under the License.
 </template>
 
 <script>
+  import { createNamespacedHelpers } from 'vuex';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import ChildRowSkillsDisplay from './ChildRowSkillsDisplay';
-  import SkillsService from './SkillsService';
   import LoadingContainer from '../utils/LoadingContainer';
 
+  const { mapGetters } = createNamespacedHelpers('skills');
+
+  // edits to id no longer work right, header still not reloaded
   export default {
     name: 'SkillOverview',
     components: {
@@ -39,20 +42,11 @@ limitations under the License.
       ChildRowSkillsDisplay,
       SubPageHeader,
     },
-    data() {
-      return {
-        isLoading: true,
-        skill: {},
-      };
-    },
-    mounted() {
-      SkillsService.getSkillDetails(this.$route.params.projectId, this.$route.params.subjectId, this.$route.params.skillId)
-        .then((response) => {
-          this.skill = Object.assign(response, { subjectId: this.$route.params.subjectId });
-        })
-        .finally(() => {
-          this.isLoading = false;
-        });
+    computed: {
+      ...mapGetters([
+        'skill',
+        'loadingSkill',
+      ]),
     },
   };
 </script>
