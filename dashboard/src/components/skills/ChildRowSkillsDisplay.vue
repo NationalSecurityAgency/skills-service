@@ -18,18 +18,21 @@ limitations under the License.
 
     <div class="row">
       <div class="col-12 col-md-6 mt-2">
-        <media-info-card :title="`${totalPoints} Points`" icon-class="fas fa-calculator text-success">
+        <media-info-card :title="`${totalPoints} Points`" icon-class="fas fa-calculator text-success"
+                         data-cy="skillOverviewTotalpoints">
           <strong>{{ skillInfo.pointIncrement | number }}</strong> points <i class="fa fa-times text-muted" aria-hidden="true"/>
           <strong> {{ skillInfo.numPerformToCompletion | number }}</strong> repetition<span v-if="skillInfo.numPerformToCompletion>1">s</span> to Completion
         </media-info-card>
       </div>
       <div class="col-12 col-md-6 mt-2">
-        <media-info-card :title="timeWindowTitle(skillInfo)" icon-class="fas fa-hourglass-half text-info">
+        <media-info-card :title="timeWindowTitle(skillInfo)" icon-class="fas fa-hourglass-half text-info"
+                         data-cy="skillOverviewTimewindow">
           {{ timeWindowDescription(skillInfo) }}
         </media-info-card>
       </div>
       <div class="col-12 col-md-6 mt-2">
-        <media-info-card :title="`Version # ${skillInfo.version}`" icon-class="fas fa-code-branch text-warning">
+        <media-info-card :title="`Version # ${skillInfo.version}`" icon-class="fas fa-code-branch text-warning"
+                         data-cy="skillOverviewVersion">
           Mechanism of adding new skills without affecting existing software running.
         </media-info-card>
       </div>
@@ -53,7 +56,7 @@ limitations under the License.
         Description
       </div>
       <div class="card-body">
-        <markdown-text v-if="description" :text="description"/>
+        <markdown-text v-if="description" :text="description" data-cy="skillOverviewDescription"/>
         <p v-else class="text-muted">
           Not Specified
         </p>
@@ -65,7 +68,8 @@ limitations under the License.
         <div class="input-group-text"><i class="fas fa-link mr-1"></i> Help URL: </div>
       </div>
       <span class="form-control">
-        <a v-if="skillInfo.helpUrl" :href="skillInfo.helpUrl" target="_blank" rel="noopener" class="skill-url">{{ skillInfo.helpUrl }}</a>
+        <a v-if="skillInfo.helpUrl" :href="skillInfo.helpUrl" target="_blank" rel="noopener" class="skill-url"
+           data-cy="skillOverviewHelpUrl">{{ skillInfo.helpUrl }}</a>
         <span v-else class="text-muted">
           Not Specified
         </span>
@@ -117,6 +121,9 @@ limitations under the License.
     watch: {
       refreshCounter() {
         this.loadSkills();
+      },
+      skill(val) {
+        this.skillInfo = val;
       },
     },
     computed: {

@@ -148,7 +148,6 @@ describe('Resource Not Found Tests', () => {
     cy.visit('/projects/proj1/subjects/subj1/skills/skillNope/');
     cy.get('[data-cy=oldLinkRedirect]').should('be.visible');
     cy.get('[data-cy=newLink]').click();
-    cy.wait('@loadSkill');
     cy.get('[data-cy=notFoundExplanation]').should('be.visible');
     cy.get('[data-cy=oldLinkRedirect]').should('not.exist');
 

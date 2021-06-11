@@ -711,52 +711,105 @@ describe('Skills Tests', () => {
     });
 
     it('edit skill on page', () => {
-      cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
-        projectId: 'proj1',
-        subjectId: 'subj1',
-        skillId: 'skill1',
-        name: `This is 1`,
-        type: 'Skill',
-        pointIncrement: 100,
-        numPerformToCompletion: 5,
-        pointIncrementInterval: 0,
-        numMaxOccurrencesIncrementInterval: 1,
-        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-        version: 1,
-        helpUrl: 'http://doHelpOnThisSkill.com'
-      });
-      cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('loadSkill1');
-      cy.intercept('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('saveSkill1');
-      cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/entirelyNewId').as('afterIdEdit');
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: 'skill1',
+            name: `This is 1`,
+            type: 'Skill',
+            pointIncrement: 100,
+            numPerformToCompletion: 5,
+            pointIncrementInterval: 0,
+            numMaxOccurrencesIncrementInterval: 1,
+            description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+            version: 1,
+            helpUrl: 'http://doHelpOnThisSkill.com',
+        });
+        cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('loadSkill1');
+        cy.intercept('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('saveSkill1');
+        cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/entirelyNewId').as('afterIdEdit');
+        cy.intercept('POST', '/api/validation/description').as('validateDescription');
+        cy.intercept('POST', '/api/validation/url').as('validateUrl');
 
-      cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
-      cy.wait('@loadSkill1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
+        cy.wait('@loadSkill1');
 
-      cy.contains('SKILL: This is 1').should('be.visible');
-      cy.get('[data-cy=editSkillButton_skill1]').click();
-      cy.get('input[data-cy=skillName]').type('{selectall}Edited Skill Name');
-      cy.get('input[data-cy=skillPointIncrement]').click();
-      cy.get('[data-cy=saveSkillButton]').click();
-      cy.wait('@saveSkill1');
-      cy.get('[data-cy=editSkillButton_skill1]').should('have.focus');
-      cy.contains('SKILL: Edited Skill Name').should('be.visible');
-      cy.contains('SKILL: This is 1').should('not.exist');
+        cy.contains('SKILL: This is 1').should('be.visible');
+        cy.get('[data-cy=childRowDisplay_skill1]').should('be.visible');
+        // skill should now only be loaded once on page load instead of twice, once by SkillPage and another time by SkillOverview
+        cy.get('@loadSkill1.all').should('have.length', 1);
+        cy.get('[data-cy=editSkillButton_skill1]').click();
+        cy.get('input[data-cy=skillName]').type('{selectall}Edited Skill Name');
+        cy.get('input[data-cy=skillPointIncrement]').click();
+        cy.get('[data-cy=saveSkillButton]').click();
+        cy.wait('@saveSkill1');
+        cy.get('[data-cy=editSkillButton_skill1]').should('have.focus');
+        cy.contains('SKILL: Edited Skill Name').should('be.visible');
+        cy.contains('SKILL: This is 1').should('not.exist');
 
+        cy.get('[data-cy=breadcrumb-skill1]').should('be.visible');
+        cy.get('[data-cy=editSkillButton_skill1]').click();
+        cy.get('[data-cy=idInputEnableControl] a').click();
+        cy.get('input[data-cy=idInputValue]').type('{selectall}entirelyNewId');
+        cy.get('input[data-cy=skillPointIncrement]').click();
+        cy.get('[data-cy=saveSkillButton]').click();
+        cy.wait('@validateDescription');
+        cy.wait('@validateUrl');
+        cy.wait('@afterIdEdit');
+        cy.get('[data-cy=editSkillButton_entirelyNewId]').should('have.focus');
+        cy.contains('ID: entirelyNewId').should('be.visible');
+        cy.get('[data-cy=breadcrumb-skill1]').should('not.exist');
+        cy.get('[data-cy=breadcrumb-entirelyNewId]').should('be.visible');
+        cy.get('[data-cy=editSkillButton_entirelyNewId]').should('be.visible');
+        cy.get('[data-cy=editSkillButton_skill1]').should('not.exist');
 
-      cy.get('[data-cy=breadcrumb-skill1]').should('be.visible');
-      cy.get('[data-cy=editSkillButton_skill1]').click();
-      cy.get('[data-cy=idInputEnableControl] a').click();
-      cy.get('input[data-cy=idInputValue]').type('{selectall}entirelyNewId');
-      cy.get('input[data-cy=skillPointIncrement]').click();
-
-      cy.get('[data-cy=saveSkillButton]').click();
-      cy.wait('@afterIdEdit');
-      cy.get('[data-cy=editSkillButton_entirelyNewId]').should('have.focus');
-      cy.contains('ID: entirelyNewId').should('be.visible');
-      cy.get('[data-cy=breadcrumb-skill1]').should('not.exist');
-      cy.get('[data-cy=breadcrumb-entirelyNewId]').should('be.visible');
-      cy.get('[data-cy=editSkillButton_entirelyNewId]').should('be.visible');
-      cy.get('[data-cy=editSkillButton_skill1]').should('not.exist');
+        //edit version, point increment, occurrences, time window, description, helpurl and confirm that the updates are reflected in the overview section
+        cy.get('[data-cy=editSkillButton_entirelyNewId]').click();
+        cy.get('[data-cy=skillPointIncrement]').type('{selectall}20');
+        cy.get('[data-cy=saveSkillButton]').click();
+        cy.wait('@validateDescription');
+        cy.wait('@validateUrl');
+        cy.wait('@afterIdEdit');
+        cy.get('[data-cy=skillOverviewTotalpoints]').contains('100 Points').should('be.visible');
+        cy.get('[data-cy=skillOverviewTotalpoints]').contains('20 points').should('be.visible');
+        cy.get('[data-cy=skillOverviewTotalpoints]').contains('5 repetitions to Completion').should('be.visible');
+        cy.get('[data-cy=editSkillButton_entirelyNewId]').click();
+        cy.get('[data-cy=numPerformToCompletion]').type('{selectall}10');
+        cy.get('[data-cy=saveSkillButton]').click();
+        cy.wait('@validateDescription');
+        cy.wait('@validateUrl');
+        cy.wait('@afterIdEdit');
+        cy.get('[data-cy=childRowDisplay_entirelyNewId]').contains('200 Points').should('be.visible');
+        cy.get('[data-cy=skillOverviewTotalpoints]').contains('20 points').should('be.visible');
+        cy.get('[data-cy=skillOverviewTotalpoints]').contains('10 repetitions to Completion').should('be.visible');
+        cy.get('[data-cy=editSkillButton_entirelyNewId]').click();
+        cy.get('[data-cy=timeWindowCheckbox]').click({force:true});
+        cy.get('[data-cy=timeWindowMinutes]').type('{selectall}59');
+        cy.get('[data-cy=saveSkillButton]').click();
+        cy.wait('@afterIdEdit');
+        cy.contains('8 Hours 59 Minutes').should('be.visible');
+        cy.get('[data-cy=editSkillButton_entirelyNewId]').click();
+        cy.get('[data-cy=selfReportEnableCheckbox]').click({force:true});
+        cy.get('[data-cy=saveSkillButton]').click();
+        cy.wait('@validateDescription');
+        cy.wait('@validateUrl');
+        cy.wait('@afterIdEdit');
+        cy.contains('Self Report: Approval').should('be.visible');
+        cy.get('[data-cy=editSkillButton_entirelyNewId]').click();
+        cy.get('[data-cy=skillDescription]').type('{selectall}LOREM');
+        cy.get('[data-cy=saveSkillButton]').click();
+        cy.wait('@validateDescription');
+        cy.wait('@validateUrl');
+        cy.wait('@afterIdEdit');
+        cy.contains('Editing Existing Skill').should('not.exist');
+        cy.get('.markdown:visible').contains('LOREM');
+        cy.get('[data-cy=editSkillButton_entirelyNewId]').click();
+        cy.get('[data-cy=skillHelpUrl]').type('{selectall}http://fake/fake/fake.fake');
+        cy.get('[data-cy=saveSkillButton]').click();
+        cy.wait('@validateDescription');
+        cy.wait('@validateUrl');
+        cy.wait('@afterIdEdit');
+        cy.contains('http://fake/fake/fake.fake').should('be.visible');
     });
 
     it('skill name should not wrap prematurely', () => {

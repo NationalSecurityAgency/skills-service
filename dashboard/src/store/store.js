@@ -23,6 +23,7 @@ import badges from './modules/badges';
 import config from './modules/config';
 import libVersion from './modules/libVersion';
 import access from './modules/access';
+import skills from './modules/skills';
 
 Vue.use(Vuex);
 
@@ -56,5 +57,6 @@ export default new Vuex.Store({
     config,
     libVersion,
     access,
+    skills,
   },
 });
