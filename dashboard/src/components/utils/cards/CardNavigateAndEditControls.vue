@@ -17,10 +17,10 @@ limitations under the License.
   <div class="row">
     <div class="col-auto">
       <b-button
-        :to="{ name:'SubjectSkills', params: { projectId: this.subject.projectId, subjectId: this.subject.subjectId, subject: this.subject}}"
+        :to="options.navTo"
         variant="outline-primary" size="sm" class="mr-2"
-        :aria-label="`Manage subject ${subject.name}`"
-        :data-cy="`subjCard_${subject.subjectId}_manageBtn`">
+        :aria-label="`Manage ${options.type} ${options.name}`"
+        :data-cy="`subjCard_${options.id}_manageBtn`">
         Manage <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
       </b-button>
     </div>
@@ -30,30 +30,30 @@ limitations under the License.
         <b-button ref="editBtn"
                   size="sm"
                   variant="outline-primary"
-                  @click="$emit('edit-subject')"
-                  title="Edit Subject"
+                  @click="$emit('edit')"
+                  :title="`Edit ${options.type}`"
                   data-cy="editSubjBtn"><i class="fas fa-edit" aria-hidden="true"/></b-button>
 
-        <span v-b-tooltip.hover="deleteDisabledText">
+        <span v-b-tooltip.hover="options.deleteDisabledText">
           <b-button variant="outline-primary"
                     class="last-right-group-btn"
                     size="sm"
-                    @click="$emit('delete-subject')"
-                    :disabled="isDeleteDisabled"
-                    title="Delete Subject"
+                    @click="$emit('delete')"
+                    :disabled="options.isDeleteDisabled"
+                    :title="`Delete ${options.type}`"
                     data-cy="deleteSubjBtn"><i class="text-warning fas fa-trash" aria-hidden="true"/></b-button>
         </span>
       </b-button-group>
 
       <b-button-group size="sm" class="buttons">
         <b-button variant="outline-primary"
-                  @click="$emit('move-up-subject')"
-                  :disabled="subject.isFirst"
+                  @click="$emit('move-up')"
+                  :disabled="options.isFirst"
                   title="Sort Order - Move up"
                   data-cy="moveSubjUpBtn"><i class="fas fa-arrow-circle-up text-info" aria-hidden="true"/></b-button>
         <b-button variant="outline-primary"
-                  @click="$emit('move-down-subject')"
-                  :disabled="subject.isLast"
+                  @click="$emit('move-down')"
+                  :disabled="options.isLast"
                   title="Sort Order - Move down"
                   data-cy="moveSubjDownBtn"><i class="fas fa-arrow-circle-down text-info" aria-hidden="true"/>
         </b-button>
@@ -64,11 +64,9 @@ limitations under the License.
 
 <script>
   export default {
-    name: 'SubjectCardControls',
+    name: 'CardNavigateAndEditControls',
     props: {
-      subject: Object,
-      isDeleteDisabled: Boolean,
-      deleteDisabledText: String,
+      options: Object,
     },
     methods: {
       focusOnEdit() {
