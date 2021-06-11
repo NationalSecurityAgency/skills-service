@@ -59,6 +59,8 @@ limitations under the License.
                       <skill-progress2
                           :skill="skill"
                           :subjectId="subject.subjectId"
+                          :badgeId="subject.badgeId"
+                          :type="type"
                           :enable-drill-down="true"
                           :show-description="showDescriptionsInternal"
                           :data-cy="`skillProgress_index-${index}`"

@@ -128,6 +128,14 @@ limitations under the License.
         type: String,
         required: false,
       },
+      badgeId: {
+        type: String,
+        required: false,
+      },
+      type: {
+        type: String,
+        default: 'subject',
+      },
     },
     computed: {
       locked() {
@@ -143,15 +151,35 @@ limitations under the License.
       },
       skillClicked() {
         if (this.enableDrillDown) {
-          const params = { skillId: this.skill.skillId, subjectId: this.subjectId };
-          if (this.skill.crossProject && this.skill.projectId) {
-            params.crossProjectId = this.skill.projectId;
-          }
+          const route = this.getSkillDetailsRoute();
+          const params = this.getParams();
           this.handlePush({
-            name: 'skillDetails',
+            name: route,
             params,
           });
         }
+      },
+      getParams() {
+        const params = { skillId: this.skill.skillId };
+        if (this.subjectId) {
+          params.subjectId = this.subjectId;
+        }
+        if (this.badgeId) {
+          params.badgeId = this.badgeId;
+        }
+        if (this.skill.crossProject && this.skill.projectId) {
+          params.crossProjectId = this.skill.projectId;
+        }
+        return params;
+      },
+      getSkillDetailsRoute() {
+        let route = 'skillDetails';
+        if (this.type === 'badge') {
+          route = 'badgeSkillDetails';
+        } else if (this.type === 'global-badge') {
+          route = 'globalBadgeSkillDetails';
+        }
+        return route;
       },
     },
   };

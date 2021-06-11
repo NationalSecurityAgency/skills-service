@@ -85,6 +85,16 @@ const router = new VueRouter({
       name: 'dependentSkillDetails',
     },
     {
+      path: '/badges/:badgeId/skills/:skillId',
+      component: SkillDetails,
+      name: 'badgeSkillDetails',
+    },
+    {
+      path: '//badges/global/:badgeId/skills/:skillId',
+      component: SkillDetails,
+      name: 'globalBadgeSkillDetails',
+    },
+    {
       path: '/rank',
       component: MyRankDetails,
       name: 'myRankDetails',
@@ -106,6 +116,7 @@ const router = new VueRouter({
 const isWildcardMatch = (matched) => matched.filter((item) => item.path === '*').length > 0;
 
 router.beforeEach((to, from, next) => {
+  console.log(`going from [${from.fullPath}] to [${to.fullPath}]`);
   if (store.state.internalBackButton && !to.params.previousRoute && to.meta.setPreviousRoute !== false && !isWildcardMatch(to.matched)) {
     const previousRoute = { ...from };
     const params = { ...to.params, ...{ previousRoute } };
