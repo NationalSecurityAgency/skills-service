@@ -779,7 +779,6 @@ describe('Skills Tests', () => {
         cy.wait('@validateDescription');
         cy.wait('@validateUrl');
         cy.wait('@afterIdEdit');
-        cy.wait(200);
         cy.get('[data-cy=childRowDisplay_entirelyNewId]').contains('200 Points').should('be.visible');
         cy.get('[data-cy=skillOverviewTotalpoints]').contains('20 points').should('be.visible');
         cy.get('[data-cy=skillOverviewTotalpoints]').contains('10 repetitions to Completion').should('be.visible');
@@ -795,7 +794,6 @@ describe('Skills Tests', () => {
         cy.wait('@validateDescription');
         cy.wait('@validateUrl');
         cy.wait('@afterIdEdit');
-        cy.wait(200);
         cy.contains('Self Report: Approval').should('be.visible');
         cy.get('[data-cy=editSkillButton_entirelyNewId]').click();
         cy.get('[data-cy=skillDescription]').type('{selectall}LOREM');
@@ -803,7 +801,6 @@ describe('Skills Tests', () => {
         cy.wait('@validateDescription');
         cy.wait('@validateUrl');
         cy.wait('@afterIdEdit');
-        cy.wait(750);
         cy.contains('Editing Existing Skill').should('not.exist');
         cy.get('.markdown:visible').contains('LOREM');
         cy.get('[data-cy=editSkillButton_entirelyNewId]').click();
