@@ -69,5 +69,9 @@ Cypress.Commands.add("cdClickBadges", () => {
     cy.validatePoweredBy();
 });
 
-
+Cypress.Commands.add("cdClickBadge", (badgeId) => {
+    cy.get(`[data-cy=badgeDetailsLink_${badgeId}]`).click();
+    cy.contains('Badge Details');
+    cy.validatePoweredBy();
+});
 

@@ -83,7 +83,7 @@ limitations under the License.
         }
       },
       loadSkillSummary() {
-        const skillId = this.$route.params.crossProjectId ? this.$route.params.dependentSkillId : this.$route.params.skillId;
+        const skillId = this.isDependency() ? this.$route.params.dependentSkillId : this.$route.params.skillId;
         UserSkillsService.getSkillSummary(skillId, this.$route.params.crossProjectId)
           .then((res) => {
             this.skill = res;
@@ -92,6 +92,10 @@ limitations under the License.
       },
       onPointsEarned(pts) {
         this.skill = SkillEnricherUtil.addPts(this.skill, pts);
+      },
+      isDependency() {
+        const routeName = this.$route.name;
+        return routeName === 'dependentSkillDetails' || routeName === 'crossProjectSkillDetails';
       },
     },
   };
