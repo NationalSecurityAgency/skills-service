@@ -34,7 +34,6 @@ limitations under the License.
 
   const { mapGetters } = createNamespacedHelpers('skills');
 
-  // edits to id no longer work right, header still not reloaded
   export default {
     name: 'SkillOverview',
     components: {

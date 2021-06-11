@@ -61,9 +61,6 @@ limitations under the License.
     mounted() {
       this.loadData();
     },
-    beforeDestroy() {
-
-    },
     computed: {
       ...subjects.mapGetters([
         'subject',
