@@ -376,7 +376,7 @@ describe('Projects Tests', () => {
       method: 'PUT',
       path: '/admin/projects/proj1/users/bar/roles/ROLE_PROJECT_ADMIN',
     }, {
-      usCode: 400,
+      statusCode: 400,
       body: {errorCode: 'UserNotFound', explanation: 'User was not found'}
     }).as('addAdmin');
 
