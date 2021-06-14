@@ -20,16 +20,17 @@ limitations under the License.
         <template slot="title">
           <i class="fa fa-edit mr-1" aria-hidden="true"/> <span id="markdownEditLabel">Write</span>
         </template>
-        <div class="mt-2 content-height">
+        <div class="mt-2" :style="[!resizable ? {'height':markdownHeight} : {}]">
           <b-form-textarea rows="5" max-rows="5" v-model="valueInternal" @input="dataChanged"
-                           data-cy="markdownEditorInput" no-resize aria-labelledby="markdownEditLabel"/>
+                           :no-resize="!resizable"
+                           data-cy="markdownEditorInput" aria-labelledby="markdownEditLabel" @mouseup="wasResized"/>
         </div>
       </b-tab>
       <b-tab>
         <template slot="title">
           <i class="fa fa-eye mr-1" aria-hidden="true"/> <span>Preview</span>
         </template>
-        <div class="mt-2 content-height border rounded p-3" style="overflow-y: scroll;" data-cy="markdownEditor-preview">
+        <div class="mt-2 border rounded p-3" :style="{'overflow-y':'scroll','height':markdownHeight}" data-cy="markdownEditor-preview">
           <markdown-text v-if="valueInternal" :text="valueInternal"/>
         </div>
       </b-tab>
@@ -47,10 +48,15 @@ limitations under the License.
     components: { MarkdownText },
     props: {
       value: String,
+      resizable: {
+        type: Boolean,
+        default: false,
+      },
     },
     data() {
       return {
         valueInternal: this.value,
+        markdownHeight: '10rem',
       };
     },
     watch: {
@@ -62,12 +68,19 @@ limitations under the License.
       dataChanged: debounce(function debouncedDataChanged() {
         this.$emit('input', this.valueInternal);
       }, 250),
+      wasResized(e) {
+        if (this.resizable) {
+          const oneRem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+          const targetHeight = e.target.clientHeight;
+          const inRem = `${targetHeight / oneRem}rem`;
+          if (inRem !== this.markdownHeight) {
+            this.markdownHeight = inRem;
+          }
+        }
+      },
     },
   };
 </script>
 
 <style scoped>
-  .content-height {
-    height: 10rem;
-  }
 </style>

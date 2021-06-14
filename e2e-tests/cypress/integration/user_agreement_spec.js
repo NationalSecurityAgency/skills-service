@@ -46,8 +46,9 @@ describe('User Agreement Specs', ()=> {
        cy.get('[data-cy=login]').click();
        cy.wait('@loadUserAgreement');
        cy.contains('User Agreement');
-       cy.get('[data-cy="breadcrumb-User Agreement"]').should('be.visible');
+       cy.get('[data-cy="breadcrumb-User Agreement"]').should('not.exist');
        cy.get('[data-cy=userAgreement]').should('be.visible');
+       cy.get('[data-cy=rejectUserAgreement]').should('be.visible');
        cy.get('[data-cy=acknowledgeUserAgreement]').should('be.visible').click();
        cy.wait('@acknowledgeUa');
        cy.wait('@loadProject');
@@ -79,41 +80,44 @@ describe('User Agreement Specs', ()=> {
         cy.login('user1@fake.fake', 'password1');
         cy.visit('/');
         cy.wait('@loadUserAgreement');
-        cy.contains('User Agreement');
-        cy.get('[data-cy="breadcrumb-User Agreement"]').should('be.visible');
+        cy.contains('User Agreement').should('be.visible');
+        cy.get('[data-cy="breadcrumb-User Agreement"]').should('not.exist');
         cy.get('[data-cy=userAgreement]').should('be.visible');
 
-        cy.get('[data-cy=skillTreeLogo]').click();
-        cy.contains('User Agreement');
-        cy.get('[data-cy="breadcrumb-User Agreement"]').should('be.visible');
+        cy.visit('/settings/');
+        cy.wait('@loadUserAgreement');
+        cy.contains('User Agreement').should('be.visible');
         cy.get('[data-cy=userAgreement]').should('be.visible');
 
-        cy.get('[data-cy=inception-button]').click();
-        cy.contains('User Agreement');
-        cy.get('[data-cy="breadcrumb-User Agreement"]').should('be.visible');
+        cy.visit('/progress-and-rankings/');
+        cy.wait('@loadUserAgreement');
+        cy.contains('User Agreement').should('be.visible');
+        cy.get('[data-cy=userAgreement]').should('be.visible');
+    });
+
+    it('rejecting user agreement returns user to login page', () => {
+        cy.request('POST', '/root/saveSystemSettings', {
+            publicUrl: 'http://foo.bar',
+            userAgreement: '#This is a user agreement\n* one \n * two \n * 3\n more text'
+        });
+
+        cy.intercept('GET', '/app/userAgreement').as('loadUserAgreement');
+        cy.intercept('GET', '/admin/projects/projBanana/').as('loadProject');
+        cy.intercept('GET', '/logout').as('logout');
+
+        cy.logout();
+        cy.login('user1@fake.fake', 'password1');
+        cy.visit('/');
+        cy.wait('@loadUserAgreement');
+        cy.contains('User Agreement').should('be.visible');
         cy.get('[data-cy=userAgreement]').should('be.visible');
 
-        cy.get('[data-cy="settings-button"]').click();
-        cy.get('[data-cy="settingsButton-navToSettings"]').should('not.be.disabled');
-        cy.get('[data-cy="settingsButton-navToSettings"]').click();
-        cy.contains('User Agreement');
-        cy.get('[data-cy="breadcrumb-User Agreement"]').should('be.visible');
-        cy.get('[data-cy=userAgreement]').should('be.visible');
+        cy.get('[data-cy=rejectUserAgreement]').click();
+        cy.wait('@logout');
+        cy.location().should((loc) => {
+            expect(loc.pathname).to.eq('/skills-login');
+        });
 
-
-        cy.get('[data-cy="settings-button"]').click();
-        cy.get('[data-cy="settingsButton-navToMyProgress"]').should('not.be.disabled');
-        cy.get('[data-cy="settingsButton-navToMyProgress"]').click();
-        cy.contains('User Agreement');
-        cy.get('[data-cy="breadcrumb-User Agreement"]').should('be.visible');
-        cy.get('[data-cy=userAgreement]').should('be.visible');
-
-        cy.get('[data-cy="settings-button"]').click();
-        cy.get('[data-cy="settingsButton-navToProjectAdmin"]').should('not.be.disabled');
-        cy.get('[data-cy="settingsButton-navToProjectAdmin"]').click();
-        cy.contains('User Agreement');
-        cy.get('[data-cy="breadcrumb-User Agreement"]').should('be.visible');
-        cy.get('[data-cy=userAgreement]').should('be.visible');
     });
 
     it('edits to user agreement require acknowledgement of new ua on next login', () => {
@@ -131,7 +135,6 @@ describe('User Agreement Specs', ()=> {
             cy.visit('/settings/system');
             cy.wait('@loadUserAgreement');
             cy.contains('User Agreement');
-            cy.get('[data-cy="breadcrumb-User Agreement"]').should('be.visible');
             cy.get('[data-cy=userAgreement]').should('be.visible');
             cy.get('[data-cy=acknowledgeUserAgreement]').should('be.visible').click();
             cy.wait('@loadSystemSettings');
@@ -142,7 +145,6 @@ describe('User Agreement Specs', ()=> {
             cy.visit('/');
             cy.wait('@loadUserAgreement');
             cy.contains('User Agreement');
-            cy.get('[data-cy="breadcrumb-User Agreement"]').should('be.visible');
             cy.get('[data-cy=userAgreement]').should('be.visible');
         })
     });
