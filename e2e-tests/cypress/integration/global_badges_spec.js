@@ -149,8 +149,7 @@ describe('Global Badges Tests', () => {
         cy.wait('@getGlobalBadges');
         cy.wait('@checkSupervisorRole');
 
-        cy.get('.card-body button.dropdown-toggle').click();
-        cy.get('.card-body div.dropdown').contains('Delete').click();
+        cy.get('[data-cy=badgeCard-JustABadgeBadge] [data-cy="deleteBtn"]').click();
         cy.get('.btn-danger').contains('YES, Delete It!').click();
         cy.wait('@deleteGlobalBadge');
         cy.contains('No Badges Yet').should('be.visible');
@@ -219,7 +218,7 @@ describe('Global Badges Tests', () => {
         cy.visit('/administrator/');
         cy.clickNav('Badges');
         cy.wait('@getBadges');
-        cy.get('[data-cy="manageBadge_a_badge"]').click({force:true});
+        cy.get('[data-cy="manageBtn_a_badge"]').click();
         cy.get('.multiselect__tags').click();
         cy.contains('Project ID: proj2').click();
         cy.validateTable(tableSelector, [
@@ -891,7 +890,7 @@ describe('Global Badges Tests', () => {
         ], 5);
     });
 
-    it('edit badge button should retain focus after dialog is closed', () => {
+    it.only('edit badge button should retain focus after dialog is closed', () => {
         cy.request('POST', '/supervisor/badges/badge1', {
             projectId: 'proj1',
             badgeId: 'badge1',
@@ -910,36 +909,30 @@ describe('Global Badges Tests', () => {
         cy.clickNav('Badges');
         cy.wait('@getGlobalBadges');
 
-        cy.get('div.badge-settings').eq(0).click();
-        cy.get('[data-cy=editMenuEditBtn]').eq(0).click();
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy=editBtn]').click()
         cy.get('[data-cy=closeBadgeButton]').click();
-        cy.get('div.badge-settings').eq(0).children().first().should('have.focus');
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy=editBtn]').should('have.focus');
 
-        cy.get('div.badge-settings').eq(0).click();
-        cy.get('[data-cy=editMenuEditBtn]').eq(0).click();
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy=editBtn]').click()
         cy.get('[aria-label=Close]').filter('.text-light').click();
-        cy.get('div.badge-settings').eq(0).children().first().should('have.focus');
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy=editBtn]').should('have.focus');
 
-        cy.get('div.badge-settings').eq(0).click();
-        cy.get('[data-cy=editMenuEditBtn]').eq(0).click();
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy=editBtn]').click()
         cy.get('[data-cy=badgeName]').type('{esc}');
-        cy.get('div.badge-settings').eq(0).children().first().should('have.focus');
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy=editBtn]').should('have.focus');
 
 
-        cy.get('div.badge-settings').eq(1).click();
-        cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy=editBtn]').click()
         cy.get('[data-cy=closeBadgeButton]').click();
-        cy.get('div.badge-settings').eq(1).children().first().should('have.focus');
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy=editBtn]').should('have.focus');
 
-        cy.get('div.badge-settings').eq(1).click();
-        cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy=editBtn]').click()
         cy.get('[aria-label=Close]').filter('.text-light').click();
-        cy.get('div.badge-settings').eq(1).children().first().should('have.focus');
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy=editBtn]').should('have.focus');
 
-        cy.get('div.badge-settings').eq(1).click();
-        cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy=editBtn]').click()
         cy.get('[data-cy=badgeName]').type('{esc}');
-        cy.get('div.badge-settings').eq(1).children().first().should('have.focus');
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy=editBtn]').should('have.focus');
     });
 
     it('description is validated against custom validators', () => {

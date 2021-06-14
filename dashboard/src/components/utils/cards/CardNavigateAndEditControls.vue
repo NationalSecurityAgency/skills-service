@@ -20,7 +20,7 @@ limitations under the License.
         :to="options.navTo"
         variant="outline-primary" size="sm" class="mr-2"
         :aria-label="`Manage ${options.type} ${options.name}`"
-        :data-cy="`subjCard_${options.id}_manageBtn`">
+        :data-cy="`manageBtn_${options.id}`">
         Manage <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
       </b-button>
     </div>
@@ -32,7 +32,7 @@ limitations under the License.
                   variant="outline-primary"
                   @click="$emit('edit')"
                   :title="`Edit ${options.type}`"
-                  data-cy="editSubjBtn"><i class="fas fa-edit" aria-hidden="true"/></b-button>
+                  data-cy="editBtn"><i class="fas fa-edit" aria-hidden="true"/></b-button>
 
         <span v-b-tooltip.hover="options.deleteDisabledText">
           <b-button variant="outline-primary"
@@ -41,7 +41,7 @@ limitations under the License.
                     @click="$emit('delete')"
                     :disabled="options.isDeleteDisabled"
                     :title="`Delete ${options.type}`"
-                    data-cy="deleteSubjBtn"><i class="text-warning fas fa-trash" aria-hidden="true"/></b-button>
+                    data-cy="deleteBtn"><i class="text-warning fas fa-trash" aria-hidden="true"/></b-button>
         </span>
       </b-button-group>
 
@@ -50,12 +50,12 @@ limitations under the License.
                   @click="$emit('move-up')"
                   :disabled="options.isFirst"
                   title="Sort Order - Move up"
-                  data-cy="moveSubjUpBtn"><i class="fas fa-arrow-circle-up text-info" aria-hidden="true"/></b-button>
+                  data-cy="moveUpBtn"><i class="fas fa-arrow-circle-up text-info" aria-hidden="true"/></b-button>
         <b-button variant="outline-primary"
                   @click="$emit('move-down')"
                   :disabled="options.isLast"
                   title="Sort Order - Move down"
-                  data-cy="moveSubjDownBtn"><i class="fas fa-arrow-circle-down text-info" aria-hidden="true"/>
+                  data-cy="movejDownBtn"><i class="fas fa-arrow-circle-down text-info" aria-hidden="true"/>
         </b-button>
       </b-button-group>
     </div>

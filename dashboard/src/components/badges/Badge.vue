@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <subject-card :options="cardOptions" :isLoading="isLoading" :data-cy="`subjectCard-${badgeInternal.badgeId}`">
+  <subject-card :options="cardOptions" :isLoading="isLoading" :data-cy="`badgeCard-${badgeInternal.badgeId}`">
     <div slot="header-top-right">
     </div>
     <div slot="underTitle">

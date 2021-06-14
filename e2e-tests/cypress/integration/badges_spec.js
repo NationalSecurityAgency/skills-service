@@ -411,7 +411,7 @@ describe('Badges Tests', () => {
         cy.clickSave();
         cy.wait('@loadBadges');
 
-        cy.get('[data-cy=manageBadge_TestBadgeBadge]').click();
+        cy.get('[data-cy=manageBtn_TestBadgeBadge]').click();
         cy.get('#skills-selector').click();
         cy.get('#skills-selector input[type=text]').type('{enter}');
         cy.contains('.router-link-active', 'Badges').click();
@@ -451,7 +451,7 @@ describe('Badges Tests', () => {
         cy.clickSave();
         cy.wait('@loadBadges');
 
-        cy.get('[data-cy=manageBadge_TestBadgeBadge]').click();
+        cy.get('[data-cy=manageBtn_TestBadgeBadge]').click();
         cy.get('#skills-selector').click();
         cy.get('#skills-selector input[type=text]').type('{enter}');
         cy.contains('.router-link-active', 'Badges').click();
@@ -489,7 +489,7 @@ describe('Badges Tests', () => {
         cy.get('#badgeName').type('Test Badge');
         cy.clickSave();
         cy.wait('@loadBadges');
-        cy.get('[data-cy=manageBadge_TestBadgeBadge]').click();
+        cy.get('[data-cy=manageBtn_TestBadgeBadge]').click();
         cy.get('#skills-selector').click();
         cy.get('#skills-selector input[type=text]').type('{enter}');
         cy.contains('.router-link-active', 'Badges').click();
@@ -524,7 +524,7 @@ describe('Badges Tests', () => {
         cy.get('#badgeName').type('Test Badge');
         cy.clickSave();
         cy.wait('@loadBadges');
-        cy.get('[data-cy=manageBadge_TestBadgeBadge]').click();
+        cy.get('[data-cy=manageBtn_TestBadgeBadge]').click();
         cy.get('#skills-selector').click();
         cy.get('#skills-selector input[type=text]').type('{enter}');
         cy.validateTable(tableSelector, [
@@ -540,7 +540,7 @@ describe('Badges Tests', () => {
         cy.wait('@loadBadges');
         cy.contains('Test Badge');
         cy.get('[data-cy=badgeStatus]').contains('Status: Live').should('exist');
-        cy.get('[data-cy=manageBadge_TestBadgeBadge]').click();
+        cy.get('[data-cy=manageBtn_TestBadgeBadge]').click();
         cy.get('[data-cy=deleteSkill_skill1]').click();
         cy.contains('YES, Delete It!').click();
         cy.contains('No Skills Selected Yet');
@@ -623,36 +623,30 @@ describe('Badges Tests', () => {
         cy.visit('/administrator/projects/proj1');
         cy.get('[data-cy=nav-Badges]').click();
 
-        cy.get('div.badge-settings').eq(0).click();
-        cy.get('[data-cy=editMenuEditBtn]').eq(0).click();
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy=editBtn]').click();
         cy.get('[data-cy=closeBadgeButton]').click();
-        cy.get('div.badge-settings').eq(0).children().first().should('have.focus');
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy=editBtn]').should('have.focus');
 
-        cy.get('div.badge-settings').eq(0).click();
-        cy.get('[data-cy=editMenuEditBtn]').eq(0).click();
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy=editBtn]').click();
         cy.get('[aria-label=Close]').filter('.text-light').click();
-        cy.get('div.badge-settings').eq(0).children().first().should('have.focus');
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy=editBtn]').should('have.focus');
 
-        cy.get('div.badge-settings').eq(0).click();
-        cy.get('[data-cy=editMenuEditBtn]').eq(0).click();
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy=editBtn]').click();
         cy.get('[data-cy=badgeName]').type('{esc}');
-        cy.get('div.badge-settings').eq(0).children().first().should('have.focus');
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy=editBtn]').should('have.focus');
 
 
-        cy.get('div.badge-settings').eq(1).click();
-        cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy=editBtn]').click();
         cy.get('[data-cy=closeBadgeButton]').click();
-        cy.get('div.badge-settings').eq(1).children().first().should('have.focus');
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy=editBtn]').should('have.focus');
 
-        cy.get('div.badge-settings').eq(1).click();
-        cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy=editBtn]').click();
         cy.get('[aria-label=Close]').filter('.text-light').click();
-        cy.get('div.badge-settings').eq(1).children().first().should('have.focus');
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy=editBtn]').should('have.focus');
 
-        cy.get('div.badge-settings').eq(1).click();
-        cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy=editBtn]').click();
         cy.get('[data-cy=badgeName]').type('{esc}');
-        cy.get('div.badge-settings').eq(1).children().first().should('have.focus');
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy=editBtn]').should('have.focus');
     });
 
 
