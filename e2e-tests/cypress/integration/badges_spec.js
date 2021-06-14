@@ -607,6 +607,30 @@ describe('Badges Tests', () => {
         cy.get('[aria-label="new badge"]').should('have.focus');
     });
 
+
+    it('edit badge from badges page', () => {
+        cy.createBadge(1, 1);
+        cy.createBadge(1, 2);
+
+        cy.visit('/administrator/projects/proj1/badges');
+
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="subjTitle-link"]').contains('Badge 1');
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="subTitle"]').contains('ID: badge1');
+
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy="subjTitle-link"]').contains('Badge 2');
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy="subTitle"]').contains('ID: badge2');
+
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy="editBtn"]').click()
+        cy.get('input[data-cy=badgeName]').type('{selectall}Updated Badge Name');
+        cy.get('button[data-cy=saveBadgeButton]').click();
+
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="subjTitle-link"]').contains('Badge 1');
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="subTitle"]').contains('ID: badge1');
+
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy="subjTitle-link"]').contains('Updated Badge Name');
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy="subTitle"]').contains('ID: badge2');
+    });
+
     it('edit badge button should retain focus after dialog is closed', () => {
         cy.request('POST', '/admin/projects/proj1/badges/badge1', {
             projectId: 'proj1',

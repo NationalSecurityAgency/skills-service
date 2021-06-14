@@ -600,22 +600,22 @@ describe('Subjects Tests', () => {
         cy.createSubject(1, 2)
 
         cy.visit('/administrator/projects/proj1');
-        cy.get('[data-cy="subjectCard-subj1"] [cy-data="subjTitle-link"]').click();
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="subjTitle-link"]').click();
         cy.contains('No Skills Yet');
         cy.contains('ID: subj1')
 
         cy.visit('/administrator/projects/proj1');
-        cy.get('[data-cy="subjectCard-subj2"] [cy-data="subjTitle-link"]').click();
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="subjTitle-link"]').click();
         cy.contains('No Skills Yet');
         cy.contains('ID: subj2')
 
         cy.visit('/administrator/projects/proj1');
-        cy.get('[data-cy="subjectCard-subj1"] [cy-data="subjIcon-link"]').click();
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="subjIcon-link"]').click();
         cy.contains('No Skills Yet');
         cy.contains('ID: subj1')
 
         cy.visit('/administrator/projects/proj1');
-        cy.get('[data-cy="subjectCard-subj2"] [cy-data="subjIcon-link"]').click();
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="subjIcon-link"]').click();
         cy.contains('No Skills Yet');
         cy.contains('ID: subj2')
     });

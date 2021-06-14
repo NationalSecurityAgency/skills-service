@@ -890,7 +890,7 @@ describe('Global Badges Tests', () => {
         ], 5);
     });
 
-    it.only('edit badge button should retain focus after dialog is closed', () => {
+    it('edit badge button should retain focus after dialog is closed', () => {
         cy.request('POST', '/supervisor/badges/badge1', {
             projectId: 'proj1',
             badgeId: 'badge1',
