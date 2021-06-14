@@ -342,7 +342,7 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy="skillTreePoweredBy"] a').should("have.attr", "href", "https://code.nsa.gov/skills-docs");
     });
 
-    it.only('view global badge with no skills assigned', () => {
+    it('view global badge with no skills assigned', () => {
         cy.resetDb();
         cy.fixture('vars.json').then((vars) => {
             if (!Cypress.env('oauthMode')) {
