@@ -29,7 +29,7 @@ class SkillBadgeSummary {
     Date endDate
     boolean isGem() { return startDate && endDate }
 
-    List<SkillSummary> skills
+    List<SkillSummary> skills = []
 
     String iconClass
     boolean global = false

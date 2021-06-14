@@ -342,5 +342,46 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy="skillTreePoweredBy"] a').should("have.attr", "href", "https://code.nsa.gov/skills-docs");
     });
 
+    it.only('view global badge with no skills assigned', () => {
+        cy.resetDb();
+        cy.fixture('vars.json').then((vars) => {
+            if (!Cypress.env('oauthMode')) {
+                cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);
+            }
+        })
+        cy.loginAsProxyUser()
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1, {name: 'Search blah skill 1'});
+        cy.createSkill(1, 1, 2, {name: 'is a skill 2'});
+        cy.createSkill(1, 1, 3, {name: 'find Blah other skill 3'});
+        cy.createSkill(1, 1, 4, {name: 'Search nothing skill 4'});
+
+        cy.loginAsRootUser();
+
+        cy.createGlobalBadge(1)
+        cy.assignProjectToGlobalBadge(1, 1)
+
+
+        cy.loginAsProxyUser();
+
+        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday')
+        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now')
+        cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'yesterday')
+        cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now')
+        cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday')
+        cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now')
+        cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'yesterday')
+        cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now')
+
+        cy.cdVisit('/');
+        cy.cdClickBadges();
+
+        // visit global badge
+        cy.get('[data-cy=badgeDetailsLink_globalBadge1]').click();
+
+        cy.contains("Global Badge Details")
+
+    });
 });
 
