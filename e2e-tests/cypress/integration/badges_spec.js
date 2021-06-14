@@ -631,6 +631,146 @@ describe('Badges Tests', () => {
         cy.get('[data-cy="badgeCard-badge2"] [data-cy="subTitle"]').contains('ID: badge2');
     });
 
+
+    it('delete badge', () => {
+        cy.createBadge(1, 1);
+        cy.createBadge(1, 2);
+
+        cy.visit('/administrator/projects/proj1/badges');
+
+        cy.get('[data-cy="badgeCard-badge1"]').should('exist');
+        cy.get('[data-cy="badgeCard-badge2"]').should('exist');
+
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy="deleteBtn"]').click()
+        cy.get('.btn-danger').contains('YES, Delete It!').click();
+
+        cy.get('[data-cy="badgeCard-badge1"]').should('exist');
+        cy.get('[data-cy="badgeCard-badge2"]').should('not.exist');
+
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="deleteBtn"]').click()
+        cy.get('.btn-danger').contains('YES, Delete It!').click();
+
+        cy.get('[data-cy="badgeCard-badge1"]').should('not.exist');
+        cy.get('[data-cy="badgeCard-badge2"]').should('not.exist');
+
+        cy.contains('No Badges Yet');
+    });
+
+
+    it('navigate to badge by clicking on name and icon', () => {
+        cy.createBadge(1, 1);
+        cy.createBadge(1, 2);
+
+        cy.visit('/administrator/projects/proj1/badges');
+
+        // using title link
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy="subjTitle-link"]').click();
+        cy.contains('No Skills Selected Yet');
+        cy.contains('ID: badge2');
+
+        // using icon
+        cy.visit('/administrator/projects/proj1/badges');
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy="subjIcon-link"]').click();
+        cy.contains('No Skills Selected Yet');
+        cy.contains('ID: badge2');
+    });
+
+    it('sort management', () => {
+        cy.createBadge(1, 1);
+        cy.createBadge(1, 2);
+        cy.createBadge(1, 3);
+
+        cy.visit('/administrator/projects/proj1/badges');
+
+        cy.get('[data-cy="badgeCard"]').should('have.length', 3).as('badges');
+        cy.get('@badges').eq(0).should('contain.text', 'Badge 1');
+        cy.get('@badges').eq(1).should('contain.text', 'Badge 2');
+        cy.get('@badges').eq(2).should('contain.text', 'Badge 3');
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="moveUpBtn"]').should('be.disabled');
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="moveDownBtn"]').should('be.enabled');
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy="moveUpBtn"]').should('be.enabled');
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy="moveDownBtn"]').should('be.enabled');
+        cy.get('[data-cy="badgeCard-badge3"] [data-cy="moveUpBtn"]').should('be.enabled');
+        cy.get('[data-cy="badgeCard-badge3"] [data-cy="moveDownBtn"]').should('be.disabled');
+
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="moveDownBtn"]').click();
+        cy.get('@badges').eq(0).should('contain.text', 'Badge 2');
+        cy.get('@badges').eq(1).should('contain.text', 'Badge 1');
+        cy.get('@badges').eq(2).should('contain.text', 'Badge 3');
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy="moveUpBtn"]').should('be.disabled');
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy="moveDownBtn"]').should('be.enabled');
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="moveUpBtn"]').should('be.enabled');
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="moveDownBtn"]').should('be.enabled');
+        cy.get('[data-cy="badgeCard-badge3"] [data-cy="moveUpBtn"]').should('be.enabled');
+        cy.get('[data-cy="badgeCard-badge3"] [data-cy="moveDownBtn"]').should('be.disabled');
+
+        cy.visit('/administrator/projects/proj1/badges');
+        cy.get('@badges').eq(0).should('contain.text', 'Badge 2');
+        cy.get('@badges').eq(1).should('contain.text', 'Badge 1');
+        cy.get('@badges').eq(2).should('contain.text', 'Badge 3');
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy="moveUpBtn"]').should('be.disabled');
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy="moveDownBtn"]').should('be.enabled');
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="moveUpBtn"]').should('be.enabled');
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="moveDownBtn"]').should('be.enabled');
+        cy.get('[data-cy="badgeCard-badge3"] [data-cy="moveUpBtn"]').should('be.enabled');
+        cy.get('[data-cy="badgeCard-badge3"] [data-cy="moveDownBtn"]').should('be.disabled');
+
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="moveDownBtn"]').click();
+        cy.get('@badges').eq(0).should('contain.text', 'Badge 2');
+        cy.get('@badges').eq(1).should('contain.text', 'Badge 3');
+        cy.get('@badges').eq(2).should('contain.text', 'Badge 1');
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy="moveUpBtn"]').should('be.disabled');
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy="moveDownBtn"]').should('be.enabled');
+        cy.get('[data-cy="badgeCard-badge3"] [data-cy="moveUpBtn"]').should('be.enabled');
+        cy.get('[data-cy="badgeCard-badge3"] [data-cy="moveDownBtn"]').should('be.enabled');
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="moveUpBtn"]').should('be.enabled');
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="moveDownBtn"]').should('be.disabled');
+
+        cy.get('[data-cy="badgeCard-badge3"] [data-cy="moveUpBtn"]').click();
+        cy.get('@badges').eq(0).should('contain.text', 'Badge 3');
+        cy.get('@badges').eq(1).should('contain.text', 'Badge 2');
+        cy.get('@badges').eq(2).should('contain.text', 'Badge 1');
+        cy.get('[data-cy="badgeCard-badge3"] [data-cy="moveUpBtn"]').should('be.disabled');
+        cy.get('[data-cy="badgeCard-badge3"] [data-cy="moveDownBtn"]').should('be.enabled');
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy="moveUpBtn"]').should('be.enabled');
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy="moveDownBtn"]').should('be.enabled');
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="moveUpBtn"]').should('be.enabled');
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="moveDownBtn"]').should('be.disabled');
+
+        cy.visit('/administrator/projects/proj1/badges');
+        cy.get('@badges').eq(0).should('contain.text', 'Badge 3');
+        cy.get('@badges').eq(1).should('contain.text', 'Badge 2');
+        cy.get('@badges').eq(2).should('contain.text', 'Badge 1');
+        cy.get('[data-cy="badgeCard-badge3"] [data-cy="moveUpBtn"]').should('be.disabled');
+        cy.get('[data-cy="badgeCard-badge3"] [data-cy="moveDownBtn"]').should('be.enabled');
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy="moveUpBtn"]').should('be.enabled');
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy="moveDownBtn"]').should('be.enabled');
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="moveUpBtn"]').should('be.enabled');
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="moveDownBtn"]').should('be.disabled');
+    });
+
+
+    it('badged card stats', () => {
+        cy.createBadge(1, 1);
+        cy.createBadge(1, 2);
+
+        cy.createSubject(1,1)
+
+        cy.createSkill(1, 1, 1);
+        cy.assignSkillToBadge(1, 1, 1);
+
+        cy.createSkill(1, 1, 2);
+        cy.assignSkillToBadge(1, 1, 2);
+
+        cy.visit('/administrator/projects/proj1/badges');
+
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="pagePreviewCardStat_# Skills"] [data-cy="statNum"]').contains(2);
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="pagePreviewCardStat_Points"] [data-cy="statNum"]').contains(400);
+
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy="pagePreviewCardStat_# Skills"] [data-cy="statNum"]').contains(0);
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy="pagePreviewCardStat_Points"] [data-cy="statNum"]').contains(0);
+    });
+
     it('edit badge button should retain focus after dialog is closed', () => {
         cy.request('POST', '/admin/projects/proj1/badges/badge1', {
             projectId: 'proj1',

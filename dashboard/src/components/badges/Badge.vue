@@ -14,36 +14,38 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <subject-card :options="cardOptions" :isLoading="isLoading" :data-cy="`badgeCard-${badgeInternal.badgeId}`">
-    <div slot="header-top-right">
-    </div>
-    <div slot="underTitle">
-      <card-navigate-and-edit-controls ref="cardNavControls" class="mt-2"
-                             :options="cardOptions.controls"
-                             @edit="showEditBadge=true"
-                             @delete="deleteBadge"
-                             @move-up="moveUp"
-                             @move-down="moveDown"/>
-    </div>
-    <div slot="footer">
-      <i v-if="badgeInternal.endDate" class="fas fa-gem position-absolute" style="font-size: 1rem; top: 1rem; left: 1rem; color: purple" aria-hidden="true"/>
-      <div class="mt-1 row align-items-center" style="height: 2rem;">
-        <div class="col text-right small">
-        <div v-if="!this.live" data-cy="badgeStatus" style="">
-          <span class="text-secondary" style="height: 3rem;">Status: </span>
-          <span class="text-uppercase border-right pr-2 mr-2">Disabled <span class="far fa-stop-circle text-warning" aria-hidden="true"/></span><a href="#0" @click.stop="handlePublish" class="btn btn-outline-primary btn-sm" data-cy="goLive">Go Live</a>
+  <div data-cy="badgeCard">
+    <subject-card :options="cardOptions" :isLoading="isLoading" :data-cy="`badgeCard-${badgeInternal.badgeId}`">
+      <div slot="header-top-right">
+      </div>
+      <div slot="underTitle">
+        <card-navigate-and-edit-controls ref="cardNavControls" class="mt-2"
+                               :options="cardOptions.controls"
+                               @edit="showEditBadge=true"
+                               @delete="deleteBadge"
+                               @move-up="moveUp"
+                               @move-down="moveDown"/>
+      </div>
+      <div slot="footer">
+        <i v-if="badgeInternal.endDate" class="fas fa-gem position-absolute" style="font-size: 1rem; top: 1rem; left: 1rem; color: purple" aria-hidden="true"/>
+        <div class="mt-1 row align-items-center" style="height: 2rem;">
+          <div class="col text-right small">
+          <div v-if="!this.live" data-cy="badgeStatus" style="">
+            <span class="text-secondary" style="height: 3rem;">Status: </span>
+            <span class="text-uppercase border-right pr-2 mr-2">Disabled <span class="far fa-stop-circle text-warning" aria-hidden="true"/></span><a href="#0" @click.stop="handlePublish" class="btn btn-outline-primary btn-sm" data-cy="goLive">Go Live</a>
+          </div>
+          <div v-else data-cy="badgeStatus"  style="">
+            <span class="text-secondary align-middle" style="height: 4rem;">Status: </span> <span class="text-uppercase align-middle" style="height: 4rem;">Live <span class="far fa-check-circle text-success" aria-hidden="true"/></span>
+          </div>
+          </div>
         </div>
-        <div v-else data-cy="badgeStatus"  style="">
-          <span class="text-secondary align-middle" style="height: 4rem;">Status: </span> <span class="text-uppercase align-middle" style="height: 4rem;">Live <span class="far fa-check-circle text-success" aria-hidden="true"/></span>
-        </div>
-        </div>
+
+        <edit-badge v-if="showEditBadge" v-model="showEditBadge" :id="badge.badgeId" :badge="badge" :is-edit="true"
+                    :global="global" @badge-updated="badgeEdited" @hidden="handleHidden"></edit-badge>
       </div>
 
-      <edit-badge v-if="showEditBadge" v-model="showEditBadge" :id="badge.badgeId" :badge="badge" :is-edit="true"
-                  :global="global" @badge-updated="badgeEdited" @hidden="handleHidden"></edit-badge>
-    </div>
-
-  </subject-card>
+    </subject-card>
+  </div>
 </template>
 
 <script>
@@ -90,13 +92,13 @@ limitations under the License.
     methods: {
       buildCardOptions() {
         const stats = [{
-          label: 'Number Skills',
+          label: '# Skills',
           count: this.badgeInternal.numSkills,
           icon: 'fas fa-graduation-cap skills-color-skills',
         }];
         if (!this.global) {
           stats.push({
-            label: 'Total Points',
+            label: 'Points',
             count: this.badgeInternal.totalPoints,
             icon: 'far fa-arrow-alt-circle-up skills-color-points',
           });

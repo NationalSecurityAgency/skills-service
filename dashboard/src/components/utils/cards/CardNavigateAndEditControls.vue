@@ -55,7 +55,7 @@ limitations under the License.
                   @click="$emit('move-down')"
                   :disabled="options.isLast"
                   title="Sort Order - Move down"
-                  data-cy="movejDownBtn"><i class="fas fa-arrow-circle-down text-info" aria-hidden="true"/>
+                  data-cy="moveDownBtn"><i class="fas fa-arrow-circle-down text-info" aria-hidden="true"/>
         </b-button>
       </b-button-group>
     </div>

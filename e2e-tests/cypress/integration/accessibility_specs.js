@@ -470,6 +470,7 @@ describe('Accessibility Tests', () => {
     //view skill
     cy.get('[data-cy=manageSkillBtn_skill1]').click();
     cy.contains('Help URL');
+    cy.contains('http://doHelpOnThisSkill.com');
     cy.contains('500 Points');
     cy.customLighthouse();
     cy.customA11y();
@@ -504,7 +505,9 @@ describe('Accessibility Tests', () => {
 
     cy.get('[data-cy=nav-Metrics]').click();
     cy.contains('Achievements over time');
-    cy.contains('No achievements yet for this skill.');
+    cy.get('[data-cy="numUsersPostAchievement"]').contains('No achievements yet for this skill.');
+    cy.get('[data-cy="numUsersPostAchievement"]').contains('No achievements yet for this skill.');
+
     cy.contains('This chart needs at least 2 days of user activity.');
     cy.customLighthouse();
     cy.customA11y();
