@@ -24,7 +24,7 @@ limitations under the License.
           <pki-app-bootstrap v-if="isPkiAndNeedsToBootstrap" role="alert"/>
           <loading-container v-else v-bind:is-loading="isLoading" role="presentation">
             <div v-if="!isLoading">
-              <header-view v-if="isAuthenticatedUser" role="banner"/>
+              <header-view v-if="isAuthenticatedUser && !this.$store.state.showUa" role="banner"/>
               <div role="main">
                 <router-view/>
               </div>
