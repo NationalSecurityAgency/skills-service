@@ -69,11 +69,13 @@ limitations under the License.
         this.$emit('input', this.valueInternal);
       }, 250),
       wasResized(e) {
-        const oneRem = parseFloat(getComputedStyle(document.documentElement).fontSize);
-        const targetHeight = e.target.clientHeight;
-        const inRem = `${targetHeight / oneRem}rem`;
-        if (inRem !== this.markdownHeight) {
-          this.markdownHeight = inRem;
+        if (this.resizable) {
+          const oneRem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+          const targetHeight = e.target.clientHeight;
+          const inRem = `${targetHeight / oneRem}rem`;
+          if (inRem !== this.markdownHeight) {
+            this.markdownHeight = inRem;
+          }
         }
       },
     },
