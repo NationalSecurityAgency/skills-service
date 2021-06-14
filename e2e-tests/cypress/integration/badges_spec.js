@@ -750,7 +750,7 @@ describe('Badges Tests', () => {
     });
 
 
-    it('badged card stats', () => {
+    it('badge card stats', () => {
         cy.createBadge(1, 1);
         cy.createBadge(1, 2);
 

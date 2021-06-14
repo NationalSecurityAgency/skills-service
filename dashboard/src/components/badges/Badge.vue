@@ -104,7 +104,7 @@ limitations under the License.
           });
         } else {
           stats.push({
-            label: 'Total Projects',
+            label: 'Projects',
             count: this.badgeInternal.uniqueProjectCount,
             icon: 'fas fa-trophy skills-color-levels',
           });
