@@ -57,6 +57,7 @@ limitations under the License.
     props: {
       dependencies: Array,
       skillId: String,
+      subjectId: String,
     },
     data() {
       return {
@@ -130,15 +131,19 @@ limitations under the License.
               this.handlePush({
                 name: 'crossProjectSkillDetails',
                 params: {
+                  subjectId: this.$route.params.subjectId,
                   crossProjectId: skillItem.projectId,
-                  skillId: skillItem.skillId,
+                  skillId: this.$route.params.skillId,
+                  dependentSkillId: skillItem.skillId,
                 },
               });
             } else {
               this.handlePush({
-                name: 'skillDetails',
+                name: 'dependentSkillDetails',
                 params: {
-                  skillId: skillItem.skillId,
+                  subjectId: this.$route.params.subjectId,
+                  skillId: this.$route.params.skillId,
+                  dependentSkillId: skillItem.skillId,
                 },
               });
             }

@@ -70,14 +70,29 @@ const router = new VueRouter({
       props: true,
     },
     {
-      path: '/skills/:skillId',
+      path: '/subjects/:subjectId/skills/:skillId',
       component: SkillDetails,
       name: 'skillDetails',
     },
     {
-      path: '/skills/crossProject/:crossProjectId/:skillId',
+      path: '/subjects/:subjectId/skills/:skillId/crossProject/:crossProjectId/:dependentSkillId',
       component: SkillDetails,
       name: 'crossProjectSkillDetails',
+    },
+    {
+      path: '/subjects/:subjectId/skills/:skillId/dependency/:dependentSkillId',
+      component: SkillDetails,
+      name: 'dependentSkillDetails',
+    },
+    {
+      path: '/badges/:badgeId/skills/:skillId',
+      component: SkillDetails,
+      name: 'badgeSkillDetails',
+    },
+    {
+      path: '//badges/global/:badgeId/skills/:skillId',
+      component: SkillDetails,
+      name: 'globalBadgeSkillDetails',
     },
     {
       path: '/rank',

@@ -23,7 +23,7 @@ limitations under the License.
               </div>
             </div>
             <skill-dependencies class="mt-2" v-if="dependencies && dependencies.length > 0" :dependencies="dependencies"
-                                :skill-id="$route.params.skillId"></skill-dependencies>
+                                :skill-id="$route.params.skillId" :subject-id="this.$route.params.subjectId"></skill-dependencies>
         </div>
         <div v-else>
             <skills-spinner :loading="loading.dependencies || loading.skill" class="mt-5"/>
@@ -83,7 +83,8 @@ limitations under the License.
         }
       },
       loadSkillSummary() {
-        UserSkillsService.getSkillSummary(this.$route.params.skillId, this.$route.params.crossProjectId)
+        const skillId = this.isDependency() ? this.$route.params.dependentSkillId : this.$route.params.skillId;
+        UserSkillsService.getSkillSummary(skillId, this.$route.params.crossProjectId)
           .then((res) => {
             this.skill = res;
             this.loading.skill = false;
@@ -91,6 +92,10 @@ limitations under the License.
       },
       onPointsEarned(pts) {
         this.skill = SkillEnricherUtil.addPts(this.skill, pts);
+      },
+      isDependency() {
+        const routeName = this.$route.name;
+        return routeName === 'dependentSkillDetails' || routeName === 'crossProjectSkillDetails';
       },
     },
   };

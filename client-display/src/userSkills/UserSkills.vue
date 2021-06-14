@@ -27,7 +27,7 @@ limitations under the License.
 </template>
 
 <script>
-  import UserSkillsHeader from '@/userSkills/UserSkillsHeader';
+  import UserSkillsHeader from '@/userSkills/header/UserSkillsHeader';
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
   import SubjectsContainer from '@/userSkills/subject/SubjectsContainer';
   import SkillsSpinner from '@/common/utilities/SkillsSpinner';

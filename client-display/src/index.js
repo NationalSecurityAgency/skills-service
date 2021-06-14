@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import UserSkills from './userSkills/UserSkills';
-import UserSkillsHeader from './userSkills/UserSkillsHeader';
+import UserSkillsHeader from './userSkills/header/UserSkillsHeader';
 
 const plugin = {
   install(Vue) {
