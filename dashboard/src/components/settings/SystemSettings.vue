@@ -31,7 +31,7 @@ limitations under the License.
                     id="publicUrl"
                     :aria-invalid="errors && errors.length > 0"
                     aria-errormessage="publicUrlError" aria-describedby="publicUrlError"/>
-              <p class="text-danger" v-show="errors[0]" id="publicUrlError">{{errors[0]}}</p>
+              <p class="text-danger" v-show="errors[0]" id="publicUrlError" data-cy="publicUrlError">{{errors[0]}}</p>
             </ValidationProvider>
           </div>
           <div class="form-group">
@@ -196,6 +196,9 @@ limitations under the License.
               this.userAgreement = resp.userAgreement;
             }
           }
+          this.$nextTick(() => {
+            this.$refs.observer.validate();
+          });
         });
       },
       updateUserAgreement(event) {
