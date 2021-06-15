@@ -83,7 +83,7 @@ limitations under the License.
             <label>User Agreement</label>
             <ValidationProvider rules="noscript" v-slot="{errors}"
                                 name="User Agreement">
-              <markdown-editor v-model="userAgreement" @input="updateUserAgreement" resizable="true"></markdown-editor>
+              <markdown-editor v-model="userAgreement" @input="updateUserAgreement" :resizable="true"></markdown-editor>
               <small class="form-text text-danger mb-3" data-cy="userAgreement">{{ errors[0] }}</small>
             </ValidationProvider>
           </div>
