@@ -27,14 +27,6 @@ limitations under the License.
           @move-down="moveDown"
           :is-delete-disabled="deleteSubjectDisabled"
           :delete-disabled-text="deleteSubjectToolTip" />
-<!--        <subject-card-controls ref="subjectCardControls" class="mt-2"-->
-<!--                               :subject="subjectInternal"-->
-<!--                               @edit-subject="showEditSubject=true"-->
-<!--                               @delete-subject="deleteSubject"-->
-<!--                               @move-up-subject="moveUp"-->
-<!--                               @move-down-subject="moveDown"-->
-<!--                               :is-delete-disabled="deleteSubjectDisabled"-->
-<!--                               :delete-disabled-text="deleteSubjectToolTip"/>-->
       </div>
       <div slot="footer" class="text-right">
         <span class="small"><b-badge style="font-size: 0.8rem;" variant="primary" data-cy="pointsPercent">{{ this.subjectInternal.pointsPercentage }}%</b-badge> of the total points</span>
