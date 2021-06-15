@@ -17,8 +17,9 @@ limitations under the License.
   <span>
     <span data-cy="projectCreated">
       <span class="text-secondary small font-italic">Created: </span><slim-date-cell :value="created"/>
-      <span class="text-secondary small mx-2">|</span>
+      <span class="text-secondary small mx-2 d-none d-md-inline">|</span>
     </span>
+    <br class="d-md-none"/>
     <span data-cy=projectLastReportedSkill>
       <span class="text-secondary small font-italic">Last Reported Skill: </span><slim-date-cell :value="lastReportedSkill" :fromStartOfDay="true"/>
     </span>

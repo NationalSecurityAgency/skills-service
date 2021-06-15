@@ -14,50 +14,48 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <page-preview-card :options="cardOptions">
-    <div slot="header-top-right">
-      <edit-and-delete-dropdown ref="editAndDeleteBadge" v-on:deleted="deleteBadge"
-                                v-on:edited="showEditBadge=true"
-                                v-on:move-up="moveUp"
-                                v-on:move-down="moveDown"
-                                :isFirst="badgeInternal.isFirst" :isLast="badgeInternal.isLast" :isLoading="isLoading"
-                                class="badge-settings"></edit-and-delete-dropdown>
-    </div>
-    <div slot="footer">
-      <i v-if="badgeInternal.endDate" class="fas fa-gem position-absolute" style="font-size: 1rem; top: 1rem; left: 1rem; color: purple" aria-hidden="true"/>
-      <div>
-        <router-link :to="buildManageLink()"
-                     :aria-label="`Manage badge ${badgeInternal.name}`"
-                     class="btn btn-outline-primary btn-sm" :data-cy="`manageBadge_${badgeInternal.badgeId}`">
-          Manage <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
-        </router-link>
+  <div data-cy="badgeCard">
+    <nav-card-with-stats-and-controls :options="cardOptions" :isLoading="isLoading" :data-cy="`badgeCard-${badgeInternal.badgeId}`">
+      <div slot="header-top-right">
       </div>
-      <hr/>
-      <div class="float-md-right" style="font-size: 0.8rem;">
-        <span v-if="!this.live" data-cy="badgeStatus">
-          <span class="text-secondary">Status: </span>
-          <span class="text-uppercase">Disabled <span class="far fa-stop-circle text-warning" aria-hidden="true"/></span> | <a href="#0" @click.stop="handlePublish" class="btn btn-outline-primary btn-sm" data-cy="goLive">Go Live</a>
-        </span>
-        <span v-else data-cy="badgeStatus">
-          <span class="text-secondary">Status: </span> <span class="text-uppercase">Live <span class="far fa-check-circle text-success" aria-hidden="true"/></span>
-        </span>
+      <div slot="underTitle">
+        <card-navigate-and-edit-controls ref="cardNavControls" class="mt-2"
+                               :options="cardOptions.controls"
+                               @edit="showEditBadge=true"
+                               @delete="deleteBadge"
+                               @move-up="moveUp"
+                               @move-down="moveDown"/>
       </div>
+      <div slot="footer">
+        <i v-if="badgeInternal.endDate" class="fas fa-gem position-absolute" style="font-size: 1rem; top: 1rem; left: 1rem; color: purple" aria-hidden="true"/>
+        <div class="mt-1 row align-items-center" style="height: 2rem;">
+          <div class="col text-right small">
+          <div v-if="!this.live" data-cy="badgeStatus" style="">
+            <span class="text-secondary" style="height: 3rem;">Status: </span>
+            <span class="text-uppercase border-right pr-2 mr-2">Disabled <span class="far fa-stop-circle text-warning" aria-hidden="true"/></span><a href="#0" @click.stop="handlePublish" class="btn btn-outline-primary btn-sm" data-cy="goLive">Go Live</a>
+          </div>
+          <div v-else data-cy="badgeStatus"  style="">
+            <span class="text-secondary align-middle" style="height: 4rem;">Status: </span> <span class="text-uppercase align-middle" style="height: 4rem;">Live <span class="far fa-check-circle text-success" aria-hidden="true"/></span>
+          </div>
+          </div>
+        </div>
 
-      <edit-badge v-if="showEditBadge" v-model="showEditBadge" :id="badge.badgeId" :badge="badge" :is-edit="true"
-                  :global="global" @badge-updated="badgeEdited" @hidden="handleHidden"></edit-badge>
-    </div>
-  </page-preview-card>
+        <edit-badge v-if="showEditBadge" v-model="showEditBadge" :id="badge.badgeId" :badge="badge" :is-edit="true"
+                    :global="global" @badge-updated="badgeEdited" @hidden="handleHidden"></edit-badge>
+      </div>
+    </nav-card-with-stats-and-controls>
+  </div>
 </template>
 
 <script>
-  import EditAndDeleteDropdown from '@/components/utils/EditAndDeleteDropdown';
   import EditBadge from './EditBadge';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
-  import PagePreviewCard from '../utils/pages/PagePreviewCard';
+  import CardNavigateAndEditControls from '../utils/cards/CardNavigateAndEditControls';
+  import NavCardWithStatsAndControls from '../utils/cards/NavCardWithStatsAndControls';
 
   export default {
     name: 'Badge',
-    components: { PagePreviewCard, EditAndDeleteDropdown, EditBadge },
+    components: { NavCardWithStatsAndControls, CardNavigateAndEditControls, EditBadge },
     props: {
       badge: Object,
       global: {
@@ -70,7 +68,7 @@ limitations under the License.
       return {
         isLoading: false,
         badgeInternal: { ...this.badge },
-        cardOptions: {},
+        cardOptions: { controls: {} },
         showEditBadge: false,
       };
     },
@@ -93,27 +91,41 @@ limitations under the License.
     methods: {
       buildCardOptions() {
         const stats = [{
-          label: 'Number Skills',
+          label: '# Skills',
           count: this.badgeInternal.numSkills,
+          icon: 'fas fa-graduation-cap skills-color-skills',
         }];
         if (!this.global) {
           stats.push({
-            label: 'Total Points',
+            label: 'Points',
             count: this.badgeInternal.totalPoints,
+            icon: 'far fa-arrow-alt-circle-up skills-color-points',
           });
         } else {
           stats.push({
-            label: 'Total Projects',
+            label: 'Projects',
             count: this.badgeInternal.uniqueProjectCount,
+            icon: 'fas fa-trophy skills-color-levels',
           });
         }
         this.cardOptions = {
+          navTo: this.buildManageLink(),
           icon: this.badgeInternal.iconClass,
           title: this.badgeInternal.name,
           subTitle: `ID: ${this.badgeInternal.badgeId}`,
           warn: this.badgeInternal.enabled === 'false',
           warnMsg: this.badgeInternal.enabled === 'false' ? 'This badge cannot be achieved until it is live' : '',
           stats,
+          controls: {
+            navTo: this.buildManageLink(),
+            type: this.global ? 'Global Badge' : 'Badge',
+            name: this.badgeInternal.name,
+            id: this.badgeInternal.badgeId,
+            deleteDisabledText: this.deleteDisabledText,
+            isDeleteDisabled: this.isDeleteDisabled,
+            isFirst: this.badgeInternal.isFirst,
+            isLast: this.badgeInternal.isLast,
+          },
         };
       },
       buildManageLink() {
@@ -197,7 +209,7 @@ limitations under the License.
       },
       handleFocus() {
         this.$nextTick(() => {
-          this.$refs.editAndDeleteBadge.focus();
+          this.$refs.cardNavControls.focusOnEdit();
         });
       },
     },

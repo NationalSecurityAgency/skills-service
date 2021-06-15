@@ -96,10 +96,10 @@ describe('Projects Tests', () => {
       expect(loc.pathname).to.eq('/administrator/projects/editedProjectId/');
     });
     cy.contains('Subject 1').should('be.visible');
-    cy.get('a[data-cy=subjCard_subj1_manageBtn').click();
+    cy.get('[data-cy="manageBtn_subj1"]').click();
     cy.contains('SUBJECT: Subject 1').should('be.visible');
     cy.get('[data-cy=breadcrumb-editedProjectId]').click();
-    cy.get('[data-cy="subjectCard-subj1"] [data-cy="editSubjBtn"]').click();
+    cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
     cy.get('input[data-cy=subjectNameInput]').type('{selectall}I Am A Changed Subject');
     cy.get('button[data-cy=saveSubjectButton]').click();
     cy.contains('I Am A Changed Subject').should('be.visible');

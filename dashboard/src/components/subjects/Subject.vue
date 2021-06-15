@@ -16,21 +16,22 @@ limitations under the License.
 <template>
   <div class="h-100" data-cy="subjectCard">
     <loading-card :loading="isLoading"/>
-    <subject-card v-if="!isLoading" :options="cardOptions" :data-cy="`subjectCard-${subjectInternal.subjectId}`">
+    <nav-card-with-stats-and-controls v-if="!isLoading" :options="cardOptions" :data-cy="`subjectCard-${subjectInternal.subjectId}`">
       <div slot="underTitle">
-        <subject-card-controls ref="subjectCardControls" class="mt-2"
-                               :subject="subjectInternal"
-                               @edit-subject="showEditSubject=true"
-                               @delete-subject="deleteSubject"
-                               @move-up-subject="moveUp"
-                               @move-down-subject="moveDown"
-                               :is-delete-disabled="deleteSubjectDisabled"
-                               :delete-disabled-text="deleteSubjectToolTip"/>
+        <card-navigate-and-edit-controls
+          ref="subjectCardControls" class="mt-2"
+          :options="cardOptions.controls"
+          @edit="showEditSubject=true"
+          @delete="deleteSubject"
+          @move-up="moveUp"
+          @move-down="moveDown"
+          :is-delete-disabled="deleteSubjectDisabled"
+          :delete-disabled-text="deleteSubjectToolTip" />
       </div>
       <div slot="footer" class="text-right">
         <span class="small"><b-badge style="font-size: 0.8rem;" variant="primary" data-cy="pointsPercent">{{ this.subjectInternal.pointsPercentage }}%</b-badge> of the total points</span>
       </div>
-    </subject-card>
+    </nav-card-with-stats-and-controls>
 
     <edit-subject v-if="showEditSubject" v-model="showEditSubject" :id="subjectInternal.subjectId"
                   :subject="subjectInternal" :is-edit="true" @subject-saved="subjectSaved" @hidden="hiddenEventHandler"/>
@@ -42,15 +43,15 @@ limitations under the License.
   import SubjectsService from './SubjectsService';
   import LoadingCard from '../utils/LoadingCard';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
-  import SubjectCard from './SubjectCard';
-  import SubjectCardControls from './SubjectCardControls';
+  import NavCardWithStatsAndControls from '../utils/cards/NavCardWithStatsAndControls';
+  import CardNavigateAndEditControls from '../utils/cards/CardNavigateAndEditControls';
 
   export default {
     name: 'Subject',
     mixins: [MsgBoxMixin],
     components: {
-      SubjectCardControls,
-      SubjectCard,
+      CardNavigateAndEditControls,
+      NavCardWithStatsAndControls,
       LoadingCard,
       EditSubject,
     },
@@ -59,7 +60,7 @@ limitations under the License.
       return {
         isLoading: false,
         showEditSubject: false,
-        cardOptions: {},
+        cardOptions: { controls: {} },
         subjectInternal: { ...this.subject },
         deleteSubjectDisabled: false,
         deleteSubjectToolTip: '',
@@ -84,7 +85,7 @@ limitations under the License.
     methods: {
       buildCardOptions() {
         this.cardOptions = {
-          navTo: { name: 'SubjectSkills', params: { projectId: this.subjectInternal.projectId, subjectId: this.subjectInternal.subjectId, subject: this.subjectInternal } },
+          navTo: this.buildManageNavLink(),
           icon: this.subjectInternal.iconClass,
           title: this.subjectInternal.name,
           subTitle: `ID: ${this.subjectInternal.subjectId}`,
@@ -99,7 +100,20 @@ limitations under the License.
             warnMsg: this.subjectInternal.totalPoints < this.minimumPoints ? `Subject has insufficient points assigned. Skills cannot be achieved until subject has at least ${this.minimumPoints} points.` : null,
             icon: 'far fa-arrow-alt-circle-up skills-color-points',
           }],
+          controls: {
+            navTo: this.buildManageNavLink(),
+            type: 'Subject',
+            name: this.subjectInternal.name,
+            id: this.subjectInternal.subjectId,
+            deleteDisabledText: this.deleteSubjectToolTip,
+            isDeleteDisabled: this.deleteSubjectDisabled,
+            isFirst: this.subjectInternal.isFirst,
+            isLast: this.subjectInternal.isLast,
+          },
         };
+      },
+      buildManageNavLink() {
+        return { name: 'SubjectSkills', params: { projectId: this.subjectInternal.projectId, subjectId: this.subjectInternal.subjectId, subject: this.subjectInternal } };
       },
       deleteSubject() {
         SubjectsService.checkIfSubjectBelongsToGlobalBadge(this.subjectInternal.projectId, this.subjectInternal.subjectId)

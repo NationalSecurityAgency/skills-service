@@ -232,6 +232,9 @@ Cypress.Commands.add("getResetLink", () => {
 });
 
 Cypress.Commands.add('customLighthouse', () => {
+    cy.closeToasts();
+    cy.wait(500);
+
     const lighthouseOptions = {
         extends: 'lighthouse:default',
         settings: {
@@ -250,6 +253,9 @@ Cypress.Commands.add('customLighthouse', () => {
 })
 
 Cypress.Commands.add('customPa11y', (optsObj) => {
+    cy.closeToasts();
+    cy.wait(500);
+
     // ignore heading-order for now
     // ignore multi-select plugin elements, there are a11y improvements pending for the library
     // ignore visualizations for now as those come from a 3rd party library
@@ -320,7 +326,7 @@ Cypress.Commands.add("clickButton", (label) => {
 });
 
 Cypress.Commands.add("clickManageSubject", (subjId) => {
-    cy.get(`[data-cy=subjCard_${subjId}_manageBtn]`).click();
+    cy.get(`[data-cy=manageBtn_${subjId}]`).click();
 });
 
 

@@ -20,17 +20,17 @@ limitations under the License.
         <div class="col">
           <div class="media">
             <router-link v-if="options.icon" tag="a"
-                         :to="options.navTo" aria-label="Navigate to Skills" cy-data="subjIcon-link">
+                         :to="options.navTo" aria-label="Navigate to Skills" data-cy="iconLink">
               <div class="d-inline-block mr-2 border rounded text-info text-center icon-link" style="min-width: 3.2rem;">
                 <i :class="[`${options.icon}`]" class="m-1"/>
               </div>
             </router-link>
             <div class="media-body" style="min-width: 0px;">
               <div class="text-truncate text-info mb-0 pb-0 preview-card-title">
-                <router-link v-if="options.icon" tag="a" :to="options.navTo" cy-data="subjTitle-link">{{ options.title }}</router-link>
+                <router-link v-if="options.icon" tag="a" :to="options.navTo" data-cy="titleLink">{{ options.title }}</router-link>
                 <i v-if="options.warn" class="fas fa-exclamation-circle text-warning ml-1" style="font-size: 1.5rem;" v-b-tooltip.hover="options.warnMsg"/>
               </div>
-              <div class="text-truncate text-secondary preview-card-subTitle">{{ options.subTitle }}</div>
+              <div class="text-truncate text-secondary preview-card-subTitle" data-cy="subTitle">{{ options.subTitle }}</div>
             </div>
           </div>
         </div>
@@ -60,7 +60,7 @@ limitations under the License.
 
 <script>
   export default {
-    name: 'SubjectCard',
+    name: 'NavCardWithStatsAndControls',
     props: {
       options: {
         icon: String,
