@@ -282,7 +282,7 @@ describe('Accessibility Tests', () => {
     //view project
     cy.get('[data-cy=projCard_MyNewtestProject_manageBtn]').click();
     // wait on subjects
-    cy.get('[data-cy=subjCard_subj1_manageBtn]')
+    cy.get('[data-cy=manageBtn_subj1]')
 
     cy.customLighthouse();
     cy.get('[aria-label="new subject"]').click();
@@ -402,7 +402,7 @@ describe('Accessibility Tests', () => {
     cy.get('[data-cy=projCard_MyNewtestProject_manageBtn]').click();
     cy.wait('@getSubjects');
     //view subject
-    cy.get('[data-cy=subjCard_subj1_manageBtn]').click();
+    cy.get('[data-cy=manageBtn_subj1]').click();
     cy.wait('@getSkills');
     cy.contains('This is 2');
     cy.customLighthouse();
@@ -466,11 +466,12 @@ describe('Accessibility Tests', () => {
     //view project
     cy.get('[data-cy="projCard_MyNewtestProject_manageBtn"]').click();
     //view subject
-    cy.get('[data-cy="subjCard_subj1_manageBtn"]').click();
+    cy.get('[data-cy="manageBtn_subj1"]').click();
     //view skill
     cy.get('[data-cy=manageSkillBtn_skill1]').click();
     cy.contains('Help URL');
     cy.contains('http://doHelpOnThisSkill.com');
+    cy.contains('Lorem ipsum dolor sit amet, consectetur adipiscing elit,');
     cy.contains('500 Points');
     cy.customLighthouse();
     cy.customA11y();
