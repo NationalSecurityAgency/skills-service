@@ -1107,14 +1107,14 @@ describe('Global Badges Tests', () => {
         cy.visit('/administrator/globalBadges');
 
         // using title link
-        cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy="subjTitle-link"]').click();
+        cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy="titleLink"]').click();
         cy.contains('ID: globalBadge1');
         cy.contains('No Skills Added Yet');
 
         cy.visit('/administrator/globalBadges');
 
         // using icon link
-        cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy="subjIcon-link"]').click();
+        cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy="iconLink"]').click();
         cy.contains('ID: globalBadge1');
         cy.contains('No Skills Added Yet');
 

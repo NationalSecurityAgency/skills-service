@@ -614,20 +614,20 @@ describe('Badges Tests', () => {
 
         cy.visit('/administrator/projects/proj1/badges');
 
-        cy.get('[data-cy="badgeCard-badge1"] [data-cy="subjTitle-link"]').contains('Badge 1');
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="titleLink"]').contains('Badge 1');
         cy.get('[data-cy="badgeCard-badge1"] [data-cy="subTitle"]').contains('ID: badge1');
 
-        cy.get('[data-cy="badgeCard-badge2"] [data-cy="subjTitle-link"]').contains('Badge 2');
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy="titleLink"]').contains('Badge 2');
         cy.get('[data-cy="badgeCard-badge2"] [data-cy="subTitle"]').contains('ID: badge2');
 
         cy.get('[data-cy="badgeCard-badge2"] [data-cy="editBtn"]').click()
         cy.get('input[data-cy=badgeName]').type('{selectall}Updated Badge Name');
         cy.get('button[data-cy=saveBadgeButton]').click();
 
-        cy.get('[data-cy="badgeCard-badge1"] [data-cy="subjTitle-link"]').contains('Badge 1');
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="titleLink"]').contains('Badge 1');
         cy.get('[data-cy="badgeCard-badge1"] [data-cy="subTitle"]').contains('ID: badge1');
 
-        cy.get('[data-cy="badgeCard-badge2"] [data-cy="subjTitle-link"]').contains('Updated Badge Name');
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy="titleLink"]').contains('Updated Badge Name');
         cy.get('[data-cy="badgeCard-badge2"] [data-cy="subTitle"]').contains('ID: badge2');
     });
 
@@ -664,13 +664,13 @@ describe('Badges Tests', () => {
         cy.visit('/administrator/projects/proj1/badges');
 
         // using title link
-        cy.get('[data-cy="badgeCard-badge2"] [data-cy="subjTitle-link"]').click();
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy="titleLink"]').click();
         cy.contains('No Skills Selected Yet');
         cy.contains('ID: badge2');
 
         // using icon
         cy.visit('/administrator/projects/proj1/badges');
-        cy.get('[data-cy="badgeCard-badge2"] [data-cy="subjIcon-link"]').click();
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy="iconLink"]').click();
         cy.contains('No Skills Selected Yet');
         cy.contains('ID: badge2');
     });

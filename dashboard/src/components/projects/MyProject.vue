@@ -18,29 +18,25 @@ limitations under the License.
     <div class="card h-100" :data-cy="`projectCard_${projectInternal.projectId}`">
       <div class="card-body">
         <div class="row mb-2">
-          <div class="col">
-            <div class="media">
-              <div class="media-body" style="min-width: 0px;">
-                <router-link
-                  :to="{ name:'Subjects', params: { projectId: this.projectInternal.projectId, project: this.projectInternal }}"
-                  class="text-truncate text-info mb-0 pb-0 preview-card-title"
-                  data-cy="projCard_proj1_manageLink"><b-avatar variant="info" icon="people-fill" class="text-uppercase avatar-link"> {{ projectInternal.name.substring(0,2) }}</b-avatar> {{ projectInternal.name }}
-                </router-link>
-                <div class="text-truncate text-secondary preview-card-subTitle mt-1 ml-1">ID: {{ projectInternal.projectId }}</div>
-              </div>
-              <div class="col-auto text-center text-sm-right p-0">
-                <project-card-controls
-                  ref="cardControls"
-                  :project="projectInternal"
-                  @edit-project="editProject"
-                  @delete-project="deleteProject"
-                  @move-up-project="moveUp"
-                  @move-down-project="moveDown"
-                  @unpin-project="unpin"
-                  :is-delete-disabled="deleteProjectDisabled"
-                  :delete-disabled-text="deleteProjectToolTip"/>
-              </div>
-            </div>
+          <div class="col-md text-truncate">
+            <router-link
+              :to="{ name:'Subjects', params: { projectId: this.projectInternal.projectId, project: this.projectInternal }}"
+              class="text-info mb-0 pb-0 preview-card-title" :title="`${projectInternal.name}`"
+              data-cy="projCard_proj1_manageLink"><b-avatar variant="info" icon="people-fill" class="text-uppercase avatar-link"> {{ projectInternal.name.substring(0,2) }}</b-avatar> {{ projectInternal.name }}
+            </router-link>
+            <div class="text-secondary preview-card-subTitle mt-1 ml-1">ID: {{ projectInternal.projectId }}</div>
+          </div>
+          <div class="col-md-auto mt-3 mt-md-0">
+            <project-card-controls
+              ref="cardControls"
+              :project="projectInternal"
+              @edit-project="editProject"
+              @delete-project="deleteProject"
+              @move-up-project="moveUp"
+              @move-down-project="moveDown"
+              @unpin-project="unpin"
+              :is-delete-disabled="deleteProjectDisabled"
+              :delete-disabled-text="deleteProjectToolTip"/>
           </div>
         </div>
 
@@ -237,7 +233,6 @@ limitations under the License.
   }
 
   .preview-card-subTitle {
-    max-width: 12rem;
     font-size: 0.8rem;
   }
 

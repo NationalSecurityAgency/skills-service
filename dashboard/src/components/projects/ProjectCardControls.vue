@@ -27,38 +27,40 @@ limitations under the License.
               :aria-pressed="project.pinned">
       <span class="d-none d-sm-inline">Unpin</span> <i class="fas fa-ban" style="font-size: 1rem;" aria-hidden="true"/>
     </b-button>
-    <b-button-group size="sm" class="buttons mr-2">
-      <b-button ref="editBtn"
-                size="sm"
-                variant="outline-primary"
-                @click="$emit('edit-project')"
-                title="Edit Project"
-                data-cy="editProjBtn"><i class="fas fa-edit" aria-hidden="true"/></b-button>
-
-      <span v-b-tooltip.hover="deleteDisabledText">
-        <b-button variant="outline-primary"
-                  class="last-right-group-btn"
+    <div class="d-inline-block float-right">
+      <b-button-group size="sm" class="buttons mr-2">
+        <b-button ref="editBtn"
                   size="sm"
-                  @click="$emit('delete-project')"
-                  :disabled="isDeleteDisabled"
-                  title="Delete Project"
-                  data-cy="deleteProjBtn"><i class="text-warning fas fa-trash" aria-hidden="true"/></b-button>
-      </span>
-    </b-button-group>
+                  variant="outline-primary"
+                  @click="$emit('edit-project')"
+                  title="Edit Project"
+                  data-cy="editProjBtn"><i class="fas fa-edit" aria-hidden="true"/></b-button>
 
-    <b-button-group size="sm" class="buttons">
-      <b-button variant="outline-primary"
-                @click="$emit('move-up-project')"
-                :disabled="project.isFirst"
-                title="Sort Order - Move up"
-                data-cy="moveProjUpBtn"><i class="fas fa-arrow-circle-up text-info" aria-hidden="true"/></b-button>
-      <b-button variant="outline-primary"
-                @click="$emit('move-down-project')"
-                :disabled="project.isLast"
-                title="Sort Order - Move down"
-                data-cy="moveProjDownBtn"><i class="fas fa-arrow-circle-down text-info" aria-hidden="true"/>
-      </b-button>
-    </b-button-group>
+        <span v-b-tooltip.hover="deleteDisabledText">
+          <b-button variant="outline-primary"
+                    class="last-right-group-btn"
+                    size="sm"
+                    @click="$emit('delete-project')"
+                    :disabled="isDeleteDisabled"
+                    title="Delete Project"
+                    data-cy="deleteProjBtn"><i class="text-warning fas fa-trash" aria-hidden="true"/></b-button>
+        </span>
+      </b-button-group>
+
+      <b-button-group size="sm" class="buttons">
+        <b-button variant="outline-primary"
+                  @click="$emit('move-up-project')"
+                  :disabled="project.isFirst"
+                  title="Sort Order - Move up"
+                  data-cy="moveProjUpBtn"><i class="fas fa-arrow-circle-up text-info" aria-hidden="true"/></b-button>
+        <b-button variant="outline-primary"
+                  @click="$emit('move-down-project')"
+                  :disabled="project.isLast"
+                  title="Sort Order - Move down"
+                  data-cy="moveProjDownBtn"><i class="fas fa-arrow-circle-down text-info" aria-hidden="true"/>
+        </b-button>
+      </b-button-group>
+    </div>
   </div>
 </template>
 

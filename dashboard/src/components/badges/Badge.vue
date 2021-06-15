@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <div data-cy="badgeCard">
-    <subject-card :options="cardOptions" :isLoading="isLoading" :data-cy="`badgeCard-${badgeInternal.badgeId}`">
+    <nav-card-with-stats-and-controls :options="cardOptions" :isLoading="isLoading" :data-cy="`badgeCard-${badgeInternal.badgeId}`">
       <div slot="header-top-right">
       </div>
       <div slot="underTitle">
@@ -43,20 +43,19 @@ limitations under the License.
         <edit-badge v-if="showEditBadge" v-model="showEditBadge" :id="badge.badgeId" :badge="badge" :is-edit="true"
                     :global="global" @badge-updated="badgeEdited" @hidden="handleHidden"></edit-badge>
       </div>
-
-    </subject-card>
+    </nav-card-with-stats-and-controls>
   </div>
 </template>
 
 <script>
   import EditBadge from './EditBadge';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
-  import SubjectCard from '../subjects/SubjectCard';
   import CardNavigateAndEditControls from '../utils/cards/CardNavigateAndEditControls';
+  import NavCardWithStatsAndControls from '../utils/cards/NavCardWithStatsAndControls';
 
   export default {
     name: 'Badge',
-    components: { CardNavigateAndEditControls, SubjectCard, EditBadge },
+    components: { NavCardWithStatsAndControls, CardNavigateAndEditControls, EditBadge },
     props: {
       badge: Object,
       global: {
