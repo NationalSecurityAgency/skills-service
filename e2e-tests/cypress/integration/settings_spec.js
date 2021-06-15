@@ -362,8 +362,11 @@ describe('Settings Tests', () => {
 
         cy.wait('@loadSystemSettings');
         cy.get('[data-cy=resetTokenExpiration]').should('have.value', '2H');
+        cy.get('[data-cy=publicUrlError]').should('be.visible');
+        cy.get('[data-cy=publicUrlError]').contains('Public URL is required').should('be.visible');
         cy.get$('[data-cy=publicUrl]').type('{selectall}http://localhost:8082');
         cy.get$('[data-cy=resetTokenExpiration]').type('{selectall}2H25M22S');
+        cy.get('[data-cy=publicUrlError]').should('not.be.visible');
         cy.get$('[data-cy=fromEmail]').type('{selectall}foo@skilltree.madeup');
         cy.get$('[data-cy=customHeader').type('{selectall}<div id="customHeaderDiv" style="font-size:3em;color:red">HEADER</div>');
         cy.get$('[data-cy=customFooter').type('{selectall}<div id="customFooterDiv" style="font-size:3em;color:red">FOOTER</div>');
