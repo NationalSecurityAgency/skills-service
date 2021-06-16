@@ -18,7 +18,6 @@ package skills.utils
 
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
-import spock.lang.IgnoreRest
 import spock.lang.Specification
 
 class InputSanitizerSpec extends Specification{
