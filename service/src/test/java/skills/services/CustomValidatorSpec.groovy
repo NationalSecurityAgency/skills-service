@@ -15,6 +15,7 @@
  */
 package skills.services
 
+
 import spock.lang.Specification
 
 class CustomValidatorSpec extends Specification{
@@ -294,6 +295,37 @@ A paragraph two
         then:
         validator.validateDescription("""> A This is a block quote""").valid
         !validator.validateDescription("""> This is a block quote""").valid
+    }
+
+    def "apply paragraph validator to bulleted/numbered lists"() {
+        String text = """
+        A fish
+        A fish
+
+        * A fish
+        * Not a fish 
+
+        - A fish
+        - Not a fish
+
+        1. A fish
+        1. Not a fish
+
+        2. A fish
+        3. Not a fish
+            - A fish
+        """
+
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^A.*$'
+        validator.paragraphValidationMessage = 'fail'
+
+        when:
+        validator.init()
+
+        boolean success = validator.validateDescription(text).valid
+        then:
+        success
     }
 }
 
