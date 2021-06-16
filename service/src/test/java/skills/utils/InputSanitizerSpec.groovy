@@ -83,4 +83,40 @@ class InputSanitizerSpec extends Specification{
         then:
         sanitized == "markdown markdown markdown >blockquote markdown markdown markdown"
     }
+
+    def "sanitize url with space in params"() {
+        when:
+        def sanitized = InputSanitizer.sanitizeUrl("http://foo.foo?a=b%20c")
+
+        then:
+        sanitized == "http://foo.foo?a=b%20c"
+        sanitized != "http://foo.foo?a=b c"
+    }
+
+    def "un-sanitize url with space in params"() {
+        when:
+        def sanitized = InputSanitizer.unsanitizeUrl(InputSanitizer.sanitizeUrl("http://foo.foo?a=b%20c"))
+
+        then:
+        sanitized == "http://foo.foo?a=b%20c"
+        sanitized != "http://foo.foo?a=b c"
+    }
+
+    def "sanitize url with space in path"() {
+        when:
+        def sanitized = InputSanitizer.sanitizeUrl("http://foo.foo/bar%20baz")
+
+        then:
+        sanitized == "http://foo.foo/bar%20baz"
+        sanitized != "http://foo.foo/bar bazc"
+    }
+
+    def "un-sanitize url with space in path"() {
+        when:
+        def unsani = InputSanitizer.unsanitizeUrl(InputSanitizer.sanitizeUrl("http://foo.foo/bar%20baz"))
+
+        then:
+        unsani == "http://foo.foo/bar%20baz"
+        unsani != "http://foo.foo/bar baz"
+    }
 }
