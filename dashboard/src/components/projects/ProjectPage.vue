@@ -36,12 +36,12 @@ limitations under the License.
                     variant="outline-primary"
                     data-cy="btn_edit-project"
                     :aria-label="'edit Project '+project.projectId">
-            <span class="d-none d-sm-inline">Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
+            <span>Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
           </b-button>
           <b-button target="_blank" v-if="project" :to="{ name:'MyProjectSkills', params: { projectId: project.projectId } }"
                     data-cy="projectPreview"
                     variant="outline-primary" :aria-label="'preview client display for project'+project.name">
-            <span class="d-sm-line">Preview</span> <i class="fas fa-eye" style="font-size:1rem;" aria-hidden="true"/>
+            <span>Preview</span> <i class="fas fa-eye" style="font-size:1rem;" aria-hidden="true"/>
           </b-button>
         </b-button-group>
       </div>

@@ -18,6 +18,14 @@ import utcPlugin from 'dayjs/plugin/utc';
 
 dayjs.extend(utcPlugin);
 
+const snapshotOptions = {
+  blackout: ['[data-cy=projectCreated]', '[data-cy=projectLastReportedSkill]'],
+  failureThreshold: 0.03, // threshold for entire image
+  failureThresholdType: 'percent', // percent of image or number of pixels
+  customDiffConfig: { threshold: 0.01 }, // threshold for each pixel
+  capture: 'fullPage', // When fullPage, the application under test is captured in its entirety from top to bottom.
+};
+
 describe('Projects Tests', () => {
   beforeEach(() => {
     cy.intercept('GET', '/app/projects').as('getProjects')
@@ -1055,7 +1063,21 @@ describe('Projects Tests', () => {
     cy.get('[data-cy="projectCard_proj2"] [data-cy="pagePreviewCardStat_Skills"] [data-cy="warning"]').should('not.exist');
     cy.get('[data-cy="projectCard_proj2"] [data-cy="pagePreviewCardStat_Points"] [data-cy="warning"]').should('exist');
     cy.get('[data-cy="projectCard_proj2"] [data-cy="pagePreviewCardStat_Badges"] [data-cy="warning"]').should('not.exist');
+  });
 
+  it('page header rendering on small screen', () => {
+    cy.createProject(1);
+    cy.createSubject(1, 1);
+    cy.createSubject(1, 2);
+
+    cy.createSkill(1, 1, 1);
+    cy.createSkill(1, 1, 2);
+    cy.createSkill(1, 2, 3);
+
+    cy.setResolution('iphone-6');
+    cy.visit('/administrator/projects/proj1');
+
+    cy.matchSnapshotImage(`project-page-iphone6`, snapshotOptions);
   });
 
 });
