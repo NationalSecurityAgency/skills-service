@@ -35,6 +35,7 @@ class InputSanitizer {
 
     private static final Pattern GT = ~/&gt;/
     private static final Pattern AMP = ~/&amp;/
+    private static final Pattern SPACE = ~/\s/
 
     static String sanitize(String input) {
         if (!input) {
@@ -76,6 +77,7 @@ class InputSanitizer {
                 reassembled.append(authority)
             }
             if (path) {
+                path = SPACE.matcher(path).replaceAll("%20")
                 reassembled.append(path)
             }
             if (queryString) {
@@ -116,7 +118,10 @@ class InputSanitizer {
             return input;
         }
 
-        return AMP.matcher(input).replaceAll("&")
+        def clean = AMP.matcher(input).replaceAll("&")
+        /*clean = SPACE.matcher(input).replaceAll("%20")
+        return clean*/
+        return clean
     }
 
     /**

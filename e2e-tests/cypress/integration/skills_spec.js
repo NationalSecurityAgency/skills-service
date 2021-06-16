@@ -839,4 +839,34 @@ describe('Skills Tests', () => {
 
     });
 
+
+    it('skill help url with %20 in path retains %20 on edit', () => {
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/dummy`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: 'dummy',
+            name: `dummy`,
+            type: 'Skill',
+            pointIncrement: 100,
+            numPerformToCompletion: 5,
+            pointIncrementInterval: 0,
+            numMaxOccurrencesIncrementInterval: 1,
+            description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+            version: 1,
+            helpUrl: 'http://doHelpOnThisSkill.com/i%20have%20spaces'
+        });
+        cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/dummy').as('loadSkill');
+
+        // resolutions over 1280 are ignored in headless mode so we can only test at this resolution
+        cy.setResolution([1280, 900]);
+        cy.wait(200);
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/dummy/');
+        cy.wait('@loadSkill');
+
+        cy.get('[data-cy=editSkillButton_dummy]').click();
+        cy.wait('@loadSkill');
+        cy.get('[data-cy=skillHelpUrl]').should('have.value', 'http://doHelpOnThisSkill.com/i%20have%20spaces');
+
+    });
+
 });
