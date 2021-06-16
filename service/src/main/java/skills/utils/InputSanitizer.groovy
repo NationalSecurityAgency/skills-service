@@ -119,8 +119,6 @@ class InputSanitizer {
         }
 
         def clean = AMP.matcher(input).replaceAll("&")
-        /*clean = SPACE.matcher(input).replaceAll("%20")
-        return clean*/
         return clean
     }
 
