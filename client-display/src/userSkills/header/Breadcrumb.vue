@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="d-flex justify-content-center" data-cy="breadcrumb-bar">
+  <div v-if="!disabled" class="d-flex justify-content-center" data-cy="breadcrumb-bar">
     <nav aria-label="breadcrumb" role="navigation">
       <ol class="breadcrumb bg-transparent m-0 p-0">
         <li v-for="(item, index) of items" :key="item.label" class="breadcrumb-item" data-cy="breadcrumb-item">
@@ -115,6 +115,11 @@ limitations under the License.
       },
       shouldExcludeKey(key) {
         return this.keysToExcludeFromPath.some((searchForMe) => key === searchForMe);
+      },
+    },
+    computed: {
+      disabled() {
+        return this.$store.state.themeModule.disableBreadcrumb;
       },
     },
   };
