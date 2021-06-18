@@ -571,4 +571,17 @@ describe('Client Display Tests', () => {
     });
 
 
+    it('ability to disable the breadcrumb', () => {
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+
+        // ensure brand exist
+        cy.cdVisit('/?enableTheme=true');
+        cy.contains('Overall Points');
+        cy.get('[data-cy=breadcrumb-Overview]').should('exist');
+        cy.get('[data-cy=breadcrumb-bar]').contains('Overview').should('be.visible');
+
+        cy.cdVisit('/?enableTheme=true&themeParam=disableBreadcrumb|true');
+        cy.get('[data-cy=breadcrumb-Overview]').should('not.exist');
+    });
 });
