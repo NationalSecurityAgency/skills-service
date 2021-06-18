@@ -320,12 +320,22 @@ A paragraph two
         validator.paragraphValidationRegex = '^A.*$'
         validator.paragraphValidationMessage = 'fail'
 
+        String shouldFail = """
+        A fish
+        A fish
+
+        * Not A fish
+        * Not a fish 
+        """
+
         when:
         validator.init()
 
         boolean success = validator.validateDescription(text).valid
+        boolean shouldBeInvalid = validator.validateDescription(shouldFail).valid
         then:
         success
+        !shouldBeInvalid
     }
 }
 
