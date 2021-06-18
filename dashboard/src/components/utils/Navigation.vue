@@ -16,13 +16,13 @@ limitations under the License.
 <template>
   <div class="container-fluid px-0" data-cy="nav">
     <div class="row skills-nav no-gutters">
-      <div class="col-md-auto border rounded pt-3 pr-0 bg-light">
+      <div class="col-md-auto border rounded pt-3 pr-0 bg-light" data-cy="nav-col">
         <div class="mb-3 ml-3 text-secondary">
           <b-row no-gutters>
             <b-col v-if="smallScreenMode || !collapsed">
               <span class="h6 text-uppercase mr-2 nav-title" v-if="!collapsed || smallScreenMode">Navigation</span>
             </b-col>
-            <b-col :class="{ 'text-right' : !collapsed }">
+            <b-col :class="{'text-right': !collapsed || smallScreenMode }">
               <div v-if="!smallScreenMode" :class="{ 'pr-2 pl-3' : !collapsed }">
                 <b-button v-if="!smallScreenMode" size="sm" variant="outline-secondary" @click="flipCollapsed"
                           class="py-0 text-primary" style="border-color: #d8d8d9;" data-cy="navCollapseOrExpand" v-b-tooltip.hover
