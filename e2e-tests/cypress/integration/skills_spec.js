@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+var moment = require('moment-timezone');
+
 describe('Skills Tests', () => {
 
     beforeEach(() => {
@@ -867,6 +869,30 @@ describe('Skills Tests', () => {
         cy.wait('@loadSkill');
         cy.get('[data-cy=skillHelpUrl]').should('have.value', 'http://doHelpOnThisSkill.com/i%20have%20spaces');
 
+    });
+
+    it('load page with apex charts directly and repeatedly', () => {
+        // apex charts and dynamic imports had a race condition, this test verifies that charts load successfully
+
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2);
+        cy.createSkill(1, 1, 3);
+        cy.createSkill(1, 1, 4);
+        cy.createSkill(1, 1, 5);
+
+        const m = moment.utc().subtract(10, 'days');
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'someuser1', timestamp: m.clone().add(1, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'someuser1', timestamp: m.clone().add(2, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'someuser2', timestamp: new Date().getTime()})
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'someuser3', timestamp: new Date().getTime()})
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'someuser4', timestamp: new Date().getTime()})
+
+        const numTries = 5;
+        for (let i = 1; i <= numTries; i += 1) {
+            cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/metrics');
+            cy.contains('# Users');
+            cy.contains('stopped after achieving')
+        }
     });
 
 });
