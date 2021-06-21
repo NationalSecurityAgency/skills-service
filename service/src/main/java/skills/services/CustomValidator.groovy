@@ -49,6 +49,10 @@ class CustomValidator {
     private String nameValidationMsg
     private Pattern nameRegex
 
+    private static final Pattern BULLET = ~/^\s*(?:\d\. |\* |- )/
+    private static final Pattern NEWLINE = ~/\n/
+    private static final Pattern HEADER_OR_BLOCK_QUOTE = ~/^[#>]{1,}/
+
     @PostConstruct
     CustomValidator init() {
         paragraphValidationMsg = paragraphValidationMessage ?: "Description failed validation"
@@ -121,18 +125,22 @@ class CustomValidator {
     private String adjustForMarkdownSupport(String s) {
 
         String toValidate = s.trim()
+
+        //remove markdown bullets that start at the beginning of a line/paragraph
+        toValidate = BULLET.matcher(toValidate).replaceAll("")
+
         // remove a single newline so the provided regex does not need check for newlines themselves
         // since regex . doesn't match \n
         // this important since description allows the use of markdown, for example is an input for the markdown list:
         // "some paragraph\n*item1 *item2
-        toValidate = toValidate.replaceAll("\n", "")
+        toValidate = NEWLINE.matcher(toValidate).replaceAll("")
 
         // support markdown headers and blockquotes
         // # Header
         // ## Header
         // ### Header
         // > quote
-        toValidate = toValidate.replaceAll("^[#>]{1,}", "")
+        toValidate = HEADER_OR_BLOCK_QUOTE.matcher(toValidate).replaceAll("")
 
         return toValidate.trim()
     }
