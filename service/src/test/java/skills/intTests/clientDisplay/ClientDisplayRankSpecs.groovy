@@ -325,7 +325,9 @@ class ClientDisplayRankSpecs extends DefaultIntSpec {
     }
 
     def "get rank - only 1 very lonely user opted out"(){
-        String userId = getRandomUsers(1).first()
+        List<String> users = getRandomUsers(2)
+        String userId = users.get(0)
+        String otherUserId = users.get(1)
         SkillsService user1SkillService = createService(userId)
 
         def proj1 = SkillsFactory.createProject(1)
@@ -343,8 +345,8 @@ class ClientDisplayRankSpecs extends DefaultIntSpec {
         def summary = skillsService.getRank(userId, proj1.projectId)
         def summarySubj = skillsService.getRank(userId, proj1.projectId, proj1_subj.subjectId)
 
-        def summary1 = skillsService.getRank("otheruser", proj1.projectId)
-        def summarySubj1 = skillsService.getRank("otheruser", proj1.projectId, proj1_subj.subjectId)
+        def summary1 = skillsService.getRank(otherUserId, proj1.projectId)
+        def summarySubj1 = skillsService.getRank(otherUserId, proj1.projectId, proj1_subj.subjectId)
 
         then:
         summary.numUsers == 1
