@@ -57,6 +57,7 @@ import {
 import en from 'vee-validate/dist/locale/en.json';
 import Vuex from 'vuex';
 import marked from 'marked';
+import VueApexCharts from 'vue-apexcharts';
 import InceptionConfigurer from './InceptionConfigurer';
 import 'babel-polyfill';
 import 'matchmedia-polyfill';
@@ -73,11 +74,7 @@ import App from './App';
 import router from './router';
 import store from './store/store';
 
-const getApex = () => import(
-  /* webpackChunkName: "apexCharts" */
-  'vue-apexcharts'
-);
-
+Vue.component('apexchart', VueApexCharts);
 Vue.component('ValidationProvider', ValidationProvider);
 Vue.component('ValidationObserver', ValidationObserver);
 Vue.use(Vuex);
@@ -228,9 +225,5 @@ store.dispatch('loadConfigState').finally(() => {
       store,
     });
     window.vm = vm;
-    getApex().then((VueApexCharts) => {
-      Vue.component('apexchart', VueApexCharts.default);
-      Vue.use(VueApexCharts.default);
-    });
   });
 });
