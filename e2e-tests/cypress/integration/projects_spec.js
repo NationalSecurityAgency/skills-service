@@ -1074,11 +1074,10 @@ describe('Projects Tests', () => {
     cy.createSkill(1, 1, 2);
     cy.createSkill(1, 2, 3);
 
-    cy.intercept('GET', '/admin/projects/proj1').as('loadProject');
-
     cy.setResolution('iphone-6');
     cy.visit('/administrator/projects/proj1');
-    cy.wait('@loadProject');
+    cy.get('[data-cy="manageBtn_subj1"]');
+    cy.get('[data-cy="manageBtn_subj2"]');
 
     cy.matchSnapshotImage(`project-page-iphone6`, snapshotOptions);
   });
