@@ -27,6 +27,8 @@ import skills.storage.model.SkillRelDef
 import skills.storage.model.DayCountItem
 import skills.storage.model.UserPoints
 
+import java.time.LocalDateTime
+
 @CompileStatic
 interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
 
@@ -48,7 +50,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
         String getUserFirstName()
         String getUserLastName()
         Integer getPoints()
-        Date getUserFirstSeenTimestamp()
+        LocalDateTime getUserFirstSeenTimestamp()
     }
 
 
@@ -115,7 +117,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     (p.points<?3 OR (p.points=?3 and uAttrs.created>?4)) and
                     p.day is null
             ''')
-    List<RankedUserRes> findUsersForLeaderboardPointsLessOrEqual(String projectId, String subjectId, Integer points, Date usrCreated, Pageable pageable)
+    List<RankedUserRes> findUsersForLeaderboardPointsLessOrEqual(String projectId, String subjectId, Integer points, LocalDateTime usrCreated, Pageable pageable)
 
     @Query('''SELECT 
                     p.userId as userId, 
@@ -133,7 +135,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     (p.points<?2 OR (p.points=?2 and uAttrs.created>?3)) and
                     p.day is null
             ''')
-    List<RankedUserRes> findUsersForLeaderboardPointsLessOrEqual(String projectId, Integer points, Date usrCreated, Pageable pageable)
+    List<RankedUserRes> findUsersForLeaderboardPointsLessOrEqual(String projectId, Integer points, LocalDateTime usrCreated, Pageable pageable)
 
     @Query('''SELECT 
                     p.userId as userId, 
@@ -150,7 +152,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     (p.points>?3 OR (p.points=?3 and uAttrs.created<?4)) and
                     p.day is null
             ''')
-    List<RankedUserRes> findUsersForLeaderboardPointsMoreOrEqual(String projectId, String subjectId, Integer points, Date userCreateDate, Pageable pageable)
+    List<RankedUserRes> findUsersForLeaderboardPointsMoreOrEqual(String projectId, String subjectId, Integer points, LocalDateTime userCreateDate, Pageable pageable)
 
     @Query('''SELECT 
                     p.userId as userId, 
@@ -167,7 +169,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     (p.points>?2 OR (p.points=?2 and uAttrs.created<?3)) and
                     p.day is null
             ''')
-    List<RankedUserRes> findUsersForLeaderboardPointsMoreOrEqual(String projectId, Integer points, Date createdDate, Pageable pageable)
+    List<RankedUserRes>  findUsersForLeaderboardPointsMoreOrEqual(String projectId, Integer points, LocalDateTime createdDate, Pageable pageable)
 
     long countByProjectIdAndSkillIdAndDay(String projectId, @Nullable String skillId, @Nullable Date day)
 
@@ -210,7 +212,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             p.skillId=?2 and 
             (p.points > ?3 OR (p.points = ?3 and ua.created < ?4)) and 
             p.day is null''' )
-    Integer calculateNumUsersWithHigherScoreAndIfScoreTheSameThenAfterUserCreateDate(String projectId, String skillId, int points, Date created)
+    Integer calculateNumUsersWithHigherScoreAndIfScoreTheSameThenAfterUserCreateDate(String projectId, String skillId, int points, LocalDateTime created)
 
     @Query('''SELECT count(p) from UserPoints p, UserAttrs ua where
             p.userId = ua.userId and 
@@ -218,7 +220,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             p.skillId is null and 
             (p.points > ?2 OR (p.points = ?2 and ua.created < ?3)) and 
             p.day is null''')
-    Integer calculateNumUsersWithHigherScoreAndIfScoreTheSameThenAfterUserCreateDate(String projectId, int points, Date created)
+    Integer calculateNumUsersWithHigherScoreAndIfScoreTheSameThenAfterUserCreateDate(String projectId, int points, LocalDateTime created)
 
     List<UserPoints> findByProjectIdAndSkillIdAndPointsGreaterThanAndDayIsNull(String projectId, @Nullable String skillId, int points, Pageable pageable)
     List<UserPoints> findByProjectIdAndSkillIdAndPointsLessThanAndDayIsNull(String projectId, @Nullable String skillId, int points, Pageable pageable)
