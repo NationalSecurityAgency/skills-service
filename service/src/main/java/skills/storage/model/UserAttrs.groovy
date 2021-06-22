@@ -39,7 +39,6 @@ class UserAttrs {
     String nickname
     String userIdForDisplay
 
-//    @Temporal(TemporalType.TIMESTAMP)
     @CreatedDate
     LocalDateTime created
 }
