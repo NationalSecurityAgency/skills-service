@@ -74,7 +74,6 @@ import App from './App';
 import router from './router';
 import store from './store/store';
 
-
 Vue.component('apexchart', VueApexCharts);
 Vue.component('ValidationProvider', ValidationProvider);
 Vue.component('ValidationObserver', ValidationObserver);
