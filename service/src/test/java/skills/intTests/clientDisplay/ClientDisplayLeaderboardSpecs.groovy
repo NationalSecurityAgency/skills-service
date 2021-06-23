@@ -15,10 +15,10 @@
  */
 package skills.intTests.clientDisplay
 
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
+
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
+import org.springframework.jdbc.core.JdbcTemplate
 import skills.controller.UserInfoController
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
@@ -27,12 +27,14 @@ import skills.skillLoading.RankingLoader
 import skills.storage.model.UserAttrs
 import skills.storage.repos.UserAttrsRepo
 import spock.lang.IgnoreIf
-import spock.lang.IgnoreRest
 
 class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
 
     @Autowired
     UserAttrsRepo userAttrsRepo
+
+    @Autowired
+    JdbcTemplate jdbcTemplate
 
     def "get top 10"(){
         List<String> users = createUsers(12)
@@ -1388,5 +1390,59 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         then:
         leaderboard.optedOut
         !leaderboard1.optedOut
+    }
+
+    def "pre-existing users should not show up twice in around me leaderboard"() {
+        int numUsers = 16;
+        int selectedUser = 5
+
+        List<String> users = createUsers(numUsers)
+        List<Date> days = (0..numUsers+1).collect { new Date() - it }
+
+        String preCreateMe = users.get(selectedUser)
+        // create user via direct jdbc insert so that JPA AuditingEntityListener
+        // is not called. This simulates a user that was created prior to 1.5 where the created and updated columns
+        // were populated exclusively via default value on the database
+        jdbcTemplate.update("insert into user_attrs (user_id, user_id_for_display) values ('${preCreateMe.toLowerCase()}', '$preCreateMe')")
+        jdbcTemplate.update("insert into users (user_id) values ('${preCreateMe.toLowerCase()}')")
+
+        def proj = SkillsFactory.createProject(1)
+        def subj = SkillsFactory.createSubject(1, 1)
+        List<Map> skills = SkillsFactory.createSkills(numUsers+2, 1, 1)
+        def subj2 = SkillsFactory.createSubject(1, 2)
+        List<Map> subj2_skills = SkillsFactory.createSkills(numUsers+2, 1, 2)
+        subj2_skills.each { it.pointIncrement = 100 }
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+        skillsService.createSubject(subj2)
+        skillsService.createSkills(subj2_skills)
+
+        (0..numUsers-1).each {Integer userNum ->
+            String userId = users.get(userNum)
+            (userNum + 1).times {Integer skillNum ->
+                skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(skillNum).skillId], userId, days.get(userNum))
+            }
+        }
+        (0..numUsers-1).reverse().each {Integer userNum ->
+            String userId = users.get(userNum)
+            (numUsers - userNum).times {Integer skillNum ->
+                skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills.get(skillNum).skillId], userId, days.get(userNum))
+            }
+        }
+
+        // sort users by rank
+        users = users.reverse()
+        List<String> userIdsForDisplay = users.collect {
+            userAttrsRepo.findByUserId(it)?.userIdForDisplay
+        }
+
+        when:
+        def leaderboard = skillsService.getLeaderboard(preCreateMe, proj.projectId, subj.subjectId, "tenAroundMe")
+        then:
+        leaderboard.rankedUsers.size() == 11
+        leaderboard.rankedUsers.findAll { it.isItMe }.size() == 1
+        leaderboard.rankedUsers.findAll { it.userId == preCreateMe }.size() == 1
     }
 }

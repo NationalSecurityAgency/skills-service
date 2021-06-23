@@ -37,6 +37,9 @@ import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserPointsRepo
 
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+
 @Component
 @Slf4j
 @CompileStatic
@@ -85,7 +88,7 @@ class RankingLoader {
     @Profile
     LeaderboardRes getLeaderboard(String projectId, String userId, LeaderboardRes.Type type, String subjectId = null) {
         UserAttrs userAttrs = userAttrsRepo.findByUserId(userId)
-        Date userCreatedDate = new Date(userAttrs.created.time)
+        LocalDateTime userCreatedDate = userAttrs.created
         OptOutInfo optOutInfo = getOptOutInfo(userId, projectId)
 
         List<RankedUserRes> res
@@ -129,7 +132,7 @@ class RankingLoader {
 
     private RankedUserRes createRankedUserForThisUser(int rank, UserAttrs userAttrs, int myPoints) {
         new RankedUserRes(rank: rank, userId: userAttrs.userIdForDisplay, firstName: userAttrs.firstName, lastName: userAttrs.lastName,
-                isItMe: true, points: myPoints, userFirstSeenTimestamp: userAttrs.created.time)
+                isItMe: true, points: myPoints, userFirstSeenTimestamp: userAttrs.created.toInstant(ZoneOffset.UTC).toEpochMilli())
     }
 
     private Integer getAvailablePoints(String projectId, String subjectId) {
@@ -172,7 +175,7 @@ class RankingLoader {
                     firstName: it.getUserFirstName(),
                     lastName: it.getUserLastName(),
                     points: it.getPoints(),
-                    userFirstSeenTimestamp: it.getUserFirstSeenTimestamp()?.getTime(),
+                    userFirstSeenTimestamp: it.getUserFirstSeenTimestamp()?.toInstant(ZoneOffset.UTC)?.toEpochMilli(),
                     isItMe: it.getUserId() == userId,
             )
         }
