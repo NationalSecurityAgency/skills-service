@@ -123,10 +123,9 @@ limitations under the License.
         const data = this.buildData(vis);
         const container = document.getElementById('dependent-skills-network');
         this.network = new vis.Network(container, data, this.displayOptions);
-        // const self = this;
         this.network.on('click', (params) => {
           const skillItem = this.locateSelectedSkill(params);
-          if (skillItem) {
+          if (skillItem && skillItem.skillId !== this.thisSkill.skillId) {
             if (skillItem.isCrossProject) {
               this.handlePush({
                 name: 'crossProjectSkillDetails',
@@ -196,7 +195,7 @@ limitations under the License.
         const createdSkillIds = [];
 
         this.dependencies.forEach((item) => {
-          const isThisSkill = !item.crossProject && this.$route.params.skillId === item.skill.skillId;
+          const isThisSkill = this.$route.params.skillId === item.skill.skillId;
 
           if (isThisSkill) {
             this.thisSkill = item.skill;
