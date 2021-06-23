@@ -542,5 +542,10 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=breadcrumb-projects]').should('not.exist');
   });
 
+  it( 'ability to enable theme on project Skills Display', function () {
+    cy.visit('/progress-and-rankings/projects/proj1?enableTheme=true');
+    cy.wrapIframe().contains('powered by');
+  });
+
 });
 

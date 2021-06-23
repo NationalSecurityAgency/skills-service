@@ -18,7 +18,7 @@ limitations under the License.
   <skills-display
     :options="options"
     :version="skillsVersion"
-    :theme="theme"/>
+    :theme="themeObj"/>
 </div>
 </template>
 
@@ -48,7 +48,47 @@ limitations under the License.
             lineHeight: '1.5',
           },
         },
+        darkTheme: {
+          disableSkillTreeBrand: false,
+          maxWidth: '100%',
+          backgroundColor: '#626d7d',
+          pageTitleTextColor: 'white',
+          textSecondaryColor: 'white',
+          textPrimaryColor: 'white',
+          stars: {
+            unearnedColor: '#787886',
+            earnedColor: 'gold',
+          },
+          progressIndicators: {
+            beforeTodayColor: '#3e4d44',
+            earnedTodayColor: '#667da4',
+            completeColor: '#59ad52',
+            incompleteColor: '#cdcdcd',
+          },
+          charts: {
+            axisLabelColor: 'white',
+          },
+          tiles: {
+            backgroundColor: '#152E4d',
+            watermarkIconColor: '#a6c5f7',
+          },
+          buttons: {
+            backgroundColor: '#152E4d',
+            foregroundColor: '#59ad52',
+          },
+          graphLegendBorderColor: '1px solid grey',
+        },
       };
+    },
+    computed: {
+      themeObj() {
+        if (this.$route.query.enableTheme) {
+          const res = { ...this.theme };
+          return Object.assign(res, this.darkTheme);
+        }
+
+        return this.theme;
+      },
     },
   };
 </script>
