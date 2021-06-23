@@ -218,6 +218,52 @@ describe('Client Display Features Tests', () => {
     cy.get('[data-cy=subjectTile]').eq(0).contains('Level 5')
   });
 
+  it('cross-project dependency properly displayed', () => {
+    cy.request('POST', '/app/projects/proj2', {
+      projectId: 'proj2',
+      name: 'proj2'
+    });
+    cy.request('POST', '/admin/projects/proj2/subjects/subj1', {
+      projectId: 'proj2',
+      subjectId: 'subj1',
+      name: 'Subject 1',
+      helpUrl: 'http://doHelpOnThisSubject.com',
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+    });
+    cy.request('POST', `/admin/projects/proj2/subjects/subj1/skills/skill42`, {
+      projectId: 'proj2',
+      subjectId: 'subj1',
+      skillId: `skill42`,
+      name: `This is 42`,
+      type: 'Skill',
+      pointIncrement: 50,
+      numPerformToCompletion: 2,
+      pointIncrementInterval: 0,
+      numMaxOccurrencesIncrementInterval: -1,
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+      version: 0,
+      helpUrl: 'http://doHelpOnThisSkill.com'
+    });
+    // share skill42 to proj1
+    cy.request('PUT', '/admin/projects/proj2/skills/skill42/shared/projects/proj1');
+    cy.createSkill(1);
+    // issue #659 was evidenced in the specific situation of a skill having only a single dependency which was a skill
+    // shared from another project
+    cy.request('POST', '/admin/projects/proj1/skills/skill1/dependency/projects/proj2/skills/skill42');
+
+    cy.cdVisit('/?internalBackButton=true');
+    cy.cdClickSubj(0, 'Subject 1');
+    cy.wait(4000);
+
+    cy.cdClickSkill(0);
+    cy.contains('This is 1');
+    // should render dependencies section
+    cy.contains('Dependencies');
+
+    cy.wait(4000);
+    cy.matchSnapshotImage(`LockedSkill-CrossProjectDependency`, snapshotOptions);
+  });
+
   it('deps are added to partially achieved skill', () => {
     cy.createSkill(1);
     cy.request('POST', `/api/projects/proj1/skills/skill1`, {
