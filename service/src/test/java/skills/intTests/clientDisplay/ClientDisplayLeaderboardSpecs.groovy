@@ -27,6 +27,7 @@ import skills.skillLoading.RankingLoader
 import skills.storage.model.UserAttrs
 import skills.storage.repos.UserAttrsRepo
 import spock.lang.IgnoreIf
+import spock.lang.IgnoreRest
 
 class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
 
@@ -1432,17 +1433,23 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
             }
         }
 
+
         // sort users by rank
         users = users.reverse()
         List<String> userIdsForDisplay = users.collect {
             userAttrsRepo.findByUserId(it)?.userIdForDisplay
         }
 
+        def shouldBeMe = userAttrsRepo.findByUserId(preCreateMe)?.userIdForDisplay
+
         when:
         def leaderboard = skillsService.getLeaderboard(preCreateMe, proj.projectId, subj.subjectId, "tenAroundMe")
+
+        println "leaderboard users should contain user ${preCreateMe}"
+        println "instead, isitme users is: ${leaderboard.rankedUsers.find {it.isItMe}}"
         then:
         leaderboard.rankedUsers.size() == 11
         leaderboard.rankedUsers.findAll { it.isItMe }.size() == 1
-        leaderboard.rankedUsers.findAll { it.userId == preCreateMe }.size() == 1
+        leaderboard.rankedUsers.findAll { it.userId.toLowerCase() == shouldBeMe.toLowerCase() }.size() == 1
     }
 }
