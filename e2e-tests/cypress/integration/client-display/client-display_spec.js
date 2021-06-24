@@ -273,6 +273,8 @@ describe('Client Display Tests', () => {
         cy.cdVisit('/?enableTheme=true');
         cy.cdClickSubj(0);
         cy.cdClickSkill(1);
+        cy.get('[data-cy=breadcrumb-skill2]').should('have.css', 'color')
+            .and('equal', 'rgb(253, 253, 255)');
 
         cy.get('[data-cy=achievementDate]').contains(`Achieved on ${orig.format("MMMM Do YYYY")}`);
         cy.get('[data-cy=achievementDate]').contains(`${orig.fromNow()}`);
