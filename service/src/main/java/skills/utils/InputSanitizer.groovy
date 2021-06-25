@@ -74,6 +74,7 @@ class InputSanitizer {
                 reassembled.append(userInfo).append("@")
             }
             if (authority) {
+                authority = SPACE.matcher(authority).replaceAll("%20")
                 reassembled.append(authority)
             }
             if (path) {

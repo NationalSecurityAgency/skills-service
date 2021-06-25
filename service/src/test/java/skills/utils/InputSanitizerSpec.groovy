@@ -119,4 +119,21 @@ class InputSanitizerSpec extends Specification{
         unsani == "http://foo.foo/bar%20baz"
         unsani != "http://foo.foo/bar baz"
     }
+
+    def "sanitize url with space in host/authority"() {
+        when:
+        def sanitized = InputSanitizer.sanitizeUrl("http://foo%20space%20bar.foo")
+
+        then:
+        sanitized == "http://foo%20space%20bar.foo"
+    }
+
+    def "un-sanitize url with space in host/authority"() {
+        when:
+        def sanitized = InputSanitizer.unsanitizeUrl(InputSanitizer.sanitizeUrl("http://foo%20space%20bar.foo"))
+
+        then:
+        sanitized == "http://foo%20space%20bar.foo"
+    }
+
 }
