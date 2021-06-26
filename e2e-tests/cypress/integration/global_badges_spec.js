@@ -933,6 +933,13 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy="badgeCard-badge2"] [data-cy=editBtn]').click()
         cy.get('[data-cy=badgeName]').type('{esc}');
         cy.get('[data-cy="badgeCard-badge2"] [data-cy=editBtn]').should('have.focus');
+
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy=editBtn]').click();
+        cy.contains('Badge 1');
+        cy.get('[data-cy=badgeName]').type('42');
+        cy.get('[data-cy=saveBadgeButton]').click();
+        cy.wait('@getGlobalBadges');
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy=editBtn]').should('have.focus');
     });
 
     it('description is validated against custom validators', () => {

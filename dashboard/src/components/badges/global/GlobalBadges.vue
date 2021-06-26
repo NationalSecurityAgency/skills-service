@@ -94,7 +94,9 @@ limitations under the License.
               this.badges = [];
             }
             if (afterLoad) {
-              afterLoad();
+              setTimeout(() => {
+                afterLoad();
+              }, 0);
             }
           })
           .finally(() => {
