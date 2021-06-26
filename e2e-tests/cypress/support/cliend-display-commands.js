@@ -75,3 +75,22 @@ Cypress.Commands.add("cdClickBadge", (badgeId) => {
     cy.validatePoweredBy();
 });
 
+
+
+Cypress.Commands.add("dashboardCd", (firstVisit=false, project='proj1') => {
+    cy.intercept(`/api/projects/${project}/rank`).as(`getRank${project}`)
+    cy.intercept(`/api/projects/${project}/pointHistory`).as(`getPointsHistory${project}`)
+    if (firstVisit) {
+        cy.wait(`@getRank${project}`)
+        cy.wait(`@getPointsHistory${project}`)
+    }
+    return cy.wrapIframe();
+});
+
+Cypress.Commands.add("dashboardCdClickSubj", (subjIndex, expectedTitle) => {
+    cy.wrapIframe().find(`.user-skill-subject-tile:nth-child(${subjIndex + 1})`).first().click();
+    if (expectedTitle) {
+        cy.wrapIframe().contains(expectedTitle);
+    }
+});
+

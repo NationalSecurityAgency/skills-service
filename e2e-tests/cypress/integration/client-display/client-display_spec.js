@@ -158,7 +158,7 @@ describe('Client Display Tests', () => {
         cy.customA11y();
     });
 
-    it('back button', () => {
+    it('internal back button', () => {
 
         cy.intercept('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
 

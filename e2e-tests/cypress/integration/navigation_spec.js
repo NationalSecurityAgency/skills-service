@@ -28,7 +28,7 @@ describe('Navigation Tests', () => {
     cy.visit('/administrator');
     cy.get('[data-cy=inception-button]').click();
     cy.get('[data-cy="breadcrumb-Dashboard Skills"]').contains('Dashboard Skills').should('be.visible');
-    cy.wrapIframe().contains('Overall Points');
+    cy.dashboardCd().contains('Overall Points');
   });
 
   it('ability to expand and collapse navigation', function () {
