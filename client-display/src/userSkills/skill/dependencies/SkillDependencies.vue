@@ -228,8 +228,9 @@ limitations under the License.
         return data;
       },
       buildNode(skill, isCrossProject, createdSkillIds, nodes, extraProps = {}) {
-        if (!createdSkillIds.includes(skill.skillId)) {
-          createdSkillIds.push(skill.skillId);
+        const cachedId = `${skill.projectId}-${skill.skillId}`;
+        if (!createdSkillIds.includes(cachedId)) {
+          createdSkillIds.push(cachedId);
 
           const node = {
             id: this.getNodeId(skill),

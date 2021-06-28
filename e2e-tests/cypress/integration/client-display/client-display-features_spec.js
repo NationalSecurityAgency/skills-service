@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import moment from 'moment';
+import moment from 'moment-timezone';
 
 const dateFormatter = value => moment.utc(value).format('YYYY-MM-DD[T]HH:mm:ss[Z]');
 
@@ -40,22 +40,6 @@ describe('Client Display Features Tests', () => {
       description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
     });
 
-    Cypress.Commands.add("createSkill", (num) => {
-      cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${num}`, {
-        projectId: 'proj1',
-        subjectId: 'subj1',
-        skillId: `skill${num}`,
-        name: `This is ${num}`,
-        type: 'Skill',
-        pointIncrement: 50,
-        numPerformToCompletion: 2,
-        pointIncrementInterval: 0,
-        numMaxOccurrencesIncrementInterval: -1,
-        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-        version: 0,
-        helpUrl: 'http://doHelpOnThisSkill.com'
-      });
-    });
   })
 
   it('display new version banner when software is updated', () => {
@@ -256,7 +240,7 @@ describe('Client Display Features Tests', () => {
     cy.wait(4000);
 
     cy.cdClickSkill(0);
-    cy.contains('This is 1');
+    cy.contains('Very Great Skill 1');
     // should render dependencies section
     cy.contains('Dependencies');
 
@@ -265,9 +249,9 @@ describe('Client Display Features Tests', () => {
   });
 
   it('parent and child dependencies are properly displayed', () => {
-    cy.createSkill(1);
-    cy.createSkill(2);
-    cy.createSkill(3);
+    cy.createSkill(1, 1, 1);
+    cy.createSkill(1, 1, 2);
+    cy.createSkill(1, 1, 3);
 
     // create dependency from skill3 -> skill2 -> skill1
     cy.request('POST', `/admin/projects/proj1/skills/skill3/dependency/skill2`)
@@ -276,7 +260,7 @@ describe('Client Display Features Tests', () => {
     // Go to parent dependency page
     cy.cdVisit('/subjects/subj1/skills/skill3');
 
-    cy.get('[data-cy="skillProgressTitle"]').contains('This is 3');
+    cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 3');
     // should render dependencies section
     cy.contains('Dependencies');
     cy.wait(4000);
@@ -284,21 +268,44 @@ describe('Client Display Features Tests', () => {
 
     // Go to child dependency page
     cy.cdVisit('/subjects/subj1/skills/skill3/dependency/skill2');
-    cy.get('[data-cy="skillProgressTitle"]').contains('This is 2');
+    cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 2');
     // should render dependencies section
     cy.contains('Dependencies');
     cy.wait(4000);
     cy.matchSnapshotImage(`InProjectDependency-child`, snapshotOptions);
   });
 
+  it('cross-project skill dep is shown when skill ids match', function () {
+    cy.createSkill(1, 1, 1);
+
+    cy.createProject(2);
+    cy.createSubject(2, 1);
+    cy.log('before');
+    cy.createSkill(2, 1, 1);
+    cy.log('after');
+
+    cy.assignCrossProjectDep(1, 1, 2, 1);
+
+    // Go to parent dependency page
+    cy.cdVisit('/subjects/subj1/skills/skill1');
+
+    cy.get('[data-cy="skillProgressTitle"]')
+        .contains('Very Great Skill 1');
+    // should render dependencies section
+    cy.contains('Dependencies');
+    cy.wait(4000);
+    cy.matchSnapshotImage(`CrossProject Dep with the same skillId`, snapshotOptions);
+
+  });
+
   it('deps are added to partially achieved skill', () => {
-    cy.createSkill(1);
+    cy.createSkill(1, 1, 1);
     cy.request('POST', `/api/projects/proj1/skills/skill1`, {
       userId: Cypress.env('proxyUser'),
       timestamp: new Date().getTime()
     })
-    cy.createSkill(2);
-    cy.createSkill(3);
+    cy.createSkill(1, 1, 2);
+    cy.createSkill(1, 1, 3);
     cy.request('POST', `/admin/projects/proj1/skills/skill1/dependency/skill2`)
     cy.request('POST', `/admin/projects/proj1/skills/skill2/dependency/skill3`)
 
@@ -310,7 +317,7 @@ describe('Client Display Features Tests', () => {
     cy.matchSnapshotImage(`Subject-WithLockedSkills-ThatWerePartiallyAchieved`, snapshotOptions);
 
     cy.cdClickSkill(0);
-    cy.contains('This is 1');
+    cy.contains('Very Great Skill 1');
     const expectedMsg = 'You were able to earn partial points before the dependencies were added';
     cy.contains(expectedMsg);
     // should render dependencies section
@@ -322,27 +329,27 @@ describe('Client Display Features Tests', () => {
     // make sure the other locked skill doesn't contain the same message
     cy.cdBack('Subject 1');
     cy.cdClickSkill(1);
-    cy.contains('This is 2');
+    cy.contains('Very Great Skill 2');
     cy.contains(expectedMsg).should('not.exist');
 
     // make sure the skill without deps doesn't have the message
     cy.cdBack('Subject 1');
     cy.cdClickSkill(2);
-    cy.contains('This is 3');
+    cy.contains('Very Great Skill 3');
     cy.contains(expectedMsg).should('not.exist');
   });
 
   it('deps are added to fully achieved skill', () => {
-    cy.createSkill(1);
+    cy.createSkill(1, 1, 1);
     cy.request('POST', `/api/projects/proj1/skills/skill1`, {
       userId: Cypress.env('proxyUser'),
-      timestamp: new Date().getTime()
+      timestamp: moment.utc().format('x')
     })
     cy.request('POST', `/api/projects/proj1/skills/skill1`, {
       userId: Cypress.env('proxyUser'),
-      timestamp: new Date().getTime() - 1000 * 60 * 24
+      timestamp: moment.utc().subtract(2, 'day').format('x')
     })
-    cy.createSkill(2);
+    cy.createSkill(1, 1, 2);
     cy.request('POST', `/admin/projects/proj1/skills/skill1/dependency/skill2`)
 
     cy.cdVisit('/?internalBackButton=true');
@@ -351,7 +358,7 @@ describe('Client Display Features Tests', () => {
     cy.matchSnapshotImage(`Subject-WithLockedSkills-ThatWereFullyAchieved`, snapshotOptions);
 
     cy.cdClickSkill(0);
-    cy.contains('This is 1');
+    cy.contains('Very Great Skill 1');
     const msg = "Congrats! You completed this skill before the dependencies were added";
     cy.contains(msg);
 
@@ -361,21 +368,21 @@ describe('Client Display Features Tests', () => {
     // other skill should not have the message
     cy.cdBack('Subject 1');
     cy.cdClickSkill(1);
-    cy.contains('This is 2');
+    cy.contains('Very Great Skill 2');
     cy.contains(msg).should('not.exist');
 
     // now let's achieve the dependent skill
     cy.request('POST', `/api/projects/proj1/skills/skill2`, {
       userId: Cypress.env('proxyUser'),
-      timestamp: new Date().getTime()
+      timestamp:  moment.utc().format('x')
     })
     cy.request('POST', `/api/projects/proj1/skills/skill2`, {
       userId: Cypress.env('proxyUser'),
-      timestamp: new Date().getTime() - 1000 * 60 * 24
+      timestamp:  moment.utc().subtract(2, 'day').format('x')
     })
     cy.cdBack('Subject 1');
     cy.cdClickSkill(0);
-    cy.contains('This is 1');
+    cy.contains('Very Great Skill 1');
     cy.contains(msg).should('not.exist');
   });
 
