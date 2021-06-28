@@ -44,6 +44,7 @@ class ProjectOrderSpecs extends DefaultIntSpec {
         def proj3 = SkillsFactory.createProject(3)
 
         rootServiceTwo.createProject(proj1)
+        rootServiceTwo.pinProject(proj1.projectId)
 
         rootServiceOne.createProject(proj2)
         rootServiceOne.createProject(proj3)
