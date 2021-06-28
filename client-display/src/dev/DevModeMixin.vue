@@ -73,8 +73,16 @@ limitations under the License.
             if (themeParamProvided) {
               const split = themeParamProvided.split('|');
               const key = split[0];
-              const val = split[1];
-              theme[key] = val;
+              let val = split[1];
+              if (val === 'null') {
+                delete theme[key];
+              } else {
+                if (val.includes('{')) {
+                  console.log(`parsing: ${val}`);
+                  val = JSON.parse(val);
+                }
+                theme[key] = val;
+              }
             }
             this.handleTheming(theme);
           }

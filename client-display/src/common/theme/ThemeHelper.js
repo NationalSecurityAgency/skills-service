@@ -109,7 +109,7 @@ export default {
         selector: 'body #app .skills-theme-btn',
         styleName: 'background-color',
       }, {
-        selector: 'body #app .skills-theme-btn:hover, body #app a:hover',
+        selector: 'body #app .skills-theme-btn:hover, body #app .skills-theme-link a:hover',
         styleName: 'color',
       }, {
         selector: 'body #app .skills-theme-btn:hover',
@@ -122,7 +122,7 @@ export default {
         selector: 'body #app .skills-theme-btn',
         styleName: 'border-color',
       }, {
-        selector: 'body #app .skills-theme-btn:hover, body #app a:hover',
+        selector: 'body #app .skills-theme-btn:hover, body #app .skills-theme-link a:hover',
         styleName: 'background-color',
       }],
       disabledColor: [{
@@ -152,6 +152,20 @@ export default {
       incompleteColor: [{
         selector: 'body #app .leaderboard .progress',
         styleName: 'background-color',
+      }],
+    },
+    breadcrumb: {
+      parentLinkColor: [{
+        selector: 'body #app .skills-theme-breadcrumb a',
+        styleName: 'color',
+      }],
+      parentLinkHoverColor: [{
+        selector: 'body #app .skills-theme-breadcrumb a:hover',
+        styleName: 'color',
+      }],
+      currentPageColor: [{
+        selector: 'body #app .skills-theme-breadcrumb .skills-theme-breadcrumb-current-page',
+        styleName: 'color',
       }],
     },
   },
