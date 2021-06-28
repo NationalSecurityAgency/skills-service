@@ -607,7 +607,7 @@ describe('Client Display Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="breadcrumb-bar"] ol', 'Client Display Tests - breadcrumb with buttons themed', snapshotOptions);
 
         // test breadcrumb theme
-        const breadcrumbParam = 'breadcrumb|{"parentLinkColor":"pink","parentLinkHoverColor":"purple","currentPageColor":"green"}'
+        const breadcrumbParam = 'breadcrumb|{"linkColor":"pink","linkHoverColor":"purple","currentPageColor":"green"}'
         cy.cdVisit(`/?enableTheme=true&themeParam=${breadcrumbParam}`);
         cy.cdClickSubj(0);
         cy.cdClickSkill(0);

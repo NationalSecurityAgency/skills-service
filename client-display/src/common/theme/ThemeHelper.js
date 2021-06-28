@@ -155,11 +155,11 @@ export default {
       }],
     },
     breadcrumb: {
-      parentLinkColor: [{
+      linkColor: [{
         selector: 'body #app .skills-theme-breadcrumb a',
         styleName: 'color',
       }],
-      parentLinkHoverColor: [{
+      linkHoverColor: [{
         selector: 'body #app .skills-theme-breadcrumb a:hover',
         styleName: 'color',
       }],
