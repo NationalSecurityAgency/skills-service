@@ -193,9 +193,10 @@ limitations under the License.
         const nodes = new vis.DataSet();
         const edges = new vis.DataSet();
         const createdSkillIds = [];
+        const skillId = this.isDependency() ? this.$route.params.dependentSkillId : this.$route.params.skillId;
 
         this.dependencies.forEach((item) => {
-          const isThisSkill = this.$route.params.skillId === item.skill.skillId;
+          const isThisSkill = skillId === item.skill.skillId;
 
           if (isThisSkill) {
             this.thisSkill = item.skill;
@@ -248,6 +249,10 @@ limitations under the License.
       getLabel(skill, isCrossProject) {
         const label = isCrossProject ? `CROSS-PROJECT SKILL\n<b>${skill.projectName}</b>\n${skill.skillName}` : skill.skillName;
         return label;
+      },
+      isDependency() {
+        const routeName = this.$route.name;
+        return routeName === 'dependentSkillDetails' || routeName === 'crossProjectSkillDetails';
       },
     },
   };

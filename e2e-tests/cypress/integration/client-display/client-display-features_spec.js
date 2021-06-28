@@ -264,6 +264,33 @@ describe('Client Display Features Tests', () => {
     cy.matchSnapshotImage(`LockedSkill-CrossProjectDependency`, snapshotOptions);
   });
 
+  it('parent and child dependencies are properly displayed', () => {
+    cy.createSkill(1);
+    cy.createSkill(2);
+    cy.createSkill(3);
+
+    // create dependency from skill3 -> skill2 -> skill1
+    cy.request('POST', `/admin/projects/proj1/skills/skill3/dependency/skill2`)
+    cy.request('POST', `/admin/projects/proj1/skills/skill2/dependency/skill1`)
+
+    // Go to parent dependency page
+    cy.cdVisit('/subjects/subj1/skills/skill3');
+
+    cy.get('[data-cy="skillProgressTitle"]').contains('This is 3');
+    // should render dependencies section
+    cy.contains('Dependencies');
+    cy.wait(4000);
+    cy.matchSnapshotImage(`InProjectDependency-parent`, snapshotOptions);
+
+    // Go to child dependency page
+    cy.cdVisit('/subjects/subj1/skills/skill3/dependency/skill2');
+    cy.get('[data-cy="skillProgressTitle"]').contains('This is 2');
+    // should render dependencies section
+    cy.contains('Dependencies');
+    cy.wait(4000);
+    cy.matchSnapshotImage(`InProjectDependency-child`, snapshotOptions);
+  });
+
   it('deps are added to partially achieved skill', () => {
     cy.createSkill(1);
     cy.request('POST', `/api/projects/proj1/skills/skill1`, {
