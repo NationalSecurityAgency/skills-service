@@ -73,7 +73,8 @@ limitations under the License.
       },
       loadDependencies() {
         if (!this.$route.params.crossProjectId) {
-          UserSkillsService.getSkillDependencies(this.$route.params.skillId)
+          const skillId = this.isDependency() ? this.$route.params.dependentSkillId : this.$route.params.skillId;
+          UserSkillsService.getSkillDependencies(skillId)
             .then((res) => {
               this.dependencies = res.dependencies;
               this.loading.dependencies = false;
