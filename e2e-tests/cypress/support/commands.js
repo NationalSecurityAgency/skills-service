@@ -182,6 +182,16 @@ Cypress.Commands.add("assignProjectToGlobalBadge", (badgeNum = 1, projNum = 1, l
 });
 
 
+Cypress.Commands.add("assignDep", (projNum, skillNum1, skillNum2) => {
+    cy.request('POST', `/admin/projects/proj${projNum}/skills/skill${skillNum1}/dependency/skill${skillNum2}`);
+});
+
+Cypress.Commands.add("assignCrossProjectDep", (proj1Num, skillNum1, proj2Num, skillNum2, share=true) => {
+    if (share) {
+        cy.request('PUT', `/admin/projects/proj${proj2Num}/skills/skill${skillNum2}/shared/projects/proj${proj1Num}`);
+    }
+    cy.request('POST', `/admin/projects/proj${proj1Num}/skills/skill${skillNum1}/dependency/projects/proj${proj2Num}/skills/skill${skillNum2}`);
+});
 
 
 Cypress.Commands.add("reportSkill", (project = 1, skill = 1, userId = 'user@skills.org', date = '2020-09-12 11:00', failOnError=true) => {
