@@ -30,6 +30,8 @@ import skills.controller.exceptions.SkillException
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.ProjectRequest
 import skills.controller.request.model.RootUserProjectSettingsRequest
+import skills.controller.request.model.UserProjectSettingsRequest
+import skills.controller.request.model.UserSettingsRequest
 import skills.controller.result.model.CustomIconResult
 import skills.controller.result.model.ProjectResult
 import skills.controller.result.model.SettingsResult
@@ -55,6 +57,7 @@ import skills.utils.RelativeTimeUtil
 class ProjAdminService {
 
     private static final String rootUserPinnedProjectGroup = "pinned_project"
+    public static final String PINNED = "pinned"
 
     @Autowired
     ProjDefRepo projDefRepo
@@ -178,26 +181,32 @@ class ProjAdminService {
         if (!existsByProjectId(projectId)) {
             throw new SkillException("Project with id [${projectId}] does NOT exist")
         }
-
-        RootUserProjectSettingsRequest settingsRequest = new RootUserProjectSettingsRequest(
-                projectId:  projectId,
+        UserProjectSettingsRequest userSettingsRequest = new UserProjectSettingsRequest(
+                projectId: projectId,
                 settingGroup: rootUserPinnedProjectGroup,
-                setting: "pinned",
+                setting: PINNED,
                 value: projectId
         )
-
-        settingsService.saveSetting(settingsRequest)
+        settingsService.saveSetting(userSettingsRequest)
+        sortingService.setNewProjectDisplayOrder(projectId, userInfoService.getCurrentUserId().toLowerCase())
     }
 
     @Transactional()
     void unpinProjectForRootUser(String projectId) {
         if (existsByProjectId(projectId)) {
-            settingsService.deleteRootUserSetting("pinned", projectId)
+            String currentUserIdLower = userInfoService.getCurrentUserId().toLowerCase()
+            settingsService.deleteUserSetting(
+                    currentUserIdLower,
+                    rootUserPinnedProjectGroup,
+                    PINNED,
+                    projectId
+            )
+            sortingService.deleteProjectDisplayOrder(projectId, currentUserIdLower)
         }
     }
 
-    private  List<ProjectResult> loadProjectsForRoot(Map<String, Integer> projectIdSortOrder) {
-        List<SettingsResult> pinnedProjectSettings = settingsService.getRootUserSettingsForGroup(rootUserPinnedProjectGroup)
+    private  List<ProjectResult> loadProjectsForRoot(Map<String, Integer> projectIdSortOrder, String userId) {
+        List<SettingsResult> pinnedProjectSettings = settingsService.getUserProjectSettingsForGroup(userId, rootUserPinnedProjectGroup)
         List<String> pinnedProjects = pinnedProjectSettings.collect { it.projectId }
 
         List<ProjSummaryResult> projects = projDefRepo.getAllSummariesByProjectIdIn(pinnedProjects)
@@ -227,7 +236,7 @@ class ProjAdminService {
 
     private List<ProjectResult> convertProjectsWithPinnedIndicator(List<ProjSummaryResult> projects) {
         Map<String, Integer> projectIdSortOrder = [:]
-        List<SettingsResult> pinnedProjectSettings = settingsService.getRootUserSettingsForGroup(rootUserPinnedProjectGroup)
+        List<SettingsResult> pinnedProjectSettings = settingsService.getUserProjectSettingsForGroup(userInfoService.getCurrentUserId(), rootUserPinnedProjectGroup)
         List<String> pinnedProjects = pinnedProjectSettings.collect { it.value }
         return projects?.unique({ it.projectId })?.collect({
             return convert(it, projectIdSortOrder, pinnedProjects?.toSet())
@@ -255,7 +264,7 @@ class ProjAdminService {
 
         List<ProjectResult> finalRes
         if (isRoot) {
-            finalRes = loadProjectsForRoot(projectIdSortOrder)
+            finalRes = loadProjectsForRoot(projectIdSortOrder, userId)
         } else {
             // sql join with UserRoles and there is 1-many relationship that needs to be normalized
             List<ProjSummaryResult> projects = projDefRepo.getProjectSummariesByUser(userId)

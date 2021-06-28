@@ -118,6 +118,10 @@ class SettingsDataAccessor {
         settingRepo.deleteBySettingAndTypeAndUserRefId(setting, SettingType.User, userRefId)
     }
 
+    void deleteUserSetting(Integer userRefId, String setting, String settingGroup, String projectId=null) {
+        settingRepo.deleteBySettingAndSettingGroupAndProjectIdAndTypeAndUserRefId(setting, settingGroup, projectId, SettingType.User, userRefId)
+    }
+
     void deleteGlobalSetting(String setting) {
         settingRepo.deleteGlobalSetting(setting)
     }

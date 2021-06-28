@@ -78,6 +78,12 @@ class SettingsService {
     }
 
     @Transactional
+    void deleteUserSetting(String userId, String settingGroup, String setting, String projectId = null) {
+        Integer userRefId = getUserRefId(userId)
+        settingsDataAccessor.deleteUserSetting(userRefId, setting, settingGroup, projectId)
+    }
+
+    @Transactional
     SettingsResult saveSetting(SettingsRequest request, User user=null) {
         Integer userRefId = user ? user.id : getUserRefId(request)
         String userId = user ? user.userId : loadCurrentUser(isUserSettingRequest(request))?.username
