@@ -271,7 +271,7 @@ describe('Navigation Tests', () => {
 
     cy.intercept('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
     cy.wait('@pointHistoryChart');
-    cy.wrapIframe().contains('Overall Points');
+    cy.dashboardCd().contains('Overall Points');
     cy.get('[data-cy="breadcrumb-Progress And Rankings"]').should('be.visible');
     cy.get('[data-cy=breadcrumb-proj1]').should('be.visible');
     cy.get('[data-cy=breadcrumb-projects]').should('not.exist');
@@ -524,7 +524,7 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=project-link-proj3]').find('[data-cy=project-card-project-rank]').contains(new RegExp(/^Rank: 1,001 \/ 1,001$/));
   });
 
-  it('All skill versions are included in the Client Display', function () {
+  it('All skill versions are included in the Skills Display', function () {
     cy.intercept('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
 
     cy.visit('/');
@@ -534,8 +534,8 @@ describe('Navigation Tests', () => {
 
     cy.get('[data-cy=project-link-proj1]').click()
     cy.wait('@pointHistoryChart');
-    cy.wrapIframe().contains('Overall Points');
-    cy.wrapIframe().contains('Earn up to 1,400 points');
+    cy.dashboardCd().contains('Overall Points');
+    cy.dashboardCd().contains('Earn up to 1,400 points');
 
     cy.get('[data-cy="breadcrumb-Progress And Rankings"]').should('be.visible');
     cy.get('[data-cy=breadcrumb-proj1]').should('be.visible');
@@ -544,8 +544,50 @@ describe('Navigation Tests', () => {
 
   it( 'ability to enable theme on project Skills Display', function () {
     cy.visit('/progress-and-rankings/projects/proj1?enableTheme=true');
-    cy.wrapIframe().contains('powered by');
+    cy.dashboardCd().contains('powered by');
   });
 
+  it('Browser back button works in Skills Display', function () {
+    cy.intercept('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
+
+    cy.visit('/');
+    cy.wait('@allSkillEventsForUser');
+
+    cy.get('[data-cy=inception-button]').should('not.exist');
+
+    cy.get('[data-cy=project-link-proj1]').click()
+    cy.wait('@pointHistoryChart');
+    cy.dashboardCd().contains('Overall Points');
+    cy.dashboardCd().contains('Earn up to 1,400 points');
+
+    cy.get('[data-cy="breadcrumb-Progress And Rankings"]').should('be.visible');
+    cy.get('[data-cy=breadcrumb-proj1]').should('be.visible');
+    cy.get('[data-cy=breadcrumb-projects]').should('not.exist');
+
+    cy.dashboardCd().find('[data-cy=back]').should('not.exist');
+    cy.dashboardCd().contains('PROJECT: proj1');
+
+    // to subject page
+    cy.dashboardCdClickSubj(0, 'Subject 1');
+
+    // navigate to Rank Overview and that it does NOT contains the internal back button
+    cy.dashboardCd().find('[data-cy=myRank]').click();
+    cy.dashboardCd().contains('Rank Overview');
+    cy.dashboardCd().find('[data-cy=back]').should('not.exist');
+
+    // click the browser back button and verify that we are still in the
+    // client display (Subject page)
+    cy.go('back')  // browser back button
+    cy.dashboardCd().contains('Subject 1');
+
+    // then back one more time and we should be back on the client display home page
+    cy.go('back')  // browser back button
+    cy.dashboardCd().contains('PROJECT: proj1');
+
+    // finally back one more time and we should be back on the my progress page
+    cy.go('back')  // browser back button
+    cy.wait('@allSkillEventsForUser');
+    cy.get('[data-cy="breadcrumb-Progress And Rankings"]').contains('Progress And Rankings').should('be.visible');
+  });
 });
 
