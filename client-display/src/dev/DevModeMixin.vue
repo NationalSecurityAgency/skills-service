@@ -78,7 +78,6 @@ limitations under the License.
                 delete theme[key];
               } else {
                 if (val.includes('{')) {
-                  console.log(`parsing: ${val}`);
                   val = JSON.parse(val);
                 }
                 theme[key] = val;
