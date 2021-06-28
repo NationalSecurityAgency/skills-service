@@ -584,4 +584,35 @@ describe('Client Display Tests', () => {
         cy.cdVisit('/?enableTheme=true&themeParam=disableBreadcrumb|true');
         cy.get('[data-cy=breadcrumb-Overview]').should('not.exist');
     });
+
+    it('breadcrumb should use textPrimaryColor when buttons are disabled', () => {
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+
+        // test without buttons & breadcrumb configured
+        cy.cdVisit('/?enableTheme=true&themeParam=buttons|null');
+        cy.cdClickSubj(0);
+        cy.cdClickSkill(0);
+        cy.get('[data-cy="breadcrumb-bar"]').contains('Skill: skill1')
+        cy.contains('powered by');
+        cy.matchSnapshotImageForElement('[data-cy="breadcrumb-bar"] ol', 'Client Display Tests - breadcrumb default', snapshotOptions);
+
+        // // make sure buttons color doesn't affect breadcrumb
+        const buttonsParam = 'buttons|{"backgroundColor":"pink","foregroundColor":"purple","disabledColor":"purple"}'
+        cy.cdVisit(`/?enableTheme=true&themeParam=${buttonsParam}`);
+        cy.cdClickSubj(0);
+        cy.cdClickSkill(0);
+        cy.get('[data-cy="breadcrumb-bar"]').contains('Skill: skill1')
+        cy.contains('powered by');
+        cy.matchSnapshotImageForElement('[data-cy="breadcrumb-bar"] ol', 'Client Display Tests - breadcrumb with buttons themed', snapshotOptions);
+
+        // test breadcrumb theme
+        const breadcrumbParam = 'breadcrumb|{"linkColor":"pink","linkHoverColor":"purple","currentPageColor":"green"}'
+        cy.cdVisit(`/?enableTheme=true&themeParam=${breadcrumbParam}`);
+        cy.cdClickSubj(0);
+        cy.cdClickSkill(0);
+        cy.get('[data-cy="breadcrumb-bar"]').contains('Skill: skill1')
+        cy.contains('powered by');
+        cy.matchSnapshotImageForElement('[data-cy="breadcrumb-bar"] ol', 'Client Display Tests - breadcrumb with breadcrumb themed', snapshotOptions);
+    });
 });

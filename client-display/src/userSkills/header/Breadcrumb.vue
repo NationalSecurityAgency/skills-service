@@ -14,15 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div v-if="!disabled" class="d-flex justify-content-center skills-page-title-text-color" data-cy="breadcrumb-bar">
-    <nav aria-label="breadcrumb" role="navigation">
+  <div v-if="!disabled" class="d-flex justify-content-center" data-cy="breadcrumb-bar">
+    <nav aria-label="breadcrumb" role="navigation" class="skills-theme-breadcrumb">
       <ol class="breadcrumb bg-transparent m-0 p-0">
-        <li v-for="(item, index) of items" :key="item.label" class="breadcrumb-item" data-cy="breadcrumb-item">
-         <span v-if="index === items.length-1" class="text-muted" :data-cy="`breadcrumb-${item.value}`">
+        <li v-for="(item, index) of items" :key="item.label" class="breadcrumb-item theme-link" data-cy="breadcrumb-item">
+         <span v-if="index === items.length-1" class="text-muted skills-theme-breadcrumb-current-page" :data-cy="`breadcrumb-${item.value}`">
            <span v-if="item.label" class="breadcrumb-item-label text-uppercase" aria-current="page">{{ item.label }}: </span><span>{{ item.value }}</span>
          </span>
           <span v-else>
-           <router-link :to="item.url" :data-cy="`breadcrumb-${item.value}`">
+           <router-link :to="item.url" :data-cy="`breadcrumb-${item.value}`" class="skills-page-title-text-color">
              <span v-if="item.label" class="breadcrumb-item-label text-uppercase">{{ item.label }}: </span>
              <span class="">{{ item.value }}</span>
            </router-link>
@@ -124,3 +124,6 @@ limitations under the License.
     },
   };
 </script>
+
+<style scoped>
+</style>

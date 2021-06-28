@@ -22,7 +22,7 @@ limitations under the License.
           <span class="sr-only">clear filter</span>
         </template>
         <b-dropdown-item href="#" v-for="filter in filters" :key="filter.id" @click="filterSelected(filter.id)" :disabled="filter.count === 0"
-                         :data-cy="`skillsFilter_${filter.id}`">
+                         :data-cy="`skillsFilter_${filter.id}`" class="skills-theme-link">
           <div style="min-width: 16rem;">
             <i class="text-center" :class="filter.icon" style="min-width: 1.2rem;"></i> <span v-html="filter.html"></span> <span class="badge badge-info float-right" data-cy="filterCount">{{ filter.count }}</span>
           </div>
