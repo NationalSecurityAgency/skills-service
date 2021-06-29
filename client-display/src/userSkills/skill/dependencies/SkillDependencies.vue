@@ -125,7 +125,7 @@ limitations under the License.
         this.network = new vis.Network(container, data, this.displayOptions);
         this.network.on('click', (params) => {
           const skillItem = this.locateSelectedSkill(params);
-          if (skillItem && skillItem.skillId !== this.thisSkill.skillId) {
+          if (skillItem && skillItem.skillId && skillItem.skillId !== this.thisSkill.skillId) {
             if (skillItem.isCrossProject) {
               this.handlePush({
                 name: 'crossProjectSkillDetails',

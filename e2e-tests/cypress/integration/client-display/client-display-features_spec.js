@@ -298,6 +298,27 @@ describe('Client Display Features Tests', () => {
 
   });
 
+  it('clicking off of a node but inside the dependency graph does not cause an error', () => {
+    cy.createSkill(1, 1, 1);
+    cy.createSkill(1, 1, 2);
+
+    // create dependency from skill2 -> skill1
+    cy.request('POST', `/admin/projects/proj1/skills/skill2/dependency/skill1`)
+
+    // Go to parent dependency page
+    cy.cdVisit('/subjects/subj1/skills/skill2');
+
+    cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 2');
+    // should render dependencies section
+    cy.contains('Dependencies');
+
+    cy.get('#dependent-skills-network canvas').should('be.visible').click(50, 325, { force: true })
+
+    // should still be on the same page and no errors should have occurred (no errors are checked in afterEach)
+    cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 2');
+    cy.contains('Dependencies');
+  });
+
   it('deps are added to partially achieved skill', () => {
     cy.createSkill(1, 1, 1);
     cy.request('POST', `/api/projects/proj1/skills/skill1`, {

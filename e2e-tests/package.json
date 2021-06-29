@@ -73,6 +73,7 @@
     "cypress-axe": "0.12.2",
     "cypress-file-upload": "5.0.2",
     "cypress-image-snapshot": "4.0.1",
+    "cypress-mouse-position": "^1.0.0",
     "dayjs": "1.10.4",
     "eslint": "7.9.0",
     "fake-smtp-server": "0.8.0",
