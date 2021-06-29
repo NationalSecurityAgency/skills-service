@@ -73,14 +73,14 @@ class SettingsService {
     @Transactional
     void deleteUserSettings(List<UserSettingsRequest> request) {
         request.each {
-            deleteUserSetting(it.setting, getUserRefId(request))
+            deleteUserProjectSetting(it.setting, getUserRefId(request))
         }
     }
 
     @Transactional
-    void deleteUserSetting(String userId, String settingGroup, String setting, String projectId = null) {
+    void deleteUserProjectSetting(String userId, String settingGroup, String setting, String projectId = null) {
         Integer userRefId = getUserRefId(userId)
-        settingsDataAccessor.deleteUserSetting(userRefId, setting, settingGroup, projectId)
+        settingsDataAccessor.deleteUserProjectSetting(userRefId, setting, settingGroup, projectId)
     }
 
     @Transactional
@@ -249,8 +249,8 @@ class SettingsService {
     }
 
     @Transactional()
-    void deleteUserSetting(String setting, Integer userRefId) {
-        settingsDataAccessor.deleteUserSetting(setting, userRefId)
+    void deleteUserProjectSetting(String setting, Integer userRefId) {
+        settingsDataAccessor.deleteUserProjectSetting(setting, userRefId)
     }
 
     @Transactional()

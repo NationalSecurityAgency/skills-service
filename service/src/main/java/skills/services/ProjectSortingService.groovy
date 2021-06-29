@@ -110,7 +110,7 @@ class ProjectSortingService {
 
     @Transactional
     void deleteProjectDisplayOrder(String projectId, String userId) {
-        settingsService.deleteUserSetting(userId.toLowerCase(), PROJECT_SORT_GROUP, PROJECT_SORT_SETTING, projectId)
+        settingsService.deleteUserProjectSetting(userId.toLowerCase(), PROJECT_SORT_GROUP, PROJECT_SORT_SETTING, projectId)
     }
 
     @Transactional

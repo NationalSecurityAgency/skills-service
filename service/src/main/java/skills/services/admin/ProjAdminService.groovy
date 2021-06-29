@@ -29,9 +29,7 @@ import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.ProjectRequest
-import skills.controller.request.model.RootUserProjectSettingsRequest
 import skills.controller.request.model.UserProjectSettingsRequest
-import skills.controller.request.model.UserSettingsRequest
 import skills.controller.result.model.CustomIconResult
 import skills.controller.result.model.ProjectResult
 import skills.controller.result.model.SettingsResult
@@ -50,7 +48,6 @@ import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserEventsRepo
 import skills.utils.ClientSecretGenerator
 import skills.utils.Props
-import skills.utils.RelativeTimeUtil
 
 @Service
 @Slf4j
@@ -195,7 +192,7 @@ class ProjAdminService {
     void unpinProjectForRootUser(String projectId) {
         if (existsByProjectId(projectId)) {
             String currentUserIdLower = userInfoService.getCurrentUserId().toLowerCase()
-            settingsService.deleteUserSetting(
+            settingsService.deleteUserProjectSetting(
                     currentUserIdLower,
                     rootUserPinnedProjectGroup,
                     PINNED,
