@@ -115,22 +115,6 @@ limitations under the License.
       },
     },
     mounted() {
-      if (!this.horizontal) {
-        this.options.fill = {
-          type: 'gradient',
-          gradient: {
-            shade: 'light',
-            type: 'horizontal',
-            shadeIntensity: 0.25,
-            gradientToColors: undefined,
-            inverseColors: true,
-            opacityFrom: 0.85,
-            opacityTo: 0.85,
-            stops: [50, 0, 100],
-          },
-        };
-      }
-
       this.seriesInternal = [{
         name: this.title,
         data: this.series,
