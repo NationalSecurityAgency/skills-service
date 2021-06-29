@@ -15,12 +15,10 @@
  */
 package skills.notify
 
-
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Transactional
 import skills.notify.builders.NotificationEmailBuilderManager
 
 @Component
@@ -34,14 +32,12 @@ class EmailNotificationScheduler {
     NotificationEmailBuilderManager notificationEmailBuilderManager
 
     @Scheduled(cron = '#{"${skills.config.notifications.dispatchSchedule:0 * * * * *}"}')
-    @Transactional
     void dispatchNotifications() {
         log.debug("Checking notifications to dispatch.")
         emailNotifier.dispatchNotifications()
     }
 
     @Scheduled(cron = '#{"${skills.config.notifications.dispatchRetrySchedule:0 0 * * * *}"}')
-    @Transactional
     void attemptToDispatchErroredNotifications() {
         log.debug("Checking for errored notifications.")
         emailNotifier.attemptToDispatchErroredNotifications()
