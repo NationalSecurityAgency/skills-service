@@ -31,13 +31,20 @@ class RootAccessSpec extends DefaultIntSpec {
     SkillsService rootSkillsService
     String nonRootUserId = 'foo@bar.com'
     SkillsService nonRootSkillsService
+    String secondRoot = "bob@email.foo"
+    SkillsService secondRootSkillService
 
     def setup() {
         rootSkillsService = createService(ultimateRoot, 'aaaaaaaa')
+        secondRootSkillService = createService(secondRoot, 'bbbbbbbbbbbbbbb')
         nonRootSkillsService = createService(nonRootUserId)
 
         if (!rootSkillsService.isRoot()) {
             rootSkillsService.grantRoot()
+        }
+        if(!secondRootSkillService.isRoot()) {
+            rootSkillsService.grantRootRole(secondRoot)
+            assert secondRootSkillService.isRoot()
         }
         if (nonRootSkillsService.isRoot()) {
             rootSkillsService.removeRootRole(nonRootUserId)
@@ -305,6 +312,36 @@ class RootAccessSpec extends DefaultIntSpec {
         then:
         projects.size() == 1
         projects.find { it.projectId == proj.projectId }
+    }
+
+    def "pinned projects are unique per root user"() {
+        def proj = SkillsFactory.createProject(1)
+        def proj2 = SkillsFactory.createProject(2)
+        def proj3 = SkillsFactory.createProject(3)
+        def proj4 = SkillsFactory.createProject(4)
+        nonRootSkillsService.createProject(proj)
+        nonRootSkillsService.createProject(proj2)
+        nonRootSkillsService.createProject(proj3)
+        nonRootSkillsService.createProject(proj4)
+
+        rootSkillsService.pinProject(proj.projectId)
+        rootSkillsService.pinProject(proj2.projectId)
+
+        when:
+        def prePinProjects = secondRootSkillService.getProjects()
+        secondRootSkillService.pinProject(proj3.projectId)
+        secondRootSkillService.pinProject(proj4.projectId)
+        def postPinProjects = secondRootSkillService.getProjects()
+        def otherRootUserProjects = rootSkillsService.getProjects()
+
+        then:
+        !prePinProjects
+        postPinProjects.size() == 2
+        postPinProjects.find { it.projectId == proj3.projectId}
+        postPinProjects.find { it.projectId == proj4.projectId}
+        otherRootUserProjects.size() == 2
+        otherRootUserProjects.find { it.projectId == proj.projectId }
+        otherRootUserProjects.find { it.projectId == proj2.projectId }
     }
 
     def 'able to search all projects'() {
