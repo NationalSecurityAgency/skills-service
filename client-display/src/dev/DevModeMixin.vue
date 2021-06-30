@@ -14,13 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script>
-  import TokenReauthorizer from '@/userSkills/service/TokenReauthorizer';
+  import DevModeUtil from '@/dev/DevModeUtil';
 
   export default {
     name: 'DevModeMixin',
     methods: {
       isDevelopmentMode() {
-        return process.env.NODE_ENV === 'development';
+        return DevModeUtil.isDevelopmentMode();
       },
       configureDevelopmentMode() {
         if (!this.isValidDevelopmentMode()) {
@@ -38,21 +38,6 @@ limitations under the License.
           // eslint-disable-next-line no-alert
           alert(errorMessage);
         } else {
-          this.$store.commit('projectId', process.env.VUE_APP_PROJECT_ID);
-          this.$store.commit('serviceUrl', process.env.VUE_APP_SERVICE_URL);
-          if (process.env.VUE_APP_AUTHENTICATION_URL !== 'hydra') {
-            let authenticator = process.env.VUE_APP_AUTHENTICATION_URL;
-            if (this.$route.query.loginAsUser && this.$route.query.loginAsUser.length > 0) {
-              authenticator = authenticator.replace('user0', this.$route.query.loginAsUser);
-            }
-            this.$store.commit('authenticator', authenticator);
-          } else {
-            this.$store.commit('authenticator', `${this.$store.state.serviceUrl}/api/projects/${this.$store.state.projectId}/token`);
-            // eslint-disable-next-line
-            console.log(`Authenticator set to hydra, setting new authenticator to [${this.$store.state.authenticator}]`);
-          }
-          this.storeAuthToken();
-
           const isSummaryOnly = this.$route.query.isSummaryOnly ? this.$route.query.isSummaryOnly : false;
           this.$store.commit('isSummaryOnly', isSummaryOnly);
 
@@ -88,13 +73,7 @@ limitations under the License.
         }
       },
       isValidDevelopmentMode() {
-        return process.env.VUE_APP_AUTHENTICATION_URL && process.env.VUE_APP_PROJECT_ID && process.env.VUE_APP_SERVICE_URL;
-      },
-      storeAuthToken() {
-        TokenReauthorizer.getAuthenticationToken()
-          .then((result) => {
-            this.$store.commit('authToken', result.data.access_token);
-          });
+        return DevModeUtil.isValidDevelopmentMode();
       },
     },
   };
