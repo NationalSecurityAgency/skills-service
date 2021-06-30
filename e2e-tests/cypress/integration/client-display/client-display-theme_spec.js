@@ -19,7 +19,7 @@ const dateFormatter = value => moment.utc(value).format('YYYY-MM-DD[T]HH:mm:ss[Z
 describe('Client Display Tests', () => {
 
     const snapshotOptions = {
-        blackout: ['[data-cy=pointHistoryChart]', '#dependent-skills-network', '[data-cy=achievementDate]'],
+        blackout: ['[data-cy=pointHistoryChart]', '[data-cy=achievementDate]'],
         failureThreshold: 0.03, // threshold for entire image
         failureThresholdType: 'percent', // percent of image or number of pixels
         customDiffConfig: { threshold: 0.01 }, // threshold for each pixel
@@ -310,25 +310,6 @@ describe('Client Display Tests', () => {
             cy.matchSnapshotImage(snapshotOptions);
         });
 
-        it(`test theming - skill details with deps - ${size}`, () => {
-            cy.setResolution(size);
-
-            cy.cdInitProjWithSkills();
-
-            cy.cdVisit('/?enableTheme=true')
-
-            cy.cdClickSubj(0);
-            cy.contains('Subject 1')
-
-            cy.cdClickSkill(3);
-            cy.contains('Skill Overview')
-            cy.contains('This is 4');
-            cy.contains('Lorem ipsum dolor sit amet');
-            cy.contains('Achieved Dependencies');
-            cy.wait(4000);
-            cy.matchSnapshotImage(snapshotOptions);
-        });
-
         it(`test theming - new version notification  - ${size}`, () => {
             cy.setResolution(size);
             cy.intercept(/\/api\/projects\/proj1\/rank$/,
@@ -353,6 +334,46 @@ describe('Client Display Tests', () => {
             cy.matchSnapshotImage(snapshotOptions);
         });
 
+    });
+
+    // sizes came from https://docs.cypress.io/api/commands/viewport#Syntax
+    const expandedVerticalSizes = [
+        {
+            name: 'iphone-6',
+            width: 375,
+            height: 667 * 3,
+        },
+        {
+            name: 'ipad-2',
+            width: 768,
+            height: 1024 * 2,
+        },
+        {
+            name: 'default',
+            width: 1000,
+            height: 660 * 2,
+        },
+    ]
+    expandedVerticalSizes.forEach((size) => {
+        it(`test theming - skill details with deps - ${size.name}`, () => {
+            // must set viewport to show entire canvas or it will not appear in the screenshot
+            cy.viewport(size.width, size.height)
+
+            cy.cdInitProjWithSkills();
+
+            cy.cdVisit('/?enableTheme=true')
+
+            cy.cdClickSubj(0);
+            cy.contains('Subject 1')
+
+            cy.cdClickSkill(3);
+            cy.contains('Skill Overview')
+            cy.contains('This is 4');
+            cy.contains('Lorem ipsum dolor sit amet');
+            cy.contains('Achieved Dependencies');
+            cy.wait(4000);
+            cy.matchSnapshotImage(snapshotOptions);
+        });
     });
 
     it(`test theming - No Subjects`, () => {

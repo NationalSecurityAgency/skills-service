@@ -26,7 +26,6 @@
 // This function is called when a project is opened or re-opened (e.g. due to
 // the project's config changing)
 
-const initCypressMousePositionPlugin = require('cypress-mouse-position/plugin');
 const { lighthouse, pa11y, prepareAudit } = require("cypress-audit");
 const objectScan = require('object-scan');
 const fs = require('fs');
@@ -90,8 +89,6 @@ module.exports = (on, config) => {
   // `on` is used to hook into various events Cypress emits
   // `config` is the resolved Cypress config
     addMatchImageSnapshotPlugin(on, config);
-
-    initCypressMousePositionPlugin(on);
 
     on("before:browser:launch", (browser = {}, launchOptions) => {
         prepareAudit(launchOptions);
