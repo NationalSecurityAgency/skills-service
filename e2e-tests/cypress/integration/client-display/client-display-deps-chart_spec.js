@@ -44,7 +44,6 @@ describe('Client Display Dependencies Tests', () => {
             cy.cdClickSkill(1);
         });
 
-
         // must set viewport to show entire canvas or it will not appear in the screenshot
         cy.viewport(1280, 1280)
     })
@@ -111,7 +110,6 @@ describe('Client Display Dependencies Tests', () => {
     });
 
     it('Deps Chart - partially completed deps - 1 out 4', () => {
-        cy.viewport(1280, 1280)
         const numSkills = 6;
         for (let i = 0; i < numSkills; i += 1) {
             cy.createSkill(1, 1, i, { name: `This is a very long name. yet is it ${i}`, numPerformToCompletion: 1 })

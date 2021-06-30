@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-    <div class="card skills-card-theme-border" data-cy="depsProgress">
+    <div class="card graph-legend skills-card-theme-border" data-cy="depsProgress">
         <div class="card-header">
             <h6 class="card-title mb-0 float-left">Progress</h6>
         </div>

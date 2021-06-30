@@ -121,17 +121,20 @@ limitations under the License.
         });
       },
       cleanUp() {
+        this.clearNetwork();
+        this.thisSkill = {};
+      },
+      clearNetwork() {
         if (this.network) {
           this.network.destroy();
         }
-        this.thisSkill = {};
       },
       isSmallScreen() {
         const width = window.innerWidth;
         return width <= 768;
       },
       createGraph() {
-        this.cleanUp();
+        this.clearNetwork();
 
         const data = this.buildData();
         const container = document.getElementById('dependent-skills-network');
@@ -181,7 +184,8 @@ limitations under the License.
               easingFunction: 'easeInOutQuad',
             },
           };
-          this.network.focus(this.getNodeId(this.thisSkill), options);
+          const nodeIdToFocus = this.getNodeId(this.thisSkill);
+          this.network.focus(nodeIdToFocus, options);
         }
       },
       locateSelectedSkill(params) {
