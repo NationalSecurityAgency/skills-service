@@ -14,17 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-    <div class="card skills-card-theme-border">
+    <div class="card skills-card-theme-border" data-cy="depsProgress">
         <div class="card-header">
             <h6 class="card-title mb-0 float-left">Progress</h6>
         </div>
         <div class="card-body">
             <div class="row">
                 <div class="col-8 text-left">
-                    <strong>{{ numDependencies }}</strong> Dependencies
+                    <strong data-cy="numDeps">{{ numDependencies }}</strong> Dependencies
                 </div>
                 <div class="col-4">
-                    <span class="text-muted">{{ percentComplete }}%</span>
+                    <span class="text-muted" data-cy="depsPercentComplete">{{ percentComplete }}%</span>
                 </div>
             </div>
             <progress-bar bar-color="lightgreen" :val="percentComplete"></progress-bar>

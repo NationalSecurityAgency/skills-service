@@ -21,14 +21,14 @@ limitations under the License.
         <div class="card-body">
             <div class="row legend-row">
                 <div class="col-12 mb-2 m-sm-0 col-sm-6">
-                    <graph-legend :items="legendItems" class="legend-component"/>
+                    <graph-legend :items="legendItems" class="legend-component deps-overlay"/>
                 </div>
 
                 <div class="col-12 col-sm-6">
                     <skill-dependency-summary
                         v-if="dependencies && dependencies.length > 0"
                         :dependencies="dependencies"
-                        class="legend-component float-md-right"/>
+                        class="legend-component float-md-right deps-overlay"/>
                 </div>
             </div>
             <div id="dependent-skills-network" style="height: 500px"></div>
@@ -37,15 +37,11 @@ limitations under the License.
 </template>
 
 <script>
-  import 'vis/dist/vis.css';
+  import 'vis-network/styles/vis-network.css';
+  import { Network } from 'vis-network';
   import GraphLegend from '@/userSkills/skill/dependencies/GraphLegend';
   import SkillDependencySummary from '@/userSkills/skill/dependencies/SkillDependencySummary';
   import NavigationErrorMixin from '@/common/utilities/NavigationErrorMixin';
-
-  const getVis = () => import(
-  /* webpackChunkName: "vis" */
-  'vis'
-  );
 
   export default {
     name: 'SkillDependencies',
@@ -62,6 +58,7 @@ limitations under the License.
     data() {
       return {
         thisSkill: {},
+        dependenciesInternal: [],
         network: null,
         legendItems: [
           { label: 'This Skill', color: 'lightblue' },
@@ -78,7 +75,6 @@ limitations under the License.
             },
           },
           interaction: {
-            selectConnectedEdges: false,
             navigationButtons: true,
             hover: true,
           },
@@ -99,14 +95,31 @@ limitations under the License.
       };
     },
     mounted() {
-      getVis().then((vis) => {
-        this.createGraph(vis);
-      });
+      this.initInternalDeps();
+      this.createGraph();
     },
     beforeDestroy() {
       this.cleanUp();
     },
     methods: {
+      initInternalDeps() {
+        const skillId = this.isDependency() ? this.$route.params.dependentSkillId : this.$route.params.skillId;
+        const idForThisSkill = this.appendForId(this.$store.state.projectId, skillId);
+        this.dependenciesInternal = this.dependencies.map((item) => {
+          const copy = { ...item };
+          copy.dependsOn.id = this.getNodeId(copy.dependsOn);
+          copy.dependsOn.isThisSkill = false;
+
+          copy.skill.id = this.getNodeId(copy.skill);
+          copy.skill.isThisSkill = idForThisSkill === copy.skill.id;
+
+          if (copy.skill.isThisSkill) {
+            this.thisSkill = copy.skill;
+          }
+
+          return copy;
+        });
+      },
       cleanUp() {
         if (this.network) {
           this.network.destroy();
@@ -117,15 +130,15 @@ limitations under the License.
         const width = window.innerWidth;
         return width <= 768;
       },
-      createGraph(vis) {
+      createGraph() {
         this.cleanUp();
 
-        const data = this.buildData(vis);
+        const data = this.buildData();
         const container = document.getElementById('dependent-skills-network');
-        this.network = new vis.Network(container, data, this.displayOptions);
+        this.network = new Network(container, data, this.displayOptions);
         this.network.on('click', (params) => {
           const skillItem = this.locateSelectedSkill(params);
-          if (skillItem && skillItem.skillId && skillItem.skillId !== this.thisSkill.skillId) {
+          if (skillItem && skillItem.skillId && !skillItem.isThisSkill) {
             if (skillItem.isCrossProject) {
               this.handlePush({
                 name: 'crossProjectSkillDetails',
@@ -172,15 +185,15 @@ limitations under the License.
         }
       },
       locateSelectedSkill(params) {
-        const skillId = params.nodes[0];
+        const nodeId = params.nodes[0];
         let skillItem = null;
         let crossProj = false;
-        const depItem = this.dependencies.find((item) => this.getNodeId(item.dependsOn) === skillId);
+        const depItem = this.dependenciesInternal.find((item) => item.dependsOn.id === nodeId);
         if (depItem) {
           skillItem = depItem.dependsOn;
           crossProj = depItem.crossProject;
         } else {
-          const found = this.dependencies.find((item) => this.getNodeId(item.skill) === skillId);
+          const found = this.dependenciesInternal.find((item) => item.skill.id === nodeId);
           if (found) {
             skillItem = found.skill;
             crossProj = found.crossProject;
@@ -189,20 +202,12 @@ limitations under the License.
 
         return { ...skillItem, ...{ isCrossProject: crossProj } };
       },
-      buildData(vis) {
-        const nodes = new vis.DataSet();
-        const edges = new vis.DataSet();
+      buildData() {
+        const nodes = [];
+        const edges = [];
         const createdSkillIds = [];
-        const skillId = this.isDependency() ? this.$route.params.dependentSkillId : this.$route.params.skillId;
-
-        this.dependencies.forEach((item) => {
-          const isThisSkill = skillId === item.skill.skillId;
-
-          if (isThisSkill) {
-            this.thisSkill = item.skill;
-          }
-
-          const extraParentProps = isThisSkill ? {
+        this.dependenciesInternal.forEach((item) => {
+          const extraParentProps = item.skill.isThisSkill ? {
             color: {
               border: '#3273dc',
               background: 'lightblue',
@@ -217,7 +222,7 @@ limitations under the License.
             },
           } : {};
           this.buildNode(item.dependsOn, item.crossProject, createdSkillIds, nodes, extraChildProps);
-          edges.add({
+          edges.push({
             from: this.getNodeId(item.skill),
             to: this.getNodeId(item.dependsOn),
             arrows: 'to',
@@ -228,24 +233,25 @@ limitations under the License.
         return data;
       },
       buildNode(skill, isCrossProject, createdSkillIds, nodes, extraProps = {}) {
-        const cachedId = `${skill.projectId}-${skill.skillId}`;
-        if (!createdSkillIds.includes(cachedId)) {
-          createdSkillIds.push(cachedId);
-
+        if (!createdSkillIds.includes(skill.id)) {
+          createdSkillIds.push(skill.id);
           const node = {
-            id: this.getNodeId(skill),
+            id: skill.id,
             label: this.getLabel(skill, isCrossProject),
             margin: 10,
             shape: 'box',
-            chosen: false,
+            chosen: !skill.isThisSkill,
             font: { multi: 'html', size: 20 },
           };
           const res = Object.assign(node, extraProps);
-          nodes.add(res);
+          nodes.push(res);
         }
       },
       getNodeId(skill) {
-        return `${skill.projectName}_${skill.skillId}`;
+        return this.appendForId(skill.projectId, skill.skillId);
+      },
+      appendForId(projectId, skillId) {
+        return `${projectId}_${skillId}`;
       },
       getLabel(skill, isCrossProject) {
         const label = isCrossProject ? `CROSS-PROJECT SKILL\n<b>${skill.projectName}</b>\n${skill.skillName}` : skill.skillName;
@@ -271,8 +277,10 @@ limitations under the License.
         }
         .legend-row {
             position: absolute;
-            z-index: 99;
             width: 100%;
+        }
+        .deps-overlay {
+            z-index: 99;
         }
     }
 </style>
