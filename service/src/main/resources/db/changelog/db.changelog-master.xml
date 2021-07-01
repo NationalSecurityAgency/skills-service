@@ -1299,4 +1299,11 @@
                          tableName="settings"/>
     </changeSet>
 
+    <changeSet id="9" author="skills team" context="migration9">
+        <sql>
+            delete from settings where setting_group = 'pinned_project' and user_ref_id in (select distinct user_ref_id from user_roles where role_name = 'ROLE_SUPER_DUPER_USER');
+            delete from settings where setting_group = 'project_sort_order' and user_ref_id in (select distinct user_ref_id from user_roles where role_name = 'ROLE_SUPER_DUPER_USER');
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
