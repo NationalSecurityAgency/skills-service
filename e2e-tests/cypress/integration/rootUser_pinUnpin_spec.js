@@ -474,5 +474,93 @@ describe('Root Pin and Unpin Tests', () => {
     });
   });
 
+  it('Sort auto-pinned project', ()=> {
+    cy.request('POST', '/app/projects/proj1', {
+      projectId: 'proj1',
+      name: "one"
+    });
+
+    cy.request('POST', '/app/projects/proj2', {
+      projectId: 'proj2',
+      name: "two"
+    });
+
+    cy.request('POST', '/app/projects/proj3', {
+      projectId: 'proj3',
+      name: "three"
+    });
+
+    cy.request('POST', '/app/projects/proj4', {
+      projectId: 'proj4',
+      name: "four"
+    });
+    cy.logout();
+    cy.fixture('vars.json').then((vars) => {
+      cy.login(vars.rootUser, vars.defaultPass);
+      cy.intercept('GET', '/app/projects').as('default');
+      cy.intercept('GET', '/app/projects?search=one').as('searchOne');
+      cy.intercept('POST', '/root/pin/proj1').as('pinOne');
+      cy.intercept('DELETE', '/root/pin/proj1').as('unpinOne');
+      cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+
+      cy.intercept('GET', '/app/projects').as('loadProjects');
+
+      cy.visit('/administrator/');
+      //confirm that default project loading returns no projects for root user
+      cy.wait('@default');
+      cy.contains('No Projects Yet...').should('be.visible');
+
+      cy.get('[data-cy=subPageHeaderControls]').contains('Pin').click();
+      cy.contains('Pin Projects');
+      cy.contains('Search Project Catalog');
+
+      cy.get('[data-cy=pinProjectsSearchInput]').type('t');
+      cy.get('[data-cy=pinProjectsSearchResultsNumRows]').contains('Rows: 3');
+      cy.get('[data-cy=pinProjectsSearchResults]').contains('Inception');
+      cy.get('[data-cy=pinProjectsSearchResults]').contains('two');
+      cy.get('[data-cy=pinProjectsSearchResults]').contains('three');
+
+      cy.get('[data-cy=pinProjectsSearchInput]').type('wo');
+      cy.get('[data-cy=pinProjectsSearchResultsNumRows]').contains('Rows: 1');
+      cy.get('[data-cy=pinProjectsSearchResults]').contains('Inception').should('not.exist');
+      cy.get('[data-cy=pinProjectsSearchResults]').contains('two');
+
+      cy.get('[data-cy=pinProjectsSearchInput]').type('1');
+      cy.get('[data-cy=pinProjects]').contains('No Results');
+
+      cy.get('[data-cy=pinProjectsClearSearch]').click();
+      cy.get('[data-cy=pinProjects]').contains('Search Project Catalog');
+
+      cy.get('[data-cy=pinProjectsLoadAllButton]').click();
+      cy.get('[data-cy=pinProjectsSearchResultsNumRows]').contains('Rows: 5');
+      cy.get('[data-cy=pinProjectsSearchResults]').contains('Inception');
+      cy.get('[data-cy=pinProjectsSearchResults]').contains('two');
+      cy.get('[data-cy=pinProjectsSearchResults]').contains('three');
+
+      // pin 1 project
+      const rowSelector = '[data-cy=pinProjectsSearchResults] tbody tr'
+      cy.get(rowSelector).should('have.length', 5).as('cyRows');
+      cy.get('@cyRows').eq(0).find('td').as('row1');
+      cy.get('@row1').eq(0).contains('four');
+      cy.get('@row1').eq(0).find('[data-cy=unpinButton]').should('not.exist');
+      cy.get('@row1').eq(0).find('[data-cy=pinButton]').click();
+      cy.get('@row1').eq(0).find('[data-cy=pinButton]').should('not.exist');
+      cy.get('@row1').eq(0).find('[data-cy=unpinButton]').should('exist');
+      cy.get('[data-cy=modalDoneButton]').click();
+
+      cy.get('[data-cy=newProjectButton]').click();
+      cy.contains('New Project').should('be.visible');
+      cy.get('[data-cy=projectName]').type('A Brand New Project');
+      cy.get('[data-cy=saveProjectButton]').click();
+      cy.contains('A Brand New Project').should('be.visible');
+
+      cy.get('[data-cy=projectCard]').eq(0).should('not.contain', 'A Brand New Project');
+      cy.get('[data-cy=moveProjUpBtn]').eq(1).click();
+      cy.wait('@loadProjects');
+      cy.contains('A Brand New Project').should('be.visible');
+      cy.get('[data-cy=projectCard]').eq(0).should('contain', 'A Brand New Project');
+    });
+  });
+
 });
 
