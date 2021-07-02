@@ -17,7 +17,7 @@ limitations under the License.
   <div id="full-dependent-skills-graph">
     <sub-page-header title="Skill Dependencies"/>
 
-    <simple-card>
+    <simple-card data-cy="fullDepsSkillsGraph">
       <loading-container :is-loading="!isLoading">
         <div v-if="!this.graph.nodes || this.graph.nodes.length === 0" class="mt-5">
             <no-content2 icon="fa fa-project-diagram" title="No Dependencies Yet..."
@@ -38,7 +38,8 @@ limitations under the License.
 </template>
 
 <script>
-  import 'vis/dist/vis.css';
+  import 'vis-network/styles/vis-network.css';
+  import { Network } from 'vis-network';
   import SkillsService from '../SkillsService';
   import LoadingContainer from '../../utils/LoadingContainer';
   import GraphNodeSortMethodSelector from './GraphNodeSortMethodSelector';
@@ -47,11 +48,6 @@ limitations under the License.
   import GraphLegend from './GraphLegend';
   import SubPageHeader from '../../utils/pages/SubPageHeader';
   import SimpleCard from '../../utils/cards/SimpleCard';
-
-  const getVis = import(
-    /* webpackChunkName: "vis" */
-    'vis'
-  );
 
   export default {
     name: 'FullDependencyGraph',
@@ -80,6 +76,7 @@ limitations under the License.
               enabled: true,
               sortMethod: 'directed',
               nodeSpacing: 350,
+              treeSpacing: 370,
             },
           },
           interaction: {
@@ -102,11 +99,9 @@ limitations under the License.
       };
     },
     mounted() {
-      getVis.then((vis) => {
-        this.nodes = new vis.DataSet();
-        this.edges = new vis.DataSet();
-        this.loadGraphDataAndCreateGraph(vis);
-      });
+      this.nodes = [];
+      this.edges = [];
+      this.loadGraphDataAndCreateGraph();
     },
     beforeDestroy() {
       if (this.network) {
@@ -134,15 +129,13 @@ limitations under the License.
         if (this.network) {
           this.network.destroy();
           this.network = null;
-          this.nodes.clear();
-          this.edges.clear();
+          this.nodes = [];
+          this.edges = [];
         }
 
         const data = this.buildData();
         const container = document.getElementById('dependency-graph');
-        getVis.then((vis) => {
-          this.network = new vis.Network(container, data, this.displayOptions);
-        });
+        this.network = new Network(container, data, this.displayOptions);
       },
       buildData() {
         this.graph.nodes.forEach((node) => {
@@ -161,10 +154,10 @@ limitations under the License.
               background: '#ffb87f',
             };
           }
-          this.nodes.add(newNode);
+          this.nodes.push(newNode);
         });
         this.graph.edges.forEach((edge) => {
-          this.edges.add({
+          this.edges.push({
             from: edge.fromId,
             to: edge.toId,
             arrows: 'to',
