@@ -109,6 +109,11 @@ class ProjectSortingService {
     }
 
     @Transactional
+    void deleteProjectDisplayOrder(String projectId, String userId) {
+        settingsService.deleteUserProjectSetting(userId.toLowerCase(), PROJECT_SORT_GROUP, PROJECT_SORT_SETTING, projectId)
+    }
+
+    @Transactional
     void setProjectSortOrder(String projectId, Integer order, String userId){
 
         User user = userRepo.findByUserId(userId.toLowerCase())

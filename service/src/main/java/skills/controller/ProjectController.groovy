@@ -110,12 +110,6 @@ class ProjectController {
         return new RequestResult(success: true)
     }
 
-    //need pin/unpin controller. Only permit if:
-    /*
-    boolean isRoot = userInfo.authorities?.find() {
-            it instanceof UserSkillsGrantedAuthority && RoleName.ROLE_SUPER_DUPER_USER == it.role?.roleName
-        }
-     */
 
     @RequestMapping(value = "/projectExist", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody

@@ -27,6 +27,7 @@ import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.web.bind.annotation.*
 import skills.auth.AuthMode
+import skills.auth.UserInfoService
 import skills.auth.pki.PkiUserLookup
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
@@ -81,6 +82,9 @@ class RootController {
 
     @Autowired
     ProjAdminService projAdminService
+
+    @Autowired
+    UserInfoService userInfoService
 
     @GetMapping('/rootUsers')
     @ResponseBody
@@ -260,12 +264,14 @@ class RootController {
 
     @PostMapping('/pin/{projectId}')
     RequestResult pinProject(@PathVariable("projectId") String projectId) {
+        //create project order setting for this user
         projAdminService.pinProjectForRootUser(projectId)
         return new RequestResult(success: true)
     }
 
     @DeleteMapping('/pin/{projectId}')
     RequestResult unpinProject(@PathVariable("projectId") String projectId) {
+        //remove project order setting for this user
         projAdminService.unpinProjectForRootUser(projectId)
         return new RequestResult(success: true)
     }

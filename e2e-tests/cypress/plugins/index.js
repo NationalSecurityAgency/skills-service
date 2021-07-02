@@ -35,6 +35,7 @@ const {
 } = require('cypress-image-snapshot/plugin');
 const { makeBadge, ValidationError } = require('badge-maker');
 
+
 const deleteFolderRecursive = function(path) {
     if (fs.existsSync(path)) {
         fs.readdirSync(path).forEach((file, index) => {

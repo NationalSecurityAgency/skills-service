@@ -922,6 +922,11 @@ class SkillsService {
         return wsHelper.rootPut("/users/${userId}/roles/ROLE_SUPERVISOR")
     }
 
+    def grantRootRole(String userId) {
+        userId = getUserId(userId)
+        return wsHelper.rootPut("/users/${userId}/roles/ROLE_SUPER_DUPER_USER")
+    }
+
     def removeSupervisorRole(String userId) {
         userId = getUserId(userId)
         return wsHelper.rootDelete("/users/${userId}/roles/ROLE_SUPERVISOR")

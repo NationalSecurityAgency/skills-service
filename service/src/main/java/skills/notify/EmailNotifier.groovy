@@ -16,17 +16,12 @@
 package skills.notify
 
 import callStack.profiler.Profile
-import com.google.common.math.Stats
 import groovy.json.JsonOutput
-import groovy.lang.Closure
-import groovy.transform.ToString
 import groovy.time.TimeCategory
 import groovy.util.logging.Slf4j
-import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.time.StopWatch
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.result.model.SettingsResult
@@ -101,14 +96,12 @@ class EmailNotifier implements Notifier {
 
     }
 
-    @Scheduled(cron = '#{"${skills.config.notifications.dispatchSchedule:0 * * * * *}"}')
     @Transactional
     void dispatchNotifications() {
         log.debug("Checking notifications to dispatch.")
         doDispatchNotifications { notificationsRepo.streamNewNotifications() }
     }
 
-    @Scheduled(cron = '#{"${skills.config.notifications.dispatchRetrySchedule:0 0 * * * *}"}')
     @Transactional
     void attemptToDispatchErroredNotifications() {
         log.debug("Checking for errored notifications.")

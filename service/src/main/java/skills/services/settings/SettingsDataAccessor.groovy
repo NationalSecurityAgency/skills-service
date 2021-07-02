@@ -58,7 +58,7 @@ class SettingsDataAccessor {
     }
 
     Setting getUserProjectSetting(Integer userRefId, String projectId, String setting, String settingGroup){
-        settingRepo.findByTypeAndUserRefIdAndProjectIdAndSettingGroupAndSetting(Setting.SettingType.User, userRefId, projectId, settingGroup, setting)
+        settingRepo.findByTypeAndUserRefIdAndProjectIdAndSettingGroupAndSetting(Setting.SettingType.UserProject, userRefId, projectId, settingGroup, setting)
     }
 
     Setting getUserSetting(Integer userRefId, String setting, String settingGroup){
@@ -114,8 +114,12 @@ class SettingsDataAccessor {
         settingRepo.deleteBySettingAndType(setting, type)
     }
 
-    void deleteUserSetting(String setting, Integer userRefId) {
+    void deleteUserProjectSetting(String setting, Integer userRefId) {
         settingRepo.deleteBySettingAndTypeAndUserRefId(setting, SettingType.User, userRefId)
+    }
+
+    void deleteUserProjectSetting(Integer userRefId, String setting, String settingGroup, String projectId=null) {
+        settingRepo.deleteBySettingAndSettingGroupAndProjectIdAndTypeAndUserRefId(setting, settingGroup, projectId, SettingType.UserProject, userRefId)
     }
 
     void deleteGlobalSetting(String setting) {
