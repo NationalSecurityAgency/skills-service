@@ -22,6 +22,7 @@ import router from '@/router';
 import store from '@/store/store';
 import 'apexcharts';
 import '@/common/filter/DayJsFilters';
+import DevModeUtil from '@/dev/DevModeUtil';
 
 import {
     ModalPlugin,
@@ -63,8 +64,16 @@ marked.setOptions({
   renderer,
 });
 
-new Vue({
+const initializeVueApp = () => {
+  new Vue({
     router,
     store,
     render: (h) => h(App),
-}).$mount('#app');
+  }).$mount('#app');
+};
+
+if (DevModeUtil.isDevelopmentMode()) {
+  DevModeUtil.configureDevelopmentMode(store).then(() => { initializeVueApp(); });
+} else {
+  initializeVueApp();
+}
