@@ -42,17 +42,13 @@ limitations under the License.
 </template>
 
 <script>
-  import 'vis/dist/vis.css';
+  import 'vis-network/styles/vis-network.css';
+  import { Network } from 'vis-network';
   import GraphLegend from './GraphLegend';
   import GraphNodeSortMethodSelector from './GraphNodeSortMethodSelector';
   import NoContent2 from '../../utils/NoContent2';
   import GraphUtils from './GraphUtils';
   import SimpleCard from '../../utils/cards/SimpleCard';
-
-  const getVis = import(
-    /* webpackChunkName: "vis" */
-    'vis'
-  );
 
   export default {
     name: 'DependantsGraph',
@@ -66,8 +62,8 @@ limitations under the License.
     data() {
       return {
         network: null,
-        nodes: {},
-        edges: {},
+        nodes: [],
+        edges: [],
         displayOptions: {
           layout: {
             randomSeed: 419465,
@@ -98,14 +94,9 @@ limitations under the License.
       };
     },
     mounted() {
-      getVis.then((vis) => {
-        this.nodes = new vis.DataSet();
-        this.edges = new vis.DataSet();
-
-        if (this.graph && this.graph.nodes && this.graph.nodes.length > 0) {
-          this.createGraph();
-        }
-      });
+      if (this.graph && this.graph.nodes && this.graph.nodes.length > 0) {
+        this.createGraph();
+      }
     },
     beforeDestroy() {
       if (this.network) {
@@ -119,46 +110,29 @@ limitations under the License.
           this.network = null;
         }
 
-        this.nodes.clear();
-        this.edges.clear();
+        this.nodes = [];
+        this.edges = [];
 
         this.createGraph();
       },
     },
     methods: {
-      updateNodes() {
-        const newItems = this.dependentSkills.filter((item) => !this.nodes.get().find((item1) => item1.id === item.id));
-        newItems.forEach((newItem) => {
-          const nodeEdgeData = this.buildNodeEdgeData(newItem);
-          this.edges.add(nodeEdgeData.edge);
-          this.nodes.add(nodeEdgeData.node);
-        });
-
-        const removeItems = this.nodes.get().filter((item) => !this.dependentSkills.find((item1) => item1.id === item.id) && item.id !== this.skill.id);
-        removeItems.forEach((item) => {
-          this.nodes.remove(item.id);
-          const edgeToRemove = this.edges.get().find((edgeItem) => edgeItem.to === item.id);
-          this.edges.remove(edgeToRemove);
-        });
-      },
       onSortNodeStrategyChange(newStrategy) {
         this.displayOptions.layout.hierarchical.sortMethod = newStrategy;
         this.createGraph();
       },
       createGraph() {
-        getVis.then((vis) => {
-          if (this.network) {
-            this.network.destroy();
-            this.network = null;
+        if (this.network) {
+          this.network.destroy();
+          this.network = null;
 
-            this.nodes.clear();
-            this.edges.clear();
-          }
+          this.nodes = [];
+          this.edges = [];
+        }
 
-          const data = this.buildData();
-          const container = document.getElementById('dependent-skills-network');
-          this.network = new vis.Network(container, data, this.displayOptions);
-        });
+        const data = this.buildData();
+        const container = document.getElementById('dependent-skills-network');
+        this.network = new Network(container, data, this.displayOptions);
       },
       buildData() {
         this.graph.nodes.forEach((node) => {
@@ -188,10 +162,10 @@ limitations under the License.
               background: '#ffb87f',
             };
           }
-          this.nodes.add(newNode);
+          this.nodes.push(newNode);
         });
         this.graph.edges.forEach((edge) => {
-          this.edges.add({
+          this.edges.push({
             from: edge.fromId,
             to: edge.toId,
             arrows: 'to',
