@@ -22,6 +22,7 @@ import org.springframework.lang.Nullable
 import skills.storage.model.ProjDef
 import skills.storage.model.ProjSummaryResult
 import skills.storage.model.ProjectLastTouched
+import skills.storage.model.ProjectSummaryResult
 
 interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
 
@@ -319,4 +320,27 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
     @Query("select p from ProjDef p, Setting s where p.projectId = s.projectId and s.setting = 'expiration.expiring.unused' and s.value = 'true' and s.updated > ?1 order by p.projectId")
     List<ProjDef> getProjectsWithinGracePeriod(Date cutoff)
 
+    @Query('''
+SELECT pd.id as projectRefId,
+       pd.projectId as projectId,
+       pd.name as projectName,
+       up.points as points,
+       (select count(*) from UserPoints where projectId = pd.projectId and skillId is NULL and day IS NULL) as totalUsers,
+       (select count(*)+1 from UserPoints where projectId = pd.projectId and skillId is NULL and day IS NULL and points > up.points) as rank,
+       (select sum(sdChild.totalPoints)
+        FROM SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
+        WHERE srd.parent = sdParent.id and
+              srd.child = sdChild.id and
+              sdParent.projectId = pd.projectId and srd.type='RuleSetDefinition' and sdChild.version<=?2) as totalPoints
+from UserPoints up, ProjDef pd, Setting s
+where up.projectId = pd.projectId and
+      up.projectId = s.projectId and
+      up.projectId = up.projectId and
+      s.setting = 'production.mode.enabled' and
+      s.value = 'true' and
+      up.userId=?1 and
+      up.day is null and up.skillId is null
+group by points, pd.projectId, pd.name, pd.id
+''')
+    List<ProjectSummaryResult> getProjectSummaries(String userId, Integer version)
 }

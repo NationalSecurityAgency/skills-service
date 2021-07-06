@@ -16,9 +16,11 @@
 package skills.skillLoading.model
 
 import groovy.transform.Canonical
+import skills.storage.model.ProjectSummaryResult
 
 @Canonical
 class ProjectSummary {
+    int projectRefId
     String projectId
     String projectName
     int points
@@ -26,5 +28,16 @@ class ProjectSummary {
     int level
     int totalUsers
     int rank
+
+    ProjectSummary fromProjectSummaryResult(ProjectSummaryResult projectSummaryResult) {
+        this.projectRefId = projectSummaryResult.projectRefId
+        this.projectId = projectSummaryResult.projectId
+        this.projectName = projectSummaryResult.projectName
+        this.points = projectSummaryResult.points ?: 0
+        this.totalPoints = projectSummaryResult.totalPoints ?: 0
+        this.totalUsers = projectSummaryResult.totalUsers ?: 0
+        this.rank = projectSummaryResult.rank ?: 0
+        return this
+    }
 }
 
