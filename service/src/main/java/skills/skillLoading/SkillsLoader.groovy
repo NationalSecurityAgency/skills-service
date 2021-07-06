@@ -136,7 +136,7 @@ class SkillsLoader {
     MyProgressSummary loadMyProgressSummary(String userId, Integer version = -1) {
         MyProgressSummary myProgressSummary = new MyProgressSummary()
         List<ProjectSummaryResult> projectSummaries = projDefRepo.getProjectSummaries(userId, version)
-        myProgressSummary.totalProjects = projectSummaries.size()
+        myProgressSummary.totalProjects = projDefRepo.count()?.intValue()
         for (ProjectSummaryResult summaryResult : projectSummaries) {
             ProjectSummary summary = new ProjectSummary().fromProjectSummaryResult(summaryResult)
             myProgressSummary.projectSummaries << summary
