@@ -15,6 +15,7 @@
  */
 package skills.intTests.myProgress
 
+import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import skills.intTests.utils.DefaultIntSpec
@@ -655,4 +656,88 @@ class MyProgressSpec extends DefaultIntSpec {
         res.numAchievedGemBadges == 0
         res.numAchievedGlobalBadges == 0
     }
+
+    def "add and remove my project - single project"() {
+        def proj1 = SkillsFactory.createProject()
+        skillsService.createProject(proj1)
+        skillsService.enableProdMode(proj1)
+
+        when:
+        def forMyProjects = skillsService.getAvailableMyProjects()
+
+        skillsService.addMyProject(proj1.projectId)
+        def forMyProjects1 = skillsService.getAvailableMyProjects()
+
+        skillsService.removeMyProject(proj1.projectId)
+        def forMyProjects2 = skillsService.getAvailableMyProjects()
+
+        then:
+        !forMyProjects[0].isMyProject
+        forMyProjects1[0].isMyProject
+        !forMyProjects2[0].isMyProject
+    }
+
+    def "add and remove my project - many projects"() {
+
+        List projs = (1..6).collect {
+            def proj = SkillsFactory.createProject(it)
+            skillsService.createProject(proj)
+            skillsService.enableProdMode(proj)
+            return proj
+        }
+
+        when:
+        def forMyProjects = skillsService.getAvailableMyProjects().sort { it.projectId }
+
+        skillsService.addMyProject(projs[1].projectId)
+        def forMyProjects1 = skillsService.getAvailableMyProjects()
+
+        skillsService.addMyProject(projs[2].projectId)
+        def forMyProjects2 = skillsService.getAvailableMyProjects()
+
+        skillsService.addMyProject(projs[4].projectId)
+        def forMyProjects3 = skillsService.getAvailableMyProjects()
+
+        skillsService.removeMyProject(projs[1].projectId)
+        def forMyProjects4 = skillsService.getAvailableMyProjects()
+
+        skillsService.removeMyProject(projs[2].projectId)
+        def forMyProjects5 = skillsService.getAvailableMyProjects()
+
+        then:
+        forMyProjects.collect { it.isMyProject }  == [false, false, false, false, false, false]
+        forMyProjects1.collect { it.isMyProject }  == [false, true, false, false, false, false]
+        forMyProjects2.collect { it.isMyProject }  == [false, true, true, false, false, false]
+        forMyProjects3.collect { it.isMyProject }  == [false, true, true, false, true, false]
+        forMyProjects4.collect { it.isMyProject }  == [false, false, true, false, true, false]
+        forMyProjects5.collect { it.isMyProject }  == [false, false, false, false, true, false]
+    }
+
+    def "add and remove my project - all projects"() {
+        List projs = (1..6).collect {
+            def proj = SkillsFactory.createProject(it)
+            skillsService.createProject(proj)
+            skillsService.enableProdMode(proj)
+            return proj
+        }
+
+        when:
+        def forMyProjects = skillsService.getAvailableMyProjects().sort { it.projectId }
+
+        projs.each {
+            skillsService.addMyProject(it.projectId)
+        }
+        def forMyProjects1 = skillsService.getAvailableMyProjects()
+
+        projs.each {
+            skillsService.removeMyProject(it.projectId)
+        }
+        def forMyProjects2 = skillsService.getAvailableMyProjects()
+
+        then:
+        forMyProjects.collect { it.isMyProject }  == [false, false, false, false, false, false]
+        forMyProjects1.collect { it.isMyProject }  == [true, true, true, true, true, true]
+        forMyProjects2.collect { it.isMyProject }  == [false, false, false, false, false, false]
+    }
 }
+

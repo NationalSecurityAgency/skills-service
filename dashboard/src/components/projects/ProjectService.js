@@ -21,6 +21,11 @@ export default {
     return axios.get(url)
       .then((response) => response.data);
   },
+  getAvailableProjectsInProduction() {
+    const url = '/api/availableProjects';
+    return axios.get(url)
+      .then((response) => response.data);
+  },
   searchProjects(search) {
     const url = `/root/searchProjects?name=${search}`;
     return axios.get(url)

@@ -20,6 +20,7 @@ import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.SerializationUtils
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -135,15 +136,24 @@ class SkillsLoader {
 
     @Profile
     @Transactional(readOnly = true)
-    List<AvailableProjectResult> getAvailableProjects(String userId, Integer version = -1) {
+    List<AvailableProjectResult> getAvailableForMyProjects(String userId, Integer version = -1) {
 
-        List<ProjDef> prodProjectDefs = projDefRepo.getProjectsInProduction()
-        List<AvailableProjectResult> res = prodProjectDefs.collect { ProjDef projDef ->
+        List<ProjDefRepo.AvailableProjectSummary> projectSummaries = projDefRepo.getAvailableProjectSummariesInProduction(userId)
+        List<AvailableProjectResult> res = projectSummaries.collect { ProjDefRepo.AvailableProjectSummary summary ->
+            String myProjectId = summary.getMyProjectId();
             new AvailableProjectResult(
-                    totalPoints: calculateTotalPointsForProject(projDef, version),
-                    numSubjects: projDef.su
+                    projectId: summary.getProjectId(),
+                    name: summary.getName(),
+                    totalPoints: calculateTotalPointsForProject(summary.getProjectId(), version),
+                    numSubjects: summary.getNumSubjects(),
+                    numSkills: summary.getNumSkills(),
+                    numBadges: summary.getNumBadges(),
+                    created: summary.getCreated(),
+                    isMyProject: myProjectId != null,
             )
         }
+
+        return res;
     }
 
     @Profile
@@ -573,8 +583,8 @@ class SkillsLoader {
     }
 
     @Profile
-    private int calculateTotalPointsForProject(ProjDef projDef, int version) {
-        Integer res = skillDefRepo.calculateTotalPointsForProject(projDef.projectId, SkillRelDef.RelationshipType.RuleSetDefinition, version)
+    private int calculateTotalPointsForProject(String projectId, int version) {
+        Integer res = skillDefRepo.calculateTotalPointsForProject(projectId, SkillRelDef.RelationshipType.RuleSetDefinition, version)
         return res ?: 0
     }
 

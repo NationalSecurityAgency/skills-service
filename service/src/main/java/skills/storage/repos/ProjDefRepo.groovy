@@ -289,7 +289,21 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
     @Nullable
     List<ProjSummaryResult> getProjectSummariesInProduction()
 
-    static interface
+    @Query("select p from ProjDef p, Setting s where p.projectId = s.projectId and s.setting = 'production.mode.enabled' and s.value = 'true' order by p.projectId")
+    List<ProjDef> getProjectsInProduction()
+
+    static interface AvailableProjectSummary {
+        String getProjectId();
+        String getName();
+        int getTotalPoints();
+        int getNumSubjects();
+        int getNumSkills();
+        int getNumBadges();
+        Date getCreated();
+        // set to project is if this project was added to 'My Projects'
+        @Nullable
+        String getMyProjectId();
+    }
     @Query(value="""
                 SELECT
                     pd.project_id AS projectId,
@@ -298,16 +312,19 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                     COALESCE(skills.skillCount, 0) AS numSkills,
                     COALESCE(badges.badgeCount, 0) AS numBadges,
                     COALESCE(subjects.subjectCount, 0) AS numSubjects,
-                    events.latest AS lastReportedSkill,
-                    pd.created,
-                FROM project_definition pd
+                    pd.created, 
+                    theSettings.myProjectId AS myProjectId
+                FROM settings s, project_definition pd
                 LEFT JOIN (SELECT project_id, MAX(event_time) AS latest FROM user_events GROUP BY project_id) events ON events.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS skillCount, MAX(updated) AS skillUpdated FROM skill_definition WHERE type = 'Skill' GROUP BY project_id) skills ON skills.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS badgeCount, MAX(updated) AS badgeUpdated FROM skill_definition WHERE type = 'Badge' GROUP BY project_id) badges ON badges.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS subjectCount, MAX(updated) AS subjectUpdated FROM skill_definition WHERE type = 'Subject' GROUP BY project_id) subjects ON subjects.project_id = pd.project_id
+                LEFT JOIN (SELECT ss.project_id as myProjectId FROM settings ss, users uu WHERE ss.setting = 'my_project' and uu.user_id=?1 and uu.id = ss.user_ref_id) theSettings ON theSettings.myProjectId = pd.project_id
+                WHERE pd.project_id = s.project_id and s.setting = 'production.mode.enabled' and s.value = 'true'
+                ORDER BY projectId
             """, nativeQuery = true)
     @Nullable
-    List<ProjDef> getAvailableProjectSummaries()
+    List<AvailableProjectSummary> getAvailableProjectSummariesInProduction(String userId)
 
     @Query(value="""
             SELECT pd.project_id as projectId,

@@ -15,11 +15,16 @@
  */
 package skills.controller.result.model
 
-class AvailableProjectResult extends SimpleProjectResult {
+class AvailableProjectResult {
 
+    String projectId
+    String name
+    Date created
     int totalPoints
     int numSubjects
     int numSkills
     int numBadges
+
+    boolean isMyProject
 
 }
