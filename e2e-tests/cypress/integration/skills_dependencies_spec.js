@@ -205,33 +205,4 @@ describe('Skills Tests', () => {
     });
 
 
-    it('Project Deps Graph: verify that seperate graph trees do NOT overlap', () => {
-        // must set viewport to show entire canvas or it will not appear in the screenshot
-        cy.viewport(1280, 1280)
-
-        const numSkills = 15;
-        for (let i = 0; i < numSkills; i += 1) {
-            cy.createSkill(1, 1, i, { name: `This is a very long name. yet is it ${i}`})
-        }
-
-        cy.createProject(2);
-        cy.createSubject(2, 1);
-        cy.createSkill(2, 1, 1);
-
-        // cy.assignDep(1, 1, 2);
-        cy.assignDep(1, 2, 3);
-        cy.assignDep(1, 3, 4);
-        cy.assignDep(1, 4, 5);
-        cy.assignDep(1, 5, 6);
-        cy.assignDep(1, 6, 7);
-        cy.assignDep(1, 7, 8);
-
-        cy.assignCrossProjectDep(1, 1, 2, 1);
-
-        cy.visit('/administrator/projects/proj1/dependencies');
-        cy.get('[data-cy="fullDepsSkillsGraph"]').contains('Color Legend');
-        cy.wait(4000);
-        cy.matchSnapshotImageForElement('[data-cy=fullDepsSkillsGraph]', 'project-deps-graph multiple trees');
-    });
-
 });
