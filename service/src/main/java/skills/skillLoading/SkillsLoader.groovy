@@ -120,7 +120,7 @@ class SkillsLoader {
         ProjDef projDef = projDefRepo.findByProjectId(projectId)
         if (!projDef) {
             // indicates that project doesn't exist at all
-            return -1;
+            return -1
         }
 
         Integer res = 0
@@ -135,17 +135,12 @@ class SkillsLoader {
     @Transactional(readOnly = true)
     MyProgressSummary loadMyProgressSummary(String userId, Integer version = -1) {
         MyProgressSummary myProgressSummary = new MyProgressSummary()
-        List<ProjDef> prodProjectDefs = projDefRepo.getProjectsInProduction()
+        List<ProjectSummaryResult> projectSummaries = projDefRepo.getProjectSummaries(userId, version)
         myProgressSummary.totalProjects = projDefRepo.count()?.intValue()
-        for (ProjDef projDef : prodProjectDefs) {
-            ProjectSummary summary = new ProjectSummary(projectId: projDef.projectId, projectName: projDef.name)
-            SkillsRanking ranking = rankingLoader.getUserSkillsRanking(projDef.projectId, userId);
-            summary.totalUsers = ranking.numUsers
-            summary.rank = ranking.position
+        for (ProjectSummaryResult summaryResult : projectSummaries) {
+            ProjectSummary summary = new ProjectSummary().fromProjectSummaryResult(summaryResult)
             myProgressSummary.projectSummaries << summary
-            summary.totalPoints = calculateTotalPointsForProject(projDef, version)
-            summary.points = calculatePointsForProject(projDef, userId, version)
-            summary.level = getRealLevelInfo(projDef, userId, summary.points, summary.totalPoints).level
+            summary.level = getRealLevelInfo(new ProjDef(id: summary.projectRefId, projectId: summary.projectId, totalPoints: summary.totalPoints), userId, summary.points, summary.totalPoints).level  // SLOW!
             myProgressSummary.numProjectsContributed += summary.points > 0 ? 1 : 0
         }
 
@@ -322,7 +317,7 @@ class SkillsLoader {
                 } else {
                     AggregateAchievement achievement = achievementsByDay[dayOfAchievement]
                     if (achievement) {
-                        achievement.levels.add(it.level);
+                        achievement.levels.add(it.level)
 //                        achievement.name += ", ${it.level}"
                     } else {
                         achievementsByDay[dayOfAchievement] = new AggregateAchievement(achievedOn: dayOfAchievement, points: foundPts.first().points, levels: [it.level])
@@ -454,7 +449,7 @@ class SkillsLoader {
                     )
             )
         }
-        return res;
+        return res
     }
 
     @Transactional(readOnly = true)

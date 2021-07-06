@@ -16,9 +16,11 @@
 package skills.skillLoading.model
 
 import groovy.transform.Canonical
+import skills.storage.model.ProjectSummaryResult
 
 @Canonical
 class ProjectSummary {
+    int projectRefId
     String projectId
     String projectName
     int points
@@ -26,5 +28,17 @@ class ProjectSummary {
     int level
     int totalUsers
     int rank
+
+    ProjectSummary fromProjectSummaryResult(ProjectSummaryResult projectSummaryResult) {
+        this.projectRefId = projectSummaryResult.projectRefId
+        this.projectId = projectSummaryResult.projectId
+        this.projectName = projectSummaryResult.projectName
+        this.points = projectSummaryResult.points ?: 0
+        this.totalPoints = projectSummaryResult.totalPoints ?: 0
+        // if there are no points, then set totalUsers and rank to totalUsers+1, b/c they are last but not included in the results
+        this.totalUsers = projectSummaryResult.points > 0 ? projectSummaryResult.totalUsers : projectSummaryResult.totalUsers + 1
+        this.rank = projectSummaryResult.points > 0 ? projectSummaryResult.rank : projectSummaryResult.totalUsers + 1
+        return this
+    }
 }
 

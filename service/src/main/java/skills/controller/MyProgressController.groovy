@@ -43,13 +43,13 @@ class MyProgressController {
     MetricsService metricsServiceNew
 
     @Autowired
-    private SkillsLoader skillsLoader;
+    private SkillsLoader skillsLoader
 
     @Autowired
-    private UserInfoService userInfoService;
+    private UserInfoService userInfoService
 
     @Autowired
-    private PublicProps publicProps;
+    private PublicProps publicProps
 
     @RequestMapping(value = "/metrics/{metricsId}", method =  RequestMethod.GET, produces = "application/json")
     def getChartData(@PathVariable("metricsId") String metricsId,
@@ -63,14 +63,14 @@ class MyProgressController {
     @Profile
     MyProgressSummary getMyProgressSummary(HttpServletRequest request,
                                            @RequestParam(name = "version", required = false) Integer version) {
-        String userId = userInfoService.getCurrentUserId();
-        return skillsLoader.loadMyProgressSummary(userId, getProvidedVersionOrReturnDefault(version));
+        String userId = userInfoService.getCurrentUserId()
+        return skillsLoader.loadMyProgressSummary(userId, getProvidedVersionOrReturnDefault(version))
     }
 
     private int getProvidedVersionOrReturnDefault(Integer versionParam) {
         if (versionParam != null) {
-            return versionParam;
+            return versionParam
         }
-        return publicProps.getInt(PublicProps.UiProp.maxSkillVersion);
+        return publicProps.getInt(PublicProps.UiProp.maxSkillVersion)
     }
 }
