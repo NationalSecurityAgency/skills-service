@@ -28,10 +28,11 @@ limitations under the License.
         </b-col>
       </b-row>
     </div>
-    <b-row class="justify-content-between no-gutters border-top text-muted small">
+    <b-row class="justify-content-between no-gutters border-top text-muted small"  style="min-height: 3rem;">
       <b-col class="p-2">
         <span v-if="projectsNotContributedToYet > 0" data-cy="info-snap-footer">You still have <b-badge variant="info">{{ projectsNotContributedToYet }}</b-badge> project{{ projectsNotContributedToYet > 1 ? 's' : ''}} to explore.</span>
         <span v-else data-cy="info-snap-footer" class="text-nowrap">Great job, you have contributed to all projects!</span>
+        <span class="float-right"><b-button :to="{ name: 'MyUsagePage' }" variant="outline-info" size="sm"><i class="fas fa-eye"/> View Usage</b-button></span>
       </b-col>
     </b-row>
   </b-card>

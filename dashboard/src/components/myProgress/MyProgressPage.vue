@@ -15,15 +15,10 @@ limitations under the License.
 */
 <template>
   <loading-container :is-loading="loading" class="container-fluid">
-    <b-row class="mt-2">
-      <b-col>
-        <div class="card p-0 m-0">
-          <div class="card-body mt-2 mb-0 p-0">
-            <h1 class="h4 text-uppercase text-center">Progress and Rankings</h1>
-          </div>
-        </div>
-      </b-col>
-    </b-row>
+
+    <sub-page-header title="My Projects" class="pt-4">
+      <b-button :to="{ name: 'DiscoverProjectsPage' }" variant="outline-primary"><i class="fas fa-search-plus" aria-hidden="true"/> Discover Projects</b-button>
+    </sub-page-header>
 
     <div v-if="!loading">
       <b-overlay :show="!hasProjects" rounded="sm" opacity="0.6" no-center>
@@ -79,11 +74,7 @@ limitations under the License.
                              class="flex-grow-1 my-summary-card"/>
           </b-col>
         </b-row>
-        <b-row class="my-4">
-          <b-col class="my-summary-card">
-            <event-history-chart v-if="!loading" :availableProjects="projects"></event-history-chart>
-          </b-col>
-        </b-row>
+        <hr/>
         <b-row class="my-4">
         <b-col v-for="(proj, index) in projects" :key="proj.projectName"
                cols="12" md="6" xl="4"
@@ -105,20 +96,20 @@ limitations under the License.
   import NumSkills from './NumSkills';
   import BadgesNumCard from './BadgesNumCard';
   import LastEarnedCard from './LastEarnedCard';
-  import EventHistoryChart from './EventHistoryChart';
   import MyProgressService from './MyProgressService';
   import LoadingContainer from '../utils/LoadingContainer';
+  import SubPageHeader from '../utils/pages/SubPageHeader';
 
   export default {
     name: 'MyProgressPage',
     components: {
+      SubPageHeader,
       NoContent2,
       LastEarnedCard,
       BadgesNumCard,
       NumSkills,
       InfoSnapshotCard,
       ProjectLinkCard,
-      EventHistoryChart,
       LoadingContainer,
     },
     data() {
@@ -199,5 +190,16 @@ limitations under the License.
 }
 .my-summary-card {
   min-width: 17rem !important;
+}
+hr {
+  border:none;
+  height: 20px;
+  width: 90%;
+  height: 50px;
+  margin-top: 0;
+  border-bottom: 1px solid rgba(45, 135, 121, 0.31);
+  box-shadow: 0 10px 10px -10px rgba(45, 134, 120, 0.15);
+  margin: -50px auto 10px;
+  width: 90%;
 }
 </style>

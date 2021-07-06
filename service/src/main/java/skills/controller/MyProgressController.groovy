@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import skills.PublicProps
 import skills.auth.UserInfoService
+import skills.controller.result.model.AvailableProjectResult
 import skills.metrics.MetricsService
 import skills.profile.EnableCallStackProf
 import skills.services.AdminUsersService
@@ -35,9 +36,6 @@ import javax.servlet.http.HttpServletRequest
 @Slf4j
 @EnableCallStackProf
 class MyProgressController {
-
-    @Autowired
-    AdminUsersService adminUsersService
 
     @Autowired
     MetricsService metricsServiceNew
@@ -65,6 +63,15 @@ class MyProgressController {
                                            @RequestParam(name = "version", required = false) Integer version) {
         String userId = userInfoService.getCurrentUserId()
         return skillsLoader.loadMyProgressSummary(userId, getProvidedVersionOrReturnDefault(version))
+    }
+
+    @RequestMapping(value = "/availableProjects", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @CompileStatic
+    @Profile
+    List<AvailableProjectResult> getAvailableProjects(HttpServletRequest request, @RequestParam(name = "version", required = false) Integer version) {
+        String userId = userInfoService.getCurrentUserId();
+        return skillsLoader.getAvailableProjects(userId, getProvidedVersionOrReturnDefault(version));
     }
 
     private int getProvidedVersionOrReturnDefault(Integer versionParam) {

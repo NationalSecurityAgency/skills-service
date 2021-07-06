@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillExceptionBuilder
+import skills.controller.result.model.AvailableProjectResult
 import skills.controller.result.model.GlobalBadgeLevelRes
 import skills.controller.result.model.SettingsResult
 import skills.services.BadgeUtils
@@ -129,6 +130,20 @@ class SkillsLoader {
             res = levels.collect({ it.level }).max()
         }
         return res
+    }
+
+
+    @Profile
+    @Transactional(readOnly = true)
+    List<AvailableProjectResult> getAvailableProjects(String userId, Integer version = -1) {
+
+        List<ProjDef> prodProjectDefs = projDefRepo.getProjectsInProduction()
+        List<AvailableProjectResult> res = prodProjectDefs.collect { ProjDef projDef ->
+            new AvailableProjectResult(
+                    totalPoints: calculateTotalPointsForProject(projDef, version),
+                    numSubjects: projDef.su
+            )
+        }
     }
 
     @Profile

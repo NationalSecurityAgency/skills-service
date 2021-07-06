@@ -168,6 +168,7 @@ describe('Navigation Tests', () => {
       cy.loginAsProxyUser()
     });
     cy.loginAsProxyUser()
+
   });
 
   it('badges card - gems and not global badges', function () {
@@ -589,5 +590,16 @@ describe('Navigation Tests', () => {
     cy.wait('@allSkillEventsForUser');
     cy.get('[data-cy="breadcrumb-Progress And Rankings"]').contains('Progress And Rankings').should('be.visible');
   });
+
+
+  it.only('many projects', function () {
+    for (let i = 2; i <= 8; i += 1) {
+      cy.createProject(i);
+      cy.enableProdMode(i);
+    }
+
+    cy.visit('/');
+  });
+
 });
 

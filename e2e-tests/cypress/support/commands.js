@@ -83,6 +83,14 @@ Cypress.Commands.add("matchSnapshotImage", (subject, maybeName, commandOptions) 
     cy.matchImageSnapshot(subject, maybeName, commandOptions);
 })
 
+Cypress.Commands.add("enableProdMode", (projNum) => {
+    cy.request('POST', `/admin/projects/proj${projNum}/settings/production.mode.enabled`, {
+        projectId: `proj${projNum}`,
+        setting: 'production.mode.enabled',
+        value: 'true'
+    });
+})
+
 Cypress.Commands.add("register", (user, pass, grantRoot) => {
     return cy.request(`/app/users/validExistingDashboardUserId/${user}`)
         .then((response) => {

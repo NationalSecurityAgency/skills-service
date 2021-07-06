@@ -289,8 +289,25 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
     @Nullable
     List<ProjSummaryResult> getProjectSummariesInProduction()
 
-    @Query("select p from ProjDef p, Setting s where p.projectId = s.projectId and s.setting = 'production.mode.enabled' and s.value = 'true' order by p.projectId")
-    List<ProjDef> getProjectsInProduction()
+    static interface
+    @Query(value="""
+                SELECT
+                    pd.project_id AS projectId,
+                    pd.name AS name,
+                    pd.total_points AS totalPoints,
+                    COALESCE(skills.skillCount, 0) AS numSkills,
+                    COALESCE(badges.badgeCount, 0) AS numBadges,
+                    COALESCE(subjects.subjectCount, 0) AS numSubjects,
+                    events.latest AS lastReportedSkill,
+                    pd.created,
+                FROM project_definition pd
+                LEFT JOIN (SELECT project_id, MAX(event_time) AS latest FROM user_events GROUP BY project_id) events ON events.project_id = pd.project_id
+                LEFT JOIN (SELECT project_id, COUNT(id) AS skillCount, MAX(updated) AS skillUpdated FROM skill_definition WHERE type = 'Skill' GROUP BY project_id) skills ON skills.project_id = pd.project_id
+                LEFT JOIN (SELECT project_id, COUNT(id) AS badgeCount, MAX(updated) AS badgeUpdated FROM skill_definition WHERE type = 'Badge' GROUP BY project_id) badges ON badges.project_id = pd.project_id
+                LEFT JOIN (SELECT project_id, COUNT(id) AS subjectCount, MAX(updated) AS subjectUpdated FROM skill_definition WHERE type = 'Subject' GROUP BY project_id) subjects ON subjects.project_id = pd.project_id
+            """, nativeQuery = true)
+    @Nullable
+    List<ProjDef> getAvailableProjectSummaries()
 
     @Query(value="""
             SELECT pd.project_id as projectId,

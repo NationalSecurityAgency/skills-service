@@ -72,6 +72,8 @@ const ProjectMetrics = () => import(/* webpackChunkName: 'ProjectMetrics' */'@//
 const MetricsPageNav = () => import(/* webpackChunkName: 'MetricsPageNav' */'@//components/metrics/MetricsPageNav');
 const MyProgressPage = () => import(/* webpackChunkName: 'myProgressPage' */'@//components/myProgress/MyProgressPage');
 const MyProgress = () => import(/* webpackChunkName: 'myProgress' */'@//components/myProgress/MyProgress');
+const MyUsagePage = () => import(/* webpackChunkName: 'myUsage' */'@//components/myProgress/usage/MyUsagePage');
+const DiscoverProjectsPage = () => import(/* webpackChunkName: 'discoverProjects' */'@//components/myProgress/discover/DiscoverProjectsPage');
 const MyProjectSkillsPage = () => import(/* webpackChunkName: 'myProjectSkillsPage' */'@//components/myProgress/MyProjectSkillsPage');
 const ProjectErrorsPage = () => import(/* webpackChunkName: 'projectErrorsPage' */'@//components/projects/ProjectErrors');
 
@@ -210,6 +212,20 @@ const router = new Router({
         name: 'MyProjectSkills',
         path: 'projects/:projectId',
         component: MyProjectSkillsPage,
+        meta: {
+          requiresAuth: true, nonAdmin: true,
+        },
+      }, {
+        name: 'MyUsagePage',
+        path: 'usage',
+        component: MyUsagePage,
+        meta: {
+          requiresAuth: true, nonAdmin: true,
+        },
+      }, {
+        name: 'DiscoverProjectsPage',
+        path: 'discover',
+        component: DiscoverProjectsPage,
         meta: {
           requiresAuth: true, nonAdmin: true,
         },
