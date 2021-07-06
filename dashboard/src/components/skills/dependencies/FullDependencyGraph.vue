@@ -138,7 +138,8 @@ limitations under the License.
         this.network = new Network(container, data, this.displayOptions);
       },
       buildData() {
-        this.graph.nodes.forEach((node) => {
+        const sortedNodes = this.graph.nodes.sort((a, b) => a.id - b.id);
+        sortedNodes.forEach((node) => {
           const isCrossProject = node.projectId !== this.$route.params.projectId;
           const newNode = {
             id: node.id,
@@ -156,7 +157,8 @@ limitations under the License.
           }
           this.nodes.push(newNode);
         });
-        this.graph.edges.forEach((edge) => {
+        const sortedEdges = this.graph.edges.sort((a, b) => a.toId - b.toId);
+        sortedEdges.forEach((edge) => {
           this.edges.push({
             from: edge.fromId,
             to: edge.toId,
