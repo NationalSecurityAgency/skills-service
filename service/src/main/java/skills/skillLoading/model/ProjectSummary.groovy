@@ -35,8 +35,9 @@ class ProjectSummary {
         this.projectName = projectSummaryResult.projectName
         this.points = projectSummaryResult.points ?: 0
         this.totalPoints = projectSummaryResult.totalPoints ?: 0
-        this.totalUsers = projectSummaryResult.totalUsers ?: 0
-        this.rank = projectSummaryResult.rank ?: 0
+        // if there are no points, then set totalUsers and rank to totalUsers+1, b/c they are last but not included in the results
+        this.totalUsers = projectSummaryResult.points > 0 ? projectSummaryResult.totalUsers : projectSummaryResult.totalUsers + 1
+        this.rank = projectSummaryResult.points > 0 ? projectSummaryResult.rank : projectSummaryResult.totalUsers + 1
         return this
     }
 }
