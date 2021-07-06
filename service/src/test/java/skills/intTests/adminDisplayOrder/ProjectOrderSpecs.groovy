@@ -22,7 +22,7 @@ import skills.intTests.utils.SkillsService
 class ProjectOrderSpecs extends DefaultIntSpec {
 
     String rootOne = "jh@dojo.com"
-    String rootTwo = "bob@email.foo"
+    String rootTwo = "bob@email.com"
     SkillsService rootServiceOne
     SkillsService rootServiceTwo
 

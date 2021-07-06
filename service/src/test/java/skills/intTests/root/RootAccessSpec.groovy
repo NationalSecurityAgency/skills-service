@@ -31,7 +31,7 @@ class RootAccessSpec extends DefaultIntSpec {
     SkillsService rootSkillsService
     String nonRootUserId = 'foo@bar.com'
     SkillsService nonRootSkillsService
-    String secondRoot = "bob@email.foo"
+    String secondRoot = "bob@email.com"
     SkillsService secondRootSkillService
 
     def setup() {
