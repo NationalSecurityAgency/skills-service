@@ -592,38 +592,5 @@ describe('Navigation Tests', () => {
   });
 
 
-  it.only('many projects', function () {
-    for (let i = 2; i <= 8; i += 1) {
-      cy.createProject(i);
-      cy.enableProdMode(i);
-    }
-
-    cy.visit('/');
-  });
-
-  it('no prod projects', function () {
-    cy.loginAsRootUser();
-    cy.request('POST', '/admin/projects/Inception/settings/production.mode.enabled', {
-      projectId: 'Inception',
-      setting: 'production.mode.enabled',
-      value: 'false'
-    });
-    cy.request('POST', '/admin/projects/proj1/settings/production.mode.enabled', {
-      projectId: 'proj1',
-      setting: 'production.mode.enabled',
-      value: 'false'
-    });
-
-    cy.fixture('vars.json').then((vars) => {
-      cy.request('POST', '/logout');
-      cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);
-      cy.loginAsProxyUser()
-    });
-    cy.loginAsProxyUser()
-
-
-    cy.visit('/');
-  });
-
 });
 
