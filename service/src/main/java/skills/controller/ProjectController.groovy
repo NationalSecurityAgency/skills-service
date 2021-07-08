@@ -24,6 +24,7 @@ import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
+import skills.controller.request.model.ContactUsersCriteria
 import skills.controller.request.model.ProjectExistsRequest
 import skills.controller.request.model.ProjectRequest
 import skills.controller.result.model.CustomIconResult
@@ -137,5 +138,11 @@ class ProjectController {
     @ResponseBody
     List<Integer> listVersions(@PathVariable("id") String projectId) {
         return skillsAdminService.getUniqueSkillVersionList(projectId)
+    }
+
+    @RequestMapping(value = "/projects/{id}/contactUsersCount", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @ResponseBody
+    Integer countMatchingUsers(@PathVariable("id") String projectId, @RequestBody ContactUsersCriteria contactUsersCriteria) {
+
     }
 }

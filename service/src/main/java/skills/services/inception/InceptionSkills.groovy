@@ -21,6 +21,8 @@ import skills.controller.request.model.SkillRequest
 import skills.storage.model.SkillDef
 
 import static skills.services.inception.InceptionProjectService.*
+import static skills.services.inception.InceptionProjectService.inceptionProjectId
+import static skills.services.inception.InceptionProjectService.subjectProjectId
 
 @Component
 class InceptionSkills {
@@ -264,6 +266,13 @@ Approval requests can be located on the ``Self Report`` page, navigate to ``Proj
                         pointIncrementInterval : 60 * 12,
                         numMaxOccurrencesIncrementInterval: 1,
                         description: '''The Project Client Display Preview allows a Project Administrator to preview what their training profile will look like to a user. The Project Client Display Preview button is located directly below the Project ID, on the top left when viewing a specific Project in the Dashboard.'''
+                ),
+                new SkillRequest(name: 'Visit Contact Users Page', skillId: 'VisitContactUsers', subjectId: subjectProjectId, projectId: inceptionProjectId,
+                        pointIncrement: 15,
+                        numPerformToCompletion: 2,
+                        pointIncrementInterval: 60 * 12,
+                        numMaxOccurrencesIncrementInterval: 1,
+                        description: '''The Contact Users Page allows a Project Administrator to email the users of a Project by employing a variety of different filters to select all or some of the Project users.'''
                 )
 
         ]
