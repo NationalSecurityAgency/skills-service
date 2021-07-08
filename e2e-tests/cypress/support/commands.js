@@ -89,7 +89,12 @@ Cypress.Commands.add("enableProdMode", (projNum) => {
         setting: 'production.mode.enabled',
         value: 'true'
     });
-})
+});
+
+Cypress.Commands.add("addToMyProjects", (projNum) => {
+    cy.request('POST', `/api/myprojects/proj${projNum}`, {});
+});
+
 
 Cypress.Commands.add("register", (user, pass, grantRoot) => {
     return cy.request(`/app/users/validExistingDashboardUserId/${user}`)

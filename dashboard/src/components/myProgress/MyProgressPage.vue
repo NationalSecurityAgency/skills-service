@@ -17,7 +17,7 @@ limitations under the License.
   <loading-container :is-loading="loading" class="container-fluid">
 
     <sub-page-header title="My Projects" class="pt-4">
-      <b-button :to="{ name: 'DiscoverProjectsPage' }" variant="outline-primary"><i class="fas fa-cog" aria-hidden="true"/> Manage My Projects</b-button>
+      <b-button :to="{ name: 'DiscoverProjectsPage' }" variant="outline-primary" data-cy="manageMyProjsBtn"><i class="fas fa-cog" aria-hidden="true"/> Manage My Projects</b-button>
     </sub-page-header>
 
     <div v-if="!loading">

@@ -224,7 +224,7 @@ const router = new Router({
         },
       }, {
         name: 'DiscoverProjectsPage',
-        path: 'discover',
+        path: 'manage-my-projects',
         component: DiscoverProjectsPage,
         meta: {
           requiresAuth: true, nonAdmin: true,
