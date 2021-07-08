@@ -90,7 +90,7 @@ class UserInfoController {
     @RequestMapping(value = "/userInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @CrossOrigin(allowCredentials = 'true')
     ResponseEntity<UserInfoRes> getUserInfo() {
-        UserInfoRes res = 'null';
+        def res = 'null';
         UserInfo currentUser = loadCurrentUser()
         HttpHeaders headers = new HttpHeaders()
         if (currentUser) {
