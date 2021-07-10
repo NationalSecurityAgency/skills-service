@@ -175,12 +175,21 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
             ua.level is null and
             ua.userId= :userId and
             skillDef.skillId = ua.skillId and (
-                (skillDef.projectId = ua.projectId and skillDef.projectId IN (
-                    select s.projectId
-                    from Setting s
-                    where s.projectId = skillDef.projectId
-                      and s.setting = 'production.mode.enabled'
-                      and s.value = 'true')
+                (
+                    skillDef.projectId = ua.projectId and 
+                    skillDef.projectId IN 
+                    (
+                        select s.projectId
+                        from Setting s
+                        where s.projectId = skillDef.projectId
+                          and s.setting = 'production.mode.enabled'
+                          and s.value = 'true'
+                    ) and
+                    skillDef.projectId IN (
+                        select s.projectId
+                        from Setting s, User uu
+                        where (s.setting = 'my_project' and uu.userId=:userId and uu.id = s.userRefId and s.projectId = skillDef.projectId)
+                    )
                 ) OR 
                 (skillDef.projectId is null and ua.projectId is null)
             ) and
@@ -392,13 +401,6 @@ where ua.projectId = :projectId and ua.skillId = :skillId
 ''')
     SkillStatsItem calculateNumAchievedAndLastAchieved(@Param("projectId") String projectId, @Param("skillId") String skillId)
 
-    @Query('''select count(ua)
-      from SkillDef skillDef, UserAchievement ua 
-      where 
-        ua.level is null and ua.userId=?1 and 
-        skillDef.skillId = ua.skillId and skillDef.projectId = ua.projectId and
-        skillDef.type='Skill' ''')
-    int countAchievedSkillsForUser(String userId)
 
     @Query(value = '''select count(ua) as totalCount,
                       sum(case when ua.achievedOn >= (current_date - 30) then 1 end) as monthCount,
@@ -411,11 +413,20 @@ where ua.projectId = :projectId and ua.skillId = :skillId
             ua.userId= :userId and
             skillDef.skillId = ua.skillId and
             skillDef.projectId = ua.projectId and
-            skillDef.type='Skill' and skillDef.projectId IN (
+            skillDef.type='Skill' and 
+            skillDef.projectId IN 
+            (
                 select s.projectId
                 from Setting s
                 where s.projectId = skillDef.projectId
                   and s.setting = 'production.mode.enabled'
-                  and s.value = 'true')''')
+                  and s.value = 'true'
+            ) and 
+            skillDef.projectId IN (
+                select s.projectId
+                from Setting s, User uu
+                where (s.setting = 'my_project' and uu.userId=:userId and uu.id = s.userRefId and s.projectId = skillDef.projectId)
+            ) 
+    ''')
     AchievedSkillsCount countAchievedProductionSkillsForUserByDayWeekMonth(@Param('userId') String userId)
 }

@@ -94,7 +94,9 @@ Cypress.Commands.add("enableProdMode", (projNum) => {
 Cypress.Commands.add("addToMyProjects", (projNum) => {
     cy.request('POST', `/api/myprojects/proj${projNum}`, {});
 });
-
+Cypress.Commands.add("removeFromMyProjects", (projNum) => {
+    cy.request('DELETE', `/api/myprojects/proj${projNum}`, {});
+});
 
 Cypress.Commands.add("register", (user, pass, grantRoot) => {
     return cy.request(`/app/users/validExistingDashboardUserId/${user}`)

@@ -54,10 +54,9 @@ limitations under the License.
       MetricsCard, MetricsOverlay, TimeLengthSelector, Multiselect,
     },
     props: {
-      projectIds: {
+      availableProjects: {
         type: Array,
-        required: false,
-        default: null,
+        required: true,
       },
       title: {
         type: String,

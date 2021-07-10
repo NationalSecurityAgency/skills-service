@@ -144,7 +144,7 @@ class SkillsLoader {
             new AvailableProjectResult(
                     projectId: summary.getProjectId(),
                     name: summary.getName(),
-                    totalPoints: calculateTotalPointsForProject(summary.getProjectId(), version),
+                    totalPoints: summary.getTotalPoints(),
                     numSubjects: summary.getNumSubjects(),
                     numSkills: summary.getNumSkills(),
                     numBadges: summary.getNumBadges(),
@@ -169,7 +169,7 @@ class SkillsLoader {
             myProgressSummary.numProjectsContributed += summary.points > 0 ? 1 : 0
         }
 
-        BadgeCount badgeCount = skillDefRepo.getProductionBadgesCount()
+        BadgeCount badgeCount = skillDefRepo.getProductionBadgesCount(userId)
         myProgressSummary.totalBadges = badgeCount.totalCount ?: 0
         myProgressSummary.globalBadgeCount = badgeCount.globalCount ?: 0
         myProgressSummary.gemCount = badgeCount.gemCount ?: 0
@@ -179,7 +179,7 @@ class SkillsLoader {
         myProgressSummary.numAchievedGemBadges = achievedBadgeCounts.gemCount ?: 0
         myProgressSummary.numAchievedGlobalBadges = achievedBadgeCounts.globalCount ?: 0
 
-        myProgressSummary.totalSkills = skillDefRepo.countTotalProductionSkills()
+        myProgressSummary.totalSkills = skillDefRepo.countTotalProductionSkills(userId)
         AchievedSkillsCount achievedSkillsCount = achievedLevelRepository.countAchievedProductionSkillsForUserByDayWeekMonth(userId)
         myProgressSummary.numAchievedSkills = achievedSkillsCount.totalCount
         myProgressSummary.numAchievedSkillsLastMonth = achievedSkillsCount.monthCount ?: 0
@@ -579,12 +579,6 @@ class SkillsLoader {
     @Profile
     private int calculateTotalForSkillDef(ProjDef projDef, SkillDefParent subjectDefinition, int version) {
         Integer res = skillDefRepo.calculateTotalPointsForSkill(projDef.projectId, subjectDefinition.skillId, SkillRelDef.RelationshipType.RuleSetDefinition, version)
-        return res ?: 0
-    }
-
-    @Profile
-    private int calculateTotalPointsForProject(String projectId, int version) {
-        Integer res = skillDefRepo.calculateTotalPointsForProject(projectId, SkillRelDef.RelationshipType.RuleSetDefinition, version)
         return res ?: 0
     }
 

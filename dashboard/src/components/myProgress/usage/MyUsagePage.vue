@@ -18,7 +18,8 @@ limitations under the License.
       <sub-page-header title="My Usage" class="pt-4">
       </sub-page-header>
 
-      <b-row class="my-4">
+      <skills-spinner :is-loading="loading" />
+      <b-row v-if="!loading" class="my-4">
         <b-col class="my-summary-card">
           <event-history-chart :availableProjects="projects"></event-history-chart>
         </b-col>
@@ -29,11 +30,37 @@ limitations under the License.
 <script>
   import SubPageHeader from '../../utils/pages/SubPageHeader';
   import EventHistoryChart from './EventHistoryChart';
+  import MyProgressService from '../MyProgressService';
+  import SkillsSpinner from '../../utils/SkillsSpinner';
 
   export default {
     name: 'MyUsagePage',
-    components: { EventHistoryChart, SubPageHeader },
-    props: ['projects'],
+    components: { SkillsSpinner, EventHistoryChart, SubPageHeader },
+    data() {
+      return {
+        loading: true,
+        projects: [],
+      };
+    },
+    mounted() {
+      if (this.$route.params.projects) {
+        this.projects = this.$route.params.projects;
+        this.loading = false;
+      } else {
+        this.loadProjects();
+      }
+    },
+    methods: {
+      loadProjects() {
+        MyProgressService.loadMyProgressSummary()
+          .then((res) => {
+            this.myProgressSummary = res;
+            this.projects = this.myProgressSummary.projectSummaries;
+          }).finally(() => {
+            this.loading = false;
+          });
+      },
+    },
   };
 </script>
 

@@ -105,6 +105,7 @@ class MyProgressSpec extends DefaultIntSpec {
 
         // enable "production mode"
         skillsService.changeSetting(proj1.projectId, PROD_MODE, [projectId: proj1.projectId, setting: PROD_MODE, value: "true"])
+        skillsService.addMyProject(proj1.projectId)
 
         def res2 = skillsService.getMyProgressSummary()
 
@@ -226,6 +227,7 @@ class MyProgressSpec extends DefaultIntSpec {
 
         // enable "production mode"
         skillsService.changeSetting(proj1.projectId, PROD_MODE, [projectId: proj1.projectId, setting: PROD_MODE, value: "true"])
+        skillsService.addMyProject(proj1.projectId)
 
         when:
         def res = skillsService.getMyProgressSummary()
@@ -272,6 +274,7 @@ class MyProgressSpec extends DefaultIntSpec {
 
         // enable "production mode"
         skillsService.changeSetting(proj1.projectId, PROD_MODE, [projectId: proj1.projectId, setting: PROD_MODE, value: "true"])
+        skillsService.addMyProject(proj1.projectId)
 
         when:
         def res = skillsService.getMyProgressSummary()
@@ -305,6 +308,7 @@ class MyProgressSpec extends DefaultIntSpec {
 
         // enable "production mode"
         skillsService.changeSetting(projId, PROD_MODE, [projectId: projId, setting: PROD_MODE, value: "true"])
+        skillsService.addMyProject(projId)
 
         def badge = SkillsFactory.createBadge()
         skillsService.createBadge(badge)
@@ -379,6 +383,7 @@ class MyProgressSpec extends DefaultIntSpec {
 
         // enable "production mode"
         skillsService.changeSetting(projId, PROD_MODE, [projectId: projId, setting: PROD_MODE, value: "true"])
+        skillsService.addMyProject(projId)
 
         def badge = SkillsFactory.createBadge()
         skillsService.createBadge(badge)
@@ -400,6 +405,7 @@ class MyProgressSpec extends DefaultIntSpec {
 
         // enable "production mode"
         skillsService.changeSetting(projId2, PROD_MODE, [projectId: projId2, setting: PROD_MODE, value: "true"])
+        skillsService.addMyProject(projId2)
 
         def badge2 = SkillsFactory.createBadge(2)
         skillsService.createBadge(badge2)
@@ -483,6 +489,7 @@ class MyProgressSpec extends DefaultIntSpec {
 
         // enable "production mode"
         skillsService.changeSetting(projId, PROD_MODE, [projectId: projId, setting: PROD_MODE, value: "true"])
+        skillsService.addMyProject(projId)
 
         when:
         def mySummary0 = skillsService.getMyProgressSummary(0)
@@ -534,6 +541,7 @@ class MyProgressSpec extends DefaultIntSpec {
 
         // enable "production mode"
         skillsService.changeSetting(projId, PROD_MODE, [projectId: projId, setting: PROD_MODE, value: "true"])
+        skillsService.addMyProject(projId)
 
         when:
         def mySummary0 = skillsService.getMyProgressSummary(0)
@@ -588,6 +596,7 @@ class MyProgressSpec extends DefaultIntSpec {
 
         // enable "production mode"
         skillsService.changeSetting(projId, PROD_MODE, [projectId: projId, setting: PROD_MODE, value: "true"])
+        skillsService.addMyProject(projId)
 
         when:
         def mySummary0 = skillsService.getMyProgressSummary(0)
