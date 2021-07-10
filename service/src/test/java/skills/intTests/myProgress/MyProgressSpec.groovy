@@ -472,55 +472,7 @@ class MyProgressSpec extends DefaultIntSpec {
         }
     }
 
-    def "my progress summary - create skills with different versions; only the correct skills are returned when filtered by version 1"() {
-        String projId = SkillsFactory.defaultProjId
-        List<Map> skills = SkillsFactory.createSkillsWithDifferentVersions([0, 0, 1, 1, 1, 2])
-        skills.each{
-            it.pointIncrement = 20
-        }
-        def subject = SkillsFactory.createSubject()
-
-        skillsService.createProject(SkillsFactory.createProject())
-        skillsService.createSubject(subject)
-        skillsService.createSkills(skills)
-        skillsService.assignDependency([projectId: projId, skillId: skills.get(1).skillId, dependentSkillId: skills.get(0).skillId])
-        skillsService.assignDependency([projectId: projId, skillId: skills.get(2).skillId, dependentSkillId: skills.get(1).skillId])
-        skillsService.addSkill([projectId: projId, skillId: skills.get(0).skillId], userId, new Date())
-
-        // enable "production mode"
-        skillsService.changeSetting(projId, PROD_MODE, [projectId: projId, setting: PROD_MODE, value: "true"])
-        skillsService.addMyProject(projId)
-
-        when:
-        def mySummary0 = skillsService.getMyProgressSummary(0)
-        def mySummary1 = skillsService.getMyProgressSummary(1)
-        def mySummary2 = skillsService.getMyProgressSummary(2)
-
-        then:
-
-        mySummary0
-        mySummary0.projectSummaries
-        mySummary0.projectSummaries.size() == 1
-        mySummary0.projectSummaries.find{ it.projectId == projId }
-        mySummary0.projectSummaries.find{ it.projectId == projId }.points == 20
-        mySummary0.projectSummaries.find{ it.projectId == projId }.totalPoints == 40
-
-        mySummary1
-        mySummary1.projectSummaries
-        mySummary1.projectSummaries.size() == 1
-        mySummary1.projectSummaries.find{ it.projectId == projId }
-        mySummary1.projectSummaries.find{ it.projectId == projId }.points == 20
-        mySummary1.projectSummaries.find{ it.projectId == projId }.totalPoints == 100
-
-        mySummary2
-        mySummary2.projectSummaries
-        mySummary2.projectSummaries.size() == 1
-        mySummary2.projectSummaries.find{ it.projectId == projId }
-        mySummary2.projectSummaries.find{ it.projectId == projId }.points == 20
-        mySummary2.projectSummaries.find{ it.projectId == projId }.totalPoints == 120
-    }
-
-    def "my progress summary - user points DO NOT respect the version - if user earns those points they are proudly displayed in all versions"() {
+    def "my progress summary - earned and total points they are proudly displayed for all skill versions"() {
         String projId = SkillsFactory.defaultProjId
         List<Map> skills = SkillsFactory.createSkillsWithDifferentVersions([0, 0, 1, 1, 1, 2])
         skills.each{
@@ -555,14 +507,14 @@ class MyProgressSpec extends DefaultIntSpec {
         mySummary0.projectSummaries.size() == 1
         mySummary0.projectSummaries.find{ it.projectId == projId }
         mySummary0.projectSummaries.find{ it.projectId == projId }.points == 120
-        mySummary0.projectSummaries.find{ it.projectId == projId }.totalPoints == 40
+        mySummary0.projectSummaries.find{ it.projectId == projId }.totalPoints == 120
 
         mySummary1
         mySummary1.projectSummaries
         mySummary1.projectSummaries.size() == 1
         mySummary1.projectSummaries.find{ it.projectId == projId }
         mySummary1.projectSummaries.find{ it.projectId == projId }.points == 120
-        mySummary1.projectSummaries.find{ it.projectId == projId }.totalPoints == 100
+        mySummary1.projectSummaries.find{ it.projectId == projId }.totalPoints == 120
 
         mySummary2
         mySummary2.projectSummaries
@@ -610,14 +562,14 @@ class MyProgressSpec extends DefaultIntSpec {
         mySummary0.projectSummaries.size() == 1
         mySummary0.projectSummaries.find{ it.projectId == projId }
         mySummary0.projectSummaries.find{ it.projectId == projId }.points == 80
-        mySummary0.projectSummaries.find{ it.projectId == projId }.totalPoints == 100
+        mySummary0.projectSummaries.find{ it.projectId == projId }.totalPoints == 300
 
         mySummary1
         mySummary1.projectSummaries
         mySummary1.projectSummaries.size() == 1
         mySummary1.projectSummaries.find{ it.projectId == projId }
         mySummary1.projectSummaries.find{ it.projectId == projId }.points == 80
-        mySummary1.projectSummaries.find{ it.projectId == projId }.totalPoints == 250
+        mySummary1.projectSummaries.find{ it.projectId == projId }.totalPoints == 300
 
         mySummary2
         mySummary2.projectSummaries

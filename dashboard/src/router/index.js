@@ -217,7 +217,7 @@ const router = new Router({
         },
       }, {
         name: 'MyUsagePage',
-        path: 'usage',
+        path: 'my-usage',
         component: MyUsagePage,
         meta: {
           requiresAuth: true, nonAdmin: true,

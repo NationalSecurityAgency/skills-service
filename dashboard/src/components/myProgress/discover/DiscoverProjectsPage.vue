@@ -50,11 +50,15 @@ limitations under the License.
               label="Search:"
               label-for="searchProjectsInput"
             >
-              <b-input-group id="searchProjectsInput">
+              <b-input-group>
                 <template #append>
-                  <b-button variant="outline-secondary" @click="searchByName('')" data-cy="clearSearch" aria-label="clear search button"><i class="fas fa-times" aria-hidden="true"/></b-button>
+                  <b-button variant="outline-secondary"
+                            @click="searchByName('')"
+                            data-cy="clearSearch"
+                            aria-label="clear search button"><i class="fas fa-times" aria-hidden="true"/></b-button>
                 </template>
-                <b-input v-focus v-model="searchValue" @input="searchByName" data-cy="searchInput" aria-label="search for projects to pin"></b-input>
+                <b-input id="searchProjectsInput" v-focus v-model="searchValue" @input="searchByName" data-cy="searchInput"
+aria-label="search for projects to pin"></b-input>
               </b-input-group>
             </b-form-group>
           </b-col>

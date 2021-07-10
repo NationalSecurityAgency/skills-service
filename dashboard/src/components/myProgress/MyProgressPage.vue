@@ -30,7 +30,7 @@ limitations under the License.
         <b-card class="mb-5 mt-2 px-5">
           <div>Please click</div>
           <div class="my-2">
-          <b-button :to="{ name: 'DiscoverProjectsPage' }" variant="outline-primary" data-cy="manageMyProjsBtn" :disabled="true"><i class="fas fa-cog" aria-hidden="true"/> Manage My Projects</b-button>
+          <b-button :to="{ name: 'DiscoverProjectsPage' }" variant="outline-primary" :disabled="true"><i class="fas fa-cog" aria-hidden="true"/> Manage My Projects</b-button>
           </div>
           <div>
           on the <b>top-right</b> to start adding adding projects to <b class="text-uppercase">My Projects</b> view.

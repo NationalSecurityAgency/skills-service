@@ -131,90 +131,17 @@ describe('Accessibility Tests', () => {
     // setup a project for the landing page
     const dateFormatter = value => moment.utc(value).format('YYYY-MM-DD[T]HH:mm:ss[Z]');
     const timeFromNowFormatter = (value) => dayjs(value).startOf('hour').fromNow();
-    cy.request('POST', '/app/projects/proj1', {
-      projectId: 'proj1',
-      name: 'Project 1'
-    });
-    cy.request('POST', '/admin/projects/proj1/settings/production.mode.enabled', {
-      projectId: 'proj1',
-      setting: 'production.mode.enabled',
-      value: 'true'
-    });
-    cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
-      projectId: 'proj1',
-      subjectId: 'subj1',
-      name: 'Subject 1',
-      helpUrl: 'http://doHelpOnThisSubject.com',
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-    });
-    cy.request('POST', '/admin/projects/proj1/subjects/subj2', {
-      projectId: 'proj1',
-      subjectId: 'subj2',
-      name: 'Subject 2'
-    });
-    cy.request('POST', '/admin/projects/proj1/subjects/subj3', {
-      projectId: 'proj1',
-      subjectId: 'subj3',
-      name: 'Subject 3'
-    });
-    cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
-      projectId: 'proj1',
-      subjectId: 'subj1',
-      skillId: 'skill1',
-      name: `This is 1`,
-      type: 'Skill',
-      pointIncrement: 100,
-      numPerformToCompletion: 5,
-      pointIncrementInterval: 0,
-      numMaxOccurrencesIncrementInterval: -1,
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-      version: 0,
-      helpUrl: 'http://doHelpOnThisSkill.com'
-    });
+    cy.createProject(1);
+    cy.enableProdMode(1);
+    cy.addToMyProjects(1)
+    cy.createSubject(1, 1);
+    cy.createSubject(1, 2);
+    cy.createSubject(1, 3);
+    cy.createSkill(1, 1, 1);
+    cy.createSkill(1, 1, 2);
+    cy.createSkill(1, 1, 3);
+    cy.createSkill(1, 1, 4);
 
-    cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill2`, {
-      projectId: 'proj1',
-      subjectId: 'subj1',
-      skillId: 'skill2',
-      name: `This is 2`,
-      type: 'Skill',
-      pointIncrement: 100,
-      numPerformToCompletion: 5,
-      pointIncrementInterval: 0,
-      numMaxOccurrencesIncrementInterval: -1,
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-      version: 0,
-      helpUrl: 'http://doHelpOnThisSkill.com'
-    });
-    cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill3`, {
-      projectId: 'proj1',
-      subjectId: 'subj1',
-      skillId: 'skill3',
-      name: `This is 3`,
-      type: 'Skill',
-      pointIncrement: 100,
-      numPerformToCompletion: 2,
-      pointIncrementInterval: 0,
-      numMaxOccurrencesIncrementInterval: -1,
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-      version: 0,
-      helpUrl: 'http://doHelpOnThisSkill.com'
-    });
-
-    cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill4`, {
-      projectId: 'proj1',
-      subjectId: 'subj1',
-      skillId: 'skill4',
-      name: `This is 4`,
-      type: 'Skill',
-      pointIncrement: 100,
-      numPerformToCompletion: 2,
-      pointIncrementInterval: 0,
-      numMaxOccurrencesIncrementInterval: -1,
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-      version: 0,
-      helpUrl: 'http://doHelpOnThisSkill.com'
-    });
     cy.request('POST', `/admin/projects/proj1/skills/skill4/dependency/skill2`)
 
     cy.request('POST', `/api/projects/proj1/skills/skill1`, {
@@ -248,11 +175,11 @@ describe('Accessibility Tests', () => {
       startDate: dateFormatter(new Date() - 1000 * 60 * 60 * 24 * 7),
       endDate: dateFormatter(new Date() + 1000 * 60 * 60 * 24 * 5),
     });
-    cy.intercept('/api/metrics/allProjectsSkillEventsOverTimeMetricsBuilder**').as('allSkillEventsForUser');
 
-    cy.visit('/');
-    cy.wait('@allSkillEventsForUser');
+    cy.visit('/progress-and-rankings');
     cy.get('[data-cy="breadcrumb-Progress And Rankings"]').contains('Progress And Rankings').should('be.visible');
+    cy.get('[data-cy=numSkillsAvailable]').contains(new RegExp(/^Total: 4$/));
+    cy.get('[data-cy=project-link-proj1]').should('be.visible');
 
     cy.customLighthouse();
     cy.injectAxe()
@@ -604,6 +531,77 @@ describe('Accessibility Tests', () => {
     cy.get('[data-cy=addGlobalBadgeLevel]').click();
     cy.customA11y();
   });
+
+
+  it('manage my projects page', ()=>{
+
+    for (let i = 1; i <= 9; i += 1) {
+      cy.createProject(i);
+      cy.enableProdMode(i);
+      if (i < 4) {
+        cy.addToMyProjects(i)
+      }
+    }
+
+    cy.visit('/progress-and-rankings');
+    cy.injectAxe()
+    cy.get('[data-cy="manageMyProjsBtn"]').click()
+
+    cy.get('[data-cy="allProjectsCount"] [data-cy="mediaInfoCardTitle"]').contains('9');
+
+    cy.wait(1500);
+    cy.customLighthouse();
+    cy.customA11y();
+  });
+
+  it('my usage page', ()=>{
+
+
+    cy.fixture('vars.json').then((vars) => {
+      cy.request('POST', '/logout');
+      cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);
+      cy.loginAsProxyUser()
+    });
+    cy.loginAsProxyUser()
+
+    for (let i = 1; i <= 3; i += 1) {
+      cy.createProject(i);
+      cy.enableProdMode(i);
+      cy.addToMyProjects(i)
+
+      cy.createSubject(i, 1);
+      cy.createSkill(i, 1, 1);
+      cy.createSkill(i, 1, 2);
+    }
+
+    const dateFormat = 'YYYY-MM-DD HH:mm';
+    const user =  Cypress.env('proxyUser');
+    cy.reportSkill(1, 1, user, moment.utc().subtract(2, 'days').format(dateFormat))
+    cy.reportSkill(1, 1, user, 'yesterday')
+    cy.reportSkill(1, 2, user, 'now')
+    cy.reportSkill(1, 2, user, 'yesterday')
+
+    cy.reportSkill(2, 1, user, moment.utc().subtract(5, 'days').format(dateFormat))
+    cy.reportSkill(2, 1, user, moment.utc().subtract(6, 'days').format(dateFormat))
+    cy.reportSkill(2, 2, user, moment.utc().subtract(6, 'days').format(dateFormat))
+    cy.reportSkill(2, 2, user, moment.utc().subtract(3, 'days').format(dateFormat))
+
+
+    cy.visit('/progress-and-rankings');
+    cy.injectAxe()
+    cy.get('[data-cy="viewUsageBtn"]').click()
+
+    cy.contains('Your Daily Usage History');
+    cy.contains('6 months');
+    cy.get('[data-cy=eventHistoryChartProjectSelector]')
+        .contains('This is project 2')
+        .should('be.visible');
+
+    cy.wait(1500);
+    cy.customLighthouse();
+    cy.customA11y();
+  });
+
 
 
 });
