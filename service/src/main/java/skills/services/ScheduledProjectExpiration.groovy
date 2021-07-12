@@ -40,7 +40,7 @@ class ScheduledProjectExpiration {
     @Value('#{"${skills.config.expirationGracePeriod:7}"}')
     int unusedProjectExpirationGracePeriodInDays
 
-    @Scheduled(cron='#{"${skills.config.projectExpirationSchedule:* 4 0 * * *}"}')
+    @Scheduled(cron='#{"${skills.config.projectExpirationSchedule:0 4 0 * * *}"}')
     public void flagUnusedProjectsForDeletion(){
         if (!unusedProjectDeletionEnabled) {
             log.debug("skills.config.unusedProjectDeletionEnabled is set to false, unused project deletion will not occur")
@@ -50,14 +50,8 @@ class ScheduledProjectExpiration {
             log.debug("Email Settings have not configured for this instance, unused project deletion will not occur")
             return
         }
-        log.info("identifying projects that haven't been used in [${unusedProjectExpirationInDays}] days")
-        Date expireOlderThan = new Date().minus(unusedProjectExpirationInDays)
-        projectExpirationService.flagOldProjects(expireOlderThan)
-        log.info("deleting projects whose grace period has expired")
-        Date cutoff = new Date().minus(unusedProjectExpirationGracePeriodInDays)
-        projectExpirationService.deleteUnusedProjects(cutoff)
-        log.info("sending pending deletion notifications to Project Administrators")
-        projectExpirationService.notifyGracePeriodProjectAdmins(cutoff)
+
+        projectExpirationService.flagDeleteAndNotify()
     }
 
 }

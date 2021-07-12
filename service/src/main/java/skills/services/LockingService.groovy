@@ -64,5 +64,8 @@ class LockingService {
         return skillsDBLockRepo.findUserAttrsByUserId(userId?.toLowerCase())
     }
 
+    SkillsDBLock lockForProjectExpiration() {
+        return skillsDBLockRepo.findByLock("project_expiration_lock")
+    }
 
 }

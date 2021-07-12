@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
+import skills.controller.request.model.GlobalSettingsRequest
 import skills.controller.request.model.ProjectSettingsRequest
 import skills.controller.result.model.SettingsResult
 import skills.notify.EmailNotifier
@@ -35,6 +36,7 @@ import skills.storage.model.auth.RoleName
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.UserRoleRepo
 
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -44,6 +46,9 @@ import java.time.temporal.ChronoUnit
 class ProjectExpirationService {
 
     private static final String SETTING_GROUP = "expiration"
+
+    public static final String SCHEDULED_SETTING_GROUP = "scheduled"
+    public static final String EXPIRATION_LAST_RUN_DATE = "expiration_last_run"
 
     @Value('#{"${skills.config.expireUnusedProjectsOlderThan:180}"}')
     int unusedProjectExpirationInDays
@@ -65,6 +70,9 @@ class ProjectExpirationService {
 
     @Autowired
     EmailNotifier notifier
+
+    @Autowired
+    LockingService lockingService
 
     @Transactional
     public void flagOldProjects(Date expireOlderThan) {
@@ -149,6 +157,38 @@ class ProjectExpirationService {
                 )
                 notifier.sendNotification(request)
             }
+        }
+    }
+
+    @Transactional
+    public void flagDeleteAndNotify() {
+        lockingService.lockForProjectExpiration()
+
+        final LocalDate todayLd = LocalDate.now()
+        final String today = todayLd.format(DateTimeFormatter.BASIC_ISO_DATE)
+
+        SettingsResult expirationLastRan = settingService.getGlobalSetting(EXPIRATION_LAST_RUN_DATE, SCHEDULED_SETTING_GROUP)
+
+        if (expirationLastRan && !LocalDate.parse(expirationLastRan.getValue(), DateTimeFormatter.BASIC_ISO_DATE).isBefore(todayLd)) {
+            log.info("project expiration was already run today (potentially by another node), will not run again today")
+            return
+        }
+
+        try {
+            log.info("identifying projects that haven't been used in [${unusedProjectExpirationInDays}] days")
+            Date expireOlderThan = new Date().minus(unusedProjectExpirationInDays)
+            flagOldProjects(expireOlderThan)
+            log.info("deleting projects whose grace period has expired")
+            Date cutoff = new Date().minus(unusedProjectExpirationGracePeriodInDays)
+            deleteUnusedProjects(cutoff)
+            log.info("sending pending deletion notifications to Project Administrators")
+            notifyGracePeriodProjectAdmins(cutoff)
+        } finally {
+            GlobalSettingsRequest lastRunSettingRequest = new GlobalSettingsRequest()
+            lastRunSettingRequest.value = today
+            lastRunSettingRequest.setting = EXPIRATION_LAST_RUN_DATE
+            lastRunSettingRequest.settingGroup = SCHEDULED_SETTING_GROUP
+            settingService.saveSetting(lastRunSettingRequest)
         }
     }
 }

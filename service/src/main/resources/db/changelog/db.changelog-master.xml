@@ -1306,4 +1306,10 @@
         </sql>
     </changeSet>
 
+    <changeSet id="10" author="skills team" context="migration10">
+        <insert tableName="skills_db_locks">
+            <column name="lock" type="varchar(255)" value="project_expiration_lock" />
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>
