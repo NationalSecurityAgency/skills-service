@@ -98,7 +98,7 @@ describe('My Usage Tests', () => {
     });
 
     it('point history chart - add project', () => {
-        cy.visit('/progress-and-rankings/usage');
+        cy.visit('/progress-and-rankings/my-usage');
 
         cy.get('[data-cy=eventHistoryChartProjectSelector]')
             .click()
@@ -127,7 +127,7 @@ describe('My Usage Tests', () => {
     });
 
     it('point history chart - only up to 5 projects can be selected', () => {
-        cy.visit('/progress-and-rankings/usage');
+        cy.visit('/progress-and-rankings/my-usage');
 
         cy.get('[data-cy=eventHistoryChartProjectSelector]')
             .click()
@@ -160,7 +160,7 @@ describe('My Usage Tests', () => {
     });
 
     it('point history chart - all projects removed', () => {
-        cy.visit('/progress-and-rankings/usage');
+        cy.visit('/progress-and-rankings/my-usage');
 
         cy.get('[data-cy=eventHistoryChartProjectSelector] .multiselect__tag-icon')
             .should('have.length', 4)
@@ -176,7 +176,7 @@ describe('My Usage Tests', () => {
     });
 
     it('point history chart - projects with no user events', () => {
-        cy.visit('/progress-and-rankings/usage');
+        cy.visit('/progress-and-rankings/my-usage');
 
         cy.get('[data-cy=eventHistoryChartProjectSelector] .multiselect__tag-icon')
             .should('have.length', 4)
@@ -213,7 +213,7 @@ describe('My Usage Tests', () => {
 
         cy.intercept('GET', '/api/metrics/allProjectsSkillEventsOverTimeMetricsBuilder*').as('pointHistoryChart');
 
-        cy.visit('/progress-and-rankings/usage');
+        cy.visit('/progress-and-rankings/my-usage');
 
         cy.get('[data-cy=eventHistoryChart] [data-cy=timeLengthSelector]').contains('6 months').click();
         cy.wait('@pointHistoryChart');
