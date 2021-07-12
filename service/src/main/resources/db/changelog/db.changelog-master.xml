@@ -1307,6 +1307,12 @@
     </changeSet>
 
     <changeSet id="10" author="skills team" context="migration10">
+        <insert tableName="skills_db_locks">
+            <column name="lock" type="varchar(255)" value="project_expiration_lock" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="11" author="skills team" context="migration11">
         <dropForeignKeyConstraint baseTableName="notifications" constraintName="fk_notifications_user_id" />
         <dropIndex tableName="notifications" indexName="notifications_user_id" />
         <modifyDataType tableName="notifications" columnName="user_id" newDataType="text" />

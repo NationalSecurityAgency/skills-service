@@ -15,11 +15,15 @@
  */
 package skills.intTests
 
+import org.junit.Rule
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.system.OutputCaptureRule
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionStatus
 import org.springframework.transaction.support.TransactionCallback
 import org.springframework.transaction.support.TransactionTemplate
+import skills.controller.request.model.GlobalSettingsRequest
+import skills.controller.result.model.SettingsResult
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.EmailUtils
 import skills.intTests.utils.SkillsFactory
@@ -29,9 +33,15 @@ import skills.services.UserEventService
 import skills.services.settings.SettingsService
 import skills.storage.model.UserAttrs
 import skills.storage.repos.SkillDefRepo
+import skills.utils.LoggerHelper
 import skills.utils.WaitFor
 import spock.lang.IgnoreRest
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.concurrent.Callable
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
 
@@ -54,6 +64,7 @@ class UnusedProjectExpirationSpecs extends DefaultIntSpec{
 
     @Autowired
     ProjectErrorService errorService
+
 
     def setup() {
         startEmailServer()
@@ -216,6 +227,24 @@ class UnusedProjectExpirationSpecs extends DefaultIntSpec{
         emails.find { p1.matcher(it.html).find() }
         emails.find { p2.matcher(it.html).find() }
         emails.find { p3.matcher(it.html).find() }
+    }
+
+    def "only one run per day" () {
+        LoggerHelper loggerHelper = new LoggerHelper(ProjectExpirationService)
+
+        when:
+
+        expirationService.flagDeleteAndNotify()
+
+        expirationService.flagDeleteAndNotify()
+        expirationService.flagDeleteAndNotify()
+        expirationService.flagDeleteAndNotify()
+
+        then:
+        loggerHelper.logEvents.each { println it.message }
+        loggerHelper.logEvents.findAll { it.message.contains("identifying projects that haven't been used in") }.size() == 1
+        loggerHelper.logEvents.findAll { it.message.contains("project expiration was already run today (potentially by another node), will not run again today")}.size() == 3
+
     }
 
 }

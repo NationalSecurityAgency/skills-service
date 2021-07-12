@@ -61,4 +61,14 @@ class LockingServiceSpec extends DefaultIntSpec {
         lock
     }
 
+    @Transactional
+    def "lock project expiration"() {
+        when:
+        SkillsDBLock lock = lockingService.lockForProjectExpiration()
+
+        then:
+        lock
+    }
+
+
 }
