@@ -101,7 +101,13 @@ class SkillsService {
 
     static String PROD_MODE = Settings.PRODUCTION_MODE.settingName
     def enableProdMode(proj) {
-        this.changeSetting(proj.projectId, PROD_MODE, [projectId: proj.projectId, setting: PROD_MODE, value: "true"])
+        setProdMode(proj, true)
+    }
+    def disableProdMode(proj) {
+        setProdMode(proj, false)
+    }
+    def setProdMode(proj, boolean isProd) {
+        this.changeSetting(proj.projectId, PROD_MODE, [projectId: proj.projectId, setting: PROD_MODE, value: isProd.toString()])
     }
 
 

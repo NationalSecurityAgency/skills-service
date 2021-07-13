@@ -16,6 +16,7 @@
 package skills.intTests.myProgress
 
 import groovy.json.JsonOutput
+import groovy.time.TimeCategory
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import skills.intTests.utils.DefaultIntSpec
@@ -44,6 +45,40 @@ class MyProgressSpec extends DefaultIntSpec {
 
         // delete Inception so it doesn't affect our test numbers
         rootSkillsService.deleteProject('Inception')
+    }
+
+    def "my progress summary only includes My Projects - no projects"() {
+        (1..3).collect {
+            def project = SkillsFactory.createProject(it)
+            skillsService.createProject(project)
+            skillsService.enableProdMode(project)
+        }
+
+        when:
+        def res = skillsService.getMyProgressSummary()
+
+        println JsonOutput.toJson(res)
+        then:
+        !res.projectSummaries
+    }
+
+
+    def "my progress summary only includes My Projects"() {
+        List projs = (1..3).collect {
+            def project = SkillsFactory.createProject(it)
+            skillsService.createProject(project)
+            skillsService.enableProdMode(project)
+            return project
+        }
+        skillsService.addMyProject(projs[0].projectId)
+        skillsService.addMyProject(projs[2].projectId)
+
+        when:
+        def res = skillsService.getMyProgressSummary()
+
+        println JsonOutput.toJson(res)
+        then:
+        res.projectSummaries.collect { it.projectId } == [projs[0].projectId, projs[2].projectId]
     }
 
     def "my progress summary - badge count"() {
@@ -179,6 +214,430 @@ class MyProgressSpec extends DefaultIntSpec {
         res8.globalBadgeCount == 3
     }
 
+    def "skills are only counted from My Projects "() {
+        List skills = []
+        List projs = (1..3).collect { int projNum ->
+            def project = SkillsFactory.createProject(projNum)
+            skillsService.createProject(project)
+            skillsService.enableProdMode(project)
+
+            skillsService.createSubject(SkillsFactory.createSubject(projNum, 1))
+            def skillsForProj = SkillsFactory.createSkills(projNum, projNum, 1, 200)
+            skillsService.createSkills(skillsForProj)
+
+            skills.addAll(skillsForProj)
+
+            return project
+        }
+        skillsService.addMyProject(projs[0].projectId)
+        skillsService.addMyProject(projs[2].projectId)
+
+        assert skillsService.addSkill([projectId: projs[1].projectId, skillId: skills[1].skillId], userId, new Date()).body.completed.find { it.type == "Skill"}
+
+        assert skillsService.addSkill([projectId: projs[1].projectId, skillId: skills[2].skillId], userId, new Date()).body.completed.find { it.type == "Skill"}
+        assert skillsService.addSkill([projectId: projs[2].projectId, skillId: skills[3].skillId], userId, new Date()).body.completed.find { it.type == "Skill"}
+
+        when:
+        def res = skillsService.getMyProgressSummary()
+
+        use(TimeCategory) {
+            assert skillsService.addSkill([projectId: projs[0].projectId, skillId: skills[0].skillId], userId, 2.months.ago).body.completed.find { it.type == "Skill"}
+            assert skillsService.addSkill([projectId: projs[2].projectId, skillId: skills[4].skillId], userId, 2.weeks.ago).body.completed.find { it.type == "Skill"}
+        }
+
+        def res1 = skillsService.getMyProgressSummary()
+
+        then:
+        res.totalSkills == 4
+        res.numAchievedSkills == 1
+        res.numAchievedSkillsLastMonth == 1
+        res.numAchievedSkillsLastWeek == 1
+        res.mostRecentAchievedSkill
+
+        res1.totalSkills == 4
+        res1.numAchievedSkills == 3
+        res1.numAchievedSkillsLastMonth == 2
+        res1.numAchievedSkillsLastWeek == 1
+        res1.mostRecentAchievedSkill
+    }
+
+    def "skills are only counted from projects in the production mode even if they are part of My Projects"() {
+        List skills = []
+        List projs = (1..3).collect { int projNum ->
+            def project = SkillsFactory.createProject(projNum)
+            skillsService.createProject(project)
+            skillsService.enableProdMode(project)
+            skillsService.addMyProject(project.projectId)
+
+            skillsService.createSubject(SkillsFactory.createSubject(projNum, 1))
+            def skillsForProj = SkillsFactory.createSkills(projNum, projNum, 1, 200)
+            skillsService.createSkills(skillsForProj)
+
+            skills.addAll(skillsForProj)
+
+            return project
+        }
+
+        skillsService.disableProdMode(projs[1])
+        assert skillsService.addSkill([projectId: projs[1].projectId, skillId: skills[1].skillId], userId, new Date()).body.completed.find { it.type == "Skill"}
+
+        assert skillsService.addSkill([projectId: projs[1].projectId, skillId: skills[2].skillId], userId, new Date()).body.completed.find { it.type == "Skill"}
+        assert skillsService.addSkill([projectId: projs[2].projectId, skillId: skills[3].skillId], userId, new Date()).body.completed.find { it.type == "Skill"}
+
+        when:
+        def res = skillsService.getMyProgressSummary()
+
+        use(TimeCategory) {
+            assert skillsService.addSkill([projectId: projs[0].projectId, skillId: skills[0].skillId], userId, 2.months.ago).body.completed.find { it.type == "Skill"}
+            assert skillsService.addSkill([projectId: projs[2].projectId, skillId: skills[4].skillId], userId, 2.weeks.ago).body.completed.find { it.type == "Skill"}
+        }
+
+        def res1 = skillsService.getMyProgressSummary()
+
+        then:
+        res.totalSkills == 4
+        res.numAchievedSkills == 1
+        res.numAchievedSkillsLastMonth == 1
+        res.numAchievedSkillsLastWeek == 1
+        res.mostRecentAchievedSkill
+
+        res1.totalSkills == 4
+        res1.numAchievedSkills == 3
+        res1.numAchievedSkillsLastMonth == 2
+        res1.numAchievedSkillsLastWeek == 1
+        res1.mostRecentAchievedSkill
+    }
+
+    def "numProjectsContributed are only counted from My Projects "() {
+        List skills = []
+        List projs = (1..3).collect { int projNum ->
+            def project = SkillsFactory.createProject(projNum)
+            skillsService.createProject(project)
+            skillsService.enableProdMode(project)
+
+            skillsService.createSubject(SkillsFactory.createSubject(projNum, 1))
+            def skillsForProj = SkillsFactory.createSkills(projNum, projNum, 1, 200)
+            skillsService.createSkills(skillsForProj)
+
+            skills.addAll(skillsForProj)
+
+            return project
+        }
+        skillsService.addMyProject(projs[0].projectId)
+        skillsService.addMyProject(projs[2].projectId)
+
+        when:
+        assert skillsService.addSkill([projectId: projs[1].projectId, skillId: skills[1].skillId], userId, new Date()).body.completed.find { it.type == "Skill"}
+        def res = skillsService.getMyProgressSummary()
+
+        assert skillsService.addSkill([projectId: projs[1].projectId, skillId: skills[2].skillId], userId, new Date()).body.completed.find { it.type == "Skill"}
+        assert skillsService.addSkill([projectId: projs[2].projectId, skillId: skills[3].skillId], userId, new Date()).body.completed.find { it.type == "Skill"}
+        def res1 = skillsService.getMyProgressSummary()
+
+        use(TimeCategory) {
+            assert skillsService.addSkill([projectId: projs[0].projectId, skillId: skills[0].skillId], userId, 2.months.ago).body.completed.find { it.type == "Skill"}
+            assert skillsService.addSkill([projectId: projs[2].projectId, skillId: skills[4].skillId], userId, 2.weeks.ago).body.completed.find { it.type == "Skill"}
+        }
+        def res2 = skillsService.getMyProgressSummary()
+
+        then:
+        res.numProjectsContributed == 0
+        res1.numProjectsContributed == 1
+        res2.numProjectsContributed == 2
+    }
+
+
+    def "numProjectsContributed  are only counted from projects in the production mode even if they are part of My Projects"() {
+        List skills = []
+        List projs = (1..3).collect { int projNum ->
+            def project = SkillsFactory.createProject(projNum)
+            skillsService.createProject(project)
+            skillsService.enableProdMode(project)
+            skillsService.addMyProject(project.projectId)
+
+            skillsService.createSubject(SkillsFactory.createSubject(projNum, 1))
+            def skillsForProj = SkillsFactory.createSkills(projNum, projNum, 1, 200)
+            skillsService.createSkills(skillsForProj)
+
+            skills.addAll(skillsForProj)
+
+            return project
+        }
+        skillsService.disableProdMode(projs[1])
+        when:
+        assert skillsService.addSkill([projectId: projs[1].projectId, skillId: skills[1].skillId], userId, new Date()).body.completed.find { it.type == "Skill"}
+        def res = skillsService.getMyProgressSummary()
+
+        assert skillsService.addSkill([projectId: projs[1].projectId, skillId: skills[2].skillId], userId, new Date()).body.completed.find { it.type == "Skill"}
+        assert skillsService.addSkill([projectId: projs[2].projectId, skillId: skills[3].skillId], userId, new Date()).body.completed.find { it.type == "Skill"}
+        def res1 = skillsService.getMyProgressSummary()
+
+        use(TimeCategory) {
+            assert skillsService.addSkill([projectId: projs[0].projectId, skillId: skills[0].skillId], userId, 2.months.ago).body.completed.find { it.type == "Skill"}
+            assert skillsService.addSkill([projectId: projs[2].projectId, skillId: skills[4].skillId], userId, 2.weeks.ago).body.completed.find { it.type == "Skill"}
+        }
+        def res2 = skillsService.getMyProgressSummary()
+
+        then:
+        res.numProjectsContributed == 0
+        res1.numProjectsContributed == 1
+        res2.numProjectsContributed == 2
+    }
+
+    def "badges are only counted from My Projects "() {
+        def skills = []
+        List projs = (1..3).collect { int projNum ->
+            def project = SkillsFactory.createProject(projNum)
+            skillsService.createProject(project)
+            skillsService.enableProdMode(project)
+
+            skillsService.createSubject(SkillsFactory.createSubject(projNum, 1))
+            def skillsForProj = SkillsFactory.createSkills(5, projNum, 1, 200)
+            skillsService.createSkills(skillsForProj)
+            (1..projNum).each {
+                def badge = SkillsFactory.createBadge(projNum, it)
+                skillsService.createBadge(badge)
+                skillsService.assignSkillToBadge([projectId: project.projectId, badgeId: badge.badgeId, skillId: skillsForProj[it].skillId])
+                skills.add(skillsForProj[it])
+            }
+
+            return project
+        }
+        skillsService.addMyProject(projs[0].projectId)
+        skillsService.addMyProject(projs[2].projectId)
+
+
+        assert skillsService.addSkill([projectId: projs[1].projectId, skillId: skills[1].skillId], userId, new Date()).body.completed.find { it.type == "Badge"}
+        assert skillsService.addSkill([projectId: projs[1].projectId, skillId: skills[2].skillId], userId, new Date()).body.completed.find { it.type == "Badge"}
+
+        assert skillsService.addSkill([projectId: projs[2].projectId, skillId: skills[3].skillId], userId, new Date()).body.completed.find { it.type == "Badge"}
+        when:
+        def res = skillsService.getMyProgressSummary()
+
+        assert skillsService.addSkill([projectId: projs[0].projectId, skillId: skills[0].skillId], userId, new Date()).body.completed.find { it.type == "Badge"}
+        assert skillsService.addSkill([projectId: projs[2].projectId, skillId: skills[4].skillId], userId, new Date()).body.completed.find { it.type == "Badge"}
+
+        def res1 = skillsService.getMyProgressSummary()
+        then:
+        res.totalBadges == 4
+        res.gemCount == 0
+        res.globalBadgeCount == 0
+        res.numAchievedBadges == 1
+        res.numAchievedGemBadges == 0
+        res.numAchievedGlobalBadges == 0
+
+        res1.totalBadges == 4
+        res1.gemCount == 0
+        res1.globalBadgeCount == 0
+        res1.numAchievedBadges == 3
+        res1.numAchievedGemBadges == 0
+        res1.numAchievedGlobalBadges == 0
+    }
+
+    def "badges are only counted from projects in the production mode even if they are part of My Projects"() {
+        def skills = []
+        List projs = (1..3).collect { int projNum ->
+            def project = SkillsFactory.createProject(projNum)
+            skillsService.createProject(project)
+            skillsService.enableProdMode(project)
+            skillsService.addMyProject(project.projectId)
+
+            skillsService.createSubject(SkillsFactory.createSubject(projNum, 1))
+            def skillsForProj = SkillsFactory.createSkills(5, projNum, 1, 200)
+            skillsService.createSkills(skillsForProj)
+            (1..projNum).each {
+                def badge = SkillsFactory.createBadge(projNum, it)
+                skillsService.createBadge(badge)
+                skillsService.assignSkillToBadge([projectId: project.projectId, badgeId: badge.badgeId, skillId: skillsForProj[it].skillId])
+                skills.add(skillsForProj[it])
+            }
+
+            return project
+        }
+
+        assert skillsService.addSkill([projectId: projs[1].projectId, skillId: skills[1].skillId], userId, new Date()).body.completed.find { it.type == "Badge"}
+        assert skillsService.addSkill([projectId: projs[1].projectId, skillId: skills[2].skillId], userId, new Date()).body.completed.find { it.type == "Badge"}
+
+        assert skillsService.addSkill([projectId: projs[2].projectId, skillId: skills[3].skillId], userId, new Date()).body.completed.find { it.type == "Badge"}
+
+        skillsService.removeMyProject(projs[1].projectId)
+        when:
+        def res = skillsService.getMyProgressSummary()
+
+        assert skillsService.addSkill([projectId: projs[0].projectId, skillId: skills[0].skillId], userId, new Date()).body.completed.find { it.type == "Badge"}
+        assert skillsService.addSkill([projectId: projs[2].projectId, skillId: skills[4].skillId], userId, new Date()).body.completed.find { it.type == "Badge"}
+
+        def res1 = skillsService.getMyProgressSummary()
+        then:
+        res.totalBadges == 4
+        res.gemCount == 0
+        res.globalBadgeCount == 0
+        res.numAchievedBadges == 1
+        res.numAchievedGemBadges == 0
+        res.numAchievedGlobalBadges == 0
+
+        res1.totalBadges == 4
+        res1.gemCount == 0
+        res1.globalBadgeCount == 0
+        res1.numAchievedBadges == 3
+        res1.numAchievedGemBadges == 0
+        res1.numAchievedGlobalBadges == 0
+    }
+
+    def "gems are only counted from My Projects "() {
+        def skills = []
+        List projs = (1..3).collect { int projNum ->
+            def project = SkillsFactory.createProject(projNum)
+            skillsService.createProject(project)
+            skillsService.enableProdMode(project)
+
+            skillsService.createSubject(SkillsFactory.createSubject(projNum, 1))
+            def skillsForProj = SkillsFactory.createSkills(5, projNum, 1, 200)
+            skillsService.createSkills(skillsForProj)
+            (1..projNum).each {
+                def gem1 = SkillsFactory.createBadge(projNum, it)
+                gem1.startDate = new Date()-7
+                gem1.endDate = new Date()+7
+
+                skillsService.createBadge(gem1)
+                skillsService.assignSkillToBadge([projectId: project.projectId, badgeId: gem1.badgeId, skillId: skillsForProj[it].skillId])
+                skills.add(skillsForProj[it])
+            }
+
+            return project
+        }
+        skillsService.addMyProject(projs[0].projectId)
+        skillsService.addMyProject(projs[2].projectId)
+
+
+        assert skillsService.addSkill([projectId: projs[1].projectId, skillId: skills[1].skillId], userId, new Date()).body.completed.find { it.type == "Badge"}
+        assert skillsService.addSkill([projectId: projs[1].projectId, skillId: skills[2].skillId], userId, new Date()).body.completed.find { it.type == "Badge"}
+
+        assert skillsService.addSkill([projectId: projs[2].projectId, skillId: skills[3].skillId], userId, new Date()).body.completed.find { it.type == "Badge"}
+        when:
+        def res = skillsService.getMyProgressSummary()
+
+        assert skillsService.addSkill([projectId: projs[0].projectId, skillId: skills[0].skillId], userId, new Date()).body.completed.find { it.type == "Badge"}
+        assert skillsService.addSkill([projectId: projs[2].projectId, skillId: skills[4].skillId], userId, new Date()).body.completed.find { it.type == "Badge"}
+
+        def res1 = skillsService.getMyProgressSummary()
+        then:
+        res.totalBadges == 4
+        res.gemCount == 4
+        res.globalBadgeCount == 0
+        res.numAchievedBadges == 1
+        res.numAchievedGemBadges == 1
+        res.numAchievedGlobalBadges == 0
+
+        res1.totalBadges == 4
+        res1.gemCount == 4
+        res1.globalBadgeCount == 0
+        res1.numAchievedBadges == 3
+        res1.numAchievedGemBadges == 3
+        res1.numAchievedGlobalBadges == 0
+    }
+
+    def "gems are only counted from projects in the production mode even if they are part of My Projects"() {
+        def skills = []
+        List projs = (1..3).collect { int projNum ->
+            def project = SkillsFactory.createProject(projNum)
+            skillsService.createProject(project)
+            skillsService.enableProdMode(project)
+            skillsService.addMyProject(project.projectId)
+
+            skillsService.createSubject(SkillsFactory.createSubject(projNum, 1))
+            def skillsForProj = SkillsFactory.createSkills(5, projNum, 1, 200)
+            skillsService.createSkills(skillsForProj)
+            (1..projNum).each {
+                def gem1 = SkillsFactory.createBadge(projNum, it)
+                gem1.startDate = new Date()-7
+                gem1.endDate = new Date()+7
+
+                skillsService.createBadge(gem1)
+                skillsService.assignSkillToBadge([projectId: project.projectId, badgeId: gem1.badgeId, skillId: skillsForProj[it].skillId])
+                skills.add(skillsForProj[it])
+            }
+
+            return project
+        }
+
+        assert skillsService.addSkill([projectId: projs[1].projectId, skillId: skills[1].skillId], userId, new Date()).body.completed.find { it.type == "Badge"}
+        assert skillsService.addSkill([projectId: projs[1].projectId, skillId: skills[2].skillId], userId, new Date()).body.completed.find { it.type == "Badge"}
+
+        assert skillsService.addSkill([projectId: projs[2].projectId, skillId: skills[3].skillId], userId, new Date()).body.completed.find { it.type == "Badge"}
+
+        skillsService.disableProdMode(projs[1])
+        when:
+        def res = skillsService.getMyProgressSummary()
+
+        assert skillsService.addSkill([projectId: projs[0].projectId, skillId: skills[0].skillId], userId, new Date()).body.completed.find { it.type == "Badge"}
+        assert skillsService.addSkill([projectId: projs[2].projectId, skillId: skills[4].skillId], userId, new Date()).body.completed.find { it.type == "Badge"}
+
+        def res1 = skillsService.getMyProgressSummary()
+        then:
+        res.totalBadges == 4
+        res.gemCount == 4
+        res.globalBadgeCount == 0
+        res.numAchievedBadges == 1
+        res.numAchievedGemBadges == 1
+        res.numAchievedGlobalBadges == 0
+
+        res1.totalBadges == 4
+        res1.gemCount == 4
+        res1.globalBadgeCount == 0
+        res1.numAchievedBadges == 3
+        res1.numAchievedGemBadges == 3
+        res1.numAchievedGlobalBadges == 0
+    }
+
+    def "global badges counts are always shown regardless of production mode or My Project status"() {
+        def skills = []
+        List projs = (1..3).collect { int projNum ->
+            def project = SkillsFactory.createProject(projNum)
+            skillsService.createProject(project)
+            skillsService.enableProdMode(project)
+
+            skillsService.createSubject(SkillsFactory.createSubject(projNum, 1))
+            def skillsForProj = SkillsFactory.createSkills(5, projNum, 1, 200)
+            skillsService.createSkills(skillsForProj)
+            (1..projNum).each {
+                def globalBadge = [badgeId: "globalBadge${projNum}${it}".toString(), name: "Test Global Badge ${projNum}${it}".toString(), enabled: "true"]
+                supervisorService.createGlobalBadge(globalBadge)
+                supervisorService.assignSkillToGlobalBadge(projectId: project.projectId, badgeId: globalBadge.badgeId, skillId: skillsForProj[it].skillId)
+                skills.add(skillsForProj[it])
+            }
+            return project
+        }
+        skillsService.addMyProject(projs[0].projectId)
+        skillsService.addMyProject(projs[2].projectId)
+
+        assert skillsService.addSkill([projectId: projs[1].projectId, skillId: skills[1].skillId], userId, new Date()).body.completed.find { it.type == "GlobalBadge"}
+        assert skillsService.addSkill([projectId: projs[1].projectId, skillId: skills[2].skillId], userId, new Date()).body.completed.find { it.type == "GlobalBadge"}
+
+        assert skillsService.addSkill([projectId: projs[2].projectId, skillId: skills[3].skillId], userId, new Date()).body.completed.find { it.type == "GlobalBadge"}
+        when:
+        def res = skillsService.getMyProgressSummary()
+
+        assert skillsService.addSkill([projectId: projs[0].projectId, skillId: skills[0].skillId], userId, new Date()).body.completed.find { it.type == "GlobalBadge"}
+        assert skillsService.addSkill([projectId: projs[2].projectId, skillId: skills[4].skillId], userId, new Date()).body.completed.find { it.type == "GlobalBadge"}
+
+        def res1 = skillsService.getMyProgressSummary()
+        then:
+        res.totalBadges == 6
+        res.gemCount == 0
+        res.globalBadgeCount == 6
+        res.numAchievedBadges == 3
+        res.numAchievedGemBadges == 0
+        res.numAchievedGlobalBadges == 3
+
+        res1.totalBadges == 6
+        res1.gemCount == 0
+        res1.globalBadgeCount == 6
+        res1.numAchievedBadges == 5
+        res1.numAchievedGemBadges == 0
+        res1.numAchievedGlobalBadges == 5
+    }
+
     def "my progress summary - global badge achieved count"() {
         def proj1 = SkillsFactory.createProject()
         def subj1 = SkillsFactory.createSubject()
@@ -240,7 +699,6 @@ class MyProgressSpec extends DefaultIntSpec {
         res.projectSummaries.first().points == 0
         res.projectSummaries.first().totalPoints == 0
         res.projectSummaries.first().level == 0
-        res.totalProjects == 1
         res.numProjectsContributed == 0
         res.totalSkills == 0
         res.numAchievedSkills == 0
@@ -288,7 +746,6 @@ class MyProgressSpec extends DefaultIntSpec {
         res.projectSummaries.find{ it.projectId == 'TestProject1' }.points == 0
         res.projectSummaries.find{ it.projectId == 'TestProject1' }.totalPoints == 10
         res.projectSummaries.find{ it.projectId == 'TestProject1' }.level == 0
-        res.totalProjects == 1
         res.numProjectsContributed == 0
         res.totalSkills == 1
         res.numAchievedSkills == 0
@@ -346,7 +803,6 @@ class MyProgressSpec extends DefaultIntSpec {
             assert res.projectSummaries.find{ it.projectId == projId }.totalUsers == 1
             assert res.projectSummaries.find{ it.projectId == projId }.points == (index+1) * 10
             assert res.projectSummaries.find{ it.projectId == projId }.totalPoints == 100
-            assert res.totalProjects == 1
             assert res.numProjectsContributed == 1
             assert res.totalSkills == 2
             assert res.totalBadges == 2
@@ -443,7 +899,6 @@ class MyProgressSpec extends DefaultIntSpec {
             assert res.projectSummaries.find{ it.projectId == projId }.totalUsers == 1
             assert res.projectSummaries.find{ it.projectId == projId }.points == (index+1) * 10
             assert res.projectSummaries.find{ it.projectId == projId }.totalPoints == 100
-            assert res.totalProjects == 2
             assert res.numProjectsContributed == 1
             assert res.totalSkills == 4
             assert res.totalBadges == 4
@@ -606,7 +1061,6 @@ class MyProgressSpec extends DefaultIntSpec {
         // "production mode" is not enabled, so proj1 should not be included in the results
         res
         res.projectSummaries.isEmpty()
-        res.totalProjects == 1
         res.numProjectsContributed == 0
         res.totalSkills == 0
         res.numAchievedSkills == 0
@@ -618,87 +1072,5 @@ class MyProgressSpec extends DefaultIntSpec {
         res.numAchievedGlobalBadges == 0
     }
 
-    def "add and remove my project - single project"() {
-        def proj1 = SkillsFactory.createProject()
-        skillsService.createProject(proj1)
-        skillsService.enableProdMode(proj1)
-
-        when:
-        def forMyProjects = skillsService.getAvailableMyProjects()
-
-        skillsService.addMyProject(proj1.projectId)
-        def forMyProjects1 = skillsService.getAvailableMyProjects()
-
-        skillsService.removeMyProject(proj1.projectId)
-        def forMyProjects2 = skillsService.getAvailableMyProjects()
-
-        then:
-        !forMyProjects[0].isMyProject
-        forMyProjects1[0].isMyProject
-        !forMyProjects2[0].isMyProject
-    }
-
-    def "add and remove my project - many projects"() {
-
-        List projs = (1..6).collect {
-            def proj = SkillsFactory.createProject(it)
-            skillsService.createProject(proj)
-            skillsService.enableProdMode(proj)
-            return proj
-        }
-
-        when:
-        def forMyProjects = skillsService.getAvailableMyProjects().sort { it.projectId }
-
-        skillsService.addMyProject(projs[1].projectId)
-        def forMyProjects1 = skillsService.getAvailableMyProjects()
-
-        skillsService.addMyProject(projs[2].projectId)
-        def forMyProjects2 = skillsService.getAvailableMyProjects()
-
-        skillsService.addMyProject(projs[4].projectId)
-        def forMyProjects3 = skillsService.getAvailableMyProjects()
-
-        skillsService.removeMyProject(projs[1].projectId)
-        def forMyProjects4 = skillsService.getAvailableMyProjects()
-
-        skillsService.removeMyProject(projs[2].projectId)
-        def forMyProjects5 = skillsService.getAvailableMyProjects()
-
-        then:
-        forMyProjects.collect { it.isMyProject }  == [false, false, false, false, false, false]
-        forMyProjects1.collect { it.isMyProject }  == [false, true, false, false, false, false]
-        forMyProjects2.collect { it.isMyProject }  == [false, true, true, false, false, false]
-        forMyProjects3.collect { it.isMyProject }  == [false, true, true, false, true, false]
-        forMyProjects4.collect { it.isMyProject }  == [false, false, true, false, true, false]
-        forMyProjects5.collect { it.isMyProject }  == [false, false, false, false, true, false]
-    }
-
-    def "add and remove my project - all projects"() {
-        List projs = (1..6).collect {
-            def proj = SkillsFactory.createProject(it)
-            skillsService.createProject(proj)
-            skillsService.enableProdMode(proj)
-            return proj
-        }
-
-        when:
-        def forMyProjects = skillsService.getAvailableMyProjects().sort { it.projectId }
-
-        projs.each {
-            skillsService.addMyProject(it.projectId)
-        }
-        def forMyProjects1 = skillsService.getAvailableMyProjects()
-
-        projs.each {
-            skillsService.removeMyProject(it.projectId)
-        }
-        def forMyProjects2 = skillsService.getAvailableMyProjects()
-
-        then:
-        forMyProjects.collect { it.isMyProject }  == [false, false, false, false, false, false]
-        forMyProjects1.collect { it.isMyProject }  == [true, true, true, true, true, true]
-        forMyProjects2.collect { it.isMyProject }  == [false, false, false, false, false, false]
-    }
 }
 

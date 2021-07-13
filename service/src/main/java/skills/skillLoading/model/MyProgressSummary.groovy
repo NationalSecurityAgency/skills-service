@@ -21,7 +21,6 @@ import groovy.transform.Canonical
 class MyProgressSummary {
     List<ProjectSummary> projectSummaries = []
 
-    Integer totalProjects = 0
     Integer numProjectsContributed = 0
 
     Integer totalSkills = 0
