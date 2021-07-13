@@ -610,8 +610,10 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         skillsService.createSkills(skillsSubj1)
 
         List<String> users = getRandomUsers(2)
-        skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(0).skillId], users[0], new Date())
-        skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(0).skillId], users[1], new Date())
+        // user1 string should be longer because there is a chance of user1 being a sub-string of user2
+        def (user1, user2) = users[0].length() > users[1].length() ? [users[0], users[1]] : [users[1], users[0]]
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(0).skillId], user1, new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(0).skillId], user2, new Date())
 
         Map props = [:]
         props[MetricsPagingParamsHelper.PROP_CURRENT_PAGE] = 1
@@ -623,7 +625,7 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         when:
         def res = skillsService.getMetricsData(proj.projectId, metricsId, props)
 
-        props[MetricsParams.P_USERNAME_FILTER] = "${users[0]} for display"
+        props[MetricsParams.P_USERNAME_FILTER] = "${user1} for display"
         def res1 = skillsService.getMetricsData(proj.projectId, metricsId, props)
 
         then:
