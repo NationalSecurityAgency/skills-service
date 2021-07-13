@@ -17,8 +17,8 @@ limitations under the License.
   <div class="text-secondary text-center">
     <div class="row">
       <div class="col">
-        <span class="fa-stack fa-3x " style="vertical-align: top;">
-          <i class="fas fa-circle fa-stack-2x"></i>
+        <span class="fa-stack" :class="iconSize" style="vertical-align: top;">
+          <i class="fas fa-circle fa-stack-2x" :class="iconColor"></i>
           <i class="fa-stack-1x fa-inverse" :class="icon"></i>
         </span>
       </div>
@@ -28,9 +28,10 @@ limitations under the License.
       </div>
     </div>
     <div class="row justify-content-center ">
-      <div v-if="message" class="col col-md-8 col-lg-7 col-xl-5 no-content">
-        {{ message }}
-        <slot/>
+      <div class="col col-md-8 col-lg-7 col-xl-5 no-content">
+        <slot>
+          {{ message }}
+        </slot>
       </div>
     </div>
   </div>
@@ -41,10 +42,21 @@ limitations under the License.
     name: 'NoContent2',
     props: {
       title: String,
-      message: String,
+      message: {
+        type: String,
+        default: '',
+      },
       icon: {
         type: String,
         default: 'fas fa-dragon',
+      },
+      iconSize: {
+        type: String,
+        default: 'fa-3x',
+      },
+      iconColor: {
+        type: String,
+        default: 'text-secondary',
       },
     },
   };

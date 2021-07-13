@@ -13,29 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.skillLoading.model
+package skills.controller.result.model
 
-import groovy.transform.Canonical
+class AvailableProjectResult {
 
-@Canonical
-class MyProgressSummary {
-    List<ProjectSummary> projectSummaries = []
+    String projectId
+    String name
+    Date created
+    int totalPoints
+    int numSubjects
+    int numSkills
+    int numBadges
 
-    Integer numProjectsContributed = 0
-
-    Integer totalSkills = 0
-    Integer numAchievedSkills = 0
-    Integer numAchievedSkillsLastMonth = 0
-    Integer numAchievedSkillsLastWeek = 0
-    Date mostRecentAchievedSkill
-
-    Integer totalBadges = 0
-    Integer gemCount = 0;
-    Integer globalBadgeCount = 0;
-
-    Integer numAchievedBadges = 0
-    Integer numAchievedGemBadges = 0
-    Integer numAchievedGlobalBadges = 0
+    boolean isMyProject
 
 }
-

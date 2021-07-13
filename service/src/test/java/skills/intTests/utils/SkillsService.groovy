@@ -18,8 +18,6 @@ package skills.intTests.utils
 import callStack.profiler.Profile
 import com.github.jknack.handlebars.Options
 import groovy.util.logging.Slf4j
-import org.springframework.core.io.Resource
-
 @Slf4j
 class SkillsService {
 
@@ -100,6 +98,18 @@ class SkillsService {
     def createProject(Map props, String originalProjectId = null) {
         wsHelper.appPost(getProjectUrl(originalProjectId ?: props.projectId), props)
     }
+
+    static String PROD_MODE = Settings.PRODUCTION_MODE.settingName
+    def enableProdMode(proj) {
+        setProdMode(proj, true)
+    }
+    def disableProdMode(proj) {
+        setProdMode(proj, false)
+    }
+    def setProdMode(proj, boolean isProd) {
+        this.changeSetting(proj.projectId, PROD_MODE, [projectId: proj.projectId, setting: PROD_MODE, value: isProd.toString()])
+    }
+
 
     @Profile
     def createProjectAndSubjectAndSkills(Map projProps, Map subjProps, List skills) {
@@ -610,6 +620,24 @@ class SkillsService {
         wsHelper.apiGet(url)
     }
 
+    def getAvailableMyProjects(int version = -1) {
+        String url = "/availableForMyProjects"
+        if (version >= 0) {
+            url += "?version=${version}"
+        }
+        wsHelper.apiGet(url)
+    }
+
+    def addMyProject(String projectId) {
+        String url = "/myprojects/${projectId}"
+        wsHelper.apiPost(url, [])
+    }
+
+    def removeMyProject(String projectId) {
+        String url = "/myprojects/${projectId}"
+        wsHelper.apiDelete(url)
+    }
+
     def getDependencyGraph(String projId, String skillId=null) {
         String url = skillId ? "/projects/${projId}/skills/${skillId}/dependency/graph" : "/projects/${projId}/dependency/graph"
         wsHelper.adminGet(url)
@@ -1015,7 +1043,7 @@ class SkillsService {
     def saveEmailSettings(String host, String protocol, Integer port, boolean tlsEnabled, boolean authEnabled, String username, String password) {
 //        username = getUserId(username)
         return wsHelper.rootPost("/saveEmailSettings", [
-              host: host,
+                host: host,
                 protocol: protocol,
                 port: port,
                 tlsEnabled: tlsEnabled,
@@ -1027,9 +1055,9 @@ class SkillsService {
 
     def addOrUpdateUserSetting(String setting, String value) {
         Map params = [
-                              settingGroup: "user.prefs",
-                              setting: setting,
-                              value: value,
+                settingGroup: "user.prefs",
+                setting: setting,
+                value: value,
         ]
         return wsHelper.appPost("/userInfo/settings", [ params ])
     }
@@ -1052,8 +1080,8 @@ class SkillsService {
                 [publicUrl: publicUrl,
                  resetTokenExpiration: resetTokenExpiration,
                  fromEmail: fromEmail,
-                customHeader: customHeader,
-                customFooter: customFooter])
+                 customHeader: customHeader,
+                 customFooter: customFooter])
     }
 
     def getSystemSettings() {
@@ -1184,3 +1212,6 @@ class SkillsService {
     }
 
 }
+
+import org.springframework.core.io.Resource
+import skills.services.settings.Settings

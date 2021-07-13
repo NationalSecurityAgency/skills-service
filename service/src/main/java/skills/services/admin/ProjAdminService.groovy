@@ -30,6 +30,7 @@ import skills.controller.exceptions.SkillException
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.ProjectRequest
 import skills.controller.request.model.UserProjectSettingsRequest
+import skills.controller.request.model.UserSettingsRequest
 import skills.controller.result.model.CustomIconResult
 import skills.controller.result.model.ProjectResult
 import skills.controller.result.model.SettingsResult
@@ -54,6 +55,8 @@ import skills.utils.Props
 class ProjAdminService {
 
     private static final String rootUserPinnedProjectGroup = "pinned_project"
+    private static final String myProjectGroup = "my_projects"
+    private static final String myProjectSetting = "my_project"
     public static final String PINNED = "pinned"
 
     @Autowired
@@ -199,6 +202,33 @@ class ProjAdminService {
                     projectId
             )
             sortingService.deleteProjectDisplayOrder(projectId, currentUserIdLower)
+        }
+    }
+
+    @Transactional()
+    void addMyProject(String projectId) {
+        if (!existsByProjectId(projectId)) {
+            throw new SkillException("Project with id [${projectId}] does NOT exist")
+        }
+        UserProjectSettingsRequest userSettingsRequest = new UserProjectSettingsRequest(
+                projectId: projectId,
+                settingGroup: myProjectGroup,
+                setting: myProjectSetting,
+                value: projectId
+        )
+        settingsService.saveSetting(userSettingsRequest)
+    }
+
+    @Transactional()
+    void removeMyProject(String projectId) {
+        if (existsByProjectId(projectId)) {
+            String currentUserIdLower = userInfoService.getCurrentUserId().toLowerCase()
+            settingsService.deleteUserProjectSetting(
+                    currentUserIdLower,
+                    myProjectGroup,
+                    myProjectSetting,
+                    projectId
+            )
         }
     }
 

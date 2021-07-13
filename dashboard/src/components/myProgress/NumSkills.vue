@@ -29,7 +29,7 @@ limitations under the License.
         </b-col>
       </b-row>
       </div>
-      <b-row class="justify-content-between no-gutters border-top text-muted small">
+      <b-row class="justify-content-between no-gutters border-top text-muted small" style="min-height: 3rem;">
         <b-col class="p-2">
           <span data-cy="num-skills-footer">So many skills... so little time! Good luck!</span>
         </b-col>

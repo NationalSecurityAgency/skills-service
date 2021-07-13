@@ -41,12 +41,12 @@ limitations under the License.
 
 <script>
   import Multiselect from 'vue-multiselect';
-  import MetricsCard from '../metrics/utils/MetricsCard';
-  import MetricsOverlay from '../metrics/utils/MetricsOverlay';
+  import MetricsCard from '../../metrics/utils/MetricsCard';
+  import MetricsOverlay from '../../metrics/utils/MetricsOverlay';
   import numberFormatter from '@//filters/NumberFilter';
-  import TimeLengthSelector from '../metrics/common/TimeLengthSelector';
-  import dayjs from '../../DayJsCustomizer';
-  import MetricsService from '../metrics/MetricsService';
+  import TimeLengthSelector from '../../metrics/common/TimeLengthSelector';
+  import dayjs from '../../../DayJsCustomizer';
+  import MetricsService from '../../metrics/MetricsService';
 
   export default {
     name: 'EventHistoryChart',

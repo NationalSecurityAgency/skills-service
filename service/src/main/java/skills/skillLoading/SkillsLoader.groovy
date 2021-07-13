@@ -20,11 +20,13 @@ import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.SerializationUtils
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillExceptionBuilder
+import skills.controller.result.model.AvailableProjectResult
 import skills.controller.result.model.GlobalBadgeLevelRes
 import skills.controller.result.model.SettingsResult
 import skills.services.BadgeUtils
@@ -131,12 +133,34 @@ class SkillsLoader {
         return res
     }
 
+
+    @Profile
+    @Transactional(readOnly = true)
+    List<AvailableProjectResult> getAvailableForMyProjects(String userId, Integer version = -1) {
+
+        List<ProjDefRepo.AvailableProjectSummary> projectSummaries = projDefRepo.getAvailableProjectSummariesInProduction(userId)
+        List<AvailableProjectResult> res = projectSummaries.collect { ProjDefRepo.AvailableProjectSummary summary ->
+            String myProjectId = summary.getMyProjectId();
+            new AvailableProjectResult(
+                    projectId: summary.getProjectId(),
+                    name: summary.getName(),
+                    totalPoints: summary.getTotalPoints(),
+                    numSubjects: summary.getNumSubjects(),
+                    numSkills: summary.getNumSkills(),
+                    numBadges: summary.getNumBadges(),
+                    created: summary.getCreated(),
+                    isMyProject: myProjectId != null,
+            )
+        }
+
+        return res;
+    }
+
     @Profile
     @Transactional(readOnly = true)
     MyProgressSummary loadMyProgressSummary(String userId, Integer version = -1) {
         MyProgressSummary myProgressSummary = new MyProgressSummary()
         List<ProjectSummaryResult> projectSummaries = projDefRepo.getProjectSummaries(userId, version)
-        myProgressSummary.totalProjects = projDefRepo.count()?.intValue()
         for (ProjectSummaryResult summaryResult : projectSummaries) {
             ProjectSummary summary = new ProjectSummary().fromProjectSummaryResult(summaryResult)
             myProgressSummary.projectSummaries << summary
@@ -144,7 +168,7 @@ class SkillsLoader {
             myProgressSummary.numProjectsContributed += summary.points > 0 ? 1 : 0
         }
 
-        BadgeCount badgeCount = skillDefRepo.getProductionBadgesCount()
+        BadgeCount badgeCount = skillDefRepo.getProductionBadgesCount(userId)
         myProgressSummary.totalBadges = badgeCount.totalCount ?: 0
         myProgressSummary.globalBadgeCount = badgeCount.globalCount ?: 0
         myProgressSummary.gemCount = badgeCount.gemCount ?: 0
@@ -154,7 +178,7 @@ class SkillsLoader {
         myProgressSummary.numAchievedGemBadges = achievedBadgeCounts.gemCount ?: 0
         myProgressSummary.numAchievedGlobalBadges = achievedBadgeCounts.globalCount ?: 0
 
-        myProgressSummary.totalSkills = skillDefRepo.countTotalProductionSkills()
+        myProgressSummary.totalSkills = skillDefRepo.countTotalProductionSkills(userId)
         AchievedSkillsCount achievedSkillsCount = achievedLevelRepository.countAchievedProductionSkillsForUserByDayWeekMonth(userId)
         myProgressSummary.numAchievedSkills = achievedSkillsCount.totalCount
         myProgressSummary.numAchievedSkillsLastMonth = achievedSkillsCount.monthCount ?: 0
@@ -554,12 +578,6 @@ class SkillsLoader {
     @Profile
     private int calculateTotalForSkillDef(ProjDef projDef, SkillDefParent subjectDefinition, int version) {
         Integer res = skillDefRepo.calculateTotalPointsForSkill(projDef.projectId, subjectDefinition.skillId, SkillRelDef.RelationshipType.RuleSetDefinition, version)
-        return res ?: 0
-    }
-
-    @Profile
-    private int calculateTotalPointsForProject(ProjDef projDef, int version) {
-        Integer res = skillDefRepo.calculateTotalPointsForProject(projDef.projectId, SkillRelDef.RelationshipType.RuleSetDefinition, version)
         return res ?: 0
     }
 

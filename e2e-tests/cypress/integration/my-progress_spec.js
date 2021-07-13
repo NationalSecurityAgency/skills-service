@@ -37,90 +37,17 @@ describe('Navigation Tests', () => {
   beforeEach(() => {
     cy.intercept('/api/metrics/allProjectsSkillEventsOverTimeMetricsBuilder**').as('allSkillEventsForUser');
 
-    cy.request('POST', '/app/projects/proj1', {
-      projectId: 'proj1',
-      name: 'Project 1'
-    });
-    cy.request('POST', '/admin/projects/proj1/settings/production.mode.enabled', {
-      projectId: 'proj1',
-      setting: 'production.mode.enabled',
-      value: 'true'
-    });
-    cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
-      projectId: 'proj1',
-      subjectId: 'subj1',
-      name: 'Subject 1',
-      helpUrl: 'http://doHelpOnThisSubject.com',
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-    });
-    cy.request('POST', '/admin/projects/proj1/subjects/subj2', {
-      projectId: 'proj1',
-      subjectId: 'subj2',
-      name: 'Subject 2'
-    });
-    cy.request('POST', '/admin/projects/proj1/subjects/subj3', {
-      projectId: 'proj1',
-      subjectId: 'subj3',
-      name: 'Subject 3'
-    });
-    cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
-      projectId: 'proj1',
-      subjectId: 'subj1',
-      skillId: 'skill1',
-      name: `This is 1`,
-      type: 'Skill',
-      pointIncrement: 100,
-      numPerformToCompletion: 5,
-      pointIncrementInterval: 0,
-      numMaxOccurrencesIncrementInterval: -1,
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-      version: 1,
-      helpUrl: 'http://doHelpOnThisSkill.com'
-    });
+    cy.createProject(1);
+    cy.enableProdMode(1);
 
-    cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill2`, {
-      projectId: 'proj1',
-      subjectId: 'subj1',
-      skillId: 'skill2',
-      name: `This is 2`,
-      type: 'Skill',
-      pointIncrement: 100,
-      numPerformToCompletion: 5,
-      pointIncrementInterval: 0,
-      numMaxOccurrencesIncrementInterval: -1,
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-      version: 0,
-      helpUrl: 'http://doHelpOnThisSkill.com'
-    });
-    cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill3`, {
-      projectId: 'proj1',
-      subjectId: 'subj1',
-      skillId: 'skill3',
-      name: `This is 3`,
-      type: 'Skill',
-      pointIncrement: 100,
-      numPerformToCompletion: 2,
-      pointIncrementInterval: 0,
-      numMaxOccurrencesIncrementInterval: -1,
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-      version: 0,
-      helpUrl: 'http://doHelpOnThisSkill.com'
-    });
+    cy.createSubject(1, 1);
+    cy.createSubject(1, 2);
+    cy.createSubject(1, 3);
 
-    cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill4`, {
-      projectId: 'proj1',
-      subjectId: 'subj1',
-      skillId: 'skill4',
-      name: `This is 4`,
-      type: 'Skill',
-      pointIncrement: 100,
-      numPerformToCompletion: 2,
-      pointIncrementInterval: 0,
-      numMaxOccurrencesIncrementInterval: -1,
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-      version: 0,
-      helpUrl: 'http://doHelpOnThisSkill.com'
-    });
+    cy.createSkill(1, 1, 1);
+    cy.createSkill(1, 1, 2);
+    cy.createSkill(1, 1, 3);
+    cy.createSkill(1, 1, 4);
     cy.request('POST', `/admin/projects/proj1/skills/skill4/dependency/skill2`)
 
     cy.request('POST', `/api/projects/proj1/skills/skill1`, {
@@ -155,6 +82,20 @@ describe('Navigation Tests', () => {
       endDate: dateFormatter(new Date() + 1000 * 60 * 60 * 24 * 5),
     });
 
+
+    cy.createProject(2);
+    cy.enableProdMode(2);
+    cy.createSubject(2, 1);
+    cy.createSubject(2, 2);
+    cy.createSubject(2, 3);
+
+    cy.createSkill(2, 1, 1);
+    cy.createSkill(2, 1, 2);
+    cy.createSkill(2, 1, 3);
+    cy.createSkill(2, 1, 4);
+    cy.createSkill(2, 1, 5);
+    cy.createSkill(2, 1, 6);
+
     cy.loginAsRootUser();
     cy.request('POST', '/admin/projects/Inception/settings/production.mode.enabled', {
       projectId: 'Inception',
@@ -168,11 +109,13 @@ describe('Navigation Tests', () => {
       cy.loginAsProxyUser()
     });
     cy.loginAsProxyUser()
+
+    cy.addToMyProjects(1);
+    cy.addToMyProjects(2);
   });
 
   it('badges card - gems and not global badges', function () {
     cy.visit('/');
-    cy.wait('@allSkillEventsForUser');
 
     cy.get('[data-cy=numAchievedGlobalBadges]').should('not.exist')
     cy.get('[data-cy=numAchievedGemBadges]').contains('Gems: 0 / 1')
@@ -189,7 +132,6 @@ describe('Navigation Tests', () => {
 
     cy.visit('/');
     cy.wait('@getMyProgress');
-    cy.wait('@allSkillEventsForUser');
 
     cy.get('[data-cy=numAchievedGlobalBadges]').contains('Global Badges: 1 / 2')
     cy.get('[data-cy=numAchievedGemBadges]').should('not.exist')
@@ -207,7 +149,6 @@ describe('Navigation Tests', () => {
 
     cy.visit('/');
     cy.wait('@getMyProgress');
-    cy.wait('@allSkillEventsForUser');
 
     cy.get('[data-cy=numAchievedGlobalBadges]').contains('Global Badges: 1 / 2')
     cy.get('[data-cy=numAchievedGemBadges]').contains('Gems: 2 / 5')
@@ -224,7 +165,6 @@ describe('Navigation Tests', () => {
 
     cy.visit('/');
     cy.wait('@getMyProgress');
-    cy.wait('@allSkillEventsForUser');
 
     cy.get('[data-cy=numAchievedGlobalBadges]').should('not.exist')
     cy.get('[data-cy=numAchievedGemBadges]').should('not.exist')
@@ -232,7 +172,6 @@ describe('Navigation Tests', () => {
 
   it('visit My Progress page', function () {
     cy.visit('/');
-    cy.wait('@allSkillEventsForUser');
 
     cy.get('[data-cy="breadcrumb-Progress And Rankings"]').contains('Progress And Rankings').should('be.visible');
 
@@ -240,14 +179,14 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=numProjectsAvailable]').contains(new RegExp(/^\/ 2$/));
     cy.get('[data-cy=info-snap-footer]').contains('You still have 1 project to explore.');
 
-    cy.get('[data-cy=numAchievedSkills]').contains(new RegExp(/^1$/));
-    cy.get('[data-cy=numSkillsAvailable]').contains(new RegExp(/^Total: 57$/));
+    cy.get('[data-cy=numAchievedSkills]').contains(new RegExp(/^2$/));
+    cy.get('[data-cy=numSkillsAvailable]').contains(new RegExp(/^Total: 10$/));
     cy.get('[data-cy=num-skills-footer]').contains('So many skills... so little time! Good luck!');
 
     // cy.get('[data-cy=mostRecentAchievedSkill]').contains(new RegExp(/^Last Achieved skill \d+ minute[s]? ago$/));
     cy.get('[data-cy=mostRecentAchievedSkill]').contains(`Last Achieved skill ${timeFromNowFormatter(now)}`);
-    cy.get('[data-cy=numAchievedSkillsLastWeek]').contains('1 skills in the last week');
-    cy.get('[data-cy=numAchievedSkillsLastMonth]').contains('1 skills in the last month');
+    cy.get('[data-cy=numAchievedSkillsLastWeek]').contains('2 skills in the last week');
+    cy.get('[data-cy=numAchievedSkillsLastMonth]').contains('2 skills in the last month');
     cy.get('[data-cy=last-earned-footer]').contains('Keep up the good work!!');
 
     cy.get('[data-cy=badges-num-footer]').contains('Be proud to earn those badges!!');
@@ -256,21 +195,19 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=numAchievedGlobalBadges]').should('not.exist')
     cy.get('[data-cy=numAchievedGemBadges]').contains('Gems: 0');
 
-    cy.get('[data-cy=project-link-Inception]').should('be.visible');
-    cy.get('[data-cy=project-link-Inception]').find('[data-cy=project-card-project-name]').contains('Inception');
+    cy.get('[data-cy=project-link-proj2]').should('be.visible');
+    cy.get('[data-cy=project-link-proj2]').find('[data-cy=project-card-project-name]').contains('This is project 2');
 
     cy.get('[data-cy=project-link-proj1]').should('be.visible');
-    cy.get('[data-cy=project-link-proj1]').find('[data-cy=project-card-project-name]').contains('Project 1');
-    cy.get('[data-cy=project-link-proj1]').find('[data-cy=project-card-project-level]').contains('2');
+    cy.get('[data-cy=project-link-proj1]').find('[data-cy=project-card-project-name]').contains('This is project 1');
+    cy.get('[data-cy=project-link-proj1]').find('[data-cy=project-card-project-level]').contains('3');
     cy.get('[data-cy=project-link-proj1]').find('[data-cy=project-card-project-rank]').contains(new RegExp(/^Rank: 1 \/ 1$/));
-    cy.get('[data-cy=project-link-proj1]').find('[data-cy=project-card-project-points]').contains(new RegExp(/^400 \/ 1,400$/));
+    cy.get('[data-cy=project-link-proj1]').find('[data-cy=project-card-project-points]').contains(new RegExp(/^400 \/ 800$/));
 
     cy.get('[data-cy=inception-button]').should('not.exist');
 
     cy.get('[data-cy=project-link-proj1]').click()
 
-    cy.intercept('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
-    cy.wait('@pointHistoryChart');
     cy.dashboardCd().contains('Overall Points');
     cy.get('[data-cy="breadcrumb-Progress And Rankings"]').should('be.visible');
     cy.get('[data-cy=breadcrumb-proj1]').should('be.visible');
@@ -278,16 +215,15 @@ describe('Navigation Tests', () => {
   });
 
   it('My Progress page - contributed to all projects', function () {
-    // add a skill to Inception to have contributed to all projects
+    // // add a skill to Inception to have contributed to all projects
     cy.loginAsRootUser();
-    cy.request('POST', `/api/projects/Inception/skills/VisitUserSettings`, {
+    cy.request('POST', `/api/projects/proj2/skills/skill1`, {
       userId: Cypress.env('proxyUser'),
       timestamp: new Date().getTime()
     })
 
     cy.loginAsProxyUser();
     cy.visit('/');
-    cy.wait('@allSkillEventsForUser');
 
     cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^2$/));
     cy.get('[data-cy=numProjectsAvailable]').contains(new RegExp(/^\/ 2$/));
@@ -295,151 +231,86 @@ describe('Navigation Tests', () => {
   });
 
   it('My Progress page - not contributed to more than one project', function () {
-    cy.request('POST', '/app/projects/proj2', {
-      projectId: 'proj2',
-      name: 'Project 2'
-    });
-    cy.request('POST', '/admin/projects/proj2/settings/production.mode.enabled', {
-      projectId: 'proj2',
-      setting: 'production.mode.enabled',
-      value: 'true'
-    });
+    cy.createProject(3)
+    cy.enableProdMode(3);
+    cy.addToMyProjects(3);
 
     cy.loginAsProxyUser();
     cy.visit('/');
-    cy.wait('@allSkillEventsForUser');
 
     cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^1$/));
     cy.get('[data-cy=numProjectsAvailable]').contains(new RegExp(/^\/ 3$/));
     cy.get('[data-cy=info-snap-footer]').contains('You still have 2 projects to explore.');
   });
 
-  it('My Progress page - time controls call out to the server',() => {
-
-    cy.visit('/');
-    cy.wait('@allSkillEventsForUser');
-
-    cy.get('[data-cy=eventHistoryChart] [data-cy=timeLengthSelector]').contains('6 months').click();
-    cy.wait('@allSkillEventsForUser');
-
-    cy.get('[data-cy=eventHistoryChart] [data-cy=timeLengthSelector]').contains('1 year').click();
-    cy.wait('@allSkillEventsForUser');
-  });
-
-  it('My Progress page - add/remove projects in event history chart',() => {
-    // create 5 projects total (including Inception)
-    cy.request('POST', '/app/projects/proj2', {
-      projectId: 'proj2',
-      name: 'Project 2'
-    });
-    cy.request('POST', '/admin/projects/proj2/settings/production.mode.enabled', {
-      projectId: 'proj2',
-      setting: 'production.mode.enabled',
-      value: 'true'
-    });
-    cy.request('POST', '/app/projects/proj3', {
-      projectId: 'proj3',
-      name: 'Project 3'
-    });
-    cy.request('POST', '/admin/projects/proj3/settings/production.mode.enabled', {
-      projectId: 'proj3',
-      setting: 'production.mode.enabled',
-      value: 'true'
-    });
-    cy.request('POST', '/app/projects/proj4', {
-      projectId: 'proj4',
-      name: 'Project 4'
-    });
-    cy.request('POST', '/admin/projects/proj4/settings/production.mode.enabled', {
-      projectId: 'proj4',
-      setting: 'production.mode.enabled',
-      value: 'true'
-    });
-
-    cy.loginAsProxyUser();
-    cy.visit('/');
-    cy.wait('@allSkillEventsForUser');
-
-    // validate 4 projects are loaded by default
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Inception').should('be.visible');
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 1').should('be.visible');
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 2').should('be.visible');
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 3').should('be.visible');
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 4').should('not.be.visible');
-
-    // remove a project
-    cy.get('[data-cy=eventHistoryChartProjectSelector] .multiselect__tag-icon').should('have.length', 4).as('removeBtns');
-    cy.get('@removeBtns').eq(2).click()
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Inception').should('be.visible');
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 1').should('be.visible');
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 2').should('not.be.visible');
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 3').should('be.visible');
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 4').should('not.be.visible');
-
-    // add a project
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').click()
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 4').should('be.visible').as('project4');
-    cy.get('@project4').click();
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Inception').should('be.visible');
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 1').should('be.visible');
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 2').should('not.be.visible');
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 3').should('be.visible');
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 4').should('be.visible');
-
-    // allows up to 5 projects
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').click()
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 2').should('be.visible').as('project2');
-    cy.get('@project2').click();
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Inception').should('be.visible');
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 1').should('be.visible');
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 2').should('be.visible');
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 3').should('be.visible');
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 4').should('be.visible');
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').click()
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Maximum of 5 options selected');
-
-    // remove all 5 projects
-    for (let i=0; i<5; i+= 1) {
-      cy.get('@removeBtns').eq(0).click()
-    }
-    cy.get('[data-cy=eventHistoryChart]').contains('Please select at least one project from the list above.');
-
-
-    // select just Project 2 (which has no user events yet)
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').click()
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 2').click()
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Inception').should('not.be.visible');
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 1').should('not.be.visible');
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 2').should('be.visible');
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 3').should('not.be.visible');
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 4').should('not.be.visible');
-    // cy.get('[data-cy=eventHistoryChartProjectSelector]').click()
-    cy.get('[data-cy=eventHistoryChart]').contains('There are no events for the selected project(s) and time period.');
-  });
 
   it('mySkills page - projects that do not have "production mode" enabled are not included', function () {
-    cy.request('POST', '/app/projects/proj2', {
-      projectId: 'proj2',
-      name: 'Project 2'
-    });
+    cy.createProject(3);
+    cy.addToMyProjects(3)
+
+    cy.createSubject(3, 1);
+    cy.createSubject(3, 2);
+
+    cy.createSkill(3, 1, 1);
+    cy.createSkill(3, 1, 2);
+    cy.createSkill(3, 1, 3);
+    cy.createSkill(3, 1, 4);
+
+    cy.createBadge(3, 1);
 
     cy.loginAsProxyUser();
     cy.visit('/');
-    cy.wait('@allSkillEventsForUser');
 
     cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^1$/));
     cy.get('[data-cy=numProjectsAvailable]').contains(new RegExp(/^\/ 2$/));
     cy.get('[data-cy=info-snap-footer]').contains('You still have 1 project to explore.');
 
-    cy.get('[data-cy=project-link-Inception]').should('be.visible');
-    cy.get('[data-cy=project-link-Inception]').find('[data-cy=project-card-project-name]').contains('Inception');
+    cy.get('[data-cy=numSkillsAvailable]').contains(new RegExp(/^Total: 10$/));
+    cy.get('[data-cy=numBadgesAvailable]').contains(new RegExp(/^\/ 2$/));
 
     cy.get('[data-cy=project-link-proj1]').should('be.visible');
-    cy.get('[data-cy=project-link-proj1]').find('[data-cy=project-card-project-name]').contains('Project 1');
+    cy.get('[data-cy=project-link-proj1]').find('[data-cy=project-card-project-name]').contains('This is project 1');
+
+    cy.get('[data-cy=project-link-proj2]').should('be.visible');
+    cy.get('[data-cy=project-link-proj2]').find('[data-cy=project-card-project-name]').contains('This is project 2');
 
 
-    cy.get('[data-cy=project-link-proj2]').should('not.exist');
-    cy.get('[data-cy=project-link-proj1]').find('[data-cy=project-card-project-name]').contains('Project 2').should('not.exist');
+    cy.get('[data-cy=project-link-proj3]').should('not.exist');
+  });
+
+
+  it('mySkills page - projects that are not added to My Projects are not included', function () {
+    cy.createProject(3);
+    cy.enableProdMode(3);
+
+    cy.createSubject(3, 1);
+    cy.createSubject(3, 2);
+
+    cy.createSkill(3, 1, 1);
+    cy.createSkill(3, 1, 2);
+    cy.createSkill(3, 1, 3);
+    cy.createSkill(3, 1, 4);
+
+    cy.createBadge(3, 1);
+
+    cy.loginAsProxyUser();
+    cy.visit('/');
+
+    cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^1$/));
+    cy.get('[data-cy=numProjectsAvailable]').contains(new RegExp(/^\/ 2$/));
+    cy.get('[data-cy=info-snap-footer]').contains('You still have 1 project to explore.');
+
+    cy.get('[data-cy=numSkillsAvailable]').contains(new RegExp(/^Total: 10$/));
+    cy.get('[data-cy=numBadgesAvailable]').contains(new RegExp(/^\/ 2$/));
+
+    cy.get('[data-cy=project-link-proj1]').should('be.visible');
+    cy.get('[data-cy=project-link-proj1]').find('[data-cy=project-card-project-name]').contains('This is project 1');
+
+    cy.get('[data-cy=project-link-proj2]').should('be.visible');
+    cy.get('[data-cy=project-link-proj2]').find('[data-cy=project-card-project-name]').contains('This is project 2');
+
+
+    cy.get('[data-cy=project-link-proj3]').should('not.exist');
   });
 
   it('My Progress page - no projects created', function () {
@@ -454,7 +325,19 @@ describe('Navigation Tests', () => {
     cy.visit('/');
     cy.wait('@getMyProgress');
 
-    cy.contains('Projects can be created from the "Project Admin" view, accessible by clicking on your name at the top-right of the screen.')
+    cy.contains('START CUSTOMIZING TODAY!')
+    // make sure tooltip is displayed
+    cy.contains('Click here to add My Projects')
+  });
+
+  it('no projects added to My PRojects', function () {
+    cy.removeFromMyProjects(1)
+    cy.removeFromMyProjects(2)
+    cy.visit('/progress-and-rankings');
+
+    cy.contains('START CUSTOMIZING TODAY!')
+    // make sure tooltip is displayed
+    cy.contains('Click here to add My Projects')
   });
 
   it('My Progress page - no projects with production mode enabled', function () {
@@ -465,8 +348,8 @@ describe('Navigation Tests', () => {
       setting: 'production.mode.enabled',
       value: 'false'
     });
-    cy.request('POST', '/admin/projects/Inception/settings/production.mode.enabled', {
-      projectId: 'Inception',
+    cy.request('POST', '/admin/projects/proj2/settings/production.mode.enabled', {
+      projectId: 'proj2',
       setting: 'production.mode.enabled',
       value: 'false'
     });
@@ -474,68 +357,24 @@ describe('Navigation Tests', () => {
     cy.loginAsProxyUser();
     cy.visit('/');
 
-    cy.contains('You will see your SkillTree progress and rankings on this page when project(s) have their production mode enabled.')
+
+    cy.contains('START CUSTOMIZING TODAY!')
+    // make sure tooltip is displayed
+    cy.contains('Click here to add My Projects')
   });
 
-  it('validate ranking format', function () {
-    // report skills for lots of other users
-    cy.loginAsRootUser();
-    cy.request('POST', '/app/projects/proj3', {
-      projectId: 'proj3',
-      name: 'Project 3'
-    });
-    cy.request('POST', '/admin/projects/proj3/settings/production.mode.enabled', {
-      projectId: 'proj3',
-      setting: 'production.mode.enabled',
-      value: 'true'
-    });
-    cy.request('POST', '/admin/projects/proj3/subjects/subj1', {
-      projectId: 'proj3',
-      subjectId: 'subj1',
-      name: 'Subject 1',
-      helpUrl: 'http://doHelpOnThisSubject.com',
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-    });
-    cy.request('POST', `/admin/projects/proj3/subjects/subj1/skills/skill1`, {
-      projectId: 'proj3',
-      subjectId: 'subj1',
-      skillId: 'skill1',
-      name: `This is 1`,
-      type: 'Skill',
-      pointIncrement: 100,
-      numPerformToCompletion: 5,
-      pointIncrementInterval: 0,
-      numMaxOccurrencesIncrementInterval: -1,
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-      version: 0,
-      helpUrl: 'http://doHelpOnThisSkill.com'
-    });
-
-    for (let i = 0; i < 1000; i++) {
-      cy.request('POST', `/api/projects/proj3/skills/skill1`, {
-        userId: `other-user${i}`,
-        timestamp: new Date().getTime()
-      })
-    }
-    cy.loginAsProxyUser();
-
-    cy.visit('/');
-    cy.wait('@allSkillEventsForUser');
-    cy.get('[data-cy=project-link-proj3]').find('[data-cy=project-card-project-rank]').contains(new RegExp(/^Rank: 1,001 \/ 1,001$/));
-  });
 
   it('All skill versions are included in the Skills Display', function () {
     cy.intercept('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
 
     cy.visit('/');
-    cy.wait('@allSkillEventsForUser');
 
     cy.get('[data-cy=inception-button]').should('not.exist');
 
     cy.get('[data-cy=project-link-proj1]').click()
     cy.wait('@pointHistoryChart');
     cy.dashboardCd().contains('Overall Points');
-    cy.dashboardCd().contains('Earn up to 1,400 points');
+    cy.dashboardCd().contains('Earn up to 800 points');
 
     cy.get('[data-cy="breadcrumb-Progress And Rankings"]').should('be.visible');
     cy.get('[data-cy=breadcrumb-proj1]').should('be.visible');
@@ -551,14 +390,13 @@ describe('Navigation Tests', () => {
     cy.intercept('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
 
     cy.visit('/');
-    cy.wait('@allSkillEventsForUser');
 
     cy.get('[data-cy=inception-button]').should('not.exist');
 
     cy.get('[data-cy=project-link-proj1]').click()
     cy.wait('@pointHistoryChart');
     cy.dashboardCd().contains('Overall Points');
-    cy.dashboardCd().contains('Earn up to 1,400 points');
+    cy.dashboardCd().contains('Earn up to 800 points');
 
     cy.get('[data-cy="breadcrumb-Progress And Rankings"]').should('be.visible');
     cy.get('[data-cy=breadcrumb-proj1]').should('be.visible');
@@ -586,8 +424,9 @@ describe('Navigation Tests', () => {
 
     // finally back one more time and we should be back on the my progress page
     cy.go('back')  // browser back button
-    cy.wait('@allSkillEventsForUser');
     cy.get('[data-cy="breadcrumb-Progress And Rankings"]').contains('Progress And Rankings').should('be.visible');
   });
+
+
 });
 

@@ -22,9 +22,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import skills.PublicProps
 import skills.auth.UserInfoService
+import skills.controller.result.model.AvailableProjectResult
+import skills.controller.result.model.RequestResult
 import skills.metrics.MetricsService
 import skills.profile.EnableCallStackProf
-import skills.services.AdminUsersService
+import skills.services.admin.ProjAdminService
 import skills.skillLoading.SkillsLoader
 import skills.skillLoading.model.MyProgressSummary
 
@@ -37,9 +39,6 @@ import javax.servlet.http.HttpServletRequest
 class MyProgressController {
 
     @Autowired
-    AdminUsersService adminUsersService
-
-    @Autowired
     MetricsService metricsServiceNew
 
     @Autowired
@@ -50,6 +49,9 @@ class MyProgressController {
 
     @Autowired
     private PublicProps publicProps
+
+    @Autowired
+    ProjAdminService projAdminService
 
     @RequestMapping(value = "/metrics/{metricsId}", method =  RequestMethod.GET, produces = "application/json")
     def getChartData(@PathVariable("metricsId") String metricsId,
@@ -65,6 +67,27 @@ class MyProgressController {
                                            @RequestParam(name = "version", required = false) Integer version) {
         String userId = userInfoService.getCurrentUserId()
         return skillsLoader.loadMyProgressSummary(userId, getProvidedVersionOrReturnDefault(version))
+    }
+
+    @RequestMapping(value = "/availableForMyProjects", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @CompileStatic
+    @Profile
+    List<AvailableProjectResult> getAvailableForMyProjects(HttpServletRequest request, @RequestParam(name = "version", required = false) Integer version) {
+        String currentUserIdLower = userInfoService.getCurrentUserId().toLowerCase()
+        return skillsLoader.getAvailableForMyProjects(currentUserIdLower, getProvidedVersionOrReturnDefault(version));
+    }
+
+    @PostMapping('/myprojects/{projectId}')
+    RequestResult pinProject(@PathVariable("projectId") String projectId) {
+        projAdminService.addMyProject(projectId)
+        return new RequestResult(success: true)
+    }
+
+    @DeleteMapping('/myprojects/{projectId}')
+    RequestResult unpinProject(@PathVariable("projectId") String projectId) {
+        projAdminService.removeMyProject(projectId)
+        return new RequestResult(success: true)
     }
 
     private int getProvidedVersionOrReturnDefault(Integer versionParam) {

@@ -21,6 +21,21 @@ export default {
     return axios.get(url)
       .then((response) => response.data);
   },
+  getAvailableForMyProjects() {
+    const url = '/api/availableForMyProjects';
+    return axios.get(url)
+      .then((response) => response.data);
+  },
+  addToMyProjects(projectId) {
+    const url = `/api/myprojects/${projectId}`;
+    return axios.post(url)
+      .then((response) => response.data);
+  },
+  removeFromMyProjects(projectId) {
+    const url = `/api/myprojects/${projectId}`;
+    return axios.delete(url)
+      .then((response) => response.data);
+  },
   searchProjects(search) {
     const url = `/root/searchProjects?name=${search}`;
     return axios.get(url)

@@ -20,7 +20,7 @@ limitations under the License.
         <b-col cols="5">
           <div class="text-uppercase text-secondary">Projects</div>
           <div class="mt-2 ml-1 text-dark">
-            <span style="font-size: 2.5rem;" data-cy="numProjectsContributed">{{ numProjectsContributed }}</span> <span class="text-secondary" style="font-size: 1.2rem;" data-cy="numProjectsAvailable">/ {{ totalProjects }}</span>
+            <span style="font-size: 2.5rem;" data-cy="numProjectsContributed">{{ numProjectsContributed }}</span> <span class="text-secondary" style="font-size: 1.2rem;" data-cy="numProjectsAvailable">/ {{ projects.length }}</span>
           </div>
         </b-col>
         <b-col cols="7">
@@ -28,10 +28,21 @@ limitations under the License.
         </b-col>
       </b-row>
     </div>
-    <b-row class="justify-content-between no-gutters border-top text-muted small">
+    <b-row class="justify-content-between no-gutters border-top text-muted small"  style="min-height: 3rem;">
       <b-col class="p-2">
-        <span v-if="projectsNotContributedToYet > 0" data-cy="info-snap-footer">You still have <b-badge variant="info">{{ projectsNotContributedToYet }}</b-badge> project{{ projectsNotContributedToYet > 1 ? 's' : ''}} to explore.</span>
-        <span v-else data-cy="info-snap-footer" class="text-nowrap">Great job, you have contributed to all projects!</span>
+        <b-row :no-gutters="true">
+          <b-col class="text-truncate">
+            <span v-if="projectsNotContributedToYet > 0"
+                  data-cy="info-snap-footer"
+                  :title="`You still have ${projectsNotContributedToYet} project${ projectsNotContributedToYet > 1 ? 's' : ''} to explore.`">
+              You still have <b-badge variant="info">{{ projectsNotContributedToYet }}</b-badge> project{{ projectsNotContributedToYet > 1 ? 's' : ''}} to explore.
+            </span>
+            <span v-else data-cy="info-snap-footer" class="text-nowrap" title="Great job, you have contributed to all projects!">Great job, you have contributed to all projects!</span>
+          </b-col>
+          <b-col cols="auto">
+            <span class="float-right"><b-button :to="{ name: 'MyUsagePage', params: { projects } }" variant="outline-info" size="sm" data-cy="viewUsageBtn"><i class="fas fa-eye"/> Usage</b-button></span>
+          </b-col>
+        </b-row>
       </b-col>
     </b-row>
   </b-card>
@@ -41,8 +52,8 @@ limitations under the License.
   export default {
     name: 'InfoSnapshotCard',
     props: {
-      totalProjects: {
-        type: Number,
+      projects: {
+        type: Array,
         required: true,
       },
       numProjectsContributed: {
@@ -141,7 +152,7 @@ limitations under the License.
     },
     computed: {
       series() {
-        const percent = (this.numProjectsContributed / this.totalProjects) * 100;
+        const percent = (this.numProjectsContributed / this.projects.length) * 100;
         if (percent > 0) {
           if (percent < 1) {
             return [1];
@@ -151,7 +162,7 @@ limitations under the License.
         return [0];
       },
       projectsNotContributedToYet() {
-        return this.totalProjects - this.numProjectsContributed;
+        return this.projects.length - this.numProjectsContributed;
       },
     },
   };
