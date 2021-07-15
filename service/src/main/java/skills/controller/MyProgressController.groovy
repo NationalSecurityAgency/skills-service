@@ -22,6 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import skills.PublicProps
 import skills.auth.UserInfoService
+import skills.controller.exceptions.SkillsValidator
+import skills.controller.request.model.AddMyProjectRequest
 import skills.controller.result.model.AvailableProjectResult
 import skills.controller.result.model.RequestResult
 import skills.metrics.MetricsService
@@ -79,13 +81,16 @@ class MyProgressController {
     }
 
     @PostMapping('/myprojects/{projectId}')
-    RequestResult pinProject(@PathVariable("projectId") String projectId) {
-        projAdminService.addMyProject(projectId)
+    RequestResult addMyProject(@PathVariable("projectId") String projectId, @RequestBody(required = false) AddMyProjectRequest addMyProjectRequest) {
+        if (addMyProjectRequest?.newSortIndex != null){
+            SkillsValidator.isTrue(addMyProjectRequest.newSortIndex >=0, "Provided [newSortIndex=${addMyProjectRequest.newSortIndex}] is less than 0", projectId)
+        }
+        projAdminService.addMyProject(projectId, addMyProjectRequest)
         return new RequestResult(success: true)
     }
 
     @DeleteMapping('/myprojects/{projectId}')
-    RequestResult unpinProject(@PathVariable("projectId") String projectId) {
+    RequestResult removeMyProject(@PathVariable("projectId") String projectId) {
         projAdminService.removeMyProject(projectId)
         return new RequestResult(success: true)
     }

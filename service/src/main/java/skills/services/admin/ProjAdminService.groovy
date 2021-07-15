@@ -17,6 +17,7 @@ package skills.services.admin
 
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
@@ -28,9 +29,10 @@ import skills.auth.UserSkillsGrantedAuthority
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.ActionPatchRequest
+import skills.controller.request.model.AddMyProjectRequest
 import skills.controller.request.model.ProjectRequest
+import skills.controller.request.model.SettingsRequest
 import skills.controller.request.model.UserProjectSettingsRequest
-import skills.controller.request.model.UserSettingsRequest
 import skills.controller.result.model.CustomIconResult
 import skills.controller.result.model.ProjectResult
 import skills.controller.result.model.SettingsResult
@@ -44,9 +46,11 @@ import skills.storage.model.ProjSummaryResult
 import skills.storage.model.SkillDef
 import skills.storage.model.auth.RoleName
 import skills.storage.accessors.ProjDefAccessor
+import skills.storage.model.auth.User
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserEventsRepo
+import skills.storage.repos.UserRepo
 import skills.utils.ClientSecretGenerator
 import skills.utils.Props
 
@@ -103,6 +107,9 @@ class ProjAdminService {
 
     @Autowired
     ProjectExpirationService projectExpirationService
+
+    @Autowired
+    UserRepo userRepo
 
     @Transactional()
     void saveProject(String originalProjectId, ProjectRequest projectRequest, String userIdParam = null) {
@@ -206,17 +213,50 @@ class ProjAdminService {
     }
 
     @Transactional()
-    void addMyProject(String projectId) {
+    void addMyProject(String projectId, AddMyProjectRequest addMyProjectRequest) {
         if (!existsByProjectId(projectId)) {
             throw new SkillException("Project with id [${projectId}] does NOT exist")
         }
-        UserProjectSettingsRequest userSettingsRequest = new UserProjectSettingsRequest(
-                projectId: projectId,
-                settingGroup: myProjectGroup,
-                setting: myProjectSetting,
-                value: projectId
-        )
-        settingsService.saveSetting(userSettingsRequest)
+
+        String currentUserIdLower = userInfoService.getCurrentUserId().toLowerCase()
+        List<SettingsResult> allExistingProjects = settingsService.getUserProjectSettingsForAllProjectsForGroup(currentUserIdLower, myProjectGroup)
+        List<SettingsRequest> finalRes = allExistingProjects.collect({
+            new UserProjectSettingsRequest(
+                    projectId: it.projectId,
+                    settingGroup: it.settingGroup,
+                    setting: it.setting,
+                    value: it.value
+            )
+        }).sort { it.value }
+
+        SettingsRequest alreadyExistProjectRequest =  finalRes.find({ ((UserProjectSettingsRequest)it).getProjectId() == projectId})
+        if(!alreadyExistProjectRequest) {
+            UserProjectSettingsRequest newProjectAdded = new UserProjectSettingsRequest(
+                    projectId: projectId,
+                    settingGroup: myProjectGroup,
+                    setting: myProjectSetting,
+            )
+
+            // new project should always appear first in the list
+            int insertIndex = 0;
+            if (addMyProjectRequest?.newSortIndex != null) {
+                insertIndex = Math.min(addMyProjectRequest.newSortIndex, finalRes.size() - 1)
+            }
+            finalRes.add(insertIndex, newProjectAdded)
+        } else if (alreadyExistProjectRequest && addMyProjectRequest?.newSortIndex != null && addMyProjectRequest.newSortIndex < finalRes.size()) {
+            finalRes.remove(alreadyExistProjectRequest)
+            finalRes.add(addMyProjectRequest.newSortIndex, alreadyExistProjectRequest)
+        }
+
+        finalRes.eachWithIndex{ def entry, int i ->
+            entry.value = "sort_${StringUtils.leftPad(i.toString(), 4, "0")}"
+        }
+
+        User user = userRepo.findByUserId(currentUserIdLower)
+        if (!user) {
+            throw new SkillException("Failed to find user with id [${currentUserIdLower}]")
+        }
+        settingsService.saveSettings(finalRes, user)
     }
 
     @Transactional()

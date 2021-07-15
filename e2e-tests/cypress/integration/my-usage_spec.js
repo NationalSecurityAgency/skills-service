@@ -31,7 +31,7 @@ describe('My Usage Tests', () => {
             }
         });
 
-        for (let i = 2; i <= 9; i += 1) {
+        for (let i = 9; i >= 2; i -= 1) {
             cy.createProject(i);
             cy.enableProdMode(i);
             cy.addToMyProjects(i)

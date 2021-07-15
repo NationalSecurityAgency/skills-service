@@ -15,13 +15,13 @@ limitations under the License.
 */
 <template>
   <div class="proj-link-container">
-    <b-card class="proj-link-card">
+    <b-card :class="{ 'proj-link-card' : !overSortControl }">
       <b-row class="m-0 p-0 flex-nowrap">
         <b-col cols="4" class="proj-progress-chart">
           <apexchart :name="proj.projectName" type="radialBar" height="200" :options="chartOptions" :series="series"></apexchart>
         </b-col>
         <b-col cols="8" class="text-right pr-md-5">
-          <div class="h4 text-uppercase text-truncate" data-cy="project-card-project-name">{{ proj.projectName }}</div>
+          <div class="h4 text-uppercase text-truncate" data-cy="project-card-project-name" :title="proj.projectName ">{{ proj.projectName }}</div>
           <div class="h5 text-secondary" data-cy="project-card-project-level">Level {{ proj.level }}</div>
           <div data-cy="project-card-project-rank">
             <b-badge :variant="rankVariant">Rank: {{ proj.rank | number }} / {{ proj.totalUsers | number}}</b-badge>
@@ -44,6 +44,11 @@ limitations under the License.
         <span id="projectProgressLabel" class="small text-center" data-cy="project-card-project-points">{{ proj.points | number }} / {{ proj.totalPoints | number }}</span>
       </div>
       <div class="position-absolute text-muted d-none small click-indicator" style="right: 15px; bottom: 10px;">Click to View</div>
+
+      <div  @mouseover="overSortControl = true"
+            @mouseleave="overSortControl = false"
+            @click.prevent.self
+        class="position-absolute text-secondary px-2 py-1 sort-control"><i class="fas fa-arrows-alt"></i></div>
     </b-card>
   </div>
 </template>
@@ -54,6 +59,7 @@ limitations under the License.
     props: ['proj'],
     data() {
       return {
+        overSortControl: false,
         series: [0],
         chartOptions: {
           chart: {
@@ -154,9 +160,6 @@ limitations under the License.
   border-color: $info !important;
 }
 
-</style>
-
-<style scoped>
 .proj-link-container .proj-link-card:hover {
   box-shadow: 0 2px 2px #146c75, 0 4px 8px rgba(10,16,20,.12);
 }
@@ -169,5 +172,22 @@ limitations under the License.
 }
 .proj-progress-chart {
   min-width: 152px;
+}
+
+.sort-control {
+  font-size: 1.3rem;
+  color: #b3b3b3 !important;
+  top: 0rem;
+  left: 0rem;
+  border-bottom: 1px solid #e8e8e8;
+  border-right: 1px solid #e8e8e8;
+  background-color: #fbfbfb !important;
+  border-bottom-right-radius:.25rem!important
+}
+
+.sort-control:hover, .sort-control i:hover {
+  cursor: grab !important;
+  color: $info !important;
+  font-size: 1.6rem;
 }
 </style>
