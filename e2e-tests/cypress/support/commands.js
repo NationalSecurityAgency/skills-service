@@ -636,3 +636,30 @@ Cypress.Commands.add('closeToasts', () => {
     });
 });
 
+
+Cypress.Commands.add('dragMyProject', { prevSubject: 'element' }, (sourceProjectElement, destProjectSelector) => {
+    const dataTransfer = new DataTransfer()
+
+    cy.get(destProjectSelector).then((destProject) => {
+        cy.wrap(sourceProjectElement.get(0))
+            .trigger('pointerdown', { eventConstructor: 'PointerEvent' })
+            .trigger('dragstart', { dataTransfer, eventConstructor: 'DragEvent' })
+            .then(() => {
+                cy.wrap(destProject.get(0))
+                    .trigger('dragover', { dataTransfer, eventConstructor: 'DragEvent' })
+                    .wait(1000)
+                    .trigger('drop', {
+                        dataTransfer,
+                        eventConstructor: 'DragEvent',
+                    })
+                    .wait(1000)
+            });
+    })
+});
+
+Cypress.Commands.add("validateMyProjectsSort", (projects) => {
+    cy.get('[data-cy="project-card-project-name"]').should('have.length', projects.length).as('projectNames');
+    for (const [i, value] of projects.entries()) {
+        cy.get('@projectNames').eq(i).contains(value);
+    }
+});

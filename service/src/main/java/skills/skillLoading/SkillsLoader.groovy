@@ -115,6 +115,9 @@ class SkillsLoader {
     @Autowired
     SkillApprovalRepo skillApprovalRepo
 
+    @Autowired
+    UserAttrsRepo userAttrsRepo
+
     private static String PROP_HELP_URL_ROOT = CommonSettings.HELP_URL_ROOT
 
     @Transactional(readOnly = true)

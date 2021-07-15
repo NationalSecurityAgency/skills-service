@@ -45,10 +45,12 @@ limitations under the License.
       </div>
       <div class="position-absolute text-muted d-none small click-indicator" style="right: 15px; bottom: 10px;">Click to View</div>
 
-      <div  @mouseover="overSortControl = true"
-            @mouseleave="overSortControl = false"
-            @click.prevent.self
-        class="position-absolute text-secondary px-2 py-1 sort-control"><i class="fas fa-arrows-alt"></i></div>
+      <div
+        @mouseover="overSortControl = true"
+        @mouseleave="overSortControl = false"
+        @click.prevent.self
+        class="position-absolute text-secondary px-2 py-1 sort-control"
+        data-cy="sortControlHandle"><i class="fas fa-arrows-alt"></i></div>
     </b-card>
   </div>
 </template>

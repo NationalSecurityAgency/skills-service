@@ -554,9 +554,7 @@ describe('Accessibility Tests', () => {
     cy.customA11y();
   });
 
-  it('my usage page', ()=>{
-
-
+  it.only('my usage page', ()=>{
     cy.fixture('vars.json').then((vars) => {
       cy.request('POST', '/logout');
       cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);

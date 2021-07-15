@@ -363,7 +363,7 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                    (SELECT COALESCE(count(*)+1, 1) FROM UserPoints WHERE projectId = pd.projectId and skillId is NULL and day IS NULL and points > up.points) as rank,
                    pd.totalPoints as totalPoints,
                    ss.value as orderVal
-            FROM Setting s, Setting ss, UserAttrs uu, ProjDef pd
+            FROM Setting s, Setting ss, Users uu, ProjDef pd
             LEFT JOIN UserPoints up on pd.projectId = up.projectId and
                   up.userId=?1 and
                   up.day is null and up.skillId is null
@@ -372,25 +372,5 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
             GROUP BY points, pd.projectId, pd.name, pd.id
     ''')
     List<ProjectSummaryResult> getProjectSummaries(String userId, Integer version)
-
-
-    @Query(value='''
-            SELECT pd.id as projectRefId,
-                   pd.project_id as projectId,
-                   pd.name as projectName,
-                   COALESCE(up.points, 0) as points,
-                   (SELECT COALESCE(count(*), 1) FROM user_points WHERE project_id = pd.project_id and skill_id is NULL and day IS NULL) as totalUsers,
-                   (SELECT COALESCE(count(*)+1, 1) FROM user_points WHERE project_id = pd.project_id and skill_id is NULL and day IS NULL and points > up.points) as rank,
-                   pd.total_points as totalPoints,
-                   ss.value as orderVal
-            FROM settings s, settings ss, users uu, project_definition pd
-            LEFT JOIN user_points up on pd.project_id = up.project_id and
-                  up.user_id=?1 and
-                  up.day is null and up.skill_id is null
-            WHERE (s.setting = 'production.mode.enabled' and s.project_id = pd.project_id and s.value = 'true') and 
-                (ss.setting = 'my_project' and uu.user_id=?1 and uu.id = ss.user_ref_id and ss.project_id = pd.project_id)
-            GROUP BY points, pd.project_id, pd.name, pd.id
-''', nativeQuery = true)
-    List<ProjectSummaryResult> getProjectSummaries1(String userId, Integer version)
 
 }

@@ -16,7 +16,9 @@ limitations under the License.
 <template>
   <div class="container-fluid">
     <sub-page-header title="Manage My Projects" class="pt-4">
-      <b-button :to="{ name: 'MyProgressPage' }" variant="outline-primary"><i class="fas fa-arrow-alt-circle-left" aria-hidden="true"/> Back <span class="d-none d-md-inline">to Progress and Ranking</span></b-button>
+      <b-button :to="{ name: 'MyProgressPage' }"
+                data-cy="backToProgressAndRankingBtn"
+                variant="outline-primary"><i class="fas fa-arrow-alt-circle-left" aria-hidden="true"/> Back <span class="d-none d-md-inline">to Progress and Ranking</span></b-button>
     </sub-page-header>
 
     <skills-spinner :is-loading="isLoading"/>
