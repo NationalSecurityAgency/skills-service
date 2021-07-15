@@ -635,7 +635,7 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         res.items.size() > res1.items.size()
         res.items.collect { it.userId }.unique().sort() == [users[0], users[1]].sort()
 
-        res1.items.collect { it.userId }.unique() == [users[0]]
+        res1.items.collect { it.userId }.unique() == [user1]
     }
 
     def "get achievements - filtering by level"() {
