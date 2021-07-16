@@ -78,7 +78,7 @@ class AccessSettingsStorageService {
     @Autowired
     UserAttrsService userAttrsService
 
-    @Value('#{"${skills.config.defaultLandingPage:progress}"}')
+    @Value('#{"${skills.config.defaultLandingPage:admin}"}')
     String defaultLandingPage
 
     @Transactional(readOnly = true)
@@ -295,11 +295,6 @@ class AccessSettingsStorageService {
         )
         userRepository.save(user)
 
-        settingsService.saveSetting(new UserSettingsRequest(
-                settingGroup: USER_PREFS_GROUP,
-                setting: HOME_PAGE_PREF,
-                value: defaultLandingPage
-        ), user)
         return user
     }
 

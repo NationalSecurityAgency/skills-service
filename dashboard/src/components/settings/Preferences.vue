@@ -20,7 +20,7 @@ limitations under the License.
     <loading-container v-bind:is-loading="isLoading">
         <div class="card">
           <div class="card-body">
-            <div class="">
+            <div v-if="isProgressAndRankingEnabled">
               <b-form-group label-for="home-page-pref">
                 <template v-slot:label>
                   <i class="fas fa-home" aria-hidden="true"></i> Default Home Page:
@@ -33,7 +33,7 @@ limitations under the License.
                   data-cy="landingPageSelector"
                   v-on:input="homePagePrefChanged"
                   v-model="settings.homePage.value"
-                  :options="[{ text: 'Progress and Rankings', value: 'progress'}, {text: 'Project Admin', value: 'admin'}]"
+                  :options="[{text: 'Project Admin', value: 'admin'}, { text: 'Progress and Rankings', value: 'progress'}]"
                   stacked
                 ></b-form-radio-group>
               </b-form-group>
@@ -96,7 +96,7 @@ limitations under the License.
         settings: {
           homePage: {
             settingGroup: 'user.prefs',
-            value: 'progress',
+            value: 'admin',
             setting: 'home_page',
             lastLoadedValue: '',
             dirty: false,
@@ -181,6 +181,9 @@ limitations under the License.
       isDirty() {
         const foundDirty = Object.values(this.settings).find((item) => item.dirty);
         return foundDirty;
+      },
+      isProgressAndRankingEnabled() {
+        return this.$store.getters.config.rankingAndProgressViewsEnabled === true || this.$store.getters.config.rankingAndProgressViewsEnabled === 'true';
       },
     },
   };

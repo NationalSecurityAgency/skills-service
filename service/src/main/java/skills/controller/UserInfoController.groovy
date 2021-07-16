@@ -81,6 +81,11 @@ class UserInfoController {
     @Autowired
     UserAgreementService userAgreementService
 
+    @Value('#{"${skills.config.ui.rankingAndProgressViewsEnabled}"}')
+    Boolean rankingAndProgressViewsEnabled
+
+    @Value('#{"${skills.config.defaultLandingPage:admin}"}')
+    String defaultLandingPage
 
     @RequestMapping(value = "/userInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @CrossOrigin(allowCredentials = 'true')
@@ -90,7 +95,13 @@ class UserInfoController {
         HttpHeaders headers = new HttpHeaders()
         if (currentUser) {
             res = new UserInfoRes(currentUser)
-            res.landingPage = settingsService.getUserSetting(currentUser.username, HOME_PAGE_PREF, USER_PREFS_GROUP)?.value
+            if (!rankingAndProgressViewsEnabled) {
+                res.landingPage = "admin"
+            } else {
+                SettingsResult settingsResult = settingsService.getUserSetting(currentUser.username, HOME_PAGE_PREF, USER_PREFS_GROUP)
+                res.landingPage = settingsResult?.value ?: defaultLandingPage
+            }
+            log.trace("Assigned landing page of [{}] to user [{}]", res.landingPage, currentUser.username )
             UserAgreementResult uar = userAgreementService.getUserAgreementStatus(currentUser.getUsername())
             if (uar.userAgreement && uar.lastViewedVersion != uar.currentVersion) {
                 headers.set(DISPLAY_UA_HEADER, "true")

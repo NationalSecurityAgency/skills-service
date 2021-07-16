@@ -87,6 +87,7 @@ skills:
     expireUnusedProjectsOlderThan: 180
     expirationGracePeriod: 7
     projectExpirationSchedule: "* 4 0 * * *"
+    defaultLandingPage: "admin"
     ui:
       dashboardVersion: @pom.version@
       buildTimestamp: @maven.build.timestamp@
@@ -125,6 +126,7 @@ skills:
       maxNumPointIncrementMaxOccurrences: 999
       userSuggestOptions:
       pointHistoryInDays: 1825
+      rankingAndProgressViewsEnabled: false
     client:
       loggingEnabled: false
       loggingLevel: DEBUG
