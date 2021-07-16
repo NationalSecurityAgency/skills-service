@@ -369,7 +369,7 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                   up.day is null and up.skillId is null
             WHERE (s.setting = 'production.mode.enabled' and s.projectId = pd.projectId and s.value = 'true') and 
                 (ss.setting = 'my_project' and uu.userId=?1 and uu.id = ss.userRefId and ss.projectId = pd.projectId)
-            GROUP BY points, pd.projectId, pd.name, pd.id
+            GROUP BY up.points, pd.projectId, pd.name, pd.id, ss.value
     ''')
     List<ProjectSummaryResult> getProjectSummaries(String userId, Integer version)
 
