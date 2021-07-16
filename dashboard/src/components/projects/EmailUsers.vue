@@ -109,10 +109,8 @@ limitations under the License.
 </template>
 
 <script>
-  // import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import VueTypeaheadBootstrap from 'vue-typeahead-bootstrap';
   import SubPageHeader from '../utils/pages/SubPageHeader';
-  // import InlineHelp from '../utils/InlineHelp';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import SkillsService from '../skills/SkillsService';
   import LevelService from '../levels/LevelService';
@@ -223,22 +221,7 @@ limitations under the License.
     },
     computed: {
       formattedType() {
-        let formatted = '';
-        switch (this.currentFilterType) {
-        case 'skill':
-          formatted = 'Skills';
-          break;
-        case 'badge':
-          formatted = 'Badges';
-          break;
-        case 'subject':
-          formatted = 'Subjects';
-          break;
-        default:
-          // eslint-disable-next-line no-console
-          console.error(`formattedType does not support ${this.currentFilterType}`);
-        }
-        return formatted;
+        return this.currentFilterType.charAt(0).toUpperCase() + this.currentFilterType.slice(1);
       },
       levelsDisabled() {
         let disabled = true;
@@ -316,7 +299,6 @@ limitations under the License.
         }
       },
       selectedItem(newVal) {
-        console.log('selectedItem changed to', newVal);
         switch (this.currentFilterType) {
         case 'subject':
           this.subjects.selected = newVal;
@@ -335,7 +317,6 @@ limitations under the License.
     },
     methods: {
       addCriteria() {
-        // need to maintain the query object
         let tag = null;
         const c = this.criteria;
         switch (this.currentFilterType) {
@@ -454,7 +435,6 @@ limitations under the License.
         return exists;
       },
       deleteCriteria(tag) {
-        // eslint-disable-next-line no-console
         switch (tag.type) {
         case 'project':
           if (tag.projectLevel) {
@@ -502,7 +482,6 @@ limitations under the License.
           queryCriteria: this.criteria,
           emailBody: this.body,
           emailSubject: this.subject,
-
         }).then(() => {
           this.emailSent = true;
           setTimeout(() => { this.emailSent = false; }, 8000);
