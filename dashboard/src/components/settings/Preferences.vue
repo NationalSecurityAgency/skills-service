@@ -140,7 +140,6 @@ limitations under the License.
                 }
               });
               if (!hasHomeKey) {
-                console.log(this.$store.getters.config.defaultLandingPage);
                 this.settings.homePage.value = this.$store.getters.config.defaultLandingPage;
               }
             }
