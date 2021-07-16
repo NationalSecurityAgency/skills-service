@@ -15,6 +15,8 @@
  */
 package skills.storage.repos.nativeSql
 
+import skills.controller.request.model.QueryUsersCriteriaRequest
+import skills.storage.model.QueryUsersCriteria
 import skills.storage.model.SkillDef
 
 interface NativeQueriesRepo {
@@ -51,6 +53,10 @@ interface NativeQueriesRepo {
     void identifyAndAddProjectLevelAchievements(String projectId, boolean pointsBasedLevels);
 
     void createOrUpdateUserEvent(String projectId, Integer skillRefId, String userId, Date start, String type, Integer count, Integer weekNumber)
+
+    long countUsers(QueryUsersCriteria queryUsersCriteria)
+
+    List<String> getUserIds(QueryUsersCriteria queryUsersCriteria)
 
 }
 

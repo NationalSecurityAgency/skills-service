@@ -24,23 +24,18 @@ import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
-import skills.controller.request.model.ContactUsersCriteria
 import skills.controller.request.model.ProjectExistsRequest
 import skills.controller.request.model.ProjectRequest
 import skills.controller.result.model.CustomIconResult
-import skills.controller.result.model.ProjectError
 import skills.controller.result.model.ProjectResult
 import skills.controller.result.model.RequestResult
 import skills.icons.CustomIconFacade
 import skills.profile.EnableCallStackProf
 import skills.services.IdFormatValidator
-import skills.services.ProjectErrorService
 import skills.services.admin.ProjAdminService
 import skills.services.admin.ShareSkillsService
 import skills.services.admin.SkillsAdminService
 import skills.utils.InputSanitizer
-
-import java.nio.charset.StandardCharsets
 
 @RestController
 @RequestMapping("/app")
@@ -140,9 +135,4 @@ class ProjectController {
         return skillsAdminService.getUniqueSkillVersionList(projectId)
     }
 
-    @RequestMapping(value = "/projects/{id}/contactUsersCount", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
-    @ResponseBody
-    Integer countMatchingUsers(@PathVariable("id") String projectId, @RequestBody ContactUsersCriteria contactUsersCriteria) {
-
-    }
 }

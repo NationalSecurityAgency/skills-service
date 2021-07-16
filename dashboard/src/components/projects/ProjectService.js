@@ -103,4 +103,10 @@ export default {
   cancelUnusedProjectDeletion(projectId) {
     return axios.post(`/admin/projects/${projectId}/cancelExpiration`).then((response) => response.data);
   },
+  countUsersMatchingCriteria(projectId, userQueryCriteria) {
+    return axios.post(`/admin/projects/${projectId}/contactUsersCount`, userQueryCriteria).then((response) => response.data);
+  },
+  contactUsers(projectId, contactUsersRequest) {
+    return axios.post(`/admin/projects/${projectId}/contactUsers`, contactUsersRequest).then((response) => response.data);
+  },
 };

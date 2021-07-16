@@ -17,17 +17,20 @@ package skills.services
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.jpa.domain.Specification
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
-import skills.controller.request.model.ContactUsersCriteria
+import skills.controller.request.model.QueryUsersCriteriaRequest
 import skills.controller.result.model.RequestResult
 import skills.services.events.CompletionItem
 import skills.services.events.SkillEventResult
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.model.*
 import skills.storage.repos.*
+import skills.storage.repos.nativeSql.NativeQueriesRepo
+import skills.utils.Props
 
 @Component
 @Slf4j
@@ -100,11 +103,6 @@ class SkillEventAdminService {
         userEventService.removeEvent(performedSkill.performedOn, performedSkill.userId, performedSkill.skillRefId)
 
         return res
-    }
-
-    @Transactional(readOnly = true)
-    Integer countMatchingUsers(ContactUsersCriteria contactUsersCriteria) {
-        
     }
 
     private void deleteProjectLevelIfNecessary(String projectId, String userId, int numberOfExistingEvents) {

@@ -18,6 +18,9 @@ package skills.storage.repos.nativeSql
 import groovy.util.logging.Slf4j
 import org.springframework.context.annotation.Conditional
 import org.springframework.stereotype.Service
+import skills.controller.request.model.QueryUsersCriteriaRequest
+import skills.controller.request.model.SubjectLevelQueryRequest
+import skills.storage.model.QueryUsersCriteria
 import skills.storage.model.SkillDef
 
 import javax.persistence.EntityManager
@@ -801,4 +804,31 @@ class H2NativeRepo implements NativeQueriesRepo {
             query.executeUpdate()
         }
     }
+
+    @Override
+    long countUsers(QueryUsersCriteria queryUsersCriteria) {
+        String sql = QueryUserCriteriaHelper.generateCountSql(queryUsersCriteria)
+        if (!sql) {
+            return 0
+        }
+        Query query = entityManager.createNativeQuery(sql)
+        QueryUserCriteriaHelper.setCountParams(query, queryUsersCriteria)
+
+        return query.getSingleResult()
+    }
+
+    @Override
+    List<String> getUserIds(QueryUsersCriteria queryUsersCriteria) {
+        String sql = QueryUserCriteriaHelper.generateSelectUserIdsSql(queryUsersCriteria)
+        if (!sql) {
+            return []
+        }
+
+        Query query = entityManager.createNativeQuery(sql)
+        QueryUserCriteriaHelper.setSelectUserIdParams(query, queryUsersCriteria)
+
+        return query.getResultList()
+    }
+
+
 }

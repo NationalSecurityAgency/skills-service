@@ -17,6 +17,9 @@ package skills.storage.repos.nativeSql
 
 import org.springframework.context.annotation.Conditional
 import org.springframework.stereotype.Service
+import skills.controller.request.model.QueryUsersCriteriaRequest
+import skills.controller.request.model.SubjectLevelQueryRequest
+import skills.storage.model.QueryUsersCriteria
 import skills.storage.model.SkillDef
 
 import javax.persistence.EntityManager
@@ -598,5 +601,32 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
         query.setParameter("count", count)
         query.setParameter("weekNumber", weekNumber)
         query.executeUpdate()
+    }
+
+    @Override
+    long countUsers(QueryUsersCriteria queryUsersCriteria) {
+        String sql = QueryUserCriteriaHelper.generateCountSql(queryUsersCriteria)
+        if (!sql) {
+            return 0
+        }
+
+        Query query = entityManager.createNativeQuery(sql)
+        QueryUserCriteriaHelper.setCountParams(query, queryUsersCriteria)
+
+        return query.getSingleResult()
+    }
+
+    @Override
+    List<String> getUserIds(QueryUsersCriteria queryUsersCriteria) {
+        //TODO: This should probably be streaming/paging at some point
+        String sql = QueryUserCriteriaHelper.generateSelectUserIdsSql(queryUsersCriteria)
+        if (!sql) {
+            return []
+        }
+
+        Query query = entityManager.createNativeQuery(sql)
+        QueryUserCriteriaHelper.setSelectUserIdParams(query, queryUsersCriteria)
+
+        return query.getResultList()
     }
 }

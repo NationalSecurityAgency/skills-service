@@ -15,7 +15,8 @@
  */
 package skills.controller.request.model
 
-class SubjectLevel {
-    String subuectId
-    Integer level
+class ContactUsersRequest {
+    QueryUsersCriteriaRequest queryCriteria
+    String emailBody
+    String emailSubject
 }

@@ -15,11 +15,7 @@
  */
 package skills.controller.request.model
 
-class ContactUsersCriteria {
-    String projectId
-    Integer projectLevel = null
-    List<SubjectLevel> subjectLevels = []
-    List<String> achievedSkillIds = []
-    List<String> badgeIds = []
-    List<String> notAchievedSkillIds = []
+class SubjectLevelQueryRequest {
+    String subjectId
+    Integer level
 }
