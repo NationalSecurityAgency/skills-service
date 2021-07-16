@@ -57,9 +57,9 @@ class SettingsService {
     List<SettingChangedListener> listeners = [];
 
     @Transactional
-    void saveSettings(List<SettingsRequest> request) {
+    void saveSettings(List<SettingsRequest> request, User user=null) {
         request.each {
-            saveSetting(it)
+            saveSetting(it, user)
         }
     }
 
@@ -236,6 +236,13 @@ class SettingsService {
         List<Setting> settings = settingsDataAccessor.getUserProjectSettingsForGroup(getUserRefId(userId), settingGroup)
         return convertToResList(settings)
     }
+
+    @Transactional(readOnly = true)
+    List<SettingsResult> getUserProjectSettingsForAllProjectsForGroup(String userId, String settingGroup){
+        List<Setting> settings = settingsDataAccessor.getUserProjectSettingsForAllProjectsBySettingsGroup(userId, settingGroup)
+        return convertToResList(settings)
+    }
+
 
     @Transactional(readOnly = true)
     List<SettingsResult> getRootUserSettingsForGroup(String settingGroup) {

@@ -428,5 +428,45 @@ describe('Navigation Tests', () => {
   });
 
 
+  it('sort my projects', function () {
+    cy.createProject(3);
+    cy.enableProdMode(3);
+    cy.addToMyProjects(3);
+
+    cy.viewport(1200, 1000)
+
+    cy.visit('/progress-and-rankings');
+
+    const proj1Selector = '[data-cy=project-link-proj1] [data-cy="sortControlHandle"]';
+    const proj2Selector = '[data-cy=project-link-proj2] [data-cy="sortControlHandle"]';
+    const proj3Selector = '[data-cy=project-link-proj3] [data-cy="sortControlHandle"]';
+
+    cy.intercept('/api/myprojects/proj1').as('updateMyProj1');
+    cy.intercept('/api/myprojects/proj2').as('updateMyProj2');
+    cy.intercept('/api/myprojects/proj3').as('updateMyProj3');
+
+    cy.validateMyProjectsSort(['This is project 3', 'This is project 2', 'This is project 1'])
+    cy.get(proj2Selector).dragMyProject(proj1Selector)
+    cy.wait('@updateMyProj2')
+    cy.validateMyProjectsSort(['This is project 3', 'This is project 1', 'This is project 2'])
+
+    // refresh and make sure that sort order is still the same
+    cy.visit('/progress-and-rankings');
+    cy.validateMyProjectsSort(['This is project 3', 'This is project 1', 'This is project 2'])
+
+    cy.get(proj3Selector).dragMyProject(proj2Selector)
+    cy.wait('@updateMyProj3')
+    cy.validateMyProjectsSort(['This is project 1', 'This is project 2', 'This is project 3'])
+
+    cy.get(proj1Selector).dragMyProject(proj2Selector)
+    cy.wait('@updateMyProj1')
+    cy.validateMyProjectsSort(['This is project 2', 'This is project 1', 'This is project 3'])
+
+    // navigate to My Projects and then return
+    cy.get('[data-cy="manageMyProjsBtn"]').click();
+    cy.get('[data-cy="backToProgressAndRankingBtn"]').click();
+    cy.validateMyProjectsSort(['This is project 2', 'This is project 1', 'This is project 3'])
+  })
+
 });
 

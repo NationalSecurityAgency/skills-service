@@ -115,6 +115,9 @@ class SkillsLoader {
     @Autowired
     SkillApprovalRepo skillApprovalRepo
 
+    @Autowired
+    UserAttrsRepo userAttrsRepo
+
     private static String PROP_HELP_URL_ROOT = CommonSettings.HELP_URL_ROOT
 
     @Transactional(readOnly = true)
@@ -161,7 +164,7 @@ class SkillsLoader {
     MyProgressSummary loadMyProgressSummary(String userId, Integer version = -1) {
         MyProgressSummary myProgressSummary = new MyProgressSummary()
         List<ProjectSummaryResult> projectSummaries = projDefRepo.getProjectSummaries(userId, version)
-        for (ProjectSummaryResult summaryResult : projectSummaries) {
+        for (ProjectSummaryResult summaryResult : projectSummaries.sort({it.getOrderVal()})) {
             ProjectSummary summary = new ProjectSummary().fromProjectSummaryResult(summaryResult)
             myProgressSummary.projectSummaries << summary
             summary.level = getRealLevelInfo(new ProjDef(id: summary.projectRefId, projectId: summary.projectId, totalPoints: summary.totalPoints), userId, summary.points, summary.totalPoints).level  // SLOW!

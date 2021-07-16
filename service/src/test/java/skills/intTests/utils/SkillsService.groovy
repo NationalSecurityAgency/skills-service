@@ -630,7 +630,12 @@ class SkillsService {
 
     def addMyProject(String projectId) {
         String url = "/myprojects/${projectId}"
-        wsHelper.apiPost(url, [])
+        wsHelper.apiPost(url, null)
+    }
+
+    def moveMyProject(String projectId, Integer newSortIndex) {
+        String url = "/myprojects/${projectId}"
+        wsHelper.apiPost(url, [newSortIndex: newSortIndex])
     }
 
     def removeMyProject(String projectId) {

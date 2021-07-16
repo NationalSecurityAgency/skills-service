@@ -16,19 +16,19 @@
 package skills.intTests.myProgress
 
 
-import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
-import spock.lang.IgnoreRest
 
 @Slf4j
 class ManageMyProjectsSpec extends DefaultIntSpec {
     SkillsService anotherUser
-
+    List<String> randomUsers
     def setup() {
-        String anotherUserName = getRandomUsers(1)[0]
+        randomUsers = getRandomUsers(10)
+        String anotherUserName = randomUsers.remove(0)
         log.info("This user will crate projects: [${anotherUserName}")
         anotherUser = createService(anotherUserName)
     }
@@ -90,7 +90,6 @@ class ManageMyProjectsSpec extends DefaultIntSpec {
         when:
         def forMyProjects = skillsService.getAvailableMyProjects()
 
-        println JsonOutput.prettyPrint(JsonOutput.toJson(forMyProjects))
         then:
         forMyProjects.collect { it.projectId } == projects.collect { it.projectId }.sort()
     }
@@ -202,5 +201,299 @@ class ManageMyProjectsSpec extends DefaultIntSpec {
         forMyProjects1.collect { it.isMyProject }  == [true, true, true, true, true, true]
         forMyProjects2.collect { it.isMyProject }  == [false, false, false, false, false, false]
     }
+
+
+    def "Summaries sort order - newly added project always appears first"() {
+        List projects = (1..7).collect {
+            def proj = SkillsFactory.createProject(it)
+            anotherUser.createProject(proj)
+            anotherUser.enableProdMode(proj)
+
+            return proj
+        }
+
+        when:
+        skillsService.addMyProject(projects[2].projectId)
+        def summary = skillsService.getMyProgressSummary()
+
+        skillsService.addMyProject(projects[5].projectId)
+        def summary1 = skillsService.getMyProgressSummary()
+
+        skillsService.addMyProject(projects[1].projectId)
+        def summary2 = skillsService.getMyProgressSummary()
+
+        skillsService.addMyProject(projects[6].projectId)
+        def summary3 = skillsService.getMyProgressSummary()
+
+        then:
+        summary.projectSummaries.collect { it.projectId } == [projects[2].projectId]
+        summary1.projectSummaries.collect { it.projectId } == [projects[5].projectId, projects[2].projectId]
+        summary2.projectSummaries.collect { it.projectId } == [projects[1].projectId, projects[5].projectId, projects[2].projectId]
+        summary3.projectSummaries.collect { it.projectId } == [projects[6].projectId, projects[1].projectId, projects[5].projectId, projects[2].projectId]
+    }
+
+    def "Summaries sort order - removing my project doesn't break the order"() {
+        List projects = (1..7).collect {
+            def proj = SkillsFactory.createProject(it)
+            anotherUser.createProject(proj)
+            anotherUser.enableProdMode(proj)
+            skillsService.addMyProject(proj.projectId)
+            return proj
+        }
+
+        when:
+        def summary = skillsService.getMyProgressSummary()
+        skillsService.removeMyProject(projects[2].projectId)
+        skillsService.removeMyProject(projects[6].projectId)
+
+        def summary1 = skillsService.getMyProgressSummary()
+
+        skillsService.addMyProject(projects[2].projectId)
+
+        def summary2 = skillsService.getMyProgressSummary()
+        then:
+        summary.projectSummaries.collect {
+            it.projectId
+        } == [projects[6].projectId, projects[5].projectId, projects[4].projectId, projects[3].projectId, projects[2].projectId, projects[1].projectId, projects[0].projectId]
+
+        summary1.projectSummaries.collect {
+            it.projectId
+        } == [ projects[5].projectId, projects[4].projectId, projects[3].projectId, projects[1].projectId, projects[0].projectId]
+
+        summary2.projectSummaries.collect {
+            it.projectId
+        } == [ projects[2].projectId, projects[5].projectId, projects[4].projectId, projects[3].projectId, projects[1].projectId, projects[0].projectId]
+    }
+
+    def "Summaries sort order - change sort order of an existing project"() {
+        List projects = (1..7).collect {
+            def proj = SkillsFactory.createProject(it)
+            anotherUser.createProject(proj)
+            anotherUser.enableProdMode(proj)
+            skillsService.addMyProject(proj.projectId)
+            return proj
+        }
+
+        when:
+        def summary = skillsService.getMyProgressSummary()
+
+        skillsService.moveMyProject(projects[6].projectId, 1)
+        def summary1 = skillsService.getMyProgressSummary()
+
+        skillsService.moveMyProject(projects[0].projectId, 2)
+        def summary2 = skillsService.getMyProgressSummary()
+
+        skillsService.moveMyProject(projects[5].projectId, 6)
+        def summary3 = skillsService.getMyProgressSummary()
+
+        then:
+        summary.projectSummaries.collect {
+            it.projectId
+        } == [projects[6].projectId, projects[5].projectId, projects[4].projectId, projects[3].projectId, projects[2].projectId, projects[1].projectId, projects[0].projectId]
+
+        summary1.projectSummaries.collect {
+            it.projectId
+        } == [projects[5].projectId, projects[6].projectId, projects[4].projectId, projects[3].projectId, projects[2].projectId, projects[1].projectId, projects[0].projectId]
+
+        summary2.projectSummaries.collect {
+            it.projectId
+        } == [projects[5].projectId, projects[6].projectId, projects[0].projectId, projects[4].projectId, projects[3].projectId, projects[2].projectId, projects[1].projectId]
+
+        summary3.projectSummaries.collect {
+            it.projectId
+        } == [projects[6].projectId, projects[0].projectId, projects[4].projectId, projects[3].projectId, projects[2].projectId, projects[1].projectId, projects[5].projectId]
+    }
+
+    def "Summaries sort order - change sort order outsid of existing range"() {
+        List projects = (1..7).collect {
+            def proj = SkillsFactory.createProject(it)
+            anotherUser.createProject(proj)
+            anotherUser.enableProdMode(proj)
+            skillsService.addMyProject(proj.projectId)
+            return proj
+        }
+
+        when:
+        def summary = skillsService.getMyProgressSummary()
+
+        skillsService.moveMyProject(projects[6].projectId, 20)
+        def summary1 = skillsService.getMyProgressSummary()
+
+        then:
+        summary.projectSummaries.collect {
+            it.projectId
+        } == [projects[6].projectId, projects[5].projectId, projects[4].projectId, projects[3].projectId, projects[2].projectId, projects[1].projectId, projects[0].projectId]
+
+        summary1.projectSummaries.collect {
+            it.projectId
+        } == [projects[6].projectId, projects[5].projectId, projects[4].projectId, projects[3].projectId, projects[2].projectId, projects[1].projectId, projects[0].projectId]
+
+    }
+
+    def "Summaries sort order - do not fail if project was removed from My Projects (ex. other browser's tab)"() {
+        List projects = (1..7).collect {
+            def proj = SkillsFactory.createProject(it)
+            anotherUser.createProject(proj)
+            anotherUser.enableProdMode(proj)
+            skillsService.addMyProject(proj.projectId)
+            return proj
+        }
+
+        when:
+        def summary = skillsService.getMyProgressSummary()
+        skillsService.removeMyProject(projects[3].projectId)
+        def summary1 = skillsService.getMyProgressSummary()
+
+        skillsService.moveMyProject(projects[3].projectId, 1)
+        def summary2 = skillsService.getMyProgressSummary()
+
+        then:
+        summary.projectSummaries.collect {
+            it.projectId
+        } == [projects[6].projectId, projects[5].projectId, projects[4].projectId, projects[3].projectId, projects[2].projectId, projects[1].projectId, projects[0].projectId]
+
+        summary1.projectSummaries.collect {
+            it.projectId
+        } == [projects[6].projectId, projects[5].projectId, projects[4].projectId, projects[2].projectId, projects[1].projectId, projects[0].projectId]
+
+        summary2.projectSummaries.collect {
+            it.projectId
+        } == [projects[6].projectId, projects[3].projectId, projects[5].projectId, projects[4].projectId, projects[2].projectId, projects[1].projectId, projects[0].projectId]
+
+    }
+
+    def "Summaries sort order - error is emitted if project is moved to index below 0"() {
+        List projects = (1..3).collect {
+            def proj = SkillsFactory.createProject(it)
+            anotherUser.createProject(proj)
+            anotherUser.enableProdMode(proj)
+            skillsService.addMyProject(proj.projectId)
+            return proj
+        }
+
+        when:
+        assert skillsService.getMyProgressSummary().projectSummaries.collect {
+            it.projectId
+        } == [projects[2].projectId, projects[1].projectId, projects[0].projectId]
+
+        skillsService.moveMyProject(projects[0].projectId, 0)
+        assert skillsService.getMyProgressSummary().projectSummaries.collect {
+            it.projectId
+        } == [projects[0].projectId, projects[2].projectId, projects[1].projectId]
+
+        skillsService.moveMyProject(projects[2].projectId, -1)
+
+
+        then:
+        SkillsClientException e = thrown()
+        e.getMessage().contains("Provided [newSortIndex=-1] is less than 0")
+    }
+
+    def "Summaries sort order - multiple users - move projects"() {
+        List projects = (1..7).collect {
+            def proj = SkillsFactory.createProject(it)
+            anotherUser.createProject(proj)
+            anotherUser.enableProdMode(proj)
+            return proj
+        }
+
+        SkillsService user1 = createService(randomUsers[0])
+        SkillsService user2 = createService(randomUsers[1])
+        SkillsService user3 = createService(randomUsers[2])
+
+        projects.each {
+            user1.addMyProject(it.projectId)
+        }
+        projects.reverse().each {
+            user2.addMyProject(it.projectId)
+        }
+
+        user3.addMyProject(projects[2].projectId)
+        user3.addMyProject(projects[4].projectId)
+        user3.addMyProject(projects[0].projectId)
+
+        when:
+        def user1Sum1 = user1.getMyProgressSummary()
+        def user2Sum1 = user2.getMyProgressSummary()
+        def user3Sum1 = user3.getMyProgressSummary()
+
+        user1.moveMyProject(projects[4].projectId, 0)
+        def user1Sum2 = user1.getMyProgressSummary()
+
+        user2.moveMyProject(projects[0].projectId, 6)
+        def user2Sum2 = user2.getMyProgressSummary()
+
+        user3.moveMyProject(projects[4].projectId, 2)
+        def user3Sum2 = user3.getMyProgressSummary()
+
+        then:
+        user1Sum1.projectSummaries.collect { it.projectId } == projects.reverse().collect { it.projectId }
+        user2Sum1.projectSummaries.collect { it.projectId } == projects.collect { it.projectId }
+        user3Sum1.projectSummaries.collect { it.projectId } == [projects[0].projectId, projects[4].projectId, projects[2].projectId]
+
+        user1Sum2.projectSummaries.collect {
+            it.projectId
+        } == [ projects[4].projectId, projects[6].projectId, projects[5].projectId, projects[3].projectId, projects[2].projectId, projects[1].projectId, projects[0].projectId]
+
+        user2Sum2.projectSummaries.collect {
+            it.projectId
+        } == [ projects[1].projectId, projects[2].projectId, projects[3].projectId, projects[4].projectId, projects[5].projectId, projects[6].projectId, projects[0].projectId,]
+
+        user3Sum2.projectSummaries.collect { it.projectId } == [projects[0].projectId, projects[2].projectId, projects[4].projectId]
+    }
+
+    def "Summaries sort order - multiple users - remove from My Projects"() {
+        List projects = (1..7).collect {
+            def proj = SkillsFactory.createProject(it)
+            anotherUser.createProject(proj)
+            anotherUser.enableProdMode(proj)
+            return proj
+        }
+
+        SkillsService user1 = createService(randomUsers[0])
+        SkillsService user2 = createService(randomUsers[1])
+        SkillsService user3 = createService(randomUsers[2])
+
+        projects.each {
+            user1.addMyProject(it.projectId)
+        }
+        projects.reverse().each {
+            user2.addMyProject(it.projectId)
+        }
+
+        user3.addMyProject(projects[2].projectId)
+        user3.addMyProject(projects[4].projectId)
+        user3.addMyProject(projects[0].projectId)
+
+        when:
+        def user1Sum1 = user1.getMyProgressSummary()
+        def user2Sum1 = user2.getMyProgressSummary()
+        def user3Sum1 = user3.getMyProgressSummary()
+
+        user1.removeMyProject(projects[4].projectId)
+        def user1Sum2 = user1.getMyProgressSummary()
+
+        user2.removeMyProject(projects[0].projectId)
+        def user2Sum2 = user2.getMyProgressSummary()
+
+        user3.removeMyProject(projects[4].projectId)
+        def user3Sum2 = user3.getMyProgressSummary()
+
+        then:
+        user1Sum1.projectSummaries.collect { it.projectId } == projects.reverse().collect { it.projectId }
+        user2Sum1.projectSummaries.collect { it.projectId } == projects.collect { it.projectId }
+        user3Sum1.projectSummaries.collect { it.projectId } == [projects[0].projectId, projects[4].projectId, projects[2].projectId]
+
+        user1Sum2.projectSummaries.collect {
+            it.projectId
+        } == [ projects[6].projectId, projects[5].projectId, projects[3].projectId, projects[2].projectId, projects[1].projectId, projects[0].projectId]
+
+        user2Sum2.projectSummaries.collect {
+            it.projectId
+        } == [ projects[1].projectId, projects[2].projectId, projects[3].projectId, projects[4].projectId, projects[5].projectId, projects[6].projectId]
+
+        user3Sum2.projectSummaries.collect { it.projectId } == [projects[0].projectId, projects[2].projectId]
+    }
+
 }
 

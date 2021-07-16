@@ -78,7 +78,7 @@ class MyProgressSpec extends DefaultIntSpec {
 
         println JsonOutput.toJson(res)
         then:
-        res.projectSummaries.collect { it.projectId } == [projs[0].projectId, projs[2].projectId]
+        res.projectSummaries.collect { it.projectId } == [projs[2].projectId, projs[0].projectId]
     }
 
     def "my progress summary - badge count"() {

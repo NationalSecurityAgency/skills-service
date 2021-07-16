@@ -66,14 +66,25 @@ limitations under the License.
         </b-col>
       </b-row>
       <hr/>
-      <b-row class="my-4">
-        <b-col v-for="(proj, index) in projects" :key="proj.projectName"
+      <b-row class="my-4 px-1" id="projectCards">
+        <b-col v-for="(proj) in projects" :key="proj.projectName" :id="proj.projectId"
                cols="12" md="6" xl="4"
-               class="mb-2 px-0">
-          <router-link :to="{ name:'MyProjectSkills', params: { projectId: proj.projectId } }" tag="div"
-                       class="project-link" :data-cy="`project-link-${proj.projectId}`">
-            <project-link-card :proj="proj" class="my-summary-card px-3" :class="projectLinkClass(index)"/>
-          </router-link>
+               class="mb-2 px-2">
+          <b-overlay :show="sortOrderLoading" rounded="sm" opacity="0.4">
+            <template #overlay>
+              <div class="text-center">
+                <div v-if="proj.projectId===sortOrderLoadingProjectId">
+                  <div class="text-info text-uppercase mb-1">Updating sort order!</div>
+                  <b-spinner label="Loading..." style="width: 3rem; height: 3rem;" variant="info"/>
+                </div>
+              </div>
+            </template>
+
+            <router-link :to="{ name:'MyProjectSkills', params: { projectId: proj.projectId } }" tag="div"
+                         class="project-link" :data-cy="`project-link-${proj.projectId}`">
+              <project-link-card :proj="proj" class="my-summary-card" />
+            </router-link>
+          </b-overlay>
         </b-col>
       </b-row>
     </div>
@@ -81,6 +92,7 @@ limitations under the License.
 </template>
 
 <script>
+  import Sortable from 'sortablejs';
   import NoContent2 from '@/components/utils/NoContent2';
   import ProjectLinkCard from './ProjectLinkCard';
   import InfoSnapshotCard from './InfoSnapshotCard';
@@ -90,6 +102,7 @@ limitations under the License.
   import MyProgressService from './MyProgressService';
   import LoadingContainer from '../utils/LoadingContainer';
   import SubPageHeader from '../utils/pages/SubPageHeader';
+  import ProjectService from '../projects/ProjectService';
 
   export default {
     name: 'MyProgressPage',
@@ -107,6 +120,8 @@ limitations under the License.
       return {
         showTooltip: true,
         loading: true,
+        sortOrderLoading: false,
+        sortOrderLoadingProjectId: -1,
         myProgressSummary: null,
         projects: [],
       };
@@ -122,49 +137,38 @@ limitations under the License.
             this.projects = this.myProgressSummary.projectSummaries;
           }).finally(() => {
             this.loading = false;
+            this.enableProjectDropAndDrop();
           });
       },
-      projectLinkClass(index) {
-        if (index === 0) {
-          // first
-          return 'pl-3 pr-sm-3 pr-md-1';
+      enableProjectDropAndDrop() {
+        if (this.projects && this.projects.length > 0) {
+          const self = this;
+          this.$nextTick(() => {
+            const cards = document.getElementById('projectCards');
+            Sortable.create(cards, {
+              handle: '.sort-control',
+              animation: 150,
+              ghostClass: 'sort-order-ghost-class',
+              onUpdate(event) {
+                self.projectOrderUpdate(event);
+              },
+            });
+          });
         }
-        let classes = '';
-
-        // xl - 3 per row
-        if (index % 3 === 0) {
-          // start of a new xl row
-          classes += 'pl-xl-3 pr-xl-1 ';
-        } else if ((index + 1) % 3 === 0) {
-          // end of an xl row
-          classes += 'pl-xl-1 pr-xl-3 ';
-        } else {
-          // middle of an xl row
-          classes += 'px-xl-1 ';
-        }
-
-        // md - two per row
-        if (index % 2 === 1) {
-          // index is odd, end of a md row
-          classes += 'pl-md-1 pr-md-3';
-        } else {
-          // index is even, start of a md row
-          classes += 'pl-md-3 pr-md-1';
-        }
-        return classes;
+      },
+      projectOrderUpdate(updateEvent) {
+        const projectId = updateEvent.item.id;
+        this.sortOrderLoadingProjectId = projectId;
+        this.sortOrderLoading = true;
+        ProjectService.moveMyProject(projectId, updateEvent.newIndex)
+          .finally(() => {
+            this.sortOrderLoading = false;
+          });
       },
     },
     computed: {
       hasProjects() {
         return this.projects && this.projects.length > 0;
-      },
-    },
-    watch: {
-      series() {
-        this.seriesInternal = [{
-          name: this.title,
-          data: this.series,
-        }];
       },
     },
   };
@@ -187,5 +191,12 @@ hr {
   box-shadow: 0 10px 10px -10px rgba(45, 134, 120, 0.15);
   margin: -50px auto 10px;
   width: 90%;
+}
+
+.sort-order-ghost-class {
+  background-color: #146c75;
+  border-radius: 5px;
+  box-shadow: #146c75 0px 5px 5px;
+
 }
 </style>

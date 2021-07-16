@@ -31,6 +31,11 @@ export default {
     return axios.post(url)
       .then((response) => response.data);
   },
+  moveMyProject(projectId, newSortIndex) {
+    const url = `/api/myprojects/${projectId}`;
+    return axios.post(url, { newSortIndex })
+      .then((response) => response.data);
+  },
   removeFromMyProjects(projectId) {
     const url = `/api/myprojects/${projectId}`;
     return axios.delete(url)
