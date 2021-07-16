@@ -84,7 +84,7 @@ class UserInfoController {
     @Value('#{"${skills.config.ui.rankingAndProgressViewsEnabled}"}')
     Boolean rankingAndProgressViewsEnabled
 
-    @Value('#{"${skills.config.defaultLandingPage:admin}"}')
+    @Value('#{"${skills.config.ui.defaultLandingPage:admin}"}')
     String defaultLandingPage
 
     @RequestMapping(value = "/userInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

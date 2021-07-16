@@ -20,7 +20,7 @@ limitations under the License.
     <loading-container v-bind:is-loading="isLoading">
         <div class="card">
           <div class="card-body">
-            <div v-if="isProgressAndRankingEnabled">
+            <div v-if="isProgressAndRankingEnabled()">
               <b-form-group label-for="home-page-pref">
                 <template v-slot:label>
                   <i class="fas fa-home" aria-hidden="true"></i> Default Home Page:
@@ -128,13 +128,21 @@ limitations under the License.
           .then((response) => {
             if (response) {
               const entries = Object.entries(this.settings);
+              let hasHomeKey = false;
               entries.forEach((entry) => {
                 const [key, value] = entry;
                 const found = response.find((item) => item.setting === value.setting);
                 if (found) {
                   this.settings[key] = { dirty: false, lastLoadedValue: found.value, ...found };
+                  if (key === 'homePage') {
+                    hasHomeKey = true;
+                  }
                 }
               });
+              if (!hasHomeKey) {
+                console.log(this.$store.getters.config.defaultLandingPage);
+                this.settings.homePage.value = this.$store.getters.config.defaultLandingPage;
+              }
             }
           })
           .finally(() => {
@@ -176,14 +184,14 @@ limitations under the License.
             this.isLoading = false;
           });
       },
+      isProgressAndRankingEnabled() {
+        return this.$store.getters.config.rankingAndProgressViewsEnabled === true || this.$store.getters.config.rankingAndProgressViewsEnabled === 'true';
+      },
     },
     computed: {
       isDirty() {
         const foundDirty = Object.values(this.settings).find((item) => item.dirty);
         return foundDirty;
-      },
-      isProgressAndRankingEnabled() {
-        return this.$store.getters.config.rankingAndProgressViewsEnabled === true || this.$store.getters.config.rankingAndProgressViewsEnabled === 'true';
       },
     },
   };

@@ -129,19 +129,6 @@ class SettingsSpecs extends DefaultIntSpec {
         res.body.valid
     }
 
-    def "get user settings - none defined"() {
-        when:
-        def res = skillsService.getUserSettings()
-
-        then:
-        res.size() == 1
-        res.get(0).userId == 'skills@skills.org'
-        res.get(0).setting == 'home_page'
-        res.get(0).value == "progress"
-        res.get(0).settingGroup == "user.prefs"
-        res.get(0).projectId == null
-    }
-
     def "get user settings - several settings"() {
         when:
         skillsService.changeUserSettings([
@@ -153,27 +140,22 @@ class SettingsSpecs extends DefaultIntSpec {
         res = res.sort { it.setting}
 
         then:
-        res.size() == 4
+        res.size() == 3
+
         res.get(0).userId == 'skills@skills.org'
-        res.get(0).setting == 'home_page'
-        res.get(0).value == "progress"
+        res.get(0).setting == "set1"
         res.get(0).settingGroup == "user.prefs"
-        res.get(0).projectId == null
+        res.get(0).value == "true"
 
         res.get(1).userId == 'skills@skills.org'
-        res.get(1).setting == "set1"
+        res.get(1).setting == "set2"
         res.get(1).settingGroup == "user.prefs"
-        res.get(1).value == "true"
+        res.get(1).value == "val2"
 
         res.get(2).userId == 'skills@skills.org'
-        res.get(2).setting == "set2"
+        res.get(2).setting == "set3"
         res.get(2).settingGroup == "user.prefs"
-        res.get(2).value == "val2"
-
-        res.get(3).userId == 'skills@skills.org'
-        res.get(3).setting == "set3"
-        res.get(3).settingGroup == "user.prefs"
-        res.get(3).value == "val3"
+        res.get(2).value == "val3"
     }
 
     def "update home_page setting and verify the change is reflected in the userInfo result"() {
@@ -183,25 +165,20 @@ class SettingsSpecs extends DefaultIntSpec {
         when:
 
         skillsService.changeUserSettings([
-                [userId: 'skills@skills.org', settingGroup: 'user.prefs', setting: "home_page", value: "admin"],
+                [userId: 'skills@skills.org', settingGroup: 'user.prefs', setting: "home_page", value: "progress"],
         ])
         def currentUser2 = skillsService.getCurrentUser()
         def res2 = skillsService.getUserSettings()
 
         then:
-        currentUser1.landingPage == 'progress'  // default
-        res1.size() == 1
-        res1.get(0).userId == 'skills@skills.org'
-        res1.get(0).setting == 'home_page'
-        res1.get(0).value == "progress"
-        res1.get(0).settingGroup == "user.prefs"
-        res1.get(0).projectId == null
+        currentUser1.landingPage == 'admin'  // default
+        !res1
 
-        currentUser2.landingPage == 'admin'  // updated value
+        currentUser2.landingPage == 'progress'  // updated value
         res2.size() == 1
         res2.get(0).userId == 'skills@skills.org'
         res2.get(0).setting == 'home_page'
-        res2.get(0).value == "admin"
+        res2.get(0).value == "progress"
         res2.get(0).settingGroup == "user.prefs"
         res2.get(0).projectId == null
     }
