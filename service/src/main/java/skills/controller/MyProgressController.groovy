@@ -72,23 +72,22 @@ class MyProgressController {
     @ResponseBody
     @CompileStatic
     @Profile
-    MyProgressSummary getMyProgressSummary(HttpServletRequest request,
-                                           @RequestParam(name = "version", required = false) Integer version) {
+    MyProgressSummary getMyProgressSummary() {
 
         validateRankingAndProgressViewsEnabled()
         String userId = userInfoService.getCurrentUserId()
-        return skillsLoader.loadMyProgressSummary(userId, getProvidedVersionOrReturnDefault(version))
+        return skillsLoader.loadMyProgressSummary(userId)
     }
 
     @RequestMapping(value = "/availableForMyProjects", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     @CompileStatic
     @Profile
-    List<AvailableProjectResult> getAvailableForMyProjects(HttpServletRequest request, @RequestParam(name = "version", required = false) Integer version) {
+    List<AvailableProjectResult> getAvailableForMyProjects() {
         validateRankingAndProgressViewsEnabled()
 
         String currentUserIdLower = userInfoService.getCurrentUserId().toLowerCase()
-        return skillsLoader.getAvailableForMyProjects(currentUserIdLower, getProvidedVersionOrReturnDefault(version));
+        return skillsLoader.getAvailableForMyProjects(currentUserIdLower);
     }
 
     @PostMapping('/myprojects/{projectId}')
@@ -106,13 +105,6 @@ class MyProgressController {
         validateRankingAndProgressViewsEnabled()
         projAdminService.removeMyProject(projectId)
         return new RequestResult(success: true)
-    }
-
-    private int getProvidedVersionOrReturnDefault(Integer versionParam) {
-        if (versionParam != null) {
-            return versionParam
-        }
-        return publicProps.getInt(PublicProps.UiProp.maxSkillVersion)
     }
 
     private void validateRankingAndProgressViewsEnabled() {

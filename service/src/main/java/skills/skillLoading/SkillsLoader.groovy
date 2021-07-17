@@ -139,7 +139,7 @@ class SkillsLoader {
 
     @Profile
     @Transactional(readOnly = true)
-    List<AvailableProjectResult> getAvailableForMyProjects(String userId, Integer version = -1) {
+    List<AvailableProjectResult> getAvailableForMyProjects(String userId) {
 
         List<ProjDefRepo.AvailableProjectSummary> projectSummaries = projDefRepo.getAvailableProjectSummariesInProduction(userId)
         List<AvailableProjectResult> res = projectSummaries.collect { ProjDefRepo.AvailableProjectSummary summary ->
@@ -161,9 +161,9 @@ class SkillsLoader {
 
     @Profile
     @Transactional(readOnly = true)
-    MyProgressSummary loadMyProgressSummary(String userId, Integer version = -1) {
+    MyProgressSummary loadMyProgressSummary(String userId) {
         MyProgressSummary myProgressSummary = new MyProgressSummary()
-        List<ProjectSummaryResult> projectSummaries = projDefRepo.getProjectSummaries(userId, version)
+        List<ProjectSummaryResult> projectSummaries = projDefRepo.getProjectSummaries(userId)
         for (ProjectSummaryResult summaryResult : projectSummaries.sort({it.getOrderVal()})) {
             ProjectSummary summary = new ProjectSummary().fromProjectSummaryResult(summaryResult)
             myProgressSummary.projectSummaries << summary
