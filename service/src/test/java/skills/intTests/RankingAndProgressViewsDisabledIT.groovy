@@ -23,7 +23,7 @@ import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 
 @Slf4j
-@SpringBootTest(properties = ['skills.config.ui.rankingAndProgressViewsEnabled=false', 'skills.config.ui.defaultLandingPage=progress'], webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
+@SpringBootTest(properties = ['skills.h2.port=9091', 'skills.config.ui.rankingAndProgressViewsEnabled=false', 'skills.config.ui.defaultLandingPage=progress'], webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
 class RankingAndProgressViewsDisabledIT extends DefaultIntSpec {
 
     def "landingPage page is always admin when rankingAndProgressViewsDisabled=true"() {
