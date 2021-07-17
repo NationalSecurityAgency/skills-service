@@ -313,31 +313,21 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=project-link-proj3]').should('not.exist');
   });
 
-  it('My Progress page - no projects created', function () {
-    cy.intercept({
-      method: 'GET',
-      path: '/api/myProgressSummary',
-    }, {
-      statusCode: 200,
-      body: {"projectSummaries":[],"totalProjects":0,"numProjectsContributed":0,"totalSkills":0,"numAchievedSkills":0,"numAchievedSkillsLastMonth":0,"numAchievedSkillsLastWeek":0,"mostRecentAchievedSkill":null,"totalBadges":0,"gemCount":0,"globalBadgeCount":0,"numAchievedBadges":0,"numAchievedGemBadges":0,"numAchievedGlobalBadges":0}
-    }).as('getMyProgress');
-
-    cy.visit('/');
-    cy.wait('@getMyProgress');
-
-    cy.contains('START CUSTOMIZING TODAY!')
-    // make sure tooltip is displayed
-    cy.contains('Click here to add My Projects')
-  });
-
-  it('no projects added to My PRojects', function () {
+  it.only('no projects added to My PRojects', function () {
     cy.removeFromMyProjects(1)
     cy.removeFromMyProjects(2)
     cy.visit('/progress-and-rankings');
 
     cy.contains('START CUSTOMIZING TODAY!')
     // make sure tooltip is displayed
-    cy.contains('Click here to add My Projects')
+    cy.contains('Click here to add to My Projects')
+
+    cy.get('[data-cy="manageMyProjsBtnInNoContent"]').click();
+    cy.get('[data-cy="backToProgressAndRankingBtn"]');
+
+    cy.visit('/progress-and-rankings');
+    cy.get('[data-cy="manageMyProjsBtn"]').click();
+    cy.get('[data-cy="backToProgressAndRankingBtn"]');
   });
 
   it('My Progress page - no projects with production mode enabled', function () {
