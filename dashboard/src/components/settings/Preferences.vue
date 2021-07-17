@@ -20,7 +20,7 @@ limitations under the License.
     <loading-container v-bind:is-loading="isLoading">
         <div class="card">
           <div class="card-body">
-            <div v-if="isProgressAndRankingEnabled()">
+            <div v-if="isProgressAndRankingEnabled()" data-cy="defaultHomePageSetting">
               <b-form-group label-for="home-page-pref">
                 <template v-slot:label>
                   <i class="fas fa-home" aria-hidden="true"></i> Default Home Page:
@@ -38,7 +38,7 @@ limitations under the License.
                 ></b-form-radio-group>
               </b-form-group>
             </div>
-            <div >
+            <div data-cy="rankOptOut">
               <i class="fas fa-users-slash" aria-hidden="true"></i> <span id="rankAndLeaderboardOptOutLabel">Rank and Leaderboard Opt-Out:</span>
               <inline-help
                 msg="Change to true and you will not be shown on the Leaderboard or assigned a rank"/>

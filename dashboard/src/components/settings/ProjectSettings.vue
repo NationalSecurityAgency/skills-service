@@ -18,7 +18,7 @@ limitations under the License.
     <sub-page-header title="Project Settings"/>
     <simple-card>
       <loading-container :is-loading="isLoading">
-        <div v-if="isProgressAndRankingEnabled" class="row">
+        <div v-if="isProgressAndRankingEnabled" class="row" data-cy="productionModeSetting">
           <div class="col col-md-3 text-secondary" id="productionModeEnabledLabel">
             Production Mode:
             <inline-help
