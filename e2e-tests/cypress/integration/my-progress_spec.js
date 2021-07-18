@@ -319,8 +319,6 @@ describe('Navigation Tests', () => {
     cy.visit('/progress-and-rankings');
 
     cy.contains('START CUSTOMIZING TODAY!')
-    // make sure tooltip is displayed
-    cy.contains('Click here to add to My Projects')
 
     cy.get('[data-cy="manageMyProjsBtnInNoContent"]').click();
     cy.get('[data-cy="backToProgressAndRankingBtn"]');
@@ -349,8 +347,6 @@ describe('Navigation Tests', () => {
 
 
     cy.contains('START CUSTOMIZING TODAY!')
-    // make sure tooltip is displayed
-    cy.contains('Click here to add My Projects')
   });
 
 

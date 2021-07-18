@@ -18,7 +18,7 @@ limitations under the License.
 
     <sub-page-header title="My Projects" class="pt-4">
         <b-button id="manageMyProjectsBtn" :to="{ name: 'DiscoverProjectsPage' }" variant="outline-primary" data-cy="manageMyProjsBtn"><i class="fas fa-cog" aria-hidden="true"/> Manage My Projects</b-button>
-      <b-tooltip v-if="!hasProjects" :show.sync="showTooltip" target="manageMyProjectsBtn" placement="bottom" variant="primary">
+      <b-tooltip v-if="!hasProjects" target="manageMyProjectsBtn" placement="bottom" variant="primary">
         <i class="fas fa-info-circle"></i> Click here to add to
         <div class="text-uppercase"><b>My Projects</b></div>
       </b-tooltip>
@@ -118,7 +118,6 @@ limitations under the License.
     },
     data() {
       return {
-        showTooltip: true,
         loading: true,
         sortOrderLoading: false,
         sortOrderLoadingProjectId: -1,
