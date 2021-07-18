@@ -313,7 +313,7 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=project-link-proj3]').should('not.exist');
   });
 
-  it.only('no projects added to My PRojects', function () {
+  it('no projects added to My Projects', function () {
     cy.removeFromMyProjects(1)
     cy.removeFromMyProjects(2)
     cy.visit('/progress-and-rankings');
