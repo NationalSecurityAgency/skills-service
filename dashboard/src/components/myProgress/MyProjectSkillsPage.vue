@@ -18,7 +18,9 @@ limitations under the License.
   <skills-display
     :options="options"
     :version="skillsVersion"
-    :theme="themeObj"/>
+    :theme="themeObj"
+    ref="skillsDisplayRef"
+    @route-changed="skillsDisplayRouteChanged"/>
 </div>
 </template>
 
@@ -38,6 +40,7 @@ limitations under the License.
         skillsVersion: 2147483647, // max int
         theme: {
           disableSkillTreeBrand: true,
+          disableBreadcrumb: true,
           landingPageTitle: `PROJECT: ${this.$route.params.projectId}`,
           maxWidth: '100%',
           pageTitleTextColor: '#212529',
@@ -50,6 +53,7 @@ limitations under the License.
         },
         darkTheme: {
           disableSkillTreeBrand: false,
+          disableBreadcrumb: true,
           maxWidth: '100%',
           backgroundColor: '#626d7d',
           pageTitleTextColor: 'white',
@@ -83,7 +87,7 @@ limitations under the License.
     computed: {
       themeObj() {
         if (this.$route.query.enableTheme) {
-          const res = { ...this.theme };
+          const res = {...this.theme};
           return Object.assign(res, this.darkTheme);
         }
 

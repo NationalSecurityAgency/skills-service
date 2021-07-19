@@ -96,6 +96,7 @@ plugins.push(new BundleAnalyzerPlugin({
 }));
 
 module.exports = {
+  // lintOnSave: false,
   pluginOptions: {
     webpackBundleAnalyzer: {
       openAnalyzer: false,

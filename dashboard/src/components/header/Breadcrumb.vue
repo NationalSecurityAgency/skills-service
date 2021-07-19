@@ -48,23 +48,49 @@ limitations under the License.
     data() {
       return {
         items: [],
-        idsToExcludeFromPath: ['subjects', 'skills', 'projects'],
+        idsToExcludeFromPath: ['subjects', 'skills', 'projects', 'crossProject', 'dependency', 'global'],
         keysToExcludeFromPath: [],
+        ignoreNext: false,
       };
     },
     mounted() {
       this.build();
     },
+    computed: {
+      skillsClientDisplayPath() {
+        return this.$store.getters.skillsClientDisplayPath;
+      },
+      skillsClientDisplayPathParts() {
+        return this.skillsClientDisplayPath.path.replace(/^\/+|\/+$/g, '').split('/');
+      },
+      hasSkillsClientDisplayPath() {
+        return this.skillsClientDisplayPath && this.skillsClientDisplayPath.path;
+      },
+      dashboardPath() {
+        return this.$route.path;
+      },
+      dashboardPathParts() {
+        return this.dashboardPath.replace(/^\/+|\/+$/g, '').split('/');
+      },
+    },
     watch: {
       $route: function routeChange() {
         this.build();
       },
+      skillsClientDisplayPath() {
+        this.build();
+      },
     },
     methods: {
+      forceNavigate(to) {
+        this.$router.push(to);
+      },
       build() {
         const newItems = [];
-        let res = this.$route.path.split('/');
-        res = res.slice(1, res.length);
+        let res = this.dashboardPathParts;
+        if (this.hasSkillsClientDisplayPath) {
+          res = [...res, ...this.skillsClientDisplayPathParts];
+        }
         let key = null;
 
         const lastItemInPathCustomName = this.$route.meta.breadcrumb;
@@ -72,30 +98,40 @@ limitations under the License.
         res.forEach((item, index) => {
           let value = item === 'administrator' ? 'Projects' : item;
           if (value) {
-            if (index === res.length - 1 && lastItemInPathCustomName) {
-              key = null;
-              value = lastItemInPathCustomName;
-            }
+            if (!this.ignoreNext && item !== 'global') {
+              // treat crossProject as a special case
+              if (value === 'crossProject') {
+                this.ignoreNext = true;
+                key = 'Dependency';
+                return;
+              }
+              if (index === this.dashboardPathParts.length - 1 && lastItemInPathCustomName) {
+                key = null;
+                value = lastItemInPathCustomName;
+              }
 
-            if (key) {
-              if (!this.shouldExcludeKey(key)) {
-                newItems.push(this.buildResItem(key, value, res, index));
+              if (key) {
+                if (!this.shouldExcludeKey(key)) {
+                  newItems.push(this.buildResItem(key, value, res, index));
+                }
+                key = null;
+              } else {
+                // must exclude items in the path because each page with navigation
+                // doesn't have a sub-route in the url, for example:
+                // '/projects/projectId' will conceptually map to '/projects/projectId/subjects'
+                // but there is no '/project/projectId/subjects' route configured so when parsing something like
+                // '/projects/projectId/subjects/subjectId/stats we must end up with:
+                //    'projects / project:projectId / subject:subjectId / stats'
+                // notice that 'subjects' is missing
+                if (!this.shouldExcludeValue(value)) {
+                  newItems.push(this.buildResItem(key, value, res, index));
+                }
+                if (value !== 'Projects' && value !== 'progress-and-rankings' && value !== lastItemInPathCustomName) {
+                  key = value;
+                }
               }
-              key = null;
             } else {
-              // must exclude items in the path because each page with navigation
-              // doesn't have a sub-route in the url, for example:
-              // '/projects/projectId' will conceptually map to '/projects/projectId/subjects'
-              // but there is no '/project/projectId/subjects' route configured so when parsing something like
-              // '/projects/projectId/subjects/subjectId/stats we must end up with:
-              //    'projects / project:projectId / subject:subjectId / stats'
-              // notice that 'subjects' is missing
-              if (!this.shouldExcludeValue(value)) {
-                newItems.push(this.buildResItem(key, value, res, index));
-              }
-              if (value !== 'Projects' && value !== 'progress-and-rankings') {
-                key = value;
-              }
+              this.ignoreNext = false;
             }
           }
         });
@@ -111,7 +147,15 @@ limitations under the License.
         };
       },
       getUrl(arr, endIndex) {
-        return `/${arr.slice(0, endIndex).join('/')}`;
+        const dashboardUrlSize = this.dashboardPathParts.length;
+        let url = `/${arr.slice(0, Math.min(endIndex, dashboardUrlSize)).join('/')}/`;
+        if (this.hasSkillsClientDisplayPath && endIndex >= dashboardUrlSize) {
+          const skillsClientDisplayPath = (endIndex > dashboardUrlSize) ? `/${arr.slice(dashboardUrlSize, endIndex).join('/')}` : '/';
+          const queryParams = new URLSearchParams(window.location.search);
+          queryParams.set('skillsClientDisplayPath', skillsClientDisplayPath);
+          url += `?${queryParams.toString()}`;
+        }
+        return url;
       },
       prepKey(key) {
         const res = key.endsWith('s') ? key.substring(0, key.length - 1) : key;
