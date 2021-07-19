@@ -156,7 +156,7 @@ Cypress.Commands.add("createSubject", (projNum = 1, subjNum = 1, overrideProps =
 
 Cypress.Commands.add("createSkill", (projNum = 1, subjNum = 1, skillNum = 1, overrideProps = {}) => {
     const skillId = `skill${skillNum}${subjNum > 1 ? `Subj${subjNum}` : ''}`;
-    const skillName = `Very Great Skill ${skillNum} ${subjNum > 1 ? `Subj${subjNum}` : ''}`;
+    const skillName = `Very Great Skill ${skillNum}${subjNum > 1 ? ` Subj${subjNum}` : ''}`;
     cy.request('POST', `/admin/projects/proj${projNum}/subjects/subj${subjNum}/skills/${skillId}`, Object.assign({
         projectId: `proj${projNum}`,
         subjectId: `subj${subjNum}`,
@@ -211,7 +211,7 @@ Cypress.Commands.add("assignCrossProjectDep", (proj1Num, skillNum1, proj2Num, sk
 });
 
 
-Cypress.Commands.add("reportSkill", (project = 1, skill = 1, userId = 'user@skills.org', date = '2020-09-12 11:00', failOnError=true) => {
+Cypress.Commands.add("doReportSkill", ({project = 1, skill = 1, subjNum = 1, userId = 'user@skills.org', date = '2020-09-12 11:00', failOnError=true} = {}) => {
     let m = moment.utc(date, 'YYYY-MM-DD HH:mm');
     if (date === 'now') {
         m = moment.utc()
@@ -228,6 +228,9 @@ Cypress.Commands.add("reportSkill", (project = 1, skill = 1, userId = 'user@skil
     let skillId = '';
     if (!isNaN(parseFloat(skill))) {
         skillId = `skill${skill}`;
+        if (subjNum > 1){
+            skillId = `${skillId}Subj${subjNum}`;
+        }
     } else {
         skillId = skill;
     }
@@ -238,6 +241,10 @@ Cypress.Commands.add("reportSkill", (project = 1, skill = 1, userId = 'user@skil
         body: {userId, timestamp: m.clone().format('x')}});
 });
 
+// deprecated, pease use doReportSkill
+Cypress.Commands.add("reportSkill", (project = 1, skill = 1, userId = 'user@skills.org', date = '2020-09-12 11:00', failOnError=true) => {
+    cy.doReportSkill({ project, skill, userId, date, failOnError } );
+});
 
 
 Cypress.Commands.add("getResetLink", () => {
