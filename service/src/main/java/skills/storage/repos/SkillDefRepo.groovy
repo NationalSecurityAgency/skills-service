@@ -250,4 +250,20 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         sd.type='GlobalBadge') and
       (sd.enabled  = 'true' OR sd.enabled is null)''')
     BadgeCount getProductionBadgesCount(String userId)
+
+    static interface ProjectAndSubjectPoints {
+        Integer getProjectTotalPoints()
+        Integer getSubjectTotalPoints()
+    }
+    @Query(value='''SELECT sdParent.totalPoints as subjectTotalPoints, p.totalPoints as projectTotalPoints
+            from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild, ProjDef  p
+            where 
+                sdChild.projectId = p.projectId and 
+                srd.parent=sdParent.id and 
+                srd.child=sdChild.id and 
+                sdChild.projectId=?1 and 
+                sdChild.skillId=?2 and 
+                srd.type='RuleSetDefinition'
+        ''')
+    ProjectAndSubjectPoints getProjectAndSubjectPoints(String projectId, String skillId)
 }

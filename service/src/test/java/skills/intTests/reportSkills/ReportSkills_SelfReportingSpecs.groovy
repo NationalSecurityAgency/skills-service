@@ -725,4 +725,93 @@ Always yours, <br/> -SkillTree Bot
         approvalsEndpointRes.data[0].requestMsg == "Please approve this!"
     }
 
+    def "self report approval skill with insufficient project points"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Date date = new Date()
+        String userId = "user0"
+        when:
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId, date, "Please approve this!")
+
+        then:
+        SkillsClientException skillsClientException = thrown(SkillsClientException)
+        skillsClientException.message.contains("Insufficient project points, skill achievement is disallowed, errorCode:InsufficientProjectPoints, success:false, projectId:${subj.projectId}, skillId:null")
+        skillsClientException.message.contains(userId)
+    }
+
+    def "self report honor skill with insufficient project points"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].selfReportingType = SkillDef.SelfReportingType.HonorSystem
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Date date = new Date()
+        String userId = "user0"
+        when:
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId, date, "Please approve this!")
+
+        then:
+        SkillsClientException skillsClientException = thrown(SkillsClientException)
+        skillsClientException.message.contains("Insufficient project points, skill achievement is disallowed, errorCode:InsufficientProjectPoints, success:false, projectId:${subj.projectId}, skillId:null")
+        skillsClientException.message.contains(userId)
+    }
+
+    def "self report approval skill with insufficient subject points"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        skillsService.createSubject(SkillsFactory.createSubject(1, 2))
+        skillsService.createSkills(SkillsFactory.createSkills(1, 1, 2, 200))
+
+        Date date = new Date()
+        String userId = "user0"
+        when:
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId, date, "Please approve this!")
+
+        then:
+        SkillsClientException skillsClientException = thrown(SkillsClientException)
+        skillsClientException.message.contains("Insufficient Subject points, skill achievement is disallowed, errorCode:InsufficientSubjectPoints, success:false, projectId:${subj.projectId}, skillId:null")
+        skillsClientException.message.contains(userId)
+    }
+
+    def "self report honor skill with insufficient subject points"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].selfReportingType = SkillDef.SelfReportingType.HonorSystem
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        skillsService.createSubject(SkillsFactory.createSubject(1, 2))
+        skillsService.createSkills(SkillsFactory.createSkills(1, 1, 2, 200))
+
+        Date date = new Date()
+        String userId = "user0"
+        when:
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId, date, "Please approve this!")
+
+        then:
+        SkillsClientException skillsClientException = thrown(SkillsClientException)
+        skillsClientException.message.contains("Insufficient Subject points, skill achievement is disallowed, errorCode:InsufficientSubjectPoints, success:false, projectId:${subj.projectId}, skillId:null")
+        skillsClientException.message.contains(userId)
+    }
 }
