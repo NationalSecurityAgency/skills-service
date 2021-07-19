@@ -87,7 +87,7 @@ limitations under the License.
     computed: {
       themeObj() {
         if (this.$route.query.enableTheme) {
-          const res = {...this.theme};
+          const res = { ...this.theme };
           return Object.assign(res, this.darkTheme);
         }
 

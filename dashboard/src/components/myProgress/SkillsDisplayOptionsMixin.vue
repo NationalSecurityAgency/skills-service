@@ -58,17 +58,15 @@ limitations under the License.
           if (newVal.path && newVal.path !== oldVal.path) { // && newVal.path !== currentRoute.query.skillsClientDisplayPath) {
             this.$refs.skillsDisplayRef.navigate(newVal.path);
           }
-        } else {
-          if (this.pathsAreDifferent(newVal.path, oldVal.path, currentRoute)) {
-            const newRoute = {
-              path: currentRoute.path,
-              query: JSON.parse(JSON.stringify(currentRoute.query)),
-              hash: currentRoute.hash,
-              meta: currentRoute.meta,
-            };
-            newRoute.query.skillsClientDisplayPath = newVal.path;
-            this.$router.replace(newRoute);
-          }
+        } else if (this.pathsAreDifferent(newVal.path, oldVal.path, currentRoute)) {
+          const newRoute = {
+            path: currentRoute.path,
+            query: JSON.parse(JSON.stringify(currentRoute.query)),
+            hash: currentRoute.hash,
+            meta: currentRoute.meta,
+          };
+          newRoute.query.skillsClientDisplayPath = newVal.path;
+          this.$router.replace(newRoute);
         }
       },
     },
