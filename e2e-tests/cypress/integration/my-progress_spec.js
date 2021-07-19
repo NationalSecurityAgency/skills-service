@@ -21,8 +21,7 @@ dayjs.extend(relativeTimePlugin);
 const dateFormatter = value => moment.utc(value).format('YYYY-MM-DD[T]HH:mm:ss[Z]');
 const timeFromNowFormatter = (value) => dayjs(value).startOf('seconds').fromNow();
 
-
-const now = new Date().getTime()
+const testTime = new Date().getTime()
 const yesterday = new Date().getTime() - (1000 * 60 * 60 * 24)
 
 describe('Navigation Tests', () => {
@@ -35,6 +34,7 @@ describe('Navigation Tests', () => {
   // };
 
   beforeEach(() => {
+    cy.log(`--------> ${testTime}`);
     cy.intercept('/api/metrics/allProjectsSkillEventsOverTimeMetricsBuilder**').as('allSkillEventsForUser');
 
     cy.createProject(1);
@@ -50,23 +50,26 @@ describe('Navigation Tests', () => {
     cy.createSkill(1, 1, 4);
     cy.request('POST', `/admin/projects/proj1/skills/skill4/dependency/skill2`)
 
-    cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-      userId: Cypress.env('proxyUser'),
-      timestamp: now
-    })
+
     cy.request('POST', `/api/projects/proj1/skills/skill1`, {
       userId: Cypress.env('proxyUser'),
       timestamp: yesterday
     })
+    cy.request('POST', `/api/projects/proj1/skills/skill1`, {
+      userId: Cypress.env('proxyUser'),
+      timestamp: testTime
+    })
+
 
     cy.request('POST', `/api/projects/proj1/skills/skill3`, {
       userId: Cypress.env('proxyUser'),
-      timestamp: now
+      timestamp: yesterday
     })
     cy.request('POST', `/api/projects/proj1/skills/skill3`, {
       userId: Cypress.env('proxyUser'),
-      timestamp: yesterday
+      timestamp: testTime
     })
+
 
     cy.request('POST', '/admin/projects/proj1/badges/badge1', {
       projectId: 'proj1',
@@ -113,6 +116,51 @@ describe('Navigation Tests', () => {
     cy.addToMyProjects(1);
     cy.addToMyProjects(2);
   });
+
+  it('visit My Progress page', function () {
+    cy.visit('/');
+
+    cy.get('[data-cy="breadcrumb-Progress And Rankings"]').contains('Progress And Rankings').should('be.visible');
+
+    cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^1$/));
+    cy.get('[data-cy=numProjectsAvailable]').contains(new RegExp(/^\/ 2$/));
+    cy.get('[data-cy=info-snap-footer]').contains('You still have 1 project to explore.');
+
+    cy.get('[data-cy=numAchievedSkills]').contains(new RegExp(/^2$/));
+    cy.get('[data-cy=numSkillsAvailable]').contains(new RegExp(/^Total: 10$/));
+    cy.get('[data-cy=num-skills-footer]').contains('So many skills... so little time! Good luck!');
+
+    // cy.get('[data-cy=mostRecentAchievedSkill]').contains(new RegExp(/^Last Achieved skill \d+ minute[s]? ago$/));
+    cy.get('[data-cy=mostRecentAchievedSkill]').contains(`Last Achieved skill ${timeFromNowFormatter(testTime)}`);
+    cy.get('[data-cy=numAchievedSkillsLastWeek]').contains('2 skills in the last week');
+    cy.get('[data-cy=numAchievedSkillsLastMonth]').contains('2 skills in the last month');
+    cy.get('[data-cy=last-earned-footer]').contains('Keep up the good work!!');
+
+    cy.get('[data-cy=badges-num-footer]').contains('Be proud to earn those badges!!');
+    cy.get('[data-cy=numAchievedBadges]').contains(new RegExp(/^0$/));
+    cy.get('[data-cy=numBadgesAvailable]').contains(new RegExp(/^\/ 2$/));
+    cy.get('[data-cy=numAchievedGlobalBadges]').should('not.exist')
+    cy.get('[data-cy=numAchievedGemBadges]').contains('Gems: 0');
+
+    cy.get('[data-cy=project-link-proj2]').should('be.visible');
+    cy.get('[data-cy=project-link-proj2]').find('[data-cy=project-card-project-name]').contains('This is project 2');
+
+    cy.get('[data-cy=project-link-proj1]').should('be.visible');
+    cy.get('[data-cy=project-link-proj1]').find('[data-cy=project-card-project-name]').contains('This is project 1');
+    cy.get('[data-cy=project-link-proj1]').find('[data-cy=project-card-project-level]').contains('3');
+    cy.get('[data-cy=project-link-proj1]').find('[data-cy=project-card-project-rank]').contains(new RegExp(/^Rank: 1 \/ 1$/));
+    cy.get('[data-cy=project-link-proj1]').find('[data-cy=project-card-project-points]').contains(new RegExp(/^400 \/ 800$/));
+
+    cy.get('[data-cy=inception-button]').should('not.exist');
+
+    cy.get('[data-cy=project-link-proj1]').click()
+
+    cy.dashboardCd().contains('Overall Points');
+    cy.get('[data-cy="breadcrumb-Progress And Rankings"]').should('be.visible');
+    cy.get('[data-cy=breadcrumb-proj1]').should('be.visible');
+    cy.get('[data-cy=breadcrumb-projects]').should('not.exist');
+  });
+
 
   it('badges card - gems and not global badges', function () {
     cy.visit('/');
@@ -169,50 +217,6 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=numAchievedGlobalBadges]').should('not.exist')
     cy.get('[data-cy=numAchievedGemBadges]').should('not.exist')
   })
-
-  it('visit My Progress page', function () {
-    cy.visit('/');
-
-    cy.get('[data-cy="breadcrumb-Progress And Rankings"]').contains('Progress And Rankings').should('be.visible');
-
-    cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^1$/));
-    cy.get('[data-cy=numProjectsAvailable]').contains(new RegExp(/^\/ 2$/));
-    cy.get('[data-cy=info-snap-footer]').contains('You still have 1 project to explore.');
-
-    cy.get('[data-cy=numAchievedSkills]').contains(new RegExp(/^2$/));
-    cy.get('[data-cy=numSkillsAvailable]').contains(new RegExp(/^Total: 10$/));
-    cy.get('[data-cy=num-skills-footer]').contains('So many skills... so little time! Good luck!');
-
-    // cy.get('[data-cy=mostRecentAchievedSkill]').contains(new RegExp(/^Last Achieved skill \d+ minute[s]? ago$/));
-    cy.get('[data-cy=mostRecentAchievedSkill]').contains(`Last Achieved skill ${timeFromNowFormatter(now)}`);
-    cy.get('[data-cy=numAchievedSkillsLastWeek]').contains('2 skills in the last week');
-    cy.get('[data-cy=numAchievedSkillsLastMonth]').contains('2 skills in the last month');
-    cy.get('[data-cy=last-earned-footer]').contains('Keep up the good work!!');
-
-    cy.get('[data-cy=badges-num-footer]').contains('Be proud to earn those badges!!');
-    cy.get('[data-cy=numAchievedBadges]').contains(new RegExp(/^0$/));
-    cy.get('[data-cy=numBadgesAvailable]').contains(new RegExp(/^\/ 2$/));
-    cy.get('[data-cy=numAchievedGlobalBadges]').should('not.exist')
-    cy.get('[data-cy=numAchievedGemBadges]').contains('Gems: 0');
-
-    cy.get('[data-cy=project-link-proj2]').should('be.visible');
-    cy.get('[data-cy=project-link-proj2]').find('[data-cy=project-card-project-name]').contains('This is project 2');
-
-    cy.get('[data-cy=project-link-proj1]').should('be.visible');
-    cy.get('[data-cy=project-link-proj1]').find('[data-cy=project-card-project-name]').contains('This is project 1');
-    cy.get('[data-cy=project-link-proj1]').find('[data-cy=project-card-project-level]').contains('3');
-    cy.get('[data-cy=project-link-proj1]').find('[data-cy=project-card-project-rank]').contains(new RegExp(/^Rank: 1 \/ 1$/));
-    cy.get('[data-cy=project-link-proj1]').find('[data-cy=project-card-project-points]').contains(new RegExp(/^400 \/ 800$/));
-
-    cy.get('[data-cy=inception-button]').should('not.exist');
-
-    cy.get('[data-cy=project-link-proj1]').click()
-
-    cy.dashboardCd().contains('Overall Points');
-    cy.get('[data-cy="breadcrumb-Progress And Rankings"]').should('be.visible');
-    cy.get('[data-cy=breadcrumb-proj1]').should('be.visible');
-    cy.get('[data-cy=breadcrumb-projects]').should('not.exist');
-  });
 
   it('My Progress page - contributed to all projects', function () {
     // // add a skill to Inception to have contributed to all projects

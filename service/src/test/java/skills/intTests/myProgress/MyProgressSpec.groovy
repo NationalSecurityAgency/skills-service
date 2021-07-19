@@ -56,8 +56,6 @@ class MyProgressSpec extends DefaultIntSpec {
 
         when:
         def res = skillsService.getMyProgressSummary()
-
-        println JsonOutput.toJson(res)
         then:
         !res.projectSummaries
     }
@@ -76,7 +74,6 @@ class MyProgressSpec extends DefaultIntSpec {
         when:
         def res = skillsService.getMyProgressSummary()
 
-        println JsonOutput.toJson(res)
         then:
         res.projectSummaries.collect { it.projectId } == [projs[2].projectId, projs[0].projectId]
     }
@@ -925,113 +922,6 @@ class MyProgressSpec extends DefaultIntSpec {
                 assert res.numAchievedGlobalBadges == 0
             }
         }
-    }
-
-    def "my progress summary - earned and total points they are proudly displayed for all skill versions"() {
-        String projId = SkillsFactory.defaultProjId
-        List<Map> skills = SkillsFactory.createSkillsWithDifferentVersions([0, 0, 1, 1, 1, 2])
-        skills.each{
-            it.pointIncrement = 20
-        }
-        def subject = SkillsFactory.createSubject()
-
-        skillsService.createProject(SkillsFactory.createProject())
-        skillsService.createSubject(subject)
-        skillsService.createSkills(skills)
-
-        skillsService.addSkill([projectId: projId, skillId: skills.get(0).skillId], userId, new Date())
-        skillsService.addSkill([projectId: projId, skillId: skills.get(1).skillId], userId, new Date() - 1)
-        skillsService.addSkill([projectId: projId, skillId: skills.get(2).skillId], userId, new Date())
-        skillsService.addSkill([projectId: projId, skillId: skills.get(3).skillId], userId, new Date() - 3)
-        skillsService.addSkill([projectId: projId, skillId: skills.get(4).skillId], userId, new Date())
-        skillsService.addSkill([projectId: projId, skillId: skills.get(5).skillId], userId, new Date() - 2)
-
-        // enable "production mode"
-        skillsService.changeSetting(projId, PROD_MODE, [projectId: projId, setting: PROD_MODE, value: "true"])
-        skillsService.addMyProject(projId)
-
-        when:
-        def mySummary0 = skillsService.getMyProgressSummary(0)
-        def mySummary1 = skillsService.getMyProgressSummary(1)
-        def mySummary2 = skillsService.getMyProgressSummary(2)
-
-        then:
-
-        mySummary0
-        mySummary0.projectSummaries
-        mySummary0.projectSummaries.size() == 1
-        mySummary0.projectSummaries.find{ it.projectId == projId }
-        mySummary0.projectSummaries.find{ it.projectId == projId }.points == 120
-        mySummary0.projectSummaries.find{ it.projectId == projId }.totalPoints == 120
-
-        mySummary1
-        mySummary1.projectSummaries
-        mySummary1.projectSummaries.size() == 1
-        mySummary1.projectSummaries.find{ it.projectId == projId }
-        mySummary1.projectSummaries.find{ it.projectId == projId }.points == 120
-        mySummary1.projectSummaries.find{ it.projectId == projId }.totalPoints == 120
-
-        mySummary2
-        mySummary2.projectSummaries
-        mySummary2.projectSummaries.size() == 1
-        mySummary2.projectSummaries.find{ it.projectId == projId }
-        mySummary2.projectSummaries.find{ it.projectId == projId }.points == 120
-        mySummary2.projectSummaries.find{ it.projectId == projId }.totalPoints == 120
-    }
-
-    def "my progress summary - user points to NOT respect the version (skills with numPerformToCompletion > 1) - if user ends those points they are proudly displayed in all versions"() {
-        String projId = SkillsFactory.defaultProjId
-        List<Map> skills = SkillsFactory.createSkillsWithDifferentVersions([0, 0, 1, 1, 1, 2])
-        skills.each {
-            it.numPerformToCompletion = 5
-        }
-        def subject = SkillsFactory.createSubject()
-
-        skillsService.createProject(SkillsFactory.createProject())
-        skillsService.createSubject(subject)
-        skillsService.createSkills(skills)
-
-        skillsService.addSkill([projectId: projId, skillId: skills.get(0).skillId], userId, new Date())
-        skillsService.addSkill([projectId: projId, skillId: skills.get(0).skillId], userId, new Date() - 1)
-        skillsService.addSkill([projectId: projId, skillId: skills.get(0).skillId], userId, new Date() - 2)
-        skillsService.addSkill([projectId: projId, skillId: skills.get(0).skillId], userId, new Date() - 3)
-        skillsService.addSkill([projectId: projId, skillId: skills.get(0).skillId], userId, new Date() - 4)
-
-        skillsService.addSkill([projectId: projId, skillId: skills.get(5).skillId], userId, new Date() - 2)
-        skillsService.addSkill([projectId: projId, skillId: skills.get(5).skillId], userId, new Date() - 1)
-        skillsService.addSkill([projectId: projId, skillId: skills.get(5).skillId], userId, new Date())
-
-        // enable "production mode"
-        skillsService.changeSetting(projId, PROD_MODE, [projectId: projId, setting: PROD_MODE, value: "true"])
-        skillsService.addMyProject(projId)
-
-        when:
-        def mySummary0 = skillsService.getMyProgressSummary(0)
-        def mySummary1 = skillsService.getMyProgressSummary(1)
-        def mySummary2 = skillsService.getMyProgressSummary(2)
-
-        then:
-
-        mySummary0
-        mySummary0.projectSummaries
-        mySummary0.projectSummaries.size() == 1
-        mySummary0.projectSummaries.find{ it.projectId == projId }
-        mySummary0.projectSummaries.find{ it.projectId == projId }.points == 80
-        mySummary0.projectSummaries.find{ it.projectId == projId }.totalPoints == 300
-
-        mySummary1
-        mySummary1.projectSummaries
-        mySummary1.projectSummaries.size() == 1
-        mySummary1.projectSummaries.find{ it.projectId == projId }
-        mySummary1.projectSummaries.find{ it.projectId == projId }.points == 80
-        mySummary1.projectSummaries.find{ it.projectId == projId }.totalPoints == 300
-
-        mySummary2
-        mySummary2.projectSummaries
-        mySummary2.projectSummaries.size() == 1
-        mySummary2.projectSummaries.find{ it.projectId == projId }
-        mySummary2.projectSummaries.find{ it.projectId == projId }.points == 80
-        mySummary2.projectSummaries.find{ it.projectId == projId }.totalPoints == 300
     }
 
     def "my skills summary - skills have been created and achieved, but 'production mode' is not enabled"() {

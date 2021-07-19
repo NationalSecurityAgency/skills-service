@@ -378,7 +378,7 @@
                 <version>2.22.2</version>
                 <configuration>
                     <includes>
-                        <include>**/*DBIT</include>
+                        <include>**/*IT</include>
                     </includes>
                 </configuration>
             </plugin>

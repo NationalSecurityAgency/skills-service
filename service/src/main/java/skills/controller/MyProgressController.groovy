@@ -19,9 +19,12 @@ import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.web.bind.annotation.*
 import skills.PublicProps
 import skills.auth.UserInfoService
+import skills.controller.exceptions.ErrorCode
+import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.AddMyProjectRequest
 import skills.controller.result.model.AvailableProjectResult
@@ -55,6 +58,10 @@ class MyProgressController {
     @Autowired
     ProjAdminService projAdminService
 
+
+    @Value('#{"${skills.config.ui.rankingAndProgressViewsEnabled}"}')
+    Boolean rankingAndProgressViewsEnabled
+
     @RequestMapping(value = "/metrics/{metricsId}", method =  RequestMethod.GET, produces = "application/json")
     def getChartData(@PathVariable("metricsId") String metricsId,
                      @RequestParam Map<String,String> metricsProps) {
@@ -65,19 +72,22 @@ class MyProgressController {
     @ResponseBody
     @CompileStatic
     @Profile
-    MyProgressSummary getMyProgressSummary(HttpServletRequest request,
-                                           @RequestParam(name = "version", required = false) Integer version) {
+    MyProgressSummary getMyProgressSummary() {
+
+        validateRankingAndProgressViewsEnabled()
         String userId = userInfoService.getCurrentUserId()
-        return skillsLoader.loadMyProgressSummary(userId, getProvidedVersionOrReturnDefault(version))
+        return skillsLoader.loadMyProgressSummary(userId)
     }
 
     @RequestMapping(value = "/availableForMyProjects", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     @CompileStatic
     @Profile
-    List<AvailableProjectResult> getAvailableForMyProjects(HttpServletRequest request, @RequestParam(name = "version", required = false) Integer version) {
+    List<AvailableProjectResult> getAvailableForMyProjects() {
+        validateRankingAndProgressViewsEnabled()
+
         String currentUserIdLower = userInfoService.getCurrentUserId().toLowerCase()
-        return skillsLoader.getAvailableForMyProjects(currentUserIdLower, getProvidedVersionOrReturnDefault(version));
+        return skillsLoader.getAvailableForMyProjects(currentUserIdLower);
     }
 
     @PostMapping('/myprojects/{projectId}')
@@ -85,20 +95,21 @@ class MyProgressController {
         if (addMyProjectRequest?.newSortIndex != null){
             SkillsValidator.isTrue(addMyProjectRequest.newSortIndex >=0, "Provided [newSortIndex=${addMyProjectRequest.newSortIndex}] is less than 0", projectId)
         }
+        validateRankingAndProgressViewsEnabled()
         projAdminService.addMyProject(projectId, addMyProjectRequest)
         return new RequestResult(success: true)
     }
 
     @DeleteMapping('/myprojects/{projectId}')
     RequestResult removeMyProject(@PathVariable("projectId") String projectId) {
+        validateRankingAndProgressViewsEnabled()
         projAdminService.removeMyProject(projectId)
         return new RequestResult(success: true)
     }
 
-    private int getProvidedVersionOrReturnDefault(Integer versionParam) {
-        if (versionParam != null) {
-            return versionParam
+    private void validateRankingAndProgressViewsEnabled() {
+        if (!rankingAndProgressViewsEnabled) {
+            throw new SkillException("Progress and Ranking Views are disabled for this installation of the SkillTree", null, null, ErrorCode.AccessDenied)
         }
-        return publicProps.getInt(PublicProps.UiProp.maxSkillVersion)
     }
 }

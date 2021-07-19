@@ -18,7 +18,7 @@ limitations under the License.
     <sub-page-header title="Project Settings"/>
     <simple-card>
       <loading-container :is-loading="isLoading">
-        <div class="row">
+        <div v-if="isProgressAndRankingEnabled" class="row" data-cy="productionModeSetting">
           <div class="col col-md-3 text-secondary" id="productionModeEnabledLabel">
             Production Mode:
             <inline-help
@@ -219,6 +219,9 @@ limitations under the License.
       isDirty() {
         const foundDirty = Object.values(this.settings).find((item) => item.dirty);
         return foundDirty;
+      },
+      isProgressAndRankingEnabled() {
+        return this.$store.getters.config.rankingAndProgressViewsEnabled === true || this.$store.getters.config.rankingAndProgressViewsEnabled === 'true';
       },
     },
     methods: {

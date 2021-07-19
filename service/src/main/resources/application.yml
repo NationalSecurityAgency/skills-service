@@ -125,6 +125,8 @@ skills:
       maxNumPointIncrementMaxOccurrences: 999
       userSuggestOptions:
       pointHistoryInDays: 1825
+      rankingAndProgressViewsEnabled: false
+      defaultLandingPage: "admin"
     client:
       loggingEnabled: false
       loggingLevel: DEBUG

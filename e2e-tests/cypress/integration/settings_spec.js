@@ -593,8 +593,8 @@ describe('Settings Tests', () => {
         cy.contains('Default Home Page').should('be.visible');
 
         // verify the default is set to 'Progress and Rankings'
-        cy.get('[data-cy="landingPageSelector"] [value="progress"]').should('be.checked');
         cy.get('[data-cy="landingPageSelector"] [value="admin"]').should('not.be.checked');
+        cy.get('[data-cy="landingPageSelector"] [value="progress"]').should('be.checked');
 
         // click SkillTree logo and verify we are on the correct page
         cy.get('[data-cy="skillTreeLogo"]').click()

@@ -371,6 +371,6 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                 (ss.setting = 'my_project' and uu.userId=?1 and uu.id = ss.userRefId and ss.projectId = pd.projectId)
             GROUP BY up.points, pd.projectId, pd.name, pd.id, ss.value
     ''')
-    List<ProjectSummaryResult> getProjectSummaries(String userId, Integer version)
+    List<ProjectSummaryResult> getProjectSummaries(String userId)
 
 }

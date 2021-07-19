@@ -612,19 +612,13 @@ class SkillsService {
         wsHelper.apiGet(url)
     }
 
-    def getMyProgressSummary(int version = -1) {
+    def getMyProgressSummary() {
         String url = "/myProgressSummary"
-        if (version >= 0) {
-            url += "?version=${version}"
-        }
         wsHelper.apiGet(url)
     }
 
-    def getAvailableMyProjects(int version = -1) {
+    def getAvailableMyProjects() {
         String url = "/availableForMyProjects"
-        if (version >= 0) {
-            url += "?version=${version}"
-        }
         wsHelper.apiGet(url)
     }
 
