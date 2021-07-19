@@ -75,6 +75,7 @@ addMatchImageSnapshotCommand();
 
 Cypress.Commands.add("matchSnapshotImageForElement", (selector, subject, maybeName, commandOptions) => {
     cy.closeToasts();
+    cy.wait(500);
     cy.get(selector).matchImageSnapshot(subject, maybeName, commandOptions);
 })
 
