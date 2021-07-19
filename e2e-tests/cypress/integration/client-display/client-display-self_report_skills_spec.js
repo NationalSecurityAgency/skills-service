@@ -21,35 +21,8 @@ describe('Client Display Self Report Skills Tests', () => {
 
   beforeEach(() => {
     Cypress.env('disabledUILoginProp', true);
-    cy.request('POST', '/app/projects/proj1', {
-      projectId: 'proj1',
-      name: 'proj1'
-    });
-    cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
-      projectId: 'proj1',
-      subjectId: 'subj1',
-      name: 'Subject 1',
-      helpUrl: 'http://doHelpOnThisSubject.com',
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-    });
-
-    Cypress.Commands.add("createSkill", (num, selfReportingType) => {
-      cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${num}`, {
-        projectId: 'proj1',
-        subjectId: 'subj1',
-        skillId: `skill${num}`,
-        name: `This is ${num}`,
-        type: 'Skill',
-        pointIncrement: 50,
-        numPerformToCompletion: 2,
-        pointIncrementInterval: 0,
-        numMaxOccurrencesIncrementInterval: -1,
-        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-        version: 0,
-        helpUrl: 'http://doHelpOnThisSkill.com',
-        selfReportingType
-      });
-    });
+    cy.createProject(1);
+    cy.createSubject(1, 1)
 
     Cypress.Commands.add("approveRequest", (requestNum=0) => {
       cy.request('/admin/projects/proj1/approvals?limit=10&ascending=true&page=1&orderBy=userId')
@@ -79,9 +52,9 @@ describe('Client Display Self Report Skills Tests', () => {
 
 
   it('only show self-report button if enabled', () => {
-    cy.createSkill(1, 'Approval');
-    cy.createSkill(2, 'HonorSystem');
-    cy.createSkill(3, null);
+    cy.createSkill(1, 1, 1, {selfReportingType : 'Approval'});
+    cy.createSkill(1, 1, 2, {selfReportingType: 'HonorSystem'});
+    cy.createSkill(1, 1, 3);
 
     cy.cdVisit('/?internalBackButton=true');
     cy.cdClickSubj(0);
@@ -104,7 +77,8 @@ describe('Client Display Self Report Skills Tests', () => {
   });
 
   it('do not show report if skill is completed', () => {
-    cy.createSkill(1, 'HonorSystem');
+    cy.createSkill(1, 1, 1, {selfReportingType: 'HonorSystem'});
+
     cy.cdVisit('/');
     const m = moment.utc('2020-09-12 11', 'YYYY-MM-DD HH');
     cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: Cypress.env('proxyUser'), timestamp: m.clone().add(1, 'day').format('x')})
@@ -117,8 +91,9 @@ describe('Client Display Self Report Skills Tests', () => {
   })
 
   it('do not show report if skill has uncompleted dependencies', () => {
-    cy.createSkill(1, 'HonorSystem');
-    cy.createSkill(2, 'HonorSystem');
+    cy.createSkill(1, 1, 1, {selfReportingType : 'HonorSystem'});
+    cy.createSkill(1, 1, 2, {selfReportingType: 'HonorSystem'});
+
     cy.request('POST', `/admin/projects/proj1/skills/skill1/dependency/skill2`)
     cy.cdVisit('/?internalBackButton=true');
     cy.cdClickSubj(0);
@@ -137,7 +112,7 @@ describe('Client Display Self Report Skills Tests', () => {
 
 
   it('self report honor skill', () => {
-    cy.createSkill(1, 'HonorSystem');
+    cy.createSkill(1, 1, 1, { selfReportingType : 'HonorSystem', pointIncrement: 50,  pointIncrementInterval: 0 });
     cy.cdVisit('/');
     cy.cdClickSubj(0);
     cy.cdClickSkill(0);
@@ -171,9 +146,9 @@ describe('Client Display Self Report Skills Tests', () => {
   });
 
   it('self report honor skill from subject page', () => {
-    cy.createSkill(1, 'Approval');
-    cy.createSkill(2, 'HonorSystem');
-    cy.createSkill(3, null);
+    cy.createSkill(1, 1, 1, {selfReportingType : 'Approval', pointIncrement: 50,  pointIncrementInterval: 0 });
+    cy.createSkill(1, 1, 2, {selfReportingType: 'HonorSystem', pointIncrement: 50,  pointIncrementInterval: 0 });
+    cy.createSkill(1, 1, 3);
 
     cy.cdVisit('/');
     cy.cdClickSubj(0);
@@ -209,7 +184,7 @@ describe('Client Display Self Report Skills Tests', () => {
   });
 
   it('self report approval-required skill - skill gets approved', () => {
-    cy.createSkill(1, 'Approval');
+    cy.createSkill(1, 1, 1, {selfReportingType : 'Approval', pointIncrement: 50,  pointIncrementInterval: 0 });
     cy.cdVisit('/');
     cy.cdClickSubj(0);
     cy.cdClickSkill(0);
@@ -248,7 +223,7 @@ describe('Client Display Self Report Skills Tests', () => {
   });
 
   it('self report - skill was submitted for approval', () => {
-    cy.createSkill(1, 'Approval');
+    cy.createSkill(1, 1, 1, {selfReportingType : 'Approval'});
     cy.submitForApproval()
 
 
@@ -263,8 +238,8 @@ describe('Client Display Self Report Skills Tests', () => {
   });
 
   it('self report - skill was submitted for approval - on subject page', () => {
-    cy.createSkill(1, 'Approval');
-    cy.createSkill(2, 'HonorSystem');
+    cy.createSkill(1, 1, 1, {selfReportingType : 'Approval'});
+    cy.createSkill(1, 1, 2, {selfReportingType: 'HonorSystem'});
     cy.submitForApproval()
 
 
@@ -279,7 +254,7 @@ describe('Client Display Self Report Skills Tests', () => {
   });
 
   it('self report - skill was rejected', () => {
-    cy.createSkill(1, 'Approval');
+    cy.createSkill(1, 1, 1, {selfReportingType : 'Approval'});
     cy.submitForApproval();
     cy.rejectRequest();
 
@@ -296,9 +271,9 @@ describe('Client Display Self Report Skills Tests', () => {
 
 
   it('self report - skill was rejected - on subject page', () => {
-    cy.createSkill(1, 'HonorSystem');
-    cy.createSkill(2, 'Approval');
-    cy.createSkill(3, null);
+    cy.createSkill(1, 1, 1, {selfReportingType : 'HonorSystem', pointIncrement: 200,  pointIncrementInterval: 0 });
+    cy.createSkill(1, 1, 2, {selfReportingType: 'Approval', pointIncrement: 200,  pointIncrementInterval: 0 });
+    cy.createSkill(1, 1, 3);
     cy.submitForApproval(2);
     cy.rejectRequest();
 
@@ -314,7 +289,7 @@ describe('Client Display Self Report Skills Tests', () => {
   });
 
   it('self report - resubmit rejected skill', () => {
-    cy.createSkill(1, 'Approval');
+    cy.createSkill(1, 1, 1, {selfReportingType : 'Approval'});
     cy.submitForApproval();
     cy.rejectRequest();
 
@@ -345,9 +320,9 @@ describe('Client Display Self Report Skills Tests', () => {
   });
 
   it('self report - resubmit rejected skill - on subject page', () => {
-    cy.createSkill(1, 'HonorSystem');
-    cy.createSkill(2, 'Approval');
-    cy.createSkill(3, null);
+    cy.createSkill(1, 1, 1, {selfReportingType : 'HonorSystem'});
+    cy.createSkill(1, 1, 2, {selfReportingType: 'Approval'});
+    cy.createSkill(1, 1, 3);
     cy.submitForApproval(2);
     cy.rejectRequest();
 
@@ -379,7 +354,7 @@ describe('Client Display Self Report Skills Tests', () => {
   });
 
   it('self report - delete rejection', () => {
-    cy.createSkill(1, 'Approval');
+    cy.createSkill(1, 1, 1, {selfReportingType : 'Approval'});
     cy.submitForApproval();
     cy.rejectRequest();
 
@@ -411,7 +386,7 @@ describe('Client Display Self Report Skills Tests', () => {
 
 
   it('self report - delete rejection - subject page', () => {
-    cy.createSkill(1, 'Approval');
+    cy.createSkill(1, 1, 1, {selfReportingType : 'Approval'});
     cy.submitForApproval();
     cy.rejectRequest();
 
@@ -447,8 +422,7 @@ describe('Client Display Self Report Skills Tests', () => {
       expect(req.body.approvalRequestedMsg).to.include('some val jabberwock')
     }).as('reportSkill');
 
-
-    cy.createSkill(1, 'Approval');
+    cy.createSkill(1, 1, 1, {selfReportingType : 'Approval'});
     cy.cdVisit('/');
     cy.cdClickSubj(0);
     cy.cdClickSkill(0);
@@ -477,9 +451,9 @@ describe('Client Display Self Report Skills Tests', () => {
   });
 
   it('clearly indicate which skills are self reportable', () => {
-    cy.createSkill(1, 'Approval');
-    cy.createSkill(2, null);
-    cy.createSkill(3, 'HonorSystem');
+    cy.createSkill(1, 1, 1, {selfReportingType : 'Approval'});
+    cy.createSkill(1, 1, 2);
+    cy.createSkill(1, 1, 3, {selfReportingType: 'HonorSystem'});
 
     cy.cdVisit('/');
     cy.cdClickSubj(0);
@@ -496,9 +470,9 @@ describe('Client Display Self Report Skills Tests', () => {
   });
 
   it('clearly indicate on the skill overview whether skill is self reportable', () => {
-    cy.createSkill(1, 'Approval');
-    cy.createSkill(2, null);
-    cy.createSkill(3, 'HonorSystem');
+    cy.createSkill(1, 1, 1, {selfReportingType : 'Approval'});
+    cy.createSkill(1, 1, 2);
+    cy.createSkill(1, 1, 3, {selfReportingType: 'HonorSystem'});
 
     cy.cdVisit('/');
     cy.cdClickSubj(0);
@@ -516,5 +490,51 @@ describe('Client Display Self Report Skills Tests', () => {
     cy.cdClickSubj(0);
     cy.cdClickSkill(0);
     cy.matchSnapshotImageForElement('[data-cy="skillProgressTitle"]', 'Self_Reportable Label on Skill Overview - Themed');
+  });
+
+  it('attempt to report skill with insufficient project points', () => {
+    cy.createSkill(1, 1, 1, {selfReportingType : 'Approval', pointIncrement: 10});
+    cy.createSkill(1, 1, 2, {selfReportingType : 'HonorSystem', pointIncrement: 10});
+
+    cy.cdVisit('/');
+    cy.cdClickSubj(0);
+    cy.cdClickSkill(0);
+
+    cy.get('[data-cy="selfReportBtn"]').click();
+    cy.get('[data-cy="selfReportSubmitBtn"]').click();
+    cy.get('[data-cy="selfReportError"]').contains('Insufficient project points, skill achievement is disallowed');
+
+
+    cy.cdVisit('/');
+    cy.cdClickSubj(0);
+    cy.cdClickSkill(1);
+
+    cy.get('[data-cy="selfReportBtn"]').click();
+    cy.get('[data-cy="selfReportSubmitBtn"]').click();
+    cy.get('[data-cy="selfReportError"]').contains('Insufficient project points, skill achievement is disallowed');
+  });
+
+  it('attempt to report skill with insufficient subject points', () => {
+    cy.createSkill(1, 1, 1, {selfReportingType : 'Approval', pointIncrement: 10});
+    cy.createSkill(1, 1, 2, {selfReportingType : 'HonorSystem', pointIncrement: 10});
+
+    cy.createSubject(1, 2)
+    cy.createSkill(1, 2, 1, {selfReportingType : 'HonorSystem', pointIncrement: 200});
+
+    cy.cdVisit('/');
+    cy.cdClickSubj(0);
+    cy.cdClickSkill(0);
+
+    cy.get('[data-cy="selfReportBtn"]').click();
+    cy.get('[data-cy="selfReportSubmitBtn"]').click();
+    cy.get('[data-cy="selfReportError"]').contains('Insufficient Subject points, skill achievement is disallowed');
+
+    cy.cdVisit('/');
+    cy.cdClickSubj(0);
+    cy.cdClickSkill(1);
+
+    cy.get('[data-cy="selfReportBtn"]').click();
+    cy.get('[data-cy="selfReportSubmitBtn"]').click();
+    cy.get('[data-cy="selfReportError"]').contains('Insufficient Subject points, skill achievement is disallowed');
   });
 })

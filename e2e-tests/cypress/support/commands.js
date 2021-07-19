@@ -155,11 +155,13 @@ Cypress.Commands.add("createSubject", (projNum = 1, subjNum = 1, overrideProps =
 });
 
 Cypress.Commands.add("createSkill", (projNum = 1, subjNum = 1, skillNum = 1, overrideProps = {}) => {
-    cy.request('POST', `/admin/projects/proj${projNum}/subjects/subj${subjNum}/skills/skill${skillNum}`, Object.assign({
+    const skillId = `skill${skillNum}${subjNum > 1 ? `Subj${subjNum}` : ''}`;
+    const skillName = `Very Great Skill ${skillNum} ${subjNum > 1 ? `Subj${subjNum}` : ''}`;
+    cy.request('POST', `/admin/projects/proj${projNum}/subjects/subj${subjNum}/skills/${skillId}`, Object.assign({
         projectId: `proj${projNum}`,
         subjectId: `subj${subjNum}`,
-        skillId: `skill${skillNum}`,
-        name: `Very Great Skill ${skillNum}`,
+        skillId: skillId,
+        name: skillName,
         pointIncrement: '100',
         numPerformToCompletion: '2',
     }, overrideProps));

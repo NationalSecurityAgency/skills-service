@@ -132,7 +132,7 @@ export default {
     response = axios.post(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/skills/${skillId}`, {
       params: this.getUserIdAndVersionParams(),
       approvalRequestedMsg,
-    }).then((result) => result.data);
+    }, { handleErrorCode: 400 }).then((result) => result.data);
     return response;
   },
 
