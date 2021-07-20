@@ -60,7 +60,7 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
 
     for (let i = 1; i <= 12; i += 1) {
       for (let reportCounter = 1; reportCounter <= i; reportCounter += 1){
-        cy.reportSkill(1,reportCounter, `user${i}@skills.org`, '2021-02-24 10:00');
+        cy.doReportSkill({ skill: reportCounter, userId: `user${i}@skills.org`, date: '2021-02-24 10:00', subjNum: reportCounter <= 10 ? 1 : 2 } );
       }
     }
   })

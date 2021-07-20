@@ -66,16 +66,35 @@ const getErrorMsg = (errorResponse) => {
 };
 
 axios.interceptors.response.use((response) => response, (error) => {
-  if (!error || !error.response || (error.response && error.response.status !== 401)) {
-    const errorMessage = getErrorMsg(error);
-    router.push({
-      name: 'error',
-      params: {
-        errorMessage,
-      },
-    });
+  const errorCode = (error && error.response) ? error.response.status : undefined;
+
+  // check if the caller wants to handle a specific error status code
+  if (Object.prototype.hasOwnProperty.call(error.config, 'handleErrorCode')) {
+    if (Array.isArray(error.config.handleErrorCode)) {
+      if (error.config.handleErrorCode.find((el) => el === errorCode)) {
+        return Promise.reject(error);
+      }
+    } else if (typeof error.config.handleErrorCode === 'string' && error.config.handleErrorCode.contains(',')) {
+      const arr = error.config.handleErrorCode.split(',');
+      if (arr.find((el) => el === errorCode)) {
+        return Promise.reject(error);
+      }
+    } else if (error.config.handleErrorCode === errorCode) {
+      return Promise.reject(error);
+    }
+
+    return Promise.resolve({ data: {} });
   }
-  return Promise.reject(error);
+    if (!error || !error.response || (error.response && error.response.status !== 401)) {
+      const errorMessage = getErrorMsg(error);
+      router.push({
+        name: 'error',
+        params: {
+          errorMessage,
+        },
+      });
+    }
+    return Promise.reject(error);
 });
 
 service = {

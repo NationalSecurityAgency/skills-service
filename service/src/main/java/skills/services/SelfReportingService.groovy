@@ -26,6 +26,7 @@ import skills.controller.result.model.UserRoleRes
 import skills.notify.EmailNotifier
 import skills.notify.Notifier
 import skills.services.events.SkillEventsService
+import skills.services.events.pointsAndAchievements.InsufficientPointsValidator
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.storage.model.Notification
@@ -35,6 +36,7 @@ import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillApprovalRepo
+import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillEventsSupportRepo
 import skills.storage.repos.UserAttrsRepo
 
@@ -66,6 +68,12 @@ class SelfReportingService {
     @Autowired
     FeatureService featureService
 
+    @Autowired
+    InsufficientPointsValidator insufficientPointsValidator
+
+    @Autowired
+    SkillDefRepo skillDefRepo
+
     SkillEventsService.AppliedCheckRes requestApproval(String userId, SkillEventsSupportRepo.SkillDefMin skillDefinition, Date performedOn, String requestMsg) {
 
         if (StringUtils.isNotBlank(requestMsg)) {
@@ -75,6 +83,8 @@ class SelfReportingService {
                 throw new SkillException(msg, skillDefinition.projectId, skillDefinition.skillId, ErrorCode.BadParam)
             }
         }
+
+        validateSufficientPoints(skillDefinition, userId)
 
         SkillEventsService.AppliedCheckRes res
         SkillApproval existing = skillApprovalRepo.findByUserIdProjectIdAndSkillId(userId, skillDefinition.projectId, skillDefinition.skillId)
@@ -165,5 +175,11 @@ class SelfReportingService {
             log.warn("Failed to find existing approval with id of [${approvalId}]. Could be a bug OR could be that it was removed by another admin or in a different tab:" +
                     " projectId=[${projectId}], userId=[${userId}], approvalId=[${approvalId}]")
         }
+    }
+
+    private void validateSufficientPoints(SkillEventsSupportRepo.SkillDefMin skillDefinition, String userId) {
+        SkillDefRepo.ProjectAndSubjectPoints projectAndSubjectPoints = skillDefRepo.getProjectAndSubjectPoints(skillDefinition.projectId, skillDefinition.skillId)
+        insufficientPointsValidator.validateProjectPoints(projectAndSubjectPoints.projectTotalPoints, skillDefinition.projectId, userId)
+        insufficientPointsValidator.validateSubjectPoints(projectAndSubjectPoints.subjectTotalPoints, skillDefinition.projectId, userId)
     }
 }

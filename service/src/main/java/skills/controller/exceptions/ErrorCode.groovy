@@ -29,4 +29,6 @@ enum ErrorCode {
     SubjectNotFound,
     ProjectNotFound,
     EmptyBadgeNotAllowed,
+    InsufficientProjectPoints,
+    InsufficientSubjectPoints
 }

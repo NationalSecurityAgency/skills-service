@@ -64,6 +64,10 @@ limitations under the License.
         </div>
       </div>
     </div>
+
+    <div v-if="errNotification.enable" class="alert alert-danger mt-2" role="alert" data-cy="selfReportError">
+      <i class="fas fa-exclamation-triangle" /> {{ errNotification.msg }}
+    </div>
     <div v-if="!selfReport.msgHidden" class="alert alert-success mt-2" role="alert" data-cy="selfReportAlert">
       <div class="row">
         <div class="col">
@@ -142,6 +146,10 @@ limitations under the License.
           res: null,
           msgHidden: true,
         },
+        errNotification: {
+          enable: false,
+          msg: '',
+        },
       };
     },
     mounted() {
@@ -195,6 +203,9 @@ limitations under the License.
           });
       },
       reportSkill(approvalRequestedMsg) {
+        this.errNotification.enable = false;
+        this.errNotification.msg = '';
+
         UserSkillsService.reportSkill(this.skillInternal.skillId, approvalRequestedMsg)
           .then((res) => {
             if (this.skillInternal.selfReporting) {
@@ -211,7 +222,21 @@ limitations under the License.
               this.skillInternal.points += res.pointsEarned;
               this.$emit('points-earned', res.pointsEarned);
             }
-
+          }).catch((e) => {
+            if (e.response.data && e.response.data.errorCode
+              && (e.response.data.errorCode === 'InsufficientProjectPoints' || e.response.data.errorCode === 'InsufficientSubjectPoints')) {
+              this.errNotification.msg = e.response.data.explanation;
+              this.errNotification.enable = true;
+            } else {
+              const errorMessage = (e.response && e.response.data && e.response.data.explanation) ? e.response.data.explanation : undefined;
+              this.$router.push({
+                name: 'error',
+                params: {
+                  errorMessage,
+                },
+              });
+            }
+          }).finally(() => {
             this.selfReportModalVisible = false;
           });
       },
