@@ -406,7 +406,10 @@ class ClientDisplayRankSpecs extends DefaultIntSpec {
     }
 
     def "ability to opt-out all project admins from being ranked"() {
-        List<String> users = getRandomUsers(7)
+        int numUsers = 7
+        // filter default user name, that's the admin user that creates the project and will also be opted-out
+        List<String> users = getRandomUsers(numUsers + 1)
+        users = users.findAll({ it != skillsService.userName}).subList(0, numUsers)
 
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)
@@ -431,7 +434,11 @@ class ClientDisplayRankSpecs extends DefaultIntSpec {
 
         when:
         List subjectRanks = users.collect {skillsService.getRank(it, proj1.projectId, proj1_subj.subjectId) }
-        List ranks = users.collect {skillsService.getRank(it, proj1.projectId) }
+        List ranks = users.collect {
+            def res = skillsService.getRank(it, proj1.projectId)
+            res.userId = it
+            return res;
+        }
 
         then:
         ranks.collect { it.optedOut } == [false, false, true, false, false, true, false]
