@@ -45,7 +45,6 @@ describe('Client Display Breadcrumb Tests', () => {
                 cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);
             }
         })
-        cy.log('lo')
         cy.loginAsProxyUser()
 
         cy.request('POST', '/app/projects/proj1', {
