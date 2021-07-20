@@ -66,7 +66,7 @@ const getErrorMsg = (errorResponse) => {
 };
 
 axios.interceptors.response.use((response) => response, (error) => {
-  const errorCode = error.response ? error.response.status : undefined;
+  const errorCode = (error && error.response) ? error.response.status : undefined;
 
   // check if the caller wants to handle a specific error status code
   if (Object.prototype.hasOwnProperty.call(error.config, 'handleErrorCode')) {
