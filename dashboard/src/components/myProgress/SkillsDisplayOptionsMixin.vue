@@ -47,6 +47,41 @@ limitations under the License.
         }
         return id;
       },
+      skillsClientDisplayPath() {
+        return this.$store.getters.skillsClientDisplayPath;
+      },
+    },
+    watch: {
+      skillsClientDisplayPath(newVal, oldVal) {
+        const currentRoute = this.$route;
+        if (newVal.fromDashboard) {
+          if (newVal.path && newVal.path !== oldVal.path) { // && newVal.path !== currentRoute.query.skillsClientDisplayPath) {
+            this.$refs.skillsDisplayRef.navigate(newVal.path);
+          }
+        } else if (this.pathsAreDifferent(newVal.path, oldVal.path, currentRoute)) {
+          const newRoute = {
+            path: currentRoute.path,
+            query: JSON.parse(JSON.stringify(currentRoute.query)),
+            hash: currentRoute.hash,
+            meta: currentRoute.meta,
+          };
+          newRoute.query.skillsClientDisplayPath = newVal.path;
+          this.$router.replace(newRoute);
+        }
+      },
+    },
+    methods: {
+      skillsDisplayRouteChanged(newPath) {
+        if (newPath !== '/' && newPath !== this.skillsClientDisplayPath) {
+          this.$store.commit('skillsClientDisplayPath', { path: newPath, fromDashboard: false });
+        }
+      },
+      pathsAreDifferent(newPath, oldPath, currentRoute) {
+        const routePath = currentRoute.query.skillsClientDisplayPath;
+        const newAndOldDiff = newPath !== oldPath;
+        const newAndRouteDiff = newPath !== routePath;
+        return newAndOldDiff && newAndRouteDiff;
+      },
     },
   };
 </script>

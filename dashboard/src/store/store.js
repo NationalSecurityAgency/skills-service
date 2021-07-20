@@ -33,6 +33,7 @@ export default new Vuex.Store({
     previousUrl: '',
     projectSearch: '',
     showUa: false,
+    skillsClientDisplayPath: { path: '/', fromDashboard: false },
   },
   mutations: {
     currentProjectId(state, projectId) {
@@ -46,6 +47,14 @@ export default new Vuex.Store({
     },
     showUa(state, showUa) {
       state.showUa = showUa;
+    },
+    skillsClientDisplayPath(state, skillsClientDisplayPath) {
+      state.skillsClientDisplayPath = skillsClientDisplayPath;
+    },
+  },
+  getters: {
+    skillsClientDisplayPath(state) {
+      return state.skillsClientDisplayPath;
     },
   },
   modules: {

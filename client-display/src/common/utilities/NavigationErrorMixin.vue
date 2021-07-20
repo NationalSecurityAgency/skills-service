@@ -19,7 +19,7 @@ limitations under the License.
     methods: {
       handlePush(page) {
         this.$router.push(page).catch((error) => {
-          if (error.message.indexOf('Redirected when going from') !== -1) {
+          if (error.message.indexOf('Redirected when going from') !== -1 || error.message.indexOf('Avoided redundant navigation') !== -1) {
             // squash, vue-router made changes in version 3 that
             // causes a redirect to trigger an error. router-link squashes these and in previous
             // versions of vue-router they were ignored. Because we define a beforeRouter guard

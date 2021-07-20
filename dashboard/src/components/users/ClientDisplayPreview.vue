@@ -32,20 +32,24 @@ limitations under the License.
     <skills-display
       :options="configuration"
       :version="selectedVersion"
-      :user-id="userId"
-      :theme="theme"/>
+      :user-id="userIdParam"
+      :theme="theme"
+      ref="skillsDisplayRef"
+      @route-changed="skillsDisplayRouteChanged"/>
   </div>
 
 </template>
 
 <script>
   import { SkillsDisplay, SkillsReporter } from '@skilltree/skills-client-vue';
+  import SkillsDisplayOptionsMixin from '../myProgress/SkillsDisplayOptionsMixin';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import UsersService from './UsersService';
   import InlineHelp from '../utils/InlineHelp';
 
   export default {
     name: 'ClientDisplayPreview',
+    mixins: [SkillsDisplayOptionsMixin],
     components: {
       InlineHelp,
       SubPageHeader,
@@ -54,7 +58,7 @@ limitations under the License.
     data() {
       return {
         projectId: '',
-        userId: '',
+        userIdParam: '',
         loading: {
           userInfo: true,
           availableVersions: true,
@@ -63,6 +67,7 @@ limitations under the License.
         versionOptions: [],
         theme: {
           disableSkillTreeBrand: true,
+          disableBreadcrumb: true,
           maxWidth: '100%',
           pageTitleFontSize: '1.5rem',
           backButton: {
@@ -78,17 +83,17 @@ limitations under the License.
       if (this.$store.getters.isPkiAuthenticated) {
         // dn is provided when routed form other pages
         if (this.$route.params.dn && !this.$route.params.userId) {
-          this.userId = this.$route.params.dn;
+          this.userIdParam = this.$route.params.dn;
           this.loading.userInfo = false;
         } else {
-          this.userId = {
+          this.userIdParam = {
             id: this.$route.params.userId,
             idType: 'ID',
           };
           this.loading.userInfo = false;
         }
       } else {
-        this.userId = this.$route.params.userId;
+        this.userIdParam = this.$route.params.userId;
         this.loading.userInfo = false;
       }
 
@@ -118,7 +123,7 @@ limitations under the License.
         if (this.$store.getters.isPkiAuthenticated) {
           return 'pki';
         }
-        return `${this.serviceUrl}/admin/projects/${encodeURIComponent(this.projectId)}/token/${encodeURIComponent(this.userId)}`;
+        return `${this.serviceUrl}/admin/projects/${encodeURIComponent(this.projectId)}/token/${encodeURIComponent(this.userIdParam)}`;
       },
     },
     methods: {

@@ -141,6 +141,9 @@ const getLandingPage = () => {
 };
 
 router.beforeEach((to, from, next) => {
+  const { skillsClientDisplayPath } = to.query;
+  store.commit('skillsClientDisplayPath', { path: skillsClientDisplayPath, fromDashboard: true });
+
   const requestAccountPath = '/request-root-account';
   if (!isPki() && !isLoggedIn() && to.path !== requestAccountPath && store.getters.config.needToBootstrap) {
     next({ path: requestAccountPath });

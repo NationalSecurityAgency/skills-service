@@ -18,7 +18,9 @@ limitations under the License.
     <skills-display
       :options="options"
       :version="skillsVersion"
-      :theme="theme"/>
+      :theme="theme"
+      ref="skillsDisplayRef"
+      @route-changed="skillsDisplayRouteChanged"/>
   </div>
 </template>
 
@@ -38,16 +40,12 @@ limitations under the License.
         skillsVersion: 0,
         theme: {
           disableSkillTreeBrand: true,
+          disableBreadcrumb: true,
           backgroundColor: '#f6f8fa',
           landingPageTitle: 'Dashboard Skills',
           maxWidth: '100%',
           pageTitleTextColor: '#212529',
           pageTitleFontSize: '1.5rem',
-          backButton: {
-            padding: '5px 10px',
-            fontSize: '12px',
-            lineHeight: '1.5',
-          },
         },
       };
     },
