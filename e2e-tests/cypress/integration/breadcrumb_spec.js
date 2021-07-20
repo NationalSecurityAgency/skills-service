@@ -230,7 +230,7 @@ describe('Breadcrumb Navigation Tests', () => {
         cy.get('[data-cy=errorPage]').should('not.exist');
     });
 
-    it('Cross Project', () => {
+    it.only('Cross Project', () => {
         cy.intercept('GET', '/admin/projects/proj1/shared').as('loadSharedSkills');
         cy.visit('/administrator/projects/proj1/cross%20Project');
         cy.wait('@loadSharedSkills');
