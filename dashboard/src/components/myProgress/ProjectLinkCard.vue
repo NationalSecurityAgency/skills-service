@@ -16,11 +16,11 @@ limitations under the License.
 <template>
   <div class="proj-link-container">
     <b-card :class="{ 'proj-link-card' : !overSortControl }">
-      <b-row class="m-0 p-0 flex-nowrap">
-        <b-col cols="4" class="proj-progress-chart">
+      <b-row class="m-0 p-0 mb-2 mb-sm-0 flex-sm-nowrap">
+        <b-col cols="12" sm="4" class="proj-progress-chart">
           <apexchart :name="proj.projectName" type="radialBar" height="200" :options="chartOptions" :series="series"></apexchart>
         </b-col>
-        <b-col cols="8" class="text-right pr-md-5">
+        <b-col cols="12" sm="8" class="text-center text-sm-right pr-md-5">
           <div class="h4 text-uppercase text-truncate" data-cy="project-card-project-name" :title="proj.projectName ">{{ proj.projectName }}</div>
           <div class="h5 text-secondary" data-cy="project-card-project-level">Level {{ proj.level }}</div>
           <div data-cy="project-card-project-rank">

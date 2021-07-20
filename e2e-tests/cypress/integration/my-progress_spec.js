@@ -472,5 +472,17 @@ describe('Navigation Tests', () => {
     cy.validateMyProjectsSort(['This is project 2', 'This is project 1', 'This is project 3'])
   })
 
+  it('cards on small and medium screen', function () {
+    cy.viewport('iphone-6');
+    cy.visit('/progress-and-rankings');
+    cy.wait(2000);
+    cy.matchSnapshotImageForElement('[data-cy="project-link-proj1"]', 'project-card-small-screen');
+
+    cy.viewport('ipad-2');
+    cy.visit('/progress-and-rankings');
+    cy.wait(2000);
+    cy.matchSnapshotImageForElement('[data-cy="project-link-proj1"]', 'project-card-mid-screen');
+  });
+
 });
 
