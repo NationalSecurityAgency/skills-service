@@ -20,7 +20,7 @@ limitations under the License.
           <span>Client ID:</span>
         </div>
         <div class="col">
-          <span>{{ project.projectId }}</span>
+          <span>{{ projectId }}</span>
         </div>
       </div>
       <div class="row mt-1">
@@ -47,7 +47,7 @@ limitations under the License.
     name: 'TrustedClientProps',
     components: { MetricsCard },
     mixins: [MsgBoxMixin],
-    props: ['project'],
+    props: ['projectId'],
     data() {
       return {
         loadingSecret: true,
@@ -55,7 +55,7 @@ limitations under the License.
       };
     },
     mounted() {
-      AccessService.getClientSecret(this.project.projectId)
+      AccessService.getClientSecret(this.projectId)
         .then((clientSecret) => {
           this.clientSecret = clientSecret;
         });
@@ -70,9 +70,9 @@ limitations under the License.
           });
       },
       resetClientSecret() {
-        AccessService.resetClientSecret(this.project.projectId)
+        AccessService.resetClientSecret(this.projectId)
           .then((clientSecret) => {
-            this.project.clientSecret = clientSecret;
+            this.clientSecret = clientSecret;
           });
       },
     },

@@ -36,7 +36,7 @@ limitations under the License.
     name: 'IconRow',
     props: {
       source: {
-        type: Object,
+        type: Array,
         default() {
           return [];
         },
