@@ -18,9 +18,9 @@ limitations under the License.
 
     <sub-page-header title="My Projects" class="pt-4">
         <b-button id="manageMyProjectsBtn" :to="{ name: 'DiscoverProjectsPage' }" variant="outline-primary" data-cy="manageMyProjsBtn"><i class="fas fa-cog" aria-hidden="true"/> Manage My Projects</b-button>
-      <b-tooltip v-if="!hasProjects" :show.sync="showTooltip" target="manageMyProjectsBtn" placement="bottom" variant="primary">
-        <i class="fas fa-info-circle"></i> Click here to add
-        <div class="text-uppercase animate__headShake">My Projects</div>
+      <b-tooltip v-if="!hasProjects" target="manageMyProjectsBtn" placement="bottom" variant="primary">
+        <i class="fas fa-info-circle"></i> Click here to add to
+        <div class="text-uppercase"><b>My Projects</b></div>
       </b-tooltip>
     </sub-page-header>
 
@@ -30,7 +30,7 @@ limitations under the License.
         <b-card class="mb-5 mt-2 px-5">
           <div>Please click</div>
           <div class="my-2">
-          <b-button :to="{ name: 'DiscoverProjectsPage' }" variant="outline-primary" :disabled="true"><i class="fas fa-cog" aria-hidden="true"/> Manage My Projects</b-button>
+          <b-button :to="{ name: 'DiscoverProjectsPage' }" variant="outline-primary" data-cy="manageMyProjsBtnInNoContent" class="animate__bounceIn"><i class="fas fa-cog" aria-hidden="true"/> Manage My Projects</b-button>
           </div>
           <div>
           on the <b>top-right</b> to start adding adding projects to <b class="text-uppercase">My Projects</b> view.
@@ -118,7 +118,6 @@ limitations under the License.
     },
     data() {
       return {
-        showTooltip: true,
         loading: true,
         sortOrderLoading: false,
         sortOrderLoadingProjectId: -1,
