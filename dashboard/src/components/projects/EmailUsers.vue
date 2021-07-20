@@ -20,15 +20,15 @@ limitations under the License.
     <b-card body-class="p-0">
       <div class="row p-2 m-2">
         <div class="col-12 col-md-3 col-lg-2 border-md-right">
-          <b-form-group label="Type:" label-for="filter-type" label-class="text-muted">
-            <b-form-radio-group id="type-radio-group" v-model="currentFilterType" name="filter-type-options" stacked>
-              <b-form-radio value="project">Project</b-form-radio>
-              <b-form-radio value="badge">Badge</b-form-radio>
-              <b-form-radio value="subject">Subject</b-form-radio>
-              <b-form-radio value="skill">Skill</b-form-radio>
-            </b-form-radio-group>
-          </b-form-group>
-        </div>
+            <b-form-group label="Type:" label-for="filter-type" label-class="text-muted">
+              <b-form-radio-group id="type-radio-group" v-model="currentFilterType" name="filter-type-options" :disabled="criteria.allProjectUsers" stacked>
+                <b-form-radio value="project">Project</b-form-radio>
+                <b-form-radio value="badge">Badge</b-form-radio>
+                <b-form-radio value="subject">Subject</b-form-radio>
+                <b-form-radio value="skill">Skill</b-form-radio>
+              </b-form-radio-group>
+            </b-form-group>
+          </div>
         <div class="col-9 col-lg-10">
           <b-form-group label="Name (Subject, Skill and Badge Only):" label-for="name-filter" label-class="text-muted">
             <b-overlay :show="loading.skills || loading.badges || loading.subjects" rounded="sm" opacity="0.5"
@@ -45,7 +45,8 @@ limitations under the License.
                                          :serializer="serializer"
                                           :data="ids"/>
 
-               <b-form-group label="Achieved" label-for="achieved-button" label-class="text-muted" v-show="currentFilterType && currentFilterType==='skill'" class="mt-4">
+               <b-form-group label="Achieved" label-for="achieved-button" label-class="text-muted" v-show="currentFilterType && currentFilterType==='skill'"
+                             class="mt-4" :disabled="criteria.allProjectUsers">
                   <b-form-checkbox v-model="skills.achieved"
                                    name="achieved-button"
                                    aria-labelledby="productionModeEnabledLabel"
@@ -59,15 +60,14 @@ limitations under the License.
             </b-overlay>
 
           </b-form-group>
-
           <div class="row p-3">
             <b-form-group id="levels-input-group" label="Minimum Level (Project & Subject Only):" label-for="input-3" label-class="text-muted">
               <b-form-select id="input-3" v-model="levels.selected" :options="levels.available"
                              required data-cy="emailUsers-levelsInput"
                              :disabled="levelsDisabled" />
             </b-form-group>
-          </div>
         </div>
+      </div>
       </div>
       <div class="row p-3 m-3">
         <b-button variant="outline-primary" class="mr-1" @click="addCriteria" data-cy="emailUsers-addBtn" :disabled="isAddDisabled || maxTagsReached"><i class="fas fa-plus-circle"/> Add</b-button>
@@ -77,16 +77,17 @@ limitations under the License.
         <span v-if="maxTagsReached" class="text-warning pt-2 pl-1">Only {{maxCriteria}} filters are allowed</span>
       </div>
 
-      <div class="container-fluid p-3 m-3">
-        <h1 class="h5 text-uppercase">Contact {{this.currentCount}} Users</h1>
-        <!--long text breaks this -->
+      <div class="container-fluid p-3 m-3 ml-1">
         <b-badge v-for="(tag) of tags" :key="tag.display" variant="info" class="pl-2 m-2 text-break" style="max-width: 85%;">
           {{tag.display}} <b-button @click="deleteCriteria(tag)"
                                     variant="outline-info" size="sm" class="text-warning"
                                     :aria-label="`Remove contact user criteria ${tag.display}`"
                                     data-cy="contactUserCriteria-removeBtn"><i class="fa fa-trash" /><span class="sr-only">delete filter {{tag.display}}</span></b-button>
         </b-badge>
+
+        <h1 class="h5 text-uppercase pt-5"><b-badge variant="info">{{this.currentCount}}</b-badge> Users</h1>
       </div>
+
       <div class="row p-3 m-3">
         <b-form-group class="w-100" id="subject-line-input-group" label="Subject Line" label-for="subject-line-input" label-class="text-muted">
           <b-input class="w-100" v-model="subject" id="subject-line-input" />
@@ -117,6 +118,7 @@ limitations under the License.
   import BadgeService from '../badges/BadgesService';
   import SubjectService from '../subjects/SubjectsService';
   import ProjectService from './ProjectService';
+  import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
 
   const nameSort = (one, two) => {
     const nameOne = one.name.toUpperCase();
@@ -139,6 +141,7 @@ limitations under the License.
       MarkdownEditor,
       VueTypeaheadBootstrap,
     },
+    mixins: [MsgBoxMixin],
     data() {
       return {
         maxCriteria: 15,
@@ -251,6 +254,9 @@ limitations under the License.
         return ids;
       },
       isAddDisabled() {
+        if (this.criteria.allProjectUsers) {
+          return true;
+        }
         let retVal = true;
         if (this.currentFilterType === 'project') {
           // can add just the project id to contact all users in the project
@@ -268,7 +274,7 @@ limitations under the License.
         return this.tags.length === this.maxCriteria;
       },
       isEmailDisabled() {
-        return !this.body || !this.subject || this.emailing || this.emailSent;
+        return !this.body || !this.subject || this.emailing || this.emailSent || this.tags.length < 1;
       },
     },
     watch: {
@@ -277,7 +283,7 @@ limitations under the License.
           this.loading.levels = true;
           this.levels.selected = '';
           LevelService.getLevelsForProject(this.$route.params.projectId).then((levels) => {
-            this.levels.available = levels?.map((level) => ({ value: level.level, text: level.name }));
+            this.levels.available = levels?.map((level) => ({ value: level.level, text: level.level }));
           }).finally(() => {
             this.loading.levels = false;
           });
@@ -292,7 +298,7 @@ limitations under the License.
         this.levels.selected = '';
         if (subject) {
           LevelService.getLevelsForSubject(this.$route.params.projectId, subject.subjectId).then((levels) => {
-            this.levels.available = levels?.map((level) => ({ value: level.level, text: level.name }));
+            this.levels.available = levels?.map((level) => ({ value: level.level, text: level.level }));
           }).finally(() => {
             this.loading.levels = false;
           });
@@ -322,8 +328,6 @@ limitations under the License.
         switch (this.currentFilterType) {
         case 'project':
           if (this.levels.selected === '') {
-            // need to confirm that this is what they want if there are other filters
-            // already present?
             tag = {
               display: 'All Users',
               type: this.currentFilterType,
@@ -384,24 +388,68 @@ limitations under the License.
           console.error(`unrecognized filter type ${this.currentFilterType}`);
         }
 
-        if (tag) {
-          const contained = this.tagAlreadyExists(tag);
-          if (!contained) {
-            this.tags.push(tag);
-            this.selectedItemQuery = '';
-            this.badges.selected = null;
-            this.levels.selected = null;
-            this.subjects.selected = null;
-            this.skills.selected = null;
-            this.skills.achieved = true;
-          } else {
-            this.alreadyApplied = true;
-            setTimeout(() => { this.alreadyApplied = false; }, 2000);
-          }
-          this.selectedItemQuery = '';
+        this.handleTagAdd(tag);
+      },
+      handleTagAdd(tag) {
+        if (!tag) {
+          return;
         }
 
-        this.updateCount();
+        this.selectedItemQuery = '';
+        const contained = this.tagAlreadyExists(tag);
+        if (contained) {
+          this.alreadyApplied = true;
+          setTimeout(() => { this.alreadyApplied = false; }, 2000);
+          return;
+        }
+        const addTagAndUpdate = () => {
+          this.updateCount();
+          this.tags.push(tag);
+          this.resetSelections();
+        };
+        // vomit
+        if (this.criteria.allProjectUsers) {
+          if (this.tags.length > 0) {
+            this.msgConfirm(
+              'Adding the All Users filter will remove all other filters',
+              'Remove Other Filters?',
+              'YES, Remove Them!',
+            ).then((res) => {
+              if (res) {
+                this.resetCriteria(true);
+                this.resetTags();
+                addTagAndUpdate();
+              } else {
+                this.criteria.allProjectUsers = false;
+              }
+            });
+          } else {
+            this.resetCriteria(true);
+            this.resetTags();
+            addTagAndUpdate();
+          }
+        } else {
+          addTagAndUpdate();
+        }
+      },
+      resetSelections() {
+        this.selectedItemQuery = '';
+        this.badges.selected = null;
+        this.levels.selected = null;
+        this.subjects.selected = null;
+        this.skills.selected = null;
+        this.skills.achieved = true;
+      },
+      resetCriteria(allProjects) {
+        this.criteria.projectLevel = '';
+        this.criteria.subjectLevels = [];
+        this.criteria.badgeIds = [];
+        this.criteria.achievedSkillIds = [];
+        this.criteria.notAchievedSkillIds = [];
+        this.criteria.allProjectUsers = allProjects;
+      },
+      resetTags() {
+        this.tags.splice(0, this.tags.length);
       },
       serializer(suggestItem) {
         let result = null;
@@ -484,6 +532,13 @@ limitations under the License.
           emailSubject: this.subject,
         }).then(() => {
           this.emailSent = true;
+          this.$nextTick(() => {
+            this.resetTags();
+            this.resetCriteria();
+            this.body = '';
+            this.subject = '';
+            this.currentCount = 0;
+          });
           setTimeout(() => { this.emailSent = false; }, 8000);
         }).finally(() => {
           this.emailing = false;
