@@ -109,4 +109,7 @@ export default {
   contactUsers(projectId, contactUsersRequest) {
     return axios.post(`/admin/projects/${projectId}/contactUsers`, contactUsersRequest).then((response) => response.data);
   },
+  isEmailServiceSupported() {
+    return axios.get('/public/isFeatureSupported?feature=emailservice').then((response) => response.data);
+  },
 };
