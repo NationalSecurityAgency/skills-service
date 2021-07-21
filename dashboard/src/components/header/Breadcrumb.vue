@@ -43,6 +43,7 @@ limitations under the License.
 </template>
 
 <script>
+  const projectAndRankingPathItem = 'progress-and-rankings';
   export default {
     name: 'Breadcrumb',
     data() {
@@ -105,6 +106,9 @@ limitations under the License.
                 key = 'Dependency';
                 return;
               }
+              if (value === projectAndRankingPathItem && !this.isProgressAndRankingEnabled()) {
+                return;
+              }
               if (index === this.dashboardPathParts.length - 1 && lastItemInPathCustomName) {
                 key = null;
                 value = lastItemInPathCustomName;
@@ -126,7 +130,7 @@ limitations under the License.
                 if (!this.shouldExcludeValue(value)) {
                   newItems.push(this.buildResItem(key, value, res, index));
                 }
-                if (value !== 'Projects' && value !== 'progress-and-rankings' && value !== lastItemInPathCustomName) {
+                if (value !== 'Projects' && value !== projectAndRankingPathItem && value !== lastItemInPathCustomName) {
                   key = value;
                 }
               }
@@ -172,6 +176,9 @@ limitations under the License.
       },
       shouldExcludeKey(key) {
         return this.keysToExcludeFromPath.some((searchForMe) => key === searchForMe);
+      },
+      isProgressAndRankingEnabled() {
+        return this.$store.getters.config.rankingAndProgressViewsEnabled === true || this.$store.getters.config.rankingAndProgressViewsEnabled === 'true';
       },
     },
   };

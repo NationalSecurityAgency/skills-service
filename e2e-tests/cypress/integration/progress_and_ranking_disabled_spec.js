@@ -75,5 +75,23 @@ describe('Project and Ranking Views are disabled Tests', () => {
         cy.get('[ data-cy="productionModeSetting"]').should('not.exist');
     });
 
+    it('do not show Progress and Ranking in the breadcrumb when those views are disabled', function () {
+        cy.createProject(1);
+        cy.visit('/progress-and-rankings/projects/proj1/');
+        cy.get('[data-cy=breadcrumb-item]').its('length').should('eq', 2);
+        cy.get('[data-cy=breadcrumb-item]').eq(0).should('contain.text', 'Progress And Rankings');
+        cy.get('[data-cy=breadcrumb-item]').eq(1).should('contain.text', 'Project: proj1');
+
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply({
+                body: {
+                    rankingAndProgressViewsEnabled: 'false',
+                },
+            })
+        }).as('getConfig')
+        cy.visit('/progress-and-rankings/projects/proj1/');
+        cy.get('[data-cy=breadcrumb-item]').its('length').should('eq', 1);
+        cy.get('[data-cy=breadcrumb-item]').eq(0).should('contain.text', 'Project: proj1');
+    });
 });
 
