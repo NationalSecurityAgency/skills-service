@@ -55,7 +55,7 @@ limitations under the License.
           <template slot="title">
             <i class="fas fa-wrench"></i> Custom
           </template>
-          <ValidationProvider vid="customIcon" ref="validationProvider" name="Custom Icon" v-slot="{ validate, errors }" rules="image|imageDimensions|duplicateFilename">
+          <ValidationProvider vid="customIcon" ref="validationProvider" name="Custom Icon" v-slot="{ errors }" rules="image|imageDimensions|duplicateFilename">
             <file-upload
                          :name="'customIcon'"
                          @file-selected="customIconUploadRequest"

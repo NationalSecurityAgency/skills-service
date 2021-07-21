@@ -271,7 +271,7 @@ const router = new Router({
         meta: { requiresAuth: true, reportSkillId: 'VisitProjectDependencies' },
       }, {
         name: 'CrossProjectsSkills',
-        path: 'cross Project',
+        path: 'cross%20Project',
         component: CrossProjectsSkills,
         meta: { requiresAuth: true, reportSkillId: 'VisitProjectCrossProjectSkills' },
       }, {

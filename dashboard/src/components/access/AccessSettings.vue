@@ -20,7 +20,7 @@ limitations under the License.
       <role-manager :project="project"/>
     </metrics-card>
 
-    <trusted-client-props v-if="showTrustedClientProps" :project="project" class="my-4"/>
+    <trusted-client-props v-if="showTrustedClientProps" :project-id="project.projectId" class="my-4"/>
   </loading-container>
 </template>
 
