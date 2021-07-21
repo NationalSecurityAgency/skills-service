@@ -100,7 +100,14 @@ describe('Users skills-display Breadcrumb Tests', () => {
         cy.assignSkillToGlobalBadge(1, 3)
         cy.assignSkillToGlobalBadge(1, 4)
 
-        cy.loginAsDefaultUser()
+        cy.logout()
+        if (!Cypress.env('oauthMode')) {
+            cy.log('NOT in oauthMode, using form login')
+            cy.loginAsDefaultUser()
+        } else {
+            cy.log('oauthMode, using loginBySingleSignOn')
+            cy.loginBySingleSignOn()
+        }
     });
 
     it('test breadcrumbs starting on Overview page', () => {
@@ -136,7 +143,7 @@ describe('Users skills-display Breadcrumb Tests', () => {
         cy.get('[data-cy=breadcrumb-item]').eq(0).should('contain.text', 'Projects');
         cy.get('[data-cy=breadcrumb-item]').eq(1).should('contain.text', 'Project: proj1');
         cy.get('[data-cy=breadcrumb-item]').eq(2).should('contain.text', 'Users');
-        cy.get('[data-cy=breadcrumb-item]').eq(3).should('contain.text', 'User: user0');
+        cy.get('[data-cy=breadcrumb-item]').eq(3).should('contain.text', `User: ${proxyUser}`);
         cy.get('[data-cy=breadcrumb-item]').eq(4).should('contain.text', 'Rank');
 
         // back to home page
@@ -163,7 +170,7 @@ describe('Users skills-display Breadcrumb Tests', () => {
         cy.get('[data-cy=breadcrumb-item]').eq(0).should('contain.text', 'Projects');
         cy.get('[data-cy=breadcrumb-item]').eq(1).should('contain.text', 'Project: proj1');
         cy.get('[data-cy=breadcrumb-item]').eq(2).should('contain.text', 'Users');
-        cy.get('[data-cy=breadcrumb-item]').eq(3).should('contain.text', 'User: user0');
+        cy.get('[data-cy=breadcrumb-item]').eq(3).should('contain.text', `User: ${proxyUser}`);
         cy.get('[data-cy=breadcrumb-item]').eq(4).should('contain.text', 'Subject: subj1');
 
         // back to home page
@@ -192,7 +199,7 @@ describe('Users skills-display Breadcrumb Tests', () => {
         cy.get('[data-cy=breadcrumb-item]').eq(0).should('contain.text', 'Projects');
         cy.get('[data-cy=breadcrumb-item]').eq(1).should('contain.text', 'Project: proj1');
         cy.get('[data-cy=breadcrumb-item]').eq(2).should('contain.text', 'Users');
-        cy.get('[data-cy=breadcrumb-item]').eq(3).should('contain.text', 'User: user0');
+        cy.get('[data-cy=breadcrumb-item]').eq(3).should('contain.text', `User: ${proxyUser}`);
         cy.get('[data-cy=breadcrumb-item]').eq(4).should('contain.text', 'Subject: subj1');
         cy.get('[data-cy=breadcrumb-item]').eq(5).should('contain.text', 'Skill: skill1');
 
@@ -226,7 +233,7 @@ describe('Users skills-display Breadcrumb Tests', () => {
         cy.get('[data-cy=breadcrumb-item]').eq(0).should('contain.text', 'Projects');
         cy.get('[data-cy=breadcrumb-item]').eq(1).should('contain.text', 'Project: proj1');
         cy.get('[data-cy=breadcrumb-item]').eq(2).should('contain.text', 'Users');
-        cy.get('[data-cy=breadcrumb-item]').eq(3).should('contain.text', 'User: user0');
+        cy.get('[data-cy=breadcrumb-item]').eq(3).should('contain.text', `User: ${proxyUser}`);
         cy.get('[data-cy=breadcrumb-item]').eq(4).should('contain.text', 'Subject: subj1');
         cy.get('[data-cy=breadcrumb-item]').eq(5).should('contain.text', 'Skill: skill4');
         cy.get('[data-cy=breadcrumb-item]').eq(6).should('contain.text', 'Dependency: skill2');
@@ -266,7 +273,7 @@ describe('Users skills-display Breadcrumb Tests', () => {
         cy.get('[data-cy=breadcrumb-item]').eq(0).should('contain.text', 'Projects');
         cy.get('[data-cy=breadcrumb-item]').eq(1).should('contain.text', 'Project: proj1');
         cy.get('[data-cy=breadcrumb-item]').eq(2).should('contain.text', 'Users');
-        cy.get('[data-cy=breadcrumb-item]').eq(3).should('contain.text', 'User: user0');
+        cy.get('[data-cy=breadcrumb-item]').eq(3).should('contain.text', `User: ${proxyUser}`);
         cy.get('[data-cy=breadcrumb-item]').eq(4).should('contain.text', 'Subject: subj1');
         cy.get('[data-cy=breadcrumb-item]').eq(5).should('contain.text', 'Skill: skill3');
         cy.get('[data-cy=breadcrumb-item]').eq(6).should('contain.text', 'Dependency: skill1');
@@ -303,7 +310,7 @@ describe('Users skills-display Breadcrumb Tests', () => {
         cy.get('[data-cy=breadcrumb-item]').eq(0).should('contain.text', 'Projects');
         cy.get('[data-cy=breadcrumb-item]').eq(1).should('contain.text', 'Project: proj1');
         cy.get('[data-cy=breadcrumb-item]').eq(2).should('contain.text', 'Users');
-        cy.get('[data-cy=breadcrumb-item]').eq(3).should('contain.text', 'User: user0');
+        cy.get('[data-cy=breadcrumb-item]').eq(3).should('contain.text', `User: ${proxyUser}`);
         cy.get('[data-cy=breadcrumb-item]').eq(4).should('contain.text', 'Badges');
 
         // Go to regular badge page
@@ -323,7 +330,7 @@ describe('Users skills-display Breadcrumb Tests', () => {
         cy.get('[data-cy=breadcrumb-item]').eq(0).should('contain.text', 'Projects');
         cy.get('[data-cy=breadcrumb-item]').eq(1).should('contain.text', 'Project: proj1');
         cy.get('[data-cy=breadcrumb-item]').eq(2).should('contain.text', 'Users');
-        cy.get('[data-cy=breadcrumb-item]').eq(3).should('contain.text', 'User: user0');
+        cy.get('[data-cy=breadcrumb-item]').eq(3).should('contain.text', `User: ${proxyUser}`);
         cy.get('[data-cy=breadcrumb-item]').eq(4).should('contain.text', 'Badges');
         cy.get('[data-cy=breadcrumb-item]').eq(5).should('contain.text', 'Badge: badge1');
 
@@ -357,7 +364,7 @@ describe('Users skills-display Breadcrumb Tests', () => {
         cy.get('[data-cy=breadcrumb-item]').eq(0).should('contain.text', 'Projects');
         cy.get('[data-cy=breadcrumb-item]').eq(1).should('contain.text', 'Project: proj1');
         cy.get('[data-cy=breadcrumb-item]').eq(2).should('contain.text', 'Users');
-        cy.get('[data-cy=breadcrumb-item]').eq(3).should('contain.text', 'User: user0');
+        cy.get('[data-cy=breadcrumb-item]').eq(3).should('contain.text', `User: ${proxyUser}`);
         cy.get('[data-cy=breadcrumb-item]').eq(4).should('contain.text', 'Badges');
         cy.get('[data-cy=breadcrumb-item]').eq(5).should('contain.text', 'Badge: globalBadge1');
 
