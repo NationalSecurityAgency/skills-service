@@ -99,6 +99,7 @@ describe('Contact Project Users Specs', () => {
         cy.get('[data-cy=filterBadge]').eq(0).contains('All Users');
         cy.get('[data-cy=usersMatchingFilters] .badge-info').should('have.text', '3');
         cy.get('[data-cy=emailUsers-addBtn]').should('be.disabled');
+        cy.get('[data-cy=emailUsers-levelsInput]').should('be.disabled');
         //contactUserCriteria-removeBtn
         cy.get('[data-cy=projectFilter]').should('be.disabled');
         cy.get('[data-cy=badgeFilter]').should('be.disabled');
@@ -116,6 +117,13 @@ describe('Contact Project Users Specs', () => {
         cy.get('[data-cy=skillFilter]').should('be.enabled');
         cy.get('[data-cy=emailUsers-submitBtn]').should('be.disabled');
         cy.get('[data-cy=usersMatchingFilters] .badge-info').should('have.text', '0');
+        cy.get('[data-cy=emailUsers-levelsInput]').select('1');
+        cy.get('[data-cy=emailUsers-addBtn]').click();
+        cy.wait('@updateCount');
+        cy.get('[data-cy=filterBadge]').eq(0).contains('Level 1 or greater');
+        cy.get('[data-cy=usersMatchingFilters] .badge-info').should('have.text', '3');
+        cy.get('[data-cy=contactUserCriteria-removeBtn]').click();
+        cy.contains('Level 1 or greater').should('not.exist');
 
         cy.get('[data-cy=badgeFilter]').click({force:true});
         cy.wait(200);

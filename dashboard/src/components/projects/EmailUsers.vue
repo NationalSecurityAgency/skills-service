@@ -61,7 +61,7 @@ limitations under the License.
               <b-form-group id="levels-input-group" label="Minimum Level (Project & Subject Only):" label-for="input-3" label-class="text-muted">
                 <b-form-select id="input-3" v-model="levels.selected" :options="levels.available"
                                required data-cy="emailUsers-levelsInput"
-                               :disabled="levelsDisabled" />
+                               :disabled="levelsDisabled || criteria.allProjectUsers" />
               </b-form-group>
           </div>
         </div>
@@ -286,11 +286,13 @@ limitations under the License.
         return this.loading.skills || this.loading.badges;
       },
       selectText() {
-        let text = 'Not applicable';
+        let text = '';
         if (this.currentFilterType === 'skill') {
           text = 'Select Skill';
         } else if (this.currentFilterType === 'badge') {
           text = 'Select Badge';
+        } else if (this.currentFilterType === 'subject') {
+          text = 'Select Subject';
         }
         return text;
       },
