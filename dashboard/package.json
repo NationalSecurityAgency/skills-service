@@ -50,7 +50,6 @@
     "vuejs-datepicker": "1.6.2",
     "vuex": "3.6.2",
     "webstomp-client": "1.2.6",
-    "vue-typeahead-bootstrap": "2.11.1"
   },
   "devDependencies": {
     "@babel/core": "7.14.6",

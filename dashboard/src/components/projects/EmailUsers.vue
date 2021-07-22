@@ -26,10 +26,10 @@ limitations under the License.
           <div class="col-12 col-md-3 col-lg-2 border-md-right">
               <b-form-group label="Type:" label-for="filter-type" label-class="text-muted">
                 <b-form-radio-group id="type-radio-group" v-model="currentFilterType" name="filter-type-options" :disabled="criteria.allProjectUsers" stacked>
-                  <b-form-radio value="project">Project</b-form-radio>
-                  <b-form-radio value="badge">Badge</b-form-radio>
-                  <b-form-radio value="subject">Subject</b-form-radio>
-                  <b-form-radio value="skill">Skill</b-form-radio>
+                  <b-form-radio value="project" data-cy="projectFilter">Project</b-form-radio>
+                  <b-form-radio value="badge" data-cy="badgeFilter">Badge</b-form-radio>
+                  <b-form-radio value="subject" data-cy="subjectFilter">Subject</b-form-radio>
+                  <b-form-radio value="skill" data-cy="skillFilter">Skill</b-form-radio>
                 </b-form-radio-group>
               </b-form-group>
             </div>
@@ -38,23 +38,16 @@ limitations under the License.
               <b-overlay :show="loading.skills || loading.badges || loading.subjects" rounded="sm" opacity="0.5"
                          spinner-variant="info" spinner-type="grow" spinner-small>
                 <template v-if="currentFilterType && currentFilterType !== 'project'">
-                  <vue-typeahead-bootstrap id="name-filter" v-model="selectedItemQuery"
-                                           @hit="selectedItem = $event"
-                                           data-cy="emailUsers-nameInput"
-                                           :showOnFocus="true"
-                                           :max-matches="15"
-                                           :disable-sort="false"
-                                           :placeholder="`Search ${formattedType}`"
-                                           :required="currentFilterType !== 'project'"
-                                           :serializer="serializer"
-                                            :data="ids"/>
+
+                  <multiselect ref="select" v-model="selectedItem" :options="ids" label="name" :searchable="true"
+                               :loading="isLoading" trackBy="name"
+                              :placeholder="selectText" :multiple="false"/>
 
                  <b-form-group label="Achieved" label-for="achieved-button" label-class="text-muted" v-show="currentFilterType && currentFilterType==='skill'"
                                class="mt-4" :disabled="criteria.allProjectUsers">
                     <b-form-checkbox v-model="skills.achieved"
                                      name="achieved-button"
-                                     aria-labelledby="productionModeEnabledLabel"
-                                     data-cy="productionModeEnabledSwitch"
+                                     data-cy="skillAchievedSwitch"
                                      switch>
                       {{ skills.achieved ? 'Achieved' : 'Not Achieved' }}
                     </b-form-checkbox>
@@ -74,37 +67,40 @@ limitations under the License.
         </div>
         </div>
         <div class="row p-3 m-3">
-          <b-button variant="outline-primary" class="mr-1" @click="addCriteria" data-cy="emailUsers-addBtn" :disabled="isAddDisabled || maxTagsReached"><i class="fas fa-plus-circle"/> Add</b-button>
+          <b-button variant="outline-primary" class="mr-1" @click="addCriteria" data-cy="emailUsers-addBtn"
+                    :disabled="isAddDisabled || maxTagsReached"><i class="fas fa-plus-circle"/> Add</b-button>
           <transition name="fade">
-            <span v-if="alreadyApplied" class="pt-2 pl-1">Filter already exists</span>
+            <span v-if="alreadyApplied" data-cy="filterExists" class="pt-2 pl-1">Filter already exists</span>
           </transition>
-          <span v-if="maxTagsReached" class="text-warning pt-2 pl-1">Only {{maxCriteria}} filters are allowed</span>
+          <span v-if="maxTagsReached" data-cy="maxFiltersReached" class="text-warning pt-2 pl-1">Only {{maxCriteria}} filters are allowed</span>
         </div>
 
         <div class="container-fluid p-3 m-3 ml-1">
           <div class="pb-5">
-            <b-badge v-for="(tag) of tags" :key="tag.display" variant="info" class="pl-2 m-2 text-break" style="max-width: 85%;">
+            <b-badge v-for="(tag) of tags" :key="tag.display" variant="info" class="pl-2 m-2 text-break"
+                     style="max-width: 85%;" data-cy="filterBadge">
               {{tag.display}} <b-button @click="deleteCriteria(tag)"
                                         variant="outline-info" size="sm" class="text-warning"
                                         :aria-label="`Remove contact user criteria ${tag.display}`"
                                         data-cy="contactUserCriteria-removeBtn"><i class="fa fa-trash" /><span class="sr-only">delete filter {{tag.display}}</span></b-button>
             </b-badge>
           </div>
-          <h1 class="h5 text-uppercase"><b-badge variant="info">{{this.currentCount}}</b-badge> Users</h1>
+          <h1 class="h5 text-uppercase" data-cy="usersMatchingFilters"><b-badge variant="info">{{this.currentCount}}</b-badge> Users</h1>
         </div>
 
         <div class="row p-3 m-3">
           <b-form-group class="w-100" id="subject-line-input-group" label="Subject Line" label-for="subject-line-input" label-class="text-muted">
-            <b-input class="w-100" v-model="subject" id="subject-line-input" />
+            <b-input class="w-100" v-model="subject" id="subject-line-input" data-cy="emailUsers_subject"/>
           </b-form-group>
         </div>
         <div class="row p-3 m-3">
           <b-form-group class="w-100" id="body-input-group" label="Email Body" label-for="body-input" label-class="text-muted">
-            <markdown-editor class="w-100" v-model="body" />
+            <markdown-editor class="w-100" v-model="body" data-cy="emailUsers_body"/>
           </b-form-group>
         </div>
         <div class="row p-3 m-3">
-          <b-button variant="outline-primary" class="mr-1" @click="emailUsers" data-cy="emailUsers-submitBtn" :disabled="isEmailDisabled"><i :class="[emailing ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fas fa-mail-bulk']" /> Email</b-button>
+          <b-button variant="outline-primary" class="mr-1" @click="emailUsers" data-cy="emailUsers-submitBtn"
+                    :disabled="isEmailDisabled"><i :class="[emailing ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fas fa-mail-bulk']" /> Email</b-button>
           <transition name="fade">
             <span v-if="emailSent" class="pt-2 pl-1"><i class="far fa-check-square text-success"/> Email sent!</span>
           </transition>
@@ -116,7 +112,7 @@ limitations under the License.
 </template>
 
 <script>
-  import VueTypeaheadBootstrap from 'vue-typeahead-bootstrap';
+  import Multiselect from 'vue-multiselect';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import SkillsService from '../skills/SkillsService';
@@ -145,7 +141,7 @@ limitations under the License.
       SubPageHeader,
       // InlineHelp,
       MarkdownEditor,
-      VueTypeaheadBootstrap,
+      Multiselect,
     },
     mixins: [MsgBoxMixin],
     data() {
@@ -157,7 +153,6 @@ limitations under the License.
         tags: [],
         subject: '',
         body: '',
-        selectedItemQuery: '',
         selectedItem: '',
         emailSent: false,
         emailing: false,
@@ -268,24 +263,36 @@ limitations under the License.
         if (this.criteria.allProjectUsers) {
           return true;
         }
-        let retVal = true;
+        let disabled = true;
         if (this.currentFilterType === 'project') {
           // can add just the project id to contact all users in the project
-          retVal = false;
+          disabled = false;
         } else if (this.currentFilterType === 'subject') {
-          retVal = !this.subjects.selected || !this.levels.selected;
+          disabled = !this.subjects.selected || !this.levels.selected;
         } else if (this.currentFilterType === 'skill') {
-          retVal = !this.skills.selected;
+          disabled = !this.skills.selected;
         } else if (this.currentFilterType === 'badge') {
-          retVal = !this.badges.selected;
+          disabled = !this.badges.selected;
         }
-        return retVal;
+        return disabled;
       },
       maxTagsReached() {
         return this.tags.length === this.maxCriteria;
       },
       isEmailDisabled() {
         return !this.body || !this.subject || this.emailing || this.emailSent || this.tags.length < 1;
+      },
+      isLoading() {
+        return this.loading.skills || this.loading.badges;
+      },
+      selectText() {
+        let text = 'Not applicable';
+        if (this.currentFilterType === 'skill') {
+          text = 'Select Skill';
+        } else if (this.currentFilterType === 'badge') {
+          text = 'Select Badge';
+        }
+        return text;
       },
     },
     watch: {
@@ -316,6 +323,10 @@ limitations under the License.
         }
       },
       selectedItem(newVal) {
+        if (!newVal) {
+          return;
+        }
+
         switch (this.currentFilterType) {
         case 'subject':
           this.subjects.selected = newVal;
@@ -328,7 +339,7 @@ limitations under the License.
           break;
         default:
           // eslint-disable-next-line no-console
-          console.error(`selectedItem does not support filter type ${this.currentFilterType}`);
+          console.error(`selectedItem does not support filter type ${this.currentFilterType}, value [${newVal}]`);
         }
       },
     },
@@ -405,8 +416,6 @@ limitations under the License.
         if (!tag) {
           return;
         }
-
-        this.selectedItemQuery = '';
         const contained = this.tagAlreadyExists(tag);
         if (contained) {
           this.alreadyApplied = true;
@@ -418,7 +427,6 @@ limitations under the License.
           this.tags.push(tag);
           this.resetSelections();
         };
-        // vomit
         if (this.criteria.allProjectUsers) {
           if (this.tags.length > 0) {
             this.msgConfirm(
@@ -444,12 +452,12 @@ limitations under the License.
         }
       },
       resetSelections() {
-        this.selectedItemQuery = '';
         this.badges.selected = null;
         this.levels.selected = null;
         this.subjects.selected = null;
         this.skills.selected = null;
         this.skills.achieved = true;
+        this.selectedItem = null;
       },
       resetCriteria(allProjects) {
         this.criteria.projectLevel = '';
@@ -461,20 +469,6 @@ limitations under the License.
       },
       resetTags() {
         this.tags.splice(0, this.tags.length);
-      },
-      serializer(suggestItem) {
-        let result = null;
-        switch (this.currentFilterType) {
-        case 'subject':
-        case 'badge':
-        case 'skill':
-          result = suggestItem.name;
-          break;
-        default:
-          // eslint-disable-next-line no-console
-          console.error(`serializer function does not support filter type ${this.currentFilterType}`);
-        }
-        return result;
       },
       tagAlreadyExists(tag) {
         const exists = this.arrayContainsObject(this.tags, tag);

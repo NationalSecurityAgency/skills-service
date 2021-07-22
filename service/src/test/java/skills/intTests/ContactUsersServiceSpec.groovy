@@ -16,17 +16,24 @@
 package skills.intTests
 
 import org.springframework.beans.factory.annotation.Autowired
+import skills.controller.request.model.ContactUsersRequest
 import skills.controller.request.model.QueryUsersCriteriaRequest
 import skills.controller.request.model.SubjectLevelQueryRequest
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.EmailUtils
 import skills.intTests.utils.SkillsFactory
 import skills.services.ContactUsersService
+import skills.utils.WaitFor
 import spock.lang.IgnoreRest
 
 class ContactUsersServiceSpec extends DefaultIntSpec {
 
     @Autowired
     ContactUsersService contactUsersService
+
+    def setup() {
+        startEmailServer()
+    }
 
     def "test count query"(){
         def proj = SkillsFactory.createProject(1)
@@ -289,5 +296,97 @@ class ContactUsersServiceSpec extends DefaultIntSpec {
         notAchieved.size() == 3
         notAchieved.sort() == [users[4], users[5], users[6]].sort()
     }
+
+    @IgnoreRest
+    def "test email"() {
+        def proj = SkillsFactory.createProject(1)
+        def subj = SkillsFactory.createSubject(1, 1)
+        def subj2 = SkillsFactory.createSubject(1, 2)
+        def subj3 = SkillsFactory.createSubject(1, 3)
+        def subj4 = SkillsFactory.createSubject(1, 4)
+
+        def badge = SkillsFactory.createBadge()
+        badge.enabled = true
+
+        Map skill1 = [projectId: proj.projectId, subjectId: subj.subjectId, skillId: "skill1", name  : "Test Skill 1", type: "Skill",
+                      pointIncrement: 100, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+
+        Map skill2 = [projectId: proj.projectId, subjectId: subj2.subjectId, skillId: "skill2", name  : "Test Skill 2", type: "Skill",
+                      pointIncrement: 100, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+
+        Map skill3 = [projectId: proj.projectId, subjectId: subj3.subjectId, skillId: "skill3", name  : "Test Skill 3", type: "Skill",
+                      pointIncrement: 100, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+
+        Map skill4 = [projectId: proj.projectId, subjectId: subj3.subjectId, skillId: "skill4", name  : "Test Skill 4", type: "Skill",
+                      pointIncrement: 100, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+
+
+        Map skill5 = [projectId: proj.projectId, subjectId: subj4.subjectId, skillId: "skill5", name  : "Test Skill 5", type: "Skill",
+                      pointIncrement: 50, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+
+        Map skill6 = [projectId: proj.projectId, subjectId: subj4.subjectId, skillId: "skill6", name  : "Test Skill 6", type: "Skill",
+                      pointIncrement: 50, numPerformToCompletion: 2, pointIncrementInterval: 0, numMaxOccurrencesIncrementInterval: 1]
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSubject(subj2)
+        skillsService.createSubject(subj3)
+        skillsService.createSubject(subj4)
+        skillsService.createSkill(skill1)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(skill3)
+        skillsService.createSkill(skill4)
+        skillsService.createSkill(skill5)
+        skillsService.createSkill(skill6)
+        skillsService.createBadge(badge)
+
+        [skill2.skillId, skill3.skillId, skill6.skillId].each {
+            skillsService.assignSkillToBadge(proj.projectId, badge.badgeId, it)
+        }
+
+        def users = getRandomUsers(7, true)
+
+        skillsService.addSkill(skill1, users[0])
+        skillsService.addSkill(skill2, users[0])
+        skillsService.addSkill(skill3, users[0])
+
+        skillsService.addSkill(skill2, users[1])
+
+        skillsService.addSkill(skill2, users[2])
+        skillsService.addSkill(skill3, users[2])
+        skillsService.addSkill(skill5, users[2])
+        skillsService.addSkill(skill6, users[2])
+        skillsService.addSkill(skill6, users[2])
+
+        skillsService.addSkill(skill2, users[3])
+        skillsService.addSkill(skill3, users[3])
+        skillsService.addSkill(skill6, users[3])
+        skillsService.addSkill(skill6, users[3])
+
+        skillsService.addSkill(skill6, users[4])
+        skillsService.addSkill(skill6, users[5])
+        skillsService.addSkill(skill6, users[6])
+
+        QueryUsersCriteriaRequest queryUsersCriteriaRequest = new QueryUsersCriteriaRequest()
+        queryUsersCriteriaRequest.projectId = proj.projectId
+        queryUsersCriteriaRequest.achievedSkillIds = [skill6.skillId]
+
+
+        ContactUsersRequest cur = new ContactUsersRequest(queryCriteria: queryUsersCriteriaRequest)
+        cur.emailSubject = "The Subject"
+        cur.emailBody = "The Body"
+
+        when:
+        contactUsersService.contactUsers(cur)
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() >= 2 }
+
+        def messages = EmailUtils.getEmails(greenMail)
+
+        then:
+        messages.find { it.recipients.size() == 1 && it.recipients[0].contains(users[2]) }
+        messages.find { it.recipients.size() == 1 && it.recipients[0].contains(users[3]) }
+        messages.findAll { it.subj == "The Subject"}.size() == 2
+    }
+
 
 }
