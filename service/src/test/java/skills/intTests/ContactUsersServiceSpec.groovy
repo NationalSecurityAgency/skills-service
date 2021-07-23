@@ -297,7 +297,6 @@ class ContactUsersServiceSpec extends DefaultIntSpec {
         notAchieved.sort() == [users[4], users[5], users[6]].sort()
     }
 
-    @IgnoreRest
     def "test email"() {
         def proj = SkillsFactory.createProject(1)
         def subj = SkillsFactory.createSubject(1, 1)
