@@ -323,21 +323,21 @@ class ContactUsersServiceSpec extends DefaultIntSpec {
 
 
         then:
-        projectLevelSubjectLevelSkillsUsers.toArray().length == 1
-        projectLevelSubjectLevelSkillsUsers.toArray()[0] == users[0]
-        achievedNotAchieved.toArray().length == 1
-        achievedNotAchieved.toArray()[0] == users[3]
-        onlyFullyAchieved.toArray().length == 2
-        onlyFullyAchieved.toArray().sort() == [users[2], users[3]].sort()
-        badgeAchievedNotSkill.toArray().length == 1
-        badgeAchievedNotSkill.toArray()[0] == users[3]
-        twoAchievedSkills.toArray().length == 3
-        twoAchievedSkills.toArray().sort() == [users[0], users[2], users[3]].sort()
-        allUsers.toArray().length == 7
-        allUsers.toArray() == users.sort(false)
-        subjectLevelNotSkills.toArray().length == 0
-        notAchieved.toArray().length == 3
-        notAchieved.toArray().sort() == [users[4], users[5], users[6]].sort()
+        projectLevelSubjectLevelSkillsUsers.size() == 1
+        projectLevelSubjectLevelSkillsUsers[0] == users[0]
+        achievedNotAchieved.size() == 1
+        achievedNotAchieved[0] == users[3]
+        onlyFullyAchieved.size() == 2
+        onlyFullyAchieved.sort() == [users[2], users[3]].sort()
+        badgeAchievedNotSkill.size() == 1
+        badgeAchievedNotSkill[0] == users[3]
+        twoAchievedSkills.size() == 3
+        twoAchievedSkills.sort() == [users[0], users[2], users[3]].sort()
+        allUsers.size() == 7
+        allUsers.sort() == users.sort(false)
+        subjectLevelNotSkills.size() == 0
+        notAchieved.size() == 3
+        notAchieved.sort() == [users[4], users[5], users[6]].sort()
     }
 
     def "test email"() {
