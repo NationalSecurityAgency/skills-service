@@ -117,6 +117,7 @@ describe('Contact Project Users Specs', () => {
         cy.get('[data-cy=skillFilter]').should('be.enabled');
         cy.get('[data-cy=emailUsers-submitBtn]').should('be.disabled');
         cy.get('[data-cy=usersMatchingFilters] .badge-info').should('have.text', '0');
+
         cy.get('[data-cy=emailUsers-levelsInput]').select('1');
         cy.get('[data-cy=emailUsers-addBtn]').click();
         cy.wait('@updateCount');
@@ -124,6 +125,15 @@ describe('Contact Project Users Specs', () => {
         cy.get('[data-cy=usersMatchingFilters] .badge-info').should('have.text', '3');
         cy.get('[data-cy=contactUserCriteria-removeBtn]').click();
         cy.contains('Level 1 or greater').should('not.exist');
+
+        cy.get('[data-cy=projectFilter]').click({force:true});
+        cy.get('[data-cy=emailUsers-levelsInput]').select('5');
+        cy.get('[data-cy=emailUsers-addBtn]').click();
+        cy.wait('@updateCount');
+        cy.get('[data-cy=filterBadge]').eq(0).contains('Level 5 or greater');
+        cy.get('[data-cy=usersMatchingFilters] .badge-info').should('have.text', '0');
+        cy.get('[data-cy=emailUsers-submitBtn]').should('be.disabled');
+        cy.get('[data-cy=contactUserCriteria-removeBtn]').click();
 
         cy.get('[data-cy=badgeFilter]').click({force:true});
         cy.wait(200);
@@ -159,7 +169,6 @@ describe('Contact Project Users Specs', () => {
         cy.get('[data-cy=usersMatchingFilters] .badge-info').should('have.text', '0');
         cy.get('[data-cy=emailUsers-submitBtn]').should('be.disabled');
 
-
         cy.get('[data-cy=skillFilter]').click({force:true});
         cy.wait(200);
         cy.get('[data-cy=emailUsers-levelsInput]').should('be.disabled');
@@ -193,6 +202,7 @@ describe('Contact Project Users Specs', () => {
         cy.get('[data-cy=filterExists]').should('be.visible');
         cy.contains('Not Achieved Skill Skill 1').should('have.length', 1);
 
+
         const addSkillCriteria = (skillName) => {
             cy.get('.multiselect__tags').click();
             cy.get('.multiselect__tags input').eq(0).type(`${skillName}{enter}`);
@@ -222,6 +232,27 @@ describe('Contact Project Users Specs', () => {
         cy.get('[data-cy=contactUserCriteria-removeBtn]').should('have.length', 14);
         cy.get('[data-cy=maxFiltersReached]').should('not.exist');
 
+        cy.get('[data-cy=contactUserCriteria-removeBtn]').eq(0).click();
+        cy.get('[data-cy=contactUserCriteria-removeBtn]').eq(0).click();
+        cy.get('[data-cy=contactUserCriteria-removeBtn]').eq(0).click();
+        cy.get('[data-cy=contactUserCriteria-removeBtn]').eq(0).click();
+        cy.get('[data-cy=contactUserCriteria-removeBtn]').eq(0).click();
+        cy.get('[data-cy=contactUserCriteria-removeBtn]').eq(0).click();
+        cy.get('[data-cy=contactUserCriteria-removeBtn]').eq(0).click();
+        cy.get('[data-cy=contactUserCriteria-removeBtn]').eq(0).click();
+        cy.get('[data-cy=contactUserCriteria-removeBtn]').eq(0).click();
+        cy.get('[data-cy=contactUserCriteria-removeBtn]').eq(0).click();
+        cy.get('[data-cy=contactUserCriteria-removeBtn]').eq(0).click();
+        cy.get('[data-cy=contactUserCriteria-removeBtn]').eq(0).click();
+        cy.get('[data-cy=contactUserCriteria-removeBtn]').eq(0).click();
+        cy.get('[data-cy=contactUserCriteria-removeBtn]').eq(0).click();
+        cy.get('[data-cy=contactUserCriteria-removeBtn]').should('have.length', 0);
+
+        cy.get('[data-cy=projectFilter]').click({force:true});
+        cy.get('[data-cy=emailUsers-addBtn]').click();
+        cy.wait('@updateCount');
+        cy.get('[data-cy=filterBadge]').eq(0).contains('All Users');
+        cy.get('[data-cy=usersMatchingFilters] .badge-info').should('have.text', '3');
 
         cy.get('[data-cy=emailUsers_subject]').type('Test Subject');
         cy.get('[data-cy=emailUsers-submitBtn]').should('be.disabled');

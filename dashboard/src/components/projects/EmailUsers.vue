@@ -22,6 +22,7 @@ limitations under the License.
         <div slot="overlay" class="alert alert-warning mt-2" data-cy="contactUsers_emailServiceWarning">
           <i class="fa fa-exclamation-triangle" aria-hidden="true"/> Please note that email notifications are currently disabled. Email configuration has not been performed on this instance of SkillTree. Please contact the root administrator.
         </div>
+        <div class="h5 pt-2 mt-2 pr-2 pl-2 mr-2 ml-2 text-uppercase">Filters</div>
         <div class="row p-2 m-2">
           <div class="col-12 col-md-3 col-lg-2 border-md-right">
               <b-form-group label="Type:" label-for="filter-type" label-class="text-muted">
@@ -66,7 +67,7 @@ limitations under the License.
           </div>
         </div>
         </div>
-        <div class="row p-3 m-3">
+        <div class="row pl-3 pr-3 pt-1 pb-1 ml-3 mr-3 mt-1 mb-1">
           <b-button variant="outline-primary" class="mr-1" @click="addCriteria" data-cy="emailUsers-addBtn"
                     :disabled="isAddDisabled || maxTagsReached"><i class="fas fa-plus-circle"/> Add</b-button>
           <transition name="fade">
@@ -75,8 +76,8 @@ limitations under the License.
           <span v-if="maxTagsReached" data-cy="maxFiltersReached" class="text-warning pt-2 pl-1">Only {{maxCriteria}} filters are allowed</span>
         </div>
 
-        <div class="container-fluid p-3 m-3 ml-1">
-          <div class="pb-5">
+        <div class="container-fluid pl-3 pr-3 pb-3 pt-1 mr-3 ml-1">
+          <div class="pb-3 mt-1 ml-3">
             <b-badge v-for="(tag) of tags" :key="tag.display" variant="info" class="pl-2 m-2 text-break"
                      style="max-width: 85%;" data-cy="filterBadge">
               {{tag.display}} <b-button @click="deleteCriteria(tag)"
@@ -85,24 +86,26 @@ limitations under the License.
                                         data-cy="contactUserCriteria-removeBtn"><i class="fa fa-trash" /><span class="sr-only">delete filter {{tag.display}}</span></b-button>
             </b-badge>
           </div>
-          <h1 class="h5 text-uppercase" data-cy="usersMatchingFilters"><b-badge variant="info">{{this.currentCount}}</b-badge> Users</h1>
+          <h1 class="ml-4 h5 text-uppercase" data-cy="usersMatchingFilters"><b-badge variant="info">{{this.currentCount}}</b-badge> Users Selected</h1>
         </div>
 
-        <div class="row p-3 m-3">
+        <hr />
+        <div class="pl-3 ml-3 pr-3 mr-3 h5 pb-2 text-uppercase">Email Content</div>
+        <div class="row pl-3 pr-3 pt-3 pb-1 m-3 mb-1">
           <b-form-group class="w-100" id="subject-line-input-group" label="Subject Line" label-for="subject-line-input" label-class="text-muted">
             <b-input class="w-100" v-model="subject" id="subject-line-input" data-cy="emailUsers_subject"/>
           </b-form-group>
         </div>
-        <div class="row p-3 m-3">
+        <div class="row pl-3 pr-3 pb-1 ml-3 mr-3 mb-1 mt-1">
           <b-form-group class="w-100" id="body-input-group" label="Email Body" label-for="body-input" label-class="text-muted">
             <markdown-editor class="w-100" v-model="body" data-cy="emailUsers_body"/>
           </b-form-group>
         </div>
-        <div class="row p-3 m-3">
+        <div class="row pl-3 pr-3 pb-3 pt-1 ml-3 mr-3 mb-3 mt-1">
           <b-button variant="outline-primary" class="mr-1" @click="emailUsers" data-cy="emailUsers-submitBtn"
                     :disabled="isEmailDisabled"><i :class="[emailing ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fas fa-mail-bulk']" /> Email</b-button>
           <transition name="fade">
-            <span v-if="emailSent" class="pt-2 pl-1"><i class="far fa-check-square text-success"/> Email sent!</span>
+            <span v-if="emailSent" class="pt-2 pl-1"><i class="far fa-check-square text-success"/> Email{{currentCount > 1 ? 's' : ''}} sent!</span>
           </transition>
         </div>
       </b-overlay>
@@ -280,7 +283,7 @@ limitations under the License.
         return this.tags.length === this.maxCriteria;
       },
       isEmailDisabled() {
-        return !this.body || !this.subject || this.emailing || this.emailSent || this.tags.length < 1;
+        return !this.body || !this.subject || this.emailing || this.emailSent || this.tags.length < 1 || this.currentCount < 1;
       },
       isLoading() {
         return this.loading.skills || this.loading.badges;
@@ -304,6 +307,8 @@ limitations under the License.
           this.levels.selected = '';
           LevelService.getLevelsForProject(this.$route.params.projectId).then((levels) => {
             this.levels.available = levels?.map((level) => ({ value: level.level, text: level.level }));
+            this.levels.available.unshift({ value: null, text: 'Any Level' });
+            this.levels.selected = null;
           }).finally(() => {
             this.loading.levels = false;
           });
@@ -351,7 +356,7 @@ limitations under the License.
         const c = this.criteria;
         switch (this.currentFilterType) {
         case 'project':
-          if (this.levels.selected === '') {
+          if (this.levels.selected === '' || this.levels.selected === null) {
             tag = {
               display: 'All Users',
               type: this.currentFilterType,

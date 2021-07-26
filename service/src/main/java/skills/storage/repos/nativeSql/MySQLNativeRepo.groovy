@@ -24,6 +24,7 @@ import skills.storage.model.SkillDef
 import javax.persistence.EntityManager
 import javax.persistence.PersistenceContext
 import javax.persistence.Query
+import java.util.stream.Stream
 
 @Conditional(DBConditions.MySQL)
 @Service
@@ -194,7 +195,7 @@ class MySQLNativeRepo implements NativeQueriesRepo {
     }
 
     @Override
-    List<String> getUserIds(QueryUsersCriteria queryUsersCriteria) {
+    Stream<String> getUserIds(QueryUsersCriteria queryUsersCriteria) {
         throw new UnsupportedOperationException("Sorry!")
     }
 }

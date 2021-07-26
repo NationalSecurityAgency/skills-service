@@ -1091,6 +1091,37 @@ class SkillsService {
         return wsHelper.isFeatureEnabled(featureName)
     }
 
+    def countProjectUsers(String projectId, Boolean allProjectUsers = false, List<String> achievedSkillIds = null, List<String> notAchievedSkillIds = null, List<Map<String,String>> subjectLevels = null, Integer projectLevel = null) {
+
+        def params = [
+                projectId: projectId,
+                projectLevel: projectLevel,
+                subjectLevels: subjectLevels,
+                achievedSkillIds: achievedSkillIds,
+                notAchievedSkillIds: notAchievedSkillIds,
+                allProjectUsers: allProjectUsers
+            ]
+
+        return wsHelper.adminPost("/projects/${projectId}/contactUsersCount", params)?.body
+    }
+
+    def contactProjectUsers(String projectId, String emailSubject, String emailBody, Boolean allProjectUsers = false, List<String> achievedSkillIds = null, List<String> notAchievedSkillIds = null, List<Map<String,String>> subjectLevels = null, Integer projectLevel = null) {
+        def params = [
+                queryCriteria: [
+                    projectId: projectId,
+                    projectLevel: projectLevel,
+                    subjectLevels: subjectLevels,
+                    achievedSkillIds: achievedSkillIds,
+                    notAchievedSkillIds: notAchievedSkillIds,
+                    allProjectUsers: allProjectUsers
+                ],
+                emailBody: emailBody,
+                emailSubject: emailSubject
+            ]
+
+        return wsHelper.adminPost("/projects/${projectId}/contactUsers", params)
+    }
+
     private String getProjectUrl(String project) {
         return "/projects/${project}".toString()
     }

@@ -19,6 +19,8 @@ import skills.controller.request.model.QueryUsersCriteriaRequest
 import skills.storage.model.QueryUsersCriteria
 import skills.storage.model.SkillDef
 
+import java.util.stream.Stream
+
 interface NativeQueriesRepo {
     void decrementPointsForDeletedSkill(String projectId, String deletedSkillId, String parentSubjectSkillId)
 
@@ -56,7 +58,7 @@ interface NativeQueriesRepo {
 
     long countUsers(QueryUsersCriteria queryUsersCriteria)
 
-    List<String> getUserIds(QueryUsersCriteria queryUsersCriteria)
+    Stream<String> getUserIds(QueryUsersCriteria queryUsersCriteria)
 
 }
 

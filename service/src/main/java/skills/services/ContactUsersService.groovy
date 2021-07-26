@@ -31,6 +31,8 @@ import skills.storage.repos.nativeSql.NativeQueriesRepo
 import skills.utils.Props
 import org.commonmark.parser.Parser
 
+import java.util.stream.Stream
+
 @Slf4j
 @Service
 class ContactUsersService {
@@ -48,30 +50,32 @@ class ContactUsersService {
     }
 
     @Transactional(readOnly = true)
-    List<String> retrieveMatchingUserIds(QueryUsersCriteriaRequest queryUsersCriteriaRequest) {
+    Stream<String> retrieveMatchingUserIds(QueryUsersCriteriaRequest queryUsersCriteriaRequest) {
         QueryUsersCriteria queryUsersCriteria = convert(queryUsersCriteriaRequest)
         return nativeQueriesRepo.getUserIds(queryUsersCriteria)
     }
 
     @Transactional
     void contactUsers(ContactUsersRequest contactUsersRequest) {
-        List<String> userIds = retrieveMatchingUserIds(contactUsersRequest.queryCriteria)
+        Stream<String> userIds = retrieveMatchingUserIds(contactUsersRequest.queryCriteria)
 
         Parser parser = Parser.builder().build()
         HtmlRenderer renderer = HtmlRenderer.builder().build()
-
-        String parsedBody = renderer.render(parser.parse(contactUsersRequest.emailBody))
-        Notifier.NotificationRequest request = new Notifier.NotificationRequest(
-                userIds: userIds,
-                type: Notification.Type.ContactUsers,
-                keyValParams: [
-                    projectId: contactUsersRequest.queryCriteria.projectId,
-                    htmlBody: parsedBody,
-                    emailSubject: contactUsersRequest.emailSubject,
-                    rawBody: contactUsersRequest.emailBody,
-                ]
-        )
-        emailNotifier.sendNotification(request)
+        def markdown = parser.parse(contactUsersRequest.emailBody)
+        String parsedBody = renderer.render(markdown)
+        userIds.forEach({
+            Notifier.NotificationRequest request = new Notifier.NotificationRequest(
+                    userIds: [it],
+                    type: Notification.Type.ContactUsers,
+                    keyValParams: [
+                            projectId: contactUsersRequest.queryCriteria.projectId,
+                            htmlBody: parsedBody,
+                            emailSubject: contactUsersRequest.emailSubject,
+                            rawBody: contactUsersRequest.emailBody,
+                    ]
+            )
+            emailNotifier.sendNotification(request)
+        })
     }
 
     private QueryUsersCriteria convert(QueryUsersCriteriaRequest request) {

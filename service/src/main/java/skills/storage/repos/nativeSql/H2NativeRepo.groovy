@@ -26,6 +26,7 @@ import skills.storage.model.SkillDef
 import javax.persistence.EntityManager
 import javax.persistence.PersistenceContext
 import javax.persistence.Query
+import java.util.stream.Stream
 
 @Conditional(DBConditions.H2)
 @Service
@@ -818,7 +819,7 @@ class H2NativeRepo implements NativeQueriesRepo {
     }
 
     @Override
-    List<String> getUserIds(QueryUsersCriteria queryUsersCriteria) {
+    Stream<String> getUserIds(QueryUsersCriteria queryUsersCriteria) {
         String sql = QueryUserCriteriaHelper.generateSelectUserIdsSql(queryUsersCriteria)
         if (!sql) {
             return []
@@ -827,7 +828,7 @@ class H2NativeRepo implements NativeQueriesRepo {
         Query query = entityManager.createNativeQuery(sql)
         QueryUserCriteriaHelper.setSelectUserIdParams(query, queryUsersCriteria)
 
-        return query.getResultList()
+        return query.getResultStream()
     }
 
 

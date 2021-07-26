@@ -25,6 +25,7 @@ import skills.storage.model.SkillDef
 import javax.persistence.EntityManager
 import javax.persistence.PersistenceContext
 import javax.persistence.Query
+import java.util.stream.Stream
 
 @Conditional(DBConditions.PostgresQL)
 @Service
@@ -617,7 +618,7 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
     }
 
     @Override
-    List<String> getUserIds(QueryUsersCriteria queryUsersCriteria) {
+    Stream<String> getUserIds(QueryUsersCriteria queryUsersCriteria) {
         //TODO: This should probably be streaming/paging at some point
         String sql = QueryUserCriteriaHelper.generateSelectUserIdsSql(queryUsersCriteria)
         if (!sql) {
@@ -627,6 +628,6 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
         Query query = entityManager.createNativeQuery(sql)
         QueryUserCriteriaHelper.setSelectUserIdParams(query, queryUsersCriteria)
 
-        return query.getResultList()
+        return query.getResultStream()
     }
 }
