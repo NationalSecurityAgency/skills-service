@@ -636,4 +636,59 @@ describe('Client Display Tests', () => {
         cy.contains('powered by');
         cy.matchSnapshotImageForElement('[data-cy="breadcrumb-bar"] ol', 'Client Display Tests - breadcrumb with breadcrumb themed', snapshotOptions);
     });
+
+
+    it('ability to control title color and size as well as border, padding and margin', () => {
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+
+        const pageTitle = 'pageTitle|{"' +
+            'textAlign":"left", ' +
+            '"textColor":"%239cfd00", ' +
+            '"margin": "-10px -15px 30px -15px", ' +
+            '"padding": "10px 0px 10px 0px", ' +
+            '"fontSize": "24px", ' +
+            '"borderColor": "%23f2ff35", ' +
+            '"borderStyle": "none none solid none", ' +
+            '"backgroundColor": "%230374ff" }'
+        cy.cdVisit(`/?enableTheme=true&themeParam=${pageTitle}`);
+        cy.matchSnapshotImage(snapshotOptions, 'Client Display Tests - theme page title card');
+    });
+
+    it('ability to left align breadcrumb', () => {
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+
+        const breadcrumbParam = 'breadcrumb|{"align":"start"}'
+        cy.cdVisit(`/?enableTheme=true&themeParam=${breadcrumbParam}`);
+        cy.cdClickSubj(0);
+        cy.cdClickSkill(0);
+
+        cy.matchSnapshotImageForElement('.skills-theme-page-title', 'Client Display Tests - left align breadcrumb', snapshotOptions);
+    });
+
+    it('change text color of "powered by" logo', () => {
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+
+        const legacyPageTitleParam = 'themeParam=pageTitleTextColor|%2300ff80'; // green
+        const pageTitleParam = 'themeParam=pageTitle|{"textColor":"%2300FFFF"}'; // blue
+        const skillTreeBrandColorParam = 'themeParam=skillTreeBrandColor|%23ffff00'; // yellow
+
+        // legacy pageTitleTextColor param
+        cy.cdVisit(`/?enableTheme=true&${legacyPageTitleParam}`);
+        cy.matchSnapshotImageForElement('[data-cy="skillsTitle"]', 'Client Display Tests - legacy title color param', snapshotOptions);
+
+        // new pageTitle.textColor overrides legacy pageTitleTextColor param
+        cy.cdVisit(`/?enableTheme=true&${legacyPageTitleParam}&${pageTitleParam}`);
+        cy.matchSnapshotImageForElement('[data-cy="skillsTitle"]', 'Client Display Tests - title color param overrides legacy', snapshotOptions);
+
+        // explicit brand color overrides title param
+        cy.cdVisit(`/?enableTheme=true&${skillTreeBrandColorParam}&${legacyPageTitleParam}&${pageTitleParam}`);
+        cy.matchSnapshotImageForElement('[data-cy="skillsTitle"]', 'Client Display Tests - explicit brand color', snapshotOptions);
+
+        // just pageTitle.textColor param
+        cy.cdVisit(`/?enableTheme=true&${pageTitleParam}`);
+        // cy.matchSnapshotImageForElement('[data-cy="skillsTitle"]', 'Client Display Tests - title color param', snapshotOptions);
+    });
 });

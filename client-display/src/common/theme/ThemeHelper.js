@@ -15,7 +15,7 @@
  */
 export default {
   nonCSSConfig: ['charts', 'landingPageTitle', 'earnedTodayColor', 'beforeTodayColor', 'disableSkillTreeBrand', 'disableBreadcrumb'],
-  bothCssAndThemModule: ['progressIndicators', 'pageTitleTextColor'],
+  bothCssAndThemModule: ['progressIndicators', 'pageTitleTextColor', 'pageTitle', 'skillTreeBrandColor'],
   selectorKey: {
     maxWidth: {
       selector: 'body #app.skills-display-container',
@@ -43,6 +43,40 @@ export default {
       selector: 'body #app .skills-badge .skills-badge-icon, body #app .skills-progress-info-card, body #app .skills-card-theme-border',
       styleName: 'border-color',
     }],
+    pageTitle: {
+      textColor: [{
+        selector: 'body #app .skills-page-title-text-color',
+        styleName: 'color',
+      }],
+      borderColor: {
+        selector: 'body #app .skills-theme-page-title',
+        styleName: 'border-color',
+      },
+      borderStyle: {
+        selector: 'body #app .skills-theme-page-title',
+        styleName: 'border-style',
+      },
+      backgroundColor: {
+        selector: 'body #app .skills-theme-page-title .titleBody',
+        styleName: 'background',
+      },
+      textAlign: {
+        selector: 'body #app .skills-theme-page-title .titleBody',
+        styleName: 'text-align',
+      },
+      padding: [{
+        selector: 'body #app .skills-theme-page-title .titleBody',
+        styleName: 'padding',
+      }],
+      fontSize: {
+        selector: 'body #app .skills-page-title-text-color .skills-title',
+        styleName: 'font-size',
+      },
+      margin: {
+        selector: 'body #app .skills-theme-page-title',
+        styleName: 'margin',
+      },
+    },
     circleProgressInteriorTextColor: {
       selector: 'body #app .circle-number span',
       styleName: 'color',
@@ -167,6 +201,17 @@ export default {
         selector: 'body #app .skills-theme-breadcrumb .skills-theme-breadcrumb-current-page',
         styleName: 'color',
       }],
+      align: [{
+        selector: 'body #app .skills-theme-breadcrumb-container',
+        styleName: '-ms-flex-pack',
+      }, {
+        selector: 'body #app .skills-theme-breadcrumb-container',
+        styleName: 'justify-content',
+      }],
+    },
+    skillTreeBrandColor: {
+      selector: 'body #app .poweredByContainer .skills-theme-brand',
+      styleName: 'color',
     },
   },
 

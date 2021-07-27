@@ -43,8 +43,17 @@ limitations under the License.
           disableBreadcrumb: true,
           landingPageTitle: `PROJECT: ${this.$route.params.projectId}`,
           maxWidth: '100%',
-          pageTitleTextColor: '#212529',
-          pageTitleFontSize: '1.5rem',
+          backgroundColor: '#f8f9fe',
+          pageTitle: {
+            textColor: '#212529',
+            fontSize: '1.5rem',
+            borderColor: '#dee2e6',
+            borderStyle: 'none none solid none',
+            backgroundColor: '#fff',
+            textAlign: 'left',
+            padding: '1.6rem 1rem 1.1rem 1rem',
+            margin: '-10px -15px 1.6rem -15px',
+          },
           backButton: {
             padding: '5px 10px',
             fontSize: '12px',
@@ -53,10 +62,13 @@ limitations under the License.
         },
         darkTheme: {
           disableSkillTreeBrand: false,
-          disableBreadcrumb: true,
+          disableBreadcrumb: false,
           maxWidth: '100%',
           backgroundColor: '#626d7d',
-          pageTitleTextColor: 'white',
+          pageTitle: {
+            textColor: '#FFF',
+            fontSize: '1.5rem',
+          },
           textSecondaryColor: 'white',
           textPrimaryColor: 'white',
           stars: {

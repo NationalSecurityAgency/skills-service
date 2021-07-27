@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="card mb-3">
+  <div class="card mb-3 skills-theme-page-title" data-cy="skillsTitle">
     <div class="titleBody card-body skills-page-title-text-color text-info m-0 py-2">
       <div class="row position-absolute" v-if="showBackButton">
         <div class="col">

@@ -56,17 +56,20 @@ limitations under the License.
 
             const themeParamProvided = this.$route.query.themeParam;
             if (themeParamProvided) {
-              const split = themeParamProvided.split('|');
-              const key = split[0];
-              let val = split[1];
-              if (val === 'null') {
-                delete theme[key];
-              } else {
-                if (val.includes('{')) {
-                  val = JSON.parse(val);
+              const themeParams = Array.isArray(themeParamProvided) ? themeParamProvided : [themeParamProvided];
+              themeParams.forEach((themeParamItem) => {
+                const split = themeParamItem.split('|');
+                const key = split[0];
+                let val = split[1];
+                if (val === 'null') {
+                  delete theme[key];
+                } else {
+                  if (val.includes('{')) {
+                    val = JSON.parse(val);
+                  }
+                  theme[key] = val;
                 }
-                theme[key] = val;
-              }
+              });
             }
             this.handleTheming(theme);
           }
