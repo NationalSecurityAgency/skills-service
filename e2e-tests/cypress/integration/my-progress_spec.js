@@ -376,6 +376,11 @@ describe('Navigation Tests', () => {
     cy.dashboardCd().contains('powered by');
   });
 
+  it( 'ability to enable classic look on project Skills Display', function () {
+    cy.visit('/progress-and-rankings/projects/proj1?classicSkillsDisplay=true');
+    cy.dashboardCd().contains('powered by');
+  });
+
   it('Browser back button works in Skills Display', function () {
     cy.intercept('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
 

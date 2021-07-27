@@ -98,6 +98,18 @@ limitations under the License.
     },
     computed: {
       themeObj() {
+        if (this.$route.query.classicSkillsDisplay) {
+          const res = { ...this.theme };
+          return Object.assign(res, {
+            disableSkillTreeBrand: false,
+            disableBreadcrumb: false,
+            pageTitle: {
+              textColor: '#212529',
+              fontSize: '1.5rem',
+            },
+          });
+        }
+
         if (this.$route.query.enableTheme) {
           const res = { ...this.theme };
           return Object.assign(res, this.darkTheme);
