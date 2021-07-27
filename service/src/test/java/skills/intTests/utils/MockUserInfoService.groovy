@@ -25,6 +25,7 @@ import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemp
 import com.github.tomakehurst.wiremock.http.Request
 import com.github.tomakehurst.wiremock.http.ResponseDefinition
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Conditional
 import org.springframework.stereotype.Component
 import skills.auth.SecurityMode
@@ -41,7 +42,8 @@ import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 @Component
 public class MockUserInfoService {
 
-    private static final int port = 8181;
+    @Value('${skills.authorization.userInfoHealthCheckUri}')
+    String userInfoHealthCheckUri
 
     static final Map<String, FirstnameLastname> DN_TO_NAME = [
             "cn=jdoe@email.foo, ou=integration tests, o=skilltree test, c=us": new FirstnameLastname("John", "Doe"),
@@ -60,23 +62,27 @@ public class MockUserInfoService {
             "cn=userrolespecsuser3, ou=integration tests, o=skilltree test, c=us": new FirstnameLastname("John", "Smith"),
     ]
 
-    WireMockServer mockServer = new WireMockServer(wireMockConfig()
-            .httpsPort(port)
-            .keystorePath("classpath:certs/test.skilltree.userinfoservice.p12")
-            .keystorePassword("skillspass")
-            .keyManagerPassword("skillspass")
-            .keystoreType("PKCS12")
-            .trustStorePath("classpath:certs/truststore.jks")
-            .trustStorePassword("skillspass")
-            .trustStoreType("JKS")
-            .httpDisabled(true)
-            .needClientAuth(true)
-            .extensions(new UserInfoResponseTransformer())
-    );
+    WireMockServer mockServer
 
     @PostConstruct
-    public void start() {
+    void start() {
+        def matcher = userInfoHealthCheckUri =~ /https:\/\/localhost:(\d\d\d\d)\/actuator\/health/
+        int port = Integer.parseInt(matcher[0][1]);
+
         log.info("starting mock user-info-service on port ${port}")
+
+        mockServer = new WireMockServer(wireMockConfig()
+                .httpsPort(port)
+                .keystorePath("classpath:certs/test.skilltree.userinfoservice.p12")
+                .keystorePassword("skillspass")
+                .keyManagerPassword("skillspass")
+                .keystoreType("PKCS12")
+                .trustStorePath("classpath:certs/truststore.jks")
+                .trustStorePassword("skillspass")
+                .trustStoreType("JKS")
+                .httpDisabled(true)
+                .needClientAuth(true)
+                .extensions(new UserInfoResponseTransformer()));
 
         mockServer.stubFor(any(urlPathEqualTo("/actuator/health")).willReturn(
                 ok()
