@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
 import skills.SpringBootApp
+import skills.storage.model.UserAttrs
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SettingRepo
 import skills.storage.repos.SkillDefRepo
@@ -173,7 +174,25 @@ class DefaultIntSpec extends Specification {
      * of test p12 certificates available if in pki mode
      * @return
      */
-    List<String> getRandomUsers(int numUsers) {
-        return userUtil.getUsers(numUsers)
+    List<String> getRandomUsers(int numUsers, boolean createEmail = false) {
+        //create email addresses for the users automatically?
+        List<String> userIds =  userUtil.getUsers(numUsers)
+        if (createEmail) {
+            userIds?.each {
+                if (!it.contains('@')) {
+                    UserAttrs userAttrs = new UserAttrs()
+                    userAttrs.userId = it
+                    userAttrs.userIdForDisplay = it
+                    userAttrs.email = "${it}@email.foo"
+                    userAttrs.firstName = "${it.toUpperCase()}_first"
+                    userAttrs.lastName = "${it.toUpperCase()}_last"
+                    userAttrsRepo.save(userAttrs)
+                }
+            }
+
+        }
+
+        return userIds
     }
+
 }

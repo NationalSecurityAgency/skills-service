@@ -15,7 +15,11 @@
  */
 package skills.storage.repos.nativeSql
 
+import skills.controller.request.model.QueryUsersCriteriaRequest
+import skills.storage.model.QueryUsersCriteria
 import skills.storage.model.SkillDef
+
+import java.util.stream.Stream
 
 interface NativeQueriesRepo {
     void decrementPointsForDeletedSkill(String projectId, String deletedSkillId, String parentSubjectSkillId)
@@ -51,6 +55,10 @@ interface NativeQueriesRepo {
     void identifyAndAddProjectLevelAchievements(String projectId, boolean pointsBasedLevels);
 
     void createOrUpdateUserEvent(String projectId, Integer skillRefId, String userId, Date start, String type, Integer count, Integer weekNumber)
+
+    long countUsers(QueryUsersCriteria queryUsersCriteria)
+
+    Stream<String> getUserIds(QueryUsersCriteria queryUsersCriteria)
 
 }
 

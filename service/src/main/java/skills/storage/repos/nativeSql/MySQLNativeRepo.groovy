@@ -17,11 +17,14 @@ package skills.storage.repos.nativeSql
 
 import org.springframework.context.annotation.Conditional
 import org.springframework.stereotype.Service
+import skills.controller.request.model.QueryUsersCriteriaRequest
+import skills.storage.model.QueryUsersCriteria
 import skills.storage.model.SkillDef
 
 import javax.persistence.EntityManager
 import javax.persistence.PersistenceContext
 import javax.persistence.Query
+import java.util.stream.Stream
 
 @Conditional(DBConditions.MySQL)
 @Service
@@ -183,6 +186,16 @@ class MySQLNativeRepo implements NativeQueriesRepo {
 
     @Override
     void createOrUpdateUserEvent(String projectId, Integer skillRefId, String userId, Date start, String type, Integer count, Integer weekNumber) {
+        throw new UnsupportedOperationException("Sorry!")
+    }
+
+    @Override
+    long countUsers(QueryUsersCriteria queryUsersCriteria) {
+        throw new UnsupportedOperationException("Sorry!")
+    }
+
+    @Override
+    Stream<String> getUserIds(QueryUsersCriteria queryUsersCriteria) {
         throw new UnsupportedOperationException("Sorry!")
     }
 }

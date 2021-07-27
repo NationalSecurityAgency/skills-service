@@ -92,18 +92,17 @@ class InceptionProjectService {
         accessSettingsStorageService.deleteUserRole(userId, inceptionProjectId, RoleName.ROLE_PROJECT_ADMIN)
     }
 
-    private assignAllRootUsersToInception(){
+    private assignAllRootUsersToInception() {
         List<UserRoleRes> rootUsers = accessSettingsStorageService.getRootUsers()
 
         rootUsers.each {
             List<UserRoleRes> inceptionRoles = accessSettingsStorageService.getUserRolesForProjectIdAndUserId(inceptionProjectId, it.userId)
-            if (!inceptionRoles.find({it.roleName == RoleName.ROLE_PROJECT_ADMIN})) {
+            if (!inceptionRoles.find({ it.roleName == RoleName.ROLE_PROJECT_ADMIN })) {
                 log.info("Making [{}] project admin of [{}]", it.userId, inceptionProjectId)
                 accessSettingsStorageService.addUserRole(it.userId, inceptionProjectId, RoleName.ROLE_PROJECT_ADMIN)
             }
         }
     }
-
 
 
     private boolean createInceptionProjectIfNeeded(String userId) {

@@ -56,6 +56,7 @@ limitations under the License.
           {name: 'Levels', iconClass: 'fa-trophy skills-color-levels', page: 'ProjectLevels'},
           {name: 'Users', iconClass: 'fa-users skills-color-users', page: 'ProjectUsers'},
           {name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'ProjectMetrics'},
+          {name: 'Contact Users', iconClass: 'fas fa-mail-bulk', page: 'EmailUsers'},
           {name: 'Issues', iconClass: 'fas fa-exclamation-triangle', page: 'ProjectErrorsPage'},
           {name: 'Access', iconClass: 'fa-shield-alt skills-color-access', page: 'ProjectAccess'},
           {name: 'Settings', iconClass: 'fa-cogs skills-color-settings', page: 'ProjectSettings'},

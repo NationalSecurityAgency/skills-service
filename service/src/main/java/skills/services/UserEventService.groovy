@@ -277,15 +277,16 @@ class UserEventService {
         StopWatch sw = new StopWatch()
         sw.start()
 
-        Stream<UserEvent> stream = userEventsRepo.findAllByEventTypeAndEventTimeLessThan(EventType.DAILY, dateTime.toDate())
-        stream.forEach({ UserEvent userEvent ->
-            totalProcessed++
-            recordEvent(userEvent.projectId,  userEvent.skillRefId, userEvent.userId, userEvent.eventTime, userEvent.count, EventType.WEEKLY)
-            entityManager.detach(userEvent)
-            if (totalProcessed % 50000 == 0) {
-                log.info("compacted $totalProcessed daily user events so far")
-            }
-        })
+        userEventsRepo.findAllByEventTypeAndEventTimeLessThan(EventType.DAILY, dateTime.toDate()).withCloseable { Stream<UserEvent> stream ->
+            stream.forEach({ UserEvent userEvent ->
+                totalProcessed++
+                recordEvent(userEvent.projectId, userEvent.skillRefId, userEvent.userId, userEvent.eventTime, userEvent.count, EventType.WEEKLY)
+                entityManager.detach(userEvent)
+                if (totalProcessed % 50000 == 0) {
+                    log.info("compacted $totalProcessed daily user events so far")
+                }
+            })
+        }
         sw.stop()
         Duration duration = Duration.of(sw.getTime(), ChronoUnit.MILLIS)
 
@@ -339,31 +340,35 @@ class UserEventService {
             [projectId, new PerProjectCounts(lastDate: StartDateUtil.computeStartDate(new Date(), eventType))]
         }
 
-        stream.forEach({
-            PerProjectCounts perProject = perProjectCounts.get(it.projectId)
-            if (!perProject) {
-                perProject = new PerProjectCounts(lastDate: StartDateUtil.computeStartDate(new Date(), eventType))
-                perProjectCounts.put(it.projectId, perProject)
-            }
-            if (EventType.WEEKLY == eventType) {
-                if (it.day.toLocalDate().getDayOfWeek() != DayOfWeek.SUNDAY) {
-                    //we have to fix the day to align with the start of the week as there can be gaps in the daily data
-                    //this happens when daily metrics are grouped into weekly in the query
-                    it.day = StartDateUtil.computeStartDate(it.day, EventType.WEEKLY)
+        try {
+            stream.forEach({
+                PerProjectCounts perProject = perProjectCounts.get(it.projectId)
+                if (!perProject) {
+                    perProject = new PerProjectCounts(lastDate: StartDateUtil.computeStartDate(new Date(), eventType))
+                    perProjectCounts.put(it.projectId, perProject)
                 }
-            }
+                if (EventType.WEEKLY == eventType) {
+                    if (it.day.toLocalDate().getDayOfWeek() != DayOfWeek.SUNDAY) {
+                        //we have to fix the day to align with the start of the week as there can be gaps in the daily data
+                        //this happens when daily metrics are grouped into weekly in the query
+                        it.day = StartDateUtil.computeStartDate(it.day, EventType.WEEKLY)
+                    }
+                }
 
-            Date last = perProject.lastDate
-            boolean first = perProject.count == 0
+                Date last = perProject.lastDate
+                boolean first = perProject.count == 0
 
-            List<DayCountItem> zeroFills = zeroFillGaps(eventType, last, it.day, (first && it.day != perProject.lastDate), it.projectId)
-            if (zeroFills) {
-                perProject.results.addAll(zeroFills)
-            }
-            perProject.lastDate = it.day
-            perProject.results.add(it)
-            perProject.count++
-        })
+                List<DayCountItem> zeroFills = zeroFillGaps(eventType, last, it.day, (first && it.day != perProject.lastDate), it.projectId)
+                if (zeroFills) {
+                    perProject.results.addAll(zeroFills)
+                }
+                perProject.lastDate = it.day
+                perProject.results.add(it)
+                perProject.count++
+            })
+        } finally {
+            stream.close()
+        }
 
         List<DayCountItem> finalResults = []
         perProjectCounts?.each {String projectId , PerProjectCounts value ->
@@ -385,25 +390,29 @@ class UserEventService {
             [projectId, new PerProjectCounts(lastDate: StartDateUtil.computeStartDate(new Date(), EventType.WEEKLY))]
         }
 
-        stream.forEach({
-            Date day = WeekNumberUtil.getStartOfWeekFromWeekNumber(it.weekNumber).atStartOfDay().toDate()
-            DayCountItem dci = new DayCountItem(it.projectId, day, it.count)
+        try {
+            stream.forEach({
+                Date day = WeekNumberUtil.getStartOfWeekFromWeekNumber(it.weekNumber).atStartOfDay().toDate()
+                DayCountItem dci = new DayCountItem(it.projectId, day, it.count)
 
-            PerProjectCounts perProject = perProjectCounts.get(it.projectId)
-            if (!perProject) {
-                perProject = new PerProjectCounts(lastDate: StartDateUtil.computeStartDate(new Date(), EventType.WEEKLY))
-                perProjectCounts.put(it.projectId, perProject)
-            }
+                PerProjectCounts perProject = perProjectCounts.get(it.projectId)
+                if (!perProject) {
+                    perProject = new PerProjectCounts(lastDate: StartDateUtil.computeStartDate(new Date(), EventType.WEEKLY))
+                    perProjectCounts.put(it.projectId, perProject)
+                }
 
-            boolean first=perProject.count == 0
-            List<DayCountItem> zeroFills = zeroFillGaps(EventType.WEEKLY, perProject.lastDate, dci.day, (first && day != perProject.lastDate), it.projectId)
-            if (zeroFills) {
-                perProject.results.addAll(zeroFills)
-            }
-            perProject.lastDate = dci.day
-            perProject.results.add(dci)
-            perProject.count++
-        })
+                boolean first = perProject.count == 0
+                List<DayCountItem> zeroFills = zeroFillGaps(EventType.WEEKLY, perProject.lastDate, dci.day, (first && day != perProject.lastDate), it.projectId)
+                if (zeroFills) {
+                    perProject.results.addAll(zeroFills)
+                }
+                perProject.lastDate = dci.day
+                perProject.results.add(dci)
+                perProject.count++
+            })
+        } finally {
+            stream.close()
+        }
 
         List<DayCountItem> finalResults = []
         perProjectCounts?.each {String projectId , PerProjectCounts value ->

@@ -92,6 +92,12 @@ class AdminController {
     @Autowired
     ProjectErrorService errorService
 
+    @Autowired
+    SkillEventAdminService skillEventAdminService
+
+    @Autowired
+    ContactUsersService contactUsersService
+
 
     @RequestMapping(value = "/projects/{id}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
@@ -941,4 +947,21 @@ class AdminController {
         errorService.deleteError(projectId, errorType, error)
         return RequestResult.success()
     }
+
+
+    @RequestMapping(value = "/projects/{id}/contactUsersCount", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @ResponseBody
+    Integer countMatchingUsers(@PathVariable("id") String projectId, @RequestBody QueryUsersCriteriaRequest contactUsersCriteria) {
+        contactUsersCriteria.projectId = projectId
+        return contactUsersService.countMatchingUsers(contactUsersCriteria)
+    }
+
+    @RequestMapping(value = "/projects/{id}/contactUsers", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @ResponseBody
+    RequestResult contactUsers(@PathVariable("id") String projectId, @RequestBody ContactUsersRequest contactUsersRequest) {
+        contactUsersRequest?.queryCriteria?.projectId = projectId
+        contactUsersService.contactUsers(contactUsersRequest)
+        return RequestResult.success()
+    }
 }
+
