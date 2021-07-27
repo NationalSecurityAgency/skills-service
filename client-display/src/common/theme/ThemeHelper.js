@@ -47,9 +47,6 @@ export default {
       textColor: [{
         selector: 'body #app .skills-page-title-text-color',
         styleName: 'color',
-      }, {
-        selector: 'body #app .skills-badge .skills-badge-icon, body #app .skills-progress-info-card, body #app .skills-card-theme-border',
-        styleName: 'border-color',
       }],
       borderColor: {
         selector: 'body #app .skills-theme-page-title',
