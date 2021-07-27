@@ -619,7 +619,6 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
 
     @Override
     Stream<String> getUserIds(QueryUsersCriteria queryUsersCriteria) {
-        //TODO: This should probably be streaming/paging at some point
         String sql = QueryUserCriteriaHelper.generateSelectUserIdsSql(queryUsersCriteria)
         if (!sql) {
             return []

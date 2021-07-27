@@ -90,7 +90,7 @@ limitations under the License.
         </div>
 
         <hr />
-        <div class="pl-3 ml-3 pr-3 mr-3 h5 pb-2 text-uppercase">Email Content</div>
+        <div class="pl-2 ml-2 pr-2 mr-2 h5 pb-2 text-uppercase">Email Content</div>
         <div class="row pl-3 pr-3 pt-3 pb-1 m-3 mb-1">
           <b-form-group class="w-100" id="subject-line-input-group" label="Subject Line" label-for="subject-line-input" label-class="text-muted">
             <b-input class="w-100" v-model="subject" id="subject-line-input" data-cy="emailUsers_subject"/>

@@ -57,25 +57,26 @@ class ContactUsersService {
 
     @Transactional
     void contactUsers(ContactUsersRequest contactUsersRequest) {
-        Stream<String> userIds = retrieveMatchingUserIds(contactUsersRequest.queryCriteria)
 
-        Parser parser = Parser.builder().build()
-        HtmlRenderer renderer = HtmlRenderer.builder().build()
-        def markdown = parser.parse(contactUsersRequest.emailBody)
-        String parsedBody = renderer.render(markdown)
-        userIds.forEach({
-            Notifier.NotificationRequest request = new Notifier.NotificationRequest(
-                    userIds: [it],
-                    type: Notification.Type.ContactUsers,
-                    keyValParams: [
-                            projectId: contactUsersRequest.queryCriteria.projectId,
-                            htmlBody: parsedBody,
-                            emailSubject: contactUsersRequest.emailSubject,
-                            rawBody: contactUsersRequest.emailBody,
-                    ]
-            )
-            emailNotifier.sendNotification(request)
-        })
+        try (Stream<String> userIds = retrieveMatchingUserIds(contactUsersRequest.queryCriteria)){
+            Parser parser = Parser.builder().build()
+            HtmlRenderer renderer = HtmlRenderer.builder().build()
+            def markdown = parser.parse(contactUsersRequest.emailBody)
+            String parsedBody = renderer.render(markdown)
+            userIds.forEach({
+                Notifier.NotificationRequest request = new Notifier.NotificationRequest(
+                        userIds: [it],
+                        type: Notification.Type.ContactUsers,
+                        keyValParams: [
+                                projectId   : contactUsersRequest.queryCriteria.projectId,
+                                htmlBody    : parsedBody,
+                                emailSubject: contactUsersRequest.emailSubject,
+                                rawBody     : contactUsersRequest.emailBody,
+                        ]
+                )
+                emailNotifier.sendNotification(request)
+            })
+        }
     }
 
     private QueryUsersCriteria convert(QueryUsersCriteriaRequest request) {

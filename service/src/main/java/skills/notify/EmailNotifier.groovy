@@ -39,6 +39,7 @@ import skills.storage.repos.NotificationsRepo
 import skills.storage.repos.UserAttrsRepo
 
 import java.util.concurrent.TimeUnit
+import java.util.stream.Stream
 
 @Component
 @Slf4j
@@ -108,7 +109,7 @@ class EmailNotifier implements Notifier {
         doDispatchNotifications("Retry: ") { notificationsRepo.streamFailedNotifications() }
     }
 
-    private void doDispatchNotifications(String prependToLogs = "", Closure streamCreator) {
+    private void doDispatchNotifications(String prependToLogs = "", Closure<Stream<Notification>> streamCreator) {
         lockingService.lockForNotifying()
         List<SettingsResult> emailSettings = settingsService.getGlobalSettingsByGroup(EmailSettingsService.settingsGroup);
 
@@ -124,33 +125,35 @@ class EmailNotifier implements Notifier {
         int count = 0
         int errCount = 0
         String lastErrMsg
-        streamCreator.call().forEach({ Notification notification ->
-            NotificationEmailBuilder.Res emailRes = notificationEmailBuilderManager.build(notification, formatting)
-            UserAttrs userAttrs = userAttrs.findByUserId(notification.userId)
-            boolean failed = false;
-            try {
-                sendingService.sendEmail(emailRes.subject, userAttrs.email, emailRes.html, emailRes.plainText, notification.requestedOn)
-            } catch (Throwable t) {
-                // don't print the same message over and over again
-                if (!lastErrMsg?.equalsIgnoreCase(t.message)) {
-                    log.error("${prependToLogs}Failed to sent notification with id [${notification.id}] and type [${notification.type}]. Updating notification to retry", t)
-                    lastErrMsg = t.message
-                }
-                notification.failedCount = notification.failedCount + 1
+        try (Stream<Notification> notifications = streamCreator.call()) {
+            notifications.forEach({ Notification notification ->
+                NotificationEmailBuilder.Res emailRes = notificationEmailBuilderManager.build(notification, formatting)
+                UserAttrs userAttrs = userAttrs.findByUserId(notification.userId)
+                boolean failed = false;
+                try {
+                    sendingService.sendEmail(emailRes.subject, userAttrs.email, emailRes.html, emailRes.plainText, notification.requestedOn)
+                } catch (Throwable t) {
+                    // don't print the same message over and over again
+                    if (!lastErrMsg?.equalsIgnoreCase(t.message)) {
+                        log.error("${prependToLogs}Failed to sent notification with id [${notification.id}] and type [${notification.type}]. Updating notification to retry", t)
+                        lastErrMsg = t.message
+                    }
+                    notification.failedCount = notification.failedCount + 1
 
-                boolean removed = removeIfOlderThanConfiguredRetainPeriod(notification)
-                if (!removed) {
-                    notificationsRepo.save(notification)
+                    boolean removed = removeIfOlderThanConfiguredRetainPeriod(notification)
+                    if (!removed) {
+                        notificationsRepo.save(notification)
+                    }
+                    failed = true;
                 }
-                failed = true;
-            }
-            if (!failed) {
-                removeNotificationImmediately(notification.id)
-                count++
-            } else {
-                errCount++
-            }
-        })
+                if (!failed) {
+                    removeNotificationImmediately(notification.id)
+                    count++
+                } else {
+                    errCount++
+                }
+            })
+        }
 
         stopWatch.stop()
         if (count > 0 || errCount > 0) {
