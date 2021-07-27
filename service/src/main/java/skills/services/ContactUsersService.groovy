@@ -58,7 +58,7 @@ class ContactUsersService {
     @Transactional
     void contactUsers(ContactUsersRequest contactUsersRequest) {
 
-        try (Stream<String> userIds = retrieveMatchingUserIds(contactUsersRequest.queryCriteria)){
+        retrieveMatchingUserIds(contactUsersRequest.queryCriteria).withCloseable { Stream<String> userIds ->
             Parser parser = Parser.builder().build()
             HtmlRenderer renderer = HtmlRenderer.builder().build()
             def markdown = parser.parse(contactUsersRequest.emailBody)

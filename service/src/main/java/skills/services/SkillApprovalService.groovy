@@ -168,7 +168,7 @@ class SkillApprovalService {
         if (existing.selfReportingType == SkillDef.SelfReportingType.Approval && !incomingType) {
             skillApprovalRepo.deleteByProjectIdAndSkillRefId(existing.projectId, existing.id)
         } else if (existing.selfReportingType == SkillDef.SelfReportingType.Approval && incomingType == SkillDef.SelfReportingType.HonorSystem) {
-            try(Stream<SkillApproval> existingApprovals = skillApprovalRepo.findAllBySkillRefIdAndRejectedOnIsNull(existing.id)) {
+            skillApprovalRepo.findAllBySkillRefIdAndRejectedOnIsNull(existing.id).withCloseable { Stream<SkillApproval> existingApprovals ->
                 existingApprovals.forEach({ SkillApproval skillApproval ->
                     SkillEventResult res = skillEventsService.reportSkill(existing.projectId, existing.skillId, skillApproval.userId, false,
                             skillApproval.requestedOn, new SkillEventsService.SkillApprovalParams(disableChecks: true))

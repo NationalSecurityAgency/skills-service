@@ -277,7 +277,7 @@ class UserEventService {
         StopWatch sw = new StopWatch()
         sw.start()
 
-        try(Stream<UserEvent> stream = userEventsRepo.findAllByEventTypeAndEventTimeLessThan(EventType.DAILY, dateTime.toDate())) {
+        userEventsRepo.findAllByEventTypeAndEventTimeLessThan(EventType.DAILY, dateTime.toDate()).withCloseable { Stream<UserEvent> stream ->
             stream.forEach({ UserEvent userEvent ->
                 totalProcessed++
                 recordEvent(userEvent.projectId, userEvent.skillRefId, userEvent.userId, userEvent.eventTime, userEvent.count, EventType.WEEKLY)

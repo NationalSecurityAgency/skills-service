@@ -125,7 +125,7 @@ class EmailNotifier implements Notifier {
         int count = 0
         int errCount = 0
         String lastErrMsg
-        try (Stream<Notification> notifications = streamCreator.call()) {
+        streamCreator.call().withCloseable { Stream<Notification> notifications ->
             notifications.forEach({ Notification notification ->
                 NotificationEmailBuilder.Res emailRes = notificationEmailBuilderManager.build(notification, formatting)
                 UserAttrs userAttrs = userAttrs.findByUserId(notification.userId)
