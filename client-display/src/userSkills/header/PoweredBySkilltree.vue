@@ -19,8 +19,8 @@ limitations under the License.
        @mouseover="isHovering = true"
        @mouseout="isHovering = false"
        data-cy="skillTreePoweredBy">
-    <a :href="docsHost" target="_blank">
-      <div class="poweredByLabel pb-2 skills-page-title-text-color"
+    <a :href="docsHost" target="_blank" class="skills-page-title-text-color">
+      <div class="poweredByLabel pb-2 skills-theme-brand"
            :class="{'animate__animated':animatePowerByLabel, 'animate__backInUp' : animatePowerByLabel}">powered by
       </div>
       <skill-tree-svg-icon class="float-right" :is-hovering="isHovering" :logo-fill="logoFillThemeColor"/>
@@ -44,6 +44,18 @@ limitations under the License.
     },
     computed: {
       logoFillThemeColor() {
+        //  1. if skillTreeBrandColor is provided
+        //  2. pageTitle.textColor
+        //  3. pageTitleTextColor (backward compat)
+
+        if (this.$store.state.themeModule.skillTreeBrandColor) {
+          return this.$store.state.themeModule.skillTreeBrandColor;
+        }
+        const color = this.$store.state.themeModule.pageTitle && this.$store.state.themeModule.pageTitle.textColor
+          ? this.$store.state.themeModule.pageTitle.textColor : null;
+        if (color) {
+          return color;
+        }
         return this.$store.state.themeModule.pageTitleTextColor;
       },
       docsHost() {

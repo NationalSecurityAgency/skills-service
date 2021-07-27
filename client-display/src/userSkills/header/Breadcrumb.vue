@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div v-if="!disabled" class="d-flex justify-content-center" data-cy="breadcrumb-bar">
+  <div v-if="!disabled" class="d-flex justify-content-center skills-theme-breadcrumb-container" data-cy="breadcrumb-bar">
     <nav aria-label="breadcrumb" role="navigation" class="skills-theme-breadcrumb">
       <ol class="breadcrumb bg-transparent m-0 p-0">
         <li v-for="(item, index) of items" :key="item.label" class="breadcrumb-item theme-link" data-cy="breadcrumb-item">
