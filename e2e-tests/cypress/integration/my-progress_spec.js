@@ -374,11 +374,19 @@ describe('Navigation Tests', () => {
   it( 'ability to enable theme on project Skills Display', function () {
     cy.visit('/progress-and-rankings/projects/proj1?enableTheme=true');
     cy.dashboardCd().contains('powered by');
+
+    cy.visit('/progress-and-rankings/projects/proj1?enableTheme=false');
+    cy.dashboardCd().contains('Overall Points');
+    cy.dashboardCd().contains('powered by').should('not.exist');
   });
 
   it( 'ability to enable classic look on project Skills Display', function () {
     cy.visit('/progress-and-rankings/projects/proj1?classicSkillsDisplay=true');
     cy.dashboardCd().contains('powered by');
+
+    cy.visit('/progress-and-rankings/projects/proj1?classicSkillsDisplay=false');
+    cy.dashboardCd().contains('Overall Points');
+    cy.dashboardCd().contains('powered by').should('not.exist');
   });
 
   it('Browser back button works in Skills Display', function () {

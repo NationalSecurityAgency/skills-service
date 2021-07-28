@@ -98,7 +98,7 @@ limitations under the License.
     },
     computed: {
       themeObj() {
-        if (this.$route.query.classicSkillsDisplay) {
+        if (this.$route.query.classicSkillsDisplay && this.$route.query.classicSkillsDisplay.toLowerCase() === 'true') {
           const res = { ...this.theme };
           return Object.assign(res, {
             disableSkillTreeBrand: false,
@@ -110,7 +110,7 @@ limitations under the License.
           });
         }
 
-        if (this.$route.query.enableTheme) {
+        if (this.$route.query.enableTheme && this.$route.query.enableTheme.toLowerCase() === 'true') {
           const res = { ...this.theme };
           return Object.assign(res, this.darkTheme);
         }
