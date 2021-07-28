@@ -26,6 +26,7 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.EmailUtils
 import skills.intTests.utils.SkillsFactory
 import skills.services.ContactUsersService
+import skills.services.UserAttrsService
 import skills.utils.WaitFor
 import spock.lang.IgnoreRest
 
@@ -38,6 +39,9 @@ class ContactUsersServiceSpec extends DefaultIntSpec {
 
     @Autowired
     private PlatformTransactionManager transactionManager;
+
+    @Autowired
+    UserAttrsService userAttrsService
 
     def setup() {
         startEmailServer()
@@ -416,6 +420,9 @@ class ContactUsersServiceSpec extends DefaultIntSpec {
 * two items
         """
 
+        String user2Email = userAttrsService.findByUserId(users[2].toLowerCase())?.email
+        String user3Email = userAttrsService.findByUserId(users[3].toLowerCase())?.email
+
         when:
         skillsService.contactProjectUsers(proj.projectId, emailSubject, emailBody, false, [skill6.skillId])
 
@@ -424,8 +431,8 @@ class ContactUsersServiceSpec extends DefaultIntSpec {
         def messages = EmailUtils.getEmails(greenMail)
 
         then:
-        messages.find { it.recipients.size() == 1 && it.recipients[0].contains(users[2]) }
-        messages.find { it.recipients.size() == 1 && it.recipients[0].contains(users[3]) }
+        messages.find { it.recipients.size() == 1 && it.recipients[0].contains(user2Email) }
+        messages.find { it.recipients.size() == 1 && it.recipients[0].contains(user3Email) }
         messages[0].html.replaceAll('\r\n', '\n') == '''<!--
 Copyright 2020 SkillTree
 
