@@ -16,6 +16,7 @@
 package skills.services
 
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.commonmark.renderer.html.HtmlRenderer
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -27,6 +28,7 @@ import skills.notify.Notifier
 import skills.storage.model.Notification
 import skills.storage.model.QueryUsersCriteria
 import skills.storage.model.SubjectLevelCriteria
+import skills.storage.model.auth.RoleName
 import skills.storage.repos.nativeSql.NativeQueriesRepo
 import skills.utils.Props
 import org.commonmark.parser.Parser
@@ -37,11 +39,44 @@ import java.util.stream.Stream
 @Service
 class ContactUsersService {
 
+    private Parser parser = Parser.builder().build()
+    private HtmlRenderer renderer = HtmlRenderer.builder().build()
+
     @Autowired
     NativeQueriesRepo nativeQueriesRepo
 
     @Autowired
     EmailNotifier emailNotifier
+
+    @Autowired
+    AccessSettingsStorageService accessSettingsStorageService
+
+    @Transactional(readOnly = true)
+    Long countAllProjectAdminsWithEmail() {
+        getAllProjectAdminsEmail()?.size()
+    }
+
+    @Transactional
+    contactAllProjectAdmins(String emailSubject, String emailBody) {
+        List<String> projectAdminEmails = getAllProjectAdminsEmail()
+        Parser parser = Parser.builder().build()
+        HtmlRenderer renderer = HtmlRenderer.builder().build()
+        def markdown = parser.parse(emailBody)
+        String parsedBody = renderer.render(markdown)
+
+        projectAdminEmails.each {
+            Notifier.NotificationRequest request = new Notifier.NotificationRequest(
+                    userIds: [it],
+                    type: Notification.Type.ContactUsers,
+                    keyValParams: [
+                            htmlBody    : parsedBody,
+                            emailSubject: emailSubject,
+                            rawBody     : emailBody,
+                    ]
+            )
+            emailNotifier.sendNotification(request)
+        }
+    }
 
     @Transactional(readOnly = true)
     Integer countMatchingUsers(QueryUsersCriteriaRequest contactUsersCriteria) {
@@ -59,8 +94,6 @@ class ContactUsersService {
     void contactUsers(ContactUsersRequest contactUsersRequest) {
 
         retrieveMatchingUserIds(contactUsersRequest.queryCriteria).withCloseable { Stream<String> userIds ->
-            Parser parser = Parser.builder().build()
-            HtmlRenderer renderer = HtmlRenderer.builder().build()
             def markdown = parser.parse(contactUsersRequest.emailBody)
             String parsedBody = renderer.render(markdown)
             userIds.forEach({
@@ -77,6 +110,14 @@ class ContactUsersService {
                 emailNotifier.sendNotification(request)
             })
         }
+    }
+
+    private List<String> getAllProjectAdminsEmail() {
+        accessSettingsStorageService.getUserRolesWithRole(RoleName.ROLE_PROJECT_ADMIN)?.findAll {
+            StringUtils.isNotEmpty(it.email)
+        }?.collect {
+            it.email
+        }?.unique()
     }
 
     private QueryUsersCriteria convert(QueryUsersCriteriaRequest request) {

@@ -338,6 +338,7 @@ class AccessSettingsStorageService {
                 roleName: input.role.roleName,
                 firstName: input.attrs.firstName,
                 lastName: input.attrs.lastName,
+                email: input.attrs.email
         )
         return res
     }

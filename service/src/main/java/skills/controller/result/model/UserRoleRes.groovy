@@ -29,4 +29,6 @@ class UserRoleRes {
     String projectId
 
     RoleName roleName
+
+    String email
 }

@@ -112,4 +112,7 @@ export default {
   isEmailServiceSupported() {
     return axios.get('/public/isFeatureSupported?feature=emailservice').then((response) => response.data);
   },
+  countProjectAdmins() {
+    return axios.get('/root/countAllProjectAdmins').then((response) => response.data);
+  },
 };
