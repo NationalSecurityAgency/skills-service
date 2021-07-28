@@ -98,7 +98,19 @@ limitations under the License.
     },
     computed: {
       themeObj() {
-        if (this.$route.query.enableTheme) {
+        if (this.$route.query.classicSkillsDisplay && this.$route.query.classicSkillsDisplay.toLowerCase() === 'true') {
+          const res = { ...this.theme };
+          return Object.assign(res, {
+            disableSkillTreeBrand: false,
+            disableBreadcrumb: false,
+            pageTitle: {
+              textColor: '#212529',
+              fontSize: '1.5rem',
+            },
+          });
+        }
+
+        if (this.$route.query.enableTheme && this.$route.query.enableTheme.toLowerCase() === 'true') {
           const res = { ...this.theme };
           return Object.assign(res, this.darkTheme);
         }
