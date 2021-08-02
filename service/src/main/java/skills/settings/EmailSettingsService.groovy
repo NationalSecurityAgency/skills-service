@@ -132,9 +132,13 @@ class EmailSettingsService {
 
     EmailConnectionInfo fetchEmailSettings() {
         List<SettingsResult> emailSettings = settingsService.getGlobalSettingsByGroup(settingsGroup)
+        return convert(emailSettings)
+    }
+
+    EmailConnectionInfo convert(List<SettingsResult> emailGroupSettings) {
         EmailConnectionInfo info = new EmailConnectionInfo()
-        if (emailSettings) {
-            def mappedSettings = emailSettings.collectEntries() {
+        if (emailGroupSettings) {
+            def mappedSettings = emailGroupSettings.collectEntries() {
                 [it.setting, it.value]
             }
             if (mappedSettings[(hostSetting)]) {
@@ -183,6 +187,10 @@ class EmailSettingsService {
 
     JavaMailSender getMailSender() {
         EmailConnectionInfo emailConnectionInfo = fetchEmailSettings()
+        return getMailSender(emailConnectionInfo)
+    }
+
+    JavaMailSender getMailSender(EmailConnectionInfo emailConnectionInfo) {
         return emailConnectionInfo ? createJavaMailSender(emailConnectionInfo) : null
     }
 }

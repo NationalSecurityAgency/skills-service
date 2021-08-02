@@ -1122,6 +1122,15 @@ class SkillsService {
         return wsHelper.adminPost("/projects/${projectId}/contactUsers", params)
     }
 
+    def countAllProjectAdminsWithEmail() {
+        return wsHelper.rootGet("/users/countAllProjectAdmins")
+    }
+
+    def contactAllProjectAdmins(String emailSubject, String emailBody) {
+        return wsHelper.rootPost("/users/contactAllProjectAdmins", ["emailSubject":emailSubject,"emailBody":emailBody])
+    }
+
+
     private String getProjectUrl(String project) {
         return "/projects/${project}".toString()
     }

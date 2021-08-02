@@ -45,6 +45,9 @@ limitations under the License.
       isSupervisor() {
         return this.$store.getters['access/isSupervisor'];
       },
+      isRoot() {
+        return this.$store.getters['access/isRoot'];
+      },
       headerOptions() {
         return {
           icon: 'fas fa-cubes',
@@ -64,6 +67,13 @@ limitations under the License.
     },
     methods: {
       loadNavItems() {
+        const contactAdmins = {
+          name: 'Contact Admins',
+          iconClass: 'fas fa-mail-bulk',
+          page: 'ContactAdmins',
+        };
+        this.handleNavItem(contactAdmins, this.isRoot);
+
         const metricsNavItem = {
           name: 'Metrics',
           iconClass: 'fa-chart-bar skills-color-metrics',

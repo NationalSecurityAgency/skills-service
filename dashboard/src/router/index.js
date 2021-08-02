@@ -49,6 +49,7 @@ import ResetNotSupportedPage from '@//components/access/ResetNotSupportedPage';
 import SelfReportStatusPage from '@//components/skills/selfReport/SelfReportStatusPage';
 import UserAgreement from '@//components/access/UserAgreement';
 import EmailUsers from '@//components/projects/EmailUsers';
+import EmaillProjectAdmins from '@//components/projects/EmailProjectAdmins';
 
 const GlobalBadgePage = () => import(/* webpackChunkName: 'globalBadgePage' */'@/components/badges/global/GlobalBadgePage');
 const GlobalBadgeSkills = () => import(/* webpackChunkName: 'globalBadgeSkills' */'@//components/badges/global/GlobalBadgeSkills');
@@ -101,6 +102,11 @@ const router = new Router({
         name: 'MultipleProjectsMetricsPage',
         path: 'metrics',
         component: MultipleProjectsMetricsPage,
+        meta: { requiresAuth: true },
+      }, {
+        name: 'ContactAdmins',
+        path: 'contactAdmins',
+        component: EmaillProjectAdmins,
         meta: { requiresAuth: true },
       }],
     },

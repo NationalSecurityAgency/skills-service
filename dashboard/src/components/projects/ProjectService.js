@@ -113,6 +113,9 @@ export default {
     return axios.get('/public/isFeatureSupported?feature=emailservice').then((response) => response.data);
   },
   countProjectAdmins() {
-    return axios.get('/root/countAllProjectAdmins').then((response) => response.data);
+    return axios.get('/root/users/countAllProjectAdmins').then((response) => response.data);
+  },
+  contactProjectAdmins(email) {
+    return axios.post('/root/users/contactAllProjectAdmins', email).then((response) => response.data);
   },
 };

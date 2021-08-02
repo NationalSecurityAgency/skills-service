@@ -22,8 +22,8 @@ limitations under the License.
         <div slot="overlay" class="alert alert-warning mt-2" data-cy="contactUsers_emailServiceWarning">
           <i class="fa fa-exclamation-triangle" aria-hidden="true"/> Please note that email notifications are currently disabled. Email configuration has not been performed on this instance of SkillTree. Please contact the root administrator.
         </div>
-        <div class="pl-2 ml-2 pr-2 mr-2 h5 pb-2 text-uppercase">Email Content</div>
-        <div class="m-4"><b-badge variant="info">{{this.currentCount}}</b-badge> Project Administrators</div>
+        <div class="m-4 h5 text-uppercase">Email Content</div>
+        <div class="m-4"><b-badge variant="info">{{this.currentCount}}</b-badge> Project Administrators <inline-help msg="Project Administrators without an associated email address will not be included in this count"/></div>
         <div class="row pl-3 pr-3 pt-3 pb-1 m-3 mb-1">
           <b-form-group class="w-100" id="subject-line-input-group" label="Subject Line" label-for="subject-line-input" label-class="text-muted">
             <b-input class="w-100" v-model="subject" id="subject-line-input" data-cy="emailUsers_subject"/>
@@ -48,15 +48,11 @@ limitations under the License.
 </template>
 
 <script>
-  import Multiselect from 'vue-multiselect';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import MarkdownEditor from '../utils/MarkdownEditor';
-  import SkillsService from '../skills/SkillsService';
-  import LevelService from '../levels/LevelService';
-  import BadgeService from '../badges/BadgesService';
-  import SubjectService from '../subjects/SubjectsService';
   import ProjectService from './ProjectService';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
+  import InlineHelp from '../utils/InlineHelp';
 
   export default {
     name: 'EmailUsers',
@@ -65,6 +61,7 @@ limitations under the License.
       SubPageHeader,
       // InlineHelp,
       MarkdownEditor,
+      InlineHelp,
     },
     mixins: [MsgBoxMixin],
     data() {
@@ -101,8 +98,6 @@ limitations under the License.
         }).then(() => {
           this.emailSent = true;
           this.$nextTick(() => {
-            this.resetTags();
-            this.resetCriteria();
             this.body = '';
             this.subject = '';
           });

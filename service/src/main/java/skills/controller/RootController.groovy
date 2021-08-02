@@ -271,26 +271,27 @@ class RootController {
     RequestResult pinProject(@PathVariable("projectId") String projectId) {
         //create project order setting for this user
         projAdminService.pinProjectForRootUser(projectId)
-        return new RequestResult(success: true)
+        return RequestResult.success()
     }
 
     @DeleteMapping('/pin/{projectId}')
     RequestResult unpinProject(@PathVariable("projectId") String projectId) {
         //remove project order setting for this user
         projAdminService.unpinProjectForRootUser(projectId)
-        return new RequestResult(success: true)
+        return RequestResult.success()
     }
 
-    @PostMapping('/users/countAllProjectAdmins')
+    @GetMapping('/users/countAllProjectAdmins')
     Long countProjectAdministrators() {
         Long res = contactUsersService.countAllProjectAdminsWithEmail()
         res == null ? 0 : res
     }
 
     @PostMapping('/users/contactAllProjectAdmins')
-    void contactProjectAdministrators(@RequestBody ContactUsersRequest cur) {
+    RequestResult contactProjectAdministrators(@RequestBody ContactUsersRequest cur) {
         //intentionally ignore queryCriteria as that doesn't apply to this use case
         contactUsersService.contactAllProjectAdmins(cur.emailSubject, cur.emailBody)
+        return RequestResult.success()
     }
 
 

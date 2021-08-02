@@ -15,8 +15,10 @@
  */
 package skills.services
 
+
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.stereotype.Component
 import org.thymeleaf.context.Context
@@ -40,18 +42,28 @@ class EmailSendingService {
     @Autowired
     SystemSettingsService systemSettingsService
 
-    void sendEmail(String subject, String to, String htmlBody, String plainTextBody = null, Date sentDate = null) {
-        sendEmail(subject, [to], htmlBody, plainTextBody, sentDate)
+    void sendEmail(String subject, String to, String htmlBody, String plainTextBody = null, Date sentDate = null, JavaMailSender mailSender = null, String fromEmail = null) {
+        sendEmail(subject, [to], htmlBody, plainTextBody, sentDate, mailSender, fromEmail)
     }
 
-    void sendEmail(String subject, List<String> to, String htmlBody, String plainTextBody = null, Date sentDate = null) {
+    void sendEmail(String subject, List<String> to, String htmlBody, String plainTextBody = null, Date sentDate = null, JavaMailSender sender = null, String sendFrom = null) {
 
-        String fromEmail = systemSettingsService.get()?.fromEmail
+        if (!sendFrom) {
+            sendFrom = systemSettingsService.get()?.fromEmail
+        }
+
+        String fromEmail = sendFrom
+
         if (!fromEmail) {
             fromEmail = FROM
         }
 
-        MimeMessage message = emailSettings.mailSender.createMimeMessage()
+        JavaMailSender mailSender = sender
+        if (!mailSender) {
+            mailSender = emailSettings.mailSender
+        }
+
+        MimeMessage message = mailSender.createMimeMessage()
         MimeMessageHelper helper = plainTextBody ?
                 new MimeMessageHelper(message, true) :
                 new MimeMessageHelper(message, "UTF-8")
@@ -68,7 +80,7 @@ class EmailSendingService {
         } else {
             helper.setText(htmlBody, true)
         }
-        emailSettings.mailSender.send(message)
+        mailSender.send(message)
     }
 
     void sendEmailWithThymeleafTemplate(String subject, String to, String templateFileName, Context thymeleafContext, String plainTextBodyAlt = null) {
@@ -79,4 +91,5 @@ class EmailSendingService {
         String htmlBody = thymeleafTemplateEngine.process(templateFileName, thymeleafContext)
         sendEmail(subject, to, htmlBody, plainTextBodyAlt)
     }
+
 }

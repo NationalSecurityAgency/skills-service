@@ -1306,4 +1306,10 @@
         </sql>
     </changeSet>
 
+    <changeSet id="10" author="skills team" context="migration10">
+        <dropForeignKeyConstraint baseTableName="notifications" constraintName="fk_notifications_user_id" />
+        <dropIndex tableName="notifications" indexName="notifications_user_id" />
+        <modifyDataType tableName="notifications" columnName="user_id" newDataType="text" />
+    </changeSet>
+
 </databaseChangeLog>
