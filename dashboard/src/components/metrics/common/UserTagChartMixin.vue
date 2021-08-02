@@ -20,72 +20,123 @@ limitations under the License.
 </template>
 
 <script>
+  import numberFormatter from '@/filters/NumberFilter';
+
   export default {
     name: 'UserTagChartMixin',
-    computed: {
-      options() {
-        return {
-          projectId: this.projectId,
-          authenticator: this.authenticator,
-          serviceUrl: this.serviceUrl,
-          autoScrollStrategy: 'top-of-page',
-        };
-      },
-      serviceUrl() {
-        return window.location.origin;
-      },
-      authenticator() {
-        if (this.$store.getters.isPkiAuthenticated) {
-          return 'pki';
-        }
-        return `${this.serviceUrl}/api/projects/${encodeURIComponent(this.projectId)}/token`;
-      },
-      userId() {
-        let id = null;
-        if (this.$store.getters.userInfo) {
-          id = this.$store.getters.userInfo.userId;
-        }
-        return id;
-      },
-      skillsClientDisplayPath() {
-        return this.$store.getters.skillsClientDisplayPath;
-      },
-    },
-    watch: {
-      skillsClientDisplayPath(newVal, oldVal) {
-        const currentRoute = this.$route;
-        if (newVal.fromDashboard) {
-          if (newVal.path && newVal.path !== oldVal.path) { // && newVal.path !== currentRoute.query.skillsClientDisplayPath) {
-            this.$refs.skillsDisplayRef.navigate(newVal.path);
-          }
-        } else if (this.pathsAreDifferent(newVal.path, oldVal.path, currentRoute)) {
-          const newRoute = {
-            path: currentRoute.path,
-            query: JSON.parse(JSON.stringify(currentRoute.query)),
-            hash: currentRoute.hash,
-            meta: currentRoute.meta,
-          };
-          newRoute.query.skillsClientDisplayPath = newVal.path;
-          this.$router.replace(newRoute);
-        }
-      },
-    },
-    methods: {
-      skillsDisplayRouteChanged(newPath) {
-        if (newPath !== '/' && newPath !== this.skillsClientDisplayPath) {
-          this.$store.commit('skillsClientDisplayPath', { path: newPath, fromDashboard: false });
-        }
-      },
-      pathsAreDifferent(newPath, oldPath, currentRoute) {
-        const routePath = currentRoute.query.skillsClientDisplayPath;
-        const newAndOldDiff = newPath !== oldPath;
-        const newAndRouteDiff = newPath !== routePath;
-        return newAndOldDiff && newAndRouteDiff;
-      },
+    data() {
+      return {
+        pieChartOptions: {
+          chart: {
+            // height: 250,
+            // width: 250,
+            type: 'pie',
+            toolbar: {
+              show: true,
+              offsetX: 0,
+              offsetY: -60,
+            },
+          },
+          // colors: ['#17a2b8', '#28a745'],
+          labels: [],
+          dataLabels: {
+            enabled: false,
+          },
+          legend: {
+            position: 'top',
+            horizontalAlign: 'left',
+          },
+        },
+        barChartOptions: {
+          chart: {
+            type: 'bar',
+            // height: 350,
+            toolbar: {
+              show: true,
+              offsetX: 0,
+              offsetY: -60,
+            },
+          },
+          plotOptions: {
+            bar: {
+              barHeight: '90%',
+              endingShape: 'rounded',
+              distributed: true,
+              horizontal: true,
+              dataLabels: {
+                position: 'bottom',
+              },
+            },
+          },
+          dataLabels: {
+            enabled: true,
+            textAnchor: 'start',
+            style: {
+              colors: ['#17a2b8'],
+              fontSize: '14px',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              fontWeight: 'bold',
+            },
+            formatter(val, opt) {
+              return `${opt.w.globals.labels[opt.dataPointIndex]}: ${numberFormatter(val)} users`;
+            },
+            offsetX: 0,
+            dropShadow: {
+              enabled: true,
+            },
+            background: {
+              enabled: true,
+              foreColor: '#ffffff',
+              padding: 10,
+              borderRadius: 2,
+              borderWidth: 1,
+              borderColor: '#686565',
+              opacity: 1,
+              dropShadow: {
+                enabled: false,
+              },
+            },
+          },
+          stroke: {
+            show: true,
+            width: 2,
+            colors: ['transparent'],
+          },
+          xaxis: {
+            categories: [],
+            labels: {
+              formatter(val) {
+                return numberFormatter(val);
+              },
+            },
+          },
+          yaxis: {
+            labels: {
+              show: false,
+            },
+          },
+          grid: {
+            borderColor: '#cfeaf3',
+            position: 'front',
+          },
+          legend: {
+            show: false,
+          },
+          fill: {
+            opacity: 1,
+          },
+          tooltip: {
+            y: {
+              formatter(val) {
+                return numberFormatter(val);
+              },
+            },
+          },
+        },
+      };
     },
   };
 </script>
 
 <style scoped>
-
 </style>

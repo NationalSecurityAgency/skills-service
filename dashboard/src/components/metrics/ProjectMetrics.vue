@@ -23,8 +23,8 @@ limitations under the License.
     <div v-if="tagCharts" class="row" data-cy="userTagCharts">
       <div class="col-12 col-md-6 mt-2" v-for="(tagChart, index) in tagCharts" :key="`${tagChart.key}-${index}`">
         <div  v-if="index > 0 && index % 2 == 0" class="w-100"></div>
-        <user-tag-pie-chart v-if="tagChart.type == 'pie'" class="h-100" :tag-key="tagChart.key" :title="tagChart.title"/>
-        <user-tag-bar-chart v-if="tagChart.type == 'bar'" class="h-100" :tag-key="tagChart.key" :title="tagChart.title"/>
+<!--        <user-tag-pie-chart v-if="tagChart.type == 'pie'" class="h-100" :tag-key="tagChart.key" :title="tagChart.title"/>-->
+        <user-tag-chart class="h-100" :chart-type="tagChart.type" :tag-key="tagChart.key" :title="tagChart.title"/>
       </div>
     </div>
   </div>
@@ -32,13 +32,14 @@ limitations under the License.
 
 <script>
   import NumUsersPerDay from './common/NumUsersPerDay';
-  import UserTagPieChart from './common/UserTagPieChart';
-  import UserTagBarChart from './common/UserTagBarChart';
+  // import UserTagPieChart from './common/UserTagPieChart';
+  // import UserTagBarChart from './common/UserTagBarChart';
+  import UserTagChart from './common/UserTagChart';
 
   export default {
     name: 'ProjectMetrics',
     components: {
-      NumUsersPerDay, UserTagPieChart, UserTagBarChart,
+      NumUsersPerDay, UserTagChart,
     },
     computed: {
       tagCharts() {

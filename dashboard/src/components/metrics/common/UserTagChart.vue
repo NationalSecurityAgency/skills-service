@@ -16,7 +16,7 @@ limitations under the License.
 <template>
   <metrics-card :title="title" data-cy="userTagPieChart">
     <metrics-overlay :loading="isLoading" :has-data="!isEmpty" no-data-icon="fa fa-info-circle" no-data-msg="No user data yet...">
-      <apexchart type="pie" height="350"  :options="chartOptions" :series="series"></apexchart>
+      <apexchart :type="this.chartType" height="350"  :options="chartOptions" :series="series"></apexchart>
     </metrics-overlay>
   </metrics-card>
 </template>
@@ -25,14 +25,24 @@ limitations under the License.
   import MetricsCard from '../utils/MetricsCard';
   import MetricsService from '../MetricsService';
   import MetricsOverlay from '../utils/MetricsOverlay';
+  import UserTagChartMixin from './UserTagChartMixin';
+
+  const PIE = 'pie';
+  const BAR = 'bar';
 
   export default {
-    name: 'UserTagPieChart',
+    name: 'UserTagChart',
+    mixins: [UserTagChartMixin],
     components: { MetricsOverlay, MetricsCard },
     props: {
       tagKey: {
         type: String,
         required: true,
+      },
+      chartType: {
+        type: String,
+        required: true,
+        validator: (value) => ([PIE, BAR].indexOf(value) >= 0),
       },
       title: {
         type: String,
@@ -45,30 +55,16 @@ limitations under the License.
         isLoading: true,
         isEmpty: false,
         series: [],
-        chartOptions: {
-          chart: {
-            // height: 250,
-            // width: 250,
-            type: 'pie',
-            toolbar: {
-              show: true,
-              offsetX: 0,
-              offsetY: -60,
-            },
-          },
-          // colors: ['#17a2b8', '#28a745'],
-          labels: [],
-          dataLabels: {
-            enabled: false,
-          },
-          legend: {
-            position: 'top',
-            horizontalAlign: 'left',
-          },
-        },
+        chartOptions: {},
       };
     },
     mounted() {
+      if (this.chartType === PIE) {
+        this.chartOptions = this.pieChartOptions;
+      }
+      if (this.chartType === BAR) {
+        this.chartOptions = this.barChartOptions;
+      }
       this.loadData();
     },
     methods: {
@@ -83,7 +79,15 @@ limitations under the License.
                 series.push(data.count);
                 labels.push(data.value);
               });
-              this.series = series;
+              if (this.chartType === PIE) {
+                this.series = series;
+              }
+              if (this.chartType === BAR) {
+                this.series = [{
+                  name: 'Number of Users',
+                  data: series,
+                }];
+              }
               this.chartOptions = { labels };
               this.isEmpty = dataFromServer.find((item) => item.count > 0) === undefined;
             }
@@ -95,5 +99,4 @@ limitations under the License.
 </script>
 
 <style scoped>
-
 </style>
