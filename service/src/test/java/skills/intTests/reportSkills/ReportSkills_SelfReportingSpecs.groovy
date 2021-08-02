@@ -476,7 +476,6 @@ Always yours, <br/> -SkillTree Bot
         res2.body.explanation == "Skill was submitted for approval"
     }
 
-    @IgnoreRest
     def "ability to override submission for a rejected approval"() {
         String user = "skills@skills.org"
 
