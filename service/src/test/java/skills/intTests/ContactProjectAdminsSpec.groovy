@@ -16,6 +16,7 @@
 package skills.intTests
 
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.EmailUtils
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.utils.WaitFor
@@ -34,13 +35,11 @@ class ContactProjectAdminsSpec extends DefaultIntSpec {
     }
 
     def "count project admins"() {
-
-        def users = getRandomUsers(15)
+        def users = getRandomUsers(15, true)
 
         SkillsService proj1Serv = createService(users[0])
         SkillsService proj2Serv = createService(users[1])
         SkillsService proj3Serv = createService(users[2])
-
 
         def proj1 = SkillsFactory.createProject(1)
         def subj1 = SkillsFactory.createSubject()
@@ -56,9 +55,9 @@ class ContactProjectAdminsSpec extends DefaultIntSpec {
         proj2Serv.createProject(proj2)
         proj3Serv.createProject(proj3)
 
-        proj1Serv.createUser([email: users[3],  password: 'p@ssW0rd', firstName: 'fname', lastName: 'lname'])
-        proj1Serv.createUser([email: users[4],  password: 'p@ssW0rd', firstName: 'fname', lastName: 'lname'])
-        proj1Serv.createUser([email: users[5],  password: 'p@ssW0rd', firstName: 'fname', lastName: 'lname'])
+        createService(users[3])
+        createService(users[4])
+        createService(users[5])
         proj1Serv.addUserRole(users[3], proj1.projectId, "ROLE_PROJECT_ADMIN")
         proj2Serv.addUserRole(users[4], proj2.projectId, "ROLE_PROJECT_ADMIN")
         proj3Serv.addUserRole(users[5], proj3.projectId, "ROLE_PROJECT_ADMIN")
@@ -71,15 +70,45 @@ class ContactProjectAdminsSpec extends DefaultIntSpec {
 
         when:
         def count = rootServiceOne.countAllProjectAdminsWithEmail()
-        rootServiceOne.contactAllProjectAdmins("test subject", "#test email body")
+        rootServiceOne.contactAllProjectAdmins("test subject", "# test email body")
 
         WaitFor.wait { greenMail.getReceivedMessages().size() >= 6 }
 
-        then:
-        count == 6
-        greenMail.receivedMessages.length == 6
+        def messages = EmailUtils.getEmails(greenMail)
 
-        //create projects, assign these users as project admins
-        //add one user as just a skill reporter
+        then:
+        count == 7 //inception adds +1 to the expectation
+        messages.size() == count
+        messages.collect {
+            assert it.html.replaceAll('\r\n', '\n') == '''<!--
+Copyright 2020 SkillTree
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<!DOCTYPE html>
+<html   lang="en"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.thymeleaf.org http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body class="overall-container">
+
+<h1>test email body</h1>
+
+
+</body>
+</html>'''
+        }
     }
 }
