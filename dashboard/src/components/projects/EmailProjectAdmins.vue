@@ -23,7 +23,7 @@ limitations under the License.
           <i class="fa fa-exclamation-triangle" aria-hidden="true"/> Please note that email notifications are currently disabled. Email configuration has not been performed on this instance of SkillTree. Please contact the root administrator.
         </div>
         <div class="m-4 h5 text-uppercase">Email Content</div>
-        <div class="m-4"><b-badge variant="info">{{this.currentCount}}</b-badge> Project Administrators <inline-help msg="Project Administrators without an associated email address will not be included in this count"/></div>
+        <div class="m-4"><b-badge variant="info" data-cy="projectAdminCount">{{this.currentCount}}</b-badge> Project Administrators <inline-help msg="Project Administrators without an associated email address will not be included in this count"/></div>
         <div class="row pl-3 pr-3 pt-3 pb-1 m-3 mb-1">
           <b-form-group class="w-100" id="subject-line-input-group" label="Subject Line" label-for="subject-line-input" label-class="text-muted">
             <b-input class="w-100" v-model="subject" id="subject-line-input" data-cy="emailUsers_subject"/>
