@@ -1318,4 +1318,49 @@
         <modifyDataType tableName="notifications" columnName="user_id" newDataType="text" />
     </changeSet>
 
+    <changeSet id="11" author="skills team" context="migration11">
+        <!-- ============================================================================
+        Table: User Tags
+        ============================================================================-->
+        <createTable tableName="user_tags">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="key" type="varchar(255)"/>
+            <column name="value" type="varchar(255)"/>
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="index_users_tags_user_id"
+                     tableName="user_tags">
+            <column name="user_id" type="varchar(255)"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="user_tags"
+                                 constraintName="fk_user_tags_user_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="user_id"
+                                 referencedTableName="user_attrs" />
+
+        <addColumn tableName="user_attrs">
+            <column name="user_tags_last_updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <insert tableName="skills_db_locks">
+            <column name="lock" type="varchar(255)" value="create_or_update_user"/>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>

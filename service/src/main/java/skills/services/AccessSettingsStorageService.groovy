@@ -34,11 +34,13 @@ import skills.controller.result.model.UserRoleRes
 import skills.services.inception.InceptionProjectService
 import skills.services.settings.SettingsService
 import skills.storage.model.UserAttrs
+import skills.storage.model.UserTag
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.User
 import skills.storage.model.auth.UserRole
 import skills.storage.repos.UserRepo
 import skills.storage.repos.UserRoleRepo
+import skills.storage.repos.UserTagRepo
 
 import java.util.stream.Stream
 
@@ -54,6 +56,9 @@ class AccessSettingsStorageService {
 
     @Autowired
     UserRepo userRepository
+
+    @Autowired
+    UserTagRepo userTagsRepository
 
     @Autowired
     UserInfoService userInfoService
@@ -255,6 +260,8 @@ class AccessSettingsStorageService {
             log.debug("Creating new app user for ID [{}], DN [{}]", userInfo.username, userInfo.userDn)
             user = createNewUser(userInfo)
         }
+        userTagsRepository.deleteByUserId(userId)
+        userTagsRepository.saveAll(userInfo.additionalAttributes.collect { new UserTag(userId: userId, key: it.key, value: it.value) })
 
         return new UserAndUserAttrsHolder(user: user, userAttrs: userAttrs)
     }

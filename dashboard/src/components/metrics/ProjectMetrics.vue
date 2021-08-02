@@ -14,15 +14,42 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <num-users-per-day />
+  <div>
+    <div class="row">
+      <div class="col-12">
+        <num-users-per-day />
+      </div>
+    </div>
+    <div v-if="tagCharts" class="row" data-cy="userTagCharts">
+      <div class="col-12 col-md-6 mt-2" v-for="(tagChart, index) in tagCharts" :key="`${tagChart.key}-${index}`">
+        <div  v-if="index > 0 && index % 2 == 0" class="w-100"></div>
+        <user-tag-pie-chart v-if="tagChart.type == 'pie'" class="h-100" :tag-key="tagChart.key" :title="tagChart.title"/>
+        <user-tag-bar-chart v-if="tagChart.type == 'bar'" class="h-100" :tag-key="tagChart.key" :title="tagChart.title"/>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
   import NumUsersPerDay from './common/NumUsersPerDay';
+  import UserTagPieChart from './common/UserTagPieChart';
+  import UserTagBarChart from './common/UserTagBarChart';
 
   export default {
     name: 'ProjectMetrics',
-    components: { NumUsersPerDay },
+    components: {
+      NumUsersPerDay, UserTagPieChart, UserTagBarChart,
+    },
+    computed: {
+      tagCharts() {
+        if (this.$store.getters.config && this.$store.getters.config.projectMetricsTagCharts) {
+          const json = this.$store.getters.config.projectMetricsTagCharts;
+          const charts = JSON.parse(json);
+          return charts;
+        }
+        return [];
+      },
+    },
   };
 </script>
 

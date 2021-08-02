@@ -23,11 +23,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import skills.controller.result.model.LabelCountItem
-import skills.controller.result.model.ProjectUser
-import skills.controller.result.model.TableResult
-import skills.controller.result.model.TimestampCountItem
-import skills.controller.result.model.UserInfoRes
+import skills.controller.result.model.*
 import skills.skillLoading.RankingLoader
 import skills.skillLoading.model.UsersPerLevel
 import skills.storage.model.DayCountItem
@@ -35,13 +31,13 @@ import skills.storage.model.SkillDef
 import skills.storage.model.UserPoints
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPointsRepo
+import skills.storage.repos.UserTagRepo
 
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.Month
 import java.time.format.TextStyle
-import java.time.temporal.TemporalField
 
 @Service
 @Slf4j
@@ -61,6 +57,9 @@ class AdminUsersService {
 
     @Autowired
     UserEventService userEventService
+
+    @Autowired
+    UserTagRepo userTagRepo
 
     List<TimestampCountItem> getUsage(String projectId, String skillId, Date start) {
         Date startDate = LocalDateTime.of(start.toLocalDate(), LocalTime.MIN).toDate()
@@ -143,6 +142,14 @@ class AdminUsersService {
 
         return levels.collect{
             new LabelCountItem(value: "Level ${it.level}", count: it.numUsers)
+        }
+    }
+
+    List<LabelCountItem> getUserCountsForTag(String projectId, String tagKey) {
+        List<UserTagRepo.UserTagCount> userTagCounts = userTagRepo.countDistinctUserIdByProjectIdAndUserTag(projectId, tagKey)
+
+        return userTagCounts.collect{
+            new LabelCountItem(value: it.tag, count: it.numUsers)
         }
     }
 

@@ -44,6 +44,7 @@ class MetricsParams {
     public static final String P_MIN_LEVEL = "minLevel"
     public static final String P_FROM_DAY_FILTER = "fromDayFilter"
     public static final String P_TO_DAY_FILTER = "toDayFilter"
+    public static final String P_TAG_KEY = "tagKey"
     public static final DateFormat DAY_FORMAT = new SimpleDateFormat("yyyy-MM-dd")
 
     static String ACHIEVEMENT_TYPE_OVERALL = "Overall"
@@ -54,6 +55,10 @@ class MetricsParams {
 
     static String getSubjectId(String projectId, String chartId, Map<String, String> props) {
         return getParam(props, P_SUBJECT_ID, chartId, projectId)
+    }
+
+    static String getTagKey(String projectId, String chartId, Map<String, String> props) {
+        return getParam(props, P_TAG_KEY, chartId, projectId)
     }
 
     static String getUsernameFilter(String projectId, String chartId, Map<String, String> props, boolean isOptional = false) {
