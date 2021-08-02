@@ -26,7 +26,7 @@ limitations under the License.
     </div>
 
     <div class="col text-right">
-      <b-button-group size="sm" class="buttons mr-2">
+      <b-button-group size="sm" class="buttons">
         <b-button ref="editBtn"
                   size="sm"
                   variant="outline-primary"
@@ -45,7 +45,7 @@ limitations under the License.
         </span>
       </b-button-group>
 
-      <b-button-group size="sm" class="buttons">
+      <b-button-group v-if="!disableSortControls" size="sm" class="buttons ml-2">
         <b-button variant="outline-primary"
                   @click="$emit('move-up')"
                   :disabled="options.isFirst"
@@ -67,6 +67,10 @@ limitations under the License.
     name: 'CardNavigateAndEditControls',
     props: {
       options: Object,
+      disableSortControls: {
+        type: Boolean,
+        default: false,
+      },
     },
     methods: {
       focusOnEdit() {

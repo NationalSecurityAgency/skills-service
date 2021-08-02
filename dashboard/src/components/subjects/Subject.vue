@@ -16,15 +16,16 @@ limitations under the License.
 <template>
   <div class="h-100" data-cy="subjectCard">
     <loading-card :loading="isLoading"/>
-    <nav-card-with-stats-and-controls v-if="!isLoading" :options="cardOptions" :data-cy="`subjectCard-${subjectInternal.subjectId}`">
+    <nav-card-with-stats-and-controls v-if="!isLoading"
+                                      :disable-sort-control="disableSortControl"
+                                      :options="cardOptions" :data-cy="`subjectCard-${subjectInternal.subjectId}`">
       <div slot="underTitle">
         <card-navigate-and-edit-controls
           ref="subjectCardControls" class="mt-2"
           :options="cardOptions.controls"
           @edit="showEditSubject=true"
           @delete="deleteSubject"
-          @move-up="moveUp"
-          @move-down="moveDown"
+          :disable-sort-controls="true"
           :is-delete-disabled="deleteSubjectDisabled"
           :delete-disabled-text="deleteSubjectToolTip" />
       </div>
@@ -55,7 +56,7 @@ limitations under the License.
       LoadingCard,
       EditSubject,
     },
-    props: ['subject'],
+    props: ['subject', 'disableSortControl'],
     data() {
       return {
         isLoading: false,
@@ -107,8 +108,6 @@ limitations under the License.
             id: this.subjectInternal.subjectId,
             deleteDisabledText: this.deleteSubjectToolTip,
             isDeleteDisabled: this.deleteSubjectDisabled,
-            isFirst: this.subjectInternal.isFirst,
-            isLast: this.subjectInternal.isLast,
           },
         };
       },
@@ -144,12 +143,6 @@ limitations under the License.
           .finally(() => {
             this.isLoading = false;
           });
-      },
-      moveUp() {
-        this.$emit('move-subject-up', this.subjectInternal);
-      },
-      moveDown() {
-        this.$emit('move-subject-down', this.subjectInternal);
       },
       hiddenEventHandler(e) {
         if (!e || !e.update) {

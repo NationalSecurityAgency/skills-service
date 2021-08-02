@@ -448,27 +448,27 @@ describe('Navigation Tests', () => {
     cy.intercept('/api/myprojects/proj2').as('updateMyProj2');
     cy.intercept('/api/myprojects/proj3').as('updateMyProj3');
 
-    cy.validateMyProjectsSort(['This is project 3', 'This is project 2', 'This is project 1'])
-    cy.get(proj2Selector).dragMyProject(proj1Selector)
+    cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 3', 'This is project 2', 'This is project 1'])
+    cy.get(proj2Selector).dragAndDrop(proj1Selector)
     cy.wait('@updateMyProj2')
-    cy.validateMyProjectsSort(['This is project 3', 'This is project 1', 'This is project 2'])
+    cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 3', 'This is project 1', 'This is project 2'])
 
     // refresh and make sure that sort order is still the same
     cy.visit('/progress-and-rankings');
-    cy.validateMyProjectsSort(['This is project 3', 'This is project 1', 'This is project 2'])
+    cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 3', 'This is project 1', 'This is project 2'])
 
-    cy.get(proj3Selector).dragMyProject(proj2Selector)
+    cy.get(proj3Selector).dragAndDrop(proj2Selector)
     cy.wait('@updateMyProj3')
-    cy.validateMyProjectsSort(['This is project 1', 'This is project 2', 'This is project 3'])
+    cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 1', 'This is project 2', 'This is project 3'])
 
-    cy.get(proj1Selector).dragMyProject(proj2Selector)
+    cy.get(proj1Selector).dragAndDrop(proj2Selector)
     cy.wait('@updateMyProj1')
-    cy.validateMyProjectsSort(['This is project 2', 'This is project 1', 'This is project 3'])
+    cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 2', 'This is project 1', 'This is project 3'])
 
     // navigate to My Projects and then return
     cy.get('[data-cy="manageMyProjsBtn"]').click();
     cy.get('[data-cy="backToProgressAndRankingBtn"]').click();
-    cy.validateMyProjectsSort(['This is project 2', 'This is project 1', 'This is project 3'])
+    cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 2', 'This is project 1', 'This is project 3'])
   })
 
   it('cards on small and medium screen', function () {

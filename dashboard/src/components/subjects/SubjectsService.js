@@ -40,8 +40,8 @@ export default {
     return axios.post(`/admin/projects/${subject.projectId}/subjects/${subject.subjectId}`, subject)
       .then(() => this.getSubjectDetails(subject.projectId, subject.subjectId));
   },
-  patchSubject(subject, actionToSubmit) {
-    return axios.patch(`/admin/projects/${subject.projectId}/subjects/${subject.subjectId}`, { action: actionToSubmit });
+  updateSubjectsDisplaySortOrder(projectId, subjectId, newDisplayOrderIndex) {
+    return axios.patch(`/admin/projects/${projectId}/subjects/${subjectId}`, { action: 'NewDisplayOrderIndex', newDisplayOrderIndex });
   },
   deleteSubject(subject) {
     return axios.delete(`/admin/projects/${subject.projectId}/subjects/${subject.subjectId}`);

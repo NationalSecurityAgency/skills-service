@@ -19,11 +19,21 @@ limitations under the License.
                      :disabled="addSubjectDisabled" :disabled-msg="addSubjectsDisabledMsg"
                      :aria-label="'new subject'"/>
     <loading-container v-bind:is-loading="isLoading">
-      <div v-if="subjects && subjects.length" class="row justify-content-center">
+      <div v-if="subjects && subjects.length" class="row justify-content-center" id="subjectCards">
         <div v-for="(subject) of subjects" :key="subject.subjectId" :id="subject.subjectId" class="col-lg-4 mb-3"
              style="min-width: 23rem;">
-          <subject :subject="subject" v-on:subject-deleted="deleteSubject" v-on:move-subject-up="moveSubjectUp"
-                   v-on:move-subject-down="moveSubjectDown"/>
+          <b-overlay :show="sortOrder.loading" rounded="sm" opacity="0.4">
+            <template #overlay>
+              <div class="text-center">
+                <div v-if="subject.subjectId===sortOrder.loadingSubjectId">
+                  <div class="text-info text-uppercase mb-1">Updating sort order!</div>
+                  <b-spinner label="Loading..." style="width: 3rem; height: 3rem;" variant="info"/>
+                </div>
+              </div>
+            </template>
+
+            <subject :subject="subject" v-on:subject-deleted="deleteSubject" :disable-sort-control="subjects.length === 1" />
+          </b-overlay>
         </div>
       </div>
 
@@ -38,6 +48,7 @@ limitations under the License.
 </template>
 
 <script>
+  import Sortable from 'sortablejs';
   import { createNamespacedHelpers } from 'vuex';
   import { SkillsReporter } from '@skilltree/skills-client-vue';
   import Subject from './Subject';
@@ -64,6 +75,10 @@ limitations under the License.
         subjects: [],
         displayNewSubjectModal: false,
         projectId: null,
+        sortOrder: {
+          loading: false,
+          loadingSubjectId: '-1',
+        },
       };
     },
     mounted() {
@@ -87,13 +102,10 @@ limitations under the License.
         SubjectsService.getSubjects(this.projectId)
           .then((response) => {
             this.subjects = response;
-            if (this.subjects.length) {
-              this.subjects[0].isFirst = true;
-              this.subjects[this.subjects.length - 1].isLast = true;
-            }
           })
           .finally(() => {
             this.isLoading = false;
+            this.enableDropAndDrop();
           });
       },
       deleteSubject(subject) {
@@ -120,19 +132,6 @@ limitations under the License.
             this.handleFocus();
           });
       },
-      moveSubjectDown(subject) {
-        this.moveSubject(subject, 'DisplayOrderDown');
-      },
-      moveSubjectUp(subject) {
-        this.moveSubject(subject, 'DisplayOrderUp');
-      },
-      moveSubject(subject, actionToSubmit) {
-        this.isLoading = true;
-        SubjectsService.patchSubject(subject, actionToSubmit)
-          .then(() => {
-            this.loadSubjects();
-          });
-      },
       handleHide(e) {
         if (!e || !e.update) {
           this.handleFocus();
@@ -142,6 +141,32 @@ limitations under the License.
         this.$nextTick(() => {
           this.$refs.subPageHeader.$refs.actionButton.focus();
         });
+      },
+      enableDropAndDrop() {
+        if (this.subjects && this.subjects.length > 0) {
+          const self = this;
+          this.$nextTick(() => {
+            const cards = document.getElementById('subjectCards');
+            Sortable.create(cards, {
+              handle: '.sort-control',
+              animation: 150,
+              ghostClass: 'sort-order-ghost-class',
+              onUpdate(event) {
+                self.sortOrderUpdate(event);
+              },
+            });
+          });
+        }
+      },
+      sortOrderUpdate(updateEvent) {
+        const { id } = updateEvent.item;
+        this.sortOrder.loadingSubjectId = id;
+        this.sortOrder.loading = true;
+        console.log(`${id} => ${updateEvent.newIndex}`);
+        SubjectsService.updateSubjectsDisplaySortOrder(this.projectId, id, updateEvent.newIndex)
+          .finally(() => {
+            this.sortOrder.loading = false;
+          });
       },
     },
     computed: {

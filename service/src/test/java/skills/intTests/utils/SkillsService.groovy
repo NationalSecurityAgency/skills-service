@@ -157,6 +157,15 @@ class SkillsService {
         wsHelper.adminPatch(getSubjectUrl(props.projectId, props.subjectId), '{"action": "DisplayOrderDown"}')
     }
 
+
+    @Profile
+    def changeSubjectDisplayOrder(Map props, Integer newDisplayOrderIndex){
+        wsHelper.adminPatch(getSubjectUrl(props.projectId, props.subjectId), [
+                action: "NewDisplayOrderIndex",
+                newDisplayOrderIndex: newDisplayOrderIndex,
+        ]);
+    }
+
     @Profile
     def moveSkillUp(Map props){
         wsHelper.adminPatch(getSkillUrl(props.projectId, props.subjectId, props.skillId), '{"action": "DisplayOrderUp"}')

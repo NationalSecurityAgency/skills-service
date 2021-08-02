@@ -15,6 +15,7 @@
  */
 package skills.intTests.adminDisplayOrder
 
+import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
@@ -38,40 +39,67 @@ class SubjectsOrderSpecs extends DefaultIntSpec {
     def "move subject down"() {
         when:
         def beforeMove = skillsService.getSubjects(proj.projectId)
-        skillsService.moveSubjectDown(subjects.first())
+        skillsService.changeSubjectDisplayOrder(subjects.first(), 1)
         def afterMove = skillsService.getSubjects(proj.projectId)
         then:
         beforeMove.collect({it.subjectId}) == ["TestSubject1", "TestSubject2", "TestSubject3", "TestSubject4", "TestSubject5"]
         afterMove.collect({it.subjectId}) == ["TestSubject2", "TestSubject1", "TestSubject3", "TestSubject4", "TestSubject5"]
-    }
-
-    def "should not be able to move down the last subject"() {
-        when:
-        def beforeMove = skillsService.getSubjects(proj.projectId)
-        skillsService.moveSubjectDown(subjects.last())
-        then:
-        thrown(SkillsClientException)
-        beforeMove.collect({it.subjectId}) == ["TestSubject1", "TestSubject2", "TestSubject3", "TestSubject4", "TestSubject5"]
-        skillsService.getSubjects(proj.projectId).collect({it.subjectId}) == ["TestSubject1", "TestSubject2", "TestSubject3", "TestSubject4", "TestSubject5"]
     }
 
     def "move subject up"() {
         when:
         def beforeMove = skillsService.getSubjects(proj.projectId)
-        skillsService.moveSubjectUp(subjects.get(1))
+        skillsService.changeSubjectDisplayOrder(subjects.get(1), 0)
         def afterMove = skillsService.getSubjects(proj.projectId)
         then:
         beforeMove.collect({it.subjectId}) == ["TestSubject1", "TestSubject2", "TestSubject3", "TestSubject4", "TestSubject5"]
         afterMove.collect({it.subjectId}) == ["TestSubject2", "TestSubject1", "TestSubject3", "TestSubject4", "TestSubject5"]
     }
 
-    def "should not be able to move the first subject up"() {
+    def "sequence of subject display order operations"() {
         when:
         def beforeMove = skillsService.getSubjects(proj.projectId)
-        skillsService.moveSubjectUp(subjects.first())
+        skillsService.changeSubjectDisplayOrder(subjects.get(0), 3)
+        def move1 = skillsService.getSubjects(proj.projectId)
+
+        skillsService.changeSubjectDisplayOrder(subjects.get(4), 0)
+        def move2 = skillsService.getSubjects(proj.projectId)
+
+        skillsService.changeSubjectDisplayOrder(subjects.get(1), 4)
+        def move3 = skillsService.getSubjects(proj.projectId)
+
+        skillsService.changeSubjectDisplayOrder(subjects.get(2), 2)
+        def move4 = skillsService.getSubjects(proj.projectId)
         then:
-        thrown(SkillsClientException)
         beforeMove.collect({it.subjectId}) == ["TestSubject1", "TestSubject2", "TestSubject3", "TestSubject4", "TestSubject5"]
-        skillsService.getSubjects(proj.projectId).collect({it.subjectId}) == ["TestSubject1", "TestSubject2", "TestSubject3", "TestSubject4", "TestSubject5"]
+        move1.collect({it.subjectId}) == ["TestSubject2", "TestSubject3", "TestSubject4", "TestSubject1", "TestSubject5"]
+        move2.collect({it.subjectId}) == ["TestSubject5", "TestSubject2", "TestSubject3", "TestSubject4", "TestSubject1"]
+        move3.collect({it.subjectId}) == ["TestSubject5", "TestSubject3", "TestSubject4", "TestSubject1", "TestSubject2"]
+        move4.collect({it.subjectId}) == ["TestSubject5", "TestSubject4", "TestSubject3", "TestSubject1", "TestSubject2"]
     }
+
+    def "move subject to out of the max bound - should be placed last"() {
+        when:
+        def beforeMove = skillsService.getSubjects(proj.projectId)
+        skillsService.changeSubjectDisplayOrder(subjects.get(0), 10)
+        def afterMove = skillsService.getSubjects(proj.projectId)
+        then:
+        beforeMove.collect({it.subjectId}) == ["TestSubject1", "TestSubject2", "TestSubject3", "TestSubject4", "TestSubject5"]
+        afterMove.collect({it.subjectId}) == ["TestSubject2", "TestSubject3", "TestSubject4", "TestSubject5", "TestSubject1"]
+    }
+
+    def "new display index must be >=0 "() {
+        when:
+        skillsService.changeSubjectDisplayOrder(subjects.get(2), 0)
+        def afterMove = skillsService.getSubjects(proj.projectId)
+        skillsService.changeSubjectDisplayOrder(subjects.get(2), -1)
+        then:
+        SkillsClientException exception = thrown()
+        exception.httpStatus == HttpStatus.BAD_REQUEST
+        exception.message.contains('[newDisplayOrderIndex] param must be >=0 but received [-1]')
+
+        afterMove.collect({it.subjectId}) == ["TestSubject3", "TestSubject1", "TestSubject2", "TestSubject4", "TestSubject5"]
+
+    }
+
 }

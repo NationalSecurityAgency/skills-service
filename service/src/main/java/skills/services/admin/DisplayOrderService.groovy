@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillException
+import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ActionPatchRequest
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillDefRepo
@@ -48,6 +49,28 @@ class DisplayOrderService {
         }
     }
 
+    @Transactional
+    void updateDisplayOrderByUsingNewIndex(String skillId, List<SkillDef> skills, ActionPatchRequest patchRequest) {
+        assert patchRequest.action == ActionPatchRequest.ActionType.NewDisplayOrderIndex
+        SkillsValidator.isTrue(patchRequest.newDisplayOrderIndex >= 0, "[newDisplayOrderIndex] param must be >=0 but received [${patchRequest.newDisplayOrderIndex}]", skills?.first()?.projectId, skillId)
+
+        SkillDef theItem = skills.find({ it.skillId == skillId })
+        List<SkillDef> result = skills.findAll({ it.skillId != skillId }).sort({ it.displayOrder })
+
+        int newIndex = Math.min(patchRequest.newDisplayOrderIndex, skills.size() - 1)
+        result.add(newIndex, theItem)
+        result.eachWithIndex{ SkillDef entry, int i ->
+            entry.displayOrder = i
+        }
+
+        skillDefRepo.saveAll(result)
+
+        if (log.isDebugEnabled()) {
+            log.debug("Updated display order {}", result.collect { "${it.skillId}=>${it.displayOrder}" })
+        }
+    }
+
+    @Deprecated
     @Transactional
     void updateDisplayOrder(String skillId, List<SkillDef> skills, ActionPatchRequest patchRequest) {
         SkillDef toUpdate = skills.find({ it.skillId == skillId })

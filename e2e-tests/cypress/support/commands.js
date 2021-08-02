@@ -647,11 +647,11 @@ Cypress.Commands.add('closeToasts', () => {
 });
 
 
-Cypress.Commands.add('dragMyProject', { prevSubject: 'element' }, (sourceProjectElement, destProjectSelector) => {
+Cypress.Commands.add('dragAndDrop', { prevSubject: 'element' }, (sourceElement, destSelector) => {
     const dataTransfer = new DataTransfer()
 
-    cy.get(destProjectSelector).then((destProject) => {
-        cy.wrap(sourceProjectElement.get(0))
+    cy.get(destSelector).then((destProject) => {
+        cy.wrap(sourceElement.get(0))
             .trigger('pointerdown', { eventConstructor: 'PointerEvent' })
             .trigger('dragstart', { dataTransfer, eventConstructor: 'DragEvent' })
             .then(() => {
@@ -666,10 +666,9 @@ Cypress.Commands.add('dragMyProject', { prevSubject: 'element' }, (sourceProject
             });
     })
 });
-
-Cypress.Commands.add("validateMyProjectsSort", (projects) => {
-    cy.get('[data-cy="project-card-project-name"]').should('have.length', projects.length).as('projectNames');
-    for (const [i, value] of projects.entries()) {
-        cy.get('@projectNames').eq(i).contains(value);
+Cypress.Commands.add("validateElementsOrder", (selector, containsValues) => {
+    cy.get(selector).should('have.length', containsValues.length).as('elements');
+    for (const [i, value] of containsValues.entries()) {
+        cy.get('@elements').eq(i).contains(value);
     }
 });
