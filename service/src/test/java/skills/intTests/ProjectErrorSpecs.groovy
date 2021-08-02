@@ -32,7 +32,7 @@ class ProjectErrorSpecs extends DefaultIntSpec {
 
         when:
 
-        skillsService.addSkill(skill, getRandomUsers(0).first())
+        skillsService.addSkill(skill, getRandomUsers(1).first())
         try {
             skillsService.addSkill([projectId: proj.projectId, skillId: "notASkill"], getRandomUsers(1).first())
         } catch (SkillsClientException skillsClientException) {
@@ -62,7 +62,7 @@ class ProjectErrorSpecs extends DefaultIntSpec {
 
         when:
 
-        skillsService.addSkill(skill, getRandomUsers(0).first())
+        skillsService.addSkill(skill, getRandomUsers(1).first())
         try {
             skillsService.addSkill([projectId: proj.projectId, skillId: "notASkill"], getRandomUsers(1).first())
         } catch (SkillsClientException skillsClientException) {
@@ -97,7 +97,7 @@ class ProjectErrorSpecs extends DefaultIntSpec {
 
         when:
 
-        skillsService.addSkill(skill, getRandomUsers(0).first())
+        skillsService.addSkill(skill, getRandomUsers(1).first())
         try {
             skillsService.addSkill([projectId: proj.projectId, skillId: "notASkill"], getRandomUsers(1).first())
         } catch (SkillsClientException skillsClientException) {
