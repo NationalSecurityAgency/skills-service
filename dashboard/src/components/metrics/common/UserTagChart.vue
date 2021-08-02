@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <metrics-card :title="title" data-cy="userTagPieChart">
+  <metrics-card :title="title" data-cy="userTagChart">
     <metrics-overlay :loading="isLoading" :has-data="!isEmpty" no-data-icon="fa fa-info-circle" no-data-msg="No user data yet...">
       <apexchart :type="this.chartType" height="350"  :options="chartOptions" :series="series"></apexchart>
     </metrics-overlay>
