@@ -176,17 +176,25 @@ class DefaultIntSpec extends Specification {
      */
     List<String> getRandomUsers(int numUsers, boolean createEmail = false) {
         //create email addresses for the users automatically?
-        List<String> userIds =  userUtil.getUsers(numUsers)
+        List<String> userIds =  userUtil.getUsers(numUsers+1)
+        userIds.remove(DEFAULT_ROOT_USER_ID)
+        if (userIds.size() > numUsers) {
+            userIds.pop()
+        }
         if (createEmail) {
             userIds?.each {
                 if (!it.contains('@')) {
-                    UserAttrs userAttrs = new UserAttrs()
-                    userAttrs.userId = it
-                    userAttrs.userIdForDisplay = it
-                    userAttrs.email = "${it}@email.foo"
-                    userAttrs.firstName = "${it.toUpperCase()}_first"
-                    userAttrs.lastName = "${it.toUpperCase()}_last"
-                    userAttrsRepo.save(userAttrs)
+                    try {
+                        UserAttrs userAttrs = new UserAttrs()
+                        userAttrs.userId = it
+                        userAttrs.userIdForDisplay = it
+                        userAttrs.email = "${it}@email.foo"
+                        userAttrs.firstName = "${it.toUpperCase()}_first"
+                        userAttrs.lastName = "${it.toUpperCase()}_last"
+                        userAttrsRepo.save(userAttrs)
+                    } catch (Exception e) {
+                        throw new RuntimeException("error initializing UserAttrs for [${it}]", e)
+                    }
                 }
             }
 
