@@ -70,37 +70,4 @@ class DisplayOrderService {
         }
     }
 
-    @Deprecated
-    @Transactional
-    void updateDisplayOrder(String skillId, List<SkillDef> skills, ActionPatchRequest patchRequest) {
-        SkillDef toUpdate = skills.find({ it.skillId == skillId })
-
-        SkillDef switchWith
-
-        switch (patchRequest.action) {
-            case ActionPatchRequest.ActionType.DisplayOrderDown:
-                skills = skills.sort({ it.displayOrder })
-                switchWith = skills.find({ it.displayOrder > toUpdate.displayOrder })
-                break;
-            case ActionPatchRequest.ActionType.DisplayOrderUp:
-                skills = skills.sort({ it.displayOrder }).reverse()
-                switchWith = skills.find({ it.displayOrder < toUpdate.displayOrder })
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown action ${patchRequest.action}")
-        }
-
-        if (!switchWith) {
-            throw new SkillException("Failed to find definition to switch with [${toUpdate?.skillId}] for action [$patchRequest.action]", SkillException.NA, skillId)
-        }
-        assert switchWith.skillId != toUpdate.skillId
-
-        int switchWithDisplayOrderTmp = toUpdate.displayOrder
-
-        toUpdate.displayOrder = switchWith.displayOrder
-        switchWith.displayOrder = switchWithDisplayOrderTmp
-        skillDefRepo.saveAll([toUpdate, switchWith])
-
-        log.debug("Switched order of [{}] and [{}]", toUpdate.skillId, switchWith.skillId)
-    }
 }

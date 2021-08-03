@@ -15,16 +15,15 @@ limitations under the License.
 */
 <template>
   <div data-cy="badgeCard">
-    <nav-card-with-stats-and-controls :options="cardOptions" :isLoading="isLoading" :data-cy="`badgeCard-${badgeInternal.badgeId}`">
+    <nav-card-with-stats-and-controls :options="cardOptions" :isLoading="isLoading" :disable-sort-control="disableSortControl"
+                                      :data-cy="`badgeCard-${badgeInternal.badgeId}`">
       <div slot="header-top-right">
       </div>
       <div slot="underTitle">
         <card-navigate-and-edit-controls ref="cardNavControls" class="mt-2"
                                :options="cardOptions.controls"
                                @edit="showEditBadge=true"
-                               @delete="deleteBadge"
-                               @move-up="moveUp"
-                               @move-down="moveDown"/>
+                               @delete="deleteBadge" />
       </div>
       <div slot="footer">
         <i v-if="badgeInternal.endDate" class="fas fa-gem position-absolute" style="font-size: 1rem; top: 1rem; left: 1rem; color: purple" aria-hidden="true"/>
@@ -59,6 +58,10 @@ limitations under the License.
     props: {
       badge: Object,
       global: {
+        type: Boolean,
+        default: false,
+      },
+      disableSortControl: {
         type: Boolean,
         default: false,
       },
@@ -152,12 +155,6 @@ limitations under the License.
       },
       badgeDeleted() {
         this.$emit('badge-deleted', this.badgeInternal);
-      },
-      moveUp() {
-        this.$emit('move-badge-up', this.badgeInternal);
-      },
-      moveDown() {
-        this.$emit('move-badge-down', this.badgeInternal);
       },
       canPublish() {
         if (this.global) {

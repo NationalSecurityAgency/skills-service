@@ -45,19 +45,6 @@ limitations under the License.
         </span>
       </b-button-group>
 
-      <b-button-group v-if="!disableSortControls" size="sm" class="buttons ml-2">
-        <b-button variant="outline-primary"
-                  @click="$emit('move-up')"
-                  :disabled="options.isFirst"
-                  title="Sort Order - Move up"
-                  data-cy="moveUpBtn"><i class="fas fa-arrow-circle-up text-info" aria-hidden="true"/></b-button>
-        <b-button variant="outline-primary"
-                  @click="$emit('move-down')"
-                  :disabled="options.isLast"
-                  title="Sort Order - Move down"
-                  data-cy="moveDownBtn"><i class="fas fa-arrow-circle-down text-info" aria-hidden="true"/>
-        </b-button>
-      </b-button-group>
     </div>
   </div>
 </template>
@@ -67,10 +54,6 @@ limitations under the License.
     name: 'CardNavigateAndEditControls',
     props: {
       options: Object,
-      disableSortControls: {
-        type: Boolean,
-        default: false,
-      },
     },
     methods: {
       focusOnEdit() {

@@ -147,7 +147,7 @@ limitations under the License.
             Sortable.create(cards, {
               handle: '.sort-control',
               animation: 150,
-              ghostClass: 'sort-order-ghost-class',
+              ghostClass: 'skills-sort-order-ghost-class',
               onUpdate(event) {
                 self.projectOrderUpdate(event);
               },
@@ -192,10 +192,4 @@ hr {
   width: 90%;
 }
 
-.sort-order-ghost-class {
-  background-color: #146c75;
-  border-radius: 5px;
-  box-shadow: #146c75 0px 5px 5px;
-
-}
 </style>

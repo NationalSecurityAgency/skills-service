@@ -38,11 +38,8 @@ export default {
     return axios.delete(`/admin/projects/${projectId}/badges/${badgeId}`)
       .then((repsonse) => repsonse.data);
   },
-  moveBadge(projectId, badgeId, actionToSubmit) {
-    return axios.patch(`/admin/projects/${projectId}/badges/${badgeId}`, {
-      action: actionToSubmit,
-    })
-      .then((response) => response.data);
+  updateBadgeDisplaySortOrder(projectId, badgeId, newDisplayOrderIndex) {
+    return axios.patch(`/admin/projects/${projectId}/badges/${badgeId}`, { action: 'NewDisplayOrderIndex', newDisplayOrderIndex });
   },
   badgeWithNameExists(projectId, badgeName) {
     return axios.post(`/admin/projects/${projectId}/badgeNameExists`, { name: badgeName })

@@ -1127,74 +1127,73 @@ describe('Global Badges Tests', () => {
 
     });
 
-    it('sort management', () => {
+    it('drag-and-drop sort management', () => {
         cy.createGlobalBadge(1);
         cy.createGlobalBadge(2);
         cy.createGlobalBadge(3);
+        cy.createGlobalBadge(4);
+        cy.createGlobalBadge(5);
+
+        const badge1Card = '[data-cy="badgeCard-globalBadge1"] [data-cy="sortControlHandle"]';
+        const badge2Card = '[data-cy="badgeCard-globalBadge2"] [data-cy="sortControlHandle"]';
+        const badge4Card = '[data-cy="badgeCard-globalBadge4"] [data-cy="sortControlHandle"]';
+        const badge5Card = '[data-cy="badgeCard-globalBadge5"] [data-cy="sortControlHandle"]';
 
         cy.visit('/administrator/globalBadges');
+        cy.validateElementsOrder('[data-cy="badgeCard"]', ['Badge 1', 'Badge 2', 'Badge 3', 'Badge 4', 'Badge 5']);
+        cy.get(badge1Card).dragAndDrop(badge4Card)
+        cy.validateElementsOrder('[data-cy="badgeCard"]', ['Badge 2', 'Badge 3', 'Badge 4', 'Badge 1', 'Badge 5']);
 
-        cy.get('[data-cy="badgeCard"]').should('have.length', 3).as('badges');
-        cy.get('@badges').eq(0).should('contain.text', 'Global Badge 1');
-        cy.get('@badges').eq(1).should('contain.text', 'Global Badge 2');
-        cy.get('@badges').eq(2).should('contain.text', 'Global Badge 3');
-        cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy="moveUpBtn"]').should('be.disabled');
-        cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy="moveDownBtn"]').should('be.enabled');
-        cy.get('[data-cy="badgeCard-globalBadge2"] [data-cy="moveUpBtn"]').should('be.enabled');
-        cy.get('[data-cy="badgeCard-globalBadge2"] [data-cy="moveDownBtn"]').should('be.enabled');
-        cy.get('[data-cy="badgeCard-globalBadge3"] [data-cy="moveUpBtn"]').should('be.enabled');
-        cy.get('[data-cy="badgeCard-globalBadge3"] [data-cy="moveDownBtn"]').should('be.disabled');
-
-        cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy="moveDownBtn"]').click();
-        cy.get('[data-cy="badgeCard"]').should('have.length', 3).as('badges');
-        cy.get('@badges').eq(0).should('contain.text', 'Global Badge 2');
-        cy.get('@badges').eq(1).should('contain.text', 'Global Badge 1');
-        cy.get('@badges').eq(2).should('contain.text', 'Global Badge 3');
-        cy.get('[data-cy="badgeCard-globalBadge2"] [data-cy="moveUpBtn"]').should('be.disabled');
-        cy.get('[data-cy="badgeCard-globalBadge2"] [data-cy="moveDownBtn"]').should('be.enabled');
-        cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy="moveUpBtn"]').should('be.enabled');
-        cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy="moveDownBtn"]').should('be.enabled');
-        cy.get('[data-cy="badgeCard-globalBadge3"] [data-cy="moveUpBtn"]').should('be.enabled');
-        cy.get('[data-cy="badgeCard-globalBadge3"] [data-cy="moveDownBtn"]').should('be.disabled');
-
-
+        // refresh to make sure it was saved
         cy.visit('/administrator/globalBadges');
-        cy.get('[data-cy="badgeCard"]').should('have.length', 3).as('badges');
-        cy.get('@badges').eq(0).should('contain.text', 'Global Badge 2');
-        cy.get('@badges').eq(1).should('contain.text', 'Global Badge 1');
-        cy.get('@badges').eq(2).should('contain.text', 'Global Badge 3');
-        cy.get('[data-cy="badgeCard-globalBadge2"] [data-cy="moveUpBtn"]').should('be.disabled');
-        cy.get('[data-cy="badgeCard-globalBadge2"] [data-cy="moveDownBtn"]').should('be.enabled');
-        cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy="moveUpBtn"]').should('be.enabled');
-        cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy="moveDownBtn"]').should('be.enabled');
-        cy.get('[data-cy="badgeCard-globalBadge3"] [data-cy="moveUpBtn"]').should('be.enabled');
-        cy.get('[data-cy="badgeCard-globalBadge3"] [data-cy="moveDownBtn"]').should('be.disabled');
+        cy.validateElementsOrder('[data-cy="badgeCard"]', ['Badge 2', 'Badge 3', 'Badge 4', 'Badge 1', 'Badge 5']);
 
+        cy.get(badge5Card).dragAndDrop(badge2Card)
+        cy.validateElementsOrder('[data-cy="badgeCard"]', ['Badge 5', 'Badge 2', 'Badge 3', 'Badge 4', 'Badge 1']);
 
-        cy.get('[data-cy="badgeCard-globalBadge3"] [data-cy="moveUpBtn"]').click();
-        cy.get('[data-cy="badgeCard"]').should('have.length', 3).as('badges');
-        cy.get('@badges').eq(0).should('contain.text', 'Global Badge 2');
-        cy.get('@badges').eq(1).should('contain.text', 'Global Badge 3');
-        cy.get('@badges').eq(2).should('contain.text', 'Global Badge 1');
-        cy.get('[data-cy="badgeCard-globalBadge2"] [data-cy="moveUpBtn"]').should('be.disabled');
-        cy.get('[data-cy="badgeCard-globalBadge2"] [data-cy="moveDownBtn"]').should('be.enabled');
-        cy.get('[data-cy="badgeCard-globalBadge3"] [data-cy="moveUpBtn"]').should('be.enabled');
-        cy.get('[data-cy="badgeCard-globalBadge3"] [data-cy="moveDownBtn"]').should('be.enabled');
-        cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy="moveUpBtn"]').should('be.enabled');
-        cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy="moveDownBtn"]').should('be.disabled');
+        cy.get(badge2Card).dragAndDrop(badge1Card)
+        cy.validateElementsOrder('[data-cy="badgeCard"]', ['Badge 5', 'Badge 3', 'Badge 4', 'Badge 1', 'Badge 2']);
 
+        // refresh to make sure it was saved
         cy.visit('/administrator/globalBadges');
-        cy.get('[data-cy="badgeCard"]').should('have.length', 3).as('badges');
-        cy.get('@badges').eq(0).should('contain.text', 'Global Badge 2');
-        cy.get('@badges').eq(1).should('contain.text', 'Global Badge 3');
-        cy.get('@badges').eq(2).should('contain.text', 'Global Badge 1');
-        cy.get('[data-cy="badgeCard-globalBadge2"] [data-cy="moveUpBtn"]').should('be.disabled');
-        cy.get('[data-cy="badgeCard-globalBadge2"] [data-cy="moveDownBtn"]').should('be.enabled');
-        cy.get('[data-cy="badgeCard-globalBadge3"] [data-cy="moveUpBtn"]').should('be.enabled');
-        cy.get('[data-cy="badgeCard-globalBadge3"] [data-cy="moveDownBtn"]').should('be.enabled');
-        cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy="moveUpBtn"]').should('be.enabled');
-        cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy="moveDownBtn"]').should('be.disabled');
+        cy.validateElementsOrder('[data-cy="badgeCard"]', ['Badge 5', 'Badge 3', 'Badge 4', 'Badge 1', 'Badge 2']);
     });
+
+    it('no drag-and-drag sort controls when there is only 1 badge', () => {
+        cy.createGlobalBadge(1);
+        cy.visit('/administrator/globalBadges');
+        cy.get('[data-cy="badgeCard-globalBadge1"]');
+        cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy="sortControlHandle"]').should('not.exist');
+
+        cy.createGlobalBadge(2);
+        cy.visit('/administrator/globalBadges');
+        cy.get('[data-cy="badgeCard-globalBadge1"]');
+        cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy="sortControlHandle"]');
+    })
+
+    it('drag-and-drag sort should spinner while backend operation is happening', () => {
+        cy.intercept('/supervisor/badges/globalBadge1', (req) => {
+            req.reply((res) => {
+                res.send({ delay: 6000})
+            })
+        }).as('badge1Async');
+
+        cy.createGlobalBadge(1)
+        cy.createGlobalBadge(2)
+
+        const badge1Card = '[data-cy="badgeCard-globalBadge1"] [data-cy="sortControlHandle"]';
+        const badge2Card = '[data-cy="badgeCard-globalBadge2"] [data-cy="sortControlHandle"]';
+
+        cy.visit('/administrator/globalBadges');
+        cy.validateElementsOrder('[data-cy="badgeCard"]', ['Badge 1', 'Badge 2']);
+        cy.get(badge1Card).dragAndDrop(badge2Card)
+
+        // overlaw over both cards but loading message only on badge 1
+        cy.get('[data-cy="globalBadge1_overlayShown"] [data-cy="updatingSortMsg"]').contains('Updating sort order');
+        cy.get('[data-cy="globalBadge2_overlayShown"]');
+        cy.get('[data-cy="globalBadge2_overlayShown"] [data-cy="updatingSortMsg"]').should('not.exist');
+        cy.wait('@badge1Async')
+    })
 
 
     it('badge card stats', () => {

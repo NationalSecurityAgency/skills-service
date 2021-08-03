@@ -204,7 +204,9 @@ class GlobalBadgesService {
     void setBadgeDisplayOrder(String badgeId, ActionPatchRequest badgePatchRequest) {
         lockingService.lockGlobalBadges()
         List<SkillDef> badges = skillDefRepo.findAllByProjectIdAndType(null,  SkillDef.ContainerType.GlobalBadge)
-        displayOrderService.updateDisplayOrder(badgeId, badges, badgePatchRequest)
+        if(ActionPatchRequest.ActionType.NewDisplayOrderIndex == badgePatchRequest.action) {
+            displayOrderService.updateDisplayOrderByUsingNewIndex(badgeId, badges, badgePatchRequest)
+        }
     }
 
     @Transactional(readOnly = true)

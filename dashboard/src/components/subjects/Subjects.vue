@@ -150,7 +150,7 @@ limitations under the License.
             Sortable.create(cards, {
               handle: '.sort-control',
               animation: 150,
-              ghostClass: 'sort-order-ghost-class',
+              ghostClass: 'skills-sort-order-ghost-class',
               onUpdate(event) {
                 self.sortOrderUpdate(event);
               },

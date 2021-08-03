@@ -370,11 +370,6 @@ class ProjAdminService {
     }
 
 
-    @Transactional(readOnly = true)
-    long countNumberOfSkills(String projectId) {
-        return skillDefRepo.countByProjectIdAndType(projectId, SkillDef.ContainerType.Skill)
-    }
-
     @Transactional()
     void setProjectDisplayOrder(String projectId, ActionPatchRequest projectPatchRequest) {
         assert projectPatchRequest.action

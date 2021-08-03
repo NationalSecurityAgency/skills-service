@@ -25,7 +25,6 @@ limitations under the License.
           :options="cardOptions.controls"
           @edit="showEditSubject=true"
           @delete="deleteSubject"
-          :disable-sort-controls="true"
           :is-delete-disabled="deleteSubjectDisabled"
           :delete-disabled-text="deleteSubjectToolTip" />
       </div>

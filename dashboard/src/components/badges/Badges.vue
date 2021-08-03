@@ -21,15 +21,25 @@ limitations under the License.
     <loading-container v-bind:is-loading="isLoading">
       <transition name="projectContainer" enter-active-class="animated fadeIn">
         <div>
-          <div v-if="badges && badges.length" class="row justify-content-center ">
-            <div v-for="(badge) of badges"
+          <div v-if="badges && badges.length" id="badgeCards" class="row justify-content-center">
+            <div v-for="(badge) of badges" :id="badge.badgeId"
                  :key="badge.badgeId" class="col-lg-4 mb-3"  style="min-width: 23rem;">
-              <badge :badge="badge"
+              <b-overlay :show="sortOrder.loading" rounded="sm" opacity="0.4">
+                <template #overlay>
+                  <div class="text-center" :data-cy="`${badge.badgeId}_overlayShown`">
+                    <div v-if="badge.badgeId===sortOrder.loadingBadgeId" data-cy="updatingSortMsg">
+                      <div class="text-info text-uppercase mb-1">Updating sort order!</div>
+                      <b-spinner label="Loading..." style="width: 3rem; height: 3rem;" variant="info"/>
+                    </div>
+                  </div>
+                </template>
+
+                <badge :badge="badge"
                      :ref="'badge_'+badge.badgeId"
                      @badge-updated="saveBadge"
                      @badge-deleted="deleteBadge"
-                     @move-badge-up="moveBadgeUp"
-                     @move-badge-down="moveBadgeDown"/>
+                     :disable-sort-control="badges.length === 1"/>
+              </b-overlay>
             </div>
           </div>
 
@@ -48,6 +58,7 @@ limitations under the License.
 </template>
 
 <script>
+  import Sortable from 'sortablejs';
   import { createNamespacedHelpers } from 'vuex';
   import { SkillsReporter } from '@skilltree/skills-client-vue';
 
@@ -75,6 +86,10 @@ limitations under the License.
         badges: [],
         displayNewBadgeModal: false,
         projectId: null,
+        sortOrder: {
+          loading: false,
+          loadingBadgeId: '-1',
+        },
       };
     },
     mounted() {
@@ -123,6 +138,7 @@ limitations under the License.
           })
           .finally(() => {
             this.isLoading = false;
+            this.enableDropAndDrop();
           });
       },
       deleteBadge(badge) {
@@ -168,19 +184,6 @@ limitations under the License.
       newBadge() {
         this.displayNewBadgeModal = true;
       },
-      moveBadgeDown(badge) {
-        this.moveBadge(badge, 'DisplayOrderDown');
-      },
-      moveBadgeUp(badge) {
-        this.moveBadge(badge, 'DisplayOrderUp');
-      },
-      moveBadge(badge, actionToSubmit) {
-        this.isLoading = true;
-        BadgesService.moveBadge(badge.projectId, badge.badgeId, actionToSubmit)
-          .then(() => {
-            this.loadBadges();
-          });
-      },
       handleHidden(e) {
         if (!e || !e.update) {
           this.handleFocus();
@@ -190,6 +193,31 @@ limitations under the License.
         this.$nextTick(() => {
           this.$refs.subPageHeader.$refs.actionButton.focus();
         });
+      },
+      enableDropAndDrop() {
+        if (this.badges && this.badges.length > 0) {
+          const self = this;
+          this.$nextTick(() => {
+            const cards = document.getElementById('badgeCards');
+            Sortable.create(cards, {
+              handle: '.sort-control',
+              animation: 150,
+              ghostClass: 'skills-sort-order-ghost-class',
+              onUpdate(event) {
+                self.sortOrderUpdate(event);
+              },
+            });
+          });
+        }
+      },
+      sortOrderUpdate(updateEvent) {
+        const { id } = updateEvent.item;
+        this.sortOrder.loadingBadgeId = id;
+        this.sortOrder.loading = true;
+        BadgesService.updateBadgeDisplaySortOrder(this.projectId, id, updateEvent.newIndex)
+          .finally(() => {
+            this.sortOrder.loading = false;
+          });
       },
     },
   };

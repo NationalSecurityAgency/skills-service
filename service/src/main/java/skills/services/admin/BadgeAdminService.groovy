@@ -227,7 +227,9 @@ class BadgeAdminService {
     void setBadgeDisplayOrder(String projectId, String badgeId, ActionPatchRequest badgePatchRequest) {
         lockingService.lockProject(projectId)
         ProjDef projDef = projDefAccessor.getProjDef(projectId)
-        displayOrderService.updateDisplayOrder(badgeId, projDef.badges, badgePatchRequest)
+        if(ActionPatchRequest.ActionType.NewDisplayOrderIndex == badgePatchRequest.action) {
+            displayOrderService.updateDisplayOrderByUsingNewIndex(badgeId, projDef.badges, badgePatchRequest)
+        }
     }
 
     @Transactional()

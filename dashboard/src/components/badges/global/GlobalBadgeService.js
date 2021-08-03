@@ -37,11 +37,8 @@ export default {
     return axios.delete(`/supervisor/badges/${badgeId}`)
       .then((response) => response.data);
   },
-  moveBadge(badgeId, actionToSubmit) {
-    return axios.patch(`/supervisor/badges/${badgeId}`, {
-      action: actionToSubmit,
-    })
-      .then((response) => response.data);
+  updateBadgeDisplaySortOrder(badgeId, newDisplayOrderIndex) {
+    return axios.patch(`/supervisor/badges/${badgeId}`, { action: 'NewDisplayOrderIndex', newDisplayOrderIndex });
   },
   badgeWithNameExists(badgeName) {
     return axios.post('/supervisor/badges/name/exists', { name: badgeName })
