@@ -109,10 +109,10 @@ class EmailNotifier implements Notifier {
 
             notificationsRepo.save(notification)
         }
-        // save as semi-colon delimited when sending bcc batch?
+
         List<String> batch = []
         notificationRequest.userIds.each { String userId ->
-            batch.add(userId)
+            batch.add(userId.toLowerCase())
             if (batch.size() == maxRecipients) {
                 saveNotification(new ArrayList(batch))
                 batch.clear()
@@ -171,7 +171,6 @@ class EmailNotifier implements Notifier {
             JsonSlurper slurper = new JsonSlurper()
 
             notifications.forEach({ Notification notification ->
-
                 if (!senderForBatch) {
                     SettingsInit init = getEmailConfig()
                     senderForBatch = init.mailSender
@@ -201,7 +200,7 @@ class EmailNotifier implements Notifier {
                         } catch (Throwable t) {
                             // don't print the same message over and over again
                             if (!lastErrMsg?.equalsIgnoreCase(t.message)) {
-                                log.error("${prependToLogs}Failed to sent notification with id [${notification.id}] and type [${notification.type}]. Updating notification to retry", t)
+                                log.error("${prependToLogs}Failed to send notification with id [${notification.id}] and type [${notification.type}]. Updating notification to retry", t)
                                 lastErrMsg = t.message
                             }
                             failed = true;

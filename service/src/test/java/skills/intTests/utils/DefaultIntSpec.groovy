@@ -23,6 +23,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
 import skills.SpringBootApp
 import skills.storage.model.UserAttrs
+import skills.storage.repos.NotificationsRepo
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SettingRepo
 import skills.storage.repos.SkillDefRepo
@@ -62,6 +63,9 @@ class DefaultIntSpec extends Specification {
     @Autowired
     SettingRepo settingRepo
 
+    @Autowired
+    NotificationsRepo notificationsRepo
+
     @Autowired(required=false)
     MockUserInfoService mockUserInfoService
 
@@ -92,6 +96,8 @@ class DefaultIntSpec extends Specification {
         userAttrsRepo.deleteAll()
         // global badges don't have references to a project so must delete those manually
         skillDefRepo.deleteAll()
+        // notificationsRepo no longer has a fk to users so must delete explicitly
+        notificationsRepo.deleteAll()
 
         settingRepo.findAll().each {
             if (!it.settingGroup?.startsWith("public_")) {

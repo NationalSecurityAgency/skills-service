@@ -15,6 +15,7 @@
  */
 package skills.notify
 
+import groovy.util.logging.Slf4j
 import org.apache.commons.io.FileUtils
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -38,8 +39,11 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender
-import spock.mock.AutoAttach;
+import spock.mock.AutoAttach
 
+import java.util.concurrent.TimeUnit;
+
+@Slf4j
 class EmailNotifierSpecs extends DefaultIntSpec {
 
     @Autowired
@@ -187,7 +191,7 @@ class EmailNotifierSpecs extends DefaultIntSpec {
         notificationsRepo.count() == 0
     }
 
-    def "notification fails if used id doesn't exist"() {
+    def "non-existent users allowed due to changes in model"() {
 
         when:
         emailNotifier.sendNotification(new Notifier.NotificationRequest(
@@ -196,9 +200,9 @@ class EmailNotifierSpecs extends DefaultIntSpec {
                 keyValParams: [simpleParam: 'param value']
         ))
         then:
-        thrown(DataIntegrityViolationException)
+        notThrown(DataIntegrityViolationException)
 
-        notificationsRepo.count() == 0
+        notificationsRepo.count() == 1
     }
 
     def "send multiple notification when service is down"() {
@@ -226,7 +230,7 @@ class EmailNotifierSpecs extends DefaultIntSpec {
 
         then:
         // should be only 1 notification of failure
-        logsList.findAll { it.message.startsWith("Failed to sent notification") }.size() == 1
+        logsList.findAll { it.message.startsWith("Failed to send notification") }.size() == 1
 
         // dispatch should only happen 1 time
         logsList.findAll { it.message.startsWith("Dispatched ") }.size() == 1
@@ -240,11 +244,13 @@ class EmailNotifierSpecs extends DefaultIntSpec {
 
     def "failed emails must be retried when the email server is back functioning"() {
         setup:
+        assert notificationsRepo.count() == 0
         LoggerHelper loggerHelper = new LoggerHelper(EmailNotifier.class)
-
+        log.info("########## stopping greenMail")
         greenMail.stop()
 
         when:
+        assert notificationsRepo.count() == 0
         emailNotifier.sendNotification(new Notifier.NotificationRequest(
                 userIds: [skillsService.userName],
                 type: "ForTestNotificationBuilder",
@@ -260,6 +266,7 @@ class EmailNotifierSpecs extends DefaultIntSpec {
         WaitFor.wait { loggerHelper.hasLogMsgStartsWith("Dispatched ") }
         assert loggerHelper.logEvents.find { it.message.startsWith("Dispatched [0] notification(s) with [2] error(s)") }
 
+        log.info("########## starting greenMail")
         greenMail.start()
 
         assert WaitFor.wait { greenMail.getReceivedMessages().length > 1 }
