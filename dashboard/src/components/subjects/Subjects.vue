@@ -162,7 +162,6 @@ limitations under the License.
         const { id } = updateEvent.item;
         this.sortOrder.loadingSubjectId = id;
         this.sortOrder.loading = true;
-        console.log(`${id} => ${updateEvent.newIndex}`);
         SubjectsService.updateSubjectsDisplaySortOrder(this.projectId, id, updateEvent.newIndex)
           .finally(() => {
             this.sortOrder.loading = false;
