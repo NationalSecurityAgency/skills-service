@@ -22,7 +22,7 @@ limitations under the License.
           <div class="col col-md-3 text-secondary" id="productionModeEnabledLabel">
             Production Mode:
             <inline-help
-              msg="Change to true for this project to be visible in the 'Progress and Ranking' page for all SkillTree users."/>
+              msg="Change to true for this project to be discoverable in the 'Progress and Ranking' page for all SkillTree users."/>
           </div>
           <div class="col">
             <b-form-checkbox v-model="settings.productionModeEnabled.value"
