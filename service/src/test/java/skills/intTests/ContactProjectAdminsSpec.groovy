@@ -72,9 +72,12 @@ class ContactProjectAdminsSpec extends DefaultIntSpec {
         def count = rootServiceOne.countAllProjectAdminsWithEmail()
         rootServiceOne.contactAllProjectAdmins("test subject", "# test email body")
 
-        WaitFor.wait { greenMail.getReceivedMessages().size() >= 6 }
+        WaitFor.wait { greenMail.getReceivedMessages().size() >= 7 }
 
         def messages = EmailUtils.getEmails(greenMail)
+        messages.each {
+            println it.recipients
+        }
 
         then:
         count == 7 //inception adds +1 to the expectation
