@@ -35,13 +35,6 @@ limitations under the License.
     data() {
       return {
         isLoading: true,
-        foo: [
-          {
-            name: 'Projects',
-            iconClass: 'fa-tasks skills-color-projects',
-            page: 'AdminHomePage',
-          },
-        ],
       };
     },
     computed: {
