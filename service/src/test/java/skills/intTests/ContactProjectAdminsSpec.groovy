@@ -34,7 +34,7 @@ class ContactProjectAdminsSpec extends DefaultIntSpec {
         }
     }
 
-    def "count project admins"() {
+    def "contact project admins"() {
         def users = getRandomUsers(15, true)
 
         SkillsService proj1Serv = createService(users[0])
@@ -75,13 +75,18 @@ class ContactProjectAdminsSpec extends DefaultIntSpec {
         WaitFor.wait { greenMail.getReceivedMessages().size() >= 7 }
 
         def messages = EmailUtils.getEmails(greenMail)
-        messages.each {
-            println it.recipients
-        }
 
         then:
         count == 7 //inception adds +1 to the expectation
         messages.size() == count
+        messages.find { it.recipients.find {it.contains(users[0])}}
+        messages.find { it.recipients.find {it.contains(users[1])}}
+        messages.find { it.recipients.find {it.contains(users[2])}}
+        messages.find { it.recipients.find {it.contains(users[3])}}
+        messages.find { it.recipients.find {it.contains(users[4])}}
+        messages.find { it.recipients.find {it.contains(users[5])}}
+        messages.find { it.recipients.find {it.contains(DEFAULT_ROOT_USER_ID)}} //inception
+
         messages.collect {
             assert it.html.replaceAll('\r\n', '\n') == '''<!--
 Copyright 2020 SkillTree
