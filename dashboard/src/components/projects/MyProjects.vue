@@ -33,10 +33,20 @@ limitations under the License.
       <div v-if="useTableView">
         <projects-table :projects="projects" @project-deleted="projectRemoved" @edit-project="editProject"></projects-table>
       </div>
-      <div v-else>
-        <div v-for="project of projects" :key="project.projectId" class="mb-3">
-          <my-project :project="project" v-on:project-deleted="projectRemoved" v-on:move-project-up="moveProjectUp"
-                      v-on:move-project-down="moveProjectDown" v-on:pin-removed="loadProjects" />
+      <div v-else id="projectCards">
+        <div v-for="project of projects" :key="project.projectId" class="mb-3"  :id="project.projectId">
+          <b-overlay :show="sortOrder.loading" rounded="sm" opacity="0.4">
+            <template #overlay>
+              <div class="text-center" :data-cy="`${project.projectId}_overlayShown`">
+                <div v-if="project.projectId===sortOrder.loadingProjectId" data-cy="updatingSortMsg">
+                  <div class="text-info text-uppercase mb-1">Updating sort order!</div>
+                  <b-spinner label="Loading..." style="width: 3rem; height: 3rem;" variant="info"/>
+                </div>
+              </div>
+            </template>
+            <my-project :project="project" :disable-sort-control="projects.length === 1"
+                      v-on:project-deleted="projectRemoved" v-on:pin-removed="loadProjects" />
+          </b-overlay>
         </div>
       </div>
 
@@ -62,6 +72,7 @@ limitations under the License.
 </template>
 
 <script>
+  import Sortable from 'sortablejs';
   import { SkillsReporter } from '@skilltree/skills-client-vue';
   import MyProject from './MyProject';
   import EditProject from './EditProject';
@@ -85,6 +96,10 @@ limitations under the License.
           project: { name: '', projectId: '' },
         },
         showSearchProjectModal: false,
+        sortOrder: {
+          loading: false,
+          loadingProjectId: '-1',
+        },
       };
     },
     components: {
@@ -137,6 +152,7 @@ limitations under the License.
           })
           .finally(() => {
             this.isLoading = false;
+            this.enableDropAndDrop();
           });
       },
       projectRemoved(project) {
@@ -162,19 +178,6 @@ limitations under the License.
             }
           });
       },
-      moveProjectDown(project) {
-        this.moveProject(project, 'DisplayOrderDown');
-      },
-      moveProjectUp(project) {
-        this.moveProject(project, 'DisplayOrderUp');
-      },
-      moveProject(project, actionToSubmit) {
-        this.isLoading = true;
-        ProjectService.changeProjectOrder(project.projectId, actionToSubmit)
-          .then(() => {
-            this.loadProjects();
-          });
-      },
       editNewProject() {
         this.newProject = {
           show: true,
@@ -188,6 +191,32 @@ limitations under the License.
           isEdit: true,
           project: projectToEdit,
         };
+      },
+      enableDropAndDrop() {
+        if (this.projects && this.projects.length > 0
+          && this.$store.getters.config && this.projects.length < this.$store.getters.config.numProjectsForTableView) {
+          const self = this;
+          this.$nextTick(() => {
+            const cards = document.getElementById('projectCards');
+            Sortable.create(cards, {
+              handle: '.sort-control',
+              animation: 150,
+              ghostClass: 'skills-sort-order-ghost-class',
+              onUpdate(event) {
+                self.sortOrderUpdate(event);
+              },
+            });
+          });
+        }
+      },
+      sortOrderUpdate(updateEvent) {
+        const { id } = updateEvent.item;
+        this.sortOrder.loadingProjectId = id;
+        this.sortOrder.loading = true;
+        ProjectService.updateProjectDisplaySortOrder(id, updateEvent.newIndex)
+          .finally(() => {
+            this.sortOrder.loading = false;
+          });
       },
     },
   };

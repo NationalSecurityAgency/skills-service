@@ -714,6 +714,32 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="sortControlHandle"]');
     })
 
+    it('drag-and-drag sort should spinner while backend operation is happening', () => {
+        cy.intercept('/admin/projects/proj1/subjects/subj1', (req) => {
+            req.reply((res) => {
+                res.send({ delay: 6000})
+            })
+        }).as('subj1Async');
+
+        cy.createSubject(1, 1)
+        cy.createSubject(1, 2)
+
+        const subj1Card = '[data-cy="subjectCard-subj1"] [data-cy="sortControlHandle"]';
+        const subj2Card = '[data-cy="subjectCard-subj2"] [data-cy="sortControlHandle"]';
+
+        cy.visit('/administrator/projects/proj1');
+        cy.validateElementsOrder('[data-cy="subjectCard"]', ['Subject 1', 'Subject 2']);
+        cy.get(subj1Card).dragAndDrop(subj2Card)
+
+        // overlay over both cards but loading message only on subject 1
+        cy.get('[data-cy="subj1_overlayShown"] [data-cy="updatingSortMsg"]').contains('Updating sort order');
+        cy.get('[data-cy="subj2_overlayShown"]');
+        cy.get('[data-cy="subj2_overlayShown"] [data-cy="updatingSortMsg"]').should('not.exist');
+        cy.wait('@subj1Async')
+        cy.get('[data-cy="subj1_overlayShown"]').should('not.exist');
+        cy.get('[data-cy="subj2_overlayShown"]').should('not.exist');
+    })
+
     it('subject card stats', () => {
         cy.createSubject(1, 1)
         cy.createSubject(1, 2)

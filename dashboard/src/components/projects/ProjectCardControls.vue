@@ -47,19 +47,6 @@ limitations under the License.
         </span>
       </b-button-group>
 
-      <b-button-group size="sm" class="buttons">
-        <b-button variant="outline-primary"
-                  @click="$emit('move-up-project')"
-                  :disabled="project.isFirst"
-                  title="Sort Order - Move up"
-                  data-cy="moveProjUpBtn"><i class="fas fa-arrow-circle-up text-info" aria-hidden="true"/></b-button>
-        <b-button variant="outline-primary"
-                  @click="$emit('move-down-project')"
-                  :disabled="project.isLast"
-                  title="Sort Order - Move down"
-                  data-cy="moveProjDownBtn"><i class="fas fa-arrow-circle-down text-info" aria-hidden="true"/>
-        </b-button>
-      </b-button-group>
     </div>
   </div>
 </template>

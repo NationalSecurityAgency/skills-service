@@ -970,70 +970,78 @@ describe('Projects Tests', () => {
     cy.get('[data-cy="projectCard_proj3"]').should('exist');
   });
 
-  it('project sort management', () => {
+  it('drag-and-drop project sort management', () => {
     cy.createProject(1);
     cy.createProject(2);
     cy.createProject(3);
+    cy.createProject(4);
+    cy.createProject(5);
     cy.visit('/administrator')
-    cy.get('[data-cy="projectCard"]').should('have.length', 3).as('projects');
-    cy.get('@projects').eq(0).should('contain.text', 'This is project 1');
-    cy.get('@projects').eq(1).should('contain.text', 'This is project 2');
-    cy.get('@projects').eq(2).should('contain.text', 'This is project 3');
-    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjUpBtn"]').should('be.disabled');
-    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjDownBtn"]').should('be.enabled');
-    cy.get('[data-cy="projectCard_proj2"] [data-cy="moveProjUpBtn"]').should('be.enabled');
-    cy.get('[data-cy="projectCard_proj2"] [data-cy="moveProjDownBtn"]').should('be.enabled');
-    cy.get('[data-cy="projectCard_proj3"] [data-cy="moveProjUpBtn"]').should('be.enabled');
-    cy.get('[data-cy="projectCard_proj3"] [data-cy="moveProjDownBtn"]').should('be.disabled');
 
-    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjDownBtn"]').click();
-    cy.get('[data-cy="projectCard"]').should('have.length', 3).as('projects');
-    cy.get('@projects').eq(0).should('contain.text', 'This is project 2');
-    cy.get('@projects').eq(1).should('contain.text', 'This is project 1');
-    cy.get('@projects').eq(2).should('contain.text', 'This is project 3');
-    cy.get('[data-cy="projectCard_proj2"] [data-cy="moveProjUpBtn"]').should('be.disabled');
-    cy.get('[data-cy="projectCard_proj2"] [data-cy="moveProjDownBtn"]').should('be.enabled');
-    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjUpBtn"]').should('be.enabled');
-    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjDownBtn"]').should('be.enabled');
-    cy.get('[data-cy="projectCard_proj3"] [data-cy="moveProjUpBtn"]').should('be.enabled');
-    cy.get('[data-cy="projectCard_proj3"] [data-cy="moveProjDownBtn"]').should('be.disabled');
 
-    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjDownBtn"]').click();
-    cy.get('[data-cy="projectCard"]').should('have.length', 3).as('projects');
-    cy.get('@projects').eq(0).should('contain.text', 'This is project 2');
-    cy.get('@projects').eq(1).should('contain.text', 'This is project 3');
-    cy.get('@projects').eq(2).should('contain.text', 'This is project 1');
-    cy.get('[data-cy="projectCard_proj2"] [data-cy="moveProjUpBtn"]').should('be.disabled');
-    cy.get('[data-cy="projectCard_proj2"] [data-cy="moveProjDownBtn"]').should('be.enabled');
-    cy.get('[data-cy="projectCard_proj3"] [data-cy="moveProjUpBtn"]').should('be.enabled');
-    cy.get('[data-cy="projectCard_proj3"] [data-cy="moveProjDownBtn"]').should('be.enabled');
-    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjUpBtn"]').should('be.enabled');
-    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjDownBtn"]').should('be.disabled');
+    const project1Card = '[data-cy="projectCard_proj1"] [data-cy="sortControlHandle"]';
+    const project2Card = '[data-cy="projectCard_proj2"] [data-cy="sortControlHandle"]';
+    const project4Card = '[data-cy="projectCard_proj4"] [data-cy="sortControlHandle"]';
+    const project5Card = '[data-cy="projectCard_proj5"] [data-cy="sortControlHandle"]';
 
-    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjUpBtn"]').click();
-    cy.get('[data-cy="projectCard"]').should('have.length', 3).as('projects');
-    cy.get('@projects').eq(0).should('contain.text', 'This is project 2');
-    cy.get('@projects').eq(1).should('contain.text', 'This is project 1');
-    cy.get('@projects').eq(2).should('contain.text', 'This is project 3');
-    cy.get('[data-cy="projectCard_proj2"] [data-cy="moveProjUpBtn"]').should('be.disabled');
-    cy.get('[data-cy="projectCard_proj2"] [data-cy="moveProjDownBtn"]').should('be.enabled');
-    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjUpBtn"]').should('be.enabled');
-    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjDownBtn"]').should('be.enabled');
-    cy.get('[data-cy="projectCard_proj3"] [data-cy="moveProjUpBtn"]').should('be.enabled');
-    cy.get('[data-cy="projectCard_proj3"] [data-cy="moveProjDownBtn"]').should('be.disabled');
+    cy.validateElementsOrder('[data-cy="projectCard"]', ['This is project 1', 'This is project 2', 'This is project 3', 'This is project 4', 'This is project 5']);
+    cy.get(project1Card).dragAndDrop(project4Card)
+    cy.validateElementsOrder('[data-cy="projectCard"]', ['This is project 2', 'This is project 3', 'This is project 4', 'This is project 1', 'This is project 5']);
 
-    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjUpBtn"]').click();
-    cy.get('[data-cy="projectCard"]').should('have.length', 3).as('projects');
-    cy.get('@projects').eq(0).should('contain.text', 'This is project 1');
-    cy.get('@projects').eq(1).should('contain.text', 'This is project 2');
-    cy.get('@projects').eq(2).should('contain.text', 'This is project 3');
-    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjUpBtn"]').should('be.disabled');
-    cy.get('[data-cy="projectCard_proj1"] [data-cy="moveProjDownBtn"]').should('be.enabled');
-    cy.get('[data-cy="projectCard_proj2"] [data-cy="moveProjUpBtn"]').should('be.enabled');
-    cy.get('[data-cy="projectCard_proj2"] [data-cy="moveProjDownBtn"]').should('be.enabled');
-    cy.get('[data-cy="projectCard_proj3"] [data-cy="moveProjUpBtn"]').should('be.enabled');
-    cy.get('[data-cy="projectCard_proj3"] [data-cy="moveProjDownBtn"]').should('be.disabled');
+    // refresh to make sure it was saved
+    cy.visit('/administrator')
+    cy.validateElementsOrder('[data-cy="projectCard"]', ['This is project 2', 'This is project 3', 'This is project 4', 'This is project 1', 'This is project 5']);
+
+    cy.get(project5Card).dragAndDrop(project2Card)
+    cy.validateElementsOrder('[data-cy="projectCard"]', ['This is project 5', 'This is project 2', 'This is project 3', 'This is project 4', 'This is project 1']);
+
+    cy.get(project2Card).dragAndDrop(project1Card)
+    cy.validateElementsOrder('[data-cy="projectCard"]', ['This is project 5', 'This is project 3', 'This is project 4', 'This is project 1', 'This is project 2']);
+
+    // refresh to make sure it was saved
+    cy.visit('/administrator')
+    cy.validateElementsOrder('[data-cy="projectCard"]', ['This is project 5', 'This is project 3', 'This is project 4', 'This is project 1', 'This is project 2']);
+
   });
+
+  it('no drag-and-drag sort controls when there is only 1 project', () => {
+    cy.createProject(1)
+
+    cy.visit('/administrator')
+    cy.get('[data-cy="projectCard_proj1"]');
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="sortControlHandle"]').should('not.exist');
+
+    cy.createProject(2)
+    cy.visit('/administrator')
+    cy.get('[data-cy="projectCard_proj1"]');
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="sortControlHandle"]');
+  })
+
+  it('drag-and-drag sort should spinner while backend operation is happening', () => {
+    cy.intercept('/admin/projects/proj1', (req) => {
+      req.reply((res) => {
+        res.send({ delay: 6000})
+      })
+    }).as('proj1Async');
+
+    cy.createProject(1)
+    cy.createProject(2)
+
+    const proj1Card = '[data-cy="projectCard_proj1"] [data-cy="sortControlHandle"]';
+    const proj2Card = '[data-cy="projectCard_proj2"] [data-cy="sortControlHandle"]';
+
+    cy.visit('/administrator');
+    cy.validateElementsOrder('[data-cy="projectCard"]', ['This is project 1', 'This is project 2']);
+    cy.get(proj1Card).dragAndDrop(proj2Card)
+
+    // overlay over both cards but loading message only on project 1
+    cy.get('[data-cy="proj1_overlayShown"] [data-cy="updatingSortMsg"]').contains('Updating sort order');
+    cy.get('[data-cy="proj2_overlayShown"]');
+    cy.get('[data-cy="proj2_overlayShown"] [data-cy="updatingSortMsg"]').should('not.exist');
+    cy.wait('@proj1Async')
+    cy.get('[data-cy="proj1_overlayShown"]').should('not.exist');
+    cy.get('[data-cy="proj2_overlayShown"]').should('not.exist');
+  })
 
   it('project card stats', () => {
     cy.createProject(1);

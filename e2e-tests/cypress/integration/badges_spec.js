@@ -738,11 +738,13 @@ describe('Badges Tests', () => {
         cy.validateElementsOrder('[data-cy="badgeCard"]', ['Badge 1', 'Badge 2']);
         cy.get(badge1Card).dragAndDrop(badge2Card)
 
-        // overlaw over both cards but loading message only on badge 1
+        // overlay over both cards but loading message only on badge 1
         cy.get('[data-cy="badge1_overlayShown"] [data-cy="updatingSortMsg"]').contains('Updating sort order');
         cy.get('[data-cy="badge2_overlayShown"]');
         cy.get('[data-cy="badge2_overlayShown"] [data-cy="updatingSortMsg"]').should('not.exist');
         cy.wait('@badge1Async')
+        cy.get('[data-cy="badge1_overlayShown"]').should('not.exist');
+        cy.get('[data-cy="badge2_overlayShown"]').should('not.exist');
     })
 
 

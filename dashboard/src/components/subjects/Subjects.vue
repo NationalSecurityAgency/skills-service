@@ -24,8 +24,8 @@ limitations under the License.
              style="min-width: 23rem;">
           <b-overlay :show="sortOrder.loading" rounded="sm" opacity="0.4">
             <template #overlay>
-              <div class="text-center">
-                <div v-if="subject.subjectId===sortOrder.loadingSubjectId">
+              <div class="text-center"  :data-cy="`${subject.subjectId}_overlayShown`">
+                <div v-if="subject.subjectId===sortOrder.loadingSubjectId" data-cy="updatingSortMsg">
                   <div class="text-info text-uppercase mb-1">Updating sort order!</div>
                   <b-spinner label="Loading..." style="width: 3rem; height: 3rem;" variant="info"/>
                 </div>

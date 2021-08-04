@@ -374,15 +374,11 @@ class ProjAdminService {
     void setProjectDisplayOrder(String projectId, ActionPatchRequest projectPatchRequest) {
         assert projectPatchRequest.action
 
-        switch (projectPatchRequest.action) {
-            case ActionPatchRequest.ActionType.DisplayOrderDown:
-                sortingService.changeProjectOrder(projectId, ProjectSortingService.Move.DOWN)
-                break;
-            case ActionPatchRequest.ActionType.DisplayOrderUp:
-                sortingService.changeProjectOrder(projectId, ProjectSortingService.Move.UP)
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown action ${projectPatchRequest.action}")
+        if (ActionPatchRequest.ActionType.NewDisplayOrderIndex == projectPatchRequest.action) {
+            UserInfo userInfo = userInfoService.getCurrentUser()
+            String userId = userInfo.username
+            User user = userRepo.findByUserId(userId.toLowerCase())
+            sortingService.updateDisplayOrderByUsingNewIndex(user.id, projectId, projectPatchRequest)
         }
     }
 

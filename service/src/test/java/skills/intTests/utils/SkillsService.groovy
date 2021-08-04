@@ -137,16 +137,14 @@ class SkillsService {
         wsHelper.adminGet("/projects/${projectId}/projectSearch?nameQuery=${query}")
     }
 
-    @Profile
-    def moveProjectUp(Map props){
-        wsHelper.adminPatch(getProjectUrl(props.projectId), '{"action": "DisplayOrderUp"}')
-    }
 
     @Profile
-    def moveProjectDown(Map props){
-        wsHelper.adminPatch(getProjectUrl(props.projectId), '{"action": "DisplayOrderDown"}')
+    def changeProjectDisplayOrder(Map props, Integer newDisplayOrderIndex){
+        wsHelper.adminPatch(getProjectUrl(props.projectId), [
+                action: "NewDisplayOrderIndex",
+                newDisplayOrderIndex: newDisplayOrderIndex,
+        ]);
     }
-
 
     @Profile
     def changeSubjectDisplayOrder(Map props, Integer newDisplayOrderIndex){
