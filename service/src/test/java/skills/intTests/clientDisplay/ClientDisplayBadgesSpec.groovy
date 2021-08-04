@@ -15,7 +15,6 @@
  */
 package skills.intTests.clientDisplay
 
-
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
@@ -483,9 +482,9 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
             skillsService.addBadge([projectId: proj1.projectId, badgeId: it, name: it, description: "This is ${it}".toString(), iconClass: "fa fa-${it}".toString()])
         }
 
-        skillsService.moveBadgeDown([projectId: proj1.projectId, badgeId: badgeIds[0]])
-        skillsService.moveBadgeDown([projectId: proj1.projectId, badgeId: badgeIds[0]])
-        skillsService.moveBadgeUp([projectId: proj1.projectId, badgeId: badgeIds[2]])
+        skillsService.changeBadgeDisplayOrder([projectId: proj1.projectId, badgeId: badgeIds[0]], 1)
+        skillsService.changeBadgeDisplayOrder([projectId: proj1.projectId, badgeId: badgeIds[0]], 2)
+        skillsService.changeBadgeDisplayOrder([projectId: proj1.projectId, badgeId: badgeIds[2]], 0)
 
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badgeIds.get(0), skillId: proj1_skills.get(0).skillId])
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badgeIds.get(0), skillId: proj1_skills.get(1).skillId])
