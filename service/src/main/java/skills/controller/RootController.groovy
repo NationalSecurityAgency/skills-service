@@ -31,6 +31,7 @@ import skills.auth.UserInfoService
 import skills.auth.pki.PkiUserLookup
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
+import skills.controller.request.model.ContactUsersRequest
 import skills.controller.request.model.GlobalSettingsRequest
 import skills.controller.request.model.SuggestRequest
 import skills.controller.result.model.ProjectResult
@@ -40,6 +41,7 @@ import skills.controller.result.model.UserInfoRes
 import skills.controller.result.model.UserRoleRes
 import skills.profile.EnableCallStackProf
 import skills.services.AccessSettingsStorageService
+import skills.services.ContactUsersService
 import skills.services.SystemSettingsService
 import skills.services.admin.ProjAdminService
 import skills.services.settings.SettingsService
@@ -85,6 +87,9 @@ class RootController {
 
     @Autowired
     UserInfoService userInfoService
+
+    @Autowired
+    ContactUsersService contactUsersService
 
     @GetMapping('/rootUsers')
     @ResponseBody
@@ -266,15 +271,30 @@ class RootController {
     RequestResult pinProject(@PathVariable("projectId") String projectId) {
         //create project order setting for this user
         projAdminService.pinProjectForRootUser(projectId)
-        return new RequestResult(success: true)
+        return RequestResult.success()
     }
 
     @DeleteMapping('/pin/{projectId}')
     RequestResult unpinProject(@PathVariable("projectId") String projectId) {
         //remove project order setting for this user
         projAdminService.unpinProjectForRootUser(projectId)
-        return new RequestResult(success: true)
+        return RequestResult.success()
     }
+
+    @GetMapping('/users/countAllProjectAdmins')
+    Long countProjectAdministrators() {
+        Long res = contactUsersService.countAllProjectAdminsWithEmail()
+        res == null ? 0 : res
+    }
+
+    @PostMapping('/users/contactAllProjectAdmins')
+    RequestResult contactProjectAdministrators(@RequestBody ContactUsersRequest cur) {
+        //intentionally ignore queryCriteria as that doesn't apply to this use case
+        contactUsersService.contactAllProjectAdmins(cur.emailSubject, cur.emailBody)
+        return RequestResult.success()
+    }
+
+
 
 
 

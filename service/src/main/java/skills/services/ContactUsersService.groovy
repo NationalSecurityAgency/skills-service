@@ -16,8 +16,10 @@
 package skills.services
 
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.commonmark.renderer.html.HtmlRenderer
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.request.model.ContactUsersRequest
@@ -27,6 +29,7 @@ import skills.notify.Notifier
 import skills.storage.model.Notification
 import skills.storage.model.QueryUsersCriteria
 import skills.storage.model.SubjectLevelCriteria
+import skills.storage.model.auth.RoleName
 import skills.storage.repos.nativeSql.NativeQueriesRepo
 import skills.utils.Props
 import org.commonmark.parser.Parser
@@ -37,11 +40,61 @@ import java.util.stream.Stream
 @Service
 class ContactUsersService {
 
+    private Parser parser = Parser.builder().build()
+    private HtmlRenderer renderer = HtmlRenderer.builder().build()
+
     @Autowired
     NativeQueriesRepo nativeQueriesRepo
 
     @Autowired
     EmailNotifier emailNotifier
+
+    @Autowired
+    AccessSettingsStorageService accessSettingsStorageService
+
+    @Value('#{"${skills.config.notifications.maxRecipients:50}"}')
+    int batchSize
+
+    @Transactional(readOnly = true)
+    Long countAllProjectAdminsWithEmail() {
+        return accessSettingsStorageService.countUserIdsWithRoleAndEmail(RoleName.ROLE_PROJECT_ADMIN)
+    }
+
+    @Transactional
+    contactAllProjectAdmins(String emailSubject, String emailBody) {
+        Parser parser = Parser.builder().build()
+        HtmlRenderer renderer = HtmlRenderer.builder().build()
+        def markdown = parser.parse(emailBody)
+        String parsedBody = renderer.render(markdown)
+
+        List<String> batch = []
+        Closure sendNotifications = { List<String> userIds ->
+            Notifier.NotificationRequest request = new Notifier.NotificationRequest(
+                    userIds: new ArrayList(batch),
+                    type: Notification.Type.ContactUsers,
+                    keyValParams: [
+                            htmlBody    : parsedBody,
+                            emailSubject: emailSubject,
+                            rawBody     : emailBody,
+                    ]
+            )
+            emailNotifier.sendNotification(request)
+            batch.clear()
+        }
+        getAllProjectAdminsWithEmail().withCloseable { Stream<String> userIds ->
+            userIds.forEach {
+                batch.add(it)
+                if (batch.size() == batchSize) {
+                    sendNotifications(new ArrayList(batch))
+                    batch.clear()
+                }
+            }
+        }
+
+        if (batch.size() > 0) {
+            sendNotifications(new ArrayList(batch))
+        }
+    }
 
     @Transactional(readOnly = true)
     Integer countMatchingUsers(QueryUsersCriteriaRequest contactUsersCriteria) {
@@ -59,13 +112,12 @@ class ContactUsersService {
     void contactUsers(ContactUsersRequest contactUsersRequest) {
 
         retrieveMatchingUserIds(contactUsersRequest.queryCriteria).withCloseable { Stream<String> userIds ->
-            Parser parser = Parser.builder().build()
-            HtmlRenderer renderer = HtmlRenderer.builder().build()
             def markdown = parser.parse(contactUsersRequest.emailBody)
             String parsedBody = renderer.render(markdown)
-            userIds.forEach({
+
+            Closure sendNotification = { List<String> batch ->
                 Notifier.NotificationRequest request = new Notifier.NotificationRequest(
-                        userIds: [it],
+                        userIds: batch,
                         type: Notification.Type.ContactUsers,
                         keyValParams: [
                                 projectId   : contactUsersRequest.queryCriteria.projectId,
@@ -75,8 +127,26 @@ class ContactUsersService {
                         ]
                 )
                 emailNotifier.sendNotification(request)
+            }
+
+            List<String> batch = []
+            userIds.forEach({
+                batch.add(it)
+                if (batch.size() == 150) {
+                    sendNotification(new ArrayList(batch))
+                    batch.clear()
+                }
             })
+
+            if (batch.size() > 0) {
+                sendNotification(new ArrayList(batch))
+                batch.clear()
+            }
         }
+    }
+
+    private Stream<String> getAllProjectAdminsWithEmail() {
+        return accessSettingsStorageService.getUsersIdsWithRoleAndEmail(RoleName.ROLE_PROJECT_ADMIN)
     }
 
     private QueryUsersCriteria convert(QueryUsersCriteriaRequest request) {

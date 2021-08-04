@@ -35,4 +35,8 @@ interface UserAttrsRepo extends CrudRepository<UserAttrs, Integer> {
         order by attrs.firstName asc''')
     List<UserAttrs> searchForUser(String userIdQuery, Pageable pageable)
 
+    @Nullable
+    @Query(value='''select attrs.email from user_attrs attrs where attrs.user_id = ?1''', nativeQuery = true)
+    String findEmailByUserId(String userId)
+
 }

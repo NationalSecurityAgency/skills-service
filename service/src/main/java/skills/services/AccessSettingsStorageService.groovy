@@ -29,7 +29,6 @@ import skills.auth.pki.PkiUserLookup
 import skills.controller.UserInfoController
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
-import skills.controller.request.model.UserSettingsRequest
 import skills.controller.result.model.UserInfoRes
 import skills.controller.result.model.UserRoleRes
 import skills.services.inception.InceptionProjectService
@@ -40,6 +39,8 @@ import skills.storage.model.auth.User
 import skills.storage.model.auth.UserRole
 import skills.storage.repos.UserRepo
 import skills.storage.repos.UserRoleRepo
+
+import java.util.stream.Stream
 
 @Service
 @Slf4j
@@ -106,13 +107,24 @@ class AccessSettingsStorageService {
     }
 
     @Transactional(readOnly = true)
-    List<UserRoleRes> getUserRolesWithRole(RoleName roleName) {
+    getUserRolesWithRole(RoleName roleName) {
         List<UserRoleRepo.UserRoleWithAttrs> roles = userRoleRepository.findAllByRoleName(roleName)
         return roles.collect { convert(it) }
     }
 
     @Transactional(readOnly = true)
+    Stream<String> getUsersIdsWithRoleAndEmail(RoleName roleName) {
+        return userRoleRepository.findAllUserIdsWithRoleAndEmail(roleName)
+    }
+
+    @Transactional(readOnly = true)
+    Long countUserIdsWithRoleAndEmail(RoleName roleName) {
+        return userRoleRepository.countAllUserIdsWithRoleAndEmail(roleName)
+    }
+
+    @Transactional(readOnly = true)
     List<UserRoleRes> getUserRolesWithoutRole(RoleName roleName) {
+
         List<UserRoleRes> usersWithRole = getUserRolesWithRole(roleName)
         List<UserRoleRepo.UserRoleWithAttrs> res
         if (usersWithRole) {
@@ -338,6 +350,7 @@ class AccessSettingsStorageService {
                 roleName: input.role.roleName,
                 firstName: input.attrs.firstName,
                 lastName: input.attrs.lastName,
+                email: input.attrs.email
         )
         return res
     }

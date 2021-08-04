@@ -16,12 +16,15 @@
 package skills.notify
 
 import callStack.profiler.Profile
+import groovy.json.JsonException
 import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 import groovy.time.TimeCategory
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.time.StopWatch
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.result.model.SettingsResult
@@ -31,10 +34,10 @@ import skills.notify.builders.NotificationEmailBuilderManager
 import skills.services.EmailSendingService
 import skills.services.FeatureService
 import skills.services.LockingService
+import skills.services.SystemSettingsService
 import skills.services.settings.SettingsService
 import skills.settings.EmailSettingsService
 import skills.storage.model.Notification
-import skills.storage.model.UserAttrs
 import skills.storage.repos.NotificationsRepo
 import skills.storage.repos.UserAttrsRepo
 
@@ -47,6 +50,9 @@ class EmailNotifier implements Notifier {
 
     @Value('#{"${skills.config.notifications.retainFailedNotificationsForNumSecs}"}')
     int retainFailedNotificationsForNumSecs
+
+    @Value('#{"${skills.config.notifications.maxRecipients:50}"}')
+    int maxRecipients = 50
 
     @Autowired
     EmailSendingService sendingService
@@ -69,6 +75,12 @@ class EmailNotifier implements Notifier {
     @Autowired
     NotificationEmailBuilderManager notificationEmailBuilderManager
 
+    @Autowired
+    EmailSettingsService emailSettingsService
+
+    @Autowired
+    SystemSettingsService systemSettingsService
+
     @Transactional
     @Profile
     void sendNotification(Notifier.NotificationRequest notificationRequest) {
@@ -83,16 +95,33 @@ class EmailNotifier implements Notifier {
         }
 
         String serParams = JsonOutput.toJson(notificationRequest.keyValParams)
-        notificationRequest.userIds.each { String userId ->
+
+        Closure saveNotification = { List<String> userIds ->
+            String json = JsonOutput.toJson(userIds)
+
             Notification notification = new Notification(
                     requestedOn: notificationRequest.requestedOn,
-                    userId: userId?.toLowerCase(),
+                    userId: json,
                     failedCount: 0,
                     encodedParams: serParams,
                     type: notificationRequest.type,
             )
 
             notificationsRepo.save(notification)
+        }
+
+        List<String> batch = []
+        notificationRequest.userIds.each { String userId ->
+            batch.add(userId.toLowerCase())
+            if (batch.size() == maxRecipients) {
+                saveNotification(new ArrayList(batch))
+                batch.clear()
+            }
+        }
+
+        if (batch.size() > 0) {
+            saveNotification(new ArrayList(batch))
+            batch.clear()
         }
 
     }
@@ -109,9 +138,10 @@ class EmailNotifier implements Notifier {
         doDispatchNotifications("Retry: ") { notificationsRepo.streamFailedNotifications() }
     }
 
-    private void doDispatchNotifications(String prependToLogs = "", Closure<Stream<Notification>> streamCreator) {
-        lockingService.lockForNotifying()
-        List<SettingsResult> emailSettings = settingsService.getGlobalSettingsByGroup(EmailSettingsService.settingsGroup);
+    private SettingsInit getEmailConfig() {
+        List<SettingsResult> emailSettings = settingsService.getGlobalSettingsByGroup(EmailSettingsService.settingsGroup)
+        JavaMailSender senderForBatch = emailSettingsService.getMailSender(emailSettingsService.convert(emailSettings))
+        String fromEmail = systemSettingsService.get()?.fromEmail
 
         Formatting formatting = new Formatting(
                 htmlHeader: emailSettings.find {it.setting == EmailSettingsService.htmlHeader }?.value ?: null,
@@ -119,38 +149,83 @@ class EmailNotifier implements Notifier {
                 htmlFooter: emailSettings.find { it.setting == EmailSettingsService.htmlFooter }?.value ?: null,
                 plaintextFooter: emailSettings.find { it.setting == EmailSettingsService.plaintextFooter }?.value ?:null
         )
+
+        return new SettingsInit(formatting: formatting, fromEmail: fromEmail, mailSender: senderForBatch)
+    }
+
+    private void doDispatchNotifications(String prependToLogs = "", Closure<Stream<Notification>> streamCreator) {
+        lockingService.lockForNotifying()
+
         StopWatch stopWatch = new StopWatch()
         stopWatch.start()
 
         int count = 0
         int errCount = 0
         String lastErrMsg
-        streamCreator.call().withCloseable { Stream<Notification> notifications ->
-            notifications.forEach({ Notification notification ->
-                NotificationEmailBuilder.Res emailRes = notificationEmailBuilderManager.build(notification, formatting)
-                UserAttrs userAttrs = userAttrs.findByUserId(notification.userId)
-                boolean failed = false;
-                try {
-                    sendingService.sendEmail(emailRes.subject, userAttrs.email, emailRes.html, emailRes.plainText, notification.requestedOn)
-                } catch (Throwable t) {
-                    // don't print the same message over and over again
-                    if (!lastErrMsg?.equalsIgnoreCase(t.message)) {
-                        log.error("${prependToLogs}Failed to sent notification with id [${notification.id}] and type [${notification.type}]. Updating notification to retry", t)
-                        lastErrMsg = t.message
-                    }
-                    notification.failedCount = notification.failedCount + 1
 
+        streamCreator.call().withCloseable { Stream<Notification> notifications ->
+
+            JavaMailSender senderForBatch = null
+            String fromEmail = null
+            Formatting formatting = null
+            JsonSlurper slurper = new JsonSlurper()
+
+            notifications.forEach({ Notification notification ->
+                if (!senderForBatch) {
+                    SettingsInit init = getEmailConfig()
+                    senderForBatch = init.mailSender
+                    fromEmail = init.fromEmail
+                    formatting = init.formatting
+                }
+
+                def userIds = null
+                try {
+                    userIds = slurper.parseText(notification.userId)
+                } catch (JsonException ex) {
+                    log.warn("user id field [${notification.userId}] was not in the expected json format, this is expected for any notifications that existed prior to 1.6")
+                    userIds = [notification.userId]
+                }
+
+                NotificationEmailBuilder.Res emailRes = notificationEmailBuilderManager.build(notification, formatting)
+                assert notification.userId?.size() > 0
+
+                List<String> failedUserIds = []
+
+                userIds.each {
+                    String email = userAttrs.findEmailByUserId(it)
+                    if (email) {
+                        boolean failed = false;
+                        try {
+                            sendingService.sendEmail(emailRes.subject, email, emailRes.html, emailRes.plainText, notification.requestedOn, senderForBatch, fromEmail)
+                        } catch (Throwable t) {
+                            // don't print the same message over and over again
+                            if (!lastErrMsg?.equalsIgnoreCase(t.message)) {
+                                log.error("${prependToLogs}Failed to send notification with id [${notification.id}] and type [${notification.type}]. Updating notification to retry", t)
+                                lastErrMsg = t.message
+                            }
+                            failed = true;
+                        }
+                        if (!failed) {
+                            count++
+                        } else {
+                            failedUserIds.add(it)
+                            errCount++
+                        }
+                    } else {
+                        log.warn("unable to send notification to recipient [${it}], no email address found")
+                    }
+                }
+
+                if (!failedUserIds) {
+                    removeNotificationImmediately(notification.id)
+                } else {
+                    notification.failedCount = notification.failedCount + 1
+                    //only some failed. Update the notification to only include the failed ids
+                    notification.userId = JsonOutput.toJson(failedUserIds)
                     boolean removed = removeIfOlderThanConfiguredRetainPeriod(notification)
                     if (!removed) {
                         notificationsRepo.save(notification)
                     }
-                    failed = true;
-                }
-                if (!failed) {
-                    removeNotificationImmediately(notification.id)
-                    count++
-                } else {
-                    errCount++
                 }
             })
         }
@@ -181,6 +256,13 @@ class EmailNotifier implements Notifier {
         notificationsRepo.deleteById(id)
         notificationsRepo.flush()
     }
+
+    private static class SettingsInit {
+        Formatting formatting
+        String fromEmail
+        JavaMailSender mailSender
+    }
+
 
 
 }

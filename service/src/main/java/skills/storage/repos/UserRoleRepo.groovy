@@ -17,10 +17,13 @@ package skills.storage.repos
 
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
+import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
 import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.UserRole
+
+import java.util.stream.Stream
 
 interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
 
@@ -77,6 +80,22 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
             ur.userId = ua.userId and 
             ur.userId not in (?1)''')
     List<UserRoleWithAttrs> findAllByUserIdNotIn(List<String> userIds)
+
+
+    @Query('''
+        select distinct ua.userId from UserAttrs ua 
+            join UserRole ur on ur.userId = ua.userId 
+            where ua.email is not null and ur.roleName = ?1 
+            group by ua.userId order by ua.userId asc
+    ''')
+    Stream<String> findAllUserIdsWithRoleAndEmail(RoleName roleName)
+
+    @Query(value='''
+        select sum(count(distinct ua.user_id)) over () totalTotal 
+        from user_attrs ua join user_roles ur on ur.user_id = ua.user_id 
+        where ua.email is not null and ur.role_name = :#{#roleName.name()} group by ua.user_id order by ua.user_id asc limit 1
+    ''', nativeQuery = true)
+    Long countAllUserIdsWithRoleAndEmail(@Param("roleName") RoleName roleName)
 
     boolean existsByUserIdAndRoleName(String userId, RoleName roleName)
 

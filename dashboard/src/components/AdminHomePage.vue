@@ -22,7 +22,10 @@ limitations under the License.
 </template>
 
 <script>
+  import { createNamespacedHelpers } from 'vuex';
   import Navigation from './utils/Navigation';
+
+  const { mapGetters } = createNamespacedHelpers('access');
 
   export default {
     name: 'AdminHomePage',
@@ -32,19 +35,13 @@ limitations under the License.
     data() {
       return {
         isLoading: true,
-        navItems: [
-          {
-            name: 'Projects',
-            iconClass: 'fa-tasks skills-color-projects',
-            page: 'AdminHomePage',
-          },
-        ],
       };
     },
     computed: {
-      isSupervisor() {
-        return this.$store.getters['access/isSupervisor'];
-      },
+      ...mapGetters([
+        'isSupervisor',
+        'isRoot',
+      ]),
       headerOptions() {
         return {
           icon: 'fas fa-cubes',
@@ -53,46 +50,41 @@ limitations under the License.
           stats: [],
         };
       },
+      navItems() {
+        const items = [];
+        items.push({
+          name: 'Projects',
+          iconClass: 'fa-tasks skills-color-projects',
+          page: 'AdminHomePage',
+        });
+
+        if (this.isSupervisor || this.isRoot) {
+          items.push({
+            name: 'Badges',
+            iconClass: 'fa-globe-americas skills-color-badges',
+            page: 'GlobalBadges',
+          });
+          items.push({
+            name: 'Metrics',
+            iconClass: 'fa-chart-bar skills-color-metrics',
+            page: 'MultipleProjectsMetricsPage',
+          });
+        }
+
+        if (this.isRoot) {
+          items.push({
+            name: 'Contact Admins',
+            iconClass: 'fas fa-mail-bulk',
+            page: 'ContactAdmins',
+          });
+        }
+
+        return items;
+      },
     },
     mounted() {
-      this.loadNavItems();
-    },
-    watch: {
-      isSupervisor() {
-        this.loadNavItems();
-      },
     },
     methods: {
-      loadNavItems() {
-        const metricsNavItem = {
-          name: 'Metrics',
-          iconClass: 'fa-chart-bar skills-color-metrics',
-          page: 'MultipleProjectsMetricsPage',
-        };
-        this.handleNavItem(metricsNavItem, this.isSupervisor);
-
-        const globalBadgeNav = {
-          name: 'Badges',
-          iconClass: 'fa-globe-americas skills-color-badges',
-          page: 'GlobalBadges',
-        };
-        this.handleNavItem(globalBadgeNav, this.isSupervisor);
-
-        this.isLoading = false;
-      },
-      handleNavItem(newItem, isRole) {
-        const existingItem = this.navItems.find((element) => element.name === newItem.name);
-        if (isRole) {
-          if (!existingItem) {
-            this.navItems.splice(1, 0, newItem);
-          }
-        } else if (existingItem) {
-          const idx = this.navItems.indexOf(existingItem);
-          if (idx >= 0) {
-            this.navItems.splice(idx, 1);
-          }
-        }
-      },
     },
   };
 </script>
