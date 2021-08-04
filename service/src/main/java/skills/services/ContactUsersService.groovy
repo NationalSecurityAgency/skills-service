@@ -19,6 +19,7 @@ import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.commonmark.renderer.html.HtmlRenderer
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.request.model.ContactUsersRequest
@@ -51,6 +52,9 @@ class ContactUsersService {
     @Autowired
     AccessSettingsStorageService accessSettingsStorageService
 
+    @Value('#{"${skills.config.notifications.maxRecipients:50}"}')
+    int batchSize
+
     @Transactional(readOnly = true)
     Long countAllProjectAdminsWithEmail() {
         return accessSettingsStorageService.countUserIdsWithRoleAndEmail(RoleName.ROLE_PROJECT_ADMIN)
@@ -80,7 +84,7 @@ class ContactUsersService {
         getAllProjectAdminsWithEmail().withCloseable { Stream<String> userIds ->
             userIds.forEach {
                 batch.add(it)
-                if (batch.size() == 150) {
+                if (batch.size() == batchSize) {
                     sendNotifications(new ArrayList(batch))
                     batch.clear()
                 }
