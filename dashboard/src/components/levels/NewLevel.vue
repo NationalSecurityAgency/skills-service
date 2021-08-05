@@ -15,7 +15,8 @@ limitations under the License.
 */
 <template>
   <ValidationObserver ref="observer" v-slot="{ invalid, handleSubmit }" slim>
-    <b-modal :id="levelId" size="xl" :title="title" v-model="show" :no-close-on-backdrop="true"
+    <b-modal :id="levelId" size="md" :title="title" v-model="show"
+             :no-close-on-backdrop="true" :centered="true"
              header-bg-variant="info" header-text-variant="light" no-fade
              @hide="publishHidden">
       <b-container fluid>

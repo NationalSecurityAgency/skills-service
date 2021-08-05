@@ -71,6 +71,7 @@ limitations under the License.
     <ValidationObserver v-slot="{invalid}" slim>
     <b-modal id="rejectSkillsModal"
              :no-close-on-backdrop="true"
+             :centered="true"
              v-model="reject.showModal">
       <template #modal-title>
         <div class="h5 text-uppercase">Reject Skills</div>

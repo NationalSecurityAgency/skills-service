@@ -19,6 +19,7 @@ limitations under the License.
              v-model="isShown"
              size="lg"
              :no-close-on-backdrop="true"
+             :centered="true"
              @close="done"
              header-bg-variant="info"
              header-text-variant="light"
