@@ -18,6 +18,7 @@ limitations under the License.
            title="REPORT SKILL"
            ok-title="Submit"
            :no-close-on-backdrop="true"
+           :centered="true"
            v-model="modalVisible">
     <div id="reportSkillMsg" class="row p-2" data-cy="selfReportSkillMsg">
       <div class="col-auto text-center">

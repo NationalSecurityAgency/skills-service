@@ -106,6 +106,7 @@ limitations under the License.
     <b-modal id="clearRejectionMsgDialog"
              title="CLEAR APPROVAL REJECTION"
              :no-close-on-backdrop="true"
+             :centered="true"
              v-model="clearRejectionModalVisible">
       <div class="row p-2" data-cy="clearRejectionMsgDialog">
         <div class="col-auto text-center">
