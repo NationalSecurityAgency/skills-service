@@ -128,7 +128,6 @@ describe('Contact Project Admins Specs', () => {
     })
 
     it('preview email button', () => {
-
         cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice').as('emailSupported');
         cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPER_DUPER_USER').as('isRoot');
 
@@ -141,6 +140,6 @@ describe('Contact Project Admins Specs', () => {
         cy.get('[data-cy=emailUsers_subject]').type('Test Subject');
         cy.get('[data-cy=previewUsersEmail]').should('be.disabled');
         cy.get('[data-cy="markdownEditorInput"]').type('Test Body');
-        cy.get('[data-cy=previewUsersEmail]').should('be.enabled');
+        cy.get('[data-cy=previewAdminEmail]').should('be.enabled');
     });
 });
