@@ -137,24 +137,21 @@ class SkillsService {
         wsHelper.adminGet("/projects/${projectId}/projectSearch?nameQuery=${query}")
     }
 
+
     @Profile
-    def moveProjectUp(Map props){
-        wsHelper.adminPatch(getProjectUrl(props.projectId), '{"action": "DisplayOrderUp"}')
+    def changeProjectDisplayOrder(Map props, Integer newDisplayOrderIndex){
+        wsHelper.adminPatch(getProjectUrl(props.projectId), [
+                action: "NewDisplayOrderIndex",
+                newDisplayOrderIndex: newDisplayOrderIndex,
+        ]);
     }
 
     @Profile
-    def moveProjectDown(Map props){
-        wsHelper.adminPatch(getProjectUrl(props.projectId), '{"action": "DisplayOrderDown"}')
-    }
-
-    @Profile
-    def moveSubjectUp(Map props){
-        wsHelper.adminPatch(getSubjectUrl(props.projectId, props.subjectId), '{"action": "DisplayOrderUp"}')
-    }
-
-    @Profile
-    def moveSubjectDown(Map props){
-        wsHelper.adminPatch(getSubjectUrl(props.projectId, props.subjectId), '{"action": "DisplayOrderDown"}')
+    def changeSubjectDisplayOrder(Map props, Integer newDisplayOrderIndex){
+        wsHelper.adminPatch(getSubjectUrl(props.projectId, props.subjectId), [
+                action: "NewDisplayOrderIndex",
+                newDisplayOrderIndex: newDisplayOrderIndex,
+        ]);
     }
 
     @Profile
@@ -167,24 +164,21 @@ class SkillsService {
         wsHelper.adminPatch(getSkillUrl(props.projectId, props.subjectId, props.skillId), '{"action": "DisplayOrderDown"}')
     }
 
+
     @Profile
-    def moveBadgeUp(Map props){
-        wsHelper.adminPatch(getBadgeUrl(props.projectId, props.badgeId), '{"action": "DisplayOrderUp"}')
+    def changeBadgeDisplayOrder(Map props, Integer newDisplayOrderIndex){
+        wsHelper.adminPatch(getBadgeUrl(props.projectId, props.badgeId), [
+                action: "NewDisplayOrderIndex",
+                newDisplayOrderIndex: newDisplayOrderIndex,
+        ]);
     }
 
     @Profile
-    def moveBadgeDown(Map props){
-        wsHelper.adminPatch(getBadgeUrl(props.projectId, props.badgeId), '{"action": "DisplayOrderDown"}')
-    }
-
-    @Profile
-    def moveGlobalBadgeUp(Map props){
-        wsHelper.supervisorPatch(getGlobalBadgeUrl(props.badgeId), '{"action": "DisplayOrderUp"}')
-    }
-
-    @Profile
-    def moveGlobalBadgeDown(Map props){
-        wsHelper.supervisorPatch(getGlobalBadgeUrl(props.badgeId), '{"action": "DisplayOrderDown"}')
+    def changeGlobalBadgeDisplayOrder(Map props, Integer newDisplayOrderIndex){
+        wsHelper.supervisorPatch(getGlobalBadgeUrl(props.badgeId), [
+                action: "NewDisplayOrderIndex",
+                newDisplayOrderIndex: newDisplayOrderIndex,
+        ]);
     }
 
     @Profile

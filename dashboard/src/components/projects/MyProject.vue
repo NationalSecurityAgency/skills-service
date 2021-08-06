@@ -28,12 +28,11 @@ limitations under the License.
           </div>
           <div class="col-md-auto mt-3 mt-md-0">
             <project-card-controls
+              :class="{ 'mr-md-4': !disableSortControl}"
               ref="cardControls"
               :project="projectInternal"
               @edit-project="editProject"
               @delete-project="deleteProject"
-              @move-up-project="moveUp"
-              @move-down-project="moveDown"
               @unpin-project="unpin"
               :is-delete-disabled="deleteProjectDisabled"
               :delete-disabled-text="deleteProjectToolTip"/>
@@ -63,6 +62,14 @@ limitations under the License.
           </b-button>
         </div>
       </div>
+
+      <div v-if="!disableSortControl"
+           @mouseover="overSortControl = true"
+           @mouseleave="overSortControl = false"
+           @click.prevent.self
+           class="position-absolute text-secondary px-2 py-1 sort-control"
+           data-cy="sortControlHandle"><i class="fas fa-arrows-alt"></i></div>
+
     </div>
 
     <edit-project v-if="showEditProjectModal" v-model="showEditProjectModal" :project="projectInternal" :is-edit="true"
@@ -86,7 +93,7 @@ limitations under the License.
       ProjectCardControls,
       EditProject,
     },
-    props: ['project'],
+    props: ['project', 'disableSortControl'],
     mixins: [MsgBoxMixin],
     data() {
       return {
@@ -191,12 +198,6 @@ limitations under the License.
             this.isLoading = false;
           });
       },
-      moveUp() {
-        this.$emit('move-project-up', this.projectInternal);
-      },
-      moveDown() {
-        this.$emit('move-project-down', this.projectInternal);
-      },
       unpin() {
         SettingsService.unpinProject(this.projectInternal.projectId)
           .then(() => {
@@ -218,6 +219,8 @@ limitations under the License.
 </script>
 
 <style lang="scss" scoped>
+  @import "../../assets/custom";
+
   .project-settings {
     position: relative;
     display: inline-block;
@@ -240,7 +243,7 @@ limitations under the License.
     font-size: 0.9rem;
   }
 
-  i {
+  .avatar-link i {
     font-size: 2.5rem;
     display: inline-block;
   }
@@ -248,6 +251,23 @@ limitations under the License.
   .stat-card {
     background-color: #f8f9fa;
     padding: 1rem;
+  }
+
+  .sort-control {
+    font-size: 1.3rem !important;
+    color: #b3b3b3 !important;
+    top: 0rem;
+    right: 0rem;
+    border-bottom: 1px solid #e8e8e8;
+    border-left: 1px solid #e8e8e8;
+    background-color: #fbfbfb !important;
+    border-bottom-left-radius:.25rem!important
+  }
+
+  .sort-control:hover, .sort-control i:hover {
+    cursor: grab !important;
+    color: $info !important;
+    font-size: 1.5rem;
   }
 
 </style>

@@ -466,9 +466,9 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
             supervisorSkillsService.createGlobalBadge(badge)
         }
 
-        supervisorSkillsService.moveGlobalBadgeDown([badgeId: badgeIds[0]])
-        supervisorSkillsService.moveGlobalBadgeDown([badgeId: badgeIds[0]])
-        supervisorSkillsService.moveGlobalBadgeUp([badgeId: badgeIds[2]])
+        supervisorSkillsService.changeGlobalBadgeDisplayOrder([badgeId: badgeIds[0]], 1)
+        supervisorSkillsService.changeGlobalBadgeDisplayOrder([badgeId: badgeIds[0]], 2)
+        supervisorSkillsService.changeGlobalBadgeDisplayOrder([badgeId: badgeIds[2]], 0)
 
         supervisorSkillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: badgeIds.get(0), skillId: proj1_skills.get(0).skillId])
         supervisorSkillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: badgeIds.get(0), skillId: proj1_skills.get(1).skillId])

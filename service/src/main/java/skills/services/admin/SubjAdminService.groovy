@@ -207,7 +207,9 @@ class SubjAdminService {
     void setSubjectDisplayOrder(String projectId, String subjectId, ActionPatchRequest subjectPatchRequest) {
         lockingService.lockProject(projectId)
         ProjDef projDef = projDefAccessor.getProjDef(projectId)
-        displayOrderService.updateDisplayOrder(subjectId, projDef.subjects, subjectPatchRequest)
+        if(ActionPatchRequest.ActionType.NewDisplayOrderIndex == subjectPatchRequest.action) {
+            displayOrderService.updateDisplayOrderByUsingNewIndex(subjectId, projDef.subjects, subjectPatchRequest)
+        }
     }
 
     @Transactional(readOnly = true)

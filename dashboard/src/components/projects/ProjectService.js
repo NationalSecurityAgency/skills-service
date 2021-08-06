@@ -66,9 +66,8 @@ export default {
     return axios.get(`/admin/projects/${projectId}`)
       .then((response) => response.data);
   },
-  changeProjectOrder(projectId, actionToSubmit) {
-    return axios.patch(`/admin/projects/${projectId}`, { action: actionToSubmit })
-      .then((response) => response.data);
+  updateProjectDisplaySortOrder(projectId, newDisplayOrderIndex) {
+    return axios.patch(`/admin/projects/${projectId}`, { action: 'NewDisplayOrderIndex', newDisplayOrderIndex });
   },
   saveProject(project) {
     if (project.isEdit) {

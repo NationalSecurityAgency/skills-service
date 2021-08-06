@@ -16,7 +16,7 @@ limitations under the License.
 <template>
   <div class="card h-100">
     <div class="card-body">
-      <div class="row mb-2">
+      <div class="row mb-2 nav-cards-header">
         <div class="col">
           <div class="media">
             <router-link v-if="options.icon" tag="a"
@@ -54,6 +54,13 @@ limitations under the License.
       <div>
         <slot name="footer"></slot>
       </div>
+
+      <div v-if="!disableSortControl"
+        @mouseover="overSortControl = true"
+        @mouseleave="overSortControl = false"
+        @click.prevent.self
+        class="position-absolute text-secondary px-2 py-1 sort-control"
+        data-cy="sortControlHandle"><i class="fas fa-arrows-alt"></i></div>
     </div>
   </div>
 </template>
@@ -70,11 +77,22 @@ limitations under the License.
         subTitle: String,
         stats: {},
       },
+      disableSortControl: {
+        type: Boolean,
+        default: false,
+      },
+    },
+    data() {
+      return {
+        overSortControl: false,
+      };
     },
   };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+  @import "../../../assets/custom";
+
   .preview-card-title {
     font-size: 1.4rem;
     font-weight: bold;
@@ -89,7 +107,7 @@ limitations under the License.
     font-size: 0.9rem;
   }
 
-  i {
+  .nav-cards-header i {
     font-size: 1.8rem;
     display: inline-block;
   }
@@ -101,5 +119,22 @@ limitations under the License.
 
   .icon-link:hover {
     border-color: black !important;
+  }
+
+  .sort-control {
+    font-size: 1.3rem !important;
+    color: #b3b3b3 !important;
+    top: 0rem;
+    right: 0rem;
+    border-bottom: 1px solid #e8e8e8;
+    border-left: 1px solid #e8e8e8;
+    background-color: #fbfbfb !important;
+    border-bottom-left-radius:.25rem!important
+  }
+
+  .sort-control:hover, .sort-control i:hover {
+    cursor: grab !important;
+    color: $info !important;
+    font-size: 1.5rem;
   }
 </style>

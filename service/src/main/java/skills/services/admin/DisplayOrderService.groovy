@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillException
+import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ActionPatchRequest
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillDefRepo
@@ -49,35 +50,24 @@ class DisplayOrderService {
     }
 
     @Transactional
-    void updateDisplayOrder(String skillId, List<SkillDef> skills, ActionPatchRequest patchRequest) {
-        SkillDef toUpdate = skills.find({ it.skillId == skillId })
+    void updateDisplayOrderByUsingNewIndex(String skillId, List<SkillDef> skills, ActionPatchRequest patchRequest) {
+        assert patchRequest.action == ActionPatchRequest.ActionType.NewDisplayOrderIndex
+        SkillsValidator.isTrue(patchRequest.newDisplayOrderIndex >= 0, "[newDisplayOrderIndex] param must be >=0 but received [${patchRequest.newDisplayOrderIndex}]", skills?.first()?.projectId, skillId)
 
-        SkillDef switchWith
+        SkillDef theItem = skills.find({ it.skillId == skillId })
+        List<SkillDef> result = skills.findAll({ it.skillId != skillId }).sort({ it.displayOrder })
 
-        switch (patchRequest.action) {
-            case ActionPatchRequest.ActionType.DisplayOrderDown:
-                skills = skills.sort({ it.displayOrder })
-                switchWith = skills.find({ it.displayOrder > toUpdate.displayOrder })
-                break;
-            case ActionPatchRequest.ActionType.DisplayOrderUp:
-                skills = skills.sort({ it.displayOrder }).reverse()
-                switchWith = skills.find({ it.displayOrder < toUpdate.displayOrder })
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown action ${patchRequest.action}")
+        int newIndex = Math.min(patchRequest.newDisplayOrderIndex, skills.size() - 1)
+        result.add(newIndex, theItem)
+        result.eachWithIndex{ SkillDef entry, int i ->
+            entry.displayOrder = i
         }
 
-        if (!switchWith) {
-            throw new SkillException("Failed to find definition to switch with [${toUpdate?.skillId}] for action [$patchRequest.action]", SkillException.NA, skillId)
+        skillDefRepo.saveAll(result)
+
+        if (log.isDebugEnabled()) {
+            log.debug("Updated display order {}", result.collect { "${it.skillId}=>${it.displayOrder}" })
         }
-        assert switchWith.skillId != toUpdate.skillId
-
-        int switchWithDisplayOrderTmp = toUpdate.displayOrder
-
-        toUpdate.displayOrder = switchWith.displayOrder
-        switchWith.displayOrder = switchWithDisplayOrderTmp
-        skillDefRepo.saveAll([toUpdate, switchWith])
-
-        log.debug("Switched order of [{}] and [{}]", toUpdate.skillId, switchWith.skillId)
     }
+
 }

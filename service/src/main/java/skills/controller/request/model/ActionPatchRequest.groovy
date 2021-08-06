@@ -19,6 +19,7 @@ import groovy.transform.Canonical
 
 @Canonical
 class ActionPatchRequest {
-    static enum ActionType { DisplayOrderUp, DisplayOrderDown}
+    static enum ActionType { DisplayOrderUp, DisplayOrderDown, NewDisplayOrderIndex}
     ActionType action
+    Integer newDisplayOrderIndex
 }

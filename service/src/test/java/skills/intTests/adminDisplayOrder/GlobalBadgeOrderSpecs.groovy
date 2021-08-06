@@ -15,6 +15,7 @@
  */
 package skills.intTests.adminDisplayOrder
 
+import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
@@ -44,42 +45,67 @@ class GlobalBadgeOrderSpecs extends DefaultIntSpec {
     def "move badge down"() {
         when:
         def beforeMove = supervisorSkillsService.getAllGlobalBadges()
-        supervisorSkillsService.moveGlobalBadgeDown(badges.first())
+        supervisorSkillsService.changeGlobalBadgeDisplayOrder(badges.first(), 1)
         def afterMove = supervisorSkillsService.getAllGlobalBadges()
         then:
         beforeMove.collect({it.badgeId}) == ["badge1", "badge2", "badge3", "badge4", "badge5"]
         afterMove.collect({it.badgeId}) == ["badge2", "badge1", "badge3", "badge4", "badge5"]
-    }
-
-    def "should not be able to move down the last badge"() {
-        when:
-        def beforeMove = supervisorSkillsService.getAllGlobalBadges()
-        supervisorSkillsService.moveGlobalBadgeDown(badges.last())
-        then:
-        def ex = thrown(Exception)
-        ex.message.contains("Failed to find definition to switch with [badge5] for action [DisplayOrderDown]")
-        beforeMove.collect({it.badgeId}) == ["badge1", "badge2", "badge3", "badge4", "badge5"]
-        supervisorSkillsService.getAllGlobalBadges().collect({it.badgeId}) == ["badge1", "badge2", "badge3", "badge4", "badge5"]
     }
 
     def "move badge up"() {
         when:
         def beforeMove = supervisorSkillsService.getAllGlobalBadges()
-        supervisorSkillsService.moveGlobalBadgeUp(badges.get(1))
+        supervisorSkillsService.changeGlobalBadgeDisplayOrder(badges.get(1), 0)
         def afterMove = supervisorSkillsService.getAllGlobalBadges()
         then:
         beforeMove.collect({it.badgeId}) == ["badge1", "badge2", "badge3", "badge4", "badge5"]
         afterMove.collect({it.badgeId}) == ["badge2", "badge1", "badge3", "badge4", "badge5"]
     }
 
-    def "should not be able to move up the first badge"() {
+    def "sequence of badge display order operations"() {
         when:
         def beforeMove = supervisorSkillsService.getAllGlobalBadges()
-        supervisorSkillsService.moveGlobalBadgeUp(badges.first())
+        supervisorSkillsService.changeGlobalBadgeDisplayOrder(badges.get(0), 3)
+        def move1 = supervisorSkillsService.getAllGlobalBadges()
+
+        supervisorSkillsService.changeGlobalBadgeDisplayOrder(badges.get(4), 0)
+        def move2 = supervisorSkillsService.getAllGlobalBadges()
+
+        supervisorSkillsService.changeGlobalBadgeDisplayOrder(badges.get(1), 4)
+        def move3 = supervisorSkillsService.getAllGlobalBadges()
+
+        supervisorSkillsService.changeGlobalBadgeDisplayOrder(badges.get(2), 2)
+        def move4 = supervisorSkillsService.getAllGlobalBadges()
         then:
-        def ex = thrown(Exception)
-        ex.message.contains("Failed to find definition to switch with [badge1] for action [DisplayOrderUp]")
         beforeMove.collect({it.badgeId}) == ["badge1", "badge2", "badge3", "badge4", "badge5"]
-        supervisorSkillsService.getAllGlobalBadges().collect({it.badgeId}) == ["badge1", "badge2", "badge3", "badge4", "badge5"]
+        move1.collect({it.badgeId}) == ["badge2", "badge3", "badge4", "badge1", "badge5"]
+        move2.collect({it.badgeId}) == ["badge5", "badge2", "badge3", "badge4", "badge1"]
+        move3.collect({it.badgeId}) == ["badge5", "badge3", "badge4", "badge1", "badge2"]
+        move4.collect({it.badgeId}) == ["badge5", "badge4", "badge3", "badge1", "badge2"]
     }
+
+    def "move badge to out of the max bound - should be placed last"() {
+        when:
+        def beforeMove = supervisorSkillsService.getAllGlobalBadges()
+        supervisorSkillsService.changeGlobalBadgeDisplayOrder(badges.get(0), 10)
+        def afterMove = supervisorSkillsService.getAllGlobalBadges()
+        then:
+        beforeMove.collect({it.badgeId}) == ["badge1", "badge2", "badge3", "badge4", "badge5"]
+        afterMove.collect({it.badgeId}) == ["badge2", "badge3", "badge4", "badge5", "badge1"]
+    }
+
+    def "new display index must be >=0 "() {
+        when:
+        supervisorSkillsService.changeGlobalBadgeDisplayOrder(badges.get(2), 0)
+        def afterMove = supervisorSkillsService.getAllGlobalBadges()
+        supervisorSkillsService.changeGlobalBadgeDisplayOrder(badges.get(2), -1)
+        then:
+        SkillsClientException exception = thrown()
+        exception.httpStatus == HttpStatus.BAD_REQUEST
+        exception.message.contains('[newDisplayOrderIndex] param must be >=0 but received [-1]')
+
+        afterMove.collect({it.badgeId}) == ["badge3", "badge1", "badge2", "badge4", "badge5"]
+
+    }
+
 }

@@ -658,77 +658,86 @@ describe('Subjects Tests', () => {
         cy.contains('No Subjects Yet');
     });
 
-    it('sort management', () => {
+    it('drag-and-drop sort order', () => {
+        cy.intercept('/admin/projects/proj1/subjects/subj1').as('subj1Async')
+        cy.intercept('/admin/projects/proj1/subjects/subj2').as('subj2Async')
+        cy.intercept('/admin/projects/proj1/subjects/subj3').as('subj3Async')
+        cy.intercept('/admin/projects/proj1/subjects/subj4').as('subj4Async')
+        cy.intercept('/admin/projects/proj1/subjects/subj5').as('subj5Async')
+
         cy.createSubject(1, 1)
         cy.createSubject(1, 2)
         cy.createSubject(1, 3)
+        cy.createSubject(1, 4)
+        cy.createSubject(1, 5)
 
         cy.visit('/administrator/projects/proj1');
-        cy.get('[data-cy="subjectCard"]').should('have.length', 3).as('subjects');
-        cy.get('@subjects').eq(0).should('contain.text', 'Subject 1');
-        cy.get('@subjects').eq(1).should('contain.text', 'Subject 2');
-        cy.get('@subjects').eq(2).should('contain.text', 'Subject 3');
-        cy.get('[data-cy="subjectCard-subj1"] [data-cy="moveUpBtn"]').should('be.disabled');
-        cy.get('[data-cy="subjectCard-subj1"] [data-cy="moveDownBtn"]').should('be.enabled');
-        cy.get('[data-cy="subjectCard-subj2"] [data-cy="moveUpBtn"]').should('be.enabled');
-        cy.get('[data-cy="subjectCard-subj2"] [data-cy="moveDownBtn"]').should('be.enabled');
-        cy.get('[data-cy="subjectCard-subj3"] [data-cy="moveUpBtn"]').should('be.enabled');
-        cy.get('[data-cy="subjectCard-subj3"] [data-cy="moveDownBtn"]').should('be.disabled');
 
-        cy.get('[data-cy="subjectCard-subj1"] [data-cy="moveDownBtn"]').click();
-        cy.get('@subjects').eq(0).should('contain.text', 'Subject 2');
-        cy.get('@subjects').eq(1).should('contain.text', 'Subject 1');
-        cy.get('@subjects').eq(2).should('contain.text', 'Subject 3');
-        cy.get('[data-cy="subjectCard-subj2"] [data-cy="moveUpBtn"]').should('be.disabled');
-        cy.get('[data-cy="subjectCard-subj2"] [data-cy="moveDownBtn"]').should('be.enabled');
-        cy.get('[data-cy="subjectCard-subj1"] [data-cy="moveUpBtn"]').should('be.enabled');
-        cy.get('[data-cy="subjectCard-subj1"] [data-cy="moveDownBtn"]').should('be.enabled');
-        cy.get('[data-cy="subjectCard-subj3"] [data-cy="moveUpBtn"]').should('be.enabled');
-        cy.get('[data-cy="subjectCard-subj3"] [data-cy="moveDownBtn"]').should('be.disabled');
+        const subj1Card = '[data-cy="subjectCard-subj1"] [data-cy="sortControlHandle"]';
+        const subj2Card = '[data-cy="subjectCard-subj2"] [data-cy="sortControlHandle"]';
+        const subj4Card = '[data-cy="subjectCard-subj4"] [data-cy="sortControlHandle"]';
+        const subj5Card = '[data-cy="subjectCard-subj5"] [data-cy="sortControlHandle"]';
 
-        cy.get('[data-cy="subjectCard-subj1"] [data-cy="moveDownBtn"]').click();
-        cy.get('@subjects').eq(0).should('contain.text', 'Subject 2');
-        cy.get('@subjects').eq(1).should('contain.text', 'Subject 3');
-        cy.get('@subjects').eq(2).should('contain.text', 'Subject 1');
-        cy.get('[data-cy="subjectCard-subj2"] [data-cy="moveUpBtn"]').should('be.disabled');
-        cy.get('[data-cy="subjectCard-subj2"] [data-cy="moveDownBtn"]').should('be.enabled');
-        cy.get('[data-cy="subjectCard-subj3"] [data-cy="moveUpBtn"]').should('be.enabled');
-        cy.get('[data-cy="subjectCard-subj3"] [data-cy="moveDownBtn"]').should('be.enabled');
-        cy.get('[data-cy="subjectCard-subj1"] [data-cy="moveUpBtn"]').should('be.enabled');
-        cy.get('[data-cy="subjectCard-subj1"] [data-cy="moveDownBtn"]').should('be.disabled');
+
+        cy.validateElementsOrder('[data-cy="subjectCard"]', ['Subject 1', 'Subject 2', 'Subject 3', 'Subject 4', 'Subject 5']);
+        cy.get(subj1Card).dragAndDrop(subj4Card)
+        cy.wait('@subj1Async')
+        cy.validateElementsOrder('[data-cy="subjectCard"]', ['Subject 2', 'Subject 3', 'Subject 4', 'Subject 1', 'Subject 5']);
+
+        // refresh to make sure it was saved
+        cy.visit('/administrator/projects/proj1');
+        cy.validateElementsOrder('[data-cy="subjectCard"]', ['Subject 2', 'Subject 3', 'Subject 4', 'Subject 1', 'Subject 5']);
+
+        cy.get(subj5Card).dragAndDrop(subj2Card)
+        cy.wait('@subj5Async')
+        cy.validateElementsOrder('[data-cy="subjectCard"]', ['Subject 5', 'Subject 2', 'Subject 3', 'Subject 4', 'Subject 1']);
+
+        cy.get(subj2Card).dragAndDrop(subj1Card)
+        cy.wait('@subj2Async')
+        cy.validateElementsOrder('[data-cy="subjectCard"]', ['Subject 5', 'Subject 3', 'Subject 4', 'Subject 1', 'Subject 2']);
+
+        // refresh to make sure it was saved
+        cy.visit('/administrator/projects/proj1');
+        cy.validateElementsOrder('[data-cy="subjectCard"]', ['Subject 5', 'Subject 3', 'Subject 4', 'Subject 1', 'Subject 2']);
+    })
+
+    it('no drag-and-drag sort controls when there is only 1 subject', () => {
+        cy.createSubject(1, 1)
 
         cy.visit('/administrator/projects/proj1');
-        cy.get('@subjects').eq(0).should('contain.text', 'Subject 2');
-        cy.get('@subjects').eq(1).should('contain.text', 'Subject 3');
-        cy.get('@subjects').eq(2).should('contain.text', 'Subject 1');
-        cy.get('[data-cy="subjectCard-subj2"] [data-cy="moveUpBtn"]').should('be.disabled');
-        cy.get('[data-cy="subjectCard-subj2"] [data-cy="moveDownBtn"]').should('be.enabled');
-        cy.get('[data-cy="subjectCard-subj3"] [data-cy="moveUpBtn"]').should('be.enabled');
-        cy.get('[data-cy="subjectCard-subj3"] [data-cy="moveDownBtn"]').should('be.enabled');
-        cy.get('[data-cy="subjectCard-subj1"] [data-cy="moveUpBtn"]').should('be.enabled');
-        cy.get('[data-cy="subjectCard-subj1"] [data-cy="moveDownBtn"]').should('be.disabled');
+        cy.get('[data-cy="subjectCard-subj1"]');
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="sortControlHandle"]').should('not.exist');
 
-        cy.get('[data-cy="subjectCard-subj3"] [data-cy="moveUpBtn"]').click();
-        cy.get('@subjects').eq(0).should('contain.text', 'Subject 3');
-        cy.get('@subjects').eq(1).should('contain.text', 'Subject 2');
-        cy.get('@subjects').eq(2).should('contain.text', 'Subject 1');
-        cy.get('[data-cy="subjectCard-subj3"] [data-cy="moveUpBtn"]').should('be.disabled');
-        cy.get('[data-cy="subjectCard-subj3"] [data-cy="moveDownBtn"]').should('be.enabled');
-        cy.get('[data-cy="subjectCard-subj2"] [data-cy="moveUpBtn"]').should('be.enabled');
-        cy.get('[data-cy="subjectCard-subj2"] [data-cy="moveDownBtn"]').should('be.enabled');
-        cy.get('[data-cy="subjectCard-subj1"] [data-cy="moveUpBtn"]').should('be.enabled');
-        cy.get('[data-cy="subjectCard-subj1"] [data-cy="moveDownBtn"]').should('be.disabled');
+        cy.createSubject(1, 2)
+        cy.visit('/administrator/projects/proj1');
+        cy.get('[data-cy="subjectCard-subj1"]');
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="sortControlHandle"]');
+    })
+
+    it('drag-and-drag sort should spinner while backend operation is happening', () => {
+        cy.intercept('/admin/projects/proj1/subjects/subj1', (req) => {
+            req.reply((res) => {
+                res.send({ delay: 6000})
+            })
+        }).as('subj1Async');
+
+        cy.createSubject(1, 1)
+        cy.createSubject(1, 2)
+
+        const subj1Card = '[data-cy="subjectCard-subj1"] [data-cy="sortControlHandle"]';
+        const subj2Card = '[data-cy="subjectCard-subj2"] [data-cy="sortControlHandle"]';
 
         cy.visit('/administrator/projects/proj1');
-        cy.get('@subjects').eq(0).should('contain.text', 'Subject 3');
-        cy.get('@subjects').eq(1).should('contain.text', 'Subject 2');
-        cy.get('@subjects').eq(2).should('contain.text', 'Subject 1');
-        cy.get('[data-cy="subjectCard-subj3"] [data-cy="moveUpBtn"]').should('be.disabled');
-        cy.get('[data-cy="subjectCard-subj3"] [data-cy="moveDownBtn"]').should('be.enabled');
-        cy.get('[data-cy="subjectCard-subj2"] [data-cy="moveUpBtn"]').should('be.enabled');
-        cy.get('[data-cy="subjectCard-subj2"] [data-cy="moveDownBtn"]').should('be.enabled');
-        cy.get('[data-cy="subjectCard-subj1"] [data-cy="moveUpBtn"]').should('be.enabled');
-        cy.get('[data-cy="subjectCard-subj1"] [data-cy="moveDownBtn"]').should('be.disabled');
+        cy.validateElementsOrder('[data-cy="subjectCard"]', ['Subject 1', 'Subject 2']);
+        cy.get(subj1Card).dragAndDrop(subj2Card)
+
+        // overlay over both cards but loading message only on subject 1
+        cy.get('[data-cy="subj1_overlayShown"] [data-cy="updatingSortMsg"]').contains('Updating sort order');
+        cy.get('[data-cy="subj2_overlayShown"]');
+        cy.get('[data-cy="subj2_overlayShown"] [data-cy="updatingSortMsg"]').should('not.exist');
+        cy.wait('@subj1Async')
+        cy.get('[data-cy="subj1_overlayShown"]').should('not.exist');
+        cy.get('[data-cy="subj2_overlayShown"]').should('not.exist');
     })
 
     it('subject card stats', () => {

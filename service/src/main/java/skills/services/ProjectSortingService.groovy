@@ -21,7 +21,10 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfo
 import skills.auth.UserInfoService
+import skills.controller.exceptions.SkillsValidator
+import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.UserProjectSettingsRequest
+import skills.controller.result.model.ProjectResult
 import skills.controller.result.model.SettingsResult
 import skills.services.settings.SettingsDataAccessor
 import skills.services.settings.SettingsService
@@ -82,12 +85,6 @@ class ProjectSortingService {
     }
 
     @Transactional(readOnly = true)
-    Map<String,Integer> getUserProjectsOrder(){
-        UserInfo userInfo = userInfoService.getCurrentUser()
-        return getUserProjectsOrder(userInfo.username)
-    }
-
-    @Transactional(readOnly = true)
     Map<String,Integer> getUserProjectsOrder(String userId){
         List<SettingsResult> sortOrder = settingsService.getUserProjectSettingsForGroup(userId, PROJECT_SORT_GROUP)
         if(!sortOrder){
@@ -127,48 +124,27 @@ class ProjectSortingService {
         settingsService.saveSetting(request, user)
     }
 
-    /**
-     * Changes moveMeProjectId to be above or below the adjacentProjectId's sort order based on the direction parameter.
-     *
-     * Note that these projectIds must be adjacent to one another to perform this operation
-     *
-     * @param moveMeProjectId
-     * @param adjacentProjectId
-     * @param direction
-     */
+
     @Transactional
-    void changeProjectOrder(String moveMeProjectId, Move direction){
-        UserInfo userInfo = userInfoService.getCurrentUser()
-        lockingService.lockUser(userInfo.username)
+    void updateDisplayOrderByUsingNewIndex(Integer userIdRef, String projectId, ActionPatchRequest patchRequest) {
+        assert patchRequest.action == ActionPatchRequest.ActionType.NewDisplayOrderIndex
+        SkillsValidator.isTrue(patchRequest.newDisplayOrderIndex >= 0, "[newDisplayOrderIndex] param must be >=0 but received [${patchRequest.newDisplayOrderIndex}]", projectId, null)
 
-        List<Setting> sortOrder = settingsDataAccessor.getUserProjectSettingsForGroup(userInfo.username, PROJECT_SORT_GROUP)
+        List<Setting> settings = settingsDataAccessor.getUserProjectSettingsForGroup(userIdRef, PROJECT_SORT_GROUP)
+        Setting theItem = settings.find({ it.projectId == projectId })
+        List<Setting> result = settings.findAll({ it.projectId != projectId }).sort({ it.value.toInteger() })
 
-        sortOrder.sort() { Setting one, Setting two -> one.value.toInteger() <=> two.value.toInteger() }
-
-        int idx = sortOrder.findIndexOf { it.projectId == moveMeProjectId }
-
-        assert idx > -1, "failed to find sort setting for projectId [${moveMeProjectId}] for user ${userInfo.username}"
-
-        Setting moveMe = sortOrder.get(idx)
-        Setting swapWith
-
-        if(direction == Move.UP){
-            assert idx-1 >= 0
-            swapWith = sortOrder.get(idx-1)
-            assert swapWith.projectId != moveMeProjectId
-        }else{
-            assert idx+1 < sortOrder.size()
-            swapWith = sortOrder.get(idx+1)
-            assert swapWith.projectId != moveMeProjectId
+        int newIndex = Math.min(patchRequest.newDisplayOrderIndex, settings.size() - 1)
+        result.add(newIndex, theItem)
+        result.eachWithIndex{ Setting entry, int i ->
+            entry.value = i.toString()
         }
 
-        Integer swapWithOrder = swapWith.value.toInteger()
-        Integer moveMeOrder = moveMe.value.toInteger()
+        settingsDataAccessor.saveAll(result)
 
-        moveMe.value = swapWithOrder
-        swapWith.value = moveMeOrder
-
-        settingsDataAccessor.saveAll([moveMe, swapWith])
+        if (log.isDebugEnabled()) {
+            log.debug("Updated display order {}", result.collect { "${it.projectId}=>${it.value}" })
+        }
     }
 
 }

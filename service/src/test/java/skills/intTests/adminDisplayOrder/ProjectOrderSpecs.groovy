@@ -18,6 +18,7 @@ package skills.intTests.adminDisplayOrder
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import spock.lang.IgnoreRest
 
 class ProjectOrderSpecs extends DefaultIntSpec {
 
@@ -52,7 +53,7 @@ class ProjectOrderSpecs extends DefaultIntSpec {
         rootServiceTwo.pinProject(proj3.projectId)
 
         when:
-        rootServiceTwo.moveProjectUp(proj3)
+        rootServiceTwo.changeProjectDisplayOrder(proj3, 0)
 
         def projects = rootServiceTwo.getProjects()
 

@@ -554,11 +554,15 @@ describe('Root Pin and Unpin Tests', () => {
       cy.get('[data-cy=saveProjectButton]').click();
       cy.contains('A Brand New Project').should('be.visible');
 
+      const proj4Card = '[data-cy="projectCard_proj4"] [data-cy="sortControlHandle"]';
+      const newProjCard = '[data-cy="projectCard_ABrandNewProject"] [data-cy="sortControlHandle"]';
+
       cy.get('[data-cy=projectCard]').eq(0).should('not.contain', 'A Brand New Project');
-      cy.get('[data-cy=moveProjUpBtn]').eq(1).click();
-      cy.wait('@loadProjects');
-      cy.contains('A Brand New Project').should('be.visible');
-      cy.get('[data-cy=projectCard]').eq(0).should('contain', 'A Brand New Project');
+      cy.get(proj4Card).dragAndDrop(newProjCard);
+      cy.validateElementsOrder('[data-cy="projectCard"]', ['A Brand New Project', 'four']);
+
+      cy.visit('/administrator/');
+      cy.validateElementsOrder('[data-cy="projectCard"]', ['A Brand New Project', 'four']);
     });
   });
 

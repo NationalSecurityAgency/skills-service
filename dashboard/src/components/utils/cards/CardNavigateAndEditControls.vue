@@ -26,7 +26,7 @@ limitations under the License.
     </div>
 
     <div class="col text-right">
-      <b-button-group size="sm" class="buttons mr-2">
+      <b-button-group size="sm" class="buttons">
         <b-button ref="editBtn"
                   size="sm"
                   variant="outline-primary"
@@ -45,19 +45,6 @@ limitations under the License.
         </span>
       </b-button-group>
 
-      <b-button-group size="sm" class="buttons">
-        <b-button variant="outline-primary"
-                  @click="$emit('move-up')"
-                  :disabled="options.isFirst"
-                  title="Sort Order - Move up"
-                  data-cy="moveUpBtn"><i class="fas fa-arrow-circle-up text-info" aria-hidden="true"/></b-button>
-        <b-button variant="outline-primary"
-                  @click="$emit('move-down')"
-                  :disabled="options.isLast"
-                  title="Sort Order - Move down"
-                  data-cy="moveDownBtn"><i class="fas fa-arrow-circle-down text-info" aria-hidden="true"/>
-        </b-button>
-      </b-button-group>
     </div>
   </div>
 </template>

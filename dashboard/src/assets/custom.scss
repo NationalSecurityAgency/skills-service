@@ -203,5 +203,11 @@ $grid-breakpoints: (
   width: 1px;
 }
 
+.skills-sort-order-ghost-class {
+  background-color: $info;
+  border-radius: 5px;
+  box-shadow: $info 0px 5px 5px;
+}
+
 
 

@@ -15,10 +15,12 @@
  */
 package skills.intTests
 
+import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
 import spock.lang.IgnoreIf
+import spock.lang.IgnoreRest
 
 class UserInfoSettingsSpecs extends DefaultIntSpec {
 
@@ -144,18 +146,14 @@ class UserInfoSettingsSpecs extends DefaultIntSpec {
         skillsService.createProject([projectId: userProj3, name: 'proj3'])
         def result = skillsService.getProjects()
 
-        def preMoveProj2 = result.find{ it.projectId == userProj2 }
-        def preMoveProj3 = result.find{ it.projectId == userProj3 }
-
         when:
-        skillsService.moveProjectUp([projectId: userProj3])
-        def projects = skillsService.getProjects()
-        def postMoveProj2 = projects.find{ it.projectId == userProj2 }
-        def postMoveProj3 = projects.find{ it.projectId == userProj3 }
+        def beforeMove = skillsService.getProjects()
+        skillsService.changeProjectDisplayOrder([projectId: userProj3], 1)
+        def afterMove = skillsService.getProjects()
 
         then:
-        postMoveProj3.displayOrder == preMoveProj2.displayOrder
-        postMoveProj2.displayOrder == preMoveProj3.displayOrder
+        beforeMove.collect { it.projectId } == [userProj1, userProj2, userProj3]
+        afterMove.collect { it.projectId } == [userProj1, userProj3, userProj2]
     }
 
     def 'project sort - move project down'(){
@@ -165,16 +163,89 @@ class UserInfoSettingsSpecs extends DefaultIntSpec {
         def beforeMove = skillsService.getProjects()
 
         when:
-        skillsService.moveProjectDown([projectId: userProj2])
+        skillsService.changeProjectDisplayOrder([projectId: userProj2], 2)
+
         def afterMove = skillsService.getProjects()
-        skillsService.moveProjectDown([projectId: userProj1])
-        skillsService.moveProjectDown([projectId: userProj1])
+
+        skillsService.changeProjectDisplayOrder([projectId: userProj1], 1)
+        skillsService.changeProjectDisplayOrder([projectId: userProj1], 2)
         def afterMove1 = skillsService.getProjects()
 
         then:
         beforeMove.collect({it.name}) == ['proj1', 'proj2', 'proj3']
         afterMove.collect({it.name}) == ['proj1', 'proj3', 'proj2']
         afterMove1.collect({it.name}) == ['proj3', 'proj2', 'proj1']
+    }
+
+    def "sequence of display order operations"() {
+        skillsService.createProject([projectId: userProj1, name: 'proj1'])
+        skillsService.createProject([projectId: userProj2, name: 'proj2'])
+        skillsService.createProject([projectId: userProj3, name: 'proj3'])
+        String userProj4 = "up4"
+        String userProj5 = "up5"
+        skillsService.createProject([projectId: userProj4, name: 'proj4'])
+        skillsService.createProject([projectId: userProj5, name: 'proj5'])
+
+        when:
+        def beforeMove = skillsService.getProjects()
+        skillsService.changeProjectDisplayOrder([projectId: userProj1], 3)
+        def move1 = skillsService.getProjects()
+
+        skillsService.changeProjectDisplayOrder([projectId: userProj5], 0)
+        def move2 = skillsService.getProjects()
+
+        skillsService.changeProjectDisplayOrder([projectId: userProj2], 4)
+        def move3 = skillsService.getProjects()
+
+        skillsService.changeProjectDisplayOrder([projectId: userProj3], 2)
+        def move4 = skillsService.getProjects()
+        then:
+        beforeMove.collect({it.name}) == ["proj1", "proj2", "proj3", "proj4", "proj5"]
+        move1.collect({it.name}) == ["proj2", "proj3", "proj4", "proj1", "proj5"]
+        move2.collect({it.name}) == ["proj5", "proj2", "proj3", "proj4", "proj1"]
+        move3.collect({it.name}) == ["proj5", "proj3", "proj4", "proj1", "proj2"]
+        move4.collect({it.name}) == ["proj5", "proj4", "proj3", "proj1", "proj2"]
+    }
+
+    def "move subject to out of the max bound - should be placed last"() {
+        skillsService.createProject([projectId: userProj1, name: 'proj1'])
+        skillsService.createProject([projectId: userProj2, name: 'proj2'])
+        skillsService.createProject([projectId: userProj3, name: 'proj3'])
+        String userProj4 = "up4"
+        String userProj5 = "up5"
+        skillsService.createProject([projectId: userProj4, name: 'proj4'])
+        skillsService.createProject([projectId: userProj5, name: 'proj5'])
+
+
+        when:
+        def beforeMove = skillsService.getProjects()
+        skillsService.changeProjectDisplayOrder([projectId: userProj1], 10)
+        def afterMove = skillsService.getProjects()
+        then:
+        beforeMove.collect({it.name}) == ["proj1", "proj2", "proj3", "proj4", "proj5"]
+        afterMove.collect({it.name}) == ["proj2", "proj3", "proj4", "proj5", "proj1"]
+    }
+
+    def "new display index must be >=0 "() {
+        skillsService.createProject([projectId: userProj1, name: 'proj1'])
+        skillsService.createProject([projectId: userProj2, name: 'proj2'])
+        skillsService.createProject([projectId: userProj3, name: 'proj3'])
+        String userProj4 = "up4"
+        String userProj5 = "up5"
+        skillsService.createProject([projectId: userProj4, name: 'proj4'])
+        skillsService.createProject([projectId: userProj5, name: 'proj5'])
+
+        when:
+        skillsService.changeProjectDisplayOrder([projectId: userProj3], 0)
+        def afterMove = skillsService.getProjects()
+        skillsService.changeProjectDisplayOrder([projectId: userProj3], -1)
+        then:
+        SkillsClientException exception = thrown()
+        exception.httpStatus == HttpStatus.BAD_REQUEST
+        exception.message.contains('[newDisplayOrderIndex] param must be >=0 but received [-1]')
+
+        afterMove.collect({it.name}) == ["proj3", "proj1", "proj2", "proj4", "proj5"]
+
     }
 
     def 'validate project sort is per user'(){
@@ -190,33 +261,23 @@ class UserInfoSettingsSpecs extends DefaultIntSpec {
         user1Service.addUserRole('user2', userProj3, 'ROLE_PROJECT_ADMIN')
 
         def u1Results = user1Service.getProjects()
-        def preU1MoveProj2 = u1Results.find{ it.projectId == userProj2 }
-        def preU1MoveProj3 = u1Results.find{ it.projectId == userProj3 }
-
         def u2Results = user2Service.getProjects()
-        def preU2MoveProj2 = u2Results.find{ it.projectId == userProj2 }
-        def preU2MoveProj1 = u2Results.find{ it.projectId == userProj1 }
 
         when:
-        user1Service.moveProjectDown([projectId: userProj2])
-        user2Service.moveProjectUp([projectId: userProj2])
+        user1Service.changeProjectDisplayOrder([projectId: userProj2], 2)
+        user2Service.changeProjectDisplayOrder([projectId: userProj2], 0)
 
         def projectsU1 = user1Service.getProjects()
-        def postU1MoveProj2 = projectsU1.find{ it.projectId == userProj2 }
-        def postU1MoveProj3 = projectsU1.find{ it.projectId == userProj3 }
-
         def projectsU2 = user2Service.getProjects()
-        def postU2MoveProj2 = projectsU2.find{ it.projectId == userProj2 }
-        def postU2MoveProj1 = projectsU2.find{ it.projectId == userProj1 }
 
         user1Service.deleteAllMyProjects()
         user2Service.deleteAllMyProjects()
 
         then:
-        postU1MoveProj2.displayOrder == preU1MoveProj3.displayOrder
-        postU1MoveProj3.displayOrder == preU1MoveProj2.displayOrder
+        u1Results.collect { it.projectId } == [userProj1, userProj2, userProj3]
+        projectsU1.collect { it.projectId } == [userProj1, userProj3, userProj2]
 
-        postU2MoveProj2.displayOrder == preU2MoveProj1.displayOrder
-        postU2MoveProj1.displayOrder == preU2MoveProj2.displayOrder
+        u2Results.collect { it.projectId } == [userProj1, userProj2, userProj3]
+        projectsU2.collect { it.projectId } == [userProj2, userProj1, userProj3]
     }
 }
