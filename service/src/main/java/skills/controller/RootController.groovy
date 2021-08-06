@@ -289,8 +289,19 @@ class RootController {
 
     @PostMapping('/users/contactAllProjectAdmins')
     RequestResult contactProjectAdministrators(@RequestBody ContactUsersRequest cur) {
+        SkillsValidator.isNotBlank(cur?.emailSubject, "emailSubject")
+        SkillsValidator.isNotBlank(cur?.emailBody, "emailBody")
         //intentionally ignore queryCriteria as that doesn't apply to this use case
         contactUsersService.contactAllProjectAdmins(cur.emailSubject, cur.emailBody)
+        return RequestResult.success()
+    }
+
+    @RequestMapping(value="/users/previewEmail", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    RequestResult testEmail(@RequestBody ContactUsersRequest contactUsersRequest) {
+        SkillsValidator.isNotBlank(contactUsersRequest?.emailSubject, "emailSubject")
+        SkillsValidator.isNotBlank(contactUsersRequest?.emailBody, "emailBody")
+        String userId = userInfoService.getCurrentUserId()
+        contactUsersService.previewEmail(contactUsersRequest.emailSubject, contactUsersRequest.emailBody, userId)
         return RequestResult.success()
     }
 

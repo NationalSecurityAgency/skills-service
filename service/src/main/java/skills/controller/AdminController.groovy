@@ -27,6 +27,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import skills.PublicProps
+import skills.auth.UserInfoService
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.*
 import skills.controller.result.model.*
@@ -97,6 +98,9 @@ class AdminController {
 
     @Autowired
     ContactUsersService contactUsersService
+
+    @Autowired
+    UserInfoService userInfoService
 
 
     @RequestMapping(value = "/projects/{id}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
@@ -943,7 +947,6 @@ class AdminController {
     @RequestMapping(value = "/projects/{projectId}/errors/{errorType}/{error}", method = [RequestMethod.DELETE], produces = "application/json")
     @ResponseBody
     RequestResult deleteProjectError(@PathVariable("projectId") String projectId, @PathVariable("errorType") String errorType, @PathVariable("error") String error){
-
         errorService.deleteError(projectId, errorType, error)
         return RequestResult.success()
     }
@@ -960,8 +963,20 @@ class AdminController {
     @ResponseBody
     RequestResult contactUsers(@PathVariable("id") String projectId, @RequestBody ContactUsersRequest contactUsersRequest) {
         contactUsersRequest?.queryCriteria?.projectId = projectId
+        SkillsValidator.isNotBlank(contactUsersRequest?.emailSubject, "emailSubject")
+        SkillsValidator.isNotBlank(contactUsersRequest?.emailBody, "emailBody")
         contactUsersService.contactUsers(contactUsersRequest)
         return RequestResult.success()
     }
+
+    @RequestMapping(value="/projects/{id}/previewEmail", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    RequestResult testEmail(@RequestBody ContactUsersRequest contactUsersRequest) {
+        SkillsValidator.isNotBlank(contactUsersRequest?.emailSubject, "emailSubject")
+        SkillsValidator.isNotBlank(contactUsersRequest?.emailBody, "emailBody")
+        String userId = userInfoService.getCurrentUserId()
+        contactUsersService.previewEmail(contactUsersRequest.emailSubject, contactUsersRequest.emailBody, userId)
+        return RequestResult.success()
+    }
+
 }
 

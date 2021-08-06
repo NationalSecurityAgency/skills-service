@@ -117,4 +117,10 @@ export default {
   contactProjectAdmins(email) {
     return axios.post('/root/users/contactAllProjectAdmins', email).then((response) => response.data);
   },
+  previewEmail(projectId, email) {
+    return axios.post(`/admin/projects/${projectId}previewEmail`, email).then((response) => response.data);
+  },
+  rootPreviewEmail(email) {
+    return axios.post('/root/users/previewEmail', email).then((response) => response.data);
+  },
 };

@@ -86,7 +86,7 @@ limitations under the License.
                                         data-cy="contactUserCriteria-removeBtn"><i class="fa fa-trash" /><span class="sr-only">delete filter {{tag.display}}</span></b-button>
             </b-badge>
           </div>
-          <h1 class="ml-4 h5 text-uppercase" data-cy="usersMatchingFilters"><b-badge variant="info">{{this.currentCount}}</b-badge> Users Selected</h1>
+          <h1 class="ml-4 h5 text-uppercase" data-cy="usersMatchingFilters"><b-badge variant="info">{{this.currentCount|number}}</b-badge> Users Selected</h1>
         </div>
 
         <hr />
@@ -102,10 +102,16 @@ limitations under the License.
           </b-form-group>
         </div>
         <div class="row pl-3 pr-3 pb-3 pt-1 ml-3 mr-3 mb-3 mt-1">
+          <b-button class="mr-3" data-cy="previewUsersEmail"
+                    :disabled="isPreviewDisabled"
+                    @click="previewEmail"
+                    variant="outline-primary" aria-label="preview email to project users">
+            <span>Preview</span> <i :class="[emailing ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-eye']" style="font-size:1rem;" aria-hidden="true"/>
+          </b-button>
           <b-button variant="outline-primary" class="mr-1" @click="emailUsers" data-cy="emailUsers-submitBtn"
                     :disabled="isEmailDisabled"><i :class="[emailing ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fas fa-mail-bulk']" /> Email</b-button>
           <transition name="fade">
-            <span v-if="emailSent" class="pt-2 pl-1"><i class="far fa-check-square text-success"/> Email{{currentCount > 1 ? 's' : ''}} sent!</span>
+            <span v-if="emailSent" class="pt-2 pl-1"><i class="far fa-check-square text-success"/> {{ sentMsg }}</span>
           </transition>
         </div>
       </b-overlay>
@@ -140,15 +146,14 @@ limitations under the License.
   export default {
     name: 'EmailUsers',
     components: {
-      // SkillsSpinner,
       SubPageHeader,
-      // InlineHelp,
       MarkdownEditor,
       Multiselect,
     },
     mixins: [MsgBoxMixin],
     data() {
       return {
+        sentMsg: '',
         emailFeatureConfigured: true,
         maxCriteria: 15,
         alreadyApplied: false,
@@ -284,6 +289,9 @@ limitations under the License.
       },
       isEmailDisabled() {
         return !this.body || !this.subject || this.emailing || this.emailSent || this.tags.length < 1 || this.currentCount < 1;
+      },
+      isPreviewDisabled() {
+        return !this.body || !this.subject;
       },
       isLoading() {
         return this.loading.skills || this.loading.badges;
@@ -538,6 +546,7 @@ limitations under the License.
       },
       emailUsers() {
         this.emailing = true;
+        this.sentMsg = `Email${this.currentCount > 1 ? 's' : ''} sent!`;
         ProjectService.contactUsers(this.$route.params.projectId, {
           queryCriteria: this.criteria,
           emailBody: this.body,
@@ -551,6 +560,19 @@ limitations under the License.
             this.subject = '';
             this.currentCount = 0;
           });
+          setTimeout(() => { this.emailSent = false; }, 8000);
+        }).finally(() => {
+          this.emailing = false;
+        });
+      },
+      previewEmail() {
+        this.emailing = true;
+        this.sentMsg = 'Preview email sent!';
+        ProjectService.previewEmail(this.$route.params.projectId, {
+          emailBody: this.body,
+          emailSubject: this.subject,
+        }).then(() => {
+          this.emailSent = true;
           setTimeout(() => { this.emailSent = false; }, 8000);
         }).finally(() => {
           this.emailing = false;

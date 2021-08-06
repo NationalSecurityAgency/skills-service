@@ -96,6 +96,25 @@ class ContactUsersService {
         }
     }
 
+    @Transactional
+    void previewEmail(String emailSubject, String emailBody, String userId) {
+        Parser parser = Parser.builder().build()
+        HtmlRenderer renderer = HtmlRenderer.builder().build()
+        def markdown = parser.parse(emailBody)
+        String parsedBody = renderer.render(markdown)
+
+        Notifier.NotificationRequest request = new Notifier.NotificationRequest(
+                userIds: [userId],
+                type: Notification.Type.ContactUsers,
+                keyValParams: [
+                        htmlBody    : parsedBody,
+                        emailSubject: emailSubject,
+                        rawBody     : emailBody,
+                ]
+        )
+        emailNotifier.sendNotification(request)
+    }
+
     @Transactional(readOnly = true)
     Integer countMatchingUsers(QueryUsersCriteriaRequest contactUsersCriteria) {
         QueryUsersCriteria queryUsersCriteria = convert(contactUsersCriteria)

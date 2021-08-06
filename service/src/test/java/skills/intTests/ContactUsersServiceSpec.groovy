@@ -502,5 +502,52 @@ limitations under the License.
 </html>'''.replaceAll('\r\n', '\n')
     }
 
+    def "preview email"() {
+        def users = getRandomUsers(1, true)
+        def service = createService(users[0])
+
+        def proj = SkillsFactory.createProject(1)
+        service.createProject(proj)
+
+        when:
+        service.previewEmail(proj.projectId,"a subject", "**body**")
+
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() >= 1 }
+        def messages = EmailUtils.getEmails(greenMail)
+
+        then:
+        messages.size() == 1
+        messages[0].recipients.find { it.contains(users[0]) }
+        messages[0].html.replaceAll('\r\n', '\n') == '''<!--
+Copyright 2020 SkillTree
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<!DOCTYPE html>
+<html   lang="en"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.thymeleaf.org http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body class="overall-container">
+
+<p><strong>body</strong></p>
+
+
+</body>
+</html>'''
+    }
+
 
 }
