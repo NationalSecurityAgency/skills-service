@@ -43,5 +43,5 @@ class UserAttrs {
     LocalDateTime created
 
     @Temporal(TemporalType.TIMESTAMP)
-    Date attrsAndTagsUpdated
+    Date userTagsLastUpdated
 }

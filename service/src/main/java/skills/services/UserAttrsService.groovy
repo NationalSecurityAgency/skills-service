@@ -20,7 +20,6 @@ import groovy.time.TimeCategory
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -44,7 +43,7 @@ class UserAttrsService {
     @Autowired
     UserTagRepo userTagsRepository
 
-    @Value('#{"${skills.config.attrsAndUserTagsUpdateIntervalDays:30}"}')
+    @Value('#{"${skills.config.attrsAndUserTagsUpdateIntervalDays:7}"}')
     private int attrsAndUserTagsUpdateIntervalDays
 
     @Transactional
@@ -53,12 +52,17 @@ class UserAttrsService {
         validateUserId(userId)
 
         UserAttrs userAttrs = loadUserAttrsFromLocalDb(userId)
-        boolean doSave = true
+        boolean updateUserAttrs = false
+        boolean updateUserTags = false
 
         if (!userAttrs) {
+            // no userAttrs existed, creating for the first time
             userAttrs = new UserAttrs(userId: userId?.toLowerCase(), userIdForDisplay: userId)
+            updateUserAttrs = true
+            updateUserTags = true
         } else {
-            doSave = shouldUpdate(userInfo, userAttrs)
+            updateUserAttrs = shouldUpdateUserAttrs(userInfo, userAttrs)
+            updateUserTags = shouldUpdateUserTags(userAttrs)
 
             if (log.isTraceEnabled()) {
                 log.trace('UserInfo/UserAttrs: \n\tfirstName [{}/{}]\n\tlastName [{}]/[{}]\n\temail [{}]/[{}]\n\tuserDn [{}]/[{}]\n\tnickname [{}]/[{}]\n\tusernameForDisplay [{}]/[{}]\n\tlandingPage [{}]/[{}]',
@@ -69,26 +73,15 @@ class UserAttrsService {
                         userInfo.nickname, userAttrs.nickname,
                         userInfo.usernameForDisplay, userAttrs.userIdForDisplay,
                 )
+                log.trace('Updating UserAttrs [{}], UserTags [{}]', updateUserAttrs, updateUserTags)
             }
         }
-        if (doSave) {
+        if (updateUserAttrs) {
             populate(userAttrs, userInfo)
-            try {
-                saveUserAttrsInLocalDb(userAttrs)
-                replaceUserTags(userId, userInfo)
-            } catch (DataIntegrityViolationException dataIntegrityViolationException) {
-                log.warn("${dataIntegrityViolationException.getMessage()} received when trying to save userAttrs for [${userId}], fetching and retrying")
-                userAttrs = loadUserAttrsFromLocalDb(userId)
-                if (!userAttrs) {
-                    log.error(dataIntegrityViolationException.getMessage())
-                    throw new SkillException("Received DataIntegrityViolation when attempting to insert UserAttrs for [${userId}] but entry does not exist")
-                }
-                if (shouldUpdate(userInfo, userAttrs)) {
-                    populate(userAttrs, userInfo)
-                    saveUserAttrsInLocalDb(userAttrs)
-                    replaceUserTags(userId, userInfo)
-                }
-            }
+            saveUserAttrsInLocalDb(userAttrs)
+        }
+        if (updateUserTags) {
+            replaceUserTags(userId, userInfo)
         }
         return userAttrs
     }
@@ -98,15 +91,18 @@ class UserAttrsService {
         userTagsRepository.saveAll(userInfo.additionalAttributes.collect { new UserTag(userId: userId, key: it.key, value: it.value) })
     }
 
-    private boolean shouldUpdate(UserInfo userInfo, UserAttrs userAttrs) {
+    private boolean shouldUpdateUserAttrs(UserInfo userInfo, UserAttrs userAttrs) {
+        return  (userInfo.firstName && userAttrs.firstName != userInfo.firstName) ||
+                (userInfo.lastName && userAttrs.lastName != userInfo.lastName) ||
+                (userInfo.email && userAttrs.email != userInfo.email) ||
+                (userInfo.userDn && userAttrs.dn != userInfo.userDn) ||
+                (userInfo.nickname != null && userAttrs.nickname != (userInfo.nickname ?: "")) ||
+                (userInfo.usernameForDisplay && userAttrs.userIdForDisplay != userInfo.usernameForDisplay)
+    }
+
+    private boolean shouldUpdateUserTags(UserAttrs userAttrs) {
         use(TimeCategory) {
-            return userAttrs.attrsAndTagsUpdated.before(attrsAndUserTagsUpdateIntervalDays.days.ago) ||
-                    (userInfo.firstName && userAttrs.firstName != userInfo.firstName) ||
-                    (userInfo.lastName && userAttrs.lastName != userInfo.lastName) ||
-                    (userInfo.email && userAttrs.email != userInfo.email) ||
-                    (userInfo.userDn && userAttrs.dn != userInfo.userDn) ||
-                    (userInfo.nickname != null && userAttrs.nickname != (userInfo.nickname ?: "")) ||
-                    (userInfo.usernameForDisplay && userAttrs.userIdForDisplay != userInfo.usernameForDisplay)
+            return userAttrs.userTagsLastUpdated.before(attrsAndUserTagsUpdateIntervalDays.days.ago)
         }
     }
 
@@ -117,7 +113,7 @@ class UserAttrsService {
         userAttrs.dn = userInfo.userDn ?: userAttrs.dn
         userAttrs.nickname = (userInfo.nickname != null ? userInfo.nickname : userAttrs.nickname) ?: ""
         userAttrs.userIdForDisplay = userInfo.usernameForDisplay ?: userAttrs.userIdForDisplay
-        userAttrs.attrsAndTagsUpdated = new Date()
+        userAttrs.userTagsLastUpdated = new Date()
     }
 
     private void validateUserId(String userId) {

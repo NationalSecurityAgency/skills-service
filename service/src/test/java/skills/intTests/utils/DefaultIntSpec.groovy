@@ -197,7 +197,7 @@ class DefaultIntSpec extends Specification {
                         userAttrs.email = "${it}@email.foo"
                         userAttrs.firstName = "${it.toUpperCase()}_first"
                         userAttrs.lastName = "${it.toUpperCase()}_last"
-                        userAttrs.attrsAndTagsUpdated = new Date()
+                        userAttrs.userTagsLastUpdated = new Date()
                         userAttrsRepo.save(userAttrs)
                     } catch (Exception e) {
                         throw new RuntimeException("error initializing UserAttrs for [${it}]", e)
