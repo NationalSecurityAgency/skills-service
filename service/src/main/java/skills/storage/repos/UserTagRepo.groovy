@@ -21,12 +21,10 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.lang.Nullable
 import skills.storage.model.UserTag
 
-import skills.storage.model.auth.User
-
 interface UserTagRepo extends CrudRepository<UserTag, Integer> {
 
     @Nullable
-    User findByUserId(String userId)
+    List<UserTag> findAllByUserId(String userId)
 
     @Modifying
     @Query("delete from UserTag ut where ut.userId = ?1")

@@ -41,4 +41,7 @@ class UserAttrs {
 
     @CreatedDate
     LocalDateTime created
+
+    @Temporal(TemporalType.TIMESTAMP)
+    Date attrsAndTagsUpdated
 }

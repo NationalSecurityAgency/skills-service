@@ -68,4 +68,8 @@ class LockingService {
         return skillsDBLockRepo.findByLock("project_expiration_lock")
     }
 
+    SkillsDBLock lockForCreateOrUpdateUser() {
+        return skillsDBLockRepo.findByLock("create_or_update_user")
+    }
+
 }

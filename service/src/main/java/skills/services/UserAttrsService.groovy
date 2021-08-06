@@ -16,17 +16,21 @@
 package skills.services
 
 import callStack.profiler.Profile
+import groovy.time.TimeCategory
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfo
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.storage.model.UserAttrs
+import skills.storage.model.UserTag
 import skills.storage.repos.UserAttrsRepo
+import skills.storage.repos.UserTagRepo
 
 import static skills.controller.exceptions.SkillException.NA
 
@@ -36,6 +40,12 @@ class UserAttrsService {
 
     @Autowired
     UserAttrsRepo userAttrsRepo
+
+    @Autowired
+    UserTagRepo userTagsRepository
+
+    @Value('#{"${skills.config.attrsAndUserTagsUpdateIntervalDays:30}"}')
+    private int attrsAndUserTagsUpdateIntervalDays
 
     @Transactional
     @Profile
@@ -65,6 +75,7 @@ class UserAttrsService {
             populate(userAttrs, userInfo)
             try {
                 saveUserAttrsInLocalDb(userAttrs)
+                replaceUserTags(userId, userInfo)
             } catch (DataIntegrityViolationException dataIntegrityViolationException) {
                 log.warn("${dataIntegrityViolationException.getMessage()} received when trying to save userAttrs for [${userId}], fetching and retrying")
                 userAttrs = loadUserAttrsFromLocalDb(userId)
@@ -75,19 +86,28 @@ class UserAttrsService {
                 if (shouldUpdate(userInfo, userAttrs)) {
                     populate(userAttrs, userInfo)
                     saveUserAttrsInLocalDb(userAttrs)
+                    replaceUserTags(userId, userInfo)
                 }
             }
         }
         return userAttrs
     }
 
+    private void replaceUserTags(String userId, UserInfo userInfo) {
+        userTagsRepository.deleteByUserId(userId)
+        userTagsRepository.saveAll(userInfo.additionalAttributes.collect { new UserTag(userId: userId, key: it.key, value: it.value) })
+    }
+
     private boolean shouldUpdate(UserInfo userInfo, UserAttrs userAttrs) {
-        return (userInfo.firstName && userAttrs.firstName != userInfo.firstName) ||
-                (userInfo.lastName && userAttrs.lastName != userInfo.lastName) ||
-                (userInfo.email && userAttrs.email != userInfo.email) ||
-                (userInfo.userDn && userAttrs.dn != userInfo.userDn) ||
-                (userInfo.nickname !=null && userAttrs.nickname != (userInfo.nickname ?: "")) ||
-                (userInfo.usernameForDisplay && userAttrs.userIdForDisplay != userInfo.usernameForDisplay)
+        use(TimeCategory) {
+            return userAttrs.attrsAndTagsUpdated.before(attrsAndUserTagsUpdateIntervalDays.days.ago) ||
+                    (userInfo.firstName && userAttrs.firstName != userInfo.firstName) ||
+                    (userInfo.lastName && userAttrs.lastName != userInfo.lastName) ||
+                    (userInfo.email && userAttrs.email != userInfo.email) ||
+                    (userInfo.userDn && userAttrs.dn != userInfo.userDn) ||
+                    (userInfo.nickname != null && userAttrs.nickname != (userInfo.nickname ?: "")) ||
+                    (userInfo.usernameForDisplay && userAttrs.userIdForDisplay != userInfo.usernameForDisplay)
+        }
     }
 
     private void populate(UserAttrs userAttrs, UserInfo userInfo) {
@@ -97,6 +117,7 @@ class UserAttrsService {
         userAttrs.dn = userInfo.userDn ?: userAttrs.dn
         userAttrs.nickname = (userInfo.nickname != null ? userInfo.nickname : userAttrs.nickname) ?: ""
         userAttrs.userIdForDisplay = userInfo.usernameForDisplay ?: userAttrs.userIdForDisplay
+        userAttrs.attrsAndTagsUpdated = new Date()
     }
 
     private void validateUserId(String userId) {
