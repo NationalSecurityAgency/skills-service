@@ -38,5 +38,5 @@ class UserInfo implements UserDetails {
     boolean enabled = true
     boolean proxied = false
     String proxyingSystemId
-    Map<String, Object> additionalAttributes = [:]
+    Map<String, Object> userTags = [:]
 }

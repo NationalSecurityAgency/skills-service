@@ -20,6 +20,9 @@ import skills.auth.UserInfo
 import skills.auth.UserInfoService
 import skills.intTests.utils.DefaultIntSpec
 import skills.storage.model.UserAttrs
+import skills.storage.model.UserTag
+import skills.storage.repos.UserAttrsRepo
+import skills.storage.repos.UserTagRepo
 
 class UserAttrsServiceSpec extends DefaultIntSpec {
 
@@ -27,7 +30,13 @@ class UserAttrsServiceSpec extends DefaultIntSpec {
     UserAttrsService userAttrsService
 
     @Autowired
-    UserInfoService userInfoService;
+    UserInfoService userInfoService
+
+    @Autowired
+    UserTagRepo userTagRepo
+
+    @Autowired
+    UserAttrsRepo userAttrsRepo
 
     def "do not override existing user attributes with null values"() {
         String userId = "${UserAttrsServiceSpec.getSimpleName()}User1"
@@ -204,5 +213,106 @@ class UserAttrsServiceSpec extends DefaultIntSpec {
         userAttrs.nickname == userInfo.nickname
         userAttrs.dn == userInfo.userDn
         userAttrs.email == userInfo.email
+    }
+
+    def "userTags will be inserted when creating new user"() {
+        String userId = "${UserAttrsServiceSpec.getSimpleName()}User1"
+        UserInfo userInfo = new UserInfo(
+                firstName: "first",
+                lastName: "last",
+                nickname: "nick",
+                userDn: "dn",
+                email: "email",
+                username: userId.toLowerCase(),
+                usernameForDisplay: "${userId}-Display",
+                userTags: [Organization : "XYZ", Agency: "ABC"],
+        )
+
+        when:
+        userAttrsService.saveUserAttrs(userId, userInfo)
+
+        then:
+
+        List<UserTag> foundUserTags = userTagRepo.findAllByUserId(userId?.toLowerCase())
+        foundUserTags
+        foundUserTags.size() == userInfo.userTags.size()
+    }
+
+    def "userTags will not be updated if userTagsLastUpdated is not before attrsAndUserTagsUpdateIntervalDays"() {
+        String userId = "${UserAttrsServiceSpec.getSimpleName()}User1"
+        UserInfo userInfo = new UserInfo(
+                firstName: "first",
+                lastName: "last",
+                nickname: "nick",
+                userDn: "dn",
+                email: "email",
+                username: userId.toLowerCase(),
+                usernameForDisplay: "${userId}-Display",
+                userTags: [Organization : "XYZ", Agency: "ABC"],
+        )
+        userAttrsService.attrsAndUserTagsUpdateIntervalDays = 7
+
+        when:
+        userAttrsService.saveUserAttrs(userId, userInfo)
+        List<UserTag> foundUserTags1 = userTagRepo.findAllByUserId(userId?.toLowerCase())
+
+        // remove a userTag and update another
+        userInfo.userTags.remove('Organization')
+        userInfo.userTags.put('Agency', 'DEF')
+        userAttrsService.saveUserAttrs(userId, userInfo)
+        List<UserTag> foundUserTags2 = userTagRepo.findAllByUserId(userId?.toLowerCase())
+
+        then:
+
+        assert foundUserTags1
+        foundUserTags1.size() == 2
+        foundUserTags1.find { it.key == 'Organization' && it.value  == 'XYZ'}
+        foundUserTags1.find { it.key == 'Agency' && it.value  == 'ABC'}
+
+        assert foundUserTags2
+        foundUserTags2.size() == 2
+        foundUserTags2.find { it.key == 'Organization' && it.value  == 'XYZ'}
+        foundUserTags2.find { it.key == 'Agency' && it.value  == 'ABC'}
+    }
+
+    def "userTags will be updated if userTagsLastUpdated is before attrsAndUserTagsUpdateIntervalDays"() {
+        String userId = "${UserAttrsServiceSpec.getSimpleName()}User1"
+        UserInfo userInfo = new UserInfo(
+                firstName: "first",
+                lastName: "last",
+                nickname: "nick",
+                userDn: "dn",
+                email: "email",
+                username: userId.toLowerCase(),
+                usernameForDisplay: "${userId}-Display",
+                userTags: [Organization : "XYZ", Agency: "ABC"],
+        )
+        userAttrsService.attrsAndUserTagsUpdateIntervalDays = 7
+
+        when:
+        userAttrsService.saveUserAttrs(userId, userInfo)
+        List<UserTag> foundUserTags1 = userTagRepo.findAllByUserId(userId?.toLowerCase())
+
+        // force userTagsLastUpdated date to be before attrsAndUserTagsUpdateIntervalDays
+        UserAttrs userAttrs = userAttrsService.findByUserId(userId)
+        userAttrs.userTagsLastUpdated = new Date()-8
+        userAttrsRepo.save(userAttrs)
+
+        // remove a userTag and update another
+        userInfo.userTags.remove('Organization')
+        userInfo.userTags.put('Agency', 'DEF')
+        userAttrsService.saveUserAttrs(userId, userInfo)
+        List<UserTag> foundUserTags2 = userTagRepo.findAllByUserId(userId?.toLowerCase())
+
+        then:
+
+        assert foundUserTags1
+        foundUserTags1.size() == 2
+        foundUserTags1.find { it.key == 'Organization' && it.value  == 'XYZ'}
+        foundUserTags1.find { it.key == 'Agency' && it.value  == 'ABC'}
+
+        assert foundUserTags2
+        foundUserTags2.size() == 1
+        foundUserTags2.find { it.key == 'Agency' && it.value  == 'DEF'}
     }
 }

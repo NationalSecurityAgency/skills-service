@@ -77,18 +77,21 @@ class UserAttrsService {
             }
         }
         if (updateUserAttrs) {
-            populate(userAttrs, userInfo)
+            populate(userAttrs, userInfo, updateUserTags)
             saveUserAttrsInLocalDb(userAttrs)
         }
         if (updateUserTags) {
-            replaceUserTags(userId, userInfo)
+            replaceUserTags(userId?.toLowerCase(), userInfo)
         }
         return userAttrs
     }
 
     private void replaceUserTags(String userId, UserInfo userInfo) {
         userTagsRepository.deleteByUserId(userId)
-        userTagsRepository.saveAll(userInfo.additionalAttributes.collect { new UserTag(userId: userId, key: it.key, value: it.value) })
+        List<UserTag> userTags = userInfo.userTags.collect { new UserTag(userId: userId, key: it.key, value: it.value) }
+        if (userTags) {
+            userTagsRepository.saveAll(userTags)
+        }
     }
 
     private boolean shouldUpdateUserAttrs(UserInfo userInfo, UserAttrs userAttrs) {
@@ -106,14 +109,16 @@ class UserAttrsService {
         }
     }
 
-    private void populate(UserAttrs userAttrs, UserInfo userInfo) {
+    private void populate(UserAttrs userAttrs, UserInfo userInfo, boolean updateUserTags) {
         userAttrs.firstName = userInfo.firstName ?: userAttrs.firstName
         userAttrs.lastName = userInfo.lastName ?: userAttrs.lastName
         userAttrs.email = userInfo.email ?: userAttrs.email
         userAttrs.dn = userInfo.userDn ?: userAttrs.dn
         userAttrs.nickname = (userInfo.nickname != null ? userInfo.nickname : userAttrs.nickname) ?: ""
         userAttrs.userIdForDisplay = userInfo.usernameForDisplay ?: userAttrs.userIdForDisplay
-        userAttrs.userTagsLastUpdated = new Date()
+        if (updateUserTags) {
+            userAttrs.userTagsLastUpdated = new Date()
+        }
     }
 
     private void validateUserId(String userId) {
