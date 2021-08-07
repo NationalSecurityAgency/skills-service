@@ -20,6 +20,7 @@ limitations under the License.
               @hide="publishHidden"
               v-model="show"
               :no-close-on-backdrop="true"
+              :centered="true"
               header-bg-variant="info"
               header-text-variant="light" no-fade>
 

@@ -15,7 +15,8 @@ limitations under the License.
 */
 <template>
   <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit }" slim>
-    <b-modal :id="skillInternal.skillId" size="xl" :title="title" v-model="show" :no-close-on-backdrop="true"
+    <b-modal :id="skillInternal.skillId" size="xl" :title="title" v-model="show"
+             :no-close-on-backdrop="true" :centered="true"
              header-bg-variant="info" header-text-variant="light" no-fade role="dialog" @hide="publishHidden"
              :aria-label="isEdit?'Edit Skill':'New Skill'">
       <skills-spinner :is-loading="isLoading" />
