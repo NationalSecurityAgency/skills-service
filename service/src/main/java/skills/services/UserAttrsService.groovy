@@ -85,7 +85,7 @@ class UserAttrsService {
                 // this is an insert, reload UserAttrs to verify that another request has not already inserted
                 UserAttrs userAttrs2 = loadUserAttrsFromLocalDb(userId)
                 if (userAttrs2?.id) {
-                    // already inserted, now need to update
+                    // already inserted, no need to update
                     updateUserAttrs = false
                     updateUserTags = false
                 }
