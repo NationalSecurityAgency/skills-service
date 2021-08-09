@@ -136,9 +136,9 @@ describe('Contact Project Admins Specs', () => {
         cy.get('[data-cy="nav-Contact Admins"]').click();
         cy.wait('@isRoot');
 
-        cy.get('[data-cy=previewUsersEmail]').should('be.disabled');
+        cy.get('[data-cy=previewAdminEmail]').should('be.disabled');
         cy.get('[data-cy=emailUsers_subject]').type('Test Subject');
-        cy.get('[data-cy=previewUsersEmail]').should('be.disabled');
+        cy.get('[data-cy=previewAdminEmail]').should('be.disabled');
         cy.get('[data-cy="markdownEditorInput"]').type('Test Body');
         cy.get('[data-cy=previewAdminEmail]').should('be.enabled');
     });
