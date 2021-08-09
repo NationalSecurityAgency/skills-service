@@ -103,6 +103,7 @@ limitations under the License.
         </div>
         <div class="row pl-3 pr-3 pb-3 pt-1 ml-3 mr-3 mb-3 mt-1">
           <b-button class="mr-3" data-cy="previewUsersEmail"
+                    v-b-tooltip.hover="'this will send a test email to the current user'"
                     :disabled="isPreviewDisabled"
                     @click="previewEmail"
                     variant="outline-primary" aria-label="preview email to project users">
