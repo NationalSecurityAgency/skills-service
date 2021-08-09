@@ -19,7 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import skills.auth.UserAuthService
 import skills.auth.UserInfo
 import skills.intTests.utils.DefaultIntSpec
+import skills.storage.model.UserTag
 import skills.storage.repos.UserAttrsRepo
+import skills.storage.repos.UserTagRepo
 
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -30,6 +32,9 @@ class PkiUserDetailsServiceSpecs extends DefaultIntSpec {
 
     @Autowired
     UserAttrsRepo userAttrsRepo
+
+    @Autowired
+    UserTagRepo userTagRepo
 
     def "handle loading users concurrently"() {
 
@@ -42,6 +47,7 @@ class PkiUserDetailsServiceSpecs extends DefaultIntSpec {
                     username: dn,
                     usernameForDisplay: dn,
                     userDn: dn,
+                    userTags: [Organization : "XYZ"],
             )
         }
         int numThreads = 8
@@ -70,6 +76,8 @@ class PkiUserDetailsServiceSpecs extends DefaultIntSpec {
             assert allDbUserIds.contains(userIdToSearch.toLowerCase()), "[$userIdToSearch] userId does not exist in UserAttrs table"
             List<String> foundsIds = allDbUserIds.findAll({ userIdToSearch.equalsIgnoreCase(it)})
             assert foundsIds.size() == 1, "[$userIdToSearch] userId has more than 1 entry"
+            List<UserTag> foundUserTags = userTagRepo.findAllByUserId(userIdToSearch?.toLowerCase())
+            assert foundUserTags.size() == 1, "[$userIdToSearch] userId has more than 1 userTag entry"
         }
 
         exceptioncount.get() == 0

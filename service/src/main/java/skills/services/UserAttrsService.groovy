@@ -16,17 +16,20 @@
 package skills.services
 
 import callStack.profiler.Profile
+import groovy.time.TimeCategory
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfo
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.storage.model.UserAttrs
+import skills.storage.model.UserTag
 import skills.storage.repos.UserAttrsRepo
+import skills.storage.repos.UserTagRepo
 
 import static skills.controller.exceptions.SkillException.NA
 
@@ -37,18 +40,32 @@ class UserAttrsService {
     @Autowired
     UserAttrsRepo userAttrsRepo
 
+    @Autowired
+    UserTagRepo userTagsRepository
+
+    @Autowired
+    LockingService lockingService
+
+    @Value('#{"${skills.config.attrsAndUserTagsUpdateIntervalDays:7}"}')
+    private int attrsAndUserTagsUpdateIntervalDays
+
     @Transactional
     @Profile
     UserAttrs saveUserAttrs(String userId, UserInfo userInfo) {
         validateUserId(userId)
 
         UserAttrs userAttrs = loadUserAttrsFromLocalDb(userId)
-        boolean doSave = true
+        boolean updateUserAttrs = false
+        boolean updateUserTags = false
 
         if (!userAttrs) {
+            // no userAttrs existed, creating for the first time
             userAttrs = new UserAttrs(userId: userId?.toLowerCase(), userIdForDisplay: userId)
+            updateUserAttrs = true
+            updateUserTags = true
         } else {
-            doSave = shouldUpdate(userInfo, userAttrs)
+            updateUserAttrs = shouldUpdateUserAttrs(userInfo, userAttrs)
+            updateUserTags = shouldUpdateUserTags(userAttrs)
 
             if (log.isTraceEnabled()) {
                 log.trace('UserInfo/UserAttrs: \n\tfirstName [{}/{}]\n\tlastName [{}]/[{}]\n\temail [{}]/[{}]\n\tuserDn [{}]/[{}]\n\tnickname [{}]/[{}]\n\tusernameForDisplay [{}]/[{}]\n\tlandingPage [{}]/[{}]',
@@ -59,44 +76,64 @@ class UserAttrsService {
                         userInfo.nickname, userAttrs.nickname,
                         userInfo.usernameForDisplay, userAttrs.userIdForDisplay,
                 )
+                log.trace('Updating UserAttrs [{}], UserTags [{}]', updateUserAttrs, updateUserTags)
             }
         }
-        if (doSave) {
-            populate(userAttrs, userInfo)
-            try {
-                saveUserAttrsInLocalDb(userAttrs)
-            } catch (DataIntegrityViolationException dataIntegrityViolationException) {
-                log.warn("${dataIntegrityViolationException.getMessage()} received when trying to save userAttrs for [${userId}], fetching and retrying")
-                userAttrs = loadUserAttrsFromLocalDb(userId)
-                if (!userAttrs) {
-                    log.error(dataIntegrityViolationException.getMessage())
-                    throw new SkillException("Received DataIntegrityViolation when attempting to insert UserAttrs for [${userId}] but entry does not exist")
-                }
-                if (shouldUpdate(userInfo, userAttrs)) {
-                    populate(userAttrs, userInfo)
-                    saveUserAttrsInLocalDb(userAttrs)
+        if (updateUserTags || updateUserAttrs) {
+            lockingService.lockForCreateOrUpdateUser()
+            if (!userAttrs.id) {
+                // this is an insert, reload UserAttrs to verify that this another thread has not already inserted
+                UserAttrs userAttrs2 = loadUserAttrsFromLocalDb(userId)
+                if (userAttrs2?.id) {
+                    // already inserted, now we are updating
+                    updateUserAttrs = false
+                    updateUserTags = false
                 }
             }
+        }
+        if (updateUserAttrs) {
+            populate(userAttrs, userInfo, updateUserTags)
+            saveUserAttrsInLocalDb(userAttrs)
+        }
+        if (updateUserTags) {
+            replaceUserTags(userId?.toLowerCase(), userInfo)
         }
         return userAttrs
     }
 
-    private boolean shouldUpdate(UserInfo userInfo, UserAttrs userAttrs) {
-        return (userInfo.firstName && userAttrs.firstName != userInfo.firstName) ||
+    private void replaceUserTags(String userId, UserInfo userInfo) {
+        userTagsRepository.deleteByUserId(userId)
+        List<UserTag> userTags = userInfo.userTags.collect { new UserTag(userId: userId, key: it.key, value: it.value) }
+        if (userTags) {
+            userTagsRepository.saveAll(userTags)
+        }
+    }
+
+    private boolean shouldUpdateUserAttrs(UserInfo userInfo, UserAttrs userAttrs) {
+        return  (userInfo.firstName && userAttrs.firstName != userInfo.firstName) ||
                 (userInfo.lastName && userAttrs.lastName != userInfo.lastName) ||
                 (userInfo.email && userAttrs.email != userInfo.email) ||
                 (userInfo.userDn && userAttrs.dn != userInfo.userDn) ||
-                (userInfo.nickname !=null && userAttrs.nickname != (userInfo.nickname ?: "")) ||
+                (userInfo.nickname != null && userAttrs.nickname != (userInfo.nickname ?: "")) ||
                 (userInfo.usernameForDisplay && userAttrs.userIdForDisplay != userInfo.usernameForDisplay)
     }
 
-    private void populate(UserAttrs userAttrs, UserInfo userInfo) {
+    private boolean shouldUpdateUserTags(UserAttrs userAttrs) {
+        use(TimeCategory) {
+            return userAttrs.userTagsLastUpdated.before(attrsAndUserTagsUpdateIntervalDays.days.ago)
+        }
+    }
+
+    private void populate(UserAttrs userAttrs, UserInfo userInfo, boolean updateUserTags) {
         userAttrs.firstName = userInfo.firstName ?: userAttrs.firstName
         userAttrs.lastName = userInfo.lastName ?: userAttrs.lastName
         userAttrs.email = userInfo.email ?: userAttrs.email
         userAttrs.dn = userInfo.userDn ?: userAttrs.dn
         userAttrs.nickname = (userInfo.nickname != null ? userInfo.nickname : userAttrs.nickname) ?: ""
         userAttrs.userIdForDisplay = userInfo.usernameForDisplay ?: userAttrs.userIdForDisplay
+        if (updateUserTags) {
+            userAttrs.userTagsLastUpdated = new Date()
+        }
     }
 
     private void validateUserId(String userId) {

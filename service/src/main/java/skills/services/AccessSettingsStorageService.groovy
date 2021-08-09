@@ -79,6 +79,7 @@ class AccessSettingsStorageService {
     @Autowired
     UserAttrsService userAttrsService
 
+
     @Value('#{"${skills.config.ui.defaultLandingPage:admin}"}')
     String defaultLandingPage
 
@@ -255,7 +256,6 @@ class AccessSettingsStorageService {
             log.debug("Creating new app user for ID [{}], DN [{}]", userInfo.username, userInfo.userDn)
             user = createNewUser(userInfo)
         }
-
         return new UserAndUserAttrsHolder(user: user, userAttrs: userAttrs)
     }
 

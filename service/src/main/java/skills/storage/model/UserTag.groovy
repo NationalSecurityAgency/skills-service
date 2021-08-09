@@ -15,16 +15,16 @@
  */
 package skills.storage.model
 
-import org.springframework.data.annotation.CreatedDate
+import groovy.transform.ToString
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 
 import javax.persistence.*
-import java.time.LocalDateTime
 
 @Entity
-@Table(name = 'user_attrs')
+@Table(name = 'user_tags')
+@ToString(includeNames = true)
 @EntityListeners(AuditingEntityListener)
-class UserAttrs {
+class UserTag {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,16 +32,6 @@ class UserAttrs {
 
     String userId
 
-    String firstName
-    String lastName
-    String email
-    String dn
-    String nickname
-    String userIdForDisplay
-
-    @CreatedDate
-    LocalDateTime created
-
-    @Temporal(TemporalType.TIMESTAMP)
-    Date userTagsLastUpdated
+    String key
+    String value
 }
