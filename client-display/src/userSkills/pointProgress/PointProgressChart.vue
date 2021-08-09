@@ -42,9 +42,9 @@ limitations under the License.
 </template>
 
 <script>
-  import UserSkillsService from '@/userSkills/service/UserSkillsService';
   import VueApexCharts from 'vue-apexcharts';
   import Spinner from 'vue-simple-spinner';
+  import UserSkillsService from '@/userSkills/service/UserSkillsService';
   import PointProgressHelper from '@/userSkills/pointProgress/PointProgressHelper';
   import PointHistoryChartPlaceholder from '@/userSkills/pointProgress/PointHistoryChartPlaceholder';
   import numberFormatter from '../../common/filter/NumberFilter';
