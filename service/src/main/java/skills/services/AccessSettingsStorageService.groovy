@@ -79,8 +79,6 @@ class AccessSettingsStorageService {
     @Autowired
     UserAttrsService userAttrsService
 
-    @Autowired
-    LockingService lockingService
 
     @Value('#{"${skills.config.ui.defaultLandingPage:admin}"}')
     String defaultLandingPage
@@ -238,7 +236,6 @@ class AccessSettingsStorageService {
     UserAndUserAttrsHolder createAppUser(UserInfo userInfo, boolean createOrUpdate) {
         userInfoValidator.validate(userInfo)
         String userId = userInfo.username?.toLowerCase()
-        lockingService.lockForCreateOrUpdateUser()
         UserAttrs userAttrs = userAttrsService.saveUserAttrs(userId, userInfo)
 
         User user = loadUserFromLocalDb(userId)

@@ -43,6 +43,9 @@ class UserAttrsService {
     @Autowired
     UserTagRepo userTagsRepository
 
+    @Autowired
+    LockingService lockingService
+
     @Value('#{"${skills.config.attrsAndUserTagsUpdateIntervalDays:7}"}')
     private int attrsAndUserTagsUpdateIntervalDays
 
@@ -75,6 +78,9 @@ class UserAttrsService {
                 )
                 log.trace('Updating UserAttrs [{}], UserTags [{}]', updateUserAttrs, updateUserTags)
             }
+        }
+        if (updateUserTags || updateUserAttrs) {
+            lockingService.lockForCreateOrUpdateUser()
         }
         if (updateUserAttrs) {
             populate(userAttrs, userInfo, updateUserTags)
