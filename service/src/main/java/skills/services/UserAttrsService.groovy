@@ -82,10 +82,10 @@ class UserAttrsService {
         if (updateUserTags || updateUserAttrs) {
             lockingService.lockForCreateOrUpdateUser()
             if (!userAttrs.id) {
-                // this is an insert, reload UserAttrs to verify that this another thread has not already inserted
+                // this is an insert, reload UserAttrs to verify that another request has not already inserted
                 UserAttrs userAttrs2 = loadUserAttrsFromLocalDb(userId)
                 if (userAttrs2?.id) {
-                    // already inserted, now we are updating
+                    // already inserted, now need to update
                     updateUserAttrs = false
                     updateUserTags = false
                 }
