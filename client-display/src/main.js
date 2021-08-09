@@ -16,14 +16,8 @@
 import VueApexCharts from 'vue-apexcharts';
 
 import Vue from 'vue';
-import App from '@/App';
 import marked from 'marked';
-import router from '@/router';
-import store from '@/store/store';
 import 'apexcharts';
-import '@/common/filter/DayJsFilters';
-import DevModeUtil from '@/dev/DevModeUtil';
-
 import {
     ModalPlugin,
     DropdownPlugin,
@@ -34,6 +28,12 @@ import {
     ProgressPlugin,
     SpinnerPlugin,
 } from 'bootstrap-vue';
+
+import router from '@/router';
+import store from '@/store/store';
+import App from '@/App';
+import '@/common/filter/DayJsFilters';
+import DevModeUtil from '@/dev/DevModeUtil';
 
 Vue.config.productionTip = false;
 
