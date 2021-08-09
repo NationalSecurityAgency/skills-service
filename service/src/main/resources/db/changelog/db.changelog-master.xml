@@ -1318,7 +1318,7 @@
         <modifyDataType tableName="notifications" columnName="user_id" newDataType="text" />
     </changeSet>
 
-    <changeSet id="11" author="skills team" context="migration11">
+    <changeSet id="12" author="skills team" context="migration12">
         <!-- ============================================================================
         Table: User Tags
         ============================================================================-->
