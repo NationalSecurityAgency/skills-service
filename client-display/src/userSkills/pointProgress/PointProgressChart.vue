@@ -49,6 +49,7 @@ limitations under the License.
   import PointHistoryChartPlaceholder from '@/userSkills/pointProgress/PointHistoryChartPlaceholder';
   import numberFormatter from '../../common/filter/NumberFilter';
   import ChartAnimEndedMixin from '../../common/utilities/ChartAnimEndedMixin';
+  import UserSkillsService from '@/userSkills/service/UserSkillsService';
 
   export default {
     mixins: [ChartAnimEndedMixin],
