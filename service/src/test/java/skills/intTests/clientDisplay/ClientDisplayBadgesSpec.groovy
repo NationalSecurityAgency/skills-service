@@ -18,6 +18,7 @@ package skills.intTests.clientDisplay
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import spock.lang.IgnoreRest
 
 class ClientDisplayBadgesSpec extends DefaultIntSpec {
 
@@ -596,5 +597,34 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         summary2User2.badges.numBadgesCompleted == 1
         summaries2User2.size() == 1
         summaries2User2.find { it.badgeId == "badge1" }.numSkillsAchieved == 1
+    }
+
+    def "sort skills alphabetically"() {
+        String userId = "user1"
+
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(5, 1, 1)
+        proj1_skills[0].name = "dsome"
+        proj1_skills[1].name = "zsome"
+        proj1_skills[2].name = "ksome"
+        proj1_skills[3].name = "asome"
+        proj1_skills[4].name = "lsome"
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        String badge1 = "badge1"
+        skillsService.addBadge([projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",])
+
+        proj1_skills.each {
+            skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: it.skillId])
+        }
+
+        when:
+        def summary = skillsService.getBadgeSummary(userId, proj1.projectId, badge1)
+        then:
+        summary.skills.collect { it.skill } == ["asome", "dsome", "ksome", "lsome", "zsome"]
     }
 }

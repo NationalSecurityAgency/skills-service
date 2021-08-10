@@ -552,6 +552,34 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         proj2Skills.get(0).crossProject
     }
 
+    def "sort skills alphabetically"() {
+        String userId = "user1"
+
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(5, 1, 1)
+        proj1_skills[0].name = "dsome"
+        proj1_skills[1].name = "zsome"
+        proj1_skills[2].name = "ksome"
+        proj1_skills[3].name = "asome"
+        proj1_skills[4].name = "lsome"
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        Map badge = [badgeId: globalBadgeId, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
+        supervisorSkillsService.createGlobalBadge(badge)
+        proj1_skills.each {
+            supervisorSkillsService.assignSkillToGlobalBadge(projectId: projId, badgeId: badge.badgeId, skillId: it.skillId)
+        }
+
+        when:
+        def summary = skillsService.getBadgeSummary(userId, proj1.projectId, globalBadgeId, -1, true)
+        then:
+        summary.skills.collect { it.skill } == ["asome", "dsome", "ksome", "lsome", "zsome"]
+    }
+
     private deleteGlobalBadgeIfExists(String badgeId) {
         try {
             if (supervisorSkillsService?.getGlobalBadge(badgeId)) {
