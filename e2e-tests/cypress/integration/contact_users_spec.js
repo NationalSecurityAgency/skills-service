@@ -301,4 +301,26 @@ describe('Contact Project Users Specs', () => {
         cy.get('[data-cy=contactUsers_emailServiceWarning]').should('be.visible');
         cy.contains('Please note that email notifications are currently disabled. Email configuration has not been performed on this instance of SkillTree. Please contact the root administrator.').should('be.visible');
     });
+
+    it('preview email button', () => {
+        cy.request('POST', '/app/projects/proj1', {
+            projectId: 'proj1',
+            name: "proj1"
+        }).as('createProject');
+
+        cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice').as('emailSupported');
+        cy.intercept('POST', '/admin/projects/proj1/contactUsersCount').as('updateCount');
+        cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/levels').as('getSubjectLevels');
+
+        cy.visit('/administrator/projects/proj1/contact-users');
+
+        cy.get('[data-cy="nav-Contact Users"]').click();
+        cy.wait('@emailSupported');
+
+        cy.get('[data-cy=previewUsersEmail]').should('be.disabled');
+        cy.get('[data-cy=emailUsers_subject]').type('Test Subject');
+        cy.get('[data-cy=previewUsersEmail]').should('be.disabled');
+        cy.get('[data-cy="markdownEditorInput"]').type('Test Body');
+        cy.get('[data-cy=previewUsersEmail]').should('be.enabled');
+    });
 });
