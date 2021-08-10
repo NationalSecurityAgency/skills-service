@@ -558,8 +558,8 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)
         List<Map> proj1_skills = SkillsFactory.createSkills(5, 1, 1)
-        proj1_skills[0].name = "dsome"
-        proj1_skills[1].name = "zsome"
+        proj1_skills[0].name = "Dsome"
+        proj1_skills[1].name = "Zsome"
         proj1_skills[2].name = "ksome"
         proj1_skills[3].name = "asome"
         proj1_skills[4].name = "lsome"
@@ -577,7 +577,7 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         when:
         def summary = skillsService.getBadgeSummary(userId, proj1.projectId, globalBadgeId, -1, true)
         then:
-        summary.skills.collect { it.skill } == ["asome", "dsome", "ksome", "lsome", "zsome"]
+        summary.skills.collect { it.skill } == ["asome", "Dsome", "ksome", "lsome", "Zsome"]
     }
 
     private deleteGlobalBadgeIfExists(String badgeId) {

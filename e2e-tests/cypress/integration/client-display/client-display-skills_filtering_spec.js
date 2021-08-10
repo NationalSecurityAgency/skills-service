@@ -579,12 +579,12 @@ describe('Client Display Skills Filtering Tests', () => {
 
 
   it('filter skills on badge catalog page', () => {
-    cy.createSkill(1, 1, 1, {name: 'Search blah skill 1'});
-    cy.createSkill(1, 1, 2, {name: 'is a skill 2'});
-    cy.createSkill(1, 1, 3, {name: 'find Blah other skill 3'});
-    cy.createSkill(1, 1, 4, {name: 'Search nothing skill 4'});
-    cy.createSkill(1, 1, 5, {name: 'sEEk bLaH skill 5', selfReportingType: 'Approval'});
-    cy.createSkill(1, 1, 6, {name: 'some other skill 6', selfReportingType: 'HonorSystem'});
+    cy.createSkill(1, 1, 1, {name: 'a Search blah skill 1'});
+    cy.createSkill(1, 1, 2, {name: 'b is a skill 2'});
+    cy.createSkill(1, 1, 3, {name: 'c find Blah other skill 3'});
+    cy.createSkill(1, 1, 4, {name: 'd Search nothing skill 4'});
+    cy.createSkill(1, 1, 5, {name: 'e sEEk bLaH skill 5', selfReportingType: 'Approval'});
+    cy.createSkill(1, 1, 6, {name: 'f some other skill 6', selfReportingType: 'HonorSystem'});
 
     cy.createBadge(1, 1)
     cy.assignSkillToBadge(1, 1, 1)
@@ -625,10 +625,10 @@ describe('Client Display Skills Filtering Tests', () => {
   });
 
   it('filter skills on completed badge page', () => {
-    cy.createSkill(1, 1, 1, {name: 'Search blah skill 1'});
-    cy.createSkill(1, 1, 2, {name: 'is a skill 2'});
-    cy.createSkill(1, 1, 3, {name: 'find Blah other skill 3'});
-    cy.createSkill(1, 1, 4, {name: 'Search nothing skill 4'});
+    cy.createSkill(1, 1, 1, {name: 'a Search blah skill 1'});
+    cy.createSkill(1, 1, 2, {name: 'b is a skill 2'});
+    cy.createSkill(1, 1, 3, {name: 'c find Blah other skill 3'});
+    cy.createSkill(1, 1, 4, {name: 'd Search nothing skill 4'});
 
     cy.createBadge(1, 1)
     cy.assignSkillToBadge(1, 1, 1)
@@ -680,10 +680,10 @@ describe('Client Display Skills Filtering Tests', () => {
     cy.loginAsProxyUser()
     cy.createProject(1)
     cy.createSubject(1, 1)
-    cy.createSkill(1, 1, 1, {name: 'Search blah skill 1'});
-    cy.createSkill(1, 1, 2, {name: 'is a skill 2'});
-    cy.createSkill(1, 1, 3, {name: 'find Blah other skill 3'});
-    cy.createSkill(1, 1, 4, {name: 'Search nothing skill 4'});
+    cy.createSkill(1, 1, 1, {name: 'a Search blah skill 1'});
+    cy.createSkill(1, 1, 2, {name: 'b is a skill 2'});
+    cy.createSkill(1, 1, 3, {name: 'c find Blah other skill 3'});
+    cy.createSkill(1, 1, 4, {name: 'd Search nothing skill 4'});
 
     cy.loginAsRootUser();
 
