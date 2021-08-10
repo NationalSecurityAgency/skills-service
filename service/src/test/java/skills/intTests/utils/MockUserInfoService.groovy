@@ -138,6 +138,11 @@ public class MockUserInfoService {
                 lname = configuredNames.lastname
             }
 
+            String email = usernamified
+            if (!email.contains('@')) {
+                email = "${usernamified}@fakeplace"
+            }
+
             return new ResponseDefinitionBuilder()
                     .withHeader(CONTENT_TYPE, "application/json")
                     .withBody("""
@@ -145,7 +150,7 @@ public class MockUserInfoService {
                         "firstName" : "${fname}",
                         "lastName": "${lname}",
                         "nickname": "Fake",
-                        "email": "fake@fakeplace",
+                        "email": "${email.toLowerCase()}",
                         "username": "${usernamified}",
                         "usernameForDisplay": "${usernamifiedForDisplay}",
                         "userDn": "${dnQuery}"

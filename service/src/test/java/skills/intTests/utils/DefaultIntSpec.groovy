@@ -183,7 +183,8 @@ class DefaultIntSpec extends Specification {
     List<String> getRandomUsers(int numUsers, boolean createEmail = false) {
         //create email addresses for the users automatically?
         List<String> userIds =  userUtil.getUsers(numUsers+1)
-        userIds.remove(DEFAULT_ROOT_USER_ID)
+        String rootId = userIds.find { it.equalsIgnoreCase(DEFAULT_ROOT_USER_ID) }
+        userIds.remove(rootId)
         if (userIds.size() > numUsers) {
             userIds.pop()
         }

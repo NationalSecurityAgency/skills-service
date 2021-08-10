@@ -20,6 +20,7 @@ import skills.intTests.utils.EmailUtils
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.utils.WaitFor
+import spock.lang.IgnoreRest
 
 class ContactProjectAdminsSpec extends DefaultIntSpec {
 
@@ -34,6 +35,7 @@ class ContactProjectAdminsSpec extends DefaultIntSpec {
         }
     }
 
+    @IgnoreRest
     def "contact project admins"() {
         def users = getRandomUsers(15, true)
 
@@ -85,7 +87,7 @@ class ContactProjectAdminsSpec extends DefaultIntSpec {
         messages.find { it.recipients.find {it.contains(users[3])}}
         messages.find { it.recipients.find {it.contains(users[4])}}
         messages.find { it.recipients.find {it.contains(users[5])}}
-        messages.find { it.recipients.find {it.contains(DEFAULT_ROOT_USER_ID)}} //inception
+        messages.find { it.recipients.find {it.toLowerCase().contains(DEFAULT_ROOT_USER_ID.toLowerCase())}} //inception
 
         messages.collect {
             assert it.html.replaceAll('\r\n', '\n') == '''<!--
