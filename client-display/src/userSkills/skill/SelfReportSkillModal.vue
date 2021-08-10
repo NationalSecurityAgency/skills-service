@@ -18,8 +18,8 @@ limitations under the License.
            title="REPORT SKILL"
            ok-title="Submit"
            :no-close-on-backdrop="true"
-           :centered="true"
            v-model="modalVisible">
+    <modal-positioner :y-offset="modalYOffset"/>
     <div id="reportSkillMsg" class="row p-2" data-cy="selfReportSkillMsg">
       <div class="col-auto text-center">
         <i v-if="isHonorSystem" class="fas fa-chess-knight text-success" style="font-size: 3rem"></i>
@@ -55,9 +55,11 @@ limitations under the License.
 <script>
   import debounce from 'lodash/debounce';
   import UserSkillsService from '../service/UserSkillsService';
+  import ModalPositioner from './ModalPositioner';
 
   export default {
     name: 'SelfReportSkillModal',
+    components: { ModalPositioner },
     props: {
       isHonorSystem: Boolean,
       isApprovalRequired: Boolean,
@@ -69,6 +71,7 @@ limitations under the License.
         approvalRequestedMsg: '',
         inputInvalid: false,
         inputInvalidExplanation: '',
+        modalYOffset: 0,
       };
     },
     methods: {
@@ -86,6 +89,9 @@ limitations under the License.
       cancel() {
         this.modalVisible = false;
         this.$emit('cancel');
+      },
+      updatePosition(yOffset) {
+        this.modalYOffset = yOffset;
       },
     },
   };

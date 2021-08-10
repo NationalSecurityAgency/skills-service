@@ -23,7 +23,7 @@ limitations under the License.
           </a>
           <button v-if="selfReport.available" class="btn btn-outline-info skills-theme-btn"
                   :disabled="selfReportDisabled"
-                  @click="selfReportModalVisible = true;"
+                  @click="showSelfReportModal"
                   data-cy="selfReportBtn">
             <i class="fas fa-check-square"></i> I did it
           </button>
@@ -58,7 +58,7 @@ limitations under the License.
           </div>
         </div>
         <div class="col-auto text-right">
-          <button class="btn btn-info" data-cy="clearRejectionMsgBtn" @click="clearRejectionModalVisible=true">
+          <button class="btn btn-info" data-cy="clearRejectionMsgBtn" @click="showRejectionModal">
             <i class="fas fa-check"></i> I got it!
           </button>
         </div>
@@ -99,6 +99,7 @@ limitations under the License.
     </div>
 
     <self-report-skill-modal v-if="selfReportModalVisible" @report-skill="reportSkill" @cancel="selfReportModalVisible = false"
+        ref="selfReportModal"
         :skill="skillInternal"
         :is-approval-required="isApprovalRequired"
         :is-honor-system="isHonorSystem" />
@@ -106,8 +107,8 @@ limitations under the License.
     <b-modal id="clearRejectionMsgDialog"
              title="CLEAR APPROVAL REJECTION"
              :no-close-on-backdrop="true"
-             :centered="true"
              v-model="clearRejectionModalVisible">
+      <modal-positioner :y-offset="rejectionDialogYOffset" />
       <div class="row p-2" data-cy="clearRejectionMsgDialog">
         <div class="col-auto text-center">
           <i class="fas fa-exclamation-triangle text-danger" style="font-size: 3rem"></i>
@@ -131,16 +132,18 @@ limitations under the License.
 <script>
   import UserSkillsService from '../service/UserSkillsService';
   import SelfReportSkillModal from './SelfReportSkillModal';
+  import ModalPositioner from './ModalPositioner';
 
   export default {
     name: 'SkillOverviewFooter',
-    components: { SelfReportSkillModal },
+    components: { ModalPositioner, SelfReportSkillModal },
     props: ['skill'],
     data() {
       return {
         skillInternal: {},
         selfReportModalVisible: false,
         clearRejectionModalVisible: false,
+        rejectionDialogYOffset: 0,
         approvalRequestedMsg: '',
         selfReport: {
           available: true,
@@ -179,6 +182,16 @@ limitations under the License.
       },
     },
     methods: {
+      showSelfReportModal(event) {
+        this.selfReportModalVisible = true;
+        this.$nextTick(() => {
+          this.$refs.selfReportModal.updatePosition(event.pageY);
+        });
+      },
+      showRejectionModal(event) {
+        this.clearRejectionModalVisible = true;
+        this.rejectionDialogYOffset = event.pageY;
+      },
       isPendingApproval() {
         const res = this.skillInternal.selfReporting && this.skillInternal.selfReporting.requestedOn !== null && this.skillInternal.selfReporting.requestedOn !== undefined && !this.isRejected;
         return res;
