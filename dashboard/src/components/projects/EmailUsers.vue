@@ -112,7 +112,7 @@ limitations under the License.
           <b-button variant="outline-primary" class="mr-1" @click="emailUsers" data-cy="emailUsers-submitBtn"
                     :disabled="isEmailDisabled"><i :class="[emailing ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fas fa-mail-bulk']" /> Email</b-button>
           <transition name="fade">
-            <span v-if="emailSent" class="pt-2 pl-1"><i class="far fa-check-square text-success"/> {{ sentMsg }}</span>
+            <span v-if="emailSent" class="pt-2 pl-1" data-cy="emailSent"><i class="far fa-check-square text-success"/> {{ sentMsg }}</span>
           </transition>
         </div>
       </b-overlay>
