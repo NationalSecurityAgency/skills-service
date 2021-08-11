@@ -613,7 +613,7 @@ class SkillsLoader {
 
         if (loadSkills) {
             SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef?.projectId, badgeDefinition.skillId, version, SkillRelDef.RelationshipType.BadgeRequirement)
-            skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints)
+            skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints)?.sort({ it.skill?.toLowerCase() })
         }
 
         List<UserAchievement> achievements = achievedLevelRepository.findAllByUserIdAndProjectIdAndSkillId(userId, projDef?.projectId, badgeDefinition.skillId)
@@ -650,7 +650,7 @@ class SkillsLoader {
 
         if (loadSkills) {
             SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, null, badgeDefinition.skillId, version, SkillRelDef.RelationshipType.BadgeRequirement)
-            skillsRes = createSkillSummaries(null, groupChildrenMeta.childrenWithPoints)
+            skillsRes = createSkillSummaries(null, groupChildrenMeta.childrenWithPoints)?.sort({ it.skill?.toLowerCase() })
             if (skillsRes) {
                 // all the skills are "cross-project" if they don't belong to the project that originated this reqest
                 skillsRes.each {
