@@ -273,6 +273,15 @@ describe('Contact Project Users Specs', () => {
         cy.get('[data-cy=emailUsers-submitBtn]').should('be.disabled');
         cy.get('[data-cy="markdownEditorInput"]').type('Test Body');
         cy.get('[data-cy=emailUsers-submitBtn]').should('be.enabled');
+
+        cy.intercept('POST', '/admin/projects/proj1/contactUsers', {
+            statusCode: 200,
+            body: {
+                success: true
+            }
+        });
+        cy.get('[data-cy=emailUsers-submitBtn]').click();
+        cy.get('[data-cy=emailSent]').should('be.visible');
     });
 
     it('email not enabled on instance', () => {
@@ -308,6 +317,13 @@ describe('Contact Project Users Specs', () => {
             name: "proj1"
         }).as('createProject');
 
+        cy.intercept('POST', '/admin/projects/proj1/previewEmail', {
+            statusCode: 200,
+            body: {
+                success: true
+            }
+        });
+
         cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice').as('emailSupported');
         cy.intercept('POST', '/admin/projects/proj1/contactUsersCount').as('updateCount');
         cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/levels').as('getSubjectLevels');
@@ -322,5 +338,8 @@ describe('Contact Project Users Specs', () => {
         cy.get('[data-cy=previewUsersEmail]').should('be.disabled');
         cy.get('[data-cy="markdownEditorInput"]').type('Test Body');
         cy.get('[data-cy=previewUsersEmail]').should('be.enabled');
+
+        cy.get("[data-cy=previewUsersEmail]").click();
+        cy.get('[data-cy=emailSent]').should('be.visible');
     });
 });

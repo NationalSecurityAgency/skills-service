@@ -105,6 +105,12 @@ describe('Contact Project Admins Specs', () => {
             cy.visit('/administrator/');
 
             cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPER_DUPER_USER').as('isRoot');
+            cy.intercept('POST', '/root/users/contactAllProjectAdmins', {
+                statusCode: 200,
+                body: {
+                    success: true
+                }
+            });
             cy.get('[data-cy="nav-Contact Admins"]').click();
             cy.wait('@isRoot');
             cy.wait('@countAdmins');
@@ -114,6 +120,8 @@ describe('Contact Project Admins Specs', () => {
             cy.get('[data-cy=emailUsers_subject]').type('foooo');
             cy.get('[data-cy="markdownEditorInput"]').type('body');
             cy.get('[data-cy=emailUsers-submitBtn]').should('be.enabled');
+            cy.get('[data-cy=emailUsers-submitBtn]').click();
+            cy.get('[data-cy=emailSent]').should('be.visible');
         });
 
     });
@@ -131,6 +139,13 @@ describe('Contact Project Admins Specs', () => {
         cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice').as('emailSupported');
         cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPER_DUPER_USER').as('isRoot');
 
+        cy.intercept('POST', '/root/users/previewEmail', {
+            statusCode: 200,
+            body: {
+                success: true
+            }
+        });
+
         cy.visit('/administrator/');
 
         cy.get('[data-cy="nav-Contact Admins"]').click();
@@ -141,5 +156,7 @@ describe('Contact Project Admins Specs', () => {
         cy.get('[data-cy=previewAdminEmail]').should('be.disabled');
         cy.get('[data-cy="markdownEditorInput"]').type('Test Body');
         cy.get('[data-cy=previewAdminEmail]').should('be.enabled');
+        cy.get('[data-cy=previewAdminEmail]').click();
+        cy.get('[data-cy=emailSent]').should('be.visible');
     });
 });
