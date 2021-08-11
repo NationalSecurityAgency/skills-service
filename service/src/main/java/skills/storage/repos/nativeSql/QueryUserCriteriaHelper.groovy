@@ -80,6 +80,8 @@ class QueryUserCriteriaHelper {
             return '''SELECT DISTINCT user_id FROM user_events WHERE project_id = :projectId '''
         }
 
+        // we need to handle the special case of only not_achievements
+
         String sql = 'SELECT DISTINCT ua.user_id FROM user_achievement ua '
         if (queryUsersCriteria.projectLevel) {
             sql +='''
