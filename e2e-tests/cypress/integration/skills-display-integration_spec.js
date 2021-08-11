@@ -83,7 +83,14 @@ describe('Navigation Tests', () => {
     cy.dashboardCd().find('[data-cy="clearRejectionMsgDialog"]').contains('This action will permanently remove the rejection');
 
     cy.wait(5000);
-    cy.matchSnapshotImageForElement('iframe', 'self reporting rejection modal positioning');
+    const snapshotOptions = {
+      blackout: ['[data-cy="selfReportRejectedAlert"]'],
+      failureThreshold: 0.03, // threshold for entire image
+      failureThresholdType: 'percent', // percent of image or number of pixels
+      customDiffConfig: { threshold: 0.01 }, // threshold for each pixel
+      capture: 'fullPage', // When fullPage, the application under test is captured in its entirety from top to bottom.
+    };
+    cy.matchSnapshotImageForElement('iframe', 'self reporting rejection modal positioning', snapshotOptions);
   });
 
   it( 'ability to enable theme on project Skills Display', function () {

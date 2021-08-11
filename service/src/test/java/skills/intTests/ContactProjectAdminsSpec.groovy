@@ -20,7 +20,6 @@ import skills.intTests.utils.EmailUtils
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.utils.WaitFor
-import spock.lang.IgnoreRest
 
 class ContactProjectAdminsSpec extends DefaultIntSpec {
 
@@ -35,7 +34,6 @@ class ContactProjectAdminsSpec extends DefaultIntSpec {
         }
     }
 
-    @IgnoreRest
     def "contact project admins"() {
         def users = getRandomUsers(15, true)
 
