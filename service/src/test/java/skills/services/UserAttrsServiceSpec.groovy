@@ -137,7 +137,7 @@ class UserAttrsServiceSpec extends DefaultIntSpec {
                 lastName: "Fake",
                 nickname: "Fake",
                 userDn: "UserAttrsServiceSpecUser1",
-                email: "fake@fakeplace",
+                email: "userattrsservicespecuser1@fakeplace",
                 username: userId.toLowerCase(),
                 usernameForDisplay: "${userId} for display"
         )
