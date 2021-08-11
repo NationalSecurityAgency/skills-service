@@ -22,7 +22,7 @@
 
     <properties>
         <groovy.version>3.0.7</groovy.version>
-        <spock.myVersion>2.0-M3-groovy-3.0</spock.myVersion>
+        <spock.myVersion>2.0-M4-groovy-3.0</spock.myVersion>
 
         <groovy.eclipse.compiler.version>3.6.0-03</groovy.eclipse.compiler.version>
         <!-- This should match groovy.version        -->
