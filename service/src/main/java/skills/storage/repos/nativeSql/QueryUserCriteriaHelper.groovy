@@ -32,6 +32,13 @@ class QueryUserCriteriaHelper {
             return '''SELECT COUNT(DISTINCT user_id) FROM user_events WHERE project_id = :projectId '''
         }
 
+        //handle special case for only notAchievedSkills
+        if (isOnlyNotAcheived(queryUsersCriteria)) {
+            return '''SELECT COUNT(DISTINCT ue.user_id) FROM user_events ue 
+                        WHERE ue.project_id = :projectId 
+                        AND ue.user_id NOT IN (SELECT DISTINCT nsk.user_id FROM user_achievement nsk WHERE nsk.skill_id IN (:notSkillIds))'''
+        }
+
         String sql = 'SELECT COUNT(DISTINCT ua.user_id) FROM user_achievement ua '
         if (queryUsersCriteria.projectLevel) {
             sql +='''
@@ -80,7 +87,12 @@ class QueryUserCriteriaHelper {
             return '''SELECT DISTINCT user_id FROM user_events WHERE project_id = :projectId '''
         }
 
-        // we need to handle the special case of only not_achievements
+        //handle special case for only notAchievedSkills
+        if (isOnlyNotAcheived(queryUsersCriteria)) {
+            return '''SELECT DISTINCT ue.user_id FROM user_events ue 
+                        WHERE ue.project_id = :projectId 
+                        AND ue.user_id NOT IN (SELECT DISTINCT nsk.user_id FROM user_achievement nsk WHERE nsk.skill_id IN (:notSkillIds))'''
+        }
 
         String sql = 'SELECT DISTINCT ua.user_id FROM user_achievement ua '
         if (queryUsersCriteria.projectLevel) {
@@ -119,6 +131,18 @@ class QueryUserCriteriaHelper {
         }
 
         return sql
+    }
+
+    static boolean isOnlyNotAcheived(QueryUsersCriteria queryUsersCriteriaRequest) {
+        boolean anythingElsePopulated = false
+
+        anythingElsePopulated |= queryUsersCriteriaRequest.projectLevel != null
+        anythingElsePopulated |= !!queryUsersCriteriaRequest.achievedSkillIds
+        anythingElsePopulated |= !!queryUsersCriteriaRequest.badgeIds
+        anythingElsePopulated |= !!queryUsersCriteriaRequest.subjectLevels
+        anythingElsePopulated |= !!queryUsersCriteriaRequest.allProjectUsers
+
+        return !anythingElsePopulated && queryUsersCriteriaRequest.notAchievedSkillIds
     }
 
     static void setCountParams(Query query, QueryUsersCriteria queryUsersCriteria) {

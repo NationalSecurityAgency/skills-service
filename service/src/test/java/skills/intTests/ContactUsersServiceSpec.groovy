@@ -27,6 +27,7 @@ import skills.intTests.utils.EmailUtils
 import skills.intTests.utils.SkillsFactory
 import skills.services.ContactUsersService
 import skills.services.UserAttrsService
+import skills.storage.repos.nativeSql.QueryUserCriteriaHelper
 import skills.utils.WaitFor
 import spock.lang.IgnoreRest
 
@@ -153,6 +154,14 @@ class ContactUsersServiceSpec extends DefaultIntSpec {
         notSkills.projectId = proj.projectId
         notSkills.notAchievedSkillIds = [skill1.skillId, skill2.skillId, skill3.skillId, skill6.skillId]
 
+        QueryUsersCriteriaRequest notSkill6 = new QueryUsersCriteriaRequest()
+        notSkill6.projectId = proj.projectId
+        notSkill6.notAchievedSkillIds = [skill6.skillId]
+
+        QueryUsersCriteriaRequest skill6Req = new QueryUsersCriteriaRequest()
+        skill6Req.projectId = proj.projectId
+        skill6Req.achievedSkillIds = [skill6.skillId]
+
         when:
         Long numUsers = skillsService.countProjectUsers(proj.projectId, false, [skill1.skillId, skill2.skillId, skill3.skillId], null, [[subjectId: subj3.subjectId, level: 1]], 2)
         Long achievedNotAchieved = skillsService.countProjectUsers(proj.projectId, false, [skill6.skillId], [skill5.skillId])
@@ -162,6 +171,8 @@ class ContactUsersServiceSpec extends DefaultIntSpec {
         Long allUsers = skillsService.countProjectUsers(proj.projectId, true)
         Long subjectLevelNotSkills = skillsService.countProjectUsers(proj.projectId, false, null, [skill5.skillId, skill6.skillId], [[subjectId: subj4.subjectId, level: 3]])
         Long notAchieved = skillsService.countProjectUsers(proj.projectId, false, null, [skill1.skillId, skill2.skillId, skill3.skillId, skill6.skillId])
+        Long achievedSkill6 = skillsService.countProjectUsers(proj.projectId, false, [skill6.skillId])
+        Long notAchievedSkill6 = skillsService.countProjectUsers(proj.projectId, false, null, [skill6.skillId])
 
         then:
         numUsers == 1
@@ -172,6 +183,7 @@ class ContactUsersServiceSpec extends DefaultIntSpec {
         allUsers == 7
         subjectLevelNotSkills == 0
         notAchieved == 3
+        achievedSkill6 + notAchievedSkill6 == allUsers
     }
 
     def "test user retrieval query"() {
@@ -282,6 +294,13 @@ class ContactUsersServiceSpec extends DefaultIntSpec {
         notSkills.projectId = proj.projectId
         notSkills.notAchievedSkillIds = [skill1.skillId, skill2.skillId, skill3.skillId, skill6.skillId]
 
+        QueryUsersCriteriaRequest notSkill6 = new QueryUsersCriteriaRequest()
+        notSkill6.projectId = proj.projectId
+        notSkill6.notAchievedSkillIds = [skill6.skillId]
+
+        QueryUsersCriteriaRequest skill6Req = new QueryUsersCriteriaRequest()
+        skill6Req.projectId = proj.projectId
+        skill6Req.achievedSkillIds = [skill6.skillId]
 
 
         when:
@@ -325,6 +344,14 @@ class ContactUsersServiceSpec extends DefaultIntSpec {
             contactUsersService.retrieveMatchingUserIds(notSkills).forEach({notAchieved += it})
         })
 
+        List<String> notAchievedAndAchieved = []
+        transactionTemplate.execute({
+            contactUsersService.retrieveMatchingUserIds(notSkill6).forEach({notAchievedAndAchieved += it})
+        })
+        transactionTemplate.execute({
+            contactUsersService.retrieveMatchingUserIds(skill6Req).forEach({notAchievedAndAchieved += it})
+        })
+
 
         then:
         projectLevelSubjectLevelSkillsUsers.size() == 1
@@ -342,6 +369,7 @@ class ContactUsersServiceSpec extends DefaultIntSpec {
         subjectLevelNotSkills.size() == 0
         notAchieved.size() == 3
         notAchieved.sort() == [users[4], users[5], users[6]].sort()
+        notAchievedAndAchieved.sort() == allUsers.sort()
     }
 
     def "test email"() {
