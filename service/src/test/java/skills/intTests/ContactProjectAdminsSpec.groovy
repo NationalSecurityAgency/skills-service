@@ -130,7 +130,7 @@ limitations under the License.
 
         then:
         messages.size() == 1
-        messages[0].recipients.find { it.contains(DEFAULT_ROOT_USER_ID) }
+        messages[0].recipients.find { it.containsIgnoreCase(DEFAULT_ROOT_USER_ID) }
         messages[0].html.replaceAll('\r\n', '\n') == '''<!--
 Copyright 2020 SkillTree
 
