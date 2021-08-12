@@ -311,9 +311,15 @@ limitations under the License.
     },
     watch: {
       currentFilterType(newVal) {
+        this.levels.available = [];
+        this.levels.selected = '';
+        this.subjects.selected = null;
+        this.skills.selected = null;
+        this.badges.selected = null;
+        this.selectedItem = '';
+
         if (newVal === 'project') {
           this.loading.levels = true;
-          this.levels.selected = '';
           LevelService.getLevelsForProject(this.$route.params.projectId).then((levels) => {
             this.levels.available = levels?.map((level) => ({ value: level.level, text: level.level }));
             this.levels.available.unshift({ value: null, text: 'Any Level' });
@@ -321,16 +327,12 @@ limitations under the License.
           }).finally(() => {
             this.loading.levels = false;
           });
-        } else if (newVal === 'subject') {
-          // clear out levels if subject is selected, we can't load levels for a subject until the user selects the actual level
-          this.levels.available = [];
-          this.levels.selected = '';
         }
       },
       'subjects.selected': function subjectSelected(subject) {
-        this.loading.levels = true;
-        this.levels.selected = '';
         if (subject) {
+          this.loading.levels = true;
+          this.levels.selected = '';
           LevelService.getLevelsForSubject(this.$route.params.projectId, subject.subjectId).then((levels) => {
             this.levels.available = levels?.map((level) => ({ value: level.level, text: level.level }));
           }).finally(() => {
@@ -390,7 +392,7 @@ limitations under the License.
           };
           // eslint-disable-next-line no-case-declarations
           const slC = { subjectId: this.subjects.selected.subjectId, level: this.levels.selected };
-          if (!this.arrayContainsObject(c, slC)) {
+          if (!this.arrayContainsClosure(c.subjectLevels, (arrEl) => arrEl.subjectId && arrEl.subjectId === slC.subjectId)) {
             c.subjectLevels.push(slC);
           }
           break;
@@ -487,16 +489,26 @@ limitations under the License.
         this.tags.splice(0, this.tags.length);
       },
       tagAlreadyExists(tag) {
-        const exists = this.arrayContainsObject(this.tags, tag);
-        return exists;
+        const isProjectLevelTag = tag.type === 'project' && Object.prototype.hasOwnProperty.call(tag, 'projectLevel');
+        const isSubjectLevelTag = tag.type === 'subject' && Object.prototype.hasOwnProperty.call(tag, 'subjectId');
+        const searchObj = JSON.stringify(tag);
+
+        return this.arrayContainsClosure(this.tags, (arrEl) => {
+          if (isProjectLevelTag) {
+            return arrEl.type === 'project' && Object.prototype.hasOwnProperty.call(arrEl, 'projectLevel');
+          }
+          if (isSubjectLevelTag) {
+            return arrEl.type === 'subject' && arrEl.subjectId === tag.subjectId;
+          }
+          return JSON.stringify((arrEl)) === searchObj;
+        });
       },
-      arrayContainsObject(array, object) {
+      arrayContainsClosure(array, closure) {
         let exists = false;
-        const searchObj = JSON.stringify(object);
         // eslint-disable-next-line no-plusplus
         for (let i = 0; i < array.length; i++) {
           const t = array[i];
-          if (JSON.stringify(t) === searchObj) {
+          if (closure(t)) {
             exists = true;
             break;
           }
