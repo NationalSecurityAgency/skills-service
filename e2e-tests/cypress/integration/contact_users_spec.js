@@ -179,6 +179,20 @@ describe('Contact Project Users Specs', () => {
         cy.contains('Level 1 or greater in Subject Subject 1').should('be.visible');
         cy.get('[data-cy=usersMatchingFilters] .badge-info').should('have.text', '3');
         cy.get('[data-cy=emailUsers-submitBtn]').should('be.disabled');
+        // should not be able to add multiple levels for the same subject
+        cy.get('[data-cy=badgeFilter]').click({force:true});
+        cy.wait(200);
+        cy.get('[data-cy=subjectFilter]').click({force:true});
+        cy.wait(200);
+        cy.get('.multiselect__tags').click();
+        cy.get('.multiselect__tags input').eq(0).type('Subject 1{enter}');
+        cy.wait('@getSubjectLevels');
+        cy.get('[data-cy=emailUsers-levelsInput]').select('2');
+        cy.get('[data-cy=emailUsers-addBtn]').should('be.enabled');
+        cy.get('[data-cy=emailUsers-addBtn]').click();
+        cy.get('[data-cy=filterExists]').should('be.visible');
+        cy.contains('Level 2 or greater in Subject Subject 1').should('not.exist');
+
         cy.get('[data-cy=contactUserCriteria-removeBtn]').click();
         cy.wait('@updateCount');
         cy.get('[data-cy=usersMatchingFilters] .badge-info').should('have.text', '0');
