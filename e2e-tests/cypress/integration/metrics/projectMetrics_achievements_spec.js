@@ -679,203 +679,203 @@ describe('Metrics Tests - Achievements', () => {
         cy.get('[data-cy="achievementsNavigator-usernameInput"]').type('!');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-usernameInput"]').type('@');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-usernameInput"]').type('#');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-usernameInput"]').type('$');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-usernameInput"]').type('%');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-usernameInput"]').type('^');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-usernameInput"]').type('&');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-usernameInput"]').type('*');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-usernameInput"]').type('(');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-usernameInput"]').type(')');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-usernameInput"]').type('-');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-usernameInput"]').type('_');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-usernameInput"]').type('+');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-usernameInput"]').type('=');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-usernameInput"]').type('[');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-usernameInput"]').type(']');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-usernameInput"]').type('{');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-usernameInput"]').type('}');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-usernameInput"]').type('|');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-usernameInput"]').type('\\');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         //name input
         cy.get('[data-cy="achievementsNavigator-nameInput"]').type('!');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-nameInput"]').type('@');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-nameInput"]').type('#');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-nameInput"]').type('$');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-nameInput"]').type('%');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-nameInput"]').type('^');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-nameInput"]').type('&');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-nameInput"]').type('*');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-nameInput"]').type('(');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-nameInput"]').type(')');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-nameInput"]').type('-');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-nameInput"]').type('_');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-nameInput"]').type('+');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-nameInput"]').type('=');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-nameInput"]').type('[');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-nameInput"]').type(']');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-nameInput"]').type('{');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-nameInput"]').type('}');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-nameInput"]').type('|');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
 
         cy.get('[data-cy="achievementsNavigator-nameInput"]').type('\\');
         cy.get('[data-cy="achievementsNavigator-filterBtn"]').click();
         cy.contains('User Name Filter').should('be.visible');
-        cy.get('[data-cy=achievementsNavigator-resetBtn"]').click();
+        cy.get('[data-cy="achievementsNavigator-resetBtn"]').click();
     });
 
 })
