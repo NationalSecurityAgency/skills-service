@@ -20,7 +20,7 @@ function buildUrl(url, params = {}) {
   if (params) {
     const paramsEntries = Object.entries(params);
     if (paramsEntries && paramsEntries.length > 0) {
-      const paramsStr = paramsEntries.map((entry) => `${entry[0]}=${entry[1]}`)
+      const paramsStr = paramsEntries.map((entry) => `${entry[0]}=${encodeURIComponent(entry[1])}`)
         .join('&');
       res = `${res}?${paramsStr}`;
     }
