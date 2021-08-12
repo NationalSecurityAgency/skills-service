@@ -71,7 +71,7 @@ limitations under the License.
           <b-button variant="outline-primary" class="mr-1" @click="addCriteria" data-cy="emailUsers-addBtn"
                     :disabled="isAddDisabled || maxTagsReached"><i class="fas fa-plus-circle"/> Add</b-button>
           <transition name="fade">
-            <span v-if="alreadyApplied" data-cy="filterExists" class="pt-2 pl-1">Filter already exists</span>
+            <span v-if="alreadyApplied" data-cy="filterExists" class="pt-2 pl-1" role="alert">Filter already exists</span>
           </transition>
           <span v-if="maxTagsReached" data-cy="maxFiltersReached" class="text-warning pt-2 pl-1">Only {{maxCriteria}} filters are allowed</span>
         </div>
