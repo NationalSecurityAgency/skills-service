@@ -31,13 +31,111 @@ describe('Register Root Users', () => {
   });
 
   it('register root user', () => {
+    const username = 'rob.smith@madeup.org';
+    const pass = 'password'
+
     cy.visit('/administrator/');
     cy.contains('New Root Account')
     cy.get('#firstName').type("Robert")
     cy.get('#lastName').type("Smith")
-    cy.get('#email').type("rob.smith@madeup.org")
-    cy.get('#password').type("password")
+    cy.get('#email').type(username)
+    cy.get('#password').type(pass)
     cy.get('#password_confirmation').type("password")
     cy.contains('Create Account').click()
+
+    // default test install sets Progress and Ranking as a default home page
+    cy.url().should('include', '/progress-and-ranking')
   });
+
+  it('register root user when Progress and Ranking views are disabled', () => {
+
+    cy.intercept('GET', '/public/config', (req) => {
+      req.reply({
+        body: {
+          rankingAndProgressViewsEnabled: 'false',
+          needToBootstrap: true,
+        },
+      })
+    }).as('getConfig')
+
+    const username = 'rob.smith@madeup.org';
+    const pass = 'password'
+
+    cy.visit('/administrator/');
+    cy.wait('@getConfig');
+    cy.contains('New Root Account')
+
+    cy.get('#firstName').type("Robert")
+    cy.get('#lastName').type("Smith")
+    cy.get('#email').type(username)
+    cy.get('#password').type(pass)
+    cy.get('#password_confirmation').type("password")
+    cy.contains('Create Account').click()
+
+    // if rankingAndProgressViewsEnabled are disabled then always navigate to admin page
+    cy.url().should('include', '/administrator')
+  });
+
+
+  it('register root user when default home page configured - progress and ranking', () => {
+
+    cy.intercept('GET', '/public/config', (req) => {
+      req.reply({
+        body: {
+          rankingAndProgressViewsEnabled: 'true',
+          defaultLandingPage: 'progress',
+          needToBootstrap: true,
+        },
+      })
+    }).as('getConfig')
+
+    const username = 'rob.smith@madeup.org';
+    const pass = 'password'
+
+    cy.visit('/administrator/');
+    cy.wait('@getConfig');
+    cy.contains('New Root Account')
+
+    cy.get('#firstName').type("Robert")
+    cy.get('#lastName').type("Smith")
+    cy.get('#email').type(username)
+    cy.get('#password').type(pass)
+    cy.get('#password_confirmation').type("password")
+    cy.contains('Create Account').click()
+
+    // if rankingAndProgressViewsEnabled are disabled then always navigate to admin page
+    cy.url().should('include', '/progress-and-ranking')
+  });
+
+
+  it('register root user when default home page configured - admin', () => {
+
+    cy.intercept('GET', '/public/config', (req) => {
+      req.reply({
+        body: {
+          rankingAndProgressViewsEnabled: 'true',
+          defaultLandingPage: 'admin',
+          needToBootstrap: true,
+        },
+      })
+    }).as('getConfig')
+
+    const username = 'rob.smith@madeup.org';
+    const pass = 'password'
+
+    cy.visit('/administrator/');
+    cy.wait('@getConfig');
+    cy.contains('New Root Account')
+
+    cy.get('#firstName').type("Robert")
+    cy.get('#lastName').type("Smith")
+    cy.get('#email').type(username)
+    cy.get('#password').type(pass)
+    cy.get('#password_confirmation').type("password")
+    cy.contains('Create Account').click()
+
+    // if rankingAndProgressViewsEnabled are disabled then always navigate to admin page
+    cy.url().should('include', '/administrator')
+  });
+
 });

@@ -183,7 +183,13 @@ aria-describedby=
       login() {
         this.createInProgress = true;
         this.$store.dispatch('signup', { isRootAccount: this.isRootAccount, ...this.loginFields }).then(() => {
-          this.handlePush({ name: 'MyProgressPage' });
+          if (!this.isProgressAndRankingEnabled()) {
+            this.handlePush({ name: 'AdminHomePage' });
+          } else {
+            const defaultHomePage = this.$store.getters.config.defaultLandingPage;
+            const pageName = defaultHomePage === 'progress' ? 'MyProgressPage' : 'AdminHomePage';
+            this.handlePush({ name: pageName });
+          }
         });
       },
       missingRequiredValues() {
@@ -191,6 +197,9 @@ aria-describedby=
       },
       loginPage() {
         this.handlePush({ name: 'Login' });
+      },
+      isProgressAndRankingEnabled() {
+        return this.$store.getters.config.rankingAndProgressViewsEnabled === true || this.$store.getters.config.rankingAndProgressViewsEnabled === 'true';
       },
     },
   };
