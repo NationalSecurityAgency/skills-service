@@ -131,14 +131,18 @@ limitations under the License.
       };
     },
     mounted() {
-      AccessService.getUserRoles(this.project.projectId, this.role)
-        .then((result) => {
-          this.table.options.busy = false;
-          this.data = result;
-          this.userIds = result.map(({ userIdForDisplay }) => userIdForDisplay);
-        });
+      this.loadData();
     },
     methods: {
+      loadData() {
+        this.table.options.busy = true;
+        AccessService.getUserRoles(this.project.projectId, this.role)
+          .then((result) => {
+            this.table.options.busy = false;
+            this.data = result;
+            this.userIds = result.map(({ userIdForDisplay }) => userIdForDisplay);
+          });
+      },
       userAdded(userRole) {
         this.data.push(userRole);
         this.userIds.push(userRole.userIdForDisplay);
@@ -167,12 +171,13 @@ limitations under the License.
       },
       addUserRole() {
         this.isSaving = true;
+        this.table.options.busy = true;
         const pkiAuthenticated = this.$store.getters.isPkiAuthenticated;
 
         AccessService.saveUserRole(this.project.projectId, this.selectedUser, this.role, pkiAuthenticated)
-          .then((userInfo) => {
-            this.userAdded(userInfo);
+          .then(() => {
             this.$emit('role-added', { userId: this.selectedUser.userId, role: this.role });
+            this.loadData();
           }).catch((e) => {
             if (e.response.data && e.response.data.errorCode && e.response.data.errorCode === 'UserNotFound') {
               this.errNotification.msg = e.response.data.explanation;

@@ -18,11 +18,15 @@ limitations under the License.
     <sub-page-header title="Security Settings"/>
 
     <metrics-card title="Root Users Management" :no-padding="true">
-      <role-manager id="add-root-user" data-cy="rootrm" :role="root.role" :user-type="root.userType" :role-description="root.roleDescription" />
+      <role-manager id="add-root-user" ref="rootUserRoleManager"
+                    @role-added="handleRootRoleChanged"
+                    @role-deleted="handleRootRoleChanged"
+                    data-cy="rootrm" :role="root.role" :user-type="root.userType" :role-description="root.roleDescription" />
     </metrics-card>
 
     <metrics-card title="Supervisor Users Management" :no-padding="true" class="mt-3">
-      <role-manager id="add-supervisor-user" data-cy="supervisorrm" :role="supervisor.role"
+      <role-manager id="add-supervisor-user" ref="supervisorRoleManager"
+                    data-cy="supervisorrm" :role="supervisor.role"
                     :user-type="supervisor.userType"
                     :role-description="supervisor.roleDescription"
                     @role-added="handleRoleAdded"
@@ -54,6 +58,9 @@ limitations under the License.
       };
     },
     methods: {
+      handleRootRoleChanged() {
+        this.$refs.supervisorRoleManager.loadData();
+      },
       handleRoleAdded(event) {
         if (this.$store.getters.userInfo
           && event.userId === this.$store.getters.userInfo.userId
