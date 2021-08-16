@@ -22,8 +22,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 import java.time.Duration
 import java.time.temporal.ChronoUnit
-import java.time.temporal.TemporalUnit
-import java.util.concurrent.TimeUnit
 
 @Configuration
 class CachingConfiguration implements WebMvcConfigurer{
@@ -62,8 +60,11 @@ class CachingConfiguration implements WebMvcConfigurer{
         registry.addResourceHandler("/static/clientPortal/fonts/**")
                 .addResourceLocations("classpath:/public/static/clientPortal/fonts/")
                 .setCacheControl(CacheControl.maxAge(MAX_AGE).cachePrivate().mustRevalidate())
-        registry.addResourceHandler("/static/**/*.html")
-                .addResourceLocations("classpath:/public/static/clientPortal/", "classpath:/public/static/")
+        registry.addResourceHandler("/static/clientPortal/*.html")
+                .addResourceLocations("classpath:/public/static/clientPortal/")
+                .setCacheControl(CacheControl.noStore())
+        registry.addResourceHandler("/*.html")
+                .addResourceLocations("classpath:/public/")
                 .setCacheControl(CacheControl.noStore())
 
     }
