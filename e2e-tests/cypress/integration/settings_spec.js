@@ -73,12 +73,20 @@ describe('Settings Tests', () => {
             [{ colIndex: 0,  value: '(skills@skills.org)' }],
         ], 5, true, null, false);
 
+        // must also be added to supervisor table
+        cy.validateTable(supervisorTableSelector, [
+            [{ colIndex: 0,  value: '(skills@skills.org)' }],
+        ], 5, true, null, false);
+
         // remove the other user now
         cy.get(`${rootUsrTableSelector} [data-cy="removeUserBtn"]`).eq(1).click();
         cy.contains('YES, Delete It').click();
         cy.validateTable(rootUsrTableSelector, [
             [{ colIndex: 0,  value: '(root@skills.org)' }],
         ], 5, true, null, false);
+
+        // make sure user was removed from supervisor table
+        cy.get(supervisorTableSelector).contains('There are no records to show');
     });
 
     it('Add Root User - forward slash character does not cause error', () => {
@@ -726,7 +734,6 @@ describe('Settings Tests', () => {
         cy.navToSettings();
         cy.contains('Email').click();
         cy.wait('@loadTemplateSettings');
-        cy.matchSnapshotImageForElement('[data-cy=emailTemplateSettings]');
 
         cy.get('[data-cy=htmlEmailHeader]').click().type("aaaaa");
         cy.get('[data-cy=ptHeaderTitle] span.text-danger').should('be.visible');
