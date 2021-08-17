@@ -81,6 +81,8 @@ class SkillApprovalSpecs extends DefaultIntSpec {
             assert tableResultPg1.data[index].userId == users[index]
             assert tableResultPg1.data[index].userIdForDisplay == getUserIdForDisplay(users[index])
             assert tableResultPg1.data[index].skillId == "skill1"
+            assert tableResultPg1.data[index].subjectId == subj.subjectId
+            assert tableResultPg1.data[index].projectId == proj.projectId
             assert tableResultPg1.data[index].skillName == "Test Skill 1"
             assert tableResultPg1.data[index].requestedOn == dates[index].time
             assert tableResultPg1.data[index].requestMsg == "Please approve this ${index}!"
@@ -94,10 +96,46 @@ class SkillApprovalSpecs extends DefaultIntSpec {
             assert tableResultPg2.data[index].userId == users[index+5]
             assert tableResultPg2.data[index].userIdForDisplay == getUserIdForDisplay(users[index+5])
             assert tableResultPg2.data[index].skillId == "skill1"
+            assert tableResultPg2.data[index].subjectId == subj.subjectId
+            assert tableResultPg2.data[index].projectId == proj.projectId
             assert tableResultPg2.data[index].skillName == "Test Skill 1"
             assert tableResultPg2.data[index].requestedOn == dates[index+5].time
             assert tableResultPg2.data[index].requestMsg == "Please approve this ${index+5}!"
         }
+    }
+
+    void "getApprovals - validate subject id"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].numPerformToCompletion = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        def subj1 = SkillsFactory.createSubject(1, 2)
+        def skills1 = SkillsFactory.createSkills(1, 1, 2)
+        skills1[0].pointIncrement = 200
+        skills1[0].numPerformToCompletion = 200
+        skills1[0].selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createSubject(subj1)
+        skillsService.createSkills(skills1)
+
+        List<String> users = getRandomUsers(7)
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users.first(), new Date(), "Please approve this 1!")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills1[0].skillId], users.first(), new Date(), "Please approve this 2!")
+
+        when:
+        def res = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
+
+        then:
+        res.data.size() == 2
+        res.data.find { it.skillId  == skills[0].skillId}.subjectId == subj.subjectId
+        res.data.find { it.skillId  == skills1[0].skillId}.subjectId == subj1.subjectId
     }
 
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })

@@ -396,9 +396,9 @@ describe('Self Report Skills Management Tests', () => {
 
         const tableSelector = '[data-cy="skillsReportApprovalTable"]';
         const expected = [
-            [{ colIndex: 0,  value: 'user3Good@skills.org ' }, { colIndex: 1,  value: '180' }],
-            [{ colIndex: 0,  value: 'user2Good@skills.org ' }, { colIndex: 1,  value: '220' }],
-            [{ colIndex: 0,  value: 'user1Good@skills.org ' }, { colIndex: 1,  value: '100' }],
+            [{ colIndex: 1,  value: 'user3Good@skills.org ' }, { colIndex: 0,  value: '180' }],
+            [{ colIndex: 1,  value: 'user2Good@skills.org ' }, { colIndex: 0,  value: '220' }],
+            [{ colIndex: 1,  value: 'user1Good@skills.org ' }, { colIndex: 0,  value: '100' }],
         ]
         cy.validateTable(tableSelector, expected);
     })
@@ -419,13 +419,13 @@ describe('Self Report Skills Management Tests', () => {
 
         const tableSelector = '[data-cy="skillsReportApprovalTable"]';
         const expected = [
-            [{ colIndex: 0,  value: 'user0Good@skills.org ' }, { colIndex: 2,  value: '2020-09-18 11:00' }],
-            [{ colIndex: 0,  value: 'user1Good@skills.org ' }, { colIndex: 2,  value: '2020-09-17 11:00' }],
-            [{ colIndex: 0,  value: 'user2Good@skills.org ' }, { colIndex: 2,  value: '2020-09-16 11:00' }],
-            [{ colIndex: 0,  value: 'user3Good@skills.org ' }, { colIndex: 2,  value: '2020-09-15 11:00' }],
-            [{ colIndex: 0,  value: 'user4Good@skills.org ' }, { colIndex: 2,  value: '2020-09-14 11:00' }],
-            [{ colIndex: 0,  value: 'user5Good@skills.org ' }, { colIndex: 2,  value: '2020-09-13 11:00' }],
-            [{ colIndex: 0,  value: 'user6Good@skills.org ' }, { colIndex: 2,  value: '2020-09-12 11:00' }],
+            [{ colIndex: 1,  value: 'user0Good@skills.org ' }, { colIndex: 2,  value: '2020-09-18 11:00' }],
+            [{ colIndex: 1,  value: 'user1Good@skills.org ' }, { colIndex: 2,  value: '2020-09-17 11:00' }],
+            [{ colIndex: 1,  value: 'user2Good@skills.org ' }, { colIndex: 2,  value: '2020-09-16 11:00' }],
+            [{ colIndex: 1,  value: 'user3Good@skills.org ' }, { colIndex: 2,  value: '2020-09-15 11:00' }],
+            [{ colIndex: 1,  value: 'user4Good@skills.org ' }, { colIndex: 2,  value: '2020-09-14 11:00' }],
+            [{ colIndex: 1,  value: 'user5Good@skills.org ' }, { colIndex: 2,  value: '2020-09-13 11:00' }],
+            [{ colIndex: 1,  value: 'user6Good@skills.org ' }, { colIndex: 2,  value: '2020-09-12 11:00' }],
         ]
         const expectedReversed = [...expected].reverse();
 
@@ -434,9 +434,9 @@ describe('Self Report Skills Management Tests', () => {
         cy.get(`${tableSelector} th`).contains('Requested On').click();
         cy.validateTable(tableSelector, expectedReversed);
 
-        cy.get(`${tableSelector} th`).contains('User Id').click();
+        cy.get(`${tableSelector} th`).contains('For User').click();
         cy.validateTable(tableSelector, expected);
-        cy.get(`${tableSelector} th`).contains('User Id').click();
+        cy.get(`${tableSelector} th`).contains('For User').click();
         cy.validateTable(tableSelector, expectedReversed);
     });
 
@@ -472,9 +472,9 @@ describe('Self Report Skills Management Tests', () => {
 
         const tableSelector = '[data-cy="skillsReportApprovalTable"]';
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'user0' }],
-            [{ colIndex: 0,  value: 'user1' }],
-            [{ colIndex: 0,  value: 'user2' }],
+            [{ colIndex: 1,  value: 'user0' }],
+            [{ colIndex: 1,  value: 'user1' }],
+            [{ colIndex: 1,  value: 'user2' }],
         ]);
 
         cy.get('[data-cy="approveBtn"]').should('be.disabled');
@@ -485,8 +485,8 @@ describe('Self Report Skills Management Tests', () => {
 
         cy.get('[data-cy="approveBtn"]').click();
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'user0' }],
-            [{ colIndex: 0,  value: 'user2' }],
+            [{ colIndex: 1,  value: 'user0' }],
+            [{ colIndex: 1,  value: 'user2' }],
         ]);
 
         cy.visit('/administrator/projects/proj1/users/user1/skillEvents');
@@ -511,9 +511,9 @@ describe('Self Report Skills Management Tests', () => {
 
         const tableSelector = '[data-cy="skillsReportApprovalTable"]';
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'user0' }],
-            [{ colIndex: 0,  value: 'user1' }],
-            [{ colIndex: 0,  value: 'user2' }],
+            [{ colIndex: 1,  value: 'user0' }],
+            [{ colIndex: 1,  value: 'user1' }],
+            [{ colIndex: 1,  value: 'user2' }],
         ]);
 
         cy.get('[data-cy="approveBtn"]').should('be.disabled');
@@ -530,8 +530,8 @@ describe('Self Report Skills Management Tests', () => {
         cy.wait('@reject')
 
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'user0' }],
-            [{ colIndex: 0,  value: 'user2' }],
+            [{ colIndex: 1,  value: 'user0' }],
+            [{ colIndex: 1,  value: 'user2' }],
         ]);
 
         cy.visit('/administrator/projects/proj1/users/user1/skillEvents');
@@ -609,8 +609,8 @@ describe('Self Report Skills Management Tests', () => {
         const tableSelector = '[data-cy="skillsReportApprovalTable"]';
 
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'user5' }],
-            [{ colIndex: 0,  value: 'user6' }],
+            [{ colIndex: 1,  value: 'user5' }],
+            [{ colIndex: 1,  value: 'user6' }],
         ]);
 
         cy.get('[data-cy="approveBtn"]').should('be.disabled');
@@ -655,8 +655,8 @@ describe('Self Report Skills Management Tests', () => {
         const tableSelector = '[data-cy="skillsReportApprovalTable"]';
 
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'user5' }],
-            [{ colIndex: 0,  value: 'user6' }],
+            [{ colIndex: 1,  value: 'user5' }],
+            [{ colIndex: 1,  value: 'user6' }],
         ]);
 
         cy.get('[data-cy="approveBtn"]').should('be.disabled');
@@ -685,6 +685,62 @@ describe('Self Report Skills Management Tests', () => {
         cy.get('[data-cy="rejectBtn"]').should('be.disabled');
     });
 
+    it('show skill details', () => {
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval', description: 'This is skill 1'  });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval', description: 'very cool skill 2'  });
+        cy.createSkill(1, 1, 3, { selfReportingType: 'Approval', description: 'last but not least' });
+        cy.reportSkill(1, 2, 'user6', '2020-09-11 11:00');
+        cy.reportSkill(1, 1, 'user5', '2020-09-12 11:00');
+        cy.reportSkill(1, 3, 'user4', '2020-09-13 11:00');
+
+        cy.visit('/administrator/projects/proj1/self-report');
+
+
+        cy.get('[data-cy="childRowDisplay_skill1"]').should('not.exist');
+        cy.get('[data-cy="childRowDisplay_skill2"]').should('not.exist');
+        cy.get('[data-cy="childRowDisplay_skill3"]').should('not.exist');
+
+        // open
+        cy.get('[data-cy="expandDetailsBtn_skill1"]').click();
+        cy.get('[data-cy="childRowDisplay_skill1"] [data-cy="skillOverviewDescription"]').contains('This is skill 1');
+        cy.get('[data-cy="childRowDisplay_skill2"]').should('not.exist');
+        cy.get('[data-cy="childRowDisplay_skill3"]').should('not.exist');
+
+        // open
+        cy.get('[data-cy="expandDetailsBtn_skill3"]').click();
+        cy.get('[data-cy="childRowDisplay_skill1"] [data-cy="skillOverviewDescription"]').contains('This is skill 1');
+        cy.get('[data-cy="childRowDisplay_skill2"]').should('not.exist');
+        cy.get('[data-cy="childRowDisplay_skill3"] [data-cy="skillOverviewDescription"]').contains('last but not least');
+
+        // close
+        cy.get('[data-cy="expandDetailsBtn_skill1"]').click();
+        cy.get('[data-cy="childRowDisplay_skill1"]').should('not.exist');
+        cy.get('[data-cy="childRowDisplay_skill2"]').should('not.exist');
+        cy.get('[data-cy="childRowDisplay_skill3"] [data-cy="skillOverviewDescription"]').contains('last but not least');
+
+        // close
+        cy.get('[data-cy="expandDetailsBtn_skill3"]').click();
+        cy.get('[data-cy="childRowDisplay_skill1"]').should('not.exist');
+        cy.get('[data-cy="childRowDisplay_skill2"]').should('not.exist');
+        cy.get('[data-cy="childRowDisplay_skill3"]').should('not.exist');
+    });
+
+    it('approval request skill should be a link to skill details', () => {
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval', description: 'This is skill 1'  });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval', description: 'very cool skill 2'  });
+        cy.createSkill(1, 1, 3, { selfReportingType: 'Approval', description: 'last but not least' });
+        cy.reportSkill(1, 2, 'user6', '2020-09-11 11:00');
+        cy.reportSkill(1, 1, 'user5', '2020-09-12 11:00');
+        cy.reportSkill(1, 3, 'user4', '2020-09-13 11:00');
+
+        cy.visit('/administrator/projects/proj1/self-report');
+
+        cy.get('[data-cy="viewSkillLink_skill1"]').should("have.attr", "href", "/administrator/projects/proj1/subjects/subj1/skills/skill1/");
+        cy.get('[data-cy="viewSkillLink_skill2"]').should("have.attr", "href", "/administrator/projects/proj1/subjects/subj1/skills/skill2/");
+        cy.get('[data-cy="viewSkillLink_skill3"]').should("have.attr", "href", "/administrator/projects/proj1/subjects/subj1/skills/skill3/");
+    });
+
+
     it('refresh button should pull from server', () => {
         cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
         cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
@@ -695,15 +751,15 @@ describe('Self Report Skills Management Tests', () => {
 
         const tableSelector = '[data-cy="skillsReportApprovalTable"]';
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'user1' }],
+            [{ colIndex: 1,  value: 'user1' }],
         ]);
 
         cy.reportSkill(1, 2, 'user2', '2020-09-11 11:00');
 
         cy.get('[data-cy="syncApprovalsBtn"]').click();
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'user1' }],
-            [{ colIndex: 0,  value: 'user2' }],
+            [{ colIndex: 1,  value: 'user1' }],
+            [{ colIndex: 1,  value: 'user2' }],
         ]);
     });
 
