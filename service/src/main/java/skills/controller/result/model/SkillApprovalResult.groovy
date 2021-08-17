@@ -20,7 +20,9 @@ class SkillApprovalResult {
     Integer id
     String userId
     String userIdForDisplay
+    String projectId
     String skillId
+    String subjectId
     String skillName
     Long requestedOn
     String requestMsg

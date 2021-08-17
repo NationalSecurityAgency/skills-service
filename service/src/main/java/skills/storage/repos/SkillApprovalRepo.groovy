@@ -33,6 +33,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
         String getUserId()
         String getUserIdForDisplay()
         String getSkillId()
+        String getSubjectId()
         String getSkillName()
         Date getRequestedOn()
         String getRequestMsg()
@@ -42,14 +43,19 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
     @Query('''SELECT
         s.id as approvalId,
         sd.skillId as skillId,
+        subjectDef.skillId as subjectId,
         sd.name as skillName,
         s.userId as userId,
         uAttrs.userIdForDisplay as userIdForDisplay,
         s.requestedOn as requestedOn,
         s.requestMsg as requestMsg,
         sd.pointIncrement as points
-        from SkillApproval s, SkillDef sd, UserAttrs uAttrs
+        from SkillApproval s, SkillDef sd, UserAttrs uAttrs, SkillDef subjectDef, SkillRelDef srd 
         where 
+            subjectDef = srd.parent and 
+            sd = srd.child and
+            srd.type = 'RuleSetDefinition' and
+            subjectDef.type = 'Subject' and
             s.projectId = ?1 and 
             s.skillRefId = sd.id and 
             s.userId = uAttrs.userId and

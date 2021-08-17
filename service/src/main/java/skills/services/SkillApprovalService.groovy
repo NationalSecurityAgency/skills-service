@@ -78,6 +78,8 @@ class SkillApprovalService {
                     id: simpleSkillApproval.getApprovalId(),
                     userId: simpleSkillApproval.getUserId(),
                     userIdForDisplay: simpleSkillApproval.getUserIdForDisplay(),
+                    projectId: projectId,
+                    subjectId: simpleSkillApproval.getSubjectId(),
                     skillId: simpleSkillApproval.getSkillId(),
                     skillName: simpleSkillApproval.getSkillName(),
                     requestedOn: simpleSkillApproval.getRequestedOn().time,

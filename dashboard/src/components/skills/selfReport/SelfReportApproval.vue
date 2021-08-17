@@ -40,30 +40,61 @@ limitations under the License.
                     data-cy="skillsReportApprovalTable">
 
       <template v-slot:cell(userId)="data">
-        <b-form-checkbox
-          :id="`${data.item.userId}-${data.item.skillId}`"
-          v-model="data.item.selected"
-          :name="`checkbox--${data.item.skillId}`"
-          :value="true"
-          :unchecked-value="false"
-          :inline="true"
-          v-on:input="updateActionsDisableStatus"
-          :data-cy="`approvalSelect_${data.item.userId}-${data.item.skillId}`"
-        >{{ data.item.userIdForDisplay }}
-        </b-form-checkbox>
+        {{ data.item.userIdForDisplay }}
       </template>
 
       <template v-slot:cell(request)="data">
-        <div>{{ data.item.skillName }} <b-badge>+ {{ data.item.points }} Points</b-badge></div>
+        <div>
+          <b-form-checkbox
+            :id="`${data.item.userId}-${data.item.skillId}`"
+            v-model="data.item.selected"
+            :name="`checkbox--${data.item.skillId}`"
+            :value="true"
+            :unchecked-value="false"
+            :inline="true"
+            v-on:input="updateActionsDisableStatus"
+            :data-cy="`approvalSelect_${data.item.userId}-${data.item.skillId}`"
+          >
+              <span>{{ data.item.skillName }}</span>
+            <b-badge class="ml-2">+ {{ data.item.points }} Points</b-badge>
+          </b-form-checkbox>
+
+        </div>
         <div class="small text-muted">ID: {{ data.item.skillId }}</div>
         <div class="mt-2" style="font-size: 0.9rem;"><span class="text-muted">Note:</span>
           <span v-if="data.item.requestMsg && data.item.requestMsg.length > 0"> {{ data.item.requestMsg }}</span>
           <span v-else class="text-muted"> Not supplied</span>
         </div>
+
+        <b-button size="sm" variant="outline-info"
+                  class="mr-2 py-0 px-1 mt-1"
+                  @click="data.toggleDetails"
+                  :aria-label="`Expand details for ${data.item.name}`"
+                  :data-cy="`expandDetailsBtn_${data.item.skillId}`">
+          <i v-if="data.detailsShowing" class="fa fa-minus-square" />
+          <i v-else class="fa fa-plus-square" />
+          Skill Details
+        </b-button>
+
+        <b-button size="sm" variant="outline-info"
+                  class="py-0 px-1 mt-1"
+                  :data-cy="`viewSkillLink_${data.item.skillId}`"
+                  :to="{ name:'SkillOverview',
+                                  params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
+                  :aria-label="`View skill ${data.item.skillName}  via link`"
+                  target="_blank">
+          View Skill <i class="fas fa-external-link-alt" style="font-size: 0.7rem;"></i>
+        </b-button>
       </template>
 
       <template v-slot:cell(requestedOn)="data">
         <date-cell :value="data.value" />
+      </template>
+
+      <template #row-details="row">
+        <child-row-skills-display :project-id="row.item.projectId" :subject-id="row.item.subjectId" v-skills-onMount="'ExpandSkillDetailsSkillsPage'"
+                               :parent-skill-id="row.item.skillId" :refresh-counter="row.item.refreshCounter"
+                               class="mr-3 ml-5 mb-3"></child-row-skills-display>
       </template>
 
     </skills-b-table>
@@ -111,10 +142,11 @@ limitations under the License.
   import SkillsBTable from '../../utils/table/SkillsBTable';
   import DateCell from '../../utils/table/DateCell';
   import SelfReportService from './SelfReportService';
+  import ChildRowSkillsDisplay from '../ChildRowSkillsDisplay';
 
   export default {
     name: 'SelfReportApproval',
-    components: { DateCell, SkillsBTable },
+    components: { ChildRowSkillsDisplay, DateCell, SkillsBTable },
     data() {
       return {
         projectId: this.$route.params.projectId,
@@ -135,14 +167,14 @@ limitations under the License.
             emptyText: 'Nothing to approve',
             fields: [
               {
-                key: 'userId',
-                label: 'User Id',
-                sortable: true,
-              },
-              {
                 key: 'request',
                 label: 'Requested',
                 sortable: false,
+              },
+              {
+                key: 'userId',
+                label: 'For User',
+                sortable: true,
               },
               {
                 key: 'requestedOn',
