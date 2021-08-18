@@ -57,6 +57,7 @@ describe('Settings Tests', () => {
         cy.contains('Add').first().click();
         cy.wait('@addRoot');
 
+        cy.get(`${rootUsrTableSelector} th`).contains('Root User').click();
         cy.validateTable(rootUsrTableSelector, [
             [{ colIndex: 0,  value: '(root@skills.org)' }],
             [{ colIndex: 0,  value: '(skills@skills.org)' }],
@@ -74,6 +75,7 @@ describe('Settings Tests', () => {
         ], 5, true, null, false);
 
         // must also be added to supervisor table
+        cy.get(`${supervisorTableSelector} th`).contains('Supervisor User').click();
         cy.validateTable(supervisorTableSelector, [
             [{ colIndex: 0,  value: '(skills@skills.org)' }],
         ], 5, true, null, false);
@@ -147,6 +149,7 @@ describe('Settings Tests', () => {
         cy.contains('Add').first().click();
         cy.wait('@addRoot');
 
+        cy.get(`${rootUsrTableSelector} th`).contains('Root User').click();
         cy.validateTable(rootUsrTableSelector, [
             [{ colIndex: 0,  value: '(root@skills.org)' }],
             [{ colIndex: 0,  value: '(skills@skills.org)' }],
