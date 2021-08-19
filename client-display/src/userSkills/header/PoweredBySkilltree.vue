@@ -23,7 +23,8 @@ limitations under the License.
       <div class="poweredByLabel pb-2 skills-theme-brand"
            :class="{'animate__animated':animatePowerByLabel, 'animate__backInUp' : animatePowerByLabel}">powered by
       </div>
-      <skill-tree-svg-icon class="float-right" :is-hovering="isHovering" :logo-fill="logoFillThemeColor"/>
+      <skill-tree-svg-icon
+              class="float-right skill-tree-svg-icon" :is-hovering="isHovering" :logo-fill="logoFillThemeColor"/>
     </a>
   </div>
 </template>
@@ -80,9 +81,8 @@ limitations under the License.
   bottom: 0.8rem;
 }
 
-.poweredByContainer .logo {
-  height: 2.2rem !important;
-  float: right;
+.poweredByContainer .skill-tree-svg-icon {
+  width: 5rem;
 }
 
 </style>
