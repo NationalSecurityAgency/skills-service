@@ -82,7 +82,7 @@ limitations under the License.
 }
 
 .poweredByContainer .skill-tree-svg-icon {
-  width: 5rem;
+  width: 4.5rem;
 }
 
 </style>
