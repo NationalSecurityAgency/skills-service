@@ -393,10 +393,10 @@ class UserSkillsController {
 
     @RequestMapping(value = "/projects/{projectId}/rejections/{id}", method = RequestMethod.DELETE, produces = "application/json")
     @ResponseBody
-    public RequestResult getRankingDistributionBySubject(@PathVariable("projectId") String projectId,
+    public RequestResult removeRejectionFromView(@PathVariable("projectId") String projectId,
                                                                      @PathVariable("id") Integer approvalId) {
         String userId = userInfoService.getCurrentUserId();
-        selfReportingService.removeRejection(projectId, userId, approvalId);
+        selfReportingService.removeRejectionFromView(projectId, userId, approvalId);
 
         return RequestResult.success();
     }

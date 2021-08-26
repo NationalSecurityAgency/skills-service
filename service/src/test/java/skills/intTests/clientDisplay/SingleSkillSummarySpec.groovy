@@ -27,6 +27,7 @@ import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.SkillDefRepo
+import spock.lang.IgnoreRest
 
 class SingleSkillSummarySpec extends DefaultIntSpec {
 
@@ -261,7 +262,7 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         !summary5.selfReporting.rejectionMsg
     }
 
-    def "user can delete approval rejection"() {
+    def "user can remove approval rejection from their view"() {
         def proj1 = SkillsFactory.createProject(1)
         def subj = SkillsFactory.createSubject(1, 1)
         List<Map> skills = SkillsFactory.createSkills(5, 1, 1, 100)
@@ -284,16 +285,24 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
 
         when:
         skillsService.removeApproval(proj1.projectId,  approvalsBefore.find { getSkillId(it.skillRefId) == skills.get(3).skillId }.id)
-        List<SkillApproval> approvalsAfterFirstDelete = skillApprovalRepo.findAll()
+        List<SkillApproval> approvalsAfterFirstRemoval= skillApprovalRepo.findAll()
 
         skillsService.removeApproval(proj1.projectId,  approvalsBefore.find { getSkillId(it.skillRefId) == skills.get(2).skillId }.id)
         List<SkillApproval> approvalsAfter = skillApprovalRepo.findAll()
 
         then:
         approvalsBefore.size() == 2
-        approvalsAfterFirstDelete.size() == 1
-        getSkillId(approvalsAfterFirstDelete.get(0).skillRefId) == skills.get(2).skillId
-        !approvalsAfter
+        approvalsAfterFirstRemoval.size() == 2
+        approvalsAfter.size() == 2
+
+        !approvalsBefore.find({ getSkillId(it.skillRefId) == skills.get(3).skillId }).rejectionAcknowledgedOn
+        !approvalsBefore.find({ getSkillId(it.skillRefId) == skills.get(2).skillId }).rejectionAcknowledgedOn
+
+        approvalsAfterFirstRemoval.find({ getSkillId(it.skillRefId) == skills.get(3).skillId }).rejectionAcknowledgedOn
+        !approvalsAfterFirstRemoval.find({ getSkillId(it.skillRefId) == skills.get(2).skillId }).rejectionAcknowledgedOn
+
+        approvalsAfter.find({ getSkillId(it.skillRefId) == skills.get(3).skillId }).rejectionAcknowledgedOn
+        approvalsAfter.find({ getSkillId(it.skillRefId) == skills.get(2).skillId }).rejectionAcknowledgedOn
     }
 
     def "user can only delete his/her own approval rejection"() {

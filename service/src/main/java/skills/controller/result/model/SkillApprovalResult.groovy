@@ -18,13 +18,23 @@ package skills.controller.result.model
 class SkillApprovalResult {
 
     Integer id
+
     String userId
     String userIdForDisplay
+
+    String approverUserId
+    String approverUserIdForDisplay
+
     String projectId
     String skillId
     String subjectId
     String skillName
     Long requestedOn
+
+    Long approverActionTakenOn
     String requestMsg
+
+    Long rejectedOn
+    String rejectionMsg
     Integer points
 }

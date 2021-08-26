@@ -93,20 +93,7 @@ class SelfReportingService {
                     skillApplied: false,
                     explanation: "This skill was already submitted for approval and is still pending approval"
             )
-        } else if (existing && existing.rejectedOn) {
-            // override rejection with new submission
-            existing.rejectedOn = null
-            existing.rejectionMsg = null
-            existing.requestedOn = performedOn
-            existing.requestMsg = requestMsg
-            skillApprovalRepo.save(existing)
-            sentNotifications(skillDefinition, userId, requestMsg)
-
-            res = new SkillEventsService.AppliedCheckRes(
-                    skillApplied: false,
-                    explanation: "Skill was submitted for approval"
-            )
-        } else {
+        }  else {
             SkillApproval skillApproval = new SkillApproval(
                     projectId: skillDefinition.projectId,
                     userId: userId,
@@ -155,7 +142,7 @@ class SelfReportingService {
         notifier.sendNotification(request)
     }
 
-    void removeRejection(String projectId, String userId, Integer approvalId) {
+    void removeRejectionFromView(String projectId, String userId, Integer approvalId) {
 
         Optional<SkillApproval> existing = skillApprovalRepo.findById(approvalId)
         if (existing.isPresent()) {
@@ -170,7 +157,9 @@ class SelfReportingService {
                 throw new SkillException("SkillApproval with id [${approvalId}] was not rejected, user can only remove rejected SkillApproval record! projectId=[${projectId}], userId=[${userId}], approvalId=[${approvalId}]", projectId);
             }
 
-            skillApprovalRepo.delete(approval);
+            approval.rejectionAcknowledgedOn = new Date()
+
+            skillApprovalRepo.save(approval);
         } else {
             log.warn("Failed to find existing approval with id of [${approvalId}]. Could be a bug OR could be that it was removed by another admin or in a different tab:" +
                     " projectId=[${projectId}], userId=[${userId}], approvalId=[${approvalId}]")

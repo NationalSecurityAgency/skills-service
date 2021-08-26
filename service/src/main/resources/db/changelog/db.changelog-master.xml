@@ -1363,4 +1363,24 @@
         </insert>
     </changeSet>
 
+    <changeSet id="13" author="skills team" context="migration13">
+        <dropUniqueConstraint
+                constraintName="skill_approval_unique_row"
+                tableName="skill_approval" />
+
+        <addColumn tableName="skill_approval">
+            <column name="approver_action_taken_on" type="datetime"/>
+        </addColumn>
+        <addColumn tableName="skill_approval">
+            <column name="rejection_acknowledged_on" type="datetime" />
+        </addColumn>
+        <addColumn tableName="skill_approval">
+            <column name="approver_user_id" type="varchar(255)" />
+        </addColumn>
+        <createIndex indexName="index_skill_approval_approver_action_taken_on"
+                     tableName="skill_approval">
+            <column name="approver_action_taken_on" type="datetime"/>
+        </createIndex>
+    </changeSet>
+
 </databaseChangeLog>

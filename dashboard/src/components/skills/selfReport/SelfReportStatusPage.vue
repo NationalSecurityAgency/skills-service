@@ -22,7 +22,10 @@ limitations under the License.
       <div v-if="showEmailServiceWarning" class="alert alert-warning mt-2" data-cy="selfReport_emailServiceWarning">
         <i class="fa fa-exclamation-triangle" aria-hidden="true"/> Please note that email notifications are currently disabled. Email configuration has not been performed on this instance of SkillTree. Please contact the root administrator.
       </div>
-      <self-report-approval  v-if="hasSkillsWithApprovals()" class="mt-3"/>
+      <div v-if="hasSkillsWithApprovals()">
+        <self-report-approval class="mt-3" @approval-action="handleApprovalAction"/>
+        <self-report-approval-history ref="selfReportApprovalHistory" class="mt-3"/>
+      </div>
       <no-content2 v-else title="No Skills Require Approval" data-cy="noApprovalTableMsg"
                    message="Currently there are no skills that require approval. Self Reporting type of 'Approval' can be configured when creating or editing a skill."
                    class="no-skills-msg"/>
@@ -38,10 +41,12 @@ limitations under the License.
   import SubPageHeader from '../../utils/pages/SubPageHeader';
   import SelfReportInfoCards from './SelfReportInfoCards';
   import SelfReportApproval from './SelfReportApproval';
+  import SelfReportApprovalHistory from './SelfReportApprovalHistory';
 
   export default {
     name: 'SelfReportStatusPage',
     components: {
+      SelfReportApprovalHistory,
       NoContent2,
       SkillsSpinner,
       SelfReportApproval,
@@ -60,6 +65,9 @@ limitations under the License.
       this.loadData();
     },
     methods: {
+      handleApprovalAction() {
+        this.$refs.selfReportApprovalHistory.loadApprovalsHistory();
+      },
       loadData() {
         this.loading = true;
         SelfReportService.getSelfReportStats(this.projectId)

@@ -458,25 +458,45 @@ Always yours, <br/> -SkillTree Bot
 
         Date date = new Date() - 60
         when:
+        def approvalsEndpointRes0 = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
         def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date, "Please approve this!")
+        def approvalsEndpointRes1 = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
         def res1 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date, "Please approve this!")
+        def approvalsEndpointRes2 = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
         def res2 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user1, date, "Please approve this!")
+        def approvalsEndpointRes3 = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
 
         then:
+        approvalsEndpointRes0.count == 0
+        !approvalsEndpointRes0.data
+
         !res.body.skillApplied
         res.body.pointsEarned == 0
         res.body.explanation == "Skill was submitted for approval"
+
+        approvalsEndpointRes1.count == 1
+        approvalsEndpointRes1.data.size() == 1
+        approvalsEndpointRes1.data.get(0).userId == user
 
         !res1.body.skillApplied
         res1.body.pointsEarned == 0
         res1.body.explanation == "This skill was already submitted for approval and is still pending approval"
 
+        approvalsEndpointRes2.count == 1
+        approvalsEndpointRes2.data.size() == 1
+        approvalsEndpointRes2.data.get(0).userId == user
+
         !res2.body.skillApplied
         res2.body.pointsEarned == 0
         res2.body.explanation == "Skill was submitted for approval"
+
+        approvalsEndpointRes3.count == 2
+        approvalsEndpointRes3.data.size() == 2
+        approvalsEndpointRes3.data.get(0).userId == user1
+        approvalsEndpointRes3.data.get(1).userId == user
     }
 
-    def "ability to override submission for a rejected approval"() {
+    def "ability to submit again for a rejected approval"() {
         String user = "skills@skills.org"
 
         def proj = SkillsFactory.createProject()

@@ -408,7 +408,7 @@ class SkillsLoader {
     @Profile
     private SelfReportingInfo loadSelfReporting(String userId, SkillDefWithExtra skillDef){
         boolean enabled = skillDef.selfReportingType != null
-        SkillApproval skillApproval = skillApprovalRepo.findByUserIdAndProjectIdAndSkillRefId(userId, skillDef.projectId, skillDef.id)
+        SkillApproval skillApproval = skillApprovalRepo.findByUserIdAndProjectIdAndSkillRefIdAndRejectionAcknowledgedOnIsNull(userId, skillDef.projectId, skillDef.id)
 
         SelfReportingInfo selfReportingInfo = new SelfReportingInfo(
                 approvalId: skillApproval?.getId(),

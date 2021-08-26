@@ -23,14 +23,12 @@ import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.result.model.LabelCountItem
-import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.SkillApprovalResult
 import skills.controller.result.model.TableResult
 import skills.notify.EmailNotifier
 import skills.notify.Notifier
 import skills.services.events.SkillEventResult
 import skills.services.events.SkillEventsService
-import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.storage.model.*
 import skills.storage.repos.ProjDefRepo
@@ -72,8 +70,25 @@ class SkillApprovalService {
     FeatureService featureService
 
     TableResult getApprovals(String projectId, PageRequest pageRequest) {
-        List<SkillApprovalRepo.SimpleSkillApproval> approvalsFromDB = skillApprovalRepo.findToApproveByProjectIdAndNotRejected(projectId, pageRequest)
-         List<SkillApprovalResult> approvals = approvalsFromDB.collect { SkillApprovalRepo.SimpleSkillApproval simpleSkillApproval ->
+        List<SkillApprovalRepo.SimpleSkillApproval> approvalsFromDB = skillApprovalRepo.findToApproveByProjectIdAndNotRejectedOrApproved(projectId, pageRequest)
+        return buildApprovalsResult(projectId, pageRequest, {
+            skillApprovalRepo.findToApproveByProjectIdAndNotRejectedOrApproved(projectId, pageRequest)
+        }, {
+            skillApprovalRepo.countByProjectIdAndApproverUserIdIsNull(projectId)
+        })
+    }
+
+    TableResult getApprovalsHistory(String projectId, String skillNameFilter, String userIdFilter, String approverUserIdFilter, PageRequest pageRequest) {
+        return buildApprovalsResult(projectId, pageRequest, {
+            skillApprovalRepo.findApprovalsHistory(projectId, skillNameFilter, userIdFilter, approverUserIdFilter, pageRequest)
+        }, {
+            skillApprovalRepo.countApprovalsHistory(projectId, skillNameFilter, userIdFilter, approverUserIdFilter)
+        })
+    }
+
+    private TableResult buildApprovalsResult(String projectId, PageRequest pageRequest, Closure<List<SkillApprovalRepo.SimpleSkillApproval>> getData, Closure<Integer> getCount) {
+        List<SkillApprovalRepo.SimpleSkillApproval> approvalsFromDB = getData.call()
+        List<SkillApprovalResult> approvals = approvalsFromDB.collect { SkillApprovalRepo.SimpleSkillApproval simpleSkillApproval ->
             new SkillApprovalResult(
                     id: simpleSkillApproval.getApprovalId(),
                     userId: simpleSkillApproval.getUserId(),
@@ -83,16 +98,21 @@ class SkillApprovalService {
                     skillId: simpleSkillApproval.getSkillId(),
                     skillName: simpleSkillApproval.getSkillName(),
                     requestedOn: simpleSkillApproval.getRequestedOn().time,
+                    approverActionTakenOn: simpleSkillApproval.getApproverActionTakenOn()?.time,
+                    rejectedOn: simpleSkillApproval.getRejectedOn()?.time,
                     requestMsg: simpleSkillApproval.getRequestMsg(),
+                    rejectionMsg: simpleSkillApproval.getRejectionMsg(),
                     points: simpleSkillApproval.getPoints(),
+                    approverUserId: simpleSkillApproval.getApproverUserId(),
+                    approverUserIdForDisplay: simpleSkillApproval.getApproverUserIdForDisplay(),
             )
         }
 
         Integer count = approvals.size()
         Integer totalCount = approvals.size()
         if (totalCount >= pageRequest.pageSize || pageRequest.pageSize > 1) {
-            totalCount = skillApprovalRepo.countByProjectIdAndRejectedOnIsNull(projectId)
-            // alwasy the same since filter is never provided
+            totalCount = getCount.call()
+            // always the same since filter is never provided
             count = totalCount
         }
 
@@ -119,7 +139,9 @@ class SkillApprovalService {
                 log.debug("Approval for ${it} yielded:\n${res}")
             }
 
-            skillApprovalRepo.delete(it)
+            it.approverActionTakenOn = new Date()
+            it.approverUserId = userInfoService.currentUser.username
+            skillApprovalRepo.save(it)
 
             // send email
             sentNotifications(it, skillDef, true)
@@ -131,8 +153,11 @@ class SkillApprovalService {
         toReject.each {
             validateProjId(it, projectId)
 
+            Date now = new Date()
             it.rejectionMsg = rejectionMsg
-            it.rejectedOn = new Date()
+            it.rejectedOn = now
+            it.approverActionTakenOn = now
+            it.approverUserId = userInfoService.currentUser.username
 
             skillApprovalRepo.save(it)
 
