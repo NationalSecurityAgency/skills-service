@@ -40,7 +40,7 @@ limitations under the License.
     <div class="row pl-3 mb-4">
       <div class="col">
         <b-button variant="outline-success" @click="loadApprovalsHistory" data-cy="selfReportApprovalHistory-filterBtn"><i class="fa fa-filter"/> Filter</b-button>
-        <b-button variant="outline-warning" @click="reset" class="ml-1" data-cy="selfReportApprovalHistory-resetBtn"><i class="fa fa-times"/> Reset</b-button>
+        <b-button variant="outline-info" @click="reset" class="ml-1" data-cy="selfReportApprovalHistory-resetBtn"><i class="fa fa-times"/> Reset</b-button>
       </div>
     </div>
 
@@ -78,7 +78,7 @@ limitations under the License.
           </router-link>
           <b-badge class="ml-2">+ {{ data.item.points }} Points</b-badge>
         </div>
-        <div class="text-secondary">by</div>
+        <div class="text-primary">by</div>
         <div class="font-italic"><span v-if="data.item.userIdHtml" v-html="data.item.userIdHtml"></span><span v-else>{{ data.item.userIdForDisplay }}</span></div>
         <div v-if="data.item.requestMsg"><span class="text-secondary">Request Note:</span> {{ data.item.requestMsg }}</div>
       </template>
@@ -93,9 +93,9 @@ limitations under the License.
       <template v-slot:cell(rejectedOn)="data">
         <div v-if="data.item.rejectedOn"><b-badge variant="danger"><i class="fas fa-thumbs-down"></i> <span class="text-uppercase">Rejected</span></b-badge></div>
         <div v-else><b-badge variant="success"><i class="fas fa-thumbs-up"></i> <span class="text-uppercase">Approved</span></b-badge></div>
-        <div class="text-secondary">by</div>
+        <div class="text-primary">by</div>
         <div class="font-italic"><span v-if="data.item.approverUserIdHtml" v-html="data.item.approverUserIdHtml"></span><span v-else>{{ data.item.approverUserIdForDisplay }}</span></div>
-        <div v-if="data.item.rejectionMsg"><span class="text-secondary">Explanation:</span> {{ data.item.rejectionMsg }}</div>
+        <div v-if="data.item.rejectionMsg"><span class="text-primary">Explanation:</span> {{ data.item.rejectionMsg }}</div>
       </template>
 
     </skills-b-table>

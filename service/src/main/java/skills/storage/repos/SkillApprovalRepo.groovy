@@ -136,7 +136,14 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
     SkillApproval findByUserIdProjectIdAndSkillId(String userId, String projectId, String skillId)
 
     @Nullable
-    SkillApproval findByUserIdAndProjectIdAndSkillRefIdAndRejectionAcknowledgedOnIsNull(String userId, String projectId, Integer skillRefId)
+    @Query('''select s 
+        from SkillApproval s
+        where s.userId = ?1 and s.projectId = ?2 and s.skillRefId = ?3 and 
+            (
+                s.approverActionTakenOn is null or 
+                (s.rejectionAcknowledgedOn is null and s.rejectedOn is not null)
+            )''')
+    List<SkillApproval> findApprovalForSkillsDisplay(String userId, String projectId, Integer skillRefId, Pageable pageable)
 
     interface SkillApprovalPlusSkillId {
         SkillApproval getSkillApproval()
@@ -152,9 +159,12 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             s.projectId = ?2 and
             subject.skillId = ?3 and
             srd.type = 'RuleSetDefinition' and
-            s.skillRefId = sd.id and 
-            s.rejectionAcknowledgedOn is null''')
-    List<SkillApprovalPlusSkillId> findSkillApprovalsByProjectIdAndSubjectId(String userId, String projectId, String subjectId)
+            s.skillRefId = sd.id and
+            (
+                s.approverActionTakenOn is null or 
+                (s.rejectionAcknowledgedOn is null and s.rejectedOn is not null)
+            )''')
+    List<SkillApprovalPlusSkillId> findsApprovalWithSkillIdForSkillsDisplay(String userId, String projectId, String subjectId)
 
     interface SkillReportingTypeAndCount {
         SkillDef.SelfReportingType getType()

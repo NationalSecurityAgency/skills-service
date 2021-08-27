@@ -226,12 +226,6 @@ describe('Accessibility Tests', () => {
     cy.customA11y();
     cy.get('[data-cy=closeBadgeButton]').click();
 
-    // --- Self Report Page ----
-    cy.get('[data-cy="nav-Self Report"]').click();
-    cy.get('[data-cy="skillsReportApprovalTable"] tbody tr').should('have.length', 3);
-    cy.customLighthouse();
-    cy.customA11y();
-
     cy.get('[data-cy="selectPageOfApprovalsBtn"]').click();
     cy.get('[data-cy="rejectBtn"]').click();
     cy.get('[data-cy="rejectionTitle"]').contains('This will permanently reject user\'s request(s) to get points')
@@ -601,5 +595,56 @@ describe('Accessibility Tests', () => {
   });
 
 
+  it.only('self report admin page', () => {
+    Cypress.Commands.add("rejectRequest", (requestNum = 0, rejectionMsg = 'Skill was rejected') => {
+      cy.request('/admin/projects/proj1/approvals?limit=10&ascending=true&page=1&orderBy=userId')
+          .then((response) => {
+            cy.request('POST', '/admin/projects/proj1/approvals/reject', {
+              skillApprovalIds: [response.body.data[requestNum].id],
+              rejectionMessage: rejectionMsg,
+            });
+          });
+    });
+    Cypress.Commands.add("approveAllRequests", () => {
+      cy.request('/admin/projects/proj1/approvals?limit=10&ascending=true&page=1&orderBy=userId')
+          .then((response) => {
+            response.body.data.forEach((item) => {
+              cy.wait(200); // that way sort works properly
+              cy.request('POST', '/admin/projects/proj1/approvals/approve', {
+                skillApprovalIds: [item.id],
+              });
+            })
+          });
+    });
+
+    cy.createProject(1);
+    cy.createSubject(1, 1)
+    cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
+    cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
+    cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
+    cy.reportSkill(1, 2, 'user6', '2020-09-11 11:00')
+    cy.reportSkill(1, 2, 'user5', '2020-09-12 11:00')
+    cy.reportSkill(1, 2, 'user4', '2020-09-13 11:00')
+    cy.approveAllRequests();
+    cy.reportSkill(1, 2, 'user2', '2020-09-16 11:00')
+    cy.rejectRequest(0)
+
+    cy.reportSkill(1, 3, 'user1', '2020-09-17 11:00')
+    cy.reportSkill(1, 1, 'user0', '2020-09-18 11:00')
+    cy.approveAllRequests();
+
+    cy.reportSkill(1, 2, 'user3', '2020-09-14 11:00')
+    cy.rejectRequest(0)
+
+    cy.reportSkill(1, 2, 'user8', '2020-09-14 11:00')
+    cy.reportSkill(1, 2, 'user9', '2020-09-14 11:00')
+
+
+    cy.visit('/administrator/projects/proj1/self-report');
+    cy.injectAxe()
+
+    cy.customLighthouse();
+    cy.customA11y();
+  })
 
 });

@@ -20,9 +20,11 @@ import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.SerializationUtils
-import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillExceptionBuilder
@@ -408,7 +410,9 @@ class SkillsLoader {
     @Profile
     private SelfReportingInfo loadSelfReporting(String userId, SkillDefWithExtra skillDef){
         boolean enabled = skillDef.selfReportingType != null
-        SkillApproval skillApproval = skillApprovalRepo.findByUserIdAndProjectIdAndSkillRefIdAndRejectionAcknowledgedOnIsNull(userId, skillDef.projectId, skillDef.id)
+        Pageable oneRowPlease = PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "requestedOn"))
+        List<SkillApproval> skillApprovals = skillApprovalRepo.findApprovalForSkillsDisplay(userId, skillDef.projectId, skillDef.id, oneRowPlease )
+        SkillApproval skillApproval = skillApprovals?.size() > 0 ? skillApprovals.first() : null
 
         SelfReportingInfo selfReportingInfo = new SelfReportingInfo(
                 approvalId: skillApproval?.getId(),
@@ -454,13 +458,13 @@ class SkillsLoader {
         Map<String, List<SkillApprovalRepo.SkillApprovalPlusSkillId>> approvalLookup
         if (projectId) {
             dbRes = skillDefWithExtraRepo.findAllChildSkillsDescriptions(projectId, subjectId, relationshipType, version, userId)
-            List<SkillApprovalRepo.SkillApprovalPlusSkillId> approvals = skillApprovalRepo.findSkillApprovalsByProjectIdAndSubjectId(userId, projectId, subjectId)
+            List<SkillApprovalRepo.SkillApprovalPlusSkillId> approvals = skillApprovalRepo.findsApprovalWithSkillIdForSkillsDisplay(userId, projectId, subjectId)
             approvalLookup = approvals.groupBy { it.getSkillId() }
         } else {
             dbRes = skillDefWithExtraRepo.findAllGlobalChildSkillsDescriptions(subjectId, relationshipType, version, userId)
         }
         List<SkillDescription> res = dbRes.collect {
-            SkillApprovalRepo.SkillApprovalPlusSkillId skillApproval = approvalLookup?.get(it.getSkillId())?.get(0)
+            SkillApprovalRepo.SkillApprovalPlusSkillId skillApproval = approvalLookup?.get(it.getSkillId())?.sort({ it.skillApproval.requestedOn})?.reverse()?.get(0)
             new SkillDescription(
                     skillId: it.getSkillId(),
                     description: InputSanitizer.unsanitizeForMarkdown(it.getDescription()),
