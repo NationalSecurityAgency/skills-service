@@ -306,101 +306,156 @@ describe('Self Report Approval History Tests', () => {
         ], 10, true, 7)
     });
 
-    it('filter by skill name - by pressing filter button', () => {
-        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
-        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
-        cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
-        cy.reportSkill(1, 2, 'user6', '2020-09-11 11:00')
-        cy.reportSkill(1, 2, 'user5', '2020-09-12 11:00')
-        cy.reportSkill(1, 2, 'user4', '2020-09-13 11:00')
-        cy.approveAllRequests();
-        cy.reportSkill(1, 2, 'user2', '2020-09-16 11:00')
-        cy.rejectRequest(0)
 
-        cy.reportSkill(1, 3, 'user1', '2020-09-17 11:00')
-        cy.reportSkill(1, 1, 'user0', '2020-09-18 11:00')
-        cy.approveAllRequests();
+    if (!Cypress.env('oauthMode')) {
+        it('filter fields - by pressing filter button', () => {
+            cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
+            cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
+            cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
+            cy.reportSkill(1, 2, 'user6', '2020-09-11 11:00')
+            cy.reportSkill(1, 2, 'user5', '2020-09-12 11:00')
+            cy.reportSkill(1, 2, 'user4', '2020-09-13 11:00')
+            cy.approveAllRequests();
+            cy.reportSkill(1, 2, 'user2', '2020-09-16 11:00')
+            cy.rejectRequest(0)
 
-        cy.reportSkill(1, 2, 'user3', '2020-09-14 11:00')
-        cy.rejectRequest(0)
+            cy.reportSkill(1, 3, 'user1', '2020-09-17 11:00')
+            cy.reportSkill(1, 1, 'user0', '2020-09-18 11:00')
+            cy.approveAllRequests();
 
-        cy.visit('/administrator/projects/proj1/self-report');
-        cy.get('[data-cy="selfReportApprovalHistory-skillNameFilter"]').type('sKilL 1');
-        cy.get('[data-cy="selfReportApprovalHistory-filterBtn"]').click();
-        cy.validateTable(approvalHistoryTableSelector,  [
-            [ { colIndex: 0,  value: 'user0' }, { colIndex: 1,  value: 'Approved' }, ],
-        ])
+            cy.reportSkill(1, 2, 'user3', '2020-09-14 11:00')
+            cy.rejectRequest(0)
 
-        cy.get('[data-cy="selfReportApprovalHistory-resetBtn"]').click();
-        cy.get(approvalHistoryTableSelector).contains('Total Rows: 7');
+            cy.visit('/administrator/projects/proj1/self-report');
+            cy.get('[data-cy="selfReportApprovalHistory-skillNameFilter"]')
+                .type('sKilL 1');
+            cy.get('[data-cy="selfReportApprovalHistory-filterBtn"]')
+                .click();
+            cy.validateTable(approvalHistoryTableSelector, [
+                [{
+                    colIndex: 0,
+                    value: 'user0'
+                }, {
+                    colIndex: 1,
+                    value: 'Approved'
+                },],
+            ])
 
-        cy.get('[data-cy="selfReportApprovalHistory-userIdFilter"]').type('SeR2');
-        cy.get('[data-cy="selfReportApprovalHistory-filterBtn"]').click();
-        cy.validateTable(approvalHistoryTableSelector,  [
-            [ { colIndex: 0,  value: 'user2' }, { colIndex: 1,  value: 'Rejected' }, ],
-        ])
+            cy.get('[data-cy="selfReportApprovalHistory-resetBtn"]')
+                .click();
+            cy.get(approvalHistoryTableSelector)
+                .contains('Total Rows: 7');
 
-        cy.get('[data-cy="selfReportApprovalHistory-resetBtn"]').click();
-        cy.get(approvalHistoryTableSelector).contains('Total Rows: 7');
+            cy.get('[data-cy="selfReportApprovalHistory-userIdFilter"]')
+                .type('SeR2');
+            cy.get('[data-cy="selfReportApprovalHistory-filterBtn"]')
+                .click();
+            cy.validateTable(approvalHistoryTableSelector, [
+                [{
+                    colIndex: 0,
+                    value: 'user2'
+                }, {
+                    colIndex: 1,
+                    value: 'Rejected'
+                },],
+            ])
 
-        cy.get('[data-cy="selfReportApprovalHistory-approverUserIdFilter"]').type('@skills.or');
-        cy.get('[data-cy="selfReportApprovalHistory-filterBtn"]').click();
-        cy.get(approvalHistoryTableSelector).contains('Total Rows: 7');
+            cy.get('[data-cy="selfReportApprovalHistory-resetBtn"]')
+                .click();
+            cy.get(approvalHistoryTableSelector)
+                .contains('Total Rows: 7');
 
-        cy.get('[data-cy="selfReportApprovalHistory-resetBtn"]').click();
-        cy.get(approvalHistoryTableSelector).contains('Total Rows: 7');
+            cy.get('[data-cy="selfReportApprovalHistory-approverUserIdFilter"]')
+                .type('@skills.or');
+            cy.get('[data-cy="selfReportApprovalHistory-filterBtn"]')
+                .click();
+            cy.get(approvalHistoryTableSelector)
+                .contains('Total Rows: 7');
 
-        // no results
-        cy.get('[data-cy="selfReportApprovalHistory-skillNameFilter"]').type('sg');
-        cy.get('[data-cy="selfReportApprovalHistory-filterBtn"]').click();
-        cy.get(approvalHistoryTableSelector).contains(('There are no records to show'));
-    });
+            cy.get('[data-cy="selfReportApprovalHistory-resetBtn"]')
+                .click();
+            cy.get(approvalHistoryTableSelector)
+                .contains('Total Rows: 7');
 
-    it('filter by skill name - by pressing enter', () => {
-        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
-        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
-        cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
-        cy.reportSkill(1, 2, 'user6', '2020-09-11 11:00')
-        cy.reportSkill(1, 2, 'user5', '2020-09-12 11:00')
-        cy.reportSkill(1, 2, 'user4', '2020-09-13 11:00')
-        cy.approveAllRequests();
-        cy.reportSkill(1, 2, 'user2', '2020-09-16 11:00')
-        cy.rejectRequest(0)
+            // no results
+            cy.get('[data-cy="selfReportApprovalHistory-skillNameFilter"]')
+                .type('sg');
+            cy.get('[data-cy="selfReportApprovalHistory-filterBtn"]')
+                .click();
+            cy.get(approvalHistoryTableSelector)
+                .contains(('There are no records to show'));
+        });
 
-        cy.reportSkill(1, 3, 'user1', '2020-09-17 11:00')
-        cy.reportSkill(1, 1, 'user0', '2020-09-18 11:00')
-        cy.approveAllRequests();
+        it('filter fields - by pressing enter', () => {
+            cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
+            cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
+            cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
+            cy.reportSkill(1, 2, 'user6', '2020-09-11 11:00')
+            cy.reportSkill(1, 2, 'user5', '2020-09-12 11:00')
+            cy.reportSkill(1, 2, 'user4', '2020-09-13 11:00')
+            cy.approveAllRequests();
+            cy.reportSkill(1, 2, 'user2', '2020-09-16 11:00')
+            cy.rejectRequest(0)
 
-        cy.reportSkill(1, 2, 'user3', '2020-09-14 11:00')
-        cy.rejectRequest(0)
+            cy.reportSkill(1, 3, 'user1', '2020-09-17 11:00')
+            cy.reportSkill(1, 1, 'user0', '2020-09-18 11:00')
+            cy.approveAllRequests();
 
-        cy.visit('/administrator/projects/proj1/self-report');
-        cy.get('[data-cy="selfReportApprovalHistory-skillNameFilter"]').type('sKilL 1{enter}');
-        cy.validateTable(approvalHistoryTableSelector,  [
-            [ { colIndex: 0,  value: 'user0' }, { colIndex: 1,  value: 'Approved' }, ],
-        ])
+            cy.reportSkill(1, 2, 'user3', '2020-09-14 11:00')
+            cy.rejectRequest(0)
 
-        cy.get('[data-cy="selfReportApprovalHistory-resetBtn"]').click();
-        cy.get(approvalHistoryTableSelector).contains('Total Rows: 7');
+            cy.visit('/administrator/projects/proj1/self-report');
+            cy.get('[data-cy="selfReportApprovalHistory-skillNameFilter"]')
+                .type('sKilL 1{enter}');
+            cy.validateTable(approvalHistoryTableSelector, [
+                [{
+                    colIndex: 0,
+                    value: 'user0'
+                }, {
+                    colIndex: 1,
+                    value: 'Approved'
+                },],
+            ])
 
-        cy.get('[data-cy="selfReportApprovalHistory-userIdFilter"]').type('SeR2{enter}');
-        cy.validateTable(approvalHistoryTableSelector,  [
-            [ { colIndex: 0,  value: 'user2' }, { colIndex: 1,  value: 'Rejected' }, ],
-        ])
+            cy.get('[data-cy="selfReportApprovalHistory-resetBtn"]')
+                .click();
+            cy.get(approvalHistoryTableSelector)
+                .contains('Total Rows: 7');
 
-        cy.get('[data-cy="selfReportApprovalHistory-resetBtn"]').click();
-        cy.get(approvalHistoryTableSelector).contains('Total Rows: 7');
+            cy.get('[data-cy="selfReportApprovalHistory-userIdFilter"]')
+                .type('SeR2{enter}');
+            cy.validateTable(approvalHistoryTableSelector, [
+                [{
+                    colIndex: 0,
+                    value: 'user2'
+                }, {
+                    colIndex: 1,
+                    value: 'Rejected'
+                },],
+            ])
 
-        cy.get('[data-cy="selfReportApprovalHistory-approverUserIdFilter"]').type('@skills.or{enter}');
-        cy.get(approvalHistoryTableSelector).contains('Total Rows: 7');
+            cy.get('[data-cy="selfReportApprovalHistory-resetBtn"]')
+                .click();
+            cy.get(approvalHistoryTableSelector)
+                .contains('Total Rows: 7');
 
-        cy.get('[data-cy="selfReportApprovalHistory-resetBtn"]').click();
-        cy.get(approvalHistoryTableSelector).contains('Total Rows: 7');
+            cy.get('[data-cy="selfReportApprovalHistory-approverUserIdFilter"]')
+                .type('@skills.or{enter}');
+            cy.get(approvalHistoryTableSelector)
+                .contains('Total Rows: 7');
 
-        // no results
-        cy.get('[data-cy="selfReportApprovalHistory-skillNameFilter"]').type('sg{enter}');
-        cy.get(approvalHistoryTableSelector).contains(('There are no records to show'));
-    });
+            cy.get('[data-cy="selfReportApprovalHistory-resetBtn"]')
+                .click();
+            cy.get(approvalHistoryTableSelector)
+                .contains('Total Rows: 7');
+
+            // no results
+            cy.get('[data-cy="selfReportApprovalHistory-skillNameFilter"]')
+                .type('sg{enter}');
+            cy.get(approvalHistoryTableSelector)
+                .contains(('There are no records to show'));
+        });
+    }
 
     it('approval should move the item to the history table', () => {
         cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });

@@ -456,7 +456,8 @@ describe('Self Report Skills Management Tests', () => {
         const rowSelector = '[data-cy="skillsReportApprovalTable"] tbody tr';
         cy.get(rowSelector).should('have.length', 5)
 
-        cy.get('[data-cy="skillsBTablePageSize"]').select('10');
+        const tableSelector = '[data-cy="skillsReportApprovalTable"]';
+        cy.get(`${tableSelector} [data-cy="skillsBTablePageSize"]`).select('10');
         cy.get(rowSelector).should('have.length', 7)
     });
 
