@@ -595,7 +595,7 @@ describe('Accessibility Tests', () => {
   });
 
 
-  it.only('self report admin page', () => {
+  it('self report admin page', () => {
     Cypress.Commands.add("rejectRequest", (requestNum = 0, rejectionMsg = 'Skill was rejected') => {
       cy.request('/admin/projects/proj1/approvals?limit=10&ascending=true&page=1&orderBy=userId')
           .then((response) => {

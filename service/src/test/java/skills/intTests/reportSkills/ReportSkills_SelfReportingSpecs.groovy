@@ -31,7 +31,6 @@ import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAttrsRepo
 import skills.utils.WaitFor
-import spock.lang.IgnoreRest
 
 @Slf4j
 class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
@@ -457,20 +456,17 @@ Always yours, <br/> -SkillTree Bot
         skillsService.createSkills(skills)
 
         Date date = new Date() - 60
+        Date date1 = new Date() - 50
         when:
         def approvalsEndpointRes0 = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
 
         def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date, "Please approve this!")
         def approvalsEndpointRes1 = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
 
-        // sleep to force order since it's sorted by requestedOn column
-        Thread.sleep(500)
         def res1 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date, "Please approve this!")
         def approvalsEndpointRes2 = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
 
-        // sleep to force order since it's sorted by requestedOn column
-        Thread.sleep(500)
-        def res2 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user1, date, "Please approve this!")
+        def res2 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user1, date1, "Please approve this!")
         def approvalsEndpointRes3 = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
 
         then:
