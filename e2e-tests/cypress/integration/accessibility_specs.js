@@ -226,6 +226,13 @@ describe('Accessibility Tests', () => {
     cy.customA11y();
     cy.get('[data-cy=closeBadgeButton]').click();
 
+
+    // --- Self Report Page ----
+    cy.get('[data-cy="nav-Self Report"]').click();
+    cy.get('[data-cy="skillsReportApprovalTable"] tbody tr').should('have.length', 3);
+    cy.customLighthouse();
+    cy.customA11y();
+
     cy.get('[data-cy="selectPageOfApprovalsBtn"]').click();
     cy.get('[data-cy="rejectBtn"]').click();
     cy.get('[data-cy="rejectionTitle"]').contains('This will permanently reject user\'s request(s) to get points')

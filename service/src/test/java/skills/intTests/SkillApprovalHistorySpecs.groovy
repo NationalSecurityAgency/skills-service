@@ -15,10 +15,10 @@
  */
 package skills.intTests
 
-
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
+import skills.intTests.utils.SkillsService
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.UserAttrsRepo
@@ -196,6 +196,7 @@ class SkillApprovalHistorySpecs extends DefaultIntSpec {
         def approvalsHistoryUser1 = skillsService.getApprovalsHistory(proj.projectId, 5, 1, 'requestedOn', false, '',  'UsEr2', '')
         def approvalsHistoryUser2 = skillsService.getApprovalsHistory(proj.projectId, 5, 1, 'requestedOn', false, '',  users[3].toLowerCase(), '')
         def approvalsHistoryUsers = skillsService.getApprovalsHistory(proj.projectId, 5, 1, 'requestedOn', false, '',  'Er1', '')
+        def approvalsHistoryUser3 = skillsService.getApprovalsHistory(proj.projectId, 5, 1, 'requestedOn', false, '',  '1b', '')
 
         then:
         approvalsHistoryUser1.totalCount == 1
@@ -209,6 +210,113 @@ class SkillApprovalHistorySpecs extends DefaultIntSpec {
         approvalsHistoryUsers.totalCount == 2
         approvalsHistoryUsers.count == 2
         approvalsHistoryUsers.data.collect { it.userIdForDisplay } == [users[0], users[3]]
+
+        approvalsHistoryUser3.totalCount == 0
+        approvalsHistoryUser3.count == 0
+        !approvalsHistoryUser3.data
+    }
+
+
+    void "get approvals history - filter skill name"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(7,)
+        skills.each {
+            it.selfReportingType = SkillDef.SelfReportingType.Approval
+            it.pointIncrement = 200
+            it.numPerformToCompletion = 10
+        }
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        List<Date> dates = []
+        String user = getRandomUsers(1).get(0)
+        skills.size().times {
+            Date date = new Date() - it
+            dates << date
+            def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[it].skillId], user, date, "Please approve this ${it}!")
+            assert res.body.explanation == "Skill was submitted for approval"
+        }
+
+        when:
+        def approvals1 = skillsService.getApprovals(proj.projectId, 7, 1, 'requestedOn', false)
+        skillsService.approve(proj.projectId, approvals1.data.collect { it.id })
+
+        def approvalsHistoryUser1 = skillsService.getApprovalsHistory(proj.projectId, 5, 1, 'requestedOn', false, 'iLL 3',  '', '')
+        def approvalsHistoryUser2 = skillsService.getApprovalsHistory(proj.projectId, 5, 1, 'requestedOn', false, 'sK',  '', '')
+        def approvalsHistoryUser3 = skillsService.getApprovalsHistory(proj.projectId, 5, 1, 'requestedOn', false, 'bl',  '', '')
+
+        then:
+        approvalsHistoryUser1.totalCount == 1
+        approvalsHistoryUser1.count == 1
+        approvalsHistoryUser1.data.collect { it.skillName } == [skills[2].name]
+
+        approvalsHistoryUser2.totalCount == 7
+        approvalsHistoryUser2.count == 7
+
+        approvalsHistoryUser3.totalCount == 0
+        approvalsHistoryUser3.count == 0
+        !approvalsHistoryUser3.data
+    }
+
+
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
+    void "get approvals history - filter by approver id"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(7,)
+        skills.each {
+            it.selfReportingType = SkillDef.SelfReportingType.Approval
+            it.pointIncrement = 200
+            it.numPerformToCompletion = 10
+        }
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        List<Date> dates = []
+        String user = getRandomUsers(1).get(0)
+        skills.size().times {
+            Date date = new Date() - it
+            dates << date
+            def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[it].skillId], user, date, "Please approve this ${it}!")
+            assert res.body.explanation == "Skill was submitted for approval"
+        }
+
+        when:
+        def approvals1 = skillsService.getApprovals(proj.projectId, 7, 1, 'requestedOn', false)
+
+        List<SkillsService> admins = [
+                createService("ApPrOver1"),
+                createService("CoolApprover")
+        ]
+        admins.each {
+            skillsService.addProjectAdmin(proj.projectId, it.userName)
+        }
+        approvals1.data.eachWithIndex { item, int count ->
+            SkillsService service = count < 3 ? admins[0] : admins[1]
+            service.approve(proj.projectId, [item.id])
+        }
+
+        def approvalsHistoryUser1 = skillsService.getApprovalsHistory(proj.projectId, 5, 1, 'requestedOn', false, '',  '', 'appROVER1')
+        def approvalsHistoryUser2 = skillsService.getApprovalsHistory(proj.projectId, 5, 1, 'requestedOn', false, '',  '', 'olAPPROVE')
+        def approvalsHistoryUser3 = skillsService.getApprovalsHistory(proj.projectId, 5, 1, 'requestedOn', false, '',  '', 'b')
+
+        then:
+        approvalsHistoryUser1.totalCount == 3
+        approvalsHistoryUser1.count == 3
+        approvalsHistoryUser1.data.collect { it.approverUserId }.unique() == [admins[0].userName.toLowerCase()]
+
+        approvalsHistoryUser2.totalCount == 4
+        approvalsHistoryUser2.count == 4
+        approvalsHistoryUser1.data.collect { it.approverUserId }.unique() == [admins[0].userName.toLowerCase()]
+
+        approvalsHistoryUser3.totalCount == 0
+        approvalsHistoryUser3.count == 0
+        !approvalsHistoryUser3.data
     }
 
 }
