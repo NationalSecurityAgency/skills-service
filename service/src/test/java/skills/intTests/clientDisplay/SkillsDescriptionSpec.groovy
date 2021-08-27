@@ -449,7 +449,6 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
         List<Integer> ids = approvalsEndpointRes.data.findAll { it.skillId == proj1_subj1_skills[3].skillId }.collect { it.id }
         skillsService.rejectSkillApprovals(proj1.projectId, ids, "rejection message")
 
-        println JsonOutput.toJson(addSkillRes2)
         when:
         def res1 = skillsService.getSubjectDescriptions(proj1.projectId, proj1_subj1.subjectId, user).sort { it.skillId }
         def res2 = skillsService.getSubjectDescriptions(proj1.projectId, proj1_subj2.subjectId, user).sort { it.skillId }
@@ -512,4 +511,6 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
         !res2.get(2).selfReporting.rejectedOn
         !res2.get(2).selfReporting.rejectionMsg
     }
+
+
 }

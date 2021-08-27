@@ -21,13 +21,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
-import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.UserRoleRes
 import skills.notify.EmailNotifier
 import skills.notify.Notifier
 import skills.services.events.SkillEventsService
 import skills.services.events.pointsAndAchievements.InsufficientPointsValidator
-import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.storage.model.Notification
 import skills.storage.model.ProjDef
@@ -87,13 +85,16 @@ class SelfReportingService {
         validateSufficientPoints(skillDefinition, userId)
 
         SkillEventsService.AppliedCheckRes res
-        SkillApproval existing = skillApprovalRepo.findByUserIdProjectIdAndSkillId(userId, skillDefinition.projectId, skillDefinition.skillId)
+        SkillApproval existing = skillApprovalRepo.findByUserIdProjectIdAndSkillIdAndApproverActionTakenOnIsNull(userId, skillDefinition.projectId, skillDefinition.id)
         if (existing && !existing.rejectedOn) {
             res = new SkillEventsService.AppliedCheckRes(
                     skillApplied: false,
                     explanation: "This skill was already submitted for approval and is still pending approval"
             )
         }  else {
+            // must acknowledge existing rejection(s) so it does not show up for users again
+            skillApprovalRepo.acknowledgeAllRejectedApprovalsForUserAndProjectAndSkill(userId, skillDefinition.projectId, skillDefinition.id)
+
             SkillApproval skillApproval = new SkillApproval(
                     projectId: skillDefinition.projectId,
                     userId: userId,

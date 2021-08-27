@@ -15,6 +15,7 @@
  */
 package skills.intTests.clientDisplay
 
+
 import groovy.time.TimeCategory
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
@@ -27,7 +28,6 @@ import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.SkillDefRepo
-import spock.lang.IgnoreRest
 
 class SingleSkillSummarySpec extends DefaultIntSpec {
 
@@ -260,6 +260,144 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         !summary5.selfReporting.requestedOn
         !summary5.selfReporting.rejectedOn
         !summary5.selfReporting.rejectionMsg
+    }
+
+    def "when a self-reporting skill has a history of approvals only load the latest approval info - latest rejection"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].numPerformToCompletion = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        List<Date> dates = (0..5).collect { new Date() - it }
+        List<String> users = getRandomUsers(2)
+
+        when:
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], dates[3], "approve 1")
+        def approvals = skillsService.getApprovals(proj.projectId, 7, 1, 'requestedOn', false)
+        skillsService.approve(proj.projectId, approvals.data.collect { it.id })
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], dates[2], "reject 1")
+        approvals = skillsService.getApprovals(proj.projectId, 7, 1, 'requestedOn', false)
+        skillsService.rejectSkillApprovals(proj.projectId, approvals.data.collect { it.id })
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], dates[1], "approve 2")
+        approvals = skillsService.getApprovals(proj.projectId, 7, 1, 'requestedOn', false)
+        skillsService.approve(proj.projectId, approvals.data.collect { it.id })
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], dates[0], "reject 2")
+        approvals = skillsService.getApprovals(proj.projectId, 7, 1, 'requestedOn', false)
+        skillsService.rejectSkillApprovals(proj.projectId, approvals.data.collect { it.id }, 'last rejection')
+
+
+        def approvalsHistoryUser1 = skillsService.getApprovalsHistory(proj.projectId, 10, 1, 'requestedOn', false, '',  '', '')
+
+        def summary1 = skillsService.getSingleSkillSummary(users[0], proj.projectId, skills.get(0).skillId)
+
+        then:
+        approvalsHistoryUser1.totalCount == 4
+
+        summary1.selfReporting.enabled
+        summary1.selfReporting.rejectionMsg == 'last rejection'
+        summary1.selfReporting.requestedOn == dates[0].time
+        summary1.selfReporting.rejectedOn
+    }
+
+
+    def "when a self-reporting skill has a history of approvals only load the latest approval info - latest approval request"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].numPerformToCompletion = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        List<Date> dates = (0..5).collect { new Date() - it }
+        List<String> users = getRandomUsers(2)
+
+        when:
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], dates[3], "approve 1")
+        def approvals = skillsService.getApprovals(proj.projectId, 7, 1, 'requestedOn', false)
+        skillsService.approve(proj.projectId, approvals.data.collect { it.id })
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], dates[2], "reject 1")
+        approvals = skillsService.getApprovals(proj.projectId, 7, 1, 'requestedOn', false)
+        skillsService.rejectSkillApprovals(proj.projectId, approvals.data.collect { it.id })
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], dates[1], "approve 2")
+        approvals = skillsService.getApprovals(proj.projectId, 7, 1, 'requestedOn', false)
+        skillsService.approve(proj.projectId, approvals.data.collect { it.id })
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], dates[0], "approve 3")
+        approvals = skillsService.getApprovals(proj.projectId, 7, 1, 'requestedOn', false)
+
+
+        def approvalsHistoryUser1 = skillsService.getApprovalsHistory(proj.projectId, 10, 1, 'requestedOn', false, '',  '', '')
+        def summary1 = skillsService.getSingleSkillSummary(users[0], proj.projectId, skills.get(0).skillId)
+
+        then:
+        approvals.totalCount == 1
+        approvalsHistoryUser1.totalCount == 3
+
+        summary1.selfReporting.enabled
+        !summary1.selfReporting.rejectionMsg
+        summary1.selfReporting.requestedOn == dates[0].time
+        !summary1.selfReporting.rejectedOn
+    }
+
+    def "when a self-reporting skill has a history of approvals only load the latest approval info - latest approval request was approved"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].numPerformToCompletion = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        List<Date> dates = (0..5).collect { new Date() - it }
+        List<String> users = getRandomUsers(2)
+
+        when:
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], dates[3], "approve 1")
+        def approvals = skillsService.getApprovals(proj.projectId, 7, 1, 'requestedOn', false)
+        skillsService.approve(proj.projectId, approvals.data.collect { it.id })
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], dates[2], "reject 1")
+        approvals = skillsService.getApprovals(proj.projectId, 7, 1, 'requestedOn', false)
+        skillsService.rejectSkillApprovals(proj.projectId, approvals.data.collect { it.id })
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], dates[1], "approve 2")
+        approvals = skillsService.getApprovals(proj.projectId, 7, 1, 'requestedOn', false)
+        skillsService.approve(proj.projectId, approvals.data.collect { it.id })
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], dates[0], "approve 3")
+        approvals = skillsService.getApprovals(proj.projectId, 7, 1, 'requestedOn', false)
+        skillsService.approve(proj.projectId, approvals.data.collect { it.id })
+
+
+        def approvalsHistoryUser1 = skillsService.getApprovalsHistory(proj.projectId, 10, 1, 'requestedOn', false, '',  '', '')
+
+        def summary1 = skillsService.getSingleSkillSummary(users[0], proj.projectId, skills.get(0).skillId)
+
+        then:
+        approvalsHistoryUser1.totalCount == 4
+
+        summary1.selfReporting.enabled
+        !summary1.selfReporting.rejectionMsg
+        !summary1.selfReporting.requestedOn
+        !summary1.selfReporting.rejectedOn
     }
 
     def "user can remove approval rejection from their view"() {

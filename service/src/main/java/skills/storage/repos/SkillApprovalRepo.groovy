@@ -17,6 +17,7 @@ package skills.storage.repos
 
 import groovy.transform.CompileStatic
 import org.springframework.data.domain.Pageable
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
@@ -123,7 +124,6 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
                                @Param("skillNameFilter") String skillNameFilter,
                                @Param("userIdFilter") String userIdFilter,
                                @Param("approverUserIdFilter") String approverUserIdFilter)
-    long countByProjectIdAndApproverUserIdIsNotNull(String projectId)
 
     long deleteByProjectIdAndSkillRefId(String projectId, Integer skillRefId)
 
@@ -131,9 +131,20 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
 
     @Nullable
     @Query('''select s 
-        from SkillApproval s, SkillDef sd 
-        where s.userId = ?1 and s.projectId = ?2 and s.skillRefId = sd.id and sd.skillId = ?3''')
-    SkillApproval findByUserIdProjectIdAndSkillId(String userId, String projectId, String skillId)
+        from SkillApproval s 
+        where 
+            s.userId = ?1 and s.projectId = ?2 and s.skillRefId = ?3 and  
+            s.approverActionTakenOn is null 
+            ''')
+    SkillApproval findByUserIdProjectIdAndSkillIdAndApproverActionTakenOnIsNull(String userId, String projectId, Integer skillRefId)
+
+    @Modifying
+    @Query('''update SkillApproval s set s.rejectionAcknowledgedOn = CURRENT_DATE
+        where 
+            s.userId = ?1 and s.projectId = ?2 and s.skillRefId = ?3 and  
+            s.approverActionTakenOn is not null 
+            ''')
+    void acknowledgeAllRejectedApprovalsForUserAndProjectAndSkill(String userId, String projectId, Integer skillRefId)
 
     @Nullable
     @Query('''select s 
