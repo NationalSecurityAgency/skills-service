@@ -445,6 +445,7 @@ class SkillApprovalHistorySpecs extends DefaultIntSpec {
         approvalsHistoryUser1.data.collect { it.requestMsg } == ["approve 1", "reject 1", "approve 2", "reject 2"]
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     void "get approvals history - sort"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
