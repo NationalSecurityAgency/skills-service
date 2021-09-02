@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "5.15.3",
-    "@skilltree/common-components": "^1.0.0",
+    "@skilltree/common-components": "file:../common-components",
     "@skilltree/skills-client-vue": "3.3.1",
     "animate.css": "4.1.1",
     "apexcharts": "3.27.2",
