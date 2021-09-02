@@ -20,7 +20,6 @@ import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.SerializationUtils
-import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -41,6 +40,8 @@ import skills.storage.repos.*
 import skills.storage.repos.nativeSql.GraphRelWithAchievement
 import skills.storage.repos.nativeSql.NativeQueriesRepo
 import skills.utils.InputSanitizer
+
+import java.util.stream.Stream
 
 import static skills.services.LevelDefinitionStorageService.LevelInfo
 
@@ -171,7 +172,8 @@ class SkillsLoader {
             myProgressSummary.numProjectsContributed += summary.points > 0 ? 1 : 0
         }
 
-        BadgeCount badgeCount = skillDefRepo.getProductionBadgesCount(userId)
+//        BadgeCount badgeCount = skillDefRepo.getProductionBadgesCount(userId)
+        BadgeCount badgeCount = skillDefRepo.getProductionMyBadgesCount(userId)
         myProgressSummary.totalBadges = badgeCount.totalCount ?: 0
         myProgressSummary.globalBadgeCount = badgeCount.globalCount ?: 0
         myProgressSummary.gemCount = badgeCount.gemCount ?: 0
@@ -188,6 +190,25 @@ class SkillsLoader {
         myProgressSummary.numAchievedSkillsLastWeek = achievedSkillsCount.weekCount ?: 0
         myProgressSummary.mostRecentAchievedSkill = achievedSkillsCount.lastAchieved
         return myProgressSummary
+    }
+
+    @Profile
+    @Transactional(readOnly = true)
+    List<? extends SkillBadgeSummary> getBadgesForUserMyProjects(String userId) {
+        List<? extends SkillBadgeSummary> badges = []
+
+        skillDefWithExtraRepo.findAllMyBadgesForUser(userId).withCloseable { Stream<SkillDefWithExtra> rawBadges ->
+            rawBadges?.forEach({
+                if (it.projectId) {
+                    ProjDef projDef = projDefRepo.findByProjectId(it.projectId)
+                    badges << loadBadgeSummary(projDef, userId, it)
+                } else {
+                    badges << loadGlobalBadgeSummary(userId, null, it)
+                }
+            })
+        }
+
+        return badges
     }
 
     @Profile
@@ -640,7 +661,8 @@ class SkillsLoader {
                 endDate: badgeDefinition.endDate,
                 skills: skillsRes,
                 iconClass: badgeDefinition.iconClass,
-                helpUrl: helpUrl
+                helpUrl: helpUrl,
+                projectId: badgeDefinition.projectId
         )
     }
 

@@ -7,6 +7,9 @@ const exportObject = {
   configureWebpack: {
     plugins,
   },
+  chainWebpack: (config) => {
+    config.resolve.symlinks(false)
+  },
 };
 
 const proxyConf = {

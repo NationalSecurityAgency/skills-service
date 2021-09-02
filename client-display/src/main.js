@@ -26,6 +26,7 @@ import {
     ProgressPlugin,
     SpinnerPlugin,
 } from 'bootstrap-vue';
+import { FiltersPlugin } from '@skilltree/common-components';
 import marked from 'marked';
 import App from '@/App';
 import router from '@/router';
@@ -45,6 +46,7 @@ Vue.use(TablePlugin);
 Vue.use(BadgePlugin);
 Vue.use(ProgressPlugin);
 Vue.use(SpinnerPlugin);
+Vue.use(FiltersPlugin);
 
 require('@/common/softwareVersion/softwareVersionInterceptor');
 

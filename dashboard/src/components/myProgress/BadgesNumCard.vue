@@ -36,7 +36,9 @@ limitations under the License.
     <b-row class="justify-content-between no-gutters border-top text-muted small"  style="min-height: 3rem;">
       <b-col class="p-2">
         <span data-cy="badges-num-footer">Be proud to earn those badges!!</span>
-<!--        <span class="float-right"><button class="btn btn-outline-info btn-sm"><i class="fas fa-eye"/> View Badges</button></span>-->
+      </b-col>
+      <b-col cols="auto" class="p-2">
+        <span class="float-right;"><b-button :to="{ name: 'MyBadges' }" variant="outline-info" size="sm" data-cy="viewBadges"><i class="fas fa-award"/> Badges</b-button></span>
       </b-col>
     </b-row>
   </b-card>

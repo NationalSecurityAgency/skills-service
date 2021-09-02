@@ -43,7 +43,7 @@ limitations under the License.
 </template>
 
 <script>
-  import dayjs from '../../DayJsCustomizer';
+  import { dayjs } from '@skilltree/common-components';
 
   export default {
     name: 'LastEarnedCard',

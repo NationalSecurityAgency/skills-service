@@ -35,4 +35,6 @@ class SkillBadgeSummary {
     boolean global = false
 
     String helpUrl
+
+    String projectId
 }

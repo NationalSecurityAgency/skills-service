@@ -93,9 +93,9 @@ limitations under the License.
 </template>
 
 <script>
+  import { MarkdownText } from '@skilltree/common-components';
   import ProgressBar from '@/userSkills/skill/progress/ProgressBar';
   import SkillSummaryCards from '@/userSkills/skill/progress/SkillSummaryCards';
-  import MarkdownText from '@/common/utilities/MarkdownText';
   import PartialPointsAlert from '@/userSkills/skill/PartialPointsAlert';
   import AchievementDate from '@/userSkills/skill/AchievementDate';
   import NavigationErrorMixin from '@/common/utilities/NavigationErrorMixin';

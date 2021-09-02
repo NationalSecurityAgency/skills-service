@@ -27,12 +27,12 @@ limitations under the License.
 </template>
 
 <script>
+  import { dayjs } from '@skilltree/common-components';
   import TimeLengthSelector from '../common/TimeLengthSelector';
   import numberFormatter from '@//filters/NumberFilter';
   import MetricsCard from '../utils/MetricsCard';
   import MetricsService from '../MetricsService';
   import MetricsOverlay from '../utils/MetricsOverlay';
-  import dayjs from '../../../DayJsCustomizer';
 
   export default {
     name: 'SkillEventsOverTime',

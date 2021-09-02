@@ -5,9 +5,10 @@
   "license": "Apache-2.0",
   "description": "SkillTree Client Display UI",
   "author": "SkillTree Team",
+  "private": "true",
   "scripts": {
     "serve": "vue-cli-service serve",
-    "licenseDepCheck": "license-checker --production --onlyAllow='MIT;ISC;Apache-2.0;Custom: https://travis-ci.org/component/emitter.png' --summary",
+    "licenseDepCheck": "license-checker --excludePrivatePackages --production --onlyAllow='MIT;ISC;Apache-2.0;Custom: https://travis-ci.org/component/emitter.png' --summary",
     "licenseHeaderCheck": "license-check-and-add check -f '../license-add/license-add-config.json' -r 20",
     "licenseHeaderAdd": "license-check-and-add add -f ../license-add/license-add-config.json -r 21",
     "licenseCheck": "npm run licenseHeaderCheck && npm run licenseDepCheck",
@@ -45,7 +46,8 @@
     "vue-router": "3.4.3",
     "vue-simple-progress": "1.1.1",
     "vue-simple-spinner": "1.2.10",
-    "vuex": "3.5.1"
+    "vuex": "3.5.1",
+    "@skilltree/common-components": "^1.0.0"
   },
   "devDependencies": {
     "@babel/core": "7.13.1",

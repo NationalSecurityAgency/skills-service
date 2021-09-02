@@ -19,4 +19,7 @@ export default {
   loadMyProgressSummary() {
     return axios.get('/api/myProgressSummary').then((response) => response.data);
   },
+  loadMyBadges() {
+    return axios.get('/api/mybadges').then((response) => response.data);
+  },
 };

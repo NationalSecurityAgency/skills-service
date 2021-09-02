@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import axios from 'axios';
-import dayjs from '../../DayJsCustomizer';
+import { dayjs } from '@skilltree/common-components';
 
 export default {
   ajaxCall(url, params) {

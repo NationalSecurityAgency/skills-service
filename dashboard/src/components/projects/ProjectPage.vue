@@ -71,11 +71,10 @@ limitations under the License.
 
 <script>
   import { createNamespacedHelpers } from 'vuex';
-
+  import { dayjs } from '@skilltree/common-components';
   import ProjectDates from '@/components/projects/ProjectDates';
   import Navigation from '../utils/Navigation';
   import PageHeader from '../utils/pages/PageHeader';
-  import dayjs from '../../DayJsCustomizer';
   import EditProject from './EditProject';
   import ProjectService from './ProjectService';
 

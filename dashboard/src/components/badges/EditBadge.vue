@@ -135,6 +135,7 @@ limitations under the License.
 <script>
   import { extend } from 'vee-validate';
   import Datepicker from 'vuejs-datepicker';
+  import { dayjs } from '@skilltree/common-components';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import IconPicker from '../utils/iconPicker/IconPicker';
   import IdInput from '../utils/inputForm/IdInput';
@@ -142,7 +143,6 @@ limitations under the License.
   import BadgesService from './BadgesService';
   import GlobalBadgeService from './global/GlobalBadgeService';
   import InputSanitizer from '../utils/InputSanitizer';
-  import dayjs from '../../DayJsCustomizer';
 
   export default {
     name: 'EditBadge',

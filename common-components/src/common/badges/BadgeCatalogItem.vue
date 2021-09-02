@@ -16,7 +16,7 @@ limitations under the License.
 <template>
     <badge-details-overview :badge="badge" :icon-color="iconColor">
         <template slot="body-footer" slot-scope="{ props }">
-            <router-link :to="{ name: badge.global ? 'globalBadgeDetails' : 'badgeDetails', params: { badgeId: props.badgeId }}" tag="button"
+            <router-link :to="badgeRouterLinkGenerator(badge)" tag="button"
                          class="btn btn-sm btn-outline-info skills-theme-btn mr-1 text-uppercase"
                          :data-cy="`badgeDetailsLink_${props.badgeId}`">
                 View Details
@@ -26,7 +26,7 @@ limitations under the License.
 </template>
 
 <script>
-  import BadgeDetailsOverview from '@/userSkills/badge/BadgeDetailsOverview';
+  import BadgeDetailsOverview from '@/common/badges/BadgeDetailsOverview';
 
   export default {
     name: 'BadgeCatalogItem',
@@ -41,6 +41,10 @@ limitations under the License.
       iconColor: {
         type: String,
         default: 'text-success',
+      },
+      badgeRouterLinkGenerator: {
+        type: Function,
+        required: true,
       },
     },
   };
