@@ -726,7 +726,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
                 "TestProject2-skill3_user2"]
 
         !performedBefore
-        performedAfter == [
+        performedAfter.sort() == [
                 "TestProject1-skill2_user1",
                 "TestProject1-skill2_user2",
         ]
