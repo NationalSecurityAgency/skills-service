@@ -32,11 +32,13 @@ import skills.services.AccessSettingsStorageService
 import skills.services.inception.InceptionProjectService
 import skills.services.settings.SettingsService
 import skills.storage.model.UserAttrs
+import skills.storage.model.UserTag
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.User
 import skills.storage.model.auth.UserRole
 import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserRepo
+import skills.storage.repos.UserTagRepo
 
 import javax.servlet.http.HttpServletRequest
 
@@ -51,6 +53,9 @@ class UserAuthService {
 
     @Autowired
     UserAttrsRepo userAttrsRepo
+
+    @Autowired
+    UserTagRepo userTagsRepository
 
     @Autowired
     AccessSettingsStorageService accessSettingsStorageService
@@ -77,12 +82,13 @@ class UserAuthService {
         User user = userRepository.findByUserId(userId?.toLowerCase())
         if (user) {
             UserAttrs userAttrs = userAttrsRepo.findByUserId(userId?.toLowerCase())
-            userInfo = createUserInfo(user, userAttrs)
+            List<UserTag> userTags = userTagsRepository.findAllByUserId(userId?.toLowerCase())
+            userInfo = createUserInfo(user, userAttrs, userTags?.groupBy { it?.key })
         }
         return userInfo
     }
 
-    private UserInfo createUserInfo(User user, UserAttrs userAttrs) {
+    private UserInfo createUserInfo(User user, UserAttrs userAttrs, Map<String, Object> userTags) {
         return new UserInfo (
                 username: user.userId,
                 password: user.password,
@@ -93,6 +99,7 @@ class UserAuthService {
                 nickname: userAttrs.nickname,
                 authorities: convertRoles(user.roles),
                 usernameForDisplay: userAttrs.userIdForDisplay,
+                userTags: userTags,
         )
     }
 
@@ -106,7 +113,7 @@ class UserAuthService {
     @Profile
     UserInfo createOrUpdateUser(UserInfo userInfo) {
         AccessSettingsStorageService.UserAndUserAttrsHolder userAndUserAttrs = accessSettingsStorageService.createAppUser(userInfo, true)
-        return createUserInfo(userAndUserAttrs.user, userAndUserAttrs.userAttrs)
+        return createUserInfo(userAndUserAttrs.user, userAndUserAttrs.userAttrs, userInfo.userTags)
     }
 
     void autologin(UserInfo userInfo, String password) {

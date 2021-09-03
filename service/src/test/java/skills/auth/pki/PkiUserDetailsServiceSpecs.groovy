@@ -82,4 +82,32 @@ class PkiUserDetailsServiceSpecs extends DefaultIntSpec {
 
         exceptioncount.get() == 0
     }
+
+    def "user tags are carried over properly" () {
+
+        String dn = 'some-dn'
+        UserInfo initialUserInfo = new UserInfo(
+                firstName: "First",
+                lastName: "Last",
+                nickname: "",
+                username: dn,
+                usernameForDisplay: dn,
+                userDn: dn,
+                userTags: [Organization : "XYZ"],
+        )
+        PkiUserLookup pkiUserLookup = Mock(PkiUserLookup)
+        pkiUserLookup.lookupUserDn(_) >> initialUserInfo
+
+        PkiUserDetailsService pkiUserDetailsService = new PkiUserDetailsService(userAuthService: userAuthService, pkiUserLookup: pkiUserLookup)
+
+        when:
+
+        UserInfo userInfo = pkiUserDetailsService.loadUserByUsername(dn)
+
+        then:
+
+        userInfo
+        userInfo.userTags == initialUserInfo.userTags
+
+    }
 }
