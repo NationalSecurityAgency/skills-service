@@ -168,34 +168,53 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
         group by ua.created''')
     List<DayCountItem> countAchievementsForProjectPerDay(@Param('projectId') String projectId, @Param('badgeId') String badgeId, @Param('type') SkillDef.ContainerType containerType, @Param('date') Date mustBeAfterThisDate)
 
-    @Query(value = '''select count(ua) as totalCount,
-                      sum(case when skillDef.startDate is not null and skillDef.endDate is not null then 1 end) as gemCount,
-                      sum(case when skillDef.type='GlobalBadge' then 1 end) as globalCount
-        from SkillDef skillDef, UserAchievement ua
-        where
-            ua.level is null and
-            ua.userId= :userId and
-            skillDef.skillId = ua.skillId and (
-                (
-                    skillDef.projectId = ua.projectId and 
-                    skillDef.projectId IN 
-                    (
-                        select s.projectId
-                        from Setting s
-                        where s.projectId = skillDef.projectId
-                          and s.setting = 'production.mode.enabled'
-                          and s.value = 'true'
-                    ) and
-                    skillDef.projectId IN (
-                        select s.projectId
-                        from Setting s, User uu
-                        where (s.setting = 'my_project' and uu.userId=:userId and uu.id = s.userRefId and s.projectId = skillDef.projectId)
-                    )
-                ) OR 
-                (skillDef.projectId is null and ua.projectId is null)
-            ) and
-            (skillDef.type='Badge' OR skillDef.type='GlobalBadge')''')
+    @Query(value = '''WITH mp AS (
+            SELECT s.project_id AS project_id
+            FROM settings s, users uu, settings s1
+            WHERE s.setting = 'my_project'
+              AND uu.user_id=?1
+              AND uu.id = s.user_ref_id
+              AND s.project_id = s1.project_id
+              AND s1.setting = 'production.mode.enabled'
+              AND s1.value = 'true'
+        )
+        SELECT COUNT(ua.id) AS totalCount,
+               COALESCE(SUM(CASE WHEN skillDef.start_date IS NOT null and skillDef.end_date IS NOT null THEN 1 END), 0) AS gemCount,
+               COALESCE(SUM(CASE WHEN skillDef.type='GlobalBadge' THEN 1 END), 0) AS globalCount
+        FROM user_achievement ua
+        JOIN skill_definition skillDef on ua.skill_ref_id = skillDef.id
+        WHERE
+            ua.level IS null AND
+            ua.user_id = ?1 AND (
+            (
+                skillDef.type = 'Badge' AND
+                skillDef.project_id IN (
+                 SELECT project_id FROM mp
+                )
+            ) OR
+            (
+                skillDef.type='GlobalBadge'
+                AND (
+                     exists (
+                         SELECT true
+                         FROM global_badge_level_definition gbld
+                         WHERE gbld.skill_ref_id = skillDef.id AND gbld.project_id in (select project_id from mp)
+                     )
+                OR (
+                        skillDef.id IN (
+                         SELECT srd.parent_ref_id FROM skill_relationship_definition srd JOIN skill_definition ssd ON srd.child_ref_id = ssd.id AND ssd.project_id IN (select project_id FROM mp)
+                        )
+                     )
+                )
+            )
+    )''', nativeQuery = true)
     BadgeCount countAchievedProductionBadgesForUser(@Param('userId') String userId)
+
+
+    //TEMPTEMPTEMP
+    @Query(value='''select ua.* from skill_definition skillDef, user_achievement ua where ua.level IS null AND ua.user_id = ?1 AND skillDef.skill_id = ua.skill_id''', nativeQuery=true)
+    List<UserAchievement> temptemp(@Param('userId') String userId)
+    //TEMPTEMPTEMP
 
     @Query(value = '''select EXTRACT(MONTH FROM ua.created) as label, count(*) countRes
       from skill_definition skillDef, user_achievement ua 

@@ -281,7 +281,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
                             exists (
                                 SELECT true
                                 from global_badge_level_definition gbld
-                                where gbld.skill_ref_id = sd.id 
+                                where gbld.skill_ref_id = sd.id and gbld.project_id in (select project_id from mp)
                             ) 
                             OR ( 
                             sd.id in (
