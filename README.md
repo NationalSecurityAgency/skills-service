@@ -1,7 +1,7 @@
 ![SkillTree](skilltree_logo.png)
 
 # SkillTree Service, Dashboard and Client Display
-SkillTree is a micro-learning gamification platform providing out-of-the-box UI visualizations, convenient client integration libaries, and a dashboard for mananging the creation and administration of Gamified Training Profiles.  
+SkillTree is a micro-learning gamification platform providing out-of-the-box UI visualizations, convenient client integration libaries and a dashboard for mananging the creation and administration of Gamified Training Profiles.  
 
 To learn more about the SkillTree platform please visit our [Official Documentation](https://code.nsa.gov/skills-docs/). 
 These pages provide in-depth guidance on installation, usage and contribution.    
