@@ -15,7 +15,7 @@
  */
 package skills.intTests
 
-import org.junit.Ignore
+
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
@@ -25,7 +25,6 @@ import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserPerformedSkillRepo
 import spock.lang.IgnoreIf
-import spock.lang.IgnoreRest
 
 class SkillApprovalHistorySpecs extends DefaultIntSpec {
 
@@ -506,19 +505,37 @@ class SkillApprovalHistorySpecs extends DefaultIntSpec {
         skillNameAsc.data.collect { it.skillId } == [skills[0].skillId, skills[1].skillId, skills[2].skillId, skills[3].skillId, skills[4].skillId]
         skillNameDesc.data.collect { it.skillId } == [skills[6].skillId, skills[5].skillId, skills[4].skillId, skills[3].skillId, skills[2].skillId]
 
-        List rejectedOnAsc_rejectedOn = rejectedOnAsc.data.collect { it.rejectedOn }
-        rejectedOnAsc_rejectedOn[0] == null
-        rejectedOnAsc_rejectedOn[1] == null
-        rejectedOnAsc_rejectedOn[2] == null
-        rejectedOnAsc_rejectedOn[3] == null
-        rejectedOnAsc_rejectedOn[4] != null
 
+        // postgres and h2 sort differently on nulls
+        List rejectedOnAsc_rejectedOn = rejectedOnAsc.data.collect { it.rejectedOn }
         List rejectedOnDesc_rejectedOn = rejectedOnDesc.data.collect { it.rejectedOn }
-        rejectedOnDesc_rejectedOn[0] != null
-        rejectedOnDesc_rejectedOn[1] != null
-        rejectedOnDesc_rejectedOn[2] != null
-        rejectedOnDesc_rejectedOn[3] == null
-        rejectedOnDesc_rejectedOn[4] == null
+        boolean isPostgres = System.getProperty("spring.datasource.url")?.contains('postgresql')
+        if (isPostgres) {
+            assert rejectedOnAsc_rejectedOn[0] != null
+            assert rejectedOnAsc_rejectedOn[1] != null
+            assert rejectedOnAsc_rejectedOn[2] != null
+            assert rejectedOnAsc_rejectedOn[3] == null
+            assert rejectedOnAsc_rejectedOn[4] == null
+
+            assert rejectedOnDesc_rejectedOn[0] == null
+            assert rejectedOnDesc_rejectedOn[1] == null
+            assert rejectedOnDesc_rejectedOn[2] == null
+            assert rejectedOnDesc_rejectedOn[3] == null
+            assert rejectedOnDesc_rejectedOn[4] != null
+
+        } else {
+            assert rejectedOnAsc_rejectedOn[0] == null
+            assert rejectedOnAsc_rejectedOn[1] == null
+            assert rejectedOnAsc_rejectedOn[2] == null
+            assert rejectedOnAsc_rejectedOn[3] == null
+            assert rejectedOnAsc_rejectedOn[4] != null
+
+            assert rejectedOnDesc_rejectedOn[0] != null
+            assert rejectedOnDesc_rejectedOn[1] != null
+            assert rejectedOnDesc_rejectedOn[2] != null
+            assert rejectedOnDesc_rejectedOn[3] == null
+            assert rejectedOnDesc_rejectedOn[4] == null
+        }
 
         requestedOnAsc.data.collect { it.requestedOn } == requestedOnAsc.data.collect { it.requestedOn }.sort()
         requestedOnDesc.data.collect { it.requestedOn } == requestedOnDesc.data.collect { it.requestedOn }.sort().reverse()

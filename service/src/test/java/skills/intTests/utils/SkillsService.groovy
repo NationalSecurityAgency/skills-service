@@ -498,8 +498,8 @@ class SkillsService {
         return wsHelper.adminGet("/projects/${projectId}/skills/${skillId}/approvals/stats")
     }
 
-    def removeApproval(String projectId, Integer approvalId) {
-        wsHelper.apiDelete("/projects/${projectId}/rejections/${approvalId}")
+    def removeRejectionFromView(String projectId, Integer approvalId, String userId = null) {
+        wsHelper.apiDelete("/projects/${projectId}/rejections/${approvalId}?${userId ? "userId=${userId}" : ""}")
     }
 
     def getSelfReportStats(String projectId) {
