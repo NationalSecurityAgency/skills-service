@@ -33,18 +33,17 @@ limitations under the License.
 
         <div v-if="!loading" class="text-left overflow-auto m-2 m-md-5 p-2 p-md-5 pb-xs-5 border" style="min-width: 60%">
           <markdown-text data-cy="userAgreement" :text="userAgreement"/>
-          <div class="float-right ml-2 mt-2">
-            <button class="btn btn-outline-success" type="button" v-on:click="acknowledgeUa"
-                    data-cy="acknowledgeUserAgreement">
-              I Agree
-              <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
-            </button>
-          </div>
-          <div class="float-right mt-2">
+          <div class=text-align: center>
+
             <button class="btn btn-outline-danger" type="button" v-on:click="signOut"
                     data-cy="rejectUserAgreement">
               No Thanks
               <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-ban']"></i>
+            </button>
+            <button class="btn btn-outline-success" type="button" v-on:click="acknowledgeUa"
+                    data-cy="acknowledgeUserAgreement">
+              I Agree
+              <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
             </button>
           </div>
         </div>
