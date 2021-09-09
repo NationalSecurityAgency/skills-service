@@ -21,6 +21,11 @@ export default {
     return axios.get(url, { params })
       .then((response) => response.data);
   },
+  getApprovalsHistory(projectId, params) {
+    const url = `/admin/projects/${projectId}/approvals/history`;
+    return axios.get(url, { params })
+      .then((response) => response.data);
+  },
   approve(projectId, approvalIds) {
     const url = `/admin/projects/${projectId}/approvals/approve`;
     return axios.post(url, { skillApprovalIds: approvalIds })

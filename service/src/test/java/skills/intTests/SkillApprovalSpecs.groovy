@@ -890,4 +890,34 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         res2.find { it.value == 'SkillApprovalsRequests' }.count == 3
         res2.find { it.value == 'SkillApprovalsRejected' }.count == 0
     }
+
+    void "requesting same skill over and over again will only add 1 approval"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(5,)
+        skills.each {
+            it.pointIncrement = 200
+            it.selfReportingType = SkillDef.SelfReportingType.Approval
+        }
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        List<String> users = getRandomUsers(10)
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], new Date(), "Please approve this 1 ")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], new Date() - 10, "Please approve this 2")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], new Date() - 20, "Please approve this 3")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], new Date() - 30, "Please approve this 4")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], new Date() - 40, "Please approve this 5")
+
+        when:
+
+
+        def requestedOnDescPg1 = skillsService.getApprovals(proj.projectId, 20, 1, 'requestedOn', false)
+        then:
+        requestedOnDescPg1.data.collect { it.userId } == [ users[0] ]
+        requestedOnDescPg1.data.collect { it.requestMsg } == [ "Please approve this 1 " ]
+    }
 }

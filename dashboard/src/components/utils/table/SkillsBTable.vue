@@ -52,7 +52,7 @@ limitations under the License.
       </template>
 
       <template v-slot:empty="scope">
-        <div class="text-center text-info my-5" style="min-height: 15rem" data-cy="emptyTable">
+        <div class="text-center text-info mt-5" style="min-height: 12rem" data-cy="emptyTable">
           <div class="mb-2">
             <i class="fas fa-dragon fa-3x border border-info rounded p-4 bg-light text-muted" />
           </div>

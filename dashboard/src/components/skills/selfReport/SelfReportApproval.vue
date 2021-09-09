@@ -38,6 +38,15 @@ limitations under the License.
                     @page-size-changed="pageSizeChanged"
                     @sort-changed="sortTable"
                     data-cy="skillsReportApprovalTable">
+      <template #head(request)="data">
+        <span class="text-primary"><i class="fas fa-hand-pointer skills-color-skills" /> {{ data.label }}</span>
+      </template>
+      <template #head(userId)="data">
+        <span class="text-primary"><i class="fas fa-user-plus skills-color-crossProjects" /> {{ data.label }}</span>
+      </template>
+      <template #head(requestedOn)="data">
+        <span class="text-primary"><i class="fas fa-clock skills-color-access" /> {{ data.label }}</span>
+      </template>
 
       <template v-slot:cell(userId)="data">
         {{ data.item.userIdForDisplay }}
@@ -249,6 +258,7 @@ limitations under the License.
         SelfReportService.approve(this.projectId, idsToApprove)
           .then(() => {
             this.loadApprovals();
+            this.$emit('approval-action', 'approved');
           });
       },
       doReject() {
@@ -257,6 +267,7 @@ limitations under the License.
         SelfReportService.reject(this.projectId, ids, this.reject.rejectMsg)
           .then(() => {
             this.loadApprovals();
+            this.$emit('approval-action', 'rejected');
           });
       },
     },

@@ -17,8 +17,10 @@ package skills.storage.repos
 
 import groovy.transform.CompileStatic
 import org.springframework.data.domain.Pageable
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
+import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
 import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
@@ -32,11 +34,16 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
         Integer getApprovalId()
         String getUserId()
         String getUserIdForDisplay()
+        String getApproverUserId()
+        String getApproverUserIdForDisplay()
         String getSkillId()
         String getSubjectId()
         String getSkillName()
         Date getRequestedOn()
+        Date getApproverActionTakenOn()
         String getRequestMsg()
+        Date getRejectedOn()
+        String getRejectionMsg()
         Integer getPoints()
     }
 
@@ -48,7 +55,10 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
         s.userId as userId,
         uAttrs.userIdForDisplay as userIdForDisplay,
         s.requestedOn as requestedOn,
+        s.approverActionTakenOn as approverActionTakenOn,
+        s.rejectedOn as rejectedOn,
         s.requestMsg as requestMsg,
+        s.rejectionMsg as rejectionMsg,
         sd.pointIncrement as points
         from SkillApproval s, SkillDef sd, UserAttrs uAttrs, SkillDef subjectDef, SkillRelDef srd 
         where 
@@ -59,10 +69,61 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             s.projectId = ?1 and 
             s.skillRefId = sd.id and 
             s.userId = uAttrs.userId and
-            s.rejectedOn is null''')
-    List<SimpleSkillApproval> findToApproveByProjectIdAndNotRejected(String projectId, Pageable pageable)
+            s.approverUserId is null''')
+    List<SimpleSkillApproval> findToApproveByProjectIdAndNotRejectedOrApproved(String projectId, Pageable pageable)
+    long countByProjectIdAndApproverUserIdIsNull(String projectId)
 
-    long countByProjectIdAndRejectedOnIsNull(String projectId)
+    @Query('''SELECT
+        s.id as approvalId,
+        sd.skillId as skillId,
+        subjectDef.skillId as subjectId,
+        sd.name as skillName,
+        s.userId as userId,
+        uAttrs.userIdForDisplay as userIdForDisplay,
+        approverUAttrs.userId as approverUserId,
+        approverUAttrs.userIdForDisplay as approverUserIdForDisplay,
+        s.requestedOn as requestedOn,
+        s.approverActionTakenOn as approverActionTakenOn,
+        s.rejectedOn as rejectedOn,
+        s.requestMsg as requestMsg,
+        s.rejectionMsg as rejectionMsg,
+        sd.pointIncrement as points
+        from SkillApproval s, SkillDef sd, UserAttrs uAttrs, UserAttrs approverUAttrs, SkillDef subjectDef, SkillRelDef srd 
+        where 
+            subjectDef = srd.parent and 
+            sd = srd.child and
+            srd.type = 'RuleSetDefinition' and
+            subjectDef.type = 'Subject' and
+            s.projectId = :projectId and 
+            s.skillRefId = sd.id and 
+            s.userId = uAttrs.userId and
+            s.approverUserId = approverUAttrs.userId and 
+            s.approverUserId is not null and
+            upper(sd.name) like UPPER(CONCAT('%', :skillNameFilter, '%')) and
+            upper(uAttrs.userIdForDisplay) like UPPER(CONCAT('%', :userIdFilter, '%')) and
+            upper(approverUAttrs.userIdForDisplay) like UPPER(CONCAT('%', :approverUserIdFilter, '%'))
+    ''')
+    List<SimpleSkillApproval> findApprovalsHistory(@Param("projectId") String projectId,
+                                                   @Param("skillNameFilter") String skillNameFilter,
+                                                   @Param("userIdFilter") String userIdFilter,
+                                                   @Param("approverUserIdFilter") String approverUserIdFilter,
+                                                   Pageable pageable)
+    @Query('''SELECT count(s)
+        from SkillApproval s, SkillDef sd, UserAttrs uAttrs, UserAttrs approverUAttrs
+        where 
+            s.projectId = :projectId and 
+            s.skillRefId = sd.id and 
+            s.userId = uAttrs.userId and
+            s.approverUserId = approverUAttrs.userId and 
+            s.approverUserId is not null and
+            upper(sd.name) like UPPER(CONCAT('%', :skillNameFilter, '%')) and
+            upper(uAttrs.userIdForDisplay) like UPPER(CONCAT('%', :userIdFilter, '%')) and
+            upper(approverUAttrs.userIdForDisplay) like UPPER(CONCAT('%', :approverUserIdFilter, '%'))
+    ''')
+    long countApprovalsHistory(@Param("projectId") String projectId,
+                               @Param("skillNameFilter") String skillNameFilter,
+                               @Param("userIdFilter") String userIdFilter,
+                               @Param("approverUserIdFilter") String approverUserIdFilter)
 
     long deleteByProjectIdAndSkillRefId(String projectId, Integer skillRefId)
 
@@ -70,12 +131,30 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
 
     @Nullable
     @Query('''select s 
-        from SkillApproval s, SkillDef sd 
-        where s.userId = ?1 and s.projectId = ?2 and s.skillRefId = sd.id and sd.skillId = ?3''')
-    SkillApproval findByUserIdProjectIdAndSkillId(String userId, String projectId, String skillId)
+        from SkillApproval s 
+        where 
+            s.userId = ?1 and s.projectId = ?2 and s.skillRefId = ?3 and  
+            s.approverActionTakenOn is null 
+            ''')
+    SkillApproval findByUserIdProjectIdAndSkillIdAndApproverActionTakenOnIsNull(String userId, String projectId, Integer skillRefId)
+
+    @Modifying
+    @Query('''update SkillApproval s set s.rejectionAcknowledgedOn = CURRENT_DATE
+        where 
+            s.userId = ?1 and s.projectId = ?2 and s.skillRefId = ?3 and  
+            s.approverActionTakenOn is not null 
+            ''')
+    void acknowledgeAllRejectedApprovalsForUserAndProjectAndSkill(String userId, String projectId, Integer skillRefId)
 
     @Nullable
-    SkillApproval findByUserIdAndProjectIdAndSkillRefId(String userId, String projectId, Integer skillRefId)
+    @Query('''select s 
+        from SkillApproval s
+        where s.userId = ?1 and s.projectId = ?2 and s.skillRefId = ?3 and 
+            (
+                s.approverActionTakenOn is null or 
+                (s.rejectionAcknowledgedOn is null and s.rejectedOn is not null)
+            )''')
+    List<SkillApproval> findApprovalForSkillsDisplay(String userId, String projectId, Integer skillRefId, Pageable pageable)
 
     interface SkillApprovalPlusSkillId {
         SkillApproval getSkillApproval()
@@ -91,8 +170,12 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             s.projectId = ?2 and
             subject.skillId = ?3 and
             srd.type = 'RuleSetDefinition' and
-            s.skillRefId = sd.id''')
-    List<SkillApprovalPlusSkillId> findSkillApprovalsByProjectIdAndSubjectId(String userId, String projectId, String subjectId)
+            s.skillRefId = sd.id and
+            (
+                s.approverActionTakenOn is null or 
+                (s.rejectionAcknowledgedOn is null and s.rejectedOn is not null)
+            )''')
+    List<SkillApprovalPlusSkillId> findsApprovalWithSkillIdForSkillsDisplay(String userId, String projectId, String subjectId)
 
     interface SkillReportingTypeAndCount {
         SkillDef.SelfReportingType getType()

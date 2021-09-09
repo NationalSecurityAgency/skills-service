@@ -55,9 +55,31 @@ class SkillApprovalController {
                              @RequestParam int page,
                              @RequestParam String orderBy,
                              @RequestParam Boolean ascending) {
-        SkillsValidator.isNotBlank(projectId, "Project Id")
-        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
+        PageRequest pageRequest = createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending)
         return skillApprovalService.getApprovals(projectId, pageRequest)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/approvals/history", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    TableResult getApprovalsHistory(@PathVariable("projectId") String projectId,
+                             @RequestParam int limit,
+                             @RequestParam int page,
+                             @RequestParam String orderBy,
+                             @RequestParam Boolean ascending,
+                             @RequestParam String skillNameFilter,
+                             @RequestParam String userIdFilter,
+                             @RequestParam String approverUserIdFilter) {
+        PageRequest pageRequest = createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending)
+        return skillApprovalService.getApprovalsHistory(projectId, skillNameFilter, userIdFilter, approverUserIdFilter, pageRequest)
+    }
+
+    private PageRequest createPagingRequestWithValidation(String projectId, int limit, int page, String orderBy, Boolean ascending) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isTrue(limit <= 200, "Cannot ask for more than 200 items, provided=[${limit}]", projectId)
+        SkillsValidator.isTrue(page >= 0, "Cannot provide negative page. provided =[${page}]", projectId)
+        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
+
+        return pageRequest
     }
 
     @RequestMapping(value = "/projects/{projectId}/approvals/approve", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)

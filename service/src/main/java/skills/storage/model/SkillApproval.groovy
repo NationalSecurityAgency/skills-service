@@ -51,6 +51,10 @@ class SkillApproval {
 
     Date rejectedOn
     String rejectionMsg
+    Date rejectionAcknowledgedOn
+
+    String approverUserId
+    Date approverActionTakenOn
 
     @Temporal(TemporalType.TIMESTAMP)
     @CreatedDate

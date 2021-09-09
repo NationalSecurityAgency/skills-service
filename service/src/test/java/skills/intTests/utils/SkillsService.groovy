@@ -480,6 +480,12 @@ class SkillsService {
         return wsHelper.adminGet("/projects/${projectId}/approvals?limit=${limit}&page=${page}&orderBy=${orderBy}&ascending=${ascending}")
     }
 
+    def getApprovalsHistory(String projectId, int limit, int page, String orderBy, Boolean ascending,  String skillNameFilter = '', String userIdFilter ='', String approverUserIdFilter = '') {
+        return wsHelper.adminGet("/projects/${projectId}/approvals/history?limit=${limit}&page=${page}&orderBy=${orderBy}&ascending=${ascending}&" +
+                "skillNameFilter=${skillNameFilter}&userIdFilter=${userIdFilter}&approverUserIdFilter=${approverUserIdFilter}")
+    }
+
+
     def approve(String projectId, List<Integer> approvalId) {
         return wsHelper.adminPost("/projects/${projectId}/approvals/approve", [skillApprovalIds: approvalId])
     }
@@ -492,8 +498,8 @@ class SkillsService {
         return wsHelper.adminGet("/projects/${projectId}/skills/${skillId}/approvals/stats")
     }
 
-    def removeApproval(String projectId, Integer approvalId) {
-        wsHelper.apiDelete("/projects/${projectId}/rejections/${approvalId}")
+    def removeRejectionFromView(String projectId, Integer approvalId, String userId = null) {
+        wsHelper.apiDelete("/projects/${projectId}/rejections/${approvalId}?${userId ? "userId=${userId}" : ""}")
     }
 
     def getSelfReportStats(String projectId) {
