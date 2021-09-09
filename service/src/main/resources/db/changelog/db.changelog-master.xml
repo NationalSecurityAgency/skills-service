@@ -1381,6 +1381,15 @@
                      tableName="skill_approval">
             <column name="approver_action_taken_on" type="datetime"/>
         </createIndex>
+        <createIndex indexName="index_skill_approval_approver_user_id
+"
+                     tableName="skill_approval">
+            <column name="approver_user_id" type="datetime"/>
+        </createIndex>
+        <sql>
+            update skill_approval set approver_action_taken_on = rejected_on where rejected_on is not null;
+            update skill_approval ap set approver_user_id = (select user_id from user_roles ur where ur.project_id = ap.project_id and ur.role_name = 'ROLE_PROJECT_ADMIN' limit 1) where rejected_on is not null;
+        </sql>
     </changeSet>
 
 </databaseChangeLog>
