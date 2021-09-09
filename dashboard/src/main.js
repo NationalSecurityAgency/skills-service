@@ -58,7 +58,10 @@ import en from 'vee-validate/dist/locale/en.json';
 import Vuex from 'vuex';
 import marked from 'marked';
 import VueApexCharts from 'vue-apexcharts';
-import { dayjs, FiltersPlugin } from '@skilltree/common-components';
+import {
+  dayjs,
+  FiltersPlugin,
+} from '@skilltree/common-components';
 import InceptionConfigurer from './InceptionConfigurer';
 import 'babel-polyfill';
 import 'matchmedia-polyfill';

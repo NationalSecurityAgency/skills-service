@@ -30,6 +30,8 @@ limitations under the License.
 
 <script>
   import { MyBadgesDetails, BadgesCatalog } from '@skilltree/common-components';
+  import SubPageHeader from '@/components/utils/pages/SubPageHeader';
+  import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import MyProgressService from '../MyProgressService';
 
   export default {
@@ -37,6 +39,8 @@ limitations under the License.
     components: {
       MyBadgesDetails,
       BadgesCatalog,
+      SubPageHeader,
+      SkillsSpinner,
     },
     data() {
       return {

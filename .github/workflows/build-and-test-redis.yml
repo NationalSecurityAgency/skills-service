@@ -76,7 +76,10 @@ jobs:
 
     - name: Start services for Cypress tests
       run: |
-        cd e2e-tests
+        cd common-components
+        npm install
+        npm run build
+        cd ../e2e-tests
         npm install
         npm run cyServices:start:skills-service:redis
         npm run cyServices:start:client-display

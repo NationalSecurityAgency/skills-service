@@ -81,7 +81,10 @@ jobs:
 
     - name: Start Services for Cypress tests
       run: |
-        cd e2e-tests
+        cd common-components
+        npm install
+        npm run build
+        cd ../e2e-tests
         npm install
         npm run backend:dropAllDBTables:postgres
         npm run cyServices:start:skills-service:postgresql

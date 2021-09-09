@@ -159,6 +159,15 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy="breadcrumb-Progress And Rankings"]').should('be.visible');
     cy.get('[data-cy=breadcrumb-proj1]').should('be.visible');
     cy.get('[data-cy=breadcrumb-projects]').should('not.exist');
+
+    cy.get('[data-cy="breadcrumb-Progress And Rankings"]').click();
+    cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^1$/));
+    cy.get('[data-cy=viewBadges]').click();
+    cy.contains('No badges earned yet.').should('be.visible');
+
+    cy.get('.row .skills-badge').eq(0).contains('Badge 1');
+      cy.get('.row .skills-badge').eq(1).contains('Gem Badge');
+
   });
 
 

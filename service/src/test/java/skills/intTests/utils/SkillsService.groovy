@@ -611,6 +611,11 @@ class SkillsService {
         wsHelper.apiGet(url)
     }
 
+    def getMyProgressBadges() {
+        String url = "/mybadges"
+        wsHelper.apiGet(url)
+    }
+
     def getAvailableMyProjects() {
         String url = "/availableForMyProjects"
         wsHelper.apiGet(url)

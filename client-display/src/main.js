@@ -26,7 +26,9 @@ import {
     ProgressPlugin,
     SpinnerPlugin,
 } from 'bootstrap-vue';
-import { FiltersPlugin } from '@skilltree/common-components';
+import {
+    FiltersPlugin,
+} from '@skilltree/common-components';
 import marked from 'marked';
 import App from '@/App';
 import router from '@/router';
