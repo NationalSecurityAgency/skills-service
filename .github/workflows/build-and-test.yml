@@ -162,7 +162,9 @@ jobs:
 
     - name: Prep Services for Cypress tests
       run: |
-        cd e2e-tests
+        cd common-components
+        npm run build
+        cd ../e2e-tests
         npm install
         npm run cyServices:start
         cd ..
