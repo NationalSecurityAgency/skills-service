@@ -163,6 +163,7 @@ jobs:
     - name: Prep Services for Cypress tests
       run: |
         cd common-components
+        npm install
         npm run build
         cd ../e2e-tests
         npm install
