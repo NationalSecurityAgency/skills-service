@@ -28,3 +28,5 @@
 node_modules
 
 .history
+
+/src/common-components

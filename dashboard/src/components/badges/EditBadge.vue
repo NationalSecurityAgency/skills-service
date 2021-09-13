@@ -135,7 +135,7 @@ limitations under the License.
 <script>
   import { extend } from 'vee-validate';
   import Datepicker from 'vuejs-datepicker';
-  import { dayjs } from '@skilltree/common-components';
+  import dayjs from '@/common-components/DayJsCustomizer';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import IconPicker from '../utils/iconPicker/IconPicker';
   import IdInput from '../utils/inputForm/IdInput';

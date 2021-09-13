@@ -102,7 +102,7 @@ limitations under the License.
 </template>
 
 <script>
-  import { dayjs } from '@skilltree/common-components';
+  import dayjs from '@/common-components/DayJsCustomizer';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
   import ProjectService from './ProjectService';
   import SkillsBTable from '../utils/table/SkillsBTable';

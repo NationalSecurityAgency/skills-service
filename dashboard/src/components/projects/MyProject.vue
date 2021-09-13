@@ -78,7 +78,7 @@ limitations under the License.
 </template>
 
 <script>
-  import { dayjs } from '@skilltree/common-components';
+  import dayjs from '@/common-components/DayJsCustomizer';
   import ProjectCardControls from '@/components/projects/ProjectCardControls';
   import ProjectCardFooter from '@/components/projects/ProjectCardFooter';
   import EditProject from './EditProject';

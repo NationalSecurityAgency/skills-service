@@ -27,7 +27,8 @@ limitations under the License.
 </template>
 
 <script>
-  import { MyBadgesDetails, BadgesCatalog } from '@skilltree/common-components';
+  import BadgesCatalog from '@/common-components/badges/BadgesCatalog';
+  import MyBadgesDetails from '@/common-components/badges/MyBadgesDetails';
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
   import SkillsSpinner from '@/common/utilities/SkillsSpinner';
   import SkillsTitle from '@/common/utilities/SkillsTitle';

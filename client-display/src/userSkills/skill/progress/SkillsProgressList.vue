@@ -82,7 +82,7 @@ limitations under the License.
 
 <script>
   import ToggleButton from 'vue-js-toggle-button/src/Button';
-  import { NoDataYet } from '@skilltree/common-components';
+  import NoDataYet from '@/common-components/utilities/NoDataYet';
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
   import SkillsSpinner from '@/common/utilities/SkillsSpinner';
   import SkillProgress2 from './SkillProgress2';

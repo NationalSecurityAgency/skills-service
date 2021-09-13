@@ -51,7 +51,7 @@ limitations under the License.
 </template>
 
 <script>
-  import NoDataYet from '@/common/utilities/NoDataYet';
+  import NoDataYet from '../utilities/NoDataYet';
 
   export default {
     name: 'MyBadgesDetails',

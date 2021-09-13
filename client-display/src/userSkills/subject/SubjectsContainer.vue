@@ -32,7 +32,7 @@ limitations under the License.
 </template>
 
 <script>
-  import { NoDataYet } from '@skilltree/common-components';
+  import NoDataYet from '@/common-components/utilities/NoDataYet';
   import SubjectTile from '@/userSkills/subject/SubjectTile';
   import NavigationErrorMixin from '@/common/utilities/NavigationErrorMixin';
 

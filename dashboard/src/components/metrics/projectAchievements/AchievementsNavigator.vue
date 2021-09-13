@@ -120,7 +120,7 @@ limitations under the License.
 
 <script>
   import { extend } from 'vee-validate';
-  import { dayjs } from '@skilltree/common-components';
+  import dayjs from '@/common-components/DayJsCustomizer';
   import SkillsBTable from '../../utils/table/SkillsBTable';
   import MetricsService from '../MetricsService';
   import AchievementType from './AchievementType';

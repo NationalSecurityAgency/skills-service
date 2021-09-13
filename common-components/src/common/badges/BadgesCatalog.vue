@@ -35,7 +35,7 @@ limitations under the License.
 </template>
 
 <script>
-  import BadgeCatalogItem from '@/common/badges/BadgeCatalogItem';
+  import BadgeCatalogItem from './BadgeCatalogItem';
 
   export default {
     name: 'BadgesCatalog',
