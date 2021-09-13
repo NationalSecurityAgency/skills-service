@@ -17,106 +17,106 @@ limitations under the License.
   <div id="contact-users-panel">
     <sub-page-header title="Contact Users" />
 
-    <b-card body-class="p-0">
-      <b-overlay :show="!emailFeatureConfigured">
-        <div slot="overlay" class="alert alert-warning mt-2" data-cy="contactUsers_emailServiceWarning">
-          <i class="fa fa-exclamation-triangle" aria-hidden="true"/> Please note that email notifications are currently disabled. Email configuration has not been performed on this instance of SkillTree. Please contact the root administrator.
-        </div>
-        <div class="h5 pt-2 mt-2 pr-2 pl-2 mr-2 ml-2 text-uppercase">Filters</div>
-        <div class="row p-2 m-2">
-          <div class="col-12 col-md-3 col-lg-2 border-md-right">
-              <b-form-group label="Type:" label-for="filter-type" label-class="text-muted">
-                <b-form-radio-group id="type-radio-group" v-model="currentFilterType" name="filter-type-options" :disabled="criteria.allProjectUsers" stacked>
-                  <b-form-radio value="project" data-cy="projectFilter">Project</b-form-radio>
-                  <b-form-radio value="badge" data-cy="badgeFilter">Badge</b-form-radio>
-                  <b-form-radio value="subject" data-cy="subjectFilter">Subject</b-form-radio>
-                  <b-form-radio value="skill" data-cy="skillFilter">Skill</b-form-radio>
-                </b-form-radio-group>
+    <b-overlay :show="!emailFeatureConfigured">
+      <div slot="overlay" class="alert alert-warning mt-2" data-cy="contactUsers_emailServiceWarning">
+        <i class="fa fa-exclamation-triangle" aria-hidden="true"/> Please note that email notifications are currently disabled. Email configuration has not been performed on this instance of SkillTree. Please contact the root administrator.
+      </div>
+      <b-card body-class="p-0">
+          <div class="h5 pt-2 mt-2 pr-2 pl-2 mr-2 ml-2 text-uppercase">Filters</div>
+          <div class="row p-2 m-2">
+            <div class="col-12 col-md-3 col-lg-2 border-md-right">
+                <b-form-group label="Type:" label-for="filter-type" label-class="text-muted">
+                  <b-form-radio-group id="type-radio-group" v-model="currentFilterType" name="filter-type-options" :disabled="criteria.allProjectUsers" stacked>
+                    <b-form-radio value="project" data-cy="projectFilter">Project</b-form-radio>
+                    <b-form-radio value="badge" data-cy="badgeFilter">Badge</b-form-radio>
+                    <b-form-radio value="subject" data-cy="subjectFilter">Subject</b-form-radio>
+                    <b-form-radio value="skill" data-cy="skillFilter">Skill</b-form-radio>
+                  </b-form-radio-group>
+                </b-form-group>
+              </div>
+            <div class="col-9 col-lg-10">
+              <b-form-group label="Name (Subject, Skill and Badge Only):" label-for="name-filter" label-class="text-muted">
+                <b-overlay :show="loading.skills || loading.badges || loading.subjects" rounded="sm" opacity="0.5"
+                           spinner-variant="info" spinner-type="grow" spinner-small>
+                  <template v-if="currentFilterType && currentFilterType !== 'project'">
+
+                    <multiselect ref="select" v-model="selectedItem" :options="ids" label="name" :searchable="true"
+                                 :loading="isLoading" trackBy="name"
+                                :placeholder="selectText" :multiple="false"/>
+
+                   <b-form-group label="Achieved" label-for="achieved-button" label-class="text-muted" v-show="currentFilterType && currentFilterType==='skill'"
+                                 class="mt-4" :disabled="criteria.allProjectUsers">
+                      <b-form-checkbox v-model="skills.achieved"
+                                       name="achieved-button"
+                                       data-cy="skillAchievedSwitch"
+                                       switch>
+                        {{ skills.achieved ? 'Achieved' : 'Not Achieved' }}
+                      </b-form-checkbox>
+                    </b-form-group>
+                  </template>
+                  <b-form-input v-else disabled/>
+                </b-overlay>
+
               </b-form-group>
+              <div class="row p-3">
+                <b-form-group id="levels-input-group" label="Minimum Level (Project & Subject Only):" label-for="input-3" label-class="text-muted">
+                  <b-form-select id="input-3" v-model="levels.selected" :options="levels.available"
+                                 required data-cy="emailUsers-levelsInput"
+                                 :disabled="levelsDisabled || criteria.allProjectUsers" />
+                </b-form-group>
             </div>
-          <div class="col-9 col-lg-10">
-            <b-form-group label="Name (Subject, Skill and Badge Only):" label-for="name-filter" label-class="text-muted">
-              <b-overlay :show="loading.skills || loading.badges || loading.subjects" rounded="sm" opacity="0.5"
-                         spinner-variant="info" spinner-type="grow" spinner-small>
-                <template v-if="currentFilterType && currentFilterType !== 'project'">
+          </div>
+          </div>
+          <div class="row pl-3 pr-3 pt-1 pb-1 ml-3 mr-3 mt-1 mb-1">
+            <b-button variant="outline-primary" class="mr-1" @click="addCriteria" data-cy="emailUsers-addBtn"
+                      :disabled="isAddDisabled || maxTagsReached"><i class="fas fa-plus-circle"/> Add</b-button>
+            <transition name="fade">
+              <span v-if="alreadyApplied" data-cy="filterExists" class="pt-2 pl-1" role="alert">Filter already exists</span>
+            </transition>
+            <span v-if="maxTagsReached" data-cy="maxFiltersReached" class="text-warning pt-2 pl-1">Only {{maxCriteria}} filters are allowed</span>
+          </div>
 
-                  <multiselect ref="select" v-model="selectedItem" :options="ids" label="name" :searchable="true"
-                               :loading="isLoading" trackBy="name"
-                              :placeholder="selectText" :multiple="false"/>
+          <div class="container-fluid pl-3 pr-3 pb-3 pt-1 mr-3 ml-1">
+            <div class="pb-3 mt-1 ml-3">
+              <b-badge v-for="(tag) of tags" :key="tag.display" variant="info" class="pl-2 m-2 text-break"
+                       style="max-width: 85%;" data-cy="filterBadge">
+                {{tag.display}} <b-button @click="deleteCriteria(tag)"
+                                          variant="outline-info" size="sm" class="text-warning"
+                                          :aria-label="`Remove contact user criteria ${tag.display}`"
+                                          data-cy="contactUserCriteria-removeBtn"><i class="fa fa-trash" /><span class="sr-only">delete filter {{tag.display}}</span></b-button>
+              </b-badge>
+            </div>
+            <h1 class="ml-4 h5 text-uppercase" data-cy="usersMatchingFilters"><b-badge variant="info">{{this.currentCount|number}}</b-badge> Users Selected</h1>
+          </div>
 
-                 <b-form-group label="Achieved" label-for="achieved-button" label-class="text-muted" v-show="currentFilterType && currentFilterType==='skill'"
-                               class="mt-4" :disabled="criteria.allProjectUsers">
-                    <b-form-checkbox v-model="skills.achieved"
-                                     name="achieved-button"
-                                     data-cy="skillAchievedSwitch"
-                                     switch>
-                      {{ skills.achieved ? 'Achieved' : 'Not Achieved' }}
-                    </b-form-checkbox>
-                  </b-form-group>
-                </template>
-                <b-form-input v-else disabled/>
-              </b-overlay>
-
+          <hr />
+          <div class="pl-2 ml-2 pr-2 mr-2 h5 pb-2 text-uppercase">Email Content</div>
+          <div class="row pl-3 pr-3 pt-3 pb-1 m-3 mb-1">
+            <b-form-group class="w-100" id="subject-line-input-group" label="Subject Line" label-for="subject-line-input" label-class="text-muted">
+              <b-input class="w-100" v-model="subject" id="subject-line-input" data-cy="emailUsers_subject"/>
             </b-form-group>
-            <div class="row p-3">
-              <b-form-group id="levels-input-group" label="Minimum Level (Project & Subject Only):" label-for="input-3" label-class="text-muted">
-                <b-form-select id="input-3" v-model="levels.selected" :options="levels.available"
-                               required data-cy="emailUsers-levelsInput"
-                               :disabled="levelsDisabled || criteria.allProjectUsers" />
-              </b-form-group>
           </div>
-        </div>
-        </div>
-        <div class="row pl-3 pr-3 pt-1 pb-1 ml-3 mr-3 mt-1 mb-1">
-          <b-button variant="outline-primary" class="mr-1" @click="addCriteria" data-cy="emailUsers-addBtn"
-                    :disabled="isAddDisabled || maxTagsReached"><i class="fas fa-plus-circle"/> Add</b-button>
-          <transition name="fade">
-            <span v-if="alreadyApplied" data-cy="filterExists" class="pt-2 pl-1" role="alert">Filter already exists</span>
-          </transition>
-          <span v-if="maxTagsReached" data-cy="maxFiltersReached" class="text-warning pt-2 pl-1">Only {{maxCriteria}} filters are allowed</span>
-        </div>
-
-        <div class="container-fluid pl-3 pr-3 pb-3 pt-1 mr-3 ml-1">
-          <div class="pb-3 mt-1 ml-3">
-            <b-badge v-for="(tag) of tags" :key="tag.display" variant="info" class="pl-2 m-2 text-break"
-                     style="max-width: 85%;" data-cy="filterBadge">
-              {{tag.display}} <b-button @click="deleteCriteria(tag)"
-                                        variant="outline-info" size="sm" class="text-warning"
-                                        :aria-label="`Remove contact user criteria ${tag.display}`"
-                                        data-cy="contactUserCriteria-removeBtn"><i class="fa fa-trash" /><span class="sr-only">delete filter {{tag.display}}</span></b-button>
-            </b-badge>
+          <div class="row pl-3 pr-3 pb-1 ml-3 mr-3 mb-1 mt-1">
+            <b-form-group class="w-100" id="body-input-group" label="Email Body" label-for="body-input" label-class="text-muted">
+              <markdown-editor class="w-100" v-model="body" data-cy="emailUsers_body"/>
+            </b-form-group>
           </div>
-          <h1 class="ml-4 h5 text-uppercase" data-cy="usersMatchingFilters"><b-badge variant="info">{{this.currentCount|number}}</b-badge> Users Selected</h1>
-        </div>
-
-        <hr />
-        <div class="pl-2 ml-2 pr-2 mr-2 h5 pb-2 text-uppercase">Email Content</div>
-        <div class="row pl-3 pr-3 pt-3 pb-1 m-3 mb-1">
-          <b-form-group class="w-100" id="subject-line-input-group" label="Subject Line" label-for="subject-line-input" label-class="text-muted">
-            <b-input class="w-100" v-model="subject" id="subject-line-input" data-cy="emailUsers_subject"/>
-          </b-form-group>
-        </div>
-        <div class="row pl-3 pr-3 pb-1 ml-3 mr-3 mb-1 mt-1">
-          <b-form-group class="w-100" id="body-input-group" label="Email Body" label-for="body-input" label-class="text-muted">
-            <markdown-editor class="w-100" v-model="body" data-cy="emailUsers_body"/>
-          </b-form-group>
-        </div>
-        <div class="row pl-3 pr-3 pb-3 pt-1 ml-3 mr-3 mb-3 mt-1">
-          <b-button class="mr-3" data-cy="previewUsersEmail"
-                    v-b-tooltip.hover="'this will send a test email to the current user'"
-                    :disabled="isPreviewDisabled"
-                    @click="previewEmail"
-                    variant="outline-primary" aria-label="preview email to project users">
-            <span>Preview</span> <i :class="[emailing ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-eye']" style="font-size:1rem;" aria-hidden="true"/>
-          </b-button>
-          <b-button variant="outline-primary" class="mr-1" @click="emailUsers" data-cy="emailUsers-submitBtn"
-                    :disabled="isEmailDisabled"><i :class="[emailing ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fas fa-mail-bulk']" /> Email</b-button>
-          <transition name="fade">
-            <span v-if="emailSent" class="pt-2 pl-1" data-cy="emailSent"><i class="far fa-check-square text-success"/> {{ sentMsg }}</span>
-          </transition>
-        </div>
-      </b-overlay>
-    </b-card>
+          <div class="row pl-3 pr-3 pb-3 pt-1 ml-3 mr-3 mb-3 mt-1">
+            <b-button class="mr-3" data-cy="previewUsersEmail"
+                      v-b-tooltip.hover="'this will send a test email to the current user'"
+                      :disabled="isPreviewDisabled"
+                      @click="previewEmail"
+                      variant="outline-primary" aria-label="preview email to project users">
+              <span>Preview</span> <i :class="[emailing ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-eye']" style="font-size:1rem;" aria-hidden="true"/>
+            </b-button>
+            <b-button variant="outline-primary" class="mr-1" @click="emailUsers" data-cy="emailUsers-submitBtn"
+                      :disabled="isEmailDisabled"><i :class="[emailing ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fas fa-mail-bulk']" /> Email</b-button>
+            <transition name="fade">
+              <span v-if="emailSent" class="pt-2 pl-1" data-cy="emailSent"><i class="far fa-check-square text-success"/> {{ sentMsg }}</span>
+            </transition>
+          </div>
+      </b-card>
+    </b-overlay>
   </div>
 
 </template>
