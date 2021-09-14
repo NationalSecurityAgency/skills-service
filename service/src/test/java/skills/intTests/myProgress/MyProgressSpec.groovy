@@ -105,10 +105,12 @@ class MyProgressSpec extends DefaultIntSpec {
         Date oneWeekAgo = new Date()-7
         Date twoWeeksAgo = new Date()-14
         def gem1 = SkillsFactory.createBadge(1, 4)
+        gem1.badgeId = "gem1"
         gem1.enabled = false;
         gem1.startDate = twoWeeksAgo
         gem1.endDate = oneWeekAgo
         def gem2 = SkillsFactory.createBadge(1, 5)
+        gem2.badgeId = "gem2"
         gem2.enabled = false;
         gem2.startDate = twoWeeksAgo
         gem2.endDate = oneWeekAgo
@@ -203,6 +205,9 @@ class MyProgressSpec extends DefaultIntSpec {
         def myBadgesAfterAddMyProjectProj1 = skillsService.getMyProgressBadges()
 
         badge1.enabled = true
+        badge1.iconClass = "fakeityfakefake"
+        badge1.description = "a description"
+        badge1.helpUrl = "http://fakeityurlfakeity"
         skillsService.createBadge(badge1)
 
         // expect these to only contain badge1 and no other proj1 badges for both counts and badges returned
@@ -265,13 +270,21 @@ class MyProgressSpec extends DefaultIntSpec {
         summaryAfterAllEnabled.gemCount == 2
         summaryAfterAllEnabled.globalBadgeCount == 2
         myBadgesAfterAllEnabled.size() == 7
-        myBadgesAfterAllEnabled.find { it.badgeId == badge1.badgeId }
-        myBadgesAfterAllEnabled.find { it.badgeId == badge2.badgeId }
-        myBadgesAfterAllEnabled.find { it.badgeId == badge3.badgeId }
-        myBadgesAfterAllEnabled.find { it.badgeId == gem1.badgeId }
-        myBadgesAfterAllEnabled.find { it.badgeId == gem2.badgeId }
-        myBadgesAfterAllEnabled.find { it.badgeId == globalBadge.badgeId }
-        myBadgesAfterAllEnabled.find { it.badgeId == globalBadge2.badgeId }
+        myBadgesAfterAllEnabled.find {
+            it.badgeId == badge1.badgeId &&
+                    it.projectId == proj1.projectId &&
+                    it.description == badge1.description &&
+                    it.helpUrl == badge1.helpUrl &&
+                    it.iconClass == badge1.iconClass &&
+                    it.numSkillsAchieved == 0 &&
+                    it.numTotalSkills == 1
+        }
+        myBadgesAfterAllEnabled.find { it.badgeId == badge2.badgeId && it.projectId == proj1.projectId }
+        myBadgesAfterAllEnabled.find { it.badgeId == badge3.badgeId && it.projectId == proj1.projectId }
+        myBadgesAfterAllEnabled.find { it.badgeId == gem1.badgeId && it.startDate && it.endDate && it.gem }
+        myBadgesAfterAllEnabled.find { it.badgeId == gem2.badgeId && it.startDate && it.endDate && it.gem  }
+        myBadgesAfterAllEnabled.find { it.badgeId == globalBadge.badgeId && it.global }
+        myBadgesAfterAllEnabled.find { it.badgeId == globalBadge2.badgeId && it.global }
 
         summaryAfterProj2.totalBadges == 4
         summaryAfterProj2.gemCount == 0
@@ -281,7 +294,10 @@ class MyProgressSpec extends DefaultIntSpec {
         myBadgesAfterProj2.find { it.badgeId == proj2badge1.badgeId && it.badgeAchieved }
         myBadgesAfterProj2.find { it.badgeId == proj2badge2.badgeId && !it.badgeAchieved }
         myBadgesAfterProj2.find { it.badgeId == globalBadge3.badgeId && !it.badgeAchieved }
+        myBadgesAfterProj2.find { it.badgeId == globalBadge3.badgeId }.projectLevelsAndSkillsSummaries.find { it.projectId == proj3.projectId && it.skills.find { it.skillId == proj3Skills[1].skillId }}
+        myBadgesAfterProj2.find { it.badgeId == globalBadge3.badgeId }.projectLevelsAndSkillsSummaries.find { it.projectId == proj2.projectId && it.skills.find { it.skillId == proj2Skills[1].skillId }}
         myBadgesAfterProj2.find { it.badgeId == globalBadge4.badgeId && !it.badgeAchieved }
+        myBadgesAfterProj2.find { it.badgeId == globalBadge4.badgeId }.projectLevelsAndSkillsSummaries.find { it.projectId == proj2.projectId && it.projectLevel.projectId == proj2.projectId && it.projectLevel.requiredLevel == 2 }
     }
 
     def "my progress summary - badge count"() {

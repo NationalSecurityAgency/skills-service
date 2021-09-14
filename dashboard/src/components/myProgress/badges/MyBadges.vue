@@ -21,8 +21,8 @@ limitations under the License.
     <skills-spinner :is-loading="loading" />
     <b-row v-if="!loading" class="my-4">
       <b-col class="my-summary-card">
-        <my-badges-details class="mb-4" :badges="this.achievedBadges" :badgeRouterLinkGenerator="generateBadgeRouterLink" />
-        <badges-catalog :badges="this.unachievedBadges" :badgeRouterLinkGenerator="generateBadgeRouterLink" />
+        <my-badges-details class="myBadges mb-4" :badges="this.achievedBadges" :badgeRouterLinkGenerator="generateBadgeRouterLink" />
+        <badges-catalog :noBadgesMessage="noCatalogMsg" :badges="this.unachievedBadges" :badgeRouterLinkGenerator="generateBadgeRouterLink" />
       </b-col>
     </b-row>
   </div>
@@ -53,12 +53,21 @@ limitations under the License.
     mounted() {
       this.loadBadges();
     },
+    computed: {
+      noCatalogMsg() {
+        if (this.achievedBadges.length > 0 && this.unachievedBadges.length === 0) {
+          return 'No Badges left to earn!';
+        }
+        return 'No Badges available';
+      },
+    },
     methods: {
       generateBadgeRouterLink(badge) {
         if (badge.projectId) {
           const navlink = { path: `/progress-and-rankings/projects/${badge.projectId}/`, query: { skillsClientDisplayPath: `/badges/${badge.badgeId}` } };
           return navlink;
         }
+
         if (badge.projectLevelsAndSkillsSummaries) {
           const summary = badge.projectLevelsAndSkillsSummaries.find((summ) => this.projectIds.includes(summ.projectId));
           if (summary) {
@@ -83,5 +92,15 @@ limitations under the License.
 </script>
 
 <style scoped>
+  /deep/ div.earned-badge {
+    text-align: center;
+  }
 
+  /deep/ div.skills-badge-icon {
+    text-align: center;
+  }
+
+  /deep/ .skills-no-data-yet {
+    text-align: center;
+  }
 </style>

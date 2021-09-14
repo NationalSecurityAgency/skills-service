@@ -27,6 +27,9 @@ limitations under the License.
                     <hr/>
                 </div>
             </div>
+            <div v-if="!badges || badges.length === 0" class="skills-no-data-yet text-primary text-center" data-cy="badge-catalog_no-badges">
+                {{ noBadgesMessage }}
+            </div>
         </div>
     </div>
 </template>
@@ -45,6 +48,11 @@ limitations under the License.
       badgeRouterLinkGenerator: {
         type: Function,
         required: true,
+      },
+      noBadgesMessage: {
+        type: String,
+        required: false,
+        default: 'No Badges left to earn!',
       },
     },
     data() {

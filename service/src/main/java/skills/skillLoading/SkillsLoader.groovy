@@ -172,7 +172,6 @@ class SkillsLoader {
             myProgressSummary.numProjectsContributed += summary.points > 0 ? 1 : 0
         }
 
-//        BadgeCount badgeCount = skillDefRepo.getProductionBadgesCount(userId)
         BadgeCount badgeCount = skillDefRepo.getProductionMyBadgesCount(userId)
         myProgressSummary.totalBadges = badgeCount.totalCount ?: 0
         myProgressSummary.globalBadgeCount = badgeCount.globalCount ?: 0
@@ -203,7 +202,12 @@ class SkillsLoader {
                     ProjDef projDef = projDefRepo.findByProjectId(it.projectId)
                     badges << loadBadgeSummary(projDef, userId, it)
                 } else {
-                    badges << loadGlobalBadgeSummary(userId, null, it)
+                    // we have to load badge skills, if no project level is defined then without loading skills,
+                    // the client can't identify the project_ids involved in the global bage
+                    def badge = loadGlobalBadgeSummary(userId, null, it, Integer.MAX_VALUE, true)
+                    if (badge.projectLevelsAndSkillsSummaries) {
+                        badges << badge
+                    }
                 }
             })
         }

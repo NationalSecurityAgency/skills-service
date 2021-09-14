@@ -58,18 +58,16 @@ import en from 'vee-validate/dist/locale/en.json';
 import Vuex from 'vuex';
 import marked from 'marked';
 import VueApexCharts from 'vue-apexcharts';
+import 'babel-polyfill';
+import 'matchmedia-polyfill';
+import 'matchmedia-polyfill/matchMedia.addListener';
 import {
   dayjs,
   FiltersPlugin,
 } from '@skilltree/common-components';
 import InceptionConfigurer from './InceptionConfigurer';
-import 'babel-polyfill';
-import 'matchmedia-polyfill';
-import 'matchmedia-polyfill/matchMedia.addListener';
-// import './filters/NumberFilter';
 import './filters/TruncateFilter';
 import './filters/DateFilter';
-// import './filters/TimeFromNowFilter';
 import './directives/SkillsOnMountDirective';
 import RegisterValidators from './validators/RegisterValidators';
 import './directives/FocusDirective';
