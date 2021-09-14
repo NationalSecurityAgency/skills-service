@@ -234,13 +234,17 @@ limitations under the License.
           const diff = timeLengthSelectorBottom - toolbarBottom;
           if (diff !== 0) {
             this.toolbarOffset += diff;
-            this.$refs[this.chartId].updateOptions({
-              chart: {
-                toolbar: {
-                  offsetY: this.toolbarOffset,
+            this.chartOptions = {
+              ...this.chartOptions,
+              ...{
+                chart: {
+                  toolbar: {
+                    offsetY: this.toolbarOffset,
+                  },
                 },
               },
-            });
+            };
+            this.$refs[this.chartId].updateOptions(this.chartOptions);
           }
         }
       },
