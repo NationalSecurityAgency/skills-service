@@ -23,7 +23,7 @@ limitations under the License.
 
 <script>
   import { createNamespacedHelpers } from 'vuex';
-  import { dayjs } from '@skilltree/common-components';
+  import dayjs from '@/common-components/DayJsCustomizer';
   import LoadingContainer from '../utils/LoadingContainer';
   import SkillsTable from './SkillsTable';
   import SkillsService from './SkillsService';

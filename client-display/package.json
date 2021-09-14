@@ -7,16 +7,17 @@
   "author": "SkillTree Team",
   "private": "true",
   "scripts": {
-    "serve": "vue-cli-service serve",
+    "serve": "npm run setup:common && vue-cli-service serve",
     "licenseDepCheck": "license-checker --excludePrivatePackages --production --onlyAllow='MIT;ISC;Apache-2.0;Custom: https://travis-ci.org/component/emitter.png' --summary",
     "licenseHeaderCheck": "license-check-and-add check -f '../license-add/license-add-config.json' -r 20",
     "licenseHeaderAdd": "license-check-and-add add -f ../license-add/license-add-config.json -r 21",
     "licenseCheck": "npm run licenseHeaderCheck && npm run licenseDepCheck",
-    "build": "npm run licenseCheck && npm run test:unit && vue-cli-service build",
-    "build-lib": "NODE_ENV='production' && rm -rfv dist && vue-cli-service build --target lib --name userSkills './src/index.js'",
+    "build": "npm run setup:common && npm run licenseCheck && npm run test:unit && vue-cli-service build",
+    "build-lib": "NODE_ENV='production' && rm -rfv dist && npm run setup:common && vue-cli-service build --target lib --name userSkills './src/index.js'",
     "deploy": "npm run build && mkdir -p ../service/src/main/resources/public/static/ && mkdir -p ../service/target/classes/public/static && rm -rf ../service/src/main/resources/public/static/clientPortal && cp -rT dist ../service/src/main/resources/public/static/clientPortal && cp -rT dist ../service/target/classes/public/static/clientPortal ",
     "lint": "vue-cli-service lint",
-    "test:unit": "vue-cli-service test:unit"
+    "test:unit": "vue-cli-service test:unit",
+    "setup:common": "npx symlink-dir ../common-components/src/common src/common-components"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "5.14.0",
@@ -46,8 +47,7 @@
     "vue-router": "3.4.3",
     "vue-simple-progress": "1.1.1",
     "vue-simple-spinner": "1.2.10",
-    "vuex": "3.5.1",
-    "@skilltree/common-components": "file:../common-components"
+    "vuex": "3.5.1"
   },
   "devDependencies": {
     "@babel/core": "7.13.1",

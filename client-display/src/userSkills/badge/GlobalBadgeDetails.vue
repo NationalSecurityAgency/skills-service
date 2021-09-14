@@ -47,7 +47,8 @@ limitations under the License.
 </template>
 
 <script>
-  import { BadgeDetailsOverview, NoDataYet } from '@skilltree/common-components';
+  import BadgeDetailsOverview from '@/common-components/badges/BadgeDetailsOverview';
+  import NoDataYet from '@/common-components/utilities/NoDataYet';
   import SkillsProgressList from '@/userSkills/skill/progress/SkillsProgressList';
   import ProjectLevelRow from '@/userSkills/badge/ProjectLevelRow';
   import SkillsSpinner from '@/common/utilities/SkillsSpinner';

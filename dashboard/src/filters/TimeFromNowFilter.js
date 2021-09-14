@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import Vue from 'vue';
-import { dayjs } from '@skilltree/common-components';
+import dayjs from '@/common-components/DayJsCustomizer';
 
 const timeFromNowFormatter = (value) => dayjs(value).startOf('seconds').fromNow();
 Vue.filter('timeFromNow', timeFromNowFormatter);

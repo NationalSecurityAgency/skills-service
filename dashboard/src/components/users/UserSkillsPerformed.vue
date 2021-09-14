@@ -59,7 +59,7 @@ limitations under the License.
 
 <script>
   import { createNamespacedHelpers } from 'vuex';
-  import { dayjs } from '@skilltree/common-components';
+  import dayjs from '@/common-components/DayJsCustomizer';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
   import ToastSupport from '../utils/ToastSupport';

@@ -175,7 +175,7 @@ limitations under the License.
 
 <script>
   import { SkillsReporter } from '@skilltree/skills-client-vue';
-  import { dayjs } from '@skilltree/common-components';
+  import dayjs from '@/common-components/DayJsCustomizer';
   import EditSkill from './EditSkill';
   import NoContent2 from '../utils/NoContent2';
   import ChildRowSkillsDisplay from './ChildRowSkillsDisplay';

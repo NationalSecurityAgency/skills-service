@@ -13,13 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import BadgeDetailsOverview from '@/common/badges/BadgeDetailsOverview';
-import BadgesCatalog from '@/common/badges/BadgesCatalog';
-import MyBadgesDetails from '@/common/badges/MyBadgesDetails';
-import MarkdownText from '@/common/utilities/MarkdownText';
-import NoDataYet from '@/common/utilities/NoDataYet';
-import dayjs from '@/common/DayJsCustomizer';
 import format from 'number-format.js';
+import dayjs from '../DayJsCustomizer';
 
 const timeFromNowFormatter = (value) => dayjs(value).startOf('seconds').fromNow();
 
@@ -42,12 +37,4 @@ const FiltersPlugin = (vue) => {
     vue.filter('number', numberFormatter);
 };
 
-export {
-  BadgeDetailsOverview,
-  BadgesCatalog,
-  MyBadgesDetails,
-  MarkdownText,
-  NoDataYet,
-  dayjs,
-  FiltersPlugin,
-};
+export default FiltersPlugin;

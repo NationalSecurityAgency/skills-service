@@ -27,7 +27,7 @@ limitations under the License.
 </template>
 
 <script>
-  import { dayjs } from '@skilltree/common-components';
+  import dayjs from '@/common-components/DayJsCustomizer';
   import TimeLengthSelector from '../common/TimeLengthSelector';
   import numberFormatter from '@//filters/NumberFilter';
   import MetricsCard from '../utils/MetricsCard';

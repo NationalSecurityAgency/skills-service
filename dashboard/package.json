@@ -6,20 +6,20 @@
   "author": "SkillTree Team",
   "private": "true",
   "scripts": {
-    "serve": "vue-cli-service serve",
+    "serve": "npm run setup:common && vue-cli-service serve",
     "licenseDepCheck": "license-checker --excludePrivatePackages --production --onlyAllow='MIT;ISC;Apache-2.0;BSD-2-Clause;BSD-3-Clause;Unlicense;Custom: https://travis-ci.org/component/emitter.png' --summary",
     "licenseHeaderCheck": "license-check-and-add check -f '../license-add/license-add-config.json'",
     "licenseHeaderAdd": "license-check-and-add add -f ../license-add/license-add-config.json",
     "licenseCheck": "npm run licenseHeaderCheck && npm run licenseDepCheck",
-    "build": "npm run licenseCheck && npm run test:unit && vue-cli-service build",
+    "build": "npm run setup:common && npm run licenseCheck && npm run test:unit && vue-cli-service build",
     "deploy": "npm run build && rm -rf ../service/src/main/resources/public/static/js && cp -rT dist ../service/src/main/resources/public/ && cp -rT dist ../service/target/classes/public/",
     "lint": "vue-cli-service lint",
     "test:e2e": "vue-cli-service test:e2e",
-    "test:unit": "vue-cli-service test:unit"
+    "test:unit": "vue-cli-service test:unit",
+    "setup:common": "npx symlink-dir ../common-components/src/common src/common-components"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "5.15.3",
-    "@skilltree/common-components": "file:../common-components",
     "@skilltree/skills-client-vue": "3.3.1",
     "animate.css": "4.1.1",
     "apexcharts": "3.27.2",
@@ -76,6 +76,7 @@
     "moment-timezone": "0.5.33",
     "node-sass": "6.0.1",
     "sass-loader": "10.2.0",
+    "symlink-dir": "^5.0.1",
     "vue-cli-plugin-webpack-bundle-analyzer": "4.0.0",
     "vue-template-compiler": "2.6.14"
   }

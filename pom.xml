@@ -10,7 +10,6 @@
     <version>1.7.0-SNAPSHOT</version>
     <modules>
         <module>call-stack-profiler</module>
-        <module>common-components</module>
         <module>dashboard</module>
         <module>client-display</module>
         <module>service</module>

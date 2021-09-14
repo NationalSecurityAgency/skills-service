@@ -26,7 +26,7 @@ limitations under the License.
 </template>
 
 <script>
-  import BadgeDetailsOverview from '@/common/badges/BadgeDetailsOverview';
+  import BadgeDetailsOverview from './BadgeDetailsOverview';
 
   export default {
     name: 'BadgeCatalogItem',
