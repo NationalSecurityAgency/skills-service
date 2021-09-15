@@ -17,39 +17,39 @@ limitations under the License.
   <div id="contact-users-panel">
     <sub-page-header title="Contact Project Administrators" />
 
-    <b-card body-class="p-0">
-      <b-overlay :show="!emailFeatureConfigured">
-        <div slot="overlay" class="alert alert-warning mt-2" data-cy="contactUsers_emailServiceWarning">
-          <i class="fa fa-exclamation-triangle" aria-hidden="true"/> Please note that email notifications are currently disabled. Email configuration has not been performed on this instance of SkillTree. Please contact the root administrator.
-        </div>
-        <div class="m-4 h5 text-uppercase">Email Content</div>
-        <div class="m-4"><b-badge variant="info" data-cy="projectAdminCount">{{this.currentCount|number}}</b-badge> Project Administrators</div>
-        <div class="row pl-3 pr-3 pt-3 pb-1 m-3 mb-1">
-          <b-form-group class="w-100" id="subject-line-input-group" label="Subject Line" label-for="subject-line-input" label-class="text-muted">
-            <b-input class="w-100" v-model="subject" id="subject-line-input" data-cy="emailUsers_subject"/>
-          </b-form-group>
-        </div>
-        <div class="row pl-3 pr-3 pb-1 ml-3 mr-3 mb-1 mt-1">
-          <b-form-group class="w-100" id="body-input-group" label="Email Body" label-for="body-input" label-class="text-muted">
-            <markdown-editor class="w-100" v-model="body" data-cy="emailUsers_body"/>
-          </b-form-group>
-        </div>
-        <div class="row pl-3 pr-3 pb-3 pt-1 ml-3 mr-3 mb-3 mt-1">
-          <b-button class="mr-3" data-cy="previewAdminEmail"
-                    v-b-tooltip.hover="'this will send a test email to the current user'"
-                    :disabled="isEmailDisabled"
-                    @click="previewEmail"
-                    variant="outline-primary" aria-label="preview email to project administrators">
-            <span>Preview</span> <i :class="[emailing ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-eye']" style="font-size:1rem;" aria-hidden="true"/>
-          </b-button>
-          <b-button variant="outline-primary" class="mr-1" @click="emailUsers" data-cy="emailUsers-submitBtn"
-                    :disabled="isEmailDisabled"><i :class="[emailing ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fas fa-mail-bulk']" /> Email</b-button>
-          <transition name="fade">
-            <span v-if="emailSent" class="pt-2 pl-1" data-cy="emailSent"><i class="far fa-check-square text-success"/> {{ sentMsg }}</span>
-          </transition>
-        </div>
-      </b-overlay>
-    </b-card>
+    <b-overlay :show="!emailFeatureConfigured">
+      <div slot="overlay" class="alert alert-warning mt-2" data-cy="contactUsers_emailServiceWarning">
+        <i class="fa fa-exclamation-triangle" aria-hidden="true"/> Please note that email notifications are currently disabled. Email configuration has not been performed on this instance of SkillTree. Please contact the root administrator.
+      </div>
+      <b-card body-class="p-0">
+          <div class="m-4 h5 text-uppercase">Email Content</div>
+          <div class="m-4"><b-badge variant="info" data-cy="projectAdminCount">{{this.currentCount|number}}</b-badge> Project Administrators</div>
+          <div class="row pl-3 pr-3 pt-3 pb-1 m-3 mb-1">
+            <b-form-group class="w-100" id="subject-line-input-group" label="Subject Line" label-for="subject-line-input" label-class="text-muted">
+              <b-input class="w-100" v-model="subject" id="subject-line-input" data-cy="emailUsers_subject"/>
+            </b-form-group>
+          </div>
+          <div class="row pl-3 pr-3 pb-1 ml-3 mr-3 mb-1 mt-1">
+            <b-form-group class="w-100" id="body-input-group" label="Email Body" label-for="body-input" label-class="text-muted">
+              <markdown-editor class="w-100" v-model="body" data-cy="emailUsers_body"/>
+            </b-form-group>
+          </div>
+          <div class="row pl-3 pr-3 pb-3 pt-1 ml-3 mr-3 mb-3 mt-1">
+            <b-button class="mr-3" data-cy="previewAdminEmail"
+                      v-b-tooltip.hover="'this will send a test email to the current user'"
+                      :disabled="isEmailDisabled"
+                      @click="previewEmail"
+                      variant="outline-primary" aria-label="preview email to project administrators">
+              <span>Preview</span> <i :class="[emailing ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-eye']" style="font-size:1rem;" aria-hidden="true"/>
+            </b-button>
+            <b-button variant="outline-primary" class="mr-1" @click="emailUsers" data-cy="emailUsers-submitBtn"
+                      :disabled="isEmailDisabled"><i :class="[emailing ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fas fa-mail-bulk']" /> Email</b-button>
+            <transition name="fade">
+              <span v-if="emailSent" class="pt-2 pl-1" data-cy="emailSent"><i class="far fa-check-square text-success"/> {{ sentMsg }}</span>
+            </transition>
+          </div>
+      </b-card>
+    </b-overlay>
   </div>
 
 </template>
