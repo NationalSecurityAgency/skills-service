@@ -76,6 +76,10 @@ limitations under the License.
         ***
       </div>
 
+      <p v-if="skill.subjectName" class="text-secondary mt-3">
+        Subject: {{ skill.subjectName }}
+      </p>
+
       <achievement-date v-if="skill.achievedOn" :date="skill.achievedOn" class="mt-2"/>
 
       <partial-points-alert v-if="!enableDrillDown" :skill="skill" :is-locked="locked"/>

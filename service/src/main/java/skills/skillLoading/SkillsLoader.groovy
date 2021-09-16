@@ -643,7 +643,7 @@ class SkillsLoader {
 
         if (loadSkills) {
             SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef?.projectId, badgeDefinition.skillId, version, SkillRelDef.RelationshipType.BadgeRequirement)
-            skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints)?.sort({ it.skill?.toLowerCase() })
+            skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints, true)?.sort({ it.skill?.toLowerCase() })
         }
 
         List<UserAchievement> achievements = achievedLevelRepository.findAllByUserIdAndProjectIdAndSkillId(userId, projDef?.projectId, badgeDefinition.skillId)
@@ -767,7 +767,7 @@ class SkillsLoader {
     }
 
     @Profile
-    private List<SkillSummary> createSkillSummaries(ProjDef thisProjDef, List<SubjectDataLoader.SkillsAndPoints> childrenWithPoints) {
+    private List<SkillSummary> createSkillSummaries(ProjDef thisProjDef, List<SubjectDataLoader.SkillsAndPoints> childrenWithPoints, boolean populateSubjectInfo=false) {
         List<SkillSummary> skillsRes = []
 
         Map<String,ProjDef> projDefMap = [:]
@@ -783,6 +783,21 @@ class SkillsLoader {
                 projDefMap[skillDef.projectId] = projDef
             }
 
+            String subjectName = "";
+            String subjectId = "";
+            if (populateSubjectInfo) {
+                List<SkillRelDef> subject = skillRelDefRepo.findAllByChildAndType(skillDef, SkillRelDef.RelationshipType.RuleSetDefinition)
+                if (subject) {
+                    if (subject.size() == 1) {
+                        SkillRelDef subj = subject.first()
+                        subjectId = subj.parent.skillId
+                        subjectName = subj.parent.name
+                    } else {
+                        log.error("Skill [${skillDef.id}] has multiple SkillRelDef parents of type RuleSetDefinition")
+                    }
+                }
+            }
+
             skillsRes << new SkillSummary(
                     projectId: skillDef.projectId, projectName: projDef.name,
                     skillId: skillDef.skillId, skill: skillDef.name,
@@ -792,6 +807,8 @@ class SkillsLoader {
                     totalPoints: skillDef.totalPoints,
                     dependencyInfo: skillDefAndUserPoints.dependencyInfo,
                     selfReporting: skillDef.selfReportingType ? new SelfReportingInfo(enabled: true, type: skillDef.selfReportingType) : null,
+                    subjectName: subjectName,
+                    subjectId: subjectId
             )
         }
 

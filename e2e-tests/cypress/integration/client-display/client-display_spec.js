@@ -408,5 +408,22 @@ describe('Client Display Tests', () => {
         });
     }
 
+    it('project badge skills show subject name when details enabled', () => {
+        cy.assignSkillToBadge(1,1,1);
+        cy.request('POST', '/admin/projects/proj1/badges/badge1', {
+            projectId: 'proj1',
+            badgeId: 'badge1',
+            name: 'Badge 1',
+            enabled: true,
+        });
+        cy.cdVisit('/');
+        cy.cdClickBadges();
+
+        cy.get('[data-cy=badgeDetailsLink_badge1]').click();
+        cy.contains('Badge Details');
+        cy.get('[data-cy=toggleSkillDetails]').click();
+        cy.contains('Subject: Subject 1').should('be.visible');
+    });
+
 });
 
