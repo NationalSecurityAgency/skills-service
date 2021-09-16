@@ -20,15 +20,15 @@ limitations under the License.
         <div v-if="!loading">
             <skills-title>Badges</skills-title>
 
-            <my-badges-details :badges="achievedBadges"></my-badges-details>
-            <badges-catalog v-if="badges && badges.length > 0" class="mt-3" :badges="badges"></badges-catalog>
+            <my-badges-details :badges="achievedBadges" :badgeRouterLinkGenerator="genLink"></my-badges-details>
+            <badges-catalog v-if="badges && badges.length > 0" class="mt-3" :badges="badges" :badgeRouterLinkGenerator="genLink"></badges-catalog>
         </div>
     </div>
 </template>
 
 <script>
-  import MyBadgesDetails from '@/userSkills/badge/MyBadgesDetails';
-  import BadgesCatalog from '@/userSkills/badge/BadgesCatalog';
+  import BadgesCatalog from '@/common-components/badges/BadgesCatalog';
+  import MyBadgesDetails from '@/common-components/badges/MyBadgesDetails';
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
   import SkillsSpinner from '@/common/utilities/SkillsSpinner';
   import SkillsTitle from '@/common/utilities/SkillsTitle';
@@ -55,6 +55,11 @@ limitations under the License.
           this.achievedBadges = this.badges.filter((item) => item.badgeAchieved);
           this.loading = false;
         });
+    },
+    methods: {
+      genLink(b) {
+        return { name: b.global ? 'globalBadgeDetails' : 'badgeDetails', params: { badgeId: b.badgeId } };
+      },
     },
   };
 </script>

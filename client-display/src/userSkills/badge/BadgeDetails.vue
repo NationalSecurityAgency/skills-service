@@ -37,7 +37,7 @@ limitations under the License.
 </template>
 
 <script>
-  import BadgeDetailsOverview from '@/userSkills/badge/BadgeDetailsOverview';
+  import BadgeDetailsOverview from '@/common-components/badges/BadgeDetailsOverview';
   import SkillsProgressList from '@/userSkills/skill/progress/SkillsProgressList';
   import SkillsSpinner from '@/common/utilities/SkillsSpinner';
 

@@ -47,13 +47,13 @@ limitations under the License.
 </template>
 
 <script>
-  import BadgeDetailsOverview from '@/userSkills/badge/BadgeDetailsOverview';
+  import BadgeDetailsOverview from '@/common-components/badges/BadgeDetailsOverview';
+  import NoDataYet from '@/common-components/utilities/NoDataYet';
   import SkillsProgressList from '@/userSkills/skill/progress/SkillsProgressList';
   import ProjectLevelRow from '@/userSkills/badge/ProjectLevelRow';
   import SkillsSpinner from '@/common/utilities/SkillsSpinner';
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
   import SkillsTitle from '@/common/utilities/SkillsTitle';
-  import NoDataYet from '@/common/utilities/NoDataYet';
 
   export default {
     components: {

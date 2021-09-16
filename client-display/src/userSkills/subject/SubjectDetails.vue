@@ -46,12 +46,12 @@ limitations under the License.
 </template>
 
 <script>
+  import MarkdownText from '@/common-components/utilities/MarkdownText';
   import UserSkillsHeader from '@/userSkills/header/UserSkillsHeader';
   import SkillDisplayDataLoadingMixin from '@/userSkills/SkillDisplayDataLoadingMixin';
   import SkillsTitle from '@/common/utilities/SkillsTitle';
   import SkillsProgressList from '@/userSkills/skill/progress/SkillsProgressList';
   import SkillsSpinner from '@/common/utilities/SkillsSpinner';
-  import MarkdownText from '@/common/utilities/MarkdownText';
 
   export default {
     mixins: [SkillDisplayDataLoadingMixin],

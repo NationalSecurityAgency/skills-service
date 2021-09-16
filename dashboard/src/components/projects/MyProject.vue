@@ -78,13 +78,13 @@ limitations under the License.
 </template>
 
 <script>
+  import dayjs from '@/common-components/DayJsCustomizer';
   import ProjectCardControls from '@/components/projects/ProjectCardControls';
   import ProjectCardFooter from '@/components/projects/ProjectCardFooter';
   import EditProject from './EditProject';
   import ProjectService from './ProjectService';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
   import SettingsService from '../settings/SettingsService';
-  import dayjs from '../../DayJsCustomizer';
 
   export default {
     name: 'MyProject',

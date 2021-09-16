@@ -29,7 +29,7 @@ limitations under the License.
             <div v-if="badges && badges.length > 0" class="row justify-content-md-center">
                 <div v-for="(badge, index) in badges" v-bind:key="badge.badgeId" class="col-lg-3 col-sm-6 my-2">
                     <div class="card h-100 skills-card-theme-border skills-navigable-item">
-                        <router-link  :to="{ name: badge.global ? 'globalBadgeDetails' : 'badgeDetails', params: { badgeId: badge.badgeId }}"
+                        <router-link  :to="badgeRouterLinkGenerator(badge)"
                                       tag="div" class="card-body earned-badge"
                                       :data-cy="`earnedBadgeLink_${badge.badgeId}`">
                             <i class="fa fa-check-circle position-absolute text-success" style="right: 10px; top: 10px;"/>
@@ -51,7 +51,7 @@ limitations under the License.
 </template>
 
 <script>
-  import NoDataYet from '@/common/utilities/NoDataYet';
+  import NoDataYet from '../utilities/NoDataYet';
 
   export default {
     name: 'MyBadgesDetails',
@@ -64,6 +64,10 @@ limitations under the License.
     props: {
       badges: {
         type: Array,
+        required: true,
+      },
+      badgeRouterLinkGenerator: {
+        type: Function,
         required: true,
       },
     },

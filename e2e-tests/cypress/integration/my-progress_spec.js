@@ -16,9 +16,11 @@
 import moment from 'moment';
 import dayjs from 'dayjs';
 import relativeTimePlugin from 'dayjs/plugin/relativeTime';
+import utc from 'dayjs/plugin/utc';
 dayjs.extend(relativeTimePlugin);
+dayjs.extend(utc);
 
-const dateFormatter = value => moment.utc(value).format('YYYY-MM-DD[T]HH:mm:ss[Z]');
+const dateFormatter = value => dayjs(value).utc().format('YYYY-MM-DD[T]HH:mm:ss[Z]');
 const timeFromNowFormatter = (value) => dayjs(value).startOf('seconds').fromNow();
 
 const testTime = new Date().getTime()
@@ -48,43 +50,44 @@ describe('Navigation Tests', () => {
     cy.createSkill(1, 1, 2);
     cy.createSkill(1, 1, 3);
     cy.createSkill(1, 1, 4);
-    cy.request('POST', `/admin/projects/proj1/skills/skill4/dependency/skill2`)
-
-
-    cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-      userId: Cypress.env('proxyUser'),
-      timestamp: yesterday
-    })
-    cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-      userId: Cypress.env('proxyUser'),
-      timestamp: testTime
-    })
-
-
-    cy.request('POST', `/api/projects/proj1/skills/skill3`, {
-      userId: Cypress.env('proxyUser'),
-      timestamp: yesterday
-    })
-    cy.request('POST', `/api/projects/proj1/skills/skill3`, {
-      userId: Cypress.env('proxyUser'),
-      timestamp: testTime
-    })
-
+    cy.request('POST', `/admin/projects/proj1/skills/skill4/dependency/skill2`);
 
     cy.request('POST', '/admin/projects/proj1/badges/badge1', {
       projectId: 'proj1',
       badgeId: 'badge1',
-      name: 'Badge 1'
+      name: 'Badge 1',
+      enabled: 'true',
     });
+    cy.assignSkillToBadge(1, 1, 1);
 
     cy.request('POST', '/admin/projects/proj1/badges/gemBadge', {
       projectId: 'proj1',
       badgeId: 'gemBadge',
       name: 'Gem Badge',
-      startDate: dateFormatter(new Date() - 1000 * 60 * 60 * 24 * 7),
-      endDate: dateFormatter(new Date() + 1000 * 60 * 60 * 24 * 5),
+      enabled: 'true',
+      startDate: dateFormatter(dayjs().subtract(5, 'day')),
+      endDate: dateFormatter(dayjs().add(7, 'day')),
     });
+    cy.request('POST', `/admin/projects/proj1/badge/gemBadge/skills/skill4`);
 
+    cy.request('POST', `/api/projects/proj1/skills/skill1`, {
+      userId: Cypress.env('proxyUser'),
+      timestamp: yesterday
+    })
+    cy.request('POST', `/api/projects/proj1/skills/skill1`, {
+      userId: Cypress.env('proxyUser'),
+      timestamp: testTime
+    })
+
+
+    cy.request('POST', `/api/projects/proj1/skills/skill3`, {
+      userId: Cypress.env('proxyUser'),
+      timestamp: yesterday
+    })
+    cy.request('POST', `/api/projects/proj1/skills/skill3`, {
+      userId: Cypress.env('proxyUser'),
+      timestamp: testTime
+    })
 
     cy.createProject(2);
     cy.enableProdMode(2);
@@ -118,6 +121,32 @@ describe('Navigation Tests', () => {
   });
 
   it('visit My Progress page', function () {
+
+    const getIframeBody = () => {
+      // get the iframe > document > body
+      // and retry until the body element is not empty
+      return cy
+          .get('iframe')
+          .its('0.contentDocument.body').should('not.be.empty')
+          // wraps "body" DOM element to allow
+          // chaining more Cypress commands, like ".find(...)"
+          // https://on.cypress.io/wrap
+          .then(cy.wrap)
+    };
+
+    cy.loginAsRootUser();
+    cy.request('PUT', `/supervisor/badges/globalBadge1`, {
+      badgeId: `globalBadge1`,
+      isEdit: false,
+      name: `Global Badge 1`,
+      originalBadgeId: '',
+      iconClass: 'fas fa-award',
+      enabled: true,
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+    });
+    cy.assignSkillToGlobalBadge(1, 2);
+
+    cy.loginAsProxyUser();
     cy.visit('/');
 
     cy.get('[data-cy="breadcrumb-Progress And Rankings"]').contains('Progress And Rankings').should('be.visible');
@@ -130,16 +159,15 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=numSkillsAvailable]').contains(new RegExp(/^Total: 10$/));
     cy.get('[data-cy=num-skills-footer]').contains('So many skills... so little time! Good luck!');
 
-    // cy.get('[data-cy=mostRecentAchievedSkill]').contains(new RegExp(/^Last Achieved skill \d+ minute[s]? ago$/));
     cy.get('[data-cy=mostRecentAchievedSkill]').contains(`Last Achieved skill ${timeFromNowFormatter(testTime)}`);
     cy.get('[data-cy=numAchievedSkillsLastWeek]').contains('2 skills in the last week');
     cy.get('[data-cy=numAchievedSkillsLastMonth]').contains('2 skills in the last month');
     cy.get('[data-cy=last-earned-footer]').contains('Keep up the good work!!');
 
     cy.get('[data-cy=badges-num-footer]').contains('Be proud to earn those badges!!');
-    cy.get('[data-cy=numAchievedBadges]').contains(new RegExp(/^0$/));
-    cy.get('[data-cy=numBadgesAvailable]').contains(new RegExp(/^\/ 2$/));
-    cy.get('[data-cy=numAchievedGlobalBadges]').should('not.exist')
+    cy.get('[data-cy=numAchievedBadges]').contains(new RegExp(/^1$/));
+    cy.get('[data-cy=numBadgesAvailable]').contains(new RegExp(/^\/ 3$/));
+    cy.get('[data-cy=numAchievedGlobalBadges]').contains('Global Badges: 0');
     cy.get('[data-cy=numAchievedGemBadges]').contains('Gems: 0');
 
     cy.get('[data-cy=project-link-proj2]').should('be.visible');
@@ -159,6 +187,66 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy="breadcrumb-Progress And Rankings"]').should('be.visible');
     cy.get('[data-cy=breadcrumb-proj1]').should('be.visible');
     cy.get('[data-cy=breadcrumb-projects]').should('not.exist');
+
+    cy.get('[data-cy="breadcrumb-Progress And Rankings"]').click();
+    cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^1$/));
+    cy.get('[data-cy=viewBadges]').click();
+    cy.get('[data-cy=earnedBadgeLink_badge1]').should('be.visible');
+
+    cy.get('.myBadges .earned-badge').eq(0).contains('Badge 1');
+    cy.get('.row .skills-badge').eq(0).contains('Gem Badge');
+    cy.get('.row .skills-badge').eq(1).contains('Global Badge 1');
+
+    cy.intercept('/api/projects/proj1/rank').as('loadRank');
+    cy.get('[data-cy=badgeDetailsLink_globalBadge1]').click();
+    cy.get('[data-cy=breadcrumb-globalBadge1]').should('be.visible');
+    cy.get('[data-cy=breadcrumb-proj1]').should('be.visible');
+    cy.wait('@loadRank');
+    getIframeBody().find('.skills-title').contains('Global Badge Details');
+    getIframeBody().find('.skills-text-description').contains('Global Badge 1').should('be.visible');
+    getIframeBody().find('h4').contains('Project: This is project 1').should('be.visible');
+    getIframeBody().find('[data-cy=skillProgressTitle]').click();
+    getIframeBody().find('[data-cy=title]').contains('Skill Overview');
+    getIframeBody().find('[data-cy=skillProgressTitle]').contains('Very Great Skill 2');
+    getIframeBody().find('[data-cy=overallPointsEarnedCard]').should('be.visible');
+    cy.get('[data-cy="breadcrumb-Progress And Rankings"]').click();
+
+    cy.get('[data-cy=viewBadges]').click();
+    cy.get('[data-cy=earnedBadgeLink_badge1]').click();
+    cy.get('[data-cy=breadcrumb-badge1]').should('be.visible');
+    cy.get('[data-cy=breadcrumb-proj1]').should('be.visible');
+    cy.wait('@loadRank');
+    getIframeBody().find('.skills-title').contains('Badge Details');
+    getIframeBody().find('.skills-text-description').contains('Badge 1').should('be.visible');
+    getIframeBody().find('[data-cy=skillProgressTitle]').contains('Very Great Skill 1').click();
+    getIframeBody().find('[data-cy=title]').contains('Skill Overview');
+    getIframeBody().find('[data-cy=skillProgressTitle]').contains('Very Great Skill 1');
+    getIframeBody().find('[data-cy=overallPointsEarnedCard]').should('be.visible');
+
+    cy.loginAsRootUser();
+    cy.request('POST', `/api/projects/proj1/skills/skill2`, {
+      userId: Cypress.env('proxyUser'),
+      timestamp: yesterday
+    });
+    cy.request('POST', `/api/projects/proj1/skills/skill2`, {
+      userId: Cypress.env('proxyUser'),
+      timestamp: testTime
+    });
+
+    cy.request('POST', `/api/projects/proj1/skills/skill4`, {
+      userId: Cypress.env('proxyUser'),
+      timestamp: yesterday
+    });
+    cy.request('POST', `/api/projects/proj1/skills/skill4`, {
+      userId: Cypress.env('proxyUser'),
+      timestamp: testTime
+    });
+
+    cy.loginAsProxyUser();
+    cy.visit('/');
+    cy.get('[data-cy=viewBadges]').click();
+    cy.get('[data-cy=badge-catalog_no-badges]').should('be.visible');
+
   });
 
 

@@ -7,6 +7,7 @@ yarn-errpr.log*
 /tests/unit/coverage/
 /tests/e2e/reports/
 selenium-debug.log
+/src/common-components
 
 # Editor directories and files
 .idea

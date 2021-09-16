@@ -56,7 +56,6 @@
         <relativePath/>
     </parent>
 
-
     <distributionManagement>
         <repository>
             <id>nexus-releases</id>

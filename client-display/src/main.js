@@ -27,6 +27,7 @@ import {
     SpinnerPlugin,
 } from 'bootstrap-vue';
 import marked from 'marked';
+import FiltersPlugin from '@/common-components/filter/FiltersPlugin';
 import App from '@/App';
 import router from '@/router';
 import store from '@/store/store';
@@ -45,6 +46,7 @@ Vue.use(TablePlugin);
 Vue.use(BadgePlugin);
 Vue.use(ProgressPlugin);
 Vue.use(SpinnerPlugin);
+Vue.use(FiltersPlugin);
 
 require('@/common/softwareVersion/softwareVersionInterceptor');
 

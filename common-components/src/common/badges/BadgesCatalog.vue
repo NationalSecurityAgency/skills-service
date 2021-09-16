@@ -22,17 +22,20 @@ limitations under the License.
         </div>
         <div class="card-body">
             <div class="" v-for="(badge, index) in badges" v-bind:key="badge.badgeId">
-                <badge-catalog-item :badge="badge" class="pb-3"></badge-catalog-item>
+                <badge-catalog-item :badge="badge" class="pb-3" :badgeRouterLinkGenerator="badgeRouterLinkGenerator"></badge-catalog-item>
                 <div v-if="index !== badges.length - 1">
                     <hr/>
                 </div>
+            </div>
+            <div v-if="!badges || badges.length === 0" class="skills-no-data-yet text-primary text-center" data-cy="badge-catalog_no-badges">
+                {{ noBadgesMessage }}
             </div>
         </div>
     </div>
 </template>
 
 <script>
-  import BadgeCatalogItem from '@/userSkills/badge/BadgeCatalogItem';
+  import BadgeCatalogItem from './BadgeCatalogItem';
 
   export default {
     name: 'BadgesCatalog',
@@ -41,6 +44,15 @@ limitations under the License.
       badges: {
         type: Array,
         required: true,
+      },
+      badgeRouterLinkGenerator: {
+        type: Function,
+        required: true,
+      },
+      noBadgesMessage: {
+        type: String,
+        required: false,
+        default: 'No Badges left to earn!',
       },
     },
     data() {

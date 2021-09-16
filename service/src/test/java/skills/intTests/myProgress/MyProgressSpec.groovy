@@ -19,11 +19,15 @@ import groovy.json.JsonOutput
 import groovy.time.TimeCategory
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
+import org.apache.commons.lang3.builder.ToStringBuilder
+import org.apache.commons.lang3.builder.ToStringStyle
+import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.intTests.utils.TestUtils
 import skills.services.settings.Settings
+import skills.storage.repos.UserAchievedLevelRepo
 import spock.lang.IgnoreRest
 
 @Slf4j
@@ -76,6 +80,224 @@ class MyProgressSpec extends DefaultIntSpec {
 
         then:
         res.projectSummaries.collect { it.projectId } == [projs[2].projectId, projs[0].projectId]
+    }
+
+    def "my progress - only enabled badges for projects in My Projects should be included in counts and My Badges" () {
+        def proj1 = SkillsFactory.createProject()
+        def subj1 = SkillsFactory.createSubject()
+
+        def proj2 = SkillsFactory.createProject(2)
+        def proj2subj1 = SkillsFactory.createSubject(2)
+        def proj2Skills = SkillsFactory.createSkills(10, 2)
+
+        def proj3 = SkillsFactory.createProject(3)
+        def proj3subj1 = SkillsFactory.createSubject(3)
+        def proj3Skills = SkillsFactory.createSkills(10, 3)
+
+        // Project 1: 3 badges, 2 gems
+        def badge1 = SkillsFactory.createBadge()
+        badge1.enabled = false;
+        def badge2 = SkillsFactory.createBadge(1, 2)
+        badge2.enabled = false;
+        def badge3 = SkillsFactory.createBadge(1, 3)
+        badge3.enabled = false;
+
+        Date oneWeekAgo = new Date()-7
+        Date twoWeeksAgo = new Date()-14
+        def gem1 = SkillsFactory.createBadge(1, 4)
+        gem1.badgeId = "gem1"
+        gem1.enabled = false;
+        gem1.startDate = twoWeeksAgo
+        gem1.endDate = oneWeekAgo
+        def gem2 = SkillsFactory.createBadge(1, 5)
+        gem2.badgeId = "gem2"
+        gem2.enabled = false;
+        gem2.startDate = twoWeeksAgo
+        gem2.endDate = oneWeekAgo
+
+        // Project 2: 2 badges, 0 gems
+        def proj2badge1 = SkillsFactory.createBadge(2)
+        proj2badge1.enabled = false
+        def proj2badge2 = SkillsFactory.createBadge(2,2)
+        proj2badge2.enabled = false
+
+        // Project 3: 1 badge, 0 gems
+        def proj3badge1 = SkillsFactory.createBadge(3)
+        proj3badge1.enabled = false
+
+
+        def globalBadge = [badgeId: "globalBadge", name: 'Test Global Badge 1', enabled: 'false']
+        def globalBadge2 = [badgeId: "globalBadge2", name: 'Test Global Badge 2', enabled: 'false']
+        def globalBadge3 = [badgeId: "globalBadge3", name: 'Test Global Badge 3', enabled: 'false']
+        def globalBadge4 = [badgeId:"globalBadge4", name: 'Test Global Badge 4', enabled: 'false']
+
+        def skills = SkillsFactory.createSkills(3)
+        skillsService.createProject(proj1)
+        skillsService.createSubject(subj1)
+
+        skillsService.createProject(proj2)
+        skillsService.createSubject(proj2subj1)
+        skillsService.createSkills(proj2Skills)
+
+        skillsService.createProject(proj3)
+        skillsService.createSubject(proj3subj1)
+        skillsService.createSkills(proj3Skills)
+
+        skillsService.createSkills(skills)
+        skillsService.createBadge(badge1)
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1.badgeId, skillId: skills[0].skillId])
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge2.badgeId, skillId: skills[1].skillId])
+        skillsService.createBadge(badge3)
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge3.badgeId, skillId: skills[2].skillId])
+
+        skillsService.createBadge(gem1)
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: gem1.badgeId, skillId: skills[2].skillId])
+
+        skillsService.createBadge(gem2)
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: gem2.badgeId, skillId: skills[2].skillId])
+
+        skillsService.createBadge(proj2badge1)
+        skillsService.assignSkillToBadge([projectId: proj2.projectId, badgeId: proj2badge1.badgeId, skillId: proj2Skills[1].skillId])
+        skillsService.createBadge(proj2badge2)
+        skillsService.assignSkillToBadge([projectId: proj2.projectId, badgeId: proj2badge2.badgeId, skillId: proj2Skills[2].skillId])
+
+        skillsService.createBadge(proj3badge1)
+        skillsService.assignSkillToBadge([projectId: proj3.projectId, badgeId: proj3badge1.badgeId, skillId: proj3Skills[3].skillId])
+
+
+        // globalBadge depends on proj1 skill
+        supervisorService.createGlobalBadge(globalBadge)
+        supervisorService.assignSkillToGlobalBadge(projectId: proj1.projectId, badgeId: globalBadge.badgeId, skillId: skills[2].skillId)
+
+        // globalBadge2 depends on proj1 skill, proj3 level
+        supervisorService.createGlobalBadge(globalBadge2)
+        supervisorService.assignSkillToGlobalBadge(projectId: proj1.projectId, badgeId: globalBadge2.badgeId, skillId: skills[2].skillId)
+        supervisorService.assignProjectLevelToGlobalBadge(projectId: proj3.projectId, badgeId: globalBadge2.badgeId, level: "1")
+
+        // globalBadge3 depends on proj3 skill, proj2 skill
+        supervisorService.createGlobalBadge(globalBadge3)
+        supervisorService.assignSkillToGlobalBadge(projectId: proj3.projectId, badgeId: globalBadge3.badgeId, skillId: proj3Skills[1].skillId)
+        supervisorService.assignSkillToGlobalBadge(projectId: proj2.projectId, badgeId: globalBadge3.badgeId, skillId: proj2Skills[1].skillId)
+
+        // globalBadge4 only project2 level dependency
+        supervisorService.createGlobalBadge(globalBadge4)
+        supervisorService.assignProjectLevelToGlobalBadge(projectId: proj2.projectId, badgeId: globalBadge4.badgeId, level: "2")
+
+
+        when:
+
+        // should be empty
+        def summaryBeforeProductionMode = skillsService.getMyProgressSummary()
+        def myBadgesBeforeProductionMode = skillsService.getMyProgressBadges()
+        // enable "production mode"
+        skillsService.changeSetting(proj1.projectId, PROD_MODE, [projectId: proj1.projectId, setting: PROD_MODE, value: "true"])
+        skillsService.changeSetting(proj2.projectId, PROD_MODE, [projectId: proj2.projectId, setting: PROD_MODE, value: "true"])
+        skillsService.changeSetting(proj3.projectId, PROD_MODE, [projectId: proj3.projectId, setting: PROD_MODE, value: "true"])
+
+        // should be empty
+        def summaryAfterProductionMode = skillsService.getMyProgressSummary()
+        def myBadgesAfterProductionMode = skillsService.getMyProgressBadges()
+
+        skillsService.addMyProject(proj1.projectId)
+        // badge count should be empty until the badges are enabled
+        def afterAddMyProjectsProj1 = skillsService.getMyProgressSummary()
+        def myBadgesAfterAddMyProjectProj1 = skillsService.getMyProgressBadges()
+
+        badge1.enabled = true
+        badge1.iconClass = "fakeityfakefake"
+        badge1.description = "a description"
+        badge1.helpUrl = "http://fakeityurlfakeity"
+        skillsService.createBadge(badge1)
+
+        // expect these to only contain badge1 and no other proj1 badges for both counts and badges returned
+        def summaryAfterBadge1Enabled = skillsService.getMyProgressSummary()
+        def myBadgesAfterBadge1Enabled = skillsService.getMyProgressBadges()
+
+        assert skillsService.addSkill([projectId: proj2.projectId, skillId: proj2Skills[1].skillId], userId, new Date()).body.completed.find { it.type == "Skill"}
+
+        // enable all badges, only badges for proj1 or global badges with proj1 dependencies should be included in counts/returned
+        badge2.enabled = true
+        skillsService.createBadge(badge2)
+        badge3.enabled = true
+        skillsService.createBadge(badge3)
+        gem1.enabled = true
+        skillsService.createBadge(gem1)
+        gem2.enabled = true
+        skillsService.createBadge(gem2)
+        proj2badge1.enabled = true
+        skillsService.createBadge(proj2badge1)
+        proj2badge2.enabled = true
+        skillsService.createBadge(proj2badge2)
+        proj3badge1.enabled = true
+        skillsService.createBadge(proj3badge1)
+        globalBadge.enabled = true
+        supervisorService.createGlobalBadge(globalBadge)
+        globalBadge2.enabled = true
+        supervisorService.createGlobalBadge(globalBadge2)
+        globalBadge3.enabled = true
+        supervisorService.createGlobalBadge(globalBadge3)
+        globalBadge4.enabled = true
+        supervisorService.createGlobalBadge(globalBadge4)
+
+        def summaryAfterAllEnabled = skillsService.getMyProgressSummary()
+        def myBadgesAfterAllEnabled = skillsService.getMyProgressBadges()
+
+        skillsService.removeMyProject(proj1.projectId)
+        skillsService.addMyProject(proj2.projectId)
+
+        def summaryAfterProj2 = skillsService.getMyProgressSummary()
+        def myBadgesAfterProj2 = skillsService.getMyProgressBadges()
+
+        then:
+        summaryBeforeProductionMode.totalBadges == 0
+        summaryBeforeProductionMode.gemCount == 0
+        summaryBeforeProductionMode.globalBadgeCount == 0
+        !myBadgesBeforeProductionMode
+
+        summaryAfterProductionMode.totalBadges == 0
+        summaryAfterProductionMode.gemCount == 0
+        summaryAfterProductionMode.globalBadgeCount == 0
+        !myBadgesAfterProductionMode
+
+        summaryAfterBadge1Enabled.totalBadges == 1
+        summaryAfterBadge1Enabled.gemCount == 0
+        summaryAfterBadge1Enabled.globalBadgeCount == 0
+        myBadgesAfterBadge1Enabled.size() == 1
+        myBadgesAfterBadge1Enabled.find { it.badgeId == badge1.badgeId }
+
+        summaryAfterAllEnabled.totalBadges == 7
+        summaryAfterAllEnabled.gemCount == 2
+        summaryAfterAllEnabled.globalBadgeCount == 2
+        myBadgesAfterAllEnabled.size() == 7
+        myBadgesAfterAllEnabled.find {
+            it.badgeId == badge1.badgeId &&
+                    it.projectId == proj1.projectId &&
+                    it.description == badge1.description &&
+                    it.helpUrl == badge1.helpUrl &&
+                    it.iconClass == badge1.iconClass &&
+                    it.numSkillsAchieved == 0 &&
+                    it.numTotalSkills == 1
+        }
+        myBadgesAfterAllEnabled.find { it.badgeId == badge2.badgeId && it.projectId == proj1.projectId }
+        myBadgesAfterAllEnabled.find { it.badgeId == badge3.badgeId && it.projectId == proj1.projectId }
+        myBadgesAfterAllEnabled.find { it.badgeId == gem1.badgeId && it.startDate && it.endDate && it.gem }
+        myBadgesAfterAllEnabled.find { it.badgeId == gem2.badgeId && it.startDate && it.endDate && it.gem  }
+        myBadgesAfterAllEnabled.find { it.badgeId == globalBadge.badgeId && it.global }
+        myBadgesAfterAllEnabled.find { it.badgeId == globalBadge2.badgeId && it.global }
+
+        summaryAfterProj2.totalBadges == 4
+        summaryAfterProj2.gemCount == 0
+        summaryAfterProj2.globalBadgeCount == 2
+        summaryAfterProj2.numAchievedBadges == 1
+        myBadgesAfterProj2.size() == 4
+        myBadgesAfterProj2.find { it.badgeId == proj2badge1.badgeId && it.badgeAchieved }
+        myBadgesAfterProj2.find { it.badgeId == proj2badge2.badgeId && !it.badgeAchieved }
+        myBadgesAfterProj2.find { it.badgeId == globalBadge3.badgeId && !it.badgeAchieved }
+        myBadgesAfterProj2.find { it.badgeId == globalBadge3.badgeId }.projectLevelsAndSkillsSummaries.find { it.projectId == proj3.projectId && it.skills.find { it.skillId == proj3Skills[1].skillId }}
+        myBadgesAfterProj2.find { it.badgeId == globalBadge3.badgeId }.projectLevelsAndSkillsSummaries.find { it.projectId == proj2.projectId && it.skills.find { it.skillId == proj2Skills[1].skillId }}
+        myBadgesAfterProj2.find { it.badgeId == globalBadge4.badgeId && !it.badgeAchieved }
+        myBadgesAfterProj2.find { it.badgeId == globalBadge4.badgeId }.projectLevelsAndSkillsSummaries.find { it.projectId == proj2.projectId && it.projectLevel.projectId == proj2.projectId && it.projectLevel.requiredLevel == 2 }
     }
 
     def "my progress summary - badge count"() {
@@ -393,6 +615,7 @@ class MyProgressSpec extends DefaultIntSpec {
             skillsService.createSkills(skillsForProj)
             (1..projNum).each {
                 def badge = SkillsFactory.createBadge(projNum, it)
+                badge.enabled = true
                 skillsService.createBadge(badge)
                 skillsService.assignSkillToBadge([projectId: project.projectId, badgeId: badge.badgeId, skillId: skillsForProj[it].skillId])
                 skills.add(skillsForProj[it])
@@ -400,9 +623,9 @@ class MyProgressSpec extends DefaultIntSpec {
 
             return project
         }
+
         skillsService.addMyProject(projs[0].projectId)
         skillsService.addMyProject(projs[2].projectId)
-
 
         assert skillsService.addSkill([projectId: projs[1].projectId, skillId: skills[1].skillId], userId, new Date()).body.completed.find { it.type == "Badge"}
         assert skillsService.addSkill([projectId: projs[1].projectId, skillId: skills[2].skillId], userId, new Date()).body.completed.find { it.type == "Badge"}
@@ -410,6 +633,7 @@ class MyProgressSpec extends DefaultIntSpec {
         assert skillsService.addSkill([projectId: projs[2].projectId, skillId: skills[3].skillId], userId, new Date()).body.completed.find { it.type == "Badge"}
         when:
         def res = skillsService.getMyProgressSummary()
+
 
         assert skillsService.addSkill([projectId: projs[0].projectId, skillId: skills[0].skillId], userId, new Date()).body.completed.find { it.type == "Badge"}
         assert skillsService.addSkill([projectId: projs[2].projectId, skillId: skills[4].skillId], userId, new Date()).body.completed.find { it.type == "Badge"}
@@ -587,7 +811,7 @@ class MyProgressSpec extends DefaultIntSpec {
         res1.numAchievedGlobalBadges == 0
     }
 
-    def "global badges counts are always shown regardless of production mode or My Project status"() {
+    def "global badges counts should only relate to projects selected for My Projects"() {
         def skills = []
         List projs = (1..3).collect { int projNum ->
             def project = SkillsFactory.createProject(projNum)
@@ -610,8 +834,8 @@ class MyProgressSpec extends DefaultIntSpec {
 
         assert skillsService.addSkill([projectId: projs[1].projectId, skillId: skills[1].skillId], userId, new Date()).body.completed.find { it.type == "GlobalBadge"}
         assert skillsService.addSkill([projectId: projs[1].projectId, skillId: skills[2].skillId], userId, new Date()).body.completed.find { it.type == "GlobalBadge"}
-
         assert skillsService.addSkill([projectId: projs[2].projectId, skillId: skills[3].skillId], userId, new Date()).body.completed.find { it.type == "GlobalBadge"}
+
         when:
         def res = skillsService.getMyProgressSummary()
 
@@ -620,19 +844,19 @@ class MyProgressSpec extends DefaultIntSpec {
 
         def res1 = skillsService.getMyProgressSummary()
         then:
-        res.totalBadges == 6
+        res.totalBadges == 4
         res.gemCount == 0
-        res.globalBadgeCount == 6
-        res.numAchievedBadges == 3
+        res.globalBadgeCount == 4
+        res.numAchievedBadges == 1
         res.numAchievedGemBadges == 0
-        res.numAchievedGlobalBadges == 3
+        res.numAchievedGlobalBadges == 1
 
-        res1.totalBadges == 6
+        res1.totalBadges == 4
         res1.gemCount == 0
-        res1.globalBadgeCount == 6
-        res1.numAchievedBadges == 5
+        res1.globalBadgeCount == 4
+        res1.numAchievedBadges == 3
         res1.numAchievedGemBadges == 0
-        res1.numAchievedGlobalBadges == 5
+        res1.numAchievedGlobalBadges == 3
     }
 
     def "my progress summary - global badge achieved count"() {
@@ -642,6 +866,7 @@ class MyProgressSpec extends DefaultIntSpec {
         def skills = SkillsFactory.createSkills(3, )
         skills.each { it.pointIncrement = 100 }
         skillsService.createProject(proj1)
+        skillsService.enableProdMode(proj1)
         skillsService.createSubject(subj1)
         skillsService.createSkills(skills)
 
@@ -669,9 +894,15 @@ class MyProgressSpec extends DefaultIntSpec {
         when:
         def res = skillsService.getMyProgressSummary()
 
+        skillsService.addMyProject(proj1.projectId)
+
+        def res1 = skillsService.getMyProgressSummary()
+
         then:
-        res.globalBadgeCount == 3
-        res.numAchievedGlobalBadges == 1
+        res.globalBadgeCount == 0
+        res.numAchievedGlobalBadges == 0
+        res1.globalBadgeCount == 3
+        res1.numAchievedGlobalBadges == 1
     }
 
     def "my progress summary - no skills have been created"() {
@@ -946,6 +1177,11 @@ class MyProgressSpec extends DefaultIntSpec {
 
         when:
         def res = skillsService.getMyProgressSummary()
+
+        skillsService.enableProdMode(proj1)
+        skillsService.addMyProject(proj1.projectId)
+
+        def res1 = skillsService.getMyProgressSummary()
         then:
 
         // "production mode" is not enabled, so proj1 should not be included in the results
@@ -957,9 +1193,19 @@ class MyProgressSpec extends DefaultIntSpec {
         res.numAchievedSkillsLastMonth == 0
         res.numAchievedSkillsLastWeek == 0
         res.mostRecentAchievedSkill == null
-        res.totalBadges == 1 // global badge is still included
+        res.totalBadges == 0 // global badge should only be included if a dependency is in a project that has been added to My Projects
         res.numAchievedGemBadges == 0
         res.numAchievedGlobalBadges == 0
+
+        res1.numProjectsContributed == 0
+        res1.totalSkills == 1
+        res1.numAchievedSkills == 0
+        res1.numAchievedSkillsLastMonth == 0
+        res1.numAchievedSkillsLastWeek == 0
+        res1.mostRecentAchievedSkill == null
+        res1.totalBadges == 2 // global badge should only be included if a dependency is in a project that has been added to My Projects
+        res1.numAchievedGemBadges == 0
+        res1.numAchievedGlobalBadges == 0
     }
 
 }

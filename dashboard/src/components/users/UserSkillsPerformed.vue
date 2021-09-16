@@ -59,12 +59,11 @@ limitations under the License.
 
 <script>
   import { createNamespacedHelpers } from 'vuex';
-
+  import dayjs from '@/common-components/DayJsCustomizer';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
   import ToastSupport from '../utils/ToastSupport';
   import UsersService from './UsersService';
-  import dayjs from '../../DayJsCustomizer';
   import SkillsBTable from '../utils/table/SkillsBTable';
   import DateCell from '../utils/table/DateCell';
 

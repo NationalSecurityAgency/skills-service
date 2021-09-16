@@ -24,7 +24,7 @@ limitations under the License.
 </template>
 
 <script>
-  import dayjs from '../../../DayJsCustomizer';
+  import dayjs from '@/common-components/DayJsCustomizer';
 
   export default {
     name: 'TimeLengthSelector',

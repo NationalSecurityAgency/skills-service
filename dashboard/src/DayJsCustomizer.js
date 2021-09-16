@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import dayjs from 'dayjs';
+import { dayjs } from 'dayjs';
 import localizedFormatPlugin from 'dayjs/plugin/localizedFormat';
 import relativeTimePlugin from 'dayjs/plugin/relativeTime';
 import utcPlugin from 'dayjs/plugin/utc';

@@ -32,8 +32,8 @@ limitations under the License.
 </template>
 
 <script>
+  import NoDataYet from '@/common-components/utilities/NoDataYet';
   import SubjectTile from '@/userSkills/subject/SubjectTile';
-  import NoDataYet from '@/common/utilities/NoDataYet';
   import NavigationErrorMixin from '@/common/utilities/NavigationErrorMixin';
 
   export default {

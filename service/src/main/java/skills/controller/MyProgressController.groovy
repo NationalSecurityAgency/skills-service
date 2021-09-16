@@ -34,6 +34,7 @@ import skills.profile.EnableCallStackProf
 import skills.services.admin.ProjAdminService
 import skills.skillLoading.SkillsLoader
 import skills.skillLoading.model.MyProgressSummary
+import skills.skillLoading.model.SkillBadgeSummary
 
 import javax.servlet.http.HttpServletRequest
 
@@ -105,6 +106,12 @@ class MyProgressController {
         validateRankingAndProgressViewsEnabled()
         projAdminService.removeMyProject(projectId)
         return new RequestResult(success: true)
+    }
+
+    @GetMapping(value='/mybadges', produces = "application/json")
+    List<? extends SkillBadgeSummary> getMyBadges() {
+        String userId = userInfoService.getCurrentUserId()
+        return skillsLoader.getBadgesForUserMyProjects(userId)
     }
 
     private void validateRankingAndProgressViewsEnabled() {

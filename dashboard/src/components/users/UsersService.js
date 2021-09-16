@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import axios from 'axios';
-import dayjs from '../../DayJsCustomizer';
+import dayjs from '@/common-components/DayJsCustomizer';
 
 export default {
   ajaxCall(url, params) {

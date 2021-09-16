@@ -23,6 +23,8 @@ import skills.storage.model.SkillDef.ContainerType
 import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.SkillRelDef
 
+import java.util.stream.Stream
+
 interface SkillDefWithExtraRepo extends PagingAndSortingRepository<SkillDefWithExtra, Integer> {
 
     List<SkillDefWithExtra> findAllByProjectIdAndType(@Nullable String id, SkillDef.ContainerType type)
@@ -59,4 +61,40 @@ interface SkillDefWithExtraRepo extends PagingAndSortingRepository<SkillDefWithE
             s.projectId is null and
             s.skillId=?1 and r.type=?2 and c.version<=?3''')
     List<SkillDescDBRes> findAllGlobalChildSkillsDescriptions(String parentSkillId, SkillRelDef.RelationshipType relationshipType, int version, String userId)
+
+    @Query(value='''
+        WITH mp AS (
+            SELECT s.project_id AS project_id 
+            FROM settings s, users uu, settings s1
+            WHERE s.setting = 'my_project' 
+                AND uu.user_id=?1 
+                AND uu.id = s.user_ref_id 
+                AND s.project_id = s1.project_id 
+                AND s1.setting = 'production.mode.enabled' 
+                AND s1.value = 'true'
+        )
+        SELECT * FROM skill_definition sd 
+                WHERE (
+                (sd.type = 'Badge' AND 
+                    sd.project_id IN (
+                        SELECT project_id FROM mp
+                    )
+                ) OR 
+                (sd.type='GlobalBadge' 
+                        AND ( 
+                            exists (
+                                SELECT true
+                                FROM global_badge_level_definition gbld
+                                WHERE gbld.skill_ref_id = sd.id AND gbld.project_id in (select project_id from mp)
+                            ) 
+                            OR ( 
+                            sd.id IN (
+                                SELECT srd.parent_ref_id FROM skill_relationship_definition srd JOIN skill_definition ssd ON srd.child_ref_id = ssd.id AND ssd.project_id IN (SELECT project_id FROM mp) 
+                                ) 
+                            )
+                    ) 
+                )) AND
+              (sd.enabled  = 'true' OR sd.enabled IS NULL)
+    ''', nativeQuery = true)
+    Stream<SkillDefWithExtra> findAllMyBadgesForUser(String userId)
 }

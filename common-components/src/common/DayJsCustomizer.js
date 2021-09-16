@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2020 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,28 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.skillLoading.model
+import dayjs from 'dayjs';
+import localizedFormatPlugin from 'dayjs/plugin/localizedFormat';
+import relativeTimePlugin from 'dayjs/plugin/relativeTime';
+import utcPlugin from 'dayjs/plugin/utc';
+import advancedFormatPlugin from 'dayjs/plugin/advancedFormat';
 
-class SkillBadgeSummary {
+dayjs.extend(advancedFormatPlugin);
+dayjs.extend(localizedFormatPlugin);
+dayjs.extend(relativeTimePlugin);
+dayjs.extend(utcPlugin);
 
-    String badge
-    String badgeId
-    String description
-    boolean badgeAchieved = false
-    Date dateAchieved
-    int numSkillsAchieved
-    int numTotalSkills
-
-    Date startDate
-    Date endDate
-    boolean isGem() { return startDate && endDate }
-
-    List<SkillSummary> skills = []
-
-    String iconClass
-    boolean global = false
-
-    String helpUrl
-
-    String projectId
-}
+export default dayjs;

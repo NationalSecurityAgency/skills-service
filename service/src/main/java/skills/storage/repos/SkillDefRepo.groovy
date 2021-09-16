@@ -25,6 +25,8 @@ import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.SkillRelDef.RelationshipType
 
+import java.util.stream.Stream
+
 interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
 
     static interface SkillDefSkinny {
@@ -251,6 +253,47 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
       (sd.enabled  = 'true' OR sd.enabled is null)''')
     BadgeCount getProductionBadgesCount(String userId)
 
+
+    @Query(value='''
+        WITH mp AS (
+            select s.project_id as project_id 
+            from settings s, users uu, settings s1
+            where s.setting = 'my_project' 
+                and uu.user_id=?1 
+                and uu.id = s.user_ref_id 
+                and s.project_id = s1.project_id 
+                and s1.setting = 'production.mode.enabled' 
+                and s1.value = 'true'
+        )
+        
+        SELECT count(sd.id) as totalCount,
+                    sum(case when sd.start_date is not null and sd.end_date is not null then 1 end) as gemCount,
+                    sum(case when sd.type='GlobalBadge' then 1 end) as globalCount
+                from skill_definition sd 
+                where (
+                (sd.type = 'Badge' AND 
+                    sd.project_id IN (
+                        SELECT project_id FROM mp
+                    )
+                ) OR 
+                (sd.type='GlobalBadge' 
+                        AND ( 
+                            exists (
+                                SELECT true
+                                from global_badge_level_definition gbld
+                                where gbld.skill_ref_id = sd.id and gbld.project_id in (select project_id from mp)
+                            ) 
+                            OR ( 
+                            sd.id in (
+                                select srd.parent_ref_id from skill_relationship_definition srd join skill_definition ssd on srd.child_ref_id = ssd.id and ssd.project_id in (select project_id from mp) 
+                                ) 
+                            )
+                    ) 
+                )) AND
+              (sd.enabled  = 'true' OR sd.enabled is null)
+    ''', nativeQuery = true)
+    BadgeCount getProductionMyBadgesCount(String userId)
+
     static interface ProjectAndSubjectPoints {
         Integer getProjectTotalPoints()
         Integer getSubjectTotalPoints()
@@ -266,4 +309,5 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
                 srd.type='RuleSetDefinition'
         ''')
     ProjectAndSubjectPoints getProjectAndSubjectPoints(String projectId, String skillId)
+
 }

@@ -26,12 +26,12 @@ limitations under the License.
 </template>
 
 <script>
+  import dayjs from '@/common-components/DayJsCustomizer';
   import MetricsService from '../MetricsService';
   import numberFormatter from '@//filters/NumberFilter';
   import MetricsOverlay from '../utils/MetricsOverlay';
   import MetricsCard from '../utils/MetricsCard';
   import TimeLengthSelector from './TimeLengthSelector';
-  import dayjs from '../../../DayJsCustomizer';
 
   export default {
     name: 'NumUsersPerDay',

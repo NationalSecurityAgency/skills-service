@@ -58,7 +58,7 @@ limitations under the License.
 
 <script>
   import ProgressBar from 'vue-simple-progress';
-  import MarkdownText from '@/common/utilities/MarkdownText';
+  import MarkdownText from '../utilities/MarkdownText';
 
   export default {
     name: 'BadgeDetailsOverview',

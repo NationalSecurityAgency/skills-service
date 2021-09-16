@@ -115,11 +115,11 @@ limitations under the License.
 </template>
 
 <script>
+  import NoDataYet from '@/common-components/utilities/NoDataYet';
   import store from '@/store/store';
   import UserSkillsService from '../service/UserSkillsService';
   import BadgeBasedSelector from '../../common/utilities/BadgeBasedSelector';
   import SkillsSpinner from '../../common/utilities/SkillsSpinner';
-  import NoDataYet from '../../common/utilities/NoDataYet';
 
   export default {
     name: 'Leaderboard',

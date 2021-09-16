@@ -50,6 +50,7 @@ import SelfReportStatusPage from '@//components/skills/selfReport/SelfReportStat
 import UserAgreement from '@//components/access/UserAgreement';
 import EmailUsers from '@//components/projects/EmailUsers';
 import EmaillProjectAdmins from '@//components/projects/EmailProjectAdmins';
+import MyBadges from '@//components/myProgress/badges/MyBadges';
 
 const GlobalBadgePage = () => import(/* webpackChunkName: 'globalBadgePage' */'@/components/badges/global/GlobalBadgePage');
 const GlobalBadgeSkills = () => import(/* webpackChunkName: 'globalBadgeSkills' */'@//components/badges/global/GlobalBadgeSkills');
@@ -233,6 +234,13 @@ const router = new Router({
         name: 'DiscoverProjectsPage',
         path: 'manage-my-projects',
         component: DiscoverProjectsPage,
+        meta: {
+          requiresAuth: true, nonAdmin: true,
+        },
+      }, {
+        name: 'MyBadges',
+        path: 'my-badges',
+        component: MyBadges,
         meta: {
           requiresAuth: true, nonAdmin: true,
         },

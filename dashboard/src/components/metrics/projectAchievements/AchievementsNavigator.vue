@@ -120,11 +120,11 @@ limitations under the License.
 
 <script>
   import { extend } from 'vee-validate';
+  import dayjs from '@/common-components/DayJsCustomizer';
   import SkillsBTable from '../../utils/table/SkillsBTable';
   import MetricsService from '../MetricsService';
   import AchievementType from './AchievementType';
   import MetricsCard from '../utils/MetricsCard';
-  import dayjs from '../../../DayJsCustomizer';
 
   /*
    Provider's reset() method triggers an infinite loop if we use it in dateOrder
