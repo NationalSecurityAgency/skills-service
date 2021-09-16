@@ -45,6 +45,44 @@ describe('Login Tests', () => {
     cy.get('[data-cy=subPageHeader]').contains('Projects');
   });
 
+  it('form: successful dashboard login from link', () => {
+    cy.fixture('vars.json').then((vars) => {
+      if (!Cypress.env('oauthMode')) {
+        cy.log('NOT in oauthMode, using form login')
+        cy.login(vars.defaultUser, vars.defaultPass);
+      } else {
+        cy.log('oauthMode, using loginBySingleSignOn')
+        cy.loginBySingleSignOn()
+      }
+
+      // setup existing project
+      cy.createProject(1);
+      cy.enableProdMode(1);
+      cy.createSubject(1, 1);
+      cy.createSkill(1, 1, 1);
+      cy.logout();
+    });
+
+    cy.visit('/administrator/projects/proj1/');
+
+    cy.get('#username').type('root@skills.org');
+    cy.get('#inputPassword').type('password');
+    cy.contains('Login').click();
+
+    cy.wait('@getProjects')
+      .then(({ request, response}) => {
+        expect(response.statusCode).to.eq(200)
+      })
+    cy.wait('@getUserInfo')
+      .then(({ request, response}) => {
+        expect(response.statusCode).to.eq(200)
+      })
+
+    cy.contains('PROJECT: This is project 1').should('be.visible');
+    cy.contains('ID: proj1').should('be.visible');
+    cy.get('[data-cy=subPageHeader]').contains('Subjects');
+  });
+
   it('form: bad password', () => {
     cy.visit('/administrator/');
 
