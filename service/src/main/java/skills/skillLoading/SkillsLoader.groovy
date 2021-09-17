@@ -203,7 +203,7 @@ class SkillsLoader {
             rawBadges?.forEach({
                 if (it.projectId) {
                     ProjDef projDef = projDefRepo.findByProjectId(it.projectId)
-                    badges << loadBadgeSummary(projDef, userId, it)
+                    badges << loadBadgeSummary(projDef, userId, it, Integer.MAX_VALUE, false, true)
                 } else {
                     // we have to load badge skills, if no project level is defined then without loading skills,
                     // the client can't identify the project_ids involved in the global bage
@@ -638,12 +638,17 @@ class SkillsLoader {
     }
 
     @Profile
-    private SkillBadgeSummary loadBadgeSummary(ProjDef projDef, String userId, SkillDefWithExtra badgeDefinition, Integer version = Integer.MAX_VALUE, boolean loadSkills = false) {
+    private SkillBadgeSummary loadBadgeSummary(ProjDef projDef, String userId, SkillDefWithExtra badgeDefinition, Integer version = Integer.MAX_VALUE, boolean loadSkills = false, boolean loadProjectName = false) {
         List<SkillSummary> skillsRes = []
 
         if (loadSkills) {
             SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef?.projectId, badgeDefinition.skillId, version, SkillRelDef.RelationshipType.BadgeRequirement)
             skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints)?.sort({ it.skill?.toLowerCase() })
+        }
+
+        String projectName = "";
+        if (loadProjectName) {
+            projectName = projDefRepo.findByProjectId(badgeDefinition.projectId)?.name
         }
 
         List<UserAchievement> achievements = achievedLevelRepository.findAllByUserIdAndProjectIdAndSkillId(userId, projDef?.projectId, badgeDefinition.skillId)
@@ -671,7 +676,8 @@ class SkillsLoader {
                 skills: skillsRes,
                 iconClass: badgeDefinition.iconClass,
                 helpUrl: helpUrl,
-                projectId: badgeDefinition.projectId
+                projectId: badgeDefinition.projectId,
+                projectName: projectName
         )
     }
 

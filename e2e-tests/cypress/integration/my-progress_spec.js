@@ -246,7 +246,12 @@ describe('Navigation Tests', () => {
     cy.visit('/');
     cy.get('[data-cy=viewBadges]').click();
     cy.get('[data-cy=badge-catalog_no-badges]').should('be.visible');
+  });
 
+  it('project name should be visible on badges in badge catalog', () => {
+    cy.visit('/');
+    cy.get('[data-cy=viewBadges]').click();
+    cy.get('[data-cy=badgeProjectName]').should('be.visible').should('have.text', 'Project: This is project 1');
   });
 
 

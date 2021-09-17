@@ -27,6 +27,9 @@ limitations under the License.
                     <div v-if="badge.global" class="text-muted">
                         <small><b>Global Badge</b></small>
                     </div>
+                    <div v-else-if="displayProjectName" class="text-muted text-center text-truncate" data-cy="badgeProjectName">
+                        <small>Proj<span class="d-md-none d-xl-inline">ect</span>: {{badge.projectName}}</small>
+                    </div>
                 </div>
             </div>
         </div>
@@ -73,6 +76,11 @@ limitations under the License.
       iconColor: {
         type: String,
         default: 'text-success',
+      },
+      displayProjectName: {
+        type: Boolean,
+        required: false,
+        default: false,
       },
     },
     computed: {

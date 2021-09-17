@@ -22,7 +22,12 @@ limitations under the License.
     <b-row v-if="!loading" class="my-4">
       <b-col class="my-summary-card">
         <my-badges-details class="myBadges mb-4" :badges="this.achievedBadges" :badgeRouterLinkGenerator="generateBadgeRouterLink" />
-        <badges-catalog :noBadgesMessage="noCatalogMsg" :badges="this.unachievedBadges" :badgeRouterLinkGenerator="generateBadgeRouterLink" />
+        <badges-catalog
+          :noBadgesMessage="noCatalogMsg"
+          :badges="this.unachievedBadges"
+          :badgeRouterLinkGenerator="generateBadgeRouterLink"
+          :displayBadgeProject="true"
+        />
       </b-col>
     </b-row>
   </div>

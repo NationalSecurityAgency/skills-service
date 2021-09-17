@@ -37,4 +37,5 @@ class SkillBadgeSummary {
     String helpUrl
 
     String projectId
+    String projectName
 }

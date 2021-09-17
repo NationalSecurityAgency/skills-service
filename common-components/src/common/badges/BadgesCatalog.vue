@@ -22,7 +22,10 @@ limitations under the License.
         </div>
         <div class="card-body">
             <div class="" v-for="(badge, index) in badges" v-bind:key="badge.badgeId">
-                <badge-catalog-item :badge="badge" class="pb-3" :badgeRouterLinkGenerator="badgeRouterLinkGenerator"></badge-catalog-item>
+                <badge-catalog-item
+                        :display-project-name="displayBadgeProject"
+                        :badge="badge" class="pb-3"
+                        :badgeRouterLinkGenerator="badgeRouterLinkGenerator"></badge-catalog-item>
                 <div v-if="index !== badges.length - 1">
                     <hr/>
                 </div>
@@ -53,6 +56,11 @@ limitations under the License.
         type: String,
         required: false,
         default: 'No Badges left to earn!',
+      },
+      displayBadgeProject: {
+        type: Boolean,
+        required: false,
+        default: false,
       },
     },
     data() {

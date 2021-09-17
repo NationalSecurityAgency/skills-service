@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-    <badge-details-overview :badge="badge" :icon-color="iconColor">
+    <badge-details-overview :badge="badge" :icon-color="iconColor" :display-project-name="displayProjectName">
         <template slot="body-footer" slot-scope="{ props }">
             <router-link :to="badgeRouterLinkGenerator(badge)" tag="button"
                          class="btn btn-sm btn-outline-info skills-theme-btn mr-1 text-uppercase"
@@ -45,6 +45,11 @@ limitations under the License.
       badgeRouterLinkGenerator: {
         type: Function,
         required: true,
+      },
+      displayProjectName: {
+        type: Boolean,
+        required: false,
+        default: false,
       },
     },
   };
