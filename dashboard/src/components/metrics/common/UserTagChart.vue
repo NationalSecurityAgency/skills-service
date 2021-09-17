@@ -14,18 +14,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <metrics-card :title="title" data-cy="userTagChart">
-    <metrics-overlay :loading="isLoading" :has-data="!isEmpty" no-data-icon="fa fa-info-circle" no-data-msg="No user data yet...">
-      <apexchart :type="this.chartType" height="350"  :options="chartOptions" :series="series"></apexchart>
-    </metrics-overlay>
+  <metrics-card :title="titleInternal" data-cy="userTagChart">
+    <skills-spinner :is-loading="isLoading" class="mb-5"/>
+    <div v-if="!isLoading">
+      <metrics-overlay :loading="isLoading" :has-data="!isEmpty" no-data-msg="No data yet...">
+        <apexchart :type="this.chartType" :height="`${heightInPx}px`"  :options="chartOptions" :series="series"></apexchart>
+      </metrics-overlay>
+    </div>
   </metrics-card>
 </template>
 
 <script>
   import MetricsCard from '../utils/MetricsCard';
   import MetricsService from '../MetricsService';
-  import MetricsOverlay from '../utils/MetricsOverlay';
   import UserTagChartMixin from './UserTagChartMixin';
+  import SkillsSpinner from '../../utils/SkillsSpinner';
+  import MetricsOverlay from '../utils/MetricsOverlay';
 
   const PIE = 'pie';
   const BAR = 'bar';
@@ -33,7 +37,11 @@ limitations under the License.
   export default {
     name: 'UserTagChart',
     mixins: [UserTagChartMixin],
-    components: { MetricsOverlay, MetricsCard },
+    components: {
+      MetricsOverlay,
+      SkillsSpinner,
+      MetricsCard,
+    },
     props: {
       tagKey: {
         type: String,
@@ -56,6 +64,8 @@ limitations under the License.
         isEmpty: false,
         series: [],
         chartOptions: {},
+        heightInPx: 350,
+        titleInternal: this.title,
       };
     },
     mounted() {
@@ -70,12 +80,22 @@ limitations under the License.
     methods: {
       loadData() {
         this.isLoading = true;
-        MetricsService.loadChart(this.$route.params.projectId, 'numUsersPerTagBuilder', { tagKey: this.tagKey })
+
+        const params = {
+          tagKey: this.tagKey,
+          currentPage: 1,
+          pageSize: 20,
+          sortDesc: true,
+          tagFilter: '',
+        };
+        const self = this;
+        MetricsService.loadChart(this.$route.params.projectId, 'numUsersPerTagBuilder', params)
           .then((dataFromServer) => {
             if (dataFromServer) {
               const series = [];
               const labels = [];
-              dataFromServer.forEach((data) => {
+              const { items } = dataFromServer;
+              items.forEach((data) => {
                 series.push(data.count);
                 labels.push(data.value);
               });
@@ -88,8 +108,15 @@ limitations under the License.
                   data: series,
                 }];
               }
-              this.chartOptions = { labels };
-              this.isEmpty = dataFromServer.find((item) => item.count > 0) === undefined;
+              this.chartOptions = Object.assign(this.chartOptions, { labels });
+              this.isEmpty = items.find((item) => item.count > 0) === undefined;
+
+              if (items.length > 10) {
+                this.heightInPx = 600;
+              }
+              if (dataFromServer.totalNumItems > params.pageSize) {
+                self.titleInternal = `${self.titleInternal} (Top ${params.pageSize})`;
+              }
             }
             this.isLoading = false;
           });

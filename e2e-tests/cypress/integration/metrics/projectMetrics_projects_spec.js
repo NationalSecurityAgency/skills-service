@@ -26,12 +26,7 @@ describe('Metrics Tests', () => {
         })
     });
 
-    it('projects - Distinct number of users over time', {
-        retries: {
-            runMode: 0,
-            openMode: 0
-        }
-    },() => {
+    it('projects - Distinct number of users over time', () => {
         cy.intercept('/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**',
           {
             statusCode: 200,
@@ -121,12 +116,7 @@ describe('Metrics Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy=distinctNumUsersOverTime]');
     })
 
-    it('projects - Distinct number of users over time - empty project', {
-        retries: {
-            runMode: 0,
-            openMode: 0
-        }
-    },() => {
+    it('projects - Distinct number of users over time - empty project', () => {
         cy.intercept('/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**').as('distinctUsersOverTimeForProject');
 
         cy.visit('/administrator/projects/proj1/');
@@ -177,12 +167,7 @@ describe('Metrics Tests', () => {
             });
     })
 
-    it('projects - Distinct number of users over time - two days', {
-        retries: {
-            runMode: 0,
-            openMode: 0
-        }
-    },() => {
+    it('projects - Distinct number of users over time - two days', () => {
         cy.intercept('/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**',
           {
             statusCode: 200,
@@ -203,12 +188,7 @@ describe('Metrics Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy=distinctNumUsersOverTime]');
     })
 
-    it('projects - Distinct number of users over time - one days', {
-        retries: {
-            runMode: 0,
-            openMode: 0
-        }
-    },() => {
+    it('projects - Distinct number of users over time - one days', () => {
         cy.intercept('/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**',
           {
             statusCode: 200,
@@ -228,60 +208,5 @@ describe('Metrics Tests', () => {
     })
 
 
-    it('projects - User Tag charts', {
-        retries: {
-            runMode: 0,
-            openMode: 0
-        }
-    },() => {
-        cy.intercept('/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**',
-          {
-              statusCode: 200,
-              body: [ {
-                  'value': 1602115200000,
-                  'count': 52
-              }, {
-                  'value': 1602201600000,
-                  'count': 82
-              }],
-          }).as('distinctUsersOverTimeForProject');
-
-        cy.intercept('/admin/projects/proj1/metrics/numUsersPerTagBuilder?tagKey=dutyOrganization',
-          {
-              statusCode: 200,
-              body: [ {
-                  'value': 'ABC',
-                  'count': 52
-              }, {
-                  'value': 'XYZ',
-                  'count': 82
-              }, {
-                  'value': '123',
-                  'count': 14
-              }],
-          }).as('dutyOrganizationChart');
-
-        cy.intercept('/admin/projects/proj1/metrics/numUsersPerTagBuilder?tagKey=adminOrganization',
-          {
-              statusCode: 200,
-              body: [ {
-                  'value': 'US',
-                  'count': 52
-              }, {
-                  'value': 'THEM',
-                  'count': 82
-              }, {
-                  'value': 'EVERYONE ELSE',
-                  'count': 14
-              }],
-          }).as('dutyOrganizationChart');
-
-        cy.visit('/administrator/projects/proj1/');
-        cy.clickNav('Metrics');
-        cy.wait('@distinctUsersOverTimeForProject');
-
-        cy.wait(waitForSnap);
-        cy.matchSnapshotImageForElement('[data-cy=userTagCharts]');
-    })
 
 })

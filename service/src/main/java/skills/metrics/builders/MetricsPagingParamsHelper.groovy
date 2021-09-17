@@ -58,10 +58,14 @@ class MetricsPagingParamsHelper {
         return currentPage
     }
 
-    String getSortBy() {
+    String getSortBy(boolean optional = false, String defaultValue = '') {
         String sortBy = props[PROP_SORT_BY]
-        if (!sortBy) {
+        if (!optional && !sortBy) {
             throw new SkillException("Metrics[${chartId}]: Must supply ${PROP_SORT_BY} param", projectId)
+        }
+
+        if (optional && !sortBy) {
+            sortBy = defaultValue
         }
 
         return sortBy

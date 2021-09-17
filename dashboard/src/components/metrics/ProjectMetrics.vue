@@ -23,7 +23,8 @@ limitations under the License.
     <div v-if="tagCharts" class="row" data-cy="userTagCharts">
       <div class="col-12 col-md-6 mt-2" v-for="(tagChart, index) in tagCharts" :key="`${tagChart.key}-${index}`">
         <div  v-if="index > 0 && index % 2 == 0" class="w-100"></div>
-        <user-tag-chart class="h-100" :chart-type="tagChart.type" :tag-key="tagChart.key" :title="tagChart.title"/>
+        <user-tag-table v-if="tagChart.type === 'table'" class="h-100" :tag-chart="tagChart" />
+        <user-tag-chart v-if="tagChart.type !== 'table'" class="h-100" :chart-type="tagChart.type" :tag-key="tagChart.key" :title="tagChart.title"/>
       </div>
     </div>
   </div>
@@ -32,18 +33,29 @@ limitations under the License.
 <script>
   import NumUsersPerDay from './common/NumUsersPerDay';
   import UserTagChart from './common/UserTagChart';
+  import UserTagTable from './common/UserTagTable';
 
   export default {
     name: 'ProjectMetrics',
     components: {
-      NumUsersPerDay, UserTagChart,
+      UserTagTable,
+      NumUsersPerDay,
+      UserTagChart,
     },
-    computed: {
-      tagCharts() {
+    data() {
+      return {
+        tagCharts: null,
+      };
+    },
+    mounted() {
+      this.buildTagCharts();
+    },
+    methods: {
+      buildTagCharts() {
         if (this.$store.getters.config && this.$store.getters.config.projectMetricsTagCharts) {
           const json = this.$store.getters.config.projectMetricsTagCharts;
           const charts = JSON.parse(json);
-          return charts;
+          this.tagCharts = charts;
         }
         return [];
       },

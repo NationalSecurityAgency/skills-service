@@ -42,4 +42,10 @@ class SkillsValidator {
             throw new SkillException(msg, projectId, skillId, ErrorCode.BadParam)
         }
     }
+
+    static void isNotEmpty(List values, String attrName, String projectId = null, String skillId = null) {
+        if (!values) {
+            throw new SkillException("${attrName} must contain at least 1 item.".toString(), projectId, skillId, ErrorCode.BadParam)
+        }
+    }
 }

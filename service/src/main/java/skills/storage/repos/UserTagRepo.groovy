@@ -15,6 +15,7 @@
  */
 package skills.storage.repos
 
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
@@ -39,8 +40,15 @@ interface UserTagRepo extends CrudRepository<UserTag, Integer> {
     @Query('''SELECT COUNT(DISTINCT ups.userId) as numUsers, ut.value as tag
         from UserPerformedSkill ups
         join UserTag ut on ut.userId = ups.userId 
-        where ups.projectId=?1 and ut.key = ?2 
+        where ups.projectId=?1 and ut.key = ?2 and LOWER(ut.value) LIKE LOWER(CONCAT('%',?3,'%'))   
         group by ut.value''')
-    List<UserTagCount> countDistinctUserIdByProjectIdAndUserTag(String projectId, String tagKey)
+    List<UserTagCount> findDistinctUserIdByProjectIdAndUserTag(String projectId, String tagKey, String tagFilter, Pageable pageable)
+
+
+    @Query('''SELECT COUNT(DISTINCT ut.value)
+        from UserPerformedSkill ups
+        join UserTag ut on ut.userId = ups.userId 
+        where ups.projectId=?1 and ut.key = ?2 and LOWER(ut.value) LIKE LOWER(CONCAT('%',?3,'%'))   ''')
+    Integer countDistinctUserTag(String projectId, String tagKey, String tagFilter)
 
 }
