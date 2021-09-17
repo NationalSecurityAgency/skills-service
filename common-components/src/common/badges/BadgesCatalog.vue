@@ -16,8 +16,8 @@ limitations under the License.
 <template>
     <div class="flex-fill card">
         <div class="card-header">
-            <h6 class="card-title mb-0 float-left text-uppercase">
-                Badges Catalog
+            <h6 class="card-title mb-0 float-left text-uppercase" data-cy="badgesCatalogHeader">
+                Available Badges
             </h6>
         </div>
         <div class="card-body">
