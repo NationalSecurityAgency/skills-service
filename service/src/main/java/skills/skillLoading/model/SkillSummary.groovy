@@ -43,4 +43,7 @@ class SkillSummary  {
     Date achievedOn
 
     SelfReportingInfo selfReporting
+
+    String subjectName
+    String subjectId
 }

@@ -223,6 +223,8 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         summary.skills.get(0).todaysPoints == 0
         !summary.skills.get(0).description
         !summary.dependencyInfo
+        summary.skills[0].subjectName == proj1_subj.name
+        summary.skills[0].subjectId == proj1_subj.subjectId
     }
 
     def "single badge summary - gem"() {
@@ -265,6 +267,8 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         summary.skills.get(0).todaysPoints == 0
         !summary.skills.get(0).description
         !summary.dependencyInfo
+        summary.skills[0].subjectName == proj1_subj.name
+        summary.skills[0].subjectId == proj1_subj.subjectId
     }
 
     def "single badge summary - achieved skill"() {
@@ -314,6 +318,9 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         def skill3 = summary.skills.find { it.skillId == proj1_skills.get(2).skillId }
         skill3.todaysPoints == 0
         skill3.points == 0
+
+        summary.skills[0].subjectName == proj1_subj.name
+        summary.skills[0].subjectId == proj1_subj.subjectId
     }
 
 
@@ -352,6 +359,8 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         def skill1 = summary.skills.find { it.skillId == proj1_skills.get(1).skillId }
         skill1.dependencyInfo.numDirectDependents == 2
         !skill1.dependencyInfo.achieved
+        summary.skills[0].subjectName == proj1_subj.name
+        summary.skills[0].subjectId == proj1_subj.subjectId
     }
 
     def "single badge summary - with achieved dependency info"() {
@@ -390,8 +399,9 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         def skill1 = summary.skills.find { it.skillId == proj1_skills.get(1).skillId }
         skill1.dependencyInfo.numDirectDependents == 2
         skill1.dependencyInfo.achieved
+        summary.skills[0].subjectName == proj1_subj.name
+        summary.skills[0].subjectId == proj1_subj.subjectId
     }
-
 
     def "project summary should return achieved badges summary"(){
         String userId = "user1"
@@ -415,7 +425,6 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         summary.badges.numBadgesCompleted == 0
         summary.badges.enabled
     }
-
 
     def "project summary should return achieved badges summary - badges completed"(){
         String userId = "user1"

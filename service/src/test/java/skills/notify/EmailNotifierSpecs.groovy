@@ -188,7 +188,7 @@ class EmailNotifierSpecs extends DefaultIntSpec {
 </html>
 ''')
 
-        notificationsRepo.count() == 0
+        assert WaitFor.wait { notificationsRepo.count() == 0 }
     }
 
     def "non-existent users allowed due to changes in model"() {
