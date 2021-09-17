@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <div class="card">
-    <div class="card-header">
+    <div class="card-header" data-cy="metricsCard-header">
       <span class="h6 m-0 font-weight-bold">{{ title }}</span><slot name="afterTitle"></slot>
     </div>
     <div class="card-body" :class="{ 'p-0' : noPadding }">

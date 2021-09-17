@@ -34,6 +34,7 @@ import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ContactUsersRequest
 import skills.controller.request.model.GlobalSettingsRequest
 import skills.controller.request.model.SuggestRequest
+import skills.controller.request.model.UserTagRequest
 import skills.controller.result.model.ProjectResult
 import skills.controller.result.model.RequestResult
 import skills.controller.result.model.SettingsResult
@@ -49,7 +50,9 @@ import skills.settings.EmailConfigurationResult
 import skills.settings.EmailConnectionInfo
 import skills.settings.EmailSettingsService
 import skills.settings.SystemSettings
+import skills.storage.model.UserTag
 import skills.storage.model.auth.RoleName
+import skills.storage.repos.UserTagRepo
 
 import javax.xml.bind.DatatypeConverter
 import java.security.MessageDigest
@@ -90,6 +93,9 @@ class RootController {
 
     @Autowired
     ContactUsersService contactUsersService
+
+    @Autowired
+    UserTagRepo userTagRepo
 
     @GetMapping('/rootUsers')
     @ResponseBody
@@ -305,6 +311,15 @@ class RootController {
         return RequestResult.success()
     }
 
+    @RequestMapping(value="/users/{userId}/tags/{tagKey}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    RequestResult saveTag(@PathVariable("userId") String userId, @PathVariable("tagKey") String tagKey, @RequestBody UserTagRequest userTagRequest) {
+        SkillsValidator.isNotEmpty(userTagRequest?.tags, "tags")
+
+        List<UserTag> userTags = userTagRequest.tags.collect { new UserTag(userId: userId, key: tagKey, value: it)}
+        userTagRepo.saveAll(userTags)
+
+        return RequestResult.success()
+    }
 
 
 

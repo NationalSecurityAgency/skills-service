@@ -82,8 +82,8 @@ limitations under the License.
           </b-pagination>
         </span>
       </div>
-      <div class="col-md text-center text-md-right">
-        <span v-if="!options.pagination.remove">
+      <div  v-if="options.pagination.remove || !options.pagination.removePerPage" class="col-md text-center text-md-right">
+        <span v-if="!options.pagination.remove && !options.pagination.removePerPage">
           <label :for="`pagination_select_${uid}`" class="text-muted">Per page:</label>
           <b-form-select :id="`pagination_select_${uid}`" v-model="pageSizeInternal" :options="options.pagination.possiblePageSizes"
                          size="sm" class="mx-2" style="width: 4rem;" :disabled="disabledPaging"

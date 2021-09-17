@@ -897,6 +897,10 @@ class SkillsService {
         return wsHelper.rootPost("/users/", [suggestQuery: query])?.body
     }
 
+    def saveUserTag(String userId, String tagKey, List<String> tags) {
+        return wsHelper.rootPost("/users/${userId}/tags/${tagKey}", [tags: tags])?.body
+    }
+
     def getCurrentUser() {
         return wsHelper.appGet("/userInfo")
     }

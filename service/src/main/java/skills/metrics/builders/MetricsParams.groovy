@@ -15,11 +15,9 @@
  */
 package skills.metrics.builders
 
-import groovy.time.TimeCategory
-import groovy.transform.CompileDynamic
+
 import groovy.transform.CompileStatic
 import org.apache.commons.lang3.StringUtils
-import org.springframework.data.domain.PageRequest
 import skills.controller.exceptions.SkillException
 
 import java.text.DateFormat
@@ -27,9 +25,6 @@ import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
-
-import static org.springframework.data.domain.Sort.Direction.ASC
-import static org.springframework.data.domain.Sort.Direction.DESC
 
 @CompileStatic
 class MetricsParams {
@@ -45,6 +40,7 @@ class MetricsParams {
     public static final String P_FROM_DAY_FILTER = "fromDayFilter"
     public static final String P_TO_DAY_FILTER = "toDayFilter"
     public static final String P_TAG_KEY = "tagKey"
+    public static final String P_TAG_FILTER = "tagFilter"
     public static final DateFormat DAY_FORMAT = new SimpleDateFormat("yyyy-MM-dd")
 
     static String ACHIEVEMENT_TYPE_OVERALL = "Overall"
@@ -59,6 +55,10 @@ class MetricsParams {
 
     static String getTagKey(String projectId, String chartId, Map<String, String> props) {
         return getParam(props, P_TAG_KEY, chartId, projectId)
+    }
+
+    static String getTagFilter(String projectId, String chartId, Map<String, String> props) {
+        return getParam(props, P_TAG_FILTER, chartId, projectId, true)
     }
 
     static String getUsernameFilter(String projectId, String chartId, Map<String, String> props, boolean isOptional = false) {
@@ -127,16 +127,4 @@ class MetricsParams {
         return param
     }
 
-    static PageRequest getPageRequest(String projectId, String chartId, Map<String, String> props, List<String> supportedSortFields) {
-        if (!supportedSortFields.contains(props[MetricsPagingParamsHelper.PROP_SORT_BY])) {
-            throw new SkillException("Metrics[${chartId}]: Invalid value [${props[MetricsPagingParamsHelper.PROP_SORT_BY]}] for [${MetricsPagingParamsHelper.PROP_SORT_BY}] property. Suppored values are ${supportedSortFields}", projectId)
-        }
-
-        MetricsPagingParamsHelper metricsPagingParamsHelper = new MetricsPagingParamsHelper(projectId, chartId, props)
-        int currentPage = metricsPagingParamsHelper.currentPage
-        int pageSize = metricsPagingParamsHelper.pageSize
-        Boolean sortDesc = metricsPagingParamsHelper.sortDesc
-        String sortBy = metricsPagingParamsHelper.sortBy
-        return PageRequest.of(currentPage, pageSize, sortDesc ? DESC : ASC, sortBy)
-    }
 }

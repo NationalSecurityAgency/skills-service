@@ -15,6 +15,7 @@
  */
 package skills.intTests.root
 
+import groovy.json.JsonOutput
 import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
@@ -22,7 +23,6 @@ import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import spock.lang.IgnoreIf
-import spock.lang.IgnoreRest
 import spock.lang.Requires
 
 class RootAccessSpec extends DefaultIntSpec {
@@ -623,4 +623,59 @@ class RootAccessSpec extends DefaultIntSpec {
         res.body.completed.find({ it.type == "Subject" }).name == subj.name
         res.body.completed.find({ it.type == "Subject" }).level == 1
     }
+
+    def 'root user can save user tags' () {
+        // need to call DefaultIntSpec.getRandomUsers so that tests will work in ssl mode
+        String userId = getRandomUsers(1)[0]
+
+        //we need a different userId from the default root user for this test
+        while (userId.contains("jh@dojo")) {
+            userId = getRandomUsers(1)[0]
+        }
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(10,)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        when:
+        rootSkillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills[0].skillId], userId)
+        def res = rootSkillsService.saveUserTag(userId, "myKey", ["coolTag"]);
+
+        String metricsId = "numUsersPerTagBuilder"
+        def tags1 = skillsService.getMetricsData(proj.projectId, metricsId, [tagKey: "myKey", currentPage: 1, pageSize: 5, sortDesc: true])
+        println JsonOutput.toJson(tags1)
+        then:
+        res.success
+        tags1.items[0].value == "coolTag"
+    }
+
+    def 'non-root user can NOT save user tags' () {
+        // need to call DefaultIntSpec.getRandomUsers so that tests will work in ssl mode
+        String userId = getRandomUsers(1)[0]
+
+        //we need a different userId from the default root user for this test
+        while (userId.contains("jh@dojo")) {
+            userId = getRandomUsers(1)[0]
+        }
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(10,)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        when:
+        rootSkillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills[0].skillId], userId)
+        nonRootSkillsService.saveUserTag(userId, "myKey", ["coolTag"]);
+        then:
+        SkillsClientException skillsClientException = thrown(SkillsClientException)
+        skillsClientException.httpStatus == HttpStatus.FORBIDDEN
+    }
 }
+

@@ -39,6 +39,8 @@ import java.time.LocalTime
 import java.time.Month
 import java.time.format.TextStyle
 
+import static org.springframework.data.domain.Sort.Direction.ASC
+
 @Service
 @Slf4j
 class AdminUsersService {
@@ -57,9 +59,6 @@ class AdminUsersService {
 
     @Autowired
     UserEventService userEventService
-
-    @Autowired
-    UserTagRepo userTagRepo
 
     List<TimestampCountItem> getUsage(String projectId, String skillId, Date start) {
         Date startDate = LocalDateTime.of(start.toLocalDate(), LocalTime.MIN).toDate()
@@ -142,14 +141,6 @@ class AdminUsersService {
 
         return levels.collect{
             new LabelCountItem(value: "Level ${it.level}", count: it.numUsers)
-        }
-    }
-
-    List<LabelCountItem> getUserCountsForTag(String projectId, String tagKey) {
-        List<UserTagRepo.UserTagCount> userTagCounts = userTagRepo.countDistinctUserIdByProjectIdAndUserTag(projectId, tagKey)
-
-        return userTagCounts.collect{
-            new LabelCountItem(value: it.tag, count: it.numUsers)
         }
     }
 
