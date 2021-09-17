@@ -168,7 +168,7 @@ describe('Settings Tests', () => {
         cy.visit('/administrator/');
         cy.get('[data-cy=subPageHeader]').contains('Projects');
 
-        cy.get('li').contains('Badges').should('not.exist');
+        cy.get('[data-cy="nav-Badges"]').should('be.visible');
         cy.window().should('have.property','vm').then((vm) => {
             cy.wrap(vm.$store).its('state.access.isSupervisor').should('equal', false);
         });
