@@ -655,7 +655,7 @@ describe('Accessibility Tests', () => {
   })
 
 
-  it.only('user tags on the metrics page', () => {
+  it('user tags on the metrics page', () => {
     const userTagsTableSelector = '[data-cy="userTagsTable"]'
 
     cy.createProject(1);
