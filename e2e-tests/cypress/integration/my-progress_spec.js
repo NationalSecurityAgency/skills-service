@@ -252,6 +252,7 @@ describe('Navigation Tests', () => {
     cy.visit('/');
     cy.get('[data-cy=viewBadges]').click();
     cy.get('[data-cy=badgeProjectName]').should('be.visible').should('have.text', 'Project: This is project 1');
+    cy.get('[data-cy=badgesCatalogHeader]').contains('Available Badges')
   });
 
 
