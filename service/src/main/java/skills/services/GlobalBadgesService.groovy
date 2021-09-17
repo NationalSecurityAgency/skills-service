@@ -139,6 +139,7 @@ class GlobalBadgesService {
                 levelRefId: toAdd.id, level: level, projectRefId: projDef.id, projectId: projectId,
                 projectName: projDef.name, badgeRefId: badgeSkillDef.id, badgeId: badgeId
         )
+        badgeAdminService.awardBadgeToUsersMeetingRequirements(badgeSkillDef)
         DataIntegrityExceptionHandlers.dataIntegrityViolationExceptionHandler.handle(null) {
             globalBadgeLevelDefRepo.save(globalBadgeLevelDef)
         }
