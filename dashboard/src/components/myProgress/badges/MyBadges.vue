@@ -21,7 +21,10 @@ limitations under the License.
     <skills-spinner :is-loading="loading" />
     <b-row v-if="!loading" class="my-4">
       <b-col class="my-summary-card">
-        <my-badges-details class="myBadges mb-4" :badges="this.achievedBadges" :badgeRouterLinkGenerator="generateBadgeRouterLink" />
+        <my-badges-details class="myBadges mb-4"
+                           :displayBadgeProject="true"
+                           :badges="this.achievedBadges"
+                           :badgeRouterLinkGenerator="generateBadgeRouterLink" />
         <badges-catalog
           :noBadgesMessage="noCatalogMsg"
           :badges="this.unachievedBadges"

@@ -35,9 +35,12 @@ limitations under the License.
                             <i class="fa fa-check-circle position-absolute text-success" style="right: 10px; top: 10px;"/>
                             <i v-if="badge.gem" class="fas fa-gem position-absolute" style="top: 10px; left: 10px; color: purple"></i>
                             <i v-if="badge.global" class="fas fa-globe position-absolute" style="top: 10px; left: 10px; color: blue"></i>
-                            <i :class="getIconCss(badge.iconClass, index)" class="fa-5x"/>
+                            <i :class="getIconCss(badge.iconClass, index)" style="font-size: 5em;"/>
                             <div class="card-title mb-0 text-truncate">
                                 {{ badge.badge }}
+                            </div>
+                            <div v-if="displayBadgeProject && badge.projectName" class="text-muted text-center text-truncate" data-cy="badgeProjectName">
+                              <small>Proj<span class="d-md-none d-xl-inline">ect</span>: {{badge.projectName}}</small>
                             </div>
                             <div class="text-muted mb-2"><i class="far fa-clock text-secondary" style="font-size: 0.8rem;"></i> {{ badge.dateAchieved | relativeTime() }}</div>
                         </router-link>
@@ -69,6 +72,11 @@ limitations under the License.
       badgeRouterLinkGenerator: {
         type: Function,
         required: true,
+      },
+      displayBadgeProject: {
+        type: Boolean,
+        required: false,
+        default: false,
       },
     },
     methods: {
