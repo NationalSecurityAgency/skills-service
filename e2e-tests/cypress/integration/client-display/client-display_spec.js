@@ -395,7 +395,7 @@ describe('Client Display Tests', () => {
         cy.cdClickBadges();
 
         // visit global badge
-        cy.get('[data-cy=badgeDetailsLink_globalBadge1]').click();
+        cy.get('[data-cy=earnedBadgeLink_globalBadge1]').click();
 
         cy.contains("Global Badge Details")
 
