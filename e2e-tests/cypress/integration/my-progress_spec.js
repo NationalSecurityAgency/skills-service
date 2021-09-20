@@ -65,6 +65,7 @@ describe('Navigation Tests', () => {
       badgeId: 'gemBadge',
       name: 'Gem Badge',
       enabled: 'true',
+      iconClass: 'mi mi-ac-unit',
       startDate: dateFormatter(dayjs().subtract(5, 'day')),
       endDate: dateFormatter(dayjs().add(7, 'day')),
     });
@@ -114,7 +115,7 @@ describe('Navigation Tests', () => {
       cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);
       cy.loginAsProxyUser()
     });
-    cy.loginAsProxyUser()
+    cy.loginAsProxyUser();
 
     cy.addToMyProjects(1);
     cy.addToMyProjects(2);
@@ -140,7 +141,7 @@ describe('Navigation Tests', () => {
       isEdit: false,
       name: `Global Badge 1`,
       originalBadgeId: '',
-      iconClass: 'fas fa-award',
+      iconClass: 'mi mi-ac-unit',
       enabled: true,
       description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
     });
@@ -251,17 +252,47 @@ describe('Navigation Tests', () => {
   it('project name should be visible on badges in badge catalog', () => {
     cy.visit('/');
     cy.get('[data-cy=viewBadges]').click();
-    cy.get('[data-cy=badgeProjectName]').should('be.visible').should('have.text', 'Project: This is project 1');
+    cy.get('[data-cy=badgeProjectName]').eq(0).should('be.visible').should('have.text', 'Project: This is project 1');
+    cy.get('[data-cy=badgeProjectName]').eq(1).should('be.visible').should('have.text', 'Project: This is project 1');
     cy.get('[data-cy=badgesCatalogHeader]').contains('Available Badges')
   });
 
+  it('material icons should be proper size', () => {
+    cy.loginAsRootUser();
+    cy.request('PUT', `/supervisor/badges/globalBadge1`, {
+      badgeId: `globalBadge1`,
+      isEdit: false,
+      name: `Global Badge 1`,
+      originalBadgeId: '',
+      iconClass: 'mi mi-live-tv',
+      enabled: true,
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    });
+    cy.assignSkillToGlobalBadge(1, 2);
+
+    cy.loginAsRootUser();
+    cy.request('POST', `/api/projects/proj1/skills/skill2`, {
+      userId: Cypress.env('proxyUser'),
+      timestamp: yesterday
+    });
+    cy.request('POST', `/api/projects/proj1/skills/skill2`, {
+      userId: Cypress.env('proxyUser'),
+      timestamp: testTime
+    });
+
+    cy.loginAsProxyUser();
+
+    cy.visit('/');
+    cy.get('[data-cy=viewBadges]').click();
+    cy.matchSnapshotImageForElement('.myBadges', 'my-badges-material-icon');
+  });
 
   it('badges card - gems and not global badges', function () {
     cy.visit('/');
 
     cy.get('[data-cy=numAchievedGlobalBadges]').should('not.exist')
     cy.get('[data-cy=numAchievedGemBadges]').contains('Gems: 0 / 1')
-  })
+  });
 
   it('badges card - global badges and not gems', function () {
     cy.intercept({

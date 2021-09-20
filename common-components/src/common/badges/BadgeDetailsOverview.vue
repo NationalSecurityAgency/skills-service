@@ -18,7 +18,7 @@ limitations under the License.
         <div class="col-lg-2">
             <div class="card mb-2 skills-badge-icon">
                 <div class="card-body">
-                    <i :class="iconCss" class="fa-4x" style="min-width: 3rem;, max-width: 4rem;"/>
+                    <i :class="iconCss" style="font-size: 4em; min-width: 3rem;, max-width: 4rem;"/>
                     <i v-if="badge.gem" class="fas fa-gem position-absolute" style="top: 5px; right: 5px; color: purple"></i>
                     <i v-if="badge.global" class="fas fa-globe position-absolute" style="top: 5px; right: 5px; color: blue"></i>
                     <div v-if="badge.gem" class="text-muted">
