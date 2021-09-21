@@ -20,8 +20,14 @@ limitations under the License.
         <div v-if="!loading">
             <skills-title>Badges</skills-title>
 
-            <my-badges-details :badges="achievedBadges" :badgeRouterLinkGenerator="genLink"></my-badges-details>
-            <badges-catalog v-if="badges && badges.length > 0" class="mt-3" :badges="badges" :badgeRouterLinkGenerator="genLink"></badges-catalog>
+            <my-badges-details data-cy="achievedBadges" :badges="achievedBadges" :badgeRouterLinkGenerator="genLink"></my-badges-details>
+            <badges-catalog class="mt-3"
+              :noBadgesMessage="noCatalogMsg"
+              :badges="unachievedBadges"
+              :badgeRouterLinkGenerator="genLink"
+              data-cy="availableBadges"
+            >
+            </badges-catalog>
         </div>
     </div>
 </template>
@@ -45,20 +51,34 @@ limitations under the License.
       return {
         loading: true,
         badges: [],
+        unachievedBadges: [],
         achievedBadges: [],
       };
     },
     mounted() {
-      UserSkillsService.getBadgeSummaries()
-        .then((res) => {
-          this.badges = res;
-          this.achievedBadges = this.badges.filter((item) => item.badgeAchieved);
-          this.loading = false;
-        });
+      this.loadBadges();
+    },
+    computed: {
+      noCatalogMsg() {
+        if (this.achievedBadges.length > 0 && this.unachievedBadges.length === 0) {
+          return 'No Badges left to earn!';
+        }
+        return 'No Badges available';
+      },
     },
     methods: {
       genLink(b) {
         return { name: b.global ? 'globalBadgeDetails' : 'badgeDetails', params: { badgeId: b.badgeId } };
+      },
+      loadBadges() {
+        this.loading = true;
+        UserSkillsService.getBadgeSummaries().then((res) => {
+          this.badges = res;
+          this.unachievedBadges = res.filter((badge) => badge.badgeAchieved === false);
+          this.achievedBadges = res.filter((badge) => badge.badgeAchieved === true);
+        }).finally(() => {
+          this.loading = false;
+        });
       },
     },
   };

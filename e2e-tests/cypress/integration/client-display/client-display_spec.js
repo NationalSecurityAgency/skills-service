@@ -113,6 +113,21 @@ describe('Client Display Tests', () => {
             version: 0,
             helpUrl: 'http://doHelpOnThisSkill.com'
         });
+
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill5`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: 'skill5',
+            name: `This is 5`,
+            type: 'Skill',
+            pointIncrement: 100,
+            numPerformToCompletion: 1,
+            pointIncrementInterval: 0,
+            numMaxOccurrencesIncrementInterval: -1,
+            description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+            version: 0,
+            helpUrl: 'http://doHelpOnThisSkill.com'
+        });
         cy.request('POST', `/admin/projects/proj1/skills/skill4/dependency/skill2`)
 
         cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: Cypress.env('proxyUser'), timestamp: new Date().getTime()})
@@ -380,7 +395,7 @@ describe('Client Display Tests', () => {
         cy.cdClickBadges();
 
         // visit global badge
-        cy.get('[data-cy=badgeDetailsLink_globalBadge1]').click();
+        cy.get('[data-cy=earnedBadgeLink_globalBadge1]').click();
 
         cy.contains("Global Badge Details")
 
@@ -423,6 +438,35 @@ describe('Client Display Tests', () => {
         cy.contains('Badge Details');
         cy.get('[data-cy=toggleSkillDetails]').click();
         cy.contains('Subject: Subject 1').should('be.visible');
+    });
+
+    it('badges details page does not show achieved badges in available badges section', () => {
+
+        cy.request('POST', '/admin/projects/proj1/badges/badge2', {
+            projectId: 'proj1',
+            badgeId: 'badge2',
+            name: 'Badge 2'
+        });
+        cy.assignSkillToBadge(1,2,5);
+        cy.request('POST', '/admin/projects/proj1/badges/badge2', {
+            projectId: 'proj1',
+            badgeId: 'badge2',
+            name: 'Badge 2',
+            enabled: true,
+        });
+        cy.reportSkill(1, 5, Cypress.env('proxyUser')); // achieve badge 2
+
+        cy.assignSkillToBadge(1,1,1);
+        cy.request('POST', '/admin/projects/proj1/badges/badge1', {
+            projectId: 'proj1',
+            badgeId: 'badge1',
+            name: 'Badge 1',
+            enabled: true,
+        });
+        cy.cdVisit('/');
+        cy.cdClickBadges();
+        cy.get('[data-cy=achievedBadges]').contains('Badge 2')
+        cy.get('[data-cy=availableBadges]').contains('Badge 1')
     });
 
 });

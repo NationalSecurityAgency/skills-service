@@ -706,29 +706,6 @@ describe('Client Display Skills Filtering Tests', () => {
 
     cy.cdVisit('/');
     cy.cdClickBadges();
-    cy.get('[data-cy="badgeDetailsLink_globalBadge1"]').click();
-
-    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
-    cy.get('[data-cy="skillProgress_index-1"]').contains('skill 2')
-    cy.get('[data-cy="skillProgress_index-2"]').contains('skill 3')
-    cy.get('[data-cy="skillProgress_index-3"]').contains('skill 4')
-
-    cy.validateCounts(0, 4, 4, 0, 0);
-
-    cy.get('[data-cy="skillsFilter_complete"]').click();
-
-    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
-    cy.get('[data-cy="skillProgress_index-1"]').contains('skill 2')
-    cy.get('[data-cy="skillProgress_index-2"]').contains('skill 3')
-    cy.get('[data-cy="skillProgress_index-3"]').contains('skill 4')
-
-    cy.get('[data-cy="skillsSearchInput"]').type('blah');
-    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
-    cy.get('[data-cy="skillProgress_index-1"]').contains('skill 3')
-    cy.get('[data-cy="skillProgress_index-2"]').should('not.exist')
-
-    cy.cdVisit('/');
-    cy.cdClickBadges();
     cy.get('[data-cy="earnedBadgeLink_globalBadge1"]').click();
 
     cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
