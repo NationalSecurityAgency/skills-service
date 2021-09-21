@@ -254,7 +254,6 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=viewBadges]').click();
     cy.get('[data-cy=badgeProjectName]').eq(0).should('be.visible').should('have.text', 'Project: This is project 1');
     cy.get('[data-cy=badgeProjectName]').eq(1).should('be.visible').should('have.text', 'Project: This is project 1');
-    cy.get('[data-cy=badgesCatalogHeader]').contains('Available Badges')
   });
 
   it('material icons should be proper size', () => {
