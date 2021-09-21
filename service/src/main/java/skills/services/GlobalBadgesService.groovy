@@ -175,7 +175,11 @@ class GlobalBadgesService {
     @Transactional()
     void removeSkillFromBadge(String badgeId, projectId, String skillId) {
         removeGraphRelationship(badgeId, SkillDef.ContainerType.GlobalBadge, projectId, skillId, RelationshipType.BadgeRequirement)
+
+        SkillDef badgeSkillDef = skillDefRepo.findGlobalBadgeByBadgeId(badgeId)
+        badgeAdminService.awardBadgeToUsersMeetingRequirements(badgeSkillDef)
     }
+
     @Transactional
     void assignGraphRelationship(String badgeSkillId, SkillDef.ContainerType skillType, String projectId,
                                  String relationshipSkillId, RelationshipType relationshipType) {

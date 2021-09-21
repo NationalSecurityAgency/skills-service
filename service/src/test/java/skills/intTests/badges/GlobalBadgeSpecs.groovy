@@ -31,12 +31,79 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
 
     def "remvoing level satisfies global badge for some of the existing users"() {
 
-        // TODO: add another users that do not have level 1 but have same skill achievement so should get the badge
-        // TODO: add another user that has another skill achieved and so should NOT get the badge
         def proj = SkillsFactory.createProject()
         def subj2 = SkillsFactory.createSubject(1, 2)
         def subj3 = SkillsFactory.createSubject(1, 3)
         def subj = SkillsFactory.createSubject()
+        def badge = SkillsFactory.createBadge()
+        def badge2 = SkillsFactory.createBadge(1, 2)
+
+
+        //subj1 skills
+        // 1500 total points
+        // 150 for level 1
+        // 375 for level 2
+        List<Map> skills = SkillsFactory.createSkills(5, 1, 1, 100)
+        List<Map> subj2Skills = SkillsFactory.createSkills(5, 1, 2, 100)
+        List<Map> subj3Skills = SkillsFactory.createSkills(5, 1, 3, 100)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSubject(subj2)
+        skillsService.createSubject(subj3)
+        skillsService.createSkills(skills)
+        skillsService.createSkills(subj2Skills)
+        skillsService.createSkills(subj3Skills)
+
+        badge.enabled = 'true'
+        badge2.enabled = 'true'
+        supervisorService.createGlobalBadge(badge)
+        supervisorService.createGlobalBadge(badge2)
+        supervisorService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, level: "3")
+        supervisorService.assignSkillToGlobalBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[0].skillId])
+
+        // Adding level 1 and skills[3] to badge 2, the level is achieved but the skill is not so the badge should not be awarded
+        supervisorService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge2.badgeId, level: "1")
+        supervisorService.assignSkillToGlobalBadge(proj.projectId, badge2.badgeId, skills[2].skillId.toString())
+
+        when:
+        skillsService.addSkill(['projectId': proj.projectId, skillId: skills[0].skillId], "user1", new Date()).body.completed
+
+        // User that does not get level 1 but does get the skill achievement
+        skillsService.addSkill(['projectId': proj.projectId, skillId: skills[0].skillId], "user2", new Date()).body.completed
+
+        // User that gets a different skill and should NOT get the global badge
+        skillsService.addSkill(['projectId': proj.projectId, skillId: skills[1].skillId], "user3", new Date()).body.completed
+        //triggers level 1
+        def addSkillRes = skillsService.addSkill(['projectId': proj.projectId, skillId: skills[1].skillId], "user1", new Date()).body.completed
+
+        def badge_level_before = skillsService.getBadgeSummary("user1", proj.projectId,  badge.badgeId,-1, true)
+        supervisorService.removeProjectLevelFromGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, level: "3")
+        def badge_level_after = skillsService.getBadgeSummary("user1", proj.projectId,  badge.badgeId,-1, true)
+        def badge_summary_user2 = skillsService.getBadgeSummary("user2", proj.projectId,  badge.badgeId,-1, true)
+        def badge_summary_user3 = skillsService.getBadgeSummary("user3", proj.projectId,  badge.badgeId,-1, true)
+        def badge2_summary_user1 = skillsService.getBadgeSummary("user1", proj.projectId,  badge2.badgeId,-1, true)
+
+        then:
+        addSkillRes.find( { it.type == "Overall"}).level == 1
+        !badge_level_before.badgeAchieved
+        !badge_level_before.dateAchieved
+
+        badge_level_after.badgeAchieved
+        badge_level_after.dateAchieved
+        badge_summary_user2.badgeAchieved
+        badge_summary_user2.dateAchieved
+        !badge_summary_user3.badgeAchieved
+        !badge_summary_user3.dateAchieved
+        !badge2_summary_user1.badgeAchieved
+    }
+
+    def "removing skill requirement from badge where level achievement is met should award badge"() {
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def subj2 = SkillsFactory.createSubject(1, 2)
+        def subj3 = SkillsFactory.createSubject(1, 3)
         def badge = SkillsFactory.createBadge()
 
 
@@ -58,30 +125,26 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
 
         badge.enabled = 'true'
         supervisorService.createGlobalBadge(badge)
-        supervisorService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, level: "3")
-        supervisorService.assignSkillToGlobalBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[0].skillId])
-
+        supervisorService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, level: "1")
+        supervisorService.assignSkillToGlobalBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[4].skillId])
 
         when:
-        println skillsService.addSkill(['projectId': proj.projectId, skillId: skills[0].skillId], "user1", new Date()).body.completed
+        skillsService.addSkill(['projectId': proj.projectId, skillId: skills[0].skillId], "user1", new Date()).body.completed
         //triggers level 1
         def addSkillRes = skillsService.addSkill(['projectId': proj.projectId, skillId: skills[1].skillId], "user1", new Date()).body.completed
+        def badge_level_before_skill_removed = skillsService.getBadgeSummary("user1", proj.projectId,  badge.badgeId,-1, true)
 
-        def badge_level_before = skillsService.getBadgeSummary("user1", proj.projectId,  badge.badgeId,-1, true)
-        supervisorService.removeProjectLevelFromGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, level: "3")
-        def badge_level_after = skillsService.getBadgeSummary("user1", proj.projectId,  badge.badgeId,-1, true)
+        // Remove the skill requirement so that the user should now qualify for the badge
+        supervisorService.removeSkillFromGlobalBadge(proj.projectId, badge.badgeId, skills[4].skillId.toString())
+        def badge_level_after_skill_removed = skillsService.getBadgeSummary("user1", proj.projectId,  badge.badgeId,-1, true)
 
         then:
         addSkillRes.find( { it.type == "Overall"}).level == 1
-        !badge_level_before.badgeAchieved
-        !badge_level_before.dateAchieved
+        !badge_level_before_skill_removed.badgeAchieved
+        badge_level_after_skill_removed.badgeAchieved
 
-        badge_level_after.badgeAchieved
-        badge_level_after.dateAchieved
     }
 
-    // TODO: create another badge with similar level requirement but a different skill that is not achieved and make sure badge is not mistakenly awarded
-    // TODO: add another test where level achievement is met but required skill is not; remove that skill from the requirement and verify that badge is awarded
 
     def "achieving subject level does not satisfy global badge level dependency"(){
         def proj = SkillsFactory.createProject()

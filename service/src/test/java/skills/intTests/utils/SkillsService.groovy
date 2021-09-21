@@ -547,9 +547,15 @@ class SkillsService {
     def removeSkillFromBadge(Map props) {
         wsHelper.adminDelete(getAddSkillToBadgeUrl(props.projectId, props.badgeId, props.skillId), props)
     }
-
+    def assignSkillToGlobalBadge(String projectId, String badgeId, String skillId) {
+        this.assignSkillToGlobalBadge(['badgeId': badgeId, 'projectId': projectId, 'skillId': skillId])
+    }
     def assignSkillToGlobalBadge(Map props) {
         wsHelper.supervisorPost(getAddSkillToGlobalBadgeUrl(props.badgeId, props.projectId, props.skillId), props)
+    }
+
+    def removeSkillFromGlobalBadge(String projectId, String badgeId, String skillId) {
+        this.removeSkillFromGlobalBadge([badgeId: badgeId, projectId: projectId, skillId: skillId])
     }
 
     def removeSkillFromGlobalBadge(Map props) {
