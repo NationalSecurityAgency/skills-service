@@ -16,17 +16,12 @@ limitations under the License.
 <template>
     <div class="flex-fill card">
         <div class="card-header">
-            <div class="row mb-1 ml-1 card-title">
-              <h6 class="float-left text-uppercase">
-                  Badges Catalog
-              </h6>
-            </div>
             <div class="row" v-if="badgesInternalOrig && badgesInternalOrig.length > 0">
                 <div class="col-md-auto text-left pr-md-0">
                     <div class="d-flex">
                         <b-form-input @input="searchBadges" style="padding-right: 2.3rem;"
                                       v-model="searchString"
-                                      placeholder="Search badges"
+                                      placeholder="Search Available Badges"
                                       aria-label="Search badges"
                                       data-cy="badgeSearchInput"></b-form-input>
                         <b-button v-if="searchString && searchString.length > 0" @click="clearSearch"
