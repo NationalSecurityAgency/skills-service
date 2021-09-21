@@ -8,7 +8,7 @@
   "private": "true",
   "scripts": {
     "serve": "npm run setup:common && vue-cli-service serve",
-    "licenseDepCheck": "license-checker --excludePrivatePackages --production --onlyAllow='MIT;ISC;Apache-2.0;BSD-2-ClauseCustom: https://travis-ci.org/component/emitter.png' --summary",
+    "licenseDepCheck": "license-checker --excludePrivatePackages --production --onlyAllow='MIT;ISC;Apache-2.0;BSD-2-Clause;Custom: https://travis-ci.org/component/emitter.png' --summary",
     "licenseHeaderCheck": "license-check-and-add check -f '../license-add/license-add-config.json' -r 20",
     "licenseHeaderAdd": "license-check-and-add add -f ../license-add/license-add-config.json -r 21",
     "licenseCheck": "npm run licenseHeaderCheck && npm run licenseDepCheck",
