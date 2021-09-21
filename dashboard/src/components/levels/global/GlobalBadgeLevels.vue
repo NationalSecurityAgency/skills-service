@@ -138,7 +138,8 @@ limitations under the License.
           });
       },
       deleteLevel(deletedLevel) {
-        const msg = `Are you sure you want to remove Level "${deletedLevel.level}" for project "${deletedLevel.projectName}" from Badge "${this.badge.name}"?`;
+        const msg = `Removing this level will award this badge to users that fulfill all of the remaining requirements.
+        Are you sure you want to remove Level "${deletedLevel.level}" for project "${deletedLevel.projectName}" from Badge "${this.badge.name}"?`;
         this.msgConfirm(msg, 'WARNING: Remove Required Level').then((res) => {
           if (res) {
             this.levelDeleted(deletedLevel);
