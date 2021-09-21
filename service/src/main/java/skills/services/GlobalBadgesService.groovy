@@ -98,6 +98,9 @@ class GlobalBadgesService {
     @Autowired
     SkillsDepsService skillsDepsService
 
+    @Autowired
+    UserAchievedLevelRepo achievedLevelRepo
+
     @Transactional()
     void saveBadge(String originalBadgeId, BadgeRequest badgeRequest) {
         badgeAdminService.saveBadge(null, originalBadgeId, badgeRequest, SkillDef.ContainerType.GlobalBadge)
@@ -139,7 +142,7 @@ class GlobalBadgesService {
                 levelRefId: toAdd.id, level: level, projectRefId: projDef.id, projectId: projectId,
                 projectName: projDef.name, badgeRefId: badgeSkillDef.id, badgeId: badgeId
         )
-        badgeAdminService.awardBadgeToUsersMeetingRequirements(badgeSkillDef)
+
         DataIntegrityExceptionHandlers.dataIntegrityViolationExceptionHandler.handle(null) {
             globalBadgeLevelDefRepo.save(globalBadgeLevelDef)
         }
@@ -151,7 +154,11 @@ class GlobalBadgesService {
         if (!globalBadgeLevelDef) {
             throw new SkillException("Failed to find global badge project level for badge [${badgeId}], project [${projectId}] and level [${level}]", projectId, badgeId)
         }
+
         globalBadgeLevelDefRepo.delete(globalBadgeLevelDef)
+
+        SkillDef badgeSkillDef = skillDefRepo.findGlobalBadgeByBadgeId(badgeId)
+        badgeAdminService.awardBadgeToUsersMeetingRequirements(badgeSkillDef)
     }
 
     @Transactional(readOnly = true)

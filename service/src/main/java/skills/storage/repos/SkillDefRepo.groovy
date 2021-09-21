@@ -310,4 +310,8 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         ''')
     ProjectAndSubjectPoints getProjectAndSubjectPoints(String projectId, String skillId)
 
+    @Nullable
+    @Query("SELECT sd from SkillDef sd where sd.skillId=?1 and sd.type='GlobalBadge'")
+    SkillDef findGlobalBadgeByBadgeId(String badgeId)
+
 }
