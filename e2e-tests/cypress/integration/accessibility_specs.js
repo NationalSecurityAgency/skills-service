@@ -655,65 +655,66 @@ describe('Accessibility Tests', () => {
   })
 
 
-  it('user tags on the metrics page', () => {
-    const userTagsTableSelector = '[data-cy="userTagsTable"]'
+  if (!Cypress.env('oauthMode')) {
+    it('user tags on the metrics page', () => {
+      const userTagsTableSelector = '[data-cy="userTagsTable"]'
 
-    cy.createProject(1);
-    cy.createSubject(1, 1);
-    cy.createSkill(1, 1, 1);
+      cy.createProject(1);
+      cy.createSubject(1, 1);
+      cy.createSkill(1, 1, 1);
 
-    cy.logout();
-    cy.fixture('vars.json').then((vars) => {
-      cy.login(vars.rootUser, vars.defaultPass);
-    });
+      cy.logout();
+      cy.fixture('vars.json').then((vars) => {
+        cy.login(vars.rootUser, vars.defaultPass);
+      });
 
-    Cypress.Commands.add("addUserTag", (userId, tagKey, tags) => {
-      cy.request('POST', `/root/users/${userId}/tags/${tagKey}`, { tags } );
-    });
+      Cypress.Commands.add("addUserTag", (userId, tagKey, tags) => {
+        cy.request('POST', `/root/users/${userId}/tags/${tagKey}`, { tags } );
+      });
 
-    const createTags = (numTags, tagKey) => {
-      for (let i = 0; i < numTags; i += 1) {
-        const userId = `user${i}`;
-        cy.reportSkill(1, 1, userId, 'now');
+      const createTags = (numTags, tagKey) => {
+        for (let i = 0; i < numTags; i += 1) {
+          const userId = `user${i}`;
+          cy.reportSkill(1, 1, userId, 'now');
 
-        const tags = [];
-        for (let j = 0; j <= i; j += 1) {
-          tags.push(`tag${j}`);
+          const tags = [];
+          for (let j = 0; j <= i; j += 1) {
+            tags.push(`tag${j}`);
+          }
+          cy.addUserTag(userId, tagKey, tags);
         }
-        cy.addUserTag(userId, tagKey, tags);
-      }
-    };
+      };
 
-    createTags(21, 'someValues');
-    createTags(25, 'manyValues');
+      createTags(21, 'someValues');
+      createTags(25, 'manyValues');
 
-    cy.logout();
-    cy.fixture('vars.json').then((vars) => {
-      cy.login(vars.defaultUser, vars.defaultPass);
-    })
-
-    cy.intercept('GET', '/public/config', (req) => {
-      req.reply({
-        body: {
-          projectMetricsTagCharts: "[{\"key\":\"manyValues\",\"type\":\"table\",\"title\":\"Many Values\",\"tagLabel\":\"Best Label\"},{\"key\":\"someValues\",\"type\":\"bar\",\"title\":\"Some Values\"}]"
-        },
+      cy.logout();
+      cy.fixture('vars.json').then((vars) => {
+        cy.login(vars.defaultUser, vars.defaultPass);
       })
-    }).as('getConfig')
-    cy.viewport(1200, 1000)
 
-    cy.visit('/administrator/projects/proj1/');
-    cy.wait('@getConfig');
-    cy.injectAxe()
+      cy.intercept('GET', '/public/config', (req) => {
+        req.reply({
+          body: {
+            projectMetricsTagCharts: "[{\"key\":\"manyValues\",\"type\":\"table\",\"title\":\"Many Values\",\"tagLabel\":\"Best Label\"},{\"key\":\"someValues\",\"type\":\"bar\",\"title\":\"Some Values\"}]"
+          },
+        })
+      }).as('getConfig')
+      cy.viewport(1200, 1000)
 
-    cy.clickNav('Metrics');
-    cy.get('[data-cy="userTagTableCard"] [data-cy="metricsCard-header"]').contains('Many Values');
-    cy.get(`${userTagsTableSelector} th`).contains('Best Label');
-    cy.get(`${userTagsTableSelector} th`).contains('# Users');
+      cy.visit('/administrator/projects/proj1/');
+      cy.wait('@getConfig');
+      cy.injectAxe()
 
-    cy.wait(3000);
+      cy.clickNav('Metrics');
+      cy.get('[data-cy="userTagTableCard"] [data-cy="metricsCard-header"]').contains('Many Values');
+      cy.get(`${userTagsTableSelector} th`).contains('Best Label');
+      cy.get(`${userTagsTableSelector} th`).contains('# Users');
 
-    cy.customLighthouse();
-    cy.customA11y();
-  });
+      cy.wait(3000);
 
+      cy.customLighthouse();
+      cy.customA11y();
+    });
+  }
 });

@@ -79,158 +79,159 @@ describe('Metrics Using User Tags Tests', () => {
         cy.viewport(1200, 1000)
     });
 
-    it('user tag table', () => {
-        cy.visit('/administrator/projects/proj1/');
-        cy.wait('@getConfig');
+    if (!Cypress.env('oauthMode')) {
+        it('user tag table', () => {
+            cy.visit('/administrator/projects/proj1/');
+            cy.wait('@getConfig');
 
-        cy.clickNav('Metrics');
-        cy.get('[data-cy="userTagTableCard"] [data-cy="metricsCard-header"]').contains('Many Values');
-        cy.get(`${userTagsTableSelector} th`).contains('Best Label');
-        cy.get(`${userTagsTableSelector} th`).contains('# Users');
+            cy.clickNav('Metrics');
+            cy.get('[data-cy="userTagTableCard"] [data-cy="metricsCard-header"]').contains('Many Values');
+            cy.get(`${userTagsTableSelector} th`).contains('Best Label');
+            cy.get(`${userTagsTableSelector} th`).contains('# Users');
 
-        const expected = []
-        for (let i = 0; i < 25; i += 1) {
-            expected.push([
-                { colIndex: 0,  value: `tag${i}` },
-                { colIndex: 1,  value: `${25 -i}` }
-            ])
-        }
+            const expected = []
+            for (let i = 0; i < 25; i += 1) {
+                expected.push([
+                    { colIndex: 0,  value: `tag${i}` },
+                    { colIndex: 1,  value: `${25 -i}` }
+                ])
+            }
 
-        // test values and paging
-        // cy.validateTable(userTagsTableSelector, expected, 10);
-    });
+            // test values and paging
+            // cy.validateTable(userTagsTableSelector, expected, 10);
+        });
 
-    it('user tag table - ability to sort by tag', () => {
-        cy.visit('/administrator/projects/proj1/');
-        cy.wait('@getConfig');
+        it('user tag table - ability to sort by tag', () => {
+            cy.visit('/administrator/projects/proj1/');
+            cy.wait('@getConfig');
 
-        cy.clickNav('Metrics');
-        cy.get('[data-cy="userTagTableCard"] [data-cy="metricsCard-header"]').contains('Many Values');
-
-
-        cy.get(`${userTagsTableSelector} th`).contains('# Users').click();
-
-        const expected = []
-        for (let i = 0; i < 10; i += 1) {
-            expected.push([
-                { colIndex: 1,  value: `${1 + i}` }
-            ])
-        }
-        cy.validateTable(userTagsTableSelector, expected, 10, true, 25);
-
-        cy.get(`${userTagsTableSelector} th`).contains('Best Label').click();
-        const expected1 = []
-        for (let i = 0; i < 10; i += 1) {
-            expected1.push([
-                { colIndex: 0,  value: `tag${24 - i}` },
-            ])
-        }
-        cy.validateTable(userTagsTableSelector, expected1, 10, true, 25);
+            cy.clickNav('Metrics');
+            cy.get('[data-cy="userTagTableCard"] [data-cy="metricsCard-header"]').contains('Many Values');
 
 
-        cy.get(`${userTagsTableSelector} th`).contains('Best Label').click();
-        const expected2 = [
-                [{ colIndex: 0,  value: 'tag9' }],
-                [{ colIndex: 0,  value: 'tag8' }],
-                [{ colIndex: 0,  value: 'tag7' }],
-                [{ colIndex: 0,  value: 'tag6' }],
-                [{ colIndex: 0,  value: 'tag5' }],
-                [{ colIndex: 0,  value: 'tag4' }],
-                [{ colIndex: 0,  value: 'tag3' }],
-                [{ colIndex: 0,  value: 'tag24' }],
+            cy.get(`${userTagsTableSelector} th`).contains('# Users').click();
+
+            const expected = []
+            for (let i = 0; i < 10; i += 1) {
+                expected.push([
+                    { colIndex: 1,  value: `${1 + i}` }
+                ])
+            }
+            cy.validateTable(userTagsTableSelector, expected, 10, true, 25);
+
+            cy.get(`${userTagsTableSelector} th`).contains('Best Label').click();
+            const expected1 = []
+            for (let i = 0; i < 10; i += 1) {
+                expected1.push([
+                    { colIndex: 0,  value: `tag${24 - i}` },
+                ])
+            }
+            cy.validateTable(userTagsTableSelector, expected1, 10, true, 25);
+
+
+            cy.get(`${userTagsTableSelector} th`).contains('Best Label').click();
+            const expected2 = [
+                    [{ colIndex: 0,  value: 'tag9' }],
+                    [{ colIndex: 0,  value: 'tag8' }],
+                    [{ colIndex: 0,  value: 'tag7' }],
+                    [{ colIndex: 0,  value: 'tag6' }],
+                    [{ colIndex: 0,  value: 'tag5' }],
+                    [{ colIndex: 0,  value: 'tag4' }],
+                    [{ colIndex: 0,  value: 'tag3' }],
+                    [{ colIndex: 0,  value: 'tag24' }],
+                    [{ colIndex: 0,  value: 'tag23' }],
+                [{ colIndex: 0,  value: 'tag22' }],
+            ]
+            cy.validateTable(userTagsTableSelector, expected2, 10, true, 25);
+        });
+
+        it('user tag table - filter by tag - press button', () => {
+            cy.visit('/administrator/projects/proj1/');
+            cy.wait('@getConfig');
+
+            cy.clickNav('Metrics');
+            cy.get('[data-cy="userTagTableCard"] [data-cy="metricsCard-header"]')
+                .contains('Many Values');
+            cy.get('[data-cy="userTagTable-tagFilter"]').type('aG2');
+            cy.get('[ data-cy="userTagTable-filterBtn"]').click();
+
+            const expected2 = [
+                [{ colIndex: 0,  value: 'tag2' }],
+                [{ colIndex: 0,  value: 'tag20' }],
+                [{ colIndex: 0,  value: 'tag21' }],
+                [{ colIndex: 0,  value: 'tag22' }],
                 [{ colIndex: 0,  value: 'tag23' }],
-            [{ colIndex: 0,  value: 'tag22' }],
-        ]
-        cy.validateTable(userTagsTableSelector, expected2, 10, true, 25);
-    });
-
-    it('user tag table - filter by tag - press button', () => {
-        cy.visit('/administrator/projects/proj1/');
-        cy.wait('@getConfig');
-
-        cy.clickNav('Metrics');
-        cy.get('[data-cy="userTagTableCard"] [data-cy="metricsCard-header"]')
-            .contains('Many Values');
-        cy.get('[data-cy="userTagTable-tagFilter"]').type('aG2');
-        cy.get('[ data-cy="userTagTable-filterBtn"]').click();
-
-        const expected2 = [
-            [{ colIndex: 0,  value: 'tag2' }],
-            [{ colIndex: 0,  value: 'tag20' }],
-            [{ colIndex: 0,  value: 'tag21' }],
-            [{ colIndex: 0,  value: 'tag22' }],
-            [{ colIndex: 0,  value: 'tag23' }],
-            [{ colIndex: 0,  value: 'tag24' }],
-        ]
-        cy.validateTable(userTagsTableSelector, expected2, 10);
-    });
+                [{ colIndex: 0,  value: 'tag24' }],
+            ]
+            cy.validateTable(userTagsTableSelector, expected2, 10);
+        });
 
 
-    it('user tag table - filter by tag - press enter', () => {
-        cy.visit('/administrator/projects/proj1/');
-        cy.wait('@getConfig');
+        it('user tag table - filter by tag - press enter', () => {
+            cy.visit('/administrator/projects/proj1/');
+            cy.wait('@getConfig');
 
-        cy.clickNav('Metrics');
-        cy.get('[data-cy="userTagTableCard"] [data-cy="metricsCard-header"]')
-            .contains('Many Values');
-        cy.get('[data-cy="userTagTable-tagFilter"]').type('aG2{enter}');
+            cy.clickNav('Metrics');
+            cy.get('[data-cy="userTagTableCard"] [data-cy="metricsCard-header"]')
+                .contains('Many Values');
+            cy.get('[data-cy="userTagTable-tagFilter"]').type('aG2{enter}');
 
-        const expected2 = [
-            [{ colIndex: 0,  value: 'tag2' }],
-            [{ colIndex: 0,  value: 'tag20' }],
-            [{ colIndex: 0,  value: 'tag21' }],
-            [{ colIndex: 0,  value: 'tag22' }],
-            [{ colIndex: 0,  value: 'tag23' }],
-            [{ colIndex: 0,  value: 'tag24' }],
-        ]
-        cy.validateTable(userTagsTableSelector, expected2, 10);
-    });
-
-
-    it('user tag table - clear filter', () => {
-        cy.visit('/administrator/projects/proj1/');
-        cy.wait('@getConfig');
-
-        cy.clickNav('Metrics');
-        cy.get('[data-cy="userTagTableCard"] [data-cy="metricsCard-header"]')
-            .contains('Many Values');
-        cy.get('[data-cy="userTagTable-tagFilter"]').type('aG2{enter}');
-        cy.get(`${userTagsTableSelector}`).contains('Total Rows: 6')
-
-        cy.get('[data-cy="userTagTable-clearBtn"]').click();
-        cy.get(`${userTagsTableSelector}`).contains('Total Rows: 25')
-    });
+            const expected2 = [
+                [{ colIndex: 0,  value: 'tag2' }],
+                [{ colIndex: 0,  value: 'tag20' }],
+                [{ colIndex: 0,  value: 'tag21' }],
+                [{ colIndex: 0,  value: 'tag22' }],
+                [{ colIndex: 0,  value: 'tag23' }],
+                [{ colIndex: 0,  value: 'tag24' }],
+            ]
+            cy.validateTable(userTagsTableSelector, expected2, 10);
+        });
 
 
-    it('bar chart', () => {
-        cy.visit('/administrator/projects/proj1/');
-        cy.wait('@getConfig');
+        it('user tag table - clear filter', () => {
+            cy.visit('/administrator/projects/proj1/');
+            cy.wait('@getConfig');
 
-        cy.clickNav('Metrics');
-        cy.get('[data-cy="userTagChart"] [data-cy="metricsCard-header"]').contains('Some Values (Top 20)');
-        cy.get('[data-cy="userTagChart"]').contains('tag0: 21 users');
-        cy.get('[data-cy="userTagChart"]').contains('tag1: 20 users');
-        cy.get('[data-cy="userTagChart"]').contains('tag2: 19 users');
-        cy.get('[data-cy="userTagChart"]').contains('tag3: 18 users');
-        cy.get('[data-cy="userTagChart"]').contains('tag4: 17 users');
-        cy.get('[data-cy="userTagChart"]').contains('tag5: 16 users');
-        cy.get('[data-cy="userTagChart"]').contains('tag6: 15 users');
-        cy.get('[data-cy="userTagChart"]').contains('tag7: 14 users');
-        cy.get('[data-cy="userTagChart"]').contains('tag8: 13 users');
-        cy.get('[data-cy="userTagChart"]').contains('tag9: 12 users');
-        cy.get('[data-cy="userTagChart"]').contains('tag10: 11 users');
-        cy.get('[data-cy="userTagChart"]').contains('tag11: 10 users');
-        cy.get('[data-cy="userTagChart"]').contains('tag12: 9 users');
-        cy.get('[data-cy="userTagChart"]').contains('tag13: 8 users');
-        cy.get('[data-cy="userTagChart"]').contains('tag14: 7 users');
-        cy.get('[data-cy="userTagChart"]').contains('tag15: 6 users');
-        cy.get('[data-cy="userTagChart"]').contains('tag16: 5 users');
-        cy.get('[data-cy="userTagChart"]').contains('tag17: 4 users');
-        cy.get('[data-cy="userTagChart"]').contains('tag18: 3 users');
-        cy.get('[data-cy="userTagChart"]').contains('tag19: 2 users');
-        cy.get('[data-cy="userTagChart"]').contains('tag20').should('not.exist');
+            cy.clickNav('Metrics');
+            cy.get('[data-cy="userTagTableCard"] [data-cy="metricsCard-header"]')
+                .contains('Many Values');
+            cy.get('[data-cy="userTagTable-tagFilter"]').type('aG2{enter}');
+            cy.get(`${userTagsTableSelector}`).contains('Total Rows: 6')
+
+            cy.get('[data-cy="userTagTable-clearBtn"]').click();
+            cy.get(`${userTagsTableSelector}`).contains('Total Rows: 25')
+        });
 
 
-    });
+        it('bar chart', () => {
+            cy.visit('/administrator/projects/proj1/');
+            cy.wait('@getConfig');
 
+            cy.clickNav('Metrics');
+            cy.get('[data-cy="userTagChart"] [data-cy="metricsCard-header"]').contains('Some Values (Top 20)');
+            cy.get('[data-cy="userTagChart"]').contains('tag0: 21 users');
+            cy.get('[data-cy="userTagChart"]').contains('tag1: 20 users');
+            cy.get('[data-cy="userTagChart"]').contains('tag2: 19 users');
+            cy.get('[data-cy="userTagChart"]').contains('tag3: 18 users');
+            cy.get('[data-cy="userTagChart"]').contains('tag4: 17 users');
+            cy.get('[data-cy="userTagChart"]').contains('tag5: 16 users');
+            cy.get('[data-cy="userTagChart"]').contains('tag6: 15 users');
+            cy.get('[data-cy="userTagChart"]').contains('tag7: 14 users');
+            cy.get('[data-cy="userTagChart"]').contains('tag8: 13 users');
+            cy.get('[data-cy="userTagChart"]').contains('tag9: 12 users');
+            cy.get('[data-cy="userTagChart"]').contains('tag10: 11 users');
+            cy.get('[data-cy="userTagChart"]').contains('tag11: 10 users');
+            cy.get('[data-cy="userTagChart"]').contains('tag12: 9 users');
+            cy.get('[data-cy="userTagChart"]').contains('tag13: 8 users');
+            cy.get('[data-cy="userTagChart"]').contains('tag14: 7 users');
+            cy.get('[data-cy="userTagChart"]').contains('tag15: 6 users');
+            cy.get('[data-cy="userTagChart"]').contains('tag16: 5 users');
+            cy.get('[data-cy="userTagChart"]').contains('tag17: 4 users');
+            cy.get('[data-cy="userTagChart"]').contains('tag18: 3 users');
+            cy.get('[data-cy="userTagChart"]').contains('tag19: 2 users');
+            cy.get('[data-cy="userTagChart"]').contains('tag20').should('not.exist');
+
+
+        });
+    }
 })
