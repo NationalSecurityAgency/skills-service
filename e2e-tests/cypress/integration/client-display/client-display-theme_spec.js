@@ -691,4 +691,100 @@ describe('Client Display Tests', () => {
         cy.cdVisit(`/?enableTheme=true&${pageTitleParam}`);
         // cy.matchSnapshotImageForElement('[data-cy="skillsTitle"]', 'Client Display Tests - title color param', snapshotOptions);
     });
+
+  it('badge search and badge filter selected', () => {
+    cy.createSubject(1, 1);
+    cy.createSkill(1, 1, 1, {name: 'Search blah skill 1'});
+    cy.createSkill(1, 1, 2, {name: 'is a skill 2'});
+    cy.createSkill(1, 1, 3, {name: 'find Blah other skill 3'});
+    cy.createSkill(1, 1, 4, {name: 'Search nothing skill 4'});
+    cy.createSkill(1, 1, 5, {name: 'sEEk bLaH skill 5', selfReportingType: 'Approval'});
+    cy.createSkill(1, 1, 6, {name: 'some other skill 6', selfReportingType: 'HonorSystem'});
+
+    //create badge
+
+    cy.createBadge(1, 1);
+    cy.assignSkillToBadge(1, 1, 1);
+    cy.assignSkillToBadge(1, 1, 3);
+
+    cy.createBadge(1,2);
+    cy.assignSkillToBadge(1,2,2);
+    cy.assignSkillToBadge(1, 2, 1);
+
+    cy.createBadge(1,3);
+    cy.assignSkillToBadge(1,3,6);
+
+    cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday');
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now');
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday');
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
+    cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now');
+
+    cy.cdVisit('/?enableTheme=true');
+    cy.cdClickBadges();
+
+    cy.get('[data-cy="badgeSearchInput"]').type('badge');
+
+    cy.get('[data-cy="skillsFilter"] [data-cy="badgesFilterBtn"]').click();
+    cy.get('[data-cy="badgesFilter_projectBadges"]').click();
+    cy.get('[data-cy="selectedFilter"]').contains('Project Badges');
+
+    cy.get('[data-cy=earnedBadgeLink_badge1]').should('be.visible');
+
+    cy.get('.skills-badge').should('have.length', 2);
+    cy.get('.skills-badge').eq(0).contains('50% Complete')
+    cy.get('.skills-badge').eq(0).contains('Badge 2')
+    cy.get('.skills-badge').eq(1).contains('0% Complete')
+    cy.get('.skills-badge').eq(1).contains('Badge 3');
+
+    cy.matchSnapshotImageForElement('[data-cy="availableBadges"]', 'Client Display Tests - badge search and badge filter selected-available');
+    cy.matchSnapshotImageForElement('[data-cy="achievedBadges"]', 'Client Display Tests - badge search and badge filter selected-achieved');
+  });
+
+  it('badge filter open', () => {
+    cy.createSubject(1, 1);
+    cy.createSkill(1, 1, 1, {name: 'Search blah skill 1'});
+    cy.createSkill(1, 1, 2, {name: 'is a skill 2'});
+    cy.createSkill(1, 1, 3, {name: 'find Blah other skill 3'});
+    cy.createSkill(1, 1, 4, {name: 'Search nothing skill 4'});
+    cy.createSkill(1, 1, 5, {name: 'sEEk bLaH skill 5', selfReportingType: 'Approval'});
+    cy.createSkill(1, 1, 6, {name: 'some other skill 6', selfReportingType: 'HonorSystem'});
+
+    //create badge
+
+    cy.createBadge(1, 1);
+    cy.assignSkillToBadge(1, 1, 1);
+    cy.assignSkillToBadge(1, 1, 3);
+
+    cy.createBadge(1,2);
+    cy.assignSkillToBadge(1,2,2);
+    cy.assignSkillToBadge(1, 2, 1);
+
+    cy.createBadge(1,3);
+    cy.assignSkillToBadge(1,3,6);
+
+    cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday');
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now');
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday');
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
+    cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now');
+
+    cy.cdVisit('/?enableTheme=true');
+    cy.cdClickBadges();
+
+    cy.get('[data-cy="badgeSearchInput"]').type('badge');
+
+    cy.get('[data-cy="skillsFilter"] [data-cy="badgesFilterBtn"]').click();
+
+    cy.get('[data-cy=earnedBadgeLink_badge1]').should('be.visible');
+
+    cy.get('.skills-badge').should('have.length', 2);
+    cy.get('.skills-badge').eq(0).contains('50% Complete')
+    cy.get('.skills-badge').eq(0).contains('Badge 2')
+    cy.get('.skills-badge').eq(1).contains('0% Complete')
+    cy.get('.skills-badge').eq(1).contains('Badge 3');
+    cy.matchSnapshotImage(snapshotOptions);
+  });
 });
