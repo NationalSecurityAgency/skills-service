@@ -113,98 +113,99 @@ describe('Self Report Approval History Tests', () => {
         cy.get(approvalHistoryTableSelector).contains('Explanation').should('not.exist');
     });
 
+    if (!Cypress.env('db') || Cypress.env('db') !== 'postgres') {
+        it('approved and rejected requests - sorting', () => {
+            cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
+            cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
+            cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
+            cy.reportSkill(1, 2, 'user6', '2020-09-11 11:00')
+            cy.reportSkill(1, 2, 'user5', '2020-09-12 11:00')
+            cy.reportSkill(1, 2, 'user4', '2020-09-13 11:00')
+            cy.approveAllRequests();
+            cy.reportSkill(1, 2, 'user2', '2020-09-16 11:00')
+            cy.rejectRequest(0)
 
-    it('approved and rejected requests - sorting', () => {
-        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
-        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
-        cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
-        cy.reportSkill(1, 2, 'user6', '2020-09-11 11:00')
-        cy.reportSkill(1, 2, 'user5', '2020-09-12 11:00')
-        cy.reportSkill(1, 2, 'user4', '2020-09-13 11:00')
-        cy.approveAllRequests();
-        cy.reportSkill(1, 2, 'user2', '2020-09-16 11:00')
-        cy.rejectRequest(0)
+            cy.reportSkill(1, 3, 'user1', '2020-09-17 11:00')
+            cy.reportSkill(1, 1, 'user0', '2020-09-18 11:00')
+            cy.approveAllRequests();
 
-        cy.reportSkill(1, 3, 'user1', '2020-09-17 11:00')
-        cy.reportSkill(1, 1, 'user0', '2020-09-18 11:00')
-        cy.approveAllRequests();
+            cy.reportSkill(1, 2, 'user3', '2020-09-14 11:00')
+            cy.rejectRequest(0)
 
-        cy.reportSkill(1, 2, 'user3', '2020-09-14 11:00')
-        cy.rejectRequest(0)
+            cy.visit('/administrator/projects/proj1/self-report');
+            cy.validateTable(approvalHistoryTableSelector,  [
+                [ { colIndex: 0,  value: 'user3' }, { colIndex: 1,  value: 'Rejected' }, ],
+                [ { colIndex: 0,  value: 'user1' }, { colIndex: 1,  value: 'Approved' }, ],
+                [ { colIndex: 0,  value: 'user0' }, { colIndex: 1,  value: 'Approved' }, ],
+                [ { colIndex: 0,  value: 'user2' }, { colIndex: 1,  value: 'Rejected' }, ],
+                [ { colIndex: 0,  value: 'user6' }, { colIndex: 1,  value: 'Approved' }, ],
+            ], 5, true, 7)
 
-        cy.visit('/administrator/projects/proj1/self-report');
-        cy.validateTable(approvalHistoryTableSelector,  [
-            [ { colIndex: 0,  value: 'user3' }, { colIndex: 1,  value: 'Rejected' }, ],
-            [ { colIndex: 0,  value: 'user1' }, { colIndex: 1,  value: 'Approved' }, ],
-            [ { colIndex: 0,  value: 'user0' }, { colIndex: 1,  value: 'Approved' }, ],
-            [ { colIndex: 0,  value: 'user2' }, { colIndex: 1,  value: 'Rejected' }, ],
-            [ { colIndex: 0,  value: 'user6' }, { colIndex: 1,  value: 'Approved' }, ],
-        ], 5, true, 7)
+            const headerSelector = `${approvalHistoryTableSelector} thead tr th`
+            cy.get(headerSelector).contains('Response On').click();
+            cy.validateTable(approvalHistoryTableSelector,  [
+                [ { colIndex: 0,  value: 'user4' }, { colIndex: 1,  value: 'Approved' }, ],
+                [ { colIndex: 0,  value: 'user5' }, { colIndex: 1,  value: 'Approved' }, ],
+                [ { colIndex: 0,  value: 'user6' }, { colIndex: 1,  value: 'Approved' }, ],
+                [ { colIndex: 0,  value: 'user2' }, { colIndex: 1,  value: 'Rejected' }, ],
+                [ { colIndex: 0,  value: 'user0' }, { colIndex: 1,  value: 'Approved' }, ],
+            ], 5, true, 7)
 
-        const headerSelector = `${approvalHistoryTableSelector} thead tr th`
-        cy.get(headerSelector).contains('Response On').click();
-        cy.validateTable(approvalHistoryTableSelector,  [
-            [ { colIndex: 0,  value: 'user4' }, { colIndex: 1,  value: 'Approved' }, ],
-            [ { colIndex: 0,  value: 'user5' }, { colIndex: 1,  value: 'Approved' }, ],
-            [ { colIndex: 0,  value: 'user6' }, { colIndex: 1,  value: 'Approved' }, ],
-            [ { colIndex: 0,  value: 'user2' }, { colIndex: 1,  value: 'Rejected' }, ],
-            [ { colIndex: 0,  value: 'user0' }, { colIndex: 1,  value: 'Approved' }, ],
-        ], 5, true, 7)
+            cy.get(headerSelector).contains('Requested On').click();
+            cy.validateTable(approvalHistoryTableSelector,  [
+                [ { colIndex: 2,  value: '2020-09-11 11:00' }, ],
+                [ { colIndex: 2,  value: '2020-09-12 11:00' }, ],
+                [ { colIndex: 2,  value: '2020-09-13 11:00' }, ],
+                [ { colIndex: 2,  value: '2020-09-14 11:00' }, ],
+                [ { colIndex: 2,  value: '2020-09-16 11:00' }, ],
+            ], 5, true, 7)
 
-        cy.get(headerSelector).contains('Requested On').click();
-        cy.validateTable(approvalHistoryTableSelector,  [
-            [ { colIndex: 2,  value: '2020-09-11 11:00' }, ],
-            [ { colIndex: 2,  value: '2020-09-12 11:00' }, ],
-            [ { colIndex: 2,  value: '2020-09-13 11:00' }, ],
-            [ { colIndex: 2,  value: '2020-09-14 11:00' }, ],
-            [ { colIndex: 2,  value: '2020-09-16 11:00' }, ],
-        ], 5, true, 7)
+            cy.get(headerSelector).contains('Requested On').click();
+            cy.validateTable(approvalHistoryTableSelector,  [
+                [ { colIndex: 2,  value: '2020-09-18 11:00' }, ],
+                [ { colIndex: 2,  value: '2020-09-17 11:00' }, ],
+                [ { colIndex: 2,  value: '2020-09-16 11:00' }, ],
+                [ { colIndex: 2,  value: '2020-09-14 11:00' }, ],
+                [ { colIndex: 2,  value: '2020-09-13 11:00' }, ],
+            ], 5, true, 7)
 
-        cy.get(headerSelector).contains('Requested On').click();
-        cy.validateTable(approvalHistoryTableSelector,  [
-            [ { colIndex: 2,  value: '2020-09-18 11:00' }, ],
-            [ { colIndex: 2,  value: '2020-09-17 11:00' }, ],
-            [ { colIndex: 2,  value: '2020-09-16 11:00' }, ],
-            [ { colIndex: 2,  value: '2020-09-14 11:00' }, ],
-            [ { colIndex: 2,  value: '2020-09-13 11:00' }, ],
-        ], 5, true, 7)
+            cy.get(headerSelector).contains('Response').click();
+            cy.validateTable(approvalHistoryTableSelector,  [
+                [ { colIndex: 1,  value: 'Approved' }, ],
+                [ { colIndex: 1,  value: 'Approved' }, ],
+                [ { colIndex: 1,  value: 'Approved' }, ],
+                [ { colIndex: 1,  value: 'Approved' }, ],
+                [ { colIndex: 1,  value: 'Approved' }, ],
+            ], 5, true, 7)
 
-        cy.get(headerSelector).contains('Response').click();
-        cy.validateTable(approvalHistoryTableSelector,  [
-            [ { colIndex: 1,  value: 'Approved' }, ],
-            [ { colIndex: 1,  value: 'Approved' }, ],
-            [ { colIndex: 1,  value: 'Approved' }, ],
-            [ { colIndex: 1,  value: 'Approved' }, ],
-            [ { colIndex: 1,  value: 'Approved' }, ],
-        ], 5, true, 7)
+            cy.get(headerSelector).contains('Response').click();
+            cy.validateTable(approvalHistoryTableSelector,  [
+                [ { colIndex: 1,  value: 'Rejected' }, ],
+                [ { colIndex: 1,  value: 'Rejected' }, ],
+                [ { colIndex: 1,  value: 'Approved' }, ],
+                [ { colIndex: 1,  value: 'Approved' }, ],
+                [ { colIndex: 1,  value: 'Approved' }, ],
+            ], 5, true, 7)
 
-        cy.get(headerSelector).contains('Response').click();
-        cy.validateTable(approvalHistoryTableSelector,  [
-            [ { colIndex: 1,  value: 'Rejected' }, ],
-            [ { colIndex: 1,  value: 'Rejected' }, ],
-            [ { colIndex: 1,  value: 'Approved' }, ],
-            [ { colIndex: 1,  value: 'Approved' }, ],
-            [ { colIndex: 1,  value: 'Approved' }, ],
-        ], 5, true, 7)
+            cy.get(headerSelector).contains('Requested').click();
+            cy.validateTable(approvalHistoryTableSelector,  [
+                [ { colIndex: 0,  value: 'Very Great Skill 1' }],
+                [ { colIndex: 0,  value: 'Very Great Skill 2' }],
+                [ { colIndex: 0,  value: 'Very Great Skill 2' }],
+                [ { colIndex: 0,  value: 'Very Great Skill 2' }],
+                [ { colIndex: 0,  value: 'Very Great Skill 2' }],
+            ], 5, true, 7)
 
-        cy.get(headerSelector).contains('Requested').click();
-        cy.validateTable(approvalHistoryTableSelector,  [
-            [ { colIndex: 0,  value: 'Very Great Skill 1' }],
-            [ { colIndex: 0,  value: 'Very Great Skill 2' }],
-            [ { colIndex: 0,  value: 'Very Great Skill 2' }],
-            [ { colIndex: 0,  value: 'Very Great Skill 2' }],
-            [ { colIndex: 0,  value: 'Very Great Skill 2' }],
-        ], 5, true, 7)
-
-        cy.get(headerSelector).contains('Requested').click();
-        cy.validateTable(approvalHistoryTableSelector,  [
-            [ { colIndex: 0,  value: 'Very Great Skill 3' }],
-            [ { colIndex: 0,  value: 'Very Great Skill 2' }],
-            [ { colIndex: 0,  value: 'Very Great Skill 2' }],
-            [ { colIndex: 0,  value: 'Very Great Skill 2' }],
-            [ { colIndex: 0,  value: 'Very Great Skill 2' }],
-        ], 5, true, 7)
-    });
+            cy.get(headerSelector).contains('Requested').click();
+            cy.validateTable(approvalHistoryTableSelector,  [
+                [ { colIndex: 0,  value: 'Very Great Skill 3' }],
+                [ { colIndex: 0,  value: 'Very Great Skill 2' }],
+                [ { colIndex: 0,  value: 'Very Great Skill 2' }],
+                [ { colIndex: 0,  value: 'Very Great Skill 2' }],
+                [ { colIndex: 0,  value: 'Very Great Skill 2' }],
+            ], 5, true, 7)
+        });
+    }
 
     it('sorting on the 2nd page+ should re-set paging', () => {
         cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });

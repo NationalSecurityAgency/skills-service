@@ -283,7 +283,9 @@ describe('Navigation Tests', () => {
 
     cy.visit('/');
     cy.get('[data-cy=viewBadges]').click();
-    cy.matchSnapshotImageForElement('.myBadges', 'my-badges-material-icon');
+    cy.matchSnapshotImageForElement('.myBadges', 'my-badges-material-icon', 'my-badges-material-icon', {
+      blackout: ['.earned-badge .text-muted'],
+    });
   });
 
 

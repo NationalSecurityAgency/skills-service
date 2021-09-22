@@ -101,49 +101,51 @@ describe('Metrics Using User Tags Tests', () => {
             // cy.validateTable(userTagsTableSelector, expected, 10);
         });
 
-        it('user tag table - ability to sort by tag', () => {
-            cy.visit('/administrator/projects/proj1/');
-            cy.wait('@getConfig');
+        if (!Cypress.env('db') || Cypress.env('db') !== 'postgres') {
+            it('user tag table - ability to sort by tag', () => {
+                cy.visit('/administrator/projects/proj1/');
+                cy.wait('@getConfig');
 
-            cy.clickNav('Metrics');
-            cy.get('[data-cy="userTagTableCard"] [data-cy="metricsCard-header"]').contains('Many Values');
-
-
-            cy.get(`${userTagsTableSelector} th`).contains('# Users').click();
-
-            const expected = []
-            for (let i = 0; i < 10; i += 1) {
-                expected.push([
-                    { colIndex: 1,  value: `${1 + i}` }
-                ])
-            }
-            cy.validateTable(userTagsTableSelector, expected, 10, true, 25);
-
-            cy.get(`${userTagsTableSelector} th`).contains('Best Label').click();
-            const expected1 = []
-            for (let i = 0; i < 10; i += 1) {
-                expected1.push([
-                    { colIndex: 0,  value: `tag${24 - i}` },
-                ])
-            }
-            cy.validateTable(userTagsTableSelector, expected1, 10, true, 25);
+                cy.clickNav('Metrics');
+                cy.get('[data-cy="userTagTableCard"] [data-cy="metricsCard-header"]').contains('Many Values');
 
 
-            cy.get(`${userTagsTableSelector} th`).contains('Best Label').click();
-            const expected2 = [
-                    [{ colIndex: 0,  value: 'tag9' }],
-                    [{ colIndex: 0,  value: 'tag8' }],
-                    [{ colIndex: 0,  value: 'tag7' }],
-                    [{ colIndex: 0,  value: 'tag6' }],
-                    [{ colIndex: 0,  value: 'tag5' }],
-                    [{ colIndex: 0,  value: 'tag4' }],
-                    [{ colIndex: 0,  value: 'tag3' }],
-                    [{ colIndex: 0,  value: 'tag24' }],
-                    [{ colIndex: 0,  value: 'tag23' }],
-                [{ colIndex: 0,  value: 'tag22' }],
-            ]
-            cy.validateTable(userTagsTableSelector, expected2, 10, true, 25);
-        });
+                cy.get(`${userTagsTableSelector} th`).contains('# Users').click();
+
+                const expected = []
+                for (let i = 0; i < 10; i += 1) {
+                    expected.push([
+                        { colIndex: 1,  value: `${1 + i}` }
+                    ])
+                }
+                cy.validateTable(userTagsTableSelector, expected, 10, true, 25);
+
+                cy.get(`${userTagsTableSelector} th`).contains('Best Label').click();
+                const expected1 = []
+                for (let i = 0; i < 10; i += 1) {
+                    expected1.push([
+                        { colIndex: 0,  value: `tag${24 - i}` },
+                    ])
+                }
+                cy.validateTable(userTagsTableSelector, expected1, 10, true, 25);
+
+
+                cy.get(`${userTagsTableSelector} th`).contains('Best Label').click();
+                const expected2 = [
+                        [{ colIndex: 0,  value: 'tag9' }],
+                        [{ colIndex: 0,  value: 'tag8' }],
+                        [{ colIndex: 0,  value: 'tag7' }],
+                        [{ colIndex: 0,  value: 'tag6' }],
+                        [{ colIndex: 0,  value: 'tag5' }],
+                        [{ colIndex: 0,  value: 'tag4' }],
+                        [{ colIndex: 0,  value: 'tag3' }],
+                        [{ colIndex: 0,  value: 'tag24' }],
+                        [{ colIndex: 0,  value: 'tag23' }],
+                    [{ colIndex: 0,  value: 'tag22' }],
+                ]
+                cy.validateTable(userTagsTableSelector, expected2, 10, true, 25);
+            });
+        }
 
         it('user tag table - filter by tag - press button', () => {
             cy.visit('/administrator/projects/proj1/');
