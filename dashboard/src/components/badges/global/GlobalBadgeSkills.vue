@@ -126,7 +126,8 @@ limitations under the License.
           });
       },
       deleteSkill(skill) {
-        const msg = `Are you sure you want to remove Skill "${skill.name}" from Badge "${this.badge.name}"?`;
+        const msg = `Removing this skill will award this badge to users that fulfill all of the remaining requirements.
+        Are you sure you want to remove Skill "${skill.name}" from Badge "${this.badge.name}"?`;
         this.msgConfirm(msg, 'WARNING: Remove Required Skill').then((res) => {
           if (res) {
             this.skillDeleted(skill);
