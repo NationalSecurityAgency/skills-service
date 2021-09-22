@@ -16,12 +16,29 @@ limitations under the License.
 <template>
     <div class="flex-fill card">
         <div class="card-header">
-            <h6 class="card-title mb-0 float-left text-uppercase" data-cy="badgesCatalogHeader">
-                Available Badges
-            </h6>
+            <div class="row" v-if="badgesInternalOrig && badgesInternalOrig.length > 0">
+                <div class="col-md-auto text-left pr-md-0">
+                    <div class="d-flex">
+                        <b-form-input @input="searchBadges" style="padding-right: 2.3rem;"
+                                      v-model="searchString"
+                                      placeholder="Search Available Badges"
+                                      aria-label="Search badges"
+                                      data-cy="badgeSearchInput"></b-form-input>
+                        <b-button v-if="searchString && searchString.length > 0" @click="clearSearch"
+                                  class="position-absolute skills-theme-btn" variant="outline-info" style="right: 0rem;"
+                                  data-cy="clearBadgesSearchInput">
+                            <i class="fas fa-times"></i>
+                            <span class="sr-only">clear search</span>
+                        </b-button>
+                    </div>
+                </div>
+                <div class="col-md text-left my-2 my-md-0 ml-md-0 pl-md-0">
+                    <badges-filter :counts="metaCounts" @filter-selected="filterSelected" @clear-filter="clearFilters"/>
+                </div>
+            </div>
         </div>
         <div class="card-body">
-            <div class="" v-for="(badge, index) in badges" v-bind:key="badge.badgeId">
+            <div class="" v-for="(badge, index) in badgesInternal" v-bind:key="badge.badgeId">
                 <badge-catalog-item
                         :display-project-name="displayBadgeProject"
                         :badge="badge" class="pb-3"
@@ -30,19 +47,28 @@ limitations under the License.
                     <hr/>
                 </div>
             </div>
-            <div v-if="!badges || badges.length === 0" class="skills-no-data-yet text-primary text-center" data-cy="badge-catalog_no-badges">
-                {{ noBadgesMessage }}
-            </div>
+
+            <no-data-yet v-if="!(badgesInternal && badgesInternal.length > 0) && searchString.length > 0" class="my-5"
+                         icon="fas fa-search-minus fa-5x"
+                         title="No results" :sub-title="`Please refine [${searchString}] search${(this.filter) ? ' and/or clear the selected filter' : ''}`"/>
+
+            <no-data-yet v-if="!(badgesInternal && badgesInternal.length > 0) && searchString.length === 0" class="my-5"
+                         data-cy="badge-catalog_no-badges"
+                         :title="noBadgesMessage"/>
+
         </div>
     </div>
 </template>
 
 <script>
+  import debounce from 'lodash.debounce';
+  import NoDataYet from '@/common-components/utilities/NoDataYet';
   import BadgeCatalogItem from './BadgeCatalogItem';
+  import BadgesFilter from './BadgesFilter';
 
   export default {
     name: 'BadgesCatalog',
-    components: { BadgeCatalogItem },
+    components: { NoDataYet, BadgeCatalogItem, BadgesFilter },
     props: {
       badges: {
         type: Array,
@@ -63,12 +89,88 @@ limitations under the License.
         default: false,
       },
     },
+    mounted() {
+      this.badgesInternal = this.badges;
+      this.badgesInternalOrig = [...this.badges];
+      this.updateCounts(this.badgesInternal);
+    },
     data() {
       return {
         colors: ['text-success', 'text-warning', 'text-danger', 'text-info'],
+        badgesInternal: [],
+        badgesInternalOrig: [],
+        searchString: '',
+        filter: null,
+        metaCounts: {
+          projectBadges: 0,
+          globalBadges: 0,
+          gems: 0,
+        },
       };
     },
     methods: {
+      updateCounts(badges) {
+        const counts = {
+          globalBadges: 0,
+          projectBadges: 0,
+          gems: 0,
+        };
+
+        badges.forEach((badge) => {
+          if (badge.global) {
+            counts.globalBadges += 1;
+          } else if (badge.projectId) {
+            counts.projectBadges += 1;
+            if (badge.startDate && badge.endDate) {
+              counts.gems += 1;
+            }
+          }
+        });
+
+        this.$set(this.metaCounts, 'globalBadges', counts.globalBadges);
+        this.$set(this.metaCounts, 'projectBadges', counts.projectBadges);
+        this.$set(this.metaCounts, 'gems', counts.gems);
+      },
+      filterSelected(filter) {
+        this.filter = filter;
+        this.filterAndSearch(false);
+      },
+      clearFilters() {
+        this.filter = null;
+        this.filterAndSearch(false);
+      },
+      searchBadges: debounce(function search() {
+        this.filterAndSearch(true);
+      }, 200),
+      clearSearch() {
+        this.searchString = '';
+        this.filterAndSearch(true);
+      },
+      filterAndSearch(updateCounts) {
+        let filteredResult = this.badgesInternalOrig.map((item) => ({ ...item }));
+        if (this.searchString && this.searchString.trim().length > 0) {
+          const searchStrNormalized = this.searchString.trim().toLowerCase();
+          filteredResult = filteredResult.reduce((result, item) => {
+            const name = item.badge;
+            const nameLc = name?.toLowerCase();
+            if (nameLc?.trim()?.includes(searchStrNormalized)) {
+              const index = nameLc.indexOf(searchStrNormalized);
+              const badgeHtml = `${name.substring(0, index)}<mark>${name.substring(index, index + searchStrNormalized.length)}</mark>${name.substring(index + searchStrNormalized.length)}`;
+              return result.concat({ badgeHtml, ...item });
+            }
+            return result;
+          }, []);
+        }
+
+        if (updateCounts) {
+          this.updateCounts(filteredResult);
+        }
+
+        if (this.filter) {
+          filteredResult = filteredResult.filter(this.filter.filter);
+        }
+        this.badgesInternal = filteredResult;
+      },
       getIconColor(index) {
         const colorIndex = index % this.colors.length;
         const color = this.colors[colorIndex];

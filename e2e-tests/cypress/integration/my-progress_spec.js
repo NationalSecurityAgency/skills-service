@@ -254,7 +254,6 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=viewBadges]').click();
     cy.get('[data-cy=badgeProjectName]').eq(0).should('be.visible').should('have.text', 'Project: This is project 1');
     cy.get('[data-cy=badgeProjectName]').eq(1).should('be.visible').should('have.text', 'Project: This is project 1');
-    cy.get('[data-cy=badgesCatalogHeader]').contains('Available Badges')
   });
 
   it('material icons should be proper size', () => {
@@ -285,6 +284,114 @@ describe('Navigation Tests', () => {
     cy.visit('/');
     cy.get('[data-cy=viewBadges]').click();
     cy.matchSnapshotImageForElement('.myBadges', 'my-badges-material-icon');
+  });
+
+
+  it('My Badges filtering', () => {
+    cy.loginAsRootUser();
+    cy.request('PUT', `/supervisor/badges/globalBadge1`, {
+      badgeId: `globalBadge1`,
+      isEdit: false,
+      name: `Global Badge One`,
+      originalBadgeId: '',
+      iconClass: 'fas fa-award',
+      enabled: true,
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+    });
+    cy.assignSkillToGlobalBadge(1, 2);
+
+    cy.request('PUT', `/supervisor/badges/globalBadge2`, {
+      badgeId: `globalBadge2`,
+      isEdit: false,
+      name: `Global Badge two`,
+      originalBadgeId: '',
+      iconClass: 'fas fa-award',
+      enabled: true,
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+    });
+    cy.assignSkillToGlobalBadge(2, 3);
+
+    cy.request('POST', '/admin/projects/proj1/badges/badge2', {
+      projectId: 'proj1',
+      badgeId: 'badge2',
+      name: 'Badge two',
+      enabled: 'true',
+    });
+    cy.assignSkillToBadge(1, 2, 1);
+
+    cy.request('POST', '/admin/projects/proj1/badges/badge11', {
+      projectId: 'proj1',
+      badgeId: 'badge11',
+      name: 'Badge one one',
+      enabled: 'true',
+    });
+    cy.assignSkillToBadge(1, 11, 1);
+
+    cy.request('POST', '/admin/projects/proj1/badges/gemBadge2', {
+      projectId: 'proj1',
+      badgeId: 'gemBadge2',
+      name: 'Gem Badge Two',
+      enabled: 'true',
+      startDate: dateFormatter(dayjs().subtract(5, 'day')),
+      endDate: dateFormatter(dayjs().add(7, 'day')),
+    });
+
+    cy.loginAsProxyUser();
+    cy.visit('/');
+    cy.get('[data-cy=viewBadges]').click();
+    cy.get('[data-cy=badgesFilterBtn]').click();
+    cy.get('[data-cy=badgesFilter_projectBadges] [data-cy=filterCount]').contains('4');
+    cy.get('[data-cy=badgesFilter_gems] [data-cy=filterCount]').contains('2');
+    cy.get('[data-cy=badgesFilter_globalBadges] [data-cy=filterCount]').contains('2');
+
+    cy.get('[data-cy=badgesFilter_projectBadges] [data-cy=filterCount]').click();
+    cy.get('[data-cy=selectedFilter]').should('be.visible');
+    cy.get('.row .skills-badge').should('have.length', 4);
+    cy.get('.row .skills-badge').eq(0).contains('Gem Badge');
+    cy.get('.row .skills-badge').eq(1).contains('Badge two');
+    cy.get('.row .skills-badge').eq(2).contains('Badge one one');
+    cy.get('.row .skills-badge').eq(3).contains('Gem Badge Two');
+    cy.get('[data-cy=clearSelectedFilter]').click();
+    cy.get('.row .skills-badge').should('have.length', 6);
+
+    cy.get('[data-cy=badgesFilterBtn]').click();
+    cy.get('[data-cy=badgesFilter_gems] [data-cy=filterCount]').click();
+    cy.get('[data-cy=selectedFilter]').should('be.visible');
+    cy.get('.row .skills-badge').should('have.length', 2);
+    cy.get('.row .skills-badge').eq(0).contains('Gem Badge');
+    cy.get('.row .skills-badge').eq(1).contains('Gem Badge Two');
+    cy.get('[data-cy=clearSelectedFilter]').click();
+    cy.get('.row .skills-badge').should('have.length', 6);
+
+    cy.get('[data-cy=badgesFilterBtn]').click();
+    cy.get('[data-cy=badgesFilter_globalBadges] [data-cy=filterCount]').click();
+    cy.get('[data-cy=selectedFilter]').should('be.visible');
+    cy.get('.row .skills-badge').should('have.length', 2);
+    cy.get('.row .skills-badge').eq(0).contains('Global Badge One');
+    cy.get('.row .skills-badge').eq(1).contains('Global Badge two');
+    cy.get('[data-cy=clearSelectedFilter]').click();
+    cy.get('.row .skills-badge').should('have.length', 6);
+
+    cy.get('[data-cy=badgeSearchInput]').type('two');
+    cy.get('.row .skills-badge').should('have.length', 3);
+    cy.get('.row .skills-badge').eq(0).contains('Global Badge two');
+    cy.get('.row .skills-badge').eq(1).contains('Badge two');
+    cy.get('.row .skills-badge').eq(2).contains('Gem Badge Two');
+    cy.get('[data-cy=badgesFilterBtn]').click();
+    cy.get('[data-cy=badgesFilter_projectBadges] [data-cy=filterCount]').contains('2');
+    cy.get('[data-cy=badgesFilter_gems] [data-cy=filterCount]').contains('1');
+    cy.get('[data-cy=badgesFilter_globalBadges] [data-cy=filterCount]').contains('1');
+    cy.get('[data-cy=badgesFilter_gems] [data-cy=filterCount]').click();
+    cy.get('.row .skills-badge').should('have.length', 1);
+    cy.get('.row .skills-badge').eq(0).contains('Gem Badge Two');
+    cy.get('[data-cy=clearSelectedFilter]').click();
+    cy.get('.row .skills-badge').should('have.length', 3);
+    cy.get('.row .skills-badge').eq(0).contains('Global Badge two');
+    cy.get('.row .skills-badge').eq(1).contains('Badge two');
+    cy.get('.row .skills-badge').eq(2).contains('Gem Badge Two');
+
+    cy.get('[data-cy=clearBadgesSearchInput]').click();
+    cy.get('.row .skills-badge').should('have.length', 6);
   });
 
   it('badges card - gems and not global badges', function () {
