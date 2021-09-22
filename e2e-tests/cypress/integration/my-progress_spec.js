@@ -256,7 +256,7 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=badgeProjectName]').eq(1).should('be.visible').should('have.text', 'Project: This is project 1');
   });
 
-  it('material icons should be proper size', () => {
+  it.only('material icons should be proper size', () => {
     cy.loginAsRootUser();
     cy.request('PUT', `/supervisor/badges/globalBadge1`, {
       badgeId: `globalBadge1`,
@@ -283,7 +283,9 @@ describe('Navigation Tests', () => {
 
     cy.visit('/');
     cy.get('[data-cy=viewBadges]').click();
-    cy.matchSnapshotImageForElement('.myBadges', 'my-badges-material-icon');
+    cy.matchSnapshotImageForElement('.myBadges', 'my-badges-material-icon', 'my-badges-material-icon', {
+      blackout: ['.earned-badge .text-muted'],
+    });
   });
 
 
