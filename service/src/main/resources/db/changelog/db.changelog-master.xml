@@ -1392,4 +1392,14 @@
         </sql>
     </changeSet>
 
+    <changeSet id="14" author="skills team" context="migration14">
+        <createIndex indexName="index_users_tags_key"
+                     tableName="user_tags">
+            <column name="key" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_users_tags_value"
+                     tableName="user_tags">
+            <column name="value" type="varchar(255)"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>
