@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-    <div class="card">
+    <div class="card" data-cy="myBadges">
         <div class="card-header">
             <h6 class="card-title mb-0 float-left text-uppercase">
                 My Earned Badges
@@ -42,7 +42,7 @@ limitations under the License.
                             <div v-if="displayBadgeProject && badge.projectName" class="text-muted text-center text-truncate" data-cy="badgeProjectName">
                               <small>Proj<span class="d-md-none d-xl-inline">ect</span>: {{badge.projectName}}</small>
                             </div>
-                            <div class="text-muted mb-2"><i class="far fa-clock text-secondary" style="font-size: 0.8rem;"></i> {{ badge.dateAchieved | relativeTime() }}</div>
+                            <div data-cy="dateBadgeAchieved" class="text-muted mb-2"><i class="far fa-clock text-secondary" style="font-size: 0.8rem;"></i> {{ badge.dateAchieved | relativeTime() }}</div>
                         </router-link>
                     </div>
 
