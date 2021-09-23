@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import moment from 'moment';
 import dayjs from 'dayjs';
 import relativeTimePlugin from 'dayjs/plugin/relativeTime';
 import utc from 'dayjs/plugin/utc';
+
 dayjs.extend(relativeTimePlugin);
 dayjs.extend(utc);
 
@@ -283,8 +283,8 @@ describe('Navigation Tests', () => {
 
     cy.visit('/progress-and-rankings/');
     cy.get('[data-cy=viewBadges]').click();
-    cy.matchSnapshotImageForElement('.myBadges', 'my-badges-material-icon', 'my-badges-material-icon', {
-      blackout: ['.earned-badge .text-muted'],
+    cy.matchSnapshotImageForElement('[data-cy=myBadges]', 'my-badges-material-icon', {
+      blackout: ['[data-cy=dateBadgeAchieved]'],
     });
   });
 
