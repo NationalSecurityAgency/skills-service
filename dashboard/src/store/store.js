@@ -24,6 +24,7 @@ import config from './modules/config';
 import libVersion from './modules/libVersion';
 import access from './modules/access';
 import skills from './modules/skills';
+import myProgress from './modules/myProgress';
 
 Vue.use(Vuex);
 
@@ -67,5 +68,6 @@ export default new Vuex.Store({
     libVersion,
     access,
     skills,
+    myProgress,
   },
 });
