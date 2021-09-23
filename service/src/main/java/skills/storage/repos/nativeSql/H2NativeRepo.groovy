@@ -489,7 +489,7 @@ class H2NativeRepo implements NativeQueriesRepo {
             ua.user_id 
             FROM USER_ACHIEVEMENT ua
             INNER JOIN GLOBAL_BADGE_LEVEL_DEFINITION g ON g.level=ua.level 
-            AND g.project_id = ua.project_id
+            AND g.project_id = ua.project_id and g.skill_id = :badgeId
             WHERE ua.SKILL_ID is null 
             GROUP BY ua.user_id having count(ua.project_id) >= (SELECT count(*) FROM global_badge_level_definition WHERE skill_id = :badgeId)
         '''

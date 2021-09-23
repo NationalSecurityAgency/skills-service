@@ -20,6 +20,7 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import spock.lang.IgnoreRest
 
 class GlobalBadgeSpecs extends DefaultIntSpec {
 
@@ -253,5 +254,102 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
 
         then:
         def ex = thrown(Exception)
+    }
+
+    def "enabling badge with only level requirements should only award badge to users who have the requisite level(s)"() {
+        def proj = SkillsFactory.createProject()
+
+        def subj = SkillsFactory.createSubject()
+        def subj2 = SkillsFactory.createSubject(1, 2)
+        def badge = SkillsFactory.createBadge()
+
+        def badge2 = SkillsFactory.createBadge()
+
+        def proj2 = SkillsFactory.createProject(2)
+        def proj2subj1 = SkillsFactory.createSubject(2)
+        List<Map> proj2skills = SkillsFactory.createSkills(4, 2, 1, 50)
+
+        //subj1 skills
+        List<Map> skills = SkillsFactory.createSkills(3, 1, 1, 40)
+        List<Map> subj2Skills = SkillsFactory.createSkills(20, 1, 2, 200)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSubject(subj2)
+        skillsService.createSkills(skills)
+        skillsService.createSkills(subj2Skills)
+
+        skillsService.createProject(proj2)
+        skillsService.createSubject(proj2subj1)
+        skillsService.createSkills(proj2skills)
+
+
+        //create user
+        def users = getRandomUsers(6)
+        String user = users[0]
+        skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[0].skillId], user, new Date())
+        skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[1].skillId], user, new Date())
+        skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[2].skillId], user, new Date())
+        skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[3].skillId], user, new Date())
+        skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[4].skillId], user, new Date())
+        skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[5].skillId], user, new Date())
+
+
+        skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[0].skillId], users[1], new Date())
+        skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[1].skillId], users[1], new Date())
+        skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[2].skillId], users[1], new Date())
+        skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[3].skillId], users[1], new Date())
+        skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[4].skillId], users[1], new Date())
+        skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[5].skillId], users[1], new Date())
+
+        skillsService.addSkill(['projectId': proj2.projectId, skillId: proj2skills[0].skillId], users[1], new Date())
+        skillsService.addSkill(['projectId': proj2.projectId, skillId: proj2skills[1].skillId], users[1], new Date())
+        skillsService.addSkill(['projectId': proj2.projectId, skillId: proj2skills[2].skillId], users[1], new Date())
+        skillsService.addSkill(['projectId': proj2.projectId, skillId: proj2skills[3].skillId], users[1], new Date())
+
+        skillsService.addSkill(['projectId': proj2.projectId, skillId: proj2skills[0].skillId], users[2], new Date())
+        skillsService.addSkill(['projectId': proj2.projectId, skillId: proj2skills[1].skillId], users[2], new Date())
+
+        skillsService.addSkill(['projectId': proj2.projectId, skillId: proj2skills[0].skillId], users[3], new Date())
+
+        skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[0].skillId], users[4], new Date())
+        skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[1].skillId], users[4], new Date())
+        skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[2].skillId], users[4], new Date())
+        skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[3].skillId], users[4], new Date())
+        skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[4].skillId], users[4], new Date())
+        skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[5].skillId], users[4], new Date())
+
+        skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[0].skillId], users[5], new Date())
+        skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[1].skillId], users[5], new Date())
+        skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[2].skillId], users[5], new Date())
+        skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[3].skillId], users[5], new Date())
+        skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[4].skillId], users[5], new Date())
+        skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[5].skillId], users[5], new Date())
+
+        badge2.badgeId = 'global2'
+        badge2.name = 'Global 2'
+        badge2.enabled = 'false'
+        supervisorService.createGlobalBadge(badge2)
+        supervisorService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge2.badgeId, level: "2")
+        badge2.enabled = 'true'
+        supervisorService.createGlobalBadge(badge2)
+
+        badge.enabled = 'false'
+        supervisorService.createGlobalBadge(badge)
+        def summaryBeforeEnabling = skillsService.getBadgeSummary(user, proj.projectId,  badge.badgeId,-1, true)
+
+        supervisorService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, level: "5")
+
+
+        when:
+
+        badge.enabled = 'true'
+        supervisorService.createGlobalBadge(badge)
+
+        def summary = skillsService.getBadgeSummary(user, proj.projectId,  badge.badgeId,-1, true)
+
+        then:
+        !summaryBeforeEnabling.badgeAchieved
+        !summary.badgeAchieved
     }
 }
