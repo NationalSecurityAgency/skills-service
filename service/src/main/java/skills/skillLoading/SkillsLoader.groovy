@@ -215,7 +215,7 @@ class SkillsLoader {
             })
         }
 
-        return badges
+        return badges.sort { it.badge }
     }
 
     @Profile

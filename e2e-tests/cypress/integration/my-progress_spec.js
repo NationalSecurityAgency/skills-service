@@ -148,7 +148,7 @@ describe('Navigation Tests', () => {
     cy.assignSkillToGlobalBadge(1, 2);
 
     cy.loginAsProxyUser();
-    cy.visit('/');
+    cy.visit('/progress-and-rankings/');
 
     cy.get('[data-cy="breadcrumb-Progress And Rankings"]').contains('Progress And Rankings').should('be.visible');
 
@@ -244,13 +244,13 @@ describe('Navigation Tests', () => {
     });
 
     cy.loginAsProxyUser();
-    cy.visit('/');
+    cy.visit('/progress-and-rankings/');
     cy.get('[data-cy=viewBadges]').click();
     cy.get('[data-cy=badge-catalog_no-badges]').should('be.visible');
   });
 
   it('project name should be visible on badges in badge catalog', () => {
-    cy.visit('/');
+    cy.visit('/progress-and-rankings/');
     cy.get('[data-cy=viewBadges]').click();
     cy.get('[data-cy=badgeProjectName]').eq(0).should('be.visible').should('have.text', 'Project: This is project 1');
     cy.get('[data-cy=badgeProjectName]').eq(1).should('be.visible').should('have.text', 'Project: This is project 1');
@@ -281,7 +281,7 @@ describe('Navigation Tests', () => {
 
     cy.loginAsProxyUser();
 
-    cy.visit('/');
+    cy.visit('/progress-and-rankings/');
     cy.get('[data-cy=viewBadges]').click();
     cy.matchSnapshotImageForElement('.myBadges', 'my-badges-material-icon', 'my-badges-material-icon', {
       blackout: ['.earned-badge .text-muted'],
@@ -339,7 +339,7 @@ describe('Navigation Tests', () => {
     });
 
     cy.loginAsProxyUser();
-    cy.visit('/');
+    cy.visit('/progress-and-rankings/');
     cy.get('[data-cy=viewBadges]').click();
     cy.get('[data-cy=badgesFilterBtn]').click();
     cy.get('[data-cy=badgesFilter_projectBadges] [data-cy=filterCount]').contains('4');
@@ -349,9 +349,9 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=badgesFilter_projectBadges] [data-cy=filterCount]').click();
     cy.get('[data-cy=selectedFilter]').should('be.visible');
     cy.get('.row .skills-badge').should('have.length', 4);
-    cy.get('.row .skills-badge').eq(0).contains('Gem Badge');
+    cy.get('.row .skills-badge').eq(0).contains('Badge one one');
     cy.get('.row .skills-badge').eq(1).contains('Badge two');
-    cy.get('.row .skills-badge').eq(2).contains('Badge one one');
+    cy.get('.row .skills-badge').eq(2).contains('Gem Badge');
     cy.get('.row .skills-badge').eq(3).contains('Gem Badge Two');
     cy.get('[data-cy=clearSelectedFilter]').click();
     cy.get('.row .skills-badge').should('have.length', 6);
@@ -376,9 +376,9 @@ describe('Navigation Tests', () => {
 
     cy.get('[data-cy=badgeSearchInput]').type('two');
     cy.get('.row .skills-badge').should('have.length', 3);
-    cy.get('.row .skills-badge').eq(0).contains('Global Badge two');
-    cy.get('.row .skills-badge').eq(1).contains('Badge two');
-    cy.get('.row .skills-badge').eq(2).contains('Gem Badge Two');
+    cy.get('.row .skills-badge').eq(0).contains('Badge two');
+    cy.get('.row .skills-badge').eq(1).contains('Gem Badge Two');
+    cy.get('.row .skills-badge').eq(2).contains('Global Badge two');
     cy.get('[data-cy=badgesFilterBtn]').click();
     cy.get('[data-cy=badgesFilter_projectBadges] [data-cy=filterCount]').contains('2');
     cy.get('[data-cy=badgesFilter_gems] [data-cy=filterCount]').contains('1');
@@ -388,16 +388,16 @@ describe('Navigation Tests', () => {
     cy.get('.row .skills-badge').eq(0).contains('Gem Badge Two');
     cy.get('[data-cy=clearSelectedFilter]').click();
     cy.get('.row .skills-badge').should('have.length', 3);
-    cy.get('.row .skills-badge').eq(0).contains('Global Badge two');
-    cy.get('.row .skills-badge').eq(1).contains('Badge two');
-    cy.get('.row .skills-badge').eq(2).contains('Gem Badge Two');
+    cy.get('.row .skills-badge').eq(0).contains('Badge two');
+    cy.get('.row .skills-badge').eq(1).contains('Gem Badge Two');
+    cy.get('.row .skills-badge').eq(2).contains('Global Badge two');
 
     cy.get('[data-cy=clearBadgesSearchInput]').click();
     cy.get('.row .skills-badge').should('have.length', 6);
   });
 
   it('badges card - gems and not global badges', function () {
-    cy.visit('/');
+    cy.visit('/progress-and-rankings/');
 
     cy.get('[data-cy=numAchievedGlobalBadges]').should('not.exist')
     cy.get('[data-cy=numAchievedGemBadges]').contains('Gems: 0 / 1')
@@ -412,7 +412,7 @@ describe('Navigation Tests', () => {
       body: {"projectSummaries":[{"projectId":"Inception","projectName":"Inception","points":0,"totalPoints":2695,"level":0,"totalUsers":1,"rank":1},{"projectId":"proj1","projectName":"Project 1","points":0,"totalPoints":1400,"level":0,"totalUsers":2,"rank":2}],"totalProjects":2,"numProjectsContributed":0,"totalSkills":56,"numAchievedSkills":0,"numAchievedSkillsLastMonth":0,"numAchievedSkillsLastWeek":0,"mostRecentAchievedSkill":null,"totalBadges":2,"gemCount":0,"globalBadgeCount":2,"numAchievedBadges":0,"numAchievedGemBadges":0,"numAchievedGlobalBadges":1}
     }).as('getMyProgress');
 
-    cy.visit('/');
+    cy.visit('/progress-and-rankings/');
     cy.wait('@getMyProgress');
 
     cy.get('[data-cy=numAchievedGlobalBadges]').contains('Global Badges: 1 / 2')
@@ -429,7 +429,7 @@ describe('Navigation Tests', () => {
       body: {"projectSummaries":[{"projectId":"Inception","projectName":"Inception","points":0,"totalPoints":2695,"level":0,"totalUsers":1,"rank":1},{"projectId":"proj1","projectName":"Project 1","points":0,"totalPoints":1400,"level":0,"totalUsers":2,"rank":2}],"totalProjects":2,"numProjectsContributed":0,"totalSkills":56,"numAchievedSkills":0,"numAchievedSkillsLastMonth":0,"numAchievedSkillsLastWeek":0,"mostRecentAchievedSkill":null,"totalBadges":2,"gemCount":5,"globalBadgeCount":2,"numAchievedBadges":0,"numAchievedGemBadges":2,"numAchievedGlobalBadges":1}
     }).as('getMyProgress');
 
-    cy.visit('/');
+    cy.visit('/progress-and-rankings/');
     cy.wait('@getMyProgress');
 
     cy.get('[data-cy=numAchievedGlobalBadges]').contains('Global Badges: 1 / 2')
@@ -445,7 +445,7 @@ describe('Navigation Tests', () => {
       body: {"projectSummaries":[{"projectId":"Inception","projectName":"Inception","points":0,"totalPoints":2695,"level":0,"totalUsers":1,"rank":1},{"projectId":"proj1","projectName":"Project 1","points":0,"totalPoints":1400,"level":0,"totalUsers":2,"rank":2}],"totalProjects":2,"numProjectsContributed":0,"totalSkills":56,"numAchievedSkills":0,"numAchievedSkillsLastMonth":0,"numAchievedSkillsLastWeek":0,"mostRecentAchievedSkill":null,"totalBadges":2,"gemCount":0,"globalBadgeCount":0,"numAchievedBadges":0,"numAchievedGemBadges":0,"numAchievedGlobalBadges":0}
     }).as('getMyProgress');
 
-    cy.visit('/');
+    cy.visit('/progress-and-rankings/');
     cy.wait('@getMyProgress');
 
     cy.get('[data-cy=numAchievedGlobalBadges]').should('not.exist')
@@ -461,7 +461,7 @@ describe('Navigation Tests', () => {
     })
 
     cy.loginAsProxyUser();
-    cy.visit('/');
+    cy.visit('/progress-and-rankings/');
 
     cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^2$/));
     cy.get('[data-cy=numProjectsAvailable]').contains(new RegExp(/^\/ 2$/));
@@ -474,7 +474,7 @@ describe('Navigation Tests', () => {
     cy.addToMyProjects(3);
 
     cy.loginAsProxyUser();
-    cy.visit('/');
+    cy.visit('/progress-and-rankings/');
 
     cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^1$/));
     cy.get('[data-cy=numProjectsAvailable]').contains(new RegExp(/^\/ 3$/));
@@ -497,7 +497,7 @@ describe('Navigation Tests', () => {
     cy.createBadge(3, 1);
 
     cy.loginAsProxyUser();
-    cy.visit('/');
+    cy.visit('/progress-and-rankings/');
 
     cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^1$/));
     cy.get('[data-cy=numProjectsAvailable]').contains(new RegExp(/^\/ 2$/));
@@ -532,7 +532,7 @@ describe('Navigation Tests', () => {
     cy.createBadge(3, 1);
 
     cy.loginAsProxyUser();
-    cy.visit('/');
+    cy.visit('/progress-and-rankings/');
 
     cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^1$/));
     cy.get('[data-cy=numProjectsAvailable]').contains(new RegExp(/^\/ 2$/));
@@ -581,7 +581,7 @@ describe('Navigation Tests', () => {
     });
 
     cy.loginAsProxyUser();
-    cy.visit('/');
+    cy.visit('/progress-and-rankings/');
 
 
     cy.contains('START CUSTOMIZING TODAY!')
