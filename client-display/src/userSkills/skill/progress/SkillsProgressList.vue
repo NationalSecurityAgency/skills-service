@@ -110,6 +110,11 @@ limitations under the License.
         type: String,
         default: 'subject',
       },
+      projectId: {
+        type: String,
+        default: null,
+        required: false,
+      },
     },
     data() {
       return {
@@ -133,10 +138,18 @@ limitations under the License.
     mounted() {
       const theSubject = this.subject;
       this.showDescriptionsInternal = this.showDescriptions;
-      this.skillsInternal = this.subject.skills.map((item) => {
-        this.updateMetaCounts(item.meta);
-        return { ...item, subject: theSubject };
-      });
+      if (this.projectId) {
+        this.skillsInternal = this.subject.skills.filter((s) => s.projectId === this.projectId).map((item) => {
+          this.updateMetaCounts(item.meta);
+          return { ...item, subject: theSubject };
+        });
+      } else {
+        this.skillsInternal = this.subject.skills.map((item) => {
+          this.updateMetaCounts(item.meta);
+          return { ...item, subject: theSubject };
+        });
+      }
+
       this.skillsInternalOrig = this.skillsInternal.map((item) => ({ ...item }));
     },
     methods: {
