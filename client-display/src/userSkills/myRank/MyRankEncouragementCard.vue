@@ -17,8 +17,8 @@ limitations under the License.
     <div class="card">
         <div class="card-body">
             <div class="media">
-                <div class="d-inline-block mt-2 mr-3 border p-3 rounded-circle icon-bg">
-                    <i class="fa-3x" :class="icon" style="min-width: 3.5rem;"/>
+                <div class="d-inline-block mt-2 mr-3 border p-3 rounded-circle icon-bg skills-theme-info-card">
+                    <i class="fa-3x" :class="icon" :style="`min-width: 3.5rem; color:${iconColor};`"/>
                 </div>
                 <div class="media-body text-left">
                     <slot/>
@@ -33,6 +33,10 @@ limitations under the License.
     name: 'MyRankEncouragementCard',
     props: {
       icon: String,
+      iconColor: {
+        type: String,
+        require: false,
+      },
     },
   };
 </script>

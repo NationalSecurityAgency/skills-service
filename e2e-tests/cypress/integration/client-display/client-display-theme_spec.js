@@ -469,8 +469,8 @@ describe('Client Display Tests', () => {
 
         cy.get('[data-cy="skillsSearchInput"]').type('blah');
 
-        cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
-        cy.get('[data-cy="skillsFilter_withPointsToday"]').click();
+        cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
+        cy.get('[data-cy="filter_withPointsToday"]').click();
         cy.get('[data-cy="selectedFilter"]').contains('Skills with points earned today')
 
         cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
@@ -507,7 +507,7 @@ describe('Client Display Tests', () => {
 
         cy.cdVisit('/?enableTheme=true');
         cy.cdClickSubj(0);
-        cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
+        cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
 
         cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
         cy.get('[data-cy="skillProgress_index-0"]').contains('200 / 200')
@@ -726,8 +726,8 @@ describe('Client Display Tests', () => {
 
     cy.get('[data-cy="badgeSearchInput"]').type('badge');
 
-    cy.get('[data-cy="skillsFilter"] [data-cy="badgesFilterBtn"]').click();
-    cy.get('[data-cy="badgesFilter_projectBadges"]').click();
+    cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
+    cy.get('[data-cy="filter_projectBadges"]').click();
     cy.get('[data-cy="selectedFilter"]').contains('Project Badges');
 
     cy.get('[data-cy=earnedBadgeLink_badge1]').should('be.visible');
@@ -776,7 +776,7 @@ describe('Client Display Tests', () => {
 
     cy.get('[data-cy="badgeSearchInput"]').type('badge');
 
-    cy.get('[data-cy="skillsFilter"] [data-cy="badgesFilterBtn"]').click();
+    cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
 
     cy.get('[data-cy=earnedBadgeLink_badge1]').should('be.visible');
 
@@ -787,4 +787,7 @@ describe('Client Display Tests', () => {
     cy.get('.skills-badge').eq(1).contains('Badge 3');
     cy.matchSnapshotImage(snapshotOptions);
   });
+
+//   http://localhost:8083/?themeParam=buttons|{%22backgroundColor%22:%22green%22,%22foregroundColor%22:%22white%22,%20%22borderColor%22:%22purple%22}&themeParam=textPrimaryColor|blue&themeParam=textSecondaryColor|purple&themeParam=tiles|{%22backgroundColor%22:%20%22yellow%22}&themeParam=badges|{%22backgroundColor%22:%22blue%22}
+//     http://localhost:8083/?themeParam=charts|{%22lineColor%22:%22purple%22,%22labelBorderColor%22:%22green%22,%22labelBackgroundColor%22:%22neon%22,%22labelForegroundColor%22:%22gray%22,%22gradientStartColor%22:%22blue%22,%22gradientStopColor%22:%22yellow%22}
 });

@@ -114,7 +114,7 @@ describe('Client Display Point History Tests', () => {
     });
 
 
-    it('point history with data from server', () => {
+    it.only('point history with data from server', () => {
         cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
             projectId: 'proj1',
             subjectId: 'subj1',

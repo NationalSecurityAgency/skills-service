@@ -14,11 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-    <div class="card h-100 skills-progress-info-card">
+    <div class="card h-100 skills-progress-info-card skills-theme-info-card">
             <div class="card-body px-2 bg-light">
                 <div class="media">
                     <div class="d-inline-block mt-2 mr-3">
-                        <i class="fa-3x" :class="icon"/>
+                        <i class="fa-3x" :class="icon" :style="`color: ${iconColor}`"/>
                     </div>
                     <div class="media-body text-truncate text-primary">
                         <div class="h4 mb-0 text-truncate">
@@ -52,6 +52,10 @@ limitations under the License.
       animated: {
         type: Boolean,
         default: true,
+      },
+      iconColor: {
+        type: String,
+        require: false,
       },
     },
   };

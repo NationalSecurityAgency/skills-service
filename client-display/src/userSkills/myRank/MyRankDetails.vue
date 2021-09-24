@@ -53,8 +53,8 @@ limitations under the License.
                     <levels-breakdown-chart :users-per-level="usersPerLevel" :my-level="rankingDistribution.myLevel"/>
                 </div>
 
-                <div class="col-lg-6">
-                    <my-rank-encouragement-card icon="fa fa-user-astronaut skills-color-orange" class="mb-2">
+                <div class="col-lg-6" data-cy="encouragementCards">
+                    <my-rank-encouragement-card icon="fa fa-user-astronaut" :icon-color="infoCards().iconColors[0]" class="mb-2">
 
                         <span v-if="rankingDistribution.pointsToPassNextUser === -1">
                             <h4 class="mb-2">Wow!! You are in the lead!</h4>
@@ -67,7 +67,7 @@ limitations under the License.
 
                     </my-rank-encouragement-card>
 
-                    <my-rank-encouragement-card icon="fa fa-running text-warning" class="mb-2">
+                    <my-rank-encouragement-card icon="fa fa-running" :icon-color="infoCards().iconColors[1]" class="mb-2">
                          <span v-if="rankingDistribution.pointsAnotherUserToPassMe === -1">
                             <h4 class="mb-2">You just got started!!</h4>
                             <div class="">Exciting times, enjoy gaining those points!</div>
@@ -78,7 +78,7 @@ limitations under the License.
                         </span>
                     </my-rank-encouragement-card>
 
-                    <my-rank-encouragement-card icon="fa fa-glass-cheers skills-color-bronze">
+                    <my-rank-encouragement-card icon="fa fa-glass-cheers" :icon-color="infoCards().iconColors[2]">
                         <span v-if="myRank">
                             <span v-if="numUsersBehindMe <= 0">
                                 <h4 class="mb-2">Earn those point riches!</h4>
@@ -113,8 +113,10 @@ limitations under the License.
   import SkillsTitle from '@/common/utilities/SkillsTitle';
   import SkillsSpinner from '@/common/utilities/SkillsSpinner';
   import Leaderboard from './Leaderboard';
+  import ThemePropsMixin from '../../common/theme/ThemePropsMixin';
 
   export default {
+    mixins: [ThemePropsMixin],
     components: {
       Leaderboard,
       SkillsSpinner,

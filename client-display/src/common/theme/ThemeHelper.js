@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 export default {
-  nonCSSConfig: ['charts', 'landingPageTitle', 'earnedTodayColor', 'beforeTodayColor', 'disableSkillTreeBrand', 'disableBreadcrumb'],
-  bothCssAndThemModule: ['progressIndicators', 'pageTitleTextColor', 'pageTitle', 'skillTreeBrandColor'],
+  nonCSSConfig: ['charts', 'landingPageTitle', 'earnedTodayColor', 'beforeTodayColor', 'disableSkillTreeBrand', 'disableBreadcrumb', 'iconColors'],
+  bothCssAndThemModule: ['progressIndicators', 'pageTitleTextColor', 'pageTitle', 'skillTreeBrandColor', 'infoCards'],
   selectorKey: {
     maxWidth: {
       selector: 'body #app.skills-display-container',
@@ -81,16 +81,28 @@ export default {
       selector: 'body #app .circle-number span',
       styleName: 'color',
     },
-    textPrimaryColor: {
-      selector: 'body #app .text-primary, body #app, body #app .skills-navigable-item, body #app .skills-theme-primary-color,  body #app .leaderboardTable tr td',
+    textPrimaryColor: [{
+      selector: 'body #app .text-primary, body #app, body #app .skills-navigable-item, body #app .skills-theme-primary-color, body #app .leaderboardTable tr td, body #app .skills-theme-menu-primary-color, body #app .skills-theme-menu-primary-color .dropdown-item',
       styleName: 'color',
-    },
-    textPrimaryMutedColor: {
+    }, {
+      selector: 'body #app .skills-theme-menu-primary-color:hover, body #app .skills-theme-menu-primary-color .dropdown-item:hover',
+      styleName: 'background-color',
+    }, {
+      selector: 'body #app .skills-theme-filter-menu .dropdown-menu',
+      styleName: 'border-color',
+    }, {
+      selector: 'body #app .apexcharts-toolbar svg',
+      styleName: 'fill',
+    }],
+    textPrimaryMutedColor: [{
       selector: 'body #app .text-primary .text-muted, body #app .text-primary.text-muted',
       styleName: 'color',
-    },
+    }, {
+      selector: 'body #app .skills-theme-menu:hover, body #app .apexcharts-menu.apexcharts-menu-open .apexcharts-menu-item:hover',
+      styleName: 'background-color',
+    }],
     textSecondaryColor: {
-      selector: 'body #app .text-muted, body #app .text-secondary, body #app .text-secondary a',
+      selector: 'body #app .text-muted, body #app .text-secondary, body #app .text-secondary a, body #app .skills-theme-secondary-color, body #app .skills-theme-menu-secondary-color, body #app .skills-theme-menu-secondary-color .dropdown-item',
       styleName: 'color',
     },
     pageTitleFontSize: {
@@ -116,8 +128,12 @@ export default {
         selector: 'body #app .card, body #app .card-header, body #app .card-body, body #app .card-footer, body #app .apexcharts-menu.apexcharts-menu-open, body #app .dropdown-menu',
         styleName: 'background-color',
       }, {
-        selector: 'body #app .skills-no-data-yet .fa-inverse, body #app .apexcharts-menu.apexcharts-menu-open .apexcharts-menu-item:hover',
+        selector: 'body #app .skills-no-data-yet .fa-inverse, body #app .apexcharts-menu.apexcharts-menu-open .apexcharts-menu-item:hover, body #app .skills-theme-menu-primary-color, body #app .skills-theme-menu-primary-color .dropdown-item:hover',
         styleName: 'color',
+      }],
+      borderColor: [{
+        selector: 'body #app .card, body #app .card-header, body #app .card-body, body #app .card-footer, body #app .apexcharts-menu.apexcharts-menu-open, body #app .dropdown-menu',
+        styleName: 'border-color',
       }],
       watermarkIconColor: {
         selector: 'body #app .card-body .watermark-icon',
@@ -150,7 +166,7 @@ export default {
         styleName: 'border-color',
       }],
       foregroundColor: [{
-        selector: 'body #app .skills-theme-btn, body #app .btn.btn-link, body #app a',
+        selector: 'body #app .skills-theme-btn',
         styleName: 'color',
       }, {
         selector: 'body #app .skills-theme-btn',
@@ -160,7 +176,27 @@ export default {
         styleName: 'background-color',
       }],
       disabledColor: [{
-        selector: 'body #app a.disabled',
+        selector: 'body #app .skills-theme-btn .disabled',
+        styleName: 'color',
+      }],
+      borderColor: [{
+        selector: 'body #app .skills-theme-btn',
+        styleName: 'border-color',
+      }],
+    },
+    links: {
+      foregroundColor: [{
+        selector: 'body #app .skills-theme-link',
+        styleName: 'color',
+      }, {
+        selector: 'body #app .skills-theme-link',
+        styleName: 'border-color',
+      }, {
+        selector: 'body #app .skills-theme-link a:hover',
+        styleName: 'background-color',
+      }],
+      disabledColor: [{
+        selector: 'body #app .skills-theme-link a.disabled',
         styleName: 'color',
       }],
     },
@@ -207,6 +243,20 @@ export default {
       }, {
         selector: 'body #app .skills-theme-breadcrumb-container',
         styleName: 'justify-content',
+      }],
+    },
+    infoCards: {
+      backgroundColor: [{
+        selector: 'body #app .skills-theme-info-card, body #app .skills-theme-info-card .card-body',
+        styleName: 'background-color',
+      }],
+      foregroundColor: [{
+        selector: 'body #app .skills-theme-info-card .card-body, body #app .skills-theme-info-card .card-body .text-primary',
+        styleName: 'color',
+      }],
+      borderColor: [{
+        selector: 'body #app .skills-theme-info-card',
+        styleName: 'border-color',
       }],
     },
     skillTreeBrandColor: {
@@ -265,6 +315,23 @@ export default {
           }
         });
     };
+
+    const setDefaultBackgroundIfNotSet = (themeParam) => {
+      // since background color is used on hover when primary color is set we need to default it to white
+      const isTilesBackgroundSet = themeParam.tiles && themeParam.tiles.backgroundColor;
+      const isPrimaryColorSet = themeParam.textPrimaryColor;
+      if (!isTilesBackgroundSet && isPrimaryColorSet) {
+        if (!themeParam.tiles) {
+          // eslint-disable-next-line no-param-reassign
+          themeParam.tiles = { backgroundColor: '#fff' };
+        } else {
+          // eslint-disable-next-line no-param-reassign
+          themeParam.tiles.backgroundColor = '#fff';
+        }
+      }
+    };
+
+    setDefaultBackgroundIfNotSet(theme);
     populateResult(this.selectorKey, theme);
 
     // Some CSS may mess up some things, fix those here

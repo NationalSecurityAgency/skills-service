@@ -33,7 +33,7 @@ limitations under the License.
                     </div>
                 </div>
                 <div class="col-md text-left my-2 my-md-0 ml-md-0 pl-md-0">
-                    <badges-filter :counts="metaCounts" @filter-selected="filterSelected" @clear-filter="clearFilters"/>
+                    <badges-filter :counts="metaCounts" :filters="filters" @filter-selected="filterSelected" @clear-filter="clearFilters"/>
                 </div>
             </div>
         </div>
@@ -64,7 +64,7 @@ limitations under the License.
   import debounce from 'lodash.debounce';
   import NoDataYet from '@/common-components/utilities/NoDataYet';
   import BadgeCatalogItem from './BadgeCatalogItem';
-  import BadgesFilter from './BadgesFilter';
+  import BadgesFilter from '@/common-components/utilities/ListFilterMenu';
 
   export default {
     name: 'BadgesCatalog',
@@ -106,6 +106,29 @@ limitations under the License.
           globalBadges: 0,
           gems: 0,
         },
+        filters: [
+          {
+            icon: 'fas fa-list-alt',
+            id: 'projectBadges',
+            html: 'Project Badges',
+            count: 0,
+            filter: (badge) => badge.projectId,
+          },
+          {
+            icon: 'fas fa-gem',
+            id: 'gems',
+            html: 'Gems',
+            count: 0,
+            filter: (badge) => badge.startDate && badge.endDate,
+          },
+          {
+            icon: 'fas fa-globe',
+            id: 'globalBadges',
+            html: 'Global Badges',
+            count: 0,
+            filter: (badge) => badge.global === true,
+          },
+        ],
       };
     },
     methods: {
