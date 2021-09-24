@@ -100,7 +100,6 @@ limitations under the License.
   import NumSkills from './NumSkills';
   import BadgesNumCard from './BadgesNumCard';
   import LastEarnedCard from './LastEarnedCard';
-  import MyProgressService from './MyProgressService';
   import LoadingContainer from '../utils/LoadingContainer';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import ProjectService from '../projects/ProjectService';
@@ -128,27 +127,13 @@ limitations under the License.
       };
     },
     mounted() {
-      if (!this.myProgress) {
-        // need to add loading false in the completion of this
-        this.loadMyProgressSummary().finally(() => {
-          this.loading = false;
-        });
-      } else {
+      this.loadMyProgressSummary().finally(() => {
         this.loading = false;
-      }
+        this.enableProjectDropAndDrop();
+      });
     },
     methods: {
       ...mapActions(['loadMyProgressSummary']),
-      loadProjects() {
-        MyProgressService.loadMyProgressSummary()
-          .then((res) => {
-            this.myProgressSummary = res;
-            this.projects = this.myProgressSummary.projectSummaries;
-          }).finally(() => {
-            this.loading = false;
-            this.enableProjectDropAndDrop();
-          });
-      },
       enableProjectDropAndDrop() {
         if (this.myProjects && this.myProjects.length > 0) {
           const self = this;

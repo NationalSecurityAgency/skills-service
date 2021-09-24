@@ -168,16 +168,12 @@ aria-label="search for projects to pin"></b-input>
 </template>
 
 <script>
-  import { createNamespacedHelpers } from 'vuex';
-  import debounce from 'lodash.debounce';
   import SubPageHeader from '../../utils/pages/SubPageHeader';
   import ProjectService from '../../projects/ProjectService';
   import SkillsSpinner from '../../utils/SkillsSpinner';
   import MediaInfoCard from '../../utils/cards/MediaInfoCard';
   import NoContent2 from '../../utils/NoContent2';
   import NoProjectsInProdMessage from './NoProjectsInProdMessage';
-
-  const { mapActions } = createNamespacedHelpers('myProgress');
 
   export default {
     name: 'DiscoverProjectsPage',
@@ -250,7 +246,6 @@ aria-label="search for projects to pin"></b-input>
       },
     },
     methods: {
-      ...mapActions(['loadMyProgressSummary']),
       loadAll() {
         this.searchValue = '';
         this.isLoading = true;
@@ -273,7 +268,6 @@ aria-label="search for projects to pin"></b-input>
           .then(() => {
             itemRef.isMyProject = true;
             this.updateCounts();
-            this.reloadSummary();
           }).finally(() => {
             itemRef.loading = false;
           });
@@ -285,7 +279,6 @@ aria-label="search for projects to pin"></b-input>
           .then(() => {
             itemRef.isMyProject = false;
             this.updateCounts();
-            this.reloadSummary();
           }).finally(() => {
             itemRef.loading = false;
           });
@@ -313,9 +306,6 @@ aria-label="search for projects to pin"></b-input>
         }
         this.paging.totalRows = this.projects.length;
       },
-      reloadSummary: debounce(function db() {
-        return this.loadMyProgressSummary();
-      }, 750),
     },
   };
 </script>
