@@ -14,6 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script>
+  const colors = {
+    info: '#146c75',
+    primary: '#143740',
+    secondary: '#60737b',
+    warning: '#ffc42b',
+    success: '#007c49',
+    danger: '#290000',
+    white: '#fff',
+    pointHistoryGradientStartColor: '#00a4e8',
+  };
   export default {
     name: 'ThemePropsMixin',
     methods: {
@@ -23,27 +33,27 @@ limitations under the License.
       chartLabels() {
         const chartsModule = this.getThemeModule()?.charts;
         return {
-          borderColor: chartsModule?.labelBorderColor ? chartsModule.labelBorderColor : '#143740',
-          backgroundColor: chartsModule?.labelBackgroundColor ? chartsModule.labelBackgroundColor : '#007c49',
-          foregroundColor: chartsModule?.labelForegroundColor ? chartsModule.labelForegroundColor : '#fff',
+          borderColor: chartsModule?.labelBorderColor ? chartsModule.labelBorderColor : colors.primary,
+          backgroundColor: chartsModule?.labelBackgroundColor ? chartsModule.labelBackgroundColor : colors.success,
+          foregroundColor: chartsModule?.labelForegroundColor ? chartsModule.labelForegroundColor : colors.white,
         };
       },
       pointHistoryChart() {
         const chartsModule = this.getThemeModule()?.charts?.pointHistory;
         return {
-          lineColor: chartsModule?.lineColor ? chartsModule.lineColor : '#146c75',
-          gradientStartColor: chartsModule?.gradientStartColor ? [chartsModule.gradientStartColor] : ['#00a4e8'],
-          gradientStopColor: chartsModule?.gradientStopColor ? [chartsModule.gradientStopColor] : ['#fff'],
+          lineColor: chartsModule?.lineColor ? chartsModule.lineColor : colors.info,
+          gradientStartColor: chartsModule?.gradientStartColor ? [chartsModule.gradientStartColor] : [colors.pointHistoryGradientStartColor],
+          gradientStopColor: chartsModule?.gradientStopColor ? [chartsModule.gradientStopColor] : [colors.white],
         };
       },
       infoCards() {
         const iconColors = this.getThemeModule()?.infoCards?.iconColors;
         return {
           iconColors: [
-            iconColors && iconColors.length > 0 ? iconColors[0] : '#007c49',
-            iconColors && iconColors.length > 1 ? iconColors[1] : '#ffc42b',
-            iconColors && iconColors.length > 2 ? iconColors[2] : '#146c75',
-            iconColors && iconColors.length > 3 ? iconColors[3] : '#290000',
+            iconColors && iconColors.length > 0 ? iconColors[0] : colors.success,
+            iconColors && iconColors.length > 1 ? iconColors[1] : colors.warning,
+            iconColors && iconColors.length > 2 ? iconColors[2] : colors.info,
+            iconColors && iconColors.length > 3 ? iconColors[3] : colors.danger,
           ],
         };
       },
