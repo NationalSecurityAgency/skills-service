@@ -341,12 +341,12 @@ describe('Navigation Tests', () => {
     cy.loginAsProxyUser();
     cy.visit('/progress-and-rankings/');
     cy.get('[data-cy=viewBadges]').click();
-    cy.get('[data-cy=badgesFilterBtn]').click();
-    cy.get('[data-cy=badgesFilter_projectBadges] [data-cy=filterCount]').contains('4');
-    cy.get('[data-cy=badgesFilter_gems] [data-cy=filterCount]').contains('2');
-    cy.get('[data-cy=badgesFilter_globalBadges] [data-cy=filterCount]').contains('2');
+    cy.get('[data-cy=filterBtn]').click();
+    cy.get('[data-cy=filter_projectBadges] [data-cy=filterCount]').contains('4');
+    cy.get('[data-cy=filter_gems] [data-cy=filterCount]').contains('2');
+    cy.get('[data-cy=filter_globalBadges] [data-cy=filterCount]').contains('2');
 
-    cy.get('[data-cy=badgesFilter_projectBadges] [data-cy=filterCount]').click();
+    cy.get('[data-cy=filter_projectBadges] [data-cy=filterCount]').click();
     cy.get('[data-cy=selectedFilter]').should('be.visible');
     cy.get('.row .skills-badge').should('have.length', 4);
     cy.get('.row .skills-badge').eq(0).contains('Badge one one');
@@ -356,8 +356,8 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=clearSelectedFilter]').click();
     cy.get('.row .skills-badge').should('have.length', 6);
 
-    cy.get('[data-cy=badgesFilterBtn]').click();
-    cy.get('[data-cy=badgesFilter_gems] [data-cy=filterCount]').click();
+    cy.get('[data-cy=filterBtn]').click();
+    cy.get('[data-cy=filter_gems] [data-cy=filterCount]').click();
     cy.get('[data-cy=selectedFilter]').should('be.visible');
     cy.get('.row .skills-badge').should('have.length', 2);
     cy.get('.row .skills-badge').eq(0).contains('Gem Badge');
@@ -365,8 +365,8 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=clearSelectedFilter]').click();
     cy.get('.row .skills-badge').should('have.length', 6);
 
-    cy.get('[data-cy=badgesFilterBtn]').click();
-    cy.get('[data-cy=badgesFilter_globalBadges] [data-cy=filterCount]').click();
+    cy.get('[data-cy=filterBtn]').click();
+    cy.get('[data-cy=filter_globalBadges] [data-cy=filterCount]').click();
     cy.get('[data-cy=selectedFilter]').should('be.visible');
     cy.get('.row .skills-badge').should('have.length', 2);
     cy.get('.row .skills-badge').eq(0).contains('Global Badge One');
@@ -379,11 +379,11 @@ describe('Navigation Tests', () => {
     cy.get('.row .skills-badge').eq(0).contains('Badge two');
     cy.get('.row .skills-badge').eq(1).contains('Gem Badge Two');
     cy.get('.row .skills-badge').eq(2).contains('Global Badge two');
-    cy.get('[data-cy=badgesFilterBtn]').click();
-    cy.get('[data-cy=badgesFilter_projectBadges] [data-cy=filterCount]').contains('2');
-    cy.get('[data-cy=badgesFilter_gems] [data-cy=filterCount]').contains('1');
-    cy.get('[data-cy=badgesFilter_globalBadges] [data-cy=filterCount]').contains('1');
-    cy.get('[data-cy=badgesFilter_gems] [data-cy=filterCount]').click();
+    cy.get('[data-cy=filterBtn]').click();
+    cy.get('[data-cy=filter_projectBadges] [data-cy=filterCount]').contains('2');
+    cy.get('[data-cy=filter_gems] [data-cy=filterCount]').contains('1');
+    cy.get('[data-cy=filter_globalBadges] [data-cy=filterCount]').contains('1');
+    cy.get('[data-cy=filter_gems] [data-cy=filterCount]').click();
     cy.get('.row .skills-badge').should('have.length', 1);
     cy.get('.row .skills-badge').eq(0).contains('Gem Badge Two');
     cy.get('[data-cy=clearSelectedFilter]').click();
