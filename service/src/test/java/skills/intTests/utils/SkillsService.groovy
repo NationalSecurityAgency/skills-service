@@ -407,8 +407,9 @@ class SkillsService {
         wsHelper.adminGet(getSkillUrl(props.projectId, props.subjectId, props.skillId), props)
     }
 
-    def getSkillsForProject(String projectId) {
-        wsHelper.adminGet("/projects/${projectId}/skills")
+    def getSkillsForProject(String projectId, String optionalSkillNameQuery = "") {
+        String query = optionalSkillNameQuery ? "?skillNameQuery=${optionalSkillNameQuery}" : ''
+        wsHelper.adminGet("/projects/${projectId}/skills${query}")
     }
 
     def getSkillsForSubject(String projectId, String subjectId) {

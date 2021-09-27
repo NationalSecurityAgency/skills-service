@@ -67,6 +67,84 @@ class AdminSkillInfoSpecs extends DefaultIntSpec {
         skills.get(2).totalPoints == proj1_skills.get(2).pointIncrement * proj1_skills.get(2).numPerformToCompletion
     }
 
+    def "get all skills for a project - returns subject id"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+
+        def proj1_subj2 = SkillsFactory.createSubject(1, 2)
+        List<Map> proj1_skills_subj2 = SkillsFactory.createSkills(2, 1, 2)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        skillsService.createSubject(proj1_subj2)
+        skillsService.createSkills(proj1_skills_subj2)
+
+        // another project to make sure that code selects the right project
+        def proj2 = SkillsFactory.createProject(2)
+        def proj2_subj = SkillsFactory.createSubject(2, 1)
+        List<Map> proj2_skills = SkillsFactory.createSkills(3, 2, 1)
+
+
+        skillsService.createProject(proj2)
+        skillsService.createSubject(proj2_subj)
+        skillsService.createSkills(proj2_skills)
+
+        when:
+        def skills = skillsService.getSkillsForProject(proj1.projectId)
+        skills.sort() { it.skillId }
+        then:
+        skills.size() == 5
+
+        skills.collect { it.subjectId } == ["TestSubject1", "TestSubject2", "TestSubject1", "TestSubject2", "TestSubject1"]
+        skills.collect { it.skillId } == ["skill1", "skill1subj2", "skill2", "skill2subj2", "skill3"]
+        skills.collect { it.subjectName } == ["Test Subject #1", "Test Subject #2", "Test Subject #1", "Test Subject #2", "Test Subject #1"]
+    }
+
+    def "query all skills for a project"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+
+        def proj1_subj2 = SkillsFactory.createSubject(1, 2)
+        List<Map> proj1_skills_subj2 = SkillsFactory.createSkills(2, 1, 2)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        skillsService.createSubject(proj1_subj2)
+        skillsService.createSkills(proj1_skills_subj2)
+
+        // another project to make sure that code selects the right project
+        def proj2 = SkillsFactory.createProject(2)
+        def proj2_subj = SkillsFactory.createSubject(2, 1)
+        List<Map> proj2_skills = SkillsFactory.createSkills(3, 2, 1)
+
+
+        skillsService.createProject(proj2)
+        skillsService.createSubject(proj2_subj)
+        skillsService.createSkills(proj2_skills)
+
+        when:
+        def allSkills = skillsService.getSkillsForProject(proj1.projectId)
+        allSkills.sort() { it.skillId }
+
+        def subj2Skills = skillsService.getSkillsForProject(proj1.projectId, "sUbJeCt2")
+        subj2Skills.sort() { it.skillId }
+
+        def startsWithSkill1 = skillsService.getSkillsForProject(proj1.projectId, "Skill 1")
+        startsWithSkill1.sort() { it.skillId }
+
+        then:
+        allSkills.collect { it.skillId } == ["skill1", "skill1subj2", "skill2", "skill2subj2", "skill3"]
+
+        subj2Skills.collect { it.skillId } == ["skill1subj2", "skill2subj2"]
+        startsWithSkill1.collect { it.skillId } == ["skill1", "skill1subj2"]
+    }
+
     def "get all skills for a subject"() {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)

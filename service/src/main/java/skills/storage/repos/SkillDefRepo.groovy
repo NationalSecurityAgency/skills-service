@@ -32,6 +32,8 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     static interface SkillDefSkinny {
         Integer getId()
         String getProjectId()
+        String getSubjectSkillId()
+        String getSubjectName()
         String getName()
         String getSkillId()
         Integer getVersion()
@@ -60,19 +62,28 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         s.id as id,
         s.name as name,
         s.skillId as skillId,
+        subjectDef.skillId as subjectSkillId,
+        subjectDef.name as subjectName,
         s.projectId as projectId,
         s.displayOrder as displayOrder,
         s.created as created,
         s.version as version,
         s.totalPoints as totalPoints
-        from SkillDef s where s.projectId = ?1 and s.type = ?2''')
-    List<SkillDefSkinny> findAllSkinnySelectByProjectIdAndType(String id, SkillDef.ContainerType type)
+        from SkillDef s, SkillDef subjectDef, SkillRelDef srd
+         where
+            subjectDef = srd.parent and s = srd.child and 
+            srd.type = 'RuleSetDefinition' and subjectDef.type = 'Subject' and 
+            s.projectId = ?1 and s.type = ?2 and 
+            upper(s.name) like UPPER(CONCAT('%', ?3, '%'))''')
+    List<SkillDefSkinny> findAllSkinnySelectByProjectIdAndType(String id, SkillDef.ContainerType type, String skillNameQuery)
 
     @Nullable
     @Query('''SELECT         
         s.id as id,
         s.name as name, 
         s.skillId as skillId, 
+        subjectDef.skillId as subjectSkillId,
+        subjectDef.name as subjectName,
         s.projectId as projectId, 
         s.version as version,
         s.pointIncrement as pointIncrement,
@@ -83,7 +94,11 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         s.displayOrder as displayOrder,
         s.created as created,
         s.updated as updated
-        from SkillDef s where s.type = ?1 and upper(s.name) like UPPER(CONCAT('%', ?2, '%'))''')
+        from SkillDef s, SkillDef subjectDef, SkillRelDef srd 
+        where
+        subjectDef = srd.parent and s = srd.child and 
+        srd.type = 'RuleSetDefinition' and subjectDef.type = 'Subject' and  
+        s.type = ?1 and upper(s.name) like UPPER(CONCAT('%', ?2, '%'))''')
     List<SkillDefPartial> findAllByTypeAndNameLike(SkillDef.ContainerType type, String name)
 
     List<SkillDef> findAllByProjectIdAndType(@Nullable String id, SkillDef.ContainerType type)

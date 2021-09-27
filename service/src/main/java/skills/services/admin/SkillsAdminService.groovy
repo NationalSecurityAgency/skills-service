@@ -466,9 +466,9 @@ class SkillsAdminService {
     }
 
     @Transactional(readOnly = true)
-    List<SkillDefSkinnyRes> getSkinnySkills(String projectId) {
-        List<SkillDefRepo.SkillDefSkinny> data = loadSkinnySkills(projectId)
-        List<SkillDefPartialRes> res = data.collect { convertToSkillDefSkinnyRes(it) }
+    List<SkillDefSkinnyRes> getSkinnySkills(String projectId, String skillNameQuery) {
+        List<SkillDefRepo.SkillDefSkinny> data = loadSkinnySkills(projectId, skillNameQuery)
+        List<SkillDefPartialRes> res = data.collect { convertToSkillDefSkinnyRes(it) }?.sort({ it.skillId })
         return res
     }
 
@@ -573,6 +573,8 @@ class SkillsAdminService {
                 skillId: skinny.skillId,
                 projectId: skinny.projectId,
                 name: skinny.name,
+                subjectId: skinny.subjectSkillId,
+                subjectName: skinny.subjectName,
                 version: skinny.version,
                 displayOrder: skinny.displayOrder,
                 created: skinny.created,
@@ -588,6 +590,8 @@ class SkillsAdminService {
                 skillId: partial.skillId,
                 projectId: partial.projectId,
                 name: partial.name,
+                subjectId: partial.subjectSkillId,
+                subjectName: partial.subjectName,
                 pointIncrement: partial.pointIncrement,
                 pointIncrementInterval: partial.pointIncrementInterval,
                 numMaxOccurrencesIncrementInterval: partial.numMaxOccurrencesIncrementInterval,
@@ -637,8 +641,13 @@ class SkillsAdminService {
     }
 
     @Profile
+    private List<SkillDefRepo.SkillDefSkinny> loadSkinnySkills(String projectId, String skillNameQuery) {
+        skillDefRepo.findAllSkinnySelectByProjectIdAndType(projectId, SkillDef.ContainerType.Skill, skillNameQuery)
+    }
+
+    @Profile
     private List<SkillDefRepo.SkillDefSkinny> loadSkinnySkills(String projectId) {
-        skillDefRepo.findAllSkinnySelectByProjectIdAndType(projectId, SkillDef.ContainerType.Skill)
+        this.loadSkinnySkills(projectId, '')
     }
 
     private void validateSkillVersion(SkillRequest skillRequest){

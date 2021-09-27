@@ -17,14 +17,22 @@ limitations under the License.
   <div id="skills-selector" class="skills-selector">
 
     <!-- see https://github.com/shentao/vue-multiselect/issues/421 for explanation of :blockKeys-->
-    <multiselect v-model="selectedInternal" placeholder="Select skill(s)..."
+    <multiselect v-model="selectedInternal" :placeholder="placeholder" :select-label="selectLabel"
                  :options="optionsInternal" :multiple="multipleSelection" :taggable="false" :blockKeys="['Delete']"
                  :hide-selected="true" label="name" track-by="entryId" :is-loading="isLoading"
-                 v-on:select="added" v-on:search-change="searchChanged" :internal-search="internalSearch">
+                 v-on:select="added" v-on:search-change="searchChanged" :internal-search="internalSearch"
+                 data-cy="skillsSelector">
       <template slot="option" slot-scope="props">
         <slot name="dropdown-item" v-bind:props="props">
-          <h6>{{ props.option.name }}</h6>
-          <div class="" style="font-size: 0.8rem;">{{dropDownItemSlot(props)}}</div>
+          <div class="h5 text-info" data-cy="skillsSelector-skillName">{{ props.option.name }}</div>
+          <div class="" style="font-size: 0.8rem;">
+            <span>
+              <span v-if="showProject"><span class="text-uppercase mr-1 font-italic">Project ID:</span><span class="font-weight-bold" data-cy="skillsSelector-projectId">{{props.option.projectId}}</span></span>
+              <span v-if="!showProject"><span class="text-uppercase mr-1 font-italic">ID:</span><span class="font-weight-bold" data-cy="skillsSelector-skillId">{{props.option.skillId}}</span></span>
+            </span>
+            <span class="mx-2">|</span>
+            <span class="text-uppercase mr-1 font-italic">Subject:</span><span class="font-weight-bold" data-cy="skillsSelector-subjectName">{{props.option.subjectName}}</span>
+          </div>
         </slot>
       </template>
       <template slot="tag" slot-scope="{ option, remove }">
@@ -35,6 +43,10 @@ limitations under the License.
       </template>
       <template v-if="afterListSlotText" slot="afterList">
         <h6 class="ml-1"> {{ this.afterListSlotText }}</h6>
+      </template>
+      <template slot="noOptions">
+        <span v-if="emptyWithoutSearch && !internalSearch"><i class="fas fa-search"/> Type to <span class="font-weight-bold">search</span> for skills...</span>
+        <span v-else>List is empty!</span>
       </template>
     </multiselect>
   </div>
@@ -68,6 +80,10 @@ limitations under the License.
         type: Boolean,
         default: true,
       },
+      emptyWithoutSearch: {
+        type: Boolean,
+        default: false,
+      },
       afterListSlotText: {
         type: String,
         default: '',
@@ -75,6 +91,14 @@ limitations under the License.
       showProject: {
         type: Boolean,
         default: false,
+      },
+      placeholder: {
+        type: String,
+        default: 'Select skill(s)...',
+      },
+      selectLabel: {
+        type: String,
+        default: 'Press enter to select',
       },
     },
     data() {
@@ -128,32 +152,13 @@ limitations under the License.
       searchChanged(query) {
         this.$emit('search-change', query);
       },
-      dropDownItemSlot(props) {
-        let slotText = `ID: ${props.option.skillId}`;
-        if (this.showProject) {
-          slotText = ` Project ID: ${props.option.projectId}`;
-        }
-        return slotText;
-      },
     },
   };
 </script>
 
 <style scoped>
-  .selected-tag {
-    background-color: lightblue;
-    color: black;
-  }
-  .remove-x:hover {
-    cursor: pointer;
-  }
 
 </style>
 
 <style>
-  .skills-selector .multiselect__content-wrapper {
-    background: #f8f9fa;
-    /*border-width: 2px;*/
-    border-color: #b1b1b1;
-  }
 </style>

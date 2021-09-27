@@ -924,4 +924,60 @@ describe('Skills Tests', () => {
         }
     });
 
+
+    it('search for skills across subjects', () => {
+        // apex charts and dynamic imports had a race condition, this test verifies that charts load successfully
+
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2);
+        cy.createSkill(1, 1, 3);
+        cy.createSkill(1, 1, 4);
+        cy.createSkill(1, 1, 5);
+
+        cy.createSubject(1, 2)
+        cy.createSkill(1, 2, 6);
+        cy.createSkill(1, 2, 7);
+        cy.createSkill(1, 2, 8);
+
+        cy.createSubject(1, 3)
+        cy.createSkill(1, 3, 9);
+        cy.createSkill(1, 3, 10);
+
+
+        cy.visit('/administrator/projects/proj1/');
+        cy.get('[data-cy="skillsSelector"]').contains('Search and navigate directly to a skill').should('be.visible')
+        cy.get('[data-cy="skillsSelector"]').click();
+        cy.get('[data-cy="skillsSelector"]').contains('Type to search for skills').should('be.visible')
+        cy.get('[data-cy="skillsSelector"]').type('sUbJ2')
+
+        cy.get('[data-cy="skillsSelector"] [data-cy="skillsSelector-skillId"]').should('have.length', 3).as('skillIds');
+        cy.get('@skillIds').eq(0).contains('skill6Subj2');
+        cy.get('@skillIds').eq(1).contains('skill7Subj2');
+        cy.get('@skillIds').eq(2).contains('skill8Subj2');
+
+        cy.get('[data-cy="skillsSelector"] [data-cy="skillsSelector-skillName"]').should('have.length', 3).as('names');
+        cy.get('@names').eq(0).contains('Very Great Skill 6 Subj2');
+        cy.get('@names').eq(1).contains('Very Great Skill 7 Subj2');
+        cy.get('@names').eq(2).contains('Very Great Skill 8 Subj2');
+
+        cy.get('[data-cy="skillsSelector"] [data-cy="skillsSelector-subjectName"]').should('have.length', 3).as('subjects');
+        cy.get('@subjects').eq(0).contains('Subject 2');
+        cy.get('@subjects').eq(1).contains('Subject 2');
+        cy.get('@subjects').eq(2).contains('Subject 2');
+
+        // navigate to a skill
+        cy.get('@skillIds').eq(1).click();
+        cy.get('[data-cy="pageHeader"]').contains('ID: skill7Subj2')
+
+        // search produces no results
+        cy.visit('/administrator/projects/proj1/');
+        cy.get('[data-cy="skillsSelector"]').contains('Search and navigate directly to a skill').should('be.visible')
+        cy.get('[data-cy="skillsSelector"]').type('sUbJ2*kd')
+        cy.get('[data-cy="skillsSelector"]').contains('No elements found. Consider changing the search query').should('be.visible')
+
+        // special chars don't break anything
+        cy.get('[data-cy="skillsSelector"]').type('!@#$%^&*()')
+        cy.get('[data-cy="skillsSelector"]').contains('No elements found. Consider changing the search query').should('be.visible')
+    });
+
 });
