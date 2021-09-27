@@ -86,7 +86,6 @@ limitations under the License.
     },
     computed: {
       percent() {
-        /* TODO: this needs to account for badge.projectLevelsAndSkillsSummaries and any projectLevels that are present */
         if (this.badge.numTotalSkills === 0) {
           return 0;
         }
