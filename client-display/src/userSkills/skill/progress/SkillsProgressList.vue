@@ -138,17 +138,14 @@ limitations under the License.
     mounted() {
       const theSubject = this.subject;
       this.showDescriptionsInternal = this.showDescriptions;
+      let filter = () => true;
       if (this.projectId) {
-        this.skillsInternal = this.subject.skills.filter((s) => s.projectId === this.projectId).map((item) => {
-          this.updateMetaCounts(item.meta);
-          return { ...item, subject: theSubject };
-        });
-      } else {
-        this.skillsInternal = this.subject.skills.map((item) => {
-          this.updateMetaCounts(item.meta);
-          return { ...item, subject: theSubject };
-        });
+        filter = (s) => s.projectId === this.projectId;
       }
+      this.skillsInternal = this.subject.skills.filter(filter).map((item) => {
+        this.updateMetaCounts(item.meta);
+        return { ...item, subject: theSubject };
+      });
 
       this.skillsInternalOrig = this.skillsInternal.map((item) => ({ ...item }));
     },
