@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-    <div class="card mt-2" data-cy="skillsProgressList">
+    <div class="card mt-2" data-cy="skillsProgressList" v-if="(skillsInternal.length > 0 || showNoDataMsg)">
         <div class="card-header float-left">
             <div class="row" v-if="skillsInternalOrig && skillsInternalOrig.length > 0">
                 <div class="col-md-auto text-left pr-md-0">
@@ -73,7 +73,7 @@ limitations under the License.
                              icon="fas fa-search-minus fa-5x"
                            title="No results" :sub-title="`Please refine [${searchString}] search${(this.filterId) ? ' and/or clear the selected filter' : ''}`"/>
 
-                <no-data-yet v-if="!(skillsInternalOrig && skillsInternalOrig.length > 0)" class="my-5"
+                <no-data-yet v-if="!(skillsInternalOrig && skillsInternalOrig.length > 0) && showNoDataMsg" class="my-5"
                         title="Skills have not been added yet." sub-title="Please contact this project's administrator."/>
             </div>
         </div>
@@ -110,6 +110,16 @@ limitations under the License.
         type: String,
         default: 'subject',
       },
+      projectId: {
+        type: String,
+        default: null,
+        required: false,
+      },
+      showNoDataMsg: {
+        type: Boolean,
+        default: true,
+        required: false,
+      },
     },
     data() {
       return {
@@ -133,10 +143,15 @@ limitations under the License.
     mounted() {
       const theSubject = this.subject;
       this.showDescriptionsInternal = this.showDescriptions;
-      this.skillsInternal = this.subject.skills.map((item) => {
+      let filter = () => true;
+      if (this.projectId) {
+        filter = (s) => s.projectId === this.projectId;
+      }
+      this.skillsInternal = this.subject.skills.filter(filter).map((item) => {
         this.updateMetaCounts(item.meta);
         return { ...item, subject: theSubject };
       });
+
       this.skillsInternalOrig = this.skillsInternal.map((item) => ({ ...item }));
     },
     methods: {
