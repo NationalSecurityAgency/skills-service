@@ -69,11 +69,6 @@ limitations under the License.
         this.loadMyProgressSummary()
           .then(() => {
             this.loadBadges();
-          })
-          .catch((err) => {
-            this.loading = false;
-            // eslint-disable-next-line no-console
-            console.error('unable to load my progress summary', err);
           });
       }
     },
