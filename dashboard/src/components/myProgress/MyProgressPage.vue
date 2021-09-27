@@ -41,33 +41,33 @@ limitations under the License.
     <div v-if="!loading && hasProjects">
       <b-row class="my-4">
         <b-col cols="12" md="6" xl="3" class="d-flex mb-2 pl-md-3 pr-md-1">
-          <info-snapshot-card :projects="projects"
-                              :num-projects-contributed="myProgressSummary.numProjectsContributed"
+          <info-snapshot-card :projects="myProjects"
+                              :num-projects-contributed="myProgress.numProjectsContributed"
                               class="flex-grow-1 my-summary-card"/>
         </b-col>
         <b-col cols="12" md="6" xl="3" class="d-flex mb-2 pr-md-3 pl-md-1 pr-xl-1">
-          <num-skills :total-skills="myProgressSummary.totalSkills"
-                      :num-achieved-skills="myProgressSummary.numAchievedSkills" class="flex-grow-1 my-summary-card"/>
+          <num-skills :total-skills="myProgress.totalSkills"
+                      :num-achieved-skills="myProgress.numAchievedSkills" class="flex-grow-1 my-summary-card"/>
         </b-col>
         <b-col cols="12" md="6" xl="3" class="d-flex mb-2 pl-md-3 pr-md-1 pl-xl-1">
-          <last-earned-card :num-achieved-skills-last-month="myProgressSummary.numAchievedSkillsLastMonth"
-                            :num-achieved-skills-last-week="myProgressSummary.numAchievedSkillsLastWeek"
-                            :most-recent-achieved-skill="myProgressSummary.mostRecentAchievedSkill"
+          <last-earned-card :num-achieved-skills-last-month="myProgress.numAchievedSkillsLastMonth"
+                            :num-achieved-skills-last-week="myProgress.numAchievedSkillsLastWeek"
+                            :most-recent-achieved-skill="myProgress.mostRecentAchievedSkill"
                             class="flex-grow-1 my-summary-card"/>
         </b-col>
         <b-col cols="12" md="6" xl="3" class="d-flex mb-2 pr-md-3 pl-md-1">
-          <badges-num-card :total-badges="myProgressSummary.totalBadges"
-                           :num-achieved-badges="myProgressSummary.numAchievedBadges"
-                           :num-achieved-gem-badges="myProgressSummary.numAchievedGemBadges"
-                           :num-achieved-global-badges="myProgressSummary.numAchievedGlobalBadges"
-                           :total-gems="myProgressSummary.gemCount"
-                           :total-global-badges="myProgressSummary.globalBadgeCount"
+          <badges-num-card :total-badges="myProgress.totalBadges"
+                           :num-achieved-badges="myProgress.numAchievedBadges"
+                           :num-achieved-gem-badges="myProgress.numAchievedGemBadges"
+                           :num-achieved-global-badges="myProgress.numAchievedGlobalBadges"
+                           :total-gems="myProgress.gemCount"
+                           :total-global-badges="myProgress.globalBadgeCount"
                            class="flex-grow-1 my-summary-card"/>
         </b-col>
       </b-row>
       <hr/>
       <b-row class="my-4 px-1" id="projectCards">
-        <b-col v-for="(proj) in projects" :key="proj.projectName" :id="proj.projectId"
+        <b-col v-for="(proj) in myProjects" :key="proj.projectName" :id="proj.projectId"
                cols="12" md="6" xl="4"
                class="mb-2 px-2">
           <b-overlay :show="sortOrderLoading" rounded="sm" opacity="0.4">
@@ -92,6 +92,7 @@ limitations under the License.
 </template>
 
 <script>
+  import { createNamespacedHelpers } from 'vuex';
   import Sortable from 'sortablejs';
   import NoContent2 from '@/components/utils/NoContent2';
   import ProjectLinkCard from './ProjectLinkCard';
@@ -99,10 +100,11 @@ limitations under the License.
   import NumSkills from './NumSkills';
   import BadgesNumCard from './BadgesNumCard';
   import LastEarnedCard from './LastEarnedCard';
-  import MyProgressService from './MyProgressService';
   import LoadingContainer from '../utils/LoadingContainer';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import ProjectService from '../projects/ProjectService';
+
+  const { mapActions, mapGetters } = createNamespacedHelpers('myProgress');
 
   export default {
     name: 'MyProgressPage',
@@ -121,26 +123,19 @@ limitations under the License.
         loading: true,
         sortOrderLoading: false,
         sortOrderLoadingProjectId: -1,
-        myProgressSummary: null,
         projects: [],
       };
     },
     mounted() {
-      this.loadProjects();
+      this.loadMyProgressSummary().finally(() => {
+        this.loading = false;
+        this.enableProjectDropAndDrop();
+      });
     },
     methods: {
-      loadProjects() {
-        MyProgressService.loadMyProgressSummary()
-          .then((res) => {
-            this.myProgressSummary = res;
-            this.projects = this.myProgressSummary.projectSummaries;
-          }).finally(() => {
-            this.loading = false;
-            this.enableProjectDropAndDrop();
-          });
-      },
+      ...mapActions(['loadMyProgressSummary']),
       enableProjectDropAndDrop() {
-        if (this.projects && this.projects.length > 0) {
+        if (this.myProjects && this.myProjects.length > 0) {
           const self = this;
           this.$nextTick(() => {
             const cards = document.getElementById('projectCards');
@@ -167,8 +162,12 @@ limitations under the License.
     },
     computed: {
       hasProjects() {
-        return this.projects && this.projects.length > 0;
+        return this.myProjects && this.myProjects.length > 0;
       },
+      ...mapGetters([
+        'myProgress',
+        'myProjects',
+      ]),
     },
   };
 </script>

@@ -20,6 +20,7 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import spock.lang.IgnoreRest
 
 @Slf4j
 class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
@@ -394,6 +395,71 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         skill1.dependencyInfo.achieved
     }
 
+    def "single badge summary with only level dependencies should not appear completed due to subject level achievements" () {
+        //steps
+        //create 2 projects
+        //create 2 subjects in one project
+        //make sure user has achieved level 1 in project 1 and level 2 in project 1 subject 1
+        //make sure user has achieved level 2 in project 2
+        //create global badge which requires project 1 level 2 and project 2 level 2
+
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(4, 1, 1)
+        proj1_skills.each{
+            it.pointIncrement=25
+        }
+
+        def proj1_subj2 = SkillsFactory.createSubject(1, 2)
+        def proj1_subj2_skills = SkillsFactory.createSkills(4, 1, 2)
+        proj1_subj2_skills.each {
+            it.pointIncrement = 100
+        }
+
+
+        def proj2 = SkillsFactory.createProject(2)
+        def proj2_subj1 = SkillsFactory.createSubject(2, 1)
+        List<Map> proj2_skills = SkillsFactory.createSkills(5, 2)
+        proj2_skills.each {
+            it.pointIncrement = 25
+        }
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+        skillsService.createSubject(proj1_subj2)
+        skillsService.createSkills(proj1_subj2_skills)
+        skillsService.createProject(proj2)
+        skillsService.createSubject(proj2_subj1)
+        skillsService.createSkills(proj2_skills)
+
+        Map badge = [badgeId: globalBadgeId, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
+        supervisorSkillsService.createGlobalBadge(badge)
+        supervisorSkillsService.assignProjectLevelToGlobalBadge(projectId: proj1.projectId, badgeId: globalBadgeId, level: "2")
+        supervisorSkillsService.assignProjectLevelToGlobalBadge(projectId: proj2.projectId, badgeId: globalBadgeId, level: "2")
+        badge.enabled = true
+        supervisorSkillsService.createGlobalBadge(badge)
+
+        String user = getRandomUsers(1)
+        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], user, new Date())
+        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(1).skillId], user, new Date())
+        skillsService.addSkill([projectId: proj2.projectId, skillId: proj2_skills.get(0).skillId], user, new Date())
+        skillsService.addSkill([projectId: proj2.projectId, skillId: proj2_skills.get(1).skillId], user, new Date())
+
+        when:
+        def proj1level = skillsService.getUserLevel(proj1.projectId, user)
+        def proj2level = skillsService.getUserLevel(proj2.projectId, user)
+
+        def summary = skillsService.getBadgeSummary(user, proj1.projectId, globalBadgeId, -1, true)
+
+        then:
+        proj1level == 1
+        proj2level == 2
+        summary.projectLevelsAndSkillsSummaries.find {it.projectId == proj1.projectId}.projectLevel.requiredLevel == 2
+        summary.projectLevelsAndSkillsSummaries.find {it.projectId == proj1.projectId}.projectLevel.achievedLevel == proj1level
+        summary.projectLevelsAndSkillsSummaries.find {it.projectId == proj2.projectId}.projectLevel.requiredLevel == 2
+        summary.projectLevelsAndSkillsSummaries.find {it.projectId == proj2.projectId}.projectLevel.achievedLevel == proj2level
+    }
 
     def "project summary should return achieved badges summary"(){
         String userId = "user1"

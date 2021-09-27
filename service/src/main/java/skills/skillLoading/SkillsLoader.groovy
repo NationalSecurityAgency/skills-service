@@ -707,7 +707,7 @@ class SkillsLoader {
         int numAchievedSkills = achievedLevelRepository.countAchievedGlobalSkills(userId, badgeDefinition.skillId, SkillRelDef.RelationshipType.BadgeRequirement)
         int numChildSkills = skillDefRepo.countGlobalChildren(badgeDefinition.skillId, SkillRelDef.RelationshipType.BadgeRequirement)
 
-        List<UserAchievement> achievedLevels = achievedLevelRepository.findAllLevelsByUserId(userId)
+        List<UserAchievement> achievedLevels = achievedLevelRepository.findAllProjectLevelsByUserId(userId)
         Map<String, Integer> userProjectLevels = (Map<String, Integer>)achievedLevels?.groupBy { it.projectId }
                 ?.collectEntries {String key, List<UserAchievement> val -> [key,val.collect{it.level}.max()]}
 

@@ -37,11 +37,14 @@ limitations under the License.
 </template>
 
 <script>
+  import { createNamespacedHelpers } from 'vuex';
   import MyBadgesDetails from '@/common-components/badges/MyBadgesDetails';
   import BadgesCatalog from '@/common-components/badges/BadgesCatalog';
   import SubPageHeader from '@/components/utils/pages/SubPageHeader';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import MyProgressService from '../MyProgressService';
+
+  const { mapActions, mapGetters } = createNamespacedHelpers('myProgress');
 
   export default {
     name: 'MyBadges',
@@ -60,7 +63,14 @@ limitations under the License.
       };
     },
     mounted() {
-      this.loadBadges();
+      if (this.myProjects) {
+        this.loadBadges();
+      } else {
+        this.loadMyProgressSummary()
+          .then(() => {
+            this.loadBadges();
+          });
+      }
     },
     computed: {
       noCatalogMsg() {
@@ -69,8 +79,13 @@ limitations under the License.
         }
         return 'No Badges available';
       },
+      ...mapGetters([
+        'myProgress',
+        'myProjects',
+      ]),
     },
     methods: {
+      ...mapActions(['loadMyProgressSummary']),
       generateBadgeRouterLink(badge) {
         if (badge.projectId) {
           const navlink = { path: `/progress-and-rankings/projects/${badge.projectId}/`, query: { skillsClientDisplayPath: `/badges/${badge.badgeId}` } };
@@ -88,8 +103,8 @@ limitations under the License.
       },
       loadBadges() {
         this.loading = true;
+        this.projectIds = this.myProjects.map((p) => p.projectId);
         MyProgressService.loadMyBadges().then((res) => {
-          this.projectIds = res.filter((badge) => badge.projectId).map((badge) => badge.projectId);
           this.unachievedBadges = res.filter((badge) => badge.badgeAchieved === false);
           this.achievedBadges = res.filter((badge) => badge.badgeAchieved === true);
         }).finally(() => {
