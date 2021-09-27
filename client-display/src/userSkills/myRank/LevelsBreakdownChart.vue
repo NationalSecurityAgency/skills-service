@@ -92,9 +92,6 @@ limitations under the License.
               columnWidth: '50%',
               borderRadius: 5,
             },
-            toolbar: {
-              offsetY: -80,
-            },
           },
           dataLabels: {
             enabled: false,
