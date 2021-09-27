@@ -246,7 +246,8 @@ describe('Settings Tests', () => {
         cy.visit('/administrator/');
         cy.get('[data-cy=subPageHeader]').contains('Projects');
 
-        cy.get('li').contains('Badges').should('not.exist');
+        // root user can see/manage global badges
+        cy.get('[data-cy="nav-Badges"]')
         cy.window().should('have.property','vm').then((vm) => {
             cy.wrap(vm.$store).its('state.access.isSupervisor').should('equal', false);
         });
@@ -278,7 +279,8 @@ describe('Settings Tests', () => {
 
         cy.visit('/administrator/');
 
-        cy.get('li').contains('Badges').should('not.exist');
+        // root user can see/manage global badges
+        cy.get('[data-cy="nav-Badges"]')
         cy.window().should('have.property','vm').then((vm) => {
             cy.wrap(vm.$store).its('state.access.isSupervisor').should('equal', false);
         });

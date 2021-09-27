@@ -19,7 +19,7 @@ const dateFormatter = value => moment.utc(value).format('YYYY-MM-DD[T]HH:mm:ss[Z
 describe('Client Display Theme Components Tests', () => {
 
     const snapshotOptions = {
-        blackout: ['[data-cy=pointHistoryChart]', '[data-cy=achievementDate]'],
+        blackout: ['[data-cy=achievementDate]'],
         failureThreshold: 0.03, // threshold for entire image
         failureThresholdType: 'percent', // percent of image or number of pixels
         customDiffConfig: { threshold: 0.01 }, // threshold for each pixel
@@ -113,14 +113,14 @@ describe('Client Display Theme Components Tests', () => {
 
         const url = '/?themeParam=tiles|{"backgroundColor":"black"}&themeParam=textPrimaryColor|white&themeParam=textSecondaryColor|yellow'
         cy.cdVisit(url);
-        cy.cdClickSubj(0);
+        cy.cdClickSubj(0);``
         cy.get('[data-cy="filterMenu"] .dropdown').click();
-        cy.matchSnapshotImageForElement('[data-cy="filterMenu"] .dropdown-menu.show', 'filterMenu-skills');
+        cy.matchSnapshotImageForElement('[data-cy="filterMenu"] .dropdown-menu.show', 'filterMenu-skills', snapshotOptions);
 
         cy.cdBack()
         cy.cdClickBadges();
         cy.get('[data-cy="filterMenu"] .dropdown').click();
-        cy.matchSnapshotImageForElement('[data-cy="filterMenu"] .dropdown-menu.show', 'filterMenu-badges');
+        cy.matchSnapshotImageForElement('[data-cy="filterMenu"] .dropdown-menu.show', 'filterMenu-badges', snapshotOptions);
     })
 
 
@@ -170,22 +170,6 @@ describe('Client Display Theme Components Tests', () => {
         cy.matchSnapshotImage();
     });
 
-    it('dark tile background', () => {
-        cy.createBadge(1, 1)
-        cy.assignSkillToBadge(1, 1, 1)
-
-        const url = '/?themeParam=tiles|{"backgroundColor":"black"}&themeParam=textPrimaryColor|white&themeParam=textSecondaryColor|lightblue'
-        cy.cdVisit(url);
-
-
-        // cy.get('[data-cy="filterMenu"] .dropdown').click();
-        // cy.matchSnapshotImageForElement('[data-cy="filterMenu"] .dropdown-menu.show', 'filterMenu-skills');
-        //
-        // cy.cdBack()
-        // cy.cdClickBadges();
-        // cy.get('[data-cy="filterMenu"] .dropdown').click();
-        // cy.matchSnapshotImageForElement('[data-cy="filterMenu"] .dropdown-menu.show', 'filterMenu-badges');
-    })
 
 })
 
