@@ -356,6 +356,15 @@ limitations under the License.
           && this.skills.length <= this.disableDeleteButtonsInfo.minNumSkills;
         return (isDisabled) ? this.disableDeleteButtonsInfo.tooltip : 'Delete Skill';
       },
+      addSkillDisabled() {
+        return this.skills && this.$store.getters.config && this.skills.length >= this.$store.getters.config.maxSkillsPerSubject;
+      },
+      addSkillsDisabledMsg() {
+        if (this.$store.getters.config) {
+          return `The maximum number of Skills allowed is ${this.$store.getters.config.maxSkillsPerSubject}`;
+        }
+        return '';
+      },
     },
     methods: {
       updateColumns(newList) {
@@ -412,8 +421,8 @@ limitations under the License.
       loadDataFromParams(skillsProp) {
         this.skills = skillsProp.map((item) => {
           let enhancedSkill = {
-            subjectId: this.subjectId,
             ...item,
+            subjectId: this.subjectId,
           };
           enhancedSkill = this.addMetaToSkillObj(enhancedSkill);
           return SkillsService.enhanceWithTimeWindow(enhancedSkill);
