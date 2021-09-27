@@ -35,7 +35,11 @@ limitations under the License.
                 <h4 class="card-header text-sm-left text-secondary text-center col">Project: {{ projectSummary.projectName }}</h4>
                 <div class="card-body">
                     <project-level-row v-if="projectSummary && projectSummary.projectLevel" :projectLevel="projectSummary.projectLevel" />
-                    <skills-progress-list v-if="projectSummary && projectSummary.skills" :subject="badge" :projectId="projectSummary.projectId" :show-descriptions="showDescriptions" type="global-badge"/>
+                    <skills-progress-list v-if="projectSummary && projectSummary.skills"
+                                          :subject="badge" :projectId="projectSummary.projectId"
+                                          :show-descriptions="showDescriptions"
+                                          :show-no-data-msg="false"
+                                          type="global-badge"/>
                 </div>
             </div>
             <div v-if="!(projectSummaries && projectSummaries.length > 0)">
