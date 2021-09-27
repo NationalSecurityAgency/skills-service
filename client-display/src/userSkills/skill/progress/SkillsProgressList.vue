@@ -141,13 +141,6 @@ limitations under the License.
       };
     },
     mounted() {
-      if (this.projectId) {
-        // eslint-disable-next-line no-console
-        console.log(`SkillsProgressList configured with projectId ${this.projectId}`);
-      } else {
-        // eslint-disable-next-line no-console
-        console.log('SkillsProgressList has no projectId configured');
-      }
       const theSubject = this.subject;
       this.showDescriptionsInternal = this.showDescriptions;
       let filter = () => true;
