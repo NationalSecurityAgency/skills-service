@@ -33,7 +33,7 @@ limitations under the License.
                   </div>
                 </div>
                 <div class="col-md text-left my-2 my-md-0 ml-md-0 pl-md-0">
-                  <skills-filter :counts="metaCounts" @filter-selected="filterSkills" @clear-filter="clearFilters"/>
+                  <skills-filter :counts="metaCounts" :filters="filters" @filter-selected="filterSkills" @clear-filter="clearFilters"/>
                 </div>
                 <div class="col-md-auto text-right" >
                     <span class="text-muted pr-1">Skill Details:</span>
@@ -86,7 +86,7 @@ limitations under the License.
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
   import SkillsSpinner from '@/common/utilities/SkillsSpinner';
   import SkillProgress2 from './SkillProgress2';
-  import SkillsFilter from './SkillsFilter';
+  import SkillsFilter from '@/common-components/utilities/ListFilterMenu';
   import SkillEnricherUtil from '../../utils/SkillEnricherUtil';
 
   export default {
@@ -138,6 +138,38 @@ limitations under the License.
         descriptionsLoaded: false,
         skillsInternal: [],
         skillsInternalOrig: [],
+        filters: [
+          {
+            icon: 'fas fa-battery-empty',
+            id: 'withoutProgress',
+            html: 'Skills <b>without</b> progress',
+            count: 0,
+          },
+          {
+            icon: 'far fa-calendar-check',
+            id: 'withPointsToday',
+            html: 'Skills with points earned <b>today</b>',
+            count: 0,
+          },
+          {
+            icon: 'far fa-check-circle',
+            id: 'complete',
+            html: '<b>Completed</b> skills',
+            count: 0,
+          },
+          {
+            icon: 'fas fa-laptop',
+            id: 'selfReported',
+            html: '<b>Self</b> Reported Skills',
+            count: 0,
+          },
+          {
+            icon: 'fas fa-running',
+            id: 'inProgress',
+            html: 'Skills <b>in progress</b>',
+            count: 0,
+          },
+        ],
       };
     },
     mounted() {
@@ -205,7 +237,7 @@ limitations under the License.
         updateSkill(this.skillsInternal);
       },
       filterSkills(filterId) {
-        this.filterId = filterId;
+        this.filterId = filterId.id;
         this.searchAndFilterSkills();
       },
       clearFilters() {

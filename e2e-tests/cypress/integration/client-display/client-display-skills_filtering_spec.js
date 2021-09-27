@@ -42,12 +42,12 @@ describe('Client Display Skills Filtering Tests', () => {
     });
 
     Cypress.Commands.add("validateCounts", (withoutProgress, withPointsToday, complete, selfReported, inProgress) => {
-      cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
-      cy.get('[data-cy="skillsFilter_withoutProgress"] [data-cy="filterCount"]').contains(withoutProgress)
-      cy.get('[data-cy="skillsFilter_withPointsToday"] [data-cy="filterCount"]').contains(withPointsToday)
-      cy.get('[data-cy="skillsFilter_complete"] [data-cy="filterCount"]').contains(complete)
-      cy.get('[data-cy="skillsFilter_selfReported"] [data-cy="filterCount"]').contains(selfReported)
-      cy.get('[data-cy="skillsFilter_inProgress"] [data-cy="filterCount"]').contains(inProgress)
+      cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
+      cy.get('[data-cy="filter_withoutProgress"] [data-cy="filterCount"]').contains(withoutProgress)
+      cy.get('[data-cy="filter_withPointsToday"] [data-cy="filterCount"]').contains(withPointsToday)
+      cy.get('[data-cy="filter_complete"] [data-cy="filterCount"]').contains(complete)
+      cy.get('[data-cy="filter_selfReported"] [data-cy="filterCount"]').contains(selfReported)
+      cy.get('[data-cy="filter_inProgress"] [data-cy="filterCount"]').contains(inProgress)
     });
   })
 
@@ -111,16 +111,16 @@ describe('Client Display Skills Filtering Tests', () => {
     cy.cdVisit('/');
     cy.cdClickSubj(0);
 
-    cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
-    cy.get('[data-cy="skillsFilter_withoutProgress"]').click();
+    cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
+    cy.get('[data-cy="filter_withoutProgress"]').click();
     cy.get('[data-cy="selectedFilter"]').contains('Skills without progress')
 
     cy.get('[data-cy="skillProgress_index-0"]').contains('Very Great Skill 5')
     cy.get('[data-cy="skillProgress_index-1"]').contains('Very Great Skill 6')
     cy.get('[data-cy="skillProgress_index-2"]').should('not.exist')
 
-    cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
-    cy.get('[data-cy="skillsFilter_withPointsToday"]').click();
+    cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
+    cy.get('[data-cy="filter_withPointsToday"]').click();
     cy.get('[data-cy="selectedFilter"]').contains('Skills with points earned today')
 
     cy.get('[data-cy="skillProgress_index-0"]').contains('Very Great Skill 1')
@@ -129,22 +129,22 @@ describe('Client Display Skills Filtering Tests', () => {
     cy.get('[data-cy="skillProgress_index-3"]').contains('Very Great Skill 4')
     cy.get('[data-cy="skillProgress_index-4"]').should('not.exist')
 
-    cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
-    cy.get('[data-cy="skillsFilter_complete"]').click();
+    cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
+    cy.get('[data-cy="filter_complete"]').click();
     cy.get('[data-cy="selectedFilter"]').contains('Completed skills')
     cy.get('[data-cy="skillProgress_index-0"]').contains('Very Great Skill 1')
     cy.get('[data-cy="skillProgress_index-1"]').contains('Very Great Skill 3')
     cy.get('[data-cy="skillProgress_index-2"]').should('not.exist')
 
-    cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
-    cy.get('[data-cy="skillsFilter_selfReported"]').click();
+    cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
+    cy.get('[data-cy="filter_selfReported"]').click();
     cy.get('[data-cy="selectedFilter"]').contains('Self Reported Skills')
     cy.get('[data-cy="skillProgress_index-0"]').contains('Very Great Skill 5')
     cy.get('[data-cy="skillProgress_index-1"]').contains('Very Great Skill 6')
     cy.get('[data-cy="skillProgress_index-2"]').should('not.exist')
 
-    cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
-    cy.get('[data-cy="skillsFilter_inProgress"]').click();
+    cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
+    cy.get('[data-cy="filter_inProgress"]').click();
     cy.get('[data-cy="selectedFilter"]').contains('Skills in progress')
     cy.get('[data-cy="skillProgress_index-0"]').contains('Very Great Skill 2')
     cy.get('[data-cy="skillProgress_index-1"]').contains('Very Great Skill 4')
@@ -171,8 +171,8 @@ describe('Client Display Skills Filtering Tests', () => {
 
     cy.get('[data-cy=toggleSkillDetails]').click()
 
-    cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
-    cy.get('[data-cy="skillsFilter_withoutProgress"]').click();
+    cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
+    cy.get('[data-cy="filter_withoutProgress"]').click();
     cy.get('[data-cy="selectedFilter"]').contains('Skills without progress')
 
     cy.get('[data-cy="skillProgress_index-0"]').contains('Very Great Skill 5')
@@ -181,8 +181,8 @@ describe('Client Display Skills Filtering Tests', () => {
     cy.get('[data-cy="skillProgress_index-1"]').contains('Overall Points Earned')
     cy.get('[data-cy="skillProgress_index-2"]').should('not.exist')
 
-    cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
-    cy.get('[data-cy="skillsFilter_withPointsToday"]').click();
+    cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
+    cy.get('[data-cy="filter_withPointsToday"]').click();
     cy.get('[data-cy="selectedFilter"]').contains('Skills with points earned today')
 
     cy.get('[data-cy="skillProgress_index-0"]').contains('Very Great Skill 1')
@@ -214,8 +214,8 @@ describe('Client Display Skills Filtering Tests', () => {
     cy.cdVisit('/');
     cy.cdClickSubj(0);
 
-    cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
-    cy.get('[data-cy="skillsFilter_withoutProgress"]').click();
+    cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
+    cy.get('[data-cy="filter_withoutProgress"]').click();
     cy.get('[data-cy="selectedFilter"]').contains('Skills without progress')
 
     cy.get('[data-cy="skillProgress_index-0"]').contains('Very Great Skill 5')
@@ -233,8 +233,8 @@ describe('Client Display Skills Filtering Tests', () => {
     cy.get('[data-cy="skillProgress_index-1"]').contains('Overall Points Earned')
     cy.get('[data-cy="skillProgress_index-2"]').should('not.exist')
 
-    cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
-    cy.get('[data-cy="skillsFilter_withPointsToday"]').click();
+    cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
+    cy.get('[data-cy="filter_withPointsToday"]').click();
     cy.get('[data-cy="selectedFilter"]').contains('Skills with points earned today')
 
     cy.get('[data-cy="skillProgress_index-0"]').contains('Very Great Skill 1')
@@ -276,8 +276,8 @@ describe('Client Display Skills Filtering Tests', () => {
     cy.get('[data-cy="skillProgress_index-6"]').should('not.exist')
 
     // filter
-    cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
-    cy.get('[data-cy="skillsFilter_withoutProgress"]').click();
+    cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
+    cy.get('[data-cy="filter_withoutProgress"]').click();
     cy.get('[data-cy="selectedFilter"]').contains('Skills without progress')
 
     cy.get('[data-cy="skillProgress_index-0"]').contains('Very Great Skill 5')
@@ -391,8 +391,8 @@ describe('Client Display Skills Filtering Tests', () => {
 
     cy.get('[data-cy="skillsSearchInput"]').type('bLaH1 ');
 
-    cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
-    cy.get('[data-cy="skillsFilter_withoutProgress"]').click();
+    cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
+    cy.get('[data-cy="filter_withoutProgress"]').click();
 
     cy.get('[data-cy="skillProgress_index-0"]').should('not.exist')
     cy.get('[ data-cy="noDataYet"]').contains('No results');
@@ -417,8 +417,8 @@ describe('Client Display Skills Filtering Tests', () => {
     cy.cdVisit('/');
     cy.cdClickSubj(0);
 
-    cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
-    cy.get('[data-cy="skillsFilter_withPointsToday"]').click();
+    cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
+    cy.get('[data-cy="filter_withPointsToday"]').click();
     cy.get('[data-cy="selectedFilter"]').contains('Skills with points earned today')
 
     cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
@@ -459,8 +459,8 @@ describe('Client Display Skills Filtering Tests', () => {
     cy.get('[data-cy="skillProgress_index-2"]').contains('skill 5')
     cy.get('[data-cy="skillProgress_index-3"]').should('not.exist')
 
-    cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
-    cy.get('[data-cy="skillsFilter_withPointsToday"]').click();
+    cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
+    cy.get('[data-cy="filter_withPointsToday"]').click();
     cy.get('[data-cy="selectedFilter"]').contains('Skills with points earned today')
 
     cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
@@ -488,8 +488,8 @@ describe('Client Display Skills Filtering Tests', () => {
     cy.cdClickSubj(0);
 
     cy.get('[data-cy="skillsSearchInput"]').type('b');
-    cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
-    cy.get('[data-cy="skillsFilter_withPointsToday"]').click();
+    cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
+    cy.get('[data-cy="filter_withPointsToday"]').click();
     cy.get('[data-cy="selectedFilter"]').contains('Skills with points earned today')
 
     cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
@@ -525,8 +525,8 @@ describe('Client Display Skills Filtering Tests', () => {
     cy.cdClickSubj(0);
 
     cy.get('[data-cy="skillsSearchInput"]').type('b');
-    cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
-    cy.get('[data-cy="skillsFilter_withPointsToday"]').click();
+    cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
+    cy.get('[data-cy="filter_withPointsToday"]').click();
     cy.get('[data-cy="selectedFilter"]').contains('Skills with points earned today')
 
     cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
@@ -562,16 +562,16 @@ describe('Client Display Skills Filtering Tests', () => {
     cy.cdClickSubj(0);
 
     cy.get('[data-cy="skillsSearchInput"]').type('b');
-    cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
-    cy.get('[data-cy="skillsFilter_withPointsToday"]').click();
+    cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
+    cy.get('[data-cy="filter_withPointsToday"]').click();
     cy.get('[data-cy="selectedFilter"]').contains('Skills with points earned today')
 
     cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
     cy.get('[data-cy="skillProgress_index-1"]').contains('skill 3')
     cy.get('[data-cy="skillProgress_index-2"]').should('not.exist')
 
-    cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
-    cy.get('[data-cy="skillsFilter_selfReported"]').click();
+    cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
+    cy.get('[data-cy="filter_selfReported"]').click();
 
     cy.get('[data-cy="skillProgress_index-0"]').contains('skill 5')
     cy.get('[data-cy="skillProgress_index-1"]').should('not.exist')
@@ -614,7 +614,7 @@ describe('Client Display Skills Filtering Tests', () => {
 
     cy.validateCounts(1, 4, 2, 1, 2);
 
-    cy.get('[data-cy="skillsFilter_complete"]').click();
+    cy.get('[data-cy="filter_complete"]').click();
     cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
     cy.get('[data-cy="skillProgress_index-1"]').contains('skill 3')
     cy.get('[data-cy="skillProgress_index-2"]').should('not.exist')
@@ -657,7 +657,7 @@ describe('Client Display Skills Filtering Tests', () => {
 
     cy.validateCounts(0, 4, 4, 0, 0);
 
-    cy.get('[data-cy="skillsFilter_complete"]').click();
+    cy.get('[data-cy="filter_complete"]').click();
 
     cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
     cy.get('[data-cy="skillProgress_index-1"]').contains('skill 2')
@@ -715,7 +715,7 @@ describe('Client Display Skills Filtering Tests', () => {
 
     cy.validateCounts(0, 4, 4, 0, 0);
 
-    cy.get('[data-cy="skillsFilter_complete"]').click();
+    cy.get('[data-cy="filter_complete"]').click();
 
     cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
     cy.get('[data-cy="skillProgress_index-1"]').contains('skill 2')
@@ -756,8 +756,8 @@ describe('Client Display Skills Filtering Tests', () => {
 
     cy.get('[data-cy="skillsSearchInput"]').type('blah');
 
-    cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
-    cy.get('[data-cy="skillsFilter_withPointsToday"]').click();
+    cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
+    cy.get('[data-cy="filter_withPointsToday"]').click();
     cy.get('[data-cy="selectedFilter"]').contains('Skills with points earned today')
 
     cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
@@ -792,7 +792,7 @@ describe('Client Display Skills Filtering Tests', () => {
 
     cy.cdVisit('/');
     cy.cdClickSubj(0);
-    cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
+    cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
 
     cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
     cy.get('[data-cy="skillProgress_index-0"]').contains('200 / 200')

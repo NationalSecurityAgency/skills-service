@@ -30,7 +30,8 @@ limitations under the License.
     <div class="card-header">
       <h3 class="h6 card-title mb-0 float-left">Point History</h3>
       <button v-if="chartWasZoomed" @click="resetZoom"
-              class="reset-zoom-btn btn btn-secondary btn-sm skills-theme-btn"><i class="fas fa-search-minus"></i> Reset Zoom</button>
+              data-cy="pointProgressChart-resetZoomBtn"
+              class="reset-zoom-btn btn btn-outline-info btn-sm skills-theme-btn"><i class="fas fa-search-minus"></i> Reset Zoom</button>
     </div>
     <div class="card-body m-0 mr-1 p-0 apex-chart-container">
       <apexchart ref="ptChart" id="points-chart" v-if="!loading.inProgress && hasData" :options="chartOptions"
@@ -49,9 +50,10 @@ limitations under the License.
   import PointHistoryChartPlaceholder from '@/userSkills/pointProgress/PointHistoryChartPlaceholder';
   import numberFormatter from '../../common/filter/NumberFilter';
   import ChartAnimEndedMixin from '../../common/utilities/ChartAnimEndedMixin';
+  import ThemePropsMixin from '../../common/theme/ThemePropsMixin';
 
   export default {
-    mixins: [ChartAnimEndedMixin],
+    mixins: [ChartAnimEndedMixin, ThemePropsMixin],
     components: {
       PointHistoryChartPlaceholder,
       apexchart: VueApexCharts,
@@ -111,13 +113,18 @@ limitations under the License.
             },
           },
           fill: {
+            colors: this.pointHistoryChart().gradientStartColor,
             type: 'gradient',
             gradient: {
               shadeIntensity: 1,
               opacityFrom: 0.7,
               opacityTo: 0.9,
               stops: [0, 100],
+              gradientToColors: this.pointHistoryChart().gradientStopColor,
             },
+          },
+          stroke: {
+            colors: this.lineColor(),
           },
         },
         chartSeries: [],
@@ -135,6 +142,10 @@ limitations under the License.
       },
     },
     methods: {
+      lineColor(returnArr = true) {
+        const color = this.pointHistoryChart().lineColor;
+        return returnArr ? [color] : color;
+      },
       loadPointsHistory() {
         UserSkillsService.getPointsHistory(this.$route.params.subjectId)
           .then((result) => {
@@ -161,6 +172,7 @@ limitations under the License.
               firstDay = seriesData[0].x;
             }
             if (result.achievements && result.achievements.length > 0) {
+              const labelColors = this.chartLabels();
               const annotationPoints = result.achievements.map((item) => {
                 const timestamp = new Date(item.achievedOn).getTime();
                 return {
@@ -169,17 +181,17 @@ limitations under the License.
                   marker: {
                     size: 8,
                     fillColor: '#fff',
-                    strokeColor: 'rgb(68, 114, 186)',
+                    strokeColor: this.lineColor(false),
                     radius: 2,
                     cssClass: 'apexcharts-custom-class',
                   },
                   label: {
-                    borderColor: 'rgb(68, 114, 186)',
+                    borderColor: labelColors.borderColor,
                     offsetX: this.getOffsetX(item.name, firstDay, lastDay, timestamp),
                     offsetY: 2,
                     style: {
-                      color: '#fff',
-                      background: 'rgb(89, 173, 82)',
+                      color: labelColors.foregroundColor,
+                      background: labelColors.backgroundColor,
                     },
                     text: item.name,
                   },

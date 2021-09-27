@@ -14,7 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div :class="{'disabled': showOverlay}" class="card level-breakdown-container h-100">
+  <div :class="{'disabled': showOverlay}" class="card level-breakdown-container h-100"
+       data-cy="levelBreakdownChart">
 
     <div v-if="showOverlay" class="disabled-overlay" />
     <div v-if="showOverlay" class="overlay-msg">
@@ -46,10 +47,11 @@ limitations under the License.
   import Spinner from 'vue-simple-spinner';
   import numberFormatter from '../../common/filter/NumberFilter';
   import ChartAnimEndedMixin from '../../common/utilities/ChartAnimEndedMixin';
+  import ThemePropsMixin from '../../common/theme/ThemePropsMixin';
 
   export default {
     name: 'LevelsBreakdownChart',
-    mixins: [ChartAnimEndedMixin],
+    mixins: [ChartAnimEndedMixin, ThemePropsMixin],
     components: {
       apexchart: VueApexCharts,
       'vue-simple-spinner': Spinner,
@@ -65,16 +67,21 @@ limitations under the License.
           data: [{ x: 'Level 1', y: 0 }, { x: 'Level 2', y: 0 }, { x: 'Level 3', y: 0 }, { x: 'Level 4', y: 0 }, { x: 'Level 5', y: 0 }],
         }],
         chartOptions: {
+          chart: {
+            toolbar: {
+              offsetY: -38,
+            },
+          },
           annotations: {
             points: [{
               x: 'Level 1',
               seriesIndex: 0,
               label: {
-                borderColor: '#775DD0',
+                borderColor: this.chartLabels().borderColor,
                 offsetY: 0,
                 style: {
-                  color: '#fff',
-                  background: '#775DD0',
+                  color: this.chartLabels().foregroundColor,
+                  background: this.chartLabels().backgroundColor,
                 },
                 text: '',
               },
@@ -183,10 +190,7 @@ limitations under the License.
 </script>
 
 <style>
-  .level-breakdown-container .apexcharts-menu-icon {
-    position: relative !important;
-    top: -2.3rem !important;
-  }
+
 </style>
 
 <style scoped>

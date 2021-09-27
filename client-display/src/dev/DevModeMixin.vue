@@ -50,27 +50,33 @@ limitations under the License.
           }
 
           const isThemeEnabled = this.$route.query.enableTheme ? this.$route.query.enableTheme : false;
+          let theme = null;
           if (isThemeEnabled) {
             // eslint-disable-next-line global-require
-            const theme = require('../../tests/data/theme.json');
-
-            const themeParamProvided = this.$route.query.themeParam;
-            if (themeParamProvided) {
-              const themeParams = Array.isArray(themeParamProvided) ? themeParamProvided : [themeParamProvided];
-              themeParams.forEach((themeParamItem) => {
-                const split = themeParamItem.split('|');
-                const key = split[0];
-                let val = split[1];
-                if (val === 'null') {
-                  delete theme[key];
-                } else {
-                  if (val.includes('{')) {
-                    val = JSON.parse(val);
-                  }
-                  theme[key] = val;
-                }
-              });
+            theme = require('../../tests/data/theme.json');
+          }
+          const themeParamProvided = this.$route.query.themeParam;
+          if (themeParamProvided) {
+            if (!theme) {
+              theme = {};
             }
+            const themeParams = Array.isArray(themeParamProvided) ? themeParamProvided : [themeParamProvided];
+            themeParams.forEach((themeParamItem) => {
+              const split = themeParamItem.split('|');
+              const key = split[0];
+              let val = split[1];
+              if (val === 'null') {
+                delete theme[key];
+              } else {
+                if (val.includes('{')) {
+                  val = JSON.parse(val);
+                }
+                theme[key] = val;
+              }
+            });
+          }
+
+          if (theme) {
             this.handleTheming(theme);
           }
         }

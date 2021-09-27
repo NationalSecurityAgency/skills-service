@@ -207,17 +207,17 @@ describe('Client Display Accessibility tests', () => {
     cy.get('[data-cy="skillsSearchInput"]').type('is');
 
     // select a filter with results
-    cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
-    cy.get('[data-cy="skillsFilter_withoutProgress"]').click();
+    cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
+    cy.get('[data-cy="filter_withoutProgress"]').click();
     cy.get('[data-cy="selectedFilter"]').contains('Skills without progress')
 
     // open filter
-    cy.get('[data-cy="skillsFilter"] [data-cy="skillsFilterBtn"]').click();
-    cy.get('[data-cy="skillsFilter_withoutProgress"] [data-cy="filterCount"]').contains(2)
-    cy.get('[data-cy="skillsFilter_withPointsToday"] [data-cy="filterCount"]').contains(2)
-    cy.get('[data-cy="skillsFilter_complete"] [data-cy="filterCount"]').contains(1)
-    cy.get('[data-cy="skillsFilter_selfReported"] [data-cy="filterCount"]').contains(1)
-    cy.get('[data-cy="skillsFilter_inProgress"] [data-cy="filterCount"]').contains(1)
+    cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
+    cy.get('[data-cy="filter_withoutProgress"] [data-cy="filterCount"]').contains(2)
+    cy.get('[data-cy="filter_withPointsToday"] [data-cy="filterCount"]').contains(2)
+    cy.get('[data-cy="filter_complete"] [data-cy="filterCount"]').contains(1)
+    cy.get('[data-cy="filter_selfReported"] [data-cy="filterCount"]').contains(1)
+    cy.get('[data-cy="filter_inProgress"] [data-cy="filterCount"]').contains(1)
 
     cy.customA11y();
     cy.customLighthouse();

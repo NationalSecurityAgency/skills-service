@@ -14,28 +14,30 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-    <div class="row mt-0 px-3 justify-content-center">
+    <div class="row mt-0 px-3 justify-content-center" data-cy="skillsSummaryCards">
         <div class="mb-2 px-1 col-md-6 col-lg">
           <progress-info-card :title="skill.points" label="Overall Points Earned" :sub-title="overallPtsSubTitle"
-                              icon="fa fa-running text-success"
+                              icon="fa fa-running" :icon-color="infoCards().iconColors[0]"
                               data-cy="overallPointsEarnedCard"/>
         </div>
 
         <div class="mb-2 px-1 col-md-6 col-lg">
           <progress-info-card :title="skill.todaysPoints" label="Points Achieved Today" :sub-title="todayPtsSubTitle"
-                              icon="fa fa-clock text-warning"
+                              icon="fa fa-clock"  :icon-color="infoCards().iconColors[1]"
                               data-cy="pointsAchievedTodayCard"/>
         </div>
 
         <div class="mb-2 px-1 col-md">
             <progress-info-card :title="skill.pointIncrement" label="Points per occurrence" :sub-title="occurrenceSubTitle"
-                                icon="fas fa-flag-checkered text-info" :animated="false"
+                                icon="fas fa-flag-checkered" :animated="false"  :icon-color="infoCards().iconColors[2]"
                                 data-cy="pointsPerOccurrenceCard"/>
         </div>
 
         <div v-if="!isTimeWindowDisabled" class="col-md mb-2 px-1">
             <progress-info-card :title="timeWindowTitle" :sub-title="timeWindowSubTitle" :label="timeWindowLabel"
-                                icon="fas fa-hourglass-half text-danger" :animated="false"/>
+                                :icon-color="infoCards().iconColors[3]"
+                                icon="fas fa-hourglass-half" :animated="false"
+                                data-cy="timeWindowPts"/>
         </div>
 
     </div>
@@ -44,9 +46,11 @@ limitations under the License.
 <script>
   import ProgressInfoCard from '@/userSkills/skill/progress/ProgressInfoCard';
   import numberFormatter from '../../../common/filter/NumberFilter';
+  import ThemePropsMixin from '../../../common/theme/ThemePropsMixin';
 
   export default {
     name: 'SkillSummaryCards',
+    mixins: [ThemePropsMixin],
     components: { ProgressInfoCard },
     props: {
       skill: Object,
