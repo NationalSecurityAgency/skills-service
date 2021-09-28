@@ -149,7 +149,8 @@ describe('Client Display Skills Filtering Tests', () => {
     cy.get('[data-cy="skillProgress_index-0"]').contains('Very Great Skill 2')
     cy.get('[data-cy="skillProgress_index-1"]').contains('Very Great Skill 4')
     cy.get('[data-cy="skillProgress_index-2"]').should('not.exist')
-  });
+  })
+
 
   it('filter expanded skills', () => {
     cy.createSkill(1, 1, 1);
@@ -335,6 +336,30 @@ describe('Client Display Skills Filtering Tests', () => {
     cy.get('[data-cy="skillsSearchInput"]').type('e');
     cy.get('[data-cy="skillProgress_index-0"]').contains('skill 5')
     cy.get('[data-cy="skillProgress_index-1"]').should('not.exist')
+  })
+
+
+  it('search skills no results', () => {
+    cy.createSkill(1, 1, 1, {name: 'Search blah skill 1'});
+    cy.createSkill(1, 1, 2, {name: 'is a skill 2'});
+    cy.createSkill(1, 1, 3, {name: 'find Blah other skill 3'});
+    cy.createSkill(1, 1, 4, {name: 'Search nothing skill 4'});
+    cy.createSkill(1, 1, 5, {name: 'sEEk bLaH skill 5'});
+    cy.createSkill(1, 1, 6, {name: 'some other skill 6'});
+
+    cy.cdVisit('/');
+    cy.cdClickSubj(0);
+
+    cy.get('[data-cy="skillProgress_index-0"]').contains('skill 1')
+    cy.get('[data-cy="skillProgress_index-1"]').contains('skill 2')
+    cy.get('[data-cy="skillProgress_index-2"]').contains('skill 3')
+    cy.get('[data-cy="skillProgress_index-3"]').contains('skill 4')
+    cy.get('[data-cy="skillProgress_index-4"]').contains('skill 5')
+    cy.get('[data-cy="skillProgress_index-5"]').contains('skill 6')
+    cy.get('[data-cy="skillProgress_index-6"]').should('not.exist')
+
+    cy.get('[data-cy="skillsSearchInput"]').type('bbbbbb ');
+    cy.get('[data-cy=noDataYet]').should('be.visible').contains('No results');
   })
 
 

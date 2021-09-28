@@ -394,6 +394,9 @@ describe('Navigation Tests', () => {
 
     cy.get('[data-cy=clearBadgesSearchInput]').click();
     cy.get('.row .skills-badge').should('have.length', 6);
+
+    cy.get('[data-cy=badgeSearchInput]').type('fffffffffffffffffffff');
+    cy.get('[data-cy=noDataYet]').should('be.visible').contains('No results');
   });
 
   it('badges card - gems and not global badges', function () {
