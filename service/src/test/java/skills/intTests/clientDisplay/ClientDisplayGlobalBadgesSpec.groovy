@@ -16,6 +16,7 @@
 package skills.intTests.clientDisplay
 
 import groovy.util.logging.Slf4j
+import org.junit.Ignore
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
@@ -440,7 +441,7 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         badge.enabled = true
         supervisorSkillsService.createGlobalBadge(badge)
 
-        String user = getRandomUsers(1)
+        String user = getRandomUsers(1)[0]
         skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], user, new Date())
         skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(1).skillId], user, new Date())
         skillsService.addSkill([projectId: proj2.projectId, skillId: proj2_skills.get(0).skillId], user, new Date())
