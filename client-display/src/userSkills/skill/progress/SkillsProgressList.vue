@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-    <div class="card mt-2" data-cy="skillsProgressList" v-if="(skillsInternal.length > 0 || showNoDataMsg)">
+    <div class="card mt-2" data-cy="skillsProgressList" v-if="(skillsInternal.length > 0 || searchString || showNoDataMsg)">
         <div class="card-header float-left">
             <div class="row" v-if="skillsInternalOrig && skillsInternalOrig.length > 0">
                 <div class="col-md-auto text-left pr-md-0">
