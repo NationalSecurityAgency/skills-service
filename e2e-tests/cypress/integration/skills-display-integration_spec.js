@@ -111,7 +111,7 @@ describe('Navigation Tests', () => {
     cy.dashboardCd().contains('powered by').should('not.exist');
   });
 
-  it.only('Browser back button works in Skills Display', function () {
+  it('Browser back button works in Skills Display', function () {
     cy.createSkill(1, 1, 1);
     cy.createSkill(1, 1, 2);
     cy.createSkill(1, 1, 3);
