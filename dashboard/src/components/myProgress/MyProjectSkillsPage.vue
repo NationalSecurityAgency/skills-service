@@ -41,7 +41,7 @@ limitations under the License.
         theme: {
           disableSkillTreeBrand: true,
           disableBreadcrumb: true,
-          landingPageTitle: `PROJECT: ${this.$route.params.projectId}`,
+          landingPageTitle: `PROJECT: ${this.$route.params.name ? this.$route.params.name : this.$route.params.projectId}`,
           maxWidth: '100%',
           backgroundColor: '#f8f9fe',
           pageTitle: {
