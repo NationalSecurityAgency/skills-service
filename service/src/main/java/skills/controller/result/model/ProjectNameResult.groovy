@@ -1,5 +1,5 @@
-/*
- * Copyright 2020 SkillTree
+/**
+ * Copyright 2021 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import axios from 'axios';
+package skills.controller.result.model
 
-export default {
-  loadMyProgressSummary() {
-    return axios.get('/api/myProgressSummary').then((response) => response.data);
-  },
-  loadMyBadges() {
-    return axios.get('/api/mybadges').then((response) => response.data);
-  },
-  findProjectName(projId) {
-    return axios.get(`/api/myprojects/${projId}/name`).then((resp) => resp.data);
-  },
-};
+class ProjectNameResult {
+    String projectId
+    String name
+}

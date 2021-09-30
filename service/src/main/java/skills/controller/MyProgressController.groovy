@@ -28,6 +28,7 @@ import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.AddMyProjectRequest
 import skills.controller.result.model.AvailableProjectResult
+import skills.controller.result.model.ProjectNameResult
 import skills.controller.result.model.RequestResult
 import skills.metrics.MetricsService
 import skills.profile.EnableCallStackProf
@@ -112,6 +113,12 @@ class MyProgressController {
     List<? extends SkillBadgeSummary> getMyBadges() {
         String userId = userInfoService.getCurrentUserId()
         return skillsLoader.getBadgesForUserMyProjects(userId)
+    }
+
+    @GetMapping('/myprojects/{projectId}/name')
+    ProjectNameResult getProjectName(@PathVariable("projectId") String projectId) {
+        String name = projAdminService.lookupMyProjectName(userInfoService.getCurrentUserId().toLowerCase(), projectId)
+        return new ProjectNameResult(projectId: projectId, name: name)
     }
 
     private void validateRankingAndProgressViewsEnabled() {
