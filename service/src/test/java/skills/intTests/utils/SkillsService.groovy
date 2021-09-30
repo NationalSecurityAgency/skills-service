@@ -566,6 +566,10 @@ class SkillsService {
         wsHelper.supervisorPost(getAddProjectLevelToGlobalBadgeUrl(props.badgeId, props.projectId, props.level), props)
     }
 
+    def changeProjectLevelOnGlobalBadge(Map props) {
+        wsHelper.supervisorPost(getchangeProjectLevelOnGlobalBadgeUrl(props.badgeId, props.projectId, props.currentLevel, props.newLevel), [:])
+    }
+
     def removeProjectLevelFromGlobalBadge(Map props) {
         wsHelper.supervisorDelete(getAddProjectLevelToGlobalBadgeUrl(props.badgeId, props.projectId, props.level), props)
     }
@@ -1192,6 +1196,10 @@ class SkillsService {
 
     private String getAddProjectLevelToGlobalBadgeUrl(String badge, String project, String level) {
         return "/badges/${badge}/projects/${project}/level/${level}".toString()
+    }
+
+    private String getchangeProjectLevelOnGlobalBadgeUrl(String badge, String project, String currentLevel, String newLevel) {
+        return "/badges/${badge}/projects/${project}/level/${currentLevel}/${newLevel}"
     }
 
     private String getSaveIconUrl(String project){

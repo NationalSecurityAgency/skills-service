@@ -37,7 +37,8 @@ limitations under the License.
             </div>
           </div>
         </div>
-        <simple-levels-table v-if="badgeLevels && badgeLevels.length > 0"
+        <simple-levels-table ref="globalLevelsTable" v-if="badgeLevels && badgeLevels.length > 0"
+                             @change-level="changeLevel"
                              :levels="badgeLevels" @level-removed="deleteLevel"></simple-levels-table>
         <no-content2 v-else title="No Levels Added Yet..." icon="fas fa-trophy" class="mb-5"
                      message="Please select a project and level from drop-down menus above to start adding levels to this badge!"></no-content2>
@@ -45,6 +46,12 @@ limitations under the License.
       </loading-container>
     </b-card>
 
+    <change-project-level @level-changed="saveLevelChange"
+                          @hidden="changeLevelClosed"
+                          v-if="showChangeLevel"
+                          :title="`Change Required Level for ${projectLevelName}`"
+                          :current-level="projectLevel"
+                          :project-id="projectLevelId"/>
   </div>
 </template>
 
@@ -59,6 +66,7 @@ limitations under the License.
   import SubPageHeader from '../../utils/pages/SubPageHeader';
   import LoadingContainer from '../../utils/LoadingContainer';
   import MsgBoxMixin from '../../utils/modal/MsgBoxMixin';
+  import ChangeProjectLevel from '@/components/levels/global/ChangeProjectLevel';
 
   const { mapActions } = createNamespacedHelpers('badges');
 
@@ -71,6 +79,7 @@ limitations under the License.
       LoadingContainer,
       SubPageHeader,
       NoContent2,
+      ChangeProjectLevel,
     },
     mixins: [MsgBoxMixin],
     data() {
@@ -82,6 +91,10 @@ limitations under the License.
         badge: null,
         badgeId: null,
         badgeLevels: [],
+        showChangeLevel: false,
+        projectLevelId: null,
+        projectLevel: null,
+        projectLevelName: null,
       };
     },
     computed: {
@@ -164,6 +177,37 @@ limitations under the License.
         this.selectedProject = null;
         this.selectedLevel = null;
         this.levelPlaceholder = 'First choose a Project';
+      },
+      changeLevel(level) {
+        this.projectLevelId = level.projectId;
+        this.projectLevelName = level.projectName;
+        this.projectLevel = level.level;
+        this.showChangeLevel = true;
+      },
+      changeLevelClosed(e) {
+        const { projectId } = e;
+        setTimeout(() => {
+          this.handleFocus({ projectId });
+        }, 0);
+        this.showChangeLevel = false;
+        this.projectLevelId = null;
+        this.projectLevel = null;
+        this.projectLevelName = null;
+      },
+      saveLevelChange(e) {
+        GlobalBadgeService.changeProjectLevel(this.badgeId, e.projectId, e.oldLevel, e.newLevel)
+          .then(() => this.loadBadgeLevels());
+      },
+      handleFocus(e) {
+        if (e && e.projectId) {
+          const refName = `edit_${e.projectId}`;
+          const ref = this.$refs.globalLevelsTable.$refs[refName];
+          this.$nextTick(() => {
+            if (ref) {
+              ref.focus();
+            }
+          });
+        }
       },
     },
   };

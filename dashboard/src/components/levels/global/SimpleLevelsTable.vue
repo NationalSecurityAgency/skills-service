@@ -18,11 +18,19 @@ limitations under the License.
 
     <skills-b-table :options="table.options" :items="levels" data-cy="simpleLevelsTable">
       <template #cell(edit)="data">
-        <button v-on:click="onDeleteEvent(data.item)" class="btn btn-sm btn-outline-primary"
-                :aria-label="`delete level ${data.item.level} from ${data.item.projectId}`"
-                :data-cy="`deleteLevelBtn_${data.item.projectId}-${data.item.level}`">
-          <i class="fas fa-trash text-warning" aria-hidden="true"/>
-        </button>
+        <b-button-group size="sm" class="ml-1">
+          <b-button @click="onEditLevel(data.item)"
+                  variant="outline-primary" :data-cy="`editProjectLevelButton_${data.item.projectId}`"
+                    :aria-label="`edit level ${data.item.level} from ${data.item.projectId}`" :ref="'edit_'+data.item.projectId"
+                    title="Edit Project Level Requirement">
+            <i class="fas fa-edit" aria-hidden="true"/>
+          </b-button>
+          <b-button v-on:click="onDeleteEvent(data.item)" variant="outline-primary"
+                  :aria-label="`delete level ${data.item.level} from ${data.item.projectId}`"
+                  :data-cy="`deleteLevelBtn_${data.item.projectId}-${data.item.level}`">
+            <i class="fas fa-trash text-warning" aria-hidden="true"/>
+          </b-button>
+        </b-button-group>
       </template>
 
     </skills-b-table>
@@ -74,6 +82,9 @@ limitations under the License.
     methods: {
       onDeleteEvent(level) {
         this.$emit('level-removed', level);
+      },
+      onEditLevel(level) {
+        this.$emit('change-level', level);
       },
     },
   };
