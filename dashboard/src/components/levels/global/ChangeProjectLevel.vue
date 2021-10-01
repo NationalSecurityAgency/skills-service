@@ -92,10 +92,10 @@ limitations under the License.
       },
       closeMe() {
         this.show = false;
-        this.publishHidden({ projectId: this.projectId });
+        this.publishHidden();
       },
-      publishHidden(e) {
-        this.$emit('hidden', e);
+      publishHidden() {
+        this.$emit('hidden', { projectId: this.projectId });
       },
     },
   };
