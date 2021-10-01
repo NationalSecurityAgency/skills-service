@@ -40,7 +40,6 @@ import skills.controller.result.model.SimpleProjectResult
 import skills.icons.IconCssNameUtil
 import skills.services.*
 import skills.services.settings.SettingsService
-import skills.skillLoading.model.ProjectSummary
 import skills.storage.model.CustomIcon
 import skills.storage.model.ProjDef
 import skills.storage.model.ProjSummaryResult
@@ -423,13 +422,12 @@ class ProjAdminService {
 
     @Transactional(readOnly = true)
     String lookupMyProjectName(String userId, String projectId){
-        List<ProjectSummaryResult> mySummaries = projDefRepo.getProjectSummariesLite(userId)
-        ProjectSummaryResult foundProj = mySummaries?.find { it.projectId == projectId }
-        if (!foundProj) {
+        ProjectSummaryResult mySummary = projDefRepo.getMyProjectName(userId, projectId)
+        if (!mySummary) {
             throw new SkillException("Project not found", projectId, null, ErrorCode.ProjectNotFound)
         }
 
-        return foundProj.projectName
+        return mySummary.projectName
     }
 
     @Profile

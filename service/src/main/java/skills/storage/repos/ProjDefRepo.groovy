@@ -379,9 +379,9 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                    pd.name as projectName
             FROM Setting s, Setting ss, Users uu, ProjDef pd
             WHERE (s.setting = 'production.mode.enabled' and s.projectId = pd.projectId and s.value = 'true') and 
-                (ss.setting = 'my_project' and uu.userId=?1 and uu.id = ss.userRefId and ss.projectId = pd.projectId)
-            GROUP BY pd.projectId, pd.name, pd.id, ss.value
+                (ss.setting = 'my_project' and uu.userId=?1 and uu.id = ss.userRefId and ss.projectId = pd.projectId) and
+                pd.projectId = ?2
     ''')
-    List<ProjectSummaryResult> getProjectSummariesLite(String userId)
+    ProjectSummaryResult getMyProjectName(String userId, String projectId)
 
 }
