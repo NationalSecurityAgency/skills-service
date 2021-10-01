@@ -155,7 +155,7 @@ describe('Global Badges Tests', () => {
         cy.contains('No Badges Yet').should('be.visible');
     });
 
-    it.only('Add dependencies to badge', () => {
+    it('Add dependencies to badge', () => {
       //proj/subj/skill1
       cy.request('POST', '/app/projects/proj1', {
           projectId: 'proj1',
