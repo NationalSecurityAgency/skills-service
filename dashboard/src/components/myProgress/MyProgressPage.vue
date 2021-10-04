@@ -80,7 +80,7 @@ limitations under the License.
               </div>
             </template>
 
-            <router-link :to="{ name:'MyProjectSkills', params: { projectId: proj.projectId } }" tag="div"
+            <router-link :to="{ name:'MyProjectSkills', params: { projectId: proj.projectId, name: proj.projectName } }" tag="div"
                          class="project-link" :data-cy="`project-link-${proj.projectId}`">
               <project-link-card :proj="proj" class="my-summary-card" />
             </router-link>

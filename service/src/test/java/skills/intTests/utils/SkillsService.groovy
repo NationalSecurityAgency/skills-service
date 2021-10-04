@@ -1153,6 +1153,10 @@ class SkillsService {
         return wsHelper.rootPost("/users/previewEmail", ["emailSubject": emailSubject, "emailBody": emailBody])
     }
 
+    def lookupMyProjectName(String projectId) {
+        return wsHelper.apiGet("/myprojects/${projectId}/name")
+    }
+
     private String getProjectUrl(String project) {
         return "/projects/${project}".toString()
     }

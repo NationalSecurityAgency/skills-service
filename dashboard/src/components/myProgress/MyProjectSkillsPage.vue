@@ -27,6 +27,7 @@ limitations under the License.
 <script>
   import { SkillsDisplay } from '@skilltree/skills-client-vue';
   import SkillsDisplayOptionsMixin from './SkillsDisplayOptionsMixin';
+  import MyProgressService from '@/components/myProgress/MyProgressService';
 
   export default {
     name: 'MyProjectSkillsPage',
@@ -41,7 +42,7 @@ limitations under the License.
         theme: {
           disableSkillTreeBrand: true,
           disableBreadcrumb: true,
-          landingPageTitle: `PROJECT: ${this.$route.params.projectId}`,
+          landingPageTitle: `PROJECT: ${this.$route.params.name ? this.$route.params.name : this.$route.params.projectId}`,
           maxWidth: '100%',
           backgroundColor: '#f8f9fe',
           pageTitle: {
@@ -95,6 +96,15 @@ limitations under the License.
           graphLegendBorderColor: '1px solid grey',
         },
       };
+    },
+    mounted() {
+      if (!this.$route.params.name) {
+        MyProgressService.findProjectName(this.projectId).then((res) => {
+          if (res) {
+            this.$set(this.theme, 'landingPageTitle', `PROJECT: ${res.name}`);
+          }
+        });
+      }
     },
     computed: {
       themeObj() {

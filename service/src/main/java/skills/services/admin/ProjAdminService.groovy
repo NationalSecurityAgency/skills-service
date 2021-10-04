@@ -43,6 +43,7 @@ import skills.services.settings.SettingsService
 import skills.storage.model.CustomIcon
 import skills.storage.model.ProjDef
 import skills.storage.model.ProjSummaryResult
+import skills.storage.model.ProjectSummaryResult
 import skills.storage.model.SkillDef
 import skills.storage.model.auth.RoleName
 import skills.storage.accessors.ProjDefAccessor
@@ -417,6 +418,16 @@ class ProjAdminService {
     @Transactional
     void cancelProjectExpiration(String projectId) {
         projectExpirationService.cancelExpiration(projectId)
+    }
+
+    @Transactional(readOnly = true)
+    String lookupMyProjectName(String userId, String projectId){
+        ProjectSummaryResult mySummary = projDefRepo.getMyProjectName(userId, projectId)
+        if (!mySummary) {
+            throw new SkillException("Project not found", projectId, null, ErrorCode.ProjectNotFound)
+        }
+
+        return mySummary.projectName
     }
 
     @Profile

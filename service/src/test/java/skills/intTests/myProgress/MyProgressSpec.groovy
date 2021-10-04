@@ -23,6 +23,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder
 import org.apache.commons.lang3.builder.ToStringStyle
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.intTests.utils.TestUtils
@@ -1207,6 +1208,45 @@ class MyProgressSpec extends DefaultIntSpec {
         res1.numAchievedGemBadges == 0
         res1.numAchievedGlobalBadges == 0
     }
+
+    def "lookup project name for my project" () {
+        def proj1 = SkillsFactory.createProject()
+        def subj1 = SkillsFactory.createSubject()
+        def skill1 = SkillsFactory.createSkill()
+        def badge = SkillsFactory.createBadge()
+
+        skillsService.createProject(proj1)
+        skillsService.enableProdMode(proj1)
+        skillsService.addMyProject(proj1.projectId)
+
+        when:
+        def res = skillsService.lookupMyProjectName(proj1.projectId)
+
+        then:
+        res.projectId == proj1.projectId
+        res.name == proj1.name
+    }
+
+    def "lookup project name for project not in user's my projects" () {
+        def proj1 = SkillsFactory.createProject()
+        def subj1 = SkillsFactory.createSubject()
+        def skill1 = SkillsFactory.createSkill()
+        def badge = SkillsFactory.createBadge()
+        def proj2 = SkillsFactory.createProject(2)
+
+        skillsService.createProject(proj1)
+        skillsService.createProject(proj2)
+        skillsService.enableProdMode(proj1)
+        skillsService.addMyProject(proj1.projectId)
+
+        when:
+        def res = skillsService.lookupMyProjectName(proj2.projectId)
+
+        then:
+        thrown(SkillsClientException)
+    }
+
+
 
 }
 

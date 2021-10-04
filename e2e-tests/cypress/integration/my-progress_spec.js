@@ -183,8 +183,8 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=inception-button]').should('not.exist');
 
     cy.get('[data-cy=project-link-proj1]').click()
-
     cy.dashboardCd().contains('Overall Points');
+    getIframeBody().find('[data-cy=skillsTitle]').contains('PROJECT: This is project 1').should('be.visible');
     cy.get('[data-cy="breadcrumb-Progress And Rankings"]').should('be.visible');
     cy.get('[data-cy=breadcrumb-proj1]').should('be.visible');
     cy.get('[data-cy=breadcrumb-projects]').should('not.exist');
@@ -247,6 +247,12 @@ describe('Navigation Tests', () => {
     cy.visit('/progress-and-rankings/');
     cy.get('[data-cy=viewBadges]').click();
     cy.get('[data-cy=badge-catalog_no-badges]').should('be.visible');
+
+    cy.visit('/progress-and-rankings/projects/proj1');
+    cy.intercept('/api/myprojects/proj1/name').as('getName');
+    cy.dashboardCd().contains('Overall Points');
+    cy.wait('@getName');
+    getIframeBody().find('[data-cy=skillsTitle]').contains('PROJECT: This is project 1').should('be.visible');
   });
 
   it('project name should be visible on badges in badge catalog', () => {

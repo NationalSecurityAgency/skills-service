@@ -133,7 +133,7 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=breadcrumb-projects]').should('not.exist');
 
     cy.dashboardCd().find('[data-cy=back]').should('not.exist');
-    cy.dashboardCd().contains('PROJECT: proj1');
+    cy.dashboardCd().contains('PROJECT: This is project 1');
 
     // to subject page
     cy.dashboardCdClickSubj(0, 'Subject 1');
@@ -150,7 +150,7 @@ describe('Navigation Tests', () => {
 
     // then back one more time and we should be back on the client display home page
     cy.go('back')  // browser back button
-    cy.dashboardCd().contains('PROJECT: proj1');
+    cy.dashboardCd().contains('PROJECT: This is project 1');
 
     // finally back one more time and we should be back on the my progress page
     cy.go('back')  // browser back button

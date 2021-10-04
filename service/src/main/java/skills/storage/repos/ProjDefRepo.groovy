@@ -373,4 +373,15 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
     ''')
     List<ProjectSummaryResult> getProjectSummaries(String userId)
 
+    @Query('''
+            SELECT pd.id as projectRefId,
+                   pd.projectId as projectId,
+                   pd.name as projectName
+            FROM Setting s, Setting ss, Users uu, ProjDef pd
+            WHERE (s.setting = 'production.mode.enabled' and s.projectId = pd.projectId and s.value = 'true') and 
+                (ss.setting = 'my_project' and uu.userId=?1 and uu.id = ss.userRefId and ss.projectId = pd.projectId) and
+                pd.projectId = ?2
+    ''')
+    ProjectSummaryResult getMyProjectName(String userId, String projectId)
+
 }
