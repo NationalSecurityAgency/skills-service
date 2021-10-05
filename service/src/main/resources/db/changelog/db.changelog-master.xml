@@ -1402,4 +1402,13 @@
             <column name="value" type="varchar(255)"/>
         </createIndex>
     </changeSet>
+
+    <changeSet id="15" author="skills team" context="migration15">
+        <addColumn tableName="skill_definition">
+            <column name="num_skills_required" type="int" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

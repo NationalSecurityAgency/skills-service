@@ -18,6 +18,7 @@ package skills.services.admin
 import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.PageRequest
@@ -101,10 +102,12 @@ class SkillsAdminService {
 
         validateSkillVersion(skillRequest)
 
-        final CustomValidationResult customValidationResult = customValidator.validate(skillRequest)
-        if(performCustomValidation && !customValidationResult.valid){
-            String msg = "Custom validation failed: msg=[${customValidationResult.msg}], type=[skill], skillId=[${skillRequest.skillId}], name=[${skillRequest.name}], description=[${skillRequest.description}]"
-            throw new SkillException(msg)
+        if (performCustomValidation) {
+            final CustomValidationResult customValidationResult = customValidator.validate(skillRequest)
+            if (!customValidationResult.valid) {
+                String msg = "Custom validation failed: msg=[${customValidationResult.msg}], type=[skill], skillId=[${skillRequest.skillId}], name=[${skillRequest.name}], description=[${skillRequest.description}]"
+                throw new SkillException(msg)
+            }
         }
 
         SkillDefWithExtra skillDefinition = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, originalSkillId, SkillDef.ContainerType.Skill)
@@ -133,9 +136,13 @@ class SkillsAdminService {
         final int incrementRequested = skillRequest.pointIncrement
         final int currentOccurrences = isEdit ? (skillDefinition.totalPoints / skillDefinition.pointIncrement) : -1
         final SelfReportingType selfReportingType =  skillRequest.selfReportingType ? SkillDef.SelfReportingType.valueOf(skillRequest.selfReportingType) : null;
+        final SkillDef.ContainerType skillType =  skillRequest.type ? SkillDef.ContainerType.valueOf(skillRequest.type) : SkillDef.ContainerType.Skill;
 
         SkillDef subject = null
         if (isEdit) {
+            if (skillType == SkillDef.ContainerType.SkillsGroup) {
+                validateSkillsGroup(skillRequest, skillDefinition)
+            }
             shouldRebuildScores = skillDefinition.totalPoints != totalPointsRequested
             occurrencesDelta = skillRequest.numPerformToCompletion - currentOccurrences
             updateUserPoints = shouldRebuildScores || occurrencesDelta != 0
@@ -170,7 +177,7 @@ class SkillsAdminService {
                     description: skillRequest.description,
                     helpUrl: skillRequest.helpUrl,
                     displayOrder: displayOrder,
-                    type: SkillDef.ContainerType.Skill,
+                    type: skillType,
                     version: skillRequest.version,
                     selfReportingType: selfReportingType,
             )
@@ -227,6 +234,27 @@ class SkillsAdminService {
         }
 
         log.debug("Saved [{}]", savedSkill)
+    }
+
+    private void validateSkillsGroup(SkillRequest skillRequest, SkillDefWithExtra skillDefinition) {
+        int numSkillsRequired = skillRequest.numSkillsRequired
+        boolean enabled = StringUtils.isNotBlank(skillRequest.enabled) && StringUtils.equalsIgnoreCase(skillRequest.enabled, Boolean.TRUE.toString())
+        if (numSkillsRequired != -1 && numSkillsRequired < 2 && enabled) {
+            throw new SkillException("A Skill Group must have at least 2 required skills in order to be enabled.")
+        } else {
+            List<SkillDef> groupChildSkills = getSkillsGroupChildSkills(skillDefinition.id)
+            if (numSkillsRequired > groupChildSkills.size()) {
+                throw new SkillException("A Skill Group cannot require more skills than the number of skills that belong to the group.")
+            }
+            if (numSkillsRequired == -1 || numSkillsRequired != groupChildSkills.size()) {
+                int testValue = groupChildSkills.first().totalPoints
+                // if numSkillsRequired is less than the total available, then all skills must have the same total point value
+                boolean allTotalPointsEqual = groupChildSkills.every { it.totalPoints == testValue }
+                if (!allTotalPointsEqual) {
+                    throw new SkillException("All skills that belong to the Skill Group must have the same total value when all skills are not required to be completed.")
+                }
+            }
+        }
     }
 
     @Transactional
@@ -448,6 +476,12 @@ class SkillsAdminService {
             res.numUsers = calculateDistinctUsersForSkill((SkillDefRepo.SkillDefPartial)partial)
         }
 
+        if (partial.skillType == SkillDef.ContainerType.SkillsGroup) {
+            List<SkillDef> groupChildSkills = getSkillsGroupChildSkills(partial.getId())
+            res.numberOfSkillsInGroup = groupChildSkills.size()
+            res.numberOfSelfReportSkills = groupChildSkills.count( {it.selfReportingType })?.intValue()
+            res.enabled = partial.enabled
+        }
         return res;
     }
 
@@ -459,6 +493,11 @@ class SkillsAdminService {
     @Transactional(readOnly = true)
     boolean existsBySkillId(String projectId, String skillId) {
         return skillDefRepo.existsByProjectIdIgnoreCaseAndSkillId(projectId, skillId)
+    }
+
+    @Profile
+    private List<SkillDef> getSkillsGroupChildSkills(Integer skillsGroupId) {
+        return skillDefRepo.findChildSkillsByIdAndRelationshipType(skillsGroupId, SkillRelDef.RelationshipType.SkillsGroupRequirement)
     }
 
     @Profile

@@ -418,7 +418,7 @@ class AdminController {
         SkillsValidator.isTrue(skillRequest.numPerformToCompletion > 0, "numPerformToCompletion must be > 0", projectId, skillId)
         propsBasedValidator.validateMaxIntValue(PublicProps.UiProp.maxNumPerformToCompletion, "numPerformToCompletion", skillRequest.numPerformToCompletion)
 
-        if ( skillRequest.pointIncrementInterval > 0) {
+        if (skillRequest.pointIncrementInterval > 0) {
             // if pointIncrementInterval is disabled then this validation is not needed
             SkillsValidator.isTrue(skillRequest.numMaxOccurrencesIncrementInterval > 0, "numMaxOccurrencesIncrementInterval must be > 0", projectId, skillId)
             SkillsValidator.isTrue(skillRequest.numPerformToCompletion >= skillRequest.numMaxOccurrencesIncrementInterval, "numPerformToCompletion must be >= numMaxOccurrencesIncrementInterval", projectId, skillId)

@@ -40,7 +40,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         Integer getTotalPoints()
     }
 
-    static interface SkillDefPartial extends SkillDefSkinny{
+    static interface SkillDefPartial extends SkillDefSkinny {
         Integer getPointIncrement()
         Integer getPointIncrementInterval()
         Integer getNumMaxOccurrencesIncrementInterval()
@@ -48,6 +48,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         SkillDef.ContainerType getSkillType()
         Date getUpdated()
         SkillDef.SelfReportingType getSelfReportingType()
+        String getEnabled()
     }
 
     /**

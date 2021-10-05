@@ -16,6 +16,7 @@
 package skills.controller.request.model
 
 import groovy.transform.Canonical
+import skills.storage.model.SkillDef
 
 @Canonical
 class SkillRequest {
@@ -43,4 +44,10 @@ class SkillRequest {
     String helpUrl
 
     String selfReportingType
+
+    String type = SkillDef.ContainerType.Skill
+
+    // the following props only apply when type == SkillsGroup
+    int numSkillsRequired = 0
+    String enabled
 }
