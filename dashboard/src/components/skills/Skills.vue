@@ -16,8 +16,29 @@ limitations under the License.
 <template>
   <div>
     <loading-container v-bind:is-loading="isLoading">
-      <skills-table :skills-prop="skills" :is-top-level="true" :project-id="this.$route.params.projectId" :subject-id="this.$route.params.subjectId" v-on:skills-change="skillsChanged"/>
+      <sub-page-header ref="subPageHeader" title="Skills"
+                       :disabled="addSkillDisabled" :disabled-msg="addSkillsDisabledMsg" aria-label="new skill">
+        <b-button id="newGroupBtn" ref="newGroupButton" @click="newGroup" variant="outline-primary" size="sm"
+                  data-cy="newGroupButton">
+          <span class="">Group</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
+        </b-button>
+        <b-button id="newSkillBtn" ref="newSkillButton" @click="newSkill" variant="outline-primary" size="sm"
+                  data-cy="newSkillButton" class="ml-1">
+          <span class="">Skill</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
+        </b-button>
+      </sub-page-header>
+
+      <b-card body-class="p-0">
+        <skills-table ref="skillsTable"
+          :skills-prop="skills" :is-top-level="true" :project-id="this.$route.params.projectId" :subject-id="this.$route.params.subjectId" v-on:skills-change="skillsChanged"/>
+      </b-card>
     </loading-container>
+
+    <edit-skill v-if="editSkillInfo.show" v-model="editSkillInfo.show" :skillId="editSkillInfo.skill.skillId" :is-copy="editSkillInfo.isCopy" :is-edit="editSkillInfo.isEdit"
+                :project-id="projectId" :subject-id="subjectId" @skill-saved="skillCreatedOrUpdated" @hidden="handleHide"/>
+
+    <edit-skill-group v-if="editGroupInfo.show" v-model="editGroupInfo.show" :group="editGroupInfo.group" :is-edit="false"
+                  @group-saved="groupSaved" @hidden="handleHide"/>
   </div>
 </template>
 
@@ -27,38 +48,93 @@ limitations under the License.
   import LoadingContainer from '../utils/LoadingContainer';
   import SkillsTable from './SkillsTable';
   import SkillsService from './SkillsService';
+  import SubPageHeader from '../utils/pages/SubPageHeader';
+  import EditSkill from './EditSkill';
+  import EditSkillGroup from './EditSkillGroup';
 
   const { mapActions, mapGetters } = createNamespacedHelpers('subjects');
 
   export default {
     name: 'Skills',
-    components: { SkillsTable, LoadingContainer },
+    components: {
+      EditSkillGroup,
+      EditSkill,
+      SubPageHeader,
+      SkillsTable,
+      LoadingContainer,
+    },
     data() {
       return {
         isLoading: true,
         skills: [],
         projectId: null,
         subjectId: null,
+        editSkillInfo: {
+          isEdit: false,
+          isCopy: false,
+          show: false,
+          skill: {},
+        },
+        editGroupInfo: {
+          isEdit: false,
+          show: false,
+          group: {},
+        },
       };
-    },
-    mounted() {
-      this.projectId = this.$route.params.projectId;
-      this.subjectId = this.$route.params.subjectId;
-      this.loadSkills();
-    },
-    computed: {
-      ...mapGetters([
-        'subject',
-      ]),
     },
     methods: {
       ...mapActions([
         'loadSubjectDetailsState',
       ]),
+      skillCreatedOrUpdated(skill) {
+        this.$refs.skillsTable.skillCreatedOrUpdated(skill);
+      },
+      handleHide(e) {
+        if (!e || !e.saved || (e.saved && !e.updated)) {
+          this.handleFocus(e);
+        }
+      },
+      handleFocus(e) {
+        let ref = this.$refs.subPageHeader.$refs.actionButton;
+        if (e && e.updated && this.currentlyFocusedSkillId) {
+          const refName = `edit_${this.currentlyFocusedSkillId}`;
+          ref = this.$refs[refName];
+        }
+        this.currentlyFocusedSkillId = '';
+        this.$nextTick(() => {
+          if (ref) {
+            ref.focus();
+          }
+        });
+      },
       loadSkills() {
         SkillsService.getSubjectSkills(this.projectId, this.subjectId)
           .then((skills) => {
             const loadedSkills = skills;
+            loadedSkills.push({
+              skillId: 'group1',
+              projectId: 'proj1',
+              name: 'A bunch of important skills grouped together',
+              version: 1,
+              displayOrder: 4,
+              created: '2021-10-12T13:41:19.444+00:00',
+              totalPoints: 200,
+              numberOfSkills: 4,
+              selfReportSkills: 1,
+              type: 'Group',
+            });
+            loadedSkills.push({
+              skillId: 'group2',
+              projectId: 'proj1',
+              name: 'A bunch of important skills grouped together',
+              version: 1,
+              displayOrder: 5,
+              created: '2021-10-12T13:41:20.444+00:00',
+              totalPoints: 200,
+              numberOfSkills: 4,
+              selfReportSkills: 1,
+              type: 'Group',
+            });
             this.skills = loadedSkills.map((loadedSkill) => {
               const copy = { ...loadedSkill };
               copy.created = dayjs(loadedSkill.created);
@@ -73,6 +149,45 @@ limitations under the License.
       skillsChanged(skillId) {
         this.loadSubjectDetailsState({ projectId: this.projectId, subjectId: this.subject.subjectId });
         this.$emit('skills-change', skillId);
+      },
+      newSkill() {
+        this.editSkillInfo = {
+          skill: {},
+          show: true,
+          isEdit: false,
+          isCopy: false,
+        };
+      },
+      newGroup() {
+        this.editGroupInfo = {
+          isEdit: false,
+          show: true,
+          group: {
+            projectId: this.projectId,
+          },
+        };
+      },
+      groupSaved(group) {
+        console.log(group);
+      },
+    },
+    mounted() {
+      this.projectId = this.$route.params.projectId;
+      this.subjectId = this.$route.params.subjectId;
+      this.loadSkills();
+    },
+    computed: {
+      ...mapGetters([
+        'subject',
+      ]),
+      addSkillDisabled() {
+        return this.skills && this.$store.getters.config && this.skills.length >= this.$store.getters.config.maxSkillsPerSubject;
+      },
+      addSkillsDisabledMsg() {
+        if (this.$store.getters.config) {
+          return `The maximum number of Skills allowed is ${this.$store.getters.config.maxSkillsPerSubject}`;
+        }
+        return '';
       },
     },
   };

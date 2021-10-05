@@ -16,35 +16,36 @@ limitations under the License.
 <template>
   <div id="skillsTable">
 
-    <sub-page-header ref="subPageHeader" title="Skills" action="Skill" @add-action="newSkill"
-                     :disabled="addSkillDisabled" :disabled-msg="addSkillsDisabledMsg" aria-label="new skill"/>
-
     <loading-container v-bind:is-loading="isLoading">
-      <b-card v-if="this.skillsOriginal && this.skillsOriginal.length" body-class="p-0">
-      <div class="row px-3 pt-3">
-        <div class="col-12">
-          <b-form-group label="Skill Filter" label-class="text-muted">
-            <b-input v-model="table.filter.name" v-on:keyup.enter="applyFilters"
-                     data-cy="skillsTable-skillFilter" aria-label="skill name filter"/>
-          </b-form-group>
-        </div>
-        <div class="col-md">
-        </div>
-      </div>
+      <div v-if="this.skillsOriginal && this.skillsOriginal.length">
+        <div v-if="showSearch">
+          <div class="row px-3 pt-3">
+            <div class="col-12">
+              <b-form-group label="Skill Filter" label-class="text-muted">
+                <b-input v-model="table.filter.name" v-on:keyup.enter="applyFilters"
+                         data-cy="skillsTable-skillFilter" aria-label="skill name filter"/>
+              </b-form-group>
+            </div>
+            <div class="col-md">
+            </div>
+          </div>
 
-      <div class="row pl-3 mb-3">
-        <div class="col">
-          <b-button variant="outline-info" @click="applyFilters" data-cy="users-filterBtn"><i class="fa fa-filter"/> Filter</b-button>
-          <b-button variant="outline-info" @click="reset" class="ml-1" data-cy="users-resetBtn"><i class="fa fa-times"/> Reset</b-button>
+          <div class="row pl-3 mb-3">
+            <div class="col">
+              <b-button variant="outline-info" @click="applyFilters" data-cy="users-filterBtn"><i class="fa fa-filter"/> Filter</b-button>
+              <b-button variant="outline-info" @click="reset" class="ml-1" data-cy="users-resetBtn"><i class="fa fa-times"/> Reset</b-button>
+            </div>
+          </div>
         </div>
-      </div>
 
       <div class="row mb-2">
         <div class="col"></div>
         <div class="col-auto text-right" data-cy="skillsTable-additionalColumns">
             <span class="text-secondary mr-2">Additional Columns:</span>
-            <b-form-checkbox-group class="d-inline"
-              id="skillsAdditionalColumns"
+            <b-form-checkbox-group
+              :id="`skillsAdditionalColumns_${tableId}`"
+              class="d-inline"
+              @input="updateColumns"
               v-model="table.extraColumns.selected"
               :options="table.extraColumns.options"
               name="Skills Table Additional Columns"
@@ -67,23 +68,34 @@ limitations under the License.
               </b-button>
             </div>
             <div class="col pl-0">
-              <router-link :data-cy="`manageSkillLink_${data.item.skillId}`" tag="a" :to="{ name:'SkillOverview',
-                                  params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
-                           :aria-label="`Manage skill ${data.item.name}  via link`">
-                <div class="h5">{{ data.item.name }}</div>
-              </router-link>
+              <div v-if="data.item.isGroupType">
+                <div class="text-success font-weight-bold">
+                  <i class="fas fa-layer-group" aria-hidden="true"></i> <span class="text-uppercase">Group</span>
+                  <b-badge variant="success" class="ml-2">{{ data.item.numberOfSkills}} skills</b-badge>
+                </div>
+                <div class="h5 text-primary"><span v-if="data.item.nameHtml" v-html="data.item.nameHtml"></span><span v-else>{{ data.item.name }}</span></div>
+              </div>
+              <div v-if="data.item.isSkillType">
+                <router-link :data-cy="`manageSkillLink_${data.item.skillId}`" tag="a" :to="{ name:'SkillOverview',
+                                    params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
+                             :aria-label="`Manage skill ${data.item.name}  via link`">
+                  <div class="h5"><span v-if="data.item.nameHtml" v-html="data.item.nameHtml"></span><span v-else>{{ data.item.name }}</span></div>
+                </router-link>
+              </div>
 
-              <div class="text-muted" style="font-size: 0.9rem;">ID: {{ data.item.skillId }}</div>
+              <div class="text-muted" style="font-size: 0.9rem;">ID: <span v-if="data.item.skillIdHtml" v-html="data.item.skillIdHtml"></span><span v-else>{{ data.item.skillId }}</span></div>
             </div>
             <div class="col-auto ml-auto mr-0">
-              <router-link :data-cy="`manageSkillBtn_${data.item.skillId}`" :to="{ name:'SkillOverview',
+              <router-link v-if="data.item.isSkillType"
+                           :data-cy="`manageSkillBtn_${data.item.skillId}`" :to="{ name:'SkillOverview',
                                   params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
                            :aria-label="`Manage skill ${data.item.name}`"
                            class="btn btn-outline-primary btn-sm">
                 <span class="d-none d-sm-inline">Manage </span> <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
               </router-link>
               <b-button-group size="sm" class="ml-1">
-                <b-button @click="copySkill(data.item)"
+                <b-button v-if="data.item.type === 'Skill'"
+                          @click="copySkill(data.item)"
                           variant="outline-primary" :data-cy="`copySkillButton_${data.item.skillId}`"
                           :aria-label="'copy Skill '+data.item.name" :ref="'copy_'+data.item.skillId"
                           title="Copy Skill">
@@ -105,15 +117,18 @@ limitations under the License.
             </div>
           </div>
         </template>
-
         <template v-slot:cell(totalPoints)="data">
-          <div>{{ data.value }}</div>
-          <div class="small text-secondary">{{ data.item.pointIncrement | number }} pts x {{ data.item.numPerformToCompletion | number }} repetitions</div>
+            <div>{{ data.value | number }}</div>
+            <div v-if="data.item.isSkillType" class="small text-secondary">{{ data.item.pointIncrement | number }} pts x {{ data.item.numPerformToCompletion | number }} repetitions</div>
+            <div v-if="data.item.isGroupType" class="small text-secondary">from {{ data.item.numberOfSkills | number }} skills</div>
         </template>
 
         <template v-slot:cell(timeWindow)="data">
-          <div>{{ timeWindowTitle(data.item) }}
+          <div v-if="data.item.isSkillType">{{ timeWindowTitle(data.item) }}
             <i v-if="!timeWindowHasLength(data.item)" class="fas fa-question-circle text-muted" v-b-tooltip.hover="`${timeWindowDescription(data.item)}`"></i>
+          </div>
+          <div v-if="data.item.isGroupType" class="text-secondary">
+            N/A
           </div>
         </template>
 
@@ -153,17 +168,18 @@ limitations under the License.
           </div>
         </template>
         <template v-slot:cell(selfReportingType)="data">
-         {{ getSelfReportingTypePretty(data.item.selfReportingType) }}
+          <span v-if="data.item.isSkillType">{{ getSelfReportingTypePretty(data.item.selfReportingType) }}</span>
+          <span v-if="data.item.isGroupType" class="text-secondary">N/A</span>
         </template>
         <template #row-details="row">
-            <ChildRowSkillsDisplay :project-id="projectId" :subject-id="subjectId" v-skills-onMount="'ExpandSkillDetailsSkillsPage'"
+            <child-row-skill-group-display v-if="row.item.isGroupType" :parent-skill-id="row.item.skillId"/>
+            <ChildRowSkillsDisplay v-if="row.item.isSkillType" :project-id="projectId" :subject-id="subjectId" v-skills-onMount="'ExpandSkillDetailsSkillsPage'"
                                    :parent-skill-id="row.item.skillId" :refresh-counter="row.item.refreshCounter"
                                    class="mr-3 ml-5 mb-3"></ChildRowSkillsDisplay>
         </template>
       </skills-b-table>
 
-    </b-card>
-
+      </div>
       <no-content2 v-else title="No Skills Yet" class="mt-4"
                  message="Projects are composed of Subjects which are made of Skills and a single skill defines a training unit within the gamification framework."/>
     </loading-container>
@@ -180,21 +196,42 @@ limitations under the License.
   import NoContent2 from '../utils/NoContent2';
   import ChildRowSkillsDisplay from './ChildRowSkillsDisplay';
   import SkillsService from './SkillsService';
-  import SubPageHeader from '../utils/pages/SubPageHeader';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
   import ToastSupport from '../utils/ToastSupport';
   import LoadingContainer from '../utils/LoadingContainer';
   import SkillsBTable from '../utils/table/SkillsBTable';
   import TimeWindowMixin from './TimeWindowMixin';
+  import ChildRowSkillGroupDisplay from './ChildRowSkillGroupDisplay';
+  import StringHighlighter from '../utils/StringHighlighter';
 
   export default {
     name: 'SkillsTable',
     mixins: [MsgBoxMixin, ToastSupport, TimeWindowMixin],
-    props: ['projectId', 'subjectId', 'skillsProp'],
+    props: {
+      projectId: String,
+      subjectId: String,
+      skillsProp: Array,
+      showSearch: {
+        type: Boolean,
+        default: true,
+      },
+      showHeader: {
+        type: Boolean,
+        default: true,
+      },
+      showPaging: {
+        type: Boolean,
+        default: true,
+      },
+      tableId: {
+        type: String,
+        default: 'skillsTable',
+      },
+    },
     components: {
+      ChildRowSkillGroupDisplay,
       SkillsBTable,
       EditSkill,
-      SubPageHeader,
       ChildRowSkillsDisplay,
       LoadingContainer,
       NoContent2,
@@ -258,6 +295,7 @@ limitations under the License.
 
             ],
             pagination: {
+              remove: !this.showPaging,
               currentPage: 1,
               totalRows: 1,
               pageSize: 10,
@@ -268,8 +306,35 @@ limitations under the License.
         sortButtonEnabled: false,
       };
     },
-    watch: {
-      'table.extraColumns.selected': function updateColumns(newList) {
+    mounted() {
+      this.skills = this.skillsProp.map((item) => {
+        const withSubjId = {
+          subjectId: this.subjectId,
+          refreshCounter: 0,
+          isGroupType: item.type === 'Group',
+          isSkillType: item.type === 'Skill',
+          ...item,
+        };
+        return SkillsService.enhanceWithTimeWindow(withSubjId);
+      });
+      this.skillsOriginal = this.skills.map((item) => item);
+      this.disableFirstAndLastButtons();
+      this.table.options.pagination.totalRows = this.skills.length;
+      this.table.options.busy = false;
+    },
+    // computed: {
+    //   addSkillDisabled() {
+    //     return this.skills && this.$store.getters.config && this.skills.length >= this.$store.getters.config.maxSkillsPerSubject;
+    //   },
+    //   addSkillsDisabledMsg() {
+    //     if (this.$store.getters.config) {
+    //       return `The maximum number of Skills allowed is ${this.$store.getters.config.maxSkillsPerSubject}`;
+    //     }
+    //     return '';
+    //   },
+    // },
+    methods: {
+      updateColumns(newList) {
         const extraColLookup = {
           totalPoints: {
             key: 'totalPoints',
@@ -301,38 +366,20 @@ limitations under the License.
           }
         });
       },
-    },
-    mounted() {
-      this.skills = this.skillsProp.map((item) => {
-        const withSubjId = { subjectId: this.subjectId, refreshCounter: 0, ...item };
-        return SkillsService.enhanceWithTimeWindow(withSubjId);
-      });
-      this.skillsOriginal = this.skills.map((item) => item);
-      this.disableFirstAndLastButtons();
-      this.table.options.pagination.totalRows = this.skills.length;
-      this.table.options.busy = false;
-    },
-    computed: {
-      addSkillDisabled() {
-        return this.skills && this.$store.getters.config && this.skills.length >= this.$store.getters.config.maxSkillsPerSubject;
-      },
-      addSkillsDisabledMsg() {
-        if (this.$store.getters.config) {
-          return `The maximum number of Skills allowed is ${this.$store.getters.config.maxSkillsPerSubject}`;
-        }
-        return '';
-      },
-    },
-    methods: {
       applyFilters() {
         if (this.table.filter.name && this.table.filter.name.length > 0) {
+          const filter = this.table.filter.name.trim().toLowerCase();
+
           this.skills = this.skillsOriginal.filter((item) => {
-            const filter = this.table.filter.name.trim().toLowerCase();
             if (item.name.trim().toLowerCase().indexOf(filter) !== -1
               || item.skillId.trim().toLowerCase().indexOf(filter) !== -1) {
               return true;
             }
             return false;
+          })?.map((item) => {
+            const nameHtml = StringHighlighter.highlight(item.name, filter);
+            const skillIdHtml = StringHighlighter.highlight(item.skillId, filter);
+            return { nameHtml, skillIdHtml, ...item };
           });
         } else {
           this.reset();
@@ -346,14 +393,14 @@ limitations under the License.
         return dayjs(timestamp)
           .isSame(new Date(), 'day');
       },
-      newSkill() {
-        this.editSkillInfo = {
-          skill: {},
-          show: true,
-          isEdit: false,
-          isCopy: false,
-        };
-      },
+      // newSkill() {
+      //   this.editSkillInfo = {
+      //     skill: {},
+      //     show: true,
+      //     isEdit: false,
+      //     isCopy: false,
+      //   };
+      // },
       editSkill(skillToEdit) {
         this.currentlyFocusedSkillId = skillToEdit.skillId;
         this.editSkillInfo = { skill: skillToEdit, show: true, isEdit: true };
@@ -384,7 +431,13 @@ limitations under the License.
         SkillsService.saveSkill(skill)
           .then((skillRes) => {
             let createdSkill = skillRes;
-            createdSkill = { subjectId: this.subjectId, ...createdSkill, created: new Date(createdSkill.created) };
+            createdSkill = {
+              subjectId: this.subjectId,
+              isGroupType: skill.type === 'Group',
+              isSkillType: skill.type === 'Skill',
+              ...createdSkill,
+              created: new Date(createdSkill.created),
+            };
             if (item1Index >= 0) {
               createdSkill.refreshCounter = this.skills[item1Index].refreshCounter + 1;
               this.skills.splice(item1Index, 1, createdSkill);

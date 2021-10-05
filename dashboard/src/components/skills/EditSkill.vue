@@ -310,6 +310,7 @@ limitations under the License.
           description: null,
           helpUrl: null,
           selfReportingType: null,
+          type: 'Skill',
         },
         canEditSkillId: false,
         initial: {
