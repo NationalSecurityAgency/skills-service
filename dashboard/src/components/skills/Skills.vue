@@ -170,6 +170,7 @@ limitations under the License.
         };
       },
       groupSaved(group) {
+        // eslint-disable-next-line no-console
         console.log(group);
       },
     },
