@@ -451,7 +451,9 @@ class SkillsAdminService {
                 selfReportingType: partial.getSelfReportingType()
         )
 
-        res.numPerformToCompletion = (Integer)(res.totalPoints / res.pointIncrement)
+        if (partial.skillType == SkillDef.ContainerType.Skill) {
+            res.numPerformToCompletion = (Integer) (res.totalPoints / res.pointIncrement)
+        }
         res.totalPoints = partial.totalPoints
         res.numMaxOccurrencesIncrementInterval = partial.numMaxOccurrencesIncrementInterval
 
