@@ -9,7 +9,6 @@
     <packaging>pom</packaging>
     <version>1.8.0-SNAPSHOT</version>
     <modules>
-        <module>call-stack-profiler</module>
         <module>dashboard</module>
         <module>client-display</module>
         <module>service</module>
