@@ -106,7 +106,7 @@ class SkillsGroupAdminService {
             if (numSkillsRequired > groupChildSkills.size()) {
                 throw new SkillException("A Skill Group cannot require more skills than the number of skills that belong to the group.")
             }
-            if (numSkillsRequired == -1 || numSkillsRequired == groupChildSkills.size()) {
+            if (groupChildSkills.size() > 0 && (numSkillsRequired == -1 || numSkillsRequired == groupChildSkills.size())) {
                 int testValue = expectedPoints ?: groupChildSkills.first().totalPoints
                 // if numSkillsRequired is less than the total available, then all skills must have the same total point value
                 boolean allTotalPointsEqual = groupChildSkills.every { it.totalPoints == testValue }

@@ -390,7 +390,7 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(groupId, "Skills Group Id", projectId)
 
-        return skillsAdminService.getSkills(projectId, groupId, SkillDef.ContainerType.SkillsGroup, SkillRelDef.RelationshipType.SkillsGroupRequirement)
+        return skillsAdminService.getSkillsByProjectSkillAndType(projectId, groupId, SkillDef.ContainerType.SkillsGroup, SkillRelDef.RelationshipType.SkillsGroupRequirement)
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/skills/{skillId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -425,12 +425,12 @@ class AdminController {
                                                   @PathVariable("skillId") String skillId,
                                                   @RequestBody SkillRequest skillRequest) {
         SkillsValidator.isNotBlank(groupId, "Skills Group Id", projectId)
-        validateAndSaveSkill(projectId, subjectId, skillId, skillRequest)
+        validateAndSaveSkill(projectId, subjectId, skillId, skillRequest, groupId)
         skillsGroupAdminService.addSkillToSkillsGroup(projectId, groupId, skillId)
         return new RequestResult(success: true)
     }
 
-    private void validateAndSaveSkill(String projectId, String subjectId, String skillId, SkillRequest skillRequest) {
+    private void validateAndSaveSkill(String projectId, String subjectId, String skillId, SkillRequest skillRequest, String groupId=null) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
@@ -478,7 +478,7 @@ class AdminController {
             skillRequest.helpUrl = InputSanitizer.sanitizeUrl(skillRequest.helpUrl)
         }
 
-        skillsAdminService.saveSkill(skillId, skillRequest)
+        skillsAdminService.saveSkill(skillId, skillRequest, true, groupId)
     }
 
     @GetMapping(value = '/projects/{projectId}/latestVersion', produces = 'application/json')

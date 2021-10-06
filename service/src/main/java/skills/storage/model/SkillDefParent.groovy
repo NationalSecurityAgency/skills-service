@@ -78,5 +78,5 @@ class SkillDefParent {
     String enabled
 
     // only applies when type == SkillsGroup
-    int numSkillsRequired = 0
+    int numSkillsRequired = -1
 }

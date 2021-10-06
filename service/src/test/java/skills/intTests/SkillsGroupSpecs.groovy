@@ -35,6 +35,12 @@ class SkillsGroupSpecs extends DefaultIntSpec {
 
         then:
         res
+        res.skillId == skillsGroup.skillId
+        res.name == skillsGroup.name
+        res.type == skillsGroup.type
+        res.numSkillsInGroup == 0
+        res.numSelfReportSkills == 0
+        res.enabled == 'false'
     }
 
     void "cannot convert an existing Skill To a SkillsGroup " () {
@@ -58,180 +64,88 @@ class SkillsGroupSpecs extends DefaultIntSpec {
     void "create and add skills to SkillsGroup" () {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
-        def skills = SkillsFactory.createSkills(4)
+        def skills = SkillsFactory.createSkills(3)
         def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 5)
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
         skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
         skills.each { skill ->
-            skillsService.assignSkillToSkillsGroup(skillsGroup.skillId, skill)
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
         }
-        when:
 
+        when:
         def res = skillsService.getSkill(skillsGroup)
+        def groupSkills = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
+        groupSkills.sort() { it.skillId }
 
         then:
         res
+        res.skillId == skillsGroup.skillId
+        res.name == skillsGroup.name
+        res.type == skillsGroup.type
+        res.numSkillsInGroup == groupSkills.size()
+        res.numSelfReportSkills == 0
+        res.enabled == 'false'
+        
+        groupSkills.size() == 3
+
+        groupSkills.get(0).skillId == skills.get(0).skillId
+        groupSkills.get(0).projectId == proj.projectId
+        groupSkills.get(0).name == skills.get(0).name
+        groupSkills.get(0).version == skills.get(0).version
+        groupSkills.get(0).displayOrder == 1
+        groupSkills.get(0).totalPoints == skills.get(0).pointIncrement * skills.get(0).numPerformToCompletion
+
+        groupSkills.get(1).skillId == skills.get(1).skillId
+        groupSkills.get(1).projectId == proj.projectId
+        groupSkills.get(1).name == skills.get(1).name
+        groupSkills.get(1).version == skills.get(1).version
+        groupSkills.get(1).displayOrder == 2
+        groupSkills.get(1).totalPoints == skills.get(1).pointIncrement * skills.get(1).numPerformToCompletion
+
+        groupSkills.get(2).skillId == skills.get(2).skillId
+        groupSkills.get(2).projectId == proj.projectId
+        groupSkills.get(2).name == skills.get(2).name
+        groupSkills.get(2).version == skills.get(2).version
+        groupSkills.get(2).displayOrder == 3
+        groupSkills.get(2).totalPoints == skills.get(2).pointIncrement * skills.get(2).numPerformToCompletion
     }
 
-//    void "get badge that have skills assigned"() {
-//        def proj = SkillsFactory.createProject()
-//        def subj = SkillsFactory.createSubject()
-//        def skills = SkillsFactory.createSkills(4)
-//        def badge = SkillsFactory.createBadge()
-//
-//        skillsService.createProject(proj)
-//        skillsService.createSubject(subj)
-//        skillsService.createSkills(skills)
-//        skillsService.assignDependency([projectId: proj.projectId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(1).skillId])
-//        skillsService.assignDependency([projectId: proj.projectId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(2).skillId])
-//
-//        skillsService.createBadge(badge)
-//        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(0).skillId])
-//        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(3).skillId])
-//
-//        when:
-//        def res = skillsService.getBadge(badge)
-//
-//        then:
-//        res
-//        res.numSkills == 2
-//        res.requiredSkills.size() == 2
-//        res.requiredSkills.collect { it.skillId }.sort() == ["skill1", "skill4"]
-//        res.totalPoints == 20
-//        res.badgeId == badge.badgeId
-//        res.name == badge.name
-//        res.projectId == proj.projectId
-//    }
-//
-//    void "assign skills to inactive badge"() {
-//        def proj = SkillsFactory.createProject()
-//        def subj = SkillsFactory.createSubject()
-//        def skills = SkillsFactory.createSkills(4)
-//        def badge = SkillsFactory.createBadge()
-//
-//        skillsService.createProject(proj)
-//        skillsService.createSubject(subj)
-//        skillsService.createSkills(skills)
-//        skillsService.assignDependency([projectId: proj.projectId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(1).skillId])
-//        skillsService.assignDependency([projectId: proj.projectId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(2).skillId])
-//
-//        badge.enabled = false
-//        skillsService.createBadge(badge)
-//        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(0).skillId])
-//        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(3).skillId])
-//
-//        when:
-//        def res = skillsService.getBadge(badge)
-//
-//        then:
-//        res
-//        res.numSkills == 2
-//        res.requiredSkills.size() == 2
-//        res.requiredSkills.collect { it.skillId }.sort() == ["skill1", "skill4"]
-//        res.totalPoints == 20
-//        res.badgeId == badge.badgeId
-//        res.name == badge.name
-//        res.projectId == proj.projectId
-//        res.enabled == 'false'
-//    }
-//
-//    void "remove skills from a badge"() {
-//        def proj = SkillsFactory.createProject()
-//        def subj = SkillsFactory.createSubject()
-//        def skills = SkillsFactory.createSkills(4)
-//        def badge = SkillsFactory.createBadge()
-//
-//        skillsService.createProject(proj)
-//        skillsService.createSubject(subj)
-//        skillsService.createSkills(skills)
-//
-//        skillsService.createBadge(badge)
-//        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(0).skillId])
-//        Map badgeSkillDeclaration = [projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(3).skillId]
-//        skillsService.assignSkillToBadge(badgeSkillDeclaration)
-//
-//        when:
-//        def res = skillsService.getBadge(badge)
-//        skillsService.removeSkillFromBadge(badgeSkillDeclaration)
-//        def resAfterDeletion = skillsService.getBadge(badge)
-//        then:
-//        res
-//        res.numSkills == 2
-//        res.requiredSkills.collect { it.skillId }.sort() == ["skill1", "skill4"]
-//
-//        resAfterDeletion
-//        resAfterDeletion.numSkills == 1
-//        resAfterDeletion.requiredSkills.collect { it.skillId }.sort() == ["skill1"]
-//    }
-//
-//    void "remove badge"() {
-//        def proj = SkillsFactory.createProject()
-//        def subj = SkillsFactory.createSubject()
-//        def skills = SkillsFactory.createSkills(4)
-//        def badge = SkillsFactory.createBadge()
-//        def badge1 = SkillsFactory.createBadge(1, 2)
-//
-//        skillsService.createProject(proj)
-//        skillsService.createSubject(subj)
-//        skillsService.createSkills(skills)
-//
-//        skillsService.createBadge(badge)
-//        skillsService.createBadge(badge1)
-//
-//        when:
-//        def res = skillsService.getBadges(proj.projectId)
-//        skillsService.removeBadge(badge1)
-//        def resAfterDeletion = skillsService.getBadges(proj.projectId)
-//        then:
-//        res
-//        res.collect { it.badgeId }.sort() == [badge.badgeId, badge1.badgeId].sort()
-//
-//        resAfterDeletion
-//        resAfterDeletion.collect { it.badgeId } == [badge.badgeId]
-//    }
-//
-//    void "cannot disable a badge after it has been enabled"(){
-//        def proj = SkillsFactory.createProject()
-//        def subj = SkillsFactory.createSubject()
-//        def skills = SkillsFactory.createSkills(4)
-//        def badge = SkillsFactory.createBadge()
-//        badge.enabled = 'true'
-//
-//        skillsService.createProject(proj)
-//        skillsService.createSubject(subj)
-//        skillsService.createSkills(skills)
-//
-//        skillsService.createBadge(badge)
-//
-//        when:
-//        badge = skillsService.getBadge(badge)
-//        badge.enabled = 'false'
-//        skillsService.createBadge(badge)
-//
-//        then:
-//        Exception ex = thrown()
-//        ex.getMessage().contains("Once a Badge has been published, the only allowable value for enabled is [true]")
-//    }
-//
-//    def "cannot enable badge with no skills"() {
-//        def proj = SkillsFactory.createProject()
-//        def subj = SkillsFactory.createSubject()
-//        def skills = SkillsFactory.createSkills(4)
-//        def badge = SkillsFactory.createBadge()
-//        badge.enabled = 'false'
-//
-//        skillsService.createProject(proj)
-//        skillsService.createSubject(subj)
-//        skillsService.createSkills(skills)
-//
-//        when:
-//        skillsService.createBadge(badge)
-//        badge.enabled = 'true'
-//        skillsService.createBadge(badge)
-//
-//        then:
-//        def ex = thrown(Exception)
-//    }
+    void "create and then update SkillsGroup name" () {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skillsGroup = SkillsFactory.createSkillsGroup()
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+
+        when:
+        def res1 = skillsService.getSkill(skillsGroup)
+
+        String origName = skillsGroup.name
+        skillsGroup.name = 'New Group Name'
+        skillsService.updateSkill(skillsGroup, null)
+
+        def res2 = skillsService.getSkill(skillsGroup)
+
+        then:
+        res1
+        res1.skillId == skillsGroup.skillId
+        res1.name == origName
+        res1.type == skillsGroup.type
+        res1.numSkillsInGroup == 0
+        res1.numSelfReportSkills == 0
+        res1.enabled == 'false'
+
+        res2
+        res2.skillId == skillsGroup.skillId
+        res2.name == skillsGroup.name
+        res2.type == skillsGroup.type
+        res2.numSkillsInGroup == 0
+        res2.numSelfReportSkills == 0
+        res2.enabled == 'false'
+    }
 }

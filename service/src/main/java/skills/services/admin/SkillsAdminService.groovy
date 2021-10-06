@@ -18,7 +18,6 @@ package skills.services.admin
 import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
-import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.PageRequest
@@ -100,7 +99,7 @@ class SkillsAdminService {
     SkillsGroupAdminService skillsGroupAdminService
 
     @Transactional()
-    void saveSkill(String originalSkillId, SkillRequest skillRequest, boolean performCustomValidation=true) {
+    void saveSkill(String originalSkillId, SkillRequest skillRequest, boolean performCustomValidation=true, String groupId=null) {
         lockingService.lockProject(skillRequest.projectId)
 
         validateSkillVersion(skillRequest)
@@ -113,7 +112,7 @@ class SkillsAdminService {
             }
         }
 
-        SkillDefWithExtra skillDefinition = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, originalSkillId, SkillDef.ContainerType.Skill)
+        SkillDefWithExtra skillDefinition = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(skillRequest.projectId, originalSkillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
 
         if (!skillDefinition || !skillDefinition.skillId.equalsIgnoreCase(skillRequest.skillId)) {
             SkillDef idExists = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, skillRequest.skillId, SkillDef.ContainerType.Skill)
@@ -135,15 +134,16 @@ class SkillsAdminService {
         int occurrencesDelta
 
         final boolean isEdit = skillDefinition
-        final int totalPointsRequested = skillRequest.pointIncrement * skillRequest.numPerformToCompletion
-        final int incrementRequested = skillRequest.pointIncrement
-        final int currentOccurrences = isEdit ? (skillDefinition.totalPoints / skillDefinition.pointIncrement) : -1
-        final SelfReportingType selfReportingType =  skillRequest.selfReportingType ? SkillDef.SelfReportingType.valueOf(skillRequest.selfReportingType) : null;
-        final SkillDef.ContainerType skillType =  skillRequest.type ? SkillDef.ContainerType.valueOf(skillRequest.type) : SkillDef.ContainerType.Skill;
+        final SkillDef.ContainerType skillType = skillRequest.type ? SkillDef.ContainerType.valueOf(skillRequest.type) : SkillDef.ContainerType.Skill;
+        final boolean isSkillsGroup = skillType == SkillDef.ContainerType.SkillsGroup
+        final int totalPointsRequested = isSkillsGroup ? 0 : skillRequest.pointIncrement * skillRequest.numPerformToCompletion
+        final int incrementRequested = isSkillsGroup ? 0 : skillRequest.pointIncrement
+        final int currentOccurrences = isEdit && !isSkillsGroup ? (skillDefinition.totalPoints / skillDefinition.pointIncrement) : -1
+        final SelfReportingType selfReportingType = skillRequest.selfReportingType && !isSkillsGroup ? SkillDef.SelfReportingType.valueOf(skillRequest.selfReportingType) : null;
 
         SkillDef subject = null
         if (isEdit) {
-            if (skillType == SkillDef.ContainerType.SkillsGroup) {
+            if (isSkillsGroup) {
                 skillsGroupAdminService.validateSkillsGroup(skillRequest, skillDefinition)
             }
             shouldRebuildScores = skillDefinition.totalPoints != totalPointsRequested
@@ -167,7 +167,7 @@ class SkillsAdminService {
 
             createdResourceLimitsValidator.validateNumSkillsCreated(subject)
 
-            Integer highestDisplayOrder = skillDefRepo.calculateChildSkillsHighestDisplayOrder(skillRequest.projectId, parentSkillId)
+            Integer highestDisplayOrder = skillDefRepo.calculateChildSkillsHighestDisplayOrder(skillRequest.projectId, groupId ?: parentSkillId)
             int displayOrder = highestDisplayOrder == null ? 1 : highestDisplayOrder + 1
             skillDefinition = new SkillDefWithExtra(
                     skillId: skillRequest.skillId,
@@ -183,6 +183,8 @@ class SkillsAdminService {
                     type: skillType,
                     version: skillRequest.version,
                     selfReportingType: selfReportingType,
+                    numSkillsRequired: skillRequest.numSkillsRequired,
+                    enabled: skillRequest.enabled,
             )
             log.debug("Saving [{}]", skillDefinition)
             shouldRebuildScores = true
@@ -202,7 +204,7 @@ class SkillsAdminService {
             ruleSetDefinitionScoreUpdater.updateFromLeaf(savedSkill)
         }
 
-        if (isEdit) {
+        if (isEdit && !isSkillsGroup) {
             // order is CRITICAL HERE
             // must update point increment first then deal with changes in the occurrences;
             // changes in the occurrences will use the newly updated point increment
@@ -412,6 +414,12 @@ class SkillsAdminService {
         if (skillDef.type == SkillDef.ContainerType.Skill) {
             res.numPerformToCompletion = skillDef.totalPoints / res.pointIncrement
         }
+        if (skillDef.type == SkillDef.ContainerType.SkillsGroup) {
+            List<SkillDef> groupChildSkills = skillsGroupAdminService.getSkillsGroupChildSkills(skillDef.getId())
+            res.numSkillsInGroup = groupChildSkills.size()
+            res.numSelfReportSkills = groupChildSkills.count( {it.selfReportingType })?.intValue()
+            res.enabled = skillDef.enabled
+        }
 
         return res
     }
@@ -463,8 +471,8 @@ class SkillsAdminService {
 
         if (partial.skillType == SkillDef.ContainerType.SkillsGroup) {
             List<SkillDef> groupChildSkills = skillsGroupAdminService.getSkillsGroupChildSkills(partial.getId())
-            res.numberOfSkillsInGroup = groupChildSkills.size()
-            res.numberOfSelfReportSkills = groupChildSkills.count( {it.selfReportingType })?.intValue()
+            res.numSkillsInGroup = groupChildSkills.size()
+            res.numSelfReportSkills = groupChildSkills.count( {it.selfReportingType })?.intValue()
             res.enabled = partial.enabled
         }
         return res;

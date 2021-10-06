@@ -49,6 +49,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         Date getUpdated()
         SkillDef.SelfReportingType getSelfReportingType()
         String getEnabled()
+        Integer getNumSkillsRequired()
     }
 
     /**
@@ -97,7 +98,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
 
     @Query(value = '''SELECT max(sdChild.displayOrder) from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
       where srd.parent=sdParent.id and srd.child=sdChild.id and 
-      sdParent.projectId=?1 and sdParent.skillId=?2 and srd.type='RuleSetDefinition' ''' )
+      sdParent.projectId=?1 and sdParent.skillId=?2''' )
     @Nullable
     Integer calculateChildSkillsHighestDisplayOrder(String projectId, String skillId)
 

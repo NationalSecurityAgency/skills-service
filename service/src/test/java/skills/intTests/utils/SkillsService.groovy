@@ -406,6 +406,10 @@ class SkillsService {
         wsHelper.adminGet("/projects/${projectId}/subjects/${subjectId}/skills")
     }
 
+    def getSkillsForGroup(String projectId, String groupId) {
+        wsHelper.adminGet("/projects/${projectId}/groups/${groupId}/skills")
+    }
+
     def getSubject(Map props) {
         wsHelper.adminGet("/projects/${props.projectId}/subjects/${props.subjectId}")
     }
