@@ -110,7 +110,7 @@ limitations under the License.
     },
     computed: {
       title() {
-        return this.isEdit ? 'Editing Existing Project' : 'New Project';
+        return this.isEdit ? 'Editing Existing Skills Group' : 'New Skills Group';
       },
     },
     watch: {

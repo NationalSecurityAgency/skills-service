@@ -122,6 +122,7 @@ limitations under the License.
               numberOfSkills: 4,
               selfReportSkills: 1,
               type: 'Group',
+              enabled: true,
             });
             loadedSkills.push({
               skillId: 'group2',
@@ -134,6 +135,7 @@ limitations under the License.
               numberOfSkills: 4,
               selfReportSkills: 1,
               type: 'Group',
+              enabled: false,
             });
             this.skills = loadedSkills.map((loadedSkill) => {
               const copy = { ...loadedSkill };

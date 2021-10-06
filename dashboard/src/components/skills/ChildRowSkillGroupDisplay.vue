@@ -1,25 +1,38 @@
 <template>
 <div>
   <b-card body-class="p-0" class="ml-4 mb-3" style="background-color: rgba(0,124,73,0.04)">
-    <div class="row px-3 py-2">
+    <div class="row px-3 my-2" style="height: 3rem;">
       <div class="col">
-        <b-form inline class="h5">
-          <span class="align-middle form-check-label mr-1">Required: </span>
-          <b-form-select size="sm" v-model="numSkillsRequired.selected" :options="numSkillsRequired.options" class="">
-          </b-form-select>
 
-          <span class="ml-1">
-          out <b-badge>2</b-badge> skills
-          </span>
-        </b-form>
+        <div class="row align-items-center">
+          <div class="col-auto border-right">
+            <div v-if="enabled">
+              <span class="text-secondary">Status: </span> <span class="text-uppercase"><b-badge variant="success">Live <span class="far fa-check-circle" aria-hidden="true"/></b-badge></span>
+            </div>
+            <div v-if="!enabled" data-cy="skillGroupStatus" style="">
+              <span class="text-secondary">Status: </span>
+              <span class="text-uppercase mr-1"><b-badge variant="warning">Disabled</b-badge></span> <b-button variant="outline-info" size="sm"
+                                                                                             data-cy="selectPageOfApprovalsBtn"><i class="fas fa-glass-cheers"></i> Go Live</b-button>
+            </div>
+          </div>
+          <div class="col">
+            <b-form inline>
+              <span class="mr-1 text-secondary">Required: </span>
+              <b-form-select size="sm" v-model="numSkillsRequired.selected" :options="numSkillsRequired.options" />
+              <span class="ml-1">out <b-badge>2</b-badge> skills</span>
+
+              <b-button variant="outline-info" size="sm"
+                        data-cy="selectPageOfApprovalsBtn" class="ml-2"><i class="fas fa-sync"></i> Sync Points</b-button>
+            </b-form>
+
+          </div>
+        </div>
       </div>
       <div class="col text-right">
-        <b-button variant="outline-info" size="sm"
-                  data-cy="selectPageOfApprovalsBtn" class="mr-2"><i class="fas fa-sync"></i> Sync Points</b-button>
         <b-button id="newProjectBtn" ref="newProjButton" variant="outline-info" size="sm"
                 data-cy="newProjectButton" class="ml-1">
-        <span class="">Add Skill to Group</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
-      </b-button>
+          <span class="">Add Skill to Group</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
+        </b-button>
       </div>
     </div>
     <skills-table :table-id="`groupSkills_${parentSkillId}`"
@@ -39,6 +52,7 @@
     },
     props: {
       parentSkillId: String,
+      enabled: Boolean,
     },
     data() {
       return {

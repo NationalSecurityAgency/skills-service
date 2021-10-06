@@ -71,7 +71,8 @@ limitations under the License.
               <div v-if="data.item.isGroupType">
                 <div class="text-success font-weight-bold">
                   <i class="fas fa-layer-group" aria-hidden="true"></i> <span class="text-uppercase">Group</span>
-                  <b-badge variant="success" class="ml-2">{{ data.item.numberOfSkills}} skills</b-badge>
+                  <b-badge variant="success" class="ml-2 text-uppercase">{{ data.item.numberOfSkills}} skills</b-badge>
+                  <b-badge v-if="!data.item.enabled" variant="warning" class="ml-2 text-uppercase">Disabled</b-badge>
                 </div>
                 <div class="h5 text-primary"><span v-if="data.item.nameHtml" v-html="data.item.nameHtml"></span><span v-else>{{ data.item.name }}</span></div>
               </div>
@@ -172,7 +173,9 @@ limitations under the License.
           <span v-if="data.item.isGroupType" class="text-secondary">N/A</span>
         </template>
         <template #row-details="row">
-            <child-row-skill-group-display v-if="row.item.isGroupType" :parent-skill-id="row.item.skillId"/>
+            <child-row-skill-group-display v-if="row.item.isGroupType"
+                                           :enabled="row.item.enabled"
+                                           :parent-skill-id="row.item.skillId"/>
             <ChildRowSkillsDisplay v-if="row.item.isSkillType" :project-id="projectId" :subject-id="subjectId" v-skills-onMount="'ExpandSkillDetailsSkillsPage'"
                                    :parent-skill-id="row.item.skillId" :refresh-counter="row.item.refreshCounter"
                                    class="mr-3 ml-5 mb-3"></ChildRowSkillsDisplay>
@@ -322,17 +325,6 @@ limitations under the License.
       this.table.options.pagination.totalRows = this.skills.length;
       this.table.options.busy = false;
     },
-    // computed: {
-    //   addSkillDisabled() {
-    //     return this.skills && this.$store.getters.config && this.skills.length >= this.$store.getters.config.maxSkillsPerSubject;
-    //   },
-    //   addSkillsDisabledMsg() {
-    //     if (this.$store.getters.config) {
-    //       return `The maximum number of Skills allowed is ${this.$store.getters.config.maxSkillsPerSubject}`;
-    //     }
-    //     return '';
-    //   },
-    // },
     methods: {
       updateColumns(newList) {
         const extraColLookup = {
@@ -393,14 +385,6 @@ limitations under the License.
         return dayjs(timestamp)
           .isSame(new Date(), 'day');
       },
-      // newSkill() {
-      //   this.editSkillInfo = {
-      //     skill: {},
-      //     show: true,
-      //     isEdit: false,
-      //     isCopy: false,
-      //   };
-      // },
       editSkill(skillToEdit) {
         this.currentlyFocusedSkillId = skillToEdit.skillId;
         this.editSkillInfo = { skill: skillToEdit, show: true, isEdit: true };
