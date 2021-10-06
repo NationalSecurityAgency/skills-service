@@ -78,8 +78,8 @@ class SkillsGroupAdminService {
     SkillRelDefRepo skillRelDefRepo
 
     @Transactional()
-    void addSkillToSkillsGroup(String projectId, String skillsGroupId, String skillid) {
-        ruleSetDefGraphService.assignGraphRelationship(projectId, skillsGroupId, SkillDef.ContainerType.SkillsGroup, skillid, SkillRelDef.RelationshipType.SkillsGroupRequirement)
+    void addSkillToSkillsGroup(String projectId, String skillsGroupId, String skillId) {
+        ruleSetDefGraphService.assignGraphRelationship(projectId, skillsGroupId, SkillDef.ContainerType.SkillsGroup, skillId, SkillRelDef.RelationshipType.SkillsGroupRequirement)
     }
 
     @Profile
@@ -88,6 +88,9 @@ class SkillsGroupAdminService {
     }
 
     void validateSkillsGroup(SkillRequest skillRequest, SkillDefWithExtra skillDefinition) {
+        if (skillDefinition.type != skills.storage.model.SkillDef.ContainerType.valueOf(skillRequest.type)) {
+            throw new SkillException("Cannot convert an existing Skill to a Skill Group, or existing Skill Group to Skill.")
+        }
         int numSkillsRequired = skillRequest.numSkillsRequired
         boolean enabled = StringUtils.isNotBlank(skillRequest.enabled) && StringUtils.equalsIgnoreCase(skillRequest.enabled, Boolean.TRUE.toString())
         Integer skillsGroupIdRef = skillDefinition.id

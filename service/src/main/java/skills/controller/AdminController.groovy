@@ -426,7 +426,7 @@ class AdminController {
                                                   @RequestBody SkillRequest skillRequest) {
         SkillsValidator.isNotBlank(groupId, "Skills Group Id", projectId)
         validateAndSaveSkill(projectId, subjectId, skillId, skillRequest)
-        skillsGroupAdminService.addSkillToSkillsGroup(projectId, groupId)
+        skillsGroupAdminService.addSkillToSkillsGroup(projectId, groupId, skillId)
         return new RequestResult(success: true)
     }
 
