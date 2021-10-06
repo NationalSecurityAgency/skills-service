@@ -48,6 +48,6 @@ class SkillRequest {
     String type = SkillDef.ContainerType.Skill
 
     // the following props only apply when type == SkillsGroup
-    int numSkillsRequired = 0
+    int numSkillsRequired = -1
     String enabled
 }
