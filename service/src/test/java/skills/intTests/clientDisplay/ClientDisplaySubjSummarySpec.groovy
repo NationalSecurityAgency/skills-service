@@ -17,6 +17,7 @@ package skills.intTests.clientDisplay
 
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
+import spock.lang.IgnoreRest
 
 class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
 
@@ -38,6 +39,25 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         summary.skills.each {
             it.maxOccurrencesWithinIncrementInterval == 1
         }
+        summary.description == "This is a description"
+        summary.helpUrl == "http://foo.org"
+    }
+
+    def "load subject summary, no skills"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        proj1_subj.helpUrl = "http://foo.org"
+        proj1_subj.description = "This is a description"
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        when:
+        def summary = skillsService.getSkillSummary("user1", proj1.projectId, proj1_subj.subjectId, -1, false)
+        then:
+        summary.skills.size() == 0
         summary.description == "This is a description"
         summary.helpUrl == "http://foo.org"
     }

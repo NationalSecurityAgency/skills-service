@@ -601,12 +601,13 @@ class SkillsService {
         wsHelper.get(url.toString(), "api", null, false)
     }
 
-    def getSkillSummary(String userId, String projId, String subjId=null, int version = -1) {
+    def getSkillSummary(String userId, String projId, String subjId=null, int version = -1, boolean includeSkills=true) {
         userId = getUserId(userId)
         String url = "/projects/${projId}/${subjId ? "subjects/${subjId}/" : ''}summary?userId=${userId}"
         if (version >= 0) {
             url += "&version=${version}"
         }
+        url += "&includeSkills=${includeSkills}"
         wsHelper.apiGet(url)
     }
 

@@ -22,7 +22,7 @@ limitations under the License.
             <skills-title>{{ displayData.userSkills.subject }}</skills-title>
 
             <div class="user-skill-subject-overall">
-                <user-skills-header :display-data="displayData"/>
+                <user-skills-header :display-data="displayDataHeader"/>
             </div>
 
             <div v-if="displayData.userSkills.description" class="card mt-2">
@@ -64,15 +64,42 @@ limitations under the License.
     },
     watch: {
       $route: 'fetchData',
+      displayData: {
+        deep: true,
+        handler() {
+          this.displayDataHeader = this.displayData;
+        },
+      },
+    },
+    data() {
+      return {
+        displayDataHeader: this.displayData,
+      };
     },
     mounted() {
       this.fetchData();
+      this.$bus.on('skill.self_report.hs', this.refreshHeader);
+    },
+    beforeDestroy() {
+      this.$bus.off('skill.self_report.hs', this.refreshHeader);
     },
     methods: {
       fetchData() {
         this.resetLoading();
         this.loadSubject();
         this.loadUserSkillsRanking();
+      },
+      refreshHeader(event) {
+        if (event.subjectId && event.skillId) {
+          const newDisplayData = {};
+          this.rawLoadUserSkillsRanking().then((resp) => {
+            newDisplayData.userSkillsRanking = resp;
+            this.rawLoadUserSubject(false).then((resp2) => {
+              newDisplayData.userSkills = resp2;
+              this.displayDataHeader = newDisplayData;
+            });
+          });
+        }
       },
     },
   };

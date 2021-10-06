@@ -453,12 +453,12 @@ class SkillsLoader {
     }
 
     @Transactional(readOnly = true)
-    SkillSubjectSummary loadSubject(String projectId, String userId, String subjectId, Integer version = -1) {
+    SkillSubjectSummary loadSubject(String projectId, String userId, String subjectId, Integer version = -1, Boolean loadSkills = true) {
         ProjDef projDef = getProjDef(userId, projectId)
         SkillDefWithExtra subjectDef = getSkillDefWithExtra(userId, projectId, subjectId, SkillDef.ContainerType.Subject)
 
         if (version == -1 || subjectDef.version <= version) {
-            return loadSubjectSummary(projDef, userId, subjectDef, version, true)
+            return loadSubjectSummary(projDef, userId, subjectDef, version, loadSkills)
         } else {
             return null
         }

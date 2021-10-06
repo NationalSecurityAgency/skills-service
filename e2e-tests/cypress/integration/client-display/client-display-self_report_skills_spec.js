@@ -537,4 +537,45 @@ describe('Client Display Self Report Skills Tests', () => {
     cy.get('[data-cy="selfReportSubmitBtn"]').click();
     cy.get('[data-cy="selfReportError"]').contains('Insufficient Subject points, skill achievement is disallowed');
   });
+
+  it('self report honor system updates overall progress and points', () => {
+    cy.createSkill(1, 1, 1, {selfReportingType : 'Approval', pointIncrement: 50,  pointIncrementInterval: 0 });
+    cy.createSkill(1, 1, 2, {selfReportingType: 'HonorSystem', pointIncrement: 50,  pointIncrementInterval: 0 });
+    cy.createSkill(1, 1, 3);
+
+    cy.cdVisit('/');
+    cy.cdClickSubj(0);
+
+    cy.get('[data-cy=toggleSkillDetails]').click()
+
+    cy.get('.user-skills-overview .circle-number').eq(0).contains('0');
+    cy.get('.user-skills-overview .circle-number').eq(0).contains('out of');
+    cy.get('.user-skills-overview .circle-number').eq(0).contains('400');
+    cy.get('.progress-circle-wrapper').eq(0).contains('0 Points earned Today');
+    cy.get('.user-skills-overview .circle-number').eq(1).contains('0');
+    cy.get('.user-skills-overview .circle-number').eq(1).contains('out of');
+    cy.get('.user-skills-overview .circle-number').eq(1).contains('40');
+    cy.get('.progress-circle-wrapper').eq(1).contains('0 Points earned Today');
+    cy.get('.progress-circle-wrapper').eq(1).contains('40 Points to Level 1');
+
+    cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportBtn"]').click();
+    cy.get('[data-cy="selfReportSkillMsg"]').contains('This skill can be submitted under the Honor System and 50 points will be awarded right away')
+    cy.get('[data-cy="selfReportSubmitBtn"]').click();
+
+    cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportAlert"]').contains("You just earned 50 points!")
+    cy.get('[data-cy="skillProgress_index-1"] [data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').contains('50');
+    cy.get('[data-cy="skillProgress_index-1"] [data-cy="pointsAchievedTodayCard"] [data-cy="progressInfoCardTitle"]').contains('50');
+    cy.get('[data-cy="skillProgress_index-1"] [data-cy="pointsPerOccurrenceCard"] [data-cy="progressInfoCardTitle"]').contains('50');
+    cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('50 / 100 Points')
+
+    cy.get('.user-skills-overview .circle-number').eq(0).contains('50');
+    cy.get('.user-skills-overview .circle-number').eq(0).contains('out of');
+    cy.get('.user-skills-overview .circle-number').eq(0).contains('400');
+    cy.get('.progress-circle-wrapper').eq(0).contains('50 Points earned Today');
+    cy.get('.user-skills-overview .circle-number').eq(1).contains('10');
+    cy.get('.user-skills-overview .circle-number').eq(1).contains('out of');
+    cy.get('.user-skills-overview .circle-number').eq(1).contains('60');
+    cy.get('.progress-circle-wrapper').eq(1).contains('50 Points earned Today');
+    cy.get('.progress-circle-wrapper').eq(1).contains('50 Points to Level 2');
+  });
 })

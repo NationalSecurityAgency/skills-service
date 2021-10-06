@@ -134,7 +134,11 @@ limitations under the License.
       };
     },
     mounted() {
+      this.$bus.on('skill.self_report.hs', this.reloadData);
       this.loadPointsHistory();
+    },
+    beforeDestroy() {
+      this.$bus.off('skill.self_report.hs', this.reloadData);
     },
     computed: {
       hasData() {
@@ -230,6 +234,11 @@ limitations under the License.
             min: undefined,
           },
         });
+      },
+      reloadData(event) {
+        if (event.subjectId && event.skillId) {
+          this.loadPointsHistory();
+        }
       },
     },
   };

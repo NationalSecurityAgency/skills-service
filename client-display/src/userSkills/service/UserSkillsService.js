@@ -72,9 +72,11 @@ export default {
     return response;
   },
 
-  getSubjectSummary(subjectId) {
+  getSubjectSummary(subjectId, includeSkills = true) {
+    const params = this.getUserIdAndVersionParams();
+    params.includeSkills = includeSkills;
     return axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/subjects/${subjectId}/summary`, {
-      params: this.getUserIdAndVersionParams(),
+      params,
     }).then((result) => SkillEnricherUtil.addMetaToSummary(result.data));
   },
 
