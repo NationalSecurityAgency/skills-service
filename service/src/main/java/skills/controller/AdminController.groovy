@@ -36,6 +36,7 @@ import skills.services.admin.*
 import skills.services.inception.InceptionProjectService
 import skills.services.settings.SettingsService
 import skills.services.settings.listeners.ValidationRes
+import skills.storage.model.SkillDef
 import skills.utils.ClientSecretGenerator
 import skills.utils.InputSanitizer
 
@@ -410,38 +411,41 @@ class AdminController {
         skillRequest.subjectId = skillRequest.subjectId ?: subjectId
         skillRequest.skillId = skillRequest.skillId ?: skillId
 
-        SkillsValidator.isTrue(skillRequest.pointIncrement > 0, "pointIncrement must be > 0", projectId, skillId)
-        propsBasedValidator.validateMaxIntValue(PublicProps.UiProp.maxPointIncrement, "pointIncrement", skillRequest.pointIncrement)
-
-        SkillsValidator.isTrue(skillRequest.pointIncrementInterval >= 0, "pointIncrementInterval must be >= 0", projectId, skillId)
-        SkillsValidator.isTrue(skillRequest.pointIncrementInterval <= maxTimeWindowInMinutes, "pointIncrementInterval must be <= $maxTimeWindowInMinutes", projectId, skillId)
-        SkillsValidator.isTrue(skillRequest.numPerformToCompletion > 0, "numPerformToCompletion must be > 0", projectId, skillId)
-        propsBasedValidator.validateMaxIntValue(PublicProps.UiProp.maxNumPerformToCompletion, "numPerformToCompletion", skillRequest.numPerformToCompletion)
-
-        if (skillRequest.pointIncrementInterval > 0) {
-            // if pointIncrementInterval is disabled then this validation is not needed
-            SkillsValidator.isTrue(skillRequest.numMaxOccurrencesIncrementInterval > 0, "numMaxOccurrencesIncrementInterval must be > 0", projectId, skillId)
-            SkillsValidator.isTrue(skillRequest.numPerformToCompletion >= skillRequest.numMaxOccurrencesIncrementInterval, "numPerformToCompletion must be >= numMaxOccurrencesIncrementInterval", projectId, skillId)
-            propsBasedValidator.validateMaxIntValue(PublicProps.UiProp.maxNumPointIncrementMaxOccurrences, "numMaxOccurrencesIncrementInterval", skillRequest.numMaxOccurrencesIncrementInterval)
-        }
-
-        SkillsValidator.isTrue(skillRequest.version >= 0, "version must be >= 0", projectId, skillId)
-        propsBasedValidator.validateMaxIntValue(PublicProps.UiProp.maxSkillVersion, "Skill Version", skillRequest.version)
-
         IdFormatValidator.validate(skillRequest.skillId)
         propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxIdLength, "Skill Id", skillRequest.skillId)
         propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minIdLength, "Skill Id", skillRequest.skillId)
 
         propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxSkillNameLength, "Skill Name", skillRequest.name)
         propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minNameLength, "Skill Name", skillRequest.name)
-        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.descriptionMaxLength, "Skill Description", skillRequest.description)
 
         skillRequest.name = InputSanitizer.sanitize(skillRequest.name)
         skillRequest.projectId = InputSanitizer.sanitize(skillRequest.projectId)
         skillRequest.skillId = InputSanitizer.sanitize(skillRequest.skillId)
-        skillRequest.description = InputSanitizer.sanitize(skillRequest.description)
         skillRequest.subjectId = InputSanitizer.sanitize(skillRequest.subjectId)
-        skillRequest.helpUrl = InputSanitizer.sanitizeUrl(skillRequest.helpUrl)
+
+        if (skillRequest.type == SkillDef.ContainerType.Skill.toString()) {
+            SkillsValidator.isTrue(skillRequest.pointIncrement > 0, "pointIncrement must be > 0", projectId, skillId)
+            propsBasedValidator.validateMaxIntValue(PublicProps.UiProp.maxPointIncrement, "pointIncrement", skillRequest.pointIncrement)
+
+            SkillsValidator.isTrue(skillRequest.pointIncrementInterval >= 0, "pointIncrementInterval must be >= 0", projectId, skillId)
+            SkillsValidator.isTrue(skillRequest.pointIncrementInterval <= maxTimeWindowInMinutes, "pointIncrementInterval must be <= $maxTimeWindowInMinutes", projectId, skillId)
+            SkillsValidator.isTrue(skillRequest.numPerformToCompletion > 0, "numPerformToCompletion must be > 0", projectId, skillId)
+            propsBasedValidator.validateMaxIntValue(PublicProps.UiProp.maxNumPerformToCompletion, "numPerformToCompletion", skillRequest.numPerformToCompletion)
+
+            if (skillRequest.pointIncrementInterval > 0) {
+                // if pointIncrementInterval is disabled then this validation is not needed
+                SkillsValidator.isTrue(skillRequest.numMaxOccurrencesIncrementInterval > 0, "numMaxOccurrencesIncrementInterval must be > 0", projectId, skillId)
+                SkillsValidator.isTrue(skillRequest.numPerformToCompletion >= skillRequest.numMaxOccurrencesIncrementInterval, "numPerformToCompletion must be >= numMaxOccurrencesIncrementInterval", projectId, skillId)
+                propsBasedValidator.validateMaxIntValue(PublicProps.UiProp.maxNumPointIncrementMaxOccurrences, "numMaxOccurrencesIncrementInterval", skillRequest.numMaxOccurrencesIncrementInterval)
+            }
+
+            SkillsValidator.isTrue(skillRequest.version >= 0, "version must be >= 0", projectId, skillId)
+            propsBasedValidator.validateMaxIntValue(PublicProps.UiProp.maxSkillVersion, "Skill Version", skillRequest.version)
+
+            propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.descriptionMaxLength, "Skill Description", skillRequest.description)
+            skillRequest.description = InputSanitizer.sanitize(skillRequest.description)
+            skillRequest.helpUrl = InputSanitizer.sanitizeUrl(skillRequest.helpUrl)
+        }
 
         skillsAdminService.saveSkill(skillId, skillRequest)
         return new RequestResult(success: true)

@@ -38,7 +38,7 @@ limitations under the License.
                 :project-id="projectId" :subject-id="subjectId" @skill-saved="skillCreatedOrUpdated" @hidden="handleHide"/>
 
     <edit-skill-group v-if="editGroupInfo.show" v-model="editGroupInfo.show" :group="editGroupInfo.group" :is-edit="false"
-                  @group-saved="groupSaved" @hidden="handleHide"/>
+                      @group-saved="skillCreatedOrUpdated" @hidden="handleHide"/>
   </div>
 </template>
 
@@ -111,32 +111,32 @@ limitations under the License.
         SkillsService.getSubjectSkills(this.projectId, this.subjectId)
           .then((skills) => {
             const loadedSkills = skills;
-            loadedSkills.push({
-              skillId: 'group1',
-              projectId: 'proj1',
-              name: 'A bunch of important skills grouped together',
-              version: 1,
-              displayOrder: 4,
-              created: '2021-10-12T13:41:19.444+00:00',
-              totalPoints: 200,
-              numberOfSkills: 4,
-              selfReportSkills: 1,
-              type: 'Group',
-              enabled: true,
-            });
-            loadedSkills.push({
-              skillId: 'group2',
-              projectId: 'proj1',
-              name: 'A bunch of important skills grouped together',
-              version: 1,
-              displayOrder: 5,
-              created: '2021-10-12T13:41:20.444+00:00',
-              totalPoints: 200,
-              numberOfSkills: 4,
-              selfReportSkills: 1,
-              type: 'Group',
-              enabled: false,
-            });
+            // loadedSkills.push({
+            //   skillId: 'group1',
+            //   projectId: 'proj1',
+            //   name: 'A bunch of important skills grouped together',
+            //   version: 1,
+            //   displayOrder: 4,
+            //   created: '2021-10-12T13:41:19.444+00:00',
+            //   totalPoints: 200,
+            //   numberOfSkills: 4,
+            //   selfReportSkills: 1,
+            //   type: 'SkillsGroup',
+            //   enabled: true,
+            // });
+            // loadedSkills.push({
+            //   skillId: 'group2',
+            //   projectId: 'proj1',
+            //   name: 'A bunch of important skills grouped together',
+            //   version: 1,
+            //   displayOrder: 5,
+            //   created: '2021-10-12T13:41:20.444+00:00',
+            //   totalPoints: 200,
+            //   numberOfSkills: 4,
+            //   selfReportSkills: 1,
+            //   type: 'SkillsGroup',
+            //   enabled: false,
+            // });
             this.skills = loadedSkills.map((loadedSkill) => {
               const copy = { ...loadedSkill };
               copy.created = dayjs(loadedSkill.created);
@@ -154,7 +154,11 @@ limitations under the License.
       },
       newSkill() {
         this.editSkillInfo = {
-          skill: {},
+          skill: {
+            projectId: this.projectId,
+            subjectId: this.subject.subjectId,
+            type: 'Skill',
+          },
           show: true,
           isEdit: false,
           isCopy: false,
@@ -166,6 +170,8 @@ limitations under the License.
           show: true,
           group: {
             projectId: this.projectId,
+            subjectId: this.subject.subjectId,
+            type: 'SkillsGroup',
           },
         };
       },

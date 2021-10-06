@@ -189,8 +189,7 @@ class SkillsAdminService {
             skillDefWithExtraRepo.save(skillDefinition)
         }
 
-        SkillDef savedSkill = skillDefRepo.findByProjectIdAndSkillIdAndType(skillRequest.projectId, skillRequest.skillId, SkillDef.ContainerType.Skill)
-
+        SkillDef savedSkill = skillDefRepo.findByProjectIdAndSkillIdAndType(skillRequest.projectId, skillRequest.skillId, skillType)
         if (!isEdit) {
             assignToParent(skillRequest, savedSkill, subject)
         }

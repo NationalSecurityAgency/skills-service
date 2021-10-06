@@ -183,7 +183,7 @@ limitations under the License.
       </skills-b-table>
 
       </div>
-      <no-content2 v-else title="No Skills Yet" class="mt-4"
+      <no-content2 v-else title="No Skills Yet" class="my-5"
                  message="Projects are composed of Subjects which are made of Skills and a single skill defines a training unit within the gamification framework."/>
     </loading-container>
 
@@ -314,7 +314,7 @@ limitations under the License.
         const withSubjId = {
           subjectId: this.subjectId,
           refreshCounter: 0,
-          isGroupType: item.type === 'Group',
+          isGroupType: item.type === 'SkillsGroup',
           isSkillType: item.type === 'Skill',
           ...item,
         };
@@ -417,7 +417,7 @@ limitations under the License.
             let createdSkill = skillRes;
             createdSkill = {
               subjectId: this.subjectId,
-              isGroupType: skill.type === 'Group',
+              isGroupType: skill.type === 'SkillsGroup',
               isSkillType: skill.type === 'Skill',
               ...createdSkill,
               created: new Date(createdSkill.created),
