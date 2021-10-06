@@ -37,6 +37,7 @@ import skills.services.inception.InceptionProjectService
 import skills.services.settings.SettingsService
 import skills.services.settings.listeners.ValidationRes
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillRelDef
 import skills.utils.ClientSecretGenerator
 import skills.utils.InputSanitizer
 
@@ -81,6 +82,9 @@ class AdminController {
 
     @Autowired
     SkillsAdminService skillsAdminService
+
+    @Autowired
+    SkillsGroupAdminService skillsGroupAdminService
 
     @Autowired
     SkillsDepsService skillsDepsService
@@ -380,6 +384,15 @@ class AdminController {
         return skillsAdminService.getSkills(projectId, subjectId)
     }
 
+    @RequestMapping(value = "/projects/{projectId}/groups/{groupId}/skills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    List<SkillDefPartialRes> getSkillsForSkillsGroup(
+            @PathVariable("projectId") String projectId, @PathVariable("groupId") String groupId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(groupId, "Skills Group Id", projectId)
+
+        return skillsAdminService.getSkills(projectId, groupId, SkillDef.ContainerType.SkillsGroup, SkillRelDef.RelationshipType.SkillsGroupRequirement)
+    }
+
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/skills/{skillId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     SkillDefRes getSkill(
@@ -400,6 +413,24 @@ class AdminController {
                             @PathVariable("skillId") String skillId,
                             @RequestBody SkillRequest skillRequest) {
 
+        validateAndSaveSkill(projectId, subjectId, skillId, skillRequest)
+        return new RequestResult(success: true)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/groups/{groupId}/skills/{skillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    RequestResult saveSkillAndAssignToSkillsGroup(@PathVariable("projectId") String projectId,
+                                                  @PathVariable("subjectId") String subjectId,
+                                                  @PathVariable("groupId") String groupId,
+                                                  @PathVariable("skillId") String skillId,
+                                                  @RequestBody SkillRequest skillRequest) {
+        SkillsValidator.isNotBlank(groupId, "Skills Group Id", projectId)
+        validateAndSaveSkill(projectId, subjectId, skillId, skillRequest)
+        skillsGroupAdminService.addSkillToSkillsGroup(projectId, groupId)
+        return new RequestResult(success: true)
+    }
+
+    private void validateAndSaveSkill(String projectId, String subjectId, String skillId, SkillRequest skillRequest) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
@@ -448,7 +479,6 @@ class AdminController {
         }
 
         skillsAdminService.saveSkill(skillId, skillRequest)
-        return new RequestResult(success: true)
     }
 
     @GetMapping(value = '/projects/{projectId}/latestVersion', produces = 'application/json')
