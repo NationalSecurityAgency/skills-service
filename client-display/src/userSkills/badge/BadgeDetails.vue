@@ -77,7 +77,7 @@ limitations under the License.
           });
       },
       refreshHeader(event) {
-        if (event.badgeId === this.badge.badgeId) {
+        if (event.badgeId && event.badgeId === this.badge.badgeId) {
           UserSkillsService.getBadgeSkills(this.$route.params.badgeId, false, false)
             .then((badgeSummary) => {
               this.badgeOverview = badgeSummary;
