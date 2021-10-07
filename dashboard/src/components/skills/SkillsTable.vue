@@ -58,7 +58,7 @@ limitations under the License.
                       @sort-changed="handleColumnSort">
 
         <template v-slot:cell(name)="data">
-          <div class="row">
+          <div class="row" :data-cy="`nameCell_${data.item.skillId}`">
             <div class="col-auto pr-0">
               <b-button size="sm" @click="data.toggleDetails" class="mr-2 py-0 px-1 btn btn-info"
                         :aria-label="`Expand details for ${data.item.name}`"
@@ -71,7 +71,7 @@ limitations under the License.
               <div v-if="data.item.isGroupType">
                 <div class="text-success font-weight-bold">
                   <i class="fas fa-layer-group" aria-hidden="true"></i> <span class="text-uppercase">Group</span>
-                  <b-badge variant="success" class="ml-2 text-uppercase">{{ data.item.numberOfSkills}} skills</b-badge>
+                  <b-badge variant="success" class="ml-2 text-uppercase">{{ data.item.numSkillsInGroup }} skills</b-badge>
                   <b-badge v-if="!data.item.enabled" variant="warning" class="ml-2 text-uppercase">Disabled</b-badge>
                 </div>
                 <div class="h5 text-primary"><span v-if="data.item.nameHtml" v-html="data.item.nameHtml"></span><span v-else>{{ data.item.name }}</span></div>
@@ -121,7 +121,7 @@ limitations under the License.
         <template v-slot:cell(totalPoints)="data">
             <div>{{ data.value | number }}</div>
             <div v-if="data.item.isSkillType" class="small text-secondary">{{ data.item.pointIncrement | number }} pts x {{ data.item.numPerformToCompletion | number }} repetitions</div>
-            <div v-if="data.item.isGroupType" class="small text-secondary">from {{ data.item.numberOfSkills | number }} skills</div>
+            <div v-if="data.item.isGroupType" class="small text-secondary">from {{ data.item.numberOfSkillsInGroup | number }} skills</div>
         </template>
 
         <template v-slot:cell(timeWindow)="data">
@@ -173,9 +173,9 @@ limitations under the License.
           <span v-if="data.item.isGroupType" class="text-secondary">N/A</span>
         </template>
         <template #row-details="row">
-            <child-row-skill-group-display v-if="row.item.isGroupType"
-                                           :enabled="row.item.enabled"
-                                           :parent-skill-id="row.item.skillId"/>
+            <child-row-skill-group-display v-if="row.item.isGroupType" :group="row.item"
+                                           @skill-added="row.item.numSkillsInGroup = row.item.numSkillsInGroup + 1"
+                                           @skill-removed="row.item.numSkillsInGroup = row.item.numSkillsInGroup - 1"/>
             <ChildRowSkillsDisplay v-if="row.item.isSkillType" :project-id="projectId" :subject-id="subjectId" v-skills-onMount="'ExpandSkillDetailsSkillsPage'"
                                    :parent-skill-id="row.item.skillId" :refresh-counter="row.item.refreshCounter"
                                    class="mr-3 ml-5 mb-3"></ChildRowSkillsDisplay>
@@ -188,7 +188,9 @@ limitations under the License.
     </loading-container>
 
     <edit-skill v-if="editSkillInfo.show" v-model="editSkillInfo.show" :skillId="editSkillInfo.skill.skillId" :is-copy="editSkillInfo.isCopy" :is-edit="editSkillInfo.isEdit"
-                :project-id="projectId" :subject-id="subjectId" @skill-saved="skillCreatedOrUpdated" @hidden="handleHide"/>
+                :project-id="projectId" :subject-id="subjectId" @skill-saved="skillCreatedOrUpdated" @hidden="handleFocus"/>
+    <edit-skill-group v-if="editGroupInfo.show" v-model="editGroupInfo.show" :group="editGroupInfo.group" :is-edit="editGroupInfo.isEdit"
+                      @group-saved="skillCreatedOrUpdated" @hidden="handleFocus"/>
   </div>
 </template>
 
@@ -206,6 +208,7 @@ limitations under the License.
   import TimeWindowMixin from './TimeWindowMixin';
   import ChildRowSkillGroupDisplay from './ChildRowSkillGroupDisplay';
   import StringHighlighter from '../utils/StringHighlighter';
+  import EditSkillGroup from './EditSkillGroup';
 
   export default {
     name: 'SkillsTable',
@@ -232,6 +235,7 @@ limitations under the License.
       },
     },
     components: {
+      EditSkillGroup,
       ChildRowSkillGroupDisplay,
       SkillsBTable,
       EditSkill,
@@ -248,6 +252,11 @@ limitations under the License.
           isCopy: false,
           show: false,
           skill: {},
+        },
+        editGroupInfo: {
+          isEdit: false,
+          show: false,
+          group: {},
         },
         skillsOriginal: [],
         skills: [],
@@ -385,9 +394,17 @@ limitations under the License.
         return dayjs(timestamp)
           .isSame(new Date(), 'day');
       },
-      editSkill(skillToEdit) {
-        this.currentlyFocusedSkillId = skillToEdit.skillId;
-        this.editSkillInfo = { skill: skillToEdit, show: true, isEdit: true };
+      editSkill(itemToEdit) {
+        this.currentlyFocusedSkillId = itemToEdit.skillId;
+        if (itemToEdit.isGroupType) {
+          this.editGroupInfo = {
+            isEdit: true,
+            show: true,
+            group: itemToEdit,
+          };
+        } else {
+          this.editSkillInfo = { skill: itemToEdit, show: true, isEdit: true };
+        }
       },
       copySkill(skillToCopy) {
         // deep copy skill to prevent any future conflicts
@@ -412,7 +429,7 @@ limitations under the License.
         const item1Index = this.skills.findIndex((item) => item.skillId === skill.originalSkillId);
         const { isEdit } = skill;
 
-        SkillsService.saveSkill(skill)
+        return SkillsService.saveSkill(skill)
           .then((skillRes) => {
             let createdSkill = skillRes;
             createdSkill = {
@@ -443,9 +460,10 @@ limitations under the License.
 
             if (isEdit) {
               setTimeout(() => {
-                this.handleFocus({ updated: true });
+                this.handleFocus();
               }, 0);
             }
+            return createdSkill;
           })
           .finally(() => {
             this.doneShowingLoading();
@@ -499,6 +517,7 @@ limitations under the License.
             this.rebuildDisplayOrder();
             this.disableFirstAndLastButtons();
             this.$emit('skills-change', skill.skillId);
+            this.$emit('skill-removed', skill);
 
             this.successToast('Removed Skill', `Skill '${skill.name}' was removed.`);
           })
@@ -552,23 +571,18 @@ limitations under the License.
           tableData[tableData.length - 1].disabledDownButton = true;
         }
       },
-      handleHide(e) {
-        if (!e || !e.saved || (e.saved && !e.updated)) {
-          this.handleFocus(e);
-        }
-      },
-      handleFocus(e) {
-        let ref = this.$refs.subPageHeader.$refs.actionButton;
-        if (e && e.updated && this.currentlyFocusedSkillId) {
+      handleFocus() {
+        let ref = null;
+        if (this.currentlyFocusedSkillId) {
           const refName = `edit_${this.currentlyFocusedSkillId}`;
           ref = this.$refs[refName];
         }
         this.currentlyFocusedSkillId = '';
-        this.$nextTick(() => {
-          if (ref) {
+        if (ref) {
+          this.$nextTick(() => {
             ref.focus();
-          }
-        });
+          });
+        }
       },
       getSelfReportingTypePretty(selfReportingType) {
         return (selfReportingType === 'HonorSystem') ? 'Honor System' : selfReportingType;

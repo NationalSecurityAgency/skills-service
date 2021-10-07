@@ -15,6 +15,19 @@
  */
 import axios from 'axios';
 
+const enrichSkillObjWithRequiredAtts = (skill) => {
+  const copy = { ...skill };
+  if (!skill.timeWindowEnabled) {
+    copy.pointIncrementInterval = 0;
+  } else {
+    // convert to minutes
+    copy.pointIncrementInterval = ((parseInt(skill.pointIncrementIntervalHrs, 10) * 60) + parseInt(skill.pointIncrementIntervalMins, 10));
+  }
+  copy.numMaxOccurrencesIncrementInterval = skill.numPointIncrementMaxOccurrences;
+
+  return copy;
+};
+
 export default {
   getSkillDetails(projectId, subjectId, skillId) {
     return axios.get(`/admin/projects/${projectId}/subjects/${subjectId}/skills/${skillId}`)
@@ -43,25 +56,25 @@ export default {
     return axios.get(`/admin/projects/${projectId}/subjects/${subjectId}/skills`)
       .then((response) => response.data);
   },
+  getGroupSkills(projectId, groupId) {
+    return axios.get(`/admin/projects/${projectId}/groups/${groupId}/skills`)
+      .then((response) => response.data);
+  },
   getProjectSkills(projectId) {
     return axios.get(`/admin/projects/${projectId}/skills`)
       .then((response) => response.data);
   },
   saveSkill(skill) {
-    const copy = { ...skill };
-    if (!skill.timeWindowEnabled) {
-      copy.pointIncrementInterval = 0;
-    } else {
-      // convert to minutes
-      copy.pointIncrementInterval = ((parseInt(skill.pointIncrementIntervalHrs, 10) * 60) + parseInt(skill.pointIncrementIntervalMins, 10));
-    }
-    copy.numMaxOccurrencesIncrementInterval = skill.numPointIncrementMaxOccurrences;
-
+    const copy = enrichSkillObjWithRequiredAtts(skill);
     let requestSkillId = skill.skillId;
     if (skill.isEdit) {
       requestSkillId = skill.originalSkillId;
     }
-    return axios.post(`/admin/projects/${skill.projectId}/subjects/${skill.subjectId}/skills/${requestSkillId}`, copy)
+    const url = (skill.groupId && skill.groupId.length > 0)
+      ? `/admin/projects/${skill.projectId}/subjects/${skill.subjectId}/groups/${skill.groupId}/skills/${requestSkillId}`
+      : `/admin/projects/${skill.projectId}/subjects/${skill.subjectId}/skills/${requestSkillId}`;
+
+    return axios.post(url, copy)
       .then(() => this.getSkillDetails(skill.projectId, skill.subjectId, skill.skillId));
   },
   deleteSkill(skill) {

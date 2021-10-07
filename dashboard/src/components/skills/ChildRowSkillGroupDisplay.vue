@@ -15,104 +15,174 @@ limitations under the License.
 */
 <template>
 <div>
-  <b-card body-class="p-0" class="ml-4 mb-3" style="background-color: rgba(0,124,73,0.04)">
-    <div class="row px-3 my-2" style="height: 3rem;">
-      <div class="col">
+  <loading-container v-bind:is-loading="isLoading" :data-cy="`ChildRowSkillGroupDisplay_${group.skillId}`">
+    <b-card body-class="p-0" class="ml-4 mb-3" style="background-color: rgba(0,124,73,0.04)">
+      <div class="row px-3 my-2" style="height: 3rem;">
+        <div class="col">
 
-        <div class="row align-items-center">
-          <div class="col-auto border-right">
-            <div v-if="enabled">
-              <span class="text-secondary">Status: </span> <span class="text-uppercase"><b-badge variant="success">Live <span class="far fa-check-circle" aria-hidden="true"/></b-badge></span>
+          <div class="row align-items-center">
+            <div class="col-auto border-right">
+              <div v-if="this.group.enabled">
+                <span class="text-secondary">Status: </span> <span class="text-uppercase"><b-badge variant="success">Live <span class="far fa-check-circle" aria-hidden="true"/></b-badge></span>
+              </div>
+              <div v-if="!this.group.enabled" data-cy="skillGroupStatus" style="">
+                <span class="text-secondary">Status: </span>
+                <span class="text-uppercase mr-1"><b-badge variant="warning">Disabled</b-badge></span>
+                <span v-b-tooltip.hover="goLiveToolTipText">
+                  <b-button variant="outline-info" size="sm" data-cy="selectPageOfApprovalsBtn"
+                            @click="enableGroup"
+                            :disabled="goLiveDisabled">
+                    <i class="fas fa-glass-cheers"></i> Go Live
+                  </b-button>
+                </span>
+              </div>
             </div>
-            <div v-if="!enabled" data-cy="skillGroupStatus" style="">
-              <span class="text-secondary">Status: </span>
-              <span class="text-uppercase mr-1"><b-badge variant="warning">Disabled</b-badge></span> <b-button variant="outline-info" size="sm"
-                                                                                             data-cy="selectPageOfApprovalsBtn"><i class="fas fa-glass-cheers"></i> Go Live</b-button>
+            <div class="col">
+              <b-form inline>
+                <span class="mr-1 text-secondary">Required: </span>
+                <b-badge variant="info">{{ group.numSkillsInGroup }}</b-badge>
+                <span class="ml-1">out <b-badge>{{ numSkills }}</b-badge> skills</span>
+
+                <b-button variant="outline-info" size="sm"
+                          @click="showEditRequiredSkillsDialog"
+                          data-cy="selectPageOfApprovalsBtn" class="ml-2"><i class="far fa-edit"></i></b-button>
+              </b-form>
+
             </div>
-          </div>
-          <div class="col">
-            <b-form inline>
-              <span class="mr-1 text-secondary">Required: </span>
-              <b-form-select size="sm" v-model="numSkillsRequired.selected" :options="numSkillsRequired.options" />
-              <span class="ml-1">out <b-badge>2</b-badge> skills</span>
-
-              <b-button variant="outline-info" size="sm"
-                        data-cy="selectPageOfApprovalsBtn" class="ml-2"><i class="fas fa-sync"></i> Sync Points</b-button>
-            </b-form>
-
           </div>
         </div>
+        <div class="col text-right">
+          <b-button :id="`group-${group.skillId}_newSkillBtn`" :ref="`group-${group.skillId}_newSkillBtn`" variant="outline-info" size="sm"
+                    @click="showNewSkillDialog"
+                  data-cy="newProjectButton" class="ml-1">
+            <span class="">Add Skill to Group</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
+          </b-button>
+        </div>
       </div>
-      <div class="col text-right">
-        <b-button id="newProjectBtn" ref="newProjButton" variant="outline-info" size="sm"
-                data-cy="newProjectButton" class="ml-1">
-          <span class="">Add Skill to Group</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
-        </b-button>
-      </div>
-    </div>
-    <skills-table :table-id="`groupSkills_${parentSkillId}`"
-      :skills-prop="skills" :is-top-level="true"
-                  :project-id="this.$route.params.projectId"
-                  :subject-id="this.$route.params.subjectId"
-      :show-search="false" :show-header="false" :show-paging="false"/>
-  </b-card>
+      <skills-table :table-id="`groupSkills_${this.group.skillId}`" :ref="`groupSkills_${this.group.skillId}`"
+        :skills-prop="skills" :is-top-level="true"
+                    :project-id="this.$route.params.projectId"
+                    :subject-id="this.$route.params.subjectId"
+                    @skill-removed="skillRemoved"
+        :show-search="false" :show-header="false" :show-paging="false"/>
+    </b-card>
+  </loading-container>
+
+  <edit-skill v-if="editSkillInfo.show" v-model="editSkillInfo.show" :is-copy="editSkillInfo.isCopy" :is-edit="editSkillInfo.isEdit"
+              :project-id="editSkillInfo.skill.projectId" :subject-id="editSkillInfo.skill.subjectId" @skill-saved="saveSkill" @hidden="focusOnNewSkillButton"/>
+  <edit-num-required-skills v-if="editRequiredSkillsInfo.show" v-model="editRequiredSkillsInfo.show"
+                            :group="group" :skills="skills" />
 </div>
 </template>
 
 <script>
+  import SkillsService from './SkillsService';
+  import EditSkill from './EditSkill';
+  import LoadingContainer from '../utils/LoadingContainer';
+  import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
+  import EditNumRequiredSkills from './skillsGroup/EditNumRequiredSkills';
+
   export default {
     name: 'ChildRowSkillGroupDisplay',
+    mixins: [MsgBoxMixin],
     components: {
+      EditNumRequiredSkills,
+      LoadingContainer,
       SkillsTable: () => import('./SkillsTable'),
+      EditSkill,
     },
     props: {
-      parentSkillId: String,
-      enabled: Boolean,
+      group: Object,
     },
     data() {
       return {
-        isLoading: false,
-        numSkillsRequired: {
-          options: [1, 2],
-          selected: 2,
+        isLoading: true,
+        numSkills: 0,
+        editSkillInfo: {},
+        skills: [],
+        editRequiredSkillsInfo: {
+          show: false,
         },
-        skills: [
-          {
-            created: '2021-10-04T13:41:19.444+00:00',
-            displayOrder: 1,
-            name: 'Very Great Skill 1',
-            numMaxOccurrencesIncrementInterval: 1,
-            numPerformToCompletion: 2,
-            numUsers: 0,
-            pointIncrement: 100,
-            pointIncrementInterval: 480,
-            projectId: 'proj1',
-            selfReportingType: 'Approval',
-            skillId: 'skill1',
-            totalPoints: 200,
-            type: 'Skill',
-            updated: '2021-10-04T13:41:19.444+00:00',
-            version: 0,
-          },
-          {
-            created: '2021-10-04T13:41:19.444+00:00',
-            displayOrder: 1,
-            name: 'Very Great Skill 1',
-            numMaxOccurrencesIncrementInterval: 1,
-            numPerformToCompletion: 2,
-            numUsers: 0,
-            pointIncrement: 100,
-            pointIncrementInterval: 480,
-            projectId: 'proj1',
-            selfReportingType: 'Approval',
-            skillId: 'skill1',
-            totalPoints: 200,
-            type: 'Skill',
-            updated: '2021-10-04T13:41:19.444+00:00',
-            version: 0,
-          },
-        ],
       };
+    },
+    mounted() {
+      this.loadData();
+    },
+    computed: {
+      goLiveDisabled() {
+        return this.numSkills < 2;
+      },
+      goLiveToolTipText() {
+        const disabled = this.numSkills < 2;
+        if (disabled) {
+          return 'Must have at least 2 skills to go live!';
+        }
+        return '';
+      },
+    },
+    methods: {
+      loadData() {
+        this.isLoading = true;
+        SkillsService.getGroupSkills(this.group.projectId, this.group.skillId)
+          .then((res) => {
+            this.numSkills = res.length;
+            this.skills = res;
+          }).finally(() => {
+            this.isLoading = false;
+          });
+      },
+      showNewSkillDialog() {
+        this.editSkillInfo = {
+          skill: {
+            projectId: this.group.projectId,
+            subjectId: this.group.subjectId,
+            type: 'Skill',
+          },
+          show: true,
+          isEdit: false,
+          isCopy: false,
+        };
+      },
+      showEditRequiredSkillsDialog() {
+        this.editRequiredSkillsInfo = {
+          show: true,
+        };
+      },
+      saveSkill(skill) {
+        const copy = { groupId: this.group.skillId, ...skill };
+        this.$refs[`groupSkills_${this.group.skillId}`].skillCreatedOrUpdated(copy)
+          .then((newSkill) => {
+            this.numSkills += 1;
+            this.$emit('skill-added', newSkill);
+          });
+      },
+      skillRemoved(skill) {
+        this.numSkills -= 1;
+        this.$emit('skill-removed', skill);
+      },
+      focusOnNewSkillButton() {
+        const ref = this.$refs[`group-${this.group.skillId}_newSkillBtn`];
+        this.$nextTick(() => {
+          if (ref) {
+            ref.focus();
+          }
+        });
+      },
+      enableGroup() {
+        const msg = `While this Group is disabled, user's cannot see the group or achieve it. Once the group is live, it will be visible to users.
+        Please note that once the group is live, it cannot be disabled.`;
+        this.msgConfirm(msg, 'Please Confirm!', 'Yes, Go Live!')
+          .then((res) => {
+            if (res) {
+              console.log(res);
+              console.log(this.group);
+
+              const copy = { ...this.group, enabled: true };
+              SkillsService.saveSkill(copy);
+              this.$emit('group-enabled', copy);
+            }
+          });
+      },
     },
   };
 </script>

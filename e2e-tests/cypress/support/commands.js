@@ -165,6 +165,19 @@ Cypress.Commands.add("createSkill", (projNum = 1, subjNum = 1, skillNum = 1, ove
         name: skillName,
         pointIncrement: '100',
         numPerformToCompletion: '2',
+        type: 'Skill',
+    }, overrideProps));
+});
+
+Cypress.Commands.add("createSkillsGroup", (projNum = 1, subjNum = 1, groupNum = 1, overrideProps = {}) => {
+    const skillId = `group${groupNum}${subjNum > 1 ? `Subj${subjNum}` : ''}`;
+    const skillName = `Awesome Group ${groupNum}${groupNum > 1 ? ` Subj${subjNum}` : ''}`;
+    cy.request('POST', `/admin/projects/proj${projNum}/subjects/subj${subjNum}/skills/${skillId}`, Object.assign({
+        projectId: `proj${projNum}`,
+        subjectId: `subj${subjNum}`,
+        skillId: skillId,
+        name: skillName,
+        type: 'SkillsGroup',
     }, overrideProps));
 });
 

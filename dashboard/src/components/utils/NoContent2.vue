@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="text-secondary text-center">
+  <div class="text-secondary text-center" data-cy="noContent">
     <div class="row">
       <div class="col">
         <span class="fa-stack" :class="iconSize" style="vertical-align: top;">

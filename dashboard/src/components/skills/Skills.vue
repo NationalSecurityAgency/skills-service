@@ -35,10 +35,10 @@ limitations under the License.
     </loading-container>
 
     <edit-skill v-if="editSkillInfo.show" v-model="editSkillInfo.show" :skillId="editSkillInfo.skill.skillId" :is-copy="editSkillInfo.isCopy" :is-edit="editSkillInfo.isEdit"
-                :project-id="projectId" :subject-id="subjectId" @skill-saved="skillCreatedOrUpdated" @hidden="handleHide"/>
+                :project-id="projectId" :subject-id="subjectId" @skill-saved="skillCreatedOrUpdated" @hidden="focusOnNewSkillButton"/>
 
     <edit-skill-group v-if="editGroupInfo.show" v-model="editGroupInfo.show" :group="editGroupInfo.group" :is-edit="false"
-                      @group-saved="skillCreatedOrUpdated" @hidden="handleHide"/>
+                      @group-saved="skillCreatedOrUpdated" @hidden="focusOnNewGroupButton"/>
   </div>
 </template>
 
@@ -89,18 +89,13 @@ limitations under the License.
       skillCreatedOrUpdated(skill) {
         this.$refs.skillsTable.skillCreatedOrUpdated(skill);
       },
-      handleHide(e) {
-        if (!e || !e.saved || (e.saved && !e.updated)) {
-          this.handleFocus(e);
-        }
+      focusOnNewSkillButton() {
+        this.focusOn(this.$refs.newSkillButton);
       },
-      handleFocus(e) {
-        let ref = this.$refs.subPageHeader.$refs.actionButton;
-        if (e && e.updated && this.currentlyFocusedSkillId) {
-          const refName = `edit_${this.currentlyFocusedSkillId}`;
-          ref = this.$refs[refName];
-        }
-        this.currentlyFocusedSkillId = '';
+      focusOnNewGroupButton() {
+        this.focusOn(this.$refs.newGroupButton);
+      },
+      focusOn(ref) {
         this.$nextTick(() => {
           if (ref) {
             ref.focus();
@@ -111,36 +106,9 @@ limitations under the License.
         SkillsService.getSubjectSkills(this.projectId, this.subjectId)
           .then((skills) => {
             const loadedSkills = skills;
-            // loadedSkills.push({
-            //   skillId: 'group1',
-            //   projectId: 'proj1',
-            //   name: 'A bunch of important skills grouped together',
-            //   version: 1,
-            //   displayOrder: 4,
-            //   created: '2021-10-12T13:41:19.444+00:00',
-            //   totalPoints: 200,
-            //   numberOfSkills: 4,
-            //   selfReportSkills: 1,
-            //   type: 'SkillsGroup',
-            //   enabled: true,
-            // });
-            // loadedSkills.push({
-            //   skillId: 'group2',
-            //   projectId: 'proj1',
-            //   name: 'A bunch of important skills grouped together',
-            //   version: 1,
-            //   displayOrder: 5,
-            //   created: '2021-10-12T13:41:20.444+00:00',
-            //   totalPoints: 200,
-            //   numberOfSkills: 4,
-            //   selfReportSkills: 1,
-            //   type: 'SkillsGroup',
-            //   enabled: false,
-            // });
             this.skills = loadedSkills.map((loadedSkill) => {
               const copy = { ...loadedSkill };
               copy.created = dayjs(loadedSkill.created);
-              copy.selfReportingType = loadedSkill.selfReportingType ? loadedSkill.selfReportingType : 'Disabled';
               return copy;
             });
           })
@@ -174,10 +142,6 @@ limitations under the License.
             type: 'SkillsGroup',
           },
         };
-      },
-      groupSaved(group) {
-        // eslint-disable-next-line no-console
-        console.log(group);
       },
     },
     mounted() {

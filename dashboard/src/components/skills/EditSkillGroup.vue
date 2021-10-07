@@ -21,6 +21,7 @@ limitations under the License.
              v-model="show"
              :no-close-on-backdrop="true"
              :centered="true"
+             data-cy="EditSkillGroupModal"
              header-bg-variant="info"
              header-text-variant="light" no-fade>
 
@@ -90,12 +91,13 @@ limitations under the License.
     data() {
       return {
         show: this.value,
-        internalGroup: { isEdit: this.isEdit, ...this.group },
+        internalGroup: { originalSkillId: this.group.skillId, isEdit: this.isEdit, ...this.group },
         canEditGroupId: false,
         overallErrMsg: '',
         original: {
           name: '',
           skillId: '',
+          projectId: '',
         },
       };
     },
@@ -105,6 +107,7 @@ limitations under the License.
     mounted() {
       this.original = {
         name: this.group.name,
+        skillId: this.group.skillId,
         projectId: this.group.projectId,
       };
     },
@@ -159,7 +162,7 @@ limitations under the License.
         extend('uniqueGroupId', {
           message: (field) => `The value for the ${field} is already taken.`,
           validate(value) {
-            if (self.isEdit && self.original.projectId === value) {
+            if (self.isEdit && self.original.skillId === value) {
               return true;
             }
             return SkillsService.skillWithIdExists(self.original.projectId, value);
