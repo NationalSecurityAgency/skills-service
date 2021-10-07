@@ -99,19 +99,26 @@ class SkillsGroupAdminService {
 
     @Profile
     void validateSkillsGroup(Integer numSkillsRequired, boolean enabled, Integer skillsGroupIdRef, Integer expectedPoints=null) {
-        if (numSkillsRequired != -1 && numSkillsRequired < 2 && enabled) {
-            throw new SkillException("A Skill Group must have at least 2 required skills in order to be enabled.")
-        } else {
-            List<SkillDef> groupChildSkills = getSkillsGroupChildSkills(skillsGroupIdRef)
-            if (numSkillsRequired > groupChildSkills.size()) {
-                throw new SkillException("A Skill Group cannot require more skills than the number of skills that belong to the group.")
-            }
-            if (groupChildSkills.size() > 0 && (numSkillsRequired == -1 || numSkillsRequired == groupChildSkills.size())) {
-                int testValue = expectedPoints ?: groupChildSkills.first().totalPoints
-                // if numSkillsRequired is less than the total available, then all skills must have the same total point value
-                boolean allTotalPointsEqual = groupChildSkills.every { it.totalPoints == testValue }
-                if (!allTotalPointsEqual) {
-                    throw new SkillException("All skills that belong to the Skill Group must have the same total value when all skills are not required to be completed.")
+        if (enabled) {
+            if (numSkillsRequired != -1 && numSkillsRequired < 2) {
+                // this check can be done w/o loading child skills
+                throw new SkillException("A Skill Group must have at least 2 required skills in order to be enabled.")
+            } else {
+                List<SkillDef> groupChildSkills = getSkillsGroupChildSkills(skillsGroupIdRef)
+                int numChildSkills = groupChildSkills.size()
+                if (numSkillsRequired > numChildSkills) {
+                    throw new SkillException("A Skill Group cannot require more skills than the number of skills that belong to the group.")
+                }
+                if (numChildSkills < 2 || (numSkillsRequired != -1 && numSkillsRequired < 2)) {
+                    throw new SkillException("A Skill Group must have at least 2 required skills in order to be enabled.")
+                }
+                if (numSkillsRequired == -1 || numSkillsRequired == numChildSkills) {
+                    int testValue = expectedPoints ?: groupChildSkills.first().totalPoints
+                    // if numSkillsRequired is less than the total available, then all skills must have the same total point value
+                    boolean allTotalPointsEqual = groupChildSkills.every { it.totalPoints == testValue }
+                    if (!allTotalPointsEqual) {
+                        throw new SkillException("All skills that belong to the Skill Group must have the same total value when all skills are not required to be completed.")
+                    }
                 }
             }
         }
