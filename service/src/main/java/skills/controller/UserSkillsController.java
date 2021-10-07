@@ -146,9 +146,10 @@ class UserSkillsController {
                                                  @PathVariable("subjectId") String subjectId,
                                                  @RequestParam(name = "userId", required = false) String userIdParam,
                                                  @RequestParam(name = "version", required = false) Integer version,
-                                                 @RequestParam(name = "idType", required = false) String idType) {
+                                                 @RequestParam(name = "idType", required = false) String idType,
+                                                 @RequestParam(name = "includeSkills", required = false, defaultValue = "true") String includeSkills) {
         String userId = userInfoService.getUserName(userIdParam, true, idType);
-        return skillsLoader.loadSubject(projectId, userId, subjectId, getProvidedVersionOrReturnDefault(version));
+        return skillsLoader.loadSubject(projectId, userId, subjectId, getProvidedVersionOrReturnDefault(version), Boolean.valueOf(includeSkills));
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/descriptions", method = RequestMethod.GET, produces = "application/json")
@@ -226,12 +227,13 @@ class UserSkillsController {
                                              @RequestParam(name = "userId", required = false) String userIdParam,
                                              @RequestParam(name = "version", required = false) Integer version,
                                              @RequestParam(name = "global", required = false) Boolean isGlobal,
-                                             @RequestParam(name = "idType", required = false) String idType) {
+                                             @RequestParam(name = "idType", required = false) String idType,
+                                             @RequestParam(name = "includeSkills", required = false, defaultValue = "true") String includeSkills) {
         String userId = userInfoService.getUserName(userIdParam, true, idType);
         if (isGlobal != null && isGlobal) {
-            return skillsLoader.loadGlobalBadge(userId, projectId, badgeId, getProvidedVersionOrReturnDefault(version));
+            return skillsLoader.loadGlobalBadge(userId, projectId, badgeId, getProvidedVersionOrReturnDefault(version), Boolean.valueOf(includeSkills));
         } else {
-            return skillsLoader.loadBadge(projectId, userId, badgeId, getProvidedVersionOrReturnDefault(version));
+            return skillsLoader.loadBadge(projectId, userId, badgeId, getProvidedVersionOrReturnDefault(version), Boolean.valueOf(includeSkills));
         }
     }
 

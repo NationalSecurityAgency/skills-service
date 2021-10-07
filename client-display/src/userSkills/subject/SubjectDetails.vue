@@ -22,7 +22,7 @@ limitations under the License.
             <skills-title>{{ displayData.userSkills.subject }}</skills-title>
 
             <div class="user-skill-subject-overall">
-                <user-skills-header :display-data="displayData"/>
+                <user-skills-header :display-data="displayDataHeader"/>
             </div>
 
             <div v-if="displayData.userSkills.description" class="card mt-2">
@@ -40,7 +40,7 @@ limitations under the License.
               </div>
             </div>
 
-            <skills-progress-list :subject="displayData.userSkills"/>
+            <skills-progress-list @self_report="refreshHeader" :subject="displayData.userSkills"/>
         </div>
     </section>
 </template>
@@ -64,6 +64,17 @@ limitations under the License.
     },
     watch: {
       $route: 'fetchData',
+      displayData: {
+        deep: true,
+        handler() {
+          this.displayDataHeader = this.displayData;
+        },
+      },
+    },
+    data() {
+      return {
+        displayDataHeader: this.displayData,
+      };
     },
     mounted() {
       this.fetchData();
@@ -73,6 +84,18 @@ limitations under the License.
         this.resetLoading();
         this.loadSubject();
         this.loadUserSkillsRanking();
+      },
+      refreshHeader(event) {
+        if (event.subjectId && event.skillId) {
+          const newDisplayData = {};
+          this.rawLoadUserSkillsRanking().then((resp) => {
+            newDisplayData.userSkillsRanking = resp;
+            this.rawLoadUserSubject(false).then((resp2) => {
+              newDisplayData.userSkills = resp2;
+              this.displayDataHeader = newDisplayData;
+            });
+          });
+        }
       },
     },
   };

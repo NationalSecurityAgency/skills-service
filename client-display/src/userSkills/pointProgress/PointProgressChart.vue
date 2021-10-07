@@ -231,6 +231,11 @@ limitations under the License.
           },
         });
       },
+      reloadData(event) {
+        if (event.subjectId && event.skillId) {
+          this.loadPointsHistory();
+        }
+      },
     },
   };
 </script>

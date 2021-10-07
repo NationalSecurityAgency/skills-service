@@ -582,5 +582,29 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy=availableBadges]').contains('Badge 1')
     });
 
+    it('self report skills update badge progress in my badges display', () => {
+        cy.createSkill(1, 1, 1, {selfReportingType : 'Approval', pointIncrement: 50,  pointIncrementInterval: 0 });
+        cy.createSkill(1, 1, 2, {selfReportingType: 'HonorSystem', pointIncrement: 50,  pointIncrementInterval: 0, numPerformToCompletion: 1 });
+        cy.createSkill(1, 1, 3);
+
+      cy.request('POST', '/admin/projects/proj1/badges/badge2', {
+        projectId: 'proj1',
+        badgeId: 'badge2',
+        name: 'Badge 2'
+      });
+      cy.assignSkillToBadge(1,2,1);
+      cy.assignSkillToBadge(1,2,2);
+      cy.assignSkillToBadge(1,2,3);
+
+      cy.cdVisit('/');
+      cy.cdClickBadges();
+      cy.get('[data-cy=badgeDetailsLink_badge2]').click();
+
+      cy.get('.skills-badge').contains('66% Complete');
+      cy.get('[data-cy=toggleSkillDetails]').click();
+      cy.get('[data-cy=selfReportBtn]').click();
+      cy.get('[data-cy=selfReportSubmitBtn]').click();
+      cy.get('.skills-badge').contains('100% Complete');
+    });
 });
 

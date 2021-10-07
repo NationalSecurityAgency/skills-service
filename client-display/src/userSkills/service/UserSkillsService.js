@@ -72,9 +72,11 @@ export default {
     return response;
   },
 
-  getSubjectSummary(subjectId) {
+  getSubjectSummary(subjectId, includeSkills = true) {
+    const params = this.getUserIdAndVersionParams();
+    params.includeSkills = includeSkills;
     return axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/subjects/${subjectId}/summary`, {
-      params: this.getUserIdAndVersionParams(),
+      params,
     }).then((result) => SkillEnricherUtil.addMetaToSummary(result.data));
   },
 
@@ -95,17 +97,21 @@ export default {
     }).then((result) => SkillEnricherUtil.addMeta(result.data));
   },
 
-  getBadgeSkills(badgeId, global) {
+  getBadgeSkills(badgeId, global, includeSkills = true) {
     const requestParams = this.getUserIdAndVersionParams();
     requestParams.global = global;
+    requestParams.includeSkills = includeSkills;
     return axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/badges/${badgeId}/summary`, {
       params: requestParams,
     }).then((result) => {
-      const res = SkillEnricherUtil.addMetaToSummary(result.data);
-      if (res.projectLevelsAndSkillsSummaries) {
-        res.projectLevelsAndSkillsSummaries = res.projectLevelsAndSkillsSummaries.map((summary) => SkillEnricherUtil.addMetaToSummary(summary));
+      if (includeSkills) {
+        const res = SkillEnricherUtil.addMetaToSummary(result.data);
+        if (res.projectLevelsAndSkillsSummaries) {
+          res.projectLevelsAndSkillsSummaries = res.projectLevelsAndSkillsSummaries.map((summary) => SkillEnricherUtil.addMetaToSummary(summary));
+        }
+        return res;
       }
-      return res;
+      return result.data;
     });
   },
 

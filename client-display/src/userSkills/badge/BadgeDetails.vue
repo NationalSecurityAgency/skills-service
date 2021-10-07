@@ -22,7 +22,7 @@ limitations under the License.
 
             <div class="card">
                 <div class="card-body">
-                    <badge-details-overview :badge="badge"></badge-details-overview>
+                    <badge-details-overview :badge="badgeOverview"></badge-details-overview>
                 </div>
                 <div v-if="badge.helpUrl" class="card-footer text-left">
                   <a :href="badge.helpUrl" target="_blank" rel="noopener" class="btn btn-sm btn-outline-info skills-theme-btn">
@@ -31,7 +31,7 @@ limitations under the License.
                 </div>
             </div>
 
-            <skills-progress-list v-if="badge" :subject="badge" :show-descriptions="showDescriptions" type="badge"/>
+            <skills-progress-list @self_report="refreshHeader" v-if="badge" :subject="badge" :show-descriptions="showDescriptions" type="badge"/>
         </div>
     </div>
 </template>
@@ -56,6 +56,7 @@ limitations under the License.
       return {
         loading: true,
         badge: null,
+        badgeOverview: null,
         initialized: false,
         showDescriptions: false,
       };
@@ -71,8 +72,17 @@ limitations under the License.
         UserSkillsService.getBadgeSkills(this.$route.params.badgeId)
           .then((badgeSummary) => {
             this.badge = badgeSummary;
+            this.badgeOverview = badgeSummary;
             this.loading = false;
           });
+      },
+      refreshHeader(event) {
+        if (event.badgeId && event.badgeId === this.badge.badgeId) {
+          UserSkillsService.getBadgeSkills(this.$route.params.badgeId, false, false)
+            .then((badgeSummary) => {
+              this.badgeOverview = badgeSummary;
+            });
+        }
       },
     },
   };

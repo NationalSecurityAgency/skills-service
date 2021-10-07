@@ -78,7 +78,7 @@ describe('Client Display Features Tests', () => {
   it('do not display new version banner if lib version in headers is older than lib version in local storage', () => {
     const mockedLibVersion = dateFormatter(new Date() - 1000 * 60 * 60 * 24 * 5);
     cy.intercept({
-      path: '/api/projects/proj1/subjects/subj1/summary',
+      path: '/api/projects/proj1/subjects/subj1/summary*',
       statusCode: 200,
     }, {
       body: {

@@ -19,19 +19,19 @@ limitations under the License.
             <div class="row card-body ml-0 mr-0">
                 <div class="text-center col-md-4">
                     <circle-progress
-                            :total-completed-points="displayData.userSkills.points"
-                            :points-completed-today="displayData.userSkills.todaysPoints"
-                            :total-possible-points="displayData.userSkills.totalPoints"
+                            :total-completed-points="displayDataInternal.userSkills.points"
+                            :points-completed-today="displayDataInternal.userSkills.todaysPoints"
+                            :total-possible-points="displayDataInternal.userSkills.totalPoints"
                             :completed-before-today-color="beforeTodayColor"
                             :incomplete-color="incompleteColor"
-                            :total-completed-color="displayData.userSkills.points === displayData.userSkills.totalPoints ? completeColor : earnedTodayColor"
+                            :total-completed-color="displayDataInternal.userSkills.points === displayDataInternal.userSkills.totalPoints ? completeColor : earnedTodayColor"
                             title="Overall Points">
                         <div slot="footer">
-                            <p v-if="displayData.userSkills.points > 0 && displayData.userSkills.points === displayData.userSkills.totalPoints">All Points earned</p>
+                            <p v-if="displayDataInternal.userSkills.points > 0 && displayDataInternal.userSkills.points === displayDataInternal.userSkills.totalPoints">All Points earned</p>
                             <div v-else>
-                                <div>Earn up to <strong>{{ displayData.userSkills.totalPoints | number }}</strong> points</div>
+                                <div>Earn up to <strong>{{ displayDataInternal.userSkills.totalPoints | number }}</strong> points</div>
                                 <div>
-                                    <strong>{{ displayData.userSkills.todaysPoints | number }}</strong> Points earned Today
+                                    <strong>{{ displayDataInternal.userSkills.todaysPoints | number }}</strong> Points earned Today
                                 </div>
                             </div>
                         </div>
@@ -39,14 +39,14 @@ limitations under the License.
                 </div>
 
                 <div class="text-center col-md-4 my-5 my-md-0">
-                    <my-skill-level :skill-level="displayData.userSkills.skillsLevel" :total-num-levels="displayData.userSkills.totalLevels"/>
+                    <my-skill-level :skill-level="displayDataInternal.userSkills.skillsLevel" :total-num-levels="displayDataInternal.userSkills.totalLevels"/>
                 </div>
 
                 <div class="text-center col-md-4">
                     <circle-progress
-                            :total-completed-points="displayData.userSkills.levelPoints"
-                            :points-completed-today="displayData.userSkills.todaysPoints"
-                            :total-possible-points="displayData.userSkills.levelTotalPoints"
+                            :total-completed-points="displayDataInternal.userSkills.levelPoints"
+                            :points-completed-today="displayDataInternal.userSkills.todaysPoints"
+                            :total-possible-points="displayDataInternal.userSkills.levelTotalPoints"
                             :completed-before-today-color="beforeTodayColor"
                             :incomplete-color="incompleteColor"
                             :total-completed-color="isLevelComplete ? completeColor : earnedTodayColor"
@@ -61,7 +61,7 @@ limitations under the License.
                                     levelStats.nextLevel }}
                                 </div>
                                 <div>
-                                    <strong>{{ displayData.userSkills.todaysPoints | number}}</strong> Points earned Today
+                                    <strong>{{ displayDataInternal.userSkills.todaysPoints | number}}</strong> Points earned Today
                                 </div>
                             </div>
                         </div>
@@ -78,11 +78,11 @@ limitations under the License.
 
             <div id="point-progress-container" class="pb-3 pb-lg-0"
                     :class="{ 'col-lg-6' : hasBadges, 'col-lg-9' : !hasBadges }">
-                <point-progress-chart />
+                <point-progress-chart ref="pointProgressChart" />
             </div>
 
             <div v-if="hasBadges" class="col-lg-3">
-                <my-badges :num-badges-completed="displayData.userSkills.badges.numBadgesCompleted"></my-badges>
+                <my-badges :num-badges-completed="displayDataInternal.userSkills.badges.numBadgesCompleted"></my-badges>
             </div>
         </div>
     </div>
@@ -111,18 +111,32 @@ limitations under the License.
         default: 5,
       },
     },
+    data() {
+      return {
+        displayDataInternal: this.displayData,
+      };
+    },
+    watch: {
+      displayData: {
+        deep: true,
+        handler() {
+          this.displayDataInternal = this.displayData;
+          this.$refs.pointProgressChart.loadPointsHistory();
+        },
+      },
+    },
     computed: {
       isLevelComplete() {
-        return this.displayData.userSkills.levelTotalPoints === -1;
+        return this.displayDataInternal.userSkills.levelTotalPoints === -1;
       },
       hasBadges() {
-        return this.displayData.userSkills && this.displayData.userSkills.badges && this.displayData.userSkills.badges.enabled;
+        return this.displayDataInternal.userSkills && this.displayDataInternal.userSkills.badges && this.displayDataInternal.userSkills.badges.enabled;
       },
       levelStats() {
         return {
-          title: this.isLevelComplete ? 'Level Progress' : `Level ${this.displayData.userSkills.skillsLevel + 1} Progress`,
-          nextLevel: this.displayData.userSkills.skillsLevel + 1,
-          pointsTillNextLevel: this.displayData.userSkills.levelTotalPoints - this.displayData.userSkills.levelPoints,
+          title: this.isLevelComplete ? 'Level Progress' : `Level ${this.displayDataInternal.userSkills.skillsLevel + 1} Progress`,
+          nextLevel: this.displayDataInternal.userSkills.skillsLevel + 1,
+          pointsTillNextLevel: this.displayDataInternal.userSkills.levelTotalPoints - this.displayDataInternal.userSkills.levelPoints,
         };
       },
       beforeTodayColor() {
@@ -136,6 +150,13 @@ limitations under the License.
       },
       incompleteColor() {
         return this.$store.state.themeModule.progressIndicators.incompleteColor;
+      },
+    },
+    methods: {
+      refreshData(displayData) {
+        if (displayData) {
+          this.displayDataInternal = displayData;
+        }
       },
     },
   };

@@ -39,20 +39,24 @@ limitations under the License.
           });
       },
       loadSubject() {
-        UserSkillsService.getSubjectSummary(this.$route.params.subjectId)
-          .then((result) => {
-            this.displayData.userSkills = result;
-            this.loading.userSkills = false;
-          });
+        this.rawLoadUserSubject(true).then((result) => {
+          this.displayData.userSkills = result;
+          this.loading.userSkills = false;
+        });
       },
       loadUserSkillsRanking() {
-        UserSkillsService.getUserSkillsRanking(this.$route.params.subjectId)
+        this.rawLoadUserSkillsRanking()
           .then((response) => {
             this.displayData.userSkillsRanking = response;
             this.loading.userSkillsRanking = false;
           });
       },
-
+      rawLoadUserSubject(includeSkills) {
+        return UserSkillsService.getSubjectSummary(this.$route.params.subjectId, includeSkills);
+      },
+      rawLoadUserSkillsRanking() {
+        return UserSkillsService.getUserSkillsRanking(this.$route.params.subjectId);
+      },
       resetLoading() {
         this.loading.userSkills = true;
         this.loading.pointsHistory = true;
