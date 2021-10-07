@@ -78,7 +78,7 @@ limitations under the License.
 
             <div id="point-progress-container" class="pb-3 pb-lg-0"
                     :class="{ 'col-lg-6' : hasBadges, 'col-lg-9' : !hasBadges }">
-                <point-progress-chart />
+                <point-progress-chart ref="pointProgressChart" />
             </div>
 
             <div v-if="hasBadges" class="col-lg-3">
@@ -121,14 +121,9 @@ limitations under the License.
         deep: true,
         handler() {
           this.displayDataInternal = this.displayData;
+          this.$refs.pointProgressChart.loadPointsHistory();
         },
       },
-    },
-    mounted() {
-      this.$bus.on('header.refresh', this.refreshData);
-    },
-    beforeDestroy() {
-      this.$bus.off('header.refresh', this.refreshData);
     },
     computed: {
       isLevelComplete() {

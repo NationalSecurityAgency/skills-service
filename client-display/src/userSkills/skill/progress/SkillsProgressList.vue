@@ -238,7 +238,13 @@ limitations under the License.
 
         const skill = this.skillsInternalOrig.find((item) => item.skillId === skillId);
         if (skill.selfReporting && skill.selfReporting.type === 'HonorSystem') {
-          this.$bus.emit('skill.self_report.hs', { skillId, subjectId: this.subject.subjectId });
+          const event = { skillId };
+          if (this.type !== 'badge') {
+            event.subjectId = this.subject.subjectId;
+          } else if (this.type === 'badge') {
+            event.badgeId = this.subject.badgeId;
+          }
+          this.$emit('self_report', event);
         }
       },
       filterSkills(filterId) {

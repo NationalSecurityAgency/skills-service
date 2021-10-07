@@ -40,7 +40,7 @@ limitations under the License.
               </div>
             </div>
 
-            <skills-progress-list :subject="displayData.userSkills"/>
+            <skills-progress-list @self_report="refreshHeader" :subject="displayData.userSkills"/>
         </div>
     </section>
 </template>
@@ -78,10 +78,6 @@ limitations under the License.
     },
     mounted() {
       this.fetchData();
-      this.$bus.on('skill.self_report.hs', this.refreshHeader);
-    },
-    beforeDestroy() {
-      this.$bus.off('skill.self_report.hs', this.refreshHeader);
     },
     methods: {
       fetchData() {

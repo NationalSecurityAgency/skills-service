@@ -27,7 +27,6 @@ import {
     SpinnerPlugin,
 } from 'bootstrap-vue';
 import marked from 'marked';
-import mitt from 'mitt';
 import FiltersPlugin from '@/common-components/filter/FiltersPlugin';
 import App from '@/App';
 import router from '@/router';
@@ -66,8 +65,6 @@ marked.setOptions({
   renderer,
 });
 
-const bus = mitt();
-Vue.prototype.$bus = bus;
 const initializeVueApp = () => {
   new Vue({
     router,
