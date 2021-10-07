@@ -18,6 +18,7 @@ package skills.services.admin
 import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.PageRequest
@@ -133,9 +134,10 @@ class SkillsAdminService {
         int pointIncrementDelta
         int occurrencesDelta
 
-        final boolean isEdit = skillDefinition
         final SkillDef.ContainerType skillType = skillRequest.type ? SkillDef.ContainerType.valueOf(skillRequest.type) : SkillDef.ContainerType.Skill;
+        final boolean isEdit = skillDefinition
         final boolean isSkillsGroup = skillType == SkillDef.ContainerType.SkillsGroup
+        final boolean isSkillsGroupChild = StringUtils.isNotBlank(groupId)
         final int totalPointsRequested = isSkillsGroup ? 0 : skillRequest.pointIncrement * skillRequest.numPerformToCompletion
         final int incrementRequested = isSkillsGroup ? 0 : skillRequest.pointIncrement
         final int currentOccurrences = isEdit && !isSkillsGroup ? (skillDefinition.totalPoints / skillDefinition.pointIncrement) : -1
@@ -196,7 +198,11 @@ class SkillsAdminService {
 
         SkillDef savedSkill = skillDefRepo.findByProjectIdAndSkillIdAndType(skillRequest.projectId, skillRequest.skillId, skillType)
         if (!isEdit) {
-            assignToParent(skillRequest, savedSkill, subject)
+            if (isSkillsGroupChild) {
+                skillsGroupAdminService.addSkillToSkillsGroup(savedSkill.projectId, groupId, savedSkill.skillId)
+            } else {
+                assignToParent(skillRequest, savedSkill, subject)
+            }
         }
 
         if (shouldRebuildScores) {

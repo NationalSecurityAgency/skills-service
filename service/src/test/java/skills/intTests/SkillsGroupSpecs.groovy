@@ -78,6 +78,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         when:
         def res = skillsService.getSkill(skillsGroup)
         def groupSkills = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
+        def subjSkills = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
         groupSkills.sort() { it.skillId }
 
         then:
@@ -111,6 +112,15 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         groupSkills.get(2).version == skills.get(2).version
         groupSkills.get(2).displayOrder == 3
         groupSkills.get(2).totalPoints == skills.get(2).pointIncrement * skills.get(2).numPerformToCompletion
+
+        subjSkills
+        subjSkills.size() == 1
+        subjSkills.get(0).skillId == skillsGroup.skillId
+        subjSkills.get(0).name == skillsGroup.name
+        subjSkills.get(0).type == skillsGroup.type
+        subjSkills.get(0).numSkillsInGroup == groupSkills.size()
+        subjSkills.get(0).numSelfReportSkills == 0
+        subjSkills.get(0).enabled == 'false'
     }
 
     void "create and then update SkillsGroup name" () {
