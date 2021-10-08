@@ -187,7 +187,8 @@ limitations under the License.
                  message="Projects are composed of Subjects which are made of Skills and a single skill defines a training unit within the gamification framework."/>
     </loading-container>
 
-    <edit-skill v-if="editSkillInfo.show" v-model="editSkillInfo.show" :skillId="editSkillInfo.skill.skillId" :is-copy="editSkillInfo.isCopy" :is-edit="editSkillInfo.isEdit"
+    <edit-skill v-if="editSkillInfo.show" v-model="editSkillInfo.show" :skillId="editSkillInfo.skill.skillId" :group-id="editSkillInfo.skill.groupId"
+                :is-copy="editSkillInfo.isCopy" :is-edit="editSkillInfo.isEdit"
                 :project-id="projectId" :subject-id="subjectId" @skill-saved="skillCreatedOrUpdated" @hidden="handleFocus"/>
     <edit-skill-group v-if="editGroupInfo.show" v-model="editGroupInfo.show" :group="editGroupInfo.group" :is-edit="editGroupInfo.isEdit"
                       @group-saved="skillCreatedOrUpdated" @hidden="handleFocus"/>

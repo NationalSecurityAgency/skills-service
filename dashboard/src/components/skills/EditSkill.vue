@@ -274,6 +274,10 @@ limitations under the License.
         type: String,
         required: true,
       },
+      groupId: {
+        type: String,
+        required: false,
+      },
       skillId: String,
       isEdit: {
         type: Boolean,
@@ -483,7 +487,7 @@ limitations under the License.
                 this.skillInternal.selfReportingType = null;
               }
               this.skillInternal = { subjectId: this.subjectId, ...this.skillInternal };
-              this.$emit('skill-saved', { isEdit: this.isEdit, ...this.skillInternal });
+              this.$emit('skill-saved', { isEdit: this.isEdit, ...this.skillInternal, groupId: this.groupId });
               this.close({ saved: true });
             }
           });

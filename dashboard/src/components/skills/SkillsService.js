@@ -58,7 +58,7 @@ export default {
   },
   getGroupSkills(projectId, groupId) {
     return axios.get(`/admin/projects/${projectId}/groups/${groupId}/skills`)
-      .then((response) => response.data);
+      .then((response) => response.data.map((item) => ({ ...item, groupId })));
   },
   getProjectSkills(projectId) {
     return axios.get(`/admin/projects/${projectId}/skills`)
