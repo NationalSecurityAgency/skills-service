@@ -69,7 +69,8 @@ limitations under the License.
   </loading-container>
 
   <edit-skill v-if="editSkillInfo.show" v-model="editSkillInfo.show" :is-copy="editSkillInfo.isCopy" :is-edit="editSkillInfo.isEdit"
-              :project-id="editSkillInfo.skill.projectId" :subject-id="editSkillInfo.skill.subjectId" @skill-saved="saveSkill" @hidden="focusOnNewSkillButton"/>
+              :project-id="editSkillInfo.skill.projectId" :subject-id="editSkillInfo.skill.subjectId" :group-id="this.group.skillId"
+              @skill-saved="saveSkill" @hidden="focusOnNewSkillButton"/>
   <edit-num-required-skills v-if="editRequiredSkillsInfo.show" v-model="editRequiredSkillsInfo.show"
                             :group="group" :skills="skills" />
 </div>
@@ -151,14 +152,16 @@ limitations under the License.
       saveSkill(skill) {
         const copy = { groupId: this.group.skillId, ...skill };
         this.$refs[`groupSkills_${this.group.skillId}`].skillCreatedOrUpdated(copy)
-          .then((newSkill) => {
+          .then(() => {
             this.numSkills += 1;
-            this.$emit('skill-added', newSkill);
+            const updatedGroup = { ...this.group, numSkillsInGroup: this.group.numSkillsInGroup + 1, numSkillsRequired: this.numSkills };
+            this.$emit('group-changed', updatedGroup);
           });
       },
-      skillRemoved(skill) {
+      skillRemoved() {
         this.numSkills -= 1;
-        this.$emit('skill-removed', skill);
+        const updatedGroup = { ...this.group, numSkillsInGroup: this.group.numSkillsInGroup - 1, numSkillsRequired: this.numSkills };
+        this.$emit('group-changed', updatedGroup);
       },
       focusOnNewSkillButton() {
         const ref = this.$refs[`group-${this.group.skillId}_newSkillBtn`];
@@ -174,12 +177,10 @@ limitations under the License.
         this.msgConfirm(msg, 'Please Confirm!', 'Yes, Go Live!')
           .then((res) => {
             if (res) {
-              console.log(res);
-              console.log(this.group);
-
               const copy = { ...this.group, enabled: true };
-              SkillsService.saveSkill(copy);
-              this.$emit('group-enabled', copy);
+              SkillsService.saveSkill(copy).then((savedGroup) => {
+                this.$emit('group-changed', savedGroup);
+              });
             }
           });
       },

@@ -174,8 +174,7 @@ limitations under the License.
         </template>
         <template #row-details="row">
             <child-row-skill-group-display v-if="row.item.isGroupType" :group="row.item"
-                                           @skill-added="row.item.numSkillsInGroup = row.item.numSkillsInGroup + 1"
-                                           @skill-removed="row.item.numSkillsInGroup = row.item.numSkillsInGroup - 1"/>
+                                           @group-changed="row.item = Object.assign(row.item, arguments[0])"/>
             <ChildRowSkillsDisplay v-if="row.item.isSkillType" :project-id="projectId" :subject-id="subjectId" v-skills-onMount="'ExpandSkillDetailsSkillsPage'"
                                    :parent-skill-id="row.item.skillId" :refresh-counter="row.item.refreshCounter"
                                    class="mr-3 ml-5 mb-3"></ChildRowSkillsDisplay>
