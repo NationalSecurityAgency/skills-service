@@ -156,90 +156,116 @@ describe('Global Badges Tests', () => {
     });
 
     it('Add dependencies to badge', () => {
-        //proj/subj/skill1
-        cy.request('POST', '/app/projects/proj1', {
-            projectId: 'proj1',
-            name: "proj1"
-        });
-        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
-            projectId: 'proj1',
-            subjectId: 'subj1',
-            name: "Subject 1"
-        });
-        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
-            projectId: 'proj1',
-            subjectId: 'subj1',
-            skillId: 'skill1',
-            name: `This is 1`,
-            type: 'Skill',
-            pointIncrement: 100,
-            numPerformToCompletion: 5,
-            pointIncrementInterval: 0,
-            numMaxOccurrencesIncrementInterval: -1,
-            version: 0,
-        });
-        //proj/subj/skill2
-        cy.request('POST', '/app/projects/proj2', {
-            projectId: 'proj2',
-            name: "proj2"
-        });
-        cy.request('POST', '/admin/projects/proj2/subjects/subj1', {
-            projectId: 'proj2',
-            subjectId: 'subj1',
-            name: "Subject 1"
-        });
-        cy.request('POST', `/admin/projects/proj2/subjects/subj1/skills/skill1`, {
-            projectId: 'proj2',
-            subjectId: 'subj1',
-            skillId: 'skill1',
-            name: `This is 1`,
-            type: 'Skill',
-            pointIncrement: 100,
-            numPerformToCompletion: 5,
-            pointIncrementInterval: 0,
-            numMaxOccurrencesIncrementInterval: -1,
-            version: 0,
-        });
+      //proj/subj/skill1
+      cy.request('POST', '/app/projects/proj1', {
+          projectId: 'proj1',
+          name: "proj1"
+      });
+      cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+          projectId: 'proj1',
+          subjectId: 'subj1',
+          name: "Subject 1"
+      });
+      cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
+          projectId: 'proj1',
+          subjectId: 'subj1',
+          skillId: 'skill1',
+          name: `This is 1`,
+          type: 'Skill',
+          pointIncrement: 100,
+          numPerformToCompletion: 5,
+          pointIncrementInterval: 0,
+          numMaxOccurrencesIncrementInterval: -1,
+          version: 0,
+      });
+      //proj/subj/skill2
+      cy.request('POST', '/app/projects/proj2', {
+          projectId: 'proj2',
+          name: "proj2"
+      });
+      cy.request('POST', '/admin/projects/proj2/subjects/subj1', {
+          projectId: 'proj2',
+          subjectId: 'subj1',
+          name: "Subject 1"
+      });
+      cy.request('POST', `/admin/projects/proj2/subjects/subj1/skills/skill1`, {
+          projectId: 'proj2',
+          subjectId: 'subj1',
+          skillId: 'skill1',
+          name: `This is 1`,
+          type: 'Skill',
+          pointIncrement: 100,
+          numPerformToCompletion: 5,
+          pointIncrementInterval: 0,
+          numMaxOccurrencesIncrementInterval: -1,
+          version: 0,
+      });
 
-        const badgeId = 'a_badge';
-        cy.request('PUT', `/supervisor/badges/${badgeId}`, {
-            badgeId: badgeId,
-            description: "",
-            iconClass: 'fas fa-award',
-            isEdit: false,
-            name: 'A Badge',
-            originalBadgeId: ''
-        });
+      const badgeId = 'a_badge';
+      cy.request('PUT', `/supervisor/badges/${badgeId}`, {
+          badgeId: badgeId,
+          description: "",
+          iconClass: 'fas fa-award',
+          isEdit: false,
+          name: 'A Badge',
+          originalBadgeId: ''
+      });
 
-        cy.intercept('GET', '/supervisor/badges').as('getBadges');
-        cy.intercept('GET', '/supervisor/projects/proj2/levels').as('getLevels');
-        cy.intercept('GET', '/supervisor/badges/a_badge/projects/available').as('getAvailableLevels');
+      cy.intercept('GET', '/supervisor/badges').as('getBadges');
+      cy.intercept('GET', '/supervisor/projects/proj2/levels').as('getLevels');
+      cy.intercept('GET', '/supervisor/badges/a_badge/projects/available').as('getAvailableLevels');
 
-        cy.visit('/administrator/');
-        cy.clickNav('Badges');
-        cy.wait('@getBadges');
-        cy.get('[data-cy="manageBtn_a_badge"]').click();
-        cy.get('.multiselect__tags').click();
-        cy.contains('Project ID: proj2').click();
-        cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'proj2' }, { colIndex: 1,  value: 'This is 1' }, { colIndex: 2,  value: 'skill1' }],
-        ], 5);
+      cy.visit('/administrator/');
+      cy.clickNav('Badges');
+      cy.wait('@getBadges');
+      cy.get('[data-cy="manageBtn_a_badge"]').click();
+      cy.get('.multiselect__tags').click();
+      cy.contains('Project ID: proj2').click();
+      cy.validateTable(tableSelector, [
+          [{ colIndex: 0,  value: 'proj2' }, { colIndex: 1,  value: 'This is 1' }, { colIndex: 2,  value: 'skill1' }],
+      ], 5);
 
-        cy.clickNav('Levels');
-        cy.wait('@getAvailableLevels');
+      cy.clickNav('Levels');
+      cy.wait('@getAvailableLevels');
 
-        cy.get('#skills-selector').first().click();
-        cy.get('.multiselect__tags input').first().type('proj2{enter}');
+      cy.get('#skills-selector').first().click();
+      cy.get('.multiselect__tags input').first().type('proj2{enter}');
 
-        cy.get('#level-selector').last().click();
-        cy.wait('@getLevels');
-        cy.get('.multiselect__tags input').last().type('5{enter}');
+      cy.get('#level-selector').last().click();
+      cy.wait('@getLevels');
+      cy.get('.multiselect__tags input').last().type('5{enter}');
 
-        cy.contains('Add').click();
-        cy.validateTable(levelsTableSelector, [
-            [{ colIndex: 0,  value: 'proj2' }, { colIndex: 1,  value: '5' }],
-        ], 5);
-    });
+      cy.contains('Add').click();
+      cy.validateTable(levelsTableSelector, [
+          [{ colIndex: 0,  value: 'proj2' }, { colIndex: 1,  value: '5' }],
+      ], 5);
+
+
+      cy.get('[data-label=Level]').contains('5');
+      cy.intercept('/api/projects/Inception/skills/AddOrModifyLevels').as('modifyLevel');
+      cy.get('[data-cy=editProjectLevelButton_proj2]').should('be.visible').click();
+      cy.contains('Change Required Level for proj2').should('be.visible');
+      cy.get('#existingLevel').should('have.value', 5);
+      cy.get('#proj2___BV_modal_content_ div.multiselect__select').click();
+      cy.get('.multiselect__element').should('have.length', 6);
+      cy.get('.multiselect__element').eq(5).click();
+      cy.get('[data-cy=saveLevelButton]').should('be.disabled');
+      cy.get('#proj2___BV_modal_content_ div.multiselect__select').click();
+      cy.get('.multiselect__element').eq(1).click();
+      cy.get('[data-cy=saveLevelButton]').should('be.enabled');
+      cy.get('[data-cy=saveLevelButton]').click();
+      cy.wait('@modifyLevel');
+      cy.validateTable(levelsTableSelector, [
+        [{ colIndex: 0,  value: 'proj2' }, { colIndex: 1,  value: '1' }],
+      ], 5);
+      cy.get('[data-cy=editProjectLevelButton_proj2]').should('have.focus');
+      cy.get('[data-cy=editProjectLevelButton_proj2]').click();
+      cy.get('[data-cy=cancelLevel]').click();
+      cy.get('[data-cy=editProjectLevelButton_proj2]').should('have.focus');
+      cy.get('[data-cy=editProjectLevelButton_proj2]').click();
+      cy.get('#proj2___BV_modal_content_ button.close').click();
+      cy.get('[data-cy=editProjectLevelButton_proj2]').should('have.focus');
+    })
 
     it('Navigate to global badges menu entry', () => {
 

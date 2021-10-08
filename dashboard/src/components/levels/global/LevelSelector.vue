@@ -42,6 +42,11 @@ limitations under the License.
       placeholder: {
         type: String,
       },
+      loadImmediately: {
+        type: Boolean,
+        required: false,
+        default: false,
+      },
     },
     data() {
       return {
@@ -52,6 +57,9 @@ limitations under the License.
     },
     mounted() {
       this.setSelectedInternal();
+      if (this.loadImmediately && this.projectId) {
+        this.loadProjectLevels(this.projectId);
+      }
     },
     watch: {
       projectId: function watchUpdatesToProjectId(newProjectId) {

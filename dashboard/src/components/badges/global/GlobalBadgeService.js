@@ -80,4 +80,8 @@ export default {
     return axios.delete(`/supervisor/badges/${badgeId}/projects/${projectId}/level/${level}`)
       .then((res) => res.data);
   },
+  changeProjectLevel(badgeId, projectId, oldLevel, newLevel) {
+    return axios.post(`/supervisor/badges/${badgeId}/projects/${projectId}/level/${oldLevel}/${newLevel}`)
+      .then((res) => res.data);
+  },
 };

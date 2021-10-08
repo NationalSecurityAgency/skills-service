@@ -270,4 +270,14 @@ class SupervisorController {
         iconFacade.deleteGlobalIcon(filename)
         return ResponseEntity.ok(true)
     }
+
+    @RequestMapping(value="/badges/{badgeId}/projects/{projectId}/level/{currentLevel}/{newLevel}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<Boolean> editProjectLevelForBadge(@PathVariable("badgeId") String badgeId,
+                                                        @PathVariable("projectId") String projectId,
+                                                        @PathVariable("currentLevel") Integer currentLevel,
+                                                        @PathVariable("newLevel") Integer newLevel) {
+        globalBadgesService.changeProjectLevelOnBadge(badgeId, projectId, currentLevel, newLevel)
+        //this would need to trigger identification of users who meet new criteria if the level is lower
+        return ResponseEntity.ok(true)
+    }
 }
