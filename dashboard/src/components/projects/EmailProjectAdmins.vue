@@ -31,7 +31,7 @@ limitations under the License.
           </div>
           <div class="row pl-3 pr-3 pb-1 ml-3 mr-3 mb-1 mt-1">
             <b-form-group class="w-100" id="body-input-group" label="Email Body" label-for="body-input" label-class="text-muted">
-              <markdown-editor class="w-100" v-model="body" data-cy="emailUsers_body"/>
+              <markdown-editor class="w-100" v-model="body" data-cy="emailUsers_body" :resizable="true"/>
             </b-form-group>
           </div>
           <div class="row pl-3 pr-3 pb-3 pt-1 ml-3 mr-3 mb-3 mt-1">
