@@ -87,18 +87,18 @@ class SkillsGroupAdminService {
         return skillDefRepo.findChildSkillsByIdAndRelationshipType(skillsGroupIdRef, SkillRelDef.RelationshipType.SkillsGroupRequirement)
     }
 
-    void validateSkillsGroup(SkillRequest skillRequest, SkillDefWithExtra skillDefinition) {
+    List<SkillDef> validateSkillsGroup(SkillRequest skillRequest, SkillDefWithExtra skillDefinition) {
         if (skillDefinition.type != skills.storage.model.SkillDef.ContainerType.valueOf(skillRequest.type)) {
             throw new SkillException("Cannot convert an existing Skill to a Skill Group, or existing Skill Group to Skill.")
         }
         int numSkillsRequired = skillRequest.numSkillsRequired
         boolean enabled = StringUtils.isNotBlank(skillRequest.enabled) && StringUtils.equalsIgnoreCase(skillRequest.enabled, Boolean.TRUE.toString())
         Integer skillsGroupIdRef = skillDefinition.id
-        validateSkillsGroup(numSkillsRequired, enabled, skillsGroupIdRef)
+        return validateSkillsGroup(numSkillsRequired, enabled, skillsGroupIdRef)
     }
 
     @Profile
-    void validateSkillsGroup(Integer numSkillsRequired, boolean enabled, Integer skillsGroupIdRef, Integer expectedPoints=null) {
+    List<SkillDef> validateSkillsGroup(Integer numSkillsRequired, boolean enabled, Integer skillsGroupIdRef, Integer expectedPoints=null) {
         if (enabled) {
             if (numSkillsRequired != -1 && numSkillsRequired < 2) {
                 // this check can be done w/o loading child skills
@@ -121,6 +121,7 @@ class SkillsGroupAdminService {
                         throw new SkillException("All skills that belong to the Skill Group must have the same total value when all skills are not required to be completed.")
                     }
                 }
+                return groupChildSkills
             }
         }
     }
