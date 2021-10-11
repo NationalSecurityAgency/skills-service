@@ -17,7 +17,7 @@ limitations under the License.
   <div class="user-skill-progress-layers" :class="{ 'cursor-pointer': isClickable, 'locked-background': isLocked }">
     <div class="locked-border"></div>
     <span v-if="isLocked" class="locked-icon">
-      <i class="fas fa-lock"></i>
+      <i class="fas fa-lock" :class="{'locked-icon-on-skinny-progress  border rounded p-1 border-secondary bg-light': isSkinnyProgress}"></i>
     </span>
     <progress-bar
       v-if="totalProgress === 100"
@@ -92,6 +92,9 @@ limitations under the License.
         }
         return res;
       },
+      isSkinnyProgress() {
+        return this.barSize < 20;
+      },
     },
   };
 </script>
@@ -123,9 +126,15 @@ limitations under the License.
 
   .locked-icon {
     position: absolute;
-    /*top: -5px;*/
     left: 50%;
     color: #5d5d5d;
+    z-index: 1000;
+  }
+
+  .locked-icon-on-skinny-progress {
+    position: absolute;
+    top: -7px !important;
+    font-size: 0.7rem;
   }
 
   .cursor-pointer {

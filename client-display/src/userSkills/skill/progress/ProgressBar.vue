@@ -18,10 +18,12 @@ limitations under the License.
         <vertical-progress v-if="progress.total === 100"
                            total-progress-bar-color="#28a745" before-today-bar-color="#28a745"
                            :total-progress="progress.total"
-                           :total-progress-before-today="progress.totalBeforeToday"/>
+                           :total-progress-before-today="progress.totalBeforeToday"
+                           :bar-size="barSize"/>
         <vertical-progress v-if="skill.points !== skill.totalPoints && progress.total !== 100"
                            :total-progress="progress.total"
-                           :total-progress-before-today="progress.totalBeforeToday" :is-locked="locked" :is-clickable="isClickable"/>
+                           :total-progress-before-today="progress.totalBeforeToday" :is-locked="locked" :is-clickable="isClickable"
+                           :bar-size="barSize"/>
     </div>
 </template>
 
@@ -36,6 +38,10 @@ limitations under the License.
     props: {
       skill: Object,
       isClickable: Boolean,
+      barSize: {
+        type: Number,
+        default: 22,
+      },
     },
     computed: {
       progress() {

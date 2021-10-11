@@ -15,6 +15,14 @@
  */
 
 export default {
+
+    updateSkillPtsInList(skills, pts, skillId) {
+        const index = skills.findIndex((item) => item.skillId === skillId);
+        const skill = skills[index];
+        const updatedSkill = this.addPts(skill, pts);
+        skills.splice(index, 1, updatedSkill);
+    },
+
     addPts(skill, pts) {
         const copy = { ...skill };
         copy.points += pts;
@@ -41,7 +49,14 @@ export default {
 
     addMetaToSummary(summary) {
         const res = summary;
-        res.skills = res.skills.map((item) => this.addMeta(item));
+        res.skills = res.skills.map((item) => {
+            const skillRes = this.addMeta(item);
+            if (item.type === 'SkillsGroup' && item.children) {
+                skillRes.children = skillRes.children.map((child) => this.addMeta(child));
+            }
+
+            return skillRes;
+        });
         return res;
     },
 

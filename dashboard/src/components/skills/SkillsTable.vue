@@ -207,7 +207,7 @@ limitations under the License.
   import SkillsBTable from '../utils/table/SkillsBTable';
   import TimeWindowMixin from './TimeWindowMixin';
   import ChildRowSkillGroupDisplay from './ChildRowSkillGroupDisplay';
-  import StringHighlighter from '../utils/StringHighlighter';
+  import StringHighlighter from '@/common-components/utilities/StringHighlighter';
   import EditSkillGroup from './EditSkillGroup';
 
   export default {

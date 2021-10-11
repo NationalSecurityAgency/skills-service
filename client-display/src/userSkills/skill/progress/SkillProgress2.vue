@@ -47,9 +47,16 @@ limitations under the License.
 
     <div class="row">
       <div class="col text-md-left">
-        <div class="h4" @click="skillClicked" :class="{ 'skill-name-url' : enableDrillDown }" data-cy="skillProgressTitle">
-          <span v-if="skill.skillHtml" v-html="skill.skillHtml"></span>
-          <span v-else>{{ skill.skill }}</span>
+        <div class="h4" @click="skillClicked" :class="{ 'skill-name-url' : allowDrillDown }" data-cy="skillProgressTitle">
+          <div class="d-inline" :class="{ 'text-success' : skill.isSkillsGroupType,
+                                          'text-info' : skill.isSkillType && !skill.childSkill,
+                                          'text-secondary' : skill.childSkill }">
+            <span v-if="skill.isSkillsGroupType"><i class="fas fa-layer-group mr-1"></i></span>
+
+            <span v-if="skill.skillHtml" v-html="skill.skillHtml"></span>
+            <span v-else>{{ skill.skill }}</span>
+          </div>
+
           <b-badge v-if="skill.selfReporting && skill.selfReporting.enabled"
               variant="success" style="font-size: 0.8rem" class="ml-2"><i class="fas fa-check-circle"></i> Self Reportable</b-badge>
         </div>
@@ -65,13 +72,14 @@ limitations under the License.
     <div class="row">
       <div class="col">
         <progress-bar :skill="skill" v-on:progressbar-clicked="skillClicked"
-                      :class="{ 'skills-navigable-item' : enableDrillDown }" data-cy="skillProgressBar"/>
+                      :bar-size="skill.groupId ? 12 : 22"
+                      :class="{ 'skills-navigable-item' : allowDrillDown }" data-cy="skillProgressBar"/>
       </div>
     </div>
-    <div v-if="showDescription">
+    <div v-if="showDescription && skill.isSkillType">
       <div v-if="locked" class="text-center text-muted locked-text">
           *** Skill has <b>{{ skill.dependencyInfo.numDirectDependents}}</b> direct dependent(s).
-          <span v-if="enableDrillDown">Click <i class="fas fa-lock icon"></i> to see its dependencies.</span>
+          <span v-if="allowDrillDown">Click <i class="fas fa-lock icon"></i> to see its dependencies.</span>
           <span v-else>Please see its dependencies below.</span>
         ***
       </div>
@@ -82,7 +90,7 @@ limitations under the License.
 
       <achievement-date v-if="skill.achievedOn" :date="skill.achievedOn" class="mt-2"/>
 
-      <partial-points-alert v-if="!enableDrillDown" :skill="skill" :is-locked="locked"/>
+      <partial-points-alert v-if="!allowDrillDown" :skill="skill" :is-locked="locked"/>
       <skill-summary-cards v-if="!locked" :skill="skill" class="mt-3"></skill-summary-cards>
 
       <p class="skills-text-description text-primary mt-3">
@@ -92,7 +100,32 @@ limitations under the License.
       <div>
         <skill-overview-footer :skill="skill" v-on:points-earned="pointsEarned"/>
       </div>
+
+      <hr v-if="!isLast"/>
     </div>
+
+    <div v-if="skill.isSkillsGroupType && childSkillsInternal" class="ml-3 mt-3">
+      <div v-for="(childSkill, index) in childSkillsInternal"
+           :key="`group-${skill.skillId}_skill-${childSkill.skillId}`"
+           class="skills-theme-bottom-border-with-background-color"
+           :class="{ 'separator-border-thick' : showDescription }"
+      >
+        <skill-progress2
+            :id="`group-${skill.skillId}_skillProgress-${childSkill.skillId}`"
+            class="mb-3"
+            :skill="childSkill"
+            :subjectId="subjectId"
+            :badgeId="badgeId"
+            :type="type"
+            :enable-drill-down="true"
+            :show-description="showDescription"
+            :data-cy="`group-${skill.skillId}_skillProgress-${childSkill.skillId}`"
+            @points-earned="onChildSkillPointsEarned"
+            :is-last="index === (childSkillsInternal.length - 1)"
+        ></skill-progress2>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -105,6 +138,8 @@ limitations under the License.
   import NavigationErrorMixin from '@/common/utilities/NavigationErrorMixin';
   import SkillOverviewFooter from '../SkillOverviewFooter';
   import AnimatedNumber from './AnimatedNumber';
+  import SkillEnricherUtil from '../../utils/SkillEnricherUtil';
+  import StringHighlighter from '@/common-components/utilities/StringHighlighter';
 
   export default {
     name: 'SkillProgress2',
@@ -140,6 +175,24 @@ limitations under the License.
         type: String,
         default: 'subject',
       },
+      childSkillHighlightString: {
+        type: String,
+        default: '',
+      },
+      isLast: {
+        type: Boolean,
+        default: false,
+      },
+    },
+    data() {
+      return {
+        childSkillsInternal: [],
+      };
+    },
+    mounted() {
+      if (this.skill.isSkillsGroupType && this.skill?.children && this.skill?.children.length > 0) {
+        this.childSkillsInternal = this.skill.children.map((item) => ({ ...item, childSkill: true }));
+      }
     },
     computed: {
       locked() {
@@ -148,13 +201,34 @@ limitations under the License.
       isSkillComplete() {
         return this.skill.meta.complete;
       },
+      allowDrillDown() {
+        return this.enableDrillDown && this.skill.isSkillType;
+      },
+    },
+    watch: {
+      childSkillHighlightString() {
+        this.highlightChildSkillName();
+      },
     },
     methods: {
+      highlightChildSkillName() {
+        if (!this.childSkillHighlightString || this.childSkillHighlightString.trim().length === 0) {
+          this.childSkillsInternal = this.childSkillsInternal.map((item) => ({ ...item, skillHtml: null }));
+        } else if (this.childSkillsInternal && this.childSkillsInternal.length > 0) {
+          this.childSkillsInternal = this.childSkillsInternal.map((item) => {
+            const skillHtml = StringHighlighter.highlight(item.skill, this.childSkillHighlightString);
+            return ({ ...item, skillHtml });
+          });
+        }
+      },
+      onChildSkillPointsEarned(pts, skillId) {
+        SkillEnricherUtil.updateSkillPtsInList(this.skills, pts, skillId);
+      },
       pointsEarned(pts) {
         this.$emit('points-earned', pts, this.skill.skillId);
       },
       skillClicked() {
-        if (this.enableDrillDown) {
+        if (this.allowDrillDown) {
           const route = this.getSkillDetailsRoute();
           const params = this.getParams();
           this.handlePush({

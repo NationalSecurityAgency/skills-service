@@ -48,7 +48,7 @@ limitations under the License.
             <div v-if="!loading">
                 <div v-if="skillsInternal && skillsInternal.length > 0">
                   <div v-for="(skill, index) in skillsInternal"
-                       :key="`unique-skill-old-${index}`"
+                       :key="`skill-${skill.skillId}`"
                        class="skills-theme-bottom-border-with-background-color"
                        :class="{
                          'separator-border-thick' : showDescriptionsInternal,
@@ -57,6 +57,7 @@ limitations under the License.
                   >
                     <div class="p-3 pt-4">
                       <skill-progress2
+                          :id="`skill-${skill.skillId}`"
                           :skill="skill"
                           :subjectId="subject.subjectId"
                           :badgeId="subject.badgeId"
@@ -65,6 +66,8 @@ limitations under the License.
                           :show-description="showDescriptionsInternal"
                           :data-cy="`skillProgress_index-${index}`"
                           @points-earned="onPointsEarned"
+                          :child-skill-highlight-string="searchString"
+                          :is-last="index === (skillsInternal.length - 1)"
                       />
                     </div>
                   </div>
@@ -88,6 +91,7 @@ limitations under the License.
   import SkillProgress2 from './SkillProgress2';
   import SkillsFilter from '@/common-components/utilities/ListFilterMenu';
   import SkillEnricherUtil from '../../utils/SkillEnricherUtil';
+  import StringHighlighter from '@/common-components/utilities/StringHighlighter';
 
   export default {
     components: {
@@ -180,13 +184,31 @@ limitations under the License.
         filter = (s) => s.projectId === this.projectId;
       }
       this.skillsInternal = this.subject.skills.filter(filter).map((item) => {
-        this.updateMetaCounts(item.meta);
-        return { ...item, subject: theSubject };
+        const isSkillsGroupType = item.type === 'SkillsGroup';
+        if (isSkillsGroupType) {
+          // eslint-disable-next-line no-param-reassign
+          item.children = item.children.map((child) => ({ ...child, groupId: item.skillId, isSkillType: true }));
+        }
+        const res = {
+          ...item, subject: theSubject, isSkillsGroupType, isSkillType: !isSkillsGroupType,
+        };
+
+        this.updateMetaCountsForSkillRes(res);
+        return res;
       });
 
-      this.skillsInternalOrig = this.skillsInternal.map((item) => ({ ...item }));
+      this.skillsInternalOrig = this.skillsInternal.map((item) => ({ ...item, children: item.children?.map((child) => ({ ...child })) }));
     },
     methods: {
+      updateMetaCountsForSkillRes(skillRes) {
+        if (skillRes.isSkillsGroupType) {
+          skillRes.children.forEach((childItem) => {
+            this.updateMetaCounts(childItem.meta);
+          });
+        } else {
+          this.updateMetaCounts(skillRes.meta);
+        }
+      },
       updateMetaCounts(meta) {
         if (meta.complete) {
           this.metaCounts.complete += 1;
@@ -226,15 +248,8 @@ limitations under the License.
         }
       },
       onPointsEarned(pts, skillId) {
-        const updateSkill = (skills) => {
-          const index = skills.findIndex((item) => item.skillId === skillId);
-          const skill = skills[index];
-          const updatedSkill = SkillEnricherUtil.addPts(skill, pts);
-          skills.splice(index, 1, updatedSkill);
-        };
-
-        updateSkill(this.skillsInternalOrig);
-        updateSkill(this.skillsInternal);
+        SkillEnricherUtil.updateSkillPtsInList(this.skillsInternalOrig, pts, skillId);
+        SkillEnricherUtil.updateSkillPtsInList(this.skillsInternal, pts, skillId);
 
         const skill = this.skillsInternalOrig.find((item) => item.skillId === skillId);
         if (skill.selfReporting && skill.selfReporting.type === 'HonorSystem') {
@@ -267,12 +282,23 @@ limitations under the License.
         let resultSkills = this.skillsInternalOrig.map((item) => ({ ...item }));
         if (this.searchString && this.searchString.trim().length > 0) {
           const searchStrNormalized = this.searchString.trim().toLowerCase();
-          const foundItems = resultSkills.filter((item) => item.skill?.trim()?.toLowerCase().includes(searchStrNormalized));
+
+          // groups are treated as a single unit (group and child skills shown OR the entire group is removed)
+          // group is shown when either a group name matches OR any of the skill names match the search string
+          const foundItems = resultSkills.filter((item) => {
+            if (item.isSkillsGroupType) {
+              // find at least 1 item that matches the search string
+              const foundChild = item.children.find((childItem) => childItem.skill?.trim()?.toLowerCase().includes(searchStrNormalized));
+              if (foundChild) {
+                return true;
+              }
+            }
+            return item.skill?.trim()?.toLowerCase().includes(searchStrNormalized);
+          });
+
           resultSkills = foundItems.map((item) => {
-            const name = item.skill;
-            const index = name.toLowerCase().indexOf(searchStrNormalized);
-            const skillHtml = `${name.substring(0, index)}<mark>${name.substring(index, index + searchStrNormalized.length)}</mark>${name.substring(index + searchStrNormalized.length)}`;
-            return { skillHtml, ...item };
+            const skillHtml = StringHighlighter.highlight(item.skill, searchStrNormalized);
+            return skillHtml ? ({ ...item, skillHtml }) : item;
           });
         }
 

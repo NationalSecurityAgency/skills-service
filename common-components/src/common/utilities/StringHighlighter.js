@@ -17,6 +17,9 @@ export default class StringHighlighter {
   static highlight(value, searchStr) {
     const searchStringNorm = searchStr.trim().toLowerCase();
     const index = value.toLowerCase().indexOf(searchStringNorm);
+    if (index < 0) {
+       return null;
+    }
     const htmlRel = `${value.substring(0, index)}<mark>${value.substring(index, index + searchStringNorm.length)}</mark>${value.substring(index + searchStringNorm.length)}`;
     return htmlRel;
   }
