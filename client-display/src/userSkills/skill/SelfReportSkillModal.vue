@@ -33,19 +33,21 @@ limitations under the License.
           <span class="text-muted">optional</span> message and it will enter an approval queue.</p>
       </div>
     </div>
-    <input type="text" id="approvalRequiredMsg" @input="validate"
+    <b-form-textarea type="text" id="approvalRequiredMsg" @input="validate"
            v-if="isApprovalRequired" v-model="approvalRequestedMsg"
+           rows="5"
            data-cy="selfReportMsgInput"
            aria-describedby="reportSkillMsg"
            aria-label="Optional request approval message"
-           class="form-control" placeholder="Message (optional)">
+           class="form-control" placeholder="Message (optional)"/>
+    <div :class="{ 'float-right':true, 'text-small': true, 'text-danger': charactersRemaining < 0 }" data-cy="charactersRemaining">{{charactersRemaining}} characters remaining <i v-if="charactersRemaining < 0" class="fas fa-exclamation-circle"/></div>
     <span v-if="inputInvalid" class="text-small text-danger" data-cy="selfReportMsgInput_errMsg"><i class="fas fa-exclamation-circle"/> {{ inputInvalidExplanation }}</span>
     <template #modal-footer>
       <button type="button" class="btn btn-outline-danger text-uppercase" @click="cancel">
         <i class="fas fa-times-circle"></i> Cancel
       </button>
       <button type="button" class="btn btn-outline-success text-uppercase" @click="reportSkill"
-              data-cy="selfReportSubmitBtn" :disabled="inputInvalid">
+              data-cy="selfReportSubmitBtn" :disabled="!messageValid">
         <i class="fas fa-arrow-alt-circle-right"></i> Submit
       </button>
     </template>
@@ -73,6 +75,23 @@ limitations under the License.
         inputInvalidExplanation: '',
         modalYOffset: 0,
       };
+    },
+    computed: {
+      messageValid() {
+        if (this.inputInvalid) {
+          return false;
+        }
+
+        const maxLength = this.$store.getters.config ? this.$store.getters.config.maxSelfReportMessageLength : -1;
+        if (maxLength === -1) {
+          return true;
+        }
+
+        return this.charactersRemaining >= 0;
+      },
+      charactersRemaining() {
+        return this.$store.getters.config.maxSelfReportMessageLength - this.approvalRequestedMsg.length;
+      },
     },
     methods: {
       validate: debounce(function debouncedValidate() {

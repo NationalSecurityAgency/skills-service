@@ -94,6 +94,7 @@ class PublicConfigController {
         String docsHost = uiConfigProperties.ui.docsHost
         Map<String,String> res = new HashMap<>()
         res["docsHost"] = docsHost
+        res["maxSelfReportMessageLength"] = uiConfigProperties.ui.maxSelfReportMessageLength
         return res
     }
 

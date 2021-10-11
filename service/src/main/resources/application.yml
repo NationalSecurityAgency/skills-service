@@ -127,6 +127,8 @@ skills:
       pointHistoryInDays: 1825
       rankingAndProgressViewsEnabled: false
       defaultLandingPage: "admin"
+      maxSelfReportMessageLength: 250
+      maxSelfReportRejectionMessageLength: 250
     client:
       loggingEnabled: false
       loggingLevel: DEBUG

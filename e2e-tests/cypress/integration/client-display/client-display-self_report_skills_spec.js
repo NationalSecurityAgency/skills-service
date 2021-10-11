@@ -450,6 +450,31 @@ describe('Client Display Self Report Skills Tests', () => {
     cy.wait('@reportSkill');
   });
 
+  it('approval message must not exceed maximum length', () => {
+    cy.createSkill(1, 1, 1, {selfReportingType : 'Approval'});
+    cy.cdVisit('/');
+    cy.cdClickSubj(0);
+    cy.cdClickSkill(0);
+
+    const fifty = new Array(51).join("A");
+    const twoFiftyOne = new Array(252).join('A');
+    cy.get('[data-cy="selfReportBtn"]').click();
+    cy.get('[data-cy="selfReportSkillMsg"]').contains('This skill requires approval. Submit with an optional message and it will enter an approval queue.')
+
+
+    cy.get('[data-cy="selfReportMsgInput"]').type(fifty);
+    cy.get('[data-cy=charactersRemaining]').contains('200 characters remaining');
+    cy.get('[data-cy="selfReportSubmitBtn"]').should('be.enabled');
+
+    cy.get('[data-cy="selfReportMsgInput"]').clear();
+    cy.get('[data-cy="selfReportSubmitBtn"]').should('be.enabled');
+    cy.get('[data-cy=charactersRemaining]').contains('250 characters remaining');
+
+    cy.get('[data-cy="selfReportMsgInput"]').type(twoFiftyOne);
+    cy.get('[data-cy=charactersRemaining]').contains('-1 characters remaining');
+    cy.get('[data-cy="selfReportSubmitBtn"]').should('be.disabled');
+  });
+
   it('clearly indicate which skills are self reportable', () => {
     cy.createSkill(1, 1, 1, {selfReportingType : 'Approval'});
     cy.createSkill(1, 1, 2);
