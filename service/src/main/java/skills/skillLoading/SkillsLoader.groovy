@@ -15,7 +15,6 @@
  */
 package skills.skillLoading
 
-
 import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
@@ -809,7 +808,7 @@ class SkillsLoader {
                 }
             }
 
-            if (skillDef.type == SkillDef.ContainerType.SkillsGroup) {
+            if (skillDef.type == SkillDef.ContainerType.SkillsGroup && Boolean.valueOf(skillDef.enabled)) {
                 SkillsSummaryGroup skillsSummary = new SkillsSummaryGroup(
                         projectId: skillDef.projectId,
                         projectName: projDef.name,
@@ -825,7 +824,7 @@ class SkillsLoader {
                 skillsSummary.points = skillsSummary.children ? skillsSummary.children.collect({it.points}).sum() as Integer: 0
                 skillsSummary.todaysPoints = skillsSummary.children ? skillsSummary.children.collect({it.todaysPoints}).sum() as Integer: 0
                 skillsRes << skillsSummary
-            } else {
+            } else if (skillDef.type == SkillDef.ContainerType.Skill) {
                 skillsRes << new SkillSummary(
                         projectId: skillDef.projectId, projectName: projDef.name,
                         skillId: skillDef.skillId, skill: skillDef.name,
