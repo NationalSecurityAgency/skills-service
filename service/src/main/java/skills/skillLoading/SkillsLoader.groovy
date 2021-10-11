@@ -429,6 +429,7 @@ class SkillsLoader {
                 crossProject: crossProjectId != null,
                 achievedOn: achievedOn,
                 selfReporting: loadSelfReporting(userId, skillDef),
+                type: skillDef.type,
         )
     }
 
