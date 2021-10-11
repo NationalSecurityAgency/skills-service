@@ -309,7 +309,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
                 srd.child=sdChild.id and 
                 sdChild.projectId=?1 and 
                 sdChild.skillId=?2 and 
-                srd.type='RuleSetDefinition'
+                srd.type IN ('RuleSetDefinition', 'SkillsGroupRequirement')
         ''')
     ProjectAndSubjectPoints getProjectAndSubjectPoints(String projectId, String skillId)
 

@@ -44,16 +44,26 @@ interface SkillDefWithExtraRepo extends PagingAndSortingRepository<SkillDefWithE
         String getHelpUrl()
         Date getAchievedOn()
         SkillDef.SelfReportingType getSelfReportingType()
+        SkillDef.ContainerType getType()
     }
 
-    @Query(value='''SELECT c.skillId as skillId, c.description as description, c.helpUrl as helpUrl, ua.achievedOn as achievedOn, c.selfReportingType as selfReportingType
+    @Query(value='''SELECT c.skillId as skillId, c.description as description, c.helpUrl as helpUrl, ua.achievedOn as achievedOn, c.selfReportingType as selfReportingType, c.type as type
         from SkillDefWithExtra s, SkillRelDef r, SkillDefWithExtra c
         left join UserAchievement ua on c.skillId = ua.skillId and c.projectId = ua.projectId and ua.userId=?5
         where 
             s.id = r.parent and c.id = r.child and 
             s.projectId=?1 and c.projectId=?1 and
-            s.skillId=?2 and r.type in ?3 and c.version<=?4''')
-    List<SkillDescDBRes> findAllChildSkillsDescriptions(String projectId, String parentSkillId, List<SkillRelDef.RelationshipType> relationshipTypes, int version, String userId)
+            s.skillId=?2 and r.type=?3 and c.version<=?4''')
+    List<SkillDescDBRes> findAllChildSkillsDescriptions(String projectId, String parentSkillId, SkillRelDef.RelationshipType relationshipType, int version, String userId)
+
+    @Query(value='''SELECT c.skillId as skillId, c.description as description, c.helpUrl as helpUrl, ua.achievedOn as achievedOn, c.selfReportingType as selfReportingType, c.type as type
+        from SkillDefWithExtra s, SkillRelDef r, SkillDefWithExtra c
+        left join UserAchievement ua on c.skillId = ua.skillId and c.projectId = ua.projectId and ua.userId=?5
+        where 
+            s.id = r.parent and c.id = r.child and 
+            s.projectId=?1 and c.projectId=?1 and
+            s.skillId in ?2 and r.type=?3 and c.version<=?4''')
+    List<SkillDescDBRes> findAllChildSkillsDescriptionsForSkillsGroups(String projectId, List<String> parentSkillIds, SkillRelDef.RelationshipType relationshipType, int version, String userId)
 
 
     @Query(value='''SELECT c.skillId as skillId, c.description as description, c.helpUrl as helpUrl, ua.achievedOn as achievedOn
@@ -62,8 +72,8 @@ interface SkillDefWithExtraRepo extends PagingAndSortingRepository<SkillDefWithE
         where 
             s.id = r.parent and c.id = r.child and 
             s.projectId is null and
-            s.skillId=?1 and r.type in ?2 and c.version<=?3''')
-    List<SkillDescDBRes> findAllGlobalChildSkillsDescriptions(String parentSkillId, List<SkillRelDef.RelationshipType> relationshipTypes, int version, String userId)
+            s.skillId=?1 and r.type=?2 and c.version<=?3''')
+    List<SkillDescDBRes> findAllGlobalChildSkillsDescriptions(String parentSkillId, SkillRelDef.RelationshipType relationshipType, int version, String userId)
 
     @Query(value='''
         WITH mp AS (

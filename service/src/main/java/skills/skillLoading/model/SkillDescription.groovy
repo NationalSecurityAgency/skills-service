@@ -15,11 +15,14 @@
  */
 package skills.skillLoading.model
 
+import skills.storage.model.SkillDef
+
 class SkillDescription {
     String skillId
     String description
     String href
     Date achievedOn
+    SkillDef.ContainerType type
 
     SelfReportingInfo selfReporting
 }

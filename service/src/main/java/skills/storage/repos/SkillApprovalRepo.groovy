@@ -177,6 +177,22 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             )''')
     List<SkillApprovalPlusSkillId> findsApprovalWithSkillIdForSkillsDisplay(String userId, String projectId, String subjectId)
 
+    @Query('''SELECT s as skillApproval, sd.skillId as skillId
+        from SkillApproval s, SkillDef subject, SkillRelDef  srd, SkillDef sd 
+        where
+            subject = srd.parent and 
+            sd = srd.child and
+            s.userId = ?1 and
+            s.projectId = ?2 and
+            subject.skillId in ?3 and
+            srd.type = 'SkillsGroupRequirement' and
+            s.skillRefId = sd.id and
+            (
+                s.approverActionTakenOn is null or 
+                (s.rejectionAcknowledgedOn is null and s.rejectedOn is not null)
+            )''')
+    List<SkillApprovalPlusSkillId> findsApprovalWithSkillIdInForSkillsDisplay(String userId, String projectId, List<String> skillIds)
+
     interface SkillReportingTypeAndCount {
         SkillDef.SelfReportingType getType()
         Integer getCount()
