@@ -291,4 +291,205 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         def exception = thrown(SkillsClientException)
         exception.message.contains("A Skill Group must have at least 2 required skills in order to be enabled.")
     }
+
+    void "cannot enable a SkillsGroup when not all skills are required, and not all have the same # of points" () {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(2)
+        def skill3WithDiffNumPoints = SkillsFactory.createSkill(1, 1, 3)
+        skill3WithDiffNumPoints.pointIncrement = 100
+        skills.add(skill3WithDiffNumPoints)
+        def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 5)
+        skillsGroup.numSkillsRequired = skills.size()-1
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skills.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+
+        when:
+        skillsGroup.enabled = 'true'
+        skillsService.updateSkill(skillsGroup, null)
+
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains("All skills that belong to the Skill Group must have the same total value when all skills are not required to be completed.")
+    }
+
+    void "can enable a SkillsGroup when all skills are required, and not all skills have the same # of points" () {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(2)
+        def skill3WithDiffNumPoints = SkillsFactory.createSkill(1, 1, 3)
+        skill3WithDiffNumPoints.pointIncrement = 100
+        skills.add(skill3WithDiffNumPoints)
+        def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 5)
+        skillsGroup.numSkillsRequired = skills.size()
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skills.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+
+        when:
+        skillsGroup.enabled = 'true'
+        skillsService.updateSkill(skillsGroup, null)
+        def res = skillsService.getSkill(skillsGroup)
+        def groupSkills = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
+        groupSkills.sort() { it.skillId }
+
+        then:
+        res
+        res.skillId == skillsGroup.skillId
+        res.name == skillsGroup.name
+        res.type == skillsGroup.type
+        res.numSkillsInGroup == groupSkills.size()
+        res.numSelfReportSkills == 0
+        res.numSkillsRequired == skills.size()
+        res.enabled == 'true'
+
+        groupSkills.size() == 3
+
+        groupSkills.get(0).skillId == skills.get(0).skillId
+        groupSkills.get(0).projectId == proj.projectId
+        groupSkills.get(0).name == skills.get(0).name
+        groupSkills.get(0).version == skills.get(0).version
+        groupSkills.get(0).displayOrder == 1
+        groupSkills.get(0).totalPoints == skills.get(0).pointIncrement * skills.get(0).numPerformToCompletion
+
+        groupSkills.get(1).skillId == skills.get(1).skillId
+        groupSkills.get(1).projectId == proj.projectId
+        groupSkills.get(1).name == skills.get(1).name
+        groupSkills.get(1).version == skills.get(1).version
+        groupSkills.get(1).displayOrder == 2
+        groupSkills.get(1).totalPoints == skills.get(1).pointIncrement * skills.get(1).numPerformToCompletion
+
+        groupSkills.get(2).skillId == skills.get(2).skillId
+        groupSkills.get(2).projectId == proj.projectId
+        groupSkills.get(2).name == skills.get(2).name
+        groupSkills.get(2).version == skills.get(2).version
+        groupSkills.get(2).displayOrder == 3
+        groupSkills.get(2).totalPoints == 100 * skills.get(2).numPerformToCompletion
+    }
+
+    void "can enable a SkillsGroup when numSkillsRequired == -1, and not all skills have the same # of points" () {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(2)
+        def skill3WithDiffNumPoints = SkillsFactory.createSkill(1, 1, 3)
+        skill3WithDiffNumPoints.pointIncrement = 100
+        skills.add(skill3WithDiffNumPoints)
+        def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 5)
+        skillsGroup.numSkillsRequired = -1
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skills.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+
+        when:
+        skillsGroup.enabled = 'true'
+        skillsService.updateSkill(skillsGroup, null)
+        def res = skillsService.getSkill(skillsGroup)
+        def groupSkills = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
+        groupSkills.sort() { it.skillId }
+
+        then:
+        res
+        res.skillId == skillsGroup.skillId
+        res.name == skillsGroup.name
+        res.type == skillsGroup.type
+        res.numSkillsInGroup == groupSkills.size()
+        res.numSelfReportSkills == 0
+        res.numSkillsRequired == -1
+        res.enabled == 'true'
+
+        groupSkills.size() == 3
+
+        groupSkills.get(0).skillId == skills.get(0).skillId
+        groupSkills.get(0).projectId == proj.projectId
+        groupSkills.get(0).name == skills.get(0).name
+        groupSkills.get(0).version == skills.get(0).version
+        groupSkills.get(0).displayOrder == 1
+        groupSkills.get(0).totalPoints == skills.get(0).pointIncrement * skills.get(0).numPerformToCompletion
+
+        groupSkills.get(1).skillId == skills.get(1).skillId
+        groupSkills.get(1).projectId == proj.projectId
+        groupSkills.get(1).name == skills.get(1).name
+        groupSkills.get(1).version == skills.get(1).version
+        groupSkills.get(1).displayOrder == 2
+        groupSkills.get(1).totalPoints == skills.get(1).pointIncrement * skills.get(1).numPerformToCompletion
+
+        groupSkills.get(2).skillId == skills.get(2).skillId
+        groupSkills.get(2).projectId == proj.projectId
+        groupSkills.get(2).name == skills.get(2).name
+        groupSkills.get(2).version == skills.get(2).version
+        groupSkills.get(2).displayOrder == 3
+        groupSkills.get(2).totalPoints == 100 * skills.get(2).numPerformToCompletion
+    }
+
+    void "can enable a SkillsGroup when not all skills are required, but all skills have the same # of points" () {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(3)
+        def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 5)
+        skillsGroup.numSkillsRequired = skills.size() - 1
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skills.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+
+        when:
+        skillsGroup.enabled = 'true'
+        skillsService.updateSkill(skillsGroup, null)
+        def res = skillsService.getSkill(skillsGroup)
+        def groupSkills = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
+        groupSkills.sort() { it.skillId }
+
+        then:
+        res
+        res.skillId == skillsGroup.skillId
+        res.name == skillsGroup.name
+        res.type == skillsGroup.type
+        res.numSkillsInGroup == groupSkills.size()
+        res.numSelfReportSkills == 0
+        res.numSkillsRequired == 2
+        res.enabled == 'true'
+
+        groupSkills.size() == 3
+
+        groupSkills.get(0).skillId == skills.get(0).skillId
+        groupSkills.get(0).projectId == proj.projectId
+        groupSkills.get(0).name == skills.get(0).name
+        groupSkills.get(0).version == skills.get(0).version
+        groupSkills.get(0).displayOrder == 1
+        groupSkills.get(0).totalPoints == skills.get(0).pointIncrement * skills.get(0).numPerformToCompletion
+
+        groupSkills.get(1).skillId == skills.get(1).skillId
+        groupSkills.get(1).projectId == proj.projectId
+        groupSkills.get(1).name == skills.get(1).name
+        groupSkills.get(1).version == skills.get(1).version
+        groupSkills.get(1).displayOrder == 2
+        groupSkills.get(1).totalPoints == skills.get(0).pointIncrement * skills.get(0).numPerformToCompletion
+
+        groupSkills.get(2).skillId == skills.get(2).skillId
+        groupSkills.get(2).projectId == proj.projectId
+        groupSkills.get(2).name == skills.get(2).name
+        groupSkills.get(2).version == skills.get(2).version
+        groupSkills.get(2).displayOrder == 3
+        groupSkills.get(2).totalPoints == skills.get(0).pointIncrement * skills.get(0).numPerformToCompletion
+    }
 }
