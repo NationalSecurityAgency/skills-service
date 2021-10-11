@@ -67,7 +67,6 @@ limitations under the License.
                           :data-cy="`skillProgress_index-${index}`"
                           @points-earned="onPointsEarned"
                           :child-skill-highlight-string="searchString"
-                          :is-last="index === (skillsInternal.length - 1)"
                       />
                     </div>
                   </div>

@@ -19,7 +19,7 @@ limitations under the License.
             <skills-title>Skill Overview</skills-title>
             <div class="card">
               <div class="card-body text-center text-sm-left">
-                <skill-progress2 :skill="skill" @points-earned="onPointsEarned"/>
+                <skill-progress2 :skill="skill" @points-earned="onPointsEarned" />
               </div>
             </div>
             <skill-dependencies class="mt-2" v-if="dependencies && dependencies.length > 0" :dependencies="dependencies"

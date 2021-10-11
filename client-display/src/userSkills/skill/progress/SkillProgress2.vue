@@ -76,7 +76,7 @@ limitations under the License.
                       :class="{ 'skills-navigable-item' : allowDrillDown }" data-cy="skillProgressBar"/>
       </div>
     </div>
-    <div v-if="showDescription && skill.isSkillType">
+    <div v-if="showDescription && skill.type === 'Skill'">
       <div v-if="locked" class="text-center text-muted locked-text">
           *** Skill has <b>{{ skill.dependencyInfo.numDirectDependents}}</b> direct dependent(s).
           <span v-if="allowDrillDown">Click <i class="fas fa-lock icon"></i> to see its dependencies.</span>
@@ -101,7 +101,6 @@ limitations under the License.
         <skill-overview-footer :skill="skill" v-on:points-earned="pointsEarned"/>
       </div>
 
-      <hr v-if="!isLast"/>
     </div>
 
     <div v-if="skill.isSkillsGroupType && childSkillsInternal" class="ml-3 mt-3">
@@ -121,8 +120,9 @@ limitations under the License.
             :show-description="showDescription"
             :data-cy="`group-${skill.skillId}_skillProgress-${childSkill.skillId}`"
             @points-earned="onChildSkillPointsEarned"
-            :is-last="index === (childSkillsInternal.length - 1)"
         ></skill-progress2>
+
+        <hr v-if="index < (childSkillsInternal.length - 1)"/>
       </div>
     </div>
 
@@ -178,10 +178,6 @@ limitations under the License.
       childSkillHighlightString: {
         type: String,
         default: '',
-      },
-      isLast: {
-        type: Boolean,
-        default: false,
       },
     },
     data() {
