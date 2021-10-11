@@ -16,7 +16,11 @@ limitations under the License.
 <template>
 <div>
   <loading-container v-bind:is-loading="isLoading" :data-cy="`ChildRowSkillGroupDisplay_${group.skillId}`">
-    <b-card body-class="p-0" class="ml-4 mb-3" style="background-color: rgba(0,124,73,0.04)">
+    <div class="ml-4 mb-3">
+      <b-card v-if="description" header="Description" class="mb-3" body-class="card-bg">
+        {{ description }}
+      </b-card>
+      <b-card body-class="p-0 card-bg" >
       <div class="row px-3 my-2" style="height: 3rem;">
         <div class="col">
 
@@ -66,6 +70,7 @@ limitations under the License.
                     @skill-removed="skillRemoved"
         :show-search="false" :show-header="false" :show-paging="false"/>
     </b-card>
+    </div>
   </loading-container>
 
   <edit-skill v-if="editSkillInfo.show" v-model="editSkillInfo.show" :is-copy="editSkillInfo.isCopy" :is-edit="editSkillInfo.isEdit"
@@ -97,10 +102,14 @@ limitations under the License.
     },
     data() {
       return {
-        isLoading: true,
+        loading: {
+          details: true,
+          skills: true,
+        },
         numSkills: 0,
         editSkillInfo: {},
         skills: [],
+        description: null,
         editRequiredSkillsInfo: {
           show: false,
         },
@@ -110,6 +119,9 @@ limitations under the License.
       this.loadData();
     },
     computed: {
+      isLoading() {
+        return this.loading.details || this.loading.skills;
+      },
       goLiveDisabled() {
         return this.numSkills < 2;
       },
@@ -123,13 +135,22 @@ limitations under the License.
     },
     methods: {
       loadData() {
-        this.isLoading = true;
+        this.loading.skills = true;
+        this.loading.details = true;
+
+        SkillsService.getSkillDetails(this.group.projectId, this.group.subjectId, this.group.skillId)
+          .then((res) => {
+            this.description = res.description;
+          }).finally(() => {
+            this.loading.details = false;
+          });
+
         SkillsService.getGroupSkills(this.group.projectId, this.group.skillId)
           .then((res) => {
             this.numSkills = res.length;
             this.skills = res;
           }).finally(() => {
-            this.isLoading = false;
+            this.loading.skills = false;
           });
       },
       showNewSkillDialog() {
@@ -189,5 +210,7 @@ limitations under the License.
 </script>
 
 <style scoped>
-
+.card-bg {
+  background-color: rgba(0,124,73,0.04) !important;
+}
 </style>

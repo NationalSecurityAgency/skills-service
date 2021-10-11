@@ -19,6 +19,7 @@ limitations under the License.
              :title="title"
              @hide="publishHidden"
              v-model="show"
+             size="xl"
              :no-close-on-backdrop="true"
              :centered="true"
              data-cy="EditSkillGroupModal"
@@ -54,6 +55,16 @@ limitations under the License.
           </div>
         </div>
 
+        <div class="mt-3">
+          <label class="label">Description</label>
+          <div class="control">
+            <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" v-slot="{errors}" name="Skill Description">
+              <markdown-editor v-if="internalGroup" v-model="internalGroup.description" data-cy="skillDescription"/>
+              <small class="form-text text-danger" data-cy="skillDescriptionError">{{ errors[0] }}</small>
+            </ValidationProvider>
+          </div>
+        </div>
+
         <p v-if="invalid && overallErrMsg" class="text-center text-danger mt-2" aria-live="polite"><small>***{{ overallErrMsg }}***</small></p>
       </b-container>
 
@@ -76,10 +87,11 @@ limitations under the License.
   import IdInput from '../utils/inputForm/IdInput';
   import InputSanitizer from '../utils/InputSanitizer';
   import SkillsService from './SkillsService';
+  import MarkdownEditor from '../utils/MarkdownEditor';
 
   export default {
     name: 'EditSkillGroup',
-    components: { IdInput },
+    components: { MarkdownEditor, IdInput },
     props: {
       group: Object,
       isEdit: Boolean,
@@ -91,7 +103,12 @@ limitations under the License.
     data() {
       return {
         show: this.value,
-        internalGroup: { originalSkillId: this.group.skillId, isEdit: this.isEdit, ...this.group },
+        internalGroup: {
+          originalSkillId: this.group.skillId,
+          isEdit: this.isEdit,
+          description: null,
+          ...this.group,
+        },
         canEditGroupId: false,
         overallErrMsg: '',
         original: {
