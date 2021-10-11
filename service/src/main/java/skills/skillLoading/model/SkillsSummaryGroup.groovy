@@ -15,21 +15,8 @@
  */
 package skills.skillLoading.model
 
-class SkillSummary extends SkillSummaryParent {
-
-    int pointIncrement
-    int pointIncrementInterval
-    int maxOccurrencesWithinIncrementInterval
-
-    SkillDescription description
-
-    SkillDependencySummary dependencyInfo
-
-    // null if the skill is NOT achieved
-    Date achievedOn
-
-    SelfReportingInfo selfReporting
-
-    String subjectName
-    String subjectId
+class SkillsSummaryGroup extends SkillSummaryParent {
+    String enabled
+    Integer numSkillsRequired
+    List<SkillSummaryParent> children
 }

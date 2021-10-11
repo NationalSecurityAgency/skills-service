@@ -15,21 +15,21 @@
  */
 package skills.skillLoading.model
 
-class SkillSummary extends SkillSummaryParent {
+import skills.storage.model.SkillDef
 
-    int pointIncrement
-    int pointIncrementInterval
-    int maxOccurrencesWithinIncrementInterval
+class SkillSummaryParent {
 
-    SkillDescription description
+    String projectId
+    String projectName
 
-    SkillDependencySummary dependencyInfo
+    String skillId
+    String skill
 
-    // null if the skill is NOT achieved
-    Date achievedOn
+    int points
+    int totalPoints
+    int todaysPoints
 
-    SelfReportingInfo selfReporting
+    boolean crossProject
 
-    String subjectName
-    String subjectId
+    SkillDef.ContainerType type
 }

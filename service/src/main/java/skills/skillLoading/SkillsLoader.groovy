@@ -544,14 +544,14 @@ class SkillsLoader {
 
     @Profile
     private SkillSubjectSummary loadSubjectSummary(ProjDef projDef, String userId, SkillDefParent subjectDefinition, Integer version, boolean loadSkills = false) {
-        List<SkillSummary> skillsRes = []
+        List<SkillSummaryParent> skillsRes = []
 
         // must compute total points so the provided version is taken into account
         // subjectDefinition.totalPoints is total overall regardless of the version
         int totalPoints
         if (loadSkills) {
             SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, subjectDefinition.skillId, version)
-            skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints)
+            skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints, false, userId, version)
             totalPoints = skillsRes ? skillsRes.collect({it.totalPoints}).sum() as Integer: 0
         } else {
             totalPoints = calculateTotalForSkillDef(projDef, subjectDefinition, version)
@@ -639,7 +639,7 @@ class SkillsLoader {
 
     @Profile
     private SkillBadgeSummary loadBadgeSummary(ProjDef projDef, String userId, SkillDefWithExtra badgeDefinition, Integer version = Integer.MAX_VALUE, boolean loadSkills = false, boolean loadProjectName = false) {
-        List<SkillSummary> skillsRes = []
+        List<SkillSummaryParent> skillsRes = []
 
         if (loadSkills) {
             SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef?.projectId, badgeDefinition.skillId, version, SkillRelDef.RelationshipType.BadgeRequirement)
@@ -683,7 +683,7 @@ class SkillsLoader {
 
     @Profile
     private SkillGlobalBadgeSummary loadGlobalBadgeSummary(String userId, String originatingProject, SkillDefWithExtra badgeDefinition, Integer version = Integer.MAX_VALUE, boolean loadSkills = false) {
-        List<SkillSummary> skillsRes = []
+        List<SkillSummaryParent> skillsRes = []
 
         if (loadSkills) {
             SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, null, badgeDefinition.skillId, version, SkillRelDef.RelationshipType.BadgeRequirement)
@@ -773,8 +773,13 @@ class SkillsLoader {
     }
 
     @Profile
-    private List<SkillSummary> createSkillSummaries(ProjDef thisProjDef, List<SubjectDataLoader.SkillsAndPoints> childrenWithPoints, boolean populateSubjectInfo=false) {
-        List<SkillSummary> skillsRes = []
+    private List<SkillSummaryParent> createSkillSummaries(ProjDef thisProjDef, List<SubjectDataLoader.SkillsAndPoints> childrenWithPoints, boolean populateSubjectInfo=false) {
+        return createSkillSummaries(thisProjDef, childrenWithPoints, populateSubjectInfo, null, null)
+    }
+
+    @Profile
+    private List<SkillSummaryParent> createSkillSummaries(ProjDef thisProjDef, List<SubjectDataLoader.SkillsAndPoints> childrenWithPoints, boolean populateSubjectInfo, String userId, Integer version) {
+        List<SkillSummaryParent> skillsRes = []
 
         Map<String,ProjDef> projDefMap = [:]
         childrenWithPoints.each { SubjectDataLoader.SkillsAndPoints skillDefAndUserPoints ->
@@ -804,18 +809,37 @@ class SkillsLoader {
                 }
             }
 
-            skillsRes << new SkillSummary(
-                    projectId: skillDef.projectId, projectName: projDef.name,
-                    skillId: skillDef.skillId, skill: skillDef.name,
-                    points: points, todaysPoints: todayPoints,
-                    pointIncrement: skillDef.pointIncrement, pointIncrementInterval: skillDef.pointIncrementInterval,
-                    maxOccurrencesWithinIncrementInterval: skillDef.numMaxOccurrencesIncrementInterval,
-                    totalPoints: skillDef.totalPoints,
-                    dependencyInfo: skillDefAndUserPoints.dependencyInfo,
-                    selfReporting: skillDef.selfReportingType ? new SelfReportingInfo(enabled: true, type: skillDef.selfReportingType) : null,
-                    subjectName: subjectName,
-                    subjectId: subjectId
-            )
+            if (skillDef.type == SkillDef.ContainerType.SkillsGroup) {
+                SkillsSummaryGroup skillsSummary = new SkillsSummaryGroup(
+                        projectId: skillDef.projectId,
+                        projectName: projDef.name,
+                        skillId: skillDef.skillId,
+                        skill: skillDef.name,
+                        type: skillDef.type,
+                        enabled: Boolean.valueOf(skillDef.enabled).toString(),
+                        numSkillsRequired: skillDef.numSkillsRequired,
+                )
+                SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, skillDef.skillId, version, SkillRelDef.RelationshipType.SkillsGroupRequirement)
+                skillsSummary.children = createSkillSummaries(thisProjDef, groupChildrenMeta.childrenWithPoints, false, userId, version)
+                skillsSummary.totalPoints = skillsSummary.children ? skillsSummary.children.collect({it.totalPoints}).sum() as Integer: 0
+                skillsSummary.points = skillsSummary.children ? skillsSummary.children.collect({it.points}).sum() as Integer: 0
+                skillsSummary.todaysPoints = skillsSummary.children ? skillsSummary.children.collect({it.todaysPoints}).sum() as Integer: 0
+                skillsRes << skillsSummary
+            } else {
+                skillsRes << new SkillSummary(
+                        projectId: skillDef.projectId, projectName: projDef.name,
+                        skillId: skillDef.skillId, skill: skillDef.name,
+                        points: points, todaysPoints: todayPoints,
+                        pointIncrement: skillDef.pointIncrement, pointIncrementInterval: skillDef.pointIncrementInterval,
+                        maxOccurrencesWithinIncrementInterval: skillDef.numMaxOccurrencesIncrementInterval,
+                        totalPoints: skillDef.totalPoints,
+                        dependencyInfo: skillDefAndUserPoints.dependencyInfo,
+                        selfReporting: skillDef.selfReportingType ? new SelfReportingInfo(enabled: true, type: skillDef.selfReportingType) : null,
+                        subjectName: subjectName,
+                        subjectId: subjectId,
+                        type: skillDef.type
+                )
+            }
         }
 
         return skillsRes
