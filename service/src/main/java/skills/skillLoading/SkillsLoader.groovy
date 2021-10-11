@@ -466,28 +466,28 @@ class SkillsLoader {
 
     @Transactional(readOnly = true)
     List<SkillDescription> loadSubjectDescriptions(String projectId, String subjectId, String userId, Integer version = -1) {
-        return loadDescriptions(projectId, subjectId, userId, SkillRelDef.RelationshipType.RuleSetDefinition, version)
+        return loadDescriptions(projectId, subjectId, userId, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement], version)
     }
     @Transactional(readOnly = true)
     List<SkillDescription> loadBadgeDescriptions(String projectId, String badgeId, String userId, Integer version = -1) {
-        return loadDescriptions(projectId, badgeId, userId, SkillRelDef.RelationshipType.BadgeRequirement, version)
+        return loadDescriptions(projectId, badgeId, userId, [SkillRelDef.RelationshipType.BadgeRequirement], version)
     }
     @Transactional(readOnly = true)
     List<SkillDescription> loadGlobalBadgeDescriptions(String badgeId, String userId,Integer version = -1) {
-        return loadDescriptions(null, badgeId, userId, SkillRelDef.RelationshipType.BadgeRequirement, version)
+        return loadDescriptions(null, badgeId, userId, [SkillRelDef.RelationshipType.BadgeRequirement], version)
     }
 
-    private List<SkillDescription> loadDescriptions(String projectId, String subjectId,  String userId, SkillRelDef.RelationshipType relationshipType, int version) {
+    private List<SkillDescription> loadDescriptions(String projectId, String subjectId,  String userId, List<SkillRelDef.RelationshipType> relationshipTypes, int version) {
         SettingsResult helpUrlRootSetting = settingsService.getProjectSetting(projectId, PROP_HELP_URL_ROOT)
 
         List<SkillDefWithExtraRepo.SkillDescDBRes> dbRes
         Map<String, List<SkillApprovalRepo.SkillApprovalPlusSkillId>> approvalLookup
         if (projectId) {
-            dbRes = skillDefWithExtraRepo.findAllChildSkillsDescriptions(projectId, subjectId, relationshipType, version, userId)
+            dbRes = skillDefWithExtraRepo.findAllChildSkillsDescriptions(projectId, subjectId, relationshipTypes, version, userId)
             List<SkillApprovalRepo.SkillApprovalPlusSkillId> approvals = skillApprovalRepo.findsApprovalWithSkillIdForSkillsDisplay(userId, projectId, subjectId)
             approvalLookup = approvals.groupBy { it.getSkillId() }
         } else {
-            dbRes = skillDefWithExtraRepo.findAllGlobalChildSkillsDescriptions(subjectId, relationshipType, version, userId)
+            dbRes = skillDefWithExtraRepo.findAllGlobalChildSkillsDescriptions(subjectId, relationshipTypes, version, userId)
         }
         List<SkillDescription> res = dbRes.collect {
             SkillApprovalRepo.SkillApprovalPlusSkillId skillApproval = approvalLookup?.get(it.getSkillId())?.sort({ it.skillApproval.requestedOn})?.reverse()?.get(0)
