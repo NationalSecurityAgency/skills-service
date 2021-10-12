@@ -232,7 +232,7 @@ limitations under the License.
             .then((res) => {
               this.descriptions = res;
               res.forEach((desc) => {
-                const foundSkill = this.skillsInternal.find((skill) => desc.skillId === skill.skillId);
+                const foundSkill = this.searchBySkillId(desc.skillId);
                 if (foundSkill) {
                   foundSkill.description = desc;
                   foundSkill.achievedOn = desc.achievedOn;
@@ -245,6 +245,21 @@ limitations under the License.
               this.loading = false;
             });
         }
+      },
+      searchBySkillId(skillId) {
+        let res = null;
+        for (let i = 0; i < this.skillsInternal.length; i += 1) {
+          const skill = this.skillsInternal[i];
+          if (skill.isSkillsGroupType) {
+            res = skill.children.find((child) => skillId === child.skillId);
+          } else if (skillId === skill.skillId) {
+            res = skill;
+          }
+          if (res) {
+            break;
+          }
+        }
+        return res;
       },
       onPointsEarned(pts, skillId) {
         SkillEnricherUtil.updateSkillPtsInList(this.skillsInternalOrig, pts, skillId);

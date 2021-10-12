@@ -25,6 +25,7 @@ import {
     BadgePlugin,
     ProgressPlugin,
     SpinnerPlugin,
+    TooltipPlugin,
     FormTextareaPlugin,
 } from 'bootstrap-vue';
 import marked from 'marked';
@@ -47,6 +48,7 @@ Vue.use(TablePlugin);
 Vue.use(BadgePlugin);
 Vue.use(ProgressPlugin);
 Vue.use(SpinnerPlugin);
+Vue.use(TooltipPlugin);
 Vue.use(FormTextareaPlugin);
 Vue.use(FiltersPlugin);
 

@@ -55,6 +55,15 @@ limitations under the License.
 
             <span v-if="skill.skillHtml" v-html="skill.skillHtml"></span>
             <span v-else>{{ skill.skill }}</span>
+            <div v-if="skill.isSkillsGroupType"
+                 v-b-tooltip.hover.v-info
+                 title="A Group allows a Skill to be defined by the collection of other Skills within a Project. A Skill Group can require the completion of some or all of the included Skills before the group be achieved."
+                 class="ml-2 d-inline border rounded p-1 text-primary bg-light border-success"
+                 style="font-size: 0.9rem">
+              <span class="">Requires </span> <b-badge variant="success">1</b-badge> <span class="font-italic">out of</span> <b-badge variant="secondary">2</b-badge> skills
+            </div>
+<!--            <i v-if="skill.isSkillsGroupType"-->
+<!--               class="fas fa-question-circle ml-1 text-info" style="font-size: 1.2rem;"></i>-->
           </div>
 
           <b-badge v-if="skill.selfReporting && skill.selfReporting.enabled"
@@ -93,7 +102,7 @@ limitations under the License.
       <partial-points-alert v-if="!allowDrillDown" :skill="skill" :is-locked="locked"/>
       <skill-summary-cards v-if="!locked" :skill="skill" class="mt-3"></skill-summary-cards>
 
-      <p class="skills-text-description text-primary mt-3">
+      <p class="skills-text-description text-primary mt-3" style="font-size: 0.9rem;">
         <markdown-text v-if="skill.description && skill.description.description" :text="skill.description.description"/>
       </p>
 
