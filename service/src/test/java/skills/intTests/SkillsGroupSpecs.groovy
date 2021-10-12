@@ -384,6 +384,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         res.numSelfReportSkills == 0
         res.numSkillsRequired == skills.size()
         res.enabled == 'true'
+        res.totalPoints == groupSkills[0].totalPoints + groupSkills[1].totalPoints + groupSkills[2].totalPoints
 
         groupSkills.size() == 3
 
@@ -443,6 +444,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         res.numSelfReportSkills == 0
         res.numSkillsRequired == -1
         res.enabled == 'true'
+        res.totalPoints == groupSkills[0].totalPoints + groupSkills[1].totalPoints + groupSkills[2].totalPoints
 
         groupSkills.size() == 3
 
@@ -498,6 +500,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         res.numSkillsInGroup == groupSkills.size()
         res.numSelfReportSkills == 0
         res.numSkillsRequired == 2
+        res.totalPoints == (skills.get(0).pointIncrement * skills.get(0).numPerformToCompletion) * res.numSkillsRequired
         res.enabled == 'true'
 
         groupSkills.size() == 3
