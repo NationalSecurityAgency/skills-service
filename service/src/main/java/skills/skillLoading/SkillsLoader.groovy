@@ -493,10 +493,12 @@ class SkillsLoader {
         List<SkillDescription> res = []
         dbRes.each {
             SkillApprovalRepo.SkillApprovalPlusSkillId skillApproval = approvalLookup?.get(it.getSkillId())?.sort({ it.skillApproval.requestedOn})?.reverse()?.get(0)
-            SkillDescription skillDescription = createSkillDescription(it, helpUrlRootSetting, skillApproval)
-            res << skillDescription
-            if (it.type == SkillDef.ContainerType.SkillsGroup) {
-                skillGroupIds << skillDescription.skillId
+            if (it.type != SkillDef.ContainerType.SkillsGroup || Boolean.valueOf(it.enabled)) {
+                SkillDescription skillDescription = createSkillDescription(it, helpUrlRootSetting, skillApproval)
+                res << skillDescription
+                if (it.type == SkillDef.ContainerType.SkillsGroup && Boolean.valueOf(it.enabled)) {
+                    skillGroupIds << skillDescription.skillId
+                }
             }
         }
         if (skillGroupIds) {
