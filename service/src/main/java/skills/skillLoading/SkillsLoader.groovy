@@ -397,7 +397,7 @@ class SkillsLoader {
     @Transactional(readOnly = true)
     SkillSummary loadSkillSummary(String projectId, String userId, String crossProjectId, String skillId) {
         ProjDef projDef = getProjDef(userId, crossProjectId ?: projectId)
-        SkillDefWithExtra skillDef = getSkillDefWithExtra(userId, crossProjectId ?: projectId, skillId, SkillDef.ContainerType.Skill)
+        SkillDefWithExtra skillDef = getSkillDefWithExtra(userId, crossProjectId ?: projectId, skillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
 
         if(crossProjectId) {
             dependencyValidator.validateDependencyEligibility(projectId, skillDef)
@@ -455,7 +455,7 @@ class SkillsLoader {
     @Transactional(readOnly = true)
     SkillSubjectSummary loadSubject(String projectId, String userId, String subjectId, Integer version = -1, Boolean loadSkills = true) {
         ProjDef projDef = getProjDef(userId, projectId)
-        SkillDefWithExtra subjectDef = getSkillDefWithExtra(userId, projectId, subjectId, SkillDef.ContainerType.Subject)
+        SkillDefWithExtra subjectDef = getSkillDefWithExtra(userId, projectId, subjectId, [SkillDef.ContainerType.Subject])
 
         if (version == -1 || subjectDef.version <= version) {
             return loadSubjectSummary(projDef, userId, subjectDef, version, loadSkills)
@@ -534,7 +534,7 @@ class SkillsLoader {
     @Transactional(readOnly = true)
     SkillBadgeSummary loadBadge(String projectId, String userId, String subjectId, Integer version = Integer.MAX_VALUE, boolean loadSkills=true) {
         ProjDef projDef = getProjDef(userId, projectId)
-        SkillDefWithExtra badgeDef = getSkillDefWithExtra(userId, projectId, subjectId, SkillDef.ContainerType.Badge)
+        SkillDefWithExtra badgeDef = getSkillDefWithExtra(userId, projectId, subjectId, [SkillDef.ContainerType.Badge])
 
         return loadBadgeSummary(projDef, userId, badgeDef, version,loadSkills)
     }
@@ -920,8 +920,8 @@ class SkillsLoader {
         return projDef
     }
 
-    private SkillDefWithExtra getSkillDefWithExtra(String userId, String projectId, String skillId, SkillDef.ContainerType containerType) {
-        SkillDefWithExtra skillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, skillId, containerType)
+    private SkillDefWithExtra getSkillDefWithExtra(String userId, String projectId, String skillId, List<SkillDef.ContainerType> containerTypes) {
+        SkillDefWithExtra skillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(projectId, skillId, containerTypes)
         if (!skillDef) {
             throw new SkillExceptionBuilder()
                     .msg("Skill definition with id [${skillId}] doesn't exist")
