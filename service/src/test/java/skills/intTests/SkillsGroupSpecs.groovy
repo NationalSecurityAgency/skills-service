@@ -342,6 +342,30 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         exception.message.contains("A Skill Group must have at least 2 skills in order to be enabled.")
     }
 
+    void "cannot enable a SkillsGroup with < 1 required skill" () {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(2)
+        def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 5)
+        skillsGroup.numSkillsRequired = 0
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skills.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+
+        when:
+        skillsGroup.enabled = 'true'
+        skillsService.updateSkill(skillsGroup, null)
+
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains("A Skill Group must have at least 1 required skill in order to be enabled.")
+    }
+
     void "cannot enable a SkillsGroup when not all skills are required, and not all have the same # of points" () {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
