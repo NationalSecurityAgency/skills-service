@@ -129,6 +129,10 @@ class SkillsAdminService {
             }
         }
 
+        if (skillDefinition && !groupId) {
+            groupId = skillDefinition.groupId
+        }
+
         boolean shouldRebuildScores
         boolean updateUserPoints
         int pointIncrementDelta
@@ -151,7 +155,7 @@ class SkillsAdminService {
                     groupChildSkills = skillsGroupAdminService.validateSkillsGroup(skillRequest, skillDefinition)
                 } else {
                     SkillDefWithExtra skillsGroupSkillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(skillRequest.projectId, groupId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
-                    groupChildSkills = skillsGroupAdminService.validateSkillsGroup(skillsGroupSkillDef.numSkillsRequired, Boolean.valueOf(skillsGroupSkillDef.enabled), skillsGroupSkillDef.id)
+                    groupChildSkills = skillsGroupAdminService.validateSkillsGroup(skillsGroupSkillDef.numSkillsRequired, Boolean.valueOf(skillsGroupSkillDef.enabled), skillsGroupSkillDef.id, totalPointsRequested)
                 }
                 if (groupChildSkills) {
                     int numSkillsRequired = skillRequest.numSkillsRequired == -1 ? groupChildSkills.size() : skillRequest.numSkillsRequired
@@ -203,6 +207,7 @@ class SkillsAdminService {
                     selfReportingType: selfReportingType,
                     numSkillsRequired: skillRequest.numSkillsRequired,
                     enabled: skillRequest.enabled,
+                    groupId: groupId,
             )
             log.debug("Saving [{}]", skillDefinition)
             shouldRebuildScores = true
@@ -478,7 +483,8 @@ class SkillsAdminService {
                 displayOrder: partial.displayOrder,
                 created: partial.created,
                 updated: partial.updated,
-                selfReportingType: partial.getSelfReportingType()
+                selfReportingType: partial.getSelfReportingType(),
+                numSkillsRequired: partial.getNumSkillsRequired(),
         )
 
         if (partial.skillType == SkillDef.ContainerType.Skill) {
