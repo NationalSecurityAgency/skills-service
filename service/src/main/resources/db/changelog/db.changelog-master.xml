@@ -1409,6 +1409,10 @@
                 <constraints nullable="false"/>
             </column>
         </addColumn>
+        <addColumn tableName="skill_definition">
+            <!-- optional, only used for skill groups -->
+            <column name="group_id" type="varchar(255)"/>
+        </addColumn>
     </changeSet>
 
 </databaseChangeLog>

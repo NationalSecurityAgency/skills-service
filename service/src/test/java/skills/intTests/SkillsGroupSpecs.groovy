@@ -319,6 +319,37 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         exception.message.contains("All skills that belong to the Skill Group must have the same total value when all skills are not required to be completed.")
     }
 
+    void "cannot update a child skill's points to a value different than the other child skills when not all skills are required" () {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(3)
+        def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 5)
+        skillsGroup.numSkillsRequired = skills.size() - 1
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skills.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+
+        when:
+        skillsGroup.enabled = 'true'
+        skillsService.updateSkill(skillsGroup, null)
+        def res = skillsService.getSkill(skillsGroup)
+        def groupSkills = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
+        groupSkills.sort() { it.skillId }
+
+        def skillWithDifferentPoints = skills.first()
+        skillWithDifferentPoints.pointIncrement = 321
+        skillsService.updateSkill(skillWithDifferentPoints, null)
+
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains("All skills that belong to the Skill Group must have the same total value when all skills are not required to be completed.")
+    }
+
     void "can enable a SkillsGroup when all skills are required, and not all skills have the same # of points" () {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
@@ -492,4 +523,5 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         groupSkills.get(2).displayOrder == 3
         groupSkills.get(2).totalPoints == skills.get(0).pointIncrement * skills.get(0).numPerformToCompletion
     }
+
 }
