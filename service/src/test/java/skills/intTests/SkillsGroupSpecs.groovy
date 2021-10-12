@@ -195,7 +195,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         res2.enabled == 'false'
     }
 
-    void "create and add more than one skill with same total point values to SkillsGroup, then succesfully enable" () {
+    void "create and add more than one skill with same total point values to SkillsGroup, then successfully enable" () {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(3)
@@ -269,6 +269,56 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         res2.enabled == 'true'
     }
 
+    void "can enable a SkillsGroup with only 1 required child skill, but must have at least 2 child skills" () {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(2)
+        def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 5)
+        skillsGroup.numSkillsRequired = 1
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skills.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+
+        when:
+        skillsGroup.enabled = 'true'
+        skillsService.updateSkill(skillsGroup, null)
+        def res = skillsService.getSkill(skillsGroup)
+        def groupSkills = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
+        groupSkills.sort() { it.skillId }
+
+        then:
+        res
+        res.skillId == skillsGroup.skillId
+        res.name == skillsGroup.name
+        res.type == skillsGroup.type
+        res.numSkillsInGroup == groupSkills.size()
+        res.numSelfReportSkills == 0
+        res.numSkillsRequired == 1
+        res.enabled == 'true'
+        res.totalPoints == groupSkills[0].totalPoints
+
+        groupSkills.size() == 2
+
+        groupSkills.get(0).skillId == skills.get(0).skillId
+        groupSkills.get(0).projectId == proj.projectId
+        groupSkills.get(0).name == skills.get(0).name
+        groupSkills.get(0).version == skills.get(0).version
+        groupSkills.get(0).displayOrder == 1
+        groupSkills.get(0).totalPoints == skills.get(0).pointIncrement * skills.get(0).numPerformToCompletion
+
+        groupSkills.get(1).skillId == skills.get(1).skillId
+        groupSkills.get(1).projectId == proj.projectId
+        groupSkills.get(1).name == skills.get(1).name
+        groupSkills.get(1).version == skills.get(1).version
+        groupSkills.get(1).displayOrder == 2
+        groupSkills.get(1).totalPoints == skills.get(1).pointIncrement * skills.get(1).numPerformToCompletion
+    }
+
     void "cannot enable a SkillsGroup with < 2 child skills" () {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
@@ -289,7 +339,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
 
         then:
         def exception = thrown(SkillsClientException)
-        exception.message.contains("A Skill Group must have at least 2 required skills in order to be enabled.")
+        exception.message.contains("A Skill Group must have at least 2 skills in order to be enabled.")
     }
 
     void "cannot enable a SkillsGroup when not all skills are required, and not all have the same # of points" () {

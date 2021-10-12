@@ -101,17 +101,20 @@ class SkillsGroupAdminService {
     List<SkillDef> validateSkillsGroup(Integer numSkillsRequired, boolean enabled, Integer skillsGroupIdRef, Integer expectedPoints=null) {
         List<SkillDef> groupChildSkills = []
         if (enabled) {
-            if (numSkillsRequired != -1 && numSkillsRequired < 2) {
+            if (numSkillsRequired == 0) {
                 // this check can be done w/o loading child skills
-                throw new SkillException("A Skill Group must have at least 2 required skills in order to be enabled.")
+                throw new SkillException("A Skill Group must have at least 1 required skill in order to be enabled.")
             } else {
                 groupChildSkills = getSkillsGroupChildSkills(skillsGroupIdRef)
                 int numChildSkills = groupChildSkills.size()
+                if (numChildSkills < 2) {
+                    throw new SkillException("A Skill Group must have at least 2 skills in order to be enabled.")
+                }
                 if (numSkillsRequired > numChildSkills) {
                     throw new SkillException("A Skill Group cannot require more skills than the number of skills that belong to the group.")
                 }
-                if (numChildSkills < 2 || (numSkillsRequired != -1 && numSkillsRequired < 2)) {
-                    throw new SkillException("A Skill Group must have at least 2 required skills in order to be enabled.")
+                if (numSkillsRequired !== -1 && numSkillsRequired < 1) {
+                    throw new SkillException("A Skill Group must have at least 1 required skill in order to be enabled.")
                 }
                 boolean allSkillsRequired = numSkillsRequired == -1 || numSkillsRequired == numChildSkills
                 if (!allSkillsRequired) {
