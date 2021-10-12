@@ -853,7 +853,7 @@ class SkillsLoader {
                         skillsSummary.totalPoints = skillsSummary.children.collect { it.totalPoints }.sum() as Integer
                     } else {
                         // subset is required so validation makes sure they all have the same totalPoints value
-                        skillsSummary.totalPoints = numSkillsRequired * groupChildSkills.first().totalPoints
+                        skillsSummary.totalPoints = numSkillsRequired * skillsSummary.children.first().totalPoints
                     }
                 }
                 skillsRes << skillsSummary
