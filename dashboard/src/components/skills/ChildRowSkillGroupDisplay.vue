@@ -44,8 +44,8 @@ limitations under the License.
             <div class="col">
               <b-form inline>
                 <span class="mr-1 text-secondary">Required: </span>
-                <b-badge variant="info">{{ group.numSkillsInGroup }}</b-badge>
-                <span class="ml-1">out <b-badge>{{ numSkills }}</b-badge> skills</span>
+                <b-badge variant="info">{{ requiredSkillsNum }}</b-badge>
+                <span class="ml-1">out <b-badge>{{ group.numSkillsInGroup }}</b-badge> skills</span>
 
                 <b-button variant="outline-info" size="sm"
                           @click="showEditRequiredSkillsDialog"
@@ -68,6 +68,7 @@ limitations under the License.
                     :project-id="this.$route.params.projectId"
                     :subject-id="this.$route.params.subjectId"
                     @skill-removed="skillRemoved"
+                    @skills-change="skillChanged"
         :show-search="false" :show-header="false" :show-paging="false"/>
     </b-card>
     </div>
@@ -77,7 +78,7 @@ limitations under the License.
               :project-id="editSkillInfo.skill.projectId" :subject-id="editSkillInfo.skill.subjectId" :group-id="this.group.skillId"
               @skill-saved="saveSkill" @hidden="focusOnNewSkillButton"/>
   <edit-num-required-skills v-if="editRequiredSkillsInfo.show" v-model="editRequiredSkillsInfo.show"
-                            :group="group" :skills="skills" />
+                            :group="group" :skills="skills" @group-changed="handleNumRequiredSkillsChanged"/>
 </div>
 </template>
 
@@ -132,6 +133,10 @@ limitations under the License.
         }
         return '';
       },
+      requiredSkillsNum() {
+        // -1 is disabled
+        return (this.group.numSkillsRequired === -1) ? this.skills.length : this.group.numSkillsInGroup;
+      },
     },
     methods: {
       loadData() {
@@ -183,6 +188,20 @@ limitations under the License.
         this.numSkills -= 1;
         const updatedGroup = { ...this.group, numSkillsInGroup: this.group.numSkillsInGroup - 1, numSkillsRequired: this.numSkills };
         this.$emit('group-changed', updatedGroup);
+      },
+      skillChanged(skill) {
+        console.log('skillChanged');
+        const item1Index = this.skills.findIndex((item) => item.skillId === skill.originalSkillId);
+        if (item1Index >= 0) {
+          this.skills.splice(item1Index, 1, skill);
+        } else {
+          this.skills.push(skill);
+        }
+      },
+      handleNumRequiredSkillsChanged(updatedGroup) {
+        SkillsService.saveSkill(updatedGroup).then(() => {
+          this.$emit('group-changed', updatedGroup);
+        });
       },
       focusOnNewSkillButton() {
         const ref = this.$refs[`group-${this.group.skillId}_newSkillBtn`];

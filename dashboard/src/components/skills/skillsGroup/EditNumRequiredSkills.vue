@@ -23,6 +23,7 @@ limitations under the License.
            data-cy="EditSkillGroupModal"
            header-bg-variant="info"
            ok-title="Save"
+           @ok="handleSave"
            header-text-variant="light" no-fade>
 <!--    <div>-->
 <!--&lt;!&ndash;      <b-badge variant="success">COMPLIANT</b-badge>&ndash;&gt;-->
@@ -32,8 +33,8 @@ limitations under the License.
 <!--    </div>-->
 <!--    <hr />-->
 
+    <div v-if="skillsPointsSettingsDoNotMatch">
         <div>
-    <!--      <b-badge variant="success">COMPLIANT</b-badge>-->
           <i class="fas fa-exclamation-circle text-warning"></i> Group's skills points <b>must</b> be the same. Set all skills to:
           <div class="row mt-3">
             <div class="col">
@@ -70,15 +71,21 @@ limitations under the License.
           <b-button variant="outline-success"><i class="fas fa-sync"></i> Sync Group's Points</b-button>
         </div>
         <hr />
+    </div>
     <b-form inline>
       <span class="mr-1 text-secondary">Required: </span>
-      <b-form-select size="sm" v-model="numSkillsRequired.selected" :options="numSkillsRequired.options" />
+      <b-form-select size="sm" v-model="numSkillsRequired.selected" :options="numSkillsRequired.options" :disabled="skillsPointsSettingsDoNotMatch"/>
       <span class="ml-1">out <b-badge>{{ skills.length }}</b-badge> skills</span>
+      <div v-b-tooltip.hover.v-info class="ml-1 text-warning"
+        title="A Group allows a Skill to be defined by the collection of other Skills within a Project. A Skill Group can require the completion of some or all of the included Skills before the group be achieved.">
+        <i class="fas fa-question-circle"></i>
+      </div>
     </b-form>
   </b-modal>
 </template>
 
 <script>
+
   export default {
     name: 'EditNumRequiredSkills',
     props: {
@@ -106,13 +113,24 @@ limitations under the License.
     mounted() {
       this.updateNumSkillsRequired();
     },
+    computed: {
+      skillsPointsSettingsDoNotMatch() {
+        const first = this.skills[0];
+        const diffSkill = this.skills.find((skill) => skill.numPerformToCompletion !== first.numPerformToCompletion || skill.pointIncrement !== first.pointIncrement);
+        return diffSkill !== undefined && diffSkill !== null;
+      },
+    },
     methods: {
       publishHidden(e) {
         this.$emit('hidden', e);
       },
       updateNumSkillsRequired() {
         this.numSkillsRequired.options = Array.from({ length: this.skills.length }, (_, i) => i + 1);
-        this.numSkillsRequired.selected = this.numSkillsRequired.options[this.numSkillsRequired.options.length - 1];
+        this.numSkillsRequired.selected = (this.group.numSkillsRequired === -1) ? this.skills.length : this.group.numSkillsInGroup;
+      },
+      handleSave() {
+        const updatedGroup = { ...this.group, numSkillsRequired: this.numSkillsRequired.selected };
+        this.$emit('group-changed', updatedGroup);
       },
     },
   };

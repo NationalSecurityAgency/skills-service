@@ -250,10 +250,10 @@ limitations under the License.
         let res = null;
         for (let i = 0; i < this.skillsInternal.length; i += 1) {
           const skill = this.skillsInternal[i];
-          if (skill.isSkillsGroupType) {
-            res = skill.children.find((child) => skillId === child.skillId);
-          } else if (skillId === skill.skillId) {
+          if (skillId === skill.skillId) {
             res = skill;
+          } else if (skill.isSkillsGroupType) {
+            res = skill.children.find((child) => skillId === child.skillId);
           }
           if (res) {
             break;
