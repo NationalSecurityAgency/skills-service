@@ -79,4 +79,5 @@ class SkillDefParent {
 
     // only applies when type == SkillsGroup
     int numSkillsRequired = -1
+    String groupId
 }
