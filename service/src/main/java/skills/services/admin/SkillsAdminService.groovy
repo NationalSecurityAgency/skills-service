@@ -153,13 +153,15 @@ class SkillsAdminService {
                     SkillDefWithExtra skillsGroupSkillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(skillRequest.projectId, groupId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
                     groupChildSkills = skillsGroupAdminService.validateSkillsGroup(skillsGroupSkillDef.numSkillsRequired, Boolean.valueOf(skillsGroupSkillDef.enabled), skillsGroupSkillDef.id)
                 }
-                int numSkillsRequired = skillRequest.numSkillsRequired == -1 ? groupChildSkills.size() : skillRequest.numSkillsRequired
-                if (numSkillsRequired == groupChildSkills.size()) {
-                    // all skills are required, but can have different totalPoints so add them all up
-                    totalPointsRequested = groupChildSkills.collect {it.totalPoints}.sum()
-                } else {
-                    // subset is required so validation makes sure they all have the same totalPoints value
-                    totalPointsRequested = numSkillsRequired * groupChildSkills.first().totalPoints
+                if (groupChildSkills) {
+                    int numSkillsRequired = skillRequest.numSkillsRequired == -1 ? groupChildSkills.size() : skillRequest.numSkillsRequired
+                    if (numSkillsRequired == groupChildSkills.size()) {
+                        // all skills are required, but can have different totalPoints so add them all up
+                        totalPointsRequested = groupChildSkills.collect { it.totalPoints }.sum()
+                    } else {
+                        // subset is required so validation makes sure they all have the same totalPoints value
+                        totalPointsRequested = numSkillsRequired * groupChildSkills.first().totalPoints
+                    }
                 }
             }
             shouldRebuildScores = skillDefinition.totalPoints != totalPointsRequested
