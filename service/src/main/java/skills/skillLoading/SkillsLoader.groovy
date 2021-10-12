@@ -843,9 +843,19 @@ class SkillsLoader {
                 )
                 SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, skillDef.skillId, version, SkillRelDef.RelationshipType.SkillsGroupRequirement)
                 skillsSummary.children = createSkillSummaries(thisProjDef, groupChildrenMeta.childrenWithPoints, false, userId, version)
-                skillsSummary.totalPoints = skillsSummary.children ? skillsSummary.children.collect({it.totalPoints}).sum() as Integer: 0
                 skillsSummary.points = skillsSummary.children ? skillsSummary.children.collect({it.points}).sum() as Integer: 0
                 skillsSummary.todaysPoints = skillsSummary.children ? skillsSummary.children.collect({it.todaysPoints}).sum() as Integer: 0
+                skillsSummary.totalPoints = 0
+                if (skillsSummary.children) {
+                    int numSkillsRequired = skillDef.numSkillsRequired == -1 ? skillsSummary.children.size() : skillDef.numSkillsRequired
+                    if (numSkillsRequired == skillsSummary.children.size()) {
+                        // all skills are required, but can have different totalPoints so add them all up
+                        skillsSummary.totalPoints = skillsSummary.children.collect { it.totalPoints }.sum() as Integer
+                    } else {
+                        // subset is required so validation makes sure they all have the same totalPoints value
+                        skillsSummary.totalPoints = numSkillsRequired * groupChildSkills.first().totalPoints
+                    }
+                }
                 skillsRes << skillsSummary
             } else if (skillDef.type == SkillDef.ContainerType.Skill) {
                 skillsRes << new SkillSummary(
