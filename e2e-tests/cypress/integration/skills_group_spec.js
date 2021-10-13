@@ -50,22 +50,12 @@ describe('Skills Group Tests', () => {
         ], 5);
     });
 
-    it.only('create group with description', () => {
+    it('create group with description', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="noContent"]').contains('No Skills Yet');
         cy.createGroupViaUI('Blah', 'Description for this group!');
         cy.get('[data-cy="expandDetailsBtn_BlahGroup"]').click();
         cy.get('[data-cy="ChildRowSkillGroupDisplay_BlahGroup"] [data-cy="description"]').contains('Description for this group!');
-
-        // cy.validateTable(tableSelector, [
-        //     [{ colIndex: 0,  value: 'Blah' }, { colIndex: 0,  value: 'ID: BlahGroup' }, { colIndex: 1, value: '1' }],
-        // ], 5);
-        //
-        // cy.createGroupViaUI('another');
-        // cy.validateTable(tableSelector, [
-        //     [{ colIndex: 0,  value: 'another' }, { colIndex: 0,  value: 'ID: anotherGroup' }, { colIndex: 1, value: '2' }],
-        //     [{ colIndex: 0,  value: 'Blah' }, { colIndex: 0,  value: 'ID: BlahGroup' }, { colIndex: 1, value: '1' }],
-        // ], 5);
     });
 
     it('handle focus', () => {
