@@ -17,60 +17,62 @@ limitations under the License.
 <div>
   <loading-container v-bind:is-loading="isLoading" :data-cy="`ChildRowSkillGroupDisplay_${group.skillId}`">
     <div class="ml-4 mb-3">
-      <b-card v-if="description" header="Description" class="mb-3" body-class="card-bg">
+      <b-card v-if="description" header="Description" class="mb-3" body-class="card-bg" data-cy="description">
         {{ description }}
       </b-card>
+
       <b-card body-class="p-0 card-bg" >
-      <div class="row px-3 my-2" style="height: 3rem;">
-        <div class="col">
-
-          <div class="row align-items-center">
-            <div class="col-auto border-right">
-              <div v-if="this.group.enabled">
-                <span class="text-secondary">Status: </span> <span class="text-uppercase"><b-badge variant="success">Live <span class="far fa-check-circle" aria-hidden="true"/></b-badge></span>
+        <div class="row px-3 my-2">
+          <div class="col">
+            <div class="row align-items-center">
+              <div class="col-lg-auto border-right">
+                <div v-if="this.group.enabled">
+                  <span class="text-secondary">Status: </span> <span class="text-uppercase"><b-badge variant="success">Live <span class="far fa-check-circle" aria-hidden="true"/></b-badge></span>
+                </div>
+                <div v-if="!this.group.enabled" data-cy="skillGroupStatus" style="">
+                  <span class="text-secondary">Status: </span>
+                  <span class="text-uppercase mr-1"><b-badge variant="warning">Disabled</b-badge></span>
+                  <span v-b-tooltip.hover="goLiveToolTipText">
+                    <b-button variant="outline-info" size="sm" data-cy="selectPageOfApprovalsBtn"
+                              @click="enableGroup"
+                              :disabled="goLiveDisabled">
+                      <i class="fas fa-glass-cheers"></i> Go Live
+                    </b-button>
+                  </span>
+                </div>
               </div>
-              <div v-if="!this.group.enabled" data-cy="skillGroupStatus" style="">
-                <span class="text-secondary">Status: </span>
-                <span class="text-uppercase mr-1"><b-badge variant="warning">Disabled</b-badge></span>
-                <span v-b-tooltip.hover="goLiveToolTipText">
-                  <b-button variant="outline-info" size="sm" data-cy="selectPageOfApprovalsBtn"
-                            @click="enableGroup"
-                            :disabled="goLiveDisabled">
-                    <i class="fas fa-glass-cheers"></i> Go Live
-                  </b-button>
-                </span>
+              <div class="col-lg mt-2">
+                <b-form inline>
+                  <span class="mr-1 text-secondary">Required: </span>
+                  <b-badge variant="info">{{ requiredSkillsNum }}</b-badge>
+                  <span class="ml-1">out <b-badge>{{ group.numSkillsInGroup }}</b-badge> skills</span>
+
+                  <b-button variant="outline-info" size="sm"
+                            @click="showEditRequiredSkillsDialog"
+                            data-cy="selectPageOfApprovalsBtn" class="ml-2"><i class="far fa-edit"></i></b-button>
+                </b-form>
+
               </div>
-            </div>
-            <div class="col">
-              <b-form inline>
-                <span class="mr-1 text-secondary">Required: </span>
-                <b-badge variant="info">{{ requiredSkillsNum }}</b-badge>
-                <span class="ml-1">out <b-badge>{{ group.numSkillsInGroup }}</b-badge> skills</span>
-
-                <b-button variant="outline-info" size="sm"
-                          @click="showEditRequiredSkillsDialog"
-                          data-cy="selectPageOfApprovalsBtn" class="ml-2"><i class="far fa-edit"></i></b-button>
-              </b-form>
-
             </div>
           </div>
+          <div class="col-auto text-right">
+            <b-button :id="`group-${group.skillId}_newSkillBtn`" :ref="`group-${group.skillId}_newSkillBtn`" variant="outline-info" size="sm"
+                      @click="showNewSkillDialog"
+                    data-cy="newProjectButton" class="ml-1">
+              <span class="">Add Skill to Group</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
+            </b-button>
+          </div>
         </div>
-        <div class="col text-right">
-          <b-button :id="`group-${group.skillId}_newSkillBtn`" :ref="`group-${group.skillId}_newSkillBtn`" variant="outline-info" size="sm"
-                    @click="showNewSkillDialog"
-                  data-cy="newProjectButton" class="ml-1">
-            <span class="">Add Skill to Group</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
-          </b-button>
-        </div>
-      </div>
-      <skills-table :table-id="`groupSkills_${this.group.skillId}`" :ref="`groupSkills_${this.group.skillId}`"
-        :skills-prop="skills" :is-top-level="true"
+        <div class="mt-3">
+          <skills-table :table-id="`groupSkills_${this.group.skillId}`" :ref="`groupSkills_${this.group.skillId}`"
+                    :skills-prop="skills" :is-top-level="true"
                     :project-id="this.$route.params.projectId"
                     :subject-id="this.$route.params.subjectId"
                     @skill-removed="skillRemoved"
                     @skills-change="skillChanged"
-        :show-search="false" :show-header="false" :show-paging="false"/>
-    </b-card>
+                    :show-search="false" :show-header="false" :show-paging="false"/>
+        </div>
+      </b-card>
     </div>
   </loading-container>
 
@@ -176,6 +178,8 @@ limitations under the License.
         };
       },
       saveSkill(skill) {
+        console.log('saveSkill');
+        console.log(skill);
         const copy = { groupId: this.group.skillId, ...skill };
         this.$refs[`groupSkills_${this.group.skillId}`].skillCreatedOrUpdated(copy)
           .then(() => {
@@ -190,7 +194,6 @@ limitations under the License.
         this.$emit('group-changed', updatedGroup);
       },
       skillChanged(skill) {
-        console.log('skillChanged');
         const item1Index = this.skills.findIndex((item) => item.skillId === skill.originalSkillId);
         if (item1Index >= 0) {
           this.skills.splice(item1Index, 1, skill);

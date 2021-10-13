@@ -21,11 +21,14 @@ describe('Skills Group Tests', () => {
         cy.createProject(1);
         cy.createSubject(1, 1);
 
-        Cypress.Commands.add("createGroupViaUI", (groupName) => {
+        Cypress.Commands.add("createGroupViaUI", (groupName, description) => {
             cy.get('[data-cy="newGroupButton"]').click();
             cy.get('[data-cy="EditSkillGroupModal"]').contains('New Skills Group');
 
             cy.get('[data-cy="groupName"]').type(groupName);
+            if (description) {
+                cy.get('[data-cy="groupDescription"]').type(description);
+            }
             cy.get('[data-cy="saveGroupButton"]').click();
             cy.get('[data-cy="EditSkillGroupModal"]').should('not.exist');
         });
@@ -47,7 +50,25 @@ describe('Skills Group Tests', () => {
         ], 5);
     });
 
-    it.only('handle focus', () => {
+    it.only('create group with description', () => {
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="noContent"]').contains('No Skills Yet');
+        cy.createGroupViaUI('Blah', 'Description for this group!');
+        cy.get('[data-cy="expandDetailsBtn_BlahGroup"]').click();
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_BlahGroup"] [data-cy="description"]').contains('Description for this group!');
+
+        // cy.validateTable(tableSelector, [
+        //     [{ colIndex: 0,  value: 'Blah' }, { colIndex: 0,  value: 'ID: BlahGroup' }, { colIndex: 1, value: '1' }],
+        // ], 5);
+        //
+        // cy.createGroupViaUI('another');
+        // cy.validateTable(tableSelector, [
+        //     [{ colIndex: 0,  value: 'another' }, { colIndex: 0,  value: 'ID: anotherGroup' }, { colIndex: 1, value: '2' }],
+        //     [{ colIndex: 0,  value: 'Blah' }, { colIndex: 0,  value: 'ID: BlahGroup' }, { colIndex: 1, value: '1' }],
+        // ], 5);
+    });
+
+    it('handle focus', () => {
         cy.createSkillsGroup(1, 1, 1);
         cy.createSkill(1, 1, 1);
         cy.createSkillsGroup(1, 1, 2);
@@ -82,7 +103,7 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="saveGroupButton"]').should('be.enabled');
     });
 
-    it('Skills Group modal - id must not be auto generated based on namewhen id input is enabled', () => {
+    it('Skills Group modal - id must not be auto generated based on name when id input is enabled', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="noContent"]').contains('No Skills Yet');
 
@@ -151,7 +172,7 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="saveGroupButton"]').should('be.enabled');
     });
 
-    it('Skills Group modal - input validation - name or id alrady exist', () => {
+    it('Skills Group modal - input validation - name or id already exist', () => {
         cy.createSkillsGroup(1, 1, 1);
         cy.createSkill(1, 1, 1);
 
@@ -197,6 +218,18 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="idInputValue"]').type('a');
         cy.get('[data-cy="idError"]').should('not.be.visible');
         cy.get('[data-cy="saveGroupButton"]').should('be.enabled');
+    });
+
+    it('Skills Group modal - input validation - description custom validation', () => {
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.get('[data-cy="newGroupButton"]').click();
+
+        cy.get('[data-cy="groupName"]').type('Awesome Group 1');
+        cy.get('[data-cy="groupDescription"]').type('ldkj aljdl aj\n\njabberwocky');
+
+        cy.get('[data-cy="groupDescriptionError"]').contains('Group Description - paragraphs may not contain jabberwocky');
+        cy.get('[data-cy=saveGroupButton]').should('be.disabled');
     });
 
 });

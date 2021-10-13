@@ -487,7 +487,6 @@ limitations under the License.
                 this.skillInternal.selfReportingType = null;
               }
               this.skillInternal = { subjectId: this.subjectId, ...this.skillInternal };
-              console.log('emit skill');
               this.$emit('skill-saved', { isEdit: this.isEdit, ...this.skillInternal, groupId: this.groupId });
               this.close({ saved: true });
             }

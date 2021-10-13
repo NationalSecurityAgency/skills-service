@@ -58,9 +58,9 @@ limitations under the License.
         <div class="mt-3">
           <label class="label">Description</label>
           <div class="control">
-            <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" v-slot="{errors}" name="Skill Description">
-              <markdown-editor v-if="internalGroup" v-model="internalGroup.description" data-cy="skillDescription"/>
-              <small class="form-text text-danger" data-cy="skillDescriptionError">{{ errors[0] }}</small>
+            <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" v-slot="{errors}" name="Group Description">
+              <markdown-editor v-if="internalGroup" v-model="internalGroup.description" data-cy="groupDescription"/>
+              <small class="form-text text-danger" data-cy="groupDescriptionError">{{ errors[0] }}</small>
             </ValidationProvider>
           </div>
         </div>

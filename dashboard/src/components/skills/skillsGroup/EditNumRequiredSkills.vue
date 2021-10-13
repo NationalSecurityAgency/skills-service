@@ -111,10 +111,12 @@ limitations under the License.
       };
     },
     mounted() {
+      console.log('mounted in EditNumRquiredSkills');
       this.updateNumSkillsRequired();
     },
     computed: {
       skillsPointsSettingsDoNotMatch() {
+        console.log(this.skills);
         const first = this.skills[0];
         const diffSkill = this.skills.find((skill) => skill.numPerformToCompletion !== first.numPerformToCompletion || skill.pointIncrement !== first.pointIncrement);
         return diffSkill !== undefined && diffSkill !== null;

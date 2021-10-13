@@ -455,7 +455,7 @@ limitations under the License.
 
             this.disableFirstAndLastButtons();
 
-            this.$emit('skills-change', skill.skillId);
+            this.$emit('skills-change', skill);
             this.successToast('Skill Saved', `Saved '${skill.name}' skill.`);
 
             if (isEdit) {
