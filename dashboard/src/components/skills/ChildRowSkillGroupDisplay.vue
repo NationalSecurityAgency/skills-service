@@ -178,8 +178,6 @@ limitations under the License.
         };
       },
       saveSkill(skill) {
-        console.log('saveSkill');
-        console.log(skill);
         const copy = { groupId: this.group.skillId, ...skill };
         this.$refs[`groupSkills_${this.group.skillId}`].skillCreatedOrUpdated(copy)
           .then(() => {
