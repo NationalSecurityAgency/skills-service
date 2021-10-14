@@ -601,4 +601,36 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         groupSkills.get(2).totalPoints == skills.get(0).pointIncrement * skills.get(0).numPerformToCompletion
     }
 
+    def "delete SkillsGroup"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(3)
+        def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 5)
+        skillsGroup.enabled = 'true'
+        skillsGroup.numSkillsRequired = skills.size() - 1
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skills.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+
+        def subjSkillsBefore = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
+        List<Boolean> idsExistBefore = skills.collect { skillsService.doesEntityExist(proj.projectId, it.skillId) }
+        idsExistBefore.add(skillsService.doesEntityExist(proj.projectId, skillsGroupId))
+
+        when:
+        skillsService.deleteSkill(skillsGroup)
+        def subjSkillsAfter = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
+        List<Boolean> idsExistAfter = skills.collect { skillsService.doesEntityExist(proj.projectId, it.skillId) }
+        idsExistAfter.add(skillsService.doesEntityExist(proj.projectId, skillsGroupId))
+
+        then:
+        subjSkillsBefore
+        idsExistBefore.every { it }
+        subjSkillsAfter.every { !it }
+    }
+
 }

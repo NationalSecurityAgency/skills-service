@@ -82,7 +82,7 @@ class RuleSetDefGraphService {
     @Transactional
     void assignGraphRelationship(String projectId, String skillId, SkillDef.ContainerType skillType,
                                  String relationshipProjectId, String relationshipSkillId, RelationshipType relationshipType) {
-        SkillDef skill1 = skillDefAccessor.getSkillDef(projectId, skillId, skillType)
+        SkillDef skill1 = skillDefAccessor.getSkillDef(projectId, skillId, [skillType])
         SkillDef skill2 = skillDefAccessor.getSkillDef(relationshipProjectId, relationshipSkillId)
         skillRelDefRepo.save(new SkillRelDef(parent: skill1, child: skill2, type: relationshipType))
     }
@@ -90,7 +90,7 @@ class RuleSetDefGraphService {
     @Transactional
     void removeGraphRelationship(String projectId, String skillId, SkillDef.ContainerType skillType,
                                  String relationshipProjectId, String relationshipSkillId, RelationshipType relationshipType){
-        SkillDef skill1 = skillDefAccessor.getSkillDef(projectId, skillId, skillType)
+        SkillDef skill1 = skillDefAccessor.getSkillDef(projectId, skillId, [skillType])
         SkillDef skill2 = skillDefAccessor.getSkillDef(relationshipProjectId, relationshipSkillId)
         SkillRelDef relDef = skillRelDefRepo.findByChildAndParentAndType(skill2, skill1, relationshipType)
         if (!relDef) {
