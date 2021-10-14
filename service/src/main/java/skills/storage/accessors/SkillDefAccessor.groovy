@@ -31,10 +31,10 @@ class SkillDefAccessor {
     SkillDefRepo skillDefRepo
 
 
-    SkillDef getSkillDef(String projectId, String skillId, SkillDef.ContainerType containerType = SkillDef.ContainerType.Skill) {
-        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, skillId, containerType)
+    SkillDef getSkillDef(String projectId, String skillId, List<SkillDef.ContainerType> containerTypes = [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup]) {
+        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(projectId, skillId, containerTypes)
         if (!skillDef) {
-            throw new SkillException("Failed to find skillId [$skillId] for [$projectId] with type [${containerType}]", projectId, skillId)
+            throw new SkillException("Failed to find skillId [$skillId] for [$projectId] with types [${containerTypes}]", projectId, skillId)
         }
         return skillDef
     }
