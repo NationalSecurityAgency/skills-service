@@ -50,19 +50,19 @@ class RuleSetDefGraphService {
 
     @Transactional
     List<SkillDef> getChildrenSkills(SkillDef skillDef) {
-        getChildrenSkills(skillDef, RelationshipType.RuleSetDefinition)
+        getChildrenSkills(skillDef, [RelationshipType.RuleSetDefinition])
     }
 
     @Transactional
-    List<SkillDef> getChildrenSkills(SkillDef skillDef, RelationshipType relationshipType) {
-        return skillRelDefRepo.getChildren(skillDef.projectId, skillDef.skillId, relationshipType)
+    List<SkillDef> getChildrenSkills(SkillDef skillDef, List<RelationshipType> relationshipTypes) {
+        return skillRelDefRepo.getChildren(skillDef.projectId, skillDef.skillId, relationshipTypes)
     }
 
     @Transactional
     void deleteSkillWithItsDescendants(SkillDef skillDef) {
         List<SkillDef> toDelete = []
 
-        List<SkillDef> currentChildren = getChildrenSkills(skillDef)
+        List<SkillDef> currentChildren = getChildrenSkills(skillDef, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
         while (currentChildren) {
             toDelete.addAll(currentChildren)
             currentChildren = currentChildren?.collect {

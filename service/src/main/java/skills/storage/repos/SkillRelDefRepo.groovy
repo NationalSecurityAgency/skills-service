@@ -92,10 +92,9 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
 
     @Query('''SELECT sd2 
         from SkillDef sd1, SkillDef sd2, SkillRelDef srd 
-        where sd1 = srd.parent and sd2 = srd.child and srd.type=?3 
+        where sd1 = srd.parent and sd2 = srd.child and srd.type in ?3 
               and sd1.projectId=?1 and sd1.skillId=?2''')
-    List<SkillDef> getChildren(@Nullable String projectId, String parentSkillId, SkillRelDef.RelationshipType type)
-
+    List<SkillDef> getChildren(@Nullable String projectId, String parentSkillId, List<SkillRelDef.RelationshipType> types)
 
     @Nullable
     @Query(value = '''select srd.parent from SkillRelDef srd where srd.child.skillId=?1 and srd.type='BadgeRequirement' and srd.parent.type = 'GlobalBadge' ''')
