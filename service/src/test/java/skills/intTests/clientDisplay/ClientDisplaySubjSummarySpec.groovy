@@ -26,19 +26,48 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         def proj1_subj = SkillsFactory.createSubject(1, 1)
         proj1_subj.helpUrl = "http://foo.org"
         proj1_subj.description = "This is a description"
-        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        List<Map> allSkills = SkillsFactory.createSkills(10, 1, 1)
+        List<Map> proj1_skills = allSkills[0..2]
 
         skillsService.createProject(proj1)
         skillsService.createSubject(proj1_subj)
         skillsService.createSkills(proj1_skills)
 
+        // skills group1 - enabled
+        def skillsGroup1 = allSkills[3]
+        skillsGroup1.type = 'SkillsGroup'
+        skillsGroup1.enabled = 'true'
+        skillsGroup1.numSkillsRequired = 2
+        skillsService.createSkill(skillsGroup1)
+        String skillsGroup1Id = skillsGroup1.skillId
+        def group1Children = allSkills[4..6]
+        group1Children.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroup1Id, skill)
+        }
+
+        // skills group2 - disabled (should not be included in the summary)
+        def skillsGroup2 = allSkills[7]
+        skillsGroup2.type = 'SkillsGroup'
+        skillsGroup2.enabled = 'false'
+        skillsService.createSkill(skillsGroup2)
+        String skillsGroup2Id = skillsGroup2.skillId
+        def group2Children = allSkills[8..9]
+        group2Children.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroup2Id, skill)
+        }
+
         when:
         def summary = skillsService.getSkillSummary("user1", proj1.projectId, proj1_subj.subjectId)
         then:
-        summary.skills.size() == 3
-        summary.skills.each {
-            it.maxOccurrencesWithinIncrementInterval == 1
-        }
+        summary.skills.size() == 4
+        summary.skills[0..2].every { it.type == 'Skill' && it.maxOccurrencesWithinIncrementInterval == 1}
+        summary.skills[3].type == 'SkillsGroup'
+        summary.skills[3].enabled == 'true'
+        summary.skills[3].numSkillsRequired == 2
+        summary.skills[3].children
+        summary.skills[3].children.size() == 3
+        summary.skills[3].children.every { it.type == 'Skill' }
+
         summary.description == "This is a description"
         summary.helpUrl == "http://foo.org"
     }

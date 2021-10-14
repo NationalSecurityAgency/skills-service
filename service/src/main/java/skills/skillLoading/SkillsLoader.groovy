@@ -861,7 +861,7 @@ class SkillsLoader {
                         selfReporting: skillDef.selfReportingType ? new SelfReportingInfo(enabled: true, type: skillDef.selfReportingType) : null,
                         subjectName: subjectName,
                         subjectId: subjectId,
-                        type: skillDef.type
+                        type: skillDef.type,
                 )
             }
         }
