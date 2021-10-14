@@ -40,7 +40,7 @@ class DisplayOrderService {
             copy.eachWithIndex { SkillDef entry, int i ->
                 if (entry.displayOrder != i) {
                     toSave.add(entry)
-                    entry.displayOrder = i
+                    entry.displayOrder = i+1
                 }
             }
             if (toSave) {

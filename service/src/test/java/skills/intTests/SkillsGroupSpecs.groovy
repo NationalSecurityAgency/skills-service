@@ -18,6 +18,7 @@ package skills.intTests
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import spock.lang.IgnoreRest
 
 class SkillsGroupSpecs extends DefaultIntSpec {
 
@@ -631,6 +632,52 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         subjSkillsBefore
         idsExistBefore.every { it }
         subjSkillsAfter.every { !it }
+    }
+
+    @IgnoreRest
+    def "delete SkillsGroup and verify proper display order is maintained"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def allSkills = SkillsFactory.createSkills(6)
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+
+        def skillsGroup1 = allSkills[0]
+        skillsGroup1.type = 'SkillsGroup'
+        skillsService.createSkill(skillsGroup1)
+        String skillsGroup1Id = skillsGroup1.skillId
+        def group1Children = allSkills[1..2]
+        group1Children.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroup1Id, skill)
+        }
+        skillsGroup1.enabled = 'true'
+        skillsService.updateSkill(skillsGroup1, null)
+
+        def skillsGroup2 = allSkills[3]
+        skillsGroup2.type = 'SkillsGroup'
+        skillsService.createSkill(skillsGroup2)
+        String skillsGroup2Id = skillsGroup2.skillId
+        def group2Children = allSkills[4..5]
+        group2Children.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroup2Id, skill)
+        }
+        skillsGroup2.enabled = 'true'
+        skillsService.updateSkill(skillsGroup2, null)
+
+        def subjSkillsBefore = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
+        def skillsGroup1DisplayOrderBefore = subjSkillsBefore.find { it.skillId == skillsGroup1Id }.displayOrder
+        def skillsGroup2DisplayOrderBefore = subjSkillsBefore.find { it.skillId == skillsGroup2Id }.displayOrder
+
+        when:
+        skillsService.deleteSkill(skillsGroup1)
+        def subjSkillsAfter = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
+        def skillsGroup2DisplayOrderAfter = subjSkillsAfter.find { it.skillId == skillsGroup2Id }.displayOrder
+
+        then:
+        skillsGroup1DisplayOrderBefore == 1
+        skillsGroup2DisplayOrderBefore == 2
+
+        skillsGroup2DisplayOrderAfter == 1
     }
 
 }
