@@ -119,9 +119,11 @@ limitations under the License.
           </div>
         </template>
         <template v-slot:cell(totalPoints)="data">
-            <div>{{ data.value | number }}</div>
+          <div :data-cy="`totalPointsCell_${data.item.skillId}`">
+            <div>{{ data.item.totalPoints | number }}</div>
             <div v-if="data.item.isSkillType" class="small text-secondary">{{ data.item.pointIncrement | number }} pts x {{ data.item.numPerformToCompletion | number }} repetitions</div>
-            <div v-if="data.item.isGroupType" class="small text-secondary">from {{ data.item.numberOfSkillsInGroup | number }} skills</div>
+            <div v-if="data.item.isGroupType" class="small text-secondary">from <b>{{ data.item.numSkillsInGroup | number }}</b> skill{{ data.item.numSkillsInGroup !== 1 ? 's' : ''}}</div>
+          </div>
         </template>
 
         <template v-slot:cell(timeWindow)="data">
@@ -419,6 +421,15 @@ limitations under the License.
         this.isLoading = false;
         this.table.options.busy = false;
       },
+      addMetaToSkillObj(skill) {
+        return {
+          subjectId: this.subjectId,
+          isGroupType: skill.type === 'SkillsGroup',
+          isSkillType: skill.type === 'Skill',
+          ...skill,
+          created: new Date(skill.created),
+        };
+      },
       skillCreatedOrUpdated(skill) {
         if (this.skillsOriginal.length === 0) {
           this.isLoading = true;
@@ -431,14 +442,7 @@ limitations under the License.
 
         return SkillsService.saveSkill(skill)
           .then((skillRes) => {
-            let createdSkill = skillRes;
-            createdSkill = {
-              subjectId: this.subjectId,
-              isGroupType: skill.type === 'SkillsGroup',
-              isSkillType: skill.type === 'Skill',
-              ...createdSkill,
-              created: new Date(createdSkill.created),
-            };
+            const createdSkill = this.addMetaToSkillObj(skillRes);
             if (item1Index >= 0) {
               createdSkill.refreshCounter = this.skills[item1Index].refreshCounter + 1;
               this.skills.splice(item1Index, 1, createdSkill);
@@ -491,7 +495,9 @@ limitations under the License.
             if (belongsToGlobalBadge) {
               this.msgOk(`Cannot delete Skill Id: [${row.skillId}].  This skill belongs to one or more global badges. Please contact a Supervisor to remove this dependency.`, 'Unable to delete');
             } else {
-              this.msgConfirm('Delete Action can NOT be undone and permanently removes users\' performed skills and any dependency associations.', `DELETE [${row.skillId}]?`)
+              const msg = row.isGroupType ? 'Delete Action CANNOT be undone and will permanently remove all of the group\'s skills. All the associated users\' performed skills and any dependency associations will also be removed.'
+                : 'Delete Action CANNOT be undone and permanently removes users\' performed skills and any dependency associations.';
+              this.msgConfirm(msg, `DELETE [${row.skillId}]?`)
                 .then((res) => {
                   if (res) {
                     this.doDeleteSkill(row);
@@ -554,7 +560,7 @@ limitations under the License.
         SkillsService.updateSkill(row, actionToSubmit)
           .then(() => {
             SkillsService.getSubjectSkills(this.projectId, this.subjectId).then((data) => {
-              this.skills = data;
+              this.skills = data.map((skill) => this.addMetaToSkillObj(skill));
               this.disableFirstAndLastButtons();
             });
           });

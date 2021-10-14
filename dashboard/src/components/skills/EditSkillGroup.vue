@@ -25,8 +25,8 @@ limitations under the License.
              data-cy="EditSkillGroupModal"
              header-bg-variant="info"
              header-text-variant="light" no-fade>
-
-      <b-container fluid>
+      <skills-spinner :is-loading="isLoading" />
+      <b-container :is-loading="!isLoading" fluid>
         <div class="row">
           <div class="col-12">
             <div class="form-group">
@@ -88,10 +88,11 @@ limitations under the License.
   import InputSanitizer from '../utils/InputSanitizer';
   import SkillsService from './SkillsService';
   import MarkdownEditor from '../utils/MarkdownEditor';
+  import SkillsSpinner from '../utils/SkillsSpinner';
 
   export default {
     name: 'EditSkillGroup',
-    components: { MarkdownEditor, IdInput },
+    components: { SkillsSpinner, MarkdownEditor, IdInput },
     props: {
       group: Object,
       isEdit: Boolean,
@@ -102,6 +103,7 @@ limitations under the License.
     },
     data() {
       return {
+        isLoading: this.isEdit,
         show: this.value,
         internalGroup: {
           originalSkillId: this.group.skillId,
@@ -127,6 +129,15 @@ limitations under the License.
         skillId: this.group.skillId,
         projectId: this.group.projectId,
       };
+      if (this.isEdit) {
+        this.isLoading = true;
+        SkillsService.getSkillDetails(this.group.projectId, this.group.subjectId, this.group.skillId)
+          .then((res) => {
+            this.internalGroup.description = res.description;
+          }).finally(() => {
+            this.isLoading = false;
+          });
+      }
     },
     computed: {
       title() {

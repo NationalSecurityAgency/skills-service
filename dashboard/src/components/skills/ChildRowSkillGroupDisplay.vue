@@ -35,21 +35,24 @@ limitations under the License.
                   <span v-b-tooltip.hover="goLiveToolTipText">
                     <b-button variant="outline-info" size="sm" data-cy="selectPageOfApprovalsBtn"
                               @click="enableGroup"
-                              :disabled="goLiveDisabled">
+                              :disabled="lessThanTwoSkills">
                       <i class="fas fa-glass-cheers"></i> Go Live
                     </b-button>
                   </span>
                 </div>
               </div>
-              <div class="col-lg mt-2">
+              <div class="col-lg mt-2 mt-lg-0">
                 <b-form inline>
                   <span class="mr-1 text-secondary">Required: </span>
                   <b-badge variant="info">{{ requiredSkillsNum }}</b-badge>
                   <span class="ml-1">out <b-badge>{{ group.numSkillsInGroup }}</b-badge> skills</span>
 
+                  <span v-b-tooltip.hover="editRequiredNumSkillsToolTipText">
                   <b-button variant="outline-info" size="sm"
                             @click="showEditRequiredSkillsDialog"
+                            :disabled="lessThanTwoSkills"
                             data-cy="selectPageOfApprovalsBtn" class="ml-2"><i class="far fa-edit"></i></b-button>
+                  </span>
                 </b-form>
 
               </div>
@@ -58,7 +61,7 @@ limitations under the License.
           <div class="col-auto text-right">
             <b-button :id="`group-${group.skillId}_newSkillBtn`" :ref="`group-${group.skillId}_newSkillBtn`" variant="outline-info" size="sm"
                       @click="showNewSkillDialog"
-                    data-cy="newProjectButton" class="ml-1">
+                    :data-cy="`addSkillToGroupBtn-${group.skillId}`" class="ml-1">
               <span class="">Add Skill to Group</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
             </b-button>
           </div>
@@ -125,13 +128,20 @@ limitations under the License.
       isLoading() {
         return this.loading.details || this.loading.skills;
       },
-      goLiveDisabled() {
+      lessThanTwoSkills() {
         return this.numSkills < 2;
       },
       goLiveToolTipText() {
         const disabled = this.numSkills < 2;
         if (disabled) {
           return 'Must have at least 2 skills to go live!';
+        }
+        return '';
+      },
+      editRequiredNumSkillsToolTipText() {
+        const disabled = this.numSkills < 2;
+        if (disabled) {
+          return 'Must have at least 2 skills to modify!';
         }
         return '';
       },
@@ -182,7 +192,12 @@ limitations under the License.
         this.$refs[`groupSkills_${this.group.skillId}`].skillCreatedOrUpdated(copy)
           .then(() => {
             this.numSkills += 1;
-            const updatedGroup = { ...this.group, numSkillsInGroup: this.group.numSkillsInGroup + 1, numSkillsRequired: this.numSkills };
+            const updatedGroup = {
+              ...this.group,
+              numSkillsInGroup: this.group.numSkillsInGroup + 1,
+              numSkillsRequired: this.numSkills,
+              totalPoints: this.group.totalPoints + (skill.pointIncrement * skill.numPerformToCompletion),
+            };
             this.$emit('group-changed', updatedGroup);
           });
       },

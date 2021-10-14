@@ -21,7 +21,7 @@ describe('Skills Group Tests', () => {
         cy.createProject(1);
         cy.createSubject(1, 1);
 
-        Cypress.Commands.add("createGroupViaUI", (groupName, description) => {
+        Cypress.Commands.add("createGroupViaUI", (groupName, description = null) => {
             cy.get('[data-cy="newGroupButton"]').click();
             cy.get('[data-cy="EditSkillGroupModal"]').contains('New Skills Group');
 
@@ -32,6 +32,16 @@ describe('Skills Group Tests', () => {
             cy.get('[data-cy="saveGroupButton"]').click();
             cy.get('[data-cy="EditSkillGroupModal"]').should('not.exist');
         });
+
+        Cypress.Commands.add("addSkillToGroupViaUI", (groupId, skillNum) => {
+            const skillName = `Skill ${skillNum}`;
+            cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
+            cy.get(`[data-cy="addSkillToGroupBtn-${groupId}"]`).click();
+            cy.get('[data-cy="skillName"]').type(skillName);
+            cy.get('[data-cy="saveSkillButton"]').click();
+            cy.get('[data-cy="saveSkillButton"]').should('not.exist');
+        });
+
     });
     const tableSelector = '[data-cy="skillsTable"]';
 
@@ -77,149 +87,162 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="editSkillButton_skill1"]').should('have.focus')
     });
 
-
-    it('Skills Group modal - id is auto generated based on name - special chars', () => {
-        cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="noContent"]').contains('No Skills Yet');
-
-        cy.get('[data-cy="newGroupButton"]').click();
-        cy.get('[data-cy="EditSkillGroupModal"]').contains('New Skills Group');
-
-        cy.get('[data-cy="saveGroupButton"]').should('be.disabled');
-        cy.get('[data-cy="groupName"]').type('Great !@#$% Name %^&*(+_)(');
-        // cy.get('[data-cy="idInputEnableControl"]').contains('Enable').click();
-        cy.get('[data-cy="idInputValue"]').should('have.value','GreatNameGroup');
-
-        cy.get('[data-cy="saveGroupButton"]').should('be.enabled');
-    });
-
-    it('Skills Group modal - id must not be auto generated based on name when id input is enabled', () => {
-        cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="noContent"]').contains('No Skills Yet');
-
-        cy.get('[data-cy="newGroupButton"]').click();
-        cy.get('[data-cy="EditSkillGroupModal"]').contains('New Skills Group');
-
-        cy.get('[data-cy="saveGroupButton"]').should('be.disabled');
-        cy.get('[data-cy="idInputValue"]').should('be.disabled');
-        cy.get('[data-cy="idInputEnableControl"]').contains('Enable').click();
-        cy.get('[data-cy="idInputValue"]').should('be.enabled');
-
-        cy.get('[data-cy="groupName"]').type('Great');
-        cy.get('[data-cy="idInputValue"]').should('have.value','');
-
-        cy.get('[data-cy="saveGroupButton"]').should('be.disabled');
-    });
-
-    it('Skills Group modal - input validation - min/max length', () => {
-        cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="noContent"]').contains('No Skills Yet');
-
-        cy.get('[data-cy="newGroupButton"]').click();
-        cy.get('[data-cy="EditSkillGroupModal"]').contains('New Skills Group');
-
-        cy.get('[data-cy="saveGroupButton"]').should('be.disabled');
-        cy.get('[data-cy="groupName"]').type('12');
-        cy.get('[data-cy="groupNameError"]').contains('Group Name cannot be less than 3 characters.');
-        cy.get('[data-cy="groupName"]').type('3');
-        cy.get('[data-cy="groupNameError"]').should('not.be.visible');
-        cy.get('[data-cy="saveGroupButton"]').should('be.enabled');
-
-        // so id doesn't change anymore
-        cy.get('[data-cy="idInputEnableControl"]').contains('Enable').click();
-
-        // max value
-        // Group Name cannot exceed 100 characters.
-        const invalidName = Array(101).fill('a').join('');
-        cy.get('[data-cy=groupName]').clear()
-        cy.get('[data-cy=groupName]').fill(invalidName);
-        cy.get('[data-cy=groupNameError]').contains('Group Name cannot exceed 100 characters.').should('be.visible');
-        cy.get('[data-cy=saveGroupButton]').should('be.disabled');
-
-        cy.get('[data-cy=groupName]').type('{backspace}');
-        cy.get('[data-cy="groupNameError"]').should('not.be.visible');
-        cy.get('[data-cy="saveGroupButton"]').should('be.enabled');
-
-        // now let's validate id
-        // min value
-        cy.get('[data-cy="idInputValue"]').clear();
-        cy.get('[data-cy="idInputValue"]').type('12');
-        cy.get('[data-cy=saveGroupButton]').should('be.disabled');
-        cy.get('[data-cy="idError"]').contains('Group ID cannot be less than 3 characters.');
-        cy.get('[data-cy="idInputValue"]').type('3');
-        cy.get('[data-cy="idError"]').should('not.be.visible');
-        cy.get('[data-cy="saveGroupButton"]').should('be.enabled');
-
-        // max value
-        const invalidId = Array(51).fill('a').join('');
-        cy.get('[data-cy="idInputValue"]').clear();
-        cy.get('[data-cy="idInputValue"]').fill(invalidId);
-        cy.get('[data-cy="idError"]').contains('Group ID cannot exceed 50 characters.');
-        cy.get('[data-cy=saveGroupButton]').should('be.disabled');
-
-        cy.get('[data-cy=idInputValue]').type('{backspace}');
-        cy.get('[data-cy="idError"]').should('not.be.visible');
-        cy.get('[data-cy="saveGroupButton"]').should('be.enabled');
-    });
-
-    it('Skills Group modal - input validation - name or id already exist', () => {
+    it('remove group - display order should be updated', () => {
         cy.createSkillsGroup(1, 1, 1);
+        cy.createSkillsGroup(1, 1, 2);
         cy.createSkill(1, 1, 1);
+        cy.createSkillsGroup(1, 1, 3);
+        cy.createSkill(1, 1, 2);
+
+        cy.addSkillToGroup(1, 1, 1, 4);
+        cy.addSkillToGroup(1, 1, 1, 5);
+        cy.createSkillsGroup(1, 1, 1, { enabled: true });
+
+        cy.addSkillToGroup(1, 1, 2, 6);
+        cy.addSkillToGroup(1, 1, 2, 7);
+        cy.createSkillsGroup(1, 1, 2, { enabled: true });
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get(`${tableSelector} th`).contains('Display Order').click()
 
-        cy.get('[data-cy="newGroupButton"]').click();
-        cy.get('[data-cy="EditSkillGroupModal"]').contains('New Skills Group');
-        cy.get('[data-cy="saveGroupButton"]').should('be.disabled');
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'group1' },  { colIndex: 1, value: '1' }],
+            [{ colIndex: 0,  value: 'group2' },  { colIndex: 1, value: '2' }],
+            [{ colIndex: 0,  value: 'skill1' },  { colIndex: 1, value: '3' }],
+            [{ colIndex: 0,  value: 'group3' },  { colIndex: 1, value: '4' }],
+            [{ colIndex: 0,  value: 'skill2' },  { colIndex: 1, value: '5' }],
+        ], 5);
 
-        // validate against skill
-        cy.get('[data-cy="groupName"]').type('Very Great Skill 1');
-        cy.get('[data-cy=groupNameError]').contains('The value for the Group Name is already taken.').should('be.visible');
-        cy.get('[data-cy="saveGroupButton"]').should('be.disabled');
-        cy.get('[data-cy="groupName"]').type('a');
-        cy.get('[data-cy="groupNameError"]').should('not.be.visible');
-        cy.get('[data-cy="saveGroupButton"]').should('be.enabled');
+        cy.get('[data-cy="deleteSkillButton_group2"]').click();
+        cy.contains('DELETE [group2]?');
+        cy.contains('YES, Delete It!').click();
 
-        cy.get('[data-cy="groupName"]').clear()
-        // validate against group
-        cy.get('[data-cy="groupName"]').type('Awesome Group 1');
-        cy.get('[data-cy=groupNameError]').contains('The value for the Group Name is already taken.').should('be.visible');
-        cy.get('[data-cy="saveGroupButton"]').should('be.disabled');
-        cy.get('[data-cy="groupName"]').type('a');
-        cy.get('[data-cy="groupNameError"]').should('not.be.visible');
-        cy.get('[data-cy="saveGroupButton"]').should('be.enabled');
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'group1' },  { colIndex: 1, value: '1' }],
+            [{ colIndex: 0,  value: 'skill1' },  { colIndex: 1, value: '2' }],
+            [{ colIndex: 0,  value: 'group3' },  { colIndex: 1, value: '3' }],
+            [{ colIndex: 0,  value: 'skill2' },  { colIndex: 1, value: '4' }],
+        ], 5);
 
-        // now let's test id field
-        cy.get('[data-cy="idInputEnableControl"]').contains('Enable').click();
-        cy.get('[data-cy="idInputValue"]').clear();
-        cy.get('[data-cy="idInputValue"]').type('skill1');
-        cy.get('[data-cy="idError"]').contains('The value for the Group ID is already taken.');
-        cy.get('[data-cy=saveGroupButton]').should('be.disabled');
-
-        cy.get('[data-cy="idInputValue"]').type('a');
-        cy.get('[data-cy="idError"]').should('not.be.visible');
-        cy.get('[data-cy="saveGroupButton"]').should('be.enabled');
-
-        cy.get('[data-cy="idInputValue"]').clear();
-        cy.get('[data-cy="idInputValue"]').type('group1');
-        cy.get('[data-cy="idError"]').contains('The value for the Group ID is already taken.');
-        cy.get('[data-cy=saveGroupButton]').should('be.disabled');
-
-        cy.get('[data-cy="idInputValue"]').type('a');
-        cy.get('[data-cy="idError"]').should('not.be.visible');
-        cy.get('[data-cy="saveGroupButton"]').should('be.enabled');
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get(`${tableSelector} th`).contains('Display Order').click()
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'group1' },  { colIndex: 1, value: '1' }],
+            [{ colIndex: 0,  value: 'skill1' },  { colIndex: 1, value: '2' }],
+            [{ colIndex: 0,  value: 'group3' },  { colIndex: 1, value: '3' }],
+            [{ colIndex: 0,  value: 'skill2' },  { colIndex: 1, value: '4' }],
+        ], 5);
     });
 
-    it('Skills Group modal - input validation - description custom validation', () => {
+    it('change display order', () => {
+        cy.createSkillsGroup(1, 1, 1);
+        cy.createSkillsGroup(1, 1, 2);
+        cy.createSkill(1, 1, 1);
+        cy.createSkillsGroup(1, 1, 3);
+        cy.createSkill(1, 1, 2);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get(`${tableSelector} th`)
+            .contains('Display Order')
+            .click()
+        cy.get('[data-cy="orderMoveDown_group1"]').click();
+        cy.get('[data-cy="orderMoveDown_group3"]').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Awesome Group 2' },  { colIndex: 1, value: '1' }],
+            [{ colIndex: 0,  value: 'Awesome Group 1' },  { colIndex: 1, value: '2' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 1' },  { colIndex: 1, value: '3' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 2' },  { colIndex: 1, value: '4' }],
+            [{ colIndex: 0,  value: 'Awesome Group 3' },  { colIndex: 1, value: '5' }],
+        ], 5);
+
+        cy.get('[data-cy="orderMoveDown_group1"]').should('be.enabled');
+        cy.get('[data-cy="orderMoveUp_group1"]').should('be.enabled');
+
+        cy.get('[data-cy="orderMoveDown_group2"]').should('be.enabled');
+        cy.get('[data-cy="orderMoveUp_group2"]').should('be.disabled');
+
+        cy.get('[data-cy="orderMoveDown_group3"]').should('be.disabled');
+        cy.get('[data-cy="orderMoveUp_group3"]').should('be.enabled');
+
+        cy.get('[data-cy="orderMoveDown_skill1"]').should('be.enabled');
+        cy.get('[data-cy="orderMoveUp_skill1"]').should('be.enabled');
+
+        cy.get('[data-cy="orderMoveDown_skill2"]').should('be.enabled');
+        cy.get('[data-cy="orderMoveUp_skill2"]').should('be.enabled');
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get(`${tableSelector} th`)
+            .contains('Display Order')
+            .click()
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Awesome Group 2' },  { colIndex: 1, value: '1' }],
+            [{ colIndex: 0,  value: 'Awesome Group 1' },  { colIndex: 1, value: '2' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 1' },  { colIndex: 1, value: '3' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 2' },  { colIndex: 1, value: '4' }],
+            [{ colIndex: 0,  value: 'Awesome Group 3' },  { colIndex: 1, value: '5' }],
+        ], 5);
+
+        cy.get('[data-cy="orderMoveDown_group1"]').should('be.enabled');
+        cy.get('[data-cy="orderMoveUp_group1"]').should('be.enabled');
+
+        cy.get('[data-cy="orderMoveDown_group2"]').should('be.enabled');
+        cy.get('[data-cy="orderMoveUp_group2"]').should('be.disabled');
+
+        cy.get('[data-cy="orderMoveDown_group3"]').should('be.disabled');
+        cy.get('[data-cy="orderMoveUp_group3"]').should('be.enabled');
+
+        cy.get('[data-cy="orderMoveDown_skill1"]').should('be.enabled');
+        cy.get('[data-cy="orderMoveUp_skill1"]').should('be.enabled');
+
+        cy.get('[data-cy="orderMoveDown_skill2"]').should('be.enabled');
+        cy.get('[data-cy="orderMoveUp_skill2"]').should('be.enabled');
+    })
+
+    it('additional columns', () => {
+        cy.createSkillsGroup(1, 1, 1);
+        cy.createSkillsGroup(1, 1, 2);
+        cy.createSkillsGroup(1, 1, 3);
+
+        cy.addSkillToGroup(1, 1, 1, 4);
+        cy.addSkillToGroup(1, 1, 1, 5);
+        cy.createSkillsGroup(1, 1, 1, { enabled: true });
+
+        cy.addSkillToGroup(1, 1, 3, 6);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get(`${tableSelector} th`)
+            .contains('Display Order')
+            .click()
+        cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Points').click();
+        cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Self Report').click();
+        cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Time Window').click();
+        cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Version').click();
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'group1' },  { colIndex: 3, value: '400from 2 skills' }, { colIndex: 4, value: 'N/A' }, { colIndex: 5, value: 'N/A' }, { colIndex: 6, value: '0' }],
+            [{ colIndex: 0,  value: 'group2' },  { colIndex: 3, value: '0from 0 skills' }],
+            [{ colIndex: 0,  value: 'group3' },  { colIndex: 3, value: '200from 1 skill' }],
+        ], 5);
+    });
+
+    it('total points in additional column are incremented when skills are added', () => {
+        cy.createSkillsGroup(1, 1, 1);
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
-        cy.get('[data-cy="newGroupButton"]').click();
-
-        cy.get('[data-cy="groupName"]').type('Awesome Group 1');
-        cy.get('[data-cy="groupDescription"]').type('ldkj aljdl aj\n\njabberwocky');
-
-        cy.get('[data-cy="groupDescriptionError"]').contains('Group Description - paragraphs may not contain jabberwocky');
-        cy.get('[data-cy=saveGroupButton]').should('be.disabled');
+        cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Points').click();
+        cy.addSkillToGroupViaUI('group1', 1);
+        cy.get(`${tableSelector} [data-cy="totalPointsCell_group1"]`).contains('50');
     });
+
+    // it('go live', () => {
+    //     cy.createSkillsGroup(1, 1, 1);
+    //     cy.visit('/administrator/projects/proj1/subjects/subj1');
+    //
+    //     cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Points').click();
+    //     cy.addSkillToGroupViaUI('group1', 1);
+    //     cy.get(`${tableSelector} [data-cy="totalPointsCell_group1"]`).contains('50');
+    //
+    //     cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="skillGroupStatus"]').contains('Disabled');
+    // });
 
 });
