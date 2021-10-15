@@ -679,4 +679,38 @@ class SkillsGroupSpecs extends DefaultIntSpec {
 
         skillsGroup2DisplayOrderAfter == 1
     }
+
+    def "validate totalPoints on SkillsGroup"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def allSkills = SkillsFactory.createSkills(3)
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+
+        def skillsGroup = allSkills[0]
+        skillsGroup.type = 'SkillsGroup'
+        skillsService.createSkill(skillsGroup)
+        def children = allSkills[1..2]
+
+        int initialPoints = skillsService.getSkill(skillsGroup).totalPoints
+
+        when:
+
+        String skillsGroupId = skillsGroup.skillId
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, children[0])
+        int pointAfterFirstChild = skillsService.getSkill(skillsGroup).totalPoints
+
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, children[1])
+        int pointAfterSecondChild = skillsService.getSkill(skillsGroup).totalPoints
+
+        skillsGroup.numSkillsRequired = 1
+        skillsService.updateSkill(skillsGroup, null)
+        int pointAfterNumSkillsRequiredReduced = skillsService.getSkill(skillsGroup).totalPoints
+
+        then:
+        initialPoints == 0
+        pointAfterFirstChild == 10
+        pointAfterSecondChild == 20
+        pointAfterNumSkillsRequiredReduced == 10
+    }
 }
