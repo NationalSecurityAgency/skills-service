@@ -88,18 +88,18 @@ class SkillsGroupAdminService {
     }
 
     @Profile
-    List<SkillDef> loadAndValidateSkillsGroup(SkillRequest skillRequest, SkillDefWithExtra skillDefinition) {
+    List<SkillDef> validateSkillsGroupAndReturnChildren(SkillRequest skillRequest, SkillDefWithExtra skillDefinition) {
         if (skillDefinition.type != skills.storage.model.SkillDef.ContainerType.valueOf(skillRequest.type)) {
             throw new SkillException("Cannot convert an existing Skill to a Skill Group, or existing Skill Group to Skill.")
         }
         int numSkillsRequired = skillRequest.numSkillsRequired
         boolean enabled = StringUtils.isNotBlank(skillRequest.enabled) && StringUtils.equalsIgnoreCase(skillRequest.enabled, Boolean.TRUE.toString())
         Integer skillsGroupIdRef = skillDefinition.id
-        return loadAndValidateSkillsGroup(numSkillsRequired, enabled, skillsGroupIdRef)
+        return validateSkillsGroupAndReturnChildren(numSkillsRequired, enabled, skillsGroupIdRef)
     }
 
     @Profile
-    List<SkillDef> loadAndValidateSkillsGroup(Integer numSkillsRequired, boolean enabled, Integer skillsGroupIdRef, Integer expectedPoints=null) {
+    List<SkillDef> validateSkillsGroupAndReturnChildren(Integer numSkillsRequired, boolean enabled, Integer skillsGroupIdRef, Integer expectedPoints=null) {
         List<SkillDef> groupChildSkills = getSkillsGroupChildSkills(skillsGroupIdRef)
         if (enabled) {
             if (numSkillsRequired == 0) {
@@ -130,13 +130,14 @@ class SkillsGroupAdminService {
     }
 
     @Profile
-    void validateCanDeleteChildSkill(SkillDef parentSkill) {
+    List<SkillDef> validateCanDeleteChildSkillAndReturnChildren(SkillDef parentSkill) {
+        List<SkillDef> groupChildSkills = getSkillsGroupChildSkills(parentSkill.id)
         if (parentSkill.enabled) {
-            List<SkillDef> groupChildSkills = getSkillsGroupChildSkills(parentSkill.id)
             int numChildSkills = groupChildSkills.size()
             if (numChildSkills < 2) {
                 throw new SkillException("A Skill Group must have at least 2 skills in order to be enabled.")
             }
         }
+        return groupChildSkills
     }
 }

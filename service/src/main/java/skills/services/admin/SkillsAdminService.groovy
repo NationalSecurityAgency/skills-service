@@ -151,7 +151,7 @@ class SkillsAdminService {
         if (isEdit) {
             if (isSkillsGroup) {
                 // need to update total points for the group
-                List<SkillDef> groupChildSkills = skillsGroupAdminService.loadAndValidateSkillsGroup(skillRequest, skillDefinition)
+                List<SkillDef> groupChildSkills = skillsGroupAdminService.validateSkillsGroupAndReturnChildren(skillRequest, skillDefinition)
                 totalPointsRequested = getGroupTotalPoints(groupChildSkills, skillRequest.numSkillsRequired)
             }
             shouldRebuildScores = skillDefinition.totalPoints != totalPointsRequested
@@ -215,7 +215,7 @@ class SkillsAdminService {
         if (isSkillsGroupChild) {
             // need to update total points for parent skill group
             SkillDefWithExtra skillsGroupSkillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(skillRequest.projectId, groupId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
-            List<SkillDef> groupChildSkills = skillsGroupAdminService.loadAndValidateSkillsGroup(skillsGroupSkillDef.numSkillsRequired, Boolean.valueOf(skillsGroupSkillDef.enabled), skillsGroupSkillDef.id)
+            List<SkillDef> groupChildSkills = skillsGroupAdminService.validateSkillsGroupAndReturnChildren(skillsGroupSkillDef.numSkillsRequired, Boolean.valueOf(skillsGroupSkillDef.enabled), skillsGroupSkillDef.id)
             skillsGroupSkillDef.totalPoints = getGroupTotalPoints(groupChildSkills, skillsGroupSkillDef.numSkillsRequired)
             DataIntegrityExceptionHandlers.skillDataIntegrityViolationExceptionHandler.handle(skillRequest.projectId, skillRequest.skillId) {
                 skillDefWithExtraRepo.save(skillsGroupSkillDef)
@@ -305,10 +305,14 @@ class SkillsAdminService {
         // this MUST happen after the skill was removed as sql relies on the skill to be gone
         userPointsManagement.identifyAndAddLevelAchievements(parentSkill)
 
-        // make sure skills group is still valid
+        // make sure skills group is still valid and update group's totalPoints
         if (skillDefinition.groupId) {
             assert parentSkill.type == SkillDef.ContainerType.SkillsGroup
-            skillsGroupAdminService.validateCanDeleteChildSkill(parentSkill)
+            List<SkillDef> children = skillsGroupAdminService.validateCanDeleteChildSkillAndReturnChildren(parentSkill)
+            parentSkill.totalPoints = getGroupTotalPoints(children, parentSkill.numSkillsRequired)
+            DataIntegrityExceptionHandlers.skillDataIntegrityViolationExceptionHandler.handle(projectId, skillId) {
+                skillDefWithExtraRepo.save(parentSkill)
+            }
         }
 
         badges?.each {
