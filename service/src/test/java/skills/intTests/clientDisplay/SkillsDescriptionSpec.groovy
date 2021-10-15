@@ -376,7 +376,6 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
         def regularSkills = proj1_subj1_skills.subList(0, 3)
         def skillsGroup = proj1_subj1_skills[3]
         skillsGroup.type = 'SkillsGroup'
-        skillsGroup.enabled = 'true'
         def childSkills = proj1_subj1_skills.subList(4, 7)
 
         proj1_subj1_skills.each {
@@ -395,6 +394,8 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
         childSkills.each { skill ->
             skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
         }
+        skillsGroup.enabled = 'true'
+        skillsService.updateSkill(skillsGroup, null)
 
         when:
         def res = skillsService.getSubjectDescriptions(proj1.projectId, proj1_subj1.subjectId).sort { it.skillId }

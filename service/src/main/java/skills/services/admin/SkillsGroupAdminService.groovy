@@ -113,7 +113,7 @@ class SkillsGroupAdminService {
                 if (numSkillsRequired > numChildSkills) {
                     throw new SkillException("A Skill Group cannot require more skills than the number of skills that belong to the group.")
                 }
-                if (numSkillsRequired !== -1 && numSkillsRequired < 1) {
+                if (numSkillsRequired != -1 && numSkillsRequired < 1) {
                     throw new SkillException("A Skill Group must have at least 1 required skill in order to be enabled.")
                 }
                 boolean allSkillsRequired = numSkillsRequired == -1 || numSkillsRequired == numChildSkills

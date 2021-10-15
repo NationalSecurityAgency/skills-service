@@ -607,8 +607,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(3)
         def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 5)
-        skillsGroup.enabled = 'true'
-        skillsGroup.numSkillsRequired = skills.size() - 1
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -617,6 +615,9 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         skills.each { skill ->
             skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
         }
+        skillsGroup.numSkillsRequired = skills.size() - 1
+        skillsGroup.enabled = 'true'
+        skillsService.updateSkill(skillsGroup, null)
 
         def subjSkillsBefore = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
         List<Boolean> idsExistBefore = skills.collect { skillsService.doesEntityExist(proj.projectId, it.skillId) }
@@ -634,7 +635,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         subjSkillsAfter.every { !it }
     }
 
-    @IgnoreRest
     def "delete SkillsGroup and verify proper display order is maintained"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
@@ -679,5 +679,4 @@ class SkillsGroupSpecs extends DefaultIntSpec {
 
         skillsGroup2DisplayOrderAfter == 1
     }
-
 }

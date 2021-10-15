@@ -149,24 +149,10 @@ class SkillsAdminService {
 
         SkillDef subject = null
         if (isEdit) {
-            if (isSkillsGroup || isSkillsGroupChild) {
-                List<SkillDef> groupChildSkills
-                if (isSkillsGroup) {
-                    groupChildSkills = skillsGroupAdminService.validateSkillsGroup(skillRequest, skillDefinition)
-                } else {
-                    SkillDefWithExtra skillsGroupSkillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(skillRequest.projectId, groupId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
-                    groupChildSkills = skillsGroupAdminService.validateSkillsGroup(skillsGroupSkillDef.numSkillsRequired, Boolean.valueOf(skillsGroupSkillDef.enabled), skillsGroupSkillDef.id, totalPointsRequested)
-                }
-                if (groupChildSkills) {
-                    int numSkillsRequired = skillRequest.numSkillsRequired == -1 ? groupChildSkills.size() : skillRequest.numSkillsRequired
-                    if (numSkillsRequired == groupChildSkills.size()) {
-                        // all skills are required, but can have different totalPoints so add them all up
-                        totalPointsRequested = groupChildSkills.collect { it.totalPoints }.sum()
-                    } else {
-                        // subset is required so validation makes sure they all have the same totalPoints value
-                        totalPointsRequested = numSkillsRequired * groupChildSkills.first().totalPoints
-                    }
-                }
+            if (isSkillsGroup) {
+                // need to update total points for the group
+                List<SkillDef> groupChildSkills = skillsGroupAdminService.validateSkillsGroup(skillRequest, skillDefinition)
+                totalPointsRequested = getGroupTotalPoints(groupChildSkills, skillRequest.numSkillsRequired)
             }
             shouldRebuildScores = skillDefinition.totalPoints != totalPointsRequested
             occurrencesDelta = skillRequest.numPerformToCompletion - currentOccurrences
@@ -218,6 +204,16 @@ class SkillsAdminService {
         }
 
         SkillDef savedSkill = skillDefRepo.findByProjectIdAndSkillIdAndType(skillRequest.projectId, skillRequest.skillId, skillType)
+        if (isSkillsGroupChild) {
+            // need to update total points for parent skill group
+            SkillDefWithExtra skillsGroupSkillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(skillRequest.projectId, groupId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
+            List<SkillDef> groupChildSkills = skillsGroupAdminService.validateSkillsGroup(skillsGroupSkillDef.numSkillsRequired, Boolean.valueOf(skillsGroupSkillDef.enabled), skillsGroupSkillDef.id)
+            skillsGroupSkillDef.totalPoints = getGroupTotalPoints(groupChildSkills, skillsGroupSkillDef.numSkillsRequired)
+            DataIntegrityExceptionHandlers.skillDataIntegrityViolationExceptionHandler.handle(skillRequest.projectId, skillRequest.skillId) {
+                skillDefWithExtraRepo.save(skillsGroupSkillDef)
+            }
+        }
+
         if (!isEdit) {
             if (isSkillsGroupChild) {
                 skillsGroupAdminService.addSkillToSkillsGroup(savedSkill.projectId, groupId, savedSkill.skillId)
@@ -265,6 +261,21 @@ class SkillsAdminService {
         }
 
         log.debug("Saved [{}]", savedSkill)
+    }
+
+    private int getGroupTotalPoints(List<SkillDef> groupChildSkills, int numSkillsRequired) {
+        int totalPoints = 0
+        if (groupChildSkills) {
+            numSkillsRequired = numSkillsRequired == -1 ? groupChildSkills.size() : numSkillsRequired
+            if (numSkillsRequired == groupChildSkills.size()) {
+                // all skills are required, but can have different totalPoints so add them all up
+                totalPoints = groupChildSkills.collect { it.totalPoints }.sum()
+            } else {
+                // only a subset is required; validation already made sure that all have the same totalPoints so grab first value
+                totalPoints = numSkillsRequired * groupChildSkills.first().totalPoints
+            }
+        }
+        return totalPoints
     }
 
     @Transactional
