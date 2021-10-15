@@ -728,16 +728,16 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
 
-        def skillsGroup1 = allSkills[0]
-        skillsGroup1.type = 'SkillsGroup'
-        skillsService.createSkill(skillsGroup1)
-        String skillsGroup1Id = skillsGroup1.skillId
+        def skillsGroup = allSkills[0]
+        skillsGroup.type = 'SkillsGroup'
+        skillsService.createSkill(skillsGroup)
+        String skillsGroup1Id = skillsGroup.skillId
         def group1Children = allSkills[1..2]
         group1Children.each { skill ->
             skillsService.assignSkillToSkillsGroup(skillsGroup1Id, skill)
         }
-        skillsGroup1.enabled = 'true'
-        skillsService.updateSkill(skillsGroup1, null)
+        skillsGroup.enabled = 'true'
+        skillsService.updateSkill(skillsGroup, null)
 
         when:
         // delete one of the two skills will cause the group to only have one skill left
@@ -747,4 +747,35 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         def exception = thrown(SkillsClientException)
         exception.message.contains("A Skill Group must have at least 2 skills in order to be enabled.")
     }
+
+    def "numSkillsRequired is reduced when enough child skills are deleted"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def allSkills = SkillsFactory.createSkills(4)
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+
+        def skillsGroup = allSkills[0]
+        skillsGroup.type = 'SkillsGroup'
+        skillsService.createSkill(skillsGroup)
+        String skillsGroup1Id = skillsGroup.skillId
+        def group1Children = allSkills[1..3]
+        group1Children.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroup1Id, skill)
+        }
+        skillsGroup.enabled = 'true'
+        skillsGroup.numSkillsRequired = 3
+        skillsService.updateSkill(skillsGroup, null)
+        int numSkillsRequiredBeforeDelete = skillsService.getSkill(skillsGroup).numSkillsRequired
+
+        when:
+        // delete one of the two skills will cause the group to only have one skill left
+        skillsService.deleteSkill(allSkills[2])
+        int numSkillsRequiredAfterDelete = skillsService.getSkill(skillsGroup).numSkillsRequired
+
+        then:
+        numSkillsRequiredBeforeDelete == 3
+        numSkillsRequiredAfterDelete == 2
+    }
+
 }
