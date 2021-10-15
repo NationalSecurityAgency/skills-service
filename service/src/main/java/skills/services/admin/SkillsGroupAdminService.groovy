@@ -87,25 +87,23 @@ class SkillsGroupAdminService {
         return skillDefRepo.findChildSkillsByIdAndRelationshipType(skillsGroupIdRef, SkillRelDef.RelationshipType.SkillsGroupRequirement)
     }
 
-    List<SkillDef> validateSkillsGroup(SkillRequest skillRequest, SkillDefWithExtra skillDefinition) {
+    List<SkillDef> loadAndValidateSkillsGroup(SkillRequest skillRequest, SkillDefWithExtra skillDefinition) {
         if (skillDefinition.type != skills.storage.model.SkillDef.ContainerType.valueOf(skillRequest.type)) {
             throw new SkillException("Cannot convert an existing Skill to a Skill Group, or existing Skill Group to Skill.")
         }
         int numSkillsRequired = skillRequest.numSkillsRequired
         boolean enabled = StringUtils.isNotBlank(skillRequest.enabled) && StringUtils.equalsIgnoreCase(skillRequest.enabled, Boolean.TRUE.toString())
         Integer skillsGroupIdRef = skillDefinition.id
-        return validateSkillsGroup(numSkillsRequired, enabled, skillsGroupIdRef)
+        return loadAndValidateSkillsGroup(numSkillsRequired, enabled, skillsGroupIdRef)
     }
 
     @Profile
-    List<SkillDef> validateSkillsGroup(Integer numSkillsRequired, boolean enabled, Integer skillsGroupIdRef, Integer expectedPoints=null) {
-        List<SkillDef> groupChildSkills = []
+    List<SkillDef> loadAndValidateSkillsGroup(Integer numSkillsRequired, boolean enabled, Integer skillsGroupIdRef, Integer expectedPoints=null) {
+        List<SkillDef> groupChildSkills = getSkillsGroupChildSkills(skillsGroupIdRef)
         if (enabled) {
             if (numSkillsRequired == 0) {
-                // this check can be done w/o loading child skills
                 throw new SkillException("A Skill Group must have at least 1 required skill in order to be enabled.")
             } else {
-                groupChildSkills = getSkillsGroupChildSkills(skillsGroupIdRef)
                 int numChildSkills = groupChildSkills.size()
                 if (numChildSkills < 2) {
                     throw new SkillException("A Skill Group must have at least 2 skills in order to be enabled.")

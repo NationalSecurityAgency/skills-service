@@ -151,7 +151,7 @@ class SkillsAdminService {
         if (isEdit) {
             if (isSkillsGroup) {
                 // need to update total points for the group
-                List<SkillDef> groupChildSkills = skillsGroupAdminService.validateSkillsGroup(skillRequest, skillDefinition)
+                List<SkillDef> groupChildSkills = skillsGroupAdminService.loadAndValidateSkillsGroup(skillRequest, skillDefinition)
                 totalPointsRequested = getGroupTotalPoints(groupChildSkills, skillRequest.numSkillsRequired)
             }
             shouldRebuildScores = skillDefinition.totalPoints != totalPointsRequested
@@ -204,21 +204,21 @@ class SkillsAdminService {
         }
 
         SkillDef savedSkill = skillDefRepo.findByProjectIdAndSkillIdAndType(skillRequest.projectId, skillRequest.skillId, skillType)
-        if (isSkillsGroupChild) {
-            // need to update total points for parent skill group
-            SkillDefWithExtra skillsGroupSkillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(skillRequest.projectId, groupId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
-            List<SkillDef> groupChildSkills = skillsGroupAdminService.validateSkillsGroup(skillsGroupSkillDef.numSkillsRequired, Boolean.valueOf(skillsGroupSkillDef.enabled), skillsGroupSkillDef.id)
-            skillsGroupSkillDef.totalPoints = getGroupTotalPoints(groupChildSkills, skillsGroupSkillDef.numSkillsRequired)
-            DataIntegrityExceptionHandlers.skillDataIntegrityViolationExceptionHandler.handle(skillRequest.projectId, skillRequest.skillId) {
-                skillDefWithExtraRepo.save(skillsGroupSkillDef)
-            }
-        }
-
         if (!isEdit) {
             if (isSkillsGroupChild) {
                 skillsGroupAdminService.addSkillToSkillsGroup(savedSkill.projectId, groupId, savedSkill.skillId)
             } else {
                 assignToParent(skillRequest, savedSkill, subject)
+            }
+        }
+
+        if (isSkillsGroupChild) {
+            // need to update total points for parent skill group
+            SkillDefWithExtra skillsGroupSkillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(skillRequest.projectId, groupId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
+            List<SkillDef> groupChildSkills = skillsGroupAdminService.loadAndValidateSkillsGroup(skillsGroupSkillDef.numSkillsRequired, Boolean.valueOf(skillsGroupSkillDef.enabled), skillsGroupSkillDef.id)
+            skillsGroupSkillDef.totalPoints = getGroupTotalPoints(groupChildSkills, skillsGroupSkillDef.numSkillsRequired)
+            DataIntegrityExceptionHandlers.skillDataIntegrityViolationExceptionHandler.handle(skillRequest.projectId, skillRequest.skillId) {
+                skillDefWithExtraRepo.save(skillsGroupSkillDef)
             }
         }
 
