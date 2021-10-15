@@ -682,14 +682,14 @@ class SkillsGroupSpecs extends DefaultIntSpec {
     def "validate totalPoints on SkillsGroup"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
-        def allSkills = SkillsFactory.createSkills(3)
+        def allSkills = SkillsFactory.createSkills(4)
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
 
         def skillsGroup = allSkills[0]
         skillsGroup.type = 'SkillsGroup'
         skillsService.createSkill(skillsGroup)
-        def children = allSkills[1..2]
+        def children = allSkills[1..3]
 
         int initialPoints = skillsService.getSkill(skillsGroup).totalPoints
 
@@ -702,6 +702,12 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         skillsService.assignSkillToSkillsGroup(skillsGroupId, children[1])
         int pointAfterSecondChild = skillsService.getSkill(skillsGroup).totalPoints
 
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, children[2])
+        int pointAfterThirdChild = skillsService.getSkill(skillsGroup).totalPoints
+
+        skillsService.deleteSkill(children[1])
+        int pointAfterOneChildDeleted = skillsService.getSkill(skillsGroup).totalPoints
+
         skillsGroup.numSkillsRequired = 1
         skillsService.updateSkill(skillsGroup, null)
         int pointAfterNumSkillsRequiredReduced = skillsService.getSkill(skillsGroup).totalPoints
@@ -710,6 +716,8 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         initialPoints == 0
         pointAfterFirstChild == 10
         pointAfterSecondChild == 20
+        pointAfterThirdChild == 30
+        pointAfterOneChildDeleted == 20
         pointAfterNumSkillsRequiredReduced == 10
     }
 
