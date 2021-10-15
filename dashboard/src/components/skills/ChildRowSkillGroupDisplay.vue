@@ -25,15 +25,15 @@ limitations under the License.
         <div class="row px-3 my-2">
           <div class="col">
             <div class="row align-items-center">
-              <div class="col-lg-auto border-right">
+              <div class="col-lg-auto border-right" data-cy="skillGroupStatus">
                 <div v-if="this.group.enabled">
                   <span class="text-secondary">Status: </span> <span class="text-uppercase"><b-badge variant="success">Live <span class="far fa-check-circle" aria-hidden="true"/></b-badge></span>
                 </div>
-                <div v-if="!this.group.enabled" data-cy="skillGroupStatus" style="">
+                <div v-if="!this.group.enabled">
                   <span class="text-secondary">Status: </span>
                   <span class="text-uppercase mr-1"><b-badge variant="warning">Disabled</b-badge></span>
                   <span v-b-tooltip.hover="goLiveToolTipText">
-                    <b-button variant="outline-info" size="sm" data-cy="selectPageOfApprovalsBtn"
+                    <b-button variant="outline-info" size="sm" data-cy="goLiveBtn"
                               @click="enableGroup"
                               :disabled="lessThanTwoSkills">
                       <i class="fas fa-glass-cheers"></i> Go Live
@@ -41,17 +41,17 @@ limitations under the License.
                   </span>
                 </div>
               </div>
-              <div class="col-lg mt-2 mt-lg-0">
+              <div class="col-lg mt-2 mt-lg-0" data-cy="requiredSkillsSection">
                 <b-form inline>
                   <span class="mr-1 text-secondary">Required: </span>
-                  <b-badge variant="info">{{ requiredSkillsNum }}</b-badge>
-                  <span class="ml-1">out <b-badge>{{ group.numSkillsInGroup }}</b-badge> skills</span>
+                  <b-badge variant="info" data-cy="requiredSkillsNum">{{ requiredSkillsNum }}</b-badge>
+                  <span class="ml-1">out <b-badge data-cy="numSkillsInGroup">{{ group.numSkillsInGroup }}</b-badge> skills</span>
 
                   <span v-b-tooltip.hover="editRequiredNumSkillsToolTipText">
                   <b-button variant="outline-info" size="sm"
                             @click="showEditRequiredSkillsDialog"
                             :disabled="lessThanTwoSkills"
-                            data-cy="selectPageOfApprovalsBtn" class="ml-2"><i class="far fa-edit"></i></b-button>
+                            data-cy="editRequired" class="ml-2"><i class="far fa-edit"></i></b-button>
                   </span>
                 </b-form>
 
@@ -73,6 +73,7 @@ limitations under the License.
                     :subject-id="this.$route.params.subjectId"
                     @skill-removed="skillRemoved"
                     @skills-change="skillChanged"
+                    :disableDeleteButtonsInfo="group.enabled ? { minNumSkills: 3, tooltip: 'Cannot delete! Groups that went Live must have at least 2 skill.' } : null"
                     :show-search="false" :show-header="false" :show-paging="false"/>
         </div>
       </b-card>
@@ -147,7 +148,7 @@ limitations under the License.
       },
       requiredSkillsNum() {
         // -1 is disabled
-        return (this.group.numSkillsRequired === -1) ? this.skills.length : this.group.numSkillsInGroup;
+        return (this.group.numSkillsRequired === -1) ? this.skills.length : this.group.numSkillsRequired;
       },
     },
     methods: {
@@ -195,21 +196,33 @@ limitations under the License.
             const updatedGroup = {
               ...this.group,
               numSkillsInGroup: this.group.numSkillsInGroup + 1,
-              numSkillsRequired: this.numSkills,
+              numSkillsRequired: this.group.numSkillsRequired,
               totalPoints: this.group.totalPoints + (skill.pointIncrement * skill.numPerformToCompletion),
             };
             this.$emit('group-changed', updatedGroup);
           });
       },
-      skillRemoved() {
+      skillRemoved(skill) {
         this.numSkills -= 1;
-        const updatedGroup = { ...this.group, numSkillsInGroup: this.group.numSkillsInGroup - 1, numSkillsRequired: this.numSkills };
+        this.skills = this.skills.filter((item) => item.skillId !== skill.skillId);
+        const updatedGroup = {
+          ...this.group,
+          numSkillsInGroup: this.group.numSkillsInGroup - 1,
+          numSkillsRequired: (this.group.numSkillsRequired > 0 && this.group.numSkillsRequired > this.numSkills) ? this.group.numSkillsInGroup - 1 : this.group.numSkillsRequired,
+          totalPoints: this.group.totalPoints - (skill.pointIncrement * skill.numPerformToCompletion),
+        };
         this.$emit('group-changed', updatedGroup);
       },
       skillChanged(skill) {
         const item1Index = this.skills.findIndex((item) => item.skillId === skill.originalSkillId);
         if (item1Index >= 0) {
+          const removedSkill = this.skills[item1Index];
           this.skills.splice(item1Index, 1, skill);
+          const updatedGroup = {
+            ...this.group,
+            totalPoints: this.group.totalPoints - (removedSkill.pointIncrement * removedSkill.numPerformToCompletion) + (skill.pointIncrement * skill.numPerformToCompletion),
+          };
+          this.$emit('group-changed', updatedGroup);
         } else {
           this.skills.push(skill);
         }

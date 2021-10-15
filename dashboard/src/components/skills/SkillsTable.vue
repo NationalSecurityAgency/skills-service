@@ -105,16 +105,23 @@ limitations under the License.
                 <b-button @click="editSkill(data.item)"
                           variant="outline-primary" :data-cy="`editSkillButton_${data.item.skillId}`"
                           :aria-label="'edit Skill '+data.item.name" :ref="'edit_'+data.item.skillId"
-                          title="Edit Skill">
+                          title="Edit Skill" b-tooltip.hover="Edit Skill">
                   <i class="fas fa-edit" aria-hidden="true"/>
                 </b-button>
-                <b-button @click="deleteSkill(data.item)" variant="outline-primary"
-                          :data-cy="`deleteSkillButton_${data.item.skillId}`"
-                          :aria-label="'delete Skill '+data.item.name"
-                          title="Delete Skill">
-                  <i class="text-warning fas fa-trash" aria-hidden="true"/>
-                </b-button>
+                <span :id="`deleteSkillButton-wrapper_${data.item.skillId}`" class="d-inline-block" tabindex="0">
+                  <b-button :id="`deleteSkillButton_${data.item.skillId}`"
+                            @click="deleteSkill(data.item)" variant="outline-primary"
+                            :data-cy="`deleteSkillButton_${data.item.skillId}`"
+                            :aria-label="'delete Skill '+data.item.name"
+                            title="Delete Skill"
+                            size="sm"
+                            class="delete-btn-border-fix"
+                            :disabled="deleteButtonsDisabled">
+                    <i class="text-warning fas fa-trash" aria-hidden="true"/>
+                  </b-button>
+                </span>
               </b-button-group>
+              <b-tooltip :target="`deleteSkillButton-wrapper_${data.item.skillId}`">{{ deleteButtonsTooltip }}</b-tooltip>
             </div>
           </div>
         </template>
@@ -235,6 +242,10 @@ limitations under the License.
         type: String,
         default: 'skillsTable',
       },
+      disableDeleteButtonsInfo: {
+        type: Object,
+        default: null,
+      },
     },
     components: {
       EditSkillGroup,
@@ -335,6 +346,19 @@ limitations under the License.
       this.disableFirstAndLastButtons();
       this.table.options.pagination.totalRows = this.skills.length;
       this.table.options.busy = false;
+    },
+    computed: {
+      deleteButtonsDisabled() {
+        return this.disableDeleteButtonsInfo
+          && this.disableDeleteButtonsInfo.minNumSkills
+          && this.skills.length < this.disableDeleteButtonsInfo.minNumSkills;
+      },
+      deleteButtonsTooltip() {
+        const isDisabled = this.disableDeleteButtonsInfo
+          && this.disableDeleteButtonsInfo.minNumSkills
+          && this.skills.length < this.disableDeleteButtonsInfo.minNumSkills;
+        return (isDisabled) ? this.disableDeleteButtonsInfo.tooltip : 'Delete Skill';
+      },
     },
     methods: {
       updateColumns(newList) {
@@ -522,7 +546,6 @@ limitations under the License.
 
             this.rebuildDisplayOrder();
             this.disableFirstAndLastButtons();
-            this.$emit('skills-change', skill.skillId);
             this.$emit('skill-removed', skill);
 
             this.successToast('Removed Skill', `Skill '${skill.name}' was removed.`);
@@ -598,5 +621,9 @@ limitations under the License.
 </script>
 
 <style>
-
+.delete-btn-border-fix {
+  border-top-left-radius: 0px !important;;
+  border-bottom-left-radius: 0px !important;;
+  border-left: none !important;
+}
 </style>

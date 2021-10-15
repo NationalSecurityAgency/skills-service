@@ -25,22 +25,14 @@ limitations under the License.
            ok-title="Save"
            @ok="handleSave"
            header-text-variant="light" no-fade>
-<!--    <div>-->
-<!--&lt;!&ndash;      <b-badge variant="success">COMPLIANT</b-badge>&ndash;&gt;-->
-<!--      <i class="fas fa-check-double fa-2x text-success"></i>-->
-<!--      All skills have the same # of points .-->
-<!--      <span class="text-secondary">(Please note that this operation is only allowed if all the skills in the group have same amount of points.)</span>-->
-<!--    </div>-->
-<!--    <hr />-->
-
-    <div v-if="skillsPointsSettingsDoNotMatch">
+    <div v-if="skillsPointsSettingsDoNotMatch" data-cy="syncSkillsPointsSection">
         <div>
           <i class="fas fa-exclamation-circle text-warning"></i> Group's skills points <b>must</b> be the same. Set all skills to:
           <div class="row mt-3">
             <div class="col">
               <div class="form-group mb-1">
                 <label>Increment</label>
-                <b-form-input :id="`type`" type="number" value="10"></b-form-input>
+                <b-form-input type="number" v-model="syncSkillsPoints.pointIncrement" data-cy="pointIncrement"></b-form-input>
               </div>
             </div>
             <div class="col">
@@ -50,7 +42,7 @@ limitations under the License.
                   <div class="input-group-prepend">
                     <div class="input-group-text"><i class="fas fa-times"></i></div>
                   </div>
-                  <div class="form-control font-italic">5</div>
+                  <b-form-input type="number" v-model="syncSkillsPoints.numPerformToCompletion" data-cy="numPerformToCompletion"></b-form-input>
                 </div>
               </div>
             </div>
@@ -61,21 +53,22 @@ limitations under the License.
                   <div class="input-group-prepend">
                     <div class="input-group-text"><i class="fas fa-equals"/></div>
                   </div>
-                  <div class="form-control font-italic" style="background: #eeeeee;">50</div>
+                  <div class="form-control font-italic" style="background: #eeeeee;" data-cy="totalPoints">{{ totalSyncPoints }}</div>
                 </div>
               </div>
             </div>
           </div>
         </div>
         <div class="text-right mt-2">
-          <b-button variant="outline-success"><i class="fas fa-sync"></i> Sync Group's Points</b-button>
+          <b-button variant="outline-success" data-cy="syncBtn" :disabled="totalSyncPoints <= 0"><i class="fas fa-sync"></i> Sync Group's Points</b-button>
         </div>
         <hr />
     </div>
-    <b-form inline>
+    <b-form inline :data-cy="`editRequiredModal-${group.skillId}`">
       <span class="mr-1 text-secondary">Required: </span>
-      <b-form-select size="sm" v-model="numSkillsRequired.selected" :options="numSkillsRequired.options" :disabled="skillsPointsSettingsDoNotMatch"/>
-      <span class="ml-1">out <b-badge>{{ skills.length }}</b-badge> skills</span>
+      <b-form-select size="sm" v-model="numSkillsRequired.selected" :options="numSkillsRequired.options" :disabled="skillsPointsSettingsDoNotMatch"
+                     data-cy="requiredSkillsNumSelect"/>
+      <span class="ml-1">out <b-badge data-cy="numSkillsInGroup">{{ skills.length }}</b-badge> skills</span>
       <div v-b-tooltip.hover.v-info class="ml-1 text-warning"
         title="A Group allows a Skill to be defined by the collection of other Skills within a Project. A Skill Group can require the completion of some or all of the included Skills before the group be achieved.">
         <i class="fas fa-question-circle"></i>
@@ -108,16 +101,25 @@ limitations under the License.
           options: [],
           selected: null,
         },
+        syncSkillsPoints: {
+          numPerformToCompletion: 5,
+          pointIncrement: 10,
+        },
       };
     },
     mounted() {
       this.updateNumSkillsRequired();
+      this.syncSkillsPoints.pointIncrement = this.skills[0].pointIncrement;
+      this.syncSkillsPoints.numPerformToCompletion = this.skills[0].numPerformToCompletion;
     },
     computed: {
       skillsPointsSettingsDoNotMatch() {
         const first = this.skills[0];
         const diffSkill = this.skills.find((skill) => skill.numPerformToCompletion !== first.numPerformToCompletion || skill.pointIncrement !== first.pointIncrement);
         return diffSkill !== undefined && diffSkill !== null;
+      },
+      totalSyncPoints() {
+        return this.syncSkillsPoints.numPerformToCompletion * this.syncSkillsPoints.pointIncrement;
       },
     },
     methods: {
@@ -126,7 +128,7 @@ limitations under the License.
       },
       updateNumSkillsRequired() {
         this.numSkillsRequired.options = Array.from({ length: this.skills.length }, (_, i) => i + 1);
-        this.numSkillsRequired.selected = (this.group.numSkillsRequired === -1) ? this.skills.length : this.group.numSkillsInGroup;
+        this.numSkillsRequired.selected = (this.group.numSkillsRequired === -1) ? this.skills.length : this.group.numSkillsRequired;
       },
       handleSave() {
         const updatedGroup = { ...this.group, numSkillsRequired: this.numSkillsRequired.selected };
