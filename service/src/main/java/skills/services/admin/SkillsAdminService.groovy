@@ -305,6 +305,12 @@ class SkillsAdminService {
         // this MUST happen after the skill was removed as sql relies on the skill to be gone
         userPointsManagement.identifyAndAddLevelAchievements(parentSkill)
 
+        // make sure skills group is still valid
+        if (skillDefinition.groupId) {
+            assert parentSkill.type == SkillDef.ContainerType.SkillsGroup
+            skillsGroupAdminService.validateCanDeleteChildSkill(parentSkill)
+        }
+
         badges?.each {
             badgeAdminService.awardBadgeToUsersMeetingRequirements(it)
         }

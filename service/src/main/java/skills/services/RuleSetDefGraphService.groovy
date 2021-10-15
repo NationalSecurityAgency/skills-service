@@ -42,7 +42,7 @@ class RuleSetDefGraphService {
 
     @Transactional
     SkillDef getParentSkill(SkillDef skillDef) {
-        List<SkillRelDef> parents = skillRelDefRepo.findAllByChildAndType(skillDef, RelationshipType.RuleSetDefinition)
+        List<SkillRelDef> parents = skillRelDefRepo.findAllByChildAndTypeIn(skillDef, [RelationshipType.RuleSetDefinition, RelationshipType.SkillsGroupRequirement])
         // assume that I only have one parent
         SkillDef parent = parents.first().parent
         return parent

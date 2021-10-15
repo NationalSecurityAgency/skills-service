@@ -87,6 +87,7 @@ class SkillsGroupAdminService {
         return skillDefRepo.findChildSkillsByIdAndRelationshipType(skillsGroupIdRef, SkillRelDef.RelationshipType.SkillsGroupRequirement)
     }
 
+    @Profile
     List<SkillDef> loadAndValidateSkillsGroup(SkillRequest skillRequest, SkillDefWithExtra skillDefinition) {
         if (skillDefinition.type != skills.storage.model.SkillDef.ContainerType.valueOf(skillRequest.type)) {
             throw new SkillException("Cannot convert an existing Skill to a Skill Group, or existing Skill Group to Skill.")
@@ -126,5 +127,16 @@ class SkillsGroupAdminService {
             }
         }
         return groupChildSkills
+    }
+
+    @Profile
+    void validateCanDeleteChildSkill(SkillDef parentSkill) {
+        if (parentSkill.enabled) {
+            List<SkillDef> groupChildSkills = getSkillsGroupChildSkills(parentSkill.id)
+            int numChildSkills = groupChildSkills.size()
+            if (numChildSkills < 2) {
+                throw new SkillException("A Skill Group must have at least 2 skills in order to be enabled.")
+            }
+        }
     }
 }

@@ -18,7 +18,6 @@ package skills.intTests
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
-import spock.lang.IgnoreRest
 
 class SkillsGroupSpecs extends DefaultIntSpec {
 
@@ -712,5 +711,32 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         pointAfterFirstChild == 10
         pointAfterSecondChild == 20
         pointAfterNumSkillsRequiredReduced == 10
+    }
+
+    def "once a skills group is live it cannot have less than 2 skills"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def allSkills = SkillsFactory.createSkills(3)
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+
+        def skillsGroup1 = allSkills[0]
+        skillsGroup1.type = 'SkillsGroup'
+        skillsService.createSkill(skillsGroup1)
+        String skillsGroup1Id = skillsGroup1.skillId
+        def group1Children = allSkills[1..2]
+        group1Children.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroup1Id, skill)
+        }
+        skillsGroup1.enabled = 'true'
+        skillsService.updateSkill(skillsGroup1, null)
+
+        when:
+        // delete one of the two skills will cause the group to only have one skill left
+        skillsService.deleteSkill(allSkills[2])
+
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains("A Skill Group must have at least 2 skills in order to be enabled.")
     }
 }
