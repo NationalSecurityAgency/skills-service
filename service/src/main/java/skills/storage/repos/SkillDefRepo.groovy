@@ -112,9 +112,9 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
 
     @Query(value = '''SELECT sum(sdChild.totalPoints) from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
       where srd.parent=sdParent.id and srd.child=sdChild.id and 
-      sdParent.projectId=?1 and sdParent.skillId=?2 and srd.type=?3 and sdChild.version<=?4 ''' )
+      sdParent.projectId=?1 and sdParent.skillId=?2 and srd.type IN ('RuleSetDefinition', 'SkillsGroupRequirement') and sdChild.version<=?3 ''' )
     @Nullable
-    Integer calculateTotalPointsForSkill(String projectId, String skillId, RelationshipType relationshipType, Integer version)
+    Integer calculateTotalPointsForSubject(String projectId, String skillId, Integer version)
 
 
     @Query(value = '''SELECT sum(sdChild.totalPoints) from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild

@@ -578,7 +578,7 @@ class SkillsLoader {
             skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints, false, userId, version)
             totalPoints = skillsRes ? skillsRes.collect({it.totalPoints}).sum() as Integer: 0
         } else {
-            totalPoints = calculateTotalForSkillDef(projDef, subjectDefinition, version)
+            totalPoints = calculateTotalForSubject(projDef, subjectDefinition, version)
         }
 
         Integer points = calculatePoints(projDef, userId, subjectDefinition, version)
@@ -633,8 +633,8 @@ class SkillsLoader {
     }
 
     @Profile
-    private int calculateTotalForSkillDef(ProjDef projDef, SkillDefParent subjectDefinition, int version) {
-        Integer res = skillDefRepo.calculateTotalPointsForSkill(projDef.projectId, subjectDefinition.skillId, SkillRelDef.RelationshipType.RuleSetDefinition, version)
+    private int calculateTotalForSubject(ProjDef projDef, SkillDefParent subjectDefinition, int version) {
+        Integer res = skillDefRepo.calculateTotalPointsForSubject(projDef.projectId, subjectDefinition.skillId, version)
         return res ?: 0
     }
 
@@ -666,7 +666,7 @@ class SkillsLoader {
         List<SkillSummaryParent> skillsRes = []
 
         if (loadSkills) {
-            SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef?.projectId, badgeDefinition.skillId, version, SkillRelDef.RelationshipType.BadgeRequirement)
+            SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef?.projectId, badgeDefinition.skillId, version, [SkillRelDef.RelationshipType.BadgeRequirement])
             skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints, true)?.sort({ it.skill?.toLowerCase() })
         }
 
@@ -710,7 +710,7 @@ class SkillsLoader {
         List<SkillSummaryParent> skillsRes = []
 
         if (loadSkills) {
-            SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, null, badgeDefinition.skillId, version, SkillRelDef.RelationshipType.BadgeRequirement)
+            SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, null, badgeDefinition.skillId, version, [SkillRelDef.RelationshipType.BadgeRequirement])
             skillsRes = createSkillSummaries(null, groupChildrenMeta.childrenWithPoints)?.sort({ it.skill?.toLowerCase() })
             if (skillsRes) {
                 // all the skills are "cross-project" if they don't belong to the project that originated this reqest
@@ -844,7 +844,7 @@ class SkillsLoader {
                         numSkillsRequired: skillDef.numSkillsRequired,
                         totalPoints: skillDef.totalPoints,
                 )
-                SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, skillDef.skillId, version, SkillRelDef.RelationshipType.SkillsGroupRequirement)
+                SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, skillDef.skillId, version, [SkillRelDef.RelationshipType.SkillsGroupRequirement])
                 skillsSummary.children = createSkillSummaries(thisProjDef, groupChildrenMeta.childrenWithPoints, false, userId, version)
                 skillsSummary.points = skillsSummary.children ? skillsSummary.children.collect({it.points}).sum() as Integer: 0
                 skillsSummary.todaysPoints = skillsSummary.children ? skillsSummary.children.collect({it.todaysPoints}).sum() as Integer: 0

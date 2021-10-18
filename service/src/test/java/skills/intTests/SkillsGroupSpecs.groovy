@@ -697,9 +697,9 @@ class SkillsGroupSpecs extends DefaultIntSpec {
 
         String skillsGroupId = skillsGroup.skillId
         skillsService.assignSkillToSkillsGroup(skillsGroupId, children[0])
-        int pointAfterFirstChild = skillsService.getSkill(skillsGroup).totalPoints
-
         skillsService.assignSkillToSkillsGroup(skillsGroupId, children[1])
+        skillsGroup.enabled = 'true'
+        skillsService.updateSkill(skillsGroup, null)
         int pointAfterSecondChild = skillsService.getSkill(skillsGroup).totalPoints
 
         skillsService.assignSkillToSkillsGroup(skillsGroupId, children[2])
@@ -714,7 +714,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
 
         then:
         initialPoints == 0
-        pointAfterFirstChild == 10
         pointAfterSecondChild == 20
         pointAfterThirdChild == 30
         pointAfterOneChildDeleted == 20

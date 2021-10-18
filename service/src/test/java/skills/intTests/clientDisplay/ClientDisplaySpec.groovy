@@ -145,4 +145,90 @@ class ClientDisplaySpec extends DefaultIntSpec {
         summaryOneDisabledBadgeOneEnabledGlobalBadge.badges.enabled
         summaryBothBadgesEnabled.badges.enabled
     }
+
+    def "disabled skills group do not contribute to the summary"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def allSkills = SkillsFactory.createSkills(3)
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+
+        def skillsGroup = allSkills[0]
+        skillsGroup.type = 'SkillsGroup'
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        def group1Children = allSkills[1..2]
+        group1Children.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+
+        when:
+        def projectSummary = skillsService.getSkillSummary('user1', proj.projectId)
+
+        then:
+        projectSummary.skillsLevel == 0
+        projectSummary.totalPoints == 0
+        projectSummary.subjects
+        projectSummary.subjects[0].skillsLevel == 0
+        projectSummary.subjects[0].totalPoints == 0
+    }
+
+    def "enabled skills group do contribute to the summary"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def allSkills = SkillsFactory.createSkills(3)
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+
+        def skillsGroup = allSkills[0]
+        skillsGroup.type = 'SkillsGroup'
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        def group1Children = allSkills[1..2]
+        group1Children.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+        skillsGroup.enabled = 'true'
+        skillsService.updateSkill(skillsGroup, null)
+
+        when:
+        def projectSummary = skillsService.getSkillSummary('user1', proj.projectId)
+
+        then:
+        projectSummary.skillsLevel == 0
+        projectSummary.totalPoints == 20
+        projectSummary.subjects
+        projectSummary.subjects[0].skillsLevel == 0
+        projectSummary.subjects[0].totalPoints == 20
+    }
+
+    def "enabled skills group calculate totalPoints based on numSkillsRequired"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def allSkills = SkillsFactory.createSkills(3)
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+
+        def skillsGroup = allSkills[0]
+        skillsGroup.type = 'SkillsGroup'
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        def group1Children = allSkills[1..2]
+        group1Children.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+        skillsGroup.numSkillsRequired = 1
+        skillsGroup.enabled = 'true'
+        skillsService.updateSkill(skillsGroup, null)
+
+        when:
+        def projectSummary = skillsService.getSkillSummary('user1', proj.projectId)
+
+        then:
+        projectSummary.skillsLevel == 0
+        projectSummary.totalPoints == 10
+        projectSummary.subjects
+        projectSummary.subjects[0].skillsLevel == 0
+        projectSummary.subjects[0].totalPoints == 10
+    }
 }

@@ -60,14 +60,16 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         when:
         def summary = skillsService.getSkillSummary("user1", proj1.projectId, proj1_subj.subjectId)
         then:
+        summary.skillsLevel == 0
         summary.skills.size() == 4
-        summary.skills[0..2].every { it.type == 'Skill' && it.maxOccurrencesWithinIncrementInterval == 1}
+        summary.skills[0..2].every { it.type == 'Skill' && it.maxOccurrencesWithinIncrementInterval == 1 && it.totalPoints == 10 }
         summary.skills[3].type == 'SkillsGroup'
         summary.skills[3].enabled == 'true'
         summary.skills[3].numSkillsRequired == 2
+        summary.skills[3].totalPoints == 20  // 2 of 3 skills required, so group totalPoints is 20
         summary.skills[3].children
         summary.skills[3].children.size() == 3
-        summary.skills[3].children.every { it.type == 'Skill' }
+        summary.skills[3].children.every { it.type == 'Skill' && it.totalPoints == 10 }
 
         summary.description == "This is a description"
         summary.helpUrl == "http://foo.org"

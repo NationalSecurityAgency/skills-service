@@ -152,7 +152,7 @@ class SkillsAdminService {
             if (isSkillsGroup) {
                 // need to update total points for the group
                 List<SkillDef> groupChildSkills = skillsGroupAdminService.validateSkillsGroupAndReturnChildren(skillRequest, skillDefinition)
-                totalPointsRequested = getGroupTotalPoints(groupChildSkills, skillRequest.numSkillsRequired)
+                totalPointsRequested = Boolean.valueOf(skillRequest.enabled) ? skillsGroupAdminService.getGroupTotalPoints(groupChildSkills, skillRequest.numSkillsRequired) : 0
             }
             shouldRebuildScores = skillDefinition.totalPoints != totalPointsRequested
             occurrencesDelta = skillRequest.numPerformToCompletion - currentOccurrences
@@ -213,13 +213,9 @@ class SkillsAdminService {
         }
 
         if (isSkillsGroupChild) {
-            // need to update total points for parent skill group
-            SkillDefWithExtra skillsGroupSkillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(skillRequest.projectId, groupId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
-            List<SkillDef> groupChildSkills = skillsGroupAdminService.validateSkillsGroupAndReturnChildren(skillsGroupSkillDef.numSkillsRequired, Boolean.valueOf(skillsGroupSkillDef.enabled), skillsGroupSkillDef.id)
-            skillsGroupSkillDef.totalPoints = getGroupTotalPoints(groupChildSkills, skillsGroupSkillDef.numSkillsRequired)
-            DataIntegrityExceptionHandlers.skillDataIntegrityViolationExceptionHandler.handle(skillRequest.projectId, skillRequest.skillId) {
-                skillDefWithExtraRepo.save(skillsGroupSkillDef)
-            }
+            // need to validate skills group
+            SkillDefWithExtra skillsGroupSkillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, groupId, SkillDef.ContainerType.SkillsGroup)
+            skillsGroupAdminService.validateSkillsGroupAndReturnChildren(skillsGroupSkillDef.numSkillsRequired, Boolean.valueOf(skillsGroupSkillDef.enabled), skillsGroupSkillDef.id)
         }
 
         if (shouldRebuildScores) {
@@ -263,21 +259,6 @@ class SkillsAdminService {
         log.debug("Saved [{}]", savedSkill)
     }
 
-    private int getGroupTotalPoints(List<SkillDef> groupChildSkills, int numSkillsRequired) {
-        int totalPoints = 0
-        if (groupChildSkills) {
-            numSkillsRequired = numSkillsRequired == -1 ? groupChildSkills.size() : numSkillsRequired
-            if (numSkillsRequired == groupChildSkills.size()) {
-                // all skills are required, but can have different totalPoints so add them all up
-                totalPoints = groupChildSkills.collect { it.totalPoints }.sum()
-            } else {
-                // only a subset is required; validation already made sure that all have the same totalPoints so grab first value
-                totalPoints = numSkillsRequired * groupChildSkills.first().totalPoints
-            }
-        }
-        return totalPoints
-    }
-
     @Transactional
     void deleteSkill(String projectId, String subjectId, String skillId) {
         log.debug("Deleting skill with project id [{}] and subject id [{}] and skill id [{}]", projectId, subjectId, skillId)
@@ -312,7 +293,7 @@ class SkillsAdminService {
             if (children.size() < parentSkill.numSkillsRequired) {
                 parentSkill.numSkillsRequired = children.size()
             }
-            parentSkill.totalPoints = getGroupTotalPoints(children, parentSkill.numSkillsRequired)
+            parentSkill.totalPoints = Boolean.valueOf(parentSkill.enabled) ? skillsGroupAdminService.getGroupTotalPoints(children, parentSkill.numSkillsRequired) : 0
             DataIntegrityExceptionHandlers.skillDataIntegrityViolationExceptionHandler.handle(projectId, skillId) {
                 skillDefWithExtraRepo.save(parentSkill)
             }
