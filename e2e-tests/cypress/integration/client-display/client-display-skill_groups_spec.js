@@ -463,25 +463,73 @@ describe('Client Display Skills Groups Tests', () => {
         cy.get('[data-cy=noDataYet]').should('be.visible').contains('No results');
     })
 
-    it('description ', () => {
+    it('description are displayed', () => {
         cy.createSkillsGroup(1, 1, 1);
-        cy.addSkillToGroup(1, 1, 1, 1, { name: 'For SkIll1 Searching' });
-        cy.addSkillToGroup(1, 1, 1, 2, { name: 'For skill1 SkIll2  Searching' });
-        cy.createSkillsGroup(1, 1, 1, { enabled: true, numSkillsRequired: 1, name: 'gRouP1' });
+        cy.addSkillToGroup(1, 1, 1, 1, { description: 'Skill 1 Desc' });
+        cy.addSkillToGroup(1, 1, 1, 2, { description: 'Skill 2 Desc' });
+        cy.createSkillsGroup(1, 1, 1, { enabled: true, numSkillsRequired: 1, description: 'This is where cool description' });
 
         cy.createSkillsGroup(1, 1, 2);
-        cy.addSkillToGroup(1, 1, 2, 3, { name: 'For skill1 SkIll2 skill3  Searching' });
-        cy.addSkillToGroup(1, 1, 2, 4, { name: 'For skill1 SkIll2 skill3 skill4  Searching' });
-        cy.addSkillToGroup(1, 1, 2, 5, { name: 'For skill1 SkIll2 skill3 skill4 skill5  Searching' });
-        cy.createSkillsGroup(1, 1, 2, { enabled: true, name: 'gRouP1 GrOuP2' });
+        cy.addSkillToGroup(1, 1, 2, 3, { description: 'Skill 3 Desc'  });
+        cy.addSkillToGroup(1, 1, 2, 4, { description: 'Skill 4 Desc'  });
+        cy.addSkillToGroup(1, 1, 2, 5, { description: 'Skill 5 Desc'  });
+        cy.createSkillsGroup(1, 1, 2, { enabled: true, description: 'Some other cool info'  });
 
         cy.createSkillsGroup(1, 1, 3);
-        cy.addSkillToGroup(1, 1, 3, 6, { name: 'For skill1 SkIll2 skill3 skill4 skill5 skill6 skill7  Searching' });
-        cy.addSkillToGroup(1, 1, 3, 7, { name: 'For skill1 SkIll2 skill3 skill4 skill5 skill6 skill7 skill8 Searching' });
-        cy.createSkillsGroup(1, 1, 3, { enabled: true, name: 'gRouP1 GrOuP2 group3' });
+        cy.addSkillToGroup(1, 1, 3, 6, { description: 'Skill 6 Desc'  });
+        cy.addSkillToGroup(1, 1, 3, 7, { description: 'Skill 7 Desc'  });
+        cy.createSkillsGroup(1, 1, 3, { enabled: true, description: '3rd group is OK'  });
 
         cy.cdVisit('/');
         cy.cdClickSubj(0);
+
+        cy.get('[data-cy=toggleSkillDetails]').click()
+        cy.get('[data-cy="skillDescription-group1"]').contains('This is where cool description');
+        cy.get('[data-cy="skillDescription-group2"]').contains('Some other cool info');
+        cy.get('[data-cy="skillDescription-group3"]').contains('3rd group is OK');
+        cy.get('[data-cy="skillDescription-skill1"]').contains('Skill 1 Desc')
+        cy.get('[data-cy="skillDescription-skill2"]').contains('Skill 2 Desc')
+        cy.get('[data-cy="skillDescription-skill3"]').contains('Skill 3 Desc')
+        cy.get('[data-cy="skillDescription-skill4"]').contains('Skill 4 Desc')
+        cy.get('[data-cy="skillDescription-skill5"]').contains('Skill 5 Desc')
+        cy.get('[data-cy="skillDescription-skill6"]').contains('Skill 6 Desc')
+        cy.get('[data-cy="skillDescription-skill7"]').contains('Skill 7 Desc')
+
+        // description persist after filter
+        cy.get('[data-cy="skillsSearchInput"]').type('skill 2');
+        cy.get('[data-cy="skillDescription-group1"]').contains('This is where cool description');
+        cy.get('[data-cy="skillDescription-skill1"]').contains('Skill 1 Desc')
+        cy.get('[data-cy="skillDescription-skill2"]').contains('Skill 2 Desc')
+    })
+
+    it('skill attributes are loaded when expanded', () => {
+        cy.createSkillsGroup(1, 1, 1);
+        cy.addSkillToGroup(1, 1, 1, 1, { pointIncrement: 10, numPerformToCompletion: 5, numMaxOccurrencesIncrementInterval: 3 });
+        cy.addSkillToGroup(1, 1, 1, 2, { pointIncrement: 20, numPerformToCompletion: 3 });
+        cy.createSkillsGroup(1, 1, 1, { enabled: true, description: 'This is where cool description' });
+
+        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday');
+        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now');
+
+        cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'yesterday');
+        cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
+
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+
+        cy.get('[data-cy=toggleSkillDetails]').click()
+
+        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').contains('20');
+        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="pointsAchievedTodayCard"] [data-cy="progressInfoCardTitle"]').contains('10');
+        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="pointsPerOccurrenceCard"] [data-cy="progressInfoCardTitle"]').contains('10');
+        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="timeWindowPts"] [data-cy="progressInfoCardTitle"]').contains('30');
+
+        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').contains('40');
+        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="pointsAchievedTodayCard"] [data-cy="progressInfoCardTitle"]').contains('20');
+        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="pointsPerOccurrenceCard"] [data-cy="progressInfoCardTitle"]').contains('20');
+        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="timeWindowPts"] [data-cy="progressInfoCardTitle"]').contains('20');
     })
 })
+
+
 

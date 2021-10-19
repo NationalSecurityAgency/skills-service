@@ -93,6 +93,27 @@ limitations under the License.
   import SkillEnricherUtil from '../../utils/SkillEnricherUtil';
   import StringHighlighter from '@/common-components/utilities/StringHighlighter';
 
+  const updateSkillForLoadedDescription = (skills, desc) => {
+    let foundSkill = null;
+    for (let i = 0; i < skills.length; i += 1) {
+      const skill = skills[i];
+      if (desc.skillId === skill.skillId) {
+        foundSkill = skill;
+      } else if (skill.isSkillsGroupType) {
+        foundSkill = skill.children.find((child) => desc.skillId === child.skillId);
+      }
+      if (foundSkill) {
+        break;
+      }
+    }
+
+    if (foundSkill) {
+      foundSkill.description = desc;
+      foundSkill.achievedOn = desc.achievedOn;
+      foundSkill.selfReporting = desc.selfReporting;
+    }
+  };
+
   export default {
     components: {
       SkillsFilter,
@@ -233,12 +254,8 @@ limitations under the License.
             .then((res) => {
               this.descriptions = res;
               res.forEach((desc) => {
-                const foundSkill = this.searchBySkillId(desc.skillId);
-                if (foundSkill) {
-                  foundSkill.description = desc;
-                  foundSkill.achievedOn = desc.achievedOn;
-                  foundSkill.selfReporting = desc.selfReporting;
-                }
+                updateSkillForLoadedDescription(this.skillsInternal, desc);
+                updateSkillForLoadedDescription(this.skillsInternalOrig, desc);
               });
               this.descriptionsLoaded = true;
             })
@@ -246,21 +263,6 @@ limitations under the License.
               this.loading = false;
             });
         }
-      },
-      searchBySkillId(skillId) {
-        let res = null;
-        for (let i = 0; i < this.skillsInternal.length; i += 1) {
-          const skill = this.skillsInternal[i];
-          if (skillId === skill.skillId) {
-            res = skill;
-          } else if (skill.isSkillsGroupType) {
-            res = skill.children.find((child) => skillId === child.skillId);
-          }
-          if (res) {
-            break;
-          }
-        }
-        return res;
       },
       onPointsEarned(pts, skillId) {
         SkillEnricherUtil.updateSkillPtsInList(this.skillsInternalOrig, pts, skillId);

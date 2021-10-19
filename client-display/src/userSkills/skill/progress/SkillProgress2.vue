@@ -86,7 +86,7 @@ limitations under the License.
                       :class="{ 'skills-navigable-item' : allowDrillDown }" data-cy="skillProgressBar"/>
       </div>
     </div>
-    <div v-if="showDescription">
+    <div v-if="showDescription" :data-cy="`skillDescription-${skill.skillId}`">
       <div v-if="skill.type === 'SkillsGroup'">
         <p class="skills-text-description text-primary mt-3" style="font-size: 0.9rem;">
           <markdown-text v-if="skill.description && skill.description.description" :text="skill.description.description"/>
