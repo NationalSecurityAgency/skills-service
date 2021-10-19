@@ -178,13 +178,14 @@ Cypress.Commands.add("createSkill", (projNum = 1, subjNum = 1, skillNum = 1, ove
 Cypress.Commands.add("createSkillsGroup", (projNum = 1, subjNum = 1, groupNum = 1, overrideProps = {}) => {
     const skillId = `group${groupNum}${subjNum > 1 ? `Subj${subjNum}` : ''}`;
     const skillName = `Awesome Group ${groupNum}${groupNum > 1 ? ` Subj${subjNum}` : ''}`;
-    cy.request('POST', `/admin/projects/proj${projNum}/subjects/subj${subjNum}/skills/${skillId}`, Object.assign({
+    const payload = Object.assign({
         projectId: `proj${projNum}`,
         subjectId: `subj${subjNum}`,
         skillId: skillId,
         name: skillName,
         type: 'SkillsGroup',
-    }, overrideProps));
+    }, overrideProps);
+    cy.request('POST', `/admin/projects/proj${projNum}/subjects/subj${subjNum}/skills/${skillId}`, payload);
 });
 
 Cypress.Commands.add("addSkillToGroup", (projNum = 1, subjNum = 1, groupNum = 1, skillNum = 1, overrideProps = {}) => {
@@ -245,6 +246,9 @@ Cypress.Commands.add("doReportSkill", ({project = 1, skill = 1, subjNum = 1, use
     }
     if (date === 'yesterday') {
         m = moment.utc().subtract(1, 'day')
+    }
+    if (date === '2 days ago') {
+        m = moment.utc().subtract(2, 'day')
     }
     let proj = '';
     if (!isNaN(parseFloat(project))) {

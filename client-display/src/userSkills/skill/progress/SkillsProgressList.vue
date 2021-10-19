@@ -58,6 +58,7 @@ limitations under the License.
                     <div class="p-3 pt-4">
                       <skill-progress2
                           :id="`skill-${skill.skillId}`"
+                          :ref="`skillProgress${skill.skillId}`"
                           :skill="skill"
                           :subjectId="subject.subjectId"
                           :badgeId="subject.badgeId"
@@ -316,8 +317,20 @@ limitations under the License.
           });
         }
 
-        if (this.filterId && this.filterId.length > 0) {
-          resultSkills = resultSkills.filter((item) => item.meta[this.filterId] === true);
+        if (resultSkills && this.filterId && this.filterId.length > 0) {
+          const filteredRes = [];
+          resultSkills.forEach((item) => {
+            if (item.isSkillsGroupType) {
+              const copyItem = ({ ...item });
+              copyItem.children = copyItem.children.filter((childItem) => childItem.meta[this.filterId] === true);
+              if (copyItem.children && copyItem.children.length > 0) {
+                filteredRes.push(copyItem);
+              }
+            } else if (item.meta[this.filterId] === true) {
+              filteredRes.push(item);
+            }
+          });
+          resultSkills = filteredRes;
         }
         this.skillsInternal = resultSkills;
       },

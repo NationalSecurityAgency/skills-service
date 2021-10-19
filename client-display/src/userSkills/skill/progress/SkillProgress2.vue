@@ -55,11 +55,12 @@ limitations under the License.
 
             <span v-if="skill.skillHtml" v-html="skill.skillHtml"></span>
             <span v-else>{{ skill.skill }}</span>
-            <div v-if="skill.isSkillsGroupType && skill.numSkillsRequired < skill.children.length"
+            <div v-if="skill.isSkillsGroupType && skill.numSkillsRequired > 0 && skill.numSkillsRequired < skill.children.length"
                  v-b-tooltip.hover.v-info
                  title="A Group allows a Skill to be defined by the collection of other Skills within a Project. A Skill Group can require the completion of some or all of the included Skills before the group be achieved."
                  class="ml-2 d-inline border rounded p-1 text-primary bg-light border-success"
-                 style="font-size: 0.9rem">
+                 style="font-size: 0.9rem"
+                 data-cy="groupSkillsRequiredBadge">
               <span class="">Requires </span> <b-badge variant="success">{{ skill.numSkillsRequired }}</b-badge> <span class="font-italic">out of</span> <b-badge variant="secondary">{{ skill.children.length }}</b-badge> skills
             </div>
 <!--            <i v-if="skill.isSkillsGroupType"-->
@@ -201,9 +202,8 @@ limitations under the License.
       };
     },
     mounted() {
-      if (this.skill.isSkillsGroupType && this.skill?.children && this.skill?.children.length > 0) {
-        this.childSkillsInternal = this.skill.children.map((item) => ({ ...item, childSkill: true }));
-      }
+      this.initChildSkills();
+      this.highlightChildSkillName();
     },
     computed: {
       locked() {
@@ -217,11 +217,17 @@ limitations under the License.
       },
     },
     watch: {
-      childSkillHighlightString() {
+      'skill.children': function updateChildSkills() {
+        this.initChildSkills();
         this.highlightChildSkillName();
       },
     },
     methods: {
+      initChildSkills() {
+        if (this.skill.isSkillsGroupType && this.skill?.children && this.skill?.children.length > 0) {
+          this.childSkillsInternal = this.skill.children.map((item) => ({ ...item, childSkill: true }));
+        }
+      },
       highlightChildSkillName() {
         if (!this.childSkillHighlightString || this.childSkillHighlightString.trim().length === 0) {
           this.childSkillsInternal = this.childSkillsInternal.map((item) => ({ ...item, skillHtml: null }));
