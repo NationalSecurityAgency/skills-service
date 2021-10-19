@@ -34,6 +34,7 @@ import skills.services.BadgeUtils
 import skills.services.DependencyValidator
 import skills.services.GlobalBadgesService
 import skills.services.LevelDefinitionStorageService
+import skills.services.admin.SkillsGroupAdminService
 import skills.services.settings.SettingsService
 import skills.settings.CommonSettings
 import skills.skillLoading.model.*
@@ -120,6 +121,9 @@ class SkillsLoader {
 
     @Autowired
     UserAttrsRepo userAttrsRepo
+
+    @Autowired
+    SkillsGroupAdminService skillsGroupAdminService
 
     private static String PROP_HELP_URL_ROOT = CommonSettings.HELP_URL_ROOT
 
@@ -845,9 +849,10 @@ class SkillsLoader {
                         totalPoints: skillDef.totalPoints,
                 )
                 SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, skillDef.skillId, version, [SkillRelDef.RelationshipType.SkillsGroupRequirement])
+                Integer numSkillsRequired = skillsGroupAdminService.getActualNumSkillsRequred(skillDef.numSkillsRequired, skillDef.id)
                 skillsSummary.children = createSkillSummaries(thisProjDef, groupChildrenMeta.childrenWithPoints, false, userId, version)
-                skillsSummary.points = skillsSummary.children ? skillsSummary.children.collect({it.points}).sum() as Integer: 0
-                skillsSummary.todaysPoints = skillsSummary.children ? skillsSummary.children.collect({it.todaysPoints}).sum() as Integer: 0
+                skillsSummary.points = skillsSummary.children ? skillsSummary.children.collect({it.points}).sort().takeRight(numSkillsRequired).sum() as Integer: 0
+                skillsSummary.todaysPoints = skillsSummary.children ? skillsSummary.children.collect({it.todaysPoints}).sort().takeRight(numSkillsRequired).sum() as Integer: 0
                 skillsRes << skillsSummary
             } else if (skillDef.type == SkillDef.ContainerType.Skill) {
                 skillsRes << new SkillSummary(

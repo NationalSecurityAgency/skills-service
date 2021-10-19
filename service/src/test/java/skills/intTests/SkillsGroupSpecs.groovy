@@ -15,11 +15,17 @@
  */
 package skills.intTests
 
+import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import skills.storage.model.UserAchievement
+import skills.storage.repos.UserAchievedLevelRepo
 
 class SkillsGroupSpecs extends DefaultIntSpec {
+
+    @Autowired
+    UserAchievedLevelRepo achievedRepo
 
     void "create and get initial SkillsGroup" () {
         def proj = SkillsFactory.createProject()
@@ -777,4 +783,39 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         numSkillsRequiredAfterDelete == 2
     }
 
+    def "achieve group skill"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def allSkills = SkillsFactory.createSkills(3)
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+
+        def skillsGroup = allSkills[0]
+        skillsGroup.type = 'SkillsGroup'
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        def groupChildren = allSkills[1..2]
+        groupChildren.each { skill ->
+            skill.pointIncrement = 100
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+        skillsGroup.numSkillsRequired = 1
+        skillsGroup.enabled = 'true'
+        skillsService.updateSkill(skillsGroup, null)
+
+        when:
+        String userId = 'user1'
+        String projectId = proj.projectId
+        String skillId = groupChildren.first().skillId
+        String subjectId = subj.subjectId
+        def res = skillsService.addSkill([projectId: projectId, skillId: skillId], userId, new Date())
+        assert res.body.skillApplied
+        assert res.body.completed.find { it.id == skillId }
+        def subjectSummary = skillsService.getSkillSummary(userId, projectId, subjectId)
+        List<UserAchievement> subjectAchievements = achievedRepo.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, skillsGroupId)
+
+        then:
+        subjectAchievements
+        subjectSummary
+    }
 }

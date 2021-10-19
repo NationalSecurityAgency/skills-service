@@ -81,7 +81,7 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
           ups.userId=:userId and
           sdParent.skillId=:skillId and
           sdChild.version<=:version and
-          srd.type='RuleSetDefinition' and
+          srd.type IN ('RuleSetDefinition', 'SkillsGroupRequirement') and
           (CAST(ups.performedOn as date)=:day OR CAST(:day as date) is null)''')
     Integer calculateUserPointsByProjectIdAndUserIdAndAndDayAndVersion(@Param('projectId') String projectId,
                                                                        @Param('userId') String userId,
@@ -99,9 +99,17 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
           srd.child=sdChild.id and
           sdChild.id = ups.skillRefId and 
           ups.userId=:userId and
-          (sdParent.skillId=:skillId OR :skillId is null) and
+          (sdParent.skillId=:skillId 
+            OR sdParent.skillId in (select sdGroup.skillId
+                                    from SkillDef sdGroup,
+                                         SkillDef sdSubject,
+                                         SkillRelDef srd
+                                     where sdGroup.id = srd.child
+                                       and srd.parent = sdSubject.id
+                                       and sdSubject.skillId=:skillId)
+            OR :skillId is null) and
           sdChild.version<=:version and
-          srd.type='RuleSetDefinition'
+          srd.type IN ('RuleSetDefinition', 'SkillsGroupRequirement')
        group by CAST(ups.performedOn as date)''')
     List<DayCountItem> calculatePointHistoryByProjectIdAndUserIdAndVersion(@Param('projectId') String projectId,
                                                                            @Param('userId') String userId,

@@ -22,7 +22,7 @@ import groovy.transform.CompileStatic
 @CompileStatic
 class CompletionItem {
     static enum CompletionItemType {
-        Overall, Subject, Skill, Badge, GlobalBadge
+        Overall, Subject, Skill, Badge, GlobalBadge, SkillsGroup
     };
     CompletionItemType type
     Integer level // optional

@@ -74,6 +74,9 @@ class SkillEventsService {
     AchievedGlobalBadgeHandler achievedGlobalBadgeHandler
 
     @Autowired
+    AchievedSkillsGroupHandler achievedSkillsGroupHandler
+
+    @Autowired
     LockingService lockingService
 
     @Autowired
@@ -246,6 +249,7 @@ class SkillEventsService {
         if (requestedSkillCompleted) {
             documentSkillAchieved(userId, numExistingSkills, skillDefinition, res, skillDate)
             achievedBadgeHandler.checkForBadges(res, userId, skillDefinition, skillDate)
+            achievedSkillsGroupHandler.checkForSkillsGroup(res, userId, skillDefinition, skillDate)
         }
 
         // if requestedSkillCompleted OR overall level achieved, then need to check for global badges

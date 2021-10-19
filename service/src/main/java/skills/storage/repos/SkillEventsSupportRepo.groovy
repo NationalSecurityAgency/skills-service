@@ -98,6 +98,8 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
         Date getStartDate()
         Date getEndDate()
         String getEnabled()
+        String getGroupId()
+        int getNumSkillsRequired()
         SkillDef.SelfReportingType getSelfReportingType()
     }
 
@@ -112,6 +114,8 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
         s.totalPoints as totalPoints,
         s.type as type,
         s.enabled as enabled,
+        s.groupId as groupId,
+        s.numSkillsRequired as numSkillsRequired,
         s.selfReportingType as selfReportingType
         from SkillDef s where s.projectId = ?1 and s.skillId=?2 and s.type = ?3''')
     @Nullable

@@ -88,6 +88,15 @@ class SkillsGroupAdminService {
     }
 
     @Profile
+    Integer getActualNumSkillsRequred(Integer storedNumSkillsRequired, Integer skillsGroupIdRef) {
+        if (storedNumSkillsRequired == -1) {
+            return skillDefRepo.countChildSkillsByIdAndRelationshipType(skillsGroupIdRef, SkillRelDef.RelationshipType.SkillsGroupRequirement)
+        } else {
+            return storedNumSkillsRequired
+        }
+    }
+
+    @Profile
     List<SkillDef> validateSkillsGroupAndReturnChildren(SkillRequest skillRequest, SkillDefWithExtra skillDefinition) {
         if (skillDefinition.type != skills.storage.model.SkillDef.ContainerType.valueOf(skillRequest.type)) {
             throw new SkillException("Cannot convert an existing Skill to a Skill Group, or existing Skill Group to Skill.")
