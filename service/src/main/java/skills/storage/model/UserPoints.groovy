@@ -56,4 +56,8 @@ class UserPoints {
     @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
     Date updated
+
+    // set to `false` when these points do not contribute to the parent skills group because
+    // the group does not require all skills, and there are enough other skills that have higher points
+    String contributesToSkillsGroup
 }

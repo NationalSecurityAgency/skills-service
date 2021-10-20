@@ -20,8 +20,10 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import skills.services.admin.SkillsGroupAdminService
 import skills.services.events.SkillDate
 import skills.storage.model.LevelDefInterface
+import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 import skills.storage.repos.SkillEventsSupportRepo
 
@@ -36,9 +38,28 @@ class PointsAndAchievementsDataLoader {
     @Autowired
     LoadedDataValidator validator
 
+    @Autowired
+    SkillsGroupAdminService skillsGroupAdminService
+
     @Profile
     LoadedData loadData(String projectId, String userId, SkillDate incomingSkillDate, SkillEventsSupportRepo.SkillDefMin skillDef){
         List<SkillEventsSupportRepo.TinySkillDef> parentDefs = loadParents(skillDef)
+
+        // handle skills group with less than all skills required
+        Integer skillsGroupDefId
+        Integer numChildSkillsRequired
+        List<SkillEventsSupportRepo.TinyUserPoints> skillsGroupChildUserPoints
+        if (skillDef.groupId) {
+            // skills group child, check parent and if numSkillsRequired then need to load siblings to determine which contribute to points
+            assert parentDefs && parentDefs.size() == 1 && parentDefs.first().type == SkillDef.ContainerType.SkillsGroup && parentDefs.first().skillId == skillDef.groupId
+            if (parentDefs.first().numSkillsRequired > 0 && Boolean.valueOf(parentDefs.first().enabled)) {
+                skillsGroupDefId = parentDefs.first().id
+                numChildSkillsRequired = parentDefs.first().numSkillsRequired
+            }
+        } else if (skillDef.type == SkillDef.ContainerType.SkillsGroup && skillDef.numSkillsRequired > 0 && Boolean.valueOf(skillDef.enabled)) {
+            skillsGroupDefId = skillDef.id
+            numChildSkillsRequired = skillDef.numSkillsRequired
+        }
 
         List<Integer> skillRefIds = [skillDef.id]
         skillRefIds.addAll(parentDefs.collect { it.id })
@@ -51,7 +72,8 @@ class PointsAndAchievementsDataLoader {
         List<SkillEventsSupportRepo.TinyUserAchievement> tinyUserAchievements = loadAchievements(userId, projectId, skillRefIds)
 
         LoadedData res = new LoadedData(userId: userId, projectId: projectId, parentDefs: parentDefs, tinyUserPoints: tinyUserPoints,
-                levels: tinyLevels, tinyUserAchievements: tinyUserAchievements, tinyProjectDef:tinyProjectDef)
+                levels: tinyLevels, tinyUserAchievements: tinyUserAchievements, tinyProjectDef:tinyProjectDef, skillsRefId: skillDef.id,
+                numChildSkillsRequired: numChildSkillsRequired, skillsGroupDefId: skillsGroupDefId)
         validator.validate(res)
 
         return res
@@ -79,6 +101,6 @@ class PointsAndAchievementsDataLoader {
 
     @Profile
     private List<SkillEventsSupportRepo.TinySkillDef> loadParents(SkillEventsSupportRepo.SkillDefMin skillDef) {
-        skillEventsSupportRepo.findTinySkillDefsParentsByChildIdAndType(skillDef.id, SkillRelDef.RelationshipType.RuleSetDefinition)
+        skillEventsSupportRepo.findTinySkillDefsParentsByChildIdAndTypeIn(skillDef.id, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
     }
 }

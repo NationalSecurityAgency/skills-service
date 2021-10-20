@@ -1413,6 +1413,9 @@
             <!-- optional, only used for skill groups -->
             <column name="group_id" type="varchar(255)"/>
         </addColumn>
+        <addColumn tableName="user_points">
+            <column name="contributes_to_skills_group" type="varchar(255)"/>
+        </addColumn>
     </changeSet>
 
 </databaseChangeLog>

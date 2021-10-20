@@ -19,6 +19,7 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import skills.controller.exceptions.SkillException
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillEventsSupportRepo
 
@@ -37,6 +38,10 @@ class LoadedDataValidator {
             if (parentSkillDef.type == SkillDef.ContainerType.Subject) {
                 insufficientPointsValidator.validateSubjectPoints(parentSkillDef.totalPoints, loadedData.projectId, loadedData.userId)
             }
+        }
+
+        if (loadedData.numChildSkillsRequired != null && loadedData.numChildSkillsRequired <= 0) {
+            throw new SkillException("Unexpected number of required skills group child skills [${loadedData.numChildSkillsRequired}]")
         }
     }
 }

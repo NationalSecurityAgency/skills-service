@@ -51,8 +51,8 @@ class PointsAndAchievementsBuilder {
     List<CompletionItem> completionItems = []
 
     @Profile
-    PointsAndAchievementsResult  build() {
-        dataToSave = new DataToSave(pointIncrement: pointIncrement)
+    PointsAndAchievementsResult build() {
+        dataToSave = new DataToSave(pointIncrement: pointIncrement, numChildSkillsRequired: loadedData.numChildSkillsRequired, skillsGroupDefId: loadedData.skillsGroupDefId, userId: userId)
 
         // any parent that exist must get points added
         dataToSave.toAddPointsTo.addAll(loadedData.tinyUserPoints)

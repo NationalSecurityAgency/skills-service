@@ -45,6 +45,7 @@ class PointsAndAchievementsSaver {
         saveNewPoints(dataToSave)
         addToExistingPoints(dataToSave)
         saveAchievements(dataToSave)
+        handleSkillsGroupUserPoints(dataToSave)
     }
 
     @Profile
@@ -67,5 +68,28 @@ class PointsAndAchievementsSaver {
                 log.info("Failed ---> {}", it)
             }
         }
+    }
+
+    @Profile
+    private void handleSkillsGroupUserPoints(DataToSave dataToSave) {
+        Integer skillsGroupDefId = dataToSave.skillsGroupDefId
+        String userId = dataToSave.userId
+        Integer numChildSkillsRequired = dataToSave.numChildSkillsRequired
+
+        if (skillsGroupDefId) {
+            // load all group's child skills
+            List<SkillEventsSupportRepo.TinyUserPoints> skillsGroupChildUserPoints = loadChildPoints(userId, skillsGroupDefId)
+            skillsGroupChildUserPoints.sort{it.points}.dropRight(numChildSkillsRequired).each {
+                skillEventsSupportRepo.updateContributingFlag(it.id, Boolean.FALSE.toString())
+            }
+            skillsGroupChildUserPoints.sort{it.points}.takeRight(numChildSkillsRequired).each {
+                skillEventsSupportRepo.updateContributingFlag(it.id, Boolean.TRUE.toString())
+            }
+        }
+    }
+
+    @Profile
+    private List<SkillEventsSupportRepo.TinyUserPoints> loadChildPoints(String userId, Integer parentId) {
+        return skillEventsSupportRepo.findTotalTinyUserPointsByUserIdAndParentId(userId, parentId)
     }
 }

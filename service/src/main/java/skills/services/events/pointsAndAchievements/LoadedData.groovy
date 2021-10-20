@@ -31,6 +31,11 @@ class LoadedData {
     List<SkillEventsSupportRepo.TinyUserAchievement> tinyUserAchievements
     SkillEventsSupportRepo.TinyProjectDef tinyProjectDef
 
+    List<SkillEventsSupportRepo.TinyUserPoints> skillsGroupChildUserPoints
+    Integer numChildSkillsRequired
+    Integer skillsGroupDefId
+    Integer skillsRefId
+
     /**
      * @param skillRefId null will retrieve OVERALL points (an not for a specific skill);
      * the word 'Total' in the name refers to total points for all days which can either be for a specific skill or OVERALL

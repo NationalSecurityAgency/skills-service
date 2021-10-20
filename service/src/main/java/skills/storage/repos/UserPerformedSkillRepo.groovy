@@ -70,26 +70,6 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
     List<SkillDef> findPerformedParentSkills(String userId, String projectId, String skillId)
 
     @Nullable
-    @Query('''select SUM(sdChild.pointIncrement)
-    from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild, UserPerformedSkill ups
-      where
-          srd.parent=sdParent.id and 
-          srd.child=sdChild.id and
-          sdChild.id = ups.skillRefId and 
-          sdChild.projectId=:projectId and
-          sdParent.projectId=:projectId and 
-          ups.userId=:userId and
-          sdParent.skillId=:skillId and
-          sdChild.version<=:version and
-          srd.type IN ('RuleSetDefinition', 'SkillsGroupRequirement') and
-          (CAST(ups.performedOn as date)=:day OR CAST(:day as date) is null)''')
-    Integer calculateUserPointsByProjectIdAndUserIdAndAndDayAndVersion(@Param('projectId') String projectId,
-                                                                       @Param('userId') String userId,
-                                                                       @Param('skillId') String skillId,
-                                                                       @Param('version') Integer version,
-                                                                       @Param('day') @Nullable Date day)
-
-    @Nullable
     @Query('''select new skills.storage.model.DayCountItem(CAST(ups.performedOn as date), SUM(sdChild.pointIncrement))
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild, UserPerformedSkill ups
       where
@@ -110,6 +90,7 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
             OR :skillId is null) and
           sdChild.version<=:version and
           srd.type IN ('RuleSetDefinition', 'SkillsGroupRequirement')
+          and ups.skillRefId NOT IN (select up.skillRefId from UserPoints up where up.contributesToSkillsGroup = 'false' and up.userId=:userId and up.projectId = :projectId)
        group by CAST(ups.performedOn as date)''')
     List<DayCountItem> calculatePointHistoryByProjectIdAndUserIdAndVersion(@Param('projectId') String projectId,
                                                                            @Param('userId') String userId,
