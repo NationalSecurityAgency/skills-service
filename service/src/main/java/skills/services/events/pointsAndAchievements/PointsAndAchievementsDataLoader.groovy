@@ -52,13 +52,17 @@ class PointsAndAchievementsDataLoader {
         if (skillDef.groupId) {
             // skills group child, check parent and if numSkillsRequired then need to load siblings to determine which contribute to points
             assert parentDefs && parentDefs.size() == 1 && parentDefs.first().type == SkillDef.ContainerType.SkillsGroup && parentDefs.first().skillId == skillDef.groupId
+            parentDefs.addAll(loadParents(parentDefs.first().id))
             if (parentDefs.first().numSkillsRequired > 0 && Boolean.valueOf(parentDefs.first().enabled)) {
                 skillsGroupDefId = parentDefs.first().id
                 numChildSkillsRequired = parentDefs.first().numSkillsRequired
             }
-        } else if (skillDef.type == SkillDef.ContainerType.SkillsGroup && skillDef.numSkillsRequired > 0 && Boolean.valueOf(skillDef.enabled)) {
-            skillsGroupDefId = skillDef.id
-            numChildSkillsRequired = skillDef.numSkillsRequired
+        } else if (skillDef.type == SkillDef.ContainerType.SkillsGroup) {
+            parentDefs.addAll(loadParents(parentDefs.first().id))
+            if (skillDef.numSkillsRequired > 0 && Boolean.valueOf(skillDef.enabled)) {
+                skillsGroupDefId = skillDef.id
+                numChildSkillsRequired = skillDef.numSkillsRequired
+            }
         }
 
         List<Integer> skillRefIds = [skillDef.id]
@@ -101,6 +105,11 @@ class PointsAndAchievementsDataLoader {
 
     @Profile
     private List<SkillEventsSupportRepo.TinySkillDef> loadParents(SkillEventsSupportRepo.SkillDefMin skillDef) {
-        skillEventsSupportRepo.findTinySkillDefsParentsByChildIdAndTypeIn(skillDef.id, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
+        loadParents(skillDef.id)
+    }
+
+    @Profile
+    private List<SkillEventsSupportRepo.TinySkillDef> loadParents(Integer skillRefId) {
+        skillEventsSupportRepo.findTinySkillDefsParentsByChildIdAndTypeIn(skillRefId, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
     }
 }
