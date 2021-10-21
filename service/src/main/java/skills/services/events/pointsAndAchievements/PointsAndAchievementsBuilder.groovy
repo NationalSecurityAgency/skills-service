@@ -63,8 +63,8 @@ class PointsAndAchievementsBuilder {
         loadedData.parentDefs.each { SkillEventsSupportRepo.TinySkillDef parentSkillDef ->
             // if needed, create user points for parents
             dataToSave.toSave.addAll(createUserPointsIfNeeded(parentSkillDef.id, parentSkillDef.skillId))
-            handleSubjectAchievement(parentSkillDef)
         }
+        handleSubjectAchievement(loadedData.parentDefs)
 
         // if needed, created user points for project
         dataToSave.toSave.addAll(createUserPointsIfNeeded(null, null))
@@ -90,15 +90,25 @@ class PointsAndAchievementsBuilder {
         }
     }
 
-    private void handleSubjectAchievement(SkillEventsSupportRepo.TinySkillDef skillDef) {
-        if (skillDef.type == SkillDef.ContainerType.Subject) {
-            List<UserAchievement> achievements = checkForAchievements(skillDef.skillId, skillDef.id, skillDef.totalPoints)
+    private void handleSubjectAchievement(List<SkillEventsSupportRepo.TinySkillDef> parentDefs) {
+        List<SkillEventsSupportRepo.TinySkillDef> subjects = parentDefs.findAll { it.type == SkillDef.ContainerType.Subject }
+        if (subjects) {
+            assert subjects.size() == 1, "Unexpected number of subjects [${subjects.size()}] found for skill [${skillId}]"
+            SkillEventsSupportRepo.TinySkillDef subjectSkillDef = subjects.first()
+            List<SkillEventsSupportRepo.TinySkillDef> groups = parentDefs.findAll { it.type == SkillDef.ContainerType.SkillsGroup }
+            SkillEventsSupportRepo.TinySkillDef groupSkillDef
+            if (groups) {
+                // if this is for a skill group, we need to check it for existing achievements instead of the subject
+                assert groups.size() == 1, "Unexpected number of groups [${groups.size()}] found for skill [${skillId}]"
+                groupSkillDef = groups.first()
+            }
+            List<UserAchievement> achievements = checkForAchievements(subjectSkillDef.skillId, subjectSkillDef.id, subjectSkillDef.totalPoints, groupSkillDef?.id)
             if (achievements) {
                 dataToSave.userAchievements.addAll(achievements)
                 completionItems.addAll(achievements.collect {
                     new CompletionItem(
-                            level: it.level, name: skillDef.name,
-                            id: skillDef.skillId,
+                            level: it.level, name: subjectSkillDef.name,
+                            id: subjectSkillDef.skillId,
                             type: CompletionItem.CompletionItemType.Subject)
                 })
             }
@@ -106,25 +116,25 @@ class PointsAndAchievementsBuilder {
     }
 
     @Profile
-    private  List<UserAchievement> checkForAchievements(String skillId, Integer skillRefId, Integer totalPoints) {
+    private  List<UserAchievement> checkForAchievements(String skillId, Integer subjectSkillRefId, Integer totalPoints, Integer groupSkillRefId=null) {
         List<UserAchievement> res
 
-        SkillEventsSupportRepo.TinyUserPoints existingUserPoints = loadedData.getTotalUserPoints(skillRefId)
+        SkillEventsSupportRepo.TinyUserPoints existingUserPoints = loadedData.getTotalUserPoints(subjectSkillRefId)
 
-        List<LevelDefInterface> levelDefs = loadedData.levels.findAll({ it.skillRefId == skillRefId })
+        List<LevelDefInterface> levelDefs = loadedData.levels.findAll({ it.skillRefId == subjectSkillRefId })
         int currentScore = existingUserPoints ? existingUserPoints.points + pointIncrement : pointIncrement
         LevelDefinitionStorageService.LevelInfo levelInfo = levelDefService.getLevelInfo(projectId, levelDefs, totalPoints, currentScore)
 
         // first achieved level is 1, level 0 should not be documented
         if (levelInfo.level > 0) {
-            List<SkillEventsSupportRepo.TinyUserAchievement> userAchievedLevels = loadedData.getUserAchievements(skillRefId)
+            List<SkillEventsSupportRepo.TinyUserAchievement> userAchievedLevels = loadedData.getUserAchievements(subjectSkillRefId)
             Integer maxAchieved = userAchievedLevels.collect({it.level}).max()
             maxAchieved = maxAchieved ?: 0
             // handle an edge case where user achieves multiple levels via one event
             if (levelInfo.level > maxAchieved) {
-                Date achievedOn = getAchievedOnDate(skillRefId)
+                Date achievedOn = groupSkillRefId ? getAchievedOnDate(groupSkillRefId, SkillRelDef.RelationshipType.SkillsGroupRequirement) : getAchievedOnDate(subjectSkillRefId, SkillRelDef.RelationshipType.RuleSetDefinition)
                 res = (maxAchieved+1..levelInfo.level).collect {
-                    UserAchievement achievement = new UserAchievement(userId: userId.toLowerCase(), projectId: projectId, skillId: skillId, skillRefId: skillRefId,
+                    UserAchievement achievement = new UserAchievement(userId: userId.toLowerCase(), projectId: projectId, skillId: skillId, skillRefId: subjectSkillRefId,
                             level: it, pointsWhenAchieved: currentScore, achievedOn: achievedOn)
                     log.debug("Achieved new level [{}]", achievement)
                     return achievement
@@ -136,14 +146,14 @@ class PointsAndAchievementsBuilder {
     }
 
     @Profile
-    private Date getAchievedOnDate(Integer skillRefId) {
+    private Date getAchievedOnDate(Integer skillRefId, SkillRelDef.RelationshipType type) {
         Date achievedOn = incomingSkillDate.date
         // this work is only performed if the date was provided for the event that caused an achievement to happen;
         // with that said the provided date may not be the latest date of all of the events that contributed to this achievement
         if (incomingSkillDate.isProvided) {
             // get the date of the latest event
             achievedOn = skillRefId ?
-                    skillEventsSupportRepo.getUserPerformedSkillLatestDate(userId.toLowerCase(), projectId, skillRefId, SkillRelDef.RelationshipType.RuleSetDefinition) :
+                    skillEventsSupportRepo.getUserPerformedSkillLatestDate(userId.toLowerCase(), projectId, skillRefId, type) :
                     skillEventsSupportRepo.getUserPerformedSkillLatestDate(userId.toLowerCase(), projectId)
 
             if (!achievedOn || incomingSkillDate.date.after(achievedOn)) {
