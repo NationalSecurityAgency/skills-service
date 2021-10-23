@@ -24,7 +24,10 @@ limitations under the License.
            header-bg-variant="info"
            ok-title="Save"
            @ok="handleSave"
+           :cancel-disabled="loading"
+           :ok-disabled="loading || skillsPointsSettingsDoNotMatch"
            header-text-variant="light" no-fade>
+    <b-overlay :show="loading" rounded="sm" opacity="0.4" spinner-variant="info">
     <div v-if="skillsPointsSettingsDoNotMatch" data-cy="syncSkillsPointsSection">
         <div>
           <i class="fas fa-exclamation-circle text-warning"></i> Group's skills points <b>must</b> be the same. Set all skills to:
@@ -60,7 +63,8 @@ limitations under the License.
           </div>
         </div>
         <div class="text-right mt-2">
-          <b-button variant="outline-success" data-cy="syncBtn" :disabled="totalSyncPoints <= 0"><i class="fas fa-sync"></i> Sync Group's Points</b-button>
+          <b-button variant="outline-success" data-cy="syncBtn" :disabled="totalSyncPoints <= 0"
+            @click="syncSkills"><i class="fas fa-sync"></i> Sync Group's Points</b-button>
         </div>
         <hr />
     </div>
@@ -68,16 +72,19 @@ limitations under the License.
       <span class="mr-1 text-secondary">Required: </span>
       <b-form-select size="sm" v-model="numSkillsRequired.selected" :options="numSkillsRequired.options" :disabled="skillsPointsSettingsDoNotMatch"
                      data-cy="requiredSkillsNumSelect"/>
-      <span class="ml-1">out <b-badge data-cy="numSkillsInGroup">{{ skills.length }}</b-badge> skills</span>
+      <span class="ml-1">skills</span>
       <div v-b-tooltip.hover.v-info class="ml-1 text-warning"
         title="A Group allows a Skill to be defined by the collection of other Skills within a Project. A Skill Group can require the completion of some or all of the included Skills before the group be achieved.">
         <i class="fas fa-question-circle"></i>
       </div>
     </b-form>
+    </b-overlay>
   </b-modal>
+
 </template>
 
 <script>
+  import SkillsService from '../SkillsService';
 
   export default {
     name: 'EditNumRequiredSkills',
@@ -105,6 +112,7 @@ limitations under the License.
           numPerformToCompletion: 5,
           pointIncrement: 10,
         },
+        loading: false,
       };
     },
     mounted() {
@@ -127,12 +135,40 @@ limitations under the License.
         this.$emit('hidden', e);
       },
       updateNumSkillsRequired() {
-        this.numSkillsRequired.options = Array.from({ length: this.skills.length }, (_, i) => i + 1);
-        this.numSkillsRequired.selected = (this.group.numSkillsRequired === -1) ? this.skills.length : this.group.numSkillsRequired;
+        const numSkills = this.skills.length;
+        const options = [];
+        for (let i = 1; i < numSkills; i += 1) {
+          options.push({ value: i, text: `${i} out of ${numSkills}` });
+        }
+        options.push({ value: -1, text: 'ALL SKILLS' });
+        this.numSkillsRequired.options = options;
+        this.numSkillsRequired.selected = this.group.numSkillsRequired;
       },
       handleSave() {
-        const updatedGroup = { ...this.group, numSkillsRequired: this.numSkillsRequired.selected };
-        this.$emit('group-changed', updatedGroup);
+        if (this.numSkillsRequired.selected < this.skills.length) {
+          const updatedGroup = {
+            ...this.group,
+            numSkillsRequired: this.numSkillsRequired.selected,
+          };
+          this.$emit('group-changed', updatedGroup);
+        }
+      },
+      syncSkills() {
+        this.loading = true;
+        const skillsWithSyncedPoints = this.skills.map((skill) => ({ ...skill, pointIncrement: this.syncSkillsPoints.pointIncrement, numPerformToCompletion: this.syncSkillsPoints.numPerformToCompletion }));
+        const promises = skillsWithSyncedPoints.map((skill) => new Promise((resolve) => {
+          SkillsService.saveSkill(skill)
+            .then((res) => resolve(res));
+        }));
+
+        const self = this;
+        Promise.all(promises)
+          .then((res) => {
+            self.$emit('skills-updated', res);
+          })
+          .finally(() => {
+            this.loading = false;
+          });
       },
     },
   };

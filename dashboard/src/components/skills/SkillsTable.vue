@@ -197,6 +197,7 @@ limitations under the License.
 
     <edit-skill v-if="editSkillInfo.show" v-model="editSkillInfo.show" :skillId="editSkillInfo.skill.skillId" :group-id="editSkillInfo.skill.groupId"
                 :is-copy="editSkillInfo.isCopy" :is-edit="editSkillInfo.isEdit"
+                :can-edit-points="canEditPoints" :can-edit-points-msg="canEditPointsMsg"
                 :project-id="projectId" :subject-id="subjectId" @skill-saved="skillCreatedOrUpdated" @hidden="handleFocus"/>
     <edit-skill-group v-if="editGroupInfo.show" v-model="editGroupInfo.show" :group="editGroupInfo.group" :is-edit="editGroupInfo.isEdit"
                       @group-saved="skillCreatedOrUpdated" @hidden="handleFocus"/>
@@ -245,6 +246,16 @@ limitations under the License.
       disableDeleteButtonsInfo: {
         type: Object,
         default: null,
+      },
+      canEditPoints: {
+        type: Boolean,
+        required: false,
+        default: true,
+      },
+      canEditPointsMsg: {
+        type: String,
+        required: false,
+        default: '',
       },
     },
     components: {
@@ -332,31 +343,19 @@ limitations under the License.
       };
     },
     mounted() {
-      this.skills = this.skillsProp.map((item) => {
-        const withSubjId = {
-          subjectId: this.subjectId,
-          refreshCounter: 0,
-          isGroupType: item.type === 'SkillsGroup',
-          isSkillType: item.type === 'Skill',
-          ...item,
-        };
-        return SkillsService.enhanceWithTimeWindow(withSubjId);
-      });
-      this.skillsOriginal = this.skills.map((item) => item);
-      this.disableFirstAndLastButtons();
-      this.table.options.pagination.totalRows = this.skills.length;
-      this.table.options.busy = false;
+      console.log(`calling mounted, ${JSON.stringify(this.disableDeleteButtonsInfo)}`);
+      this.loadDataFromParams(this.skillsProp);
     },
     computed: {
       deleteButtonsDisabled() {
         return this.disableDeleteButtonsInfo
           && this.disableDeleteButtonsInfo.minNumSkills
-          && this.skills.length < this.disableDeleteButtonsInfo.minNumSkills;
+          && this.skills.length <= this.disableDeleteButtonsInfo.minNumSkills;
       },
       deleteButtonsTooltip() {
         const isDisabled = this.disableDeleteButtonsInfo
           && this.disableDeleteButtonsInfo.minNumSkills
-          && this.skills.length < this.disableDeleteButtonsInfo.minNumSkills;
+          && this.skills.length <= this.disableDeleteButtonsInfo.minNumSkills;
         return (isDisabled) ? this.disableDeleteButtonsInfo.tooltip : 'Delete Skill';
       },
     },
@@ -411,6 +410,22 @@ limitations under the License.
         } else {
           this.reset();
         }
+      },
+      loadDataFromParams(skillsProp) {
+        this.skills = skillsProp.map((item) => {
+          const withSubjId = {
+            subjectId: this.subjectId,
+            refreshCounter: 0,
+            isGroupType: item.type === 'SkillsGroup',
+            isSkillType: item.type === 'Skill',
+            ...item,
+          };
+          return SkillsService.enhanceWithTimeWindow(withSubjId);
+        });
+        this.skillsOriginal = this.skills.map((item) => item);
+        this.disableFirstAndLastButtons();
+        this.table.options.pagination.totalRows = this.skills.length;
+        this.table.options.busy = false;
       },
       reset() {
         this.table.filter.name = '';

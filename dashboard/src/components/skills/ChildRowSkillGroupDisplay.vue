@@ -43,16 +43,23 @@ limitations under the License.
               </div>
               <div class="col-lg mt-2 mt-lg-0" data-cy="requiredSkillsSection">
                 <b-form inline>
-                  <span class="mr-1 text-secondary">Required: </span>
-                  <b-badge variant="info" data-cy="requiredSkillsNum">{{ requiredSkillsNum }}</b-badge>
-                  <span class="ml-1">out <b-badge data-cy="numSkillsInGroup">{{ group.numSkillsInGroup }}</b-badge> skills</span>
-
+                  <span>
+                    <span class="mr-1 text-secondary">Required: </span>
+                    <span v-if="!allSkillsRequired">
+                      <b-badge variant="info" data-cy="requiredSkillsNum">{{ requiredSkillsNum }}</b-badge>
+                      <span class="ml-1">out <b-badge data-cy="numSkillsInGroup">{{ group.numSkillsInGroup }}</b-badge> skills</span>
+                    </span>
+                    <span v-if="allSkillsRequired" data-cy="requiredAllSkills">
+                      <b-badge variant="info" class="text-uppercase">all skills</b-badge>
+                    </span>
+                  </span>
                   <span v-b-tooltip.hover="editRequiredNumSkillsToolTipText">
                   <b-button variant="outline-info" size="sm"
                             @click="showEditRequiredSkillsDialog"
                             :disabled="lessThanTwoSkills"
                             data-cy="editRequired" class="ml-2"><i class="far fa-edit"></i></b-button>
                   </span>
+
                 </b-form>
 
               </div>
@@ -73,8 +80,9 @@ limitations under the License.
                     :subject-id="this.$route.params.subjectId"
                     @skill-removed="skillRemoved"
                     @skills-change="skillChanged"
-                    :disableDeleteButtonsInfo="group.enabled ? { minNumSkills: 3, tooltip: 'Cannot delete! Groups that went Live must have at least 2 skill.' } : null"
-                    :show-search="false" :show-header="false" :show-paging="false"/>
+                    :disableDeleteButtonsInfo="disableDeleteButtonInfo"
+                    :can-edit-points="canEditPoints" :can-edit-points-msg="canEditPointsMsg()"
+                        :show-search="false" :show-header="false" :show-paging="false"/>
         </div>
       </b-card>
     </div>
@@ -82,9 +90,11 @@ limitations under the License.
 
   <edit-skill v-if="editSkillInfo.show" v-model="editSkillInfo.show" :is-copy="editSkillInfo.isCopy" :is-edit="editSkillInfo.isEdit"
               :project-id="editSkillInfo.skill.projectId" :subject-id="editSkillInfo.skill.subjectId" :group-id="this.group.skillId"
+              :can-edit-points="canEditPoints" :can-edit-points-msg="canEditPointsMsg()" :new-skill-default-values="defaultNewSkillValues()"
               @skill-saved="saveSkill" @hidden="focusOnNewSkillButton"/>
   <edit-num-required-skills v-if="editRequiredSkillsInfo.show" v-model="editRequiredSkillsInfo.show"
-                            :group="group" :skills="skills" @group-changed="handleNumRequiredSkillsChanged"/>
+                            :group="group" :skills="skills" @group-changed="handleNumRequiredSkillsChanged"
+              @skills-updated="handleSkillsUpdate"/>
 </div>
 </template>
 
@@ -120,6 +130,7 @@ limitations under the License.
         editRequiredSkillsInfo: {
           show: false,
         },
+        disableDeleteButtonInfo: null,
       };
     },
     mounted() {
@@ -147,11 +158,37 @@ limitations under the License.
         return '';
       },
       requiredSkillsNum() {
-        // -1 is disabled
+        // -1 == all skills required
         return (this.group.numSkillsRequired === -1) ? this.skills.length : this.group.numSkillsRequired;
+      },
+      allSkillsRequired() {
+        // -1 == all skills required
+        return (this.group.numSkillsRequired < 0);
+      },
+      canEditPoints() {
+        return (this.group.numSkillsRequired === -1);
       },
     },
     methods: {
+      canEditPointsMsg() {
+        return (this.group.numSkillsRequired === -1) ? null : 'Points CANNOT be modified when group\'s number of the required skill is set.';
+      },
+      buildDisableDeleteButtonInfo() {
+        let res = null;
+        console.log(`${this.group.numSkillsRequired} <> ${this.skills.length}`);
+        if (this.group.enabled) {
+          if (this.group.numSkillsRequired > 0 && this.group.numSkillsRequired === this.skills.length) {
+            res = {
+              minNumSkills: this.group.numSkillsRequired,
+              tooltip: 'Cannot delete! Cannot go below the number of the required skills.',
+            };
+          } else {
+            res = { minNumSkills: 2, tooltip: 'Cannot delete! Groups that went Live must have at least 2 skill.' };
+          }
+        }
+        console.log(`calling build, ${JSON.stringify(res)}`);
+        this.disableDeleteButtonInfo = res;
+      },
       loadData() {
         this.loading.skills = true;
         this.loading.details = true;
@@ -165,11 +202,19 @@ limitations under the License.
 
         SkillsService.getGroupSkills(this.group.projectId, this.group.skillId)
           .then((res) => {
-            this.numSkills = res.length;
-            this.skills = res;
+            this.setInternalSkills(res);
           }).finally(() => {
             this.loading.skills = false;
           });
+      },
+      handleSkillsUpdate(skills) {
+        this.setInternalSkills(skills);
+        this.$refs[`groupSkills_${this.group.skillId}`].loadDataFromParams(skills);
+      },
+      setInternalSkills(skillsParam) {
+        this.numSkills = skillsParam.length;
+        this.skills = skillsParam.map((skill) => ({ ...skill, subjectId: this.group.subjectId }));
+        this.buildDisableDeleteButtonInfo();
       },
       showNewSkillDialog() {
         this.editSkillInfo = {
@@ -200,6 +245,7 @@ limitations under the License.
               totalPoints: this.group.totalPoints + (skill.pointIncrement * skill.numPerformToCompletion),
             };
             this.$emit('group-changed', updatedGroup);
+            this.buildDisableDeleteButtonInfo();
           });
       },
       skillRemoved(skill) {
@@ -208,10 +254,11 @@ limitations under the License.
         const updatedGroup = {
           ...this.group,
           numSkillsInGroup: this.group.numSkillsInGroup - 1,
-          numSkillsRequired: (this.group.numSkillsRequired > 0 && this.group.numSkillsRequired > this.numSkills) ? this.group.numSkillsInGroup - 1 : this.group.numSkillsRequired,
+          numSkillsRequired: this.group.numSkillsRequired === this.numSkills ? -1 : this.group.numSkillsRequired,
           totalPoints: this.group.totalPoints - (skill.pointIncrement * skill.numPerformToCompletion),
         };
         this.$emit('group-changed', updatedGroup);
+        this.buildDisableDeleteButtonInfo();
       },
       skillChanged(skill) {
         const item1Index = this.skills.findIndex((item) => item.skillId === skill.originalSkillId);
@@ -230,6 +277,7 @@ limitations under the License.
       handleNumRequiredSkillsChanged(updatedGroup) {
         SkillsService.saveSkill(updatedGroup).then(() => {
           this.$emit('group-changed', updatedGroup);
+          this.buildDisableDeleteButtonInfo();
         });
       },
       focusOnNewSkillButton() {
@@ -252,6 +300,15 @@ limitations under the License.
               });
             }
           });
+      },
+      defaultNewSkillValues() {
+        if (this.group.numSkillsRequired === -1) {
+          return null;
+        }
+        return {
+          pointIncrement: this.skills[0].pointIncrement,
+          numPerformToCompletion: this.skills[0].numPerformToCompletion,
+        };
       },
     },
   };
