@@ -343,7 +343,6 @@ limitations under the License.
       };
     },
     mounted() {
-      console.log(`calling mounted, ${JSON.stringify(this.disableDeleteButtonsInfo)}`);
       this.loadDataFromParams(this.skillsProp);
     },
     computed: {

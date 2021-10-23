@@ -99,11 +99,14 @@ limitations under the License.
 </template>
 
 <script>
+  import { createNamespacedHelpers } from 'vuex';
   import SkillsService from './SkillsService';
   import EditSkill from './EditSkill';
   import LoadingContainer from '../utils/LoadingContainer';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
   import EditNumRequiredSkills from './skillsGroup/EditNumRequiredSkills';
+
+  const { mapActions } = createNamespacedHelpers('subjects');
 
   export default {
     name: 'ChildRowSkillGroupDisplay',
@@ -170,12 +173,14 @@ limitations under the License.
       },
     },
     methods: {
+      ...mapActions([
+        'loadSubjectDetailsState',
+      ]),
       canEditPointsMsg() {
         return (this.group.numSkillsRequired === -1) ? null : 'Points CANNOT be modified when group\'s number of the required skill is set.';
       },
       buildDisableDeleteButtonInfo() {
         let res = null;
-        console.log(`${this.group.numSkillsRequired} <> ${this.skills.length}`);
         if (this.group.enabled) {
           if (this.group.numSkillsRequired > 0 && this.group.numSkillsRequired === this.skills.length) {
             res = {
@@ -186,7 +191,6 @@ limitations under the License.
             res = { minNumSkills: 2, tooltip: 'Cannot delete! Groups that went Live must have at least 2 skill.' };
           }
         }
-        console.log(`calling build, ${JSON.stringify(res)}`);
         this.disableDeleteButtonInfo = res;
       },
       loadData() {
@@ -273,6 +277,8 @@ limitations under the License.
         } else {
           this.skills.push(skill);
         }
+
+        this.loadSubjectDetailsState({ projectId: this.group.projectId, subjectId: this.group.subjectId });
       },
       handleNumRequiredSkillsChanged(updatedGroup) {
         SkillsService.saveSkill(updatedGroup).then(() => {
@@ -297,6 +303,7 @@ limitations under the License.
               const copy = { ...this.group, enabled: true };
               SkillsService.saveSkill(copy).then((savedGroup) => {
                 this.$emit('group-changed', savedGroup);
+                this.loadSubjectDetailsState({ projectId: this.group.projectId, subjectId: this.group.subjectId });
               });
             }
           });

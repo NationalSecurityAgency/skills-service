@@ -534,6 +534,78 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="pageHeader"]').contains('SKILL: Very Great Skill 2');
     });
 
+    it('Report Skill Events: ability to report skill events after group is enabled', () => {
+        cy.createSkillsGroup(1, 1, 1);
+        cy.addSkillToGroup(1, 1, 1, 1, { pointIncrement: 10, numPerformToCompletion: 5 });
+        cy.addSkillToGroup(1, 1, 1, 2, { pointIncrement: 10, numPerformToCompletion: 5 });
+        const groupId = 'group1'
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
+
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="goLiveBtn"]`).click();
+        cy.contains('Yes, Go Live').click();
+
+        cy.get('[data-cy="manageSkillBtn_skill2"]').click();
+        cy.get('[data-cy="pageHeader"]').contains('SKILL: Very Great Skill 2');
+
+        cy.get('[data-cy="nav-Add Event"] .fa-exclamation-circle').should('not.exist');
+        cy.get('[data-cy="nav-Add Event"]').click();
+        cy.get('[data-cy="userIdInput"]').type('user1{enter}')
+        cy.get('[data-cy="addSkillEventButton"]').should('be.enabled');
+
+        // refresh and re-validate
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill2/addSkillEvent');
+        cy.get('[data-cy="nav-Add Event"] .fa-exclamation-circle').should('not.exist');
+        cy.get('[data-cy="userIdInput"]').type('user1{enter}')
+        cy.get('[data-cy="addSkillEventButton"]').should('be.enabled');
+    });
+
+    it('Report Skill Events: do not allow to report skill if the group is disabled', () => {
+        cy.createSkillsGroup(1, 1, 1);
+        cy.addSkillToGroup(1, 1, 1, 1, { pointIncrement: 10, numPerformToCompletion: 5 });
+        cy.addSkillToGroup(1, 1, 1, 2, { pointIncrement: 10, numPerformToCompletion: 5 });
+
+        // create just a skill to fulfill project and subject minimum points requirement
+        cy.createSkill(1, 1, 3, { pointIncrement: 100, numPerformToCompletion: 5 });
+        const groupId = 'group1'
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
+
+        cy.get('[data-cy="manageSkillBtn_skill2"]').click();
+        cy.get('[data-cy="pageHeader"]').contains('SKILL: Very Great Skill 2');
+
+        cy.get('[data-cy="nav-Add Event"] .fa-exclamation-circle').should('exist');
+        cy.get('[data-cy="nav-Add Event"]').click();
+        cy.get('[data-cy="userIdInput"]').type('user1{enter}')
+        cy.get('[data-cy="addSkillEventButton"]').should('be.disabled');
+    });
+
+    it('Report Skill Events:  must not be able to report skill events if there is not enough points because group is not enabled', () => {
+        cy.createSkillsGroup(1, 1, 1);
+        cy.addSkillToGroup(1, 1, 1, 1, { pointIncrement: 10, numPerformToCompletion: 5 });
+        cy.addSkillToGroup(1, 1, 1, 2, { pointIncrement: 10, numPerformToCompletion: 5 });
+        const groupId = 'group1'
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
+
+        cy.get('[data-cy="manageSkillBtn_skill2"]').click();
+        cy.get('[data-cy="pageHeader"]').contains('SKILL: Very Great Skill 2');
+
+        cy.get('[data-cy="nav-Add Event"] .fa-exclamation-circle').should('exist');
+        cy.get('[data-cy="nav-Add Event"]').click();
+        cy.get('[data-cy="userIdInput"]').type('user1{enter}')
+        cy.get('[data-cy="addSkillEventButton"]').should('be.disabled');
+
+        // refresh and re-validate
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill2/addSkillEvent');
+        cy.get('[data-cy="nav-Add Event"] .fa-exclamation-circle').should('exist');
+        cy.get('[data-cy="userIdInput"]').type('user1{enter}')
+        cy.get('[data-cy="addSkillEventButton"]').should('be.disabled');
+    });
+
     it('modify number of required skills is enabled once there are 2 skills', () => {
         cy.createSkillsGroup(1, 1, 1);
         const groupId = 'group1'
