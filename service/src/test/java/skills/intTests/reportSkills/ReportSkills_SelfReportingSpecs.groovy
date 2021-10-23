@@ -31,6 +31,7 @@ import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAttrsRepo
 import skills.utils.WaitFor
+import spock.lang.IgnoreRest
 
 @Slf4j
 class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
@@ -109,6 +110,26 @@ class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
         approvalsEndpointRes.data.get(0).skillName == "Test Skill 1"
         approvalsEndpointRes.data.get(0).requestedOn == date.time
         approvalsEndpointRes.data.get(0).requestMsg == "Please approve this!"
+    }
+
+    def "self report skill request message limited to configured max"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Date date = new Date() - 60
+        when:
+        def request = "lorem " * 50
+        def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "user0", date, request)
+
+        then:
+        def err = thrown(SkillsClientException)
     }
 
     def "self report skill with approval but no message"() {

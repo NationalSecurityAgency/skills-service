@@ -52,6 +52,8 @@ class PublicProps {
         maxPointIncrement,
         maxNumPerformToCompletion,
         maxNumPointIncrementMaxOccurrences,
+        maxSelfReportMessageLength,
+        maxSelfReportRejectionMessageLength,
     }
 
     @Autowired

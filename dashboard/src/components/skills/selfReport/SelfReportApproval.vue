@@ -71,7 +71,7 @@ limitations under the License.
         </div>
         <div class="small text-muted">ID: {{ data.item.skillId }}</div>
         <div class="mt-2" style="font-size: 0.9rem;"><span class="text-muted">Note:</span>
-          <span v-if="data.item.requestMsg && data.item.requestMsg.length > 0"> {{ data.item.requestMsg }}</span>
+          <show-more :text="data.item.requestMsg" v-if="data.item.requestMsg && data.item.requestMsg.length > 0"/>
           <span v-else class="text-muted"> Not supplied</span>
         </div>
 
@@ -124,11 +124,11 @@ limitations under the License.
           <p class="h6">This will <b class="font-weight-bold">permanently</b> reject user's request(s) to get points. Users will be notified and you can provide an optional message below.</p>
         </div>
       </div>
-      <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" v-slot="{errors}"
+      <ValidationProvider rules="maxSelfReportRejectionMessageLength|customDescriptionValidator" v-slot="{errors}"
                           name="Rejection Message">
-        <input type="text" id="approvalRequiredMsg" v-model="reject.rejectMsg"
+        <b-form-textarea rows="5" type="text" id="approvalRequiredMsg" v-model="reject.rejectMsg"
                aria-describedby="rejectionTitleInModal" aria-label="Optional Rejection Message"
-              class="form-control" placeholder="Message (optional)" data-cy="rejectionInputMsg">
+              class="form-control" placeholder="Message (optional)" data-cy="rejectionInputMsg"/>
         <small class="form-text text-danger mb-3" data-cy="rejectionInputMsgError">{{ errors[0] }}</small>
       </ValidationProvider>
       <template #modal-footer>
@@ -152,10 +152,16 @@ limitations under the License.
   import DateCell from '../../utils/table/DateCell';
   import SelfReportService from './SelfReportService';
   import ChildRowSkillsDisplay from '../ChildRowSkillsDisplay';
+  import ShowMore from './ShowMore';
 
   export default {
     name: 'SelfReportApproval',
-    components: { ChildRowSkillsDisplay, DateCell, SkillsBTable },
+    components: {
+      ChildRowSkillsDisplay,
+      DateCell,
+      SkillsBTable,
+      ShowMore,
+    },
     data() {
       return {
         projectId: this.$route.params.projectId,

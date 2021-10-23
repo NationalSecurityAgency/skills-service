@@ -54,6 +54,7 @@ export default {
     extend('userNoSpaceInUserIdInNonPkiMode', ValidatorFactory.newUserObjNoSpacesValidatorInNonPkiMode(store.getters.isPkiAuthenticated));
 
     extend('required', required);
+    extend('maxSelfReportRejectionMessageLength', ValidatorFactory.newCharLengthValidator(store.getters.config.maxSelfReportRejectionMessageLength));
 
     localize({
       en: {

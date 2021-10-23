@@ -102,6 +102,43 @@ describe('Self Report Approval History Tests', () => {
         ]);
     });
 
+    it('approval history notes and rejection message should display truncated', ()=> {
+      cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
+      cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
+      const requestMsg = new Array(40).join('lorem ');
+      cy.reportSkill(1, 3, 'user1', '2020-09-17 11:00', true, requestMsg)
+      cy.approveAllRequests();
+      cy.reportSkill(1, 2, 'user2', '2020-09-16 11:00')
+      const rejectMsg = new Array(250).join('A');
+      cy.rejectRequest(0, rejectMsg);
+
+      cy.intercept('/admin/projects/proj1/approvals/history*').as('loadHistory');
+
+      cy.visit('/administrator/projects/proj1/self-report');
+      cy.wait('@loadHistory');
+      cy.get('[data-cy=showMore]').should('have.length', 2);
+      cy.get('[data-cy=selfReportApprovalHistoryTable] [data-label=Response]').eq(0).find('[data-cy=showMoreText] [data-cy=showMore]').should('be.visible');
+      cy.get('[data-cy=smtText]').eq(0).should('have.text', `${rejectMsg.substr(0, 50)}...`);
+      cy.get('[data-cy=selfReportApprovalHistoryTable] [data-label=Response]').eq(0).find('[data-cy=showMoreText] [data-cy=showMore]').click();
+      cy.get('[data-cy=showMore]').should('have.length', 1);
+      cy.get('[data-cy=showLess]').should('have.length', 1);
+      cy.get('[data-cy=smtText]').eq(0).should('have.text', rejectMsg);
+      cy.get('[data-cy=selfReportApprovalHistoryTable] [data-label=Response]').eq(0).find('[data-cy=showMoreText] [data-cy=showLess]').click();
+      cy.get('[data-cy=selfReportApprovalHistoryTable] [data-label=Response]').eq(0).find('[data-cy=showMoreText] [data-cy=showMore]').should('be.visible');
+      cy.get('[data-cy=smtText]').eq(0).should('have.text', `${rejectMsg.substr(0, 50)}...`);
+
+      cy.log('validating second row');
+      cy.get('[data-cy=selfReportApprovalHistoryTable] [data-label=Requested]').eq(1).find('[data-cy=showMoreText] [data-cy=showMore]').should('be.visible');
+      cy.get('[data-cy=smtText]').eq(1).should('have.text', `${requestMsg.substr(0, 50)}...`);
+      cy.get('[data-cy=selfReportApprovalHistoryTable] [data-label=Requested]').eq(1).find('[data-cy=showMoreText] [data-cy=showMore]').click();
+      cy.get('[data-cy=showMore]').should('have.length', 1);
+      cy.get('[data-cy=showLess]').should('have.length', 1);
+      cy.get('[data-cy=smtText]').eq(1).should('have.text', requestMsg);
+      cy.get('[data-cy=selfReportApprovalHistoryTable] [data-label=Requested]').eq(1).find('[data-cy=showMoreText] [data-cy=showLess]').click();
+      cy.get('[data-cy=selfReportApprovalHistoryTable] [data-label=Requested]').eq(1).find('[data-cy=showMoreText] [data-cy=showMore]').should('be.visible');
+      cy.get('[data-cy=smtText]').eq(1).should('have.text', `${requestMsg.substr(0, 50)}...`);
+    });
+
     it('rejected request without explanation', () => {
         cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
         cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });

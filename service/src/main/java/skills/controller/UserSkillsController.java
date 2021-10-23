@@ -290,6 +290,12 @@ class UserSkillsController {
             incomingDate = new Date(requestedTimestamp);
         }
 
+        if (skillEventRequest != null && skillEventRequest.getApprovalRequestedMsg() != null) {
+            int maxLength = publicProps.getInt(PublicProps.UiProp.maxSelfReportMessageLength);
+            int msgLength = skillEventRequest.getApprovalRequestedMsg().length();
+            SkillsValidator.isTrue(msgLength <= maxLength, String.format("message has length of %d, maximum allowed length is %d", msgLength, maxLength), projectId, skillId);
+        }
+
         SkillEventResult result;
         String userId = userInfoService.getUserName(requestedUserId, false);
         if (log.isInfoEnabled()) {

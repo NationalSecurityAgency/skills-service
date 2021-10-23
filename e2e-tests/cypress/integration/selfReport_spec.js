@@ -726,6 +726,58 @@ describe('Self Report Skills Management Tests', () => {
         cy.get('[data-cy="childRowDisplay_skill3"]').should('not.exist');
     });
 
+    it('request message should be truncated by default', () => {
+      cy.createSkill(1, 1, 1, { selfReportingType: 'Approval', description: 'This is skill 1'  });
+      cy.createSkill(1, 1, 2, { selfReportingType: 'Approval', description: 'very cool skill 2'  });
+      cy.createSkill(1, 1, 3, { selfReportingType: 'Approval', description: 'last but not least' });
+      const msgNoExpandBtn = new Array(60).join('A');
+      const msgExpandBtn1 = new Array(66).join('B');
+      const msgExpandBtn2 = new Array(251).join('C');
+      cy.doReportSkill({project:1, skill:2, userId:'user6', date:'2020-09-11 11:00', approvalRequestedMsg:msgNoExpandBtn});
+      cy.doReportSkill({project:1, skill:1, userId:'user5', date:'2020-09-12 11:00', approvalRequestedMsg:msgExpandBtn1});
+      cy.doReportSkill({project:1, skill:3, userId:'user4', date:'2020-09-13 11:00', approvalRequestedMsg:msgExpandBtn2});
+
+      cy.visit('/administrator/projects/proj1/self-report');
+
+      cy.get('[data-cy=showMoreText]').should('have.length', 3);
+      cy.get('[data-cy=showLess]').should('not.exist');
+      cy.get('[data-cy=showMore]').should('have.length', 2);
+      cy.get('[data-cy=smtText]').eq(1).should('not.have.text', msgExpandBtn1);
+      cy.get('[data-cy=smtText]').eq(1).should('have.text', `${msgExpandBtn1.substring(0, 50)}...`);
+      cy.get('[data-cy=showMore]').eq(1).click();
+      cy.get('[data-cy=smtText]').eq(1).should('have.text', msgExpandBtn1);
+      cy.get('[data-cy=showLess]').should('have.length', 1);
+      cy.get('[data-cy=showMore]').should('have.length', 1);
+      cy.get('[data-cy=showLess]').click();
+      cy.get('[data-cy=showMore]').should('have.length', 2);
+      cy.get('[data-cy=smtText]').eq(1).should('not.have.text', msgExpandBtn1);
+      cy.get('[data-cy=smtText]').eq(1).should('have.text', `${msgExpandBtn1.substring(0, 50)}...`);
+    });
+
+    it('rejection message is limited to configure max size', () => {
+      cy.createSkill(1, 1, 1, { selfReportingType: 'Approval', description: 'This is skill 1'  });
+      cy.createSkill(1, 1, 2, { selfReportingType: 'Approval', description: 'very cool skill 2'  });
+      cy.createSkill(1, 1, 3, { selfReportingType: 'Approval', description: 'last but not least' });
+      const msgNoExpandBtn = new Array(60).join('A');
+      cy.doReportSkill({project:1, skill:2, userId:'user6', date:'2020-09-11 11:00', approvalRequestedMsg:msgNoExpandBtn});
+
+      cy.intercept('/admin/projects/proj1/approvals*').as('loadApprovals');
+      cy.visit('/administrator/projects/proj1/self-report');
+      cy.wait('@loadApprovals');
+      cy.get('[data-cy="selectPageOfApprovalsBtn"]').click();
+      cy.get('[data-cy=rejectBtn]').click();
+      cy.contains('Reject Skills');
+      cy.get('[data-cy=rejectionInputMsg]').fill(new Array(500).join('A'));
+      cy.get('[data-cy=rejectionInputMsgError]').contains('Message cannot exceed 250 characters').should('be.visible');
+      cy.get('[data-cy=confirmRejectionBtn]').should('be.disabled');
+      cy.get('[data-cy=rejectionInputMsg]').clear();
+      cy.get('[data-cy=confirmRejectionBtn]').should('be.enabled');
+      cy.get('[data-cy=rejectionInputMsgError]').should('not.be.visible');
+      cy.get('[data-cy=rejectionInputMsg]').type(new Array(50).join('B'));
+      cy.get('[data-cy=confirmRejectionBtn]').should('be.enabled');
+      cy.get('[data-cy=rejectionInputMsgError]').should('not.be.visible');
+    });
+
     it('approval request skill should be a link to skill details', () => {
         cy.createSkill(1, 1, 1, { selfReportingType: 'Approval', description: 'This is skill 1'  });
         cy.createSkill(1, 1, 2, { selfReportingType: 'Approval', description: 'very cool skill 2'  });

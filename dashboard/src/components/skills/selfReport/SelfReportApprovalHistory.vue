@@ -80,7 +80,7 @@ limitations under the License.
         </div>
         <div class="text-primary">by</div>
         <div class="font-italic"><span v-if="data.item.userIdHtml" v-html="data.item.userIdHtml"></span><span v-else>{{ data.item.userIdForDisplay }}</span></div>
-        <div v-if="data.item.requestMsg"><span class="text-secondary">Request Note:</span> {{ data.item.requestMsg }}</div>
+        <div v-if="data.item.requestMsg"><span class="text-secondary text-break">Request Note:</span> <show-more :text="data.item.requestMsg"/></div>
       </template>
 
       <template v-slot:cell(requestedOn)="data">
@@ -95,7 +95,7 @@ limitations under the License.
         <div v-else><b-badge variant="success"><i class="fas fa-thumbs-up"></i> <span class="text-uppercase">Approved</span></b-badge></div>
         <div class="text-primary">by</div>
         <div class="font-italic"><span v-if="data.item.approverUserIdHtml" v-html="data.item.approverUserIdHtml"></span><span v-else>{{ data.item.approverUserIdForDisplay }}</span></div>
-        <div v-if="data.item.rejectionMsg"><span class="text-primary">Explanation:</span> {{ data.item.rejectionMsg }}</div>
+        <div v-if="data.item.rejectionMsg"><span class="text-primary text-break">Explanation:</span> <show-more :text="data.item.rejectionMsg"/></div>
       </template>
 
     </skills-b-table>
@@ -107,10 +107,11 @@ limitations under the License.
   import SkillsBTable from '../../utils/table/SkillsBTable';
   import DateCell from '../../utils/table/DateCell';
   import SelfReportService from './SelfReportService';
+  import ShowMore from './ShowMore';
 
   export default {
     name: 'SelfReportApprovalHistory',
-    components: { DateCell, SkillsBTable },
+    components: { DateCell, SkillsBTable, ShowMore },
     data() {
       return {
         projectId: this.$route.params.projectId,
