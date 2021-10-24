@@ -133,7 +133,6 @@ limitations under the License.
         editRequiredSkillsInfo: {
           show: false,
         },
-        disableDeleteButtonInfo: null,
       };
     },
     mounted() {
@@ -171,15 +170,7 @@ limitations under the License.
       canEditPoints() {
         return (this.group.numSkillsRequired === -1);
       },
-    },
-    methods: {
-      ...mapActions([
-        'loadSubjectDetailsState',
-      ]),
-      canEditPointsMsg() {
-        return (this.group.numSkillsRequired === -1) ? null : 'Points CANNOT be modified when group\'s number of the required skill is set.';
-      },
-      buildDisableDeleteButtonInfo() {
+      disableDeleteButtonInfo() {
         let res = null;
         if (this.group.enabled) {
           if (this.group.numSkillsRequired > 0 && this.group.numSkillsRequired === this.skills.length) {
@@ -191,7 +182,15 @@ limitations under the License.
             res = { minNumSkills: 2, tooltip: 'Cannot delete! Groups that went Live must have at least 2 skill.' };
           }
         }
-        this.disableDeleteButtonInfo = res;
+        return res;
+      },
+    },
+    methods: {
+      ...mapActions([
+        'loadSubjectDetailsState',
+      ]),
+      canEditPointsMsg() {
+        return (this.group.numSkillsRequired === -1) ? null : 'Points CANNOT be modified when group\'s number of the required skill is set.';
       },
       loadData() {
         this.loading.skills = true;
@@ -218,7 +217,6 @@ limitations under the License.
       setInternalSkills(skillsParam) {
         this.numSkills = skillsParam.length;
         this.skills = skillsParam.map((skill) => ({ ...skill, subjectId: this.group.subjectId }));
-        this.buildDisableDeleteButtonInfo();
       },
       showNewSkillDialog() {
         this.editSkillInfo = {
@@ -249,7 +247,6 @@ limitations under the License.
               totalPoints: this.group.totalPoints + (skill.pointIncrement * skill.numPerformToCompletion),
             };
             this.$emit('group-changed', updatedGroup);
-            this.buildDisableDeleteButtonInfo();
           });
       },
       skillRemoved(skill) {
@@ -262,7 +259,6 @@ limitations under the License.
           totalPoints: this.group.totalPoints - (skill.pointIncrement * skill.numPerformToCompletion),
         };
         this.$emit('group-changed', updatedGroup);
-        this.buildDisableDeleteButtonInfo();
       },
       skillChanged(skill) {
         const item1Index = this.skills.findIndex((item) => item.skillId === skill.originalSkillId);
@@ -283,7 +279,6 @@ limitations under the License.
       handleNumRequiredSkillsChanged(updatedGroup) {
         SkillsService.saveSkill(updatedGroup).then(() => {
           this.$emit('group-changed', updatedGroup);
-          this.buildDisableDeleteButtonInfo();
         });
       },
       focusOnNewSkillButton() {
