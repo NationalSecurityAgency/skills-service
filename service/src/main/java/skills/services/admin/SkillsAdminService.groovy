@@ -290,8 +290,8 @@ class SkillsAdminService {
         if (skillDefinition.groupId) {
             assert parentSkill.type == SkillDef.ContainerType.SkillsGroup
             List<SkillDef> children = skillsGroupAdminService.validateCanDeleteChildSkillAndReturnChildren(parentSkill)
-            if (children.size() < parentSkill.numSkillsRequired) {
-                parentSkill.numSkillsRequired = children.size()
+            if (children.size() == parentSkill.numSkillsRequired) {
+                parentSkill.numSkillsRequired = -1
             }
             parentSkill.totalPoints = Boolean.valueOf(parentSkill.enabled) ? skillsGroupAdminService.getGroupTotalPoints(children, parentSkill.numSkillsRequired) : 0
             DataIntegrityExceptionHandlers.skillDataIntegrityViolationExceptionHandler.handle(projectId, skillId) {

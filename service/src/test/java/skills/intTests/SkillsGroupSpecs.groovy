@@ -753,7 +753,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         exception.message.contains("A Skill Group must have at least 2 skills in order to be enabled.")
     }
 
-    def "numSkillsRequired is reduced when enough child skills are deleted"() {
+    def "when deleting a child skill, if the numRequired == child.size(), then set numRequired = -1"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def allSkills = SkillsFactory.createSkills(4)
@@ -769,18 +769,19 @@ class SkillsGroupSpecs extends DefaultIntSpec {
             skillsService.assignSkillToSkillsGroup(skillsGroup1Id, skill)
         }
         skillsGroup.enabled = 'true'
-        skillsGroup.numSkillsRequired = 3
+        skillsGroup.numSkillsRequired = 2
         skillsService.updateSkill(skillsGroup, null)
         int numSkillsRequiredBeforeDelete = skillsService.getSkill(skillsGroup).numSkillsRequired
 
         when:
-        // delete one of the two skills will cause the group to only have one skill left
+        // delete one of the three skills will cause the group to only have two skills left, it was
+        // decided that if deleting caused # skills to == numSkillsRequired to set numSkillsRequired to -1
         skillsService.deleteSkill(allSkills[2])
         int numSkillsRequiredAfterDelete = skillsService.getSkill(skillsGroup).numSkillsRequired
 
         then:
-        numSkillsRequiredBeforeDelete == 3
-        numSkillsRequiredAfterDelete == 2
+        numSkillsRequiredBeforeDelete == 2
+        numSkillsRequiredAfterDelete == -1
     }
 
     def "achieve group skill"() {
