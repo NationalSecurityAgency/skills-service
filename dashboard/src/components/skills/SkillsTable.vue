@@ -458,8 +458,6 @@ limitations under the License.
         this.table.options.busy = false;
       },
       addMetaToSkillObj(skill) {
-        console.log(skill.type);
-        console.log(skill.selfReportingType);
         return {
           subjectId: this.subjectId,
           isGroupType: skill.type === 'SkillsGroup',
