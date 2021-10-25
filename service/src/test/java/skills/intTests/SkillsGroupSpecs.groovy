@@ -637,7 +637,41 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         then:
         subjSkillsBefore
         idsExistBefore.every { it }
-        subjSkillsAfter.every { !it }
+        !subjSkillsAfter
+        idsExistAfter.every { !it }
+    }
+
+    def "delete subject with a SkillsGroup"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(3)
+        def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 5)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skills.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+        skillsGroup.numSkillsRequired = skills.size() - 1
+        skillsGroup.enabled = 'true'
+        skillsService.updateSkill(skillsGroup, null)
+
+        def subjSkillsBefore = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
+        List<Boolean> idsExistBefore = skills.collect { skillsService.doesEntityExist(proj.projectId, it.skillId) }
+        idsExistBefore.add(skillsService.doesEntityExist(proj.projectId, skillsGroupId))
+
+        when:
+        skillsService.deleteSubject(subj)
+        List<Boolean> idsExistAfter = skills.collect { skillsService.doesEntityExist(proj.projectId, it.skillId) }
+        idsExistAfter.add(skillsService.doesEntityExist(proj.projectId, skillsGroupId))
+        idsExistAfter.add(skillsService.doesEntityExist(proj.projectId, subj.subjectId))
+
+        then:
+        subjSkillsBefore
+        idsExistBefore.every { it }
+        idsExistAfter.every { !it }
     }
 
     def "delete SkillsGroup and verify proper display order is maintained"() {

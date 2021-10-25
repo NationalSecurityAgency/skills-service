@@ -66,7 +66,7 @@ class RuleSetDefGraphService {
         while (currentChildren) {
             toDelete.addAll(currentChildren)
             currentChildren = currentChildren?.collect {
-                getChildrenSkills(it)
+                getChildrenSkills(it, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
             }?.flatten()
         }
         toDelete.add(skillDef)
