@@ -292,7 +292,7 @@ class BadgeAdminService {
 
     private Integer getBadgeDisplayOrder(ProjDef projDef, SkillDef.ContainerType type) {
         Integer lastDisplayOrder = getBadgesInternal(projDef, type)?.collect({ it.displayOrder })?.max()
-        int displayOrder = lastDisplayOrder != null ? lastDisplayOrder + 1 : 0
+        int displayOrder = lastDisplayOrder != null ? lastDisplayOrder + 1 : 1
         return displayOrder
     }
 

@@ -119,7 +119,7 @@ class SubjAdminService {
             createdResourceLimitsValidator.validateNumSubjectsCreated(projectId)
 
             Integer lastDisplayOrder = skillDefRepo.calculateHighestDisplayOrderByProjectIdAndType(projectId, SkillDef.ContainerType.Subject)
-            int displayOrder = lastDisplayOrder != null ? lastDisplayOrder + 1 : 0
+            int displayOrder = lastDisplayOrder != null ? lastDisplayOrder + 1 : 1
 
             SkillDefWithExtra skillDef = new SkillDefWithExtra(
                     type: SkillDef.ContainerType.Subject,

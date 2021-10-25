@@ -125,7 +125,7 @@ class RuleSetDeletionsSpecs  extends DefaultIntSpec {
         projectAfterDelete.totalPoints == 21
     }
 
-    def "when subject is deleted display order should be rebuilt to start with 0"(){
+    def "when subject is deleted display order should be rebuilt to start with 1"(){
         List<Map> subj1 = (1..1).collect { [projectId: projId, subjectId: "subj1", skillId: "s1${it}".toString(), name: "subj1 ${it}".toString(), type: "Skill", pointIncrement: it, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
         List<Map> subj2 = (1..1).collect { [projectId: projId, subjectId: "subj2", skillId: "s2${it}".toString(), name: "subj2 ${it}".toString(), type: "Skill", pointIncrement: it, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
         List<Map> subj3 = (1..1).collect { [projectId: projId, subjectId: "subj3", skillId: "23${it}".toString(), name: "subj3 ${it}".toString(), type: "Skill", pointIncrement: it, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
@@ -152,16 +152,16 @@ class RuleSetDeletionsSpecs  extends DefaultIntSpec {
 
         then:
         subjects.size() == 3
-        subjects.get(0).displayOrder == 0
-        subjects.get(1).displayOrder == 1
+        subjects.get(0).displayOrder == 1
+        subjects.get(1).displayOrder == 2
         subjects.get(1).subjectId == "subj2"
-        subjects.get(2).displayOrder == 2
+        subjects.get(2).displayOrder == 3
         subjects.get(2).subjectId == "subj3"
 
         subjectsAfterDelete.size() == 2
-        subjectsAfterDelete.get(0).displayOrder == 0
+        subjectsAfterDelete.get(0).displayOrder == 1
         subjectsAfterDelete.get(0).subjectId == "subj2"
-        subjectsAfterDelete.get(1).displayOrder == 1
+        subjectsAfterDelete.get(1).displayOrder == 2
         subjectsAfterDelete.get(1).subjectId == "subj3"
     }
 
