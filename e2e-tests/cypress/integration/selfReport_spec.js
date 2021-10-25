@@ -119,7 +119,7 @@ describe('Self Report Skills Management Tests', () => {
 
     it('create skills - self reporting disabled - no project level default', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="btn_Skills"]').click();
+        cy.get('[data-cy="newSkillButton"]').click();
         cy.get('[data-cy="selfReportEnableCheckbox"]').should('not.be.checked');
         cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.disabled');
         cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('be.disabled');
@@ -138,7 +138,7 @@ describe('Self Report Skills Management Tests', () => {
 
     it('create skills - self reporting with approval - no project level default', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="btn_Skills"]').click();
+        cy.get('[data-cy="newSkillButton"]').click();
         cy.get('[data-cy="selfReportEnableCheckbox"]').should('not.be.checked');
         cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.disabled');
         cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('be.disabled');
@@ -163,7 +163,7 @@ describe('Self Report Skills Management Tests', () => {
 
     it('create skills - self reporting with Honor System - no project level default', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="btn_Skills"]').click();
+        cy.get('[data-cy="newSkillButton"]').click();
         cy.get('[data-cy="selfReportEnableCheckbox"]').should('not.be.checked');
         cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.disabled');
         cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('be.disabled');
@@ -198,7 +198,7 @@ describe('Self Report Skills Management Tests', () => {
         cy.get('[data-cy="settingsSavedAlert"]').contains('Settings Updated');
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="btn_Skills"]').click();
+        cy.get('[data-cy="newSkillButton"]').click();
         cy.get('[data-cy="selfReportEnableCheckbox"]').should('be.checked');
         cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.enabled');
         cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('be.enabled');
@@ -213,7 +213,7 @@ describe('Self Report Skills Management Tests', () => {
         cy.get('[data-cy="settingsSavedAlert"]').contains('Settings Updated');
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="btn_Skills"]').click();
+        cy.get('[data-cy="newSkillButton"]').click();
         cy.get('[data-cy="selfReportEnableCheckbox"]').should('be.checked');
         cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.enabled');
         cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('be.enabled');

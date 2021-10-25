@@ -412,14 +412,12 @@ limitations under the License.
       },
       loadDataFromParams(skillsProp) {
         this.skills = skillsProp.map((item) => {
-          const withSubjId = {
+          let enhancedSkill = {
             subjectId: this.subjectId,
-            refreshCounter: 0,
-            isGroupType: item.type === 'SkillsGroup',
-            isSkillType: item.type === 'Skill',
             ...item,
           };
-          return SkillsService.enhanceWithTimeWindow(withSubjId);
+          enhancedSkill = this.addMetaToSkillObj(enhancedSkill);
+          return SkillsService.enhanceWithTimeWindow(enhancedSkill);
         });
         this.skillsOriginal = this.skills.map((item) => item);
         this.disableFirstAndLastButtons();
@@ -460,11 +458,14 @@ limitations under the License.
         this.table.options.busy = false;
       },
       addMetaToSkillObj(skill) {
+        console.log(skill.type);
+        console.log(skill.selfReportingType);
         return {
           subjectId: this.subjectId,
           isGroupType: skill.type === 'SkillsGroup',
           isSkillType: skill.type === 'Skill',
           ...skill,
+          selfReportingType: (skill.type === 'Skill' && !skill.selfReportingType) ? 'Disabled' : skill.selfReportingType,
           created: new Date(skill.created),
         };
       },
@@ -501,6 +502,8 @@ limitations under the License.
             this.successToast('Skill Saved', `Saved '${skill.name}' skill.`);
 
             if (isEdit) {
+              // override in case skillId was updated
+              this.currentlyFocusedSkillId = createdSkill.skillId;
               setTimeout(() => {
                 this.handleFocus();
               }, 0);
