@@ -784,6 +784,34 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         numSkillsRequiredAfterDelete == -1
     }
 
+    def "cannot delete a child skill that would cause the group to have less than 2 skills"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def allSkills = SkillsFactory.createSkills(3)
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+
+        def skillsGroup = allSkills[0]
+        skillsGroup.type = 'SkillsGroup'
+        skillsService.createSkill(skillsGroup)
+        String skillsGroup1Id = skillsGroup.skillId
+        def group1Children = allSkills[1..2]
+        group1Children.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroup1Id, skill)
+        }
+        skillsGroup.enabled = 'true'
+        skillsService.updateSkill(skillsGroup, null)
+        int numSkillsRequiredBeforeDelete = skillsService.getSkill(skillsGroup).numSkillsRequired
+
+        when:
+        skillsService.deleteSkill(allSkills[2])
+
+        then:
+        numSkillsRequiredBeforeDelete == -1
+        def exception = thrown(SkillsClientException)
+        exception.message.contains("A Skill Group must have at least 2 skills in order to be enabled.")
+    }
+
     def "achieve group skill"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
