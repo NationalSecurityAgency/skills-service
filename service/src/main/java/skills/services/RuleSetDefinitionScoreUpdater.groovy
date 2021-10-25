@@ -49,7 +49,7 @@ class RuleSetDefinitionScoreUpdater {
         if (childRels) {
             int total
             if (skillDef.type == SkillDef.ContainerType.SkillsGroup) {
-                total = Boolean.valueOf(skillDef.enabled) ? skillsGroupAdminService.getGroupTotalPoints(childRels.collect({it.child}), skillDef.numSkillsRequired) : 0
+                total = skillsGroupAdminService.getGroupTotalPoints(childRels.collect({it.child}), skillDef.numSkillsRequired)
             } else {
                 total = childRels.collect({ it.child.totalPoints }).sum()
             }

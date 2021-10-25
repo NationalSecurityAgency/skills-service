@@ -726,6 +726,35 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         pointAfterNumSkillsRequiredReduced == 10
     }
 
+    def "totalPoints on are returned for skills endpoint for disabled group"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def allSkills = SkillsFactory.createSkills(3)
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+
+        def skillsGroup = allSkills[0]
+        skillsGroup.type = 'SkillsGroup'
+        skillsService.createSkill(skillsGroup)
+        def children = allSkills[1..2]
+
+        String skillsGroupId = skillsGroup.skillId
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, children[0])
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, children[1])
+
+        int initialPoints = skillsService.getSkill(skillsGroup).totalPoints
+
+        when:
+
+        def subjSkills = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
+
+        then:
+        subjSkills
+        subjSkills.size() == 1
+        subjSkills[0].totalPoints == 20
+        initialPoints == 20
+    }
+
     def "once a skills group is live it cannot have less than 2 skills"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
