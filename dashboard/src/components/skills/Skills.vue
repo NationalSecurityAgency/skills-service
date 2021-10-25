@@ -19,10 +19,12 @@ limitations under the License.
       <sub-page-header ref="subPageHeader" title="Skills"
                        :disabled="addSkillDisabled" :disabled-msg="addSkillsDisabledMsg" aria-label="new skill">
         <b-button id="newGroupBtn" ref="newGroupButton" @click="newGroup" variant="outline-primary" size="sm"
+                  aria-label="new skills group"
                   data-cy="newGroupButton">
           <span class="">Group</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
         </b-button>
         <b-button id="newSkillBtn" ref="newSkillButton" @click="newSkill" variant="outline-primary" size="sm"
+                  aria-label="new skill"
                   data-cy="newSkillButton" class="ml-1">
           <span class="">Skill</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
         </b-button>

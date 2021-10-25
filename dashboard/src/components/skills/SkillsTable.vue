@@ -104,7 +104,7 @@ limitations under the License.
                 </b-button>
                 <b-button @click="editSkill(data.item)"
                           variant="outline-primary" :data-cy="`editSkillButton_${data.item.skillId}`"
-                          :aria-label="'edit Skill '+data.item.name" :ref="'edit_'+data.item.skillId"
+                          :aria-label="'edit Skill '+data.item.name" :ref="`edit_${data.item.skillId}`"
                           title="Edit Skill" b-tooltip.hover="Edit Skill">
                   <i class="fas fa-edit" aria-hidden="true"/>
                 </b-button>
@@ -614,17 +614,21 @@ limitations under the License.
           tableData[tableData.length - 1].disabledDownButton = true;
         }
       },
-      handleFocus() {
-        let ref = null;
-        if (this.currentlyFocusedSkillId) {
-          const refName = `edit_${this.currentlyFocusedSkillId}`;
-          ref = this.$refs[refName];
-        }
-        this.currentlyFocusedSkillId = '';
-        if (ref) {
-          this.$nextTick(() => {
-            ref.focus();
-          });
+      handleFocus(args = null) {
+        // this event is called from the EditSkill components callback and from
+        // the handling of the saved event; this checks filters the saved event
+        // from the EditSkill component allowing the other path to run
+        if (!args?.saved) {
+          const theRefs = this.$refs;
+          let ref = null;
+          if (this.currentlyFocusedSkillId) {
+            const refName = `edit_${this.currentlyFocusedSkillId}`;
+            ref = theRefs[refName];
+            this.currentlyFocusedSkillId = '';
+            this.$nextTick(() => {
+              ref.focus();
+            });
+          }
         }
       },
       getSelfReportingTypePretty(selfReportingType) {
