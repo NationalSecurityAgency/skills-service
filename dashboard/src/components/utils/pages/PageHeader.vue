@@ -22,7 +22,7 @@ limitations under the License.
           <div class="row">
             <div :class="titleCss">
               <h3><i v-if="options.icon" class="has-text-link" :class="options.icon"/> {{ options.title }}<slot name="right-of-header"></slot></h3>
-              <div class="h5 text-muted">{{ options.subTitle }}</div>
+              <slot name="subTitle"><div class="h5 text-muted">{{ options.subTitle }}</div></slot>
               <slot name="subSubTitle"></slot>
             </div>
             <div :class="statcsCss">

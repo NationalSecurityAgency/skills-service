@@ -514,6 +514,8 @@ describe('Skills Group Tests', () => {
 
         cy.get('[data-cy="manageSkillBtn_skill2"]').click();
         cy.get('[data-cy="pageHeader"]').contains('SKILL: Very Great Skill 2');
+        cy.get('[data-cy="pageHeader"]').contains('Group ID: group1');
+        cy.get('[data-cy="disabledGroupBadge-group1"]').should('not.exist');
 
         cy.get('[data-cy="nav-Add Event"] .fa-exclamation-circle').should('not.exist');
         cy.get('[data-cy="nav-Add Event"]').click();
@@ -541,6 +543,8 @@ describe('Skills Group Tests', () => {
 
         cy.get('[data-cy="manageSkillBtn_skill2"]').click();
         cy.get('[data-cy="pageHeader"]').contains('SKILL: Very Great Skill 2');
+        cy.get('[data-cy="pageHeader"]').contains('Group ID: group1');
+        cy.get('[data-cy="disabledGroupBadge-group1"]');
 
         cy.get('[data-cy="nav-Add Event"] .fa-exclamation-circle').should('exist');
         cy.get('[data-cy="nav-Add Event"]').click();
@@ -559,7 +563,8 @@ describe('Skills Group Tests', () => {
 
         cy.get('[data-cy="manageSkillBtn_skill2"]').click();
         cy.get('[data-cy="pageHeader"]').contains('SKILL: Very Great Skill 2');
-
+        cy.get('[data-cy="pageHeader"]').contains('Group ID: group1');
+        cy.get('[data-cy="disabledGroupBadge-group1"]');
         cy.get('[data-cy="nav-Add Event"] .fa-exclamation-circle').should('exist');
         cy.get('[data-cy="nav-Add Event"]').click();
         cy.get('[data-cy="userIdInput"]').type('user1{enter}')
