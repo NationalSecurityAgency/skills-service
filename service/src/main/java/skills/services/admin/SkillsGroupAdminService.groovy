@@ -150,6 +150,12 @@ class SkillsGroupAdminService {
         return groupChildSkills
     }
 
+    @Profile
+    boolean isParentSkillsGroupEnabled(String projectId, String groupId) {
+        SkillDefWithExtra skillsGroupSkillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, groupId, SkillDef.ContainerType.SkillsGroup)
+        return Boolean.valueOf(skillsGroupSkillDef.enabled)
+    }
+
     int getGroupTotalPoints(List<SkillDef> groupChildSkills, int numSkillsRequired) {
         int totalPoints = 0
         if (groupChildSkills) {
