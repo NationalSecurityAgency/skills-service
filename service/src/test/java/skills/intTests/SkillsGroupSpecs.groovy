@@ -743,7 +743,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         skillsService.assignSkillToSkillsGroup(skillsGroupId, children[0])
         skillsService.assignSkillToSkillsGroup(skillsGroupId, children[1])
 
-
         when:
 
         def res = skillsService.getSkill(children[0])
@@ -755,7 +754,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         res.groupId == skillsGroup.skillId
     }
 
-    def "totalPoints on are returned for skills endpoint for disabled group"() {
+    def "totalPoints are returned for skills endpoint for disabled group, but not subjects or projects"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def allSkills = SkillsFactory.createSkills(3)
@@ -771,17 +770,67 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         skillsService.assignSkillToSkillsGroup(skillsGroupId, children[0])
         skillsService.assignSkillToSkillsGroup(skillsGroupId, children[1])
 
-        int initialPoints = skillsService.getSkill(skillsGroup).totalPoints
-
         when:
 
+        int skillPoints = skillsService.getSkill(skillsGroup).totalPoints
+        def subjects = skillsService.getSubjects(proj.projectId)
+        def projects = skillsService.getProjects()
         def subjSkills = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
 
         then:
         subjSkills
         subjSkills.size() == 1
         subjSkills[0].totalPoints == 20
-        initialPoints == 20
+        skillPoints == 20
+
+        subjects
+        subjects.size() == 1
+        subjects[0].totalPoints == 0
+
+        projects
+        projects.size() == 1
+        projects[0].totalPoints == 0
+    }
+
+    def "totalPoints on are always included for enabled groups"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def allSkills = SkillsFactory.createSkills(3)
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+
+        def skillsGroup = allSkills[0]
+        skillsGroup.type = 'SkillsGroup'
+        skillsService.createSkill(skillsGroup)
+        def children = allSkills[1..2]
+
+        String skillsGroupId = skillsGroup.skillId
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, children[0])
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, children[1])
+
+        skillsGroup.enabled = 'true'
+        skillsService.updateSkill(skillsGroup, null)
+
+        when:
+
+        int skillPoints = skillsService.getSkill(skillsGroup).totalPoints
+        def subjects = skillsService.getSubjects(proj.projectId)
+        def projects = skillsService.getProjects()
+        def subjSkills = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
+
+        then:
+        subjSkills
+        subjSkills.size() == 1
+        subjSkills[0].totalPoints == 20
+        skillPoints == 20
+
+        subjects
+        subjects.size() == 1
+        subjects[0].totalPoints == 20
+
+        projects
+        projects.size() == 1
+        projects[0].totalPoints == 20
     }
 
     def "once a skills group is live it cannot have less than 2 skills"() {

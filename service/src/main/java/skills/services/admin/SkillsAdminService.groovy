@@ -154,7 +154,7 @@ class SkillsAdminService {
                 List<SkillDef> groupChildSkills = skillsGroupAdminService.validateSkillsGroupAndReturnChildren(skillRequest, skillDefinition)
                 totalPointsRequested = skillsGroupAdminService.getGroupTotalPoints(groupChildSkills, skillRequest.numSkillsRequired)
             }
-            shouldRebuildScores = skillDefinition.totalPoints != totalPointsRequested
+            shouldRebuildScores = skillDefinition.totalPoints != totalPointsRequested || (!Boolean.valueOf(skillDefinition.enabled) && Boolean.valueOf(skillRequest.enabled))
             occurrencesDelta = skillRequest.numPerformToCompletion - currentOccurrences
             updateUserPoints = shouldRebuildScores || occurrencesDelta != 0
             pointIncrementDelta = incrementRequested - skillDefinition.pointIncrement
