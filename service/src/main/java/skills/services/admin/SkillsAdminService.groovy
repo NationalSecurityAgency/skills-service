@@ -452,6 +452,12 @@ class SkillsAdminService {
             res.numSelfReportSkills = groupChildSkills.count( {it.selfReportingType })?.intValue()
             res.enabled = skillDef.enabled
         }
+        if (skillDef.groupId) {
+            SkillDefWithExtra skillsGroup = skillsGroupAdminService.getSkillsGroup(skillDef.projectId, skillDef.groupId)
+            res.enabled = skillsGroup.enabled
+            res.groupName = skillsGroup.name
+            res.groupId = skillsGroup.skillId
+        }
 
         return res
     }

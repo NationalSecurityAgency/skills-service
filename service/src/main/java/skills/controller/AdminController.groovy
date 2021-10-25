@@ -402,8 +402,7 @@ class AdminController {
         SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
 
-        return skillsAdminService
-                .getSkill(projectId, subjectId, skillId)
+        return skillsAdminService.getSkill(projectId, subjectId, skillId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/skills/{skillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)

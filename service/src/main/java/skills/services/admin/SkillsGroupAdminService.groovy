@@ -153,8 +153,13 @@ class SkillsGroupAdminService {
 
     @Profile
     boolean isParentSkillsGroupEnabled(String projectId, String groupId) {
-        SkillDefWithExtra skillsGroupSkillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, groupId, SkillDef.ContainerType.SkillsGroup)
+        SkillDefWithExtra skillsGroupSkillDef = getSkillsGroup(projectId, groupId)
         return Boolean.valueOf(skillsGroupSkillDef.enabled)
+    }
+
+    @Profile
+    SkillDefWithExtra getSkillsGroup(String projectId, String groupId) {
+        return skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, groupId, SkillDef.ContainerType.SkillsGroup)
     }
 
     int getGroupTotalPoints(List<SkillDef> groupChildSkills, int numSkillsRequired) {

@@ -726,6 +726,35 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         pointAfterNumSkillsRequiredReduced == 10
     }
 
+    def "group info is returned for child skill on skill endpoint"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def allSkills = SkillsFactory.createSkills(3)
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+
+        def skillsGroup = allSkills[0]
+        skillsGroup.type = 'SkillsGroup'
+        skillsGroup.enabled = 'false'
+        skillsService.createSkill(skillsGroup)
+        def children = allSkills[1..2]
+
+        String skillsGroupId = skillsGroup.skillId
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, children[0])
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, children[1])
+
+
+        when:
+
+        def res = skillsService.getSkill(children[0])
+
+        then:
+        res
+        res.enabled == 'false'
+        res.groupName == skillsGroup.name
+        res.groupId == skillsGroup.skillId
+    }
+
     def "totalPoints on are returned for skills endpoint for disabled group"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
