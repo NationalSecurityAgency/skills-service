@@ -52,7 +52,7 @@ class PointsAndAchievementsBuilder {
 
     @Profile
     PointsAndAchievementsResult build() {
-        dataToSave = new DataToSave(pointIncrement: pointIncrement, numChildSkillsRequired: loadedData.numChildSkillsRequired, skillsGroupDefId: loadedData.skillsGroupDefId, userId: userId)
+        dataToSave = new DataToSave(pointIncrement: pointIncrement, subjectDefId: loadedData.subjectDefId, numChildSkillsRequired: loadedData.numChildSkillsRequired, skillsGroupDefId: loadedData.skillsGroupDefId, userId: userId)
 
         // any parent that exist must get points added
         dataToSave.toAddPointsTo.addAll(loadedData.tinyUserPoints)
@@ -132,6 +132,7 @@ class PointsAndAchievementsBuilder {
             maxAchieved = maxAchieved ?: 0
             // handle an edge case where user achieves multiple levels via one event
             if (levelInfo.level > maxAchieved) {
+                // if this is a group, find the date the group was achieved; otherwise find the date the regular skill was achieved
                 Date achievedOn = groupSkillRefId ? getAchievedOnDate(groupSkillRefId, SkillRelDef.RelationshipType.SkillsGroupRequirement) : getAchievedOnDate(subjectSkillRefId, SkillRelDef.RelationshipType.RuleSetDefinition)
                 res = (maxAchieved+1..levelInfo.level).collect {
                     UserAchievement achievement = new UserAchievement(userId: userId.toLowerCase(), projectId: projectId, skillId: skillId, skillRefId: subjectSkillRefId,

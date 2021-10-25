@@ -33,5 +33,6 @@ class DataToSave {
     Integer pointIncrement
     Integer numChildSkillsRequired
     Integer skillsGroupDefId
+    Integer subjectDefId
     String userId
 }

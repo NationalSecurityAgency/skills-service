@@ -34,6 +34,7 @@ class LoadedData {
     List<SkillEventsSupportRepo.TinyUserPoints> skillsGroupChildUserPoints
     Integer numChildSkillsRequired
     Integer skillsGroupDefId
+    Integer subjectDefId
     Integer skillsRefId
 
     /**

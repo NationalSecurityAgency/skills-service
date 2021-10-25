@@ -48,7 +48,7 @@ class PointsAndAchievementsDataLoader {
         // handle skills group with less than all skills required
         Integer skillsGroupDefId
         Integer numChildSkillsRequired
-        List<SkillEventsSupportRepo.TinyUserPoints> skillsGroupChildUserPoints
+        Integer subjectDefId
         if (skillDef.groupId) {
             // skills group child, check parent and if numSkillsRequired then need to load siblings to determine which contribute to points
             assert parentDefs && parentDefs.size() == 1 && parentDefs.first().type == SkillDef.ContainerType.SkillsGroup && parentDefs.first().skillId == skillDef.groupId
@@ -58,12 +58,12 @@ class PointsAndAchievementsDataLoader {
                 numChildSkillsRequired = parentDefs.first().numSkillsRequired
             }
         } else if (skillDef.type == SkillDef.ContainerType.SkillsGroup) {
-            parentDefs.addAll(loadParents(parentDefs.first().id))
             if (skillDef.numSkillsRequired > 0 && Boolean.valueOf(skillDef.enabled)) {
                 skillsGroupDefId = skillDef.id
                 numChildSkillsRequired = skillDef.numSkillsRequired
             }
         }
+        subjectDefId = parentDefs.find { it.type == SkillDef.ContainerType.Subject }?.id
 
         List<Integer> skillRefIds = [skillDef.id]
         skillRefIds.addAll(parentDefs.collect { it.id })
@@ -77,7 +77,7 @@ class PointsAndAchievementsDataLoader {
 
         LoadedData res = new LoadedData(userId: userId, projectId: projectId, parentDefs: parentDefs, tinyUserPoints: tinyUserPoints,
                 levels: tinyLevels, tinyUserAchievements: tinyUserAchievements, tinyProjectDef:tinyProjectDef, skillsRefId: skillDef.id,
-                numChildSkillsRequired: numChildSkillsRequired, skillsGroupDefId: skillsGroupDefId)
+                subjectDefId: subjectDefId, numChildSkillsRequired: numChildSkillsRequired, skillsGroupDefId: skillsGroupDefId)
         validator.validate(res)
 
         return res
