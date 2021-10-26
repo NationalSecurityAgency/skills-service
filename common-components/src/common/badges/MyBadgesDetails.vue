@@ -28,24 +28,25 @@ limitations under the License.
 
             <div v-if="badges && badges.length > 0" class="row justify-content-md-center">
                 <div v-for="(badge, index) in badges" v-bind:key="badge.badgeId" class="col-lg-3 col-sm-6 my-2">
-                    <div class="card h-100 skills-card-theme-border skills-navigable-item">
                         <router-link  :to="badgeRouterLinkGenerator(badge)"
-                                      class="card-body earned-badge"
+                                      custom
                                       :data-cy="`earnedBadgeLink_${badge.badgeId}`">
-                            <i class="fa fa-check-circle position-absolute text-success" style="right: 10px; top: 10px;"/>
-                            <i v-if="badge.gem" class="fas fa-gem position-absolute" style="top: 10px; left: 10px; color: purple"></i>
-                            <i v-if="badge.global" class="fas fa-globe position-absolute" style="top: 10px; left: 10px; color: blue"></i>
-                            <i :class="getIconCss(badge.iconClass, index)" style="font-size: 5em;"/>
-                            <div class="card-title mb-0 text-truncate">
-                                {{ badge.badge }}
+                          <div class="card h-100 skills-card-theme-border skills-navigable-item text-center">
+                            <div class="card-body earned-badge">
+                              <i class="fa fa-check-circle position-absolute text-success" style="right: 10px; top: 10px;"/>
+                              <i v-if="badge.gem" class="fas fa-gem position-absolute" style="top: 10px; left: 10px; color: purple"></i>
+                              <i v-if="badge.global" class="fas fa-globe position-absolute" style="top: 10px; left: 10px; color: blue"></i>
+                              <i :class="getIconCss(badge.iconClass, index)" style="font-size: 5em;"/>
+                              <div class="card-title mb-0 text-truncate">
+                                  {{ badge.badge }}
+                              </div>
+                              <div v-if="displayBadgeProject && badge.projectName" class="text-muted text-center text-truncate" data-cy="badgeProjectName">
+                                <small>Proj<span class="d-md-none d-xl-inline">ect</span>: {{badge.projectName}}</small>
+                              </div>
+                              <div data-cy="dateBadgeAchieved" class="text-muted mb-2"><i class="far fa-clock text-secondary" style="font-size: 0.8rem;"></i> {{ badge.dateAchieved | relativeTime() }}</div>
                             </div>
-                            <div v-if="displayBadgeProject && badge.projectName" class="text-muted text-center text-truncate" data-cy="badgeProjectName">
-                              <small>Proj<span class="d-md-none d-xl-inline">ect</span>: {{badge.projectName}}</small>
-                            </div>
-                            <div data-cy="dateBadgeAchieved" class="text-muted mb-2"><i class="far fa-clock text-secondary" style="font-size: 0.8rem;"></i> {{ badge.dateAchieved | relativeTime() }}</div>
+                          </div>
                         </router-link>
-                    </div>
-
                 </div>
             </div>
 

@@ -262,7 +262,7 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=badgeProjectName]').eq(1).should('be.visible').should('have.text', 'Project: This is project 1');
   });
 
-  it('material icons should be proper size', () => {
+  it.only('material icons should be proper size', () => {
     cy.loginAsRootUser();
     cy.request('PUT', `/supervisor/badges/globalBadge1`, {
       badgeId: `globalBadge1`,

@@ -48,7 +48,7 @@ limitations under the License.
     <div class="row">
       <div class="col text-md-left">
         <div class="h4" @click="skillClicked" :class="{ 'skill-name-url' : allowDrillDown }" data-cy="skillProgressTitle">
-          <div class="d-inline" :class="{ 'text-success' : skill.isSkillsGroupType,
+          <div class="d-inline skills-theme-primary-color" :class="{ 'text-success' : skill.isSkillsGroupType,
                                           'text-info' : skill.isSkillType && !skill.childSkill,
                                           'text-secondary' : skill.childSkill }">
             <span v-if="skill.isSkillsGroupType"><i class="fas fa-layer-group mr-1"></i></span>

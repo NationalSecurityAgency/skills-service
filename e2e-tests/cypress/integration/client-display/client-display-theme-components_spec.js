@@ -123,8 +123,6 @@ describe('Client Display Theme Components Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="filterMenu"] .dropdown-menu.show', 'filterMenu-badges', snapshotOptions);
     })
 
-
-
     it('theme info cards', () => {
         const url = '/?themeParam=tiles|{%22backgroundColor%22:%22black%22}&themeParam=textPrimaryColor|white&themeParam=infoCards|{%22backgroundColor%22:%22lightgray%22,%22borderColor%22:%22green%22,%22foregroundColor%22:%22purple%22,%22iconColors%22:[%22blue%22,%22red%22,%20%22yellow%22,%22green%22]}';
         cy.cdVisit(url);

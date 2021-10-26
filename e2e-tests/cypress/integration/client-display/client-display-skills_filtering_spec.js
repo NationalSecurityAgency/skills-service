@@ -602,7 +602,6 @@ describe('Client Display Skills Filtering Tests', () => {
     cy.get('[data-cy="skillProgress_index-1"]').should('not.exist')
   });
 
-
   it('filter skills on badge catalog page', () => {
     cy.createSkill(1, 1, 1, {name: 'a Search blah skill 1'});
     cy.createSkill(1, 1, 2, {name: 'b is a skill 2'});
