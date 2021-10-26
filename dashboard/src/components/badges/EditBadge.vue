@@ -48,7 +48,7 @@ limitations under the License.
 
           <div class="mt-2">
             <label>Description</label>
-            <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" v-slot="{errors}"
+            <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{errors}"
                                 name="Badge Description">
               <markdown-editor v-model="badgeInternal.description" @input="updateDescription"></markdown-editor>
               <small class="form-text text-danger mb-3" data-cy="badgeDescriptionError">{{ errors[0] }}</small>

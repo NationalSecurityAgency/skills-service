@@ -58,7 +58,7 @@ limitations under the License.
         <div class="mt-3">
           <label class="label">Description</label>
           <div class="control">
-            <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" v-slot="{errors}" name="Group Description">
+            <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{errors}" name="Group Description">
               <markdown-editor v-if="internalGroup" v-model="internalGroup.description" data-cy="groupDescription"/>
               <small class="form-text text-danger" data-cy="groupDescriptionError">{{ errors[0] }}</small>
             </ValidationProvider>
@@ -158,10 +158,17 @@ limitations under the License.
         this.publishHidden({});
       },
       updateGroup() {
-        this.close();
-        this.internalGroup.name = InputSanitizer.sanitize(this.internalGroup.name);
-        this.internalGroup.projectId = InputSanitizer.sanitize(this.internalGroup.projectId);
-        this.$emit('group-saved', this.internalGroup);
+        this.$refs.observer.validate()
+          .then((res) => {
+            if (!res) {
+              this.overallErrMsg = 'Form did NOT pass validation, please fix and try to Save again';
+            } else {
+              this.internalGroup.name = InputSanitizer.sanitize(this.internalGroup.name);
+              this.internalGroup.projectId = InputSanitizer.sanitize(this.internalGroup.projectId);
+              this.$emit('group-saved', this.internalGroup);
+              this.close();
+            }
+          });
       },
       updateId() {
         if (!this.isEdit && !this.canEditGroupId) {

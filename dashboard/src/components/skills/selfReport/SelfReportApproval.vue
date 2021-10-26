@@ -124,7 +124,7 @@ limitations under the License.
           <p class="h6">This will <b class="font-weight-bold">permanently</b> reject user's request(s) to get points. Users will be notified and you can provide an optional message below.</p>
         </div>
       </div>
-      <ValidationProvider rules="maxSelfReportRejectionMessageLength|customDescriptionValidator" v-slot="{errors}"
+      <ValidationProvider rules="maxSelfReportRejectionMessageLength|customDescriptionValidator" :debounce="250" v-slot="{errors}"
                           name="Rejection Message">
         <b-form-textarea rows="5" type="text" id="approvalRequiredMsg" v-model="reject.rejectMsg"
                aria-describedby="rejectionTitleInModal" aria-label="Optional Rejection Message"

@@ -23,12 +23,13 @@ describe('Skills Group Tests', () => {
 
         Cypress.Commands.add("createGroupViaUI", (groupName, description = null) => {
             cy.get('[data-cy="newGroupButton"]').click();
-            cy.get('[data-cy="EditSkillGroupModal"]').contains('New Skills Group');
 
             cy.get('[data-cy="groupName"]').type(groupName);
             if (description) {
                 cy.get('[data-cy="groupDescription"]').type(description);
             }
+            cy.get('[data-cy="EditSkillGroupModal"]').contains('New Skills Group');
+
             cy.get('[data-cy="saveGroupButton"]').click();
             cy.get('[data-cy="EditSkillGroupModal"]').should('not.exist');
         });
@@ -67,6 +68,11 @@ describe('Skills Group Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="noContent"]').contains('No Skills Yet');
         cy.createGroupViaUI('Blah', 'Description for this group!');
+        cy.get('[data-cy="expandDetailsBtn_BlahGroup"]').click();
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_BlahGroup"] [data-cy="description"]').contains('Description for this group!');
+
+        // refresh and re-validate
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="expandDetailsBtn_BlahGroup"]').click();
         cy.get('[data-cy="ChildRowSkillGroupDisplay_BlahGroup"] [data-cy="description"]').contains('Description for this group!');
     });
@@ -501,6 +507,7 @@ describe('Skills Group Tests', () => {
     });
 
     it('Report Skill Events: ability to report skill events after group is enabled', () => {
+        cy.intercept('POST', '/app/users/projects/proj1/suggestClientUsers?userSuggestOption=ONE').as('userSuggest');
         cy.createSkillsGroup(1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 1, { pointIncrement: 10, numPerformToCompletion: 5 });
         cy.addSkillToGroup(1, 1, 1, 2, { pointIncrement: 10, numPerformToCompletion: 5 });
@@ -520,16 +527,21 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="nav-Add Event"] .fa-exclamation-circle').should('not.exist');
         cy.get('[data-cy="nav-Add Event"]').click();
         cy.get('[data-cy="userIdInput"]').type('user1{enter}')
+        cy.wait('@userSuggest');
+        cy.get('[data-cy="userIdInput"]').contains('user1')
         cy.get('[data-cy="addSkillEventButton"]').should('be.enabled');
 
         // refresh and re-validate
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill2/addSkillEvent');
         cy.get('[data-cy="nav-Add Event"] .fa-exclamation-circle').should('not.exist');
         cy.get('[data-cy="userIdInput"]').type('user1{enter}')
+        cy.wait('@userSuggest');
+        cy.get('[data-cy="userIdInput"]').contains('user1')
         cy.get('[data-cy="addSkillEventButton"]').should('be.enabled');
     });
 
     it('Report Skill Events: do not allow to report skill if the group is disabled', () => {
+        cy.intercept('POST', '/app/users/projects/proj1/suggestClientUsers?userSuggestOption=ONE').as('userSuggest');
         cy.createSkillsGroup(1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 1, { pointIncrement: 10, numPerformToCompletion: 5 });
         cy.addSkillToGroup(1, 1, 1, 2, { pointIncrement: 10, numPerformToCompletion: 5 });
@@ -549,10 +561,14 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="nav-Add Event"] .fa-exclamation-circle').should('exist');
         cy.get('[data-cy="nav-Add Event"]').click();
         cy.get('[data-cy="userIdInput"]').type('user1{enter}')
+        cy.wait('@userSuggest');
+        cy.get('[data-cy="userIdInput"]').contains('user1')
         cy.get('[data-cy="addSkillEventButton"]').should('be.disabled');
     });
 
     it('Report Skill Events:  must not be able to report skill events if there is not enough points because group is not enabled', () => {
+        cy.intercept('POST', '/app/users/projects/proj1/suggestClientUsers?userSuggestOption=ONE').as('userSuggest');
+
         cy.createSkillsGroup(1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 1, { pointIncrement: 10, numPerformToCompletion: 5 });
         cy.addSkillToGroup(1, 1, 1, 2, { pointIncrement: 10, numPerformToCompletion: 5 });
@@ -568,12 +584,16 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="nav-Add Event"] .fa-exclamation-circle').should('exist');
         cy.get('[data-cy="nav-Add Event"]').click();
         cy.get('[data-cy="userIdInput"]').type('user1{enter}')
+        cy.wait('@userSuggest');
+        cy.get('[data-cy="userIdInput"]').contains('user1')
         cy.get('[data-cy="addSkillEventButton"]').should('be.disabled');
 
         // refresh and re-validate
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill2/addSkillEvent');
         cy.get('[data-cy="nav-Add Event"] .fa-exclamation-circle').should('exist');
         cy.get('[data-cy="userIdInput"]').type('user1{enter}')
+        cy.wait('@userSuggest');
+        cy.get('[data-cy="userIdInput"]').contains('user1')
         cy.get('[data-cy="addSkillEventButton"]').should('be.disabled');
     });
 
