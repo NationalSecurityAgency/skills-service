@@ -49,11 +49,6 @@ class RuleSetDefGraphService {
     }
 
     @Transactional
-    List<SkillDef> getChildrenSkills(SkillDef skillDef) {
-        getChildrenSkills(skillDef, [RelationshipType.RuleSetDefinition])
-    }
-
-    @Transactional
     List<SkillDef> getChildrenSkills(SkillDef skillDef, List<RelationshipType> relationshipTypes) {
         return skillRelDefRepo.getChildren(skillDef.projectId, skillDef.skillId, relationshipTypes)
     }

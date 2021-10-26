@@ -674,10 +674,10 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         idsExistAfter.every { !it }
     }
 
-    def "delete SkillsGroup and verify proper display order is maintained"() {
+    def "delete SkillsGroup and a child skill and verify proper display order is maintained for both"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
-        def allSkills = SkillsFactory.createSkills(6)
+        def allSkills = SkillsFactory.createSkills(7)
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
 
@@ -696,7 +696,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         skillsGroup2.type = 'SkillsGroup'
         skillsService.createSkill(skillsGroup2)
         String skillsGroup2Id = skillsGroup2.skillId
-        def group2Children = allSkills[4..5]
+        def group2Children = allSkills[4..6]
         group2Children.each { skill ->
             skillsService.assignSkillToSkillsGroup(skillsGroup2Id, skill)
         }
@@ -707,16 +707,36 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         def skillsGroup1DisplayOrderBefore = subjSkillsBefore.find { it.skillId == skillsGroup1Id }.displayOrder
         def skillsGroup2DisplayOrderBefore = subjSkillsBefore.find { it.skillId == skillsGroup2Id }.displayOrder
 
+        def skillsGroup2ChildrenResBefore = skillsService.getSkillsForGroup(proj.projectId, skillsGroup2Id)
+
         when:
         skillsService.deleteSkill(skillsGroup1)
         def subjSkillsAfter = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
         def skillsGroup2DisplayOrderAfter = subjSkillsAfter.find { it.skillId == skillsGroup2Id }.displayOrder
 
+        skillsService.deleteSkill(group2Children[1])
+        def skillsGroup2ChildrenResAfter = skillsService.getSkillsForGroup(proj.projectId, skillsGroup2Id)
+
         then:
+        // skill group order
         skillsGroup1DisplayOrderBefore == 1
         skillsGroup2DisplayOrderBefore == 2
-
         skillsGroup2DisplayOrderAfter == 1
+
+        // skills group 2 children order
+        skillsGroup2ChildrenResBefore.size() == 3
+        skillsGroup2ChildrenResBefore[0].skillId == group2Children[0].skillId
+        skillsGroup2ChildrenResBefore[0].displayOrder == 1
+        skillsGroup2ChildrenResBefore[1].skillId == group2Children[1].skillId
+        skillsGroup2ChildrenResBefore[1].displayOrder == 2
+        skillsGroup2ChildrenResBefore[2].skillId == group2Children[2].skillId
+        skillsGroup2ChildrenResBefore[2].displayOrder == 3
+
+        skillsGroup2ChildrenResAfter.size() == 2
+        skillsGroup2ChildrenResAfter[0].skillId == group2Children[0].skillId
+        skillsGroup2ChildrenResAfter[0].displayOrder == 1
+        skillsGroup2ChildrenResAfter[1].skillId == group2Children[2].skillId
+        skillsGroup2ChildrenResAfter[1].displayOrder == 2
     }
 
     def "validate totalPoints on SkillsGroup"() {

@@ -303,7 +303,7 @@ class SkillsAdminService {
             badgeAdminService.awardBadgeToUsersMeetingRequirements(it)
         }
 
-        List<SkillDef> siblings = ruleSetDefGraphService.getChildrenSkills(parentSkill)
+        List<SkillDef> siblings = ruleSetDefGraphService.getChildrenSkills(parentSkill, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
         displayOrderService.resetDisplayOrder(siblings)
     }
 
