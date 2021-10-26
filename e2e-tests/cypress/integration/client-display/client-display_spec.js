@@ -340,6 +340,7 @@ describe('Client Display Tests', () => {
     });
 
     it('skill with dependency renders dependency graph', () => {
+        cy.viewport(1200, 1000)
         cy.cdVisit('/');
         cy.cdClickSubj(0);
         cy.get('[data-cy=toggleSkillDetails]').click()
