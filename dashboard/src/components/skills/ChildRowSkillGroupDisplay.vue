@@ -247,7 +247,13 @@ limitations under the License.
               totalPoints: this.group.totalPoints + (skill.pointIncrement * skill.numPerformToCompletion),
             };
             this.$emit('group-changed', updatedGroup);
+            this.refreshSubjectState();
           });
+      },
+      refreshSubjectState(forceRefresh = false) {
+        if (this.group.enabled || forceRefresh) {
+          this.loadSubjectDetailsState({ projectId: this.group.projectId, subjectId: this.group.subjectId });
+        }
       },
       skillRemoved(skill) {
         this.numSkills -= 1;
@@ -259,6 +265,7 @@ limitations under the License.
           totalPoints: this.group.totalPoints - (skill.pointIncrement * skill.numPerformToCompletion),
         };
         this.$emit('group-changed', updatedGroup);
+        this.refreshSubjectState();
       },
       skillChanged(skill) {
         const item1Index = this.skills.findIndex((item) => item.skillId === skill.originalSkillId);
@@ -273,8 +280,7 @@ limitations under the License.
         } else {
           this.skills.push(skill);
         }
-
-        this.loadSubjectDetailsState({ projectId: this.group.projectId, subjectId: this.group.subjectId });
+        this.refreshSubjectState();
       },
       handleNumRequiredSkillsChanged(updatedGroup) {
         SkillsService.saveSkill(updatedGroup).then(() => {
@@ -298,7 +304,7 @@ limitations under the License.
               const copy = { ...this.group, enabled: true };
               SkillsService.saveSkill(copy).then((savedGroup) => {
                 this.$emit('group-changed', savedGroup);
-                this.loadSubjectDetailsState({ projectId: this.group.projectId, subjectId: this.group.subjectId });
+                this.refreshSubjectState(true);
               });
             }
           });

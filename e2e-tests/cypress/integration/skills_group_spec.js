@@ -525,13 +525,8 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="disabledGroupBadge-group1"]').should('not.exist');
 
         cy.get('[data-cy="nav-Add Event"] .fa-exclamation-circle').should('not.exist');
-        cy.get('[data-cy="nav-Add Event"]').click();
-        cy.get('[data-cy="userIdInput"]').type('user1{enter}')
-        cy.wait('@userSuggest');
-        cy.get('[data-cy="userIdInput"]').contains('user1')
-        cy.get('[data-cy="addSkillEventButton"]').should('be.enabled');
 
-        // refresh and re-validate
+        // nav directly to the page and nav item is disabled
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill2/addSkillEvent');
         cy.get('[data-cy="nav-Add Event"] .fa-exclamation-circle').should('not.exist');
         cy.get('[data-cy="userIdInput"]').type('user1{enter}')
@@ -557,9 +552,10 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="pageHeader"]').contains('SKILL: Very Great Skill 2');
         cy.get('[data-cy="pageHeader"]').contains('Group ID: group1');
         cy.get('[data-cy="disabledGroupBadge-group1"]');
-
         cy.get('[data-cy="nav-Add Event"] .fa-exclamation-circle').should('exist');
-        cy.get('[data-cy="nav-Add Event"]').click();
+
+        // nav directly to the page and nav item is disabled
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill2/addSkillEvent');
         cy.get('[data-cy="userIdInput"]').type('user1{enter}')
         cy.wait('@userSuggest');
         cy.get('[data-cy="userIdInput"]').contains('user1')
@@ -582,15 +578,9 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="pageHeader"]').contains('Group ID: group1');
         cy.get('[data-cy="disabledGroupBadge-group1"]');
         cy.get('[data-cy="nav-Add Event"] .fa-exclamation-circle').should('exist');
-        cy.get('[data-cy="nav-Add Event"]').click();
-        cy.get('[data-cy="userIdInput"]').type('user1{enter}')
-        cy.wait('@userSuggest');
-        cy.get('[data-cy="userIdInput"]').contains('user1')
-        cy.get('[data-cy="addSkillEventButton"]').should('be.disabled');
 
-        // refresh and re-validate
+        // nav directly to the page and nav item is disabled
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill2/addSkillEvent');
-        cy.get('[data-cy="nav-Add Event"] .fa-exclamation-circle').should('exist');
         cy.get('[data-cy="userIdInput"]').type('user1{enter}')
         cy.wait('@userSuggest');
         cy.get('[data-cy="userIdInput"]').contains('user1')
@@ -639,7 +629,7 @@ describe('Skills Group Tests', () => {
         cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="editRequired"]`).click();
         // -1 === all skills
         cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).should('have.value','-1');
-        cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).select('1');
+        cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).select('1 out of 2');
 
         cy.get('.modal-content').contains('Save').click();
 
@@ -676,7 +666,7 @@ describe('Skills Group Tests', () => {
         cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="editRequired"]`).click();
         // -1 == all skills
         cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).should('have.value', -1)
-        cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).select(1);
+        cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).select('2 out of 4');
 
         cy.get('.modal-content').contains('Save').click();
 
@@ -727,7 +717,7 @@ describe('Skills Group Tests', () => {
         // set numSkillsRequired
         cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="editRequired"]`).click();
         cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).contains(3);
-        cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).select(2);
+        cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).select('2 out of 4');
         cy.get('.modal-content').contains('Save').click();
 
         // verify new skill modal validation
@@ -849,5 +839,57 @@ describe('Skills Group Tests', () => {
         cy.get('.modal-footer button').last().should('be.enabled');
         cy.get('[data-cy="syncSkillsPointsSection"]').should('not.exist');
     });
+
+    it('subject overview cards are updated when group is enabled', () => {
+        cy.createSkillsGroup(1, 1, 1);
+        cy.addSkillToGroup(1, 1, 1, 1, { pointIncrement: 10, numPerformToCompletion: 5 });
+        cy.addSkillToGroup(1, 1, 1, 2, { pointIncrement: 10, numPerformToCompletion: 5 });
+        cy.addSkillToGroup(1, 1, 1, 3, { pointIncrement: 10, numPerformToCompletion: 5 });
+        const groupId = 'group1'
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
+
+        cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '0');
+
+        // go live
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="goLiveBtn"]`).click();
+        cy.contains('While this Group is disabled, user\'s cannot see the group or achieve it');
+        cy.contains('Yes, Go Live').click();
+
+        cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '150');
+    })
+
+    it('subject overview cards are updated when skills added, deleted or modified for group that is enabled', () => {
+        cy.createSkillsGroup(1, 1, 1);
+        cy.addSkillToGroup(1, 1, 1, 1, { pointIncrement: 10, numPerformToCompletion: 5 });
+        cy.addSkillToGroup(1, 1, 1, 2, { pointIncrement: 10, numPerformToCompletion: 5 });
+        cy.addSkillToGroup(1, 1, 1, 3, { pointIncrement: 10, numPerformToCompletion: 5 });
+        cy.createSkillsGroup(1, 1, 1, { enabled: true });
+        const groupId = 'group1'
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
+
+        cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '150');
+
+        // delete
+        cy.get('[data-cy="deleteSkillButton_skill1"]').click();
+        cy.contains('Delete Action CANNOT be undone');
+        cy.contains('YES, Delete It!').click();
+
+        cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '100');
+
+        // modify
+        cy.get('[data-cy="editSkillButton_skill2"]').click();
+        cy.get('[data-cy="skillPointIncrement"]').clear().type(50);
+        cy.get('button').contains('Save').click();
+
+        cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '300');
+
+        // add
+        cy.addSkillToGroupViaUI('group1', 4, false)
+        cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '350');
+    })
 
 });
