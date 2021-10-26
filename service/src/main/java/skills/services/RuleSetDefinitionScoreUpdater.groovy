@@ -16,6 +16,7 @@
 package skills.services
 
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import skills.services.admin.SkillsGroupAdminService
@@ -69,12 +70,19 @@ class RuleSetDefinitionScoreUpdater {
 
     void skillToBeRemoved(SkillDef skillDef) {
         List<SkillRelDef> parents = skillRelDefRepo.findAllByChildAndTypeIn(skillDef, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
-        parents?.each {
-            walkUpAndSubtractFromTotal(it.parent, skillDef.totalPoints)
-        }
-        if(SkillDef.ContainerType.Skill == skillDef.type){
-            ProjDef projDef = projDefRepo.findByProjectId(skillDef.projectId)
-            projDef.totalPoints -= skillDef.totalPoints
+        if (isChildOfDisabledSkillsGroup(skillDef, parents)) {
+            // disabled groups do not contribute to parent total points, just update the group itself
+            SkillDef skillsGroupDef = parents.first().parent
+            skillsGroupDef.totalPoints = skillsGroupDef.totalPoints - skillDef.totalPoints
+            skillDefRepo.save(skillDef)
+        } else {
+            parents?.each {
+                walkUpAndSubtractFromTotal(it.parent, skillDef.totalPoints)
+            }
+            if(SkillDef.ContainerType.Skill == skillDef.type){
+                ProjDef projDef = projDefRepo.findByProjectId(skillDef.projectId)
+                projDef.totalPoints -= skillDef.totalPoints
+            }
         }
     }
 
@@ -95,5 +103,15 @@ class RuleSetDefinitionScoreUpdater {
             projDef.totalPoints = total
             projDefRepo.save(projDef)
         }
+    }
+
+    private boolean isChildOfDisabledSkillsGroup(SkillDef skillDef, List<SkillRelDef> parents) {
+        boolean isSkillsGroupChild = StringUtils.isNotBlank(skillDef.groupId)
+        if (isSkillsGroupChild) {
+            assert parents && parents.size() == 1 && parents.first().parent.type == SkillDef.ContainerType.SkillsGroup && parents.first().parent.skillId == skillDef.groupId
+            SkillDef skillsGroupDef = parents.first().parent
+            return !Boolean.valueOf(skillsGroupDef.enabled)
+        }
+        return false
     }
 }

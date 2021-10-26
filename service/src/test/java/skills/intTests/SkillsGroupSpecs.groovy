@@ -808,7 +808,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         res.groupId == skillsGroup.skillId
     }
 
-    def "totalPoints are returned for skills endpoint for disabled group, but not subjects or projects"() {
+    def "totalPoints are returned for skills endpoint for disabled group, but not subjects or project"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def allSkills = SkillsFactory.createSkills(3)
@@ -826,7 +826,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
 
         when:
 
-        int skillPoints = skillsService.getSkill(skillsGroup).totalPoints
+        int skillsGroupPoints = skillsService.getSkill(skillsGroup).totalPoints
         def subjects = skillsService.getSubjects(proj.projectId)
         def projects = skillsService.getProjects()
         def subjSkills = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
@@ -835,7 +835,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         subjSkills
         subjSkills.size() == 1
         subjSkills[0].totalPoints == 20
-        skillPoints == 20
+        skillsGroupPoints == 20
 
         subjects
         subjects.size() == 1
@@ -1007,5 +1007,63 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         then:
         subjectAchievements
         subjectSummary
+    }
+
+    def "deleting child skill of a disabled group will update totalPoints for the group, but not subjects or project"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def allSkills = SkillsFactory.createSkills(3)
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+
+        def skillsGroup = allSkills[0]
+        skillsGroup.type = 'SkillsGroup'
+        skillsService.createSkill(skillsGroup)
+        def children = allSkills[1..2]
+
+        String skillsGroupId = skillsGroup.skillId
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, children[0])
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, children[1])
+
+        int skillsGroupPointsBefore = skillsService.getSkill(skillsGroup).totalPoints
+        def subjectsBefore = skillsService.getSubjects(proj.projectId)
+        def projectsBefore = skillsService.getProjects()
+        def subjSkillsBefore = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
+        when:
+
+        skillsService.deleteSkill(children[1])
+
+        int skillsGroupPointsAfter = skillsService.getSkill(skillsGroup).totalPoints
+        def subjectsAfter = skillsService.getSubjects(proj.projectId)
+        def projectsAfter = skillsService.getProjects()
+        def subjSkillsAfter = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
+
+        then:
+        subjSkillsBefore
+        subjSkillsBefore.size() == 1
+        subjSkillsBefore[0].totalPoints == 20
+        skillsGroupPointsBefore == 20
+
+        subjectsBefore
+        subjectsBefore.size() == 1
+        subjectsBefore[0].totalPoints == 0
+
+        projectsBefore
+        projectsBefore.size() == 1
+        projectsBefore[0].totalPoints == 0
+
+
+        subjSkillsAfter
+        subjSkillsAfter.size() == 1
+        subjSkillsAfter[0].totalPoints == 10
+        skillsGroupPointsAfter == 10
+
+        subjectsAfter
+        subjectsAfter.size() == 1
+        subjectsAfter[0].totalPoints == 0
+
+        projectsAfter
+        projectsAfter.size() == 1
+        projectsAfter[0].totalPoints == 0
     }
 }
