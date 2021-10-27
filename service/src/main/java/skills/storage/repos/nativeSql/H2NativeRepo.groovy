@@ -628,9 +628,9 @@ class H2NativeRepo implements NativeQueriesRepo {
             subjectLevels?.each { Object[] level ->
                 Number levelId = level[0]
                 String levelValue = level[1]
-                Number pointsRequired = level[2]
+                Number pointsRequired = level[2].toDouble().trunc()
 
-                if (userPoints > pointsRequired) {
+                if (userPoints >= pointsRequired) {
                     Query alreadyExists = entityManager.createNativeQuery('''
                         SELECT 1 
                         FROM user_achievement 
@@ -721,9 +721,9 @@ class H2NativeRepo implements NativeQueriesRepo {
             levels.each { Object[] level ->
                 Number levelId = level[0]
                 String levelValue = level[1]
-                Number pointsRequired = level[2]
+                Number pointsRequired = level[2].toDouble().trunc()
 
-                if (userPoints > pointsRequired) {
+                if (userPoints >= pointsRequired) {
                     Query alreadyExists = entityManager.createNativeQuery('''
                         SELECT 1 
                         FROM user_achievement 
