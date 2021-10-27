@@ -122,12 +122,14 @@ class UserAchievementsAndPointsManagement {
             log.debug("Insert User Achievements. projectId=[${projectId}], skillId=[${skillId}], skillRefId=[${skillRefId}], numOfOccurrences=[$numOfOccurrences]")
         }
         userAchievedLevelRepo.insertUserAchievementWhenDecreaseOfOccurrencesCausesUsersToAchieve(projectId, skillId, skillRefId, numOfOccurrences, Boolean.FALSE.toString())
+    }
 
+    @Transactional
+    void identifyAndAddLevelAchievements(String projectId, Integer skillRefId) {
         List<SkillRelDef> parent = skillRelDefRepo.findAllByChildIdAndType(skillRefId, SkillRelDef.RelationshipType.RuleSetDefinition)
         assert parent.size() == 1
 
         SettingsResult settingsResult = settingsService.getProjectSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
-
         boolean pointsBased = settingsResult ? settingsResult.isEnabled() : false
 
         nativeQueriesRepo.identifyAndAddProjectLevelAchievements(projectId, pointsBased)
