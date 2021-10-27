@@ -192,7 +192,7 @@ class SkillsAdminService {
                     version: skillRequest.version,
                     selfReportingType: selfReportingType,
                     numSkillsRequired: skillRequest.numSkillsRequired,
-                    enabled: skillRequest.enabled,
+                    enabled: isSkillsGroup ? false : skillRequest.enabled,
                     groupId: groupId,
             )
             log.debug("Saving [{}]", skillDefinition)

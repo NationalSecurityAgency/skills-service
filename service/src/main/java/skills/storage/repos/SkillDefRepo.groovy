@@ -111,14 +111,14 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     Integer calculateHighestDisplayOrderByProjectIdAndType(String projectId, SkillDef.ContainerType type)
 
     @Query(value = '''SELECT sum(sdChild.totalPoints) from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
-      where srd.parent=sdParent.id and srd.child=sdChild.id and 
+      where srd.parent=sdParent.id and srd.child=sdChild.id and (sdChild.enabled is null or sdChild.enabled = 'true') and  
       sdParent.projectId=?1 and sdParent.skillId=?2 and srd.type IN ('RuleSetDefinition', 'SkillsGroupRequirement') and sdChild.version<=?3 ''' )
     @Nullable
     Integer calculateTotalPointsForSubject(String projectId, String skillId, Integer version)
 
 
     @Query(value = '''SELECT sum(sdChild.totalPoints) from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
-      where srd.parent=sdParent.id and srd.child=sdChild.id and 
+      where srd.parent=sdParent.id and srd.child=sdChild.id and (sdChild.enabled is null or sdChild.enabled = 'true') and 
       sdParent.projectId=?1 and srd.type=?2 and sdChild.version<=?3 ''' )
     @Nullable
     Integer calculateTotalPointsForProject(String projectId, RelationshipType relationshipType, Integer version)
