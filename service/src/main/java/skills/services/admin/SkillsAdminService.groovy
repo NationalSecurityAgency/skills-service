@@ -219,6 +219,10 @@ class SkillsAdminService {
             } else if (occurrencesDelta > 0) {
                 userPointsManagement.removeUserAchievementsThatDoNotMeetNewNumberOfOccurrences(savedSkill.projectId, savedSkill.skillId, newOccurrences)
             }
+
+            if (pointIncrementDelta < 0 || occurrencesDelta < 0) {
+                userPointsManagement.identifyAndAddLevelAchievements(savedSkill.projectId, savedSkill.id)
+            }
         }
 
         log.debug("Saved [{}]", savedSkill)

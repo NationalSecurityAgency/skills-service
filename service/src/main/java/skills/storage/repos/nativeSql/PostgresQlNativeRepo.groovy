@@ -508,7 +508,7 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
         SELECT user_totals.user_id, subject_score.skill_id, subject_levels.level, user_totals.totalPoints, ''' + "'$projectId', 'false'" +
         '''
         FROM user_totals, subject_score, subject_levels
-        WHERE user_totals.totalPoints > subject_levels.pointsRequired 
+        WHERE user_totals.totalPoints >= TRUNC(subject_levels.pointsRequired) 
             AND NOT EXISTS 
                 (
                     SELECT 1 
@@ -555,7 +555,7 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
         SELECT user_totals.user_id, project_levels.level, user_totals.totalPoints, '''+"'$projectId', 'false'"+
         '''
         FROM project_levels, user_totals 
-        WHERE user_totals.totalPoints > project_levels.pointsRequired 
+        WHERE user_totals.totalPoints >= TRUNC(project_levels.pointsRequired) 
             AND NOT EXISTS 
                 (
                     SELECT 1 
