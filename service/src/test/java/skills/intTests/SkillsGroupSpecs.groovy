@@ -1115,6 +1115,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
 
         projects
         projects.size() == 1
-//        projects[0].numSkills == 3
+        projects[0].numSkills == 3
     }
 }

@@ -43,7 +43,28 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                 FROM project_definition pd
                 LEFT JOIN (SELECT project_id, MAX(event_time) AS latest FROM user_events GROUP BY project_id) events ON events.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS errorCount FROM project_error GROUP BY project_id) errors ON errors.project_id = pd.project_id
-                LEFT JOIN (SELECT project_id, COUNT(id) AS skillCount, MAX(updated) as skillUpdated FROM skill_definition WHERE type = 'Skill' GROUP BY project_id) skills ON skills.project_id = pd.project_id
+                LEFT JOIN (SELECT sd1.project_id, COUNT(sd1.id) AS skillCount, MAX(sd1.updated) as skillUpdated 
+                    FROM skill_definition sd1,
+                         skill_definition sd2,
+                         skill_relationship_definition srd1,
+                         skill_relationship_definition srd2
+                    WHERE sd1.type = 'Skill'
+                        and (
+                                (sd1.id = srd1.child_ref_id
+                                    and sd1.id = srd2.child_ref_id
+                                    and sd1.id = sd2.id
+                                    and srd1.type = 'RuleSetDefinition'
+                                    )
+                                or
+                                (sd1.id = srd2.child_ref_id
+                                    and sd2.id = srd1.child_ref_id
+                                    and srd1.child_ref_id = srd2.parent_ref_id
+                                    and srd1.type = 'RuleSetDefinition'
+						            and srd2.type = 'SkillsGroupRequirement'
+                                    and (sd2.enabled is null or sd2.enabled = 'true')
+                                )
+                        )
+                    GROUP BY sd1.project_id) skills ON skills.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS badgeCount, MAX(updated) as badgeUpdated FROM skill_definition WHERE type = 'Badge' GROUP BY project_id) badges ON badges.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS subjectCount, MAX(updated) as subjectUpdated FROM skill_definition WHERE type = 'Subject' GROUP BY project_id) subjects ON subjects.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, value AS expiringUnused, updated as expirationTriggeredDate FROM settings WHERE type = 'Project' AND setting = 'expiration.expiring.unused' AND value = 'true') expiration ON expiration.project_id = pd.project_id
@@ -72,7 +93,28 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                 FROM project_definition pd
                 LEFT JOIN (SELECT project_id, MAX(event_time) AS latest FROM user_events GROUP BY project_id) events ON events.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS errorCount FROM project_error GROUP BY project_id) errors ON errors.project_id = pd.project_id
-                LEFT JOIN (SELECT project_id, COUNT(id) AS skillCount, MAX(updated) AS skillUpdated FROM skill_definition WHERE type = 'Skill' GROUP BY project_id) skills ON skills.project_id = pd.project_id
+                LEFT JOIN (SELECT sd1.project_id, COUNT(sd1.id) AS skillCount, MAX(sd1.updated) as skillUpdated 
+                    FROM skill_definition sd1,
+                         skill_definition sd2,
+                         skill_relationship_definition srd1,
+                         skill_relationship_definition srd2
+                    WHERE sd1.type = 'Skill'
+                        and (
+                                (sd1.id = srd1.child_ref_id
+                                    and sd1.id = srd2.child_ref_id
+                                    and sd1.id = sd2.id
+                                    and srd1.type = 'RuleSetDefinition'
+                                    )
+                                or
+                                (sd1.id = srd2.child_ref_id
+                                    and sd2.id = srd1.child_ref_id
+                                    and srd1.child_ref_id = srd2.parent_ref_id
+                                    and srd1.type = 'RuleSetDefinition'
+						            and srd2.type = 'SkillsGroupRequirement'
+                                    and (sd2.enabled is null or sd2.enabled = 'true')
+                                )
+                        )
+                    GROUP BY sd1.project_id) skills ON skills.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS badgeCount, MAX(updated) AS badgeUpdated FROM skill_definition WHERE type = 'Badge' GROUP BY project_id) badges ON badges.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS subjectCount, MAX(updated) AS subjectUpdated FROM skill_definition WHERE type = 'Subject' GROUP BY project_id) subjects ON subjects.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, value AS expiringUnused, updated as expirationTriggeredDate FROM settings WHERE type = 'Project' AND setting = 'expiration.expiring.unused' AND value = 'true') expiration ON expiration.project_id = pd.project_id
@@ -101,7 +143,28 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                 FROM project_definition pd
                 LEFT JOIN (SELECT project_id, MAX(event_time) AS latest FROM user_events GROUP BY project_id) events ON events.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS errorCount FROM project_error GROUP BY project_id) errors ON errors.project_id = pd.project_id
-                LEFT JOIN (SELECT project_id, COUNT(id) AS skillCount, MAX(updated) AS skillUpdated FROM skill_definition WHERE type = 'Skill' GROUP BY project_id) skills ON skills.project_id = pd.project_id
+                LEFT JOIN (SELECT sd1.project_id, COUNT(sd1.id) AS skillCount, MAX(sd1.updated) as skillUpdated 
+                    FROM skill_definition sd1,
+                         skill_definition sd2,
+                         skill_relationship_definition srd1,
+                         skill_relationship_definition srd2
+                    WHERE sd1.type = 'Skill'
+                        and (
+                                (sd1.id = srd1.child_ref_id
+                                    and sd1.id = srd2.child_ref_id
+                                    and sd1.id = sd2.id
+                                    and srd1.type = 'RuleSetDefinition'
+                                    )
+                                or
+                                (sd1.id = srd2.child_ref_id
+                                    and sd2.id = srd1.child_ref_id
+                                    and srd1.child_ref_id = srd2.parent_ref_id
+                                    and srd1.type = 'RuleSetDefinition'
+						            and srd2.type = 'SkillsGroupRequirement'
+                                    and (sd2.enabled is null or sd2.enabled = 'true')
+                                )
+                        )
+                    GROUP BY sd1.project_id) skills ON skills.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS badgeCount, MAX(updated) AS badgeUpdated FROM skill_definition WHERE type = 'Badge' GROUP BY project_id) badges ON badges.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS subjectCount, MAX(updated) AS subjectUpdated FROM skill_definition WHERE type = 'Subject' GROUP BY project_id) subjects ON subjects.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, value AS expiringUnused, updated as expirationTriggeredDate FROM settings WHERE type = 'Project' AND setting = 'expiration.expiring.unused' AND value = 'true') expiration ON expiration.project_id = pd.project_id
@@ -130,7 +193,28 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                 FROM project_definition pd
                 LEFT JOIN (SELECT project_id, MAX(event_time) AS latest FROM user_events GROUP BY project_id) events ON events.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS errorCount FROM project_error GROUP BY project_id) errors ON errors.project_id = pd.project_id
-                LEFT JOIN (SELECT project_id, COUNT(id) AS skillCount, MAX(updated) as skillUpdated FROM skill_definition WHERE type = 'Skill' GROUP BY project_id) skills ON skills.project_id = pd.project_id
+                LEFT JOIN (SELECT sd1.project_id, COUNT(sd1.id) AS skillCount, MAX(sd1.updated) as skillUpdated 
+                    FROM skill_definition sd1,
+                         skill_definition sd2,
+                         skill_relationship_definition srd1,
+                         skill_relationship_definition srd2
+                    WHERE sd1.type = 'Skill'
+                        and (
+                                (sd1.id = srd1.child_ref_id
+                                    and sd1.id = srd2.child_ref_id
+                                    and sd1.id = sd2.id
+                                    and srd1.type = 'RuleSetDefinition'
+                                    )
+                                or
+                                (sd1.id = srd2.child_ref_id
+                                    and sd2.id = srd1.child_ref_id
+                                    and srd1.child_ref_id = srd2.parent_ref_id
+                                    and srd1.type = 'RuleSetDefinition'
+						            and srd2.type = 'SkillsGroupRequirement'
+                                    and (sd2.enabled is null or sd2.enabled = 'true')
+                                )
+                        )
+                    GROUP BY sd1.project_id) skills ON skills.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS badgeCount, MAX(updated) as badgeUpdated FROM skill_definition WHERE type = 'Badge' GROUP BY project_id) badges ON badges.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS subjectCount, MAX(updated) as subjectUpdated FROM skill_definition WHERE type = 'Subject' GROUP BY project_id) subjects ON subjects.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, value AS expiringUnused, updated as expirationTriggeredDate FROM settings WHERE type = 'Project' AND setting = 'expiration.expiring.unused' AND value = 'true') expiration ON expiration.project_id = pd.project_id
@@ -158,7 +242,28 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                 FROM project_definition pd
                 LEFT JOIN (SELECT project_id, MAX(event_time) AS latest FROM user_events GROUP BY project_id) events ON events.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS errorCount FROM project_error GROUP BY project_id) errors ON errors.project_id = pd.project_id
-                LEFT JOIN (SELECT project_id, COUNT(id) AS skillCount FROM skill_definition WHERE type = 'Skill' GROUP BY project_id) skills ON skills.project_id = pd.project_id
+                LEFT JOIN (SELECT sd1.project_id, COUNT(sd1.id) AS skillCount
+                    FROM skill_definition sd1,
+                         skill_definition sd2,
+                         skill_relationship_definition srd1,
+                         skill_relationship_definition srd2
+                    WHERE sd1.type = 'Skill'
+                        and (
+                                (sd1.id = srd1.child_ref_id
+                                    and sd1.id = srd2.child_ref_id
+                                    and sd1.id = sd2.id
+                                    and srd1.type = 'RuleSetDefinition'
+                                    )
+                                or
+                                (sd1.id = srd2.child_ref_id
+                                    and sd2.id = srd1.child_ref_id
+                                    and srd1.child_ref_id = srd2.parent_ref_id
+                                    and srd1.type = 'RuleSetDefinition'
+						            and srd2.type = 'SkillsGroupRequirement'
+                                    and (sd2.enabled is null or sd2.enabled = 'true')
+                                )
+                        )
+                    GROUP BY sd1.project_id) skills ON skills.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS badgeCount FROM skill_definition WHERE type = 'Badge' GROUP BY project_id) badges ON badges.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS subjectCount FROM skill_definition WHERE type = 'Subject' GROUP BY project_id) subjects ON subjects.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, value AS expiringUnused, updated as expirationTriggeredDate FROM settings WHERE type = 'Project' AND setting = 'expiration.expiring.unused' AND value = 'true') expiration ON expiration.project_id = pd.project_id
@@ -189,7 +294,28 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                 FROM project_definition pd
                 LEFT JOIN (SELECT project_id, MAX(event_time) AS latest FROM user_events GROUP BY project_id) events ON events.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS errorCount FROM project_error GROUP BY project_id) errors ON errors.project_id = pd.project_id
-                LEFT JOIN (SELECT project_id, COUNT(id) AS skillCount FROM skill_definition WHERE type = 'Skill' GROUP BY project_id) skills ON skills.project_id = pd.project_id
+                LEFT JOIN (SELECT sd1.project_id, COUNT(sd1.id) AS skillCount
+                    FROM skill_definition sd1,
+                         skill_definition sd2,
+                         skill_relationship_definition srd1,
+                         skill_relationship_definition srd2
+                    WHERE sd1.type = 'Skill'
+                        and (
+                                (sd1.id = srd1.child_ref_id
+                                    and sd1.id = srd2.child_ref_id
+                                    and sd1.id = sd2.id
+                                    and srd1.type = 'RuleSetDefinition'
+                                    )
+                                or
+                                (sd1.id = srd2.child_ref_id
+                                    and sd2.id = srd1.child_ref_id
+                                    and srd1.child_ref_id = srd2.parent_ref_id
+                                    and srd1.type = 'RuleSetDefinition'
+						            and srd2.type = 'SkillsGroupRequirement'
+                                    and (sd2.enabled is null or sd2.enabled = 'true')
+                                )
+                        )
+                    GROUP BY sd1.project_id) skills ON skills.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS badgeCount FROM skill_definition WHERE type = 'Badge' GROUP BY project_id) badges ON badges.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS subjectCount FROM skill_definition WHERE type = 'Subject' GROUP BY project_id) subjects ON subjects.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, value AS expiringUnused, updated as expirationTriggeredDate FROM settings WHERE type = 'Project' AND setting = 'expiration.expiring.unused' AND value = 'true') expiration ON expiration.project_id = pd.project_id
@@ -218,7 +344,28 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                 FROM project_definition pd
                 LEFT JOIN (SELECT project_id, MAX(event_time) AS latest FROM user_events GROUP BY project_id) events ON events.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS errorCount FROM project_error GROUP BY project_id) errors ON errors.project_id = pd.project_id
-                LEFT JOIN (SELECT project_id, COUNT(id) AS skillCount FROM skill_definition WHERE type = 'Skill' GROUP BY project_id) skills ON skills.project_id = pd.project_id
+                LEFT JOIN (SELECT sd1.project_id, COUNT(sd1.id) AS skillCount
+                    FROM skill_definition sd1,
+                         skill_definition sd2,
+                         skill_relationship_definition srd1,
+                         skill_relationship_definition srd2
+                    WHERE sd1.type = 'Skill'
+                        and (
+                                (sd1.id = srd1.child_ref_id
+                                    and sd1.id = srd2.child_ref_id
+                                    and sd1.id = sd2.id
+                                    and srd1.type = 'RuleSetDefinition'
+                                    )
+                                or
+                                (sd1.id = srd2.child_ref_id
+                                    and sd2.id = srd1.child_ref_id
+                                    and srd1.child_ref_id = srd2.parent_ref_id
+                                    and srd1.type = 'RuleSetDefinition'
+						            and srd2.type = 'SkillsGroupRequirement'
+                                    and (sd2.enabled is null or sd2.enabled = 'true')
+                                )
+                        )
+                    GROUP BY sd1.project_id) skills ON skills.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS badgeCount FROM skill_definition WHERE type = 'Badge' GROUP BY project_id) badges ON badges.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS subjectCount FROM skill_definition WHERE type = 'Subject' GROUP BY project_id) subjects ON subjects.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, value AS expiringUnused, updated as expirationTriggeredDate FROM settings WHERE type = 'Project' AND setting = 'expiration.expiring.unused' AND value = 'true') expiration ON expiration.project_id = pd.project_id
@@ -249,7 +396,28 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                 FROM project_definition pd
                 LEFT JOIN (SELECT project_id, MAX(event_time) AS latest FROM user_events GROUP BY project_id) events ON events.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS errorCount FROM project_error GROUP BY project_id) errors ON errors.project_id = pd.project_id
-                LEFT JOIN (SELECT project_id, COUNT(id) AS skillCount FROM skill_definition WHERE type = 'Skill' GROUP BY project_id) skills ON skills.project_id = pd.project_id
+                LEFT JOIN (SELECT sd1.project_id, COUNT(sd1.id) AS skillCount
+                    FROM skill_definition sd1,
+                         skill_definition sd2,
+                         skill_relationship_definition srd1,
+                         skill_relationship_definition srd2
+                    WHERE sd1.type = 'Skill'
+                        and (
+                                (sd1.id = srd1.child_ref_id
+                                    and sd1.id = srd2.child_ref_id
+                                    and sd1.id = sd2.id
+                                    and srd1.type = 'RuleSetDefinition'
+                                    )
+                                or
+                                (sd1.id = srd2.child_ref_id
+                                    and sd2.id = srd1.child_ref_id
+                                    and srd1.child_ref_id = srd2.parent_ref_id
+                                    and srd1.type = 'RuleSetDefinition'
+						            and srd2.type = 'SkillsGroupRequirement'
+                                    and (sd2.enabled is null or sd2.enabled = 'true')
+                                )
+                        )
+                    GROUP BY sd1.project_id) skills ON skills.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS badgeCount FROM skill_definition WHERE type = 'Badge' GROUP BY project_id) badges ON badges.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS subjectCount FROM skill_definition WHERE type = 'Subject' GROUP BY project_id) subjects ON subjects.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, value AS expiringUnused, updated as expirationTriggeredDate FROM settings WHERE type = 'Project' AND setting = 'expiration.expiring.unused' AND value = 'true') expiration ON expiration.project_id = pd.project_id
@@ -280,7 +448,28 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                 JOIN settings s on s.project_id = pd.project_id 
                 LEFT JOIN (SELECT project_id, MAX(event_time) AS latest FROM user_events GROUP BY project_id) events ON events.project_id = pd.project_id 
                 LEFT JOIN (SELECT project_id, COUNT(id) AS errorCount FROM project_error GROUP BY project_id) errors ON errors.project_id = pd.project_id 
-                LEFT JOIN (SELECT project_id, COUNT(id) AS skillCount FROM skill_definition WHERE type = 'Skill' GROUP BY project_id) skills ON skills.project_id = pd.project_id 
+                LEFT JOIN (SELECT sd1.project_id, COUNT(sd1.id) AS skillCount
+                    FROM skill_definition sd1,
+                         skill_definition sd2,
+                         skill_relationship_definition srd1,
+                         skill_relationship_definition srd2
+                    WHERE sd1.type = 'Skill'
+                        and (
+                                (sd1.id = srd1.child_ref_id
+                                    and sd1.id = srd2.child_ref_id
+                                    and sd1.id = sd2.id
+                                    and srd1.type = 'RuleSetDefinition'
+                                    )
+                                or
+                                (sd1.id = srd2.child_ref_id
+                                    and sd2.id = srd1.child_ref_id
+                                    and srd1.child_ref_id = srd2.parent_ref_id
+                                    and srd1.type = 'RuleSetDefinition'
+						            and srd2.type = 'SkillsGroupRequirement'
+                                    and (sd2.enabled is null or sd2.enabled = 'true')
+                                )
+                        )
+                    GROUP BY sd1.project_id) skills ON skills.project_id = pd.project_id 
                 LEFT JOIN (SELECT project_id, COUNT(id) AS badgeCount FROM skill_definition WHERE type = 'Badge' GROUP BY project_id) badges ON badges.project_id = pd.project_id 
                 LEFT JOIN (SELECT project_id, COUNT(id) AS subjectCount FROM skill_definition WHERE type = 'Subject' GROUP BY project_id) subjects ON subjects.project_id = pd.project_id 
                 LEFT JOIN (SELECT project_id, value AS expiringUnused, updated as expirationTriggeredDate FROM settings WHERE type = 'Project' AND setting = 'expiration.expiring.unused' AND value = 'true') expiration ON expiration.project_id = pd.project_id
@@ -316,7 +505,28 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                     theSettings.myProjectId AS myProjectId
                 FROM settings s, project_definition pd
                 LEFT JOIN (SELECT project_id, MAX(event_time) AS latest FROM user_events GROUP BY project_id) events ON events.project_id = pd.project_id
-                LEFT JOIN (SELECT project_id, COUNT(id) AS skillCount, MAX(updated) AS skillUpdated FROM skill_definition WHERE type = 'Skill' GROUP BY project_id) skills ON skills.project_id = pd.project_id
+                LEFT JOIN (SELECT sd1.project_id, COUNT(sd1.id) AS skillCount, MAX(sd1.updated) as skillUpdated 
+                    FROM skill_definition sd1,
+                         skill_definition sd2,
+                         skill_relationship_definition srd1,
+                         skill_relationship_definition srd2
+                    WHERE sd1.type = 'Skill'
+                        and (
+                                (sd1.id = srd1.child_ref_id
+                                    and sd1.id = srd2.child_ref_id
+                                    and sd1.id = sd2.id
+                                    and srd1.type = 'RuleSetDefinition'
+                                    )
+                                or
+                                (sd1.id = srd2.child_ref_id
+                                    and sd2.id = srd1.child_ref_id
+                                    and srd1.child_ref_id = srd2.parent_ref_id
+                                    and srd1.type = 'RuleSetDefinition'
+						            and srd2.type = 'SkillsGroupRequirement'
+                                    and (sd2.enabled is null or sd2.enabled = 'true')
+                                )
+                        )
+                    GROUP BY sd1.project_id) skills ON skills.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS badgeCount, MAX(updated) AS badgeUpdated FROM skill_definition WHERE type = 'Badge' GROUP BY project_id) badges ON badges.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS subjectCount, MAX(updated) AS subjectUpdated FROM skill_definition WHERE type = 'Subject' GROUP BY project_id) subjects ON subjects.project_id = pd.project_id
                 LEFT JOIN (SELECT ss.project_id as myProjectId FROM settings ss, users uu WHERE ss.setting = 'my_project' and uu.user_id=?1 and uu.id = ss.user_ref_id) theSettings ON theSettings.myProjectId = pd.project_id
