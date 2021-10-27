@@ -1012,18 +1012,19 @@ class SkillsGroupSpecs extends DefaultIntSpec {
     def "deleting child skill of a disabled group will update totalPoints for the group, but not subjects or project"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
-        def allSkills = SkillsFactory.createSkills(3)
+        def allSkills = SkillsFactory.createSkills(4)
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
 
         def skillsGroup = allSkills[0]
         skillsGroup.type = 'SkillsGroup'
         skillsService.createSkill(skillsGroup)
-        def children = allSkills[1..2]
+        def children = allSkills[1..3]
 
         String skillsGroupId = skillsGroup.skillId
         skillsService.assignSkillToSkillsGroup(skillsGroupId, children[0])
         skillsService.assignSkillToSkillsGroup(skillsGroupId, children[1])
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, children[2])
 
         int skillsGroupPointsBefore = skillsService.getSkill(skillsGroup).totalPoints
         def subjectsBefore = skillsService.getSubjects(proj.projectId)
@@ -1041,8 +1042,8 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         then:
         subjSkillsBefore
         subjSkillsBefore.size() == 1
-        subjSkillsBefore[0].totalPoints == 20
-        skillsGroupPointsBefore == 20
+        subjSkillsBefore[0].totalPoints == 30
+        skillsGroupPointsBefore == 30
 
         subjectsBefore
         subjectsBefore.size() == 1
@@ -1055,8 +1056,8 @@ class SkillsGroupSpecs extends DefaultIntSpec {
 
         subjSkillsAfter
         subjSkillsAfter.size() == 1
-        subjSkillsAfter[0].totalPoints == 10
-        skillsGroupPointsAfter == 10
+        subjSkillsAfter[0].totalPoints == 20
+        skillsGroupPointsAfter == 20
 
         subjectsAfter
         subjectsAfter.size() == 1
