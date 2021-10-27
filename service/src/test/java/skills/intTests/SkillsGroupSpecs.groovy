@@ -1067,4 +1067,54 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         projectsAfter.size() == 1
         projectsAfter[0].totalPoints == 0
     }
+
+    def "numSkills includes child skills for enabled groups child skills but does not include child skills of for disabled groups"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def allSkills = SkillsFactory.createSkills(7)
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+
+        def skillsGroup1 = allSkills[0]
+        skillsGroup1.type = 'SkillsGroup'
+        skillsService.createSkill(skillsGroup1)
+        def children1 = allSkills[1..2]
+
+        String skillsGroupId1 = skillsGroup1.skillId
+        skillsService.assignSkillToSkillsGroup(skillsGroupId1, children1[0])
+        skillsService.assignSkillToSkillsGroup(skillsGroupId1, children1[1])
+
+        skillsGroup1.enabled = 'true'
+        skillsService.updateSkill(skillsGroup1, null)
+
+        def skillsGroup2 = allSkills[3]
+        skillsGroup2.type = 'SkillsGroup'
+        skillsService.createSkill(skillsGroup2)
+        def children2 = allSkills[4..5]
+
+        String skillsGroupId2 = skillsGroup2.skillId
+        skillsService.assignSkillToSkillsGroup(skillsGroupId2, children2[0])
+        skillsService.assignSkillToSkillsGroup(skillsGroupId2, children2[1])
+
+        skillsGroup2.enabled = 'false'
+        skillsService.updateSkill(skillsGroup2, null)
+
+
+        skillsService.createSkill(allSkills[6])  // regular skill
+
+        when:
+
+        def subjects = skillsService.getSubjects(proj.projectId)
+        def projects = skillsService.getProjects()
+
+        then:
+
+        subjects
+        subjects.size() == 1
+        subjects[0].numSkills == 3
+
+        projects
+        projects.size() == 1
+//        projects[0].numSkills == 3
+    }
 }

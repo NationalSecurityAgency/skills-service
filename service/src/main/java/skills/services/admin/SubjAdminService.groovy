@@ -220,7 +220,7 @@ class SubjAdminService {
 
     @Profile
     private long calculateNumChildSkills(SkillDefParent skillDef) {
-        skillDefRepo.countChildSkillsByIdAndRelationshipType(skillDef.id, SkillRelDef.RelationshipType.RuleSetDefinition)
+        skillDefRepo.countActiveSkillsForSubject(skillDef.id)
     }
 
     @Profile
