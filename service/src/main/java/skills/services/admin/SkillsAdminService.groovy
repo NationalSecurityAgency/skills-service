@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.ActionPatchRequest
+import skills.controller.request.model.SkillImportRequest
 import skills.controller.request.model.PointSyncPatchRequest
 import skills.controller.request.model.SkillRequest
 import skills.controller.result.model.SkillDefPartialRes
@@ -36,10 +37,12 @@ import skills.controller.result.model.SkillDefRes
 import skills.controller.result.model.SkillDefSkinnyRes
 import skills.services.*
 import skills.storage.accessors.SkillDefAccessor
+import skills.storage.model.QueuedSkillUpdate
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDef.SelfReportingType
 import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.SkillRelDef
+import skills.storage.repos.QueuedSkillUpdateRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillDefWithExtraRepo
 import skills.storage.repos.SkillRelDefRepo
@@ -96,6 +99,12 @@ class SkillsAdminService {
     @Autowired
     @Lazy
     SkillApprovalService skillApprovalService
+
+    @Autowired
+    SkillCatalogService skillCatalogService
+
+    @Autowired
+    QueuedSkillUpdateRepo queuedSkillUpdateRepo
 
     @Autowired
     SkillsGroupAdminService skillsGroupAdminService
@@ -195,6 +204,9 @@ class SkillsAdminService {
         SkillDef skillsGroupSkillDef = null
         List<SkillDef> groupChildSkills = null
         if (isEdit) {
+            if (skillDefinition.readOnly && !(skillRequest instanceof ReplicatedSkillUpdateRequest)) {
+                throw new SkillException("Skill with id [${skillRequest.skillId}] has been imported from the Global Catalog and cannot be altered", skillRequest.projectId, skillRequest.skillId, ErrorCode.ReadOnlySkill)
+            }
             // for updates, use the existing value if it is not set on the skillRequest (null or empty String)
             if (StringUtils.isBlank(skillRequest.enabled)) {
                 skillRequest.enabled = skillDefinition.enabled
@@ -229,7 +241,6 @@ class SkillsAdminService {
             //totalPoints is not a prop on skillRequest, it is a calculated value so we
             //need to manually update it in the case of edits.
             skillDefinition.totalPoints = totalPointsRequested
-
         } else {
             String parentSkillId = skillRequest.subjectId
             subject = skillDefRepo.findByProjectIdAndSkillIdAndType(skillRequest.projectId, parentSkillId, SkillDef.ContainerType.Subject)
@@ -265,6 +276,12 @@ class SkillsAdminService {
                     enabled: enabled,
                     groupId: groupId,
             )
+
+            if (skillRequest instanceof SkillImportRequest) {
+                skillDefinition.copiedFrom = skillRequest.copiedFrom
+                skillDefinition.readOnly = skillRequest.readOnly
+                skillDefinition.copiedFromProjectId = skillRequest.copiedFromProjectId
+            }
             log.debug("Saving [{}]", skillDefinition)
             shouldRebuildScores = true
         }
@@ -277,6 +294,7 @@ class SkillsAdminService {
         if (isSkillsGroup) {
             skillsGroupSkillDef = savedSkill
         }
+
         if (!isEdit) {
             if (isSkillsGroupChild) {
                 skillsGroupAdminService.addSkillToSkillsGroup(savedSkill.projectId, groupId, savedSkill.skillId)
@@ -308,7 +326,7 @@ class SkillsAdminService {
                     currentOccurrences,
                     numSkillsRequiredDelta,
                     skillsGroupSkillDef,
-                    groupChildSkills,
+                    groupChildSkills
             )
         }
 
@@ -352,6 +370,11 @@ class SkillsAdminService {
         if (pointIncrementDelta < 0 || occurrencesDelta < 0) {
             SkillDef subject = skillDefRepo.findByProjectIdAndSkillIdAndType(savedSkill.projectId, subjectId, SkillDef.ContainerType.Subject)
             userPointsManagement.identifyAndAddLevelAchievements(subject)
+        }
+
+        if (skillCatalogService.isAvailableInCatalog(savedSkill.projectId, savedSkill.skillId)) {
+            QueuedSkillUpdate queuedSkillUpdate = new QueuedSkillUpdate(skill:  savedSkill, isCatalogSkill: true)
+            queuedSkillUpdateRepo.save(queuedSkillUpdate)
         }
 
         log.debug("Saved [{}]", savedSkill)

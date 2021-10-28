@@ -28,12 +28,17 @@ import skills.controller.exceptions.SkillExceptionBuilder
 import skills.services.LockingService
 import skills.services.SelfReportingService
 import skills.services.UserEventService
+import skills.services.admin.SkillCatalogService
 import skills.services.admin.SkillsGroupAdminService
 import skills.services.events.pointsAndAchievements.PointsAndAchievementsHandler
+import skills.storage.model.QueuedSkillUpdate
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillDefMin
 import skills.storage.model.UserAchievement
 import skills.storage.model.UserPerformedSkill
 import skills.storage.model.UserPoints
+import skills.storage.repos.QueuedSkillUpdateRepo
+import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillEventsSupportRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPerformedSkillRepo
@@ -98,6 +103,15 @@ class SkillEventsService {
     @Autowired
     SkillsGroupAdminService skillsGroupAdminService
 
+    @Autowired
+    SkillCatalogService skillCatalogService
+
+    @Autowired
+    SkillDefRepo skillDefRepo
+
+    @Autowired
+    QueuedSkillUpdateRepo queuedSkillUpdateRepo
+
     static class SkillApprovalParams {
         boolean disableChecks = false
         String approvalRequestedMsg
@@ -128,7 +142,7 @@ class SkillEventsService {
             SkillEventResult ser
 
             pendingNotificationAchievements?.each {
-                SkillEventsSupportRepo.SkillDefMin skill
+                SkillDefMin skill
 
                 if(it.projectId && it.skillId) {
                     skill = skillEventsSupportRepo.findByProjectIdAndSkillId(it.projectId, it.skillId)
@@ -188,7 +202,8 @@ class SkillEventsService {
 
         SkillDate skillDate = new SkillDate(date: incomingSkillDateParam ?: new Date(), isProvided: incomingSkillDateParam != null)
 
-        SkillEventsSupportRepo.SkillDefMin skillDefinition = getSkillDef(userId, projectId, skillId)
+        SkillDefMin skillDefinition = getSkillDef(userId, projectId, skillId)
+        final boolean isCatalogSkill = skillCatalogService.isAvailableInCatalog(skillDefinition.projectId, skillDefinition.skillId)
 
         SkillEventResult res = new SkillEventResult(projectId: projectId, skillId: skillId, name: skillDefinition.name)
 
@@ -207,7 +222,7 @@ class SkillEventsService {
             // record event should happen AFTER the lock OR if it does not need the lock;
             // otherwise there is a chance of a deadlock (although unlikely); this can happen because record event
             // mutates the row - so that row is locked in addition to the explicit lock
-            recordEvent(skillDefinition, userId, skillDate)
+            recordEvent(skillDefinition, userId, skillDate, isCatalogSkill)
 
             res.skillApplied = checkRes.skillApplied
             res.explanation = checkRes.explanation
@@ -219,10 +234,11 @@ class SkillEventsService {
          * once transaction is locked must redo all of the checks
          */
         lockTransaction(userId)
+
         // record event should happen AFTER the lock OR if it does not need the lock;
         // otherwise there is a chance of a deadlock (although unlikely); this can happen because record event
         // mutates the row - so that row is locked in addition to the explicit lock
-        recordEvent(skillDefinition, userId, skillDate)
+        recordEvent(skillDefinition, userId, skillDate, isCatalogSkill)
         numExistingSkills = getNumExistingSkills(userId, projectId, skillId)
         checkRes = checkIfSkillApplied(userId, numExistingSkills, skillDate.date, skillDefinition)
         if (!checkRes.skillApplied) {
@@ -233,41 +249,97 @@ class SkillEventsService {
 
         if (approvalParams && !approvalParams.disableChecks &&
             skillDefinition.getSelfReportingType() == SkillDef.SelfReportingType.Approval) {
+            // if this skill was imported from the catalog, request approval using the original OG
+            // skill id to prevent duplicated approval requests for what is effectively the same skill
+            if (skillDefinition.copiedFrom) {
+                skillDefinition = skillDefRepo.findSkillDefMinById(skillDefinition.copiedFrom)
+            }
             checkRes = selfReportingService.requestApproval(userId, skillDefinition, skillDate.date, approvalParams?.approvalRequestedMsg)
             res.skillApplied = checkRes.skillApplied
             res.explanation = checkRes.explanation
             return res
         }
 
-        UserPerformedSkill performedSkill = new UserPerformedSkill(userId: userId, skillId: skillId, projectId: projectId, performedOn: skillDate.date, skillRefId: skillDefinition.id)
-        savePerformedSkill(performedSkill)
+        // capture res for the reported skillDefinition but perform this loop
+        // for each copy including og if in catalog
+        Closure<SkillEventResult> recordSkillOccurrence = { SkillDefMin sd,  SkillEventResult r ->
+            UserPerformedSkill performedSkill = new UserPerformedSkill(userId: userId, skillId: skillId, projectId: sd.projectId, performedOn: skillDate.date, skillRefId: sd.id)
+            savePerformedSkill(performedSkill)
 
-        res.pointsEarned = skillDefinition.pointIncrement
+            r.pointsEarned = skillDefinition.pointIncrement
 
-        List<CompletionItem> achievements = pointsAndAchievementsHandler.updatePointsAndAchievements(userId, skillDefinition, skillDate)
-        if (achievements) {
-            res.completed.addAll(achievements)
+            List<CompletionItem> achievements = pointsAndAchievementsHandler.updatePointsAndAchievements(userId, sd, skillDate)
+            if (achievements) {
+                r.completed.addAll(achievements)
+            }
+
+            boolean requestedSkillCompleted = hasReachedMaxPoints(numExistingSkills + 1, sd)
+            if (requestedSkillCompleted) {
+                documentSkillAchieved(userId, numExistingSkills, sd, res, skillDate)
+                achievedBadgeHandler.checkForBadges(res, userId, sd, skillDate)
+                achievedSkillsGroupHandler.checkForSkillsGroup(res, userId, sd, skillDate)
+            }
+
+            // if requestedSkillCompleted OR overall level achieved, then need to check for global badges
+            boolean overallLevelAchieved = r.completed.find { it.level != null && it.type == CompletionItemType.Overall }
+            if (requestedSkillCompleted || overallLevelAchieved) {
+                achievedGlobalBadgeHandler.checkForGlobalBadges(r, userId, sd.projectId, sd)
+            }
+            return r
         }
 
-        boolean requestedSkillCompleted = hasReachedMaxPoints(numExistingSkills + 1, skillDefinition)
-        if (requestedSkillCompleted) {
-            documentSkillAchieved(userId, numExistingSkills, skillDefinition, res, skillDate)
-            achievedBadgeHandler.checkForBadges(res, userId, skillDefinition, skillDate)
-            achievedSkillsGroupHandler.checkForSkillsGroup(res, userId, skillDefinition, skillDate)
-        }
-
-        // if requestedSkillCompleted OR overall level achieved, then need to check for global badges
-        boolean overallLevelAchieved = res.completed.find { it.level != null && it.type == CompletionItemType.Overall }
-        if (requestedSkillCompleted || overallLevelAchieved) {
-            achievedGlobalBadgeHandler.checkForGlobalBadges(res, userId, projectId, skillDefinition)
+        res = recordSkillOccurrence(skillDefinition, res)
+        //now do it for each of the skills if in catalog or from catalog
+        if (isCatalogSkill || skillDefinition.copiedFrom != null) {
+            def relatedSkills
+            if (isCatalogSkill) {
+                relatedSkills = skillCatalogService.getSkillsCopiedFrom(skillDefinition.id)
+            } else {
+                //this needs to include the og skill as well as any copies
+                relatedSkills = skillCatalogService.getSkillsCopiedFrom(skillDefinition.copiedFrom)?.findAll { it.id != skillDefinition.id }
+                SkillDefMin og = skillDefRepo.findSkillDefMinById(skillDefinition.copiedFrom)
+                relatedSkills.add(og)
+            }
+            //TODO: this probably will need to be extracted to an asynch process
+            relatedSkills?.each {
+                recordSkillOccurrence(it, new SkillEventResult())
+            }
         }
 
         return res
     }
 
     @Profile
-    private void recordEvent(SkillEventsSupportRepo.SkillDefMin skillDefinition, String userId, SkillDate skillDate) {
+    private void recordEvent(SkillDefMin skillDefinition, String userId, SkillDate skillDate, boolean isCatalogSkill=false) {
+        if (skillDefinition.getCopiedFrom() != null || isCatalogSkill) {
+            List<SkillDefMin> toBeRecorded = []
+            if (isCatalogSkill) {
+                List<SkillDefMin> copies = skillCatalogService.getSkillsCopiedFrom(skillDefinition.id)
+                if (copies) {
+                    toBeRecorded.addAll(copies)
+                }
+                toBeRecorded.add(skillDefinition)
+            } else {
+                //get og skill, record event for og and all copies except for skillDefinition
+                SkillDefMin og = skillDefRepo.findSkillDefMinById(skillDefinition.copiedFrom)
+                List<SkillDefMin> copies = skillCatalogService.getSkillsCopiedFrom(og.id)
+                toBeRecorded.add(og)
+                //not working
+                if (copies) {
+                    toBeRecorded.addAll(copies)
+                    toBeRecorded.removeIf { it.id == skillDefinition.id }
+                }
+            }
+            toBeRecorded?.each {
+                userEventService.recordEvent(it.projectId, it.id, userId, skillDate.date)
+            }
+        }
         userEventService.recordEvent(skillDefinition.projectId, skillDefinition.id, userId, skillDate.date)
+    }
+
+    @Profile
+    private void recordEvent(String projectId, Integer rawSkillDefId, String userId, SkillDate skillDate) {
+        userEventService.recordEvent(projectId, rawSkillDefId, userId, skillDate.date)
     }
 
     @Profile
@@ -282,7 +354,7 @@ class SkillEventsService {
     }
 
     @Profile
-    private AppliedCheckRes checkIfSkillApplied(String userId, long numExistingSkills, Date incomingSkillDate, SkillEventsSupportRepo.SkillDefMin skillDefinition) {
+    private AppliedCheckRes checkIfSkillApplied(String userId, long numExistingSkills, Date incomingSkillDate, SkillDefMin skillDefinition) {
         AppliedCheckRes res = new AppliedCheckRes()
         if (hasReachedMaxPoints(numExistingSkills, skillDefinition)) {
             res.skillApplied = false
@@ -325,8 +397,8 @@ class SkillEventsService {
     }
 
     @Profile
-    private SkillEventsSupportRepo.SkillDefMin getSkillDef(String userId, String projectId, String skillId) {
-        SkillEventsSupportRepo.SkillDefMin skillDefinition = skillEventsSupportRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, SkillDef.ContainerType.Skill)
+    private SkillDefMin getSkillDef(String userId, String projectId, String skillId) {
+        SkillDefMin skillDefinition = skillEventsSupportRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, SkillDef.ContainerType.Skill)
         if (!skillDefinition) {
             throw new SkillExceptionBuilder()
                     .msg("Failed to report skill event because skill definition does not exist.")
@@ -340,7 +412,7 @@ class SkillEventsService {
     }
 
     @Profile
-    private void documentSkillAchieved(String userId, long numExistingSkills, SkillEventsSupportRepo.SkillDefMin skillDefinition, SkillEventResult res, SkillDate skillDate) {
+    private void documentSkillAchieved(String userId, long numExistingSkills, SkillDefMin skillDefinition, SkillEventResult res, SkillDate skillDate) {
         Date achievedOn = getAchievedOnDate(userId, skillDefinition, skillDate)
         UserAchievement skillAchieved = new UserAchievement(userId: userId.toLowerCase(), projectId: skillDefinition.projectId, skillId: skillDefinition.skillId, skillRefId: skillDefinition?.id,
                 pointsWhenAchieved: ((numExistingSkills.intValue() + 1) * skillDefinition.pointIncrement), achievedOn: achievedOn)
@@ -349,7 +421,7 @@ class SkillEventsService {
     }
 
     @Profile
-    private Date getAchievedOnDate(String userId, SkillEventsSupportRepo.SkillDefMin skillDefinition, SkillDate skillDate) {
+    private Date getAchievedOnDate(String userId, SkillDefMin skillDefinition, SkillDate skillDate) {
         if (!skillDate.isProvided) {
             return skillDate.date
         }
@@ -360,7 +432,7 @@ class SkillEventsService {
         return achievedOn
     }
 
-    private boolean hasReachedMaxPoints(long numSkills, SkillEventsSupportRepo.SkillDefMin skillDefinition) {
+    private boolean hasReachedMaxPoints(long numSkills, SkillDefMin skillDefinition) {
         return numSkills * skillDefinition.pointIncrement >= skillDefinition.totalPoints
     }
 

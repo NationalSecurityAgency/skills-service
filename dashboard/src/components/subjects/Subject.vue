@@ -25,8 +25,10 @@ limitations under the License.
           :options="cardOptions.controls"
           @edit="showEditSubject=true"
           @delete="deleteSubject"
+          @share="shareSubject"
+          @unshare="unshareSubject"
           :is-delete-disabled="deleteSubjectDisabled"
-          :delete-disabled-text="deleteSubjectToolTip" />
+          :delete-disabled-text="deleteSubjectToolTip"/>
       </div>
       <div slot="footer" class="text-right">
         <span class="small"><b-badge style="font-size: 0.8rem;" variant="primary" data-cy="pointsPercent">{{ this.subjectInternal.pointsPercentage }}%</b-badge> of the total points</span>
@@ -81,6 +83,9 @@ limitations under the License.
       minimumPoints() {
         return this.$store.getters.config.minimumSubjectPoints;
       },
+      alreadyShared() {
+        return this.subjectInternal?.exported === true;
+      },
     },
     methods: {
       buildCardOptions() {
@@ -107,6 +112,8 @@ limitations under the License.
             id: this.subjectInternal.subjectId,
             deleteDisabledText: this.deleteSubjectToolTip,
             isDeleteDisabled: this.deleteSubjectDisabled,
+            showShare: false,
+            shareEnabled: !this.alreadyShared,
           },
         };
       },
@@ -129,6 +136,16 @@ limitations under the License.
                 });
             }
           });
+      },
+      shareSubject() {
+        SubjectsService.shareSubject(this.subjectInternal.projectId, this.subjectInternal.subjectId).then(() => {
+          this.subjectInternal.exported = true;
+        });
+      },
+      unshareSubject() {
+        SubjectsService.unshareSubject(this.subjectInternal.projectId, this.subjectInternal.subjectId).then(() => {
+          this.subjectInternal.exported = false;
+        });
       },
       subjectSaved(subject) {
         this.isLoading = true;

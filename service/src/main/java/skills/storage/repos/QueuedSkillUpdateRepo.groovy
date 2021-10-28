@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 SkillTree
+ * Copyright 2021 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,24 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.controller.exceptions
+package skills.storage.repos
 
-enum ErrorCode {
-    InternalError,
-    FailedToAssignDependency,
-    InsufficientPointsToConvertLevels,
-    UserAlreadyExists,
-    ConstraintViolation,
-    BadParam,
-    AccessDenied,
-    UserNotFound,
-    SkillNotFound,
-    BadgeNotFound,
-    SubjectNotFound,
-    ProjectNotFound,
-    EmptyBadgeNotAllowed,
-    InsufficientProjectPoints,
-    InsufficientSubjectPoints,
-    ReadOnlySkill
-    UserTokenExpired,
+import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.PagingAndSortingRepository
+import skills.storage.model.QueuedSkillUpdate
+import skills.storage.model.SkillDef
+
+interface QueuedSkillUpdateRepo extends PagingAndSortingRepository<QueuedSkillUpdate, Integer> {
+
+    @Query(value='''select qsu.skill from QueuedSkillUpdate qsu where qsu.isCatalogSkill = true group by qsu.skill order by qsu.created asc''')
+    List<SkillDef> findCatalogSkillsUpdated()
 }

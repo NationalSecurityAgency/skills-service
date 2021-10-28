@@ -21,7 +21,9 @@ import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
 import skills.storage.model.BadgeCount
+import skills.storage.model.ImportExportStats
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillDefMin
 import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.SkillRelDef.RelationshipType
 
@@ -392,4 +394,60 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     @Query("SELECT sd from SkillDef sd where sd.skillId=?1 and sd.type='GlobalBadge'")
     SkillDef findGlobalBadgeByBadgeId(String badgeId)
 
+    @Nullable
+    @Query('''select s from SkillDef s where s.copiedFrom = ?1''')
+    List<SkillDef> findSkillsCopiedFrom(int skillRefId)
+
+    @Nullable
+    @Query('''
+        select s.id as id,
+        s.projectId as projectId,
+        s.skillId as skillId,
+        s.name as name,
+        s.pointIncrement as pointIncrement,
+        s.pointIncrementInterval as pointIncrementInterval,
+        s.numMaxOccurrencesIncrementInterval as numMaxOccurrencesIncrementInterval,
+        s.totalPoints as totalPoints,
+        s.type as type,
+        s.startDate as startDate,
+        s.endDate as endDate,
+        s.enabled as enabled,
+        s.copiedFrom as copiedFrom,
+        s.copiedFromProjectId as copiedFromProjectId,
+        s.readOnly as readOnly
+        from SkillDef s where s.copiedFrom = ?1
+    ''')
+    List<SkillDefMin> findSkillDefMinCopiedFrom(int skillRefId)
+
+    @Query('''
+        select s.id as id,
+        s.projectId as projectId,
+        s.skillId as skillId,
+        s.name as name,
+        s.pointIncrement as pointIncrement,
+        s.pointIncrementInterval as pointIncrementInterval,
+        s.numMaxOccurrencesIncrementInterval as numMaxOccurrencesIncrementInterval,
+        s.totalPoints as totalPoints,
+        s.type as type,
+        s.startDate as startDate,
+        s.endDate as endDate,
+        s.enabled as enabled,
+        s.copiedFrom as copiedFrom,
+        s.copiedFromProjectId as copiedFromProjectId,
+        s.readOnly as readOnly
+        from SkillDef s where s.id = ?1
+    ''')
+    SkillDefMin findSkillDefMinById(int id)
+
+    @Query('''
+          select s from SkillDef s where s.projectId = ?1 and s.readOnly = true  
+    ''')
+    List<SkillDef> findImportedSkills(String projectId, Pageable pageable)
+
+    @Query('''
+        select count(sd.id) as numberOfSkills, 
+        count(distinct sd.copiedFromProjectId) as numberOfProjects
+        from SkillDef sd where sd.copiedFromProjectId is not null
+    ''')
+    ImportExportStats getImportedSKillStats(String projectId)
 }

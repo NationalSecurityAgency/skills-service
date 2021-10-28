@@ -112,6 +112,9 @@ class AdminController {
     @Autowired
     UserInfoService userInfoService
 
+    @Autowired
+    SkillCatalogService skillCatalogService
+
 
     @RequestMapping(value = "/projects/{id}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
@@ -1039,6 +1042,71 @@ class AdminController {
         String userId = userInfoService.getCurrentUserId()
         contactUsersService.previewEmail(contactUsersRequest.emailSubject, contactUsersRequest.emailBody, userId)
         return RequestResult.success()
+    }
+
+    @RequestMapping(value="/projects/{projectId}/skills/{skillId}/export", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
+    RequestResult exportSkillToCatalog(@PathVariable("projectId") String projectId, @PathVariable("skillId") String skillId) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        SkillsValidator.isNotBlank(skillId, "skillId")
+
+        skillCatalogService.exportSkillToCatalog(projectId, skillId)
+        return RequestResult.success()
+    }
+
+    @RequestMapping(value="/projects/{projectId}/subjects/{subjectId}/import/{fromProjectId}/{fromSkillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
+    SkillDefRes importSkillFromCatalog(@PathVariable("projectId") String projectId,
+                                       @PathVariable("subjectId") String subjectId,
+                                       @PathVariable("fromProjectId") String fromProjectId,
+                                       @PathVariable("fromSkillId") String fromSkillId) {
+
+        skillCatalogService.importSkillFromCatalog(fromProjectId, fromSkillId, projectId, subjectId)
+    }
+
+    @RequestMapping(value="/projects/{projectId}/skills/catalog", method=RequestMethod.GET, produces = "application/json")
+    List<SkillDefRes> getCatalogSkills(@PathVariable("projectId") String projectId,
+                                  @RequestParam int limit,
+                                  @RequestParam int page,
+                                  @RequestParam String orderBy,
+                                  @RequestParam Boolean ascending) {
+        // this needs to enrich the SkillDefRes with the subjectId/name of the Skill...
+        skillCatalogService.getSkillsAvailableInCatalog(projectId, createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending))
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/exported", method = RequestMethod.GET, produces = "application/json")
+    List<ExportedSkillRes> getExportedSkills(@PathVariable("projectId") String projectId,
+                                        @RequestParam int limit,
+                                        @RequestParam int page,
+                                        @RequestParam String orderBy,
+                                        @RequestParam Boolean ascending) {
+        skillCatalogService.getSkillsExportedByProject(projectId, createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending))
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/imported", method = RequestMethod.GET, produces = "application/json")
+    List<SkillDefRes> getSkillsImportedFromCatalog(@PathVariable("projectId") String projectId,
+                                                   @RequestParam int limit,
+                                                   @RequestParam int page,
+                                                   @RequestParam String orderBy,
+                                                   @RequestParam Boolean ascending) {
+        skillCatalogService.getSkillsImportedFromCatalog(projectId, createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending))
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/imported/stats", method = RequestMethod.GET, produces = "application/json")
+    ImportedSkillStats getImportedSkillsStats(@PathVariable("projectId") String projectId) {
+        return skillCatalogService.getSkillsImportedStats(projectId)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/exported/stats", method = RequestMethod.GET, produces = "application/json")
+    ExportedSkillStats getExportedSkillsStats(@PathVariable("projectId") String projectId) {
+        return skillCatalogService.getSkillsExportedByProject(projectId)
+    }
+
+    private PageRequest createPagingRequestWithValidation(String projectId, int limit, int page, String orderBy, Boolean ascending) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isTrue(limit <= 200, "Cannot ask for more than 200 items, provided=[${limit}]", projectId)
+        SkillsValidator.isTrue(page >= 0, "Cannot provide negative page. provided =[${page}]", projectId)
+        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
+
+        return pageRequest
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")

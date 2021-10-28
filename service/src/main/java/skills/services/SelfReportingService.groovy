@@ -30,6 +30,7 @@ import skills.services.settings.SettingsService
 import skills.storage.model.Notification
 import skills.storage.model.ProjDef
 import skills.storage.model.SkillApproval
+import skills.storage.model.SkillDefMin
 import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.ProjDefRepo
@@ -72,7 +73,7 @@ class SelfReportingService {
     @Autowired
     SkillDefRepo skillDefRepo
 
-    SkillEventsService.AppliedCheckRes requestApproval(String userId, SkillEventsSupportRepo.SkillDefMin skillDefinition, Date performedOn, String requestMsg) {
+    SkillEventsService.AppliedCheckRes requestApproval(String userId, SkillDefMin skillDefinition, Date performedOn, String requestMsg) {
 
         if (StringUtils.isNotBlank(requestMsg)) {
             CustomValidationResult customValidationResult = customValidator.validateDescription(requestMsg)
@@ -81,7 +82,6 @@ class SelfReportingService {
                 throw new SkillException(msg, skillDefinition.projectId, skillDefinition.skillId, ErrorCode.BadParam)
             }
         }
-
         validateSufficientPoints(skillDefinition, userId)
 
         SkillEventsService.AppliedCheckRes res
@@ -115,7 +115,7 @@ class SelfReportingService {
         return res
     }
 
-    private void sentNotifications(SkillEventsSupportRepo.SkillDefMin skillDefinition, String userId, String requestMsg) {
+    private void sentNotifications(SkillDefMin skillDefinition, String userId, String requestMsg) {
         String publicUrl = featureService.getPublicUrl()
         if(!publicUrl) {
             return
@@ -167,7 +167,7 @@ class SelfReportingService {
         }
     }
 
-    private void validateSufficientPoints(SkillEventsSupportRepo.SkillDefMin skillDefinition, String userId) {
+    private void validateSufficientPoints(SkillDefMin skillDefinition, String userId) {
         SkillDefRepo.ProjectAndSubjectPoints projectAndSubjectPoints = skillDefRepo.getProjectAndSubjectPoints(skillDefinition.projectId, skillDefinition.skillId)
         insufficientPointsValidator.validateProjectPoints(projectAndSubjectPoints.projectTotalPoints, skillDefinition.projectId, userId)
         insufficientPointsValidator.validateSubjectPoints(projectAndSubjectPoints.subjectTotalPoints, skillDefinition.projectId, userId)

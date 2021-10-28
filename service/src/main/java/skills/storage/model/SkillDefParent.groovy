@@ -18,6 +18,7 @@ package skills.storage.model
 import groovy.transform.CompileStatic
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
+import skills.storage.converters.BooleanConverter
 
 import javax.persistence.*
 
@@ -80,4 +81,14 @@ class SkillDefParent {
     // only applies when type == SkillsGroup
     int numSkillsRequired = -1
     String groupId
+
+    @Convert(converter= BooleanConverter)
+    @Column(name="read_only")
+    Boolean readOnly
+
+    @Column(name="copied_from_skill_ref")
+    Integer copiedFrom
+
+    @Column(name="copied_from_project_id")
+    String copiedFromProjectId
 }

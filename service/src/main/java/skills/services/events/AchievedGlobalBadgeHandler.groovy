@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component
 import skills.controller.result.model.GlobalBadgeLevelRes
 import skills.services.GlobalBadgesService
 import skills.skillLoading.SkillsLoader
+import skills.storage.model.SkillDefMin
 import skills.storage.model.SkillRelDef
 import skills.storage.model.UserAchievement
 import skills.storage.repos.SkillEventsSupportRepo

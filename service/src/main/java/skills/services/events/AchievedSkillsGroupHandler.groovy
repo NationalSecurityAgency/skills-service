@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.services.admin.SkillsGroupAdminService
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillDefMin
 import skills.storage.model.SkillRelDef
 import skills.storage.model.UserAchievement
 import skills.storage.repos.SkillDefWithExtraRepo
@@ -50,8 +51,8 @@ class AchievedSkillsGroupHandler {
     SkillsGroupAdminService skillsGroupAdminService
 
     @Profile
-    void checkForSkillsGroup(SkillEventResult res, String userId, SkillEventsSupportRepo.SkillDefMin currentSkillDef, SkillDate skillDate) {
-        SkillEventsSupportRepo.SkillDefMin skillsGroupSkillDef
+    void checkForSkillsGroup(SkillEventResult res, String userId, SkillDefMin currentSkillDef, SkillDate skillDate) {
+        SkillDefMin skillsGroupSkillDef
         if (currentSkillDef.groupId) {
             skillsGroupSkillDef = skillEventsSupportRepo.findByProjectIdAndSkillIdAndType(currentSkillDef.projectId, currentSkillDef.groupId, SkillDef.ContainerType.SkillsGroup)
         } else  if (currentSkillDef.type == SkillDef.ContainerType.SkillsGroup) {
@@ -73,7 +74,7 @@ class AchievedSkillsGroupHandler {
     }
 
     @Profile
-    private Date getAchievedOnDate(String userId, SkillEventsSupportRepo.SkillDefMin skillsGroup, SkillDate skillDate) {
+    private Date getAchievedOnDate(String userId, SkillDefMin skillsGroup, SkillDate skillDate) {
         if (!skillDate.isProvided) {
             return skillDate.date
         }

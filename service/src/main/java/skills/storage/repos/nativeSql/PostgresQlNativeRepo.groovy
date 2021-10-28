@@ -201,6 +201,7 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
 
     @Override
     void updatePointTotalWhenOccurrencesAreDecreased(String projectId, String subjectId, String skillId, int pointIncrement, int numOccurrences) {
+        subjectId = subjectId ?: '';
         String q = '''
             WITH
                 eventsRes AS (
@@ -240,6 +241,7 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
 
     @Override
     void updatePointHistoryWhenOccurrencesAreDecreased(String projectId, String subjectId, String skillId, int pointIncrement, int numOccurrences) {
+        subjectId = subjectId ?: ''
         String q = '''
             WITH
                 eventsRes AS (

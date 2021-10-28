@@ -170,7 +170,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             s.projectId = ?2 and
             subject.skillId = ?3 and
             srd.type = 'RuleSetDefinition' and
-            s.skillRefId = sd.id and
+            ( s.skillRefId = sd.id or (sd.copiedFrom > 0 and s.skillRefId = sd.copiedFrom) ) and
             (
                 s.approverActionTakenOn is null or 
                 (s.rejectionAcknowledgedOn is null and s.rejectedOn is not null)

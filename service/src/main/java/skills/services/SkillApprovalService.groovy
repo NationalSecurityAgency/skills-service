@@ -27,6 +27,7 @@ import skills.controller.result.model.SkillApprovalResult
 import skills.controller.result.model.TableResult
 import skills.notify.EmailNotifier
 import skills.notify.Notifier
+import skills.services.admin.SkillCatalogService
 import skills.services.events.SkillEventResult
 import skills.services.events.SkillEventsService
 import skills.services.settings.SettingsService
@@ -68,6 +69,9 @@ class SkillApprovalService {
 
     @Autowired
     FeatureService featureService
+
+    @Autowired
+    SkillCatalogService skillCatalogService
 
     TableResult getApprovals(String projectId, PageRequest pageRequest) {
         return buildApprovalsResult(projectId, pageRequest, {
@@ -131,8 +135,18 @@ class SkillApprovalService {
 
             Optional<SkillDef> optional = skillDefRepo.findById(it.skillRefId)
             SkillDef skillDef = optional.get()
+            // enter SkillEventResult for all copies
             SkillEventResult res = skillEventsService.reportSkill(projectId, skillDef.skillId, it.userId, false, it.requestedOn,
                     new SkillEventsService.SkillApprovalParams(disableChecks: true))
+
+            // enter  event for all imported copies if in catalog
+            if (skillCatalogService.isAvailableInCatalog(skillDef)) {
+                //TODO: this may need to be moved to an asynch process eventually
+                skillCatalogService.getRelatedSkills(skillDef)?.each { SkillDef copy ->
+                    skillEventsService.reportSkill(copy.projectId, copy.skillId, it.userId, false, it.requestedOn,
+                            new SkillEventsService.SkillApprovalParams(disableChecks: true))
+                }
+            }
 
             if (log.isDebugEnabled()){
                 log.debug("Approval for ${it} yielded:\n${res}")
@@ -190,7 +204,7 @@ class SkillApprovalService {
         if (existing.selfReportingType == incomingType) {
             return;
         }
-
+        //TODO: this probably needs to take into account catalog skills as well
         if (existing.selfReportingType == SkillDef.SelfReportingType.Approval && !incomingType) {
             skillApprovalRepo.deleteByProjectIdAndSkillRefId(existing.projectId, existing.id)
         } else if (existing.selfReportingType == SkillDef.SelfReportingType.Approval && incomingType == SkillDef.SelfReportingType.HonorSystem) {

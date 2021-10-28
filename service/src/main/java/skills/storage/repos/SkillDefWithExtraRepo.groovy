@@ -44,11 +44,12 @@ interface SkillDefWithExtraRepo extends PagingAndSortingRepository<SkillDefWithE
         String getHelpUrl()
         Date getAchievedOn()
         SkillDef.SelfReportingType getSelfReportingType()
+        Integer getCopiedFrom()
         SkillDef.ContainerType getType()
         String getEnabled()
     }
 
-    @Query(value='''SELECT c.skillId as skillId, c.description as description, c.helpUrl as helpUrl, ua.achievedOn as achievedOn, c.selfReportingType as selfReportingType, c.type as type, c.enabled as enabled
+    @Query(value='''SELECT c.skillId as skillId, c.description as description, c.helpUrl as helpUrl, ua.achievedOn as achievedOn, c.selfReportingType as selfReportingType, c.type as type, c.enabled as enabled, c.copiedFrom as copiedFrom
         from SkillDefWithExtra s, SkillRelDef r, SkillDefWithExtra c
         left join UserAchievement ua on c.skillId = ua.skillId and c.projectId = ua.projectId and ua.userId=?5
         where 
@@ -67,7 +68,7 @@ interface SkillDefWithExtraRepo extends PagingAndSortingRepository<SkillDefWithE
     List<SkillDescDBRes> findAllChildSkillsDescriptionsForSkillsGroups(String projectId, List<String> parentSkillIds, SkillRelDef.RelationshipType relationshipType, int version, String userId)
 
 
-    @Query(value='''SELECT c.skillId as skillId, c.description as description, c.helpUrl as helpUrl, ua.achievedOn as achievedOn
+    @Query(value='''SELECT c.skillId as skillId, c.description as description, c.helpUrl as helpUrl, ua.achievedOn as achievedOn, c.copiedFrom as copiedFrom
         from SkillDefWithExtra s, SkillRelDef r, SkillDefWithExtra c 
         left join UserAchievement ua on c.skillId = ua.skillId and c.projectId = ua.projectId and ua.userId=?4
         where 

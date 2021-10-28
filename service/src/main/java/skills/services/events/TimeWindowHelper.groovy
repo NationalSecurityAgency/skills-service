@@ -22,6 +22,7 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import skills.storage.model.SkillDefMin
 import skills.storage.repos.SkillEventsSupportRepo
 import skills.storage.repos.UserPerformedSkillRepo
 
@@ -42,7 +43,7 @@ class TimeWindowHelper {
 
     @Profile
     @CompileDynamic
-    TimeWindowRes checkTimeWindow(SkillEventsSupportRepo.SkillDefMin skillDefinition, String userId, Date incomingSkillDate) {
+    TimeWindowRes checkTimeWindow(SkillDefMin skillDefinition, String userId, Date incomingSkillDate) {
         // pointIncrementInterval set to 0 disables time windows and skill events should be applied immediately
         boolean timeWindowDisabled = skillDefinition.pointIncrementInterval <= 0
         if (timeWindowDisabled) {
@@ -75,11 +76,11 @@ class TimeWindowHelper {
         new TimeWindowRes(full: isFull, msg: msg)
     }
 
-    private String buildMsg(SkillEventsSupportRepo.SkillDefMin skillDef, Long count){
+    private String buildMsg(SkillDefMin skillDef, Long count){
         "This skill was already performed ${count > 1 ? "${count} out of ${count} times " : ""}within the configured time period (within the last ${timeWindowPrettyPrint(skillDef)})".toString()
     }
 
-    private String timeWindowPrettyPrint(SkillEventsSupportRepo.SkillDefMin skillDefinition) {
+    private String timeWindowPrettyPrint(SkillDefMin skillDefinition) {
         int hours = skillDefinition.pointIncrementInterval >= 60 ? (int) (skillDefinition.pointIncrementInterval / 60) : 0
         int minutes = skillDefinition.pointIncrementInterval >= 60 ? (int) (skillDefinition.pointIncrementInterval % 60) : skillDefinition.pointIncrementInterval
         StringBuilder res = new StringBuilder()

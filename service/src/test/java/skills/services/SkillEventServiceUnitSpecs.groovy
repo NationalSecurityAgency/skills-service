@@ -20,6 +20,7 @@ import org.springframework.messaging.simp.broker.BrokerAvailabilityEvent
 import skills.services.events.*
 import skills.services.events.pointsAndAchievements.PointsAndAchievementsHandler
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillDefMin
 import skills.storage.model.UserAchievement
 import skills.storage.model.UserPoints
 import skills.storage.repos.SkillEventsSupportRepo
@@ -31,7 +32,6 @@ import skills.utils.MetricsLogger
 import spock.lang.IgnoreRest
 import spock.lang.Specification
 
-import static skills.storage.repos.SkillEventsSupportRepo.SkillDefMin
 
 class SkillEventServiceUnitSpecs extends Specification {
 
