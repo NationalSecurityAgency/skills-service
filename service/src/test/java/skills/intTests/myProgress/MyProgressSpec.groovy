@@ -1243,7 +1243,8 @@ class MyProgressSpec extends DefaultIntSpec {
         def res = skillsService.lookupMyProjectName(proj2.projectId)
 
         then:
-        thrown(SkillsClientException)
+        res.projectId == proj2.projectId
+        res.name == proj2.name
     }
 
 
