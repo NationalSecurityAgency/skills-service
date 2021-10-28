@@ -430,6 +430,16 @@ class ProjAdminService {
         return mySummary.projectName
     }
 
+    @Transactional(readOnly = true)
+    String lookupProjectName(String projectId){
+        ProjectSummaryResult mySummary = projDefRepo.getProjectName(projectId)
+        if (!mySummary) {
+            throw new SkillException("Project not found", projectId, null, ErrorCode.ProjectNotFound)
+        }
+
+        return mySummary.projectName
+    }
+
     @Profile
     private ProjectResult convert(ProjSummaryResult definition, Map<String, Integer> projectIdSortOrder, Set<String> pinnedProjectIds = []) {
         Integer order = projectIdSortOrder?.get(definition.getProjectId())

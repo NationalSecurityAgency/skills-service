@@ -384,4 +384,13 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
     ''')
     ProjectSummaryResult getMyProjectName(String userId, String projectId)
 
+    @Query('''
+            SELECT pd.id as projectRefId,
+                   pd.projectId as projectId,
+                   pd.name as projectName
+            FROM ProjDef pd
+            WHERE pd.projectId = ?1
+    ''')
+    ProjectSummaryResult getProjectName(String projectId)
+
 }

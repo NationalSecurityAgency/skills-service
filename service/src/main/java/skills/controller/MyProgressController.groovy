@@ -117,7 +117,7 @@ class MyProgressController {
 
     @GetMapping('/myprojects/{projectId}/name')
     ProjectNameResult getProjectName(@PathVariable("projectId") String projectId) {
-        String name = projAdminService.lookupMyProjectName(userInfoService.getCurrentUserId().toLowerCase(), projectId)
+        String name = projAdminService.lookupProjectName(projectId)
         return new ProjectNameResult(projectId: projectId, name: name)
     }
 
