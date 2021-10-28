@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.ActionPatchRequest
+import skills.controller.request.model.PointSyncPatchRequest
 import skills.controller.request.model.SkillRequest
 import skills.controller.result.model.SkillDefPartialRes
 import skills.controller.result.model.SkillDefRes
@@ -99,6 +100,43 @@ class SkillsAdminService {
     @Autowired
     SkillsGroupAdminService skillsGroupAdminService
 
+    @Transactional
+    void syncSkillPoints(String projectId,
+                             String subjectId,
+                             String groupId,
+                             PointSyncPatchRequest patchRequest) {
+        lockingService.lockProject(projectId)
+
+        SkillDef skillsGroupSkillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, groupId, SkillDef.ContainerType.SkillsGroup)
+        List<SkillDef> groupChildSkills = skillsGroupAdminService.getSkillsGroupChildSkills(skillsGroupSkillDef.id)
+
+        final int totalPointsRequested = patchRequest.pointIncrement * patchRequest.numPerformToCompletion
+        final int pointIncrement = patchRequest.pointIncrement
+
+        groupChildSkills.each {childSkillDef ->
+            childSkillDef.pointIncrement = pointIncrement
+            childSkillDef.totalPoints = totalPointsRequested
+            DataIntegrityExceptionHandlers.skillDataIntegrityViolationExceptionHandler.handle(projectId, childSkillDef.skillId) {
+                skillDefWithExtraRepo.save(childSkillDef)
+            }
+        }
+
+        // if enabled, validate and update points and achievements
+        if (Boolean.valueOf(skillsGroupSkillDef.enabled)) {
+            groupChildSkills.each {childSkillDef ->
+                final int incrementRequested = pointIncrement
+                final int currentOccurrences = (childSkillDef.totalPoints / childSkillDef.pointIncrement)
+                final int occurrencesDelta = patchRequest.numPerformToCompletion - currentOccurrences
+                final int pointIncrementDelta = incrementRequested - pointIncrement
+                // need to validate skills group
+                skillsGroupAdminService.validateSkillsGroupAndReturnChildren(skillsGroupSkillDef.numSkillsRequired, true, skillsGroupSkillDef.id)
+                log.debug("Rebuilding scores for [${}]", childSkillDef.skillId)
+                ruleSetDefinitionScoreUpdater.updateFromLeaf(childSkillDef)
+                updatePointsAndAchievements(childSkillDef, subjectId, pointIncrementDelta, occurrencesDelta, currentOccurrences)
+            }
+        }
+    }
+
     @Transactional()
     void saveSkill(String originalSkillId, SkillRequest skillRequest, boolean performCustomValidation=true, String groupId=null) {
         lockingService.lockProject(skillRequest.projectId)
@@ -116,7 +154,7 @@ class SkillsAdminService {
         SkillDefWithExtra skillDefinition = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(skillRequest.projectId, originalSkillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
 
         if (!skillDefinition || !skillDefinition.skillId.equalsIgnoreCase(skillRequest.skillId)) {
-            SkillDef idExists = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, skillRequest.skillId, SkillDef.ContainerType.Skill)
+            SkillDef idExists = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(skillRequest.projectId, skillRequest.skillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
             if (idExists) {
                 throw new SkillException("Skill with id [${skillRequest.skillId}] already exists! Sorry!", skillRequest.projectId, null, ErrorCode.ConstraintViolation)
             }
@@ -224,36 +262,42 @@ class SkillsAdminService {
         }
 
         if (isEdit && !isSkillsGroup) {
+            updatePointsAndAchievements(savedSkill, skillRequest.subjectId, pointIncrementDelta, occurrencesDelta, currentOccurrences)
+        }
+
+        log.debug("Saved [{}]", savedSkill)
+    }
+
+    private void updatePointsAndAchievements(SkillDef savedSkill, String subjectId, int pointIncrementDelta, int occurrencesDelta, int currentOccurrences) {
+        // order is CRITICAL HERE
+        // must update point increment first then deal with changes in the occurrences;
+        // changes in the occurrences will use the newly updated point increment
+        if (pointIncrementDelta != 0) {
+            userPointsManagement.handlePointIncrementUpdate(savedSkill.projectId, subjectId, savedSkill.skillId, pointIncrementDelta)
+        }
+        int newOccurrences = savedSkill.totalPoints / savedSkill.pointIncrement
+        if (occurrencesDelta < 0) {
             // order is CRITICAL HERE
-            // must update point increment first then deal with changes in the occurrences;
-            // changes in the occurrences will use the newly updated point increment
-            if (pointIncrementDelta != 0) {
-                userPointsManagement.handlePointIncrementUpdate(savedSkill.projectId, skillRequest.subjectId, savedSkill.skillId, pointIncrementDelta)
-            }
-            int newOccurrences = savedSkill.totalPoints / savedSkill.pointIncrement
-            if (occurrencesDelta < 0) {
-                // order is CRITICAL HERE
-                // Must update points prior removal of UserPerformedSkill events as the removal relies on the existence of those extra events
-                userPointsManagement.updatePointsWhenOccurrencesAreDecreased(savedSkill.projectId, skillRequest.subjectId, savedSkill.skillId, savedSkill.pointIncrement, newOccurrences)
-                userPointsManagement.removeExtraEntriesOfUserPerformedSkillByUser(savedSkill.projectId, savedSkill.skillId, currentOccurrences + occurrencesDelta)
-                //identify what badge (or badges) this skill belongs to.
-                //if any, look for users who qualify for the badge now after this change is persisted See BadgeAdminService.identifyUsersMeetingBadgeRequirements
-                userPointsManagement.insertUserAchievementWhenDecreaseOfOccurrencesCausesUsersToAchieve(savedSkill.projectId, savedSkill.skillId, savedSkill.id, newOccurrences)
+            // Must update points prior removal of UserPerformedSkill events as the removal relies on the existence of those extra events
+            userPointsManagement.updatePointsWhenOccurrencesAreDecreased(savedSkill.projectId, subjectId, savedSkill.skillId, savedSkill.pointIncrement, newOccurrences)
+            userPointsManagement.removeExtraEntriesOfUserPerformedSkillByUser(savedSkill.projectId, savedSkill.skillId, currentOccurrences + occurrencesDelta)
+            //identify what badge (or badges) this skill belongs to.
+            //if any, look for users who qualify for the badge now after this change is persisted See BadgeAdminService.identifyUsersMeetingBadgeRequirements
+            userPointsManagement.insertUserAchievementWhenDecreaseOfOccurrencesCausesUsersToAchieve(savedSkill.projectId, savedSkill.skillId, savedSkill.id, newOccurrences)
 
-                //identify any badges that this skill belongs to and award the badge if any users now qualify for this badge
-                List<SkillDef> badges = findAllBadgesSkillBelongsTo(savedSkill.skillId)
-                badges?.each {
-                    badgeAdminService.awardBadgeToUsersMeetingRequirements(it)
-                }
-
-            } else if (occurrencesDelta > 0) {
-                userPointsManagement.removeUserAchievementsThatDoNotMeetNewNumberOfOccurrences(savedSkill.projectId, savedSkill.skillId, newOccurrences)
+            //identify any badges that this skill belongs to and award the badge if any users now qualify for this badge
+            List<SkillDef> badges = findAllBadgesSkillBelongsTo(savedSkill.skillId)
+            badges?.each {
+                badgeAdminService.awardBadgeToUsersMeetingRequirements(it)
             }
 
-            if (pointIncrementDelta < 0 || occurrencesDelta < 0) {
-                SkillDef parent = ruleSetDefGraphService.getParentSkill(savedSkill)
-                userPointsManagement.identifyAndAddLevelAchievements(parent)
-            }
+        } else if (occurrencesDelta > 0) {
+            userPointsManagement.removeUserAchievementsThatDoNotMeetNewNumberOfOccurrences(savedSkill.projectId, savedSkill.skillId, newOccurrences)
+        }
+
+        if (pointIncrementDelta < 0 || occurrencesDelta < 0) {
+            SkillDef parent = ruleSetDefGraphService.getParentSkill(savedSkill)
+            userPointsManagement.identifyAndAddLevelAchievements(parent)
         }
 
         log.debug("Saved [{}]", savedSkill)

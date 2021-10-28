@@ -1145,4 +1145,101 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         projects.size() == 1
         projects[0].numSkills == 3
     }
+
+    void "update multiple skills at the same time" () {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(3)
+        def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 5)
+        skillsGroup.numSkillsRequired = skills.size()-1
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skills.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+        skillsGroup.enabled = 'true'
+        skillsService.updateSkill(skillsGroup, null)
+
+        def resBefore = skillsService.getSkill(skillsGroup)
+        def groupSkillsBefore = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
+        groupSkillsBefore.sort() { it.skillId }
+
+        when:
+
+        skillsService.syncPointsForSkillsGroup(proj.projectId, subj.subjectId, skillsGroupId, [pointIncrement: 100, numPerformToCompletion: skills[0].numPerformToCompletion])
+
+        def resAfter = skillsService.getSkill(skillsGroup)
+        def groupSkillsAfter = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
+        groupSkillsAfter.sort() { it.skillId }
+
+        then:
+        resBefore
+        resBefore.skillId == skillsGroup.skillId
+        resBefore.name == skillsGroup.name
+        resBefore.type == skillsGroup.type
+        resBefore.numSkillsInGroup == 3
+        resBefore.numSelfReportSkills == 0
+        resBefore.numSkillsRequired == 2
+        resBefore.enabled == 'true'
+        resBefore.totalPoints == 20
+
+        groupSkillsBefore.size() == 3
+
+        groupSkillsBefore.get(0).skillId == skills.get(0).skillId
+        groupSkillsBefore.get(0).projectId == proj.projectId
+        groupSkillsBefore.get(0).name == skills.get(0).name
+        groupSkillsBefore.get(0).version == skills.get(0).version
+        groupSkillsBefore.get(0).displayOrder == 1
+        groupSkillsBefore.get(0).totalPoints == 10
+
+        groupSkillsBefore.get(1).skillId == skills.get(1).skillId
+        groupSkillsBefore.get(1).projectId == proj.projectId
+        groupSkillsBefore.get(1).name == skills.get(1).name
+        groupSkillsBefore.get(1).version == skills.get(1).version
+        groupSkillsBefore.get(1).displayOrder == 2
+        groupSkillsBefore.get(1).totalPoints == 10
+
+        groupSkillsBefore.get(2).skillId == skills.get(2).skillId
+        groupSkillsBefore.get(2).projectId == proj.projectId
+        groupSkillsBefore.get(2).name == skills.get(2).name
+        groupSkillsBefore.get(2).version == skills.get(2).version
+        groupSkillsBefore.get(2).displayOrder == 3
+        groupSkillsBefore.get(2).totalPoints == 10
+
+        resAfter
+        resAfter.skillId == skillsGroup.skillId
+        resAfter.name == skillsGroup.name
+        resAfter.type == skillsGroup.type
+        resAfter.numSkillsInGroup == 3
+        resAfter.numSelfReportSkills == 0
+        resAfter.numSkillsRequired == 2
+        resAfter.enabled == 'true'
+        resAfter.totalPoints == 200
+
+        groupSkillsAfter.size() == 3
+
+        groupSkillsAfter.get(0).skillId == skills.get(0).skillId
+        groupSkillsAfter.get(0).projectId == proj.projectId
+        groupSkillsAfter.get(0).name == skills.get(0).name
+        groupSkillsAfter.get(0).version == skills.get(0).version
+        groupSkillsAfter.get(0).displayOrder == 1
+        groupSkillsAfter.get(0).totalPoints == 100
+
+        groupSkillsAfter.get(1).skillId == skills.get(1).skillId
+        groupSkillsAfter.get(1).projectId == proj.projectId
+        groupSkillsAfter.get(1).name == skills.get(1).name
+        groupSkillsAfter.get(1).version == skills.get(1).version
+        groupSkillsAfter.get(1).displayOrder == 2
+        groupSkillsAfter.get(1).totalPoints == 100
+
+        groupSkillsAfter.get(2).skillId == skills.get(2).skillId
+        groupSkillsAfter.get(2).projectId == proj.projectId
+        groupSkillsAfter.get(2).name == skills.get(2).name
+        groupSkillsAfter.get(2).version == skills.get(2).version
+        groupSkillsAfter.get(2).displayOrder == 3
+        groupSkillsAfter.get(2).totalPoints == 100
+    }
 }

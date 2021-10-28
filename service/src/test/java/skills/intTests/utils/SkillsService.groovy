@@ -351,6 +351,10 @@ class SkillsService {
         wsHelper.adminPost(getSkillUrl(props.projectId, props.subjectId, originalSkillId ?: props.skillId), props)
     }
 
+    def syncPointsForSkillsGroup(String projectId, String subjectId, String groupId, Map props) {
+        wsHelper.adminPatch(getSyncSkillPointsUrl(projectId, subjectId, groupId), props)
+    }
+
     def createSkillsGroup(Map props, String originalGroupId = null) {
         wsHelper.adminPost(getBadgeUrl(props.projectId, originalGroupId ?: props.groupId), props)
     }
@@ -1188,6 +1192,10 @@ class SkillsService {
         } else {
             return "${getProjectUrl(project)}/skills/${skill}".toString()
         }
+    }
+
+    private String getSyncSkillPointsUrl(String project, String subject, String groupId) {
+        return "${getSubjectUrl(project, subject)}/groups/${groupId}/skills".toString()
     }
 
     private String getSkillEventUrl(String project, String skill) {
