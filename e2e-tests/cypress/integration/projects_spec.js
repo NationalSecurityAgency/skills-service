@@ -67,6 +67,16 @@ describe('Projects Tests', () => {
     //opens in a new tab, cypress can't interact with those
   });
 
+  it('Preview project training plan for non-production project', () => {
+    cy.request('POST', '/app/projects/proj1', {
+      projectId: 'proj1',
+      name: "proj1"
+    })
+    cy.visit('/progress-and-rankings/projects/proj1');
+    cy.dashboardCd().contains('Overall Points');
+    cy.contains('proj1');
+  });
+
   it('Edit in place', () => {
     cy.request('POST', '/app/projects/proj1', {
       projectId: 'proj1',
