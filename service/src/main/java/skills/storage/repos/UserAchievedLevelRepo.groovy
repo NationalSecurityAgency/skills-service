@@ -254,6 +254,29 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
                                                                             @Param('numOfOccurrences') int numOfOccurrences,
                                                                             @Param('notified') String notified)
 
+    @Query(value = '''INSERT INTO user_achievement(user_id, project_id, skill_id, skill_ref_id, points_when_achieved, notified)
+            SELECT achievementsByUserId.user_id, :projectId, :groupSkillId, :groupSkillRefId, -1, :notified
+            FROM (
+                SELECT user_id, count(id) achievementCount
+                FROM user_achievement
+                WHERE
+                      skill_id IN :childSkillIds and
+                      project_id = :projectId
+                GROUP BY user_id
+                ) achievementsByUserId
+            WHERE
+                  achievementsByUserId.achievementCount >= :numSkillsRequired and
+                NOT EXISTS (
+                        SELECT id FROM user_achievement WHERE project_id = :projectId and skill_id = :groupSkillId and user_id = achievementsByUserId.user_id
+                    )''', nativeQuery = true)
+    @Modifying
+    void insertUserAchievementWhenDecreaseOfNumSkillsRequiredCausesUsersToAchieve(@Param('projectId') String projectId,
+                                                                                  @Param('groupSkillId') String groupSkillId,
+                                                                                  @Param('groupSkillRefId') Integer groupSkillRefId,
+                                                                                  @Param('childSkillIds') List<String> childSkillIds,
+                                                                                  @Param('numSkillsRequired') int numSkillsRequired,
+                                                                                  @Param('notified') String notified)
+
     static interface AchievementItem {
         Date getAchievedOn()
         String getUserId()

@@ -1001,42 +1001,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         exception.message.contains("A Skill Group must have at least 2 skills in order to be enabled.")
     }
 
-    def "achieve group skill"() {
-        def proj = SkillsFactory.createProject()
-        def subj = SkillsFactory.createSubject()
-        def allSkills = SkillsFactory.createSkills(3)
-        skillsService.createProject(proj)
-        skillsService.createSubject(subj)
-
-        def skillsGroup = allSkills[0]
-        skillsGroup.type = 'SkillsGroup'
-        skillsService.createSkill(skillsGroup)
-        String skillsGroupId = skillsGroup.skillId
-        def groupChildren = allSkills[1..2]
-        groupChildren.each { skill ->
-            skill.pointIncrement = 100
-            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
-        }
-        skillsGroup.numSkillsRequired = 1
-        skillsGroup.enabled = 'true'
-        skillsService.updateSkill(skillsGroup, null)
-
-        when:
-        String userId = 'user1'
-        String projectId = proj.projectId
-        String skillId = groupChildren.first().skillId
-        String subjectId = subj.subjectId
-        def res = skillsService.addSkill([projectId: projectId, skillId: skillId], userId, new Date())
-        assert res.body.skillApplied
-        assert res.body.completed.find { it.id == skillId }
-        def subjectSummary = skillsService.getSkillSummary(userId, projectId, subjectId)
-        List<UserAchievement> subjectAchievements = achievedRepo.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, skillsGroupId)
-
-        then:
-        subjectAchievements
-        subjectSummary
-    }
-
     def "deleting child skill of a disabled group will update totalPoints for the group, but not subjects or project"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
@@ -1241,5 +1205,111 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         groupSkillsAfter.get(2).version == skills.get(2).version
         groupSkillsAfter.get(2).displayOrder == 3
         groupSkillsAfter.get(2).totalPoints == 100
+    }
+
+    def "achieve group skill"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def allSkills = SkillsFactory.createSkills(3)
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+
+        def skillsGroup = allSkills[0]
+        skillsGroup.type = 'SkillsGroup'
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        def groupChildren = allSkills[1..2]
+        groupChildren.each { skill ->
+            skill.pointIncrement = 100
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+        skillsGroup.numSkillsRequired = 1
+        skillsGroup.enabled = 'true'
+        skillsService.updateSkill(skillsGroup, null)
+
+        when:
+        String userId = 'user1'
+        String projectId = proj.projectId
+        String skillId = groupChildren.first().skillId
+        String subjectId = subj.subjectId
+        def res = skillsService.addSkill([projectId: projectId, skillId: skillId], userId, new Date())
+        assert res.body.skillApplied
+        assert res.body.completed.find { it.id == skillId }
+        def subjectSummary = skillsService.getSkillSummary(userId, projectId, subjectId)
+        List<UserAchievement> subjectAchievements = achievedRepo.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, skillsGroupId)
+
+        then:
+        subjectAchievements
+        subjectAchievements.size() == 1
+        subjectAchievements[0].userId == userId
+        subjectAchievements[0].projectId == projectId
+        subjectAchievements[0].skillId == skillsGroupId
+
+        subjectSummary
+        subjectSummary.skills
+        subjectSummary.skills.size() == 1
+        subjectSummary.skills[0].skillId == skillsGroupId
+        subjectSummary.skills[0].points == 100
+        subjectSummary.skills[0].totalPoints == 100
+        subjectSummary.skills[0].children
+        subjectSummary.skills[0].children.size() == 2
+        subjectSummary.skills[0].children.find { it.skillId = skillId }
+        subjectSummary.skills[0].children.find { it.skillId = skillId }.points == 100
+        subjectSummary.skills[0].children.find { it.skillId = skillId }.totalPoints == 100
+    }
+
+    def "achieve group skill after lowering numSkillsRequired"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def allSkills = SkillsFactory.createSkills(3)
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+
+        def skillsGroup = allSkills[0]
+        skillsGroup.type = 'SkillsGroup'
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        def groupChildren = allSkills[1..2]
+        groupChildren.each { skill ->
+            skill.pointIncrement = 100
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+        skillsGroup.enabled = 'true'
+        skillsService.updateSkill(skillsGroup, null)
+
+        when:
+        String userId = 'user1'
+        String projectId = proj.projectId
+        String skillId = groupChildren.first().skillId
+        String subjectId = subj.subjectId
+
+        def res = skillsService.addSkill([projectId: projectId, skillId: skillId], userId, new Date())
+
+        skillsGroup.numSkillsRequired = 1
+        skillsService.updateSkill(skillsGroup, null)
+
+        assert res.body.skillApplied
+        assert res.body.completed.find { it.id == skillId }
+        def subjectSummary = skillsService.getSkillSummary(userId, projectId, subjectId)
+        List<UserAchievement> subjectAchievements = achievedRepo.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, skillsGroupId)
+
+        then:
+        subjectAchievements
+        subjectAchievements.size() == 1
+        subjectAchievements[0].userId == userId
+        subjectAchievements[0].projectId == projectId
+        subjectAchievements[0].skillId == skillsGroupId
+
+        subjectSummary
+        subjectSummary.skills
+        subjectSummary.skills.size() == 1
+        subjectSummary.skills[0].skillId == skillsGroupId
+        subjectSummary.skills[0].points == 100
+        subjectSummary.skills[0].totalPoints == 100
+        subjectSummary.skills[0].children
+        subjectSummary.skills[0].children.size() == 2
+        subjectSummary.skills[0].children.find { it.skillId = skillId }
+        subjectSummary.skills[0].children.find { it.skillId = skillId }.points == 100
+        subjectSummary.skills[0].children.find { it.skillId = skillId }.totalPoints == 100
     }
 }

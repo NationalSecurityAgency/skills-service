@@ -77,13 +77,13 @@ class UserAchievementsAndPointsManagement {
     @Transactional
     void handlePointIncrementUpdate(String projectId, String subjectId, String skillId, int incrementDelta){
         SkillsValidator.isTrue(
-                skillDefRepo.existsByProjectIdAndSkillIdAndTypeAllIgnoreCase(projectId, skillId, SkillDef.ContainerType.Skill),
+                skillDefRepo.existsByProjectIdAndSkillIdAndTypeInAllIgnoreCase(projectId, skillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup]),
                 "Skill does not exist",
                 projectId,
                 skillId
         )
         SkillsValidator.isTrue(
-            skillDefRepo.existsByProjectIdAndSkillIdAndTypeAllIgnoreCase(projectId, subjectId, SkillDef.ContainerType.Subject),
+            skillDefRepo.existsByProjectIdAndSkillIdAndTypeInAllIgnoreCase(projectId, subjectId, [SkillDef.ContainerType.Subject]),
                 "Subject does not exist",
                 projectId,
                 subjectId,
@@ -130,6 +130,15 @@ class UserAchievementsAndPointsManagement {
 
         nativeQueriesRepo.identifyAndAddProjectLevelAchievements(subject.projectId, pointsBased)
         nativeQueriesRepo.identifyAndAddSubjectLevelAchievements(subject.projectId, subject.skillId, pointsBased)
+    }
+
+    @Transactional
+    void insertUserAchievementWhenDecreaseOfSkillsRequiredCausesUsersToAchieve(String projectId, String groupSkillId, Integer groupSkillRefId, List<String> childSkillIds, int numSkillsRequired) {
+        assert numSkillsRequired > 0
+        if (log.isDebugEnabled()){
+            log.debug("Insert User Achievements. projectId=[${projectId}], skillId=[${groupSkillId}], skillRefId=[${groupSkillRefId}], childSkillIds=[${childSkillIds}] numSkillsRequired=[$numSkillsRequired]")
+        }
+        userAchievedLevelRepo.insertUserAchievementWhenDecreaseOfNumSkillsRequiredCausesUsersToAchieve(projectId, groupSkillId, groupSkillRefId, childSkillIds, numSkillsRequired, Boolean.FALSE.toString())
     }
 
     @Transactional
