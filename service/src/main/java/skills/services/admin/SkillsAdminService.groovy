@@ -319,8 +319,8 @@ class SkillsAdminService {
         }
 
         if (numSkillsRequiredDelta < 0 && skillsGroupSkillDef && Boolean.valueOf(skillsGroupSkillDef.enabled)) {
-            // need to insertUserAchievementWhenDecreaseOfSkillsRequiredCausesUsersToAchieve
-            userPointsManagement.insertUserAchievementWhenDecreaseOfSkillsRequiredCausesUsersToAchieve(savedSkill.projectId, skillsGroupSkillDef.skillId, skillsGroupSkillDef.id, groupChildSkills.collect {it.skillId}, skillsGroupSkillDef.numSkillsRequired)
+            int numSkillsRequired = skillsGroupSkillDef.numSkillsRequired == -1 ? groupChildSkills.size() : skillsGroupSkillDef.numSkillsRequired
+            userPointsManagement.insertUserAchievementWhenDecreaseOfSkillsRequiredCausesUsersToAchieve(savedSkill.projectId, skillsGroupSkillDef.skillId, skillsGroupSkillDef.id, groupChildSkills.collect {it.skillId}, numSkillsRequired)
         }
 
         if (pointIncrementDelta < 0 || occurrencesDelta < 0) {
@@ -368,6 +368,11 @@ class SkillsAdminService {
             parentSkill.totalPoints = skillsGroupAdminService.getGroupTotalPoints(children, parentSkill.numSkillsRequired)
             DataIntegrityExceptionHandlers.skillDataIntegrityViolationExceptionHandler.handle(projectId, skillId) {
                 skillDefWithExtraRepo.save(parentSkill)
+            }
+
+            if (Boolean.valueOf(parentSkill.enabled)) {
+                int numSkillsRequired = parentSkill.numSkillsRequired == -1 ? children.size() : parentSkill.numSkillsRequired
+                userPointsManagement.insertUserAchievementWhenDecreaseOfSkillsRequiredCausesUsersToAchieve(projectId, parentSkill.skillId, parentSkill.id, children.collect { it.skillId }, numSkillsRequired)
             }
         }
 

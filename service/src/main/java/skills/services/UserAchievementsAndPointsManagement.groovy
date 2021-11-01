@@ -62,6 +62,9 @@ class UserAchievementsAndPointsManagement {
 
     @Transactional
     void handleSkillRemoval(SkillDef skillDef, SkillDef subject) {
+        if (skillDef.groupId) {
+            subject = ruleSetDefGraphService.getParentSkill(subject)
+        }
         nativeQueriesRepo.decrementPointsForDeletedSkill(skillDef.projectId, skillDef.skillId, subject.skillId)
         userPointsRepo.deleteByProjectIdAndSkillId(skillDef.projectId, skillDef.skillId)
 
