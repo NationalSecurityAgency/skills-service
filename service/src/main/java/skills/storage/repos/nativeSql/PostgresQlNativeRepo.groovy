@@ -504,8 +504,8 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
             WHERE project_id = :projectId AND skill_id = :skillId AND day is null 
             GROUP BY user_id
         )
-        INSERT INTO user_achievement (user_id, skill_id, level, points_when_achieved, project_id, notified)
-        SELECT user_totals.user_id, subject_score.skill_id, subject_levels.level, user_totals.totalPoints, ''' + "'$projectId', 'false'" +
+        INSERT INTO user_achievement (user_id, skill_id, skill_ref_id, level, points_when_achieved, project_id, notified)
+        SELECT user_totals.user_id, subject_score.skill_id, subject_score.id, subject_levels.level, user_totals.totalPoints, ''' + "'$projectId', 'false'" +
         '''
         FROM user_totals, subject_score, subject_levels
         WHERE user_totals.totalPoints >= TRUNC(subject_levels.pointsRequired) 
