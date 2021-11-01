@@ -113,7 +113,9 @@ class SkillsAdminService {
         final int totalPointsRequested = patchRequest.pointIncrement * patchRequest.numPerformToCompletion
         final int pointIncrement = patchRequest.pointIncrement
 
+        def origAttrs = [:]
         groupChildSkills.each {childSkillDef ->
+            origAttrs.put(childSkillDef, [childSkillDef.totalPoints, childSkillDef.pointIncrement])
             childSkillDef.pointIncrement = pointIncrement
             childSkillDef.totalPoints = totalPointsRequested
             DataIntegrityExceptionHandlers.skillDataIntegrityViolationExceptionHandler.handle(projectId, childSkillDef.skillId) {
@@ -123,13 +125,13 @@ class SkillsAdminService {
 
         // if enabled, validate and update points and achievements
         if (Boolean.valueOf(skillsGroupSkillDef.enabled)) {
+            // need to validate skills group
+            skillsGroupAdminService.validateSkillsGroupAndReturnChildren(skillsGroupSkillDef.numSkillsRequired, true, skillsGroupSkillDef.id)
             groupChildSkills.each {childSkillDef ->
                 final int incrementRequested = pointIncrement
-                final int currentOccurrences = (childSkillDef.totalPoints / childSkillDef.pointIncrement)
+                final int currentOccurrences = (origAttrs.get(childSkillDef)[0] / origAttrs.get(childSkillDef)[1])
                 final int occurrencesDelta = patchRequest.numPerformToCompletion - currentOccurrences
                 final int pointIncrementDelta = incrementRequested - pointIncrement
-                // need to validate skills group
-                skillsGroupAdminService.validateSkillsGroupAndReturnChildren(skillsGroupSkillDef.numSkillsRequired, true, skillsGroupSkillDef.id)
                 log.debug("Rebuilding scores for [${}]", childSkillDef.skillId)
                 ruleSetDefinitionScoreUpdater.updateFromLeaf(childSkillDef)
                 updatePointsAndAchievements(childSkillDef, subjectId, pointIncrementDelta, occurrencesDelta, currentOccurrences, 0, skillsGroupSkillDef, groupChildSkills)
@@ -318,7 +320,7 @@ class SkillsAdminService {
             }
         }
 
-        if (numSkillsRequiredDelta < 0 && skillsGroupSkillDef && Boolean.valueOf(skillsGroupSkillDef.enabled)) {
+        if ((occurrencesDelta < 0 || numSkillsRequiredDelta < 0) && skillsGroupSkillDef && Boolean.valueOf(skillsGroupSkillDef.enabled)) {
             int numSkillsRequired = skillsGroupSkillDef.numSkillsRequired == -1 ? groupChildSkills.size() : skillsGroupSkillDef.numSkillsRequired
             userPointsManagement.insertUserAchievementWhenDecreaseOfSkillsRequiredCausesUsersToAchieve(savedSkill.projectId, skillsGroupSkillDef.skillId, skillsGroupSkillDef.id, groupChildSkills.collect {it.skillId}, numSkillsRequired)
         }
