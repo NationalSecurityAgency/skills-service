@@ -61,8 +61,7 @@ class UserAchievementsAndPointsManagement {
     SettingsService settingsService
 
     @Transactional
-    void handleSkillRemoval(SkillDef skillDef) {
-        SkillDef subject = ruleSetDefGraphService.getParentSkill(skillDef)
+    void handleSkillRemoval(SkillDef skillDef, SkillDef subject) {
         nativeQueriesRepo.decrementPointsForDeletedSkill(skillDef.projectId, skillDef.skillId, subject.skillId)
         userPointsRepo.deleteByProjectIdAndSkillId(skillDef.projectId, skillDef.skillId)
 
@@ -125,15 +124,12 @@ class UserAchievementsAndPointsManagement {
     }
 
     @Transactional
-    void identifyAndAddLevelAchievements(String projectId, Integer skillRefId) {
-        List<SkillRelDef> parent = skillRelDefRepo.findAllByChildIdAndType(skillRefId, SkillRelDef.RelationshipType.RuleSetDefinition)
-        assert parent.size() == 1
-
-        SettingsResult settingsResult = settingsService.getProjectSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
+    void identifyAndAddLevelAchievements(SkillDef subject) {
+        SettingsResult settingsResult = settingsService.getProjectSetting(subject.projectId, Settings.LEVEL_AS_POINTS.settingName)
         boolean pointsBased = settingsResult ? settingsResult.isEnabled() : false
 
-        nativeQueriesRepo.identifyAndAddProjectLevelAchievements(projectId, pointsBased)
-        nativeQueriesRepo.identifyAndAddSubjectLevelAchievements(projectId, parent[0].parent.skillId, pointsBased)
+        nativeQueriesRepo.identifyAndAddProjectLevelAchievements(subject.projectId, pointsBased)
+        nativeQueriesRepo.identifyAndAddSubjectLevelAchievements(subject.projectId, subject.skillId, pointsBased)
     }
 
     @Transactional
