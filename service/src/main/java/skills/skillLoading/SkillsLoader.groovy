@@ -548,7 +548,7 @@ class SkillsLoader {
 
     @Transactional(readOnly = true)
     SkillGlobalBadgeSummary loadGlobalBadge(String userId, String originatingProject, String badgeSkillId, Integer version = Integer.MAX_VALUE, boolean loadSkills=true) {
-        SkillDefWithExtra badgeDef = getSkillDefWithExtra(userId, null, badgeSkillId, SkillDef.ContainerType.GlobalBadge)
+        SkillDefWithExtra badgeDef = getSkillDefWithExtra(userId, null, badgeSkillId, [SkillDef.ContainerType.GlobalBadge])
 
         return loadGlobalBadgeSummary(userId, originatingProject, badgeDef, version,loadSkills)
     }
