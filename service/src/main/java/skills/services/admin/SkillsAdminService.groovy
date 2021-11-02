@@ -219,6 +219,11 @@ class SkillsAdminService {
             } else if (occurrencesDelta > 0) {
                 userPointsManagement.removeUserAchievementsThatDoNotMeetNewNumberOfOccurrences(savedSkill.projectId, savedSkill.skillId, newOccurrences)
             }
+
+            if (pointIncrementDelta < 0 || occurrencesDelta < 0) {
+                SkillDef parent = ruleSetDefGraphService.getParentSkill(savedSkill)
+                userPointsManagement.identifyAndAddLevelAchievements(parent)
+            }
         }
 
         log.debug("Saved [{}]", savedSkill)
@@ -233,19 +238,23 @@ class SkillsAdminService {
         if (globalBadgesService.isSkillUsedInGlobalBadge(skillDefinition)) {
             throw new SkillException("Skill with id [${skillId}] cannot be deleted as it is currently referenced by one or more global badges")
         }
-
         SkillDef parentSkill = ruleSetDefGraphService.getParentSkill(skillDefinition)
 
         //we need to check to see if this skill belongs to any badges, if so we need to look for any users who now qualify
         //for those badges
         ruleSetDefinitionScoreUpdater.skillToBeRemoved(skillDefinition)
-        userPointsManagement.handleSkillRemoval(skillDefinition)
+
+        // this MUST happen before the skill was removed as sql relies on the skill to exist
+        userPointsManagement.handleSkillRemoval(skillDefinition, parentSkill)
 
         //identify any badges that this skill belonged to and award the badge if any users now qualify for this badge
         List<SkillDef> badges = findAllBadgesSkillBelongsTo(skillDefinition.skillId)
 
         ruleSetDefGraphService.deleteSkillWithItsDescendants(skillDefinition)
         log.debug("Deleted skill [{}]", skillDefinition.skillId)
+
+        // this MUST happen after the skill was removed as sql relies on the skill to be gone
+        userPointsManagement.identifyAndAddLevelAchievements(parentSkill)
 
         badges?.each {
             badgeAdminService.awardBadgeToUsersMeetingRequirements(it)

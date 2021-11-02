@@ -628,9 +628,9 @@ class H2NativeRepo implements NativeQueriesRepo {
             subjectLevels?.each { Object[] level ->
                 Number levelId = level[0]
                 String levelValue = level[1]
-                Number pointsRequired = level[2]
+                Number pointsRequired = level[2].toDouble().trunc()
 
-                if (userPoints > pointsRequired) {
+                if (userPoints >= pointsRequired) {
                     Query alreadyExists = entityManager.createNativeQuery('''
                         SELECT 1 
                         FROM user_achievement 
@@ -644,11 +644,12 @@ class H2NativeRepo implements NativeQueriesRepo {
 
                     if (exists.isEmpty() || exists[0] < 1) {
                         Query insertAchievement = entityManager.createNativeQuery('''
-                             INSERT INTO user_achievement (user_id, skill_id, level, points_when_achieved, project_id, notified)
-                             VALUES (:userId, :skillId, :level, :userPoints, :projectId, 'false')
+                             INSERT INTO user_achievement (user_id, skill_id, skill_ref_id, level, points_when_achieved, project_id, notified)
+                             VALUES (:userId, :skillId, :skillRefId, :level, :userPoints, :projectId, 'false')
                         ''')
                         insertAchievement.setParameter("userId", userId)
                         insertAchievement.setParameter("skillId", skillId)
+                        insertAchievement.setParameter("skillRefId", id)
                         insertAchievement.setParameter("level", levelValue)
                         insertAchievement.setParameter("userPoints", userPoints.toInteger())
                         insertAchievement.setParameter("projectId", projectId)
@@ -721,9 +722,9 @@ class H2NativeRepo implements NativeQueriesRepo {
             levels.each { Object[] level ->
                 Number levelId = level[0]
                 String levelValue = level[1]
-                Number pointsRequired = level[2]
+                Number pointsRequired = level[2].toDouble().trunc()
 
-                if (userPoints > pointsRequired) {
+                if (userPoints >= pointsRequired) {
                     Query alreadyExists = entityManager.createNativeQuery('''
                         SELECT 1 
                         FROM user_achievement 

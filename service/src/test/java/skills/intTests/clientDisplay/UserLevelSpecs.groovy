@@ -17,6 +17,7 @@ package skills.intTests.clientDisplay
 
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
+import spock.lang.IgnoreRest
 
 class UserLevelSpecs extends DefaultIntSpec {
 
@@ -57,5 +58,60 @@ class UserLevelSpecs extends DefaultIntSpec {
 
         then:
         levels == [1, 1, 2, 2, 3, 3, 4, 4, 4, 5]
+    }
+
+    def "get levels - multiple subjects"() {
+        String userId1 = "user1"
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def subj1 = SkillsFactory.createSubject(1, 2)
+        def skills = SkillsFactory.createSkills(2, 1, 1)
+        def skills_subj1 = SkillsFactory.createSkills(1, 1, 2)
+
+        skills.each {
+            it.pointIncrement = 10
+            it.numPerformToCompletion = 5
+        }
+        skills_subj1.each {
+            it.pointIncrement = 10
+            it.numPerformToCompletion = 5
+        }
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSubject(subj1)
+        skillsService.createSkills(skills)
+        skillsService.createSkills(skills_subj1)
+
+        /**
+         Level 1 => 15
+         Level 2 => 37
+         Level 3 => 67
+         Level 4 => 100
+         Level 5 => 138
+         */
+
+        when:
+        def user1_level_call1 = skillsService.getUserLevel(proj.projectId, userId1)
+        def user1_summary1 = skillsService.getSkillSummary(userId1, proj.projectId)
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId1, new Date())
+        def user1_summary2 = skillsService.getSkillSummary(userId1, proj.projectId)
+        def user1_level_call2 = skillsService.getUserLevel(proj.projectId, userId1)
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], userId1, new Date())
+        def user1_summary3 = skillsService.getSkillSummary(userId1, proj.projectId)
+        def user1_level_call3 = skillsService.getUserLevel(proj.projectId, userId1)
+
+        then:
+        user1_summary1.skillsLevel == 0
+        user1_summary1.points == 0
+        user1_level_call1 == 0
+        user1_summary2.points == 10
+        user1_summary2.skillsLevel == 0
+        user1_level_call2 == 0
+        user1_summary3.skillsLevel == 1
+        user1_summary3.points == 20
+        user1_level_call3 == 1
     }
 }

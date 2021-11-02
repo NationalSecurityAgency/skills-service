@@ -15,6 +15,7 @@
  */
 package skills.intTests
 
+import groovy.json.JsonOutput
 import groovy.time.TimeCategory
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
@@ -23,6 +24,7 @@ import skills.storage.model.UserAchievement
 import skills.storage.model.UserPerformedSkill
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPerformedSkillRepo
+import spock.lang.IgnoreRest
 
 import java.text.DateFormat
 
@@ -988,10 +990,23 @@ class SkillOccurrencesSpecs extends DefaultIntSpec {
 
         List<UserAchievement> afterAchievements = userAchievementRepo.findAll()
 
+        List newAchievements = afterAchievements.findAll({ after -> !beforeAchievements.find({ it.id == after.id})})
+        List<String> newAchievementsAsStrings = newAchievements.collect {
+            "user=[${it.userId}], skillId=[${it.skillId ?: "Overall"}], achievement=[${it.level ? "Level ${it.level}" : "Skill Completed" }]"
+        }.sort()
+
         then:
-        // 1 skill achievement should be added, 2 subject level achievements, and 2 project level achievements
-        beforeAchievements.size() == afterAchievements.size() - 5
-        afterAchievements.findAll { it.notified == 'false' }.size() == 5
+        newAchievementsAsStrings == [
+            "user=[user1], skillId=[Overall], achievement=[Level 5]",
+            "user=[user1], skillId=[TestSubject1], achievement=[Level 5]",
+            "user=[user1], skillId=[skill2], achievement=[Skill Completed]",
+            "user=[user2], skillId=[Overall], achievement=[Level 1]",
+            "user=[user2], skillId=[TestSubject1], achievement=[Level 1]",
+            "user=[user3], skillId=[Overall], achievement=[Level 3]",
+            "user=[user3], skillId=[TestSubject1], achievement=[Level 3]",
+        ]
+
+        afterAchievements.findAll { it.notified == 'false' }.size() == newAchievementsAsStrings.size()
         !beforeAchievements.findAll { it.projectId == proj1.projectId && it.skillId == proj1_skills.get(1).skillId && it.userId == userId1 }
         afterAchievements.find { it.projectId == proj1.projectId && it.skillId == proj1_skills.get(1).skillId && it.userId == userId1 }
 
@@ -1025,6 +1040,472 @@ class SkillOccurrencesSpecs extends DefaultIntSpec {
         getPointHistory(userId4, proj1.projectId, proj1_subj.subjectId) == [3, 6, 9]
         getPointHistory(userId4, proj2.projectId) == [10, 20, 50]
         getPointHistory(userId4, proj2.projectId, proj2_subj.subjectId) == [10, 20, 50]
+    }
+
+    def "point increment decreased causes users to achieve levels"() {
+        String userId1 = "user1"
+        String userId2 = "user2"
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(6,)
+        skills.each {
+            it.pointIncrement = 100
+            it.numPerformToCompletion = 2
+        }
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        /**
+         Level 1 => 120
+         Level 2 => 300
+         Level 3 => 540
+         Level 4 => 804
+         Level 5 => 1104
+         */
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId1, new Date())
+        def user1_summary_before = skillsService.getSkillSummary(userId1, proj.projectId)
+        def user1_subj_summary_before = skillsService.getSkillSummary(userId1, proj.projectId, subj.subjectId)
+        def user1_level_before = skillsService.getUserLevel(proj.projectId, userId1)
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId2, new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[2].skillId], userId2, new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[3].skillId], userId2, new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[4].skillId], userId2, new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[5].skillId], userId2, new Date())
+
+        def user2_summary_before = skillsService.getSkillSummary(userId2, proj.projectId)
+        def user2_subj_summary_before = skillsService.getSkillSummary(userId2, proj.projectId, subj.subjectId)
+        def user2_level_before = skillsService.getUserLevel(proj.projectId, userId2)
+
+        List<UserAchievement> beforeAllAchievements = userAchievementRepo.findAll()
+        List<UserAchievement> user1BeforeAchievements = beforeAllAchievements.findAll( { it.userId == userId1 })
+        List<UserAchievement> user2BeforeAchievements = beforeAllAchievements.findAll( { it.userId == userId2 })
+        when:
+        skills[1].pointIncrement = 2
+        skillsService.createSkills([skills[1]])
+
+        /**
+         Level 1 => 100
+         Level 2 => 251
+         Level 3 => 451
+         Level 4 => 672
+         Level 5 => 923
+         */
+
+        def user1_summary_after = skillsService.getSkillSummary(userId1, proj.projectId)
+        def user1_subj_summary_after = skillsService.getSkillSummary(userId1, proj.projectId, subj.subjectId)
+        def user1_level_after = skillsService.getUserLevel(proj.projectId, userId1)
+
+        def user2_summary_after = skillsService.getSkillSummary(userId2, proj.projectId)
+        def user2_subj_summary_after = skillsService.getSkillSummary(userId2, proj.projectId, subj.subjectId)
+        def user2_level_after = skillsService.getUserLevel(proj.projectId, userId2)
+
+        List<UserAchievement> afterAllAchievements = userAchievementRepo.findAll()
+        List<UserAchievement> user1AfterAchievements = afterAllAchievements.findAll( { it.userId == userId1 })
+        List<UserAchievement> user2AfterAchievements = afterAllAchievements.findAll( { it.userId == userId2 })
+                .findAll({ after -> !user2BeforeAchievements.find({ it.id == after.id})})
+
+
+        then:
+        user1_summary_before.points == 100
+        user1_summary_before.skillsLevel == 0
+        user1_summary_before.totalLevels == 5
+        user1_summary_before.totalPoints == 1200
+        user1_subj_summary_before.points == 100
+        user1_subj_summary_before.skillsLevel == 0
+        user1_subj_summary_before.totalLevels == 5
+        user1_subj_summary_before.totalPoints == 1200
+        user1_level_before == 0
+        !user1BeforeAchievements
+
+        user2_summary_before.points == 500
+        user2_summary_before.skillsLevel == 2
+        user2_summary_before.totalPoints == 1200
+        user2_subj_summary_before.points == 500
+        user2_subj_summary_before.skillsLevel == 2
+        user2_subj_summary_before.totalPoints == 1200
+        user2_level_before == 2
+        user2BeforeAchievements
+
+        user1_summary_after.points == 100
+        user1_summary_after.skillsLevel == 1
+        user1_summary_after.totalLevels == 5
+        user1_summary_after.totalPoints == 1004
+        user1_subj_summary_after.points == 100
+        user1_subj_summary_after.skillsLevel == 1
+        user1_subj_summary_after.totalLevels == 5
+        user1_subj_summary_after.totalPoints == 1004
+        user1AfterAchievements.size() == 2
+        user1AfterAchievements.find { it.projectId == proj.projectId && !it.skillId && it.level == 1}
+        user1AfterAchievements.find { it.projectId == proj.projectId && it.skillId == subj.subjectId && it.level == 1}
+        user1_level_after == 1
+
+        user2_summary_after.points == 500
+        user2_summary_after.skillsLevel == 3
+        user2_summary_after.totalPoints == 1004
+        user2_subj_summary_after.points == 500
+        user2_subj_summary_after.skillsLevel == 3
+        user2_subj_summary_after.totalPoints == 1004
+        user2_level_after == 3
+        user2AfterAchievements.size() == 2
+        user2AfterAchievements.find { it.projectId == proj.projectId && !it.skillId && it.level == 3}
+        user2AfterAchievements.find { it.projectId == proj.projectId && it.skillId == subj.subjectId && it.level == 3}
+    }
+
+    def "deleting of a skill (without points) causes users to achieve levels"() {
+        String userId1 = "user1"
+        String userId2 = "user2"
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(6,)
+        skills.each {
+            it.pointIncrement = 100
+            it.numPerformToCompletion = 2
+        }
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        /**
+         Level 1 => 120
+         Level 2 => 300
+         Level 3 => 540
+         Level 4 => 804
+         Level 5 => 1104
+         */
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId1, new Date())
+        def user1_summary_before = skillsService.getSkillSummary(userId1, proj.projectId)
+        def user1_subj_summary_before = skillsService.getSkillSummary(userId1, proj.projectId, subj.subjectId)
+        def user1_level_before = skillsService.getUserLevel(proj.projectId, userId1)
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId2, new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[2].skillId], userId2, new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[3].skillId], userId2, new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[4].skillId], userId2, new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[5].skillId], userId2, new Date())
+
+        def user2_summary_before = skillsService.getSkillSummary(userId2, proj.projectId)
+        def user2_subj_summary_before = skillsService.getSkillSummary(userId2, proj.projectId, subj.subjectId)
+        def user2_level_before = skillsService.getUserLevel(proj.projectId, userId2)
+
+        List<UserAchievement> beforeAllAchievements = userAchievementRepo.findAll()
+        List<UserAchievement> user1BeforeAchievements = beforeAllAchievements.findAll( { it.userId == userId1 })
+        List<UserAchievement> user2BeforeAchievements = beforeAllAchievements.findAll( { it.userId == userId2 })
+        when:
+        skillsService.deleteSkill([skills[1]])
+
+        /**
+         Level 1 => 100
+         Level 2 => 250
+         Level 3 => 450
+         Level 4 => 670
+         Level 5 => 920
+         */
+
+        def user1_summary_after = skillsService.getSkillSummary(userId1, proj.projectId)
+        def user1_subj_summary_after = skillsService.getSkillSummary(userId1, proj.projectId, subj.subjectId)
+        def user1_level_after = skillsService.getUserLevel(proj.projectId, userId1)
+
+        def user2_summary_after = skillsService.getSkillSummary(userId2, proj.projectId)
+        def user2_subj_summary_after = skillsService.getSkillSummary(userId2, proj.projectId, subj.subjectId)
+        def user2_level_after = skillsService.getUserLevel(proj.projectId, userId2)
+
+        List<UserAchievement> afterAllAchievements = userAchievementRepo.findAll()
+        List<UserAchievement> user1AfterAchievements = afterAllAchievements.findAll( { it.userId == userId1 })
+        println JsonOutput.toJson(user1AfterAchievements)
+        List<UserAchievement> user2AfterAchievements = afterAllAchievements.findAll( { it.userId == userId2 })
+                .findAll({ after -> !user2BeforeAchievements.find({ it.id == after.id})})
+
+
+        then:
+        user1_summary_before.points == 100
+        user1_summary_before.skillsLevel == 0
+        user1_summary_before.totalLevels == 5
+        user1_summary_before.totalPoints == 1200
+        user1_subj_summary_before.points == 100
+        user1_subj_summary_before.skillsLevel == 0
+        user1_subj_summary_before.totalLevels == 5
+        user1_subj_summary_before.totalPoints == 1200
+        user1_level_before == 0
+        !user1BeforeAchievements
+
+        user2_summary_before.points == 500
+        user2_summary_before.skillsLevel == 2
+        user2_summary_before.totalPoints == 1200
+        user2_subj_summary_before.points == 500
+        user2_subj_summary_before.skillsLevel == 2
+        user2_subj_summary_before.totalPoints == 1200
+        user2_level_before == 2
+        user2BeforeAchievements
+
+        user1_summary_after.points == 100
+        user1_summary_after.skillsLevel == 1
+        user1_summary_after.totalLevels == 5
+        user1_summary_after.totalPoints == 1000
+        user1_subj_summary_after.points == 100
+        user1_subj_summary_after.skillsLevel == 1
+        user1_subj_summary_after.totalLevels == 5
+        user1_subj_summary_after.totalPoints == 1000
+        user1AfterAchievements.size() == 2
+        user1AfterAchievements.find { it.projectId == proj.projectId && !it.skillId && it.level == 1}
+        user1AfterAchievements.find { it.projectId == proj.projectId && it.skillId == subj.subjectId && it.skillRefId && it.level == 1}
+        user1_level_after == 1
+
+        user2_summary_after.points == 500
+        user2_summary_after.skillsLevel == 3
+        user2_summary_after.totalPoints == 1000
+        user2_subj_summary_after.points == 500
+        user2_subj_summary_after.skillsLevel == 3
+        user2_subj_summary_after.totalPoints == 1000
+        user2_level_after == 3
+        user2AfterAchievements.size() == 2
+        user2AfterAchievements.find { it.projectId == proj.projectId && !it.skillId && it.level == 3}
+        user2AfterAchievements.find { it.projectId == proj.projectId && it.skillId == subj.subjectId && it.level == 3}
+    }
+
+    def "deleting of a skill (with points) causes users to achieve levels"() {
+        String userId1 = "user1"
+        String userId2 = "user2"
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(6,)
+        skills.each {
+            it.pointIncrement = 100
+            it.numPerformToCompletion = 2
+        }
+        skills[1].pointIncrement = 1
+        skills[1].numPerformToCompletion = 200
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        /**
+         Level 1 => 120
+         Level 2 => 300
+         Level 3 => 540
+         Level 4 => 804
+         Level 5 => 1104
+         */
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId1, new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], userId1, new Date())
+        def user1_summary_before = skillsService.getSkillSummary(userId1, proj.projectId)
+        def user1_subj_summary_before = skillsService.getSkillSummary(userId1, proj.projectId, subj.subjectId)
+        def user1_level_before = skillsService.getUserLevel(proj.projectId, userId1)
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId2, new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], userId2, new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[2].skillId], userId2, new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[3].skillId], userId2, new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[4].skillId], userId2, new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[5].skillId], userId2, new Date())
+
+        def user2_summary_before = skillsService.getSkillSummary(userId2, proj.projectId)
+        def user2_subj_summary_before = skillsService.getSkillSummary(userId2, proj.projectId, subj.subjectId)
+        def user2_level_before = skillsService.getUserLevel(proj.projectId, userId2)
+
+        List<UserAchievement> beforeAllAchievements = userAchievementRepo.findAll()
+        List<UserAchievement> user1BeforeAchievements = beforeAllAchievements.findAll( { it.userId == userId1 })
+        List<UserAchievement> user2BeforeAchievements = beforeAllAchievements.findAll( { it.userId == userId2 })
+        when:
+        skillsService.deleteSkill([skills[1]])
+
+        /**
+         Level 1 => 100
+         Level 2 => 250
+         Level 3 => 450
+         Level 4 => 670
+         Level 5 => 920
+         */
+
+        def user1_summary_after = skillsService.getSkillSummary(userId1, proj.projectId)
+        def user1_subj_summary_after = skillsService.getSkillSummary(userId1, proj.projectId, subj.subjectId)
+        def user1_level_after = skillsService.getUserLevel(proj.projectId, userId1)
+
+        def user2_summary_after = skillsService.getSkillSummary(userId2, proj.projectId)
+        def user2_subj_summary_after = skillsService.getSkillSummary(userId2, proj.projectId, subj.subjectId)
+        def user2_level_after = skillsService.getUserLevel(proj.projectId, userId2)
+
+        List<UserAchievement> afterAllAchievements = userAchievementRepo.findAll()
+        List<UserAchievement> user1AfterAchievements = afterAllAchievements.findAll( { it.userId == userId1 })
+        println JsonOutput.toJson(user1AfterAchievements)
+        List<UserAchievement> user2AfterAchievements = afterAllAchievements.findAll( { it.userId == userId2 })
+                .findAll({ after -> !user2BeforeAchievements.find({ it.id == after.id})})
+
+
+        then:
+        user1_summary_before.points == 101
+        user1_summary_before.skillsLevel == 0
+        user1_summary_before.totalLevels == 5
+        user1_summary_before.totalPoints == 1200
+        user1_subj_summary_before.points == 101
+        user1_subj_summary_before.skillsLevel == 0
+        user1_subj_summary_before.totalLevels == 5
+        user1_subj_summary_before.totalPoints == 1200
+        user1_level_before == 0
+        !user1BeforeAchievements
+
+        user2_summary_before.points == 501
+        user2_summary_before.skillsLevel == 2
+        user2_summary_before.totalPoints == 1200
+        user2_subj_summary_before.points == 501
+        user2_subj_summary_before.skillsLevel == 2
+        user2_subj_summary_before.totalPoints == 1200
+        user2_level_before == 2
+        user2BeforeAchievements
+
+        user1_summary_after.points == 100
+        user1_summary_after.skillsLevel == 1
+        user1_summary_after.totalLevels == 5
+        user1_summary_after.totalPoints == 1000
+        user1_subj_summary_after.points == 100
+        user1_subj_summary_after.skillsLevel == 1
+        user1_subj_summary_after.totalLevels == 5
+        user1_subj_summary_after.totalPoints == 1000
+        user1AfterAchievements.size() == 2
+        user1AfterAchievements.find { it.projectId == proj.projectId && !it.skillId && it.level == 1}
+        user1AfterAchievements.find { it.projectId == proj.projectId && it.skillId == subj.subjectId && it.skillRefId && it.level == 1}
+        user1_level_after == 1
+
+        user2_summary_after.points == 500
+        user2_summary_after.skillsLevel == 3
+        user2_summary_after.totalPoints == 1000
+        user2_subj_summary_after.points == 500
+        user2_subj_summary_after.skillsLevel == 3
+        user2_subj_summary_after.totalPoints == 1000
+        user2_level_after == 3
+        user2AfterAchievements.size() == 2
+        user2AfterAchievements.find { it.projectId == proj.projectId && !it.skillId && it.level == 3}
+        user2AfterAchievements.find { it.projectId == proj.projectId && it.skillId == subj.subjectId && it.level == 3}
+    }
+
+    def "deleting of a skill causes users to achieve subject levels but not project"() {
+        String userId1 = "user1"
+        String userId2 = "user2"
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(6,)
+        skills.each {
+            it.pointIncrement = 100
+            it.numPerformToCompletion = 2
+        }
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        def subj2 = SkillsFactory.createSubject(1, 2)
+        def skills1 = SkillsFactory.createSkills(2, 1, 2)
+        skills1.each {
+            it.pointIncrement = 100
+            it.numPerformToCompletion = 2
+        }
+        skillsService.createSubject(subj2)
+        skillsService.createSkills(skills1)
+
+        /**
+         * subject 1:
+         Level 1 => 120
+         Level 2 => 300
+         Level 3 => 540
+         Level 4 => 804
+         Level 5 => 1104
+         */
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId1, new Date())
+        def user1_summary_before = skillsService.getSkillSummary(userId1, proj.projectId)
+        def user1_subj_summary_before = skillsService.getSkillSummary(userId1, proj.projectId, subj.subjectId)
+        def user1_level_before = skillsService.getUserLevel(proj.projectId, userId1)
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId2, new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[2].skillId], userId2, new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[3].skillId], userId2, new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[4].skillId], userId2, new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[5].skillId], userId2, new Date())
+
+        def user2_summary_before = skillsService.getSkillSummary(userId2, proj.projectId)
+        def user2_subj_summary_before = skillsService.getSkillSummary(userId2, proj.projectId, subj.subjectId)
+        def user2_level_before = skillsService.getUserLevel(proj.projectId, userId2)
+
+        List<UserAchievement> beforeAllAchievements = userAchievementRepo.findAll()
+        List<UserAchievement> user1BeforeAchievements = beforeAllAchievements.findAll( { it.userId == userId1 })
+        List<UserAchievement> user2BeforeAchievements = beforeAllAchievements.findAll( { it.userId == userId2 })
+        when:
+        skillsService.deleteSkill([skills[1]])
+
+        /**
+         *  subject1:
+         Level 1 => 100
+         Level 2 => 250
+         Level 3 => 450
+         Level 4 => 670
+         Level 5 => 920
+         */
+
+        def user1_summary_after = skillsService.getSkillSummary(userId1, proj.projectId)
+        def user1_subj_summary_after = skillsService.getSkillSummary(userId1, proj.projectId, subj.subjectId)
+        def user1_level_after = skillsService.getUserLevel(proj.projectId, userId1)
+
+        def user2_summary_after = skillsService.getSkillSummary(userId2, proj.projectId)
+        def user2_subj_summary_after = skillsService.getSkillSummary(userId2, proj.projectId, subj.subjectId)
+        def user2_level_after = skillsService.getUserLevel(proj.projectId, userId2)
+
+        List<UserAchievement> afterAllAchievements = userAchievementRepo.findAll()
+        List<UserAchievement> user1AfterAchievements = afterAllAchievements.findAll( { it.userId == userId1 })
+        println JsonOutput.toJson(user1AfterAchievements)
+        List<UserAchievement> user2AfterAchievements = afterAllAchievements.findAll( { it.userId == userId2 })
+                .findAll({ after -> !user2BeforeAchievements.find({ it.id == after.id})})
+
+
+        then:
+        user1_summary_before.points == 100
+        user1_summary_before.skillsLevel == 0
+        user1_summary_before.totalLevels == 5
+        user1_summary_before.totalPoints == 1600
+        user1_subj_summary_before.points == 100
+        user1_subj_summary_before.skillsLevel == 0
+        user1_subj_summary_before.totalLevels == 5
+        user1_subj_summary_before.totalPoints == 1200
+        user1_level_before == 0
+        !user1BeforeAchievements
+
+        user2_summary_before.points == 500
+        user2_summary_before.skillsLevel == 2
+        user2_summary_before.totalPoints == 1600
+        user2_subj_summary_before.points == 500
+        user2_subj_summary_before.skillsLevel == 2
+        user2_subj_summary_before.totalPoints == 1200
+        user2_level_before == 2
+        user2BeforeAchievements
+
+        user1_summary_after.points == 100
+        user1_summary_after.skillsLevel == 0
+        user1_summary_after.totalLevels == 5
+        user1_summary_after.totalPoints == 1400
+        user1_subj_summary_after.points == 100
+        user1_subj_summary_after.skillsLevel == 1
+        user1_subj_summary_after.totalLevels == 5
+        user1_subj_summary_after.totalPoints == 1000
+        user1AfterAchievements.size() == 1
+        user1AfterAchievements.find { it.projectId == proj.projectId && it.skillId == subj.subjectId && it.skillRefId && it.level == 1}
+        user1_level_after == 0
+
+        user2_summary_after.points == 500
+        user2_summary_after.skillsLevel == 2
+        user2_summary_after.totalPoints == 1400
+        user2_subj_summary_after.points == 500
+        user2_subj_summary_after.skillsLevel == 3
+        user2_subj_summary_after.totalPoints == 1000
+        user2_level_after == 2
+        user2AfterAchievements.size() == 1
+        user2AfterAchievements.find { it.projectId == proj.projectId && it.skillId == subj.subjectId && it.level == 3}
     }
 
     def "decrease in occurrences causes project and subject level achievements"() {
