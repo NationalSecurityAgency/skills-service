@@ -169,6 +169,17 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
       ''')
     long countActiveSkillsForSubject(Integer subjectId)
 
+    @Query(value='''select count(sd) 
+        from SkillRelDef srd, SkillDef sd
+        where 
+          srd.parent.id=?1
+          and srd.child.id = sd.id 
+          and srd.type = 'RuleSetDefinition' 
+          and sd.type = 'SkillsGroup' 
+          and (sd.enabled is null or sd.enabled = 'true')
+      ''')
+    long countActiveGroupsForSubject(Integer subjectId)
+
     @Query(value='''select c 
         from SkillRelDef r, SkillDef c 
         where r.parent.id=?1 and c.id = r.child and r.type=?2''')

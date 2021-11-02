@@ -15,12 +15,10 @@
  */
 package skills.intTests
 
-import org.springframework.beans.factory.annotation.Autowired
+
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
-import skills.storage.model.UserAchievement
-import skills.storage.repos.UserAchievedLevelRepo
 
 class SkillsGroupSpecs extends DefaultIntSpec {
 
@@ -1057,7 +1055,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         projectsAfter[0].totalPoints == 0
     }
 
-    def "numSkills includes child skills for enabled groups child skills but does not include child skills of for disabled groups"() {
+    def "numGroups includes enabled groups and numSkills includes child skills for enabled groups child skills but does not include child skills of for disabled groups"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def allSkills = SkillsFactory.createSkills(7)
@@ -1100,11 +1098,13 @@ class SkillsGroupSpecs extends DefaultIntSpec {
 
         subjects
         subjects.size() == 1
-        subjects[0].numSkills == 3
+        subjects[0].numSkills == 3  // two group child skills, one regular skill (2 disabled group child skills not included)
+        subjects[0].numGroups == 1  // one enabled, one disabled
 
         projects
         projects.size() == 1
-        projects[0].numSkills == 3
+        projects[0].numSkills == 3  // two group child skills, one regular skill (2 disabled group child skills not included)
+        projects[0].numGroups == 1  // one enabled, one disabled
     }
 
     void "update multiple skills at the same time" () {
@@ -1203,5 +1203,4 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         groupSkillsAfter.get(2).displayOrder == 3
         groupSkillsAfter.get(2).totalPoints == 100
     }
-
 }

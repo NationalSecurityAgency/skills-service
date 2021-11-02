@@ -446,6 +446,7 @@ class ProjAdminService {
         ProjectResult res = new ProjectResult(
                 projectId: definition.getProjectId(), name: definition.getName(), totalPoints: definition.getTotalPoints(),
                 numSubjects: definition.getNumSubjects(),
+                numGroups: definition.getNumGroups(),
                 displayOrder: order != null ? order : 0,
                 pinned: pinnedProjectIds?.contains(definition.getProjectId()),
                 created: definition.getCreated(),

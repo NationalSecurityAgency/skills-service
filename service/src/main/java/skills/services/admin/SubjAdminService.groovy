@@ -200,6 +200,7 @@ class SubjAdminService {
         )
 
         res.numSkills = calculateNumChildSkills(skillDef)
+        res.numGroups = calculateNumGroups(skillDef)
         return res
     }
 
@@ -217,10 +218,14 @@ class SubjAdminService {
         return skillDefRepo.existsByProjectIdAndNameAndTypeAllIgnoreCase(projectId, subjectName, SkillDef.ContainerType.Subject)
     }
 
-
     @Profile
     private long calculateNumChildSkills(SkillDefParent skillDef) {
         skillDefRepo.countActiveSkillsForSubject(skillDef.id)
+    }
+
+    @Profile
+    private long calculateNumGroups(SkillDefParent skillDef) {
+        skillDefRepo.countActiveGroupsForSubject(skillDef.id)
     }
 
     @Profile
