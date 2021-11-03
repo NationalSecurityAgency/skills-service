@@ -428,7 +428,7 @@ class AdminController {
         SkillsValidator.isNotNull(patchRequest.pointIncrement, "pointIncrement must be provided", projectId, groupId)
         SkillsValidator.isNotNull(patchRequest.numPerformToCompletion, "numPerformToCompletion must be provided", projectId, groupId)
 
-        skillsAdminService.syncSkillPoints(projectId, subjectId, groupId, patchRequest)
+        skillsAdminService.syncSkillPointsForSkillsGroup(projectId, subjectId, groupId, patchRequest)
         return new RequestResult(success: true)
     }
 

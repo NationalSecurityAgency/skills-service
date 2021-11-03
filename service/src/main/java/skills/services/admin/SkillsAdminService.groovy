@@ -101,10 +101,10 @@ class SkillsAdminService {
     SkillsGroupAdminService skillsGroupAdminService
 
     @Transactional
-    void syncSkillPoints(String projectId,
-                         String subjectId,
-                         String groupId,
-                         PointSyncPatchRequest patchRequest) {
+    void syncSkillPointsForSkillsGroup(String projectId,
+                                       String subjectId,
+                                       String groupId,
+                                       PointSyncPatchRequest patchRequest) {
         lockingService.lockProject(projectId)
 
         SkillDef skillsGroupSkillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, groupId, SkillDef.ContainerType.SkillsGroup)

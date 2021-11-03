@@ -366,6 +366,20 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
         subjectSummaryAfter.skills[0].children.find { it.skillId == groupChildren[1].skillId }
         subjectSummaryAfter.skills[0].children.find { it.skillId == groupChildren[1].skillId }.points == 100
         subjectSummaryAfter.skills[0].children.find { it.skillId == groupChildren[1].skillId }.totalPoints == 100
+
+        groupAchievementsAfter
+        groupAchievementsAfter.size() == 1
+        groupAchievementsAfter[0].userId == userId
+        groupAchievementsAfter[0].projectId == projectId
+        groupAchievementsAfter[0].skillId == skillsGroupId
+
+        subjectAchievementsAfter
+        subjectAchievementsAfter.size() == 5
+        subjectAchievementsAfter.find { it.level == 1 && it.userId == userId && it.projectId == projectId && it.skillId == subjectId }
+        subjectAchievementsAfter.find { it.level == 2 && it.userId == userId && it.projectId == projectId && it.skillId == subjectId }
+        subjectAchievementsAfter.find { it.level == 3 && it.userId == userId && it.projectId == projectId && it.skillId == subjectId }
+        subjectAchievementsAfter.find { it.level == 4 && it.userId == userId && it.projectId == projectId && it.skillId == subjectId }
+        subjectAchievementsAfter.find { it.level == 5 && it.userId == userId && it.projectId == projectId && it.skillId == subjectId }
     }
 
     def "group achieved when child skill occurrences are decreased, all skills required and now user has all skills"() {
