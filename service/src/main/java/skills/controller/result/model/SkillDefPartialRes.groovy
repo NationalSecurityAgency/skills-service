@@ -40,7 +40,7 @@ class SkillDefPartialRes extends SkillDefSkinnyRes{
     Integer numSkillsInGroup
     Integer numSelfReportSkills
     Integer numSkillsRequired
-    String enabled
+    boolean enabled
     String groupId
     String groupName
 }

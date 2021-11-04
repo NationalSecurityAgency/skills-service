@@ -15,7 +15,6 @@
  */
 package skills.intTests
 
-
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
@@ -41,7 +40,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         res.type == skillsGroup.type
         res.numSkillsInGroup == 0
         res.numSelfReportSkills == 0
-        res.enabled == 'false'
+        res.enabled == false
     }
 
     void "cannot convert an existing Skill To a SkillsGroup " () {
@@ -89,7 +88,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         res.type == skillsGroup.type
         res.numSkillsInGroup == groupSkills.size()
         res.numSelfReportSkills == 0
-        res.enabled == 'false'
+        res.enabled == false
         
         groupSkills.size() == 3
 
@@ -121,7 +120,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         subjSkills.get(0).type == skillsGroup.type
         subjSkills.get(0).numSkillsInGroup == groupSkills.size()
         subjSkills.get(0).numSelfReportSkills == 0
-        subjSkills.get(0).enabled == 'false'
+        subjSkills.get(0).enabled == false
     }
 
     void "create and then update SkillsGroup name" () {
@@ -149,7 +148,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         res1.type == skillsGroup.type
         res1.numSkillsInGroup == 0
         res1.numSelfReportSkills == 0
-        res1.enabled == 'false'
+        res1.enabled == false
 
         res2
         res2.skillId == skillsGroup.skillId
@@ -157,7 +156,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         res2.type == skillsGroup.type
         res2.numSkillsInGroup == 0
         res2.numSelfReportSkills == 0
-        res2.enabled == 'false'
+        res2.enabled == false
     }
 
     void "create and then update SkillsGroup ID" () {
@@ -185,7 +184,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         res1.type == skillsGroup.type
         res1.numSkillsInGroup == 0
         res1.numSelfReportSkills == 0
-        res1.enabled == 'false'
+        res1.enabled == false
 
         res2
         res2.skillId == skillsGroup.skillId
@@ -193,7 +192,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         res2.type == skillsGroup.type
         res2.numSkillsInGroup == 0
         res2.numSelfReportSkills == 0
-        res2.enabled == 'false'
+        res2.enabled == false
     }
 
     void "create and add more than one skill with same total point values to SkillsGroup, then successfully enable" () {
@@ -227,7 +226,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         res.type == skillsGroup.type
         res.numSkillsInGroup == groupSkills.size()
         res.numSelfReportSkills == 0
-        res.enabled == 'false'
+        res.enabled == false
 
         groupSkills.size() == 3
 
@@ -259,7 +258,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         subjSkills.get(0).type == skillsGroup.type
         subjSkills.get(0).numSkillsInGroup == groupSkills.size()
         subjSkills.get(0).numSelfReportSkills == 0
-        subjSkills.get(0).enabled == 'false'
+        subjSkills.get(0).enabled == false
 
         res2
         res2.skillId == skillsGroup.skillId
@@ -267,7 +266,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         res2.type == skillsGroup.type
         res2.numSkillsInGroup == groupSkills.size()
         res2.numSelfReportSkills == 0
-        res2.enabled == 'true'
+        res2.enabled == true
     }
 
     void "can enable a SkillsGroup with only 1 required child skill, but must have at least 2 child skills" () {
@@ -300,7 +299,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         res.numSkillsInGroup == groupSkills.size()
         res.numSelfReportSkills == 0
         res.numSkillsRequired == 1
-        res.enabled == 'true'
+        res.enabled == true
         res.totalPoints == groupSkills[0].totalPoints
 
         groupSkills.size() == 2
@@ -486,7 +485,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         res.numSkillsInGroup == groupSkills.size()
         res.numSelfReportSkills == 0
         res.numSkillsRequired == skills.size()
-        res.enabled == 'true'
+        res.enabled == true
         res.totalPoints == groupSkills[0].totalPoints + groupSkills[1].totalPoints + groupSkills[2].totalPoints
 
         groupSkills.size() == 3
@@ -546,7 +545,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         res.numSkillsInGroup == groupSkills.size()
         res.numSelfReportSkills == 0
         res.numSkillsRequired == -1
-        res.enabled == 'true'
+        res.enabled == true
         res.totalPoints == groupSkills[0].totalPoints + groupSkills[1].totalPoints + groupSkills[2].totalPoints
 
         groupSkills.size() == 3
@@ -604,7 +603,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         res.numSelfReportSkills == 0
         res.numSkillsRequired == 2
         res.totalPoints == (skills.get(0).pointIncrement * skills.get(0).numPerformToCompletion) * res.numSkillsRequired
-        res.enabled == 'true'
+        res.enabled == true
 
         groupSkills.size() == 3
 
@@ -826,7 +825,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
 
         then:
         res
-        res.enabled == 'false'
+        res.enabled == false
         res.groupName == skillsGroup.name
         res.groupId == skillsGroup.skillId
     }
@@ -1144,7 +1143,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         resBefore.numSkillsInGroup == 3
         resBefore.numSelfReportSkills == 0
         resBefore.numSkillsRequired == 2
-        resBefore.enabled == 'true'
+        resBefore.enabled == true
         resBefore.totalPoints == 20
 
         groupSkillsBefore.size() == 3
@@ -1177,7 +1176,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         resAfter.numSkillsInGroup == 3
         resAfter.numSelfReportSkills == 0
         resAfter.numSkillsRequired == 2
-        resAfter.enabled == 'true'
+        resAfter.enabled == true
         resAfter.totalPoints == 200
 
         groupSkillsAfter.size() == 3

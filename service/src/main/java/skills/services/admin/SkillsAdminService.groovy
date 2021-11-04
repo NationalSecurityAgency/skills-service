@@ -529,11 +529,11 @@ class SkillsAdminService {
             List<SkillDef> groupChildSkills = skillsGroupAdminService.getSkillsGroupChildSkills(skillDef.getId())
             res.numSkillsInGroup = groupChildSkills.size()
             res.numSelfReportSkills = groupChildSkills.count( {it.selfReportingType })?.intValue()
-            res.enabled = skillDef.enabled
+            res.enabled = Boolean.valueOf(skillDef.enabled)
         }
         if (skillDef.groupId) {
             SkillDefWithExtra skillsGroup = skillsGroupAdminService.getSkillsGroup(skillDef.projectId, skillDef.groupId)
-            res.enabled = skillsGroup.enabled
+            res.enabled = Boolean.valueOf(skillDef.enabled)
             res.groupName = skillsGroup.name
             res.groupId = skillsGroup.skillId
         }
@@ -591,7 +591,7 @@ class SkillsAdminService {
             List<SkillDef> groupChildSkills = skillsGroupAdminService.getSkillsGroupChildSkills(partial.getId())
             res.numSkillsInGroup = groupChildSkills.size()
             res.numSelfReportSkills = groupChildSkills.count( {it.selfReportingType })?.intValue()
-            res.enabled = partial.enabled
+            res.enabled = Boolean.valueOf(partial.enabled)
         }
         return res;
     }
