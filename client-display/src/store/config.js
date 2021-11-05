@@ -19,6 +19,9 @@ const getters = {
   config(state) {
     return state.config;
   },
+  levelDisplayName(state) {
+    return state.config.levelDisplayName || 'LevelDefault';
+  },
 };
 
 const mutations = {
@@ -30,8 +33,9 @@ const mutations = {
 const actions = {
   loadConfigState({ commit, rootState }) {
     const url = rootState.serviceUrl;
+    const { projectId } = rootState;
     return new Promise((resolve, reject) => {
-      axios.get(`${url}/public/clientDisplay/config`, {
+      axios.get(`${url}/public/clientDisplay/config?projectId=${projectId}`, {
         withCredentials: false,
       }).then((result) => {
         commit('setConfig', result.data);

@@ -23,14 +23,14 @@ limitations under the License.
         <div class="col-5 text-center border rounded bg-light p-2 text-dark">
           <vue-simple-spinner v-if="loading" line-bg-color="#333" line-fg-color="#17a2b8" message="Loading Chart ..."/>
           <div v-else>
-            No one achieved <span class="text-hc-info">Level 1</span> yet... You could be the <i><strong>first one</strong></i>!
+            No one achieved <span class="text-hc-info">{{ levelDisplayName }} 1</span> yet... You could be the <i><strong>first one</strong></i>!
           </div>
         </div>
       </div>
     </div>
 
     <div class="card-header">
-      <h3 class="h6 card-title mb-0 float-left">Level Breakdown</h3>
+      <h3 class="h6 card-title mb-0 float-left">{{ levelDisplayName }} Breakdown</h3>
     </div>
     <div class="card-body m-0 p-0 pl-2 mr-1 mt-1">
       <apexchart
@@ -64,7 +64,7 @@ limitations under the License.
       return {
         chartSeries: [{
           name: '# of Users',
-          data: [{ x: 'Level 1', y: 0 }, { x: 'Level 2', y: 0 }, { x: 'Level 3', y: 0 }, { x: 'Level 4', y: 0 }, { x: 'Level 5', y: 0 }],
+          data: [{ x: `${this.levelDisplayName()} 1`, y: 0 }, { x: `${this.levelDisplayName()} 2`, y: 0 }, { x: `${this.levelDisplayName()} 3`, y: 0 }, { x: `${this.levelDisplayName()} 4`, y: 0 }, { x: `${this.levelDisplayName()} 5`, y: 0 }],
         }],
         chartOptions: {
           chart: {
@@ -74,7 +74,7 @@ limitations under the License.
           },
           annotations: {
             points: [{
-              x: 'Level 1',
+              x: `${this.levelDisplayName()} 1`,
               seriesIndex: 0,
               label: {
                 borderColor: this.chartLabels().borderColor,
@@ -169,7 +169,7 @@ limitations under the License.
         }];
         if (this.usersPerLevel) {
           this.usersPerLevel.forEach((level) => {
-            const datum = { x: `Level ${level.level}`, y: level.numUsers };
+            const datum = { x: `${this.levelDisplayName()} ${level.level}`, y: level.numUsers };
             series[0].data.push(datum);
             if (level.level === this.myLevel) {
               // const label = {

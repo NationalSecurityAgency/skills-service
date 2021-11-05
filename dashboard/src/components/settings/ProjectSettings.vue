@@ -55,6 +55,18 @@ limitations under the License.
         </div>
 
         <div class="row mt-3">
+          <div class="col col-md-3 text-secondary" id="levelDisplayName">
+            Level Display Text:
+            <inline-help
+              msg='The word "Level" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+          </div>
+          <div class="col">
+            <b-form-input v-model="settings.levelDisplayName.value"
+                          v-on:input="levelDisplayNameChanged" aria-labelledby="levelDisplayNameLabel"></b-form-input>
+          </div>
+        </div>
+
+        <div class="row mt-3">
           <div class="col col-md-3 text-secondary" id="rootHelpUrlLabel">
             Root Help Url:
             <inline-help
@@ -207,6 +219,13 @@ limitations under the License.
             dirty: false,
             projectId: this.$route.params.projectId,
           },
+          levelDisplayName: {
+            value: 'Level',
+            setting: 'level.displayName',
+            lastLoadedValue: 'Level',
+            dirty: false,
+            projectId: this.$route.params.projectId,
+          },
         },
         errMsg: null,
         showSavedMsg: false,
@@ -256,6 +275,9 @@ limitations under the License.
       },
       helpUrlHostChanged(value) {
         this.settings.helpUrlHost.dirty = `${value}` !== `${this.settings.helpUrlHost.lastLoadedValue}`;
+      },
+      levelDisplayNameChanged(value) {
+        this.settings.levelDisplayName.dirty = `${value}` !== `${this.settings.levelDisplayName.lastLoadedValue}`;
       },
       loadSettings() {
         SettingService.getSettingsForProject(this.$route.params.projectId)

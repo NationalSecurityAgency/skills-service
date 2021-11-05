@@ -52,12 +52,12 @@ limitations under the License.
                             :total-completed-color="isLevelComplete ? completeColor : earnedTodayColor"
                             :title="levelStats.title">
                         <div slot="footer">
-                            <p v-if="isLevelComplete">All levels complete</p>
+                            <p v-if="isLevelComplete">All {{ levelDisplayName.toLowerCase() }}s complete</p>
 
                             <div v-if="!isLevelComplete">
                                 <div>
                                     <strong>{{ levelStats.pointsTillNextLevel | number }}</strong>
-                                    {{ 'Point' | plural(levelStats.pointsTillNextLevel) }} to Level {{
+                                    {{ 'Point' | plural(levelStats.pointsTillNextLevel) }} to {{ levelDisplayName }} {{
                                     levelStats.nextLevel }}
                                 </div>
                                 <div  data-cy="pointsEarnedTodayForTheNextLevel">
@@ -134,7 +134,7 @@ limitations under the License.
       },
       levelStats() {
         return {
-          title: this.isLevelComplete ? 'Level Progress' : `Level ${this.displayDataInternal.userSkills.skillsLevel + 1} Progress`,
+          title: this.isLevelComplete ? `${this.levelDisplayName} Progress` : `${this.levelDisplayName} ${this.displayDataInternal.userSkills.skillsLevel + 1} Progress`,
           nextLevel: this.displayDataInternal.userSkills.skillsLevel + 1,
           pointsTillNextLevel: this.displayDataInternal.userSkills.levelTotalPoints - this.displayDataInternal.userSkills.levelPoints,
         };

@@ -20,7 +20,7 @@ limitations under the License.
 <!--                <i class="text-success fa fa-trophy fa-3x float-left mr-2" style="min-width: 3rem;, max-width: 4rem;"></i>-->
                 <div class="text-center text-nowrap">
                     <h5>Requires</h5>
-                    <h4> Level {{ projectLevel.requiredLevel }}</h4>
+                    <h4> {{ levelDisplayName }} {{ projectLevel.requiredLevel }}</h4>
                 </div>
             </div>
             <div class="col-lg-10 text-sm-left text-secondary text-center skills-text-description">

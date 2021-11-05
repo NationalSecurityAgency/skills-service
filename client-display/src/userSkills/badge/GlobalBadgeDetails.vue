@@ -45,7 +45,7 @@ limitations under the License.
             </div>
             <div v-if="!(projectSummaries && projectSummaries.length > 0)">
                 <no-data-yet class="my-2"
-                             title="No Skills or Project Levels have not been added yet." sub-title="Please contact a Skills Supervisor."/>
+                             :title="`No Skills or Project ${this.levelDisplayName}s have not been added yet.`" sub-title="Please contact a Skills Supervisor."/>
             </div>
         </div>
     </div>

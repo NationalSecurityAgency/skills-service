@@ -90,11 +90,18 @@ class PublicConfigController {
     @CrossOrigin
     @RequestMapping(value = "/clientDisplay/config", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    Map<String,Object> getClientDisplayConfig(){
+    Map<String,Object> getClientDisplayConfig(@RequestParam String projectId){
         String docsHost = uiConfigProperties.ui.docsHost
         Map<String,String> res = new HashMap<>()
         res["docsHost"] = docsHost
         res["maxSelfReportMessageLength"] = uiConfigProperties.ui.maxSelfReportMessageLength
+        res["levelDisplayName"] = 'Level'
+        if (projectId) {
+            String customLevelName = settingsService.getProjectSetting(projectId, 'level.displayName')?.value
+            if (customLevelName) {
+                res["levelDisplayName"] = customLevelName
+            }
+        }
         return res
     }
 

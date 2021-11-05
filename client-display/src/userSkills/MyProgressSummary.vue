@@ -65,7 +65,7 @@ limitations under the License.
         const summaryObject = { };
         switch (this.summaryType) {
         case 'level':
-          summaryObject.title = 'Points Earned Toward Next Level';
+          summaryObject.title = `Points Earned Toward Next ${this.levelDisplayName()}`;
           summaryObject.overallPoints = this.userSkills.levelPoints;
           summaryObject.todaysPoints = this.userSkills.todaysPoints < this.userSkills.levelPoints ? this.userSkills.todaysPoints : this.userSkills.levelPoints;
           break;
