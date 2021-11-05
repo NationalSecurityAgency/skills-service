@@ -17,6 +17,7 @@ package skills.intTests
 
 import groovy.util.logging.Slf4j
 import org.apache.http.ssl.SSLContextBuilder
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
 import org.springframework.lang.Nullable
 import org.springframework.messaging.converter.MappingJackson2MessageConverter
@@ -36,6 +37,9 @@ import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.TestUtils
 import skills.services.events.CompletionItem
 import skills.services.events.SkillEventResult
+import skills.storage.repos.UserAchievedLevelRepo
+import skills.storage.repos.UserRepo
+import spock.lang.IgnoreRest
 
 import java.lang.reflect.Type
 import java.util.concurrent.CountDownLatch
@@ -49,6 +53,14 @@ class WebsocketSpecs extends DefaultIntSpec {
     List<String> sampleUserIds // loaded from system props
     StompSession stompSession
     List<Map> subj1, subj2, subj3
+
+
+    @Autowired
+    UserAchievedLevelRepo userAchievedLevelRepo
+
+    @Autowired
+    UserRepo userRepo
+
 
     def setup() {
         skillsService.deleteProjectIfExist(projId)
@@ -201,6 +213,33 @@ class WebsocketSpecs extends DefaultIntSpec {
         wsResults[0].completed?.find{it.id=='skill1'}.type == CompletionItem.CompletionItemType.Skill
         wsResults[0].completed?.find{it.id=='skill1'}.name == skill.name
         wsResults[0].completed?.findAll { it.type == CompletionItem.CompletionItemType.Subject }.size() == 3
+    }
+
+    def "non-notified project level achievements are notified when user connects to websocket" () {
+        def subj = SkillsFactory.createSubject(1, 1)
+        def skill = SkillsFactory.createSkill(1, 1, 1, 0, 4, 0, 1800)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skill)
+
+        skillsService.addSkill([projectId: projId, skillId: skill.skillId], 'skills@skills.org', new Date())
+
+        skill.numPerformToCompletion = 1
+        skillsService.updateSkill(skill, skill.skillId)
+
+        List<SkillEventResult> wsResults = []
+
+        when:
+        CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, false, false, 1, 'skills@skills.org')
+        messagesReceived.await(30, TimeUnit.SECONDS)
+
+        then:
+        wsResults[0].success
+        wsResults[0].completed
+        wsResults[0].explanation == 'Achieved due to a modification in the training profile (such as: skill deleted, occurrences modified, badge published, etc..)'
+        wsResults[0].completed.size() == 6
+        wsResults[0].completed?.findAll {it.type == CompletionItem.CompletionItemType.Overall}?.size() == 2
+        wsResults[0].completed?.find {it.type == CompletionItem.CompletionItemType.Overall && it.level == 2 }
+        wsResults[0].completed?.find {it.type == CompletionItem.CompletionItemType.Overall && it.level == 3 }
     }
 
    def "achieve subject's level - validate via xhr streaming"(){
