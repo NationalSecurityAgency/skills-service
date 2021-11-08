@@ -19,6 +19,8 @@ import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import skills.intTests.utils.SkillsService
+import spock.lang.IgnoreRest
 
 class ClientDisplaySpec extends DefaultIntSpec {
 
@@ -35,6 +37,45 @@ class ClientDisplaySpec extends DefaultIntSpec {
         res.subjects.size() == 1
         res.subjects.first().subjectId == subj1.subjectId
         res.subjects.first().totalPoints == 0
+    }
+
+    def "global badge with no dependencies on requested project should not be included in count of completed badges"() {
+        def proj1 = SkillsFactory.createProject()
+        def subj1 = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(2, 1, 1, 100)
+        skillsService.createProject(proj1)
+        skillsService.createSubject(subj1)
+        skillsService.createSkills(skills)
+
+        def proj2 = SkillsFactory.createProject(2)
+        def subj21 = SkillsFactory.createSubject(2, 1)
+        def skills2 = SkillsFactory.createSkills(2, 2, 1, 100)
+        skillsService.createProject(proj2)
+        skillsService.createSubject(subj21)
+        skillsService.createSkills(skills2)
+
+        def globalBadge = SkillsFactory.createBadge(1, 1)
+        SkillsService supervisorService = createSupervisor()
+        globalBadge.enabled = 'true'
+        supervisorService.createGlobalBadge(globalBadge)
+        supervisorService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: globalBadge.badgeId, skillId: skills[0].skillId])
+        supervisorService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: globalBadge.badgeId, skillId: skills[1].skillId])
+
+        def user = getRandomUsers(1)[0]
+        skillsService.addSkill(skills[0], user)
+        skillsService.addSkill(skills[1], user)
+        skillsService.addSkill(skills2[0], user)
+        skillsService.addSkill(skills2[1], user)
+
+        when:
+        def summaryProj1 = skillsService.getSkillSummary(user, proj1.projectId)
+        def summaryProj2 = skillsService.getSkillSummary(user, proj2.projectId)
+
+        then:
+        summaryProj1.badges.numTotalBadges == 1
+        summaryProj1.badges.numBadgesCompleted == 1
+        summaryProj2.badges.numTotalBadges == 0
+        summaryProj2.badges.numBadgesCompleted == 0
     }
 
     def "attempt to get proj summary for project that does not exist"() {
@@ -232,3 +273,4 @@ class ClientDisplaySpec extends DefaultIntSpec {
         projectSummary.subjects[0].totalPoints == 10
     }
 }
+
