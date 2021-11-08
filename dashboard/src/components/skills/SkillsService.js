@@ -77,6 +77,11 @@ export default {
     return axios.post(url, copy)
       .then(() => this.getSkillDetails(skill.projectId, skill.subjectId, skill.skillId));
   },
+  syncSkillsPoints(projectId, subjectId, groupId, skillsPointsSyncRequest) {
+    const url = `/admin/projects/${projectId}/subjects/${subjectId}/groups/${groupId}/skills`;
+    return axios.patch(url, skillsPointsSyncRequest)
+      .then(() => this.getGroupSkills(projectId, groupId));
+  },
   deleteSkill(skill) {
     return axios.delete(`/admin/projects/${skill.projectId}/subjects/${skill.subjectId}/skills/${skill.skillId}`)
       .then((res) => res.data);

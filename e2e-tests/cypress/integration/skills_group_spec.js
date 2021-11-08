@@ -506,7 +506,7 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="pageHeader"]').contains('SKILL: Very Great Skill 2');
     });
 
-    it('Report Skill Events: ability to report skill events after group is enabled', () => {
+    it.only('Report Skill Events: ability to report skill events after group is enabled', () => {
         cy.intercept('POST', '/app/users/projects/proj1/suggestClientUsers?userSuggestOption=ONE').as('userSuggest');
         cy.createSkillsGroup(1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 1, { pointIncrement: 10, numPerformToCompletion: 5 });

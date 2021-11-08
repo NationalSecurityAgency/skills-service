@@ -155,16 +155,13 @@ limitations under the License.
       },
       syncSkills() {
         this.loading = true;
-        const skillsWithSyncedPoints = this.skills.map((skill) => ({ ...skill, pointIncrement: this.syncSkillsPoints.pointIncrement, numPerformToCompletion: this.syncSkillsPoints.numPerformToCompletion }));
-        const promises = skillsWithSyncedPoints.map((skill) => new Promise((resolve) => {
-          SkillsService.saveSkill(skill)
-            .then((res) => resolve(res));
-        }));
-
-        const self = this;
-        Promise.all(promises)
+        SkillsService.syncSkillsPoints(this.group.projectId, this.group.subjectId, this.group.skillId,
+                                       {
+                                         pointIncrement: this.syncSkillsPoints.pointIncrement,
+                                         numPerformToCompletion: this.syncSkillsPoints.numPerformToCompletion,
+                                       })
           .then((res) => {
-            self.$emit('skills-updated', res);
+            this.$emit('skills-updated', res);
           })
           .finally(() => {
             this.loading = false;
