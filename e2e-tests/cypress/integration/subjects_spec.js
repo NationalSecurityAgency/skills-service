@@ -795,7 +795,8 @@ describe('Subjects Tests', () => {
 
         cy.intercept('GET', '/admin/projects/proj1/subjects/areallylongsubjectnamethatmaywraptoosoonSubject').as('loadSubj');
         // resolutions over 1280 are ignored in headless mode so we can only test at this resolution
-        cy.setResolution([1280, 900]);
+        cy.viewport(1280, 900);
+
         cy.wait(200);
         cy.visit('/administrator/projects/proj1/subjects/areallylongsubjectnamethatmaywraptoosoonSubject/');
         cy.wait('@loadSubj');
