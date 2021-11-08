@@ -202,6 +202,12 @@ class SkillsAdminService {
                     int requestedNumSkillsRequired = skillRequest.numSkillsRequired == -1 ? groupChildSkills.size() : skillRequest.numSkillsRequired
                     numSkillsRequiredDelta = requestedNumSkillsRequired - currentNumSkillsRequired
                 }
+
+                if (Boolean.valueOf(skillDefinition.enabled) != Boolean.valueOf(skillRequest.enabled)) {
+                    // enabling or disabling, need to update child skills enabled to match the group value
+                    groupChildSkills.each { it.enabled = skillRequest.enabled }
+                    skillDefRepo.saveAll(groupChildSkills)
+                }
             }
             shouldRebuildScores = skillDefinition.totalPoints != totalPointsRequested || (!Boolean.valueOf(skillDefinition.enabled) && Boolean.valueOf(skillRequest.enabled))
             occurrencesDelta = isSkillsGroup ? 0 : skillRequest.numPerformToCompletion - currentOccurrences
@@ -226,6 +232,11 @@ class SkillsAdminService {
 
             Integer highestDisplayOrder = skillDefRepo.calculateChildSkillsHighestDisplayOrder(skillRequest.projectId, groupId ?: parentSkillId)
             int displayOrder = highestDisplayOrder == null ? 1 : highestDisplayOrder + 1
+            String enabled = isSkillsGroup ? Boolean.FALSE.toString() : Boolean.TRUE.toString()
+            if (isSkillsGroupChild) {
+                skillsGroupSkillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, groupId, SkillDef.ContainerType.SkillsGroup)
+                enabled = skillsGroupSkillDef.enabled
+            }
             skillDefinition = new SkillDefWithExtra(
                     skillId: skillRequest.skillId,
                     projectId: skillRequest.projectId,
@@ -241,7 +252,7 @@ class SkillsAdminService {
                     version: skillRequest.version,
                     selfReportingType: selfReportingType,
                     numSkillsRequired: skillRequest.numSkillsRequired,
-                    enabled: isSkillsGroup ? false : skillRequest.enabled,
+                    enabled: enabled,
                     groupId: groupId,
             )
             log.debug("Saving [{}]", skillDefinition)
@@ -266,7 +277,9 @@ class SkillsAdminService {
 
         if (isSkillsGroupChild) {
             // need to validate skills group
-            skillsGroupSkillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, groupId, SkillDef.ContainerType.SkillsGroup)
+            if (!skillsGroupSkillDef) {
+                skillsGroupSkillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, groupId, SkillDef.ContainerType.SkillsGroup)
+            }
             groupChildSkills = skillsGroupAdminService.validateSkillsGroupAndReturnChildren(skillsGroupSkillDef.numSkillsRequired, Boolean.valueOf(skillsGroupSkillDef.enabled), skillsGroupSkillDef.id)
         }
 
@@ -575,6 +588,7 @@ class SkillsAdminService {
                 updated: partial.updated,
                 selfReportingType: partial.getSelfReportingType(),
                 numSkillsRequired: partial.getNumSkillsRequired(),
+                enabled: Boolean.valueOf(partial.enabled),
         )
 
         if (partial.skillType == SkillDef.ContainerType.Skill) {
@@ -591,7 +605,6 @@ class SkillsAdminService {
             List<SkillDef> groupChildSkills = skillsGroupAdminService.getSkillsGroupChildSkills(partial.getId())
             res.numSkillsInGroup = groupChildSkills.size()
             res.numSelfReportSkills = groupChildSkills.count( {it.selfReportingType })?.intValue()
-            res.enabled = Boolean.valueOf(partial.enabled)
         }
         return res;
     }

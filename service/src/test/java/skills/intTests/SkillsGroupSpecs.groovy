@@ -1202,4 +1202,68 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         groupSkillsAfter.get(2).displayOrder == 3
         groupSkillsAfter.get(2).totalPoints == 100
     }
+
+    def "child skills are enabled/disabled with the parent group"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def allSkills = SkillsFactory.createSkills(3)
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+
+        def skillsGroup = allSkills[0]
+        skillsGroup.type = 'SkillsGroup'
+        skillsGroup.enabled = 'false'
+        skillsService.createSkill(skillsGroup)
+        def children = allSkills[1..2]
+
+        String skillsGroupId = skillsGroup.skillId
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, children[0])
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, children[1])
+
+
+        when:
+
+        def groupSkillsInitial = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
+        def subjSkillsInitial = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
+        def groupInitial = skillsService.getSkill(skillsGroup)
+        def child1Initial = skillsService.getSkill(children[0])
+        def child2Initial = skillsService.getSkill(children[1])
+
+        skillsGroup.enabled = 'true'
+        skillsService.updateSkill(skillsGroup, null)
+
+        def groupSkillsEnabled = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
+        def subjSkillsEnabled = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
+        def groupEnabled = skillsService.getSkill(skillsGroup)
+        def child1Enabled = skillsService.getSkill(children[0])
+        def child2Enabled = skillsService.getSkill(children[1])
+
+        skillsGroup.enabled = 'false'
+        skillsService.updateSkill(skillsGroup, null)
+
+        def groupSkillsDisabled = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
+        def subjSkillsDisabled = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
+        def groupDisabled = skillsService.getSkill(skillsGroup)
+        def child1Disabled = skillsService.getSkill(children[0])
+        def child2Disabled = skillsService.getSkill(children[1])
+
+        then:
+        groupSkillsInitial.every { it.enabled == false }
+        subjSkillsInitial.every { it.enabled == false }
+        groupInitial.enabled == false
+        child1Initial.enabled == false
+        child2Initial.enabled == false
+
+        groupSkillsEnabled.every { it.enabled == true }
+        subjSkillsEnabled.every { it.enabled == true }
+        groupEnabled.enabled == true
+        child1Enabled.enabled == true
+        child2Enabled.enabled == true
+
+        groupSkillsDisabled.every { it.enabled == false }
+        subjSkillsDisabled.every { it.enabled == false }
+        groupDisabled.enabled == false
+        child1Disabled.enabled == false
+        child2Disabled.enabled == false
+    }
 }

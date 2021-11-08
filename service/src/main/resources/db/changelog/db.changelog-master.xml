@@ -1418,4 +1418,10 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="16" author="skills team" context="migration16">
+        <sql>
+            update skill_definition set enabled = 'true' where enabled is null and (type = 'Skill' OR type = 'SkillsGroup');
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
