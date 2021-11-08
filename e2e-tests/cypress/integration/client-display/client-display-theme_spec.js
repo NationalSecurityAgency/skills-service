@@ -788,6 +788,56 @@ describe('Client Display Tests', () => {
     cy.matchSnapshotImage(snapshotOptions);
   });
 
+    it('skills group', () => {
+        cy.createSubject(1, 1);
+        cy.createSkillsGroup(1, 1, 1);
+        cy.addSkillToGroup(1, 1, 1, 1);
+        cy.addSkillToGroup(1, 1, 1, 2);
+        cy.createSkillsGroup(1, 1, 1, { enabled: true });
+
+        cy.cdVisit('/?enableTheme=true');
+        cy.cdClickSubj(0);
+        cy.get('[data-cy="skillProgress_index-0"]')
+        cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"]');
+    });
+
+    it('skills group - partial completion ', () => {
+        cy.createSubject(1, 1);
+        cy.createSkillsGroup(1, 1, 1);
+        cy.addSkillToGroup(1, 1, 1, 1);
+        cy.addSkillToGroup(1, 1, 1, 2);
+        cy.createSkillsGroup(1, 1, 1, { enabled: true });
+
+        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now')
+        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday')
+
+        cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'yesterday')
+
+        cy.cdVisit('/?enableTheme=true');
+        cy.cdClickSubj(0);
+        cy.get('[data-cy="skillProgress_index-0"]')
+        cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"]');
+    });
+
+    it('skills group - 1 out 2 skills required', () => {
+        cy.createSubject(1, 1);
+        cy.createSkillsGroup(1, 1, 1);
+        cy.addSkillToGroup(1, 1, 1, 1);
+        cy.addSkillToGroup(1, 1, 1, 2);
+        cy.createSkillsGroup(1, 1, 1, { numSkillsRequired: 1, enabled: true });
+
+        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now')
+        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday')
+
+        cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'yesterday')
+
+        cy.cdVisit('/?enableTheme=true');
+        cy.cdClickSubj(0);
+        cy.get('[data-cy="skillProgress_index-0"]')
+        cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"]');
+    });
+
+
 //   http://localhost:8083/?themeParam=buttons|{%22backgroundColor%22:%22green%22,%22foregroundColor%22:%22white%22,%20%22borderColor%22:%22purple%22}&themeParam=textPrimaryColor|blue&themeParam=textSecondaryColor|purple&themeParam=tiles|{%22backgroundColor%22:%20%22yellow%22}&themeParam=badges|{%22backgroundColor%22:%22blue%22}
 //     http://localhost:8083/?themeParam=charts|{%22lineColor%22:%22purple%22,%22labelBorderColor%22:%22green%22,%22labelBackgroundColor%22:%22neon%22,%22labelForegroundColor%22:%22gray%22,%22gradientStartColor%22:%22blue%22,%22gradientStopColor%22:%22yellow%22}
 });

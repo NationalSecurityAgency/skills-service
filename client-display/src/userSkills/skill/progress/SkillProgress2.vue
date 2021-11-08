@@ -56,9 +56,9 @@ limitations under the License.
             <span v-if="skill.skillHtml" v-html="skill.skillHtml"></span>
             <span v-else>{{ skill.skill }}</span>
             <div v-if="skill.isSkillsGroupType && skill.numSkillsRequired > 0 && skill.numSkillsRequired < skill.children.length"
-                 v-b-tooltip.hover.v-info
+                 v-b-tooltip.hover
                  title="A Group allows a Skill to be defined by the collection of other Skills within a Project. A Skill Group can require the completion of some or all of the included Skills before the group be achieved."
-                 class="ml-2 d-inline border rounded p-1 text-primary bg-light border-success"
+                 class="ml-2 d-inline border rounded p-1 text-primary border-success"
                  style="font-size: 0.9rem"
                  data-cy="groupSkillsRequiredBadge">
               <span class="">Requires </span> <b-badge variant="success">{{ skill.numSkillsRequired }}</b-badge> <span class="font-italic">out of</span> <b-badge variant="secondary">{{ skill.children.length }}</b-badge> skills
