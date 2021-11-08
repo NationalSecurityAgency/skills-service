@@ -64,7 +64,7 @@ limitations under the License.
       return {
         chartSeries: [{
           name: '# of Users',
-          data: [{ x: `${this.levelDisplayName()} 1`, y: 0 }, { x: `${this.levelDisplayName()} 2`, y: 0 }, { x: `${this.levelDisplayName()} 3`, y: 0 }, { x: `${this.levelDisplayName()} 4`, y: 0 }, { x: `${this.levelDisplayName()} 5`, y: 0 }],
+          data: [{ x: `${this.levelDisplayName} 1`, y: 0 }, { x: `${this.levelDisplayName} 2`, y: 0 }, { x: `${this.levelDisplayName} 3`, y: 0 }, { x: `${this.levelDisplayName} 4`, y: 0 }, { x: `${this.levelDisplayName} 5`, y: 0 }],
         }],
         chartOptions: {
           chart: {
@@ -74,7 +74,7 @@ limitations under the License.
           },
           annotations: {
             points: [{
-              x: `${this.levelDisplayName()} 1`,
+              x: `${this.levelDisplayName} 1`,
               seriesIndex: 0,
               label: {
                 borderColor: this.chartLabels().borderColor,
@@ -169,7 +169,7 @@ limitations under the License.
         }];
         if (this.usersPerLevel) {
           this.usersPerLevel.forEach((level) => {
-            const datum = { x: `${this.levelDisplayName()} ${level.level}`, y: level.numUsers };
+            const datum = { x: `${this.levelDisplayName} ${level.level}`, y: level.numUsers };
             series[0].data.push(datum);
             if (level.level === this.myLevel) {
               // const label = {
