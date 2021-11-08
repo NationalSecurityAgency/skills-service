@@ -90,7 +90,7 @@ class PublicConfigController {
     @CrossOrigin
     @RequestMapping(value = "/clientDisplay/config", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    Map<String,Object> getClientDisplayConfig(@RequestParam String projectId){
+    Map<String,Object> getClientDisplayConfig(@RequestParam(required = false) String projectId){
         String docsHost = uiConfigProperties.ui.docsHost
         Map<String,String> res = new HashMap<>()
         res["docsHost"] = docsHost
