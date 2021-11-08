@@ -851,6 +851,8 @@ describe('Skills Group Tests', () => {
         cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
 
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '0');
+        cy.get('[data-cy="pageHeaderStat_Groups"] [data-cy="statValue"]').should('have.text', '0');
+        cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '0');
 
         // go live
         cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="goLiveBtn"]`).click();
@@ -858,6 +860,8 @@ describe('Skills Group Tests', () => {
         cy.contains('Yes, Go Live').click();
 
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '150');
+        cy.get('[data-cy="pageHeaderStat_Groups"] [data-cy="statValue"]').should('have.text', '1');
+        cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '3');
     })
 
     it('subject overview cards are updated when skills added, deleted or modified for group that is enabled', () => {
@@ -872,6 +876,8 @@ describe('Skills Group Tests', () => {
         cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
 
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '150');
+        cy.get('[data-cy="pageHeaderStat_Groups"] [data-cy="statValue"]').should('have.text', '1');
+        cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '3');
 
         // delete
         cy.get('[data-cy="deleteSkillButton_skill1"]').click();
@@ -879,6 +885,8 @@ describe('Skills Group Tests', () => {
         cy.contains('YES, Delete It!').click();
 
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '100');
+        cy.get('[data-cy="pageHeaderStat_Groups"] [data-cy="statValue"]').should('have.text', '1');
+        cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '2');
 
         // modify
         cy.get('[data-cy="editSkillButton_skill2"]').click();
@@ -886,10 +894,14 @@ describe('Skills Group Tests', () => {
         cy.get('button').contains('Save').click();
 
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '300');
+        cy.get('[data-cy="pageHeaderStat_Groups"] [data-cy="statValue"]').should('have.text', '1');
+        cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '2');
 
         // add
         cy.addSkillToGroupViaUI('group1', 4, false)
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '350');
+        cy.get('[data-cy="pageHeaderStat_Groups"] [data-cy="statValue"]').should('have.text', '1');
+        cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '3');
     })
 
 });
