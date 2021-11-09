@@ -123,9 +123,9 @@ class SkillEventsService {
             pendingNotificationAchievements?.each {
                 SkillEventsSupportRepo.SkillDefMin skill
 
-                if(it.projectId) {
+                if(it.projectId && it.skillId) {
                     skill = skillEventsSupportRepo.findByProjectIdAndSkillId(it.projectId, it.skillId)
-                } else {
+                } else if (it.skillId) {
                     skill = skillEventsSupportRepo.findBySkillIdWhereProjectIdIsNull(it.skillId)
                 }
 
@@ -139,12 +139,10 @@ class SkillEventsService {
                     Date day = it.created.clearTime()
                     UserPoints points = userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay(it.projectId, userId, it.skillId, day)
 
-                    if (points) {
-                        completionItem = new CompletionItem(
-                                level: it.level, name: skill.name,
-                                id: points.skillId ?: "OVERALL",
-                                type: points.skillId ? CompletionItemType.Subject : CompletionItemType.Overall)
-                    }
+                    completionItem = new CompletionItem(
+                            level: it.level, name: skill?.name ?: "OVERALL",
+                            id: points?.skillId ?: "OVERALL",
+                            type: points?.skillId ? CompletionItemType.Subject : CompletionItemType.Overall)
                 } else {
                     if(SkillDef.ContainerType.Skill == skill.type) {
                         completionItem = new CompletionItem(type: CompletionItemType.Skill, id: skill.skillId, name: skill.name)
