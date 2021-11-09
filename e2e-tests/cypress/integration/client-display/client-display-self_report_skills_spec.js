@@ -119,6 +119,7 @@ describe('Client Display Self Report Skills Tests', () => {
 
     cy.get('[data-cy="selfReportBtn"]').click();
     cy.get('[data-cy="selfReportSkillMsg"]').contains('This skill can be submitted under the Honor System and 50 points will be awarded right away')
+    cy.get('[data-cy=charactersRemaining').should('not.exist');
     cy.get('[data-cy="selfReportSubmitBtn"]').click();
 
     cy.get('[data-cy="selfReportAlert"]').contains("You just earned 50 points!")

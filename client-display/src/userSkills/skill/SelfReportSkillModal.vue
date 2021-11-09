@@ -40,7 +40,7 @@ limitations under the License.
            aria-describedby="reportSkillMsg"
            aria-label="Optional request approval message"
            class="form-control" placeholder="Message (optional)"/>
-    <div :class="{ 'float-right':true, 'text-small': true, 'text-danger': charactersRemaining < 0 }" data-cy="charactersRemaining">{{charactersRemaining}} characters remaining <i v-if="charactersRemaining < 0" class="fas fa-exclamation-circle"/></div>
+    <div v-if="isApprovalRequired" :class="{ 'float-right':true, 'text-small': true, 'text-danger': charactersRemaining < 0 }" data-cy="charactersRemaining">{{charactersRemaining}} characters remaining <i v-if="charactersRemaining < 0" class="fas fa-exclamation-circle"/></div>
     <span v-if="inputInvalid" class="text-small text-danger" data-cy="selfReportMsgInput_errMsg"><i class="fas fa-exclamation-circle"/> {{ inputInvalidExplanation }}</span>
     <template #modal-footer>
       <button type="button" class="btn btn-outline-danger text-uppercase" @click="cancel">
