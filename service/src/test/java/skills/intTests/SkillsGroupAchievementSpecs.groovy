@@ -17,6 +17,7 @@ package skills.intTests
 
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.storage.model.UserAchievement
 import skills.storage.repos.UserAchievedLevelRepo
@@ -557,6 +558,35 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
         subjectSummary.skills[0].children.find { it.skillId = groupChildren[1].skillId }
         subjectSummary.skills[0].children.find { it.skillId = groupChildren[1].skillId }.points == 100
         subjectSummary.skills[0].children.find { it.skillId = groupChildren[1].skillId }.totalPoints == 100
+    }
+
+    def "cannot add skill for a skills group itself"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def allSkills = SkillsFactory.createSkills(3)
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+
+        def skillsGroup = allSkills[0]
+        skillsGroup.type = 'SkillsGroup'
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        def groupChildren = allSkills[1..2]
+        groupChildren.each { skill ->
+            skill.pointIncrement = 100
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+
+        when:
+        String userId = 'user1'
+        String projectId = proj.projectId
+        String skillId = skillsGroupId
+
+        def res = skillsService.addSkill([projectId: projectId, skillId: skillId], userId, new Date())
+
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains("Failed to report skill event because skill definition does not exist") // only looks for skillDef.type == SkillDef.ContainerType.Skill
     }
 
 }
