@@ -995,6 +995,34 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         exception.message.contains("A Skill Group must have at least 2 skills in order to be enabled.")
     }
 
+    def "can delete a child skill that would cause the group to have less than 2 skills when group is disabled"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def allSkills = SkillsFactory.createSkills(3)
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+
+        def skillsGroup = allSkills[0]
+        skillsGroup.type = 'SkillsGroup'
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        def group1Children = allSkills[1..2]
+        group1Children.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+        skillsGroup.enabled = 'false'
+        skillsService.updateSkill(skillsGroup, null)
+
+        when:
+        group1Children.each { skill ->
+            skillsService.deleteSkill(skill)
+        }
+        def groupSkillsAfterDelete = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
+
+        then:
+        !groupSkillsAfterDelete
+    }
+
     def "deleting child skill of a disabled group will update totalPoints for the group, but not subjects or project"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()

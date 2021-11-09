@@ -102,7 +102,7 @@ class SkillsGroupAdminService {
             throw new SkillException("Cannot convert an existing Skill to a Skill Group, or existing Skill Group to Skill.")
         }
         int numSkillsRequired = skillRequest.numSkillsRequired
-        boolean enabled = StringUtils.isNotBlank(skillRequest.enabled) && StringUtils.equalsIgnoreCase(skillRequest.enabled, Boolean.TRUE.toString())
+        boolean enabled = Boolean.valueOf(skillRequest.enabled)
         Integer skillsGroupIdRef = skillDefinition.id
         return validateSkillsGroupAndReturnChildren(numSkillsRequired, enabled, skillsGroupIdRef)
     }
@@ -142,7 +142,7 @@ class SkillsGroupAdminService {
     @Profile
     List<SkillDef> validateCanDeleteChildSkillAndReturnChildren(SkillDef parentSkill) {
         List<SkillDef> groupChildSkills = getSkillsGroupChildSkills(parentSkill.id)
-        if (parentSkill.enabled) {
+        if (Boolean.valueOf(parentSkill.enabled)) {
             int numChildSkills = groupChildSkills.size()
             if (numChildSkills < 2) {
                 throw new SkillException("A Skill Group must have at least 2 skills in order to be enabled.")
