@@ -304,7 +304,7 @@ class SkillEventsService {
             return res
         }
 
-        if (skillDefinition.groupId && !skillsGroupAdminService.isParentSkillsGroupEnabled(skillDefinition.projectId, skillDefinition.groupId)) {
+        if (skillDefinition.groupId && (!Boolean.valueOf(skillDefinition.enabled) || !skillsGroupAdminService.isParentSkillsGroupEnabled(skillDefinition.projectId, skillDefinition.groupId))) {
             res.skillApplied = false
             res.explanation = "This skill belongs to a Skill Group that is not yet enabled"
             return res
