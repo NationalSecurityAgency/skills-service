@@ -716,5 +716,41 @@ describe('Accessibility Tests', () => {
       cy.customLighthouse();
       cy.customA11y();
     });
+
+    it('skills groups', () => {
+      cy.createProject(1)
+      cy.createSubject(1, 1)
+      cy.createSkillsGroup(1, 1, 1);
+      cy.addSkillToGroup(1, 1, 1, 11, { pointIncrement: 10, numPerformToCompletion: 5 });
+      cy.addSkillToGroup(1, 1, 1, 22, { pointIncrement: 10, numPerformToCompletion: 5 });
+      const groupId = 'group1'
+
+      cy.visit('/administrator/projects/proj1/subjects/subj1');
+      cy.injectAxe()
+
+      cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
+      cy.get('[data-cy="editSkillButton_skill11"]')
+      cy.get('[data-cy="editSkillButton_skill22"]')
+
+      cy.customLighthouse();
+      cy.customA11y();
+
+      cy.createSkillsGroup(1, 1, 1, { numSkillsRequired: 1, enabled: true });
+
+      cy.visit('/administrator/projects/proj1/subjects/subj1');
+      cy.injectAxe()
+
+      cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
+      cy.get('[data-cy="editSkillButton_skill11"]')
+      cy.get('[data-cy="editSkillButton_skill22"]')
+
+      cy.customLighthouse();
+      cy.customA11y();
+
+      cy.createSkillsGroup(1, 1, 1, { numSkillsRequired: -1, enabled: false });
+      cy.addSkillToGroup(1, 1, 1, 33, { pointIncrement: 11, numPerformToCompletion: 2 });
+      cy.visit('/administrator/projects/proj1/subjects/subj1');
+      cy.injectAxe()
+    });
   }
 });

@@ -14,8 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div id="skillsTable">
-
+  <div :id="tableId">
     <loading-container v-bind:is-loading="isLoading">
       <div v-if="this.skillsOriginal && this.skillsOriginal.length">
         <div v-if="showSearch">
@@ -41,7 +40,7 @@ limitations under the License.
       <div class="row mb-2">
         <div class="col"></div>
         <div class="col-auto text-right" data-cy="skillsTable-additionalColumns">
-            <span class="text-secondary mr-2">Additional Columns:</span>
+            <span class="font-italic mr-2">Additional Columns:</span>
             <b-form-checkbox-group
               :id="`skillsAdditionalColumns_${tableId}`"
               class="d-inline"

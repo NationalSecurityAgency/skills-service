@@ -27,10 +27,10 @@ limitations under the License.
             <div class="row align-items-center">
               <div class="col-lg-auto border-right" data-cy="skillGroupStatus">
                 <div v-if="this.group.enabled">
-                  <span class="text-secondary">Status: </span> <span class="text-uppercase"><b-badge variant="success">Live <span class="far fa-check-circle" aria-hidden="true"/></b-badge></span>
+                  <span class="font-italic">Status: </span> <span class="text-uppercase"><b-badge variant="success">Live <span class="far fa-check-circle" aria-hidden="true"/></b-badge></span>
                 </div>
                 <div v-if="!this.group.enabled">
-                  <span class="text-secondary">Status: </span>
+                  <span class="font-italic">Status: </span>
                   <span class="text-uppercase mr-1"><b-badge variant="warning">Disabled</b-badge></span>
                   <span v-b-tooltip.hover="goLiveToolTipText">
                     <b-button variant="outline-info" size="sm" data-cy="goLiveBtn"
@@ -44,7 +44,7 @@ limitations under the License.
               <div class="col-lg mt-2 mt-lg-0" data-cy="requiredSkillsSection">
                 <b-form inline>
                   <span>
-                    <span class="mr-1 text-secondary">Required: </span>
+                    <span class="mr-1 font-italic">Required: </span>
                     <span v-if="!allSkillsRequired">
                       <b-badge variant="info" data-cy="requiredSkillsNum">{{ requiredSkillsNum }}</b-badge>
                       <span class="ml-1">out <b-badge data-cy="numSkillsInGroup">{{ group.numSkillsInGroup }}</b-badge> skills</span>
