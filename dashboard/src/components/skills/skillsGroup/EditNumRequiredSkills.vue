@@ -35,7 +35,9 @@ limitations under the License.
             <div class="col">
               <div class="form-group mb-1">
                 <label>Increment</label>
-                <b-form-input type="number" v-model="syncSkillsPoints.pointIncrement" data-cy="pointIncrement"></b-form-input>
+                <b-form-input type="number" v-model="syncSkillsPoints.pointIncrement"
+                              aria-label="Point Increment"
+                              data-cy="pointIncrement"></b-form-input>
               </div>
             </div>
             <div class="col">
@@ -45,7 +47,9 @@ limitations under the License.
                   <div class="input-group-prepend">
                     <div class="input-group-text"><i class="fas fa-times"></i></div>
                   </div>
-                  <b-form-input type="number" v-model="syncSkillsPoints.numPerformToCompletion" data-cy="numPerformToCompletion"></b-form-input>
+                  <b-form-input type="number" v-model="syncSkillsPoints.numPerformToCompletion"
+                                aria-label="Occurrences"
+                                data-cy="numPerformToCompletion"></b-form-input>
                 </div>
               </div>
             </div>

@@ -797,7 +797,9 @@ describe('Client Display Tests', () => {
 
         cy.cdVisit('/?enableTheme=true');
         cy.cdClickSubj(0);
-        cy.get('[data-cy="skillProgress_index-0"]')
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').first().contains('0 / 400 Points')
+        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('0 / 200 Points')
+        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('0 / 200 Points')
         cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"]');
     });
 
@@ -815,7 +817,9 @@ describe('Client Display Tests', () => {
 
         cy.cdVisit('/?enableTheme=true');
         cy.cdClickSubj(0);
-        cy.get('[data-cy="skillProgress_index-0"]')
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').first().contains('300 / 400 Points')
+        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 200 Points')
+        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 200 Points')
         cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"]');
     });
 
@@ -833,7 +837,9 @@ describe('Client Display Tests', () => {
 
         cy.cdVisit('/?enableTheme=true');
         cy.cdClickSubj(0);
-        cy.get('[data-cy="skillProgress_index-0"]')
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').first().contains('200 / 200 Points')
+        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 200 Points')
+        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 200 Points')
         cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"]');
     });
 

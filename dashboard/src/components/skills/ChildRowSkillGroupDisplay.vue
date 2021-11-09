@@ -57,7 +57,8 @@ limitations under the License.
                   <b-button variant="outline-info" size="sm"
                             @click="showEditRequiredSkillsDialog"
                             :disabled="lessThanTwoSkills"
-                            data-cy="editRequired" class="ml-2"><i class="far fa-edit"></i></b-button>
+                            :aria-label="'Edit Number of Required skills for '+ group.name + ' group'"
+                            data-cy="editRequired" class="ml-2"><i class="far fa-edit"  aria-hidden="true"></i></b-button>
                   </span>
 
                 </b-form>
