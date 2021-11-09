@@ -276,7 +276,7 @@ class BadgeAdminService {
             res.numSkills = dependentSkills ? dependentSkills.size() : 0
             res.totalPoints = dependentSkills ? dependentSkills?.collect({ it.totalPoints })?.sum() : 0
         } else {
-            res.numSkills = skillDefRepo.countChildSkillsByIdAndRelationshipType(skillDef.id, SkillRelDef.RelationshipType.BadgeRequirement)
+            res.numSkills = skillDefRepo.countActiveChildSkillsByIdAndRelationshipType(skillDef.id, SkillRelDef.RelationshipType.BadgeRequirement)
             if (res.numSkills > 0) {
                 res.totalPoints = skillDefRepo.sumChildSkillsTotalPointsBySkillAndRelationshipType(skillDef.id, SkillRelDef.RelationshipType.BadgeRequirement)
             } else {

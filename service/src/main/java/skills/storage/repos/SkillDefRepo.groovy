@@ -146,28 +146,8 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
 
     @Query(value='''select count(c) 
         from SkillRelDef r, SkillDef c 
-        where r.parent.id=?1 and c.id = r.child and r.type=?2''')
-    long countChildSkillsByIdAndRelationshipType(Integer parentSkillRefId, RelationshipType relationshipType)
-
-    @Query(value='''select count(c) 
-        from SkillRelDef r, SkillDef c, SkillRelDef r2
-        where 
-          r.parent.id=?1 and c.type = 'Skill' 
-           and (
-            (c.id = r.child 
-             and c.id = r2.child 
-             and r.type = 'RuleSetDefinition'
-             ) 
-            OR 
-            (r.child.id = r2.parent.id 
-             and c.id = r2.child 
-             and r.type = 'RuleSetDefinition' 
-             and r2.type = 'SkillsGroupRequirement' 
-             and (r.child.enabled is null or r.child.enabled = 'true')
-             )
-           )
-      ''')
-    long countActiveSkillsForSubject(Integer subjectId)
+        where r.parent.id=?1 and c.id = r.child and r.type=?2 and c.type = 'Skill' and (c.enabled is null or c.enabled = 'true')''')
+    long countActiveChildSkillsByIdAndRelationshipType(Integer parentSkillRefId, RelationshipType relationshipType)
 
     @Query(value='''select count(sd) 
         from SkillRelDef srd, SkillDef sd
@@ -179,6 +159,22 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
           and (sd.enabled is null or sd.enabled = 'true')
       ''')
     long countActiveGroupsForSubject(Integer subjectId)
+
+    @Query(value='''select count(c) 
+        from SkillRelDef r, SkillDef c, SkillRelDef r2
+        where 
+          r.parent.id=?1
+           and (
+            (r.child.id = r2.parent.id 
+             and c.id = r2.child 
+             and c.type = 'Skill'
+             and r.type = 'RuleSetDefinition' 
+             and r2.type = 'SkillsGroupRequirement' 
+             and (r.child.enabled is null or r.child.enabled = 'true')
+             )
+           )
+      ''')
+    long countActiveGroupChildSkillsForSubject(Integer subjectId)
 
     @Query(value='''select c 
         from SkillRelDef r, SkillDef c 

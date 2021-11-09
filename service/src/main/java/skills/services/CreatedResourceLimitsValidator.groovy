@@ -68,7 +68,8 @@ class CreatedResourceLimitsValidator {
     }
 
     void validateNumSkillsCreated(SkillDef subject){
-        long skillCount = skillDefRepo.countActiveSkillsForSubject(subject.id)
+        long skillCount = skillDefRepo.countActiveChildSkillsByIdAndRelationshipType(subject.id, SkillRelDef.RelationshipType.RuleSetDefinition)
+        skillCount += skillDefRepo.countActiveGroupChildSkillsForSubject(subject.id)
         if(skillCount >= maxSkillsPerSubject){
             throw new SkillException("Each Subject is limited to [${maxSkillsPerSubject}] Skills")
         }

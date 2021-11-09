@@ -347,7 +347,7 @@ class GlobalBadgesService {
             uniqueProjectIds.addAll(res.requiredProjectLevels*.projectId)
             res.uniqueProjectCount = uniqueProjectIds.size()
         } else {
-            res.numSkills = skillDefRepo.countChildSkillsByIdAndRelationshipType(skillDef.id, SkillRelDef.RelationshipType.BadgeRequirement)
+            res.numSkills = skillDefRepo.countActiveChildSkillsByIdAndRelationshipType(skillDef.id, SkillRelDef.RelationshipType.BadgeRequirement)
             if (res.numSkills > 0) {
                 res.totalPoints = skillDefRepo.sumChildSkillsTotalPointsBySkillAndRelationshipType(skillDef.id, SkillRelDef.RelationshipType.BadgeRequirement)
             } else {

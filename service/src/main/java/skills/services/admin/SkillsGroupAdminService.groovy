@@ -90,7 +90,7 @@ class SkillsGroupAdminService {
     @Profile
     Integer getActualNumSkillsRequred(Integer storedNumSkillsRequired, Integer skillsGroupIdRef) {
         if (storedNumSkillsRequired == -1) {
-            return skillDefRepo.countChildSkillsByIdAndRelationshipType(skillsGroupIdRef, SkillRelDef.RelationshipType.SkillsGroupRequirement)
+            return skillDefRepo.countActiveChildSkillsByIdAndRelationshipType(skillsGroupIdRef, SkillRelDef.RelationshipType.SkillsGroupRequirement)
         } else {
             return storedNumSkillsRequired
         }
