@@ -107,7 +107,7 @@ class SubjAdminService {
 
         SkillDefWithExtra res
         if (existing) {
-            // for updates, user the existing value if it is not set on the subjectRequest (null or empty String)
+            // for updates, use the existing value if it is not set on the subjectRequest (null or empty String)
             if (StringUtils.isBlank(subjectRequest.enabled)) {
                 subjectRequest.enabled = existing.enabled
             }

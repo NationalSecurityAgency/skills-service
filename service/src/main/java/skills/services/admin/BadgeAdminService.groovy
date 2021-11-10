@@ -111,6 +111,10 @@ class BadgeAdminService {
 
         if (skillDefinition) {
             String existingEnabled = skillDefinition.enabled;
+            // for updates, use the existing value if it is not set on the badgeRequest (null or empty String)
+            if (StringUtils.isBlank(badgeRequest.enabled)) {
+                badgeRequest.enabled = existingEnabled
+            }
             if (StringUtils.isNotBlank(existingEnabled) && StringUtils.equals(existingEnabled, Boolean.TRUE.toString()) && StringUtils.equals(badgeRequest.enabled, Boolean.FALSE.toString())){
                 throw new SkillException("Once a Badge has been published, the only allowable value for enabled is [${Boolean.TRUE.toString()}]", projectId, null, ErrorCode.BadParam)
             }
@@ -140,7 +144,7 @@ class BadgeAdminService {
                     projDef: projDef,
                     displayOrder: displayOrder,
                     helpUrl: badgeRequest.helpUrl,
-                    enabled: badgeRequest.enabled
+                    enabled: Boolean.FALSE.toString()
             )
             log.debug("Saving [{}]", skillDefinition)
         }

@@ -192,7 +192,7 @@ class SkillsAdminService {
         SkillDef skillsGroupSkillDef = null
         List<SkillDef> groupChildSkills = null
         if (isEdit) {
-            // for updates, user the existing value if it is not set on the skillRequest (null or empty String)
+            // for updates, use the existing value if it is not set on the skillRequest (null or empty String)
             if (StringUtils.isBlank(skillRequest.enabled)) {
                 skillRequest.enabled = skillDefinition.enabled
             }
