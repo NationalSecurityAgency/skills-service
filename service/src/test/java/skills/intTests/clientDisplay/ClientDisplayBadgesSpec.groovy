@@ -544,23 +544,17 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         def summaries = skillsService.getBadgesSummary(userId, proj1.projectId)
         then:
         summaries.size() == 2
-        summaries.get(2).badge == "badge1"
-        summaries.get(2).badgeId == "badge1"
-        summaries.get(2).iconClass == "fa fa-badge1"
-        summaries.get(2).numSkillsAchieved == 1
-        summaries.get(2).numTotalSkills == 2
-
-//        summaries.get(1).badge == "badge2"
-//        summaries.get(1).badgeId == "badge2"
-//        summaries.get(1).iconClass == "fa fa-badge2"
-//        summaries.get(1).numSkillsAchieved == 0
-//        summaries.get(1).numTotalSkills == 0
-
-        summaries.get(1).badge == "badge3"
-        summaries.get(1).badgeId == "badge3"
-        summaries.get(1).iconClass == "fa fa-badge3"
+        summaries.get(1).badge == "badge1"
+        summaries.get(1).badgeId == "badge1"
+        summaries.get(1).iconClass == "fa fa-badge1"
         summaries.get(1).numSkillsAchieved == 1
-        summaries.get(1).numTotalSkills == 5
+        summaries.get(1).numTotalSkills == 2
+
+        summaries.get(0).badge == "badge3"
+        summaries.get(0).badgeId == "badge3"
+        summaries.get(0).iconClass == "fa fa-badge3"
+        summaries.get(0).numSkillsAchieved == 1
+        summaries.get(0).numTotalSkills == 5
     }
 
     def "user badge achievement should not leak into another project"() {
