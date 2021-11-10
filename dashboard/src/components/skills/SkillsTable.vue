@@ -606,8 +606,7 @@ limitations under the License.
         SkillsService.updateSkill(row, actionToSubmit)
           .then(() => {
             SkillsService.getSubjectSkills(this.projectId, this.subjectId).then((data) => {
-              this.skills = data.map((skill) => this.addMetaToSkillObj(skill));
-              this.disableFirstAndLastButtons();
+              this.loadDataFromParams(data);
             });
           });
       },

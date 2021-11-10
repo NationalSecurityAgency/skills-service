@@ -24,14 +24,16 @@ limitations under the License.
                  data-cy="skillsSelector">
       <template slot="option" slot-scope="props">
         <slot name="dropdown-item" v-bind:props="props">
-          <div class="h5 text-info" data-cy="skillsSelector-skillName">{{ props.option.name }}</div>
-          <div class="" style="font-size: 0.8rem;">
-            <span>
-              <span v-if="showProject"><span class="text-uppercase mr-1 font-italic">Project ID:</span><span class="font-weight-bold" data-cy="skillsSelector-projectId">{{props.option.projectId}}</span></span>
-              <span v-if="!showProject"><span class="text-uppercase mr-1 font-italic">ID:</span><span class="font-weight-bold" data-cy="skillsSelector-skillId">{{props.option.skillId}}</span></span>
-            </span>
-            <span class="mx-2">|</span>
-            <span class="text-uppercase mr-1 font-italic">Subject:</span><span class="font-weight-bold" data-cy="skillsSelector-subjectName">{{props.option.subjectName}}</span>
+          <div :data-cy="`skillsSelectionItem-${props.option.projectId}-${props.option.skillId}`">
+            <div class="h5 text-info" data-cy="skillsSelector-skillName">{{ props.option.name }}</div>
+            <div class="" style="font-size: 0.8rem;">
+              <span>
+                <span v-if="showProject" data-cy="skillsSelectionItem-projectId"><span class="text-uppercase mr-1 font-italic">Project ID:</span><span class="font-weight-bold" data-cy="skillsSelector-projectId">{{props.option.projectId}}</span></span>
+                <span v-if="!showProject" data-cy="skillsSelectionItem-skillId"><span class="text-uppercase mr-1 font-italic">ID:</span><span class="font-weight-bold" data-cy="skillsSelector-skillId">{{props.option.skillId}}</span></span>
+              </span>
+              <span class="mx-2">|</span>
+              <span class="text-uppercase mr-1 font-italic" data-cy="skillsSelectionItem-subjectId">Subject:</span><span class="font-weight-bold" data-cy="skillsSelector-subjectName">{{props.option.subjectName}}</span>
+            </div>
           </div>
         </slot>
       </template>
