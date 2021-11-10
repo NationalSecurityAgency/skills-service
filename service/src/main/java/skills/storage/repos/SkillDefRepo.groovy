@@ -111,14 +111,14 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     Integer calculateHighestDisplayOrderByProjectIdAndType(String projectId, SkillDef.ContainerType type)
 
     @Query(value = '''SELECT sum(sdChild.totalPoints) from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
-      where srd.parent=sdParent.id and srd.child=sdChild.id and (sdChild.enabled is null or sdChild.enabled = 'true') and  
+      where srd.parent=sdParent.id and srd.child=sdChild.id and sdChild.enabled = 'true' and  
       sdParent.projectId=?1 and sdParent.skillId=?2 and srd.type IN ('RuleSetDefinition', 'SkillsGroupRequirement') and sdChild.version<=?3 ''' )
     @Nullable
     Integer calculateTotalPointsForSubject(String projectId, String skillId, Integer version)
 
 
     @Query(value = '''SELECT sum(sdChild.totalPoints) from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
-      where srd.parent=sdParent.id and srd.child=sdChild.id and (sdChild.enabled is null or sdChild.enabled = 'true') and 
+      where srd.parent=sdParent.id and srd.child=sdChild.id and sdChild.enabled = 'true' and 
       sdParent.projectId=?1 and srd.type=?2 and sdChild.version<=?3 ''' )
     @Nullable
     Integer calculateTotalPointsForProject(String projectId, RelationshipType relationshipType, Integer version)
@@ -140,13 +140,13 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     int countByProjectIdAndType(@Nullable String projectId, SkillDef.ContainerType type)
 
     @Query('''select count(s) from SkillDef s 
-            where (:projectId is null or s.projectId=:projectId) and s.type=:type and (s.enabled is null or s.enabled = 'true')  
+            where (:projectId is null or s.projectId=:projectId) and s.type=:type and s.enabled = 'true'  
         ''')
     int countByProjectIdAndTypeWhereEnabled(@Nullable @Param('projectId') String projectId, @Param('type') SkillDef.ContainerType type)
 
     @Query(value='''select count(c) 
         from SkillRelDef r, SkillDef c 
-        where r.parent.id=?1 and c.id = r.child and r.type=?2 and c.type = 'Skill' and (c.enabled is null or c.enabled = 'true')''')
+        where r.parent.id=?1 and c.id = r.child and r.type=?2 and c.type = 'Skill' and c.enabled = 'true'''')
     long countActiveChildSkillsByIdAndRelationshipType(Integer parentSkillRefId, RelationshipType relationshipType)
 
     @Query(value='''select count(sd) 
@@ -156,7 +156,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
           and srd.child.id = sd.id 
           and srd.type = 'RuleSetDefinition' 
           and sd.type = 'SkillsGroup' 
-          and (sd.enabled is null or sd.enabled = 'true')
+          and sd.enabled = 'true'
       ''')
     long countActiveGroupsForSubject(Integer subjectId)
 
@@ -170,7 +170,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
              and c.type = 'Skill'
              and r.type = 'RuleSetDefinition' 
              and r2.type = 'SkillsGroupRequirement' 
-             and (r.child.enabled is null or r.child.enabled = 'true')
+             and r.child.enabled = 'true'
              )
            )
       ''')
@@ -258,7 +258,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
             )
         ) OR 
         sd.type='GlobalBadge') and
-      (sd.enabled  = 'true' OR sd.enabled is null)''')
+      sd.enabled is null''')
     Integer countTotalProductionBadges(String userId)
 
 
@@ -284,7 +284,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
             )
         ) OR 
         sd.type='GlobalBadge') and
-      (sd.enabled  = 'true' OR sd.enabled is null)''')
+      sd.enabled is null''')
     BadgeCount getProductionBadgesCount(String userId)
 
 
@@ -324,7 +324,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
                             )
                     ) 
                 )) AND
-              (sd.enabled  = 'true' OR sd.enabled is null)
+              sd.enabled is null
     ''', nativeQuery = true)
     BadgeCount getProductionMyBadgesCount(String userId)
 
