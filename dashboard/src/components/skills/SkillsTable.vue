@@ -215,9 +215,9 @@ limitations under the License.
   import LoadingContainer from '../utils/LoadingContainer';
   import SkillsBTable from '../utils/table/SkillsBTable';
   import TimeWindowMixin from './TimeWindowMixin';
-  import ChildRowSkillGroupDisplay from './ChildRowSkillGroupDisplay';
+  import ChildRowSkillGroupDisplay from './skillsGroup/ChildRowSkillGroupDisplay';
   import StringHighlighter from '@/common-components/utilities/StringHighlighter';
-  import EditSkillGroup from './EditSkillGroup';
+  import EditSkillGroup from './skillsGroup/EditSkillGroup';
 
   export default {
     name: 'SkillsTable',

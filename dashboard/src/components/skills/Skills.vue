@@ -52,7 +52,7 @@ limitations under the License.
   import SkillsService from './SkillsService';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import EditSkill from './EditSkill';
-  import EditSkillGroup from './EditSkillGroup';
+  import EditSkillGroup from './skillsGroup/EditSkillGroup';
 
   const { mapActions, mapGetters } = createNamespacedHelpers('subjects');
 

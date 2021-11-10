@@ -101,11 +101,11 @@ limitations under the License.
 
 <script>
   import { createNamespacedHelpers } from 'vuex';
-  import SkillsService from './SkillsService';
-  import EditSkill from './EditSkill';
-  import LoadingContainer from '../utils/LoadingContainer';
-  import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
-  import EditNumRequiredSkills from './skillsGroup/EditNumRequiredSkills';
+  import SkillsService from '../SkillsService';
+  import EditSkill from '../EditSkill';
+  import LoadingContainer from '../../utils/LoadingContainer';
+  import MsgBoxMixin from '../../utils/modal/MsgBoxMixin';
+  import EditNumRequiredSkills from './EditNumRequiredSkills';
 
   const { mapActions } = createNamespacedHelpers('subjects');
 
@@ -115,7 +115,7 @@ limitations under the License.
     components: {
       EditNumRequiredSkills,
       LoadingContainer,
-      SkillsTable: () => import('./SkillsTable'),
+      SkillsTable: () => import('../SkillsTable'),
       EditSkill,
     },
     props: {

@@ -84,11 +84,11 @@ limitations under the License.
 
 <script>
   import { extend } from 'vee-validate';
-  import IdInput from '../utils/inputForm/IdInput';
-  import InputSanitizer from '../utils/InputSanitizer';
-  import SkillsService from './SkillsService';
-  import MarkdownEditor from '../utils/MarkdownEditor';
-  import SkillsSpinner from '../utils/SkillsSpinner';
+  import IdInput from '../../utils/inputForm/IdInput';
+  import InputSanitizer from '../../utils/InputSanitizer';
+  import SkillsService from '../SkillsService';
+  import MarkdownEditor from '../../utils/MarkdownEditor';
+  import SkillsSpinner from '../../utils/SkillsSpinner';
 
   export default {
     name: 'EditSkillGroup',
