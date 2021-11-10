@@ -214,6 +214,7 @@ limitations under the License.
       handleSkillsUpdate(skills) {
         this.setInternalSkills(skills);
         this.$refs[`groupSkills_${this.group.skillId}`].loadDataFromParams(skills);
+        this.refreshSubjectState();
       },
       setInternalSkills(skillsParam) {
         this.numSkills = skillsParam.length;

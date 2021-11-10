@@ -904,4 +904,49 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '3');
     })
 
+    it('subject overview cards are updated after skill sync', () => {
+        cy.createSkillsGroup(1, 1, 1);
+        cy.addSkillToGroup(1, 1, 1, 1, { pointIncrement: 12, numPerformToCompletion: 7 });
+        cy.addSkillToGroup(1, 1, 1, 2, { pointIncrement: 50, numPerformToCompletion: 2 });
+        cy.addSkillToGroup(1, 1, 1, 3, { pointIncrement: 11, numPerformToCompletion: 5 });
+        cy.createSkillsGroup(1, 1, 1, { enabled: true });
+        const groupId = 'group1'
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
+
+        cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '239');
+        cy.get('[data-cy="pageHeaderStat_Groups"] [data-cy="statValue"]').should('have.text', '1');
+        cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '3');
+
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="editRequired"]`).click();
+
+        // verify defaults
+        cy.get('[data-cy="syncSkillsPointsSection"] [data-cy="pointIncrement"]').should('have.value', 12)
+        cy.get('[data-cy="syncSkillsPointsSection"] [data-cy="numPerformToCompletion"]').should('have.value', 7)
+        cy.get('[data-cy="syncSkillsPointsSection"] [data-cy="totalPoints"]').contains('84')
+
+        // can not add num required
+        cy.get('[data-cy="requiredSkillsNumSelect"]').should('be.disabled')
+
+        // set all skills to
+        cy.get('[data-cy="syncSkillsPointsSection"] [data-cy="pointIncrement"]').clear().type(50);
+        cy.get('[data-cy="syncSkillsPointsSection"] [data-cy="numPerformToCompletion"]').clear().type(4);
+
+        // save button should be disabled while cancel enabled
+        cy.get('.modal-footer button').first().should('be.enabled');
+        cy.get('.modal-footer button').last().should('be.disabled');
+
+        cy.get('[data-cy="syncBtn"]').click();
+
+        cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '600');
+        cy.get('[data-cy="pageHeaderStat_Groups"] [data-cy="statValue"]').should('have.text', '1');
+        cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '3');
+
+        // refresh and re-validate
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '600');
+        cy.get('[data-cy="pageHeaderStat_Groups"] [data-cy="statValue"]').should('have.text', '1');
+        cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '3');
+    });
 });
