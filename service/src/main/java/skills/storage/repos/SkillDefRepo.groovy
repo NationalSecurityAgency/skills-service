@@ -144,9 +144,10 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         ''')
     int countByProjectIdAndTypeWhereEnabled(@Nullable @Param('projectId') String projectId, @Param('type') SkillDef.ContainerType type)
 
-    @Query(value='''select count(c) 
-        from SkillRelDef r, SkillDef c 
-        where r.parent.id=?1 and c.id = r.child and r.type=?2 and c.type = 'Skill' and c.enabled = 'true'''')
+    @Query('''select count(c) 
+            from SkillRelDef r, SkillDef c 
+            where r.parent.id=?1 and c.id = r.child and r.type=?2 and c.type = 'Skill' and c.enabled = 'true'
+        ''')
     long countActiveChildSkillsByIdAndRelationshipType(Integer parentSkillRefId, RelationshipType relationshipType)
 
     @Query(value='''select count(sd) 
