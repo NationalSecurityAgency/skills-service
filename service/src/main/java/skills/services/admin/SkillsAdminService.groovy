@@ -192,6 +192,10 @@ class SkillsAdminService {
         SkillDef skillsGroupSkillDef = null
         List<SkillDef> groupChildSkills = null
         if (isEdit) {
+            // for updates, user the existing value if it is not set on the skillRequest (null or empty String)
+            if (StringUtils.isBlank(skillRequest.enabled)) {
+                skillRequest.enabled = skillDefinition.enabled
+            }
             if (isSkillsGroup) {
                 // need to update total points for the group
                 groupChildSkills = skillsGroupAdminService.validateSkillsGroupAndReturnChildren(skillRequest, skillDefinition)
@@ -339,8 +343,8 @@ class SkillsAdminService {
         }
 
         if (pointIncrementDelta < 0 || occurrencesDelta < 0) {
-            SkillDef parent = ruleSetDefGraphService.getParentSkill(savedSkill)
-            userPointsManagement.identifyAndAddLevelAchievements(parent)
+            SkillDef subject = skillDefRepo.findByProjectIdAndSkillIdAndType(savedSkill.projectId, subjectId, SkillDef.ContainerType.Subject)
+            userPointsManagement.identifyAndAddLevelAchievements(subject)
         }
 
         log.debug("Saved [{}]", savedSkill)
@@ -356,13 +360,21 @@ class SkillsAdminService {
             throw new SkillException("Skill with id [${skillId}] cannot be deleted as it is currently referenced by one or more global badges")
         }
         SkillDef parentSkill = ruleSetDefGraphService.getParentSkill(skillDefinition)
+        SkillDef subject
+        if (parentSkill.type == SkillDef.ContainerType.Subject) {
+            subject = parentSkill
+        } else if (parentSkill.type == SkillDef.ContainerType.SkillsGroup) {
+            subject = skillDefRepo.findByProjectIdAndSkillIdAndType(projectId, subjectId, SkillDef.ContainerType.Subject)
+        } else {
+            throw new SkillException("Unexpected parent type [${parentSkill.type}]")
+        }
 
         //we need to check to see if this skill belongs to any badges, if so we need to look for any users who now qualify
         //for those badges
         ruleSetDefinitionScoreUpdater.skillToBeRemoved(skillDefinition)
 
         // this MUST happen before the skill was removed as sql relies on the skill to exist
-        userPointsManagement.handleSkillRemoval(skillDefinition, parentSkill)
+        userPointsManagement.handleSkillRemoval(skillDefinition, subject)
 
         //identify any badges that this skill belonged to and award the badge if any users now qualify for this badge
         List<SkillDef> badges = findAllBadgesSkillBelongsTo(skillDefinition.skillId)
@@ -371,7 +383,7 @@ class SkillsAdminService {
         log.debug("Deleted skill [{}]", skillDefinition.skillId)
 
         // this MUST happen after the skill was removed as sql relies on the skill to be gone
-        userPointsManagement.identifyAndAddLevelAchievements(parentSkill)
+        userPointsManagement.identifyAndAddLevelAchievements(subject)
 
         // make sure skills group is still valid and update group's totalPoints
         if (skillDefinition.groupId) {

@@ -24,12 +24,7 @@ import skills.controller.result.model.SettingsResult
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.storage.model.SkillDef
-import skills.storage.model.SkillRelDef
-import skills.storage.repos.SkillDefRepo
-import skills.storage.repos.SkillRelDefRepo
-import skills.storage.repos.UserAchievedLevelRepo
-import skills.storage.repos.UserPerformedSkillRepo
-import skills.storage.repos.UserPointsRepo
+import skills.storage.repos.*
 import skills.storage.repos.nativeSql.NativeQueriesRepo
 
 @Service
@@ -62,9 +57,7 @@ class UserAchievementsAndPointsManagement {
 
     @Transactional
     void handleSkillRemoval(SkillDef skillDef, SkillDef subject) {
-        if (skillDef.groupId) {
-            subject = ruleSetDefGraphService.getParentSkill(subject)
-        }
+        assert subject.type == SkillDef.ContainerType.Subject
         nativeQueriesRepo.decrementPointsForDeletedSkill(skillDef.projectId, skillDef.skillId, subject.skillId)
         userPointsRepo.deleteByProjectIdAndSkillId(skillDef.projectId, skillDef.skillId)
 
@@ -128,6 +121,7 @@ class UserAchievementsAndPointsManagement {
 
     @Transactional
     void identifyAndAddLevelAchievements(SkillDef subject) {
+        assert subject.type == SkillDef.ContainerType.Subject
         SettingsResult settingsResult = settingsService.getProjectSetting(subject.projectId, Settings.LEVEL_AS_POINTS.settingName)
         boolean pointsBased = settingsResult ? settingsResult.isEnabled() : false
 

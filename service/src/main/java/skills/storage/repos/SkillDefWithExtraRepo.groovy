@@ -108,7 +108,7 @@ interface SkillDefWithExtraRepo extends PagingAndSortingRepository<SkillDefWithE
                             )
                     ) 
                 )) AND
-              (sd.enabled  = 'true' OR sd.enabled IS NULL)
+              sd.enabled  = 'true'
     ''', nativeQuery = true)
     Stream<SkillDefWithExtra> findAllMyBadgesForUser(String userId)
 }

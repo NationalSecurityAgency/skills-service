@@ -259,7 +259,8 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
             )
         ) OR 
         sd.type='GlobalBadge') and
-      sd.enabled is null''')
+      sd.enabled = 'true'
+      ''')
     Integer countTotalProductionBadges(String userId)
 
 
@@ -285,7 +286,8 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
             )
         ) OR 
         sd.type='GlobalBadge') and
-      sd.enabled is null''')
+      sd.enabled = 'true'
+      ''')
     BadgeCount getProductionBadgesCount(String userId)
 
 
@@ -325,7 +327,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
                             )
                     ) 
                 )) AND
-              sd.enabled is null
+              sd.enabled = 'true'
     ''', nativeQuery = true)
     BadgeCount getProductionMyBadgesCount(String userId)
 
