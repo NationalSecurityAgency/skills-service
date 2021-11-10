@@ -201,6 +201,7 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         supervisorService.createGlobalBadge(badge)
 
         supervisorService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, level: "1")
+        supervisorService.updateGlobalBadge(badge) // can only enable after initial creation
 
         when:
         skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[0].skillId], "user1", new Date())
@@ -224,6 +225,8 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         skillsService.createSkills(skills)
 
         supervisorService.createGlobalBadge(badge)
+        supervisorService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, level: "1")
+        supervisorService.updateGlobalBadge(badge) // can only enable after initial creation
 
         when:
         badge = supervisorService.getGlobalBadge(badge.badgeId)

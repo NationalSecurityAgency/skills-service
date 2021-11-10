@@ -54,6 +54,8 @@ class ReportSkills_BadgeSkillsSpecs extends DefaultIntSpec {
         requiredSkillsIds.each { skillId ->
             skillsService.assignSkillToBadge(projectId: projId, badgeId: badge.badgeId, skillId: skillId)
         }
+        badge.enabled  = 'true'
+        skillsService.updateBadge(badge, badge.badgeId)
 
         def resSkill1 = skillsService.addSkill([projectId: projId, skillId: skill1.skillId]).body
         def resSkill3 = skillsService.addSkill([projectId: projId, skillId: skill3.skillId]).body
@@ -95,7 +97,8 @@ class ReportSkills_BadgeSkillsSpecs extends DefaultIntSpec {
         requiredSkillsIds.each { skillId ->
             skillsService.assignSkillToBadge(projectId: projId, badgeId: badge.badgeId, skillId: skillId)
         }
-
+        badge.enabled  = 'true'
+        skillsService.updateBadge(badge, badge.badgeId)
 
         def resSkill1 = skillsService.addSkill([projectId: projId, skillId: skill1.skillId]).body
         def resSkill3 = skillsService.addSkill([projectId: projId, skillId: skill3.skillId]).body
