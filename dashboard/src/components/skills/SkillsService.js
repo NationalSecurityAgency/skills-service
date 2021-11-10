@@ -57,7 +57,7 @@ export default {
       .then((response) => response.data);
   },
   getProjectSkills(projectId, skillNameQuery = null) {
-    const query = skillNameQuery ? `?skillNameQuery=${skillNameQuery}` : '';
+    const query = skillNameQuery ? `?skillNameQuery=${encodeURIComponent(skillNameQuery)}` : '';
     return axios.get(`/admin/projects/${projectId}/skills${query}`)
       .then((response) => response.data);
   },

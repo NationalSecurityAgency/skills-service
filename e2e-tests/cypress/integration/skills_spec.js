@@ -926,8 +926,6 @@ describe('Skills Tests', () => {
 
 
     it('search for skills across subjects', () => {
-        // apex charts and dynamic imports had a race condition, this test verifies that charts load successfully
-
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
