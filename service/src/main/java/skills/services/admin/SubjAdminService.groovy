@@ -18,7 +18,6 @@ package skills.services.admin
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.apache.commons.collections4.CollectionUtils
-import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -107,10 +106,6 @@ class SubjAdminService {
 
         SkillDefWithExtra res
         if (existing) {
-            // for updates, use the existing value if it is not set on the subjectRequest (null or empty String)
-            if (StringUtils.isBlank(subjectRequest.enabled)) {
-                subjectRequest.enabled = existing.enabled
-            }
             Props.copy(subjectRequest, existing)
             //we need to manually copy subjectId into skillId
             existing.skillId = subjectRequest.subjectId
