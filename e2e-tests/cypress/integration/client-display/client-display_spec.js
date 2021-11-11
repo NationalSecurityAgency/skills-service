@@ -136,11 +136,14 @@ describe('Client Display Tests', () => {
         cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: Cypress.env('proxyUser'), timestamp: new Date().getTime()})
         cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: Cypress.env('proxyUser'), timestamp: new Date().getTime() - 1000*60*60*24})
 
-        cy.request('POST', '/admin/projects/proj1/badges/badge1', {
-            projectId: 'proj1',
-            badgeId: 'badge1',
-            name: 'Badge 1'
-        });
+      const badge1 = {
+        projectId: 'proj1',
+        badgeId: 'badge1',
+        name: 'Badge 1'
+      }
+      cy.request('POST', '/admin/projects/proj1/badges/badge1', badge1);
+      cy.assignSkillToBadge(1,1,1);
+      cy.enableBadge(1, 1);
     });
 
     it('visit home page', () => {
@@ -379,6 +382,7 @@ describe('Client Display Tests', () => {
 
         cy.createGlobalBadge(1)
         cy.assignProjectToGlobalBadge(1, 1)
+        cy.enableGlobalBadge();
 
 
         cy.loginAsProxyUser();
@@ -428,6 +432,7 @@ describe('Client Display Tests', () => {
       cy.createGlobalBadge(1);
       cy.assignSkillToGlobalBadge(1, 1, 1);
       cy.assignSkillToGlobalBadge(1, 1, 2);
+      cy.enableGlobalBadge();
 
 
       cy.loginAsProxyUser();
@@ -466,7 +471,7 @@ describe('Client Display Tests', () => {
 
       cy.createGlobalBadge(1);
       cy.assignSkillToGlobalBadge(1, 1, 1);
-
+      cy.enableGlobalBadge();
 
       cy.loginAsProxyUser();
 
@@ -507,6 +512,8 @@ describe('Client Display Tests', () => {
       cy.createGlobalBadge(1);
       cy.assignProjectToGlobalBadge(1,1,2);
       cy.assignProjectToGlobalBadge(1,2,2);
+      cy.enableGlobalBadge();
+
       cy.cdVisit('/');
       cy.cdClickBadges();
       cy.contains('Global Badge 1');
@@ -538,13 +545,6 @@ describe('Client Display Tests', () => {
     }
 
     it('project badge skills show subject name when details enabled', () => {
-        cy.assignSkillToBadge(1,1,1);
-        cy.request('POST', '/admin/projects/proj1/badges/badge1', {
-            projectId: 'proj1',
-            badgeId: 'badge1',
-            name: 'Badge 1',
-            enabled: true,
-        });
         cy.cdVisit('/');
         cy.cdClickBadges();
 
@@ -570,13 +570,6 @@ describe('Client Display Tests', () => {
         });
         cy.reportSkill(1, 5, Cypress.env('proxyUser')); // achieve badge 2
 
-        cy.assignSkillToBadge(1,1,1);
-        cy.request('POST', '/admin/projects/proj1/badges/badge1', {
-            projectId: 'proj1',
-            badgeId: 'badge1',
-            name: 'Badge 1',
-            enabled: true,
-        });
         cy.cdVisit('/');
         cy.cdClickBadges();
         cy.get('[data-cy=achievedBadges]').contains('Badge 2')
@@ -596,6 +589,7 @@ describe('Client Display Tests', () => {
       cy.assignSkillToBadge(1,2,1);
       cy.assignSkillToBadge(1,2,2);
       cy.assignSkillToBadge(1,2,3);
+      cy.enableBadge(1, 2);
 
       cy.cdVisit('/');
       cy.cdClickBadges();

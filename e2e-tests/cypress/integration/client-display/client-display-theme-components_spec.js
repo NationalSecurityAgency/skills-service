@@ -65,10 +65,10 @@ describe('Client Display Theme Components Tests', () => {
 
     })
 
-
     it('buttons customization without changing tile background', () => {
         cy.createBadge(1, 1)
-        cy.assignSkillToBadge(1, 1, 1)
+        cy.assignSkillToBadge(1, 1, 2)
+        cy.enableBadge(1, 1);
 
         const url = '/?themeParam=buttons|{"backgroundColor":"green","foregroundColor":"white",%20"borderColor":"purple"}'
         cy.cdVisit(url);
@@ -89,7 +89,8 @@ describe('Client Display Theme Components Tests', () => {
 
     it('buttons customization with changing tile background', () => {
         cy.createBadge(1, 1)
-        cy.assignSkillToBadge(1, 1, 1)
+        cy.assignSkillToBadge(1, 1, 2)
+        cy.enableBadge(1, 1);
 
         const url = '/?themeParam=buttons|{"backgroundColor":"green","foregroundColor":"white",%20"borderColor":"purple"}&themeParam=tiles|{"backgroundColor":"black"}'
         cy.cdVisit(url);
@@ -106,10 +107,10 @@ describe('Client Display Theme Components Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="badgeDetailsLink_badge1"]', 'buttons-viewBadgeDetails-darkTileBackground');
     })
 
-
     it('filter menu with dark tile background', () => {
         cy.createBadge(1, 1)
-        cy.assignSkillToBadge(1, 1, 1)
+        cy.assignSkillToBadge(1, 1, 2)
+        cy.enableBadge(1, 1);
 
         const url = '/?themeParam=tiles|{"backgroundColor":"black"}&themeParam=textPrimaryColor|white&themeParam=textSecondaryColor|yellow'
         cy.cdVisit(url);

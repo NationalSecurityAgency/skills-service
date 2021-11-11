@@ -64,6 +64,7 @@ describe('Contact Project Users Specs', () => {
             enabled: true,
         });
 
+
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
@@ -85,6 +86,8 @@ describe('Contact Project Users Specs', () => {
                 cy.request('POST', `/admin/projects/proj1/badge/badge1/skills/skill${i}`);
             }
         }
+        // cy.assignSkillToBadge(1, 1, 1)
+        cy.enableBadge(1, 1);
 
         // user 1 achieved badge
         cy.reportSkill(1, 0, "user1", 'now');

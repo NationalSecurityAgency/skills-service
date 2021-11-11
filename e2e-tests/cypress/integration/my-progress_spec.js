@@ -52,15 +52,18 @@ describe('Navigation Tests', () => {
     cy.createSkill(1, 1, 4);
     cy.request('POST', `/admin/projects/proj1/skills/skill4/dependency/skill2`);
 
-    cy.request('POST', '/admin/projects/proj1/badges/badge1', {
+    const badge1 = {
       projectId: 'proj1',
       badgeId: 'badge1',
       name: 'Badge 1',
       enabled: 'true',
-    });
+      iconClass: 'fa fa-question-circle',
+    }
+    cy.request('POST', '/admin/projects/proj1/badges/badge1', badge1);
     cy.assignSkillToBadge(1, 1, 1);
+    cy.enableBadge(1, 1, badge1);
 
-    cy.request('POST', '/admin/projects/proj1/badges/gemBadge', {
+    const gemBadge = {
       projectId: 'proj1',
       badgeId: 'gemBadge',
       name: 'Gem Badge',
@@ -68,8 +71,10 @@ describe('Navigation Tests', () => {
       iconClass: 'mi mi-ac-unit',
       startDate: dateFormatter(dayjs().subtract(5, 'day')),
       endDate: dateFormatter(dayjs().add(7, 'day')),
-    });
+    }
+    cy.request('POST', '/admin/projects/proj1/badges/gemBadge', gemBadge);
     cy.request('POST', `/admin/projects/proj1/badge/gemBadge/skills/skill4`);
+    cy.enableBadge(1, 'gem', gemBadge);
 
     cy.request('POST', `/api/projects/proj1/skills/skill1`, {
       userId: Cypress.env('proxyUser'),
@@ -146,6 +151,7 @@ describe('Navigation Tests', () => {
       description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
     });
     cy.assignSkillToGlobalBadge(1, 2);
+    cy.enableGlobalBadge();
 
     cy.loginAsProxyUser();
     cy.visit('/progress-and-rankings/');
@@ -264,7 +270,7 @@ describe('Navigation Tests', () => {
 
   it('material icons should be proper size', () => {
     cy.loginAsRootUser();
-    cy.request('PUT', `/supervisor/badges/globalBadge1`, {
+    const globalBadge1 = {
       badgeId: `globalBadge1`,
       isEdit: false,
       name: `Global Badge 1`,
@@ -272,8 +278,10 @@ describe('Navigation Tests', () => {
       iconClass: 'mi mi-live-tv',
       enabled: true,
       description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-    });
+    }
+    cy.request('PUT', `/supervisor/badges/globalBadge1`, globalBadge1);
     cy.assignSkillToGlobalBadge(1, 2);
+    cy.enableGlobalBadge(1, globalBadge1)
 
     cy.loginAsRootUser();
     cy.request('POST', `/api/projects/proj1/skills/skill2`, {
@@ -307,6 +315,7 @@ describe('Navigation Tests', () => {
       description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
     });
     cy.assignSkillToGlobalBadge(1, 2);
+    cy.enableGlobalBadge();
 
     cy.request('PUT', `/supervisor/badges/globalBadge2`, {
       badgeId: `globalBadge2`,
@@ -318,6 +327,7 @@ describe('Navigation Tests', () => {
       description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
     });
     cy.assignSkillToGlobalBadge(2, 3);
+    cy.enableGlobalBadge(2);
 
     cy.request('POST', '/admin/projects/proj1/badges/badge2', {
       projectId: 'proj1',
@@ -326,6 +336,7 @@ describe('Navigation Tests', () => {
       enabled: 'true',
     });
     cy.assignSkillToBadge(1, 2, 1);
+    cy.enableBadge(1, 2);
 
     cy.request('POST', '/admin/projects/proj1/badges/badge11', {
       projectId: 'proj1',
@@ -334,6 +345,7 @@ describe('Navigation Tests', () => {
       enabled: 'true',
     });
     cy.assignSkillToBadge(1, 11, 1);
+    cy.enableBadge(1, 11);
 
     cy.request('POST', '/admin/projects/proj1/badges/gemBadge2', {
       projectId: 'proj1',

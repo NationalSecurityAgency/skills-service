@@ -229,6 +229,8 @@ describe('Client Display Accessibility tests', () => {
       badgeId: 'badge1',
       name: 'Badge 1'
     });
+    cy.assignSkillToBadge(1, 1, 1);
+    cy.enableBadge(1, 1);
     cy.cdVisit('/?isSummaryOnly=true');
     cy.injectAxe();
 

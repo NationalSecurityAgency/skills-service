@@ -591,13 +591,15 @@ describe('Metrics Tests - Achievements', () => {
             });
         };
 
-        cy.request('POST', '/admin/projects/proj1/badges/badge1', {
+        const badge1 = {
             projectId: 'proj1',
             badgeId: 'badge1',
             name: 'This is a cool badge',
             "iconClass":"fas fa-jedi",
-        });
+        }
+        cy.request('POST', '/admin/projects/proj1/badges/badge1', badge1);
         cy.request('POST', '/admin/projects/proj1/badge/badge1/skills/skill1')
+        cy.enableBadge(1, 1, badge1)
 
         const m = moment.utc('2020-09-12 11', 'YYYY-MM-DD HH');
 
