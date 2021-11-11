@@ -437,8 +437,6 @@ describe('Client Display Tests', () => {
 
       cy.loginAsProxyUser();
 
-      cy.loginAsProxyUser();
-
       cy.cdVisit('/');
       cy.cdClickBadges();
       cy.contains('Global Badge 1');
@@ -486,7 +484,6 @@ describe('Client Display Tests', () => {
 
 
       cy.loginAsProxyUser();
-      cy.loginAsProxyUser();
 
       cy.cdVisit('/');
       cy.get('[data-cy=myBadges]').contains(" 0 ");
@@ -514,8 +511,6 @@ describe('Client Display Tests', () => {
       cy.createGlobalBadge(1);
       cy.assignSkillToGlobalBadge(1, 1, 1);
       cy.enableGlobalBadge();
-
-      cy.loginAsProxyUser();
 
       cy.loginAsProxyUser();
 
