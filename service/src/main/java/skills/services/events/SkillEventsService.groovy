@@ -28,6 +28,7 @@ import skills.controller.exceptions.SkillExceptionBuilder
 import skills.services.LockingService
 import skills.services.SelfReportingService
 import skills.services.UserEventService
+import skills.services.admin.SkillsGroupAdminService
 import skills.services.events.pointsAndAchievements.PointsAndAchievementsHandler
 import skills.storage.model.SkillDef
 import skills.storage.model.UserAchievement
@@ -74,6 +75,9 @@ class SkillEventsService {
     AchievedGlobalBadgeHandler achievedGlobalBadgeHandler
 
     @Autowired
+    AchievedSkillsGroupHandler achievedSkillsGroupHandler
+
+    @Autowired
     LockingService lockingService
 
     @Autowired
@@ -90,6 +94,9 @@ class SkillEventsService {
 
     @Autowired
     SelfReportingService selfReportingService
+
+    @Autowired
+    SkillsGroupAdminService skillsGroupAdminService
 
     static class SkillApprovalParams {
         boolean disableChecks = false
@@ -246,6 +253,7 @@ class SkillEventsService {
         if (requestedSkillCompleted) {
             documentSkillAchieved(userId, numExistingSkills, skillDefinition, res, skillDate)
             achievedBadgeHandler.checkForBadges(res, userId, skillDefinition, skillDate)
+            achievedSkillsGroupHandler.checkForSkillsGroup(res, userId, skillDefinition, skillDate)
         }
 
         // if requestedSkillCompleted OR overall level achieved, then need to check for global badges
@@ -293,6 +301,12 @@ class SkillEventsService {
         if (dependencyCheckRes.hasNotAchievedDependents) {
             res.skillApplied = false
             res.explanation = dependencyCheckRes.msg
+            return res
+        }
+
+        if (skillDefinition.groupId && (!Boolean.valueOf(skillDefinition.enabled) || !skillsGroupAdminService.isParentSkillsGroupEnabled(skillDefinition.projectId, skillDefinition.groupId))) {
+            res.skillApplied = false
+            res.explanation = "This skill belongs to a Skill Group that is not yet enabled"
             return res
         }
         return  res

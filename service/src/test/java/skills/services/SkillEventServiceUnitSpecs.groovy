@@ -48,6 +48,7 @@ class SkillEventServiceUnitSpecs extends Specification {
         AchievedGlobalBadgeHandler mockAchievedGlobalBadgeHandler = Mock()
         MetricsLogger mockMetricsLogger = Mock()
         UserEventService mockUserEventService = Mock()
+        AchievedSkillsGroupHandler mockAchievedSkillsGroupHandler = Mock()
 
         SkillEventsService skillEventsService = new SkillEventsService(
                 skillEventPublisher: mockSkillEventPublisher,
@@ -61,7 +62,8 @@ class SkillEventServiceUnitSpecs extends Specification {
                 achievedBadgeHandler: mockAchievedBadgeHandler,
                 achievedGlobalBadgeHandler: mockAchievedGlobalBadgeHandler,
                 metricsLogger: mockMetricsLogger,
-                userEventService: mockUserEventService
+                userEventService: mockUserEventService,
+                achievedSkillsGroupHandler: mockAchievedSkillsGroupHandler
         )
 
         // make it so skill has NOT already reached it's max points, is withing the time window, and has achieved any dependencies

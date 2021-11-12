@@ -229,12 +229,51 @@ describe('Client Display Accessibility tests', () => {
       badgeId: 'badge1',
       name: 'Badge 1'
     });
+    cy.assignSkillToBadge(1, 1, 1);
+    cy.enableBadge(1, 1);
     cy.cdVisit('/?isSummaryOnly=true');
     cy.injectAxe();
 
     cy.get('[data-cy=myBadges]').contains("0 Badges")
     cy.wait(4000) //need to wait on the pointHistoryChart to complete rendering before running a11y
 
+    cy.customA11y();
+    cy.customLighthouse();
+  });
+
+  it('Skills groups', () => {
+    cy.createSkillsGroup(1, 2, 1);
+    cy.addSkillToGroup(1, 2, 1, 11, { pointIncrement: 50, numPerformToCompletion: 2 });
+    cy.addSkillToGroup(1, 2, 1, 22, { pointIncrement: 50, numPerformToCompletion: 2 });
+    cy.createSkillsGroup(1, 2, 1, { enabled: true });
+
+    cy.cdVisit('/');
+    cy.injectAxe();
+    cy.cdClickSubj(1);
+
+    cy.get('[data-cy="group-group1Subj2_skillProgress-skill22Subj2"]')
+    cy.get('[data-cy="group-group1Subj2_skillProgress-skill11Subj2"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('0 / 100 Points')
+    cy.get('[data-cy="group-group1Subj2_skillProgress-skill22Subj2"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('0 / 100 Points')
+
+    cy.wait(4000) //need to wait on the pointHistoryChart to complete rendering before running a11y
+    cy.customA11y();
+    cy.customLighthouse();
+
+    cy.createSkillsGroup(1, 2, 1, { numSkillsRequired: 1, enabled: true });
+
+    cy.doReportSkill({ project:1, skill:11, subjNum:2, userId:Cypress.env('proxyUser'), date:'now', failOnError:true, approvalRequestedMsg:null});
+    cy.doReportSkill({ project:1, skill:11, subjNum:2, userId:Cypress.env('proxyUser'), date:'yesterday', failOnError:true, approvalRequestedMsg:null});
+    cy.doReportSkill({ project:1, skill:22, subjNum:2, userId:Cypress.env('proxyUser'), date:'yesterday', failOnError:true, approvalRequestedMsg:null});
+
+    cy.cdVisit('/');
+    cy.injectAxe();
+    cy.cdClickSubj(1);
+
+    cy.get('[data-cy="group-group1Subj2_skillProgress-skill22Subj2"]')
+    cy.get('[data-cy="group-group1Subj2_skillProgress-skill11Subj2"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 100 Points')
+    cy.get('[data-cy="group-group1Subj2_skillProgress-skill22Subj2"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('50 / 100 Points')
+
+    cy.wait(4000) //need to wait on the pointHistoryChart to complete rendering before running a11y
     cy.customA11y();
     cy.customLighthouse();
   });

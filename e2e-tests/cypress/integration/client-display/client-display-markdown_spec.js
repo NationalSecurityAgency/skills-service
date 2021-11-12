@@ -148,13 +148,16 @@ describe('Client Display Markdown Tests', () => {
             helpUrl: 'http://doHelpOnThisSkill.com'
         });
 
-        cy.request('POST', '/admin/projects/proj1/badges/badge1', {
+        const badge = {
             projectId: 'proj1',
             badgeId: 'badge1',
             name: 'Badge 1',
             "iconClass":"fas fa-ghost",
             description: markdown,
-        });
+        }
+        cy.request('POST', '/admin/projects/proj1/badges/badge1', badge);
+        cy.assignSkillToBadge(1, 1, 1);
+        cy.enableBadge(1, 1, badge);
 
         cy.cdVisit('/?internalBackButton=true');
         cy.contains('Overall Points');

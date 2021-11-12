@@ -35,7 +35,7 @@ limitations under the License.
     </div>
     <b-form-textarea type="text" id="approvalRequiredMsg" @input="validate"
            v-if="isApprovalRequired" v-model="approvalRequestedMsg"
-           rows="5"
+           rows="2"
            data-cy="selfReportMsgInput"
            aria-describedby="reportSkillMsg"
            aria-label="Optional request approval message"

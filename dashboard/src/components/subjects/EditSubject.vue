@@ -50,7 +50,7 @@ limitations under the License.
 
               <div class="mt-2">
                 <label>Description</label>
-                <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" v-slot="{ errors }" name="Subject Description">
+                <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{ errors }" name="Subject Description">
                   <markdown-editor v-model="subjectInternal.description"/>
                   <small class="form-text text-danger" data-cy="subjectDescError">{{ errors[0] }}</small>
                 </ValidationProvider>

@@ -28,6 +28,8 @@ public interface ProjSummaryResult {
 
     public abstract int getNumSkills();
 
+    public abstract int getNumGroups();
+
     public abstract int getNumBadges();
 
     public abstract int getNumErrors();

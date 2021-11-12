@@ -93,6 +93,7 @@ class ContactUsersServiceSpec extends DefaultIntSpec {
         [skill2.skillId, skill3.skillId, skill6.skillId].each {
             skillsService.assignSkillToBadge(proj.projectId, badge.badgeId, it)
         }
+        skillsService.updateBadge(badge, badge.badgeId)  // can only enable after initial creation
 
         def users = getRandomUsers(7)
 
@@ -233,6 +234,7 @@ class ContactUsersServiceSpec extends DefaultIntSpec {
         [skill2.skillId, skill3.skillId, skill6.skillId].each {
             skillsService.assignSkillToBadge(proj.projectId, badge.badgeId, it)
         }
+        skillsService.updateBadge(badge, badge.badgeId)  // can only enable after initial creation
 
         def users = getRandomUsers(7)
 

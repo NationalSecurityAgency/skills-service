@@ -28,7 +28,7 @@ import javax.persistence.Table
 @CompileStatic
 class SkillDef extends SkillDefParent {
     static enum ContainerType {
-        Subject, Skill, Badge, GlobalBadge
+        Subject, Skill, Badge, GlobalBadge, SkillsGroup
     }
 
     static enum SelfReportingType {

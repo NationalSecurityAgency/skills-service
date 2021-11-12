@@ -821,6 +821,30 @@ class ReportSkillsSpecs extends DefaultIntSpec {
         !res1.body.completed
     }
 
+    def "do not allow reporting for a skill if skill's group is disabled"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(2)
+        def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 5)
+        skillsGroup.numSkillsRequired = 1
+
+        when:
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skills.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+
+        def res = skillsService.addSkill([projectId: projId, skillId: skills[0].skillId])
+
+        then:
+
+        !res.body.skillApplied
+        res.body.explanation == "This skill belongs to a Skill Group that is not yet enabled"
+        !res.body.completed
+    }
 
     def "skills from different projects with the same subject id do not intermingle"() {
         def proj1 = SkillsFactory.createProject()

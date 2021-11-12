@@ -1402,4 +1402,27 @@
             <column name="value" type="varchar(255)"/>
         </createIndex>
     </changeSet>
+
+    <changeSet id="15" author="skills team" context="migration15">
+        <addColumn tableName="skill_definition">
+            <column name="num_skills_required" type="int" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="skill_definition">
+            <!-- optional, only used for skill groups -->
+            <column name="group_id" type="varchar(255)"/>
+        </addColumn>
+        <addColumn tableName="user_points">
+            <column name="contributes_to_skills_group" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="16" author="skills team" context="migration16">
+        <sql>
+            update skill_definition set enabled = 'true' where enabled is null and (type = 'Skill' OR type = 'Subject' OR type = 'SkillsGroup');
+        </sql>
+        <addNotNullConstraint columnDataType="varchar(255)" columnName="enabled" tableName="skill_definition"/>
+    </changeSet>
+
 </databaseChangeLog>

@@ -16,6 +16,16 @@ limitations under the License.
 <template>
   <div>
     <page-header :loading="isLoading" :options="headerOptions">
+      <div slot="subTitle">
+        <div class="h5 text-muted">ID: {{ skill ? skill.skillId : 'Loading...' }}</div>
+        <div class="h5 text-muted" v-if="skill && skill.groupId">
+          <span style="font-size: 1rem">Group ID:</span> <span v-b-tooltip.hover="`Name: ${ skill.groupName }`">{{ skill.groupId }}</span>
+          <b-badge :data-cy="`disabledGroupBadge-${skill.groupId}`"
+            v-b-tooltip.hover="`Group is disabled. Skill will not be visible on the Skills Display`"
+            class="text-uppercase ml-1"
+            style="font-size: 0.8rem" variant="warning" v-if="!skill.enabled">disabled</b-badge>
+        </div>
+      </div>
       <div slot="subSubTitle">
         <b-button v-if="skill" @click="displayEdit"
                   size="sm"
@@ -77,9 +87,13 @@ limitations under the License.
         items.push({ name: 'Dependencies', iconClass: 'fa-project-diagram skills-color-dependencies', page: 'SkillDependencies' });
         items.push({ name: 'Users', iconClass: 'fa-users skills-color-users', page: 'SkillUsers' });
         const addEventDisabled = this.subject.totalPoints < this.$store.getters.config.minimumSubjectPoints;
-        const msg = addEventDisabled ? `Subject needs at least ${this.$store.getters.config.minimumSubjectPoints} points before events can be added` : '';
+        let msg = addEventDisabled ? `Subject needs at least ${this.$store.getters.config.minimumSubjectPoints} points before events can be added` : '';
+        const disabledDueToGroupBeingDisabled = this.skill.groupId && !this.skill.enabled;
+        if (disabledDueToGroupBeingDisabled) {
+          msg = `CANNOT report skill events because this skill belongs to a group whose current status is disabled. ${msg}`;
+        }
         items.push({
-          name: 'Add Event', iconClass: 'fa-user-plus skills-color-events', page: 'AddSkillEvent', isDisabled: addEventDisabled, msg,
+          name: 'Add Event', iconClass: 'fa-user-plus skills-color-events', page: 'AddSkillEvent', isDisabled: addEventDisabled || disabledDueToGroupBeingDisabled, msg,
         });
         items.push({ name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'SkillMetrics' });
         return items;
@@ -164,7 +178,7 @@ limitations under the License.
         return {
           icon: 'fas fa-graduation-cap skills-color-skills',
           title: `SKILL: ${skill.name}`,
-          subTitle: `ID: ${skill.skillId}`,
+          subTitle: `ID: ${skill.skillId} | GROUP ID: ${skill.groupId}`,
           stats: [{
             label: 'Points',
             count: skill.totalPoints,

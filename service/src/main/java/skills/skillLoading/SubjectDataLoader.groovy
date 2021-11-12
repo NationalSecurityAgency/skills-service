@@ -52,15 +52,15 @@ class SubjectDataLoader {
 
     @Profile
     SkillsData loadData(String userId, String projectId, String skillId, Integer version = Integer.MAX_VALUE) {
-        return loadData(userId, projectId, skillId, version, SkillRelDef.RelationshipType.RuleSetDefinition)
+        return loadData(userId, projectId, skillId, version, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
     }
 
     @Profile
-    SkillsData loadData(String userId, String projectId, String skillId, Integer version = Integer.MAX_VALUE, SkillRelDef.RelationshipType relationshipType) {
-        List<SkillDefAndUserPoints> childrenWithUserPoints = loadChildren(userId, projectId, skillId, relationshipType, version)
+    SkillsData loadData(String userId, String projectId, String skillId, Integer version = Integer.MAX_VALUE, List<SkillRelDef.RelationshipType> relationshipTypes) {
+        List<SkillDefAndUserPoints> childrenWithUserPoints = loadChildren(userId, projectId, skillId, relationshipTypes, version)
         childrenWithUserPoints = childrenWithUserPoints?.sort({ it.skillDef.displayOrder })
 
-        List<SkillDefAndUserPoints> todaysUserPoints = loadChildren(userId, projectId, skillId, relationshipType, version, new Date().clearTime())
+        List<SkillDefAndUserPoints> todaysUserPoints = loadChildren(userId, projectId, skillId, relationshipTypes, version, new Date().clearTime())
 
         List<UserPointsRepo.SkillWithChildAndAchievementIndicator> allProjectDepsAndAchievements = loadAllDepsWithAchievementIndicator(userId, projectId, version)
         Map<Integer, List<UserPointsRepo.SkillWithChildAndAchievementIndicator>> byParentId = allProjectDepsAndAchievements.groupBy { it.parentId }
@@ -100,11 +100,11 @@ class SubjectDataLoader {
     }
 
     @Profile
-    private List<SkillDefAndUserPoints> loadChildren(String userId, String projectId, String skillId, SkillRelDef.RelationshipType relationshipType, Integer version = Integer.MAX_VALUE, Date day = null) {
+    private List<SkillDefAndUserPoints> loadChildren(String userId, String projectId, String skillId, List<SkillRelDef.RelationshipType> relationshipTypes, Integer version = Integer.MAX_VALUE, Date day = null) {
 
         List<Object[]> childrenWithUserPoints = day ?
-                findChildrenPointsByDay(userId, projectId, skillId, relationshipType, version, day) :
-                findChildrenPoints(userId, projectId, skillId, relationshipType, version)
+                findChildrenPointsByDay(userId, projectId, skillId, relationshipTypes, version, day) :
+                findChildrenPoints(userId, projectId, skillId, relationshipTypes, version)
 
         List<SkillDefAndUserPoints> res = childrenWithUserPoints.collect {
             UserPoints userPoints = (it.length > 1 ? it[1] : null) as UserPoints
@@ -116,20 +116,20 @@ class SubjectDataLoader {
     }
 
     @Profile
-    private List<Object[]> findChildrenPoints(String userId, String projectId, String skillId, SkillRelDef.RelationshipType relationshipType, int version) {
+    private List<Object[]> findChildrenPoints(String userId, String projectId, String skillId, List<SkillRelDef.RelationshipType> relationshipTypes, int version) {
         if (projectId) {
-            return userPointsRepo.findChildrenAndTheirUserPoints(userId, projectId, skillId, relationshipType, version)
+            return userPointsRepo.findChildrenAndTheirUserPoints(userId, projectId, skillId, relationshipTypes, version)
         } else {
-            return userPointsRepo.findGlobalChildrenAndTheirUserPoints(userId, skillId, relationshipType, version)
+            return userPointsRepo.findGlobalChildrenAndTheirUserPoints(userId, skillId, relationshipTypes, version)
         }
     }
 
     @Profile
-    private List<Object[]> findChildrenPointsByDay(String userId, String projectId, String skillId, SkillRelDef.RelationshipType relationshipType, int version, Date day) {
+    private List<Object[]> findChildrenPointsByDay(String userId, String projectId, String skillId, List<SkillRelDef.RelationshipType> relationshipTypes, int version, Date day) {
         if (projectId) {
-            return userPointsRepo.findChildrenAndTheirUserPoints(userId, projectId, skillId, relationshipType, version, day)
+            return userPointsRepo.findChildrenAndTheirUserPoints(userId, projectId, skillId, relationshipTypes, version, day)
         } else {
-            return userPointsRepo.findGlobalChildrenAndTheirUserPoints(userId, skillId, relationshipType, version, day)
+            return userPointsRepo.findGlobalChildrenAndTheirUserPoints(userId, skillId, relationshipTypes, version, day)
         }
     }
 

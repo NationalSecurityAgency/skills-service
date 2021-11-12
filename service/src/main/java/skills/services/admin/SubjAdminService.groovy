@@ -119,7 +119,7 @@ class SubjAdminService {
             createdResourceLimitsValidator.validateNumSubjectsCreated(projectId)
 
             Integer lastDisplayOrder = skillDefRepo.calculateHighestDisplayOrderByProjectIdAndType(projectId, SkillDef.ContainerType.Subject)
-            int displayOrder = lastDisplayOrder != null ? lastDisplayOrder + 1 : 0
+            int displayOrder = lastDisplayOrder != null ? lastDisplayOrder + 1 : 1
 
             SkillDefWithExtra skillDef = new SkillDefWithExtra(
                     type: SkillDef.ContainerType.Subject,
@@ -130,7 +130,8 @@ class SubjAdminService {
                     iconClass: subjectRequest?.iconClass ?: "fa fa-question-circle",
                     projDef: projDef,
                     displayOrder: displayOrder,
-                    helpUrl: subjectRequest.helpUrl
+                    helpUrl: subjectRequest.helpUrl,
+                    enabled: Boolean.TRUE.toString(),
             )
 
             DataIntegrityExceptionHandlers.subjectDataIntegrityViolationExceptionHandler.handle(projectId) {
@@ -200,6 +201,7 @@ class SubjAdminService {
         )
 
         res.numSkills = calculateNumChildSkills(skillDef)
+        res.numGroups = calculateNumGroups(skillDef)
         return res
     }
 
@@ -217,10 +219,16 @@ class SubjAdminService {
         return skillDefRepo.existsByProjectIdAndNameAndTypeAllIgnoreCase(projectId, subjectName, SkillDef.ContainerType.Subject)
     }
 
-
     @Profile
     private long calculateNumChildSkills(SkillDefParent skillDef) {
-        skillDefRepo.countChildSkillsByIdAndRelationshipType(skillDef.id, SkillRelDef.RelationshipType.RuleSetDefinition)
+        long skillCount = skillDefRepo.countActiveChildSkillsByIdAndRelationshipType(skillDef.id, SkillRelDef.RelationshipType.RuleSetDefinition)
+        skillCount += skillDefRepo.countActiveGroupChildSkillsForSubject(skillDef.id)
+        return skillCount
+    }
+
+    @Profile
+    private long calculateNumGroups(SkillDefParent skillDef) {
+        skillDefRepo.countActiveGroupsForSubject(skillDef.id)
     }
 
     @Profile

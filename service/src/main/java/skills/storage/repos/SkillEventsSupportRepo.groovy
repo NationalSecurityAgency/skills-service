@@ -43,6 +43,8 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
         SkillDef.ContainerType getType()
         Integer getTotalPoints()
         Integer getPointIncrement()
+        Integer getNumSkillsRequired()
+        String getEnabled()
     }
 
     static interface TinyUserPoints {
@@ -63,14 +65,15 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
         s.name as name,
         s.totalPoints as totalPoints,
         s.type as type,
-        s.pointIncrement as pointIncrement
+        s.pointIncrement as pointIncrement,
+        s.numSkillsRequired as numSkillsRequired,
+        s.enabled as enabled
         from SkillDef s, SkillRelDef srd 
         where
             s.id = srd.parent and  
             srd.child.id=?1 and 
-            srd.type =?2''')
-    List<TinySkillDef> findTinySkillDefsParentsByChildIdAndType(Integer childId, SkillRelDef.RelationshipType type)
-
+            srd.type in ?2''')
+    List<TinySkillDef> findTinySkillDefsParentsByChildIdAndTypeIn(Integer childId, List<SkillRelDef.RelationshipType> types)
 
     @Query('''SELECT
         up.id as id,
@@ -85,6 +88,19 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
             (up.day=?4 or up.day is null)''')
     List<TinyUserPoints> findTinyUserPointsProjectIdAndUserIdAndSkillsAndDay(String projectId, String usedId, List<Integer> skillRefIds, Date day)
 
+    @Query('''SELECT
+        up.id as id,
+        up.skillRefId as skillRefId,
+        up.points as points,
+        up.day as day
+        from UserPoints up, SkillRelDef srd
+        where
+            up.userId=?1 and  
+            up.skillRefId = srd.child and  
+            srd.parent.id=?2 and 
+            up.day is null''')
+    List<TinyUserPoints> findTotalTinyUserPointsByUserIdAndParentId(String usedId, Integer parentId)
+
     static interface SkillDefMin {
         int getId()
         String getProjectId()
@@ -98,6 +114,8 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
         Date getStartDate()
         Date getEndDate()
         String getEnabled()
+        String getGroupId()
+        int getNumSkillsRequired()
         SkillDef.SelfReportingType getSelfReportingType()
     }
 
@@ -112,6 +130,8 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
         s.totalPoints as totalPoints,
         s.type as type,
         s.enabled as enabled,
+        s.groupId as groupId,
+        s.numSkillsRequired as numSkillsRequired,
         s.selfReportingType as selfReportingType
         from SkillDef s where s.projectId = ?1 and s.skillId=?2 and s.type = ?3''')
     @Nullable
@@ -148,9 +168,6 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
         from SkillDef s where s.projectId is null and s.skillId=:skillId''')
     @Nullable
     SkillDefMin findBySkillIdWhereProjectIdIsNull(@Param("skillId") String skillId)
-
-
-
 
     @Query('''SELECT
         badge.id as id,
@@ -189,6 +206,10 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
     @Query('''update UserPoints up set up.points = up.points + ?2 where up.id = ?1''')
     void addUserPoints(Integer id, int pointsToAdd)
 
+    @Modifying
+    @Query('''update UserPoints up set up.contributesToSkillsGroup = ?2 where up.id = ?1''')
+    void updateContributingFlag(Integer id, String contributesToSkillsGroup)
+
     @Query('''SELECT l from LevelDef l where l.skillRefId = ?1''')
     List<LevelDef> findLevelsBySkillId(Integer skillId)
 
@@ -201,7 +222,6 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
         l.pointsTo as pointsTo 
         from LevelDef l where l.skillRefId in (?1) or l.projectRefId = ?2''')
     List<LevelDefInterface> findLevelsBySkillIdsOrByProjectId(List<Integer> skillIds, Integer projectId)
-
 
     @Query('''SELECT 
         ua.skillRefId as skillRefId,

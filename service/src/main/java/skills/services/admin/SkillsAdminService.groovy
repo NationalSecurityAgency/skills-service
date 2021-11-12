@@ -18,6 +18,7 @@ package skills.services.admin
 import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.PageRequest
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.ActionPatchRequest
+import skills.controller.request.model.PointSyncPatchRequest
 import skills.controller.request.model.SkillRequest
 import skills.controller.result.model.SkillDefPartialRes
 import skills.controller.result.model.SkillDefRes
@@ -95,22 +97,66 @@ class SkillsAdminService {
     @Lazy
     SkillApprovalService skillApprovalService
 
+    @Autowired
+    SkillsGroupAdminService skillsGroupAdminService
+
+    @Transactional
+    void syncSkillPointsForSkillsGroup(String projectId,
+                                       String subjectId,
+                                       String groupId,
+                                       PointSyncPatchRequest patchRequest) {
+        lockingService.lockProject(projectId)
+
+        SkillDef skillsGroupSkillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, groupId, SkillDef.ContainerType.SkillsGroup)
+        List<SkillDef> groupChildSkills = skillsGroupAdminService.getSkillsGroupChildSkills(skillsGroupSkillDef.id)
+
+        final int totalPointsRequested = patchRequest.pointIncrement * patchRequest.numPerformToCompletion
+        final int pointIncrement = patchRequest.pointIncrement
+
+        def origAttrs = [:]
+        groupChildSkills.each {childSkillDef ->
+            origAttrs.put(childSkillDef, [childSkillDef.totalPoints, childSkillDef.pointIncrement])
+            childSkillDef.pointIncrement = pointIncrement
+            childSkillDef.totalPoints = totalPointsRequested
+            DataIntegrityExceptionHandlers.skillDataIntegrityViolationExceptionHandler.handle(projectId, childSkillDef.skillId) {
+                skillDefWithExtraRepo.save(childSkillDef)
+            }
+        }
+
+        // if enabled, validate and update points and achievements
+        if (Boolean.valueOf(skillsGroupSkillDef.enabled)) {
+            // need to validate skills group
+            skillsGroupAdminService.validateSkillsGroupAndReturnChildren(skillsGroupSkillDef.numSkillsRequired, true, skillsGroupSkillDef.id)
+            groupChildSkills.each {childSkillDef ->
+                final int incrementRequested = pointIncrement
+                final int currentOccurrences = (origAttrs.get(childSkillDef)[0] / origAttrs.get(childSkillDef)[1])
+                final int occurrencesDelta = patchRequest.numPerformToCompletion - currentOccurrences
+                final int pointIncrementDelta = incrementRequested - pointIncrement
+                log.debug("Rebuilding scores for [${}]", childSkillDef.skillId)
+                ruleSetDefinitionScoreUpdater.updateFromLeaf(childSkillDef)
+                updatePointsAndAchievements(childSkillDef, subjectId, pointIncrementDelta, occurrencesDelta, currentOccurrences, 0, skillsGroupSkillDef, groupChildSkills)
+            }
+        }
+    }
+
     @Transactional()
-    void saveSkill(String originalSkillId, SkillRequest skillRequest, boolean performCustomValidation=true) {
+    void saveSkill(String originalSkillId, SkillRequest skillRequest, boolean performCustomValidation=true, String groupId=null) {
         lockingService.lockProject(skillRequest.projectId)
 
         validateSkillVersion(skillRequest)
 
-        final CustomValidationResult customValidationResult = customValidator.validate(skillRequest)
-        if(performCustomValidation && !customValidationResult.valid){
-            String msg = "Custom validation failed: msg=[${customValidationResult.msg}], type=[skill], skillId=[${skillRequest.skillId}], name=[${skillRequest.name}], description=[${skillRequest.description}]"
-            throw new SkillException(msg)
+        if (performCustomValidation) {
+            final CustomValidationResult customValidationResult = customValidator.validate(skillRequest)
+            if (!customValidationResult.valid) {
+                String msg = "Custom validation failed: msg=[${customValidationResult.msg}], type=[skill], skillId=[${skillRequest.skillId}], name=[${skillRequest.name}], description=[${skillRequest.description}]"
+                throw new SkillException(msg)
+            }
         }
 
-        SkillDefWithExtra skillDefinition = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, originalSkillId, SkillDef.ContainerType.Skill)
+        SkillDefWithExtra skillDefinition = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(skillRequest.projectId, originalSkillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
 
         if (!skillDefinition || !skillDefinition.skillId.equalsIgnoreCase(skillRequest.skillId)) {
-            SkillDef idExists = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, skillRequest.skillId, SkillDef.ContainerType.Skill)
+            SkillDef idExists = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(skillRequest.projectId, skillRequest.skillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
             if (idExists) {
                 throw new SkillException("Skill with id [${skillRequest.skillId}] already exists! Sorry!", skillRequest.projectId, null, ErrorCode.ConstraintViolation)
             }
@@ -123,23 +169,54 @@ class SkillsAdminService {
             }
         }
 
-        boolean shouldRebuildScores
-        boolean updateUserPoints
-        int pointIncrementDelta
-        int occurrencesDelta
+        if (skillDefinition && !groupId) {
+            groupId = skillDefinition.groupId
+        }
 
+        boolean shouldRebuildScores = false
+        boolean updateUserPoints = false
+        int pointIncrementDelta = 0
+        int occurrencesDelta = 0
+        int numSkillsRequiredDelta = 0
+
+        final SkillDef.ContainerType skillType = skillRequest.type ? SkillDef.ContainerType.valueOf(skillRequest.type) : SkillDef.ContainerType.Skill;
         final boolean isEdit = skillDefinition
-        final int totalPointsRequested = skillRequest.pointIncrement * skillRequest.numPerformToCompletion
-        final int incrementRequested = skillRequest.pointIncrement
-        final int currentOccurrences = isEdit ? (skillDefinition.totalPoints / skillDefinition.pointIncrement) : -1
-        final SelfReportingType selfReportingType =  skillRequest.selfReportingType ? SkillDef.SelfReportingType.valueOf(skillRequest.selfReportingType) : null;
+        final boolean isSkillsGroup = skillType == SkillDef.ContainerType.SkillsGroup
+        final boolean isSkillsGroupChild = StringUtils.isNotBlank(groupId)
+        int totalPointsRequested = isSkillsGroup ? 0 : skillRequest.pointIncrement * skillRequest.numPerformToCompletion
+        final int incrementRequested = isSkillsGroup ? 0 : skillRequest.pointIncrement
+        final int currentOccurrences = isEdit && !isSkillsGroup ? (skillDefinition.totalPoints / skillDefinition.pointIncrement) : -1
+        final SelfReportingType selfReportingType = skillRequest.selfReportingType && !isSkillsGroup ? SkillDef.SelfReportingType.valueOf(skillRequest.selfReportingType) : null;
 
         SkillDef subject = null
+        SkillDef skillsGroupSkillDef = null
+        List<SkillDef> groupChildSkills = null
         if (isEdit) {
-            shouldRebuildScores = skillDefinition.totalPoints != totalPointsRequested
-            occurrencesDelta = skillRequest.numPerformToCompletion - currentOccurrences
+            // for updates, use the existing value if it is not set on the skillRequest (null or empty String)
+            if (StringUtils.isBlank(skillRequest.enabled)) {
+                skillRequest.enabled = skillDefinition.enabled
+            }
+            if (isSkillsGroup) {
+                // need to update total points for the group
+                groupChildSkills = skillsGroupAdminService.validateSkillsGroupAndReturnChildren(skillRequest, skillDefinition)
+                totalPointsRequested = skillsGroupAdminService.getGroupTotalPoints(groupChildSkills, skillRequest.numSkillsRequired)
+
+                if (Boolean.valueOf(skillRequest.enabled) && skillDefinition.numSkillsRequired != skillRequest.numSkillsRequired) {
+                    int currentNumSkillsRequired = skillDefinition.numSkillsRequired == -1 ? groupChildSkills.size() : skillDefinition.numSkillsRequired
+                    int requestedNumSkillsRequired = skillRequest.numSkillsRequired == -1 ? groupChildSkills.size() : skillRequest.numSkillsRequired
+                    numSkillsRequiredDelta = requestedNumSkillsRequired - currentNumSkillsRequired
+                }
+
+                if (Boolean.valueOf(skillDefinition.enabled) != Boolean.valueOf(skillRequest.enabled)) {
+                    // enabling or disabling, need to update child skills enabled to match the group value
+                    groupChildSkills.each { it.enabled = skillRequest.enabled }
+                    skillDefRepo.saveAll(groupChildSkills)
+                }
+            }
+            shouldRebuildScores = skillDefinition.totalPoints != totalPointsRequested || (!Boolean.valueOf(skillDefinition.enabled) && Boolean.valueOf(skillRequest.enabled))
+            occurrencesDelta = isSkillsGroup ? 0 : skillRequest.numPerformToCompletion - currentOccurrences
             updateUserPoints = shouldRebuildScores || occurrencesDelta != 0
-            pointIncrementDelta = incrementRequested - skillDefinition.pointIncrement
+            pointIncrementDelta = isSkillsGroup ? 0 : incrementRequested - skillDefinition.pointIncrement
 
             Props.copy(skillRequest, skillDefinition, "childSkills", 'version', 'selfReportType')
 
@@ -157,8 +234,13 @@ class SkillsAdminService {
 
             createdResourceLimitsValidator.validateNumSkillsCreated(subject)
 
-            Integer highestDisplayOrder = skillDefRepo.calculateChildSkillsHighestDisplayOrder(skillRequest.projectId, parentSkillId)
+            Integer highestDisplayOrder = skillDefRepo.calculateChildSkillsHighestDisplayOrder(skillRequest.projectId, groupId ?: parentSkillId)
             int displayOrder = highestDisplayOrder == null ? 1 : highestDisplayOrder + 1
+            String enabled = isSkillsGroup ? Boolean.FALSE.toString() : Boolean.TRUE.toString()
+            if (isSkillsGroupChild) {
+                skillsGroupSkillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, groupId, SkillDef.ContainerType.SkillsGroup)
+                enabled = skillsGroupSkillDef.enabled
+            }
             skillDefinition = new SkillDefWithExtra(
                     skillId: skillRequest.skillId,
                     projectId: skillRequest.projectId,
@@ -170,9 +252,12 @@ class SkillsAdminService {
                     description: skillRequest.description,
                     helpUrl: skillRequest.helpUrl,
                     displayOrder: displayOrder,
-                    type: SkillDef.ContainerType.Skill,
+                    type: skillType,
                     version: skillRequest.version,
                     selfReportingType: selfReportingType,
+                    numSkillsRequired: skillRequest.numSkillsRequired,
+                    enabled: enabled,
+                    groupId: groupId,
             )
             log.debug("Saving [{}]", skillDefinition)
             shouldRebuildScores = true
@@ -182,10 +267,24 @@ class SkillsAdminService {
             skillDefWithExtraRepo.save(skillDefinition)
         }
 
-        SkillDef savedSkill = skillDefRepo.findByProjectIdAndSkillIdAndType(skillRequest.projectId, skillRequest.skillId, SkillDef.ContainerType.Skill)
-
+        SkillDef savedSkill = skillDefRepo.findByProjectIdAndSkillIdAndType(skillRequest.projectId, skillRequest.skillId, skillType)
+        if (isSkillsGroup) {
+            skillsGroupSkillDef = savedSkill
+        }
         if (!isEdit) {
-            assignToParent(skillRequest, savedSkill, subject)
+            if (isSkillsGroupChild) {
+                skillsGroupAdminService.addSkillToSkillsGroup(savedSkill.projectId, groupId, savedSkill.skillId)
+            } else {
+                assignToParent(skillRequest, savedSkill, subject)
+            }
+        }
+
+        if (isSkillsGroupChild) {
+            // need to validate skills group
+            if (!skillsGroupSkillDef) {
+                skillsGroupSkillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, groupId, SkillDef.ContainerType.SkillsGroup)
+            }
+            groupChildSkills = skillsGroupAdminService.validateSkillsGroupAndReturnChildren(skillsGroupSkillDef.numSkillsRequired, Boolean.valueOf(skillsGroupSkillDef.enabled), skillsGroupSkillDef.id)
         }
 
         if (shouldRebuildScores) {
@@ -194,17 +293,34 @@ class SkillsAdminService {
         }
 
         if (isEdit) {
+            updatePointsAndAchievements(
+                    savedSkill,
+                    skillRequest.subjectId,
+                    pointIncrementDelta,
+                    occurrencesDelta,
+                    currentOccurrences,
+                    numSkillsRequiredDelta,
+                    skillsGroupSkillDef,
+                    groupChildSkills,
+            )
+        }
+
+        log.debug("Saved [{}]", savedSkill)
+    }
+
+    private void updatePointsAndAchievements(SkillDef savedSkill, String subjectId, int pointIncrementDelta, int occurrencesDelta, int currentOccurrences, int numSkillsRequiredDelta, SkillDef skillsGroupSkillDef, List<SkillDef> groupChildSkills) {
+        if (savedSkill.type != SkillDef.ContainerType.SkillsGroup) {
             // order is CRITICAL HERE
             // must update point increment first then deal with changes in the occurrences;
             // changes in the occurrences will use the newly updated point increment
             if (pointIncrementDelta != 0) {
-                userPointsManagement.handlePointIncrementUpdate(savedSkill.projectId, skillRequest.subjectId, savedSkill.skillId, pointIncrementDelta)
+                userPointsManagement.handlePointIncrementUpdate(savedSkill.projectId, subjectId, savedSkill.skillId, pointIncrementDelta)
             }
             int newOccurrences = savedSkill.totalPoints / savedSkill.pointIncrement
             if (occurrencesDelta < 0) {
                 // order is CRITICAL HERE
                 // Must update points prior removal of UserPerformedSkill events as the removal relies on the existence of those extra events
-                userPointsManagement.updatePointsWhenOccurrencesAreDecreased(savedSkill.projectId, skillRequest.subjectId, savedSkill.skillId, savedSkill.pointIncrement, newOccurrences)
+                userPointsManagement.updatePointsWhenOccurrencesAreDecreased(savedSkill.projectId, subjectId, savedSkill.skillId, savedSkill.pointIncrement, newOccurrences)
                 userPointsManagement.removeExtraEntriesOfUserPerformedSkillByUser(savedSkill.projectId, savedSkill.skillId, currentOccurrences + occurrencesDelta)
                 //identify what badge (or badges) this skill belongs to.
                 //if any, look for users who qualify for the badge now after this change is persisted See BadgeAdminService.identifyUsersMeetingBadgeRequirements
@@ -219,11 +335,16 @@ class SkillsAdminService {
             } else if (occurrencesDelta > 0) {
                 userPointsManagement.removeUserAchievementsThatDoNotMeetNewNumberOfOccurrences(savedSkill.projectId, savedSkill.skillId, newOccurrences)
             }
+        }
 
-            if (pointIncrementDelta < 0 || occurrencesDelta < 0) {
-                SkillDef parent = ruleSetDefGraphService.getParentSkill(savedSkill)
-                userPointsManagement.identifyAndAddLevelAchievements(parent)
-            }
+        if ((occurrencesDelta < 0 || numSkillsRequiredDelta < 0) && skillsGroupSkillDef && Boolean.valueOf(skillsGroupSkillDef.enabled)) {
+            int numSkillsRequired = skillsGroupSkillDef.numSkillsRequired == -1 ? groupChildSkills.size() : skillsGroupSkillDef.numSkillsRequired
+            userPointsManagement.insertUserAchievementWhenDecreaseOfSkillsRequiredCausesUsersToAchieve(savedSkill.projectId, skillsGroupSkillDef.skillId, skillsGroupSkillDef.id, groupChildSkills.collect {it.skillId}, numSkillsRequired)
+        }
+
+        if (pointIncrementDelta < 0 || occurrencesDelta < 0) {
+            SkillDef subject = skillDefRepo.findByProjectIdAndSkillIdAndType(savedSkill.projectId, subjectId, SkillDef.ContainerType.Subject)
+            userPointsManagement.identifyAndAddLevelAchievements(subject)
         }
 
         log.debug("Saved [{}]", savedSkill)
@@ -232,20 +353,28 @@ class SkillsAdminService {
     @Transactional
     void deleteSkill(String projectId, String subjectId, String skillId) {
         log.debug("Deleting skill with project id [{}] and subject id [{}] and skill id [{}]", projectId, subjectId, skillId)
-        SkillDef skillDefinition = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, skillId, SkillDef.ContainerType.Skill)
+        SkillDef skillDefinition = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(projectId, skillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
         assert skillDefinition, "DELETE FAILED -> no skill with project find with projectId=[$projectId], subjectId=[$subjectId], skillId=[$skillId]"
 
         if (globalBadgesService.isSkillUsedInGlobalBadge(skillDefinition)) {
             throw new SkillException("Skill with id [${skillId}] cannot be deleted as it is currently referenced by one or more global badges")
         }
         SkillDef parentSkill = ruleSetDefGraphService.getParentSkill(skillDefinition)
+        SkillDef subject
+        if (parentSkill.type == SkillDef.ContainerType.Subject) {
+            subject = parentSkill
+        } else if (parentSkill.type == SkillDef.ContainerType.SkillsGroup) {
+            subject = skillDefRepo.findByProjectIdAndSkillIdAndType(projectId, subjectId, SkillDef.ContainerType.Subject)
+        } else {
+            throw new SkillException("Unexpected parent type [${parentSkill.type}]")
+        }
 
         //we need to check to see if this skill belongs to any badges, if so we need to look for any users who now qualify
         //for those badges
         ruleSetDefinitionScoreUpdater.skillToBeRemoved(skillDefinition)
 
         // this MUST happen before the skill was removed as sql relies on the skill to exist
-        userPointsManagement.handleSkillRemoval(skillDefinition, parentSkill)
+        userPointsManagement.handleSkillRemoval(skillDefinition, subject)
 
         //identify any badges that this skill belonged to and award the badge if any users now qualify for this badge
         List<SkillDef> badges = findAllBadgesSkillBelongsTo(skillDefinition.skillId)
@@ -254,13 +383,31 @@ class SkillsAdminService {
         log.debug("Deleted skill [{}]", skillDefinition.skillId)
 
         // this MUST happen after the skill was removed as sql relies on the skill to be gone
-        userPointsManagement.identifyAndAddLevelAchievements(parentSkill)
+        userPointsManagement.identifyAndAddLevelAchievements(subject)
+
+        // make sure skills group is still valid and update group's totalPoints
+        if (skillDefinition.groupId) {
+            assert parentSkill.type == SkillDef.ContainerType.SkillsGroup
+            List<SkillDef> children = skillsGroupAdminService.validateCanDeleteChildSkillAndReturnChildren(parentSkill)
+            if (children.size() == parentSkill.numSkillsRequired) {
+                parentSkill.numSkillsRequired = -1
+            }
+            parentSkill.totalPoints = skillsGroupAdminService.getGroupTotalPoints(children, parentSkill.numSkillsRequired)
+            DataIntegrityExceptionHandlers.skillDataIntegrityViolationExceptionHandler.handle(projectId, skillId) {
+                skillDefWithExtraRepo.save(parentSkill)
+            }
+
+            if (Boolean.valueOf(parentSkill.enabled)) {
+                int numSkillsRequired = parentSkill.numSkillsRequired == -1 ? children.size() : parentSkill.numSkillsRequired
+                userPointsManagement.insertUserAchievementWhenDecreaseOfSkillsRequiredCausesUsersToAchieve(projectId, parentSkill.skillId, parentSkill.id, children.collect { it.skillId }, numSkillsRequired)
+            }
+        }
 
         badges?.each {
             badgeAdminService.awardBadgeToUsersMeetingRequirements(it)
         }
 
-        List<SkillDef> siblings = ruleSetDefGraphService.getChildrenSkills(parentSkill)
+        List<SkillDef> siblings = ruleSetDefGraphService.getChildrenSkills(parentSkill, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
         displayOrderService.resetDisplayOrder(siblings)
     }
 
@@ -327,7 +474,7 @@ class SkillsAdminService {
 
     @Transactional(readOnly = true)
     SkillDefRes getSkill(String projectId, String subjectId, String skillId) {
-        SkillDefWithExtra res = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, skillId, SkillDef.ContainerType.Skill)
+        SkillDefWithExtra res = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(projectId, skillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
         if (!res) {
             throw new SkillException("Skill [${skillId}] doesn't exist.", projectId, null, ErrorCode.SkillNotFound)
         }
@@ -338,7 +485,7 @@ class SkillsAdminService {
 
     @Transactional(readOnly = true)
     boolean existsBySkillName(String projectId, String skillName) {
-        return skillDefRepo.existsByProjectIdAndNameAndTypeAllIgnoreCase(projectId, skillName, SkillDef.ContainerType.Skill)
+        return skillDefRepo.existsByProjectIdAndNameAndTypeInAllIgnoreCase(projectId, skillName, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
     }
 
     @Transactional
@@ -400,7 +547,21 @@ class SkillsAdminService {
         Props.copy(skillDef, res)
         res.description = InputSanitizer.unsanitizeForMarkdown(res.description)
         res.helpUrl = InputSanitizer.unsanitizeUrl(res.helpUrl)
-        res.numPerformToCompletion = skillDef.totalPoints / res.pointIncrement
+        if (skillDef.type == SkillDef.ContainerType.Skill) {
+            res.numPerformToCompletion = skillDef.totalPoints / res.pointIncrement
+        }
+        if (skillDef.type == SkillDef.ContainerType.SkillsGroup) {
+            List<SkillDef> groupChildSkills = skillsGroupAdminService.getSkillsGroupChildSkills(skillDef.getId())
+            res.numSkillsInGroup = groupChildSkills.size()
+            res.numSelfReportSkills = groupChildSkills.count( {it.selfReportingType })?.intValue()
+            res.enabled = Boolean.valueOf(skillDef.enabled)
+        }
+        if (skillDef.groupId) {
+            SkillDefWithExtra skillsGroup = skillsGroupAdminService.getSkillsGroup(skillDef.projectId, skillDef.groupId)
+            res.enabled = Boolean.valueOf(skillDef.enabled)
+            res.groupName = skillsGroup.name
+            res.groupId = skillsGroup.skillId
+        }
 
         return res
     }
@@ -437,10 +598,14 @@ class SkillsAdminService {
                 displayOrder: partial.displayOrder,
                 created: partial.created,
                 updated: partial.updated,
-                selfReportingType: partial.getSelfReportingType()
+                selfReportingType: partial.getSelfReportingType(),
+                numSkillsRequired: partial.getNumSkillsRequired(),
+                enabled: Boolean.valueOf(partial.enabled),
         )
 
-        res.numPerformToCompletion = (Integer)(res.totalPoints / res.pointIncrement)
+        if (partial.skillType == SkillDef.ContainerType.Skill) {
+            res.numPerformToCompletion = (Integer) (res.totalPoints / res.pointIncrement)
+        }
         res.totalPoints = partial.totalPoints
         res.numMaxOccurrencesIncrementInterval = partial.numMaxOccurrencesIncrementInterval
 
@@ -448,6 +613,11 @@ class SkillsAdminService {
             res.numUsers = calculateDistinctUsersForSkill((SkillDefRepo.SkillDefPartial)partial)
         }
 
+        if (partial.skillType == SkillDef.ContainerType.SkillsGroup) {
+            List<SkillDef> groupChildSkills = skillsGroupAdminService.getSkillsGroupChildSkills(partial.getId())
+            res.numSkillsInGroup = groupChildSkills.size()
+            res.numSelfReportSkills = groupChildSkills.count( {it.selfReportingType })?.intValue()
+        }
         return res;
     }
 

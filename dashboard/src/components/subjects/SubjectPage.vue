@@ -88,6 +88,10 @@ limitations under the License.
           title: `SUBJECT: ${this.subject.name}`,
           subTitle: `ID: ${this.subjectId}`,
           stats: [{
+            label: 'Groups',
+            count: this.subject.numGroups,
+            icon: 'fas fa-layer-group skills-color-groups',
+          }, {
             label: 'Skills',
             count: this.subject.numSkills,
             icon: 'fas fa-graduation-cap skills-color-skills',

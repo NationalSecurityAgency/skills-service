@@ -602,7 +602,6 @@ describe('Client Display Skills Filtering Tests', () => {
     cy.get('[data-cy="skillProgress_index-1"]').should('not.exist')
   });
 
-
   it('filter skills on badge catalog page', () => {
     cy.createSkill(1, 1, 1, {name: 'a Search blah skill 1'});
     cy.createSkill(1, 1, 2, {name: 'b is a skill 2'});
@@ -617,6 +616,7 @@ describe('Client Display Skills Filtering Tests', () => {
     cy.assignSkillToBadge(1, 1, 3)
     cy.assignSkillToBadge(1, 1, 4)
     cy.assignSkillToBadge(1, 1, 5)
+    cy.enableBadge(1, 1);
 
     cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now')
     cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday')
@@ -660,6 +660,7 @@ describe('Client Display Skills Filtering Tests', () => {
     cy.assignSkillToBadge(1, 1, 2)
     cy.assignSkillToBadge(1, 1, 3)
     cy.assignSkillToBadge(1, 1, 4)
+    cy.enableBadge(1, 1);
 
     cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday')
     cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now')
@@ -717,6 +718,7 @@ describe('Client Display Skills Filtering Tests', () => {
     cy.assignSkillToGlobalBadge(1, 2)
     cy.assignSkillToGlobalBadge(1, 3)
     cy.assignSkillToGlobalBadge(1, 4)
+    cy.enableGlobalBadge();
 
     cy.loginAsProxyUser();
 

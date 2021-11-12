@@ -40,7 +40,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         Integer getTotalPoints()
     }
 
-    static interface SkillDefPartial extends SkillDefSkinny{
+    static interface SkillDefPartial extends SkillDefSkinny {
         Integer getPointIncrement()
         Integer getPointIncrementInterval()
         Integer getNumMaxOccurrencesIncrementInterval()
@@ -48,6 +48,8 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         SkillDef.ContainerType getSkillType()
         Date getUpdated()
         SkillDef.SelfReportingType getSelfReportingType()
+        String getEnabled()
+        Integer getNumSkillsRequired()
     }
 
     /**
@@ -88,7 +90,11 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     @Nullable
     SkillDef findByProjectIdAndSkillIdIgnoreCaseAndType(@Nullable String id, String skillId, SkillDef.ContainerType type)
     @Nullable
+    SkillDef findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(@Nullable String id, String skillId, List<SkillDef.ContainerType> types)
+    @Nullable
     SkillDef findByProjectIdAndSkillIdAndType(String id, String skillId, SkillDef.ContainerType type)
+    @Nullable
+    SkillDef findByProjectIdAndSkillIdAndTypeIn(String id, String skillId, List<SkillDef.ContainerType> types)
     @Nullable
     SkillDef findByProjectIdAndNameIgnoreCaseAndType(@Nullable String id, String name, SkillDef.ContainerType type)
     @Nullable
@@ -96,7 +102,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
 
     @Query(value = '''SELECT max(sdChild.displayOrder) from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
       where srd.parent=sdParent.id and srd.child=sdChild.id and 
-      sdParent.projectId=?1 and sdParent.skillId=?2 and srd.type='RuleSetDefinition' ''' )
+      sdParent.projectId=?1 and sdParent.skillId=?2''' )
     @Nullable
     Integer calculateChildSkillsHighestDisplayOrder(String projectId, String skillId)
 
@@ -105,14 +111,14 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     Integer calculateHighestDisplayOrderByProjectIdAndType(String projectId, SkillDef.ContainerType type)
 
     @Query(value = '''SELECT sum(sdChild.totalPoints) from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
-      where srd.parent=sdParent.id and srd.child=sdChild.id and 
-      sdParent.projectId=?1 and sdParent.skillId=?2 and srd.type=?3 and sdChild.version<=?4 ''' )
+      where srd.parent=sdParent.id and srd.child=sdChild.id and sdChild.enabled = 'true' and  
+      sdParent.projectId=?1 and sdParent.skillId=?2 and srd.type IN ('RuleSetDefinition', 'SkillsGroupRequirement') and sdChild.version<=?3 ''' )
     @Nullable
-    Integer calculateTotalPointsForSkill(String projectId, String skillId, RelationshipType relationshipType, Integer version)
+    Integer calculateTotalPointsForSubject(String projectId, String skillId, Integer version)
 
 
     @Query(value = '''SELECT sum(sdChild.totalPoints) from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
-      where srd.parent=sdParent.id and srd.child=sdChild.id and 
+      where srd.parent=sdParent.id and srd.child=sdChild.id and sdChild.enabled = 'true' and 
       sdParent.projectId=?1 and srd.type=?2 and sdChild.version<=?3 ''' )
     @Nullable
     Integer calculateTotalPointsForProject(String projectId, RelationshipType relationshipType, Integer version)
@@ -134,14 +140,42 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     int countByProjectIdAndType(@Nullable String projectId, SkillDef.ContainerType type)
 
     @Query('''select count(s) from SkillDef s 
-            where (:projectId is null or s.projectId=:projectId) and s.type=:type and (s.enabled is null or s.enabled = 'true')  
+            where (:projectId is null or s.projectId=:projectId) and s.type=:type and s.enabled = 'true'  
         ''')
     int countByProjectIdAndTypeWhereEnabled(@Nullable @Param('projectId') String projectId, @Param('type') SkillDef.ContainerType type)
 
+    @Query('''select count(c) 
+            from SkillRelDef r, SkillDef c 
+            where r.parent.id=?1 and c.id = r.child and r.type=?2 and c.type = 'Skill' and c.enabled = 'true'
+        ''')
+    long countActiveChildSkillsByIdAndRelationshipType(Integer parentSkillRefId, RelationshipType relationshipType)
+
+    @Query(value='''select count(sd) 
+        from SkillRelDef srd, SkillDef sd
+        where 
+          srd.parent.id=?1
+          and srd.child.id = sd.id 
+          and srd.type = 'RuleSetDefinition' 
+          and sd.type = 'SkillsGroup' 
+          and sd.enabled = 'true'
+      ''')
+    long countActiveGroupsForSubject(Integer subjectId)
+
     @Query(value='''select count(c) 
-        from SkillRelDef r, SkillDef c 
-        where r.parent.id=?1 and c.id = r.child and r.type=?2''')
-    long countChildSkillsByIdAndRelationshipType(Integer parentSkillRefId, RelationshipType relationshipType)
+        from SkillRelDef r, SkillDef c, SkillRelDef r2
+        where 
+          r.parent.id=?1
+           and (
+            (r.child.id = r2.parent.id 
+             and c.id = r2.child 
+             and c.type = 'Skill'
+             and r.type = 'RuleSetDefinition' 
+             and r2.type = 'SkillsGroupRequirement' 
+             and r.child.enabled = 'true'
+             )
+           )
+      ''')
+    long countActiveGroupChildSkillsForSubject(Integer subjectId)
 
     @Query(value='''select c 
         from SkillRelDef r, SkillDef c 
@@ -156,11 +190,12 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     @Query(value = "SELECT COUNT(DISTINCT s.userId) from UserPoints s where s.projectId=?1 and s.skillId=?2")
     int calculateDistinctUsersForASingleSkill(String projectId, String skillId)
 
-    boolean existsByProjectIdAndSkillIdAndTypeAllIgnoreCase(String id, String skillId, SkillDef.ContainerType type)
+    boolean existsByProjectIdAndSkillIdAndTypeInAllIgnoreCase(String id, String skillId, List<SkillDef.ContainerType> types)
     boolean existsByProjectIdAndSkillIdAllIgnoreCase(@Nullable String id, String skillId)
     boolean existsByProjectIdIgnoreCaseAndSkillId(@Nullable String id, String skillId)
 
     boolean existsByProjectIdAndNameAndTypeAllIgnoreCase(@Nullable String id, String name, SkillDef.ContainerType type)
+    boolean existsByProjectIdAndNameAndTypeInAllIgnoreCase(@Nullable String id, String name, List<SkillDef.ContainerType> types)
 
     @Query('SELECT MAX (s.version) from SkillDef s where s.projectId=?1')
     Integer findMaxVersionByProjectId(String projectId)
@@ -224,7 +259,8 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
             )
         ) OR 
         sd.type='GlobalBadge') and
-      (sd.enabled  = 'true' OR sd.enabled is null)''')
+      sd.enabled = 'true'
+      ''')
     Integer countTotalProductionBadges(String userId)
 
 
@@ -250,7 +286,8 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
             )
         ) OR 
         sd.type='GlobalBadge') and
-      (sd.enabled  = 'true' OR sd.enabled is null)''')
+      sd.enabled = 'true'
+      ''')
     BadgeCount getProductionBadgesCount(String userId)
 
 
@@ -290,7 +327,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
                             )
                     ) 
                 )) AND
-              (sd.enabled  = 'true' OR sd.enabled is null)
+              sd.enabled = 'true'
     ''', nativeQuery = true)
     BadgeCount getProductionMyBadgesCount(String userId)
 
@@ -306,7 +343,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
                 srd.child=sdChild.id and 
                 sdChild.projectId=?1 and 
                 sdChild.skillId=?2 and 
-                srd.type='RuleSetDefinition'
+                srd.type IN ('RuleSetDefinition', 'SkillsGroupRequirement')
         ''')
     ProjectAndSubjectPoints getProjectAndSubjectPoints(String projectId, String skillId)
 

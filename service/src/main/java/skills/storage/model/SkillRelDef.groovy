@@ -28,7 +28,7 @@ import javax.persistence.*
 @EntityListeners(AuditingEntityListener)
 class SkillRelDef {
 
-    enum RelationshipType { RuleSetDefinition, Dependence, BadgeRequirement, Recommendation }
+    enum RelationshipType { RuleSetDefinition, Dependence, BadgeRequirement, Recommendation, SkillsGroupRequirement }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

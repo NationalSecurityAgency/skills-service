@@ -40,7 +40,6 @@ limitations under the License.
 </template>
 
 <script>
-  import debounce from 'lodash.debounce';
   import MarkdownText from './MarkdownText';
 
   export default {
@@ -65,9 +64,9 @@ limitations under the License.
       },
     },
     methods: {
-      dataChanged: debounce(function debouncedDataChanged() {
+      dataChanged() {
         this.$emit('input', this.valueInternal);
-      }, 250),
+      },
       wasResized(e) {
         if (this.resizable) {
           const oneRem = parseFloat(getComputedStyle(document.documentElement).fontSize);

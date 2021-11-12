@@ -48,7 +48,7 @@ limitations under the License.
             <div v-if="!loading">
                 <div v-if="skillsInternal && skillsInternal.length > 0">
                   <div v-for="(skill, index) in skillsInternal"
-                       :key="`unique-skill-old-${index}`"
+                       :key="`skill-${skill.skillId}`"
                        class="skills-theme-bottom-border-with-background-color"
                        :class="{
                          'separator-border-thick' : showDescriptionsInternal,
@@ -57,6 +57,8 @@ limitations under the License.
                   >
                     <div class="p-3 pt-4">
                       <skill-progress2
+                          :id="`skill-${skill.skillId}`"
+                          :ref="`skillProgress${skill.skillId}`"
                           :skill="skill"
                           :subjectId="subject.subjectId"
                           :badgeId="subject.badgeId"
@@ -65,6 +67,7 @@ limitations under the License.
                           :show-description="showDescriptionsInternal"
                           :data-cy="`skillProgress_index-${index}`"
                           @points-earned="onPointsEarned"
+                          :child-skill-highlight-string="searchString"
                       />
                     </div>
                   </div>
@@ -88,6 +91,28 @@ limitations under the License.
   import SkillProgress2 from './SkillProgress2';
   import SkillsFilter from '@/common-components/utilities/ListFilterMenu';
   import SkillEnricherUtil from '../../utils/SkillEnricherUtil';
+  import StringHighlighter from '@/common-components/utilities/StringHighlighter';
+
+  const updateSkillForLoadedDescription = (skills, desc) => {
+    let foundSkill = null;
+    for (let i = 0; i < skills.length; i += 1) {
+      const skill = skills[i];
+      if (desc.skillId === skill.skillId) {
+        foundSkill = skill;
+      } else if (skill.isSkillsGroupType) {
+        foundSkill = skill.children.find((child) => desc.skillId === child.skillId);
+      }
+      if (foundSkill) {
+        break;
+      }
+    }
+
+    if (foundSkill) {
+      foundSkill.description = desc;
+      foundSkill.achievedOn = desc.achievedOn;
+      foundSkill.selfReporting = desc.selfReporting;
+    }
+  };
 
   export default {
     components: {
@@ -180,13 +205,31 @@ limitations under the License.
         filter = (s) => s.projectId === this.projectId;
       }
       this.skillsInternal = this.subject.skills.filter(filter).map((item) => {
-        this.updateMetaCounts(item.meta);
-        return { ...item, subject: theSubject };
+        const isSkillsGroupType = item.type === 'SkillsGroup';
+        if (isSkillsGroupType) {
+          // eslint-disable-next-line no-param-reassign
+          item.children = item.children.map((child) => ({ ...child, groupId: item.skillId, isSkillType: true }));
+        }
+        const res = {
+          ...item, subject: theSubject, isSkillsGroupType, isSkillType: !isSkillsGroupType,
+        };
+
+        this.updateMetaCountsForSkillRes(res);
+        return res;
       });
 
-      this.skillsInternalOrig = this.skillsInternal.map((item) => ({ ...item }));
+      this.skillsInternalOrig = this.skillsInternal.map((item) => ({ ...item, children: item.children?.map((child) => ({ ...child })) }));
     },
     methods: {
+      updateMetaCountsForSkillRes(skillRes) {
+        if (skillRes.isSkillsGroupType) {
+          skillRes.children.forEach((childItem) => {
+            this.updateMetaCounts(childItem.meta);
+          });
+        } else {
+          this.updateMetaCounts(skillRes.meta);
+        }
+      },
       updateMetaCounts(meta) {
         if (meta.complete) {
           this.metaCounts.complete += 1;
@@ -211,12 +254,8 @@ limitations under the License.
             .then((res) => {
               this.descriptions = res;
               res.forEach((desc) => {
-                const foundSkill = this.skillsInternal.find((skill) => desc.skillId === skill.skillId);
-                if (foundSkill) {
-                  foundSkill.description = desc;
-                  foundSkill.achievedOn = desc.achievedOn;
-                  foundSkill.selfReporting = desc.selfReporting;
-                }
+                updateSkillForLoadedDescription(this.skillsInternal, desc);
+                updateSkillForLoadedDescription(this.skillsInternalOrig, desc);
               });
               this.descriptionsLoaded = true;
             })
@@ -225,27 +264,24 @@ limitations under the License.
             });
         }
       },
-      onPointsEarned(pts, skillId) {
-        const updateSkill = (skills) => {
-          const index = skills.findIndex((item) => item.skillId === skillId);
-          const skill = skills[index];
-          const updatedSkill = SkillEnricherUtil.addPts(skill, pts);
-          skills.splice(index, 1, updatedSkill);
-        };
+      onPointsEarned(pts, skillId, childSkillId = null) {
+        SkillEnricherUtil.updateSkillPtsInList(this.skillsInternalOrig, pts, skillId);
+        SkillEnricherUtil.updateSkillPtsInList(this.skillsInternal, pts, skillId);
 
-        updateSkill(this.skillsInternalOrig);
-        updateSkill(this.skillsInternal);
-
-        const skill = this.skillsInternalOrig.find((item) => item.skillId === skillId);
-        if (skill.selfReporting && skill.selfReporting.type === 'HonorSystem') {
-          const event = { skillId };
-          if (this.type !== 'badge') {
-            event.subjectId = this.subject.subjectId;
-          } else if (this.type === 'badge') {
-            event.badgeId = this.subject.badgeId;
-          }
-          this.$emit('self_report', event);
+        // childSkillId is only provided for SkillsGroup skills,
+        // if so, find child skill and update its points
+        if (childSkillId) {
+          SkillEnricherUtil.updateChildSkillPtsInList(this.skillsInternal, pts, skillId, childSkillId);
+          SkillEnricherUtil.updateChildSkillPtsInList(this.skillsInternalOrig, pts, skillId, childSkillId);
         }
+
+        const event = { skillId, pointsEarned: pts };
+        if (this.type !== 'badge') {
+          event.subjectId = this.subject.subjectId;
+        } else if (this.type === 'badge') {
+          event.badgeId = this.subject.badgeId;
+        }
+        this.$emit('points-earned', event);
       },
       filterSkills(filterId) {
         this.filterId = filterId.id;
@@ -267,17 +303,40 @@ limitations under the License.
         let resultSkills = this.skillsInternalOrig.map((item) => ({ ...item }));
         if (this.searchString && this.searchString.trim().length > 0) {
           const searchStrNormalized = this.searchString.trim().toLowerCase();
-          const foundItems = resultSkills.filter((item) => item.skill?.trim()?.toLowerCase().includes(searchStrNormalized));
+
+          // groups are treated as a single unit (group and child skills shown OR the entire group is removed)
+          // group is shown when either a group name matches OR any of the skill names match the search string
+          const foundItems = resultSkills.filter((item) => {
+            if (item.isSkillsGroupType) {
+              // find at least 1 item that matches the search string
+              const foundChild = item.children.find((childItem) => childItem.skill?.trim()?.toLowerCase().includes(searchStrNormalized));
+              if (foundChild) {
+                return true;
+              }
+            }
+            return item.skill?.trim()?.toLowerCase().includes(searchStrNormalized);
+          });
+
           resultSkills = foundItems.map((item) => {
-            const name = item.skill;
-            const index = name.toLowerCase().indexOf(searchStrNormalized);
-            const skillHtml = `${name.substring(0, index)}<mark>${name.substring(index, index + searchStrNormalized.length)}</mark>${name.substring(index + searchStrNormalized.length)}`;
-            return { skillHtml, ...item };
+            const skillHtml = StringHighlighter.highlight(item.skill, searchStrNormalized);
+            return skillHtml ? ({ ...item, skillHtml }) : item;
           });
         }
 
-        if (this.filterId && this.filterId.length > 0) {
-          resultSkills = resultSkills.filter((item) => item.meta[this.filterId] === true);
+        if (resultSkills && this.filterId && this.filterId.length > 0) {
+          const filteredRes = [];
+          resultSkills.forEach((item) => {
+            if (item.isSkillsGroupType) {
+              const copyItem = ({ ...item });
+              copyItem.children = copyItem.children.filter((childItem) => childItem.meta[this.filterId] === true);
+              if (copyItem.children && copyItem.children.length > 0) {
+                filteredRes.push(copyItem);
+              }
+            } else if (item.meta[this.filterId] === true) {
+              filteredRes.push(item);
+            }
+          });
+          resultSkills = filteredRes;
         }
         this.skillsInternal = resultSkills;
       },

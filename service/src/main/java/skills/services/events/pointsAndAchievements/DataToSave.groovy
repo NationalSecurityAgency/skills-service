@@ -27,6 +27,12 @@ import skills.storage.repos.SkillEventsSupportRepo
 class DataToSave {
     List<UserPoints> toSave = []
     List<SkillEventsSupportRepo.TinyUserPoints> toAddPointsTo = []
-    int pointIncrement
     List<UserAchievement> userAchievements = []
+
+    // reference data
+    Integer pointIncrement
+    Integer numChildSkillsRequired
+    Integer skillsGroupDefId
+    Integer subjectDefId
+    String userId
 }

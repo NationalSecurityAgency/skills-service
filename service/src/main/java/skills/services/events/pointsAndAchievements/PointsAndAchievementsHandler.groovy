@@ -22,10 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.services.LevelDefinitionStorageService
 import skills.services.events.CompletionItem
-import skills.services.events.CompletionTypeUtil
 import skills.services.events.SkillDate
-import skills.services.events.SkillEventResult
-import skills.storage.model.*
 import skills.storage.repos.SkillEventsSupportRepo
 import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.UserAchievedLevelRepo

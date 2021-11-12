@@ -15,7 +15,6 @@
  */
 package skills.skillLoading
 
-
 import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
@@ -35,6 +34,7 @@ import skills.services.BadgeUtils
 import skills.services.DependencyValidator
 import skills.services.GlobalBadgesService
 import skills.services.LevelDefinitionStorageService
+import skills.services.admin.SkillsGroupAdminService
 import skills.services.settings.SettingsService
 import skills.settings.CommonSettings
 import skills.skillLoading.model.*
@@ -121,6 +121,9 @@ class SkillsLoader {
 
     @Autowired
     UserAttrsRepo userAttrsRepo
+
+    @Autowired
+    SkillsGroupAdminService skillsGroupAdminService
 
     private static String PROP_HELP_URL_ROOT = CommonSettings.HELP_URL_ROOT
 
@@ -398,7 +401,7 @@ class SkillsLoader {
     @Transactional(readOnly = true)
     SkillSummary loadSkillSummary(String projectId, String userId, String crossProjectId, String skillId) {
         ProjDef projDef = getProjDef(userId, crossProjectId ?: projectId)
-        SkillDefWithExtra skillDef = getSkillDefWithExtra(userId, crossProjectId ?: projectId, skillId, SkillDef.ContainerType.Skill)
+        SkillDefWithExtra skillDef = getSkillDefWithExtra(userId, crossProjectId ?: projectId, skillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
 
         if(crossProjectId) {
             dependencyValidator.validateDependencyEligibility(projectId, skillDef)
@@ -430,6 +433,7 @@ class SkillsLoader {
                 crossProject: crossProjectId != null,
                 achievedOn: achievedOn,
                 selfReporting: loadSelfReporting(userId, skillDef),
+                type: skillDef.type,
         )
     }
 
@@ -455,7 +459,7 @@ class SkillsLoader {
     @Transactional(readOnly = true)
     SkillSubjectSummary loadSubject(String projectId, String userId, String subjectId, Integer version = -1, Boolean loadSkills = true) {
         ProjDef projDef = getProjDef(userId, projectId)
-        SkillDefWithExtra subjectDef = getSkillDefWithExtra(userId, projectId, subjectId, SkillDef.ContainerType.Subject)
+        SkillDefWithExtra subjectDef = getSkillDefWithExtra(userId, projectId, subjectId, [SkillDef.ContainerType.Subject])
 
         if (version == -1 || subjectDef.version <= version) {
             return loadSubjectSummary(projDef, userId, subjectDef, version, loadSkills)
@@ -479,40 +483,64 @@ class SkillsLoader {
 
     private List<SkillDescription> loadDescriptions(String projectId, String subjectId,  String userId, SkillRelDef.RelationshipType relationshipType, int version) {
         SettingsResult helpUrlRootSetting = settingsService.getProjectSetting(projectId, PROP_HELP_URL_ROOT)
-
         List<SkillDefWithExtraRepo.SkillDescDBRes> dbRes
         Map<String, List<SkillApprovalRepo.SkillApprovalPlusSkillId>> approvalLookup
         if (projectId) {
-            dbRes = skillDefWithExtraRepo.findAllChildSkillsDescriptions(projectId, subjectId, relationshipType, version, userId)
+            dbRes = skillDefWithExtraRepo.findAllChildSkillsDescriptions(projectId, subjectId,relationshipType, version, userId)
             List<SkillApprovalRepo.SkillApprovalPlusSkillId> approvals = skillApprovalRepo.findsApprovalWithSkillIdForSkillsDisplay(userId, projectId, subjectId)
             approvalLookup = approvals.groupBy { it.getSkillId() }
         } else {
             dbRes = skillDefWithExtraRepo.findAllGlobalChildSkillsDescriptions(subjectId, relationshipType, version, userId)
         }
-        List<SkillDescription> res = dbRes.collect {
+
+        List<String> skillGroupIds = []
+        List<SkillDescription> res = []
+        dbRes.each {
             SkillApprovalRepo.SkillApprovalPlusSkillId skillApproval = approvalLookup?.get(it.getSkillId())?.sort({ it.skillApproval.requestedOn})?.reverse()?.get(0)
-            new SkillDescription(
-                    skillId: it.getSkillId(),
-                    description: InputSanitizer.unsanitizeForMarkdown(it.getDescription()),
-                    href: getHelpUrl(helpUrlRootSetting, it.getHelpUrl()),
-                    achievedOn: it.getAchievedOn(),
-                    selfReporting: new SelfReportingInfo(
-                            approvalId: skillApproval?.getSkillApproval()?.getId(),
-                            type: it.getSelfReportingType(),
-                            enabled: it.getSelfReportingType() != null,
-                            requestedOn: skillApproval?.getSkillApproval()?.getRequestedOn()?.time,
-                            rejectedOn: skillApproval?.getSkillApproval()?.getRejectedOn()?.time,
-                            rejectionMsg: skillApproval?.getSkillApproval()?.getRejectionMsg()
-                    )
-            )
+            if (it.type != SkillDef.ContainerType.SkillsGroup || Boolean.valueOf(it.enabled)) {
+                SkillDescription skillDescription = createSkillDescription(it, helpUrlRootSetting, skillApproval)
+                res << skillDescription
+                if (it.type == SkillDef.ContainerType.SkillsGroup && Boolean.valueOf(it.enabled)) {
+                    skillGroupIds << skillDescription.skillId
+                }
+            }
+        }
+        if (skillGroupIds) {
+            dbRes = skillDefWithExtraRepo.findAllChildSkillsDescriptionsForSkillsGroups(projectId, skillGroupIds, SkillRelDef.RelationshipType.SkillsGroupRequirement, version, userId)
+            List<SkillApprovalRepo.SkillApprovalPlusSkillId> approvals = skillApprovalRepo.findsApprovalWithSkillIdInForSkillsDisplay(userId, projectId, skillGroupIds)
+            approvalLookup = approvals.groupBy { it.getSkillId() }
+            dbRes.each {
+                SkillApprovalRepo.SkillApprovalPlusSkillId skillApproval = approvalLookup?.get(it.getSkillId())?.sort({ it.skillApproval.requestedOn})?.reverse()?.get(0)
+                SkillDescription skillDescription = createSkillDescription(it, helpUrlRootSetting, skillApproval)
+                res << skillDescription
+            }
         }
         return res
+    }
+
+    private SkillDescription createSkillDescription(SkillDefWithExtraRepo.SkillDescDBRes it, SettingsResult helpUrlRootSetting, SkillApprovalRepo.SkillApprovalPlusSkillId skillApproval) {
+        SkillDescription skillDescription = new SkillDescription(
+                skillId: it.getSkillId(),
+                description: InputSanitizer.unsanitizeForMarkdown(it.getDescription()),
+                href: getHelpUrl(helpUrlRootSetting, it.getHelpUrl()),
+                achievedOn: it.getAchievedOn(),
+                type: it.getType(),
+                selfReporting: new SelfReportingInfo(
+                        approvalId: skillApproval?.getSkillApproval()?.getId(),
+                        type: it.getSelfReportingType(),
+                        enabled: it.getSelfReportingType() != null,
+                        requestedOn: skillApproval?.getSkillApproval()?.getRequestedOn()?.time,
+                        rejectedOn: skillApproval?.getSkillApproval()?.getRejectedOn()?.time,
+                        rejectionMsg: skillApproval?.getSkillApproval()?.getRejectionMsg()
+                )
+        )
+        skillDescription
     }
 
     @Transactional(readOnly = true)
     SkillBadgeSummary loadBadge(String projectId, String userId, String subjectId, Integer version = Integer.MAX_VALUE, boolean loadSkills=true) {
         ProjDef projDef = getProjDef(userId, projectId)
-        SkillDefWithExtra badgeDef = getSkillDefWithExtra(userId, projectId, subjectId, SkillDef.ContainerType.Badge)
+        SkillDefWithExtra badgeDef = getSkillDefWithExtra(userId, projectId, subjectId, [SkillDef.ContainerType.Badge])
 
         return loadBadgeSummary(projDef, userId, badgeDef, version,loadSkills)
     }
@@ -520,7 +548,7 @@ class SkillsLoader {
 
     @Transactional(readOnly = true)
     SkillGlobalBadgeSummary loadGlobalBadge(String userId, String originatingProject, String badgeSkillId, Integer version = Integer.MAX_VALUE, boolean loadSkills=true) {
-        SkillDefWithExtra badgeDef = getSkillDefWithExtra(userId, null, badgeSkillId, SkillDef.ContainerType.GlobalBadge)
+        SkillDefWithExtra badgeDef = getSkillDefWithExtra(userId, null, badgeSkillId, [SkillDef.ContainerType.GlobalBadge])
 
         return loadGlobalBadgeSummary(userId, originatingProject, badgeDef, version,loadSkills)
     }
@@ -544,17 +572,17 @@ class SkillsLoader {
 
     @Profile
     private SkillSubjectSummary loadSubjectSummary(ProjDef projDef, String userId, SkillDefParent subjectDefinition, Integer version, boolean loadSkills = false) {
-        List<SkillSummary> skillsRes = []
+        List<SkillSummaryParent> skillsRes = []
 
         // must compute total points so the provided version is taken into account
         // subjectDefinition.totalPoints is total overall regardless of the version
         int totalPoints
         if (loadSkills) {
             SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, subjectDefinition.skillId, version)
-            skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints)
+            skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints, false, userId, version)
             totalPoints = skillsRes ? skillsRes.collect({it.totalPoints}).sum() as Integer: 0
         } else {
-            totalPoints = calculateTotalForSkillDef(projDef, subjectDefinition, version)
+            totalPoints = calculateTotalForSubject(projDef, subjectDefinition, version)
         }
 
         Integer points = calculatePoints(projDef, userId, subjectDefinition, version)
@@ -609,8 +637,8 @@ class SkillsLoader {
     }
 
     @Profile
-    private int calculateTotalForSkillDef(ProjDef projDef, SkillDefParent subjectDefinition, int version) {
-        Integer res = skillDefRepo.calculateTotalPointsForSkill(projDef.projectId, subjectDefinition.skillId, SkillRelDef.RelationshipType.RuleSetDefinition, version)
+    private int calculateTotalForSubject(ProjDef projDef, SkillDefParent subjectDefinition, int version) {
+        Integer res = skillDefRepo.calculateTotalPointsForSubject(projDef.projectId, subjectDefinition.skillId, version)
         return res ?: 0
     }
 
@@ -639,10 +667,10 @@ class SkillsLoader {
 
     @Profile
     private SkillBadgeSummary loadBadgeSummary(ProjDef projDef, String userId, SkillDefWithExtra badgeDefinition, Integer version = Integer.MAX_VALUE, boolean loadSkills = false, boolean loadProjectName = false) {
-        List<SkillSummary> skillsRes = []
+        List<SkillSummaryParent> skillsRes = []
 
         if (loadSkills) {
-            SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef?.projectId, badgeDefinition.skillId, version, SkillRelDef.RelationshipType.BadgeRequirement)
+            SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef?.projectId, badgeDefinition.skillId, version, [SkillRelDef.RelationshipType.BadgeRequirement])
             skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints, true)?.sort({ it.skill?.toLowerCase() })
         }
 
@@ -683,10 +711,10 @@ class SkillsLoader {
 
     @Profile
     private SkillGlobalBadgeSummary loadGlobalBadgeSummary(String userId, String originatingProject, SkillDefWithExtra badgeDefinition, Integer version = Integer.MAX_VALUE, boolean loadSkills = false) {
-        List<SkillSummary> skillsRes = []
+        List<SkillSummaryParent> skillsRes = []
 
         if (loadSkills) {
-            SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, null, badgeDefinition.skillId, version, SkillRelDef.RelationshipType.BadgeRequirement)
+            SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, null, badgeDefinition.skillId, version, [SkillRelDef.RelationshipType.BadgeRequirement])
             skillsRes = createSkillSummaries(null, groupChildrenMeta.childrenWithPoints)?.sort({ it.skill?.toLowerCase() })
             if (skillsRes) {
                 // all the skills are "cross-project" if they don't belong to the project that originated this reqest
@@ -773,8 +801,13 @@ class SkillsLoader {
     }
 
     @Profile
-    private List<SkillSummary> createSkillSummaries(ProjDef thisProjDef, List<SubjectDataLoader.SkillsAndPoints> childrenWithPoints, boolean populateSubjectInfo=false) {
-        List<SkillSummary> skillsRes = []
+    private List<SkillSummaryParent> createSkillSummaries(ProjDef thisProjDef, List<SubjectDataLoader.SkillsAndPoints> childrenWithPoints, boolean populateSubjectInfo=false) {
+        return createSkillSummaries(thisProjDef, childrenWithPoints, populateSubjectInfo, null, null)
+    }
+
+    @Profile
+    private List<SkillSummaryParent> createSkillSummaries(ProjDef thisProjDef, List<SubjectDataLoader.SkillsAndPoints> childrenWithPoints, boolean populateSubjectInfo, String userId, Integer version) {
+        List<SkillSummaryParent> skillsRes = []
 
         Map<String,ProjDef> projDefMap = [:]
         childrenWithPoints.each { SubjectDataLoader.SkillsAndPoints skillDefAndUserPoints ->
@@ -804,18 +837,38 @@ class SkillsLoader {
                 }
             }
 
-            skillsRes << new SkillSummary(
-                    projectId: skillDef.projectId, projectName: projDef.name,
-                    skillId: skillDef.skillId, skill: skillDef.name,
-                    points: points, todaysPoints: todayPoints,
-                    pointIncrement: skillDef.pointIncrement, pointIncrementInterval: skillDef.pointIncrementInterval,
-                    maxOccurrencesWithinIncrementInterval: skillDef.numMaxOccurrencesIncrementInterval,
-                    totalPoints: skillDef.totalPoints,
-                    dependencyInfo: skillDefAndUserPoints.dependencyInfo,
-                    selfReporting: skillDef.selfReportingType ? new SelfReportingInfo(enabled: true, type: skillDef.selfReportingType) : null,
-                    subjectName: subjectName,
-                    subjectId: subjectId
-            )
+            if (skillDef.type == SkillDef.ContainerType.SkillsGroup && Boolean.valueOf(skillDef.enabled)) {
+                SkillsSummaryGroup skillsSummary = new SkillsSummaryGroup(
+                        projectId: skillDef.projectId,
+                        projectName: projDef.name,
+                        skillId: skillDef.skillId,
+                        skill: skillDef.name,
+                        type: skillDef.type,
+                        enabled: Boolean.valueOf(skillDef.enabled).toString(),
+                        numSkillsRequired: skillDef.numSkillsRequired,
+                        totalPoints: skillDef.totalPoints,
+                )
+                SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, skillDef.skillId, version, [SkillRelDef.RelationshipType.SkillsGroupRequirement])
+                Integer numSkillsRequired = skillsGroupAdminService.getActualNumSkillsRequred(skillDef.numSkillsRequired, skillDef.id)
+                skillsSummary.children = createSkillSummaries(thisProjDef, groupChildrenMeta.childrenWithPoints, false, userId, version)
+                skillsSummary.points = skillsSummary.children ? skillsSummary.children.collect({it.points}).sort().takeRight(numSkillsRequired).sum() as Integer: 0
+                skillsSummary.todaysPoints = skillsSummary.children ? skillsSummary.children.collect({it.todaysPoints}).sort().takeRight(numSkillsRequired).sum() as Integer: 0
+                skillsRes << skillsSummary
+            } else if (skillDef.type == SkillDef.ContainerType.Skill) {
+                skillsRes << new SkillSummary(
+                        projectId: skillDef.projectId, projectName: projDef.name,
+                        skillId: skillDef.skillId, skill: skillDef.name,
+                        points: points, todaysPoints: todayPoints,
+                        pointIncrement: skillDef.pointIncrement, pointIncrementInterval: skillDef.pointIncrementInterval,
+                        maxOccurrencesWithinIncrementInterval: skillDef.numMaxOccurrencesIncrementInterval,
+                        totalPoints: skillDef.totalPoints,
+                        dependencyInfo: skillDefAndUserPoints.dependencyInfo,
+                        selfReporting: skillDef.selfReportingType ? new SelfReportingInfo(enabled: true, type: skillDef.selfReportingType) : null,
+                        subjectName: subjectName,
+                        subjectId: subjectId,
+                        type: skillDef.type,
+                )
+            }
         }
 
         return skillsRes
@@ -874,8 +927,8 @@ class SkillsLoader {
         return projDef
     }
 
-    private SkillDefWithExtra getSkillDefWithExtra(String userId, String projectId, String skillId, SkillDef.ContainerType containerType) {
-        SkillDefWithExtra skillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, skillId, containerType)
+    private SkillDefWithExtra getSkillDefWithExtra(String userId, String projectId, String skillId, List<SkillDef.ContainerType> containerTypes) {
+        SkillDefWithExtra skillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(projectId, skillId, containerTypes)
         if (!skillDef) {
             throw new SkillExceptionBuilder()
                     .msg("Skill definition with id [${skillId}] doesn't exist")

@@ -42,31 +42,26 @@ class RuleSetDefGraphService {
 
     @Transactional
     SkillDef getParentSkill(SkillDef skillDef) {
-        List<SkillRelDef> parents = skillRelDefRepo.findAllByChildAndType(skillDef, RelationshipType.RuleSetDefinition)
+        List<SkillRelDef> parents = skillRelDefRepo.findAllByChildAndTypeIn(skillDef, [RelationshipType.RuleSetDefinition, RelationshipType.SkillsGroupRequirement])
         // assume that I only have one parent
         SkillDef parent = parents.first().parent
         return parent
     }
 
     @Transactional
-    List<SkillDef> getChildrenSkills(SkillDef skillDef) {
-        getChildrenSkills(skillDef, RelationshipType.RuleSetDefinition)
-    }
-
-    @Transactional
-    List<SkillDef> getChildrenSkills(SkillDef skillDef, RelationshipType relationshipType) {
-        return skillRelDefRepo.getChildren(skillDef.projectId, skillDef.skillId, relationshipType)
+    List<SkillDef> getChildrenSkills(SkillDef skillDef, List<RelationshipType> relationshipTypes) {
+        return skillRelDefRepo.getChildren(skillDef.projectId, skillDef.skillId, relationshipTypes)
     }
 
     @Transactional
     void deleteSkillWithItsDescendants(SkillDef skillDef) {
         List<SkillDef> toDelete = []
 
-        List<SkillDef> currentChildren = getChildrenSkills(skillDef)
+        List<SkillDef> currentChildren = getChildrenSkills(skillDef, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
         while (currentChildren) {
             toDelete.addAll(currentChildren)
             currentChildren = currentChildren?.collect {
-                getChildrenSkills(it)
+                getChildrenSkills(it, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
             }?.flatten()
         }
         toDelete.add(skillDef)
@@ -82,7 +77,7 @@ class RuleSetDefGraphService {
     @Transactional
     void assignGraphRelationship(String projectId, String skillId, SkillDef.ContainerType skillType,
                                  String relationshipProjectId, String relationshipSkillId, RelationshipType relationshipType) {
-        SkillDef skill1 = skillDefAccessor.getSkillDef(projectId, skillId, skillType)
+        SkillDef skill1 = skillDefAccessor.getSkillDef(projectId, skillId, [skillType])
         SkillDef skill2 = skillDefAccessor.getSkillDef(relationshipProjectId, relationshipSkillId)
         skillRelDefRepo.save(new SkillRelDef(parent: skill1, child: skill2, type: relationshipType))
     }
@@ -90,7 +85,7 @@ class RuleSetDefGraphService {
     @Transactional
     void removeGraphRelationship(String projectId, String skillId, SkillDef.ContainerType skillType,
                                  String relationshipProjectId, String relationshipSkillId, RelationshipType relationshipType){
-        SkillDef skill1 = skillDefAccessor.getSkillDef(projectId, skillId, skillType)
+        SkillDef skill1 = skillDefAccessor.getSkillDef(projectId, skillId, [skillType])
         SkillDef skill2 = skillDefAccessor.getSkillDef(relationshipProjectId, relationshipSkillId)
         SkillRelDef relDef = skillRelDefRepo.findByChildAndParentAndType(skill2, skill1, relationshipType)
         if (!relDef) {

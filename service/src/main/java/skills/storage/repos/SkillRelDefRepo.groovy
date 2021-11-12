@@ -24,10 +24,18 @@ import skills.storage.model.SkillRelDef
 interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
     List<SkillRelDef> findAllByChildAndType(SkillDef child, SkillRelDef.RelationshipType type)
 
+    List<SkillRelDef> findAllByChildAndTypeIn(SkillDef child, List<SkillRelDef.RelationshipType> types)
+
     @Query('''SELECT srd from SkillRelDef srd where srd.child.id=?1 and srd.type=?2''')
     List<SkillRelDef> findAllByChildIdAndType(Integer childId, SkillRelDef.RelationshipType type)
+
+    @Query('''SELECT srd from SkillRelDef srd where srd.child.id=?1 and srd.type in ?2''')
+    List<SkillRelDef> findAllByChildIdAndTypeIn(Integer childId, List<SkillRelDef.RelationshipType> types)
+
     SkillRelDef findByChildAndParentAndType(SkillDef child, SkillDef parent, SkillRelDef.RelationshipType type)
     List<SkillRelDef> findAllByParentAndType(SkillDef parent, SkillRelDef.RelationshipType type)
+    List<SkillRelDef> findAllByParentAndTypeIn(SkillDef parent, List<SkillRelDef.RelationshipType> types)
+
 
     @Query(value = '''select count(srd.id) from SkillRelDef srd where srd.child.skillId=?1 and srd.type='BadgeRequirement' and srd.parent.type = 'GlobalBadge' ''')
     Integer getSkillUsedInGlobalBadgeCount(String skillId)
@@ -62,7 +70,9 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         sd2.displayOrder as displayOrder,
         sd2.created as created,
         sd2.updated as updated,
-        sd2.selfReportingType as selfReportingType
+        sd2.selfReportingType as selfReportingType,
+        sd2.enabled as enabled,
+        sd2.numSkillsRequired as numSkillsRequired
         from SkillDef sd1, SkillDef sd2, SkillRelDef srd 
         where sd1 = srd.parent and sd2 = srd.child and srd.type=?3 
               and sd1.projectId=?1 and sd1.skillId=?2''')
@@ -90,10 +100,9 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
 
     @Query('''SELECT sd2 
         from SkillDef sd1, SkillDef sd2, SkillRelDef srd 
-        where sd1 = srd.parent and sd2 = srd.child and srd.type=?3 
+        where sd1 = srd.parent and sd2 = srd.child and srd.type in ?3 
               and sd1.projectId=?1 and sd1.skillId=?2''')
-    List<SkillDef> getChildren(@Nullable String projectId, String parentSkillId, SkillRelDef.RelationshipType type)
-
+    List<SkillDef> getChildren(@Nullable String projectId, String parentSkillId, List<SkillRelDef.RelationshipType> types)
 
     @Nullable
     @Query(value = '''select srd.parent from SkillRelDef srd where srd.child.skillId=?1 and srd.type='BadgeRequirement' and srd.parent.type = 'GlobalBadge' ''')

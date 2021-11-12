@@ -47,20 +47,20 @@ limitations under the License.
                 v-for="(navItem) of navItems"
                 :key="navItem.name"
                 :data-cy="`nav-${navItem.name}`"
-                v-b-tooltip="{ title: navItem.name, placement: 'right', variant: 'primary', disabled: !collapsed }"
+                v-b-tooltip="{ title: navItem.msg ? navItem.msg : navItem.name, placement: 'right', variant: 'primary', disabled: !collapsed && !navItem.isDisabled }"
                 :class="{'bg-primary': menuSelections.get(navItem.name)}">
-            <router-link :to="{ name: navItem.page }"
-                         @click.native="()=>{navigate(navItem.name)}"
-                         @keypress.enter="()=>{navigate(navItem.name)}"
-                         tag="a"
-                         :class="{'text-light': menuSelections.get(navItem.name), 'select-cursor': !menuSelections.get(navItem.name), 'disabled': navItem.isDisabled}"
-                         aria-current-value="page">
-                <div class="text-truncate ml-3" :class="{'mr-4': !collapsed}">
-                    <i :class="navItem.iconClass" class="fas"
-                       style="min-width: 1.7rem;" aria-hidden="true"/> <span v-if="!collapsed || smallScreenMode">{{ navItem.name }}</span>
-                    <i v-if="navItem.isDisabled" class="fas fa-exclamation-circle text-warning ml-1" style="pointer-events: all;" v-b-tooltip.hover="navItem.msg"/>
-                </div>
-            </router-link>
+                <router-link :to="{ name: navItem.page }"
+                             @click.native="()=>{navigate(navItem.name)}"
+                             @keypress.enter="()=>{navigate(navItem.name)}"
+                             tag="a"
+                             :class="{'text-light': menuSelections.get(navItem.name), 'select-cursor': !menuSelections.get(navItem.name), 'disabled': navItem.isDisabled}"
+                             aria-current-value="page">
+                    <div class="text-truncate ml-3" :class="{'mr-4': !collapsed}">
+                        <i :class="navItem.iconClass" class="fas"
+                           style="min-width: 1.7rem;" aria-hidden="true"/> <span v-if="!collapsed || smallScreenMode">{{ navItem.name }}</span>
+                        <i v-if="navItem.isDisabled" class="fas fa-exclamation-circle text-warning ml-1" />
+                    </div>
+                </router-link>
             </li>
           </ul>
         </b-collapse>

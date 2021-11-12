@@ -16,9 +16,7 @@
 package skills.intTests
 
 import skills.intTests.utils.DefaultIntSpec
-import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
-import spock.lang.IgnoreRest
 
 class AdminBadgesSpecs extends DefaultIntSpec {
 
@@ -151,11 +149,13 @@ class AdminBadgesSpecs extends DefaultIntSpec {
         skillsService.createSkills(skills)
 
         skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge(projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(0).skillId)
+        skillsService.updateBadge(badge, badge.badgeId)  // can only enable after initial creation
 
         when:
         badge = skillsService.getBadge(badge)
         badge.enabled = 'false'
-        skillsService.createBadge(badge)
+        skillsService.updateBadge(badge, badge.badgeId)
 
         then:
         Exception ex = thrown()

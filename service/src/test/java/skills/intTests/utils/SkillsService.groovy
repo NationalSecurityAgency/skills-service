@@ -351,6 +351,14 @@ class SkillsService {
         wsHelper.adminPost(getSkillUrl(props.projectId, props.subjectId, originalSkillId ?: props.skillId), props)
     }
 
+    def syncPointsForSkillsGroup(String projectId, String subjectId, String groupId, Map props) {
+        wsHelper.adminPatch(getSyncSkillPointsUrl(projectId, subjectId, groupId), props)
+    }
+
+    def createSkillsGroup(Map props, String originalGroupId = null) {
+        wsHelper.adminPost(getBadgeUrl(props.projectId, originalGroupId ?: props.groupId), props)
+    }
+
     def createBadge(Map props, String originalBadgeId = null) {
         wsHelper.adminPost(getBadgeUrl(props.projectId, originalBadgeId ?: props.badgeId), props)
     }
@@ -358,6 +366,11 @@ class SkillsService {
     def createGlobalBadge(Map props, String originalBadgeId = null) {
         wsHelper.supervisorPut(getGlobalBadgeUrl(originalBadgeId ?: props.badgeId), props)
     }
+
+    def updateGlobalBadge(Map props, String originalBadgeId = null) {
+        wsHelper.supervisorPut(getGlobalBadgeUrl(originalBadgeId ?: props.badgeId), props)
+    }
+
     def updateBadge(Map props, String originalBadgeId) {
         wsHelper.adminPut(getBadgeUrl(props.projectId, originalBadgeId ?: props.badgeId), props)
     }
@@ -400,6 +413,10 @@ class SkillsService {
 
     def getSkillsForSubject(String projectId, String subjectId) {
         wsHelper.adminGet("/projects/${projectId}/subjects/${subjectId}/skills")
+    }
+
+    def getSkillsForGroup(String projectId, String groupId) {
+        wsHelper.adminGet("/projects/${projectId}/groups/${groupId}/skills")
     }
 
     def getSubject(Map props) {
@@ -542,6 +559,10 @@ class SkillsService {
 
     def assignSkillToBadge(Map props) {
         wsHelper.adminPost(getAddSkillToBadgeUrl(props.projectId, props.badgeId, props.skillId), props)
+    }
+
+    def assignSkillToSkillsGroup(String groupId, Map props) {
+        wsHelper.adminPost(getAddSkillToSkillsGroupUrl(props.projectId, props.subjectId, groupId, props.skillId), props)
     }
 
     def removeSkillFromBadge(Map props) {
@@ -1178,6 +1199,10 @@ class SkillsService {
         }
     }
 
+    private String getSyncSkillPointsUrl(String project, String subject, String groupId) {
+        return "${getSubjectUrl(project, subject)}/groups/${groupId}/skills".toString()
+    }
+
     private String getSkillEventUrl(String project, String skill) {
         // /projects/{projectId}/skills/{skillEventId}
         return "${getProjectUrl(project)}/skills/${skill}".toString()
@@ -1189,6 +1214,10 @@ class SkillsService {
 
     private String getGlobalBadgeUrl(String badge) {
         return "/badges/${badge}".toString()
+    }
+
+    private String getAddSkillToSkillsGroupUrl(String project, String subjectId, String groupId, String skillId) {
+        return "${getProjectUrl(project)}/subjects/${subjectId}/groups/${groupId}/skills/${skillId}".toString()
     }
 
     private String getAddSkillToBadgeUrl(String project, String badge, String skillId) {

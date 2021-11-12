@@ -369,6 +369,104 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
         res[2].href == "http://${proj1_subj2_skills[2].skillId}".toString()
     }
 
+    void "get descriptions for a SkillsGroup"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj1 = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_subj1_skills = SkillsFactory.createSkills(7, 1, 1)
+        def regularSkills = proj1_subj1_skills.subList(0, 3)
+        def skillsGroup = proj1_subj1_skills[3]
+        skillsGroup.type = 'SkillsGroup'
+        def childSkills = proj1_subj1_skills.subList(4, 7)
+
+        proj1_subj1_skills.each {
+            it.description = "Desc [${it.skillId}]".toString()
+            it.helpUrl = "http://${it.skillId}".toString()
+        }
+
+        proj1_subj1_skills[1].description = null
+        proj1_subj1_skills[5].description = null
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj1)
+        skillsService.createSkills(regularSkills)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        childSkills.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+        skillsGroup.enabled = 'true'
+        skillsService.updateSkill(skillsGroup, null)
+
+        when:
+        def res = skillsService.getSubjectDescriptions(proj1.projectId, proj1_subj1.subjectId).sort { it.skillId }
+
+        then:
+        res.size() == 7
+
+        res[0].description == "Desc [${proj1_subj1_skills[0].skillId}]".toString()
+        res[0].href == "http://${proj1_subj1_skills[0].skillId}".toString()
+
+        !res[1].description
+        res[1].href == "http://${proj1_subj1_skills[1].skillId}".toString()
+
+        res[2].description == "Desc [${proj1_subj1_skills[2].skillId}]".toString()
+        res[2].href == "http://${proj1_subj1_skills[2].skillId}".toString()
+
+        res[3].description == "Desc [${proj1_subj1_skills[3].skillId}]".toString()
+        res[3].href == "http://${proj1_subj1_skills[3].skillId}".toString()
+
+        res[4].description == "Desc [${proj1_subj1_skills[4].skillId}]".toString()
+        res[4].href == "http://${proj1_subj1_skills[4].skillId}".toString()
+
+        !res[5].description
+        res[5].href == "http://${proj1_subj1_skills[5].skillId}".toString()
+
+        res[6].description == "Desc [${proj1_subj1_skills[6].skillId}]".toString()
+        res[6].href == "http://${proj1_subj1_skills[6].skillId}".toString()
+    }
+
+    void "disabled SkillsGroup's descriptions are not included"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj1 = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_subj1_skills = SkillsFactory.createSkills(7, 1, 1)
+        def regularSkills = proj1_subj1_skills.subList(0, 3)
+        def skillsGroup = proj1_subj1_skills[3]
+        skillsGroup.type = 'SkillsGroup'
+        skillsGroup.enabled = 'false'
+        def childSkills = proj1_subj1_skills.subList(4, 7)
+
+        proj1_subj1_skills.each {
+            it.description = "Desc [${it.skillId}]".toString()
+            it.helpUrl = "http://${it.skillId}".toString()
+        }
+
+        proj1_subj1_skills[1].description = null
+        proj1_subj1_skills[5].description = null
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj1)
+        skillsService.createSkills(regularSkills)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        childSkills.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+
+        when:
+        def res = skillsService.getSubjectDescriptions(proj1.projectId, proj1_subj1.subjectId).sort { it.skillId }
+
+        then:
+        res.size() == 3
+
+        res[0].description == "Desc [${proj1_subj1_skills[0].skillId}]".toString()
+        res[0].href == "http://${proj1_subj1_skills[0].skillId}".toString()
+
+        !res[1].description
+        res[1].href == "http://${proj1_subj1_skills[1].skillId}".toString()
+
+        res[2].description == "Desc [${proj1_subj1_skills[2].skillId}]".toString()
+        res[2].href == "http://${proj1_subj1_skills[2].skillId}".toString()
+    }
 
     void "badge's skills have no descriptions"(){
         def proj1 = SkillsFactory.createProject(1)

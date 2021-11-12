@@ -47,6 +47,8 @@ class ReportSkills_AchievementsSpecs extends DefaultIntSpec {
         skillsService.createSkills(skills)
         skillsService.createBadge(badge)
         skillsService.assignSkillToBadge(proj.projectId, badge.badgeId, skills[0].skillId)
+        badge.enabled  = 'true'
+        skillsService.updateBadge(badge, badge.badgeId)
 
         Date date = new Date() - 60
         when:
@@ -226,6 +228,8 @@ class ReportSkills_AchievementsSpecs extends DefaultIntSpec {
         skillsService.createBadge(badge)
         skillsService.assignSkillToBadge(proj.projectId, badge.badgeId, skills[0].skillId)
         skillsService.assignSkillToBadge(proj.projectId, badge.badgeId, skills[1].skillId)
+        badge.enabled  = 'true'
+        skillsService.updateBadge(badge, badge.badgeId)
 
         Date date1 = new Date() - 60
         Date date2 = new Date() - 30

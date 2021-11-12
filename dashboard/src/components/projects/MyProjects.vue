@@ -198,14 +198,18 @@ limitations under the License.
           const self = this;
           this.$nextTick(() => {
             const cards = document.getElementById('projectCards');
-            Sortable.create(cards, {
-              handle: '.sort-control',
-              animation: 150,
-              ghostClass: 'skills-sort-order-ghost-class',
-              onUpdate(event) {
-                self.sortOrderUpdate(event);
-              },
-            });
+            // need to check for null because this logic is within nextTick method
+            // an may actually run after the user moved onto another page
+            if (cards) {
+              Sortable.create(cards, {
+                handle: '.sort-control',
+                animation: 150,
+                ghostClass: 'skills-sort-order-ghost-class',
+                onUpdate(event) {
+                  self.sortOrderUpdate(event);
+                },
+              });
+            }
           });
         }
       },

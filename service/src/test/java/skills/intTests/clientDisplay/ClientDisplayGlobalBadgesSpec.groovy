@@ -65,6 +65,8 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         supervisorSkillsService.createGlobalBadge(badge)
         supervisorSkillsService.assignProjectLevelToGlobalBadge(projectId: projId, badgeId: badge.badgeId, level: "3")
         supervisorSkillsService.assignSkillToGlobalBadge(projectId: projId, badgeId: badge.badgeId, skillId: proj1_skills.get(0).skillId)
+        badge.enabled  = 'true'
+        supervisorSkillsService.updateGlobalBadge(badge, badge.badgeId)
 
         when:
         def summaries = skillsService.getBadgesSummary(userId, projId)
@@ -100,6 +102,8 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         Map badge = [badgeId: globalBadgeId, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
         supervisorSkillsService.createGlobalBadge(badge)
         supervisorSkillsService.assignSkillToGlobalBadge(projectId: projId, badgeId: badge.badgeId, skillId: proj1_skills.get(0).skillId)
+        badge.enabled  = 'true'
+        supervisorSkillsService.updateGlobalBadge(badge, badge.badgeId)
 
         skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], userId, new Date())
 
@@ -479,6 +483,9 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         supervisorSkillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: globalBadgeId, skillId: proj1_skills.get(0).skillId])
         supervisorSkillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: globalBadgeId, skillId: proj1_skills.get(1).skillId])
 
+        badge.enabled  = 'true'
+        supervisorSkillsService.updateGlobalBadge(badge, badge.badgeId)
+
         when:
         def summary = skillsService.getSkillSummary(userId, proj1.projectId)
         then:
@@ -505,6 +512,8 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
 
         supervisorSkillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: globalBadgeId, skillId: proj1_skills.get(0).skillId])
         supervisorSkillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: globalBadgeId, skillId: proj1_skills.get(1).skillId])
+        badge.enabled  = 'true'
+        supervisorSkillsService.updateGlobalBadge(badge, badge.badgeId)
 
         skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], userId, new Date())
         def res = skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(1).skillId], userId, new Date())

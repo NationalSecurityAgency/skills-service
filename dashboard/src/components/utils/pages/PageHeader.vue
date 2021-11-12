@@ -22,7 +22,7 @@ limitations under the License.
           <div class="row">
             <div :class="titleCss">
               <h3><i v-if="options.icon" class="has-text-link" :class="options.icon"/> {{ options.title }}<slot name="right-of-header"></slot></h3>
-              <div class="h5 text-muted">{{ options.subTitle }}</div>
+              <slot name="subTitle"><div class="h5 text-muted">{{ options.subTitle }}</div></slot>
               <slot name="subSubTitle"></slot>
             </div>
             <div :class="statcsCss">
@@ -33,7 +33,7 @@ limitations under the License.
                       <div class="d-flex flex-row">
                         <div class="text-left mr-auto" :data-cy="`pageHeaderStat_${stat.label}`">
                           <div class="h5 card-title text-uppercase text-muted mb-0 small">{{stat.label}}</div>
-                          <span class="h5 font-weight-bold mb-0">{{ stat.count | number}}</span>
+                          <span class="h5 font-weight-bold mb-0" data-cy="statValue">{{ stat.count | number}}</span>
                           <span v-if="stat.warnMsg" class="ml-1">
                             <i class="fa fa-exclamation-circle text-warning" v-b-tooltip.hover="stat.warnMsg"/>
                           </span>

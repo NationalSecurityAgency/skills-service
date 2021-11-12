@@ -620,6 +620,8 @@ class MyProgressSpec extends DefaultIntSpec {
                 skillsService.createBadge(badge)
                 skillsService.assignSkillToBadge([projectId: project.projectId, badgeId: badge.badgeId, skillId: skillsForProj[it].skillId])
                 skills.add(skillsForProj[it])
+                badge.enabled  = 'true'
+                skillsService.updateBadge(badge, badge.badgeId)
             }
 
             return project
@@ -672,6 +674,8 @@ class MyProgressSpec extends DefaultIntSpec {
                 skillsService.createBadge(badge)
                 skillsService.assignSkillToBadge([projectId: project.projectId, badgeId: badge.badgeId, skillId: skillsForProj[it].skillId])
                 skills.add(skillsForProj[it])
+                badge.enabled  = 'true'
+                skillsService.updateBadge(badge, badge.badgeId)
             }
 
             return project
@@ -724,6 +728,8 @@ class MyProgressSpec extends DefaultIntSpec {
                 skillsService.createBadge(gem1)
                 skillsService.assignSkillToBadge([projectId: project.projectId, badgeId: gem1.badgeId, skillId: skillsForProj[it].skillId])
                 skills.add(skillsForProj[it])
+                gem1.enabled  = 'true'
+                skillsService.updateBadge(gem1, gem1.badgeId)
             }
 
             return project
@@ -778,6 +784,8 @@ class MyProgressSpec extends DefaultIntSpec {
                 skillsService.createBadge(gem1)
                 skillsService.assignSkillToBadge([projectId: project.projectId, badgeId: gem1.badgeId, skillId: skillsForProj[it].skillId])
                 skills.add(skillsForProj[it])
+                gem1.enabled  = 'true'
+                skillsService.updateBadge(gem1, gem1.badgeId)
             }
 
             return project
@@ -827,6 +835,8 @@ class MyProgressSpec extends DefaultIntSpec {
                 supervisorService.createGlobalBadge(globalBadge)
                 supervisorService.assignSkillToGlobalBadge(projectId: project.projectId, badgeId: globalBadge.badgeId, skillId: skillsForProj[it].skillId)
                 skills.add(skillsForProj[it])
+                globalBadge.enabled  = 'true'
+                supervisorService.updateGlobalBadge(globalBadge, globalBadge.badgeId)
             }
             return project
         }

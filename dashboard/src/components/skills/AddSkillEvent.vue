@@ -64,6 +64,7 @@ limitations under the License.
 
 <script>
   import Datepicker from 'vuejs-datepicker';
+  import { createNamespacedHelpers } from 'vuex';
   import ExistingUserInput from '../utils/ExistingUserInput';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import SimpleCard from '../utils/cards/SimpleCard';
@@ -72,6 +73,7 @@ limitations under the License.
   import NavigationErrorMixin from '../utils/NavigationErrorMixin';
 
   const disabledDates = (date) => date > new Date();
+  const skills = createNamespacedHelpers('skills');
 
   const datePickerState = {
     disabledDates: {
@@ -113,6 +115,9 @@ limitations under the License.
       this.pkiAuthenticated = this.$store.getters.isPkiAuthenticated;
     },
     computed: {
+      ...skills.mapGetters([
+        'skill',
+      ]),
       reversedUsersAdded: function reversedUsersAdded() {
         return this.usersAdded.map((e) => e)
           .reverse();
@@ -124,11 +129,16 @@ limitations under the License.
         return this.$store.getters.config.minimumSubjectPoints;
       },
       disable() {
-        return (!this.currentSelectedUser || !this.currentSelectedUser.userId || this.currentSelectedUser.userId.length === 0) || this.projectTotalPoints < this.minimumPoints;
+        return (!this.currentSelectedUser || !this.currentSelectedUser.userId || this.currentSelectedUser.userId.length === 0)
+          || this.projectTotalPoints < this.minimumPoints
+          || (this.skill?.groupId && !this.skill?.enabled);
       },
       minPointsTooltip() {
         let text = '';
-        if (this.projectTotalPoints < this.minimumPoints) {
+
+        if (this.skill?.groupId && !this.skill?.enabled) {
+          text = 'Unable to add skill for user. This skill belongs to a group whose current status is disabled';
+        } else if (this.projectTotalPoints < this.minimumPoints) {
           text = 'Unable to add skill for user. Insufficient available points in project.';
         }
         return text;

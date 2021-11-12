@@ -31,6 +31,7 @@ class SubjectResult {
     String description
 
     int numSkills
+    int numGroups
     int numUsers
     int pointsPercentage
 

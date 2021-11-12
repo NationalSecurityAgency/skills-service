@@ -76,4 +76,8 @@ class SkillDefParent {
     Date updated
 
     String enabled
+
+    // only applies when type == SkillsGroup
+    int numSkillsRequired = -1
+    String groupId
 }

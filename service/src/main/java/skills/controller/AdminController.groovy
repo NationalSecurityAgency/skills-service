@@ -36,6 +36,8 @@ import skills.services.admin.*
 import skills.services.inception.InceptionProjectService
 import skills.services.settings.SettingsService
 import skills.services.settings.listeners.ValidationRes
+import skills.storage.model.SkillDef
+import skills.storage.model.SkillRelDef
 import skills.utils.ClientSecretGenerator
 import skills.utils.InputSanitizer
 
@@ -80,6 +82,9 @@ class AdminController {
 
     @Autowired
     SkillsAdminService skillsAdminService
+
+    @Autowired
+    SkillsGroupAdminService skillsGroupAdminService
 
     @Autowired
     SkillsDepsService skillsDepsService
@@ -379,6 +384,15 @@ class AdminController {
         return skillsAdminService.getSkills(projectId, subjectId)
     }
 
+    @RequestMapping(value = "/projects/{projectId}/groups/{groupId}/skills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    List<SkillDefPartialRes> getSkillsForSkillsGroup(
+            @PathVariable("projectId") String projectId, @PathVariable("groupId") String groupId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(groupId, "Skills Group Id", projectId)
+
+        return skillsAdminService.getSkillsByProjectSkillAndType(projectId, groupId, SkillDef.ContainerType.SkillsGroup, SkillRelDef.RelationshipType.SkillsGroupRequirement)
+    }
+
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/skills/{skillId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     SkillDefRes getSkill(
@@ -388,8 +402,7 @@ class AdminController {
         SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
 
-        return skillsAdminService
-                .getSkill(projectId, subjectId, skillId)
+        return skillsAdminService.getSkill(projectId, subjectId, skillId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/skills/{skillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
@@ -399,6 +412,39 @@ class AdminController {
                             @PathVariable("skillId") String skillId,
                             @RequestBody SkillRequest skillRequest) {
 
+        validateAndSaveSkill(projectId, subjectId, skillId, skillRequest)
+        return new RequestResult(success: true)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/groups/{groupId}/skills", method = RequestMethod.PATCH)
+    @ResponseBody
+    RequestResult syncSkillPointsForSkillsGroup(@PathVariable("projectId") String projectId,
+                                                @PathVariable("subjectId") String subjectId,
+                                                @PathVariable("groupId") String groupId,
+                                                @RequestBody PointSyncPatchRequest patchRequest) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId, groupId)
+        SkillsValidator.isNotBlank(groupId, "Group Id", projectId)
+        SkillsValidator.isNotNull(patchRequest.pointIncrement, "pointIncrement must be provided", projectId, groupId)
+        SkillsValidator.isNotNull(patchRequest.numPerformToCompletion, "numPerformToCompletion must be provided", projectId, groupId)
+
+        skillsAdminService.syncSkillPointsForSkillsGroup(projectId, subjectId, groupId, patchRequest)
+        return new RequestResult(success: true)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/groups/{groupId}/skills/{skillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    RequestResult saveSkillAndAssignToSkillsGroup(@PathVariable("projectId") String projectId,
+                                                  @PathVariable("subjectId") String subjectId,
+                                                  @PathVariable("groupId") String groupId,
+                                                  @PathVariable("skillId") String skillId,
+                                                  @RequestBody SkillRequest skillRequest) {
+        SkillsValidator.isNotBlank(groupId, "Skills Group Id", projectId)
+        validateAndSaveSkill(projectId, subjectId, skillId, skillRequest, groupId)
+        return new RequestResult(success: true)
+    }
+
+    private void validateAndSaveSkill(String projectId, String subjectId, String skillId, SkillRequest skillRequest, String groupId=null) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
@@ -410,41 +456,43 @@ class AdminController {
         skillRequest.subjectId = skillRequest.subjectId ?: subjectId
         skillRequest.skillId = skillRequest.skillId ?: skillId
 
-        SkillsValidator.isTrue(skillRequest.pointIncrement > 0, "pointIncrement must be > 0", projectId, skillId)
-        propsBasedValidator.validateMaxIntValue(PublicProps.UiProp.maxPointIncrement, "pointIncrement", skillRequest.pointIncrement)
-
-        SkillsValidator.isTrue(skillRequest.pointIncrementInterval >= 0, "pointIncrementInterval must be >= 0", projectId, skillId)
-        SkillsValidator.isTrue(skillRequest.pointIncrementInterval <= maxTimeWindowInMinutes, "pointIncrementInterval must be <= $maxTimeWindowInMinutes", projectId, skillId)
-        SkillsValidator.isTrue(skillRequest.numPerformToCompletion > 0, "numPerformToCompletion must be > 0", projectId, skillId)
-        propsBasedValidator.validateMaxIntValue(PublicProps.UiProp.maxNumPerformToCompletion, "numPerformToCompletion", skillRequest.numPerformToCompletion)
-
-        if ( skillRequest.pointIncrementInterval > 0) {
-            // if pointIncrementInterval is disabled then this validation is not needed
-            SkillsValidator.isTrue(skillRequest.numMaxOccurrencesIncrementInterval > 0, "numMaxOccurrencesIncrementInterval must be > 0", projectId, skillId)
-            SkillsValidator.isTrue(skillRequest.numPerformToCompletion >= skillRequest.numMaxOccurrencesIncrementInterval, "numPerformToCompletion must be >= numMaxOccurrencesIncrementInterval", projectId, skillId)
-            propsBasedValidator.validateMaxIntValue(PublicProps.UiProp.maxNumPointIncrementMaxOccurrences, "numMaxOccurrencesIncrementInterval", skillRequest.numMaxOccurrencesIncrementInterval)
-        }
-
-        SkillsValidator.isTrue(skillRequest.version >= 0, "version must be >= 0", projectId, skillId)
-        propsBasedValidator.validateMaxIntValue(PublicProps.UiProp.maxSkillVersion, "Skill Version", skillRequest.version)
-
         IdFormatValidator.validate(skillRequest.skillId)
         propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxIdLength, "Skill Id", skillRequest.skillId)
         propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minIdLength, "Skill Id", skillRequest.skillId)
 
         propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxSkillNameLength, "Skill Name", skillRequest.name)
         propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minNameLength, "Skill Name", skillRequest.name)
-        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.descriptionMaxLength, "Skill Description", skillRequest.description)
 
         skillRequest.name = InputSanitizer.sanitize(skillRequest.name)
         skillRequest.projectId = InputSanitizer.sanitize(skillRequest.projectId)
         skillRequest.skillId = InputSanitizer.sanitize(skillRequest.skillId)
-        skillRequest.description = InputSanitizer.sanitize(skillRequest.description)
         skillRequest.subjectId = InputSanitizer.sanitize(skillRequest.subjectId)
-        skillRequest.helpUrl = InputSanitizer.sanitizeUrl(skillRequest.helpUrl)
 
-        skillsAdminService.saveSkill(skillId, skillRequest)
-        return new RequestResult(success: true)
+        if (skillRequest.type == SkillDef.ContainerType.Skill.toString()) {
+            SkillsValidator.isTrue(skillRequest.pointIncrement > 0, "pointIncrement must be > 0", projectId, skillId)
+            propsBasedValidator.validateMaxIntValue(PublicProps.UiProp.maxPointIncrement, "pointIncrement", skillRequest.pointIncrement)
+
+            SkillsValidator.isTrue(skillRequest.pointIncrementInterval >= 0, "pointIncrementInterval must be >= 0", projectId, skillId)
+            SkillsValidator.isTrue(skillRequest.pointIncrementInterval <= maxTimeWindowInMinutes, "pointIncrementInterval must be <= $maxTimeWindowInMinutes", projectId, skillId)
+            SkillsValidator.isTrue(skillRequest.numPerformToCompletion > 0, "numPerformToCompletion must be > 0", projectId, skillId)
+            propsBasedValidator.validateMaxIntValue(PublicProps.UiProp.maxNumPerformToCompletion, "numPerformToCompletion", skillRequest.numPerformToCompletion)
+
+            if (skillRequest.pointIncrementInterval > 0) {
+                // if pointIncrementInterval is disabled then this validation is not needed
+                SkillsValidator.isTrue(skillRequest.numMaxOccurrencesIncrementInterval > 0, "numMaxOccurrencesIncrementInterval must be > 0", projectId, skillId)
+                SkillsValidator.isTrue(skillRequest.numPerformToCompletion >= skillRequest.numMaxOccurrencesIncrementInterval, "numPerformToCompletion must be >= numMaxOccurrencesIncrementInterval", projectId, skillId)
+                propsBasedValidator.validateMaxIntValue(PublicProps.UiProp.maxNumPointIncrementMaxOccurrences, "numMaxOccurrencesIncrementInterval", skillRequest.numMaxOccurrencesIncrementInterval)
+            }
+
+            SkillsValidator.isTrue(skillRequest.version >= 0, "version must be >= 0", projectId, skillId)
+            propsBasedValidator.validateMaxIntValue(PublicProps.UiProp.maxSkillVersion, "Skill Version", skillRequest.version)
+
+            propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.descriptionMaxLength, "Skill Description", skillRequest.description)
+            skillRequest.description = InputSanitizer.sanitize(skillRequest.description)
+            skillRequest.helpUrl = InputSanitizer.sanitizeUrl(skillRequest.helpUrl)
+        }
+
+        skillsAdminService.saveSkill(skillId, skillRequest, true, groupId)
     }
 
     @GetMapping(value = '/projects/{projectId}/latestVersion', produces = 'application/json')

@@ -549,7 +549,7 @@ describe('Skills Tests', () => {
     cy.get('[aria-label="new skill"]').should('have.focus');
   });
 
-  it('focus should be returned to subject edit button', () => {
+  it('focus should be returned to skill edit button', () => {
 
     cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
       projectId: 'proj1',

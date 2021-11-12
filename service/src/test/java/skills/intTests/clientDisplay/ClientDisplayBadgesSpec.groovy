@@ -48,8 +48,12 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         skillsService.createSkills(proj1_skills)
 
         String badge1 = "badge1"
-        skillsService.addBadge([projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",])
+        Map badge = [projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
+        skillsService.addBadge(badge)
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: proj1_skills.get(0).skillId])
+
+        badge.enabled  = 'true'
+        skillsService.updateBadge(badge, badge.badgeId)
 
         when:
         def summaries = skillsService.getBadgesSummary(userId, proj1.projectId)
@@ -80,10 +84,13 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         Date oneWeekAgo = new Date()-7
         Date twoWeeksAgo = new Date()-14
         String badge1 = "badge1"
-        skillsService.addBadge([projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1',
-                                startDate: twoWeeksAgo, endDate: oneWeekAgo,
-                                description: 'This is a first badge', iconClass: "fa fa-seleted-icon",])
+        Map badge = [projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1',
+                     startDate: twoWeeksAgo, endDate: oneWeekAgo,
+                     description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
+        skillsService.addBadge(badge)
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: proj1_skills.get(0).skillId])
+        badge.enabled  = 'true'
+        skillsService.updateBadge(badge, badge.badgeId)
 
         when:
         def summaries = skillsService.getBadgesSummary(userId, proj1.projectId)
@@ -115,8 +122,11 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         skillsService.createSkills(proj1_skills)
 
         String badge1 = "badge1"
-        skillsService.addBadge([projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon", helpUrl: "http://foo.org"])
+        Map badge = [projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon", helpUrl: "http://foo.org"]
+        skillsService.addBadge(badge)
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: proj1_skills.get(0).skillId])
+        badge.enabled  = 'true'
+        skillsService.updateBadge(badge, badge.badgeId)
         skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], userId, new Date())
 
         when:
@@ -150,12 +160,16 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         skillsService.createSkills(proj1_skills)
 
         List<String> badgeIds = (1..3).collect({ "badge${it}".toString()})
+        List badges = []
         badgeIds.each {
-            skillsService.addBadge([projectId: proj1.projectId, badgeId: it, name: it, description: "This is ${it}".toString(), iconClass: "fa fa-${it}".toString()])
+            Map badge = [projectId: proj1.projectId, badgeId: it, name: it, description: "This is ${it}".toString(), iconClass: "fa fa-${it}".toString(), enabled: 'true']
+            badges << badge
+            skillsService.addBadge(badge)
         }
 
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badgeIds.get(0), skillId: proj1_skills.get(0).skillId])
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badgeIds.get(0), skillId: proj1_skills.get(1).skillId])
+        skillsService.updateBadge(badges[0], badgeIds.get(0))  // can only enable after initial creation
         skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], userId, new Date())
 
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badgeIds.get(2), skillId: proj1_skills.get(0).skillId])
@@ -163,28 +177,23 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badgeIds.get(2), skillId: proj1_skills.get(2).skillId])
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badgeIds.get(2), skillId: proj1_skills.get(3).skillId])
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badgeIds.get(2), skillId: proj1_skills.get(4).skillId])
+        skillsService.updateBadge(badges[2], badgeIds.get(2))
 
         when:
         def summaries = skillsService.getBadgesSummary(userId, proj1.projectId)
         then:
-        summaries.size() == 3
+        summaries.size() == 2
         summaries.get(0).badge == "badge1"
         summaries.get(0).badgeId == "badge1"
         summaries.get(0).iconClass == "fa fa-badge1"
         summaries.get(0).numSkillsAchieved == 1
         summaries.get(0).numTotalSkills == 2
 
-        summaries.get(1).badge == "badge2"
-        summaries.get(1).badgeId == "badge2"
-        summaries.get(1).iconClass == "fa fa-badge2"
-        summaries.get(1).numSkillsAchieved == 0
-        summaries.get(1).numTotalSkills == 0
-
-        summaries.get(2).badge == "badge3"
-        summaries.get(2).badgeId == "badge3"
-        summaries.get(2).iconClass == "fa fa-badge3"
-        summaries.get(2).numSkillsAchieved == 1
-        summaries.get(2).numTotalSkills == 5
+        summaries.get(1).badge == "badge3"
+        summaries.get(1).badgeId == "badge3"
+        summaries.get(1).iconClass == "fa fa-badge3"
+        summaries.get(1).numSkillsAchieved == 1
+        summaries.get(1).numTotalSkills == 5
     }
 
     def "single badge summary"() {
@@ -199,8 +208,11 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         skillsService.createSkills(proj1_skills)
 
         String badge1 = "badge1"
-        skillsService.addBadge([projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",])
+        Map badge = [projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
+        skillsService.addBadge(badge)
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: proj1_skills.get(0).skillId])
+        badge.enabled  = 'true'
+        skillsService.updateBadge(badge, badge.badgeId)
 
         when:
         def summary = skillsService.getBadgeSummary(userId, proj1.projectId, badge1)
@@ -241,10 +253,13 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         Date oneWeekAgo = new Date()-7
         Date twoWeeksAgo = new Date()-14
         String badge1 = "badge1"
-        skillsService.addBadge([projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1',
-                                startDate: twoWeeksAgo, endDate: oneWeekAgo,
-                                description: 'This is a first badge', iconClass: "fa fa-seleted-icon",])
+        Map badge = [projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1',
+                     startDate: twoWeeksAgo, endDate: oneWeekAgo,
+                     description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
+        skillsService.addBadge(badge)
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: proj1_skills.get(0).skillId])
+        badge.enabled  = 'true'
+        skillsService.updateBadge(badge, badge.badgeId)
 
         when:
         def summary = skillsService.getBadgeSummary(userId, proj1.projectId, badge1)
@@ -286,10 +301,13 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         skillsService.createSkills(proj1_skills)
 
         String badge1 = "badge1"
-        skillsService.addBadge([projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",])
+        Map badge = [projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
+        skillsService.addBadge(badge)
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: proj1_skills.get(0).skillId])
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: proj1_skills.get(1).skillId])
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: proj1_skills.get(2).skillId])
+        badge.enabled  = 'true'
+        skillsService.updateBadge(badge, badge.badgeId)
 
         skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], userId, new Date())
 
@@ -339,9 +357,12 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         skillsService.createSkills(proj1_skills)
 
         String badge1 = "badge1"
-        skillsService.addBadge([projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",])
+        Map badge = [projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
+        skillsService.addBadge(badge)
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: proj1_skills.get(0).skillId])
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: proj1_skills.get(1).skillId])
+        badge.enabled  = 'true'
+        skillsService.updateBadge(badge, badge.badgeId)
 
         skillsService.assignDependency([projectId: proj1.projectId, skillId: proj1_skills.get(1).skillId, dependentSkillId: proj1_skills.get(2).skillId])
         skillsService.assignDependency([projectId: proj1.projectId, skillId: proj1_skills.get(1).skillId, dependentSkillId: proj1_skills.get(3).skillId])
@@ -378,9 +399,12 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         skillsService.createSkills(proj1_skills)
 
         String badge1 = "badge1"
-        skillsService.addBadge([projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",])
+        Map badge = [projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
+        skillsService.addBadge(badge)
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: proj1_skills.get(0).skillId])
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: proj1_skills.get(1).skillId])
+        badge.enabled  = 'true'
+        skillsService.updateBadge(badge, badge.badgeId)
 
         skillsService.assignDependency([projectId: proj1.projectId, skillId: proj1_skills.get(1).skillId, dependentSkillId: proj1_skills.get(2).skillId])
         skillsService.assignDependency([projectId: proj1.projectId, skillId: proj1_skills.get(1).skillId, dependentSkillId: proj1_skills.get(3).skillId])
@@ -415,9 +439,12 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         skillsService.createSkills(proj1_skills)
 
         String badge1 = "badge1"
-        skillsService.addBadge([projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",])
+        Map badge = [projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
+        skillsService.addBadge(badge)
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: proj1_skills.get(0).skillId])
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: proj1_skills.get(1).skillId])
+        badge.enabled  = 'true'
+        skillsService.updateBadge(badge, badge.badgeId)
 
         when:
         def summary = skillsService.getSkillSummary(userId, proj1.projectId)
@@ -441,9 +468,12 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         skillsService.createSkills(proj1_skills)
 
         String badge1 = "badge1"
-        skillsService.addBadge([projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",])
+        Map badge = [projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
+        skillsService.addBadge(badge)
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: proj1_skills.get(0).skillId])
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: proj1_skills.get(1).skillId])
+        badge.enabled  = 'true'
+        skillsService.updateBadge(badge, badge.badgeId)
 
         skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], userId, new Date())
         skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(1).skillId], userId, new Date())
@@ -487,8 +517,11 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         skillsService.createSkills(proj1_skills)
 
         List<String> badgeIds = (1..3).collect({ "badge${it}".toString()})
+        List badges = []
         badgeIds.each {
-            skillsService.addBadge([projectId: proj1.projectId, badgeId: it, name: it, description: "This is ${it}".toString(), iconClass: "fa fa-${it}".toString()])
+            Map badge = [projectId: proj1.projectId, badgeId: it, name: it, description: "This is ${it}".toString(), iconClass: "fa fa-${it}".toString(), enabled: 'true']
+            badges << badge
+            skillsService.addBadge(badge)
         }
 
         skillsService.changeBadgeDisplayOrder([projectId: proj1.projectId, badgeId: badgeIds[0]], 1)
@@ -497,6 +530,7 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
 
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badgeIds.get(0), skillId: proj1_skills.get(0).skillId])
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badgeIds.get(0), skillId: proj1_skills.get(1).skillId])
+        skillsService.updateBadge(badges[0], badgeIds.get(0))  // can only enable after initial badge creation
         skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], userId, new Date())
 
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badgeIds.get(2), skillId: proj1_skills.get(0).skillId])
@@ -504,22 +538,17 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badgeIds.get(2), skillId: proj1_skills.get(2).skillId])
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badgeIds.get(2), skillId: proj1_skills.get(3).skillId])
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badgeIds.get(2), skillId: proj1_skills.get(4).skillId])
+        skillsService.updateBadge(badges[2], badgeIds.get(2))
 
         when:
         def summaries = skillsService.getBadgesSummary(userId, proj1.projectId)
         then:
-        summaries.size() == 3
-        summaries.get(2).badge == "badge1"
-        summaries.get(2).badgeId == "badge1"
-        summaries.get(2).iconClass == "fa fa-badge1"
-        summaries.get(2).numSkillsAchieved == 1
-        summaries.get(2).numTotalSkills == 2
-
-        summaries.get(1).badge == "badge2"
-        summaries.get(1).badgeId == "badge2"
-        summaries.get(1).iconClass == "fa fa-badge2"
-        summaries.get(1).numSkillsAchieved == 0
-        summaries.get(1).numTotalSkills == 0
+        summaries.size() == 2
+        summaries.get(1).badge == "badge1"
+        summaries.get(1).badgeId == "badge1"
+        summaries.get(1).iconClass == "fa fa-badge1"
+        summaries.get(1).numSkillsAchieved == 1
+        summaries.get(1).numTotalSkills == 2
 
         summaries.get(0).badge == "badge3"
         summaries.get(0).badgeId == "badge3"
@@ -543,8 +572,11 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         skillsService.createSubject(proj1_subj)
         skillsService.createSkills(proj1_skills)
 
-        skillsService.addBadge([projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",])
+        Map badge = [projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
+        skillsService.addBadge(badge)
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: proj1_skills.get(0).skillId])
+        badge.enabled  = 'true'
+        skillsService.updateBadge(badge, badge.badgeId)
 
         // proj2
         def proj2 = SkillsFactory.createProject(2)
@@ -556,14 +588,19 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         skillsService.createSubject(proj2_subj)
         skillsService.createSkills(proj2_skills)
 
-        skillsService.addBadge([projectId: proj2.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",])
+        Map badge2 = [projectId: proj2.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
+        skillsService.addBadge(badge2)
         skillsService.assignSkillToBadge([projectId: proj2.projectId, badgeId: badge1, skillId: proj2_skills.get(0).skillId])
+        badge2.enabled  = 'true'
+        skillsService.updateBadge(badge2, badge2.badgeId)
 
         // global badge
-        Map badge = [badgeId: "globalBadge", name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon"]
-        badge.helpUrl = "http://foo.org"
-        supervisorSkillsService.createGlobalBadge(badge)
-        supervisorSkillsService.assignSkillToGlobalBadge(projectId: proj1.projectId, badgeId: badge.badgeId, skillId: proj1_skills.get(0).skillId)
+        Map globalBadge = [badgeId: "globalBadge", name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon"]
+        globalBadge.helpUrl = "http://foo.org"
+        supervisorSkillsService.createGlobalBadge(globalBadge)
+        supervisorSkillsService.assignSkillToGlobalBadge(projectId: proj1.projectId, badgeId: globalBadge.badgeId, skillId: proj1_skills.get(0).skillId)
+        globalBadge.enabled = 'true'
+        supervisorSkillsService.updateGlobalBadge(globalBadge)
 
         // add skill
         skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], userId, new Date())
@@ -624,10 +661,13 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         skillsService.createSkills(proj1_skills)
 
         String badge1 = "badge1"
-        skillsService.addBadge([projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",])
+        Map badge = [projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
+        skillsService.addBadge(badge)
 
         proj1_skills.each {
             skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: it.skillId])
+            badge.enabled  = 'true'
+            skillsService.updateBadge(badge, badge.badgeId)
         }
 
         when:

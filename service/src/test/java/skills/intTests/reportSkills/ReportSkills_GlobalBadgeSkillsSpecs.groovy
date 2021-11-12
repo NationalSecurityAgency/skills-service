@@ -73,6 +73,8 @@ class ReportSkills_GlobalBadgeSkillsSpecs extends DefaultIntSpec {
         requiredSkillsIds.each { skillId ->
             skillsService.assignSkillToGlobalBadge(projectId: projId, badgeId: badge.badgeId, skillId: skillId)
         }
+        badge.enabled = 'true'
+        skillsService.updateGlobalBadge(badge)
 
         DateTime dt = new DateTime().minusDays(4)
 

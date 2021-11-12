@@ -16,8 +16,31 @@ limitations under the License.
 <template>
   <div>
     <loading-container v-bind:is-loading="isLoading">
-      <skills-table :skills-prop="skills" :is-top-level="true" :project-id="this.$route.params.projectId" :subject-id="this.$route.params.subjectId" v-on:skills-change="skillsChanged"/>
+      <sub-page-header ref="subPageHeader" title="Skills"
+                       :disabled="addSkillDisabled" :disabled-msg="addSkillsDisabledMsg" aria-label="new skill">
+        <b-button id="newGroupBtn" ref="newGroupButton" @click="newGroup" variant="outline-primary" size="sm"
+                  aria-label="new skills group"
+                  data-cy="newGroupButton">
+          <span class="">Group</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
+        </b-button>
+        <b-button id="newSkillBtn" ref="newSkillButton" @click="newSkill" variant="outline-primary" size="sm"
+                  aria-label="new skill"
+                  data-cy="newSkillButton" class="ml-1">
+          <span class="">Skill</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
+        </b-button>
+      </sub-page-header>
+
+      <b-card body-class="p-0">
+        <skills-table ref="skillsTable"
+          :skills-prop="skills" :is-top-level="true" :project-id="this.$route.params.projectId" :subject-id="this.$route.params.subjectId" v-on:skills-change="skillsChanged"/>
+      </b-card>
     </loading-container>
+
+    <edit-skill v-if="editSkillInfo.show" v-model="editSkillInfo.show" :skillId="editSkillInfo.skill.skillId" :is-copy="editSkillInfo.isCopy" :is-edit="editSkillInfo.isEdit"
+                :project-id="projectId" :subject-id="subjectId" @skill-saved="skillCreatedOrUpdated" @hidden="focusOnNewSkillButton"/>
+
+    <edit-skill-group v-if="editGroupInfo.show" v-model="editGroupInfo.show" :group="editGroupInfo.group" :is-edit="false"
+                      @group-saved="skillCreatedOrUpdated" @hidden="focusOnNewGroupButton"/>
   </div>
 </template>
 
@@ -27,34 +50,60 @@ limitations under the License.
   import LoadingContainer from '../utils/LoadingContainer';
   import SkillsTable from './SkillsTable';
   import SkillsService from './SkillsService';
+  import SubPageHeader from '../utils/pages/SubPageHeader';
+  import EditSkill from './EditSkill';
+  import EditSkillGroup from './skillsGroup/EditSkillGroup';
 
   const { mapActions, mapGetters } = createNamespacedHelpers('subjects');
 
   export default {
     name: 'Skills',
-    components: { SkillsTable, LoadingContainer },
+    components: {
+      EditSkillGroup,
+      EditSkill,
+      SubPageHeader,
+      SkillsTable,
+      LoadingContainer,
+    },
     data() {
       return {
         isLoading: true,
         skills: [],
         projectId: null,
         subjectId: null,
+        editSkillInfo: {
+          isEdit: false,
+          isCopy: false,
+          show: false,
+          skill: {},
+        },
+        editGroupInfo: {
+          isEdit: false,
+          show: false,
+          group: {},
+        },
       };
-    },
-    mounted() {
-      this.projectId = this.$route.params.projectId;
-      this.subjectId = this.$route.params.subjectId;
-      this.loadSkills();
-    },
-    computed: {
-      ...mapGetters([
-        'subject',
-      ]),
     },
     methods: {
       ...mapActions([
         'loadSubjectDetailsState',
       ]),
+      skillCreatedOrUpdated(skill) {
+        this.$refs.skillsTable.skillCreatedOrUpdated(skill);
+      },
+      focusOnNewSkillButton() {
+        this.focusOn(this.$refs.newSkillButton);
+      },
+      focusOnNewGroupButton() {
+        this.focusOn(this.$refs.newGroupButton);
+      },
+      focusOn(ref) {
+        this.$nextTick(() => {
+          if (ref) {
+            ref.focus();
+          }
+        });
+      },
       loadSkills() {
         SkillsService.getSubjectSkills(this.projectId, this.subjectId)
           .then((skills) => {
@@ -62,7 +111,6 @@ limitations under the License.
             this.skills = loadedSkills.map((loadedSkill) => {
               const copy = { ...loadedSkill };
               copy.created = dayjs(loadedSkill.created);
-              copy.selfReportingType = loadedSkill.selfReportingType ? loadedSkill.selfReportingType : 'Disabled';
               return copy;
             });
           })
@@ -73,6 +121,48 @@ limitations under the License.
       skillsChanged(skillId) {
         this.loadSubjectDetailsState({ projectId: this.projectId, subjectId: this.subject.subjectId });
         this.$emit('skills-change', skillId);
+      },
+      newSkill() {
+        this.editSkillInfo = {
+          skill: {
+            projectId: this.projectId,
+            subjectId: this.subject.subjectId,
+            type: 'Skill',
+          },
+          show: true,
+          isEdit: false,
+          isCopy: false,
+        };
+      },
+      newGroup() {
+        this.editGroupInfo = {
+          isEdit: false,
+          show: true,
+          group: {
+            projectId: this.projectId,
+            subjectId: this.subject.subjectId,
+            type: 'SkillsGroup',
+          },
+        };
+      },
+    },
+    mounted() {
+      this.projectId = this.$route.params.projectId;
+      this.subjectId = this.$route.params.subjectId;
+      this.loadSkills();
+    },
+    computed: {
+      ...mapGetters([
+        'subject',
+      ]),
+      addSkillDisabled() {
+        return this.skills && this.$store.getters.config && this.skills.length >= this.$store.getters.config.maxSkillsPerSubject;
+      },
+      addSkillsDisabledMsg() {
+        if (this.$store.getters.config) {
+          return `The maximum number of Skills allowed is ${this.$store.getters.config.maxSkillsPerSubject}`;
+        }
+        return '';
       },
     },
   };

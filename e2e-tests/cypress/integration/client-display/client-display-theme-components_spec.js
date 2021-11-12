@@ -65,10 +65,10 @@ describe('Client Display Theme Components Tests', () => {
 
     })
 
-
     it('buttons customization without changing tile background', () => {
         cy.createBadge(1, 1)
-        cy.assignSkillToBadge(1, 1, 1)
+        cy.assignSkillToBadge(1, 1, 2)
+        cy.enableBadge(1, 1);
 
         const url = '/?themeParam=buttons|{"backgroundColor":"green","foregroundColor":"white",%20"borderColor":"purple"}'
         cy.cdVisit(url);
@@ -89,7 +89,8 @@ describe('Client Display Theme Components Tests', () => {
 
     it('buttons customization with changing tile background', () => {
         cy.createBadge(1, 1)
-        cy.assignSkillToBadge(1, 1, 1)
+        cy.assignSkillToBadge(1, 1, 2)
+        cy.enableBadge(1, 1);
 
         const url = '/?themeParam=buttons|{"backgroundColor":"green","foregroundColor":"white",%20"borderColor":"purple"}&themeParam=tiles|{"backgroundColor":"black"}'
         cy.cdVisit(url);
@@ -106,10 +107,10 @@ describe('Client Display Theme Components Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="badgeDetailsLink_badge1"]', 'buttons-viewBadgeDetails-darkTileBackground');
     })
 
-
     it('filter menu with dark tile background', () => {
         cy.createBadge(1, 1)
-        cy.assignSkillToBadge(1, 1, 1)
+        cy.assignSkillToBadge(1, 1, 2)
+        cy.enableBadge(1, 1);
 
         const url = '/?themeParam=tiles|{"backgroundColor":"black"}&themeParam=textPrimaryColor|white&themeParam=textSecondaryColor|yellow'
         cy.cdVisit(url);
@@ -122,8 +123,6 @@ describe('Client Display Theme Components Tests', () => {
         cy.get('[data-cy="filterMenu"] .dropdown').click();
         cy.matchSnapshotImageForElement('[data-cy="filterMenu"] .dropdown-menu.show', 'filterMenu-badges', snapshotOptions);
     })
-
-
 
     it('theme info cards', () => {
         const url = '/?themeParam=tiles|{%22backgroundColor%22:%22black%22}&themeParam=textPrimaryColor|white&themeParam=infoCards|{%22backgroundColor%22:%22lightgray%22,%22borderColor%22:%22green%22,%22foregroundColor%22:%22purple%22,%22iconColors%22:[%22blue%22,%22red%22,%20%22yellow%22,%22green%22]}';

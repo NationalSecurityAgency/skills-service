@@ -66,6 +66,8 @@ limitations under the License.
             <div class="col-12 col-lg">
               <div class="form-group mb-1">
                 <label for="pointIncrement">* Point Increment</label>
+                <i v-if="!canEditPoints && canEditPointsMsg && canEditPointsMsg.length > 0" class="fa fa-exclamation-circle text-warning ml-1"
+                   v-b-tooltip.hover="canEditPointsMsg" data-cy="skillPointIncrementDisabledWarning"/>
                 <ValidationProvider rules="optionalNumeric|required|min_value:1|maxPointIncrement" v-slot="{errors}" name="Point Increment">
                   <input class="form-control" type="text"  v-model="skillInternal.pointIncrement"
                          aria-required="true"
@@ -73,7 +75,8 @@ limitations under the License.
                          id="pointIncrement"
                          aria-describedby="skillPointIncrementError"
                          aria-errormessage="skillPointIncrementError"
-                         :aria-invalid="errors && errors.length > 0"/>
+                         :aria-invalid="errors && errors.length > 0"
+                         :disabled="!canEditPoints"/>
                   <small class="form-text text-danger" data-cy="skillPointIncrementError" id="skillPointIncrementError">{{ errors[0] }}</small>
                 </ValidationProvider>
               </div>
@@ -81,13 +84,16 @@ limitations under the License.
             <div class="col-12 col-lg">
               <div class="form-group mt-2 mt-lg-0">
                 <label for="numPerformToCompletion">* Occurrences to Completion</label>
+                <i v-if="!canEditPoints && canEditPointsMsg && canEditPointsMsg.length > 0" class="fa fa-exclamation-circle text-warning ml-1"
+                   v-b-tooltip.hover="canEditPointsMsg" data-cy="numPerformToCompletionDisabledWarning"/>
                 <ValidationProvider vid="totalOccurrences" rules="optionalNumeric|required|min_value:1|maxNumPerformToCompletion|moreThanMaxWindowOccurrences:@windowMaxOccurrence" v-slot="{errors}" name="Occurrences to Completion" tag="div">
                   <input class="form-control" type="text" v-model="skillInternal.numPerformToCompletion"
                          data-cy="numPerformToCompletion" aria-required="true" v-on:keyup.enter="handleSubmit(saveSkill)"
                          id="numPerformToCompletion"
                          aria-describedby="skillOccurrencesError"
                          aria-errormessage="skillOccurrencesError"
-                         :aria-invalid="errors && errors.length > 0"/>
+                         :aria-invalid="errors && errors.length > 0"
+                         :disabled="!canEditPoints"/>
                   <small class="form-text text-danger" data-cy="skillOccurrencesError" id="skillOccurrencesError">{{ errors[0] }}</small>
                 </ValidationProvider>
               </div>
@@ -183,7 +189,7 @@ limitations under the License.
             <div class="">
             <label class="label">Description</label>
             <div class="control">
-              <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" v-slot="{errors}" name="Skill Description">
+              <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{errors}" name="Skill Description">
                 <markdown-editor v-if="skillInternal" v-model="skillInternal.description" data-cy="skillDescription"/>
                 <small class="form-text text-danger" data-cy="skillDescriptionError">{{ errors[0] }}</small>
               </ValidationProvider>
@@ -274,6 +280,10 @@ limitations under the License.
         type: String,
         required: true,
       },
+      groupId: {
+        type: String,
+        required: false,
+      },
       skillId: String,
       isEdit: {
         type: Boolean,
@@ -287,6 +297,20 @@ limitations under the License.
       value: {
         type: Boolean,
         required: true,
+      },
+      canEditPoints: {
+        type: Boolean,
+        required: false,
+        default: true,
+      },
+      canEditPointsMsg: {
+        type: String,
+        required: false,
+        default: '',
+      },
+      newSkillDefaultValues: {
+        type: Object,
+        required: false,
       },
     },
     data() {
@@ -310,6 +334,7 @@ limitations under the License.
           description: null,
           helpUrl: null,
           selfReportingType: null,
+          type: 'Skill',
         },
         canEditSkillId: false,
         initial: {
@@ -333,6 +358,9 @@ limitations under the License.
         this.selfReport.loading = false;
       } else {
         this.skillInternal = { version: 0, ...this.skillInternal };
+        if (this.newSkillDefaultValues) {
+          this.skillInternal = Object.assign(this.skillInternal, this.newSkillDefaultValues);
+        }
         this.findLatestSkillVersion();
         this.loadSelfReportProjectSetting();
       }
@@ -482,7 +510,7 @@ limitations under the License.
                 this.skillInternal.selfReportingType = null;
               }
               this.skillInternal = { subjectId: this.subjectId, ...this.skillInternal };
-              this.$emit('skill-saved', { isEdit: this.isEdit, ...this.skillInternal });
+              this.$emit('skill-saved', { isEdit: this.isEdit, ...this.skillInternal, groupId: this.groupId });
               this.close({ saved: true });
             }
           });

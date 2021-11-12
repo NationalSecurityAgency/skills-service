@@ -155,19 +155,45 @@ Cypress.Commands.add("createSubject", (projNum = 1, subjNum = 1, overrideProps =
     }, overrideProps));
 });
 
-Cypress.Commands.add("createSkill", (projNum = 1, subjNum = 1, skillNum = 1, overrideProps = {}) => {
+const constructSkills = (projNum = 1, subjNum = 1, skillNum = 1, overrideProps = {}) => {
     const skillId = `skill${skillNum}${subjNum > 1 ? `Subj${subjNum}` : ''}`;
     const skillName = `Very Great Skill ${skillNum}${subjNum > 1 ? ` Subj${subjNum}` : ''}`;
-    cy.request('POST', `/admin/projects/proj${projNum}/subjects/subj${subjNum}/skills/${skillId}`, Object.assign({
+    return Object.assign({
         projectId: `proj${projNum}`,
         subjectId: `subj${subjNum}`,
         skillId: skillId,
         name: skillName,
         pointIncrement: '100',
         numPerformToCompletion: '2',
-    }, overrideProps));
+        type: 'Skill',
+    }, overrideProps);
+}
+
+Cypress.Commands.add("createSkill", (projNum = 1, subjNum = 1, skillNum = 1, overrideProps = {}) => {
+    const skill = constructSkills(projNum, subjNum, skillNum, overrideProps);
+    cy.request('POST', `/admin/projects/${skill.projectId}/subjects/${skill.subjectId}/skills/${skill.skillId}`,
+        constructSkills(projNum, subjNum, skillNum, overrideProps));
 });
 
+Cypress.Commands.add("createSkillsGroup", (projNum = 1, subjNum = 1, groupNum = 1, overrideProps = {}) => {
+    const skillId = `group${groupNum}${subjNum > 1 ? `Subj${subjNum}` : ''}`;
+    const skillName = `Awesome Group ${groupNum}${groupNum > 1 ? ` Subj${subjNum}` : ''}`;
+    const payload = Object.assign({
+        projectId: `proj${projNum}`,
+        subjectId: `subj${subjNum}`,
+        skillId: skillId,
+        name: skillName,
+        type: 'SkillsGroup',
+    }, overrideProps);
+    cy.request('POST', `/admin/projects/proj${projNum}/subjects/subj${subjNum}/skills/${skillId}`, payload);
+});
+
+Cypress.Commands.add("addSkillToGroup", (projNum = 1, subjNum = 1, groupNum = 1, skillNum = 1, overrideProps = {}) => {
+    const groupId = `group${groupNum}${subjNum > 1 ? `Subj${subjNum}` : ''}`;
+    const skill = constructSkills(projNum, subjNum, skillNum, overrideProps);
+    cy.request('POST', `/admin/projects/${skill.projectId}/subjects/${skill.subjectId}/groups/${groupId}/skills/${skill.skillId}`,
+        constructSkills(projNum, subjNum, skillNum, overrideProps));
+});
 
 Cypress.Commands.add("createBadge", (projNum = 1, badgeNum = 1, overrideProps = {}) => {
     cy.request('POST', `/admin/projects/proj${projNum}/badges/badge${badgeNum}`, Object.assign({
@@ -178,6 +204,18 @@ Cypress.Commands.add("createBadge", (projNum = 1, badgeNum = 1, overrideProps = 
         description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
     }, overrideProps));
 });
+Cypress.Commands.add("enableBadge", (projNum = 1, badgeNum = 1, overrideProps = {}) => {
+    let badgeId = overrideProps.badgeId ? overrideProps.badgeId : `badge${badgeNum}`
+    cy.request('POST', `/admin/projects/proj${projNum}/badges/${badgeId}`, Object.assign({
+        projectId: `proj${projNum}`,
+        badgeId: `badge${badgeNum}`,
+        name: `Badge ${badgeNum}`,
+        "iconClass":"fas fa-ghost",
+        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        enabled: 'true',
+    }, overrideProps));
+});
+
 Cypress.Commands.add("assignSkillToBadge", (projNum = 1, badgeNum = 1, skillNum = 1) => {
     cy.request('POST', `/admin/projects/proj${projNum}/badge/badge${badgeNum}/skills/skill${skillNum}`)
 });
@@ -190,6 +228,17 @@ Cypress.Commands.add("createGlobalBadge", (badgeNum = 1, overrideProps = {}) => 
         originalBadgeId: '',
         iconClass: 'fas fa-award',
         description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+    }, overrideProps));
+});
+Cypress.Commands.add("enableGlobalBadge", (badgeNum = 1, overrideProps = {}) => {
+    cy.request('PUT', `/supervisor/badges/globalBadge${badgeNum}`, Object.assign({
+        badgeId: `globalBadge${badgeNum}`,
+        isEdit: false,
+        name: `Global Badge ${badgeNum}`,
+        originalBadgeId: '',
+        iconClass: 'fas fa-award',
+        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        enabled: 'true',
     }, overrideProps));
 });
 Cypress.Commands.add("assignSkillToGlobalBadge", (badgeNum = 1, skillNum = 1, projNum = 1) => {
@@ -219,6 +268,9 @@ Cypress.Commands.add("doReportSkill", ({project = 1, skill = 1, subjNum = 1, use
     }
     if (date === 'yesterday') {
         m = moment.utc().subtract(1, 'day')
+    }
+    if (date === '2 days ago') {
+        m = moment.utc().subtract(2, 'day')
     }
     let proj = '';
     if (!isNaN(parseFloat(project))) {

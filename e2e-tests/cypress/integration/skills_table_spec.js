@@ -33,7 +33,7 @@ describe('Skills Table Tests', () => {
         cy.contains('No Skills Yet');
 
         const skillName = 'This is a Skill'
-        cy.get('[data-cy="btn_Skills"').click();
+        cy.get('[data-cy="newSkillButton"').click();
         cy.get('[data-cy="skillName"]').type(skillName)
         cy.clickSave();
 
@@ -301,6 +301,21 @@ describe('Skills Table Tests', () => {
             [{ colIndex: 0,  value: 'Very Great Skill 3' }, { colIndex: 3,  value: 'Disabled' }],
             [{ colIndex: 3,  value: 'Honor System' }],
             [{ colIndex: 3,  value: 'Honor System' }],
+        ], 10);
+    });
+
+    it('display Disabled for self reporting type for a new (non self-reporting) skill', () => {
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.get('[data-cy="newSkillButton"]').click();
+        cy.get('[data-cy="skillName"]').type('Disabled Test')
+        cy.clickSave();
+
+        cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Self Report').click();
+        cy.get(`${tableSelector} th`).contains('Self Report Type').click();
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Disabled Test' }, { colIndex: 3,  value: 'Disabled' }],
         ], 10);
     });
 

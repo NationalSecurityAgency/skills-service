@@ -31,7 +31,7 @@ limitations under the License.
                 </div>
             </div>
 
-            <skills-progress-list @self_report="refreshHeader" v-if="badge" :subject="badge" :show-descriptions="showDescriptions" type="badge"/>
+            <skills-progress-list @points-earned="refreshHeader" v-if="badge" :subject="badge" :show-descriptions="showDescriptions" type="badge"/>
         </div>
     </div>
 </template>

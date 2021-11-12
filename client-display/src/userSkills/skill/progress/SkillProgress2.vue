@@ -47,9 +47,24 @@ limitations under the License.
 
     <div class="row">
       <div class="col text-md-left">
-        <div class="h4" @click="skillClicked" :class="{ 'skill-name-url' : enableDrillDown }" data-cy="skillProgressTitle">
-          <span v-if="skill.skillHtml" v-html="skill.skillHtml"></span>
-          <span v-else>{{ skill.skill }}</span>
+        <div class="h4" @click="skillClicked" :class="{ 'skill-name-url' : allowDrillDown }" data-cy="skillProgressTitle">
+          <div class="d-inline skills-theme-primary-color" :class="{ 'text-success' : skill.isSkillsGroupType,
+                                          'text-info' : skill.isSkillType && !skill.childSkill,
+                                          'text-secondary' : skill.childSkill }">
+            <span v-if="skill.isSkillsGroupType"><i class="fas fa-layer-group mr-1"></i></span>
+
+            <span v-if="skill.skillHtml" v-html="skill.skillHtml"></span>
+            <span v-else>{{ skill.skill }}</span>
+            <div v-if="skill.isSkillsGroupType && skill.numSkillsRequired > 0 && skill.numSkillsRequired < skill.children.length"
+                 v-b-tooltip.hover
+                 title="A Group allows a Skill to be defined by the collection of other Skills within a Project. A Skill Group can require the completion of some or all of the included Skills before the group be achieved."
+                 class="ml-2 d-inline border rounded p-1 text-primary border-success"
+                 style="font-size: 0.9rem"
+                 data-cy="groupSkillsRequiredBadge">
+              <span class="">Requires </span> <b-badge variant="success">{{ skill.numSkillsRequired }}</b-badge> <span class="font-italic">out of</span> <b-badge variant="secondary">{{ skill.children.length }}</b-badge> skills
+            </div>
+          </div>
+
           <b-badge v-if="skill.selfReporting && skill.selfReporting.enabled"
               variant="success" style="font-size: 0.8rem" class="ml-2"><i class="fas fa-check-circle"></i> Self Reportable</b-badge>
         </div>
@@ -65,34 +80,66 @@ limitations under the License.
     <div class="row">
       <div class="col">
         <progress-bar :skill="skill" v-on:progressbar-clicked="skillClicked"
-                      :class="{ 'skills-navigable-item' : enableDrillDown }" data-cy="skillProgressBar"/>
+                      :bar-size="skill.groupId ? 12 : 22"
+                      :class="{ 'skills-navigable-item' : allowDrillDown }" data-cy="skillProgressBar"/>
       </div>
     </div>
-    <div v-if="showDescription">
-      <div v-if="locked" class="text-center text-muted locked-text">
-          *** Skill has <b>{{ skill.dependencyInfo.numDirectDependents}}</b> direct dependent(s).
-          <span v-if="enableDrillDown">Click <i class="fas fa-lock icon"></i> to see its dependencies.</span>
-          <span v-else>Please see its dependencies below.</span>
-        ***
+    <div v-if="showDescription" :data-cy="`skillDescription-${skill.skillId}`">
+      <div v-if="skill.type === 'SkillsGroup'">
+        <p class="skills-text-description text-primary mt-3" style="font-size: 0.9rem;">
+          <markdown-text v-if="skill.description && skill.description.description" :text="skill.description.description"/>
+        </p>
       </div>
+      <div v-if="skill.type === 'Skill'">
+        <div v-if="locked" class="text-center text-muted locked-text">
+            *** Skill has <b>{{ skill.dependencyInfo.numDirectDependents}}</b> direct dependent(s).
+            <span v-if="allowDrillDown">Click <i class="fas fa-lock icon"></i> to see its dependencies.</span>
+            <span v-else>Please see its dependencies below.</span>
+          ***
+        </div>
 
-      <p v-if="skill.subjectName" class="text-secondary mt-3">
-        Subject: {{ skill.subjectName }}
-      </p>
+        <p v-if="skill.subjectName" class="text-secondary mt-3">
+          Subject: {{ skill.subjectName }}
+        </p>
 
-      <achievement-date v-if="skill.achievedOn" :date="skill.achievedOn" class="mt-2"/>
+        <achievement-date v-if="skill.achievedOn" :date="skill.achievedOn" class="mt-2"/>
 
-      <partial-points-alert v-if="!enableDrillDown" :skill="skill" :is-locked="locked"/>
-      <skill-summary-cards v-if="!locked" :skill="skill" class="mt-3"></skill-summary-cards>
+        <partial-points-alert v-if="!allowDrillDown" :skill="skill" :is-locked="locked"/>
+        <skill-summary-cards v-if="!locked" :skill="skill" class="mt-3"></skill-summary-cards>
 
-      <p class="skills-text-description text-primary mt-3">
-        <markdown-text v-if="skill.description && skill.description.description" :text="skill.description.description"/>
-      </p>
+        <p class="skills-text-description text-primary mt-3" style="font-size: 0.9rem;">
+          <markdown-text v-if="skill.description && skill.description.description" :text="skill.description.description"/>
+        </p>
 
-      <div>
-        <skill-overview-footer :skill="skill" v-on:points-earned="pointsEarned"/>
+        <div>
+          <skill-overview-footer :skill="skill" v-on:points-earned="pointsEarned"/>
+        </div>
       </div>
     </div>
+
+    <div v-if="skill.isSkillsGroupType && childSkillsInternal" class="ml-4 mt-3">
+      <div v-for="(childSkill, index) in childSkillsInternal"
+           :key="`group-${skill.skillId}_skill-${childSkill.skillId}`"
+           class="skills-theme-bottom-border-with-background-color"
+           :class="{ 'separator-border-thick' : showDescription }"
+      >
+        <skill-progress2
+            :id="`group-${skill.skillId}_skillProgress-${childSkill.skillId}`"
+            class="mb-3"
+            :skill="childSkill"
+            :subjectId="subjectId"
+            :badgeId="badgeId"
+            :type="type"
+            :enable-drill-down="true"
+            :show-description="showDescription"
+            :data-cy="`group-${skill.skillId}_skillProgress-${childSkill.skillId}`"
+            @points-earned="onChildSkillPointsEarned"
+        ></skill-progress2>
+
+        <hr v-if="index < (childSkillsInternal.length - 1)"/>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -105,6 +152,7 @@ limitations under the License.
   import NavigationErrorMixin from '@/common/utilities/NavigationErrorMixin';
   import SkillOverviewFooter from '../SkillOverviewFooter';
   import AnimatedNumber from './AnimatedNumber';
+  import StringHighlighter from '@/common-components/utilities/StringHighlighter';
 
   export default {
     name: 'SkillProgress2',
@@ -140,21 +188,61 @@ limitations under the License.
         type: String,
         default: 'subject',
       },
+      childSkillHighlightString: {
+        type: String,
+        default: '',
+      },
+    },
+    data() {
+      return {
+        childSkillsInternal: [],
+      };
+    },
+    mounted() {
+      this.initChildSkills();
+      this.highlightChildSkillName();
     },
     computed: {
       locked() {
         return this.skill.dependencyInfo && !this.skill.dependencyInfo.achieved;
       },
       isSkillComplete() {
-        return this.skill.meta.complete;
+        return this.skill && this.skill.meta && this.skill.meta.complete;
+      },
+      allowDrillDown() {
+        return this.enableDrillDown && this.skill.isSkillType;
+      },
+    },
+    watch: {
+      'skill.children': function updateChildSkills() {
+        this.initChildSkills();
+        this.highlightChildSkillName();
       },
     },
     methods: {
+      initChildSkills() {
+        if (this.skill.isSkillsGroupType && this.skill?.children && this.skill?.children.length > 0) {
+          this.childSkillsInternal = this.skill.children.map((item) => ({ ...item, childSkill: true }));
+        }
+      },
+      highlightChildSkillName() {
+        if (!this.childSkillHighlightString || this.childSkillHighlightString.trim().length === 0) {
+          this.childSkillsInternal = this.childSkillsInternal.map((item) => ({ ...item, skillHtml: null }));
+        } else if (this.childSkillsInternal && this.childSkillsInternal.length > 0) {
+          this.childSkillsInternal = this.childSkillsInternal.map((item) => {
+            const skillHtml = StringHighlighter.highlight(item.skill, this.childSkillHighlightString);
+            return ({ ...item, skillHtml });
+          });
+        }
+      },
+      onChildSkillPointsEarned(pts, skillId) {
+        this.$emit('points-earned', pts, this.skill.skillId, skillId);
+      },
       pointsEarned(pts) {
         this.$emit('points-earned', pts, this.skill.skillId);
       },
       skillClicked() {
-        if (this.enableDrillDown) {
+        if (this.allowDrillDown) {
           const route = this.getSkillDetailsRoute();
           const params = this.getParams();
           this.handlePush({

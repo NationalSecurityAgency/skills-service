@@ -111,6 +111,10 @@ class BadgeAdminService {
 
         if (skillDefinition) {
             String existingEnabled = skillDefinition.enabled;
+            // for updates, use the existing value if it is not set on the badgeRequest (null or empty String)
+            if (StringUtils.isBlank(badgeRequest.enabled)) {
+                badgeRequest.enabled = existingEnabled
+            }
             if (StringUtils.isNotBlank(existingEnabled) && StringUtils.equals(existingEnabled, Boolean.TRUE.toString()) && StringUtils.equals(badgeRequest.enabled, Boolean.FALSE.toString())){
                 throw new SkillException("Once a Badge has been published, the only allowable value for enabled is [${Boolean.TRUE.toString()}]", projectId, null, ErrorCode.BadParam)
             }
@@ -140,7 +144,7 @@ class BadgeAdminService {
                     projDef: projDef,
                     displayOrder: displayOrder,
                     helpUrl: badgeRequest.helpUrl,
-                    enabled: badgeRequest.enabled
+                    enabled: Boolean.FALSE.toString()
             )
             log.debug("Saving [{}]", skillDefinition)
         }
@@ -276,7 +280,7 @@ class BadgeAdminService {
             res.numSkills = dependentSkills ? dependentSkills.size() : 0
             res.totalPoints = dependentSkills ? dependentSkills?.collect({ it.totalPoints })?.sum() : 0
         } else {
-            res.numSkills = skillDefRepo.countChildSkillsByIdAndRelationshipType(skillDef.id, SkillRelDef.RelationshipType.BadgeRequirement)
+            res.numSkills = skillDefRepo.countActiveChildSkillsByIdAndRelationshipType(skillDef.id, SkillRelDef.RelationshipType.BadgeRequirement)
             if (res.numSkills > 0) {
                 res.totalPoints = skillDefRepo.sumChildSkillsTotalPointsBySkillAndRelationshipType(skillDef.id, SkillRelDef.RelationshipType.BadgeRequirement)
             } else {
@@ -292,7 +296,7 @@ class BadgeAdminService {
 
     private Integer getBadgeDisplayOrder(ProjDef projDef, SkillDef.ContainerType type) {
         Integer lastDisplayOrder = getBadgesInternal(projDef, type)?.collect({ it.displayOrder })?.max()
-        int displayOrder = lastDisplayOrder != null ? lastDisplayOrder + 1 : 0
+        int displayOrder = lastDisplayOrder != null ? lastDisplayOrder + 1 : 1
         return displayOrder
     }
 

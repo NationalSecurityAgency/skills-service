@@ -29,6 +29,7 @@ limitations under the License.
           :options="selfReport.options"
           :aria-describedby="ariaDescribedby"
           name="Self Reporting Options"
+          aria-label="Self Reporting Options"
           data-cy="selfReportTypeSelector"
         ></b-form-radio-group>
       </b-form-group>
