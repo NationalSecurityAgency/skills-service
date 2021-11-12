@@ -420,10 +420,7 @@ limitations under the License.
       },
       loadDataFromParams(skillsProp) {
         this.skills = skillsProp.map((item) => {
-          let enhancedSkill = {
-            ...item,
-            subjectId: this.subjectId,
-          };
+          let enhancedSkill = { ...item };
           enhancedSkill = this.addMetaToSkillObj(enhancedSkill);
           return SkillsService.enhanceWithTimeWindow(enhancedSkill);
         });
@@ -467,12 +464,12 @@ limitations under the License.
       },
       addMetaToSkillObj(skill) {
         return {
-          subjectId: this.subjectId,
+          ...skill,
           isGroupType: skill.type === 'SkillsGroup',
           isSkillType: skill.type === 'Skill',
-          ...skill,
           selfReportingType: (skill.type === 'Skill' && !skill.selfReportingType) ? 'Disabled' : skill.selfReportingType,
           created: new Date(skill.created),
+          subjectId: this.subjectId,
         };
       },
       skillCreatedOrUpdated(skill) {

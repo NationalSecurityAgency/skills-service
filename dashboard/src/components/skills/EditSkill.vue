@@ -519,11 +519,14 @@ limitations under the License.
         SkillsService.getSkillDetails(this.projectId, this.subjectId, this.skillId)
           .then((loadedSkill) => {
             if (!isCopy) {
-              this.skillInternal = { originalSkillId: loadedSkill.skillId, isEdit: this.isEdit, ...loadedSkill };
+              this.skillInternal = {
+                originalSkillId: loadedSkill.skillId, isEdit: this.isEdit, ...loadedSkill, subjectId: this.subjectId,
+              };
             } else {
               const copy = { ...loadedSkill };
               copy.name = `Copy of ${loadedSkill.name}`;
               copy.skillId = `copy_of_${loadedSkill.skillId}`;
+              copy.subjectId = this.subjectId;
               this.skillInternal = { isEdit: false, ...copy };
               const self = this;
               setTimeout(() => {
