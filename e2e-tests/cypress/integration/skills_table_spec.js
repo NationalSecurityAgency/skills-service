@@ -388,6 +388,25 @@ describe('Skills Table Tests', () => {
         cy.get('[data-cy="orderMoveDown_skill4"]').should('be.disabled');
     })
 
+    it('change display order and validate that manage skill navigation still works', () => {
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2);
+        cy.createSkill(1, 1, 3);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.get(`${tableSelector} th`).contains('Display Order').click();
+        cy.get('[data-cy="orderMoveUp_skill3"]').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: 1 }],
+            [{ colIndex: 0,  value: 'skill3' }, { colIndex: 1,  value: 2 }],
+            [{ colIndex: 0,  value: 'skill2' }, { colIndex: 1,  value: 3 }],
+        ], 10);
+
+        cy.get('[data-cy="manageSkillBtn_skill3"]').click();
+        cy.get('[data-cy="pageHeader"]').contains('ID: skill3');
+    })
+
     it('change display order with the last item on the current page', () => {
         const numSkills = 12;
         for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
