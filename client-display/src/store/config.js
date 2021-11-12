@@ -20,7 +20,7 @@ const getters = {
     return state.config;
   },
   levelDisplayName(state) {
-    return state.config.levelDisplayName || 'LevelDefault';
+    return state.config.levelDisplayName || 'Level';
   },
 };
 
