@@ -602,7 +602,7 @@ describe('Client Display Tests', () => {
       cy.get('.skills-badge').contains('100% Complete');
     });
 
-  it.only('set custom Level name', () => {
+  it('set custom Level name', () => {
     cy.loginAsRootUser();
 
     cy.createGlobalBadge(1);
