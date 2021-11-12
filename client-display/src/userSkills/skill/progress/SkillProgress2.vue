@@ -63,8 +63,6 @@ limitations under the License.
                  data-cy="groupSkillsRequiredBadge">
               <span class="">Requires </span> <b-badge variant="success">{{ skill.numSkillsRequired }}</b-badge> <span class="font-italic">out of</span> <b-badge variant="secondary">{{ skill.children.length }}</b-badge> skills
             </div>
-<!--            <i v-if="skill.isSkillsGroupType"-->
-<!--               class="fas fa-question-circle ml-1 text-info" style="font-size: 1.2rem;"></i>-->
           </div>
 
           <b-badge v-if="skill.selfReporting && skill.selfReporting.enabled"
@@ -154,7 +152,6 @@ limitations under the License.
   import NavigationErrorMixin from '@/common/utilities/NavigationErrorMixin';
   import SkillOverviewFooter from '../SkillOverviewFooter';
   import AnimatedNumber from './AnimatedNumber';
-  import SkillEnricherUtil from '../../utils/SkillEnricherUtil';
   import StringHighlighter from '@/common-components/utilities/StringHighlighter';
 
   export default {
@@ -210,7 +207,7 @@ limitations under the License.
         return this.skill.dependencyInfo && !this.skill.dependencyInfo.achieved;
       },
       isSkillComplete() {
-        return this.skill.meta.complete;
+        return this.skill && this.skill.meta && this.skill.meta.complete;
       },
       allowDrillDown() {
         return this.enableDrillDown && this.skill.isSkillType;
@@ -239,7 +236,7 @@ limitations under the License.
         }
       },
       onChildSkillPointsEarned(pts, skillId) {
-        SkillEnricherUtil.updateSkillPtsInList(this.skills, pts, skillId);
+        this.$emit('points-earned', pts, this.skill.skillId, skillId);
       },
       pointsEarned(pts) {
         this.$emit('points-earned', pts, this.skill.skillId);

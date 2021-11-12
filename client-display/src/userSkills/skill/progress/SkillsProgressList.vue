@@ -264,20 +264,24 @@ limitations under the License.
             });
         }
       },
-      onPointsEarned(pts, skillId) {
+      onPointsEarned(pts, skillId, childSkillId = null) {
         SkillEnricherUtil.updateSkillPtsInList(this.skillsInternalOrig, pts, skillId);
         SkillEnricherUtil.updateSkillPtsInList(this.skillsInternal, pts, skillId);
 
-        const skill = this.skillsInternalOrig.find((item) => item.skillId === skillId);
-        if (skill.selfReporting && skill.selfReporting.type === 'HonorSystem') {
-          const event = { skillId };
-          if (this.type !== 'badge') {
-            event.subjectId = this.subject.subjectId;
-          } else if (this.type === 'badge') {
-            event.badgeId = this.subject.badgeId;
-          }
-          this.$emit('self_report', event);
+        // childSkillId is only provided for SkillsGroup skills,
+        // if so, find child skill and update its points
+        if (childSkillId) {
+          SkillEnricherUtil.updateChildSkillPtsInList(this.skillsInternal, pts, skillId, childSkillId);
+          SkillEnricherUtil.updateChildSkillPtsInList(this.skillsInternalOrig, pts, skillId, childSkillId);
         }
+
+        const event = { skillId, pointsEarned: pts };
+        if (this.type !== 'badge') {
+          event.subjectId = this.subject.subjectId;
+        } else if (this.type === 'badge') {
+          event.badgeId = this.subject.badgeId;
+        }
+        this.$emit('points-earned', event);
       },
       filterSkills(filterId) {
         this.filterId = filterId.id;

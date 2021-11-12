@@ -36,7 +36,7 @@ limitations under the License.
                 <div class="card-body">
                     <project-level-row v-if="projectSummary && projectSummary.projectLevel" :projectLevel="projectSummary.projectLevel" />
                     <skills-progress-list v-if="projectSummary && projectSummary.skills"
-                                          @self_report="refreshHeader"
+                                          @points-earned="refreshHeader"
                                           :subject="badge" :projectId="projectSummary.projectId"
                                           :show-descriptions="showDescriptions"
                                           :show-no-data-msg="false"

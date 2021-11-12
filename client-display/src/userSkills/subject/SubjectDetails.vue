@@ -40,7 +40,7 @@ limitations under the License.
               </div>
             </div>
 
-            <skills-progress-list @self_report="refreshHeader" :subject="displayData.userSkills"/>
+            <skills-progress-list @points-earned="refreshHeader" :subject="displayData.userSkills"/>
         </div>
     </section>
 </template>

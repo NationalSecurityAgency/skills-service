@@ -30,7 +30,7 @@ limitations under the License.
                             <p v-if="displayDataInternal.userSkills.points > 0 && displayDataInternal.userSkills.points === displayDataInternal.userSkills.totalPoints">All Points earned</p>
                             <div v-else>
                                 <div>Earn up to <strong>{{ displayDataInternal.userSkills.totalPoints | number }}</strong> points</div>
-                                <div>
+                                <div data-cy="overallPointsEarnedToday">
                                     <strong>{{ displayDataInternal.userSkills.todaysPoints | number }}</strong> Points earned Today
                                 </div>
                             </div>
@@ -60,7 +60,7 @@ limitations under the License.
                                     {{ 'Point' | plural(levelStats.pointsTillNextLevel) }} to Level {{
                                     levelStats.nextLevel }}
                                 </div>
-                                <div>
+                                <div  data-cy="pointsEarnedTodayForTheNextLevel">
                                     <strong>{{ displayDataInternal.userSkills.todaysPoints | number}}</strong> Points earned Today
                                 </div>
                             </div>

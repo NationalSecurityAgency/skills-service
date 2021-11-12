@@ -529,6 +529,39 @@ describe('Client Display Skills Groups Tests', () => {
         cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="pointsPerOccurrenceCard"] [data-cy="progressInfoCardTitle"]').contains('20');
         cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="timeWindowPts"] [data-cy="progressInfoCardTitle"]').contains('20');
     })
+
+    it('achieve self-reporting skills points with honor system - must update progress points and overall subject points', () => {
+        cy.createSkillsGroup(1, 1, 1);
+        cy.addSkillToGroup(1, 1, 1, 1, { pointIncrement: 100, numPerformToCompletion: 2, selfReportingType: 'HonorSystem' });
+        cy.addSkillToGroup(1, 1, 1, 2, { pointIncrement: 50, numPerformToCompletion: 2, selfReportingType: 'HonorSystem'  });
+        cy.createSkillsGroup(1, 1, 1, { enabled: true });
+
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+
+        cy.get('[data-cy="groupSkillsRequiredBadge"]').should('not.exist');
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]').first().contains('Awesome Group 1')
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').first().contains('0 / 300 Points')
+        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="skillProgressTitle"]').contains('Very Great Skill 1');
+        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('0 / 200 Points')
+        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="skillProgressTitle"]').contains('Very Great Skill 2');
+        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('0 / 100 Points')
+
+        cy.get('[data-cy=toggleSkillDetails]').click()
+
+        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="selfReportBtn"]').click();
+        cy.get('[data-cy="selfReportSkillMsg"]').contains('This skill can be submitted under the Honor System and 100 points will be awarded right away')
+        cy.get('[data-cy="selfReportSubmitBtn"]').click();
+        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="selfReportAlert"]').contains('Congrats! You just earned 100 points');
+
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').first().contains('100 / 300 Points')
+        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 200 Points')
+        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('0 / 100 Points')
+
+        cy.get('[data-cy="overallPointsEarnedToday"]').contains('100 Points earned Today');
+        cy.get('[data-cy="pointsEarnedTodayForTheNextLevel"]').contains('100 Points earned Today');
+        cy.get('[data-cy="overallLevelDesc"]').contains('Level 2 out of 5')
+    });
 })
 
 

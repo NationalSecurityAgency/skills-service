@@ -23,7 +23,7 @@ limitations under the License.
             <strong class="fa-stack-1x trophy-text">{{ skillLevel }}</strong>
         </span>
 
-        <div>
+        <div data-cy="overallLevelDesc">
             Level <strong>{{ skillLevel }}</strong> out of <strong>{{ totalNumLevels }}</strong>
         </div>
 

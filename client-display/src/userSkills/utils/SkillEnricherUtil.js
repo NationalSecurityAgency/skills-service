@@ -23,6 +23,12 @@ export default {
         skills.splice(index, 1, updatedSkill);
     },
 
+    updateChildSkillPtsInList(skills, pts, skillId, childSkillId) {
+        const index = skills.findIndex((item) => item.skillId === skillId);
+        const childSkill = skills[index];
+        this.updateSkillPtsInList(childSkill.children, pts, childSkillId);
+    },
+
     addPts(skill, pts) {
         const copy = { ...skill };
         copy.points += pts;
