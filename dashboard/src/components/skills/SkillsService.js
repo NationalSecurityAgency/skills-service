@@ -33,6 +33,7 @@ export default {
     return axios.get(`/admin/projects/${projectId}/subjects/${subjectId}/skills/${skillId}`)
       .then((response) => {
         const skill = response.data;
+        skill.subjectId = subjectId;
         return this.enhanceWithTimeWindow(skill);
       });
   },
