@@ -871,6 +871,20 @@ describe('Skills Tests', () => {
 
     });
 
+
+    it('append "Root Help URL" to the "Help Url" if configured', () => {
+        cy.request('POST', '/admin/projects/proj1/settings/help.url.root', {
+            projectId: 'proj1',
+            setting: 'help.url.root',
+            value: 'https://SomeArticleRepo.com/'
+        });
+        cy.createSkill(1, 1, 1, {helpUrl: '/some/path'});
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="expandDetailsBtn_skill1"]').click();
+        cy.get('[data-cy="childRowDisplay_skill1"] [data-cy="skillOverviewHelpUrl"]').should('have.attr', 'href', 'https://SomeArticleRepo.com/some/path')
+    });
+
     it('skill help url with %20 in host retains %20 on edit', () => {
         cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/dummy`, {
             projectId: 'proj1',

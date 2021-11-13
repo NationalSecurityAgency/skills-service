@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <loading-container class="child-row" v-bind:is-loading="isLoading" :data-cy="`childRowDisplay_${skillInfo.skillId}`">
+  <loading-container class="child-row" v-bind:is-loading="loading.skills || loading.settings" :data-cy="`childRowDisplay_${skillInfo.skillId}`">
 
     <div class="row">
       <div class="col-12 col-md-6 mt-2">
@@ -68,8 +68,8 @@ limitations under the License.
         <div class="input-group-text"><i class="fas fa-link mr-1"></i> Help URL: </div>
       </div>
       <span class="form-control">
-        <a v-if="skillInfo.helpUrl" :href="skillInfo.helpUrl" target="_blank" rel="noopener" class="skill-url"
-           data-cy="skillOverviewHelpUrl">{{ skillInfo.helpUrl }}</a>
+        <a v-if="skillInfo.helpUrl" :href="helpUrl" target="_blank" rel="noopener" class="skill-url"
+           data-cy="skillOverviewHelpUrl"><span v-if="rootHelpUrl" class="border rounded pt-1 pl-1 pb-1 root-help-url" v-b-tooltip.hover="'Root Help URL was configured on the project\'s settings.'"><i class="fas fa-cogs"></i> {{ rootHelpUrl }}</span>{{ skillInfo.helpUrl }}</a>
         <span v-else class="text-muted">
           Not Specified
         </span>
@@ -85,6 +85,7 @@ limitations under the License.
   import NumberFilter from '../../filters/NumberFilter';
   import MarkdownText from '../utils/MarkdownText';
   import TimeWindowMixin from './TimeWindowMixin';
+  import SettingsService from '../settings/SettingsService';
 
   export default {
     name: 'ChildRowSkillsDisplay',
@@ -111,12 +112,17 @@ limitations under the License.
     },
     data() {
       return {
-        isLoading: true,
+        loading: {
+          skills: true,
+          settings: true,
+        },
+        rootHelpUrlSetting: null,
         skillInfo: {},
       };
     },
     mounted() {
       this.loadSkills();
+      this.loadSettings();
     },
     watch: {
       refreshCounter() {
@@ -147,21 +153,52 @@ limitations under the License.
 
         return this.skillInfo.selfReportingType;
       },
+      rootHelpUrl() {
+        if (!this.rootHelpUrlSetting || this.skillInfo?.helpUrl?.toLowerCase()?.startsWith('http')) {
+          return null;
+        }
+        if (this.rootHelpUrlSetting.endsWith('/')) {
+          return this.rootHelpUrlSetting.substring(0, this.rootHelpUrlSetting.length - 1);
+        }
+        return this.rootHelpUrlSetting;
+      },
+      helpUrl() {
+        if (!this.skillInfo?.helpUrl) {
+          return null;
+        }
+        const rootHelpUrlSetting = this.rootHelpUrl;
+        if (rootHelpUrlSetting) {
+          return `${rootHelpUrlSetting}${this.skillInfo.helpUrl}`;
+        }
+        return this.skillInfo.helpUrl;
+      },
     },
     methods: {
+      loadSettings() {
+        this.loading.settings = true;
+        SettingsService.getProjectSetting(this.projectId, 'help.url.root').then((response) => {
+          if (response && response.value) {
+            this.rootHelpUrlSetting = response.value;
+          } else {
+            this.rootHelpUrlSetting = null;
+          }
+        })
+          .finally(() => {
+            this.loading.settings = false;
+          });
+      },
       loadSkills() {
-        this.isLoading = true;
+        this.loading.skills = true;
         if (this.skill) {
           this.skillInfo = this.skill;
-          this.isLoading = false;
+          this.loading.skills = false;
         } else {
           SkillsService.getSkillDetails(this.projectId, this.subjectId, this.parentSkillId)
             .then((response) => {
               this.skillInfo = response;
-              this.isLoading = false;
             })
             .finally(() => {
-              this.isLoading = false;
+              this.loading.skills = false;
             });
         }
       },
@@ -203,6 +240,11 @@ limitations under the License.
     height: 1.5em;
     overflow: hidden;
     display: block;
+  }
+
+  .root-help-url {
+    background-color: #eeeeee;
+    border-color: black !important;
   }
 
 </style>
