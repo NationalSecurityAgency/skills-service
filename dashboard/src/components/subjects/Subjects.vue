@@ -19,6 +19,7 @@ limitations under the License.
                      :disabled="addSubjectDisabled" :disabled-msg="addSubjectsDisabledMsg"
                      :aria-label="'new subject'"/>
     <loading-container v-bind:is-loading="isLoading">
+      <jump-to-skill />
       <div v-if="subjects && subjects.length" class="row justify-content-center" id="subjectCards">
         <div v-for="(subject) of subjects" :key="subject.subjectId" :id="subject.subjectId" class="col-lg-4 mb-3"
              style="min-width: 23rem;">
@@ -57,12 +58,14 @@ limitations under the License.
   import SubjectsService from './SubjectsService';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import NoContent2 from '../utils/NoContent2';
+  import JumpToSkill from './JumpToSkill';
 
   const { mapActions } = createNamespacedHelpers('projects');
 
   export default {
     name: 'Subjects',
     components: {
+      JumpToSkill,
       NoContent2,
       EditSubject,
       SubPageHeader,

@@ -334,7 +334,6 @@ describe('Skills Table Tests', () => {
             });
         };
 
-        console.log('visiting subjects/subj1');
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         // sort is enabled when sorted by display order column
@@ -347,7 +346,6 @@ describe('Skills Table Tests', () => {
         cy.get('[data-cy="orderMoveDown_skill3"]').should('be.disabled');
         cy.get('[data-cy="orderMoveDown_skill4"]').should('be.disabled');
 
-        console.log('sorting by display order');
         cy.get(`${tableSelector} th`).contains('Display Order').click();
         cy.get('[data-cy="orderMoveUp_skill1"]').should('be.disabled');
         cy.get('[data-cy="orderMoveUp_skill2"]').should('be.enabled');
@@ -358,7 +356,6 @@ describe('Skills Table Tests', () => {
         cy.get('[data-cy="orderMoveDown_skill3"]').should('be.enabled');
         cy.get('[data-cy="orderMoveDown_skill4"]').should('be.disabled');
 
-        console.log('validating table');
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'Skill # 1' }, { colIndex: 1,  value: 1 }],
             [{ colIndex: 0,  value: 'Skill # 2' }, { colIndex: 1,  value: 2 }],
@@ -366,7 +363,6 @@ describe('Skills Table Tests', () => {
             [{ colIndex: 0,  value: 'Skill # 4' }, { colIndex: 1,  value: 4 }],
         ], 10);
 
-        console.log('changing order of skill3');
         cy.get('[data-cy="orderMoveUp_skill3"]').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'Skill # 1' }, { colIndex: 1,  value: 1 }],
@@ -375,7 +371,6 @@ describe('Skills Table Tests', () => {
             [{ colIndex: 0,  value: 'Skill # 4' }, { colIndex: 1,  value: 4 }],
         ], 10);
 
-        console.log('changing order of skill1');
         cy.get('[data-cy="orderMoveDown_skill1"]').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'Skill # 3' }, { colIndex: 1,  value: 1 }],
@@ -391,6 +386,25 @@ describe('Skills Table Tests', () => {
         cy.get('[data-cy="orderMoveDown_skill2"]').should('be.enabled');
         cy.get('[data-cy="orderMoveDown_skill3"]').should('be.enabled');
         cy.get('[data-cy="orderMoveDown_skill4"]').should('be.disabled');
+    })
+
+    it('change display order and validate that manage skill navigation still works', () => {
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2);
+        cy.createSkill(1, 1, 3);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.get(`${tableSelector} th`).contains('Display Order').click();
+        cy.get('[data-cy="orderMoveUp_skill3"]').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: 1 }],
+            [{ colIndex: 0,  value: 'skill3' }, { colIndex: 1,  value: 2 }],
+            [{ colIndex: 0,  value: 'skill2' }, { colIndex: 1,  value: 3 }],
+        ], 10);
+
+        cy.get('[data-cy="manageSkillBtn_skill3"]').click();
+        cy.get('[data-cy="pageHeader"]').contains('ID: skill3');
     })
 
     it('change display order with the last item on the current page', () => {

@@ -356,6 +356,15 @@ limitations under the License.
           && this.skills.length <= this.disableDeleteButtonsInfo.minNumSkills;
         return (isDisabled) ? this.disableDeleteButtonsInfo.tooltip : 'Delete Skill';
       },
+      addSkillDisabled() {
+        return this.skills && this.$store.getters.config && this.skills.length >= this.$store.getters.config.maxSkillsPerSubject;
+      },
+      addSkillsDisabledMsg() {
+        if (this.$store.getters.config) {
+          return `The maximum number of Skills allowed is ${this.$store.getters.config.maxSkillsPerSubject}`;
+        }
+        return '';
+      },
     },
     methods: {
       updateColumns(newList) {
@@ -411,10 +420,7 @@ limitations under the License.
       },
       loadDataFromParams(skillsProp) {
         this.skills = skillsProp.map((item) => {
-          let enhancedSkill = {
-            subjectId: this.subjectId,
-            ...item,
-          };
+          let enhancedSkill = { ...item };
           enhancedSkill = this.addMetaToSkillObj(enhancedSkill);
           return SkillsService.enhanceWithTimeWindow(enhancedSkill);
         });
@@ -458,12 +464,12 @@ limitations under the License.
       },
       addMetaToSkillObj(skill) {
         return {
-          subjectId: this.subjectId,
+          ...skill,
           isGroupType: skill.type === 'SkillsGroup',
           isSkillType: skill.type === 'Skill',
-          ...skill,
           selfReportingType: (skill.type === 'Skill' && !skill.selfReportingType) ? 'Disabled' : skill.selfReportingType,
           created: new Date(skill.created),
+          subjectId: this.subjectId,
         };
       },
       skillCreatedOrUpdated(skill) {
@@ -597,8 +603,7 @@ limitations under the License.
         SkillsService.updateSkill(row, actionToSubmit)
           .then(() => {
             SkillsService.getSubjectSkills(this.projectId, this.subjectId).then((data) => {
-              this.skills = data.map((skill) => this.addMetaToSkillObj(skill));
-              this.disableFirstAndLastButtons();
+              this.loadDataFromParams(data);
             });
           });
       },

@@ -627,10 +627,11 @@ class AdminController {
 
     @RequestMapping(value = "/projects/{projectId}/skills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     List<SkillDefSkinnyRes> getAllSkillsForProject(
-            @PathVariable("projectId") String projectId) {
+            @PathVariable("projectId") String projectId,
+            @RequestParam(required = false, value = "skillNameQuery") String skillNameQuery) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
 
-        List<SkillDefSkinnyRes> res = skillsAdminService.getSkinnySkills(projectId)
+        List<SkillDefSkinnyRes> res = skillsAdminService.getSkinnySkills(projectId, skillNameQuery ?: '')
         return res
     }
 

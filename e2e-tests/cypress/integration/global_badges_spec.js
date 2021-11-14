@@ -220,7 +220,7 @@ describe('Global Badges Tests', () => {
       cy.wait('@getBadges');
       cy.get('[data-cy="manageBtn_a_badge"]').click();
       cy.get('.multiselect__tags').click();
-      cy.contains('Project ID: proj2').click();
+      cy.get('[data-cy="skillsSelectionItem-proj2-skill1"]').click();
       cy.validateTable(tableSelector, [
           [{ colIndex: 0,  value: 'proj2' }, { colIndex: 1,  value: 'This is 1' }, { colIndex: 2,  value: 'skill1' }],
       ], 5);
@@ -351,7 +351,7 @@ describe('Global Badges Tests', () => {
         cy.clickNav('Badges');
         cy.contains('Manage').click();
         cy.get('.multiselect__tags').click();
-        cy.contains('Project ID: proj1').click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-skill1"]').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'proj1' }, { colIndex: 1,  value: 'This is 1' }],
         ], 5);
@@ -414,7 +414,7 @@ describe('Global Badges Tests', () => {
         cy.contains('Test Badge').should('exist');
         cy.contains('Manage').click();
         cy.get('.multiselect__tags').click();
-        cy.contains('Project ID: proj1').click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-skill1"]').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'proj1' }, { colIndex: 1,  value: 'This is 1' }],
         ], 5);
@@ -504,7 +504,7 @@ describe('Global Badges Tests', () => {
 
         cy.wait('@availableSkills');
         cy.get('.multiselect__tags').click();
-        cy.contains('Project ID: proj1').click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-skill1"]').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'proj1' }, { colIndex: 1,  value: 'This is 1' }, { colIndex: 2,  value: 'skill1' }],
         ], 5);
@@ -610,7 +610,7 @@ describe('Global Badges Tests', () => {
         cy.contains('Manage').click();
         //wahat to wait on....
         cy.get('.multiselect__tags').click();
-        cy.contains('Project ID: proj2').click();
+        cy.get('[data-cy="skillsSelectionItem-proj2-skill1"]').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'proj2' }, { colIndex: 1,  value: 'This is 1' }, { colIndex: 2,  value: 'skill1' }],
         ], 5);
@@ -1078,7 +1078,7 @@ describe('Global Badges Tests', () => {
         });
 
         cy.get('.multiselect__tags').click();
-        cy.contains('Project ID: proj2').click();
+        cy.get('[data-cy="skillsSelectionItem-proj2-skill1"]').click();
         cy.get('button[data-cy=deleteSkill_skill1]').click();
         cy.contains('YES, Delete It!').click();
 

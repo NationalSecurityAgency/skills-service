@@ -23,6 +23,10 @@ class SkillDefSkinnyRes {
 
     String name
 
+    String subjectId
+
+    String subjectName
+
     Integer version
 
     int displayOrder

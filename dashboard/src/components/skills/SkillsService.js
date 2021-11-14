@@ -33,6 +33,7 @@ export default {
     return axios.get(`/admin/projects/${projectId}/subjects/${subjectId}/skills/${skillId}`)
       .then((response) => {
         const skill = response.data;
+        skill.subjectId = subjectId;
         return this.enhanceWithTimeWindow(skill);
       });
   },
@@ -56,13 +57,14 @@ export default {
     return axios.get(`/admin/projects/${projectId}/subjects/${subjectId}/skills`)
       .then((response) => response.data);
   },
+  getProjectSkills(projectId, skillNameQuery = null) {
+    const query = skillNameQuery ? `?skillNameQuery=${encodeURIComponent(skillNameQuery)}` : '';
+    return axios.get(`/admin/projects/${projectId}/skills${query}`)
+      .then((response) => response.data);
+  },
   getGroupSkills(projectId, groupId) {
     return axios.get(`/admin/projects/${projectId}/groups/${groupId}/skills`)
       .then((response) => response.data.map((item) => ({ ...item, groupId })));
-  },
-  getProjectSkills(projectId) {
-    return axios.get(`/admin/projects/${projectId}/skills`)
-      .then((response) => response.data);
   },
   saveSkill(skill) {
     const copy = enrichSkillObjWithRequiredAtts(skill);

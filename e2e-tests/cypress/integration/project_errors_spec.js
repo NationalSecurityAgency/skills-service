@@ -57,7 +57,7 @@ describe('Project Errors Tests', () => {
     cy.reportSkill(1,13, 'user@skills.org', '2021-02-24 10:00', false);
 
     cy.intercept('GET', '/admin/projects/proj1').as('getProject');
-    cy.intercept('GET', '/admin/projects/proj1/errors').as('getErrors');
+    cy.intercept('GET', '/admin/projects/proj1/errors**').as('getErrors');
 
     cy.visit('/administrator/projects/proj1/');
     cy.wait('@getProject');
@@ -76,7 +76,7 @@ describe('Project Errors Tests', () => {
     cy.reportSkill(1,13, 'user@skills.org', '2021-02-24 10:00', false);
 
     cy.intercept('GET', '/admin/projects/proj1').as('getProject');
-    cy.intercept('GET', '/admin/projects/proj1/errors').as('getErrors');
+    cy.intercept('GET', '/admin/projects/proj1/errors**').as('getErrors');
     cy.intercept('DELETE', '/admin/projects/proj1/errors').as('deleteAllErrors');
 
     cy.visit('/administrator/projects/proj1/');
@@ -106,7 +106,7 @@ describe('Project Errors Tests', () => {
     cy.reportSkill(1,13, 'user@skills.org', '2021-02-24 10:00', false);
 
     cy.intercept('GET', '/admin/projects/proj1').as('getProject');
-    cy.intercept('GET', '/admin/projects/proj1/errors').as('getErrors');
+    cy.intercept('GET', '/admin/projects/proj1/errors**').as('getErrors');
     cy.intercept('DELETE', '/admin/projects/proj1/errors/SkillNotFound/skill42').as('deleteError');
 
     cy.visit('/administrator/projects/proj1/');
@@ -176,7 +176,7 @@ describe('Project Errors Tests', () => {
     cy.reportSkill(1,47, 'user@skills.org', '2021-02-24 10:00', false);
 
     cy.intercept('GET', '/admin/projects/proj1').as('getProject');
-    cy.intercept('GET', '/admin/projects/proj1/errors').as('getErrors');
+    cy.intercept('GET', '/admin/projects/proj1/errors**').as('getErrors');
     cy.visit('/administrator/projects/proj1/');
     cy.wait('@getProject');
     cy.get('[data-cy=nav-Issues]').click();
