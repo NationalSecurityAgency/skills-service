@@ -1416,11 +1416,15 @@
         <addColumn tableName="user_points">
             <column name="contributes_to_skills_group" type="varchar(255)"/>
         </addColumn>
+        <createIndex indexName="index_user_points_contributes_to_skills_group"
+                     tableName="user_points">
+            <column name="contributes_to_skills_group" type="varchar(255)"/>
+        </createIndex>
     </changeSet>
 
     <changeSet id="16" author="skills team" context="migration16">
         <sql>
-            update skill_definition set enabled = 'true' where enabled is null and (type = 'Skill' OR type = 'Subject' OR type = 'SkillsGroup');
+            update skill_definition set enabled = 'true' where enabled is null;
         </sql>
         <addNotNullConstraint columnDataType="varchar(255)" columnName="enabled" tableName="skill_definition"/>
     </changeSet>
