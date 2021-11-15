@@ -191,6 +191,32 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
            )
       ''')
     long countActiveGroupChildSkillsForSubject(Integer subjectId)
+    @Query(value='''
+        SELECT count(sd.id) 
+                from skill_definition sd 
+                where (
+                (sd.type='GlobalBadge' 
+                        AND ( 
+                            exists (
+                                SELECT true
+                                from global_badge_level_definition gbld
+                                where gbld.skill_ref_id = sd.id and gbld.project_id = ?1
+                            ) 
+                            OR ( 
+                            sd.id in (
+                                select srd.parent_ref_id from skill_relationship_definition srd join skill_definition ssd on srd.child_ref_id = ssd.id and ssd.project_id = ?1 
+                                ) 
+                            )
+                    ) 
+                )) AND
+              sd.enabled  = 'true'
+    ''', nativeQuery = true)
+    int countGlobalBadgesIntersectingWithProjectIdWhereEnabled(@Param('projectId') String projectId)
+
+    @Query(value='''select count(c) 
+        from SkillRelDef r, SkillDef c 
+        where r.parent.id=?1 and c.id = r.child and r.type=?2''')
+    long countChildSkillsByIdAndRelationshipType(Integer parentSkillRefId, RelationshipType relationshipType)
 
     @Query(value='''select c 
         from SkillRelDef r, SkillDef c 

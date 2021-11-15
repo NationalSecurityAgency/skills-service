@@ -437,8 +437,6 @@ describe('Client Display Tests', () => {
 
       cy.loginAsProxyUser();
 
-      cy.loginAsProxyUser();
-
       cy.cdVisit('/');
       cy.cdClickBadges();
       cy.contains('Global Badge 1');
@@ -448,6 +446,49 @@ describe('Client Display Tests', () => {
       cy.get('[data-cy=gb_proj1]').contains('blah1').should('not.exist');
       cy.get('[data-cy=gb_proj2]').contains('blah1').should('exist');
       cy.get('[data-cy=gb_proj1]').contains('Search blah skill 1');
+    });
+
+    it('completed badge count should not include global badges that do not have dependencies on this project', () => {
+      cy.resetDb();
+      cy.fixture('vars.json').then((vars) => {
+        if (!Cypress.env('oauthMode')) {
+          cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);
+        }
+      })
+      cy.loginAsProxyUser()
+      cy.createProject(1)
+      cy.createProject(2)
+      cy.createSubject(1, 1)
+      cy.createSubject(2, 1)
+      cy.createSkill(1, 1, 1, {name: 'Search blah skill 1'});
+      cy.createSkill(1, 1, 2, {name: 'is a skill 2'});
+      cy.createSkill(1, 1, 3, {name: 'find Blah other skill 3'});
+      cy.createSkill(1, 1, 4, {name: 'Search nothing skill 4'});
+
+      cy.createSkill(2, 1, 1, {name: 'blah1'});
+      cy.createSkill(2, 1, 2, {name: 'blah2'});
+      cy.createSkill(2, 1, 3, {name: 'blah3'});
+      cy.createSkill(2, 1, 4, {name: 'blah4'});
+
+      cy.loginAsRootUser();
+
+      cy.createGlobalBadge(1);
+      cy.assignSkillToGlobalBadge(1, 1, 1);
+      cy.assignSkillToGlobalBadge(1, 1, 2);
+      cy.enableGlobalBadge(1);
+
+      cy.reportSkill(2, 1, Cypress.env('proxyUser'));
+      cy.reportSkill(2, 2, Cypress.env('proxyUser'));
+
+      cy.createGlobalBadge(2);
+      cy.assignSkillToGlobalBadge(2,1,2);
+      cy.enableGlobalBadge(2);
+
+
+      cy.loginAsProxyUser();
+
+      cy.cdVisit('/');
+      cy.get('[data-cy=myBadges]').contains(" 0 ");
     });
 
     it('global badge skills filter search no results', () => {
@@ -472,8 +513,6 @@ describe('Client Display Tests', () => {
       cy.createGlobalBadge(1);
       cy.assignSkillToGlobalBadge(1, 1, 1);
       cy.enableGlobalBadge();
-
-      cy.loginAsProxyUser();
 
       cy.loginAsProxyUser();
 
@@ -602,4 +641,5 @@ describe('Client Display Tests', () => {
       cy.get('.skills-badge').contains('100% Complete');
     });
 });
+
 
