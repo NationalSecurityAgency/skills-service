@@ -194,7 +194,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
                             )
                     ) 
                 )) AND
-              (sd.enabled  = 'true' OR sd.enabled is null)
+              sd.enabled  = 'true'
     ''', nativeQuery = true)
     int countGlobalBadgesIntersectingWithProjectIdWhereEnabled(@Param('projectId') String projectId)
 

@@ -475,12 +475,14 @@ describe('Client Display Tests', () => {
       cy.createGlobalBadge(1);
       cy.assignSkillToGlobalBadge(1, 1, 1);
       cy.assignSkillToGlobalBadge(1, 1, 2);
+      cy.enableGlobalBadge(1);
 
       cy.reportSkill(2, 1, Cypress.env('proxyUser'));
       cy.reportSkill(2, 2, Cypress.env('proxyUser'));
 
       cy.createGlobalBadge(2);
       cy.assignSkillToGlobalBadge(2,1,2);
+      cy.enableGlobalBadge(2);
 
 
       cy.loginAsProxyUser();

@@ -56,10 +56,11 @@ class ClientDisplaySpec extends DefaultIntSpec {
 
         def globalBadge = SkillsFactory.createBadge(1, 1)
         SkillsService supervisorService = createSupervisor()
-        globalBadge.enabled = 'true'
         supervisorService.createGlobalBadge(globalBadge)
         supervisorService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: globalBadge.badgeId, skillId: skills[0].skillId])
         supervisorService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: globalBadge.badgeId, skillId: skills[1].skillId])
+        globalBadge.enabled = 'true'
+        supervisorService.createGlobalBadge(globalBadge)
 
         def user = getRandomUsers(1)[0]
         skillsService.addSkill(skills[0], user)
