@@ -116,7 +116,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     SkillDef findByProjectIdAndSkillId(String projectId, String skillId)
 
     @Query(value = '''SELECT max(sdChild.displayOrder) from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
-      where srd.parent=sdParent.id and srd.child=sdChild.id and 
+      where srd.parent=sdParent.id and srd.child=sdChild.id and srd.type IN ('RuleSetDefinition', 'SkillsGroupRequirement') and 
       sdParent.projectId=?1 and sdParent.skillId=?2''' )
     @Nullable
     Integer calculateChildSkillsHighestDisplayOrder(String projectId, String skillId)
