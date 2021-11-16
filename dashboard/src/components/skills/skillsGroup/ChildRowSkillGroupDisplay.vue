@@ -18,7 +18,7 @@ limitations under the License.
   <loading-container v-bind:is-loading="isLoading" :data-cy="`ChildRowSkillGroupDisplay_${group.skillId}`">
     <div class="ml-4 mb-3">
       <b-card v-if="description" header="Description" class="mb-3" body-class="card-bg" data-cy="description">
-        {{ description }}
+        <markdown-text :text="description" />
       </b-card>
 
       <b-card body-class="p-0 card-bg" >
@@ -106,6 +106,7 @@ limitations under the License.
   import LoadingContainer from '../../utils/LoadingContainer';
   import MsgBoxMixin from '../../utils/modal/MsgBoxMixin';
   import EditNumRequiredSkills from './EditNumRequiredSkills';
+  import MarkdownText from '../../utils/MarkdownText';
 
   const { mapActions } = createNamespacedHelpers('subjects');
 
@@ -113,6 +114,7 @@ limitations under the License.
     name: 'ChildRowSkillGroupDisplay',
     mixins: [MsgBoxMixin],
     components: {
+      MarkdownText,
       EditNumRequiredSkills,
       LoadingContainer,
       SkillsTable: () => import('../SkillsTable'),

@@ -77,6 +77,67 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="ChildRowSkillGroupDisplay_BlahGroup"] [data-cy="description"]').contains('Description for this group!');
     });
 
+    it('group\'s description supports markdown', () => {
+        const markdown = "# Title1\n## Title2\n### Title 3\n#### Title 4\n##### Title 5\nTitle 6\n\n" +
+        "---\n" +
+        "# Emphasis\n" +
+        "italics: *italicized* or _italicized_\n\n" +
+        "bold: **bolded** or __bolded__\n\n" +
+        "combination **_bolded & italicized_**\n\n" +
+        "strikethrough: ~~struck~~\n\n" +
+        "---\n" +
+        "# Inline\n" +
+        "Inline `code` has `back-ticks around` it\n\n" +
+        "---\n" +
+        "# Multiline\n" +
+        "\n" +
+        "\n" +
+        "```\n" +
+        "import { SkillsDirective } from '@skilltree/skills-client-vue';\n" +
+        "Vue.use(SkillsDirective);\n" +
+        "```\n" +
+        "# Lists\n" +
+        "Ordered Lists:\n" +
+        "1. Item one\n" +
+        "1. Item two\n" +
+        "1. Item three (actual number does not matter)\n\n" +
+        "If List item has multiple lines of text, subsequent lines must be idented four spaces, otherwise list item numbers will reset, e.g.,\n" +
+        "1. item one\n" +
+        "    paragrah one\n" +
+        "1. item two\n" +
+        "1. item three\n" +
+        "\n" +
+        "Unordered Lists\n" +
+        "* Item\n" +
+        "* Item\n" +
+        "* Item\n" +
+        "___\n" +
+        "# Links\n" +
+        "[in line link](https://www.somewebsite.com)\n" +
+        "___\n" +
+        "# Blockquotes\n" +
+        "> Blockquotes are very handy to emulate reply text.\n" +
+        "> This line is part of the same quote.\n\n" +
+        "# Horizontal rule\n" +
+        "Use three or more dashes, asterisks, or underscores to generate a horizontal rule line\n" +
+        "\n" +
+        "Separate me\n\n" +
+        "___\n\n" +
+        "Separate me\n\n" +
+        "---\n\n" +
+        "Separate me\n\n" +
+        "***\n\n" +
+        "# Emojis\n" +
+        ":+1: :+1: :+1: :+1:\n";
+        cy.createSkillsGroup(1, 1, 1, { description : markdown });
+
+        cy.viewport(1200, 1200)
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="expandDetailsBtn_group1"]').click();
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="description"]');
+        cy.matchSnapshotImageForElement('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="description"]', 'Groups Description Markdown');
+    });
+
     it('handle focus', () => {
         cy.createSkillsGroup(1, 1, 1);
         cy.createSkill(1, 1, 1);
