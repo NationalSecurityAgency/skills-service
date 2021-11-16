@@ -382,10 +382,12 @@ class SkillsLoader {
                     }
                 }
             }
+
+            String customLevelName = settingsService.getProjectSetting(projectId, 'level.displayName')?.value ?: 'Level'
             achievements = achievementsByDay.values().collect {
                 Achievement combined = new Achievement(achievedOn: it.achievedOn, points: it.points)
                 String name = it.levels?.sort()?.join(", ")
-                combined.name = "Level${name.contains(",") ? "s" : ""} ${name}"
+                combined.name = "${customLevelName}${name.contains(",") ? "s" : ""} ${name}"
                 return combined
             }
         }

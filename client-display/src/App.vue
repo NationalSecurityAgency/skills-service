@@ -56,6 +56,11 @@ limitations under the License.
         updated() {
           onHeightChanged();
         },
+        computed: {
+          levelDisplayName() {
+            return store.getters.levelDisplayName;
+          },
+        },
       });
     },
   });

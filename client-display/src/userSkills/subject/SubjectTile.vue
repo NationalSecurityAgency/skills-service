@@ -21,7 +21,7 @@ limitations under the License.
       </ribbon>
 
       <i :class="subject.iconClass" class="d-inline-block subject-tile-icon"/>
-      <h2 class="skill-tile-label text-primary pt-1">Level {{ subject.skillsLevel }}</h2>
+      <h2 class="skill-tile-label text-primary pt-1">{{ levelDisplayName }} {{ subject.skillsLevel }}</h2>
       <star-progress :number-complete="subject.skillsLevel" class="py-1"/>
 
       <div class="row">
@@ -44,7 +44,7 @@ limitations under the License.
 
       <div class="row mt-3">
         <div v-if="!progress.allLevelsComplete" class="col-5">
-          <label class="skill-label text-left" style="min-width: 10rem;">Next Level</label>
+          <label class="skill-label text-left" style="min-width: 10rem;">Next {{ levelDisplayName }}</label>
         </div>
         <div v-if="!progress.allLevelsComplete" class="col-7">
           <label class="skill-label text-right">
@@ -52,7 +52,7 @@ limitations under the License.
           </label>
         </div>
         <div v-if="progress.allLevelsComplete" class="col-12">
-          <label class="skill-label text-center text-uppercase"><i class="fas fa-check text-success"/> All levels complete</label>
+          <label class="skill-label text-center text-uppercase"><i class="fas fa-check text-success"/> All {{ levelDisplayName.toLowerCase() }}s complete</label>
         </div>
         <div class="col-12">
           <progress-bar

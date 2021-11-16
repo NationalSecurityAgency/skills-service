@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
     <div>
-        <label class="skill-tile-label">My Level</label>
+        <label class="skill-tile-label">My {{ levelDisplayName }}</label>
 
         <span slot="reference" class="fa-stack skills-icon trophy-stack">
             <i class="fa fa-trophy fa-stack-2x"/>
@@ -24,7 +24,7 @@ limitations under the License.
         </span>
 
         <div data-cy="overallLevelDesc">
-            Level <strong>{{ skillLevel }}</strong> out of <strong>{{ totalNumLevels }}</strong>
+          {{ levelDisplayName }} <strong>{{ skillLevel }}</strong> out of <strong>{{ totalNumLevels }}</strong>
         </div>
 
         <star-progress v-if="totalNumLevels <= 6" :number-complete="skillLevel" :total-num-levels="totalNumLevels" star-style="circle"/>

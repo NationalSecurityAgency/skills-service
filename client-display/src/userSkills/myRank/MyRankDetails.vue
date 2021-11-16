@@ -31,7 +31,7 @@ limitations under the License.
                 <my-rank-detail-stat-card
                         class="col-md-3 mb-2 mb-md-0"
                         icon-class="fas fa-trophy"
-                        label="My Level"
+                        :label="`My ${this.levelDisplayName}`"
                         :value="rankingDistribution.myLevel"/>
 
                 <my-rank-detail-stat-card
