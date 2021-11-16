@@ -15,9 +15,12 @@
  */
 package skills.intTests
 
+import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import skills.storage.model.SkillRelDef
+import skills.storage.repos.SkillRelDefRepo
 
 class SkillsGroupSpecs extends DefaultIntSpec {
 
@@ -1293,5 +1296,88 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         groupDisabled.enabled == false
         child1Disabled.enabled == false
         child2Disabled.enabled == false
+    }
+
+    void "skills under SkillsGroup are returned in project's skills endpoint" () {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skillsGroup = SkillsFactory.createSkillsGroup()
+        def allSkills = SkillsFactory.createSkills(4) // first one is group
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[1])
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[2])
+        // regular skill
+        skillsService.createSkill(allSkills[3])
+
+        when:
+        def res = skillsService.getSkillsForProject(proj.projectId)
+
+        then:
+        res.size() == 3
+        res.collect { it.skillId }.sort() == [ allSkills[1].skillId, allSkills[2].skillId, allSkills[3].skillId, ]
+    }
+
+    void "skills under SkillsGroup are available to be used as dependencies" () {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skillsGroup = SkillsFactory.createSkillsGroup()
+        def allSkills = SkillsFactory.createSkills(4) // first one is group
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[1])
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[2])
+        // regular skill
+        skillsService.createSkill(allSkills[3])
+
+        when:
+        def res = skillsService.getSkillsAvailableForDependency(proj.projectId)
+
+        then:
+        res.size() == 3
+        res.collect { it.skillId }.sort() == [ allSkills[1].skillId, allSkills[2].skillId, allSkills[3].skillId, ]
+    }
+
+    @Autowired
+    SkillRelDefRepo skillRelDefRepo
+
+    void "subject-to-skill SkillRelDef is removed when skill is deleted" () {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skillsGroup = SkillsFactory.createSkillsGroup()
+        def allSkills = SkillsFactory.createSkills(4) // first one is group
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[1])
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[2])
+        // regular skill
+        skillsService.createSkill(allSkills[3])
+
+        List<SkillRelDef> before = skillRelDefRepo.findAll()
+        when:
+        skillsService.deleteSkill(allSkills[1])
+        List<SkillRelDef> after = skillRelDefRepo.findAll()
+        before.collect {
+            println "${it.parent.skillId} => ${it.type} => ${it.child.skillId}"
+        }
+        println "-------------------"
+        after.collect {
+            println "${it.parent.skillId} => ${it.type} => ${it.child.skillId}"
+        }
+        then:
+        before.findAll { it.child.skillId ==  allSkills[1].skillId }.collect { "${it.type}-${it.parent.skillId}"}.sort() == ["GroupSkillToSubject-TestSubject1", "SkillsGroupRequirement-skill1"]
+        before.findAll { it.child.skillId ==  allSkills[2].skillId }.collect { "${it.type}-${it.parent.skillId}"}.sort() == ["GroupSkillToSubject-TestSubject1", "SkillsGroupRequirement-skill1"]
+
+        !after.findAll { it.child.skillId ==  allSkills[1].skillId }.collect { "${it.type}-${it.parent.skillId}"}
+        after.findAll { it.child.skillId ==  allSkills[2].skillId }.collect { "${it.type}-${it.parent.skillId}"}.sort() == ["GroupSkillToSubject-TestSubject1", "SkillsGroupRequirement-skill1"]
     }
 }

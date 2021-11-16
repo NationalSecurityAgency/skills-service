@@ -274,6 +274,7 @@ class SkillsAdminService {
         if (!isEdit) {
             if (isSkillsGroupChild) {
                 skillsGroupAdminService.addSkillToSkillsGroup(savedSkill.projectId, groupId, savedSkill.skillId)
+                ruleSetDefGraphService.assignGraphRelationship(savedSkill.projectId, subject.skillId, SkillDef.ContainerType.Subject, savedSkill.skillId, SkillRelDef.RelationshipType.GroupSkillToSubject)
             } else {
                 assignToParent(skillRequest, savedSkill, subject)
             }

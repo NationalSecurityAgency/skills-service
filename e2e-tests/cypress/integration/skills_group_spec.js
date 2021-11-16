@@ -960,4 +960,38 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="pageHeaderStat_Groups"] [data-cy="statValue"]').should('have.text', '1');
         cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '3');
     });
+
+    it('search and navigate to group\'s skill', () => {
+        cy.createSkillsGroup(1, 1, 1);
+        cy.addSkillToGroup(1, 1, 1, 1);
+        cy.addSkillToGroup(1, 1, 1, 2);
+
+        cy.visit('/administrator/projects/proj1/');
+        cy.get('[data-cy="skillsSelector"]').click();
+        cy.get('[data-cy="skillsSelector"]').contains('Type to search for skills').should('be.visible')
+        cy.get('[data-cy="skillsSelector"]').type('skill')
+
+        cy.get('[data-cy="skillsSelector"] [data-cy="skillsSelector-skillId"]').should('have.length', 2).as('skillIds');
+        cy.get('@skillIds').eq(0).contains('skill1');
+        cy.get('@skillIds').eq(1).contains('skill2');
+        cy.get('@skillIds').eq(1).click();
+        cy.get('[data-cy="pageHeader"]').contains('ID: skill2')
+    });
+
+    it('add group\'s skill as a dependency', () => {
+        cy.createSkillsGroup(1, 1, 1);
+        cy.addSkillToGroup(1, 1, 1, 1);
+        cy.addSkillToGroup(1, 1, 1, 2);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill2/dependencies');
+        cy.contains('No Dependencies Yet');
+
+        cy.get('[data-cy="depsSelector"]').click();
+        cy.get('[data-cy="skillsSelector"] [data-cy="skillsSelector-skillId"]').should('have.length', 1).as('skillIds');
+        cy.get('@skillIds').eq(0).contains('skill1');
+        cy.get('@skillIds').eq(0).click();
+        cy.get('[data-cy="simpleSkillsTable"]').contains('Very Great Skill 1');
+    });
+
+
 });

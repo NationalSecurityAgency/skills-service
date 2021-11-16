@@ -72,7 +72,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         from SkillDef s, SkillDef subjectDef, SkillRelDef srd
          where
             subjectDef = srd.parent and s = srd.child and 
-            srd.type = 'RuleSetDefinition' and subjectDef.type = 'Subject' and 
+            (srd.type = 'RuleSetDefinition' or srd.type = 'GroupSkillToSubject') and subjectDef.type = 'Subject' and 
             s.projectId = ?1 and s.type = ?2 and 
             upper(s.name) like UPPER(CONCAT('%', ?3, '%'))''')
     List<SkillDefSkinny> findAllSkinnySelectByProjectIdAndType(String id, SkillDef.ContainerType type, String skillNameQuery)
@@ -116,7 +116,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     SkillDef findByProjectIdAndSkillId(String projectId, String skillId)
 
     @Query(value = '''SELECT max(sdChild.displayOrder) from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
-      where srd.parent=sdParent.id and srd.child=sdChild.id and 
+      where srd.parent=sdParent.id and srd.child=sdChild.id and srd.type IN ('RuleSetDefinition', 'SkillsGroupRequirement') and 
       sdParent.projectId=?1 and sdParent.skillId=?2''' )
     @Nullable
     Integer calculateChildSkillsHighestDisplayOrder(String projectId, String skillId)
