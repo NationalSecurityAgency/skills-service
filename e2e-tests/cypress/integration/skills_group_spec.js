@@ -77,6 +77,17 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="ChildRowSkillGroupDisplay_BlahGroup"] [data-cy="description"]').contains('Description for this group!');
     });
 
+    it('group\'s description supports markdown', () => {
+        const markdown = "# Title1\n## Title2\n### Title 3\n#### Title 4\n##### Title 5\nTitle 6\n\n";
+        cy.createSkillsGroup(1, 1, 1, { description : markdown });
+
+        cy.viewport(1200, 1200)
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="expandDetailsBtn_group1"]').click();
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="description"]');
+        cy.matchSnapshotImageForElement('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="description"]', 'Groups Description Markdown');
+    });
+
     it('handle focus', () => {
         cy.createSkillsGroup(1, 1, 1);
         cy.createSkill(1, 1, 1);
