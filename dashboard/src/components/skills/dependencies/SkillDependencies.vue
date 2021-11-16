@@ -23,7 +23,7 @@ limitations under the License.
           <skills-selector2 :options="allSkills" :selected="skills" v-on:added="skillAdded" v-on:removed="skillDeleted"
             data-cy="depsSelector">
             <template slot="dropdown-item" slot-scope="{ props }">
-              <div class="media">
+              <div class="media" data-cy="skillsSelector">
                 <div class="d-inline-block mt-1 mr-3">
                   <i v-if="props.option.otherProjectId" class="fas fa-w-16 fa-handshake text-hc"></i>
                   <i v-else class="fas fa-w-16 fa-list-alt text-info"></i>
@@ -33,7 +33,7 @@ limitations under the License.
                     {{ props.option.name }}</strong>
                   <div style="font-size: 0.95rem;" class="row text-secondary">
                     <div class="col-md">
-                      <span class="font-italic">ID:</span> <span class="ml-1">{{props.option.skillId}}</span>
+                      <span class="font-italic">ID:</span> <span class="ml-1" data-cy="skillsSelector-skillId">{{props.option.skillId}}</span>
                     </div>
                     <div class="col-md">
                       <span v-if="props.option.otherProjectId" class="text-warning ml-3">** Shared Skill **</span>
