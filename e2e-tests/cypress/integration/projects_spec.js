@@ -953,6 +953,56 @@ describe('Projects Tests', () => {
     cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
   });
 
+  it('project-level settings: set custom level name', () => {
+    cy.createProject(1);
+    cy.visit('/administrator/projects/proj1/settings')
+    cy.get('[data-cy="levelDisplayTextInput"]').should('have.value', 'Level');
+    cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
+    cy.get('[data-cy="settingsSavedAlert"]').should('not.exist')
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+
+    cy.get('[data-cy=levelDisplayTextInput]').clear().type('Stage')
+
+    cy.get('[data-cy="levelDisplayTextInput"]').should('have.value', 'Stage');
+    cy.get('[data-cy="unsavedChangesAlert"]').contains('Unsaved Changes')
+    cy.get('[data-cy="settingsSavedAlert"]').should('not.exist')
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
+
+    cy.get('[data-cy="saveSettingsBtn"]').click();
+    cy.get('[data-cy="settingsSavedAlert"]').contains('Settings Updated')
+    cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+
+    // refresh
+    cy.visit('/administrator/projects/proj1/settings')
+
+    cy.get('[data-cy="levelDisplayTextInput"]').should('have.value', 'Stage');
+    cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
+    cy.get('[data-cy="settingsSavedAlert"]').should('not.exist')
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+
+    // set back to default
+    cy.get('[data-cy=levelDisplayTextInput]').clear()
+
+    cy.get('[data-cy="levelDisplayTextInput"]').should('have.value', '');
+    cy.get('[data-cy="unsavedChangesAlert"]').contains('Unsaved Changes')
+    cy.get('[data-cy="settingsSavedAlert"]').should('not.exist')
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
+
+    cy.get('[data-cy="saveSettingsBtn"]').click();
+    cy.get('[data-cy="settingsSavedAlert"]').contains('Settings Updated')
+    cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+
+    // refresh, validate default is back
+    cy.visit('/administrator/projects/proj1/settings')
+
+    cy.get('[data-cy="levelDisplayTextInput"]').should('have.value', 'Level');
+    cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
+    cy.get('[data-cy="settingsSavedAlert"]').should('not.exist')
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+  });
+
   it('navigate to subjects by click on project name', () => {
     cy.createProject(1);
     cy.visit('/administrator')

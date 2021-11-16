@@ -55,14 +55,14 @@ limitations under the License.
         </div>
 
         <div class="row mt-3">
-          <div class="col col-md-3 text-secondary" id="levelDisplayNameLabel">
+          <div class="col col-md-3 text-secondary" id="levelDisplayTextLabel">
             Level Display Text:
             <inline-help
               msg='The word "Level" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
           </div>
           <div class="col">
-            <b-form-input v-model="settings.levelDisplayName.value"
-                          v-on:input="levelDisplayNameChanged" aria-labelledby="levelDisplayNameLabel"></b-form-input>
+            <b-form-input v-model="settings.levelDisplayName.value" data-cy="levelDisplayTextInput"
+                          v-on:input="levelDisplayNameChanged" aria-labelledby="levelDisplayTextLabel"></b-form-input>
           </div>
         </div>
 
