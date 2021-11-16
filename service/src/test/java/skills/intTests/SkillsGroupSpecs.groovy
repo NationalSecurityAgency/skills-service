@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 import skills.storage.repos.SkillRelDefRepo
 
@@ -1366,18 +1367,52 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         when:
         skillsService.deleteSkill(allSkills[1])
         List<SkillRelDef> after = skillRelDefRepo.findAll()
-        before.collect {
-            println "${it.parent.skillId} => ${it.type} => ${it.child.skillId}"
-        }
-        println "-------------------"
-        after.collect {
-            println "${it.parent.skillId} => ${it.type} => ${it.child.skillId}"
-        }
         then:
         before.findAll { it.child.skillId ==  allSkills[1].skillId }.collect { "${it.type}-${it.parent.skillId}"}.sort() == ["GroupSkillToSubject-TestSubject1", "SkillsGroupRequirement-skill1"]
         before.findAll { it.child.skillId ==  allSkills[2].skillId }.collect { "${it.type}-${it.parent.skillId}"}.sort() == ["GroupSkillToSubject-TestSubject1", "SkillsGroupRequirement-skill1"]
 
         !after.findAll { it.child.skillId ==  allSkills[1].skillId }.collect { "${it.type}-${it.parent.skillId}"}
         after.findAll { it.child.skillId ==  allSkills[2].skillId }.collect { "${it.type}-${it.parent.skillId}"}.sort() == ["GroupSkillToSubject-TestSubject1", "SkillsGroupRequirement-skill1"]
+    }
+
+    void "group's skills are eligible for self-reporting approval"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skillsGroup = SkillsFactory.createSkillsGroup()
+        def allSkills = SkillsFactory.createSkills(3) // first one is group
+        allSkills[1].selfReportingType = SkillDef.SelfReportingType.Approval
+        allSkills[2].selfReportingType = SkillDef.SelfReportingType.Approval
+        allSkills[1].pointIncrement = 100
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[1])
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[2])
+
+        skillsGroup.enabled = 'true'
+        skillsService.updateSkill(skillsGroup, null)
+
+        List<String> users = getRandomUsers(7)
+        println skillsService.addSkill([projectId: proj.projectId, skillId: allSkills[1].skillId], users.first(), new Date(), "Please approve this 1!")
+        println skillsService.addSkill([projectId: proj.projectId, skillId: allSkills[2].skillId], users.first(), new Date(), "Please approve this 2!")
+
+        when:
+        def res = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
+
+        def approvals1 = skillsService.getApprovals(proj.projectId, 7, 1, 'requestedOn', false)
+        skillsService.approve(proj.projectId, approvals1.data.collect { it.id })
+
+        def approvalsHistoryPg1 = skillsService.getApprovalsHistory(proj.projectId, 5, 1, 'requestedOn', false)
+
+        then:
+        res.data.size() == 2
+        res.data.find { it.skillId  == allSkills[1].skillId}
+        res.data.find { it.skillId  == allSkills[2].skillId}
+
+        approvalsHistoryPg1.totalCount == 2
+        approvalsHistoryPg1.count == 2
+        approvalsHistoryPg1.data.size() == 2
     }
 }

@@ -64,7 +64,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
         where 
             subjectDef = srd.parent and 
             sd = srd.child and
-            srd.type = 'RuleSetDefinition' and
+            (srd.type = 'RuleSetDefinition' or srd.type = 'GroupSkillToSubject') and
             subjectDef.type = 'Subject' and
             s.projectId = ?1 and 
             s.skillRefId = sd.id and 
@@ -92,7 +92,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
         where 
             subjectDef = srd.parent and 
             sd = srd.child and
-            srd.type = 'RuleSetDefinition' and
+            (srd.type = 'RuleSetDefinition' or srd.type = 'GroupSkillToSubject') and
             subjectDef.type = 'Subject' and
             s.projectId = :projectId and 
             s.skillRefId = sd.id and 

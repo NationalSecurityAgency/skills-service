@@ -70,7 +70,6 @@ class SkillApprovalService {
     FeatureService featureService
 
     TableResult getApprovals(String projectId, PageRequest pageRequest) {
-        List<SkillApprovalRepo.SimpleSkillApproval> approvalsFromDB = skillApprovalRepo.findToApproveByProjectIdAndNotRejectedOrApproved(projectId, pageRequest)
         return buildApprovalsResult(projectId, pageRequest, {
             skillApprovalRepo.findToApproveByProjectIdAndNotRejectedOrApproved(projectId, pageRequest)
         }, {
