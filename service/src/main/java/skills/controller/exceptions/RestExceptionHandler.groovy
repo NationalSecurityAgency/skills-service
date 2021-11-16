@@ -16,7 +16,7 @@
 package skills.controller.exceptions
 
 import groovy.util.logging.Slf4j
-import org.apache.commons.collections4.MapUtils
+import org.apache.catalina.connector.ClientAbortException
 import org.springframework.core.annotation.AnnotatedElementUtils
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.HttpHeaders
@@ -31,10 +31,8 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.context.request.ServletWebRequest
 import org.springframework.web.context.request.WebRequest
 import org.springframework.web.server.ResponseStatusException
-import org.springframework.web.servlet.function.ServerRequest
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 import skills.auth.SkillsAuthorizationException
-import skills.controller.exceptions.SkillException.SkillExceptionLogLevel
 
 @ControllerAdvice
 @Slf4j
@@ -123,10 +121,19 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @Override
     ResponseEntity<Object> handleHttpMessageNotReadable(
             HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-        log.error("${buildRequestInfo(request)}, HttpMessageNotReadableException", ex)
-        String msg = "${ex.message}"
-        BasicErrBody body = new BasicErrBody(explanation: msg, errorCode: ErrorCode.BadParam)
-        return new ResponseEntity(body, HttpStatus.BAD_REQUEST)
+        if (ex.getCause() instanceof ClientAbortException) {
+            handleClientAbortException(ex, request)
+        } else {
+            log.error("${buildRequestInfo(request)}, HttpMessageNotReadableException", ex)
+            String msg = "${ex.message}"
+            BasicErrBody body = new BasicErrBody(explanation: msg, errorCode: ErrorCode.BadParam)
+            return new ResponseEntity(body, HttpStatus.BAD_REQUEST)
+        }
+    }
+
+    @ExceptionHandler(ClientAbortException)
+    void handleClientAbortException(ClientAbortException ex, WebRequest webRequest) {
+        log.warn("${buildRequestInfo(webRequest)}, ClientAbortException - client prematurely closed the connection")
     }
 
     /**
