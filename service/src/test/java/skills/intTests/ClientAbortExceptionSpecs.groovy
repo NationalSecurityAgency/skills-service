@@ -37,7 +37,9 @@ class ClientAbortExceptionSpecs extends DefaultIntSpec {
     }
 
     private int disconnectEarly(String path) throws IOException {
-        HttpURLConnection urlConnection = (HttpURLConnection) URI.create("http://localhost:" + localPort + path).toURL().openConnection()
+        boolean pkiEnabled = mockUserInfoService != null
+        String protocol = pkiEnabled ? 'https' : 'http'
+        HttpURLConnection urlConnection = (HttpURLConnection) URI.create("${protocol}://localhost:" + localPort + path).toURL().openConnection()
         // Prematurely close the connection.
         urlConnection.getInputStream().close()
         return urlConnection.getResponseCode()
