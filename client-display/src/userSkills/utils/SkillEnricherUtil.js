@@ -23,10 +23,30 @@ export default {
         skills.splice(index, 1, updatedSkill);
     },
 
-    updateChildSkillPtsInList(skills, pts, skillId, childSkillId) {
+    updateSkillPtsUnderSkillGroup(skills, pts, skillId, childSkillId) {
         const index = skills.findIndex((item) => item.skillId === skillId);
-        const childSkill = skills[index];
-        this.updateSkillPtsInList(childSkill.children, pts, childSkillId);
+        const groupSkill = skills[index];
+        this.updateSkillPtsInList(groupSkill.children, pts, childSkillId);
+
+        let skillsToAddPtsFor = [];
+        if (groupSkill.numSkillsRequired > 0) {
+            const copyChildren = groupSkill.children.map((skill) => ({ ...skill }));
+            copyChildren.sort((a, b) => b.points - a.points);
+            skillsToAddPtsFor = copyChildren.slice(0, groupSkill.numSkillsRequired);
+        } else {
+            skillsToAddPtsFor = groupSkill.children;
+        }
+
+        const points = skillsToAddPtsFor.map((skill) => skill.points).reduce(
+            (previousValue, currentValue) => previousValue + currentValue,
+            0,
+        );
+        const todaysPoints = skillsToAddPtsFor.map((skill) => skill.todaysPoints).reduce(
+            (previousValue, currentValue) => previousValue + currentValue,
+            0,
+        );
+        const updatedSkill = ({ ...groupSkill, points, todaysPoints });
+        skills.splice(index, 1, updatedSkill);
     },
 
     addPts(skill, pts) {
