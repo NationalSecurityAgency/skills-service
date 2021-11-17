@@ -22,7 +22,7 @@ limitations under the License.
         </b-col>
         <b-col cols="12" sm="8" class="text-center text-sm-right pr-md-5">
           <div class="h4 text-uppercase text-truncate" data-cy="project-card-project-name" :title="proj.projectName ">{{ proj.projectName }}</div>
-          <div class="h5 text-secondary" data-cy="project-card-project-level">Level {{ proj.level }}</div>
+          <div class="h5 text-secondary" data-cy="project-card-project-level">{{ proj.levelDisplayName }} {{ proj.level }}</div>
           <div data-cy="project-card-project-rank">
             <b-badge :variant="rankVariant">Rank: {{ proj.rank | number }} / {{ proj.totalUsers | number}}</b-badge>
           </div>

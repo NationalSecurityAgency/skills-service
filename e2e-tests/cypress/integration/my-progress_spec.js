@@ -658,5 +658,24 @@ describe('Navigation Tests', () => {
     cy.matchSnapshotImageForElement('[data-cy="project-link-proj1"]', 'project-card-mid-screen');
   });
 
+  it('My Progress page - verify custom level on ProjectLinkCard', function () {
+    // set custom level display name for proj1
+    cy.loginAsRootUser();
+    cy.request('POST', '/admin/projects/proj1/settings', [{
+      value: 'Stage',
+      setting: 'level.displayName',
+      projectId: 'proj1',
+    }])
+
+    cy.loginAsProxyUser();
+    cy.visit('/progress-and-rankings/');
+
+    // proj1 has custom level name ("Stage")
+    cy.get('[data-cy=project-link-proj1]').find('[data-cy=project-card-project-level]').contains('Stage');
+    cy.get('[data-cy=project-link-proj1]').find('[data-cy=project-card-project-level]').contains('Level').should('not.exist');
+
+    // proj2 has default level name ("Level")
+    cy.get('[data-cy=project-link-proj2]').find('[data-cy=project-card-project-level]').contains('Level');
+  });
 });
 
