@@ -265,14 +265,13 @@ limitations under the License.
         }
       },
       onPointsEarned(pts, skillId, childSkillId = null) {
-        SkillEnricherUtil.updateSkillPtsInList(this.skillsInternalOrig, pts, skillId);
-        SkillEnricherUtil.updateSkillPtsInList(this.skillsInternal, pts, skillId);
-
-        // childSkillId is only provided for SkillsGroup skills,
-        // if so, find child skill and update its points
+        // childSkillId is only provided for SkillsGroup skills
         if (childSkillId) {
-          SkillEnricherUtil.updateChildSkillPtsInList(this.skillsInternal, pts, skillId, childSkillId);
-          SkillEnricherUtil.updateChildSkillPtsInList(this.skillsInternalOrig, pts, skillId, childSkillId);
+          SkillEnricherUtil.updateSkillPtsUnderSkillGroup(this.skillsInternal, pts, skillId, childSkillId);
+          SkillEnricherUtil.updateSkillPtsUnderSkillGroup(this.skillsInternalOrig, pts, skillId, childSkillId);
+        } else {
+          SkillEnricherUtil.updateSkillPtsInList(this.skillsInternalOrig, pts, skillId);
+          SkillEnricherUtil.updateSkillPtsInList(this.skillsInternal, pts, skillId);
         }
 
         const event = { skillId, pointsEarned: pts };
