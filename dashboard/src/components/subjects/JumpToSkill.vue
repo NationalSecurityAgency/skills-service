@@ -14,8 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div>
-    <skills-selector2 :options="availableSkills" class="mb-4 m-3"
+  <div class="row" style="height: 5rem;">
+    <div class="col">
+      <skills-selector2 :options="availableSkills" class="mb-4 m-3"
                       v-on:search-change="searchChanged"
                       v-on:added="navToSkill"
                       :is-loading="loading"
@@ -24,6 +25,7 @@ limitations under the License.
                       :onlySingleSelectedValue="true"
                       :internal-search="false"
                       :empty-without-search="true"/>
+    </div>
   </div>
 </template>
 
