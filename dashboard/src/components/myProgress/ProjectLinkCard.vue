@@ -56,8 +56,6 @@ limitations under the License.
 </template>
 
 <script>
-  import SettingsService from '../settings/SettingsService';
-
   export default {
     name: 'ProjectLinkCard',
     props: ['proj'],
@@ -109,7 +107,6 @@ limitations under the License.
           labels: ['Median Ratio'],
         },
         rankVariant: 'secondary',
-        levelDisplayName: 'Level',
       };
     },
     mounted() {
@@ -122,7 +119,6 @@ limitations under the License.
         const rankPercent = this.getPercent((this.proj.rank / this.proj.totalUsers) * 100);
         this.rankVariant = this.getVariant(rankPercent);
       }
-      this.setCustomLevelDisplayName();
     },
     methods: {
       getPercent(percent) {
@@ -154,13 +150,14 @@ limitations under the License.
         }
         return res;
       },
-      setCustomLevelDisplayName() {
-        SettingsService.getClientDisplayConfig(this.proj.projectId)
-          .then((res) => {
-            if (res && res.levelDisplayName) {
-              this.levelDisplayName = res.levelDisplayName;
-            }
-          });
+    },
+    computed: {
+      levelDisplayName() {
+        const customLevelDisplayKey = `${this.proj.projectId}LevelDisplayName`;
+        if (this.$store.getters.config && this.$store.getters.config[customLevelDisplayKey]) {
+          return this.$store.getters.config[customLevelDisplayKey];
+        }
+        return 'Level';
       },
     },
   };
