@@ -51,7 +51,7 @@ describe('Navigation Tests', () => {
     cy.dashboardCd().find('[data-cy="skillProgress_index-3"] [data-cy="selfReportBtn"]').click();
     cy.dashboardCd().find('[data-cy="selfReportSkillMsg"]').contains('This skill requires approval');
 
-    cy.wait(5000);
+    cy.wait(8000);
     cy.matchSnapshotImageForElement('iframe', 'self reporting modal positioning');
   });
 
@@ -82,7 +82,7 @@ describe('Navigation Tests', () => {
     cy.dashboardCd().find('[data-cy="clearRejectionMsgBtn"]').click();
     cy.dashboardCd().find('[data-cy="clearRejectionMsgDialog"]').contains('This action will permanently remove the rejection');
 
-    cy.wait(5000);
+    cy.wait(8000);
     const snapshotOptions = {
       blackout: ['[data-cy="selfReportRejectedAlert"]'],
       failureThreshold: 0.03, // threshold for entire image
