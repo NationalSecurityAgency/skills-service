@@ -22,7 +22,7 @@ limitations under the License.
         </b-col>
         <b-col cols="12" sm="8" class="text-center text-sm-right pr-md-5">
           <div class="h4 text-uppercase text-truncate" data-cy="project-card-project-name" :title="proj.projectName ">{{ proj.projectName }}</div>
-          <div class="h5 text-secondary" data-cy="project-card-project-level">Level {{ proj.level }}</div>
+          <div class="h5 text-secondary" data-cy="project-card-project-level">{{ levelDisplayName }} {{ proj.level }}</div>
           <div data-cy="project-card-project-rank">
             <b-badge :variant="rankVariant">Rank: {{ proj.rank | number }} / {{ proj.totalUsers | number}}</b-badge>
           </div>
@@ -56,6 +56,8 @@ limitations under the License.
 </template>
 
 <script>
+  import SettingsService from '../settings/SettingsService';
+
   export default {
     name: 'ProjectLinkCard',
     props: ['proj'],
@@ -107,6 +109,7 @@ limitations under the License.
           labels: ['Median Ratio'],
         },
         rankVariant: 'secondary',
+        levelDisplayName: 'Level',
       };
     },
     mounted() {
@@ -119,6 +122,7 @@ limitations under the License.
         const rankPercent = this.getPercent((this.proj.rank / this.proj.totalUsers) * 100);
         this.rankVariant = this.getVariant(rankPercent);
       }
+      this.setCustomLevelDisplayName();
     },
     methods: {
       getPercent(percent) {
@@ -149,6 +153,14 @@ limitations under the License.
           res = 'success';
         }
         return res;
+      },
+      setCustomLevelDisplayName() {
+        SettingsService.getClientDisplayConfig(this.proj.projectId)
+          .then((res) => {
+            if (res && res.levelDisplayName) {
+              this.levelDisplayName = res.levelDisplayName;
+            }
+          });
       },
     },
   };

@@ -92,4 +92,9 @@ export default {
     return axios.get('/public/config')
       .then((remoteRes) => remoteRes.data);
   },
+  getClientDisplayConfig(projectId) {
+    return axios.get(`/public/clientDisplay/config?projectId=${projectId}`)
+      .then((remoteRes) => remoteRes.data);
+  },
+
 };
