@@ -84,14 +84,6 @@ class PublicConfigController {
         if (oAuthProviders) {
             res['oAuthProviders'] = oAuthProviders
         }
-        List<SettingsResult> customLevelTextForProjects = settingsService.getProjectSettingsForAllProjects('level.displayName')
-        customLevelTextForProjects?.each {
-            String projectId = it.projectId
-            String customLevelName = it.value
-            if (projectId && customLevelName) {
-                res["${projectId}LevelDisplayName"] = customLevelName
-            }
-        }
         return res
     }
 

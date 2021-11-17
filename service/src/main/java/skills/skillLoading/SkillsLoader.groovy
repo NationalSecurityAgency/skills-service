@@ -171,11 +171,16 @@ class SkillsLoader {
     MyProgressSummary loadMyProgressSummary(String userId) {
         MyProgressSummary myProgressSummary = new MyProgressSummary()
         List<ProjectSummaryResult> projectSummaries = projDefRepo.getProjectSummaries(userId)
+        List<SettingsResult> customLevelTextForProjects = settingsService.getProjectSettingsForAllProjects('level.displayName')
         for (ProjectSummaryResult summaryResult : projectSummaries.sort({it.getOrderVal()})) {
             ProjectSummary summary = new ProjectSummary().fromProjectSummaryResult(summaryResult)
             myProgressSummary.projectSummaries << summary
             summary.level = getRealLevelInfo(new ProjDef(id: summary.projectRefId, projectId: summary.projectId, totalPoints: summary.totalPoints), userId, summary.points, summary.totalPoints).level  // SLOW!
             myProgressSummary.numProjectsContributed += summary.points > 0 ? 1 : 0
+            SettingsResult customLevelText = customLevelTextForProjects.find { it.projectId == summary.projectId }
+            if (customLevelText && customLevelText.value) {
+                summary.levelDisplayName = customLevelText.value
+            }
         }
 
         BadgeCount badgeCount = skillDefRepo.getProductionMyBadgesCount(userId)
