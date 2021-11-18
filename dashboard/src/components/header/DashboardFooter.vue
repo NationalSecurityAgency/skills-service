@@ -26,7 +26,7 @@ limitations under the License.
       <span class="small footer-text">SkillTree Dashboard</span>
     </div>
     <div class="col-sm text-right">
-      <span class="small mr-2 footer-text">v{{ $store.getters.config.dashboardVersion }}</span>
+      <span class="small mr-2 footer-text" :title="skillTreeVersionTitle">v{{ $store.getters.config.dashboardVersion }}</span>
       <i class="fas fa-code-branch"></i>
     </div>
   </div>
@@ -36,6 +36,12 @@ limitations under the License.
 <script>
   export default {
     name: 'DashboardFooter',
+    computed: {
+      skillTreeVersionTitle() {
+        const dateString = window.dayjs(this.$store.getters.config.artifactBuildTimestamp).format('llll [(]Z[ from UTC)]');
+        return `Build Date: ${dateString}`;
+      },
+    },
   };
 </script>
 
