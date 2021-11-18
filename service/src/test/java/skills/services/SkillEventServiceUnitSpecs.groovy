@@ -20,11 +20,15 @@ import org.springframework.messaging.simp.broker.BrokerAvailabilityEvent
 import skills.services.events.*
 import skills.services.events.pointsAndAchievements.PointsAndAchievementsHandler
 import skills.storage.model.SkillDef
+import skills.storage.model.UserAchievement
+import skills.storage.model.UserPoints
 import skills.storage.repos.SkillEventsSupportRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPerformedSkillRepo
+import skills.storage.repos.UserPointsRepo
 import skills.utils.LoggerHelper
 import skills.utils.MetricsLogger
+import spock.lang.IgnoreRest
 import spock.lang.Specification
 
 import static skills.storage.repos.SkillEventsSupportRepo.SkillDefMin
@@ -182,5 +186,42 @@ class SkillEventServiceUnitSpecs extends Specification {
 
         cleanup:
         loggerHelper.stop()
+    }
+
+    def "notify user of achievements does not fail with project level achievements"() {
+        SkillEventPublisher mockSkillEventPublisher = Mock()
+        SkillEventsSupportRepo mockSkillEventsSupportRepo = Mock()
+        UserPerformedSkillRepo mockPerformedSkillRepository = Mock()
+        MetricsLogger mockMetricsLogger = Mock()
+        UserEventService mockUserEventService = Mock()
+        UserAchievedLevelRepo userAchievedLevelRepo = Mock()
+        UserPointsRepo userPointsRepo = Mock()
+
+        SkillEventsService skillEventsService = new SkillEventsService(
+                skillEventPublisher: mockSkillEventPublisher,
+                skillEventsSupportRepo: mockSkillEventsSupportRepo,
+                performedSkillRepository: mockPerformedSkillRepository,
+                metricsLogger: mockMetricsLogger,
+                userEventService: mockUserEventService,
+                achievedLevelRepo: userAchievedLevelRepo,
+                userPointsRepo: userPointsRepo
+        )
+
+        UserAchievement ua = new UserAchievement(projectId: "proj", level: 1, created: new Date())
+        userAchievedLevelRepo.findAllByUserIdAndNotifiedOrderByCreatedAsc(_, _) >> [ua]
+        userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay("proj", null, _) >> null
+
+        when:
+
+        skillEventsService.identifyPendingNotifications("aUser")
+
+        then:
+
+        1 * mockSkillEventPublisher.publishSkillUpdate({
+            !it.skillId && it.projectId == "proj" && it.name == "OVERALL" &&
+                    it.completed.size() == 1 && it.completed[0].name == "OVERALL" &&
+                    it.completed[0].level == 1
+        }, "aUser")
+        1 * userAchievedLevelRepo.saveAll(_)
     }
 }
