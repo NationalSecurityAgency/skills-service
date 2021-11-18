@@ -50,9 +50,9 @@ describe('Navigation Tests', () => {
     cy.dashboardCd().find('[data-cy="selfReportBtn"]').should('have.length', 4)
     cy.dashboardCd().find('[data-cy="skillProgress_index-3"] [data-cy="selfReportBtn"]').click();
     cy.dashboardCd().find('[data-cy="selfReportSkillMsg"]').contains('This skill requires approval');
-
+    cy.get('iframe');
     cy.wait(8000);
-    cy.matchSnapshotImageForElement('iframe', 'self reporting modal positioning');
+    cy.matchSnapshotImageForElement('iframe', 'self reporting modal positioning', {blackout: ['#point-progress-container']});
   });
 
   it('self report rejection modals must render at the same level of the button that initiated the modal', () => {
