@@ -137,7 +137,7 @@ class SkillEventsService {
                 }
 
                 if (!ser) {
-                    ser = new SkillEventResult(projectId: it.projectId, skillId: it.skillId, name: skill.name)
+                    ser = new SkillEventResult(projectId: it.projectId, skillId: it.skillId, name: skill? skill.name : 'OVERALL')
                     ser.completed = []
                 }
 
