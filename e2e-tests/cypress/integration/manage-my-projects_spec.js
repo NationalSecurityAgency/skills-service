@@ -63,7 +63,7 @@ describe('Manage My Projects Tests', () => {
 
     cy.visit('/progress-and-rankings');
     cy.get('[data-cy="manageMyProjsBtn"]').click();
-    cy.contains('No Projects in the Production Mode');
+    cy.contains('No Discoverable Projects');
     cy.contains('Projects can be created and managed from the "Project Admin" view')
   });
 

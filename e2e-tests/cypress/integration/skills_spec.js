@@ -943,7 +943,7 @@ describe('Skills Tests', () => {
 
 
         cy.visit('/administrator/projects/proj1/');
-        cy.get('[data-cy="skillsSelector"]').contains('Search and navigate directly to a skill').should('be.visible')
+        cy.get('[data-cy="skillsSelector"]').contains('Search and Navigate directly to a skill').should('be.visible')
         cy.get('[data-cy="skillsSelector"]').click();
         cy.get('[data-cy="skillsSelector"]').contains('Type to search for skills').should('be.visible')
         cy.get('[data-cy="skillsSelector"]').type('sUbJ2')
@@ -969,7 +969,7 @@ describe('Skills Tests', () => {
 
         // search produces no results
         cy.visit('/administrator/projects/proj1/');
-        cy.get('[data-cy="skillsSelector"]').contains('Search and navigate directly to a skill').should('be.visible')
+        cy.get('[data-cy="skillsSelector"]').contains('Search and Navigate directly to a skill').should('be.visible')
         cy.get('[data-cy="skillsSelector"]').type('sUbJ2*kd')
         cy.get('[data-cy="skillsSelector"]').contains('No elements found. Consider changing the search query').should('be.visible')
 
