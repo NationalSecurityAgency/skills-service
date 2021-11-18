@@ -993,5 +993,32 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="simpleSkillsTable"]').contains('Very Great Skill 1');
     });
 
+    it('go live should not change groups display order', () => {
+        cy.createSkill(1, 1, 1)
+        cy.wait(1000)
+        cy.createSkill(1, 1, 2)
+        cy.wait(1000)
+        cy.createSkill(1, 1, 3)
+        cy.wait(1000)
+        cy.createSkillsGroup(1, 1, 4);
+        cy.addSkillToGroup(1, 1, 4, 5);
+        cy.addSkillToGroup(1, 1, 4, 6);
+
+        const groupId = 'group4';
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="goLiveBtn"]`).click();
+        cy.contains('Yes, Go Live').click();
+
+        cy.get('[data-label="Skill"]').should('have.length', 6).as('cells');
+        cy.get('@cells').eq(0).contains('ID: group4');
+        cy.get('@cells').eq(1).contains('ID: skill6');
+        cy.get('@cells').eq(2).contains('ID: skill5');
+        cy.get('@cells').eq(3).contains('ID: skill3');
+        cy.get('@cells').eq(4).contains('ID: skill2');
+        cy.get('@cells').eq(5).contains('ID: skill1');
+
+    });
 
 });
+
