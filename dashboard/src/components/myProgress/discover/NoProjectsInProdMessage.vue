@@ -16,7 +16,7 @@ limitations under the License.
 <template>
   <b-card class="p-4 text-center">
 
-    <no-content2 title="No Projects in the Production Mode"/>
+    <no-content2 title="No Discoverable Projects"/>
     <p class="text-primary">
       Projects can be created and managed from the "Project Admin" view.
     </p>
@@ -40,7 +40,7 @@ limitations under the License.
         <div class="mt-2">
           <b-badge class="mr-1">3.</b-badge>
           Enable the <img class="border rounded"
-                          src="/static/img/screenshot_prodMode.png" alt="Production Mode switch screenshot"/> setting
+                          src="/static/img/screenshot_discoverable_setting1.png" alt="Discoverable Setting"/> setting
         </div>
       </b-col>
     </b-row>

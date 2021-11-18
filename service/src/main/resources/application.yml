@@ -129,6 +129,7 @@ skills:
       defaultLandingPage: "admin"
       maxSelfReportMessageLength: 250
       maxSelfReportRejectionMessageLength: 250
+      artifactBuildTimestamp: @maven.build.timestamp@
     client:
       loggingEnabled: false
       loggingLevel: DEBUG

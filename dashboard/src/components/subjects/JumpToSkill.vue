@@ -14,13 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="row" style="height: 5rem;">
+  <div class="row mb-2" style="height: 3rem;">
     <div class="col">
-      <skills-selector2 :options="availableSkills" class="mb-4 m-3"
+      <skills-selector2 :options="availableSkills"
+                      class="search-and-nav border rounded"
                       v-on:search-change="searchChanged"
                       v-on:added="navToSkill"
                       :is-loading="loading"
-                      placeholder="Search and navigate directly to a skill"
+                      placeholder="Search and Navigate directly to a skill"
+                      placeholder-icon="fas fa-search"
                       select-label="Click to navigate"
                       :onlySingleSelectedValue="true"
                       :internal-search="false"
@@ -67,5 +69,7 @@ limitations under the License.
 </script>
 
 <style scoped>
-
+.search-and-nav {
+  border-color: #d9d9d9 !important;
+}
 </style>

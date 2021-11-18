@@ -50,6 +50,9 @@ limitations under the License.
         <span v-if="emptyWithoutSearch && !internalSearch"><i class="fas fa-search"/> Type to <span class="font-weight-bold">search</span> for skills...</span>
         <span v-else>List is empty!</span>
       </template>
+      <template slot="placeholder">
+        <span class="text-secondary"><i v-if="placeholderIcon" :class="placeholderIcon"></i> {{ placeholder }}</span>
+      </template>
     </multiselect>
   </div>
 </template>
@@ -97,6 +100,10 @@ limitations under the License.
       placeholder: {
         type: String,
         default: 'Select skill(s)...',
+      },
+      placeholderIcon: {
+        type: String,
+        default: null,
       },
       selectLabel: {
         type: String,
