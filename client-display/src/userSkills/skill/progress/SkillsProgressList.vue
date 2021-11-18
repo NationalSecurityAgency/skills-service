@@ -314,7 +314,7 @@ limitations under the License.
               }
             }
             return item.skill?.trim()?.toLowerCase().includes(searchStrNormalized);
-          });
+          }).map((item) => ({ ...item, children: item.children?.map((child) => ({ ...child })) }));
 
           resultSkills = foundItems.map((item) => {
             const skillHtml = StringHighlighter.highlight(item.skill, searchStrNormalized);
