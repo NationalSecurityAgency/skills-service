@@ -62,7 +62,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
 
         then:
         def exception = thrown(SkillsClientException)
-        exception.message.contains("Cannot convert an existing Skill to a Skill Group, or existing Skill Group to Skill")
+        exception.message.contains("Skill with id [skill1] with type [Skill] already exists! Requested to create skill with type of [SkillsGroup]")
     }
 
     void "create and add skills to SkillsGroup" () {
@@ -1414,5 +1414,88 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         approvalsHistoryPg1.totalCount == 2
         approvalsHistoryPg1.count == 2
         approvalsHistoryPg1.data.size() == 2
+    }
+
+    void "when type is not provided must default to type=Skill and execute all of the skill's validation"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skillsGroup = SkillsFactory.createSkillsGroup()
+        def allSkills = SkillsFactory.createSkills(2) // first one is group
+        allSkills[1].type = null
+        allSkills[1].pointIncrement = 0
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+
+        when:
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[1])
+
+        then:
+        def ex = thrown(SkillsClientException)
+        ex.message.contains("pointIncrement must be > 0")
+    }
+
+    void "skills ids cannot have the same skillId as an existing group"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skillsGroup = SkillsFactory.createSkillsGroup()
+        def allSkills = SkillsFactory.createSkills(2) // first one is group
+        allSkills[1].skillId = skillsGroup.skillId
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+
+        when:
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[1])
+
+        then:
+        def ex = thrown(SkillsClientException)
+        ex.message.contains("Skill with id [skill1] with type [SkillsGroup] already exists! Requested to create skill with type of [Skill]")
+    }
+
+    void "groups ids cannot have the same skillId as an existing skill"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skillsGroup = SkillsFactory.createSkillsGroup()
+        def allSkills = SkillsFactory.createSkills(2) // first one is group
+        skillsGroup.skillId = allSkills[1].skillId
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(allSkills[1])
+
+        when:
+        skillsService.createSkill(skillsGroup)
+
+        then:
+        def ex = thrown(SkillsClientException)
+        ex.message.contains("Skill with id [skill2] with type [Skill] already exists! Requested to create skill with type of [SkillsGroup]")
+    }
+
+    void "groups ids cannot have the same skillId as an existing group's skill"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skillsGroup = SkillsFactory.createSkillsGroup(1 , 1, 1)
+        def skillsGroup2 = SkillsFactory.createSkillsGroup(1 , 1, 2)
+        def allSkills = SkillsFactory.createSkills(3) // first one is group
+        skillsGroup2.skillId = allSkills[2].skillId
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[2])
+
+        when:
+        skillsService.createSkill(skillsGroup2)
+
+        then:
+        def ex = thrown(SkillsClientException)
+        ex.message.contains("Skill with id [skill3] with type [Skill] already exists! Requested to create skill with type of [SkillsGroup]")
     }
 }

@@ -161,6 +161,9 @@ class SkillsAdminService {
                 throw new SkillException("Skill with id [${skillRequest.skillId}] already exists! Sorry!", skillRequest.projectId, null, ErrorCode.ConstraintViolation)
             }
         }
+        if (skillDefinition && skillDefinition.type.toString() != skillRequest.type) {
+            throw new SkillException("Skill with id [${skillRequest.skillId}] with type [${skillDefinition.type}] already exists! Requested to create skill with type of [${skillRequest.type}]", skillRequest.projectId, skillDefinition.skillId, ErrorCode.ConstraintViolation)
+        }
 
         if (!skillDefinition || !skillDefinition.name.equalsIgnoreCase(skillRequest.name)) {
             SkillDef nameExists = skillDefRepo.findByProjectIdAndNameIgnoreCaseAndType(skillRequest.projectId, skillRequest.name, SkillDef.ContainerType.Skill)
@@ -239,6 +242,9 @@ class SkillsAdminService {
             String enabled = isSkillsGroup ? Boolean.FALSE.toString() : Boolean.TRUE.toString()
             if (isSkillsGroupChild) {
                 skillsGroupSkillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, groupId, SkillDef.ContainerType.SkillsGroup)
+                if (!skillsGroupSkillDef) {
+                    throw new SkillException("[${groupId}] groupId was not found.".toString(), skillRequest.projectId, skillRequest.skillId, ErrorCode.BadParam)
+                }
                 enabled = skillsGroupSkillDef.enabled
             }
             skillDefinition = new SkillDefWithExtra(
