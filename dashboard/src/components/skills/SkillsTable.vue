@@ -182,7 +182,7 @@ limitations under the License.
         </template>
         <template #row-details="row">
             <child-row-skill-group-display v-if="row.item.isGroupType" :group="row.item"
-                                           @group-changed="row.item = Object.assign(row.item, arguments[0])"/>
+                                           @group-changed="groupChanged(row, arguments[0])"/>
             <ChildRowSkillsDisplay v-if="row.item.isSkillType" :project-id="projectId" :subject-id="subjectId" v-skills-onMount="'ExpandSkillDetailsSkillsPage'"
                                    :parent-skill-id="row.item.skillId" :refresh-counter="row.item.refreshCounter"
                                    class="mr-3 ml-5 mb-3"></ChildRowSkillsDisplay>
@@ -471,6 +471,12 @@ limitations under the License.
           created: new Date(skill.created),
           subjectId: this.subjectId,
         };
+      },
+      groupChanged(row, updated) {
+        const groupIndex = this.skills.findIndex((item) => item.skillId === row.item.skillId);
+        const newGroup = this.addMetaToSkillObj(updated);
+        // eslint-disable-next-line no-param-reassign
+        row.item = Object.assign(this.skills[groupIndex], newGroup);
       },
       skillCreatedOrUpdated(skill) {
         if (this.skillsOriginal.length === 0) {
