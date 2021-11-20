@@ -468,6 +468,9 @@ class AdminController {
         skillRequest.skillId = InputSanitizer.sanitize(skillRequest.skillId)
         skillRequest.subjectId = InputSanitizer.sanitize(skillRequest.subjectId)
 
+        // if type is not provided then we default to skill
+        skillRequest.type = skillRequest.type ?:  SkillDef.ContainerType.Skill.toString()
+
         if (skillRequest.type == SkillDef.ContainerType.Skill.toString()) {
             SkillsValidator.isTrue(skillRequest.pointIncrement > 0, "pointIncrement must be > 0", projectId, skillId)
             propsBasedValidator.validateMaxIntValue(PublicProps.UiProp.maxPointIncrement, "pointIncrement", skillRequest.pointIncrement)
