@@ -283,6 +283,7 @@ limitations under the License.
           this.$emit('group-changed', updatedGroup);
         } else {
           this.skills.push(skill);
+          this.numSkills = this.skills.length;
         }
         this.refreshSubjectState();
       },
