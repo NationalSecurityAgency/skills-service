@@ -1498,4 +1498,62 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         def ex = thrown(SkillsClientException)
         ex.message.contains("Skill with id [skill3] with type [Skill] already exists! Requested to create skill with type of [SkillsGroup]")
     }
+
+    void "self report skills that require approval under a group"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skillsGroup = SkillsFactory.createSkillsGroup(1 , 1, 1)
+        def skillsGroup2 = SkillsFactory.createSkillsGroup(1 , 1, 2)
+        def allSkills = SkillsFactory.createSkills(3) // first one is group
+        skillsGroup2.skillId = allSkills[2].skillId
+
+        when:
+        true
+        then:
+        true
+    }
+
+    void "when self reporting - group can  have very little points as long as the entire subject and project has sufficient points"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skillsGroup = SkillsFactory.createSkillsGroup()
+        def allSkills = SkillsFactory.createSkills(4) // first one is group
+        allSkills[1].selfReportingType = SkillDef.SelfReportingType.Approval
+        allSkills[2].selfReportingType = SkillDef.SelfReportingType.Approval
+        allSkills[1].pointIncrement = 1
+        allSkills[2].pointIncrement = 1
+        allSkills[3].pointIncrement = 500
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[1])
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[2])
+        skillsService.createSkill(allSkills[3])
+
+        skillsGroup.enabled = 'true'
+        skillsService.updateSkill(skillsGroup, null)
+
+        List<String> users = getRandomUsers(7)
+        println skillsService.addSkill([projectId: proj.projectId, skillId: allSkills[1].skillId], users.first(), new Date(), "Please approve this 1!")
+        println skillsService.addSkill([projectId: proj.projectId, skillId: allSkills[2].skillId], users.first(), new Date(), "Please approve this 2!")
+
+        when:
+        def res = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
+
+        def approvals1 = skillsService.getApprovals(proj.projectId, 7, 1, 'requestedOn', false)
+        skillsService.approve(proj.projectId, approvals1.data.collect { it.id })
+
+        def approvalsHistoryPg1 = skillsService.getApprovalsHistory(proj.projectId, 5, 1, 'requestedOn', false)
+
+        then:
+        res.data.size() == 2
+        res.data.find { it.skillId  == allSkills[1].skillId}
+        res.data.find { it.skillId  == allSkills[2].skillId}
+
+        approvalsHistoryPg1.totalCount == 2
+        approvalsHistoryPg1.count == 2
+        approvalsHistoryPg1.data.size() == 2
+    }
 }

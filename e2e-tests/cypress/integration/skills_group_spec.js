@@ -44,6 +44,7 @@ describe('Skills Group Tests', () => {
             cy.get('[data-cy="skillName"]').type(skillName);
             cy.get('[data-cy="saveSkillButton"]').click();
             cy.get('[data-cy="saveSkillButton"]').should('not.exist');
+            cy.contains(`Skill${skillNum}Skill`);
         });
 
     });
