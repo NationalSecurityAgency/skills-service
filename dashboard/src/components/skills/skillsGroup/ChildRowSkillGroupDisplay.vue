@@ -243,7 +243,6 @@ limitations under the License.
         const copy = { groupId: this.group.skillId, ...skill };
         this.$refs[`groupSkills_${this.group.skillId}`].skillCreatedOrUpdated(copy)
           .then(() => {
-            this.numSkills += 1;
             const updatedGroup = {
               ...this.group,
               numSkillsInGroup: this.group.numSkillsInGroup + 1,
