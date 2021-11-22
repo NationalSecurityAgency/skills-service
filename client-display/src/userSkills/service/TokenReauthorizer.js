@@ -37,7 +37,7 @@ const refreshAuthorization = (failedRequest) => {
         delete axios.defaults.headers.common.Authorization;
       } else {
         const accessToken = result.data.access_token;
-        this.$store.commit('authToken', accessToken);
+        store.commit('authToken', accessToken);
         // eslint-disable-next-line no-param-reassign
         failedRequest.response.config.headers.Authorization = `Bearer ${accessToken}`;
         axios.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
@@ -69,7 +69,7 @@ axios.interceptors.response.use((response) => response, (error) => {
   const errorCode = (error && error.response) ? error.response.status : undefined;
 
   // check if the caller wants to handle a specific error status code
-  if (Object.prototype.hasOwnProperty.call(error.config, 'handleErrorCode')) {
+  if (error && error.config && Object.prototype.hasOwnProperty.call(error.config, 'handleErrorCode')) {
     if (Array.isArray(error.config.handleErrorCode)) {
       if (error.config.handleErrorCode.find((el) => el === errorCode)) {
         return Promise.reject(error);
