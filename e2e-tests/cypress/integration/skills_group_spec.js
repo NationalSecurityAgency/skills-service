@@ -504,6 +504,28 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="nameCell_copy_of_skill2"]').contains('ID: copy_of_skill2')
     });
 
+    it('"Go Live" button must enabled after copying operation creates 2nd skill', () => {
+        cy.createSkillsGroup(1, 1, 1);
+        cy.addSkillToGroup(1, 1, 1, 1, { pointIncrement: 10, numPerformToCompletion: 5 });
+        const groupId = 'group1'
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
+
+        cy.get('[data-cy="copySkillButton_skill1"]').click();
+        cy.get('button').contains('Save').click();
+
+        cy.get('[data-cy="nameCell_copy_of_skill1"]').contains('Copy of Very Great Skill 1')
+        cy.get('[data-cy="nameCell_copy_of_skill1"]').contains('ID: copy_of_skill1')
+
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="goLiveBtn"]`).should('be.enabled');
+
+        // refresh and verify
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="goLiveBtn"]`).should('be.enabled');
+    });
+
     it('nav to skill', () => {
         cy.createSkillsGroup(1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 1, { pointIncrement: 10, numPerformToCompletion: 5 });
@@ -913,6 +935,33 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '350');
         cy.get('[data-cy="pageHeaderStat_Groups"] [data-cy="statValue"]').should('have.text', '1');
         cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '3');
+    })
+
+    it('subject overview cards are updated when group skill is copied', () => {
+        cy.createSkillsGroup(1, 1, 1);
+        cy.addSkillToGroup(1, 1, 1, 1, { pointIncrement: 10, numPerformToCompletion: 5 });
+        cy.addSkillToGroup(1, 1, 1, 2, { pointIncrement: 10, numPerformToCompletion: 5 });
+        cy.addSkillToGroup(1, 1, 1, 3, { pointIncrement: 10, numPerformToCompletion: 5 });
+        cy.createSkillsGroup(1, 1, 1, { enabled: true });
+        const groupId = 'group1'
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
+
+        cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '150');
+        cy.get('[data-cy="pageHeaderStat_Groups"] [data-cy="statValue"]').should('have.text', '1');
+        cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '3');
+
+        // copy
+        cy.get('[data-cy="copySkillButton_skill1"]').click();
+        cy.get('button').contains('Save').click();
+
+        cy.get('[data-cy="nameCell_copy_of_skill1"]').contains('Copy of Very Great Skill 1')
+        cy.get('[data-cy="nameCell_copy_of_skill1"]').contains('ID: copy_of_skill1')
+
+        cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '200');
+        cy.get('[data-cy="pageHeaderStat_Groups"] [data-cy="statValue"]').should('have.text', '1');
+        cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '4');
     })
 
     it('subject overview cards are updated after skill sync', () => {
