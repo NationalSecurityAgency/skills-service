@@ -1499,20 +1499,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         ex.message.contains("Skill with id [skill3] with type [Skill] already exists! Requested to create skill with type of [SkillsGroup]")
     }
 
-    void "self report skills that require approval under a group"() {
-        def proj = SkillsFactory.createProject()
-        def subj = SkillsFactory.createSubject()
-        def skillsGroup = SkillsFactory.createSkillsGroup(1 , 1, 1)
-        def skillsGroup2 = SkillsFactory.createSkillsGroup(1 , 1, 2)
-        def allSkills = SkillsFactory.createSkills(3) // first one is group
-        skillsGroup2.skillId = allSkills[2].skillId
-
-        when:
-        true
-        then:
-        true
-    }
-
     void "when self reporting - group can  have very little points as long as the entire subject and project has sufficient points"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
