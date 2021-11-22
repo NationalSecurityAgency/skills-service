@@ -63,6 +63,9 @@ class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
     @Value('#{"${security.oauth2.jwt.keystore.alias:jwtkeys}"}')
     private String jwtKeystoreAlias
 
+    @Value('#{"${security.oauth2.jwt.accessTokenValiditySeconds:43200}"}') // default 12 hours.
+    private int accessTokenValiditySeconds
+
     @Autowired
     private AuthenticationManager authenticationManager
 
@@ -124,7 +127,7 @@ class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
         DefaultTokenServices defaultTokenServices = new DefaultTokenServices()
         defaultTokenServices.setTokenStore(tokenStore())
         defaultTokenServices.setTokenEnhancer(tokenEnhancer())
-//        defaultTokenServices.setAccessTokenValiditySeconds(10)
+        defaultTokenServices.setAccessTokenValiditySeconds(accessTokenValiditySeconds)
         return defaultTokenServices
     }
 
