@@ -87,7 +87,7 @@ describe('Markdown Tests', () => {
 
         validateMarkdown('List:\n* Item\n* Item\n* Item\n', 'Markdown-UnorderedList')
 
-        validateMarkdown('[in line link](https://www.somewebsite.com)', 'Markdown-Link')
+        validateMarkdown('this is [in line link](https://www.somewebsite.com)', 'Markdown-Link')
 
         const blockQuote = "# Blockquote:\n" +
             "> Blockquotes are very handy to emulate reply text.\n" +
