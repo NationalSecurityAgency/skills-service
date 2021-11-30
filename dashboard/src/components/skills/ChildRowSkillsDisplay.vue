@@ -69,7 +69,7 @@ limitations under the License.
       </div>
       <span class="form-control">
         <a v-if="skillInfo.helpUrl" :href="helpUrl" target="_blank" rel="noopener" class="skill-url"
-           data-cy="skillOverviewHelpUrl"><span v-if="rootHelpUrl" class="border rounded pt-1 pl-1 pb-1 root-help-url" v-b-tooltip.hover="'Root Help URL was configured on the project\'s settings.'"><i class="fas fa-cogs"></i> {{ rootHelpUrl }}</span>{{ skillInfo.helpUrl }}</a>
+           data-cy="skillOverviewHelpUrl"><span v-if="rootHelpUrl" class="border rounded pt-1 pl-1 pb-1 root-help-url" v-b-tooltip.hover="'Root Help URL was configured in the project\'s settings.'"><i class="fas fa-cogs"></i> {{ rootHelpUrl }}</span>{{ skillInfo.helpUrl }}</a>
         <span v-else class="text-muted">
           Not Specified
         </span>
