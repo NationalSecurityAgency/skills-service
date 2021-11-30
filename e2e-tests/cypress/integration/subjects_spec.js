@@ -808,4 +808,58 @@ describe('Subjects Tests', () => {
 
     });
 
+    it('subject modal shows Root Help Url when configured', () => {
+        cy.request('POST', '/admin/projects/proj1/settings/help.url.root', {
+            projectId: 'proj1',
+            setting: 'help.url.root',
+            value: 'https://SomeArticleRepo.com/'
+        });
+        cy.createSubject(1, 2, {helpUrl: '/some/path'})
+        cy.createSubject(1, 3, {helpUrl: 'https://www.OverrideHelpUrl.com/other/path'})
+
+        cy.visit('/administrator/projects/proj1/');
+        cy.get('[data-cy="btn_Subjects"]').click();
+        cy.get('[data-cy="rootHelpUrlSetting"]').contains('https://SomeArticleRepo.com')
+
+        const textDecorationMatch = 'line-through solid rgb(38, 70, 83)';
+
+        // strike-through when url starts with http:// or https://
+        cy.get('[data-cy="skillHelpUrl"]').type('https:/');
+        cy.get('[data-cy="rootHelpUrlSetting"]').should('not.have.css', 'text-decoration', textDecorationMatch);
+        cy.get('[data-cy="skillHelpUrl"]').type('/');
+        cy.get('[data-cy="rootHelpUrlSetting"]').should('have.css', 'text-decoration', textDecorationMatch);
+
+        cy.get('[data-cy="skillHelpUrl"]').clear().type('http:/');
+        cy.get('[data-cy="rootHelpUrlSetting"]').should('not.have.css', 'text-decoration', textDecorationMatch);
+        cy.get('[data-cy="skillHelpUrl"]').type('/');
+        cy.get('[data-cy="rootHelpUrlSetting"]').should('have.css', 'text-decoration', textDecorationMatch);
+
+        // now test edit
+        cy.get('[data-cy="closeSubjectButton"]').click();
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="editBtn"]').click();
+        cy.get('[data-cy="rootHelpUrlSetting"]').contains('https://SomeArticleRepo.com')
+        cy.get('[data-cy="rootHelpUrlSetting"]').should('not.have.css', 'text-decoration', textDecorationMatch);
+
+        // edit again - anything that starts with https or http must not use Root Help Url
+        cy.get('[data-cy="closeSubjectButton"]').click();
+        cy.get('[data-cy="subjectCard-subj3"] [data-cy="editBtn"]').click();
+        cy.get('[data-cy="rootHelpUrlSetting"]').contains('https://SomeArticleRepo.com')
+        cy.get('[data-cy="rootHelpUrlSetting"]').should('have.css', 'text-decoration', textDecorationMatch);
+
+        // do not show Root Help Url if it's not configured
+        cy.request('POST', '/admin/projects/proj1/settings/help.url.root', {
+            projectId: 'proj1',
+            setting: 'help.url.root',
+            value: ''
+        });
+        cy.visit('/administrator/projects/proj1');
+        cy.get('[data-cy="btn_Subjects"]').click();
+        cy.get('[data-cy="skillHelpUrl"]');
+        cy.get('[data-cy="rootHelpUrlSetting"]').should('not.exist');
+        cy.get('[data-cy="closeSubjectButton"]').click();
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="editBtn"]').click();
+        cy.get('[data-cy="skillHelpUrl"]');
+        cy.get('[data-cy="rootHelpUrlSetting"]').should('not.exist');
+    });
+
 });

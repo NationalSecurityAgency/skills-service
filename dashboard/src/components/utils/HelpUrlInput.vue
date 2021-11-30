@@ -16,7 +16,7 @@ limitations under the License.
 <template>
   <div class="form-group">
     <label for="skillHelpUrl">Help URL/Path
-      <inline-help
+      <inline-help v-if="$route.params.projectId"
         msg="If project level 'Root Help Url' is specified then this path will be relative to 'Root Help Url'"/>
     </label>
       <ValidationProvider rules="help_url|customUrlValidator" v-slot="{errors}"
@@ -98,17 +98,22 @@ limitations under the License.
     },
     methods: {
       loadSettings() {
-        this.loadingSettings = true;
-        SettingsService.getProjectSetting(this.$route.params.projectId, 'help.url.root').then((response) => {
-          if (response && response.value) {
-            this.rootHelpUrlSetting = response.value;
-          } else {
-            this.rootHelpUrlSetting = null;
-          }
-        })
-          .finally(() => {
-            this.loadingSettings = false;
-          });
+        if (this.$route.params.projectId) {
+          this.loadingSettings = true;
+          SettingsService.getProjectSetting(this.$route.params.projectId, 'help.url.root')
+            .then((response) => {
+              if (response && response.value) {
+                this.rootHelpUrlSetting = response.value;
+              } else {
+                this.rootHelpUrlSetting = null;
+              }
+            })
+            .finally(() => {
+              this.loadingSettings = false;
+            });
+        } else {
+          this.loadingSettings = false;
+        }
       },
     },
   };
