@@ -47,6 +47,30 @@ describe('Register Root Users', () => {
     cy.url().should('include', '/progress-and-ranking')
   });
 
+  it('create account form is not shown for oauth only bootstrap', () => {
+    cy.intercept('GET', '/public/config', {
+      oAuthOnly: true,
+      rankingAndProgressViewsEnabled: true,
+      needToBootstrap: true
+    }).as('loadConfig');
+    cy.intercept('GET', '/app/oAuthProviders', [{"registrationId":"gitlab","clientName":"GitLab","iconClass":"fab fa-gitlab"}]).as('getOauthProviders')
+
+    cy.visit('/administrator/');
+
+    cy.wait('@loadConfig');
+    cy.wait('@getOauthProviders');
+    cy.contains('New Root Account')
+
+    cy.get('#firstName').should('not.exist');
+    cy.get('#lastName').should('not.exist');
+    cy.get('#email').should('not.exist');
+    cy.get('#password').should('not.exist');
+    cy.get('#password_confirmation').should('not.exist');
+    cy.contains('Create Account').should('not.exist');
+    cy.get('[data-cy=oAuthProviders]').should('exist');
+    cy.contains('Login via GitLab')
+  });
+
   it('register root user when Progress and Ranking views are disabled', () => {
 
     cy.intercept('GET', '/public/config', (req) => {

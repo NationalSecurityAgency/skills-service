@@ -17,6 +17,7 @@ package skills.auth.form
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionOutcome
 import org.springframework.boot.autoconfigure.security.oauth2.client.ClientsConfiguredCondition
 import org.springframework.boot.context.properties.ConfigurationProperties
@@ -30,10 +31,13 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.*
 import skills.PublicProps
+import skills.auth.AuthMode
 import skills.auth.SecurityMode
 import skills.auth.UserAuthService
 import skills.auth.UserInfo
 import skills.controller.PublicPropsBasedValidator
+import skills.controller.exceptions.ErrorCode
+import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.result.model.OAuth2Provider
 
@@ -61,9 +65,18 @@ class CreateAccountController {
     @Autowired
     PublicPropsBasedValidator propsBasedValidator
 
+    @Value('${skills.authorization.authMode:#{T(skills.auth.AuthMode).DEFAULT_AUTH_MODE}}')
+    AuthMode authMode
+
+    @Value('#{"${skills.authorization.oAuthOnly:false}"}')
+    Boolean oAuthOnly
+
     @Conditional(SecurityMode.FormAuth)
     @PutMapping("createAccount")
     void createAppUser(@RequestBody UserInfo userInfo, HttpServletResponse response) {
+        if (oAuthOnly || authMode == AuthMode.PKI) {
+            throw new SkillException("Username/Password account creation is disabled for this installation of the SkillTree", null, null, ErrorCode.AccessDenied)
+        }
         String password = userInfo.password
         userInfo = createUser(userInfo)
         userAuthService.autologin(userInfo, password)
@@ -97,7 +110,7 @@ class CreateAccountController {
         return userAuthService.createUser(userInfo)
     }
 
-    @Conditional(SecurityMode.PkiAuth)
+    // used only for OAuth and PKI
     @RequestMapping(value = "/grantFirstRoot", method = [RequestMethod.POST, RequestMethod.PUT])
     void grantFirstRoot(HttpServletRequest request) {
         SkillsValidator.isTrue(!userAuthService.rootExists(), 'A root user already exists! Granting additional root privileges requires a root user to grant them!')

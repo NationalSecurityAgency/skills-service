@@ -19,7 +19,7 @@ import store from './store/store';
 export default {
 
   configure() {
-    if (store.getters.userInfo) {
+    if (store.getters.userInfo && !store.getters.config.needToBootstrap) {
       const projectId = 'Inception';
       const serviceUrl = window.location.origin;
       let authenticator;
