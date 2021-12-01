@@ -391,22 +391,38 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
 
     @Query(value = '''SELECT 
                 up.user_id as userId, 
-                max(upa.performed_on) as lastUpdated, 
+                max(upa.performedOn) as lastUpdated, 
                 sum(up.points) as totalPoints,
-                max(ua.first_name) as firstName,
-                max(ua.last_name) as lastName,
+                max(ua.firstName) as firstName,
+                max(ua.lastName) as lastName,
                 max(ua.dn) as dn,
                 max(ua.email) as email,
-                max(ua.user_id_for_display) as userIdForDisplay  
-            from user_points up, user_attrs ua
-            join (select uupa.user_id, max(uupa.performed_on) as performed_on from user_performed_skill uupa where uupa.project_id=?1 and uupa.skill_id in (?2) group by uupa.user_id) upa
-            on upa.user_id = up.user_id
-            where 
-                up.user_id = ua.user_id and
+                max(ua.userIdForDisplay) as userIdForDisplay 
+            FROM user_points up
+            LEFT JOIN (
+                SELECT user_id, 
+                max(performed_on) AS performedOn 
+                FROM user_performed_skill upa 
+                WHERE upa.project_id=?1 
+                and upa.skill_id in (?2)
+                GROUP BY user_id
+                ) upa ON upa.user_id = up.user_id
+            LEFT JOIN (
+                SELECT 
+                user_id, 
+                max(first_name) AS firstName, 
+                max(last_name) AS lastName, 
+                max(dn) AS dn, 
+                max(email) AS email, 
+                max(user_id_for_display) AS userIdForDisplay 
+                FROM user_attrs ua GROUP BY user_id
+                ) ua ON ua.user_id=up.user_id
+            WHERE 
                 up.project_id=?1 and 
-                up.skill_id in (?2) and
-                (upper(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like UPPER(CONCAT('%', ?3, '%')) OR 
-                 upper(ua.user_id_for_display) like UPPER(CONCAT('%', ?3, '%'))) and 
+                up.skill_id in (?2) and 
+                (upper(CONCAT(ua.firstName, ' ', ua.lastName, ' (',  ua.userIdForDisplay, ')')) like UPPER(CONCAT('%', ?3, '%'))  OR
+                 upper(ua.userIdForDisplay) like UPPER(CONCAT('%', ?3, '%'))
+                ) and 
                 up.day is null 
             GROUP BY up.user_id''', nativeQuery = true)
     List<ProjectUser> findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLike(String projectId, List<String> skillIds, String userId, Pageable pageable)
