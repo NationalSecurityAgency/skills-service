@@ -32,12 +32,14 @@ const actions = {
     return new Promise((resolve, reject) => {
       SettingService.getSettingsForProject(projectId)
         .then((response) => {
-          const projConfig = response.reduce((map, obj) => {
-            // eslint-disable-next-line no-param-reassign
-            map[obj.setting] = obj.value;
-            return map;
-          }, {});
-          commit('setProjConfig', projConfig);
+          if (response) {
+            const projConfig = response.reduce((map, obj) => {
+              // eslint-disable-next-line no-param-reassign
+              map[obj.setting] = obj.value;
+              return map;
+            }, {});
+            commit('setProjConfig', projConfig);
+          }
           resolve(response);
         })
         .catch((error) => reject(error));
