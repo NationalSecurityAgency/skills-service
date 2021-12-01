@@ -61,7 +61,7 @@ describe('Projects Tests', () => {
     });
     cy.visit('/administrator/');
     cy.contains('No Projects Yet...')
-    cy.contains('A Project is an overall container that represents the skills ruleset for a single application with gamified training.')
+    cy.contains('A Project represents a gamified training profile that consists of skills divided into subjects')
     cy.get('[data-cy="firstNewProjectButton"]').click();
     cy.get('[data-cy="projectName"]').type('one');
     cy.get('[data-cy="saveProjectButton"]').click();

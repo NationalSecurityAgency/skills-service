@@ -51,7 +51,7 @@ limitations under the License.
       </div>
 
       <no-content2 v-if="!projects || projects.length==0" icon="fas fa-hand-spock" class="mt-4"
-                   title="No Projects Yet..." message="A Project is an overall container that represents the skills ruleset for a single application with gamified training.">
+                   title="No Projects Yet..." message="A Project represents a gamified training profile that consists of skills divided into subjects. Create as many Projects as you need.">
         <div class="mt-3">
           <span v-if="!isRootUser && isProgressAndRankingEnabled()" class="text-muted" style="font-size: .90em">
             Note: This section of SkillTree is for <strong>project administrators only</strong>. If you do not plan on creating and integrating a project with SkillTree then please return to the
@@ -61,7 +61,7 @@ limitations under the License.
           </span>
           <span v-if="isRootUser || !isProgressAndRankingEnabled()">
             <b-card class="mb-5 mt-2 px-5">
-              A Project is an overall container that represents the skills ruleset for a single application with gamified training.
+              A Project represents a gamified training profile that consists of skills divided into subjects. Create as many Projects as you need.
               <hr />
               <div class="mt-2">Please click</div>
               <div class="my-2">
