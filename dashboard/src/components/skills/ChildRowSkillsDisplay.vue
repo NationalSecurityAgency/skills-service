@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <loading-container class="child-row" v-bind:is-loading="loading.skills || loading.settings" :data-cy="`childRowDisplay_${skillInfo.skillId}`">
+  <loading-container class="child-row" v-bind:is-loading="loading.skills" :data-cy="`childRowDisplay_${skillInfo.skillId}`">
 
     <div class="row">
       <div class="col-12 col-md-6 mt-2">
@@ -85,7 +85,6 @@ limitations under the License.
   import NumberFilter from '../../filters/NumberFilter';
   import MarkdownText from '../utils/MarkdownText';
   import TimeWindowMixin from './TimeWindowMixin';
-  import SettingsService from '../settings/SettingsService';
 
   export default {
     name: 'ChildRowSkillsDisplay',
@@ -114,15 +113,12 @@ limitations under the License.
       return {
         loading: {
           skills: true,
-          settings: true,
         },
-        rootHelpUrlSetting: null,
         skillInfo: {},
       };
     },
     mounted() {
       this.loadSkills();
-      this.loadSettings();
     },
     watch: {
       refreshCounter() {
@@ -153,6 +149,9 @@ limitations under the License.
 
         return this.skillInfo.selfReportingType;
       },
+      rootHelpUrlSetting() {
+        return this.$store.getters.projConfig['help.url.root'];
+      },
       rootHelpUrl() {
         if (!this.rootHelpUrlSetting || this.skillInfo?.helpUrl?.toLowerCase()?.startsWith('http')) {
           return null;
@@ -174,19 +173,6 @@ limitations under the License.
       },
     },
     methods: {
-      loadSettings() {
-        this.loading.settings = true;
-        SettingsService.getProjectSetting(this.projectId, 'help.url.root').then((response) => {
-          if (response && response.value) {
-            this.rootHelpUrlSetting = response.value;
-          } else {
-            this.rootHelpUrlSetting = null;
-          }
-        })
-          .finally(() => {
-            this.loading.settings = false;
-          });
-      },
       loadSkills() {
         this.loading.skills = true;
         if (this.skill) {

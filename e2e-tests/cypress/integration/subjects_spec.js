@@ -862,4 +862,52 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="rootHelpUrlSetting"]').should('not.exist');
     });
 
+    it('subject modal shows Root Help Url after it was update via UI', () => {
+        cy.createSubject(1, 2, {helpUrl: '/some/path'})
+        cy.createSubject(1, 3, {helpUrl: 'https://www.OverrideHelpUrl.com/other/path'})
+
+        cy.visit('/administrator/projects/proj1/');
+        cy.get('[data-cy="btn_Subjects"]').click();
+        cy.get('[data-cy="skillHelpUrl"]')
+        cy.get('[data-cy="rootHelpUrlSetting"]').should('not.exist')
+        cy.get('[data-cy="closeSubjectButton"]').click();
+
+        cy.clickNav('Settings');
+        cy.get('[data-cy="rootHelpUrlInput"]').type('https://someCoolWebsite.com/');
+        cy.get('[data-cy="saveSettingsBtn"]').click();
+
+        cy.clickNav('Subjects');
+        cy.get('[data-cy="btn_Subjects"]').click();
+        cy.get('[data-cy="skillHelpUrl"]')
+        cy.get('[data-cy="rootHelpUrlSetting"]').contains('https://someCoolWebsite.com')
+    })
+
+    it('root help url is properly set for multiple projects', () => {
+        cy.request('POST', '/admin/projects/proj1/settings/help.url.root', {
+            projectId: 'proj1',
+            setting: 'help.url.root',
+            value: 'https://SomeArticleRepo.com/'
+        });
+        cy.createSubject(1, 2, { helpUrl: '/some/path' })
+        cy.createSubject(1, 3, { helpUrl: 'https://www.OverrideHelpUrl.com/other/path' })
+
+        cy.createProject(2);
+        cy.createSubject(2, 4, { helpUrl: '/some/path' })
+        cy.createSubject(2, 5, { helpUrl: 'https://www.OverrideHelpUrl.com/other/path' })
+        cy.request('POST', '/admin/projects/proj2/settings/help.url.root', {
+            projectId: 'proj2',
+            setting: 'help.url.root',
+            value: 'https://veryDifferentUrl.com'
+        });
+
+        cy.visit('/administrator/projects/proj1/');
+        cy.get('[data-cy="btn_Subjects"]').click();
+        cy.get('[data-cy="rootHelpUrlSetting"]').contains('https://SomeArticleRepo.com')
+        cy.get('[data-cy="closeSubjectButton"]').click();
+
+        cy.get('[data-cy="breadcrumb-Projects"]').click();
+        cy.get('[data-cy="projCard_proj2_manageBtn"]').click();
+        cy.get('[data-cy="btn_Subjects"]').click();
+        cy.get('[data-cy="rootHelpUrlSetting"]').contains('https://veryDifferentUrl.com')
+    });
 });

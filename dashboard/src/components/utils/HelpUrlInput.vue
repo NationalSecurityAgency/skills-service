@@ -21,8 +21,6 @@ limitations under the License.
     </label>
       <ValidationProvider rules="help_url|customUrlValidator" v-slot="{errors}"
                           name="Help URL/Path">
-        <b-overlay :show="loadingSettings" spinner-variant="info" :spinner-small="true">
-
           <b-input-group>
             <template #prepend v-if="rootHelpUrlSetting">
               <b-input-group-text><i class="fas fa-cogs mr-1"></i>
@@ -36,7 +34,6 @@ limitations under the License.
               aria-errormessage="skillHelpUrlError"
               :aria-invalid="(errors && errors.length > 0)"></b-form-input>
           </b-input-group>
-        </b-overlay>
         <small class="form-text text-danger" id="skillHelpUrlError"
                data-cy="skillHelpUrlError">{{ errors[0] }}</small>
       </ValidationProvider>
@@ -45,7 +42,6 @@ limitations under the License.
 
 <script>
   import { extend, ValidationProvider } from 'vee-validate';
-  import SettingsService from '../settings/SettingsService';
   import InlineHelp from './InlineHelp';
 
   extend('help_url', {
@@ -70,16 +66,14 @@ limitations under the License.
     data() {
       return {
         internalValue: this.value,
-        loadingSettings: true,
-        rootHelpUrlSetting: null,
       };
-    },
-    mounted() {
-      this.loadSettings();
     },
     computed: {
       overrideRootHelpUrl() {
         return this.rootHelpUrlSetting && this.internalValue && (this.internalValue.startsWith('http://') || this.internalValue.startsWith('https://'));
+      },
+      rootHelpUrlSetting() {
+        return this.$store.getters.projConfig['help.url.root'];
       },
       rootHelpUrl() {
         if (!this.rootHelpUrlSetting) {
@@ -94,26 +88,6 @@ limitations under the License.
     watch: {
       internalValue(newVal) {
         this.$emit('input', newVal);
-      },
-    },
-    methods: {
-      loadSettings() {
-        if (this.$route.params.projectId) {
-          this.loadingSettings = true;
-          SettingsService.getProjectSetting(this.$route.params.projectId, 'help.url.root')
-            .then((response) => {
-              if (response && response.value) {
-                this.rootHelpUrlSetting = response.value;
-              } else {
-                this.rootHelpUrlSetting = null;
-              }
-            })
-            .finally(() => {
-              this.loadingSettings = false;
-            });
-        } else {
-          this.loadingSettings = false;
-        }
       },
     },
   };
