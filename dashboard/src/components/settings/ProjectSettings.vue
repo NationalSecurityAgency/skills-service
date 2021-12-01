@@ -74,6 +74,7 @@ limitations under the License.
           </div>
           <div class="col">
             <b-form-input v-model="settings.helpUrlHost.value" placeholder="http://www.HelpArticlesHost.com"
+                          data-cy="rootHelpUrlInput"
                           v-on:input="helpUrlHostChanged" aria-labelledby="rootHelpUrlLabel"></b-form-input>
           </div>
         </div>
@@ -332,6 +333,7 @@ limitations under the License.
                 SkillsReporter.reportSkill('ConfigureProjectRootHelpUrl');
               }
             });
+            this.$store.dispatch('loadProjConfigState', this.$route.params.projectId);
           })
           .finally(() => {
             this.isLoading = false;

@@ -21,6 +21,7 @@ import subjects from './modules/subjects';
 import projects from './modules/projects';
 import badges from './modules/badges';
 import config from './modules/config';
+import projConfig from './modules/projConfig';
 import libVersion from './modules/libVersion';
 import access from './modules/access';
 import skills from './modules/skills';
@@ -65,6 +66,7 @@ export default new Vuex.Store({
     projects,
     badges,
     config,
+    projConfig,
     libVersion,
     access,
     skills,

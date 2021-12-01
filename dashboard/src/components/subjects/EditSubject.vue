@@ -56,21 +56,8 @@ limitations under the License.
                 </ValidationProvider>
               </div>
 
-              <div>
-                <label for="subjectHelpUrl">Help URL/Path
-                  <inline-help
-                    msg="If project level 'Root Help Url' is specified then this path will be relative to 'Root Help Url'"/>
-                </label>
-                <ValidationProvider rules="help_url|customUrlValidator" v-slot="{errors}" name="Help URL/Path">
-                  <input class="form-control" type="text" v-model="subjectInternal.helpUrl" v-on:keyup.enter="handleSubmit(updateSubject)"
-                         id="subjectHelpUrl"
-                         data-cy="subjectHelpUrl"
-                         aria-describedby="subjectHelpUrlError"
-                         aria-errormessage="subjectHelpUrlError"
-                         :aria-invalid="errors && errors.length > 0"/>
-                  <small class="form-text text-danger" id="subjectHelpUrlError" data-cy="subjectHelpUrlError">{{ errors[0] }}</small>
-                </ValidationProvider>
-              </div>
+              <help-url-input class="mt-3"
+                            v-model="subjectInternal.helpUrl" v-on:keyup.enter.native="handleSubmit(updateSubject)" />
 
               <p v-if="invalid && overallErrMsg" class="text-center text-danger" role="alert">***{{ overallErrMsg }}***</p>
           </div>
@@ -108,15 +95,15 @@ limitations under the License.
   import MarkdownEditor from '../utils/MarkdownEditor';
   import IdInput from '../utils/inputForm/IdInput';
   import InputSanitizer from '../utils/InputSanitizer';
-  import InlineHelp from '../utils/InlineHelp';
+  import HelpUrlInput from '../utils/HelpUrlInput';
 
   export default {
     name: 'EditSubject',
     components: {
+      HelpUrlInput,
       IdInput,
       IconPicker,
       MarkdownEditor,
-      InlineHelp,
       'icon-manager': () => import(/* webpackChunkName: 'iconManager' */'../utils/iconPicker/IconManager'),
     },
     props: {

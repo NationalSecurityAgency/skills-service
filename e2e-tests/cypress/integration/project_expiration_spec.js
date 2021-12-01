@@ -104,7 +104,11 @@ describe('Project Expiration Tests', () => {
         'expirationTriggered': '',
       },[]];
     cy.intercept('GET', '/admin/projects/proj1', (req) => {
-      req.reply(results.shift());
+      if (req.url.endsWith('settings')) {
+        req.reply([]);
+      } else {
+        req.reply(results.shift());
+      }
     }).as('getProject');
 
     cy.intercept('POST', '/admin/projects/proj1/cancelExpiration', { body: { success: true }}).as('stopExpiration');

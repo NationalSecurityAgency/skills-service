@@ -297,33 +297,33 @@ describe('Badges Tests', () => {
         cy.get('[data-cy=badgeDescriptionError]').should('not.be.visible');
 
         //helpUrl
-        cy.get('[data-cy=badgeHelpUrl]').clear().type('javascript:alert("uh oh");');
-        cy.get('[data-cy=badgeHelpUrlError]').should('be.visible');
-        cy.get('[data-cy=badgeHelpUrlError]').should('have.text', 'Help URL/Path must use http, https, or be a relative url.');
+        cy.get('[data-cy=skillHelpUrl]').clear().type('javascript:alert("uh oh");');
+        cy.get('[data-cy=skillHelpUrlError]').should('be.visible');
+        cy.get('[data-cy=skillHelpUrlError]').should('have.text', 'Help URL/Path must use http, https, or be a relative url.');
         cy.get('[data-cy=saveBadgeButton]').should('be.disabled');
-        cy.get('[data-cy=badgeHelpUrl]').clear().type('/foo?p1=v1&p2=v2');
-        cy.get('[data-cy=badgeHelpUrlError]').should('not.be.visible');
+        cy.get('[data-cy=skillHelpUrl]').clear().type('/foo?p1=v1&p2=v2');
+        cy.get('[data-cy=skillHelpUrlError]').should('not.be.visible');
         cy.get('[data-cy=saveBadgeButton]').should('be.enabled');
-        cy.get('[data-cy=badgeHelpUrl]').clear().type('http://foo.bar?p1=v1&p2=v2');
-        cy.get('[data-cy=badgeHelpUrlError]').should('not.be.visible');
+        cy.get('[data-cy=skillHelpUrl]').clear().type('http://foo.bar?p1=v1&p2=v2');
+        cy.get('[data-cy=skillHelpUrlError]').should('not.be.visible');
         cy.get('[data-cy=saveBadgeButton]').should('be.enabled');
-        cy.get('[data-cy=badgeHelpUrl]').clear().type('https://foo.bar?p1=v1&p2=v2');
-        cy.get('[data-cy=badgeHelpUrlError]').should('not.be.visible');
+        cy.get('[data-cy=skillHelpUrl]').clear().type('https://foo.bar?p1=v1&p2=v2');
+        cy.get('[data-cy=skillHelpUrlError]').should('not.be.visible');
         cy.get('[data-cy=saveBadgeButton]').should('be.enabled');
 
-        cy.get('[data-cy=badgeHelpUrl]').clear().type('https://');
+        cy.get('[data-cy=skillHelpUrl]').clear().type('https://');
         cy.wait('@customUrlValidation');
-        cy.get('[data-cy=badgeHelpUrlError]').should('be.visible');
+        cy.get('[data-cy=skillHelpUrlError]').should('be.visible');
         cy.get('[data-cy=saveBadgeButton]').should('be.disabled');
 
-        cy.get('[data-cy=badgeHelpUrl]').clear().type('https://---??..??##');
+        cy.get('[data-cy=skillHelpUrl]').clear().type('https://---??..??##');
         cy.wait('@customUrlValidation');
-        cy.get('[data-cy=badgeHelpUrlError]').should('be.visible');
+        cy.get('[data-cy=skillHelpUrlError]').should('be.visible');
         cy.get('[data-cy=saveBadgeButton]').should('be.disabled');
         // trailing space should work now
-        cy.get('[data-cy=badgeHelpUrl]').clear().type('https://foo.bar?p1=v1&p2=v2 ');
+        cy.get('[data-cy=skillHelpUrl]').clear().type('https://foo.bar?p1=v1&p2=v2 ');
         cy.wait('@customUrlValidation');
-        cy.get('[data-cy=badgeHelpUrlError]').should('not.be.visible');
+        cy.get('[data-cy=skillHelpUrlError]').should('not.be.visible');
         cy.get('[data-cy=saveBadgeButton]').should('be.enabled');
 
 
@@ -1023,6 +1023,59 @@ describe('Badges Tests', () => {
         cy.contains('No Skills Selected Yet...').should('be.visible');
         cy.get('[data-cy=nav-Users]').click();
         cy.wait('@loadBadgeUsers');
+    });
 
+    it('badge modal shows Root Help Url when configured', () => {
+        cy.request('POST', '/admin/projects/proj1/settings/help.url.root', {
+            projectId: 'proj1',
+            setting: 'help.url.root',
+            value: 'https://SomeArticleRepo.com/'
+        });
+        cy.createBadge(1, 2, {helpUrl: '/some/path'})
+        cy.createBadge(1, 3, {helpUrl: 'https://www.OverrideHelpUrl.com/other/path'})
+
+        cy.visit('/administrator/projects/proj1/badges');
+        cy.get('[data-cy="btn_Badges"]').click();
+        cy.get('[data-cy="rootHelpUrlSetting"]').contains('https://SomeArticleRepo.com')
+
+        const textDecorationMatch = 'line-through solid rgb(38, 70, 83)';
+
+        // strike-through when url starts with http:// or https://
+        cy.get('[data-cy="skillHelpUrl"]').type('https:/');
+        cy.get('[data-cy="rootHelpUrlSetting"]').should('not.have.css', 'text-decoration', textDecorationMatch);
+        cy.get('[data-cy="skillHelpUrl"]').type('/');
+        cy.get('[data-cy="rootHelpUrlSetting"]').should('have.css', 'text-decoration', textDecorationMatch);
+
+        cy.get('[data-cy="skillHelpUrl"]').clear().type('http:/');
+        cy.get('[data-cy="rootHelpUrlSetting"]').should('not.have.css', 'text-decoration', textDecorationMatch);
+        cy.get('[data-cy="skillHelpUrl"]').type('/');
+        cy.get('[data-cy="rootHelpUrlSetting"]').should('have.css', 'text-decoration', textDecorationMatch);
+
+        // now test edit
+        cy.get('[data-cy="closeBadgeButton"]').click();
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy="editBtn"]').click();
+        cy.get('[data-cy="rootHelpUrlSetting"]').contains('https://SomeArticleRepo.com')
+        cy.get('[data-cy="rootHelpUrlSetting"]').should('not.have.css', 'text-decoration', textDecorationMatch);
+
+        // edit again - anything that starts with https or http must not use Root Help Url
+        cy.get('[data-cy="closeBadgeButton"]').click();
+        cy.get('[data-cy="badgeCard-badge3"] [data-cy="editBtn"]').click();
+        cy.get('[data-cy="rootHelpUrlSetting"]').contains('https://SomeArticleRepo.com')
+        cy.get('[data-cy="rootHelpUrlSetting"]').should('have.css', 'text-decoration', textDecorationMatch);
+
+        // do not show Root Help Url if it's not configured
+        cy.request('POST', '/admin/projects/proj1/settings/help.url.root', {
+            projectId: 'proj1',
+            setting: 'help.url.root',
+            value: ''
+        });
+        cy.visit('/administrator/projects/proj1/badges');
+        cy.get('[data-cy="btn_Badges"]').click();
+        cy.get('[data-cy="skillHelpUrl"]');
+        cy.get('[data-cy="rootHelpUrlSetting"]').should('not.exist');
+        cy.get('[data-cy="closeBadgeButton"]').click();
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy="editBtn"]').click();
+        cy.get('[data-cy="skillHelpUrl"]');
+        cy.get('[data-cy="rootHelpUrlSetting"]').should('not.exist');
     });
 });

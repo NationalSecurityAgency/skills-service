@@ -196,21 +196,8 @@ limitations under the License.
             </div>
           </div>
 
-          <div class="form-group mt-3">
-            <label for="skillHelpUrl">Help URL/Path
-              <inline-help
-                msg="If project level 'Root Help Url' is specified then this path will be relative to 'Root Help Url'"/>
-            </label>
-            <ValidationProvider rules="help_url|customUrlValidator" v-slot="{errors}" name="Help URL/Path">
-              <input class="form-control" type="text" v-model="skillInternal.helpUrl"
-                     v-on:keyup.enter="handleSubmit(saveSkill)" id="skillHelpUrl" data-cy="skillHelpUrl"
-                     aria-describedby="skillHelpUrlError"
-                     aria-errormessage="skillHelpUrlError"
-                     :aria-invalid="errors && errors.length > 0"
-              />
-              <small class="form-text text-danger" id="skillHelpUrlError" data-cy="skillHelpUrlError">{{ errors[0] }}</small>
-            </ValidationProvider>
-          </div>
+          <help-url-input class="mt-3"
+            v-model="skillInternal.helpUrl" v-on:keyup.enter.native="handleSubmit(saveSkill)" />
 
           <p v-if="invalid && overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
         </b-container>
@@ -241,6 +228,7 @@ limitations under the License.
   import InlineHelp from '../utils/InlineHelp';
   import InputSanitizer from '../utils/InputSanitizer';
   import SettingsService from '../settings/SettingsService';
+  import HelpUrlInput from '../utils/HelpUrlInput';
 
   extend('min_value', {
     // eslint-disable-next-line camelcase
@@ -265,6 +253,7 @@ limitations under the License.
   export default {
     name: 'EditSkill',
     components: {
+      HelpUrlInput,
       SkillsSpinner,
       SelfReportingTypeInput,
       InlineHelp,
