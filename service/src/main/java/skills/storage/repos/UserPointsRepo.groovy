@@ -337,11 +337,11 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 up.user_id as userId, 
                 max(upa.performedOn) as lastUpdated, 
                 sum(up.points) as totalPoints,
-                max(ua.firstName) as firstName,
-                max(ua.lastName) as lastName,
+                max(ua.first_name) as firstName,
+                max(ua.last_name) as lastName,
                 max(ua.dn) as dn,
                 max(ua.email) as email,
-                max(ua.userIdForDisplay) as userIdForDisplay 
+                max(ua.user_id_for_display) as userIdForDisplay 
             FROM user_points up
             LEFT JOIN (
                 SELECT user_id, 
@@ -350,20 +350,11 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 WHERE upa.project_id=?1 
                 GROUP BY user_id
                 ) upa ON upa.user_id = up.user_id
-            LEFT JOIN (
-                SELECT 
-                user_id, 
-                max(first_name) AS firstName, 
-                max(last_name) AS lastName, 
-                max(dn) AS dn, 
-                max(email) AS email, 
-                max(user_id_for_display) AS userIdForDisplay 
-                FROM user_attrs ua
-                ) ua ON ua.user_id=up.user_id
+            JOIN user_attrs ua ON ua.user_id=up.user_id
             WHERE 
                 up.project_id=?1 and 
-                (upper(CONCAT(ua.firstName, ' ', ua.lastName, ' (',  ua.userIdForDisplay, ')')) like UPPER(CONCAT(\'%\', ?2, \'%\'))  OR
-                 upper(ua.userIdForDisplay) like UPPER(CONCAT('%', ?2, '%'))
+                (upper(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like UPPER(CONCAT(\'%\', ?2, \'%\'))  OR
+                 upper(ua.user_id_for_display) like UPPER(CONCAT('%', ?2, '%'))
                 ) and 
                 up.day is null and 
                 up.skill_id is null 
@@ -393,11 +384,11 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 up.user_id as userId, 
                 max(upa.performedOn) as lastUpdated, 
                 sum(up.points) as totalPoints,
-                max(ua.firstName) as firstName,
-                max(ua.lastName) as lastName,
+                max(ua.first_name) as firstName,
+                max(ua.last_name) as lastName,
                 max(ua.dn) as dn,
                 max(ua.email) as email,
-                max(ua.userIdForDisplay) as userIdForDisplay 
+                max(ua.user_id_for_display) as userIdForDisplay 
             FROM user_points up
             LEFT JOIN (
                 SELECT user_id, 
@@ -407,21 +398,12 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 and upa.skill_id in (?2)
                 GROUP BY user_id
                 ) upa ON upa.user_id = up.user_id
-            JOIN (
-                SELECT 
-                user_id, 
-                max(first_name) AS firstName, 
-                max(last_name) AS lastName, 
-                max(dn) AS dn, 
-                max(email) AS email, 
-                max(user_id_for_display) AS userIdForDisplay 
-                FROM user_attrs ua
-                ) ua ON ua.user_id=up.user_id
+            JOIN user_attrs ua ON ua.user_id=up.user_id
             WHERE 
                 up.project_id=?1 and 
                 up.skill_id in (?2) and 
-                (upper(CONCAT(ua.firstName, ' ', ua.lastName, ' (',  ua.userIdForDisplay, ')')) like UPPER(CONCAT('%', ?3, '%'))  OR
-                 upper(ua.userIdForDisplay) like UPPER(CONCAT('%', ?3, '%'))
+                (upper(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like UPPER(CONCAT('%', ?3, '%'))  OR
+                 upper(ua.user_id_for_display) like UPPER(CONCAT('%', ?3, '%'))
                 ) and 
                 up.day is null 
             GROUP BY up.user_id''', nativeQuery = true)
