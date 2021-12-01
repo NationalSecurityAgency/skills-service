@@ -150,7 +150,7 @@ limitations under the License.
         return this.skillInfo.selfReportingType;
       },
       rootHelpUrlSetting() {
-        return this.$store.getters.projConfig['help.url.root'];
+        return this.$store.getters.projConfig && this.$store.getters.projConfig['help.url.root'];
       },
       rootHelpUrl() {
         if (!this.rootHelpUrlSetting || this.skillInfo?.helpUrl?.toLowerCase()?.startsWith('http')) {

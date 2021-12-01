@@ -130,6 +130,7 @@ require('./interceptors/userAgreementInterceptor');
 require('vue-multiselect/dist/vue-multiselect.min.css');
 
 const isActiveProjectIdChange = (to, from) => to.params.projectId !== from.params.projectId;
+const isAdminPage = (route) => route.path.startsWith('/administrator');
 const isLoggedIn = () => store.getters.isAuthenticated;
 const isPki = () => store.getters.isPkiAuthenticated;
 const getLandingPage = () => {
@@ -172,7 +173,7 @@ router.beforeEach((to, from, next) => {
       }
       if (isActiveProjectIdChange(to, from)) {
         store.commit('currentProjectId', to.params.projectId);
-        if (to.params.projectId) {
+        if (isAdminPage(to) && to.params.projectId) {
           store.dispatch('loadProjConfigState', to.params.projectId);
         }
       }

@@ -73,7 +73,7 @@ limitations under the License.
         return this.rootHelpUrlSetting && this.internalValue && (this.internalValue.startsWith('http://') || this.internalValue.startsWith('https://'));
       },
       rootHelpUrlSetting() {
-        return this.$store.getters.projConfig['help.url.root'];
+        return this.$store.getters.projConfig && this.$store.getters.projConfig['help.url.root'];
       },
       rootHelpUrl() {
         if (!this.rootHelpUrlSetting) {
