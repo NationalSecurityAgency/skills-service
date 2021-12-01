@@ -126,30 +126,30 @@ describe('Subjects Tests', () => {
         cy.clickButton('Subject');
         //helpUrl
         cy.get('[data-cy=subjectNameInput]').type('A Subject');
-        cy.get('[data-cy=subjectHelpUrl]').clear().type('javascript:alert("uh oh");');
-        cy.get('[data-cy=subjectHelpUrlError]').should('be.visible');
-        cy.get('[data-cy=subjectHelpUrlError]').should('have.text', 'Help URL/Path must use http, https, or be a relative url.');
+        cy.get('[data-cy=skillHelpUrl]').clear().type('javascript:alert("uh oh");');
+        cy.get('[data-cy=skillHelpUrlError]').should('be.visible');
+        cy.get('[data-cy=skillHelpUrlError]').should('have.text', 'Help URL/Path must use http, https, or be a relative url.');
         cy.get('[data-cy=saveSubjectButton]').should('be.disabled');
-        cy.get('[data-cy=subjectHelpUrl]').clear().type('/foo?p1=v1&p2=v2');
-        cy.get('[data-cy=subjectHelpUrlError]').should('not.be.visible');
-        cy.get('[data-cy=subjectHelpUrl]').clear().type('http://foo.bar?p1=v1&p2=v2');
-        cy.get('[data-cy=subjectHelpUrlError]').should('not.be.visible');
-        cy.get('[data-cy=subjectHelpUrl]').clear().type('https://foo.bar?p1=v1&p2=v2');
-        cy.get('[data-cy=subjectHelpUrlError]').should('not.be.visible');
+        cy.get('[data-cy=skillHelpUrl]').clear().type('/foo?p1=v1&p2=v2');
+        cy.get('[data-cy=skillHelpUrlError]').should('not.be.visible');
+        cy.get('[data-cy=skillHelpUrl]').clear().type('http://foo.bar?p1=v1&p2=v2');
+        cy.get('[data-cy=skillHelpUrlError]').should('not.be.visible');
+        cy.get('[data-cy=skillHelpUrl]').clear().type('https://foo.bar?p1=v1&p2=v2');
+        cy.get('[data-cy=skillHelpUrlError]').should('not.be.visible');
 
-        cy.get('[data-cy=subjectHelpUrl]').clear().type('https://');
+        cy.get('[data-cy=skillHelpUrl]').clear().type('https://');
         cy.wait('@customUrlValidation');
-        cy.get('[data-cy=subjectHelpUrlError]').should('be.visible');
+        cy.get('[data-cy=skillHelpUrlError]').should('be.visible');
         cy.get('[data-cy=saveSubjectButton]').should('be.disabled');
 
-        cy.get('[data-cy=subjectHelpUrl]').clear().type('https://---??..??##');
+        cy.get('[data-cy=skillHelpUrl]').clear().type('https://---??..??##');
         cy.wait('@customUrlValidation');
-        cy.get('[data-cy=subjectHelpUrlError]').should('be.visible');
+        cy.get('[data-cy=skillHelpUrlError]').should('be.visible');
         cy.get('[data-cy=saveSubjectButton]').should('be.disabled');
         // trailing space should work now
-        cy.get('[data-cy=subjectHelpUrl]').clear().type('https://foo.bar?p1=v1&p2=v2 ');
+        cy.get('[data-cy=skillHelpUrl]').clear().type('https://foo.bar?p1=v1&p2=v2 ');
         cy.wait('@customUrlValidation');
-        cy.get('[data-cy=subjectHelpUrlError]').should('not.be.visible');
+        cy.get('[data-cy=skillHelpUrlError]').should('not.be.visible');
         cy.get('[data-cy=saveSubjectButton]').should('be.enabled');
     });
 
