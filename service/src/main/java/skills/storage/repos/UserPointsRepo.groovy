@@ -358,7 +358,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 max(dn) AS dn, 
                 max(email) AS email, 
                 max(user_id_for_display) AS userIdForDisplay 
-                FROM user_attrs ua GROUP BY user_id
+                FROM user_attrs ua
                 ) ua ON ua.user_id=up.user_id
             WHERE 
                 up.project_id=?1 and 
@@ -415,7 +415,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 max(dn) AS dn, 
                 max(email) AS email, 
                 max(user_id_for_display) AS userIdForDisplay 
-                FROM user_attrs ua GROUP BY user_id
+                FROM user_attrs ua
                 ) ua ON ua.user_id=up.user_id
             WHERE 
                 up.project_id=?1 and 
