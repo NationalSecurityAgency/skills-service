@@ -205,24 +205,6 @@ describe('Login Tests', () => {
       cy.get('[data-cy=oAuthProviders]').should('exist');
       cy.contains('Login via GitLab')
     });
-
-    it('login form is present for oAuthOnly mode when showForm=true', () => {
-      cy.intercept('GET', '/public/config', {oAuthOnly: true}).as('loadConfig');
-      cy.intercept('GET', '/app/oAuthProviders', [{"registrationId":"gitlab","clientName":"GitLab","iconClass":"fab fa-gitlab"}]).as('getOauthProviders')
-
-      cy.visit('/skills-login', {
-        qs: {
-          showForm: 'true',
-        }
-      });
-
-      cy.wait('@loadConfig');
-      cy.wait('@getOauthProviders');
-      cy.get('#username').should('exist')
-      cy.get('#inputPassword').should('exist')
-      cy.get('[data-cy=oAuthProviders]').should('exist');
-      cy.contains('Login via GitLab')
-    });
   }
 
 });

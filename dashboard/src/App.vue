@@ -21,7 +21,7 @@ limitations under the License.
         <new-software-version-component role="alert"/>
 
         <div class="overall-container">
-          <pki-app-bootstrap v-if="isPkiAndNeedsToBootstrap" role="alert"/>
+          <pki-app-bootstrap v-if="isPkiAndNeedsToBootstrap || isOAuthOnlyAndNeedsToBootstrap" role="alert"/>
           <loading-container v-else v-bind:is-loading="isLoading" role="presentation">
             <div v-if="!isLoading">
               <header-view v-if="isAuthenticatedUser && !this.$store.state.showUa" role="banner"/>
@@ -80,6 +80,9 @@ limitations under the License.
       },
       isPkiAndNeedsToBootstrap() {
         return this.$store.getters.isPkiAuthenticated && this.$store.getters.config.needToBootstrap;
+      },
+      isOAuthOnlyAndNeedsToBootstrap() {
+        return this.$store.getters.config.oAuthOnly && this.$store.getters.config.needToBootstrap && this.$store.getters.isAuthenticated;
       },
     },
     created() {

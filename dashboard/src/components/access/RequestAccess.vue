@@ -25,7 +25,7 @@ limitations under the License.
         </div>
         <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit}" slim>
           <form @submit.prevent="handleSubmit(login)">
-            <div class="card">
+            <div v-if="!oAuthOnly" class="card">
               <div class="card-body p-4">
                 <div class="form-group">
                   <label for="firstName" class="text-primary">* First Name</label>
@@ -130,6 +130,21 @@ limitations under the License.
                 </div>
               </div>
             </div>
+
+            <div v-if="oAuthProviders && oAuthProviders.length > 0" class="card mt-3" data-cy="oAuthProviders">
+              <div class="card-body">
+                <div class="row">
+                  <div v-for="oAuthProvider in oAuthProviders" :key="oAuthProvider.registrationId" class="col-12 mb-3">
+                    <button type="button" class="btn btn-outline-primary w-100"
+                            @click="oAuth2Login(oAuthProvider.registrationId)" aria-label="oAuth authentication link">
+                      <i :class="oAuthProvider.iconClass" aria-hidden="true" class="mr-1 text-info" />
+                      Login via {{ oAuthProvider.clientName }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </form>
         </ValidationObserver>
       </div>
@@ -177,6 +192,7 @@ aria-describedby=
         },
         passwordConfirmation: '',
         createInProgress: false,
+        oAuthProviders: [],
       };
     },
     methods: {
@@ -192,6 +208,9 @@ aria-describedby=
           }
         });
       },
+      oAuth2Login(registrationId) {
+        this.$store.dispatch('oAuth2Login', registrationId);
+      },
       missingRequiredValues() {
         return !this.loginFields.firstName || !this.loginFields.lastName || !this.loginFields.email || !this.loginFields.password;
       },
@@ -201,6 +220,19 @@ aria-describedby=
       isProgressAndRankingEnabled() {
         return this.$store.getters.config.rankingAndProgressViewsEnabled === true || this.$store.getters.config.rankingAndProgressViewsEnabled === 'true';
       },
+    },
+    computed: {
+      oAuthOnly() {
+        return this.$store.getters.config.oAuthOnly;
+      },
+    },
+    created() {
+      if (!this.$store.getters.isPkiAuthenticated) {
+        AccessService.getOAuthProviders()
+          .then((result) => {
+            this.oAuthProviders = result;
+          });
+      }
     },
   };
 </script>

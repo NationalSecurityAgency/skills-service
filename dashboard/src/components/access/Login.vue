@@ -189,7 +189,7 @@ limitations under the License.
         return (!this.isAutoFilled && (!this.loginFields.username || !this.loginFields.password));
       },
       oAuthOnly() {
-        return this.$store.getters.config.oAuthOnly && this.$route.query.showForm !== 'true';
+        return this.$store.getters.config.oAuthOnly;
       },
     },
     created() {
