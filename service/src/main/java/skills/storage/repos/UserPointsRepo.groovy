@@ -407,7 +407,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 and upa.skill_id in (?2)
                 GROUP BY user_id
                 ) upa ON upa.user_id = up.user_id
-            LEFT JOIN (
+            JOIN (
                 SELECT 
                 user_id, 
                 max(first_name) AS firstName, 
