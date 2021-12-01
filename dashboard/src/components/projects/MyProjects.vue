@@ -53,11 +53,27 @@ limitations under the License.
       <no-content2 v-if="!projects || projects.length==0" icon="fas fa-hand-spock" class="mt-4"
                    title="No Projects Yet..." message="A Project is an overall container that represents the skills ruleset for a single application with gamified training.">
         <div class="mt-3">
-          <span v-if="!isRootUser" class="text-muted" style="font-size: .90em">
+          <span v-if="!isRootUser && isProgressAndRankingEnabled()" class="text-muted" style="font-size: .90em">
             Note: This section of SkillTree is for <strong>project administrators only</strong>. If you do not plan on creating and integrating a project with SkillTree then please return to the
             <router-link to="/">
               <span class="skill-url">Progress and Ranking</span>
             </router-link> page.
+          </span>
+          <span v-if="isRootUser || !isProgressAndRankingEnabled()">
+            <b-card class="mb-5 mt-2 px-5">
+              A Project is an overall container that represents the skills ruleset for a single application with gamified training.
+              <hr />
+              <div class="mt-2">Please click</div>
+              <div class="my-2">
+                <b-button id="firstNewProjectBtn" @click="editNewProject()" variant="outline-primary" size="sm"
+                           data-cy="firstNewProjectButton" class="animate__bounceIn">
+                  <span class="d-none d-sm-inline">Project</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
+                </b-button>
+              </div>
+              <div>
+              on the <b>top-right</b> to create your first project.
+              </div>
+            </b-card>
           </span>
         </div>
       </no-content2>
@@ -221,6 +237,9 @@ limitations under the License.
           .finally(() => {
             this.sortOrder.loading = false;
           });
+      },
+      isProgressAndRankingEnabled() {
+        return this.$store.getters.config.rankingAndProgressViewsEnabled === true || this.$store.getters.config.rankingAndProgressViewsEnabled === 'true';
       },
     },
   };
