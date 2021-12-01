@@ -254,7 +254,7 @@ describe('Root Pin and Unpin Tests', () => {
     });
   });
 
-  it.only('Close Pin Projects modal using escape and then reopen', () => {
+  it('Close Pin Projects modal using escape and then reopen', () => {
     cy.logout();
     cy.fixture('vars.json').then((vars) => {
       cy.login(vars.rootUser, vars.defaultPass);
