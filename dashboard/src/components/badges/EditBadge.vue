@@ -272,15 +272,27 @@ limitations under the License.
           },
         });
 
-        extend('help_url', {
-          message: (field) => `${field} must use http, https, or be a relative url.`,
-          validate(value) {
-            if (!value) {
-              return true;
-            }
-            return value.startsWith('http') || value.startsWith('https') || value.startsWith('/');
-          },
-        });
+        if (this.global) {
+          extend('help_url', {
+            message: (field) => `${field} must start with "http(s)"`,
+            validate(value) {
+              if (!value) {
+                return true;
+              }
+              return value.startsWith('http') || value.startsWith('https');
+            },
+          });
+        } else {
+          extend('help_url', {
+            message: (field) => `${field} must start with "/" or "http(s)"`,
+            validate(value) {
+              if (!value) {
+                return true;
+              }
+              return value.startsWith('http') || value.startsWith('https') || value.startsWith('/');
+            },
+          });
+        }
 
         /*
         Provider's reset() method triggers an infinite loop if we use it in dateOrder

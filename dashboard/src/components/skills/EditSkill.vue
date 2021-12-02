@@ -241,7 +241,7 @@ limitations under the License.
     message: (fieldname, placeholders) => `${fieldname} must be ${placeholders.max} or less`,
   });
   extend('help_url', {
-    message: (field) => `${field} must use http, https, or be a relative url.`,
+    message: (field) => `${field} must start with "/" or "http(s)"`,
     validate(value) {
       if (!value) {
         return true;

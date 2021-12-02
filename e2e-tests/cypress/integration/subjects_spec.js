@@ -128,7 +128,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy=subjectNameInput]').type('A Subject');
         cy.get('[data-cy=skillHelpUrl]').clear().type('javascript:alert("uh oh");');
         cy.get('[data-cy=skillHelpUrlError]').should('be.visible');
-        cy.get('[data-cy=skillHelpUrlError]').should('have.text', 'Help URL/Path must use http, https, or be a relative url.');
+        cy.get('[data-cy=skillHelpUrlError]').should('have.text', 'Help URL/Path must start with "/" or "http(s)"');
         cy.get('[data-cy=saveSubjectButton]').should('be.disabled');
         cy.get('[data-cy=skillHelpUrl]').clear().type('/foo?p1=v1&p2=v2');
         cy.get('[data-cy=skillHelpUrlError]').should('not.be.visible');
