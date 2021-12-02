@@ -94,24 +94,23 @@ limitations under the License.
                 <span class="d-none d-sm-inline">Manage </span> <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
               </router-link>
               <b-button-group size="sm" class="ml-1">
-                <b-button v-if="showShare(data.item) === true"
-                          ref="shareBtn"
+                <b-button @click="editSkill(data.item)"
+                          variant="outline-primary" :data-cy="`editSkillButton_${data.item.skillId}`"
+                          :aria-label="'edit Skill '+data.item.name" :ref="`edit_${data.item.skillId}`"
+                          title="Edit Skill" b-tooltip.hover="Edit Skill">
+                  <i class="fas fa-edit" aria-hidden="true"/>
+                </b-button>
+                <b-button v-if="data.item.type === 'Skill'"
+                          ref="addToCatalogBtn"
                           size="sm"
                           variant="outline-primary"
-                          @click="handleShareClick"
-                          :title="shareTitle(data.item)"><i :class="shareBtnIcon(data.item)" aria-hidden="true"/></b-button>
+                          title="Add to catalog"> <i class="fas fa-book-medical" aria-hidden="true" /></b-button>
                 <b-button v-if="data.item.type === 'Skill'"
                           @click="copySkill(data.item)"
                           variant="outline-primary" :data-cy="`copySkillButton_${data.item.skillId}`"
                           :aria-label="'copy Skill '+data.item.name" :ref="'copy_'+data.item.skillId"
                           title="Copy Skill">
                   <i class="fas fa-copy" aria-hidden="true" />
-                </b-button>
-                <b-button @click="editSkill(data.item)"
-                          variant="outline-primary" :data-cy="`editSkillButton_${data.item.skillId}`"
-                          :aria-label="'edit Skill '+data.item.name" :ref="`edit_${data.item.skillId}`"
-                          title="Edit Skill" b-tooltip.hover="Edit Skill">
-                  <i class="fas fa-edit" aria-hidden="true"/>
                 </b-button>
                 <span :id="`deleteSkillButton-wrapper_${data.item.skillId}`" class="d-inline-block" tabindex="0">
                   <b-button :id="`deleteSkillButton_${data.item.skillId}`"
@@ -658,9 +657,6 @@ limitations under the License.
       },
       getSelfReportingTypePretty(selfReportingType) {
         return (selfReportingType === 'HonorSystem') ? 'Honor System' : selfReportingType;
-      },
-      showShare() {
-        return false;
       },
     },
   };

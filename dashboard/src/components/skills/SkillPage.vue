@@ -27,12 +27,21 @@ limitations under the License.
         </div>
       </div>
       <div slot="subSubTitle">
-        <b-button v-if="skill" @click="displayEdit"
-                  size="sm"
-                  variant="outline-primary" :data-cy="`editSkillButton_${this.$route.params.skillId}`"
-                  :aria-label="'edit Skill '+skill.name" ref="editSkillInPlaceBtn">
-          <span class="d-none d-sm-inline">Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
-        </b-button>
+        <b-button-group>
+          <b-button v-if="skill" @click="displayEdit"
+                    size="sm"
+                    variant="outline-primary" :data-cy="`editSkillButton_${this.$route.params.skillId}`"
+                    :aria-label="'edit Skill '+skill.name" ref="editSkillInPlaceBtn">
+            <span class="d-none d-sm-inline">Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
+          </b-button>
+          <b-button ref="addToCatalogBtn"
+                    size="sm"
+                    @click="showExportToCatalog=true"
+                    variant="outline-primary"
+                    title="Add to catalog">
+            <span class="d-none d-sm-inline">Catalog</span> <i class="fas fa-book-medical" aria-hidden="true" />
+          </b-button>
+        </b-button-group>
       </div>
     </page-header>
 
@@ -40,6 +49,7 @@ limitations under the License.
     </navigation>
     <edit-skill v-if="showEdit" v-model="showEdit" :skillId="skill.skillId" :is-copy="false" :is-edit="true"
                 :project-id="this.$route.params.projectId" :subject-id="this.$route.params.subjectId" @skill-saved="skillEdited" @hidden="handleHide"/>
+    <export-to-catalog v-if="showExportToCatalog" v-model="showExportToCatalog" :id="skill.skillId"/>
   </div>
 </template>
 
@@ -49,6 +59,7 @@ limitations under the License.
   import Navigation from '../utils/Navigation';
   import PageHeader from '../utils/pages/PageHeader';
   import EditSkill from './EditSkill';
+  import ExportToCatalog from './catalog/ExportToCatalog';
 
   const subjects = createNamespacedHelpers('subjects');
   const skills = createNamespacedHelpers('skills');
@@ -56,6 +67,7 @@ limitations under the License.
   export default {
     name: 'SkillPage',
     components: {
+      ExportToCatalog,
       PageHeader,
       Navigation,
       EditSkill,
@@ -66,6 +78,7 @@ limitations under the License.
         subjectId: '',
         headerOptions: {},
         showEdit: false,
+        showExportToCatalog: false,
       };
     },
     mounted() {
