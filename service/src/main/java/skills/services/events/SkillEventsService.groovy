@@ -291,16 +291,8 @@ class SkillEventsService {
         res = recordSkillOccurrence(skillDefinition, res)
         //now do it for each of the skills if in catalog or from catalog
         if (isCatalogSkill || skillDefinition.copiedFrom != null) {
-            def relatedSkills
-            if (isCatalogSkill) {
-                relatedSkills = skillCatalogService.getSkillsCopiedFrom(skillDefinition.id)
-            } else {
-                //this needs to include the og skill as well as any copies
-                relatedSkills = skillCatalogService.getSkillsCopiedFrom(skillDefinition.copiedFrom)?.findAll { it.id != skillDefinition.id }
-                SkillDefMin og = skillDefRepo.findSkillDefMinById(skillDefinition.copiedFrom)
-                relatedSkills.add(og)
-            }
-            //TODO: this probably will need to be extracted to an asynch process
+            def relatedSkills = skillCatalogService.getRelatedSkills(skillDefinition)
+            //TODO: make async
             relatedSkills?.each {
                 recordSkillOccurrence(it, new SkillEventResult())
             }

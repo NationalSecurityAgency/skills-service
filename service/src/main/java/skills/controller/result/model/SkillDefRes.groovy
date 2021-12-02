@@ -26,4 +26,6 @@ class SkillDefRes extends SkillDefPartialRes {
     String helpUrl
 
     SkillDef.SelfReportingType selfReportingType
+
+    boolean sharedToCatalog
 }

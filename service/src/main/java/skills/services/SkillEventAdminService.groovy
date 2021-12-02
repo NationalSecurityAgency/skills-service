@@ -25,6 +25,7 @@ import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.result.model.RequestResult
 import skills.services.events.BulkSkillEventResult
+import skills.services.admin.SkillCatalogService
 import skills.services.events.CompletionItem
 import skills.services.events.SkillEventResult
 import skills.services.events.SkillEventsService
@@ -66,6 +67,9 @@ class SkillEventAdminService {
     @Autowired
     private UserInfoService userInfoService
 
+    @Autowired
+    SkillCatalogService skillCatalogService
+
     @Transactional
     @Profile
     BulkSkillEventResult bulkReportSkills(String projectId, String skillId, List<String> userIds, Date incomingSkillDate) {
@@ -90,6 +94,11 @@ class SkillEventAdminService {
 
     @Transactional
     RequestResult deleteSkillEvent(String projectId, String skillId, String userId, Long timestamp) {
+        return deleteSkillEvent(projectId, skillId, userId, timestamp, true)
+    }
+
+    @Transactional
+    RequestResult deleteSkillEvent(String projectId, String skillId, String userId, Long timestamp, Boolean performCatalogChecks) {
         List<UserPerformedSkill> performedSkills = performedSkillRepository.findAllByProjectIdAndSkillIdAndUserIdAndPerformedOn(projectId, skillId, userId, new Date(timestamp))
         if (!performedSkills) {
             throw new SkillException("This skill event does not exist", projectId, skillId, ErrorCode.BadParam)
@@ -100,6 +109,17 @@ class SkillEventAdminService {
         log.debug("Deleting skill [{}] for user [{}]", performedSkill, userId)
 
         SkillDefMin skillDefinitionMin = getSkillDef(projectId, skillId)
+
+        if (performCatalogChecks) {
+            //TODO: make async
+            final boolean isInCatalog = skillCatalogService.isAvailableInCatalog(skillDefinitionMin.projectId, skillDefinitionMin.skillId)
+            if (skillDefinitionMin.getCopiedFrom() > 0 || isInCatalog) {
+                List<SkillDefMin> related = skillCatalogService.getRelatedSkills(skillDefinitionMin)
+                related?.each {
+                    deleteSkillEvent(it.projectId, it.skillId, userId, timestamp, false)
+                }
+            }
+        }
 
         RequestResult res = new RequestResult()
 

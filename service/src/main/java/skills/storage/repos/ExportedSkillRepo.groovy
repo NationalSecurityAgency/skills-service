@@ -35,6 +35,10 @@ interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, In
     List<SkillDef> getSkillsInCatalog(Pageable pageable)
 
     @Nullable
+    @Query('''select es.skill from ExportedSkill es where lower(es.skill.name) like lower(concat('%', ?1, '%'))''')
+    List<SkillDef> getSkillsInCatalog(String search, Pageable pageable)
+
+    @Nullable
     @Query('''select es.skill from ExportedSkill es where es.projectId = ?1''')
     List<SkillDef> getSkillsExportedByProject(String projectId, Pageable pageable)
 

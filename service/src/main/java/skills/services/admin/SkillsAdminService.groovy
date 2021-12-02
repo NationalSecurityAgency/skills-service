@@ -328,6 +328,10 @@ class SkillsAdminService {
                     skillsGroupSkillDef,
                     groupChildSkills
             )
+            if (skillCatalogService.isAvailableInCatalog(savedSkill.projectId, savedSkill.skillId)) {
+                QueuedSkillUpdate queuedSkillUpdate = new QueuedSkillUpdate(skill:  savedSkill, isCatalogSkill: true)
+                queuedSkillUpdateRepo.save(queuedSkillUpdate)
+            }
         }
 
         log.debug("Saved [{}]", savedSkill)
@@ -371,12 +375,6 @@ class SkillsAdminService {
             SkillDef subject = skillDefRepo.findByProjectIdAndSkillIdAndType(savedSkill.projectId, subjectId, SkillDef.ContainerType.Subject)
             userPointsManagement.identifyAndAddLevelAchievements(subject)
         }
-
-        if (skillCatalogService.isAvailableInCatalog(savedSkill.projectId, savedSkill.skillId)) {
-            QueuedSkillUpdate queuedSkillUpdate = new QueuedSkillUpdate(skill:  savedSkill, isCatalogSkill: true)
-            queuedSkillUpdateRepo.save(queuedSkillUpdate)
-        }
-
         log.debug("Saved [{}]", savedSkill)
     }
 
@@ -439,6 +437,16 @@ class SkillsAdminService {
 
         List<SkillDef> siblings = ruleSetDefGraphService.getChildrenSkills(parentSkill, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
         displayOrderService.resetDisplayOrder(siblings)
+
+        if (skillCatalogService.isAvailableInCatalog(skillDefinition)) {
+            List<SkillDef> related = skillCatalogService.getRelatedSkills(skillDefinition)
+            log.info("catalog skill is being deleted, deleting [{}] copies imported into other projects", related?.size())
+            //TODO: move this to an async process
+            related?.each {
+                SkillDef subj = skillRelDefRepo.findAllByChildAndType(it, SkillRelDef.RelationshipType.RuleSetDefinition)
+                deleteSkill(it.projectId, subj.skillId, it.skillId)
+            }
+        }
     }
 
     @Transactional(readOnly = true)
@@ -510,6 +518,7 @@ class SkillsAdminService {
         }
 
         SkillDefRes finalRes = convertToSkillDefRes(res)
+        finalRes.sharedToCatalog = skillCatalogService.isAvailableInCatalog(res.projectId, res.skillId)
         return finalRes
     }
 

@@ -1067,9 +1067,10 @@ class AdminController {
                                   @RequestParam int limit,
                                   @RequestParam int page,
                                   @RequestParam String orderBy,
-                                  @RequestParam Boolean ascending) {
+                                  @RequestParam Boolean ascending,
+                                  @RequestParam String search) {
         // this needs to enrich the SkillDefRes with the subjectId/name of the Skill...
-        skillCatalogService.getSkillsAvailableInCatalog(projectId, createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending))
+        skillCatalogService.getSkillsAvailableInCatalog(projectId, search, createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending))
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/exported", method = RequestMethod.GET, produces = "application/json")

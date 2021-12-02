@@ -76,8 +76,11 @@ class SkillCatalogService {
     LockingService lockingService
 
     @Transactional(readOnly = true)
-    List<SkillDefRes> getSkillsAvailableInCatalog(String projectId, Pageable pageable) {
+    List<SkillDefRes> getSkillsAvailableInCatalog(String projectId, String search, Pageable pageable) {
         //projectId unused for now
+        if (search) {
+            return exportedSkillRepo.getSkillsInCatalog(search, pageable)?.collect { convert(it)}
+        }
         exportedSkillRepo.getSkillsInCatalog(pageable)?.collect {convert(it)}
     }
 
@@ -180,6 +183,23 @@ class SkillCatalogService {
             related = skillDefRepo.findSkillsCopiedFrom(skillDef.copiedFrom)
             related = related?.findAll { it.id != skillDef.id }
             SkillDef og = skillDefRepo.findById(skillDef.copiedFrom)
+            if (og) {
+                related.add(og)
+            }
+        }
+
+        return related
+    }
+
+    @Transactional
+    List<SkillDefMin> getRelatedSkills(SkillDefMin skillDef) {
+        List<SkillDefMin> related = []
+        if (isAvailableInCatalog(skillDef.projectId, skillDef.skillId)) {
+            related = skillDefRepo.findSkillDefMinCopiedFrom(skillDef.id)
+        } else if (skillDef.copiedFrom != null) {
+            related = skillDefRepo.findSkillDefMinCopiedFrom(skillDef.copiedFrom)
+            related = related?.findAll { it.id != skillDef.id }
+            SkillDefMin og = skillDefRepo.findSkillDefMinById(skillDef.copiedFrom)
             if (og) {
                 related.add(og)
             }
