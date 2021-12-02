@@ -22,6 +22,7 @@ import org.joda.time.format.DateTimeFormatter
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import spock.lang.IgnoreRest
 
 class UserPointsSpecs extends DefaultIntSpec {
 
@@ -31,7 +32,7 @@ class UserPointsSpecs extends DefaultIntSpec {
     List<String> subjects
     List<List<String>> allSkillIds
     String badgeId
-    
+
     Date threeDaysAgo = new Date()-3
     DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").withZoneUTC()
 
@@ -433,6 +434,66 @@ class UserPointsSpecs extends DefaultIntSpec {
 
         mostRecentDate1 == mostRecentDate2
         mostRecentDate3 > mostRecentDate2
+    }
+
+    def 'skill users total points should not be a multiple of the actual total'() {
+        def project = SkillsFactory.createProject(99)
+        def subject = SkillsFactory.createSubject(99)
+        def skill1 = SkillsFactory.createSkill(99, 1, 1, 0, 10, 0, 10)
+        def skill2 = SkillsFactory.createSkill(99, 1, 2, 0, 10, 0, 20)
+
+        skillsService.createProject(project)
+        skillsService.createSubject(subject)
+        skillsService.createSkill(skill1)
+        skillsService.createSkill(skill2)
+
+        when:
+        def user = getRandomUsers(1)[0]
+        skillsService.addSkill(skill1, user, new Date().minus(5))
+
+        def skillUsersOneOccurence = skillsService.getSkillUsers(project.projectId, skill1.skillId)
+        skillsService.addSkill(skill1, user, new Date().minus(3))
+        def skillUsersTwoOccurrences = skillsService.getSkillUsers(project.projectId, skill1.skillId)
+        skillsService.addSkill(skill1, user, new Date().minus(1))
+        def skillUsersThreeOccurrences = skillsService.getSkillUsers(project.projectId, skill1.skillId)
+
+        then:
+        skillUsersOneOccurence.data[0].userId == user
+        skillUsersOneOccurence.data[0].totalPoints == 10
+        skillUsersTwoOccurrences.data[0].userId == user
+        skillUsersTwoOccurrences.data[0].totalPoints == 20
+        skillUsersThreeOccurrences.data[0].userId == user
+        skillUsersThreeOccurrences.data[0].totalPoints == 30
+    }
+
+    def 'subject users total points should not be a multiple of the actual total'() {
+        def project = SkillsFactory.createProject(99)
+        def subject = SkillsFactory.createSubject(99)
+        def skill1 = SkillsFactory.createSkill(99, 1, 1, 0, 10, 0, 10)
+        def skill2 = SkillsFactory.createSkill(99, 1, 2, 0, 10, 0, 20)
+
+        skillsService.createProject(project)
+        skillsService.createSubject(subject)
+        skillsService.createSkill(skill1)
+        skillsService.createSkill(skill2)
+
+        when:
+        def user = getRandomUsers(1)[0]
+        skillsService.addSkill(skill1, user, new Date().minus(5))
+
+        def subjectUsersOneOccurrence = skillsService.getSubjectUsers(project.projectId, subject.subjectId)
+        skillsService.addSkill(skill1, user, new Date().minus(3))
+        def subjectUsersTwoOccurrences = skillsService.getSubjectUsers(project.projectId, subject.subjectId)
+        skillsService.addSkill(skill1, user, new Date().minus(1))
+        def subjectUsersThreeOccurrences = skillsService.getSubjectUsers(project.projectId, subject.subjectId)
+
+        then:
+        subjectUsersOneOccurrence.data[0].userId == user
+        subjectUsersOneOccurrence.data[0].totalPoints == 10
+        subjectUsersTwoOccurrences.data[0].userId == user
+        subjectUsersTwoOccurrences.data[0].totalPoints == 20
+        subjectUsersThreeOccurrences.data[0].userId == user
+        subjectUsersThreeOccurrences.data[0].totalPoints == 30
     }
 
 }
