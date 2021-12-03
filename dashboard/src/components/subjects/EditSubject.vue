@@ -198,7 +198,7 @@ limitations under the License.
         });
 
         extend('help_url', {
-          message: (field) => `${field} must use http, https, or be a relative url.`,
+          message: (field) => `${field} must start with "/" or "http(s)"`,
           validate(value) {
             if (!value) {
               return true;
