@@ -14,7 +14,7 @@
       <div class="h6">Visibility:
         <b-form-checkbox v-model="visibilityToAllProjects" @change="onVisibilityToAllProjects" class="mt-2 d-inline"
                          data-cy="shareWithAllProjectsCheckbox">
-          <small>Share With All Projects </small><inline-help msg="Select this checkbox to share the skill with ALL projects."/>
+          <small>Share With All Projects </small>
         </b-form-checkbox>
       </div>
       <project-selector :project-id="$route.params.projectId" :selected="selectedProject"

@@ -91,7 +91,6 @@ limitations under the License.
       };
     },
     mounted() {
-      console.log(`this.$route.params.projectId: ${this.$route.params.projectId}`);
       this.loadExported();
     },
     watch: {
