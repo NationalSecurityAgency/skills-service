@@ -648,6 +648,33 @@ describe('Skills Group Tests', () => {
         cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="editRequired"]`).should('be.enabled');
     });
 
+    it('modify number of required skills after copying skill', () => {
+        cy.createSkillsGroup(1, 1, 1);
+        const groupId = 'group1'
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
+
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredAllSkills"]`).contains('all skills')
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="editRequired"]`).should('be.disabled');
+
+        cy.addSkillToGroupViaUI(groupId, 1, false);
+        cy.get('[data-cy="copySkillButton_Skill1Skill"]').click();
+        cy.get('[data-cy="saveSkillButton"]').click();
+        cy.get('[data-cy="saveSkillButton"]').should('not.exist');
+        cy.contains(`copy_of_Skill1Skill`);
+
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredAllSkills"]`).contains('all skills')
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="editRequired"]`).click();
+        cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).should('have.value','-1');
+        cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).select('1 out of 2');
+        cy.get('.modal-content').contains('Save').click();
+
+
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="requiredSkillsNum"]`).contains('1')
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="numSkillsInGroup"]`).contains('2')
+    });
+
     it('modify number of required skills', () => {
         cy.createSkillsGroup(1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 1);

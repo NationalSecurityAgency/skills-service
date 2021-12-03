@@ -241,17 +241,7 @@ limitations under the License.
       },
       saveSkill(skill) {
         const copy = { groupId: this.group.skillId, ...skill };
-        this.$refs[`groupSkills_${this.group.skillId}`].skillCreatedOrUpdated(copy)
-          .then(() => {
-            const updatedGroup = {
-              ...this.group,
-              numSkillsInGroup: this.group.numSkillsInGroup + 1,
-              numSkillsRequired: this.group.numSkillsRequired,
-              totalPoints: this.group.totalPoints + (skill.pointIncrement * skill.numPerformToCompletion),
-            };
-            this.$emit('group-changed', updatedGroup);
-            this.refreshSubjectState();
-          });
+        this.$refs[`groupSkills_${this.group.skillId}`].skillCreatedOrUpdated(copy);
       },
       refreshSubjectState(forceRefresh = false) {
         if (this.group.enabled || forceRefresh) {
@@ -283,6 +273,15 @@ limitations under the License.
         } else {
           this.skills.push(skill);
           this.numSkills = this.skills.length;
+
+          const updatedGroup = {
+            ...this.group,
+            numSkillsInGroup: this.group.numSkillsInGroup + 1,
+            numSkillsRequired: this.group.numSkillsRequired,
+            totalPoints: this.group.totalPoints + (skill.pointIncrement * skill.numPerformToCompletion),
+          };
+          this.$emit('group-changed', updatedGroup);
+          this.refreshSubjectState();
         }
         this.refreshSubjectState();
       },
