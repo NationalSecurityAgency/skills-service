@@ -23,6 +23,7 @@ import skills.storage.model.ExportedSkill
 import skills.storage.model.ExportedSkillTiny
 import skills.storage.model.ImportExportStats
 import skills.storage.model.SkillDef
+import skills.storage.model.SubjectAwareSkillDef
 
 interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, Integer> {
 
@@ -31,12 +32,34 @@ interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, In
     Boolean doesSkillExistInCatalog(String projectId, String skillId)
 
     @Nullable
-    @Query('''select es.skill from ExportedSkill es''')
-    List<SkillDef> getSkillsInCatalog(Pageable pageable)
+    @Query('''select es.skill as skill, 
+                subject.name as subjectName, 
+                subject.skillId as subjectId,
+                project.name as projectName 
+        from ExportedSkill es, SkillRelDef srd, SkillDef subject
+        join ProjDef project on project.projectId = es.projectId
+        where subject = srd.parent and
+             srd.type = 'RuleSetDefinition' and
+             subject.type = 'Subject' and 
+             srd.child = es.skill
+    ''')
+    List<SubjectAwareSkillDef> getSkillsInCatalog(Pageable pageable)
 
     @Nullable
-    @Query('''select es.skill from ExportedSkill es where lower(es.skill.name) like lower(concat('%', ?1, '%'))''')
-    List<SkillDef> getSkillsInCatalog(String search, Pageable pageable)
+    @Query('''
+        select es.skill as skill, 
+                subject.name as subjectName, 
+                subject.skillId as subjectId,
+                project.name as projectName 
+        from ExportedSkill es, SkillRelDef srd, SkillDef subject
+        join ProjDef project on project.projectId = es.projectId
+        where lower(es.skill.name) like lower(concat('%', ?1, '%'))
+        and subject = srd.parent and
+             srd.type = 'RuleSetDefinition' and
+             subject.type = 'Subject' and 
+             srd.child = es.skill
+    ''')
+    List<SubjectAwareSkillDef> getSkillsInCatalog(String search, Pageable pageable)
 
     @Nullable
     @Query('''select es.skill from ExportedSkill es where es.projectId = ?1''')

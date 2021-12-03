@@ -1063,13 +1063,12 @@ class AdminController {
     }
 
     @RequestMapping(value="/projects/{projectId}/skills/catalog", method=RequestMethod.GET, produces = "application/json")
-    List<SkillDefRes> getCatalogSkills(@PathVariable("projectId") String projectId,
+    List<ProjectNameAwareSkillDefRes> getCatalogSkills(@PathVariable("projectId") String projectId,
                                   @RequestParam int limit,
                                   @RequestParam int page,
                                   @RequestParam String orderBy,
                                   @RequestParam Boolean ascending,
-                                  @RequestParam String search) {
-        // this needs to enrich the SkillDefRes with the subjectId/name of the Skill...
+                                  @RequestParam(required=false) String search) {
         skillCatalogService.getSkillsAvailableInCatalog(projectId, search, createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending))
     }
 
@@ -1101,7 +1100,7 @@ class AdminController {
         return skillCatalogService.getSkillsExportedByProject(projectId)
     }
 
-    private PageRequest createPagingRequestWithValidation(String projectId, int limit, int page, String orderBy, Boolean ascending) {
+    private static PageRequest createPagingRequestWithValidation(String projectId, int limit, int page, String orderBy, Boolean ascending) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isTrue(limit <= 200, "Cannot ask for more than 200 items, provided=[${limit}]", projectId)
         SkillsValidator.isTrue(page >= 0, "Cannot provide negative page. provided =[${page}]", projectId)

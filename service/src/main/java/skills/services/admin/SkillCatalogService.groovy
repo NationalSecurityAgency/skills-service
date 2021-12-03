@@ -17,7 +17,9 @@ package skills.services.admin
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillException
@@ -26,6 +28,7 @@ import skills.controller.request.model.SkillImportRequest
 import skills.controller.result.model.ExportedSkillRes
 import skills.controller.result.model.ExportedSkillStats
 import skills.controller.result.model.ImportedSkillStats
+import skills.controller.result.model.ProjectNameAwareSkillDefRes
 import skills.controller.result.model.SkillDefRes
 import skills.services.LockingService
 import skills.services.RuleSetDefGraphService
@@ -39,6 +42,7 @@ import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefMin
 import skills.storage.model.SkillRelDef
 import skills.storage.model.SkillsDBLock
+import skills.storage.model.SubjectAwareSkillDef
 import skills.storage.repos.ExportedSkillRepo
 import skills.storage.repos.QueuedSkillUpdateRepo
 import skills.storage.repos.SkillDefRepo
@@ -76,12 +80,38 @@ class SkillCatalogService {
     LockingService lockingService
 
     @Transactional(readOnly = true)
-    List<SkillDefRes> getSkillsAvailableInCatalog(String projectId, String search, Pageable pageable) {
-        //projectId unused for now
+    List<ProjectNameAwareSkillDefRes> getSkillsAvailableInCatalog(String projectId, String search, PageRequest pageable) {
+        //TODO: projectId will need to be eventually used to govern accessibility shared skills
+        //e.g., projects will more than likely want to share skills to the catalog with specific projects only
+        // because these methods return a projection, we need to alias the sort keys and prefix any that aren't
+        // projectName, subjectName, subjectId with "skill."
+        pageable = convertForCatalogSkills(pageable)
+
         if (search) {
-            return exportedSkillRepo.getSkillsInCatalog(search, pageable)?.collect { convert(it)}
+            return exportedSkillRepo.getSkillsInCatalog(search, pageable)?.findAll {it.skill.projectId != projectId }?.collect { convert(it)}
         }
-        exportedSkillRepo.getSkillsInCatalog(pageable)?.collect {convert(it)}
+        exportedSkillRepo.getSkillsInCatalog(pageable)?.findAll {it.skill.projectId != projectId }?.collect {convert(it)}
+    }
+
+    private static final Set<String> aliasUnnecessary = Set.of("projectName", "subjectName", "subjectId")
+    private PageRequest convertForCatalogSkills(PageRequest pageRequest) {
+        int pageNum = pageRequest.getPageNumber()
+        int pageSize = pageRequest.getPageSize()
+        Sort sort = pageRequest.getSort()
+        if (!sort.isEmpty()) {
+            List<Sort.Order> props = []
+            sort.get().forEach({
+                if (!aliasUnnecessary.contains(it.property)) {
+                    props.add(new Sort.Order(it.direction, "skill.${it.property}"))
+                } else {
+                    props.add(it)
+                }
+            })
+
+            pageRequest = PageRequest.of(pageNum, pageSize, Sort.by(props))
+        }
+
+        return pageRequest
     }
 
     @Transactional(readOnly = true)
@@ -256,5 +286,14 @@ class SkillCatalogService {
         esr.subjectName = exportedSkillTiny.subjectName
         esr.exportedOn = exportedSkillTiny.exportedOn
         return esr
+    }
+
+    private static ProjectNameAwareSkillDefRes convert(SubjectAwareSkillDef subjectAwareSkillDef) {
+        ProjectNameAwareSkillDefRes partial = new ProjectNameAwareSkillDefRes()
+        Props.copy(subjectAwareSkillDef.skill, partial)
+        partial.subjectId = subjectAwareSkillDef.subjectId
+        partial.subjectName = subjectAwareSkillDef.subjectName
+        partial.projectName = subjectAwareSkillDef.projectName
+        return partial
     }
 }
