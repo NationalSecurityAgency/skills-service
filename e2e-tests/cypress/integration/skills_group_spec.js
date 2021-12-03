@@ -675,6 +675,59 @@ describe('Skills Group Tests', () => {
         cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="numSkillsInGroup"]`).contains('2')
     });
 
+    it('"Group skills points must be the same" after points were aligned by editing a skill - numPerformToCompletion attribute is different', () => {
+        cy.createSkillsGroup(1, 1, 1);
+        cy.addSkillToGroup(1, 1, 1, 1, { pointIncrement: 10, numPerformToCompletion: 5 });
+        cy.addSkillToGroup(1, 1, 1, 2, { pointIncrement: 10, numPerformToCompletion: 50 });
+        const groupId = 'group1'
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
+
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="editRequired"]`).click();
+        cy.contains('Group\'s skills points must be the same');
+        cy.get('.modal-footer').contains('Cancel').click();
+
+        cy.get('[data-cy="editSkillButton_skill2"]').click();
+        cy.get('[data-cy="numPerformToCompletion"]').clear().type('5');
+        cy.get('[data-cy="saveSkillButton"]').click();
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="editRequired"]`).click();
+        cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).should('have.value','-1');
+        cy.contains('Group\'s skills points must be the same').should('not.exist');
+
+        cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).select('1 out of 2');
+        cy.get('.modal-content').contains('Save').click();
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="requiredSkillsNum"]`).contains('1')
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="numSkillsInGroup"]`).contains('2')
+    });
+
+    it('"Group skills points must be the same" after points were aligned by editing a skill - pointIncrement attribute is different', () => {
+        cy.createSkillsGroup(1, 1, 1);
+        cy.addSkillToGroup(1, 1, 1, 1, { pointIncrement: 10, numPerformToCompletion: 5 });
+        cy.addSkillToGroup(1, 1, 1, 2, { pointIncrement: 15, numPerformToCompletion: 5 });
+        const groupId = 'group1'
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
+
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="editRequired"]`).click();
+        cy.contains('Group\'s skills points must be the same');
+        cy.get('.modal-footer').contains('Cancel').click();
+
+        cy.get('[data-cy="editSkillButton_skill2"]').click();
+        cy.get('[data-cy="skillPointIncrement"]').clear().type('10');
+        cy.get('[data-cy="saveSkillButton"]').click();
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="editRequired"]`).click();
+        cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).should('have.value','-1');
+        cy.contains('Group\'s skills points must be the same').should('not.exist');
+
+        cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).select('1 out of 2');
+        cy.get('.modal-content').contains('Save').click();
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="requiredSkillsNum"]`).contains('1')
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="numSkillsInGroup"]`).contains('2')
+    });
+
+
     it('modify number of required skills', () => {
         cy.createSkillsGroup(1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 1);
