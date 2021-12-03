@@ -20,4 +20,5 @@ interface ExportedSkillTiny {
     String getSkillName();
     String getSubjectName();
     Date getExportedOn();
+    String getSubjectId();
 }

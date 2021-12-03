@@ -47,7 +47,8 @@ interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, In
             select es.skill.skillId as skillId, 
                  es.skill.name as skillName,
                  es.created as exportedOn,
-                 subject.name as subjectName
+                 subject.name as subjectName,
+                 subject.skillId as subjectId
              from ExportedSkill es, SkillRelDef srd, SkillDef subject 
              where es.projectId = ?1 and 
              subject = srd.parent and

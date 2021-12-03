@@ -20,4 +20,5 @@ class ExportedSkillRes {
     String skillName
     String subjectName
     Date exportedOn
+    String subjectId
 }
