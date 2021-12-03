@@ -15,24 +15,11 @@ limitations under the License.
 */
 <template>
   <div id="exportedSkillsPanel">
-    <sub-page-header title="Exported Skills">
-      <!--div class="row">
-        <div class="col">
-          <b-tooltip target="remove-button" title="Remove all project errors." :disabled="errors.length < 1"></b-tooltip>
-          <span id="remove-button" class="mr-2">
-            <b-button variant="outline-primary" ref="removeAllErrors" @click="removeAllErrors" :disabled="errors.length < 1" size="sm"
-                      data-cy="removeAllErrors">
-              <span class="d-none d-sm-inline">Remove</span> All <i class="text-warning fas fa-trash-alt" aria-hidden="true"/>
-            </b-button>
-          </span>
-        </div>
-      </div-->
-    </sub-page-header>
-
     <b-card body-class="p-0">
-  <!-- Going to want stat cards that show how many skills are exported, maybe another that shows how many of those are in use by other projects
-      maybe number of projects using exported skills as well
-  -->
+      <template #header>
+        <div class="h6 mb-0 font-weight-bold">Exported to Catalog</div>
+      </template>
+
       <skills-spinner :is-loading="loading" />
 
       <skills-b-table v-if="!loading"
@@ -42,7 +29,9 @@ limitations under the License.
                       @page-changed="pageChanged"
                       @page-size-changed="pageSizeChanged"
                       @sort-changed="sortTable">
-
+        <template v-slot:cell(exportedOn)="data">
+          <date-cell :value="data.value" />
+        </template>
       </skills-b-table>
     </b-card>
   </div>
@@ -52,16 +41,14 @@ limitations under the License.
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import SkillsService from '@/components/skills/SkillsService';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
-  import SubPageHeader from '@/components/utils/pages/SubPageHeader';
-  /* import DateCell from '@/components/utils/table/DateCell'; */
+  import DateCell from '@/components/utils/table/DateCell';
 
   export default {
     name: 'ExportedSkills',
     components: {
       SkillsBTable,
       SkillsSpinner,
-      SubPageHeader,
-      /* DateCell, */
+      DateCell,
     },
     data() {
       return {

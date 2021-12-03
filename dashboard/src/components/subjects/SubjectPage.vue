@@ -24,7 +24,7 @@ limitations under the License.
                   variant="outline-primary"
                   data-cy="btn_edit-subject"
                   :aria-label="'edit Subject '+subject.subjectId">
-          <span class="d-none d-sm-inline">Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
+          <span class="">Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
         </b-button>
       </div>
     </page-header>

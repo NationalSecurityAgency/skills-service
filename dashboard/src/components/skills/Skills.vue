@@ -18,9 +18,15 @@ limitations under the License.
     <loading-container v-bind:is-loading="isLoading">
       <sub-page-header ref="subPageHeader" title="Skills"
                        :disabled="addSkillDisabled" :disabled-msg="addSkillsDisabledMsg" aria-label="new skill">
+
+        <b-button id="importFromCatalogBtn" ref="importFromCatalogBtn" @click="importCatalog.show=true" variant="outline-primary" size="sm"
+                  aria-label="import from catalog"
+                  data-cy="importFromCatalogBtn">
+          <span class="">Import</span> <i class="fas fa-book" aria-hidden="true"/>
+        </b-button>
         <b-button id="newGroupBtn" ref="newGroupButton" @click="newGroup" variant="outline-primary" size="sm"
                   aria-label="new skills group"
-                  data-cy="newGroupButton">
+                  data-cy="newGroupButton" class="ml-1">
           <span class="">Group</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
         </b-button>
         <b-button id="newSkillBtn" ref="newSkillButton" @click="newSkill" variant="outline-primary" size="sm"
@@ -41,6 +47,7 @@ limitations under the License.
 
     <edit-skill-group v-if="editGroupInfo.show" v-model="editGroupInfo.show" :group="editGroupInfo.group" :is-edit="false"
                       @group-saved="skillCreatedOrUpdated" @hidden="focusOnNewGroupButton"/>
+    <import-from-catalog v-if="importCatalog.show" v-model="importCatalog.show"/>
   </div>
 </template>
 
@@ -53,12 +60,14 @@ limitations under the License.
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import EditSkill from './EditSkill';
   import EditSkillGroup from './skillsGroup/EditSkillGroup';
+  import ImportFromCatalog from './catalog/ImportFromCatalog';
 
   const { mapActions, mapGetters } = createNamespacedHelpers('subjects');
 
   export default {
     name: 'Skills',
     components: {
+      ImportFromCatalog,
       EditSkillGroup,
       EditSkill,
       SubPageHeader,
@@ -81,6 +90,9 @@ limitations under the License.
           isEdit: false,
           show: false,
           group: {},
+        },
+        importCatalog: {
+          show: false,
         },
       };
     },
