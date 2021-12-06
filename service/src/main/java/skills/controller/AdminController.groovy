@@ -1063,13 +1063,21 @@ class AdminController {
     }
 
     @RequestMapping(value="/projects/{projectId}/skills/catalog", method=RequestMethod.GET, produces = "application/json")
-    List<ProjectNameAwareSkillDefRes> getCatalogSkills(@PathVariable("projectId") String projectId,
+    TableResult getCatalogSkills(@PathVariable("projectId") String projectId,
                                   @RequestParam int limit,
                                   @RequestParam int page,
                                   @RequestParam String orderBy,
                                   @RequestParam Boolean ascending,
-                                  @RequestParam(required=false) String search) {
-        skillCatalogService.getSkillsAvailableInCatalog(projectId, search, createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending))
+                                  @RequestParam(required=false) String projectNameSearch,
+                                  @RequestParam(required=false) String subjectNameSearch,
+                                  @RequestParam(required=false) String skillNameSearch) {
+        TotalCountAwareResult<ProjectNameAwareSkillDefRes> res = skillCatalogService.getSkillsAvailableInCatalog(projectId, projectNameSearch, subjectNameSearch, skillNameSearch, createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending))
+        TableResult tr = new TableResult()
+        tr.count = res.results?.size()
+        tr.totalCount = res.total
+        tr.data = res.results
+
+        return tr
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/exported", method = RequestMethod.GET, produces = "application/json")

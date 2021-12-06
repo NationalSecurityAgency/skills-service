@@ -141,7 +141,7 @@ class SkillApprovalService {
 
             // enter  event for all imported copies if in catalog
             if (skillCatalogService.isAvailableInCatalog(skillDef)) {
-                //TODO: this may need to be moved to an asynch process eventually
+                //TODO: this may need to be moved to an async process eventually
                 skillCatalogService.getRelatedSkills(skillDef)?.each { SkillDef copy ->
                     skillEventsService.reportSkill(copy.projectId, copy.skillId, it.userId, false, it.requestedOn,
                             new SkillEventsService.SkillApprovalParams(disableChecks: true))

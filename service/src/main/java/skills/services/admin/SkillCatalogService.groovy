@@ -80,17 +80,25 @@ class SkillCatalogService {
     LockingService lockingService
 
     @Transactional(readOnly = true)
-    List<ProjectNameAwareSkillDefRes> getSkillsAvailableInCatalog(String projectId, String search, PageRequest pageable) {
+    TotalCountAwareResult<ProjectNameAwareSkillDefRes> getSkillsAvailableInCatalog(String projectId, String projectNameSearch, String subjectNameSearch, String skillNameSearch, PageRequest pageable) {
         //TODO: projectId will need to be eventually used to govern accessibility shared skills
         //e.g., projects will more than likely want to share skills to the catalog with specific projects only
         // because these methods return a projection, we need to alias the sort keys and prefix any that aren't
         // projectName, subjectName, subjectId with "skill."
         pageable = convertForCatalogSkills(pageable)
+        TotalCountAwareResult<ProjectNameAwareSkillDefRes> res = new TotalCountAwareResult<>()
 
-        if (search) {
-            return exportedSkillRepo.getSkillsInCatalog(search, pageable)?.findAll {it.skill.projectId != projectId }?.collect { convert(it)}
+        if (projectNameSearch || subjectNameSearch || skillNameSearch) {
+            res.total = exportedSkillRepo.countSkillsInCatalog(projectNameSearch, subjectNameSearch, skillNameSearch)
+            res.results = exportedSkillRepo.getSkillsInCatalog(projectNameSearch, subjectNameSearch, skillNameSearch, pageable)?.findAll {it.skill.projectId != projectId }?.collect { convert(it)}
+            return res
         }
-        exportedSkillRepo.getSkillsInCatalog(pageable)?.findAll {it.skill.projectId != projectId }?.collect {convert(it)}
+
+        res.total = exportedSkillRepo.countSkillsInCatalog()
+        def catalogSkills = exportedSkillRepo.getSkillsInCatalog(pageable)
+        def onlyNotAlreadyImported = exportedSkillRepo.getSkillsInCatalog(pageable)?.findAll { it.skill.projectId != projectId }
+        res.results = onlyNotAlreadyImported?.collect {convert(it)}
+        return res
     }
 
     private static final Set<String> aliasUnnecessary = Set.of("projectName", "subjectName", "subjectId")
@@ -289,11 +297,13 @@ class SkillCatalogService {
     }
 
     private static ProjectNameAwareSkillDefRes convert(SubjectAwareSkillDef subjectAwareSkillDef) {
+        // Not sure this is copying correctly
         ProjectNameAwareSkillDefRes partial = new ProjectNameAwareSkillDefRes()
         Props.copy(subjectAwareSkillDef.skill, partial)
         partial.subjectId = subjectAwareSkillDef.subjectId
         partial.subjectName = subjectAwareSkillDef.subjectName
         partial.projectName = subjectAwareSkillDef.projectName
+        partial.sharedToCatalog = true
         return partial
     }
 }
