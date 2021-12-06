@@ -72,7 +72,11 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         sd2.updated as updated,
         sd2.selfReportingType as selfReportingType,
         sd2.enabled as enabled,
-        sd2.numSkillsRequired as numSkillsRequired
+        sd2.numSkillsRequired as numSkillsRequired,
+        sd2.copiedFrom as 
+        sd2.copiedFrom as copiedFrom,
+        sd2.readOnly as readOnly,
+        sd2.copiedFromProjectId as copiedFromProjectId
         from SkillDef sd1, SkillDef sd2, SkillRelDef srd 
         where sd1 = srd.parent and sd2 = srd.child and srd.type=?3 
               and sd1.projectId=?1 and sd1.skillId=?2''')

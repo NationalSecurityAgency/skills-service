@@ -54,6 +54,9 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         SkillDef.SelfReportingType getSelfReportingType()
         String getEnabled()
         Integer getNumSkillsRequired()
+        Integer getCopiedFrom()
+        String getCopiedFromProjectId()
+        Boolean readOnly()
     }
 
     /**

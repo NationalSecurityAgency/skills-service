@@ -304,6 +304,7 @@ class SkillCatalogService {
         partial.subjectName = subjectAwareSkillDef.subjectName
         partial.projectName = subjectAwareSkillDef.projectName
         partial.sharedToCatalog = true
+        partial.numPerformToCompletion = subjectAwareSkillDef.skill.totalPoints / subjectAwareSkillDef.skill.pointIncrement
         return partial
     }
 }
