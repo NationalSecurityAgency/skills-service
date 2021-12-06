@@ -498,7 +498,12 @@ limitations under the License.
               if (this.skillInternal.selfReportingType === 'Disabled') {
                 this.skillInternal.selfReportingType = null;
               }
-              this.skillInternal = { subjectId: this.subjectId, ...this.skillInternal };
+              this.skillInternal = {
+                subjectId: this.subjectId,
+                ...this.skillInternal,
+                pointIncrement: parseInt(this.skillInternal.pointIncrement, 10),
+                numPerformToCompletion: parseInt(this.skillInternal.numPerformToCompletion, 10),
+              };
               this.$emit('skill-saved', { isEdit: this.isEdit, ...this.skillInternal, groupId: this.groupId });
               this.close({ saved: true });
             }
