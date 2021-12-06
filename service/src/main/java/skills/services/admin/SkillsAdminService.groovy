@@ -646,7 +646,7 @@ class SkillsAdminService {
                 selfReportingType: partial.getSelfReportingType(),
                 numSkillsRequired: partial.getNumSkillsRequired(),
                 enabled: Boolean.valueOf(partial.enabled),
-                readOnly: partial.readOnly(),
+                readOnly: partial.readOnly,
                 copiedFrom: partial.copiedFrom,
                 copiedFromProjectId: partial.copiedFromProjectId
         )
