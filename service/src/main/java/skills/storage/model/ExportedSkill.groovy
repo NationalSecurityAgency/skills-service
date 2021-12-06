@@ -46,7 +46,7 @@ class ExportedSkill implements Serializable {
 
     @ManyToOne
     @JoinColumn(name="skill_ref_id")
-    SkillDef skill
+    SkillDefWithExtra skill
 
     @Temporal(TemporalType.TIMESTAMP)
     @CreatedDate
