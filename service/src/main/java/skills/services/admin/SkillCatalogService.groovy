@@ -22,8 +22,10 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
+import skills.controller.request.model.CatalogSkill
 import skills.controller.request.model.SkillImportRequest
 import skills.controller.result.model.ExportedSkillRes
 import skills.controller.result.model.ExportedSkillStats
@@ -164,6 +166,9 @@ class SkillCatalogService {
     @Transactional
     void exportSkillToCatalog(String projectId, String skillId) {
         log.debug("saving exported skill [{}] in project [{}] to the Skill Catalog", projectId, skillId)
+        if (isAvailableInCatalog(projectId, skillId)) {
+            throw new SkillException("Skill has already been exported to the catalog", projectId, skillId, ErrorCode.SkillAlreadyInCatalog)
+        }
         projDefAccessor.getProjDef(projectId)
         SkillDefWithExtra skillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, SkillDef.ContainerType.Skill)
         SkillsValidator.isTrue(skillDef != null, "skill does not exist", projectId, skillId)
@@ -201,6 +206,13 @@ class SkillCatalogService {
         copy.version = skillsAdminService.findLatestSkillVersion(projectIdTo)
 
         skillsAdminService.saveSkill(copy.skillId, copy)
+    }
+
+    @Transactional
+    void importSkillsFromCatalog(String projectIdTo, String subjectIdTo, List<CatalogSkill> listOfSkills) {
+        listOfSkills?.each {
+            importSkillFromCatalog(it.projectId, it.skillId, projectIdTo, subjectIdTo)
+        }
     }
 
     @Transactional(readOnly=true)

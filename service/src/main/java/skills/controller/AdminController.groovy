@@ -115,6 +115,9 @@ class AdminController {
     @Autowired
     SkillCatalogService skillCatalogService
 
+    @Value('#{"${skills.config.ui.maxSkillsInBulkImport}"}')
+    int maxBulkImport
+
 
     @RequestMapping(value = "/projects/{id}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
@@ -1058,8 +1061,24 @@ class AdminController {
                                        @PathVariable("subjectId") String subjectId,
                                        @PathVariable("fromProjectId") String fromProjectId,
                                        @PathVariable("fromSkillId") String fromSkillId) {
-
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        SkillsValidator.isNotBlank(projectId, "subjectId")
+        SkillsValidator.isNotBlank(projectId, "fromProjectId")
+        SkillsValidator.isNotBlank(projectId, "fromSkillId")
         skillCatalogService.importSkillFromCatalog(fromProjectId, fromSkillId, projectId, subjectId)
+    }
+
+    @RequestMapping(value="/projects/{projectId}/subjects/{subjectId}/import", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
+    RequestResult bulkImportSkillFromCatalog(@PathVariable("projectId") String projectId,
+                                       @PathVariable("subjectId") String subjectId,
+                                       @RequestBody List<CatalogSkill> bulkImport) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        SkillsValidator.isNotBlank(projectId, "subjectId")
+        SkillsValidator.isTrue(bulkImport?.size() <= maxBulkImport, "Bulk imports are limited to no more than ${maxBulkImport} Skills at once", projectId)
+        skillCatalogService.importSkillsFromCatalog(projectId, subjectId, bulkImport)
+        RequestResult success = RequestResult.success()
+        success.explanation = "imported [${bulkImport?.size()}] skills from the catalog into [${projectId}] - [${subjectId}]"
+        return success
     }
 
     @RequestMapping(value="/projects/{projectId}/skills/catalog", method=RequestMethod.GET, produces = "application/json")

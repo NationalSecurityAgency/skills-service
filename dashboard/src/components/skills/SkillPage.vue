@@ -99,14 +99,19 @@ limitations under the License.
         items.push({ name: 'Overview', iconClass: 'fa-info-circle skills-color-overview', page: 'SkillOverview' });
         items.push({ name: 'Dependencies', iconClass: 'fa-project-diagram skills-color-dependencies', page: 'SkillDependencies' });
         items.push({ name: 'Users', iconClass: 'fa-users skills-color-users', page: 'SkillUsers' });
-        const addEventDisabled = this.subject.totalPoints < this.$store.getters.config.minimumSubjectPoints;
+        const isReadOnlyNonSr = (this.skill.readOnly === true && !this.skill.selfReportType);
+        const addEventDisabled = this.subject.totalPoints < this.$store.getters.config.minimumSubjectPoints || isReadOnlyNonSr;
+
         let msg = addEventDisabled ? `Subject needs at least ${this.$store.getters.config.minimumSubjectPoints} points before events can be added` : '';
         const disabledDueToGroupBeingDisabled = this.skill.groupId && !this.skill.enabled;
         if (disabledDueToGroupBeingDisabled) {
           msg = `CANNOT report skill events because this skill belongs to a group whose current status is disabled. ${msg}`;
         }
+        if (isReadOnlyNonSr) {
+          msg = 'Skills imported from the catalog can only have events added if they are configured for Self Reporting';
+        }
         items.push({
-          name: 'Add Event', iconClass: 'fa-user-plus skills-color-events', page: 'AddSkillEvent', isDisabled: addEventDisabled || disabledDueToGroupBeingDisabled, msg,
+          name: 'Add Event', iconClass: 'fa-user-plus skills-color-events', page: 'AddSkillEvent', isDisabled: addEventDisabled || disabledDueToGroupBeingDisabled || isReadOnlyNonSr, msg,
         });
         items.push({ name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'SkillMetrics' });
         return items;
