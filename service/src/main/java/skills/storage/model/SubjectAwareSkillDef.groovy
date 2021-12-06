@@ -2,7 +2,7 @@ package skills.storage.model
 
 interface SubjectAwareSkillDef {
 
-    SkillDef getSkill()
+    SkillDefWithExtra getSkill()
     String getSubjectId()
     String getSubjectName()
     String getProjectName()

@@ -23,6 +23,7 @@ import skills.storage.model.ExportedSkill
 import skills.storage.model.ExportedSkillTiny
 import skills.storage.model.ImportExportStats
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.SubjectAwareSkillDef
 
 interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, Integer> {
@@ -41,7 +42,7 @@ interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, In
         where subject = srd.parent and
              srd.type = 'RuleSetDefinition' and
              subject.type = 'Subject' and 
-             srd.child = es.skill
+             srd.child.id = es.skill.id
     ''')
     List<SubjectAwareSkillDef> getSkillsInCatalog(Pageable pageable)
 
@@ -52,7 +53,7 @@ interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, In
         where subject = srd.parent and
              srd.type = 'RuleSetDefinition' and
              subject.type = 'Subject' and 
-             srd.child = es.skill
+             srd.child.id = es.skill.id
     ''')
     Integer countSkillsInCatalog()
 
@@ -70,7 +71,7 @@ interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, In
             subject = srd.parent and
             srd.type = 'RuleSetDefinition' and
             subject.type = 'Subject' and 
-            srd.child = es.skill
+            srd.child.id = es.skill.id
     ''')
     List<SubjectAwareSkillDef> getSkillsInCatalog(String projectSearch, String subjectSearch, String skillSearch, Pageable pageable)
 
@@ -85,13 +86,13 @@ interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, In
             subject = srd.parent and
             srd.type = 'RuleSetDefinition' and
             subject.type = 'Subject' and 
-            srd.child = es.skill
+            srd.child.id = es.skill.id
     ''')
     Integer countSkillsInCatalog(String projectSearch, String subjectSearch, String skillSearch)
 
     @Nullable
     @Query('''select es.skill from ExportedSkill es where es.projectId = ?1''')
-    List<SkillDef> getSkillsExportedByProject(String projectId, Pageable pageable)
+    List<SkillDefWithExtra> getSkillsExportedByProject(String projectId, Pageable pageable)
 
     @Nullable
     @Query('''
@@ -105,7 +106,7 @@ interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, In
              subject = srd.parent and
              srd.type = 'RuleSetDefinition' and
              subject.type = 'Subject' and 
-             srd.child = es.skill
+             srd.child.id = es.skill.id
             ''')
     List<ExportedSkillTiny> getTinySkillsExportedByProject(String projectId, Pageable pageable)
 
