@@ -40,12 +40,14 @@ import skills.storage.model.ImportExportStats
 import skills.storage.model.QueuedSkillUpdate
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefMin
+import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.SkillRelDef
 import skills.storage.model.SkillsDBLock
 import skills.storage.model.SubjectAwareSkillDef
 import skills.storage.repos.ExportedSkillRepo
 import skills.storage.repos.QueuedSkillUpdateRepo
 import skills.storage.repos.SkillDefRepo
+import skills.storage.repos.SkillDefWithExtraRepo
 import skills.storage.repos.SkillEventsSupportRepo
 import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.SkillsDBLockRepo
@@ -79,6 +81,10 @@ class SkillCatalogService {
     @Autowired
     LockingService lockingService
 
+    @Autowired
+    SkillDefWithExtraRepo skillDefWithExtraRepo
+
+
     @Transactional(readOnly = true)
     TotalCountAwareResult<ProjectNameAwareSkillDefRes> getSkillsAvailableInCatalog(String projectId, String projectNameSearch, String subjectNameSearch, String skillNameSearch, PageRequest pageable) {
         //TODO: projectId will need to be eventually used to govern accessibility shared skills
@@ -102,7 +108,7 @@ class SkillCatalogService {
     }
 
     private static final Set<String> aliasUnnecessary = Set.of("projectName", "subjectName", "subjectId")
-    private PageRequest convertForCatalogSkills(PageRequest pageRequest) {
+    private static PageRequest convertForCatalogSkills(PageRequest pageRequest) {
         int pageNum = pageRequest.getPageNumber()
         int pageSize = pageRequest.getPageSize()
         Sort sort = pageRequest.getSort()
@@ -159,7 +165,7 @@ class SkillCatalogService {
     void exportSkillToCatalog(String projectId, String skillId) {
         log.debug("saving exported skill [{}] in project [{}] to the Skill Catalog", projectId, skillId)
         projDefAccessor.getProjDef(projectId)
-        SkillDef skillDef = skillAccessor.getSkillDef(projectId, skillId)
+        SkillDefWithExtra skillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, SkillDef.ContainerType.Skill)
         SkillsValidator.isTrue(skillDef != null, "skill does not exist", projectId, skillId)
 
         ExportedSkill exportedSkill = new ExportedSkill(projectId: skillDef.projectId, skill: skillDef)
