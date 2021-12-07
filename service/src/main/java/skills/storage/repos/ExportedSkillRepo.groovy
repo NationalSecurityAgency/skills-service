@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.lang.Nullable
+import skills.storage.CatalogSkill
 import skills.storage.model.ExportedSkill
 import skills.storage.model.ExportedSkillTiny
 import skills.storage.model.ImportExportStats
@@ -36,7 +37,8 @@ interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, In
     @Query('''select es.skill as skill, 
                 subject.name as subjectName, 
                 subject.skillId as subjectId,
-                project.name as projectName 
+                project.name as projectName,
+                es.created as exportedOn 
         from ExportedSkill es, SkillRelDef srd, SkillDef subject
         join ProjDef project on project.projectId = es.projectId
         where subject = srd.parent and
@@ -44,7 +46,7 @@ interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, In
              subject.type = 'Subject' and 
              srd.child.id = es.skill.id
     ''')
-    List<SubjectAwareSkillDef> getSkillsInCatalog(Pageable pageable)
+    List<CatalogSkill> getSkillsInCatalog(Pageable pageable)
 
     @Nullable
     @Query('''select count(es) 
@@ -62,18 +64,19 @@ interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, In
         select es.skill as skill, 
                 subject.name as subjectName, 
                 subject.skillId as subjectId,
-                project.name as projectName 
+                project.name as projectName,
+                es.created as exportedOn 
         from ExportedSkill es, SkillRelDef srd, SkillDef subject
         join ProjDef project on project.projectId = es.projectId
         where lower(es.skill.name) like lower(concat('%', ?3, '%'))  and 
-            lower(es.projectId) like lower(concat('%', ?1, '%')) and 
+            lower(project.name) like lower(concat('%', ?1, '%')) and 
             lower(subject.name) like lower(concat('%', ?2, '%')) and 
             subject = srd.parent and
             srd.type = 'RuleSetDefinition' and
             subject.type = 'Subject' and 
             srd.child.id = es.skill.id
     ''')
-    List<SubjectAwareSkillDef> getSkillsInCatalog(String projectSearch, String subjectSearch, String skillSearch, Pageable pageable)
+    List<CatalogSkill> getSkillsInCatalog(String projectSearch, String subjectSearch, String skillSearch, Pageable pageable)
 
     @Nullable
     @Query('''
@@ -81,7 +84,7 @@ interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, In
         from ExportedSkill es, SkillRelDef srd, SkillDef subject
         join ProjDef project on project.projectId = es.projectId
         where lower(es.skill.name) like lower(concat('%', ?3, '%'))  and 
-            lower(es.projectId) like lower(concat('%', ?1, '%')) and 
+            lower(project.name) like lower(concat('%', ?1, '%')) and 
             lower(subject.name) like lower(concat('%', ?2, '%')) and 
             subject = srd.parent and
             srd.type = 'RuleSetDefinition' and

@@ -647,8 +647,8 @@ class SkillsAdminService {
                 numSkillsRequired: partial.getNumSkillsRequired(),
                 enabled: Boolean.valueOf(partial.enabled),
                 readOnly: partial.readOnly,
-                copiedFrom: partial.copiedFrom,
-                copiedFromProjectId: partial.copiedFromProjectId
+                copiedFromProjectId: partial.copiedFromProjectId,
+                copiedFromProjectName: partial.copiedFromProjectName
         )
 
         if (partial.skillType == SkillDef.ContainerType.Skill) {

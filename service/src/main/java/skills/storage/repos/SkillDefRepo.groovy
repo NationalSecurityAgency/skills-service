@@ -57,6 +57,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         Integer getCopiedFrom()
         String getCopiedFromProjectId()
         Boolean getReadOnly()
+        String getCopiedFromProjectName()
     }
 
     /**

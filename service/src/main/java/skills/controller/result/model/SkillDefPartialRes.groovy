@@ -44,6 +44,6 @@ class SkillDefPartialRes extends SkillDefSkinnyRes{
     String groupId
     String groupName
     Boolean readOnly
-    Integer copiedFrom
     String copiedFromProjectId
+    String copiedFromProjectName
 }

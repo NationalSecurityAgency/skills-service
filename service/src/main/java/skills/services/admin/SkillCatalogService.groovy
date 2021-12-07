@@ -27,6 +27,7 @@ import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.CatalogSkill
 import skills.controller.request.model.SkillImportRequest
+import skills.controller.result.model.CatalogSkillRes
 import skills.controller.result.model.ExportedSkillRes
 import skills.controller.result.model.ExportedSkillStats
 import skills.controller.result.model.ImportedSkillStats
@@ -321,15 +322,16 @@ class SkillCatalogService {
         return esr
     }
 
-    private static ProjectNameAwareSkillDefRes convert(SubjectAwareSkillDef subjectAwareSkillDef) {
+    private static ProjectNameAwareSkillDefRes convert(skills.storage.CatalogSkill catalogSkill) {
         // Not sure this is copying correctly
-        ProjectNameAwareSkillDefRes partial = new ProjectNameAwareSkillDefRes()
-        Props.copy(subjectAwareSkillDef.skill, partial)
-        partial.subjectId = subjectAwareSkillDef.subjectId
-        partial.subjectName = subjectAwareSkillDef.subjectName
-        partial.projectName = subjectAwareSkillDef.projectName
+        CatalogSkillRes partial = new CatalogSkillRes()
+        Props.copy(catalogSkill.skill, partial)
+        partial.subjectId = catalogSkill.subjectId
+        partial.subjectName = catalogSkill.subjectName
+        partial.projectName = catalogSkill.projectName
+        partial.exportedOn = catalogSkill.exportedOn
         partial.sharedToCatalog = true
-        partial.numPerformToCompletion = subjectAwareSkillDef.skill.totalPoints / subjectAwareSkillDef.skill.pointIncrement
+        partial.numPerformToCompletion = catalogSkill.skill.totalPoints / catalogSkill.skill.pointIncrement
         return partial
     }
 }
