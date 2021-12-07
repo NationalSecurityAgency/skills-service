@@ -178,6 +178,13 @@ class SkillCatalogService {
     }
 
     @Transactional
+    void exportSkillToCatalog(String projectId, List<String> skillIds) {
+        skillIds?.each { String skillId ->
+            exportSkillToCatalog(projectId, skillId)
+        }
+    }
+
+    @Transactional
     void importSkillFromCatalog(String projectIdFrom, String skillIdFrom, String projectIdTo, String subjectIdTo) {
         boolean inCatalog = isAvailableInCatalog(projectIdFrom, skillIdFrom)
         SkillsValidator.isTrue(inCatalog, "Skill [${skillIdFrom}] from project [${projectIdFrom}] has not been shared to the catalog and may not be imported")

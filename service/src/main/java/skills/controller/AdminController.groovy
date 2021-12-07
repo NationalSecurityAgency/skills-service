@@ -1056,6 +1056,14 @@ class AdminController {
         return RequestResult.success()
     }
 
+    @RequestMapping(value="/projects/{projectId}/skills/export", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
+    RequestResult bulkExportSkillsToCatalog(@PathVariable("projectId") String projectId, @RequestBody List<String> skillIds) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        SkillsValidator.isTrue(skillIds?.size() > 0, "No SkillIds specified to export to catalog", projectId)
+        skillCatalogService.exportSkillToCatalog(projectId, skillIds)
+        return RequestResult.success()
+    }
+
     @RequestMapping(value="/projects/{projectId}/subjects/{subjectId}/import/{fromProjectId}/{fromSkillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
     SkillDefRes importSkillFromCatalog(@PathVariable("projectId") String projectId,
                                        @PathVariable("subjectId") String subjectId,
