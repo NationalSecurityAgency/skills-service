@@ -326,15 +326,16 @@ limitations under the License.
       },
       importSkills() {
         const selected = this.table.items.filter((item) => item.selected);
-        const promises = selected.map((skill) => new Promise((resolve) => {
-          CatalogService.import(this.$route.params.projectId, this.$route.params.subjectId, skill.projectId, skill.skillId)
-            .then((res) => resolve(res));
+        const projAndSkillIds = selected.map((skill) => ({
+          projectId: skill.projectId,
+          skillId: skill.skillId,
         }));
-        Promise.all(promises).then(() => {
-          // set to the first page
-          this.table.options.pagination.currentPage = 1;
-          this.loadData();
-        });
+        CatalogService.bulkImport(this.$route.params.projectId, this.$route.params.subjectId, projAndSkillIds)
+          .then(() => {
+            // set to the first page
+            this.table.options.pagination.currentPage = 1;
+            this.loadData();
+          });
       },
       changeSelectionForAll(selectedValue) {
         this.table.items.forEach((item) => {

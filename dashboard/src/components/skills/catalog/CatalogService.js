@@ -31,4 +31,9 @@ export default {
     return axios.post(url)
       .then((response) => response.data);
   },
+  bulkImport(projectId, subjectId, listOfProjectAndSkillIds) {
+    const url = `/admin/projects/${projectId}/subjects/${subjectId}/import`;
+    return axios.post(url, listOfProjectAndSkillIds)
+      .then((response) => response.data);
+  },
 };

@@ -32,8 +32,8 @@ limitations under the License.
           <div class="row pl-3 mb-3">
             <div class="col">
               <div class="pr-2 border-right mr-2 d-inline-block">
-                <b-button variant="outline-info" @click="applyFilters" data-cy="users-filterBtn"><i class="fa fa-filter"/> Filter</b-button>
-                <b-button variant="outline-info" @click="reset" class="ml-1" data-cy="users-resetBtn"><i class="fa fa-times"/> Reset</b-button>
+                <b-button variant="outline-primary" @click="applyFilters" data-cy="users-filterBtn"><i class="fa fa-filter"/> Filter</b-button>
+                <b-button variant="outline-primary" @click="reset" class="ml-1" data-cy="users-resetBtn"><i class="fa fa-times"/> Reset</b-button>
               </div>
 
               <b-button variant="outline-info" @click="changeSelectionForAll(true)"
