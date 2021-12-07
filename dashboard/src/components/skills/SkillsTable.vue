@@ -31,8 +31,27 @@ limitations under the License.
 
           <div class="row pl-3 mb-3">
             <div class="col">
-              <b-button variant="outline-info" @click="applyFilters" data-cy="users-filterBtn"><i class="fa fa-filter"/> Filter</b-button>
-              <b-button variant="outline-info" @click="reset" class="ml-1" data-cy="users-resetBtn"><i class="fa fa-times"/> Reset</b-button>
+              <div class="pr-2 border-right mr-2 d-inline-block">
+                <b-button variant="outline-info" @click="applyFilters" data-cy="users-filterBtn"><i class="fa fa-filter"/> Filter</b-button>
+                <b-button variant="outline-info" @click="reset" class="ml-1" data-cy="users-resetBtn"><i class="fa fa-times"/> Reset</b-button>
+              </div>
+
+              <b-button variant="outline-info" @click="changeSelectionForAll(true)"
+                        data-cy="selectPageOfApprovalsBtn" class="mr-2"><i
+                class="fa fa-check-square"/> Select Page
+              </b-button>
+              <b-button variant="outline-info" @click="changeSelectionForAll(false)"
+                        data-cy="clearSelectedApprovalsBtn" class=""><i class="far fa-square"></i>
+                Clear
+              </b-button>
+            </div>
+            <div class="col text-right">
+              <b-dropdown id="dropdown-right" right variant="outline-info" class="mr-3" :disabled="actionsDisable">
+                <template #button-content>
+                  <i class="fas fa-tools"></i> Action
+                </template>
+                <b-dropdown-item href="#">Export To Catalog</b-dropdown-item>
+              </b-dropdown>
             </div>
           </div>
         </div>
@@ -58,15 +77,7 @@ limitations under the License.
 
         <template v-slot:cell(name)="data">
           <div class="row" :data-cy="`nameCell_${data.item.skillId}`">
-            <div class="col-auto pr-0">
-              <b-button size="sm" @click="data.toggleDetails" class="mr-2 py-0 px-1 btn btn-info"
-                        :aria-label="`Expand details for ${data.item.name}`"
-                        :data-cy="`expandDetailsBtn_${data.item.skillId}`">
-                <i v-if="data.detailsShowing" class="fa fa-minus-square" />
-                <i v-else class="fa fa-plus-square" />
-              </b-button>
-            </div>
-            <div class="col pl-0">
+            <div class="col">
               <div v-if="data.item.isGroupType">
                 <div class="text-success font-weight-bold">
                   <i class="fas fa-layer-group" aria-hidden="true"></i> <span class="text-uppercase">Group</span>
@@ -76,14 +87,36 @@ limitations under the License.
                 <div class="h5 text-primary"><span v-if="data.item.nameHtml" v-html="data.item.nameHtml"></span><span v-else>{{ data.item.name }}</span></div>
               </div>
               <div v-if="data.item.isSkillType">
-                <router-link :data-cy="`manageSkillLink_${data.item.skillId}`" tag="a" :to="{ name:'SkillOverview',
+                <b-form-checkbox
+                  :id="`${data.item.projectId}-${data.item.skillId}`"
+                  v-model="data.item.selected"
+                  :name="`checkbox_${data.item.projectId}_${data.item.skillId}`"
+                  :value="true"
+                  :unchecked-value="false"
+                  :inline="true"
+                  v-on:input="updateActionsDisableStatus"
+                  :data-cy="`approvalSelect_${data.item.projectId}-${data.item.skillId}`"
+                >
+                  <router-link :data-cy="`manageSkillLink_${data.item.skillId}`" tag="a" :to="{ name:'SkillOverview',
                                     params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
-                             :aria-label="`Manage skill ${data.item.name}  via link`">
-                  <div class="h5"><span v-if="data.item.nameHtml" v-html="data.item.nameHtml"></span><span v-else>{{ data.item.name }}</span></div>
-                </router-link>
+                               :aria-label="`Manage skill ${data.item.name}  via link`">
+                    <div class="h5"><span v-if="data.item.nameHtml" v-html="data.item.nameHtml"></span><span v-else>{{ data.item.name }}</span></div>
+                  </router-link>
+                </b-form-checkbox>
               </div>
 
               <div class="text-muted" style="font-size: 0.9rem;">ID: <span v-if="data.item.skillIdHtml" v-html="data.item.skillIdHtml"></span><span v-else>{{ data.item.skillId }}</span></div>
+
+              <div class="">
+                <b-button size="sm" @click="data.toggleDetails" class="mr-2 py-0 px-1 btn btn-info"
+                          :aria-label="`Expand details for ${data.item.name}`"
+                          :data-cy="`expandDetailsBtn_${data.item.skillId}`">
+                  <i v-if="data.detailsShowing" class="fa fa-minus-square" />
+                  <i v-else class="fa fa-plus-square" />
+                  Skill Details
+                </b-button>
+              </div>
+
             </div>
             <div class="col-auto ml-auto mr-0">
               <router-link v-if="data.item.isSkillType"
@@ -288,6 +321,7 @@ limitations under the License.
         },
         skillsOriginal: [],
         skills: [],
+        actionsDisable: true,
         table: {
           extraColumns: {
             options: [{
@@ -657,6 +691,20 @@ limitations under the License.
       },
       getSelfReportingTypePretty(selfReportingType) {
         return (selfReportingType === 'HonorSystem') ? 'Honor System' : selfReportingType;
+      },
+      updateActionsDisableStatus() {
+        if (this.skills.find((item) => item.selected) !== undefined) {
+          this.actionsDisable = false;
+        } else {
+          this.actionsDisable = true;
+        }
+      },
+      changeSelectionForAll(selectedValue) {
+        this.skills.forEach((item) => {
+          // eslint-disable-next-line no-param-reassign
+          item.selected = selectedValue;
+        });
+        this.updateActionsDisableStatus();
       },
     },
   };

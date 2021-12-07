@@ -34,21 +34,21 @@ limitations under the License.
         <div class="col-md border-right">
           <b-form-group label="Skill Name:" label-for="user-name-filter" label-class="text-muted">
             <b-form-input id="user-name-filter" v-model="filters.skillName"
-                          v-on:keydown.enter="reloadTable"
+                          v-on:keydown.enter="loadData"
                           data-cy="achievementsNavigator-usernameInput"/>
           </b-form-group>
         </div>
         <div class="col-md border-right">
           <b-form-group label="Project Name:" label-for="user-name-filter" label-class="text-muted">
             <b-form-input id="user-name-filter" v-model="filters.projectName"
-                          v-on:keydown.enter="reloadTable"
+                          v-on:keydown.enter="loadData"
                           data-cy="achievementsNavigator-usernameInput"/>
           </b-form-group>
         </div>
         <div class="col-md">
           <b-form-group label="Subject Name:" label-for="user-name-filter" label-class="text-muted">
             <b-form-input id="user-name-filter" v-model="filters.subjectName"
-                          v-on:keydown.enter="reloadTable"
+                          v-on:keydown.enter="loadData"
                           data-cy="achievementsNavigator-usernameInput"/>
           </b-form-group>
         </div>
@@ -57,10 +57,11 @@ limitations under the License.
       <div class="row px-3 mb-3 mt-2">
         <div class="col">
           <div class="pr-2 border-right mr-2 d-inline-block">
-            <b-button variant="outline-primary" @click="reloadTable"
+            <b-button variant="outline-primary" @click="loadData"
                       data-cy="" class="mt-1"><i
               class="fa fa-filter"/> Filter
             </b-button>
+            <b-button variant="outline-primary" @click="reset" class="ml-1 mt-1" data-cy="users-resetBtn"><i class="fa fa-times"/> Reset</b-button>
           </div>
           <b-button variant="outline-info" @click="changeSelectionForAll(true)"
                     data-cy="selectPageOfApprovalsBtn" class="mr-2 mt-1"><i
@@ -199,6 +200,7 @@ limitations under the License.
       return {
         show: this.value,
         loading: false,
+        initialLoadHadData: false,
         importDisabled: true,
         filters: {
           skillName: '',
@@ -248,7 +250,7 @@ limitations under the License.
       };
     },
     mounted() {
-      this.loadData();
+      this.loadData(true);
     },
     watch: {
       show(newValue) {
@@ -260,24 +262,36 @@ limitations under the License.
         return this.exportType === 'Skill';
       },
       emptyCatalog() {
-        return this.table.items && this.table.items.length === 0;
+        return !this.initialLoadHadData;
       },
     },
     methods: {
-      loadData() {
-        this.loading = true;
+      loadData(isInitial = undefined) {
+        if (isInitial === true) {
+          this.loading = true;
+        }
+        this.table.options.busy = true;
         const params = {
-          limit: 5,
-          page: 1,
+          limit: this.table.options.pagination.pageSize,
+          page: this.table.options.pagination.currentPage,
           orderBy: 'skillId',
           ascending: true,
+          projectNameSearch: this.filters.projectName,
+          subjectNameSearch: this.filters.subjectName,
+          skillNameSearch: this.filters.skillName,
         };
         CatalogService.getCatalogSkills(this.$route.params.projectId, params)
           .then((res) => {
-            this.table.items = res.map((item) => ({ selected: false, ...item }));
+            const dataSkills = res.data;
+            this.table.items = dataSkills.map((item) => ({ selected: false, ...item }));
+            this.table.options.pagination.totalRows = res.totalCount;
+            if (this.table.items.length > 0) {
+              this.initialLoadHadData = true;
+            }
           })
           .finally(() => {
             this.loading = false;
+            this.table.options.busy = false;
           });
       },
       close(e) {
@@ -287,14 +301,21 @@ limitations under the License.
       publishHidden(e) {
         this.$emit('hidden', { importType: this.importType, ...e });
       },
-      pageSizeChanged() {
-
+      pageChanged(pageNum) {
+        this.table.options.pagination.currentPage = pageNum;
+        this.loadData();
       },
-      pageChanged() {
-
+      pageSizeChanged(newSize) {
+        this.table.options.pagination.pageSize = newSize;
+        this.loadData();
       },
-      sortTable() {
+      sortTable(sortContext) {
+        this.table.options.sortBy = sortContext.sortBy;
+        this.table.options.sortDesc = sortContext.sortDesc;
 
+        // set to the first page
+        this.table.options.pagination.currentPage = 1;
+        this.loadApprovals();
       },
       updateActionsDisableStatus() {
         if (this.table.items.find((item) => item.selected) !== undefined) {
@@ -310,14 +331,10 @@ limitations under the License.
             .then((res) => resolve(res));
         }));
         Promise.all(promises).then(() => {
+          // set to the first page
+          this.table.options.pagination.currentPage = 1;
           this.loadData();
         });
-      },
-      importSkill(skill) {
-        console.log(skill);
-      },
-      reloadTable() {
-
       },
       changeSelectionForAll(selectedValue) {
         this.table.items.forEach((item) => {
@@ -325,6 +342,12 @@ limitations under the License.
           item.selected = selectedValue;
         });
         this.updateActionsDisableStatus();
+      },
+      reset() {
+        this.filters.skillName = '';
+        this.filters.projectName = '';
+        this.filters.subjectName = '';
+        this.loadData();
       },
     },
   };

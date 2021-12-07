@@ -31,6 +31,39 @@ describe('Gatalog Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
     });
 
+    it('import skills from catalog - paging', () => {
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1);
+        cy.createSkill(2, 1, 2);
+        cy.createSkill(2, 1, 3);
+        cy.createSkill(2, 1, 4);
+        cy.createSkill(2, 1, 5);
+
+        cy.createSubject(2, 2);
+        cy.createSkill(2, 2, 6);
+        cy.createSkill(2, 2, 7);
+        cy.createSkill(2, 2, 8);
+        cy.createSkill(2, 2, 9);
+        cy.createSkill(2, 2, 10);
+        cy.createSkill(2, 2, 11);
+
+        cy.exportSkillToCatalog(2, 1, 1);
+        cy.exportSkillToCatalog(2, 1, 2);
+        cy.exportSkillToCatalog(2, 1, 3);
+        cy.exportSkillToCatalog(2, 1, 4);
+        cy.exportSkillToCatalog(2, 1, 5);
+
+        cy.exportSkillToCatalog(2, 2, 6);
+        cy.exportSkillToCatalog(2, 2, 7);
+        cy.exportSkillToCatalog(2, 2, 8);
+        cy.exportSkillToCatalog(2, 2, 9);
+        cy.exportSkillToCatalog(2, 2, 10);
+        cy.exportSkillToCatalog(2, 2, 11);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+    });
+
 
 });
 

@@ -163,6 +163,12 @@ Cypress.Commands.add("createSubject", (projNum = 1, subjNum = 1, overrideProps =
     }, overrideProps));
 });
 
+Cypress.Commands.add("exportSkillToCatalog", (projNum = 1, subjNum = 1, skillNum = 1) => {
+    const skillId = `skill${skillNum}${subjNum > 1 ? `Subj${subjNum}` : ''}`;
+    const url = `/admin/projects/proj${projNum}/skills/${skillId}/export`;
+    cy.request('POST', url);
+});
+
 const constructSkills = (projNum = 1, subjNum = 1, skillNum = 1, overrideProps = {}) => {
     const skillId = `skill${skillNum}${subjNum > 1 ? `Subj${subjNum}` : ''}`;
     const skillName = `Very Great Skill ${skillNum}${subjNum > 1 ? ` Subj${subjNum}` : ''}`;
