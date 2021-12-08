@@ -1056,6 +1056,15 @@ class AdminController {
         return RequestResult.success()
     }
 
+    @RequestMapping(value="/projects/{projectId}/skills/{skillId}/export", method = [RequestMethod.DELETE], produces = "application/json")
+    RequestResult removeSkillFromCatalog(@PathVariable("projectId") String projectId, @PathVariable("skillId") String skillId) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        SkillsValidator.isNotBlank(skillId, "skillId")
+
+        skillCatalogService.removeSkillFromCatalog(projectId, skillId)
+        return RequestResult.success()
+    }
+
     @RequestMapping(value="/projects/{projectId}/skills/export", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
     RequestResult bulkExportSkillsToCatalog(@PathVariable("projectId") String projectId, @RequestBody List<String> skillIds) {
         SkillsValidator.isNotBlank(projectId, "projectId")
@@ -1134,6 +1143,7 @@ class AdminController {
     ExportedSkillStats getExportedSkillsStats(@PathVariable("projectId") String projectId) {
         return skillCatalogService.getSkillsExportedByProject(projectId)
     }
+
 
     private static PageRequest createPagingRequestWithValidation(String projectId, int limit, int page, String orderBy, Boolean ascending) {
         SkillsValidator.isNotBlank(projectId, "Project Id")

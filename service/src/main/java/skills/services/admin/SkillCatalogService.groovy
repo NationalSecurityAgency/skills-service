@@ -178,6 +178,21 @@ class SkillCatalogService {
     }
 
     @Transactional
+    void removeSkillFromCatalog(String projectId, String skillId) {
+        if (!isAvailableInCatalog(projectId, skillId)) {
+            throw new SkillException("Skill cannot be removed from catalog as it is not in the catalog", projectId, skillId, ErrorCode.SkillNotFound)
+        }
+
+        ExportedSkill es = exportedSkillRepo.getCatalogSkill(projectId, skillId)
+        List<SkillDef> related = skillDefRepo.findSkillsCopiedFrom(es.skill.id)
+        related?.each {
+            SkillDef subject = relationshipService.getParentSkill(it)
+            skillsAdminService.deleteSkill(it.projectId, subject.skillId, it.skillId)
+        }
+        exportedSkillRepo.delete(es)
+    }
+
+    @Transactional
     void exportSkillToCatalog(String projectId, List<String> skillIds) {
         skillIds?.each { String skillId ->
             exportSkillToCatalog(projectId, skillId)
@@ -204,6 +219,7 @@ class SkillCatalogService {
         }
 
         SkillImportRequest copy = new SkillImportRequest()
+        int numToCompletion = original.totalPoints / original.pointIncrement
         Props.copy(original, copy)
         copy.projectId = projectIdTo
         copy.readOnly = 'true'
@@ -211,6 +227,7 @@ class SkillCatalogService {
         copy.copiedFrom = original.id
         copy.subjectId = subject.skillId
         copy.version = skillsAdminService.findLatestSkillVersion(projectIdTo)
+        copy.numPerformToCompletion = numToCompletion
 
         skillsAdminService.saveSkill(copy.skillId, copy)
     }
@@ -318,6 +335,7 @@ class SkillCatalogService {
         esr.skillName = exportedSkillTiny.skillName
         esr.subjectName = exportedSkillTiny.subjectName
         esr.exportedOn = exportedSkillTiny.exportedOn
+        esr.subjectId = exportedSkillTiny.subjectId
         return esr
     }
 

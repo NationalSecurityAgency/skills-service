@@ -35,6 +35,11 @@ interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, In
     Boolean doesSkillExistInCatalog(String projectId, String skillId)
 
     @Nullable
+    @Query('''select es from ExportedSkill es where es.projectId = :projectId and es.skill.skillId = :skillId and es.skill.projectId = :projectId''')
+    ExportedSkill getCatalogSkill(@Param("projectId") String projectId, @Param("skillId") String skillId)
+
+
+    @Nullable
     @Query('''select es.skill as skill, 
                 subject.name as subjectName, 
                 subject.skillId as subjectId,
