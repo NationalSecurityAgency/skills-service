@@ -392,7 +392,7 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
 
-        return skillsAdminService.getSkills(projectId, subjectId)
+        return skillsAdminService.getSkillsForSubjectWithCatalogStatus(projectId, subjectId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/groups/{groupId}/skills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -1125,6 +1125,12 @@ class AdminController {
         skillCatalogService.getSkillsExportedByProject(projectId, createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending))
     }
 
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/exported/stats", method = RequestMethod.GET, produces = "application/json")
+    ExportedSkillStats getExportedSkillStats(@PathVariable("projectId") String projectId,
+                                             @PathVariable("skillId") String skillId) {
+        skillCatalogService.getExportedSkillStats(projectId, skillId)
+    }
+
     @RequestMapping(value = "/projects/{projectId}/skills/imported", method = RequestMethod.GET, produces = "application/json")
     List<SkillDefRes> getSkillsImportedFromCatalog(@PathVariable("projectId") String projectId,
                                                    @RequestParam int limit,
@@ -1140,8 +1146,8 @@ class AdminController {
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/exported/stats", method = RequestMethod.GET, produces = "application/json")
-    ExportedSkillStats getExportedSkillsStats(@PathVariable("projectId") String projectId) {
-        return skillCatalogService.getSkillsExportedByProject(projectId)
+    ExportedSkillsStats getExportedSkillsStats(@PathVariable("projectId") String projectId) {
+        return skillCatalogService.getSkillsExportedStats(projectId)
     }
 
 

@@ -30,6 +30,8 @@ import skills.controller.request.model.SkillImportRequest
 import skills.controller.result.model.CatalogSkillRes
 import skills.controller.result.model.ExportedSkillRes
 import skills.controller.result.model.ExportedSkillStats
+import skills.controller.result.model.ExportedSkillUser
+import skills.controller.result.model.ExportedSkillsStats
 import skills.controller.result.model.ImportedSkillStats
 import skills.controller.result.model.ProjectNameAwareSkillDefRes
 import skills.controller.result.model.SkillDefRes
@@ -44,16 +46,10 @@ import skills.storage.model.QueuedSkillUpdate
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefMin
 import skills.storage.model.SkillDefWithExtra
-import skills.storage.model.SkillRelDef
-import skills.storage.model.SkillsDBLock
-import skills.storage.model.SubjectAwareSkillDef
 import skills.storage.repos.ExportedSkillRepo
 import skills.storage.repos.QueuedSkillUpdateRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillDefWithExtraRepo
-import skills.storage.repos.SkillEventsSupportRepo
-import skills.storage.repos.SkillRelDefRepo
-import skills.storage.repos.SkillsDBLockRepo
 import skills.utils.Props
 
 @Service
@@ -152,10 +148,10 @@ class SkillCatalogService {
     }
 
     @Transactional(readOnly = true)
-    ExportedSkillStats getSkillsExportedStats(String projectId) {
+    ExportedSkillsStats getSkillsExportedStats(String projectId) {
         //convert result to response model
         ImportExportStats stats = exportedSkillRepo.getExportedSkillStats(projectId)
-        ExportedSkillStats res = new ExportedSkillStats()
+        ExportedSkillsStats res = new ExportedSkillsStats()
         if (stats) {
             res.numberOfProjectsUsing = stats.numberOfProjects
             res.numberOfSkillsExported = stats.numberOfSkills
@@ -320,6 +316,27 @@ class SkillCatalogService {
         if (queuedSkillUpdates) {
             queuedSkillUpdateRepo.deleteAll(queuedSkillUpdates)
         }
+    }
+
+    @Transactional
+    ExportedSkillStats getExportedSkillStats(String projectId, String skillId) {
+        if (!isAvailableInCatalog(projectId, skillId)) {
+            throw new SkillException("Skill is not shared to the catalog", projectId, skillId)
+        }
+
+        ExportedSkillStats stats = new ExportedSkillStats()
+        ExportedSkill es = exportedSkillRepo.getCatalogSkill(projectId, skillId)
+        stats.projectId = projectId
+        stats.skillId = skillId
+        stats.exportedOn = es.created
+        stats.users = []
+        List<SkillDef> copies = skillDefRepo.findSkillsCopiedFrom(es.skill.id)
+        copies?.each {
+            SkillDef subject = relationshipService.getParentSkill(it)
+            stats.users << new ExportedSkillUser(importingProjectId: it.projectId, importedOn: it.created, importedIntoSubjectId: subject.skillId)
+        }
+
+        return stats
     }
 
     private static SkillDefRes convert(SkillDef skillDef) {

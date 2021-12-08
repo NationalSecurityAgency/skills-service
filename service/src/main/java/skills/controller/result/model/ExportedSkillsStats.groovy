@@ -15,12 +15,7 @@
  */
 package skills.controller.result.model
 
-import groovy.transform.Canonical
-
-@Canonical
-class ExportedSkillStats {
-    String projectId
-    String skillId
-    Date exportedOn
-    List<ExportedSkillUser> users
+class ExportedSkillsStats {
+    int numberOfSkillsExported
+    int numberOfProjectsUsing
 }

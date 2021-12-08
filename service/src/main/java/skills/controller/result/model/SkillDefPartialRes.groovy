@@ -46,4 +46,5 @@ class SkillDefPartialRes extends SkillDefSkinnyRes{
     Boolean readOnly
     String copiedFromProjectId
     String copiedFromProjectName
+    Boolean sharedToCatalog
 }

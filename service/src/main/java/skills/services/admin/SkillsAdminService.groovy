@@ -504,6 +504,19 @@ class SkillsAdminService {
     }
 
     @Transactional(readOnly = true)
+    List<SkillDefPartialRes> getSkillsForSubjectWithCatalogStatus(String projectId, String subjectId) {
+        SkillDef subject = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, subjectId, SkillDef.ContainerType.Subject)
+        if (!subject) {
+            ErrorCode code = ErrorCode.SubjectNotFound
+            throw new SkillException("Subject [${subjectId}] doesn't exist.", projectId, null, code)
+        }
+
+        List<SkillDefRepo.SkillDefPartial> res
+        res = skillRelDefRepo.getSkillsWithCatalogStatus(projectId, subject.skillId)
+        return res.collect { convertToSkillDefPartialRes(it) }.sort({ it.displayOrder })
+    }
+
+    @Transactional(readOnly = true)
     List<SkillDefSkinnyRes> getSkinnySkills(String projectId, String skillNameQuery) {
         List<SkillDefRepo.SkillDefSkinny> data = loadSkinnySkills(projectId, skillNameQuery)
         List<SkillDefPartialRes> res = data.collect { convertToSkillDefSkinnyRes(it) }?.sort({ it.skillId })
@@ -648,7 +661,8 @@ class SkillsAdminService {
                 enabled: Boolean.valueOf(partial.enabled),
                 readOnly: partial.readOnly,
                 copiedFromProjectId: partial.copiedFromProjectId,
-                copiedFromProjectName: partial.copiedFromProjectName
+                copiedFromProjectName: partial.copiedFromProjectName,
+                sharedToCatalog: partial.sharedToCatalog
         )
 
         if (partial.skillType == SkillDef.ContainerType.Skill) {
