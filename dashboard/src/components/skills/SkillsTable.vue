@@ -189,12 +189,11 @@ limitations under the License.
         <template v-slot:cell(isCatalogSkill)="data">
           <div v-if="data.item.isCatalogSkill">
             <b-badge><i class="fas fa-book"></i> FROM CATALOG</b-badge>
-            <p class="text-secondary">Imported from <span class="text-primary font-weight-bold">{{ data.item.copiedFromProjectId }}</span></p>
+            <p class="text-secondary">Imported from <span class="text-primary font-weight-bold">{{ data.item.copiedFromProjectName }}</span></p>
           </div>
           <div v-else class="text-secondary">
             N/A
           </div>
-
         </template>
 
         <template v-slot:cell(displayOrder)="data">

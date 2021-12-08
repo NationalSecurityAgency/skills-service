@@ -1,0 +1,77 @@
+<template>
+  <b-modal id="importSkillsFromCatalog" size="md" title="Removal Safety Check"
+           v-model="show"
+           :no-close-on-backdrop="true" :centered="true" body-class="px-0 mx-0"
+           header-bg-variant="info" header-text-variant="light" no-fade role="dialog"
+           @hide="publishHidden"
+           aria-label="Removal Safety Check">
+    <div class="px-2">
+      <div>
+        <slot />
+      </div>
+
+      <hr />
+
+      <div>
+        <p>Please type <span class="font-italic font-weight-bold text-primary">{{ validationText }}</span> to permanently remove the record.</p>
+        <b-form-input v-model="currentValidationText"></b-form-input>
+      </div>
+    </div>
+
+    <div slot="modal-footer" class="w-100">
+      <b-button variant="danger" size="sm" class="float-right ml-2"
+                @click="removeAction" data-cy="approveBtn" :disabled="removeDisabled"><i
+        class="fas fa-trash"></i> Yes, Do Remove!
+      </b-button>
+      <b-button variant="secondary" size="sm" class="float-right" @click="publishHidden" data-cy="closeSkillButton">
+        <i class="fas fa-times"></i> Cancel
+      </b-button>
+    </div>
+  </b-modal>
+</template>
+
+<script>
+  export default {
+    name: 'RemovalValidation',
+    props: {
+      value: {
+        type: Boolean,
+        required: true,
+      },
+      validationText: {
+        type: String,
+        required: false,
+        default: 'Delete Me',
+      },
+    },
+    data() {
+      return {
+        show: this.value,
+        currentValidationText: '',
+      };
+    },
+    watch: {
+      show(newValue) {
+        this.$emit('input', newValue);
+      },
+    },
+    computed: {
+      removeDisabled() {
+        return this.currentValidationText !== this.validationText;
+      },
+    },
+    methods: {
+      publishHidden(e) {
+        this.show = false;
+        this.$emit('hidden', { ...e });
+      },
+      removeAction() {
+        this.$emit('validated');
+      },
+    },
+  };
+</script>
+
+<style scoped>
+
+</style>

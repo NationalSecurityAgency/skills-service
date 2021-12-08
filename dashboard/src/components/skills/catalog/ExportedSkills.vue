@@ -44,11 +44,77 @@ limitations under the License.
                       @page-changed="pageChanged"
                       @page-size-changed="pageSizeChanged"
                       @sort-changed="sortTable">
+        <template #head(skillName)="data">
+          <span class="text-primary"><i
+            class="fas fa-graduation-cap skills-color-skills"/> {{ data.label }}</span>
+        </template>
+        <template #head(subjectName)="data">
+          <span class="text-primary"><i
+            class="fas fa-cubes skills-color-subjects"></i> {{ data.label }}</span>
+        </template>
+        <template #head(exportedOn)="data">
+          <span class="text-primary"><i
+            class="fas fa-clock skills-color-projects"></i> {{ data.label }}</span>
+        </template>
+
+        <template v-slot:cell(skillName)="data">
+          <div class="row" :data-cy="`nameCell_${data.item.skillId}`">
+            <div class="col">
+              <div>
+                <router-link :data-cy="`viewSkillLink_${data.item.skillId}`" tag="a" :to="{ name:'SkillOverview',
+                                        params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
+                             :aria-label="`View skill ${data.item.name} via link`">
+                  <div class="h5 d-inline-block">{{ data.item.skillName }}</div>
+                </router-link>
+              </div>
+              <div class="text-secondary sub-info">
+                <span>ID:</span> {{ data.item.skillId }}
+              </div>
+            </div>
+            <div class="col-auto ml-auto mr-0">
+              <b-button-group size="sm" class="ml-1">
+                <b-button v-if="!data.item.isCatalogSkill" @click="editSkill(data.item)"
+                          variant="outline-primary" :data-cy="`editSkillButton_${data.item.skillId}`"
+                          :aria-label="'edit Skill '+data.item.name" :ref="`edit_${data.item.skillId}`"
+                          title="Edit Skill" b-tooltip.hover="Edit Skill">
+                  <i class="fas fa-edit" aria-hidden="true"/>
+                </b-button>
+                <b-button :id="`deleteSkillButton_${data.item.skillId}`"
+                          @click="removeExported(data.item)" variant="outline-primary"
+                          :data-cy="`deleteSkillButton_${data.item.skillId}`"
+                          :aria-label="'delete Skill '+data.item.name"
+                          title="Delete Skill"
+                          size="sm">
+                  <i class="text-warning fas fa-trash" aria-hidden="true"/>
+                </b-button>
+              </b-button-group>
+            </div>
+          </div>
+        </template>
+        <template v-slot:cell(subjectName)="data">
+          <div class="h5 d-inline-block">{{ data.item.subjectName }}</div>
+          <div class="text-secondary sub-info">
+            <span>ID:</span> {{ data.item.subjectId }}
+          </div>
+        </template>
         <template v-slot:cell(exportedOn)="data">
           <date-cell :value="data.value" />
         </template>
       </skills-b-table>
     </b-card>
+
+    <removal-validation v-if="removalValidation.show" v-model="removalValidation.show">
+      <p>
+        This will <span class="text-primary font-weight-bold">PERMANENTLY</span> remove skill <span class="text-primary font-weight-bold">[{{ removalValidation.skillToRemove.skillId }}]</span> from the catalog.
+      This skill is currently imported by <b-badge variant="info">2</b-badge> projects.
+      </p>
+
+      <p>
+        This action <b>CANNOT</b> be undone and will permanently remove the skill from those projects including their achievements. Please proceed with care.
+      </p>
+    </removal-validation>
+
+    <export-to-catalog v-if="edit.show" v-model="edit.show" />
   </div>
 </template>
 
@@ -57,10 +123,14 @@ limitations under the License.
   import SkillsService from '@/components/skills/SkillsService';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import DateCell from '@/components/utils/table/DateCell';
+  import RemovalValidation from '@/components/utils/modal/RemovalValidation';
+  import ExportToCatalog from '@/components/skills/catalog/ExportToCatalog';
 
   export default {
     name: 'ExportedSkills',
     components: {
+      ExportToCatalog,
+      RemovalValidation,
       SkillsBTable,
       SkillsSpinner,
       DateCell,
@@ -70,6 +140,14 @@ limitations under the License.
         projectId: this.$route.params.projectId,
         loading: true,
         exportedSkills: [],
+        removalValidation: {
+          show: false,
+          skillToRemove: {},
+        },
+        edit: {
+          show: false,
+          skillToEdit: {},
+        },
         table: {
           options: {
             sortBy: 'exportedOn',
@@ -86,19 +164,19 @@ limitations under the License.
             fields: [
               {
                 key: 'skillName',
-                label: 'Name',
+                label: 'Skill',
                 sortable: true,
                 sortKey: 'skillName',
+              }, {
+                key: 'subjectName',
+                label: 'Subject',
+                sortable: true,
+                sortKey: 'subjectName',
               }, {
                 key: 'exportedOn',
                 label: 'Exported On',
                 sortable: true,
                 sortKey: 'exportedOn',
-              }, {
-                key: 'subjectName',
-                label: 'Subject Name',
-                sortable: true,
-                sortKey: 'subjectName',
               },
             ],
           },
@@ -144,6 +222,14 @@ limitations under the License.
           this.loading = false;
           this.table.options.busy = false;
         });
+      },
+      removeExported(skill) {
+        this.removalValidation.skillToRemove = skill;
+        this.removalValidation.show = true;
+      },
+      editSkill(skill) {
+        this.edit.skillToRemove = skill;
+        this.edit.show = true;
       },
     },
   };

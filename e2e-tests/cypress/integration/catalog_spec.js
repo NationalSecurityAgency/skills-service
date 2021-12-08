@@ -31,7 +31,7 @@ describe('Gatalog Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
     });
 
-    it('import skills from catalog - paging', () => {
+    it.only('import skills from catalog - paging', () => {
         cy.createProject(2);
         cy.createSubject(2, 1);
         cy.createSkill(2, 1, 1);
