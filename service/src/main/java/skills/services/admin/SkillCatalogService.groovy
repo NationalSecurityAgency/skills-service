@@ -90,7 +90,7 @@ class SkillCatalogService {
 
     @Transactional(readOnly = true)
     TotalCountAwareResult<ProjectNameAwareSkillDefRes> getSkillsAvailableInCatalog(String projectId, String projectNameSearch, String subjectNameSearch, String skillNameSearch, PageRequest pageable) {
-        //TODO: projectId will need to be eventually used to govern accessibility shared skills
+        //TODO: projectId will need to be eventually used to govern accessibility to shared skills
         //e.g., projects will more than likely want to share skills to the catalog with specific projects only
         // because these methods return a projection, we need to alias the sort keys and prefix any that aren't
         // projectName, subjectName, subjectId with "skill."
@@ -98,19 +98,18 @@ class SkillCatalogService {
         TotalCountAwareResult<ProjectNameAwareSkillDefRes> res = new TotalCountAwareResult<>()
 
         if (projectNameSearch || subjectNameSearch || skillNameSearch) {
-            res.total = exportedSkillRepo.countSkillsInCatalog(projectNameSearch, subjectNameSearch, skillNameSearch)
-            res.results = exportedSkillRepo.getSkillsInCatalog(projectNameSearch, subjectNameSearch, skillNameSearch, pageable)?.findAll {it.skill.projectId != projectId }?.collect { convert(it)}
+            res.total = exportedSkillRepo.countSkillsInCatalog(projectId, projectNameSearch, subjectNameSearch, skillNameSearch)
+            res.results = exportedSkillRepo.getSkillsInCatalog(projectId, projectNameSearch, subjectNameSearch, skillNameSearch, pageable)?.findAll { it.skill.projectId != projectId}?.collect { convert(it)}
             return res
         }
 
-        res.total = exportedSkillRepo.countSkillsInCatalog()
-        def catalogSkills = exportedSkillRepo.getSkillsInCatalog(pageable)
-        def onlyNotAlreadyImported = exportedSkillRepo.getSkillsInCatalog(pageable)?.findAll { it.skill.projectId != projectId }
-        res.results = onlyNotAlreadyImported?.collect {convert(it)}
+        res.total = exportedSkillRepo.countSkillsInCatalog(projectId)
+        def catalogSkills = exportedSkillRepo.getSkillsInCatalog(projectId, pageable)?.findAll { it.skill.projectId != projectId}
+        res.results = catalogSkills?.collect {convert(it)}
         return res
     }
 
-    private static final Set<String> aliasUnnecessary = Set.of("projectName", "subjectName", "subjectId")
+    private static final Set<String> aliasUnnecessary = Set.of("projectName", "subjectName", "subjectId", "exportedOn")
     private static PageRequest convertForCatalogSkills(PageRequest pageRequest) {
         int pageNum = pageRequest.getPageNumber()
         int pageSize = pageRequest.getPageSize()
