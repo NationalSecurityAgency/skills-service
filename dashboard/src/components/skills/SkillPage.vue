@@ -38,10 +38,14 @@ limitations under the License.
                     size="sm"
                     @click="showExportToCatalog=true"
                     variant="outline-primary"
-                    title="Add to catalog">
+                    title="Add to catalog"
+                    :disabled="skill.sharedToCatalog">
             <span class="d-none d-sm-inline">Catalog</span> <i class="fas fa-book-medical" aria-hidden="true" />
           </b-button>
         </b-button-group>
+      </div>
+      <div slot="right-of-header" v-if="skill.sharedToCatalog" class="d-inline h5">
+        <b-badge class="ml-2"><i class="fas fa-book"></i> IN CATALOG</b-badge>
       </div>
     </page-header>
 
@@ -49,7 +53,7 @@ limitations under the License.
     </navigation>
     <edit-skill v-if="showEdit" v-model="showEdit" :skillId="skill.skillId" :is-copy="false" :is-edit="true"
                 :project-id="this.$route.params.projectId" :subject-id="this.$route.params.subjectId" @skill-saved="skillEdited" @hidden="handleHide"/>
-    <export-to-catalog v-if="showExportToCatalog" v-model="showExportToCatalog" :id="skill.skillId"/>
+    <export-to-catalog v-if="showExportToCatalog" v-model="showExportToCatalog" :skill-ids="[skill.skillId]" @exported="loadData"/>
   </div>
 </template>
 

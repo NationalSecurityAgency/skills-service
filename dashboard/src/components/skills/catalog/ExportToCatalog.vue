@@ -14,15 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <b-modal :id="id" size="md" :title="`Export ${exportType} to the Catalog`" v-model="show"
+  <b-modal :id="firstSkillId" size="md" :title="`Export Skill to the Catalog`" v-model="show"
            :no-close-on-backdrop="true" :centered="true"
            header-bg-variant="info" header-text-variant="light" no-fade role="dialog" @hide="publishHidden"
-           :aria-label="isSkill?'Export Skill to the Catalog':'Export Subject to the Catalog'">
+           aria-label="'Export Skill to the Catalog'">
     <b-overlay v-if="!state.exported" :show="state.exporting" rounded="sm" opacity="0.5"
                spinner-variant="info" spinner-type="grow" spinner-small>
       <p>
-        This will export {{ exportType }} with id <b>[{{ id }}]</b> to the SkillTree Catalog <i class="fas fa-book" aria-hidden="true" />.
-        Other project administrators will then be able to import a read-only version of this {{ exportType }}.
+        This will export <span v-if="isSingleId">Skill with id <b>[{{ firstSkillId }}]</b></span><span v-else><b-badge variant="info">{{ skillIds.length }}</b-badge> Skills</span> to the SkillTree Catalog <i class="fas fa-book" aria-hidden="true" />.
+        Other project administrators will then be able to import a read-only version of this skill.
       </p>
 
       <hr/>
@@ -41,7 +41,10 @@ limitations under the License.
     </b-overlay>
 
     <p v-if="state.exported">
-      <i class="fas fa-check-circle text-success"></i> {{ exportType }} with id <b>[{{ id }}]</b> was <span class="text-success font-weight-bold">successfully</span> exported to the catalog!
+      <i class="fas fa-check-circle text-success"></i>
+      <span v-if="isSingleId">Skill with id <b>[{{ firstSkillId }}]</b> was</span>
+      <span v-else><b-badge variant="info" class="ml-2">{{ skillIds.length }}</b-badge>
+        Skills were</span>  <span class="text-success font-weight-bold">successfully</span> exported to the catalog!
     </p>
 
     <div v-if="state.exported" slot="modal-footer" class="w-100">
@@ -71,11 +74,7 @@ limitations under the License.
     name: 'ExportToCatalog',
     components: { ProjectSelector },
     props: {
-      id: String,
-      exportType: {
-        type: String,
-        default: 'Skill',
-      },
+      skillIds: Array,
       value: {
         type: Boolean,
         required: true,
@@ -98,8 +97,11 @@ limitations under the License.
       },
     },
     computed: {
-      isSkill() {
-        return this.exportType === 'Skill';
+      isSingleId() {
+        return this.skillIds.length === 1;
+      },
+      firstSkillId() {
+        return this.skillIds[0];
       },
     },
     methods: {
@@ -108,11 +110,14 @@ limitations under the License.
         this.publishHidden(e);
       },
       publishHidden(e) {
-        this.$emit('hidden', { id: this.id, exportType: this.exportType, ...e });
+        if (this.state.exported) {
+          this.$emit('exported', this.skillIds);
+        }
+        this.$emit('hidden', { ...e });
       },
       handleExport() {
         this.state.exporting = true;
-        CatalogService.export(this.$route.params.projectId, this.id)
+        CatalogService.bulkExport(this.$route.params.projectId, this.skillIds)
           .then(() => {
             this.state.exported = true;
           })

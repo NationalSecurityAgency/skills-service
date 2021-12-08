@@ -63,7 +63,7 @@ limitations under the License.
               <div>
                 <router-link :data-cy="`viewSkillLink_${data.item.skillId}`" tag="a" :to="{ name:'SkillOverview',
                                         params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
-                             :aria-label="`View skill ${data.item.name} via link`">
+                             :aria-label="`View skill ${data.item.skillName} via link`">
                   <div class="h5 d-inline-block">{{ data.item.skillName }}</div>
                 </router-link>
               </div>
@@ -217,7 +217,7 @@ limitations under the License.
         };
         this.loading = true;
         SkillsService.getSkillsExportedToCatalog(this.projectId, pageParams).then((data) => {
-          this.exportedSkills = data;
+          this.exportedSkills = data.map((skill) => ({ projectId: this.$route.params.projectId, ...skill }));
         }).finally(() => {
           this.loading = false;
           this.table.options.busy = false;

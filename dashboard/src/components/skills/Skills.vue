@@ -137,6 +137,7 @@ limitations under the License.
         CatalogService.bulkImport(this.$route.params.projectId, this.$route.params.subjectId, skillsInfoToImport)
           .then(() => {
             this.loadSkills();
+            this.loadSubjectDetailsState({ projectId: this.projectId, subjectId: this.subject.subjectId });
           });
       },
       skillsChanged(skillId) {

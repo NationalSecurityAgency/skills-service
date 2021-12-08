@@ -50,7 +50,7 @@ limitations under the License.
                 <template #button-content>
                   <i class="fas fa-tools"></i> Action
                 </template>
-                <b-dropdown-item href="#">Export To Catalog</b-dropdown-item>
+                <b-dropdown-item @click="handleExportRequest">Export To Catalog</b-dropdown-item>
               </b-dropdown>
             </div>
           </div>
@@ -104,16 +104,16 @@ limitations under the License.
                   </router-link>
                 </b-form-checkbox>
                 <div class="d-inline-block" v-if="data.item.isCatalogSkill">
-                <router-link :data-cy="`manageSkillLink_${data.item.skillId}`" tag="a" :to="{ name:'SkillOverview',
-                                    params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
-                             :aria-label="`Manage skill ${data.item.name}  via link`">
-                  <div class="h5 d-inline-block"><span v-if="data.item.nameHtml" v-html="data.item.nameHtml"></span><span v-else>{{ data.item.name }}</span></div>
-                </router-link>
-                <div class="h5 ml-2 d-inline-block">
-                  <b-badge variant="secondary" class="text-uppercase">
-                    <span><i class="fas fa-book"></i> Catalog</span>
-                  </b-badge>
-                </div>
+                  <router-link :data-cy="`manageSkillLink_${data.item.skillId}`" tag="a" :to="{ name:'SkillOverview',
+                                      params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
+                               :aria-label="`Manage skill ${data.item.name}  via link`">
+                    <div class="h5 d-inline-block"><span v-if="data.item.nameHtml" v-html="data.item.nameHtml"></span><span v-else>{{ data.item.name }}</span></div>
+                  </router-link>
+                  <div class="h6 ml-2 d-inline-block">
+                    <b-badge variant="secondary" class="text-uppercase">
+                      <span><i class="fas fa-book"></i> From Catalog</span>
+                    </b-badge>
+                  </div>
                 </div>
               </div>
 
@@ -136,7 +136,12 @@ limitations under the License.
                                   params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
                            :aria-label="`Manage skill ${data.item.name}`"
                            class="btn btn-outline-primary btn-sm">
-                <span class="d-none d-sm-inline">Manage </span> <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
+                <span v-if="data.item.isCatalogSkill">
+                  <span class="d-none d-sm-inline">View </span> <i class="fas fa-eye" aria-hidden="true"/>
+                </span>
+                <span v-if="!data.item.isCatalogSkill">
+                  <span class="d-none d-sm-inline">Manage </span> <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
+                </span>
               </router-link>
               <b-button-group size="sm" class="ml-1">
                 <b-button v-if="!data.item.isCatalogSkill" @click="editSkill(data.item)"
@@ -255,6 +260,7 @@ limitations under the License.
                 :project-id="projectId" :subject-id="subjectId" @skill-saved="skillCreatedOrUpdated" @hidden="handleFocus"/>
     <edit-skill-group v-if="editGroupInfo.show" v-model="editGroupInfo.show" :group="editGroupInfo.group" :is-edit="editGroupInfo.isEdit"
                       @group-saved="skillCreatedOrUpdated" @hidden="handleFocus"/>
+    <export-to-catalog v-if="exportToCatalogInfo.show" v-model="exportToCatalogInfo.show" :skill-ids="exportToCatalogInfo.skillIds" />
   </div>
 </template>
 
@@ -273,6 +279,7 @@ limitations under the License.
   import TimeWindowMixin from './TimeWindowMixin';
   import ChildRowSkillGroupDisplay from './skillsGroup/ChildRowSkillGroupDisplay';
   import EditSkillGroup from './skillsGroup/EditSkillGroup';
+  import ExportToCatalog from '@/components/skills/catalog/ExportToCatalog';
 
   export default {
     name: 'SkillsTable',
@@ -313,6 +320,7 @@ limitations under the License.
       },
     },
     components: {
+      ExportToCatalog,
       EditSkillGroup,
       ChildRowSkillGroupDisplay,
       SkillsBTable,
@@ -335,6 +343,10 @@ limitations under the License.
           isEdit: false,
           show: false,
           group: {},
+        },
+        exportToCatalogInfo: {
+          show: false,
+          skillIds: [],
         },
         skillsOriginal: [],
         skills: [],
@@ -731,6 +743,11 @@ limitations under the License.
           item.selected = selectedValue;
         });
         this.updateActionsDisableStatus();
+      },
+      handleExportRequest() {
+        const skillIds = this.skills.filter((item) => item.selected).map((skill) => skill.skillId);
+        this.exportToCatalogInfo.skillIds = skillIds;
+        this.exportToCatalogInfo.show = true;
       },
     },
   };

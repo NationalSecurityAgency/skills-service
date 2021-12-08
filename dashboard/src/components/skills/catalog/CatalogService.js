@@ -21,9 +21,9 @@ export default {
     return axios.get(url, { params })
       .then((response) => response.data);
   },
-  export(projectId, skillId) {
-    const url = `/admin/projects/${projectId}/skills/${skillId}/export`;
-    return axios.post(url)
+  bulkExport(projectId, skillIds) {
+    const url = `/admin/projects/${projectId}/skills/export`;
+    return axios.post(url, skillIds)
       .then((response) => response.data);
   },
   import(projectId, subjectId, fromProjectId, fromSkillId) {
