@@ -47,7 +47,7 @@ limitations under the License.
 
     <edit-skill-group v-if="editGroupInfo.show" v-model="editGroupInfo.show" :group="editGroupInfo.group" :is-edit="false"
                       @group-saved="skillCreatedOrUpdated" @hidden="focusOnNewGroupButton"/>
-    <import-from-catalog v-if="importCatalog.show" v-model="importCatalog.show" @imported="loadSkills()"/>
+    <import-from-catalog v-if="importCatalog.show" v-model="importCatalog.show" @to-import="importFromCatalog"/>
   </div>
 </template>
 
@@ -61,6 +61,7 @@ limitations under the License.
   import EditSkill from './EditSkill';
   import EditSkillGroup from './skillsGroup/EditSkillGroup';
   import ImportFromCatalog from './catalog/ImportFromCatalog';
+  import CatalogService from '@/components/skills/catalog/CatalogService';
 
   const { mapActions, mapGetters } = createNamespacedHelpers('subjects');
 
@@ -129,6 +130,13 @@ limitations under the License.
           })
           .finally(() => {
             this.isLoading = false;
+          });
+      },
+      importFromCatalog(skillsInfoToImport) {
+        this.isLoading = true;
+        CatalogService.bulkImport(this.$route.params.projectId, this.$route.params.subjectId, skillsInfoToImport)
+          .then(() => {
+            this.loadSkills();
           });
       },
       skillsChanged(skillId) {

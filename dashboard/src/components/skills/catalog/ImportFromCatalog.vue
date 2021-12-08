@@ -16,7 +16,7 @@ limitations under the License.
 <template>
   <b-modal id="importSkillsFromCatalog" size="xl" :title="`Import ${importType} from the Catalog`"
            v-model="show"
-           :no-close-on-backdrop="true" :centered="true" :hide-footer="true" body-class="px-0 mx-0"
+           :no-close-on-backdrop="true" :centered="true" body-class="px-0 mx-0"
            header-bg-variant="info" header-text-variant="light" no-fade role="dialog"
            @hide="publishHidden"
            :aria-label="isSkill?'Import Skill from the Catalog':'Import Subject from the Catalog'">
@@ -70,12 +70,6 @@ limitations under the License.
           <b-button variant="outline-info" @click="changeSelectionForAll(false)"
                     data-cy="clearSelectedApprovalsBtn" class="mt-1"><i class="far fa-square"></i>
             Clear
-          </b-button>
-        </div>
-        <div class="col text-right">
-          <b-button variant="outline-success" @click="importSkills" data-cy="approveBtn"
-                    class="mt-1 ml-2" :disabled="importDisabled"><i
-            class="far fa-arrow-alt-circle-down"></i> Import
           </b-button>
         </div>
       </div>
@@ -168,6 +162,15 @@ limitations under the License.
       </skills-b-table>
     </div>
 
+    <div slot="modal-footer" class="w-100">
+      <b-button variant="success" size="sm" class="float-right ml-2"
+                @click="importSkills" data-cy="approveBtn" :disabled="importDisabled"><i
+        class="far fa-arrow-alt-circle-down"></i> Import
+      </b-button>
+      <b-button variant="secondary" size="sm" class="float-right" @click="close" data-cy="closeSkillButton">
+        <i class="fas fa-times"></i> Cancel
+      </b-button>
+    </div>
   </b-modal>
 </template>
 
@@ -330,13 +333,8 @@ limitations under the License.
           projectId: skill.projectId,
           skillId: skill.skillId,
         }));
-        CatalogService.bulkImport(this.$route.params.projectId, this.$route.params.subjectId, projAndSkillIds)
-          .then(() => {
-            // set to the first page
-            this.table.options.pagination.currentPage = 1;
-            this.loadData();
-            this.$emit('imported', selected);
-          });
+        this.$emit('to-import', projAndSkillIds);
+        this.show = false;
       },
       changeSelectionForAll(selectedValue) {
         this.table.items.forEach((item) => {
