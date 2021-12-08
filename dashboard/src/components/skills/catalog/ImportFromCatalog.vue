@@ -335,6 +335,7 @@ limitations under the License.
             // set to the first page
             this.table.options.pagination.currentPage = 1;
             this.loadData();
+            this.$emit('imported', selected);
           });
       },
       changeSelectionForAll(selectedValue) {

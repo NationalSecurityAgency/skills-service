@@ -47,7 +47,7 @@ limitations under the License.
 
     <edit-skill-group v-if="editGroupInfo.show" v-model="editGroupInfo.show" :group="editGroupInfo.group" :is-edit="false"
                       @group-saved="skillCreatedOrUpdated" @hidden="focusOnNewGroupButton"/>
-    <import-from-catalog v-if="importCatalog.show" v-model="importCatalog.show"/>
+    <import-from-catalog v-if="importCatalog.show" v-model="importCatalog.show" @imported="loadSkills()"/>
   </div>
 </template>
 
@@ -117,6 +117,7 @@ limitations under the License.
         });
       },
       loadSkills() {
+        this.isLoading = true;
         SkillsService.getSubjectSkills(this.projectId, this.subjectId)
           .then((skills) => {
             const loadedSkills = skills;
