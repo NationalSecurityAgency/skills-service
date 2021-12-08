@@ -290,7 +290,7 @@ describe('Root Pin and Unpin Tests', () => {
       cy.get('[data-cy=pinProjects').should('not.exist') // dialog does not exists
 
       // open the new project modal
-      cy.clickButton('Project');
+      cy.get('[data-cy="newProjectButton"]').click();
       cy.contains('New Project'); // new project dialog does exist
       cy.get('[data-cy=pinProjects').should('not.exist') // pin project dialog does not exists
     });

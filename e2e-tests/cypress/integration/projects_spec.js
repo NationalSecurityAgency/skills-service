@@ -54,6 +54,26 @@ describe('Projects Tests', () => {
     cy.contains('ID: MyNewtestProject')
   });
 
+  it('Provide clear instructions how to create a new project - root user', function () {
+    cy.logout();
+    cy.fixture('vars.json').then((vars) => {
+      cy.login(vars.rootUser, vars.defaultPass);
+    });
+    cy.visit('/administrator/');
+    cy.contains('No Projects Yet...')
+    cy.contains('A Project represents a gamified training profile that consists of skills divided into subjects')
+    cy.get('[data-cy="firstNewProjectButton"]').click();
+    cy.get('[data-cy="projectName"]').type('one');
+    cy.get('[data-cy="saveProjectButton"]').click();
+    cy.get('[data-cy="projCard_one_manageBtn"]');
+  });
+
+  it('Provide clear instructions how to create a new project - regular user', function () {
+    cy.visit('/administrator/');
+    cy.contains('No Projects Yet...')
+    cy.contains('Note: This section of SkillTree is for project administrators only. If you do not plan on creating and integrating a project with SkillTree then please return to the Progress and Ranking page.')
+  });
+
   it('Preview project training plan', function () {
     cy.request('POST', '/app/projects/proj1', {
       projectId: 'proj1',

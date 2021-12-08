@@ -60,4 +60,7 @@ limitations under the License.
     border-radius: 6px;
     background-color: #f6f8fa;
   }
+  .markdown a {
+    text-decoration: underline;
+  }
 </style>

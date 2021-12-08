@@ -182,7 +182,7 @@ describe('Skills Tests', () => {
       //helpUrl
       cy.get('[data-cy=skillHelpUrl]').clear().type('javascript:alert("uh oh");');
       cy.get('[data-cy=skillHelpUrlError]').should('be.visible');
-      cy.get('[data-cy=skillHelpUrlError]').should('have.text', 'Help URL/Path must use http, https, or be a relative url.');
+      cy.get('[data-cy=skillHelpUrlError]').should('have.text', 'Help URL/Path must start with "/" or "http(s)"');
       cy.get('[data-cy=saveSkillButton]').should('be.disabled');
       cy.get('[data-cy=skillHelpUrl]').clear().type('/foo?p1=v1&p2=v2');
       cy.get('[data-cy=skillHelpUrlError]').should('not.be.visible');
@@ -870,6 +870,110 @@ describe('Skills Tests', () => {
         cy.get('[data-cy=skillHelpUrl]').should('have.value', 'http://doHelpOnThisSkill.com/i%20have%20spaces');
 
     });
+
+
+    it('append "Root Help URL" to the "Help Url" if configured', () => {
+        cy.request('POST', '/admin/projects/proj1/settings/help.url.root', {
+            projectId: 'proj1',
+            setting: 'help.url.root',
+            value: 'https://SomeArticleRepo.com/'
+        });
+        cy.createSkill(1, 1, 1, {helpUrl: '/some/path'});
+        cy.createSkill(1, 1, 2, {helpUrl: 'https://www.OverrideHelpUrl.com/other/path'});
+
+        const runHelpUrlValidation = () => {
+            cy.visit('/administrator/projects/proj1/subjects/subj1');
+            cy.get('[data-cy="expandDetailsBtn_skill1"]').click();
+            cy.get('[data-cy="childRowDisplay_skill1"] [data-cy="skillOverviewHelpUrl"]').should('have.attr', 'href', 'https://SomeArticleRepo.com/some/path')
+            cy.get('[data-cy="childRowDisplay_skill1"] [data-cy="skillOverviewHelpUrl"]').contains('https://SomeArticleRepo.com/some/path')
+
+            cy.get('[data-cy="expandDetailsBtn_skill2"]').click();
+            cy.get('[data-cy="childRowDisplay_skill2"] [data-cy="skillOverviewHelpUrl"]').should('have.attr', 'href', 'https://www.OverrideHelpUrl.com/other/path')
+            cy.get('[data-cy="childRowDisplay_skill2"] [data-cy="skillOverviewHelpUrl"]').contains('https://www.OverrideHelpUrl.com/other/path')
+
+            // navigate to each skill and validate help url
+            cy.get('[data-cy="manageSkillBtn_skill1"]').click();
+            cy.get('[data-cy="skillOverviewHelpUrl"]').should('have.attr', 'href', 'https://SomeArticleRepo.com/some/path')
+            cy.get('[data-cy="skillOverviewHelpUrl"]').contains('https://SomeArticleRepo.com/some/path')
+            // refresh and re-validate
+            cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
+            cy.get('[data-cy="skillOverviewHelpUrl"]').should('have.attr', 'href', 'https://SomeArticleRepo.com/some/path')
+            cy.get('[data-cy="skillOverviewHelpUrl"]').contains('https://SomeArticleRepo.com/some/path')
+
+            // now let's do the same for the 2nd skill
+            cy.visit('/administrator/projects/proj1/subjects/subj1');
+            cy.get('[data-cy="manageSkillBtn_skill2"]').click();
+            cy.get('[data-cy="skillOverviewHelpUrl"]').should('have.attr', 'href', 'https://www.OverrideHelpUrl.com/other/path')
+            cy.get('[data-cy="skillOverviewHelpUrl"]').contains('https://www.OverrideHelpUrl.com/other/path')
+            cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill2');
+            cy.get('[data-cy="skillOverviewHelpUrl"]').should('have.attr', 'href', 'https://www.OverrideHelpUrl.com/other/path')
+            cy.get('[data-cy="skillOverviewHelpUrl"]').contains('https://www.OverrideHelpUrl.com/other/path')
+        }
+        runHelpUrlValidation();
+
+        // run same tests but root help url value does NOT end with '/'
+        cy.request('POST', '/admin/projects/proj1/settings/help.url.root', {
+            projectId: 'proj1',
+            setting: 'help.url.root',
+            value: 'https://SomeArticleRepo.com'
+        });
+        runHelpUrlValidation();
+    });
+
+    it('skill modal shows Root Help Url when configured', () => {
+        cy.request('POST', '/admin/projects/proj1/settings/help.url.root', {
+            projectId: 'proj1',
+            setting: 'help.url.root',
+            value: 'https://SomeArticleRepo.com/'
+        });
+        cy.createSkill(1, 1, 1, {helpUrl: '/some/path'});
+        cy.createSkill(1, 1, 2, {helpUrl: 'https://www.OverrideHelpUrl.com/other/path'});
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="newSkillButton"]').click();
+        cy.get('[data-cy="rootHelpUrlSetting"]').contains('https://SomeArticleRepo.com')
+
+        const textDecorationMatch = 'line-through solid rgb(38, 70, 83)';
+
+        // strike-through when url starts with http:// or https://
+        cy.get('[data-cy="skillHelpUrl"]').type('https:/');
+        cy.get('[data-cy="rootHelpUrlSetting"]').should('not.have.css', 'text-decoration', textDecorationMatch);
+        cy.get('[data-cy="skillHelpUrl"]').type('/');
+        cy.get('[data-cy="rootHelpUrlSetting"]').should('have.css', 'text-decoration', textDecorationMatch);
+
+        cy.get('[data-cy="skillHelpUrl"]').clear().type('http:/');
+        cy.get('[data-cy="rootHelpUrlSetting"]').should('not.have.css', 'text-decoration', textDecorationMatch);
+        cy.get('[data-cy="skillHelpUrl"]').type('/');
+        cy.get('[data-cy="rootHelpUrlSetting"]').should('have.css', 'text-decoration', textDecorationMatch);
+
+        // now test edit
+        cy.get('[data-cy="closeSkillButton"]').click();
+        cy.get('[data-cy="editSkillButton_skill1"]').click();
+        cy.get('[data-cy="rootHelpUrlSetting"]').contains('https://SomeArticleRepo.com')
+        cy.get('[data-cy="rootHelpUrlSetting"]').should('not.have.css', 'text-decoration', textDecorationMatch);
+
+        // edit again - anything that starts with https or http must not use Root Help Url
+        cy.get('[data-cy="closeSkillButton"]').click();
+        cy.get('[data-cy="editSkillButton_skill2"]').click();
+        cy.get('[data-cy="rootHelpUrlSetting"]').contains('https://SomeArticleRepo.com')
+        cy.get('[data-cy="rootHelpUrlSetting"]').should('have.css', 'text-decoration', textDecorationMatch);
+
+        // do not show Root Help Url if it's not configured
+        cy.request('POST', '/admin/projects/proj1/settings/help.url.root', {
+            projectId: 'proj1',
+            setting: 'help.url.root',
+            value: ''
+        });
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="newSkillButton"]').click();
+        cy.get('[data-cy="skillHelpUrl"]');
+        cy.get('[data-cy="rootHelpUrlSetting"]').should('not.exist');
+        cy.get('[data-cy="closeSkillButton"]').click();
+        cy.get('[data-cy="editSkillButton_skill1"]').click();
+        cy.get('[data-cy="skillHelpUrl"]');
+        cy.get('[data-cy="rootHelpUrlSetting"]').should('not.exist');
+    });
+
 
     it('skill help url with %20 in host retains %20 on edit', () => {
         cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/dummy`, {

@@ -93,5 +93,45 @@ describe('Project and Ranking Views are disabled Tests', () => {
         cy.get('[data-cy=breadcrumb-item]').its('length').should('eq', 1);
         cy.get('[data-cy=breadcrumb-item]').eq(0).should('contain.text', 'Project: proj1');
     });
+
+    it('Provide clear instructions how to create a new project - root user', function () {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply({
+                body: {
+                    rankingAndProgressViewsEnabled: 'false',
+                },
+            })
+        }).as('getConfig')
+
+        cy.logout();
+        cy.fixture('vars.json').then((vars) => {
+            cy.login(vars.rootUser, vars.defaultPass);
+        });
+        cy.visit('/administrator/');
+        cy.contains('No Projects Yet...')
+        cy.contains('A Project represents a gamified training profile that consists of skills divided into subjects')
+        cy.get('[data-cy="firstNewProjectButton"]').click();
+        cy.get('[data-cy="projectName"]').type('one');
+        cy.get('[data-cy="saveProjectButton"]').click();
+        cy.get('[data-cy="projCard_one_manageBtn"]');
+    });
+
+    it('Provide clear instructions how to create a new project - regular user', function () {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply({
+                body: {
+                    rankingAndProgressViewsEnabled: 'false',
+                },
+            })
+        }).as('getConfig')
+
+        cy.visit('/administrator/');
+        cy.contains('No Projects Yet...')
+        cy.contains('A Project represents a gamified training profile that consists of skills divided into subjects')
+        cy.get('[data-cy="firstNewProjectButton"]').click();
+        cy.get('[data-cy="projectName"]').type('one');
+        cy.get('[data-cy="saveProjectButton"]').click();
+        cy.get('[data-cy="projCard_one_manageBtn"]');
+    });
 });
 

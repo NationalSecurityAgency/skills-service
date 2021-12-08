@@ -19,7 +19,7 @@ limitations under the License.
     <loading-container :is-loading="loadingSkill">
       <div class="card">
         <div class="card-body">
-          <child-row-skills-display v-if="skill && skill.skillId" :skill="skill"></child-row-skills-display>
+          <child-row-skills-display v-if="skill && skill.skillId" :skill="skill" :project-id="this.$route.params.projectId"></child-row-skills-display>
         </div>
       </div>
     </loading-container>
