@@ -1117,12 +1117,19 @@ class AdminController {
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/exported", method = RequestMethod.GET, produces = "application/json")
-    List<ExportedSkillRes> getExportedSkills(@PathVariable("projectId") String projectId,
+    TableResult getExportedSkills(@PathVariable("projectId") String projectId,
                                         @RequestParam int limit,
                                         @RequestParam int page,
                                         @RequestParam String orderBy,
                                         @RequestParam Boolean ascending) {
-        skillCatalogService.getSkillsExportedByProject(projectId, createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending))
+        TotalCountAwareResult<ExportedSkillRes> res =skillCatalogService.getSkillsExportedByProject(projectId, createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending))
+
+        TableResult tr = new TableResult()
+        tr.count = res.results?.size()
+        tr.totalCount = res.total
+        tr.data = res.results
+
+        return tr
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/exported/stats", method = RequestMethod.GET, produces = "application/json")

@@ -1197,6 +1197,10 @@ class SkillsService {
         return wsHelper.apiGet("/myprojects/${projectId}/name")
     }
 
+    def getExportedSkillsForProjectStats(String projectId) {
+        return wsHelper.adminGet("/projects/${projectId}/skills/exported/stats")
+    }
+
     private String getProjectUrl(String project) {
         return "/projects/${project}".toString()
     }

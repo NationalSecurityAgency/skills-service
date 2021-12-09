@@ -127,8 +127,15 @@ class SkillCatalogService {
     }
 
     @Transactional(readOnly = true)
-    List<ExportedSkillRes> getSkillsExportedByProject(String projectId, Pageable pageable) {
-        exportedSkillRepo.getTinySkillsExportedByProject(projectId, pageable)?.collect {convert(it) }
+    TotalCountAwareResult<ExportedSkillRes> getSkillsExportedByProject(String projectId, Pageable pageable) {
+        TotalCountAwareResult<ExportedSkillRes> result = new TotalCountAwareResult()
+        Integer count = exportedSkillRepo.countSkillsExportedByProject(projectId)
+        result.total = count
+        if (count > 0) {
+            result.results = exportedSkillRepo.getTinySkillsExportedByProject(projectId, pageable)?.collect { convert(it) }
+        }
+
+        return result
     }
 
     @Transactional(readOnly = true)
