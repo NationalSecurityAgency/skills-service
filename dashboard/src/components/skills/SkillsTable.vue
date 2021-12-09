@@ -87,7 +87,7 @@ limitations under the License.
                 <div class="h5 text-primary"><span v-if="data.item.nameHtml" v-html="data.item.nameHtml"></span><span v-else>{{ data.item.name }}</span></div>
               </div>
               <div v-if="data.item.isSkillType">
-                <b-form-checkbox v-if="!data.item.isCatalogSkill"
+                <b-form-checkbox v-if="!data.item.isCatalogImportedSkills"
                   :id="`${data.item.projectId}-${data.item.skillId}`"
                   v-model="data.item.selected"
                   :name="`checkbox_${data.item.projectId}_${data.item.skillId}`"
@@ -102,16 +102,21 @@ limitations under the License.
                                :aria-label="`Manage skill ${data.item.name}  via link`">
                     <div class="h5 d-inline-block"><span v-if="data.item.nameHtml" v-html="data.item.nameHtml"></span><span v-else>{{ data.item.name }}</span></div>
                   </router-link>
+                  <div v-if="data.item.sharedToCatalog" class="h6 ml-2 d-inline-block">
+                    <b-badge variant="secondary" class="text-uppercase">
+                      <span><i class="fas fa-book"></i> Exported</span>
+                    </b-badge>
+                  </div>
                 </b-form-checkbox>
-                <div class="d-inline-block" v-if="data.item.isCatalogSkill">
+                <div class="d-inline-block" v-if="data.item.isCatalogImportedSkills">
                   <router-link :data-cy="`manageSkillLink_${data.item.skillId}`" tag="a" :to="{ name:'SkillOverview',
                                       params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
                                :aria-label="`Manage skill ${data.item.name}  via link`">
                     <div class="h5 d-inline-block"><span v-if="data.item.nameHtml" v-html="data.item.nameHtml"></span><span v-else>{{ data.item.name }}</span></div>
                   </router-link>
                   <div class="h6 ml-2 d-inline-block">
-                    <b-badge variant="secondary" class="text-uppercase">
-                      <span><i class="fas fa-book"></i> From Catalog</span>
+                    <b-badge variant="success" class="text-uppercase">
+                      <span><i class="fas fa-book"></i> Imported</span>
                     </b-badge>
                   </div>
                 </div>
@@ -136,21 +141,21 @@ limitations under the License.
                                   params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
                            :aria-label="`Manage skill ${data.item.name}`"
                            class="btn btn-outline-primary btn-sm">
-                <span v-if="data.item.isCatalogSkill">
+                <span v-if="data.item.isCatalogImportedSkills">
                   <span class="d-none d-sm-inline">View </span> <i class="fas fa-eye" aria-hidden="true"/>
                 </span>
-                <span v-if="!data.item.isCatalogSkill">
+                <span v-if="!data.item.isCatalogImportedSkills">
                   <span class="d-none d-sm-inline">Manage </span> <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
                 </span>
               </router-link>
               <b-button-group size="sm" class="ml-1">
-                <b-button v-if="!data.item.isCatalogSkill" @click="editSkill(data.item)"
+                <b-button v-if="!data.item.isCatalogImportedSkills" @click="editSkill(data.item)"
                           variant="outline-primary" :data-cy="`editSkillButton_${data.item.skillId}`"
                           :aria-label="'edit Skill '+data.item.name" :ref="`edit_${data.item.skillId}`"
                           title="Edit Skill" b-tooltip.hover="Edit Skill">
                   <i class="fas fa-edit" aria-hidden="true"/>
                 </b-button>
-                <b-button v-if="data.item.type === 'Skill' && !data.item.isCatalogSkill"
+                <b-button v-if="data.item.type === 'Skill' && !data.item.isCatalogImportedSkills"
                           @click="copySkill(data.item)"
                           variant="outline-primary" :data-cy="`copySkillButton_${data.item.skillId}`"
                           :aria-label="'copy Skill '+data.item.name" :ref="'copy_'+data.item.skillId"
@@ -164,7 +169,7 @@ limitations under the License.
                             :aria-label="'delete Skill '+data.item.name"
                             title="Delete Skill"
                             size="sm"
-                            :class="{ 'delete-btn-border-fix' : !data.item.isCatalogSkill }"
+                            :class="{ 'delete-btn-border-fix' : !data.item.isCatalogImportedSkills }"
                             :disabled="deleteButtonsDisabled">
                     <i class="text-warning fas fa-trash" aria-hidden="true"/>
                   </b-button>
@@ -191,12 +196,17 @@ limitations under the License.
           </div>
         </template>
 
-        <template v-slot:cell(isCatalogSkill)="data">
-          <div v-if="data.item.isCatalogSkill">
-            <b-badge><i class="fas fa-book"></i> FROM CATALOG</b-badge>
+        <template v-slot:cell(catalogType)="data">
+          <div v-if="data.item.isCatalogImportedSkills">
+            <b-badge variant="success"><i class="fas fa-book"></i> IMPORTED</b-badge>
             <p class="text-secondary">Imported from <span class="text-primary font-weight-bold">{{ data.item.copiedFromProjectName }}</span></p>
           </div>
-          <div v-else class="text-secondary">
+          <div v-if="data.item.sharedToCatalog">
+            <b-badge variant="secondary"><i class="fas fa-book"></i> EXPORTED</b-badge>
+            <p class="text-secondary">Exported to Skill Catalog</p>
+          </div>
+
+          <div v-if="!data.item.isCatalogSkill" class="text-secondary">
             N/A
           </div>
         </template>
@@ -260,7 +270,7 @@ limitations under the License.
                 :project-id="projectId" :subject-id="subjectId" @skill-saved="skillCreatedOrUpdated" @hidden="handleFocus"/>
     <edit-skill-group v-if="editGroupInfo.show" v-model="editGroupInfo.show" :group="editGroupInfo.group" :is-edit="editGroupInfo.isEdit"
                       @group-saved="skillCreatedOrUpdated" @hidden="handleFocus"/>
-    <export-to-catalog v-if="exportToCatalogInfo.show" v-model="exportToCatalogInfo.show" :skill-ids="exportToCatalogInfo.skillIds" />
+    <export-to-catalog v-if="exportToCatalogInfo.show" v-model="exportToCatalogInfo.show" :skill-ids="exportToCatalogInfo.skillIds" @exported="handleSkillsExportedToCatalog"/>
   </div>
 </template>
 
@@ -360,7 +370,7 @@ limitations under the License.
               value: 'selfReportingType',
               text: 'Self Report',
             }, {
-              value: 'isCatalogSkill',
+              value: 'catalogType',
               text: 'Catalog',
             }, {
               value: 'timeWindow',
@@ -460,8 +470,8 @@ limitations under the License.
             label: 'Self Report Type',
             sortable: true,
           },
-          isCatalogSkill: {
-            key: 'isCatalogSkill',
+          catalogType: {
+            key: 'catalogType',
             label: 'Catalog',
             sortable: true,
           },
@@ -539,6 +549,12 @@ limitations under the License.
         this.table.options.busy = false;
       },
       addMetaToSkillObj(skill) {
+        const isCatalogImportedSkills = skill.copiedFromProjectId !== null && skill.copiedFromProjectId !== undefined && skill.copiedFromProjectId !== '';
+        let catalogType = isCatalogImportedSkills ? 'imported' : null;
+        if (skill.sharedToCatalog) {
+          catalogType = 'exported';
+        }
+        const isCatalogSkill = isCatalogImportedSkills || skill.sharedToCatalog;
         return {
           ...skill,
           isGroupType: skill.type === 'SkillsGroup',
@@ -546,7 +562,9 @@ limitations under the License.
           selfReportingType: (skill.type === 'Skill' && !skill.selfReportingType) ? 'Disabled' : skill.selfReportingType,
           created: new Date(skill.created),
           subjectId: this.subjectId,
-          isCatalogSkill: skill.copiedFromProjectId !== null && skill.copiedFromProjectId !== undefined && skill.copiedFromProjectId !== '',
+          isCatalogSkill,
+          isCatalogImportedSkills,
+          catalogType,
         };
       },
       groupChanged(row, updated) {
@@ -554,6 +572,16 @@ limitations under the License.
         const newGroup = this.addMetaToSkillObj(updated);
         // eslint-disable-next-line no-param-reassign
         row.item = Object.assign(this.skills[groupIndex], newGroup);
+      },
+      handleSkillsExportedToCatalog(skillIds) {
+        this.skills = this.skills.map((skill) => {
+          let res = skill;
+          if (skillIds.includes(skill.skillId)) {
+            res = ({ ...skill, sharedToCatalog: true });
+          }
+          return res;
+        });
+        this.changeSelectionForAll(false);
       },
       skillCreatedOrUpdated(skill) {
         if (this.skillsOriginal.length === 0) {

@@ -42,7 +42,7 @@ limitations under the License.
 
     <p v-if="state.exported">
       <i class="fas fa-check-circle text-success"></i>
-      <span v-if="isSingleId">Skill with id <b>[{{ firstSkillId }}]</b> was</span>
+      <span v-if="isSingleId"> Skill with id <b class="text-primary">{{ firstSkillId }}</b> was</span>
       <span v-else><b-badge variant="info" class="ml-2">{{ skillIds.length }}</b-badge>
         Skills were</span>  <span class="text-success font-weight-bold">successfully</span> exported to the catalog!
     </p>

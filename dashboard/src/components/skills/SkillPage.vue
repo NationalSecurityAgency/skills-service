@@ -39,12 +39,12 @@ limitations under the License.
                     @click="showExportToCatalog=true"
                     variant="outline-primary"
                     title="Add to catalog"
-                    :disabled="skill.sharedToCatalog">
+                    :disabled="skill && skill.sharedToCatalog">
             <span class="d-none d-sm-inline">Catalog</span> <i class="fas fa-book-medical" aria-hidden="true" />
           </b-button>
         </b-button-group>
       </div>
-      <div slot="right-of-header" v-if="skill.sharedToCatalog" class="d-inline h5">
+      <div slot="right-of-header" v-if="!isLoading && skill.sharedToCatalog" class="d-inline h5">
         <b-badge class="ml-2"><i class="fas fa-book"></i> IN CATALOG</b-badge>
       </div>
     </page-header>
