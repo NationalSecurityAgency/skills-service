@@ -42,6 +42,7 @@ import skills.storage.model.SkillDef
 import skills.storage.model.SkillDef.SelfReportingType
 import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.SkillRelDef
+import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.QueuedSkillUpdateRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillDefWithExtraRepo
@@ -108,6 +109,9 @@ class SkillsAdminService {
 
     @Autowired
     SkillsGroupAdminService skillsGroupAdminService
+
+    @Autowired
+    ProjDefRepo projDefRepo
 
     @Transactional
     void syncSkillPointsForSkillsGroup(String projectId,
@@ -532,6 +536,9 @@ class SkillsAdminService {
 
         SkillDefRes finalRes = convertToSkillDefRes(res)
         finalRes.sharedToCatalog = skillCatalogService.isAvailableInCatalog(res.projectId, res.skillId)
+        if (finalRes.copiedFromProjectId) {
+            finalRes.copiedFromProjectName = projDefRepo.getProjectName(finalRes.copiedFromProjectId)?.projectName
+        }
         return finalRes
     }
 
