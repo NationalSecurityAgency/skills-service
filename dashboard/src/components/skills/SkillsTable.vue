@@ -270,7 +270,8 @@ limitations under the License.
                 :project-id="projectId" :subject-id="subjectId" @skill-saved="skillCreatedOrUpdated" @hidden="handleFocus"/>
     <edit-skill-group v-if="editGroupInfo.show" v-model="editGroupInfo.show" :group="editGroupInfo.group" :is-edit="editGroupInfo.isEdit"
                       @group-saved="skillCreatedOrUpdated" @hidden="handleFocus"/>
-    <export-to-catalog v-if="exportToCatalogInfo.show" v-model="exportToCatalogInfo.show" :skill-ids="exportToCatalogInfo.skillIds" @exported="handleSkillsExportedToCatalog"/>
+    <export-to-catalog v-if="exportToCatalogInfo.show" v-model="exportToCatalogInfo.show" :skills="exportToCatalogInfo.skills"
+                       @exported="handleSkillsExportedToCatalog" @hidden="changeSelectionForAll(false)"/>
   </div>
 </template>
 
@@ -356,7 +357,7 @@ limitations under the License.
         },
         exportToCatalogInfo: {
           show: false,
-          skillIds: [],
+          skills: [],
         },
         skillsOriginal: [],
         skills: [],
@@ -573,15 +574,11 @@ limitations under the License.
         // eslint-disable-next-line no-param-reassign
         row.item = Object.assign(this.skills[groupIndex], newGroup);
       },
-      handleSkillsExportedToCatalog(skillIds) {
+      handleSkillsExportedToCatalog(skills) {
         this.skills = this.skills.map((skill) => {
-          let res = skill;
-          if (skillIds.includes(skill.skillId)) {
-            res = ({ ...skill, sharedToCatalog: true });
-          }
-          return res;
+          const replacement = skills.find((item) => item.skillId === skill.skillId);
+          return replacement || skill;
         });
-        this.changeSelectionForAll(false);
       },
       skillCreatedOrUpdated(skill) {
         if (this.skillsOriginal.length === 0) {
@@ -766,15 +763,11 @@ limitations under the License.
         }
       },
       changeSelectionForAll(selectedValue) {
-        this.skills.forEach((item) => {
-          // eslint-disable-next-line no-param-reassign
-          item.selected = selectedValue;
-        });
+        this.skills = this.skills.map((sk) => ({ ...sk, selected: selectedValue }));
         this.updateActionsDisableStatus();
       },
       handleExportRequest() {
-        const skillIds = this.skills.filter((item) => item.selected).map((skill) => skill.skillId);
-        this.exportToCatalogInfo.skillIds = skillIds;
+        this.exportToCatalogInfo.skills = this.skills.filter((item) => item.selected);
         this.exportToCatalogInfo.show = true;
       },
     },

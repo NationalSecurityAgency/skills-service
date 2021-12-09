@@ -18,11 +18,19 @@ limitations under the License.
            :no-close-on-backdrop="true" :centered="true"
            header-bg-variant="info" header-text-variant="light" no-fade role="dialog" @hide="publishHidden"
            aria-label="'Export Skill to the Catalog'">
-    <b-overlay v-if="!state.exported" :show="state.exporting" rounded="sm" opacity="0.5"
+
+    <div v-if="allSkillsExportedAlready">
+      All selected <b-badge variant="info">{{ skills.length }}</b-badge> skill(s) are already in the Skill Catalog.
+    </div>
+
+    <b-overlay v-if="!allSkillsExportedAlready && !state.exported" :show="state.exporting" rounded="sm" opacity="0.5"
                spinner-variant="info" spinner-type="grow" spinner-small>
       <p>
-        This will export <span v-if="isSingleId">Skill with id <b>[{{ firstSkillId }}]</b></span><span v-else><b-badge variant="info">{{ skillIds.length }}</b-badge> Skills</span> to the SkillTree Catalog <i class="fas fa-book" aria-hidden="true" />.
+        This will export <span v-if="isSingleId">Skill with id <b>[{{ firstSkillId }}]</b></span><span v-else><b-badge variant="info">{{ skillsFiltered.length }}</b-badge> Skills</span> to the SkillTree Catalog <i class="fas fa-book" aria-hidden="true" />.
         Other project administrators will then be able to import a read-only version of this skill.
+      </p>
+      <p v-if="numAlreadyExported > 0">
+        <span class="font-italic"><i class="fas fa-exclamation-triangle text-warning" /> Note:</span> The are already <b-badge variant="info">{{ numAlreadyExported }}</b-badge> skill(s) in the Skill Catalog from the provided selection.
       </p>
 
       <hr/>
@@ -43,17 +51,17 @@ limitations under the License.
     <p v-if="state.exported">
       <i class="fas fa-check-circle text-success"></i>
       <span v-if="isSingleId"> Skill with id <b class="text-primary">{{ firstSkillId }}</b> was</span>
-      <span v-else><b-badge variant="info" class="ml-2">{{ skillIds.length }}</b-badge>
+      <span v-else><b-badge variant="info" class="ml-2">{{ skillsFiltered.length }}</b-badge>
         Skills were</span>  <span class="text-success font-weight-bold">successfully</span> exported to the catalog!
     </p>
 
-    <div v-if="state.exported" slot="modal-footer" class="w-100">
+    <div v-if="allSkillsExportedAlready || state.exported" slot="modal-footer" class="w-100">
       <b-button variant="secondary" size="sm" class="float-right mr-2" @click="close" data-cy="closeButton">
         OK
       </b-button>
     </div>
 
-    <div v-if="!state.exported" slot="modal-footer" class="w-100">
+    <div v-if="!allSkillsExportedAlready && !state.exported" slot="modal-footer" class="w-100">
       <b-button variant="success" size="sm" class="float-right"
                 @click="handleExport"
                 data-cy="exportToCatalogButton">
@@ -74,7 +82,7 @@ limitations under the License.
     name: 'ExportToCatalog',
     components: { ProjectSelector },
     props: {
-      skillIds: Array,
+      skills: Array,
       value: {
         type: Boolean,
         required: true,
@@ -85,6 +93,7 @@ limitations under the License.
         show: this.value,
         visibilityToAllProjects: true,
         selectedProject: null,
+        skillsFiltered: this.skills.filter((skill) => !skill.sharedToCatalog),
         state: {
           exporting: false,
           exported: false,
@@ -97,11 +106,17 @@ limitations under the License.
       },
     },
     computed: {
+      allSkillsExportedAlready() {
+        return this.skillsFiltered.length === 0;
+      },
+      numAlreadyExported() {
+        return this.skills.length - this.skillsFiltered.length;
+      },
       isSingleId() {
-        return this.skillIds.length === 1;
+        return this.skillsFiltered.length === 1;
       },
       firstSkillId() {
-        return this.skillIds[0];
+        return this.skillsFiltered && this.skillsFiltered.length > 0 ? this.skillsFiltered[0].skillId : null;
       },
     },
     methods: {
@@ -111,13 +126,14 @@ limitations under the License.
       },
       publishHidden(e) {
         if (this.state.exported) {
-          this.$emit('exported', this.skillIds);
+          const res = this.skillsFiltered.map((skill) => ({ ...skill, sharedToCatalog: true }));
+          this.$emit('exported', res);
         }
         this.$emit('hidden', { ...e });
       },
       handleExport() {
         this.state.exporting = true;
-        CatalogService.bulkExport(this.$route.params.projectId, this.skillIds)
+        CatalogService.bulkExport(this.$route.params.projectId, this.skillsFiltered.map((skill) => skill.skillId))
           .then(() => {
             this.state.exported = true;
           })
