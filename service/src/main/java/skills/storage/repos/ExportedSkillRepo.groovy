@@ -130,7 +130,7 @@ interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, In
             ''')
     List<ExportedSkillTiny> getTinySkillsExportedByProject(String projectId, Pageable pageable)
 
-    @Query('''select count(es.id) where es.projectId = ?1''')
+    @Query('''select count(es.id) from ExportedSkill es where es.projectId = ?1''')
     Integer countSkillsExportedByProject(String projectId)
 
     @Nullable

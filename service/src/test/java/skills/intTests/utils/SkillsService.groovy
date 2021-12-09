@@ -1201,6 +1201,56 @@ class SkillsService {
         return wsHelper.adminGet("/projects/${projectId}/skills/exported/stats")
     }
 
+    def getImportedSkillsStats(String projectId) {
+        return wsHelper.adminGet("/projects/${projectId}/skills/imported/stats")
+    }
+
+    def getSkillsImportedFromCatalog(String projectId, int limit, int page, String orderBy, boolean ascending) {
+        return wsHelper.adminGet("/projects/${projectId}/skills/imported?limit=${limit}&page=${page}&orderBy=${orderBy}&ascending=${ascending}")
+    }
+
+    def getExportedSkillStats(String projectId, String skillId) {
+        return wsHelper.adminGet("/projects/${projectId}/skills/${skillId}/exported/stats")
+    }
+
+    def getExportedSkills(String projectId, int limit, int page, String orderBy, boolean ascending){
+        return wsHelper.adminGet("/projects/${projectId}/skills/exported?limit=${limit}&page=${page}&orderBy=${orderBy}&ascending=${ascending}")
+    }
+
+    def getCatalogSkills(String projectId, int limit, int page, String orderBy="exportedOn", boolean ascending=true, String projectNameSearch="", String subjectNameSearch="", String skillNameSearch=""){
+        return wsHelper.adminGet("/projects/${projectId}/skills/catalog?" +
+                "limit=${limit}&page=${page}&orderBy=${orderBy}&ascending=${ascending}" +
+                "&projectNameSearch=${projectNameSearch}" +
+                "&subjectNameSearch=${subjectNameSearch}" +
+                "&skillNameSearch=${skillNameSearch}")
+    }
+
+    /**
+     *
+     * @param importIntoProjectId
+     * @param importIntoSubjectId
+     * @param catalogSkills - List of Maps with projectId and skillId attributes representing skills shared to the catalog
+     */
+    def bulkImportSkillsFromCatalog(String importIntoProjectId, String importIntoSubjectId, List<Map> catalogSkills) {
+        return wsHelper.adminPost("/projects/${importIntoProjectId}/subjects/${importIntoSubjectId}/import", catalogSkills)
+    }
+
+    def importSkillFromCatalog(String importIntoProjectId, String importIntoSubjectId, String catalogSkillProjectId, String catalogSkillSkillId) {
+        return wsHelper.adminPost("/projects/${importIntoProjectId}/subjects/${importIntoSubjectId}/import/${catalogSkillProjectId}/${catalogSkillSkillId}")
+    }
+
+    def bulkExportSkillsToCatalog(String projectId, List<String> skillIds) {
+        return wsHelper.adminPost("/projects/${projectId}/skills/export", skillIds)
+    }
+
+    def exportSkillToCatalog(String projectId, String skillId) {
+        return wsHelper.adminPost("/projects/${projectId}/skills/${skillId}/export", [:])
+    }
+
+    def removeSkillFromCatalog(String projectId, String skillId) {
+        return wsHelper.adminDelete("/projects/${projectId}/skills/${skillId}/export")
+    }
+
     private String getProjectUrl(String project) {
         return "/projects/${project}".toString()
     }
