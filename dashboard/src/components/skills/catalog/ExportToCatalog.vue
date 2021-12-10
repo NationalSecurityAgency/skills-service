@@ -33,19 +33,20 @@ limitations under the License.
         <span class="font-italic"><i class="fas fa-exclamation-triangle text-warning" /> Note:</span> The are already <b-badge variant="info">{{ numAlreadyExported }}</b-badge> skill(s) in the Skill Catalog from the provided selection.
       </p>
 
-      <hr/>
-      <div class="h6">Visibility:
-        <b-form-checkbox v-model="visibilityToAllProjects" @change="onVisibilityToAllProjects" class="mt-2 d-inline"
-                         data-cy="shareWithAllProjectsCheckbox">
-          <small>Share With All Projects </small>
-        </b-form-checkbox>
-      </div>
-      <project-selector :project-id="$route.params.projectId" :selected="selectedProject"
-                        v-on:selected="onSelectedProject"
-                        v-on:unselected="onUnSelectedProject"
-                        :only-single-selected-value="true"
-                        :disabled="visibilityToAllProjects">
-      </project-selector>
+<!-- Keeping this code for the follow-on ticket-->
+<!--      <hr/>-->
+<!--      <div class="h6">Visibility:-->
+<!--        <b-form-checkbox v-model="visibilityToAllProjects" @change="onVisibilityToAllProjects" class="mt-2 d-inline"-->
+<!--                         data-cy="shareWithAllProjectsCheckbox">-->
+<!--          <small>Share With All Projects </small>-->
+<!--        </b-form-checkbox>-->
+<!--      </div>-->
+<!--      <project-selector :project-id="$route.params.projectId" :selected="selectedProject"-->
+<!--                        v-on:selected="onSelectedProject"-->
+<!--                        v-on:unselected="onUnSelectedProject"-->
+<!--                        :only-single-selected-value="true"-->
+<!--                        :disabled="visibilityToAllProjects">-->
+<!--      </project-selector>-->
     </b-overlay>
 
     <p v-if="state.exported">
@@ -75,12 +76,10 @@ limitations under the License.
 </template>
 
 <script>
-  import ProjectSelector from '../crossProjects/ProjectSelector';
   import CatalogService from './CatalogService';
 
   export default {
     name: 'ExportToCatalog',
-    components: { ProjectSelector },
     props: {
       skills: Array,
       value: {
