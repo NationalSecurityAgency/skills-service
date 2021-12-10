@@ -493,6 +493,11 @@ class AdminController {
             propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.descriptionMaxLength, "Skill Description", skillRequest.description)
             skillRequest.description = InputSanitizer.sanitize(skillRequest.description)
             skillRequest.helpUrl = InputSanitizer.sanitizeUrl(skillRequest.helpUrl)
+
+            // subject skill are always enabled; don't trust the client and override enabled
+            // alternative approach was to validate that "true" is provided but that was/is a very intrusive change;
+            // we may reconsider in the future if we deiced to support enable/disabled for skills
+            skillRequest.enabled = "true"
         }
 
         skillsAdminService.saveSkill(skillId, skillRequest, true, groupId)
