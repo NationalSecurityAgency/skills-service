@@ -16,7 +16,7 @@ limitations under the License.
 <template>
   <b-dropdown right variant="link" id="helpMenu">
     <template slot="button-content">
-      <i class="far fa-question-circle" style="font-size: 1.55rem" aria-hidden="true"></i>
+      <i class="far fa-question-circle" style="font-size: 1.55rem" aria-hidden="true" data-cy="helpButton"></i>
       <span class="sr-only">help menu</span>
     </template>
     <b-dropdown-item :href="officialGuide" target="_blank" style="min-width: 12.5rem;">
@@ -31,6 +31,14 @@ limitations under the License.
       </b-dropdown-item>
       <b-dropdown-item :href="integrationGuideUrl" target="_blank">
         <span class="text-gray-700"> <i class="fas fa-hands-helping skills-color-integrationDocs" aria-hidden="true"></i>Integration</span>
+        <span class="float-right" aria-hidden="true"><i class="fas fa-external-link-alt text-secondary"></i></span>
+      </b-dropdown-item>
+    </b-dropdown-group>
+    <b-dropdown-group v-if="supportLinksProps && supportLinksProps.length > 0" id="support-group" header="Support">
+      <b-dropdown-item v-for="supportLink in supportLinksProps" :key="supportLink.label" :href="supportLink.link"
+                       :data-cy="`helpButtonSupportLinkLabel_${supportLink.label}`"
+                       target="_blank">
+        <span class="text-gray-700"> <i class="text-primary" :class="supportLink.icon" aria-hidden="true"></i>{{ supportLink.label }}</span>
         <span class="float-right" aria-hidden="true"><i class="fas fa-external-link-alt text-secondary"></i></span>
       </b-dropdown-item>
     </b-dropdown-group>
@@ -49,6 +57,17 @@ limitations under the License.
       },
       integrationGuideUrl() {
         return `${this.$store.getters.config.docsHost}/skills-client/`;
+      },
+      supportLinksProps() {
+        const configs = this.$store.getters.config;
+        const keys = [...new Set(
+          Object.keys(configs).filter((conf) => conf.startsWith('supportLink')).map((filteredConf) => filteredConf.substr(0, 12)),
+        )];
+        return keys.map((key) => ({
+          link: configs[key],
+          label: configs[`${key}Label`],
+          icon: configs[`${key}Icon`],
+        }));
       },
     },
   };

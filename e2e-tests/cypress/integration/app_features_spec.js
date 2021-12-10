@@ -92,4 +92,35 @@ describe('App Features Tests', () => {
         });*/
     });
 
+    it('show support and contact information in the help dropdown', () => {
+       cy.intercept('GET', '/public/config', (req) => {
+            req.reply({
+                body: {
+                    supportLink1: 'mailto:skilltree@someemail.com',
+                    supportLink1Label: 'Email Us',
+                    supportLink1Icon: 'fas fa-envelope-open-text',
+                    supportLink2: 'https://skilltreesupport.com',
+                    supportLink2Label: 'Support Center',
+                    supportLink2Icon: 'fas fa-ambulance',
+                },
+            });
+       }).as('getConfig');
+
+       cy.visit('/administrator');
+       cy.wait('@getConfig')
+       cy.get('[data-cy="helpButton"]').click();
+
+       // validate help button
+       cy.get('[data-cy="helpButtonSupportLinkLabel_Email Us"]').contains('Email Us');
+       cy.get('[data-cy="helpButtonSupportLinkLabel_Email Us"]').should('have.attr', 'href', 'mailto:skilltree@someemail.com')
+       cy.get('[data-cy="helpButtonSupportLinkLabel_Support Center"]').contains('Support Center');
+        cy.get('[data-cy="helpButtonSupportLinkLabel_Support Center"]').should('have.attr', 'href', 'https://skilltreesupport.com')
+
+       // validate footer
+       cy.get('[data-cy="dashboardFooter"] [data-cy="supportLink-Email Us"]').contains('Email Us')
+       cy.get('[data-cy="dashboardFooter"] [data-cy="supportLink-Email Us"]').should('have.attr', 'href', 'mailto:skilltree@someemail.com')
+       cy.get('[data-cy="dashboardFooter"] [data-cy="supportLink-Support Center"]').contains('Support Center');
+       cy.get('[data-cy="dashboardFooter"] [data-cy="supportLink-Support Center"]').should('have.attr', 'href', 'https://skilltreesupport.com')
+    });
+
 })

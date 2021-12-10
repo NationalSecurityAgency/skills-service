@@ -15,15 +15,32 @@ limitations under the License.
 */
 <template>
 <footer class="bg-primary page-footer font-small text-white-50 p-3 px-4 border-top border-info">
-  <div class="row">
+  <div class="row" data-cy="dashboardFooter">
     <div class="col-sm" role="presentation">
-      <span class="fa-stack">
-        <i class="fas fa-angle-up fa-stack-1x first"></i>
-        <i class="fas fa-angle-up fa-stack-1x second"></i>
-        <i class="fas fa-angle-up fa-stack-1x third"></i>
-        <i class="fas fa-angle-up fa-stack-1x fourth"></i>
-      </span>
-      <span class="small footer-text">SkillTree Dashboard</span>
+      <div class="row no-gutters">
+        <div class="col-auto">
+          <div class="fa-stack">
+            <i class="fas fa-angle-up fa-stack-1x first"></i>
+            <i class="fas fa-angle-up fa-stack-1x second"></i>
+            <i class="fas fa-angle-up fa-stack-1x third"></i>
+            <i class="fas fa-angle-up fa-stack-1x fourth"></i>
+          </div>
+        </div>
+        <div class="col">
+          <div class="small footer-text">
+            <div class="">
+              SkillTree Dashboard
+            </div>
+            <div v-if="supportLinksProps && supportLinksProps.length > 0">
+              <span v-for="(supportLink, index) in supportLinksProps" :key="supportLink.label">
+                <a :href="supportLink.link" class="footer-text" :data-cy="`supportLink-${supportLink.label}`"><u><i :class="supportLink.icon" class="mr-1"/>{{ supportLink.label }}</u></a>
+                <span v-if="index < supportLinksProps.length - 1" class="mx-1">|</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
     <div class="col-sm text-right">
       <span class="small mr-2 footer-text" :title="skillTreeVersionTitle">v{{ $store.getters.config.dashboardVersion }}</span>
@@ -40,6 +57,17 @@ limitations under the License.
       skillTreeVersionTitle() {
         const dateString = window.dayjs(this.$store.getters.config.artifactBuildTimestamp).format('llll [(]Z[ from UTC)]');
         return `Build Date: ${dateString}`;
+      },
+      supportLinksProps() {
+        const configs = this.$store.getters.config;
+        const keys = [...new Set(
+          Object.keys(configs).filter((conf) => conf.startsWith('supportLink')).map((filteredConf) => filteredConf.substr(0, 12)),
+        )];
+        return keys.map((key) => ({
+          link: configs[key],
+          label: configs[`${key}Label`],
+          icon: configs[`${key}Icon`],
+        }));
       },
     },
   };
@@ -62,7 +90,16 @@ limitations under the License.
   color: #e76f51ff;
 }
   .footer-text {
-    color: lightgrey;
+    color: lightgrey !important;
   }
+.no-gutters {
+    margin-right: 0;
+    margin-left: 0;
 
+  > .col,
+  > [class*="col-"] {
+    padding-right: 0;
+    padding-left: 0;
+  }
+}
 </style>
