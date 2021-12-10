@@ -113,6 +113,7 @@ class UserAttrsService {
         return  (userInfo.firstName && userAttrs.firstName != userInfo.firstName) ||
                 (userInfo.lastName && userAttrs.lastName != userInfo.lastName) ||
                 (userInfo.email && userAttrs.email != userInfo.email) ||
+                (userInfo.emailVerified && userAttrs.emailVerified != userInfo.emailVerified) ||
                 (userInfo.userDn && userAttrs.dn != userInfo.userDn) ||
                 (userInfo.nickname != null && userAttrs.nickname != (userInfo.nickname ?: "")) ||
                 (userInfo.usernameForDisplay && userAttrs.userIdForDisplay != userInfo.usernameForDisplay)
@@ -128,6 +129,7 @@ class UserAttrsService {
         userAttrs.firstName = userInfo.firstName ?: userAttrs.firstName
         userAttrs.lastName = userInfo.lastName ?: userAttrs.lastName
         userAttrs.email = userInfo.email ?: userAttrs.email
+        userAttrs.emailVerified = Boolean.valueOf(userInfo.emailVerified) ?: Boolean.FALSE.toString()
         userAttrs.dn = userInfo.userDn ?: userAttrs.dn
         userAttrs.nickname = (userInfo.nickname != null ? userInfo.nickname : userAttrs.nickname) ?: ""
         userAttrs.userIdForDisplay = userInfo.usernameForDisplay ?: userAttrs.userIdForDisplay

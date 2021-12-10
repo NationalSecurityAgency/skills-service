@@ -45,6 +45,10 @@ class SkillException extends RuntimeException {
         this(msg, projectId, NA)
     }
 
+    SkillException(String msg, ErrorCode errorCode) {
+        this(msg, NA, NA, errorCode)
+    }
+
     SkillException(String msg, String projectId, String skillId) {
         this(msg, projectId, skillId, ErrorCode.InternalError)
     }

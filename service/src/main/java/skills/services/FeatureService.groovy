@@ -17,8 +17,10 @@ package skills.services
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.thymeleaf.util.StringUtils
+import skills.auth.AuthMode
 import skills.controller.result.model.SettingsResult
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
@@ -34,8 +36,29 @@ class FeatureService {
     @Autowired
     EmailSettingsService emailSettingsService
 
+    @Value('${skills.authorization.authMode:#{T(skills.auth.AuthMode).DEFAULT_AUTH_MODE}}')
+    AuthMode authMode
+
+    @Value('#{"${skills.authorization.oAuthOnly:false}"}')
+    Boolean oAuthOnly
+
+    @Value('#{"${skills.authorization.verifyEmailAddresses:false}"}')
+    Boolean verifyEmailAddresses
+
     boolean isPasswordResetFeatureEnabled() {
         return isEmailServiceFeatureEnabled('Password Reset')
+    }
+
+    boolean isEmailVerificationFeatureEnabled() {
+        if (!verifyEmailAddresses) {
+            return false;
+        } else {
+            if (authMode != AuthMode.FORM || oAuthOnly) {
+                log.warn('Email Verification is only available in when username/password authentication is enabled')
+                return false
+            }
+            return isEmailServiceFeatureEnabled('Email Verification')
+        }
     }
 
     boolean isEmailServiceFeatureEnabled(String featureName = 'Email Service') {

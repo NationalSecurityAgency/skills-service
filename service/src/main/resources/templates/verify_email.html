@@ -24,8 +24,8 @@ limitations under the License.
 <body>
 <div th:remove="tag" th:utext="${htmlHeader}" th:if= "${htmlHeader != null}">[[${htmlHeader}]]</div>
 <p>Hi [[${recipientName}]],</p>
-<p>You have requested a password reset. Please use the link below to reset your password. The link will be valid for [[${validTime}]].</p>
-<p><a th:href="@{${publicUrl}+'reset-password/'+${token}}">Reset Password</a></p>
+<p>We're happy you created a SkillTree account! Please use the link below to confirm your email address so you can start exploring SkillTree. The link will be valid for [[${validTime}]].</p>
+<p><a th:href="@{${publicUrl}+'verify-email/'+${token}+'/'+${email}}">Confirm my email address</a></p>
 <p>Regards,</p>
 <p>
     <em>[[${senderName}]] at SkillTree</em> <br />

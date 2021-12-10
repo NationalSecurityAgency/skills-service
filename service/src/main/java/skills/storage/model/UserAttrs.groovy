@@ -44,4 +44,6 @@ class UserAttrs {
 
     @Temporal(TemporalType.TIMESTAMP)
     Date userTagsLastUpdated
+
+    String emailVerified = 'false'
 }

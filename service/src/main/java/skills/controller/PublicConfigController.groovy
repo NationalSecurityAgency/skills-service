@@ -26,6 +26,7 @@ import skills.auth.AuthMode
 import skills.controller.result.model.SettingsResult
 import skills.profile.EnableCallStackProf
 import skills.services.AccessSettingsStorageService
+import skills.services.FeatureService
 import skills.services.SystemSettingsService
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
@@ -61,6 +62,9 @@ class PublicConfigController {
     SettingsService settingsService
 
     @Autowired
+    FeatureService featureService
+
+    @Autowired
     private ClientRegistrationRepository clientRegistrationRepository;
 
     @RequestMapping(value = "/config", method = RequestMethod.GET, produces = "application/json")
@@ -70,6 +74,7 @@ class PublicConfigController {
         res["authMode"] = authMode.name()
         res["needToBootstrap"] = !accessSettingsStorageService.rootAdminExists()
         res["oAuthOnly"] = authMode == AuthMode.FORM && oAuthOnly
+        res["verifyEmailAddresses"] = featureService.isEmailVerificationFeatureEnabled()
         res["expirationGracePeriod"] = expirationGracePeriod
         res["expireUnusedProjectsOlderThan"] = expireUnusedProjectsOlderThan
         List<SettingsResult> customizationSettings = settingsService.getGlobalSettingsByGroup(SystemSettingsService.CUSTOMIZATION)
