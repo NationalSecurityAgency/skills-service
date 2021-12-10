@@ -552,6 +552,7 @@ class SkillsAdminService {
     private SkillDefRes convertToSkillDefRes(SkillDefWithExtra skillDef) {
         SkillDefRes res = new SkillDefRes()
         Props.copy(skillDef, res)
+        res.enabled = skillDef.enabled == "true" ? true : false
         res.description = InputSanitizer.unsanitizeForMarkdown(res.description)
         res.helpUrl = InputSanitizer.unsanitizeUrl(res.helpUrl)
         if (skillDef.type == SkillDef.ContainerType.Skill) {

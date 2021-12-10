@@ -1429,4 +1429,10 @@
         <addNotNullConstraint columnDataType="varchar(255)" columnName="enabled" tableName="skill_definition"/>
     </changeSet>
 
+    <changeSet id="17" author="skills team" context="migration17">
+        <sql>
+            update skill_definition set enabled = 'true' where enabled = 'false' and type = 'Skill' and group_id is null;
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
