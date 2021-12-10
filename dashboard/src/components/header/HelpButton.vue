@@ -60,9 +60,8 @@ limitations under the License.
       },
       supportLinksProps() {
         const configs = this.$store.getters.config;
-        const keys = [...new Set(
-          Object.keys(configs).filter((conf) => conf.startsWith('supportLink')).map((filteredConf) => filteredConf.substr(0, 12)),
-        )];
+        const dupKeys = Object.keys(configs).filter((conf) => conf.startsWith('supportLink')).map((filteredConf) => filteredConf.substr(0, 12));
+        const keys = dupKeys.filter((v, i, a) => a.indexOf(v) === i);
         return keys.map((key) => ({
           link: configs[key],
           label: configs[`${key}Label`],
