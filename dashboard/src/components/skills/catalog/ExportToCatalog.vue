@@ -140,15 +140,6 @@ limitations under the License.
             this.state.exporting = false;
           });
       },
-      onVisibilityToAllProjects() {
-
-      },
-      onSelectedProject() {
-
-      },
-      onUnSelectedProject() {
-
-      },
     },
   };
 </script>

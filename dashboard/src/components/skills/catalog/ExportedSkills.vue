@@ -73,12 +73,6 @@ limitations under the License.
             </div>
             <div class="col-auto ml-auto mr-0">
               <b-button-group size="sm" class="ml-1">
-                <b-button v-if="!data.item.isCatalogSkill" @click="editSkill(data.item)"
-                          variant="outline-primary" :data-cy="`editSkillButton_${data.item.skillId}`"
-                          :aria-label="'edit Skill '+data.item.name" :ref="`edit_${data.item.skillId}`"
-                          title="Edit Skill" b-tooltip.hover="Edit Skill">
-                  <i class="fas fa-edit" aria-hidden="true"/>
-                </b-button>
                 <b-button :id="`deleteSkillButton_${data.item.skillId}`"
                           @click="removeExported(data.item)" variant="outline-primary"
                           :data-cy="`deleteSkillButton_${data.item.skillId}`"
@@ -104,17 +98,8 @@ limitations under the License.
     </b-card>
 
     <removal-validation v-if="removalValidation.show" v-model="removalValidation.show">
-      <p>
-        This will <span class="text-primary font-weight-bold">PERMANENTLY</span> remove skill <span class="text-primary font-weight-bold">[{{ removalValidation.skillToRemove.skillId }}]</span> from the catalog.
-      This skill is currently imported by <b-badge variant="info">2</b-badge> projects.
-      </p>
-
-      <p>
-        This action <b>CANNOT</b> be undone and will permanently remove the skill from those projects including their achievements. Please proceed with care.
-      </p>
+      <exported-skill-deletion-warning :skill-id="removalValidation.skillToRemove.skillId" />
     </removal-validation>
-
-    <export-to-catalog v-if="edit.show" v-model="edit.show" />
   </div>
 </template>
 
@@ -124,12 +109,13 @@ limitations under the License.
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import DateCell from '@/components/utils/table/DateCell';
   import RemovalValidation from '@/components/utils/modal/RemovalValidation';
-  import ExportToCatalog from '@/components/skills/catalog/ExportToCatalog';
+  import ExportedSkillDeletionWarning
+    from '@/components/skills/catalog/ExportedSkillDeletionWarning';
 
   export default {
     name: 'ExportedSkills',
     components: {
-      ExportToCatalog,
+      ExportedSkillDeletionWarning,
       RemovalValidation,
       SkillsBTable,
       SkillsSpinner,
@@ -143,10 +129,6 @@ limitations under the License.
         removalValidation: {
           show: false,
           skillToRemove: {},
-        },
-        edit: {
-          show: false,
-          skillToEdit: {},
         },
         table: {
           options: {
@@ -216,8 +198,9 @@ limitations under the License.
           orderBy: this.table.options.sortBy,
         };
         this.loading = true;
-        SkillsService.getSkillsExportedToCatalog(this.projectId, pageParams).then((data) => {
-          this.exportedSkills = data.map((skill) => ({ projectId: this.$route.params.projectId, ...skill }));
+        SkillsService.getSkillsExportedToCatalog(this.projectId, pageParams).then((res) => {
+          this.exportedSkills = res.data.map((skill) => ({ projectId: this.$route.params.projectId, ...skill }));
+          this.table.options.pagination.totalRows = res.totalCount;
         }).finally(() => {
           this.loading = false;
           this.table.options.busy = false;
@@ -226,10 +209,6 @@ limitations under the License.
       removeExported(skill) {
         this.removalValidation.skillToRemove = skill;
         this.removalValidation.show = true;
-      },
-      editSkill(skill) {
-        this.edit.skillToRemove = skill;
-        this.edit.show = true;
       },
     },
   };

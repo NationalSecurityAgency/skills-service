@@ -36,4 +36,9 @@ export default {
     return axios.post(url, listOfProjectAndSkillIds)
       .then((response) => response.data);
   },
+  getExportedStats(projectId, skillId) {
+    const url = `/admin/projects/${projectId}/skills/${skillId}/exported/stats`;
+    return axios.get(url)
+      .then((response) => response.data);
+  },
 };
