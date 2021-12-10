@@ -33,7 +33,7 @@ limitations under the License.
             </div>
             <div v-if="supportLinksProps && supportLinksProps.length > 0">
               <span v-for="(supportLink, index) in supportLinksProps" :key="supportLink.label">
-                <a :href="supportLink.link" class="footer-text" :data-cy="`supportLink-${supportLink.label}`"><u><i :class="supportLink.icon" class="mr-1"/>{{ supportLink.label }}</u></a>
+                <a :href="supportLink.link" class="footer-text" :data-cy="`supportLink-${supportLink.label}`" target="_blank"><u><i :class="supportLink.icon" class="mr-1"/>{{ supportLink.label }}</u></a>
                 <span v-if="index < supportLinksProps.length - 1" class="mx-1">|</span>
               </span>
             </div>
