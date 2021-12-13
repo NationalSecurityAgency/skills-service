@@ -35,10 +35,7 @@ limitations under the License.
         <div class="h6 mb-0 font-weight-bold">Exported to Catalog</div>
       </template>
 
-      <skills-spinner :is-loading="loading" />
-
-      <skills-b-table v-if="!loading"
-                      :options="table.options"
+      <skills-b-table :options="table.options"
                       :items="exportedSkills"
                       data-cy="exportedSkills"
                       @page-changed="pageChanged"
@@ -97,7 +94,7 @@ limitations under the License.
       </skills-b-table>
     </b-card>
 
-    <removal-validation v-if="removalValidation.show" v-model="removalValidation.show">
+    <removal-validation v-if="removalValidation.show" v-model="removalValidation.show" @do-remove="doRemoveExportedSkill">
       <exported-skill-deletion-warning :skill-id="removalValidation.skillToRemove.skillId" />
     </removal-validation>
   </div>
@@ -106,11 +103,11 @@ limitations under the License.
 <script>
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import SkillsService from '@/components/skills/SkillsService';
-  import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import DateCell from '@/components/utils/table/DateCell';
   import RemovalValidation from '@/components/utils/modal/RemovalValidation';
   import ExportedSkillDeletionWarning
     from '@/components/skills/catalog/ExportedSkillDeletionWarning';
+  import CatalogService from '@/components/skills/catalog/CatalogService';
 
   export default {
     name: 'ExportedSkills',
@@ -118,13 +115,11 @@ limitations under the License.
       ExportedSkillDeletionWarning,
       RemovalValidation,
       SkillsBTable,
-      SkillsSpinner,
       DateCell,
     },
     data() {
       return {
         projectId: this.$route.params.projectId,
-        loading: true,
         exportedSkills: [],
         removalValidation: {
           show: false,
@@ -191,24 +186,30 @@ limitations under the License.
         this.loadExported();
       },
       loadExported() {
+        this.table.options.busy = true;
         const pageParams = {
           limit: this.table.options.pagination.pageSize,
           ascending: !this.table.options.sortDesc,
           page: this.table.options.pagination.currentPage,
           orderBy: this.table.options.sortBy,
         };
-        this.loading = true;
         SkillsService.getSkillsExportedToCatalog(this.projectId, pageParams).then((res) => {
           this.exportedSkills = res.data.map((skill) => ({ projectId: this.$route.params.projectId, ...skill }));
           this.table.options.pagination.totalRows = res.totalCount;
         }).finally(() => {
-          this.loading = false;
           this.table.options.busy = false;
         });
       },
       removeExported(skill) {
         this.removalValidation.skillToRemove = skill;
         this.removalValidation.show = true;
+      },
+      doRemoveExportedSkill() {
+        this.table.options.busy = true;
+        CatalogService.removeExportedSkill(this.removalValidation.skillToRemove.projectId, this.removalValidation.skillToRemove.skillId)
+          .then(() => {
+            this.loadExported();
+          });
       },
     },
   };

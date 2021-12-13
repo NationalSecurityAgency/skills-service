@@ -272,6 +272,17 @@ limitations under the License.
                       @group-saved="skillCreatedOrUpdated" @hidden="handleFocus"/>
     <export-to-catalog v-if="exportToCatalogInfo.show" v-model="exportToCatalogInfo.show" :skills="exportToCatalogInfo.skills"
                        @exported="handleSkillsExportedToCatalog" @hidden="changeSelectionForAll(false)"/>
+    <removal-validation v-if="deleteSkillInfo.show" v-model="deleteSkillInfo.show" @do-remove="doDeleteSkill">
+      <div v-if="deleteSkillInfo.skill.isSkillType">
+        Delete Action <b class="text-danger">CANNOT</b> be undone and permanently removes users' performed skills and any dependency associations.
+      </div>
+      <div v-if="deleteSkillInfo.skill.isGroupType">
+        Delete Action <b class="text-danger">CANNOT</b> be undone and will permanently remove all of the group's skills. All the associated users' performed skills and any dependency associations will also be removed.
+      </div>
+      <div class="alert alert-info mt-3" v-if="deleteSkillInfo.skill.sharedToCatalog">
+      <exported-skill-deletion-warning :skill-id="deleteSkillInfo.skill.skillId" />
+      </div>
+    </removal-validation>
   </div>
 </template>
 
@@ -291,6 +302,9 @@ limitations under the License.
   import ChildRowSkillGroupDisplay from './skillsGroup/ChildRowSkillGroupDisplay';
   import EditSkillGroup from './skillsGroup/EditSkillGroup';
   import ExportToCatalog from '@/components/skills/catalog/ExportToCatalog';
+  import RemovalValidation from '@/components/utils/modal/RemovalValidation';
+  import ExportedSkillDeletionWarning
+    from '@/components/skills/catalog/ExportedSkillDeletionWarning';
 
   export default {
     name: 'SkillsTable',
@@ -331,6 +345,8 @@ limitations under the License.
       },
     },
     components: {
+      ExportedSkillDeletionWarning,
+      RemovalValidation,
       ExportToCatalog,
       EditSkillGroup,
       ChildRowSkillGroupDisplay,
@@ -358,6 +374,10 @@ limitations under the License.
         exportToCatalogInfo: {
           show: false,
           skills: [],
+        },
+        deleteSkillInfo: {
+          show: false,
+          skill: {},
         },
         skillsOriginal: [],
         skills: [],
@@ -646,18 +666,21 @@ limitations under the License.
             if (belongsToGlobalBadge) {
               this.msgOk(`Cannot delete Skill Id: [${row.skillId}].  This skill belongs to one or more global badges. Please contact a Supervisor to remove this dependency.`, 'Unable to delete');
             } else {
-              const msg = row.isGroupType ? 'Delete Action CANNOT be undone and will permanently remove all of the group\'s skills. All the associated users\' performed skills and any dependency associations will also be removed.'
-                : 'Delete Action CANNOT be undone and permanently removes users\' performed skills and any dependency associations.';
-              this.msgConfirm(msg, `DELETE [${row.skillId}]?`)
-                .then((res) => {
-                  if (res) {
-                    this.doDeleteSkill(row);
-                  }
-                });
+              this.deleteSkillInfo.skill = row;
+              this.deleteSkillInfo.show = true;
+              // const msg = row.isGroupType ? 'Delete Action CANNOT be undone and will permanently remove all of the group\'s skills. All the associated users\' performed skills and any dependency associations will also be removed.'
+              //   : 'Delete Action CANNOT be undone and permanently removes users\' performed skills and any dependency associations.';
+              // this.msgConfirm(msg, `DELETE [${row.skillId}]?`)
+              //   .then((res) => {
+              //     if (res) {
+              //       this.doDeleteSkill(row);
+              //     }
+              //   });
             }
           });
       },
-      doDeleteSkill(skill) {
+      doDeleteSkill() {
+        const { skill } = this.deleteSkillInfo;
         if (this.skillsOriginal.length === 1) {
           this.isLoading = true;
         } else {

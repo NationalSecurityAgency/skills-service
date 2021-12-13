@@ -66,7 +66,8 @@
         this.$emit('hidden', { ...e });
       },
       removeAction() {
-        this.$emit('validated');
+        this.show = false;
+        this.$emit('do-remove');
       },
     },
   };

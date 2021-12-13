@@ -41,4 +41,7 @@ export default {
     return axios.get(url)
       .then((response) => response.data);
   },
+  removeExportedSkill(projectId, skillId) {
+    return axios.delete(`/admin/projects/${projectId}/skills/${skillId}/export`).then((response) => response.data);
+  },
 };
