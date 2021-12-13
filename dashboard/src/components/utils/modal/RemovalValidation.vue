@@ -6,7 +6,7 @@
            @hide="publishHidden"
            aria-label="Removal Safety Check">
     <div class="px-2">
-      <div>
+      <div data-cy="removalSafetyCheckMsg">
         <slot />
       </div>
 
@@ -14,16 +14,16 @@
 
       <div>
         <p>Please type <span class="font-italic font-weight-bold text-primary">{{ validationText }}</span> to permanently remove the record.</p>
-        <b-form-input v-model="currentValidationText"></b-form-input>
+        <b-form-input v-model="currentValidationText" data-cy="currentValidationText"></b-form-input>
       </div>
     </div>
 
     <div slot="modal-footer" class="w-100">
       <b-button variant="danger" size="sm" class="float-right ml-2"
-                @click="removeAction" data-cy="approveBtn" :disabled="removeDisabled"><i
+                @click="removeAction" data-cy="removeButton" :disabled="removeDisabled"><i
         class="fas fa-trash"></i> Yes, Do Remove!
       </b-button>
-      <b-button variant="secondary" size="sm" class="float-right" @click="publishHidden" data-cy="closeSkillButton">
+      <b-button variant="secondary" size="sm" class="float-right" @click="publishHidden" data-cy="closeRemovalSafetyCheck">
         <i class="fas fa-times"></i> Cancel
       </b-button>
     </div>

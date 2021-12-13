@@ -169,6 +169,13 @@ Cypress.Commands.add("exportSkillToCatalog", (projNum = 1, subjNum = 1, skillNum
     cy.request('POST', url);
 });
 
+Cypress.Commands.add("importSkillFromCatalog", (projNum = 2, subjNum = 1, fromProjNum = 1, fromSkillNum = 1) => {
+    const url = `/admin/projects/proj${projNum}/subjects/subj${subjNum}/import`;
+    cy.request('POST', url, [{ projectId: `proj${fromProjNum}`, skillId: `skill${fromSkillNum}` }]);
+});
+
+
+
 const constructSkills = (projNum = 1, subjNum = 1, skillNum = 1, overrideProps = {}) => {
     const skillId = `skill${skillNum}${subjNum > 1 ? `Subj${subjNum}` : ''}`;
     const skillName = `Very Great Skill ${skillNum}${subjNum > 1 ? ` Subj${subjNum}` : ''}`;

@@ -87,6 +87,7 @@ limitations under the License.
                 <div class="h5 text-primary"><span v-if="data.item.nameHtml" v-html="data.item.nameHtml"></span><span v-else>{{ data.item.name }}</span></div>
               </div>
               <div v-if="data.item.isSkillType">
+                <i class="fas fa-book mr-1 text-success" v-if="data.item.isCatalogImportedSkills"/>
                 <b-form-checkbox v-if="!data.item.isCatalogImportedSkills"
                   :id="`${data.item.projectId}-${data.item.skillId}`"
                   v-model="data.item.selected"

@@ -37,7 +37,7 @@ limitations under the License.
 
       <skills-b-table :options="table.options"
                       :items="exportedSkills"
-                      data-cy="exportedSkills"
+                      data-cy="exportedSkillsTable"
                       @page-changed="pageChanged"
                       @page-size-changed="pageSizeChanged"
                       @sort-changed="sortTable">
@@ -194,8 +194,12 @@ limitations under the License.
           orderBy: this.table.options.sortBy,
         };
         SkillsService.getSkillsExportedToCatalog(this.projectId, pageParams).then((res) => {
-          this.exportedSkills = res.data.map((skill) => ({ projectId: this.$route.params.projectId, ...skill }));
-          this.table.options.pagination.totalRows = res.totalCount;
+          if (res.data) {
+            this.exportedSkills = res.data.map((skill) => ({ projectId: this.$route.params.projectId, ...skill }));
+            this.table.options.pagination.totalRows = res.totalCount;
+          } else {
+            this.table.options.pagination.totalRows = 0;
+          }
         }).finally(() => {
           this.table.options.busy = false;
         });

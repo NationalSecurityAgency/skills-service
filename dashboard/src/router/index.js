@@ -334,7 +334,7 @@ const router = new Router({
         name: 'SkillsCatalog',
         path: '/administrator/projects/:projectId/skills-catalog',
         component: SkillsCatalog,
-        meta: { requiresAuth: true, reportSkillId: 'VisitSkillsCatalog' },
+        meta: { requiresAuth: true },
       }, {
         name: 'ProjectAccess',
         path: 'access',
