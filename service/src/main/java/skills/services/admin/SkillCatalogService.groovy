@@ -231,6 +231,7 @@ class SkillCatalogService {
         copy.subjectId = subject.skillId
         copy.version = skillsAdminService.findLatestSkillVersion(projectIdTo)
         copy.numPerformToCompletion = numToCompletion
+        copy.selfReportingType = original.selfReportingType?.toString()
 
         skillsAdminService.saveSkill(copy.skillId, copy)
     }
