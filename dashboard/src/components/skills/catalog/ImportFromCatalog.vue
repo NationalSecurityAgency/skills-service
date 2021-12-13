@@ -24,7 +24,7 @@ limitations under the License.
     <skills-spinner :is-loading="loading"/>
 
     <no-content2 v-if="!loading && emptyCatalog" class="mt-4 mb-5"
-                 title="Catalog is Empty">
+                 title="Nothing Available for Import">
       When other projects export {{ importType }}s to the Catalog then they will be available here
       to be imported.
     </no-content2>
