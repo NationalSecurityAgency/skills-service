@@ -51,6 +51,8 @@ spring:
 #    show-sql: true
   liquibase:
     "change-log": "classpath:db/changelog/db.changelog-master.xml"
+  session:
+    store-type: none
 
 #  security:
 #    oauth2:
