@@ -35,15 +35,15 @@ limitations under the License.
             </ValidationProvider>
           </div>
           <div class="form-group">
-            <label class="label" for="resetTokenExpiration">* Password Reset Token Expiration <InlineHelp msg="How long password reset tokens remain valid before they expire"/></label>
-            <ValidationProvider rules="required|iso8601" name="Password Reset Token Expiration" v-slot="{ errors }" :debounce=500>
-              <input class="form-control" type="text" v-model="resetTokenExpiration" name="resetTokenExpiration"
-                     data-cy="resetTokenExpiration" aria-required="true"
-                      id="resetTokenExpiration"
+            <label class="label" for="tokenExpiration">* Token Expiration <InlineHelp msg="How long password reset and email confirmation tokens remain valid before they expire"/></label>
+            <ValidationProvider rules="required|iso8601" name="Token Expiration" v-slot="{ errors }" :debounce=500>
+              <input class="form-control" type="text" v-model="tokenExpiration" name="tokenExpiration"
+                     data-cy="tokenExpiration" aria-required="true"
+                      id="tokenExpiration"
                       :aria-invalid="errors && errors.length > 0"
-                      aria-errormessage="resetTokenExpirationError" aria-describedby="resetTokenExpirationError"/>
-              <small class="text-info" id="resetTokenExpirationFormat">supports ISO 8601 time duration format, e.g., 2H, 30M, 1H30M, 1M42S, etc</small>
-              <p class="text-danger" v-show="errors[0]" data-cy="resetTokenExpirationError" id="resetTokenExpirationError">{{errors[0]}}</p>
+                      aria-errormessage="tokenExpirationError" aria-describedby="tokenExpirationError"/>
+              <small class="text-info" id="tokenExpirationFormat">supports ISO 8601 time duration format, e.g., 2H, 30M, 1H30M, 1M42S, etc</small>
+              <p class="text-danger" v-show="errors[0]" data-cy="tokenExpirationError" id="tokenExpirationError">{{errors[0]}}</p>
             </ValidationProvider>
           </div>
           <div class="form-group">
@@ -126,7 +126,7 @@ limitations under the License.
     data() {
       return {
         publicUrl: '',
-        resetTokenExpiration: '2H',
+        tokenExpiration: '2H',
         fromEmail: 'no_reply@skilltree',
         isSaving: false,
         overallErrMsg: '',
@@ -151,14 +151,14 @@ limitations under the License.
               customFooter,
               userAgreement,
             } = this;
-            let { resetTokenExpiration } = this;
-            if (!resetTokenExpiration.toLowerCase().startsWith('pt')) {
-              resetTokenExpiration = `PT${resetTokenExpiration}`;
+            let { tokenExpiration } = this;
+            if (!tokenExpiration.toLowerCase().startsWith('pt')) {
+              tokenExpiration = `PT${tokenExpiration}`;
             }
 
             SettingsService.saveSystemSettings({
               publicUrl,
-              resetTokenExpiration,
+              tokenExpiration,
               fromEmail,
               customHeader,
               customFooter,
@@ -180,8 +180,8 @@ limitations under the License.
         SettingsService.loadSystemSettings().then((resp) => {
           if (resp) {
             this.publicUrl = resp.publicUrl;
-            if (resp.resetTokenExpiration) {
-              this.resetTokenExpiration = resp.resetTokenExpiration.replace('PT', '');
+            if (resp.tokenExpiration) {
+              this.tokenExpiration = resp.tokenExpiration.replace('PT', '');
             }
             if (this.fromEmail) {
               this.fromEmail = resp.fromEmail;

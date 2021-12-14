@@ -71,7 +71,6 @@ limitations under the License.
           this.loading = false;
           this.timer = this.countDown;
         }).catch((err) => {
-          console.log('Error, redirect if message contains expired with prop saying so', err);
           if (err && err.response && err.response.data && err.response.data.errorCode === 'UserTokenExpired') {
             // token has expired, route to RequestEmailVerification so the user can re-request a new one
             const { email } = this;
