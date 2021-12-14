@@ -47,8 +47,8 @@ class PasswordManagementService {
 
     public static final String DEFAULT_TOKEN_EXPIRATION = "PT2H"
 
-    static final String RESET_PW_TOKEN_TYPE = 'reset-password'
-    static final String VERIFY_EMAIL_TOKEN_TYPE = 'verify-email'
+    public static final String RESET_PW_TOKEN_TYPE = 'reset-password'
+    public static final String VERIFY_EMAIL_TOKEN_TYPE = 'verify-email'
 
     @Autowired
     PasswordResetTokenRepo tokenRepo
@@ -134,7 +134,7 @@ class PasswordManagementService {
         )
 
         if (!settingsResult) {
-            throw new SkillException("No public URL is configured for the system, unable to send password reset email")
+            throw new SkillException("No public URL is configured for the system, unable to send ${type} email")
         }
 
         String publicUrl = settingsResult.value

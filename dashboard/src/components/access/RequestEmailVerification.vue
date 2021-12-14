@@ -17,11 +17,11 @@ limitations under the License.
   <div class="container-fluid">
     <div class="row justify-content-center text-center">
     <div class="col col-md-8 col-lg-7 col-xl-4 mt-3" style="min-width: 20rem;">
-      <div class="mt-5">
+      <div class="mt-5" data-cy="confirmEmailTitle">
         <logo1 />
         <h3 class="mt-4 text-primary">Email Verification is Required!</h3>
       </div>
-      <div class="card text-left">
+      <div class="card text-left" data-cy="confirmEmailExplanation">
         <div class="card-body p-4">
           <div v-if="explanation">
             <p>{{explanation}}</p>

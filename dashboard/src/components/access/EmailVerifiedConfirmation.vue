@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <loading-container :is-loading="loading" class="container-fluid">
-    <div class="row justify-content-center text-center" data-cy="resetConfirmation">
+    <div class="row justify-content-center text-center" data-cy="emailConfirmation">
       <div class="col col-md-8 col-lg-7 col-xl-4 mt-3" style="min-width: 20rem;">
         <div class="mt-5">
           <logo1 />

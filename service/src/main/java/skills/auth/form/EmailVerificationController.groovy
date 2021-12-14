@@ -75,7 +75,7 @@ class EmailVerificationController {
     RequestResult verifyEmail(@RequestBody EmailVerification emailVerification) {
         UserToken token = passwordMangementService.loadToken(emailVerification.token)
         if (token?.getUser()?.getUserId() != emailVerification.email) {
-            throw new SkillException("Supplied email verification token is not for the specified user")
+            throw new SkillException("Supplied email verification token does not exist or is not for the specified user")
         }
 
         if (token.type != VERIFY_EMAIL_TOKEN_TYPE) {

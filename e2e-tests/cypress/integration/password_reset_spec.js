@@ -66,7 +66,7 @@ describe('Password Reset Tests', () => {
     cy.get('[data-cy=resetRequestConfirmation').should('exist');
     cy.wait(11*1000); //request rest page redirects to login after 30 seconds
     cy.get('[data-cy=login]').should('exist');
-    cy.getResetLink().then((resetLink) => {
+    cy.getLinkFromEmail().then((resetLink) => {
       cy.visit(resetLink);
       cy.get('[data-cy=resetPasswordSubmit]').should('exist');
       cy.get('[data-cy=resetPasswordEmail]').type('test@skills.org');
@@ -99,7 +99,7 @@ describe('Password Reset Tests', () => {
     cy.get('[data-cy=resetRequestConfirmation').should('exist');
     cy.wait(11*1000); //request rest page redirects to login after 30 seconds
     cy.get('[data-cy=login]').should('exist');
-    cy.getResetLink().then((resetLink) => {
+    cy.getLinkFromEmail().then((resetLink) => {
       cy.visit(resetLink);
       cy.get('[data-cy=resetPasswordSubmit]').should('exist');
       cy.get('[data-cy=resetPasswordEmail]').type('test2@skills.org');
@@ -123,7 +123,7 @@ describe('Password Reset Tests', () => {
     cy.get('[data-cy=resetRequestConfirmation').should('exist');
     cy.wait(11*1000); //request rest page redirects to login after 30 seconds
     cy.get('[data-cy=login]').should('exist');
-    cy.getResetLink().then((resetLink) => {
+    cy.getLinkFromEmail().then((resetLink) => {
       cy.visit(resetLink);
       cy.get('[data-cy=resetPasswordSubmit]').should('exist');
       cy.get('[data-cy=resetPasswordEmail]').type('test2@skills.org');
@@ -153,7 +153,7 @@ describe('Password Reset Tests', () => {
     cy.get('[data-cy=resetRequestConfirmation').should('exist');
     cy.get('[data-cy=loginPage]').click();
     cy.get('[data-cy=login]').should('exist');
-    cy.getResetLink().then((resetLink) => {
+    cy.getLinkFromEmail().then((resetLink) => {
       cy.visit(resetLink);
       cy.get('[data-cy=resetPasswordSubmit]').should('exist');
       cy.get('[data-cy=resetPasswordEmail]').type('test@skills.org');

@@ -103,6 +103,7 @@ class CreateAccountController {
         SkillsValidator.isTrue(!userAuthService.rootExists(), 'A root user already exists! Granting additional root privileges requires a root user to grant them!')
         String password = userInfo.password
         // initial root user does not require email verification, email settings need to be configured first
+        userInfo.emailVerified = true
         userInfo = createUser(userInfo)
         userAuthService.grantRoot(userInfo.username)
         userAuthService.autologin(userInfo, password)
