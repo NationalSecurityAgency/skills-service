@@ -1435,4 +1435,18 @@
         </sql>
     </changeSet>
 
+    <changeSet id="18" author="skills team" context="migration18">
+        <renameTable newTableName="user_token"
+                     oldTableName="password_reset_token"/>
+
+        <addColumn tableName="user_token">
+            <column name="type" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="user_attrs">
+            <column name="email_verified" type="varchar(255)" defaultValueBoolean="false"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

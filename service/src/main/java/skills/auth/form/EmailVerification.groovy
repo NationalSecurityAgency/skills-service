@@ -13,23 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.controller.exceptions
+package skills.auth.form
 
-enum ErrorCode {
-    InternalError,
-    FailedToAssignDependency,
-    InsufficientPointsToConvertLevels,
-    UserAlreadyExists,
-    ConstraintViolation,
-    BadParam,
-    AccessDenied,
-    UserNotFound,
-    SkillNotFound,
-    BadgeNotFound,
-    SubjectNotFound,
-    ProjectNotFound,
-    EmptyBadgeNotAllowed,
-    InsufficientProjectPoints,
-    InsufficientSubjectPoints,
-    UserTokenExpired,
+class EmailVerification {
+    String email
+    String token
 }

@@ -35,8 +35,8 @@ limitations under the License.
             </ValidationProvider>
           </div>
           <div class="form-group">
-            <label class="label" for="resetTokenExpiration">* Password Reset Token Expiration <InlineHelp msg="How long password reset tokens remain valid before they expire"/></label>
-            <ValidationProvider rules="required|iso8601" name="Password Reset Token Expiration" v-slot="{ errors }" :debounce=500>
+            <label class="label" for="resetTokenExpiration">* Token Expiration <InlineHelp msg="How long password reset and email confirmation tokens remain valid before they expire"/></label>
+            <ValidationProvider rules="required|iso8601" name="Token Expiration" v-slot="{ errors }" :debounce=500>
               <input class="form-control" type="text" v-model="resetTokenExpiration" name="resetTokenExpiration"
                      data-cy="resetTokenExpiration" aria-required="true"
                       id="resetTokenExpiration"

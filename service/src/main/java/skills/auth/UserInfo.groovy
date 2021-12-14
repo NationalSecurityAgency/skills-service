@@ -37,6 +37,7 @@ class UserInfo implements UserDetails {
     boolean credentialsNonExpired = true
     boolean enabled = true
     boolean proxied = false
+    boolean emailVerified = false
     String proxyingSystemId
     Map<String, Object> userTags = [:]
 }

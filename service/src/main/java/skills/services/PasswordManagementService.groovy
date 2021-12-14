@@ -20,12 +20,11 @@ import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.time.DurationFormatUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Conditional
-import org.springframework.security.access.method.P
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import org.thymeleaf.context.Context
-import org.thymeleaf.spring5.SpringTemplateEngine
 import skills.auth.SecurityMode
+import skills.auth.UserAuthService
 import skills.controller.exceptions.SkillException
 import skills.controller.result.model.SettingsResult
 import skills.notify.builders.Formatting
@@ -33,11 +32,10 @@ import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.settings.EmailSettingsService
 import skills.storage.model.UserAttrs
-import skills.storage.model.auth.PasswordResetToken
 import skills.storage.model.auth.User
+import skills.storage.model.auth.UserToken
 import skills.storage.repos.PasswordResetTokenRepo
 
-import javax.annotation.PostConstruct
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -45,12 +43,18 @@ import java.time.ZoneId
 @Slf4j
 @Component
 @Conditional(SecurityMode.FormAuth)
-class PasswordResetService {
+class PasswordManagementService {
 
     public static final String DEFAULT_TOKEN_EXPIRATION = "PT2H"
 
+    public static final String RESET_PW_TOKEN_TYPE = 'reset-password'
+    public static final String VERIFY_EMAIL_TOKEN_TYPE = 'verify-email'
+
     @Autowired
     PasswordResetTokenRepo tokenRepo
+
+    @Autowired
+    UserAuthService userAuthService
 
     @Autowired
     UserAttrsService attrsService
@@ -62,13 +66,31 @@ class PasswordResetService {
     SettingsService settingsService
 
     @Transactional(readOnly = true)
-    PasswordResetToken loadToken(String token) {
+    UserToken loadToken(String token) {
         return tokenRepo.findByToken(token)
     }
 
     @Transactional()
-    void createTokenAndNotifyUser(User user) {
-        PasswordResetToken token = tokenRepo.findByUserId(user.userId)
+    void createResetPasswordTokenAndNotifyUser(User user) {
+        createTokenAndNotifyUser(user, "SkillTree Password Reset", "password_reset.html", RESET_PW_TOKEN_TYPE)
+    }
+
+    @Transactional()
+    void createEmailVerificationTokenAndNotifyUser(String userId) {
+        log.info("requesting email verification for [${userId}]")
+        User user = userAuthService.getUserRepository().findByUserId(userId)
+        if (!user) {
+            log.error("no user found for email verification")
+            throw new SkillException("No user found for id [${userId}]")
+        }
+        // remove any existing tokens and then issue a new one
+        deleteTokensForUser(user.id, VERIFY_EMAIL_TOKEN_TYPE)
+        createTokenAndNotifyUser(user, "Please verify your email address", "verify_email.html", VERIFY_EMAIL_TOKEN_TYPE)
+    }
+
+    @Transactional()
+    void createTokenAndNotifyUser(User user, String subject, String template, String type) {
+        UserToken token = tokenRepo.findByUserId(user.userId)
 
         SettingsResult expirationSetting = settingsService.getGlobalSetting(Settings.GLOBAL_RESET_TOKEN_EXPIRATION.settingName)
         Duration expirationDuration = null
@@ -83,8 +105,9 @@ class PasswordResetService {
         expires = expirationDuration.addTo(expires)
 
         if (!token) {
-            token = new PasswordResetToken()
+            token = new UserToken()
             token.user = user
+            token.type = type
         }
 
         token.setToken(UUID.randomUUID().toString())
@@ -111,7 +134,7 @@ class PasswordResetService {
         )
 
         if (!settingsResult) {
-            throw new SkillException("No public URL is configured for the system, unable to send password reset email")
+            throw new SkillException("No public URL is configured for the system, unable to send ${type} email")
         }
 
         String publicUrl = settingsResult.value
@@ -123,14 +146,15 @@ class PasswordResetService {
 
         Context templateContext = new Context()
         templateContext.setVariable("recipientName", name)
+        templateContext.setVariable("email", email)
         templateContext.setVariable("senderName", "The team")
         templateContext.setVariable("validTime", validFor)
         templateContext.setVariable("publicUrl", url)
-        templateContext.setVariable("resetToken", token.token)
+        templateContext.setVariable("token", token.token)
         templateContext.setVariable("htmlHeader", formatting.htmlHeader)
         templateContext.setVariable("htmlFooter", formatting.htmlFooter)
 
-        emailService.sendEmailWithThymeleafTemplate("SkillTree Password Reset", email, "password_reset.html", templateContext)
+        emailService.sendEmailWithThymeleafTemplate(subject, email, template, templateContext)
     }
 
     @Transactional(readOnly = true)
@@ -141,5 +165,10 @@ class PasswordResetService {
     @Transactional
     void deleteToken(String token) {
         tokenRepo.deleteByToken(token)
+    }
+
+    @Transactional
+    void deleteTokensForUser(Integer userId, String tokenType) {
+        tokenRepo.deleteByUserIdAndType(userId, tokenType)
     }
 }

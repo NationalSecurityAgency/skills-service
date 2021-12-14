@@ -43,12 +43,14 @@ Cypress.on('window:before:load', (win) => {
 before(function () {
     cy.fixture('vars.json').then((vars) => {
         cy.register(vars.rootUser, vars.defaultPass, true);
-        cy.register(vars.defaultUser, vars.defaultPass);
-        if (!Cypress.env('oauthMode')) {
-            Cypress.env('proxyUser', 'user0')
-        } else {
-            Cypress.env('proxyUser', 'foo-hydra')
-            Cypress.env('hydraAuthenticated', false)
+        if (!Cypress.env('verifyEmail')) {
+            cy.register(vars.defaultUser, vars.defaultPass);
+            if (!Cypress.env('oauthMode')) {
+                Cypress.env('proxyUser', 'user0')
+            } else {
+                Cypress.env('proxyUser', 'foo-hydra')
+                Cypress.env('hydraAuthenticated', false)
+            }
         }
     });
 });
@@ -65,12 +67,14 @@ beforeEach(function () {
     cy.fixture('vars.json').then((vars) => {
         cy.logout()
 
-        if (!Cypress.env('oauthMode')) {
-            cy.log('NOT in oauthMode, using form login')
-            cy.login(vars.defaultUser, vars.defaultPass);
-        } else {
-            cy.log('oauthMode, using loginBySingleSignOn')
-            cy.loginBySingleSignOn()
+        if (!Cypress.env('verifyEmail')) {
+            if (!Cypress.env('oauthMode')) {
+                cy.log('NOT in oauthMode, using form login')
+                cy.login(vars.defaultUser, vars.defaultPass);
+            } else {
+                cy.log('oauthMode, using loginBySingleSignOn')
+                cy.loginBySingleSignOn()
+            }
         }
     });
 });

@@ -18,22 +18,23 @@ package skills.storage.repos
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.lang.Nullable
-import skills.storage.model.auth.PasswordResetToken
+import skills.storage.model.auth.UserToken
 
-interface PasswordResetTokenRepo extends CrudRepository<PasswordResetToken, Integer> {
-
-    @Nullable
-    @Query("select p from PasswordResetToken p where p.token = ?1")
-    PasswordResetToken findByToken(String token)
+interface PasswordResetTokenRepo extends CrudRepository<UserToken, Integer> {
 
     @Nullable
-    @Query("select p from PasswordResetToken p where p.user.userId = ?1")
-    PasswordResetToken findByUserId(String userId)
+    @Query("select p from UserToken p where p.token = ?1")
+    UserToken findByToken(String token)
 
     @Nullable
-    @Query("select p from PasswordResetToken  p where p.token = ?1 and p.user.userId = ?2")
-    PasswordResetToken findByTokenAndUserId(String token, String userId)
+    @Query("select p from UserToken p where p.user.userId = ?1")
+    UserToken findByUserId(String userId)
+
+    @Nullable
+    @Query("select p from UserToken  p where p.token = ?1 and p.user.userId = ?2")
+    UserToken findByTokenAndUserId(String token, String userId)
 
     void deleteByToken(String token)
 
+    void deleteByUserIdAndType(Integer userId, String type)
 }

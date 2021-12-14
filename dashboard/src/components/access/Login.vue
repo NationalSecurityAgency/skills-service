@@ -143,6 +143,19 @@ limitations under the License.
     },
     methods: {
       login() {
+        if (this.verifyEmailAddresses) {
+          AccessService.userEmailIsVerified(this.loginFields.username).then((result) => {
+            if (!result) {
+              this.handlePush({ name: 'RequestEmailVerification', params: { email: this.loginFields.username } });
+            } else {
+              this.performFormLogin();
+            }
+          });
+        } else {
+          this.performFormLogin();
+        }
+      },
+      performFormLogin() {
         this.loginFailed = false;
         const formData = new FormData();
         formData.append('username', this.loginFields.username);
@@ -190,6 +203,9 @@ limitations under the License.
       },
       oAuthOnly() {
         return this.$store.getters.config.oAuthOnly;
+      },
+      verifyEmailAddresses() {
+        return this.$store.getters.config.verifyEmailAddresses;
       },
     },
     created() {

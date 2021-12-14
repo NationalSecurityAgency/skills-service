@@ -83,4 +83,13 @@ export default {
   getUserAgreement() {
     return axios.get('/app/userAgreement').then((response) => response.data);
   },
+  verifyEmail(verification) {
+    return axios.post('/verifyEmail', verification, { handleError: false }).then((response) => response.data);
+  },
+  resendEmailVerification(userId) {
+    return axios.post(`resendEmailVerification/${userId}`).then((response) => response.data);
+  },
+  userEmailIsVerified(email) {
+    return axios.get(`/userEmailIsVerified/${email}`).then((response) => response.data);
+  },
 };
