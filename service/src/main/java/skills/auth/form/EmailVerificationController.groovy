@@ -75,16 +75,16 @@ class EmailVerificationController {
     RequestResult verifyEmail(@RequestBody EmailVerification emailVerification) {
         UserToken token = passwordMangementService.loadToken(emailVerification.token)
         if (token?.getUser()?.getUserId() != emailVerification.email) {
-            throw new SkillException("Supplied email verification token does not exist or is not for the specified user")
+            throw new SkillException("The supplied email verification token does not exist or is not for the specified user.")
         }
 
         if (token.type != VERIFY_EMAIL_TOKEN_TYPE) {
-            throw new SkillException("Supplied email verification token has invalid token type [${token.type}]")
+            throw new SkillException("The supplied email verification token has invalid token type [${token.type}].")
         }
 
         if (!token.isValid()) {
             passwordMangementService.deleteToken(token.token)
-            throw new SkillException("Email Verification token has expired", ErrorCode.UserTokenExpired)
+            throw new SkillException("Your email verification code has expired.", ErrorCode.UserTokenExpired)
         }
 
         UserInfo userInfo = userAuthService.loadByUserId(token.user.userId)
