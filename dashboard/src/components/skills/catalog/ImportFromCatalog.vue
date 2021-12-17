@@ -20,11 +20,10 @@ limitations under the License.
            header-bg-variant="info" header-text-variant="light" no-fade role="dialog"
            @hide="publishHidden"
            :aria-label="isSkill?'Import Skill from the Catalog':'Import Subject from the Catalog'">
-
     <skills-spinner :is-loading="loading"/>
 
     <no-content2 v-if="!loading && emptyCatalog" class="mt-4 mb-5"
-                 title="Nothing Available for Import">
+                 title="Nothing Available for Import" data-cy="catalogSkillImportModal-NoData">
       When other projects export {{ importType }}s to the Catalog then they will be available here
       to be imported.
     </no-content2>
@@ -78,7 +77,7 @@ limitations under the License.
                       @page-size-changed="pageSizeChanged"
                       @page-changed="pageChanged"
                       @sort-changed="sortTable"
-                      data-cy="selfReportApprovalHistoryTable">
+                      data-cy="importSkillsFromCatalogTable">
         <template #head(skillId)="data">
           <span class="text-primary"><i
             class="fas fa-graduation-cap skills-color-skills"/> {{ data.label }}</span>
@@ -164,10 +163,10 @@ limitations under the License.
 
     <div slot="modal-footer" class="w-100">
       <b-button variant="success" size="sm" class="float-right ml-2"
-                @click="importSkills" data-cy="approveBtn" :disabled="importDisabled"><i
+                @click="importSkills" data-cy="importBtn" :disabled="importDisabled"><i
         class="far fa-arrow-alt-circle-down"></i> Import
       </b-button>
-      <b-button variant="secondary" size="sm" class="float-right" @click="close" data-cy="closeSkillButton">
+      <b-button variant="secondary" size="sm" class="float-right" @click="close" data-cy="closeButton">
         <i class="fas fa-times"></i> Cancel
       </b-button>
     </div>

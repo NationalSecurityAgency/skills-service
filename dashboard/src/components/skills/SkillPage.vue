@@ -39,14 +39,15 @@ limitations under the License.
                     @click="showExportToCatalog=true"
                     variant="outline-primary"
                     title="Add to catalog"
+                    data-cy="addToCatalogBtn"
                     :disabled="skill && skill.sharedToCatalog">
             <span class="d-none d-sm-inline">Catalog</span> <i class="fas fa-book-medical" aria-hidden="true" />
           </b-button>
         </b-button-group>
       </div>
       <div slot="right-of-header" v-if="!isLoading && (skill.sharedToCatalog || isImported)" class="d-inline h5">
-        <b-badge v-if="skill.sharedToCatalog" class="ml-2"><i class="fas fa-book"></i> EXPORTED</b-badge>
-        <b-badge v-if="isImported" class="ml-2" variant="success"><i class="fas fa-book"></i> IMPORTED</b-badge>
+        <b-badge v-if="skill.sharedToCatalog" class="ml-2" data-cy="exportedBadge"><i class="fas fa-book"></i> EXPORTED</b-badge>
+        <b-badge v-if="isImported" class="ml-2" variant="success" data-cy="importedBadge"><i class="fas fa-book"></i> IMPORTED</b-badge>
       </div>
     </page-header>
 
@@ -54,7 +55,7 @@ limitations under the License.
     </navigation>
     <edit-skill v-if="showEdit" v-model="showEdit" :skillId="skill.skillId" :is-copy="false" :is-edit="true"
                 :project-id="this.$route.params.projectId" :subject-id="this.$route.params.subjectId" @skill-saved="skillEdited" @hidden="handleHide"/>
-    <export-to-catalog v-if="showExportToCatalog" v-model="showExportToCatalog" :skill-ids="[skill.skillId]" @exported="loadData"/>
+    <export-to-catalog v-if="showExportToCatalog" v-model="showExportToCatalog" :skills="[skill]" @exported="loadData"/>
   </div>
 </template>
 

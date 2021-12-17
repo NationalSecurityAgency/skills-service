@@ -82,7 +82,10 @@ limitations under the License.
   export default {
     name: 'ExportToCatalog',
     props: {
-      skills: Array,
+      skills: {
+        type: Array,
+        required: true,
+      },
       value: {
         type: Boolean,
         required: true,

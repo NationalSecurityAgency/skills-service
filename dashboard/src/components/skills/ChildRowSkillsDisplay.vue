@@ -82,12 +82,12 @@ limitations under the License.
       </span>
     </div>
 
-    <b-card v-if="skillInfo.sharedToCatalog" class="mt-3" header="Skill Catalog">
+    <b-card v-if="skillInfo.sharedToCatalog" class="mt-3" header="Skill Catalog" data-cy="exportedToCatalogCard">
       This skill was exported to the <b-badge class=""><i class="fas fa-book"></i> CATALOG</b-badge>.
       Please visit
-      <b-button data-cy="navigateToProjCatalog" variant="outline-info" size="sm"
+      <b-button data-cy="navigateToSkillCatalog" variant="outline-info" size="sm"
                    :to="{ name:'SkillsCatalog', params: { projectId: this.projectId} }"
-                   aria-label="View Project's Catalog">Skill Catalog</b-button> page to manage exported skills.
+                   aria-label="View Skill Catalog">Skill Catalog</b-button> page to manage exported skills.
     </b-card>
 
   </loading-container>
