@@ -25,7 +25,7 @@ limitations under the License.
           <div class="card-body p-4">
             <p>Your email address has been confirmed! You will be forwarded to the login page in {{ timer }} seconds.</p>
             <div class="text-center">
-              <b-button href="/skills-login" variant="outline-primary" class="p-2"><i class="fas fa-sign-in-alt mr-1"/>Return to Login Page</b-button>
+              <b-button href="/skills-login" variant="outline-primary" class="p-2" data-cy="loginPage"><i class="fas fa-sign-in-alt mr-1"/>Return to Login Page</b-button>
             </div>
           </div>
         </div>
