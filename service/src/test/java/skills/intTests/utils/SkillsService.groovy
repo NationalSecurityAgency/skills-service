@@ -18,6 +18,8 @@ package skills.intTests.utils
 import callStack.profiler.Profile
 import com.github.jknack.handlebars.Options
 import groovy.util.logging.Slf4j
+import org.apache.commons.codec.net.URLCodec
+
 @Slf4j
 class SkillsService {
 
@@ -1218,11 +1220,12 @@ class SkillsService {
     }
 
     def getCatalogSkills(String projectId, int limit, int page, String orderBy="exportedOn", boolean ascending=true, String projectNameSearch="", String subjectNameSearch="", String skillNameSearch=""){
+        URLCodec codec = new URLCodec("UTF-8")
         return wsHelper.adminGet("/projects/${projectId}/skills/catalog?" +
                 "limit=${limit}&page=${page}&orderBy=${orderBy}&ascending=${ascending}" +
-                "&projectNameSearch=${projectNameSearch}" +
-                "&subjectNameSearch=${subjectNameSearch}" +
-                "&skillNameSearch=${skillNameSearch}")
+                "&projectNameSearch=${codec.encode(projectNameSearch)}" +
+                "&subjectNameSearch=${codec.encode(subjectNameSearch)}" +
+                "&skillNameSearch=${codec.encode(skillNameSearch)}")
     }
 
     /**

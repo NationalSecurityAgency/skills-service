@@ -45,24 +45,24 @@ interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, In
                 subject.skillId as subjectId,
                 project.name as projectName,
                 es.created as exportedOn 
-        from ExportedSkill es, SkillRelDef srd, SkillDef subject
+        from ExportedSkill es
         join ProjDef project on project.projectId = es.projectId
-        where subject = srd.parent and
-             srd.type = 'RuleSetDefinition' and
-             subject.type = 'Subject' and 
-             srd.child.id = es.skill.id and
+        join SkillRelDef srd on srd.child = es.skill and srd.type = 'RuleSetDefinition'
+        join SkillDef subject on subject = srd.parent and subject.type = 'Subject'
+        where 
+             es.projectId <> ?1 and
              not exists (select 1 from SkillDef sd where sd.projectId = ?1 and sd.copiedFrom = es.skill.id)
     ''')
     List<CatalogSkill> getSkillsInCatalog(String projectId, Pageable pageable)
 
     @Nullable
     @Query('''select count(es) 
-        from ExportedSkill es, SkillRelDef srd, SkillDef subject
+        from ExportedSkill es
         join ProjDef project on project.projectId = es.projectId
-        where subject = srd.parent and
-             srd.type = 'RuleSetDefinition' and
-             subject.type = 'Subject' and 
-             srd.child.id = es.skill.id and
+        join SkillRelDef srd on srd.child = es.skill and srd.type = 'RuleSetDefinition'
+        join SkillDef subject on subject = srd.parent and subject.type = 'Subject'
+        where 
+             es.projectId <> ?1 and
              not exists (select 1 from SkillDef sd where sd.projectId = ?1 and sd.copiedFrom = es.skill.id)
     ''')
     Integer countSkillsInCatalog(String projectId)
@@ -74,16 +74,16 @@ interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, In
                 subject.skillId as subjectId,
                 project.name as projectName,
                 es.created as exportedOn 
-        from ExportedSkill es, SkillRelDef srd, SkillDef subject
+        from ExportedSkill es
         join ProjDef project on project.projectId = es.projectId
-        where lower(es.skill.name) like lower(concat('%', :skillSearch, '%'))  and 
+        join SkillRelDef srd on srd.child = es.skill and srd.type = 'RuleSetDefinition'
+        join SkillDef subject on subject = srd.parent and subject.type = 'Subject'
+        where
+            es.projectId <> :projectId and 
+            not exists (select 1 from SkillDef sd where sd.projectId = :projectId and sd.copiedFrom = es.skill.id) and
+            lower(es.skill.name) like lower(concat('%', :skillSearch, '%'))  and 
             lower(project.name) like lower(concat('%', :projectSearch, '%')) and 
-            lower(subject.name) like lower(concat('%', :subjectSearch, '%')) and 
-            subject = srd.parent and
-            srd.type = 'RuleSetDefinition' and
-            subject.type = 'Subject' and 
-            srd.child.id = es.skill.id and
-            not exists (select 1 from SkillDef sd where sd.projectId = :projectId and sd.copiedFrom = es.skill.id)
+            lower(subject.name) like lower(concat('%', :subjectSearch, '%'))
     ''')
     List<CatalogSkill> getSkillsInCatalog(@Param("projectId") String projectId,
                                           @Param("projectSearch")String projectSearch,
@@ -93,17 +93,17 @@ interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, In
 
     @Nullable
     @Query('''
-        select count(es)
-        from ExportedSkill es, SkillRelDef srd, SkillDef subject
+        select count(es.skill)
+        from ExportedSkill es
         join ProjDef project on project.projectId = es.projectId
-        where lower(es.skill.name) like lower(concat('%', :skillSearch, '%'))  and 
+        join SkillRelDef srd on srd.child = es.skill and srd.type = 'RuleSetDefinition'
+        join SkillDef subject on subject = srd.parent and subject.type = 'Subject'
+        where
+            es.projectId <> :projectId and 
+            not exists (select 1 from SkillDef sd where sd.projectId = :projectId and sd.copiedFrom = es.skill.id) and
+            lower(es.skill.name) like lower(concat('%', :skillSearch, '%'))  and 
             lower(project.name) like lower(concat('%', :projectSearch, '%')) and 
-            lower(subject.name) like lower(concat('%', :subjectSearch, '%')) and 
-            subject = srd.parent and
-            srd.type = 'RuleSetDefinition' and
-            subject.type = 'Subject' and 
-            srd.child.id = es.skill.id and
-            not exists (select 1 from SkillDef sd where sd.projectId = :projectId and sd.copiedFrom = es.skill.id)
+            lower(subject.name) like lower(concat('%', :subjectSearch, '%'))
     ''')
     Integer countSkillsInCatalog(@Param("projectId") String projectId,
                                  @Param("projectSearch")String projectSearch,
@@ -137,9 +137,9 @@ interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, In
     @Query('''
             select count(es.skill) as numberOfSkills, 
                 count (distinct sd.projectId) as numberOfProjects
-            from ExportedSkill es, SkillDef sd 
+            from ExportedSkill es
+            left join SkillDef sd on sd.copiedFromProjectId = es.projectId 
             where es.projectId = ?1
-            and sd.copiedFromProjectId = ?1
     ''')
     ImportExportStats getExportedSkillStats(String projectId)
 

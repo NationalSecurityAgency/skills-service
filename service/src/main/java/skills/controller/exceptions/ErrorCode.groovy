@@ -33,5 +33,6 @@ enum ErrorCode {
     InsufficientSubjectPoints,
     ReadOnlySkill,
     UserTokenExpired,
-    SkillAlreadyInCatalog
+    SkillAlreadyInCatalog,
+    ExportToCatalogNotAllowed
 }

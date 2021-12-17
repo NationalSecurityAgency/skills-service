@@ -54,6 +54,11 @@ class RuleSetDefGraphService {
     }
 
     @Transactional
+    List<SkillDef> getChildrenSkills(String projectId, String skillId, List<RelationshipType> relationshipTypes) {
+        return skillRelDefRepo.getChildren(projectId, skillId, relationshipTypes)
+    }
+
+    @Transactional
     void deleteSkillWithItsDescendants(SkillDef skillDef) {
         List<SkillDef> toDelete = []
 

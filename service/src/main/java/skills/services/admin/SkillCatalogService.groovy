@@ -46,6 +46,7 @@ import skills.storage.model.QueuedSkillUpdate
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefMin
 import skills.storage.model.SkillDefWithExtra
+import skills.storage.model.SkillRelDef
 import skills.storage.repos.ExportedSkillRepo
 import skills.storage.repos.QueuedSkillUpdateRepo
 import skills.storage.repos.SkillDefRepo
@@ -94,13 +95,13 @@ class SkillCatalogService {
         TotalCountAwareResult<ProjectNameAwareSkillDefRes> res = new TotalCountAwareResult<>()
 
         if (projectNameSearch || subjectNameSearch || skillNameSearch) {
-            res.total = exportedSkillRepo.countSkillsInCatalog(projectId, projectNameSearch, subjectNameSearch, skillNameSearch)
-            res.results = exportedSkillRepo.getSkillsInCatalog(projectId, projectNameSearch, subjectNameSearch, skillNameSearch, pageable)?.findAll { it.skill.projectId != projectId}?.collect { convert(it)}
+            res.total = exportedSkillRepo.countSkillsInCatalog(projectId, projectNameSearch?:"", subjectNameSearch?:"", skillNameSearch?:"")
+            res.results = exportedSkillRepo.getSkillsInCatalog(projectId, projectNameSearch?:"", subjectNameSearch?:"", skillNameSearch?:"", pageable)?.collect { convert(it) }
             return res
         }
 
         res.total = exportedSkillRepo.countSkillsInCatalog(projectId)
-        def catalogSkills = exportedSkillRepo.getSkillsInCatalog(projectId, pageable)?.findAll { it.skill.projectId != projectId}
+        def catalogSkills = exportedSkillRepo.getSkillsInCatalog(projectId, pageable)
         res.results = catalogSkills?.collect {convert(it)}
         return res
     }
@@ -113,6 +114,11 @@ class SkillCatalogService {
         if (!sort.isEmpty()) {
             List<Sort.Order> props = []
             sort.get().forEach({
+                if (it.property == "numPerformToCompletion") {
+                    SkillException ske = new SkillException("Sorting on numPerformToCompletion is not allowed")
+                    ske.errorCode = ErrorCode.BadParam
+                    throw ske
+                }
                 if (!aliasUnnecessary.contains(it.property)) {
                     props.add(new Sort.Order(it.direction, "skill.${it.property}"))
                 } else {
@@ -148,8 +154,8 @@ class SkillCatalogService {
         ImportExportStats stats = skillDefRepo.getImportedSKillStats(projectId)
         ImportedSkillStats res = new ImportedSkillStats()
         if (stats) {
-            res.numberOfProjectsImportedFrom = stats.numberOfProjects
-            res.numberOfSkillsImported = stats.numberOfSkills
+            res.numberOfProjectsImportedFrom = Optional.ofNullable(stats.numberOfProjects).orElse(0)
+            res.numberOfSkillsImported = Optional.ofNullable(stats.numberOfSkills).orElse(0)
         }
         return res
     }
@@ -160,10 +166,10 @@ class SkillCatalogService {
         ImportExportStats stats = exportedSkillRepo.getExportedSkillStats(projectId)
         ExportedSkillsStats res = new ExportedSkillsStats()
         if (stats) {
-            res.numberOfProjectsUsing = stats.numberOfProjects
-            res.numberOfSkillsExported = stats.numberOfSkills
+            res.numberOfProjectsUsing = Optional.ofNullable(stats.numberOfProjects).orElse(0)
+            res.numberOfSkillsExported = Optional.ofNullable(stats.numberOfSkills).orElse(0)
         }
-        return stats
+        return res
     }
 
     @Transactional
@@ -172,8 +178,15 @@ class SkillCatalogService {
         if (isAvailableInCatalog(projectId, skillId)) {
             throw new SkillException("Skill has already been exported to the catalog", projectId, skillId, ErrorCode.SkillAlreadyInCatalog)
         }
+
         projDefAccessor.getProjDef(projectId)
         SkillDefWithExtra skillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, SkillDef.ContainerType.Skill)
+
+        List<SkillDef> dependencies = relationshipService.getChildrenSkills(skillDef.projectId, skillDef.skillId, [SkillRelDef.RelationshipType.Dependence])
+        if (dependencies) {
+            throw new SkillException("Skill [${skillDef.skillId}] has dependencies. Skills with dependencies may not be exported to the catalog", projectId, skillId, ErrorCode.ExportToCatalogNotAllowed)
+        }
+
         SkillsValidator.isTrue(skillDef != null, "skill does not exist", projectId, skillId)
 
         ExportedSkill exportedSkill = new ExportedSkill(projectId: skillDef.projectId, skill: skillDef)

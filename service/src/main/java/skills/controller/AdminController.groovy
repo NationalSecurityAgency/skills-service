@@ -1107,7 +1107,10 @@ class AdminController {
                                   @RequestParam(required=false) String projectNameSearch,
                                   @RequestParam(required=false) String subjectNameSearch,
                                   @RequestParam(required=false) String skillNameSearch) {
-        TotalCountAwareResult<ProjectNameAwareSkillDefRes> res = skillCatalogService.getSkillsAvailableInCatalog(projectId, projectNameSearch, subjectNameSearch, skillNameSearch, createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending))
+        TotalCountAwareResult<ProjectNameAwareSkillDefRes> res = skillCatalogService.getSkillsAvailableInCatalog(projectId,
+                URLDecoder.decode(projectNameSearch, "utf-8"),
+                URLDecoder.decode(subjectNameSearch, "utf-8"),
+                URLDecoder.decode(skillNameSearch, "utf-8"), createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending))
         TableResult tr = new TableResult()
         tr.count = res.results?.size()
         tr.totalCount = res.total
