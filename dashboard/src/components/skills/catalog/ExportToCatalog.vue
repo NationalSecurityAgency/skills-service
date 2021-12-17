@@ -26,8 +26,9 @@ limitations under the License.
     <b-overlay v-if="!allSkillsExportedAlready && !state.exported" :show="state.exporting" rounded="sm" opacity="0.5"
                spinner-variant="info" spinner-type="grow" spinner-small>
       <p>
-        This will export <span v-if="isSingleId">Skill with id <b>[{{ firstSkillId }}]</b></span><span v-else><b-badge variant="info">{{ skillsFiltered.length }}</b-badge> Skills</span> to the SkillTree Catalog <i class="fas fa-book" aria-hidden="true" />.
-        Other project administrators will then be able to import a read-only version of this skill.
+        This will export <span v-if="isSingleId">Skill with id
+        <b class="text-primary">[{{ firstSkillId }}]</b></span><span v-else><b-badge variant="info">{{ skillsFiltered.length }}</b-badge> Skills</span> to the <b-badge>SkillTree Catalog <i class="fas fa-book" aria-hidden="true" /></b-badge>.
+        Other project administrators will then be able to import a <b class="text-primary">read-only</b> version of this skill.
       </p>
       <p v-if="numAlreadyExported > 0">
         <span class="font-italic"><i class="fas fa-exclamation-triangle text-warning" /> Note:</span> The are already <b-badge variant="info">{{ numAlreadyExported }}</b-badge> skill(s) in the Skill Catalog from the provided selection.
@@ -57,7 +58,7 @@ limitations under the License.
     </p>
 
     <div v-if="allSkillsExportedAlready || state.exported" slot="modal-footer" class="w-100">
-      <b-button variant="secondary" size="sm" class="float-right mr-2" @click="close" data-cy="closeButton">
+      <b-button variant="secondary" size="sm" class="float-right mr-2" @click="close" data-cy="okButton">
         OK
       </b-button>
     </div>

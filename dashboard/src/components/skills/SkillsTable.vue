@@ -18,8 +18,8 @@ limitations under the License.
     <loading-container v-bind:is-loading="isLoading">
       <div v-if="this.skillsOriginal && this.skillsOriginal.length">
         <div v-if="showSearch">
-          <div class="row px-3 pt-3">
-            <div class="col-12">
+          <div class="row px-3 pt-3 mb-0 pb-0">
+            <div class="col-12 mb-0 pb-0">
               <b-form-group label="Name Filter" label-class="text-muted">
                 <b-input v-model="table.filter.name" v-on:keyup.enter="applyFilters"
                          data-cy="skillsTable-skillFilter" aria-label="skill name filter"/>
@@ -30,33 +30,36 @@ limitations under the License.
           </div>
 
           <div class="row pl-3 mb-3">
-            <div class="col">
-              <div class="pr-2 border-right mr-2 d-inline-block">
+            <div class="col-auto">
+              <b-button-group class="pr-2 border-right mr-2 d-inline-block mt-2">
                 <b-button variant="outline-primary" @click="applyFilters" data-cy="users-filterBtn"><i class="fa fa-filter"/> Filter</b-button>
-                <b-button variant="outline-primary" @click="reset" class="ml-1" data-cy="users-resetBtn"><i class="fa fa-times"/> Reset</b-button>
-              </div>
+                <b-button variant="outline-primary" @click="reset" data-cy="users-resetBtn"><i class="fa fa-times"/> Reset</b-button>
+              </b-button-group>
 
-              <b-button variant="outline-info" @click="changeSelectionForAll(true)"
-                        data-cy="selectPageOfApprovalsBtn" class="mr-2"><i
-                class="fa fa-check-square"/> Select Page
-              </b-button>
-              <b-button variant="outline-info" @click="changeSelectionForAll(false)"
-                        data-cy="clearSelectedApprovalsBtn" class=""><i class="far fa-square"></i>
-                Clear
-              </b-button>
+              <b-button-group class="d-inline-block mt-2 text-right">
+                <b-button variant="outline-info" @click="changeSelectionForAll(true)"
+                          data-cy="selectAllSkillsBtn" class=""><i
+                  class="fa fa-check-square"/><span class="d-none d-sm-inline"> Select All </span>
+                </b-button>
+                <b-button variant="outline-info" @click="changeSelectionForAll(false)"
+                          data-cy="clearSelectedSkillsBtn" class=""><i class="far fa-square"></i>
+                  <span class="d-none d-sm-inline"> Clear</span>
+                </b-button>
+              </b-button-group>
             </div>
             <div class="col text-right">
-              <b-dropdown id="dropdown-right" right variant="outline-info" class="mr-3" :disabled="actionsDisable">
+              <b-dropdown id="dropdown-right" right variant="outline-info" class="mr-3 mt-2" :disabled="actionsDisable"
+                          data-cy="skillActionsBtn">
                 <template #button-content>
-                  <i class="fas fa-tools"></i> Action
+                  <i class="fas fa-tools"></i> Action <b-badge variant="info" data-cy="skillActionsNumSelected">{{ numSelectedSkills }}</b-badge>
                 </template>
-                <b-dropdown-item @click="handleExportRequest">Export To Catalog</b-dropdown-item>
+                <b-dropdown-item @click="handleExportRequest" data-cy="skillExportToCatalogBtn"><i class="far fa-arrow-alt-circle-up"></i> Export To Catalog</b-dropdown-item>
               </b-dropdown>
             </div>
           </div>
         </div>
 
-      <div class="row mb-2">
+      <div class="row mb-2 ml-1">
         <div class="col"></div>
         <div class="col-auto text-right" data-cy="skillsTable-additionalColumns">
             <span class="font-italic mr-2">Additional Columns:</span>
@@ -96,14 +99,14 @@ limitations under the License.
                   :unchecked-value="false"
                   :inline="true"
                   v-on:input="updateActionsDisableStatus"
-                  :data-cy="`approvalSelect_${data.item.projectId}-${data.item.skillId}`"
+                  :data-cy="`skillSelect-${data.item.skillId}`"
                 >
-                  <router-link :data-cy="`manageSkillLink_${data.item.skillId}`" tag="a" :to="{ name:'SkillOverview',
+                    <router-link :data-cy="`manageSkillLink_${data.item.skillId}`" tag="a" :to="{ name:'SkillOverview',
                                     params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
                                :aria-label="`Manage skill ${data.item.name}  via link`">
                     <div class="h5 d-inline-block"><span v-if="data.item.nameHtml" v-html="data.item.nameHtml"></span><span v-else>{{ data.item.name }}</span></div>
                   </router-link>
-                  <div v-if="data.item.sharedToCatalog" class="h6 ml-2 d-inline-block">
+                  <div v-if="data.item.sharedToCatalog" class="h6 ml-2 d-inline-block" :data-cy="`exportedBadge-${data.item.skillId}`">
                     <b-badge variant="secondary" class="text-uppercase">
                       <span><i class="fas fa-book"></i> Exported</span>
                     </b-badge>
@@ -123,10 +126,10 @@ limitations under the License.
                 </div>
               </div>
 
-              <div class="text-muted" style="font-size: 0.9rem;">ID: <span v-if="data.item.skillIdHtml" v-html="data.item.skillIdHtml"></span><span v-else>{{ data.item.skillId }}</span></div>
+              <div class="text-muted ml-4" style="font-size: 0.9rem;">ID: <span v-if="data.item.skillIdHtml" v-html="data.item.skillIdHtml"></span><span v-else>{{ data.item.skillId }}</span></div>
 
-              <div class="">
-                <b-button size="sm" @click="data.toggleDetails" class="mr-2 py-0 px-1 btn btn-info"
+              <div class="mt-1">
+                <b-button size="sm" @click="data.toggleDetails" variant="outline-info" class="mr-2 py-0 px-1"
                           :aria-label="`Expand details for ${data.item.name}`"
                           :data-cy="`expandDetailsBtn_${data.item.skillId}`">
                   <i v-if="data.detailsShowing" class="fa fa-minus-square" />
@@ -136,7 +139,7 @@ limitations under the License.
               </div>
 
             </div>
-            <div class="col-auto ml-auto mr-0">
+            <div class="col-auto ml-auto mr-0 mt-2">
               <router-link v-if="data.item.isSkillType"
                            :data-cy="`manageSkillBtn_${data.item.skillId}`" :to="{ name:'SkillOverview',
                                   params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
@@ -383,6 +386,7 @@ limitations under the License.
         skillsOriginal: [],
         skills: [],
         actionsDisable: true,
+        numSelectedSkills: 0,
         table: {
           extraColumns: {
             options: [{
@@ -597,8 +601,12 @@ limitations under the License.
       },
       handleSkillsExportedToCatalog(skills) {
         this.skills = this.skills.map((skill) => {
-          const replacement = skills.find((item) => item.skillId === skill.skillId);
-          return replacement || skill;
+          let replacement = skills.find((item) => item.skillId === skill.skillId);
+          if (replacement) {
+            replacement = this.addMetaToSkillObj(replacement);
+            return replacement;
+          }
+          return skill;
         });
       },
       skillCreatedOrUpdated(skill) {
@@ -780,11 +788,8 @@ limitations under the License.
         return (selfReportingType === 'HonorSystem') ? 'Honor System' : selfReportingType;
       },
       updateActionsDisableStatus() {
-        if (this.skills.find((item) => item.selected) !== undefined) {
-          this.actionsDisable = false;
-        } else {
-          this.actionsDisable = true;
-        }
+        this.numSelectedSkills = this.skills.reduce((total, item) => (item.selected ? total + 1 : total), 0);
+        this.actionsDisable = this.numSelectedSkills === 0;
       },
       changeSelectionForAll(selectedValue) {
         this.skills = this.skills.map((sk) => ({ ...sk, selected: selectedValue }));
