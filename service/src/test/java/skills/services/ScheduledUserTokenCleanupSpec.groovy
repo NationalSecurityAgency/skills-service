@@ -23,6 +23,8 @@ import skills.storage.model.auth.UserToken
 import skills.storage.repos.PasswordResetTokenRepo
 import skills.storage.repos.UserRepo
 
+import static skills.services.PasswordManagementService.VERIFY_EMAIL_TOKEN_TYPE
+
 class ScheduledUserTokenCleanupSpec extends DefaultIntSpec {
 
     @Autowired
@@ -38,23 +40,25 @@ class ScheduledUserTokenCleanupSpec extends DefaultIntSpec {
 
         SkillsService createAcctService = createService()
         createAcctService.createUser([firstName: "John", lastName: "Doe", email: "jdoe@email.foo", password: "password"])
+        createAcctService.createUser([firstName: "John", lastName: "Doe", email: "jdoe2@email.foo", password: "password"])
         User user = userRepo.findByUserId('jdoe@email.foo')
-        UserToken token = new UserToken()
-        String tokenValue = 'xyz123'
-        token.user = user
-        token.type = PasswordManagementService.VERIFY_EMAIL_TOKEN_TYPE
-        token.token = tokenValue
-        token.expires = new Date()-15
+        String tokenValue1 = 'xyz123'
+        UserToken expiredToken = new UserToken(user: user, token: tokenValue1, type: VERIFY_EMAIL_TOKEN_TYPE, expires: new Date()-15)
+        tokenRepo.save(expiredToken)
 
-        tokenRepo.save(token)
-        UserToken tokenBeforeCleanup = tokenRepo.findByToken(tokenValue)
+        String tokenValue2 = 'abc456'
+        UserToken nonexpiredToken = new UserToken(user: user, token: tokenValue2, type: VERIFY_EMAIL_TOKEN_TYPE, expires: new Date()-5)
+        tokenRepo.save(nonexpiredToken)
+        UserToken expiredTokenBeforeCleanup = tokenRepo.findByToken(tokenValue1)
 
         when:
         cleanup.cleanupExpiredTokens()
-        UserToken tokenAfterCleanup = tokenRepo.findByToken(tokenValue)
+        UserToken expiredTokenAfterCleanup = tokenRepo.findByToken(tokenValue1)
+        UserToken nonExpiredtokenAfterCleanup = tokenRepo.findByToken(tokenValue2)
 
         then:
-        tokenBeforeCleanup
-        !tokenAfterCleanup
+        expiredTokenBeforeCleanup
+        !expiredTokenAfterCleanup
+        nonExpiredtokenAfterCleanup
     }
 }
