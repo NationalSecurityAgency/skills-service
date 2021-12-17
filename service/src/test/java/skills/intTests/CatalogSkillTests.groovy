@@ -298,6 +298,28 @@ class CatalogSkillTests extends DefaultIntSpec {
         e.getMessage().contains("explanation:Cannot import Skill from catalog, [skill1] already exists in Project")
     }
 
+    def "import skill that isn't shared to catalog"() {
+        def project1 = createProject(1)
+        def project2 = createProject(2)
+
+        def p1subj1 = createSubject(1, 1)
+        def p2subj1 = createSubject(2, 1)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 250)
+
+        skillsService.createProject(project1)
+        skillsService.createProject(project2)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p2subj1)
+        skillsService.createSkill(skill)
+
+        when:
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+
+        then:
+        def e = thrown(Exception)
+        e.message.contains("explanation:Skill [skill1] from project [TestProject1] has not been shared to the catalog and may not be imported")
+    }
+
     def "remove imported skill, should have no impact on original skill" () {
         def project1 = createProject(1)
         def project2 = createProject(2)
