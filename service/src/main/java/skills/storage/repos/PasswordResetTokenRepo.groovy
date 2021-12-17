@@ -37,4 +37,6 @@ interface PasswordResetTokenRepo extends CrudRepository<UserToken, Integer> {
     void deleteByToken(String token)
 
     void deleteByUserIdAndType(Integer userId, String type)
+
+    void deleteByExpiresBefore(Date date)
 }

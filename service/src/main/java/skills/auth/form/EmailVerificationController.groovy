@@ -83,7 +83,6 @@ class EmailVerificationController {
         }
 
         if (!token.isValid()) {
-            passwordMangementService.deleteToken(token.token)
             throw new SkillException("Your email verification code has expired.", ErrorCode.UserTokenExpired)
         }
 

@@ -77,7 +77,6 @@ class PasswordResetController {
         }
 
         if (!token.isValid()) {
-            resetService.deleteToken(token.token)
             throw new SkillException("Reset token has expired")
         }
 

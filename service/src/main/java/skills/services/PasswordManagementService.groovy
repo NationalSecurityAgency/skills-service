@@ -171,4 +171,9 @@ class PasswordManagementService {
     void deleteTokensForUser(Integer userId, String tokenType) {
         tokenRepo.deleteByUserIdAndType(userId, tokenType)
     }
+
+    @Transactional
+    void deleteTokensOlderThan(Date date) {
+        tokenRepo.deleteByExpiresBefore(date)
+    }
 }

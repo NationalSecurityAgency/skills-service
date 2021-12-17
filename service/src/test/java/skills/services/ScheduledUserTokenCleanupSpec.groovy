@@ -1,0 +1,45 @@
+package skills.services
+
+import org.springframework.beans.factory.annotation.Autowired
+import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsService
+import skills.storage.model.auth.User
+import skills.storage.model.auth.UserToken
+import skills.storage.repos.PasswordResetTokenRepo
+import skills.storage.repos.UserRepo
+
+class ScheduledUserTokenCleanupSpec extends DefaultIntSpec {
+
+    @Autowired
+    PasswordResetTokenRepo tokenRepo
+
+    @Autowired
+    UserRepo userRepo
+
+    @Autowired
+    ScheduledUserTokenCleanup cleanup
+
+    def "test ScheduledUserTokenCleanup"() {
+
+        SkillsService createAcctService = createService()
+        createAcctService.createUser([firstName: "John", lastName: "Doe", email: "jdoe@email.foo", password: "password"])
+        User user = userRepo.findByUserId('jdoe@email.foo')
+        UserToken token = new UserToken()
+        String tokenValue = 'xyz123'
+        token.user = user
+        token.type = PasswordManagementService.VERIFY_EMAIL_TOKEN_TYPE
+        token.token = tokenValue
+        token.expires = new Date()-15
+
+        tokenRepo.save(token)
+        UserToken tokenBeforeCleanup = tokenRepo.findByToken(tokenValue)
+
+        when:
+        cleanup.cleanupExpiredTokens()
+        UserToken tokenAfterCleanup = tokenRepo.findByToken(tokenValue)
+
+        then:
+        tokenBeforeCleanup
+        !tokenAfterCleanup
+    }
+}
