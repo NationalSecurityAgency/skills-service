@@ -23,7 +23,10 @@ limitations under the License.
       </div>
         <div class="card text-left">
           <div class="card-body p-4">
-            A password reset link has been sent to {{ email }}. You will be forwarded to the <router-link to="/skills-login" data-cy="loginPage">login page</router-link> in {{ timer }} seconds.
+            <p>A password reset link has been sent to <span class="text-primary font-weight-bold">{{ email }}</span>. You will be forwarded to the login page in {{ timer }} seconds.</p>
+            <div class="text-center">
+              <b-button href="/skills-login" variant="outline-primary" class="p-2"><i class="fas fa-sign-in-alt mr-1"/>Return to Login Page</b-button>
+            </div>
           </div>
         </div>
 
