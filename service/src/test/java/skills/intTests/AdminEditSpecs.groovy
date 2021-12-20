@@ -15,21 +15,11 @@
  */
 package skills.intTests
 
-import org.apache.http.client.methods.HttpHead
+
 import org.joda.time.DateTime
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
-import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.http.*
 import skills.controller.result.model.TableResult
-import skills.intTests.utils.DefaultIntSpec
-import skills.intTests.utils.SkillsClientException
-import skills.intTests.utils.SkillsFactory
-import skills.intTests.utils.SkillsService
-import skills.intTests.utils.WSHelper
+import skills.intTests.utils.*
 
 class AdminEditSpecs extends DefaultIntSpec {
 
@@ -871,5 +861,26 @@ class AdminEditSpecs extends DefaultIntSpec {
         u125pointHistoryAfterEdit.pointsHistory[0].points == 60
         u125pointHistoryAfterEdit.pointsHistory[1].points == 70
         u125pointHistoryAfterEdit.pointsHistory[2].points == 75
+    }
+
+    def "Editing skill should not change number of skills returned for a subject"(){
+        Map proj = SkillsFactory.createProject()
+        Map subject = SkillsFactory.createSubject()
+        Map skill = SkillsFactory.createSkill()
+        skillsService.createProject(proj)
+        skillsService.createSubject(subject)
+        skillsService.createSkill(skill)
+
+        when:
+        def subjectRes1 = skillsService.getSubject(subject)
+
+        skill.name = "anotherName"
+        skill.enabled = false
+        skillsService.updateSkill(skill, null)
+        def subjectRes2 = skillsService.getSubject(subject)
+
+        then:
+        subjectRes1.numSkills == 1
+        subjectRes2.numSkills == 1
     }
 }

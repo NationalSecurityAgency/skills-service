@@ -40,6 +40,7 @@ import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.result.model.OAuth2Provider
+import skills.services.PasswordManagementService
 
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -71,6 +72,12 @@ class CreateAccountController {
     @Value('#{"${skills.authorization.oAuthOnly:false}"}')
     Boolean oAuthOnly
 
+    @Value('#{"${skills.authorization.verifyEmailAddresses:false}"}')
+    Boolean verifyEmailAddresses
+
+    @Autowired(required = false) // not required for PKI_AUTH
+    PasswordManagementService passwordManagementService
+
     @Conditional(SecurityMode.FormAuth)
     @PutMapping("createAccount")
     void createAppUser(@RequestBody UserInfo userInfo, HttpServletResponse response) {
@@ -78,8 +85,16 @@ class CreateAccountController {
             throw new SkillException("Username/Password account creation is disabled for this installation of the SkillTree", null, null, ErrorCode.AccessDenied)
         }
         String password = userInfo.password
+        if (verifyEmailAddresses) {
+            userInfo.emailVerified = false
+        }
         userInfo = createUser(userInfo)
-        userAuthService.autologin(userInfo, password)
+
+        if (verifyEmailAddresses) {
+            passwordManagementService.createEmailVerificationTokenAndNotifyUser(userInfo.email)
+        } else {
+            userAuthService.autologin(userInfo, password)
+        }
     }
 
     @Conditional(SecurityMode.FormAuth)
@@ -87,6 +102,8 @@ class CreateAccountController {
     void createRootUser(@RequestBody UserInfo userInfo, HttpServletResponse response) {
         SkillsValidator.isTrue(!userAuthService.rootExists(), 'A root user already exists! Granting additional root privileges requires a root user to grant them!')
         String password = userInfo.password
+        // initial root user does not require email verification, email settings need to be configured first
+        userInfo.emailVerified = true
         userInfo = createUser(userInfo)
         userAuthService.grantRoot(userInfo.username)
         userAuthService.autologin(userInfo, password)

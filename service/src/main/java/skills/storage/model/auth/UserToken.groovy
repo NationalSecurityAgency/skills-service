@@ -20,9 +20,9 @@ import groovy.transform.ToString
 import javax.persistence.*
 
 @ToString
-@Table(name="password_reset_token")
+@Table(name="user_token")
 @Entity
-class PasswordResetToken implements Serializable {
+class UserToken implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -31,6 +31,7 @@ class PasswordResetToken implements Serializable {
     Integer id
 
     String token
+    String type
 
     Date expires
 

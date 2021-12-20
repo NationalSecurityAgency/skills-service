@@ -18,7 +18,6 @@ package skills.auth.form
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Conditional
-import org.springframework.context.annotation.Lazy
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -32,11 +31,9 @@ import skills.auth.UserInfo
 import skills.controller.PublicPropsBasedValidator
 import skills.controller.exceptions.SkillException
 import skills.controller.result.model.RequestResult
-import skills.services.PasswordResetService
-import skills.storage.model.auth.PasswordResetToken
+import skills.services.PasswordManagementService
+import skills.storage.model.auth.UserToken
 import skills.storage.model.auth.User
-
-import javax.annotation.PostConstruct
 
 @Conditional(SecurityMode.FormAuth)
 @Slf4j
@@ -45,7 +42,7 @@ import javax.annotation.PostConstruct
 class PasswordResetController {
 
     @Autowired
-    PasswordResetService resetService
+    PasswordManagementService resetService
 
     @Autowired
     UserAuthService userAuthService
@@ -64,15 +61,19 @@ class PasswordResetController {
             log.error("no user found for requested password reset")
             throw new SkillException("No user found for id [${userId}]")
         }
-        resetService.createTokenAndNotifyUser(user)
+        resetService.createResetPasswordTokenAndNotifyUser(user)
         return RequestResult.success()
     }
 
     @PostMapping("performPasswordReset")
     RequestResult resetPassword(@RequestBody PasswordReset reset) {
-        PasswordResetToken token = resetService.loadToken(reset.resetToken)
+        UserToken token = resetService.loadToken(reset.resetToken)
         if (token?.getUser()?.getUserId() != reset.userId) {
             throw new SkillException("Supplied reset token is not for the specified user")
+        }
+
+        if (token.type != PasswordManagementService.RESET_PW_TOKEN_TYPE) {
+            throw new SkillException("Supplied reset token has invalid token type [${token.type}]")
         }
 
         if (!token.isValid()) {

@@ -103,15 +103,23 @@ Cypress.Commands.add("register", (user, pass, grantRoot) => {
     return cy.request(`/app/users/validExistingDashboardUserId/${user}`)
         .then((response) => {
             if (response.body !== true) {
-                cy.log(`Creating user [${user}]`)
-                cy.request('PUT', '/createAccount', {
-                    firstName: 'Firstname',
-                    lastName: 'LastName',
-                    email: user,
-                    password: pass,
-                });
                 if (grantRoot) {
-                    cy.request('POST', '/grantFirstRoot');
+                    cy.log(`Creating root user [${user}]`)
+                    cy.request('PUT', '/createRootAccount', {
+                        firstName: 'Firstname',
+                        lastName: 'LastName',
+                        email: user,
+                        password: pass,
+                    });
+                    // cy.request('POST', '/grantFirstRoot');
+                } else {
+                    cy.log(`Creating app user [${user}]`)
+                    cy.request('PUT', '/createAccount', {
+                        firstName: 'Firstname',
+                        lastName: 'LastName',
+                        email: user,
+                        password: pass,
+                    });
                 }
                 cy.request('POST', '/logout');
             } else {
@@ -301,7 +309,7 @@ Cypress.Commands.add("reportSkill", (project = 1, skill = 1, userId = 'user@skil
 });
 
 
-Cypress.Commands.add("getResetLink", () => {
+Cypress.Commands.add("getLinkFromEmail", () => {
     cy.request({
         "method":"GET",
         "url": "http://localhost:1081/api/emails"

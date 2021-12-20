@@ -36,7 +36,8 @@ class PortalWebSecurityHelper {
                     "/app/users/validExistingDashboardUserId/*", "/app/oAuthProviders",
                     "index.html", "/public/**",
                     "/skills-websocket/**", "/requestPasswordReset",
-                    "/resetPassword/**", "/performPasswordReset").permitAll()
+                    "/resetPassword/**", "/performPasswordReset",
+                    "/resendEmailVerification/**", "/verifyEmail", "/userEmailIsVerified/*").permitAll()
             .antMatchers('/admin/**').hasAnyAuthority(RoleName.ROLE_PROJECT_ADMIN.name(), RoleName.ROLE_SUPER_DUPER_USER.name())
             .antMatchers('/supervisor/**').hasAnyAuthority(RoleName.ROLE_SUPERVISOR.name(), RoleName.ROLE_SUPER_DUPER_USER.name())
             .antMatchers('/root/isRoot').hasAnyAuthority(RoleName.values().collect {it.name()}.toArray(new String[0]))

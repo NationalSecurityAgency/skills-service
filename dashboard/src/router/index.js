@@ -45,6 +45,9 @@ import ResetPassword from '@//components/access/ResetPassword';
 import RequestPasswordReset from '@//components/access/RequestPasswordReset';
 import RequestResetConfirmation from '@//components/access/RequestResetConfirmation';
 import ResetConfirmation from '@//components/access/ResetConfirmation';
+import EmailVerificationSent from '@//components/access/EmailVerificationSent';
+import EmailVerifiedConfirmation from '@//components/access/EmailVerifiedConfirmation';
+import RequestEmailVerification from '@//components/access/RequestEmailVerification';
 import ResetNotSupportedPage from '@//components/access/ResetNotSupportedPage';
 import SelfReportStatusPage from '@//components/skills/selfReport/SelfReportStatusPage';
 import UserAgreement from '@//components/access/UserAgreement';
@@ -166,6 +169,33 @@ const router = new Router({
       path: '/reset-not-supported',
       name: 'ResetNotSupportedPage',
       component: ResetNotSupportedPage,
+      meta: {
+        requiresAuth: false,
+      },
+    },
+    {
+      path: '/email-verification-sent',
+      name: 'EmailVerificationSent',
+      component: EmailVerificationSent,
+      props: true,
+      meta: {
+        requiresAuth: false,
+      },
+    },
+    {
+      path: '/verify-email/:token/:email',
+      name: 'EmailVerifiedConfirmation',
+      component: EmailVerifiedConfirmation,
+      props: true,
+      meta: {
+        requiresAuth: false,
+      },
+    },
+    {
+      path: '/request-email-verification',
+      name: 'RequestEmailVerification',
+      component: RequestEmailVerification,
+      props: true,
       meta: {
         requiresAuth: false,
       },

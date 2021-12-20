@@ -199,7 +199,9 @@ aria-describedby=
       login() {
         this.createInProgress = true;
         this.$store.dispatch('signup', { isRootAccount: this.isRootAccount, ...this.loginFields }).then(() => {
-          if (!this.isProgressAndRankingEnabled()) {
+          if (this.verifyEmailAddresses) {
+            this.handlePush({ name: 'EmailVerificationSent', params: { email: this.loginFields.email } });
+          } else if (!this.isProgressAndRankingEnabled()) {
             this.handlePush({ name: 'AdminHomePage' });
           } else {
             const defaultHomePage = this.$store.getters.config.defaultLandingPage;
@@ -224,6 +226,9 @@ aria-describedby=
     computed: {
       oAuthOnly() {
         return this.$store.getters.config.oAuthOnly;
+      },
+      verifyEmailAddresses() {
+        return this.$store.getters.config.verifyEmailAddresses;
       },
     },
     created() {

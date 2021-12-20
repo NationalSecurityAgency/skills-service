@@ -19,6 +19,7 @@ import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.apache.commons.collections4.CollectionUtils
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Lazy
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -65,6 +66,9 @@ class UserAuthService {
     @Autowired
     SettingsService settingsService
 
+    @Value('#{"${skills.authorization.verifyEmailAddresses:false}"}')
+    Boolean verifyEmailAddresses
+
     @Transactional(readOnly = true)
     Collection<GrantedAuthority> loadAuthorities(String userId) {
         return convertRoles(userRepository.findByUserId(userId?.toLowerCase())?.roles)
@@ -78,6 +82,9 @@ class UserAuthService {
         if (user) {
             UserAttrs userAttrs = userAttrsRepo.findByUserId(userId?.toLowerCase())
             userInfo = createUserInfo(user, userAttrs)
+            if (verifyEmailAddresses) {
+                userInfo.accountNonLocked = userInfo.emailVerified
+            }
         }
         return userInfo
     }
@@ -89,6 +96,7 @@ class UserAuthService {
                 firstName: userAttrs.firstName,
                 lastName: userAttrs.lastName,
                 email: userAttrs.email,
+                emailVerified: Boolean.valueOf(userAttrs.emailVerified),
                 userDn: userAttrs.dn,
                 nickname: userAttrs.nickname,
                 authorities: convertRoles(user.roles),

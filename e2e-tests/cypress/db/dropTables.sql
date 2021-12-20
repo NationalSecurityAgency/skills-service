@@ -48,7 +48,7 @@ drop table project_error;
 
 drop table project_definition;
 
-drop table password_reset_token;
+drop table user_token;
 
 drop table notifications;
 

@@ -185,4 +185,21 @@ class AdminSkillInfoSpecs extends DefaultIntSpec {
         skills.get(2).displayOrder == 3
         skills.get(2).totalPoints == proj1_skills.get(2).pointIncrement * proj1_skills.get(2).numPerformToCompletion
     }
+
+    def "skills are always enabled and cannot be disabled"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        when:
+        def skill = skillsService.getSkill(proj1_skills[0])
+        def skills = skillsService.getSkillsForSubject(proj1.projectId, proj1_subj.subjectId)
+        then:
+        skill.enabled == true
+        skills[0].enabled == true
+    }
 }

@@ -1429,4 +1429,35 @@
         <addNotNullConstraint columnDataType="varchar(255)" columnName="enabled" tableName="skill_definition"/>
     </changeSet>
 
+    <changeSet id="17" author="skills team" context="migration17">
+        <sql>
+            update skill_definition set enabled = 'true' where enabled = 'false' and type = 'Skill' and group_id is null;
+        </sql>
+    </changeSet>
+
+    <changeSet id="18" author="skills team" context="migration18">
+        <renameTable newTableName="user_token"
+                     oldTableName="password_reset_token"/>
+
+        <addColumn tableName="user_token">
+            <column name="type" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="user_attrs">
+            <column name="email_verified" type="varchar(255)" defaultValueBoolean="false"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="19" author="skills team" context="migration19">
+        <dropForeignKeyConstraint baseTableName="user_token" constraintName="fk_password_reset_token_user_id" />
+        <dropIndex tableName="user_token" indexName="index_password_reset_token_user_id" />
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="user_token"
+                                 constraintName="fk_password_reset_token_user_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="users"/>
+    </changeSet>
 </databaseChangeLog>
