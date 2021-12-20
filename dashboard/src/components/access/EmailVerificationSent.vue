@@ -23,8 +23,11 @@ limitations under the License.
       </div>
         <div class="card text-left">
           <div class="card-body p-4">
-            <p>An email verification code has been sent to {{ email }}.</p>
+            <p>An email verification code has been sent to <span class="text-primary font-weight-bold">{{ email }}</span>.</p>
             <p>Please check your email and confirm your email address to complete your SkillTree account creation.</p>
+            <div class="text-center">
+              <b-button href="/skills-login" variant="outline-primary" class="p-2" data-cy="loginPage"><i class="fas fa-sign-in-alt mr-1"/>Return to Login Page</b-button>
+            </div>
           </div>
         </div>
 

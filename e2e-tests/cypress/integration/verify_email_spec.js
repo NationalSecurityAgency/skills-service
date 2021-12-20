@@ -57,7 +57,7 @@ describe('Verify Email Tests', () => {
       cy.intercept('GET', '/app/userInfo').as('getUserInfo')
     });
 
-    it('register dashboard user can confirm email address', () => {
+    it('register dashboard and confirm email address', () => {
       cy.visit('/request-account');
       cy.contains('New Account')
       cy.get('#firstName').type("Robert")
@@ -109,7 +109,9 @@ describe('Verify Email Tests', () => {
         cy.wait('@verifyEmail').its('response.body').should(
           'have.property',
           'explanation',
-          'Supplied email verification token does not exist or is not for the specified user')
+          'The supplied email verification token does not exist or is not for the specified user.')
+        cy.get('[data-cy=confirmEmailTitle]').contains('Email Verification is Required!');
+        cy.get('[data-cy=confirmEmailExplanation]').contains('An error occurred while verifying your email address. Please click the button below to resend a new verification code.');
       });
     });
 

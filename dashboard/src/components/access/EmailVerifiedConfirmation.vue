@@ -23,7 +23,10 @@ limitations under the License.
         </div>
         <div class="card text-left">
           <div class="card-body p-4">
-            Your email address has been confirmed! You will be forwarded to the <router-link to="/skills-login" data-cy="loginPage">login page</router-link> in {{ timer }} seconds.
+            <p>Your email address has been confirmed! You will be forwarded to the login page in {{ timer }} seconds.</p>
+            <div class="text-center">
+              <b-button href="/skills-login" variant="outline-primary" class="p-2" data-cy="loginPage"><i class="fas fa-sign-in-alt mr-1"/>Return to Login Page</b-button>
+            </div>
           </div>
         </div>
       </div>
@@ -71,15 +74,14 @@ limitations under the License.
           this.loading = false;
           this.timer = this.countDown;
         }).catch((err) => {
+          const params = {
+            email: this.email,
+            explanation: 'An error occurred while verifying your email address. Please click the button below to resend a new verification code.',
+          };
           if (err && err.response && err.response.data && err.response.data.errorCode === 'UserTokenExpired') {
-            // token has expired, route to RequestEmailVerification so the user can re-request a new one
-            const { email } = this;
-            const explanation = 'Your email verification code has expired.  Please click the button below to resend a new verification code.';
-            this.handlePush({ name: 'RequestEmailVerification', params: { email, explanation } });
-          } else {
-            // unexpected error - redirect to the error page
-            this.handlePush({ name: 'ErrorPage' });
+            params.explanation = 'Your email verification code has expired. Please click the button below to resend a new verification code.';
           }
+          this.handlePush({ name: 'RequestEmailVerification', params });
         });
       },
     },

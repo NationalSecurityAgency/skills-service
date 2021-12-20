@@ -27,8 +27,8 @@ interface PasswordResetTokenRepo extends CrudRepository<UserToken, Integer> {
     UserToken findByToken(String token)
 
     @Nullable
-    @Query("select p from UserToken p where p.user.userId = ?1")
-    UserToken findByUserId(String userId)
+    @Query("select p from UserToken p where p.user.userId = ?1 and p.type = ?2")
+    UserToken findByUserIdAndType(String userId, String type)
 
     @Nullable
     @Query("select p from UserToken  p where p.token = ?1 and p.user.userId = ?2")
@@ -37,4 +37,6 @@ interface PasswordResetTokenRepo extends CrudRepository<UserToken, Integer> {
     void deleteByToken(String token)
 
     void deleteByUserIdAndType(Integer userId, String type)
+
+    void deleteByExpiresBefore(Date date)
 }

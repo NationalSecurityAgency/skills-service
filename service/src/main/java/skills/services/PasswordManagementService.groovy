@@ -90,7 +90,7 @@ class PasswordManagementService {
 
     @Transactional()
     void createTokenAndNotifyUser(User user, String subject, String template, String type) {
-        UserToken token = tokenRepo.findByUserId(user.userId)
+        UserToken token = tokenRepo.findByUserIdAndType(user.userId, type)
 
         SettingsResult expirationSetting = settingsService.getGlobalSetting(Settings.GLOBAL_RESET_TOKEN_EXPIRATION.settingName)
         Duration expirationDuration = null
@@ -170,5 +170,10 @@ class PasswordManagementService {
     @Transactional
     void deleteTokensForUser(Integer userId, String tokenType) {
         tokenRepo.deleteByUserIdAndType(userId, tokenType)
+    }
+
+    @Transactional
+    void deleteTokensOlderThan(Date date) {
+        tokenRepo.deleteByExpiresBefore(date)
     }
 }
