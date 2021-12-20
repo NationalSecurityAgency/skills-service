@@ -75,7 +75,7 @@ class CreateAccountController {
     @Value('#{"${skills.authorization.verifyEmailAddresses:false}"}')
     Boolean verifyEmailAddresses
 
-    @Autowired
+    @Autowired(required = false) // not required for PKI_AUTH
     PasswordManagementService passwordManagementService
 
     @Conditional(SecurityMode.FormAuth)
