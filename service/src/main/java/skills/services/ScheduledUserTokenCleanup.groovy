@@ -18,9 +18,12 @@ package skills.services
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Conditional
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
+import skills.auth.SecurityMode
 
+@Conditional(SecurityMode.FormAuth)
 @Component
 @Slf4j
 class ScheduledUserTokenCleanup {
