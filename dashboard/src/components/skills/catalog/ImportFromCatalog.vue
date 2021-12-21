@@ -223,7 +223,7 @@ limitations under the License.
             outlined: true,
             stacked: 'md',
             sortBy: 'skillId',
-            sortDesc: true,
+            sortDesc: false,
             fields: [
               {
                 key: 'skillId',
@@ -284,18 +284,20 @@ limitations under the License.
           limit: this.table.options.pagination.pageSize,
           page: this.table.options.pagination.currentPage,
           orderBy: this.table.options.sortBy,
-          ascending: true,
-          projectNameSearch: this.filters.projectName.trim(),
-          subjectNameSearch: this.filters.subjectName.trim(),
-          skillNameSearch: this.filters.skillName.trim(),
+          ascending: !this.table.options.sortDesc,
+          projectNameSearch: encodeURIComponent(this.filters.projectName.trim()),
+          subjectNameSearch: encodeURIComponent(this.filters.subjectName.trim()),
+          skillNameSearch: encodeURIComponent(this.filters.skillName.trim()),
         };
         CatalogService.getCatalogSkills(this.$route.params.projectId, params)
           .then((res) => {
             const dataSkills = res.data;
-            this.table.items = dataSkills.map((item) => ({ selected: false, ...item }));
-            this.table.options.pagination.totalRows = res.totalCount;
-            if (this.table.items.length > 0) {
-              this.initialLoadHadData = true;
+            if (dataSkills) {
+              this.table.items = dataSkills.map((item) => ({ selected: false, ...item }));
+              this.table.options.pagination.totalRows = res.totalCount;
+              if (this.table.items.length > 0) {
+                this.initialLoadHadData = true;
+              }
             }
           })
           .finally(() => {
@@ -324,7 +326,7 @@ limitations under the License.
 
         // set to the first page
         this.table.options.pagination.currentPage = 1;
-        this.loadApprovals();
+        this.loadData();
       },
       updateActionsDisableStatus() {
         this.numSelectedSkills = this.table.items.reduce((total, item) => (item.selected ? total + 1 : total), 0);

@@ -635,7 +635,7 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.get('[data-cy="childRowDisplay_skill2"] [data-cy="exportedToCatalogCard"]').contains('This skill was exported')
     });
 
-    it.only('cancel export from a single skill page', () => {
+    it('cancel export from a single skill page', () => {
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
 

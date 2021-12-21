@@ -39,17 +39,17 @@ describe('Import From Catalog Table Tests', () => {
         cy.createSubject(1, 2);
 
         // mix skill names since it's sorted by skillId - this will force different projects in the first page
-        cy.createSkill(1, 1, 1, { pointIncrement: 10, numPerformToCompletion: 8 });
+        cy.createSkill(1, 1, 1, { pointIncrement: 10, numPerformToCompletion: 8, description: 'This is the first skill and it is cool' });
         cy.createSkill(1, 2, 6, { pointIncrement: 15, numPerformToCompletion: 7 });
         cy.createSkill(1, 1, 7, { pointIncrement: 20, numPerformToCompletion: 6 });
-        cy.createSkill(1, 2, 4, { pointIncrement: 25, numPerformToCompletion: 5 });
+        cy.createSkill(1, 2, 4, { pointIncrement: 25, numPerformToCompletion: 5, description: '### Title' });
         cy.createSkill(1, 1, 5, { pointIncrement: 30, numPerformToCompletion: 4 });
 
         cy.createProject(2);
         cy.createSubject(2, 1);
         cy.createSubject(2, 3);
-        cy.createSkill(2, 1, 2, { pointIncrement: 35, numPerformToCompletion: 3 });
-        cy.createSkill(2, 3, 3, { pointIncrement: 40, numPerformToCompletion: 2 });
+        cy.createSkill(2, 1, 2, { pointIncrement: 35, numPerformToCompletion: 3, selfReportingType: 'Approval' });
+        cy.createSkill(2, 3, 3, { pointIncrement: 40, numPerformToCompletion: 2, selfReportingType: 'HonorSystem' });
         cy.createSkill(2, 3, 8, { pointIncrement: 45, numPerformToCompletion: 1 });
 
         cy.exportSkillToCatalog(1, 1, 1);
@@ -177,4 +177,228 @@ describe('Import From Catalog Table Tests', () => {
             [{ colIndex: 0,  value: 'Very Great Skill 4 Subj2' }],
         ], 5);
     });
+
+    it('filter by project name', () => {
+        cy.visit('/administrator/projects/proj3/subjects/subj1');
+        cy.get('[data-cy="importFromCatalogBtn"]').click();
+
+        cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '8')
+
+        cy.get('[data-cy="projectNameFilter"]').type('  jEcT 2  ');
+        cy.get('[data-cy="filterBtn"]').click();
+        cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '3')
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 1,  value: 'This is project 2' }],
+            [{ colIndex: 1,  value: 'This is project 2' }],
+            [{ colIndex: 1,  value: 'This is project 2' }],
+        ], 5);
+
+        cy.get('[data-cy="filterResetBtn"]').click()
+        cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '8')
+
+        cy.get('[data-cy="projectNameFilter"]').type('project 1 {enter}');
+        cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '5')
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 1,  value: 'This is project 1' }],
+            [{ colIndex: 1,  value: 'This is project 1' }],
+            [{ colIndex: 1,  value: 'This is project 1' }],
+            [{ colIndex: 1,  value: 'This is project 1' }],
+            [{ colIndex: 1,  value: 'This is project 1' }],
+        ], 5);
+    });
+
+    it('filter by subject name', () => {
+        cy.visit('/administrator/projects/proj3/subjects/subj1');
+        cy.get('[data-cy="importFromCatalogBtn"]').click();
+
+        cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '8')
+
+        cy.get('[data-cy="subjectNameFilter"]').type('  jEcT 2  ');
+        cy.get('[data-cy="filterBtn"]').click();
+        cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '2')
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 2,  value: 'Subject 2' }],
+            [{ colIndex: 2,  value: 'Subject 2' }],
+        ], 5);
+
+        cy.get('[data-cy="filterResetBtn"]').click()
+        cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '8')
+
+        cy.get('[data-cy="subjectNameFilter"]').type('subject 3 {enter}');
+        cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '2')
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 2,  value: 'Subject 3' }],
+            [{ colIndex: 2,  value: 'Subject 3' }],
+        ], 5);
+    });
+
+    it('filter by project name, skill name and subject name', () => {
+        cy.visit('/administrator/projects/proj3/subjects/subj1');
+        cy.get('[data-cy="importFromCatalogBtn"]').click();
+
+        cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '8')
+
+        cy.get('[data-cy="skillNameFilter"]').type('skill 1');
+        cy.get('[data-cy="projectNameFilter"]').type('project 1');
+        cy.get('[data-cy="subjectNameFilter"]').type('subject 1');
+        cy.get('[data-cy="filterBtn"]').click();
+        cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '1')
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Skill 1' }, { colIndex: 1,  value: 'project 1' }, { colIndex: 2,  value: 'Subject 1' }],
+        ], 5);
+    });
+
+    it('special characters in filters do not cause issues', () => {
+        cy.visit('/administrator/projects/proj3/subjects/subj1');
+        cy.get('[data-cy="importFromCatalogBtn"]').click();
+
+        cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '8')
+
+        cy.get('[data-cy="skillNameFilter"]').type('!@#$%^&*()_+~`-=');
+        cy.get('[data-cy="projectNameFilter"]').type('!@#$%^&*()_+~`-=');
+        cy.get('[data-cy="subjectNameFilter"]').type('!@#$%^&*()_+~`-=');
+        cy.get('[data-cy="filterBtn"]').click();
+        cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '0')
+        cy.get(tableSelector).contains('There are no records to show');
+        cy.get('[data-cy="importBtn"]').should('be.disabled');
+
+        cy.get('[data-cy="filterResetBtn"]').click()
+        cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '8')
+    });
+
+    it('expand skill details', () => {
+        cy.visit('/administrator/projects/proj3/subjects/subj1');
+        cy.get('[data-cy="importFromCatalogBtn"]').click();
+
+        cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '8')
+        cy.get('[data-cy="expandDetailsBtn_proj1_skill1"]').click();
+        cy.get('[data-cy="skillToImportInfo-proj1_skill1"]').contains('Self Report: N/A')
+        cy.get('[data-cy="skillToImportInfo-proj1_skill1"]').contains(`Exported: ${moment().format('YYYY-MM-DD')}`)
+        cy.get('[data-cy="skillToImportInfo-proj1_skill1"] [data-cy="importedSkillInfoDescription"]').contains('This is the first skill and it is cool')
+
+        cy.get('[data-cy="expandDetailsBtn_proj2_skill2"]').click();
+        cy.get('[data-cy="skillToImportInfo-proj2_skill2"]').contains('Self Report: Requires Approval')
+        cy.get('[data-cy="skillToImportInfo-proj2_skill2"] [data-cy="importedSkillInfoDescription"]').should('not.exist')
+
+        cy.get('[data-cy="expandDetailsBtn_proj2_skill3Subj3"]').click();
+        cy.get('[data-cy="skillToImportInfo-proj2_skill3Subj3"]').contains('Self Report: Honor System')
+
+        cy.get('[data-cy="expandDetailsBtn_proj1_skill4Subj2"]').click();
+        // make sure markdown is not shown
+        cy.get('[data-cy="skillToImportInfo-proj1_skill4Subj2"] [data-cy="importedSkillInfoDescription"]').should('have.text', 'Title\n')
+    });
+
+
+    it('skill column sort', () => {
+        cy.visit('/administrator/projects/proj3/subjects/subj1');
+        cy.get('[data-cy="importFromCatalogBtn"]').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Very Great Skill 1' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 2' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 3 Subj3' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 4 Subj2' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 5' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 6 Subj2' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 7' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 8 Subj3' }],
+        ], 5);
+
+        cy.get(`${tableSelector} th`).contains('Skill').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Very Great Skill 8 Subj3' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 7' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 6 Subj2' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 5' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 4 Subj2' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 3 Subj3' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 2' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 1' }],
+        ], 5);
+    });
+
+    it('project column sort', () => {
+        cy.visit('/administrator/projects/proj3/subjects/subj1');
+        cy.get('[data-cy="importFromCatalogBtn"]').click();
+        cy.get(`${tableSelector} th`).contains('Project').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 1,  value: 'project 1' }],
+            [{ colIndex: 1,  value: 'project 1' }],
+            [{ colIndex: 1,  value: 'project 1' }],
+            [{ colIndex: 1,  value: 'project 1' }],
+            [{ colIndex: 1,  value: 'project 1' }],
+            [{ colIndex: 1,  value: 'project 2' }],
+            [{ colIndex: 1,  value: 'project 2' }],
+            [{ colIndex: 1,  value: 'project 2' }],
+        ], 5);
+
+        cy.get(`${tableSelector} th`).contains('Project').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 1,  value: 'project 2' }],
+            [{ colIndex: 1,  value: 'project 2' }],
+            [{ colIndex: 1,  value: 'project 2' }],
+            [{ colIndex: 1,  value: 'project 1' }],
+            [{ colIndex: 1,  value: 'project 1' }],
+            [{ colIndex: 1,  value: 'project 1' }],
+            [{ colIndex: 1,  value: 'project 1' }],
+            [{ colIndex: 1,  value: 'project 1' }],
+        ], 5);
+    });
+
+    it('subject column sort', () => {
+        cy.visit('/administrator/projects/proj3/subjects/subj1');
+        cy.get('[data-cy="importFromCatalogBtn"]').click();
+        cy.get(`${tableSelector} th`).contains('Subject').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 2,  value: 'Subject 1' }],
+            [{ colIndex: 2,  value: 'Subject 1' }],
+            [{ colIndex: 2,  value: 'Subject 1' }],
+            [{ colIndex: 2,  value: 'Subject 1' }],
+            [{ colIndex: 2,  value: 'Subject 2' }],
+            [{ colIndex: 2,  value: 'Subject 2' }],
+            [{ colIndex: 2,  value: 'Subject 3' }],
+            [{ colIndex: 2,  value: 'Subject 3' }],
+        ], 5);
+
+        cy.get(`${tableSelector} th`).contains('Subject').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 2,  value: 'Subject 3' }],
+            [{ colIndex: 2,  value: 'Subject 3' }],
+            [{ colIndex: 2,  value: 'Subject 2' }],
+            [{ colIndex: 2,  value: 'Subject 2' }],
+            [{ colIndex: 2,  value: 'Subject 1' }],
+            [{ colIndex: 2,  value: 'Subject 1' }],
+            [{ colIndex: 2,  value: 'Subject 1' }],
+            [{ colIndex: 2,  value: 'Subject 1' }],
+        ], 5);
+    });
+
+
+    it('points column sort', () => {
+        cy.visit('/administrator/projects/proj3/subjects/subj1');
+        cy.get('[data-cy="importFromCatalogBtn"]').click();
+        cy.get(`${tableSelector} th`).contains('Points').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 3,  value: '45' }],
+            [{ colIndex: 3,  value: '80' }],
+            [{ colIndex: 3,  value: '80' }],
+            [{ colIndex: 3,  value: '105' }],
+            [{ colIndex: 3,  value: '105' }],
+            [{ colIndex: 3,  value: '120' }],
+            [{ colIndex: 3,  value: '120' }],
+            [{ colIndex: 3,  value: '125' }],
+        ], 5);
+
+        cy.get(`${tableSelector} th`).contains('Points').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 3,  value: '125' }],
+            [{ colIndex: 3,  value: '120' }],
+            [{ colIndex: 3,  value: '120' }],
+            [{ colIndex: 3,  value: '105' }],
+            [{ colIndex: 3,  value: '105' }],
+            [{ colIndex: 3,  value: '80' }],
+            [{ colIndex: 3,  value: '80' }],
+            [{ colIndex: 3,  value: '45' }],
+        ], 5);
+    });
+
 })

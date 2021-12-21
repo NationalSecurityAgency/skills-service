@@ -26,11 +26,9 @@ describe('Import skills from Catalog Tests', () => {
     // drill down to a skill when skill already created
     // validate that skill page show imported badge and messages as well as extra navigation items are removed
     //    - validate after navigations and after going directly to the page
-    // select page and clear; select individual skills
-    // filters
-    // paging and sorting
     // mix regular, imported and exported skills
     // deletion of skill
+    // filter then import
 
     const tableSelector = '[data-cy="importSkillsFromCatalogTable"]';
 

@@ -14,13 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <b-card>
+  <b-card :data-cy="`skillToImportInfo-${skill.projectId}_${skill.skillId}`">
     <div class="row">
       <div class="col">
-        <span class="font-italic">Self Report:</span> <span class="text-primary">{{ selfReport }}</span>
+        <i class="fas fa-laptop skills-color-selfreport"></i> <span class="font-italic">Self Report:</span> <span class="text-primary">{{ selfReport }}</span>
       </div>
       <div class="col-auto">
-        <span class="font-italic">Created:</span> <span class="text-primary">{{ skill.created | date }}</span> <span class="text-secondary">({{ value | timeFromNow }})</span>
+        <i class="fas fa-book text-info"></i> <span class="font-italic">Exported:</span> <span class="text-primary">{{ skill.exportedOn | date }}</span> <span class="text-secondary">({{ skill.exportedOn | timeFromNow }})</span>
       </div>
     </div>
     <div class="card mt-3">
