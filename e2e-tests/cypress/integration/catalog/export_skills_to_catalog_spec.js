@@ -559,8 +559,7 @@ describe('Export Skills to the Catalog Tests', () => {
         // import dialog should be empty in this project
         cy.get('[data-cy="importFromCatalogBtn"]').click();
         cy.get('[data-cy="catalogSkillImportModal-NoData"]').contains('Nothing Available for Import')
-        cy.get('[data-cy="importBtn"]').should('be.disabled')
-        cy.get('[data-cy="closeButton"]').click();
+        cy.get('[data-cy="okButton"]').click();
 
         // navigate to another project
         cy.get('[data-cy="breadcrumb-Projects"]').click();

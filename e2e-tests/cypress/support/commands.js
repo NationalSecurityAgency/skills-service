@@ -174,6 +174,13 @@ Cypress.Commands.add("importSkillFromCatalog", (projNum = 2, subjNum = 1, fromPr
     cy.request('POST', url, [{ projectId: `proj${fromProjNum}`, skillId: `skill${fromSkillNum}` }]);
 });
 
+Cypress.Commands.add("acceptRemovalSafetyCheck", () => {
+    cy.contains('Delete Action CANNOT be undone');
+    cy.get('[data-cy="currentValidationText"]').type('Delete Me')
+    cy.get('[data-cy="removeButton"]').click();
+    cy.get('[data-cy="removeButton"]').should('not.exist')
+});
+
 
 
 const constructSkills = (projNum = 1, subjNum = 1, skillNum = 1, overrideProps = {}) => {
