@@ -119,7 +119,7 @@ limitations under the License.
                     <div class="h5 d-inline-block"><span v-if="data.item.nameHtml" v-html="data.item.nameHtml"></span><span v-else>{{ data.item.name }}</span></div>
                   </router-link>
                   <div class="h6 ml-2 d-inline-block">
-                    <b-badge variant="success" class="text-uppercase">
+                    <b-badge variant="success" class="text-uppercase" :data-cy="`importedBadge-${data.item.skillId}`">
                       <span><i class="fas fa-book"></i> Imported</span>
                     </b-badge>
                   </div>

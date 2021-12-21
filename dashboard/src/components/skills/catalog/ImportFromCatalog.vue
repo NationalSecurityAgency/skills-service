@@ -31,24 +31,24 @@ limitations under the License.
     <div v-if="!loading && !emptyCatalog">
       <div class="row px-3 pt-1">
         <div class="col-md border-right">
-          <b-form-group label="Skill Name:" label-for="user-name-filter" label-class="text-muted">
-            <b-form-input id="user-name-filter" v-model="filters.skillName"
+          <b-form-group label="Skill Name:" label-for="skill-name-filter" label-class="text-muted">
+            <b-form-input id="skill-name-filter" v-model="filters.skillName"
                           v-on:keydown.enter="loadData"
-                          data-cy="achievementsNavigator-usernameInput"/>
+                          data-cy="skillNameFilter"/>
           </b-form-group>
         </div>
         <div class="col-md border-right">
-          <b-form-group label="Project Name:" label-for="user-name-filter" label-class="text-muted">
-            <b-form-input id="user-name-filter" v-model="filters.projectName"
+          <b-form-group label="Project Name:" label-for="project-name-filter" label-class="text-muted">
+            <b-form-input id="project-name-filter" v-model="filters.projectName"
                           v-on:keydown.enter="loadData"
-                          data-cy="achievementsNavigator-usernameInput"/>
+                          data-cy="projectNameFilter"/>
           </b-form-group>
         </div>
         <div class="col-md">
-          <b-form-group label="Subject Name:" label-for="user-name-filter" label-class="text-muted">
-            <b-form-input id="user-name-filter" v-model="filters.subjectName"
+          <b-form-group label="Subject Name:" label-for="subject-name-filter" label-class="text-muted">
+            <b-form-input id="subject-name-filter" v-model="filters.subjectName"
                           v-on:keydown.enter="loadData"
-                          data-cy="achievementsNavigator-usernameInput"/>
+                          data-cy="subjectNameFilter"/>
           </b-form-group>
         </div>
       </div>
@@ -57,17 +57,17 @@ limitations under the License.
         <div class="col">
           <div class="pr-2 border-right mr-2 d-inline-block">
             <b-button variant="outline-primary" @click="loadData"
-                      data-cy="" class="mt-1"><i
+                      class="mt-1" data-cy="filterBtn"><i
               class="fa fa-filter"/> Filter
             </b-button>
-            <b-button variant="outline-primary" @click="reset" class="ml-1 mt-1" data-cy="users-resetBtn"><i class="fa fa-times"/> Reset</b-button>
+            <b-button variant="outline-primary" @click="reset" class="ml-1 mt-1" data-cy="filterResetBtn"><i class="fa fa-times"/> Reset</b-button>
           </div>
           <b-button variant="outline-info" @click="changeSelectionForAll(true)"
-                    data-cy="selectPageOfApprovalsBtn" class="mr-2 mt-1"><i
+                    data-cy="selectPageOfSkillsBtn" class="mr-2 mt-1"><i
             class="fa fa-check-square"/> Select Page
           </b-button>
           <b-button variant="outline-info" @click="changeSelectionForAll(false)"
-                    data-cy="clearSelectedApprovalsBtn" class="mt-1"><i class="far fa-square"></i>
+                    data-cy="clearSelectedBtn" class="mt-1"><i class="far fa-square"></i>
             Clear
           </b-button>
         </div>
@@ -106,7 +106,7 @@ limitations under the License.
               :unchecked-value="false"
               :inline="true"
               v-on:input="updateActionsDisableStatus"
-              :data-cy="`approvalSelect_${data.item.projectId}-${data.item.skillId}`"
+              :data-cy="`skillSelect_${data.item.projectId}-${data.item.skillId}`"
             >
               <span>{{ data.item.name }}</span>
             </b-form-checkbox>
@@ -162,12 +162,18 @@ limitations under the License.
     </div>
 
     <div slot="modal-footer" class="w-100">
-      <b-button variant="success" size="sm" class="float-right ml-2"
+      <b-button v-if="!emptyCatalog" variant="success" size="sm" class="float-right ml-2"
                 @click="importSkills" data-cy="importBtn" :disabled="importDisabled"><i
-        class="far fa-arrow-alt-circle-down"></i> Import
+        class="far fa-arrow-alt-circle-down"></i> Import <b-badge variant="primary" data-cy="numSelectedSkills">{{ numSelectedSkills }}</b-badge>
       </b-button>
-      <b-button variant="secondary" size="sm" class="float-right" @click="close" data-cy="closeButton">
+      <b-button v-if="!emptyCatalog" variant="secondary" size="sm" class="float-right" @click="close"
+                data-cy="closeButton">
         <i class="fas fa-times"></i> Cancel
+      </b-button>
+
+      <b-button v-if="emptyCatalog" variant="success" size="sm" class="float-right" @click="close"
+                data-cy="okButton">
+        <i class="fas fa-thumbs-up"></i> OK
       </b-button>
     </div>
   </b-modal>
@@ -204,6 +210,7 @@ limitations under the License.
         loading: false,
         initialLoadHadData: false,
         importDisabled: true,
+        numSelectedSkills: 0,
         filters: {
           skillName: '',
           projectName: '',
@@ -215,7 +222,7 @@ limitations under the License.
             bordered: true,
             outlined: true,
             stacked: 'md',
-            sortBy: 'approverActionTakenOn',
+            sortBy: 'skillId',
             sortDesc: true,
             fields: [
               {
@@ -276,11 +283,11 @@ limitations under the License.
         const params = {
           limit: this.table.options.pagination.pageSize,
           page: this.table.options.pagination.currentPage,
-          orderBy: 'skillId',
+          orderBy: this.table.options.sortBy,
           ascending: true,
-          projectNameSearch: this.filters.projectName,
-          subjectNameSearch: this.filters.subjectName,
-          skillNameSearch: this.filters.skillName,
+          projectNameSearch: this.filters.projectName.trim(),
+          subjectNameSearch: this.filters.subjectName.trim(),
+          skillNameSearch: this.filters.skillName.trim(),
         };
         CatalogService.getCatalogSkills(this.$route.params.projectId, params)
           .then((res) => {
@@ -320,11 +327,8 @@ limitations under the License.
         this.loadApprovals();
       },
       updateActionsDisableStatus() {
-        if (this.table.items.find((item) => item.selected) !== undefined) {
-          this.importDisabled = false;
-        } else {
-          this.importDisabled = true;
-        }
+        this.numSelectedSkills = this.table.items.reduce((total, item) => (item.selected ? total + 1 : total), 0);
+        this.importDisabled = this.numSelectedSkills === 0;
       },
       importSkills() {
         const selected = this.table.items.filter((item) => item.selected);
