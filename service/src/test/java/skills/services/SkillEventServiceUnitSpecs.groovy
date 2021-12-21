@@ -17,6 +17,7 @@ package skills.services
 
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.messaging.simp.broker.BrokerAvailabilityEvent
+import skills.services.admin.SkillCatalogService
 import skills.services.events.*
 import skills.services.events.pointsAndAchievements.PointsAndAchievementsHandler
 import skills.storage.model.SkillDef
@@ -53,6 +54,7 @@ class SkillEventServiceUnitSpecs extends Specification {
         MetricsLogger mockMetricsLogger = Mock()
         UserEventService mockUserEventService = Mock()
         AchievedSkillsGroupHandler mockAchievedSkillsGroupHandler = Mock()
+        SkillCatalogService mockCatalogService = Mock()
 
         SkillEventsService skillEventsService = new SkillEventsService(
                 skillEventPublisher: mockSkillEventPublisher,
@@ -67,7 +69,8 @@ class SkillEventServiceUnitSpecs extends Specification {
                 achievedGlobalBadgeHandler: mockAchievedGlobalBadgeHandler,
                 metricsLogger: mockMetricsLogger,
                 userEventService: mockUserEventService,
-                achievedSkillsGroupHandler: mockAchievedSkillsGroupHandler
+                achievedSkillsGroupHandler: mockAchievedSkillsGroupHandler,
+                skillCatalogService: mockCatalogService
         )
 
         // make it so skill has NOT already reached it's max points, is withing the time window, and has achieved any dependencies
@@ -81,6 +84,7 @@ class SkillEventServiceUnitSpecs extends Specification {
         mockPerformedSkillRepository.countByUserIdAndProjectIdAndSkillId(userId, projId, skillId) >> 1
         mockTimeWindowHelper.checkTimeWindow(_, _, _) >> new TimeWindowHelper.TimeWindowRes(full: false)
         mockCheckDependenciesHelper.check(_, _, _) >> new CheckDependenciesHelper.DependencyCheckRes(hasNotAchievedDependents: false)
+        mockCatalogService.isAvailableInCatalog(_, _) >> false
 
         when:
         Boolean notifyIfNotApplied = false
@@ -99,13 +103,15 @@ class SkillEventServiceUnitSpecs extends Specification {
         UserPerformedSkillRepo mockPerformedSkillRepository = Mock()
         MetricsLogger mockMetricsLogger = Mock()
         UserEventService mockUserEventService = Mock()
+        SkillCatalogService mockCatalogService = Mock()
 
         SkillEventsService skillEventsService = new SkillEventsService(
                 skillEventPublisher: mockSkillEventPublisher,
                 skillEventsSupportRepo: mockSkillEventsSupportRepo,
                 performedSkillRepository: mockPerformedSkillRepository,
                 metricsLogger: mockMetricsLogger,
-                userEventService: mockUserEventService
+                userEventService: mockUserEventService,
+                skillCatalogService: mockCatalogService
         )
 
         // make it so skill has already reached it's max points so result.skillApplied will be false
@@ -116,6 +122,7 @@ class SkillEventServiceUnitSpecs extends Specification {
         skillDefMin.getSelfReportingType() >> SkillDef.SelfReportingType.HonorSystem
         mockSkillEventsSupportRepo.findByProjectIdAndSkillIdAndType(projId, skillId, SkillDef.ContainerType.Skill) >> skillDefMin
         mockPerformedSkillRepository.countByUserIdAndProjectIdAndSkillId(userId, projId, skillId) >> 1
+        mockCatalogService.isAvailableInCatalog(_, _) >> false
 
         when:
         Boolean notifyIfNotApplied = false
@@ -133,13 +140,15 @@ class SkillEventServiceUnitSpecs extends Specification {
         UserPerformedSkillRepo mockPerformedSkillRepository = Mock()
         MetricsLogger mockMetricsLogger = Mock()
         UserEventService mockUserEventService = Mock()
+        SkillCatalogService mockCatalogService = Mock()
 
         SkillEventsService skillEventsService = new SkillEventsService(
                 skillEventPublisher: mockSkillEventPublisher,
                 skillEventsSupportRepo: mockSkillEventsSupportRepo,
                 performedSkillRepository: mockPerformedSkillRepository,
                 metricsLogger: mockMetricsLogger,
-                userEventService: mockUserEventService
+                userEventService: mockUserEventService,
+                skillCatalogService: mockCatalogService
         )
 
         // make it so skill has already reached it's max points so result.skillApplied will be false
@@ -150,6 +159,7 @@ class SkillEventServiceUnitSpecs extends Specification {
         skillDefMin.getSelfReportingType() >> SkillDef.SelfReportingType.Approval
         mockSkillEventsSupportRepo.findByProjectIdAndSkillIdAndType(projId, skillId, SkillDef.ContainerType.Skill) >> skillDefMin
         mockPerformedSkillRepository.countByUserIdAndProjectIdAndSkillId(userId, projId, skillId) >> 1
+        mockCatalogService.isAvailableInCatalog(_, _) >> false
 
         when:
         Boolean notifyIfNotApplied = true // notify even if skill is not applied
