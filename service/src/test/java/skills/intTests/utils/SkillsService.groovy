@@ -379,7 +379,11 @@ class SkillsService {
 
     def assignDependency(Map props) {
         String url = getSkillDependencyUrl(props)
-        wsHelper.adminPost(url, props, false)
+        boolean throwExceptionOnFailure = false
+        if (props.get("throwExceptionOnFailure") != null) {
+            throwExceptionOnFailure = props.throwExceptionOnFailure instanceof Boolean ? props.throwExceptionOnFailure : Boolean.valueOf(props.throwExceptionOnFailure)
+        }
+        wsHelper.adminPost(url, props, throwExceptionOnFailure)
     }
 
     def removeDependency(Map props) {
@@ -389,10 +393,20 @@ class SkillsService {
 
     String getSkillDependencyUrl(Map props) {
         String url
-        if(props.dependentProjectId){
-            url = "/projects/${props.projectId}/skills/${props.skillId}/dependency/projects/${props.dependentProjectId}/skills/${props.dependentSkillId}"
+        // variables on backend where changed to more accurately reflect the relationships
+        // adding this translation layer in place to avoid breaking pre-existing specs using the previous variable naming structure
+        if(props.dependentSkillId && props.skillId) {
+            props.dependencySkillId = props.dependentSkillId
+            props.dependentSkillId = props.skillId
+        }
+        if (props.dependentProjectId) {
+            props.dependendencyProjectId = props.dependentProjectId
+        }
+
+        if(props.dependendencyProjectId){
+            url = "/projects/${props.projectId}/skills/${props.dependentSkillId}/dependency/projects/${props.dependendencyProjectId}/skills/${props.dependencySkillId}"
         } else {
-            url = "/projects/${props.projectId}/skills/${props.skillId}/dependency/${props.dependentSkillId}"
+            url = "/projects/${props.projectId}/skills/${props.dependentSkillId}/dependency/${props.dependencySkillId}"
         }
         return url
     }

@@ -32,7 +32,6 @@ import skills.controller.result.model.SkillsGraphRes
 import skills.services.DependencyValidator
 import skills.services.RuleSetDefGraphService
 import skills.storage.model.SkillDef
-import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.SkillRelDef
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.accessors.SkillDefAccessor
@@ -71,23 +70,30 @@ class SkillsDepsService {
     @Autowired
     ShareSkillsService shareSkillsService
 
-    @Transactional()
-    void assignSkillDependency(String projectId, String skillId, String dependentSkillId, String dependentProjectId = null) {
-        SkillDef skill1 = skillDefAccessor.getSkillDef(projectId, skillId)
-        SkillDef skill2 = skillDefAccessor.getSkillDef(dependentProjectId ?: projectId, dependentSkillId)
+    @Autowired
+    SkillCatalogService skillCatalogService
 
-        if (dependentProjectId) {
-            dependencyValidator.validateDependencyEligibility(projectId, skill2)
+    @Transactional()
+    void assignSkillDependency(String projectId, String dependentSkillId, String dependencySkillId, String dependendencyProjectId = null) {
+        SkillDef dependent = skillDefAccessor.getSkillDef(projectId, dependentSkillId)
+        SkillDef dependency = skillDefAccessor.getSkillDef(dependendencyProjectId ?: projectId, dependencySkillId)
+
+        if (skillCatalogService.isAvailableInCatalog(dependent)) {
+            throw new SkillException("Skill [${dependent.skillId}] has been shared to the catalog. Dependencies cannot be added to a skill shared to the catalog.", projectId, dependentSkillId, ErrorCode.DependenciesNotAllowed)
         }
 
-        validateDependencyVersions(skill1, skill2)
-        checkForCircularGraphAndThrowException(skill1, skill2, SkillRelDef.RelationshipType.Dependence)
+        if (dependendencyProjectId) {
+            dependencyValidator.validateDependencyEligibility(projectId, dependency)
+        }
+
+        validateDependencyVersions(dependent, dependency)
+        checkForCircularGraphAndThrowException(dependent, dependency, SkillRelDef.RelationshipType.Dependence)
         try {
-            skillRelDefRepo.save(new SkillRelDef(parent: skill1, child: skill2, type: SkillRelDef.RelationshipType.Dependence))
+            skillRelDefRepo.save(new SkillRelDef(parent: dependent, child: dependency, type: SkillRelDef.RelationshipType.Dependence))
         } catch (DataIntegrityViolationException e) {
-            String msg = "Skill dependency [${skill1.projectId}:${skill1.skillId}]=>[${skill2.projectId}:${skill2.skillId}] already exist.".toString()
+            String msg = "Skill dependency [${dependent.projectId}:${dependent.skillId}]=>[${dependency.projectId}:${dependency.skillId}] already exist.".toString()
             log.error(msg, e)
-            throw new SkillException(msg, skill1.projectId, skill1.skillId, ErrorCode.FailedToAssignDependency)
+            throw new SkillException(msg, dependent.projectId, dependent.skillId, ErrorCode.FailedToAssignDependency)
         }
     }
 
@@ -100,9 +106,9 @@ class SkillsDepsService {
     }
 
     @Transactional()
-    void removeSkillDependency(String projectId, String skillId, String dependentSkillId, String dependentProjectId = null) {
-        ruleSetDefGraphService.removeGraphRelationship(projectId, skillId, SkillDef.ContainerType.Skill,
-                dependentProjectId ?: projectId, dependentSkillId, SkillRelDef.RelationshipType.Dependence)
+    void removeSkillDependency(String projectId, String dependentSkillId, String dependencySkillId, String dependentyProjectId = null) {
+        ruleSetDefGraphService.removeGraphRelationship(projectId, dependentSkillId, SkillDef.ContainerType.Skill,
+                dependentyProjectId ?: projectId, dependencySkillId, SkillRelDef.RelationshipType.Dependence)
     }
 
     @Transactional(readOnly = true)

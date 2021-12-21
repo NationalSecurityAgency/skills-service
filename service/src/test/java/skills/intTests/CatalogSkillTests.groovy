@@ -1351,6 +1351,35 @@ class CatalogSkillTests extends DefaultIntSpec {
         e.httpStatus == HttpStatus.NOT_FOUND
     }
 
+    def "add a dependency to a skill that has been exported to the catalog"() {
+        def project1 = createProject(1)
+
+        def p1subj1 = createSubject(1, 1)
+
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 10)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 10)
+        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 10)
+        def skill4 = createSkill(1, 1, 4, 0, 1, 0, 10)
+
+
+        skillsService.createProject(project1)
+        skillsService.createSubject(p1subj1)
+
+        skillsService.createSkill(skill)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(skill3)
+        skillsService.createSkill(skill4)
+
+        when:
+
+        skillsService.exportSkillToCatalog(skill.projectId, skill4.skillId)
+        skillsService.assignDependency([projectId: skill4.projectId, dependentSkillId: skill4.skillId, dependencySkillId: skill.skillId, throwExceptionOnFailure: true])
+
+        then:
+        def e = thrown(SkillsClientException)
+        e.getMessage().contains("Dependencies cannot be added to a skill shared to the catalog.")
+    }
+
 }
 
 

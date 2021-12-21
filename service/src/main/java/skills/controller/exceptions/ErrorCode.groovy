@@ -34,5 +34,6 @@ enum ErrorCode {
     ReadOnlySkill,
     UserTokenExpired,
     SkillAlreadyInCatalog,
-    ExportToCatalogNotAllowed
+    ExportToCatalogNotAllowed,
+    DependenciesNotAllowed
 }

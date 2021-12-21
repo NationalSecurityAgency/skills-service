@@ -528,61 +528,61 @@ class AdminController {
         return skillsDepsService.getSkillsAvailableForDependency(projectId)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependency/{dependentSkillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/projects/{projectId}/skills/{dependentSkillId}/dependency/{dependencySkillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     RequestResult assignDependency(@PathVariable("projectId") String projectId,
-                                   @PathVariable("skillId") String skillId,
-                                   @PathVariable("dependentSkillId") String dependentSkillId) {
+                                   @PathVariable("dependentSkillId") String dependentSkillId,
+                                   @PathVariable("dependencySkillId") String dependencySkillId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
-        SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
         SkillsValidator.isNotBlank(dependentSkillId, "Dependent Skill Id", projectId)
+        SkillsValidator.isNotBlank(dependencySkillId, "Dependency Skill Id", projectId)
 
-        skillsDepsService.assignSkillDependency(projectId, skillId, dependentSkillId)
+        skillsDepsService.assignSkillDependency(projectId, dependentSkillId, dependencySkillId)
         return new RequestResult(success: true)
     }
 
 
-    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependency/projects/{dependentProjectId}/skills/{dependentSkillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/projects/{projectId}/skills/{dependentSkillId}/dependency/projects/{dependencyProjectId}/skills/{dependencySkillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     RequestResult assignDependencyFromAnotherProject(@PathVariable("projectId") String projectId,
-                                                     @PathVariable("skillId") String skillId,
-                                                     @PathVariable("dependentProjectId") String dependentProjectId,
-                                                     @PathVariable("dependentSkillId") String dependentSkillId) {
+                                                     @PathVariable("dependentSkillId") String dependentSkillId,
+                                                     @PathVariable("dependencyProjectId") String dependencyProjectId,
+                                                     @PathVariable("dependencySkillId") String dependencySkillId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
-        SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
-        SkillsValidator.isNotBlank(dependentProjectId, "Dependent Project Id", projectId)
-        SkillsValidator.isNotBlank(dependentSkillId, "Dependent Skill Id", projectId)
+        SkillsValidator.isNotBlank(dependencySkillId, "Dependent Skill Id", projectId)
+        SkillsValidator.isNotBlank(dependencyProjectId, "Dependency Project Id", projectId)
+        SkillsValidator.isNotBlank(dependentSkillId, "Dependency Skill Id", projectId)
 
-        skillsDepsService.assignSkillDependency(projectId, skillId, dependentSkillId, dependentProjectId)
+        skillsDepsService.assignSkillDependency(projectId, dependentSkillId, dependencySkillId, dependencyProjectId)
         return new RequestResult(success: true)
     }
 
 
-    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependency/{dependentSkillId}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/projects/{projectId}/skills/{dependentSkillId}/dependency/{dependencySkillId}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     RequestResult removeDependency(@PathVariable("projectId") String projectId,
-                                   @PathVariable("skillId") String skillId,
-                                   @PathVariable("dependentSkillId") String dependentSkillId) {
+                                   @PathVariable("dependentSkillId") String dependentSkillId,
+                                   @PathVariable("dependencySkillId") String dependencySkillId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
-        SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
         SkillsValidator.isNotBlank(dependentSkillId, "Dependent Skill Id", projectId)
+        SkillsValidator.isNotBlank(dependencySkillId, "Dependency Skill Id", projectId)
 
-        skillsDepsService.removeSkillDependency(projectId, skillId, dependentSkillId)
+        skillsDepsService.removeSkillDependency(projectId, dependentSkillId, dependencySkillId)
         return new RequestResult(success: true)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependency/projects/{dependentProjectId}/skills/{dependentSkillId}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/projects/{projectId}/skills/{dependentSkillId}/dependency/projects/{dependencyProjectId}/skills/{dependencySkillId}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     RequestResult removeDependencyFromAnotherProject(@PathVariable("projectId") String projectId,
-                                                     @PathVariable("skillId") String skillId,
-                                                     @PathVariable("dependentProjectId") String dependentProjectId,
-                                                     @PathVariable("dependentSkillId") String dependentSkillId) {
+                                                     @PathVariable("dependentSkillId") String dependentSkillId,
+                                                     @PathVariable("dependentProjectId") String dependencyProjectId,
+                                                     @PathVariable("dependentSkillId") String dependencySkillId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
-        SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
-        SkillsValidator.isNotBlank(dependentProjectId, "Dependent Project Id", projectId)
         SkillsValidator.isNotBlank(dependentSkillId, "Dependent Skill Id", projectId)
+        SkillsValidator.isNotBlank(dependencyProjectId, "Dependency Project Id", projectId)
+        SkillsValidator.isNotBlank(dependencySkillId, "Dependency Skill Id", projectId)
 
-        skillsDepsService.removeSkillDependency(projectId, skillId, dependentSkillId, dependentProjectId)
+        skillsDepsService.removeSkillDependency(projectId, dependentSkillId, dependencySkillId, dependencyProjectId)
         return new RequestResult(success: true)
     }
 
