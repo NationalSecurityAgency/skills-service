@@ -393,20 +393,21 @@ class SkillsService {
 
     String getSkillDependencyUrl(Map props) {
         String url
+        def newProps = props.clone()
         // variables on backend where changed to more accurately reflect the relationships
         // adding this translation layer in place to avoid breaking pre-existing specs using the previous variable naming structure
-        if(props.dependentSkillId && props.skillId) {
-            props.dependencySkillId = props.dependentSkillId
-            props.dependentSkillId = props.skillId
+        if(newProps.dependentSkillId && newProps.skillId) {
+            newProps.dependencySkillId = newProps.dependentSkillId
+            newProps.dependentSkillId = newProps.skillId
         }
-        if (props.dependentProjectId) {
-            props.dependendencyProjectId = props.dependentProjectId
+        if (newProps.dependentProjectId) {
+            newProps.dependendencyProjectId = newProps.dependentProjectId
         }
 
-        if(props.dependendencyProjectId){
-            url = "/projects/${props.projectId}/skills/${props.dependentSkillId}/dependency/projects/${props.dependendencyProjectId}/skills/${props.dependencySkillId}"
+        if(newProps.dependendencyProjectId){
+            url = "/projects/${newProps.projectId}/skills/${newProps.dependentSkillId}/dependency/projects/${newProps.dependendencyProjectId}/skills/${newProps.dependencySkillId}"
         } else {
-            url = "/projects/${props.projectId}/skills/${props.dependentSkillId}/dependency/${props.dependencySkillId}"
+            url = "/projects/${newProps.projectId}/skills/${newProps.dependentSkillId}/dependency/${newProps.dependencySkillId}"
         }
         return url
     }

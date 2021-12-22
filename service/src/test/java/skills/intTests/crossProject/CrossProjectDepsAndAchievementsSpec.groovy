@@ -17,6 +17,7 @@ package skills.intTests.crossProject
 
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
+import spock.lang.IgnoreRest
 
 class CrossProjectDepsAndAchievementsSpec extends DefaultIntSpec {
 

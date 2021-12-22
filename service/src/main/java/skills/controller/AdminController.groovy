@@ -575,8 +575,8 @@ class AdminController {
     @ResponseBody
     RequestResult removeDependencyFromAnotherProject(@PathVariable("projectId") String projectId,
                                                      @PathVariable("dependentSkillId") String dependentSkillId,
-                                                     @PathVariable("dependentProjectId") String dependencyProjectId,
-                                                     @PathVariable("dependentSkillId") String dependencySkillId) {
+                                                     @PathVariable("dependencyProjectId") String dependencyProjectId,
+                                                     @PathVariable("dependencySkillId") String dependencySkillId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(dependentSkillId, "Dependent Skill Id", projectId)
         SkillsValidator.isNotBlank(dependencyProjectId, "Dependency Project Id", projectId)
