@@ -21,24 +21,24 @@ export default {
       .then((response) => response.data);
   },
   getBadge(badgeId) {
-    return axios.get(`/supervisor/badges/${badgeId}`)
+    return axios.get(`/supervisor/badges/${encodeURIComponent(badgeId)}`)
       .then((response) => response.data);
   },
   saveBadge(badgeReq) {
     if (badgeReq.isEdit) {
-      return axios.put(`/supervisor/badges/${badgeReq.originalBadgeId}`, badgeReq)
+      return axios.put(`/supervisor/badges/${encodeURIComponent(badgeReq.originalBadgeId)}`, badgeReq)
         .then(() => this.getBadge(badgeReq.badgeId));
     }
     const req = { enabled: false, ...badgeReq };
-    return axios.put(`/supervisor/badges/${req.badgeId}`, req)
+    return axios.put(`/supervisor/badges/${encodeURIComponent(req.badgeId)}`, req)
       .then(() => this.getBadge(req.badgeId));
   },
   deleteBadge(badgeId) {
-    return axios.delete(`/supervisor/badges/${badgeId}`)
+    return axios.delete(`/supervisor/badges/${encodeURIComponent(badgeId)}`)
       .then((response) => response.data);
   },
   updateBadgeDisplaySortOrder(badgeId, newDisplayOrderIndex) {
-    return axios.patch(`/supervisor/badges/${badgeId}`, { action: 'NewDisplayOrderIndex', newDisplayOrderIndex });
+    return axios.patch(`/supervisor/badges/${encodeURIComponent(badgeId)}`, { action: 'NewDisplayOrderIndex', newDisplayOrderIndex });
   },
   badgeWithNameExists(badgeName) {
     return axios.post('/supervisor/badges/name/exists', { name: badgeName })
@@ -49,39 +49,39 @@ export default {
       .then((remoteRes) => !remoteRes.data);
   },
   assignSkillToBadge(badgeId, projectId, skillId) {
-    return axios.post(`/supervisor/badges/${badgeId}/projects/${projectId}/skills/${skillId}`)
+    return axios.post(`/supervisor/badges/${encodeURIComponent(badgeId)}/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}`)
       .then((res) => res.data);
   },
   removeSkillFromBadge(badgeId, projectId, skillId) {
-    return axios.delete(`/supervisor/badges/${badgeId}/projects/${projectId}/skills/${skillId}`)
+    return axios.delete(`/supervisor/badges/${encodeURIComponent(badgeId)}/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}`)
       .then((res) => res.data);
   },
   getBadgeSkills(badgeId) {
-    return axios.get(`/supervisor/badges/${badgeId}/skills`)
+    return axios.get(`/supervisor/badges/${encodeURIComponent(badgeId)}/skills`)
       .then((res) => res.data);
   },
   suggestProjectSkills(badgeId, search) {
-    return axios.get(`/supervisor/badges/${badgeId}/skills/available?query=${search}`)
+    return axios.get(`/supervisor/badges/${encodeURIComponent(badgeId)}/skills/available?query=${search}`)
       .then((res) => res.data);
   },
   getAllProjectsForBadge(badgeId) {
-    return axios.get(`/supervisor/badges/${badgeId}/projects/available`)
+    return axios.get(`/supervisor/badges/${encodeURIComponent(badgeId)}/projects/available`)
       .then((res) => res.data);
   },
   getProjectLevels(projectId) {
-    return axios.get(`/supervisor/projects/${projectId}/levels`)
+    return axios.get(`/supervisor/projects/${encodeURIComponent(projectId)}/levels`)
       .then((res) => res.data);
   },
   assignProjectLevelToBadge(badgeId, projectId, levelId) {
-    return axios.post(`/supervisor/badges/${badgeId}/projects/${projectId}/level/${levelId}`)
+    return axios.post(`/supervisor/badges/${encodeURIComponent(badgeId)}/projects/${encodeURIComponent(projectId)}/level/${encodeURIComponent(levelId)}`)
       .then((res) => res.data);
   },
   removeProjectLevelFromBadge(badgeId, projectId, level) {
-    return axios.delete(`/supervisor/badges/${badgeId}/projects/${projectId}/level/${level}`)
+    return axios.delete(`/supervisor/badges/${encodeURIComponent(badgeId)}/projects/${encodeURIComponent(projectId)}/level/${level}`)
       .then((res) => res.data);
   },
   changeProjectLevel(badgeId, projectId, oldLevel, newLevel) {
-    return axios.post(`/supervisor/badges/${badgeId}/projects/${projectId}/level/${oldLevel}/${newLevel}`)
+    return axios.post(`/supervisor/badges/${encodeURIComponent(badgeId)}/projects/${encodeURIComponent(projectId)}/level/${oldLevel}/${newLevel}`)
       .then((res) => res.data);
   },
 };

@@ -19,7 +19,7 @@ export default {
   getCustomIconCss(projectId, isSupervisor) {
     let url;
     if (projectId) {
-      url = `/api/projects/${projectId}/customIconCss`;
+      url = `/api/projects/${encodeURIComponent(projectId)}/customIconCss`;
     } else if (isSupervisor) {
       url = '/api/icons/customIconCss';
     }

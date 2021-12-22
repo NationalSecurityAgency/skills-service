@@ -43,4 +43,24 @@ class IdFormatValidatorSpec extends Specification {
         id << ["Works_W\$ll", "1*K20_dk28939"]
     }
 
+    def "do not allow percent by default"() {
+        when:
+        IdFormatValidator.validate(id)
+
+        then:
+        thrown(SkillException)
+
+        where:
+        id << ["Id%20WithPercent"]
+    }
+    def "allow percent if configured"() {
+        when:
+        IdFormatValidator.validate(id, true)
+
+        then:
+        noExceptionThrown()
+
+        where:
+        id << ["Id%20WithPercent"]
+    }
 }

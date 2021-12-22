@@ -33,14 +33,14 @@ const createCustomIconStyleElementIfNotExist = () => {
 
 export default {
   getIconIndex(projectId) {
-    let url = `/app/projects/${projectId}/customIcons`;
+    let url = `/app/projects/${encodeURIComponent(projectId)}/customIcons`;
     if (!projectId) {
       url = '/supervisor/icons/customIcons';
     }
     return axios.get(url).then((response) => response.data);
   },
   deleteIcon(iconName, projectId) {
-    let url = `/admin/projects/${projectId}/icons/${iconName}`;
+    let url = `/admin/projects/${encodeURIComponent(projectId)}/icons/${iconName}`;
     if (!projectId) {
       url = `/supervisor/icons/${iconName}`;
     }

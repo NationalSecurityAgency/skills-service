@@ -456,7 +456,11 @@ class AdminController {
         skillRequest.subjectId = skillRequest.subjectId ?: subjectId
         skillRequest.skillId = skillRequest.skillId ?: skillId
 
-        IdFormatValidator.validate(skillRequest.skillId)
+        // if type is not provided then we default to skill
+        skillRequest.type = skillRequest.type ?:  SkillDef.ContainerType.Skill.toString()
+        Boolean isBasicSkill = skillRequest.type == SkillDef.ContainerType.Skill.toString()
+
+        IdFormatValidator.validate(skillRequest.skillId, isBasicSkill)
         propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxIdLength, "Skill Id", skillRequest.skillId)
         propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minIdLength, "Skill Id", skillRequest.skillId)
 
@@ -468,10 +472,7 @@ class AdminController {
         skillRequest.skillId = InputSanitizer.sanitize(skillRequest.skillId)
         skillRequest.subjectId = InputSanitizer.sanitize(skillRequest.subjectId)
 
-        // if type is not provided then we default to skill
-        skillRequest.type = skillRequest.type ?:  SkillDef.ContainerType.Skill.toString()
-
-        if (skillRequest.type == SkillDef.ContainerType.Skill.toString()) {
+        if (isBasicSkill) {
             SkillsValidator.isTrue(skillRequest.pointIncrement > 0, "pointIncrement must be > 0", projectId, skillId)
             propsBasedValidator.validateMaxIntValue(PublicProps.UiProp.maxPointIncrement, "pointIncrement", skillRequest.pointIncrement)
 
