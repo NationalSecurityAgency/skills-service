@@ -75,14 +75,14 @@ class CatalogSkillTests extends DefaultIntSpec {
 
         when:
         skillsService.bulkExportSkillsToCatalog(project1.projectId, [skill.skillId, skill2.skillId, skill3.skillId])
-        def res = skillsService.getCatalogSkills(project2.projectId, 5, 1)
+        def res = skillsService.getCatalogSkills(project2.projectId, 5, 1, "name")
 
         then:
         res
         res.totalCount == 3
         res.data[0].skillId == skill.skillId
-        res.data[1].skillId == skill2.skillId
-        res.data[2].skillId == skill3.skillId
+        res.data[1].skillId == skill3.skillId
+        res.data[2].skillId == skill2.skillId
     }
 
     def "update skill that has been exported to catalog"() {
