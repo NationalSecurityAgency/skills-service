@@ -54,11 +54,15 @@ limitations under the License.
     props: {
       label: String,
       value: String,
+      isSkillId: {
+        type: Boolean,
+        default: false,
+      },
       additionalValidationRules: [String],
     },
     data() {
       return {
-        rules: 'required|minIdLength|maxIdLength|id_validator',
+        rules: `required|minIdLength|maxIdLength|${this.isSkillId ? 'skill_id_validator' : 'id_validator'}`,
         canEdit: false,
         internalValue: this.value,
       };

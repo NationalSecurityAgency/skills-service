@@ -17,36 +17,36 @@ import axios from 'axios';
 
 export default {
   getBadges(projectId) {
-    return axios.get(`/admin/projects/${projectId}/badges`)
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/badges`)
       .then((response) => response.data);
   },
   getBadge(projectId, badgeId) {
-    return axios.get(`/admin/projects/${projectId}/badges/${badgeId}`)
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/badges/${encodeURIComponent(badgeId)}`)
       .then((response) => response.data);
   },
   saveBadge(badgeReq) {
     if (badgeReq.isEdit) {
-      return axios.post(`/admin/projects/${badgeReq.projectId}/badges/${badgeReq.originalBadgeId}`, badgeReq)
+      return axios.post(`/admin/projects/${encodeURIComponent(badgeReq.projectId)}/badges/${encodeURIComponent(badgeReq.originalBadgeId)}`, badgeReq)
         .then(() => this.getBadge(badgeReq.projectId, badgeReq.badgeId));
     }
 
     const req = { enabled: false, ...badgeReq };
-    return axios.post(`/admin/projects/${req.projectId}/badges/${req.badgeId}`, req)
+    return axios.post(`/admin/projects/${encodeURIComponent(req.projectId)}/badges/${encodeURIComponent(req.badgeId)}`, req)
       .then(() => this.getBadge(req.projectId, req.badgeId));
   },
   deleteBadge(projectId, badgeId) {
-    return axios.delete(`/admin/projects/${projectId}/badges/${badgeId}`)
+    return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}/badges/${encodeURIComponent(badgeId)}`)
       .then((repsonse) => repsonse.data);
   },
   updateBadgeDisplaySortOrder(projectId, badgeId, newDisplayOrderIndex) {
-    return axios.patch(`/admin/projects/${projectId}/badges/${badgeId}`, { action: 'NewDisplayOrderIndex', newDisplayOrderIndex });
+    return axios.patch(`/admin/projects/${encodeURIComponent(projectId)}/badges/${encodeURIComponent(badgeId)}`, { action: 'NewDisplayOrderIndex', newDisplayOrderIndex });
   },
   badgeWithNameExists(projectId, badgeName) {
-    return axios.post(`/admin/projects/${projectId}/badgeNameExists`, { name: badgeName })
+    return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/badgeNameExists`, { name: badgeName })
       .then((remoteRes) => !remoteRes.data);
   },
   badgeWithIdExists(projectId, badgeId) {
-    return axios.get(`/admin/projects/${projectId}/entityIdExists?id=${badgeId}`)
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/entityIdExists?id=${encodeURIComponent(badgeId)}`)
       .then((remoteRes) => !remoteRes.data);
   },
 };

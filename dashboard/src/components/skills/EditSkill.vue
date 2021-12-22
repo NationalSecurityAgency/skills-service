@@ -39,7 +39,7 @@ limitations under the License.
               </div>
             </div>
             <div class="col-12 col-lg">
-              <id-input type="text" label="Skill ID" additional-validation-rules="uniqueId"
+              <id-input type="text" label="Skill ID" :isSkillId="true" additional-validation-rules="uniqueId"
                         v-model="skillInternal.skillId" @can-edit="canEditSkillId=$event"
                         v-on:keyup.enter.native="handleSubmit(saveSkill)"/>
             </div>

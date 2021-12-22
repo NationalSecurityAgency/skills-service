@@ -27,17 +27,17 @@ export default {
       .then((response) => response.data);
   },
   addToMyProjects(projectId) {
-    const url = `/api/myprojects/${projectId}`;
+    const url = `/api/myprojects/${encodeURIComponent(projectId)}`;
     return axios.post(url)
       .then((response) => response.data);
   },
   moveMyProject(projectId, newSortIndex) {
-    const url = `/api/myprojects/${projectId}`;
+    const url = `/api/myprojects/${encodeURIComponent(projectId)}`;
     return axios.post(url, { newSortIndex })
       .then((response) => response.data);
   },
   removeFromMyProjects(projectId) {
-    const url = `/api/myprojects/${projectId}`;
+    const url = `/api/myprojects/${encodeURIComponent(projectId)}`;
     return axios.delete(url)
       .then((response) => response.data);
   },
@@ -51,37 +51,37 @@ export default {
       .then((response) => response.data);
   },
   getProject(projectId) {
-    return axios.get(`/admin/projects/${projectId}`).then((response) => response.data);
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}`).then((response) => response.data);
   },
   getProjectErrors(projectId, params) {
-    return axios.get(`/admin/projects/${projectId}/errors`, { params }).then((response) => response.data);
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/errors`, { params }).then((response) => response.data);
   },
   deleteProjectError(projectId, errorType, reportedSkillid) {
-    return axios.delete(`/admin/projects/${projectId}/errors/${errorType}/${encodeURIComponent(reportedSkillid)}`).then((response) => response.data);
+    return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}/errors/${errorType}/${encodeURIComponent(reportedSkillid)}`).then((response) => response.data);
   },
   deleteAllProjectErrors(projectId) {
-    return axios.delete(`/admin/projects/${projectId}/errors`).then((response) => response.data);
+    return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}/errors`).then((response) => response.data);
   },
   getProjectDetails(projectId) {
-    return axios.get(`/admin/projects/${projectId}`)
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}`)
       .then((response) => response.data);
   },
   updateProjectDisplaySortOrder(projectId, newDisplayOrderIndex) {
-    return axios.patch(`/admin/projects/${projectId}`, { action: 'NewDisplayOrderIndex', newDisplayOrderIndex });
+    return axios.patch(`/admin/projects/${encodeURIComponent(projectId)}`, { action: 'NewDisplayOrderIndex', newDisplayOrderIndex });
   },
   saveProject(project) {
     if (project.isEdit) {
-      return axios.post(`/admin/projects/${project.originalProjectId}`, project)
+      return axios.post(`/admin/projects/${encodeURIComponent(project.originalProjectId)}`, project)
         .then(() => this.getProject(project.projectId));
     }
-    return axios.post(`/app/projects/${project.projectId}`, project)
+    return axios.post(`/app/projects/${encodeURIComponent(project.projectId)}`, project)
       .then(() => this.getProject(project.projectId));
   },
   deleteProject(projectId) {
-    return axios.delete(`/admin/projects/${projectId}`);
+    return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}`);
   },
   queryOtherProjectsByName(projectId, nameQuery) {
-    return axios.get(`/admin/projects/${projectId}/projectSearch?nameQuery=${encodeURIComponent(nameQuery)}`)
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/projectSearch?nameQuery=${encodeURIComponent(nameQuery)}`)
       .then((response) => response.data);
   },
   checkIfProjectIdExist(projectId) {
@@ -96,17 +96,17 @@ export default {
       .then((response) => response.data);
   },
   checkIfProjectBelongsToGlobalBadge(projectId) {
-    return axios.get(`/admin/projects/${projectId}/globalBadge/exists`)
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/globalBadge/exists`)
       .then((response) => response.data);
   },
   cancelUnusedProjectDeletion(projectId) {
-    return axios.post(`/admin/projects/${projectId}/cancelExpiration`).then((response) => response.data);
+    return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/cancelExpiration`).then((response) => response.data);
   },
   countUsersMatchingCriteria(projectId, userQueryCriteria) {
-    return axios.post(`/admin/projects/${projectId}/contactUsersCount`, userQueryCriteria).then((response) => response.data);
+    return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/contactUsersCount`, userQueryCriteria).then((response) => response.data);
   },
   contactUsers(projectId, contactUsersRequest) {
-    return axios.post(`/admin/projects/${projectId}/contactUsers`, contactUsersRequest).then((response) => response.data);
+    return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/contactUsers`, contactUsersRequest).then((response) => response.data);
   },
   isEmailServiceSupported() {
     return axios.get('/public/isFeatureSupported?feature=emailservice').then((response) => response.data);
@@ -118,7 +118,7 @@ export default {
     return axios.post('/root/users/contactAllProjectAdmins', email).then((response) => response.data);
   },
   previewEmail(projectId, email) {
-    return axios.post(`/admin/projects/${projectId}/previewEmail`, email).then((response) => response.data);
+    return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/previewEmail`, email).then((response) => response.data);
   },
   rootPreviewEmail(email) {
     return axios.post('/root/users/previewEmail', email).then((response) => response.data);

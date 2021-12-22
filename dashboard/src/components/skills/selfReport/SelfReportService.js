@@ -17,32 +17,32 @@ import axios from 'axios';
 
 export default {
   getApprovals(projectId, params) {
-    const url = `/admin/projects/${projectId}/approvals`;
+    const url = `/admin/projects/${encodeURIComponent(projectId)}/approvals`;
     return axios.get(url, { params })
       .then((response) => response.data);
   },
   getApprovalsHistory(projectId, params) {
-    const url = `/admin/projects/${projectId}/approvals/history`;
+    const url = `/admin/projects/${encodeURIComponent(projectId)}/approvals/history`;
     return axios.get(url, { params })
       .then((response) => response.data);
   },
   approve(projectId, approvalIds) {
-    const url = `/admin/projects/${projectId}/approvals/approve`;
+    const url = `/admin/projects/${encodeURIComponent(projectId)}/approvals/approve`;
     return axios.post(url, { skillApprovalIds: approvalIds })
       .then((response) => response.data);
   },
   reject(projectId, approvalIds, rejectMsg) {
-    const url = `/admin/projects/${projectId}/approvals/reject`;
+    const url = `/admin/projects/${encodeURIComponent(projectId)}/approvals/reject`;
     return axios.post(url, { skillApprovalIds: approvalIds, rejectionMessage: rejectMsg })
       .then((response) => response.data);
   },
   getSelfReportStats(projectId) {
-    const url = `/admin/projects/${projectId}/selfReport/stats`;
+    const url = `/admin/projects/${encodeURIComponent(projectId)}/selfReport/stats`;
     return axios.get(url)
       .then((response) => response.data);
   },
   getSkillApprovalsStats(projectId, skillId) {
-    const url = `/admin/projects/${projectId}/skills/${skillId}/approvals/stats`;
+    const url = `/admin/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}/approvals/stats`;
     return axios.get(url)
       .then((response) => response.data);
   },

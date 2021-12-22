@@ -121,7 +121,7 @@ const actions = {
   oAuth2Login({ commit }, oAuthId) {
     commit('oAuth2AuthUser');
     const { redirect } = router.currentRoute.query;
-    window.location = `/oauth2/authorization/${oAuthId}${(redirect ? `?skillsRedirectUri=${redirect}` : '')}`;
+    window.location = `/oauth2/authorization/${encodeURIComponent(oAuthId)}${(redirect ? `?skillsRedirectUri=${redirect}` : '')}`;
   },
   restoreSessionIfAvailable({
     commit, dispatch, state, getters: gettersParam,

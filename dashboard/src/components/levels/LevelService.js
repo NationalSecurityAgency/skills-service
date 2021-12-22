@@ -17,43 +17,43 @@ import axios from 'axios';
 
 export default {
   getLevelsForProject(projectId) {
-    const url = `/admin/projects/${projectId}/levels`;
+    const url = `/admin/projects/${encodeURIComponent(projectId)}/levels`;
     return axios.get(url).then((response) => response.data);
   },
   getLevelsForSubject(projectId, subjectId) {
-    const url = `/admin/projects/${projectId}/subjects/${subjectId}/levels`;
+    const url = `/admin/projects/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}/levels`;
     return axios.get(url).then((response) => response.data);
   },
   deleteLastLevelForProject(projectId) {
-    const url = `/admin/projects/${projectId}/levels/last`;
+    const url = `/admin/projects/${encodeURIComponent(projectId)}/levels/last`;
     return axios.delete(url, { handleErrorCode: 400 }).then((resp) => resp.data);
   },
   deleteLastLevelForSubject(projectId, subjectId) {
-    const url = `/admin/projects/${projectId}/subjects/${subjectId}/levels/last`;
+    const url = `/admin/projects/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}/levels/last`;
     return axios.delete(url, { handleErrorCode: 400 }).then((resp) => resp.data);
   },
   createNewLevelForProject(projectId, nextLevelObject) {
-    const url = `/admin/projects/${projectId}/levels/next`;
+    const url = `/admin/projects/${encodeURIComponent(projectId)}/levels/next`;
     return axios.put(url, nextLevelObject);
   },
   createNewLevelForSubject(projectId, subjectId, nextLevelObject) {
-    const url = `/admin/projects/${projectId}/subjects/${subjectId}/levels/next`;
+    const url = `/admin/projects/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}/levels/next`;
     return axios.put(url, nextLevelObject);
   },
   editLevelForProject(projectId, editedLevel) {
-    const url = `/admin/projects/${projectId}/levels/edit/${editedLevel.level}`;
+    const url = `/admin/projects/${encodeURIComponent(projectId)}/levels/edit/${editedLevel.level}`;
     return axios.put(url, editedLevel);
   },
   editLevelForSubject(projectId, subjectId, editedLevel) {
-    const url = `/admin/projects/${projectId}/subjects/${subjectId}/levels/edit/${editedLevel.level}`;
+    const url = `/admin/projects/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}/levels/edit/${editedLevel.level}`;
     return axios.put(url, editedLevel);
   },
   getUserLevel(projectId, userId) {
-    const url = `/api/projects/${projectId}/level`;
+    const url = `/api/projects/${encodeURIComponent(projectId)}/level`;
     return axios.get(url, { userId }).then((response) => response.data);
   },
   checkIfProjectLevelBelongsToGlobalBadge(projectId, level) {
-    return axios.get(`/admin/projects/${projectId}/levels/${level}/globalBadge/exists`)
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/levels/${level}/globalBadge/exists`)
       .then((response) => response.data);
   },
 };

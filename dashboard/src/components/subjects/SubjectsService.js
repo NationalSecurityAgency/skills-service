@@ -17,37 +17,37 @@ import axios from 'axios';
 
 export default {
   subjectWithNameExists(projectId, subjectName) {
-    return axios.post(`/admin/projects/${projectId}/subjectNameExists`, { name: subjectName })
+    return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/subjectNameExists`, { name: subjectName })
       .then((remoteRes) => !remoteRes.data);
   },
   subjectWithIdExists(projectId, subjectId) {
-    return axios.get(`/admin/projects/${projectId}/entityIdExists?id=${subjectId}`)
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/entityIdExists?id=${encodeURIComponent(subjectId)}`)
       .then((remoteRes) => !remoteRes.data);
   },
   getSubjectDetails(projectId, subjectId) {
-    return axios.get(`/admin/projects/${projectId}/subjects/${subjectId}`)
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}`)
       .then((res) => res.data);
   },
   getSubjects(projectId) {
-    return axios.get(`/admin/projects/${projectId}/subjects`)
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/subjects`)
       .then((res) => res.data);
   },
   saveSubject(subject) {
     if (subject.isEdit) {
-      return axios.post(`/admin/projects/${subject.projectId}/subjects/${subject.originalSubjectId}`, subject)
+      return axios.post(`/admin/projects/${encodeURIComponent(subject.projectId)}/subjects/${encodeURIComponent(subject.originalSubjectId)}`, subject)
         .then(() => this.getSubjectDetails(subject.projectId, subject.subjectId));
     }
-    return axios.post(`/admin/projects/${subject.projectId}/subjects/${subject.subjectId}`, subject)
+    return axios.post(`/admin/projects/${encodeURIComponent(subject.projectId)}/subjects/${encodeURIComponent(subject.subjectId)}`, subject)
       .then(() => this.getSubjectDetails(subject.projectId, subject.subjectId));
   },
   updateSubjectsDisplaySortOrder(projectId, subjectId, newDisplayOrderIndex) {
-    return axios.patch(`/admin/projects/${projectId}/subjects/${subjectId}`, { action: 'NewDisplayOrderIndex', newDisplayOrderIndex });
+    return axios.patch(`/admin/projects/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}`, { action: 'NewDisplayOrderIndex', newDisplayOrderIndex });
   },
   deleteSubject(subject) {
-    return axios.delete(`/admin/projects/${subject.projectId}/subjects/${subject.subjectId}`);
+    return axios.delete(`/admin/projects/${encodeURIComponent(subject.projectId)}/subjects/${encodeURIComponent(subject.subjectId)}`);
   },
   checkIfSubjectBelongsToGlobalBadge(projectId, subjectId) {
-    return axios.get(`/admin/projects/${projectId}/subjects/${subjectId}/globalBadge/exists`)
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}/globalBadge/exists`)
       .then((response) => response.data);
   },
 };

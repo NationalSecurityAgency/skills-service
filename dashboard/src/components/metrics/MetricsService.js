@@ -30,15 +30,15 @@ function buildUrl(url, params = {}) {
 
 export default {
   loadChart(projectId, metricsId, params = {}) {
-    const url = buildUrl(`/admin/projects/${projectId}/metrics/${metricsId}`, params);
+    const url = buildUrl(`/admin/projects/${encodeURIComponent(projectId)}/metrics/${encodeURIComponent(metricsId)}`, params);
     return axios.get(url).then((response) => response.data);
   },
   loadGlobalMetrics(metricsId, params = {}) {
-    const url = buildUrl(`/supervisor/metrics/${metricsId}`, params);
+    const url = buildUrl(`/supervisor/metrics/${encodeURIComponent(metricsId)}`, params);
     return axios.get(url).then((response) => response.data);
   },
   loadMyMetrics(metricsId, params = {}) {
-    const url = buildUrl(`/api/metrics/${metricsId}`, params);
+    const url = buildUrl(`/api/metrics/${encodeURIComponent(metricsId)}`, params);
     return axios.get(url).then((response) => response.data);
   },
 };
