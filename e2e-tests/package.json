@@ -15,6 +15,7 @@
     "cy:open:postgres": "TZ=UTC cypress open --env db=postgres",
     "cy:open:oauth": "TZ=UTC cypress open --env oauthMode=true",
     "cy:open:dev": "TZ=UTC cypress open --config baseUrl=http://localhost:8082 --env failOnSnapshotDiff=false",
+    "cy:open:devEST": "TZ=EST cypress open --config baseUrl=http://localhost:8082 --env failOnSnapshotDiff=false",
     "cy:open:dev:postgres": "TZ=UTC cypress open --config baseUrl=http://localhost:8082 --env db=postgres,failOnSnapshotDiff=false",
     "cy:open:dev:oauth": "TZ=UTC cypress open --config baseUrl=http://localhost:8082 --env oauthMode=true failOnSnapshotDiff=false",
     "cy:open:dev:verifyEmail": "TZ=UTC cypress open --config baseUrl=http://localhost:8082 --env verifyEmail=true failOnSnapshotDiff=false",
