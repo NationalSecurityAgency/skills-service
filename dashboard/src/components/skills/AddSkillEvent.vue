@@ -65,7 +65,6 @@ limitations under the License.
 <script>
   import Datepicker from 'vuejs-datepicker';
   import { createNamespacedHelpers } from 'vuex';
-  import dayjs from '@/common-components/DayJsCustomizer';
   import ExistingUserInput from '../utils/ExistingUserInput';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import SimpleCard from '../utils/cards/SimpleCard';
