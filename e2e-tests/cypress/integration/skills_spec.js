@@ -711,7 +711,6 @@ describe('Skills Tests', () => {
     cy.contains('ID: GreatName1233Skill_blah')
   });
 
-
   it('skill id validation special characters can be URL encoded', () => {
 
     cy.intercept('GET', '/admin/projects/proj1/subjects/subj1')
@@ -727,24 +726,17 @@ describe('Skills Tests', () => {
 
     const errMsg = 'Skill ID may only contain alpha-numeric, underscore or percent characters';
 
-    // id can URL encode special chars
-    const providedName = "@#$^&i_l+|}{";
-    // let msg = 'Badge ID may only contain alpha-numeric characters';
+    // id cannot contain special chars
+    const providedName = '@#$^&i_l+|}{/\\';
     cy.contains('Enable').click();
     cy.getIdField().clear().type(providedName);
-
     cy.get('[data-cy="idError"]').contains(errMsg).should('be.visible');
-    // cy.get('[data-cy=idError]').contains(msg).should('be.visible');
-    // // cy.getIdField().clear().type('GoodToGo');
-    // // cy.getIdField().clear().type(encodeURIComponent(providedName));
-    // cy.getIdField().clear().type(encodeURIComponent(providedName));
-    // cy.get('[data-cy=idError]').should('not.be.visible');
+    cy.get('[data-cy="saveSkillButton"]').should('not.be.enabled');
 
-
-    // cy.get('[data-cy="idError"]').contains(errMsg).should('not.exist')
-    // cy.get('[data-cy="saveSkillButton"]').should('be.enabled');
+    // id can URL encode special chars
     cy.get('[data-cy="idInputValue"]').clear().type(`${encodeURIComponent(providedName)}_blah`);
     cy.get('[data-cy="idError"]').contains(errMsg).should('not.exist')
+    cy.get('[data-cy=idError]').should('not.be.visible');
     cy.get('[data-cy="saveSkillButton"]').should('be.enabled');
 
     cy.get('[data-cy="saveSkillButton"]').click()

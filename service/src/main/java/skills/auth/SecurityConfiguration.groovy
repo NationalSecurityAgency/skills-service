@@ -59,7 +59,7 @@ class SecurityConfiguration {
     @Autowired
     ObjectMapper objectMapper
 
-    @Value('#{"${skills.authorization.allowUrlEncodedPercent:true}"}')
+    @Value('#{"${skills.authorization.allowUrlEncodedPercent:false}"}')
     Boolean allowUrlEncodedPercent
 
     @Value('#{"${skills.authorization.allowUrlEncodedPercent:false}"}')
