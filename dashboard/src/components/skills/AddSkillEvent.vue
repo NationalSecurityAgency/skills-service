@@ -153,9 +153,6 @@ limitations under the License.
       },
       addSkill() {
         this.isSaving = true;
-        console.log(`this.dateAdded: ${this.dateAdded}`);
-        console.log(`dayjs equiv: ${dayjs(this.dateAdded.getTime())}`);
-        console.log(`raw value value: ${this.$refs.eventDatePicker.value}`);
         SkillsService.saveSkillEvent(this.$route.params.projectId, this.$route.params.skillId, this.currentSelectedUser, this.dateAdded.getTime(), this.pkiAuthenticated)
           .then((data) => {
             this.isSaving = false;
