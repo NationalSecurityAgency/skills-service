@@ -29,7 +29,7 @@ limitations under the License.
           <div class="col-auto">
             <ValidationProvider name="Event Date" rules="required">
               <datepicker input-class="border-0" wrapper-class="form-control" v-model="dateAdded" name="Event Date" data-cy="eventDatePicker"
-                          :use-utc="true" :disabled-dates="datePickerState.disabledDates" aria-required="true" aria-label="event date"/>
+                          :use-utc="false" :disabled-dates="datePickerState.disabledDates" aria-required="true" aria-label="event date" ref="eventDatePicker"/>
             </ValidationProvider>
           </div>
           <div class="col-auto">
@@ -65,6 +65,7 @@ limitations under the License.
 <script>
   import Datepicker from 'vuejs-datepicker';
   import { createNamespacedHelpers } from 'vuex';
+  import dayjs from '@/common-components/DayJsCustomizer';
   import ExistingUserInput from '../utils/ExistingUserInput';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import SimpleCard from '../utils/cards/SimpleCard';
@@ -152,6 +153,9 @@ limitations under the License.
       },
       addSkill() {
         this.isSaving = true;
+        console.log(`this.dateAdded: ${this.dateAdded}`);
+        console.log(`dayjs equiv: ${dayjs(this.dateAdded.getTime())}`);
+        console.log(`raw value value: ${this.$refs.eventDatePicker.value}`);
         SkillsService.saveSkillEvent(this.$route.params.projectId, this.$route.params.skillId, this.currentSelectedUser, this.dateAdded.getTime(), this.pkiAuthenticated)
           .then((data) => {
             this.isSaving = false;
