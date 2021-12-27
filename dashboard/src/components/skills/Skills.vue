@@ -47,7 +47,8 @@ limitations under the License.
 
     <edit-skill-group v-if="editGroupInfo.show" v-model="editGroupInfo.show" :group="editGroupInfo.group" :is-edit="false"
                       @group-saved="skillCreatedOrUpdated" @hidden="focusOnNewGroupButton"/>
-    <import-from-catalog v-if="importCatalog.show" v-model="importCatalog.show" @to-import="importFromCatalog"/>
+    <import-from-catalog v-if="importCatalog.show" v-model="importCatalog.show" :current-project-skills="skills"
+                         @to-import="importFromCatalog"/>
   </div>
 </template>
 

@@ -22,14 +22,6 @@ describe('Import skills from Catalog Tests', () => {
         cy.createSubject(1, 1);
     });
 
-    // drill down to a skill after creation
-    // drill down to a skill when skill already created
-    // validate that skill page show imported badge and messages as well as extra navigation items are removed
-    //    - validate after navigations and after going directly to the page
-    // mix regular, imported and exported skills
-    // deletion of skill
-    // filter then import
-
     const tableSelector = '[data-cy="importSkillsFromCatalogTable"]';
 
     it('there are no skills to import - empty catalog', () => {
@@ -260,42 +252,134 @@ describe('Import skills from Catalog Tests', () => {
         cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '3');
     });
 
+    it('filter then import', () => {
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2, { name: 'Find this 1'});
+        cy.createSkill(1, 1, 3);
+        cy.createSkill(1, 1, 4, { name: 'Find this 2'});
+        cy.createSkill(1, 1, 5, { name: 'Find this 3'});
+        cy.exportSkillToCatalog(1, 1, 1);
+        cy.exportSkillToCatalog(1, 1, 2);
+        cy.exportSkillToCatalog(1, 1, 3);
+        cy.exportSkillToCatalog(1, 1, 4);
+        cy.exportSkillToCatalog(1, 1, 5);
 
-    it('import skills from catalog - paging', () => {
         cy.createProject(2);
         cy.createSubject(2, 1);
-        cy.createSkill(2, 1, 1);
-        cy.createSkill(2, 1, 2);
-        cy.createSkill(2, 1, 3);
-        cy.createSkill(2, 1, 4);
-        cy.createSkill(2, 1, 5);
 
-        cy.createSubject(2, 2);
-        cy.createSkill(2, 2, 6);
-        cy.createSkill(2, 2, 7);
-        cy.createSkill(2, 2, 8);
-        cy.createSkill(2, 2, 9);
-        cy.createSkill(2, 2, 10);
-        cy.createSkill(2, 2, 11);
+        cy.visit('/administrator/projects/proj2/subjects/subj1');
+        cy.get('[data-cy="importFromCatalogBtn"]').click();
 
-        cy.exportSkillToCatalog(2, 1, 1);
-        cy.exportSkillToCatalog(2, 1, 2);
-        cy.exportSkillToCatalog(2, 1, 3);
-        cy.exportSkillToCatalog(2, 1, 4);
-        cy.exportSkillToCatalog(2, 1, 5);
+        cy.get('[data-cy="skillNameFilter"]').type('find{enter}')
+        cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '3')
 
-        cy.exportSkillToCatalog(2, 2, 6);
-        cy.exportSkillToCatalog(2, 2, 7);
-        cy.exportSkillToCatalog(2, 2, 8);
-        cy.exportSkillToCatalog(2, 2, 9);
-        cy.exportSkillToCatalog(2, 2, 10);
-        cy.exportSkillToCatalog(2, 2, 11);
+        cy.get('[data-cy="skillSelect_proj1-skill4"]').check({force: true})
+        cy.get('[data-cy="importBtn"]').click();
 
-        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get(`[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]`).should('have.text', '1')
+        cy.get('[data-cy="importedBadge-skill4"]')
 
     });
 
+    it('remove imported skill should re-appear in the import table', () => {
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2);
+        cy.createSkill(1, 1, 3);
+        cy.exportSkillToCatalog(1, 1, 1);
+        cy.exportSkillToCatalog(1, 1, 2);
+        cy.exportSkillToCatalog(1, 1, 3);
 
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+
+        cy.importSkillFromCatalog(2, 1, 1, 1)
+        cy.importSkillFromCatalog(2, 1, 1, 2)
+        cy.importSkillFromCatalog(2, 1, 1, 3)
+
+        cy.visit('/administrator/projects/proj2/subjects/subj1');
+        cy.get(`[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]`).should('have.text', '3')
+        cy.get('[data-cy="importedBadge-skill1"]')
+        cy.get('[data-cy="importedBadge-skill2"]')
+        cy.get('[data-cy="importedBadge-skill3"]')
+
+        cy.get('[data-cy="importFromCatalogBtn"]').click();
+        cy.get('[data-cy="catalogSkillImportModal-NoData"]').contains('Nothing Available for Import')
+        cy.get('[data-cy="okButton"]').click();
+        cy.get('[data-cy="catalogSkillImportModal-NoData"]').should('not.exist');
+
+        cy.get('[data-cy="deleteSkillButton_skill2"]').click()
+        cy.acceptRemovalSafetyCheck()
+        cy.get(`[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]`).should('have.text', '2')
+        cy.get('[data-cy="importedBadge-skill1"]')
+        cy.get('[data-cy="importedBadge-skill2"]').should('not.exist')
+        cy.get('[data-cy="importedBadge-skill3"]')
+
+        cy.get('[data-cy="importFromCatalogBtn"]').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Very Great Skill 2' }, { colIndex: 1,  value: 'ID: proj1' }],
+        ], 5);
+
+        cy.get('[data-cy="closeButton"]').click();
+
+        cy.get('[data-cy="deleteSkillButton_skill3"]').click()
+        cy.acceptRemovalSafetyCheck()
+        cy.get(`[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]`).should('have.text', '1')
+        cy.get('[data-cy="importedBadge-skill1"]')
+        cy.get('[data-cy="importedBadge-skill2"]').should('not.exist')
+        cy.get('[data-cy="importedBadge-skill3"]').should('not.exist')
+
+        cy.get('[data-cy="deleteSkillButton_skill1"]').click()
+        cy.acceptRemovalSafetyCheck()
+        cy.contains('No Skills Yet')
+        cy.get('[data-cy="importedBadge-skill1"]').should('not.exist')
+        cy.get('[data-cy="importedBadge-skill2"]').should('not.exist')
+        cy.get('[data-cy="importedBadge-skill3"]').should('not.exist')
+
+        cy.get('[data-cy="importFromCatalogBtn"]').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Very Great Skill 1' }, { colIndex: 1,  value: 'ID: proj1' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 2' }, { colIndex: 1,  value: 'ID: proj1' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 3' }, { colIndex: 1,  value: 'ID: proj1' }],
+        ], 5);
+
+        // refresh and re-validate
+        cy.visit('/administrator/projects/proj2/subjects/subj1');
+        cy.get('[data-cy="importFromCatalogBtn"]').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Very Great Skill 1' }, { colIndex: 1,  value: 'ID: proj1' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 2' }, { colIndex: 1,  value: 'ID: proj1' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 3' }, { colIndex: 1,  value: 'ID: proj1' }],
+        ], 5);
+    });
+
+    it('do not allow import if skill id already exist', () => {
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2);
+        cy.exportSkillToCatalog(1, 1, 1);
+        cy.exportSkillToCatalog(1, 1, 2);
+
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 2);
+        cy.importSkillFromCatalog(2, 1, 1, 1)
+
+        cy.visit('/administrator/projects/proj2/subjects/subj1');
+        // cy.get('[data-cy="importFromCatalogBtn"]').click();
+        // cy.get('[data-cy="skillSelect_proj1-skill2"]').check({force: true})
+        // cy.get('[data-cy="importBtn"]').should('be.enabled');
+        // cy.get('[data-cy="numSelectedSkills"]').should('have.text', '1');
+        // cy.get('[data-cy="importBtn"]').click();
+        //
+        // cy.get('[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '2');
+        // cy.get('[data-cy="importedBadge-skill1"]')
+        // cy.get('[data-cy="importedBadge-skill2"]')
+        //
+        // cy.get('[data-cy="importFromCatalogBtn"]').click();
+        // cy.get('[data-cy="catalogSkillImportModal-NoData"]').contains('Nothing Available for Import')
+    })
+
+    // import duplicate name or id
+    // export duplicate name and id
 });
 
 

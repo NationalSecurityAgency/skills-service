@@ -277,6 +277,9 @@ limitations under the License.
     <export-to-catalog v-if="exportToCatalogInfo.show" v-model="exportToCatalogInfo.show" :skills="exportToCatalogInfo.skills"
                        @exported="handleSkillsExportedToCatalog" @hidden="changeSelectionForAll(false)"/>
     <removal-validation v-if="deleteSkillInfo.show" v-model="deleteSkillInfo.show" @do-remove="doDeleteSkill">
+      <p>
+        This will remove <span class="text-primary font-weight-bold">{{ deleteSkillInfo.skill.name}}</span> <span class="text-secondary">(<span class="font-italic">ID:</span> {{ deleteSkillInfo.skill.name }})</span>.
+      </p>
       <div v-if="deleteSkillInfo.skill.isSkillType">
         Delete Action <b class="text-danger">CANNOT</b> be undone and permanently removes users' performed skills and any dependency associations.
       </div>
@@ -677,14 +680,6 @@ limitations under the License.
             } else {
               this.deleteSkillInfo.skill = row;
               this.deleteSkillInfo.show = true;
-              // const msg = row.isGroupType ? 'Delete Action CANNOT be undone and will permanently remove all of the group\'s skills. All the associated users\' performed skills and any dependency associations will also be removed.'
-              //   : 'Delete Action CANNOT be undone and permanently removes users\' performed skills and any dependency associations.';
-              // this.msgConfirm(msg, `DELETE [${row.skillId}]?`)
-              //   .then((res) => {
-              //     if (res) {
-              //       this.doDeleteSkill(row);
-              //     }
-              //   });
             }
           });
       },

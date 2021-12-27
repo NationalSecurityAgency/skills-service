@@ -266,6 +266,24 @@ describe('Import From Catalog Table Tests', () => {
         cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '8')
     });
 
+    it('filter input must have max length so it does not exist max url length', () => {
+        cy.visit('/administrator/projects/proj3/subjects/subj1');
+        cy.get('[data-cy="importFromCatalogBtn"]').click();
+
+        const longValue = Array(60).fill('a').join('');
+        cy.get('[data-cy="skillNameFilter"]').type(longValue);
+        cy.get('[data-cy="projectNameFilter"]').type(longValue);
+        cy.get('[data-cy="subjectNameFilter"]').type(longValue);
+        cy.get('[data-cy="filterBtn"]').click();
+        cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '0')
+
+        // max length is hard coded to 50
+        const longValue_50char = Array(50).fill('a').join('');
+        cy.get('[data-cy="skillNameFilter"]').should('have.value', longValue_50char)
+        cy.get('[data-cy="projectNameFilter"]').should('have.value', longValue_50char)
+        cy.get('[data-cy="subjectNameFilter"]').should('have.value', longValue_50char)
+    });
+
     it('expand skill details', () => {
         cy.visit('/administrator/projects/proj3/subjects/subj1');
         cy.get('[data-cy="importFromCatalogBtn"]').click();
@@ -371,7 +389,6 @@ describe('Import From Catalog Table Tests', () => {
             [{ colIndex: 2,  value: 'Subject 1' }],
         ], 5);
     });
-
 
     it('points column sort', () => {
         cy.visit('/administrator/projects/proj3/subjects/subj1');

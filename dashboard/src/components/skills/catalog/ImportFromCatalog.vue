@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <b-modal id="importSkillsFromCatalog" size="xl" :title="`Import ${importType} from the Catalog`"
+  <b-modal id="importSkillsFromCatalog" size="xl" title="Import Skills from the Catalog"
            v-model="show"
            :no-close-on-backdrop="true" :centered="true" body-class="px-0 mx-0"
            header-bg-variant="info" header-text-variant="light" no-fade role="dialog"
@@ -24,7 +24,7 @@ limitations under the License.
 
     <no-content2 v-if="!loading && emptyCatalog" class="mt-4 mb-5"
                  title="Nothing Available for Import" data-cy="catalogSkillImportModal-NoData">
-      When other projects export {{ importType }}s to the Catalog then they will be available here
+      When other projects export Skills to the Catalog then they will be available here
       to be imported.
     </no-content2>
 
@@ -34,6 +34,7 @@ limitations under the License.
           <b-form-group label="Skill Name:" label-for="skill-name-filter" label-class="text-muted">
             <b-form-input id="skill-name-filter" v-model="filters.skillName"
                           v-on:keydown.enter="loadData"
+                          maxlength="50"
                           data-cy="skillNameFilter"/>
           </b-form-group>
         </div>
@@ -41,6 +42,7 @@ limitations under the License.
           <b-form-group label="Project Name:" label-for="project-name-filter" label-class="text-muted">
             <b-form-input id="project-name-filter" v-model="filters.projectName"
                           v-on:keydown.enter="loadData"
+                          maxlength="50"
                           data-cy="projectNameFilter"/>
           </b-form-group>
         </div>
@@ -48,6 +50,7 @@ limitations under the License.
           <b-form-group label="Subject Name:" label-for="subject-name-filter" label-class="text-muted">
             <b-form-input id="subject-name-filter" v-model="filters.subjectName"
                           v-on:keydown.enter="loadData"
+                          maxlength="50"
                           data-cy="subjectNameFilter"/>
           </b-form-group>
         </div>
@@ -113,6 +116,15 @@ limitations under the License.
           </div>
           <div class="text-secondary sub-info">
             <span>ID:</span> {{ data.item.skillId }}
+          </div>
+          <div v-if="data.item.alreadyHasThisSkillId && data.item.alreadyHasThisName" class="alert alert-warning">
+            There is already a skill in the project with this Skill ID and Name!
+          </div>
+          <div v-if="data.item.alreadyHasThisSkillId && !data.item.alreadyHasThisName">
+            ALREADY has skillId
+          </div>
+          <div v-if="data.item.alreadyHasThisName && !data.item.alreadyHasThisSkillId">
+            ALREADY has name
           </div>
 
           <b-button size="sm" variant="outline-info"
@@ -195,12 +207,12 @@ limitations under the License.
       SkillsBTable,
     },
     props: {
-      importType: {
-        type: String,
-        default: 'Skill',
-      },
       value: {
         type: Boolean,
+        required: true,
+      },
+      currentProjectSkills: {
+        type: Array,
         required: true,
       },
     },
@@ -273,8 +285,17 @@ limitations under the License.
       emptyCatalog() {
         return !this.initialLoadHadData;
       },
+      maxProjectNameLength() {
+        return this.$store.state.maxProjectNameLength;
+      },
     },
     methods: {
+      doesSkillIdAlreadyExist(skillId) {
+        return this.currentProjectSkills.find((skill) => skill.skillId.toUpperCase() === skillId.toUpperCase()) !== undefined;
+      },
+      doesSkillNameAlreadyExist(name) {
+        return this.currentProjectSkills.find((skill) => skill.name.toUpperCase() === name.toUpperCase()) !== undefined;
+      },
       loadData(isInitial = undefined) {
         if (isInitial === true) {
           this.loading = true;
@@ -293,7 +314,12 @@ limitations under the License.
           .then((res) => {
             const dataSkills = res.data;
             if (dataSkills) {
-              this.table.items = dataSkills.map((item) => ({ selected: false, ...item }));
+              this.table.items = dataSkills.map((item) => ({
+                selected: false,
+                ...item,
+                alreadyHasThisSkillId: this.doesSkillIdAlreadyExist(item.skillId),
+                alreadyHasThisName: this.doesSkillNameAlreadyExist(item.name),
+              }));
               this.table.options.pagination.totalRows = res.totalCount;
               if (this.table.items.length > 0) {
                 this.initialLoadHadData = true;
@@ -310,7 +336,7 @@ limitations under the License.
         this.publishHidden(e);
       },
       publishHidden(e) {
-        this.$emit('hidden', { importType: this.importType, ...e });
+        this.$emit('hidden', { ...e });
       },
       pageChanged(pageNum) {
         this.table.options.pagination.currentPage = pageNum;
