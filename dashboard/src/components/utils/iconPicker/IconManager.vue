@@ -276,7 +276,7 @@ limitations under the License.
         return this.$store.state.projectId;
       },
       uploadUrl() {
-        let uploadUrl = `/admin/projects/${this.activeProjectId}/icons/upload`;
+        let uploadUrl = `/admin/projects/${encodeURIComponent(this.activeProjectId)}/icons/upload`;
         if (!this.activeProjectId) {
           uploadUrl = '/supervisor/icons/upload';
         }

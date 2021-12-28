@@ -36,6 +36,8 @@ import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.access.AccessDeniedHandler
 import org.springframework.security.web.access.AccessDeniedHandlerImpl
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository
+import org.springframework.security.web.firewall.HttpFirewall
+import org.springframework.security.web.firewall.StrictHttpFirewall
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextListener
 import skills.auth.util.AccessDeniedExplanation
@@ -56,6 +58,15 @@ class SecurityConfiguration {
 
     @Autowired
     ObjectMapper objectMapper
+
+    @Value('#{"${skills.authorization.allowUrlEncodedPercent:false}"}')
+    Boolean allowUrlEncodedPercent
+
+    @Value('#{"${skills.authorization.allowUrlEncodedPercent:false}"}')
+    Boolean allowUrlEncodedForwardSlash
+
+    @Value('#{"${skills.authorization.allowUrlEncodedPercent:false}"}')
+    Boolean allowUrlEncodedBackSlash
 
     @Component
     @Configuration
@@ -139,5 +150,14 @@ class SecurityConfiguration {
                 }
             }
         }
+    }
+
+    @Bean
+    HttpFirewall getHttpFirewall() {
+        StrictHttpFirewall strictHttpFirewall = new StrictHttpFirewall()
+        strictHttpFirewall.setAllowUrlEncodedPercent(allowUrlEncodedPercent)
+        strictHttpFirewall.setAllowUrlEncodedSlash(allowUrlEncodedForwardSlash)
+        strictHttpFirewall.setAllowBackSlash(allowUrlEncodedBackSlash)
+        return strictHttpFirewall
     }
 }

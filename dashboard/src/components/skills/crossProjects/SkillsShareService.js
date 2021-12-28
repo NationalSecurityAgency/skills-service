@@ -17,17 +17,17 @@ import axios from 'axios';
 
 export default {
   shareSkillToAnotherProject(projectId, skillId, shareToProjectId) {
-    return axios.put(`/admin/projects/${projectId}/skills/${skillId}/shared/projects/${shareToProjectId}`);
+    return axios.put(`/admin/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}/shared/projects/${encodeURIComponent(shareToProjectId)}`);
   },
   deleteSkillShare(projectId, skillId, shareToProjectId) {
-    return axios.delete(`/admin/projects/${projectId}/skills/${skillId}/shared/projects/${shareToProjectId}`);
+    return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}/shared/projects/${encodeURIComponent(shareToProjectId)}`);
   },
   getSharedSkills(projectId) {
-    return axios.get(`/admin/projects/${projectId}/shared`)
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/shared`)
       .then((response) => response.data);
   },
   getSharedWithmeSkills(projectId) {
-    return axios.get(`/admin/projects/${projectId}/sharedWithMe`)
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/sharedWithMe`)
       .then((response) => response.data);
   },
 

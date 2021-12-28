@@ -88,14 +88,14 @@ limitations under the License.
       ...mapActions(['loadMyProgressSummary']),
       generateBadgeRouterLink(badge) {
         if (badge.projectId) {
-          const navlink = { path: `/progress-and-rankings/projects/${badge.projectId}/`, query: { skillsClientDisplayPath: `/badges/${badge.badgeId}` } };
+          const navlink = { path: `/progress-and-rankings/projects/${encodeURIComponent(badge.projectId)}/`, query: { skillsClientDisplayPath: `/badges/${encodeURIComponent(badge.badgeId)}` } };
           return navlink;
         }
 
         if (badge.projectLevelsAndSkillsSummaries) {
           const summary = badge.projectLevelsAndSkillsSummaries.find((summ) => this.projectIds.includes(summ.projectId));
           if (summary) {
-            const globalNavLink = { path: `/progress-and-rankings/projects/${summary.projectId}/`, query: { skillsClientDisplayPath: `/badges/global/${badge.badgeId}` } };
+            const globalNavLink = { path: `/progress-and-rankings/projects/${encodeURIComponent(summary.projectId)}/`, query: { skillsClientDisplayPath: `/badges/global/${encodeURIComponent(badge.badgeId)}` } };
             return globalNavLink;
           }
         }

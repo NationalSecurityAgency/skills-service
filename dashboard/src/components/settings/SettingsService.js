@@ -17,11 +17,11 @@ import axios from 'axios';
 
 export default {
   getSetting(projectId, settingName) {
-    return axios.get(`/admin/projects/${projectId}/settings/${settingName}`)
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/settings/${settingName}`)
       .then((remoteRes) => remoteRes.data);
   },
   saveSettings(projectId, settings) {
-    return axios.post(`/admin/projects/${projectId}/settings`, settings).then((response) => response.data);
+    return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/settings`, settings).then((response) => response.data);
   },
   saveGlobalSettings(settings) {
     return axios.post('/root/global/settings', settings).then((response) => response.data);
@@ -30,14 +30,14 @@ export default {
     return axios.get(`/root/global/settings/${settingGroup}`).then((response) => response.data);
   },
   checkSettingsValidity(projectId, settings) {
-    return axios.post(`/admin/projects/${projectId}/settings/checkValidity`, settings).then((response) => response.data);
+    return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/settings/checkValidity`, settings).then((response) => response.data);
   },
   getSettingsForProject(projectId) {
-    return axios.get(`/admin/projects/${projectId}/settings`)
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/settings`)
       .then((remoteRes) => remoteRes.data);
   },
   getProjectSetting(projectId, setting) {
-    return axios.get(`/admin/projects/${projectId}/settings/${setting}`)
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/settings/${setting}`)
       .then((remoteRes) => remoteRes.data);
   },
   getUserSettings() {
@@ -69,10 +69,10 @@ export default {
     return axios.get('/root/getSystemSettings').then((response) => response.data);
   },
   pinProject(projectId) {
-    return axios.post(`/root/pin/${projectId}`).then((response) => response.data);
+    return axios.post(`/root/pin/${encodeURIComponent(projectId)}`).then((response) => response.data);
   },
   unpinProject(projectId) {
-    return axios.delete(`/root/pin/${projectId}`).then((response) => response.data);
+    return axios.delete(`/root/pin/${encodeURIComponent(projectId)}`).then((response) => response.data);
   },
   saveUserInfo(userInfo) {
     return axios.post('/app/userInfo', userInfo).then(() => this.getUserInfo());
@@ -93,7 +93,7 @@ export default {
       .then((remoteRes) => remoteRes.data);
   },
   getClientDisplayConfig(projectId) {
-    return axios.get(`/public/clientDisplay/config?projectId=${projectId}`)
+    return axios.get(`/public/clientDisplay/config?projectId=${encodeURIComponent(projectId)}`)
       .then((remoteRes) => remoteRes.data);
   },
 

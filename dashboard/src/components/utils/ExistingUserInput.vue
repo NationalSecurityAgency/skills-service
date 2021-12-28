@@ -131,7 +131,7 @@ limitations under the License.
           if (this.$store.getters.isPkiAuthenticated) {
             suggestUrl = '/app/users/suggestPkiUsers';
           } else if (this.projectId) {
-            suggestUrl = `/app/users/projects/${this.projectId}/suggestClientUsers`;
+            suggestUrl = `/app/users/projects/${encodeURIComponent(this.projectId)}/suggestClientUsers`;
           } else {
             suggestUrl = '/app/users/suggestClientUsers';
           }
@@ -152,7 +152,7 @@ limitations under the License.
         let validateUrl;
         if (this.userType === CLIENT) {
           if (this.projectId) {
-            validateUrl = `/app/users/projects/${this.projectId}/validExistingClientUserId/`;
+            validateUrl = `/app/users/projects/${encodeURIComponent(this.projectId)}/validExistingClientUserId/`;
           } else {
             validateUrl = '/app/users/validExistingClientUserId/';
           }

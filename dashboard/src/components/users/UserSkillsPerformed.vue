@@ -177,7 +177,7 @@ limitations under the License.
         });
       },
       getUrl() {
-        return `/admin/projects/${this.projectId}/performedSkills/${this.userId}`;
+        return `/admin/projects/${encodeURIComponent(this.projectId)}/performedSkills/${encodeURIComponent(this.userId)}`;
       },
       getDate(row) {
         return dayjs(row.performedOn)

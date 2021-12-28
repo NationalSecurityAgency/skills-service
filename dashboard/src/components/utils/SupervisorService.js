@@ -21,7 +21,7 @@ export default {
       .then((remoteRes) => remoteRes.data);
   },
   getProjectLevels(projectId) {
-    return axios.get(`/supervisor/projects/${projectId}/levels`)
+    return axios.get(`/supervisor/projects/${encodeURIComponent(projectId)}/levels`)
       .then((remoteRes) => remoteRes.data);
   },
 };
