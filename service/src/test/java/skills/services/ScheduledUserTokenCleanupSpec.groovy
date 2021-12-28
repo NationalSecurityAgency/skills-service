@@ -22,6 +22,7 @@ import skills.storage.model.auth.User
 import skills.storage.model.auth.UserToken
 import skills.storage.repos.PasswordResetTokenRepo
 import skills.storage.repos.UserRepo
+import spock.lang.IgnoreIf
 
 import static skills.services.PasswordManagementService.VERIFY_EMAIL_TOKEN_TYPE
 
@@ -33,9 +34,10 @@ class ScheduledUserTokenCleanupSpec extends DefaultIntSpec {
     @Autowired
     UserRepo userRepo
 
-    @Autowired
+    @Autowired(required = false)
     ScheduledUserTokenCleanup cleanup
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "test ScheduledUserTokenCleanup"() {
 
         SkillsService createAcctService = createService()
