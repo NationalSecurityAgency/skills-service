@@ -500,7 +500,7 @@ describe('Skills Group Tests', () => {
         cy.get(`${tableSelector} [data-cy="totalPointsCell_group1"]`).contains('200');
 
         cy.get('[data-cy="deleteSkillButton_skill2"]').click();
-        cy.contains('DELETE [skill2]?');
+        cy.contains('ID: skill2');
         cy.acceptRemovalSafetyCheck();;
 
         cy.get(`${tableSelector} [data-cy="totalPointsCell_group1"]`).contains('150');
@@ -846,14 +846,14 @@ describe('Skills Group Tests', () => {
         cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="numSkillsInGroup"]`).contains('4')
 
         cy.get('[data-cy="deleteSkillButton_skill2"]').click();
-        cy.contains('DELETE [skill2]?');
+        cy.contains('This will remove Very Great Skill 2 (ID: skill2)');
         cy.acceptRemovalSafetyCheck();
 
         cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="requiredSkillsNum"]`).contains('2')
         cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="numSkillsInGroup"]`).contains('3')
 
         cy.get('[data-cy="deleteSkillButton_skill1"]').click();
-        cy.contains('DELETE [skill1]?');
+        cy.contains('This will remove Very Great Skill 1 (ID: skill1)');
         cy.acceptRemovalSafetyCheck();
 
         cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="requiredSkillsNum"]`).should('not.exist')

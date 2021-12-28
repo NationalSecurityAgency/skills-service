@@ -19,7 +19,7 @@ import utcPlugin from 'dayjs/plugin/utc';
 dayjs.extend(utcPlugin);
 
 const snapshotOptions = {
-  blackout: ['[data-cy=projectCreated]', '[data-cy=projectLastReportedSkill]'],
+  blackout: ['[data-cy=projectCreated]', '[data-cy=projectLastReportedSkill]', '[data-cy="dashboardVersionContainer"]'],
   failureThreshold: 0.03, // threshold for entire image
   failureThresholdType: 'percent', // percent of image or number of pixels
   customDiffConfig: { threshold: 0.01 }, // threshold for each pixel

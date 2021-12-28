@@ -590,7 +590,8 @@ describe('Subjects Tests', () => {
         cy.contains('Copy of Edited Skill Name').should('be.visible');
 
         cy.get('[data-cy=deleteSkillButton_skill1]').click();
-        cy.contains('YES, Delete It!').click();
+        cy.contains('This will remove Edited Skill Name (ID: skill1)').click();
+        cy.acceptRemovalSafetyCheck();
         cy.wait('@deleteSkill');
         cy.contains('ID: skill1').should('not.exist');
     });

@@ -278,7 +278,7 @@ limitations under the License.
                        @exported="handleSkillsExportedToCatalog" @hidden="changeSelectionForAll(false)"/>
     <removal-validation v-if="deleteSkillInfo.show" v-model="deleteSkillInfo.show" @do-remove="doDeleteSkill">
       <p>
-        This will remove <span class="text-primary font-weight-bold">{{ deleteSkillInfo.skill.name}}</span> <span class="text-secondary">(<span class="font-italic">ID:</span> {{ deleteSkillInfo.skill.name }})</span>.
+        This will remove <span class="text-primary font-weight-bold">{{ deleteSkillInfo.skill.name}}</span> <span class="text-secondary">(<span class="font-italic">ID:</span> {{ deleteSkillInfo.skill.skillId }})</span>.
       </p>
       <div v-if="deleteSkillInfo.skill.isSkillType">
         Delete Action <b class="text-danger">CANNOT</b> be undone and permanently removes users' performed skills and any dependency associations.
