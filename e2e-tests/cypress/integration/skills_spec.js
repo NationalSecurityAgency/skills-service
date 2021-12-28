@@ -15,6 +15,8 @@
  */
 var moment = require('moment-timezone');
 
+import dayjs from "dayjs";
+
 describe('Skills Tests', () => {
 
   beforeEach(() => {
@@ -360,6 +362,58 @@ describe('Skills Tests', () => {
     cy.contains('Enter user id').type('fo');
     cy.wait('@suggestUsers');
     cy.get('li.multiselect__element').contains('foo').click();
+  });
+  it('Add Skill Event for days in past correctly does not subtract one day from selected date', () => {
+    cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
+      projectId: 'proj1',
+      subjectId: "subj1",
+      skillId: "skill1",
+      name: "Skill 1",
+      pointIncrement: '50',
+      numPerformToCompletion: '5'
+    });
+
+
+    cy.intercept({
+      method: 'POST',
+      url: '/app/users/projects/proj1/suggestClientUsers?userSuggestOption=TWO'
+    }).as('suggestUsers');
+    cy.intercept({
+      method: 'GET',
+      url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
+    }).as('loadSkill');
+    cy.intercept({
+      method: 'POST',
+      url: '/api/projects/Inception/skills/ManuallyAddSkillEvent'
+    }).as('addSkillEvent');
+    cy.intercept({
+      method: 'GET',
+      url: '/admin/projects/proj1/skills/skill1/users**'
+    }).as('loadUsers');
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
+    cy.wait('@loadSkill');
+    cy.contains('Add Event').click();
+
+    cy.contains('ONE').click();
+    cy.contains('Enter user id').type('foo{enter}');
+    // cy.wait('@suggestUsers');
+
+    const date = dayjs().subtract(1, 'month').date(10)
+    const formattedStr = dayjs(date).format('YYYY-MM-DD');
+    //need to format year/month/day to match users screen
+
+    cy.get('[data-cy="eventDatePicker"]').click()
+    cy.get('.vdp-datepicker__calendar .prev').first().click()
+    cy.get('.vdp-datepicker__calendar').contains('10').click()
+
+    cy.clickButton('Add');
+    cy.wait('@addSkillEvent');
+    cy.get('.text-success', {timeout: 5*1000}).contains('Added points for');
+    cy.get('.text-success', {timeout: 5*1000}).contains('[foo]');
+    cy.get('[data-cy=nav-Users]').click();
+    cy.contains('foo');
+    cy.get('[data-label="Points Last Earned"]').should('contain.text', formattedStr);
   });
 
   it('Add Skill Event - suggest user with slash character does not cause error', () => {
