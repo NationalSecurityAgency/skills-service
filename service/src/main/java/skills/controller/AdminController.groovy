@@ -1056,6 +1056,28 @@ class AdminController {
         return RequestResult.success()
     }
 
+    @RequestMapping(value="/projects/{projectId}/skills/catalog/exists/{skillId}", method = [RequestMethod.POST], produces = "application/json")
+    SkillInCatgalogResult doesSkillAlreadyExistInCatalog(@PathVariable("projectId") String projectId, @PathVariable("skillId") String skillId) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        SkillsValidator.isNotBlank(skillId, "skillId")
+        boolean isInCatalog = skillCatalogService.isAvailableInCatalog(projectId, skillId)
+        if (isInCatalog) {
+            return new SkillInCatgalogResult(skillAlreadyInCatalog: true)
+        }
+
+        boolean isSkillIdInCatalog = skillCatalogService.doesSkillIdAlreadyExistInCatalog(skillId)
+        if (isSkillIdInCatalog) {
+            return new SkillInCatgalogResult(skillIdConflictsWithExistingCatalogSkill: true)
+        }
+
+        boolean isSkillNameInCatalog = skillCatalogService.doesSkillNameAlreadyExistInCatalog(projectId, skillId)
+        if (isSkillNameInCatalog) {
+            return new SkillInCatgalogResult(skillNameConflictsWithExistingCatalogSkill: true)
+        }
+
+        return new SkillInCatgalogResult()
+    }
+
     @RequestMapping(value="/projects/{projectId}/skills/{skillId}/export", method = [RequestMethod.DELETE], produces = "application/json")
     RequestResult removeSkillFromCatalog(@PathVariable("projectId") String projectId, @PathVariable("skillId") String skillId) {
         SkillsValidator.isNotBlank(projectId, "projectId")

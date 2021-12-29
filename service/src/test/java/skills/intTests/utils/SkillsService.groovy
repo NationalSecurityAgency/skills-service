@@ -1269,6 +1269,10 @@ class SkillsService {
         return wsHelper.adminDelete("/projects/${projectId}/skills/${skillId}/export")
     }
 
+    def doesSkillExistInCatalog(String projectId, String skillId) {
+        return wsHelper.adminPost("/projects/${projectId}/skills/catalog/exists/${skillId}", [:]).body
+    }
+
     private String getProjectUrl(String project) {
         return "/projects/${project}".toString()
     }

@@ -1380,6 +1380,141 @@ class CatalogSkillTests extends DefaultIntSpec {
         e.getMessage().contains("Dependencies cannot be added to a skill shared to the catalog.")
     }
 
+    def "cannot import skill from catalog with same name as skill already existing in destination project"() {
+        def project1 = createProject(1)
+        def project2 = createProject(2)
+
+        def p1subj1 = createSubject(1, 1)
+        def p2subj1 = createSubject(2, 1)
+
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 100)
+
+        def p2skill1 = createSkill(2, 1, 1, 0, 1, 0, 100)
+        p2skill1.skillId = "foo"
+        p2skill1.name = skill.name
+
+        skillsService.createProject(project1)
+        skillsService.createProject(project2)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p2subj1)
+
+        skillsService.createSkill(skill)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(p2skill1)
+
+        skillsService.exportSkillToCatalog(skill.projectId, skill.skillId)
+
+        when:
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+
+        then:
+        def e = thrown(SkillsClientException)
+        e.getMessage().contains("Cannot import Skill from catalog, [${p2skill1.name}] already exists in Project")
+    }
+
+    def "cannot export skill to catalog if there is already a skill with the same id in the catalog"() {
+        def project1 = createProject(1)
+        def project2 = createProject(2)
+
+        def p1subj1 = createSubject(1, 1)
+        def p2subj1 = createSubject(2, 1)
+
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 100)
+
+        def p2skill1 = createSkill(2, 1, 1, 0, 1, 0, 100)
+        p2skill1.skillId = skill.skillId
+
+        skillsService.createProject(project1)
+        skillsService.createProject(project2)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p2subj1)
+
+        skillsService.createSkill(skill)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(p2skill1)
+
+        skillsService.exportSkillToCatalog(skill.projectId, skill.skillId)
+
+        when:
+        skillsService.exportSkillToCatalog(p2skill1.projectId, p2skill1.skillId)
+
+        then:
+        def e = thrown(SkillsClientException)
+        e.message.contains("Skill id [${p2skill1.skillId}] already exists in the catalog. Duplicated skill ids are not allowed")
+    }
+
+    def "cannot export skill to catalog if there is already a skill with the same name in the catalog"() {
+        def project1 = createProject(1)
+        def project2 = createProject(2)
+
+        def p1subj1 = createSubject(1, 1)
+        def p2subj1 = createSubject(2, 1)
+
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 100)
+
+        def p2skill1 = createSkill(2, 1, 1, 0, 1, 0, 100)
+        p2skill1.skillId = "rando"
+        p2skill1.name = skill.name
+
+        skillsService.createProject(project1)
+        skillsService.createProject(project2)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p2subj1)
+
+        skillsService.createSkill(skill)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(p2skill1)
+
+        skillsService.exportSkillToCatalog(skill.projectId, skill.skillId)
+
+        when:
+        skillsService.exportSkillToCatalog(p2skill1.projectId, p2skill1.skillId)
+
+        then:
+        def e = thrown(SkillsClientException)
+        e.message.contains("Skill name [${p2skill1.name}] already exists in the catalog. Duplicate skill names are not allowed")
+    }
+
+    def "check if skill is already exported to the catalog"() {
+        def project1 = createProject(1)
+        def project2 = createProject(2)
+
+        def p1subj1 = createSubject(1, 1)
+        def p2subj1 = createSubject(2, 1)
+
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 100)
+        def p2skill1 = createSkill(2, 1, 1, 0, 1, 0, 100)
+
+        skillsService.createProject(project1)
+        skillsService.createProject(project2)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p2subj1)
+
+        skillsService.createSkill(skill)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(p2skill1)
+
+        skillsService.exportSkillToCatalog(skill.projectId, skill.skillId)
+
+        when:
+        def res1 = skillsService.doesSkillExistInCatalog(skill.projectId, skill.skillId)
+        def res2 = skillsService.doesSkillExistInCatalog(skill2.projectId, skill2.skillId)
+
+        then:
+        res1.skillAlreadyInCatalog
+        !res1.skillIdConflictsWithExistingCatalogSkill
+        !res1.skillNameConflictsWithExistingCatalogSkill
+
+        !res2.skillAlreadyInCatalog
+        !res2.skillIdConflictsWithExistingCatalogSkill
+        !res2.skillNameConflictsWithExistingCatalogSkill
+    }
+
 }
+
 
 

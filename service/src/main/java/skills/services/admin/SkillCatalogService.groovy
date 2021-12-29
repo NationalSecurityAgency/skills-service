@@ -179,8 +179,16 @@ class SkillCatalogService {
             throw new SkillException("Skill has already been exported to the catalog", projectId, skillId, ErrorCode.SkillAlreadyInCatalog)
         }
 
+        if (doesSkillIdAlreadyExistInCatalog(skillId)) {
+            throw new SkillException("Skill id [${skillId}] already exists in the catalog. Duplicated skill ids are not allowed", projectId, skillId, ErrorCode.SkillAlreadyInCatalog)
+        }
+
         projDefAccessor.getProjDef(projectId)
         SkillDefWithExtra skillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, SkillDef.ContainerType.Skill)
+
+        if (doesSkillNameAlreadyExistInCatalog(skillDef.name)) {
+            throw new SkillException("Skill name [${skillDef.name}] already exists in the catalog. Duplicate skill names are not allowed", projectId, skillId, ErrorCode.SkillAlreadyInCatalog)
+        }
 
         List<SkillDef> dependencies = relationshipService.getChildrenSkills(skillDef.projectId, skillDef.skillId, [SkillRelDef.RelationshipType.Dependence])
         if (dependencies) {
@@ -234,6 +242,10 @@ class SkillCatalogService {
             throw new SkillException("Cannot import Skill from catalog, [${skillIdFrom}] already exists in Project", projectIdTo, skillIdFrom)
         }
 
+        if (skillDefRepo.existsByProjectIdAndNameAndTypeAllIgnoreCase(projectIdTo, original.name, SkillDef.ContainerType.Skill)) {
+            throw new SkillException("Cannot import Skill from catalog, [${original.name}] already exists in Project", projectIdTo, skillIdFrom)
+        }
+
         SkillImportRequest copy = new SkillImportRequest()
         int numToCompletion = original.totalPoints / original.pointIncrement
         Props.copy(original, copy)
@@ -262,6 +274,34 @@ class SkillCatalogService {
         Boolean retVal = exportedSkillRepo.doesSkillExistInCatalog(projectId, skillId)
         if (retVal == null) {
             return false;
+        }
+        return retVal.booleanValue()
+    }
+
+    @Transactional(readOnly=true)
+    boolean doesSkillIdAlreadyExistInCatalog(String skillId) {
+        Boolean retVal = exportedSkillRepo.doesSkillIdExistInCatalog(skillId)
+        if (retVal == null) {
+            return false
+        }
+        return retVal.booleanValue()
+    }
+
+    @Transactional(readOnly=true)
+    boolean doesSkillNameAlreadyExistInCatalog(String name) {
+        Boolean retVal = exportedSkillRepo.doesSkillNameExistInCatalog(name)
+        if (retVal == null) {
+            return false
+        }
+        return retVal.booleanValue()
+    }
+
+    @Transactional(readOnly=true)
+    boolean doesSkillNameAlreadyExistInCatalog(String projectId, String skillId) {
+        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillId(projectId, skillId)
+        Boolean retVal = exportedSkillRepo.doesSkillNameExistInCatalog(skillDef?.name)
+        if (retVal == null) {
+            return false
         }
         return retVal.booleanValue()
     }
