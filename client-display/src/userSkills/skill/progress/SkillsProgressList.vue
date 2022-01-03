@@ -88,10 +88,10 @@ limitations under the License.
   import NoDataYet from '@/common-components/utilities/NoDataYet';
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
   import SkillsSpinner from '@/common/utilities/SkillsSpinner';
-  import SkillProgress2 from './SkillProgress2';
   import SkillsFilter from '@/common-components/utilities/ListFilterMenu';
-  import SkillEnricherUtil from '../../utils/SkillEnricherUtil';
   import StringHighlighter from '@/common-components/utilities/StringHighlighter';
+  import SkillProgress2 from './SkillProgress2';
+  import SkillEnricherUtil from '../../utils/SkillEnricherUtil';
 
   const updateSkillForLoadedDescription = (skills, desc) => {
     let foundSkill = null;
