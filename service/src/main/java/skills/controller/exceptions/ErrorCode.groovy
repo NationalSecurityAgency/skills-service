@@ -36,4 +36,9 @@ enum ErrorCode {
     SkillAlreadyInCatalog,
     ExportToCatalogNotAllowed,
     DependenciesNotAllowed
+    MaxProjectsThreshold,
+    MaxBadgesThreshold,
+    MaxSkillsThreshold,
+    MaxSubjectsThreshold
+
 }

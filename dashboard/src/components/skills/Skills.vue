@@ -18,7 +18,7 @@ limitations under the License.
     <loading-container v-bind:is-loading="isLoading">
       <sub-page-header ref="subPageHeader" title="Skills"
                        :disabled="addSkillDisabled" :disabled-msg="addSkillsDisabledMsg" aria-label="new skill">
-
+        <i v-if="addSkillDisabled" class="fas fa-exclamation-circle text-warning ml-1 mr-1" style="pointer-events: all; font-size: 1.5rem;" v-b-tooltip.hover="addSkillsDisabledMsg"/>
         <b-button id="importFromCatalogBtn" ref="importFromCatalogBtn" @click="importCatalog.show=true" variant="outline-primary" size="sm"
                   aria-label="import from catalog"
                   data-cy="importFromCatalogBtn">
@@ -26,19 +26,29 @@ limitations under the License.
         </b-button>
         <b-button id="newGroupBtn" ref="newGroupButton" @click="newGroup" variant="outline-primary" size="sm"
                   aria-label="new skills group"
-                  data-cy="newGroupButton" class="ml-1">
+                  aria-describedby="newGroupSrText"
+                  data-cy="newGroupButton" :aria-disabled="addSkillDisabled" :disabled="addSkillDisabled">
           <span class="">Group</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
+          <span id="newGroupSrText" class="sr-only">
+            {{ addSkillDisabled ? addSkillDisabled : 'Create a new Skill Group'}}
+          </span>
         </b-button>
         <b-button id="newSkillBtn" ref="newSkillButton" @click="newSkill" variant="outline-primary" size="sm"
                   aria-label="new skill"
-                  data-cy="newSkillButton" class="ml-1">
+                  aria-describedby="newSkillSrText"
+                  data-cy="newSkillButton" class="ml-1" :aria-disabled="addSkillDisabled" :disabled="addSkillDisabled">
           <span class="">Skill</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
+          <span id="newSkillSrText" class="sr-only">
+            {{ addSkillDisabled ? addSkillDisabled : 'Create a new Skill'}}
+          </span>
         </b-button>
       </sub-page-header>
 
       <b-card body-class="p-0">
         <skills-table ref="skillsTable"
-          :skills-prop="skills" :is-top-level="true" :project-id="this.$route.params.projectId" :subject-id="this.$route.params.subjectId" v-on:skills-change="skillsChanged"/>
+          :skills-prop="skills" :is-top-level="true" :project-id="this.$route.params.projectId" :subject-id="this.$route.params.subjectId"
+                      v-on:skills-change="skillsChanged"
+                      @skill-removed="skillDeleted" />
       </b-card>
     </loading-container>
 
@@ -133,6 +143,9 @@ limitations under the License.
             this.isLoading = false;
           });
       },
+      skillDeleted(skill) {
+        this.skillsChanged(skill.skillId);
+      },
       importFromCatalog(skillsInfoToImport) {
         this.isLoading = true;
         CatalogService.bulkImport(this.$route.params.projectId, this.$route.params.subjectId, skillsInfoToImport)
@@ -178,8 +191,11 @@ limitations under the License.
       ...mapGetters([
         'subject',
       ]),
+      numSubjectSkills() {
+        return this.subject.numSkills;
+      },
       addSkillDisabled() {
-        return this.skills && this.$store.getters.config && this.skills.length >= this.$store.getters.config.maxSkillsPerSubject;
+        return this.skills && this.$store.getters.config && this.numSubjectSkills >= this.$store.getters.config.maxSkillsPerSubject;
       },
       addSkillsDisabledMsg() {
         if (this.$store.getters.config) {

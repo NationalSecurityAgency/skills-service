@@ -1173,4 +1173,88 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="skillsSelector"]').contains('No elements found. Consider changing the search query').should('be.visible')
   });
 
+  it('add skill and copy skill buttons disabled if max skills for subject reached', () => {
+    cy.intercept('/public/config', {
+      body: {
+        artifactBuildTimestamp: "2022-01-17T14:39:38Z",
+        authMode: "FORM",
+        buildTimestamp: "2022-01-17T14:39:38Z",
+        dashboardVersion: "1.9.0-SNAPSHOT",
+        defaultLandingPage: "progress",
+        descriptionMaxLength: "2000",
+        docsHost: "https://code.nsa.gov/skills-docs",
+        expirationGracePeriod: 7,
+        expireUnusedProjectsOlderThan: 180,
+        maxBadgeNameLength: "50",
+        maxBadgesPerProject: "25",
+        maxDailyUserEvents: "30",
+        maxFirstNameLength: "30",
+        maxIdLength: "50",
+        maxLastNameLength: "30",
+        maxLevelNameLength: "50",
+        maxNicknameLength: "70",
+        maxNumPerformToCompletion: "10000",
+        maxNumPointIncrementMaxOccurrences: "999",
+        maxPasswordLength: "40",
+        maxPointIncrement: "10000",
+        maxProjectNameLength: "50",
+        maxProjectsPerAdmin: "25",
+        maxSelfReportMessageLength: "250",
+        maxSelfReportRejectionMessageLength: "250",
+        maxSkillNameLength: "100",
+        maxSkillVersion: "999",
+        maxSkillsPerSubject: "5",
+        maxSubjectNameLength: "50",
+        maxSubjectsPerProject: "25",
+        maxTimeWindowInMinutes: "43200",
+        minIdLength: "3",
+        minNameLength: "3",
+        minPasswordLength: "8",
+        minUsernameLength: "5",
+        minimumProjectPoints: "100",
+        minimumSubjectPoints: "100",
+        nameValidationMessage: "",
+        nameValidationRegex: "",
+        needToBootstrap: false,
+        numProjectsForTableView: "10",
+        oAuthOnly: false,
+        paragraphValidationMessage: "paragraphs may not contain jabberwocky",
+        paragraphValidationRegex: "^(?i)(?s)((?!jabberwocky).)*$",
+        pointHistoryInDays: "1825",
+        projectMetricsTagCharts: "[{\"key\":\"dutyOrganization\",\"type\":\"pie\",\"title\":\"Users by Org\"},{\"key\":\"adminOrganization\",\"type\":\"bar\",\"title\":\"Users by Agency\"}]",
+        rankingAndProgressViewsEnabled: "true",
+        userSuggestOptions: "ONE,TWO,THREE",
+        verifyEmailAddresses: false,
+      }
+    });
+
+    cy.intercept('DELETE', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('deleteSkill');
+
+    cy.createSkill(1, 1, 1);
+    cy.createSkill(1, 1, 2);
+    cy.createSkill(1, 1, 3);
+    cy.createSkill(1, 1, 4);
+    cy.createSkill(1, 1, 5);
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+    cy.get('[data-cy=newGroupButton]').should('be.disabled');
+    cy.get('[data-cy=newSkillButton]').should('be.disabled');
+    cy.get('[data-cy=subPageHeaderControls] .text-warning').should('be.visible');
+
+    cy.get('[data-cy*=copySkillButton]').should('have.length', 5);
+    cy.get('[data-cy*=copySkillButton]').should('be.disabled');
+
+    cy.get('[data-cy=deleteSkillButton_skill1]').click();
+    cy.contains('YES, Delete It!').click();
+    cy.wait('@deleteSkill');
+
+    cy.get('[data-cy=newGroupButton]').should('be.enabled');
+    cy.get('[data-cy=newSkillButton]').should('be.enabled');
+    cy.get('[data-cy=subPageHeaderControls] .text-warning').should('not.exist');
+
+    cy.get('[data-cy*=copySkillButton]').should('have.length', 4);
+    cy.get('[data-cy*=copySkillButton]').should('be.enabled');
+  });
+
 });

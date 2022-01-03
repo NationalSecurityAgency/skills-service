@@ -21,12 +21,12 @@ limitations under the License.
     <div class="col-sm-6 col-md-5 pt-0 text-sm-right" data-cy="subPageHeaderControls">
       <slot>
         <b-button ref="actionButton" v-if="action" type="button" size="sm" variant="outline-primary"
-                :class="{'btn':true, 'btn-outline-primary':true, 'disabled':disabled}"
+                :class="{'btn':true, 'btn-outline-primary':true, 'disabled':disabledInternal}"
                 v-on:click="addClicked" :aria-label="ariaLabel ? ariaLabel : action"
                 :data-cy="`btn_${title}`">
           <span class="">{{ action }} </span> <i class="fas fa-plus-circle"/>
         </b-button>
-        <i v-if="disabled" class="fas fa-exclamation-circle text-warning ml-1" style="pointer-events: all; font-size: 1.5rem;" v-b-tooltip.hover="disabledMsg"/>
+        <i v-if="disabledInternal" class="fas fa-exclamation-circle text-warning ml-1" style="pointer-events: all; font-size: 1.5rem;" v-b-tooltip.hover="disabledMsg"/>
       </slot>
     </div>
   </div>
@@ -56,6 +56,16 @@ limitations under the License.
       ariaLabel: {
         type: String,
         required: false,
+      },
+    },
+    data() {
+      return {
+        disabledInternal: this.disabled,
+      };
+    },
+    watch: {
+      disabled() {
+        this.disabledInternal = this.disabled;
       },
     },
     methods: {

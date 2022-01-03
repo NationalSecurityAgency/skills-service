@@ -173,7 +173,15 @@ limitations under the License.
             this.$router.replace({ name: this.$route.name, params: { ...this.$route.params, skillId: this.skill.skillId } });
           }
           this.headerOptions = this.buildHeaderOptions(res);
-        }).finally(() => {
+        })
+        .catch((err) => {
+          if (err && err.response && err.response.data.errorCode === 'MaxSkillsThreshold') {
+            this.msgOk(err.response.data.explanation, 'Maximum Skills Reached');
+          } else {
+            throw err;
+          }
+        })
+        .finally(() => {
           this.isLoading = false;
           this.handleFocus();
         });
