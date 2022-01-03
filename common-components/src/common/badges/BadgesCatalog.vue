@@ -63,8 +63,8 @@ limitations under the License.
 <script>
   import debounce from 'lodash.debounce';
   import NoDataYet from '@/common-components/utilities/NoDataYet';
-  import BadgeCatalogItem from './BadgeCatalogItem';
   import BadgesFilter from '@/common-components/utilities/ListFilterMenu';
+  import BadgeCatalogItem from './BadgeCatalogItem';
 
   export default {
     name: 'BadgesCatalog',
