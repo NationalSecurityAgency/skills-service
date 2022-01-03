@@ -297,6 +297,9 @@ limitations under the License.
   import { SkillsReporter } from '@skilltree/skills-client-vue';
   import dayjs from '@/common-components/DayJsCustomizer';
   import StringHighlighter from '@/common-components/utilities/StringHighlighter';
+  import ExportToCatalog from '@/components/skills/catalog/ExportToCatalog';
+  import RemovalValidation from '@/components/utils/modal/RemovalValidation';
+  import ExportedSkillDeletionWarning from '@/components/skills/catalog/ExportedSkillDeletionWarning';
   import EditSkill from './EditSkill';
   import NoContent2 from '../utils/NoContent2';
   import ChildRowSkillsDisplay from './ChildRowSkillsDisplay';
@@ -308,10 +311,6 @@ limitations under the License.
   import TimeWindowMixin from './TimeWindowMixin';
   import ChildRowSkillGroupDisplay from './skillsGroup/ChildRowSkillGroupDisplay';
   import EditSkillGroup from './skillsGroup/EditSkillGroup';
-  import ExportToCatalog from '@/components/skills/catalog/ExportToCatalog';
-  import RemovalValidation from '@/components/utils/modal/RemovalValidation';
-  import ExportedSkillDeletionWarning
-    from '@/components/skills/catalog/ExportedSkillDeletionWarning';
 
   export default {
     name: 'SkillsTable',

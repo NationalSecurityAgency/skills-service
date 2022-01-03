@@ -55,6 +55,7 @@ limitations under the License.
 <script>
   import { createNamespacedHelpers } from 'vuex';
   import dayjs from '@/common-components/DayJsCustomizer';
+  import CatalogService from '@/components/skills/catalog/CatalogService';
   import LoadingContainer from '../utils/LoadingContainer';
   import SkillsTable from './SkillsTable';
   import SkillsService from './SkillsService';
@@ -62,7 +63,6 @@ limitations under the License.
   import EditSkill from './EditSkill';
   import EditSkillGroup from './skillsGroup/EditSkillGroup';
   import ImportFromCatalog from './catalog/ImportFromCatalog';
-  import CatalogService from '@/components/skills/catalog/CatalogService';
 
   const { mapActions, mapGetters } = createNamespacedHelpers('subjects');
 
