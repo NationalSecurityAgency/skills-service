@@ -1078,6 +1078,21 @@ class AdminController {
         return new SkillInCatgalogResult()
     }
 
+    @RequestMapping(value = "/projects/{projectId}/skills/catalog/exist", method = [RequestMethod.POST], produces = "application/json")
+    Map<String, Boolean> doSkillsExistInCatalog(@PathVariable("projectId") String projectId, @RequestBody List<String> skillIds) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        SkillsValidator.isNotEmpty(skillIds, "skillIds")
+
+        Map<String, Boolean> inCatalogStatus = skillIds.collectEntries() { [it, false]}
+        List<String> skillIdsInCatalog = skillCatalogService.getSkillIdsInCatalog(projectId, skillIds)
+
+        skillIdsInCatalog?.each {
+            inCatalogStatus[it] = true
+        }
+
+        return inCatalogStatus
+    }
+
     @RequestMapping(value="/projects/{projectId}/skills/{skillId}/export", method = [RequestMethod.DELETE], produces = "application/json")
     RequestResult removeSkillFromCatalog(@PathVariable("projectId") String projectId, @PathVariable("skillId") String skillId) {
         SkillsValidator.isNotBlank(projectId, "projectId")

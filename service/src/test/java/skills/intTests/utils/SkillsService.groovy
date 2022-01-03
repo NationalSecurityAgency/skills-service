@@ -1273,6 +1273,10 @@ class SkillsService {
         return wsHelper.adminPost("/projects/${projectId}/skills/catalog/exists/${skillId}", [:]).body
     }
 
+    def doSkillsExistInCatalog(String projectId, List<String> skillIds) {
+        return wsHelper.adminPost("/projects/${projectId}/skills/catalog/exist", skillIds).body
+    }
+
     private String getProjectUrl(String project) {
         return "/projects/${project}".toString()
     }

@@ -24,15 +24,17 @@ import skills.storage.CatalogSkill
 import skills.storage.model.ExportedSkill
 import skills.storage.model.ExportedSkillTiny
 import skills.storage.model.ImportExportStats
-import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefWithExtra
-import skills.storage.model.SubjectAwareSkillDef
 
 interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, Integer> {
 
     @Nullable
     @Query('''select 'true' from ExportedSkill es where es.projectId = ?1 and es.skill.skillId = ?2''')
     Boolean doesSkillExistInCatalog(String projectId, String skillId)
+
+    @Nullable
+    @Query('''select es.skill.skillId from ExportedSkill es where es.projectId = ?1 and es.skill.skillId in ?2''')
+    List<String> doSkillsExistInCatalog(String projectId, List<String> skillIds)
 
     @Nullable
     @Query('''select 'true' from ExportedSkill es where es.skill.skillId = ?1''')

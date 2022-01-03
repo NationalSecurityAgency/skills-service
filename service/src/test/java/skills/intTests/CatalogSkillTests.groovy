@@ -1514,7 +1514,56 @@ class CatalogSkillTests extends DefaultIntSpec {
         !res2.skillNameConflictsWithExistingCatalogSkill
     }
 
+    def "check catalog status of multiple skillids"() {
+        def project1 = createProject(1)
+        def project2 = createProject(2)
+
+        def p1subj1 = createSubject(1, 1)
+        def p2subj1 = createSubject(2, 1)
+
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 10)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 10)
+        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 10)
+
+        def skill4 = createSkill(2, 1, 4)
+        def skill5 = createSkill(2, 1, 5)
+        def skill6 = createSkill(2, 1, 6)
+        def skill7 = createSkill(2, 1, 7)
+        def skill8 = createSkill(2, 1, 8)
+
+        skillsService.createProject(project1)
+        skillsService.createProject(project2)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p2subj1)
+
+        skillsService.createSkill(skill)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(skill3)
+        skillsService.createSkill(skill4)
+        skillsService.createSkill(skill5)
+        skillsService.createSkill(skill6)
+        skillsService.createSkill(skill7)
+        skillsService.createSkill(skill8)
+
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
+
+        when:
+
+        def result = skillsService.doSkillsExistInCatalog(project1.projectId, [skill.skillId, skill2.skillId, skill3.skillId, skill4.skillId, skill5.skillId])
+
+        then:
+        result
+        result[skill.skillId] == true
+        result[skill2.skillId] == true
+        result[skill3.skillId] == false
+        result[skill4.skillId] == false
+        result[skill5.skillId] == false
+
+    }
+
 }
+
 
 
 

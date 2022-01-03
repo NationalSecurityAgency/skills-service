@@ -57,6 +57,8 @@ import skills.utils.Props
 @Slf4j
 class SkillCatalogService {
 
+    private static final Set<String> aliasUnnecessary = Set.of("projectName", "subjectName", "subjectId", "exportedOn")
+
     @Autowired
     ExportedSkillRepo exportedSkillRepo
 
@@ -104,32 +106,6 @@ class SkillCatalogService {
         def catalogSkills = exportedSkillRepo.getSkillsInCatalog(projectId, pageable)
         res.results = catalogSkills?.collect {convert(it)}
         return res
-    }
-
-    private static final Set<String> aliasUnnecessary = Set.of("projectName", "subjectName", "subjectId", "exportedOn")
-    private static PageRequest convertForCatalogSkills(PageRequest pageRequest) {
-        int pageNum = pageRequest.getPageNumber()
-        int pageSize = pageRequest.getPageSize()
-        Sort sort = pageRequest.getSort()
-        if (!sort.isEmpty()) {
-            List<Sort.Order> props = []
-            sort.get().forEach({
-                if (it.property == "numPerformToCompletion") {
-                    SkillException ske = new SkillException("Sorting on numPerformToCompletion is not allowed")
-                    ske.errorCode = ErrorCode.BadParam
-                    throw ske
-                }
-                if (!aliasUnnecessary.contains(it.property)) {
-                    props.add(new Sort.Order(it.direction, "skill.${it.property}"))
-                } else {
-                    props.add(it)
-                }
-            })
-
-            pageRequest = PageRequest.of(pageNum, pageSize, Sort.by(props))
-        }
-
-        return pageRequest
     }
 
     @Transactional(readOnly = true)
@@ -398,6 +374,36 @@ class SkillCatalogService {
         }
 
         return stats
+    }
+
+    @Transactional(readOnly = true)
+    List<String> getSkillIdsInCatalog(String projectId, List<String> skillIds) {
+        exportedSkillRepo.doSkillsExistInCatalog(projectId, skillIds)
+    }
+
+    private static PageRequest convertForCatalogSkills(PageRequest pageRequest) {
+        int pageNum = pageRequest.getPageNumber()
+        int pageSize = pageRequest.getPageSize()
+        Sort sort = pageRequest.getSort()
+        if (!sort.isEmpty()) {
+            List<Sort.Order> props = []
+            sort.get().forEach({
+                if (it.property == "numPerformToCompletion") {
+                    SkillException ske = new SkillException("Sorting on numPerformToCompletion is not allowed")
+                    ske.errorCode = ErrorCode.BadParam
+                    throw ske
+                }
+                if (!aliasUnnecessary.contains(it.property)) {
+                    props.add(new Sort.Order(it.direction, "skill.${it.property}"))
+                } else {
+                    props.add(it)
+                }
+            })
+
+            pageRequest = PageRequest.of(pageNum, pageSize, Sort.by(props))
+        }
+
+        return pageRequest
     }
 
     private static SkillDefRes convert(SkillDef skillDef) {

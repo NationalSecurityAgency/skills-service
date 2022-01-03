@@ -16,6 +16,8 @@
 package skills.controller.result.model
 
 class SkillInCatgalogResult {
+    String skillId
+    String projectId
     boolean skillAlreadyInCatalog
     boolean skillIdConflictsWithExistingCatalogSkill
     boolean skillNameConflictsWithExistingCatalogSkill
