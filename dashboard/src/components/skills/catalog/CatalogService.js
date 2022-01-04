@@ -44,4 +44,8 @@ export default {
   removeExportedSkill(projectId, skillId) {
     return axios.delete(`/admin/projects/${projectId}/skills/${skillId}/export`).then((response) => response.data);
   },
+  checkIfSkillExistInCatalog(projectId, skillIdOrName) {
+    const url = `/admin/projects/${projectId}/skills/catalog/exists/${skillIdOrName}`;
+    return axios.post(url).then((response) => response.data);
+  },
 };

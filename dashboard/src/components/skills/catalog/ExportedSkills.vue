@@ -195,7 +195,7 @@ limitations under the License.
         };
         SkillsService.getSkillsExportedToCatalog(this.projectId, pageParams).then((res) => {
           if (res.data) {
-            this.exportedSkills = res.data.map((skill) => ({ projectId: this.$route.params.projectId, ...skill }));
+            this.exportedSkills = res.data.map((skill) => ({ projectId: this.projectId, ...skill }));
             this.table.options.pagination.totalRows = res.totalCount;
           } else {
             this.table.options.pagination.totalRows = 0;

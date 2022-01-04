@@ -352,34 +352,47 @@ describe('Import skills from Catalog Tests', () => {
         ], 5);
     });
 
-    it('do not allow import if skill id already exist', () => {
+    it('do not allow import if skill id or name already exist', () => {
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
+        cy.createSkill(1, 1, 3);
+        cy.createSkill(1, 1, 4);
+        cy.createSkill(1, 1, 5);
         cy.exportSkillToCatalog(1, 1, 1);
         cy.exportSkillToCatalog(1, 1, 2);
+        cy.exportSkillToCatalog(1, 1, 3);
+        cy.exportSkillToCatalog(1, 1, 4);
+        cy.exportSkillToCatalog(1, 1, 5);
 
         cy.createProject(2);
         cy.createSubject(2, 1);
         cy.createSkill(2, 1, 2);
+        cy.createSkill(2, 1, 4, { name: 'Some Other' } );
+        cy.createSkill(2, 1, 5, { skillId: 'someOther' } );
         cy.importSkillFromCatalog(2, 1, 1, 1)
 
         cy.visit('/administrator/projects/proj2/subjects/subj1');
-        // cy.get('[data-cy="importFromCatalogBtn"]').click();
-        // cy.get('[data-cy="skillSelect_proj1-skill2"]').check({force: true})
-        // cy.get('[data-cy="importBtn"]').should('be.enabled');
-        // cy.get('[data-cy="numSelectedSkills"]').should('have.text', '1');
-        // cy.get('[data-cy="importBtn"]').click();
-        //
-        // cy.get('[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '2');
-        // cy.get('[data-cy="importedBadge-skill1"]')
-        // cy.get('[data-cy="importedBadge-skill2"]')
-        //
-        // cy.get('[data-cy="importFromCatalogBtn"]').click();
-        // cy.get('[data-cy="catalogSkillImportModal-NoData"]').contains('Nothing Available for Import')
+        cy.get('[data-cy="importFromCatalogBtn"]').click();
+
+        cy.get('[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '4');
+
+        cy.get('[data-cy="alreadyExistWarning_proj1-skill2"]').contains('Cannot import! Skill ID and name already exist in the project!');
+        cy.get('[data-cy="skillSelect_proj1-skill2"]').should('be.disabled')
+
+        cy.get('[data-cy="alreadyExistWarning_proj1-skill3"]').should('not.exist')
+        cy.get('[data-cy="skillSelect_proj1-skill3"]').should('be.enabled');
+
+        cy.get('[data-cy="alreadyExistWarning_proj1-skill4"]').contains('Cannot import! Skill ID already exist in the project!');
+        cy.get('[data-cy="skillSelect_proj1-skill4"]').should('be.disabled');
+
+        cy.get('[data-cy="alreadyExistWarning_proj1-skill5"]').contains('Cannot import! Skill name already exist in the project!');
+        cy.get('[data-cy="skillSelect_proj1-skill5"]').should('be.disabled');
+
+        cy.get('[data-cy="importBtn"]').should('be.disabled');
+        cy.get('[data-cy="numSelectedSkills"]').should('have.text', '0');
+
     })
 
-    // import duplicate name or id
-    // export duplicate name and id
 });
 
 

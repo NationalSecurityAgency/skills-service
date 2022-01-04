@@ -691,5 +691,96 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.get('[data-cy="exportedBadge-skill2"')
     });
 
+    it('do not allow to export skills with duplicate Skill ID or Skill Name', () => {
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2);
+        cy.createSkill(1, 1, 3);
+
+        cy.exportSkillToCatalog(1, 1, 1);
+        cy.exportSkillToCatalog(1, 1, 2);
+        cy.exportSkillToCatalog(1, 1, 3);
+
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1);
+        cy.createSkill(2, 1, 2, { name: 'Something Else'});
+        cy.createSkill(2, 1, 3, { skillId: 'diffId' });
+        cy.createSkill(2, 1, 4);
+        cy.createSkill(2, 1, 5);
+
+        cy.visit('/administrator/projects/proj2/subjects/subj1');
+        cy.get('[data-cy="skillSelect-skill1"]').click({force: true});
+        cy.get('[data-cy="skillActionsBtn"] button').click();
+        cy.get('[data-cy="skillExportToCatalogBtn"]').click();
+        cy.contains('Cannot export 1 skill(s) because their Skill ID and/or Name are already in the Catalog')
+        cy.get('[data-cy="dupSkill-skill1"]').contains('Very Great Skill 1')
+        // cy.get('[data-cy="dupSkill-skill1"]').contains('Name Exist') TODO: add back once back-end bug is resolved
+        cy.get('[data-cy="dupSkill-skill1"]').contains('ID Exist')
+        cy.get('[data-cy="exportToCatalogButton"]').should('not.exist');
+        cy.get('[data-cy="okButton"]').should('be.enabled');
+
+        // close
+        cy.get('[data-cy="okButton"]').click();
+        cy.get('[data-cy="okButton"]').should('not.exist');
+
+        // some skills not exportable because of the name and some because of the id
+        cy.get('[data-cy="skillSelect-skill2"]').click({force: true});
+        cy.get('[data-cy="skillSelect-diffId"]').click({force: true});
+        cy.get('[data-cy="skillActionsBtn"] button').click();
+        cy.get('[data-cy="skillExportToCatalogBtn"]').click();
+        cy.contains('Cannot export 2 skill(s) because their Skill ID and/or Name are already in the Catalog')
+        cy.get('[data-cy="dupSkill-skill2"]').contains('Something Else')
+        cy.get('[data-cy="dupSkill-skill2"]').contains('ID Exist')
+        cy.get('[data-cy="dupSkill-diffId"]').contains('Very Great Skill 3')
+        cy.get('[data-cy="dupSkill-diffId"]').contains('Name Exist')
+        cy.get('[data-cy="exportToCatalogButton"]').should('not.exist');
+        cy.get('[data-cy="okButton"]').should('be.enabled');
+
+        // close
+        cy.get('[data-cy="okButton"]').click();
+        cy.get('[data-cy="okButton"]').should('not.exist');
+
+        // 1 skill can be exported while 2 cannot
+        cy.get('[data-cy="skillSelect-skill2"]').click({force: true});
+        cy.get('[data-cy="skillSelect-diffId"]').click({force: true});
+        cy.get('[data-cy="skillSelect-skill4"]').click({force: true});
+        cy.get('[data-cy="skillActionsBtn"] button').click();
+        cy.get('[data-cy="skillExportToCatalogBtn"]').click();
+        cy.contains('This will export Skill with id [skill4]')
+        cy.contains('Cannot export 2 skill(s) because their Skill ID and/or Name are already in the Catalog')
+        cy.get('[data-cy="dupSkill-skill2"]').contains('Something Else')
+        cy.get('[data-cy="dupSkill-skill2"]').contains('ID Exist')
+        cy.get('[data-cy="dupSkill-diffId"]').contains('Very Great Skill 3')
+        cy.get('[data-cy="dupSkill-diffId"]').contains('Name Exist')
+        cy.get('[data-cy="exportToCatalogButton"]').should('be.enabled');
+        cy.get('[data-cy="okButton"]').should('not.exist');
+
+        cy.get('[data-cy="closeButton"]').click();
+        cy.get('[data-cy="closeButton"]').should('not.exist');
+
+        // multiple skills can be exported while some cannot
+        cy.get('[data-cy="selectAllSkillsBtn"]').click();
+        cy.get('[data-cy="skillActionsBtn"] button').click();
+        cy.get('[data-cy="skillExportToCatalogBtn"]').click();
+        cy.contains('This will export 2 Skills to the ')
+        cy.contains('Cannot export 3 skill(s) because their Skill ID and/or Name are already in the Catalog')
+        cy.get('[data-cy="dupSkill-skill1"]').contains('Very Great Skill 1')
+        cy.get('[data-cy="dupSkill-skill2"]').contains('Something Else')
+        cy.get('[data-cy="dupSkill-diffId"]').contains('Very Great Skill 3')
+        cy.get('[data-cy="exportToCatalogButton"]').should('be.enabled');
+        cy.get('[data-cy="okButton"]').should('not.exist');
+
+        cy.get('[data-cy="exportToCatalogButton"]').click();
+        cy.contains('2 Skills were successfully exported to the catalog!');
+        cy.get('[data-cy="okButton"]').click();
+        cy.get('[data-cy="breadcrumb-proj2"]').click();
+        cy.get('[data-cy="nav-Skill Catalog"]').click();
+        cy.validateTable('[data-cy="exportedSkillsTable"]', [
+            [{ colIndex: 0,  value: 'skill5' }],
+            [{ colIndex: 0,  value: 'skill4' }],
+        ], 5);
+    });
+
+
 });
 

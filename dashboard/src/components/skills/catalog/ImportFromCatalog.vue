@@ -100,8 +100,11 @@ limitations under the License.
         </template>
 
         <template v-slot:cell(skillId)="data">
+          <skill-already-existing-warning :skill="data.item"/>
+
           <div class="text-primary">
             <b-form-checkbox
+              :disabled="data.item.alreadyHasThisSkillId || data.item.alreadyHasThisName"
               :id="`${data.item.projectId}-${data.item.skillId}`"
               v-model="data.item.selected"
               :name="`checkbox_${data.item.projectId}_${data.item.skillId}`"
@@ -116,15 +119,6 @@ limitations under the License.
           </div>
           <div class="text-secondary sub-info">
             <span>ID:</span> {{ data.item.skillId }}
-          </div>
-          <div v-if="data.item.alreadyHasThisSkillId && data.item.alreadyHasThisName" class="alert alert-warning">
-            There is already a skill in the project with this Skill ID and Name!
-          </div>
-          <div v-if="data.item.alreadyHasThisSkillId && !data.item.alreadyHasThisName">
-            ALREADY has skillId
-          </div>
-          <div v-if="data.item.alreadyHasThisName && !data.item.alreadyHasThisSkillId">
-            ALREADY has name
           </div>
 
           <b-button size="sm" variant="outline-info"
@@ -197,10 +191,12 @@ limitations under the License.
   import NoContent2 from '../../utils/NoContent2';
   import SkillsSpinner from '../../utils/SkillsSpinner';
   import SkillToImportInfo from './SkillToImportInfo';
+  import SkillAlreadyExistingWarning from '@/components/skills/catalog/SkillAlreadyExistingWarning';
 
   export default {
     name: 'ImportFromCatalog',
     components: {
+      SkillAlreadyExistingWarning,
       SkillToImportInfo,
       SkillsSpinner,
       NoContent2,
