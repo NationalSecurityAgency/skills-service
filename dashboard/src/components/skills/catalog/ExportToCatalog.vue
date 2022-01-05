@@ -46,7 +46,8 @@ limitations under the License.
               {{ dupSkill.name }} <span class="text-secondary font-italic">(ID: {{ dupSkill.skillId}} )</span>
               <b-badge variant="warning" v-if="dupSkill.skillNameConflictsWithExistingCatalogSkill" class="ml-1">Name Conflict</b-badge>
               <b-badge variant="warning" v-if="dupSkill.skillIdConflictsWithExistingCatalogSkill" class="ml-1">ID Conflict</b-badge>
-              <b-badge variant="warning" v-if="dupSkill.hasDependencies" class="ml-1">Has Dependencies</b-badge>
+              <b-badge variant="warning" v-if="dupSkill.hasDependencies" class="ml-1"
+                       v-b-tooltip.hover="'Skills that have dependencies cannot be exported to the catalog.'">Has Dependencies</b-badge>
             </li>
             <li v-if="skillsWithDupIdOrName.length > skillsWithDupIdOrNameToShow.length" data-cy="cantExportTruncatedMsg">
               <span class="text-primary font-weight-bold">{{ skillsWithDupIdOrName.length - skillsWithDupIdOrNameToShow.length }}</span> <span class="font-italic">more items...</span>
