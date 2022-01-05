@@ -40,12 +40,13 @@ limitations under the License.
         </p>
 
         <div v-if="skillsWithDupIdOrName && skillsWithDupIdOrName.length > 0">
-          Cannot export <b-badge variant="primary">{{ skillsWithDupIdOrName.length }}</b-badge> skill(s), <span class="text-primary">Skill ID</span> and/or <span class="text-primary">Name</span> is already in the Catalog:
+          Cannot export <b-badge variant="primary">{{ skillsWithDupIdOrName.length }}</b-badge> skill(s):
           <ul>
             <li v-for="dupSkill in skillsWithDupIdOrNameToShow" :key="dupSkill.skillId" :data-cy="`dupSkill-${dupSkill.skillId}`">
               {{ dupSkill.name }} <span class="text-secondary font-italic">(ID: {{ dupSkill.skillId}} )</span>
               <b-badge variant="warning" v-if="dupSkill.skillNameConflictsWithExistingCatalogSkill" class="ml-1">Name Conflict</b-badge>
               <b-badge variant="warning" v-if="dupSkill.skillIdConflictsWithExistingCatalogSkill" class="ml-1">ID Conflict</b-badge>
+              <b-badge variant="warning" v-if="dupSkill.hasDependencies" class="ml-1">Has Dependencies</b-badge>
             </li>
             <li v-if="skillsWithDupIdOrName.length > skillsWithDupIdOrNameToShow.length" data-cy="cantExportTruncatedMsg">
               <span class="text-primary font-weight-bold">{{ skillsWithDupIdOrName.length - skillsWithDupIdOrNameToShow.length }}</span> <span class="font-italic">more items...</span>
@@ -165,27 +166,56 @@ limitations under the License.
           });
       },
       checkIfNamesOrIdsAreAlreadyInCatalog() {
-        const checkAgainstCatalogPromises = this.skillsFiltered.map((skill) => CatalogService.checkIfSkillExistInCatalog(skill.projectId, skill.skillId).then((res) => ({ ...res, skillId: skill.skillId })));
-        Promise.all(checkAgainstCatalogPromises).then((res) => {
-          const enrichedSkills = this.skillsFiltered.map((skillToUpdate) => {
-            const enhanceWith = res.find((s) => s.skillId === skillToUpdate.skillId);
-            return ({
-              ...skillToUpdate,
-              skillIdConflictsWithExistingCatalogSkill: enhanceWith.skillIdConflictsWithExistingCatalogSkill,
-              skillNameConflictsWithExistingCatalogSkill: enhanceWith.skillNameConflictsWithExistingCatalogSkill,
+        const skillIds = this.skillsFiltered.map((skill) => skill.skillId);
+        CatalogService.areSkillsExportable(this.$route.params.projectId, skillIds)
+          .then((res) => {
+            let enrichedSkills = this.skillsFiltered.map((skillToUpdate) => {
+              const enhanceWith = res[skillToUpdate.skillId];
+              return ({
+                ...skillToUpdate,
+                hasDependencies: enhanceWith.hasDependencies,
+                skillAlreadyInCatalog: enhanceWith.skillAlreadyInCatalog,
+                skillIdConflictsWithExistingCatalogSkill: enhanceWith.skillIdConflictsWithExistingCatalogSkill,
+                skillNameConflictsWithExistingCatalogSkill: enhanceWith.skillNameConflictsWithExistingCatalogSkill,
+              });
             });
+
+            // re-filter if another user added to the filter or if the changes was made in another tab
+            enrichedSkills = enrichedSkills.filter((skill) => !skill.skillAlreadyInCatalog);
+            const isExportableSkill = (skill) => !skill.skillIdConflictsWithExistingCatalogSkill && !skill.skillNameConflictsWithExistingCatalogSkill && !skill.hasDependencies;
+
+            this.skillsWithDupIdOrName = enrichedSkills.filter((skill) => !isExportableSkill(skill));
+            this.skillsWithDupIdOrNameToShow = this.skillsWithDupIdOrName.length > 9 ? this.skillsWithDupIdOrName.slice(0, 8) : this.skillsWithDupIdOrName;
+            this.allSkillsAreDups = enrichedSkills.length === this.skillsWithDupIdOrName.length;
+            this.skillsFiltered = enrichedSkills.filter((skill) => isExportableSkill(skill));
+            this.numAlreadyExported = this.skills.length - this.skillsFiltered.length - this.skillsWithDupIdOrName.length;
+            this.allSkillsExportedAlready = this.skillsFiltered.length === 0 && this.skillsWithDupIdOrName.length === 0;
+            this.isSingleId = this.skillsFiltered.length === 1;
+            this.firstSkillId = this.skillsFiltered && this.skillsFiltered.length > 0 ? this.skillsFiltered[0].skillId : null;
+          }).finally(() => {
+            this.loadingData = false;
           });
-          this.skillsWithDupIdOrName = enrichedSkills.filter((skill) => skill.skillIdConflictsWithExistingCatalogSkill || skill.skillNameConflictsWithExistingCatalogSkill);
-          this.skillsWithDupIdOrNameToShow = this.skillsWithDupIdOrName.length > 3 ? this.skillsWithDupIdOrName.slice(0, 3) : this.skillsWithDupIdOrName;
-          this.allSkillsAreDups = enrichedSkills.length === this.skillsWithDupIdOrName.length;
-          this.skillsFiltered = enrichedSkills.filter((skill) => !skill.skillIdConflictsWithExistingCatalogSkill && !skill.skillNameConflictsWithExistingCatalogSkill);
-          this.numAlreadyExported = this.skills.length - this.skillsFiltered.length - this.skillsWithDupIdOrName.length;
-          this.allSkillsExportedAlready = this.skillsFiltered.length === 0 && this.skillsWithDupIdOrName.length === 0;
-          this.isSingleId = this.skillsFiltered.length === 1;
-          this.firstSkillId = this.skillsFiltered && this.skillsFiltered.length > 0 ? this.skillsFiltered[0].skillId : null;
-        }).finally(() => {
-          this.loadingData = false;
-        });
+        // const checkAgainstCatalogPromises = this.skillsFiltered.map((skill) => CatalogService.checkIfSkillExistInCatalog(skill.projectId, skill.skillId).then((res) => ({ ...res, skillId: skill.skillId })));
+        // Promise.all(checkAgainstCatalogPromises).then((res) => {
+        //   const enrichedSkills = this.skillsFiltered.map((skillToUpdate) => {
+        //     const enhanceWith = res.find((s) => s.skillId === skillToUpdate.skillId);
+        //     return ({
+        //       ...skillToUpdate,
+        //       skillIdConflictsWithExistingCatalogSkill: enhanceWith.skillIdConflictsWithExistingCatalogSkill,
+        //       skillNameConflictsWithExistingCatalogSkill: enhanceWith.skillNameConflictsWithExistingCatalogSkill,
+        //     });
+        //   });
+        //   this.skillsWithDupIdOrName = enrichedSkills.filter((skill) => skill.skillIdConflictsWithExistingCatalogSkill || skill.skillNameConflictsWithExistingCatalogSkill);
+        //   this.skillsWithDupIdOrNameToShow = this.skillsWithDupIdOrName.length > 3 ? this.skillsWithDupIdOrName.slice(0, 3) : this.skillsWithDupIdOrName;
+        //   this.allSkillsAreDups = enrichedSkills.length === this.skillsWithDupIdOrName.length;
+        //   this.skillsFiltered = enrichedSkills.filter((skill) => !skill.skillIdConflictsWithExistingCatalogSkill && !skill.skillNameConflictsWithExistingCatalogSkill);
+        //   this.numAlreadyExported = this.skills.length - this.skillsFiltered.length - this.skillsWithDupIdOrName.length;
+        //   this.allSkillsExportedAlready = this.skillsFiltered.length === 0 && this.skillsWithDupIdOrName.length === 0;
+        //   this.isSingleId = this.skillsFiltered.length === 1;
+        //   this.firstSkillId = this.skillsFiltered && this.skillsFiltered.length > 0 ? this.skillsFiltered[0].skillId : null;
+        // }).finally(() => {
+        //   this.loadingData = false;
+        // });
       },
     },
   };

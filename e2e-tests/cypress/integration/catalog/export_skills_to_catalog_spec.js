@@ -625,9 +625,9 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.get('[data-cy="skillSelect-skill1"]').click({force: true});
         cy.get('[data-cy="skillActionsBtn"] button').click();
         cy.get('[data-cy="skillExportToCatalogBtn"]').click();
-        cy.contains('Cannot export 1 skill(s), Skill ID and/or Name is already in the Catalog')
+        cy.contains('Cannot export 1 skill(s)')
         cy.get('[data-cy="dupSkill-skill1"]').contains('Very Great Skill 1')
-        // cy.get('[data-cy="dupSkill-skill1"]').contains('Name Conflict') TODO: add back once back-end bug is resolved
+        cy.get('[data-cy="dupSkill-skill1"]').contains('Name Conflict')
         cy.get('[data-cy="dupSkill-skill1"]').contains('ID Conflict')
         cy.get('[data-cy="exportToCatalogButton"]').should('not.exist');
         cy.get('[data-cy="okButton"]').should('be.enabled');
@@ -641,7 +641,7 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.get('[data-cy="skillSelect-diffId"]').click({force: true});
         cy.get('[data-cy="skillActionsBtn"] button').click();
         cy.get('[data-cy="skillExportToCatalogBtn"]').click();
-        cy.contains('Cannot export 2 skill(s), Skill ID and/or Name is already in the Catalog')
+        cy.contains('Cannot export 2 skill(s)')
         cy.get('[data-cy="dupSkill-skill2"]').contains('Something Else')
         cy.get('[data-cy="dupSkill-skill2"]').contains('ID Conflict')
         cy.get('[data-cy="dupSkill-diffId"]').contains('Very Great Skill 3')
@@ -660,7 +660,7 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.get('[data-cy="skillActionsBtn"] button').click();
         cy.get('[data-cy="skillExportToCatalogBtn"]').click();
         cy.contains('This will export Skill with id [skill4]')
-        cy.contains('Cannot export 2 skill(s), Skill ID and/or Name is already in the Catalog')
+        cy.contains('Cannot export 2 skill(s)')
         cy.get('[data-cy="dupSkill-skill2"]').contains('Something Else')
         cy.get('[data-cy="dupSkill-skill2"]').contains('ID Conflict')
         cy.get('[data-cy="dupSkill-diffId"]').contains('Very Great Skill 3')
@@ -677,7 +677,7 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.get('[data-cy="skillActionsBtn"] button').click();
         cy.get('[data-cy="skillExportToCatalogBtn"]').click();
         cy.contains('This will export 2 Skills to the ')
-        cy.contains('Cannot export 3 skill(s), Skill ID and/or Name is already in the Catalog')
+        cy.contains('Cannot export 3 skill(s)')
         cy.get('[data-cy="dupSkill-skill1"]').contains('Very Great Skill 1')
         cy.get('[data-cy="dupSkill-skill2"]').contains('Something Else')
         cy.get('[data-cy="dupSkill-diffId"]').contains('Very Great Skill 3')
@@ -713,8 +713,13 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.get('[data-cy="dupSkill-skill1"]').contains('Very Great Skill 1');
         cy.get('[data-cy="dupSkill-skill2"]').contains('Very Great Skill 2');
         cy.get('[data-cy="dupSkill-skill3"]').contains('Very Great Skill 3');
-        cy.get('[data-cy="dupSkill-skill4"]').should('not.exist');
-        cy.get('[data-cy="cantExportTruncatedMsg"]').contains('12 more items');
+        cy.get('[data-cy="dupSkill-skill4"]').contains('Very Great Skill 4');
+        cy.get('[data-cy="dupSkill-skill5"]').contains('Very Great Skill 5');
+        cy.get('[data-cy="dupSkill-skill6"]').contains('Very Great Skill 6');
+        cy.get('[data-cy="dupSkill-skill7"]').contains('Very Great Skill 7');
+        cy.get('[data-cy="dupSkill-skill8"]').contains('Very Great Skill 8');
+        cy.get('[data-cy="dupSkill-skill9"]').should('not.exist');
+        cy.get('[data-cy="cantExportTruncatedMsg"]').contains('7 more items');
     });
 
 
@@ -736,9 +741,23 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.createSkill(2, 1, 5);
         cy.createSkill(2, 1, 6);
         cy.assignDep(2, 5, 6);
+        cy.createSkill(2, 1, 7);
 
         cy.visit('/administrator/projects/proj2/subjects/subj1');
-        // cy.get('[data-cy="skillSelect-skill1"]').click({force: true});
+        cy.get('[data-cy="selectAllSkillsBtn"]').click();
+
+        // export after loading the page
+        cy.exportSkillToCatalog(2, 1, 7);
+
+        cy.get('[data-cy="skillActionsBtn"] button').click();
+        cy.get('[data-cy="skillExportToCatalogBtn"]').click();
+        cy.contains('Note: The are already 1 skill(s) in the Skill Catalog from the provided selection.');
+        cy.contains('This will export 2 Skills');
+        cy.get('[data-cy="dupSkill-skill1"]').contains('ID Conflict')
+        cy.get('[data-cy="dupSkill-skill1"]').contains('Name Conflict')
+        cy.get('[data-cy="dupSkill-skill2"]').contains('ID Conflict')
+        cy.get('[data-cy="dupSkill-diffId"]').contains('Name Conflict')
+        cy.get('[data-cy="dupSkill-skill5"]').contains('Has Dependencies')
     });
 
     it('exported skill cannot depend on the completion of other skills', () => {
