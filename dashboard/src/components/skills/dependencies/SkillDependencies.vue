@@ -95,6 +95,7 @@ limitations under the License.
 
 <script>
   import { SkillsReporter } from '@skilltree/skills-client-vue';
+  import NoContent2 from '@/components/utils/NoContent2';
   import SkillsService from '../SkillsService';
   import DependantsGraph from './DependantsGraph';
   import SkillsSelector2 from '../SkillsSelector2';
@@ -102,7 +103,6 @@ limitations under the License.
   import SubPageHeader from '../../utils/pages/SubPageHeader';
   import LoadingContainer from '../../utils/LoadingContainer';
   import MsgBoxMixin from '../../utils/modal/MsgBoxMixin';
-  import NoContent2 from '@/components/utils/NoContent2';
 
   export default {
     name: 'SkillDependencies',
