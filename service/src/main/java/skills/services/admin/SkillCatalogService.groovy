@@ -35,6 +35,7 @@ import skills.controller.result.model.ExportedSkillsStats
 import skills.controller.result.model.ImportedSkillStats
 import skills.controller.result.model.ProjectNameAwareSkillDefRes
 import skills.controller.result.model.SkillDefRes
+import skills.controller.result.model.ExportableToCatalogValidationResult
 import skills.services.LockingService
 import skills.services.RuleSetDefGraphService
 import skills.storage.accessors.ProjDefAccessor
@@ -109,6 +110,29 @@ class SkillCatalogService {
     }
 
     @Transactional(readOnly = true)
+    List<ExportableToCatalogValidationResult> canSkillIdsBeExported(String projectId, List<String> skillIds) {
+        List<ExportableToCatalogValidationResult> validationResults = []
+        skillIds?.each { String skillId ->
+            boolean idConflict = doesSkillIdAlreadyExistInCatalog(skillId)
+            SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillId(projectId, skillId)
+            assert skillDef, "skillDef should always exist at this stage"
+            boolean nameConflict = doesSkillNameAlreadyExistInCatalog(skillDef.name)
+            boolean hasDependencies = countDependencies(skillDef.projectId, skillDef.skillId) > 0
+            boolean alreadyInCatalog = isAvailableInCatalog(skillDef)
+            validationResults.add(new ExportableToCatalogValidationResult(
+                    skillId: skillId,
+                    projectId: skillDef.projectId,
+                    skillAlreadyInCatalog: alreadyInCatalog,
+                    skillIdConflictsWithExistingCatalogSkill: idConflict,
+                    skillNameConflictsWithExistingCatalogSkill: nameConflict,
+                    hasDependencies: hasDependencies
+            ))
+        }
+
+        return validationResults
+    }
+
+    @Transactional(readOnly = true)
     TotalCountAwareResult<ExportedSkillRes> getSkillsExportedByProject(String projectId, Pageable pageable) {
         TotalCountAwareResult<ExportedSkillRes> result = new TotalCountAwareResult()
         Integer count = exportedSkillRepo.countSkillsExportedByProject(projectId)
@@ -166,8 +190,8 @@ class SkillCatalogService {
             throw new SkillException("Skill name [${skillDef.name}] already exists in the catalog. Duplicate skill names are not allowed", projectId, skillId, ErrorCode.SkillAlreadyInCatalog)
         }
 
-        List<SkillDef> dependencies = relationshipService.getChildrenSkills(skillDef.projectId, skillDef.skillId, [SkillRelDef.RelationshipType.Dependence])
-        if (dependencies) {
+        Long dependencies = countDependencies(skillDef.projectId, skillDef.skillId)
+        if (dependencies > 0) {
             throw new SkillException("Skill [${skillDef.skillId}] has dependencies. Skills with dependencies may not be exported to the catalog", projectId, skillId, ErrorCode.ExportToCatalogNotAllowed)
         }
 
@@ -175,6 +199,11 @@ class SkillCatalogService {
 
         ExportedSkill exportedSkill = new ExportedSkill(projectId: skillDef.projectId, skill: skillDef)
         exportedSkillRepo.save(exportedSkill)
+    }
+
+    private Long countDependencies(String projectId, String skillId) {
+        Long dependencies = relationshipService.countChildrenSkills(projectId, skillId, [SkillRelDef.RelationshipType.Dependence])
+        return dependencies
     }
 
     @Transactional

@@ -1559,10 +1559,131 @@ class CatalogSkillTests extends DefaultIntSpec {
         result[skill3.skillId] == false
         result[skill4.skillId] == false
         result[skill5.skillId] == false
+    }
 
+    def "validate exportability of multiple skillIds"() {
+        def project1 = createProject(1)
+        def project2 = createProject(2)
+        def project3 = createProject(3)
+
+        def p1subj1 = createSubject(1, 1)
+        def p2subj1 = createSubject(2, 1)
+        def p3subj1 = createSubject(3, 1)
+
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 10)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 10)
+        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 10)
+
+        def skill4 = createSkill(2, 1, 4)
+        def skill5 = createSkill(2, 1, 5)
+        def skill6 = createSkill(2, 1, 6)
+        def skill7 = createSkill(2, 1, 7)
+        def skill8 = createSkill(2, 1, 8)
+
+        def p3skill1 = createSkill(3, 1, 1)
+        p3skill1.skillId = skill.skillId
+        p3skill1.name = 'p3skill1 name'
+        def p3skill2 = createSkill(3, 1, 2)
+        p3skill2.skillId = 'p3skill2_skillId'
+        p3skill2.name = skill2.name
+        def p3skill3 = createSkill(3, 1, 3)
+        p3skill3.skillId = "p3skill3_skillId"
+        p3skill3.name = "p3skill3 name"
+        def p3skill4 = createSkill(3, 1, 4)
+        p3skill4.skillId = "p3skill4_skillId"
+        p3skill4.name = "p3skill4 name"
+        def p3skill5 = createSkill(3, 1, 5)
+        p3skill5.skillId = "p3skill5_skillId"
+        p3skill5.name = "p3skill5 name"
+        def p3skill6 = createSkill(3, 1, 6)
+        p3skill6.skillId = "p3skill6_skillId"
+        p3skill6.name = "p3skill6 name"
+        def p3skill7 = createSkill(3, 1, 7)
+        p3skill7.skillId = "p3skill7_skillId"
+        p3skill7.name = "p3skill7 name"
+
+        skillsService.createProject(project1)
+        skillsService.createProject(project2)
+        skillsService.createProject(project3)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p2subj1)
+        skillsService.createSubject(p3subj1)
+
+        skillsService.createSkill(skill)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(skill3)
+        skillsService.createSkill(skill4)
+        skillsService.createSkill(skill5)
+        skillsService.createSkill(skill6)
+        skillsService.createSkill(skill7)
+        skillsService.createSkill(skill8)
+
+        skillsService.createSkill(p3skill1)
+        skillsService.createSkill(p3skill2)
+        skillsService.createSkill(p3skill3)
+        skillsService.createSkill(p3skill4)
+        skillsService.createSkill(p3skill5)
+        skillsService.createSkill(p3skill6)
+        skillsService.createSkill(p3skill7)
+
+        skillsService.assignDependency([projectId: p3skill6.projectId, dependentSkillId: p3skill6.skillId, dependencySkillId: p3skill5.skillId, throwExceptionOnFailure: true])
+
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
+        skillsService.exportSkillToCatalog(project2.projectId, skill5.skillId)
+        skillsService.exportSkillToCatalog(project2.projectId, skill6.skillId)
+        skillsService.exportSkillToCatalog(project3.projectId, p3skill7.skillId)
+
+
+        when:
+        def validationResult = skillsService.areSkillIdsExportable(project3.projectId, [p3skill1.skillId, p3skill2.skillId, p3skill3.skillId, p3skill4.skillId, p3skill5.skillId, p3skill6.skillId, p3skill7.skillId])
+
+        then:
+        validationResult[p3skill1.skillId].skillId == p3skill1.skillId
+        validationResult[p3skill1.skillId].skillAlreadyInCatalog == false
+        validationResult[p3skill1.skillId].skillIdConflictsWithExistingCatalogSkill == true
+        validationResult[p3skill1.skillId].skillNameConflictsWithExistingCatalogSkill == false
+        validationResult[p3skill1.skillId].hasDependencies == false
+
+        validationResult[p3skill2.skillId].skillId == p3skill2.skillId
+        validationResult[p3skill2.skillId].skillAlreadyInCatalog == false
+        validationResult[p3skill2.skillId].skillIdConflictsWithExistingCatalogSkill == false
+        validationResult[p3skill2.skillId].skillNameConflictsWithExistingCatalogSkill == true
+        validationResult[p3skill2.skillId].hasDependencies == false
+
+        validationResult[p3skill3.skillId].skillId == p3skill3.skillId
+        validationResult[p3skill3.skillId].skillAlreadyInCatalog == false
+        validationResult[p3skill3.skillId].skillIdConflictsWithExistingCatalogSkill == false
+        validationResult[p3skill3.skillId].skillNameConflictsWithExistingCatalogSkill == false
+        validationResult[p3skill3.skillId].hasDependencies == false
+
+        validationResult[p3skill4.skillId].skillId == p3skill4.skillId
+        validationResult[p3skill4.skillId].skillAlreadyInCatalog == false
+        validationResult[p3skill4.skillId].skillIdConflictsWithExistingCatalogSkill == false
+        validationResult[p3skill4.skillId].skillNameConflictsWithExistingCatalogSkill == false
+        validationResult[p3skill4.skillId].hasDependencies == false
+
+        validationResult[p3skill5.skillId].skillId == p3skill5.skillId
+        validationResult[p3skill5.skillId].skillAlreadyInCatalog == false
+        validationResult[p3skill5.skillId].skillIdConflictsWithExistingCatalogSkill == false
+        validationResult[p3skill5.skillId].skillNameConflictsWithExistingCatalogSkill == false
+        validationResult[p3skill5.skillId].hasDependencies == false
+
+        validationResult[p3skill6.skillId].skillId == p3skill6.skillId
+        validationResult[p3skill6.skillId].skillAlreadyInCatalog == false
+        validationResult[p3skill6.skillId].skillIdConflictsWithExistingCatalogSkill == false
+        validationResult[p3skill6.skillId].skillNameConflictsWithExistingCatalogSkill == false
+        validationResult[p3skill6.skillId].hasDependencies == true
+
+        validationResult[p3skill7.skillId].skillId == p3skill7.skillId
+        validationResult[p3skill7.skillId].skillAlreadyInCatalog == true
+        validationResult[p3skill7.skillId].skillIdConflictsWithExistingCatalogSkill == true
+        validationResult[p3skill7.skillId].skillNameConflictsWithExistingCatalogSkill == true
+        validationResult[p3skill7.skillId].hasDependencies == false
     }
 
 }
+
 
 
 

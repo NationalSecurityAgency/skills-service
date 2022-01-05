@@ -1277,6 +1277,10 @@ class SkillsService {
         return wsHelper.adminPost("/projects/${projectId}/skills/catalog/exist", skillIds).body
     }
 
+    def areSkillIdsExportable(String projectId, List<String> skillIds) {
+        return wsHelper.adminPost("/projects/${projectId}/skills/catalog/exportable", skillIds).body
+    }
+
     private String getProjectUrl(String project) {
         return "/projects/${project}".toString()
     }
