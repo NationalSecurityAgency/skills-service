@@ -186,12 +186,12 @@ limitations under the License.
 </template>
 
 <script>
+  import SkillAlreadyExistingWarning from '@/components/skills/catalog/SkillAlreadyExistingWarning';
   import CatalogService from './CatalogService';
   import SkillsBTable from '../../utils/table/SkillsBTable';
   import NoContent2 from '../../utils/NoContent2';
   import SkillsSpinner from '../../utils/SkillsSpinner';
   import SkillToImportInfo from './SkillToImportInfo';
-  import SkillAlreadyExistingWarning from '@/components/skills/catalog/SkillAlreadyExistingWarning';
 
   export default {
     name: 'ImportFromCatalog',

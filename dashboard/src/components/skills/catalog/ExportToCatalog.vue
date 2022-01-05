@@ -95,8 +95,8 @@ limitations under the License.
 </template>
 
 <script>
-  import CatalogService from './CatalogService';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
+  import CatalogService from './CatalogService';
 
   export default {
     name: 'ExportToCatalog',
