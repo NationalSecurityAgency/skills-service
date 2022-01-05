@@ -19,7 +19,14 @@ limitations under the License.
 
     <b-card body-class="p-0" class="dependencies-container">
       <loading-container :is-loading="!loading.finishedAllSkills || !loading.finishedDependents">
-        <div class="p-3">
+
+        <no-content2 v-if="skill.sharedToCatalog"
+                     class="mt-5 pt-5"
+                     icon="fas fa-book"
+                     title="Exported to the Catalog"
+                     message="Once a Skill has been exported to the catalog, Dependencies may not be added."></no-content2>
+
+        <div class="p-3" v-if="!skill.sharedToCatalog">
           <skills-selector2 :options="allSkills" :selected="skills" v-on:added="skillAdded" v-on:removed="skillDeleted"
             data-cy="depsSelector">
             <template slot="dropdown-item" slot-scope="{ props }">
@@ -95,11 +102,13 @@ limitations under the License.
   import SubPageHeader from '../../utils/pages/SubPageHeader';
   import LoadingContainer from '../../utils/LoadingContainer';
   import MsgBoxMixin from '../../utils/modal/MsgBoxMixin';
+  import NoContent2 from '@/components/utils/NoContent2';
 
   export default {
     name: 'SkillDependencies',
     mixins: [MsgBoxMixin],
     components: {
+      NoContent2,
       LoadingContainer,
       SubPageHeader,
       SimpleSkillsTable,
@@ -147,7 +156,12 @@ limitations under the License.
         SkillsService.getSkillDetails(this.$route.params.projectId, this.$route.params.subjectId, this.$route.params.skillId)
           .then((response) => {
             this.skill = Object.assign(response, { subjectId: this.$route.params.subjectId });
-            this.initData();
+            if (!this.skill.sharedToCatalog) {
+              this.initData();
+            } else {
+              this.loading.finishedAllSkills = true;
+              this.loading.finishedDependents = true;
+            }
           });
       },
       deleteSkill(deleteItem) {

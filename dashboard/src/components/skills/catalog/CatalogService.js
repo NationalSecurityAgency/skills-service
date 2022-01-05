@@ -48,4 +48,7 @@ export default {
     const url = `/admin/projects/${projectId}/skills/catalog/exists/${skillIdOrName}`;
     return axios.post(url).then((response) => response.data);
   },
+  getSkillsExportedToCatalog(projectId, pagingParams = {}) {
+    return axios.get(`/admin/projects/${projectId}/skills/exported`, { params: { ...pagingParams } }).then((response) => response.data);
+  },
 };

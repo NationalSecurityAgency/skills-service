@@ -155,13 +155,4 @@ export default {
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}/globalBadge/exists`)
       .then((response) => response.data);
   },
-  getSkillsAvailableInCatalog(projectId, pagingParams = {}) {
-    return axios.get(`/admin/projects/${projectId}/skills/catalog`, { params: { ...pagingParams } }).then((response) => response.data);
-  },
-  getSkillsExportedToCatalog(projectId, pagingParams = {}) {
-    return axios.get(`/admin/projects/${projectId}/skills/exported`, { params: { ...pagingParams } }).then((response) => response.data);
-  },
-  getSkillsImportedFromCatalog(projectId, pagingParams = {}) {
-    return axios.get(`/admin/projects/${projectId}/skills/imported`, { params: { ...pagingParams } }).then((response) => response.data);
-  },
 };

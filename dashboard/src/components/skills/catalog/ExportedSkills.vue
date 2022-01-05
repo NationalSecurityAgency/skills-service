@@ -64,7 +64,7 @@ limitations under the License.
                   <div class="h5 d-inline-block">{{ data.item.skillName }}</div>
                 </router-link>
               </div>
-              <div class="text-secondary sub-info">
+              <div class="sub-info">
                 <span>ID:</span> {{ data.item.skillId }}
               </div>
             </div>
@@ -84,7 +84,7 @@ limitations under the License.
         </template>
         <template v-slot:cell(subjectName)="data">
           <div class="h5 d-inline-block">{{ data.item.subjectName }}</div>
-          <div class="text-secondary sub-info">
+          <div class="sub-info">
             <span>ID:</span> {{ data.item.subjectId }}
           </div>
         </template>
@@ -102,12 +102,11 @@ limitations under the License.
 
 <script>
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
-  import SkillsService from '@/components/skills/SkillsService';
+  import CatalogService from '@/components/skills/catalog/CatalogService';
   import DateCell from '@/components/utils/table/DateCell';
   import RemovalValidation from '@/components/utils/modal/RemovalValidation';
   import ExportedSkillDeletionWarning
     from '@/components/skills/catalog/ExportedSkillDeletionWarning';
-  import CatalogService from '@/components/skills/catalog/CatalogService';
 
   export default {
     name: 'ExportedSkills',
@@ -193,7 +192,7 @@ limitations under the License.
           page: this.table.options.pagination.currentPage,
           orderBy: this.table.options.sortBy,
         };
-        SkillsService.getSkillsExportedToCatalog(this.projectId, pageParams).then((res) => {
+        CatalogService.getSkillsExportedToCatalog(this.projectId, pageParams).then((res) => {
           if (res.data) {
             this.exportedSkills = res.data.map((skill) => ({ projectId: this.projectId, ...skill }));
             this.table.options.pagination.totalRows = res.totalCount;

@@ -753,4 +753,29 @@ describe('Accessibility Tests', () => {
       cy.injectAxe()
     });
   }
+
+  it('catalog page', () => {
+    cy.createProject(1);
+    cy.createSubject(1, 1)
+
+    cy.createSkill(1, 1, 1);
+    cy.createSkill(1, 1, 2);
+    cy.createSkill(1, 1, 3);
+
+    cy.exportSkillToCatalog(1, 1, 1);
+    cy.exportSkillToCatalog(1, 1, 2);
+    cy.exportSkillToCatalog(1, 1, 3);
+
+    cy.visit('/administrator/projects/proj1/skills-catalog');
+    cy.injectAxe()
+    cy.validateTable('[data-cy="exportedSkillsTable"]', [
+      [{ colIndex: 0,  value: 'Very Great Skill 3' }],
+      [{ colIndex: 0,  value: 'Very Great Skill 2' }],
+      [{ colIndex: 0,  value: 'Very Great Skill 1' }],
+    ], 5);
+
+    cy.customLighthouse();
+    cy.customA11y();
+  });
+
 });

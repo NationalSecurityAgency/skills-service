@@ -40,12 +40,15 @@ limitations under the License.
         </p>
 
         <div v-if="skillsWithDupIdOrName && skillsWithDupIdOrName.length > 0">
-          Cannot export <b-badge variant="primary">{{ skillsWithDupIdOrName.length }}</b-badge> skill(s) because their <span class="text-primary">Skill ID</span> and/or <span class="text-primary">Name</span> are already in the Catalog:
+          Cannot export <b-badge variant="primary">{{ skillsWithDupIdOrName.length }}</b-badge> skill(s), <span class="text-primary">Skill ID</span> and/or <span class="text-primary">Name</span> is already in the Catalog:
           <ul>
-            <li v-for="dupSkill in skillsWithDupIdOrName" :key="dupSkill.skillId" :data-cy="`dupSkill-${dupSkill.skillId}`">
+            <li v-for="dupSkill in skillsWithDupIdOrNameToShow" :key="dupSkill.skillId" :data-cy="`dupSkill-${dupSkill.skillId}`">
               {{ dupSkill.name }} <span class="text-secondary font-italic">(ID: {{ dupSkill.skillId}} )</span>
-              <b-badge variant="warning" v-if="dupSkill.skillNameConflictsWithExistingCatalogSkill" class="ml-1">Name Exist</b-badge>
-              <b-badge variant="warning" v-if="dupSkill.skillIdConflictsWithExistingCatalogSkill" class="ml-1">ID Exist</b-badge>
+              <b-badge variant="warning" v-if="dupSkill.skillNameConflictsWithExistingCatalogSkill" class="ml-1">Name Conflict</b-badge>
+              <b-badge variant="warning" v-if="dupSkill.skillIdConflictsWithExistingCatalogSkill" class="ml-1">ID Conflict</b-badge>
+            </li>
+            <li v-if="skillsWithDupIdOrName.length > skillsWithDupIdOrNameToShow.length" data-cy="cantExportTruncatedMsg">
+              <span class="text-primary font-weight-bold">{{ skillsWithDupIdOrName.length - skillsWithDupIdOrNameToShow.length }}</span> <span class="font-italic">more items...</span>
             </li>
           </ul>
         </div>
@@ -173,6 +176,7 @@ limitations under the License.
             });
           });
           this.skillsWithDupIdOrName = enrichedSkills.filter((skill) => skill.skillIdConflictsWithExistingCatalogSkill || skill.skillNameConflictsWithExistingCatalogSkill);
+          this.skillsWithDupIdOrNameToShow = this.skillsWithDupIdOrName.length > 3 ? this.skillsWithDupIdOrName.slice(0, 3) : this.skillsWithDupIdOrName;
           this.allSkillsAreDups = enrichedSkills.length === this.skillsWithDupIdOrName.length;
           this.skillsFiltered = enrichedSkills.filter((skill) => !skill.skillIdConflictsWithExistingCatalogSkill && !skill.skillNameConflictsWithExistingCatalogSkill);
           this.numAlreadyExported = this.skills.length - this.skillsFiltered.length - this.skillsWithDupIdOrName.length;

@@ -18,8 +18,7 @@ limitations under the License.
            v-model="show"
            :no-close-on-backdrop="true" :centered="true" body-class="px-0 mx-0"
            header-bg-variant="info" header-text-variant="light" no-fade role="dialog"
-           @hide="publishHidden"
-           aria-label="Removal Safety Check">
+           @hide="publishHidden">
     <div class="px-2">
       <div data-cy="removalSafetyCheckMsg">
         <slot />
@@ -29,7 +28,7 @@ limitations under the License.
 
       <div>
         <p>Please type <span class="font-italic font-weight-bold text-primary">{{ validationText }}</span> to permanently remove the record.</p>
-        <b-form-input v-model="currentValidationText" data-cy="currentValidationText"></b-form-input>
+        <b-form-input v-model="currentValidationText" data-cy="currentValidationText" aria-label="Validation Input"></b-form-input>
       </div>
     </div>
 

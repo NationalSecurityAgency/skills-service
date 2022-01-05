@@ -41,8 +41,6 @@ limitations under the License.
 <script>
   import SubPageHeader from '@/components/utils/pages/SubPageHeader';
   import ExportedSkills from './ExportedSkills';
-  /* import ExportedSkills from '@/components/skills/catalog/ExportedSkills';
-  import SkillsImportedFromCatalog from '@/components/skills/catalog/SkillsImportedFromCatalog'; */
 
   export default {
     name: 'SkillsCatalog',
