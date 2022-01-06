@@ -39,18 +39,18 @@ limitations under the License.
           <span class="font-italic"><i class="fas fa-exclamation-triangle text-warning" /> Note:</span> The are already <b-badge variant="info">{{ numAlreadyExported }}</b-badge> skill(s) in the Skill Catalog from the provided selection.
         </p>
 
-        <div v-if="skillsWithDupIdOrName && skillsWithDupIdOrName.length > 0">
-          Cannot export <b-badge variant="primary">{{ skillsWithDupIdOrName.length }}</b-badge> skill(s):
+        <div v-if="notExportableSkills && notExportableSkills.length > 0">
+          Cannot export <b-badge variant="primary">{{ notExportableSkills.length }}</b-badge> skill(s):
           <ul>
-            <li v-for="dupSkill in skillsWithDupIdOrNameToShow" :key="dupSkill.skillId" :data-cy="`dupSkill-${dupSkill.skillId}`">
+            <li v-for="dupSkill in notExportableSkillsToShow" :key="dupSkill.skillId" :data-cy="`dupSkill-${dupSkill.skillId}`">
               {{ dupSkill.name }} <span class="text-secondary font-italic">(ID: {{ dupSkill.skillId}} )</span>
               <b-badge variant="warning" v-if="dupSkill.skillNameConflictsWithExistingCatalogSkill" class="ml-1">Name Conflict</b-badge>
               <b-badge variant="warning" v-if="dupSkill.skillIdConflictsWithExistingCatalogSkill" class="ml-1">ID Conflict</b-badge>
               <b-badge variant="warning" v-if="dupSkill.hasDependencies" class="ml-1"
                        v-b-tooltip.hover="'Skills that have dependencies cannot be exported to the catalog.'">Has Dependencies</b-badge>
             </li>
-            <li v-if="skillsWithDupIdOrName.length > skillsWithDupIdOrNameToShow.length" data-cy="cantExportTruncatedMsg">
-              <span class="text-primary font-weight-bold">{{ skillsWithDupIdOrName.length - skillsWithDupIdOrNameToShow.length }}</span> <span class="font-italic">more items...</span>
+            <li v-if="notExportableSkills.length > notExportableSkillsToShow.length" data-cy="cantExportTruncatedMsg">
+              <span class="text-primary font-weight-bold">{{ notExportableSkills.length - notExportableSkillsToShow.length }}</span> <span class="font-italic">more items...</span>
             </li>
           </ul>
         </div>
@@ -123,7 +123,8 @@ limitations under the License.
         visibilityToAllProjects: true,
         selectedProject: null,
         skillsFiltered: [],
-        skillsWithDupIdOrName: [],
+        notExportableSkills: [],
+        notExportableSkillsToShow: [],
         numAlreadyExported: 0,
         allSkillsExportedAlready: false,
         isSingleId: false,
@@ -136,8 +137,7 @@ limitations under the License.
       };
     },
     mounted() {
-      this.skillsFiltered = this.skills.filter((skill) => !skill.sharedToCatalog);
-      this.checkIfNamesOrIdsAreAlreadyInCatalog();
+      this.prepSkillsForExport();
     },
     watch: {
       show(newValue) {
@@ -166,11 +166,11 @@ limitations under the License.
             this.state.exporting = false;
           });
       },
-      checkIfNamesOrIdsAreAlreadyInCatalog() {
-        const skillIds = this.skillsFiltered.map((skill) => skill.skillId);
+      prepSkillsForExport() {
+        const skillIds = this.skills.map((skill) => skill.skillId);
         CatalogService.areSkillsExportable(this.$route.params.projectId, skillIds)
           .then((res) => {
-            let enrichedSkills = this.skillsFiltered.map((skillToUpdate) => {
+            let enrichedSkills = this.skills.map((skillToUpdate) => {
               const enhanceWith = res[skillToUpdate.skillId];
               return ({
                 ...skillToUpdate,
@@ -185,38 +185,17 @@ limitations under the License.
             enrichedSkills = enrichedSkills.filter((skill) => !skill.skillAlreadyInCatalog);
             const isExportableSkill = (skill) => !skill.skillIdConflictsWithExistingCatalogSkill && !skill.skillNameConflictsWithExistingCatalogSkill && !skill.hasDependencies;
 
-            this.skillsWithDupIdOrName = enrichedSkills.filter((skill) => !isExportableSkill(skill));
-            this.skillsWithDupIdOrNameToShow = this.skillsWithDupIdOrName.length > 9 ? this.skillsWithDupIdOrName.slice(0, 8) : this.skillsWithDupIdOrName;
-            this.allSkillsAreDups = enrichedSkills.length === this.skillsWithDupIdOrName.length;
+            this.notExportableSkills = enrichedSkills.filter((skill) => !isExportableSkill(skill));
+            this.notExportableSkillsToShow = this.notExportableSkills.length > 9 ? this.notExportableSkills.slice(0, 8) : this.notExportableSkills;
+            this.allSkillsAreDups = enrichedSkills.length === this.notExportableSkills.length;
             this.skillsFiltered = enrichedSkills.filter((skill) => isExportableSkill(skill));
-            this.numAlreadyExported = this.skills.length - this.skillsFiltered.length - this.skillsWithDupIdOrName.length;
-            this.allSkillsExportedAlready = this.skillsFiltered.length === 0 && this.skillsWithDupIdOrName.length === 0;
+            this.numAlreadyExported = this.skills.length - this.skillsFiltered.length - this.notExportableSkills.length;
+            this.allSkillsExportedAlready = this.skillsFiltered.length === 0 && this.notExportableSkills.length === 0;
             this.isSingleId = this.skillsFiltered.length === 1;
             this.firstSkillId = this.skillsFiltered && this.skillsFiltered.length > 0 ? this.skillsFiltered[0].skillId : null;
           }).finally(() => {
             this.loadingData = false;
           });
-        // const checkAgainstCatalogPromises = this.skillsFiltered.map((skill) => CatalogService.checkIfSkillExistInCatalog(skill.projectId, skill.skillId).then((res) => ({ ...res, skillId: skill.skillId })));
-        // Promise.all(checkAgainstCatalogPromises).then((res) => {
-        //   const enrichedSkills = this.skillsFiltered.map((skillToUpdate) => {
-        //     const enhanceWith = res.find((s) => s.skillId === skillToUpdate.skillId);
-        //     return ({
-        //       ...skillToUpdate,
-        //       skillIdConflictsWithExistingCatalogSkill: enhanceWith.skillIdConflictsWithExistingCatalogSkill,
-        //       skillNameConflictsWithExistingCatalogSkill: enhanceWith.skillNameConflictsWithExistingCatalogSkill,
-        //     });
-        //   });
-        //   this.skillsWithDupIdOrName = enrichedSkills.filter((skill) => skill.skillIdConflictsWithExistingCatalogSkill || skill.skillNameConflictsWithExistingCatalogSkill);
-        //   this.skillsWithDupIdOrNameToShow = this.skillsWithDupIdOrName.length > 3 ? this.skillsWithDupIdOrName.slice(0, 3) : this.skillsWithDupIdOrName;
-        //   this.allSkillsAreDups = enrichedSkills.length === this.skillsWithDupIdOrName.length;
-        //   this.skillsFiltered = enrichedSkills.filter((skill) => !skill.skillIdConflictsWithExistingCatalogSkill && !skill.skillNameConflictsWithExistingCatalogSkill);
-        //   this.numAlreadyExported = this.skills.length - this.skillsFiltered.length - this.skillsWithDupIdOrName.length;
-        //   this.allSkillsExportedAlready = this.skillsFiltered.length === 0 && this.skillsWithDupIdOrName.length === 0;
-        //   this.isSingleId = this.skillsFiltered.length === 1;
-        //   this.firstSkillId = this.skillsFiltered && this.skillsFiltered.length > 0 ? this.skillsFiltered[0].skillId : null;
-        // }).finally(() => {
-        //   this.loadingData = false;
-        // });
       },
     },
   };
