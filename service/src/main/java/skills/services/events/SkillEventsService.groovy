@@ -313,7 +313,6 @@ class SkillEventsService {
                 if (copies) {
                     toBeRecorded.addAll(copies)
                 }
-                toBeRecorded.add(skillDefinition)
             } else {
                 //get og skill, record event for og and all copies except for skillDefinition
                 SkillDefMin og = skillDefRepo.findSkillDefMinById(skillDefinition.copiedFrom)

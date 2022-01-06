@@ -16,16 +16,27 @@
 package skills.intTests
 
 import org.junit.Ignore
+import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
+import skills.services.UserEventService
+import skills.storage.model.DayCountItem
 import skills.storage.model.SkillDef
 import skills.intTests.utils.SkillsFactory
+import skills.storage.repos.SkillDefRepo
+import skills.storage.repos.UserEventsRepo
 import spock.lang.IgnoreRest
 import org.springframework.http.HttpStatus
+
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 import static skills.intTests.utils.SkillsFactory.*
 
 class CatalogSkillTests extends DefaultIntSpec {
+
+    @Autowired
+    UserEventService userEventService
 
     def "add skill to catalog"() {
         def project1 = createProject(1)
@@ -1693,6 +1704,87 @@ class CatalogSkillTests extends DefaultIntSpec {
         validationResult[p3skill7.skillId].skillIdConflictsWithExistingCatalogSkill == true
         validationResult[p3skill7.skillId].skillNameConflictsWithExistingCatalogSkill == true
         validationResult[p3skill7.skillId].hasDependencies == false
+    }
+
+    def "skill events are replicated across catalog skill copies"() {
+        def project1 = createProject(1)
+        def project2 = createProject(2)
+        def project3 = createProject(3)
+
+        def p1subj1 = createSubject(1, 1)
+        def p2subj1 = createSubject(2, 1)
+        def p3subj1 = createSubject(3, 1)
+
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
+        def skill2 = createSkill(1, 1, 2, 0, 10, 0, 10)
+        def skill3 = createSkill(1, 1, 3, 0, 2, 0, 10)
+        skill3.selfReportingType = SkillDef.SelfReportingType.HonorSystem.toString()
+
+        skillsService.createProject(project1)
+        skillsService.createProject(project2)
+        skillsService.createProject(project3)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p2subj1)
+        skillsService.createSubject(p3subj1)
+
+        skillsService.createSkill(skill)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(skill3)
+
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
+
+        when:
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalog(project3.projectId, p3subj1.subjectId, project1.projectId, skill.skillId)
+
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill2.skillId)
+        skillsService.importSkillFromCatalog(project3.projectId, p3subj1.subjectId, project1.projectId, skill2.skillId)
+
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill3.skillId)
+        skillsService.importSkillFromCatalog(project3.projectId, p3subj1.subjectId, project1.projectId, skill3.skillId)
+
+        def user = getRandomUsers(1)[0]
+
+        skillsService.addSkill([projectId: project1.projectId, skillId: skill.skillId], user)
+        skillsService.addSkill([projectId: project1.projectId, skillId: skill2.skillId], user)
+        skillsService.addSkill([projectId: project3.projectId, skillId: skill3.skillId], user)
+
+        skillsService.addSkill([projectId: project1.projectId, skillId: skill.skillId], user)
+        skillsService.addSkill([projectId: project1.projectId, skillId: skill2.skillId], user)
+        skillsService.addSkill([projectId: project1.projectId, skillId: skill3.skillId], user)
+        skillsService.addSkill([projectId: project2.projectId, skillId: skill3.skillId], user)
+
+        List<DayCountItem> skill1Project1Counts = userEventService.getUserEventCountsForSkillId(project1.projectId, skill.skillId, LocalDate.now().atStartOfDay().toDate())
+        List<DayCountItem> skill1Project2Counts = userEventService.getUserEventCountsForSkillId(project2.projectId, skill.skillId, LocalDate.now().atStartOfDay().toDate())
+        List<DayCountItem> skill1Project3Counts = userEventService.getUserEventCountsForSkillId(project3.projectId, skill.skillId, LocalDate.now().atStartOfDay().toDate())
+        List<DayCountItem> skill2Project2Counts = userEventService.getUserEventCountsForSkillId(project2.projectId, skill2.skillId, LocalDate.now().atStartOfDay().toDate())
+        List<DayCountItem> skill2Project1Counts = userEventService.getUserEventCountsForSkillId(project1.projectId, skill2.skillId, LocalDate.now().atStartOfDay().toDate())
+        List<DayCountItem> skill2Project3Counts = userEventService.getUserEventCountsForSkillId(project3.projectId, skill2.skillId, LocalDate.now().atStartOfDay().toDate())
+        List<DayCountItem> skill3Project3Counts = userEventService.getUserEventCountsForSkillId(project3.projectId, skill3.skillId, LocalDate.now().atStartOfDay().toDate())
+        List<DayCountItem> skill3Project1Counts = userEventService.getUserEventCountsForSkillId(project1.projectId, skill3.skillId, LocalDate.now().atStartOfDay().toDate())
+        List<DayCountItem> skill3Project2Counts = userEventService.getUserEventCountsForSkillId(project2.projectId, skill3.skillId, LocalDate.now().atStartOfDay().toDate())
+
+        then:
+        skill1Project1Counts.size() == 1
+        skill1Project1Counts[0].count == 2
+        skill1Project2Counts.size() == 1
+        skill1Project2Counts[0].count == 2
+        skill1Project3Counts.size() == 1
+        skill1Project3Counts[0].count == 2
+        skill2Project2Counts.size() == 1
+        skill2Project2Counts[0].count == 2
+        skill2Project1Counts.size() == 1
+        skill2Project1Counts[0].count == 2
+        skill2Project3Counts.size() == 1
+        skill2Project3Counts[0].count == 2
+        skill3Project3Counts.size() == 1
+        skill3Project3Counts[0].count == 3
+        skill3Project1Counts.size() == 1
+        skill3Project1Counts[0].count == 3
+        skill3Project2Counts.size() == 1
+        skill3Project2Counts[0].count == 3
     }
 
 }
