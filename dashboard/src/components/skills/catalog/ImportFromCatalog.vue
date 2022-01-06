@@ -18,8 +18,7 @@ limitations under the License.
            v-model="show"
            :no-close-on-backdrop="true" :centered="true" body-class="px-0 mx-0"
            header-bg-variant="info" header-text-variant="light" no-fade role="dialog"
-           @hide="publishHidden"
-           :aria-label="isSkill?'Import Skill from the Catalog':'Import Subject from the Catalog'">
+           @hide="publishHidden">
     <skills-spinner :is-loading="loading"/>
 
     <no-content2 v-if="!loading && emptyCatalog" class="mt-4 mb-5"
@@ -117,7 +116,7 @@ limitations under the License.
               <span>{{ data.item.name }}</span>
             </b-form-checkbox>
           </div>
-          <div class="text-secondary sub-info">
+          <div class="sub-info">
             <span>ID:</span> {{ data.item.skillId }}
           </div>
 
@@ -136,7 +135,7 @@ limitations under the License.
           <div class="text-primary">
             {{ data.item.projectName }}
           </div>
-          <div class="text-secondary sub-info">
+          <div class="sub-info">
             <span>ID:</span> {{ data.item.projectId }}
           </div>
         </template>
@@ -145,7 +144,7 @@ limitations under the License.
           <div class="text-primary">
             {{ data.item.subjectName }}
           </div>
-          <div class="text-secondary sub-info">
+          <div class="sub-info">
             <span>ID:</span> {{ data.item.subjectId }}
           </div>
         </template>
@@ -154,7 +153,7 @@ limitations under the License.
           <div>
             {{ data.value }}
           </div>
-          <div class="text-secondary sub-info">
+          <div class="sub-info">
             {{ data.item.pointIncrement }} Increment x {{ data.item.numPerformToCompletion }}
             Occurrences
           </div>

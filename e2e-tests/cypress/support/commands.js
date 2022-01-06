@@ -423,7 +423,8 @@ Cypress.Commands.add('customA11y', ()=> {
                 "landmark-no-duplicate-banner": {enabled:false},
                 'landmark-no-duplicate-contentinfo': {enabled:false},
                 'heading-order': {enabled:false},
-                'landmark-unique': {enabled:false}
+                'landmark-unique': {enabled:false},
+                'aria-dialog-name': {enabled:false},
             }
     }, terminalLog);
 });

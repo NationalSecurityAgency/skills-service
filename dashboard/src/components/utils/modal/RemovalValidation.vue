@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <b-modal id="importSkillsFromCatalog" size="md" title="Removal Safety Check"
+  <b-modal id="removalValidation" size="md" title="Removal Safety Check"
            v-model="show"
            :no-close-on-backdrop="true" :centered="true" body-class="px-0 mx-0"
            header-bg-variant="info" header-text-variant="light" no-fade role="dialog"

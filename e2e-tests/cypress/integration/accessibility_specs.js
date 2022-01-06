@@ -773,9 +773,81 @@ describe('Accessibility Tests', () => {
       [{ colIndex: 0,  value: 'Very Great Skill 2' }],
       [{ colIndex: 0,  value: 'Very Great Skill 1' }],
     ], 5);
+    cy.customLighthouse();
+    cy.customA11y();
 
+    // Delete from Catalog modal
+    cy.get('[data-cy="deleteSkillButton_skill2"]').click()
+    cy.contains('This will PERMANENTLY remove skill [skill2]')
     cy.customLighthouse();
     cy.customA11y();
   });
+
+  it('import from catalog modal', () => {
+    cy.createProject(1);
+    cy.createSubject(1, 1)
+
+    cy.createSkill(1, 1, 1, { description: '# This is where description goes\n\ntest test'});
+    cy.createSkill(1, 1, 2);
+    cy.createSkill(1, 1, 3);
+
+    cy.exportSkillToCatalog(1, 1, 1);
+    cy.exportSkillToCatalog(1, 1, 2);
+    cy.exportSkillToCatalog(1, 1, 3);
+
+    cy.createProject(2);
+    cy.createSubject(2, 1)
+
+    cy.visit('/administrator/projects/proj2/subjects/subj1');
+    cy.injectAxe()
+    cy.get('[data-cy="importFromCatalogBtn"]').click();
+    cy.get('[data-cy="expandDetailsBtn_proj1_skill1"]').click();
+    cy.contains('This is where description goes');
+
+    cy.customLighthouse();
+    cy.customA11y();
+  })
+
+  it('export to catalog modal', () => {
+    cy.createProject(1);
+    cy.createSubject(1, 1)
+
+    cy.createSkill(1, 1, 1);
+    cy.createSkill(1, 1, 2);
+    cy.createSkill(1, 1, 3);
+
+    cy.exportSkillToCatalog(1, 1, 1);
+    cy.exportSkillToCatalog(1, 1, 2);
+    cy.exportSkillToCatalog(1, 1, 3);
+
+    cy.createProject(2);
+    cy.createSubject(2, 1);
+    cy.createSkill(2, 1, 1);
+    cy.createSkill(2, 1, 2, { name: 'Something Else' });
+    cy.createSkill(2, 1, 3, { skillId: 'diffId' });
+    cy.createSkill(2, 1, 4);
+    cy.createSkill(2, 1, 5);
+    cy.createSkill(2, 1, 6);
+    cy.assignDep(2, 5, 6);
+    cy.createSkill(2, 1, 7);
+    cy.exportSkillToCatalog(2, 1, 7);
+
+    cy.visit('/administrator/projects/proj2/subjects/subj1');
+    cy.injectAxe()
+    cy.get('[data-cy="selectAllSkillsBtn"]').click();
+
+    cy.get('[data-cy="skillActionsBtn"] button').click();
+    cy.get('[data-cy="skillExportToCatalogBtn"]').click();
+    cy.contains('Note: The are already 1 skill(s) in the Skill Catalog from the provided selection.');
+    cy.contains('This will export 2 Skills');
+    cy.get('[data-cy="dupSkill-skill1"]').contains('ID Conflict')
+    cy.get('[data-cy="dupSkill-skill1"]').contains('Name Conflict')
+    cy.get('[data-cy="dupSkill-skill2"]').contains('ID Conflict')
+    cy.get('[data-cy="dupSkill-diffId"]').contains('Name Conflict')
+    cy.get('[data-cy="dupSkill-skill5"]').contains('Has Dependencies')
+
+    cy.customLighthouse();
+    cy.customA11y();
+  })
 
 });
