@@ -334,6 +334,23 @@ class SkillCatalogService {
     }
 
     @Transactional
+    List<SkillDefWithExtra> getRelatedSkills(SkillDefWithExtra skillDefWithExtra) {
+        List<SkillDefWithExtra> related = []
+        if (isAvailableInCatalog(skillDefWithExtra.projectId, skillDefWithExtra.skillId)) {
+            related = skillDefWithExtraRepo.findSkillsCopiedFrom(skillDefWithExtra.id)
+        } else if (skillDefWithExtra.copiedFrom != null) {
+            related = skillDefWithExtraRepo.findSkillsCopiedFrom(skillDefWithExtra.copiedFrom)
+            related = related?.findAll { it.id != skillDefWithExtra.id }
+            SkillDefWithExtra og = skillDefWithExtraRepo.findById(skillDefWithExtra.copiedFrom)
+            if (og) {
+                related.add(og)
+            }
+        }
+
+        return related
+    }
+
+    @Transactional
     List<SkillDefMin> getRelatedSkills(SkillDefMin skillDef) {
         List<SkillDefMin> related = []
         if (isAvailableInCatalog(skillDef.projectId, skillDef.skillId)) {
@@ -358,14 +375,15 @@ class SkillCatalogService {
     @Transactional
     void distributeCatalogSkillUpdates() {
         lockingService.lockForUpdatingCatalogSkills()
+        // queued skill update needs to include
         Iterable<QueuedSkillUpdate> queuedSkillUpdates = queuedSkillUpdateRepo.findAll()
 
         log.debug("found [${queuedSkillUpdates?.size()}] updated catalog skills")
         queuedSkillUpdates.groupBy { it.skill.id }.each{key, value ->
-            SkillDef og = value?.first()?.skill
-            List<SkillDef> related = getRelatedSkills(og)
+            SkillDefWithExtra og = value?.first()?.skill
+            List<SkillDefWithExtra> related = getRelatedSkills(og)
             log.debug("found [${related?.size()}] imported skills based off of [${og.skillId}]")
-            related?.each { SkillDef imported ->
+            related?.each { SkillDefWithExtra imported ->
                 ReplicatedSkillUpdateRequest copy = new ReplicatedSkillUpdateRequest()
                 Props.copy(og, copy)
                 copy.copiedFrom = og.id
@@ -374,7 +392,8 @@ class SkillCatalogService {
                 copy.readOnly = Boolean.TRUE.toString()
                 copy.version = imported.version
                 copy.numPerformToCompletion = og.totalPoints / og.pointIncrement
-                copy.subjectId = relationshipService.getParentSkill(imported).skillId
+                copy.subjectId = relationshipService.getParentSkill(imported.id).skillId
+                copy.selfReportingType = og.selfReportingType?.toString()
                 skillsAdminService.saveSkill(imported.skillId, copy)
             }
         }

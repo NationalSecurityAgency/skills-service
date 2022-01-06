@@ -333,7 +333,8 @@ class SkillsAdminService {
                     groupChildSkills
             )
             if (skillCatalogService.isAvailableInCatalog(savedSkill.projectId, savedSkill.skillId)) {
-                QueuedSkillUpdate queuedSkillUpdate = new QueuedSkillUpdate(skill:  savedSkill, isCatalogSkill: true)
+                SkillDefWithExtra extra = skillDefWithExtraRepo.findById(savedSkill.id).get()
+                QueuedSkillUpdate queuedSkillUpdate = new QueuedSkillUpdate(skill:  extra, isCatalogSkill: true)
                 queuedSkillUpdateRepo.save(queuedSkillUpdate)
             }
         }

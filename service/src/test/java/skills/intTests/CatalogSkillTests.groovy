@@ -15,6 +15,7 @@
  */
 package skills.intTests
 
+import org.junit.Ignore
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.storage.model.SkillDef
@@ -94,7 +95,6 @@ class CatalogSkillTests extends DefaultIntSpec {
         def p1subj1 = createSubject(1, 1)
         def p2subj1 = createSubject(2, 1)
         def p3subj1 = createSubject(3, 1)
-        /* int projNumber = 1, int subjNumber = 1, int skillNumber = 1, int version = 0, int numPerformToCompletion = 1, pointIncrementInterval = 480, pointIncrement = 10, type="Skill" */
         def skill = createSkill(1, 1, 1, 0, 1, 0, 250)
 
         skillsService.createProject(project1)
@@ -110,8 +110,15 @@ class CatalogSkillTests extends DefaultIntSpec {
         when:
         def preEdit = skillsService.getCatalogSkills(project2.projectId, 10, 1)
         def skillNamePreEdit = skill.name
+        def skillDescriptionPreEdit = skill.description
+        def skillHelpUrlPreEdit = skill.helpUrl
+
         skill.name = "edited name"
         skill.numPerformToCompletion = 50
+        skill.helpUrl = "http://newHelpUrl"
+        skill.description = "updated description"
+        skill.selfReportingType = SkillDef.SelfReportingType.Approval.toString()
+
         skillsService.updateSkill(skill, skill.skillId)
         def postEdit = skillsService.getCatalogSkills(project3.projectId, 10, 1)
 
@@ -119,9 +126,15 @@ class CatalogSkillTests extends DefaultIntSpec {
         preEdit.data[0].name == skillNamePreEdit
         preEdit.data[0].totalPoints == 250
         preEdit.data[0].numPerformToCompletion == 1
+        preEdit.data[0].description == skillDescriptionPreEdit
+        preEdit.data[0].helpUrl == skillHelpUrlPreEdit
+        !preEdit.data[0].selfReportingType
         postEdit.data[0].name == skill.name
         postEdit.data[0].totalPoints == 12500
         postEdit.data[0].numPerformToCompletion == 50
+        postEdit.data[0].description == skill.description
+        postEdit.data[0].helpUrl == skill.helpUrl
+        postEdit.data[0].selfReportingType == SkillDef.SelfReportingType.Approval.toString()
     }
 
     def "update skill imported from catalog"() {
