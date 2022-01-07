@@ -238,10 +238,15 @@ class SkillEventsService {
          */
         lockTransaction(userId)
 
-        // record event should happen AFTER the lock OR if it does not need the lock;
-        // otherwise there is a chance of a deadlock (although unlikely); this can happen because record event
-        // mutates the row - so that row is locked in addition to the explicit lock
-        recordEvent(skillDefinition, userId, skillDate, isCatalogSkill)
+        final boolean isApprovalRequest = approvalParams && !approvalParams.disableChecks &&
+                skillDefinition.getSelfReportingType() == SkillDef.SelfReportingType.Approval
+
+        if (!isApprovalRequest) {
+            // record event should happen AFTER the lock OR if it does not need the lock;
+            // otherwise there is a chance of a deadlock (although unlikely); this can happen because record event
+            // mutates the row - so that row is locked in addition to the explicit lock
+            recordEvent(skillDefinition, userId, skillDate, isCatalogSkill)
+        }
         numExistingSkills = getNumExistingSkills(userId, projectId, skillId)
         checkRes = checkIfSkillApplied(userId, numExistingSkills, skillDate.date, skillDefinition)
         if (!checkRes.skillApplied) {
@@ -250,8 +255,7 @@ class SkillEventsService {
             return res
         }
 
-        if (approvalParams && !approvalParams.disableChecks &&
-            skillDefinition.getSelfReportingType() == SkillDef.SelfReportingType.Approval) {
+        if (isApprovalRequest) {
             // if this skill was imported from the catalog, request approval using the original OG
             // skill id to prevent duplicated approval requests for what is effectively the same skill
             if (skillDefinition.copiedFrom) {

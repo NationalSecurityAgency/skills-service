@@ -134,30 +134,32 @@ class SkillApprovalService {
             validateProjId(it, projectId)
 
             Optional<SkillDef> optional = skillDefRepo.findById(it.skillRefId)
-            SkillDef skillDef = optional.get()
-            // enter SkillEventResult for all copies
-            SkillEventResult res = skillEventsService.reportSkill(projectId, skillDef.skillId, it.userId, false, it.requestedOn,
-                    new SkillEventsService.SkillApprovalParams(disableChecks: true))
+            if (optional.isPresent()) {
+                SkillDef skillDef = optional.get()
+                // enter SkillEventResult for all copies
+                SkillEventResult res = skillEventsService.reportSkill(projectId, skillDef.skillId, it.userId, false, it.requestedOn,
+                        new SkillEventsService.SkillApprovalParams(disableChecks: true))
 
-            // enter  event for all imported copies if in catalog
-            if (skillCatalogService.isAvailableInCatalog(skillDef)) {
-                //TODO: this may need to be moved to an async process eventually
-                skillCatalogService.getRelatedSkills(skillDef)?.each { SkillDef copy ->
-                    skillEventsService.reportSkill(copy.projectId, copy.skillId, it.userId, false, it.requestedOn,
-                            new SkillEventsService.SkillApprovalParams(disableChecks: true))
+                // enter  event for all imported copies if in catalog
+                /*if (skillCatalogService.isAvailableInCatalog(skillDef)) {
+                    //TODO: this may need to be moved to an async process eventually
+                    skillCatalogService.getRelatedSkills(skillDef)?.each { SkillDef copy ->
+                        skillEventsService.reportSkill(copy.projectId, copy.skillId, it.userId, false, it.requestedOn,
+                                new SkillEventsService.SkillApprovalParams(disableChecks: true))
+                    }
+                }*/
+
+                if (log.isDebugEnabled()) {
+                    log.debug("Approval for ${it} yielded:\n${res}")
                 }
+
+                it.approverActionTakenOn = new Date()
+                it.approverUserId = userInfoService.currentUser.username
+                skillApprovalRepo.save(it)
+
+                // send email
+                sentNotifications(it, skillDef, true)
             }
-
-            if (log.isDebugEnabled()){
-                log.debug("Approval for ${it} yielded:\n${res}")
-            }
-
-            it.approverActionTakenOn = new Date()
-            it.approverUserId = userInfoService.currentUser.username
-            skillApprovalRepo.save(it)
-
-            // send email
-            sentNotifications(it, skillDef, true)
         }
     }
 

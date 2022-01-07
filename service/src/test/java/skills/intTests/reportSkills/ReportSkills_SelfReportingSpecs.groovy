@@ -22,7 +22,9 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.EmailUtils
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import skills.services.UserEventService
 import skills.services.settings.SettingsService
+import skills.storage.model.EventType
 import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
 import skills.storage.model.UserAttrs
@@ -30,8 +32,11 @@ import skills.storage.repos.NotificationsRepo
 import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAttrsRepo
+import skills.storage.repos.UserEventsRepo
 import skills.utils.WaitFor
 import spock.lang.IgnoreRest
+
+import java.time.LocalDate
 
 @Slf4j
 class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
@@ -50,6 +55,9 @@ class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
 
     @Autowired
     UserAttrsRepo  userAttrsRepo
+
+    @Autowired
+    UserEventsRepo userEventsRepo
 
     def setup() {
         startEmailServer()
@@ -379,6 +387,11 @@ SkillTree Bot'''
         List<Integer> ids = approvalsEndpointRes.data.collect { it.id }
         skillsService.approve(proj.projectId, ids)
 
+        def metricDate = date.toLocalDate().atStartOfDay().toDate()
+        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillId(proj.projectId, skills[0].skillId)
+        def userEventPostApproval = userEventsRepo.findByUserIdAndSkillRefIdAndEventTimeAndEventType(user, skillDef.id, metricDate, EventType.DAILY)
+        assert userEventPostApproval
+
         def approvalsEndpointResAfter = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
         def skillEvents = skillsService.getPerformedSkills(user, proj.projectId)
 
@@ -460,6 +473,7 @@ Always yours, <br/> -SkillTree Bot
         skillEvents.data.get(0).skillId == skills[0].skillId
         approvalsEndpointResAfter.data.size() == 0
         approvalsEndpointResAfter.count == 0
+        userEventPostApproval.count == 1
     }
 
     def "requesting approval for the same skill more than one time"() {

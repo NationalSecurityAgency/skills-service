@@ -17,10 +17,12 @@ package skills.intTests
 
 import org.junit.Ignore
 import org.springframework.beans.factory.annotation.Autowired
+import skills.controller.exceptions.SkillException
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.services.UserEventService
 import skills.storage.model.DayCountItem
+import skills.storage.model.EventType
 import skills.storage.model.SkillDef
 import skills.intTests.utils.SkillsFactory
 import skills.storage.repos.SkillDefRepo
@@ -1720,6 +1722,9 @@ class CatalogSkillTests extends DefaultIntSpec {
         def skill3 = createSkill(1, 1, 3, 0, 2, 0, 10)
         skill3.selfReportingType = SkillDef.SelfReportingType.HonorSystem.toString()
 
+        def skill4 = createSkill(1, 1, 4, 0, 3, 0, 10)
+        skill4.selfReportingType = SkillDef.SelfReportingType.Approval.toString()
+
         skillsService.createProject(project1)
         skillsService.createProject(project2)
         skillsService.createProject(project3)
@@ -1730,10 +1735,12 @@ class CatalogSkillTests extends DefaultIntSpec {
         skillsService.createSkill(skill)
         skillsService.createSkill(skill2)
         skillsService.createSkill(skill3)
+        skillsService.createSkill(skill4)
 
         skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
         skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
         skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skill4.skillId)
 
         when:
         skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
@@ -1745,7 +1752,31 @@ class CatalogSkillTests extends DefaultIntSpec {
         skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill3.skillId)
         skillsService.importSkillFromCatalog(project3.projectId, p3subj1.subjectId, project1.projectId, skill3.skillId)
 
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill4.skillId)
+        skillsService.importSkillFromCatalog(project3.projectId, p3subj1.subjectId, project1.projectId, skill4.skillId)
+
         def user = getRandomUsers(1)[0]
+
+        skillsService.addSkill([projectId: project1.projectId, skillId: skill4.skillId], user)
+        def approvals = skillsService.getApprovals(project1.projectId, 10, 1, 'requestedOn', false)
+        assert approvals.count == 1
+        skillsService.approve(project1.projectId, [approvals.data[0].id])
+
+        skillsService.addSkill([projectId: project2.projectId, skillId: skill4.skillId], user)
+        def p2Approvals = skillsService.getApprovals(project2.projectId, 10, 1, 'requestedOn', false)
+        assert p2Approvals.count == 0
+        approvals = skillsService.getApprovals(project1.projectId, 10, 1, 'requestedOn', false)
+        assert approvals.count == 1
+        skillsService.approve(project1.projectId, [approvals.data[0].id])
+        println userEventService.getUserEventCountsForSkillId(project1.projectId, skill4.skillId, LocalDate.now().atStartOfDay().toDate())[0].count
+
+        skillsService.addSkill([projectId: project3.projectId, skillId: skill4.skillId], user)
+        def p3Approvals = skillsService.getApprovals(project2.projectId, 10, 1, 'requestedOn', false)
+        assert p3Approvals.count == 0
+        approvals = skillsService.getApprovals(project1.projectId, 10, 1, 'requestedOn', false)
+        assert approvals.count == 1
+        skillsService.approve(project1.projectId, [approvals.data[0].id])
+        println userEventService.getUserEventCountsForSkillId(project1.projectId, skill4.skillId, LocalDate.now().atStartOfDay().toDate())[0].count
 
         skillsService.addSkill([projectId: project1.projectId, skillId: skill.skillId], user)
         skillsService.addSkill([projectId: project1.projectId, skillId: skill2.skillId], user)
@@ -1765,6 +1796,9 @@ class CatalogSkillTests extends DefaultIntSpec {
         List<DayCountItem> skill3Project3Counts = userEventService.getUserEventCountsForSkillId(project3.projectId, skill3.skillId, LocalDate.now().atStartOfDay().toDate())
         List<DayCountItem> skill3Project1Counts = userEventService.getUserEventCountsForSkillId(project1.projectId, skill3.skillId, LocalDate.now().atStartOfDay().toDate())
         List<DayCountItem> skill3Project2Counts = userEventService.getUserEventCountsForSkillId(project2.projectId, skill3.skillId, LocalDate.now().atStartOfDay().toDate())
+        List<DayCountItem> skill4Project1Counts = userEventService.getUserEventCountsForSkillId(project1.projectId, skill4.skillId, LocalDate.now().atStartOfDay().toDate())
+        List<DayCountItem> skill4Project2Counts = userEventService.getUserEventCountsForSkillId(project1.projectId, skill4.skillId, LocalDate.now().atStartOfDay().toDate())
+        List<DayCountItem> skill4Project3Counts = userEventService.getUserEventCountsForSkillId(project1.projectId, skill4.skillId, LocalDate.now().atStartOfDay().toDate())
 
         then:
         skill1Project1Counts.size() == 1
@@ -1785,6 +1819,12 @@ class CatalogSkillTests extends DefaultIntSpec {
         skill3Project1Counts[0].count == 3
         skill3Project2Counts.size() == 1
         skill3Project2Counts[0].count == 3
+        skill4Project1Counts.size() == 1
+        skill4Project1Counts[0].count == 3
+        skill4Project2Counts.size() == 1
+        skill4Project2Counts[0].count == 3
+        skill4Project3Counts.size() == 1
+        skill4Project3Counts[0].count == 3
     }
 
 }
