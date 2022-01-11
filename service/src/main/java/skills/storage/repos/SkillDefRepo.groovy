@@ -108,6 +108,32 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         s.type = ?1 and upper(s.name) like UPPER(CONCAT('%', ?2, '%'))''')
     List<SkillDefPartial> findAllByTypeAndNameLike(SkillDef.ContainerType type, String name)
 
+
+    @Nullable
+    @Query('''SELECT         
+        s.id as id,
+        s.name as name, 
+        s.skillId as skillId, 
+        subjectDef.skillId as subjectSkillId,
+        subjectDef.name as subjectName,
+        s.projectId as projectId, 
+        s.version as version,
+        s.pointIncrement as pointIncrement,
+        s.pointIncrementInterval as pointIncrementInterval,
+        s.numMaxOccurrencesIncrementInterval as numMaxOccurrencesIncrementInterval,
+        s.totalPoints as totalPoints,
+        s.type as skillType,
+        s.displayOrder as displayOrder,
+        s.created as created,
+        s.updated as updated
+        from SkillDef s, SkillDef subjectDef, SkillRelDef srd 
+        where
+        subjectDef = srd.parent and s = srd.child and 
+        srd.type = 'RuleSetDefinition' and subjectDef.type = 'Subject' and  
+        s.type = ?1 and upper(s.name) like UPPER(CONCAT('%', ?2, '%')) and
+        s.readOnly != true''')
+    List<SkillDefPartial> findAllByTypeAndNameLikeNoImportedSkills(SkillDef.ContainerType type, String name)
+
     List<SkillDef> findAllByProjectIdAndType(@Nullable String id, SkillDef.ContainerType type)
     @Nullable
     SkillDef findByProjectIdAndSkillIdIgnoreCaseAndType(@Nullable String id, String skillId, SkillDef.ContainerType type)

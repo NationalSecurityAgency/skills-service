@@ -27,6 +27,7 @@ import skills.storage.model.SkillDef
 import skills.intTests.utils.SkillsFactory
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserEventsRepo
+import skills.stressTests.CreateSkillsDef
 import spock.lang.IgnoreRest
 import org.springframework.http.HttpStatus
 
@@ -2019,6 +2020,116 @@ class CatalogSkillTests extends DefaultIntSpec {
         p3bSum.numTotalSkills == 2
         p3bSum.numSkillsAchieved == 0
         !p3bSum.badgeAchieved
+    }
+
+    def "imported skills as dependency should not be returned as potential dependencies for global badges"() {
+        def project1 = createProject(1)
+        def project2 = createProject(2)
+        def project3 = createProject(3)
+
+        def p1subj1 = createSubject(1, 1)
+        def p2subj1 = createSubject(2, 1)
+        def p3subj1 = createSubject(3, 1)
+
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 50)
+
+        def p2skill1 = createSkill(2, 1, 55, 0, 1, 0, 100)
+        def p3skill1 = createSkill(3, 1, 99, 0, 1, 0, 100)
+
+
+        def p2badge1 = createBadge(2, 11)
+        def p3badge1 = createBadge(3, 42)
+
+        skill.name = "Sample Name Query Test"
+
+        skillsService.createProject(project1)
+        skillsService.createProject(project2)
+        skillsService.createProject(project3)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p2subj1)
+        skillsService.createSubject(p3subj1)
+
+        skillsService.createSkill(skill)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(p2skill1)
+        skillsService.createSkill(p3skill1)
+        skillsService.createBadge(p2badge1)
+        skillsService.createBadge(p3badge1)
+
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
+
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalog(project3.projectId, p3subj1.subjectId, project1.projectId, skill.skillId)
+
+        def supervisorService = createSupervisor()
+
+        def badge = SkillsFactory.createBadge()
+        badge.enabled = true
+        supervisorService.createGlobalBadge(badge)
+
+        when:
+        def res = supervisorService.getAvailableSkillsForGlobalBadge(badge.badgeId, "Sample")
+
+        then:
+        res.totalAvailable == 1
+        res.suggestedSkills.findAll {it.name == 'Sample Name Query Test'}.size() == 1
+    }
+
+    def "cannont assign skill imported from catalog as a dependenty to a global badge"() {
+        def project1 = createProject(1)
+        def project2 = createProject(2)
+        def project3 = createProject(3)
+
+        def p1subj1 = createSubject(1, 1)
+        def p2subj1 = createSubject(2, 1)
+        def p3subj1 = createSubject(3, 1)
+
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 50)
+
+        def p2skill1 = createSkill(2, 1, 55, 0, 1, 0, 100)
+        def p3skill1 = createSkill(3, 1, 99, 0, 1, 0, 100)
+
+
+        def p2badge1 = createBadge(2, 11)
+        def p3badge1 = createBadge(3, 42)
+
+        skill.name = "Sample Name Query Test"
+
+        skillsService.createProject(project1)
+        skillsService.createProject(project2)
+        skillsService.createProject(project3)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p2subj1)
+        skillsService.createSubject(p3subj1)
+
+        skillsService.createSkill(skill)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(p2skill1)
+        skillsService.createSkill(p3skill1)
+        skillsService.createBadge(p2badge1)
+        skillsService.createBadge(p3badge1)
+
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
+
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalog(project3.projectId, p3subj1.subjectId, project1.projectId, skill.skillId)
+
+        def supervisorService = createSupervisor()
+
+        def badge = SkillsFactory.createBadge()
+        badge.enabled = true
+        supervisorService.createGlobalBadge(badge)
+
+        when:
+        supervisorService.assignSkillToGlobalBadge([badgeId: badge.badgeId, projectId: project3.projectId, skillId: skill.skillId])
+
+        then:
+        def e = thrown(SkillsClientException)
+        e.message.contains('Imported Skills may not be added as Global Badge Dependencies')
     }
 
 
