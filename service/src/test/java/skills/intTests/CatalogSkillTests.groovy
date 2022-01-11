@@ -181,7 +181,44 @@ class CatalogSkillTests extends DefaultIntSpec {
         then:
         def e = thrown(Exception)
         e.getMessage().contains("errorCode:ReadOnlySkill")
+    }
 
+    def "description, helpUrl, selfReportingType fields present on skill imported from catalog"() {
+        def project1 = createProject(1)
+        def project2 = createProject(2)
+        def project3 = createProject(3)
+
+        def p1subj1 = createSubject(1, 1)
+        def p2subj1 = createSubject(2, 1)
+        def p3subj1 = createSubject(3, 1)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 250)
+        skill.name = "foo name"
+        skill.numPerformToCompletion = 50
+        skill.helpUrl = "http://newHelpUrl"
+        skill.description = "updated description"
+        skill.selfReportingType = SkillDef.SelfReportingType.Approval.toString()
+
+        skillsService.createProject(project1)
+        skillsService.createProject(project2)
+        skillsService.createProject(project3)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p2subj1)
+        skillsService.createSubject(p3subj1)
+
+        skillsService.createSkill(skill)
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+
+        when:
+        def res = skillsService.getSkillsForSubject(project2.projectId, p2subj1.subjectId)
+        def importedSkill = skillsService.getSkill([projectId: project2.projectId, subjectId: p2subj1.subjectId, skillId: skill.skillId])
+
+        then:
+        importedSkill.name == skill.name
+        importedSkill.numPerformToCompletion == skill.numPerformToCompletion
+        importedSkill.helpUrl == skill.helpUrl
+        importedSkill.description == skill.description
+        importedSkill.selfReportingType == skill.selfReportingType
     }
 
     def "remove skill from catalog"() {
@@ -1826,6 +1863,164 @@ class CatalogSkillTests extends DefaultIntSpec {
         skill4Project3Counts.size() == 1
         skill4Project3Counts[0].count == 3
     }
+
+    def "project badges can depend on imported skills" () {
+        def project1 = createProject(1)
+        def project2 = createProject(2)
+        def project3 = createProject(3)
+
+        def p1subj1 = createSubject(1, 1)
+        def p2subj1 = createSubject(2, 1)
+        def p3subj1 = createSubject(3, 1)
+
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 50)
+        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 50)
+        def skill4 = createSkill(1, 1, 4, 0, 1, 0, 50)
+
+        def p2skill1 = createSkill(2, 1, 55, 0, 1, 0, 100)
+        def p3skill1 = createSkill(3, 1, 99, 0, 1, 0, 100)
+
+
+        def p2badge1 = createBadge(2, 11)
+        def p3badge1 = createBadge(3, 42)
+
+        skillsService.createProject(project1)
+        skillsService.createProject(project2)
+        skillsService.createProject(project3)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p2subj1)
+        skillsService.createSubject(p3subj1)
+
+        skillsService.createSkill(skill)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(skill3)
+        skillsService.createSkill(skill4)
+        skillsService.createSkill(p2skill1)
+        skillsService.createSkill(p3skill1)
+        skillsService.createBadge(p2badge1)
+        skillsService.createBadge(p3badge1)
+
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skill4.skillId)
+
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalog(project3.projectId, p3subj1.subjectId, project1.projectId, skill3.skillId)
+
+        skillsService.assignSkillToBadge(project2.projectId, p2badge1.badgeId, p2skill1.skillId)
+        skillsService.assignSkillToBadge(project2.projectId, p2badge1.badgeId, skill.skillId)
+
+        skillsService.assignSkillToBadge(project3.projectId, p3badge1.badgeId, p3skill1.skillId)
+        skillsService.assignSkillToBadge(project3.projectId, p3badge1.badgeId, skill3.skillId)
+
+        p2badge1.enabled = true
+        skillsService.updateBadge(p2badge1, p2badge1.badgeId)
+
+        p3badge1.enabled = true
+        skillsService.updateBadge(p3badge1, p3badge1.badgeId)
+
+        when:
+        def user = getRandomUsers(1)[0]
+
+        skillsService.addSkill([projectId: project2.projectId, skillId: p2skill1.skillId], user)
+        skillsService.addSkill([projectId: project1.projectId, skillId: skill.skillId], user)
+
+        def p2bSumm = skillsService.getBadgeSummary(user, project2.projectId, p2badge1.badgeId)
+        def p3bSumPre = skillsService.getBadgeSummary(user, project3.projectId, p3badge1.badgeId)
+
+        skillsService.addSkill([projectId: project1.projectId, skillId: skill3.skillId], user)
+        skillsService.addSkill([projectId: project3.projectId, skillId: p3skill1.skillId], user)
+        def p3bSumPost = skillsService.getBadgeSummary(user, project3.projectId, p3badge1.badgeId)
+
+        then:
+        p2bSumm.numTotalSkills == 2
+        p2bSumm.numSkillsAchieved == 2
+        p2bSumm.badgeAchieved
+        p3bSumPre.numTotalSkills == 2
+        p3bSumPre.numSkillsAchieved == 0
+        !p3bSumPre.badgeAchieved
+        p3bSumPost.numTotalSkills == 2
+        p3bSumPost.numSkillsAchieved == 2
+        p3bSumPost.badgeAchieved
+    }
+
+    def "deleting imported catalog skill causes badge to be achieved if other dependencies are satisfied"() {
+        def project1 = createProject(1)
+        def project2 = createProject(2)
+        def project3 = createProject(3)
+
+        def p1subj1 = createSubject(1, 1)
+        def p2subj1 = createSubject(2, 1)
+        def p3subj1 = createSubject(3, 1)
+
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 50)
+        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 50)
+        def skill4 = createSkill(1, 1, 4, 0, 1, 0, 50)
+
+        def p2skill1 = createSkill(2, 1, 55, 0, 1, 0, 100)
+        def p3skill1 = createSkill(3, 1, 99, 0, 1, 0, 100)
+
+
+        def p2badge1 = createBadge(2, 11)
+        def p3badge1 = createBadge(3, 42)
+
+        skillsService.createProject(project1)
+        skillsService.createProject(project2)
+        skillsService.createProject(project3)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p2subj1)
+        skillsService.createSubject(p3subj1)
+
+        skillsService.createSkill(skill)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(skill3)
+        skillsService.createSkill(skill4)
+        skillsService.createSkill(p2skill1)
+        skillsService.createSkill(p3skill1)
+        skillsService.createBadge(p2badge1)
+        skillsService.createBadge(p3badge1)
+
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skill4.skillId)
+
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalog(project3.projectId, p3subj1.subjectId, project1.projectId, skill3.skillId)
+
+        skillsService.assignSkillToBadge(project2.projectId, p2badge1.badgeId, p2skill1.skillId)
+        skillsService.assignSkillToBadge(project2.projectId, p2badge1.badgeId, skill.skillId)
+
+        skillsService.assignSkillToBadge(project3.projectId, p3badge1.badgeId, p3skill1.skillId)
+        skillsService.assignSkillToBadge(project3.projectId, p3badge1.badgeId, skill3.skillId)
+
+        p2badge1.enabled = true
+        skillsService.updateBadge(p2badge1, p2badge1.badgeId)
+
+        p3badge1.enabled = true
+        skillsService.updateBadge(p3badge1, p3badge1.badgeId)
+
+        when:
+        def user = getRandomUsers(1)[0]
+
+        skillsService.addSkill([projectId: project2.projectId, skillId: p2skill1.skillId], user)
+        skillsService.deleteSkill(skill)
+
+        def p2bSumm = skillsService.getBadgeSummary(user, project2.projectId, p2badge1.badgeId)
+        def p3bSum = skillsService.getBadgeSummary(user, project3.projectId, p3badge1.badgeId)
+
+        then:
+        p2bSumm.numTotalSkills == 1
+        p2bSumm.numSkillsAchieved == 1
+        p2bSumm.badgeAchieved
+        p3bSum.numTotalSkills == 2
+        p3bSum.numSkillsAchieved == 0
+        !p3bSum.badgeAchieved
+    }
+
 
 }
 

@@ -234,7 +234,7 @@ class SkillCatalogService {
         SkillsValidator.isTrue(inCatalog, "Skill [${skillIdFrom}] from project [${projectIdFrom}] has not been shared to the catalog and may not be imported")
         projDefAccessor.getProjDef(projectIdFrom)
         projDefAccessor.getProjDef(projectIdTo)
-        SkillDef original = skillAccessor.getSkillDef(projectIdFrom, skillIdFrom)
+        SkillDefWithExtra original = skillAccessor.getSkillDefWithExtra(projectIdFrom, skillIdFrom)
 
         SkillDef.ContainerType subjectType = SkillDef.ContainerType.Subject
         SkillDef subject = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectIdTo, subjectIdTo, subjectType)
