@@ -206,6 +206,7 @@ limitations under the License.
 <script>
   import { SkillsReporter } from '@skilltree/skills-client-vue';
   import dayjs from '@/common-components/DayJsCustomizer';
+  import StringHighlighter from '@/common-components/utilities/StringHighlighter';
   import EditSkill from './EditSkill';
   import NoContent2 from '../utils/NoContent2';
   import ChildRowSkillsDisplay from './ChildRowSkillsDisplay';
@@ -216,7 +217,6 @@ limitations under the License.
   import SkillsBTable from '../utils/table/SkillsBTable';
   import TimeWindowMixin from './TimeWindowMixin';
   import ChildRowSkillGroupDisplay from './skillsGroup/ChildRowSkillGroupDisplay';
-  import StringHighlighter from '@/common-components/utilities/StringHighlighter';
   import EditSkillGroup from './skillsGroup/EditSkillGroup';
 
   export default {

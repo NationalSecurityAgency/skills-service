@@ -42,9 +42,9 @@ limitations under the License.
 <script>
   import Multiselect from 'vue-multiselect';
   import dayjs from '@/common-components/DayJsCustomizer';
+  import numberFormatter from '@//filters/NumberFilter';
   import MetricsCard from '../../metrics/utils/MetricsCard';
   import MetricsOverlay from '../../metrics/utils/MetricsOverlay';
-  import numberFormatter from '@//filters/NumberFilter';
   import TimeLengthSelector from '../../metrics/common/TimeLengthSelector';
   import MetricsService from '../../metrics/MetricsService';
 

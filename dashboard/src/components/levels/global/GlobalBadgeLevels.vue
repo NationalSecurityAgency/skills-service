@@ -58,6 +58,7 @@ limitations under the License.
 <script>
   import { createNamespacedHelpers } from 'vuex';
 
+  import ChangeProjectLevel from '@/components/levels/global/ChangeProjectLevel';
   import GlobalBadgeService from '../../badges/global/GlobalBadgeService';
   import SimpleLevelsTable from './SimpleLevelsTable';
   import ProjectSelector from './ProjectSelector';
@@ -66,7 +67,6 @@ limitations under the License.
   import SubPageHeader from '../../utils/pages/SubPageHeader';
   import LoadingContainer from '../../utils/LoadingContainer';
   import MsgBoxMixin from '../../utils/modal/MsgBoxMixin';
-  import ChangeProjectLevel from '@/components/levels/global/ChangeProjectLevel';
 
   const { mapActions } = createNamespacedHelpers('badges');
 
