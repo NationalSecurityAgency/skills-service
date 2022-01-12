@@ -600,17 +600,26 @@ limitations under the License.
         this.disableFirstAndLastButtons();
       },
       moveDisplayOrderUp(row) {
-        this.moveDisplayOrder(row, 'DisplayOrderUp');
+        this.moveDisplayOrder(row, 'DisplayOrderUp', -1);
       },
       moveDisplayOrderDown(row) {
-        this.moveDisplayOrder(row, 'DisplayOrderDown');
+        this.moveDisplayOrder(row, 'DisplayOrderDown', 1);
       },
-      moveDisplayOrder(row, actionToSubmit) {
+      moveDisplayOrder(row, actionToSubmit, displayIndexIncrement) {
         SkillsService.updateSkill(row, actionToSubmit)
           .then(() => {
-            SkillsService.getSubjectSkills(this.projectId, this.subjectId).then((data) => {
-              this.loadDataFromParams(data);
-            });
+            const index = this.skills.findIndex((item) => item.skillId === row.skillId);
+            const newIndex = index + displayIndexIncrement;
+
+            const movedSkill = this.skills[index];
+            const otherSkill = this.skills[newIndex];
+
+            // switch display orders
+            const movedSkillDisplayOrder = movedSkill.displayOrder;
+            movedSkill.displayOrder = otherSkill.displayOrder;
+            otherSkill.displayOrder = movedSkillDisplayOrder;
+            this.skills = this.skills.map((s) => s);
+            this.disableFirstAndLastButtons();
           });
       },
       disableFirstAndLastButtons() {

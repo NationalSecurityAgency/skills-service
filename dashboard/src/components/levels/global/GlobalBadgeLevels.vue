@@ -59,6 +59,7 @@ limitations under the License.
   import { createNamespacedHelpers } from 'vuex';
   import ChangeProjectLevel from '@/components/levels/global/ChangeProjectLevel';
 
+  import ChangeProjectLevel from '@/components/levels/global/ChangeProjectLevel';
   import GlobalBadgeService from '../../badges/global/GlobalBadgeService';
   import SimpleLevelsTable from './SimpleLevelsTable';
   import ProjectSelector from './ProjectSelector';
