@@ -150,9 +150,9 @@ limitations under the License.
   import PartialPointsAlert from '@/userSkills/skill/PartialPointsAlert';
   import AchievementDate from '@/userSkills/skill/AchievementDate';
   import NavigationErrorMixin from '@/common/utilities/NavigationErrorMixin';
+  import StringHighlighter from '@/common-components/utilities/StringHighlighter';
   import SkillOverviewFooter from '../SkillOverviewFooter';
   import AnimatedNumber from './AnimatedNumber';
-  import StringHighlighter from '@/common-components/utilities/StringHighlighter';
 
   export default {
     name: 'SkillProgress2',
