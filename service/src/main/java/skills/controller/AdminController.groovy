@@ -15,6 +15,7 @@
  */
 package skills.controller
 
+import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
@@ -33,6 +34,8 @@ import skills.controller.request.model.*
 import skills.controller.result.model.*
 import skills.services.*
 import skills.services.admin.*
+import skills.services.events.BulkSkillEventResult
+import skills.services.events.SkillEventResult
 import skills.services.inception.InceptionProjectService
 import skills.services.settings.SettingsService
 import skills.services.settings.listeners.ValidationRes
@@ -1034,6 +1037,25 @@ class AdminController {
         String userId = userInfoService.getCurrentUserId()
         contactUsersService.previewEmail(contactUsersRequest.emailSubject, contactUsersRequest.emailBody, userId)
         return RequestResult.success()
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @ResponseBody
+    @Profile
+    BulkSkillEventResult addSkills(@PathVariable("projectId") String projectId,
+                                   @PathVariable("skillId") String skillId,
+                                   @RequestBody(required = true) BulkSkillEventRequest bulkSkillEventRequest) {
+
+        Long requestedTimestamp = bulkSkillEventRequest.timestamp
+        SkillsValidator.isNotNull(requestedTimestamp, 'timestamp', projectId, skillId)
+        SkillsValidator.isTrue(requestedTimestamp > 0, "timestamp must be greater than 0", projectId, skillId)
+        SkillsValidator.isTrue(requestedTimestamp <= (System.currentTimeMillis() + 30000), "Skill Events may not be in the future", projectId, skillId);
+
+        List<String> userIds = bulkSkillEventRequest.userIds
+        userIds.removeAll { StringUtils.isBlank(it) }
+        SkillsValidator.isNotEmpty(userIds, 'userIds', projectId, skillId)
+
+        return skillEventService.bulkReportSkills(projectId, skillId, userIds, new Date(requestedTimestamp))
     }
 
 }

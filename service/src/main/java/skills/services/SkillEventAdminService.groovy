@@ -15,22 +15,22 @@
  */
 package skills.services
 
+import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.jpa.domain.Specification
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
-import skills.controller.request.model.QueryUsersCriteriaRequest
 import skills.controller.result.model.RequestResult
+import skills.services.events.BulkSkillEventResult
 import skills.services.events.CompletionItem
 import skills.services.events.SkillEventResult
+import skills.services.events.SkillEventsService
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.model.*
 import skills.storage.repos.*
-import skills.storage.repos.nativeSql.NativeQueriesRepo
-import skills.utils.Props
 
 @Component
 @Slf4j
@@ -59,6 +59,34 @@ class SkillEventAdminService {
 
     @Autowired
     UserEventService userEventService
+
+    @Autowired
+    private SkillEventsService skillsManagementFacade
+
+    @Autowired
+    private UserInfoService userInfoService
+
+    @Transactional
+    @Profile
+    BulkSkillEventResult bulkReportSkills(String projectId, String skillId, List<String> userIds, Date incomingSkillDate) {
+        List<SkillEventResult> results = []
+        BulkSkillEventResult bulkResult = new BulkSkillEventResult(projectId: projectId, skillId: skillId)
+        for (String requestedUserId : userIds) {
+            try {
+                String userId = userInfoService.getUserName(requestedUserId, false)
+                SkillEventResult result = skillsManagementFacade.reportSkill(projectId, skillId, userId, false, incomingSkillDate)
+                if (!bulkResult.name) { bulkResult.name = result.name }
+                if (result.skillApplied) {
+                    bulkResult.userIdsApplied += requestedUserId
+                } else {
+                    bulkResult.userIdsNotApplied += requestedUserId
+                }
+            } catch(Exception e) {
+                bulkResult.userIdsErrored += requestedUserId
+            }
+        }
+        return bulkResult
+    }
 
     @Transactional
     RequestResult deleteSkillEvent(String projectId, String skillId, String userId, Long timestamp) {
@@ -142,7 +170,7 @@ class SkillEventAdminService {
     }
 
     private boolean withinActiveTimeframe(SkillDef skillDef) {
-        boolean withinActiveTimeframe = true;
+        boolean withinActiveTimeframe = true
         if (skillDef.startDate && skillDef.endDate) {
             Date now = new Date()
             withinActiveTimeframe = skillDef.startDate.before(now) && skillDef.endDate.after(now)
