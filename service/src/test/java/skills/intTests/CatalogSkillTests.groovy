@@ -15,24 +15,17 @@
  */
 package skills.intTests
 
-import org.junit.Ignore
+
 import org.springframework.beans.factory.annotation.Autowired
-import skills.controller.exceptions.SkillException
+import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
+import skills.intTests.utils.SkillsFactory
 import skills.services.UserEventService
 import skills.storage.model.DayCountItem
-import skills.storage.model.EventType
 import skills.storage.model.SkillDef
-import skills.intTests.utils.SkillsFactory
-import skills.storage.repos.SkillDefRepo
-import skills.storage.repos.UserEventsRepo
-import skills.stressTests.CreateSkillsDef
-import spock.lang.IgnoreRest
-import org.springframework.http.HttpStatus
 
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -1310,7 +1303,7 @@ class CatalogSkillTests extends DefaultIntSpec {
         projectSkills.findAll { it.sharedToCatalog == true }.size() == 0
     }
 
-    def "export a skill with dependencies"() {
+    def "cannot export a skill with dependencies"() {
         // create skills, add dependencies, try to export top of chain
         def project1 = createProject(1)
         def project2 = createProject(2)
@@ -1806,7 +1799,6 @@ class CatalogSkillTests extends DefaultIntSpec {
         approvals = skillsService.getApprovals(project1.projectId, 10, 1, 'requestedOn', false)
         assert approvals.count == 1
         skillsService.approve(project1.projectId, [approvals.data[0].id])
-        println userEventService.getUserEventCountsForSkillId(project1.projectId, skill4.skillId, LocalDate.now().atStartOfDay().toDate())[0].count
 
         skillsService.addSkill([projectId: project3.projectId, skillId: skill4.skillId], user)
         def p3Approvals = skillsService.getApprovals(project2.projectId, 10, 1, 'requestedOn', false)
@@ -1814,7 +1806,6 @@ class CatalogSkillTests extends DefaultIntSpec {
         approvals = skillsService.getApprovals(project1.projectId, 10, 1, 'requestedOn', false)
         assert approvals.count == 1
         skillsService.approve(project1.projectId, [approvals.data[0].id])
-        println userEventService.getUserEventCountsForSkillId(project1.projectId, skill4.skillId, LocalDate.now().atStartOfDay().toDate())[0].count
 
         skillsService.addSkill([projectId: project1.projectId, skillId: skill.skillId], user)
         skillsService.addSkill([projectId: project1.projectId, skillId: skill2.skillId], user)
@@ -2077,7 +2068,7 @@ class CatalogSkillTests extends DefaultIntSpec {
         res.suggestedSkills.findAll {it.name == 'Sample Name Query Test'}.size() == 1
     }
 
-    def "cannont assign skill imported from catalog as a dependenty to a global badge"() {
+    def "cannot assign skill imported from catalog as a dependency to a global badge"() {
         def project1 = createProject(1)
         def project2 = createProject(2)
         def project3 = createProject(3)
@@ -2132,10 +2123,172 @@ class CatalogSkillTests extends DefaultIntSpec {
         e.message.contains('Imported Skills may not be added as Global Badge Dependencies')
     }
 
+    def "cannot share via cross project skills that have been imported from the catalog"() {
+        def project1 = createProject(1)
+        def project2 = createProject(2)
+        def project3 = createProject(3)
+
+        def p1subj1 = createSubject(1, 1)
+        def p2subj1 = createSubject(2, 1)
+        def p3subj1 = createSubject(3, 1)
+
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 50)
+
+        def p2skill1 = createSkill(2, 1, 55, 0, 1, 0, 100)
+        def p3skill1 = createSkill(3, 1, 99, 0, 1, 0, 100)
+
+
+        skillsService.createProject(project1)
+        skillsService.createProject(project2)
+        skillsService.createProject(project3)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p2subj1)
+        skillsService.createSubject(p3subj1)
+
+        skillsService.createSkill(skill)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(p2skill1)
+        skillsService.createSkill(p3skill1)
+
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
+
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalog(project3.projectId, p3subj1.subjectId, project1.projectId, skill2.skillId)
+
+        when:
+        skillsService.shareSkill(project2.projectId, skill.skillId, project3.projectId)
+
+        then:
+        def e = thrown(SkillsClientException)
+        e.message.contains("Skills imported from the catalog may not be shared as cross project dependencies")
+    }
+
+    def "skills imported from the catalog cannot be shared as cross project dependencies to all projects"() {
+        def project1 = createProject(1)
+        def project2 = createProject(2)
+        def project3 = createProject(3)
+
+        def p1subj1 = createSubject(1, 1)
+        def p2subj1 = createSubject(2, 1)
+        def p3subj1 = createSubject(3, 1)
+
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 50)
+
+        def p2skill1 = createSkill(2, 1, 55, 0, 1, 0, 100)
+        def p3skill1 = createSkill(3, 1, 99, 0, 1, 0, 100)
+
+
+        skillsService.createProject(project1)
+        skillsService.createProject(project2)
+        skillsService.createProject(project3)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p2subj1)
+        skillsService.createSubject(p3subj1)
+
+        skillsService.createSkill(skill)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(p2skill1)
+        skillsService.createSkill(p3skill1)
+
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
+
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalog(project3.projectId, p3subj1.subjectId, project1.projectId, skill2.skillId)
+
+        when:
+        skillsService.shareSkill(project2.projectId, skill.skillId, "ALL_SKILLS_PROJECTS")
+
+        then:
+        def e = thrown(SkillsClientException)
+        e.message.contains("Skills imported from the catalog may not be shared as cross project dependencies")
+    }
+
+    def "skills exported to the catalog can be shared as cross project dependencies"() {
+        def project1 = createProject(1)
+        def project2 = createProject(2)
+        def project3 = createProject(3)
+
+        def p1subj1 = createSubject(1, 1)
+        def p2subj1 = createSubject(2, 1)
+        def p3subj1 = createSubject(3, 1)
+
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 50)
+
+        def p2skill1 = createSkill(2, 1, 55, 0, 1, 0, 100)
+        def p3skill1 = createSkill(3, 1, 99, 0, 1, 0, 100)
+
+
+        skillsService.createProject(project1)
+        skillsService.createProject(project2)
+        skillsService.createProject(project3)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p2subj1)
+        skillsService.createSubject(p3subj1)
+
+        skillsService.createSkill(skill)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(p2skill1)
+        skillsService.createSkill(p3skill1)
+
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
+
+
+        when:
+        skillsService.shareSkill(project1.projectId, skill.skillId, project2.projectId)
+        def sharedSkills = skillsService.getSharedWithMeSkills(project2.projectId)
+
+        then:
+        sharedSkills.size() == 1
+        sharedSkills[0].skillName == skill.name
+        sharedSkills[0].projectId == project1.projectId
+    }
+
+    def "skills exported to the catalog can be shared as cross project dependencies with all projects"() {
+        def project1 = createProject(1)
+        def project2 = createProject(2)
+        def project3 = createProject(3)
+
+        def p1subj1 = createSubject(1, 1)
+        def p2subj1 = createSubject(2, 1)
+        def p3subj1 = createSubject(3, 1)
+
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 50)
+
+        def p2skill1 = createSkill(2, 1, 55, 0, 1, 0, 100)
+        def p3skill1 = createSkill(3, 1, 99, 0, 1, 0, 100)
+
+
+        skillsService.createProject(project1)
+        skillsService.createProject(project2)
+        skillsService.createProject(project3)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p2subj1)
+        skillsService.createSubject(p3subj1)
+
+        skillsService.createSkill(skill)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(p2skill1)
+        skillsService.createSkill(p3skill1)
+
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
+
+
+        when:
+        skillsService.shareSkill(project1.projectId, skill.skillId, "ALL_SKILLS_PROJECTS")
+        def sharedSkills = skillsService.getSharedWithMeSkills(project2.projectId)
+
+        then:
+        sharedSkills.size() == 1
+        sharedSkills[0].skillName == skill.name
+        sharedSkills[0].projectId == project1.projectId
+    }
 
 }
-
-
-
-
-

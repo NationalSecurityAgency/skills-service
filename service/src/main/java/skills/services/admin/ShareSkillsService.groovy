@@ -16,10 +16,12 @@
 package skills.services.admin
 
 import groovy.util.logging.Slf4j
+import org.jsoup.helper.Validate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillException
+import skills.controller.exceptions.SkillsValidator
 import skills.controller.result.model.SharedSkillResult
 import skills.storage.model.ProjDef
 import skills.storage.model.SkillDef
@@ -73,6 +75,7 @@ class ShareSkillsService {
             throw new SkillException("Can not share skill to itself. Requested project [$sharedToProjectId] is itself!", projectId, skillId)
         }
         SkillDef skill = skillDefAccessor.getSkillDef(projectId, skillId)
+        SkillsValidator.isTrue(!skill.readOnly, "Skills imported from the catalog may not be shared as cross project dependencies", projectId, skillId)
 
         ProjDef sharedToProject = null
         if (sharedToProjectId != ALL_SKILLS_PROJECTS) {
