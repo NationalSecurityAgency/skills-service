@@ -39,6 +39,7 @@ limitations under the License.
 </template>
 
 <script>
+  import PkiAppBootstrap from '@//components/access/PkiAppBootstrap';
   import HeaderView from './components/header/Header';
   import LoadingContainer from './components/utils/LoadingContainer';
   import CustomizableHeader from './components/customization/CustomizableHeader';
@@ -47,7 +48,6 @@ limitations under the License.
   import InceptionConfigurer from './InceptionConfigurer';
   import InceptionProgressMessagesMixin from './components/inception/InceptionProgressMessagesMixin';
   import NewSoftwareVersionComponent from './components/header/NewSoftwareVersion';
-  import PkiAppBootstrap from '@//components/access/PkiAppBootstrap';
   import DashboardFooter from './components/header/DashboardFooter';
 
   export default {

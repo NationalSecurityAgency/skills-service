@@ -219,6 +219,70 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="orderMoveUp_skill2"]').should('be.enabled');
     })
 
+    it('change display order for skills under a group', () => {
+        cy.createSkillsGroup(1, 1, 1);
+        cy.addSkillToGroup(1, 1, 1, 4);
+        cy.addSkillToGroup(1, 1, 1, 5);
+        cy.addSkillToGroup(1, 1, 1, 6);
+
+        const groupId = 'group1'
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
+
+        const skillsTableSelector = '[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="skillsTable"]'
+        cy.get(`${skillsTableSelector} th`).contains('Display Order').click()
+
+        cy.validateTable(skillsTableSelector, [
+            [{ colIndex: 0,  value: 'skill4' }],
+            [{ colIndex: 0,  value: 'skill5' }],
+            [{ colIndex: 0,  value: 'skill6' }],
+        ], 5, true, null, false);
+
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="orderMoveDown_skill4"]').click()
+        cy.validateTable(skillsTableSelector, [
+            [{ colIndex: 0,  value: 'skill5' }],
+            [{ colIndex: 0,  value: 'skill4' }],
+            [{ colIndex: 0,  value: 'skill6' }],
+        ], 5, true, null, false);
+
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="orderMoveDown_skill4"]').click()
+        cy.validateTable(skillsTableSelector, [
+            [{ colIndex: 0,  value: 'skill5' }],
+            [{ colIndex: 0,  value: 'skill6' }],
+            [{ colIndex: 0,  value: 'skill4' }],
+        ], 5, true, null, false);
+
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="orderMoveUp_skill6"]').click()
+        cy.validateTable(skillsTableSelector, [
+            [{ colIndex: 0,  value: 'skill6' }],
+            [{ colIndex: 0,  value: 'skill5' }],
+            [{ colIndex: 0,  value: 'skill4' }],
+        ], 5, true, null, false);
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="orderMoveDown_skill6"]').should('be.enabled');
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="orderMoveUp_skill6"]').should('be.disabled');
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="orderMoveDown_skill5"]').should('be.enabled');
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="orderMoveUp_skill5"]').should('be.enabled');
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="orderMoveDown_skill4"]').should('be.disabled');
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="orderMoveUp_skill4"]').should('be.enabled');
+
+        // refresh and re-validate
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
+        cy.get(`${skillsTableSelector} th`).contains('Display Order').click()
+        cy.validateTable(skillsTableSelector, [
+            [{ colIndex: 0,  value: 'skill6' }],
+            [{ colIndex: 0,  value: 'skill5' }],
+            [{ colIndex: 0,  value: 'skill4' }],
+        ], 5, true, null, false);
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="orderMoveDown_skill6"]').should('be.enabled');
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="orderMoveUp_skill6"]').should('be.disabled');
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="orderMoveDown_skill5"]').should('be.enabled');
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="orderMoveUp_skill5"]').should('be.enabled');
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="orderMoveDown_skill4"]').should('be.disabled');
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="orderMoveUp_skill4"]').should('be.enabled');
+
+    })
+
     it('additional columns', () => {
         cy.createSkillsGroup(1, 1, 1);
         cy.createSkillsGroup(1, 1, 2);

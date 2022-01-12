@@ -27,8 +27,8 @@ limitations under the License.
 
 <script>
   import dayjs from '@/common-components/DayJsCustomizer';
-  import MetricsService from '../MetricsService';
   import numberFormatter from '@//filters/NumberFilter';
+  import MetricsService from '../MetricsService';
   import MetricsOverlay from '../utils/MetricsOverlay';
   import MetricsCard from '../utils/MetricsCard';
   import TimeLengthSelector from './TimeLengthSelector';

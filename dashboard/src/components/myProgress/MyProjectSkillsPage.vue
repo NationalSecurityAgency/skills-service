@@ -26,8 +26,8 @@ limitations under the License.
 
 <script>
   import { SkillsDisplay } from '@skilltree/skills-client-vue';
-  import SkillsDisplayOptionsMixin from './SkillsDisplayOptionsMixin';
   import MyProgressService from '@/components/myProgress/MyProgressService';
+  import SkillsDisplayOptionsMixin from './SkillsDisplayOptionsMixin';
 
   export default {
     name: 'MyProjectSkillsPage',

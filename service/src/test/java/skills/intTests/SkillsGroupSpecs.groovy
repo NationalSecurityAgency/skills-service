@@ -273,6 +273,36 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         res2.enabled == true
     }
 
+    void "change display order of skills under a group" () {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(3)
+        def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 5)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skills.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+
+        when:
+        def groupSkills = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
+        skillsService.moveSkillUp(skills[2])
+        def groupSkillsAfterFirstMove = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
+        skillsService.moveSkillDown(skills[0])
+        def groupSkillsAfterSecondMove = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
+        skillsService.moveSkillDown(skills[0])
+        def groupSkillsAfterThirdMove = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
+
+        then:
+        groupSkills.collect { it.skillId } == ['skill1', 'skill2', 'skill3']
+        groupSkillsAfterFirstMove.collect { it.skillId } == ['skill1', 'skill3', 'skill2']
+        groupSkillsAfterSecondMove.collect { it.skillId } == ['skill3', 'skill1', 'skill2']
+        groupSkillsAfterThirdMove.collect { it.skillId } == ['skill3', 'skill2', 'skill1']
+    }
+
     void "can enable a SkillsGroup with only 1 required child skill, but must have at least 2 child skills" () {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
