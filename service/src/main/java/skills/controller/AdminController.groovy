@@ -35,7 +35,6 @@ import skills.controller.result.model.*
 import skills.services.*
 import skills.services.admin.*
 import skills.services.events.BulkSkillEventResult
-import skills.services.events.SkillEventResult
 import skills.services.inception.InceptionProjectService
 import skills.services.settings.SettingsService
 import skills.services.settings.listeners.ValidationRes
@@ -97,6 +96,9 @@ class AdminController {
 
     @Value('#{"${skills.config.ui.maxTimeWindowInMinutes}"}')
     int maxTimeWindowInMinutes
+
+    @Value('#{"${skills.config.maxUserIdsForBulkSkillReporting:1000}"}')
+    int maxUserIdsForBulkSkillReporting
 
     @Autowired
     ProjectErrorService errorService
@@ -1054,6 +1056,7 @@ class AdminController {
         List<String> userIds = bulkSkillEventRequest.userIds
         userIds.removeAll { StringUtils.isBlank(it) }
         SkillsValidator.isNotEmpty(userIds, 'userIds', projectId, skillId)
+        SkillsValidator.isTrue(userIds.size() <= maxUserIdsForBulkSkillReporting, "number of userIds cannot exceed ${maxUserIdsForBulkSkillReporting}", projectId, skillId)
 
         return skillEventService.bulkReportSkills(projectId, skillId, userIds, new Date(requestedTimestamp))
     }
