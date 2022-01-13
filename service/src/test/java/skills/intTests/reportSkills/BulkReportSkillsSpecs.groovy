@@ -48,10 +48,9 @@ class BulkReportSkillsSpecs extends DefaultIntSpec {
         def res = skillsService.bulkAddSkill([projectId: projId, skillId: skills[0].skillId], sampleUserIds, new Date())
 
         then:
-        res.body.userIdsApplied
-        res.body.userIdsApplied.size() == sampleUserIds.size()
-        sampleUserIds.each {assert res.body.userIdsApplied.find { userId -> StringUtils.contains(userId, it)} }
-        res.body.userIdsNotApplied.size() == 0
+        res.body.userIdsAppliedCount
+        res.body.userIdsAppliedCount == sampleUserIds.size()
+        res.body.userIdsNotAppliedCount == 0
         res.body.userIdsErrored.size() == 0
     }
 
@@ -72,10 +71,9 @@ class BulkReportSkillsSpecs extends DefaultIntSpec {
         def res = skillsService.bulkAddSkill([projectId: projId, skillId: skills[0].skillId], userIds, new Date())
 
         then:
-        res.body.userIdsApplied
-        res.body.userIdsApplied.size() == sampleUserIds.size()
-        sampleUserIds.each {assert res.body.userIdsApplied.find { userId -> StringUtils.contains(userId, it)} }
-        res.body.userIdsNotApplied.size() == 0
+        res.body.userIdsAppliedCount
+        res.body.userIdsAppliedCount == sampleUserIds.size()
+        res.body.userIdsNotAppliedCount == 0
         res.body.userIdsErrored.size() == 1
         res.body.userIdsErrored[0] == 'doesNotExist'
     }
@@ -96,17 +94,14 @@ class BulkReportSkillsSpecs extends DefaultIntSpec {
 
         then:
 
-        res1.body.userIdsApplied
-        res1.body.userIdsApplied.size() == 1
-        StringUtils.contains(res1.body.userIdsApplied[0], sampleUserIds[0])
-        res1.body.userIdsNotApplied.size() == 0
+        res1.body.userIdsAppliedCount
+        res1.body.userIdsAppliedCount == 1
+        res1.body.userIdsNotAppliedCount == 0
         res1.body.userIdsErrored.size() == 0
 
-        res.body.userIdsApplied
-        res.body.userIdsApplied.size() == sampleUserIds.size()-1
-        sampleUserIds.takeRight(sampleUserIds.size()-1).each {assert res.body.userIdsApplied.find { userId -> StringUtils.contains(userId, it)} }
-        res.body.userIdsNotApplied.size() == 1
-        StringUtils.contains(res.body.userIdsNotApplied[0], sampleUserIds[0])
+        res.body.userIdsAppliedCount
+        res.body.userIdsAppliedCount == sampleUserIds.size()-1
+        res.body.userIdsNotAppliedCount == 1
         res.body.userIdsErrored.size() == 0
     }
 

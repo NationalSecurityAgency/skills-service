@@ -27,7 +27,7 @@ class BulkSkillEventResult {
     String projectId
     String skillId
     String name
-    List<String> userIdsApplied = []
-    List<String> userIdsNotApplied = []
+    Integer userIdsAppliedCount = 0
+    Integer userIdsNotAppliedCount = 0
     List<String> userIdsErrored = []
 }
