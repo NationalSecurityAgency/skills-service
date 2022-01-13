@@ -15,6 +15,7 @@
  */
 package skills.intTests.clientDisplay
 
+import groovy.json.JsonOutput
 import groovy.time.TimeCategory
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
@@ -27,6 +28,7 @@ import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.SkillDefRepo
+import spock.lang.IgnoreRest
 
 class SingleSkillSummarySpec extends DefaultIntSpec {
 
@@ -612,6 +614,75 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         summary4.selfReporting.requestedOn == dates[1].time
         summary4.selfReporting.rejectedOn
 
+    }
+
+    def "return extra fields for the catalog imported skill"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+        skillsService.exportSkillToCatalog(proj1.projectId, proj1_skills[0].skillId)
+        skillsService.exportSkillToCatalog(proj1.projectId, proj1_skills[1].skillId)
+        skillsService.exportSkillToCatalog(proj1.projectId, proj1_skills[2].skillId)
+
+        def proj2 = SkillsFactory.createProject(2)
+        def proj2_subj = SkillsFactory.createSubject(2, 2)
+        List<Map> proj2_skills = SkillsFactory.createSkills(2, 2, 2)
+
+        skillsService.createProject(proj2)
+        skillsService.createSubject(proj2_subj)
+        skillsService.importSkillFromCatalog(proj2.projectId, proj2_subj.subjectId, proj1.projectId, proj1_skills[0].skillId)
+        skillsService.createSkills(proj2_skills)
+        skillsService.importSkillFromCatalog(proj2.projectId, proj2_subj.subjectId, proj1.projectId, proj1_skills[1].skillId)
+
+        def proj3 = SkillsFactory.createProject(3)
+        def proj3_subj = SkillsFactory.createSubject(3, 3)
+        List<Map> proj3_skills = SkillsFactory.createSkills(2, 3, 3)
+
+        skillsService.createProject(proj3)
+        skillsService.createSubject(proj3_subj)
+        skillsService.createSkills(proj3_skills)
+        skillsService.exportSkillToCatalog(proj3.projectId, proj3_skills[0].skillId)
+        skillsService.exportSkillToCatalog(proj3.projectId, proj3_skills[1].skillId)
+
+        // import from project 3
+        skillsService.importSkillFromCatalog(proj2.projectId, proj2_subj.subjectId, proj3.projectId, proj3_skills[0].skillId)
+
+        // import from project 2 again
+        skillsService.importSkillFromCatalog(proj2.projectId, proj2_subj.subjectId, proj1.projectId, proj1_skills[2].skillId)
+
+        // import from project 3
+        skillsService.importSkillFromCatalog(proj2.projectId, proj2_subj.subjectId, proj3.projectId, proj3_skills[1].skillId)
+
+        when:
+        def imported1 = skillsService.getSingleSkillSummary("user1", proj2.projectId, proj1_skills[0].skillId)
+        def imported2 = skillsService.getSingleSkillSummary("user1", proj2.projectId, proj1_skills[1].skillId)
+        def imported3 = skillsService.getSingleSkillSummary("user1", proj2.projectId, proj1_skills[2].skillId)
+        def imported4 = skillsService.getSingleSkillSummary("user1", proj2.projectId, proj3_skills[0].skillId)
+        def imported5 = skillsService.getSingleSkillSummary("user1", proj2.projectId, proj3_skills[1].skillId)
+        def local1 = skillsService.getSingleSkillSummary("user1", proj2.projectId, proj2_skills[0].skillId)
+        def local2 = skillsService.getSingleSkillSummary("user1", proj2.projectId, proj2_skills[0].skillId)
+
+        then:
+        imported1.copiedFromProjectId == "TestProject1"
+        imported1.copiedFromProjectName == "Test Project#1"
+        imported2.copiedFromProjectId == "TestProject1"
+        imported2.copiedFromProjectName == "Test Project#1"
+        imported3.copiedFromProjectId == "TestProject1"
+        imported3.copiedFromProjectName == "Test Project#1"
+        imported4.copiedFromProjectId == "TestProject3"
+        imported4.copiedFromProjectName == "Test Project#3"
+        imported5.copiedFromProjectId == "TestProject3"
+        imported5.copiedFromProjectName == "Test Project#3"
+
+        !local1.copiedFromProjectId
+        !local1.copiedFromProjectName
+
+        !local2.copiedFromProjectId
+        !local2.copiedFromProjectName
     }
 
     private String getSkillId(Integer skillRefId){

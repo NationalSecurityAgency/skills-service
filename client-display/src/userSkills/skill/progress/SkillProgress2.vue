@@ -33,25 +33,37 @@ limitations under the License.
     <div class="row">
       <div class="col text-md-left">
         <div class="h4" @click="skillClicked" :class="{ 'skill-name-url' : allowDrillDown }" data-cy="skillProgressTitle">
-          <div class="d-inline skills-theme-primary-color" :class="{ 'text-success' : skill.isSkillsGroupType,
+          <div class="d-inline-block skills-theme-primary-color" :class="{ 'text-success' : skill.isSkillsGroupType,
                                           'text-info' : skill.isSkillType && !skill.childSkill,
                                           'text-secondary' : skill.childSkill }">
-            <span v-if="skill.isSkillsGroupType"><i class="fas fa-layer-group mr-1"></i></span>
+            <div class="py-1 border-secondary d-inline-block">
+              <span v-if="skill.isSkillsGroupType"><i class="fas fa-layer-group mr-1 overflow-hidden"></i></span>
+              <div class="text-truncate d-inline-block">
+                <span class="mr-1">
+                  <i v-if="!skill.copiedFromProjectId && !skill.isSkillsGroupType" class="fas fa-graduation-cap text-secondary"></i>
+                  <i v-if="skill.copiedFromProjectId" class="fas fa-book text-secondary"></i>
+                </span>
+                <span v-if="!skill.skillHtml">{{ skill.skill }}</span>
+                <span v-if="skill.skillHtml" v-html="skill.skillHtml"></span>
+              </div>
+              <div v-if="skill.copiedFromProjectId" class="text-truncate d-inline-block ml-2"
+                   style="max-width: 15rem;"><span class="text-secondary font-italic"> in </span>
+                <span class="font-italic">{{ skill.copiedFromProjectName }}</span>
+              </div>
 
-            <span v-if="skill.skillHtml" v-html="skill.skillHtml"></span>
-            <span v-else>{{ skill.skill }}</span>
-            <div v-if="skill.isSkillsGroupType && skill.numSkillsRequired > 0 && skill.numSkillsRequired < skill.children.length"
-                 v-b-tooltip.hover
-                 title="A Group allows a Skill to be defined by the collection of other Skills within a Project. A Skill Group can require the completion of some or all of the included Skills before the group be achieved."
-                 class="ml-2 d-inline border rounded p-1 text-primary border-success"
-                 style="font-size: 0.9rem"
-                 data-cy="groupSkillsRequiredBadge">
-              <span class="">Requires </span> <b-badge variant="success">{{ skill.numSkillsRequired }}</b-badge> <span class="font-italic">out of</span> <b-badge variant="secondary">{{ skill.children.length }}</b-badge> skills
+              <div v-if="skill.isSkillsGroupType && skill.numSkillsRequired > 0 && skill.numSkillsRequired < skill.children.length"
+                   v-b-tooltip.hover
+                   title="A Group allows a Skill to be defined by the collection of other Skills within a Project. A Skill Group can require the completion of some or all of the included Skills before the group be achieved."
+                   class="ml-2 d-inline-block border rounded p-1 text-primary border-success overflow-hidden"
+                   style="font-size: 0.9rem"
+                   data-cy="groupSkillsRequiredBadge">
+                <span class="">Requires </span> <b-badge variant="success">{{ skill.numSkillsRequired }}</b-badge> <span class="font-italic">out of</span> <b-badge variant="secondary">{{ skill.children.length }}</b-badge> skills
+              </div>
+
+              <b-badge v-if="skill.selfReporting && skill.selfReporting.enabled"
+                  variant="success" style="font-size: 0.9rem" class="ml-2 overflow-hidden"><i class="fas fa-check-circle"></i> Self Reportable</b-badge>
             </div>
           </div>
-
-          <b-badge v-if="skill.selfReporting && skill.selfReporting.enabled"
-              variant="success" style="font-size: 0.8rem" class="ml-2"><i class="fas fa-check-circle"></i> Self Reportable</b-badge>
         </div>
       </div>
       <div class="col-auto text-right"
@@ -91,7 +103,7 @@ limitations under the License.
 
         <partial-points-alert v-if="!allowDrillDown" :skill="skill" :is-locked="locked"/>
         <skill-summary-cards v-if="!locked" :skill="skill" class="mt-3"></skill-summary-cards>
-
+        <catalog-import-status :skill="skill" />
         <p class="skills-text-description text-primary mt-3" style="font-size: 0.9rem;">
           <markdown-text v-if="skill.description && skill.description.description" :text="skill.description.description"/>
         </p>
@@ -138,11 +150,13 @@ limitations under the License.
   import StringHighlighter from '@/common-components/utilities/StringHighlighter';
   import SkillOverviewFooter from '../SkillOverviewFooter';
   import AnimatedNumber from './AnimatedNumber';
+  import CatalogImportStatus from '@/userSkills/skill/progress/CatalogImportStatus';
 
   export default {
     name: 'SkillProgress2',
     mixins: [NavigationErrorMixin],
     components: {
+      CatalogImportStatus,
       AnimatedNumber,
       SkillOverviewFooter,
       AchievementDate,

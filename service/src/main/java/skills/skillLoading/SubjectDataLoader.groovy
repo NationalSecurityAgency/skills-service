@@ -42,6 +42,7 @@ class SubjectDataLoader {
         SkillDef skillDef
         int points
         int todaysPoints
+        String copiedFromProjectName
 
         SkillDependencySummary dependencyInfo
     }
@@ -80,7 +81,8 @@ class SubjectDataLoader {
                         achieved: !dependents.find { it.getAchievementId() == null }
                 ) : null
             }
-            new SkillsAndPoints(skillDef: skillDefAndUserPoints.skillDef, points: points, todaysPoints: todayPoints, dependencyInfo: dependencyInfo)
+            new SkillsAndPoints(skillDef: skillDefAndUserPoints.skillDef, points: points, todaysPoints: todayPoints, dependencyInfo: dependencyInfo,
+                    copiedFromProjectName: skillDefAndUserPoints.copiedFromProjectName)
         }
         new SkillsData(childrenWithPoints: skillsAndPoints)
     }
@@ -97,6 +99,7 @@ class SubjectDataLoader {
     private static class SkillDefAndUserPoints {
         SkillDef skillDef
         UserPoints points
+        String copiedFromProjectName
     }
 
     @Profile
@@ -109,7 +112,7 @@ class SubjectDataLoader {
         List<SkillDefAndUserPoints> res = childrenWithUserPoints.collect {
             UserPoints userPoints = (it.length > 1 ? it[1] : null) as UserPoints
             return new SkillDefAndUserPoints(
-                    skillDef: it[0] as SkillDef, points: userPoints
+                    skillDef: it[0] as SkillDef, points: userPoints, copiedFromProjectName: it.length > 2 ? (String)it[2] : null
             )
         }
         return res?.sort { it.skillDef.displayOrder }
