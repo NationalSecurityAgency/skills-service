@@ -148,9 +148,9 @@ limitations under the License.
   import AchievementDate from '@/userSkills/skill/AchievementDate';
   import NavigationErrorMixin from '@/common/utilities/NavigationErrorMixin';
   import StringHighlighter from '@/common-components/utilities/StringHighlighter';
-  import SkillOverviewFooter from '../SkillOverviewFooter';
-  import AnimatedNumber from './AnimatedNumber';
   import CatalogImportStatus from '@/userSkills/skill/progress/CatalogImportStatus';
+  import SkillOverviewFooter from '@/userSkills/skill/SkillOverviewFooter';
+  import AnimatedNumber from '@/userSkills/skill/progress/AnimatedNumber';
 
   export default {
     name: 'SkillProgress2',
