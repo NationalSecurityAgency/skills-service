@@ -21,7 +21,6 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.TestUtils
-import spock.lang.IgnoreRest
 import spock.lang.Requires
 
 @Slf4j
@@ -113,7 +112,6 @@ class BulkReportSkillsSpecs extends DefaultIntSpec {
         res.body.userIdsErrored.size() == 0
     }
 
-//    @IgnoreRest
     def "attempt to bulk report skill events without specifying a timestamp"(){
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
