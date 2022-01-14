@@ -648,10 +648,12 @@ class AdminController {
     @RequestMapping(value = "/projects/{projectId}/skills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     List<SkillDefSkinnyRes> getAllSkillsForProject(
             @PathVariable("projectId") String projectId,
-            @RequestParam(required = false, value = "skillNameQuery") String skillNameQuery) {
+            @RequestParam(required = false, value = "skillNameQuery") String skillNameQuery,
+            @RequestParam(required = false, value = "excludeImportedSkills") Boolean excludeImportedSkills) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
 
-        List<SkillDefSkinnyRes> res = skillsAdminService.getSkinnySkills(projectId, skillNameQuery ?: '')
+        boolean excludeImportedSkillsBol = excludeImportedSkills
+        List<SkillDefSkinnyRes> res = skillsAdminService.getSkinnySkills(projectId, skillNameQuery ?: '', excludeImportedSkillsBol)
         return res
     }
 

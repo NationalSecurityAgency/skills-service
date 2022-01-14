@@ -522,8 +522,8 @@ class SkillsAdminService {
     }
 
     @Transactional(readOnly = true)
-    List<SkillDefSkinnyRes> getSkinnySkills(String projectId, String skillNameQuery) {
-        List<SkillDefRepo.SkillDefSkinny> data = loadSkinnySkills(projectId, skillNameQuery)
+    List<SkillDefSkinnyRes> getSkinnySkills(String projectId, String skillNameQuery, boolean excludeImportedSkills = false) {
+        List<SkillDefRepo.SkillDefSkinny> data = loadSkinnySkills(projectId, skillNameQuery, excludeImportedSkills)
         List<SkillDefPartialRes> res = data.collect { convertToSkillDefSkinnyRes(it) }?.sort({ it.skillId })
         return res
     }
@@ -707,8 +707,8 @@ class SkillsAdminService {
     }
 
     @Profile
-    private List<SkillDefRepo.SkillDefSkinny> loadSkinnySkills(String projectId, String skillNameQuery) {
-        skillDefRepo.findAllSkinnySelectByProjectIdAndType(projectId, SkillDef.ContainerType.Skill, skillNameQuery)
+    private List<SkillDefRepo.SkillDefSkinny> loadSkinnySkills(String projectId, String skillNameQuery, boolean excludeImportedSkills = false) {
+        skillDefRepo.findAllSkinnySelectByProjectIdAndType(projectId, SkillDef.ContainerType.Skill, skillNameQuery, (!excludeImportedSkills).toString())
     }
 
     @Profile

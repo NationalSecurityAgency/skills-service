@@ -80,9 +80,10 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
          where
             subjectDef = srd.parent and s = srd.child and 
             (srd.type = 'RuleSetDefinition' or srd.type = 'GroupSkillToSubject') and subjectDef.type = 'Subject' and 
-            s.projectId = ?1 and s.type = ?2 and 
+            s.projectId = ?1 and s.type = ?2 and
+            (s.copiedFromProjectId is null or 'true' = ?4) and
             upper(s.name) like UPPER(CONCAT('%', ?3, '%'))''')
-    List<SkillDefSkinny> findAllSkinnySelectByProjectIdAndType(String id, SkillDef.ContainerType type, String skillNameQuery)
+    List<SkillDefSkinny> findAllSkinnySelectByProjectIdAndType(String id, SkillDef.ContainerType type, String skillNameQuery, String includeCatalogImportedSkills)
 
     @Nullable
     @Query('''SELECT         

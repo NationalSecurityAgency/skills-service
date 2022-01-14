@@ -424,8 +424,12 @@ class SkillsService {
         wsHelper.adminGet(getSkillUrl(props.projectId, props.subjectId, props.skillId), props)
     }
 
-    def getSkillsForProject(String projectId, String optionalSkillNameQuery = "") {
+    def getSkillsForProject(String projectId, String optionalSkillNameQuery = "", boolean excludeImportedSkills = false) {
         String query = optionalSkillNameQuery ? "?skillNameQuery=${optionalSkillNameQuery}" : ''
+        if (excludeImportedSkills) {
+            String append = "excludeImportedSkills=true"
+            query = query.contains("?") ? "${query}&${append}" : "${query}?${append}"
+        }
         wsHelper.adminGet("/projects/${projectId}/skills${query}")
     }
 

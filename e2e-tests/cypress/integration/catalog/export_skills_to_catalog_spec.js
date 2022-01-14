@@ -760,6 +760,24 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.get('[data-cy="dupSkill-skill5"]').contains('Has Dependencies')
     });
 
+
+    it('do not allow to export skills with global dependencies', () => {
+        cy.createSkill(1, 1, 1);
+
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1);
+        cy.assignCrossProjectDep(2, 1, 1, 1);
+
+        cy.visit('/administrator/projects/proj2/subjects/subj1');
+        cy.get('[data-cy="selectAllSkillsBtn"]').click();
+
+        cy.get('[data-cy="skillActionsBtn"] button').click();
+        cy.get('[data-cy="skillExportToCatalogBtn"]').click();
+        cy.contains('Cannot export 1 skill(s)');
+        cy.get('[data-cy="dupSkill-skill1"]').contains('Has Dependencies')
+    });
+
     it('exported skill cannot depend on the completion of other skills', () => {
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);

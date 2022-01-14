@@ -390,7 +390,66 @@ describe('Import skills from Catalog Tests', () => {
 
         cy.get('[data-cy="importBtn"]').should('be.disabled');
         cy.get('[data-cy="numSelectedSkills"]').should('have.text', '0');
+    })
 
+    it('do not allow to cross-project share for the catalog imported skills', () => {
+        cy.createSkill(1, 1, 1);
+        cy.exportSkillToCatalog(1, 1, 1);
+
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 2);
+        cy.importSkillFromCatalog(2, 1, 1, 1)
+
+        cy.visit('/administrator/projects/proj2/cross Project');
+        cy.get('[data-cy="skillSelector"]').click();
+        cy.get('[data-cy="skillsSelectionItem-proj2-skill2"]')
+        cy.get('[data-cy="skillsSelectionItem-proj2-skill1"]').should('not.exist') // imported skill
+    })
+
+    it('do not allow to use imported skills in a Global Badge', () => {
+        cy.createSkill(1, 1, 1);
+        cy.exportSkillToCatalog(1, 1, 1);
+
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 2);
+        cy.importSkillFromCatalog(2, 1, 1, 1)
+
+        cy.logout();
+        const supervisorUser = 'supervisor@skills.org';
+        cy.register(supervisorUser, 'password');
+        cy.login('root@skills.org', 'password');
+        cy.request('PUT', `/root/users/${supervisorUser}/roles/ROLE_SUPERVISOR`);
+        cy.logout();
+        cy.login(supervisorUser, 'password');
+        cy.log('completed supervisor user login');
+
+        cy.createGlobalBadge(1)
+
+        cy.visit('/administrator/globalBadges/globalBadge1');
+
+        cy.get('[data-cy="skillsSelector"]').click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-skill1"]')
+        cy.get('[data-cy="skillsSelectionItem-proj2-skill2"]')
+        cy.get('[data-cy="skillsSelectionItem-proj2-skill1"]').should('not.exist') // imported skill
+    })
+
+    it('allow to add imported skills to a project badge', () => {
+        cy.createSkill(1, 1, 1);
+        cy.exportSkillToCatalog(1, 1, 1);
+
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 2);
+        cy.importSkillFromCatalog(2, 1, 1, 1)
+
+        cy.createBadge(2, 1)
+
+        cy.visit('/administrator/projects/proj2/badges/badge1');
+        cy.get('[data-cy="skillsSelector"]').click();
+        cy.get('[data-cy="skillsSelectionItem-proj2-skill2"]')
+        cy.get('[data-cy="skillsSelectionItem-proj2-skill1"]').click() // imported skill
     })
 
 });

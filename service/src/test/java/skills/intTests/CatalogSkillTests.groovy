@@ -871,11 +871,15 @@ class CatalogSkillTests extends DefaultIntSpec {
 
         def skills = skillsService.getSkillsForSubject(project2.projectId, p2subj1.subjectId)
         def skillsForProject = skillsService.getSkillsForProject(project2.projectId)
+        def skillsForProjectWithoutImported = skillsService.getSkillsForProject(project2.projectId, "", true)
 
         then:
         skills.findAll { it.readOnly == true && it.copiedFromProjectId == project1.projectId && it.copiedFromProjectName == project1.name }.size() == 3
         //copiedFromProjectId, copiedFromProjectName, and readOnly are not populated by this endpoint
         skillsForProject.findAll { it.readOnly && it.copiedFromProjectId && it.copiedFromProjectName }.size() == 0
+
+        skills.collect { it.skillId } == ["skill4subj2", "skill5subj2", "skill6subj2", "skill1", "skill2", "skill3"]
+        skillsForProjectWithoutImported.collect { it.skillId } == ["skill4subj2", "skill5subj2", "skill6subj2"]
     }
 
     def "get exported to catalog stats for project"() {

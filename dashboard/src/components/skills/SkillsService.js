@@ -62,6 +62,10 @@ export default {
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/skills${query}`)
       .then((response) => response.data);
   },
+  getProjectSkillsWithoutImportedSkills(projectId) {
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/skills?excludeImportedSkills=true`)
+      .then((response) => response.data);
+  },
   getGroupSkills(projectId, groupId) {
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/groups/${encodeURIComponent(groupId)}/skills`)
       .then((response) => response.data.map((item) => ({ ...item, groupId })));
