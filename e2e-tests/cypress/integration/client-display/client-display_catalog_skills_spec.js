@@ -134,7 +134,7 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
         cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 200 Points')
     });
 
-    it.only('catalog imported skill visual regression', () => {
+    it('catalog imported skill visual regression', () => {
         cy.createProject(2);
         cy.createSubject(2, 1);
         cy.createSkill(2, 1, 1);
