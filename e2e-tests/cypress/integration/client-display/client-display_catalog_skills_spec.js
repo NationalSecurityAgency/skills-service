@@ -134,6 +134,33 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
         cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 200 Points')
     });
 
+    it.only('catalog imported skill visual regression', () => {
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1);
+        cy.exportSkillToCatalog(2, 1, 1);
+
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.importSkillFromCatalog(1, 1, 2, 1)
+
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+
+        cy.matchSnapshotImageForElement('[data-cy="skillProgress_index-0"]', 'catalog imported skill visual regression - skill preview');
+
+        cy.cdClickSkill(0);
+        cy.matchSnapshotImageForElement('[data-cy="skillProgress"]', 'catalog imported skill visual regression - skill details');
+
+        cy.cdVisit('/?enableTheme=true')
+        cy.cdClickSubj(0);
+
+        cy.matchSnapshotImageForElement('[data-cy="skillProgress_index-0"]', 'catalog imported skill visual regression - skill preview themed');
+
+        cy.cdClickSkill(0);
+        cy.matchSnapshotImageForElement('[data-cy="skillProgress"]', 'catalog imported skill visual regression - skill details themed');
+
+    });
 });
 
 
