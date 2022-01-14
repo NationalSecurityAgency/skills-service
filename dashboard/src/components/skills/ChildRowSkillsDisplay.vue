@@ -19,7 +19,7 @@ limitations under the License.
     <div v-if="isImported" class="mt-3 alert alert-info" header="Skill Catalog">
       This skill was <b>imported</b> from the <b-badge class=""><i class="fas fa-book"></i> CATALOG</b-badge> and was initially
       defined in the <b class="text-primary">{{ skillInfo.copiedFromProjectName }}</b> project.
-      This skill is <b-badge>Read-Only</b-badge> and can only edited in the <b class="text-primary">{{ skillInfo.copiedFromProjectName }}</b> project
+      This skill is <b-badge>Read-Only</b-badge> and can only be edited in the <b class="text-primary">{{ skillInfo.copiedFromProjectName }}</b> project
     </div>
 
     <div class="row">
