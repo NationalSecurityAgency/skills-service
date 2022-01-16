@@ -446,7 +446,6 @@ class SkillsAdminService {
         if (skillCatalogService.isAvailableInCatalog(skillDefinition)) {
             List<SkillDef> related = skillCatalogService.getRelatedSkills(skillDefinition)
             log.info("catalog skill is being deleted, deleting [{}] copies imported into other projects", related?.size())
-            //TODO: move this to an async process
             related?.each {
                 SkillDef subj = skillRelDefRepo.findAllByChildAndType(it, SkillRelDef.RelationshipType.RuleSetDefinition)
                 deleteSkill(it.projectId, subj.skillId, it.skillId)

@@ -299,7 +299,6 @@ class SkillEventsService {
         //now do it for each of the skills if in catalog or from catalog
         if (isCatalogSkill || skillDefinition.copiedFrom != null) {
             def relatedSkills = skillCatalogService.getRelatedSkills(skillDefinition)
-            //TODO: make async
             relatedSkills?.each {
                 recordSkillOccurrence(it, new SkillEventResult())
             }

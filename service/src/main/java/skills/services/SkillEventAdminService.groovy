@@ -111,7 +111,6 @@ class SkillEventAdminService {
         SkillDefMin skillDefinitionMin = getSkillDef(projectId, skillId)
 
         if (performCatalogChecks) {
-            //TODO: make async
             final boolean isInCatalog = skillCatalogService.isAvailableInCatalog(skillDefinitionMin.projectId, skillDefinitionMin.skillId)
             if (skillDefinitionMin.getCopiedFrom() > 0 || isInCatalog) {
                 List<SkillDefMin> related = skillCatalogService.getRelatedSkills(skillDefinitionMin)

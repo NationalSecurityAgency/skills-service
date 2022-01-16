@@ -90,10 +90,6 @@ class SkillCatalogService {
 
     @Transactional(readOnly = true)
     TotalCountAwareResult<ProjectNameAwareSkillDefRes> getSkillsAvailableInCatalog(String projectId, String projectNameSearch, String subjectNameSearch, String skillNameSearch, PageRequest pageable) {
-        //TODO: projectId will need to be eventually used to govern accessibility to shared skills
-        //e.g., projects will more than likely want to share skills to the catalog with specific projects only
-        // because these methods return a projection, we need to alias the sort keys and prefix any that aren't
-        // projectName, subjectName, subjectId with "skill."
         pageable = convertForCatalogSkills(pageable)
         TotalCountAwareResult<ProjectNameAwareSkillDefRes> res = new TotalCountAwareResult<>()
 

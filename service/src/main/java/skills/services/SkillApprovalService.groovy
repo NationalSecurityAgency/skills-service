@@ -140,15 +140,6 @@ class SkillApprovalService {
                 SkillEventResult res = skillEventsService.reportSkill(projectId, skillDef.skillId, it.userId, false, it.requestedOn,
                         new SkillEventsService.SkillApprovalParams(disableChecks: true))
 
-                // enter  event for all imported copies if in catalog
-                /*if (skillCatalogService.isAvailableInCatalog(skillDef)) {
-                    //TODO: this may need to be moved to an async process eventually
-                    skillCatalogService.getRelatedSkills(skillDef)?.each { SkillDef copy ->
-                        skillEventsService.reportSkill(copy.projectId, copy.skillId, it.userId, false, it.requestedOn,
-                                new SkillEventsService.SkillApprovalParams(disableChecks: true))
-                    }
-                }*/
-
                 if (log.isDebugEnabled()) {
                     log.debug("Approval for ${it} yielded:\n${res}")
                 }
@@ -206,7 +197,7 @@ class SkillApprovalService {
         if (existing.selfReportingType == incomingType) {
             return;
         }
-        //TODO: this probably needs to take into account catalog skills as well
+
         if (existing.selfReportingType == SkillDef.SelfReportingType.Approval && !incomingType) {
             skillApprovalRepo.deleteByProjectIdAndSkillRefId(existing.projectId, existing.id)
         } else if (existing.selfReportingType == SkillDef.SelfReportingType.Approval && incomingType == SkillDef.SelfReportingType.HonorSystem) {
