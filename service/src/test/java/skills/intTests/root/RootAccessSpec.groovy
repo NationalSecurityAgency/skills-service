@@ -164,7 +164,7 @@ class RootAccessSpec extends DefaultIntSpec {
     @Requires({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def 'verify the server sends a failure when a root user tries to add root privileges to a user that does not exist - 2-way ssl'() {
         when:
-        rootSkillsService.addRootRole(RandomStringUtils.randomAlphanumeric(14))
+        rootSkillsService.addRootRole("doesNotExist")
 
         then:
         // because 2-way ssl uses a user-info-service, a non-existant user can result in different error messages than
