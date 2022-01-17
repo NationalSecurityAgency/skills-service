@@ -480,7 +480,6 @@ limitations under the License.
         return (isDisabled) ? this.disableDeleteButtonsInfo.tooltip : 'Delete Skill';
       },
       addSkillDisabled() {
-        console.log(`SkillsTable.addSkillDisabled [${this.$store.getters.config && this.numSkills >= this.$store.getters.config.maxSkillsPerSubject}]`);
         return this.$store.getters.config && this.numSkills >= this.$store.getters.config.maxSkillsPerSubject;
       },
       addSkillsDisabledMsg() {

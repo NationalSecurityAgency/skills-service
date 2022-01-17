@@ -142,7 +142,6 @@ limitations under the License.
     },
     mounted() {
       this.loadData();
-      console.log(`this.addSkillDisabled on mount: [${this.addSkillDisabled}]`);
     },
     computed: {
       ...mapGetters([
