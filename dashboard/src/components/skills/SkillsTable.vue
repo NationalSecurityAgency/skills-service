@@ -786,7 +786,12 @@ limitations under the License.
         this.actionsDisable = this.numSelectedSkills === 0;
       },
       changeSelectionForAll(selectedValue) {
-        this.skills = this.skills.map((sk) => ({ ...sk, selected: selectedValue }));
+        this.skills = this.skills.map((sk) => {
+          if (sk.isGroupType) {
+            return sk;
+          }
+          return ({ ...sk, selected: selectedValue });
+        });
         this.updateActionsDisableStatus();
       },
       handleExportRequest() {

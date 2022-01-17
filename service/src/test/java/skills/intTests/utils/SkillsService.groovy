@@ -357,10 +357,6 @@ class SkillsService {
         wsHelper.adminPatch(getSyncSkillPointsUrl(projectId, subjectId, groupId), props)
     }
 
-    def createSkillsGroup(Map props, String originalGroupId = null) {
-        wsHelper.adminPost(getBadgeUrl(props.projectId, originalGroupId ?: props.groupId), props)
-    }
-
     def createBadge(Map props, String originalBadgeId = null) {
         wsHelper.adminPost(getBadgeUrl(props.projectId, originalBadgeId ?: props.badgeId), props)
     }

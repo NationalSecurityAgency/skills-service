@@ -93,6 +93,62 @@ class CatalogSkillTests extends DefaultIntSpec {
         res.data[2].skillId == skill2.skillId
     }
 
+    def "bulk export skills to catalog - 1 skill id does not exist"() {
+        def project1 = createProject(1)
+        def project2 = createProject(2)
+
+        def subj1 = createSubject(1, 1)
+        def subj2 = createSubject(1, 2)
+        /* int projNumber = 1, int subjNumber = 1, int skillNumber = 1, int version = 0, int numPerformToCompletion = 1, pointIncrementInterval = 480, pointIncrement = 10, type="Skill" */
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 250)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 250)
+        def skill3 = createSkill(1, 2, 1, 0, 1, 0, 250)
+
+        skillsService.createProject(project1)
+        skillsService.createProject(project2)
+        skillsService.createSubject(subj1)
+        skillsService.createSubject(subj2)
+        skillsService.createSkill(skill)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(skill3)
+
+        when:
+        skillsService.bulkExportSkillsToCatalog(project1.projectId, [skill.skillId, "haaaaaa", skill2.skillId, skill3.skillId])
+
+        then:
+        SkillsClientException exception = thrown()
+        exception.message.contains("explanation:Skill [haaaaaa] doesn't exist")
+    }
+
+    def "bulk export skills to catalog - do not allow to export groups"() {
+        def project1 = createProject(1)
+        def project2 = createProject(2)
+
+        def subj1 = createSubject(1, 1)
+        def subj2 = createSubject(1, 2)
+        /* int projNumber = 1, int subjNumber = 1, int skillNumber = 1, int version = 0, int numPerformToCompletion = 1, pointIncrementInterval = 480, pointIncrement = 10, type="Skill" */
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 250)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 250)
+        def skill3 = createSkill(1, 2, 1, 0, 1, 0, 250)
+        def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 4)
+
+        skillsService.createProject(project1)
+        skillsService.createProject(project2)
+        skillsService.createSubject(subj1)
+        skillsService.createSubject(subj2)
+        skillsService.createSkill(skill)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(skill3)
+        skillsService.createSkill(skillsGroup)
+
+        when:
+        skillsService.bulkExportSkillsToCatalog(project1.projectId, [skill.skillId, skillsGroup.skillId, skill2.skillId, skill3.skillId])
+
+        then:
+        SkillsClientException exception = thrown()
+        exception.message.contains("explanation:Only type=[Skill] is supported but provided type=[SkillsGroup] for skillId=[skill4]")
+    }
+
     def "update skill that has been exported to catalog"() {
         //changes should be reflected across all copies
         def project1 = createProject(1)

@@ -180,8 +180,13 @@ class SkillCatalogService {
         }
 
         projDefAccessor.getProjDef(projectId)
-        SkillDefWithExtra skillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, SkillDef.ContainerType.Skill)
-
+        SkillDefWithExtra skillDef = skillDefWithExtraRepo.findByProjectIdAndSkillId(projectId, skillId)
+        if (!skillDef) {
+            throw new SkillException("Skill [${skillId}] doesn't exist.", projectId, skillId, ErrorCode.SkillNotFound)
+        }
+        if (skillDef.type != SkillDef.ContainerType.Skill) {
+            throw new SkillException("Only type=[${SkillDef.ContainerType.Skill}] is supported but provided type=[${skillDef.type}] for skillId=[${skillId}]", projectId, skillId, ErrorCode.BadParam)
+        }
         if (doesSkillNameAlreadyExistInCatalog(skillDef.name)) {
             throw new SkillException("Skill name [${skillDef.name}] already exists in the catalog. Duplicate skill names are not allowed", projectId, skillId, ErrorCode.SkillAlreadyInCatalog)
         }
@@ -220,7 +225,14 @@ class SkillCatalogService {
     @Transactional
     void exportSkillToCatalog(String projectId, List<String> skillIds) {
         skillIds?.each { String skillId ->
-            exportSkillToCatalog(projectId, skillId)
+            try {
+                exportSkillToCatalog(projectId, skillId)
+            } catch (Exception throwable) {
+                if (throwable instanceof SkillException) {
+                    throw  throwable
+                }
+                throw new SkillException("Failed to export batch, the failure was for the skillId [${skillId}]", throwable, projectId, skillId)
+            }
         }
     }
 
