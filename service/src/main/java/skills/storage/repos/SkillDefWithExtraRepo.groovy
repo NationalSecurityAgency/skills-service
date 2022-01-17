@@ -114,6 +114,6 @@ interface SkillDefWithExtraRepo extends PagingAndSortingRepository<SkillDefWithE
     Stream<SkillDefWithExtra> findAllMyBadgesForUser(String userId)
 
     @Nullable
-    @Query('''select s from SkillDef s where s.copiedFrom = ?1''')
+    @Query('''select s from SkillDefWithExtra s where s.copiedFrom = ?1''')
     List<SkillDefWithExtra> findSkillsCopiedFrom(int skillRefId)
 }
