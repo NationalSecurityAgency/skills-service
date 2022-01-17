@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillException
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.SkillRelDef
 import skills.storage.model.SkillRelDef.RelationshipType
 import skills.storage.accessors.SkillDefAccessor
@@ -49,8 +50,26 @@ class RuleSetDefGraphService {
     }
 
     @Transactional
+    SkillDef getParentSkill(Integer childId) {
+        List<SkillRelDef> parents = skillRelDefRepo.findAllByChildIdAndTypeIn(childId, [RelationshipType.RuleSetDefinition, RelationshipType.SkillsGroupRequirement])
+        // assume that I only have one parent
+        SkillDef parent = parents.first().parent
+        return parent
+    }
+
+    @Transactional
     List<SkillDef> getChildrenSkills(SkillDef skillDef, List<RelationshipType> relationshipTypes) {
         return skillRelDefRepo.getChildren(skillDef.projectId, skillDef.skillId, relationshipTypes)
+    }
+
+    @Transactional
+    List<SkillDef> getChildrenSkills(String projectId, String skillId, List<RelationshipType> relationshipTypes) {
+        return skillRelDefRepo.getChildren(projectId, skillId, relationshipTypes)
+    }
+
+    @Transactional(readOnly=true)
+    Long countChildrenSkills(String projectId, String skillId, List<RelationshipType> relationshipTypes) {
+        return skillRelDefRepo.countChildren(projectId, skillId, relationshipTypes)
     }
 
     @Transactional

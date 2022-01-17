@@ -15,10 +15,10 @@
  */
 package skills.intTests.clientDisplay
 
+
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
-import spock.lang.IgnoreRest
 
 class ClientDisplayBadgesSpec extends DefaultIntSpec {
 
@@ -678,5 +678,66 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         def summary = skillsService.getBadgeSummary(userId, proj1.projectId, badge1)
         then:
         summary.skills.collect { it.skill } == ["asome", "Dsome", "ksome", "lsome", "Zsome"]
+    }
+
+    def "return extra fields for the catalog imported skills"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+        skillsService.exportSkillToCatalog(proj1.projectId, proj1_skills[0].skillId)
+        skillsService.exportSkillToCatalog(proj1.projectId, proj1_skills[1].skillId)
+        skillsService.exportSkillToCatalog(proj1.projectId, proj1_skills[2].skillId)
+
+        def proj2 = SkillsFactory.createProject(2)
+        def proj2_subj = SkillsFactory.createSubject(2, 2)
+        List<Map> proj2_skills = SkillsFactory.createSkills(2, 2, 2)
+
+        skillsService.createProject(proj2)
+        skillsService.createSubject(proj2_subj)
+        skillsService.importSkillFromCatalog(proj2.projectId, proj2_subj.subjectId, proj1.projectId, proj1_skills[0].skillId)
+        skillsService.createSkills(proj2_skills)
+        skillsService.importSkillFromCatalog(proj2.projectId, proj2_subj.subjectId, proj1.projectId, proj1_skills[1].skillId)
+
+        def proj3 = SkillsFactory.createProject(3)
+        def proj3_subj = SkillsFactory.createSubject(3, 3)
+        List<Map> proj3_skills = SkillsFactory.createSkills(2, 3, 3)
+
+        skillsService.createProject(proj3)
+        skillsService.createSubject(proj3_subj)
+        skillsService.createSkills(proj3_skills)
+        skillsService.exportSkillToCatalog(proj3.projectId, proj3_skills[0].skillId)
+        skillsService.exportSkillToCatalog(proj3.projectId, proj3_skills[1].skillId)
+
+        // import from project 3
+        skillsService.importSkillFromCatalog(proj2.projectId, proj2_subj.subjectId, proj3.projectId, proj3_skills[0].skillId)
+
+        // import from project 2 again
+        skillsService.importSkillFromCatalog(proj2.projectId, proj2_subj.subjectId, proj1.projectId, proj1_skills[2].skillId)
+
+        // import from project 3
+        skillsService.importSkillFromCatalog(proj2.projectId, proj2_subj.subjectId, proj3.projectId, proj3_skills[1].skillId)
+
+        String badge1 = "badge1"
+        Map badge = [projectId: proj2.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
+        skillsService.addBadge(badge)
+        skillsService.assignSkillToBadge([projectId: proj2.projectId, badgeId: badge1, skillId: proj1_skills[0].skillId])
+        skillsService.assignSkillToBadge([projectId: proj2.projectId, badgeId: badge1, skillId: proj2_skills[0].skillId])
+        skillsService.assignSkillToBadge([projectId: proj2.projectId, badgeId: badge1, skillId: proj2_skills[1].skillId])
+        skillsService.assignSkillToBadge([projectId: proj2.projectId, badgeId: badge1, skillId: proj1_skills[1].skillId])
+        skillsService.assignSkillToBadge([projectId: proj2.projectId, badgeId: badge1, skillId: proj3_skills[1].skillId])
+
+        when:
+        def summary = skillsService.getBadgeSummary("user1", proj2.projectId, badge1)
+
+        then:
+        summary
+        // order is alphabetical
+        summary.skills.collect { it.skillId } == ['skill1', 'skill1subj2', 'skill2', 'skill2subj2', 'skill2subj3']
+        summary.skills.collect { it.copiedFromProjectId } == ["TestProject1", null, "TestProject1", null, "TestProject3"]
+        summary.skills.collect { it.copiedFromProjectName } == ["Test Project#1", null, "Test Project#1", null, "Test Project#3"]
     }
 }

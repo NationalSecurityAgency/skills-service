@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillException
+import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.BadgeRequest
 import skills.controller.result.model.GlobalBadgeLevelRes
@@ -34,6 +35,7 @@ import skills.services.admin.SkillsAdminService
 import skills.services.admin.SkillsDepsService
 import skills.services.inception.InceptionProjectService
 import skills.services.settings.SettingsService
+import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.*
 import skills.storage.model.SkillRelDef.RelationshipType
 import skills.storage.repos.*
@@ -101,6 +103,9 @@ class GlobalBadgesService {
     @Autowired
     UserAchievedLevelRepo achievedLevelRepo
 
+    @Autowired
+    SkillDefAccessor skillDefAccessor
+
     @Transactional()
     void saveBadge(String originalBadgeId, BadgeRequest badgeRequest) {
         badgeAdminService.saveBadge(null, originalBadgeId, badgeRequest, SkillDef.ContainerType.GlobalBadge)
@@ -117,6 +122,8 @@ class GlobalBadgesService {
 
     @Transactional()
     void addSkillToBadge(String badgeId, String projectId, String skillId) {
+        SkillDef skillDef = skillDefAccessor.getSkillDef(projectId, skillId)
+        SkillsValidator.isTrue(!skillDef.readOnly, "Imported Skills may not be added as Global Badge Dependencies", projectId, skillId)
         assignGraphRelationship(badgeId, SkillDef.ContainerType.GlobalBadge, projectId, skillId, RelationshipType.BadgeRequirement)
     }
 
@@ -252,7 +259,7 @@ class GlobalBadgesService {
 
     @Transactional(readOnly = true)
     AvailableSkillsResult getAvailableSkillsForGlobalBadge(String badgeId, String query) {
-        List<SkillDefPartial> allSkillDefs = skillDefRepo.findAllByTypeAndNameLike(SkillDef.ContainerType.Skill, query)
+        List<SkillDefPartial> allSkillDefs = skillDefRepo.findAllByTypeAndNameLikeNoImportedSkills(SkillDef.ContainerType.Skill, query)
         Set<String> existingBadgeSkillIds = getSkillsForBadge(badgeId).collect { "${it.projectId}${it.skillId}" }
         List<SkillDefPartial> suggestedSkillDefs = allSkillDefs.findAll { !("${it.projectId}${it.skillId}" in existingBadgeSkillIds) &&  it.projectId != InceptionProjectService.inceptionProjectId }
         AvailableSkillsResult res = new AvailableSkillsResult()

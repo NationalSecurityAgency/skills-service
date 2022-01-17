@@ -118,7 +118,7 @@ limitations under the License.
     methods: {
       loadAllSkills() {
         this.loading.allSkills = true;
-        SkillsService.getProjectSkills(this.projectId)
+        SkillsService.getProjectSkillsWithoutImportedSkills(this.projectId)
           .then((skills) => {
             this.allSkills = skills;
             this.loading.allSkills = false;

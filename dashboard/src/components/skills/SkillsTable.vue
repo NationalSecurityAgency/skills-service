@@ -18,8 +18,8 @@ limitations under the License.
     <loading-container v-bind:is-loading="isLoading">
       <div v-if="this.skillsOriginal && this.skillsOriginal.length">
         <div v-if="showSearch">
-          <div class="row px-3 pt-3">
-            <div class="col-12">
+          <div class="row px-3 pt-3 mb-0 pb-0">
+            <div class="col-12 mb-0 pb-0">
               <b-form-group label="Name Filter" label-class="text-muted">
                 <b-input v-model="table.filter.name" v-on:keyup.enter="applyFilters"
                          data-cy="skillsTable-skillFilter" aria-label="skill name filter"/>
@@ -30,14 +30,36 @@ limitations under the License.
           </div>
 
           <div class="row pl-3 mb-3">
-            <div class="col">
-              <b-button variant="outline-info" @click="applyFilters" data-cy="users-filterBtn"><i class="fa fa-filter"/> Filter</b-button>
-              <b-button variant="outline-info" @click="reset" class="ml-1" data-cy="users-resetBtn"><i class="fa fa-times"/> Reset</b-button>
+            <div class="col-auto">
+              <b-button-group class="pr-2 border-right mr-2 d-inline-block mt-2">
+                <b-button variant="outline-primary" @click="applyFilters" data-cy="users-filterBtn"><i class="fa fa-filter"/> Filter</b-button>
+                <b-button variant="outline-primary" @click="reset" data-cy="users-resetBtn"><i class="fa fa-times"/> Reset</b-button>
+              </b-button-group>
+
+              <b-button-group class="d-inline-block mt-2 text-right">
+                <b-button variant="outline-info" @click="changeSelectionForAll(true)"
+                          data-cy="selectAllSkillsBtn" class=""><i
+                  class="fa fa-check-square"/><span class="d-none d-sm-inline"> Select All </span>
+                </b-button>
+                <b-button variant="outline-info" @click="changeSelectionForAll(false)"
+                          data-cy="clearSelectedSkillsBtn" class=""><i class="far fa-square"></i>
+                  <span class="d-none d-sm-inline"> Clear</span>
+                </b-button>
+              </b-button-group>
+            </div>
+            <div class="col text-right">
+              <b-dropdown id="dropdown-right" right variant="outline-info" class="mr-3 mt-2" :disabled="actionsDisable"
+                          data-cy="skillActionsBtn">
+                <template #button-content>
+                  <i class="fas fa-tools"></i> Action <b-badge variant="info" data-cy="skillActionsNumSelected">{{ numSelectedSkills }}</b-badge>
+                </template>
+                <b-dropdown-item @click="handleExportRequest" data-cy="skillExportToCatalogBtn"><i class="far fa-arrow-alt-circle-up"></i> Export To Catalog</b-dropdown-item>
+              </b-dropdown>
             </div>
           </div>
         </div>
 
-      <div class="row mb-2">
+      <div class="row mb-2 ml-1">
         <div class="col"></div>
         <div class="col-auto text-right" data-cy="skillsTable-additionalColumns">
             <span class="font-italic mr-2">Additional Columns:</span>
@@ -58,15 +80,7 @@ limitations under the License.
 
         <template v-slot:cell(name)="data">
           <div class="row" :data-cy="`nameCell_${data.item.skillId}`">
-            <div class="col-auto pr-0">
-              <b-button size="sm" @click="data.toggleDetails" class="mr-2 py-0 px-1 btn btn-info"
-                        :aria-label="`Expand details for ${data.item.name}`"
-                        :data-cy="`expandDetailsBtn_${data.item.skillId}`">
-                <i v-if="data.detailsShowing" class="fa fa-minus-square" />
-                <i v-else class="fa fa-plus-square" />
-              </b-button>
-            </div>
-            <div class="col pl-0">
+            <div class="col">
               <div v-if="data.item.isGroupType">
                 <div class="text-success font-weight-bold">
                   <i class="fas fa-layer-group" aria-hidden="true"></i> <span class="text-uppercase">Group</span>
@@ -76,36 +90,81 @@ limitations under the License.
                 <div class="h5 text-primary"><span v-if="data.item.nameHtml" v-html="data.item.nameHtml"></span><span v-else>{{ data.item.name }}</span></div>
               </div>
               <div v-if="data.item.isSkillType">
-                <router-link :data-cy="`manageSkillLink_${data.item.skillId}`" tag="a" :to="{ name:'SkillOverview',
+                <i class="fas fa-book mr-1 text-success" v-if="data.item.isCatalogImportedSkills"/>
+                <b-form-checkbox v-if="!data.item.isCatalogImportedSkills"
+                  :id="`${data.item.projectId}-${data.item.skillId}`"
+                  v-model="data.item.selected"
+                  :name="`checkbox_${data.item.projectId}_${data.item.skillId}`"
+                  :value="true"
+                  :unchecked-value="false"
+                  :inline="true"
+                  v-on:input="updateActionsDisableStatus"
+                  :data-cy="`skillSelect-${data.item.skillId}`"
+                >
+                    <router-link :data-cy="`manageSkillLink_${data.item.skillId}`" tag="a" :to="{ name:'SkillOverview',
                                     params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
-                             :aria-label="`Manage skill ${data.item.name}  via link`">
-                  <div class="h5"><span v-if="data.item.nameHtml" v-html="data.item.nameHtml"></span><span v-else>{{ data.item.name }}</span></div>
-                </router-link>
+                               :aria-label="`Manage skill ${data.item.name}  via link`">
+                    <div class="h5 d-inline-block"><span v-if="data.item.nameHtml" v-html="data.item.nameHtml"></span><span v-else>{{ data.item.name }}</span></div>
+                  </router-link>
+                  <div v-if="data.item.sharedToCatalog" class="h6 ml-2 d-inline-block" :data-cy="`exportedBadge-${data.item.skillId}`">
+                    <b-badge variant="secondary" class="text-uppercase">
+                      <span><i class="fas fa-book"></i> Exported</span>
+                    </b-badge>
+                  </div>
+                </b-form-checkbox>
+                <div class="d-inline-block" v-if="data.item.isCatalogImportedSkills">
+                  <router-link :data-cy="`manageSkillLink_${data.item.skillId}`" tag="a" :to="{ name:'SkillOverview',
+                                      params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
+                               :aria-label="`Manage skill ${data.item.name}  via link`">
+                    <div class="h5 d-inline-block"><span v-if="data.item.nameHtml" v-html="data.item.nameHtml"></span><span v-else>{{ data.item.name }}</span></div>
+                  </router-link>
+                  <div class="h6 ml-2 d-inline-block">
+                    <b-badge variant="success" class="text-uppercase" :data-cy="`importedBadge-${data.item.skillId}`">
+                      <span><i class="fas fa-book"></i> Imported</span>
+                    </b-badge>
+                  </div>
+                </div>
               </div>
 
-              <div class="text-muted" style="font-size: 0.9rem;">ID: <span v-if="data.item.skillIdHtml" v-html="data.item.skillIdHtml"></span><span v-else>{{ data.item.skillId }}</span></div>
+              <div class="text-muted ml-4" style="font-size: 0.9rem;">ID: <span v-if="data.item.skillIdHtml" v-html="data.item.skillIdHtml"></span><span v-else>{{ data.item.skillId }}</span></div>
+
+              <div class="mt-1">
+                <b-button size="sm" @click="data.toggleDetails" variant="outline-info" class="mr-2 py-0 px-1"
+                          :aria-label="`Expand details for ${data.item.name}`"
+                          :data-cy="`expandDetailsBtn_${data.item.skillId}`">
+                  <i v-if="data.detailsShowing" class="fa fa-minus-square" />
+                  <i v-else class="fa fa-plus-square" />
+                  Skill Details
+                </b-button>
+              </div>
+
             </div>
-            <div class="col-auto ml-auto mr-0">
+            <div class="col-auto ml-auto mr-0 mt-2">
               <router-link v-if="data.item.isSkillType"
                            :data-cy="`manageSkillBtn_${data.item.skillId}`" :to="{ name:'SkillOverview',
                                   params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
                            :aria-label="`Manage skill ${data.item.name}`"
                            class="btn btn-outline-primary btn-sm">
-                <span class="d-none d-sm-inline">Manage </span> <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
+                <span v-if="data.item.isCatalogImportedSkills">
+                  <span class="d-none d-sm-inline">View </span> <i class="fas fa-eye" aria-hidden="true"/>
+                </span>
+                <span v-if="!data.item.isCatalogImportedSkills">
+                  <span class="d-none d-sm-inline">Manage </span> <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
+                </span>
               </router-link>
               <b-button-group size="sm" class="ml-1">
-                <b-button v-if="data.item.type === 'Skill'"
+                <b-button v-if="!data.item.isCatalogImportedSkills" @click="editSkill(data.item)"
+                          variant="outline-primary" :data-cy="`editSkillButton_${data.item.skillId}`"
+                          :aria-label="'edit Skill '+data.item.name" :ref="`edit_${data.item.skillId}`"
+                          title="Edit Skill" b-tooltip.hover="Edit Skill">
+                  <i class="fas fa-edit" aria-hidden="true"/>
+                </b-button>
+                <b-button v-if="data.item.type === 'Skill' && !data.item.isCatalogImportedSkills"
                           @click="copySkill(data.item)"
                           variant="outline-primary" :data-cy="`copySkillButton_${data.item.skillId}`"
                           :aria-label="'copy Skill '+data.item.name" :ref="'copy_'+data.item.skillId"
                           title="Copy Skill">
                   <i class="fas fa-copy" aria-hidden="true" />
-                </b-button>
-                <b-button @click="editSkill(data.item)"
-                          variant="outline-primary" :data-cy="`editSkillButton_${data.item.skillId}`"
-                          :aria-label="'edit Skill '+data.item.name" :ref="`edit_${data.item.skillId}`"
-                          title="Edit Skill" b-tooltip.hover="Edit Skill">
-                  <i class="fas fa-edit" aria-hidden="true"/>
                 </b-button>
                 <span :id="`deleteSkillButton-wrapper_${data.item.skillId}`" class="d-inline-block" tabindex="0">
                   <b-button :id="`deleteSkillButton_${data.item.skillId}`"
@@ -114,7 +173,7 @@ limitations under the License.
                             :aria-label="'delete Skill '+data.item.name"
                             title="Delete Skill"
                             size="sm"
-                            class="delete-btn-border-fix"
+                            :class="{ 'delete-btn-border-fix' : !data.item.isCatalogImportedSkills }"
                             :disabled="deleteButtonsDisabled">
                     <i class="text-warning fas fa-trash" aria-hidden="true"/>
                   </b-button>
@@ -137,6 +196,21 @@ limitations under the License.
             <i v-if="!timeWindowHasLength(data.item)" class="fas fa-question-circle text-muted" v-b-tooltip.hover="`${timeWindowDescription(data.item)}`"></i>
           </div>
           <div v-if="data.item.isGroupType" class="text-secondary">
+            N/A
+          </div>
+        </template>
+
+        <template v-slot:cell(catalogType)="data">
+          <div v-if="data.item.isCatalogImportedSkills">
+            <b-badge variant="success"><i class="fas fa-book"></i> IMPORTED</b-badge>
+            <p class="text-secondary">Imported from <span class="text-primary font-weight-bold">{{ data.item.copiedFromProjectName }}</span></p>
+          </div>
+          <div v-if="data.item.sharedToCatalog">
+            <b-badge variant="secondary"><i class="fas fa-book"></i> EXPORTED</b-badge>
+            <p class="text-secondary">Exported to Skill Catalog</p>
+          </div>
+
+          <div v-if="!data.item.isCatalogSkill" class="text-secondary">
             N/A
           </div>
         </template>
@@ -200,6 +274,22 @@ limitations under the License.
                 :project-id="projectId" :subject-id="subjectId" @skill-saved="skillCreatedOrUpdated" @hidden="handleFocus"/>
     <edit-skill-group v-if="editGroupInfo.show" v-model="editGroupInfo.show" :group="editGroupInfo.group" :is-edit="editGroupInfo.isEdit"
                       @group-saved="skillCreatedOrUpdated" @hidden="handleFocus"/>
+    <export-to-catalog v-if="exportToCatalogInfo.show" v-model="exportToCatalogInfo.show" :skills="exportToCatalogInfo.skills"
+                       @exported="handleSkillsExportedToCatalog" @hidden="changeSelectionForAll(false)"/>
+    <removal-validation v-if="deleteSkillInfo.show" v-model="deleteSkillInfo.show" @do-remove="doDeleteSkill">
+      <p>
+        This will remove <span class="text-primary font-weight-bold">{{ deleteSkillInfo.skill.name}}</span> <span class="text-secondary">(<span class="font-italic">ID:</span> {{ deleteSkillInfo.skill.skillId }})</span>.
+      </p>
+      <div v-if="deleteSkillInfo.skill.isSkillType">
+        Delete Action <b class="text-danger">CANNOT</b> be undone and permanently removes users' performed skills and any dependency associations.
+      </div>
+      <div v-if="deleteSkillInfo.skill.isGroupType">
+        Delete Action <b class="text-danger">CANNOT</b> be undone and will permanently remove all of the group's skills. All the associated users' performed skills and any dependency associations will also be removed.
+      </div>
+      <div class="alert alert-info mt-3" v-if="deleteSkillInfo.skill.sharedToCatalog">
+      <exported-skill-deletion-warning :skill-id="deleteSkillInfo.skill.skillId" />
+      </div>
+    </removal-validation>
   </div>
 </template>
 
@@ -207,6 +297,9 @@ limitations under the License.
   import { SkillsReporter } from '@skilltree/skills-client-vue';
   import dayjs from '@/common-components/DayJsCustomizer';
   import StringHighlighter from '@/common-components/utilities/StringHighlighter';
+  import ExportToCatalog from '@/components/skills/catalog/ExportToCatalog';
+  import RemovalValidation from '@/components/utils/modal/RemovalValidation';
+  import ExportedSkillDeletionWarning from '@/components/skills/catalog/ExportedSkillDeletionWarning';
   import EditSkill from './EditSkill';
   import NoContent2 from '../utils/NoContent2';
   import ChildRowSkillsDisplay from './ChildRowSkillsDisplay';
@@ -258,6 +351,9 @@ limitations under the License.
       },
     },
     components: {
+      ExportedSkillDeletionWarning,
+      RemovalValidation,
+      ExportToCatalog,
       EditSkillGroup,
       ChildRowSkillGroupDisplay,
       SkillsBTable,
@@ -281,8 +377,18 @@ limitations under the License.
           show: false,
           group: {},
         },
+        exportToCatalogInfo: {
+          show: false,
+          skills: [],
+        },
+        deleteSkillInfo: {
+          show: false,
+          skill: {},
+        },
         skillsOriginal: [],
         skills: [],
+        actionsDisable: true,
+        numSelectedSkills: 0,
         table: {
           extraColumns: {
             options: [{
@@ -291,6 +397,9 @@ limitations under the License.
             }, {
               value: 'selfReportingType',
               text: 'Self Report',
+            }, {
+              value: 'catalogType',
+              text: 'Catalog',
             }, {
               value: 'timeWindow',
               text: 'Time Window',
@@ -389,6 +498,11 @@ limitations under the License.
             label: 'Self Report Type',
             sortable: true,
           },
+          catalogType: {
+            key: 'catalogType',
+            label: 'Catalog',
+            sortable: true,
+          },
         };
 
         Object.keys(extraColLookup).forEach((key) => {
@@ -463,6 +577,12 @@ limitations under the License.
         this.table.options.busy = false;
       },
       addMetaToSkillObj(skill) {
+        const isCatalogImportedSkills = skill.copiedFromProjectId !== null && skill.copiedFromProjectId !== undefined && skill.copiedFromProjectId !== '';
+        let catalogType = isCatalogImportedSkills ? 'imported' : null;
+        if (skill.sharedToCatalog) {
+          catalogType = 'exported';
+        }
+        const isCatalogSkill = isCatalogImportedSkills || skill.sharedToCatalog;
         return {
           ...skill,
           isGroupType: skill.type === 'SkillsGroup',
@@ -470,6 +590,9 @@ limitations under the License.
           selfReportingType: (skill.type === 'Skill' && !skill.selfReportingType) ? 'Disabled' : skill.selfReportingType,
           created: new Date(skill.created),
           subjectId: this.subjectId,
+          isCatalogSkill,
+          isCatalogImportedSkills,
+          catalogType,
         };
       },
       groupChanged(row, updated) {
@@ -477,6 +600,16 @@ limitations under the License.
         const newGroup = this.addMetaToSkillObj(updated);
         // eslint-disable-next-line no-param-reassign
         row.item = Object.assign(this.skills[groupIndex], newGroup);
+      },
+      handleSkillsExportedToCatalog(skills) {
+        this.skills = this.skills.map((skill) => {
+          let replacement = skills.find((item) => item.skillId === skill.skillId);
+          if (replacement) {
+            replacement = this.addMetaToSkillObj(replacement);
+            return replacement;
+          }
+          return skill;
+        });
       },
       skillCreatedOrUpdated(skill) {
         if (this.skillsOriginal.length === 0) {
@@ -538,25 +671,19 @@ limitations under the License.
           SkillsReporter.reportSkill('CreateSkillVersion');
         }
       },
-
       deleteSkill(row) {
         SkillsService.checkIfSkillBelongsToGlobalBadge(row.projectId, row.skillId)
           .then((belongsToGlobalBadge) => {
             if (belongsToGlobalBadge) {
               this.msgOk(`Cannot delete Skill Id: [${row.skillId}].  This skill belongs to one or more global badges. Please contact a Supervisor to remove this dependency.`, 'Unable to delete');
             } else {
-              const msg = row.isGroupType ? 'Delete Action CANNOT be undone and will permanently remove all of the group\'s skills. All the associated users\' performed skills and any dependency associations will also be removed.'
-                : 'Delete Action CANNOT be undone and permanently removes users\' performed skills and any dependency associations.';
-              this.msgConfirm(msg, `DELETE [${row.skillId}]?`)
-                .then((res) => {
-                  if (res) {
-                    this.doDeleteSkill(row);
-                  }
-                });
+              this.deleteSkillInfo.skill = row;
+              this.deleteSkillInfo.show = true;
             }
           });
       },
-      doDeleteSkill(skill) {
+      doDeleteSkill() {
+        const { skill } = this.deleteSkillInfo;
         if (this.skillsOriginal.length === 1) {
           this.isLoading = true;
         } else {
@@ -653,6 +780,18 @@ limitations under the License.
       },
       getSelfReportingTypePretty(selfReportingType) {
         return (selfReportingType === 'HonorSystem') ? 'Honor System' : selfReportingType;
+      },
+      updateActionsDisableStatus() {
+        this.numSelectedSkills = this.skills.reduce((total, item) => (item.selected ? total + 1 : total), 0);
+        this.actionsDisable = this.numSelectedSkills === 0;
+      },
+      changeSelectionForAll(selectedValue) {
+        this.skills = this.skills.map((sk) => ({ ...sk, selected: selectedValue }));
+        this.updateActionsDisableStatus();
+      },
+      handleExportRequest() {
+        this.exportToCatalogInfo.skills = this.skills.filter((item) => item.selected);
+        this.exportToCatalogInfo.show = true;
       },
     },
   };

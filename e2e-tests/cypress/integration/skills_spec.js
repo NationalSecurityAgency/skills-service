@@ -65,10 +65,10 @@ describe('Skills Tests', () => {
     cy.visit('/administrator/projects/proj1/subjects/subj1');
     cy.wait('@loadSubject');
 
-    cy.clickButton('Skill');
-    cy.get('[data-cy=closeSkillButton]').click();
-    cy.get('[data-cy=closeSkillButton]').should('not.exist');
-  });
+      cy.get('[data-cy="newSkillButton"]').click();
+      cy.get('[data-cy=closeSkillButton]').click();
+      cy.get('[data-cy=closeSkillButton]').should('not.exist');
+    });
 
   it('validation', () => {
     cy.intercept('POST', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('postNewSkill');
@@ -91,22 +91,22 @@ describe('Skills Tests', () => {
     cy.visit('/administrator/projects/proj1/subjects/subj1');
     cy.wait('@loadSubject');
 
-    cy.clickButton('Skill');
-    cy.get('[data-cy=skillName]').type('Skill123');
-    cy.get('[data-cy=skillDescription]').type('loremipsum');
-    cy.get('[data-cy=saveSkillButton]').should('be.enabled');
-    cy.get('[data-cy=skillName]').type('{selectall}Sk');
-    cy.get('[data-cy=skillNameError]').contains('Skill Name cannot be less than 3 characters.').should('be.visible');
-    cy.get('[data-cy=saveSkillButton]').should('be.disabled');
-    const invalidName = Array(101).fill('a').join('');
-    cy.get('[data-cy=skillName]').fill(invalidName);
-    cy.get('[data-cy=skillNameError]').contains('Skill Name cannot exceed 100 characters.').should('be.visible');
-    cy.get('[data-cy=saveSkillButton]').should('be.disabled');
-    cy.get('[data-cy=skillName]').type('{selectall}Duplicate');
-    cy.get('[data-cy=skillNameError]').contains('The value for the Skill Name is already taken.').should('be.visible');
-    cy.get('[data-cy=saveSkillButton]').should('be.disabled');
-    cy.get('[data-cy=skillName]').type('{selectall}Skill123');
-    cy.get('[data-cy=skillNameError]').should('not.be.visible');
+      cy.get('[data-cy="newSkillButton"]').click();
+      cy.get('[data-cy=skillName]').type('Skill123');
+      cy.get('[data-cy=skillDescription]').type('loremipsum');
+      cy.get('[data-cy=saveSkillButton]').should('be.enabled');
+      cy.get('[data-cy=skillName]').type('{selectall}Sk');
+      cy.get('[data-cy=skillNameError]').contains('Skill Name cannot be less than 3 characters.').should('be.visible');
+      cy.get('[data-cy=saveSkillButton]').should('be.disabled');
+      const invalidName = Array(101).fill('a').join('');
+      cy.get('[data-cy=skillName]').fill(invalidName);
+      cy.get('[data-cy=skillNameError]').contains('Skill Name cannot exceed 100 characters.').should('be.visible');
+      cy.get('[data-cy=saveSkillButton]').should('be.disabled');
+      cy.get('[data-cy=skillName]').type('{selectall}Duplicate');
+      cy.get('[data-cy=skillNameError]').contains('The value for the Skill Name is already taken.').should('be.visible');
+      cy.get('[data-cy=saveSkillButton]').should('be.disabled');
+      cy.get('[data-cy=skillName]').type('{selectall}Skill123');
+      cy.get('[data-cy=skillNameError]').should('not.be.visible');
 
     cy.get('[data-cy=skillVersion]').type('{selectall}-5');
     cy.get('[data-cy=skillVersionError]').contains('Version may only contain numeric characters.').should('be.visible');
@@ -227,9 +227,9 @@ describe('Skills Tests', () => {
 
     cy.wait('@loadSubject');
 
-    cy.clickButton('Skill')
-    cy.get(selectorOccurrencesToCompletion).should('have.value', '5')
-    cy.get('#skillName').type('Skill 1')
+        cy.get('[data-cy="newSkillButton"]').click();
+        cy.get(selectorOccurrencesToCompletion).should('have.value', '5')
+        cy.get('#skillName').type('Skill 1')
 
     cy.clickSave()
     cy.wait('@postNewSkill');
@@ -264,9 +264,9 @@ describe('Skills Tests', () => {
       url: '/admin/projects/proj1/subjects/subj1'
     }).as('loadSubject');
 
-    cy.visit('/administrator/projects/proj1/subjects/subj1');
-    cy.wait('@loadSubject');
-    cy.clickButton('Skill');
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.wait('@loadSubject');
+        cy.get('[data-cy="newSkillButton"]').click();
 
     cy.get('#skillName').type(providedName);
 
@@ -291,9 +291,9 @@ describe('Skills Tests', () => {
       url: '/admin/projects/proj1/subjects/subj1'
     }).as('loadSubject');
 
-    cy.visit('/administrator/projects/proj1/subjects/subj1');
-    cy.wait('@loadSubject');
-    cy.clickButton('Skill');
+      cy.visit('/administrator/projects/proj1/subjects/subj1');
+      cy.wait('@loadSubject');
+      cy.get('[data-cy="newSkillButton"]').click();
 
     cy.get('#skillName').type(providedName);
 
@@ -547,9 +547,9 @@ describe('Skills Tests', () => {
       url: '/admin/projects/proj1/subjects/subj1'
     }).as('loadSubject');
 
-    cy.visit('/administrator/projects/proj1/subjects/subj1');
-    cy.wait('@loadSubject');
-    cy.clickButton('Skill');
+      cy.visit('/administrator/projects/proj1/subjects/subj1');
+      cy.wait('@loadSubject');
+      cy.get('[data-cy="newSkillButton"]').click();
 
     cy.get('#skillName').type(providedName);
 
@@ -713,9 +713,9 @@ describe('Skills Tests', () => {
   it('description is validated against custom validators', () => {
     cy.intercept('GET', '/admin/projects/proj1/subjects/subj1').as('loadSubject');
 
-    cy.visit('/administrator/projects/proj1/subjects/subj1');
-    cy.wait('@loadSubject');
-    cy.clickButton('Skill')
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.wait('@loadSubject');
+        cy.get('[data-cy="newSkillButton"]').click();
 
     cy.get('[data-cy="skillName"]').type('Great Name');
     cy.get('[data-cy="saveSkillButton"]').should('be.enabled');
@@ -732,9 +732,9 @@ describe('Skills Tests', () => {
     cy.intercept('GET', '/admin/projects/proj1/subjects/subj1')
       .as('loadSubject');
 
-    cy.visit('/administrator/projects/proj1/subjects/subj1');
-    cy.wait('@loadSubject');
-    cy.clickButton('Skill')
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.wait('@loadSubject');
+        cy.get('[data-cy="newSkillButton"]').click();
 
     cy.get('[data-cy="skillName"]').type('Great Name 1 2 33');
     cy.get('[data-cy="idInputEnableControl"]').contains('Enable').click();

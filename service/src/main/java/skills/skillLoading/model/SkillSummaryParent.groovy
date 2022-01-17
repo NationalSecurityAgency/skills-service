@@ -32,4 +32,7 @@ class SkillSummaryParent {
     boolean crossProject
 
     SkillDef.ContainerType type
+
+    String copiedFromProjectId
+    String copiedFromProjectName
 }

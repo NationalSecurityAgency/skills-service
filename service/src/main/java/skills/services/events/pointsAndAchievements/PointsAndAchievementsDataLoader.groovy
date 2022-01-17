@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component
 import skills.services.admin.SkillsGroupAdminService
 import skills.services.events.SkillDate
 import skills.storage.model.LevelDefInterface
+import skills.storage.model.SkillDefMin
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 import skills.storage.repos.SkillEventsSupportRepo
@@ -42,7 +43,7 @@ class PointsAndAchievementsDataLoader {
     SkillsGroupAdminService skillsGroupAdminService
 
     @Profile
-    LoadedData loadData(String projectId, String userId, SkillDate incomingSkillDate, SkillEventsSupportRepo.SkillDefMin skillDef){
+    LoadedData loadData(String projectId, String userId, SkillDate incomingSkillDate, SkillDefMin skillDef){
         List<SkillEventsSupportRepo.TinySkillDef> parentDefs = loadParents(skillDef)
 
         // handle skills group with less than all skills required
@@ -104,7 +105,7 @@ class PointsAndAchievementsDataLoader {
     }
 
     @Profile
-    private List<SkillEventsSupportRepo.TinySkillDef> loadParents(SkillEventsSupportRepo.SkillDefMin skillDef) {
+    private List<SkillEventsSupportRepo.TinySkillDef> loadParents(SkillDefMin skillDef) {
         loadParents(skillDef.id)
     }
 

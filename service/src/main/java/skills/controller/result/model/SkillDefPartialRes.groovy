@@ -43,4 +43,8 @@ class SkillDefPartialRes extends SkillDefSkinnyRes{
     boolean enabled
     String groupId
     String groupName
+    Boolean readOnly
+    String copiedFromProjectId
+    String copiedFromProjectName
+    Boolean sharedToCatalog
 }

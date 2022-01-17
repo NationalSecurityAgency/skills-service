@@ -257,9 +257,10 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
      *  the reason for duplication is that when null is provided for the 'day' parameter JPA doesn't properly generate SQL statement, I am guessing the bug is because
      *      *  the parameter is withing left join clause and they didn't handle that properly
      */
-    @Query('''select sdChild, userPoints
+    @Query('''select sdChild, userPoints, pd.name
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
     left join UserPoints userPoints on sdChild.projectId = userPoints.projectId and sdChild.skillId = userPoints.skillId and userPoints.day is null and userPoints.userId=?1
+    left join ProjDef pd on sdChild.copiedFromProjectId = pd.projectId
       where srd.parent=sdParent.id and  srd.child=sdChild.id and
       sdParent.projectId=?2 and sdParent.skillId=?3 and srd.type in ?4 and sdChild.version<=?5''')
     List<Object []> findChildrenAndTheirUserPoints(String userId, String projectId, String skillId, List<SkillRelDef.RelationshipType> types, Integer version)

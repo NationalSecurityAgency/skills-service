@@ -50,4 +50,18 @@ export default {
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}/globalBadge/exists`)
       .then((response) => response.data);
   },
+  shareSubject(projectId, subjectId, shareToProjectIds) {
+    let data = {};
+    if (shareToProjectIds) {
+      data = { shareToProjectIds };
+    }
+    return axios.post(`/admin/projects/${projectId}/subjects/${subjectId}/share`, data).then((res) => res.data);
+  },
+  unshareSubject(projectId, subjectId, unshareFromProjectIds) {
+    let data = {};
+    if (unshareFromProjectIds) {
+      data = { unshareFromProjectIds };
+    }
+    return axios.post(`/admin/projects/${projectId}/subjects/${subjectId}/unshare`, data).then((res) => res.data);
+  },
 };

@@ -16,6 +16,12 @@ limitations under the License.
 <template>
   <loading-container class="child-row" v-bind:is-loading="loading.skills" :data-cy="`childRowDisplay_${skillInfo.skillId}`">
 
+    <div v-if="isImported" class="mt-3 alert alert-info" header="Skill Catalog">
+      This skill was <b>imported</b> from the <b-badge class=""><i class="fas fa-book"></i> CATALOG</b-badge> and was initially
+      defined in the <b class="text-primary">{{ skillInfo.copiedFromProjectName }}</b> project.
+      This skill is <b-badge>Read-Only</b-badge> and can only be edited in the <b class="text-primary">{{ skillInfo.copiedFromProjectName }}</b> project
+    </div>
+
     <div class="row">
       <div class="col-12 col-md-6 mt-2">
         <media-info-card :title="`${totalPoints} Points`" icon-class="fas fa-calculator text-success"
@@ -75,6 +81,15 @@ limitations under the License.
         </span>
       </span>
     </div>
+
+    <b-card v-if="skillInfo.sharedToCatalog" class="mt-3" header="Skill Catalog" data-cy="exportedToCatalogCard">
+      This skill was exported to the <b-badge class=""><i class="fas fa-book"></i> CATALOG</b-badge>.
+      Please visit
+      <b-button data-cy="navigateToSkillCatalog" variant="outline-info" size="sm"
+                   :to="{ name:'SkillsCatalog', params: { projectId: this.projectId} }"
+                   aria-label="View Skill Catalog">Skill Catalog</b-button> page to manage exported skills.
+    </b-card>
+
   </loading-container>
 </template>
 
@@ -170,6 +185,9 @@ limitations under the License.
           return `${rootHelpUrlSetting}${this.skillInfo.helpUrl}`;
         }
         return this.skillInfo.helpUrl;
+      },
+      isImported() {
+        return this.skillInfo && this.skillInfo.copiedFromProjectId && this.skillInfo.copiedFromProjectId.length > 0;
       },
     },
     methods: {

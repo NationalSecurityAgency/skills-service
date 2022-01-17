@@ -424,7 +424,7 @@ class SkillsLoader {
         }
 
         SettingsResult helpUrlRootSetting = settingsService.getProjectSetting(crossProjectId ?: projectId, PROP_HELP_URL_ROOT)
-
+        String copiedFromProjectName = skillDef.copiedFromProjectId ? projDefRepo.getProjectName(skillDef.copiedFromProjectId).getProjectName() : null
         return new SkillSummary(
                 projectId: skillDef.projectId, projectName: projDef.name,
                 skillId: skillDef.skillId, skill: skillDef.name,
@@ -441,6 +441,8 @@ class SkillsLoader {
                 achievedOn: achievedOn,
                 selfReporting: loadSelfReporting(userId, skillDef),
                 type: skillDef.type,
+                copiedFromProjectId: skillDef.copiedFromProjectId,
+                copiedFromProjectName: copiedFromProjectName,
         )
     }
 
@@ -874,6 +876,8 @@ class SkillsLoader {
                         subjectName: subjectName,
                         subjectId: subjectId,
                         type: skillDef.type,
+                        copiedFromProjectId: skillDef.copiedFromProjectId,
+                        copiedFromProjectName: skillDefAndUserPoints.copiedFromProjectName,
                 )
             }
         }
@@ -946,4 +950,5 @@ class SkillsLoader {
         }
         return skillDef
     }
+
 }

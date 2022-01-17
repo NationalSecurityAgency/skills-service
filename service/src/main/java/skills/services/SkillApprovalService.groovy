@@ -27,6 +27,7 @@ import skills.controller.result.model.SkillApprovalResult
 import skills.controller.result.model.TableResult
 import skills.notify.EmailNotifier
 import skills.notify.Notifier
+import skills.services.admin.SkillCatalogService
 import skills.services.events.SkillEventResult
 import skills.services.events.SkillEventsService
 import skills.services.settings.SettingsService
@@ -68,6 +69,9 @@ class SkillApprovalService {
 
     @Autowired
     FeatureService featureService
+
+    @Autowired
+    SkillCatalogService skillCatalogService
 
     TableResult getApprovals(String projectId, PageRequest pageRequest) {
         return buildApprovalsResult(projectId, pageRequest, {
@@ -130,20 +134,23 @@ class SkillApprovalService {
             validateProjId(it, projectId)
 
             Optional<SkillDef> optional = skillDefRepo.findById(it.skillRefId)
-            SkillDef skillDef = optional.get()
-            SkillEventResult res = skillEventsService.reportSkill(projectId, skillDef.skillId, it.userId, false, it.requestedOn,
-                    new SkillEventsService.SkillApprovalParams(disableChecks: true))
+            if (optional.isPresent()) {
+                SkillDef skillDef = optional.get()
+                // enter SkillEventResult for all copies
+                SkillEventResult res = skillEventsService.reportSkill(projectId, skillDef.skillId, it.userId, false, it.requestedOn,
+                        new SkillEventsService.SkillApprovalParams(disableChecks: true))
 
-            if (log.isDebugEnabled()){
-                log.debug("Approval for ${it} yielded:\n${res}")
+                if (log.isDebugEnabled()) {
+                    log.debug("Approval for ${it} yielded:\n${res}")
+                }
+
+                it.approverActionTakenOn = new Date()
+                it.approverUserId = userInfoService.currentUser.username
+                skillApprovalRepo.save(it)
+
+                // send email
+                sentNotifications(it, skillDef, true)
             }
-
-            it.approverActionTakenOn = new Date()
-            it.approverUserId = userInfoService.currentUser.username
-            skillApprovalRepo.save(it)
-
-            // send email
-            sentNotifications(it, skillDef, true)
         }
     }
 

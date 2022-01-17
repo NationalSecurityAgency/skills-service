@@ -1460,4 +1460,114 @@
                                  referencedColumnNames="id"
                                  referencedTableName="users"/>
     </changeSet>
+
+    <changeSet id="20" author="skills team" context="migration20">
+        <addColumn tableName="skill_definition">
+            <column name="read_only" type="varchar(255)" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="skill_definition">
+            <column name="copied_from_skill_ref" type="int">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="skill_definition">
+            <column name="copied_from_project_id" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <addForeignKeyConstraint baseColumnNames="copied_from_skill_ref"
+                                 baseTableName="skill_definition"
+                                 constraintName="fk_original_skill_skill_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="skill_definition"/>
+        <addForeignKeyConstraint baseColumnNames="copied_from_project_id"
+                                 baseTableName="skill_definition"
+                                 constraintName="fk_skill_definition_project_definition_copy_from_project_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="project_id"
+                                 referencedTableName="project_definition"/>
+        <createIndex indexName="index_skill_definition_copied_from_project_id"
+                     tableName="skill_definition">
+            <column name="copied_from_project_id" type="varchar(255)"/>
+        </createIndex>
+
+        <createTable tableName="exported_skills">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="skill_ref_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exported_from_project_id" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="skill_updated_queue">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="skill_ref_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_catalog_skill" type="varchar(255)" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="skill_ref_id"
+                                 baseTableName="exported_skills"
+                                 constraintName="fk_exported_skills_skill_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="skill_definition"/>
+
+        <addForeignKeyConstraint baseColumnNames="exported_from_project_id"
+                                 baseTableName="exported_skills"
+                                 constraintName="fk_exported_skills_project_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="project_id"
+                                 referencedTableName="project_definition"/>
+
+        <addForeignKeyConstraint baseColumnNames="skill_ref_id"
+                                 baseTableName="skill_updated_queue"
+                                 constraintName="fk_skill_updated_queue_skill_ref_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="skill_definition"/>
+
+        <createIndex indexName="index_exported_skills_exported_from_project_id"
+                     tableName="exported_skills">
+            <column name="exported_from_project_id" type="varchar(255)"/>
+        </createIndex>
+
+        <createIndex indexName="index_exported_skills_skill_ref_id" tableName="exported_skills">
+            <column name="skill_ref_id" type="int"/>
+        </createIndex>
+
+        <insert tableName="skills_db_locks">
+            <column name="lock" type="varchar(255)" value="catalog_skill_update_lock"/>
+        </insert>
+
+    </changeSet>
 </databaseChangeLog>

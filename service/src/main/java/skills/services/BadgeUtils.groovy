@@ -16,13 +16,14 @@
 package skills.services
 
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillDefMin
 import skills.storage.model.SkillDefParent
 import skills.storage.model.SkillDefWithExtra
 import skills.storage.repos.SkillEventsSupportRepo
 
 class BadgeUtils {
 
-    public static boolean withinActiveTimeframe(SkillEventsSupportRepo.SkillDefMin skillDef) {
+    public static boolean withinActiveTimeframe(SkillDefMin skillDef) {
         boolean withinActiveTimeframe = true;
         if (skillDef.startDate && skillDef.endDate) {
             Date now = new Date()

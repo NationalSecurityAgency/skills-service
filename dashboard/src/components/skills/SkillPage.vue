@@ -26,13 +26,19 @@ limitations under the License.
             style="font-size: 0.8rem" variant="warning" v-if="!skill.enabled">disabled</b-badge>
         </div>
       </div>
-      <div slot="subSubTitle">
-        <b-button v-if="skill" @click="displayEdit"
-                  size="sm"
-                  variant="outline-primary" :data-cy="`editSkillButton_${this.$route.params.skillId}`"
-                  :aria-label="'edit Skill '+skill.name" ref="editSkillInPlaceBtn">
-          <span class="d-none d-sm-inline">Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
-        </b-button>
+      <div slot="subSubTitle" v-if="!isImported">
+        <b-button-group>
+          <b-button v-if="skill" @click="displayEdit"
+                    size="sm"
+                    variant="outline-primary" :data-cy="`editSkillButton_${this.$route.params.skillId}`"
+                    :aria-label="'edit Skill '+skill.name" ref="editSkillInPlaceBtn">
+            <span class="d-none d-sm-inline">Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
+          </b-button>
+        </b-button-group>
+      </div>
+      <div slot="right-of-header" v-if="!isLoading && (skill.sharedToCatalog || isImported)" class="d-inline h5">
+        <b-badge v-if="skill.sharedToCatalog" class="ml-2" data-cy="exportedBadge"><i class="fas fa-book"></i> EXPORTED</b-badge>
+        <b-badge v-if="isImported" class="ml-2" variant="success" data-cy="importedBadge"><i class="fas fa-book"></i> IMPORTED</b-badge>
       </div>
     </page-header>
 
@@ -84,19 +90,31 @@ limitations under the License.
         }
         const items = [];
         items.push({ name: 'Overview', iconClass: 'fa-info-circle skills-color-overview', page: 'SkillOverview' });
-        items.push({ name: 'Dependencies', iconClass: 'fa-project-diagram skills-color-dependencies', page: 'SkillDependencies' });
+        if (!this.isImported) {
+          items.push({ name: 'Dependencies', iconClass: 'fa-project-diagram skills-color-dependencies', page: 'SkillDependencies' });
+        }
         items.push({ name: 'Users', iconClass: 'fa-users skills-color-users', page: 'SkillUsers' });
-        const addEventDisabled = this.subject.totalPoints < this.$store.getters.config.minimumSubjectPoints;
+        const isReadOnlyNonSr = (this.skill.readOnly === true && !this.skill.selfReportType);
+        const addEventDisabled = this.subject.totalPoints < this.$store.getters.config.minimumSubjectPoints || isReadOnlyNonSr;
+
         let msg = addEventDisabled ? `Subject needs at least ${this.$store.getters.config.minimumSubjectPoints} points before events can be added` : '';
         const disabledDueToGroupBeingDisabled = this.skill.groupId && !this.skill.enabled;
         if (disabledDueToGroupBeingDisabled) {
           msg = `CANNOT report skill events because this skill belongs to a group whose current status is disabled. ${msg}`;
         }
-        items.push({
-          name: 'Add Event', iconClass: 'fa-user-plus skills-color-events', page: 'AddSkillEvent', isDisabled: addEventDisabled || disabledDueToGroupBeingDisabled, msg,
-        });
+        if (isReadOnlyNonSr) {
+          msg = 'Skills imported from the catalog can only have events added if they are configured for Self Reporting';
+        }
+        if (!this.isImported) {
+          items.push({
+            name: 'Add Event', iconClass: 'fa-user-plus skills-color-events', page: 'AddSkillEvent', isDisabled: addEventDisabled || disabledDueToGroupBeingDisabled || isReadOnlyNonSr, msg,
+          });
+        }
         items.push({ name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'SkillMetrics' });
         return items;
+      },
+      isImported() {
+        return this.skill && this.skill.copiedFromProjectId && this.skill.copiedFromProjectId.length > 0;
       },
     },
     watch: {

@@ -112,6 +112,12 @@ class AdminController {
     @Autowired
     UserInfoService userInfoService
 
+    @Autowired
+    SkillCatalogService skillCatalogService
+
+    @Value('#{"${skills.config.ui.maxSkillsInBulkImport}"}')
+    int maxBulkImport
+
 
     @RequestMapping(value = "/projects/{id}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
@@ -386,7 +392,7 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
 
-        return skillsAdminService.getSkills(projectId, subjectId)
+        return skillsAdminService.getSkillsForSubjectWithCatalogStatus(projectId, subjectId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/groups/{groupId}/skills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -522,61 +528,61 @@ class AdminController {
         return skillsDepsService.getSkillsAvailableForDependency(projectId)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependency/{dependentSkillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/projects/{projectId}/skills/{dependentSkillId}/dependency/{dependencySkillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     RequestResult assignDependency(@PathVariable("projectId") String projectId,
-                                   @PathVariable("skillId") String skillId,
-                                   @PathVariable("dependentSkillId") String dependentSkillId) {
+                                   @PathVariable("dependentSkillId") String dependentSkillId,
+                                   @PathVariable("dependencySkillId") String dependencySkillId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
-        SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
         SkillsValidator.isNotBlank(dependentSkillId, "Dependent Skill Id", projectId)
+        SkillsValidator.isNotBlank(dependencySkillId, "Dependency Skill Id", projectId)
 
-        skillsDepsService.assignSkillDependency(projectId, skillId, dependentSkillId)
+        skillsDepsService.assignSkillDependency(projectId, dependentSkillId, dependencySkillId)
         return new RequestResult(success: true)
     }
 
 
-    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependency/projects/{dependentProjectId}/skills/{dependentSkillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/projects/{projectId}/skills/{dependentSkillId}/dependency/projects/{dependencyProjectId}/skills/{dependencySkillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     RequestResult assignDependencyFromAnotherProject(@PathVariable("projectId") String projectId,
-                                                     @PathVariable("skillId") String skillId,
-                                                     @PathVariable("dependentProjectId") String dependentProjectId,
-                                                     @PathVariable("dependentSkillId") String dependentSkillId) {
+                                                     @PathVariable("dependentSkillId") String dependentSkillId,
+                                                     @PathVariable("dependencyProjectId") String dependencyProjectId,
+                                                     @PathVariable("dependencySkillId") String dependencySkillId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
-        SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
-        SkillsValidator.isNotBlank(dependentProjectId, "Dependent Project Id", projectId)
-        SkillsValidator.isNotBlank(dependentSkillId, "Dependent Skill Id", projectId)
+        SkillsValidator.isNotBlank(dependencySkillId, "Dependent Skill Id", projectId)
+        SkillsValidator.isNotBlank(dependencyProjectId, "Dependency Project Id", projectId)
+        SkillsValidator.isNotBlank(dependentSkillId, "Dependency Skill Id", projectId)
 
-        skillsDepsService.assignSkillDependency(projectId, skillId, dependentSkillId, dependentProjectId)
+        skillsDepsService.assignSkillDependency(projectId, dependentSkillId, dependencySkillId, dependencyProjectId)
         return new RequestResult(success: true)
     }
 
 
-    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependency/{dependentSkillId}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/projects/{projectId}/skills/{dependentSkillId}/dependency/{dependencySkillId}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     RequestResult removeDependency(@PathVariable("projectId") String projectId,
-                                   @PathVariable("skillId") String skillId,
-                                   @PathVariable("dependentSkillId") String dependentSkillId) {
+                                   @PathVariable("dependentSkillId") String dependentSkillId,
+                                   @PathVariable("dependencySkillId") String dependencySkillId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
-        SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
         SkillsValidator.isNotBlank(dependentSkillId, "Dependent Skill Id", projectId)
+        SkillsValidator.isNotBlank(dependencySkillId, "Dependency Skill Id", projectId)
 
-        skillsDepsService.removeSkillDependency(projectId, skillId, dependentSkillId)
+        skillsDepsService.removeSkillDependency(projectId, dependentSkillId, dependencySkillId)
         return new RequestResult(success: true)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependency/projects/{dependentProjectId}/skills/{dependentSkillId}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/projects/{projectId}/skills/{dependentSkillId}/dependency/projects/{dependencyProjectId}/skills/{dependencySkillId}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     RequestResult removeDependencyFromAnotherProject(@PathVariable("projectId") String projectId,
-                                                     @PathVariable("skillId") String skillId,
-                                                     @PathVariable("dependentProjectId") String dependentProjectId,
-                                                     @PathVariable("dependentSkillId") String dependentSkillId) {
+                                                     @PathVariable("dependentSkillId") String dependentSkillId,
+                                                     @PathVariable("dependencyProjectId") String dependencyProjectId,
+                                                     @PathVariable("dependencySkillId") String dependencySkillId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
-        SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
-        SkillsValidator.isNotBlank(dependentProjectId, "Dependent Project Id", projectId)
         SkillsValidator.isNotBlank(dependentSkillId, "Dependent Skill Id", projectId)
+        SkillsValidator.isNotBlank(dependencyProjectId, "Dependency Project Id", projectId)
+        SkillsValidator.isNotBlank(dependencySkillId, "Dependency Skill Id", projectId)
 
-        skillsDepsService.removeSkillDependency(projectId, skillId, dependentSkillId, dependentProjectId)
+        skillsDepsService.removeSkillDependency(projectId, dependentSkillId, dependencySkillId, dependencyProjectId)
         return new RequestResult(success: true)
     }
 
@@ -642,10 +648,12 @@ class AdminController {
     @RequestMapping(value = "/projects/{projectId}/skills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     List<SkillDefSkinnyRes> getAllSkillsForProject(
             @PathVariable("projectId") String projectId,
-            @RequestParam(required = false, value = "skillNameQuery") String skillNameQuery) {
+            @RequestParam(required = false, value = "skillNameQuery") String skillNameQuery,
+            @RequestParam(required = false, value = "excludeImportedSkills") Boolean excludeImportedSkills) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
 
-        List<SkillDefSkinnyRes> res = skillsAdminService.getSkinnySkills(projectId, skillNameQuery ?: '')
+        boolean excludeImportedSkillsBol = excludeImportedSkills
+        List<SkillDefSkinnyRes> res = skillsAdminService.getSkinnySkills(projectId, skillNameQuery ?: '', excludeImportedSkillsBol)
         return res
     }
 
@@ -1039,6 +1047,175 @@ class AdminController {
         String userId = userInfoService.getCurrentUserId()
         contactUsersService.previewEmail(contactUsersRequest.emailSubject, contactUsersRequest.emailBody, userId)
         return RequestResult.success()
+    }
+
+    @RequestMapping(value="/projects/{projectId}/skills/{skillId}/export", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
+    RequestResult exportSkillToCatalog(@PathVariable("projectId") String projectId, @PathVariable("skillId") String skillId) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        SkillsValidator.isNotBlank(skillId, "skillId")
+
+        skillCatalogService.exportSkillToCatalog(projectId, skillId)
+        return RequestResult.success()
+    }
+
+    @RequestMapping(value="/projects/{projectId}/skills/catalog/exists/{skillId}", method = [RequestMethod.POST], produces = "application/json")
+    ExportableToCatalogValidationResult doesSkillAlreadyExistInCatalog(@PathVariable("projectId") String projectId, @PathVariable("skillId") String skillId) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        SkillsValidator.isNotBlank(skillId, "skillId")
+        boolean isInCatalog = skillCatalogService.isAvailableInCatalog(projectId, skillId)
+        if (isInCatalog) {
+            return new ExportableToCatalogValidationResult(skillAlreadyInCatalog: true)
+        }
+
+        boolean isSkillIdInCatalog = skillCatalogService.doesSkillIdAlreadyExistInCatalog(skillId)
+        if (isSkillIdInCatalog) {
+            return new ExportableToCatalogValidationResult(skillIdConflictsWithExistingCatalogSkill: true)
+        }
+
+        boolean isSkillNameInCatalog = skillCatalogService.doesSkillNameAlreadyExistInCatalog(projectId, skillId)
+        if (isSkillNameInCatalog) {
+            return new ExportableToCatalogValidationResult(skillNameConflictsWithExistingCatalogSkill: true)
+        }
+
+        return new ExportableToCatalogValidationResult()
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/catalog/exportable", method = [RequestMethod.POST], produces = "application/json")
+    Map<String, ExportableToCatalogValidationResult> areSkillsExportable(@PathVariable("projectId") String projectId, @RequestBody List<String> skillIds) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        SkillsValidator.isNotEmpty(skillIds, "skillIds")
+
+        List<ExportableToCatalogValidationResult> validationResults = skillCatalogService.canSkillIdsBeExported(projectId, skillIds)
+        return validationResults.collectEntries() { [it.skillId, it]}
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/catalog/exist", method = [RequestMethod.POST], produces = "application/json")
+    Map<String, Boolean> doSkillsExistInCatalog(@PathVariable("projectId") String projectId, @RequestBody List<String> skillIds) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        SkillsValidator.isNotEmpty(skillIds, "skillIds")
+
+        Map<String, Boolean> inCatalogStatus = skillIds.collectEntries() { [it, false]}
+        List<String> skillIdsInCatalog = skillCatalogService.getSkillIdsInCatalog(projectId, skillIds)
+
+        skillIdsInCatalog?.each {
+            inCatalogStatus[it] = true
+        }
+
+        return inCatalogStatus
+    }
+
+    @RequestMapping(value="/projects/{projectId}/skills/{skillId}/export", method = [RequestMethod.DELETE], produces = "application/json")
+    RequestResult removeSkillFromCatalog(@PathVariable("projectId") String projectId, @PathVariable("skillId") String skillId) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        SkillsValidator.isNotBlank(skillId, "skillId")
+
+        skillCatalogService.removeSkillFromCatalog(projectId, skillId)
+        return RequestResult.success()
+    }
+
+    @RequestMapping(value="/projects/{projectId}/skills/export", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
+    RequestResult bulkExportSkillsToCatalog(@PathVariable("projectId") String projectId, @RequestBody List<String> skillIds) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        SkillsValidator.isTrue(skillIds?.size() > 0, "No SkillIds specified to export to catalog", projectId)
+        skillCatalogService.exportSkillToCatalog(projectId, skillIds)
+        return RequestResult.success()
+    }
+
+    @RequestMapping(value="/projects/{projectId}/subjects/{subjectId}/import/{fromProjectId}/{fromSkillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
+    SkillDefRes importSkillFromCatalog(@PathVariable("projectId") String projectId,
+                                       @PathVariable("subjectId") String subjectId,
+                                       @PathVariable("fromProjectId") String fromProjectId,
+                                       @PathVariable("fromSkillId") String fromSkillId) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        SkillsValidator.isNotBlank(projectId, "subjectId")
+        SkillsValidator.isNotBlank(projectId, "fromProjectId")
+        SkillsValidator.isNotBlank(projectId, "fromSkillId")
+        skillCatalogService.importSkillFromCatalog(fromProjectId, fromSkillId, projectId, subjectId)
+    }
+
+    @RequestMapping(value="/projects/{projectId}/subjects/{subjectId}/import", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
+    RequestResult bulkImportSkillFromCatalog(@PathVariable("projectId") String projectId,
+                                       @PathVariable("subjectId") String subjectId,
+                                       @RequestBody List<CatalogSkill> bulkImport) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        SkillsValidator.isNotBlank(projectId, "subjectId")
+        SkillsValidator.isTrue(bulkImport?.size() <= maxBulkImport, "Bulk imports are limited to no more than ${maxBulkImport} Skills at once", projectId)
+        skillCatalogService.importSkillsFromCatalog(projectId, subjectId, bulkImport)
+        RequestResult success = RequestResult.success()
+        success.explanation = "imported [${bulkImport?.size()}] skills from the catalog into [${projectId}] - [${subjectId}]"
+        return success
+    }
+
+    @RequestMapping(value="/projects/{projectId}/skills/catalog", method=RequestMethod.GET, produces = "application/json")
+    TableResult getCatalogSkills(@PathVariable("projectId") String projectId,
+                                  @RequestParam int limit,
+                                  @RequestParam int page,
+                                  @RequestParam String orderBy,
+                                  @RequestParam Boolean ascending,
+                                  @RequestParam(required=false) String projectNameSearch,
+                                  @RequestParam(required=false) String subjectNameSearch,
+                                  @RequestParam(required=false) String skillNameSearch) {
+        TotalCountAwareResult<ProjectNameAwareSkillDefRes> res = skillCatalogService.getSkillsAvailableInCatalog(projectId,
+                URLDecoder.decode(projectNameSearch, "utf-8"),
+                URLDecoder.decode(subjectNameSearch, "utf-8"),
+                URLDecoder.decode(skillNameSearch, "utf-8"), createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending))
+        TableResult tr = new TableResult()
+        tr.count = res.results?.size()
+        tr.totalCount = res.total
+        tr.data = res.results
+
+        return tr
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/exported", method = RequestMethod.GET, produces = "application/json")
+    TableResult getExportedSkills(@PathVariable("projectId") String projectId,
+                                        @RequestParam int limit,
+                                        @RequestParam int page,
+                                        @RequestParam String orderBy,
+                                        @RequestParam Boolean ascending) {
+        TotalCountAwareResult<ExportedSkillRes> res =skillCatalogService.getSkillsExportedByProject(projectId, createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending))
+
+        TableResult tr = new TableResult()
+        tr.count = res.results?.size()
+        tr.totalCount = res.total
+        tr.data = res.results
+
+        return tr
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/exported/stats", method = RequestMethod.GET, produces = "application/json")
+    ExportedSkillStats getExportedSkillStats(@PathVariable("projectId") String projectId,
+                                             @PathVariable("skillId") String skillId) {
+        skillCatalogService.getExportedSkillStats(projectId, skillId)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/imported", method = RequestMethod.GET, produces = "application/json")
+    List<SkillDefRes> getSkillsImportedFromCatalog(@PathVariable("projectId") String projectId,
+                                                   @RequestParam int limit,
+                                                   @RequestParam int page,
+                                                   @RequestParam String orderBy,
+                                                   @RequestParam Boolean ascending) {
+        skillCatalogService.getSkillsImportedFromCatalog(projectId, createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending))
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/imported/stats", method = RequestMethod.GET, produces = "application/json")
+    ImportedSkillStats getImportedSkillsStats(@PathVariable("projectId") String projectId) {
+        return skillCatalogService.getSkillsImportedStats(projectId)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/exported/stats", method = RequestMethod.GET, produces = "application/json")
+    ExportedSkillsStats getExportedSkillsStats(@PathVariable("projectId") String projectId) {
+        return skillCatalogService.getSkillsExportedStats(projectId)
+    }
+
+
+    private static PageRequest createPagingRequestWithValidation(String projectId, int limit, int page, String orderBy, Boolean ascending) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isTrue(limit <= 200, "Cannot ask for more than 200 items, provided=[${limit}]", projectId)
+        SkillsValidator.isTrue(page >= 0, "Cannot provide negative page. provided =[${page}]", projectId)
+        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
+
+        return pageRequest
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")

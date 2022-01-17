@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.services.BadgeUtils
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillDefMin
 import skills.storage.model.SkillRelDef
 import skills.storage.model.UserAchievement
 import skills.storage.repos.SkillEventsSupportRepo
@@ -43,13 +44,13 @@ class AchievedBadgeHandler {
     SkillEventsSupportRepo skillEventsSupportRepo
 
     @Profile
-    void checkForBadges(SkillEventResult res, String userId, SkillEventsSupportRepo.SkillDefMin currentSkillDef, SkillDate skillDate) {
-        List<SkillEventsSupportRepo.SkillDefMin> parents = skillEventsSupportRepo.findParentSkillsByChildIdAndType(currentSkillDef.id, SkillRelDef.RelationshipType.BadgeRequirement)
+    void checkForBadges(SkillEventResult res, String userId, SkillDefMin currentSkillDef, SkillDate skillDate) {
+        List<SkillDefMin> parents = skillEventsSupportRepo.findParentSkillsByChildIdAndType(currentSkillDef.id, SkillRelDef.RelationshipType.BadgeRequirement)
 
-        parents.each { SkillEventsSupportRepo.SkillDefMin skillDefMin ->
+        parents.each { SkillDefMin skillDefMin ->
             if (skillDefMin.type == SkillDef.ContainerType.Badge && BadgeUtils.withinActiveTimeframe(skillDefMin) &&
                     (skillDefMin.enabled == null || Boolean.valueOf(skillDefMin.enabled)) ) {
-                SkillEventsSupportRepo.SkillDefMin badge = skillDefMin
+                SkillDefMin badge = skillDefMin
                 Long nonAchievedChildren = achievedLevelRepo.countNonAchievedChildren(userId, badge.projectId, badge.skillId, SkillRelDef.RelationshipType.BadgeRequirement)
                 if (nonAchievedChildren == 0) {
                     List<UserAchievement> badges = achievedLevelRepo.findAllByUserIdAndProjectIdAndSkillId(userId, badge.projectId, badge.skillId)
@@ -65,7 +66,7 @@ class AchievedBadgeHandler {
     }
 
     @Profile
-    private Date getAchievedOnDate(String userId, SkillEventsSupportRepo.SkillDefMin badge, SkillDate skillDate) {
+    private Date getAchievedOnDate(String userId, SkillDefMin badge, SkillDate skillDate) {
         if (!skillDate.isProvided) {
             return skillDate.date
         }

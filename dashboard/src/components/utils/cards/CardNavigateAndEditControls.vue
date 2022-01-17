@@ -27,6 +27,12 @@ limitations under the License.
 
     <div class="col text-right">
       <b-button-group size="sm" class="buttons">
+        <b-button v-if="options.showShare === true"
+                  ref="shareBtn"
+                  size="sm"
+                  variant="outline-primary"
+                  @click="handleShareClick"
+                  :title="this.shareTitle"><i :class="shareBtnIcon" aria-hidden="true"/></b-button>
         <b-button ref="editBtn"
                   size="sm"
                   variant="outline-primary"
@@ -55,7 +61,22 @@ limitations under the License.
     props: {
       options: Object,
     },
+    computed: {
+      shareBtnIcon() {
+        return this.options?.shareEnabled === true ? 'fas fa-hands-helping' : 'fas fa-handshake-alt-slash';
+      },
+      shareTitle() {
+        return this.options?.shareEnabled === true ? `Share ${this.options?.type}` : `Unshare ${this.options?.type}`;
+      },
+    },
     methods: {
+      handleShareClick() {
+        let eventName = 'share';
+        if (this.options.shareEnabled === false) {
+          eventName = 'unshare';
+        }
+        this.$emit(eventName);
+      },
       focusOnEdit() {
         this.$refs.editBtn.focus();
       },

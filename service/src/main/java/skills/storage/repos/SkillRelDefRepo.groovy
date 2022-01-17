@@ -72,11 +72,46 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         sd2.updated as updated,
         sd2.selfReportingType as selfReportingType,
         sd2.enabled as enabled,
-        sd2.numSkillsRequired as numSkillsRequired
-        from SkillDef sd1, SkillDef sd2, SkillRelDef srd 
+        sd2.numSkillsRequired as numSkillsRequired,
+        sd2.copiedFrom as copiedFrom,
+        sd2.readOnly as readOnly,
+        sd2.copiedFromProjectId as copiedFromProjectId,
+        pd.name as copiedFromProjectName
+        from SkillDef sd1, SkillDef sd2, SkillRelDef srd
+        left join ProjDef pd on sd2.copiedFromProjectId = pd.projectId
         where sd1 = srd.parent and sd2 = srd.child and srd.type=?3 
               and sd1.projectId=?1 and sd1.skillId=?2''')
     List<SkillDefRepo.SkillDefPartial> getChildrenPartial(String projectId, String parentSkillId, SkillRelDef.RelationshipType type)
+
+    @Query('''select 
+        sd2.id as id,
+        sd2.name as name, 
+        sd2.skillId as skillId, 
+        sd2.projectId as projectId, 
+        sd2.version as version,
+        sd2.pointIncrement as pointIncrement,
+        sd2.pointIncrementInterval as pointIncrementInterval,
+        sd2.numMaxOccurrencesIncrementInterval as numMaxOccurrencesIncrementInterval,
+        sd2.totalPoints as totalPoints,
+        sd2.type as skillType,
+        sd2.displayOrder as displayOrder,
+        sd2.created as created,
+        sd2.updated as updated,
+        sd2.selfReportingType as selfReportingType,
+        sd2.enabled as enabled,
+        sd2.numSkillsRequired as numSkillsRequired,
+        sd2.copiedFrom as copiedFrom,
+        sd2.readOnly as readOnly,
+        sd2.copiedFromProjectId as copiedFromProjectId,
+        pd.name as copiedFromProjectName,
+        case when es is not null then true else false end as sharedToCatalog
+        from SkillDef sd1, SkillDef sd2, SkillRelDef srd
+        left join ProjDef pd on sd2.copiedFromProjectId = pd.projectId
+        left join ExportedSkill es on es.skill.id = sd2.id
+        where sd1 = srd.parent and sd2 = srd.child and srd.type='RuleSetDefinition' 
+              and sd1.projectId=?1 and sd1.skillId=?2
+    ''')
+    List<SkillDefRepo.SkillDefPartial> getSkillsWithCatalogStatus(String projectId, String subjectId)
 
     @Query('''SELECT 
         sd2.id as id,
@@ -103,6 +138,11 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         where sd1 = srd.parent and sd2 = srd.child and srd.type in ?3 
               and sd1.projectId=?1 and sd1.skillId=?2''')
     List<SkillDef> getChildren(@Nullable String projectId, String parentSkillId, List<SkillRelDef.RelationshipType> types)
+
+    @Query('''select count(sd2) from SkillDef sd1, SkillDef sd2, SkillRelDef srd 
+        where sd1 = srd.parent and sd2 = srd.child and srd.type in ?3 
+              and sd1.projectId=?1 and sd1.skillId=?2''')
+    Long countChildren(@Nullable projectId, String parentSkillId, List<SkillRelDef.RelationshipType> types)
 
     @Nullable
     @Query(value = '''select srd.parent from SkillRelDef srd where srd.child.skillId=?1 and srd.type='BadgeRequirement' and srd.parent.type = 'GlobalBadge' ''')

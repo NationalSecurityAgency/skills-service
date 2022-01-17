@@ -23,6 +23,7 @@ import org.springframework.lang.Nullable
 import skills.storage.model.LevelDef
 import skills.storage.model.LevelDefInterface
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillDefMin
 import skills.storage.model.SkillRelDef
 
 /**
@@ -101,24 +102,6 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
             up.day is null''')
     List<TinyUserPoints> findTotalTinyUserPointsByUserIdAndParentId(String usedId, Integer parentId)
 
-    static interface SkillDefMin {
-        int getId()
-        String getProjectId()
-        String getSkillId()
-        String getName()
-        int getPointIncrement()
-        int getPointIncrementInterval()
-        int getNumMaxOccurrencesIncrementInterval()
-        int getTotalPoints()
-        SkillDef.ContainerType getType()
-        Date getStartDate()
-        Date getEndDate()
-        String getEnabled()
-        String getGroupId()
-        int getNumSkillsRequired()
-        SkillDef.SelfReportingType getSelfReportingType()
-    }
-
     @Query('''SELECT
         s.id as id,
         s.projectId as projectId,
@@ -130,9 +113,12 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
         s.totalPoints as totalPoints,
         s.type as type,
         s.enabled as enabled,
+        s.selfReportingType as selfReportingType,
+        s.copiedFrom as copiedFrom,
+        s.copiedFromProjectId as copiedFromProjectId,
+        s.readOnly as readOnly,
         s.groupId as groupId,
-        s.numSkillsRequired as numSkillsRequired,
-        s.selfReportingType as selfReportingType
+        s.numSkillsRequired as numSkillsRequired
         from SkillDef s where s.projectId = ?1 and s.skillId=?2 and s.type = ?3''')
     @Nullable
     SkillDefMin findByProjectIdAndSkillIdAndType(String projectId, String skillId, SkillDef.ContainerType type)
@@ -148,7 +134,10 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
         s.totalPoints as totalPoints,
         s.type as type,
         s.enabled as enabled,
-        s.selfReportingType as selfReportingType
+        s.selfReportingType as selfReportingType,
+        s.copiedFrom as copiedFrom,
+        s.copiedFromProjectId as copiedFromProjectId,
+        s.readOnly as readOnly
         from SkillDef s where ( :projectId is null OR s.projectId = :projectId ) and s.skillId=:skillId''')
     @Nullable
     SkillDefMin findByProjectIdAndSkillId(@Param("projectId") String projectId, @Param("skillId") String skillId)
@@ -164,7 +153,10 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
         s.totalPoints as totalPoints,
         s.type as type,
         s.enabled as enabled,
-        s.selfReportingType as selfReportingType
+        s.selfReportingType as selfReportingType,
+        s.copiedFrom as copiedFrom,
+        s.copiedFromProjectId as copiedFromProjectId,
+        s.readOnly as readOnly
         from SkillDef s where s.projectId is null and s.skillId=:skillId''')
     @Nullable
     SkillDefMin findBySkillIdWhereProjectIdIsNull(@Param("skillId") String skillId)
@@ -261,7 +253,10 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
         s.type as type,
         s.startDate as startDate,
         s.endDate as endDate,
-        s.enabled as enabled
+        s.enabled as enabled,
+        s.copiedFrom as copiedFrom,
+        s.copiedFromProjectId as copiedFromProjectId,
+        s.readOnly as readOnly
         from SkillDef s, SkillRelDef srd 
         where
             s.id = srd.parent and  

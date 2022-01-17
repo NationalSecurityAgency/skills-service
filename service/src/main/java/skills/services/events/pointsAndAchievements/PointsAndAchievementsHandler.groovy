@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component
 import skills.services.LevelDefinitionStorageService
 import skills.services.events.CompletionItem
 import skills.services.events.SkillDate
+import skills.storage.model.SkillDefMin
 import skills.storage.repos.SkillEventsSupportRepo
 import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
@@ -58,7 +59,7 @@ class PointsAndAchievementsHandler {
     PointsAndAchievementsDataLoader dataLoader
 
     @Profile
-    List<CompletionItem> updatePointsAndAchievements(String userId, SkillEventsSupportRepo.SkillDefMin skillDef, SkillDate incomingSkillDate){
+    List<CompletionItem> updatePointsAndAchievements(String userId, SkillDefMin skillDef, SkillDate incomingSkillDate){
         LoadedData loadedData = dataLoader.loadData(skillDef.projectId, userId, incomingSkillDate, skillDef)
 
         PointsAndAchievementsBuilder builder = new PointsAndAchievementsBuilder(

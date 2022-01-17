@@ -18,9 +18,15 @@ limitations under the License.
     <loading-container v-bind:is-loading="isLoading">
       <sub-page-header ref="subPageHeader" title="Skills"
                        :disabled="addSkillDisabled" :disabled-msg="addSkillsDisabledMsg" aria-label="new skill">
+
+        <b-button id="importFromCatalogBtn" ref="importFromCatalogBtn" @click="importCatalog.show=true" variant="outline-primary" size="sm"
+                  aria-label="import from catalog"
+                  data-cy="importFromCatalogBtn">
+          <span class="">Import</span> <i class="fas fa-book" aria-hidden="true"/>
+        </b-button>
         <b-button id="newGroupBtn" ref="newGroupButton" @click="newGroup" variant="outline-primary" size="sm"
                   aria-label="new skills group"
-                  data-cy="newGroupButton">
+                  data-cy="newGroupButton" class="ml-1">
           <span class="">Group</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
         </b-button>
         <b-button id="newSkillBtn" ref="newSkillButton" @click="newSkill" variant="outline-primary" size="sm"
@@ -41,24 +47,29 @@ limitations under the License.
 
     <edit-skill-group v-if="editGroupInfo.show" v-model="editGroupInfo.show" :group="editGroupInfo.group" :is-edit="false"
                       @group-saved="skillCreatedOrUpdated" @hidden="focusOnNewGroupButton"/>
+    <import-from-catalog v-if="importCatalog.show" v-model="importCatalog.show" :current-project-skills="skills"
+                         @to-import="importFromCatalog"/>
   </div>
 </template>
 
 <script>
   import { createNamespacedHelpers } from 'vuex';
   import dayjs from '@/common-components/DayJsCustomizer';
+  import CatalogService from '@/components/skills/catalog/CatalogService';
   import LoadingContainer from '../utils/LoadingContainer';
   import SkillsTable from './SkillsTable';
   import SkillsService from './SkillsService';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import EditSkill from './EditSkill';
   import EditSkillGroup from './skillsGroup/EditSkillGroup';
+  import ImportFromCatalog from './catalog/ImportFromCatalog';
 
   const { mapActions, mapGetters } = createNamespacedHelpers('subjects');
 
   export default {
     name: 'Skills',
     components: {
+      ImportFromCatalog,
       EditSkillGroup,
       EditSkill,
       SubPageHeader,
@@ -81,6 +92,9 @@ limitations under the License.
           isEdit: false,
           show: false,
           group: {},
+        },
+        importCatalog: {
+          show: false,
         },
       };
     },
@@ -105,6 +119,7 @@ limitations under the License.
         });
       },
       loadSkills() {
+        this.isLoading = true;
         SkillsService.getSubjectSkills(this.projectId, this.subjectId)
           .then((skills) => {
             const loadedSkills = skills;
@@ -116,6 +131,14 @@ limitations under the License.
           })
           .finally(() => {
             this.isLoading = false;
+          });
+      },
+      importFromCatalog(skillsInfoToImport) {
+        this.isLoading = true;
+        CatalogService.bulkImport(this.$route.params.projectId, this.$route.params.subjectId, skillsInfoToImport)
+          .then(() => {
+            this.loadSkills();
+            this.loadSubjectDetailsState({ projectId: this.projectId, subjectId: this.subject.subjectId });
           });
       },
       skillsChanged(skillId) {

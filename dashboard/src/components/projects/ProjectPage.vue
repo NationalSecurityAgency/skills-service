@@ -52,6 +52,7 @@ limitations under the License.
           {name: 'Badges', iconClass: 'fa-award skills-color-badges', page: 'Badges'},
           {name: 'Self Report', iconClass: 'fa-laptop skills-color-selfreport', page: 'SelfReport'},
           {name: 'Dependencies', iconClass: 'fa-project-diagram skills-color-dependencies', page: 'FullDependencyGraph'},
+          {name: 'Skill Catalog', iconClass: 'fa-book skills-color-skill-catalog', page: 'SkillsCatalog'},
           {name: 'Cross Projects', iconClass: 'fa-handshake skills-color-crossProjects', page: 'CrossProjectsSkills'},
           {name: 'Levels', iconClass: 'fa-trophy skills-color-levels', page: 'ProjectLevels'},
           {name: 'Users', iconClass: 'fa-users skills-color-users', page: 'ProjectUsers'},

@@ -132,6 +132,7 @@ skills:
       maxSelfReportMessageLength: 250
       maxSelfReportRejectionMessageLength: 250
       artifactBuildTimestamp: @maven.build.timestamp@
+      maxSkillsInBulkImport: 50
     client:
       loggingEnabled: false
       loggingLevel: DEBUG

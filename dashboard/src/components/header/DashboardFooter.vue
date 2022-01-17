@@ -42,8 +42,8 @@ limitations under the License.
       </div>
 
     </div>
-    <div class="col-sm text-right">
-      <span class="small mr-2 footer-text" :title="skillTreeVersionTitle">v{{ $store.getters.config.dashboardVersion }}</span>
+    <div class="col-sm text-right" data-cy="dashboardVersionContainer">
+      <span class="small mr-2 footer-text" :title="skillTreeVersionTitle" data-cy="dashboardVersion">v{{ $store.getters.config.dashboardVersion }}</span>
       <i class="fas fa-code-branch"></i>
     </div>
   </div>

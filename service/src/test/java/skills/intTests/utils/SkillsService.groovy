@@ -18,6 +18,8 @@ package skills.intTests.utils
 import callStack.profiler.Profile
 import com.github.jknack.handlebars.Options
 import groovy.util.logging.Slf4j
+import org.apache.commons.codec.net.URLCodec
+
 @Slf4j
 class SkillsService {
 
@@ -377,7 +379,11 @@ class SkillsService {
 
     def assignDependency(Map props) {
         String url = getSkillDependencyUrl(props)
-        wsHelper.adminPost(url, props, false)
+        boolean throwExceptionOnFailure = false
+        if (props.get("throwExceptionOnFailure") != null) {
+            throwExceptionOnFailure = props.throwExceptionOnFailure instanceof Boolean ? props.throwExceptionOnFailure : Boolean.valueOf(props.throwExceptionOnFailure)
+        }
+        wsHelper.adminPost(url, props, throwExceptionOnFailure)
     }
 
     def removeDependency(Map props) {
@@ -387,10 +393,21 @@ class SkillsService {
 
     String getSkillDependencyUrl(Map props) {
         String url
-        if(props.dependentProjectId){
-            url = "/projects/${props.projectId}/skills/${props.skillId}/dependency/projects/${props.dependentProjectId}/skills/${props.dependentSkillId}"
+        def newProps = props.clone()
+        // variables on backend where changed to more accurately reflect the relationships
+        // adding this translation layer in place to avoid breaking pre-existing specs using the previous variable naming structure
+        if(newProps.dependentSkillId && newProps.skillId) {
+            newProps.dependencySkillId = newProps.dependentSkillId
+            newProps.dependentSkillId = newProps.skillId
+        }
+        if (newProps.dependentProjectId) {
+            newProps.dependendencyProjectId = newProps.dependentProjectId
+        }
+
+        if(newProps.dependendencyProjectId){
+            url = "/projects/${newProps.projectId}/skills/${newProps.dependentSkillId}/dependency/projects/${newProps.dependendencyProjectId}/skills/${newProps.dependencySkillId}"
         } else {
-            url = "/projects/${props.projectId}/skills/${props.skillId}/dependency/${props.dependentSkillId}"
+            url = "/projects/${newProps.projectId}/skills/${newProps.dependentSkillId}/dependency/${newProps.dependencySkillId}"
         }
         return url
     }
@@ -407,8 +424,12 @@ class SkillsService {
         wsHelper.adminGet(getSkillUrl(props.projectId, props.subjectId, props.skillId), props)
     }
 
-    def getSkillsForProject(String projectId, String optionalSkillNameQuery = "") {
+    def getSkillsForProject(String projectId, String optionalSkillNameQuery = "", boolean excludeImportedSkills = false) {
         String query = optionalSkillNameQuery ? "?skillNameQuery=${optionalSkillNameQuery}" : ''
+        if (excludeImportedSkills) {
+            String append = "excludeImportedSkills=true"
+            query = query.contains("?") ? "${query}&${append}" : "${query}?${append}"
+        }
         wsHelper.adminGet("/projects/${projectId}/skills${query}")
     }
 
@@ -1195,6 +1216,73 @@ class SkillsService {
 
     def lookupMyProjectName(String projectId) {
         return wsHelper.apiGet("/myprojects/${projectId}/name")
+    }
+
+    def getExportedSkillsForProjectStats(String projectId) {
+        return wsHelper.adminGet("/projects/${projectId}/skills/exported/stats")
+    }
+
+    def getImportedSkillsStats(String projectId) {
+        return wsHelper.adminGet("/projects/${projectId}/skills/imported/stats")
+    }
+
+    def getSkillsImportedFromCatalog(String projectId, int limit, int page, String orderBy, boolean ascending) {
+        return wsHelper.adminGet("/projects/${projectId}/skills/imported?limit=${limit}&page=${page}&orderBy=${orderBy}&ascending=${ascending}")
+    }
+
+    def getExportedSkillStats(String projectId, String skillId) {
+        return wsHelper.adminGet("/projects/${projectId}/skills/${skillId}/exported/stats")
+    }
+
+    def getExportedSkills(String projectId, int limit, int page, String orderBy, boolean ascending){
+        return wsHelper.adminGet("/projects/${projectId}/skills/exported?limit=${limit}&page=${page}&orderBy=${orderBy}&ascending=${ascending}")
+    }
+
+    def getCatalogSkills(String projectId, int limit, int page, String orderBy="exportedOn", boolean ascending=true, String projectNameSearch="", String subjectNameSearch="", String skillNameSearch=""){
+        URLCodec codec = new URLCodec("UTF-8")
+        return wsHelper.adminGet("/projects/${projectId}/skills/catalog?" +
+                "limit=${limit}&page=${page}&orderBy=${orderBy}&ascending=${ascending}" +
+                "&projectNameSearch=${codec.encode(projectNameSearch)}" +
+                "&subjectNameSearch=${codec.encode(subjectNameSearch)}" +
+                "&skillNameSearch=${codec.encode(skillNameSearch)}")
+    }
+
+    /**
+     *
+     * @param importIntoProjectId
+     * @param importIntoSubjectId
+     * @param catalogSkills - List of Maps with projectId and skillId attributes representing skills shared to the catalog
+     */
+    def bulkImportSkillsFromCatalog(String importIntoProjectId, String importIntoSubjectId, List<Map> catalogSkills) {
+        return wsHelper.adminPost("/projects/${importIntoProjectId}/subjects/${importIntoSubjectId}/import", catalogSkills)
+    }
+
+    def importSkillFromCatalog(String importIntoProjectId, String importIntoSubjectId, String catalogSkillProjectId, String catalogSkillSkillId) {
+        return wsHelper.adminPost("/projects/${importIntoProjectId}/subjects/${importIntoSubjectId}/import/${catalogSkillProjectId}/${catalogSkillSkillId}", [:])
+    }
+
+    def bulkExportSkillsToCatalog(String projectId, List<String> skillIds) {
+        return wsHelper.adminPost("/projects/${projectId}/skills/export", skillIds)
+    }
+
+    def exportSkillToCatalog(String projectId, String skillId) {
+        return wsHelper.adminPost("/projects/${projectId}/skills/${skillId}/export", [:])
+    }
+
+    def removeSkillFromCatalog(String projectId, String skillId) {
+        return wsHelper.adminDelete("/projects/${projectId}/skills/${skillId}/export")
+    }
+
+    def doesSkillExistInCatalog(String projectId, String skillId) {
+        return wsHelper.adminPost("/projects/${projectId}/skills/catalog/exists/${skillId}", [:]).body
+    }
+
+    def doSkillsExistInCatalog(String projectId, List<String> skillIds) {
+        return wsHelper.adminPost("/projects/${projectId}/skills/catalog/exist", skillIds).body
+    }
+
+    def areSkillIdsExportable(String projectId, List<String> skillIds) {
+        return wsHelper.adminPost("/projects/${projectId}/skills/catalog/exportable", skillIds).body
     }
 
     private String getProjectUrl(String project) {

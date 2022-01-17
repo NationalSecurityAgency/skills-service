@@ -42,7 +42,7 @@ describe('Skills Table Tests', () => {
         ], 10);
 
         cy.get('[data-cy="deleteSkillButton_ThisisaSkillSkill"]').click();
-        cy.contains('YES, Delete It!').click();
+        cy.acceptRemovalSafetyCheck();
         cy.contains('No Skills Yet');
     });
 

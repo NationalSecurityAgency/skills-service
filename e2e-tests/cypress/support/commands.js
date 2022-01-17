@@ -163,6 +163,26 @@ Cypress.Commands.add("createSubject", (projNum = 1, subjNum = 1, overrideProps =
     }, overrideProps));
 });
 
+Cypress.Commands.add("exportSkillToCatalog", (projNum = 1, subjNum = 1, skillNum = 1) => {
+    const skillId = `skill${skillNum}${subjNum > 1 ? `Subj${subjNum}` : ''}`;
+    const url = `/admin/projects/proj${projNum}/skills/${skillId}/export`;
+    cy.request('POST', url);
+});
+
+Cypress.Commands.add("importSkillFromCatalog", (projNum = 2, subjNum = 1, fromProjNum = 1, fromSkillNum = 1) => {
+    const url = `/admin/projects/proj${projNum}/subjects/subj${subjNum}/import`;
+    cy.request('POST', url, [{ projectId: `proj${fromProjNum}`, skillId: `skill${fromSkillNum}` }]);
+});
+
+Cypress.Commands.add("acceptRemovalSafetyCheck", () => {
+    cy.contains('Delete Action CANNOT be undone');
+    cy.get('[data-cy="currentValidationText"]').type('Delete Me')
+    cy.get('[data-cy="removeButton"]').click();
+    cy.get('[data-cy="removeButton"]').should('not.exist')
+});
+
+
+
 const constructSkills = (projNum = 1, subjNum = 1, skillNum = 1, overrideProps = {}) => {
     const skillId = `skill${skillNum}${subjNum > 1 ? `Subj${subjNum}` : ''}`;
     const skillName = `Very Great Skill ${skillNum}${subjNum > 1 ? ` Subj${subjNum}` : ''}`;
@@ -403,7 +423,8 @@ Cypress.Commands.add('customA11y', ()=> {
                 "landmark-no-duplicate-banner": {enabled:false},
                 'landmark-no-duplicate-contentinfo': {enabled:false},
                 'heading-order': {enabled:false},
-                'landmark-unique': {enabled:false}
+                'landmark-unique': {enabled:false},
+                'aria-dialog-name': {enabled:false},
             }
     }, terminalLog);
 });

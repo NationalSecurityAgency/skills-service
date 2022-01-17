@@ -135,8 +135,7 @@ describe('Skills Group Tests', () => {
         ], 5);
 
         cy.get('[data-cy="deleteSkillButton_group2"]').click();
-        cy.contains('DELETE [group2]?');
-        cy.contains('YES, Delete It!').click();
+        cy.acceptRemovalSafetyCheck();
 
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'group1' },  { colIndex: 1, value: '1' }],
@@ -401,8 +400,7 @@ describe('Skills Group Tests', () => {
 
         // delete 1 skill, remaining buttons should be disabled
         cy.get('[data-cy="deleteSkillButton_skill2"]').click();
-        cy.contains('Delete Action CANNOT be undone');
-        cy.contains('YES, Delete It!').click();
+        cy.acceptRemovalSafetyCheck();
         cy.get('[data-cy="deleteSkillButton_skill1"]').should('be.disabled');
         cy.get('[data-cy="deleteSkillButton_Skill3Skill"]').should('be.disabled');
         cy.get('[data-cy="deleteSkillButton_group1"]').should('be.enabled');
@@ -426,15 +424,13 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="deleteSkillButton_skill2"]').should('be.enabled');
 
         cy.get('[data-cy="deleteSkillButton_skill2"]').click();
-        cy.contains('Delete Action CANNOT be undone');
-        cy.contains('YES, Delete It!').click();
+        cy.acceptRemovalSafetyCheck();
 
         cy.get('[data-cy="deleteSkillButton_skill1"]').should('be.enabled');
         cy.get('[data-cy="deleteSkillButton_skill2"]').should('not.exist');
 
         cy.get('[data-cy="deleteSkillButton_skill1"]').click();
-        cy.contains('Delete Action CANNOT be undone');
-        cy.contains('YES, Delete It!').click();
+        cy.acceptRemovalSafetyCheck();
 
         cy.get('[data-cy="deleteSkillButton_skill1"]').should('not.exist');
         cy.get('[data-cy="deleteSkillButton_skill2"]').should('not.exist');
@@ -467,15 +463,13 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="deleteSkillButton_skill2"]').should('be.enabled');
 
         cy.get('[data-cy="deleteSkillButton_skill2"]').click();
-        cy.contains('Delete Action CANNOT be undone');
-        cy.contains('YES, Delete It!').click();
+        cy.acceptRemovalSafetyCheck();
 
         cy.get('[data-cy="deleteSkillButton_skill1"]').should('be.enabled');
         cy.get('[data-cy="deleteSkillButton_skill2"]').should('not.exist');
 
         cy.get('[data-cy="deleteSkillButton_skill1"]').click();
-        cy.contains('Delete Action CANNOT be undone');
-        cy.contains('YES, Delete It!').click();
+        cy.acceptRemovalSafetyCheck();
 
         cy.get('[data-cy="deleteSkillButton_skill1"]').should('not.exist');
         cy.get('[data-cy="deleteSkillButton_skill2"]').should('not.exist');
@@ -506,8 +500,8 @@ describe('Skills Group Tests', () => {
         cy.get(`${tableSelector} [data-cy="totalPointsCell_group1"]`).contains('200');
 
         cy.get('[data-cy="deleteSkillButton_skill2"]').click();
-        cy.contains('DELETE [skill2]?');
-        cy.contains('YES, Delete It!').click();
+        cy.contains('ID: skill2');
+        cy.acceptRemovalSafetyCheck();;
 
         cy.get(`${tableSelector} [data-cy="totalPointsCell_group1"]`).contains('150');
     })
@@ -852,15 +846,15 @@ describe('Skills Group Tests', () => {
         cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="numSkillsInGroup"]`).contains('4')
 
         cy.get('[data-cy="deleteSkillButton_skill2"]').click();
-        cy.contains('DELETE [skill2]?');
-        cy.contains('YES, Delete It!').click();
+        cy.contains('This will remove Very Great Skill 2 (ID: skill2)');
+        cy.acceptRemovalSafetyCheck();
 
         cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="requiredSkillsNum"]`).contains('2')
         cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="numSkillsInGroup"]`).contains('3')
 
         cy.get('[data-cy="deleteSkillButton_skill1"]').click();
-        cy.contains('DELETE [skill1]?');
-        cy.contains('YES, Delete It!').click();
+        cy.contains('This will remove Very Great Skill 1 (ID: skill1)');
+        cy.acceptRemovalSafetyCheck();
 
         cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="requiredSkillsNum"]`).should('not.exist')
         cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="numSkillsInGroup"]`).should('not.exist')
@@ -1060,7 +1054,7 @@ describe('Skills Group Tests', () => {
         // delete
         cy.get('[data-cy="deleteSkillButton_skill1"]').click();
         cy.contains('Delete Action CANNOT be undone');
-        cy.contains('YES, Delete It!').click();
+        cy.acceptRemovalSafetyCheck();
 
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '100');
         cy.get('[data-cy="pageHeaderStat_Groups"] [data-cy="statValue"]').should('have.text', '1');

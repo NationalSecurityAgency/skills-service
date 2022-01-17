@@ -33,6 +33,7 @@ import skills.controller.result.model.*
 import skills.icons.CustomIconFacade
 import skills.icons.UploadedIcon
 import skills.metrics.MetricsService
+import skills.profile.EnableCallStackProf
 import skills.services.*
 import skills.services.admin.ProjAdminService
 import skills.utils.InputSanitizer
@@ -44,7 +45,7 @@ import static skills.services.GlobalBadgesService.AvailableSkillsResult
 @RestController
 @RequestMapping("/supervisor")
 @Slf4j
-@skills.profile.EnableCallStackProf
+@EnableCallStackProf
 class SupervisorController {
 
     @Autowired

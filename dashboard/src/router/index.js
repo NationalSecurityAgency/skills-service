@@ -54,6 +54,7 @@ import UserAgreement from '@//components/access/UserAgreement';
 import EmailUsers from '@//components/projects/EmailUsers';
 import EmaillProjectAdmins from '@//components/projects/EmailProjectAdmins';
 import MyBadges from '@//components/myProgress/badges/MyBadges';
+import SkillsCatalog from '@//components/skills/catalog/SkillsCatalog';
 
 const GlobalBadgePage = () => import(/* webpackChunkName: 'globalBadgePage' */'@/components/badges/global/GlobalBadgePage');
 const GlobalBadgeSkills = () => import(/* webpackChunkName: 'globalBadgeSkills' */'@//components/badges/global/GlobalBadgeSkills');
@@ -329,6 +330,11 @@ const router = new Router({
         path: 'self-report',
         component: SelfReportStatusPage,
         meta: { requiresAuth: true, reportSkillId: 'VisitSelfReport' },
+      }, {
+        name: 'SkillsCatalog',
+        path: '/administrator/projects/:projectId/skills-catalog',
+        component: SkillsCatalog,
+        meta: { requiresAuth: true },
       }, {
         name: 'ProjectAccess',
         path: 'access',
