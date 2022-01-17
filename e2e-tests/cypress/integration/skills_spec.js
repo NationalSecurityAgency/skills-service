@@ -1257,4 +1257,23 @@ describe('Skills Tests', () => {
     cy.get('[data-cy*=copySkillButton]').should('be.enabled');
   });
 
+  it('deleting a skill causes subject skill count to be updated', () => {
+    cy.createSkill(1, 1, 1);
+    cy.createSkill(1, 1, 2);
+    cy.createSkill(1, 1, 3);
+    cy.createSkill(1, 1, 4);
+    cy.createSkill(1, 1, 5);
+
+    cy.intercept('DELETE', '/admin/projects/proj1/subjects/subj1/skills/skill5').as('deleteSkill');
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+    cy.get('[data-cy=pageHeaderStat]').eq(1).should('contain.text', '5');
+    cy.get('[data-cy=deleteSkillButton_skill5]').click();
+    cy.get('[data-cy=currentValidationText]').type('Delete Me');
+    cy.get('[data-cy=removeButton]').should('be.enabled').click();
+    cy.wait('@deleteSkill');
+    cy.get('[data-cy=pageHeaderStat]').eq(1).should('contain.text', '4');
+  });
+
 });
