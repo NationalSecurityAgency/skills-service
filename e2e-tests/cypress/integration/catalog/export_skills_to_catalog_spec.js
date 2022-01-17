@@ -197,6 +197,61 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.get('[data-cy="exportedBadge-skill2"')
     });
 
+    it('export all skills ignores gorups', () => {
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2);
+        cy.createSkill(1, 1, 3);
+        cy.createSkill(1, 1, 4);
+        cy.createSkill(1, 1, 5);
+        cy.createSkillsGroup(1, 1, 13);
+        cy.createSkill(1, 1, 6);
+        cy.createSkill(1, 1, 7);
+        cy.createSkill(1, 1, 8);
+        cy.createSkill(1, 1, 9);
+        cy.createSkill(1, 1, 10);
+        cy.createSkill(1, 1, 11);
+        cy.createSkill(1, 1, 12);
+        cy.createSkillsGroup(1, 1, 14);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="skillActionsBtn"] button').should('be.disabled');
+        cy.get('[data-cy="skillActionsNumSelected"]').should('have.text', '0');
+        cy.get('[data-cy="selectAllSkillsBtn"]').click();
+        cy.get('[data-cy="skillActionsBtn"] button').should('be.enabled');
+        cy.get('[data-cy="skillActionsNumSelected"]').should('have.text', '12');
+
+        cy.get('[data-cy="skillActionsBtn"] button').click();
+        cy.get('[data-cy="skillExportToCatalogBtn"]').click();
+
+        cy.contains('This will export 12 Skills to the SkillTree Catalog');
+        cy.get('[data-cy="exportToCatalogButton"]').click();
+        cy.contains('12 Skills were successfully exported to the catalog!');
+
+        cy.get('[data-cy="exportToCatalogButton"]').should('not.exist')
+        cy.get('[data-cy="closeButton"]').should('not.exist')
+        cy.get('[data-cy="okButton"]').click()
+
+        cy.get('[data-cy="skillActionsBtn"] button').should('be.disabled');
+        cy.get('[data-cy="skillActionsNumSelected"]').should('have.text', '0');
+
+        cy.get('[data-cy="exportedBadge-skill5"')
+        cy.get('[data-cy="exportedBadge-skill6"')
+        cy.get('[data-cy="exportedBadge-skill7"')
+        cy.get('[data-cy="exportedBadge-skill8"')
+        cy.get('[data-cy="exportedBadge-skill9"')
+        cy.get('[data-cy="exportedBadge-skill10"')
+        cy.get('[data-cy="exportedBadge-skill11"')
+        cy.get('[data-cy="exportedBadge-skill12"')
+        cy.get('[data-cy="exportedBadge-skill13"').should('not.exist')
+        cy.get('[data-cy="exportedBadge-skill14"').should('not.exist')
+
+        cy.get('[data-cy="skillsBTablePaging"]').contains('2').click();
+
+        cy.get('[data-cy="exportedBadge-skill1"')
+        cy.get('[data-cy="exportedBadge-skill2"')
+        cy.get('[data-cy="exportedBadge-skill3"')
+        cy.get('[data-cy="exportedBadge-skill4"')
+    });
 
     it('try to export skills that are already exported', () => {
         cy.createSkill(1, 1, 1);

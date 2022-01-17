@@ -36,7 +36,7 @@ interface SkillDefWithExtraRepo extends PagingAndSortingRepository<SkillDefWithE
     SkillDefWithExtra findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(@Nullable String id, String skillId, List<SkillDef.ContainerType> type)
 
     @Nullable
-    SkillDefWithExtra findByProjectIdAndSkillIdAndType(String id, String skillId, SkillDef.ContainerType type)
+    SkillDefWithExtra findByProjectIdAndSkillId(String id, String skillId)
 
     static interface SkillDescDBRes {
         String getSkillId()
