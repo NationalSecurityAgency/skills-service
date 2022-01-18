@@ -20,7 +20,7 @@ import store from '../store/store';
 
 const { NavigationFailureType, isNavigationFailure } = VueRouter;
 
-const handlPush = (page) => {
+const handlePush = (page) => {
   router.push(page).catch((error) => {
     if (isNavigationFailure(error, NavigationFailureType.redirected)
       || isNavigationFailure(error, NavigationFailureType.duplicated)) {
@@ -67,22 +67,22 @@ function errorResponseHandler(error) {
       if (store.getters.isPkiAuthenticated) {
         loginRoute = path !== '/' ? { name: 'LandingPage', query: { redirect: path } } : { name: 'LandingPage' };
       }
-      router.push(loginRoute);
+      handlePush(loginRoute);
     }
   } else if (errorCode === 403) {
     let explanation;
     if (error.response && error.response.data && error.response.data.explanation) {
       ({ explanation } = error.response.data);
     }
-    router.push({ name: 'NotAuthorizedPage', params: { explanation } });
+    handlePush({ name: 'NotAuthorizedPage', params: { explanation } });
   } else if (errorCode === 404) {
     let explanation;
     if (error.response && error.response.data && error.response.data.explanation) {
       ({ explanation } = error.response.data);
     }
-    handlPush({ name: 'NotFoundPage', params: { explanation } });
+    handlePush({ name: 'NotFoundPage', params: { explanation } });
   } else {
-    router.push({ name: 'ErrorPage' });
+    handlePush({ name: 'ErrorPage' });
   }
   return Promise.resolve({ data: {} });
 }
