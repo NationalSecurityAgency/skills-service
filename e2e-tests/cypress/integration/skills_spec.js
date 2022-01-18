@@ -1173,7 +1173,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="skillsSelector"]').contains('No elements found. Consider changing the search query').should('be.visible')
   });
 
-  it.only('add skill and copy skill buttons disabled if max skills for subject reached', () => {
+  it('add skill and copy skill buttons disabled if max skills for subject reached', () => {
     cy.intercept('/public/config', {
       body: {
         artifactBuildTimestamp: "2022-01-17T14:39:38Z",
