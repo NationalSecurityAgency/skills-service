@@ -29,7 +29,7 @@ const snapshotOptions = {
 describe('Project Expiration Tests', () => {
   it('Project Expiration Projects Display', () => {
     const markedExpired = dayjs().utc().subtract(5, 'days').format('YYYY-MM-DD[T]HH:mm:ss[Z]')
-    cy.intercept('/app/projects', {
+    cy.intercept(/^\/app\/projects$/, {
       body: [{
         'projectId': 'proj1',
         'name': 'Proj 1',
