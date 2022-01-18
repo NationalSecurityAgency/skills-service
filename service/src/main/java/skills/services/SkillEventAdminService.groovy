@@ -24,8 +24,8 @@ import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.result.model.RequestResult
-import skills.services.events.BulkSkillEventResult
 import skills.services.admin.SkillCatalogService
+import skills.services.events.BulkSkillEventResult
 import skills.services.events.CompletionItem
 import skills.services.events.SkillEventResult
 import skills.services.events.SkillEventsService
@@ -73,7 +73,6 @@ class SkillEventAdminService {
     @Transactional
     @Profile
     BulkSkillEventResult bulkReportSkills(String projectId, String skillId, List<String> userIds, Date incomingSkillDate) {
-        List<SkillEventResult> results = []
         BulkSkillEventResult bulkResult = new BulkSkillEventResult(projectId: projectId, skillId: skillId)
         for (String requestedUserId : userIds) {
             try {
