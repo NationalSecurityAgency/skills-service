@@ -41,7 +41,7 @@ describe('Skills Tests', () => {
     cy.visit('/administrator/projects/proj1/subjects/subj1');
     cy.wait('@loadSubject');
 
-    cy.clickButton('Skill');
+    cy.get('[data-cy=newSkillButton]').click();
 
     // name causes id to be too long
     const msg = 'Skill ID cannot exceed 50 characters.';
@@ -772,7 +772,7 @@ describe('Skills Tests', () => {
 
     cy.visit('/administrator/projects/proj1/subjects/subj1');
     cy.wait('@loadSubject');
-    cy.clickButton('Skill')
+    cy.get('[data-cy=newSkillButton]').click();
 
     cy.get('[data-cy="skillName"]').type('Great Name 1 2 33');
     cy.get('[data-cy="idInputEnableControl"]').contains('Enable').click();
@@ -1173,7 +1173,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="skillsSelector"]').contains('No elements found. Consider changing the search query').should('be.visible')
   });
 
-  it('add skill and copy skill buttons disabled if max skills for subject reached', () => {
+  it.only('add skill and copy skill buttons disabled if max skills for subject reached', () => {
     cy.intercept('/public/config', {
       body: {
         artifactBuildTimestamp: "2022-01-17T14:39:38Z",
@@ -1246,7 +1246,8 @@ describe('Skills Tests', () => {
     cy.get('[data-cy*=copySkillButton]').should('be.disabled');
 
     cy.get('[data-cy=deleteSkillButton_skill1]').click();
-    cy.contains('YES, Delete It!').click();
+    cy.get('[data-cy=currentValidationText]').type('Delete Me');
+    cy.get('[data-cy=removeButton]').should('be.enabled').click();
     cy.wait('@deleteSkill');
 
     cy.get('[data-cy=newGroupButton]').should('be.enabled');

@@ -1286,11 +1286,14 @@ describe('Skills Group Tests', () => {
       cy.addSkillToGroupViaUI(groupId, 8, false);
 
       cy.get('[data-cy=deleteSkillButton_skill5]').click();
-      cy.contains('YES, Delete It!').click();
+      cy.get('[data-cy=currentValidationText]').type('Delete Me');
+      cy.get('[data-cy=removeButton]').should('be.enabled').click();
       cy.wait('@deleteSkill5');
 
       cy.get('[data-cy=deleteSkillButton_skill6]').click();
-      cy.contains('YES, Delete It!').click();
+
+      cy.get('[data-cy=currentValidationText]').type('Delete Me');
+      cy.get('[data-cy=removeButton]').should('be.enabled').click();
       cy.wait('@deleteSkill6');
 
       cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="goLiveBtn"]`).should('be.enabled');
