@@ -393,10 +393,9 @@ limitations under the License.
               self.handleUploadedIcon(response.data);
               self.successToast('Success!', 'File successfully uploaded');
               this.disableCustomUpload = false;
-            }, (err) => {
+            }, () => {
               self.errorToast('Error!', 'Encountered error when uploading icon');
               this.disableCustomUpload = false;
-              throw err;
             });
           }
         });
