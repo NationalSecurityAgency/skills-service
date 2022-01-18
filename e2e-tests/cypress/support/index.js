@@ -38,6 +38,9 @@ import 'cypress-axe'
 Cypress.on('window:before:load', (win) => {
     cy.spy(win.console, 'error');
     cy.spy(win.console, 'warn');
+    win.addEventListener('unhandledrejection', (event) => {
+        throw new Error(event.reason.message)
+    });
 });
 
 before(function () {

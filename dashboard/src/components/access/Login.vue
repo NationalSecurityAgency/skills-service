@@ -180,7 +180,7 @@ limitations under the License.
       resetAfterFailedLogin() {
         this.loginFailed = true;
         delete this.loginFields.password;
-        this.errors.clear();
+        this.errors?.clear();
       },
       requestAccountPage() {
         this.handlePush({ name: 'RequestAccount' });

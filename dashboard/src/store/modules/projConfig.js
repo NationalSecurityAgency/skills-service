@@ -32,7 +32,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       SettingService.getSettingsForProject(projectId)
         .then((response) => {
-          if (response) {
+          if (response && typeof response.reduce === 'function') {
             const projConfig = response.reduce((map, obj) => {
               // eslint-disable-next-line no-param-reassign
               map[obj.setting] = obj.value;
