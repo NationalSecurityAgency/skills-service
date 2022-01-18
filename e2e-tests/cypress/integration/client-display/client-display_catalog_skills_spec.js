@@ -48,22 +48,33 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
         cy.createSkillsGroup(1, 1, 5);
         cy.addSkillToGroup(1, 1, 5, 6);
         cy.addSkillToGroup(1, 1, 5, 7);
-        cy.createSkillsGroup(1, 1, 5, { enabled: true, numSkillsRequired: 1 });
+        cy.createSkillsGroup(1, 1, 5, {
+            enabled: true,
+            numSkillsRequired: 1
+        });
 
         cy.cdVisit('/');
         cy.cdClickSubj(0);
-        cy.get('[data-cy="skillProgress_index-0"]').contains('Very Great Skill 1 in This is project 2')
-        cy.get('[data-cy="skillProgress_index-1"]').contains('Very Great Skill 4')
-        cy.get('[data-cy="skillProgress_index-2"]').contains('Very Great Skill 2 in This is project 2')
-        cy.get('[data-cy="skillProgress_index-3"]').contains('Very Great Skill 3 in This is project 2')
-        cy.get('[data-cy="skillProgress_index-4"]').contains('Awesome Group 5 Subj1')
+        cy.get('[data-cy="skillProgress_index-0"]')
+            .contains('Very Great Skill 1 in This is project 2')
+        cy.get('[data-cy="skillProgress_index-1"]')
+            .contains('Very Great Skill 4')
+        cy.get('[data-cy="skillProgress_index-2"]')
+            .contains('Very Great Skill 2 in This is project 2')
+        cy.get('[data-cy="skillProgress_index-3"]')
+            .contains('Very Great Skill 3 in This is project 2')
+        cy.get('[data-cy="skillProgress_index-4"]')
+            .contains('Awesome Group 5 Subj1')
     });
 
     it('skills details', () => {
         cy.createProject(2);
         cy.createSubject(2, 1);
         cy.createSkill(2, 1, 1, { description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.' });
-        cy.createSkill(2, 1, 2, { selfReportingType: 'HonorSystem', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.' });
+        cy.createSkill(2, 1, 2, {
+            selfReportingType: 'HonorSystem',
+            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+        });
         cy.exportSkillToCatalog(2, 1, 1);
         cy.exportSkillToCatalog(2, 1, 2);
 
@@ -75,42 +86,65 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
 
         cy.cdVisit('/');
         cy.cdClickSubj(0);
-        cy.get('[data-cy="skillProgress_index-0"]').contains('Very Great Skill 1 in This is project 2')
-        cy.get('[data-cy="skillProgress_index-1"]').contains('Very Great Skill 2 in This is project 2')
-        cy.get('[data-cy="skillProgress_index-2"]').contains('Very Great Skill 3')
+        cy.get('[data-cy="skillProgress_index-0"]')
+            .contains('Very Great Skill 1 in This is project 2')
+        cy.get('[data-cy="skillProgress_index-1"]')
+            .contains('Very Great Skill 2 in This is project 2')
+        cy.get('[data-cy="skillProgress_index-2"]')
+            .contains('Very Great Skill 3')
 
-        cy.get('[data-cy=toggleSkillDetails]').click()
-        cy.get('[data-cy="skillDescription-skill1"] [data-cy="catalogImportStatus"]').contains('This skill is originally defined in This is project 2 and re-used in this project! Navigate to This is project 2 project to perform Very Great Skill 1 skill.')
-        cy.get('[data-cy="skillDescription-skill2"] [data-cy="catalogImportStatus"]').contains('This skill is originally defined in This is project 2 and re-used in this project! This skill can can be self-reported via the "I did it" button below.')
-        cy.get('[data-cy="skillDescription-skill3"] [data-cy="catalogImportStatus"]').should('not.exist')
+        cy.get('[data-cy=toggleSkillDetails]')
+            .click()
+        cy.get('[data-cy="skillDescription-skill1"] [data-cy="catalogImportStatus"]')
+            .contains('This skill is originally defined in This is project 2 and re-used in this project! Navigate to This is project 2 project to perform Very Great Skill 1 skill.')
+        cy.get('[data-cy="skillDescription-skill2"] [data-cy="catalogImportStatus"]')
+            .contains('This skill is originally defined in This is project 2 and re-used in this project! This skill can can be self-reported via the "I did it" button below.')
+        cy.get('[data-cy="skillDescription-skill3"] [data-cy="catalogImportStatus"]')
+            .should('not.exist')
 
-        cy.get('[data-cy="skillDescription-skill1"] [data-cy="selfReportBtn"]').should('not.exist');
-        cy.get('[data-cy="skillDescription-skill2"] [data-cy="selfReportBtn"]').should('be.enabled');
-        cy.get('[data-cy="skillDescription-skill3"] [data-cy="selfReportBtn"]').should('not.exist');
+        cy.get('[data-cy="skillDescription-skill1"] [data-cy="selfReportBtn"]')
+            .should('not.exist');
+        cy.get('[data-cy="skillDescription-skill2"] [data-cy="selfReportBtn"]')
+            .should('be.enabled');
+        cy.get('[data-cy="skillDescription-skill3"] [data-cy="selfReportBtn"]')
+            .should('not.exist');
 
         // check single pages
         cy.cdClickSkill(0);
-        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1 in This is project 2')
-        cy.get('[data-cy="catalogImportStatus"]').contains('This skill is originally defined in This is project 2 and re-used in this project! Navigate to This is project 2 project to perform Very Great Skill 1 skill.')
-        cy.get('[data-cy="selfReportBtn"]').should('not.exist');
+        cy.get('[data-cy="skillProgressTitle"]')
+            .contains('Very Great Skill 1 in This is project 2')
+        cy.get('[data-cy="catalogImportStatus"]')
+            .contains('This skill is originally defined in This is project 2 and re-used in this project! Navigate to This is project 2 project to perform Very Great Skill 1 skill.')
+        cy.get('[data-cy="selfReportBtn"]')
+            .should('not.exist');
 
         cy.cdBack('Subject 1');
         cy.cdClickSkill(1);
-        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 2 in This is project 2')
-        cy.get('[data-cy="catalogImportStatus"]').contains('This skill is originally defined in This is project 2 and re-used in this project! This skill can can be self-reported via the "I did it" button below.')
-        cy.get('[data-cy="selfReportBtn"]').should('be.enabled');
+        cy.get('[data-cy="skillProgressTitle"]')
+            .contains('Very Great Skill 2 in This is project 2')
+        cy.get('[data-cy="catalogImportStatus"]')
+            .contains('This skill is originally defined in This is project 2 and re-used in this project! This skill can can be self-reported via the "I did it" button below.')
+        cy.get('[data-cy="selfReportBtn"]')
+            .should('be.enabled');
 
         cy.cdBack('Subject 1');
         cy.cdClickSkill(2);
-        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 3')
-        cy.get('[data-cy="catalogImportStatus"]').should('not.exist')
-        cy.get('[data-cy="selfReportBtn"]').should('not.exist');
+        cy.get('[data-cy="skillProgressTitle"]')
+            .contains('Very Great Skill 3')
+        cy.get('[data-cy="catalogImportStatus"]')
+            .should('not.exist')
+        cy.get('[data-cy="selfReportBtn"]')
+            .should('not.exist');
     });
 
     it('self report imported skill', () => {
         cy.createProject(2);
         cy.createSubject(2, 1);
-        cy.createSkill(2, 1, 1, { selfReportingType: 'HonorSystem', pointIncrementInterval: 0, description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.' });
+        cy.createSkill(2, 1, 1, {
+            selfReportingType: 'HonorSystem',
+            pointIncrementInterval: 0,
+            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+        });
         cy.exportSkillToCatalog(2, 1, 1);
 
         cy.createProject(1)
@@ -119,19 +153,29 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
 
         cy.cdVisit('/');
         cy.cdClickSubj(0);
-        cy.get('[data-cy="skillProgress_index-0"]').contains('Very Great Skill 1 in This is project 2')
+        cy.get('[data-cy="skillProgress_index-0"]')
+            .contains('Very Great Skill 1 in This is project 2')
 
-        cy.get('[data-cy=toggleSkillDetails]').click()
-        cy.get('[data-cy="skillDescription-skill1"] [data-cy="selfReportBtn"]').click()
-        cy.get('[data-cy="selfReportSubmitBtn"]').click();
-        cy.get('[data-cy="skillDescription-skill1"] [data-cy="selfReportAlert"]').contains('Congrats! You just earned 100 points!')
-        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 200 Points')
+        cy.get('[data-cy=toggleSkillDetails]')
+            .click()
+        cy.get('[data-cy="skillDescription-skill1"] [data-cy="selfReportBtn"]')
+            .click()
+        cy.get('[data-cy="selfReportSubmitBtn"]')
+            .click();
+        cy.get('[data-cy="skillDescription-skill1"] [data-cy="selfReportAlert"]')
+            .contains('Congrats! You just earned 100 points!')
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]')
+            .contains('100 / 200 Points')
 
         cy.cdClickSkill(0);
-        cy.get('[data-cy="selfReportBtn"]').click();
-        cy.get('[data-cy="selfReportSubmitBtn"]').click();
-        cy.get('[data-cy="selfReportAlert"]').contains('Congrats! You just earned 100 points and completed the skill!')
-        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 200 Points')
+        cy.get('[data-cy="selfReportBtn"]')
+            .click();
+        cy.get('[data-cy="selfReportSubmitBtn"]')
+            .click();
+        cy.get('[data-cy="selfReportAlert"]')
+            .contains('Congrats! You just earned 100 points and completed the skill!')
+        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]')
+            .contains('200 / 200 Points')
     });
 
     it('catalog imported skill visual regression', () => {
@@ -159,7 +203,40 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
 
         cy.cdClickSkill(0);
         cy.matchSnapshotImageForElement('[data-cy="skillProgress"]', 'catalog imported skill visual regression - skill details themed');
+    });
 
+    it('catalog imported skill has self-report approval request', () => {
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1, { selfReportingType: 'Approval', });
+        cy.createSkill(2, 1, 2, { selfReportingType: 'Approval', });
+        cy.exportSkillToCatalog(2, 1, 1);
+        cy.exportSkillToCatalog(2, 1, 2);
+
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.importSkillFromCatalog(1, 1, 2, 1)
+        cy.importSkillFromCatalog(1, 1, 2, 2)
+
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+        cy.cdClickSkill(0);
+        cy.get('[data-cy="selfReportBtn"]').click();
+        cy.get('[data-cy="selfReportSubmitBtn"]').click();
+        cy.get('[data-cy="selfReportAlert"]').contains('Submitted successfully')
+        cy.get('[data-cy="pendingApprovalStatus"]').contains('Pending Approval')
+
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+        cy.get('[data-cy="toggleSkillDetails"]').click();
+        cy.get('[data-cy="skillDescription-skill1"] [data-cy="pendingApprovalStatus"]').contains('Pending Approval')
+        cy.get('[data-cy="skillDescription-skill1"] [data-cy="selfReportBtn"]').should('be.disabled')
+        cy.get('[data-cy="skillDescription-skill2"] [data-cy="pendingApprovalStatus"]').should('not.exist')
+        cy.get('[data-cy="skillDescription-skill2"] [data-cy="selfReportBtn"]').should('be.enabled')
+
+        cy.cdClickSkill(0);
+        cy.get('[data-cy="pendingApprovalStatus"]').contains('Pending Approval')
+        cy.get('[data-cy="selfReportBtn"]').should('be.disabled')
     });
 });
 
