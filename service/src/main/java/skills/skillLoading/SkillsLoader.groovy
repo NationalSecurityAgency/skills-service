@@ -450,7 +450,9 @@ class SkillsLoader {
     private SelfReportingInfo loadSelfReporting(String userId, SkillDefWithExtra skillDef){
         boolean enabled = skillDef.selfReportingType != null
         Pageable oneRowPlease = PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "requestedOn"))
-        List<SkillApproval> skillApprovals = skillApprovalRepo.findApprovalForSkillsDisplay(userId, skillDef.projectId, skillDef.id, oneRowPlease )
+        String queryProjId = skillDef.copiedFrom ? skillDef.copiedFromProjectId : skillDef.projectId
+        Integer querySkillRefId = skillDef.copiedFrom ? skillDef.copiedFrom : skillDef.id
+        List<SkillApproval> skillApprovals = skillApprovalRepo.findApprovalForSkillsDisplay(userId, queryProjId, querySkillRefId, oneRowPlease )
         SkillApproval skillApproval = skillApprovals?.size() > 0 ? skillApprovals.first() : null
 
         SelfReportingInfo selfReportingInfo = new SelfReportingInfo(
@@ -495,8 +497,8 @@ class SkillsLoader {
         List<SkillDefWithExtraRepo.SkillDescDBRes> dbRes
         Map<String, List<SkillApprovalRepo.SkillApprovalPlusSkillId>> approvalLookup
         if (projectId) {
-            dbRes = skillDefWithExtraRepo.findAllChildSkillsDescriptions(projectId, subjectId,relationshipType, version, userId)
-            List<SkillApprovalRepo.SkillApprovalPlusSkillId> approvals = skillApprovalRepo.findsApprovalWithSkillIdForSkillsDisplay(userId, projectId, subjectId)
+            dbRes = skillDefWithExtraRepo.findAllChildSkillsDescriptions(projectId, subjectId, relationshipType, version, userId)
+            List<SkillApprovalRepo.SkillApprovalPlusSkillId> approvals = skillApprovalRepo.findsApprovalWithSkillIdForSkillsDisplay(userId, projectId, subjectId, relationshipType)
             approvalLookup = approvals.groupBy { it.getSkillId() }
         } else {
             dbRes = skillDefWithExtraRepo.findAllGlobalChildSkillsDescriptions(subjectId, relationshipType, version, userId)

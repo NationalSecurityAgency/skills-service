@@ -15,7 +15,6 @@
  */
 package skills.intTests
 
-
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
@@ -655,6 +654,160 @@ class CatalogSkillTests extends DefaultIntSpec {
         p2Stats.numSkills == 1
         p2Stats.userTotalPoints == 200
     }
+
+    def "skill additional info endpoint must return self-report approval status for imported skills"() {
+        def project1 = createProject(1)
+        def project2 = createProject(2)
+        def project3 = createProject(3)
+
+        def p1subj1 = createSubject(1, 1)
+        def p2subj1 = createSubject(2, 1)
+        def p3subj1 = createSubject(3, 1)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 10)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 10)
+        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 10)
+
+        def proj2_skill4 = createSkill(2, 1, 4)
+        def proj2_skill5 = createSkill(2, 1, 5)
+
+        skill.pointIncrement = 200
+        skill.numPerformToCompletion = 1
+        skill.selfReportingType = SkillDef.SelfReportingType.Approval
+        skill2.selfReportingType = SkillDef.SelfReportingType.Approval
+        skill3.selfReportingType = SkillDef.SelfReportingType.Approval
+        proj2_skill4.selfReportingType = SkillDef.SelfReportingType.Approval
+        proj2_skill5.selfReportingType = SkillDef.SelfReportingType.Approval
+
+
+        skillsService.createProject(project1)
+        skillsService.createProject(project2)
+        skillsService.createProject(project3)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p2subj1)
+        skillsService.createSubject(p3subj1)
+
+        skillsService.createSkill(skill)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(skill3)
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
+
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill2.skillId)
+        skillsService.createSkill(proj2_skill4)
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill3.skillId)
+        skillsService.createSkill(proj2_skill5)
+
+        def user = getRandomUsers(1)[0]
+        skillsService.addSkill([projectId: project2.projectId, skillId: skill.skillId], user)
+        skillsService.addSkill([projectId: project2.projectId, skillId: proj2_skill4.skillId], user)
+        skillsService.addSkill([projectId: project2.projectId, skillId: skill3.skillId], user)
+        when:
+        def subjDescRes = skillsService.getSubjectDescriptions(project2.projectId, p2subj1.subjectId, user)
+        then:
+        subjDescRes.size() == 5
+        def self1 = subjDescRes.find { it.skillId == skill.skillId }.selfReporting
+        self1.enabled
+        self1.type == "Approval"
+        self1.requestedOn
+
+        def self2 = subjDescRes.find { it.skillId == skill2.skillId }.selfReporting
+        self2.enabled
+        self2.type == "Approval"
+        !self2.requestedOn
+
+        def self3 = subjDescRes.find { it.skillId == skill3.skillId }.selfReporting
+        self3.enabled
+        self3.type == "Approval"
+        self3.requestedOn
+
+        def self4 = subjDescRes.find { it.skillId == proj2_skill4.skillId }.selfReporting
+        self4.enabled
+        self4.type == "Approval"
+        self4.requestedOn
+
+        def self5 = subjDescRes.find { it.skillId == proj2_skill5.skillId }.selfReporting
+        self5.enabled
+        self5.type == "Approval"
+        !self5.requestedOn
+    }
+
+    def "single skill endpoint must return self-report approval status for imported skills"() {
+        def project1 = createProject(1)
+        def project2 = createProject(2)
+        def project3 = createProject(3)
+
+        def p1subj1 = createSubject(1, 1)
+        def p2subj1 = createSubject(2, 1)
+        def p3subj1 = createSubject(3, 1)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 10)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 10)
+        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 10)
+
+        def proj2_skill4 = createSkill(2, 1, 4)
+        def proj2_skill5 = createSkill(2, 1, 5)
+
+        skill.pointIncrement = 200
+        skill.numPerformToCompletion = 1
+        skill.selfReportingType = SkillDef.SelfReportingType.Approval
+        skill2.selfReportingType = SkillDef.SelfReportingType.Approval
+        skill3.selfReportingType = SkillDef.SelfReportingType.Approval
+        proj2_skill4.selfReportingType = SkillDef.SelfReportingType.Approval
+        proj2_skill5.selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(project1)
+        skillsService.createProject(project2)
+        skillsService.createProject(project3)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p2subj1)
+        skillsService.createSubject(p3subj1)
+
+        skillsService.createSkill(skill)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(skill3)
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
+
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill2.skillId)
+        skillsService.createSkill(proj2_skill4)
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill3.skillId)
+        skillsService.createSkill(proj2_skill5)
+
+        def user = getRandomUsers(1)[0]
+        skillsService.addSkill([projectId: project2.projectId, skillId: skill.skillId], user)
+        skillsService.addSkill([projectId: project2.projectId, skillId: proj2_skill4.skillId], user)
+        skillsService.addSkill([projectId: project2.projectId, skillId: skill3.skillId], user)
+        when:
+        def self1 = skillsService.getSingleSkillSummary(user, project2.projectId, skill.skillId).selfReporting
+        def self2 = skillsService.getSingleSkillSummary(user, project2.projectId, skill2.skillId).selfReporting
+        def self3 = skillsService.getSingleSkillSummary(user, project2.projectId, skill3.skillId).selfReporting
+        def self4 = skillsService.getSingleSkillSummary(user, project2.projectId, proj2_skill4.skillId).selfReporting
+        def self5 = skillsService.getSingleSkillSummary(user, project2.projectId, proj2_skill5.skillId).selfReporting
+        then:
+        self1.enabled
+        self1.type == "Approval"
+        self1.requestedOn
+
+        self2.enabled
+        self2.type == "Approval"
+        !self2.requestedOn
+
+        self3.enabled
+        self3.type == "Approval"
+        self3.requestedOn
+
+        self4.enabled
+        self4.type == "Approval"
+        self4.requestedOn
+
+        self5.enabled
+        self5.type == "Approval"
+        !self5.requestedOn
+    }
+
 
     def "delete user skill event for skill in catalog"() {
         def project1 = createProject(1)

@@ -24,6 +24,7 @@ import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
 import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillRelDef
 
 import java.util.stream.Stream
 
@@ -164,18 +165,15 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
     @Query('''SELECT s as skillApproval, sd.skillId as skillId
         from SkillApproval s, SkillDef subject, SkillRelDef  srd, SkillDef sd 
         where
-            subject = srd.parent and 
-            sd = srd.child and
+            subject = srd.parent and sd = srd.child and srd.type = ?4 and
             s.userId = ?1 and
-            s.projectId = ?2 and
-            subject.skillId = ?3 and
-            srd.type = 'RuleSetDefinition' and
-            ( s.skillRefId = sd.id or (sd.copiedFrom > 0 and s.skillRefId = sd.copiedFrom) ) and
+            subject.projectId = ?2 and subject.skillId = ?3 and
+            (s.skillRefId = sd.id or s.skillRefId = sd.copiedFrom) and
             (
                 s.approverActionTakenOn is null or 
                 (s.rejectionAcknowledgedOn is null and s.rejectedOn is not null)
             )''')
-    List<SkillApprovalPlusSkillId> findsApprovalWithSkillIdForSkillsDisplay(String userId, String projectId, String subjectId)
+    List<SkillApprovalPlusSkillId> findsApprovalWithSkillIdForSkillsDisplay(String userId, String projectId, String subjectId, SkillRelDef.RelationshipType relationshipType)
 
     @Query('''SELECT s as skillApproval, sd.skillId as skillId
         from SkillApproval s, SkillDef subject, SkillRelDef  srd, SkillDef sd 
