@@ -42,7 +42,7 @@ class PortalWebSecurityHelper {
             .antMatchers('/supervisor/**').hasAnyAuthority(RoleName.ROLE_SUPERVISOR.name(), RoleName.ROLE_SUPER_DUPER_USER.name())
             .antMatchers('/root/isRoot').hasAnyAuthority(RoleName.values().collect {it.name()}.toArray(new String[0]))
             .antMatchers('/root/**').hasRole('SUPER_DUPER_USER')
-            .antMatchers('/actuator/**').hasRole(RoleName.ROLE_SUPER_DUPER_USER.name())
+            .antMatchers('/actuator/**').hasRole('SUPER_DUPER_USER')
             .anyRequest().authenticated()
         http.headers().frameOptions().disable()
 
