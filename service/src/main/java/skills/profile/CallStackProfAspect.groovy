@@ -41,6 +41,9 @@ class CallStackProfAspect {
     @Value('#{"${skills.prof.minMillisToPrint:100}"}')
     int minMillisToPrint
 
+    @Value('#{"${skills.prof.serverTimingAPI.enabled:false}"}')
+    boolean serverTimeApiEnabled
+
     @Around("@within(EnableCallStackProf) || @annotation(EnableCallStackProf)")
     Object profile(ProceedingJoinPoint joinPoint) {
         if (!enabled) {
@@ -93,6 +96,10 @@ class CallStackProfAspect {
         }
 
         builder.append(")")
+        if (serverTimeApiEnabled) {
+            builder.append(" profId=")
+            builder.append(System.currentTimeMillis())
+        }
         return  builder.toString()
     }
 
