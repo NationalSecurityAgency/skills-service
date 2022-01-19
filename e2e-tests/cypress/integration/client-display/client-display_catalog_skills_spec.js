@@ -238,6 +238,77 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
         cy.get('[data-cy="pendingApprovalStatus"]').contains('Pending Approval')
         cy.get('[data-cy="selfReportBtn"]').should('be.disabled')
     });
+
+    it('gracefully handle self-reporting for the imported skill which already has pending approval reported another way after the page was loaded', () => {
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1, { selfReportingType: 'Approval', });
+        cy.createSkill(2, 1, 2, { selfReportingType: 'Approval', });
+        cy.exportSkillToCatalog(2, 1, 1);
+        cy.exportSkillToCatalog(2, 1, 2);
+
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.importSkillFromCatalog(1, 1, 2, 1)
+        cy.importSkillFromCatalog(1, 1, 2, 2)
+
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+        cy.get('[data-cy=toggleSkillDetails]').click()
+        cy.get('[data-cy="skillDescription-skill1"] [data-cy="selfReportBtn"]')
+
+        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now');
+        cy.wait(3000)
+
+        cy.get('[data-cy="skillDescription-skill1"] [data-cy="selfReportBtn"]').click();
+        cy.get('[data-cy="selfReportSubmitBtn"] ').click();
+        cy.get('[data-cy="skillDescription-skill1"] [data-cy="selfReportError"]').contains('This skill was already submitted for approval and is still pending approval')
+
+        cy.cdClickSkill(1);
+        cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
+        cy.wait(3000)
+        cy.get('[data-cy="selfReportBtn"]').click();
+        cy.get('[data-cy="selfReportSubmitBtn"] ').click();
+        cy.get('[data-cy="selfReportError"]').contains('This skill was already submitted for approval and is still pending approval')
+    });
+
+    it('gracefully handle self-reporting for the imported skill that was achieved another way after the page was loaded', () => {
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1, { selfReportingType: 'Approval', numPerformToCompletion: 1 });
+        cy.createSkill(2, 1, 2, { selfReportingType: 'Approval', numPerformToCompletion: 1});
+        cy.exportSkillToCatalog(2, 1, 1);
+        cy.exportSkillToCatalog(2, 1, 2);
+
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.importSkillFromCatalog(1, 1, 2, 1)
+        cy.importSkillFromCatalog(1, 1, 2, 2)
+
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+        cy.get('[data-cy=toggleSkillDetails]').click()
+        cy.get('[data-cy="skillDescription-skill1"] [data-cy="selfReportBtn"]')
+
+        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now');
+        cy.wait(3000)
+        cy.approveRequest(2)
+        cy.wait(3000)
+
+        cy.get('[data-cy="skillDescription-skill1"] [data-cy="selfReportBtn"]').click();
+        cy.get('[data-cy="selfReportSubmitBtn"] ').click();
+        cy.get('[data-cy="skillDescription-skill1"] [data-cy="selfReportError"]').contains('This skill reached its maximum points')
+
+        cy.cdClickSkill(1);
+        cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
+        cy.wait(3000)
+        cy.approveRequest(2)
+        cy.wait(3000)
+        cy.get('[data-cy="selfReportBtn"]').click();
+        cy.get('[data-cy="selfReportSubmitBtn"] ').click();
+        cy.get('[data-cy="selfReportError"]').contains('This skill reached its maximum points')
+    });
+
 });
 
 
