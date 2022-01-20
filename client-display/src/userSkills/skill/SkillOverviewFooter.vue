@@ -222,19 +222,25 @@ limitations under the License.
 
         UserSkillsService.reportSkill(this.skillInternal.skillId, approvalRequestedMsg)
           .then((res) => {
-            if (this.skillInternal.selfReporting) {
-              this.skillInternal.selfReporting.rejectedOn = null;
-              this.skillInternal.selfReporting.rejectionMsg = null;
-            }
+            if (res.explanation.includes('This skill was already submitted for approval and is still pending approval')
+              || res.explanation.includes('This skill reached its maximum points')) {
+              this.errNotification.msg = `${res.explanation}. Please refresh the page to update the status.`;
+              this.errNotification.enable = true;
+            } else {
+              if (this.skillInternal.selfReporting) {
+                this.skillInternal.selfReporting.rejectedOn = null;
+                this.skillInternal.selfReporting.rejectionMsg = null;
+              }
 
-            this.selfReport.msgHidden = false;
-            this.selfReport.res = res;
-            if (!this.isAlreadyPerformed() && this.isApprovalRequired) {
-              this.skillInternal.selfReporting.requestedOn = new Date();
-            }
-            if (res.pointsEarned > 0) {
-              this.skillInternal.points += res.pointsEarned;
-              this.$emit('points-earned', res.pointsEarned);
+              this.selfReport.msgHidden = false;
+              this.selfReport.res = res;
+              if (!this.isAlreadyPerformed() && this.isApprovalRequired) {
+                this.skillInternal.selfReporting.requestedOn = new Date();
+              }
+              if (res.pointsEarned > 0) {
+                this.skillInternal.points += res.pointsEarned;
+                this.$emit('points-earned', res.pointsEarned);
+              }
             }
           }).catch((e) => {
             if (e.response.data && e.response.data.errorCode

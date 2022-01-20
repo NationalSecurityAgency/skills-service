@@ -15,6 +15,7 @@
  */
 package skills.intTests
 
+import groovy.json.JsonOutput
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
@@ -22,7 +23,10 @@ import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.services.UserEventService
 import skills.storage.model.DayCountItem
+import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
+import skills.storage.repos.SkillApprovalRepo
+import skills.storage.repos.SkillDefRepo
 
 import java.time.LocalDate
 
@@ -32,6 +36,12 @@ class CatalogSkillTests extends DefaultIntSpec {
 
     @Autowired
     UserEventService userEventService
+
+    @Autowired
+    SkillApprovalRepo skillApprovalRepo
+
+    @Autowired
+    SkillDefRepo skillDefRepo
 
     def "add skill to catalog"() {
         def project1 = createProject(1)
@@ -653,6 +663,92 @@ class CatalogSkillTests extends DefaultIntSpec {
         p1Stats.userTotalPoints == 200
         p2Stats.numSkills == 1
         p2Stats.userTotalPoints == 200
+    }
+
+    def "report self-report approval request on skill imported from catalog - skill already has pending approval request and then approved"() {
+        def project1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+
+        def project2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+
+        def skill = createSkill(1, 1, 1, 0, 2, 0, 10)
+        def skill2 = createSkill(1, 1, 2, 0, 2, 0, 10)
+        def skill3 = createSkill(1, 1, 3, 0, 2, 0, 10)
+
+        skill.pointIncrement = 200
+        skill.selfReportingType = SkillDef.SelfReportingType.Approval
+        skill2.selfReportingType = SkillDef.SelfReportingType.Approval
+        skill3.selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(project1)
+        skillsService.createProject(project2)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p2subj1)
+
+        skillsService.createSkill(skill)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(skill3)
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
+
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill2.skillId)
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill3.skillId)
+
+        def user = getRandomUsers(1)[0]
+        when:
+        def res1 = skillsService.addSkill([projectId: project2.projectId, skillId: skill.skillId], user)
+        List<SkillApproval> approvals1 = skillApprovalRepo.findAll()
+
+        def res2 = skillsService.addSkill([projectId: project2.projectId, skillId: skill.skillId], user)
+
+        List<SkillApproval> approvals2 = skillApprovalRepo.findAll()
+        skillsService.approve(project1.projectId, approvals2.collect { it.id })
+
+        def res3 = skillsService.addSkill([projectId: project2.projectId, skillId: skill.skillId], user)
+        println JsonOutput.prettyPrint(JsonOutput.toJson(res3))
+
+        List<SkillApproval> approvals3 = skillApprovalRepo.findAll()
+        skillsService.approve(project1.projectId, approvals3.find { it.approverActionTakenOn == null }.collect { it.id })
+
+        def res4 = skillsService.addSkill([projectId: project2.projectId, skillId: skill.skillId], user)
+        List<SkillApproval> approvals4 = skillApprovalRepo.findAll()
+        then:
+        !res1.body.skillApplied
+        res1.body.explanation == "Skill was submitted for approval"
+        res1.body.pointsEarned == 0
+        approvals1.size() == 1
+        approvals1[0].projectId == project1.projectId
+        skillDefRepo.findById(approvals1[0].skillRefId).get().skillId == skill.skillId
+        !approvals1[0].approverActionTakenOn
+
+        !res2.body.skillApplied
+        res2.body.pointsEarned == 0
+        res2.body.explanation == "This skill was already submitted for approval and is still pending approval"
+        approvals2.size() == 1
+        approvals2[0].projectId == project1.projectId
+        skillDefRepo.findById(approvals2[0].skillRefId).get().skillId == skill.skillId
+        !approvals2[0].approverActionTakenOn
+
+        !res3.body.skillApplied
+        res3.body.explanation == "Skill was submitted for approval"
+        res3.body.pointsEarned == 0
+        approvals3.size() == 2
+        def approved1 = approvals3.find { it.approverActionTakenOn != null }
+        approved1.projectId == project1.projectId
+        skillDefRepo.findById(approved1.skillRefId).get().skillId == skill.skillId
+
+        def pending = approvals3.find { it.approverActionTakenOn == null }
+        pending.projectId == project1.projectId
+        skillDefRepo.findById(pending.skillRefId).get().skillId == skill.skillId
+
+        !res4.body.skillApplied
+        res4.body.pointsEarned == 0
+        res4.body.explanation == "This skill reached its maximum points"
+        approvals4.size() == 2
+        approvals4.each { assert it.getApproverActionTakenOn() != null }
     }
 
     def "skill additional info endpoint must return self-report approval status for imported skills"() {
