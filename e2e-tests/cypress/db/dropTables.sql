@@ -40,6 +40,10 @@ drop table user_events;
 
 drop table skill_approval;
 
+drop table exported_skills;
+
+drop table skill_updated_queue;
+
 drop table skill_definition;
 
 drop table custom_icons;
