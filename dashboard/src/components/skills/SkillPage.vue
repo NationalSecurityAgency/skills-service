@@ -195,11 +195,11 @@ limitations under the License.
       buildHeaderOptions(skill) {
         return {
           icon: 'fas fa-graduation-cap skills-color-skills',
-          title: `SKILL: ${skill.name}`,
-          subTitle: `ID: ${skill.skillId} | GROUP ID: ${skill.groupId}`,
+          title: `SKILL: ${skill?.name}`,
+          subTitle: `ID: ${skill?.skillId} | GROUP ID: ${skill?.groupId}`,
           stats: [{
             label: 'Points',
-            count: skill.totalPoints,
+            count: skill?.totalPoints,
             icon: 'far fa-arrow-alt-circle-up skills-color-points',
           }],
         };
