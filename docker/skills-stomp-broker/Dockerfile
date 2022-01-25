@@ -1,4 +1,4 @@
-FROM rabbitmq:3.8-management-alpine
+FROM rabbitmq:3.9.13-management-alpine
 
 ADD join.sh /
 COPY enabled_plugins /etc/rabbitmq/enabled_plugins
