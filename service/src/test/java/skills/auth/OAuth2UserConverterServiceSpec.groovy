@@ -151,6 +151,37 @@ class OAuth2UserConverterServiceSpec extends Specification {
         result == expected
     }
 
+    def "Azure OAuth Converter"() {
+        OAuth2UserConverterService service = new OAuth2UserConverterService()
+        service.lookup = new FormSecurityConfiguration().oAuth2UserConverterMap()
+
+        final String providerId = 'azure'
+        final String userName = 'joeuser'
+        final String firstName = 'Joe'
+        final String lastName = 'User'
+        final String email = "${userName}@email.com"
+        Map<String, Object> attributes = [
+                given_name: firstName,
+                family_name: lastName,
+                email: email,
+        ]
+
+        OAuth2User oAuth2User = createOAuth2User(userName, attributes)
+        UserInfo expected = new UserInfo(
+                username: "${userName}-${providerId}",
+                usernameForDisplay: userName,
+                email: email,
+                firstName: firstName,
+                lastName: lastName
+        )
+
+        when:
+        UserInfo result = service.convert(providerId, oAuth2User)
+
+        then:
+        result == expected
+    }
+
     private OAuth2User createOAuth2User(String providerUserId, Map<String, Object> attributes) {
         return new OAuth2User() {
             @Override
