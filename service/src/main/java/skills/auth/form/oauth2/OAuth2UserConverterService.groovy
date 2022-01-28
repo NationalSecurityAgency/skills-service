@@ -236,4 +236,33 @@ class OAuth2UserConverterService {
             )
         }
     }
+
+    static class AzureConverter implements OAuth2UserConverter {
+
+        static final String FIRST_NAME = 'given_name'
+        static final String LAST_NAME = 'family_name'
+        static final String EMAIL = 'email'
+
+        String providerId = 'azure'
+        @Override
+        UserInfo convert(String providerId, OAuth2User oAuth2User) {
+            String firstName =  oAuth2User.attributes.get(FIRST_NAME)
+            String lastName =  oAuth2User.attributes.get(LAST_NAME)
+            String email =  oAuth2User.attributes.get(EMAIL)
+            List tokens = email.tokenize('@')
+            String username = tokens.first()
+
+            assert email, "Error getting email attribute of oAuth2User [${oAuth2User}] from providerId [$providerId]"
+            assert username, "Error getting username attribute of oAuth2User [${oAuth2User}] from providerId [$providerId]"
+            assert firstName, "Error getting firstName attribute of oAuth2User [${oAuth2User}] from providerId [$providerId]"
+            assert lastName, "Error getting lastName attribute of oAuth2User [${oAuth2User}] from providerId [$providerId]"
+
+            return new UserInfo(
+                    username: "${username}-${providerId}",
+                    email:email,
+                    firstName: firstName,
+                    lastName: lastName,
+            )
+        }
+    }
 }
