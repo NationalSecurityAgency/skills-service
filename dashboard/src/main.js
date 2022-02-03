@@ -56,7 +56,7 @@ import {
 } from 'vee-validate';
 import en from 'vee-validate/dist/locale/en.json';
 import Vuex from 'vuex';
-import marked from 'marked';
+import { marked } from 'marked';
 import VueApexCharts from 'vue-apexcharts';
 import FiltersPlugin from '@/common-components/filter/FiltersPlugin';
 import dayjs from '@/common-components/DayJsCustomizer';
@@ -206,20 +206,20 @@ router.afterEach((to) => {
   }
 });
 
-const renderer = new marked.Renderer();
-renderer.link = function markedLinkRenderer(href, title, text) {
-  let titleRes = title;
-  if (!title) {
-    titleRes = text;
-  }
-  const link = marked.Renderer.prototype.link.call(this, href, titleRes, text);
-  let resLink = link.replace('<a', "<a target='_blank' ");
-  resLink = resLink.replace('</a>', ' <i class="fas fa-external-link-alt" style="font-size: 0.8rem"></i></a>');
-  return resLink;
+const renderer = {
+  markedLinkRenderer(href, title, text) {
+    let titleRes = title;
+    if (!title) {
+      titleRes = text;
+    }
+    const link = marked.Renderer.prototype.link.call(this, href, titleRes, text);
+    let resLink = link.replace('<a', "<a target='_blank' ");
+    resLink = resLink.replace('</a>', ' <i class="fas fa-external-link-alt" style="font-size: 0.8rem"></i></a>');
+    return resLink;
+  },
 };
-marked.setOptions({
-  renderer,
-});
+
+marked.use({ renderer });
 
 store.dispatch('loadConfigState').finally(() => {
   RegisterValidators.init();
