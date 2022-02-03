@@ -35,6 +35,7 @@ VOLUME /tmp
 
 EXPOSE 80
 EXPOSE 8443
+EXPOSE 8808
 
 RUN mkdir /data
 
