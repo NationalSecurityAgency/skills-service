@@ -63,7 +63,7 @@ describe('Breadcrumb Navigation Tests', () => {
         }).as('loadSkill');
     });
 
-    it.only('Skill Navigation', () => {
+    it('Skill Navigation', () => {
         const now = dayjs();
         cy.intercept({method: 'GET', url: '/admin/projects/proj1/subjects/subj1/skills'}).as('loadSkills');
         cy.intercept({method: 'GET', url: '/admin/projects/proj1/subjects/subj1/skills/skill1'}).as('loadSkill');
