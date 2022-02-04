@@ -98,7 +98,7 @@ describe('Markdown Tests', () => {
 
     });
 
-    it('on skills pages', () => {
+    it.only('on skills pages', () => {
 
         const markdown = "# Title1\n## Title2\n### Title 3\n#### Title 4\n##### Title 5\nTitle 6\n\n" +
             "---\n" +
