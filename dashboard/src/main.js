@@ -207,7 +207,7 @@ router.afterEach((to) => {
 });
 
 const renderer = {
-  markedLinkRenderer(href, title, text) {
+  link(href, title, text) {
     let titleRes = title;
     if (!title) {
       titleRes = text;
