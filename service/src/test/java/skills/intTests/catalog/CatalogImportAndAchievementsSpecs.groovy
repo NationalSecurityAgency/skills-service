@@ -15,14 +15,16 @@
  */
 package skills.intTests.catalog
 
-import org.junit.Ignore
+
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsFactory
 import skills.services.LevelDefinitionStorageService
 import skills.storage.model.UserAchievement
+import skills.storage.model.UserPoints
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
-import spock.lang.IgnoreRest
+import skills.storage.repos.UserPointsRepo
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -36,6 +38,9 @@ class CatalogImportAndAchievementsSpecs extends DefaultIntSpec {
 
     @Autowired
     SkillDefRepo skillDefRepo
+
+    @Autowired
+    UserPointsRepo userPointsRepo
 
     def "reporting original skill event achieves level in all of the imported projects"() {
         def project1 = createProject(1)
@@ -161,6 +166,145 @@ class CatalogImportAndAchievementsSpecs extends DefaultIntSpec {
         getLevels(users[3], project3.projectId, proj3_subj1_ref_id) == [1, 2, 3]
     }
 
+    private createProjWithCatalogSkills ( Integer projNum ) {
+        def proj = createProject(projNum)
+        def subj1 = createSubject(projNum, 1)
+        def subj2 = createSubject(projNum, 2)
+        def subj3 = createSubject(projNum, 3)
+        def subj1_skills = (1..3).collect {createSkill(projNum, 1, projNum * 10 + it, 0,2, 480, 100) }
+        def subj2_skills = (1..3).collect {createSkill(projNum, 2, projNum * 10 + it + 3, 0, 2, 480, 100) }
+        def subj3_skills = (1..3).collect {createSkill(projNum, 3, projNum * 10 + it + 6, 0, 2, 480, 100) }
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj1)
+        skillsService.createSubject(subj2)
+        skillsService.createSubject(subj3)
+        List skills = [subj1_skills, subj2_skills, subj3_skills].flatten()
+        skillsService.createSkills(skills)
+        skills.each { skillsService.exportSkillToCatalog(proj.projectId, it.skillId) }
+        return [
+                p : proj,
+                s1: subj1,
+                s2: subj2,
+                s1_skills: subj1_skills,
+                s2_skills: subj2_skills,
+                s3_skills: subj3_skills,
+        ]
+    }
+
+    def "reporting original skill event achieves subject level"() {
+        def proj1 = createProjWithCatalogSkills(1)
+        def proj2 = createProjWithCatalogSkills(2)
+
+        def proj3 = SkillsFactory.createProject(3)
+        def p3_subj1 = SkillsFactory.createSubject(3, 1)
+        def p3_subj2 = SkillsFactory.createSubject(3, 2)
+        skillsService.createProject(proj3)
+        skillsService.createSubject(p3_subj1)
+        skillsService.createSubject(p3_subj2)
+
+        skillsService.bulkImportSkillsFromCatalog(proj3.projectId, p3_subj1.subjectId, proj1.s1_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
+        skillsService.bulkImportSkillsFromCatalog(proj3.projectId, p3_subj1.subjectId, proj2.s1_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
+        skillsService.bulkImportSkillsFromCatalog(proj3.projectId, p3_subj2.subjectId, proj1.s2_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
+
+        def users = getRandomUsers(5)
+
+        Integer proj3_subj1_ref_id = skillDefRepo.findByProjectIdAndSkillId(proj3.projectId, p3_subj1.subjectId).id
+        Integer proj3_subj2_ref_id = skillDefRepo.findByProjectIdAndSkillId(proj3.projectId, p3_subj2.subjectId).id
+
+        List<UserAchievement> user1_subj1_report0 = userAchievedRepo.findAll().findAll { it.userId == users[0] && it.level != null && it.projectId ==proj3.projectId && it.skillRefId == proj3_subj1_ref_id}
+        List<UserAchievement> user1_subj2_report0 = userAchievedRepo.findAll().findAll { it.userId == users[0] && it.level != null && it.projectId ==proj3.projectId && it.skillRefId == proj3_subj2_ref_id}
+        skillsService.addSkill([projectId: proj1.p.projectId, skillId: proj1.s2_skills[0].skillId], users[0])
+        List<UserAchievement> user1_subj1_report1 = userAchievedRepo.findAll().findAll { it.userId == users[0] && it.level != null && it.projectId ==proj3.projectId && it.skillRefId == proj3_subj1_ref_id}
+        List<UserAchievement> user1_subj2_report1 = userAchievedRepo.findAll().findAll { it.userId == users[0] && it.level != null && it.projectId == proj3.projectId && it.skillRefId == proj3_subj2_ref_id}
+
+        skillsService.addSkill([projectId: proj1.p.projectId, skillId: proj1.s2_skills[0].skillId], users[0], new Date() - 1)
+        List<UserAchievement> user1_subj1_report2 = userAchievedRepo.findAll().findAll { it.userId == users[0] && it.level != null && it.projectId ==proj3.projectId && it.skillRefId == proj3_subj1_ref_id}
+        List<UserAchievement> user1_subj2_report2 = userAchievedRepo.findAll().findAll { it.userId == users[0] && it.level != null && it.projectId == proj3.projectId && it.skillRefId == proj3_subj2_ref_id}
+
+        skillsService.addSkill([projectId: proj1.p.projectId, skillId: proj1.s1_skills[0].skillId], users[0], new Date() - 2)
+        List<UserAchievement> user1_subj1_report3 = userAchievedRepo.findAll().findAll { it.userId == users[0] && it.level != null && it.projectId ==proj3.projectId && it.skillRefId == proj3_subj1_ref_id}
+        List<UserAchievement> user1_subj2_report3 = userAchievedRepo.findAll().findAll { it.userId == users[0] && it.level != null && it.projectId == proj3.projectId && it.skillRefId == proj3_subj2_ref_id}
+
+        skillsService.addSkill([projectId: proj1.p.projectId, skillId: proj1.s1_skills[0].skillId], users[0], new Date() - 1)
+        List<UserAchievement> user1_subj1_report4 = userAchievedRepo.findAll().findAll { it.userId == users[0] && it.level != null && it.projectId ==proj3.projectId && it.skillRefId == proj3_subj1_ref_id}
+        List<UserAchievement> user1_subj2_report4 = userAchievedRepo.findAll().findAll { it.userId == users[0] && it.level != null && it.projectId == proj3.projectId && it.skillRefId == proj3_subj2_ref_id}
+
+        when:
+        printLevels(proj3.projectId, "", p3_subj1.subjectId)
+        printLevels(proj3.projectId, "", p3_subj2.subjectId)
+
+        then:
+        user1_subj1_report0.collect { it.level }.sort() == []
+        user1_subj2_report0.collect { it.level }.sort() == []
+
+        user1_subj1_report1.collect { it.level }.sort() == []
+        user1_subj2_report1.collect { it.level }.sort() == [1]
+
+        user1_subj1_report2.collect { it.level }.sort() == []
+        user1_subj2_report2.collect { it.level }.sort() == [1, 2]
+
+        user1_subj1_report3.collect { it.level }.sort() == []
+        user1_subj2_report3.collect { it.level }.sort() == [1, 2]
+
+        user1_subj1_report4.collect { it.level }.sort() == [1]
+        user1_subj2_report4.collect { it.level }.sort() == [1, 2]
+    }
+
+    def "copy user-points when importing a skill"() {
+        def proj1 = createProjWithCatalogSkills(1)
+        def proj2 = createProjWithCatalogSkills(2)
+        def proj3 = createProjWithCatalogSkills(3)
+
+        def users = getRandomUsers(15)
+        List<Date> dates = (1..10).collect { new Date() - it }
+        skillsService.addSkill([projectId: proj1.p.projectId, skillId: proj1.s1_skills[0].skillId], users[0], dates[0])
+        skillsService.addSkill([projectId: proj1.p.projectId, skillId: proj1.s1_skills[0].skillId], users[0], dates[1])
+        skillsService.addSkill([projectId: proj1.p.projectId, skillId: proj1.s1_skills[1].skillId], users[0], dates[1])
+        skillsService.addSkill([projectId: proj1.p.projectId, skillId: proj1.s1_skills[1].skillId], users[0], dates[2])
+        skillsService.addSkill([projectId: proj1.p.projectId, skillId: proj1.s1_skills[2].skillId], users[0], dates[2])
+        skillsService.addSkill([projectId: proj1.p.projectId, skillId: proj1.s1_skills[2].skillId], users[0], dates[3])
+        skillsService.addSkill([projectId: proj1.p.projectId, skillId: proj1.s2_skills[0].skillId], users[0], dates[3])
+        skillsService.addSkill([projectId: proj1.p.projectId, skillId: proj1.s2_skills[0].skillId], users[0], dates[3])
+        skillsService.addSkill([projectId: proj1.p.projectId, skillId: proj1.s2_skills[1].skillId], users[0], dates[4])
+        skillsService.addSkill([projectId: proj1.p.projectId, skillId: proj1.s2_skills[1].skillId], users[0], dates[4])
+        skillsService.addSkill([projectId: proj1.p.projectId, skillId: proj1.s2_skills[2].skillId], users[0], dates[4])
+        skillsService.addSkill([projectId: proj1.p.projectId, skillId: proj1.s2_skills[2].skillId], users[0], dates[4])
+
+        dates.each {
+            skillsService.addSkill([projectId: proj1.p.projectId, skillId: proj1.s1_skills[1].skillId], users[1], dates[1])
+            skillsService.addSkill([projectId: proj1.p.projectId, skillId: proj1.s1_skills[1].skillId], users[2], dates[2])
+            skillsService.addSkill([projectId: proj1.p.projectId, skillId: proj1.s1_skills[2].skillId], users[3], dates[2])
+            skillsService.addSkill([projectId: proj1.p.projectId, skillId: proj1.s1_skills[2].skillId], users[4], dates[3])
+            skillsService.addSkill([projectId: proj1.p.projectId, skillId: proj1.s2_skills[0].skillId], users[5], dates[3])
+            skillsService.addSkill([projectId: proj1.p.projectId, skillId: proj1.s2_skills[0].skillId], users[6], dates[3])
+            skillsService.addSkill([projectId: proj1.p.projectId, skillId: proj1.s2_skills[1].skillId], users[7], dates[4])
+            skillsService.addSkill([projectId: proj1.p.projectId, skillId: proj1.s2_skills[1].skillId], users[8], dates[4])
+            skillsService.addSkill([projectId: proj1.p.projectId, skillId: proj1.s2_skills[2].skillId], users[9], dates[4])
+            skillsService.addSkill([projectId: proj1.p.projectId, skillId: proj1.s2_skills[2].skillId], users[10], dates[4])
+        }
+
+        when:
+        List<UserPoints> userPoints_import0 = userPointsRepo.findAll().findAll( { it.getProjectId() == proj3.p.projectId})
+        skillsService.bulkImportSkillsFromCatalog(proj3.p.projectId, proj3.s1.subjectId, [[projectId: proj1.p.projectId, skillId: proj1.s1_skills[0].skillId], [projectId: proj1.p.projectId, skillId: proj1.s1_skills[1].skillId]])
+        List<UserPoints> userPoints_import1 = userPointsRepo.findAll().findAll( { it.getProjectId() == proj3.p.projectId})
+        then:
+        !userPoints_import0
+        userPoints_import1
+        List<UserPoints> user0 = userPoints_import1.findAll( { it.userId == users[0] })
+        user0.size() == 14
+        user0.findAll { !it.day && it.skillId == proj1.s1_skills[0].skillId }.collect { it.points } == [200]
+        user0.findAll { it.day && it.skillId == proj1.s1_skills[0].skillId }.collect { it.day.format("yyyy/MM/dd") }.sort() == [dates[1].format("yyyy/MM/dd"), dates[0].format("yyyy/MM/dd")]
+        user0.findAll { it.day && it.skillId == proj1.s1_skills[0].skillId }.collect { it.points } == [100, 100]
+        user0.findAll { !it.day && it.skillId == proj1.s1.subjectId }.collect { it.points } == [400]
+        user0.findAll { it.day && it.skillId == proj1.s1.subjectId }.sort { it.day }.collect { it.day.format("yyyy/MM/dd") }.sort() == [dates[2].format("yyyy/MM/dd"), dates[1].format("yyyy/MM/dd"), dates[0].format("yyyy/MM/dd")]
+        user0.findAll { it.day && it.skillId == proj1.s1.subjectId }.collect { it.points } == [100, 200, 100]
+        user0.findAll { !it.day && !it.skillId }.collect { it.points } == [400]
+        user0.findAll { it.day && !it.skillId }.collect { it.day.format("yyyy/MM/dd") }.sort() == [dates[2].format("yyyy/MM/dd"), dates[1].format("yyyy/MM/dd"), dates[0].format("yyyy/MM/dd")]
+        user0.findAll { it.day && !it.skillId }.sort { it.day }.collect { it.points } == [100, 200, 100]
+        user0.findAll { !it.day && it.skillId == proj1.s1_skills[1].skillId }.collect { it.points } == [200]
+        user0.findAll { it.day && it.skillId == proj1.s1_skills[1].skillId }.collect { it.day.format("yyyy/MM/dd") }.sort() == [dates[2].format("yyyy/MM/dd"), dates[1].format("yyyy/MM/dd")]
+        user0.findAll { it.day && it.skillId == proj1.s1_skills[1].skillId }.collect { it.points } == [100, 100]
+    }
 
     def "event achieves a level after the original skill was modified (modifications are propagated to imported fields on async basis)"() {
         def project1 = createProject(1)
