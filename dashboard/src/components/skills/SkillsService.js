@@ -80,7 +80,7 @@ export default {
       ? `/admin/projects/${encodeURIComponent(skill.projectId)}/subjects/${encodeURIComponent(skill.subjectId)}/groups/${encodeURIComponent(skill.groupId)}/skills/${encodeURIComponent(requestSkillId)}`
       : `/admin/projects/${encodeURIComponent(skill.projectId)}/subjects/${encodeURIComponent(skill.subjectId)}/skills/${encodeURIComponent(requestSkillId)}`;
 
-    return axios.post(url, copy)
+    return axios.post(url, copy, { handleError: false })
       .then(() => this.getSkillDetails(skill.projectId, skill.subjectId, skill.skillId));
   },
   syncSkillsPoints(projectId, subjectId, groupId, skillsPointsSyncRequest) {

@@ -163,6 +163,7 @@ limitations under the License.
                           @click="copySkill(data.item)"
                           variant="outline-primary" :data-cy="`copySkillButton_${data.item.skillId}`"
                           :aria-label="'copy Skill '+data.item.name" :ref="'copy_'+data.item.skillId"
+                          :disabled="addSkillDisabled"
                           title="Copy Skill">
                   <i class="fas fa-copy" aria-hidden="true" />
                 </b-button>
@@ -256,6 +257,7 @@ limitations under the License.
         </template>
         <template #row-details="row">
             <child-row-skill-group-display v-if="row.item.isGroupType" :group="row.item"
+                                           :add-skill-disabled="addSkillDisabled"
                                            @group-changed="groupChanged(row, arguments[0])"/>
             <ChildRowSkillsDisplay v-if="row.item.isSkillType" :project-id="projectId" :subject-id="subjectId" v-skills-onMount="'ExpandSkillDetailsSkillsPage'"
                                    :parent-skill-id="row.item.skillId" :refresh-counter="row.item.refreshCounter"
@@ -349,6 +351,16 @@ limitations under the License.
         required: false,
         default: '',
       },
+      disableCopy: {
+        type: Boolean,
+        required: false,
+        default: false,
+      },
+      disableCopyMsg: {
+        type: String,
+        required: false,
+        default: '',
+      },
     },
     components: {
       ExportedSkillDeletionWarning,
@@ -366,6 +378,8 @@ limitations under the License.
       return {
         isLoading: false,
         currentlyFocusedSkillId: '',
+        copyDisabled: this.disableCopy,
+        copyDisabledMsg: this.disableCopyMsg,
         editSkillInfo: {
           isEdit: false,
           isCopy: false,
@@ -466,13 +480,16 @@ limitations under the License.
         return (isDisabled) ? this.disableDeleteButtonsInfo.tooltip : 'Delete Skill';
       },
       addSkillDisabled() {
-        return this.skills && this.$store.getters.config && this.skills.length >= this.$store.getters.config.maxSkillsPerSubject;
+        return this.$store.getters.config && this.numSkills >= this.$store.getters.config.maxSkillsPerSubject;
       },
       addSkillsDisabledMsg() {
         if (this.$store.getters.config) {
           return `The maximum number of Skills allowed is ${this.$store.getters.config.maxSkillsPerSubject}`;
         }
         return '';
+      },
+      numSkills() {
+        return this.skills ? this.skills.length : 0;
       },
     },
     methods: {
@@ -651,6 +668,13 @@ limitations under the License.
               }, 0);
             }
             return createdSkill;
+          })
+          .catch((err) => {
+            if (err && err.response && err.response.data.errorCode === 'MaxSkillsThreshold') {
+              this.msgOk(err.response.data.explanation, 'Maximum Skills Reached');
+            } else {
+              throw err;
+            }
           })
           .finally(() => {
             this.doneShowingLoading();

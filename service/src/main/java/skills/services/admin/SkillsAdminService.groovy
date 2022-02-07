@@ -227,10 +227,19 @@ class SkillsAdminService {
                 }
 
                 if (Boolean.valueOf(skillDefinition.enabled) != Boolean.valueOf(skillRequest.enabled)) {
+                    // validate that the Group's skills won't exceed the maximum allowed when publishing the group
+                    if (Boolean.valueOf(skillRequest.enabled)) {
+                        String parentSkillId = skillRequest.subjectId
+                        SkillDef groupSubject = skillDefRepo.findByProjectIdAndSkillIdAndType(skillRequest.projectId, parentSkillId, SkillDef.ContainerType.Subject)
+                        assert groupSubject, "Subject [${parentSkillId}] does not exist"
+
+                        createdResourceLimitsValidator.validateNumSkillsCreated(groupSubject, groupChildSkills.size())
+                    }
                     // enabling or disabling, need to update child skills enabled to match the group value
                     groupChildSkills.each { it.enabled = skillRequest.enabled }
                     skillDefRepo.saveAll(groupChildSkills)
                 }
+
             }
             shouldRebuildScores = skillDefinition.totalPoints != totalPointsRequested || (!Boolean.valueOf(skillDefinition.enabled) && Boolean.valueOf(skillRequest.enabled))
             occurrencesDelta = isSkillsGroup ? 0 : skillRequest.numPerformToCompletion - currentOccurrences

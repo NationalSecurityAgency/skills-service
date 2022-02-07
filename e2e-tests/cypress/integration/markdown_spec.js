@@ -37,7 +37,7 @@ describe('Markdown Tests', () => {
 
     it('URL in markdown must open in a new tab', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1/');
-        cy.clickButton('Skill');
+        cy.get('[data-cy=newSkillButton]').click();
         cy.get('[data-cy=skillName]').type('skill1');
         cy.get('[data-cy=skillDescription]').type('[Google Home Page](https://google.com)');
         cy.get('#markdown-editor').contains('Preview').click();

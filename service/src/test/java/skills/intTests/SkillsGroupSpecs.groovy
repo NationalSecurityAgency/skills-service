@@ -22,6 +22,7 @@ import skills.intTests.utils.SkillsFactory
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 import skills.storage.repos.SkillRelDefRepo
+import spock.lang.IgnoreRest
 
 class SkillsGroupSpecs extends DefaultIntSpec {
 
@@ -93,7 +94,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         res.numSkillsInGroup == groupSkills.size()
         res.numSelfReportSkills == 0
         res.enabled == false
-        
+
         groupSkills.size() == 3
 
         groupSkills.get(0).skillId == skills.get(0).skillId
@@ -728,6 +729,33 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         subjSkillsBefore
         idsExistBefore.every { it }
         idsExistAfter.every { !it }
+    }
+
+    def "cannot enable a skill group when the number of child skills would cause the maximum skills per subject to be exceeded"() {
+            def proj = SkillsFactory.createProject()
+            def subj = SkillsFactory.createSubject()
+            def skills = SkillsFactory.createSkills(5)
+            def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 6)
+
+            skillsService.createProject(proj)
+            skillsService.createSubject(subj)
+            skillsService.createSkill(skillsGroup)
+            String skillsGroupId = skillsGroup.skillId
+            skills.each { skill ->
+                skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+            }
+
+            def otherSkills = SkillsFactory.createSkillsStartingAt(96, 7)
+            skillsService.createSkills(otherSkills)
+
+            when:
+            skillsGroup.enabled = 'true'
+            skillsService.updateSkill(skillsGroup, null)
+            def res = skillsService.getSkill(skillsGroup)
+
+            then:
+            def e = thrown(SkillsClientException)
+            e.message.contains('explanation:Each Subject is limited to [100] Skills, enabling the Skill Group would exceed that maximum, errorCode:MaxSkillsThreshold')
     }
 
     def "delete SkillsGroup and a child skill and verify proper display order is maintained for both"() {

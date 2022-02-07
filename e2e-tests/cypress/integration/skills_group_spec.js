@@ -1205,7 +1205,99 @@ describe('Skills Group Tests', () => {
         cy.get('@cells').eq(3).contains('ID: skill3');
         cy.get('@cells').eq(4).contains('ID: skill2');
         cy.get('@cells').eq(5).contains('ID: skill1');
+    });
 
+    it('cannot enable group if number of skills in group would exceed max skills for subject', () => {
+      cy.intercept('/public/config', {
+        body: {
+          artifactBuildTimestamp: "2022-01-17T14:39:38Z",
+          authMode: "FORM",
+          buildTimestamp: "2022-01-17T14:39:38Z",
+          dashboardVersion: "1.9.0-SNAPSHOT",
+          defaultLandingPage: "progress",
+          descriptionMaxLength: "2000",
+          docsHost: "https://code.nsa.gov/skills-docs",
+          expirationGracePeriod: 7,
+          expireUnusedProjectsOlderThan: 180,
+          maxBadgeNameLength: "50",
+          maxBadgesPerProject: "25",
+          maxDailyUserEvents: "30",
+          maxFirstNameLength: "30",
+          maxIdLength: "50",
+          maxLastNameLength: "30",
+          maxLevelNameLength: "50",
+          maxNicknameLength: "70",
+          maxNumPerformToCompletion: "10000",
+          maxNumPointIncrementMaxOccurrences: "999",
+          maxPasswordLength: "40",
+          maxPointIncrement: "10000",
+          maxProjectNameLength: "50",
+          maxProjectsPerAdmin: "25",
+          maxSelfReportMessageLength: "250",
+          maxSelfReportRejectionMessageLength: "250",
+          maxSkillNameLength: "100",
+          maxSkillVersion: "999",
+          maxSkillsPerSubject: "5",
+          maxSubjectNameLength: "50",
+          maxSubjectsPerProject: "25",
+          maxTimeWindowInMinutes: "43200",
+          minIdLength: "3",
+          minNameLength: "3",
+          minPasswordLength: "8",
+          minUsernameLength: "5",
+          minimumProjectPoints: "100",
+          minimumSubjectPoints: "100",
+          nameValidationMessage: "",
+          nameValidationRegex: "",
+          needToBootstrap: false,
+          numProjectsForTableView: "10",
+          oAuthOnly: false,
+          paragraphValidationMessage: "paragraphs may not contain jabberwocky",
+          paragraphValidationRegex: "^(?i)(?s)((?!jabberwocky).)*$",
+          pointHistoryInDays: "1825",
+          projectMetricsTagCharts: "[{\"key\":\"dutyOrganization\",\"type\":\"pie\",\"title\":\"Users by Org\"},{\"key\":\"adminOrganization\",\"type\":\"bar\",\"title\":\"Users by Agency\"}]",
+          rankingAndProgressViewsEnabled: "true",
+          userSuggestOptions: "ONE,TWO,THREE",
+          verifyEmailAddresses: false,
+        }
+      });
+      cy.intercept('DELETE', '/admin/projects/proj1/subjects/subj1/skills/skill5').as('deleteSkill5');
+      cy.intercept('DELETE', '/admin/projects/proj1/subjects/subj1/skills/skill6').as('deleteSkill6');
+
+      cy.createSkill(1, 1, 1)
+      cy.wait(1000)
+      cy.createSkill(1, 1, 2)
+      cy.wait(1000)
+      cy.createSkill(1, 1, 3)
+      cy.wait(1000)
+      cy.createSkillsGroup(1, 1, 4);
+      cy.addSkillToGroup(1, 1, 4, 5);
+      cy.addSkillToGroup(1, 1, 4, 6);
+      cy.addSkillToGroup(1, 1, 4, 7);
+
+      const groupId = 'group4';
+      cy.visit('/administrator/projects/proj1/subjects/subj1');
+      cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
+
+      cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="goLiveBtn"]`).should('be.disabled');
+      cy.get('[data-cy=skillGroupStatus] .text-warning').should('be.visible');
+      cy.get('[data-cy=addSkillToGroupBtn-group4]').should('be.enabled');
+
+      cy.addSkillToGroupViaUI(groupId, 8, false);
+
+      cy.get('[data-cy=deleteSkillButton_skill5]').click();
+      cy.get('[data-cy=currentValidationText]').type('Delete Me');
+      cy.get('[data-cy=removeButton]').should('be.enabled').click();
+      cy.wait('@deleteSkill5');
+
+      cy.get('[data-cy=deleteSkillButton_skill6]').click();
+
+      cy.get('[data-cy=currentValidationText]').type('Delete Me');
+      cy.get('[data-cy=removeButton]').should('be.enabled').click();
+      cy.wait('@deleteSkill6');
+
+      cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="goLiveBtn"]`).should('be.enabled');
+      cy.get('[data-cy=skillGroupStatus] .text-warning').should('not.exist');
     });
 
 });

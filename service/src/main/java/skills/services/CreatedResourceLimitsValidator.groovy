@@ -19,6 +19,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
@@ -49,21 +50,21 @@ class CreatedResourceLimitsValidator {
     void validateNumProjectsCreated(String userId) {
         Integer projectsByUserCount = projDefRepo.getProjectsByUserCount(userId)
         if(projectsByUserCount >= maxProjectsPerUser) {
-            throw new SkillException("Each user is limited to [${maxProjectsPerUser}] Projects")
+            throw new SkillException("Each user is limited to [${maxProjectsPerUser}] Projects", ErrorCode.MaxProjectsThreshold)
         }
     }
 
     void validateNumSubjectsCreated(String projectId){
         long subjectCount = skillDefRepo.countByProjectIdAndType(projectId, SkillDef.ContainerType.Subject)
         if(subjectCount >= maxSubjectsPerProject){
-            throw new SkillException("Each Project is limited to [${maxProjectsPerUser}] Subjects")
+            throw new SkillException("Each Project is limited to [${maxProjectsPerUser}] Subjects", ErrorCode.MaxSubjectsThreshold)
         }
     }
 
     void validateNumBadgesCreated(String projectId){
         long badgeCount = skillDefRepo.countByProjectIdAndType(projectId, SkillDef.ContainerType.Badge)
         if (badgeCount >= maxBadgesPerProject) {
-            throw new SkillException("Each Project is limited to [${maxProjectsPerUser}] Badges")
+            throw new SkillException("Each Project is limited to [${maxProjectsPerUser}] Badges", ErrorCode.MaxBadgesThreshold)
         }
     }
 
@@ -71,7 +72,25 @@ class CreatedResourceLimitsValidator {
         long skillCount = skillDefRepo.countActiveChildSkillsByIdAndRelationshipType(subject.id, SkillRelDef.RelationshipType.RuleSetDefinition)
         skillCount += skillDefRepo.countActiveGroupChildSkillsForSubject(subject.id)
         if(skillCount >= maxSkillsPerSubject){
-            throw new SkillException("Each Subject is limited to [${maxSkillsPerSubject}] Skills")
+            throw new SkillException("Each Subject is limited to [${maxSkillsPerSubject}] Skills", ErrorCode.MaxSkillsThreshold)
+        }
+    }
+
+    /**
+     * To be used when enabling a skill group - subject skill group validation does not take into account
+     * disabled group's skills when enabling/publishing/"going live" for a Skill Group. When enabling a Skill Group
+     * we need to ensure that the children of the Skill Group won't cause the maximum skill count to be exceeded.
+     *
+     * @param subject
+     * @param toBeEnabledGroupSkills
+     */
+    void validateNumSkillsCreated(SkillDef subject, Integer toBeEnabledGroupSkills){
+        long skillCount = skillDefRepo.countActiveChildSkillsByIdAndRelationshipType(subject.id, SkillRelDef.RelationshipType.RuleSetDefinition)
+        skillCount += skillDefRepo.countActiveGroupChildSkillsForSubject(subject.id)
+        skillCount += toBeEnabledGroupSkills
+
+        if(skillCount > maxSkillsPerSubject){
+            throw new SkillException("Each Subject is limited to [${maxSkillsPerSubject}] Skills, enabling the Skill Group would exceed that maximum", ErrorCode.MaxSkillsThreshold)
         }
     }
 }

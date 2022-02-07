@@ -35,5 +35,9 @@ enum ErrorCode {
     UserTokenExpired,
     SkillAlreadyInCatalog,
     ExportToCatalogNotAllowed,
-    DependenciesNotAllowed
+    DependenciesNotAllowed,
+    MaxProjectsThreshold,
+    MaxBadgesThreshold,
+    MaxSkillsThreshold,
+    MaxSubjectsThreshold
 }

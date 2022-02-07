@@ -225,6 +225,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
            )
       ''')
     long countActiveGroupChildSkillsForSubject(Integer subjectId)
+
     @Query(value='''
         SELECT count(sd.id) 
                 from skill_definition sd 

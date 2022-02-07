@@ -35,9 +35,10 @@ limitations under the License.
                   <span v-b-tooltip.hover="goLiveToolTipText">
                     <b-button variant="outline-info" size="sm" data-cy="goLiveBtn"
                               @click="enableGroup"
-                              :disabled="lessThanTwoSkills">
+                              :disabled="lessThanTwoSkills || goLiveDisabled">
                       <i class="fas fa-glass-cheers"></i> Go Live
                     </b-button>
+                    <i v-if="goLiveDisabled" class="fas fa-exclamation-circle text-warning ml-1 mr-1" style="pointer-events: all; font-size: 1.5rem;" v-b-tooltip.hover="disabledMessage"/>
                   </span>
                 </div>
               </div>
@@ -67,8 +68,10 @@ limitations under the License.
             </div>
           </div>
           <div class="col-auto text-right">
+            <i v-if="addDisabled" class="fas fa-exclamation-circle text-warning ml-1 mr-1" style="pointer-events: all; font-size: 1.5rem;" v-b-tooltip.hover="addDisabledMessage"/>
             <b-button :id="`group-${group.skillId}_newSkillBtn`" :ref="`group-${group.skillId}_newSkillBtn`" variant="outline-info" size="sm"
                       @click="showNewSkillDialog"
+                      :disabled="addDisabled"
                     :data-cy="`addSkillToGroupBtn-${group.skillId}`" class="ml-1">
               <span class="">Add Skill to Group</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
             </b-button>
@@ -108,7 +111,7 @@ limitations under the License.
   import EditNumRequiredSkills from './EditNumRequiredSkills';
   import MarkdownText from '../../utils/MarkdownText';
 
-  const { mapActions } = createNamespacedHelpers('subjects');
+  const { mapActions, mapGetters } = createNamespacedHelpers('subjects');
 
   export default {
     name: 'ChildRowSkillGroupDisplay',
@@ -142,6 +145,9 @@ limitations under the License.
       this.loadData();
     },
     computed: {
+      ...mapGetters([
+        'subject',
+      ]),
       isLoading() {
         return this.loading.details || this.loading.skills;
       },
@@ -186,6 +192,29 @@ limitations under the License.
           }
         }
         return res;
+      },
+      goLiveDisabled() {
+        if (this.$store.getters.config) {
+          if (this.group.enabled) {
+            return this.subject.numSkills >= this.$store.getters.config.maxSkillsPerSubject;
+          }
+          return this.subject.numSkills + this.numSkills > this.$store.getters.config.maxSkillsPerSubject;
+        }
+        return false;
+      },
+      addDisabled() {
+        if (this.group.enabled) {
+          if (this.$store.getters.config && this.subject.numSkills >= this.$store.getters.config.maxSkillsPerSubject) {
+            return true;
+          }
+        }
+        return false;
+      },
+      addDisabledMessage() {
+        return `No more Skills can be added to this group, the maximum number of Skills allowed per subject is ${this.$store.getters.config.maxSkillsPerSubject}`;
+      },
+      disabledMessage() {
+        return `This group cannot be enabled. The maximum number of Skills allowed per subject is ${this.$store.getters.config.maxSkillsPerSubject}.`;
       },
     },
     methods: {
@@ -286,9 +315,17 @@ limitations under the License.
         this.refreshSubjectState();
       },
       handleNumRequiredSkillsChanged(updatedGroup) {
-        SkillsService.saveSkill(updatedGroup).then(() => {
-          this.$emit('group-changed', updatedGroup);
-        });
+        SkillsService.saveSkill(updatedGroup)
+          .catch((err) => {
+            if (err && err.response && err.response.data.errorCode === 'MaxSkillsThreshold') {
+              this.msgOk(err.response.data.explanation, 'Maximum Skills Reached');
+            } else {
+              throw err;
+            }
+          })
+          .then(() => {
+            this.$emit('group-changed', updatedGroup);
+          });
       },
       focusOnNewSkillButton() {
         const ref = this.$refs[`group-${this.group.skillId}_newSkillBtn`];
@@ -305,10 +342,18 @@ limitations under the License.
           .then((res) => {
             if (res) {
               const copy = { ...this.group, enabled: true };
-              SkillsService.saveSkill(copy).then((savedGroup) => {
-                this.$emit('group-changed', savedGroup);
-                this.refreshSubjectState(true);
-              });
+              SkillsService.saveSkill(copy)
+                .catch((err) => {
+                  if (err && err.response && err.response.data.errorCode === 'MaxSkillsThreshold') {
+                    this.msgOk(err.response.data.explanation, 'Maximum Skills Reached');
+                  } else {
+                    throw err;
+                  }
+                })
+                .then((savedGroup) => {
+                  this.$emit('group-changed', savedGroup);
+                  this.refreshSubjectState(true);
+                });
             }
           });
       },
