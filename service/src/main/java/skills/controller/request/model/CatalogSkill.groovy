@@ -16,8 +16,10 @@
 package skills.controller.request.model
 
 import groovy.transform.Canonical
+import groovy.transform.ToString
 
 @Canonical
+@ToString(includePackage = false)
 class CatalogSkill {
     String projectId
     String skillId

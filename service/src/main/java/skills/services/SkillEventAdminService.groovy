@@ -123,11 +123,6 @@ class SkillEventAdminService {
 
     @Transactional
     RequestResult deleteSkillEvent(String projectId, String skillId, String userId, Long timestamp) {
-        return deleteSkillEvent(projectId, skillId, userId, timestamp, true)
-    }
-
-    @Transactional
-    RequestResult deleteSkillEvent(String projectId, String skillId, String userId, Long timestamp, Boolean performCatalogChecks) {
         List<UserPerformedSkill> performedSkills = performedSkillRepository.findAllByProjectIdAndSkillIdAndUserIdAndPerformedOn(projectId, skillId, userId, new Date(timestamp))
         if (!performedSkills) {
             throw new SkillException("This skill event does not exist", projectId, skillId, ErrorCode.BadParam)
@@ -138,21 +133,18 @@ class SkillEventAdminService {
         log.debug("Deleting skill [{}] for user [{}]", performedSkill, userId)
 
         SkillDefMin skillDefinitionMin = getSkillDef(projectId, skillId)
+        Long numExistingSkills = performedSkillRepository.countByUserIdAndProjectIdAndSkillId(userId, skillDefinitionMin.projectId, skillDefinitionMin.skillId) ?: 0 // account for null
 
-        if (performCatalogChecks) {
-            final boolean isInCatalog = skillCatalogService.isAvailableInCatalog(skillDefinitionMin.projectId, skillDefinitionMin.skillId)
-            if (skillDefinitionMin.getCopiedFrom() > 0 || isInCatalog) {
-                List<SkillDefMin> related = skillCatalogService.getRelatedSkills(skillDefinitionMin)
-                related?.each {
-                    deleteSkillEvent(it.projectId, it.skillId, userId, timestamp, false)
-                }
+        // handle catalog
+        final boolean isInCatalog = skillCatalogService.isAvailableInCatalog(skillDefinitionMin.projectId, skillDefinitionMin.skillId)
+        if (skillDefinitionMin.getCopiedFrom() > 0 || isInCatalog) {
+            List<SkillDefMin> related = skillCatalogService.getRelatedSkills(skillDefinitionMin)
+            related?.each {
+                updateUserPointsAndAchievementsWhenPerformedSkillRemoved(userId, it, performedSkill.performedOn, numExistingSkills)
             }
         }
 
         RequestResult res = new RequestResult()
-
-        Long numExistingSkills = performedSkillRepository.countByUserIdAndProjectIdAndSkillId(userId, projectId, skillId)
-        numExistingSkills = numExistingSkills ?: 0 // account for null
 
         List<SkillDef> performedDependencies = performedSkillRepository.findPerformedParentSkills(userId, projectId, skillId)
         if (performedDependencies) {
@@ -162,23 +154,28 @@ class SkillEventAdminService {
             return res
         }
 
-        updateUserPoints(userId, skillDefinitionMin, performedSkill.performedOn, skillId)
-        boolean requestedSkillCompleted = hasReachedMaxPoints(numExistingSkills, skillDefinitionMin)
-        if (requestedSkillCompleted) {
-            checkForBadgesAchieved(userId, skillDefinitionMin)
-            //this removes the skill achievements
-            achievedLevelRepo.deleteByProjectIdAndSkillIdAndUserIdAndLevel(performedSkill.projectId, performedSkill.skillId, userId, null)
-        }
-        SkillEventResult skillEventResult = new SkillEventResult(projectId: projectId, skillId: skillId, name: skillDefinitionMin.name)
-        checkParentGraph(performedSkill.performedOn, skillEventResult, userId, skillDefinitionMin)
+        SkillEventResult skillEventResult = updateUserPointsAndAchievementsWhenPerformedSkillRemoved(userId, skillDefinitionMin, performedSkill.performedOn, numExistingSkills)
         res.success = skillEventResult.skillApplied
         res.explanation = skillEventResult.explanation
-        deleteProjectLevelIfNecessary(performedSkill.projectId, userId, numExistingSkills.toInteger())
-        performedSkillRepository.delete(performedSkill)
 
+        performedSkillRepository.delete(performedSkill)
         userEventService.removeEvent(performedSkill.performedOn, performedSkill.userId, performedSkill.skillRefId)
 
         return res
+    }
+
+    private SkillEventResult updateUserPointsAndAchievementsWhenPerformedSkillRemoved(String userId, SkillDefMin skillDefinitionMin, Date performedOn, Long numExistingPerformedSkills) {
+        updateUserPoints(userId, skillDefinitionMin, performedOn, skillDefinitionMin.skillId)
+        boolean requestedSkillCompleted = hasReachedMaxPoints(numExistingPerformedSkills, skillDefinitionMin)
+        if (requestedSkillCompleted) {
+            checkForBadgesAchieved(userId, skillDefinitionMin)
+            //this removes the skill achievements
+            achievedLevelRepo.deleteByProjectIdAndSkillIdAndUserIdAndLevel(skillDefinitionMin.projectId, skillDefinitionMin.skillId, userId, null)
+        }
+        SkillEventResult skillEventResult = new SkillEventResult(projectId: skillDefinitionMin.projectId, skillId: skillDefinitionMin.skillId, name: skillDefinitionMin.name)
+        checkParentGraph(performedOn, skillEventResult, userId, skillDefinitionMin)
+        deleteProjectLevelIfNecessary(skillDefinitionMin.projectId, userId, numExistingPerformedSkills.toInteger())
+        return skillEventResult
     }
 
     @Profile

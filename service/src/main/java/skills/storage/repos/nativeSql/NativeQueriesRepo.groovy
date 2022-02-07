@@ -15,6 +15,7 @@
  */
 package skills.storage.repos.nativeSql
 
+import org.springframework.data.repository.query.Param
 import skills.controller.request.model.QueryUsersCriteriaRequest
 import skills.storage.model.QueryUsersCriteria
 import skills.storage.model.SkillDef
@@ -53,6 +54,9 @@ interface NativeQueriesRepo {
     void identifyAndAddSubjectLevelAchievements(String projectId, String subjectId, boolean pointsBasedLevels);
 
     void identifyAndAddProjectLevelAchievements(String projectId, boolean pointsBasedLevels);
+
+    void updateProjectUserPointsForAllUsers(String toProjectId)
+    void updateSubjectUserPointsForAllUsers(String toProjectId, String toSubjectId)
 
     void createOrUpdateUserEvent(String projectId, Integer skillRefId, String userId, Date start, String type, Integer count, Integer weekNumber)
 

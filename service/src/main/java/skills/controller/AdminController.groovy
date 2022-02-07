@@ -1121,18 +1121,6 @@ class AdminController {
         return RequestResult.success()
     }
 
-    @RequestMapping(value="/projects/{projectId}/subjects/{subjectId}/import/{fromProjectId}/{fromSkillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
-    SkillDefRes importSkillFromCatalog(@PathVariable("projectId") String projectId,
-                                       @PathVariable("subjectId") String subjectId,
-                                       @PathVariable("fromProjectId") String fromProjectId,
-                                       @PathVariable("fromSkillId") String fromSkillId) {
-        SkillsValidator.isNotBlank(projectId, "projectId")
-        SkillsValidator.isNotBlank(projectId, "subjectId")
-        SkillsValidator.isNotBlank(projectId, "fromProjectId")
-        SkillsValidator.isNotBlank(projectId, "fromSkillId")
-        skillCatalogService.importSkillFromCatalog(fromProjectId, fromSkillId, projectId, subjectId)
-    }
-
     @RequestMapping(value="/projects/{projectId}/subjects/{subjectId}/import", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
     RequestResult bulkImportSkillFromCatalog(@PathVariable("projectId") String projectId,
                                        @PathVariable("subjectId") String subjectId,

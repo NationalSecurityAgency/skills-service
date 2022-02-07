@@ -52,7 +52,8 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
 
     List<UserPerformedSkill> findByUserIdAndProjectIdAndSkillIdIgnoreCaseContaining(String userId, String projectId, String skillId, Pageable pageable)
 
-    @Query('SELECT COUNT(DISTINCT p.skillId) from UserPerformedSkill p where p.projectId=?1 and p.userId = ?2')
+    @Query('''SELECT COUNT(DISTINCT p.skillId) from UserPerformedSkill p where p.userId = ?2 
+            and p.skillRefId in (select case when copiedFrom is not null then copiedFrom else id end as id from SkillDef where type = 'Skill' and projectId = ?1)''')
     Integer countDistinctSkillIdByProjectIdAndUserId(String projectId, String userId)
 
     @Query('SELECT COUNT(DISTINCT p.userId) from UserPerformedSkill p where p.projectId=?1 and p.skillId = ?2')

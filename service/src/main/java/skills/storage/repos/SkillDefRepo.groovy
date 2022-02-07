@@ -23,8 +23,8 @@ import org.springframework.lang.Nullable
 import skills.storage.model.BadgeCount
 import skills.storage.model.ImportExportStats
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillDef.ContainerType
 import skills.storage.model.SkillDefMin
-import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.SkillRelDef.RelationshipType
 
 import java.util.stream.Stream
@@ -294,6 +294,10 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
 
     @Query("SELECT DISTINCT s.version from SkillDef s where s.projectId=?1 ORDER BY s.version ASC")
     List<Integer> getUniqueVersionList(String projectId)
+
+
+    @Query("SELECT s.id from SkillDef s where s.projectId=?1 and s.skillId=?2 and s.type=?3")
+    Integer getIdByProjectIdAndSkillIdAndType(String projectId, String skillId, ContainerType containerType)
 
     @Query(value='''SELECT count(sd)
         from SkillDef sd 

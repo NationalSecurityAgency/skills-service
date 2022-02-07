@@ -281,21 +281,22 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
 
 
     @Query('''select max(ups.performedOn)
-    from SkillRelDef srd, SkillDef sdChild, UserPerformedSkill ups
+    from UserPerformedSkill ups
       where
-      srd.child=sdChild and sdChild.skillId = ups.skillId and
       ups.userId=?1 and 
-      ups.projectId=?2 and 
-      sdChild.projectId=?2 and
-      srd.parent.id=?3 and 
-      srd.type=?4''')
+      ups.skillRefId in (
+                select case when child.copiedFrom is not null then child.copiedFrom else child.id end as id 
+                from SkillDef parent, SkillRelDef rel, SkillDef child 
+                where parent.id = ?3 and rel.parent = parent and rel.child = child and rel.type = ?4 and   
+                    child.type = 'Skill' and parent.projectId = ?2
+            )''')
     Date getUserPerformedSkillLatestDate(String userId, String projectId, Integer parentSkillId, SkillRelDef.RelationshipType type)
 
     @Query('''select max(ups.performedOn)
     from UserPerformedSkill ups
       where
       ups.userId=?1 and 
-      ups.projectId=?2''')
+      ups.skillRefId in (select case when copiedFrom is not null then copiedFrom else id end as id from SkillDef where type = 'Skill' and projectId = ?2)''')
     Date getUserPerformedSkillLatestDate(String userId, String projectId)
 
 

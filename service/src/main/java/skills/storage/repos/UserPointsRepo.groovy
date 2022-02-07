@@ -35,6 +35,85 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     @Nullable
     UserPoints findByProjectIdAndUserIdAndSkillIdAndDay(String projectId, String userId, @Nullable String skillId, @Nullable Date day)
 
+    @Modifying
+    @Query(value = '''INSERT INTO user_points(user_id, project_id, skill_id, skill_ref_id, points, day)
+            SELECT up.user_id, toDef.project_id, toDef.skill_id, toDef.id, up.points, up.day
+            FROM user_points up, skill_definition toDef
+            WHERE
+                  toDef.project_id = :toProjectId and 
+                  toDef.skill_id = up.skill_id and
+                  up.skill_ref_id in (:fromSkillRefIds)
+            ''', nativeQuery = true)
+    void copyUserPointsToTheImportedProjects(@Param('toProjectId') String toProjectId, @Param('fromSkillRefIds') List<Integer> fromSkillRefIds)
+
+    @Modifying
+    @Query(value = '''INSERT INTO user_points(user_id, day, points, project_id)
+            SELECT up.user_id, up.day, sum(points) as points, max(up.project_id) as project_id
+            FROM user_points up, skill_definition sd
+            WHERE
+                    up.project_id = :toProjectId and
+                    sd.project_id = :toProjectId and sd.id = up.skill_ref_id and sd.type = 'Skill'
+            and not exists (select 1 from user_points innerUP where up.project_id = innerUP.project_id and up.user_id = innerUP.user_id and innerUP.skill_id is null and (up.day=innerUP.day or (up.day is null and innerUP.day is null)))
+            group by up.user_id, up.day;
+            ''', nativeQuery = true)
+    void createProjectUserPointsForTheNewUsers(@Param('toProjectId') String toProjectId)
+
+
+//    @Modifying
+//    @Query(value = '''UPDATE user_points
+//            SET points = innerUp.points
+//            from
+//                (SELECT up.user_id, up.day, sum(points) as points, max(up.project_id) as project_id
+//                FROM user_points up, skill_definition sd
+//                WHERE
+//                    up.project_id = :toProjectId and
+//                    sd.project_id = :toProjectId and sd.id = up.skill_ref_id and sd.type = 'Skill'
+//                group by up.user_id, up.day) innerUp
+//             where (user_points.project_id = innerUP.project_id and user_points.user_id = innerUP.user_id and user_points.skill_id is null and (user_points.day=innerUP.day or (user_points.day is null and innerUP.day is null)))
+//            ''', nativeQuery = true)
+//    void updateProjectUserPointsForAllUsers(@Param('toProjectId') String toProjectId)
+
+
+    @Modifying
+    @Query(value = '''INSERT INTO user_points(user_id, day, points, project_id, skill_id, skill_ref_id)
+        SELECT up.user_id, up.day, sum(points) as points, max(up.project_id) as project_id, max(subject.skill_id) as skill_id, max(subject.id) as skill_ref_id
+        FROM user_points up, skill_definition subject, skill_relationship_definition srd, skill_definition sd
+        WHERE
+          up.project_id = :toProjectId
+          and subject.project_id = :toProjectId and subject.skill_id = :toSubjectId
+          and subject.id = srd.parent_ref_id and sd.id = srd.child_ref_id and srd.type = 'RuleSetDefinition'
+          and sd.id = up.skill_ref_id
+          and not exists (
+            select 1 from user_points innerUP
+            where
+              up.project_id = innerUP.project_id
+              and innerUP.skill_id = :toSubjectId
+              and up.user_id = innerUP.user_id
+              and (up.day=innerUP.day or (up.day is null and innerUP.day is null))
+          )
+        group by up.user_id, up.day;
+            ''', nativeQuery = true)
+    void createSubjectUserPointsForTheNewUsers(@Param('toProjectId') String toProjectId, @Param('toSubjectId') String toSubjectId)
+
+//    @Modifying
+//    @Query(value = '''UPDATE user_points
+//        SET points = innerUp.points
+//        from
+//            (SELECT up.user_id, up.day, sum(points) as points, max(up.project_id) as project_id, max(subject.skill_id) as skill_id, max(subject.id) as skill_ref_id
+//             FROM user_points up, skill_definition subject, skill_relationship_definition srd, skill_definition sd
+//             WHERE
+//               up.project_id = :toProjectId
+//               and subject.project_id = :toProjectId and subject.skill_id =  :toSubjectId
+//               and subject.id = srd.parent_ref_id and sd.id = srd.child_ref_id and srd.type = 'RuleSetDefinition'
+//               and sd.id = up.skill_ref_id
+//             group by up.user_id, up.day) innerUp
+//        where user_points.project_id = innerUP.project_id
+//          and user_points.skill_id =  :toSubjectId
+//          and user_points.user_id = innerUP.user_id
+//          and (user_points.day=innerUP.day or (user_points.day is null and innerUP.day is null))
+//            ''', nativeQuery = true)
+//    void updateSubjectUserPointsForAllUsers(@Param('toProjectId') String toProjectId, @Param('toSubjectId') String toSubjectId)
+
     @Nullable
     @Query('''SELECT p.points as points from UserPoints p where p.projectId=?1 and p.userId=?2 and p.day is null and p.skillId is null''')
     Integer findPointsByProjectIdAndUserId(String projectId, String userId)

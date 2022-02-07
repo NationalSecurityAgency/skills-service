@@ -185,6 +185,16 @@ class MySQLNativeRepo implements NativeQueriesRepo {
     }
 
     @Override
+    void updateProjectUserPointsForAllUsers(String toProjectId) {
+        throw new UnsupportedOperationException("Sorry!")
+    }
+
+    @Override
+    void updateSubjectUserPointsForAllUsers(String toProjectId, String toSubjectId){
+        throw new UnsupportedOperationException("Sorry!")
+    }
+
+    @Override
     void createOrUpdateUserEvent(String projectId, Integer skillRefId, String userId, Date start, String type, Integer count, Integer weekNumber) {
         throw new UnsupportedOperationException("Sorry!")
     }

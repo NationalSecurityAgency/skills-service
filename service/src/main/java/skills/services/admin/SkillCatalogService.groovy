@@ -17,6 +17,7 @@ package skills.services.admin
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Profile
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
@@ -38,6 +39,7 @@ import skills.controller.result.model.SkillDefRes
 import skills.controller.result.model.ExportableToCatalogValidationResult
 import skills.services.LockingService
 import skills.services.RuleSetDefGraphService
+import skills.services.UserAchievementsAndPointsManagement
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.ExportedSkill
@@ -52,6 +54,8 @@ import skills.storage.repos.ExportedSkillRepo
 import skills.storage.repos.QueuedSkillUpdateRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillDefWithExtraRepo
+import skills.storage.repos.UserPointsRepo
+import skills.storage.repos.nativeSql.NativeQueriesRepo
 import skills.utils.Props
 
 @Service
@@ -79,6 +83,9 @@ class SkillCatalogService {
     SkillsAdminService skillsAdminService
 
     @Autowired
+    UserAchievementsAndPointsManagement userAchievementsAndPointsManagement
+
+    @Autowired
     QueuedSkillUpdateRepo queuedSkillUpdateRepo
 
     @Autowired
@@ -87,6 +94,14 @@ class SkillCatalogService {
     @Autowired
     SkillDefWithExtraRepo skillDefWithExtraRepo
 
+    @Autowired
+    RuleSetDefGraphService ruleSetDefGraphService
+
+    @Autowired
+    UserPointsRepo userPointsRepo
+
+    @Autowired
+    NativeQueriesRepo nativeQueriesRepo
 
     @Transactional(readOnly = true)
     TotalCountAwareResult<ProjectNameAwareSkillDefRes> getSkillsAvailableInCatalog(String projectId, String projectNameSearch, String subjectNameSearch, String skillNameSearch, PageRequest pageable) {
@@ -236,20 +251,12 @@ class SkillCatalogService {
         }
     }
 
-    @Transactional
-    void importSkillFromCatalog(String projectIdFrom, String skillIdFrom, String projectIdTo, String subjectIdTo) {
+    private void importSkillFromCatalog(String projectIdFrom, String skillIdFrom, String projectIdTo, SkillDef subjectTo) {
         boolean inCatalog = isAvailableInCatalog(projectIdFrom, skillIdFrom)
         SkillsValidator.isTrue(inCatalog, "Skill [${skillIdFrom}] from project [${projectIdFrom}] has not been shared to the catalog and may not be imported")
         projDefAccessor.getProjDef(projectIdFrom)
-        projDefAccessor.getProjDef(projectIdTo)
+
         SkillDefWithExtra original = skillAccessor.getSkillDefWithExtra(projectIdFrom, skillIdFrom)
-
-        SkillDef.ContainerType subjectType = SkillDef.ContainerType.Subject
-        SkillDef subject = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectIdTo, subjectIdTo, subjectType)
-
-        if (!subject) {
-            throw new SkillException("Requested parent skill id [${subjectIdTo}] doesn't exist for type [${subjectType}].", projectIdTo, subjectIdTo)
-        }
 
         if (skillDefRepo.existsByProjectIdAndSkillIdAllIgnoreCase(projectIdTo, skillIdFrom)) {
             throw new SkillException("Cannot import Skill from catalog, [${skillIdFrom}] already exists in Project", projectIdTo, skillIdFrom)
@@ -266,7 +273,7 @@ class SkillCatalogService {
         copy.readOnly = 'true'
         copy.copiedFromProjectId = projectIdFrom
         copy.copiedFrom = original.id
-        copy.subjectId = subject.skillId
+        copy.subjectId = subjectTo.skillId
         copy.version = skillsAdminService.findLatestSkillVersion(projectIdTo)
         copy.numPerformToCompletion = numToCompletion
         copy.selfReportingType = original.selfReportingType?.toString()
@@ -275,10 +282,38 @@ class SkillCatalogService {
     }
 
     @Transactional
+    @Profile
     void importSkillsFromCatalog(String projectIdTo, String subjectIdTo, List<CatalogSkill> listOfSkills) {
-        listOfSkills?.each {
-            importSkillFromCatalog(it.projectId, it.skillId, projectIdTo, subjectIdTo)
+        log.info("Import skills into the catalog. projectIdTo=[{}], subjectIdTo=[{}], listOfSkills={}", projectIdTo, subjectIdTo, listOfSkills)
+        // validate
+        projDefAccessor.getProjDef(projectIdTo)
+
+        SkillDef.ContainerType subjectType = SkillDef.ContainerType.Subject
+        SkillDef subjectTo = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectIdTo, subjectIdTo, subjectType)
+
+        if (!subjectTo) {
+            throw new SkillException("Requested parent skill id [${subjectIdTo}] doesn't exist for type [${subjectType}].", projectIdTo, subjectIdTo)
         }
+
+        listOfSkills?.each {
+            importSkillFromCatalog(it.projectId, it.skillId, projectIdTo, subjectTo)
+        }
+
+        copyUserPoints(projectIdTo, subjectIdTo, listOfSkills)
+        userAchievementsAndPointsManagement.identifyAndAddLevelAchievements(subjectTo)
+        log.info("Completed skills import. projectIdTo=[{}], subjectIdTo=[{}], listOfSkills={}", projectIdTo, subjectIdTo, listOfSkills)
+    }
+
+    @Profile
+    private void copyUserPoints(String projectIdTo, String subjectIdTo, List<CatalogSkill> listOfSkills) {
+        List<Integer> skillRefIds = listOfSkills.collect {
+            return skillDefRepo.getIdByProjectIdAndSkillIdAndType(it.projectId, it.skillId, SkillDef.ContainerType.Skill)
+        }
+        userPointsRepo.copyUserPointsToTheImportedProjects(projectIdTo, skillRefIds)
+        userPointsRepo.createProjectUserPointsForTheNewUsers(projectIdTo)
+        nativeQueriesRepo.updateProjectUserPointsForAllUsers(projectIdTo)
+        userPointsRepo.createSubjectUserPointsForTheNewUsers(projectIdTo, subjectIdTo)
+        nativeQueriesRepo.updateSubjectUserPointsForAllUsers(projectIdTo, subjectIdTo)
     }
 
     @Transactional(readOnly=true)
