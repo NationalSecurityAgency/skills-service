@@ -20,7 +20,7 @@ limitations under the License.
 </template>
 
 <script>
-  import marked from 'marked';
+  import { marked } from 'marked';
   import emoji from 'node-emoji';
   import DOMPurify from 'dompurify';
 

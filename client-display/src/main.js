@@ -28,7 +28,7 @@ import {
     TooltipPlugin,
     FormTextareaPlugin,
 } from 'bootstrap-vue';
-import marked from 'marked';
+import { marked } from 'marked';
 import FiltersPlugin from '@/common-components/filter/FiltersPlugin';
 import App from '@/App';
 import router from '@/router';
@@ -54,20 +54,20 @@ Vue.use(FiltersPlugin);
 
 require('@/common/softwareVersion/softwareVersionInterceptor');
 
-const renderer = new marked.Renderer();
-renderer.link = function markedLinkRenderer(href, title, text) {
-  let titleRes = title;
-  if (!title) {
-    titleRes = text;
-  }
-  const link = marked.Renderer.prototype.link.call(this, href, titleRes, text);
-  let resLink = link.replace('<a', "<a target='_blank' ");
-  resLink = resLink.replace('</a>', ' <i class="fas fa-external-link-alt" style="font-size: 0.8rem"></i></a>');
-  return resLink;
+const renderer = {
+  link(href, title, text) {
+    let titleRes = title;
+    if (!title) {
+      titleRes = text;
+    }
+    const link = marked.Renderer.prototype.link.call(this, href, titleRes, text);
+    let resLink = link.replace('<a', "<a target='_blank' ");
+    resLink = resLink.replace('</a>', ' <i class="fas fa-external-link-alt" style="font-size: 0.8rem"></i></a>');
+    return resLink;
+  },
 };
-marked.setOptions({
-  renderer,
-});
+
+marked.use({ renderer });
 
 const initializeVueApp = () => {
   new Vue({
