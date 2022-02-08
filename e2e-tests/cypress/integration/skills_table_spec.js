@@ -38,7 +38,7 @@ describe('Skills Table Tests', () => {
         cy.clickSave();
 
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: skillName }, { colIndex: 2,  value: 1 }],
+            [{ colIndex: 0,  value: skillName }, { colIndex: 1,  value: 1 }],
         ], 10);
 
         cy.get('[data-cy="deleteSkillButton_ThisisaSkillSkill"]').click();
