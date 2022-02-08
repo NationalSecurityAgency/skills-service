@@ -25,6 +25,7 @@ import skills.storage.model.UserPoints
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPointsRepo
+import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -1078,6 +1079,51 @@ class CatalogImportAndAchievementsSpecs extends DefaultIntSpec {
         proj2_user3Achievements_subj1_import2.collect { it.level }.sort() == [1, 2, 3]
         proj2_user3Achievements_subj2_import2.collect { it.level }.sort() == [1]
         proj2_user3Achievements_subj3_import2.collect { it.level }.sort() == []
+    }
+
+    def "achieve a badge via a catalog import"() {
+        def project1 = createProjWithCatalogSkills(1)
+        def project2 = createProjWithCatalogSkills(2)
+
+        def p2badge1 = createBadge(2, 11)
+        skillsService.createBadge(p2badge1)
+
+        skillsService.importSkillFromCatalog(project2.p.projectId, project1.s2.subjectId, project1.p.projectId, project1.s1_skills[0].skillId)
+
+        skillsService.assignSkillToBadge(project2.p.projectId, p2badge1.badgeId, project2.s1_skills[0].skillId)
+        skillsService.assignSkillToBadge(project2.p.projectId, p2badge1.badgeId, project1.s1_skills[0].skillId)
+
+        p2badge1.enabled = true
+        skillsService.updateBadge(p2badge1, p2badge1.badgeId)
+
+        def randomUsers = getRandomUsers(3)
+        def user = randomUsers[0]
+
+        when:
+        def sum1 = skillsService.getBadgeSummary(user, project2.p.projectId, p2badge1.badgeId)
+        skillsService.addSkill([projectId: project2.p.projectId, skillId:project2.s1_skills[0].skillId], user, new Date() - 1)
+        def skill1CompletedRes = skillsService.addSkill([projectId: project2.p.projectId, skillId:project2.s1_skills[0].skillId], user)
+        def sum2 = skillsService.getBadgeSummary(user, project2.p.projectId, p2badge1.badgeId)
+
+        skillsService.addSkill([projectId: project1.p.projectId, skillId:project1.s1_skills[0].skillId], user, new Date() - 1)
+        def skill2CompletedRes = skillsService.addSkill([projectId: project1.p.projectId, skillId:project1.s1_skills[0].skillId], user)
+        def sum3 = skillsService.getBadgeSummary(user, project2.p.projectId, p2badge1.badgeId)
+
+        then:
+        skill1CompletedRes.body.completed.find { it.type == "Skill" }
+        skill2CompletedRes.body.completed.find { it.type == "Skill" }
+
+        !sum1.badgeAchieved
+        sum1.numTotalSkills == 2
+        sum1.numSkillsAchieved == 0
+
+        !sum2.badgeAchieved
+        sum2.numTotalSkills == 2
+        sum2.numSkillsAchieved == 1
+
+        sum3.badgeAchieved
+        sum3.numTotalSkills == 2
+        sum3.numSkillsAchieved == 2
     }
 
     private void printLevels(String projectId, String label, String subjectId = null) {

@@ -21,7 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.services.RuleSetDefGraphService
 import skills.services.UserAchievementsAndPointsManagement
+import skills.services.events.AchievedBadgeHandler
 import skills.services.events.SkillDate
+import skills.services.events.SkillEventResult
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefMin
 import skills.storage.model.SkillRelDef
@@ -45,11 +47,23 @@ class ImportedSkillsAchievementsHandler {
     @Autowired
     UserAchievementsAndPointsManagement userAchievementsAndPointsManagement
 
-    void handleAchievementsForImportedSkills(String userId, SkillDefMin skill, SkillDate incomingSkillDate) {
+    @Autowired
+    AchievedBadgeHandler achievedBadgeHandler
+
+    void handleAchievementsForImportedSkills(String userId, SkillDefMin skill, SkillDate incomingSkillDate, boolean thisRequestCompletedOriginalSkill) {
         List<SkillDefMin> skills = skillDefRepo.findSkillDefMinCopiedFrom(skill.id)
         List<SkillDef> subjects = []
         skills?.each {
+            // handle user points and level achievements
             pointsAndAchievementsHandler.updatePointsAndAchievements(userId, it, incomingSkillDate)
+
+            if (thisRequestCompletedOriginalSkill) {
+                SkillEventResult mockResForBadgeCheck = new SkillEventResult()
+                pointsAndAchievementsHandler.documentSkillAchieved(userId, it, mockResForBadgeCheck, incomingSkillDate)
+                achievedBadgeHandler.checkForBadges(mockResForBadgeCheck, userId, it, incomingSkillDate)
+            }
+
+            // aggregate subjects
             SkillDef parent = ruleSetDefGraphService.getParentSkill(it.id)
             assert parent.type == SkillDef.ContainerType.Subject
             if (!subjects.find { it.id == parent.id}) {

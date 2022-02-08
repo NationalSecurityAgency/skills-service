@@ -304,7 +304,6 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
     from UserPerformedSkill ups
       where
       ups.userId=?1 and 
-      ups.projectId=?2 and 
-      ups.skillId=?3''')
+      ups.skillRefId in (select case when copiedFrom is not null then copiedFrom else id end as id from SkillDef where type = 'Skill' and projectId = ?2 and skillId= ?3)''')
     Date getUserPerformedSkillLatestDate(String userId, String projectId, String skillId)
 }
