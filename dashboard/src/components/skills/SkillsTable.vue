@@ -256,6 +256,11 @@ limitations under the License.
         required: false,
         default: '',
       },
+      pageSize: {
+        type: Number,
+        required: false,
+        default: 10,
+      },
     },
     components: {
       EditSkillGroup,
@@ -333,7 +338,7 @@ limitations under the License.
               remove: !this.showPaging,
               currentPage: 1,
               totalRows: 1,
-              pageSize: 10,
+              pageSize: this.pageSize,
               possiblePageSizes: [10, 15, 25],
             },
           },

@@ -1214,5 +1214,18 @@ describe('Skills Group Tests', () => {
 
     });
 
+    it('More than 10 skills are visible in the group', () => {
+      cy.createSkillsGroup(1, 1, 1);
+      for (let step=1; step < 100; step++) {
+        cy.addSkillToGroup(1, 1, 1, step, { pointIncrement: 11, numPerformToCompletion: 2 });
+      }
+      cy.visit('/administrator/projects/proj1/subjects/subj1');
+      cy.contains('Awesome Group 1').should('be.visible');
+      cy.get('[data-cy=expandDetailsBtn_group1]').click();
+      cy.get('[data-cy=manageSkillLink_skill99]').should('be.visible');
+      cy.get('[data-cy=manageSkillLink_skill1]').should('be.visible');
+      cy.get('[data-cy=manageSkillLink_skill50]').should('be.visible');
+    });
+
 });
 
