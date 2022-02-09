@@ -82,6 +82,7 @@ limitations under the License.
                     @skill-removed="skillRemoved"
                     @skills-change="skillChanged"
                     :disableDeleteButtonsInfo="disableDeleteButtonInfo"
+                    :page-size="this.maxSkillsToShow"
                     :can-edit-points="canEditPoints" :can-edit-points-msg="canEditPointsMsg()"
                         :show-search="false" :show-header="false" :show-paging="false"/>
         </div>
@@ -186,6 +187,12 @@ limitations under the License.
           }
         }
         return res;
+      },
+      maxSkillsToShow() {
+        if (this.$store.getters.config) {
+          return Number(this.$store.getters.config.maxSkillsPerSubject);
+        }
+        return 10;
       },
     },
     methods: {
