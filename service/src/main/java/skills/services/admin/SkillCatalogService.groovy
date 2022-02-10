@@ -54,6 +54,7 @@ import skills.storage.repos.ExportedSkillRepo
 import skills.storage.repos.QueuedSkillUpdateRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillDefWithExtraRepo
+import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPointsRepo
 import skills.storage.repos.nativeSql.NativeQueriesRepo
 import skills.utils.Props
@@ -102,6 +103,9 @@ class SkillCatalogService {
 
     @Autowired
     NativeQueriesRepo nativeQueriesRepo
+
+    @Autowired
+    UserAchievedLevelRepo userAchievedLevelRepo
 
     @Transactional(readOnly = true)
     TotalCountAwareResult<ProjectNameAwareSkillDefRes> getSkillsAvailableInCatalog(String projectId, String projectNameSearch, String subjectNameSearch, String skillNameSearch, PageRequest pageable) {
@@ -299,13 +303,13 @@ class SkillCatalogService {
             importSkillFromCatalog(it.projectId, it.skillId, projectIdTo, subjectTo)
         }
 
-        copyUserPoints(projectIdTo, subjectIdTo, listOfSkills)
+        copyUserPointsAndAchievements(projectIdTo, subjectIdTo, listOfSkills)
         userAchievementsAndPointsManagement.identifyAndAddLevelAchievements(subjectTo)
         log.info("Completed skills import. projectIdTo=[{}], subjectIdTo=[{}], listOfSkills={}", projectIdTo, subjectIdTo, listOfSkills)
     }
 
     @Profile
-    private void copyUserPoints(String projectIdTo, String subjectIdTo, List<CatalogSkill> listOfSkills) {
+    private void copyUserPointsAndAchievements(String projectIdTo, String subjectIdTo, List<CatalogSkill> listOfSkills) {
         List<Integer> skillRefIds = listOfSkills.collect {
             return skillDefRepo.getIdByProjectIdAndSkillIdAndType(it.projectId, it.skillId, SkillDef.ContainerType.Skill)
         }
@@ -314,6 +318,7 @@ class SkillCatalogService {
         nativeQueriesRepo.updateProjectUserPointsForAllUsers(projectIdTo)
         userPointsRepo.createSubjectUserPointsForTheNewUsers(projectIdTo, subjectIdTo)
         nativeQueriesRepo.updateSubjectUserPointsForAllUsers(projectIdTo, subjectIdTo)
+        userAchievedLevelRepo.copySkillAchievementsToTheImportedProjects(projectIdTo, skillRefIds)
     }
 
     @Transactional(readOnly=true)

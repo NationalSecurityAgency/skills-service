@@ -25,7 +25,6 @@ import skills.storage.model.UserPoints
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPointsRepo
-import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -1125,6 +1124,64 @@ class CatalogImportAndAchievementsSpecs extends DefaultIntSpec {
         sum3.numTotalSkills == 2
         sum3.numSkillsAchieved == 2
     }
+
+    def "skills achievements are copied when skills are imported"() {
+        def project1 = createProjWithCatalogSkills(1)
+        def project2 = createProjWithCatalogSkills(2)
+        def project3 = createProjWithCatalogSkills(3)
+
+        def p2badge1 = createBadge(2, 11)
+        skillsService.createBadge(p2badge1)
+
+        def randomUsers = getRandomUsers(3)
+        def user = randomUsers[0]
+
+        skillsService.addSkill([projectId: project1.p.projectId, skillId:project1.s1_skills[0].skillId], user, new Date() - 1)
+        def skill1CompletedRes = skillsService.addSkill([projectId: project1.p.projectId, skillId:project1.s1_skills[0].skillId], user)
+
+        skillsService.addSkill([projectId: project1.p.projectId, skillId:project1.s1_skills[1].skillId], user, new Date() - 1)
+        def skill2CompletedRes = skillsService.addSkill([projectId: project1.p.projectId, skillId:project1.s1_skills[1].skillId], user)
+
+        skillsService.addSkill([projectId: project3.p.projectId, skillId:project3.s1_skills[1].skillId], user, new Date() - 1)
+        def skill3CompletedRes = skillsService.addSkill([projectId: project3.p.projectId, skillId:project3.s1_skills[1].skillId], user)
+
+        when:
+        List<UserAchievement> before = userAchievedRepo.findAllByUserAndProjectIds(user, [project2.p.projectId])
+        skillsService.bulkImportSkillsFromCatalog(project2.p.projectId, project2.s2.subjectId, [
+                [projectId: project1.p.projectId, skillId: project1.s1_skills[0].skillId],
+                [projectId: project1.p.projectId, skillId: project1.s1_skills[1].skillId],
+                [projectId: project3.p.projectId, skillId: project3.s1_skills[1].skillId],
+        ])
+        List<UserAchievement> after = userAchievedRepo.findAllByUserAndProjectIds(user, [project2.p.projectId])
+
+        def skill1 = skillsService.getSingleSkillSummary(user, project2.p.projectId, project1.s1_skills[0].skillId)
+        def skill2 = skillsService.getSingleSkillSummary(user, project2.p.projectId, project1.s1_skills[1].skillId)
+        def skill3 = skillsService.getSingleSkillSummary(user, project2.p.projectId, project3.s1_skills[1].skillId)
+        then:
+        skill1CompletedRes.body.completed.find { it.type == "Skill" }
+        skill2CompletedRes.body.completed.find { it.type == "Skill" }
+        skill3CompletedRes.body.completed.find { it.type == "Skill" }
+        skill1.totalPoints == skill1.points
+        skill2.totalPoints == skill2.points
+        skill3.totalPoints == skill3.points
+
+        !before
+        after.find { it.skillId == project1.s1_skills[0].skillId }
+        after.find { it.skillId == project1.s1_skills[1].skillId }
+        after.find { it.skillId == project3.s1_skills[1].skillId }
+
+        // make sure attributes got copied
+        UserAchievement originalSk1 = userAchievedRepo.findAll().find {
+            it.userId == user && it.projectId == project1.p.projectId && it.skillId == project1.s1_skills[0].skillId
+        }
+        UserAchievement importedSk1 = userAchievedRepo.findAll().find {
+            it.userId == user && it.projectId == project2.p.projectId && it.skillId == project1.s1_skills[0].skillId
+        }
+        originalSk1.pointsWhenAchieved == importedSk1.pointsWhenAchieved
+        originalSk1.achievedOn == importedSk1.achievedOn
+        importedSk1.skillRefId == skillDefRepo.findByProjectIdAndSkillId( project2.p.projectId, project1.s1_skills[0].skillId).id
+    }
+
 
     private void printLevels(String projectId, String label, String subjectId = null) {
         println "------------\n${projectId}${subjectId ? ":${subjectId}" : ""} - ${label}:"

@@ -497,4 +497,15 @@ where ua.projectId = :projectId and ua.skillId = :skillId
             ) 
     ''')
     AchievedSkillsCount countAchievedProductionSkillsForUserByDayWeekMonth(@Param('userId') String userId)
+
+    @Modifying
+    @Query(value = '''INSERT INTO user_achievement(user_id, project_id, skill_id, skill_ref_id, points_when_achieved, achieved_on)
+            SELECT ua.user_id, toDef.project_id, toDef.skill_id, toDef.id, ua.points_when_achieved, ua.achieved_on
+            FROM user_achievement ua, skill_definition toDef
+            WHERE
+                  toDef.project_id = :toProjectId and 
+                  toDef.skill_id = ua.skill_id and
+                  ua.skill_ref_id in (:fromSkillRefIds)
+            ''', nativeQuery = true)
+    void copySkillAchievementsToTheImportedProjects(@Param('toProjectId') String toProjectId, @Param('fromSkillRefIds') List<Integer> fromSkillRefIds)
 }
