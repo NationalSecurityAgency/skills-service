@@ -15,6 +15,7 @@
  */
 package skills.intTests
 
+import groovy.json.JsonOutput
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
@@ -1527,6 +1528,32 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         then:
         def ex = thrown(SkillsClientException)
         ex.message.contains("Skill with id [skill3] with type [Skill] already exists! Requested to create skill with type of [SkillsGroup]")
+    }
+
+    void "change group's skillId - new value propagates to child skills"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skillsGroup = SkillsFactory.createSkillsGroup()
+        def allSkills = SkillsFactory.createSkills(3) // first one is group
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+
+        String originalSkillsGroupId = skillsGroup.skillId
+        skillsService.assignSkillToSkillsGroup(originalSkillsGroupId, allSkills[1])
+        skillsService.assignSkillToSkillsGroup(originalSkillsGroupId, allSkills[2])
+
+        when:
+        skillsGroup.skillId = "newCoolId"
+        skillsService.updateSkill(skillsGroup, originalSkillsGroupId)
+
+        def s1 = skillsService.getSkill(allSkills[1])
+        def s2 = skillsService.getSkill(allSkills[2])
+        println JsonOutput.toJson(s1)
+        then:
+        s1.groupId == "newCoolId"
+        s2.groupId == "newCoolId"
     }
 
     void "when self reporting - group can  have very little points as long as the entire subject and project has sufficient points"() {
