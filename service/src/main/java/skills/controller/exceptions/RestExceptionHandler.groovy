@@ -122,7 +122,7 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
     ResponseEntity<Object> handleHttpMessageNotReadable(
             HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         if (ex.getCause() instanceof ClientAbortException) {
-            handleClientAbortException(ex, request)
+            handleClientAbortException(ex.getCause(), request)
         } else {
             log.error("${buildRequestInfo(request)}, HttpMessageNotReadableException", ex)
             String msg = "${ex.message}"
