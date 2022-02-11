@@ -1460,4 +1460,16 @@
                                  referencedColumnNames="id"
                                  referencedTableName="users"/>
     </changeSet>
+
+    <changeSet id="20" author="skills team" context="migration20">
+        <sql dbms="postgresql"><![CDATA[update skill_definition childSkill SET group_id = groupSkill.skill_id
+            from skill_definition groupSkill, skill_relationship_definition rel
+            where groupSkill.id = rel.parent_ref_id
+              and rel.child_ref_id = childSkill.id
+              and rel.type='SkillsGroupRequirement'
+              and childSkill.group_id is not null
+              and groupSkill.skill_id <> childSkill.group_id;]]></sql>
+    </changeSet>
+
+
 </databaseChangeLog>
