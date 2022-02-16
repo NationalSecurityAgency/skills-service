@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestBody
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
+import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.SkillImportRequest
 import skills.controller.request.model.PointSyncPatchRequest
@@ -207,6 +208,7 @@ class SkillsAdminService {
         final int incrementRequested = isSkillsGroup ? 0 : skillRequest.pointIncrement
         final int currentOccurrences = isEdit && !isSkillsGroup ? (skillDefinition.totalPoints / skillDefinition.pointIncrement) : -1
         final SelfReportingType selfReportingType = skillRequest.selfReportingType && !isSkillsGroup ? SkillDef.SelfReportingType.valueOf(skillRequest.selfReportingType) : null;
+        final boolean isEnabledSkillInRequest = Boolean.valueOf(skillRequest.enabled)
 
         SkillDef subject = null
         SkillDef skillsGroupSkillDef = null
@@ -224,17 +226,17 @@ class SkillsAdminService {
                 groupChildSkills = skillsGroupAdminService.validateSkillsGroupAndReturnChildren(skillRequest, skillDefinition)
                 totalPointsRequested = skillsGroupAdminService.getGroupTotalPoints(groupChildSkills, skillRequest.numSkillsRequired)
 
-                if (Boolean.valueOf(skillRequest.enabled) && skillDefinition.numSkillsRequired != skillRequest.numSkillsRequired) {
+                if (isEnabledSkillInRequest && skillDefinition.numSkillsRequired != skillRequest.numSkillsRequired) {
                     int currentNumSkillsRequired = skillDefinition.numSkillsRequired == -1 ? groupChildSkills.size() : skillDefinition.numSkillsRequired
                     int requestedNumSkillsRequired = skillRequest.numSkillsRequired == -1 ? groupChildSkills.size() : skillRequest.numSkillsRequired
                     numSkillsRequiredDelta = requestedNumSkillsRequired - currentNumSkillsRequired
                 }
 
-                boolean enabledChanged = Boolean.valueOf(skillDefinition.enabled) != Boolean.valueOf(skillRequest.enabled)
+                boolean enabledChanged = Boolean.valueOf(skillDefinition.enabled) != isEnabledSkillInRequest
                 boolean skillIdChanged = skillDefinition.skillId != skillRequest.skillId
                 if (enabledChanged || skillIdChanged) {
                     // validate that the Group's skills won't exceed the maximum allowed when publishing the group
-                    if (Boolean.valueOf(skillRequest.enabled)) {
+                    if (isEnabledSkillInRequest) {
                         String parentSkillId = skillRequest.subjectId
                         SkillDef groupSubject = skillDefRepo.findByProjectIdAndSkillIdAndType(skillRequest.projectId, parentSkillId, SkillDef.ContainerType.Subject)
                         assert groupSubject, "Subject [${parentSkillId}] does not exist"
@@ -252,7 +254,7 @@ class SkillsAdminService {
                 }
 
             }
-            shouldRebuildScores = skillDefinition.totalPoints != totalPointsRequested || (!Boolean.valueOf(skillDefinition.enabled) && Boolean.valueOf(skillRequest.enabled))
+            shouldRebuildScores = skillDefinition.totalPoints != totalPointsRequested || (!Boolean.valueOf(skillDefinition.enabled) && isEnabledSkillInRequest)
             occurrencesDelta = isSkillsGroup ? 0 : skillRequest.numPerformToCompletion - currentOccurrences
             updateUserPoints = shouldRebuildScores || occurrencesDelta != 0
             pointIncrementDelta = isSkillsGroup ? 0 : incrementRequested - skillDefinition.pointIncrement
@@ -284,13 +286,15 @@ log.error("updating totalPoints on [${skillDefinition.projectId}-${skillDefiniti
         } else {
             String parentSkillId = skillRequest.subjectId
             subject = skillDefRepo.findByProjectIdAndSkillIdAndType(skillRequest.projectId, parentSkillId, SkillDef.ContainerType.Subject)
-            assert subject, "Subject [${parentSkillId}] does not exist"
+            if (!subject) {
+                throw new SkillException("Subject [${parentSkillId}] does not exist", skillRequest.projectId, skillRequest.skillId, ErrorCode.BadParam)
+            }
 
             createdResourceLimitsValidator.validateNumSkillsCreated(subject)
 
             Integer highestDisplayOrder = skillDefRepo.calculateChildSkillsHighestDisplayOrder(skillRequest.projectId, groupId ?: parentSkillId)
             int displayOrder = highestDisplayOrder == null ? 1 : highestDisplayOrder + 1
-            String enabled = isSkillsGroup ? Boolean.FALSE.toString() : Boolean.TRUE.toString()
+            String enabled = isSkillsGroup ? Boolean.FALSE.toString() : isEnabledSkillInRequest.toString()
             if (isSkillsGroupChild) {
                 skillsGroupSkillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, groupId, SkillDef.ContainerType.SkillsGroup)
                 if (!skillsGroupSkillDef) {
@@ -323,7 +327,7 @@ log.error("updating totalPoints on [${skillDefinition.projectId}-${skillDefiniti
                 skillDefinition.copiedFromProjectId = skillRequest.copiedFromProjectId
             }
             log.debug("Saving [{}]", skillDefinition)
-            shouldRebuildScores = true
+            shouldRebuildScores = isEnabledSkillInRequest
         }
 
         SkillDefWithExtra tempSaved
@@ -365,16 +369,18 @@ log.error("totalPoints for saved skill [${savedSkill.projectId}-${savedSkill.ski
         }
 
         if (isEdit) {
-            updatePointsAndAchievements(
-                    savedSkill,
-                    skillRequest.subjectId,
-                    pointIncrementDelta,
-                    occurrencesDelta,
-                    currentOccurrences,
-                    numSkillsRequiredDelta,
-                    skillsGroupSkillDef,
-                    groupChildSkills
-            )
+            if (isEnabledSkillInRequest) {
+                updatePointsAndAchievements(
+                        savedSkill,
+                        skillRequest.subjectId,
+                        pointIncrementDelta,
+                        occurrencesDelta,
+                        currentOccurrences,
+                        numSkillsRequiredDelta,
+                        skillsGroupSkillDef,
+                        groupChildSkills
+                )
+            }
             if (skillCatalogService.isAvailableInCatalog(savedSkill.projectId, savedSkill.skillId)) {
                 taskSchedulerService.scheduleCatalogSkillUpdate(savedSkill.projectId, savedSkill.skillId, savedSkill.id)
             }

@@ -16,6 +16,7 @@
 package skills.storage.repos
 
 import org.springframework.data.domain.Pageable
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.data.repository.query.Param
@@ -136,6 +137,10 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     List<SkillDefPartial> findAllByTypeAndNameLikeNoImportedSkills(SkillDef.ContainerType type, String name)
 
     List<SkillDef> findAllByProjectIdAndType(@Nullable String id, SkillDef.ContainerType type)
+
+    @Nullable
+    List<SkillDef> findAllByProjectIdAndTypeAndEnabledAndCopiedFromIsNotNull(@Nullable String id, SkillDef.ContainerType type, String enabled)
+
     @Nullable
     SkillDef findByProjectIdAndSkillIdIgnoreCaseAndType(@Nullable String id, String skillId, SkillDef.ContainerType type)
     @Nullable
@@ -487,4 +492,35 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         from SkillDef sd where sd.copiedFromProjectId is not null
     ''')
     ImportExportStats getImportedSKillStats(String projectId)
+
+    @Modifying
+    @Query(value = '''update project_definition
+        set total_points = (
+            select sum(total_points)
+            from skill_definition
+            where project_id = :projectId
+              and type = 'Subject'
+              and enabled = 'true')
+        where project_id = :projectId''', nativeQuery = true)
+    void updateProjectsTotalPoints(@Param('projectId') String projectId)
+
+    @Modifying
+    @Query(value = '''update skill_definition subject
+        set total_points = (
+            select sum(skill.total_points)
+            from skill_relationship_definition rel,
+                 skill_definition skill
+            where subject.id = rel.parent_ref_id
+              and skill.id = rel.child_ref_id
+              and rel.type in ('GroupSkillToSubject', 'RuleSetDefinition')
+              and subject.project_id = :projectId
+              and subject.skill_id = :subjectId
+              and subject.type = 'Subject'
+              and skill.type = 'Skill'
+              and skill.enabled = 'true')
+        where subject.project_id = :projectId
+          and subject.skill_id = :subjectId
+          and subject.type = 'Subject' 
+          ''', nativeQuery = true)
+    void updateSubjectTotalPoints(@Param('projectId') String projectId, @Param('subjectId') String subjectId)
 }

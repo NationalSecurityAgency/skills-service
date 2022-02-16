@@ -35,16 +35,20 @@ import skills.controller.result.model.ExportedSkillUser
 import skills.controller.result.model.ExportedSkillsStats
 import skills.controller.result.model.ImportedSkillStats
 import skills.controller.result.model.ProjectNameAwareSkillDefRes
+import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.SkillDefRes
 import skills.controller.result.model.ExportableToCatalogValidationResult
 import skills.services.LockingService
 import skills.services.RuleSetDefGraphService
 import skills.services.UserAchievementsAndPointsManagement
+import skills.services.settings.Settings
+import skills.services.settings.SettingsService
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.ExportedSkill
 import skills.storage.model.ExportedSkillTiny
 import skills.storage.model.ImportExportStats
+import skills.storage.model.ProjDef
 import skills.storage.model.QueuedSkillUpdate
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefMin
@@ -106,6 +110,9 @@ class SkillCatalogService {
 
     @Autowired
     UserAchievedLevelRepo userAchievedLevelRepo
+
+    @Autowired
+    SettingsService settingsService
 
     @Transactional(readOnly = true)
     TotalCountAwareResult<ProjectNameAwareSkillDefRes> getSkillsAvailableInCatalog(String projectId, String projectNameSearch, String subjectNameSearch, String skillNameSearch, PageRequest pageable) {
@@ -281,6 +288,7 @@ class SkillCatalogService {
         copy.version = skillsAdminService.findLatestSkillVersion(projectIdTo)
         copy.numPerformToCompletion = numToCompletion
         copy.selfReportingType = original.selfReportingType?.toString()
+        copy.enabled = Boolean.FALSE.toString()
 
         skillsAdminService.saveSkill(copy.skillId, copy)
     }
@@ -302,23 +310,54 @@ class SkillCatalogService {
         listOfSkills?.each {
             importSkillFromCatalog(it.projectId, it.skillId, projectIdTo, subjectTo)
         }
-
-        copyUserPointsAndAchievements(projectIdTo, subjectIdTo, listOfSkills)
-        userAchievementsAndPointsManagement.identifyAndAddLevelAchievements(subjectTo)
-        log.info("Completed skills import. projectIdTo=[{}], subjectIdTo=[{}], listOfSkills={}", projectIdTo, subjectIdTo, listOfSkills)
     }
 
+    @Transactional
     @Profile
-    private void copyUserPointsAndAchievements(String projectIdTo, String subjectIdTo, List<CatalogSkill> listOfSkills) {
-        List<Integer> skillRefIds = listOfSkills.collect {
-            return skillDefRepo.getIdByProjectIdAndSkillIdAndType(it.projectId, it.skillId, SkillDef.ContainerType.Skill)
+    void finalizeCatalogSkillsImport(String projectId) {
+        log.info("Finalizing imported skills for [{}]", projectId)
+        projDefAccessor.getProjDef(projectId) // validate
+        List<SkillDef> disabledImportedSkills = skillDefRepo.findAllByProjectIdAndTypeAndEnabledAndCopiedFromIsNotNull(projectId, SkillDef.ContainerType.Skill, Boolean.FALSE.toString())
+
+        if (disabledImportedSkills) {
+            disabledImportedSkills.each {
+                it.enabled = Boolean.TRUE.toString()
+            }
+            skillDefRepo.saveAll(disabledImportedSkills)
+
+            // important: must update subject's total points first then project
+            List<SkillDef> subjects = disabledImportedSkills.collect {ruleSetDefGraphService.getParentSkill(it.id) }
+                    .unique(false) { SkillDef a, SkillDef b -> a.skillId <=> b.skillId }
+            subjects.each {
+                skillDefRepo.updateSubjectTotalPoints(projectId, it.skillId)
+            }
+            skillDefRepo.updateProjectsTotalPoints( projectId)
+
+
+            List<Integer> skillRefIds = disabledImportedSkills.collect {it.copiedFrom }
+
+            userPointsRepo.copyUserPointsToTheImportedProjects(projectId, skillRefIds)
+            userPointsRepo.createProjectUserPointsForTheNewUsers(projectId)
+            nativeQueriesRepo.updateProjectUserPointsForAllUsers(projectId)
+
+            userAchievedLevelRepo.copySkillAchievementsToTheImportedProjects(projectId, skillRefIds)
+
+            SettingsResult settingsResult = settingsService.getProjectSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
+            boolean pointsBased = settingsResult ? settingsResult.isEnabled() : false
+
+            subjects.each { SkillDef subject ->
+                userPointsRepo.createSubjectUserPointsForTheNewUsers(projectId, subject.skillId)
+                nativeQueriesRepo.updateSubjectUserPointsForAllUsers(projectId, subject.skillId)
+
+                nativeQueriesRepo.identifyAndAddSubjectLevelAchievements(subject.projectId, subject.skillId, pointsBased)
+                log.info("Completed import for subject. projectIdTo=[{}], subjectIdTo=[{}]", projectId, subject.skillId)
+            }
+            nativeQueriesRepo.identifyAndAddProjectLevelAchievements(projectId, pointsBased)
+
+        } else {
+            log.warn("Finalize was called for [{}] projectId but there were no disabled skills", projectId)
         }
-        userPointsRepo.copyUserPointsToTheImportedProjects(projectIdTo, skillRefIds)
-        userPointsRepo.createProjectUserPointsForTheNewUsers(projectIdTo)
-        nativeQueriesRepo.updateProjectUserPointsForAllUsers(projectIdTo)
-        userPointsRepo.createSubjectUserPointsForTheNewUsers(projectIdTo, subjectIdTo)
-        nativeQueriesRepo.updateSubjectUserPointsForAllUsers(projectIdTo, subjectIdTo)
-        userAchievedLevelRepo.copySkillAchievementsToTheImportedProjects(projectIdTo, skillRefIds)
+        log.info("Completed finalizing imported skills for [{}]", projectId)
     }
 
     @Transactional(readOnly=true)

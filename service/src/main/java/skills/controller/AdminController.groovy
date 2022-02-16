@@ -1134,6 +1134,17 @@ class AdminController {
         return success
     }
 
+    @RequestMapping(value="/projects/{projectId}/catalog/finalize", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
+    RequestResult finalizeSkillsImport(@PathVariable("projectId") String projectId) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        skillCatalogService.finalizeCatalogSkillsImport(projectId)
+        RequestResult success = RequestResult.success()
+        success.explanation = "Finalized skills import from the catalog into [${projectId}]"
+        return success
+    }
+
+
+
     @RequestMapping(value="/projects/{projectId}/skills/catalog", method=RequestMethod.GET, produces = "application/json")
     TableResult getCatalogSkills(@PathVariable("projectId") String projectId,
                                   @RequestParam int limit,

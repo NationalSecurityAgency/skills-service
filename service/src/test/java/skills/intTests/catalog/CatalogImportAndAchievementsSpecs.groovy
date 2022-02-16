@@ -65,6 +65,8 @@ class CatalogImportAndAchievementsSpecs extends DefaultIntSpec {
         skillsService.bulkImportSkillsFromCatalog(project2.projectId, p2subj1.subjectId, p1_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
         skillsService.bulkImportSkillsFromCatalog(project3.projectId, p3subj1.subjectId, p1_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
         skillsService.bulkImportSkillsFromCatalog(project3.projectId, p3subj1.subjectId, p2_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
+        skillsService.finalizeSkillsImportFromCatalog(project2.projectId)
+        skillsService.finalizeSkillsImportFromCatalog(project3.projectId)
 
         def users = getRandomUsers(5)
         skillsService.addSkill([projectId: project2.projectId, skillId: p2_skills[0].skillId], users[0])
@@ -209,6 +211,7 @@ class CatalogImportAndAchievementsSpecs extends DefaultIntSpec {
         skillsService.bulkImportSkillsFromCatalog(proj3.projectId, p3_subj1.subjectId, proj1.s1_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
         skillsService.bulkImportSkillsFromCatalog(proj3.projectId, p3_subj1.subjectId, proj2.s1_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
         skillsService.bulkImportSkillsFromCatalog(proj3.projectId, p3_subj2.subjectId, proj1.s2_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
+        skillsService.finalizeSkillsImportFromCatalog(proj3.projectId)
 
         def users = getRandomUsers(5)
 
@@ -294,6 +297,8 @@ class CatalogImportAndAchievementsSpecs extends DefaultIntSpec {
         when:
         List<UserPoints> userPoints_import0 = userPointsRepo.findAll().findAll( { it.getProjectId() == proj3.p.projectId})
         skillsService.bulkImportSkillsFromCatalog(proj3.p.projectId, proj3.s1.subjectId, [[projectId: proj1.p.projectId, skillId: proj1.s1_skills[0].skillId], [projectId: proj1.p.projectId, skillId: proj1.s1_skills[1].skillId]])
+        skillsService.finalizeSkillsImportFromCatalog(proj3.p.projectId)
+
         List<UserPoints> userPoints_import1 = userPointsRepo.findAll().findAll( { it.getProjectId() == proj3.p.projectId})
         then:
         !userPoints_import0
@@ -340,6 +345,8 @@ class CatalogImportAndAchievementsSpecs extends DefaultIntSpec {
         skillsService.bulkImportSkillsFromCatalog(project2.projectId, p2subj1.subjectId, p1_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
         skillsService.bulkImportSkillsFromCatalog(project3.projectId, p3subj1.subjectId, p1_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
         skillsService.bulkImportSkillsFromCatalog(project3.projectId, p3subj1.subjectId, p2_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
+        skillsService.finalizeSkillsImportFromCatalog(project2.projectId)
+        skillsService.finalizeSkillsImportFromCatalog(project3.projectId)
 
         def users = getRandomUsers(3)
         skillsService.addSkill([projectId: project1.projectId, skillId: p1_skills[0].skillId], users[0])
@@ -476,6 +483,7 @@ class CatalogImportAndAchievementsSpecs extends DefaultIntSpec {
 
         printLevels(project2.projectId, "before import")
         skillsService.bulkImportSkillsFromCatalog(project2.projectId, p2subj1.subjectId, [[ projectId: project1.projectId, skillId: skill.skillId]])
+        skillsService.finalizeSkillsImportFromCatalog(project2.projectId)
         printLevels(project2.projectId, "after import1")
 
         Integer proj2_user1Level_import1 = skillsService.getUserLevel(project2.projectId, user)
@@ -490,6 +498,7 @@ class CatalogImportAndAchievementsSpecs extends DefaultIntSpec {
         List<UserAchievement> proj2_user3Achievements_subj1_import1 = userAchievedRepo.findAll().findAll { it.userId == user3 && it.level != null && it.projectId == project2.projectId && it.skillRefId == proj2_subj1_ref_id}
 
         skillsService.bulkImportSkillsFromCatalog(project2.projectId, p2subj1.subjectId,  [[ projectId: project3.projectId, skillId: skill7.skillId]])
+        skillsService.finalizeSkillsImportFromCatalog(project2.projectId)
         printLevels(project2.projectId, "after import2")
 
         Integer proj2_user1Level_import2 = skillsService.getUserLevel(project2.projectId, user)
@@ -645,6 +654,7 @@ class CatalogImportAndAchievementsSpecs extends DefaultIntSpec {
 
         printLevels(project2.projectId, "before import")
         skillsService.bulkImportSkillsFromCatalog(project2.projectId, p2subj1.subjectId, [[ projectId: project1.projectId, skillId: skill.skillId], [projectId: project3.projectId, skillId: skill7.skillId]])
+        skillsService.finalizeSkillsImportFromCatalog(project2.projectId)
         printLevels(project2.projectId, "after import2 (2 skills)")
 
         Integer proj2_user1Level_import2 = skillsService.getUserLevel(project2.projectId, user)
@@ -810,6 +820,7 @@ class CatalogImportAndAchievementsSpecs extends DefaultIntSpec {
         printLevels(project2.projectId, "before import", p1subj2.subjectId)
         printLevels(project2.projectId, "before import", p1subj3.subjectId)
         skillsService.bulkImportSkillsFromCatalog(project2.projectId, p2subj1.subjectId, [[projectId: project1.projectId, skillId: skill1.skillId]])
+        skillsService.finalizeSkillsImportFromCatalog(project2.projectId)
         printLevels(project2.projectId, "after import1", p1subj1.subjectId)
         printLevels(project2.projectId, "after import1", p1subj2.subjectId)
         printLevels(project2.projectId, "after import1", p1subj3.subjectId)
@@ -827,6 +838,7 @@ class CatalogImportAndAchievementsSpecs extends DefaultIntSpec {
         List<UserAchievement> proj2_user3Achievements_subj3_import1 = userAchievedRepo.findAll().findAll { it.userId == user3 && it.level != null && it.projectId == project2.projectId && it.skillRefId == proj2_subj3_ref_id}
 
         skillsService.bulkImportSkillsFromCatalog(project2.projectId, p2subj2.subjectId, [[projectId: project3.projectId, skillId: skill17.skillId]])
+        skillsService.finalizeSkillsImportFromCatalog(project2.projectId)
         printLevels(project2.projectId, "after import2", p1subj1.subjectId)
         printLevels(project2.projectId, "after import2", p1subj2.subjectId)
         printLevels(project2.projectId, "after import2", p1subj3.subjectId)
@@ -1012,6 +1024,7 @@ class CatalogImportAndAchievementsSpecs extends DefaultIntSpec {
         printLevels(project2.projectId, "before import", p1subj2.subjectId)
         printLevels(project2.projectId, "before import", p1subj3.subjectId)
         skillsService.bulkImportSkillsFromCatalog(project2.projectId, p2subj1.subjectId, [[projectId: project1.projectId, skillId: skill1.skillId], [projectId: project3.projectId, skillId: skill17.skillId]])
+        skillsService.finalizeSkillsImportFromCatalog(project2.projectId)
         printLevels(project2.projectId, "after import1", p1subj1.subjectId)
         printLevels(project2.projectId, "after import1", p1subj2.subjectId)
         printLevels(project2.projectId, "after import1", p1subj3.subjectId)
@@ -1133,6 +1146,8 @@ class CatalogImportAndAchievementsSpecs extends DefaultIntSpec {
                 [projectId: project1.p.projectId, skillId: project1.s1_skills[1].skillId],
                 [projectId: project3.p.projectId, skillId: project3.s1_skills[1].skillId],
         ])
+        skillsService.finalizeSkillsImportFromCatalog(project2.p.projectId)
+
         List<UserAchievement> after = userAchievedRepo.findAllByUserAndProjectIds(user, [project2.p.projectId])
 
         def skill1 = skillsService.getSingleSkillSummary(user, project2.p.projectId, project1.s1_skills[0].skillId)

@@ -1253,8 +1253,24 @@ class SkillsService {
         return wsHelper.adminPost("/projects/${importIntoProjectId}/subjects/${importIntoSubjectId}/import", catalogSkills)
     }
 
+    def bulkImportSkillsFromCatalogAndFinalize(String importIntoProjectId, String importIntoSubjectId, List<Map> catalogSkills) {
+        def res = wsHelper.adminPost("/projects/${importIntoProjectId}/subjects/${importIntoSubjectId}/import", catalogSkills)
+        finalizeSkillsImportFromCatalog(importIntoProjectId)
+        return res
+    }
+
+    def finalizeSkillsImportFromCatalog(String projectId) {
+        return wsHelper.adminPost("/projects/${projectId}/catalog/finalize", [])
+    }
+
     def importSkillFromCatalog(String importIntoProjectId, String importIntoSubjectId, String catalogSkillProjectId, String catalogSkillSkillId) {
         return this.bulkImportSkillsFromCatalog(importIntoProjectId, importIntoSubjectId, [[projectId: catalogSkillProjectId, skillId: catalogSkillSkillId]])
+    }
+
+    def importSkillFromCatalogAndFinalize(String importIntoProjectId, String importIntoSubjectId, String catalogSkillProjectId, String catalogSkillSkillId) {
+        def res = this.bulkImportSkillsFromCatalog(importIntoProjectId, importIntoSubjectId, [[projectId: catalogSkillProjectId, skillId: catalogSkillSkillId]])
+        finalizeSkillsImportFromCatalog(importIntoProjectId)
+        return res
     }
 
     def bulkExportSkillsToCatalog(String projectId, List<String> skillIds) {
