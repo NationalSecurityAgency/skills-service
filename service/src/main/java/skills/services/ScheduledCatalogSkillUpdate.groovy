@@ -21,6 +21,7 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import skills.services.admin.SkillCatalogService
 
+@Deprecated
 @Slf4j
 @Component
 class ScheduledCatalogSkillUpdate {
@@ -28,7 +29,7 @@ class ScheduledCatalogSkillUpdate {
     @Autowired
     SkillCatalogService skillCatalogService
 
-    @Scheduled(cron='#{"${skills.config.updateImportedSkills:* */3 * * * *}"}')
+//    @Scheduled(cron='#{"${skills.config.updateImportedSkills:* */3 * * * *}"}')
     public void updateImportedSkills() {
         log.info("propagating updates to catalog skills to the imported skill instances")
         skillCatalogService.distributeCatalogSkillUpdates()

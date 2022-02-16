@@ -48,6 +48,8 @@
 
         <log4j2.version>2.17.0</log4j2.version>
         <micrometer-registry.version>1.8.1</micrometer-registry.version>
+
+        <db-scheduler.version>10.5</db-scheduler.version>
     </properties>
 
     <parent>

@@ -420,6 +420,7 @@ class SkillCatalogService {
         return skillDefRepo.findSkillDefMinCopiedFrom(rawId)
     }
 
+    @Deprecated
     @Transactional
     void distributeCatalogSkillUpdates() {
         lockingService.lockForUpdatingCatalogSkills()
@@ -448,6 +449,31 @@ class SkillCatalogService {
 
         if (queuedSkillUpdates) {
             queuedSkillUpdateRepo.deleteAll(queuedSkillUpdates)
+        }
+    }
+
+    @Transactional
+    void distributeCatalogSkillUpdates(String projectId, String catalogSkillId, Integer rawId) {
+        Optional<SkillDefWithExtra> opt = skillDefWithExtraRepo.findById(rawId)
+        if (opt.isEmpty()) {
+            log.warn("scheduled update for [${projectId} - ${catalogSkillId} - ${rawId}] cannot be performed as the specified catalog skill does not exist")
+            return
+        }
+        SkillDefWithExtra og = opt.get()
+        List<SkillDefWithExtra> related = getRelatedSkills(og)
+        log.debug("found [${related?.size()}] imported skills based off of [${og.skillId}]")
+        related?.each { SkillDefWithExtra imported ->
+            ReplicatedSkillUpdateRequest copy = new ReplicatedSkillUpdateRequest()
+            Props.copy(og, copy)
+            copy.copiedFrom = og.id
+            copy.projectId = imported.projectId
+            copy.copiedFromProjectId = og.projectId
+            copy.readOnly = Boolean.TRUE.toString()
+            copy.version = imported.version
+            copy.numPerformToCompletion = og.totalPoints / og.pointIncrement
+            copy.subjectId = relationshipService.getParentSkill(imported.id).skillId
+            copy.selfReportingType = og.selfReportingType?.toString()
+            skillsAdminService.saveSkill(imported.skillId, copy)
         }
     }
 

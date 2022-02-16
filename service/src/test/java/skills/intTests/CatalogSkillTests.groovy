@@ -18,9 +18,11 @@ package skills.intTests
 import groovy.json.JsonOutput
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
+import skills.controller.result.model.LevelDefinitionRes
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import skills.services.LevelDefinitionStorageService
 import skills.services.UserEventService
 import skills.storage.model.DayCountItem
 import skills.storage.model.SkillApproval
@@ -43,6 +45,9 @@ class CatalogSkillTests extends DefaultIntSpec {
 
     @Autowired
     SkillDefRepo skillDefRepo
+
+    @Autowired
+    LevelDefinitionStorageService levelDefinitionStorageService
 
     def "add skill to catalog"() {
         def project1 = createProject(1)
@@ -208,6 +213,60 @@ class CatalogSkillTests extends DefaultIntSpec {
         postEdit.data[0].description == skill.description
         postEdit.data[0].helpUrl == skill.helpUrl
         postEdit.data[0].selfReportingType == SkillDef.SelfReportingType.Approval.toString()
+    }
+
+    def "update skill that has been exported to catalog, edits should be reflected on imported copies"() {
+        //changes should be reflected across all copies
+        def project1 = createProject(1)
+        def project2 = createProject(2)
+        def project3 = createProject(3)
+
+        def p1subj1 = createSubject(1, 1)
+        def p2subj1 = createSubject(2, 1)
+        def p3subj1 = createSubject(3, 1)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 250)
+
+        skillsService.createProject(project1)
+        skillsService.createProject(project2)
+        skillsService.createProject(project3)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p2subj1)
+        skillsService.createSubject(p3subj1)
+
+        skillsService.createSkill(skill)
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+
+        when:
+        def preEdit = skillsService.getSkill([projectId: project2.projectId, subjectId: p2subj1.subjectId, skillId: skill.skillId])
+        def skillNamePreEdit = skill.name
+        def skillDescriptionPreEdit = skill.description
+        def skillHelpUrlPreEdit = skill.helpUrl
+
+        skill.name = "edited name"
+        skill.numPerformToCompletion = 50
+        skill.helpUrl = "http://newHelpUrl"
+        skill.description = "updated description"
+        skill.selfReportingType = SkillDef.SelfReportingType.Approval.toString()
+
+        skillsService.updateSkill(skill, skill.skillId)
+        Thread.sleep(3500)
+
+        def postEdit = skillsService.getSkill([projectId: project2.projectId, subjectId: p2subj1.subjectId, skillId: skill.skillId])
+
+        then:
+        preEdit.name == skillNamePreEdit
+        preEdit.totalPoints == 250
+        preEdit.numPerformToCompletion == 1
+        preEdit.description == skillDescriptionPreEdit
+        preEdit.helpUrl == skillHelpUrlPreEdit
+        !preEdit.selfReportingType
+        postEdit.name == skill.name
+        postEdit.totalPoints == 12500
+        postEdit.numPerformToCompletion == 50
+        postEdit.description == skill.description
+        postEdit.helpUrl == skill.helpUrl
+        postEdit.selfReportingType == SkillDef.SelfReportingType.Approval.toString()
     }
 
     def "update skill imported from catalog"() {
@@ -604,6 +663,7 @@ class CatalogSkillTests extends DefaultIntSpec {
         def p2Approvals = skillsService.getApprovals(project2.projectId, 7, 1, 'requestedOn', false)
 
         skillsService.approve(project1.projectId, [p1Approvals.data[0].id])
+        Thread.sleep(2500) //need to wait for scheduled async updates to complete
         def p1Stats = skillsService.getUserStats(project1.projectId, user)
         def p2Stats = skillsService.getUserStats(project2.projectId, user)
 
@@ -897,6 +957,7 @@ class CatalogSkillTests extends DefaultIntSpec {
         def user = getRandomUsers(1)[0]
         Date skillDate = new Date()
         def res = skillsService.addSkill([projectId: project1.projectId, skillId: skill.skillId], user, skillDate)
+        Thread.sleep(2500) //account for async award
         def p1Stats = skillsService.getUserStats(project1.projectId, user)
         def p2Stats = skillsService.getUserStats(project2.projectId, user)
         def p3Stats = skillsService.getUserStats(project3.projectId, user)
@@ -954,6 +1015,7 @@ class CatalogSkillTests extends DefaultIntSpec {
         def user = getRandomUsers(1)[0]
         def timestamp = new Date()
         def res = skillsService.addSkill([projectId: project2.projectId, skillId: skill.skillId], user, timestamp)
+        Thread.sleep(2500) //account for async award
         def p1Stats = skillsService.getUserStats(project1.projectId, user)
         def p2Stats = skillsService.getUserStats(project2.projectId, user)
         def p3Stats = skillsService.getUserStats(project3.projectId, user)
@@ -2066,11 +2128,13 @@ class CatalogSkillTests extends DefaultIntSpec {
         skillsService.addSkill([projectId: project2.projectId, skillId: p2skill1.skillId], user)
         skillsService.addSkill([projectId: project1.projectId, skillId: skill.skillId], user)
 
+        Thread.sleep(2500) //need to account for scheduled updates
         def p2bSumm = skillsService.getBadgeSummary(user, project2.projectId, p2badge1.badgeId)
         def p3bSumPre = skillsService.getBadgeSummary(user, project3.projectId, p3badge1.badgeId)
 
         skillsService.addSkill([projectId: project1.projectId, skillId: skill3.skillId], user)
         skillsService.addSkill([projectId: project3.projectId, skillId: p3skill1.skillId], user)
+        Thread.sleep(2500) //need to account for scheduled updates
         def p3bSumPost = skillsService.getBadgeSummary(user, project3.projectId, p3badge1.badgeId)
 
         then:
@@ -2436,6 +2500,106 @@ class CatalogSkillTests extends DefaultIntSpec {
         sharedSkills.size() == 1
         sharedSkills[0].skillName == skill.name
         sharedSkills[0].projectId == project1.projectId
+    }
+
+    def "changes in points per increment of exported skill are not replicated to imported skills (modifications are propagated to imported fields on async basis)"() {
+        def project1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1_skills = (1..3).collect {createSkill(1, 1, it, 0, 5, 0, 250) }
+        skillsService.createProjectAndSubjectAndSkills(project1, p1subj1, p1_skills)
+        p1_skills.each { skillsService.exportSkillToCatalog(project1.projectId, it.skillId) }
+
+        def project2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def p2_skills = (1..3).collect {createSkill(2, 1, 3+it, 0, 5, 0, 250) }
+        skillsService.createProjectAndSubjectAndSkills(project2, p2subj1, p2_skills)
+        p2_skills.each { skillsService.exportSkillToCatalog(project2.projectId, it.skillId) }
+
+        skillsService.bulkImportSkillsFromCatalog(project2.projectId, p2subj1.subjectId, p1_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
+
+        when:
+        p1_skills[0].pointIncrement = 5000
+        skillsService.createSkills([p1_skills[0]])
+        Thread.sleep(2500) //wait for async update
+
+        then:
+        //projectId, subjectId, skillId
+        skillsService.getSkill([projectId: project2.projectId, subjectId: p2subj1.subjectId, skillId: p1_skills[0].skillId]).pointIncrement == 250
+        skillsService.getSkill([projectId: project1.projectId, subjectId: p1subj1.subjectId, skillId: p1_skills[0].skillId]).pointIncrement == 5000
+    }
+
+    def "changes in number of occurrences of exported skill ARE replicated to imported skills (modifications are propagated to imported fields on async basis)"() {
+        def project1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1_skills = (1..3).collect {createSkill(1, 1, it, 0, 5, 0, 250) }
+        skillsService.createProjectAndSubjectAndSkills(project1, p1subj1, p1_skills)
+        p1_skills.each { skillsService.exportSkillToCatalog(project1.projectId, it.skillId) }
+
+        def project2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def p2_skills = (1..3).collect {createSkill(2, 1, 3+it, 0, 5, 0, 250) }
+        skillsService.createProjectAndSubjectAndSkills(project2, p2subj1, p2_skills)
+        p2_skills.each { skillsService.exportSkillToCatalog(project2.projectId, it.skillId) }
+
+        skillsService.bulkImportSkillsFromCatalog(project2.projectId, p2subj1.subjectId, p1_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
+
+        when:
+        p1_skills[0].pointIncrement = 250
+        p1_skills[0].numPerformToCompletion = 10
+        skillsService.createSkills([p1_skills[0]])
+        Thread.sleep(2500) //wait for async update
+
+        then:
+        //projectId, subjectId, skillId
+        skillsService.getSkill([projectId: project2.projectId, subjectId: p2subj1.subjectId, skillId: p1_skills[0].skillId]).totalPoints == 2500
+        skillsService.getSkill([projectId: project1.projectId, subjectId: p1subj1.subjectId, skillId: p1_skills[0].skillId]).totalPoints == 2500
+    }
+
+    @IgnoreRest
+    def "changes in the number of occurrences of an exported skill should cause changes in the level thresholds for the importing project and subject"() {
+        def project1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1_skills = (1..4).collect {createSkill(1, 1, it, 0, 1, 0, 250) }
+        skillsService.createProjectAndSubjectAndSkills(project1, p1subj1, p1_skills)
+        p1_skills.each { skillsService.exportSkillToCatalog(project1.projectId, it.skillId) }
+
+        def project2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def p2_skills = (1..4).collect {createSkill(2, 1, 3+it, 0, 1, 0, 250) }
+        skillsService.createProjectAndSubjectAndSkills(project2, p2subj1, p2_skills)
+
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, p1_skills[0].skillId)
+
+        List<LevelDefinitionRes> subjectLevelsPreEdit = levelDefinitionStorageService.getLevels(project2.projectId, p2subj1.subjectId)
+        List<LevelDefinitionRes> projectLevelsPreEdit = levelDefinitionStorageService.getLevels(project2.projectId)
+
+        println "subject pre: "+subjectLevelsPreEdit
+        println "project pre: "+projectLevelsPreEdit
+
+        when:
+        p1_skills[0].numPerformToCompletion = 5
+        skillsService.createSkills([p1_skills[0]])
+        Thread.sleep(2500) //wait for async update
+
+        List<LevelDefinitionRes> subjectLevelsPostEdit = levelDefinitionStorageService.getLevels(project2.projectId, p2subj1.subjectId)
+        List<LevelDefinitionRes> projectLevelsPostEdit = levelDefinitionStorageService.getLevels(project2.projectId)
+
+        println "subject post: "+subjectLevelsPostEdit
+        println "project post: "+projectLevelsPostEdit
+
+        then:
+        subjectLevelsPreEdit[0].pointsFrom == 125
+        subjectLevelsPreEdit[1].pointsFrom == 312
+        subjectLevelsPreEdit[2].pointsFrom == 562
+        subjectLevelsPreEdit[3].pointsFrom == 837
+        subjectLevelsPreEdit[4].pointsFrom == 1150
+        projectLevelsPreEdit[0].pointsFrom == 125
+        projectLevelsPreEdit[1].pointsFrom == 312
+        projectLevelsPreEdit[2].pointsFrom == 562
+        projectLevelsPreEdit[3].pointsFrom == 837
+        projectLevelsPreEdit[4].pointsFrom == 1150
+        subjectLevelsPostEdit[0].pointsFrom == 225
+        projectLevelsPreEdit[0].pointsFrom == 225
     }
 
 }

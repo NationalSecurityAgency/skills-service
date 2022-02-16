@@ -6,6 +6,13 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
+    <property name="task_data_type" value="mediumblob" dbms="h2"/>
+    <property name="task_data_type" value="blob" dbms="postgresql"/>
+    <property name="task_name_type" value="varchar(100)" dbms="h2"/>
+    <property name="task_name_type" value="text" dbms="postgresql"/>
+    <property name="task_instance_type" value="varchar(100)" dbms="h2"/>
+    <property name="task_instance_type" value="text" dbms="postgresql"/>
+
     <changeSet id="1" author="skills team">
 
         <!-- ============================================================================
@@ -1579,5 +1586,31 @@
             <column name="lock" type="varchar(255)" value="catalog_skill_update_lock"/>
         </insert>
 
+    </changeSet>
+
+    <changeSet id="21" author="skills team">
+        <createTable tableName="scheduled_tasks">
+            <column name="task_name" type="${task_name_type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="task_instance" type="${task_instance_type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="task_data" type="${task_data_type}"/>
+            <!-- library wants the field defined as timestamptz, which is recommended against by postgres, hopefully this will work instead -->
+            <column name="execution_time" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="picked" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column name="picked_by" type="text"/>
+            <column name="last_success" type="datetime"/>
+            <column name="last_failure" type="datetime"/>
+            <column name="consecutive_failures" type="int"/>
+            <column name="last_heartbeat" type="datetime"/>
+            <column name="version" type="bigint"/>
+        </createTable>
+        <addPrimaryKey tableName="scheduled_tasks" columnNames="task_name, task_instance"/>
     </changeSet>
 </databaseChangeLog>
