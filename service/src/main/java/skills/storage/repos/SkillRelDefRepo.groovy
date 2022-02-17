@@ -36,6 +36,11 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
     List<SkillRelDef> findAllByParentAndType(SkillDef parent, SkillRelDef.RelationshipType type)
     List<SkillRelDef> findAllByParentAndTypeIn(SkillDef parent, List<SkillRelDef.RelationshipType> types)
 
+    @Query('''SELECT sd1.skillId 
+        from SkillDef sd1, SkillRelDef srd 
+        where sd1 = srd.parent and sd1.type = 'Subject'
+              and srd.child.id = ?1''')
+    String findSubjectSkillIdByChildId(Integer childId)
 
     @Query(value = '''select count(srd.id) from SkillRelDef srd where srd.child.skillId=?1 and srd.type='BadgeRequirement' and srd.parent.type = 'GlobalBadge' ''')
     Integer getSkillUsedInGlobalBadgeCount(String skillId)

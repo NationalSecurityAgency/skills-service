@@ -16,12 +16,14 @@
 package skills.intTests
 
 import groovy.json.JsonOutput
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import skills.controller.result.model.LevelDefinitionRes
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import skills.intTests.utils.WaitForAsyncTasksCompletion
 import skills.services.LevelDefinitionStorageService
 import skills.services.UserEventService
 import skills.storage.model.DayCountItem
@@ -35,6 +37,7 @@ import java.time.LocalDate
 
 import static skills.intTests.utils.SkillsFactory.*
 
+@Slf4j
 class CatalogSkillTests extends DefaultIntSpec {
 
     @Autowired
@@ -250,7 +253,7 @@ class CatalogSkillTests extends DefaultIntSpec {
         skill.selfReportingType = SkillDef.SelfReportingType.Approval.toString()
 
         skillsService.updateSkill(skill, skill.skillId)
-        Thread.sleep(3500)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 
         def postEdit = skillsService.getSkill([projectId: project2.projectId, subjectId: p2subj1.subjectId, skillId: skill.skillId])
 
@@ -623,7 +626,7 @@ class CatalogSkillTests extends DefaultIntSpec {
         def p2Approvals = skillsService.getApprovals(project2.projectId, 7, 1, 'requestedOn', false)
 
         skillsService.approve(project1.projectId, [p1Approvals.data[0].id])
-        Thread.sleep(2500) //need to wait for scheduled async updates to complete
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         def p1Stats = skillsService.getUserStats(project1.projectId, user)
         def p2Stats = skillsService.getUserStats(project2.projectId, user)
 
@@ -917,7 +920,7 @@ class CatalogSkillTests extends DefaultIntSpec {
         def user = getRandomUsers(1)[0]
         Date skillDate = new Date()
         def res = skillsService.addSkill([projectId: project1.projectId, skillId: skill.skillId], user, skillDate)
-        Thread.sleep(2500) //account for async award
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         def p1Stats = skillsService.getUserStats(project1.projectId, user)
         def p2Stats = skillsService.getUserStats(project2.projectId, user)
         def p3Stats = skillsService.getUserStats(project3.projectId, user)
@@ -975,7 +978,7 @@ class CatalogSkillTests extends DefaultIntSpec {
         def user = getRandomUsers(1)[0]
         def timestamp = new Date()
         def res = skillsService.addSkill([projectId: project2.projectId, skillId: skill.skillId], user, timestamp)
-        Thread.sleep(2500) //account for async award
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         def p1Stats = skillsService.getUserStats(project1.projectId, user)
         def p2Stats = skillsService.getUserStats(project2.projectId, user)
         def p3Stats = skillsService.getUserStats(project3.projectId, user)
@@ -2088,13 +2091,13 @@ class CatalogSkillTests extends DefaultIntSpec {
         skillsService.addSkill([projectId: project2.projectId, skillId: p2skill1.skillId], user)
         skillsService.addSkill([projectId: project1.projectId, skillId: skill.skillId], user)
 
-        Thread.sleep(2500) //need to account for scheduled updates
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         def p2bSumm = skillsService.getBadgeSummary(user, project2.projectId, p2badge1.badgeId)
         def p3bSumPre = skillsService.getBadgeSummary(user, project3.projectId, p3badge1.badgeId)
 
         skillsService.addSkill([projectId: project1.projectId, skillId: skill3.skillId], user)
         skillsService.addSkill([projectId: project3.projectId, skillId: p3skill1.skillId], user)
-        Thread.sleep(2500) //need to account for scheduled updates
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         def p3bSumPost = skillsService.getBadgeSummary(user, project3.projectId, p3badge1.badgeId)
 
         then:
@@ -2480,7 +2483,7 @@ class CatalogSkillTests extends DefaultIntSpec {
         when:
         p1_skills[0].pointIncrement = 5000
         skillsService.createSkills([p1_skills[0]])
-        Thread.sleep(2500) //wait for async update
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 
         then:
         //projectId, subjectId, skillId
@@ -2507,7 +2510,7 @@ class CatalogSkillTests extends DefaultIntSpec {
         p1_skills[0].pointIncrement = 250
         p1_skills[0].numPerformToCompletion = 10
         skillsService.createSkills([p1_skills[0]])
-        Thread.sleep(2500) //wait for async update
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 
         then:
         //projectId, subjectId, skillId
@@ -2515,7 +2518,6 @@ class CatalogSkillTests extends DefaultIntSpec {
         skillsService.getSkill([projectId: project1.projectId, subjectId: p1subj1.subjectId, skillId: p1_skills[0].skillId]).totalPoints == 2500
     }
 
-    @IgnoreRest
     def "changes in the number of occurrences of an exported skill should cause changes in the level thresholds for the importing project and subject"() {
         def project1 = createProject(1)
         def p1subj1 = createSubject(1, 1)
@@ -2528,7 +2530,7 @@ class CatalogSkillTests extends DefaultIntSpec {
         def p2_skills = (1..4).collect {createSkill(2, 1, 3+it, 0, 1, 0, 250) }
         skillsService.createProjectAndSubjectAndSkills(project2, p2subj1, p2_skills)
 
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, p1_skills[0].skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, p1_skills[0].skillId)
 
         List<LevelDefinitionRes> subjectLevelsPreEdit = levelDefinitionStorageService.getLevels(project2.projectId, p2subj1.subjectId)
         List<LevelDefinitionRes> projectLevelsPreEdit = levelDefinitionStorageService.getLevels(project2.projectId)
@@ -2539,7 +2541,7 @@ class CatalogSkillTests extends DefaultIntSpec {
         when:
         p1_skills[0].numPerformToCompletion = 5
         skillsService.createSkills([p1_skills[0]])
-        Thread.sleep(2500) //wait for async update
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 
         List<LevelDefinitionRes> subjectLevelsPostEdit = levelDefinitionStorageService.getLevels(project2.projectId, p2subj1.subjectId)
         List<LevelDefinitionRes> projectLevelsPostEdit = levelDefinitionStorageService.getLevels(project2.projectId)
@@ -2559,7 +2561,7 @@ class CatalogSkillTests extends DefaultIntSpec {
         projectLevelsPreEdit[3].pointsFrom == 837
         projectLevelsPreEdit[4].pointsFrom == 1150
         subjectLevelsPostEdit[0].pointsFrom == 225
-        projectLevelsPreEdit[0].pointsFrom == 225
+        subjectLevelsPostEdit[0].pointsFrom == 225
     }
 
 }

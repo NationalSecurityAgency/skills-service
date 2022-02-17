@@ -279,9 +279,6 @@ class SkillsAdminService {
             skillApprovalService.modifyApprovalsWhenSelfReportingTypeChanged(skillDefinition, selfReportingType)
             skillDefinition.selfReportingType = selfReportingType;
 
-            //totalPoints is not a prop on skillRequest, it is a calculated value so we
-            //need to manually update it in the case of edits.
-log.error("updating totalPoints on [${skillDefinition.projectId}-${skillDefinition.skillId}] to ${totalPointsRequested}")
             skillDefinition.totalPoints = totalPointsRequested
         } else {
             String parentSkillId = skillRequest.subjectId
@@ -332,16 +329,10 @@ log.error("updating totalPoints on [${skillDefinition.projectId}-${skillDefiniti
 
         SkillDefWithExtra tempSaved
         DataIntegrityExceptionHandlers.skillDataIntegrityViolationExceptionHandler.handle(skillRequest.projectId, skillRequest.skillId) {
-log.error("totalPoints for skill being saved in ExceptionHandler [${skillDefinition.projectId}-${skillDefinition.skillId}] ${skillDefinition.totalPoints}")
             //tempSaved has the correct value
             tempSaved = skillDefWithExtraRepo.save(skillDefinition)
         }
-log.error("totalPoints for tempSaved [${tempSaved.projectId}-${tempSaved.skillId}] ${tempSaved.totalPoints}")
-log.error("finding saved skill via [${skillRequest.projectId}-${skillRequest.skillId}]")
         SkillDef savedSkill = skillDefRepo.findByProjectIdAndSkillIdAndType(skillRequest.projectId, skillRequest.skillId, skillType)
-//savedSkill does not have totalPoints updated when this is called from the CatalogSkillUpdatedTaskExecutor flow
-//which results in the ruleSetDefinitionScoreUpdater.updateFromLeaf() call not properly updating project total points, etc.
-log.error("totalPoints for saved skill [${savedSkill.projectId}-${savedSkill.skillId}] to ${savedSkill.totalPoints}")
         if (isSkillsGroup) {
             skillsGroupSkillDef = savedSkill
         }

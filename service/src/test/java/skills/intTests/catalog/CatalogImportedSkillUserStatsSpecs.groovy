@@ -15,6 +15,7 @@
  */
 package skills.intTests.catalog
 
+
 import skills.intTests.utils.DefaultIntSpec
 
 import static skills.intTests.utils.SkillsFactory.*
@@ -108,7 +109,7 @@ class CatalogImportedSkillUserStatsSpecs extends DefaultIntSpec {
         skillsService.addSkill([projectId: project2.projectId, skillId: skill6.skillId], user3)
         skillsService.addSkill([projectId: project2.projectId, skillId: skill4.skillId], user3)
         skillsService.addSkill([projectId: project2.projectId, skillId: skill4.skillId], user3)
-        Thread.sleep(2500) //have to wait on async awards
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 
         def p1Stats = skillsService.getUserStats(project1.projectId, user)
         def p2Stats = skillsService.getUserStats(project2.projectId, user)

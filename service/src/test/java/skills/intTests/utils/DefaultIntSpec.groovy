@@ -21,6 +21,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
+import org.springframework.jdbc.core.JdbcTemplate
 import skills.SpringBootApp
 import skills.storage.model.UserAttrs
 import skills.storage.repos.NotificationsRepo
@@ -72,6 +73,9 @@ class DefaultIntSpec extends Specification {
     @Autowired(required=false)
     CertificateRegistry certificateRegistry
 
+    @Autowired
+    WaitForAsyncTasksCompletion waitForAsyncTasksCompletion
+
     private UserUtil userUtil
 
     @PostConstruct
@@ -105,6 +109,7 @@ class DefaultIntSpec extends Specification {
             }
         }
 
+        waitForAsyncTasksCompletion.clearScheduledTaskTable()
         skillsService = createService()
     }
 
@@ -113,6 +118,7 @@ class DefaultIntSpec extends Specification {
             log.info('Stopping email service')
             greenMail.stop()
         }
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         String msg = "\n-------------------------------------------------------------\n" +
                 "END: [${specificationContext.currentIteration.name}]\n" +
                 "-------------------------------------------------------------"

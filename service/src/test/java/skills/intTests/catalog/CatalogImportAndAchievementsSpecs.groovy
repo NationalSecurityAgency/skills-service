@@ -15,17 +15,16 @@
  */
 package skills.intTests.catalog
 
-
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
+import skills.intTests.utils.WaitForAsyncTasksCompletion
 import skills.services.LevelDefinitionStorageService
 import skills.storage.model.UserAchievement
 import skills.storage.model.UserPoints
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPointsRepo
-import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -71,7 +70,7 @@ class CatalogImportAndAchievementsSpecs extends DefaultIntSpec {
         def users = getRandomUsers(5)
         skillsService.addSkill([projectId: project2.projectId, skillId: p2_skills[0].skillId], users[0])
         skillsService.addSkill([projectId: project2.projectId, skillId: p2_skills[1].skillId], users[0])
-        Thread.sleep(2500) //wait for async awards
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         Integer proj2_user1Level_before = skillsService.getUserLevel(project2.projectId, users[0])
         List<UserAchievement> proj2_user1Achievements_before = userAchievedRepo.findAll().findAll { it.userId == users[0] && it.level != null && it.projectId == project2.projectId && it.skillRefId == null}
         def proj2_user1Stats_before = skillsService.getUserStats(project2.projectId, users[0])
@@ -86,7 +85,7 @@ class CatalogImportAndAchievementsSpecs extends DefaultIntSpec {
         printLevels(project3.projectId, "")
 
         skillsService.addSkill([projectId: project1.projectId, skillId: p1_skills[1].skillId], users[0])
-        Thread.sleep(2500) //wait for async awards
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 
         Integer proj2_user1Level_after = skillsService.getUserLevel(project2.projectId, users[0])
         List<UserAchievement> proj2_user1Achievements_after = userAchievedRepo.findAll().findAll { it.userId == users[0] && it.level != null && it.projectId == project2.projectId && it.skillRefId == null}
@@ -99,7 +98,7 @@ class CatalogImportAndAchievementsSpecs extends DefaultIntSpec {
 
         skillsService.addSkill([projectId: project1.projectId, skillId: p1_skills[1].skillId], users[0])
         skillsService.addSkill([projectId: project1.projectId, skillId: p1_skills[1].skillId], users[0])
-        Thread.sleep(2500) //wait for async awards
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 
         Integer proj3_user1Level_report2 = skillsService.getUserLevel(project3.projectId, users[0])
         List<UserAchievement> proj3_user1Achievements_report2 = userAchievedRepo.findAll().findAll { it.userId == users[0] && it.level != null && it.projectId == project3.projectId && it.skillRefId == null}
@@ -126,7 +125,7 @@ class CatalogImportAndAchievementsSpecs extends DefaultIntSpec {
             skillsService.addSkill([projectId: project3.projectId, skillId: p3_skills[1].skillId], users[3])
         }
         skillsService.addSkill([projectId: project3.projectId, skillId: p3_skills[2].skillId], users[3])
-        Thread.sleep(2500) //wait for async awards
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 
         then:
         proj2_user1Level_before == 0
@@ -221,22 +220,22 @@ class CatalogImportAndAchievementsSpecs extends DefaultIntSpec {
         List<UserAchievement> user1_subj1_report0 = userAchievedRepo.findAll().findAll { it.userId == users[0] && it.level != null && it.projectId ==proj3.projectId && it.skillRefId == proj3_subj1_ref_id}
         List<UserAchievement> user1_subj2_report0 = userAchievedRepo.findAll().findAll { it.userId == users[0] && it.level != null && it.projectId ==proj3.projectId && it.skillRefId == proj3_subj2_ref_id}
         skillsService.addSkill([projectId: proj1.p.projectId, skillId: proj1.s2_skills[0].skillId], users[0])
-        Thread.sleep(2500) //wait for async award
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         List<UserAchievement> user1_subj1_report1 = userAchievedRepo.findAll().findAll { it.userId == users[0] && it.level != null && it.projectId ==proj3.projectId && it.skillRefId == proj3_subj1_ref_id}
         List<UserAchievement> user1_subj2_report1 = userAchievedRepo.findAll().findAll { it.userId == users[0] && it.level != null && it.projectId == proj3.projectId && it.skillRefId == proj3_subj2_ref_id}
 
         skillsService.addSkill([projectId: proj1.p.projectId, skillId: proj1.s2_skills[0].skillId], users[0], new Date() - 1)
-        Thread.sleep(2500) //wait for async award
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         List<UserAchievement> user1_subj1_report2 = userAchievedRepo.findAll().findAll { it.userId == users[0] && it.level != null && it.projectId ==proj3.projectId && it.skillRefId == proj3_subj1_ref_id}
         List<UserAchievement> user1_subj2_report2 = userAchievedRepo.findAll().findAll { it.userId == users[0] && it.level != null && it.projectId == proj3.projectId && it.skillRefId == proj3_subj2_ref_id}
 
         skillsService.addSkill([projectId: proj1.p.projectId, skillId: proj1.s1_skills[0].skillId], users[0], new Date() - 2)
-        Thread.sleep(2500) //wait for async award
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         List<UserAchievement> user1_subj1_report3 = userAchievedRepo.findAll().findAll { it.userId == users[0] && it.level != null && it.projectId ==proj3.projectId && it.skillRefId == proj3_subj1_ref_id}
         List<UserAchievement> user1_subj2_report3 = userAchievedRepo.findAll().findAll { it.userId == users[0] && it.level != null && it.projectId == proj3.projectId && it.skillRefId == proj3_subj2_ref_id}
 
         skillsService.addSkill([projectId: proj1.p.projectId, skillId: proj1.s1_skills[0].skillId], users[0], new Date() - 1)
-        Thread.sleep(2500) //wait for async award
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         List<UserAchievement> user1_subj1_report4 = userAchievedRepo.findAll().findAll { it.userId == users[0] && it.level != null && it.projectId ==proj3.projectId && it.skillRefId == proj3_subj1_ref_id}
         List<UserAchievement> user1_subj2_report4 = userAchievedRepo.findAll().findAll { it.userId == users[0] && it.level != null && it.projectId == proj3.projectId && it.skillRefId == proj3_subj2_ref_id}
 
@@ -351,7 +350,7 @@ class CatalogImportAndAchievementsSpecs extends DefaultIntSpec {
         def users = getRandomUsers(3)
         skillsService.addSkill([projectId: project1.projectId, skillId: p1_skills[0].skillId], users[0])
         skillsService.addSkill([projectId: project1.projectId, skillId: p1_skills[1].skillId], users[0])
-        Thread.sleep(2500) //wait for async award
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 
         Integer proj2_user1Level_before = skillsService.getUserLevel(project2.projectId, users[0])
         List<UserAchievement> proj2_user1Achievements_before = userAchievedRepo.findAll().findAll { it.userId == users[0] && it.level != null && it.projectId == project2.projectId && it.skillRefId == null}
@@ -1091,15 +1090,15 @@ class CatalogImportAndAchievementsSpecs extends DefaultIntSpec {
         when:
         def sum1 = skillsService.getBadgeSummary(user, project2.p.projectId, p2badge1.badgeId)
         skillsService.addSkill([projectId: project2.p.projectId, skillId:project2.s1_skills[0].skillId], user, new Date() - 1)
-        Thread.sleep(2500) //wait for async award
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         def skill1CompletedRes = skillsService.addSkill([projectId: project2.p.projectId, skillId:project2.s1_skills[0].skillId], user)
-        Thread.sleep(2500) //wait for async award
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         def sum2 = skillsService.getBadgeSummary(user, project2.p.projectId, p2badge1.badgeId)
 
         skillsService.addSkill([projectId: project1.p.projectId, skillId:project1.s1_skills[0].skillId], user, new Date() - 1)
-        Thread.sleep(2500) //wait for async award
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         def skill2CompletedRes = skillsService.addSkill([projectId: project1.p.projectId, skillId:project1.s1_skills[0].skillId], user)
-        Thread.sleep(2500) //wait for async award
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         def sum3 = skillsService.getBadgeSummary(user, project2.p.projectId, p2badge1.badgeId)
 
         then:

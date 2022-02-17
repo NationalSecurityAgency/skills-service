@@ -17,6 +17,7 @@ package skills.services.admin
 
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
+import org.hibernate.Session
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
@@ -58,10 +59,14 @@ import skills.storage.repos.ExportedSkillRepo
 import skills.storage.repos.QueuedSkillUpdateRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillDefWithExtraRepo
+import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPointsRepo
 import skills.storage.repos.nativeSql.NativeQueriesRepo
 import skills.utils.Props
+
+import javax.persistence.EntityManager
+import javax.persistence.PersistenceContext
 
 @Service
 @Slf4j
@@ -80,6 +85,9 @@ class SkillCatalogService {
 
     @Autowired
     SkillDefRepo skillDefRepo
+
+    @Autowired
+    SkillRelDefRepo skillRelDefRepo
 
     @Autowired
     RuleSetDefGraphService relationshipService
@@ -459,38 +467,6 @@ class SkillCatalogService {
         return skillDefRepo.findSkillDefMinCopiedFrom(rawId)
     }
 
-    @Deprecated
-    @Transactional
-    void distributeCatalogSkillUpdates() {
-        lockingService.lockForUpdatingCatalogSkills()
-        // queued skill update needs to include
-        Iterable<QueuedSkillUpdate> queuedSkillUpdates = queuedSkillUpdateRepo.findAll()
-
-        log.debug("found [${queuedSkillUpdates?.size()}] updated catalog skills")
-        queuedSkillUpdates.groupBy { it.skill.id }.each{key, value ->
-            SkillDefWithExtra og = value?.first()?.skill
-            List<SkillDefWithExtra> related = getRelatedSkills(og)
-            log.debug("found [${related?.size()}] imported skills based off of [${og.skillId}]")
-            related?.each { SkillDefWithExtra imported ->
-                ReplicatedSkillUpdateRequest copy = new ReplicatedSkillUpdateRequest()
-                Props.copy(og, copy)
-                copy.copiedFrom = og.id
-                copy.projectId = imported.projectId
-                copy.copiedFromProjectId = og.projectId
-                copy.readOnly = Boolean.TRUE.toString()
-                copy.version = imported.version
-                copy.numPerformToCompletion = og.totalPoints / og.pointIncrement
-                copy.subjectId = relationshipService.getParentSkill(imported.id).skillId
-                copy.selfReportingType = og.selfReportingType?.toString()
-                skillsAdminService.saveSkill(imported.skillId, copy)
-            }
-        }
-
-        if (queuedSkillUpdates) {
-            queuedSkillUpdateRepo.deleteAll(queuedSkillUpdates)
-        }
-    }
-
     @Transactional
     void distributeCatalogSkillUpdates(String projectId, String catalogSkillId, Integer rawId) {
         Optional<SkillDefWithExtra> opt = skillDefWithExtraRepo.findById(rawId)
@@ -500,7 +476,8 @@ class SkillCatalogService {
         }
         SkillDefWithExtra og = opt.get()
         List<SkillDefWithExtra> related = getRelatedSkills(og)
-        log.debug("found [${related?.size()}] imported skills based off of [${og.skillId}]")
+
+        log.debug("found [{}] imported skills based off of [{}]", related?.size(), og.skillId)
         related?.each { SkillDefWithExtra imported ->
             ReplicatedSkillUpdateRequest copy = new ReplicatedSkillUpdateRequest()
             Props.copy(og, copy)
@@ -510,7 +487,7 @@ class SkillCatalogService {
             copy.readOnly = Boolean.TRUE.toString()
             copy.version = imported.version
             copy.numPerformToCompletion = og.totalPoints / og.pointIncrement
-            copy.subjectId = relationshipService.getParentSkill(imported.id).skillId
+            copy.subjectId = skillRelDefRepo.findSubjectSkillIdByChildId(imported.id)
             copy.selfReportingType = og.selfReportingType?.toString()
             skillsAdminService.saveSkill(imported.skillId, copy)
         }

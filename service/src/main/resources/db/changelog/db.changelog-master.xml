@@ -7,7 +7,7 @@
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
     <property name="task_data_type" value="mediumblob" dbms="h2"/>
-    <property name="task_data_type" value="blob" dbms="postgresql"/>
+    <property name="task_data_type" value="bytea" dbms="postgresql"/>
     <property name="task_name_type" value="varchar(100)" dbms="h2"/>
     <property name="task_name_type" value="text" dbms="postgresql"/>
     <property name="task_instance_type" value="varchar(100)" dbms="h2"/>
