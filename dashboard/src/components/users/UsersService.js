@@ -23,23 +23,23 @@ export default {
   },
 
   getUserSkillsMetrics(projectId, userId) {
-    return axios.get(`/admin/projects/${projectId}/users/${userId}/stats`)
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/users/${encodeURIComponent(userId)}/stats`)
       .then((response) => response.data);
   },
 
   getUserInfo(projectId, userId) {
-    return axios.get(`/admin/projects/${projectId}/users/${userId}`)
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/users/${encodeURIComponent(userId)}`)
       .then((response) => response.data);
   },
 
   getAvailableVersions(projectId) {
-    return axios.get(`/app/projects/${projectId}/versions`)
+    return axios.get(`/app/projects/${encodeURIComponent(projectId)}/versions`)
       .then((response) => response.data);
   },
 
   deleteSkillEvent(projectId, skill, userId) {
     const timestamp = dayjs(skill.performedOn).valueOf();
-    return axios.delete(`/admin/projects/${projectId}/skills/${skill.skillId}/users/${userId}/events/${timestamp}`)
+    return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skill.skillId)}/users/${encodeURIComponent(userId)}/events/${timestamp}`)
       .then((res) => res.data);
   },
 };

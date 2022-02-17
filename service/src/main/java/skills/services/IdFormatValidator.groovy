@@ -21,20 +21,20 @@ import org.apache.commons.lang3.StringUtils
 @CompileStatic
 class IdFormatValidator {
 
-    static void validate(String id) {
-        if (!isAlphanumericOrUnderscore(id)) {
+    static void validate(String id, Boolean allowPercent=false) {
+        if (!isAlphanumericOrUnderscoreOrPercent(id, allowPercent)) {
             throw new skills.controller.exceptions.SkillException("Bad Id [$id] - must be alpha numeric - no spaces or special characters.")
         }
     }
 
-    private static boolean isAlphanumericOrUnderscore(final CharSequence cs) {
+    private static boolean isAlphanumericOrUnderscoreOrPercent(final CharSequence cs, final Boolean allowPercent) {
         if (StringUtils.isEmpty(cs)) {
             return false;
         }
         final int sz = cs.length();
         for (int i = 0; i < sz; i++) {
             char checkMe = cs.charAt(i)
-            if (!Character.isLetterOrDigit(checkMe) && checkMe != '_') {
+            if (!Character.isLetterOrDigit(checkMe) && checkMe != '_' && (!allowPercent || checkMe != '%')) {
                 return false;
             }
         }

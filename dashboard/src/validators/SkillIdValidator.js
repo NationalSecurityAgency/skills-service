@@ -13,16 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import axios from 'axios';
+import { extend } from 'vee-validate';
 
-export default {
-  loadMyProgressSummary() {
-    return axios.get('/api/myProgressSummary').then((response) => response.data);
-  },
-  loadMyBadges() {
-    return axios.get('/api/mybadges').then((response) => response.data);
-  },
-  findProjectName(projId) {
-    return axios.get(`/api/myprojects/${encodeURIComponent(projId)}/name`).then((resp) => resp.data);
+const wordCharOrPercentRegex = /^[\w%]+$/;
+
+const validator = {
+  message: (field) => `${field} may only contain alpha-numeric, underscore or percent characters`,
+  validate(value) {
+    const testValue = (val) => {
+      const strValue = String(val);
+
+      if (strValue) {
+        return wordCharOrPercentRegex.test(strValue);
+      }
+      return true;
+    };
+
+    if (Array.isArray(value)) {
+      return value.every(testValue);
+    }
+
+    return testValue(value);
   },
 };
+
+extend('skill_id_validator', validator);
+
+export default validator;

@@ -52,7 +52,7 @@ export default {
 
   getUserSkills() {
     let response = null;
-    response = axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/summary`, {
+    response = axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${encodeURIComponent(store.state.projectId)}/summary`, {
       params: this.getUserIdAndVersionParams(),
     }).then((result) => result.data);
     return response;
@@ -60,7 +60,7 @@ export default {
 
   getCustomIconCss() {
     let response = null;
-    response = axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/customIconCss`, {
+    response = axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${encodeURIComponent(store.state.projectId)}/customIconCss`, {
     }).then((result) => result.data);
     return response;
   },
@@ -75,21 +75,21 @@ export default {
   getSubjectSummary(subjectId, includeSkills = true) {
     const params = this.getUserIdAndVersionParams();
     params.includeSkills = includeSkills;
-    return axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/subjects/${subjectId}/summary`, {
+    return axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${encodeURIComponent(store.state.projectId)}/subjects/${encodeURIComponent(subjectId)}/summary`, {
       params,
     }).then((result) => SkillEnricherUtil.addMetaToSummary(result.data));
   },
 
   getSkillDependencies(skillId) {
-    return axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/skills/${skillId}/dependencies`, {
+    return axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${encodeURIComponent(store.state.projectId)}/skills/${encodeURIComponent(skillId)}/dependencies`, {
       params: this.getUserIdParams(),
     }).then((result) => result.data);
   },
 
   getSkillSummary(skillId, optionalCrossProjectId) {
-    let url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/skills/${skillId}/summary`;
+    let url = `${store.state.serviceUrl}${this.getServicePath()}/${encodeURIComponent(store.state.projectId)}/skills/${encodeURIComponent(skillId)}/summary`;
     if (optionalCrossProjectId) {
-      url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/projects/${optionalCrossProjectId}/skills/${skillId}/summary`;
+      url = `${store.state.serviceUrl}${this.getServicePath()}/${encodeURIComponent(store.state.projectId)}/projects/${encodeURIComponent(optionalCrossProjectId)}/skills/${encodeURIComponent(skillId)}/summary`;
     }
     return axios.get(url, {
       params: this.getUserIdParams(),
@@ -101,7 +101,7 @@ export default {
     const requestParams = this.getUserIdAndVersionParams();
     requestParams.global = global;
     requestParams.includeSkills = includeSkills;
-    return axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/badges/${badgeId}/summary`, {
+    return axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${encodeURIComponent(store.state.projectId)}/badges/${encodeURIComponent(badgeId)}/summary`, {
       params: requestParams,
     }).then((result) => {
       if (includeSkills) {
@@ -116,16 +116,16 @@ export default {
   },
 
   getBadgeSummaries() {
-    return axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/badges/summary`, {
+    return axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${encodeURIComponent(store.state.projectId)}/badges/summary`, {
       params: this.getUserIdAndVersionParams(),
     }).then((result) => result.data.map((summary) => SkillEnricherUtil.addMetaToSummary(summary)));
   },
 
   getPointsHistory(subjectId) {
     let response = null;
-    let url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/subjects/${subjectId}/pointHistory`;
+    let url = `${store.state.serviceUrl}${this.getServicePath()}/${encodeURIComponent(store.state.projectId)}/subjects/${encodeURIComponent(subjectId)}/pointHistory`;
     if (!subjectId) {
-      url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/pointHistory`;
+      url = `${store.state.serviceUrl}${this.getServicePath()}/${encodeURIComponent(store.state.projectId)}/pointHistory`;
     }
     response = axios.get(url, {
       params: this.getUserIdAndVersionParams(),
@@ -135,7 +135,7 @@ export default {
 
   reportSkill(skillId, approvalRequestedMsg) {
     let response = null;
-    response = axios.post(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/skills/${skillId}`, {
+    response = axios.post(`${store.state.serviceUrl}${this.getServicePath()}/${encodeURIComponent(store.state.projectId)}/skills/${encodeURIComponent(skillId)}`, {
       params: this.getUserIdAndVersionParams(),
       approvalRequestedMsg,
     }, { handleErrorCode: 400 }).then((result) => result.data);
@@ -144,7 +144,7 @@ export default {
 
   removeApprovalRejection(rejectionId) {
     let response = null;
-    response = axios.delete(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/rejections/${rejectionId}`, {
+    response = axios.delete(`${store.state.serviceUrl}${this.getServicePath()}/${encodeURIComponent(store.state.projectId)}/rejections/${encodeURIComponent(rejectionId)}`, {
       params: this.getUserIdAndVersionParams(),
     }).then((result) => result.data);
     return response;
@@ -152,9 +152,9 @@ export default {
 
   getUserSkillsRanking(subjectId) {
     let response = null;
-    let url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/subjects/${subjectId}/rank`;
+    let url = `${store.state.serviceUrl}${this.getServicePath()}/${encodeURIComponent(store.state.projectId)}/subjects/${encodeURIComponent(subjectId)}/rank`;
     if (!subjectId) {
-      url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/rank`;
+      url = `${store.state.serviceUrl}${this.getServicePath()}/${encodeURIComponent(store.state.projectId)}/rank`;
     }
     response = axios.get(url, {
       params: this.getUserIdParams(),
@@ -164,9 +164,9 @@ export default {
 
   getLeaderboard(subjectId, type) {
     let response = null;
-    let url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/subjects/${subjectId}/leaderboard?type=${type}`;
+    let url = `${store.state.serviceUrl}${this.getServicePath()}/${encodeURIComponent(store.state.projectId)}/subjects/${encodeURIComponent(subjectId)}/leaderboard?type=${type}`;
     if (!subjectId) {
-      url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/leaderboard?type=${type}`;
+      url = `${store.state.serviceUrl}${this.getServicePath()}/${encodeURIComponent(store.state.projectId)}/leaderboard?type=${type}`;
     }
     response = axios.get(url, {
       params: this.getUserIdParams(),
@@ -176,9 +176,9 @@ export default {
 
   getUserSkillsRankingDistribution(subjectId) {
     let response = null;
-    let url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/subjects/${subjectId}/rankDistribution`;
+    let url = `${store.state.serviceUrl}${this.getServicePath()}/${encodeURIComponent(store.state.projectId)}/subjects/${encodeURIComponent(subjectId)}/rankDistribution`;
     if (!subjectId) {
-      url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/rankDistribution`;
+      url = `${store.state.serviceUrl}${this.getServicePath()}/${encodeURIComponent(store.state.projectId)}/rankDistribution`;
     }
     const requestParams = this.getUserIdParams();
     requestParams.subjectId = subjectId;
@@ -190,9 +190,9 @@ export default {
 
   getRankingDistributionUsersPerLevel(subjectId) {
     let response = null;
-    let url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/subjects/${subjectId}/rankDistribution/usersPerLevel`;
+    let url = `${store.state.serviceUrl}${this.getServicePath()}/${encodeURIComponent(store.state.projectId)}/subjects/${encodeURIComponent(subjectId)}/rankDistribution/usersPerLevel`;
     if (!subjectId) {
-      url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/rankDistribution/usersPerLevel`;
+      url = `${store.state.serviceUrl}${this.getServicePath()}/${encodeURIComponent(store.state.projectId)}/rankDistribution/usersPerLevel`;
     }
     response = axios.get(url, {
       params: {
@@ -203,9 +203,9 @@ export default {
   },
 
   getDescriptions(parentId, type = 'subject') {
-    let url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/subjects/${parentId}/descriptions`;
+    let url = `${store.state.serviceUrl}${this.getServicePath()}/${encodeURIComponent(store.state.projectId)}/subjects/${encodeURIComponent(parentId)}/descriptions`;
     if (type === 'badge' || type === 'global-badge') {
-      url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/badges/${parentId}/descriptions`;
+      url = `${store.state.serviceUrl}${this.getServicePath()}/${encodeURIComponent(store.state.projectId)}/badges/${encodeURIComponent(parentId)}/descriptions`;
     }
     const response = axios.get(url, {
       params: {

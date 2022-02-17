@@ -216,13 +216,13 @@ limitations under the License.
         return routeObj;
       },
       getUrl() {
-        let url = `/admin/projects/${this.$route.params.projectId}`;
+        let url = `/admin/projects/${encodeURIComponent(this.$route.params.projectId)}`;
         if (this.$route.params.skillId) {
-          url += `/skills/${this.$route.params.skillId}`;
+          url += `/skills/${encodeURIComponent(this.$route.params.skillId)}`;
         } else if (this.$route.params.badgeId) {
-          url += `/badges/${this.$route.params.badgeId}`;
+          url += `/badges/${encodeURIComponent(this.$route.params.badgeId)}`;
         } else if (this.$route.params.subjectId) {
-          url += `/subjects/${this.$route.params.subjectId}`;
+          url += `/subjects/${encodeURIComponent(this.$route.params.subjectId)}`;
         }
         url += '/users';
         return url;

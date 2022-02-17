@@ -18,7 +18,7 @@ import axios from 'axios';
 export default {
   getUserRoles(projectId, roleName) {
     if (projectId) {
-      return axios.get(`/admin/projects/${projectId}/userRoles`)
+      return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/userRoles`)
         .then((response) => response.data);
     }
     if (roleName === 'ROLE_SUPER_DUPER_USER' || roleName === 'ROLE_SUPERVISOR') {
@@ -35,7 +35,7 @@ export default {
       userId = userKey;
     }
     if (projectId) {
-      return axios.put(`/admin/projects/${projectId}/users/${userKey}/roles/${roleName}`, null, { handleError: false });
+      return axios.put(`/admin/projects/${encodeURIComponent(projectId)}/users/${userKey}/roles/${roleName}`, null, { handleError: false });
     }
     if (roleName === 'ROLE_SUPER_DUPER_USER' || roleName === 'ROLE_SUPERVISOR') {
       return axios.put(`/root/users/${userKey}/roles/${roleName}`, null, { handleError: false });
@@ -44,10 +44,10 @@ export default {
   },
   deleteUserRole(projectId, userId, roleName) {
     if (projectId) {
-      return axios.delete(`/admin/projects/${projectId}/users/${userId}/roles/${encodeURIComponent(roleName)}`);
+      return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}/users/${encodeURIComponent(userId)}/roles/${encodeURIComponent(roleName)}`);
     }
     if (roleName === 'ROLE_SUPER_DUPER_USER' || roleName === 'ROLE_SUPERVISOR') {
-      return axios.delete(`/root/users/${userId}/roles/${roleName}`).then((response) => response.data);
+      return axios.delete(`/root/users/${encodeURIComponent(userId)}/roles/${roleName}`).then((response) => response.data);
     }
     throw new Error(`unexpected user role [${roleName}]`);
   },
@@ -56,11 +56,11 @@ export default {
       .then((response) => response.data);
   },
   resetClientSecret(projectId) {
-    return axios.put(`/admin/projects/${projectId}/resetClientSecret`)
+    return axios.put(`/admin/projects/${encodeURIComponent(projectId)}/resetClientSecret`)
       .then(() => this.getClientSecret(projectId));
   },
   getClientSecret(projectId) {
-    return axios.get(`/admin/projects/${projectId}/clientSecret`)
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/clientSecret`)
       .then((response) => response.data);
   },
   userWithEmailExists(email) {
@@ -87,7 +87,7 @@ export default {
     return axios.post('/verifyEmail', verification, { handleError: false }).then((response) => response.data);
   },
   resendEmailVerification(userId) {
-    return axios.post(`resendEmailVerification/${userId}`).then((response) => response.data);
+    return axios.post(`resendEmailVerification/${encodeURIComponent(userId)}`).then((response) => response.data);
   },
   userEmailIsVerified(email) {
     return axios.get(`/userEmailIsVerified/${email}`).then((response) => response.data);

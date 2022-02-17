@@ -30,7 +30,7 @@ const enrichSkillObjWithRequiredAtts = (skill) => {
 
 export default {
   getSkillDetails(projectId, subjectId, skillId) {
-    return axios.get(`/admin/projects/${projectId}/subjects/${subjectId}/skills/${skillId}`)
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}/skills/${encodeURIComponent(skillId)}`)
       .then((response) => {
         const skill = response.data;
         skill.subjectId = subjectId;
@@ -54,16 +54,16 @@ export default {
     return copy;
   },
   getSubjectSkills(projectId, subjectId) {
-    return axios.get(`/admin/projects/${projectId}/subjects/${subjectId}/skills`)
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}/skills`)
       .then((response) => response.data);
   },
   getProjectSkills(projectId, skillNameQuery = null) {
     const query = skillNameQuery ? `?skillNameQuery=${encodeURIComponent(skillNameQuery)}` : '';
-    return axios.get(`/admin/projects/${projectId}/skills${query}`)
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/skills${query}`)
       .then((response) => response.data);
   },
   getGroupSkills(projectId, groupId) {
-    return axios.get(`/admin/projects/${projectId}/groups/${groupId}/skills`)
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/groups/${encodeURIComponent(groupId)}/skills`)
       .then((response) => response.data.map((item) => ({ ...item, groupId })));
   },
   saveSkill(skill) {
@@ -73,86 +73,86 @@ export default {
       requestSkillId = skill.originalSkillId;
     }
     const url = (skill.groupId && skill.groupId.length > 0)
-      ? `/admin/projects/${skill.projectId}/subjects/${skill.subjectId}/groups/${skill.groupId}/skills/${requestSkillId}`
-      : `/admin/projects/${skill.projectId}/subjects/${skill.subjectId}/skills/${requestSkillId}`;
+      ? `/admin/projects/${encodeURIComponent(skill.projectId)}/subjects/${encodeURIComponent(skill.subjectId)}/groups/${encodeURIComponent(skill.groupId)}/skills/${encodeURIComponent(requestSkillId)}`
+      : `/admin/projects/${encodeURIComponent(skill.projectId)}/subjects/${encodeURIComponent(skill.subjectId)}/skills/${encodeURIComponent(requestSkillId)}`;
 
     return axios.post(url, copy)
       .then(() => this.getSkillDetails(skill.projectId, skill.subjectId, skill.skillId));
   },
   syncSkillsPoints(projectId, subjectId, groupId, skillsPointsSyncRequest) {
-    const url = `/admin/projects/${projectId}/subjects/${subjectId}/groups/${groupId}/skills`;
+    const url = `/admin/projects/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}/groups/${encodeURIComponent(groupId)}/skills`;
     return axios.patch(url, skillsPointsSyncRequest)
       .then(() => this.getGroupSkills(projectId, groupId));
   },
   deleteSkill(skill) {
-    return axios.delete(`/admin/projects/${skill.projectId}/subjects/${skill.subjectId}/skills/${skill.skillId}`)
+    return axios.delete(`/admin/projects/${encodeURIComponent(skill.projectId)}/subjects/${encodeURIComponent(skill.subjectId)}/skills/${encodeURIComponent(skill.skillId)}`)
       .then((res) => res.data);
   },
   updateSkill(skill, actionToSubmit) {
-    return axios.patch(`/admin/projects/${skill.projectId}/subjects/${skill.subjectId}/skills/${skill.skillId}`, {
+    return axios.patch(`/admin/projects/${encodeURIComponent(skill.projectId)}/subjects/${encodeURIComponent(skill.subjectId)}/skills/${encodeURIComponent(skill.skillId)}`, {
       action: actionToSubmit,
     })
       .then(() => this.getSkillDetails(skill.projectId, skill.subjectId, skill.skillId));
   },
   getDependentSkillsGraphForSkill(projectId, skillId) {
-    return axios.get(`/admin/projects/${projectId}/skills/${skillId}/dependency/graph`)
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}/dependency/graph`)
       .then((res) => res.data);
   },
   getDependentSkillsGraphForProject(projectId) {
-    return axios.get(`/admin/projects/${projectId}/dependency/graph`)
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/dependency/graph`)
       .then((res) => res.data);
   },
   assignSkillToBadge(projectId, badgeId, skillId) {
-    return axios.post(`/admin/projects/${projectId}/badge/${badgeId}/skills/${skillId}`)
+    return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/badge/${encodeURIComponent(badgeId)}/skills/${encodeURIComponent(skillId)}`)
       .then((res) => res.data);
   },
   removeSkillFromBadge(projectId, badgeId, skillId) {
-    return axios.delete(`/admin/projects/${projectId}/badge/${badgeId}/skills/${skillId}`)
+    return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}/badge/${encodeURIComponent(badgeId)}/skills/${encodeURIComponent(skillId)}`)
       .then((res) => res.data);
   },
   getBadgeSkills(projectId, badgeId) {
-    return axios.get(`/admin/projects/${projectId}/badge/${badgeId}/skills`)
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/badge/${encodeURIComponent(badgeId)}/skills`)
       .then((res) => res.data);
   },
   getSkillsFroDependency(projectId) {
-    return axios.get(`/admin/projects/${projectId}/dependency/availableSkills`)
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/dependency/availableSkills`)
       .then((res) => res.data);
   },
   assignDependency(projectId, skillId, dependentSkillId, dependentProjectId) {
     if (dependentProjectId) {
-      return axios.post(`/admin/projects/${projectId}/skills/${skillId}/dependency/projects/${dependentProjectId}/skills/${dependentSkillId}`, null, { handleError: false })
+      return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}/dependency/projects/${encodeURIComponent(dependentProjectId)}/skills/${encodeURIComponent(dependentSkillId)}`, null, { handleError: false })
         .then((createdRuleResult) => createdRuleResult.data);
     }
-    return axios.post(`/admin/projects/${projectId}/skills/${skillId}/dependency/${dependentSkillId}`, null, { handleError: false })
+    return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}/dependency/${encodeURIComponent(dependentSkillId)}`, null, { handleError: false })
       .then((createdRuleResult) => createdRuleResult.data);
   },
   removeDependency(projectId, skillId, dependentSkillId, dependentProjectId) {
     if (dependentProjectId) {
-      return axios.delete(`/admin/projects/${projectId}/skills/${skillId}/dependency/projects/${dependentProjectId}/skills/${dependentSkillId}`)
+      return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}/dependency/projects/${encodeURIComponent(dependentProjectId)}/skills/${encodeURIComponent(dependentSkillId)}`)
         .then((createdRuleResult) => createdRuleResult.data);
     }
-    return axios.delete(`/admin/projects/${projectId}/skills/${skillId}/dependency/${dependentSkillId}`)
+    return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}/dependency/${encodeURIComponent(dependentSkillId)}`)
       .then((createdRuleResult) => createdRuleResult.data);
   },
   skillWithNameExists(projectId, skillName) {
-    return axios.post(`/admin/projects/${projectId}/skillNameExists`, { name: skillName })
+    return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/skillNameExists`, { name: skillName })
       .then((remoteRes) => !remoteRes.data);
   },
   skillWithIdExists(projectId, skillId) {
-    return axios.get(`/admin/projects/${projectId}/entityIdExists?id=${skillId}`)
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/entityIdExists?id=${encodeURIComponent(skillId)}`)
       .then((remoteRes) => !remoteRes.data);
   },
   getLatestSkillVersion(projectId) {
-    return axios.get(`/admin/projects/${projectId}/latestVersion`)
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/latestVersion`)
       .then((remoteRes) => remoteRes.data);
   },
   saveSkillEvent(projectId, skillId, user, timestamp) {
     const userId = user.dn ? user.dn : user.userId;
-    return axios.put(`/api/projects/${projectId}/skills/${skillId}`, { userId, timestamp }, { handleError: false })
+    return axios.put(`/api/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}`, { userId, timestamp }, { handleError: false })
       .then((remoteRes) => remoteRes.data);
   },
   checkIfSkillBelongsToGlobalBadge(projectId, skillId) {
-    return axios.get(`/admin/projects/${projectId}/skills/${skillId}/globalBadge/exists`)
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}/globalBadge/exists`)
       .then((response) => response.data);
   },
 };
