@@ -59,7 +59,7 @@ class TaskConfig {
     OneTimeTask<CatalogSkillDefinitionUpdated> catalogSkillDefinitionUpdatedOneTimeTask(CatalogSkillUpdatedTaskExecutor catalogSkillUpdatedTaskExecutor) {
         return Tasks.oneTime("catalog-skill-updated", CatalogSkillDefinitionUpdated.class)
                 .onFailure(
-                        new FailureHandler.MaxRetriesFailureHandler<>(maxRetries,
+                        new FailureHandler.MaxRetriesFailureHandler(maxRetries,
                                 new FailureHandler.ExponentialBackoffFailureHandler<>(Duration.ofSeconds(exponentialBackOffSeconds), exponentialBackOffRate))
                 )
                 .execute(catalogSkillUpdatedTaskExecutor);
@@ -68,7 +68,7 @@ class TaskConfig {
     @Bean
     OneTimeTask<ImportedSkillAchievement> importedSkillAchievementOneTimeTask(ImportedSkillAchievementTaskExecutor importedSkillAchievementTaskExecutor) {
         return Tasks.oneTime("imported-skill-achievement", ImportedSkillAchievement.class)
-            .onFailure(new FailureHandler.MaxRetriesFailureHandler<>(maxRetries,
+            .onFailure(new FailureHandler.MaxRetriesFailureHandler(maxRetries,
                     new FailureHandler.ExponentialBackoffFailureHandler<>(Duration.ofSeconds(exponentialBackOffSeconds), exponentialBackOffRate))
             )
             .execute(importedSkillAchievementTaskExecutor)
