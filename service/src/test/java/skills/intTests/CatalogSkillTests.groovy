@@ -17,6 +17,8 @@ package skills.intTests
 
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
+import org.joda.time.format.DateTimeFormat
+import org.joda.time.format.DateTimeFormatter
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import skills.controller.result.model.LevelDefinitionRes
@@ -51,6 +53,8 @@ class CatalogSkillTests extends DefaultIntSpec {
 
     @Autowired
     LevelDefinitionStorageService levelDefinitionStorageService
+
+    DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").withZoneUTC()
 
     def "add skill to catalog"() {
         def project1 = createProject(1)
@@ -2562,6 +2566,45 @@ class CatalogSkillTests extends DefaultIntSpec {
         projectLevelsPreEdit[4].pointsFrom == 1150
         subjectLevelsPostEdit[0].pointsFrom == 225
         subjectLevelsPostEdit[0].pointsFrom == 225
+    }
+
+    def "points awarded for imported skill must have last earned date"() {
+        def project1 = createProject(1)
+        def project2 = createProject(2)
+
+        def p1subj1 = createSubject(1, 1)
+        def p2subj1 = createSubject(2, 1)
+
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 50)
+
+        def p2skill1 = createSkill(2, 1, 55, 0, 1, 0, 100)
+
+        skillsService.createProject(project1)
+        skillsService.createProject(project2)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p2subj1)
+
+        skillsService.createSkill(skill)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(p2skill1)
+
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+
+        def user = getRandomUsers(1)[0]
+
+        when:
+        Date date = new Date()
+        skillsService.addSkill([projectId: project1.projectId, skillId: skill.skillId], user, date)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        def subjectUsers = skillsService.getSubjectUsers(project2.projectId, p2subj1.subjectId)
+        println subjectUsers
+
+        then:
+        subjectUsers.data[0].userId == user
+        subjectUsers.data[0].lastUpdated == DTF.print(date.time)
     }
 
 }
