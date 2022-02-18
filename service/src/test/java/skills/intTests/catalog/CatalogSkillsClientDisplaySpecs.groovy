@@ -16,13 +16,11 @@
 package skills.intTests.catalog
 
 import groovy.json.JsonOutput
-import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
-import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
-class CatalogSkillsClientDisplaySpecs extends DefaultIntSpec {
+class CatalogSkillsClientDisplaySpecs extends CatalogIntSpec {
 
     def "skills are only visible after they were finalized"() {
         def project1 = createProject(1)

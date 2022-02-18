@@ -29,9 +29,11 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import skills.tasks.JsonSerializer
+import skills.tasks.data.CatalogFinalizeRequest
 import skills.tasks.data.CatalogSkillDefinitionUpdated
 import skills.tasks.data.ImportedSkillAchievement
 import skills.tasks.executors.CatalogSkillUpdatedTaskExecutor
+import skills.tasks.executors.FinalizeCatalogSkillsImportExecutor
 import skills.tasks.executors.ImportedSkillAchievementTaskExecutor
 
 import java.time.Duration
@@ -73,11 +75,11 @@ class TaskConfig {
         }
     }
 
-    static class DontRetryOnNoRetryException<T> implements FailureHandler<T> {
+    static class DontRetryOnNoRetryExceptionHandler<T> implements FailureHandler<T> {
         private static final Logger LOG = LoggerFactory.getLogger(MaxRetriesFailureHandler.class);
         private FailureHandler<T> failureHandler;
 
-        DontRetryOnNoRetryException(FailureHandler<T> failureHandler){
+        DontRetryOnNoRetryExceptionHandler(FailureHandler<T> failureHandler){
             this.failureHandler = failureHandler;
         }
 
@@ -97,7 +99,7 @@ class TaskConfig {
     OneTimeTask<CatalogSkillDefinitionUpdated> catalogSkillDefinitionUpdatedOneTimeTask(CatalogSkillUpdatedTaskExecutor catalogSkillUpdatedTaskExecutor) {
         return Tasks.oneTime("catalog-skill-updated", CatalogSkillDefinitionUpdated.class)
                 .onFailure(
-                        new DontRetryOnNoRetryException(new FailureHandler.MaxRetriesFailureHandler(maxRetries,
+                        new DontRetryOnNoRetryExceptionHandler(new FailureHandler.MaxRetriesFailureHandler(maxRetries,
                                 new FailureHandler.ExponentialBackoffFailureHandler(Duration.ofSeconds(exponentialBackOffSeconds), exponentialBackOffRate)))
                 )
                 .execute(catalogSkillUpdatedTaskExecutor);
@@ -106,10 +108,19 @@ class TaskConfig {
     @Bean
     OneTimeTask<ImportedSkillAchievement> importedSkillAchievementOneTimeTask(ImportedSkillAchievementTaskExecutor importedSkillAchievementTaskExecutor) {
         return Tasks.oneTime("imported-skill-achievement", ImportedSkillAchievement.class)
-            .onFailure(new DontRetryOnNoRetryException(new FailureHandler.MaxRetriesFailureHandler(maxRetries,
+            .onFailure(new DontRetryOnNoRetryExceptionHandler(new FailureHandler.MaxRetriesFailureHandler(maxRetries,
                     new FailureHandler.ExponentialBackoffFailureHandler(Duration.ofSeconds(exponentialBackOffSeconds), exponentialBackOffRate)))
             )
             .execute(importedSkillAchievementTaskExecutor)
+    }
+
+    @Bean
+    OneTimeTask<CatalogFinalizeRequest> finalizeCatalogImportsOneTimeTask(FinalizeCatalogSkillsImportExecutor finalizeCatalogSkillsImportExecutor) {
+        return Tasks.oneTime("finalize-catalog-imports", CatalogFinalizeRequest.class)
+                .onFailure(new DontRetryOnNoRetryExceptionHandler(new FailureHandler.MaxRetriesFailureHandler(maxRetries,
+                        new FailureHandler.ExponentialBackoffFailureHandler(Duration.ofSeconds(exponentialBackOffSeconds), exponentialBackOffRate)))
+                )
+                .execute(finalizeCatalogSkillsImportExecutor)
     }
 
 }

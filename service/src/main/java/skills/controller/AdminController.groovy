@@ -1137,7 +1137,7 @@ class AdminController {
     @RequestMapping(value="/projects/{projectId}/catalog/finalize", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
     RequestResult finalizeSkillsImport(@PathVariable("projectId") String projectId) {
         SkillsValidator.isNotBlank(projectId, "projectId")
-        skillCatalogService.finalizeCatalogSkillsImport(projectId)
+        skillCatalogService.requestFinalizationOfImportedSkills(projectId)
         RequestResult success = RequestResult.success()
         success.explanation = "Finalized skills import from the catalog into [${projectId}]"
         return success

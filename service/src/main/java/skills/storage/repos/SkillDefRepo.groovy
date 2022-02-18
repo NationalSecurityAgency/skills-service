@@ -457,7 +457,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         s.copiedFrom as copiedFrom,
         s.copiedFromProjectId as copiedFromProjectId,
         s.readOnly as readOnly
-        from SkillDef s where s.copiedFrom = ?1
+        from SkillDef s where s.copiedFrom = ?1 and s.enabled = 'true'
     ''')
     List<SkillDefMin> findSkillDefMinCopiedFrom(int skillRefId)
 

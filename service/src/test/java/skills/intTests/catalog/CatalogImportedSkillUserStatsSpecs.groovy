@@ -16,11 +16,9 @@
 package skills.intTests.catalog
 
 
-import skills.intTests.utils.DefaultIntSpec
-
 import static skills.intTests.utils.SkillsFactory.*
 
-class CatalogImportedSkillUserStatsSpecs extends DefaultIntSpec {
+class CatalogImportedSkillUserStatsSpecs extends CatalogIntSpec {
 
     def "report skill event on exported skill, should be reflected in all copies"() {
         def project1 = createProject(1)
@@ -71,15 +69,16 @@ class CatalogImportedSkillUserStatsSpecs extends DefaultIntSpec {
         skillsService.exportSkillToCatalog(project3.projectId, skill8.skillId)
         skillsService.exportSkillToCatalog(project3.projectId, skill9.skillId)
 
-
         // 2nd project import
         skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
         skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project3.projectId, skill7.skillId)
         skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project3.projectId, skill8.skillId)
         skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project3.projectId, skill9.skillId)
+        skillsService.finalizeSkillsImportFromCatalog(project2.projectId)
 
         // 3rd project import
         skillsService.importSkillFromCatalog(project3.projectId, p3subj1.subjectId, project1.projectId, skill2.skillId)
+        skillsService.finalizeSkillsImportFromCatalog(project3.projectId)
 
         def randomUsers = getRandomUsers(3)
         def user = randomUsers[0]

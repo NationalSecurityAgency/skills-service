@@ -238,7 +238,7 @@ class BadgeAdminService {
 
     @Transactional()
     void addSkillToBadge(String projectId, String badgeId, String skillid) {
-        ruleSetDefGraphService.assignGraphRelationship(projectId, badgeId, SkillDef.ContainerType.Badge, skillid, SkillRelDef.RelationshipType.BadgeRequirement)
+        ruleSetDefGraphService.assignGraphRelationship(projectId, badgeId, SkillDef.ContainerType.Badge, skillid, SkillRelDef.RelationshipType.BadgeRequirement, true)
     }
 
     @Transactional()

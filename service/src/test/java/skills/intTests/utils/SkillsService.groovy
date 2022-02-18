@@ -28,6 +28,8 @@ class SkillsService {
     CertificateRegistry certificateRegistry = null
     Options handlebarOptions = null
 
+    WaitForAsyncTasksCompletion waitForAsyncTasksCompletion //optionally configured
+
     SkillsService() {
         wsHelper = new WSHelper().init()
     }
@@ -1260,7 +1262,9 @@ class SkillsService {
     }
 
     def finalizeSkillsImportFromCatalog(String projectId) {
-        return wsHelper.adminPost("/projects/${projectId}/catalog/finalize", [])
+        def res = wsHelper.adminPost("/projects/${projectId}/catalog/finalize", [])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        return res
     }
 
     def importSkillFromCatalog(String importIntoProjectId, String importIntoSubjectId, String catalogSkillProjectId, String catalogSkillSkillId) {

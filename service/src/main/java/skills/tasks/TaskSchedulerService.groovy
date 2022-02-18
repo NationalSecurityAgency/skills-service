@@ -16,21 +16,16 @@
 package skills.tasks
 
 import com.github.kagkarlsson.scheduler.Scheduler
-import com.github.kagkarlsson.scheduler.task.FailureHandler
 import com.github.kagkarlsson.scheduler.task.helper.OneTimeTask
-import com.github.kagkarlsson.scheduler.task.helper.Tasks
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import skills.services.events.SkillDate
-import skills.storage.model.SkillDefMin
+import skills.tasks.data.CatalogFinalizeRequest
 import skills.tasks.data.CatalogSkillDefinitionUpdated
 import skills.tasks.data.ImportedSkillAchievement
-import skills.tasks.executors.CatalogSkillUpdatedTaskExecutor
 
-import javax.annotation.PostConstruct
-import java.time.Duration
 import java.time.Instant
 
 @Service
@@ -49,7 +44,10 @@ class TaskSchedulerService {
     @Autowired
     OneTimeTask<ImportedSkillAchievement> importedSkillAchievementOneTimeTask
 
-    public scheduleCatalogSkillUpdate(String projectId, String catalogSkillId, Integer rawId){
+    @Autowired
+    OneTimeTask<CatalogFinalizeRequest> finalizeCatalogImportsOneTimeTask
+
+    void scheduleCatalogSkillUpdate(String projectId, String catalogSkillId, Integer rawId){
         String id = "${catalogSkillId}-${UUID.randomUUID().toString()}}"
         log.info("scheduling catalog skill update task [{}] using db-scheduler", id)
         scheduler.schedule(catalogSkillDefinitionUpdatedOneTimeTask.instance(id, new CatalogSkillDefinitionUpdated(
@@ -59,9 +57,9 @@ class TaskSchedulerService {
         )), Instant.now().plusSeconds(schedulingDelaySeconds))
     }
 
-    public scheduleImportedSkillAchievement(String projectId, String skillId, String userId, Integer rawSkillId, SkillDate incomingSkillDate, boolean thisRequestCompletedOriginalSkill) {
+    void scheduleImportedSkillAchievement(String projectId, String skillId, String userId, Integer rawSkillId, SkillDate incomingSkillDate, boolean thisRequestCompletedOriginalSkill) {
         String id = "${skillId}-${UUID.randomUUID().toString()}"
-        log.info("scheduling imported skill achievement task [{}] using db-scheduler", id)
+        log.debug("scheduling imported skill achievement task [{}] using db-scheduler", id)
         scheduler.schedule(importedSkillAchievementOneTimeTask.instance(id, new ImportedSkillAchievement(
                 userId: userId,
                 rawSkillId: rawSkillId,
@@ -69,6 +67,14 @@ class TaskSchedulerService {
                 skillId: skillId,
                 incomingSkillDate: incomingSkillDate,
                 thisRequestCompletedOriginalSkill: thisRequestCompletedOriginalSkill
+        )), Instant.now().plusSeconds(schedulingDelaySeconds))
+    }
+
+    void scheduleCatalogImportFinalization(String projectId){
+        String id = "${projectId}-${UUID.randomUUID().toString()}}"
+        log.info("scheduling catalog import finalization for [{}] using db-scheduler", id)
+        scheduler.schedule(finalizeCatalogImportsOneTimeTask.instance(id, new CatalogFinalizeRequest(
+                projectId: projectId
         )), Instant.now().plusSeconds(schedulingDelaySeconds))
     }
 }

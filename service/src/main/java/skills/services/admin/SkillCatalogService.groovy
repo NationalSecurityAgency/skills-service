@@ -17,7 +17,6 @@ package skills.services.admin
 
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
-import org.hibernate.Session
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
@@ -29,44 +28,16 @@ import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.CatalogSkill
 import skills.controller.request.model.SkillImportRequest
-import skills.controller.result.model.CatalogSkillRes
-import skills.controller.result.model.ExportedSkillRes
-import skills.controller.result.model.ExportedSkillStats
-import skills.controller.result.model.ExportedSkillUser
-import skills.controller.result.model.ExportedSkillsStats
-import skills.controller.result.model.ImportedSkillStats
-import skills.controller.result.model.ProjectNameAwareSkillDefRes
-import skills.controller.result.model.SettingsResult
-import skills.controller.result.model.SkillDefRes
-import skills.controller.result.model.ExportableToCatalogValidationResult
-import skills.services.LockingService
+import skills.controller.result.model.*
 import skills.services.RuleSetDefGraphService
-import skills.services.UserAchievementsAndPointsManagement
-import skills.services.settings.Settings
-import skills.services.settings.SettingsService
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.accessors.SkillDefAccessor
-import skills.storage.model.ExportedSkill
-import skills.storage.model.ExportedSkillTiny
-import skills.storage.model.ImportExportStats
-import skills.storage.model.ProjDef
-import skills.storage.model.QueuedSkillUpdate
-import skills.storage.model.SkillDef
-import skills.storage.model.SkillDefMin
-import skills.storage.model.SkillDefWithExtra
-import skills.storage.model.SkillRelDef
+import skills.storage.model.*
 import skills.storage.repos.ExportedSkillRepo
-import skills.storage.repos.QueuedSkillUpdateRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillDefWithExtraRepo
 import skills.storage.repos.SkillRelDefRepo
-import skills.storage.repos.UserAchievedLevelRepo
-import skills.storage.repos.UserPointsRepo
-import skills.storage.repos.nativeSql.NativeQueriesRepo
 import skills.utils.Props
-
-import javax.persistence.EntityManager
-import javax.persistence.PersistenceContext
 
 @Service
 @Slf4j
@@ -96,31 +67,10 @@ class SkillCatalogService {
     SkillsAdminService skillsAdminService
 
     @Autowired
-    UserAchievementsAndPointsManagement userAchievementsAndPointsManagement
-
-    @Autowired
-    QueuedSkillUpdateRepo queuedSkillUpdateRepo
-
-    @Autowired
-    LockingService lockingService
-
-    @Autowired
     SkillDefWithExtraRepo skillDefWithExtraRepo
 
     @Autowired
-    RuleSetDefGraphService ruleSetDefGraphService
-
-    @Autowired
-    UserPointsRepo userPointsRepo
-
-    @Autowired
-    NativeQueriesRepo nativeQueriesRepo
-
-    @Autowired
-    UserAchievedLevelRepo userAchievedLevelRepo
-
-    @Autowired
-    SettingsService settingsService
+    SkillCatalogFinalizationService skillCatalogFinalizationService
 
     @Transactional(readOnly = true)
     TotalCountAwareResult<ProjectNameAwareSkillDefRes> getSkillsAvailableInCatalog(String projectId, String projectNameSearch, String subjectNameSearch, String skillNameSearch, PageRequest pageable) {
@@ -320,54 +270,11 @@ class SkillCatalogService {
         }
     }
 
-    @Transactional
-    @Profile
-    void finalizeCatalogSkillsImport(String projectId) {
-        log.info("Finalizing imported skills for [{}]", projectId)
-        projDefAccessor.getProjDef(projectId) // validate
-        List<SkillDef> disabledImportedSkills = skillDefRepo.findAllByProjectIdAndTypeAndEnabledAndCopiedFromIsNotNull(projectId, SkillDef.ContainerType.Skill, Boolean.FALSE.toString())
-
-        if (disabledImportedSkills) {
-            disabledImportedSkills.each {
-                it.enabled = Boolean.TRUE.toString()
-            }
-            skillDefRepo.saveAll(disabledImportedSkills)
-
-            // important: must update subject's total points first then project
-            List<SkillDef> subjects = disabledImportedSkills.collect {ruleSetDefGraphService.getParentSkill(it.id) }
-                    .unique(false) { SkillDef a, SkillDef b -> a.skillId <=> b.skillId }
-            subjects.each {
-                skillDefRepo.updateSubjectTotalPoints(projectId, it.skillId)
-            }
-            skillDefRepo.updateProjectsTotalPoints( projectId)
-
-
-            List<Integer> skillRefIds = disabledImportedSkills.collect {it.copiedFrom }
-
-            userPointsRepo.copyUserPointsToTheImportedProjects(projectId, skillRefIds)
-            userPointsRepo.createProjectUserPointsForTheNewUsers(projectId)
-            nativeQueriesRepo.updateProjectUserPointsForAllUsers(projectId)
-
-            userAchievedLevelRepo.copySkillAchievementsToTheImportedProjects(projectId, skillRefIds)
-
-            SettingsResult settingsResult = settingsService.getProjectSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
-            boolean pointsBased = settingsResult ? settingsResult.isEnabled() : false
-
-            subjects.each { SkillDef subject ->
-                userPointsRepo.createSubjectUserPointsForTheNewUsers(projectId, subject.skillId)
-                nativeQueriesRepo.updateSubjectUserPointsForAllUsers(projectId, subject.skillId)
-
-                nativeQueriesRepo.identifyAndAddSubjectLevelAchievements(subject.projectId, subject.skillId, pointsBased)
-                log.info("Completed import for subject. projectIdTo=[{}], subjectIdTo=[{}]", projectId, subject.skillId)
-            }
-            nativeQueriesRepo.identifyAndAddProjectLevelAchievements(projectId, pointsBased)
-
-        } else {
-            log.warn("Finalize was called for [{}] projectId but there were no disabled skills", projectId)
-        }
-        log.info("Completed finalizing imported skills for [{}]", projectId)
+    void requestFinalizationOfImportedSkills(String projectId) {
+         skillCatalogFinalizationService.requestFinalizationOfImportedSkills(projectId)
     }
 
+    @Profile
     @Transactional(readOnly=true)
     boolean isAvailableInCatalog(String projectId, String skillId) {
         // can add sharing restriction checks here in the future

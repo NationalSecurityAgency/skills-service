@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.intTests
+package skills.intTests.catalog
 
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
@@ -40,7 +40,7 @@ import java.time.LocalDate
 import static skills.intTests.utils.SkillsFactory.*
 
 @Slf4j
-class CatalogSkillTests extends DefaultIntSpec {
+class CatalogSkillTests extends CatalogIntSpec {
 
     @Autowired
     UserEventService userEventService

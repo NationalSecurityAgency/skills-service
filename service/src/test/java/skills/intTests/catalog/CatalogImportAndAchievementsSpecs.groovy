@@ -16,9 +16,7 @@
 package skills.intTests.catalog
 
 import org.springframework.beans.factory.annotation.Autowired
-import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
-import skills.intTests.utils.WaitForAsyncTasksCompletion
 import skills.services.LevelDefinitionStorageService
 import skills.storage.model.UserAchievement
 import skills.storage.model.UserPoints
@@ -28,7 +26,7 @@ import skills.storage.repos.UserPointsRepo
 
 import static skills.intTests.utils.SkillsFactory.*
 
-class CatalogImportAndAchievementsSpecs extends DefaultIntSpec {
+class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
 
     @Autowired
     LevelDefinitionStorageService levelDefinitionStorageService
@@ -169,31 +167,6 @@ class CatalogImportAndAchievementsSpecs extends DefaultIntSpec {
         skillsService.getUserLevel(project3.projectId, users[3]) == 3
         getLevels(users[3], project3.projectId) == [1, 2, 3]
         getLevels(users[3], project3.projectId, proj3_subj1_ref_id) == [1, 2, 3]
-    }
-
-    private createProjWithCatalogSkills ( Integer projNum ) {
-        def proj = createProject(projNum)
-        def subj1 = createSubject(projNum, 1)
-        def subj2 = createSubject(projNum, 2)
-        def subj3 = createSubject(projNum, 3)
-        def subj1_skills = (1..3).collect {createSkill(projNum, 1, projNum * 10 + it, 0,2, 480, 100) }
-        def subj2_skills = (1..3).collect {createSkill(projNum, 2, projNum * 10 + it + 3, 0, 2, 480, 100) }
-        def subj3_skills = (1..3).collect {createSkill(projNum, 3, projNum * 10 + it + 6, 0, 2, 480, 100) }
-        skillsService.createProject(proj)
-        skillsService.createSubject(subj1)
-        skillsService.createSubject(subj2)
-        skillsService.createSubject(subj3)
-        List skills = [subj1_skills, subj2_skills, subj3_skills].flatten()
-        skillsService.createSkills(skills)
-        skills.each { skillsService.exportSkillToCatalog(proj.projectId, it.skillId) }
-        return [
-                p : proj,
-                s1: subj1,
-                s2: subj2,
-                s1_skills: subj1_skills,
-                s2_skills: subj2_skills,
-                s3_skills: subj3_skills,
-        ]
     }
 
     def "reporting original skill event achieves subject level"() {
@@ -465,6 +438,7 @@ class CatalogImportAndAchievementsSpecs extends DefaultIntSpec {
         skillsService.addSkill([projectId: project1.projectId, skillId: skill.skillId], user3)
         skillsService.addSkill([projectId: project1.projectId, skillId: skill2.skillId], user3)
         skillsService.addSkill([projectId: project1.projectId, skillId: skill2.skillId], user3)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 
         Integer proj2_subj1_ref_id = skillDefRepo.findByProjectIdAndSkillId(project2.projectId, p1subj1.subjectId).id
         when:
@@ -637,6 +611,7 @@ class CatalogImportAndAchievementsSpecs extends DefaultIntSpec {
         skillsService.addSkill([projectId: project1.projectId, skillId: skill.skillId], user3)
         skillsService.addSkill([projectId: project1.projectId, skillId: skill2.skillId], user3)
         skillsService.addSkill([projectId: project1.projectId, skillId: skill2.skillId], user3)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 
         Integer proj2_subj1_ref_id = skillDefRepo.findByProjectIdAndSkillId(project2.projectId, p1subj1.subjectId).id
         when:
@@ -798,6 +773,7 @@ class CatalogImportAndAchievementsSpecs extends DefaultIntSpec {
             skillsService.addSkill([projectId: project1.projectId, skillId: skill1.skillId], user3)
             skillsService.addSkill([projectId: project1.projectId, skillId: skill2.skillId], user3)
         }
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 
         Integer proj2_subj1_ref_id = skillDefRepo.findByProjectIdAndSkillId(project2.projectId, p1subj1.subjectId).id
         Integer proj2_subj2_ref_id = skillDefRepo.findByProjectIdAndSkillId(project2.projectId, p1subj2.subjectId).id
@@ -1002,6 +978,7 @@ class CatalogImportAndAchievementsSpecs extends DefaultIntSpec {
             skillsService.addSkill([projectId: project3.projectId, skillId: skill17.skillId], user3)
             skillsService.addSkill([projectId: project3.projectId, skillId: skill18.skillId], user3)
         }
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 
         Integer proj2_subj1_ref_id = skillDefRepo.findByProjectIdAndSkillId(project2.projectId, p1subj1.subjectId).id
         Integer proj2_subj2_ref_id = skillDefRepo.findByProjectIdAndSkillId(project2.projectId, p1subj2.subjectId).id
@@ -1077,6 +1054,7 @@ class CatalogImportAndAchievementsSpecs extends DefaultIntSpec {
         skillsService.createBadge(p2badge1)
 
         skillsService.importSkillFromCatalog(project2.p.projectId, project1.s2.subjectId, project1.p.projectId, project1.s1_skills[0].skillId)
+        skillsService.finalizeSkillsImportFromCatalog(project2.p.projectId)
 
         skillsService.assignSkillToBadge(project2.p.projectId, p2badge1.badgeId, project2.s1_skills[0].skillId)
         skillsService.assignSkillToBadge(project2.p.projectId, p2badge1.badgeId, project1.s1_skills[0].skillId)

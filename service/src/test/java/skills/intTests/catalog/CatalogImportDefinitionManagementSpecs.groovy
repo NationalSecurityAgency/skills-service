@@ -17,12 +17,13 @@ package skills.intTests.catalog
 
 import groovy.json.JsonOutput
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
-class CatalogImportDefinitionManagementSpecs extends DefaultIntSpec {
+class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
 
     def "import skill from catalog"() {
         def project1 = createProject(1)
@@ -256,5 +257,21 @@ class CatalogImportDefinitionManagementSpecs extends DefaultIntSpec {
         skillsAfter.find { it.skillId == p1Subj2Skills[5].skillId }.enabled == true
         skillsAfter.find { it.skillId == p2Subj1Skills[0].skillId }.enabled == true
         skillsAfter.find { it.skillId == p2Subj1Skills[1].skillId }.enabled == true
+    }
+
+    def "do not allow disabled skills to be added to a badge"() {
+        def project1 = createProjWithCatalogSkills(1)
+        def project2 = createProjWithCatalogSkills(2)
+
+        def p2badge1 = createBadge(2, 11)
+        skillsService.createBadge(p2badge1)
+
+        skillsService.importSkillFromCatalog(project2.p.projectId, project1.s2.subjectId, project1.p.projectId, project1.s1_skills[0].skillId)
+
+        when:
+        skillsService.assignSkillToBadge(project2.p.projectId, p2badge1.badgeId, project1.s1_skills[0].skillId)
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("Skill [skill11] is not enabled")
     }
 }

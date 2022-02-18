@@ -164,7 +164,9 @@ class DefaultIntSpec extends Specification {
             url = url.replace("http://", "https://")
         }
 
-        new SkillsService(username, password, firstName, lastName, url, pkiEnabled != null ? certificateRegistry : null)
+        SkillsService res = new SkillsService(username, password, firstName, lastName, url, pkiEnabled != null ? certificateRegistry : null)
+        res.waitForAsyncTasksCompletion = waitForAsyncTasksCompletion
+        return res
     }
 
     SkillsService createSupervisor(){
