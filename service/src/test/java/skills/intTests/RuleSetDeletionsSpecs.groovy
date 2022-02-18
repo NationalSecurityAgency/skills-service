@@ -481,6 +481,7 @@ class RuleSetDeletionsSpecs  extends DefaultIntSpec {
         // SUBJECT 2
         skillsService.addSkill([projectId: projId, skillId: subj2.get(0).skillId], sampleUserIds.get(0), new Date())
         skillsService.addSkill([projectId: projId, skillId: subj2.get(0).skillId], sampleUserIds.get(1), new Date())
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 
         String user1Id = sampleUserIds.get(0)
 
@@ -661,6 +662,7 @@ class RuleSetDeletionsSpecs  extends DefaultIntSpec {
                 skillsService.addSkill([projectId: projId, skillId: subj2.get(3).skillId], sampleUserIds.get(0), theDate)
             }
         }
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 
         String user1Id = sampleUserIds.get(0)
         String user2Id = sampleUserIds.get(1)
@@ -985,6 +987,7 @@ class RuleSetDeletionsSpecs  extends DefaultIntSpec {
             skillsService.addSkill([projectId: proj2, skillId: subj2.get(0).skillId], sampleUserIds.get(0), dates.get(0))
             skillsService.addSkill([projectId: proj2, skillId: subj2.get(0).skillId], sampleUserIds.get(0), dates.get(1))
         }
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 
         String user1Id = sampleUserIds.get(0)
 

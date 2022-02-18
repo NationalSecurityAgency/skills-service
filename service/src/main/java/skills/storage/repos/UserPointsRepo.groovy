@@ -313,7 +313,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     @Query('''select sdChild, userPoints
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
     left join UserPoints userPoints on sdChild.projectId = userPoints.projectId and sdChild.skillId = userPoints.skillId and userPoints.day=?6 and userPoints.userId=?1
-      where srd.parent=sdParent.id and  srd.child=sdChild.id and
+      where srd.parent=sdParent.id and  srd.child=sdChild.id and sdChild.enabled = 'true' and
       sdParent.projectId=?2 and sdParent.skillId=?3 and srd.type in ?4 and sdChild.version<=?5''')
     List<Object []> findChildrenAndTheirUserPoints(String userId, String projectId, String skillId, List<SkillRelDef.RelationshipType> types, Integer version, Date day)
 
@@ -326,7 +326,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     @Query('''select sdChild, userPoints
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
     left join UserPoints userPoints on sdChild.projectId = userPoints.projectId and sdChild.skillId = userPoints.skillId and userPoints.day=?5 and userPoints.userId=?1
-      where srd.parent=sdParent.id and  srd.child=sdChild.id and
+      where srd.parent=sdParent.id and  srd.child=sdChild.id and sdChild.enabled = 'true' and
       sdParent.projectId is null and sdParent.skillId=?2 and srd.type in ?3 and sdChild.version<=?4''')
     List<Object []> findGlobalChildrenAndTheirUserPoints(String userId, String skillId, List<SkillRelDef.RelationshipType> types, Integer version, Date day)
 
@@ -340,8 +340,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
     left join UserPoints userPoints on sdChild.projectId = userPoints.projectId and sdChild.skillId = userPoints.skillId and userPoints.day is null and userPoints.userId=?1
     left join ProjDef pd on sdChild.copiedFromProjectId = pd.projectId
-      where srd.parent=sdParent.id and  srd.child=sdChild.id and
-      sdParent.projectId=?2 and sdParent.skillId=?3 and srd.type in ?4 and sdChild.version<=?5''')
+      where srd.parent=sdParent.id and  srd.child=sdChild.id and sdChild.enabled = 'true' and
+      sdParent.projectId=?2 and sdParent.skillId=?3 and srd.type in ?4 and sdChild.version<=?5 ''')
     List<Object []> findChildrenAndTheirUserPoints(String userId, String projectId, String skillId, List<SkillRelDef.RelationshipType> types, Integer version)
 
 
@@ -354,7 +354,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     @Query('''select sdChild, userPoints
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
     left join UserPoints userPoints on sdChild.projectId = userPoints.projectId and sdChild.skillId = userPoints.skillId and userPoints.day is null and userPoints.userId=?1
-      where srd.parent=sdParent.id and  srd.child=sdChild.id and
+      where srd.parent=sdParent.id and  srd.child=sdChild.id and sdChild.enabled = 'true' and
       sdParent.projectId is null and sdParent.skillId=?2 and srd.type in ?3 and sdChild.version<=?4''')
     List<Object []> findGlobalChildrenAndTheirUserPoints(String userId, String skillId, List<SkillRelDef.RelationshipType> types, Integer version)
 

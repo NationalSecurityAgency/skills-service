@@ -17,10 +17,14 @@ package skills.tasks.config
 
 import com.github.kagkarlsson.scheduler.Serializer
 import com.github.kagkarlsson.scheduler.boot.config.DbSchedulerCustomizer
+import com.github.kagkarlsson.scheduler.task.ExecutionComplete
+import com.github.kagkarlsson.scheduler.task.ExecutionOperations
 import com.github.kagkarlsson.scheduler.task.FailureHandler
 import com.github.kagkarlsson.scheduler.task.helper.OneTimeTask
 import com.github.kagkarlsson.scheduler.task.helper.Tasks
 import groovy.util.logging.Slf4j
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -55,12 +59,46 @@ class TaskConfig {
         }
     }
 
+    static class DoNotRetryAsyncTaskException extends RuntimeException {
+        DoNotRetryAsyncTaskException(String message) {
+            super(message)
+        }
+
+        DoNotRetryAsyncTaskException(String message, Throwable cause) {
+            super(message, cause)
+        }
+
+        DoNotRetryAsyncTaskException(Throwable cause) {
+            super(cause)
+        }
+    }
+
+    static class DontRetryOnNoRetryException<T> implements FailureHandler<T> {
+        private static final Logger LOG = LoggerFactory.getLogger(MaxRetriesFailureHandler.class);
+        private FailureHandler<T> failureHandler;
+
+        DontRetryOnNoRetryException(FailureHandler<T> failureHandler){
+            this.failureHandler = failureHandler;
+        }
+
+        @Override
+        void onFailure(final ExecutionComplete executionComplete, final ExecutionOperations<T> executionOperations) {
+            Throwable t = executionComplete.getCause()?.get()
+            if(t instanceof DoNotRetryAsyncTaskException){
+                LOG.error("Stopping execution because received DoNotRetryAsyncTaskException.", t);
+                executionOperations.stop();
+            }else{
+                this.failureHandler.onFailure(executionComplete, executionOperations);
+            }
+        }
+    }
+
     @Bean
     OneTimeTask<CatalogSkillDefinitionUpdated> catalogSkillDefinitionUpdatedOneTimeTask(CatalogSkillUpdatedTaskExecutor catalogSkillUpdatedTaskExecutor) {
         return Tasks.oneTime("catalog-skill-updated", CatalogSkillDefinitionUpdated.class)
                 .onFailure(
-                        new FailureHandler.MaxRetriesFailureHandler(maxRetries,
-                                new FailureHandler.ExponentialBackoffFailureHandler(Duration.ofSeconds(exponentialBackOffSeconds), exponentialBackOffRate))
+                        new DontRetryOnNoRetryException(new FailureHandler.MaxRetriesFailureHandler(maxRetries,
+                                new FailureHandler.ExponentialBackoffFailureHandler(Duration.ofSeconds(exponentialBackOffSeconds), exponentialBackOffRate)))
                 )
                 .execute(catalogSkillUpdatedTaskExecutor);
     }
@@ -68,8 +106,8 @@ class TaskConfig {
     @Bean
     OneTimeTask<ImportedSkillAchievement> importedSkillAchievementOneTimeTask(ImportedSkillAchievementTaskExecutor importedSkillAchievementTaskExecutor) {
         return Tasks.oneTime("imported-skill-achievement", ImportedSkillAchievement.class)
-            .onFailure(new FailureHandler.MaxRetriesFailureHandler(maxRetries,
-                    new FailureHandler.ExponentialBackoffFailureHandler(Duration.ofSeconds(exponentialBackOffSeconds), exponentialBackOffRate))
+            .onFailure(new DontRetryOnNoRetryException(new FailureHandler.MaxRetriesFailureHandler(maxRetries,
+                    new FailureHandler.ExponentialBackoffFailureHandler(Duration.ofSeconds(exponentialBackOffSeconds), exponentialBackOffRate)))
             )
             .execute(importedSkillAchievementTaskExecutor)
     }

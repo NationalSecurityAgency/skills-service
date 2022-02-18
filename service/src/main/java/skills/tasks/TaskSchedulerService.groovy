@@ -51,7 +51,7 @@ class TaskSchedulerService {
 
     public scheduleCatalogSkillUpdate(String projectId, String catalogSkillId, Integer rawId){
         String id = "${catalogSkillId}-${UUID.randomUUID().toString()}}"
-        log.info("scheduling catalog skill update task ${id} using db-scheduler")
+        log.info("scheduling catalog skill update task [{}] using db-scheduler", id)
         scheduler.schedule(catalogSkillDefinitionUpdatedOneTimeTask.instance(id, new CatalogSkillDefinitionUpdated(
                 rawId: rawId,
                 skillId: catalogSkillId,
@@ -61,7 +61,7 @@ class TaskSchedulerService {
 
     public scheduleImportedSkillAchievement(String projectId, String skillId, String userId, Integer rawSkillId, SkillDate incomingSkillDate, boolean thisRequestCompletedOriginalSkill) {
         String id = "${skillId}-${UUID.randomUUID().toString()}"
-        log.info("scheduling imported skill achievement task ${id} using db-scheduler")
+        log.info("scheduling imported skill achievement task [{}] using db-scheduler", id)
         scheduler.schedule(importedSkillAchievementOneTimeTask.instance(id, new ImportedSkillAchievement(
                 userId: userId,
                 rawSkillId: rawSkillId,

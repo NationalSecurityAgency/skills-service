@@ -20,12 +20,14 @@ import com.github.kagkarlsson.scheduler.task.TaskInstance
 import com.github.kagkarlsson.scheduler.task.VoidExecutionHandler
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import skills.services.LockingService
 import skills.services.events.pointsAndAchievements.ImportedSkillsAchievementsHandler
 import skills.storage.model.SkillDefMin
 import skills.storage.repos.SkillDefRepo
+import skills.tasks.config.TaskConfig
 import skills.tasks.data.ImportedSkillAchievement
 
 @Component
@@ -46,7 +48,19 @@ class ImportedSkillAchievementTaskExecutor implements VoidExecutionHandler<Impor
     void execute(TaskInstance<ImportedSkillAchievement> taskInstance, ExecutionContext executionContext) {
         def data = taskInstance.getData()
         log.debug("running imported skill achievement scheduled task for [{}-{}, {}]", data.projectId, data.skillId, data.userId)
-        SkillDefMin min = skillDefRepo.findSkillDefMinById(data.rawSkillId)
+        SkillDefMin min = getSkill(data.rawSkillId)
         importedSkillsAchievementsHandler.handleAchievementsForImportedSkills(data.userId, min, data.incomingSkillDate, data.thisRequestCompletedOriginalSkill)
+    }
+
+    private SkillDefMin getSkill(int id) {
+        try {
+            SkillDefMin min = skillDefRepo.findSkillDefMinById(id)
+            if (!min) {
+                throw new TaskConfig.DoNotRetryAsyncTaskException("Failed to find skillId with id=[${id}]")
+            }
+            return min
+        } catch (EmptyResultDataAccessException e) {
+            throw new TaskConfig.DoNotRetryAsyncTaskException(e)
+        }
     }
 }

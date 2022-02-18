@@ -950,6 +950,14 @@ class SkillsLoader {
                     .skillId(skillId)
                     .build()
         }
+        if (!skillDef.enabled?.equalsIgnoreCase("true")) {
+            throw new SkillExceptionBuilder()
+                    .msg("Skill with id [${skillId}] is not enabled")
+                    .userId(userId)
+                    .projectId(projectId)
+                    .skillId(skillId)
+                    .build()
+        }
         return skillDef
     }
 
