@@ -31,6 +31,10 @@ class InceptionSkills {
         res.addAll(getDashboardSubjectSkills())
         res.addAll(getSkillsSubjectSkills())
 
+        res.each {
+            it.enabled = "true"
+        }
+
         return res
     }
 
