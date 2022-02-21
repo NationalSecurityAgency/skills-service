@@ -179,6 +179,8 @@ class ClientDisplaySkillVersioningSpec extends DefaultIntSpec {
         skills.each { skillItem ->
             skillsService.assignSkillToBadge([projectId: project.projectId, badgeId: badge.badgeId, skillId: skillItem.skillId])
         }
+        badge.enabled = "true"
+        skillsService.createBadge(badge)
 
         skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId], userId, new Date())
         skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId], userId, new Date() - 1)

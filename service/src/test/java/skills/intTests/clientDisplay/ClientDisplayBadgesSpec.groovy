@@ -19,6 +19,7 @@ package skills.intTests.clientDisplay
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import spock.lang.IgnoreRest
 
 class ClientDisplayBadgesSpec extends DefaultIntSpec {
 
@@ -698,9 +699,9 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
 
         skillsService.createProject(proj2)
         skillsService.createSubject(proj2_subj)
-        skillsService.importSkillFromCatalog(proj2.projectId, proj2_subj.subjectId, proj1.projectId, proj1_skills[0].skillId)
+        skillsService.importSkillFromCatalogAndFinalize(proj2.projectId, proj2_subj.subjectId, proj1.projectId, proj1_skills[0].skillId)
         skillsService.createSkills(proj2_skills)
-        skillsService.importSkillFromCatalog(proj2.projectId, proj2_subj.subjectId, proj1.projectId, proj1_skills[1].skillId)
+        skillsService.importSkillFromCatalogAndFinalize(proj2.projectId, proj2_subj.subjectId, proj1.projectId, proj1_skills[1].skillId)
 
         def proj3 = SkillsFactory.createProject(3)
         def proj3_subj = SkillsFactory.createSubject(3, 3)
@@ -713,13 +714,13 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         skillsService.exportSkillToCatalog(proj3.projectId, proj3_skills[1].skillId)
 
         // import from project 3
-        skillsService.importSkillFromCatalog(proj2.projectId, proj2_subj.subjectId, proj3.projectId, proj3_skills[0].skillId)
+        skillsService.importSkillFromCatalogAndFinalize(proj2.projectId, proj2_subj.subjectId, proj3.projectId, proj3_skills[0].skillId)
 
         // import from project 2 again
-        skillsService.importSkillFromCatalog(proj2.projectId, proj2_subj.subjectId, proj1.projectId, proj1_skills[2].skillId)
+        skillsService.importSkillFromCatalogAndFinalize(proj2.projectId, proj2_subj.subjectId, proj1.projectId, proj1_skills[2].skillId)
 
         // import from project 3
-        skillsService.importSkillFromCatalog(proj2.projectId, proj2_subj.subjectId, proj3.projectId, proj3_skills[1].skillId)
+        skillsService.importSkillFromCatalogAndFinalize(proj2.projectId, proj2_subj.subjectId, proj3.projectId, proj3_skills[1].skillId)
 
         String badge1 = "badge1"
         Map badge = [projectId: proj2.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
@@ -729,6 +730,8 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         skillsService.assignSkillToBadge([projectId: proj2.projectId, badgeId: badge1, skillId: proj2_skills[1].skillId])
         skillsService.assignSkillToBadge([projectId: proj2.projectId, badgeId: badge1, skillId: proj1_skills[1].skillId])
         skillsService.assignSkillToBadge([projectId: proj2.projectId, badgeId: badge1, skillId: proj3_skills[1].skillId])
+        badge.enabled = "true"
+        skillsService.addBadge(badge)
 
         when:
         def summary = skillsService.getBadgeSummary("user1", proj2.projectId, badge1)
