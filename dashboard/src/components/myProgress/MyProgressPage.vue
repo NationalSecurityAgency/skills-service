@@ -33,7 +33,7 @@ limitations under the License.
           <b-button :to="{ name: 'DiscoverProjectsPage' }" variant="outline-primary" data-cy="manageMyProjsBtnInNoContent" class="animate__bounceIn"><i class="fas fa-cog" aria-hidden="true"/> Manage My Projects</b-button>
           </div>
           <div>
-          on the <b>top-right</b> to start adding adding projects to <b class="text-uppercase">My Projects</b> view.
+          on the <b>top-right</b> to start adding projects to <b class="text-uppercase">My Projects</b> view.
           </div>
         </b-card>
       </no-content2>

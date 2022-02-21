@@ -226,7 +226,9 @@ class SkillsAdminService {
                     numSkillsRequiredDelta = requestedNumSkillsRequired - currentNumSkillsRequired
                 }
 
-                if (Boolean.valueOf(skillDefinition.enabled) != Boolean.valueOf(skillRequest.enabled)) {
+                boolean enabledChanged = Boolean.valueOf(skillDefinition.enabled) != Boolean.valueOf(skillRequest.enabled)
+                boolean skillIdChanged = skillDefinition.skillId != skillRequest.skillId
+                if (enabledChanged || skillIdChanged) {
                     // validate that the Group's skills won't exceed the maximum allowed when publishing the group
                     if (Boolean.valueOf(skillRequest.enabled)) {
                         String parentSkillId = skillRequest.subjectId
@@ -235,8 +237,13 @@ class SkillsAdminService {
 
                         createdResourceLimitsValidator.validateNumSkillsCreated(groupSubject, groupChildSkills.size())
                     }
-                    // enabling or disabling, need to update child skills enabled to match the group value
-                    groupChildSkills.each { it.enabled = skillRequest.enabled }
+                    // need to update child skills:
+                    //   - enabling or disabling
+                    //   - skillId changed
+                    groupChildSkills.each {
+                        it.enabled = skillRequest.enabled
+                        it.groupId = skillRequest.skillId
+                    }
                     skillDefRepo.saveAll(groupChildSkills)
                 }
 

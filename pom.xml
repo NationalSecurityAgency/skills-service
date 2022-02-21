@@ -47,6 +47,7 @@
         <owasp.encoder.version>1.2.3</owasp.encoder.version>
 
         <log4j2.version>2.17.0</log4j2.version>
+        <micrometer-registry.version>1.8.1</micrometer-registry.version>
     </properties>
 
     <parent>
