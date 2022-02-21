@@ -127,14 +127,11 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         skillsService.exportSkillToCatalog(proj3.projectId, proj3_skills[0].skillId)
         skillsService.exportSkillToCatalog(proj3.projectId, proj3_skills[1].skillId)
 
-        // import from project 3
-        skillsService.importSkillFromCatalog(proj2.projectId, proj2_subj.subjectId, proj3.projectId, proj3_skills[0].skillId)
-
-        // import from project 2 again
-        skillsService.importSkillFromCatalog(proj2.projectId, proj2_subj.subjectId, proj1.projectId, proj1_skills[2].skillId)
-
-        // import from project 3
-        skillsService.importSkillFromCatalog(proj2.projectId, proj2_subj.subjectId, proj3.projectId, proj3_skills[1].skillId)
+        skillsService.bulkImportSkillsFromCatalogAndFinalize(proj2.projectId, proj2_subj.subjectId, [
+                [projectId: proj3.projectId, skillId: proj3_skills[0].skillId],
+                [projectId: proj1.projectId, skillId: proj1_skills[2].skillId],
+                [projectId: proj3.projectId, skillId: proj3_skills[1].skillId],
+                ])
 
         when:
         def summary = skillsService.getSkillSummary("user1", proj2.projectId, proj2_subj.subjectId)

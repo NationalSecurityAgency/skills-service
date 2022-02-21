@@ -2591,7 +2591,7 @@ class CatalogSkillTests extends CatalogIntSpec {
 
         skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
 
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
 
         def user = getRandomUsers(1)[0]
 
