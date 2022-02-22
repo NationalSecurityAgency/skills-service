@@ -45,6 +45,12 @@ limitations under the License.
           </b-button>
         </b-button-group>
       </div>
+      <div slot="footer" v-if="project && project.numSkillsDisabled > 0">
+        <div class="alert alert-warning mb-0 mt-1">
+          There are <b-badge variant="info">{{project.numSkillsDisabled}}</b-badge> imported skills in this project that are not yet finalized. Once you have finished importing the skills you are interested in,
+          <b-button variant="success"><i class="fas fa-check-double"></i> Finalize</b-button> the import to enable those skills. Click <a :href="dashboardSkillsCatalogGuide" target="_blank">here <i class="fas fa-external-link-alt"></i></a> to learn more.
+        </div>
+      </div>
     </page-header>
 
     <navigation v-if="!isLoading" :nav-items="[
@@ -145,6 +151,9 @@ limitations under the License.
         const gracePeriodInDays = this.$store.getters.config.expirationGracePeriod;
         const expires = dayjs(this.project.expirationTriggered).add(gracePeriodInDays, 'day').startOf('day');
         return expires.format('YYYY-MM-DD HH:mm');
+      },
+      dashboardSkillsCatalogGuide() {
+        return `${this.$store.getters.config.docsHost}/dashboard/user-guide/skills-groups.html`;
       },
     },
     methods: {

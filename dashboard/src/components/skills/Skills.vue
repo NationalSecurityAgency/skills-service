@@ -25,7 +25,7 @@ limitations under the License.
           <span class="">Import</span> <i class="fas fa-book" aria-hidden="true"/>
         </b-button>
         <b-button id="newGroupBtn" ref="newGroupButton" @click="newGroup" variant="outline-primary" size="sm"
-                  aria-label="new skills group"
+                  aria-label="new skills group" class="ml-1"
                   aria-describedby="newGroupSrText"
                   data-cy="newGroupButton" :aria-disabled="addSkillDisabled" :disabled="addSkillDisabled">
           <span class="">Group</span> <i class="fas fa-plus-circle" aria-hidden="true"/>

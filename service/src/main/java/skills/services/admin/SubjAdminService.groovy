@@ -175,7 +175,7 @@ class SubjAdminService {
         if (!skillDef) {
             throw new SkillException("Subject [${subjectId}] doesn't exist in project [${projectId}]", projectId, null, ErrorCode.SubjectNotFound)
         }
-        convertToSubject(skillDef)
+        convertToSubject(skillDef, true)
     }
 
     @Transactional(readOnly = true)
@@ -188,7 +188,7 @@ class SubjAdminService {
 
 
     @Profile
-    private SubjectResult convertToSubject(SkillDefWithExtra skillDef) {
+    private SubjectResult convertToSubject(SkillDefWithExtra skillDef, boolean loadDisabledCount = false) {
         SubjectResult res = new SubjectResult(
                 subjectId: skillDef.skillId,
                 projectId: skillDef.projectId,
@@ -202,7 +202,15 @@ class SubjAdminService {
 
         res.numSkills = calculateNumChildSkills(skillDef)
         res.numGroups = calculateNumGroups(skillDef)
+        if (loadDisabledCount) {
+            res.numSkillsDisabled = calculateNumSkillsDisabled(skillDef)
+        }
         return res
+    }
+
+    @Profile
+    private long calculateNumSkillsDisabled(SkillDefWithExtra skillDef) {
+        skillDefRepo.countChildSkillsByIdAndRelationshipTypeAndEnabled(skillDef.id, SkillRelDef.RelationshipType.RuleSetDefinition, "false")
     }
 
     @Transactional
@@ -221,7 +229,7 @@ class SubjAdminService {
 
     @Profile
     private long calculateNumChildSkills(SkillDefParent skillDef) {
-        long skillCount = skillDefRepo.countActiveChildSkillsByIdAndRelationshipType(skillDef.id, SkillRelDef.RelationshipType.RuleSetDefinition)
+        long skillCount = skillDefRepo.countChildSkillsByIdAndRelationshipTypeAndEnabled(skillDef.id, SkillRelDef.RelationshipType.RuleSetDefinition, "true")
         skillCount += skillDefRepo.countActiveGroupChildSkillsForSubject(skillDef.id)
         return skillCount
     }

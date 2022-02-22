@@ -455,6 +455,7 @@ class ProjAdminService {
         )
         res.numBadges = definition.numBadges
         res.numSkills = definition.numSkills
+        res.numSkillsDisabled = definition.getNumSkillsDisabled()
         res.numErrors = definition.numErrors
         res.lastReportedSkill = definition.lastReportedSkill
 

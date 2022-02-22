@@ -15,13 +15,12 @@
  */
 package skills.intTests.clientDisplay
 
+import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
-import org.junit.Ignore
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
-import spock.lang.IgnoreRest
 
 @Slf4j
 class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
@@ -665,6 +664,45 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         def summary = skillsService.getBadgeSummary(userId, proj1.projectId, globalBadgeId, -1, true)
         then:
         summary.skills.collect { it.skill } == ["asome", "Dsome", "ksome", "lsome", "Zsome"]
+    }
+
+    def "disabled global badge must not show up on the badges summary"() {
+
+        String userId = "user1"
+
+        def proj1 = SkillsFactory.createProject(1)
+        def proj2 = SkillsFactory.createProject(2)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        def proj2_subj = SkillsFactory.createSubject(2, 2)
+        List<Map> proj1_skills = SkillsFactory.createSkills(2, 1, 1, 50)
+        List<Map> proj2_skills = SkillsFactory.createSkills(2, 2, 2, 50)
+
+        skillsService.createProject(proj1)
+        skillsService.createProject(proj2)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSubject(proj2_subj)
+        skillsService.createSkills(proj1_skills)
+        skillsService.createSkills(proj2_skills)
+
+        Map badge = [badgeId: "bid1", name: "global badge", description: "gbadge".toString(), iconClass: "fa fa-foo".toString(),]
+        supervisorSkillsService.createGlobalBadge(badge)
+
+        supervisorSkillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: "bid1", skillId: proj1_skills.get(0).skillId])
+        supervisorSkillsService.assignSkillToGlobalBadge([projectId: proj2.projectId, badgeId: "bid1", skillId: proj2_skills.get(0).skillId])
+
+        when:
+        def summaries = skillsService.getBadgesSummary(userId, proj1.projectId)
+        println JsonOutput.prettyPrint(JsonOutput.toJson(summaries))
+
+        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], userId, new Date())
+        badge.enabled = "true"
+        supervisorSkillsService.createGlobalBadge(badge)
+
+        def summariesAfterEnable = skillsService.getBadgesSummary(userId, proj1.projectId)
+
+        then:
+        !summaries.find { it.badgeId == badge.badgeId }
+        summariesAfterEnable.find { it.badgeId == badge.badgeId }
     }
 
     private deleteGlobalBadgeIfExists(String badgeId) {

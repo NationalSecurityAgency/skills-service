@@ -74,6 +74,16 @@ class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
 
         projectPostFinalize.totalPoints == 750
         subjectPostFinalize.totalPoints == 750
+
+        subjectPreImport.numSkillsDisabled == 0
+        subjectPostImport1.numSkillsDisabled == 1
+        subjectPostImport2.numSkillsDisabled == 2
+        subjectPostFinalize.numSkillsDisabled == 0
+
+        projectPreImport.numSkillsDisabled == 0
+        projectPostImport1.numSkillsDisabled == 1
+        projectPostImport2.numSkillsDisabled == 2
+        projectPostFinalize.numSkillsDisabled == 0
     }
 
     def "import skill from catalog - multiple subjects - multiple projects - multiple skills"() {

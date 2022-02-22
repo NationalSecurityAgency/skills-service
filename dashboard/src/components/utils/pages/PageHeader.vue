@@ -48,6 +48,7 @@ limitations under the License.
               </div>
             </div>
           </div>
+          <slot name="footer"></slot>
         </div>
       </loading-container>
     </div>

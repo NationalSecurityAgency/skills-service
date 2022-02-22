@@ -43,6 +43,7 @@ import { addMatchImageSnapshotCommand } from 'cypress-image-snapshot/command';
 import "cypress-audit/commands";
 import './cliend-display-commands';
 import 'cypress-file-upload';
+import 'cypress-wait-until';
 import LookupUtil from "./LookupUtil.js";
 var moment = require('moment-timezone');
 
@@ -170,9 +171,35 @@ Cypress.Commands.add("exportSkillToCatalog", (projNum = 1, subjNum = 1, skillNum
 });
 
 Cypress.Commands.add("importSkillFromCatalog", (projNum = 2, subjNum = 1, fromProjNum = 1, fromSkillNum = 1) => {
-    const url = `/admin/projects/proj${projNum}/subjects/subj${subjNum}/import`;
-    cy.request('POST', url, [{ projectId: `proj${fromProjNum}`, skillId: `skill${fromSkillNum}` }]);
+    cy.bulkImportSkillFromCatalog(projNum, subjNum, [{ projNum: fromProjNum, skillNum: fromSkillNum}])
 });
+
+Cypress.Commands.add("bulkImportSkillFromCatalog", (projNum = 2, subjNum = 1, projNumAndSkillsNumList) => {
+    const url = `/admin/projects/proj${projNum}/subjects/subj${subjNum}/import`;
+    const params = projNumAndSkillsNumList.map((item) => {
+        return {
+            projectId: `proj${item.projNum}`,
+            skillId: `skill${item.skillNum}`
+        };
+    });
+    cy.request('POST', url, params);
+});
+
+Cypress.Commands.add("bulkImportSkillFromCatalogAndFinalize", (projNum = 2, subjNum = 1, projNumAndSkillsNumList) => {
+    cy.bulkImportSkillFromCatalog(projNum, subjNum, projNumAndSkillsNumList)
+    cy.finalizeCatalogImport(projNum)
+});
+
+Cypress.Commands.add("finalizeCatalogImport", (projNum = 1) => {
+    const url = `/admin/projects/proj${projNum}/catalog/finalize`;
+    cy.request('POST', url);
+
+    cy.waitUntil(() => cy.request('/admin/projects/proj1/settings/FinalizeState').then((response) => response.body.value === "COMPLETED"), {
+        timeout: 60000, // waits up to 1 minutes
+        interval: 500 // performs the check every 500 ms, default to 200
+    });
+});
+
 
 Cypress.Commands.add("acceptRemovalSafetyCheck", () => {
     cy.contains('Delete Action CANNOT be undone');
@@ -508,6 +535,24 @@ Cypress.Commands.add('clearDb', () => {
         cy.exec('npm run backend:clearDb')
     }
 });
+
+Cypress.Commands.add('waitForBackendAsyncTasksToComplete', () => {
+    const db = LookupUtil.getDb();
+
+    const waitConf = {
+        timeout: 60000, // waits up to 1 minutes
+        interval: 500 // performs the check every 500 ms, default to 200
+    };
+
+    // first call to npm fails, looks like this may be the bug: https://github.com/cypress-io/cypress/issues/6081
+    cy.exec('npm version', {failOnNonZeroExit: false})
+    if (db && db === 'postgres') {
+        cy.waitUntil(() => cy.exec('npm run backend:countScheduledTasks:postgres').then((result) => result.stdout.match(/.*------\s+(\d+)\s+\(/)[1] === '0'), waitConf);
+    } else {
+        cy.waitUntil(() => cy.exec('npm run backend:countScheduledTasks').then((result) => result.stdout.match(/.*-->\s+(\d+)\s+\;/)[1] === '0'), waitConf);
+    }
+});
+
 
 Cypress.Commands.add('clickNav', (navName) => {
     cy.get(`[data-cy="nav-${navName}"]`).click()

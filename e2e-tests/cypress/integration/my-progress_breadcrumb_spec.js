@@ -67,7 +67,14 @@ describe('My Progress Breadcrumb Tests', () => {
     cy.request('POST', '/admin/projects/proj1/badges/badge1', {
       projectId: 'proj1',
       badgeId: 'badge1',
-      name: 'Badge 1'
+      name: 'Badge 1',
+    });
+    cy.request('POST', `/admin/projects/proj1/badge/badge1/skills/skill1`)
+    cy.request('POST', '/admin/projects/proj1/badges/badge1', {
+      projectId: 'proj1',
+      badgeId: 'badge1',
+      name: 'Badge 1',
+      enabled: 'true',
     });
 
     cy.request('POST', '/admin/projects/proj1/badges/gemBadge', {
@@ -78,6 +85,15 @@ describe('My Progress Breadcrumb Tests', () => {
       endDate: dateFormatter(new Date() + 1000 * 60 * 60 * 24 * 5),
     });
 
+    cy.request('POST', '/admin/projects/proj1/badge/gemBadge/skills/skill1')
+    cy.request('POST', '/admin/projects/proj1/badges/gemBadge', {
+      projectId: 'proj1',
+      badgeId: 'gemBadge',
+      name: 'Gem Badge',
+      startDate: dateFormatter(new Date() - 1000 * 60 * 60 * 24 * 7),
+      endDate: dateFormatter(new Date() + 1000 * 60 * 60 * 24 * 5),
+      enabled: 'true',
+    });
     cy.request('POST', '/admin/projects/proj1/badge/gemBadge/skills/skill1')
 
     cy.createProject(2);
@@ -109,6 +125,7 @@ describe('My Progress Breadcrumb Tests', () => {
     cy.assignSkillToGlobalBadge(1, 2)
     cy.assignSkillToGlobalBadge(1, 3)
     cy.assignSkillToGlobalBadge(1, 4)
+    cy.enableGlobalBadge(1)
 
     cy.request('POST', '/admin/projects/Inception/settings/production.mode.enabled', {
       projectId: 'Inception',

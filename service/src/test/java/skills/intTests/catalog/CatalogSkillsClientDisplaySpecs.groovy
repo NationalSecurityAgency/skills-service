@@ -16,7 +16,11 @@
 package skills.intTests.catalog
 
 import groovy.json.JsonOutput
+import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.SkillsClientException
+import skills.storage.model.SkillDef
+import skills.storage.repos.UserPointsRepo
+import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -83,5 +87,31 @@ class CatalogSkillsClientDisplaySpecs extends CatalogIntSpec {
         then:
         SkillsClientException e = thrown(SkillsClientException)
         e.resBody.contains("Skill with id [skill1] is not enabled")
+    }
+
+    def "user points are reflected in the imported skills after being reported via Honor System"() {
+        def project1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1_skills = (1..3).collect { createSkill(1, 1, it, 0, 5, 0, 250) }
+        p1_skills.each { it.selfReportingType = SkillDef.SelfReportingType.HonorSystem }
+        skillsService.createProjectAndSubjectAndSkills(project1, p1subj1, p1_skills)
+        p1_skills.each { skillsService.exportSkillToCatalog(project1.projectId, it.skillId) }
+
+        def project2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def p2_skills = (1..3).collect { createSkill(2, 1, 3 + it, 0, 5, 0, 250) }
+        skillsService.createProjectAndSubjectAndSkills(project2, p2subj1, p2_skills)
+
+        skillsService.bulkImportSkillsFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, p1_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
+
+        String user = getRandomUsers(1)[0]
+        when:
+        def addSkill1 = skillsService.addSkill([projectId: project2.projectId, skillId: p1_skills[0].skillId], user)
+        assert addSkill1.body.explanation == "Skill event was applied"
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        def res1 = skillsService.getSkillSummary(user, project2.projectId, p2subj1.subjectId)
+        then:
+        res1.points == 250
+        res1.skills.find { it.skillId == p1_skills[0].skillId}.points == 250
     }
 }

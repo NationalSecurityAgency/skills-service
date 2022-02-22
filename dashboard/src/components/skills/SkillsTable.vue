@@ -122,6 +122,10 @@ limitations under the License.
                     <b-badge variant="success" class="text-uppercase" :data-cy="`importedBadge-${data.item.skillId}`">
                       <span><i class="fas fa-book"></i> Imported</span>
                     </b-badge>
+                    <b-badge v-if="!data.item.enabled" variant="" class="text-uppercase ml-1"
+                             :data-cy="`disabledBadge-${data.item.skillId}`">
+                      <span><i class="fas fa-book"></i> Disabled</span>
+                    </b-badge>
                   </div>
                 </div>
               </div>
