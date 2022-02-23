@@ -94,7 +94,6 @@ describe('My Progress Breadcrumb Tests', () => {
       endDate: dateFormatter(new Date() + 1000 * 60 * 60 * 24 * 5),
       enabled: 'true',
     });
-    cy.request('POST', '/admin/projects/proj1/badge/gemBadge/skills/skill1')
 
     cy.createProject(2);
     cy.enableProdMode(2);
