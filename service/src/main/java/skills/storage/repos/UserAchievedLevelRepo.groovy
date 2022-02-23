@@ -180,7 +180,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
     int countAchievedGlobalSkills(String userId, String skillId, SkillRelDef.RelationshipType type)
 
 
-    @Query(value = '''select new skills.storage.model.DayCountItem(ua.created, count(ua))
+    @Query(value = '''select ua.created as day, count(ua) as count
       from SkillDef skillDef, UserAchievement ua 
       where 
         ua.level is null and 
@@ -406,7 +406,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
             @Param("skillId") String skillId
     )
 
-    @Query('''select new skills.storage.model.DayCountItem(ua.achievedOn, count(ua.id))
+    @Query('''select ua.achievedOn as day, count(ua.id) as count
             from UserAchievement as ua 
             where 
                 ua.skillId = :skillId and

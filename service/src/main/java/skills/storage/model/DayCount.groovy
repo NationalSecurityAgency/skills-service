@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 SkillTree
+ * Copyright 2022 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,19 @@
  */
 package skills.storage.model
 
-import groovy.transform.ToString
+class DayCount implements DayCountItem{
+    Date day
+    Long count
+    String projectId // optional, used when counting items for multiple projects in the same query
 
-interface DayCountItem {
-    Date getDay()
-    Long getCount()
-    String getProjectId() // optional, used when counting items for multiple projects in the same query
+    DayCount(Date day, Long count){
+        this.day = day
+        this.count = count
+    }
+
+    DayCount(String projectId, Date day, Long count){
+        this.projectId = projectId
+        this.day = day
+        this.count = count
+    }
 }

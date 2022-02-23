@@ -15,10 +15,8 @@
  */
 package skills.storage.model
 
-import groovy.transform.ToString
-
-interface DayCountItem {
-    Date getDay()
+interface WeekCountItem {
+    Integer getWeekNumber()
     Long getCount()
     String getProjectId() // optional, used when counting items for multiple projects in the same query
 }

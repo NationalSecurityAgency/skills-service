@@ -178,6 +178,73 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         resOver30days.collect {it.value} == [days[0].minus(7), *days].collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
     }
 
+    def "number of users growing over few days - include skills imported from catalog"() {
+        List<String> users = getRandomUsers(10)
+        def proj = SkillsFactory.createProject()
+        def proj2 = SkillsFactory.createProject(2)
+        def proj1_subj1 = SkillsFactory.createSubject(1, 1)
+        List<Map> skills = SkillsFactory.createSkills(9)
+        def proj2_subj1 = SkillsFactory.createSubject(2, 1)
+        def proj2_skill1 = SkillsFactory.createSkill(2, 1, 99)
+        proj2_skill1.pointIncrement = 100
+        proj2_skill1.numPerformToCompletion = 10
+
+        skills.each { it.pointIncrement = 100; it.numPerformToCompletion = 10 }
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(proj1_subj1)
+        skillsService.createSkills(skills)
+
+        skillsService.createProject(proj2)
+        skillsService.createSubject(proj2_subj1)
+        skillsService.createSkill(proj2_skill1)
+        skillsService.exportSkillToCatalog(proj2.projectId, proj2_skill1.skillId)
+        skillsService.importSkillFromCatalog(proj.projectId, proj1_subj1.subjectId, proj2.projectId, proj2_skill1.skillId)
+        skills.add([skillId: proj2_skill1.skillId])
+
+        List<Date> days
+
+        TestDates testDates = new TestDates()
+
+        days = [
+                testDates.getDateInPreviousWeek().minusDays(28).toDate(),
+                testDates.getDateInPreviousWeek().minusDays(21).toDate(),
+                testDates.getDateInPreviousWeek().minusDays(14).toDate(),
+                testDates.getDateInPreviousWeek().minusDays(7).toDate(),
+                testDates.getDateInPreviousWeek().toDate(),
+                testDates.getDateWithinCurrentWeek().toDate(),
+        ]
+
+        use(TimeCategory) {
+            days.eachWithIndex { Date date, int index ->
+                users.subList(0, index).each { String user ->
+                    skills.subList(0, index).each { skill ->
+                        skillsService.addSkill([projectId: proj.projectId, skillId: skill.skillId], user, date)
+                    }
+                }
+            }
+        }
+
+        assert maxDailyDays == 3, "test data constructed with the assumption that skills.config.compactDailyEventsOlderThan is set to 3"
+        userEventService.compactDailyEvents()
+
+        Duration duration = Duration.between(testDates.getDateInPreviousWeek().minusDays(28), LocalDateTime.now())
+
+        when:
+        def res30days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(duration.toDays().toInteger()))
+        def resOver30days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(duration.toDays().toInteger()+14))
+
+        then:
+
+        res30days.size() == 5
+        res30days.collect {it.count} == [1, 2, 3, 4, 5]
+        res30days.collect {it.value} == days.subList(1, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+
+        resOver30days.size() == 7
+        resOver30days.collect {it.count} == [0, 0, 1, 2, 3, 4, 5]
+        resOver30days.collect {it.value} == [days[0].minus(7), *days].collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+    }
+
     def "number of users growing over few days - specific skill"() {
         List<String> users = getRandomUsers(10)
         def proj = SkillsFactory.createProject()

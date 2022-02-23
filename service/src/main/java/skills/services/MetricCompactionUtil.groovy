@@ -17,16 +17,17 @@ package skills.services
 
 import skills.storage.model.DayCountItem
 import skills.storage.model.EventType
+import skills.storage.model.DayCount
 
 class MetricCompactionUtil {
 
     static List<DayCountItem> manuallyCompactDaily(List<DayCountItem> dailyMetrics) {
-        Map<Date, DayCountItem> compact = [:]
+        Map<Date, DayCount> compact = [:]
         dailyMetrics.each{
             Date start = StartDateUtil.computeStartDate(it.day, EventType.WEEKLY)
-            DayCountItem aggregate = compact.get(start)
+            DayCount aggregate = compact.get(start)
             if (!aggregate) {
-                aggregate = new DayCountItem(start, 0)
+                aggregate = new DayCount(start, 0)
                 compact.put(start, aggregate)
             }
             aggregate.count += it.count

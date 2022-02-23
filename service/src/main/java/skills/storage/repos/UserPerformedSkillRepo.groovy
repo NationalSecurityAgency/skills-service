@@ -71,7 +71,7 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
     List<SkillDef> findPerformedParentSkills(String userId, String projectId, String skillId)
 
     @Nullable
-    @Query('''select new skills.storage.model.DayCountItem(CAST(ups.performedOn as date), SUM(sdChild.pointIncrement))
+    @Query('''select CAST(ups.performedOn as date) as day, SUM(sdChild.pointIncrement) as count
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild, UserPerformedSkill ups
       where
           sdParent.projectId = :projectId and
@@ -98,7 +98,7 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
                                                                            @Nullable @Param('skillId') String skillId,
                                                                            @Param('version') Integer version)
 
-    @Query('''select new skills.storage.model.DayCountItem(CAST(ups.performedOn as date), count(ups.id))
+    @Query('''select CAST(ups.performedOn as date) as day, count(ups.id) as count
         from UserPerformedSkill ups
         where
         ups.projectId = :projectId and
@@ -107,7 +107,7 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
     ''')
     List<DayCountItem> countsByDay(@Param('projectId') String projectId, @Param('skillId') String skillId)
 
-    @Query('''select new skills.storage.model.DayCountItem(CAST(ups.performedOn as date), count(ups.id))
+    @Query('''select CAST(ups.performedOn as date) as day, count(ups.id) as count
         from UserPerformedSkill ups
         where
         ups.projectId = :projectId and

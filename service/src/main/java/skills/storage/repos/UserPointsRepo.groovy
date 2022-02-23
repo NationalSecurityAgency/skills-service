@@ -384,12 +384,12 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
         Integer getAchievementId()
     }
 
-    @Query('''select new skills.storage.model.DayCountItem(up.day, count(up))
+    @Query('''select up.day as day, count(up) as count
     from UserPoints up where up.projectId=?1 and up.day>=?2 and up.skillId is null and up.day is not null group by up.day
     ''')
     List<DayCountItem> findDistinctUserCountsByProject(String projectId, Date mustBeAfterThisDate)
 
-    @Query('''select new skills.storage.model.DayCountItem(up.day, count(up))
+    @Query('''select up.day as day, count(up) as count
     from UserPoints up where up.projectId=?1 and up.skillId=?2 and up.day>=?3 and up.day is not null group by up.day
     ''')
     List<DayCountItem> findDistinctUserCountsBySkillId(String projectId, String skillId, Date mustBeAfterThisDate)
