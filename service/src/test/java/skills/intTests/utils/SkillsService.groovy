@@ -494,6 +494,19 @@ class SkillsService {
         }
     }
 
+    @Profile
+    def bulkAddSkill(Map props, List<String> userIds, Date date) {
+        userIds = userIds.collect { getUserId(it, false) }
+        assert date
+        return wsHelper.adminPost("/projects/${props.projectId}/skills/${props.skillId}", [ userIds : userIds, timestamp:date.time])
+    }
+
+    @Profile
+    def bulkAddSkill(Map props, List<String> userIds, Long timestamp) {
+        userIds = userIds.collect { getUserId(it, false) }
+        return wsHelper.adminPost("/projects/${props.projectId}/skills/${props.skillId}", [ userIds : userIds, timestamp: timestamp])
+    }
+
     def getApprovals(String projectId, int limit, int page, String orderBy, Boolean ascending) {
         return wsHelper.adminGet("/projects/${projectId}/approvals?limit=${limit}&page=${page}&orderBy=${orderBy}&ascending=${ascending}")
     }
@@ -1300,7 +1313,7 @@ class SkillsService {
             }
             String dn = certificateRegistry.loadDNFromCert(cert)
 //            dn = StringHelpers.slugify.apply(dn, handlebarOptions)
-            return dn
+            return dn ?: userId
         }
     }
 
