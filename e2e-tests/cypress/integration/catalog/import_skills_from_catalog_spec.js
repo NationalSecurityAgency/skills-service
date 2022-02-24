@@ -452,6 +452,67 @@ describe('Import skills from Catalog Tests', () => {
         cy.get('[data-cy="skillsSelectionItem-proj2-skill1"]').click() // imported skill
     })
 
+    it.only('imported skills are disabled and finalization alert is displayed', () => {
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1);
+        cy.createSkill(2, 1, 2);
+
+        cy.exportSkillToCatalog(2, 1, 1);
+        cy.exportSkillToCatalog(2, 1, 2);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.get('[data-cy="importFromCatalogBtn"]').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Very Great Skill 1' }, { colIndex: 1,  value: 'ID: proj2' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 2' }, { colIndex: 1,  value: 'ID: proj2' }],
+        ], 5);
+
+        cy.get('[data-cy="importBtn"]').should('be.disabled');
+        cy.get('[data-cy="skillSelect_proj2-skill1"]').check({force: true})
+        cy.get('[data-cy="skillSelect_proj2-skill2"]').check({force: true})
+        cy.get('[data-cy="importBtn"]').should('be.enabled');
+
+        cy.get('[data-cy="importBtn"]').click();
+        cy.get('[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '2');
+        cy.get('[data-cy="disabledBadge-skill2"]')
+        cy.get('[data-cy="disabledBadge-skill1"]')
+        cy.get('[data-cy="importFinalizeAlert"]').contains('There are 2 imported skills in this subject that are not yet finalized.')
+
+        // refresh at subject level and validate
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '2');
+        cy.get('[data-cy="disabledBadge-skill2"]')
+        cy.get('[data-cy="disabledBadge-skill1"]')
+        cy.get('[data-cy="importFinalizeAlert"]').contains('There are 2 imported skills in this subject that are not yet finalized.')
+
+        // navigate app to a project and validate
+        cy.get('[data-cy="breadcrumb-proj1"]').click()
+        cy.get('[data-cy="importFinalizeAlert"]').contains('There are 2 imported skills in this project that are not yet finalized.')
+
+        // refresh at project level and validate
+        cy.visit('/administrator/projects/proj1');
+        cy.get('[data-cy="importFinalizeAlert"]').contains('There are 2 imported skills in this project that are not yet finalized.')
+
+        // navigate down from the project and validate
+        cy.get('[data-cy="manageBtn_subj1"]').click()
+        cy.get('[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '2');
+        cy.get('[data-cy="disabledBadge-skill2"]')
+        cy.get('[data-cy="disabledBadge-skill1"]')
+        cy.get('[data-cy="importFinalizeAlert"]').contains('There are 2 imported skills in this subject that are not yet finalized.')
+
+        // navigate down from projects and validate
+        cy.visit('/administrator')
+        cy.get('[data-cy="projCard_proj1_manageBtn"]').click()
+        cy.get('[data-cy="importFinalizeAlert"]').contains('There are 2 imported skills in this project that are not yet finalized.')
+        cy.get('[data-cy="manageBtn_subj1"]').click()
+        cy.get('[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '2');
+        cy.get('[data-cy="disabledBadge-skill2"]')
+        cy.get('[data-cy="disabledBadge-skill1"]')
+        cy.get('[data-cy="importFinalizeAlert"]').contains('There are 2 imported skills in this subject that are not yet finalized.')
+    });
+
 });
 
 

@@ -451,7 +451,8 @@ class ProjAdminService {
                 pinned: pinnedProjectIds?.contains(definition.getProjectId()),
                 created: definition.getCreated(),
                 expiring: definition.getExpiring(),
-                expirationTriggered: definition.getExpirationTriggered()
+                expirationTriggered: definition.getExpirationTriggered(),
+                numSkillsDisabled: definition.getNumSkillsDisabled()
         )
         res.numBadges = definition.numBadges
         res.numSkills = definition.numSkills

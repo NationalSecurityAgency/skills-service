@@ -181,7 +181,7 @@ class SubjAdminService {
     @Transactional(readOnly = true)
     List<SubjectResult> getSubjects(String projectId) {
         List<SkillDefWithExtra> subjects = skillDefWithExtraRepo.findAllByProjectIdAndType(projectId, SkillDef.ContainerType.Subject)
-        List<SubjectResult> res = subjects.collect { convertToSubject(it) }
+        List<SubjectResult> res = subjects.collect { convertToSubject(it, true) }
         calculatePercentages(res)
         return res?.sort({ it.displayOrder })
     }

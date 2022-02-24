@@ -28,10 +28,7 @@ limitations under the License.
         </b-button>
       </div>
       <div slot="footer" v-if="subject && subject.numSkillsDisabled > 0">
-        <div class="alert alert-warning mb-0 mt-1">
-          There are <b-badge variant="info">{{subject.numSkillsDisabled}}</b-badge> imported skills in this subject that are not yet finalized. Once you have finished importing the skills you are interested in,
-          <b-button variant="success"><i class="fas fa-check-double"></i> Finalize</b-button> the import to enable those skills. Click <a :href="dashboardSkillsCatalogGuide" target="_blank">here <i class="fas fa-external-link-alt"></i></a> to learn more.
-        </div>
+        <import-finalize-alert :num-disabled-skills="subject.numSkillsDisabled" type="subject" />
       </div>
     </page-header>
 
@@ -52,6 +49,7 @@ limitations under the License.
 
 <script>
   import { createNamespacedHelpers } from 'vuex';
+  import ImportFinalizeAlert from '@/components/skills/catalog/ImportFinalizeAlert';
   import Navigation from '../utils/Navigation';
   import PageHeader from '../utils/pages/PageHeader';
   import EditSubject from './EditSubject';
@@ -62,6 +60,7 @@ limitations under the License.
   export default {
     name: 'SubjectPage',
     components: {
+      ImportFinalizeAlert,
       PageHeader,
       Navigation,
       EditSubject,
@@ -112,9 +111,6 @@ limitations under the License.
       },
       minimumPoints() {
         return this.$store.getters.config.minimumSubjectPoints;
-      },
-      dashboardSkillsCatalogGuide() {
-        return `${this.$store.getters.config.docsHost}/dashboard/user-guide/skills-groups.html`;
       },
     },
     watch: {

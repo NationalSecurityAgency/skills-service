@@ -52,17 +52,27 @@ class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
 
         when:
         def projectPreImport = skillsService.getProject(project2.projectId)
+        def projectsPreImport = skillsService.getProjects()
         def subjectPreImport = skillsService.getSubject(p2subj1)
+        def subjectsPreImport = skillsService.getSubjects(project2.projectId)
+
         skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
         def projectPostImport1 = skillsService.getProject(project2.projectId)
+        def projectsPostImport1 = skillsService.getProjects()
         def subjectPostImport1 = skillsService.getSubject(p2subj1)
+        def subjectsPostImport1 = skillsService.getSubjects(project2.projectId)
+
         skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill2.skillId)
         def projectPostImport2 = skillsService.getProject(project2.projectId)
+        def projectsPostImport2 = skillsService.getProjects()
         def subjectPostImport2 = skillsService.getSubject(p2subj1)
+        def subjectsPostImport2 = skillsService.getSubjects(project2.projectId)
 
         skillsService.finalizeSkillsImportFromCatalog(project2.projectId)
         def projectPostFinalize = skillsService.getProject(project2.projectId)
+        def projectsPostFinalize = skillsService.getProjects()
         def subjectPostFinalize = skillsService.getSubject(p2subj1)
+        def subjectsPostFinalize = skillsService.getSubjects(project2.projectId)
 
         then:
         projectPreImport.totalPoints == 250
@@ -84,6 +94,20 @@ class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
         projectPostImport1.numSkillsDisabled == 1
         projectPostImport2.numSkillsDisabled == 2
         projectPostFinalize.numSkillsDisabled == 0
+
+        subjectsPreImport[0].numSkillsDisabled == 0
+        subjectsPostImport1[0].numSkillsDisabled == 1
+        subjectsPostImport2[0].numSkillsDisabled == 2
+        subjectsPostFinalize[0].numSkillsDisabled == 0
+
+        projectsPreImport.find({ it.projectId == project1.projectId }).numSkillsDisabled == 0
+        projectsPreImport.find({ it.projectId == project2.projectId }).numSkillsDisabled == 0
+        projectsPostImport1.find({ it.projectId == project1.projectId }).numSkillsDisabled == 0
+        projectsPostImport1.find({ it.projectId == project2.projectId }).numSkillsDisabled == 1
+        projectsPostImport2.find({ it.projectId == project1.projectId }).numSkillsDisabled == 0
+        projectsPostImport2.find({ it.projectId == project2.projectId }).numSkillsDisabled == 2
+        projectsPostFinalize.find({ it.projectId == project1.projectId }).numSkillsDisabled == 0
+        projectsPostFinalize.find({ it.projectId == project2.projectId }).numSkillsDisabled == 0
     }
 
     def "import skill from catalog - multiple subjects - multiple projects - multiple skills"() {
