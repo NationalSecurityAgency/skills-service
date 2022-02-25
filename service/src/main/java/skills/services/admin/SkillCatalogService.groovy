@@ -274,6 +274,12 @@ class SkillCatalogService {
          skillCatalogFinalizationService.requestFinalizationOfImportedSkills(projectId)
     }
 
+    CatalogFinalizeInfoResult getFinalizeInfo(String projectId) {
+        int numDisabled = skillDefRepo.countByProjectIdAndEnabled(projectId, Boolean.FALSE.toString())
+
+        return new CatalogFinalizeInfoResult(projectId: projectId, numSkillsToFinalize: numDisabled)
+    }
+
     @Profile
     @Transactional(readOnly=true)
     boolean isAvailableInCatalog(String projectId, String skillId) {

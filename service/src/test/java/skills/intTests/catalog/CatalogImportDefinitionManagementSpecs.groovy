@@ -16,10 +16,8 @@
 package skills.intTests.catalog
 
 import groovy.json.JsonOutput
-import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
-import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -307,5 +305,24 @@ class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
         then:
         SkillsClientException e = thrown(SkillsClientException)
         e.message.contains("Skill [skill11] is not enabled")
+    }
+
+    def "retrieve finalization info"() {
+        def project1 = createProjWithCatalogSkills(1)
+        def project2 = createProjWithCatalogSkills(2)
+
+        when:
+        def res0 = skillsService.getCatalogFinalizeInfo(project2.p.projectId)
+        skillsService.importSkillFromCatalog(project2.p.projectId, project1.s2.subjectId, project1.p.projectId, project1.s1_skills[0].skillId)
+        def res1 = skillsService.getCatalogFinalizeInfo(project2.p.projectId)
+        skillsService.importSkillFromCatalog(project2.p.projectId, project1.s2.subjectId, project1.p.projectId, project1.s1_skills[1].skillId)
+        def res2 = skillsService.getCatalogFinalizeInfo(project2.p.projectId)
+        skillsService.finalizeSkillsImportFromCatalog(project2.p.projectId)
+        def res3 = skillsService.getCatalogFinalizeInfo(project2.p.projectId)
+        then:
+        res0.numSkillsToFinalize == 0
+        res1.numSkillsToFinalize == 1
+        res2.numSkillsToFinalize == 2
+        res3.numSkillsToFinalize == 0
     }
 }

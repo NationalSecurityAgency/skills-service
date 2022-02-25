@@ -452,7 +452,7 @@ describe('Import skills from Catalog Tests', () => {
         cy.get('[data-cy="skillsSelectionItem-proj2-skill1"]').click() // imported skill
     })
 
-    it.only('imported skills are disabled and finalization alert is displayed', () => {
+    it('imported skills are disabled and finalization alert is displayed', () => {
         cy.createProject(2);
         cy.createSubject(2, 1);
         cy.createSkill(2, 1, 1);
@@ -511,6 +511,237 @@ describe('Import skills from Catalog Tests', () => {
         cy.get('[data-cy="disabledBadge-skill2"]')
         cy.get('[data-cy="disabledBadge-skill1"]')
         cy.get('[data-cy="importFinalizeAlert"]').contains('There are 2 imported skills in this subject that are not yet finalized.')
+    });
+
+    it('finalize imported skills', () => {
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1);
+        cy.createSkill(2, 1, 2);
+
+        cy.exportSkillToCatalog(2, 1, 1);
+        cy.exportSkillToCatalog(2, 1, 2);
+
+        cy.bulkImportSkillFromCatalog(1, 1, [
+            { projNum: 2, skillNum: 1 },
+            { projNum: 2, skillNum: 2 },
+        ])
+
+        cy.visit('/administrator/projects/proj1')
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').click();
+        cy.get('[data-cy="doPerformFinalizeButton"]').should('be.enabled');
+        cy.get('[data-cy="finalizeCancelButton"]').should('be.enabled');
+
+        cy.get('[data-cy="doPerformFinalizeButton"]').click()
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').should('not.exist');
+        cy.get('[data-cy="importFinalizeAlert"]').contains('Finalizing 2 imported skills')
+        cy.waitForBackendAsyncTasksToComplete();
+        cy.get('[data-cy="importFinalizeAlert"]').contains('Successfully finalized 2 imported skills!')
+
+        // drill down and make sure alert is gone
+        cy.get('[data-cy="manageBtn_subj1"]').click();
+        cy.contains('Very Great Skill 2');
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').should('not.exist');
+        cy.get('[data-cy="disabledBadge-skill2"]').should('not.exist')
+        cy.get('[data-cy="disabledBadge-skill1"]').should('not.exist')
+    });
+
+    it('finalize imported skills - refresh after initiating finalize', () => {
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1);
+        cy.createSkill(2, 1, 2);
+
+        cy.exportSkillToCatalog(2, 1, 1);
+        cy.exportSkillToCatalog(2, 1, 2);
+
+        cy.bulkImportSkillFromCatalog(1, 1, [
+            { projNum: 2, skillNum: 1 },
+            { projNum: 2, skillNum: 2 },
+        ])
+
+        cy.visit('/administrator/projects/proj1')
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').click();
+        cy.get('[data-cy="doPerformFinalizeButton"]').should('be.enabled');
+        cy.get('[data-cy="finalizeCancelButton"]').should('be.enabled');
+
+        cy.get('[data-cy="doPerformFinalizeButton"]').click()
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').should('not.exist');
+        cy.get('[data-cy="importFinalizeAlert"]').contains('Finalizing 2 imported skills')
+
+        // refresh
+        cy.visit('/administrator/projects/proj1')
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').should('not.exist');
+        cy.get('[data-cy="importFinalizeAlert"]').contains('Finalizing 2 imported skills')
+
+        cy.waitForBackendAsyncTasksToComplete();
+        cy.get('[data-cy="importFinalizeAlert"]').contains('Successfully finalized 2 imported skills!')
+
+        // drill down and make sure alert is gone
+        cy.get('[data-cy="manageBtn_subj1"]').click();
+        cy.contains('Very Great Skill 2');
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').should('not.exist');
+        cy.get('[data-cy="disabledBadge-skill2"]').should('not.exist')
+        cy.get('[data-cy="disabledBadge-skill1"]').should('not.exist')
+    });
+
+    it('finalize imported skills - drill down after initiating finalize', () => {
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1);
+        cy.createSkill(2, 1, 2);
+
+        cy.exportSkillToCatalog(2, 1, 1);
+        cy.exportSkillToCatalog(2, 1, 2);
+
+        cy.bulkImportSkillFromCatalog(1, 1, [
+            { projNum: 2, skillNum: 1 },
+            { projNum: 2, skillNum: 2 },
+        ])
+
+        cy.visit('/administrator/projects/proj1')
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').click();
+        cy.get('[data-cy="doPerformFinalizeButton"]').should('be.enabled');
+        cy.get('[data-cy="finalizeCancelButton"]').should('be.enabled');
+
+        cy.get('[data-cy="doPerformFinalizeButton"]').click()
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').should('not.exist');
+        cy.get('[data-cy="importFinalizeAlert"]').contains('Finalizing 2 imported skills')
+
+
+        // drill down and make sure alert is gone
+        cy.get('[data-cy="manageBtn_subj1"]').click();
+        cy.contains('Very Great Skill 2');
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').should('not.exist');
+        cy.get('[data-cy="importFinalizeAlert"]').contains('Finalizing 2 imported skills')
+
+        cy.waitForBackendAsyncTasksToComplete();
+        cy.get('[data-cy="importFinalizeAlert"]').contains('Successfully finalized 2 imported skills!')
+
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').should('not.exist');
+        cy.get('[data-cy="disabledBadge-skill2"]').should('not.exist')
+        cy.get('[data-cy="disabledBadge-skill1"]').should('not.exist')
+    });
+
+    it('finalize imported skills on subject page', () => {
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1);
+        cy.createSkill(2, 1, 2);
+
+        cy.exportSkillToCatalog(2, 1, 1);
+        cy.exportSkillToCatalog(2, 1, 2);
+
+        cy.bulkImportSkillFromCatalog(1, 1, [
+            { projNum: 2, skillNum: 1 },
+            { projNum: 2, skillNum: 2 },
+        ])
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1')
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').click();
+        cy.get('[data-cy="doPerformFinalizeButton"]').should('be.enabled');
+        cy.get('[data-cy="finalizeCancelButton"]').should('be.enabled');
+
+        cy.get('[data-cy="doPerformFinalizeButton"]').click()
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').should('not.exist');
+        cy.get('[data-cy="importFinalizeAlert"]').contains('Finalizing 2 imported skills')
+        cy.waitForBackendAsyncTasksToComplete();
+        cy.get('[data-cy="importFinalizeAlert"]').contains('Successfully finalized 2 imported skills!')
+
+        cy.get('[data-cy="disabledBadge-skill2"]').should('not.exist')
+        cy.get('[data-cy="disabledBadge-skill1"]').should('not.exist')
+    });
+
+    it('finalize imported skills on subject page - refresh after finalization', () => {
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1);
+        cy.createSkill(2, 1, 2);
+
+        cy.exportSkillToCatalog(2, 1, 1);
+        cy.exportSkillToCatalog(2, 1, 2);
+
+        cy.bulkImportSkillFromCatalog(1, 1, [
+            { projNum: 2, skillNum: 1 },
+            { projNum: 2, skillNum: 2 },
+        ])
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1')
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').click();
+        cy.get('[data-cy="doPerformFinalizeButton"]').should('be.enabled');
+        cy.get('[data-cy="finalizeCancelButton"]').should('be.enabled');
+
+        cy.get('[data-cy="doPerformFinalizeButton"]').click()
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').should('not.exist');
+        cy.get('[data-cy="importFinalizeAlert"]').contains('Finalizing 2 imported skills')
+
+        // refresh
+        cy.visit('/administrator/projects/proj1/subjects/subj1')
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').should('not.exist');
+        cy.get('[data-cy="importFinalizeAlert"]').contains('Finalizing 2 imported skills')
+
+        cy.waitForBackendAsyncTasksToComplete();
+        cy.get('[data-cy="importFinalizeAlert"]').contains('Successfully finalized 2 imported skills!')
+
+        cy.get('[data-cy="disabledBadge-skill2"]').should('not.exist')
+        cy.get('[data-cy="disabledBadge-skill1"]').should('not.exist')
+    });
+
+    it('finalize imported skills on subject page - navigate to project after finalization', () => {
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1);
+        cy.createSkill(2, 1, 2);
+
+        cy.exportSkillToCatalog(2, 1, 1);
+        cy.exportSkillToCatalog(2, 1, 2);
+
+        cy.bulkImportSkillFromCatalog(1, 1, [
+            { projNum: 2, skillNum: 1 },
+            { projNum: 2, skillNum: 2 },
+        ])
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1')
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').click();
+        cy.get('[data-cy="doPerformFinalizeButton"]').should('be.enabled');
+        cy.get('[data-cy="finalizeCancelButton"]').should('be.enabled');
+
+        cy.get('[data-cy="doPerformFinalizeButton"]').click()
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').should('not.exist');
+        cy.get('[data-cy="importFinalizeAlert"]').contains('Finalizing 2 imported skills')
+
+        // user breadcrumb to navigate up to a project
+        cy.get('[data-cy="breadcrumb-proj1"]').click();
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').should('not.exist');
+        cy.get('[data-cy="importFinalizeAlert"]').contains('Finalizing 2 imported skills')
+
+        cy.waitForBackendAsyncTasksToComplete();
+        cy.get('[data-cy="importFinalizeAlert"]').contains('Successfully finalized 2 imported skills!')
+    });
+
+
+    it('cancel finalize modal', () => {
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1);
+        cy.createSkill(2, 1, 2);
+
+        cy.exportSkillToCatalog(2, 1, 1);
+        cy.exportSkillToCatalog(2, 1, 2);
+
+        cy.bulkImportSkillFromCatalog(1, 1, [
+            { projNum: 2, skillNum: 1 },
+            { projNum: 2, skillNum: 2 },
+        ])
+
+        cy.visit('/administrator/projects/proj1')
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').click();
+        cy.get('[data-cy="doPerformFinalizeButton"]').should('be.enabled');
+        cy.get('[data-cy="finalizeCancelButton"]').should('be.enabled');
+
+        cy.get('[data-cy="finalizeCancelButton"]').click()
+        cy.get('[data-cy="finalizeCancelButton"]').should('not.exist');
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').should('exist');
     });
 
 });

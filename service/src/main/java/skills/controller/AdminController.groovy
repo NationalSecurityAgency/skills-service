@@ -1143,7 +1143,11 @@ class AdminController {
         return success
     }
 
-
+    @RequestMapping(value="/projects/{projectId}/catalog/finalize/info", method = [RequestMethod.GET], produces = "application/json")
+    CatalogFinalizeInfoResult getCatalogFinalizeInfo(@PathVariable("projectId") String projectId) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        return skillCatalogService.getFinalizeInfo(projectId)
+    }
 
     @RequestMapping(value="/projects/{projectId}/skills/catalog", method=RequestMethod.GET, produces = "application/json")
     TableResult getCatalogSkills(@PathVariable("projectId") String projectId,

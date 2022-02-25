@@ -28,7 +28,7 @@ limitations under the License.
         </b-button>
       </div>
       <div slot="footer" v-if="subject && subject.numSkillsDisabled > 0">
-        <import-finalize-alert :num-disabled-skills="subject.numSkillsDisabled" type="subject" />
+        <import-finalize-alert />
       </div>
     </page-header>
 

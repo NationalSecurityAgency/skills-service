@@ -194,7 +194,7 @@ Cypress.Commands.add("finalizeCatalogImport", (projNum = 1) => {
     const url = `/admin/projects/proj${projNum}/catalog/finalize`;
     cy.request('POST', url);
 
-    cy.waitUntil(() => cy.request('/admin/projects/proj1/settings/FinalizeState').then((response) => response.body.value === "COMPLETED"), {
+    cy.waitUntil(() => cy.request('/admin/projects/proj1/settings/catalog.finalize.state').then((response) => response.body.value === "COMPLETED"), {
         timeout: 60000, // waits up to 1 minutes
         interval: 500 // performs the check every 500 ms, default to 200
     });

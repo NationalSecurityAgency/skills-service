@@ -1267,6 +1267,11 @@ class SkillsService {
         return res
     }
 
+    def getCatalogFinalizeInfo(String projectId) {
+        def res = wsHelper.adminGet("/projects/${projectId}/catalog/finalize/info")
+        return res
+    }
+
     def importSkillFromCatalog(String importIntoProjectId, String importIntoSubjectId, String catalogSkillProjectId, String catalogSkillSkillId) {
         return this.bulkImportSkillsFromCatalog(importIntoProjectId, importIntoSubjectId, [[projectId: catalogSkillProjectId, skillId: catalogSkillSkillId]])
     }

@@ -55,4 +55,12 @@ export default {
   getSkillsExportedToCatalog(projectId, pagingParams = {}) {
     return axios.get(`/admin/projects/${projectId}/skills/exported`, { params: { ...pagingParams } }).then((response) => response.data);
   },
+  getCatalogFinalizeInfo(projectId) {
+    const url = `/admin/projects/${projectId}/catalog/finalize/info`;
+    return axios.get(url).then((response) => response.data);
+  },
+  finalizeImport(projectId) {
+    const url = `/admin/projects/${projectId}/catalog/finalize`;
+    return axios.post(url).then((response) => response.data);
+  },
 };

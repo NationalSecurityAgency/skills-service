@@ -67,7 +67,7 @@ class SkillCatalogFinalizationService {
     @Autowired
     SettingsService settingsService
 
-    final String PROJ_FINALIZE_STATE_PROP = "FinalizeState"
+    final String PROJ_FINALIZE_STATE_PROP = "catalog.finalize.state"
     static enum FinalizeState {
         NOT_RUNNING, RUNNING, COMPLETED, FAILED
     }
