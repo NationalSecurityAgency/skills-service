@@ -21,7 +21,6 @@ on:
     paths-ignore:
       - 'README.md'
       - '.github/workflows/build-and-test-postgres.yml'
-      - '.github/workflows/build-and-test-redis.yml'
       - '.gitlab-ci.yml'
 
 jobs:

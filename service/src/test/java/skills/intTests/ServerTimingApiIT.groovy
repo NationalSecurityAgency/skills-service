@@ -20,7 +20,11 @@ import org.springframework.http.ResponseEntity
 import skills.SpringBootApp
 import skills.intTests.utils.DefaultIntSpec
 
-@SpringBootTest(properties = ['skills.prof.serverTimingAPI.enabled=false'], webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
+@SpringBootTest(properties = ['skills.prof.serverTimingAPI.enabled=false',
+        'skills.authorization.userInfoUri=https://localhost:8183/userInfo?dn={dn}',
+        'skills.authorization.userQueryUri=https://localhost:8183/userQuery?query={query}',
+        'skills.authorization.userInfoHealthCheckUri=https://localhost:8183/actuator/health'],
+        webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
 class ServerTimingApiIT extends DefaultIntSpec {
 
     def "server timing is disabled" () {
