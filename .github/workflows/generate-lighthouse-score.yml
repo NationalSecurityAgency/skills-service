@@ -21,7 +21,6 @@ on:
     paths-ignore:
       - 'README.md'
       - '.github/workflows/build-and-test-postgres.yml'
-      - '.github/workflows/build-and-test-redis.yml'
       - '.github/workflows/publish-image-snapshot.yml'
       - '.github/workflows/build-and-test-rabbitmq.yml'
       - '.github/workflows/build-and-test-ssl.yml'
