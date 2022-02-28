@@ -478,14 +478,14 @@ describe('Import skills from Catalog Tests', () => {
         cy.get('[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '2');
         cy.get('[data-cy="disabledBadge-skill2"]')
         cy.get('[data-cy="disabledBadge-skill1"]')
-        cy.get('[data-cy="importFinalizeAlert"]').contains('There are 2 imported skills in this subject that are not yet finalized.')
+        cy.get('[data-cy="importFinalizeAlert"]').contains('There are 2 imported skills in this project that are not yet finalized.')
 
         // refresh at subject level and validate
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '2');
         cy.get('[data-cy="disabledBadge-skill2"]')
         cy.get('[data-cy="disabledBadge-skill1"]')
-        cy.get('[data-cy="importFinalizeAlert"]').contains('There are 2 imported skills in this subject that are not yet finalized.')
+        cy.get('[data-cy="importFinalizeAlert"]').contains('There are 2 imported skills in this project that are not yet finalized.')
 
         // navigate app to a project and validate
         cy.get('[data-cy="breadcrumb-proj1"]').click()
@@ -500,7 +500,7 @@ describe('Import skills from Catalog Tests', () => {
         cy.get('[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '2');
         cy.get('[data-cy="disabledBadge-skill2"]')
         cy.get('[data-cy="disabledBadge-skill1"]')
-        cy.get('[data-cy="importFinalizeAlert"]').contains('There are 2 imported skills in this subject that are not yet finalized.')
+        cy.get('[data-cy="importFinalizeAlert"]').contains('There are 2 imported skills in this project that are not yet finalized.')
 
         // navigate down from projects and validate
         cy.visit('/administrator')
@@ -510,7 +510,7 @@ describe('Import skills from Catalog Tests', () => {
         cy.get('[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '2');
         cy.get('[data-cy="disabledBadge-skill2"]')
         cy.get('[data-cy="disabledBadge-skill1"]')
-        cy.get('[data-cy="importFinalizeAlert"]').contains('There are 2 imported skills in this subject that are not yet finalized.')
+        cy.get('[data-cy="importFinalizeAlert"]').contains('There are 2 imported skills in this project that are not yet finalized.')
     });
 
     it('finalize imported skills', () => {
@@ -717,6 +717,25 @@ describe('Import skills from Catalog Tests', () => {
 
         cy.waitForBackendAsyncTasksToComplete();
         cy.get('[data-cy="importFinalizeAlert"]').contains('Successfully finalized 2 imported skills!')
+    });
+
+    it('imported skill has disabled badge on the skill page', () => {
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1);
+        cy.createSkill(2, 1, 2);
+
+        cy.exportSkillToCatalog(2, 1, 1);
+        cy.exportSkillToCatalog(2, 1, 2);
+
+        cy.bulkImportSkillFromCatalog(1, 1, [
+            { projNum: 2, skillNum: 1 },
+            { projNum: 2, skillNum: 2 },
+        ])
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1')
+        cy.get('[data-cy="pageHeader"] [data-cy="disabledSkillBadge"]')
+        cy.get('[data-cy="childRowDisplay_skill1"]').contains('This skill is disabled')
     });
 
 

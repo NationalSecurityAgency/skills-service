@@ -15,13 +15,13 @@ limitations under the License.
 */
 <template>
   <div v-if="finalizeInfo.numSkillsToFinalize > 0" data-cy="importFinalizeAlert" class="mb-0 mt-1">
-    <b-alert :show="finalizeSuccessfullyCompleted" variant="success" dismissible>
+    <b-alert :show="finalizeSuccessfullyCompleted && !finalizeIsRunning" variant="success" dismissible>
       <i class="fas fa-thumbs-up"></i> Successfully finalized <b-badge variant="info">{{finalizeInfo.numSkillsToFinalize}}</b-badge> imported skills! Please enjoy your day!
     </b-alert>
-    <b-alert :show="finalizeCompletedAndFailed" variant="danger" dismissible>
+    <b-alert :show="finalizeCompletedAndFailed && !finalizeIsRunning" variant="danger" dismissible>
       <i class="fas fa-thumbs-down"></i> Well this is sad. Looks like finalization failed, please reach out to the SkillTree team for further assistance.
     </b-alert>
-    <b-alert :show="finalizeIsRunning" variant="warning">
+    <b-alert :show="finalizeIsRunning && !finalizeSuccessfullyCompleted" variant="warning">
       <i class="fas fa-running"></i> Catalog finalization is in progress. Finalizing <b-badge variant="info">{{finalizeInfo.numSkillsToFinalize}}</b-badge> imported skills! The process may take a few minutes.
     </b-alert>
     <b-alert :show="!finalizeSuccessfullyCompleted && !finalizeCompletedAndFailed && !finalizeIsRunning" variant="warning">
@@ -35,9 +35,12 @@ limitations under the License.
 </template>
 
 <script>
+  import { createNamespacedHelpers } from 'vuex';
   import FinalizePreviewModal from '@/components/skills/catalog/FinalizePreviewModal';
   import SettingsService from '@/components/settings/SettingsService';
   import CatalogService from '@/components/skills/catalog/CatalogService';
+
+  const subjectSkills = createNamespacedHelpers('subjectSkills');
 
   export default {
     name: 'ImportFinalizeAlert',
@@ -69,6 +72,9 @@ limitations under the License.
         });
     },
     methods: {
+      ...subjectSkills.mapActions([
+        'loadSubjectSkills',
+      ]),
       finalizeScheduled() {
         this.finalizeIsRunning = true;
         this.checkFinalizationState();
@@ -85,6 +91,12 @@ limitations under the License.
               } else if (res.value === 'COMPLETED') {
                 this.finalizeIsRunning = false;
                 this.finalizeSuccessfullyCompleted = true;
+                if (this.$route.params.subjectId) {
+                  this.loadSubjectSkills({
+                    projectId: this.$route.params.projectId,
+                    subjectId: this.$route.params.subjectId,
+                  });
+                }
               } else {
                 this.finalizeIsRunning = false;
                 this.finalizeCompletedAndFailed = true;

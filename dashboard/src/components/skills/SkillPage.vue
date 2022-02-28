@@ -39,6 +39,7 @@ limitations under the License.
       <div slot="right-of-header" v-if="!isLoading && (skill.sharedToCatalog || isImported)" class="d-inline h5">
         <b-badge v-if="skill.sharedToCatalog" class="ml-2" data-cy="exportedBadge"><i class="fas fa-book"></i> EXPORTED</b-badge>
         <b-badge v-if="isImported" class="ml-2" variant="success" data-cy="importedBadge"><i class="fas fa-book"></i> IMPORTED</b-badge>
+        <b-badge v-if="!skill.enabled" class="ml-2" data-cy="disabledSkillBadge"> DISABLED</b-badge>
       </div>
     </page-header>
 

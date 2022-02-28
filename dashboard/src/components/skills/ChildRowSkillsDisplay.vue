@@ -21,7 +21,9 @@ limitations under the License.
       defined in the <b class="text-primary">{{ skillInfo.copiedFromProjectName }}</b> project.
       This skill is <b-badge>Read-Only</b-badge> and can only be edited in the <b class="text-primary">{{ skillInfo.copiedFromProjectName }}</b> project
     </div>
-
+    <div v-if="isImported && isDisabled" class="mt-3 alert alert-warning" header="Skill Catalog">
+      <i class="fas fa-exclamation-circle"></i> This skill is <b>disabled</b> because import was not finalized yet.
+    </div>
     <div class="row">
       <div class="col-12 col-md-6 mt-2">
         <media-info-card :title="`${totalPoints} Points`" icon-class="fas fa-calculator text-success"
@@ -188,6 +190,9 @@ limitations under the License.
       },
       isImported() {
         return this.skillInfo && this.skillInfo.copiedFromProjectId && this.skillInfo.copiedFromProjectId.length > 0;
+      },
+      isDisabled() {
+        return this.skillInfo && !this.skillInfo.enabled;
       },
     },
     methods: {

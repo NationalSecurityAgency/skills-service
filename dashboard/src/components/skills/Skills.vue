@@ -15,38 +15,38 @@ limitations under the License.
 */
 <template>
   <div>
-    <loading-container v-bind:is-loading="isLoading">
-      <sub-page-header ref="subPageHeader" title="Skills"
-                       :disabled="addSkillDisabled" :disabled-msg="addSkillsDisabledMsg" aria-label="new skill">
-        <i v-if="addSkillDisabled" class="fas fa-exclamation-circle text-warning ml-1 mr-1" style="pointer-events: all; font-size: 1.5rem;" v-b-tooltip.hover="addSkillsDisabledMsg"/>
-        <b-button id="importFromCatalogBtn" ref="importFromCatalogBtn" @click="importCatalog.show=true" variant="outline-primary" size="sm"
-                  aria-label="import from catalog"
-                  data-cy="importFromCatalogBtn">
-          <span class="">Import</span> <i class="fas fa-book" aria-hidden="true"/>
-        </b-button>
-        <b-button id="newGroupBtn" ref="newGroupButton" @click="newGroup" variant="outline-primary" size="sm"
-                  aria-label="new skills group" class="ml-1"
-                  aria-describedby="newGroupSrText"
-                  data-cy="newGroupButton" :aria-disabled="addSkillDisabled" :disabled="addSkillDisabled">
-          <span class="">Group</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
-          <span id="newGroupSrText" class="sr-only">
+    <sub-page-header ref="subPageHeader" title="Skills" :is-loading="loadingSubjectSkills"
+                     :disabled="addSkillDisabled" :disabled-msg="addSkillsDisabledMsg" aria-label="new skill">
+      <i v-if="addSkillDisabled" class="fas fa-exclamation-circle text-warning ml-1 mr-1" style="pointer-events: all; font-size: 1.5rem;" v-b-tooltip.hover="addSkillsDisabledMsg"/>
+      <b-button id="importFromCatalogBtn" ref="importFromCatalogBtn" @click="importCatalog.show=true" variant="outline-primary" size="sm"
+                aria-label="import from catalog"
+                data-cy="importFromCatalogBtn">
+        <span class="">Import</span> <i class="fas fa-book" aria-hidden="true"/>
+      </b-button>
+      <b-button id="newGroupBtn" ref="newGroupButton" @click="newGroup" variant="outline-primary" size="sm"
+                aria-label="new skills group" class="ml-1"
+                aria-describedby="newGroupSrText"
+                data-cy="newGroupButton" :aria-disabled="addSkillDisabled" :disabled="addSkillDisabled">
+        <span class="">Group</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
+        <span id="newGroupSrText" class="sr-only">
             {{ addSkillDisabled ? addSkillDisabled : 'Create a new Skill Group'}}
           </span>
-        </b-button>
-        <b-button id="newSkillBtn" ref="newSkillButton" @click="newSkill" variant="outline-primary" size="sm"
-                  aria-label="new skill"
-                  aria-describedby="newSkillSrText"
-                  data-cy="newSkillButton" class="ml-1" :aria-disabled="addSkillDisabled" :disabled="addSkillDisabled">
-          <span class="">Skill</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
-          <span id="newSkillSrText" class="sr-only">
+      </b-button>
+      <b-button id="newSkillBtn" ref="newSkillButton" @click="newSkill" variant="outline-primary" size="sm"
+                aria-label="new skill"
+                aria-describedby="newSkillSrText"
+                data-cy="newSkillButton" class="ml-1" :aria-disabled="addSkillDisabled" :disabled="addSkillDisabled">
+        <span class="">Skill</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
+        <span id="newSkillSrText" class="sr-only">
             {{ addSkillDisabled ? addSkillDisabled : 'Create a new Skill'}}
           </span>
-        </b-button>
-      </sub-page-header>
+      </b-button>
+    </sub-page-header>
 
+    <loading-container v-bind:is-loading="loadingSubjectSkills">
       <b-card body-class="p-0">
         <skills-table ref="skillsTable"
-          :skills-prop="skills" :is-top-level="true" :project-id="this.$route.params.projectId" :subject-id="this.$route.params.subjectId"
+          :skills-prop="subjectSkills" :is-top-level="true" :project-id="this.$route.params.projectId" :subject-id="this.$route.params.subjectId"
                       v-on:skills-change="skillsChanged"
                       @skill-removed="skillDeleted" />
       </b-card>
@@ -57,24 +57,23 @@ limitations under the License.
 
     <edit-skill-group v-if="editGroupInfo.show" v-model="editGroupInfo.show" :group="editGroupInfo.group" :is-edit="false"
                       @group-saved="skillCreatedOrUpdated" @hidden="focusOnNewGroupButton"/>
-    <import-from-catalog v-if="importCatalog.show" v-model="importCatalog.show" :current-project-skills="skills"
+    <import-from-catalog v-if="importCatalog.show" v-model="importCatalog.show" :current-project-skills="subjectSkills"
                          @to-import="importFromCatalog"/>
   </div>
 </template>
 
 <script>
   import { createNamespacedHelpers } from 'vuex';
-  import dayjs from '@/common-components/DayJsCustomizer';
   import CatalogService from '@/components/skills/catalog/CatalogService';
   import LoadingContainer from '../utils/LoadingContainer';
   import SkillsTable from './SkillsTable';
-  import SkillsService from './SkillsService';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import EditSkill from './EditSkill';
   import EditSkillGroup from './skillsGroup/EditSkillGroup';
   import ImportFromCatalog from './catalog/ImportFromCatalog';
 
   const { mapActions, mapGetters } = createNamespacedHelpers('subjects');
+  const subjectSkills = createNamespacedHelpers('subjectSkills');
 
   export default {
     name: 'Skills',
@@ -88,7 +87,6 @@ limitations under the License.
     },
     data() {
       return {
-        isLoading: true,
         skills: [],
         projectId: null,
         subjectId: null,
@@ -112,6 +110,12 @@ limitations under the License.
       ...mapActions([
         'loadSubjectDetailsState',
       ]),
+      ...subjectSkills.mapActions([
+        'loadSubjectSkills',
+      ]),
+      ...subjectSkills.mapMutations([
+        'setLoadingSubjectSkills',
+      ]),
       skillCreatedOrUpdated(skill) {
         this.$refs.skillsTable.skillCreatedOrUpdated(skill);
       },
@@ -129,25 +133,16 @@ limitations under the License.
         });
       },
       loadSkills() {
-        this.isLoading = true;
-        SkillsService.getSubjectSkills(this.projectId, this.subjectId)
+        this.loadSubjectSkills({ projectId: this.projectId, subjectId: this.subjectId })
           .then((skills) => {
-            const loadedSkills = skills;
-            this.skills = loadedSkills.map((loadedSkill) => {
-              const copy = { ...loadedSkill };
-              copy.created = dayjs(loadedSkill.created);
-              return copy;
-            });
-          })
-          .finally(() => {
-            this.isLoading = false;
-          });
+            this.skills = skills;
+        });
       },
       skillDeleted(skill) {
         this.skillsChanged(skill.skillId);
       },
       importFromCatalog(skillsInfoToImport) {
-        this.isLoading = true;
+        this.setLoadingSubjectSkills(true);
         CatalogService.bulkImport(this.$route.params.projectId, this.$route.params.subjectId, skillsInfoToImport)
           .then(() => {
             this.loadSkills();
@@ -190,6 +185,10 @@ limitations under the License.
     computed: {
       ...mapGetters([
         'subject',
+      ]),
+      ...subjectSkills.mapGetters([
+        'subjectSkills',
+        'loadingSubjectSkills',
       ]),
       numSubjectSkills() {
         return this.subject.numSkills;

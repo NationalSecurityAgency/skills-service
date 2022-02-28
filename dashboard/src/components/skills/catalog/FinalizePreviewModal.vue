@@ -21,14 +21,15 @@ limitations under the License.
     <skills-spinner :is-loading="loading" class="mb-5"/>
     <div v-if="!loading">
       <p>
-        There are <b-badge>{{ finalizeInfo.numSkillsToFinalize }}</b-badge> skills to finalize. Please note that finalization process may take a bit.
+        There <span v-if="isPlural">are</span><span v-else>is</span> <b-badge>{{ finalizeInfo.numSkillsToFinalize }}</b-badge> skill<span v-if="isPlural">s</span> to finalize.
+        Please note that the finalization process may take <i>several moments</i>.
       </p>
       <p>
-        Finalization process includes:
+        The finalization process includes:
         <ul>
           <li>Imported skills will <b>now</b> contribute to the overall project and subject points.</li>
-          <li>Skill points are migrated to this project for <b>all of the users</b> who made progress in the imported skills (of the original project).</li>
-          <li>Project and subject level achievements are calculated for the users that have points for the imported skills.</li>
+          <li>Skill points are migrated to this project for <b>all of the users</b> who made progress in the imported skills <i>(in the original project)</i>.</li>
+          <li>Project and subject <b>level</b> achievements are calculated for the users that have points for the imported skills.</li>
         </ul>
       </p>
     </div>
@@ -76,6 +77,11 @@ limitations under the License.
     },
     mounted() {
       this.loadFinalizeInfo();
+    },
+    computed: {
+      isPlural() {
+        return this.finalizeInfo.numSkillsToFinalize > 1;
+      },
     },
     methods: {
       close(e) {
