@@ -22,7 +22,12 @@ import skills.SpringBootApp
 import skills.intTests.utils.DefaultIntSpec
 
 @Slf4j
-@SpringBootTest(properties = ['skills.h2.port=9092', 'skills.config.ui.rankingAndProgressViewsEnabled=true', 'skills.config.ui.defaultLandingPage=progress'], webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
+@SpringBootTest(properties = ['skills.h2.port=9092',
+        'skills.config.ui.rankingAndProgressViewsEnabled=true',
+        'skills.config.ui.defaultLandingPage=progress',
+        'skills.authorization.userInfoUri=https://localhost:8184/userInfo?dn={dn}',
+        'skills.authorization.userQueryUri=https://localhost:8184/userQuery?query={query}',
+        'skills.authorization.userInfoHealthCheckUri=https://localhost:8184/actuator/health'], webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
 class UpdtedDefaultHomePageIT extends DefaultIntSpec {
 
     def "landingPage page is always admin when rankingAndProgressViewsDisabled=true"() {
