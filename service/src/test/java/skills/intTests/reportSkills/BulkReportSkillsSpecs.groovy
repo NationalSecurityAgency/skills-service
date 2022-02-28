@@ -16,7 +16,6 @@
 package skills.intTests.reportSkills
 
 import groovy.util.logging.Slf4j
-import org.apache.commons.lang3.StringUtils
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
@@ -50,10 +49,9 @@ class BulkReportSkillsSpecs extends DefaultIntSpec {
         def res = skillsService.bulkAddSkill([projectId: projId, skillId: skills[0].skillId], sampleUserIds, new Date())
 
         then:
-        res.body.userIdsApplied
-        res.body.userIdsApplied.size() == sampleUserIds.size()
-        sampleUserIds.each {assert res.body.userIdsApplied.find { userId -> StringUtils.contains(userId, it)} }
-        res.body.userIdsNotApplied.size() == 0
+        res.body.userIdsAppliedCount
+        res.body.userIdsAppliedCount == sampleUserIds.size()
+        res.body.userIdsNotAppliedCount == 0
         res.body.userIdsErrored.size() == 0
     }
 
@@ -74,10 +72,9 @@ class BulkReportSkillsSpecs extends DefaultIntSpec {
         def res = skillsService.bulkAddSkill([projectId: projId, skillId: skills[0].skillId], userIds, new Date())
 
         then:
-        res.body.userIdsApplied
-        res.body.userIdsApplied.size() == sampleUserIds.size()
-        sampleUserIds.each {assert res.body.userIdsApplied.find { userId -> StringUtils.contains(userId, it)} }
-        res.body.userIdsNotApplied.size() == 0
+        res.body.userIdsAppliedCount
+        res.body.userIdsAppliedCount == sampleUserIds.size()
+        res.body.userIdsNotAppliedCount == 0
         res.body.userIdsErrored.size() == 1
         res.body.userIdsErrored[0] == 'doesNotExist'
     }
@@ -98,17 +95,14 @@ class BulkReportSkillsSpecs extends DefaultIntSpec {
 
         then:
 
-        res1.body.userIdsApplied
-        res1.body.userIdsApplied.size() == 1
-        StringUtils.contains(res1.body.userIdsApplied[0], sampleUserIds[0])
-        res1.body.userIdsNotApplied.size() == 0
+        res1.body.userIdsAppliedCount
+        res1.body.userIdsAppliedCount == 1
+        res1.body.userIdsNotAppliedCount == 0
         res1.body.userIdsErrored.size() == 0
 
-        res.body.userIdsApplied
-        res.body.userIdsApplied.size() == sampleUserIds.size()-1
-        sampleUserIds.takeRight(sampleUserIds.size()-1).each {assert res.body.userIdsApplied.find { userId -> StringUtils.contains(userId, it)} }
-        res.body.userIdsNotApplied.size() == 1
-        StringUtils.contains(res.body.userIdsNotApplied[0], sampleUserIds[0])
+        res.body.userIdsAppliedCount
+        res.body.userIdsAppliedCount == sampleUserIds.size()-1
+        res.body.userIdsNotAppliedCount == 1
         res.body.userIdsErrored.size() == 0
     }
 
@@ -176,7 +170,6 @@ class BulkReportSkillsSpecs extends DefaultIntSpec {
         exception.message.contains("userIds must contain at least 1 item., errorCode:BadParam, success:false, projectId:TestProject1, skillId:skill1")
     }
 
-
     def "attempt to bulk report skill events specifying blank userIds"(){
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
@@ -193,4 +186,20 @@ class BulkReportSkillsSpecs extends DefaultIntSpec {
         exception.message.contains("userIds must contain at least 1 item., errorCode:BadParam, success:false, projectId:TestProject1, skillId:skill1")
     }
 
+    def "attempt to bulk report skill events for more than the max allowable userIds"(){
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(10, )
+        List<String> userIds = (0..1000).collect { "user${it}"}
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        when:
+        skillsService.bulkAddSkill([projectId: projId, skillId: skills[0].skillId], userIds, System.currentTimeMillis())
+        then:
+        SkillsClientException exception = thrown(SkillsClientException)
+        exception.message.contains("number of userIds cannot exceed 1000, errorCode:BadParam, success:false, projectId:TestProject1, skillId:skill1")
+    }
 }

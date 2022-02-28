@@ -76,9 +76,9 @@ class SkillEventAdminService {
                 SkillEventResult result = skillsManagementFacade.reportSkill(projectId, skillId, userId, false, incomingSkillDate)
                 if (!bulkResult.name) { bulkResult.name = result.name }
                 if (result.skillApplied) {
-                    bulkResult.userIdsApplied += requestedUserId
+                    bulkResult.userIdsAppliedCount++
                 } else {
-                    bulkResult.userIdsNotApplied += requestedUserId
+                    bulkResult.userIdsNotAppliedCount++
                 }
             } catch(Exception e) {
                 bulkResult.userIdsErrored += requestedUserId

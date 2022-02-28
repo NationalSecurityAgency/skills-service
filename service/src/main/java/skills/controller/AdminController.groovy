@@ -98,6 +98,9 @@ class AdminController {
     @Value('#{"${skills.config.ui.maxTimeWindowInMinutes}"}')
     int maxTimeWindowInMinutes
 
+    @Value('#{"${skills.config.maxUserIdsForBulkSkillReporting:1000}"}')
+    int maxUserIdsForBulkSkillReporting
+
     @Autowired
     ProjectErrorService errorService
 
@@ -1054,6 +1057,7 @@ class AdminController {
         List<String> userIds = bulkSkillEventRequest.userIds
         userIds.removeAll { StringUtils.isBlank(it) }
         SkillsValidator.isNotEmpty(userIds, 'userIds', projectId, skillId)
+        SkillsValidator.isTrue(userIds.size() <= maxUserIdsForBulkSkillReporting, "number of userIds cannot exceed ${maxUserIdsForBulkSkillReporting}", projectId, skillId)
 
         return skillEventService.bulkReportSkills(projectId, skillId, userIds, new Date(requestedTimestamp))
     }
