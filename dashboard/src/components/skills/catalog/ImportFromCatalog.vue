@@ -21,13 +21,19 @@ limitations under the License.
            @hide="publishHidden">
     <skills-spinner :is-loading="loading"/>
 
-    <no-content2 v-if="!loading && emptyCatalog" class="mt-4 mb-5"
+    <no-content2 v-if="!loading && emptyCatalog && !isInFinalizeState" class="mt-4 mb-5"
+                 icon="fas fa-user-clock"
                  title="Nothing Available for Import" data-cy="catalogSkillImportModal-NoData">
       When other projects export Skills to the Catalog then they will be available here
       to be imported.
     </no-content2>
 
-    <div v-if="!loading && !emptyCatalog">
+    <no-content2 v-if="!loading && isInFinalizeState" class="mt-4 mb-5"
+                 title="Finalization in Progress" data-cy="catalogSkillImport-finalizationInProcess">
+      Cannot import while imported skills are being finalized. Unfortunately will have to wait, thank you for the patience!
+    </no-content2>
+
+    <div v-if="!loading && !emptyCatalog && !isInFinalizeState">
       <div class="row px-3 pt-1">
         <div class="col-md border-right">
           <b-form-group label="Skill Name:" label-for="skill-name-filter" label-class="text-muted">
@@ -168,8 +174,9 @@ limitations under the License.
 
     <div slot="modal-footer" class="w-100">
       <b-button v-if="!emptyCatalog" variant="success" size="sm" class="float-right ml-2"
-                @click="importSkills" data-cy="importBtn" :disabled="importDisabled"><i
+                @click="importSkills" data-cy="importBtn" :disabled="importDisabled || validatingImport"><i
         class="far fa-arrow-alt-circle-down"></i> Import <b-badge variant="primary" data-cy="numSelectedSkills">{{ numSelectedSkills }}</b-badge>
+        <b-spinner v-if="validatingImport" small label="Small Spinner" class="ml-1"></b-spinner>
       </b-button>
       <b-button v-if="!emptyCatalog" variant="secondary" size="sm" class="float-right" @click="close"
                 data-cy="closeButton">
@@ -191,6 +198,7 @@ limitations under the License.
   import NoContent2 from '../../utils/NoContent2';
   import SkillsSpinner from '../../utils/SkillsSpinner';
   import SkillToImportInfo from './SkillToImportInfo';
+  import SettingsService from '@/components/settings/SettingsService';
 
   export default {
     name: 'ImportFromCatalog',
@@ -215,6 +223,8 @@ limitations under the License.
       return {
         show: this.value,
         loading: false,
+        isInFinalizeState: false,
+        validatingImport: false,
         initialLoadHadData: false,
         importDisabled: true,
         numSelectedSkills: 0,
@@ -266,7 +276,10 @@ limitations under the License.
       };
     },
     mounted() {
-      this.loadData(true);
+      this.loadFinalizationState()
+        .then(() => {
+          this.loadData(true);
+        });
     },
     watch: {
       show(newValue) {
@@ -285,6 +298,12 @@ limitations under the License.
       },
     },
     methods: {
+      loadFinalizationState() {
+        return SettingsService.getProjectSetting(this.$route.params.projectId, 'catalog.finalize.state')
+          .then((res) => {
+            this.isInFinalizeState = res && res.value === 'RUNNING';
+          });
+      },
       doesSkillIdAlreadyExist(skillId) {
         return this.currentProjectSkills.find((skill) => skill.skillId.toUpperCase() === skillId.toUpperCase()) !== undefined;
       },
@@ -354,13 +373,23 @@ limitations under the License.
         this.importDisabled = this.numSelectedSkills === 0;
       },
       importSkills() {
-        const selected = this.table.items.filter((item) => item.selected);
-        const projAndSkillIds = selected.map((skill) => ({
-          projectId: skill.projectId,
-          skillId: skill.skillId,
-        }));
-        this.$emit('to-import', projAndSkillIds);
-        this.show = false;
+        this.validatingImport = true;
+        this.loadFinalizationState()
+          .then(() => {
+            if (!this.isInFinalizeState) {
+              const selected = this.table.items.filter((item) => item.selected);
+              const projAndSkillIds = selected.map((skill) => ({
+                projectId: skill.projectId,
+                skillId: skill.skillId,
+              }));
+              this.$emit('to-import', projAndSkillIds);
+              this.show = false;
+            } else {
+              this.changeSelectionForAll(false);
+            }
+          }).finally(() => {
+            this.validatingImport = false;
+          });
       },
       changeSelectionForAll(selectedValue) {
         this.table.items.forEach((item) => {

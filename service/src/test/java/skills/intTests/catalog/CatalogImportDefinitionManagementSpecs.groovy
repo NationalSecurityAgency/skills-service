@@ -18,6 +18,7 @@ package skills.intTests.catalog
 import groovy.json.JsonOutput
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -324,5 +325,20 @@ class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
         res1.numSkillsToFinalize == 1
         res2.numSkillsToFinalize == 2
         res3.numSkillsToFinalize == 0
+    }
+
+    def "cannot import while finalizing"() {
+        def project1 = createProjWithCatalogSkills(1)
+        def project2 = createProjWithCatalogSkills(2)
+
+        skillsService.importSkillFromCatalog(project2.p.projectId, project1.s2.subjectId, project1.p.projectId, project1.s1_skills[0].skillId)
+
+        when:
+        skillsService.finalizeSkillsImportFromCatalog(project2.p.projectId, false)
+
+        skillsService.importSkillFromCatalog(project2.p.projectId, project1.s2.subjectId, project1.p.projectId, project1.s1_skills[1].skillId)
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("Cannot import skills in the middle of the finalization process")
     }
 }

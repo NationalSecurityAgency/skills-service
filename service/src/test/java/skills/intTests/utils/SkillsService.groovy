@@ -1261,9 +1261,11 @@ class SkillsService {
         return res
     }
 
-    def finalizeSkillsImportFromCatalog(String projectId) {
+    def finalizeSkillsImportFromCatalog(String projectId, boolean waitForFinalizationToComplete = true) {
         def res = wsHelper.adminPost("/projects/${projectId}/catalog/finalize", [])
-        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        if (waitForFinalizationToComplete) {
+            waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        }
         return res
     }
 

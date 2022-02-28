@@ -138,7 +138,7 @@ class SkillCatalogFinalizationService {
         }
     }
 
-    private FinalizeState getCurrentState(String projectId) {
+    FinalizeState getCurrentState(String projectId) {
         SettingsResult res = settingsService.getProjectSetting(projectId, PROJ_FINALIZE_STATE_PROP)
         return res?.value ? FinalizeState.valueOf(res?.value) : FinalizeState.NOT_RUNNING
     }

@@ -736,6 +736,10 @@ describe('Import skills from Catalog Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1')
         cy.get('[data-cy="pageHeader"] [data-cy="disabledSkillBadge"]')
         cy.get('[data-cy="childRowDisplay_skill1"]').contains('This skill is disabled')
+
+        cy.finalizeCatalogImport(1)
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1')
+        cy.get('[data-cy="pageHeader"] [data-cy="disabledSkillBadge"]').should('not.exist')
     });
 
 
@@ -761,8 +765,73 @@ describe('Import skills from Catalog Tests', () => {
         cy.get('[data-cy="finalizeCancelButton"]').click()
         cy.get('[data-cy="finalizeCancelButton"]').should('not.exist');
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').should('exist');
+
+        // now close via the X on top right
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').click();
+        cy.get('[data-cy="doPerformFinalizeButton"]').should('be.enabled');
+        cy.get('[data-cy="finalizeCancelButton"]').should('be.enabled');
+
+        cy.get('[class="modal-content"] [aria-label="Close"]').click();
+        cy.get('[data-cy="finalizeCancelButton"]').should('not.exist');
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').should('exist');
     });
 
+
+    it('must not be able to import while finalizing', () => {
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1);
+        cy.createSkill(2, 1, 2);
+
+        cy.exportSkillToCatalog(2, 1, 1);
+        cy.exportSkillToCatalog(2, 1, 2);
+
+        cy.bulkImportSkillFromCatalog(1, 1, [
+            { projNum: 2, skillNum: 1 },
+        ])
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1')
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').click();
+        cy.get('[data-cy="doPerformFinalizeButton"]').should('be.enabled');
+        cy.get('[data-cy="finalizeCancelButton"]').should('be.enabled');
+
+        cy.get('[data-cy="doPerformFinalizeButton"]').click()
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').should('not.exist');
+        cy.get('[data-cy="importFinalizeAlert"]').contains('Finalizing 1 imported skill')
+
+        cy.get('[data-cy="importFromCatalogBtn"]').click();
+        cy.get('[data-cy="catalogSkillImport-finalizationInProcess"]').contains('Finalization in Progress')
+    });
+
+    it('must not be able to import while finalizing - state session has catalog already loaded', () => {
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1);
+        cy.createSkill(2, 1, 2);
+
+        cy.exportSkillToCatalog(2, 1, 1);
+        cy.exportSkillToCatalog(2, 1, 2);
+
+        cy.bulkImportSkillFromCatalog(1, 1, [
+            { projNum: 2, skillNum: 1 },
+        ])
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1')
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').should('be.enabled')
+        // cy.get('[data-cy="doPerformFinalizeButton"]').should('be.enabled');
+        // cy.get('[data-cy="finalizeCancelButton"]').should('be.enabled');
+
+        cy.get('[data-cy="importFromCatalogBtn"]').click();
+        cy.get('[data-cy="skillSelect_proj2-skill2"]').check({force: true})
+        cy.get('[data-cy="numSelectedSkills"]').should('have.text', '1');
+
+
+        cy.finalizeCatalogImportWithoutWaiting(1);
+        cy.get('[data-cy="importBtn"]').click()
+        cy.get('[data-cy="catalogSkillImport-finalizationInProcess"]').contains('Finalization in Progress')
+        cy.get('[data-cy="numSelectedSkills"]').should('have.text', '0');
+        cy.get('[data-cy="importBtn"]').should('be.disabled');
+    });
 });
 
 

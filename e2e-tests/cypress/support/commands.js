@@ -190,10 +190,13 @@ Cypress.Commands.add("bulkImportSkillFromCatalogAndFinalize", (projNum = 2, subj
     cy.finalizeCatalogImport(projNum)
 });
 
-Cypress.Commands.add("finalizeCatalogImport", (projNum = 1) => {
+Cypress.Commands.add("finalizeCatalogImportWithoutWaiting", (projNum = 1) => {
     const url = `/admin/projects/proj${projNum}/catalog/finalize`;
     cy.request('POST', url);
+});
 
+Cypress.Commands.add("finalizeCatalogImport", (projNum = 1) => {
+    cy.finalizeCatalogImportWithoutWaiting(projNum);
     cy.waitUntil(() => cy.request('/admin/projects/proj1/settings/catalog.finalize.state').then((response) => response.body.value === "COMPLETED"), {
         timeout: 60000, // waits up to 1 minutes
         interval: 500 // performs the check every 500 ms, default to 200
@@ -467,6 +470,7 @@ Cypress.Commands.add('customA11y', ()=> {
 
 Cypress.Commands.add("logout", () => {
     cy.request('POST', '/logout');
+    cy.log('Logged out')
 });
 
 Cypress.Commands.add("clickSave", () => {
@@ -519,8 +523,10 @@ Cypress.Commands.add('resetDb', () => {
     cy.exec('npm version', {failOnNonZeroExit: false})
     if (db && db === 'postgres') {
         cy.exec('npm run backend:resetDb:postgres')
+        cy.log('reset postgres db')
     } else {
         cy.exec('npm run backend:resetDb')
+        cy.log('reset h2 db')
     }
 });
 

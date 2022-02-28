@@ -254,6 +254,9 @@ class SkillCatalogService {
     @Transactional
     @Profile
     void importSkillsFromCatalog(String projectIdTo, String subjectIdTo, List<CatalogSkill> listOfSkills) {
+        if (skillCatalogFinalizationService.getCurrentState(projectIdTo) == SkillCatalogFinalizationService.FinalizeState.RUNNING) {
+            throw new SkillException("Cannot import skills in the middle of the finalization process", projectIdTo)
+        }
         log.info("Import skills into the catalog. projectIdTo=[{}], subjectIdTo=[{}], listOfSkills={}", projectIdTo, subjectIdTo, listOfSkills)
         // validate
         projDefAccessor.getProjDef(projectIdTo)
