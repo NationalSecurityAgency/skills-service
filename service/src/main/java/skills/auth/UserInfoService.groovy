@@ -77,7 +77,6 @@ class UserInfoService {
         }
     }
 
-    @Transactional
     @Profile
     protected String doGetUserName(String userIdParam, boolean retry, String idType) {
         String userNameRes = userIdParam

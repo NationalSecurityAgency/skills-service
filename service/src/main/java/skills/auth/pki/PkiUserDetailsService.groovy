@@ -41,7 +41,6 @@ class PkiUserDetailsService implements UserDetailsService, AuthenticationUserDet
     PkiUserLookup pkiUserLookup
 
     @Override
-    @Transactional
     UserDetails loadUserByUsername(String dn) throws UsernameNotFoundException {
         this.doLoadUserByUsername(dn)
     }
