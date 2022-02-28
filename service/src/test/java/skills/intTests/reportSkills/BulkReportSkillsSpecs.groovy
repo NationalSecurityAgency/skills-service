@@ -16,7 +16,6 @@
 package skills.intTests.reportSkills
 
 import groovy.util.logging.Slf4j
-import org.apache.commons.lang3.StringUtils
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
