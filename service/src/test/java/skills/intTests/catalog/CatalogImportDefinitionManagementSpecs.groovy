@@ -18,7 +18,6 @@ package skills.intTests.catalog
 import groovy.json.JsonOutput
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
-import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -341,4 +340,38 @@ class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
         SkillsClientException e = thrown(SkillsClientException)
         e.message.contains("Cannot import skills in the middle of the finalization process")
     }
+
+    def "get all skills for a project does not include disabled skills by default"() {
+        def project1 = createProjWithCatalogSkills(1)
+        def project2 = createProjWithCatalogSkills(2)
+
+        skillsService.importSkillFromCatalog(project2.p.projectId, project1.s2.subjectId, project1.p.projectId, project1.s1_skills[0].skillId)
+
+        when:
+        def skills = skillsService.getSkillsForProject(project2.p.projectId)
+        def skillsWithDisabled = skillsService.getSkillsForProject(project2.p.projectId, "", false, true)
+        then:
+        skills.size() == 9
+        !skills.find { it.skillId == project1.s1_skills[0].skillId }
+
+        skillsWithDisabled.size() == 10
+        skillsWithDisabled.find { it.skillId == project1.s1_skills[0].skillId }
+    }
+
+    def "cannot add a disabled skill to a badge"() {
+        def project1 = createProjWithCatalogSkills(1)
+        def project2 = createProjWithCatalogSkills(2)
+
+        skillsService.importSkillFromCatalog(project2.p.projectId, project1.s2.subjectId, project1.p.projectId, project1.s1_skills[0].skillId)
+        def badge = SkillsFactory.createBadge(2, 1)
+        skillsService.createBadge(badge)
+        when:
+        skillsService.assignSkillToBadge([projectId: project2.p.projectId, badgeId: badge.badgeId, skillId: project1.s1_skills[0].skillId])
+
+        then:
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("Skill [${project1.s1_skills[0].skillId}] is not enabled")
+    }
+
 }

@@ -649,11 +649,13 @@ class AdminController {
     List<SkillDefSkinnyRes> getAllSkillsForProject(
             @PathVariable("projectId") String projectId,
             @RequestParam(required = false, value = "skillNameQuery") String skillNameQuery,
-            @RequestParam(required = false, value = "excludeImportedSkills") Boolean excludeImportedSkills) {
+            @RequestParam(required = false, value = "excludeImportedSkills") Boolean excludeImportedSkills,
+            @RequestParam(required = false, value = "includeDisabled", defaultValue = "false") Boolean includeDisabled) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
 
         boolean excludeImportedSkillsBol = excludeImportedSkills
-        List<SkillDefSkinnyRes> res = skillsAdminService.getSkinnySkills(projectId, skillNameQuery ?: '', excludeImportedSkillsBol)
+        boolean includeDisabledBool = includeDisabled
+        List<SkillDefSkinnyRes> res = skillsAdminService.getSkinnySkills(projectId, skillNameQuery ?: '', excludeImportedSkillsBol, includeDisabledBool)
         return res
     }
 
