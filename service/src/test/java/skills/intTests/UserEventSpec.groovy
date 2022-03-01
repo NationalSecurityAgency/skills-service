@@ -28,13 +28,10 @@ import skills.services.UserEventService
 import skills.storage.model.DayCountItem
 import skills.storage.model.EventType
 import skills.storage.model.SkillDef
-import skills.storage.model.SkillRelDef
 import skills.storage.model.UserEvent
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.UserEventsRepo
-import spock.lang.Ignore
-import spock.lang.IgnoreRest
 
 import java.text.DateFormat
 import java.time.DayOfWeek
@@ -1521,9 +1518,6 @@ class UserEventSpec extends DefaultIntSpec {
         distinctUserCountsForSkill[1].projectId == proj.projectId
         distinctUserCountsForSkill[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.startOfTwoWeeksAgo.toDate())
     }
-
-    @Autowired
-    SkillRelDefRepo skillRelDefRepo
 
     def "daily subject event metrics should work with imported skills"() {
         Map proj = SkillsFactory.createProject(77)
