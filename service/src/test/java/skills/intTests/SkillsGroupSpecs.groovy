@@ -23,7 +23,6 @@ import skills.intTests.utils.SkillsFactory
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 import skills.storage.repos.SkillRelDefRepo
-import spock.lang.IgnoreRest
 
 class SkillsGroupSpecs extends DefaultIntSpec {
 
@@ -1381,7 +1380,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         res.collect { it.skillId }.sort() == [ allSkills[1].skillId, allSkills[2].skillId, allSkills[3].skillId, ]
     }
 
-    void "skills under SkillsGroup are available to be used as dependencies" () {
+    void "enabled skills under SkillsGroup are available to be used as dependencies" () {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skillsGroup = SkillsFactory.createSkillsGroup()
@@ -1399,9 +1398,17 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         when:
         def res = skillsService.getSkillsAvailableForDependency(proj.projectId)
 
+        skillsGroup.enabled = true
+        skillsService.createSkill(skillsGroup)
+
+        def res1 = skillsService.getSkillsAvailableForDependency(proj.projectId)
+
         then:
-        res.size() == 3
-        res.collect { it.skillId }.sort() == [ allSkills[1].skillId, allSkills[2].skillId, allSkills[3].skillId, ]
+        res.size() == 1
+        res.collect { it.skillId }.sort() == [allSkills[3].skillId, ]
+
+        res1.size() == 3
+        res1.collect { it.skillId }.sort() == [ allSkills[1].skillId, allSkills[2].skillId, allSkills[3].skillId, ]
     }
 
     @Autowired
