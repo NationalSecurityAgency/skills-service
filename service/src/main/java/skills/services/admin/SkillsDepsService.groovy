@@ -113,7 +113,7 @@ class SkillsDepsService {
 
     @Transactional(readOnly = true)
     List<SkillDefForDependencyRes> getSkillsAvailableForDependency(String projectId) {
-        List<SkillDefRepo.SkillDefSkinny> res = skillDefRepo.findAllSkinnySelectByProjectIdAndType(projectId, SkillDef.ContainerType.Skill, "", "true")
+        List<SkillDefRepo.SkillDefSkinny> res = skillDefRepo.findAllSkinnySelectByProjectIdAndType(projectId, SkillDef.ContainerType.Skill, "", Boolean.TRUE.toString(), Boolean.FALSE.toString())
         List<SkillDefForDependencyRes> finalRes = res.collect {
             new SkillDefForDependencyRes(
                     skillId: it.skillId, name: it.name, projectId: it.projectId, version: it.version

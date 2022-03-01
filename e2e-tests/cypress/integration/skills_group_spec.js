@@ -1174,6 +1174,13 @@ describe('Skills Group Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill2/dependencies');
         cy.contains('No Dependencies Yet');
 
+        // disabled skills are NOT returned
+        cy.get('[data-cy="depsSelector"]').click();
+        cy.get('[data-cy="skillsSelector"]').contains('List is empty').should('be.visible')
+
+        cy.createSkillsGroup(1, 1, 1, { enabled: true });
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill2/dependencies');
+        cy.contains('No Dependencies Yet');
         cy.get('[data-cy="depsSelector"]').click();
         cy.get('[data-cy="skillsSelector"] [data-cy="skillsSelector-skillId"]').should('have.length', 1).as('skillIds');
         cy.get('@skillIds').eq(0).contains('skill1');

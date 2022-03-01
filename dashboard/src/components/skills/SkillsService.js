@@ -58,8 +58,11 @@ export default {
       .then((response) => response.data);
   },
   getProjectSkills(projectId, skillNameQuery = null) {
-    const query = skillNameQuery ? `?skillNameQuery=${encodeURIComponent(skillNameQuery)}` : '';
-    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/skills${query}`)
+    let params = '?includeDisabled=true';
+    if (skillNameQuery) {
+      params = `${params}&skillNameQuery=${encodeURIComponent(skillNameQuery)}`;
+    }
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/skills${params}`)
       .then((response) => response.data);
   },
   getProjectSkillsWithoutImportedSkills(projectId) {
