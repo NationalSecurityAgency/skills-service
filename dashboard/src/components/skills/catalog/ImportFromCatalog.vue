@@ -193,12 +193,12 @@ limitations under the License.
 
 <script>
   import SkillAlreadyExistingWarning from '@/components/skills/catalog/SkillAlreadyExistingWarning';
+  import SettingsService from '@/components/settings/SettingsService';
   import CatalogService from './CatalogService';
   import SkillsBTable from '../../utils/table/SkillsBTable';
   import NoContent2 from '../../utils/NoContent2';
   import SkillsSpinner from '../../utils/SkillsSpinner';
   import SkillToImportInfo from './SkillToImportInfo';
-  import SettingsService from '@/components/settings/SettingsService';
 
   export default {
     name: 'ImportFromCatalog',
