@@ -28,8 +28,10 @@ import skills.services.UserEventService
 import skills.storage.model.DayCountItem
 import skills.storage.model.EventType
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillRelDef
 import skills.storage.model.UserEvent
 import skills.storage.repos.SkillDefRepo
+import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.UserEventsRepo
 import spock.lang.Ignore
 import spock.lang.IgnoreRest
@@ -305,10 +307,6 @@ class UserEventSpec extends DefaultIntSpec {
         when:
         List<String> projectIds = [proj.projectId, proj2.projectId]
         List<DayCountItem> user0Results = eventService.getUserEventCountsForUser(userIds[0], testDates.startOfTwoWeeksAgo.toDate(), projectIds)
-        println "userId: ${userIds[0]}, two weeks ago: ${testDates.startOfTwoWeeksAgo.toDate()}"
-        user0Results.each {
-            println it.projectId +":::"+it.count+":::"+it.day
-        }
         List<DayCountItem> user1Results = eventService.getUserEventCountsForUser(userIds[1], testDates.startOfTwoWeeksAgo.toDate(), projectIds)
 
         then:
@@ -467,8 +465,6 @@ class UserEventSpec extends DefaultIntSpec {
         List<String> projectIds = [proj.projectId, proj2.projectId]
         Date queryFrom = testDates.now.toLocalDate().atStartOfDay().minusDays(maxDailyDays).toDate()
         List<DayCountItem> user0Results = eventService.getUserEventCountsForUser(userIds[0], queryFrom, projectIds)
-        println "${projectIds} :: ${queryFrom}"
-        println "${userIds[0]}:::${user0Results[1].day}:::${user0Results[1].projectId}:::${user0Results[1].count}"
         user0Results = user0Results.sort{it.projectId+(Long.MAX_VALUE-it.day.time)}
         List<DayCountItem> user1Results = eventService.getUserEventCountsForUser(userIds[1], queryFrom, projectIds)
         user1Results = user1Results.sort {it.projectId +(Long.MAX_VALUE-it.day.time)}
@@ -1072,7 +1068,6 @@ class UserEventSpec extends DefaultIntSpec {
         Map subj1_skill2 = SkillsFactory.createSkill(42,1,2,0,40, 0)
         Map subj2_skill1 = SkillsFactory.createSkill(42,2,2,0,40, 0)
 
-
         skillsService.createProject(proj)
         skillsService.createSubject(subject)
         skillsService.createSubject(subject2)
@@ -1096,24 +1091,24 @@ class UserEventSpec extends DefaultIntSpec {
         // populate events, need something that will cross a week boundary
         TestDates testDates = new TestDates()
 
-        skillsService.addSkill(subj1_skill1, userIds[0], testDates.now.toDate())
-        skillsService.addSkill(subj1_skill1, userIds[1], testDates.now.toDate())
-        skillsService.addSkill(subj1_skill1, userIds[2], testDates.now.minusYears(3).toDate())
-        skillsService.addSkill(subj1_skill2, userIds[3], testDates.getDateWithinCurrentWeek().toDate())
+        skillsService.addSkill(subj1_skill1, userIds[0], testDates.now.toDate()) // skill1, user1, YES
+        skillsService.addSkill(subj1_skill1, userIds[1], testDates.now.toDate()) // skill1, user2, YES
+        skillsService.addSkill(subj1_skill1, userIds[2], testDates.now.minusYears(3).toDate()) // skill1, user3, NO
+        skillsService.addSkill(subj1_skill2, userIds[3], testDates.getDateWithinCurrentWeek().toDate()) // skill2, user4, NO
 
-        eventService.recordEvent(proj.projectId, subj1_skill1_rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(proj.projectId, subj1_skill1_rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, subj1_skill1_rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY) // skill1, user1, YES
+        eventService.recordEvent(proj.projectId, subj1_skill1_rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY) // skill1, user1, YES
 
         //the above DAILY events should get merged with this weekly event due to overlapping start/end
-        eventService.recordEvent(proj.projectId, subj1_skill1_rawId, userIds[0], testDates.startOfCurrentWeek.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, subj1_skill1_rawId, userIds[0], testDates.startOfCurrentWeek.toDate(), 1, EventType.WEEKLY) // skill1, user1, YES
 
-        eventService.recordEvent(proj.projectId, subj1_skill1_rawId, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
-        eventService.recordEvent(proj.projectId, subj1_skill1_rawId, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, subj1_skill1_rawId, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY) //skill1, user2, YES
+        eventService.recordEvent(proj.projectId, subj1_skill1_rawId, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY) //skill1, user2, YES
 
         // should not be included in metric
-        eventService.recordEvent(proj.projectId, subj2_skill1_rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(proj.projectId, subj2_skill1_rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(proj.projectId, subj2_skill1_rawId, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, subj2_skill1_rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY) //sub2 skill1, user1, NO
+        eventService.recordEvent(proj.projectId, subj2_skill1_rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY) //sub2 skill1, user1, NO
+        eventService.recordEvent(proj.projectId, subj2_skill1_rawId, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY) //sub2, skill1, user1, NO
 
         when:
 
@@ -1368,14 +1363,11 @@ class UserEventSpec extends DefaultIntSpec {
         !eventAfter
     }
 
-    //TODO: add tests for subject counts using imported skills. These are likely broken as well
-
-    @IgnoreRest
     def "daily events for skills imported from the catalog should be reflected in a project/user/skill events"() {
-        Map proj = SkillsFactory.createProject(42)
-        Map subject = SkillsFactory.createSubject(42)
-        Map subj1_skill1 = SkillsFactory.createSkill(42,1,1,0,40, 0)
-        Map subj1_skill2 = SkillsFactory.createSkill(42,1,2,0,40, 0)
+        Map proj = SkillsFactory.createProject(77)
+        Map subject = SkillsFactory.createSubject(77)
+        Map subj1_skill1 = SkillsFactory.createSkill(77,1,1,0,40, 0)
+        Map subj1_skill2 = SkillsFactory.createSkill(77,1,2,0,40, 0)
 
         def proj2 = SkillsFactory.createProject(52)
         def p2subj1 = SkillsFactory.createSubject(52, 1)
@@ -1410,7 +1402,7 @@ class UserEventSpec extends DefaultIntSpec {
         List<DayCountItem> skillCounts = eventService.getUserEventCountsForSkillId(proj.projectId, p2skill1.skillId, testDates.now.minusDays(2).toDate())
         //distinct user counts
         List<DayCountItem> distinctUserCountsForProject = eventService.getDistinctUserCountsForProject(proj.projectId, testDates.now.minusDays(3).toDate())
-        List<DayCountItem> distinctUserCountsForSkill = eventService.getUserEventCountsForSkillId(proj.projectId, p2skill1.skillId, testDates.now.minusDays(3).toDate())
+        List<DayCountItem> distinctUserCountsForSkill = eventService.getDistinctUserCountForSkillId(proj.projectId, p2skill1.skillId, testDates.now.minusDays(3).toDate())
 
         then:
         projectCounts.size() == 3
@@ -1433,9 +1425,9 @@ class UserEventSpec extends DefaultIntSpec {
         userCounts[2].projectId == proj.projectId
         skillCounts.size() == 2
         skillCounts[0].count == 0
-        skillCounts[0].projectId == proj.projectId
+        skillCounts[0].projectId == proj.projectId //because the skill is imported, the exporting project id is returned for this count
         skillCounts[1].count == 1
-        skillCounts[1].projectId == proj.projectId
+        skillCounts[1].projectId == proj.projectId //because the skill is imported, the exporting project id is returned for this count
         skillCounts[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(1).toDate())
         distinctUserCountsForProject.size() == 3
         distinctUserCountsForProject[0].count == 0
@@ -1457,7 +1449,6 @@ class UserEventSpec extends DefaultIntSpec {
         distinctUserCountsForSkill[2].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(2).toDate())
     }
 
-    @IgnoreRest
     def "weekly events for skills imported from the catalog should be reflected in a project/user/skill events"() {
         Map proj = SkillsFactory.createProject(42)
         Map subject = SkillsFactory.createSubject(42)
@@ -1495,62 +1486,231 @@ class UserEventSpec extends DefaultIntSpec {
         List<DayCountItem> userCounts = eventService.getUserEventCountsForUser(user, testDates.startOfTwoWeeksAgo.minusDays(1).toDate(), [proj.projectId])
         List<DayCountItem> projectCounts = eventService.getUserEventCountsForProject(proj.projectId, testDates.startOfTwoWeeksAgo.minusDays(1).toDate())
         List<DayCountItem> skillCounts = eventService.getUserEventCountsForSkillId(proj.projectId, p2skill1.skillId, testDates.startOfTwoWeeksAgo.minusDays(1).toDate())
-        //distinct user counts
-        List<DayCountItem> distinctUserCountsForProject = eventService.getDistinctUserCountsForProject(proj.projectId, testDates.now.minusDays(3).toDate())
-        List<DayCountItem> distinctUserCountsForSkill = eventService.getUserEventCountsForSkillId(proj.projectId, p2skill1.skillId, testDates.now.minusDays(3).toDate())
+        List<DayCountItem> distinctUserCountsForProject = eventService.getDistinctUserCountsForProject(proj.projectId, testDates.startOfTwoWeeksAgo.minusDays(3).toDate())
+        List<DayCountItem> distinctUserCountsForSkill = eventService.getDistinctUserCountForSkillId(proj.projectId, p2skill1.skillId, testDates.startOfTwoWeeksAgo.minusDays(3).toDate())
 
         then:
         projectCounts.size() == 2
         projectCounts[0].count == 0
         projectCounts[0].projectId == proj.projectId
-        projectCounts[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(1).toDate())
-        projectCounts[1].count == 3
+        projectCounts[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.startOfTwoWeeksAgo.toDate())
+        projectCounts[1].count == 4
         projectCounts[1].projectId == proj.projectId
-        projectCounts[2].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(2).toDate())
-        projectCounts[2].count == 1
-        projectCounts[2].projectId == proj.projectId
-        userCounts.size() == 3
+        userCounts.size() == 2
         userCounts[0].count == 0
         userCounts[0].projectId == proj.projectId
-        userCounts[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(1).toDate())
-        userCounts[1].count == 2
+        userCounts[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.startOfTwoWeeksAgo.toDate())
+        userCounts[1].count == 3
         userCounts[1].projectId == proj.projectId
-        userCounts[2].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(2).toDate())
-        userCounts[2].count == 1
-        userCounts[2].projectId == proj.projectId
         skillCounts.size() == 2
         skillCounts[0].count == 0
         skillCounts[0].projectId == proj.projectId
-        skillCounts[1].count == 1
+        skillCounts[1].count == 2
         skillCounts[1].projectId == proj.projectId
-        skillCounts[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(1).toDate())
-        distinctUserCountsForProject.size() == 3
+        skillCounts[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.startOfTwoWeeksAgo.toDate())
+        distinctUserCountsForProject.size() == 2
         distinctUserCountsForProject[0].count == 0
         distinctUserCountsForProject[0].projectId == proj.projectId
         distinctUserCountsForProject[1].count == 2
-        distinctUserCountsForProject[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(1).toDate())
+        distinctUserCountsForProject[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.startOfTwoWeeksAgo.toDate())
         distinctUserCountsForProject[1].projectId == proj.projectId
-        distinctUserCountsForProject[2].count == 1
-        distinctUserCountsForProject[2].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(2).toDate())
-        distinctUserCountsForProject[2].projectId == proj.projectId
-        distinctUserCountsForSkill.size() == 3
+        distinctUserCountsForSkill.size() == 2
         distinctUserCountsForSkill[0].count == 0
         distinctUserCountsForSkill[0].projectId == proj.projectId
         distinctUserCountsForSkill[1].count == 1
         distinctUserCountsForSkill[1].projectId == proj.projectId
-        distinctUserCountsForSkill[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(1).toDate())
-        distinctUserCountsForSkill[2].count == 1
-        distinctUserCountsForSkill[2].projectId == proj.projectId
-        distinctUserCountsForSkill[2].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(2).toDate())
+        distinctUserCountsForSkill[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.startOfTwoWeeksAgo.toDate())
     }
 
-    @IgnoreRest
-    def "subject event metrics should work with imported skills"() {
+    @Autowired
+    SkillRelDefRepo skillRelDefRepo
+
+    def "daily subject event metrics should work with imported skills"() {
+        Map proj = SkillsFactory.createProject(77)
+        Map subject = SkillsFactory.createSubject(77)
+        Map subject2 = SkillsFactory.createSubject(77, 2)
+        Map subj1_skill1 = SkillsFactory.createSkill(77,1,1,0,40, 0)
+        Map subj1_skill2 = SkillsFactory.createSkill(77,1,2,0,40, 0)
+        Map subj2_skill1 = SkillsFactory.createSkill(77,2,5,0,40, 0)
+
+        def proj2 = SkillsFactory.createProject(52)
+        def p2subj1 = SkillsFactory.createSubject(52, 1)
+        def p2skill1 = SkillsFactory.createSkill(52, 1, 99)
+        p2skill1.numPerformToCompletion = 10
+        p2skill1.pointIncrement = 50
+        def p2skill2 = SkillsFactory.createSkill(52, 1, 100)
+        p2skill2.numPerformToCompletion = 10
+        p2skill2.pointIncrement = 50
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subject)
+        skillsService.createSubject(subject2)
+        skillsService.createSkill(subj1_skill1)
+        skillsService.createSkill(subj1_skill2)
+        skillsService.createSkill(subj2_skill1)
+
+        skillsService.createProject(proj2)
+        skillsService.createSubject(p2subj1)
+        skillsService.createSkill(p2skill1)
+        skillsService.createSkill(p2skill2)
+        skillsService.exportSkillToCatalog(proj2.projectId, p2skill1.skillId)
+        skillsService.exportSkillToCatalog(proj2.projectId, p2skill2.skillId)
+
+        skillsService.importSkillFromCatalog(proj.projectId, subject.subjectId, proj2.projectId, p2skill1.skillId) //import proj2.skill1 into proj.subject1
+        skillsService.importSkillFromCatalog(proj.projectId, subject2.subjectId, proj2.projectId, p2skill2.skillId) //import proj2.skill2 into proj.subject2
+
+        TestDates testDates = new TestDates()
+
+        def users = getRandomUsers(3)
+        def user = users[0]
+        def user2 = users[1]
+        def user3 = users[2]
+        skillsService.addSkill([projectId: proj2.projectId, skillId: p2skill1.skillId], user, testDates.now.minusDays(2).toDate()) //subject1
+        skillsService.addSkill([projectId: proj2.projectId, skillId: p2skill1.skillId], user, testDates.now.minusDays(1).toDate()) //subject 1
+        skillsService.addSkill([projectId: proj2.projectId, skillId: p2skill2.skillId], user3, testDates.now.minusDays(1).toDate())
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj1_skill1.skillId], user, testDates.now.minusDays(1).toDate()) //subject 1
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj1_skill1.skillId], users[1], testDates.now.minusDays(1).toDate()) //subject 1
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj1_skill1.skillId], user3, testDates.now.minusDays(2).toDate()) //subject 1
+
+        //2 days, subj1, 2 events
+        //1 day, subj 1, 3
+
         when:
-        true:
+        eventService.compactDailyEvents()
+        List<DayCountItem> subject1Counts = eventService.getUserEventCountsForSkillId(proj.projectId, subject.subjectId, testDates.now.minusDays(3).toDate())
+        List<DayCountItem> subject2Counts = eventService.getUserEventCountsForSkillId(proj.projectId, subject2.subjectId, testDates.now.minusDays(3).toDate())
+        List<DayCountItem> distinctUserCountsForSubject1 = eventService.getDistinctUserCountForSkillId(proj.projectId, subject.subjectId, testDates.now.minusDays(3).toDate())
+        List<DayCountItem> distinctUserCountsForSubject2 = eventService.getDistinctUserCountForSkillId(proj.projectId, subject2.subjectId, testDates.now.minusDays(3).toDate())
 
         then:
-        false
+        subject1Counts[0].count == 0
+        subject1Counts[0].projectId == proj.projectId
+        subject1Counts[1].count == 3
+        subject1Counts[1].projectId == proj.projectId
+        subject1Counts[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(1).toDate())
+        subject1Counts[2].count == 2
+        subject1Counts[2].projectId == proj.projectId
+        subject1Counts[2].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(2).toDate())
+
+        subject2Counts[0].count == 0
+        subject2Counts[0].projectId == proj.projectId
+        subject2Counts[1].count == 1
+        subject2Counts[1].projectId == proj.projectId
+        subject2Counts[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(1).toDate())
+        subject2Counts[2].count == 0
+        subject2Counts[2].projectId == proj.projectId
+        subject2Counts[2].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(2).toDate())
+
+        distinctUserCountsForSubject1[0].count == 0
+        distinctUserCountsForSubject1[0].projectId == proj.projectId
+        distinctUserCountsForSubject1[1].count == 2
+        distinctUserCountsForSubject1[1].projectId == proj.projectId
+        distinctUserCountsForSubject1[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(1).toDate())
+        distinctUserCountsForSubject1[2].count == 2
+        distinctUserCountsForSubject1[2].projectId == proj.projectId
+        distinctUserCountsForSubject1[2].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(2).toDate())
+
+        distinctUserCountsForSubject2[0].count == 0
+        distinctUserCountsForSubject2[0].projectId == proj.projectId
+        distinctUserCountsForSubject2[1].count == 1
+        distinctUserCountsForSubject2[1].projectId == proj.projectId
+        distinctUserCountsForSubject2[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(1).toDate())
+        distinctUserCountsForSubject2[2].count == 0
+        distinctUserCountsForSubject2[2].projectId == proj.projectId
+        distinctUserCountsForSubject2[2].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(2).toDate())
+    }
+
+    def "weekly subject event metrics should work with imported skills"() {
+        Map proj = SkillsFactory.createProject(42)
+        Map subject = SkillsFactory.createSubject(42)
+        Map subject2 = SkillsFactory.createSubject(42, 2)
+        Map subj1_skill1 = SkillsFactory.createSkill(42,1,1,0,40, 0)
+        Map subj1_skill2 = SkillsFactory.createSkill(42,1,2,0,40, 0)
+        Map subj2_skill1 = SkillsFactory.createSkill(42,2,5,0,40, 0)
+
+        def proj2 = SkillsFactory.createProject(52)
+        def p2subj1 = SkillsFactory.createSubject(52, 1)
+        def p2skill1 = SkillsFactory.createSkill(52, 1, 99)
+        p2skill1.numPerformToCompletion = 10
+        p2skill1.pointIncrement = 50
+        def p2skill2 = SkillsFactory.createSkill(52, 1, 100)
+        p2skill2.numPerformToCompletion = 10
+        p2skill2.pointIncrement = 50
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subject)
+        skillsService.createSubject(subject2)
+        skillsService.createSkill(subj1_skill1)
+        skillsService.createSkill(subj1_skill2)
+        skillsService.createSkill(subj2_skill1)
+
+        skillsService.createProject(proj2)
+        skillsService.createSubject(p2subj1)
+        skillsService.createSkill(p2skill1)
+        skillsService.createSkill(p2skill2)
+        skillsService.exportSkillToCatalog(proj2.projectId, p2skill1.skillId)
+        skillsService.exportSkillToCatalog(proj2.projectId, p2skill2.skillId)
+        skillsService.importSkillFromCatalog(proj.projectId, subject.subjectId, proj2.projectId, p2skill1.skillId)
+        skillsService.importSkillFromCatalog(proj.projectId, subject2.subjectId, proj2.projectId, p2skill2.skillId)
+
+        TestDates testDates = new TestDates()
+
+        def users = getRandomUsers(3)
+        def user = users[0]
+        def user2 = users[1]
+        def user3 = users[2]
+        skillsService.addSkill([projectId: proj2.projectId, skillId: p2skill1.skillId], user, testDates.startOfCurrentWeek.toDate()) //subject 1
+        skillsService.addSkill([projectId: proj2.projectId, skillId: p2skill1.skillId], user, testDates.startOfTwoWeeksAgo.toDate()) //subject 1
+        skillsService.addSkill([projectId: proj2.projectId, skillId: p2skill2.skillId], user3, testDates.startOfCurrentWeek.toDate())
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj1_skill1.skillId], user, testDates.startOfTwoWeeksAgo.toDate()) //subject 1
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj1_skill1.skillId], user2, testDates.startOfTwoWeeksAgo.toDate()) //subject 1
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj1_skill1.skillId], user3, testDates.startOfCurrentWeek.toDate()) //subject 1
+
+        //2 weeks ago: subj1 3 events, 2 unique users
+        //current week: subj1 2 events, 2 unique users
+        //current week:L subj2 1 event, 1 unique user
+
+        //shouldn't count towards query results
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj1_skill1.skillId], user3, testDates.startOfCurrentWeek.minusWeeks(3).toDate()) //subject 1
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj1_skill1.skillId], user2, testDates.startOfCurrentWeek.minusWeeks(5).toDate()) //subject 1
+        skillsService.addSkill([projectId: proj2.projectId, skillId: p2skill2.skillId], user, testDates.startOfCurrentWeek.minusWeeks(30).toDate())
+
+        when:
+        eventService.compactDailyEvents()
+        List<DayCountItem> subject1Counts = eventService.getUserEventCountsForSkillId(proj.projectId, subject.subjectId, testDates.startOfTwoWeeksAgo.minusDays(7).toDate())
+        List<DayCountItem> subject2Counts = eventService.getUserEventCountsForSkillId(proj.projectId, subject2.subjectId, testDates.startOfTwoWeeksAgo.minusDays(7).toDate())
+        List<DayCountItem> distinctUserCountsForSubject1 = eventService.getDistinctUserCountForSkillId(proj.projectId, subject.subjectId, testDates.startOfTwoWeeksAgo.minusDays(7).toDate())
+        List<DayCountItem> distinctUserCountsForSubject2 = eventService.getDistinctUserCountForSkillId(proj.projectId, subject2.subjectId, testDates.startOfTwoWeeksAgo.minusDays(7).toDate())
+
+        then:
+        subject1Counts.size() == 2
+        subject1Counts[0].count == 2
+        subject1Counts[0].projectId == proj.projectId
+        subject1Counts[0].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.startOfCurrentWeek.toDate())
+        subject1Counts[1].count == 3
+        subject1Counts[1].projectId == proj.projectId
+        subject1Counts[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.startOfTwoWeeksAgo.toDate())
+
+        subject2Counts[0].count == 1
+        subject2Counts[0].projectId == proj.projectId
+        subject2Counts[0].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.startOfCurrentWeek.toDate())
+        subject2Counts[1].count == 0
+        subject2Counts[1].projectId == proj.projectId
+        subject2Counts[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.startOfTwoWeeksAgo.toDate())
+
+        distinctUserCountsForSubject1[0].count == 2
+        distinctUserCountsForSubject1[0].projectId == proj.projectId
+        distinctUserCountsForSubject1[0].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.startOfCurrentWeek.toDate())
+        distinctUserCountsForSubject1[1].count == 2
+        distinctUserCountsForSubject1[1].projectId == proj.projectId
+        distinctUserCountsForSubject1[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.startOfTwoWeeksAgo.toDate())
+
+        distinctUserCountsForSubject2[0].count == 1
+        distinctUserCountsForSubject2[0].projectId == proj.projectId
+        distinctUserCountsForSubject2[0].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.startOfCurrentWeek.toDate())
+        distinctUserCountsForSubject2[1].count == 0
+        distinctUserCountsForSubject2[1].projectId == proj.projectId
+        distinctUserCountsForSubject2[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.startOfTwoWeeksAgo.toDate())
     }
 
 

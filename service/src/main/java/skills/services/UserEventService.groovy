@@ -90,7 +90,7 @@ class UserEventService {
         }
 
         Validate.isTrue(ALLOWABLE_CONTAINER_TYPES.contains(skillDef.type), "Unsupported ContainerType [${skillDef.type}]")
-
+        //TODO: fix all these
         List<DayCountItem> results
         Integer rawId = skillDef.id
         if (EventType.DAILY == eventType) {
@@ -138,7 +138,7 @@ class UserEventService {
 
         List<DayCountItem> results
         //only applicable to skills
-        Integer rawId = skillDef.copiedFrom ? skillDef.copiedFrom : skillDef.id
+        Integer rawId = skillDef.id
 
         if (EventType.DAILY == eventType) {
             Stream<DayCountItem> stream

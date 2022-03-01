@@ -36,85 +36,199 @@ import java.util.stream.Stream
 interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
 
     @Nullable
-    @Query(value="""
-        select ue.weekNumber as weekNumber, sum(ue.count) as count from UserEvent ue
-        where ue.eventTime >= :start AND ue.skillRefId = :skillRefId
-        group by ue.weekNumber
-        order by ue.weekNumber desc
-    """)
+    @Query(value="""SELECT min(all_events.project_id) as projectId, all_events.week_number as weekNumber, sum(all_events.count) as count FROM
+        (
+            SELECT uue.user_id AS user_id,
+                   def.project_id AS project_id,
+                   uue.skill_ref_id AS skill_ref_id,
+                   uue.event_time AS event_time,
+                   uue.event_type AS event_type,
+                   uue.count AS count,
+                   uue.week_number AS week_number
+            FROM user_events uue INNER JOIN (
+                    select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
+                    from skill_definition sd 
+                    where sd.type = 'Skill' and sd.id = :skillRefId
+                ) def ON uue.skill_ref_id = def.id
+            WHERE
+                    uue.event_time >= :start 
+        ) all_events
+        GROUP BY all_events.week_number
+        ORDER BY all_events.week_number DESC
+    """, nativeQuery = true)
     Stream<WeekCountItem> getEventCountForSkillGroupedByWeek(@Param("skillRefId") Integer skillRefId, @Param("start") Date start)
 
     @Nullable
-    @Query(value="""
-        select min(ue.projectId) as projectId, ue.eventTime as day, sum(ue.count) as count from UserEvent ue
-        where ue.eventTime >= :start AND ue.skillRefId = :skillRefId AND ue.eventType = :type 
-        group by ue.eventTime
-        order by ue.eventTime desc
-    """)
+    @Query(value="""SELECT min(all_events.project_id) as projectId, all_events.event_time as day, sum(all_events.count) as count FROM
+        (
+            SELECT uue.user_id AS user_id,
+                   def.project_id AS project_id,
+                   uue.skill_ref_id AS skill_ref_id,
+                   uue.event_time AS event_time,
+                   uue.event_type AS event_type,
+                   uue.count AS count,
+                   uue.week_number AS week_number
+            FROM user_events uue INNER JOIN (
+                    select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
+                    from skill_definition sd 
+                    where sd.type = 'Skill' and sd.id = :skillRefId
+                ) def ON uue.skill_ref_id = def.id
+            WHERE
+                    uue.event_time >= :start AND 
+                    uue.event_type = :#{#type.name()}
+        ) all_events
+        GROUP BY all_events.event_time
+        ORDER BY all_events.event_time DESC
+    """, nativeQuery = true)
     Stream<DayCountItem> getEventCountForSkill(@Param("skillRefId") Integer skillRefId, @Param("start") Date start, @Param("type") EventType type)
 
     @Nullable
-    @Query(value="""
-        select ue.eventTime as day, count(ue.userId) as count from UserEvent ue
-        where ue.eventTime > :start AND ue.skillRefId = :skillRefId AND ue.eventType = :type 
-        group by ue.eventTime
-        order by ue.eventTime desc
-    """)
+    @Query(value="""SELECT min(event_join.project_id) as projectId, event_join.event_time as day, count(distinct event_join.user_id) as count FROM
+        (
+            SELECT uue.user_id AS user_id,
+                   def.project_id AS project_id,
+                   uue.skill_ref_id AS skill_ref_id,
+                   uue.event_time AS event_time,
+                   uue.event_type AS event_type,
+                   uue.count AS count,
+                   uue.week_number AS week_number
+            FROM user_events uue 
+            INNER JOIN (
+                select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
+                from skill_definition sd 
+                where sd.type = 'Skill' and (sd.id = :skillRefId or sd.copied_from_skill_ref = :skillRefId)
+            ) def ON uue.skill_ref_id = def.id
+            WHERE
+                uue.event_time >= :start AND
+                uue.event_type = :#{#type.name()}
+        ) event_join
+        GROUP BY event_join.event_time
+        ORDER BY event_join.event_time DESC
+    """, nativeQuery = true)
     Stream<DayCountItem> getDistinctUserCountForSkill(@Param("skillRefId") Integer skillRefId, @Param("start") Date start, @Param("type") EventType type)
 
     @Nullable
-    @Query(value="""
-        select ue.weekNumber as weekNumber, count(distinct ue.userId) as count from UserEvent ue
-        where ue.eventTime >= :start AND ue.skillRefId = :skillRefId
-        group by ue.weekNumber
-        order by ue.weekNumber desc
-    """)
+    @Query(value="""SELECT min(event_join.project_id) as projectId, event_join.week_number as weekNumber, count(distinct event_join.user_id) as count FROM
+        (
+            SELECT uue.user_id AS user_id,
+                   def.project_id AS project_id,
+                   uue.skill_ref_id AS skill_ref_id,
+                   uue.event_time AS event_time,
+                   uue.event_type AS event_type,
+                   uue.count AS count,
+                   uue.week_number AS week_number
+            FROM user_events uue 
+            INNER JOIN (
+                select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
+                from skill_definition sd 
+                where sd.type = 'Skill' and (sd.id = :skillRefId or sd.copied_from_skill_ref = :skillRefId)
+            ) def ON uue.skill_ref_id = def.id
+            WHERE
+                uue.event_time >= :start
+        ) event_join
+        GROUP BY event_join.week_number
+        ORDER BY event_join.week_number DESC
+    """, nativeQuery = true)
     Stream<WeekCountItem> getDistinctUserCountForSkillGroupedByWeek(@Param("skillRefId") Integer skillRefId, @Param("start") Date start)
 
-    @Query(value="""
-        select min(ue.projectId) as projectId, ue.eventTime as day, sum(ue.count) as count from UserEvent ue
-        where ue.eventTime > :start AND ue.eventType = :type AND 
-        ue.skillRefId in (SELECT child.id FROM SkillRelDef where parent.id = :skillRefId)
-        group by ue.eventTime
-        order by ue.eventTime desc
-    """)
-    Stream<DayCountItem> getEventCountForSubject(@Param("skillRefId") Integer skillRefId, @Param("start") Date start, @Param("type") EventType type)
+    @Query(value="""select min(all_events.project_id) as projectId, all_events.event_time as day, sum(all_events.count) as count from
+         (
+            SELECT uue.user_id AS user_id,
+                   def.project_id AS project_id,
+                   uue.skill_ref_id AS skill_ref_id,
+                   uue.event_time AS event_time,
+                   uue.event_type AS event_type,
+                   uue.count AS count,
+                   uue.week_number AS week_number
+            FROM user_events uue 
+            INNER JOIN (
+                select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
+                from skill_definition sd 
+                where sd.type = 'Skill' and 
+                sd.id in (select rel.child_ref_id from skill_relationship_definition rel where rel.parent_ref_id = :subjectRawId)
+            ) def ON uue.skill_ref_id = def.id
+            WHERE
+                uue.event_time >= :start AND
+                uue.event_type = :#{#type.name()}
+        ) all_events
+        group by all_events.event_time 
+        order by all_events.event_time desc
+    """, nativeQuery=true)
+    Stream<DayCountItem> getEventCountForSubject(@Param("subjectRawId") Integer subjectRawId, @Param("start") Date start, @Param("type") EventType type)
 
     @Nullable
-    @Query(value="""
-        select ue.weekNumber as weekNumber, sum(ue.count) as count from UserEvent ue
-        where ue.eventTime >= :start AND ue.skillRefId in (SELECT child.id FROM SkillRelDef where parent.id = :skillRefId)
-        group by ue.weekNumber
-        order by ue.weekNumber desc
-    """)
-    Stream<WeekCountItem> getEventCountForSubjectGroupedByWeek(@Param("skillRefId") Integer skillRefId, @Param("start") Date start)
+    @Query(value="""select min(all_events.project_id) as projectId, all_events.week_number as weekNumber, sum(all_events.count) as count from
+         (
+            SELECT uue.user_id AS user_id,
+                   def.project_id AS project_id,
+                   uue.skill_ref_id AS skill_ref_id,
+                   uue.event_time AS event_time,
+                   uue.event_type AS event_type,
+                   uue.count AS count,
+                   uue.week_number AS week_number
+            FROM user_events uue 
+            INNER JOIN (
+                select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
+                from skill_definition sd 
+                where sd.type = 'Skill' and 
+                sd.id in (select rel.child_ref_id from skill_relationship_definition rel where rel.parent_ref_id = :subjectRawId)
+            ) def ON uue.skill_ref_id = def.id
+            WHERE
+                uue.event_time >= :start
+        ) all_events
+        group by all_events.week_number 
+        order by all_events.week_number desc
+    """, nativeQuery = true)
+    Stream<WeekCountItem> getEventCountForSubjectGroupedByWeek(@Param("subjectRawId") Integer subjectRawId, @Param("start") Date start)
 
-
-    @Query(value="""
-        select ue.weekNumber as weekNumber, count(distinct ue.userId) as count from UserEvent ue
-        where ue.eventTime >= :start AND
-        ue.skillRefId in (SELECT case when child.copiedFrom is not null then child.copiedFrom else child.id end as id FROM SkillRelDef where parent.id = :skillRefId)
-        group by ue.weekNumber
-        order by ue.weekNumber desc
-    """)
+    @Query(value="""select min(all_events.project_id) as projectId, all_events.week_number as weekNumber, count(distinct all_events.user_id) as count from
+         (
+            SELECT uue.user_id AS user_id,
+                   def.project_id AS project_id,
+                   uue.skill_ref_id AS skill_ref_id,
+                   uue.event_time AS event_time,
+                   uue.event_type AS event_type,
+                   uue.count AS count,
+                   uue.week_number AS week_number
+            FROM user_events uue 
+            INNER JOIN (
+                select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
+                from skill_definition sd 
+                where sd.type = 'Skill' and 
+                sd.id in (select rel.child_ref_id from skill_relationship_definition rel where rel.parent_ref_id = :skillRefId)
+            ) def ON uue.skill_ref_id = def.id
+            WHERE
+                uue.event_time >= :start
+        ) all_events
+        group by all_events.week_number 
+        order by all_events.week_number desc
+    """, nativeQuery = true)
     Stream<WeekCountItem> getDistinctUserCountForSubjectGroupedByWeek(@Param("skillRefId") Integer skillRefId, @Param("start") Date start)
 
-    @Query(value="""
-        select new skills.storage.model.EventCount(ue.eventTime, count(distinct ue.userId), ue.eventType) from UserEvent ue
-        where ue.eventTime > :start AND
-        ue.skillRefId in (SELECT child.id FROM SkillRelDef where parent.id = :skillRefId)
-        group by ue.eventTime, ue.eventType
-        order by ue.eventTime desc
-    """)
-    Stream<EventCount> getDistinctUserCountForSubject(@Param("skillRefId") Integer skillRefId, @Param("start") Date start)
-
-    @Query(value="""
-        select ue.eventTime as day, count(distinct ue.userId) as count from UserEvent ue
-        where ue.eventTime > :start AND ue.eventType = :type AND 
-        ue.skillRefId in (SELECT case when child.copiedFrom is not null then child.copiedFrom else child.id end as id FROM SkillRelDef where parent.id = :skillRefId)
-        group by ue.eventTime
-        order by ue.eventTime desc
-    """)
+    @Query(value="""select min(all_events.project_id) as projectId, all_events.event_time as day, count(distinct all_events.user_id) as count from
+         (
+            SELECT uue.user_id AS user_id,
+                   def.project_id AS project_id,
+                   uue.skill_ref_id AS skill_ref_id,
+                   uue.event_time AS event_time,
+                   uue.event_type AS event_type,
+                   uue.count AS count,
+                   uue.week_number AS week_number
+            FROM user_events uue 
+            INNER JOIN (
+                select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
+                from skill_definition sd 
+                where sd.type = 'Skill' and 
+                sd.id in (select rel.child_ref_id from skill_relationship_definition rel where rel.parent_ref_id = :skillRefId)
+            ) def ON uue.skill_ref_id = def.id
+            WHERE
+                uue.event_time > :start AND
+                uue.event_type = :#{#type.name()}
+        ) all_events
+        group by all_events.event_time 
+        order by all_events.event_time desc
+        
+    """, nativeQuery = true)
     Stream<DayCountItem> getDistinctUserCountForSubject(@Param("skillRefId") Integer skillRefId, @Param("start") Date start, @Param("type") EventType type)
 
 
@@ -135,7 +249,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                 where sd.type = 'Skill' and sd.project_id = :projectId
             ) def ON uue.skill_ref_id = def.id
             WHERE
-                uue.event_time > :start AND
+                uue.event_time >= :start AND
                 uue.event_type = :#{#type.name()}
         ) all_events
         group by all_events.event_time 
@@ -143,13 +257,27 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
     """, nativeQuery = true)
     Stream<DayCountItem> getEventCountForProject(@Param("projectId") String projectId, @Param("start") Date start, @Param("type") EventType type)
 
-    @Query(value="""
-        select min(ue.projectId) as projectId, ue.weekNumber as weekNumber, sum(ue.count) as count from UserEvent ue
-        where ue.eventTime >= :start AND
-        ue.skillRefId in (SELECT case when sd.copiedFrom is not null then sd.copiedFrom else sd.id end as id FROM SkillDef sd WHERE sd.projectId = :projectId AND sd.type = 'Skill')   
-        group by ue.weekNumber
-        order by ue.weekNumber desc
-    """)
+    @Query(value="""select min(all_events.project_id) as projectId, all_events.week_number as weekNumber, sum(all_events.count) as count from
+         (
+            SELECT uue.user_id AS user_id,
+                   def.project_id AS project_id,
+                   uue.skill_ref_id AS skill_ref_id,
+                   uue.event_time AS event_time,
+                   uue.event_type AS event_type,
+                   uue.count AS count,
+                   uue.week_number AS week_number
+            FROM user_events uue 
+            INNER JOIN (
+                select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
+                from skill_definition sd 
+                where sd.type = 'Skill' and sd.project_id = :projectId
+            ) def ON uue.skill_ref_id = def.id
+            WHERE
+                uue.event_time >= :start
+        ) all_events
+        group by all_events.week_number 
+        order by all_events.week_number desc
+    """, nativeQuery = true)
     Stream<WeekCountItem> getEventCountForProjectGroupedByWeek(@Param("projectId") String projectId, @Param("start") Date start)
 
     @Query(value="""
