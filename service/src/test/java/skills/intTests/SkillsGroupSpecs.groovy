@@ -1357,7 +1357,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         child2Disabled.enabled == false
     }
 
-    void "skills under SkillsGroup are returned in project's skills endpoint" () {
+    void "enabled skills under SkillsGroup are returned in project's skills endpoint" () {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skillsGroup = SkillsFactory.createSkillsGroup()
@@ -1375,9 +1375,17 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         when:
         def res = skillsService.getSkillsForProject(proj.projectId)
 
+        skillsGroup.enabled = true
+        skillsService.createSkill(skillsGroup)
+
+        def res1 = skillsService.getSkillsForProject(proj.projectId)
+
         then:
-        res.size() == 3
-        res.collect { it.skillId }.sort() == [ allSkills[1].skillId, allSkills[2].skillId, allSkills[3].skillId, ]
+        res.size() == 1
+        res.collect { it.skillId }.sort() == [ allSkills[3].skillId, ]
+
+        res1.size() == 3
+        res1.collect { it.skillId }.sort() == [ allSkills[1].skillId, allSkills[2].skillId, allSkills[3].skillId, ]
     }
 
     void "enabled skills under SkillsGroup are available to be used as dependencies" () {
