@@ -56,7 +56,12 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
             and p.skillRefId in (select case when copiedFrom is not null then copiedFrom else id end as id from SkillDef where type = 'Skill' and projectId = ?1)''')
     Integer countDistinctSkillIdByProjectIdAndUserId(String projectId, String userId)
 
-    @Query('SELECT COUNT(DISTINCT p.userId) from UserPerformedSkill p where p.projectId=?1 and p.skillId = ?2')
+    @Query('''SELECT COUNT(DISTINCT p.userId) from UserPerformedSkill p 
+                where p.skillRefId in (
+                    select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id
+                    from SkillDef s
+                    where 
+                    s.projectId=?1 and s.skillId = ?2)''')
     Integer countDistinctUserIdByProjectIdAndSkillId(String projectId, String skillId)
 
     @Query(''' select DISTINCT(sdParent)
@@ -110,8 +115,11 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
     @Query('''select CAST(ups.performedOn as date) as day, count(ups.id) as count
         from UserPerformedSkill ups
         where
-        ups.projectId = :projectId and
-        ups.skillId=:skillId and
+        ups.skillRefId in (
+            select case when copiedFrom is not null then copiedFrom else id end as id 
+            from SkillDef 
+            where type = 'Skill' and skillId = :skillId and projectId = :projectId
+        ) and
         ups.performedOn > :from
         group by CAST(ups.performedOn as date)
     ''')

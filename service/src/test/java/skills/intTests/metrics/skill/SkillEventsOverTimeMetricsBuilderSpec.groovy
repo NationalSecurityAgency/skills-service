@@ -137,6 +137,77 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
         res[9].countsByDay.collect { it.num } == []
     }
 
+    def "number events over time - catalog skills"() {
+        List<String> users = getRandomUsers(10)
+        def proj = SkillsFactory.createProject()
+        def proj2 = SkillsFactory.createProject(2)
+        def subj2 = SkillsFactory.createSubject(2, 2)
+        List<Map> skills = SkillsFactory.createSkills(10)
+        skills.each { it.pointIncrement = 100; it.numPerformToCompletion = 1 }
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(SkillsFactory.createSubject())
+        skillsService.createSkills(skills)
+        skillsService.createProject(proj2)
+        skillsService.createSubject(subj2)
+        skills.each {
+            skillsService.exportSkillToCatalog(proj.projectId, it.skillId)
+            skillsService.importSkillFromCatalog(proj2.projectId, subj2.subjectId, proj.projectId, it.skillId)
+        }
+
+        TestDates testDates = new TestDates()
+
+        List<Date> days = [
+                testDates.startOfTwoWeeksAgo.toDate(),
+                testDates.startOfTwoWeeksAgo.plusDays(2).toDate(),
+                testDates.startOfTwoWeeksAgo.plusDays(4).toDate(),
+                testDates.startOfTwoWeeksAgo.plusDays(6).toDate(),
+                testDates.startOfCurrentWeek.toDate()]
+
+        days.eachWithIndex { Date date, int index ->
+            users.subList(0, index).each { String user ->
+                skills.subList(0, index).each { skill ->
+                    skillsService.addSkill([projectId: proj.projectId, skillId: skill.skillId], user, date)
+                }
+            }
+        }
+
+        Map props = [:]
+        props[MetricsParams.P_SKILL_ID] = skills[0].skillId
+        props[MetricsParams.P_START_TIMESTAMP] = LocalDateTime.now().minusDays(7).toDate().time
+
+        when:
+        List res = skills.collect {
+            props[MetricsParams.P_SKILL_ID] = it.skillId
+            return skillsService.getMetricsData(proj2.projectId, metricsId, props)
+        }
+
+        then:
+        res[0].countsByDay.collect { it.num } == [3, 1]
+        res[0].countsByDay.collect { new Date(it.timestamp) } == [testDates.startOfTwoWeeksAgo.toDate(), testDates.startOfCurrentWeek.toDate()]
+        res[0].allEvents
+
+        res[1].countsByDay.collect { it.num } == [3, 1]
+        res[1].countsByDay.collect { new Date(it.timestamp) } == [testDates.startOfTwoWeeksAgo.toDate(), testDates.startOfCurrentWeek.toDate()]
+        res[1].allEvents
+
+        res[2].countsByDay.collect { it.num } == [3, 1]
+        res[2].countsByDay.collect { new Date(it.timestamp) } == [testDates.startOfTwoWeeksAgo.toDate(), testDates.startOfCurrentWeek.toDate()]
+        res[2].allEvents
+
+        res[3].countsByDay.collect { it.num } == [4]
+        res[3].countsByDay.collect { new Date(it.timestamp) } == [testDates.startOfCurrentWeek.toDate()]
+        res[3].allEvents
+
+        res[4].countsByDay.collect { it.num } == []
+
+        res[5].countsByDay.collect { it.num } == []
+        res[6].countsByDay.collect { it.num } == []
+        res[7].countsByDay.collect { it.num } == []
+        res[8].countsByDay.collect { it.num } == []
+        res[9].countsByDay.collect { it.num } == []
+    }
+
     def "number events over time - daily metrics"() {
         List<String> users = getRandomUsers(3)
         def proj = SkillsFactory.createProject()
@@ -186,6 +257,67 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
 
     }
 
+    def "number events over time - daily metrics/ - catalog skills"() {
+        List<String> users = getRandomUsers(3)
+        def proj = SkillsFactory.createProject()
+        def proj2 = SkillsFactory.createProject(2)
+        def subj2 = SkillsFactory.createSubject(2, 2)
+        List<Map> skills = SkillsFactory.createSkills(3)
+        skills.each { it.pointIncrement = 100; it.numPerformToCompletion = 2 }
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(SkillsFactory.createSubject())
+        skillsService.createSkills(skills)
+        skillsService.createProject(proj2)
+        skillsService.createSubject(subj2)
+
+        skills.each {
+            skillsService.exportSkillToCatalog(proj.projectId, it.skillId)
+            skillsService.importSkillFromCatalog(proj2.projectId, subj2.subjectId, proj.projectId, it.skillId)
+        }
+
+        TestDates testDates = new TestDates()
+
+        List<Date> days = [
+                testDates.now.minusDays(2).toDate(),
+                testDates.now.minusDays(1).toDate(),
+                testDates.now.toDate(),
+        ]
+
+        days.eachWithIndex { Date date, int index ->
+            users.subList(0, index).each { String user ->
+                skills.subList(0, index).each { skill ->
+                    skillsService.addSkill([projectId: proj.projectId, skillId: skill.skillId], user, date)
+                }
+            }
+        }
+
+        Map props = [:]
+        props[MetricsParams.P_SKILL_ID] = skills[0].skillId
+        props[MetricsParams.P_START_TIMESTAMP] = LocalDateTime.now().minusDays(2).toDate().time
+
+        //when skills are imported from the catalog, user performed skill events are only recorded against the original exported skill
+        //(i.e., no user performed skill event exists for each imported version), it is expected that requests that involve user performed skills
+        //will return all user performed skill events saved against the original exporting skill when a request is made for user performed skill
+        //events involving an IMPORTED copy of that skill
+        when:
+        List res = skills.collect {
+            props[MetricsParams.P_SKILL_ID] = it.skillId
+            return skillsService.getMetricsData(proj2.projectId, metricsId, props)
+        }
+
+        then:
+        res[0].countsByDay.collect { it.num } == [1, 2]
+        res[0].countsByDay.collect { new Date(it.timestamp) } == [StartDateUtil.computeStartDate(days[1], EventType.DAILY), StartDateUtil.computeStartDate(days[2], EventType.DAILY)]
+        res[0].allEvents
+
+        res[1].countsByDay.collect { it.num } == [0, 2]
+        res[1].countsByDay.collect { new Date(it.timestamp) } == [StartDateUtil.computeStartDate(days[1], EventType.DAILY), StartDateUtil.computeStartDate(days[2], EventType.DAILY)]
+        res[1].allEvents
+
+        res[2].countsByDay == []
+    }
+
     def "number of applied events and total events over time for project"() {
         List<String> users = getRandomUsers(10)
         def proj = SkillsFactory.createProject()
@@ -217,6 +349,51 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
         List res = skills.collect {
             props[MetricsParams.P_SKILL_ID] = it.skillId
             return skillsService.getMetricsData(proj.projectId, metricsId, props)
+        }
+
+        then:
+        res[0].countsByDay.collect { it.num }.sum() == 20
+        res[0].allEvents.collect { it.num }.sum() == 60
+    }
+
+    def "number of applied events and total events over time for project - catalog skill"() {
+        List<String> users = getRandomUsers(10)
+        def proj = SkillsFactory.createProject()
+        def proj2 = SkillsFactory.createProject(2)
+        def subj2 = SkillsFactory.createSubject(2, 2)
+        List<Map> skills = SkillsFactory.createSkills(1)
+        skills.each { it.pointIncrement = 100; it.numPerformToCompletion = 2 }
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(SkillsFactory.createSubject())
+        skillsService.createSkills(skills)
+        skillsService.createProject(proj2)
+        skillsService.createSubject(subj2)
+
+        skillsService.exportSkillToCatalog(proj.projectId, skills[0].skillId)
+        skillsService.importSkillFromCatalog(proj2.projectId, subj2.subjectId, proj.projectId, skills[0].skillId)
+
+        List<Date> days
+
+        use(TimeCategory) {
+            days = (5..0).collect { int day -> day.days.ago }
+            days.eachWithIndex { Date date, int index ->
+                users.each {String user ->
+                    skills.each { skill ->
+                        skillsService.addSkill([projectId: proj.projectId, skillId: skill.skillId], user, date)
+                    }
+                }
+            }
+        }
+
+        Map props = [:]
+        props[MetricsParams.P_SKILL_ID] = skills[0].skillId
+        props[MetricsParams.P_START_TIMESTAMP] = LocalDateTime.now().minusDays(7).toDate().time
+
+        when:
+        List res = skills.collect {
+            props[MetricsParams.P_SKILL_ID] = it.skillId
+            return skillsService.getMetricsData(proj2.projectId, metricsId, props)
         }
 
         then:
