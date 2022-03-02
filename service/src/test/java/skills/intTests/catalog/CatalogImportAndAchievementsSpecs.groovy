@@ -15,14 +15,16 @@
  */
 package skills.intTests.catalog
 
+import groovy.json.JsonOutput
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.SkillsFactory
 import skills.services.LevelDefinitionStorageService
 import skills.storage.model.UserAchievement
+import skills.storage.model.UserEvent
+import skills.storage.model.UserPerformedSkill
 import skills.storage.model.UserPoints
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
-import skills.storage.repos.UserPointsRepo
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -36,9 +38,6 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
 
     @Autowired
     SkillDefRepo skillDefRepo
-
-    @Autowired
-    UserPointsRepo userPointsRepo
 
     def "reporting original skill event achieves level in all of the imported projects"() {
         def project1 = createProject(1)
@@ -167,6 +166,122 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
         skillsService.getUserLevel(project3.projectId, users[3]) == 3
         getLevels(users[3], project3.projectId) == [1, 2, 3]
         getLevels(users[3], project3.projectId, proj3_subj1_ref_id) == [1, 2, 3]
+    }
+
+    def "reporting original skill event does NOT achieve level in all of the imported projects when imported skills are disabled"() {
+        def project1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1_skills = (1..3).collect {createSkill(1, 1, it, 0, 5, 0, 250) }
+        skillsService.createProjectAndSubjectAndSkills(project1, p1subj1, p1_skills)
+        p1_skills.each { skillsService.exportSkillToCatalog(project1.projectId, it.skillId) }
+
+        def project2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def p2_skills = (1..3).collect {createSkill(2, 1, 3+it, 0, 5, 0, 250) }
+        skillsService.createProjectAndSubjectAndSkills(project2, p2subj1, p2_skills)
+        p2_skills.each { skillsService.exportSkillToCatalog(project2.projectId, it.skillId) }
+
+        def project3 = createProject(3)
+        def p3subj1 = createSubject(3, 1)
+        def p3_skills = (1..3).collect {createSkill(3, 1, 6+it, 0, 5, 0, 250) }
+        skillsService.createProjectAndSubjectAndSkills(project3, p3subj1, p3_skills)
+        p3_skills.each { skillsService.exportSkillToCatalog(project3.projectId, it.skillId) }
+
+        skillsService.bulkImportSkillsFromCatalog(project2.projectId, p2subj1.subjectId, p1_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
+        skillsService.bulkImportSkillsFromCatalog(project3.projectId, p3subj1.subjectId, p1_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
+        skillsService.bulkImportSkillsFromCatalog(project3.projectId, p3subj1.subjectId, p2_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
+
+        def users = getRandomUsers(5)
+        skillsService.addSkill([projectId: project2.projectId, skillId: p2_skills[0].skillId], users[0])
+        skillsService.addSkill([projectId: project2.projectId, skillId: p2_skills[1].skillId], users[0])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Integer proj2_user1Level_before = skillsService.getUserLevel(project2.projectId, users[0])
+        List<UserAchievement> proj2_user1Achievements_before = userAchievedRepo.findAll().findAll { it.userId == users[0] && it.level != null && it.projectId == project2.projectId && it.skillRefId == null}
+        def proj2_user1Stats_before = skillsService.getUserStats(project2.projectId, users[0])
+        Integer proj1_subj1_ref_id = skillDefRepo.findByProjectIdAndSkillId(project1.projectId, p1subj1.subjectId).id
+        Integer proj2_subj1_ref_id = skillDefRepo.findByProjectIdAndSkillId(project2.projectId, p2subj1.subjectId).id
+        Integer proj3_subj1_ref_id = skillDefRepo.findByProjectIdAndSkillId(project3.projectId, p3subj1.subjectId).id
+        List<UserAchievement> proj2_user1Achievements_subj1_import0 = userAchievedRepo.findAll().findAll { it.userId == users[0] && it.level != null && it.projectId == project2.projectId && it.skillRefId == proj2_subj1_ref_id}
+
+        printLevels(project1.projectId, "")
+        printLevels(project2.projectId, "")
+        printLevels(project3.projectId, "")
+
+        when:
+        skillsService.addSkill([projectId: project1.projectId, skillId: p1_skills[1].skillId], users[0])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        Integer proj2_user1Level_after = skillsService.getUserLevel(project2.projectId, users[0])
+        List<UserAchievement> proj2_user1Achievements_after = userAchievedRepo.findAll().findAll { it.userId == users[0] && it.level != null && it.projectId == project2.projectId && it.skillRefId == null}
+        def proj2_user1Stats_after = skillsService.getUserStats(project2.projectId, users[0])
+        List<UserAchievement> proj2_user1Achievements_subj1_import1 = userAchievedRepo.findAll().findAll { it.userId == users[0] && it.level != null && it.projectId == project2.projectId && it.skillRefId == proj2_subj1_ref_id}
+
+        Integer proj3_user1Level_after = skillsService.getUserLevel(project3.projectId, users[0])
+        List<UserAchievement> proj3_user1Achievements_after = userAchievedRepo.findAll().findAll { it.userId == users[0] && it.level != null && it.projectId == project3.projectId && it.skillRefId == null}
+        List<UserAchievement> proj3_user1Achievements_subj1_import1 = userAchievedRepo.findAll().findAll { it.userId == users[0] && it.level != null && it.projectId == project3.projectId && it.skillRefId == proj3_subj1_ref_id}
+
+        skillsService.addSkill([projectId: project1.projectId, skillId: p1_skills[1].skillId], users[0])
+        skillsService.addSkill([projectId: project1.projectId, skillId: p1_skills[1].skillId], users[0])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        Integer proj3_user1Level_report2 = skillsService.getUserLevel(project3.projectId, users[0])
+        List<UserAchievement> proj3_user1Achievements_report2 = userAchievedRepo.findAll().findAll { it.userId == users[0] && it.level != null && it.projectId == project3.projectId && it.skillRefId == null}
+        List<UserAchievement> proj3_user1Achievements_subj1_report = userAchievedRepo.findAll().findAll { it.userId == users[0] && it.level != null && it.projectId == project3.projectId && it.skillRefId == proj3_subj1_ref_id}
+
+        then:
+        proj2_user1Level_before == 1
+        proj2_user1Stats_before.userTotalPoints == 500
+        proj2_user1Achievements_before.collect { it.level }.sort() == [1]
+        proj2_user1Achievements_subj1_import0.collect { it.level }.sort() == [1]
+
+        proj2_user1Stats_after.userTotalPoints == 500
+        proj2_user1Level_after == 1
+        proj2_user1Achievements_after.collect { it.level }.sort() == [1]
+        proj2_user1Achievements_subj1_import1.collect { it.level }.sort() == [1]
+
+        proj3_user1Level_after == 0
+        proj3_user1Achievements_after.collect { it.level }.sort() == []
+        proj3_user1Achievements_subj1_import1.collect { it.level }.sort() == []
+
+        proj3_user1Level_report2 == 0
+        proj3_user1Achievements_report2.collect { it.level }.sort() == []
+        proj3_user1Achievements_subj1_report.collect { it.level }.sort() == []
+    }
+
+    def "user points are not created/update when skill is disabled"() {
+        def proj1 = createProjWithCatalogSkills(1)
+        def proj2 = createProjWithCatalogSkills(2)
+        skillsService.importSkillFromCatalog(proj2.p.projectId, proj2.s1.subjectId, proj1.p.projectId, proj1.s1_skills[0].skillId)
+
+        String userId = getRandomUsers(1)[0]
+
+        when:
+        List<UserPoints> allPoints1 = userPointsRepo.findAll()
+        def addSkillRes = skillsService.addSkill(proj1.s1_skills[0], userId)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        println JsonOutput.toJson(addSkillRes)
+        List<UserPoints> allPoints2 = userPointsRepo.findAll().findAll({ it.skillId == proj1.s1_skills[0].skillId})
+        println JsonOutput.toJson(allPoints2)
+        then:
+        !allPoints1
+        allPoints2.collect { it.projectId } == [proj1.p.projectId, proj1.p.projectId]
+    }
+
+    def "user_events and user_performed_skill rows are only created for the original skill"() {
+        def proj1 = createProjWithCatalogSkills(1)
+        def proj2 = createProjWithCatalogSkills(2)
+        skillsService.importSkillFromCatalog(proj2.p.projectId, proj2.s1.subjectId, proj1.p.projectId, proj1.s1_skills[0].skillId)
+        skillsService.finalizeSkillsImportFromCatalog(proj2.p.projectId)
+
+        String userId = getRandomUsers(1)[0]
+        when:
+        def addSkillRes = skillsService.addSkill(proj1.s1_skills[0], userId)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        List<UserPerformedSkill> performedSkills = userPerformedSkillRepo.findAll()
+        List<UserEvent> events = userEventsRepo.findAll()
+        then:
+        performedSkills.collect({it.projectId}) == [proj1.p.projectId]
+        events.collect({it.projectId}) == [proj1.p.projectId]
     }
 
     def "reporting original skill event achieves subject level"() {

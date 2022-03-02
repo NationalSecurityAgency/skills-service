@@ -29,6 +29,9 @@ import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SettingRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAttrsRepo
+import skills.storage.repos.UserEventsRepo
+import skills.storage.repos.UserPerformedSkillRepo
+import skills.storage.repos.UserPointsRepo
 import spock.lang.Specification
 
 import javax.annotation.PostConstruct
@@ -75,6 +78,15 @@ class DefaultIntSpec extends Specification {
 
     @Autowired
     WaitForAsyncTasksCompletion waitForAsyncTasksCompletion
+
+    @Autowired
+    UserPointsRepo userPointsRepo
+
+    @Autowired
+    UserPerformedSkillRepo userPerformedSkillRepo
+
+    @Autowired
+    UserEventsRepo userEventsRepo
 
     private UserUtil userUtil
 
