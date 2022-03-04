@@ -374,4 +374,97 @@ class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
         e.message.contains("Skill [${project1.s1_skills[0].skillId}] is not enabled")
     }
 
+    def "ability to change points of the imported skill"() {
+        def project1 = createProjWithCatalogSkills(1)
+        def project2 = createProjWithCatalogSkills(2)
+
+        skillsService.importSkillFromCatalog(project2.p.projectId, project1.s2.subjectId, project1.p.projectId, project1.s1_skills[0].skillId)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        when:
+        Map skill = new HashMap<>(project1.s1_skills[0])
+        skill.projectId = project2.p.projectId
+        skill.subjectId = project1.s2.subjectId
+        skill.pointIncrement = 33
+        skill.enabled = "false"
+        skillsService.createSkill(skill)
+        def skill1 = skillsService.getSkill(skill)
+
+        skillsService.finalizeSkillsImportFromCatalog(project2.p.projectId)
+        skill.enabled = "true"
+        skill.pointIncrement = 11
+        skillsService.createSkill(skill)
+        def skill2 = skillsService.getSkill(skill)
+
+        then:
+        skill1.totalPoints == 33 * 2
+        skill2.totalPoints == 11 * 2
+    }
+
+    def "change points via update endpoint"() {
+        def project1 = createProjWithCatalogSkills(1)
+        def project2 = createProjWithCatalogSkills(2)
+
+        skillsService.importSkillFromCatalog(project2.p.projectId, project1.s2.subjectId, project1.p.projectId, project1.s1_skills[0].skillId)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        when:
+        Map skill = new HashMap<>(project1.s1_skills[0])
+        skill.projectId = project2.p.projectId
+        skill.subjectId = project1.s2.subjectId
+        skillsService.updateImportedSkill(project2.p.projectId, skill.skillId, 33)
+        def skill1 = skillsService.getSkill(skill)
+
+        skillsService.finalizeSkillsImportFromCatalog(project2.p.projectId)
+        skillsService.updateImportedSkill(project2.p.projectId, skill.skillId, 11)
+        def skill2 = skillsService.getSkill(skill)
+
+        then:
+        skill1.totalPoints == 33 * 2
+        skill2.totalPoints == 11 * 2
+    }
+
+    def 'only points can be changed for an imported skill'() {
+
+        def project1 = createProjWithCatalogSkills(1)
+        def project2 = createProjWithCatalogSkills(2)
+
+        skillsService.importSkillFromCatalogAndFinalize(project2.p.projectId, project1.s2.subjectId, project1.p.projectId, project1.s1_skills[0].skillId)
+
+        Map skillTemplate = new HashMap<>(project1.s1_skills[0])
+        skillTemplate.projectId = project2.p.projectId
+        skillTemplate.subjectId = project1.s2.subjectId
+
+        Closure<Map> createSkill = { String attr, def val ->
+            Map toUpdateSkill = new HashMap<>(skillTemplate)
+            toUpdateSkill[attr] = val
+            return toUpdateSkill
+        }
+
+        expect:
+        try {
+            skillsService.createSkill(createSkill.call(attribute, value))
+            assert !expectException
+        }
+        catch (SkillsClientException ex)
+        {
+            assert expectException
+            assert ex.message.contains(expectedMessage)
+        }
+
+        where:
+        attribute                            | value         || expectException | expectedMessage
+        "name"                               | "blah blah"   || true            | "has been imported from the Global Catalog and only pointIncrement can be altered"
+        "pointIncrementInterval"             | 120           || true            | "has been imported from the Global Catalog and only pointIncrement can be altered"
+        "numMaxOccurrencesIncrementInterval" | 2             || true            | "has been imported from the Global Catalog and only pointIncrement can be altered"
+        "numPerformToCompletion"             | 88            || true            | "has been imported from the Global Catalog and only pointIncrement can be altered"
+        "version"                            | 1             || true            | "has been imported from the Global Catalog and only pointIncrement can be altered"
+        "description"                        | "some"        || true            | "has been imported from the Global Catalog and only pointIncrement can be altered"
+        "selfReportingType"                  | "HonorSystem" || true            | "has been imported from the Global Catalog and only pointIncrement can be altered"
+        "enabled"                            | "false"       || true            | "has been imported from the Global Catalog and only pointIncrement can be altered"
+        "dljalj"                             | null          || false           | null
+
+
+    }
+
 }

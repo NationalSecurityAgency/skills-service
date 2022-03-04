@@ -21,6 +21,10 @@ import org.springframework.http.*
 import skills.controller.result.model.TableResult
 import skills.intTests.utils.*
 
+import static skills.intTests.utils.SkillsFactory.createProject
+import static skills.intTests.utils.SkillsFactory.createSkill
+import static skills.intTests.utils.SkillsFactory.createSubject
+
 class AdminEditSpecs extends DefaultIntSpec {
 
     def "Edit subjectId"(){
@@ -875,12 +879,37 @@ class AdminEditSpecs extends DefaultIntSpec {
         def subjectRes1 = skillsService.getSubject(subject)
 
         skill.name = "anotherName"
-        skill.enabled = false
         skillsService.updateSkill(skill, null)
         def subjectRes2 = skillsService.getSubject(subject)
 
         then:
         subjectRes1.numSkills == 1
         subjectRes2.numSkills == 1
+    }
+
+    def "increasing skill points causes user(s) to achieve a level"() {
+        def project1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1_skills = (1..3).collect { createSkill(1, 1, it, 0, 5, 0, 10) }
+        skillsService.createProjectAndSubjectAndSkills(project1, p1subj1, p1_skills)
+
+        String user = getRandomUsers(1)[0]
+        skillsService.addSkill(p1_skills[0], user)
+
+        when:
+        def user1_pts1 = skillsService.getUserStats(project1.projectId, user).userTotalPoints
+        Integer user1_leve_t0 = skillsService.getUserLevel(project1.projectId, user)
+        p1_skills[0].pointIncrement = 500
+        skillsService.createSkill(p1_skills[0])
+
+        def user1_pts2 = skillsService.getUserStats(project1.projectId, user).userTotalPoints
+        Integer user1_leve_t1 = skillsService.getUserLevel(project1.projectId, user)
+
+        then:
+        user1_pts1 == 10
+        user1_pts2 == 500
+
+        user1_leve_t0 == 0
+        user1_leve_t1 == 1
     }
 }

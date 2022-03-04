@@ -214,9 +214,8 @@ class SkillsAdminService {
         SkillDef skillsGroupSkillDef = null
         List<SkillDef> groupChildSkills = null
         if (isEdit) {
-            if (skillDefinition.readOnly && !(skillRequest instanceof ReplicatedSkillUpdateRequest)) {
-                throw new SkillException("Skill with id [${skillRequest.skillId}] has been imported from the Global Catalog and cannot be altered", skillRequest.projectId, skillRequest.skillId, ErrorCode.ReadOnlySkill)
-            }
+            validateImportedSkillUpdate(skillRequest, skillDefinition)
+
             // for updates, use the existing value if it is not set on the skillRequest (null or empty String)
             if (StringUtils.isBlank(skillRequest.enabled)) {
                 skillRequest.enabled = skillDefinition.enabled
@@ -264,14 +263,9 @@ class SkillsAdminService {
                 //version's point increment as importing users are allowed to scale the total points
                 //to be in line with their project's point layout. However, we do need to update the number of occurrences
                 //on imported skills if that changes on the original exported skill
-                int currentPointIncrement = skillDefinition.pointIncrement
-                int currentTotal = skillDefinition.totalPoints
-                skillRequest.pointIncrement = currentPointIncrement
-                skillRequest.numPerformToCompletion = currentOccurrences
-
-                if (occurrencesDelta != 0) {
-                    totalPointsRequested = currentTotal + (currentPointIncrement * occurrencesDelta)
-                }
+                skillRequest.pointIncrement = skillDefinition.pointIncrement
+                totalPointsRequested = skillRequest.pointIncrement * skillRequest.numPerformToCompletion
+                pointIncrementDelta = 0
             }
 
             Props.copy(skillRequest, skillDefinition, "childSkills", 'version', 'selfReportType')
@@ -380,6 +374,25 @@ class SkillsAdminService {
         log.debug("Saved [{}]", savedSkill)
     }
 
+    private void validateImportedSkillUpdate(SkillRequest skillRequest, SkillDefWithExtra skillDefinition) {
+        if (skillDefinition.readOnly && !(skillRequest instanceof ReplicatedSkillUpdateRequest)) {
+            // update is only allowed for change in pointIncrement
+            boolean isAllowed =
+                    (skillRequest.name == skillDefinition.name) &&
+                            (skillRequest.pointIncrementInterval == skillDefinition.pointIncrementInterval) &&
+                            (skillRequest.numMaxOccurrencesIncrementInterval == skillDefinition.numMaxOccurrencesIncrementInterval) &&
+                            (skillRequest.numPerformToCompletion == (skillDefinition.totalPoints / skillDefinition.pointIncrement)) &&
+                            (skillRequest.version == skillDefinition.version) &&
+                            (!skillRequest.description || skillRequest.description == skillDefinition.description) &&
+                            (!skillRequest.helpUrl || skillRequest.helpUrl == skillDefinition.helpUrl) &&
+                            (!skillRequest.selfReportingType || skillRequest.selfReportingType == skillDefinition.selfReportingType) &&
+                            (skillRequest.enabled == skillDefinition.enabled)
+            if (!isAllowed) {
+                throw new SkillException("Skill with id [${skillRequest.skillId}] has been imported from the Global Catalog and only pointIncrement can be altered", skillRequest.projectId, skillRequest.skillId, ErrorCode.ReadOnlySkill)
+            }
+        }
+    }
+
     private void updatePointsAndAchievements(SkillDef savedSkill, String subjectId, int pointIncrementDelta, int occurrencesDelta, int currentOccurrences, int numSkillsRequiredDelta, SkillDef skillsGroupSkillDef, List<SkillDef> groupChildSkills) {
         if (savedSkill.type != SkillDef.ContainerType.SkillsGroup) {
             // order is CRITICAL HERE
@@ -414,7 +427,7 @@ class SkillsAdminService {
             userPointsManagement.insertUserAchievementWhenDecreaseOfSkillsRequiredCausesUsersToAchieve(savedSkill.projectId, skillsGroupSkillDef.skillId, skillsGroupSkillDef.id, groupChildSkills.collect {it.skillId}, numSkillsRequired)
         }
 
-        if (pointIncrementDelta < 0 || occurrencesDelta < 0) {
+        if (pointIncrementDelta != 0 || occurrencesDelta < 0) {
             SkillDef subject = skillDefRepo.findByProjectIdAndSkillIdAndType(savedSkill.projectId, subjectId, SkillDef.ContainerType.Subject)
             userPointsManagement.identifyAndAddLevelAchievements(subject)
         }

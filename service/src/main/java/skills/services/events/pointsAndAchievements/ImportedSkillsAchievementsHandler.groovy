@@ -15,10 +15,12 @@
  */
 package skills.services.events.pointsAndAchievements
 
+import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import skills.services.LockingService
 import skills.services.RuleSetDefGraphService
 import skills.services.UserAchievementsAndPointsManagement
 import skills.services.events.AchievedBadgeHandler
@@ -50,7 +52,14 @@ class ImportedSkillsAchievementsHandler {
     @Autowired
     AchievedBadgeHandler achievedBadgeHandler
 
+    @Autowired
+    LockingService lockingService
+
     void handleAchievementsForImportedSkills(String userId, SkillDefMin skill, SkillDate incomingSkillDate, boolean thisRequestCompletedOriginalSkill) {
+        if (log.isDebugEnabled()) {
+            log.debug("userId=[${userId}], skill=[${skill.skillId}], incomingSkillDate=[${incomingSkillDate}], thisRequestCompletedOriginalSkill=[${thisRequestCompletedOriginalSkill}]")
+        }
+        lockTransaction(userId, skill.projectId)
         List<SkillDefMin> skills = skillDefRepo.findSkillDefMinCopiedFrom(skill.id)
         List<SkillDef> subjects = []
         skills?.each {
@@ -74,5 +83,11 @@ class ImportedSkillsAchievementsHandler {
         subjects.each {
             userAchievementsAndPointsManagement.identifyAndAddLevelAchievements(it)
         }
+    }
+
+    @Profile
+    private void lockTransaction(String userId, String project) {
+        log.debug("locking user [{}]-[{}]", userId, project)
+        lockingService.lockForUserProject(userId, project)
     }
 }

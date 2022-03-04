@@ -1266,6 +1266,10 @@ class SkillsService {
         return res
     }
 
+    def updateImportedSkill(String projectId, String skillId, Integer pointIncrement) {
+        return wsHelper.adminPatch("/projects/${projectId}/import/skills/${skillId}", [pointIncrement: pointIncrement])
+    }
+
     def finalizeSkillsImportFromCatalog(String projectId, boolean waitForFinalizationToComplete = true) {
         def res = wsHelper.adminPost("/projects/${projectId}/catalog/finalize", [])
         if (waitForFinalizationToComplete) {

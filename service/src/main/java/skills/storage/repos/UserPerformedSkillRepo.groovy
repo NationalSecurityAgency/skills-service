@@ -76,32 +76,61 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
     List<SkillDef> findPerformedParentSkills(String userId, String projectId, String skillId)
 
     @Nullable
-    @Query('''select CAST(ups.performedOn as date) as day, SUM(sdChild.pointIncrement) as count
-    from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild, UserPerformedSkill ups
-      where
-          sdParent.projectId = :projectId and
-          sdChild.projectId = :projectId and
-          srd.parent=sdParent.id and 
-          srd.child=sdChild.id and
-          sdChild.id = ups.skillRefId and 
-          ups.userId=:userId and
-          (sdParent.skillId=:skillId 
-            OR sdParent.skillId in (select sdGroup.skillId
-                                    from SkillDef sdGroup,
-                                         SkillDef sdSubject,
-                                         SkillRelDef srd
-                                     where sdGroup.id = srd.child
-                                       and srd.parent = sdSubject.id
-                                       and sdSubject.skillId=:skillId)
-            OR :skillId is null) and
-          sdChild.version<=:version and
-          srd.type IN ('RuleSetDefinition', 'SkillsGroupRequirement')
-          and ups.skillRefId NOT IN (select up.skillRefId from UserPoints up where up.contributesToSkillsGroup = 'false' and up.userId=:userId and up.projectId = :projectId)
-       group by CAST(ups.performedOn as date)''')
-    List<DayCountItem> calculatePointHistoryByProjectIdAndUserIdAndVersion(@Param('projectId') String projectId,
+    @Query(value = '''
+        WITH skills AS (
+            select case when child.copied_from_skill_ref is not null then child.copied_from_skill_ref else child.id end as id,
+                   child.point_increment                                                                                as pointIncrement
+            from skill_definition parent,
+                 skill_relationship_definition rel,
+                 skill_definition child
+            where parent.project_id = :projectId
+              and parent.skill_id = :skillId
+              and rel.parent_ref_id = parent.id
+              and rel.child_ref_id = child.id
+              and rel.type in ('RuleSetDefinition', 'SkillsGroupRequirement')
+              and child.type = 'Skill'
+              and child.version <= :version
+        )
+        select CAST(ups.performed_on as date) as day, SUM(skills.pointIncrement) as count
+        from user_performed_skill ups,
+             skills
+        where ups.user_id = :userId
+          and ups.skill_ref_id = skills.id
+          and ups.skill_ref_id NOT IN (select up.skill_ref_id
+                               from user_points up
+                               where up.contributes_to_skills_group = 'false'
+                                 and up.user_id = :userId
+                                 and up.project_Id = :projectId)
+        group by CAST(ups.performed_on as date)''', nativeQuery = true)
+    List<DayCountItem> calculatePointHistoryForSubject(@Param('projectId') String projectId,
                                                                            @Param('userId') String userId,
-                                                                           @Nullable @Param('skillId') String skillId,
+                                                                           @Param('skillId') String skillId,
                                                                            @Param('version') Integer version)
+
+    @Nullable
+    @Query(value = '''
+        WITH skills AS (
+            select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id,
+                   point_increment as pointIncrement
+            from skill_definition child
+            where project_id = :projectId
+              and type = 'Skill'
+              and version <= :version
+        )
+        select CAST(ups.performed_on as date) as day, SUM(skills.pointIncrement) as count
+        from user_performed_skill ups,
+             skills
+        where ups.user_id = :userId
+          and ups.skill_ref_id = skills.id
+          and ups.skill_ref_id NOT IN (select up.skill_ref_id
+                               from user_points up
+                               where up.contributes_to_skills_group = 'false'
+                                 and up.user_id = :userId
+                                 and up.project_Id = :projectId)
+        group by CAST(ups.performed_on as date)''', nativeQuery = true)
+    List<DayCountItem> calculatePointHistoryForProject(@Param('projectId') String projectId,
+                                                       @Param('userId') String userId,
+                                                       @Param('version') Integer version)
 
     @Query('''select CAST(ups.performedOn as date) as day, count(ups.id) as count
         from UserPerformedSkill ups

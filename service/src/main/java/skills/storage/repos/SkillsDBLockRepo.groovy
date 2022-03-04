@@ -18,6 +18,7 @@ package skills.storage.repos
 import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
+import org.springframework.lang.Nullable
 import skills.storage.model.ProjDef
 import skills.storage.model.SkillsDBLock
 
@@ -25,6 +26,7 @@ import javax.persistence.LockModeType
 
 interface SkillsDBLockRepo extends CrudRepository<SkillsDBLock, Integer> {
 
+    @Nullable
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     SkillsDBLock findByLock(String lock)
 

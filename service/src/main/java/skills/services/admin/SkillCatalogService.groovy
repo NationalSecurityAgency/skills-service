@@ -27,7 +27,9 @@ import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.CatalogSkill
+import skills.controller.request.model.ImportedSkillUpdate
 import skills.controller.request.model.SkillImportRequest
+import skills.controller.request.model.SkillRequest
 import skills.controller.result.model.*
 import skills.services.RuleSetDefGraphService
 import skills.storage.accessors.ProjDefAccessor
@@ -433,6 +435,30 @@ class SkillCatalogService {
     @Transactional(readOnly = true)
     List<String> getSkillIdsInCatalog(String projectId, List<String> skillIds) {
         exportedSkillRepo.doSkillsExistInCatalog(projectId, skillIds)
+    }
+
+    @Transactional
+    void updateImportedSkill(String projectId, String skillId, ImportedSkillUpdate importedSkillUpdate) {
+        SkillDefWithExtra skillDefWithExtra = skillAccessor.getSkillDefWithExtra(projectId, skillId, [SkillDef.ContainerType.Skill])
+        SkillDef subject = relationshipService.getParentSkill(skillDefWithExtra.id)
+        SkillRequest skillRequest = new SkillRequest(
+                pointIncrement: importedSkillUpdate.pointIncrement, // update
+
+                skillId: skillDefWithExtra.skillId,
+                projectId: skillDefWithExtra.projectId,
+                subjectId: subject.skillId,
+                name: skillDefWithExtra.name,
+                pointIncrementInterval: skillDefWithExtra.pointIncrementInterval,
+                numMaxOccurrencesIncrementInterval: skillDefWithExtra.numMaxOccurrencesIncrementInterval,
+                numPerformToCompletion: (skillDefWithExtra.totalPoints / skillDefWithExtra.pointIncrement),
+                version: skillDefWithExtra.version,
+                description: skillDefWithExtra.description,
+                helpUrl: skillDefWithExtra.helpUrl,
+                selfReportingType: skillDefWithExtra.selfReportingType,
+                enabled: skillDefWithExtra.enabled,
+        )
+        skillsAdminService.saveSkill(skillDefWithExtra.skillId, skillRequest, false)
+
     }
 
     private static PageRequest convertForCatalogSkills(PageRequest pageRequest) {

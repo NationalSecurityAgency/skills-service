@@ -86,6 +86,10 @@ export default {
     return axios.post(url, copy, { handleError: false })
       .then(() => this.getSkillDetails(skill.projectId, skill.subjectId, skill.skillId));
   },
+  updateImportedSkill(skill) {
+    const url = `/admin/projects/${encodeURIComponent(skill.projectId)}/import/skills/${encodeURIComponent(skill.skillId)}`;
+    return axios.patch(url, { pointIncrement: skill.pointIncrement }).then((res) => res.data);
+  },
   syncSkillsPoints(projectId, subjectId, groupId, skillsPointsSyncRequest) {
     const url = `/admin/projects/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}/groups/${encodeURIComponent(groupId)}/skills`;
     return axios.patch(url, skillsPointsSyncRequest)

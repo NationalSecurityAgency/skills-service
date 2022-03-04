@@ -197,7 +197,7 @@ Cypress.Commands.add("finalizeCatalogImportWithoutWaiting", (projNum = 1) => {
 
 Cypress.Commands.add("finalizeCatalogImport", (projNum = 1) => {
     cy.finalizeCatalogImportWithoutWaiting(projNum);
-    cy.waitUntil(() => cy.request('/admin/projects/proj1/settings/catalog.finalize.state').then((response) => response.body.value === "COMPLETED"), {
+    cy.waitUntil(() => cy.request(`/admin/projects/proj${projNum}/settings/catalog.finalize.state`).then((response) => response.body.value === "COMPLETED"), {
         timeout: 60000, // waits up to 1 minutes
         interval: 500 // performs the check every 500 ms, default to 200
     });

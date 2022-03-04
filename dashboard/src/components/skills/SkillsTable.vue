@@ -157,7 +157,7 @@ limitations under the License.
                 </span>
               </router-link>
               <b-button-group size="sm" class="ml-1">
-                <b-button v-if="!data.item.isCatalogImportedSkills" @click="editSkill(data.item)"
+                <b-button @click="editSkill(data.item)"
                           variant="outline-primary" :data-cy="`editSkillButton_${data.item.skillId}`"
                           :aria-label="'edit Skill '+data.item.name" :ref="`edit_${data.item.skillId}`"
                           title="Edit Skill" b-tooltip.hover="Edit Skill">
@@ -178,7 +178,7 @@ limitations under the License.
                             :aria-label="'delete Skill '+data.item.name"
                             title="Delete Skill"
                             size="sm"
-                            :class="{ 'delete-btn-border-fix' : !data.item.isCatalogImportedSkills }"
+                            class="delete-btn-border-fix"
                             :disabled="deleteButtonsDisabled">
                     <i class="text-warning fas fa-trash" aria-hidden="true"/>
                   </b-button>
@@ -278,6 +278,8 @@ limitations under the License.
                 :is-copy="editSkillInfo.isCopy" :is-edit="editSkillInfo.isEdit"
                 :can-edit-points="canEditPoints" :can-edit-points-msg="canEditPointsMsg"
                 :project-id="projectId" :subject-id="subjectId" @skill-saved="skillCreatedOrUpdated" @hidden="handleFocus"/>
+    <edit-imported-skill v-if="editImportedSkillInfo.show" v-model="editImportedSkillInfo.show"
+                         :skill="editImportedSkillInfo.skill" @skill-saved="updateImportedSkill" @hidden="handleFocus" />
     <edit-skill-group v-if="editGroupInfo.show" v-model="editGroupInfo.show" :group="editGroupInfo.group" :is-edit="editGroupInfo.isEdit"
                       @group-saved="skillCreatedOrUpdated" @hidden="handleFocus"/>
     <export-to-catalog v-if="exportToCatalogInfo.show" v-model="exportToCatalogInfo.show" :skills="exportToCatalogInfo.skills"
@@ -306,6 +308,7 @@ limitations under the License.
   import ExportToCatalog from '@/components/skills/catalog/ExportToCatalog';
   import RemovalValidation from '@/components/utils/modal/RemovalValidation';
   import ExportedSkillDeletionWarning from '@/components/skills/catalog/ExportedSkillDeletionWarning';
+  import EditImportedSkill from '@/components/skills/skillsGroup/EditImportedSkill';
   import EditSkill from './EditSkill';
   import NoContent2 from '../utils/NoContent2';
   import ChildRowSkillsDisplay from './ChildRowSkillsDisplay';
@@ -372,6 +375,7 @@ limitations under the License.
       },
     },
     components: {
+      EditImportedSkill,
       ExportedSkillDeletionWarning,
       RemovalValidation,
       ExportToCatalog,
@@ -392,6 +396,10 @@ limitations under the License.
         editSkillInfo: {
           isEdit: false,
           isCopy: false,
+          show: false,
+          skill: {},
+        },
+        editImportedSkillInfo: {
           show: false,
           skill: {},
         },
@@ -579,7 +587,12 @@ limitations under the License.
       },
       editSkill(itemToEdit) {
         this.currentlyFocusedSkillId = itemToEdit.skillId;
-        if (itemToEdit.isGroupType) {
+        if (itemToEdit.isCatalogSkill) {
+          this.editImportedSkillInfo = {
+            show: true,
+            skill: itemToEdit,
+          };
+        } else if (itemToEdit.isGroupType) {
           this.editGroupInfo = {
             isEdit: true,
             show: true,
@@ -636,6 +649,15 @@ limitations under the License.
           }
           return skill;
         });
+      },
+      updateImportedSkill(skill) {
+        const item1Index = this.skills.findIndex((item) => item.skillId === skill.skillId);
+        console.log(item1Index);
+        SkillsService.updateImportedSkill(skill)
+          .then(() => {
+            this.skills.splice(item1Index, 1, skill);
+            this.$emit('skills-change', skill);
+          });
       },
       skillCreatedOrUpdated(skill) {
         if (this.skillsOriginal.length === 0) {

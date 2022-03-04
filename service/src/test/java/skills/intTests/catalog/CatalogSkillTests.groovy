@@ -22,20 +22,14 @@ import org.joda.time.format.DateTimeFormatter
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import skills.controller.result.model.LevelDefinitionRes
-import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
-import skills.intTests.utils.WaitForAsyncTasksCompletion
 import skills.services.LevelDefinitionStorageService
 import skills.services.UserEventService
-import skills.storage.model.DayCountItem
 import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.SkillDefRepo
-import spock.lang.IgnoreRest
-
-import java.time.LocalDate
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -2483,12 +2477,12 @@ class CatalogSkillTests extends CatalogIntSpec {
         p2_skills.each { skillsService.exportSkillToCatalog(project2.projectId, it.skillId) }
 
         skillsService.bulkImportSkillsFromCatalog(project2.projectId, p2subj1.subjectId, p1_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 
         when:
         p1_skills[0].pointIncrement = 5000
         skillsService.createSkills([p1_skills[0]])
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
-
         then:
         //projectId, subjectId, skillId
         skillsService.getSkill([projectId: project2.projectId, subjectId: p2subj1.subjectId, skillId: p1_skills[0].skillId]).pointIncrement == 250
@@ -2509,6 +2503,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         p2_skills.each { skillsService.exportSkillToCatalog(project2.projectId, it.skillId) }
 
         skillsService.bulkImportSkillsFromCatalog(project2.projectId, p2subj1.subjectId, p1_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 
         when:
         p1_skills[0].pointIncrement = 250

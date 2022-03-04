@@ -16,11 +16,8 @@
 package skills.intTests.catalog
 
 import groovy.json.JsonOutput
-import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.SkillsClientException
 import skills.storage.model.SkillDef
-import skills.storage.repos.UserPointsRepo
-import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 

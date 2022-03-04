@@ -506,10 +506,8 @@ class AdminController {
             skillRequest.description = InputSanitizer.sanitize(skillRequest.description)
             skillRequest.helpUrl = InputSanitizer.sanitizeUrl(skillRequest.helpUrl)
 
-            // subject skill are always enabled; don't trust the client and override enabled
-            // alternative approach was to validate that "true" is provided but that was/is a very intrusive change;
-            // we may reconsider in the future if we deiced to support enable/disabled for skills
-            skillRequest.enabled = "true"
+            // default to enabled
+            skillRequest.enabled = skillRequest.enabled  == null ? "true" : skillRequest.enabled
         }
 
         skillsAdminService.saveSkill(skillId, skillRequest, true, groupId)
@@ -1128,12 +1126,22 @@ class AdminController {
                                        @PathVariable("subjectId") String subjectId,
                                        @RequestBody List<CatalogSkill> bulkImport) {
         SkillsValidator.isNotBlank(projectId, "projectId")
-        SkillsValidator.isNotBlank(projectId, "subjectId")
+        SkillsValidator.isNotBlank(subjectId, "subjectId")
         SkillsValidator.isTrue(bulkImport?.size() <= maxBulkImport, "Bulk imports are limited to no more than ${maxBulkImport} Skills at once", projectId)
         skillCatalogService.importSkillsFromCatalog(projectId, subjectId, bulkImport)
         RequestResult success = RequestResult.success()
         success.explanation = "imported [${bulkImport?.size()}] skills from the catalog into [${projectId}] - [${subjectId}]"
         return success
+    }
+
+    @RequestMapping(value="/projects/{projectId}/import/skills/{skillId}", method = [RequestMethod.PATCH], produces = "application/json")
+    RequestResult updatedImportedSkill(@PathVariable("projectId") String projectId,
+                                             @PathVariable("skillId") String skillId,
+                                             @RequestBody ImportedSkillUpdate update) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        SkillsValidator.isNotBlank(skillId, "skillId")
+        skillCatalogService.updateImportedSkill(projectId, skillId, update)
+        return RequestResult.success()
     }
 
     @RequestMapping(value="/projects/{projectId}/catalog/finalize", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")

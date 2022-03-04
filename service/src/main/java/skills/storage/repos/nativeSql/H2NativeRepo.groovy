@@ -147,8 +147,11 @@ class H2NativeRepo implements NativeQueriesRepo {
             FROM 
                 user_performed_skill
             WHERE 
-                skill_id = :skillId
-                AND project_id = :projectId
+                skill_ref_id in (
+                    select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id 
+                    from skill_definition 
+                    where type = 'Skill' and project_id = :projectId and skill_id = :skillId
+                )
             GROUP BY 
                 user_id
            '''
@@ -219,7 +222,11 @@ class H2NativeRepo implements NativeQueriesRepo {
             FROM
                 user_performed_skill
             WHERE
-                skill_id = :skillId AND project_id = :projectId
+                skill_ref_id in (
+                    select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id 
+                    from skill_definition 
+                    where type = 'Skill' and project_id = :projectId and skill_id = :skillId
+                )
             GROUP BY
                 user_id, FORMATDATETIME(performed_on,'yyyy-MM-dd')
            '''
