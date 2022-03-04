@@ -100,9 +100,9 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             s.userId = uAttrs.userId and
             s.approverUserId = approverUAttrs.userId and 
             s.approverUserId is not null and
-            upper(sd.name) like UPPER(CONCAT('%', :skillNameFilter, '%')) and
-            upper(uAttrs.userIdForDisplay) like UPPER(CONCAT('%', :userIdFilter, '%')) and
-            upper(approverUAttrs.userIdForDisplay) like UPPER(CONCAT('%', :approverUserIdFilter, '%'))
+            lower(sd.name) like lower(CONCAT('%', :skillNameFilter, '%')) and
+            lower(uAttrs.userIdForDisplay) like lower(CONCAT('%', :userIdFilter, '%')) and
+            lower(approverUAttrs.userIdForDisplay) like lower(CONCAT('%', :approverUserIdFilter, '%'))
     ''')
     List<SimpleSkillApproval> findApprovalsHistory(@Param("projectId") String projectId,
                                                    @Param("skillNameFilter") String skillNameFilter,
@@ -117,9 +117,9 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             s.userId = uAttrs.userId and
             s.approverUserId = approverUAttrs.userId and 
             s.approverUserId is not null and
-            upper(sd.name) like UPPER(CONCAT('%', :skillNameFilter, '%')) and
-            upper(uAttrs.userIdForDisplay) like UPPER(CONCAT('%', :userIdFilter, '%')) and
-            upper(approverUAttrs.userIdForDisplay) like UPPER(CONCAT('%', :approverUserIdFilter, '%'))
+            lower(sd.name) like lower(CONCAT('%', :skillNameFilter, '%')) and
+            lower(uAttrs.userIdForDisplay) like lower(CONCAT('%', :userIdFilter, '%')) and
+            lower(approverUAttrs.userIdForDisplay) like lower(CONCAT('%', :approverUserIdFilter, '%'))
     ''')
     long countApprovalsHistory(@Param("projectId") String projectId,
                                @Param("skillNameFilter") String skillNameFilter,

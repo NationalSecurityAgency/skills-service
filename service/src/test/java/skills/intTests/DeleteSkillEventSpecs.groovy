@@ -21,6 +21,7 @@ import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.intTests.utils.TestUtils
+import spock.lang.IgnoreRest
 import spock.lang.Specification
 
 class DeleteSkillEventSpecs extends DefaultIntSpec {
@@ -76,6 +77,51 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
 
         then:
         !addedSkills?.data?.find { it.skillId == skills[0].skillId }
+    }
+
+    def "delete skill event on skill imported from the catalog should not work"() {
+        def proj2 = SkillsFactory.createProject(22)
+        def subj2 = SkillsFactory.createSubject(22, 22)
+        def skill2 = SkillsFactory.createSkill(22, 22, 22, 0, 1, 480, 100)
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(9, 1, 1, 100)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        skillsService.createProject(proj2)
+        skillsService.createSubject(subj2)
+        skillsService.createSkill(skill2)
+
+        skillsService.exportSkillToCatalog(proj2.projectId, skill2.skillId)
+        skillsService.importSkillFromCatalog(proj.projectId, subj.subjectId, proj2.projectId, skill2.skillId)
+        skillsService.finalizeSkillsImportFromCatalog(proj.projectId, true)
+
+
+        String userId = "user1"
+        Long timestamp = new Date().time
+
+        setup:
+        def res = skillsService.addSkill([projectId: proj2.projectId, skillId: skill2.skillId], userId, new Date(timestamp))
+
+        assert res.body.skillApplied
+        assert res.body.explanation == "Skill event was applied"
+
+        assert res.body.completed.find({ it.type == "Skill" }).id == skill2.skillId
+        assert res.body.completed.find({ it.type == "Skill" }).name == skill2.name
+
+        def addedSkills = skillsService.getPerformedSkills(userId, proj.projectId)
+        assert addedSkills
+        assert addedSkills.data.find { it.skillId == skill2.skillId}
+
+        when:
+        skillsService.deleteSkillEvent([projectId: proj.projectId, skillId: skill2.skillId, userId: userId, timestamp: timestamp])
+
+        then:
+        thrown(Exception)
     }
 
     def "delete skill event when there more than 1 events fall within the configured time window"() {

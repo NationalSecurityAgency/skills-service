@@ -20,6 +20,7 @@ import org.joda.time.DateTime
 import org.springframework.http.*
 import skills.controller.result.model.TableResult
 import skills.intTests.utils.*
+import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.createProject
 import static skills.intTests.utils.SkillsFactory.createSkill
@@ -387,6 +388,70 @@ class AdminEditSpecs extends DefaultIntSpec {
         result.data.size() == 2
         result.data.any { it.skillId == expectedSkill1.skillId }
         result.data.any { it.skillId == expectedSkill2.skillId }
+    }
+
+    def "User Performed Skills should include skills imported from the catalog"() {
+        String userId = 'user1'
+
+        def project = SkillsFactory.createProject(1)
+        def project2 = SkillsFactory.createProject(2)
+        def p2subject1 = SkillsFactory.createSubject(2,1)
+        def p2skill1 = SkillsFactory.createSkill(2, 1, 201, 0, 5, 0, 100)
+        p2skill1.skillId = "p2skill1"
+
+        def subject = SkillsFactory.createSubject(1, 1)
+        List<Map> subjectSkills = SkillsFactory.createSkills(5, 1, 1)
+        def subject2 = SkillsFactory.createSubject(1, 2)
+        List<Map> subjectSkills2 = SkillsFactory.createSkills(5, 1, 2)
+        subjectSkills.each{
+            it.pointIncrement = 20
+        }
+        subjectSkills2.each{
+            it.pointIncrement = 20
+        }
+
+        def expectedSkill1 = subjectSkills.get(0)
+        def expectedSkill2 = subjectSkills2.get(1)
+        def expectedSkill3 = subjectSkills2.get(2)
+        def expectedImportedSkill = p2skill1
+
+        skillsService.createProject(project)
+        skillsService.createSubject(subject)
+        skillsService.createSubject(subject2)
+        skillsService.createSkills(subjectSkills)
+        skillsService.createSkills(subjectSkills2)
+        skillsService.createProject(project2)
+        skillsService.createSubject(p2subject1)
+        skillsService.createSkill(p2skill1)
+        skillsService.exportSkillToCatalog(project2.projectId, p2skill1.skillId)
+        skillsService.importSkillFromCatalog(project.projectId, subject.subjectId, project2.projectId, p2skill1.skillId)
+        skillsService.finalizeSkillsImportFromCatalog(project.projectId, true)
+
+        skillsService.addSkill([projectId: project.projectId, skillId: subjectSkills.get(0).skillId], userId, new Date())
+        skillsService.addSkill([projectId: project.projectId, skillId: subjectSkills2.get(1).skillId], userId, new Date())
+        skillsService.addSkill([projectId: project.projectId, skillId: subjectSkills2.get(2).skillId], userId, new Date())
+        skillsService.addSkill([projectId: project2.projectId, skillId: p2skill1.skillId], userId, new Date())
+
+        when:
+        TableResult expected = new TableResult(
+                count: 4,
+                totalCount: 4,
+                data: [subjectSkills.get(0), subjectSkills2.get(1)]
+        )
+        TableResult result = skillsService.getPerformedSkills(userId, project.projectId)
+        println result
+        result.data.each {
+            println "${it.projectId}::${it.skillId}"
+        }
+
+        then:
+        result.count == expected.count
+        result.totalCount == expected.totalCount
+        result.data.size() == 4
+        result.data.any { it.skillId == expectedSkill1.skillId }
+        result.data.any { it.skillId == expectedSkill2.skillId }
+        result.data.any { it.skillId == expectedSkill3.skillId }
+        result.data.any { it.skillId == expectedImportedSkill.skillId }
     }
 
     def "When skill id is updated it should persist to 'performed skills'"(){

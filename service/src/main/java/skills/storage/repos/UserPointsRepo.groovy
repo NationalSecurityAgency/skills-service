@@ -407,8 +407,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 where 
                     usr.user_id = usattr.user_id and 
                     usr.project_id = ?1 and 
-                    (upper(CONCAT(usattr.first_name, ' ', usattr.last_name, ' (', usattr.user_id_for_display, ')')) like UPPER(CONCAT('%', ?2, '%')) OR
-                     upper(usattr.user_id_for_display) like UPPER(CONCAT('%', ?2, '%')))) 
+                    (lower(CONCAT(usattr.first_name, ' ', usattr.last_name, ' (', usattr.user_id_for_display, ')')) like lower(CONCAT('%', ?2, '%')) OR
+                     lower(usattr.user_id_for_display) like lower(CONCAT('%', ?2, '%')))) 
                 AS temp''',
             nativeQuery = true)
     Long countDistinctUserIdByProjectIdAndUserIdLike(String projectId, String userId)
@@ -433,8 +433,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             JOIN user_attrs ua ON ua.user_id=up.user_id
             WHERE 
                 up.project_id=?1 and 
-                (upper(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like UPPER(CONCAT(\'%\', ?2, \'%\'))  OR
-                 upper(ua.user_id_for_display) like UPPER(CONCAT('%', ?2, '%'))
+                (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT(\'%\', ?2, \'%\'))  OR
+                 lower(ua.user_id_for_display) like lower(CONCAT('%', ?2, '%'))
                 ) and 
                 up.day is null and 
                 up.skill_id is null 
@@ -453,8 +453,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 up.user_id = usattr.user_id and
                 up.project_id=?1 and 
                 up.skill_id in (?2) and 
-                (upper(CONCAT(usattr.first_name, ' ', usattr.last_name, ' (', usattr.user_id_for_display, ')')) like UPPER(CONCAT('%', ?3, '%')) OR
-                 upper(usattr.user_id_for_display) like UPPER(CONCAT('%', ?3, '%'))) and   
+                (lower(CONCAT(usattr.first_name, ' ', usattr.last_name, ' (', usattr.user_id_for_display, ')')) like lower(CONCAT('%', ?3, '%')) OR
+                 lower(usattr.user_id_for_display) like lower(CONCAT('%', ?3, '%'))) and   
                 up.day is null) 
             AS temp''',
             nativeQuery = true)
@@ -483,8 +483,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             WHERE 
                 up.project_id=?1 and 
                 up.skill_id in (?2) and 
-                (upper(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like UPPER(CONCAT('%', ?3, '%'))  OR
-                 upper(ua.user_id_for_display) like UPPER(CONCAT('%', ?3, '%'))
+                (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT('%', ?3, '%'))  OR
+                 lower(ua.user_id_for_display) like lower(CONCAT('%', ?3, '%'))
                 ) and 
                 up.day is null 
             GROUP BY up.user_id''', nativeQuery = true)

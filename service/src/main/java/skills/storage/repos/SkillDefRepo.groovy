@@ -84,7 +84,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
             s.projectId = ?1 and s.type = ?2 and
             (s.copiedFromProjectId is null or 'true' = ?4) and
             (s.enabled = 'true' or 'true' = ?5) and
-            upper(s.name) like UPPER(CONCAT('%', ?3, '%'))''')
+            lower(s.name) like lower(CONCAT('%', ?3, '%'))''')
     List<SkillDefSkinny> findAllSkinnySelectByProjectIdAndType(String id, SkillDef.ContainerType type, String skillNameQuery, String includeCatalogImportedSkills, String includeDisabled)
 
     @Nullable
@@ -108,7 +108,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         where
         subjectDef = srd.parent and s = srd.child and 
         srd.type = 'RuleSetDefinition' and subjectDef.type = 'Subject' and  
-        s.type = ?1 and upper(s.name) like UPPER(CONCAT('%', ?2, '%'))''')
+        s.type = ?1 and lower(s.name) like lower(CONCAT('%', ?2, '%'))''')
     List<SkillDefPartial> findAllByTypeAndNameLike(SkillDef.ContainerType type, String name)
 
 
@@ -133,7 +133,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         where
         subjectDef = srd.parent and s = srd.child and 
         srd.type = 'RuleSetDefinition' and subjectDef.type = 'Subject' and  
-        s.type = ?1 and upper(s.name) like UPPER(CONCAT('%', ?2, '%')) and
+        s.type = ?1 and lower(s.name) like lower(CONCAT('%', ?2, '%')) and
         s.readOnly != true''')
     List<SkillDefPartial> findAllByTypeAndNameLikeNoImportedSkills(SkillDef.ContainerType type, String name)
 

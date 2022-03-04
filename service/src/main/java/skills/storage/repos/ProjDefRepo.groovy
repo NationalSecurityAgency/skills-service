@@ -250,7 +250,7 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
     @Nullable
     List<ProjSummaryResult> getSummariesByNameLike(String search)
 
-    @Query("select p from ProjDef p where upper(p.name) like UPPER(CONCAT('%', ?1, '%'))")
+    @Query("select p from ProjDef p where lower(p.name) like lower(CONCAT('%', ?1, '%'))")
     List<ProjDef> findByNameLike(String search)
 
     @Query(value = "select count(p.id) from ProjDef p, UserRole u where p.projectId = u.projectId and u.userId=?1")
