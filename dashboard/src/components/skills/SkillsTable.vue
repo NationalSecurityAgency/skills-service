@@ -652,7 +652,6 @@ limitations under the License.
       },
       updateImportedSkill(skill) {
         const item1Index = this.skills.findIndex((item) => item.skillId === skill.skillId);
-        console.log(item1Index);
         SkillsService.updateImportedSkill(skill)
           .then(() => {
             this.skills.splice(item1Index, 1, skill);
