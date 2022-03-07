@@ -235,12 +235,6 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
     )''', nativeQuery = true)
     BadgeCount countAchievedProductionBadgesForUser(@Param('userId') String userId)
 
-
-    //TEMPTEMPTEMP
-    @Query(value='''select ua.* from skill_definition skillDef, user_achievement ua where ua.level IS null AND ua.user_id = ?1 AND skillDef.skill_id = ua.skill_id''', nativeQuery=true)
-    List<UserAchievement> temptemp(@Param('userId') String userId)
-    //TEMPTEMPTEMP
-
     @Query(value = '''select EXTRACT(MONTH FROM ua.created) as label, count(*) countRes
       from skill_definition skillDef, user_achievement ua 
       where 
