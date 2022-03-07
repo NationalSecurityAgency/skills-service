@@ -450,7 +450,15 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
                 on achievements.skill_id = sd.skillId
             left join (
                 select skill_id, count(distinct user_id) as userInProgress, max(performed_on) as lastPerformed from user_performed_skill
-                where project_id = :projectId
+                where 
+                skill_ref_id in (
+                    select case when skill.copied_from_skill_ref is not null then skill.copied_from_skill_ref else skill.id end as id
+                    from skill_definition skill
+                    where
+                    skill.project_id = :projectId
+                    and skill.type = 'Skill'
+                    and skill.enabled = 'true'
+                )      
                 group by skill_id
             ) performedSkills
                 on sd.skillId = performedSkills.skill_id

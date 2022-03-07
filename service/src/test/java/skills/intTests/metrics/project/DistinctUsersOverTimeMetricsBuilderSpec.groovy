@@ -318,7 +318,8 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
                 createSkill(2, 1, 52, 0, 10, 0, 100),
                 createSkill(2, 1, 53, 0, 10, 0, 100),
                 createSkill(2, 1, 54, 0, 10, 0, 100),
-                createSkill(2, 1, 55, 0, 10, 0, 100)
+                createSkill(2, 1, 55, 0, 10, 0, 100),
+                createSkill(2, 1, 56, 0, 10, 0, 100)
         ]
         p2skills.each { it.pointIncrement = 100; it.numPerformToCompletion = 10 }
 
@@ -334,12 +335,16 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         skillsService.exportSkillToCatalog(proj2.projectId, p2skills[2].skillId)
         skillsService.exportSkillToCatalog(proj2.projectId, p2skills[3].skillId)
         skillsService.exportSkillToCatalog(proj2.projectId, p2skills[4].skillId)
+        skillsService.exportSkillToCatalog(proj2.projectId, p2skills[5].skillId)
 
         skillsService.importSkillFromCatalog(proj.projectId, subj.subjectId, proj2.projectId, p2skills[0].skillId)
         skillsService.importSkillFromCatalog(proj.projectId, subj.subjectId, proj2.projectId, p2skills[1].skillId)
         skillsService.importSkillFromCatalog(proj.projectId, subj.subjectId, proj2.projectId, p2skills[2].skillId)
         skillsService.importSkillFromCatalog(proj.projectId, subj.subjectId, proj2.projectId, p2skills[3].skillId)
         skillsService.importSkillFromCatalog(proj.projectId, subj.subjectId, proj2.projectId, p2skills[4].skillId)
+        skillsService.finalizeSkillsImportFromCatalog(proj.projectId)
+        //imported after finalize without another finalize, should not be included in metrics
+        skillsService.importSkillFromCatalog(proj.projectId, subj.subjectId, proj2.projectId, p2skills[5].skillId)
 
         List<Date> days
 
@@ -358,6 +363,7 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
             //10 user events per date
             users.each {
                 skillsService.addSkill([skillId: p2skills[0].skillId, projectId: proj2.projectId], it, date)
+                skillsService.addSkill([skillId: p2skills[5].skillId, projectId: proj2.projectId], it, date) //should not be included
             }
             //3 user events per date
             users.subList(0, 3).each {
