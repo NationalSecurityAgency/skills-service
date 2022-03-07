@@ -48,7 +48,8 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
             FROM user_events uue INNER JOIN (
                     select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
                     from skill_definition sd 
-                    where sd.type = 'Skill' and sd.id = :skillRefId
+                    where sd.type = 'Skill' and sd.id = :skillRefId and 
+                    sd.enabled = 'true'
                 ) def ON uue.skill_ref_id = def.id
             WHERE
                     uue.event_time >= :start 
@@ -71,7 +72,8 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
             FROM user_events uue INNER JOIN (
                     select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
                     from skill_definition sd 
-                    where sd.type = 'Skill' and sd.id = :skillRefId
+                    where sd.type = 'Skill' and sd.id = :skillRefId and 
+                    sd.enabled = 'true'
                 ) def ON uue.skill_ref_id = def.id
             WHERE
                     uue.event_time >= :start AND 
@@ -96,7 +98,8 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
             INNER JOIN (
                 select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
                 from skill_definition sd 
-                where sd.type = 'Skill' and (sd.id = :skillRefId or sd.copied_from_skill_ref = :skillRefId)
+                where sd.type = 'Skill' and (sd.id = :skillRefId or sd.copied_from_skill_ref = :skillRefId) and 
+                sd.enabled = 'true'
             ) def ON uue.skill_ref_id = def.id
             WHERE
                 uue.event_time >= :start AND
@@ -121,7 +124,8 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
             INNER JOIN (
                 select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
                 from skill_definition sd 
-                where sd.type = 'Skill' and (sd.id = :skillRefId or sd.copied_from_skill_ref = :skillRefId)
+                where sd.type = 'Skill' and (sd.id = :skillRefId or sd.copied_from_skill_ref = :skillRefId) and 
+                sd.enabled = 'true'
             ) def ON uue.skill_ref_id = def.id
             WHERE
                 uue.event_time >= :start
@@ -145,6 +149,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                 select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
                 from skill_definition sd 
                 where sd.type = 'Skill' and 
+                sd.enabled = 'true' and
                 sd.id in (select rel.child_ref_id from skill_relationship_definition rel where rel.parent_ref_id = :subjectRawId)
             ) def ON uue.skill_ref_id = def.id
             WHERE
@@ -171,6 +176,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                 select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
                 from skill_definition sd 
                 where sd.type = 'Skill' and 
+                sd.enabled = 'true' and
                 sd.id in (select rel.child_ref_id from skill_relationship_definition rel where rel.parent_ref_id = :subjectRawId)
             ) def ON uue.skill_ref_id = def.id
             WHERE
@@ -195,6 +201,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                 select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
                 from skill_definition sd 
                 where sd.type = 'Skill' and 
+                sd.enabled = 'true' and
                 sd.id in (select rel.child_ref_id from skill_relationship_definition rel where rel.parent_ref_id = :skillRefId)
             ) def ON uue.skill_ref_id = def.id
             WHERE
@@ -219,6 +226,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                 select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
                 from skill_definition sd 
                 where sd.type = 'Skill' and 
+                sd.enabled = 'true' and
                 sd.id in (select rel.child_ref_id from skill_relationship_definition rel where rel.parent_ref_id = :skillRefId)
             ) def ON uue.skill_ref_id = def.id
             WHERE
@@ -246,7 +254,9 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
             INNER JOIN (
                 select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
                 from skill_definition sd 
-                where sd.type = 'Skill' and sd.project_id = :projectId
+                where sd.type = 'Skill' 
+                and sd.project_id = :projectId
+                and sd.enabled = 'true'
             ) def ON uue.skill_ref_id = def.id
             WHERE
                 uue.event_time >= :start AND
@@ -270,7 +280,9 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
             INNER JOIN (
                 select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
                 from skill_definition sd 
-                where sd.type = 'Skill' and sd.project_id = :projectId
+                where sd.type = 'Skill' 
+                and sd.project_id = :projectId
+                and sd.enabled = 'true'
             ) def ON uue.skill_ref_id = def.id
             WHERE
                 uue.event_time >= :start
@@ -294,7 +306,9 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
             INNER JOIN (
                 select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
                 from skill_definition sd 
-                where sd.type = 'Skill' and sd.project_id in :projectIds
+                where sd.type = 'Skill' 
+                and sd.project_id in :projectIds
+                and sd.enabled = 'true'
             ) def ON uue.skill_ref_id = def.id
             WHERE
                 uue.event_time > :start AND
@@ -319,7 +333,9 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
             FROM user_events uue INNER JOIN (
                     select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
                     from skill_definition sd 
-                    where sd.type = 'Skill' and sd.project_id in :projectIds
+                    where sd.type = 'Skill' 
+                    and sd.project_id in :projectIds
+                    and sd.enabled = 'true'
                 ) def ON uue.skill_ref_id = def.id
             WHERE
                     uue.event_time >= :start AND
@@ -344,7 +360,9 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
             FROM user_events uue INNER JOIN (
                     select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
                     from skill_definition sd 
-                    where sd.type = 'Skill' and sd.project_id = :projectId
+                    where sd.type = 'Skill' 
+                    and sd.project_id = :projectId
+                    and sd.enabled = 'true'
                 ) def ON uue.skill_ref_id = def.id
             WHERE
                 uue.event_time >= :start AND
@@ -358,7 +376,13 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
     @Query(value="""
         select new skills.storage.model.EventCount(ue.eventTime, count(distinct ue.userId), ue.eventType) from UserEvent ue
         where ue.eventTime > :start AND
-        ue.skillRefId in (SELECT sd.id FROM SkillDef sd WHERE sd.projectId = :projectId AND sd.type = 'Skill')   
+        ue.skillRefId in (
+            SELECT case when sd.copiedFrom is not null then sd.copiedFrom else sd.id end as id 
+            FROM SkillDef sd 
+            WHERE sd.projectId = :projectId 
+            AND sd.type = 'Skill'
+            and sd.enabled = 'true'
+        )   
         group by ue.eventTime, ue.eventType
         order by ue.eventTime desc
     """)
@@ -367,7 +391,13 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
     @Query(value="""
         select min(ue.projectId) as projectId, ue.weekNumber as weekNumber, count(distinct ue.userId) as count from UserEvent ue
         where ue.eventTime >= :start AND
-        ue.skillRefId in (select case when sd.copiedFrom is not null then sd.copiedFrom else sd.id end as id from SkillDef sd WHERE sd.projectId = :projectId AND sd.type = 'Skill')   
+        ue.skillRefId in (
+            select case when sd.copiedFrom is not null then sd.copiedFrom else sd.id end as id 
+            from SkillDef sd 
+            WHERE sd.projectId = :projectId 
+            AND sd.type = 'Skill'
+            AND sd.enabled = 'true'
+        )   
         group by ue.weekNumber
         order by ue.weekNumber desc
     """)
@@ -407,7 +437,8 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
     @Query(value='''
         SELECT COUNT(ue.user_id) OVER() 
         FROM user_events ue, (
-            SELECT user_id, achieved_on FROM user_achievement WHERE skill_ref_id = :skillRefId
+            SELECT user_id, achieved_on FROM user_achievement 
+            WHERE skill_ref_id = :skillRefId
         ) AS achievements 
         WHERE 
             ue.skill_ref_id = :skillRefId 

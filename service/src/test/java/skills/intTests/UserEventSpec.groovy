@@ -1371,6 +1371,7 @@ class UserEventSpec extends DefaultIntSpec {
         def p2skill1 = SkillsFactory.createSkill(52, 1, 99)
         p2skill1.numPerformToCompletion = 10
         p2skill1.pointIncrement = 50
+        def notFinalized = SkillsFactory.createSkill(52, 1, 101)
 
         skillsService.createProject(proj)
         skillsService.createSubject(subject)
@@ -1380,8 +1381,11 @@ class UserEventSpec extends DefaultIntSpec {
         skillsService.createProject(proj2)
         skillsService.createSubject(p2subj1)
         skillsService.createSkill(p2skill1)
+        skillsService.createSkill(notFinalized)
         skillsService.exportSkillToCatalog(proj2.projectId, p2skill1.skillId)
         skillsService.importSkillFromCatalog(proj.projectId, subject.subjectId, proj2.projectId, p2skill1.skillId)
+        skillsService.finalizeSkillsImportFromCatalog(proj.projectId, true)
+
 
         TestDates testDates = new TestDates()
 
@@ -1468,6 +1472,7 @@ class UserEventSpec extends DefaultIntSpec {
         skillsService.createSkill(p2skill1)
         skillsService.exportSkillToCatalog(proj2.projectId, p2skill1.skillId)
         skillsService.importSkillFromCatalog(proj.projectId, subject.subjectId, proj2.projectId, p2skill1.skillId)
+        skillsService.finalizeSkillsImportFromCatalog(proj.projectId, true)
 
         TestDates testDates = new TestDates()
 
@@ -1535,6 +1540,7 @@ class UserEventSpec extends DefaultIntSpec {
         def p2skill2 = SkillsFactory.createSkill(52, 1, 100)
         p2skill2.numPerformToCompletion = 10
         p2skill2.pointIncrement = 50
+        def notFinalized = SkillsFactory.createSkill(52, 1, 101)
 
         skillsService.createProject(proj)
         skillsService.createSubject(subject)
@@ -1547,15 +1553,20 @@ class UserEventSpec extends DefaultIntSpec {
         skillsService.createSubject(p2subj1)
         skillsService.createSkill(p2skill1)
         skillsService.createSkill(p2skill2)
+        skillsService.createSkill(notFinalized)
         skillsService.exportSkillToCatalog(proj2.projectId, p2skill1.skillId)
         skillsService.exportSkillToCatalog(proj2.projectId, p2skill2.skillId)
+        skillsService.exportSkillToCatalog(proj2.projectId, notFinalized.skillId)
 
         skillsService.importSkillFromCatalog(proj.projectId, subject.subjectId, proj2.projectId, p2skill1.skillId) //import proj2.skill1 into proj.subject1
         skillsService.importSkillFromCatalog(proj.projectId, subject2.subjectId, proj2.projectId, p2skill2.skillId) //import proj2.skill2 into proj.subject2
+        skillsService.finalizeSkillsImportFromCatalog(proj.projectId, true)
+        //should not be included in counts as is not yet finalized
+        skillsService.importSkillFromCatalog(proj.projectId, subject.subjectId, proj2.projectId, notFinalized.skillId)
 
         TestDates testDates = new TestDates()
 
-        def users = getRandomUsers(3)
+        def users = getRandomUsers(4)
         def user = users[0]
         def user2 = users[1]
         def user3 = users[2]
@@ -1565,6 +1576,8 @@ class UserEventSpec extends DefaultIntSpec {
         skillsService.addSkill([projectId: proj.projectId, skillId: subj1_skill1.skillId], user, testDates.now.minusDays(1).toDate()) //subject 1
         skillsService.addSkill([projectId: proj.projectId, skillId: subj1_skill1.skillId], users[1], testDates.now.minusDays(1).toDate()) //subject 1
         skillsService.addSkill([projectId: proj.projectId, skillId: subj1_skill1.skillId], user3, testDates.now.minusDays(2).toDate()) //subject 1
+        skillsService.addSkill([projectId: proj2.projectId, skillId: notFinalized.skillId], users[3], testDates.now.minusDays(2).toDate())
+        skillsService.addSkill([projectId: proj2.projectId, skillId: notFinalized.skillId], users[3], testDates.now.minusDays(1).toDate())
 
         //2 days, subj1, 2 events
         //1 day, subj 1, 3
@@ -1630,6 +1643,7 @@ class UserEventSpec extends DefaultIntSpec {
         def p2skill2 = SkillsFactory.createSkill(52, 1, 100)
         p2skill2.numPerformToCompletion = 10
         p2skill2.pointIncrement = 50
+        def notFinalized = SkillsFactory.createSkill(52, 1, 101)
 
         skillsService.createProject(proj)
         skillsService.createSubject(subject)
@@ -1642,14 +1656,19 @@ class UserEventSpec extends DefaultIntSpec {
         skillsService.createSubject(p2subj1)
         skillsService.createSkill(p2skill1)
         skillsService.createSkill(p2skill2)
+        skillsService.createSkill(notFinalized)
         skillsService.exportSkillToCatalog(proj2.projectId, p2skill1.skillId)
         skillsService.exportSkillToCatalog(proj2.projectId, p2skill2.skillId)
+        skillsService.exportSkillToCatalog(proj2.projectId, notFinalized.skillId)
         skillsService.importSkillFromCatalog(proj.projectId, subject.subjectId, proj2.projectId, p2skill1.skillId)
         skillsService.importSkillFromCatalog(proj.projectId, subject2.subjectId, proj2.projectId, p2skill2.skillId)
+        skillsService.finalizeSkillsImportFromCatalog(proj.projectId, true)
+        //should not be included in counts as is not yet finalized
+        skillsService.importSkillFromCatalog(proj.projectId, subject.subjectId, proj2.projectId, notFinalized.skillId)
 
         TestDates testDates = new TestDates()
 
-        def users = getRandomUsers(3)
+        def users = getRandomUsers(4)
         def user = users[0]
         def user2 = users[1]
         def user3 = users[2]
@@ -1659,6 +1678,8 @@ class UserEventSpec extends DefaultIntSpec {
         skillsService.addSkill([projectId: proj.projectId, skillId: subj1_skill1.skillId], user, testDates.startOfTwoWeeksAgo.toDate()) //subject 1
         skillsService.addSkill([projectId: proj.projectId, skillId: subj1_skill1.skillId], user2, testDates.startOfTwoWeeksAgo.toDate()) //subject 1
         skillsService.addSkill([projectId: proj.projectId, skillId: subj1_skill1.skillId], user3, testDates.startOfCurrentWeek.toDate()) //subject 1
+        skillsService.addSkill([projectId: proj2.projectId, skillId: notFinalized.skillId], users[3], testDates.startOfCurrentWeek.toDate()) //subject 1
+        skillsService.addSkill([projectId: proj2.projectId, skillId: notFinalized.skillId], users[3], testDates.startOfTwoWeeksAgo.toDate()) //subject 1
 
         //2 weeks ago: subj1 3 events, 2 unique users
         //current week: subj1 2 events, 2 unique users
