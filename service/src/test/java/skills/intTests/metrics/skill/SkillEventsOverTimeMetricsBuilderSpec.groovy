@@ -142,7 +142,7 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
         def proj = SkillsFactory.createProject()
         def proj2 = SkillsFactory.createProject(2)
         def subj2 = SkillsFactory.createSubject(2, 2)
-        List<Map> skills = SkillsFactory.createSkills(10)
+        List<Map> skills = SkillsFactory.createSkills(12)
         skills.each { it.pointIncrement = 100; it.numPerformToCompletion = 1 }
 
         skillsService.createProject(proj)
@@ -150,10 +150,12 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
         skillsService.createSkills(skills)
         skillsService.createProject(proj2)
         skillsService.createSubject(subj2)
-        skills.each {
+        (0..9).each {idx ->
+            def it = skills.get(idx)
             skillsService.exportSkillToCatalog(proj.projectId, it.skillId)
             skillsService.importSkillFromCatalog(proj2.projectId, subj2.subjectId, proj.projectId, it.skillId)
         }
+        skillsService.finalizeSkillsImportFromCatalog(proj2.projectId, true)
 
         TestDates testDates = new TestDates()
 
@@ -164,6 +166,22 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
                 testDates.startOfTwoWeeksAgo.plusDays(6).toDate(),
                 testDates.startOfCurrentWeek.toDate()]
 
+        def notIncluded1 = skills.get(10)
+        def notIncluded2 = skills.get(11)
+        //unfinalized imports should not be included in the counts
+        skillsService.exportSkillToCatalog(proj.projectId, notIncluded1.skillId)
+        skillsService.exportSkillToCatalog(proj.projectId, notIncluded2.skillId)
+        skillsService.importSkillFromCatalog(proj2.projectId, subj2.subjectId, proj.projectId, notIncluded1.skillId)
+        skillsService.importSkillFromCatalog(proj2.projectId, subj2.subjectId, proj.projectId, notIncluded2.skillId)
+        skillsService.addSkill([projectId: proj.projectId, skillId: notIncluded1.skillId], users[0], days[0])
+        skillsService.addSkill([projectId: proj.projectId, skillId: notIncluded1.skillId], users[1], days[1])
+        skillsService.addSkill([projectId: proj.projectId, skillId: notIncluded1.skillId], users[2], days[2])
+        skillsService.addSkill([projectId: proj.projectId, skillId: notIncluded1.skillId], users[3], days[3])
+        skillsService.addSkill([projectId: proj.projectId, skillId: notIncluded2.skillId], users[0], days[0])
+        skillsService.addSkill([projectId: proj.projectId, skillId: notIncluded2.skillId], users[1], days[1])
+        skillsService.addSkill([projectId: proj.projectId, skillId: notIncluded2.skillId], users[2], days[2])
+        skillsService.addSkill([projectId: proj.projectId, skillId: notIncluded2.skillId], users[3], days[3])
+
         days.eachWithIndex { Date date, int index ->
             users.subList(0, index).each { String user ->
                 skills.subList(0, index).each { skill ->
@@ -171,6 +189,7 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
                 }
             }
         }
+
 
         Map props = [:]
         props[MetricsParams.P_SKILL_ID] = skills[0].skillId
@@ -262,7 +281,7 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
         def proj = SkillsFactory.createProject()
         def proj2 = SkillsFactory.createProject(2)
         def subj2 = SkillsFactory.createSubject(2, 2)
-        List<Map> skills = SkillsFactory.createSkills(3)
+        List<Map> skills = SkillsFactory.createSkills(5)
         skills.each { it.pointIncrement = 100; it.numPerformToCompletion = 2 }
 
         skillsService.createProject(proj)
@@ -271,10 +290,13 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
         skillsService.createProject(proj2)
         skillsService.createSubject(subj2)
 
-        skills.each {
+        (0..2).each { idx ->
+            def it = skills.get(idx)
             skillsService.exportSkillToCatalog(proj.projectId, it.skillId)
             skillsService.importSkillFromCatalog(proj2.projectId, subj2.subjectId, proj.projectId, it.skillId)
         }
+        skillsService.finalizeSkillsImportFromCatalog(proj2.projectId, true)
+
 
         TestDates testDates = new TestDates()
 
@@ -283,6 +305,21 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
                 testDates.now.minusDays(1).toDate(),
                 testDates.now.toDate(),
         ]
+
+
+        def notIncluded1 = skills.get(3)
+        def notIncluded2 = skills.get(4)
+        //unfinalized imports should not be included in the counts
+        skillsService.exportSkillToCatalog(proj.projectId, notIncluded1.skillId)
+        skillsService.exportSkillToCatalog(proj.projectId, notIncluded2.skillId)
+        skillsService.importSkillFromCatalog(proj2.projectId, subj2.subjectId, proj.projectId, notIncluded1.skillId)
+        skillsService.importSkillFromCatalog(proj2.projectId, subj2.subjectId, proj.projectId, notIncluded2.skillId)
+        skillsService.addSkill([projectId: proj.projectId, skillId: notIncluded1.skillId], users[0], days[0])
+        skillsService.addSkill([projectId: proj.projectId, skillId: notIncluded1.skillId], users[1], days[1])
+        skillsService.addSkill([projectId: proj.projectId, skillId: notIncluded1.skillId], users[2], days[2])
+        skillsService.addSkill([projectId: proj.projectId, skillId: notIncluded2.skillId], users[0], days[0])
+        skillsService.addSkill([projectId: proj.projectId, skillId: notIncluded2.skillId], users[1], days[1])
+        skillsService.addSkill([projectId: proj.projectId, skillId: notIncluded2.skillId], users[2], days[2])
 
         days.eachWithIndex { Date date, int index ->
             users.subList(0, index).each { String user ->
@@ -361,7 +398,7 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
         def proj = SkillsFactory.createProject()
         def proj2 = SkillsFactory.createProject(2)
         def subj2 = SkillsFactory.createSubject(2, 2)
-        List<Map> skills = SkillsFactory.createSkills(1)
+        List<Map> skills = SkillsFactory.createSkills(3)
         skills.each { it.pointIncrement = 100; it.numPerformToCompletion = 2 }
 
         skillsService.createProject(proj)
@@ -372,6 +409,7 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
 
         skillsService.exportSkillToCatalog(proj.projectId, skills[0].skillId)
         skillsService.importSkillFromCatalog(proj2.projectId, subj2.subjectId, proj.projectId, skills[0].skillId)
+        skillsService.finalizeSkillsImportFromCatalog(proj2.projectId, true)
 
         List<Date> days
 
@@ -385,6 +423,22 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
                 }
             }
         }
+
+        def notIncluded1 = skills.get(1)
+        def notIncluded2 = skills.get(2)
+        //unfinalized imports should not be included in the counts
+        skillsService.exportSkillToCatalog(proj.projectId, notIncluded1.skillId)
+        skillsService.exportSkillToCatalog(proj.projectId, notIncluded2.skillId)
+        skillsService.importSkillFromCatalog(proj2.projectId, subj2.subjectId, proj.projectId, notIncluded1.skillId)
+        skillsService.importSkillFromCatalog(proj2.projectId, subj2.subjectId, proj.projectId, notIncluded2.skillId)
+        skillsService.addSkill([projectId: proj.projectId, skillId: notIncluded1.skillId], users[0], days[0])
+        skillsService.addSkill([projectId: proj.projectId, skillId: notIncluded1.skillId], users[1], days[1])
+        skillsService.addSkill([projectId: proj.projectId, skillId: notIncluded1.skillId], users[2], days[2])
+        skillsService.addSkill([projectId: proj.projectId, skillId: notIncluded1.skillId], users[3], days[3])
+        skillsService.addSkill([projectId: proj.projectId, skillId: notIncluded2.skillId], users[0], days[0])
+        skillsService.addSkill([projectId: proj.projectId, skillId: notIncluded2.skillId], users[1], days[1])
+        skillsService.addSkill([projectId: proj.projectId, skillId: notIncluded2.skillId], users[2], days[2])
+        skillsService.addSkill([projectId: proj.projectId, skillId: notIncluded2.skillId], users[3], days[3])
 
         Map props = [:]
         props[MetricsParams.P_SKILL_ID] = skills[0].skillId

@@ -36,7 +36,8 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
               u.skillRefId in (
                 select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id from SkillDef s
                 where s.projectId = ?1 and
-                s.skillId = ?2
+                s.skillId = ?2 and
+                s.enabled = 'true'
               ) and
               u.userId = ?3 and
               u.performedOn = ?4''')
@@ -50,7 +51,8 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
               u.skillRefId in (
                 select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id from SkillDef s
                 where s.projectId = ?2 and
-                lower(s.skillId) like lower(concat('%',?3,'%'))
+                s.enabled = 'true' and
+                lower(s.skillId) like lower(concat('%',?3,'%')) 
               ) and
               u.userId = ?1''')
     Long countByUserIdAndProjectIdAndSkillIdIgnoreCaseContaining(String userId, String projectId, String skillId)
@@ -59,7 +61,8 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
               where 
               u.skillRefId in (
                 select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id from SkillDef s
-                where s.projectId = ?2
+                where s.projectId = ?2 and
+                s.enabled = 'true'
               ) and
               u.userId = ?1''')
     Long countByUserIdAndProjectId(String userId, String projectId)
@@ -69,7 +72,8 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
               u.skillRefId in (
                 select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id from SkillDef s
                 where s.projectId = ?2 and
-                s.skillId = ?3
+                s.skillId = ?3 and
+                s.enabled = 'true'
               ) and
               u.userId = ?1''')
     Long countByUserIdAndProjectIdAndSkillId(String userId, String projectId, String skillId)
@@ -79,7 +83,8 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
               u.skillRefId in (
                 select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id from SkillDef s
                 where s.projectId = ?2 and
-                s.skillId = ?3
+                s.skillId = ?3 and
+                s.enabled = 'true'
               ) and
               u.userId = ?1 and 
               u.performedOn > ?4 and
@@ -87,7 +92,11 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
     Long countByUserIdAndProjectIdAndSkillIdAndPerformedOnGreaterThanAndPerformedOnLessThan(String userId, String projectId, String skillId, Date startDate, Date endDate)
 
     @Query('''SELECT DISTINCT(p.userId) from UserPerformedSkill p where 
-                p.skillRefId in (select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id from SkillDef s where s.projectId=?1)
+                p.skillRefId in (
+                    select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id from SkillDef s 
+                    where s.projectId=?1 and
+                    s.enabled = 'true'
+                 )
                 and lower(p.userId) LIKE %?2% order by p.userId asc''' )
     List<String> findDistinctUserIdsForProject(String projectId, String userIdQuery, Pageable pageable)
 
@@ -97,7 +106,12 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
     Boolean existsByUserId(String userId)
 
     @Query('''select true from UserPerformedSkill up 
-                where up.skillRefId in (select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id from SkillDef s where s.projectId=?2) and
+                where up.skillRefId in (
+                    select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id 
+                    from SkillDef s 
+                    where s.projectId=?2 and
+                    s.enabled = 'true'
+                ) and
                 up.userId = ?1''')
     Boolean existsByProjectIdAndUserId(String userId, String projectId)
 
@@ -106,6 +120,7 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
               u.skillRefId in (
                 select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id from SkillDef s
                 where s.projectId = ?2 and
+                s.enabled = 'true' and
                 lower(s.skillId) like lower(concat('%',?3,'%'))
               ) and
               u.userId = ?1''')
@@ -115,13 +130,20 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
               where 
               u.skillRefId in (
                 select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id from SkillDef s
-                where s.projectId = ?2
+                where s.projectId = ?2 and
+                s.enabled = 'true'
               ) and
               u.userId = ?1''')
     List<UserPerformedSkill> findByUserIdAndProjectId(String userId, String projectId, Pageable pageable)
 
     @Query('''SELECT COUNT(DISTINCT p.skillId) from UserPerformedSkill p where p.userId = ?2 
-            and p.skillRefId in (select case when copiedFrom is not null then copiedFrom else id end as id from SkillDef where type = 'Skill' and projectId = ?1)''')
+            and p.skillRefId in (
+                select case when copiedFrom is not null then copiedFrom else id end as id 
+                from SkillDef 
+                where type = 'Skill' and projectId = ?1 and
+                enabled = 'true'
+            )'''
+    )
     Integer countDistinctSkillIdByProjectIdAndUserId(String projectId, String userId)
 
     @Query('''SELECT COUNT(DISTINCT p.userId) from UserPerformedSkill p 
@@ -129,7 +151,10 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
                     select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id
                     from SkillDef s
                     where 
-                    s.projectId=?1 and s.skillId = ?2)''')
+                    s.projectId=?1 and 
+                    s.skillId = ?2 and
+                    s.enabled = 'true'
+                )''')
     Integer countDistinctUserIdByProjectIdAndSkillId(String projectId, String skillId)
 
     @Query(''' select DISTINCT(sdParent)
@@ -143,7 +168,9 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
                 where
                 s.projectId=?2 and
                 type = 'Skill' and
-                s.skillId=?3) and 
+                s.skillId=?3 and
+                s.enabled = 'true'
+            ) and 
             srd.type='Dependence' ''')
     List<SkillDef> findPerformedParentSkills(String userId, String projectId, String skillId)
 
@@ -162,6 +189,7 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
               and rel.type in ('RuleSetDefinition', 'SkillsGroupRequirement')
               and child.type = 'Skill'
               and child.version <= :version
+              and child.enabled = 'true'
         )
         select CAST(ups.performed_on as date) as day, SUM(skills.pointIncrement) as count
         from user_performed_skill ups,
@@ -188,6 +216,7 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
             where project_id = :projectId
               and type = 'Skill'
               and version <= :version
+              and enabled = 'true'
         )
         select CAST(ups.performed_on as date) as day, SUM(skills.pointIncrement) as count
         from user_performed_skill ups,
@@ -213,7 +242,8 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
             where
             s.type = 'Skill' and
             s.projectId = :projectId and
-            s.skillId = :skillId
+            s.skillId = :skillId and
+            s.enabled = 'true'
         )
         group by CAST(ups.performedOn as date)
     ''')
@@ -225,7 +255,10 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
         ups.skillRefId in (
             select case when copiedFrom is not null then copiedFrom else id end as id 
             from SkillDef 
-            where type = 'Skill' and skillId = :skillId and projectId = :projectId
+            where type = 'Skill' and 
+            skillId = :skillId and 
+            projectId = :projectId and
+            enabled = 'true'
         ) and
         ups.performedOn > :from
         group by CAST(ups.performedOn as date)

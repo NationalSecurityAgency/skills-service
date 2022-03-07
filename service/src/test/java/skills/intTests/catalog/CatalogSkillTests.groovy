@@ -2587,6 +2587,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
 
         skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.finalizeSkillsImportFromCatalog(project2.projectId, true)
 
         def user = getRandomUsers(1)[0]
 
@@ -2595,7 +2596,6 @@ class CatalogSkillTests extends CatalogIntSpec {
         skillsService.addSkill([projectId: project1.projectId, skillId: skill.skillId], user, date)
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         def subjectUsers = skillsService.getSubjectUsers(project2.projectId, p2subj1.subjectId)
-        println subjectUsers
 
         then:
         subjectUsers.data[0].userId == user
