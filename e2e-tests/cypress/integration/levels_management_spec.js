@@ -42,11 +42,11 @@ describe('Levels Management Tests', () => {
 
         const tableSelector = '[data-cy=levelsTable]'
         const expected = [
-            [{ colIndex: 0,  value: 1 }, { colIndex: 2,  value: '10' }, { colIndex: 3,  value: 'Please create more rules first' }],
-            [{ colIndex: 0,  value: 2 }, { colIndex: 2,  value: '25' }, { colIndex: 3,  value: 'Please create more rules first' }],
-            [{ colIndex: 0,  value: 3 }, { colIndex: 2,  value: '45' }, { colIndex: 3,  value: 'Please create more rules first' }],
-            [{ colIndex: 0,  value: 4 }, { colIndex: 2,  value: '67' }, { colIndex: 3,  value: 'Please create more rules first' }],
-            [{ colIndex: 0,  value: 5 }, { colIndex: 2,  value: '92' }, { colIndex: 3,  value: 'Please create more rules first' }],
+            [{ colIndex: 0,  value: 1 }, { colIndex: 1,  value: '10' }, { colIndex: 2,  value: 'Please create more rules first' }],
+            [{ colIndex: 0,  value: 2 }, { colIndex: 1,  value: '25' }, { colIndex: 2,  value: 'Please create more rules first' }],
+            [{ colIndex: 0,  value: 3 }, { colIndex: 1,  value: '45' }, { colIndex: 2,  value: 'Please create more rules first' }],
+            [{ colIndex: 0,  value: 4 }, { colIndex: 1,  value: '67' }, { colIndex: 2,  value: 'Please create more rules first' }],
+            [{ colIndex: 0,  value: 5 }, { colIndex: 1,  value: '92' }, { colIndex: 2,  value: 'Please create more rules first' }],
         ]
         cy.validateTable(tableSelector, expected, 5, true, null, false);
 
@@ -279,11 +279,11 @@ describe('Levels Management Tests', () => {
 
         const tableSelector = '[data-cy=levelsTable]'
         const expected = [
-            [{ colIndex: 0,  value: 1 }, { colIndex: 2,  value: '10' }, { colIndex: 3,  value: '100' }],
-            [{ colIndex: 0,  value: 2 }, { colIndex: 2,  value: '25' }, { colIndex: 3,  value: '250' }],
-            [{ colIndex: 0,  value: 3 }, { colIndex: 2,  value: '45' }, { colIndex: 3,  value: '450' }],
-            [{ colIndex: 0,  value: 4 }, { colIndex: 2,  value: '67' }, { colIndex: 3,  value: '670' }],
-            [{ colIndex: 0,  value: 5 }, { colIndex: 2,  value: '92' }, { colIndex: 3,  value: '920' }],
+            [{ colIndex: 0,  value: 1 }, { colIndex: 1,  value: '10' }, { colIndex: 2,  value: '100' }],
+            [{ colIndex: 0,  value: 2 }, { colIndex: 1,  value: '25' }, { colIndex: 2,  value: '250' }],
+            [{ colIndex: 0,  value: 3 }, { colIndex: 1,  value: '45' }, { colIndex: 2,  value: '450' }],
+            [{ colIndex: 0,  value: 4 }, { colIndex: 1,  value: '67' }, { colIndex: 2,  value: '670' }],
+            [{ colIndex: 0,  value: 5 }, { colIndex: 1,  value: '92' }, { colIndex: 2,  value: '920' }],
         ]
         cy.validateTable(tableSelector, expected, 5, true, null, false);
 
@@ -291,27 +291,27 @@ describe('Levels Management Tests', () => {
         cy.contains('YES, Delete It').click();
 
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 1 }, { colIndex: 2,  value: '10' }, { colIndex: 3,  value: '100' }],
-            [{ colIndex: 0,  value: 2 }, { colIndex: 2,  value: '25' }, { colIndex: 3,  value: '250' }],
-            [{ colIndex: 0,  value: 3 }, { colIndex: 2,  value: '45' }, { colIndex: 3,  value: '450' }],
-            [{ colIndex: 0,  value: 4 }, { colIndex: 2,  value: '67' }, { colIndex: 3,  value: '670' }],
+            [{ colIndex: 0,  value: 1 }, { colIndex: 1,  value: '10' }, { colIndex: 2,  value: '100' }],
+            [{ colIndex: 0,  value: 2 }, { colIndex: 1,  value: '25' }, { colIndex: 2,  value: '250' }],
+            [{ colIndex: 0,  value: 3 }, { colIndex: 1,  value: '45' }, { colIndex: 2,  value: '450' }],
+            [{ colIndex: 0,  value: 4 }, { colIndex: 1,  value: '67' }, { colIndex: 2,  value: '670' }],
             ], 5, true, null, false);
 
         cy.get('[data-cy=removeLevel]').click();
         cy.contains('YES, Delete It').click();
 
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 1 }, { colIndex: 2,  value: '10' }, { colIndex: 3,  value: '100' }],
-            [{ colIndex: 0,  value: 2 }, { colIndex: 2,  value: '25' }, { colIndex: 3,  value: '250' }],
-            [{ colIndex: 0,  value: 3 }, { colIndex: 2,  value: '45' }, { colIndex: 3,  value: '450' }],
+            [{ colIndex: 0,  value: 1 }, { colIndex: 1,  value: '10' }, { colIndex: 2,  value: '100' }],
+            [{ colIndex: 0,  value: 2 }, { colIndex: 1,  value: '25' }, { colIndex: 2,  value: '250' }],
+            [{ colIndex: 0,  value: 3 }, { colIndex: 1,  value: '45' }, { colIndex: 2,  value: '450' }],
         ], 5, true, null, false);
 
         cy.get('[data-cy=removeLevel]').click();
         cy.contains('YES, Delete It').click();
 
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 1 }, { colIndex: 2,  value: '10' }, { colIndex: 3,  value: '100' }],
-            [{ colIndex: 0,  value: 2 }, { colIndex: 2,  value: '25' }, { colIndex: 3,  value: '250' }],
+            [{ colIndex: 0,  value: 1 }, { colIndex: 1,  value: '10' }, { colIndex: 2,  value: '100' }],
+            [{ colIndex: 0,  value: 2 }, { colIndex: 1,  value: '25' }, { colIndex: 2,  value: '250' }],
         ], 5, true, null, false);
 
 
@@ -319,7 +319,7 @@ describe('Levels Management Tests', () => {
         cy.contains('YES, Delete It').click();
 
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 1 }, { colIndex: 2,  value: '10' }, { colIndex: 3,  value: '100' }],
+            [{ colIndex: 0,  value: 1 }, { colIndex: 1,  value: '10' }, { colIndex: 2,  value: '100' }],
         ], 5, true, null, false);
 
         cy.get('[data-cy=removeLevel]').should('be.disabled');
@@ -451,11 +451,11 @@ describe('Levels Management Tests', () => {
 
         const tableSelector = '[data-cy=levelsTable]'
         const expected = [
-            [{ colIndex: 0,  value: 1 }, { colIndex: 2,  value: '10' }, { colIndex: 3,  value: '100' }],
-            [{ colIndex: 0,  value: 2 }, { colIndex: 2,  value: '25' }, { colIndex: 3,  value: '250' }],
-            [{ colIndex: 0,  value: 3 }, { colIndex: 2,  value: '45' }, { colIndex: 3,  value: '450' }],
-            [{ colIndex: 0,  value: 4 }, { colIndex: 2,  value: '67' }, { colIndex: 3,  value: '670' }],
-            [{ colIndex: 0,  value: 5 }, { colIndex: 2,  value: '92' }, { colIndex: 3,  value: '920' }],
+            [{ colIndex: 0,  value: 1 }, { colIndex: 1,  value: '10' }, { colIndex: 2,  value: '100' }],
+            [{ colIndex: 0,  value: 2 }, { colIndex: 1,  value: '25' }, { colIndex: 2,  value: '250' }],
+            [{ colIndex: 0,  value: 3 }, { colIndex: 1,  value: '45' }, { colIndex: 2,  value: '450' }],
+            [{ colIndex: 0,  value: 4 }, { colIndex: 1,  value: '67' }, { colIndex: 2,  value: '670' }],
+            [{ colIndex: 0,  value: 5 }, { colIndex: 1,  value: '92' }, { colIndex: 2,  value: '920' }],
         ]
         cy.validateTable(tableSelector, expected, 5, true, null, false);
 
@@ -472,7 +472,7 @@ describe('Levels Management Tests', () => {
         cy.contains('YES, Delete It').click();
 
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 1 }, { colIndex: 2,  value: '10' }, { colIndex: 3,  value: '100' }],
+            [{ colIndex: 0,  value: 1 }, { colIndex: 1,  value: '10' }, { colIndex: 2,  value: '100' }],
         ], 5, true, null, false);
 
         cy.get('[data-cy=removeLevel]').should('be.disabled');
@@ -484,106 +484,106 @@ describe('Levels Management Tests', () => {
     })
 
 
-    it('add new level without name, then add name', () => {
-        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
-            projectId: 'proj1',
-            subjectId: 'subj1',
-            name: "Subject 1"
-        });
-
-        cy.visit('/administrator/projects/proj1/');
-        cy.clickNav('Levels');
-
-        const rowSelector = '[data-cy=levelsTable] tbody tr'
-        cy.get(rowSelector).should('have.length', 5).as('cyRows');
-
-        cy.get('[data-cy=addLevel]').first().click();
-
-        // add a level with no name initially
-        cy.get('[data-cy=levelPercent]').type('95');
-        cy.get('[data-cy=levelPercentError]').should('not.be.visible');
-        cy.get('[data-cy=levelNameError]').should('not.be.visible');
-        cy.get('[data-cy=saveLevelButton]').should('not.be.disabled');
-        cy.get('[data-cy=saveLevelButton]').click();
-
-        // verify the new row was added as expected
-        cy.get(rowSelector).should('have.length', 6).as('cyRows');
-        cy.get('@cyRows')
-            .eq(5)
-            .find('[data-cy=levelsTable_name]')
-            .as('row6NameCol')
-        cy.get('@cyRows')
-            .eq(5)
-            .find('td')
-            .eq(2)
-            .as('row6PercentCol')
-        cy.get('@row6NameCol').should('be.empty')
-        cy.get('@row6PercentCol').contains('95')
-
-        // now give the level a name
-        cy.get('[data-cy=editLevelButton]').eq(5).click();
-        cy.get('[data-cy=levelName]').type('{selectall}Coral Belt');
-        cy.get('[data-cy=levelNameError]').should('not.be.visible');
-        cy.get('[data-cy=saveLevelButton]').should('not.be.disabled');
-        cy.get('[data-cy=levelName]').type('{enter}');
-
-        // verify that the new name is present
-        cy.get('@row6NameCol').contains('Coral Belt')
-    });
-
-    it('subjects: add new level without name, then add name', () => {
-        cy.server();
-        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
-            projectId: 'proj1',
-            subjectId: 'subj1',
-            name: "Subject 1"
-        });
-        cy.route({
-            method: 'GET',
-            url: '/admin/projects/proj1/subjects/subj1'
-        }).as('loadSubject');
-
-        cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.wait('@loadSubject');
-
-        cy.clickNav('Levels');
-
-        const rowSelector = '[data-cy=levelsTable] tbody tr'
-        cy.get(rowSelector).should('have.length', 5).as('cyRows');
-
-        cy.get('[data-cy=addLevel]').first().click();
-
-        // add a level with no name initially
-        cy.get('[data-cy=levelPercent]').type('95');
-        cy.get('[data-cy=levelPercentError]').should('not.be.visible');
-        cy.get('[data-cy=levelNameError]').should('not.be.visible');
-        cy.get('[data-cy=saveLevelButton]').should('not.be.disabled');
-        cy.get('[data-cy=saveLevelButton]').click();
-
-        // verify the new row was added as expected
-        cy.get(rowSelector).should('have.length', 6).as('cyRows');
-        cy.get('@cyRows')
-          .eq(5)
-          .find('[data-cy=levelsTable_name]')
-          .as('row6NameCol')
-        cy.get('@cyRows')
-          .eq(5)
-          .find('td')
-          .eq(2)
-          .as('row6PercentCol')
-        cy.get('@row6NameCol').should('be.empty')
-        cy.get('@row6PercentCol').contains('95')
-
-        // now give the level a name
-        cy.get('[data-cy=editLevelButton]').eq(5).click();
-        cy.get('[data-cy=levelName]').type('{selectall}Coral Belt');
-        cy.get('[data-cy=levelNameError]').should('not.be.visible');
-        cy.get('[data-cy=saveLevelButton]').should('not.be.disabled');
-        cy.get('[data-cy=levelName]').type('{enter}');
-
-        // verify that the new name is present
-        cy.get('@row6NameCol').contains('Coral Belt')
-    });
+    // it('add new level without name, then add name', () => {
+    //     cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+    //         projectId: 'proj1',
+    //         subjectId: 'subj1',
+    //         name: "Subject 1"
+    //     });
+    //
+    //     cy.visit('/administrator/projects/proj1/');
+    //     cy.clickNav('Levels');
+    //
+    //     const rowSelector = '[data-cy=levelsTable] tbody tr'
+    //     cy.get(rowSelector).should('have.length', 5).as('cyRows');
+    //
+    //     cy.get('[data-cy=addLevel]').first().click();
+    //
+    //     // add a level with no name initially
+    //     cy.get('[data-cy=levelPercent]').type('95');
+    //     cy.get('[data-cy=levelPercentError]').should('not.be.visible');
+    //     cy.get('[data-cy=levelNameError]').should('not.be.visible');
+    //     cy.get('[data-cy=saveLevelButton]').should('not.be.disabled');
+    //     cy.get('[data-cy=saveLevelButton]').click();
+    //
+    //     // verify the new row was added as expected
+    //     cy.get(rowSelector).should('have.length', 6).as('cyRows');
+    //     cy.get('@cyRows')
+    //         .eq(5)
+    //         .find('[data-cy=levelsTable_name]')
+    //         .as('row6NameCol')
+    //     cy.get('@cyRows')
+    //         .eq(5)
+    //         .find('td')
+    //         .eq(2)
+    //         .as('row6PercentCol')
+    //     cy.get('@row6NameCol').should('be.empty')
+    //     cy.get('@row6PercentCol').contains('95')
+    //
+    //     // now give the level a name
+    //     cy.get('[data-cy=editLevelButton]').eq(5).click();
+    //     cy.get('[data-cy=levelName]').type('{selectall}Coral Belt');
+    //     cy.get('[data-cy=levelNameError]').should('not.be.visible');
+    //     cy.get('[data-cy=saveLevelButton]').should('not.be.disabled');
+    //     cy.get('[data-cy=levelName]').type('{enter}');
+    //
+    //     // verify that the new name is present
+    //     cy.get('@row6NameCol').contains('Coral Belt')
+    // });
+    //
+    // it('subjects: add new level without name, then add name', () => {
+    //     cy.server();
+    //     cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+    //         projectId: 'proj1',
+    //         subjectId: 'subj1',
+    //         name: "Subject 1"
+    //     });
+    //     cy.route({
+    //         method: 'GET',
+    //         url: '/admin/projects/proj1/subjects/subj1'
+    //     }).as('loadSubject');
+    //
+    //     cy.visit('/administrator/projects/proj1/subjects/subj1');
+    //     cy.wait('@loadSubject');
+    //
+    //     cy.clickNav('Levels');
+    //
+    //     const rowSelector = '[data-cy=levelsTable] tbody tr'
+    //     cy.get(rowSelector).should('have.length', 5).as('cyRows');
+    //
+    //     cy.get('[data-cy=addLevel]').first().click();
+    //
+    //     // add a level with no name initially
+    //     cy.get('[data-cy=levelPercent]').type('95');
+    //     cy.get('[data-cy=levelPercentError]').should('not.be.visible');
+    //     cy.get('[data-cy=levelNameError]').should('not.be.visible');
+    //     cy.get('[data-cy=saveLevelButton]').should('not.be.disabled');
+    //     cy.get('[data-cy=saveLevelButton]').click();
+    //
+    //     // verify the new row was added as expected
+    //     cy.get(rowSelector).should('have.length', 6).as('cyRows');
+    //     cy.get('@cyRows')
+    //       .eq(5)
+    //       .find('[data-cy=levelsTable_name]')
+    //       .as('row6NameCol')
+    //     cy.get('@cyRows')
+    //       .eq(5)
+    //       .find('td')
+    //       .eq(2)
+    //       .as('row6PercentCol')
+    //     cy.get('@row6NameCol').should('be.empty')
+    //     cy.get('@row6PercentCol').contains('95')
+    //
+    //     // now give the level a name
+    //     cy.get('[data-cy=editLevelButton]').eq(5).click();
+    //     cy.get('[data-cy=levelName]').type('{selectall}Coral Belt');
+    //     cy.get('[data-cy=levelNameError]').should('not.be.visible');
+    //     cy.get('[data-cy=saveLevelButton]').should('not.be.disabled');
+    //     cy.get('[data-cy=levelName]').type('{enter}');
+    //
+    //     // verify that the new name is present
+    //     cy.get('@row6NameCol').contains('Coral Belt')
+    // });
 
     it('subjects: levels validation', () => {
         cy.server();
@@ -613,20 +613,20 @@ describe('Levels Management Tests', () => {
         cy.get('[data-cy=saveLevelButton]').should('be.disabled');
         cy.get('[data-cy=cancelLevel]').click();
 
-        cy.contains('Add Next').click();
-        cy.get('[data-cy=levelName]').type('Black Belt');
-        cy.get('[data-cy=levelNameError').contains('Name is already taken.');
-        cy.get('[data-cy=saveLevelButton]').should('be.disabled');
-        const invalidName = Array(1000).fill('a').join('');
-        cy.get('[data-cy=levelName]').invoke('val', invalidName).trigger('input');
-        cy.get('[data-cy=levelNameError').contains('Name cannot exceed 50 characters.');
-        cy.get('[data-cy=saveLevelButton]').should('be.disabled');
-
-        cy.get('[data-cy=levelName]').type('{selectall}Coral Belt');
-        cy.get('[data-cy=levelNameError]').should('not.be.visible');
-        cy.get('[data-cy=levelPercent]').type('{selectall}5');
-        cy.get('[data-cy=levelPercentError]').contains('Percent % must not overlap with other levels');
-        cy.get('[data-cy=saveLevelButton]').should('be.disabled');
+        // cy.contains('Add Next').click();
+        // cy.get('[data-cy=levelName]').type('Black Belt');
+        // cy.get('[data-cy=levelNameError').contains('Name is already taken.');
+        // cy.get('[data-cy=saveLevelButton]').should('be.disabled');
+        // const invalidName = Array(1000).fill('a').join('');
+        // cy.get('[data-cy=levelName]').invoke('val', invalidName).trigger('input');
+        // cy.get('[data-cy=levelNameError').contains('Name cannot exceed 50 characters.');
+        // cy.get('[data-cy=saveLevelButton]').should('be.disabled');
+        //
+        // cy.get('[data-cy=levelName]').type('{selectall}Coral Belt');
+        // cy.get('[data-cy=levelNameError]').should('not.be.visible');
+        // cy.get('[data-cy=levelPercent]').type('{selectall}5');
+        // cy.get('[data-cy=levelPercentError]').contains('Percent % must not overlap with other levels');
+        // cy.get('[data-cy=saveLevelButton]').should('be.disabled');
     });
 
     it('new level dialog should return focus to new level button', () => {
@@ -659,9 +659,9 @@ describe('Levels Management Tests', () => {
         cy.get('[data-cy=cancelLevel]').click();
         cy.get('[data-cy=addLevel]').should('have.focus');
 
-        cy.get('[data-cy=addLevel]').click();
-        cy.get('[data-cy=levelName]').type('{esc}');
-        cy.get('[data-cy=addLevel]').should('have.focus');
+        // cy.get('[data-cy=addLevel]').click();
+        // cy.get('[data-cy=levelName]').type('{esc}');
+        // cy.get('[data-cy=addLevel]').should('have.focus');
 
         cy.get('[data-cy=addLevel]').click();
         cy.get('[aria-label=Close]').filter('.text-light').click();
@@ -671,39 +671,39 @@ describe('Levels Management Tests', () => {
         cy.get('[data-cy=cancelLevel]').click();
         cy.get('[data-cy=editLevelButton]').eq(0).should('have.focus');
 
-        cy.get('[data-cy=editLevelButton]').eq(0).click();
-        cy.get('[data-cy=levelName]').type('{esc}');
-        cy.get('[data-cy=editLevelButton]').eq(0).should('have.focus');
+        // cy.get('[data-cy=editLevelButton]').eq(0).click();
+        // cy.get('[data-cy=levelName]').type('{esc}');
+        // cy.get('[data-cy=editLevelButton]').eq(0).should('have.focus');
 
         cy.get('[data-cy=editLevelButton]').eq(0).click();
         cy.get('[aria-label=Close]').filter('.text-light').click();
         cy.get('[data-cy=editLevelButton]').eq(0).should('have.focus');
 
-        cy.get('[data-cy=editLevelButton]').eq(0).click();
-        cy.get('[data-cy=levelName]').type('{selectall}Fooooooo');
-        cy.get('[data-cy=saveLevelButton]').click();
-        cy.wait('@saveLevel');
-        cy.wait('@loadLevels');
-        cy.get('[data-cy=editLevelButton]').eq(0).should('have.focus');
+        // cy.get('[data-cy=editLevelButton]').eq(0).click();
+        // cy.get('[data-cy=levelName]').type('{selectall}Fooooooo');
+        // cy.get('[data-cy=saveLevelButton]').click();
+        // cy.wait('@saveLevel');
+        // cy.wait('@loadLevels');
+        // cy.get('[data-cy=editLevelButton]').eq(0).should('have.focus');
 
         cy.get('[data-cy=editLevelButton]').eq(3).click();
         cy.get('[data-cy=cancelLevel]').click();
         cy.get('[data-cy=editLevelButton]').eq(3).should('have.focus');
 
-        cy.get('[data-cy=editLevelButton]').eq(3).click();
-        cy.get('[data-cy=levelName]').type('{esc}');
-        cy.get('[data-cy=editLevelButton]').eq(3).should('have.focus');
+        // cy.get('[data-cy=editLevelButton]').eq(3).click();
+        // cy.get('[data-cy=levelName]').type('{esc}');
+        // cy.get('[data-cy=editLevelButton]').eq(3).should('have.focus');
 
         cy.get('[data-cy=editLevelButton]').eq(3).click();
         cy.get('[aria-label=Close]').filter('.text-light').click();
         cy.get('[data-cy=editLevelButton]').eq(3).should('have.focus');
 
-        cy.get('[data-cy=editLevelButton]').eq(3).click();
-        cy.get('[data-cy=levelName]').type('{selectall}Baaaaar');
-        cy.get('[data-cy=saveLevelButton]').click();
-        cy.wait('@saveLevel');
-        cy.wait('@loadLevels');
-        cy.get('[data-cy=editLevelButton]').eq(3).should('have.focus');
+        // cy.get('[data-cy=editLevelButton]').eq(3).click();
+        // cy.get('[data-cy=levelName]').type('{selectall}Baaaaar');
+        // cy.get('[data-cy=saveLevelButton]').click();
+        // cy.wait('@saveLevel');
+        // cy.wait('@loadLevels');
+        // cy.get('[data-cy=editLevelButton]').eq(3).should('have.focus');
     });
 
 
