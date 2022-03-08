@@ -21,4 +21,5 @@ import groovy.transform.Canonical
 class SkillPerfomed {
     String skillId
     Date performedOn
+    boolean importedSkill
 }

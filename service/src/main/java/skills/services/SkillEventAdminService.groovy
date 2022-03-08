@@ -123,6 +123,10 @@ class SkillEventAdminService {
 
     @Transactional
     RequestResult deleteSkillEvent(String projectId, String skillId, String userId, Long timestamp) {
+        if (skillCatalogService.isSkillImportedFromCatalog(projectId, skillId)) {
+            throw new SkillException("Cannot delete skill events on skills imported from the catalog", projectId, skillId)
+        }
+
         List<UserPerformedSkill> performedSkills = performedSkillRepository.findAllByProjectIdAndSkillIdAndUserIdAndPerformedOn(projectId, skillId, userId, new Date(timestamp))
         if (!performedSkills) {
             throw new SkillException("This skill event does not exist", projectId, skillId, ErrorCode.BadParam)

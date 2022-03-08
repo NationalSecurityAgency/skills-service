@@ -56,7 +56,7 @@ class UserAdminService {
             Long filteredPerformedSkillsCount = performedSkillRepository.countByUserIdAndProjectIdAndSkillIdIgnoreCaseContaining(userId, projectId, query)
             List<UserPerformedSkill> performedSkills = performedSkillRepository.findByUserIdAndProjectIdAndSkillIdIgnoreCaseContaining(userId, projectId, query, pageRequest)
             result.data = performedSkills.collect({
-                new SkillPerfomed(skillId: it.skillId, performedOn: it.performedOn)
+                new SkillPerfomed(skillId: it.skillId, performedOn: it.performedOn, importedSkill: it.projectId != projectId)
             })
             result.count = filteredPerformedSkillsCount
         }

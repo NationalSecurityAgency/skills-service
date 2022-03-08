@@ -187,6 +187,8 @@ describe('Performed Skills Table Tests', () => {
         cy.report(3, false);
         cy.visit('/administrator/projects/proj1/subjects/subj1/users/user1@skills.org/skillEvents');
 
+        cy.intercept('DELETE', '/admin/projects/proj1/skills/skill2/users/*/events/**').as('delete');
+
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'skill3' }],
             [{ colIndex: 0,  value: 'skill2' }],
@@ -197,12 +199,31 @@ describe('Performed Skills Table Tests', () => {
         cy.get('@deleteBtns').eq(1).click();
         cy.contains('Removing skill [skill2]');
         cy.contains('YES, Delete It!').click();
+        cy.wait('@delete');
 
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'skill3' }],
             [{ colIndex: 0,  value: 'skill1' }],
         ], 5);
 
+    });
+
+    it('delete skill event disabled for events on skills imported from the catalog', () => {
+      cy.createProject(2);
+      cy.createSubject(2, 1);
+      cy.createSkill(2, 1, 1, { description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.' });
+      cy.createSkill(2, 1, 2, { description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.' });
+      cy.createSkill(2, 1, 3, { description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.' });
+      cy.exportSkillToCatalog(2, 1, 1);
+      cy.exportSkillToCatalog(2, 1, 2);
+      cy.exportSkillToCatalog(2, 1, 3);
+
+      cy.reportSkill(2, 1, 'user6Good@skills.org', '2020-09-12 11:00')
+      cy.importSkillFromCatalog(1, 1, 2, 1);
+      cy.finalizeCatalogImport(1);
+
+      cy.visit('/administrator/projects/proj1/subjects/subj1/users/user6Good@skills.org/skillEvents');
+      cy.get('[data-cy="deleteEventBtn"]').should('not.exist');
     });
 
 

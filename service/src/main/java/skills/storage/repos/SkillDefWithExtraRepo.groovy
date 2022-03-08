@@ -57,7 +57,9 @@ interface SkillDefWithExtraRepo extends PagingAndSortingRepository<SkillDefWithE
         where 
             s.id = r.parent and c.id = r.child and 
             s.projectId=?1 and c.projectId=?1 and c.enabled = 'true' and
-            s.skillId=?2 and r.type=?3 and c.version<=?4''')
+            s.skillId=?2 and r.type=?3 and c.version<=?4
+            order by s.skillId asc
+    ''')
     List<SkillDescDBRes> findAllChildSkillsDescriptions(String projectId, String parentSkillId, SkillRelDef.RelationshipType relationshipType, int version, String userId)
 
     @Query(value='''SELECT c.skillId as skillId, c.description as description, c.helpUrl as helpUrl, ua.achievedOn as achievedOn, c.selfReportingType as selfReportingType, c.type as type
@@ -76,7 +78,8 @@ interface SkillDefWithExtraRepo extends PagingAndSortingRepository<SkillDefWithE
         where 
             s.id = r.parent and c.id = r.child and 
             s.projectId is null and c.enabled = 'true' and
-            s.skillId=?1 and r.type=?2 and c.version<=?3''')
+            s.skillId=?1 and r.type=?2 and c.version<=?3
+        order by s.skillId asc''')
     List<SkillDescDBRes> findAllGlobalChildSkillsDescriptions(String parentSkillId, SkillRelDef.RelationshipType relationshipType, int version, String userId)
 
     @Query(value='''

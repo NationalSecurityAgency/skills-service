@@ -15,6 +15,7 @@
  */
 package skills.intTests
 
+import org.junit.Ignore
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
@@ -388,6 +389,35 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
         subjSummaryPostAddSkillEvent.skills[0].points == 100
         subjSummaryPostDelete.skillsLevel == 0
         subjSummaryPostDelete.skills[0].points == 0
+    }
+
+    def "cannot delete skill event for skill imported from catalog"() {
+        def user = getRandomUsers(1)[0]
+        def proj1 = SkillsFactory.createProject(1)
+        def proj2 = SkillsFactory.createProject(2)
+        def subj1 = SkillsFactory.createSubject(1, 1)
+        def subj2 = SkillsFactory.createSubject(2, 2)
+
+        def skill1 = SkillsFactory.createSkill(1, 1, 1, 1, 2, 0, 100)
+
+        skillsService.createProject(proj1)
+        skillsService.createProject(proj2)
+        skillsService.createSubject(subj1)
+        skillsService.createSubject(subj2)
+        skillsService.createSkill(skill1)
+
+        when:
+        skillsService.exportSkillToCatalog(proj1.projectId, skill1.skillId)
+        skillsService.importSkillFromCatalog(proj2.projectId, subj2.subjectId, proj1.projectId, skill1.skillId)
+        skillsService.finalizeSkillsImportFromCatalog(proj2.projectId, true)
+        Date date = new Date()
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], user, date)
+
+        skillsService.deleteSkillEvent([projectId: proj2.projectId, skillId: skill1.skillId, userId: user, timestamp: date.time])
+
+        then:
+        def e = thrown(Exception)
+        e.getMessage().contains("Cannot delete skill events on skills imported from the catalog")
 
     }
 }

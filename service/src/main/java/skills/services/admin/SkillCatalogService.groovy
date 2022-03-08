@@ -210,16 +210,22 @@ class SkillCatalogService {
 
     @Transactional
     void exportSkillToCatalog(String projectId, List<String> skillIds) {
+
         skillIds?.each { String skillId ->
             try {
                 exportSkillToCatalog(projectId, skillId)
             } catch (Exception throwable) {
                 if (throwable instanceof SkillException) {
-                    throw  throwable
+                    throw throwable
                 }
                 throw new SkillException("Failed to export batch, the failure was for the skillId [${skillId}]", throwable, projectId, skillId)
             }
         }
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isSkillImportedFromCatalog(String projectId, String skillId) {
+        return skillDefRepo.isImportedFromCatalog(projectId, skillId)
     }
 
     private void importSkillFromCatalog(String projectIdFrom, String skillIdFrom, String projectIdTo, SkillDef subjectTo) {

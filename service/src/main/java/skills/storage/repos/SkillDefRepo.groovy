@@ -542,4 +542,9 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
           and subject.type = 'Subject' 
           ''', nativeQuery = true)
     void updateSubjectTotalPoints(@Param('projectId') String projectId, @Param('subjectId') String subjectId)
+
+    @Query(value = '''
+         select exists (select 1 from skill_definition where project_id = :projectId and skill_id = :skillId and read_only = 'true') as isReadOnly
+    ''', nativeQuery = true)
+    boolean isImportedFromCatalog(@Param('projectId') String projectId, @Param('skillId') String skillId)
 }

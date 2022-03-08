@@ -47,6 +47,7 @@ limitations under the License.
         <template v-slot:cell(control)="data">
           <b-button @click="deleteSkill(data.item)" variant="outline-info" size="sm"
                     data-cy="deleteEventBtn"
+                    v-if="data.item.importedSkill === false"
                     :aria-label="`remove skill ${data.item.skillId} from user`">
             <i class="fas fa-trash" aria-hidden="true"/>
           </b-button>
