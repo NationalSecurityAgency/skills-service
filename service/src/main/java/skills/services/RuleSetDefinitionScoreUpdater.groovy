@@ -47,7 +47,7 @@ class RuleSetDefinitionScoreUpdater {
 
     void updateFromLeaf(SkillDef skillDef) {
         if (skillDef.type == SkillDef.ContainerType.SkillsGroup) {
-            List<SkillDef> children = skillRelDefRepo.findChildrenByParent(skillDef.id, [SkillRelDef.RelationshipType.SkillsGroupRequirement], Boolean.TRUE.toString())
+            List<SkillDef> children = skillRelDefRepo.findChildrenByParent(skillDef.id, [SkillRelDef.RelationshipType.SkillsGroupRequirement])
             int total = skillsGroupAdminService.getGroupTotalPoints(children, skillDef.numSkillsRequired)
             skillDef.totalPoints = total
             skillDefRepo.save(skillDef)
