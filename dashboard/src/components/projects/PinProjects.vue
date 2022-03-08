@@ -280,7 +280,7 @@ limitations under the License.
 </script>
 
 <style lang="scss" scoped>
-  /deep/ .header-text {
+  ::v-deep .header-text {
     color: #3E5461;
   }
 </style>
