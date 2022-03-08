@@ -305,16 +305,16 @@ limitations under the License.
 <style lang="scss" scoped>
 @import "../../../assets/custom";
 
-.customPagination ::v-deep button {
+.customPagination /deep/ button {
   color: $info !important;
   border-color: $secondary !important;
 }
 
-.customPagination ::v-deep .disabled > .page-link {
+.customPagination /deep/ .disabled > .page-link {
   border-color: $secondary !important;
 }
 
-.customPagination ::v-deep .active > button {
+.customPagination /deep/ .active > button {
   background-color: $info !important;
   color: $white !important;
 }
