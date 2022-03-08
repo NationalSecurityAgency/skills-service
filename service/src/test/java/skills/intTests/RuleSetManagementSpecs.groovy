@@ -17,10 +17,9 @@ package skills.intTests
 
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
-import skills.intTests.utils.SkillsService
 import skills.intTests.utils.TestUtils
-import spock.lang.IgnoreRest
-import spock.lang.Specification
+
+import static skills.intTests.utils.SkillsFactory.*
 
 class RuleSetManagementSpecs extends DefaultIntSpec {
 
@@ -56,6 +55,59 @@ class RuleSetManagementSpecs extends DefaultIntSpec {
 
         then:
         subject.totalPoints == 60
+    }
+
+    def "stats show enabled/disabled groups and skills"() {
+        def project1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Subj1Skills = createSkills(8, 1, 1, 88)
+        def p1subj2 = createSubject(1, 2)
+        def p1Subj2Skills = createSkills(6, 1, 2, 99)
+        skillsService.createProjectAndSubjectAndSkills(project1, p1subj1, p1Subj1Skills)
+        skillsService.createSubject(p1subj2)
+        skillsService.createSkills(p1Subj2Skills)
+
+        def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 25)
+        skillsService.createSkill(skillsGroup)
+        skillsService.assignSkillToSkillsGroup(skillsGroup.skillId, createSkill(1, 1, 26))
+
+        def skillsGroup1 = SkillsFactory.createSkillsGroup(1, 1, 27)
+        skillsService.createSkill(skillsGroup1)
+        skillsService.assignSkillToSkillsGroup(skillsGroup1.skillId, createSkill(1, 1, 28))
+        skillsService.assignSkillToSkillsGroup(skillsGroup1.skillId, createSkill(1, 1, 29))
+
+        def skillsGroup2 = SkillsFactory.createSkillsGroup(1, 1, 30)
+        skillsService.createSkill(skillsGroup2)
+        skillsService.assignSkillToSkillsGroup(skillsGroup2.skillId, createSkill(1, 1, 31))
+        skillsService.assignSkillToSkillsGroup(skillsGroup2.skillId, createSkill(1, 1, 32))
+        skillsService.assignSkillToSkillsGroup(skillsGroup2.skillId, createSkill(1, 1, 33))
+        skillsGroup2.enabled = 'true'
+        skillsService.createSkill(skillsGroup2)
+
+
+        def project2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def p2Subj1Skills = [ createSkill(2, 1, 40)]
+        skillsService.createProjectAndSubjectAndSkills(project2, p2subj1, p2Subj1Skills)
+        skillsService.exportSkillToCatalog(project2.projectId, p2Subj1Skills[0].skillId)
+        skillsService.importSkillFromCatalog(project1.projectId, p1subj1.subjectId, project2.projectId, p2Subj1Skills[0].skillId)
+
+        when:
+        def subject1 = skillsService.getSubject(p1subj1)
+        def subject2 = skillsService.getSubject(p1subj2)
+
+        then:
+        subject1.numSkills == 11
+        subject1.numSkillsDisabled == 4
+        subject1.numSkillsImportedAndDisabled == 1
+        subject1.numGroups == 1
+        subject1.numGroupsDisabled == 2
+
+        subject2.numSkills == 6
+        subject2.numSkillsDisabled == 0
+        subject2.numSkillsImportedAndDisabled == 0
+        subject2.numGroups == 0
+        subject2.numGroupsDisabled == 0
     }
 
     def "verify stats that are produced by subjects"() {

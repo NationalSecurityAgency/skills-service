@@ -60,7 +60,8 @@ limitations under the License.
   import NoContent2 from '../utils/NoContent2';
   import JumpToSkill from './JumpToSkill';
 
-  const { mapActions } = createNamespacedHelpers('projects');
+  const projects = createNamespacedHelpers('projects');
+  const subjectsStore = createNamespacedHelpers('subjects');
 
   export default {
     name: 'Subjects',
@@ -75,7 +76,6 @@ limitations under the License.
     data() {
       return {
         isLoading: true,
-        subjects: [],
         displayNewSubjectModal: false,
         projectId: null,
         sortOrder: {
@@ -86,26 +86,26 @@ limitations under the License.
     },
     mounted() {
       this.projectId = this.$route.params.projectId;
-      this.loadSubjects();
+      this.doLoadSubjects();
     },
     watch: {
       '$route.params.projectId': function projectIdParamUpdated() {
         this.projectId = this.$route.params.projectId;
-        this.loadSubjects();
+        this.doLoadSubjects();
       },
     },
     methods: {
-      ...mapActions([
+      ...projects.mapActions([
         'loadProjectDetailsState',
+      ]),
+      ...subjectsStore.mapActions([
+        'loadSubjects',
       ]),
       openNewSubjectModal() {
         this.displayNewSubjectModal = true;
       },
-      loadSubjects() {
-        SubjectsService.getSubjects(this.projectId)
-          .then((response) => {
-            this.subjects = response;
-          })
+      doLoadSubjects() {
+        this.loadSubjects({ projectId: this.$route.params.projectId })
           .finally(() => {
             this.isLoading = false;
             this.enableDropAndDrop();
@@ -128,7 +128,7 @@ limitations under the License.
         this.isLoading = true;
         SubjectsService.saveSubject(subject)
           .then(() => {
-            this.loadSubjects();
+            this.doLoadSubjects();
             this.loadProjectDetailsState({ projectId: this.projectId });
             this.$emit('subjects-changed', subject.subjectId);
             SkillsReporter.reportSkill('CreateSubject');
@@ -172,6 +172,9 @@ limitations under the License.
       },
     },
     computed: {
+      ...subjectsStore.mapGetters([
+        'subjects',
+      ]),
       emptyNewSubject() {
         return {
           projectId: this.$route.params.projectId,

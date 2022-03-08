@@ -23,6 +23,7 @@ limitations under the License.
     </b-alert>
     <b-alert :show="finalizeIsRunning && !finalizeSuccessfullyCompleted" variant="warning">
       <i class="fas fa-running"></i> Catalog finalization is in progress. Finalizing <b-badge variant="info">{{finalizeInfo.numSkillsToFinalize}}</b-badge> imported skills! The process may take a few minutes.
+      <import-finalize-progress />
     </b-alert>
     <b-alert :show="!finalizeSuccessfullyCompleted && !finalizeCompletedAndFailed && !finalizeIsRunning" variant="warning">
       <i class="fas fa-exclamation-circle"></i> There are <b-badge variant="info">{{finalizeInfo.numSkillsToFinalize}}</b-badge> imported skills in this project that are not yet finalized. Once you have finished importing the skills you are interested in,
@@ -39,12 +40,15 @@ limitations under the License.
   import FinalizePreviewModal from '@/components/skills/catalog/FinalizePreviewModal';
   import SettingsService from '@/components/settings/SettingsService';
   import CatalogService from '@/components/skills/catalog/CatalogService';
+  import ImportFinalizeProgress from '@/components/skills/catalog/ImportFinalizeProgress';
 
   const subjectSkills = createNamespacedHelpers('subjectSkills');
+  const subjects = createNamespacedHelpers('subjects');
+  const projects = createNamespacedHelpers('projects');
 
   export default {
     name: 'ImportFinalizeAlert',
-    components: { FinalizePreviewModal },
+    components: { ImportFinalizeProgress, FinalizePreviewModal },
     computed: {
       dashboardSkillsCatalogGuide() {
         return `${this.$store.getters.config.docsHost}/dashboard/user-guide/skills-groups.html`;
@@ -75,6 +79,15 @@ limitations under the License.
       ...subjectSkills.mapActions([
         'loadSubjectSkills',
       ]),
+      ...subjects.mapActions([
+        'loadSubjectDetailsState',
+      ]),
+      ...subjects.mapActions([
+        'loadSubjects',
+      ]),
+      ...projects.mapActions([
+        'loadProjectDetailsState',
+      ]),
       finalizeScheduled() {
         this.finalizeIsRunning = true;
         this.checkFinalizationState();
@@ -96,6 +109,13 @@ limitations under the License.
                     projectId: this.$route.params.projectId,
                     subjectId: this.$route.params.subjectId,
                   });
+                  this.loadSubjectDetailsState({
+                    projectId: this.$route.params.projectId,
+                    subjectId: this.$route.params.subjectId,
+                  });
+                } else if (this.$route.params.projectId) {
+                  this.loadProjectDetailsState({ projectId: this.$route.params.projectId });
+                  this.loadSubjects({ projectId: this.$route.params.projectId });
                 }
               } else {
                 this.finalizeIsRunning = false;

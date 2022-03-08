@@ -23,12 +23,11 @@ import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
 import skills.storage.model.BadgeCount
 import skills.storage.model.ImportExportStats
+import skills.storage.model.SkillCounts
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDef.ContainerType
 import skills.storage.model.SkillDefMin
 import skills.storage.model.SkillRelDef.RelationshipType
-
-import java.util.stream.Stream
 
 interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
 
@@ -211,7 +210,18 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         ''')
     long countChildSkillsByIdAndRelationshipTypeAndEnabled(Integer parentSkillRefId, RelationshipType relationshipType, String enabled)
 
-    long countByProjectIdAndEnabled(String projectId, String enabled)
+    @Query('''select
+            sum(case when c.enabled = 'true' and  c.type = 'Skill' then 1 end) as enabledSkillsCount,
+            sum(case when c.enabled = 'false' and  c.type = 'Skill' then 1 end) as disabledSkillsCount,
+            sum(case when c.enabled = 'false' and  c.type = 'Skill' and c.copiedFrom is not null then 1 end) as disabledImportedSkillsCount,
+            sum(case when c.enabled = 'true' and  c.type = 'SkillsGroup' then 1 end) as enabledGroupsCount,
+            sum(case when c.enabled = 'false' and  c.type = 'SkillsGroup' then 1 end) as disabledGroupsCount
+            from SkillRelDef r, SkillDef c 
+            where r.parent.id=?1 and c.id = r.child and r.type in ('RuleSetDefinition', 'GroupSkillToSubject')
+        ''')
+    SkillCounts getSkillsCountsForParentId(Integer parentSkillRefId)
+
+    long countByProjectIdAndEnabledAndCopiedFromIsNotNull(String projectId, String enabled)
 
     @Query(value='''select count(sd) 
         from SkillRelDef srd, SkillDef sd
@@ -505,7 +515,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     @Modifying
     @Query(value = '''update project_definition
         set total_points = (
-            select sum(total_points)
+            select case when sum(total_points) is not null then sum(total_points) else 0 end as totalPoints
             from skill_definition
             where project_id = :projectId
               and type = 'Subject'
@@ -516,7 +526,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     @Modifying
     @Query(value = '''update skill_definition subject
         set total_points = (
-            select sum(skill.total_points)
+            select case when sum(skill.total_points) is not null then sum(skill.total_points) else 0 end as totalPoints
             from skill_relationship_definition rel,
                  skill_definition skill
             where subject.id = rel.parent_ref_id

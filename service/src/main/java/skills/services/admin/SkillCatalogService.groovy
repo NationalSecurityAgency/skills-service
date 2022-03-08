@@ -270,7 +270,13 @@ class SkillCatalogService {
             throw new SkillException("Requested parent skill id [${subjectIdTo}] doesn't exist for type [${subjectType}].", projectIdTo, subjectIdTo)
         }
 
+        Set<String> validateProjectIds = new HashSet<>()
         listOfSkills?.each {
+            if (!validateProjectIds.contains(it.projectId)) {
+                projDefAccessor.getProjDef(it.projectId)
+                validateProjectIds.add(it.projectId)
+            }
+
             importSkillFromCatalog(it.projectId, it.skillId, projectIdTo, subjectTo)
         }
     }
@@ -280,7 +286,7 @@ class SkillCatalogService {
     }
 
     CatalogFinalizeInfoResult getFinalizeInfo(String projectId) {
-        int numDisabled = skillDefRepo.countByProjectIdAndEnabled(projectId, Boolean.FALSE.toString())
+        int numDisabled = skillDefRepo.countByProjectIdAndEnabledAndCopiedFromIsNotNull(projectId, Boolean.FALSE.toString())
 
         return new CatalogFinalizeInfoResult(projectId: projectId, numSkillsToFinalize: numDisabled)
     }

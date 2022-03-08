@@ -46,38 +46,35 @@ class RuleSetDefinitionScoreUpdater {
 
 
     void updateFromLeaf(SkillDef skillDef) {
-        List<SkillRelDef> childRels = skillRelDefRepo.findAllByParentAndTypeIn(skillDef, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
-        if (childRels) {
-            int total
-            if (skillDef.type == SkillDef.ContainerType.SkillsGroup) {
-                total = skillsGroupAdminService.getGroupTotalPoints(childRels.collect({it.child}), skillDef.numSkillsRequired)
-            } else {
-                total = childRels.findAll { it.child.type != SkillDef.ContainerType.SkillsGroup || Boolean.valueOf(it.child.enabled) }.collect({ it.child.totalPoints }).sum() ?: 0
-            }
+        if (skillDef.type == SkillDef.ContainerType.SkillsGroup) {
+            List<SkillDef> children = skillRelDefRepo.findChildrenByParent(skillDef.id, [SkillRelDef.RelationshipType.SkillsGroupRequirement], Boolean.TRUE.toString())
+            int total = skillsGroupAdminService.getGroupTotalPoints(children, skillDef.numSkillsRequired)
             skillDef.totalPoints = total
             skillDefRepo.save(skillDef)
+        } else {
+            skillDefRepo.updateSubjectTotalPoints(skillDef.projectId, skillDef.skillId)
         }
 
-        List<SkillRelDef> parents = skillRelDefRepo.findAllByChildAndTypeIn(skillDef, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
+        List<SkillDef> parents = skillRelDefRepo.findParentByChildIdAndTypes(skillDef.id, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
         parents?.each {
-            updateFromLeaf(it.parent)
+            updateFromLeaf(it)
         }
 
-        if (skillDef.projDef) {
-            updateForProjectByOnlyConsideringImmediateChildren(skillDef.projDef)
+        if (skillDef.type == SkillDef.ContainerType.Subject) {
+            skillDefRepo.updateProjectsTotalPoints(skillDef.projectId)
         }
     }
 
     void skillToBeRemoved(SkillDef skillDef) {
-        List<SkillRelDef> parents = skillRelDefRepo.findAllByChildAndTypeIn(skillDef, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
+        List<SkillDef> parents = skillRelDefRepo.findParentByChildIdAndTypes(skillDef.id, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
         if (isChildOfDisabledSkillsGroup(skillDef, parents)) {
             // disabled groups do not contribute to parent total points, just update the group itself
-            SkillDef skillsGroupDef = parents.first().parent
+            SkillDef skillsGroupDef = parents.first()
             skillsGroupDef.totalPoints = skillsGroupDef.totalPoints - skillDef.totalPoints
             skillDefRepo.save(skillDef)
         } else {
             parents?.each {
-                walkUpAndSubtractFromTotal(it.parent, skillDef.totalPoints)
+                walkUpAndSubtractFromTotal(it, skillDef.totalPoints)
             }
             if(SkillDef.ContainerType.Skill == skillDef.type){
                 ProjDef projDef = projDefRepo.findByProjectId(skillDef.projectId)
@@ -90,26 +87,17 @@ class RuleSetDefinitionScoreUpdater {
         skillDef.totalPoints = skillDef.totalPoints - pointsToSubtract
         skillDefRepo.save(skillDef)
 
-        List<SkillRelDef> parents = skillRelDefRepo.findAllByChildAndTypeIn(skillDef, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
+        List<SkillDef> parents = skillRelDefRepo.findParentByChildIdAndTypes(skillDef.id, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
         parents?.each {
-            walkUpAndSubtractFromTotal(it.parent, pointsToSubtract)
+            walkUpAndSubtractFromTotal(it, pointsToSubtract)
         }
     }
 
-    void updateForProjectByOnlyConsideringImmediateChildren(ProjDef projDef) {
-        List<SkillDef> subjects = skillDefRepo.findAllByProjectIdAndType(projDef.projectId, SkillDef.ContainerType.Subject)
-        if (subjects) {
-            int total = subjects.collect({ it.totalPoints }).sum()
-            projDef.totalPoints = total
-            projDefRepo.save(projDef)
-        }
-    }
-
-    private boolean isChildOfDisabledSkillsGroup(SkillDef skillDef, List<SkillRelDef> parents) {
+    private boolean isChildOfDisabledSkillsGroup(SkillDef skillDef, List<SkillDef> parents) {
         boolean isSkillsGroupChild = StringUtils.isNotBlank(skillDef.groupId)
         if (isSkillsGroupChild) {
-            assert parents && parents.size() == 1 && parents.first().parent.type == SkillDef.ContainerType.SkillsGroup && parents.first().parent.skillId == skillDef.groupId
-            SkillDef skillsGroupDef = parents.first().parent
+            assert parents && parents.size() == 1 && parents.first().type == SkillDef.ContainerType.SkillsGroup && parents.first().skillId == skillDef.groupId
+            SkillDef skillsGroupDef = parents.first()
             return !Boolean.valueOf(skillsGroupDef.enabled)
         }
         return false

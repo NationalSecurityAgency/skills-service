@@ -27,7 +27,7 @@ limitations under the License.
           <span class="">Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
         </b-button>
       </div>
-      <div slot="footer" v-if="subject && subject.numSkillsDisabled > 0">
+      <div slot="footer">
         <import-finalize-alert />
       </div>
     </page-header>
@@ -95,10 +95,12 @@ limitations under the License.
           stats: [{
             label: 'Groups',
             count: this.subject.numGroups,
+            disabledCount: this.subject.numGroupsDisabled,
             icon: 'fas fa-layer-group skills-color-groups',
           }, {
             label: 'Skills',
             count: this.subject.numSkills,
+            disabledCount: this.subject.numSkillsDisabled,
             icon: 'fas fa-graduation-cap skills-color-skills',
           }, {
             label: 'Points',

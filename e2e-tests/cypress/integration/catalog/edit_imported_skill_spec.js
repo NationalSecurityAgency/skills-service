@@ -24,7 +24,7 @@ describe('Edit Imported Skill Tests', () => {
 
     const tableSelector = '[data-cy="skillsTable"]';
 
-    it('there are no skills to import - all skills were imported', () => {
+    it('edit point increment of an imported skill', () => {
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
         cy.exportSkillToCatalog(1, 1, 1);
@@ -166,6 +166,56 @@ describe('Edit Imported Skill Tests', () => {
         cy.get('[data-cy="closeSkillButton"]').click()
         cy.get('[data-cy="manageSkillBtn_skill1"]').click();
         cy.get('[data-cy="skillOverviewTotalpoints"]').contains('2,002')
+    });
+
+    it('changing pointIncrement updates point metrics if skill is finalized', () => {
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2);
+        cy.exportSkillToCatalog(1, 1, 1);
+        cy.exportSkillToCatalog(1, 1, 2);
+
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+
+        cy.importSkillFromCatalog(2, 1, 1, 1)
+        cy.importSkillFromCatalog(2, 1, 1, 2)
+
+        cy.finalizeCatalogImport(2)
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '400');
+        cy.get('[data-cy="editSkillButton_skill1"]').click();
+        cy.get('[data-cy="skillPointIncrement"]').should('have.value', '100')
+        cy.get('[data-cy="skillPointIncrement"]').clear().type('33')
+        cy.get('[data-cy="saveSkillButton"]').click()
+        cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '266');
+    });
+
+    it('changing pointIncrement does not update point metrics if skill is was not finalized', () => {
+        cy.intercept('PATCH', '/admin/projects/proj2/import/skills/skill2').as('updateImportedSkill');
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2);
+        cy.exportSkillToCatalog(1, 1, 1);
+        cy.exportSkillToCatalog(1, 1, 2);
+
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+
+        cy.importSkillFromCatalog(2, 1, 1, 1)
+        cy.finalizeCatalogImport(2)
+
+        cy.importSkillFromCatalog(2, 1, 1, 2)
+
+        cy.visit('/administrator/projects/proj2/subjects/subj1');
+        cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '200');
+        cy.get('[data-cy="editSkillButton_skill2"]').click();
+        cy.get('[data-cy="skillPointIncrement"]').should('have.value', '100')
+        cy.get('[data-cy="skillPointIncrement"]').clear().type('33')
+        cy.get('[data-cy="saveSkillButton"]').click()
+        cy.wait('@updateImportedSkill')
+        cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '200');
+
+
     });
 
 });

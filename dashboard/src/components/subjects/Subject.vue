@@ -97,6 +97,7 @@ limitations under the License.
           stats: [{
             label: '# Skills',
             count: this.subjectInternal.numSkills,
+            disabledCount: this.subjectInternal.numSkillsDisabled,
             icon: 'fas fa-graduation-cap skills-color-skills',
           }, {
             label: 'Points',

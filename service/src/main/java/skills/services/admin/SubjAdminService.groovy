@@ -28,6 +28,7 @@ import skills.controller.request.model.SubjectRequest
 import skills.controller.result.model.SubjectResult
 import skills.services.*
 import skills.storage.model.ProjDef
+import skills.storage.model.SkillCounts
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefParent
 import skills.storage.model.SkillDefWithExtra
@@ -175,20 +176,20 @@ class SubjAdminService {
         if (!skillDef) {
             throw new SkillException("Subject [${subjectId}] doesn't exist in project [${projectId}]", projectId, null, ErrorCode.SubjectNotFound)
         }
-        convertToSubject(skillDef, true)
+        convertToSubject(skillDef)
     }
 
     @Transactional(readOnly = true)
     List<SubjectResult> getSubjects(String projectId) {
         List<SkillDefWithExtra> subjects = skillDefWithExtraRepo.findAllByProjectIdAndType(projectId, SkillDef.ContainerType.Subject)
-        List<SubjectResult> res = subjects.collect { convertToSubject(it, true) }
+        List<SubjectResult> res = subjects.collect { convertToSubject(it) }
         calculatePercentages(res)
         return res?.sort({ it.displayOrder })
     }
 
 
     @Profile
-    private SubjectResult convertToSubject(SkillDefWithExtra skillDef, boolean loadDisabledCount = false) {
+    private SubjectResult convertToSubject(SkillDefWithExtra skillDef) {
         SubjectResult res = new SubjectResult(
                 subjectId: skillDef.skillId,
                 projectId: skillDef.projectId,
@@ -200,17 +201,21 @@ class SubjAdminService {
                 helpUrl: InputSanitizer.unsanitizeUrl(skillDef.helpUrl)
         )
 
-        res.numSkills = calculateNumChildSkills(skillDef)
-        res.numGroups = calculateNumGroups(skillDef)
-        if (loadDisabledCount) {
-            res.numSkillsDisabled = calculateNumSkillsDisabled(skillDef)
-        }
+        SkillCounts skillCounts = getSkillsStatsForSubjects(skillDef)
+
+        res.numGroups = skillCounts.getEnabledGroupsCount()  ?: 0
+        res.numGroupsDisabled = skillCounts.getDisabledGroupsCount() ?: 0
+
+        res.numSkills = skillCounts.getEnabledSkillsCount() ?: 0
+        res.numSkillsDisabled = skillCounts.getDisabledSkillsCount() ?: 0
+        res.numSkillsImportedAndDisabled = skillCounts.getDisabledImportedSkillsCount() ?: 0
+
         return res
     }
 
     @Profile
-    private long calculateNumSkillsDisabled(SkillDefWithExtra skillDef) {
-        skillDefRepo.countChildSkillsByIdAndRelationshipTypeAndEnabled(skillDef.id, SkillRelDef.RelationshipType.RuleSetDefinition, "false")
+    private SkillCounts getSkillsStatsForSubjects(SkillDefWithExtra skillDef) {
+        skillDefRepo.getSkillsCountsForParentId(skillDef.id)
     }
 
     @Transactional

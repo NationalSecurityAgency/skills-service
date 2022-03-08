@@ -13,34 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.controller.result.model
+package skills.storage.model;
 
-import groovy.transform.Canonical
-
-@Canonical
-class SubjectResult {
-
-    String subjectId
-
-    String projectId
-
-    String name
-
-    int totalPoints
-
-    String description
-
-    int numSkills
-    int numSkillsDisabled
-    int numSkillsImportedAndDisabled
-    int numGroups
-    int numGroupsDisabled
-    int numUsers
-    int pointsPercentage
-
-    int displayOrder
-
-    String iconClass
-
-    String helpUrl
+public interface SkillCounts {
+    Integer getEnabledSkillsCount();
+    Integer getDisabledSkillsCount();
+    Integer getDisabledImportedSkillsCount();
+    Integer getEnabledGroupsCount();
+    Integer getDisabledGroupsCount();
 }

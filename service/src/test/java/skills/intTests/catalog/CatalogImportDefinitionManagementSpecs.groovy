@@ -18,6 +18,7 @@ package skills.intTests.catalog
 import groovy.json.JsonOutput
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -149,9 +150,9 @@ class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
         def subject2PreImport = skillsService.getSubject(p2subj2)
         skillsService.bulkImportSkillsFromCatalog(project2.projectId, p2subj1.subjectId,
                 [
-                        [ projectId: project1.projectId, skillId: p1Subj1Skills[4].skillId],
-                        [ projectId: project1.projectId, skillId: p1Subj2Skills[5].skillId],
-                        [ projectId: project3.projectId, skillId: p3Subj2Skills[7].skillId],
+                        [projectId: project1.projectId, skillId: p1Subj1Skills[4].skillId],
+                        [projectId: project1.projectId, skillId: p1Subj2Skills[5].skillId],
+                        [projectId: project3.projectId, skillId: p3Subj2Skills[7].skillId],
                 ])
         def projectPostImport = skillsService.getProject(project2.projectId)
         def subject1PostImport = skillsService.getSubject(p2subj1)
@@ -267,8 +268,8 @@ class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
         when:
         skillsService.bulkImportSkillsFromCatalog(project2.projectId, p2subj1.subjectId,
                 [
-                        [ projectId: project1.projectId, skillId: p1Subj1Skills[4].skillId],
-                        [ projectId: project1.projectId, skillId: p1Subj2Skills[5].skillId],
+                        [projectId: project1.projectId, skillId: p1Subj1Skills[4].skillId],
+                        [projectId: project1.projectId, skillId: p1Subj2Skills[5].skillId],
                 ])
         def skillsBefore = skillsService.getSkillsForSubject(project2.projectId, p2subj1.subjectId)
         println JsonOutput.toJson(skillsBefore)
@@ -310,6 +311,11 @@ class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
     def "retrieve finalization info"() {
         def project1 = createProjWithCatalogSkills(1)
         def project2 = createProjWithCatalogSkills(2)
+
+        // group disabled skills do not contribute to the counts
+        def skillsGroup = SkillsFactory.createSkillsGroup(2, 1, 25)
+        skillsService.createSkill(skillsGroup)
+        skillsService.assignSkillToSkillsGroup(skillsGroup.skillId, createSkill(2, 1, 26))
 
         when:
         def res0 = skillsService.getCatalogFinalizeInfo(project2.p.projectId)
@@ -446,8 +452,7 @@ class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
             skillsService.createSkill(createSkill.call(attribute, value))
             assert !expectException
         }
-        catch (SkillsClientException ex)
-        {
+        catch (SkillsClientException ex) {
             assert expectException
             assert ex.message.contains(expectedMessage)
         }
@@ -463,8 +468,177 @@ class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
         "selfReportingType"                  | "HonorSystem" || true            | "has been imported from the Global Catalog and only pointIncrement can be altered"
         "enabled"                            | "false"       || true            | "has been imported from the Global Catalog and only pointIncrement can be altered"
         "dljalj"                             | null          || false           | null
+    }
+
+    def 'subject and project metric counts are updated after skill points are mutated'() {
+
+        def project1 = createProjWithCatalogSkills(1)
+        def project2 = createProjWithCatalogSkills(2)
+
+        skillsService.importSkillFromCatalogAndFinalize(project2.p.projectId, project1.s2.subjectId, project1.p.projectId, project1.s1_skills[0].skillId)
+
+        when:
+        def subj1Stats = skillsService.getSubject(project2.s1)
+        def subjStats = skillsService.getSubject(project2.s2)
+        def projStats = skillsService.getProject(project2.p.projectId)
+        skillsService.updateImportedSkill(project2.p.projectId, project1.s1_skills[0].skillId, 698)
+        def subj1StatsAfter = skillsService.getSubject(project2.s1)
+        def subjStatsAfter = skillsService.getSubject(project2.s2)
+        def projStatsAfter = skillsService.getProject(project2.p.projectId)
+        then:
+        subj1Stats.totalPoints == 200 * 3
+        subjStats.totalPoints == 200 * 4
+        projStats.totalPoints == 200 * 10
+
+        subj1StatsAfter.totalPoints == 200 * 3
+        subjStatsAfter.totalPoints == 200 * 3 + (698 * 2)
+        projStatsAfter.totalPoints == 200 * 9 + (698 * 2)
+    }
+
+    def 'subject and project metric counts are updated after skills are finalized'() {
+        def project1 = createProjWithCatalogSkills(1)
+        def project2 = createProjWithCatalogSkills(2)
+
+        when:
+        def subj1Stats = skillsService.getSubject(project2.s1)
+        def subjStats = skillsService.getSubject(project2.s2)
+        def projStats = skillsService.getProject(project2.p.projectId)
+
+        skillsService.importSkillFromCatalog(project2.p.projectId, project1.s2.subjectId, project1.p.projectId, project1.s1_skills[0].skillId)
+
+        def subj1StatsAfterImport = skillsService.getSubject(project2.s1)
+        def subjStatsAfterImport = skillsService.getSubject(project2.s2)
+        def projStatsAfterImport = skillsService.getProject(project2.p.projectId)
+
+        skillsService.finalizeSkillsImportFromCatalog(project2.p.projectId)
+
+        def subj1StatsAfterFinalize = skillsService.getSubject(project2.s1)
+        def subjStatsAfterFinalize = skillsService.getSubject(project2.s2)
+        def projStatsAfterFinalize = skillsService.getProject(project2.p.projectId)
+
+        skillsService.importSkillFromCatalog(project2.p.projectId, project1.s2.subjectId, project1.p.projectId, project1.s1_skills[1].skillId)
+
+        def subj1StatsAfterAnotherImport = skillsService.getSubject(project2.s1)
+        def subjStatsAfterAnotherImport = skillsService.getSubject(project2.s2)
+        def projStatsAfterAnotherImport = skillsService.getProject(project2.p.projectId)
+
+        then:
+        subj1Stats.totalPoints == 200 * 3
+        subjStats.totalPoints == 200 * 3
+        projStats.totalPoints == 200 * 9
+
+        subj1StatsAfterImport.totalPoints ==  200 * 3
+        subjStatsAfterImport.totalPoints ==  200 * 3
+        projStatsAfterImport.totalPoints == 200 * 9
+
+        subj1StatsAfterFinalize.totalPoints ==  200 * 3
+        subjStatsAfterFinalize.totalPoints ==  200 * 4
+        projStatsAfterFinalize.totalPoints == 200 * 10
+
+        subj1StatsAfterAnotherImport.totalPoints ==  200 * 3
+        subjStatsAfterAnotherImport.totalPoints ==  200 * 4
+        projStatsAfterAnotherImport.totalPoints == 200 * 10
+    }
+
+    def 'only enabled skills must contribute'() {
+        def project1 = createProjWithCatalogSkills(1)
+        def project2 = createProjWithCatalogSkills(2)
+
+        skillsService.importSkillFromCatalogAndFinalize(project2.p.projectId, project1.s2.subjectId, project1.p.projectId, project1.s1_skills[0].skillId)
+        skillsService.importSkillFromCatalog(project2.p.projectId, project1.s2.subjectId, project1.p.projectId, project1.s1_skills[1].skillId)
+
+        when:
+        def subj1_t0 = skillsService.getSubject(project2.s1)
+        def subj2_t0 = skillsService.getSubject(project2.s2)
+        def proj_t0 = skillsService.getProject(project2.p.projectId)
+
+        skillsService.updateImportedSkill(project2.p.projectId, project1.s1_skills[0].skillId, 33)
+
+        def subj1_t1 = skillsService.getSubject(project2.s1)
+        def subj2_t1 = skillsService.getSubject(project2.s2)
+        def proj_t1 = skillsService.getProject(project2.p.projectId)
+
+        then:
+        subj1_t0.totalPoints == 200 * 3
+        subj2_t0.totalPoints == 200 * 4
+        proj_t0.totalPoints == 200 * 10
+
+        subj1_t1.totalPoints == 200 * 3
+        subj2_t1.totalPoints == 200 * 3 + (33 * 2)
+        proj_t1.totalPoints == 200 * 9 +  + (33 * 2)
+    }
+
+    def 'disabled imported skills do not contribute to overall points - only imported skills'() {
+        def project1 = createProjWithCatalogSkills(1)
+
+        def project2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        skillsService.createProject(project2)
+        skillsService.createSubject(p2subj1)
+
+        skillsService.bulkImportSkillsFromCatalog(project2.projectId, p2subj1.subjectId,
+                [
+                        [projectId: project1.p.projectId, skillId: project1.s1_skills[0].skillId],
+                        [projectId: project1.p.projectId, skillId: project1.s1_skills[1].skillId],
+                ])
+
+        when:
+        def subj1_t0 = skillsService.getSubject(p2subj1)
+        def proj_t0 = skillsService.getProject(project2.projectId)
+
+        skillsService.updateImportedSkill(project2.projectId, project1.s1_skills[0].skillId, 33)
+
+        def subj1_t1 = skillsService.getSubject(p2subj1)
+        def proj_t1 = skillsService.getProject(project2.projectId)
+
+        then:
+        subj1_t0.totalPoints == 0
+        proj_t0.totalPoints == 0
+
+        subj1_t1.totalPoints == 0
+        proj_t1.totalPoints == 0
+    }
+
+    def 'try to import skill from non-existent project'() {
+        def project1 = createProjWithCatalogSkills(1)
+
+        def project2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        skillsService.createProject(project2)
+        skillsService.createSubject(p2subj1)
 
 
+        when:
+        skillsService.bulkImportSkillsFromCatalog(project2.projectId, p2subj1.subjectId,
+                [
+                        [projectId: project1.p.projectId, skillId: project1.s1_skills[0].skillId],
+                        [projectId: "projectIdDoesNotExist", skillId: project1.s1_skills[0].skillId],
+                        [projectId: project1.p.projectId, skillId: project1.s1_skills[1].skillId],
+                ])
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("Failed to find project [projectIdDoesNotExist]")
+    }
+
+    def 'try to import skill that does not exist'() {
+        def project1 = createProjWithCatalogSkills(1)
+
+        def project2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        skillsService.createProject(project2)
+        skillsService.createSubject(p2subj1)
+
+
+        when:
+        skillsService.bulkImportSkillsFromCatalog(project2.projectId, p2subj1.subjectId,
+                [
+                        [projectId: project1.p.projectId, skillId: project1.s1_skills[0].skillId],
+                        [projectId: project1.p.projectId, skillId: "skillThatDoesNotExist"],
+                        [projectId: project1.p.projectId, skillId: project1.s1_skills[1].skillId],
+                ])
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("Skill [skillThatDoesNotExist] from project [TestProject1] has not been shared to the catalog")
     }
 
 }

@@ -19,11 +19,17 @@ const getters = {
   subject(state) {
     return state.subject;
   },
+  subjects(state) {
+    return state.subjects;
+  },
 };
 
 const mutations = {
   setSubject(state, value) {
     state.subject = value;
+  },
+  setSubjects(state, value) {
+    state.subjects = value;
   },
 };
 
@@ -38,10 +44,21 @@ const actions = {
         .catch((error) => reject(error));
     });
   },
+  loadSubjects({ commit }, payload) {
+    return new Promise((resolve, reject) => {
+      SubjectsService.getSubjects(payload.projectId)
+        .then((response) => {
+          commit('setSubjects', response);
+          resolve(response);
+        })
+        .catch((error) => reject(error));
+    });
+  },
 };
 
 const state = {
   subject: null,
+  subjects: [],
 };
 
 export default {

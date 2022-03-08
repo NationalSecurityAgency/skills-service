@@ -327,6 +327,7 @@ class SkillsAdminService {
             tempSaved = skillDefWithExtraRepo.save(skillDefinition)
         }
         SkillDef savedSkill = skillDefRepo.findByProjectIdAndSkillIdAndType(skillRequest.projectId, skillRequest.skillId, skillType)
+        validateThatSkillWasSaved(skillDefinition, savedSkill)
         if (isSkillsGroup) {
             skillsGroupSkillDef = savedSkill
         }
@@ -372,6 +373,22 @@ class SkillsAdminService {
         }
 
         log.debug("Saved [{}]", savedSkill)
+    }
+
+    /**
+     * Transitive relationships appear to confuse hibernate cache - if the same
+     * object was loaded earlier in the session via transitive relationship the hibernate fails
+     * to recognize the dirty object and doesn't generate sql to save the updates
+     * fail safe: compare attributes to validate that skill was actually persisted
+     */
+    private void validateThatSkillWasSaved(SkillDefWithExtra toSaved, SkillDef saved) {
+        assert toSaved.pointIncrement == saved.pointIncrement
+        assert toSaved.skillId == saved.skillId
+        assert toSaved.projectId == saved.projectId
+        assert toSaved.totalPoints == saved.totalPoints
+        assert toSaved.version == saved.version
+        assert toSaved.name == saved.name
+        assert toSaved.enabled == saved.enabled
     }
 
     private void validateImportedSkillUpdate(SkillRequest skillRequest, SkillDefWithExtra skillDefinition) {

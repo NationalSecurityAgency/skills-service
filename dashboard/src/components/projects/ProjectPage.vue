@@ -45,7 +45,7 @@ limitations under the License.
           </b-button>
         </b-button-group>
       </div>
-      <div slot="footer" v-if="project && project.numSkillsDisabled > 0">
+      <div slot="footer">
         <import-finalize-alert />
       </div>
     </page-header>
@@ -123,6 +123,7 @@ limitations under the License.
           }, {
             label: 'Skills',
             count: this.project.numSkills,
+            disabledCount: this.project.numSkillsDisabled,
             icon: 'fas fa-graduation-cap skills-color-skills',
           }, {
             label: 'Points',
