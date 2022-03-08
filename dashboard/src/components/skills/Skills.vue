@@ -139,6 +139,8 @@ limitations under the License.
         });
       },
       skillDeleted(skill) {
+        const index = this.skills.findIndex((item) => item.skillId === skill.skillId);
+        this.skills.splice(index, 1);
         this.skillsChanged(skill.skillId);
       },
       importFromCatalog(skillsInfoToImport) {

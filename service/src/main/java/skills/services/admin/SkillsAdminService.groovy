@@ -190,6 +190,9 @@ class SkillsAdminService {
             }
         }
 
+        final isCurrentlyEnabled = Boolean.valueOf(skillDefinition?.enabled)
+
+
         if (skillDefinition && !groupId) {
             groupId = skillDefinition.groupId
         }
@@ -215,6 +218,10 @@ class SkillsAdminService {
         List<SkillDef> groupChildSkills = null
         if (isEdit) {
             validateImportedSkillUpdate(skillRequest, skillDefinition)
+            // can't disable a skill/skillgroup once it's been enabled
+            if (isCurrentlyEnabled && (StringUtils.isNotBlank(skillRequest.enabled) && !isEnabledSkillInRequest)) {
+                throw new SkillException("Cannot disable ${skillDefinition.type} [${skillRequest.skillId}] once it has been enabled", skillRequest.projectId, skillRequest.skillId)
+            }
 
             // for updates, use the existing value if it is not set on the skillRequest (null or empty String)
             if (StringUtils.isBlank(skillRequest.enabled)) {

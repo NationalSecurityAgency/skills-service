@@ -26,6 +26,7 @@ import skills.storage.model.UserPerformedSkill
 import skills.storage.model.UserPoints
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
+import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -1269,6 +1270,53 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
         originalSk1.pointsWhenAchieved == importedSk1.pointsWhenAchieved
         originalSk1.achievedOn == importedSk1.achievedOn
         importedSk1.skillRefId == skillDefRepo.findByProjectIdAndSkillId( project2.p.projectId, project1.s1_skills[0].skillId).id
+    }
+
+    def "skills achievements should be removed when imported skills are removed"() {
+        def project1 = createProjWithCatalogSkills(1)
+        def project2 = createProjWithCatalogSkills(2)
+        def project3 = createProjWithCatalogSkills(3)
+
+        def randomUsers = getRandomUsers(3)
+        def user = randomUsers[0]
+
+        skillsService.addSkill([projectId: project1.p.projectId, skillId:project1.s1_skills[0].skillId], user, new Date() - 1)
+        skillsService.addSkill([projectId: project1.p.projectId, skillId:project1.s1_skills[1].skillId], user, new Date() - 1)
+        skillsService.addSkill([projectId: project3.p.projectId, skillId:project3.s1_skills[1].skillId], user, new Date() - 1)
+
+        skillsService.addSkill([projectId: project1.p.projectId, skillId:project1.s1_skills[0].skillId], user, new Date())
+        skillsService.addSkill([projectId: project1.p.projectId, skillId:project1.s1_skills[1].skillId], user, new Date())
+        skillsService.addSkill([projectId: project3.p.projectId, skillId:project3.s1_skills[1].skillId], user, new Date())
+
+        when:
+        List<UserAchievement> before = userAchievedRepo.findAllByUserAndProjectIds(user, [project2.p.projectId])
+        skillsService.bulkImportSkillsFromCatalog(project2.p.projectId, project2.s2.subjectId, [
+                [projectId: project1.p.projectId, skillId: project1.s1_skills[0].skillId],
+                [projectId: project1.p.projectId, skillId: project1.s1_skills[1].skillId],
+                [projectId: project3.p.projectId, skillId: project3.s1_skills[1].skillId],
+        ])
+        skillsService.finalizeSkillsImportFromCatalog(project2.p.projectId)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        List<UserAchievement> afterImport = userAchievedRepo.findAllByUserAndProjectIds(user, [project2.p.projectId])
+
+        skillsService.deleteSkill([projectId: project2.p.projectId, subjectId: project2.s2.subjectId, skillId: project1.s1_skills[0].skillId])
+        skillsService.deleteSkill([projectId: project2.p.projectId, subjectId: project2.s2.subjectId, skillId: project1.s1_skills[1].skillId])
+        skillsService.deleteSkill([projectId: project2.p.projectId, subjectId: project2.s2.subjectId, skillId: project3.s1_skills[1].skillId])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        List<UserAchievement> afterImportDeleted = userAchievedRepo.findAllByUserAndProjectIds(user, [project2.p.projectId])
+
+        then:
+        !before
+
+        afterImport.find {it.projectId == project2.p.projectId && it.skillId == project1.s1_skills[0].skillId }
+        afterImport.find { it.projectId == project2.p.projectId  && it.skillId == project1.s1_skills[1].skillId }
+        afterImport.find { it.projectId == project2.p.projectId  && it.skillId == project3.s1_skills[1].skillId }
+
+        !afterImportDeleted.find {it.projectId == project2.p.projectId && it.skillId == project1.s1_skills[0].skillId }
+        !afterImportDeleted.find { it.projectId == project2.p.projectId  && it.skillId == project1.s1_skills[1].skillId }
+        !afterImportDeleted.find { it.projectId == project2.p.projectId  && it.skillId == project3.s1_skills[1].skillId }
     }
 
     def "changes in number of occurrences in the original skill causes user(s) to achieve a level within imported project"() {

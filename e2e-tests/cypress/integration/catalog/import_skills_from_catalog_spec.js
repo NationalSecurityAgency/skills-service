@@ -318,6 +318,7 @@ describe('Import skills from Catalog Tests', () => {
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'Very Great Skill 2' }, { colIndex: 1,  value: 'ID: proj1' }],
         ], 5);
+        cy.get('[data-cy="alreadyExistWarning_proj1-skill1"]').should('not.exist');
 
         cy.get('[data-cy="closeButton"]').click();
 
@@ -341,6 +342,9 @@ describe('Import skills from Catalog Tests', () => {
             [{ colIndex: 0,  value: 'Very Great Skill 2' }, { colIndex: 1,  value: 'ID: proj1' }],
             [{ colIndex: 0,  value: 'Very Great Skill 3' }, { colIndex: 1,  value: 'ID: proj1' }],
         ], 5);
+        cy.get('[data-cy="alreadyExistWarning_proj1-skill1"]').should('not.exist');
+        cy.get('[data-cy="alreadyExistWarning_proj1-skill2"]').should('not.exist');
+        cy.get('[data-cy="alreadyExistWarning_proj1-skill3"]').should('not.exist');
 
         // refresh and re-validate
         cy.visit('/administrator/projects/proj2/subjects/subj1');
@@ -350,6 +354,9 @@ describe('Import skills from Catalog Tests', () => {
             [{ colIndex: 0,  value: 'Very Great Skill 2' }, { colIndex: 1,  value: 'ID: proj1' }],
             [{ colIndex: 0,  value: 'Very Great Skill 3' }, { colIndex: 1,  value: 'ID: proj1' }],
         ], 5);
+        cy.get('[data-cy="alreadyExistWarning_proj1-skill1"]').should('not.exist');
+        cy.get('[data-cy="alreadyExistWarning_proj1-skill2"]').should('not.exist');
+        cy.get('[data-cy="alreadyExistWarning_proj1-skill3"]').should('not.exist');
     });
 
     it('do not allow import if skill id or name already exist', () => {
