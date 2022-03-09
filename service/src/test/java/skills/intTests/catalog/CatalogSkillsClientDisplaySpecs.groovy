@@ -61,7 +61,7 @@ class CatalogSkillsClientDisplaySpecs extends CatalogIntSpec {
         proj2Sum_after.subjects[0].totalPoints == 5 * 250 * 3 * 2
         subjSum_after.skills.collect { it.skillId } == ["skill4", "skill5", "skill6", "skill1", "skill2", "skill3"]
         subjSum_after.totalPoints == 5 * 250 * 3 * 2
-        subjDesc_after.collect { it.skillId } == ["skill4", "skill5", "skill6", "skill1", "skill2", "skill3"]
+        subjDesc_after.collect { it.skillId } == ["skill1", "skill2", "skill3", "skill4", "skill5", "skill6"]
     }
 
     def "getting single skill that's disable should emit an exception"() {
