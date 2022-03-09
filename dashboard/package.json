@@ -74,7 +74,7 @@
     "license-check-and-add": "4.0.2",
     "license-checker": "25.0.1",
     "moment-timezone": "0.5.33",
-    "node-sass": "6.0.1",
+    "sass": "1.49.9",
     "sass-loader": "10.2.0",
     "symlink-dir": "^5.0.1",
     "vue-cli-plugin-webpack-bundle-analyzer": "4.0.0",
