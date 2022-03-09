@@ -288,6 +288,62 @@ class ReportSkills_BadgeSkillsSpecs extends DefaultIntSpec {
         !user2Summary.badgeAchieved
     }
 
+    def "badge awarded to users with requirements after enabling when dependencies include skills imported from catalog"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(10)
+        def badge = SkillsFactory.createBadge()
+
+        def proj2 = SkillsFactory.createProject(2)
+        def subj2 = SkillsFactory.createSubject(2, 2)
+        def toImport = SkillsFactory.createSkillsStartingAt(10, 11, 2, 2)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        skillsService.createProject(proj2)
+        skillsService.createSubject(subj2)
+        skillsService.createSkills(toImport)
+
+        toImport.each {
+            skillsService.exportSkillToCatalog(it.projectId, it.skillId)
+            skillsService.importSkillFromCatalog(proj.projectId, subj.subjectId, it.projectId, it.skillId)
+        }
+        skillsService.finalizeSkillsImportFromCatalog(proj.projectId, true)
+
+        badge.enabled = false
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(0).skillId])
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(1).skillId])
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: toImport[0].skillId])
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: toImport[1].skillId])
+
+        skillsService.addSkill([skillId: skills.get(0).skillId, projectId: proj.projectId], "user1", new Date())
+        skillsService.addSkill([skillId: skills.get(0).skillId, projectId: proj.projectId], "user2", new Date())
+        skillsService.addSkill([skillId: skills.get(1).skillId, projectId: proj.projectId], "user1", new Date())
+        skillsService.addSkill([skillId: toImport[0].skillId, projectId: proj2.projectId], "user1", new Date())
+        skillsService.addSkill([skillId: toImport[1].skillId, projectId: proj2.projectId], "user1", new Date())
+
+        skillsService.addSkill([skillId: skills.get(0).skillId, projectId: proj.projectId], "user3", new Date())
+        skillsService.addSkill([skillId: skills.get(1).skillId, projectId: proj.projectId], "user3", new Date())
+        skillsService.addSkill([skillId: toImport[0].skillId, projectId: proj2.projectId], "user3", new Date())
+
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        when:
+        skillsService.updateBadge([projectId: proj.projectId, badgeId: badge.badgeId, enabled: true, name: badge.name], badge.badgeId)
+
+        def user1Summary = skillsService.getBadgeSummary("user1", proj.projectId, badge.badgeId)
+        def user2Summary = skillsService.getBadgeSummary("user2", proj.projectId, badge.badgeId)
+        def user3Summary = skillsService.getBadgeSummary("user3", proj.projectId, badge.badgeId)
+
+        then:
+        user1Summary.badgeAchieved
+        !user2Summary.badgeAchieved
+        !user3Summary.badgeAchieved
+    }
+
     @Autowired
     UserAchievedLevelRepo userAchievedLevelRepo
 
