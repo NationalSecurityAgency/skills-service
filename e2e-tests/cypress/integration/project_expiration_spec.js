@@ -66,6 +66,8 @@ describe('Project Expiration Tests', () => {
   });
 
   it('Project Expiration Project Display', () => {
+    cy.intercept('POST', '/admin/projects/proj1/cancelExpiration').as('stopExpiration');
+    cy.createProject(1);
     const markedExpired = dayjs().utc().subtract(5, 'days').format('YYYY-MM-DD[T]HH:mm:ss[Z]')
     const  results = [{
       'projectId': 'proj1',
@@ -103,7 +105,7 @@ describe('Project Expiration Tests', () => {
         'expiring': false,
         'expirationTriggered': '',
       },[]];
-    cy.intercept('GET', '/admin/projects/proj1', (req) => {
+    cy.intercept('/admin/projects/proj1', (req) => {
       if (req.url.endsWith('settings')) {
         req.reply([]);
       } else {
@@ -111,7 +113,6 @@ describe('Project Expiration Tests', () => {
       }
     }).as('getProject');
 
-    cy.intercept('POST', '/admin/projects/proj1/cancelExpiration', { body: { success: true }}).as('stopExpiration');
 
     cy.visit('/administrator/projects/proj1');
     cy.wait('@getProject');
@@ -122,8 +123,7 @@ describe('Project Expiration Tests', () => {
     cy.matchSnapshotImageForElement('[data-cy=pageHeader]', 'Project-Expiration-ProjectPage', snapshotOptions);
     cy.get('button[data-cy=keepIt]').click();
     cy.wait('@stopExpiration');
-    cy.wait('@getProject');
-    cy.contains('PROJECT: Proj 1');
+    cy.contains('PROJECT: This is project 1');
     cy.get('[data-cy=projectExpiration]').should('not.exist');
     cy.get('button[data-cy=keepIt]').should('not.exist');
   });

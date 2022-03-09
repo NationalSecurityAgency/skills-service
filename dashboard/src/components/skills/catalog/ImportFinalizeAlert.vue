@@ -39,12 +39,12 @@ limitations under the License.
   import { createNamespacedHelpers } from 'vuex';
   import FinalizePreviewModal from '@/components/skills/catalog/FinalizePreviewModal';
   import SettingsService from '@/components/settings/SettingsService';
-  import CatalogService from '@/components/skills/catalog/CatalogService';
   import ImportFinalizeProgress from '@/components/skills/catalog/ImportFinalizeProgress';
 
   const subjectSkills = createNamespacedHelpers('subjectSkills');
   const subjects = createNamespacedHelpers('subjects');
   const projects = createNamespacedHelpers('projects');
+  const finalizeInfo = createNamespacedHelpers('finalizeInfo');
 
   export default {
     name: 'ImportFinalizeAlert',
@@ -53,6 +53,9 @@ limitations under the License.
       dashboardSkillsCatalogGuide() {
         return `${this.$store.getters.config.docsHost}/dashboard/user-guide/skills-groups.html`;
       },
+      ...finalizeInfo.mapGetters([
+        'finalizeInfo',
+      ]),
     },
     data() {
       return {
@@ -60,13 +63,11 @@ limitations under the License.
         finalizeIsRunning: false,
         finalizeSuccessfullyCompleted: false,
         finalizeCompletedAndFailed: false,
-        finalizeInfo: {},
       };
     },
     mounted() {
-      CatalogService.getCatalogFinalizeInfo(this.$route.params.projectId)
-        .then((finalizeInfoRes) => {
-          this.finalizeInfo = finalizeInfoRes;
+      this.loadFinalizeInfo({ projectId: this.$route.params.projectId })
+        .then(() => {
           this.getFinalizationState().then((res) => {
             if (res && res.value === 'RUNNING') {
               this.finalizeIsRunning = true;
@@ -87,6 +88,9 @@ limitations under the License.
       ]),
       ...projects.mapActions([
         'loadProjectDetailsState',
+      ]),
+      ...finalizeInfo.mapActions([
+        'loadFinalizeInfo',
       ]),
       finalizeScheduled() {
         this.finalizeIsRunning = true;

@@ -115,12 +115,12 @@ limitations under the License.
         this.isLoading = true;
         SubjectsService.deleteSubject(subject)
           .then(() => {
-            this.subjects = this.subjects.filter((item) => item.subjectId !== subject.subjectId);
             this.loadProjectDetailsState({ projectId: this.projectId });
-            this.$emit('subjects-changed', subject.subjectId);
-          })
-          .finally(() => {
-            this.isLoading = false;
+            this.loadSubjects({ projectId: this.$route.params.projectId })
+              .then(() => {
+                this.isLoading = false;
+                this.$emit('subjects-changed', subject.subjectId);
+              });
           });
       },
       subjectAdded(subject) {

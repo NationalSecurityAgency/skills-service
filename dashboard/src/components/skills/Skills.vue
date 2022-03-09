@@ -74,6 +74,7 @@ limitations under the License.
 
   const { mapActions, mapGetters } = createNamespacedHelpers('subjects');
   const subjectSkills = createNamespacedHelpers('subjectSkills');
+  const finalizeInfo = createNamespacedHelpers('finalizeInfo');
 
   export default {
     name: 'Skills',
@@ -116,6 +117,9 @@ limitations under the License.
       ...subjectSkills.mapMutations([
         'setLoadingSubjectSkills',
       ]),
+      ...finalizeInfo.mapActions([
+        'loadFinalizeInfo',
+      ]),
       skillCreatedOrUpdated(skill) {
         this.$refs.skillsTable.skillCreatedOrUpdated(skill);
       },
@@ -149,6 +153,7 @@ limitations under the License.
           .then(() => {
             this.loadSkills();
             this.loadSubjectDetailsState({ projectId: this.projectId, subjectId: this.subject.subjectId });
+            this.loadFinalizeInfo({ projectId: this.projectId });
           });
       },
       skillsChanged(skillId) {
