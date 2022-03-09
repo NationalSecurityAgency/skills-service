@@ -18,6 +18,7 @@ package skills.services.events
 import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
@@ -110,13 +111,20 @@ class SkillEventsService {
     }
     static SkillApprovalParams defaultSkillApprovalParams = new SkillApprovalParams()
 
-    @Transactional
     @Profile
     SkillEventResult reportSkill(String projectId, String skillId, String userId, Boolean notifyIfNotApplied, Date incomingSkillDate, SkillApprovalParams skillApprovalParams = defaultSkillApprovalParams) {
         SkillEventResult result = reportSkillInternal(projectId, skillId, userId, incomingSkillDate, skillApprovalParams)
         if (notifyIfNotApplied || result.skillApplied) {
             skillEventPublisher.publishSkillUpdate(result, userId)
         }
+        metricsLogger.log([
+                'skillId': skillId,
+                'projectId': projectId,
+                'requestedUserId': userId,
+                'selfReported': StringUtils.isNotEmpty(result.selfReportType).toString(),
+                'selfReportType': result.selfReportType,
+        ])
+
         return result
     }
 
@@ -182,7 +190,8 @@ class SkillEventsService {
         notifyUserOfAchievements(userId)
     }
 
-    private SkillEventResult reportSkillInternal(String projectId, String skillId, String userId, Date incomingSkillDateParam, SkillApprovalParams approvalParams) {
+    @Transactional
+    SkillEventResult reportSkillInternal(String projectId, String skillId, String userId, Date incomingSkillDateParam, SkillApprovalParams approvalParams = defaultSkillApprovalParams) {
         assert projectId
         assert skillId
 
@@ -190,16 +199,7 @@ class SkillEventsService {
 
         SkillEventsSupportRepo.SkillDefMin skillDefinition = getSkillDef(userId, projectId, skillId)
 
-        SkillEventResult res = new SkillEventResult(projectId: projectId, skillId: skillId, name: skillDefinition.name)
-
-
-        metricsLogger.log([
-                'skillId': skillId,
-                'projectId': projectId,
-                'requestedUserId': userId,
-                'selfReported': (skillDefinition.getSelfReportingType() !== null).toString(),
-                'selfReportType': skillDefinition.getSelfReportingType()?.toString(),
-        ]);
+        SkillEventResult res = new SkillEventResult(projectId: projectId, skillId: skillId, name: skillDefinition.name, selfReportType: skillDefinition.getSelfReportingType()?.toString())
 
         long numExistingSkills = getNumExistingSkills(userId, projectId, skillId)
         AppliedCheckRes checkRes = checkIfSkillApplied(userId, numExistingSkills, skillDate.date, skillDefinition)
