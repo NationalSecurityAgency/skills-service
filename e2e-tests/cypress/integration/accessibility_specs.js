@@ -248,7 +248,7 @@ describe('Accessibility Tests', () => {
 
     //levels
     cy.get('[data-cy=nav-Levels').click();
-    cy.contains('White Belt');
+    // cy.contains('White Belt');
     cy.customLighthouse();
     cy.get('[data-cy=addLevel]').click();
     cy.get('[data-cy=levelPercent]').type('1100')
@@ -348,7 +348,7 @@ describe('Accessibility Tests', () => {
 
     cy.get('[data-cy=nav-Levels]').click();
     cy.wait('@getLevels');
-    cy.contains('Black Belt');
+    // cy.contains('Black Belt');r
     cy.customLighthouse();
     cy.customA11y();
     cy.get('[data-cy=addLevel]').click();

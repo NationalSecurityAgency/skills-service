@@ -45,10 +45,10 @@ limitations under the License.
              v-b-tooltip.hover="'Level is unachievable. Insufficient available points in project.'"/>
         </template>
 
-        <template v-slot:cell(name)="data">
-          <i :class="data.item.iconClass" class="level-icon text-info mr-2" />
-          <span data-cy="levelsTable_name">{{ data.value }}</span>
-        </template>
+<!--        <template v-slot:cell(name)="data">-->
+<!--          <i :class="data.item.iconClass" class="level-icon text-info mr-2" />-->
+<!--          <span data-cy="levelsTable_name">{{ data.value }}</span>-->
+<!--        </template>-->
 
         <template v-slot:cell(points)="data">
           <span v-if="data.item.pointsFrom !== null && data.item.pointsFrom !== undefined">
@@ -143,11 +143,11 @@ limitations under the License.
               label: 'Level',
               sortable: false,
             },
-            {
-              key: 'name',
-              label: 'Name',
-              sortable: false,
-            },
+            // {
+            //   key: 'name',
+            //   label: 'Name',
+            //   sortable: false,
+            // },
             {
               key: 'percent',
               label: 'Percent %',

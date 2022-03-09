@@ -22,8 +22,8 @@ limitations under the License.
       <b-container fluid>
         <div v-if="displayIconManager === false">
           <div class="media">
-            <icon-picker :startIcon="levelInternal.iconClass" @select-icon="toggleIconDisplay(true)"
-                         class="mr-3"></icon-picker>
+<!--            <icon-picker :startIcon="levelInternal.iconClass" @select-icon="toggleIconDisplay(true)"-->
+<!--                         class="mr-3"></icon-picker>-->
             <div class="media-body">
                 <template v-if="isEdit">
                   <label for="editLevel-level">* Level</label>
@@ -68,14 +68,14 @@ limitations under the License.
                     </div>
                   </template>
 
-                  <label for="editLevel-name" class="mt-3">Name <span class="text-muted">(optional)</span></label>
-                  <ValidationProvider name="Name" :debounce=500 v-slot="{errors}" rules="maxLevelNameLength|uniqueName">
-                    <b-form-input id="editLevel-name" v-model="levelInternal.name" name="name" data-cy="levelName"
-                                  v-on:keyup.enter="handleSubmit(saveLevel)"
-                                  :aria-invalid="errors && errors.length > 0"
-                                  aria-errormessage="levelNameError" aria-describedby="levelNameError"></b-form-input>
-                    <small class="form-text text-danger" v-show="errors[0]" data-cy="levelNameError" id="levelNameError">{{ errors[0] }}</small>
-                  </ValidationProvider>
+<!--                  <label for="editLevel-name" class="mt-3">Name <span class="text-muted">(optional)</span></label>-->
+<!--                  <ValidationProvider name="Name" :debounce=500 v-slot="{errors}" rules="maxLevelNameLength|uniqueName">-->
+<!--                    <b-form-input id="editLevel-name" v-model="levelInternal.name" name="name" data-cy="levelName"-->
+<!--                                  v-on:keyup.enter="handleSubmit(saveLevel)"-->
+<!--                                  :aria-invalid="errors && errors.length > 0"-->
+<!--                                  aria-errormessage="levelNameError" aria-describedby="levelNameError"></b-form-input>-->
+<!--                    <small class="form-text text-danger" v-show="errors[0]" data-cy="levelNameError" id="levelNameError">{{ errors[0] }}</small>-->
+<!--                  </ValidationProvider>-->
                 </template>
                 <template v-else>
                   <template v-if="!levelAsPoints">
@@ -99,14 +99,14 @@ limitations under the License.
                       <small class="form-text text-danger" v-show="errors[0]" id="levelPointsError">{{ errors[0] }}</small>
                     </ValidationProvider>
                   </template>
-                  <label for="newLevel-name" class="mt-3">Name <span class="text-muted">(optional)</span></label>
-                  <ValidationProvider name="Name" :debounce=500 v-slot="{errors}" rules="maxLevelNameLength|uniqueName">
-                    <b-form-input id="newLevel-name" v-model="levelInternal.name" name="name" data-cy="levelName"
-                                  v-on:keyup.enter="handleSubmit(saveLevel)"
-                                  :aria-invalid="errors && errors.length > 0"
-                                  aria-errormessage="levelNameError" aria-describedby="levelNameError"></b-form-input>
-                    <small class="form-text text-danger" v-show="errors[0]" data-cy="levelNameError" id="levelNameError">{{ errors[0] }}</small>
-                  </ValidationProvider>
+<!--                  <label for="newLevel-name" class="mt-3">Name <span class="text-muted">(optional)</span></label>-->
+<!--                  <ValidationProvider name="Name" :debounce=500 v-slot="{errors}" rules="maxLevelNameLength|uniqueName">-->
+<!--                    <b-form-input id="newLevel-name" v-model="levelInternal.name" name="name" data-cy="levelName"-->
+<!--                                  v-on:keyup.enter="handleSubmit(saveLevel)"-->
+<!--                                  :aria-invalid="errors && errors.length > 0"-->
+<!--                                  aria-errormessage="levelNameError" aria-describedby="levelNameError"></b-form-input>-->
+<!--                    <small class="form-text text-danger" v-show="errors[0]" data-cy="levelNameError" id="levelNameError">{{ errors[0] }}</small>-->
+<!--                  </ValidationProvider>-->
                 </template>
             </div>
           </div>
@@ -142,7 +142,7 @@ limitations under the License.
   import { extend } from 'vee-validate';
   // eslint-disable-next-line camelcase
   import { min_value, max_value } from 'vee-validate/dist/rules';
-  import IconPicker from '../utils/iconPicker/IconPicker';
+  // import IconPicker from '../utils/iconPicker/IconPicker';
   // import IconManager from '../utils/iconPicker/IconManager';
   import InputSanitizer from '../utils/InputSanitizer';
 
@@ -159,10 +159,10 @@ limitations under the License.
 
   export default {
     name: 'NewLevel',
-    components: {
-      IconPicker,
-      'icon-manager': () => import(/* webpackChunkName: 'iconManager' */'../utils/iconPicker/IconManager'),
-    },
+    // components: {
+    //   IconPicker,
+    //   'icon-manager': () => import(/* webpackChunkName: 'iconManager' */'../utils/iconPicker/IconManager'),
+    // },
     props: {
       levelAsPoints: Boolean,
       iconClass: String,
