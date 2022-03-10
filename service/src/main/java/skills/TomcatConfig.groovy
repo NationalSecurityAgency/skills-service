@@ -34,16 +34,21 @@ class TomcatConfig implements WebServerFactoryCustomizer<TomcatServletWebServerF
     @Value('#{"${server.tomcat.accesslog.enabled:false}"}')
     boolean enabledAccessLog
 
+    @Value('#{"${skills.config.sameSiteNoneEnabled:true}"}')
+    boolean sameSiteNoneEnabled
+
     @Override
     void customize(TomcatServletWebServerFactory factory) {
-        factory.addContextCustomizers(new TomcatContextCustomizer() {
-            @Override
-            void customize(org.apache.catalina.Context context) {
-                Rfc6265CookieProcessor cp = new Rfc6265CookieProcessor();
-                cp.setSameSiteCookies(SameSiteCookies.NONE.getValue());
-                context.setCookieProcessor(cp);
-            }
-        });
+        if (sameSiteNoneEnabled) {
+            factory.addContextCustomizers(new TomcatContextCustomizer() {
+                @Override
+                void customize(org.apache.catalina.Context context) {
+                    Rfc6265CookieProcessor cp = new Rfc6265CookieProcessor()
+                    cp.setSameSiteCookies(SameSiteCookies.NONE.getValue())
+                    context.setCookieProcessor(cp)
+                }
+            })
+        }
         if (enabledAccessLog) {
             LogbackValve valve = new LogbackValve()
             // must set to true on the logback valve otherwise servlet async
@@ -62,7 +67,7 @@ class TomcatConfig implements WebServerFactoryCustomizer<TomcatServletWebServerF
         String convert(IAccessEvent accessEvent) {
             String dn = getSubjectDN(accessEvent)
             if (dn == null) {
-                return IAccessEvent.NA;
+                return IAccessEvent.NA
             } else {
                 return dn
             }

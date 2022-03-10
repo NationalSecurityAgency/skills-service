@@ -18,6 +18,7 @@ package skills.auth.form
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.*
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -82,6 +83,9 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
     PasswordEncoder passwordEncoder
+
+    @Value('#{"${skills.config.sameSiteNoneEnabled:true}"}')
+    boolean sameSiteNoneEnabled
 
     @Autowired
     void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
@@ -160,7 +164,11 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Bean
     CookieSerializer cookieSerializer() {
-        return new DefaultCookieSerializer(sameSite: 'None')
+        if (sameSiteNoneEnabled) {
+            return new DefaultCookieSerializer(sameSite: 'None')
+        } else {
+            return new DefaultCookieSerializer()
+        }
     }
 
     @Component
