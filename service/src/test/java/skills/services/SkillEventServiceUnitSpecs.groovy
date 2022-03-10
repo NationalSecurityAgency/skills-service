@@ -23,16 +23,13 @@ import skills.services.events.pointsAndAchievements.PointsAndAchievementsHandler
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefMin
 import skills.storage.model.UserAchievement
-import skills.storage.model.UserPoints
 import skills.storage.repos.SkillEventsSupportRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPerformedSkillRepo
 import skills.storage.repos.UserPointsRepo
 import skills.utils.LoggerHelper
 import skills.utils.MetricsLogger
-import spock.lang.IgnoreRest
 import spock.lang.Specification
-
 
 class SkillEventServiceUnitSpecs extends Specification {
 
@@ -56,7 +53,7 @@ class SkillEventServiceUnitSpecs extends Specification {
         AchievedSkillsGroupHandler mockAchievedSkillsGroupHandler = Mock()
         SkillCatalogService mockCatalogService = Mock()
 
-        SkillEventsService skillEventsService = new SkillEventsService(
+        SkillEventsTransactionalService skillEventsTransactionalService = new SkillEventsTransactionalService(
                 skillEventPublisher: mockSkillEventPublisher,
                 skillEventsSupportRepo: mockSkillEventsSupportRepo,
                 performedSkillRepository: mockPerformedSkillRepository,
@@ -67,10 +64,14 @@ class SkillEventServiceUnitSpecs extends Specification {
                 achievedLevelRepo: mockAchievedLevelRepo,
                 achievedBadgeHandler: mockAchievedBadgeHandler,
                 achievedGlobalBadgeHandler: mockAchievedGlobalBadgeHandler,
-                metricsLogger: mockMetricsLogger,
                 userEventService: mockUserEventService,
                 achievedSkillsGroupHandler: mockAchievedSkillsGroupHandler,
                 skillCatalogService: mockCatalogService
+        )
+        SkillEventsService skillEventsService = new SkillEventsService(
+                skillEventPublisher: mockSkillEventPublisher,
+                metricsLogger: mockMetricsLogger,
+                skillEventsTransactionalService: skillEventsTransactionalService,
         )
 
         // make it so skill has NOT already reached it's max points, is withing the time window, and has achieved any dependencies
@@ -105,13 +106,17 @@ class SkillEventServiceUnitSpecs extends Specification {
         UserEventService mockUserEventService = Mock()
         SkillCatalogService mockCatalogService = Mock()
 
-        SkillEventsService skillEventsService = new SkillEventsService(
+        SkillEventsTransactionalService skillEventsTransactionalService = new SkillEventsTransactionalService(
                 skillEventPublisher: mockSkillEventPublisher,
                 skillEventsSupportRepo: mockSkillEventsSupportRepo,
                 performedSkillRepository: mockPerformedSkillRepository,
-                metricsLogger: mockMetricsLogger,
                 userEventService: mockUserEventService,
                 skillCatalogService: mockCatalogService
+        )
+        SkillEventsService skillEventsService = new SkillEventsService(
+                skillEventPublisher: mockSkillEventPublisher,
+                metricsLogger: mockMetricsLogger,
+                skillEventsTransactionalService: skillEventsTransactionalService,
         )
 
         // make it so skill has already reached it's max points so result.skillApplied will be false
@@ -142,13 +147,17 @@ class SkillEventServiceUnitSpecs extends Specification {
         UserEventService mockUserEventService = Mock()
         SkillCatalogService mockCatalogService = Mock()
 
-        SkillEventsService skillEventsService = new SkillEventsService(
+        SkillEventsTransactionalService skillEventsTransactionalService = new SkillEventsTransactionalService(
                 skillEventPublisher: mockSkillEventPublisher,
                 skillEventsSupportRepo: mockSkillEventsSupportRepo,
                 performedSkillRepository: mockPerformedSkillRepository,
-                metricsLogger: mockMetricsLogger,
                 userEventService: mockUserEventService,
                 skillCatalogService: mockCatalogService
+        )
+        SkillEventsService skillEventsService = new SkillEventsService(
+                skillEventPublisher: mockSkillEventPublisher,
+                metricsLogger: mockMetricsLogger,
+                skillEventsTransactionalService: skillEventsTransactionalService,
         )
 
         // make it so skill has already reached it's max points so result.skillApplied will be false
@@ -207,14 +216,17 @@ class SkillEventServiceUnitSpecs extends Specification {
         UserAchievedLevelRepo userAchievedLevelRepo = Mock()
         UserPointsRepo userPointsRepo = Mock()
 
-        SkillEventsService skillEventsService = new SkillEventsService(
+        SkillEventsTransactionalService skillEventsTransactionalService = new SkillEventsTransactionalService(
                 skillEventPublisher: mockSkillEventPublisher,
                 skillEventsSupportRepo: mockSkillEventsSupportRepo,
                 performedSkillRepository: mockPerformedSkillRepository,
-                metricsLogger: mockMetricsLogger,
                 userEventService: mockUserEventService,
                 achievedLevelRepo: userAchievedLevelRepo,
                 userPointsRepo: userPointsRepo
+        )
+        SkillEventsService skillEventsService = new SkillEventsService(
+                metricsLogger: mockMetricsLogger,
+                skillEventsTransactionalService: skillEventsTransactionalService,
         )
 
         UserAchievement ua = new UserAchievement(projectId: "proj", level: 1, created: new Date())

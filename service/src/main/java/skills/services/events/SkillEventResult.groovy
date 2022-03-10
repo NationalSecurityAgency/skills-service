@@ -32,4 +32,5 @@ class SkillEventResult {
     // only really applicable if it wasn't performed
     String explanation = "Skill event was applied"
     List<CompletionItem> completed = []
+    String selfReportType
 }

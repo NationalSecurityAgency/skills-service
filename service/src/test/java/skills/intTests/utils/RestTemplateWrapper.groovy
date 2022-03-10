@@ -41,6 +41,7 @@ class RestTemplateWrapper extends RestTemplate {
 
     private boolean authenticated = false
     String authenticationToken
+    ResponseEntity<String> authResponse
 
     private pkiAuth = false
 
@@ -118,11 +119,11 @@ class RestTemplateWrapper extends RestTemplate {
                 params.add('password', password)
 
                 HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers)
-                ResponseEntity<String> response = restTemplate.postForEntity(skillsServiceUrl + '/performLogin', request, String.class)
+                authResponse = restTemplate.postForEntity(skillsServiceUrl + '/performLogin', request, String.class)
 
-                assert response.statusCode == HttpStatus.OK, 'authentication failed: ' + response.statusCode
+                assert authResponse.statusCode == HttpStatus.OK, 'authentication failed: ' + authResponse.statusCode
 
-                authenticationToken = response.getHeaders().getFirst(AUTH_HEADER)
+                authenticationToken = authResponse.getHeaders().getFirst(AUTH_HEADER)
 //        assert authenticationToken, 'no authentication token was provided!'
             }
         }
