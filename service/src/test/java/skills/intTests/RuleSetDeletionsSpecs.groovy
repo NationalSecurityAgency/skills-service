@@ -16,10 +16,13 @@
 package skills.intTests
 
 import groovy.time.TimeCategory
+import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.intTests.utils.TestUtils
+import skills.storage.repos.UserAchievedLevelRepo
+import spock.lang.IgnoreRest
 import spock.lang.Specification
 
 import java.text.DateFormat
@@ -32,6 +35,9 @@ class RuleSetDeletionsSpecs  extends DefaultIntSpec {
     String projId = SkillsFactory.defaultProjId
 
     List<String> sampleUserIds // loaded from system props
+
+    @Autowired
+    UserAchievedLevelRepo userAchievementsRepo
 
     def setup() {
         skillsService.deleteProjectIfExist(projId)
@@ -1116,4 +1122,129 @@ class RuleSetDeletionsSpecs  extends DefaultIntSpec {
         getPoints.call(afterRemovalUser1PointHistorySubj1PRoj1, 0) == 20
         getPoints.call(afterRemovalUser1PointHistorySubj1PRoj1, 1) == 40
     }
+
+    def "deletion of finalized imported skills should cause subject/project/user total points to be updated accordingly"() {
+
+        String subj = "testSubj"
+
+        Map skill1 = [projectId     : projId, subjectId: subj, skillId: "skill1", name: "Test Skill 1", type: "Skill",
+                      pointIncrement: 35, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+        Map skill2 = [projectId     : projId, subjectId: subj, skillId: "skill2", name: "Test Skill 2", type: "Skill",
+                      pointIncrement: 35, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+        Map skill3 = [projectId     : projId, subjectId: subj, skillId: "skill3", name: "Test Skill 3", type: "Skill",
+                      pointIncrement: 35, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+
+        def proj2 = SkillsFactory.createProject(2)
+        def subjp2 = SkillsFactory.createSubject(2,2)
+        def p2Skills = SkillsFactory.createSkillsStartingAt(10, 101, 2, 2, 35)
+
+        skillsService.createProject([projectId: projId, name: "Test Project"])
+        skillsService.createSubject([projectId: projId, subjectId: subj, name: "Test Subject"])
+        skillsService.createSkill(skill1)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(skill3)
+        skillsService.createProject(proj2)
+        skillsService.createSubject(subjp2)
+        skillsService.createSkills(p2Skills)
+
+        def user = getRandomUsers(1)[0]
+
+        when:
+        skillsService.addSkill([projectId: projId, subjectId: subj, skillId: skill1.skillId], user)
+
+        def pointHistoryPreImport = skillsService.getPointHistory(user, projId, null, 0)
+        def subjectPointHistoryPreImport = skillsService.getPointHistory(user, projId, subj, 0)
+        def userAchievementsPreImport = userAchievementsRepo.findAllByUserAndProjectIds(user, [projId])
+        def projectSummaryPreImport = skillsService.getSkillSummary(user, projId)
+        def subjectSummaryPreImport = skillsService.getSkillSummary(user, projId, subj)
+
+        p2Skills.each {
+            skillsService.exportSkillToCatalog(proj2.projectId, it.skillId)
+            skillsService.importSkillFromCatalog(projId, subj, proj2.projectId, it.skillId)
+        }
+
+        def pointHistoryPostImportPreFinalize = skillsService.getPointHistory(user, projId, null, 0)
+        def subjectPointHistoryPostImportPreFinalize = skillsService.getPointHistory(user, projId, subj, 0)
+        def userAchievementsPostImportPreFinalize = userAchievementsRepo.findAllByUserAndProjectIds(user, [projId])
+        def projectSummaryPostImportPreFinalize = skillsService.getSkillSummary(user, projId)
+        def subjectSummaryPostImportPreFinalize = skillsService.getSkillSummary(user, projId, subj)
+
+        skillsService.finalizeSkillsImportFromCatalog(projId, true)
+        skillsService.addSkill([projectId: projId, subjectId: subj, skillId: skill2.skillId], user)
+        skillsService.addSkill([projectId: projId, subjectId: subj, skillId: skill3.skillId], user)
+        skillsService.addSkill([projectId: proj2.projectId, subjectId: subj, skillId: p2Skills[0].skillId], user)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        def pointHistoryPostImportPostFinalize = skillsService.getPointHistory(user, projId, null, 0)
+        def subjectPointHistoryPostImportPostFinalize = skillsService.getPointHistory(user, projId, subj, 0)
+        def userAchievementsPostImportPostFinalize = userAchievementsRepo.findAllByUserAndProjectIds(user, [projId])
+        def projectSummaryPostImportPostFinalize = skillsService.getSkillSummary(user, projId)
+        def subjectSummaryPostImportPostFinalize = skillsService.getSkillSummary(user, projId, subj)
+
+        p2Skills.each {
+            skillsService.deleteSkill([projectId: projId, subjectId: subj, skillId: it.skillId])
+        }
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        def pointHistoryPostImportPostDelete = skillsService.getPointHistory(user, projId, null, 0)
+        def subjectPointHistoryPostImportPostDelete = skillsService.getPointHistory(user, projId, subj, 0)
+        def userAchievementsPostImportPostDelete = userAchievementsRepo.findAllByUserAndProjectIds(user, [projId])
+        def projectSummaryPostImportPostDelete = skillsService.getSkillSummary(user, projId)
+        def subjectSummaryPostImportPostDelete = skillsService.getSkillSummary(user, projId, subj)
+
+        then:
+        projectSummaryPreImport.totalPoints == 105
+        subjectSummaryPreImport.totalPoints == 105
+        !pointHistoryPreImport.pointsHistory
+        !pointHistoryPreImport.achievements
+        !subjectPointHistoryPreImport.pointsHistory
+        !subjectPointHistoryPreImport.achievements
+        userAchievementsPreImport.find { it.projectId == projId && it.skillId == subj && it.level == 2}
+        userAchievementsPreImport.find { it.projectId == projId && it.skillId == null && it.level == 2}
+        userAchievementsPreImport.find { it.projectId == projId && it.skillId == skill1.skillId}
+
+        projectSummaryPostImportPreFinalize.totalPoints == 105
+        subjectSummaryPostImportPreFinalize.totalPoints == 105
+        !pointHistoryPostImportPreFinalize.pointsHistory
+        !pointHistoryPostImportPreFinalize.achievements
+        !subjectPointHistoryPostImportPreFinalize.pointsHistory
+        !subjectPointHistoryPostImportPreFinalize.achievements
+        userAchievementsPostImportPreFinalize.find { it.projectId == projId && it.skillId == subj && it.level == 2}
+        userAchievementsPostImportPreFinalize.find { it.projectId == projId && it.skillId == null && it.level == 2}
+        userAchievementsPostImportPreFinalize.find { it.projectId == projId && it.skillId == skill1.skillId}
+        p2Skills.each { importedSkill ->
+            assert !userAchievementsPostImportPreFinalize.find { it.skillId == importedSkill.skillId }
+        }
+
+        projectSummaryPostImportPostFinalize.totalPoints == 455
+        subjectSummaryPostImportPostFinalize.totalPoints == 455
+        !pointHistoryPostImportPostFinalize.pointsHistory
+        !pointHistoryPostImportPostFinalize.achievements
+        !subjectPointHistoryPostImportPostFinalize.pointsHistory
+        !subjectPointHistoryPostImportPostFinalize.achievements
+        userAchievementsPostImportPostFinalize.find { it.projectId == projId && it.skillId == subj && it.level == 2}
+        userAchievementsPostImportPostFinalize.find { it.projectId == projId && it.skillId == null && it.level == 2}
+        !userAchievementsPostImportPostFinalize.find { it.projectId == projId && it.skillId == subj && it.level == 3}
+        !userAchievementsPostImportPostFinalize.find { it.projectId == projId && it.skillId == null && it.level == 3}
+        userAchievementsPostImportPostFinalize.find { it.projectId == projId && it.skillId == skill1.skillId}
+        userAchievementsPostImportPostFinalize.find { it.projectId == projId && it.skillId == skill2.skillId}
+        userAchievementsPostImportPostFinalize.find { it.projectId == projId && it.skillId == skill3.skillId}
+        userAchievementsPostImportPostFinalize.find { it.projectId == projId && it.skillId == p2Skills[0].skillId}
+
+        projectSummaryPostImportPostDelete.totalPoints == 105
+        subjectSummaryPostImportPostDelete.totalPoints == 105
+        !pointHistoryPostImportPostDelete.pointsHistory
+        !pointHistoryPostImportPostDelete.achievements
+        !subjectPointHistoryPostImportPostDelete.pointsHistory
+        !subjectPointHistoryPostImportPostDelete.achievements
+        userAchievementsPostImportPostDelete.find { it.projectId == projId && it.skillId == subj && it.level == 5}
+        userAchievementsPostImportPostDelete.find { it.projectId == projId && it.skillId == null && it.level == 5}
+        userAchievementsPostImportPostDelete.find { it.projectId == projId && it.skillId == skill1.skillId}
+        userAchievementsPostImportPostDelete.find { it.projectId == projId && it.skillId == skill2.skillId}
+        userAchievementsPostImportPostDelete.find { it.projectId == projId && it.skillId == skill3.skillId}
+        p2Skills.each { importedSkill ->
+            assert !userAchievementsPostImportPostDelete.find { it.skillId == importedSkill.skillId }
+        }
+    }
 }
+

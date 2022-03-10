@@ -1226,6 +1226,13 @@ class LevelsSpec extends  DefaultIntSpec{
         def levelsAfterFinalize = skillsService.getLevels(projId, null).sort(){ it.level }
         def subjectLevelsAfterFinalize = skillsService.getLevels(projId, subject).sort(){ it.level }
 
+        exported.each {
+            skillsService.deleteSkill([projectId: projId, subjectId: subject, skillId: it.skillId])
+        }
+
+        def levelsAfterRemoval = skillsService.getLevels(projId, null).sort() {it.level}
+        def subjectLevelsAfterRemoval = skillsService.getLevels(projId, subject).sort() {it.level}
+
         then:
         levelsBeforeImport[0].pointsFrom == levelsAfterImport[0].pointsFrom
         levelsBeforeImport[0].pointsTo == levelsAfterImport[0].pointsTo
@@ -1270,6 +1277,28 @@ class LevelsSpec extends  DefaultIntSpec{
         subjectLevelsAfterImport[3].pointsTo < subjectLevelsAfterFinalize[3].pointsTo
         subjectLevelsAfterImport[4].pointsFrom < subjectLevelsAfterFinalize[4].pointsFrom
         subjectLevelsAfterImport[4].pointsTo == subjectLevelsAfterFinalize[4].pointsTo
+
+        levelsBeforeImport[0].pointsFrom == levelsAfterRemoval[0].pointsFrom
+        levelsBeforeImport[0].pointsTo == levelsAfterRemoval[0].pointsTo
+        levelsBeforeImport[1].pointsFrom == levelsAfterRemoval[1].pointsFrom
+        levelsBeforeImport[1].pointsTo == levelsAfterRemoval[1].pointsTo
+        levelsBeforeImport[2].pointsFrom == levelsAfterRemoval[2].pointsFrom
+        levelsBeforeImport[2].pointsTo == levelsAfterRemoval[2].pointsTo
+        levelsBeforeImport[3].pointsFrom == levelsAfterRemoval[3].pointsFrom
+        levelsBeforeImport[3].pointsTo == levelsAfterRemoval[3].pointsTo
+        levelsBeforeImport[4].pointsFrom == levelsAfterRemoval[4].pointsFrom
+        levelsBeforeImport[4].pointsTo == levelsAfterRemoval[4].pointsTo
+
+        subjectLevelsBeforeImport[0].pointsFrom == subjectLevelsAfterRemoval[0].pointsFrom
+        subjectLevelsBeforeImport[0].pointsTo == subjectLevelsAfterRemoval[0].pointsTo
+        subjectLevelsBeforeImport[1].pointsFrom == subjectLevelsAfterRemoval[1].pointsFrom
+        subjectLevelsBeforeImport[1].pointsTo == subjectLevelsAfterRemoval[1].pointsTo
+        subjectLevelsBeforeImport[2].pointsFrom == subjectLevelsAfterRemoval[2].pointsFrom
+        subjectLevelsBeforeImport[2].pointsTo == subjectLevelsAfterRemoval[2].pointsTo
+        subjectLevelsBeforeImport[3].pointsFrom == subjectLevelsAfterRemoval[3].pointsFrom
+        subjectLevelsBeforeImport[3].pointsTo == subjectLevelsAfterRemoval[3].pointsTo
+        subjectLevelsBeforeImport[4].pointsFrom == subjectLevelsAfterRemoval[4].pointsFrom
+        subjectLevelsBeforeImport[4].pointsTo == subjectLevelsAfterRemoval[4].pointsTo
     }
 
     private List<List<String>> setupProjectWithSkills(List<String> subjects = ['testSubject1', 'testSubject2']) {

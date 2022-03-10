@@ -52,7 +52,7 @@ class SkillsFactory {
     }
 
     static List<Map> createSkillsStartingAt(int numSkills, int startingSkillNumber, int projNumber = 1, int subjNumer = 1l, int pointIncrement = 10) {
-        return (startingSkillNumber..numSkills+startingSkillNumber).collect { createSkill(projNumber, subjNumer, it, 0, 1, 480, pointIncrement) }
+        return (startingSkillNumber..numSkills+startingSkillNumber-1).collect { createSkill(projNumber, subjNumer, it, 0, 1, 480, pointIncrement) }
     }
 
     static List<Map> createSkillsWithDifferentVersions(List<Integer> skillVersions, int projNumber = 1, int subjNumber = 1) {
