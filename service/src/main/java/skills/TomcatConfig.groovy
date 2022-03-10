@@ -43,11 +43,11 @@ class TomcatConfig implements WebServerFactoryCustomizer<TomcatServletWebServerF
             factory.addContextCustomizers(new TomcatContextCustomizer() {
                 @Override
                 void customize(org.apache.catalina.Context context) {
-                    Rfc6265CookieProcessor cp = new Rfc6265CookieProcessor();
-                    cp.setSameSiteCookies(SameSiteCookies.NONE.getValue());
-                    context.setCookieProcessor(cp);
+                    Rfc6265CookieProcessor cp = new Rfc6265CookieProcessor()
+                    cp.setSameSiteCookies(SameSiteCookies.NONE.getValue())
+                    context.setCookieProcessor(cp)
                 }
-            });
+            })
         }
         if (enabledAccessLog) {
             LogbackValve valve = new LogbackValve()
@@ -67,7 +67,7 @@ class TomcatConfig implements WebServerFactoryCustomizer<TomcatServletWebServerF
         String convert(IAccessEvent accessEvent) {
             String dn = getSubjectDN(accessEvent)
             if (dn == null) {
-                return IAccessEvent.NA;
+                return IAccessEvent.NA
             } else {
                 return dn
             }
