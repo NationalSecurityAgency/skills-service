@@ -26,7 +26,7 @@ import spock.lang.IgnoreIf
 class SameSiteCookieAttrDisabledIT extends DefaultIntSpec {
 
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
-    def "server timing is disabled" () {
+    def "SameSite=None attribute is not on the Set-Cookie header" () {
         setup:
         SkillsService ss = super.createService()
 
