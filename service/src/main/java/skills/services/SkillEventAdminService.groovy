@@ -69,7 +69,10 @@ class SkillEventAdminService {
     SkillEventPublisher skillEventPublisher
 
     @Autowired
-    MetricsLogger metricsLogger;
+    MetricsLogger metricsLogger
+
+    @Autowired
+    SkillEventsTransactionalService skillEventsTransactionalService
 
     @Profile
     BulkSkillEventResult bulkReportSkills(String projectId, String skillId, List<String> userIds, Date incomingSkillDate) {
@@ -108,7 +111,7 @@ class SkillEventAdminService {
     Map<String, SkillEventResult> bulkReportSkillsInternal(String projectId, String skillId, List<String> userIds, Date incomingSkillDate) {
         Map<String, SkillEventResult> results = [:]
         for (String userId : userIds) {
-            SkillEventResult result = skillsManagementFacade.reportSkillInternal(projectId, skillId, userId, incomingSkillDate)
+            SkillEventResult result = skillEventsTransactionalService.reportSkillInternal(projectId, skillId, userId, incomingSkillDate)
             results.put(userId, result)
         }
         return results
