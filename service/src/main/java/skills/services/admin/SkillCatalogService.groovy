@@ -293,8 +293,8 @@ class SkillCatalogService {
 
     CatalogFinalizeInfoResult getFinalizeInfo(String projectId) {
         int numDisabled = skillDefRepo.countByProjectIdAndEnabledAndCopiedFromIsNotNull(projectId, Boolean.FALSE.toString())
-
-        return new CatalogFinalizeInfoResult(projectId: projectId, numSkillsToFinalize: numDisabled)
+        boolean isRunning = skillCatalogFinalizationService.getCurrentState(projectId) == SkillCatalogFinalizationService.FinalizeState.RUNNING
+        return new CatalogFinalizeInfoResult(projectId: projectId, numSkillsToFinalize: numDisabled, isRunning: isRunning)
     }
 
     @Profile

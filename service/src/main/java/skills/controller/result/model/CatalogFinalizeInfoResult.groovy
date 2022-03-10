@@ -23,4 +23,6 @@ class CatalogFinalizeInfoResult {
     String projectId
 
     Integer numSkillsToFinalize
+
+    Boolean isRunning
 }

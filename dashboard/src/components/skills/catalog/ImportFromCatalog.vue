@@ -222,7 +222,7 @@ limitations under the License.
     data() {
       return {
         show: this.value,
-        loading: false,
+        loading: true,
         isInFinalizeState: false,
         validatingImport: false,
         initialLoadHadData: false,

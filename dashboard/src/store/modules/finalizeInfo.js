@@ -32,15 +32,27 @@ const actions = {
     return new Promise((resolve, reject) => {
       CatalogService.getCatalogFinalizeInfo(payload.projectId)
         .then((finalizeInfoRes) => {
-          commit('setFinalizeInfo', finalizeInfoRes);
-          resolve(finalizeInfoRes);
+          const finalizeInfoUpdated = {
+            showFinalizeModal: false,
+            finalizeIsRunning: finalizeInfoRes.isRunning,
+            finalizeSuccessfullyCompleted: false,
+            finalizeCompletedAndFailed: false,
+            ...finalizeInfoRes,
+          };
+          commit('setFinalizeInfo', finalizeInfoUpdated);
+          resolve(finalizeInfoUpdated);
         }).catch((error) => reject(error));
     });
   },
 };
 
 const state = {
-  finalizeInfo: {},
+  finalizeInfo: {
+    showFinalizeModal: false,
+    finalizeIsRunning: false,
+    finalizeSuccessfullyCompleted: false,
+    finalizeCompletedAndFailed: false,
+  },
 };
 
 export default {

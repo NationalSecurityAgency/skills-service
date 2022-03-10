@@ -15,18 +15,28 @@ limitations under the License.
 */
 <template>
   <div v-if="finalizeInfo.numSkillsToFinalize > 0" data-cy="importFinalizeAlert" class="mb-0 mt-1">
-    <b-alert :show="finalizeSuccessfullyCompleted && !finalizeIsRunning" variant="success" dismissible>
-      <i class="fas fa-thumbs-up"></i> Successfully finalized <b-badge variant="info">{{finalizeInfo.numSkillsToFinalize}}</b-badge> imported skills! Please enjoy your day!
+    <b-alert :show="finalizeInfo.finalizeSuccessfullyCompleted && !finalizeInfo.finalizeIsRunning" variant="success" dismissible>
+      <i class="fas fa-thumbs-up"></i> Successfully finalized
+      <b-badge variant="info">{{ finalizeInfo.numSkillsToFinalize }}</b-badge>
+      imported skill{{ sOrNone(finalizeInfo.numSkillsToFinalize) }}! Please enjoy your day!
     </b-alert>
-    <b-alert :show="finalizeCompletedAndFailed && !finalizeIsRunning" variant="danger" dismissible>
-      <i class="fas fa-thumbs-down"></i> Well this is sad. Looks like finalization failed, please reach out to the SkillTree team for further assistance.
+    <b-alert :show="finalizeInfo.finalizeCompletedAndFailed && !finalizeInfo.finalizeIsRunning" variant="danger" dismissible>
+      <i class="fas fa-thumbs-down"></i> Well this is sad. Looks like finalization failed, please
+      reach out to the SkillTree team for further assistance.
     </b-alert>
-    <b-alert :show="finalizeIsRunning && !finalizeSuccessfullyCompleted" variant="warning">
-      <i class="fas fa-running"></i> Catalog finalization is in progress. Finalizing <b-badge variant="info">{{finalizeInfo.numSkillsToFinalize}}</b-badge> imported skills! The process may take a few minutes.
+    <b-alert :show="finalizeInfo.finalizeIsRunning && !finalizeInfo.finalizeSuccessfullyCompleted" variant="warning">
+      <i class="fas fa-running"></i> Catalog finalization is in progress. Finalizing
+      <b-badge variant="info">{{ finalizeInfo.numSkillsToFinalize }}</b-badge>
+      imported skill{{ sOrNone(finalizeInfo.numSkillsToFinalize) }}! The process may take a few
+      minutes.
       <import-finalize-progress />
     </b-alert>
-    <b-alert :show="!finalizeSuccessfullyCompleted && !finalizeCompletedAndFailed && !finalizeIsRunning" variant="warning">
-      <i class="fas fa-exclamation-circle"></i> There are <b-badge variant="info">{{finalizeInfo.numSkillsToFinalize}}</b-badge> imported skills in this project that are not yet finalized. Once you have finished importing the skills you are interested in,
+    <b-alert :show="!finalizeInfo.finalizeSuccessfullyCompleted && !finalizeInfo.finalizeCompletedAndFailed && !finalizeInfo.finalizeIsRunning" variant="warning">
+      <i class="fas fa-exclamation-circle"></i> There
+      {{ areOrIs(finalizeInfo.numSkillsToFinalize) }}
+      <b-badge variant="info">{{ finalizeInfo.numSkillsToFinalize }}</b-badge>
+      imported skill{{ sOrNone(finalizeInfo.numSkillsToFinalize) }} in this project that {{ this.areOrIs(finalizeInfo.numSkillsToFinalize) }} not yet finalized. Once you have finished importing
+      the skills you are interested in,
       <b-button variant="success" @click="showFinalizeModal = true" data-cy="finalizeBtn"><i class="fas fa-check-double"></i> Finalize</b-button> the import to enable those skills.
       Click <a :href="dashboardSkillsCatalogGuide" target="_blank">here <i class="fas fa-external-link-alt"></i></a> to learn more.
     </b-alert>
@@ -60,20 +70,14 @@ limitations under the License.
     data() {
       return {
         showFinalizeModal: false,
-        finalizeIsRunning: false,
-        finalizeSuccessfullyCompleted: false,
-        finalizeCompletedAndFailed: false,
       };
     },
     mounted() {
       this.loadFinalizeInfo({ projectId: this.$route.params.projectId })
-        .then(() => {
-          this.getFinalizationState().then((res) => {
-            if (res && res.value === 'RUNNING') {
-              this.finalizeIsRunning = true;
-              this.checkFinalizationState();
-            }
-          });
+        .then((finalizeInfoRes) => {
+          if (finalizeInfoRes.finalizeIsRunning) {
+            this.checkFinalizationState();
+          }
         });
     },
     methods: {
@@ -93,7 +97,7 @@ limitations under the License.
         'loadFinalizeInfo',
       ]),
       finalizeScheduled() {
-        this.finalizeIsRunning = true;
+        this.finalizeInfo.finalizeIsRunning = true;
         this.checkFinalizationState();
       },
       getFinalizationState() {
@@ -106,8 +110,8 @@ limitations under the License.
               if (res.value === 'RUNNING') {
                 this.checkFinalizationState();
               } else if (res.value === 'COMPLETED') {
-                this.finalizeIsRunning = false;
-                this.finalizeSuccessfullyCompleted = true;
+                this.finalizeInfo.finalizeIsRunning = false;
+                this.finalizeInfo.finalizeSuccessfullyCompleted = true;
                 if (this.$route.params.subjectId) {
                   this.loadSubjectSkills({
                     projectId: this.$route.params.projectId,
@@ -122,12 +126,18 @@ limitations under the License.
                   this.loadSubjects({ projectId: this.$route.params.projectId });
                 }
               } else {
-                this.finalizeIsRunning = false;
-                this.finalizeCompletedAndFailed = true;
+                this.finalizeInfo.finalizeIsRunning = false;
+                this.finalizeInfo.finalizeCompletedAndFailed = true;
               }
             }
           });
         }, 1000);
+      },
+      areOrIs(numItems) {
+        return (numItems > 1) ? 'are' : 'is';
+      },
+      sOrNone(numItems) {
+        return (numItems > 1) ? 's' : '';
       },
     },
   };
