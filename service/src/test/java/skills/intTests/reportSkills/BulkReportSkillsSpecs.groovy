@@ -39,7 +39,7 @@ class BulkReportSkillsSpecs extends DefaultIntSpec {
     def "bulk report skill for multiple users"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
-        def skills = SkillsFactory.createSkills(10, )
+        def skills = SkillsFactory.createSkills(10,)
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -55,11 +55,11 @@ class BulkReportSkillsSpecs extends DefaultIntSpec {
         res.body.userIdsErrored.size() == 0
     }
 
-    @Requires({env["SPRING_PROFILES_ACTIVE"] == "pki" })
+    @Requires({ env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "bulk report skill for multiple users, one invalid user "() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
-        def skills = SkillsFactory.createSkills(10, )
+        def skills = SkillsFactory.createSkills(10,)
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -83,7 +83,7 @@ class BulkReportSkillsSpecs extends DefaultIntSpec {
     def "bulk report skill for multiple users, one skill not applied"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
-        def skills = SkillsFactory.createSkills(10, )
+        def skills = SkillsFactory.createSkills(10,)
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -101,15 +101,15 @@ class BulkReportSkillsSpecs extends DefaultIntSpec {
         res1.body.userIdsErrored.size() == 0
 
         res.body.userIdsAppliedCount
-        res.body.userIdsAppliedCount == sampleUserIds.size()-1
+        res.body.userIdsAppliedCount == sampleUserIds.size() - 1
         res.body.userIdsNotAppliedCount == 1
         res.body.userIdsErrored.size() == 0
     }
 
-    def "attempt to bulk report skill events without specifying a timestamp"(){
+    def "attempt to bulk report skill events without specifying a timestamp"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
-        def skills = SkillsFactory.createSkills(10, )
+        def skills = SkillsFactory.createSkills(10,)
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -122,10 +122,10 @@ class BulkReportSkillsSpecs extends DefaultIntSpec {
         exception.message.contains("timestamp was not provided., errorCode:BadParam, success:false, projectId:TestProject1, skillId:skill1")
     }
 
-    def "attempt to bulk report skill events without specifying a negative timestamp"(){
+    def "attempt to bulk report skill events without specifying a negative timestamp"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
-        def skills = SkillsFactory.createSkills(10, )
+        def skills = SkillsFactory.createSkills(10,)
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -138,10 +138,10 @@ class BulkReportSkillsSpecs extends DefaultIntSpec {
         exception.message.contains("timestamp must be greater than 0, errorCode:BadParam, success:false, projectId:TestProject1, skillId:skill1")
     }
 
-    def "attempt to bulk report skill events without specifying a future timestamp"(){
+    def "attempt to bulk report skill events without specifying a future timestamp"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
-        def skills = SkillsFactory.createSkills(10, )
+        def skills = SkillsFactory.createSkills(10,)
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -154,10 +154,10 @@ class BulkReportSkillsSpecs extends DefaultIntSpec {
         exception.message.contains("Skill Events may not be in the future, errorCode:BadParam, success:false, projectId:TestProject1, skillId:skill1")
     }
 
-    def "attempt to bulk report skill events without specifying any userIds"(){
+    def "attempt to bulk report skill events without specifying any userIds"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
-        def skills = SkillsFactory.createSkills(10, )
+        def skills = SkillsFactory.createSkills(10,)
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -170,10 +170,10 @@ class BulkReportSkillsSpecs extends DefaultIntSpec {
         exception.message.contains("userIds must contain at least 1 item., errorCode:BadParam, success:false, projectId:TestProject1, skillId:skill1")
     }
 
-    def "attempt to bulk report skill events specifying blank userIds"(){
+    def "attempt to bulk report skill events specifying blank userIds"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
-        def skills = SkillsFactory.createSkills(10, )
+        def skills = SkillsFactory.createSkills(10,)
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -186,11 +186,11 @@ class BulkReportSkillsSpecs extends DefaultIntSpec {
         exception.message.contains("userIds must contain at least 1 item., errorCode:BadParam, success:false, projectId:TestProject1, skillId:skill1")
     }
 
-    def "attempt to bulk report skill events for more than the max allowable userIds"(){
+    def "attempt to bulk report skill events for more than the max allowable userIds"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
-        def skills = SkillsFactory.createSkills(10, )
-        List<String> userIds = (0..1000).collect { "user${it}"}
+        def skills = SkillsFactory.createSkills(10,)
+        List<String> userIds = (0..1000).collect { "user${it}" }
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -201,5 +201,21 @@ class BulkReportSkillsSpecs extends DefaultIntSpec {
         then:
         SkillsClientException exception = thrown(SkillsClientException)
         exception.message.contains("number of userIds cannot exceed 1000, errorCode:BadParam, success:false, projectId:TestProject1, skillId:skill1")
+    }
+
+    def "attempt to bulk report skill events when project has insufficient points"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        when:
+        skillsService.bulkAddSkill([projectId: projId, skillId: skills[0].skillId], sampleUserIds, System.currentTimeMillis())
+        then:
+        SkillsClientException exception = thrown(SkillsClientException)
+        exception.message.contains("Insufficient project points, skill achievement is disallowed, errorCode:InsufficientProjectPoints, success:false, projectId:TestProject1")
     }
 }
