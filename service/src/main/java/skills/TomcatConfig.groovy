@@ -18,7 +18,10 @@ package skills
 import ch.qos.logback.access.pattern.AccessConverter
 import ch.qos.logback.access.spi.IAccessEvent
 import ch.qos.logback.access.tomcat.LogbackValve
+import org.apache.tomcat.util.http.Rfc6265CookieProcessor
+import org.apache.tomcat.util.http.SameSiteCookies
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.web.embedded.tomcat.TomcatContextCustomizer
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory
 import org.springframework.boot.web.server.WebServerFactoryCustomizer
 import org.springframework.context.annotation.Configuration
@@ -33,6 +36,14 @@ class TomcatConfig implements WebServerFactoryCustomizer<TomcatServletWebServerF
 
     @Override
     void customize(TomcatServletWebServerFactory factory) {
+        factory.addContextCustomizers(new TomcatContextCustomizer() {
+            @Override
+            void customize(org.apache.catalina.Context context) {
+                Rfc6265CookieProcessor cp = new Rfc6265CookieProcessor();
+                cp.setSameSiteCookies(SameSiteCookies.NONE.getValue());
+                context.setCookieProcessor(cp);
+            }
+        });
         if (enabledAccessLog) {
             LogbackValve valve = new LogbackValve()
             // must set to true on the logback valve otherwise servlet async
