@@ -17,6 +17,7 @@ package skills.services
 
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -24,13 +25,11 @@ import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.result.model.RequestResult
-import skills.services.events.BulkSkillEventResult
-import skills.services.events.CompletionItem
-import skills.services.events.SkillEventResult
-import skills.services.events.SkillEventsService
+import skills.services.events.*
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.model.*
 import skills.storage.repos.*
+import skills.utils.MetricsLogger
 
 @Component
 @Slf4j
@@ -66,25 +65,56 @@ class SkillEventAdminService {
     @Autowired
     private UserInfoService userInfoService
 
-    @Transactional
+    @Autowired
+    SkillEventPublisher skillEventPublisher
+
+    @Autowired
+    MetricsLogger metricsLogger
+
+    @Autowired
+    SkillEventsTransactionalService skillEventsTransactionalService
+
     @Profile
     BulkSkillEventResult bulkReportSkills(String projectId, String skillId, List<String> userIds, Date incomingSkillDate) {
-        BulkSkillEventResult bulkResult = new BulkSkillEventResult(projectId: projectId, skillId: skillId)
+        // collect userIds outside of the DB transaction
+        List<String> requestedUserIds = []
+        List<String> userIdsErrored = []
         for (String requestedUserId : userIds) {
             try {
-                String userId = userInfoService.getUserName(requestedUserId, false)
-                SkillEventResult result = skillsManagementFacade.reportSkill(projectId, skillId, userId, false, incomingSkillDate)
-                if (!bulkResult.name) { bulkResult.name = result.name }
-                if (result.skillApplied) {
-                    bulkResult.userIdsAppliedCount++
-                } else {
-                    bulkResult.userIdsNotAppliedCount++
-                }
-            } catch(Exception e) {
-                bulkResult.userIdsErrored += requestedUserId
+                requestedUserIds += userInfoService.getUserName(requestedUserId, false)
+            } catch (Exception e) {
+                log.warn("Error reporting skillId [${projectId}], [${skillId}] for user [${requestedUserId}]: [${e.message}]")
+                userIdsErrored += requestedUserId
             }
         }
+        // report all skills as a single transaction
+        Map<String, SkillEventResult> results = bulkReportSkillsInternal(projectId, skillId, requestedUserIds, incomingSkillDate)
+
+        // perform notification and metrics logging
+        performBulkReportSkillNotifications(results)
+
+        BulkSkillEventResult bulkResult = new BulkSkillEventResult(
+                projectId: projectId,
+                skillId: skillId,
+                name: results.values().first().name,
+                userIdsAppliedCount: results.values().count { it.skillApplied },
+                userIdsNotAppliedCount: results.values().count { !it.skillApplied },
+                userIdsErrored: userIdsErrored,
+        )
+
+        log.debug("Completed bulk skill report [${bulkResult}]")
         return bulkResult
+    }
+
+    @Profile
+    @Transactional
+    Map<String, SkillEventResult> bulkReportSkillsInternal(String projectId, String skillId, List<String> userIds, Date incomingSkillDate) {
+        Map<String, SkillEventResult> results = [:]
+        for (String userId : userIds) {
+            SkillEventResult result = skillEventsTransactionalService.reportSkillInternal(projectId, skillId, userId, incomingSkillDate)
+            results.put(userId, result)
+        }
+        return results
     }
 
     @Transactional
@@ -131,6 +161,23 @@ class SkillEventAdminService {
 
         return res
     }
+
+    @Profile
+    private void performBulkReportSkillNotifications(Map<String, SkillEventResult> results) {
+        results.each { String userId, SkillEventResult result ->
+            if (result.skillApplied) {
+                skillEventPublisher.publishSkillUpdate(result, userId)
+            }
+            metricsLogger.log([
+                    'skillId'        : result.skillId,
+                    'projectId'      : result.projectId,
+                    'requestedUserId': userId,
+                    'selfReported'   : StringUtils.isNotEmpty(result.selfReportType).toString(),
+                    'selfReportType' : result.selfReportType,
+            ])
+        }
+    }
+
 
     private void deleteProjectLevelIfNecessary(String projectId, String userId, int numberOfExistingEvents) {
         List<UserAchievement> projAchievements = achievedLevelRepo.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, null)

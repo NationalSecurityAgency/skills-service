@@ -1044,7 +1044,6 @@ class AdminController {
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
-    @Profile
     BulkSkillEventResult addSkills(@PathVariable("projectId") String projectId,
                                    @PathVariable("skillId") String skillId,
                                    @RequestBody(required = true) BulkSkillEventRequest bulkSkillEventRequest) {
