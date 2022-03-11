@@ -18,6 +18,7 @@ package skills.intTests.catalog
 import groovy.json.JsonOutput
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import skills.storage.model.SkillDef
 import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
@@ -428,6 +429,64 @@ class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
         then:
         skill1.totalPoints == 33 * 2
         skill2.totalPoints == 11 * 2
+    }
+
+    def "change points on imported self report skill"(){
+        def proj1 = SkillsFactory.createProject(1)
+        def proj2 = SkillsFactory.createProject(2)
+        def subj1 = SkillsFactory.createSubject(1, 1)
+        def subj2 = SkillsFactory.createSubject(2, 2)
+        def skills1 = SkillsFactory.createSkills(10, 1, 1)
+        def skills2 = SkillsFactory.createSkillsStartingAt(10, 11, 2, 2)
+
+        skills2.eachWithIndex { skill, index ->
+            if (index % 2 == 0) {
+                skill.selfReportingType = SkillDef.SelfReportingType.Approval
+            } else {
+                skill.selfReportingType = SkillDef.SelfReportingType.HonorSystem
+            }
+        }
+
+        skillsService.createProject(proj1)
+        skillsService.createProject(proj2)
+        skillsService.createSubject(subj1)
+        skillsService.createSubject(subj2)
+        skillsService.createSkills(skills1)
+        skillsService.createSkills(skills2)
+
+        skills2.each {
+            skillsService.exportSkillToCatalog(proj2.projectId, it.skillId)
+        }
+
+        skillsService.importSkillFromCatalog(proj1.projectId, subj1.subjectId, proj2.projectId, skills2[0].skillId)
+        skillsService.importSkillFromCatalog(proj1.projectId, subj1.subjectId, proj2.projectId, skills2[1].skillId)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        when:
+        Map sellfReport1 = new HashMap<>(skills2[0])
+        sellfReport1.projectId = proj1.projectId
+        sellfReport1.subjectId = subj1.subjectId
+        skillsService.updateImportedSkill(proj1.projectId, sellfReport1.skillId, 33)
+        def skill1 = skillsService.getSkill(sellfReport1)
+
+        Map sellfReport2 = new HashMap<>(skills2[1])
+        sellfReport2.projectId = proj1.projectId
+        sellfReport2.subjectId = subj1.subjectId
+        skillsService.updateImportedSkill(proj1.projectId, sellfReport2.skillId, 34)
+        def skill3 = skillsService.getSkill(sellfReport2)
+
+        skillsService.finalizeSkillsImportFromCatalog(proj1.projectId)
+        skillsService.updateImportedSkill(proj1.projectId, sellfReport1.skillId, 11)
+        def skill2 = skillsService.getSkill(sellfReport1)
+
+        skillsService.updateImportedSkill(proj1.projectId, sellfReport2.skillId, 12)
+        def skill4 = skillsService.getSkill(sellfReport2)
+
+        then:
+        skill1.totalPoints == 33
+        skill2.totalPoints == 11
+        skill3.totalPoints == 34
+        skill4.totalPoints == 12
     }
 
     def 'only points can be changed for an imported skill'() {

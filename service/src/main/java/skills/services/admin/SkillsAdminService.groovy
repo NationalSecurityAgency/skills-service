@@ -409,7 +409,7 @@ class SkillsAdminService {
                             (skillRequest.version == skillDefinition.version) &&
                             (!skillRequest.description || skillRequest.description == skillDefinition.description) &&
                             (!skillRequest.helpUrl || skillRequest.helpUrl == skillDefinition.helpUrl) &&
-                            (!skillRequest.selfReportingType || skillRequest.selfReportingType == skillDefinition.selfReportingType) &&
+                            (!skillRequest.selfReportingType || skillRequest.selfReportingType == skillDefinition.selfReportingType?.toString()) &&
                             (skillRequest.enabled == skillDefinition.enabled)
             if (!isAllowed) {
                 throw new SkillException("Skill with id [${skillRequest.skillId}] has been imported from the Global Catalog and only pointIncrement can be altered", skillRequest.projectId, skillRequest.skillId, ErrorCode.ReadOnlySkill)
