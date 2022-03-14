@@ -22,14 +22,19 @@ import static skills.intTests.utils.SkillsFactory.*
 
 class CatalogIntSpec extends DefaultIntSpec {
 
-    protected createProjWithCatalogSkills ( Integer projNum ) {
+    protected createProjWithCatalogSkills ( Integer projNum, int numPerformToCompletion = 2, boolean disabledTimeWindow = false) {
         def proj = createProject(projNum)
         def subj1 = createSubject(projNum, 1)
         def subj2 = createSubject(projNum, 2)
         def subj3 = createSubject(projNum, 3)
-        def subj1_skills = (1..3).collect {createSkill(projNum, 1, projNum * 10 + it, 0,2, 480, 100) }
-        def subj2_skills = (1..3).collect {createSkill(projNum, 2, projNum * 10 + it + 3, 0, 2, 480, 100) }
-        def subj3_skills = (1..3).collect {createSkill(projNum, 3, projNum * 10 + it + 6, 0, 2, 480, 100) }
+        def subj1_skills = (1..3).collect {createSkill(projNum, 1, projNum * 10 + it, 0,numPerformToCompletion, 480, 100) }
+        def subj2_skills = (1..3).collect {createSkill(projNum, 2, projNum * 10 + it + 3, 0, numPerformToCompletion, 480, 100) }
+        def subj3_skills = (1..3).collect {createSkill(projNum, 3, projNum * 10 + it + 6, 0, numPerformToCompletion, 480, 100) }
+        if (disabledTimeWindow) {
+            subj1_skills.each { it.pointIncrementInterval = 0 }
+            subj2_skills.each { it.pointIncrementInterval = 0 }
+            subj3_skills.each { it.pointIncrementInterval = 0 }
+        }
         skillsService.createProject(proj)
         skillsService.createSubject(subj1)
         skillsService.createSubject(subj2)

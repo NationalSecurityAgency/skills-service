@@ -115,9 +115,6 @@ class SkillsAdminService {
     @Autowired
     ProjDefRepo projDefRepo
 
-    @Autowired
-    TaskSchedulerService taskSchedulerService
-
     @Transactional
     void syncSkillPointsForSkillsGroup(String projectId,
                                        String subjectId,
@@ -157,8 +154,15 @@ class SkillsAdminService {
         }
     }
 
+    protected static class SaveSkillTmpRes {
+        boolean isAvailableInCatalog = false
+        String projectId
+        String skillId
+        Integer skillRefId
+    }
+
     @Transactional()
-    void saveSkill(String originalSkillId, SkillRequest skillRequest, boolean performCustomValidation=true, String groupId=null) {
+    SaveSkillTmpRes saveSkill(String originalSkillId, SkillRequest skillRequest, boolean performCustomValidation=true, String groupId=null) {
         lockingService.lockProject(skillRequest.projectId)
 
         validateSkillVersion(skillRequest)
@@ -361,6 +365,7 @@ class SkillsAdminService {
             ruleSetDefinitionScoreUpdater.updateFromLeaf(savedSkill)
         }
 
+        SaveSkillTmpRes saveSkillTmpRes = new SaveSkillTmpRes(projectId: savedSkill.projectId, skillId: savedSkill.skillId, skillRefId: savedSkill.id)
         if (isEdit) {
             if (isEnabledSkillInRequest) {
                 updatePointsAndAchievements(
@@ -374,12 +379,11 @@ class SkillsAdminService {
                         groupChildSkills
                 )
             }
-            if (skillCatalogService.isAvailableInCatalog(savedSkill.projectId, savedSkill.skillId)) {
-                taskSchedulerService.scheduleCatalogSkillUpdate(savedSkill.projectId, savedSkill.skillId, savedSkill.id)
-            }
+            saveSkillTmpRes.isAvailableInCatalog = skillCatalogService.isAvailableInCatalog(savedSkill.projectId, savedSkill.skillId)
         }
 
         log.debug("Saved [{}]", savedSkill)
+        return saveSkillTmpRes
     }
 
     /**
@@ -419,18 +423,21 @@ class SkillsAdminService {
 
     private void updatePointsAndAchievements(SkillDef savedSkill, String subjectId, int pointIncrementDelta, int occurrencesDelta, int currentOccurrences, int numSkillsRequiredDelta, SkillDef skillsGroupSkillDef, List<SkillDef> groupChildSkills) {
         if (savedSkill.type != SkillDef.ContainerType.SkillsGroup) {
+
+            int newOccurrences = savedSkill.totalPoints / savedSkill.pointIncrement
+
             // order is CRITICAL HERE
             // must update point increment first then deal with changes in the occurrences;
             // changes in the occurrences will use the newly updated point increment
-            if (pointIncrementDelta != 0) {
-                userPointsManagement.handlePointIncrementUpdate(savedSkill.projectId, subjectId, savedSkill.skillId, pointIncrementDelta)
-            }
-            int newOccurrences = savedSkill.totalPoints / savedSkill.pointIncrement
-            if (occurrencesDelta < 0) {
+            if (pointIncrementDelta != 0 && occurrencesDelta >= 0) {
+//                userPointsManagement.handlePointIncrementUpdate(savedSkill.projectId, subjectId, savedSkill.skillId, pointIncrementDelta)
+                userPointsManagement.adjustUserPointsAfterModification(savedSkill)
+            } else if (occurrencesDelta < 0) {
                 // order is CRITICAL HERE
-                // Must update points prior removal of UserPerformedSkill events as the removal relies on the existence of those extra events
-                userPointsManagement.updatePointsWhenOccurrencesAreDecreased(savedSkill.projectId, subjectId, savedSkill.skillId, savedSkill.pointIncrement, newOccurrences)
+                // Must remove UserPerformedSkill events before updating points
                 userPointsManagement.removeExtraEntriesOfUserPerformedSkillByUser(savedSkill.projectId, savedSkill.skillId, currentOccurrences + occurrencesDelta)
+//                userPointsManagement.updatePointsWhenOccurrencesAreDecreased(savedSkill.projectId, subjectId, savedSkill.skillId, savedSkill.pointIncrement, newOccurrences, currentOccurrences)
+                userPointsManagement.adjustUserPointsAfterModification(savedSkill)
                 //identify what badge (or badges) this skill belongs to.
                 //if any, look for users who qualify for the badge now after this change is persisted See BadgeAdminService.identifyUsersMeetingBadgeRequirements
                 userPointsManagement.insertUserAchievementWhenDecreaseOfOccurrencesCausesUsersToAchieve(savedSkill.projectId, savedSkill.skillId, savedSkill.id, newOccurrences)

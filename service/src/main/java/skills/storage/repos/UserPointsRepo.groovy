@@ -574,4 +574,213 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 AND points.project_id = :projectId''', nativeQuery=true)
     void updatePointHistoryForSkill(@Param("projectId") String projectId, @Param("skillId") String skillId, @Param("incrementDelta") int incrementDelta)
 
+    @Modifying
+    @Query(value = '''
+            WITH skill AS (
+                select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id,
+                       point_increment as pointIncrement
+                from skill_definition
+                where project_id = :projectId and skill_id = :skillId
+            ),
+            userPoints AS (
+                SELECT ups.user_id, sum(skill.pointIncrement) as newPoints
+                FROM user_performed_skill ups, skill
+                where ups.skill_ref_id = skill.id
+                group by ups.user_id
+            )
+            UPDATE user_points
+            SET points = userPoints.newPoints
+            FROM userPoints
+            where userPoints.user_id = user_points.user_id and project_id = :projectId and skill_id = :skillId and day is null''', nativeQuery=true)
+    void updateUserPointsForASkill(@Param("projectId") String projectId, @Param("skillId") String skillId)
+
+
+    @Modifying
+    @Query(value = '''
+            WITH skills AS (
+                select case when child.copied_from_skill_ref is not null then child.copied_from_skill_ref else child.id end as id,
+                       child.point_increment as pointIncrement
+                from skill_definition parent,
+                     skill_relationship_definition rel,
+                     skill_definition child
+                where parent.project_id = :projectId
+                  and parent.skill_id = :skillId
+                  and rel.parent_ref_id = parent.id
+                  and rel.child_ref_id = child.id
+                  and rel.type in ('RuleSetDefinition', 'SkillsGroupRequirement')
+                  and child.type = 'Skill'
+                  and child.enabled = 'true'
+            ),
+            userPoints AS (
+                SELECT ups.user_id, sum(skills.pointIncrement) as newPoints
+                FROM user_performed_skill ups,
+                     skills
+                where ups.skill_ref_id = skills.id
+                group by ups.user_id
+            )
+            UPDATE user_points
+            SET points = userPoints.newPoints
+            FROM userPoints
+            where userPoints.user_id = user_points.user_id and project_id = :projectId and skill_id = :skillId and day is null''', nativeQuery=true)
+    void updateUserPointsForASubjectOrGroup(@Param("projectId") String projectId, @Param("skillId") String skillId)
+
+    @Modifying
+    @Query(value = '''
+            WITH skills AS (
+                select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id,
+                       point_increment as pointIncrement
+                from skill_definition child
+                where project_id = :projectId
+                  and type = 'Skill'
+                  and enabled = 'true'
+            ),
+            userPoints AS (
+                SELECT ups.user_id, sum(skills.pointIncrement) as newPoints
+                FROM user_performed_skill ups,
+                     skills
+                where ups.skill_ref_id = skills.id
+                group by ups.user_id
+            )
+            UPDATE user_points
+            SET points = userPoints.newPoints
+            FROM userPoints
+            where userPoints.user_id = user_points.user_id and project_id = :projectId and skill_id is null and day is null''', nativeQuery=true)
+    void updateUserPointsForAProject(@Param("projectId") String projectId)
+
+    @Modifying
+    @Query(value = '''
+              WITH skill AS (
+                    select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id,
+                           point_increment                                                                    as pointIncrement
+                    from skill_definition
+                    where project_id = :projectId
+                      and skill_id = :skillId
+                ),
+                points as (
+                    SELECT ups.user_id as userId, DATE(ups.performed_on) as pointsDay, sum(skill.pointIncrement) as newPoints
+                    FROM user_performed_skill ups,
+                         skill
+                    where ups.skill_ref_id = skill.id
+                    group by ups.user_id, DATE(ups.performed_on)
+                ),
+                userPointsRowsToRemove as (
+                    select up.id
+                    from user_points up
+                             left join points on (up.day = points.pointsDay and up.user_id = points.userId)
+                    where up.project_id = :projectId
+                      and up.skill_id = :skillId
+                      and up.day is not null
+                      and points.userId is null
+                ),
+                updateDateHistory as (
+                    update user_points up1 set points = points.newPoints
+                         from points
+                    where up1.user_id = points.userId
+                      and up1.day = points.pointsDay
+                      and up1.project_id = :projectId
+                      and up1.skill_id = :skillId
+                )
+                delete from user_points where id in (select id from userPointsRowsToRemove);''', nativeQuery=true)
+    void updateUserPointsHistoryForASkill(@Param("projectId") String projectId, @Param("skillId") String skillId)
+
+    @Modifying
+    @Query(value = '''
+              WITH skills AS (
+                select case when child.copied_from_skill_ref is not null then child.copied_from_skill_ref else child.id end as id,
+                       child.point_increment as pointIncrement
+                from skill_definition parent,
+                     skill_relationship_definition rel,
+                     skill_definition child
+                where parent.project_id = :projectId
+                  and parent.skill_id = :skillId
+                  and rel.parent_ref_id = parent.id
+                  and rel.child_ref_id = child.id
+                  and rel.type in ('RuleSetDefinition', 'SkillsGroupRequirement')
+                  and child.type = 'Skill'
+                  and child.enabled = 'true'
+            ),
+             userPoints as (
+                 SELECT ups.user_id as userId, DATE(ups.performed_on) as pointsDay, sum(skills.pointIncrement) as newPoints
+                 FROM user_performed_skill ups,
+                      skills
+                 where ups.skill_ref_id = skills.id
+                 group by ups.user_id, DATE(ups.performed_on)
+             )
+            UPDATE user_points up1
+            SET points = userPoints.newPoints
+            FROM userPoints
+            where userPoints.userId = up1.user_id
+              and day = userPoints.pointsDay
+              and project_id = :projectId
+              and skill_id = :skillId''', nativeQuery=true)
+    void updateUserPointsHistoryForSubjectOrGroup(@Param("projectId") String projectId, @Param("skillId") String skillId)
+
+    @Modifying
+    @Query(value = '''
+               WITH pointsToUpdate as (
+                    select up.user_id, up.day, sum(up.points) as newPoints
+                    from skill_definition sd,
+                    user_points up
+                    where sd.id = up.skill_ref_id
+                            and sd.project_id = :projectId
+                    and sd.type = 'Subject'
+                    and sd.enabled = 'true'
+                    group by up.user_id, up.day
+                ),
+                idsToRemove as (
+                     select up.id
+                     from user_points up
+                              left join pointsToUpdate on (
+                                  (up.day = pointsToUpdate.day) and up.user_id = pointsToUpdate.user_id)
+                     where up.project_id = :projectId
+                       and up.day is not null
+                       and pointsToUpdate.user_id is null
+                ),
+                removeUserPoints as (
+                    delete from user_points where id in (select id from idsToRemove)
+                )
+                update user_points up set points = pointsToUpdate.newPoints
+                        from pointsToUpdate
+                where up.user_id = pointsToUpdate.user_id
+                and (up.day = pointsToUpdate.day or (up.day is null and pointsToUpdate.day is null))
+                and up.project_id = :projectId and up.skill_id is null;''', nativeQuery=true)
+    void updateUserPointsHistoryForProject(@Param("projectId") String projectId)
+
+    @Modifying
+    @Query(value = '''
+             WITH pointsToUpdate as (
+                select up.user_id userId, up.day as pointsDay, sum(up.points) as newPoints
+                from skill_definition parent,
+                     skill_relationship_definition rel,
+                     skill_definition child,
+                     user_points up
+                where parent.project_id = :projectId
+                  and parent.skill_id = :skillId
+                  and rel.parent_ref_id = parent.id
+                  and rel.child_ref_id = child.id
+                  and rel.type in ('RuleSetDefinition', 'SkillsGroupRequirement')
+                  and child.type = 'Skill'
+                  and child.enabled = 'true'
+                  and child.id = up.skill_ref_id
+                group by up.user_id, up.day
+            ),
+            idsToRemove as (
+                 select up.id
+                 from user_points up
+                          left join pointsToUpdate on (
+                              (up.day = pointsToUpdate.pointsDay) and up.user_id = pointsToUpdate.userId)
+                 where up.project_id = :projectId
+                   and up.skill_id = :skillId
+                   and up.day is not null
+                   and pointsToUpdate.userId is null
+            ),
+            removeUserPoints as (
+                delete from user_points where id in (select id from idsToRemove)
+            )
+            update user_points up set points = pointsToUpdate.newPoints
+            from pointsToUpdate
+            where up.user_id = pointsToUpdate.userId
+              and (up.day = pointsToUpdate.pointsDay or (up.day is null and pointsToUpdate.pointsDay is null))
+              and up.project_id = :projectId and up.skill_id = :skillId''', nativeQuery=true)
+    void updateSubjectOrGroupUserPoints(@Param("projectId") String projectId, @Param("skillId") String skillId)
 }

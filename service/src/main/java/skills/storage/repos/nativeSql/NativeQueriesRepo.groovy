@@ -33,7 +33,7 @@ interface NativeQueriesRepo {
 
     void updatePointHistoryForSkill(String projectId, String subjectId, String skillId, int incrementDelta)
 
-    void updatePointTotalWhenOccurrencesAreDecreased(String projectId, String subjectId, String skillId, int pointIncrement, int numOccurrences)
+    void updatePointTotalWhenOccurrencesAreDecreased(String projectId, String subjectId, String skillId, int pointIncrement, int newOccurrences, int previousOccurrences)
 
     void updatePointHistoryWhenOccurrencesAreDecreased(String projectId, String subjectId, String skillId, int pointIncrement, int numOccurrences)
 

@@ -333,6 +333,79 @@ class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
         res3.numSkillsToFinalize == 0
     }
 
+    def "retrieve finalization info for multiple projects"() {
+        def project1 = createProjWithCatalogSkills(1)
+        def project2 = createProjWithCatalogSkills(2)
+        def project3 = createProjWithCatalogSkills(3)
+
+        // group disabled skills do not contribute to the counts
+        def skillsGroup = SkillsFactory.createSkillsGroup(2, 1, 25)
+        skillsService.createSkill(skillsGroup)
+        skillsService.assignSkillToSkillsGroup(skillsGroup.skillId, createSkill(2, 1, 26))
+
+        when:
+        def p1res0 = skillsService.getCatalogFinalizeInfo(project1.p.projectId)
+        def p2res0 = skillsService.getCatalogFinalizeInfo(project2.p.projectId)
+        def p3res0 = skillsService.getCatalogFinalizeInfo(project3.p.projectId)
+
+        skillsService.importSkillFromCatalog(project2.p.projectId, project1.s2.subjectId, project1.p.projectId, project1.s1_skills[0].skillId)
+        def p1res1 = skillsService.getCatalogFinalizeInfo(project1.p.projectId)
+        def p2res1 = skillsService.getCatalogFinalizeInfo(project2.p.projectId)
+        def p3res1 = skillsService.getCatalogFinalizeInfo(project3.p.projectId)
+
+        skillsService.importSkillFromCatalog(project2.p.projectId, project1.s2.subjectId, project1.p.projectId, project1.s1_skills[1].skillId)
+        skillsService.importSkillFromCatalog(project3.p.projectId, project3.s1.subjectId, project1.p.projectId, project1.s1_skills[1].skillId)
+        def p1res2 = skillsService.getCatalogFinalizeInfo(project1.p.projectId)
+        def p2res2 = skillsService.getCatalogFinalizeInfo(project2.p.projectId)
+        def p3res2 = skillsService.getCatalogFinalizeInfo(project3.p.projectId)
+
+        skillsService.finalizeSkillsImportFromCatalog(project2.p.projectId, false)
+        def p1res3 = skillsService.getCatalogFinalizeInfo(project1.p.projectId)
+        def p2res3 = skillsService.getCatalogFinalizeInfo(project2.p.projectId)
+        def p3res3 = skillsService.getCatalogFinalizeInfo(project3.p.projectId)
+
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        def p1res4 = skillsService.getCatalogFinalizeInfo(project1.p.projectId)
+        def p2res4 = skillsService.getCatalogFinalizeInfo(project2.p.projectId)
+        def p3res4 = skillsService.getCatalogFinalizeInfo(project3.p.projectId)
+
+        then:
+        p1res0.numSkillsToFinalize == 0
+        p1res0.isRunning == false
+        p2res0.numSkillsToFinalize == 0
+        p2res0.isRunning == false
+        p3res0.numSkillsToFinalize == 0
+        p3res0.isRunning == false
+
+        p1res1.numSkillsToFinalize == 0
+        p1res1.isRunning == false
+        p2res1.numSkillsToFinalize == 1
+        p2res1.isRunning == false
+        p3res1.numSkillsToFinalize == 0
+        p3res1.isRunning == false
+
+        p1res2.numSkillsToFinalize == 0
+        p1res2.isRunning == false
+        p2res2.numSkillsToFinalize == 2
+        p2res2.isRunning == false
+        p3res2.numSkillsToFinalize == 1
+        p3res2.isRunning == false
+
+        p1res3.numSkillsToFinalize == 0
+        p1res3.isRunning == false
+        p2res3.numSkillsToFinalize == 2
+        p2res3.isRunning == true
+        p3res3.numSkillsToFinalize == 1
+        p3res3.isRunning == false
+
+        p1res4.numSkillsToFinalize == 0
+        p1res4.isRunning == false
+        p2res4.numSkillsToFinalize == 0
+        p2res4.isRunning == false
+        p3res4.numSkillsToFinalize == 1
+        p3res4.isRunning == false
+    }
+
     def "cannot import while finalizing"() {
         def project1 = createProjWithCatalogSkills(1)
         def project2 = createProjWithCatalogSkills(2)

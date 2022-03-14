@@ -247,7 +247,7 @@ class H2NativeRepo implements NativeQueriesRepo {
     }
 
     @Override
-    void updatePointTotalWhenOccurrencesAreDecreased(String projectId, String subjectId, String skillId, int pointIncrement, int numOccurrences) {
+    void updatePointTotalWhenOccurrencesAreDecreased(String projectId, String subjectId, String skillId, int pointIncrement, int newOccurrences, int numOccurrences) {
         List<PerformedSkillEventCount> eventCounts = getGroupedEventCountsByUserId(projectId, skillId)
         List<PerformedSkillEventCount> eventsCountsToEdit = eventCounts.findAll({ it.eventCount > numOccurrences })
 

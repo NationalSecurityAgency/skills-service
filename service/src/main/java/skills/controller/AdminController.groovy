@@ -86,6 +86,9 @@ class AdminController {
     SkillsAdminService skillsAdminService
 
     @Autowired
+    SaveSkillService saveSkillService
+
+    @Autowired
     SkillsGroupAdminService skillsGroupAdminService
 
     @Autowired
@@ -510,7 +513,7 @@ class AdminController {
             skillRequest.enabled = skillRequest.enabled  == null ? "true" : skillRequest.enabled
         }
 
-        skillsAdminService.saveSkill(skillId, skillRequest, true, groupId)
+        saveSkillService.saveSkillAndSchedulePropagationToImportedSkills(skillId, skillRequest, true, groupId)
     }
 
     @GetMapping(value = '/projects/{projectId}/latestVersion', produces = 'application/json')

@@ -207,7 +207,7 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
 
 
     @Override
-    void updatePointTotalWhenOccurrencesAreDecreased(String projectId, String subjectId, String skillId, int pointIncrement, int numOccurrences) {
+    void updatePointTotalWhenOccurrencesAreDecreased(String projectId, String subjectId, String skillId, int pointIncrement, int newOccurrences, int previousOccurrences) {
         subjectId = subjectId ?: '';
         String q = '''
             WITH
@@ -222,13 +222,13 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
                         FROM user_performed_skill
                         where project_id = :projectId and skill_id = :skillId
                     ) rank_filter
-                    WHERE RANK > :numOccurrences
+                    WHERE RANK >= :newOccurrences
                     group by user_id
                 )
             UPDATE 
                 user_points points
             SET 
-                points = points - (eventsRes.eventCount * :pointIncrement) 
+                points = points - :pointsDelta 
             FROM
                 eventsRes
             WHERE
@@ -241,8 +241,8 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
         query.setParameter("projectId", projectId);
         query.setParameter("skillId", skillId)
         query.setParameter("subjectId", subjectId)
-        query.setParameter("numOccurrences", numOccurrences)
-        query.setParameter("pointIncrement", pointIncrement)
+        query.setParameter("newOccurrences", newOccurrences)
+        query.setParameter("pointsDelta", (previousOccurrences - newOccurrences) * pointIncrement)
         query.executeUpdate()
     }
 

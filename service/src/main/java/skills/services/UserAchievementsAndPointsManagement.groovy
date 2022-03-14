@@ -24,6 +24,7 @@ import skills.controller.result.model.SettingsResult
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillRelDef
 import skills.storage.repos.*
 import skills.storage.repos.nativeSql.NativeQueriesRepo
 
@@ -92,13 +93,34 @@ class UserAchievementsAndPointsManagement {
         nativeQueriesRepo.updatePointTotalsForSkill(projectId, subjectId, skillId, incrementDelta)
     }
 
-    @Transactional
-    void updatePointsWhenOccurrencesAreDecreased(String projectId, String subjectId, String skillId, int pointIncrement, int numOccurrences){
-        if (log.isDebugEnabled()){
-            log.debug("Update points as occurrences were decreased. projectId=[${projectId}], subjectId=[${subjectId}], skillId=[${skillId}], pointIncrement=[${pointIncrement}], numOccurrences=[$numOccurrences]")
+    void adjustUserPointsAfterModification(SkillDef skill) {
+        log.info("Updating all UserPoints for [{}]-[{}]", skill.projectId, skill.skillId)
+        userPointsRepo.updateUserPointsForASkill(skill.projectId, skill.skillId)
+        userPointsRepo.updateUserPointsHistoryForASkill(skill.projectId, skill.skillId)
+
+        List<SkillDef> parents = skillRelDefRepo.findParentByChildIdAndTypes(skill.id, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
+        while (parents) {
+            assert parents.size() == 1
+            SkillDef parent = parents.first()
+            log.info("Updating parent's UserPoints for [{}]-[{}]", parent.projectId, parent.skillId)
+//            userPointsRepo.updateUserPointsForASubjectOrGroup(parent.projectId, parent.skillId)
+//            userPointsRepo.updateUserPointsHistoryForSubjectOrGroup(parent.projectId, parent.skillId)
+            userPointsRepo.updateSubjectOrGroupUserPoints(parent.projectId, parent.skillId)
+            parents = skillRelDefRepo.findParentByChildIdAndTypes(parent.id, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
         }
-        nativeQueriesRepo.updatePointTotalWhenOccurrencesAreDecreased(projectId, subjectId, skillId, pointIncrement, numOccurrences)
-        nativeQueriesRepo.updatePointHistoryWhenOccurrencesAreDecreased(projectId, subjectId, skillId, pointIncrement, numOccurrences)
+
+        log.info("Updating project's UserPoints for [{}]", skill.projectId)
+//        userPointsRepo.updateUserPointsForAProject(skill.projectId)
+        userPointsRepo.updateUserPointsHistoryForProject(skill.projectId)
+    }
+
+    @Transactional
+    void updatePointsWhenOccurrencesAreDecreased(String projectId, String subjectId, String skillId, int pointIncrement, int newOccurrences, int previousOccurrences){
+        if (log.isDebugEnabled()){
+            log.debug("Update points as occurrences were decreased. projectId=[${projectId}], subjectId=[${subjectId}], skillId=[${skillId}], pointIncrement=[${pointIncrement}], newOccurrences=[$numOccurrences], previousOccurrences=[${previousOccurrences}]")
+        }
+        nativeQueriesRepo.updatePointTotalWhenOccurrencesAreDecreased(projectId, subjectId, skillId, pointIncrement, newOccurrences, previousOccurrences)
+        nativeQueriesRepo.updatePointHistoryWhenOccurrencesAreDecreased(projectId, subjectId, skillId, pointIncrement, newOccurrences)
     }
 
     @Transactional
