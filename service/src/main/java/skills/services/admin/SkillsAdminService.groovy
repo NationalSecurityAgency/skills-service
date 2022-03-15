@@ -432,7 +432,9 @@ class SkillsAdminService {
             if (pointIncrementDelta != 0 && occurrencesDelta >= 0) {
 //                userPointsManagement.handlePointIncrementUpdate(savedSkill.projectId, subjectId, savedSkill.skillId, pointIncrementDelta)
                 userPointsManagement.adjustUserPointsAfterModification(savedSkill)
-            } else if (occurrencesDelta < 0) {
+            }
+
+            if (occurrencesDelta < 0) {
                 // order is CRITICAL HERE
                 // Must remove UserPerformedSkill events before updating points
                 userPointsManagement.removeExtraEntriesOfUserPerformedSkillByUser(savedSkill.projectId, savedSkill.skillId, currentOccurrences + occurrencesDelta)
