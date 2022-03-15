@@ -34,12 +34,16 @@ class TomcatConfig implements WebServerFactoryCustomizer<TomcatServletWebServerF
     @Value('#{"${server.tomcat.accesslog.enabled:false}"}')
     boolean enabledAccessLog
 
-    @Value('#{"${skills.config.sameSiteNoneEnabled:true}"}')
-    boolean sameSiteNoneEnabled
+    // this will force the SameSite=None attribute to be present on the Set-Cookie header.
+    // Note that the SameSite=None attribute also requires the Secure attribute to be present
+    // setting the property to true is useful when running the skills-service spring boot
+    // container in http mode (`server.ssl.enabled=false`) but running behind a https proxy
+    @Value('#{"${skills.config.forceSameSiteNoneCookie:false}"}')
+    boolean forceSameSiteNoneCookie
 
     @Override
     void customize(TomcatServletWebServerFactory factory) {
-        if (sameSiteNoneEnabled) {
+        if (forceSameSiteNoneCookie) {
             factory.addContextCustomizers(new TomcatContextCustomizer() {
                 @Override
                 void customize(org.apache.catalina.Context context) {
