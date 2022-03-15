@@ -41,6 +41,7 @@ import skills.storage.repos.SkillEventsSupportRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPerformedSkillRepo
 import skills.storage.repos.UserPointsRepo
+import skills.tasks.TaskSchedulerService
 import skills.utils.MetricsLogger
 
 import static skills.services.events.CompletionItem.CompletionItemType
@@ -112,6 +113,10 @@ class SkillEventsTransactionalService {
     @Autowired
     QueuedSkillUpdateRepo queuedSkillUpdateRepo
 
+    @Autowired
+    TaskSchedulerService taskSchedulerService
+
+
     @Transactional
     void notifyUserOfAchievements(String userId){
         try {
@@ -177,10 +182,14 @@ class SkillEventsTransactionalService {
         SkillDate skillDate = new SkillDate(date: incomingSkillDateParam ?: new Date(), isProvided: incomingSkillDateParam != null)
 
         SkillDefMin skillDefinition = getSkillDef(userId, projectId, skillId)
-        final boolean isCatalogSkill = skillCatalogService.isAvailableInCatalog(skillDefinition.projectId, skillDefinition.skillId)
         if (Boolean.valueOf(skillDefinition.readOnly) && !skillDefinition.selfReportingType) {
             throw new SkillException("Skills imported from the catalog can only be reported if the original skill is configured for Self Reporting", projectId, skillId, ErrorCode.ReadOnlySkill)
         }
+        if (skillDefinition.selfReportingType && skillDefinition.copiedFromProjectId) {
+            projectId = skillDefinition.copiedFromProjectId
+            skillDefinition = getSkillDef(userId, projectId, skillId)
+        }
+        final boolean isCatalogSkill = skillCatalogService.isAvailableInCatalog(skillDefinition.projectId, skillDefinition.skillId)
 
         SkillEventResult res = new SkillEventResult(projectId: projectId, skillId: skillId, name: skillDefinition.name, selfReportType: skillDefinition.getSelfReportingType()?.toString())
 
@@ -232,41 +241,33 @@ class SkillEventsTransactionalService {
             return res
         }
 
-        // capture res for the reported skillDefinition but perform this loop
-        // for each copy including og if in catalog
-        Closure<SkillEventResult> recordSkillOccurrence = { SkillDefMin sd,  SkillEventResult r ->
-            UserPerformedSkill performedSkill = new UserPerformedSkill(userId: userId, skillId: skillId, projectId: sd.projectId, performedOn: skillDate.date, skillRefId: sd.id)
-            savePerformedSkill(performedSkill)
+        UserPerformedSkill performedSkill = new UserPerformedSkill(userId: userId,
+                skillId: skillId, projectId: skillDefinition.projectId,
+                performedOn: skillDate.date, skillRefId: skillDefinition.id)
+        savePerformedSkill(performedSkill)
 
-            r.pointsEarned = skillDefinition.pointIncrement
+        res.pointsEarned = skillDefinition.pointIncrement
 
-            List<CompletionItem> achievements = pointsAndAchievementsHandler.updatePointsAndAchievements(userId, sd, skillDate)
-            if (achievements) {
-                r.completed.addAll(achievements)
-            }
-
-            boolean requestedSkillCompleted = hasReachedMaxPoints(numExistingSkills + 1, sd)
-            if (requestedSkillCompleted) {
-                documentSkillAchieved(userId, numExistingSkills, sd, res, skillDate)
-                achievedBadgeHandler.checkForBadges(res, userId, sd, skillDate)
-                achievedSkillsGroupHandler.checkForSkillsGroup(res, userId, sd, skillDate)
-            }
-
-            // if requestedSkillCompleted OR overall level achieved, then need to check for global badges
-            boolean overallLevelAchieved = r.completed.find { it.level != null && it.type == CompletionItemType.Overall }
-            if (requestedSkillCompleted || overallLevelAchieved) {
-                achievedGlobalBadgeHandler.checkForGlobalBadges(r, userId, sd.projectId, sd)
-            }
-            return r
+        List<CompletionItem> achievements = pointsAndAchievementsHandler.updatePointsAndAchievements(userId, skillDefinition, skillDate)
+        if (achievements) {
+            res.completed.addAll(achievements)
         }
 
-        res = recordSkillOccurrence(skillDefinition, res)
-        //now do it for each of the skills if in catalog or from catalog
-        if (isCatalogSkill || skillDefinition.copiedFrom != null) {
-            def relatedSkills = skillCatalogService.getRelatedSkills(skillDefinition)
-            relatedSkills?.each {
-                recordSkillOccurrence(it, new SkillEventResult())
-            }
+        boolean requestedSkillCompleted = hasReachedMaxPoints(numExistingSkills + 1, skillDefinition)
+        if (requestedSkillCompleted) {
+            pointsAndAchievementsHandler.documentSkillAchieved(userId, skillDefinition, res, skillDate)
+            achievedBadgeHandler.checkForBadges(res, userId, skillDefinition, skillDate)
+            achievedSkillsGroupHandler.checkForSkillsGroup(res, userId, skillDefinition, skillDate)
+        }
+
+        // if requestedSkillCompleted OR overall level achieved, then need to check for global badges
+        boolean overallLevelAchieved = res.completed.find { it.level != null && it.type == CompletionItemType.Overall }
+        if (requestedSkillCompleted || overallLevelAchieved) {
+            achievedGlobalBadgeHandler.checkForGlobalBadges(res, userId, skillDefinition.projectId, skillDefinition)
+        }
+
+        if (isCatalogSkill) {
+            taskSchedulerService.scheduleImportedSkillAchievement(projectId, skillId, userId, skillDefinition.id, skillDate, requestedSkillCompleted)
         }
 
         return res
@@ -274,34 +275,7 @@ class SkillEventsTransactionalService {
 
     @Profile
     private void recordEvent(SkillDefMin skillDefinition, String userId, SkillDate skillDate, boolean isCatalogSkill=false) {
-        if (skillDefinition.getCopiedFrom() != null || isCatalogSkill) {
-            List<SkillDefMin> toBeRecorded = []
-            if (isCatalogSkill) {
-                List<SkillDefMin> copies = skillCatalogService.getSkillsCopiedFrom(skillDefinition.id)
-                if (copies) {
-                    toBeRecorded.addAll(copies)
-                }
-            } else {
-                //get og skill, record event for og and all copies except for skillDefinition
-                SkillDefMin og = skillDefRepo.findSkillDefMinById(skillDefinition.copiedFrom)
-                List<SkillDefMin> copies = skillCatalogService.getSkillsCopiedFrom(og.id)
-                toBeRecorded.add(og)
-                //not working
-                if (copies) {
-                    toBeRecorded.addAll(copies)
-                    toBeRecorded.removeIf { it.id == skillDefinition.id }
-                }
-            }
-            toBeRecorded?.each {
-                userEventService.recordEvent(it.projectId, it.id, userId, skillDate.date)
-            }
-        }
         userEventService.recordEvent(skillDefinition.projectId, skillDefinition.id, userId, skillDate.date)
-    }
-
-    @Profile
-    private void recordEvent(String projectId, Integer rawSkillDefId, String userId, SkillDate skillDate) {
-        userEventService.recordEvent(projectId, rawSkillDefId, userId, skillDate.date)
     }
 
     @Profile
@@ -366,27 +340,6 @@ class SkillEventsTransactionalService {
                     .projectId(projectId).skillId(skillId).userId(userId).build()
         }
         return skillDefinition
-    }
-
-    @Profile
-    private void documentSkillAchieved(String userId, long numExistingSkills, SkillDefMin skillDefinition, SkillEventResult res, SkillDate skillDate) {
-        Date achievedOn = getAchievedOnDate(userId, skillDefinition, skillDate)
-        UserAchievement skillAchieved = new UserAchievement(userId: userId.toLowerCase(), projectId: skillDefinition.projectId, skillId: skillDefinition.skillId, skillRefId: skillDefinition?.id,
-                pointsWhenAchieved: ((numExistingSkills.intValue() + 1) * skillDefinition.pointIncrement), achievedOn: achievedOn)
-        achievedLevelRepo.save(skillAchieved)
-        res.completed.add(new CompletionItem(type: CompletionItemType.Skill, id: skillDefinition.skillId, name: skillDefinition.name))
-    }
-
-    @Profile
-    private Date getAchievedOnDate(String userId, SkillDefMin skillDefinition, SkillDate skillDate) {
-        if (!skillDate.isProvided) {
-            return skillDate.date
-        }
-        Date achievedOn = skillEventsSupportRepo.getUserPerformedSkillLatestDate(userId.toLowerCase(), skillDefinition.projectId, skillDefinition.skillId)
-        if (!achievedOn || skillDate.date.after(achievedOn)) {
-            achievedOn = skillDate.date
-        }
-        return achievedOn
     }
 
     private boolean hasReachedMaxPoints(long numSkills, SkillDefMin skillDefinition) {

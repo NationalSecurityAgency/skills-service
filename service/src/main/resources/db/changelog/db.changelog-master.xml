@@ -1588,7 +1588,7 @@
 
     </changeSet>
 
-    <changeSet id="21" author="skills team">
+    <changeSet id="22" author="skills team">
         <createTable tableName="scheduled_tasks">
             <column name="task_name" type="${task_name_type}">
                 <constraints nullable="false"/>
@@ -1614,7 +1614,7 @@
         <addPrimaryKey tableName="scheduled_tasks" columnNames="task_name, task_instance"/>
     </changeSet>
 
-    <changeSet id="22" author="skills team">
+    <changeSet id="23" author="skills team">
         <sql dbms="postgresql">
             create index index_user_performed_skill_skill_id_like on user_performed_skill (lower(skill_id) varchar_pattern_ops);
             create index index_user_performed_skill_skill_id_lower on user_performed_skill (lower(skill_id));
