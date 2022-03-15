@@ -55,9 +55,6 @@ interface NativeQueriesRepo {
 
     void identifyAndAddProjectLevelAchievements(String projectId, boolean pointsBasedLevels);
 
-    void updateProjectUserPointsForAllUsers(String toProjectId)
-    void updateSubjectUserPointsForAllUsers(String toProjectId, String toSubjectId)
-
     void createOrUpdateUserEvent(String projectId, Integer skillRefId, String userId, Date start, String type, Integer count, Integer weekNumber)
 
     long countUsers(QueryUsersCriteria queryUsersCriteria)
@@ -68,7 +65,7 @@ interface NativeQueriesRepo {
 
     void updateUserPointsHistoryForASkill(String projectId, String skillId)
 
-    void updateSubjectOrGroupUserPoints(String projectId, String skillId)
+    void updateUserPointsForSubjectOrGroup(String projectId, String skillId)
 
     void updateUserPointsHistoryForProject(String projectId)
 }

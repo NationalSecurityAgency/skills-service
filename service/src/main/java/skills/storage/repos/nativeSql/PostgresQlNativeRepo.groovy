@@ -539,50 +539,6 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
     }
 
     @Override
-    void updateProjectUserPointsForAllUsers(String toProjectId) {
-        String SQL = '''UPDATE user_points
-            SET points = innerUp.points
-            from
-                (SELECT up.user_id, up.day, sum(points) as points, max(up.project_id) as project_id
-                FROM user_points up, skill_definition sd
-                WHERE
-                    up.project_id = :toProjectId and
-                    sd.project_id = :toProjectId and sd.id = up.skill_ref_id and sd.type = 'Skill'
-                group by up.user_id, up.day) innerUp
-             where (user_points.project_id = innerUP.project_id and user_points.user_id = innerUP.user_id and user_points.skill_id is null and (user_points.day=innerUP.day or (user_points.day is null and innerUP.day is null)))
-            '''
-        Query query = entityManager.createNativeQuery(SQL)
-        query.setParameter('toProjectId', toProjectId)
-
-        query.executeUpdate()
-    }
-
-    @Override
-    void updateSubjectUserPointsForAllUsers(String toProjectId, String toSubjectId){
-        String SQL = '''UPDATE user_points
-        SET points = innerUp.points
-        from
-            (SELECT up.user_id, up.day, sum(points) as points, max(up.project_id) as project_id, max(subject.skill_id) as skill_id, max(subject.id) as skill_ref_id
-             FROM user_points up, skill_definition subject, skill_relationship_definition srd, skill_definition sd
-             WHERE
-               up.project_id = :toProjectId
-               and subject.project_id = :toProjectId and subject.skill_id =  :toSubjectId
-               and subject.id = srd.parent_ref_id and sd.id = srd.child_ref_id and srd.type = 'RuleSetDefinition'
-               and sd.id = up.skill_ref_id
-             group by up.user_id, up.day) innerUp
-        where user_points.project_id = innerUP.project_id
-          and user_points.skill_id =  :toSubjectId
-          and user_points.user_id = innerUP.user_id
-          and (user_points.day=innerUP.day or (user_points.day is null and innerUP.day is null))
-            '''
-        Query query = entityManager.createNativeQuery(SQL)
-        query.setParameter('toProjectId', toProjectId)
-        query.setParameter('toSubjectId', toSubjectId)
-
-        query.executeUpdate()
-    }
-
-    @Override
     void identifyAndAddProjectLevelAchievements(String projectId, boolean pointsBasedLevels){
         String pointsRequiredFragment = '((CAST(percent AS FLOAT)/100)*project_score.totalPoints)'
         if (pointsBasedLevels) {
@@ -699,7 +655,7 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
     }
 
     @Override
-    void updateSubjectOrGroupUserPoints(String projectId, String skillId) {
+    void updateUserPointsForSubjectOrGroup(String projectId, String skillId) {
         userPointsRepo.updateSubjectOrGroupUserPoints(projectId, skillId)
     }
 

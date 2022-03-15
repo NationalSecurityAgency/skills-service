@@ -273,7 +273,6 @@ class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
                         [projectId: project1.projectId, skillId: p1Subj2Skills[5].skillId],
                 ])
         def skillsBefore = skillsService.getSkillsForSubject(project2.projectId, p2subj1.subjectId)
-        println JsonOutput.toJson(skillsBefore)
 
         skillsService.finalizeSkillsImportFromCatalog(project2.projectId)
 

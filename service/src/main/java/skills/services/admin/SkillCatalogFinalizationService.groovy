@@ -104,28 +104,32 @@ class SkillCatalogFinalizationService {
                     skillDefRepo.updateSubjectTotalPoints(projectId, it.skillId)
                 }
                 skillDefRepo.updateProjectsTotalPoints(projectId)
-
+                log.info("Updated totalPoints attribute for [{}] project", projectId)
 
                 List<Integer> skillRefIds = disabledImportedSkills.collect { it.copiedFrom }
 
-                userPointsRepo.copyUserPointsToTheImportedProjects(projectId, skillRefIds)
-                userPointsRepo.createProjectUserPointsForTheNewUsers(projectId)
-                nativeQueriesRepo.updateProjectUserPointsForAllUsers(projectId)
-
+                // 1. copy skill pints and achievements
+                userPointsRepo.copySkillUserPointsToTheImportedProjects(projectId, skillRefIds)
                 userAchievedLevelRepo.copySkillAchievementsToTheImportedProjects(projectId, skillRefIds)
+                log.info("Completed import of skill's points and achievements for [{}] skills to [{}] project", skillRefIds.size(), projectId)
 
                 SettingsResult settingsResult = settingsService.getProjectSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
                 boolean pointsBased = settingsResult ? settingsResult.isEnabled() : false
 
+                // 2. for each subject (1) create user points for new users (2) update existing (3) caluclate achievements
                 subjects.each { SkillDef subject ->
                     userPointsRepo.createSubjectUserPointsForTheNewUsers(projectId, subject.skillId)
-                    nativeQueriesRepo.updateSubjectUserPointsForAllUsers(projectId, subject.skillId)
+                    nativeQueriesRepo.updateUserPointsForSubjectOrGroup(projectId, subject.skillId)
 
                     nativeQueriesRepo.identifyAndAddSubjectLevelAchievements(subject.projectId, subject.skillId, pointsBased)
                     log.info("Completed import for subject. projectIdTo=[{}], subjectIdTo=[{}]", projectId, subject.skillId)
                 }
-                nativeQueriesRepo.identifyAndAddProjectLevelAchievements(projectId, pointsBased)
 
+                // 3. for the project (1) create user points for new users (2) update existing (3) caluclate achievements
+                userPointsRepo.createProjectUserPointsForTheNewUsers(projectId)
+                nativeQueriesRepo.updateUserPointsHistoryForProject(projectId)
+                nativeQueriesRepo.identifyAndAddProjectLevelAchievements(projectId, pointsBased)
+                log.info("Completed import of project's points and achievements for [{}] project", skillRefIds.size(), projectId)
             } else {
                 log.warn("Finalize was called for [{}] projectId but there were no disabled skills", projectId)
             }

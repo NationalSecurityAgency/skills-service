@@ -672,78 +672,6 @@ class H2NativeRepo implements NativeQueriesRepo {
     }
 
     @Override
-    void updateProjectUserPointsForAllUsers(String toProjectId) {
-        Query userPointsQuery = entityManager.createNativeQuery('''
-           SELECT up.user_id, up.day, sum(points) as points, max(up.project_id) as project_id
-                            FROM user_points up, skill_definition sd
-                            WHERE
-                                    up.project_id = :toProjectId and
-                                    sd.project_id = :toProjectId and sd.id = up.skill_ref_id and sd.type = 'Skill'
-                            group by up.user_id, up.day
-        ''')
-
-        userPointsQuery.setParameter("toProjectId", toProjectId)
-        List<Object> userTotalPointsByDay = userPointsQuery.getResultList()
-        userTotalPointsByDay?.each {
-            String userId = it[0]
-            Date day = it[1]
-            Number userPoints = it[2]
-
-            String updateSQl = "UPDATE user_points SET points = :points WHERE user_id = :userId " +
-                    "and project_id = :projectId " +
-                    "and skill_id is null " +
-                    "and day ${!day ? "is null" : " = :day"}"
-            Query updatePoints = entityManager.createNativeQuery(updateSQl)
-
-            updatePoints.setParameter("points", userPoints)
-            updatePoints.setParameter("userId", userId)
-            if (day) {
-                updatePoints.setParameter("day", day)
-            }
-            updatePoints.setParameter("projectId", toProjectId)
-            updatePoints.executeUpdate()
-        }
-    }
-
-    @Override
-    void updateSubjectUserPointsForAllUsers(String toProjectId, String toSubjectId){
-        Query userPointsQuery = entityManager.createNativeQuery('''
-           SELECT up.user_id, up.day, sum(points) as points, max(up.project_id) as project_id, max(subject.skill_id) as skill_id, max(subject.id) as skill_ref_id
-             FROM user_points up, skill_definition subject, skill_relationship_definition srd, skill_definition sd
-             WHERE
-               up.project_id = :toProjectId
-               and subject.project_id = :toProjectId and subject.skill_id =  :toSubjectId
-               and subject.id = srd.parent_ref_id and sd.id = srd.child_ref_id and srd.type = 'RuleSetDefinition'
-               and sd.id = up.skill_ref_id
-             group by up.user_id, up.day
-        ''')
-
-        userPointsQuery.setParameter("toProjectId", toProjectId)
-        userPointsQuery.setParameter("toSubjectId", toSubjectId)
-        List<Object> userTotalPointsByDay = userPointsQuery.getResultList()
-        userTotalPointsByDay?.each {
-            String userId = it[0]
-            Date day = it[1]
-            Number userPoints = it[2]
-
-            String updateSQl = "UPDATE user_points SET points = :points WHERE user_id = :userId " +
-                    "and project_id = :projectId " +
-                    "and skill_id = :subjectId " +
-                    "and day ${!day ? "is null" : " = :day"}"
-            Query updatePoints = entityManager.createNativeQuery(updateSQl)
-
-            updatePoints.setParameter("points", userPoints)
-            updatePoints.setParameter("userId", userId)
-            if (day) {
-                updatePoints.setParameter("day", day)
-            }
-            updatePoints.setParameter("projectId", toProjectId)
-            updatePoints.setParameter("subjectId", toSubjectId)
-            updatePoints.executeUpdate()
-        }
-    }
-
-    @Override
     void identifyAndAddProjectLevelAchievements(String projectId, boolean pointsBasedLevels) {
         Query projectScore = entityManager.createNativeQuery('''
             SELECT SUM(total_points) AS totalPoints 
@@ -926,7 +854,7 @@ class H2NativeRepo implements NativeQueriesRepo {
     }
 
     @Override
-    void updateSubjectOrGroupUserPoints(String projectId, String skillId) {
+    void updateUserPointsForSubjectOrGroup(String projectId, String skillId) {
         userPointsRepo.updateSubjectOrGroupUserPointsInH2(projectId, skillId)
         userPointsRepo.removeUserPointsThatDoNotExistForSubjectOrGroupInH2(projectId, skillId)
     }
