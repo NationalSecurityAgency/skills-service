@@ -64,5 +64,12 @@ interface NativeQueriesRepo {
 
     Stream<String> getUserIds(QueryUsersCriteria queryUsersCriteria)
 
+    void updateUserPointsForASkill(String projectId, String skillId)
+
+    void updateUserPointsHistoryForASkill(String projectId, String skillId)
+
+    void updateSubjectOrGroupUserPoints(String projectId, String skillId)
+
+    void updateUserPointsHistoryForProject(String projectId)
 }
 

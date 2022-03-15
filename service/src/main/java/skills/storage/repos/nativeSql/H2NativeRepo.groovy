@@ -16,12 +16,12 @@
 package skills.storage.repos.nativeSql
 
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Conditional
 import org.springframework.stereotype.Service
-import skills.controller.request.model.QueryUsersCriteriaRequest
-import skills.controller.request.model.SubjectLevelQueryRequest
 import skills.storage.model.QueryUsersCriteria
 import skills.storage.model.SkillDef
+import skills.storage.repos.UserPointsRepo
 
 import javax.persistence.EntityManager
 import javax.persistence.PersistenceContext
@@ -35,6 +35,9 @@ class H2NativeRepo implements NativeQueriesRepo {
 
     @PersistenceContext
     EntityManager entityManager;
+
+    @Autowired
+    UserPointsRepo userPointsRepo
 
     @Override
     void decrementPointsForDeletedSkill(String projectId, String deletedSkillId, String parentSubjectSkillId) {
@@ -911,5 +914,26 @@ class H2NativeRepo implements NativeQueriesRepo {
         return query.getResultStream()
     }
 
+    @Override
+    void updateUserPointsForASkill(String projectId, String skillId) {
+        userPointsRepo.updateUserPointsForASkillInH2(projectId, skillId)
+    }
 
+    @Override
+    void updateUserPointsHistoryForASkill(String projectId, String skillId) {
+        userPointsRepo.updateUserPointsHistoryForASkillInH2(projectId, skillId)
+        userPointsRepo.removeUserPointsThatDoNotExistForASkillInH2(projectId, skillId)
+    }
+
+    @Override
+    void updateSubjectOrGroupUserPoints(String projectId, String skillId) {
+        userPointsRepo.updateSubjectOrGroupUserPointsInH2(projectId, skillId)
+        userPointsRepo.removeUserPointsThatDoNotExistForSubjectOrGroupInH2(projectId, skillId)
+    }
+
+    @Override
+    void updateUserPointsHistoryForProject(String projectId) {
+        userPointsRepo.updateUserPointsHistoryForProjectInH2(projectId)
+        userPointsRepo.removeUserPointsThatDoNotExistForProjectInH2(projectId)
+    }
 }

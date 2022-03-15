@@ -71,6 +71,31 @@ class UserAchievementsAndPointsManagement {
         nativeQueriesRepo.updateOverallScoresBySummingUpAllChildSubjects(subject.projectId, SkillDef.ContainerType.Subject)
     }
 
+    void adjustUserPointsAfterModification(SkillDef skill) {
+        log.info("Updating all UserPoints for [{}]-[{}]", skill.projectId, skill.skillId)
+//        userPointsRepo.updateUserPointsForASkill(skill.projectId, skill.skillId)
+//        userPointsRepo.updateUserPointsHistoryForASkill(skill.projectId, skill.skillId)
+        nativeQueriesRepo.updateUserPointsForASkill(skill.projectId, skill.skillId)
+        nativeQueriesRepo.updateUserPointsHistoryForASkill(skill.projectId, skill.skillId)
+
+        List<SkillDef> parents = skillRelDefRepo.findParentByChildIdAndTypes(skill.id, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
+        while (parents) {
+            assert parents.size() == 1
+            SkillDef parent = parents.first()
+            log.info("Updating parent's UserPoints for [{}]-[{}]", parent.projectId, parent.skillId)
+//            userPointsRepo.updateUserPointsForASubjectOrGroup(parent.projectId, parent.skillId)
+//            userPointsRepo.updateUserPointsHistoryForSubjectOrGroup(parent.projectId, parent.skillId)
+            nativeQueriesRepo.updateSubjectOrGroupUserPoints(parent.projectId, parent.skillId)
+//            userPointsRepo.updateSubjectOrGroupUserPoints(parent.projectId, parent.skillId)
+            parents = skillRelDefRepo.findParentByChildIdAndTypes(parent.id, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
+        }
+
+        log.info("Updating project's UserPoints for [{}]", skill.projectId)
+//        userPointsRepo.updateUserPointsForAProject(skill.projectId)
+        nativeQueriesRepo.updateUserPointsHistoryForProject(skill.projectId)
+//        userPointsRepo.updateUserPointsHistoryForProject(skill.projectId)
+    }
+
     @Transactional
     void handlePointIncrementUpdate(String projectId, String subjectId, String skillId, int incrementDelta){
         SkillsValidator.isTrue(
@@ -91,27 +116,6 @@ class UserAchievementsAndPointsManagement {
         }
         nativeQueriesRepo.updatePointHistoryForSkill(projectId, subjectId, skillId, incrementDelta)
         nativeQueriesRepo.updatePointTotalsForSkill(projectId, subjectId, skillId, incrementDelta)
-    }
-
-    void adjustUserPointsAfterModification(SkillDef skill) {
-        log.info("Updating all UserPoints for [{}]-[{}]", skill.projectId, skill.skillId)
-        userPointsRepo.updateUserPointsForASkill(skill.projectId, skill.skillId)
-        userPointsRepo.updateUserPointsHistoryForASkill(skill.projectId, skill.skillId)
-
-        List<SkillDef> parents = skillRelDefRepo.findParentByChildIdAndTypes(skill.id, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
-        while (parents) {
-            assert parents.size() == 1
-            SkillDef parent = parents.first()
-            log.info("Updating parent's UserPoints for [{}]-[{}]", parent.projectId, parent.skillId)
-//            userPointsRepo.updateUserPointsForASubjectOrGroup(parent.projectId, parent.skillId)
-//            userPointsRepo.updateUserPointsHistoryForSubjectOrGroup(parent.projectId, parent.skillId)
-            userPointsRepo.updateSubjectOrGroupUserPoints(parent.projectId, parent.skillId)
-            parents = skillRelDefRepo.findParentByChildIdAndTypes(parent.id, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
-        }
-
-        log.info("Updating project's UserPoints for [{}]", skill.projectId)
-//        userPointsRepo.updateUserPointsForAProject(skill.projectId)
-        userPointsRepo.updateUserPointsHistoryForProject(skill.projectId)
     }
 
     @Transactional

@@ -15,12 +15,14 @@
  */
 package skills.storage.repos.nativeSql
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Conditional
 import org.springframework.stereotype.Service
 import skills.controller.request.model.QueryUsersCriteriaRequest
 import skills.controller.request.model.SubjectLevelQueryRequest
 import skills.storage.model.QueryUsersCriteria
 import skills.storage.model.SkillDef
+import skills.storage.repos.UserPointsRepo
 
 import javax.persistence.EntityManager
 import javax.persistence.PersistenceContext
@@ -33,6 +35,9 @@ class PostgresQlNativeRepo implements NativeQueriesRepo {
 
     @PersistenceContext
     EntityManager entityManager;
+
+    @Autowired
+    UserPointsRepo userPointsRepo
 
     @Override
     void decrementPointsForDeletedSkill(String projectId, String deletedSkillId, String parentSubjectSkillId) {
@@ -681,5 +686,25 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
         QueryUserCriteriaHelper.setSelectUserIdParams(query, queryUsersCriteria)
 
         return query.getResultStream()
+    }
+
+    @Override
+    void updateUserPointsForASkill(String projectId, String skillId) {
+        userPointsRepo.updateUserPointsForASkill(projectId, skillId)
+    }
+
+    @Override
+    void updateUserPointsHistoryForASkill(String projectId, String skillId) {
+        userPointsRepo.updateUserPointsHistoryForASkill(projectId, skillId)
+    }
+
+    @Override
+    void updateSubjectOrGroupUserPoints(String projectId, String skillId) {
+        userPointsRepo.updateSubjectOrGroupUserPoints(projectId, skillId)
+    }
+
+    @Override
+    void updateUserPointsHistoryForProject(String projectId) {
+        userPointsRepo.updateUserPointsHistoryForProject(projectId)
     }
 }
