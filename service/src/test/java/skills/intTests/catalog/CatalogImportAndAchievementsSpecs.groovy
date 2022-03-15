@@ -26,7 +26,6 @@ import skills.storage.model.UserPerformedSkill
 import skills.storage.model.UserPoints
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
-import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -1211,6 +1210,53 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
         sum3.badgeAchieved
         sum3.numTotalSkills == 2
         sum3.numSkillsAchieved == 2
+    }
+
+    def "if imported skill was the only skill that was not completed under a badge and then imported skill is removed, badge should be awarded"() {
+        def project1 = createProjWithCatalogSkills(1)
+        def project2 = createProjWithCatalogSkills(2)
+
+        def p2badge1 = createBadge(2, 11)
+        skillsService.createBadge(p2badge1)
+
+        skillsService.importSkillFromCatalog(project2.p.projectId, project1.s2.subjectId, project1.p.projectId, project1.s1_skills[0].skillId)
+        skillsService.finalizeSkillsImportFromCatalog(project2.p.projectId)
+
+        skillsService.assignSkillToBadge(project2.p.projectId, p2badge1.badgeId, project2.s1_skills[0].skillId)
+        skillsService.assignSkillToBadge(project2.p.projectId, p2badge1.badgeId, project1.s1_skills[0].skillId)
+
+        p2badge1.enabled = true
+        skillsService.updateBadge(p2badge1, p2badge1.badgeId)
+
+        def randomUsers = getRandomUsers(3)
+        def user = randomUsers[0]
+
+        when:
+        def sum1 = skillsService.getBadgeSummary(user, project2.p.projectId, p2badge1.badgeId)
+
+        skillsService.addSkill([projectId: project2.p.projectId, skillId:project2.s1_skills[0].skillId], user, new Date() - 1)
+        def skill1CompletedRes = skillsService.addSkill([projectId: project2.p.projectId, skillId:project2.s1_skills[0].skillId], user)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        def sum2 = skillsService.getBadgeSummary(user, project2.p.projectId, p2badge1.badgeId)
+
+        skillsService.deleteSkill([projectId: project2.p.projectId, subjectId: project1.s2.subjectId, skillId:project1.s1_skills[0].skillId])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        def sum3 = skillsService.getBadgeSummary(user, project2.p.projectId, p2badge1.badgeId)
+
+        then:
+        skill1CompletedRes.body.completed.find { it.type == "Skill" }
+
+        !sum1.badgeAchieved
+        sum1.numTotalSkills == 2
+        sum1.numSkillsAchieved == 0
+
+        !sum2.badgeAchieved
+        sum2.numTotalSkills == 2
+        sum2.numSkillsAchieved == 1
+
+        sum3.badgeAchieved
+        sum3.numTotalSkills == 1
+        sum3.numSkillsAchieved == 1
     }
 
     def "skills achievements are copied when skills are imported"() {
