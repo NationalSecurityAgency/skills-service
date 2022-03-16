@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestBody
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
+import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.SkillImportRequest
 import skills.controller.request.model.PointSyncPatchRequest
@@ -48,6 +49,7 @@ import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillDefWithExtraRepo
 import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.UserPointsRepo
+import skills.tasks.TaskSchedulerService
 import skills.utils.InputSanitizer
 import skills.utils.Props
 
@@ -152,8 +154,15 @@ class SkillsAdminService {
         }
     }
 
+    protected static class SaveSkillTmpRes {
+        boolean isAvailableInCatalog = false
+        String projectId
+        String skillId
+        Integer skillRefId
+    }
+
     @Transactional()
-    void saveSkill(String originalSkillId, SkillRequest skillRequest, boolean performCustomValidation=true, String groupId=null) {
+    SaveSkillTmpRes saveSkill(String originalSkillId, SkillRequest skillRequest, boolean performCustomValidation=true, String groupId=null) {
         lockingService.lockProject(skillRequest.projectId)
 
         validateSkillVersion(skillRequest)
@@ -185,6 +194,9 @@ class SkillsAdminService {
             }
         }
 
+        final isCurrentlyEnabled = Boolean.valueOf(skillDefinition?.enabled)
+
+
         if (skillDefinition && !groupId) {
             groupId = skillDefinition.groupId
         }
@@ -203,14 +215,18 @@ class SkillsAdminService {
         final int incrementRequested = isSkillsGroup ? 0 : skillRequest.pointIncrement
         final int currentOccurrences = isEdit && !isSkillsGroup ? (skillDefinition.totalPoints / skillDefinition.pointIncrement) : -1
         final SelfReportingType selfReportingType = skillRequest.selfReportingType && !isSkillsGroup ? SkillDef.SelfReportingType.valueOf(skillRequest.selfReportingType) : null;
+        final boolean isEnabledSkillInRequest = Boolean.valueOf(skillRequest.enabled)
 
         SkillDef subject = null
         SkillDef skillsGroupSkillDef = null
         List<SkillDef> groupChildSkills = null
         if (isEdit) {
-            if (skillDefinition.readOnly && !(skillRequest instanceof ReplicatedSkillUpdateRequest)) {
-                throw new SkillException("Skill with id [${skillRequest.skillId}] has been imported from the Global Catalog and cannot be altered", skillRequest.projectId, skillRequest.skillId, ErrorCode.ReadOnlySkill)
+            validateImportedSkillUpdate(skillRequest, skillDefinition)
+            // can't disable a skill/skillgroup once it's been enabled
+            if (isCurrentlyEnabled && (StringUtils.isNotBlank(skillRequest.enabled) && !isEnabledSkillInRequest)) {
+                throw new SkillException("Cannot disable ${skillDefinition.type} [${skillRequest.skillId}] once it has been enabled", skillRequest.projectId, skillRequest.skillId)
             }
+
             // for updates, use the existing value if it is not set on the skillRequest (null or empty String)
             if (StringUtils.isBlank(skillRequest.enabled)) {
                 skillRequest.enabled = skillDefinition.enabled
@@ -220,17 +236,17 @@ class SkillsAdminService {
                 groupChildSkills = skillsGroupAdminService.validateSkillsGroupAndReturnChildren(skillRequest, skillDefinition)
                 totalPointsRequested = skillsGroupAdminService.getGroupTotalPoints(groupChildSkills, skillRequest.numSkillsRequired)
 
-                if (Boolean.valueOf(skillRequest.enabled) && skillDefinition.numSkillsRequired != skillRequest.numSkillsRequired) {
+                if (isEnabledSkillInRequest && skillDefinition.numSkillsRequired != skillRequest.numSkillsRequired) {
                     int currentNumSkillsRequired = skillDefinition.numSkillsRequired == -1 ? groupChildSkills.size() : skillDefinition.numSkillsRequired
                     int requestedNumSkillsRequired = skillRequest.numSkillsRequired == -1 ? groupChildSkills.size() : skillRequest.numSkillsRequired
                     numSkillsRequiredDelta = requestedNumSkillsRequired - currentNumSkillsRequired
                 }
 
-                boolean enabledChanged = Boolean.valueOf(skillDefinition.enabled) != Boolean.valueOf(skillRequest.enabled)
+                boolean enabledChanged = Boolean.valueOf(skillDefinition.enabled) != isEnabledSkillInRequest
                 boolean skillIdChanged = skillDefinition.skillId != skillRequest.skillId
                 if (enabledChanged || skillIdChanged) {
                     // validate that the Group's skills won't exceed the maximum allowed when publishing the group
-                    if (Boolean.valueOf(skillRequest.enabled)) {
+                    if (isEnabledSkillInRequest) {
                         String parentSkillId = skillRequest.subjectId
                         SkillDef groupSubject = skillDefRepo.findByProjectIdAndSkillIdAndType(skillRequest.projectId, parentSkillId, SkillDef.ContainerType.Subject)
                         assert groupSubject, "Subject [${parentSkillId}] does not exist"
@@ -248,29 +264,39 @@ class SkillsAdminService {
                 }
 
             }
-            shouldRebuildScores = skillDefinition.totalPoints != totalPointsRequested || (!Boolean.valueOf(skillDefinition.enabled) && Boolean.valueOf(skillRequest.enabled))
+            shouldRebuildScores = skillDefinition.totalPoints != totalPointsRequested || (!Boolean.valueOf(skillDefinition.enabled) && isEnabledSkillInRequest)
             occurrencesDelta = isSkillsGroup ? 0 : skillRequest.numPerformToCompletion - currentOccurrences
             updateUserPoints = shouldRebuildScores || occurrencesDelta != 0
             pointIncrementDelta = isSkillsGroup ? 0 : incrementRequested - skillDefinition.pointIncrement
+
+            if (skillRequest instanceof ReplicatedSkillUpdateRequest) {
+                //once a skill has been imported into a project, we don't want to update that imported
+                //version's point increment as importing users are allowed to scale the total points
+                //to be in line with their project's point layout. However, we do need to update the number of occurrences
+                //on imported skills if that changes on the original exported skill
+                skillRequest.pointIncrement = skillDefinition.pointIncrement
+                totalPointsRequested = skillRequest.pointIncrement * skillRequest.numPerformToCompletion
+                pointIncrementDelta = 0
+            }
 
             Props.copy(skillRequest, skillDefinition, "childSkills", 'version', 'selfReportType')
 
             skillApprovalService.modifyApprovalsWhenSelfReportingTypeChanged(skillDefinition, selfReportingType)
             skillDefinition.selfReportingType = selfReportingType;
 
-            //totalPoints is not a prop on skillRequest, it is a calculated value so we
-            //need to manually update it in the case of edits.
             skillDefinition.totalPoints = totalPointsRequested
         } else {
             String parentSkillId = skillRequest.subjectId
             subject = skillDefRepo.findByProjectIdAndSkillIdAndType(skillRequest.projectId, parentSkillId, SkillDef.ContainerType.Subject)
-            assert subject, "Subject [${parentSkillId}] does not exist"
+            if (!subject) {
+                throw new SkillException("Subject [${parentSkillId}] does not exist", skillRequest.projectId, skillRequest.skillId, ErrorCode.BadParam)
+            }
 
             createdResourceLimitsValidator.validateNumSkillsCreated(subject)
 
             Integer highestDisplayOrder = skillDefRepo.calculateChildSkillsHighestDisplayOrder(skillRequest.projectId, groupId ?: parentSkillId)
             int displayOrder = highestDisplayOrder == null ? 1 : highestDisplayOrder + 1
-            String enabled = isSkillsGroup ? Boolean.FALSE.toString() : Boolean.TRUE.toString()
+            String enabled = isSkillsGroup ? Boolean.FALSE.toString() : isEnabledSkillInRequest.toString()
             if (isSkillsGroupChild) {
                 skillsGroupSkillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, groupId, SkillDef.ContainerType.SkillsGroup)
                 if (!skillsGroupSkillDef) {
@@ -303,14 +329,16 @@ class SkillsAdminService {
                 skillDefinition.copiedFromProjectId = skillRequest.copiedFromProjectId
             }
             log.debug("Saving [{}]", skillDefinition)
-            shouldRebuildScores = true
+            shouldRebuildScores = isEnabledSkillInRequest
         }
 
+        SkillDefWithExtra tempSaved
         DataIntegrityExceptionHandlers.skillDataIntegrityViolationExceptionHandler.handle(skillRequest.projectId, skillRequest.skillId) {
-            skillDefWithExtraRepo.save(skillDefinition)
+            //tempSaved has the correct value
+            tempSaved = skillDefWithExtraRepo.save(skillDefinition)
         }
-
         SkillDef savedSkill = skillDefRepo.findByProjectIdAndSkillIdAndType(skillRequest.projectId, skillRequest.skillId, skillType)
+        validateThatSkillWasSaved(skillDefinition, savedSkill)
         if (isSkillsGroup) {
             skillsGroupSkillDef = savedSkill
         }
@@ -337,41 +365,81 @@ class SkillsAdminService {
             ruleSetDefinitionScoreUpdater.updateFromLeaf(savedSkill)
         }
 
+        SaveSkillTmpRes saveSkillTmpRes = new SaveSkillTmpRes(projectId: savedSkill.projectId, skillId: savedSkill.skillId, skillRefId: savedSkill.id)
         if (isEdit) {
-            updatePointsAndAchievements(
-                    savedSkill,
-                    skillRequest.subjectId,
-                    pointIncrementDelta,
-                    occurrencesDelta,
-                    currentOccurrences,
-                    numSkillsRequiredDelta,
-                    skillsGroupSkillDef,
-                    groupChildSkills
-            )
-            if (skillCatalogService.isAvailableInCatalog(savedSkill.projectId, savedSkill.skillId)) {
-                SkillDefWithExtra extra = skillDefWithExtraRepo.findById(savedSkill.id).get()
-                QueuedSkillUpdate queuedSkillUpdate = new QueuedSkillUpdate(skill:  extra, isCatalogSkill: true)
-                queuedSkillUpdateRepo.save(queuedSkillUpdate)
+            if (isEnabledSkillInRequest) {
+                updatePointsAndAchievements(
+                        savedSkill,
+                        skillRequest.subjectId,
+                        pointIncrementDelta,
+                        occurrencesDelta,
+                        currentOccurrences,
+                        numSkillsRequiredDelta,
+                        skillsGroupSkillDef,
+                        groupChildSkills
+                )
             }
+            saveSkillTmpRes.isAvailableInCatalog = skillCatalogService.isAvailableInCatalog(savedSkill.projectId, savedSkill.skillId)
         }
 
         log.debug("Saved [{}]", savedSkill)
+        return saveSkillTmpRes
+    }
+
+    /**
+     * Transitive relationships appear to confuse hibernate cache - if the same
+     * object was loaded earlier in the session via transitive relationship the hibernate fails
+     * to recognize the dirty object and doesn't generate sql to save the updates
+     * fail safe: compare attributes to validate that skill was actually persisted
+     */
+    private void validateThatSkillWasSaved(SkillDefWithExtra toSaved, SkillDef saved) {
+        assert toSaved.pointIncrement == saved.pointIncrement
+        assert toSaved.skillId == saved.skillId
+        assert toSaved.projectId == saved.projectId
+        assert toSaved.totalPoints == saved.totalPoints
+        assert toSaved.version == saved.version
+        assert toSaved.name == saved.name
+        assert toSaved.enabled == saved.enabled
+    }
+
+    private void validateImportedSkillUpdate(SkillRequest skillRequest, SkillDefWithExtra skillDefinition) {
+        if (skillDefinition.readOnly && !(skillRequest instanceof ReplicatedSkillUpdateRequest)) {
+            // update is only allowed for change in pointIncrement
+            boolean isAllowed =
+                    (skillRequest.name == skillDefinition.name) &&
+                            (skillRequest.pointIncrementInterval == skillDefinition.pointIncrementInterval) &&
+                            (skillRequest.numMaxOccurrencesIncrementInterval == skillDefinition.numMaxOccurrencesIncrementInterval) &&
+                            (skillRequest.numPerformToCompletion == (skillDefinition.totalPoints / skillDefinition.pointIncrement)) &&
+                            (skillRequest.version == skillDefinition.version) &&
+                            (!skillRequest.description || skillRequest.description == skillDefinition.description) &&
+                            (!skillRequest.helpUrl || skillRequest.helpUrl == skillDefinition.helpUrl) &&
+                            (!skillRequest.selfReportingType || skillRequest.selfReportingType == skillDefinition.selfReportingType?.toString()) &&
+                            (skillRequest.enabled == skillDefinition.enabled)
+            if (!isAllowed) {
+                throw new SkillException("Skill with id [${skillRequest.skillId}] has been imported from the Global Catalog and only pointIncrement can be altered", skillRequest.projectId, skillRequest.skillId, ErrorCode.ReadOnlySkill)
+            }
+        }
     }
 
     private void updatePointsAndAchievements(SkillDef savedSkill, String subjectId, int pointIncrementDelta, int occurrencesDelta, int currentOccurrences, int numSkillsRequiredDelta, SkillDef skillsGroupSkillDef, List<SkillDef> groupChildSkills) {
         if (savedSkill.type != SkillDef.ContainerType.SkillsGroup) {
+
+            int newOccurrences = savedSkill.totalPoints / savedSkill.pointIncrement
+
             // order is CRITICAL HERE
             // must update point increment first then deal with changes in the occurrences;
             // changes in the occurrences will use the newly updated point increment
-            if (pointIncrementDelta != 0) {
-                userPointsManagement.handlePointIncrementUpdate(savedSkill.projectId, subjectId, savedSkill.skillId, pointIncrementDelta)
+            if (pointIncrementDelta != 0 && occurrencesDelta >= 0) {
+//                userPointsManagement.handlePointIncrementUpdate(savedSkill.projectId, subjectId, savedSkill.skillId, pointIncrementDelta)
+                userPointsManagement.adjustUserPointsAfterModification(savedSkill)
             }
-            int newOccurrences = savedSkill.totalPoints / savedSkill.pointIncrement
+
             if (occurrencesDelta < 0) {
                 // order is CRITICAL HERE
-                // Must update points prior removal of UserPerformedSkill events as the removal relies on the existence of those extra events
-                userPointsManagement.updatePointsWhenOccurrencesAreDecreased(savedSkill.projectId, subjectId, savedSkill.skillId, savedSkill.pointIncrement, newOccurrences)
+                // Must remove UserPerformedSkill events before updating points
                 userPointsManagement.removeExtraEntriesOfUserPerformedSkillByUser(savedSkill.projectId, savedSkill.skillId, currentOccurrences + occurrencesDelta)
+//                userPointsManagement.updatePointsWhenOccurrencesAreDecreased(savedSkill.projectId, subjectId, savedSkill.skillId, savedSkill.pointIncrement, newOccurrences, currentOccurrences)
+                userPointsManagement.adjustUserPointsAfterModification(savedSkill)
                 //identify what badge (or badges) this skill belongs to.
                 //if any, look for users who qualify for the badge now after this change is persisted See BadgeAdminService.identifyUsersMeetingBadgeRequirements
                 userPointsManagement.insertUserAchievementWhenDecreaseOfOccurrencesCausesUsersToAchieve(savedSkill.projectId, savedSkill.skillId, savedSkill.id, newOccurrences)
@@ -392,7 +460,7 @@ class SkillsAdminService {
             userPointsManagement.insertUserAchievementWhenDecreaseOfSkillsRequiredCausesUsersToAchieve(savedSkill.projectId, skillsGroupSkillDef.skillId, skillsGroupSkillDef.id, groupChildSkills.collect {it.skillId}, numSkillsRequired)
         }
 
-        if (pointIncrementDelta < 0 || occurrencesDelta < 0) {
+        if (pointIncrementDelta != 0 || occurrencesDelta < 0) {
             SkillDef subject = skillDefRepo.findByProjectIdAndSkillIdAndType(savedSkill.projectId, subjectId, SkillDef.ContainerType.Subject)
             userPointsManagement.identifyAndAddLevelAchievements(subject)
         }
@@ -537,8 +605,8 @@ class SkillsAdminService {
     }
 
     @Transactional(readOnly = true)
-    List<SkillDefSkinnyRes> getSkinnySkills(String projectId, String skillNameQuery, boolean excludeImportedSkills = false) {
-        List<SkillDefRepo.SkillDefSkinny> data = loadSkinnySkills(projectId, skillNameQuery, excludeImportedSkills)
+    List<SkillDefSkinnyRes> getSkinnySkills(String projectId, String skillNameQuery, boolean excludeImportedSkills = false, boolean includeDisabled = false) {
+        List<SkillDefRepo.SkillDefSkinny> data = loadSkinnySkills(projectId, skillNameQuery, excludeImportedSkills, includeDisabled)
         List<SkillDefPartialRes> res = data.collect { convertToSkillDefSkinnyRes(it) }?.sort({ it.skillId })
         return res
     }
@@ -722,8 +790,8 @@ class SkillsAdminService {
     }
 
     @Profile
-    private List<SkillDefRepo.SkillDefSkinny> loadSkinnySkills(String projectId, String skillNameQuery, boolean excludeImportedSkills = false) {
-        skillDefRepo.findAllSkinnySelectByProjectIdAndType(projectId, SkillDef.ContainerType.Skill, skillNameQuery, (!excludeImportedSkills).toString())
+    private List<SkillDefRepo.SkillDefSkinny> loadSkinnySkills(String projectId, String skillNameQuery, boolean excludeImportedSkills = false, boolean includeDisabled = false) {
+        skillDefRepo.findAllSkinnySelectByProjectIdAndType(projectId, SkillDef.ContainerType.Skill, skillNameQuery, (!excludeImportedSkills).toString(), includeDisabled.toString())
     }
 
     @Profile

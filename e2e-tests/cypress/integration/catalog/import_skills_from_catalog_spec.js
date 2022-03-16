@@ -64,6 +64,7 @@ describe('Import skills from Catalog Tests', () => {
         cy.get('[data-cy="catalogSkillImportModal-NoData"]').should('not.exist');
     });
 
+
     it('import 1 skill', () => {
         cy.createProject(2);
         cy.createSubject(2, 1);
@@ -102,6 +103,7 @@ describe('Import skills from Catalog Tests', () => {
             [{ colIndex: 3,  value: 'Imported from This is project 2' }],
         ])
     });
+
 
     it('import last available skill', () => {
         cy.createSkill(1, 1, 1);
@@ -252,6 +254,7 @@ describe('Import skills from Catalog Tests', () => {
         cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '3');
     });
 
+
     it('filter then import', () => {
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2, { name: 'Find this 1'});
@@ -318,6 +321,7 @@ describe('Import skills from Catalog Tests', () => {
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'Very Great Skill 2' }, { colIndex: 1,  value: 'ID: proj1' }],
         ], 5);
+        cy.get('[data-cy="alreadyExistWarning_proj1-skill1"]').should('not.exist');
 
         cy.get('[data-cy="closeButton"]').click();
 
@@ -341,6 +345,9 @@ describe('Import skills from Catalog Tests', () => {
             [{ colIndex: 0,  value: 'Very Great Skill 2' }, { colIndex: 1,  value: 'ID: proj1' }],
             [{ colIndex: 0,  value: 'Very Great Skill 3' }, { colIndex: 1,  value: 'ID: proj1' }],
         ], 5);
+        cy.get('[data-cy="alreadyExistWarning_proj1-skill1"]').should('not.exist');
+        cy.get('[data-cy="alreadyExistWarning_proj1-skill2"]').should('not.exist');
+        cy.get('[data-cy="alreadyExistWarning_proj1-skill3"]').should('not.exist');
 
         // refresh and re-validate
         cy.visit('/administrator/projects/proj2/subjects/subj1');
@@ -350,6 +357,9 @@ describe('Import skills from Catalog Tests', () => {
             [{ colIndex: 0,  value: 'Very Great Skill 2' }, { colIndex: 1,  value: 'ID: proj1' }],
             [{ colIndex: 0,  value: 'Very Great Skill 3' }, { colIndex: 1,  value: 'ID: proj1' }],
         ], 5);
+        cy.get('[data-cy="alreadyExistWarning_proj1-skill1"]').should('not.exist');
+        cy.get('[data-cy="alreadyExistWarning_proj1-skill2"]').should('not.exist');
+        cy.get('[data-cy="alreadyExistWarning_proj1-skill3"]').should('not.exist');
     });
 
     it('do not allow import if skill id or name already exist', () => {
@@ -452,6 +462,393 @@ describe('Import skills from Catalog Tests', () => {
         cy.get('[data-cy="skillsSelectionItem-proj2-skill1"]').click() // imported skill
     })
 
+
+    it('imported skills are disabled and finalization alert is displayed', () => {
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1);
+        cy.createSkill(2, 1, 2);
+
+        cy.exportSkillToCatalog(2, 1, 1);
+        cy.exportSkillToCatalog(2, 1, 2);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.get('[data-cy="importFromCatalogBtn"]').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Very Great Skill 1' }, { colIndex: 1,  value: 'ID: proj2' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 2' }, { colIndex: 1,  value: 'ID: proj2' }],
+        ], 5);
+
+        cy.get('[data-cy="importBtn"]').should('be.disabled');
+        cy.get('[data-cy="skillSelect_proj2-skill1"]').check({force: true})
+        cy.get('[data-cy="skillSelect_proj2-skill2"]').check({force: true})
+        cy.get('[data-cy="importBtn"]').should('be.enabled');
+
+        cy.get('[data-cy="importBtn"]').click();
+        cy.get('[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '2');
+        cy.get('[data-cy="disabledBadge-skill2"]')
+        cy.get('[data-cy="disabledBadge-skill1"]')
+        cy.get('[data-cy="importFinalizeAlert"]').contains('There are 2 imported skills in this project that are not yet finalized.')
+
+        // refresh at subject level and validate
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '2');
+        cy.get('[data-cy="disabledBadge-skill2"]')
+        cy.get('[data-cy="disabledBadge-skill1"]')
+        cy.get('[data-cy="importFinalizeAlert"]').contains('There are 2 imported skills in this project that are not yet finalized.')
+
+        // navigate app to a project and validate
+        cy.get('[data-cy="breadcrumb-proj1"]').click()
+        cy.get('[data-cy="importFinalizeAlert"]').contains('There are 2 imported skills in this project that are not yet finalized.')
+
+        // refresh at project level and validate
+        cy.visit('/administrator/projects/proj1');
+        cy.get('[data-cy="importFinalizeAlert"]').contains('There are 2 imported skills in this project that are not yet finalized.')
+
+        // navigate down from the project and validate
+        cy.get('[data-cy="manageBtn_subj1"]').click()
+        cy.get('[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '2');
+        cy.get('[data-cy="disabledBadge-skill2"]')
+        cy.get('[data-cy="disabledBadge-skill1"]')
+        cy.get('[data-cy="importFinalizeAlert"]').contains('There are 2 imported skills in this project that are not yet finalized.')
+
+        // navigate down from projects and validate
+        cy.visit('/administrator')
+        cy.get('[data-cy="projCard_proj1_manageBtn"]').click()
+        cy.get('[data-cy="importFinalizeAlert"]').contains('There are 2 imported skills in this project that are not yet finalized.')
+        cy.get('[data-cy="manageBtn_subj1"]').click()
+        cy.get('[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '2');
+        cy.get('[data-cy="disabledBadge-skill2"]')
+        cy.get('[data-cy="disabledBadge-skill1"]')
+        cy.get('[data-cy="importFinalizeAlert"]').contains('There are 2 imported skills in this project that are not yet finalized.')
+    });
+
+    it('imported skill has disabled badge on the skill page', () => {
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1);
+        cy.createSkill(2, 1, 2);
+
+        cy.exportSkillToCatalog(2, 1, 1);
+        cy.exportSkillToCatalog(2, 1, 2);
+
+        cy.bulkImportSkillFromCatalog(1, 1, [
+            { projNum: 2, skillNum: 1 },
+            { projNum: 2, skillNum: 2 },
+        ])
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1')
+        cy.get('[data-cy="pageHeader"] [data-cy="disabledSkillBadge"]')
+        cy.get('[data-cy="childRowDisplay_skill1"]').contains('This skill is disabled')
+
+        cy.finalizeCatalogImport(1)
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1')
+        cy.get('[data-cy="pageHeader"] [data-cy="disabledSkillBadge"]').should('not.exist')
+    });
+
+
+    it('cancel finalize modal', () => {
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1);
+        cy.createSkill(2, 1, 2);
+
+        cy.exportSkillToCatalog(2, 1, 1);
+        cy.exportSkillToCatalog(2, 1, 2);
+
+        cy.bulkImportSkillFromCatalog(1, 1, [
+            { projNum: 2, skillNum: 1 },
+            { projNum: 2, skillNum: 2 },
+        ])
+
+        cy.visit('/administrator/projects/proj1')
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').click();
+        cy.get('[data-cy="doPerformFinalizeButton"]').should('be.enabled');
+        cy.get('[data-cy="finalizeCancelButton"]').should('be.enabled');
+
+        cy.get('[data-cy="finalizeCancelButton"]').click()
+        cy.get('[data-cy="finalizeCancelButton"]').should('not.exist');
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').should('exist');
+
+        // now close via the X on top right
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').click();
+        cy.get('[data-cy="doPerformFinalizeButton"]').should('be.enabled');
+        cy.get('[data-cy="finalizeCancelButton"]').should('be.enabled');
+
+        cy.get('[class="modal-content"] [aria-label="Close"]').click();
+        cy.get('[data-cy="finalizeCancelButton"]').should('not.exist');
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').should('exist');
+    });
+
+
+    it('must not be able to import while finalizing', () => {
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1);
+        cy.createSkill(2, 1, 2);
+
+        cy.exportSkillToCatalog(2, 1, 1);
+        cy.exportSkillToCatalog(2, 1, 2);
+
+        cy.bulkImportSkillFromCatalog(1, 1, [
+            { projNum: 2, skillNum: 1 },
+        ])
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1')
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').click();
+        cy.get('[data-cy="doPerformFinalizeButton"]').should('be.enabled');
+        cy.get('[data-cy="finalizeCancelButton"]').should('be.enabled');
+
+        cy.get('[data-cy="doPerformFinalizeButton"]').click()
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').should('not.exist');
+        cy.get('[data-cy="importFinalizeAlert"]').contains('Finalizing 1 imported skill')
+
+        cy.get('[data-cy="importFromCatalogBtn"]').click();
+        cy.get('[data-cy="catalogSkillImport-finalizationInProcess"]').contains('Finalization in Progress')
+    });
+
+    it('must not be able to import while finalizing - state session has catalog already loaded', () => {
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1);
+        cy.createSkill(2, 1, 2);
+
+        cy.exportSkillToCatalog(2, 1, 1);
+        cy.exportSkillToCatalog(2, 1, 2);
+
+        cy.bulkImportSkillFromCatalog(1, 1, [
+            { projNum: 2, skillNum: 1 },
+        ])
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1')
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').should('be.enabled')
+        // cy.get('[data-cy="doPerformFinalizeButton"]').should('be.enabled');
+        // cy.get('[data-cy="finalizeCancelButton"]').should('be.enabled');
+
+        cy.get('[data-cy="importFromCatalogBtn"]').click();
+        cy.get('[data-cy="skillSelect_proj2-skill2"]').check({force: true})
+        cy.get('[data-cy="numSelectedSkills"]').should('have.text', '1');
+
+
+        cy.finalizeCatalogImportWithoutWaiting(1);
+        cy.get('[data-cy="importBtn"]').click()
+        cy.get('[data-cy="catalogSkillImport-finalizationInProcess"]').contains('Finalization in Progress')
+        cy.get('[data-cy="numSelectedSkills"]').should('have.text', '0');
+        cy.get('[data-cy="importBtn"]').should('be.disabled');
+    });
+
+    it('import more than 1 page of skills', () => {
+      // mix skill names since it's sorted by skillId - this will force different projects in the first page
+      cy.createSkill(1, 1, 1);
+      cy.createSkill(1, 1, 6);
+      cy.createSkill(1, 1, 7);
+      cy.createSkill(1, 1, 4);
+      cy.createSkill(1, 1, 5);
+      cy.createSkill(1, 1, 9);
+      cy.createSkill(1, 1, 66);
+      cy.createSkill(1, 1, 67);
+
+      cy.createProject(2);
+      cy.createSubject(2, 1);
+      cy.createSkill(2, 1, 2);
+      cy.createSkill(2, 1, 3);
+      cy.createSkill(2, 1, 8);
+
+      cy.exportSkillToCatalog(1, 1, 1);
+      cy.exportSkillToCatalog(1, 1, 6);
+      cy.exportSkillToCatalog(1, 1, 7);
+      cy.exportSkillToCatalog(1, 1, 4);
+      cy.exportSkillToCatalog(1, 1, 5);
+      cy.exportSkillToCatalog(1, 1, 9)
+      cy.exportSkillToCatalog(1, 1, 66)
+      cy.exportSkillToCatalog(1, 1, 67)
+
+      cy.exportSkillToCatalog(2, 1, 2); // proj 2
+      cy.exportSkillToCatalog(2, 1, 3); // proj 2
+      cy.exportSkillToCatalog(2, 1, 8); // proj 2
+
+      cy.createProject(3);
+      cy.createSubject(3, 1);
+
+      cy.intercept('/admin/projects/proj3/skills/catalog**').as('getCatalogSkills');
+
+      cy.visit('/administrator/projects/proj3/subjects/subj1');
+
+      cy.get('[data-cy="importFromCatalogBtn"]').click();
+      cy.wait('@getCatalogSkills');
+
+      cy.get('[data-cy="importBtn"]').should('be.disabled');
+      cy.get('[data-cy="numSelectedSkills"]').should('have.text', '0');
+
+      cy.get('[data-cy="skillSelect_proj1-skill1"]').should('not.be.checked')
+      cy.get('[data-cy="skillSelect_proj2-skill2"]').should('not.be.checked')
+      cy.get('[data-cy="skillSelect_proj2-skill3"]').should('not.be.checked')
+      cy.get('[data-cy="skillSelect_proj1-skill4"]').should('not.be.checked')
+      cy.get('[data-cy="skillSelect_proj1-skill5"]').should('not.be.checked')
+
+      cy.get('[data-cy="selectPageOfSkillsBtn"]').click();
+
+      cy.get('[data-cy="skillSelect_proj1-skill1"]').should('be.checked')
+      cy.get('[data-cy="skillSelect_proj2-skill2"]').should('be.checked')
+      cy.get('[data-cy="skillSelect_proj2-skill3"]').should('be.checked')
+      cy.get('[data-cy="skillSelect_proj1-skill4"]').should('be.checked')
+      cy.get('[data-cy="skillSelect_proj1-skill5"]').should('be.checked')
+
+      cy.get('[data-cy="importBtn"]').should('be.enabled');
+      cy.get('[data-cy="numSelectedSkills"]').should('have.text', '5');
+      cy.get('[aria-label="Go to page 2"').click();
+      cy.wait('@getCatalogSkills');
+
+      cy.get('[data-cy="skillSelect_proj1-skill6"]').should('not.be.checked')
+      cy.get('[data-cy="skillSelect_proj1-skill7"]').should('not.be.checked')
+      cy.get('[data-cy="skillSelect_proj2-skill8"]').should('not.be.checked')
+      cy.get('[data-cy="skillSelect_proj1-skill67"]').should('not.be.checked')
+      cy.get('[data-cy="skillSelect_proj1-skill66"]').should('not.be.checked')
+      cy.get('[data-cy="selectPageOfSkillsBtn"]').click();
+      cy.get('[data-cy="importBtn"]').should('be.enabled');
+      cy.get('[data-cy="numSelectedSkills"]').should('have.text', '10');
+      cy.get('[data-cy="skillSelect_proj1-skill6"]').should('be.checked')
+      cy.get('[data-cy="skillSelect_proj1-skill7"]').should('be.checked')
+      cy.get('[data-cy="skillSelect_proj2-skill8"]').should('be.checked')
+      cy.get('[data-cy="skillSelect_proj1-skill67"]').should('be.checked')
+      cy.get('[data-cy="skillSelect_proj1-skill66"]').should('be.checked')
+      cy.get('[aria-label="Go to page 1"').click();
+      cy.wait('@getCatalogSkills');
+      cy.get('[data-cy="skillSelect_proj1-skill1"]').should('be.checked')
+      cy.get('[data-cy="skillSelect_proj2-skill2"]').should('be.checked')
+      cy.get('[data-cy="skillSelect_proj2-skill3"]').should('be.checked')
+      cy.get('[data-cy="skillSelect_proj1-skill4"]').should('be.checked')
+      cy.get('[data-cy="skillSelect_proj1-skill5"]').should('be.checked')
+      cy.get('[data-cy="importBtn"]').click();
+
+      cy.get('[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '10');
+      cy.get('[data-cy="importedBadge-skill1"]')
+      cy.get('[data-cy="importedBadge-skill2"]')
+      cy.get('[data-cy="importedBadge-skill3"]')
+      cy.get('[data-cy="importedBadge-skill4"]')
+      cy.get('[data-cy="importedBadge-skill5"]')
+      cy.get('[data-cy="importedBadge-skill6"]')
+      cy.get('[data-cy="importedBadge-skill7"]')
+      cy.get('[data-cy="importedBadge-skill8"]')
+      cy.get('[data-cy="importedBadge-skill66"]')
+      cy.get('[data-cy="importedBadge-skill67"]')
+
+      // only 3 left after import
+      cy.get('[data-cy="importFromCatalogBtn"]').click();
+      cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '1');
+    });
+
+    it('clear removes selection of current page', () => {
+      // mix skill names since it's sorted by skillId - this will force different projects in the first page
+      cy.createSkill(1, 1, 1);
+      cy.createSkill(1, 1, 6);
+      cy.createSkill(1, 1, 7);
+      cy.createSkill(1, 1, 4);
+      cy.createSkill(1, 1, 5);
+      cy.createSkill(1, 1, 9);
+      cy.createSkill(1, 1, 66);
+      cy.createSkill(1, 1, 67);
+
+      cy.createProject(2);
+      cy.createSubject(2, 1);
+      cy.createSkill(2, 1, 2);
+      cy.createSkill(2, 1, 3);
+      cy.createSkill(2, 1, 8);
+
+      cy.exportSkillToCatalog(1, 1, 1);
+      cy.exportSkillToCatalog(1, 1, 6);
+      cy.exportSkillToCatalog(1, 1, 7);
+      cy.exportSkillToCatalog(1, 1, 4);
+      cy.exportSkillToCatalog(1, 1, 5);
+      cy.exportSkillToCatalog(1, 1, 9)
+      cy.exportSkillToCatalog(1, 1, 66)
+      cy.exportSkillToCatalog(1, 1, 67)
+
+      cy.exportSkillToCatalog(2, 1, 2); // proj 2
+      cy.exportSkillToCatalog(2, 1, 3); // proj 2
+      cy.exportSkillToCatalog(2, 1, 8); // proj 2
+
+      cy.createProject(3);
+      cy.createSubject(3, 1);
+
+      cy.intercept('/admin/projects/proj3/skills/catalog**').as('getCatalogSkills');
+
+      cy.visit('/administrator/projects/proj3/subjects/subj1');
+
+      cy.get('[data-cy="importFromCatalogBtn"]').click();
+      cy.wait('@getCatalogSkills');
+
+      cy.get('[data-cy="importBtn"]').should('be.disabled');
+      cy.get('[data-cy="numSelectedSkills"]').should('have.text', '0');
+
+      cy.get('[data-cy="skillSelect_proj1-skill1"]').should('not.be.checked')
+      cy.get('[data-cy="skillSelect_proj2-skill2"]').should('not.be.checked')
+      cy.get('[data-cy="skillSelect_proj2-skill3"]').should('not.be.checked')
+      cy.get('[data-cy="skillSelect_proj1-skill4"]').should('not.be.checked')
+      cy.get('[data-cy="skillSelect_proj1-skill5"]').should('not.be.checked')
+
+      cy.get('[data-cy="selectPageOfSkillsBtn"]').click();
+
+      cy.get('[data-cy="skillSelect_proj1-skill1"]').should('be.checked')
+      cy.get('[data-cy="skillSelect_proj2-skill2"]').should('be.checked')
+      cy.get('[data-cy="skillSelect_proj2-skill3"]').should('be.checked')
+      cy.get('[data-cy="skillSelect_proj1-skill4"]').should('be.checked')
+      cy.get('[data-cy="skillSelect_proj1-skill5"]').should('be.checked')
+
+      cy.get('[data-cy="importBtn"]').should('be.enabled');
+      cy.get('[data-cy="numSelectedSkills"]').should('have.text', '5');
+      cy.get('[aria-label="Go to page 2"').click();
+      cy.wait('@getCatalogSkills');
+
+      cy.get('[data-cy="skillSelect_proj1-skill6"]').should('not.be.checked')
+      cy.get('[data-cy="skillSelect_proj1-skill7"]').should('not.be.checked')
+      cy.get('[data-cy="skillSelect_proj2-skill8"]').should('not.be.checked')
+      cy.get('[data-cy="skillSelect_proj1-skill67"]').should('not.be.checked')
+      cy.get('[data-cy="skillSelect_proj1-skill66"]').should('not.be.checked')
+      cy.get('[data-cy="selectPageOfSkillsBtn"]').click();
+      cy.get('[data-cy="importBtn"]').should('be.enabled');
+      cy.get('[data-cy="numSelectedSkills"]').should('have.text', '10');
+      cy.get('[data-cy="skillSelect_proj1-skill6"]').should('be.checked')
+      cy.get('[data-cy="skillSelect_proj1-skill7"]').should('be.checked')
+      cy.get('[data-cy="skillSelect_proj2-skill8"]').should('be.checked')
+      cy.get('[data-cy="skillSelect_proj1-skill67"]').should('be.checked')
+      cy.get('[data-cy="skillSelect_proj1-skill66"]').should('be.checked')
+      cy.get('[aria-label="Go to page 1"').click();
+      cy.wait('@getCatalogSkills');
+      cy.get('[data-cy="skillSelect_proj1-skill1"]').should('be.checked')
+      cy.get('[data-cy="skillSelect_proj2-skill2"]').should('be.checked')
+      cy.get('[data-cy="skillSelect_proj2-skill3"]').should('be.checked')
+      cy.get('[data-cy="skillSelect_proj1-skill4"]').should('be.checked')
+      cy.get('[data-cy="skillSelect_proj1-skill5"]').should('be.checked')
+
+      cy.get('[data-cy="clearSelectedBtn"]').click();
+      cy.get('[data-cy="skillSelect_proj1-skill1"]').should('not.be.checked')
+      cy.get('[data-cy="skillSelect_proj2-skill2"]').should('not.be.checked')
+      cy.get('[data-cy="skillSelect_proj2-skill3"]').should('not.be.checked')
+      cy.get('[data-cy="skillSelect_proj1-skill4"]').should('not.be.checked')
+      cy.get('[data-cy="skillSelect_proj1-skill5"]').should('not.be.checked')
+      cy.get('[data-cy="importBtn"]').should('be.enabled');
+      cy.get('[data-cy="numSelectedSkills"]').should('have.text', '5')
+
+      cy.get('[aria-label="Go to page 2"').click();
+      cy.wait('@getCatalogSkills');
+      cy.get('[data-cy="skillSelect_proj1-skill6"]').should('be.checked')
+      cy.get('[data-cy="skillSelect_proj1-skill7"]').should('be.checked')
+      cy.get('[data-cy="skillSelect_proj2-skill8"]').should('be.checked')
+      cy.get('[data-cy="skillSelect_proj1-skill67"]').should('be.checked')
+      cy.get('[data-cy="skillSelect_proj1-skill66"]').should('be.checked')
+      cy.get('[data-cy="importBtn"]').should('be.enabled');
+      cy.get('[data-cy="numSelectedSkills"]').should('have.text', '5');
+      cy.get('[data-cy="clearSelectedBtn"]').click();
+      cy.get('[data-cy="skillSelect_proj1-skill6"]').should('not.be.checked')
+      cy.get('[data-cy="skillSelect_proj1-skill7"]').should('not.be.checked')
+      cy.get('[data-cy="skillSelect_proj2-skill8"]').should('not.be.checked')
+      cy.get('[data-cy="skillSelect_proj1-skill67"]').should('not.be.checked')
+      cy.get('[data-cy="skillSelect_proj1-skill66"]').should('not.be.checked')
+      cy.get('[data-cy="importBtn"]').should('be.disabled');
+      cy.get('[data-cy="numSelectedSkills"]').should('have.text', '0');
+    });
 });
 
 

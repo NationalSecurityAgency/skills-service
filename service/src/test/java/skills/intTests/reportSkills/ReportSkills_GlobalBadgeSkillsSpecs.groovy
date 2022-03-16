@@ -137,7 +137,7 @@ class ReportSkills_GlobalBadgeSkillsSpecs extends DefaultIntSpec {
         def user2Summary = skillsService.getBadgesSummary("user2", proj.projectId)
 
         then:
-        !user1SummaryBeforeEnable[0].badgeAchieved
+        !user1SummaryBeforeEnable
         user1Summary[0].badgeId == 'GlobalBadge1'
         user1Summary[0].badgeAchieved
         user2Summary[0].badgeId == 'GlobalBadge1'
@@ -188,14 +188,13 @@ class ReportSkills_GlobalBadgeSkillsSpecs extends DefaultIntSpec {
         def user2Summary = skillsService.getBadgesSummary("user2", proj.projectId)
 
         then:
-        !user1SummaryBeforeEnable.find{it.badgeId=='GlobalBadge1'}.badgeAchieved
+        !user1SummaryBeforeEnable.find{it.badgeId=='GlobalBadge1'}
         user1Summary.find{ it.badgeId == 'GlobalBadge1'}
-        user1Summary.find{it.badgeId == 'GlobalBadge2'}
-        !user1Summary.find{it.badgeId == 'GlobalBadge2'}.badgeAchieved
+        !user1Summary.find{it.badgeId == 'GlobalBadge2'}
         user1Summary.find{ it.badgeId == 'GlobalBadge1'}.badgeAchieved
         user2Summary.find{it.badgeId == 'GlobalBadge1'}
         !user2Summary.find{it.badgeId == 'GlobalBadge1'}.badgeAchieved
-        !user2Summary.find{it.badgeId == 'GlobalBadge2'}.badgeAchieved
+        !user2Summary.find{it.badgeId == 'GlobalBadge2'}
     }
 
     def "global badge awarded to users meeting skill and level requirements after enabling"() {
@@ -250,7 +249,7 @@ class ReportSkills_GlobalBadgeSkillsSpecs extends DefaultIntSpec {
         def user2Summary = skillsService.getBadgesSummary("user2", proj.projectId)
 
         then:
-        !user1SummaryBeforeEnable[0].badgeAchieved
+        !user1SummaryBeforeEnable
         user1Summary[0].badgeId == 'GlobalBadge1'
         user1Summary[0].badgeAchieved
         user2Summary[0].badgeId == 'GlobalBadge1'
@@ -279,7 +278,9 @@ class ReportSkills_GlobalBadgeSkillsSpecs extends DefaultIntSpec {
         skillsService.createGlobalBadge(badge)
         skillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: badge.badgeId, skillId: skill1.skillId])
         skillsService.assignSkillToGlobalBadge([projectId: proj2.projectId, badgeId: badge.badgeId, skillId: skill2.skillId])
-
+        badge.enabled = "true"
+        skillsService.createGlobalBadge(badge)
+        
         skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u123", new Date())
         skillsService.addSkill([projectId: proj2.projectId, skillId: skill2.skillId], "u123", new Date())
 
@@ -296,6 +297,7 @@ class ReportSkills_GlobalBadgeSkillsSpecs extends DefaultIntSpec {
                                    pointIncrementInterval: skill1.pointIncrementInterval,
                                    numMaxOccurrencesIncrementInterval: skill1.numMaxOccurrencesIncrementInterval,
                                    version: skill1.version,
+                                    enabled: "true",
                                    name: skill1.name], skill1.skillId)
 
         def u123SummaryAfterEditOccurrences = skillsService.getBadgesSummary("u123", proj1.projectId)

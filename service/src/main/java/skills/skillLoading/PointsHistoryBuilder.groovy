@@ -42,9 +42,9 @@ class PointsHistoryBuilder {
     List<SkillHistoryPoints> buildHistory(String projectId, String userId, Integer showHistoryForNumDays, String skillId = null, Integer version = Integer.MAX_VALUE) {
         List<DayCountItem> userPoints
         if(skillId) {
-            userPoints = userPerformedSkillRepo.calculatePointHistoryByProjectIdAndUserIdAndVersion(projectId, userId, skillId, version)
+            userPoints = userPerformedSkillRepo.calculatePointHistoryForSubject(projectId, userId, skillId, version)
         } else {
-            userPoints = userPerformedSkillRepo.calculatePointHistoryByProjectIdAndUserIdAndVersion(projectId, userId, null, version)
+            userPoints = userPerformedSkillRepo.calculatePointHistoryForProject(projectId, userId, version)
         }
 
         Map<Date, Long> pointsByDay = [:]

@@ -15,6 +15,7 @@
  */
 package skills.storage.repos.nativeSql
 
+import org.springframework.data.repository.query.Param
 import skills.controller.request.model.QueryUsersCriteriaRequest
 import skills.storage.model.QueryUsersCriteria
 import skills.storage.model.SkillDef
@@ -32,7 +33,7 @@ interface NativeQueriesRepo {
 
     void updatePointHistoryForSkill(String projectId, String subjectId, String skillId, int incrementDelta)
 
-    void updatePointTotalWhenOccurrencesAreDecreased(String projectId, String subjectId, String skillId, int pointIncrement, int numOccurrences)
+    void updatePointTotalWhenOccurrencesAreDecreased(String projectId, String subjectId, String skillId, int pointIncrement, int newOccurrences, int previousOccurrences)
 
     void updatePointHistoryWhenOccurrencesAreDecreased(String projectId, String subjectId, String skillId, int pointIncrement, int numOccurrences)
 
@@ -60,5 +61,12 @@ interface NativeQueriesRepo {
 
     Stream<String> getUserIds(QueryUsersCriteria queryUsersCriteria)
 
+    void updateUserPointsForASkill(String projectId, String skillId)
+
+    void updateUserPointsHistoryForASkill(String projectId, String skillId)
+
+    void updateUserPointsForSubjectOrGroup(String projectId, String skillId)
+
+    void updateUserPointsHistoryForProject(String projectId)
 }
 

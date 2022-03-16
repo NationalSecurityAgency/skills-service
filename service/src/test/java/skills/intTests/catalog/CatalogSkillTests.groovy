@@ -13,26 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.intTests
+package skills.intTests.catalog
 
 import groovy.json.JsonOutput
+import groovy.util.logging.Slf4j
+import org.joda.time.format.DateTimeFormat
+import org.joda.time.format.DateTimeFormatter
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
-import skills.intTests.utils.DefaultIntSpec
+import skills.controller.result.model.LevelDefinitionRes
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import skills.services.LevelDefinitionStorageService
 import skills.services.UserEventService
-import skills.storage.model.DayCountItem
 import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.SkillDefRepo
 
-import java.time.LocalDate
-
 import static skills.intTests.utils.SkillsFactory.*
 
-class CatalogSkillTests extends DefaultIntSpec {
+@Slf4j
+class CatalogSkillTests extends CatalogIntSpec {
 
     @Autowired
     UserEventService userEventService
@@ -42,6 +44,11 @@ class CatalogSkillTests extends DefaultIntSpec {
 
     @Autowired
     SkillDefRepo skillDefRepo
+
+    @Autowired
+    LevelDefinitionStorageService levelDefinitionStorageService
+
+    DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").withZoneUTC()
 
     def "add skill to catalog"() {
         def project1 = createProject(1)
@@ -209,7 +216,8 @@ class CatalogSkillTests extends DefaultIntSpec {
         postEdit.data[0].selfReportingType == SkillDef.SelfReportingType.Approval.toString()
     }
 
-    def "update skill imported from catalog"() {
+    def "update skill that has been exported to catalog, edits should be reflected on imported copies"() {
+        //changes should be reflected across all copies
         def project1 = createProject(1)
         def project2 = createProject(2)
         def project3 = createProject(3)
@@ -229,6 +237,59 @@ class CatalogSkillTests extends DefaultIntSpec {
         skillsService.createSkill(skill)
         skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
         skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+
+        when:
+        def preEdit = skillsService.getSkill([projectId: project2.projectId, subjectId: p2subj1.subjectId, skillId: skill.skillId])
+        def skillNamePreEdit = skill.name
+        def skillDescriptionPreEdit = skill.description
+        def skillHelpUrlPreEdit = skill.helpUrl
+
+        skill.name = "edited name"
+        skill.numPerformToCompletion = 50
+        skill.helpUrl = "http://newHelpUrl"
+        skill.description = "updated description"
+        skill.selfReportingType = SkillDef.SelfReportingType.Approval.toString()
+
+        skillsService.updateSkill(skill, skill.skillId)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        def postEdit = skillsService.getSkill([projectId: project2.projectId, subjectId: p2subj1.subjectId, skillId: skill.skillId])
+
+        then:
+        preEdit.name == skillNamePreEdit
+        preEdit.totalPoints == 250
+        preEdit.numPerformToCompletion == 1
+        preEdit.description == skillDescriptionPreEdit
+        preEdit.helpUrl == skillHelpUrlPreEdit
+        !preEdit.selfReportingType
+        postEdit.name == skill.name
+        postEdit.totalPoints == 12500
+        postEdit.numPerformToCompletion == 50
+        postEdit.description == skill.description
+        postEdit.helpUrl == skill.helpUrl
+        postEdit.selfReportingType == SkillDef.SelfReportingType.Approval.toString()
+    }
+
+    def "update skill imported from catalog"() {
+        def project1 = createProject(1)
+        def project2 = createProject(2)
+        def project3 = createProject(3)
+
+        def p1subj1 = createSubject(1, 1)
+        def p2subj1 = createSubject(2, 1)
+        def p3subj1 = createSubject(3, 1)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 250)
+
+        skillsService.createProject(project1)
+        skillsService.createProject(project2)
+        skillsService.createProject(project3)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p2subj1)
+        skillsService.createSubject(p3subj1)
+
+        skillsService.createSkill(skill)
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
 
         when:
         def res = skillsService.getSkillsForSubject(project2.projectId, p2subj1.subjectId)
@@ -266,7 +327,7 @@ class CatalogSkillTests extends DefaultIntSpec {
 
         skillsService.createSkill(skill)
         skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
 
         when:
         def res = skillsService.getSkillsForSubject(project2.projectId, p2subj1.subjectId)
@@ -299,8 +360,8 @@ class CatalogSkillTests extends DefaultIntSpec {
 
         skillsService.createSkill(skill)
         skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
-        skillsService.importSkillFromCatalog(project3.projectId, p3subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project3.projectId, p3subj1.subjectId, project1.projectId, skill.skillId)
 
         when:
         def p2SkillsPreDelete = skillsService.getSkillsForSubject(project2.projectId, p2subj1.subjectId)
@@ -343,7 +404,7 @@ class CatalogSkillTests extends DefaultIntSpec {
         skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
 
         when:
-        skillsService.bulkImportSkillsFromCatalog(project2.projectId, p2subj1.subjectId, [
+        skillsService.bulkImportSkillsFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, [
                 [projectId:project1.projectId, skillId: skill.skillId],
                 [projectId: project1.projectId, skillId: skill2.skillId]
         ])
@@ -354,46 +415,6 @@ class CatalogSkillTests extends DefaultIntSpec {
         skills.find { it.skillId == skill.skillId }
         skills.find { it.skillId == skill2.skillId }
         !skills.find { it.skillId == skill3.skillId }
-    }
-
-    def "import skill from catalog"() {
-        def project1 = createProject(1)
-        def project2 = createProject(2)
-
-        def p1subj1 = createSubject(1, 1)
-        def p2subj1 = createSubject(2, 1)
-        def skill = createSkill(1, 1, 1, 0, 1, 0, 250)
-        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 250)
-        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 250)
-
-        skillsService.createProject(project1)
-        skillsService.createProject(project2)
-        skillsService.createSubject(p1subj1)
-        skillsService.createSubject(p2subj1)
-        skillsService.createSkill(skill)
-        skillsService.createSkill(skill2)
-        skillsService.createSkill(skill3)
-        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
-        skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
-        skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
-
-        when:
-        def projectPreImport = skillsService.getProject(project2.projectId)
-        def subjectPreImport = skillsService.getSubject(p2subj1)
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
-        def projectPostImport1 = skillsService.getProject(project2.projectId)
-        def subjectPostImport1 = skillsService.getSubject(p2subj1)
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill2.skillId)
-        def projectPostImport2 = skillsService.getProject(project2.projectId)
-        def subjectPostImport2 = skillsService.getSubject(p2subj1)
-
-        then:
-        projectPreImport.totalPoints == 0
-        projectPostImport1.totalPoints == 250
-        projectPostImport2.totalPoints == 500
-        subjectPreImport.totalPoints == 0
-        subjectPostImport1.totalPoints == 250
-        subjectPostImport2.totalPoints == 500
     }
 
     def "import skill from catalog twice"() {
@@ -412,8 +433,8 @@ class CatalogSkillTests extends DefaultIntSpec {
         skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
 
         when:
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
 
         then:
         def e = thrown(Exception)
@@ -435,7 +456,7 @@ class CatalogSkillTests extends DefaultIntSpec {
         skillsService.createSkill(skill)
 
         when:
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
 
         then:
         def e = thrown(Exception)
@@ -469,8 +490,8 @@ class CatalogSkillTests extends DefaultIntSpec {
         skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
 
         when:
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
-        skillsService.importSkillFromCatalog(project3.projectId, p3subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project3.projectId, p3subj1.subjectId, project1.projectId, skill.skillId)
         skillsService.deleteSkill([projectId: project3.projectId, subjectId: p3subj1.subjectId, skillId: skill.skillId])
 
         def originalSkill = skillsService.getSkill([projectId: project1.projectId, subjectId: p1subj1.subjectId, skillId: skill.skillId])
@@ -509,8 +530,8 @@ class CatalogSkillTests extends DefaultIntSpec {
         skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
         skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
 
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
-        skillsService.importSkillFromCatalog(project3.projectId, p3subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project3.projectId, p3subj1.subjectId, project1.projectId, skill.skillId)
 
         when:
         def user = getRandomUsers(1)[0]
@@ -519,51 +540,6 @@ class CatalogSkillTests extends DefaultIntSpec {
         then:
         def e = thrown(Exception)
         e.getMessage().contains("explanation:Skills imported from the catalog can only be reported if the original skill is configured for Self Reporting")
-    }
-
-    def "report skill event on exported skill, should be reflected in all copies"() {
-        def project1 = createProject(1)
-        def project2 = createProject(2)
-        def project3 = createProject(3)
-
-        def p1subj1 = createSubject(1, 1)
-        def p2subj1 = createSubject(2, 1)
-        def p3subj1 = createSubject(3, 1)
-        def skill = createSkill(1, 1, 1, 0, 1, 0, 250)
-        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 250)
-        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 250)
-
-        skillsService.createProject(project1)
-        skillsService.createProject(project2)
-        skillsService.createProject(project3)
-        skillsService.createSubject(p1subj1)
-        skillsService.createSubject(p2subj1)
-        skillsService.createSubject(p3subj1)
-
-        skillsService.createSkill(skill)
-        skillsService.createSkill(skill2)
-        skillsService.createSkill(skill3)
-        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
-        skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
-        skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
-
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
-        skillsService.importSkillFromCatalog(project3.projectId, p3subj1.subjectId, project1.projectId, skill.skillId)
-
-        when:
-        def user = getRandomUsers(1)[0]
-        skillsService.addSkill([projectId: project1.projectId, skillId: skill.skillId], user)
-        def p1Stats = skillsService.getUserStats(project1.projectId, user)
-        def p2Stats = skillsService.getUserStats(project2.projectId, user)
-        def p3Stats = skillsService.getUserStats(project3.projectId, user)
-
-        then:
-        p1Stats.numSkills == 1
-        p1Stats.userTotalPoints == 250
-        p2Stats.numSkills == 1
-        p2Stats.userTotalPoints == 250
-        p3Stats.numSkills == 1
-        p3Stats.userTotalPoints == 250
     }
 
     def "report skill event on original exported skill when original project has insufficient points"() {
@@ -592,7 +568,7 @@ class CatalogSkillTests extends DefaultIntSpec {
         skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
         skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
 
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
 
         when:
         def user = getRandomUsers(1)[0]
@@ -634,7 +610,7 @@ class CatalogSkillTests extends DefaultIntSpec {
         skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
         skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
 
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
 
         when:
         def user = getRandomUsers(1)[0]
@@ -648,6 +624,7 @@ class CatalogSkillTests extends DefaultIntSpec {
         def p2Approvals = skillsService.getApprovals(project2.projectId, 7, 1, 'requestedOn', false)
 
         skillsService.approve(project1.projectId, [p1Approvals.data[0].id])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         def p1Stats = skillsService.getUserStats(project1.projectId, user)
         def p2Stats = skillsService.getUserStats(project2.projectId, user)
 
@@ -693,9 +670,9 @@ class CatalogSkillTests extends DefaultIntSpec {
         skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
         skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
 
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill2.skillId)
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill3.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill2.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill3.skillId)
 
         def user = getRandomUsers(1)[0]
         when:
@@ -789,10 +766,10 @@ class CatalogSkillTests extends DefaultIntSpec {
         skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
         skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
 
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill2.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill2.skillId)
         skillsService.createSkill(proj2_skill4)
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill3.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill3.skillId)
         skillsService.createSkill(proj2_skill5)
 
         def user = getRandomUsers(1)[0]
@@ -866,10 +843,10 @@ class CatalogSkillTests extends DefaultIntSpec {
         skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
         skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
 
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill2.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill2.skillId)
         skillsService.createSkill(proj2_skill4)
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill3.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill3.skillId)
         skillsService.createSkill(proj2_skill5)
 
         def user = getRandomUsers(1)[0]
@@ -904,7 +881,6 @@ class CatalogSkillTests extends DefaultIntSpec {
         !self5.requestedOn
     }
 
-
     def "delete user skill event for skill in catalog"() {
         def project1 = createProject(1)
         def project2 = createProject(2)
@@ -934,14 +910,15 @@ class CatalogSkillTests extends DefaultIntSpec {
         skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
         skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
 
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
-        skillsService.importSkillFromCatalog(project3.projectId, p3subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project3.projectId, p3subj1.subjectId, project1.projectId, skill.skillId)
 
         when:
 
         def user = getRandomUsers(1)[0]
         Date skillDate = new Date()
         def res = skillsService.addSkill([projectId: project1.projectId, skillId: skill.skillId], user, skillDate)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         def p1Stats = skillsService.getUserStats(project1.projectId, user)
         def p2Stats = skillsService.getUserStats(project2.projectId, user)
         def p3Stats = skillsService.getUserStats(project3.projectId, user)
@@ -992,13 +969,14 @@ class CatalogSkillTests extends DefaultIntSpec {
         skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
         skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
 
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
-        skillsService.importSkillFromCatalog(project3.projectId, p3subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project3.projectId, p3subj1.subjectId, project1.projectId, skill.skillId)
 
         when:
         def user = getRandomUsers(1)[0]
         def timestamp = new Date()
         def res = skillsService.addSkill([projectId: project2.projectId, skillId: skill.skillId], user, timestamp)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         def p1Stats = skillsService.getUserStats(project1.projectId, user)
         def p2Stats = skillsService.getUserStats(project2.projectId, user)
         def p3Stats = skillsService.getUserStats(project3.projectId, user)
@@ -1170,9 +1148,9 @@ class CatalogSkillTests extends DefaultIntSpec {
         skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
 
         when:
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill2.skillId)
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill3.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill2.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill3.skillId)
 
         def skills = skillsService.getSkillsForSubject(project2.projectId, p2subj1.subjectId)
         def skillsForProject = skillsService.getSkillsForProject(project2.projectId)
@@ -1223,7 +1201,7 @@ class CatalogSkillTests extends DefaultIntSpec {
 
         skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
         skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
 
         def stats = skillsService.getExportedSkillsForProjectStats(project1.projectId)
 
@@ -1281,12 +1259,12 @@ class CatalogSkillTests extends DefaultIntSpec {
         skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
         skillsService.exportSkillToCatalog(project3.projectId, skill7.skillId)
         def noImports = skillsService.getImportedSkillsStats(project2.projectId)
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
         def oneImport = skillsService.getImportedSkillsStats(project2.projectId)
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj2.subjectId, project1.projectId, skill2.skillId)
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill3.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj2.subjectId, project1.projectId, skill2.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill3.skillId)
         def threeImportsDifferentSubjects = skillsService.getImportedSkillsStats(project2.projectId)
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj2.subjectId, project3.projectId, skill7.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj2.subjectId, project3.projectId, skill7.skillId)
         def fourImporstTwoProjectsTwoSubjects = skillsService.getImportedSkillsStats(project2.projectId)
 
         then:
@@ -1344,9 +1322,9 @@ class CatalogSkillTests extends DefaultIntSpec {
         skillsService.exportSkillToCatalog(project3.projectId, skill7.skillId)
 
         def noImports = skillsService.getExportedSkillStats(project1.projectId, skill.skillId)
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
         def oneImport = skillsService.getExportedSkillStats(project1.projectId, skill.skillId)
-        skillsService.importSkillFromCatalog(project3.projectId, p3subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project3.projectId, p3subj1.subjectId, project1.projectId, skill.skillId)
         def twoImports = skillsService.getExportedSkillStats(project1.projectId, skill.skillId)
 
         then:
@@ -1438,7 +1416,7 @@ class CatalogSkillTests extends DefaultIntSpec {
 
         // import skill from project1, catalog should have 5 total skills remaining available after this
         //4: project1, 1: project3
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
 
         def postImportAvailableCatalogSkills = skillsService.getCatalogSkills(project2.projectId, 10, 1, "exportedOn")
 
@@ -1561,7 +1539,7 @@ class CatalogSkillTests extends DefaultIntSpec {
         skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
 
         when:
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
         def importedSkillDetails = skillsService.getSkill(["projectId": project2.projectId, "subjectId": p2subj1.subjectId, "skillId": skill.skillId])
 
         then:
@@ -1706,7 +1684,7 @@ class CatalogSkillTests extends DefaultIntSpec {
 
         when:
         skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
         skillsService.assignDependency([projectId: project1.projectId, skillId: skill2.skillId, dependentSkillId: skill.skillId])
 
         skillsService.deleteSkill([projectId: project1.projectId, subjectId: p1subj1.subjectId, skillId: skill.skillId])
@@ -1772,7 +1750,7 @@ class CatalogSkillTests extends DefaultIntSpec {
         skillsService.exportSkillToCatalog(skill.projectId, skill.skillId)
 
         when:
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
 
         then:
         def e = thrown(SkillsClientException)
@@ -2048,123 +2026,6 @@ class CatalogSkillTests extends DefaultIntSpec {
         validationResult[p3skill7.skillId].hasDependencies == false
     }
 
-    def "skill events are replicated across catalog skill copies"() {
-        def project1 = createProject(1)
-        def project2 = createProject(2)
-        def project3 = createProject(3)
-
-        def p1subj1 = createSubject(1, 1)
-        def p2subj1 = createSubject(2, 1)
-        def p3subj1 = createSubject(3, 1)
-
-        def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
-        def skill2 = createSkill(1, 1, 2, 0, 10, 0, 10)
-        def skill3 = createSkill(1, 1, 3, 0, 2, 0, 10)
-        skill3.selfReportingType = SkillDef.SelfReportingType.HonorSystem.toString()
-
-        def skill4 = createSkill(1, 1, 4, 0, 3, 0, 10)
-        skill4.selfReportingType = SkillDef.SelfReportingType.Approval.toString()
-
-        skillsService.createProject(project1)
-        skillsService.createProject(project2)
-        skillsService.createProject(project3)
-        skillsService.createSubject(p1subj1)
-        skillsService.createSubject(p2subj1)
-        skillsService.createSubject(p3subj1)
-
-        skillsService.createSkill(skill)
-        skillsService.createSkill(skill2)
-        skillsService.createSkill(skill3)
-        skillsService.createSkill(skill4)
-
-        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
-        skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
-        skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
-        skillsService.exportSkillToCatalog(project1.projectId, skill4.skillId)
-
-        when:
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
-        skillsService.importSkillFromCatalog(project3.projectId, p3subj1.subjectId, project1.projectId, skill.skillId)
-
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill2.skillId)
-        skillsService.importSkillFromCatalog(project3.projectId, p3subj1.subjectId, project1.projectId, skill2.skillId)
-
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill3.skillId)
-        skillsService.importSkillFromCatalog(project3.projectId, p3subj1.subjectId, project1.projectId, skill3.skillId)
-
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill4.skillId)
-        skillsService.importSkillFromCatalog(project3.projectId, p3subj1.subjectId, project1.projectId, skill4.skillId)
-
-        def user = getRandomUsers(1)[0]
-
-        skillsService.addSkill([projectId: project1.projectId, skillId: skill4.skillId], user)
-        def approvals = skillsService.getApprovals(project1.projectId, 10, 1, 'requestedOn', false)
-        assert approvals.count == 1
-        skillsService.approve(project1.projectId, [approvals.data[0].id])
-
-        skillsService.addSkill([projectId: project2.projectId, skillId: skill4.skillId], user)
-        def p2Approvals = skillsService.getApprovals(project2.projectId, 10, 1, 'requestedOn', false)
-        assert p2Approvals.count == 0
-        approvals = skillsService.getApprovals(project1.projectId, 10, 1, 'requestedOn', false)
-        assert approvals.count == 1
-        skillsService.approve(project1.projectId, [approvals.data[0].id])
-
-        skillsService.addSkill([projectId: project3.projectId, skillId: skill4.skillId], user)
-        def p3Approvals = skillsService.getApprovals(project2.projectId, 10, 1, 'requestedOn', false)
-        assert p3Approvals.count == 0
-        approvals = skillsService.getApprovals(project1.projectId, 10, 1, 'requestedOn', false)
-        assert approvals.count == 1
-        skillsService.approve(project1.projectId, [approvals.data[0].id])
-
-        skillsService.addSkill([projectId: project1.projectId, skillId: skill.skillId], user)
-        skillsService.addSkill([projectId: project1.projectId, skillId: skill2.skillId], user)
-        skillsService.addSkill([projectId: project3.projectId, skillId: skill3.skillId], user)
-
-        skillsService.addSkill([projectId: project1.projectId, skillId: skill.skillId], user)
-        skillsService.addSkill([projectId: project1.projectId, skillId: skill2.skillId], user)
-        skillsService.addSkill([projectId: project1.projectId, skillId: skill3.skillId], user)
-        skillsService.addSkill([projectId: project2.projectId, skillId: skill3.skillId], user)
-
-        List<DayCountItem> skill1Project1Counts = userEventService.getUserEventCountsForSkillId(project1.projectId, skill.skillId, LocalDate.now().atStartOfDay().toDate())
-        List<DayCountItem> skill1Project2Counts = userEventService.getUserEventCountsForSkillId(project2.projectId, skill.skillId, LocalDate.now().atStartOfDay().toDate())
-        List<DayCountItem> skill1Project3Counts = userEventService.getUserEventCountsForSkillId(project3.projectId, skill.skillId, LocalDate.now().atStartOfDay().toDate())
-        List<DayCountItem> skill2Project2Counts = userEventService.getUserEventCountsForSkillId(project2.projectId, skill2.skillId, LocalDate.now().atStartOfDay().toDate())
-        List<DayCountItem> skill2Project1Counts = userEventService.getUserEventCountsForSkillId(project1.projectId, skill2.skillId, LocalDate.now().atStartOfDay().toDate())
-        List<DayCountItem> skill2Project3Counts = userEventService.getUserEventCountsForSkillId(project3.projectId, skill2.skillId, LocalDate.now().atStartOfDay().toDate())
-        List<DayCountItem> skill3Project3Counts = userEventService.getUserEventCountsForSkillId(project3.projectId, skill3.skillId, LocalDate.now().atStartOfDay().toDate())
-        List<DayCountItem> skill3Project1Counts = userEventService.getUserEventCountsForSkillId(project1.projectId, skill3.skillId, LocalDate.now().atStartOfDay().toDate())
-        List<DayCountItem> skill3Project2Counts = userEventService.getUserEventCountsForSkillId(project2.projectId, skill3.skillId, LocalDate.now().atStartOfDay().toDate())
-        List<DayCountItem> skill4Project1Counts = userEventService.getUserEventCountsForSkillId(project1.projectId, skill4.skillId, LocalDate.now().atStartOfDay().toDate())
-        List<DayCountItem> skill4Project2Counts = userEventService.getUserEventCountsForSkillId(project1.projectId, skill4.skillId, LocalDate.now().atStartOfDay().toDate())
-        List<DayCountItem> skill4Project3Counts = userEventService.getUserEventCountsForSkillId(project1.projectId, skill4.skillId, LocalDate.now().atStartOfDay().toDate())
-
-        then:
-        skill1Project1Counts.size() == 1
-        skill1Project1Counts[0].count == 2
-        skill1Project2Counts.size() == 1
-        skill1Project2Counts[0].count == 2
-        skill1Project3Counts.size() == 1
-        skill1Project3Counts[0].count == 2
-        skill2Project2Counts.size() == 1
-        skill2Project2Counts[0].count == 2
-        skill2Project1Counts.size() == 1
-        skill2Project1Counts[0].count == 2
-        skill2Project3Counts.size() == 1
-        skill2Project3Counts[0].count == 2
-        skill3Project3Counts.size() == 1
-        skill3Project3Counts[0].count == 3
-        skill3Project1Counts.size() == 1
-        skill3Project1Counts[0].count == 3
-        skill3Project2Counts.size() == 1
-        skill3Project2Counts[0].count == 3
-        skill4Project1Counts.size() == 1
-        skill4Project1Counts[0].count == 3
-        skill4Project2Counts.size() == 1
-        skill4Project2Counts[0].count == 3
-        skill4Project3Counts.size() == 1
-        skill4Project3Counts[0].count == 3
-    }
-
     def "project badges can depend on imported skills" () {
         def project1 = createProject(1)
         def project2 = createProject(2)
@@ -2207,8 +2068,8 @@ class CatalogSkillTests extends DefaultIntSpec {
         skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
         skillsService.exportSkillToCatalog(project1.projectId, skill4.skillId)
 
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
-        skillsService.importSkillFromCatalog(project3.projectId, p3subj1.subjectId, project1.projectId, skill3.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project3.projectId, p3subj1.subjectId, project1.projectId, skill3.skillId)
 
         skillsService.assignSkillToBadge(project2.projectId, p2badge1.badgeId, p2skill1.skillId)
         skillsService.assignSkillToBadge(project2.projectId, p2badge1.badgeId, skill.skillId)
@@ -2228,11 +2089,13 @@ class CatalogSkillTests extends DefaultIntSpec {
         skillsService.addSkill([projectId: project2.projectId, skillId: p2skill1.skillId], user)
         skillsService.addSkill([projectId: project1.projectId, skillId: skill.skillId], user)
 
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         def p2bSumm = skillsService.getBadgeSummary(user, project2.projectId, p2badge1.badgeId)
         def p3bSumPre = skillsService.getBadgeSummary(user, project3.projectId, p3badge1.badgeId)
 
         skillsService.addSkill([projectId: project1.projectId, skillId: skill3.skillId], user)
         skillsService.addSkill([projectId: project3.projectId, skillId: p3skill1.skillId], user)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         def p3bSumPost = skillsService.getBadgeSummary(user, project3.projectId, p3badge1.badgeId)
 
         then:
@@ -2289,8 +2152,8 @@ class CatalogSkillTests extends DefaultIntSpec {
         skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
         skillsService.exportSkillToCatalog(project1.projectId, skill4.skillId)
 
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
-        skillsService.importSkillFromCatalog(project3.projectId, p3subj1.subjectId, project1.projectId, skill3.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project3.projectId, p3subj1.subjectId, project1.projectId, skill3.skillId)
 
         skillsService.assignSkillToBadge(project2.projectId, p2badge1.badgeId, p2skill1.skillId)
         skillsService.assignSkillToBadge(project2.projectId, p2badge1.badgeId, skill.skillId)
@@ -2360,8 +2223,8 @@ class CatalogSkillTests extends DefaultIntSpec {
         skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
         skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
 
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
-        skillsService.importSkillFromCatalog(project3.projectId, p3subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project3.projectId, p3subj1.subjectId, project1.projectId, skill.skillId)
 
         def supervisorService = createSupervisor()
 
@@ -2415,8 +2278,8 @@ class CatalogSkillTests extends DefaultIntSpec {
         skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
         skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
 
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
-        skillsService.importSkillFromCatalog(project3.projectId, p3subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project3.projectId, p3subj1.subjectId, project1.projectId, skill.skillId)
 
         def supervisorService = createSupervisor()
 
@@ -2463,8 +2326,8 @@ class CatalogSkillTests extends DefaultIntSpec {
         skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
         skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
 
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
-        skillsService.importSkillFromCatalog(project3.projectId, p3subj1.subjectId, project1.projectId, skill2.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project3.projectId, p3subj1.subjectId, project1.projectId, skill2.skillId)
 
         when:
         skillsService.shareSkill(project2.projectId, skill.skillId, project3.projectId)
@@ -2505,8 +2368,8 @@ class CatalogSkillTests extends DefaultIntSpec {
         skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
         skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
 
-        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
-        skillsService.importSkillFromCatalog(project3.projectId, p3subj1.subjectId, project1.projectId, skill2.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalogAndFinalize(project3.projectId, p3subj1.subjectId, project1.projectId, skill2.skillId)
 
         when:
         skillsService.shareSkill(project2.projectId, skill.skillId, "ALL_SKILLS_PROJECTS")
@@ -2598,6 +2461,145 @@ class CatalogSkillTests extends DefaultIntSpec {
         sharedSkills.size() == 1
         sharedSkills[0].skillName == skill.name
         sharedSkills[0].projectId == project1.projectId
+    }
+
+    def "changes in points per increment of exported skill are not replicated to imported skills (modifications are propagated to imported fields on async basis)"() {
+        def project1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1_skills = (1..3).collect {createSkill(1, 1, it, 0, 5, 0, 250) }
+        skillsService.createProjectAndSubjectAndSkills(project1, p1subj1, p1_skills)
+        p1_skills.each { skillsService.exportSkillToCatalog(project1.projectId, it.skillId) }
+
+        def project2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def p2_skills = (1..3).collect {createSkill(2, 1, 3+it, 0, 5, 0, 250) }
+        skillsService.createProjectAndSubjectAndSkills(project2, p2subj1, p2_skills)
+        p2_skills.each { skillsService.exportSkillToCatalog(project2.projectId, it.skillId) }
+
+        skillsService.bulkImportSkillsFromCatalog(project2.projectId, p2subj1.subjectId, p1_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        when:
+        p1_skills[0].pointIncrement = 5000
+        skillsService.createSkills([p1_skills[0]])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        then:
+        //projectId, subjectId, skillId
+        skillsService.getSkill([projectId: project2.projectId, subjectId: p2subj1.subjectId, skillId: p1_skills[0].skillId]).pointIncrement == 250
+        skillsService.getSkill([projectId: project1.projectId, subjectId: p1subj1.subjectId, skillId: p1_skills[0].skillId]).pointIncrement == 5000
+    }
+
+    def "changes in number of occurrences of exported skill ARE replicated to imported skills (modifications are propagated to imported fields on async basis)"() {
+        def project1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1_skills = (1..3).collect {createSkill(1, 1, it, 0, 5, 0, 250) }
+        skillsService.createProjectAndSubjectAndSkills(project1, p1subj1, p1_skills)
+        p1_skills.each { skillsService.exportSkillToCatalog(project1.projectId, it.skillId) }
+
+        def project2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def p2_skills = (1..3).collect {createSkill(2, 1, 3+it, 0, 5, 0, 250) }
+        skillsService.createProjectAndSubjectAndSkills(project2, p2subj1, p2_skills)
+        p2_skills.each { skillsService.exportSkillToCatalog(project2.projectId, it.skillId) }
+
+        skillsService.bulkImportSkillsFromCatalog(project2.projectId, p2subj1.subjectId, p1_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        when:
+        p1_skills[0].pointIncrement = 250
+        p1_skills[0].numPerformToCompletion = 10
+        skillsService.createSkills([p1_skills[0]])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        then:
+        //projectId, subjectId, skillId
+        skillsService.getSkill([projectId: project2.projectId, subjectId: p2subj1.subjectId, skillId: p1_skills[0].skillId]).totalPoints == 2500
+        skillsService.getSkill([projectId: project1.projectId, subjectId: p1subj1.subjectId, skillId: p1_skills[0].skillId]).totalPoints == 2500
+    }
+
+    def "changes in the number of occurrences of an exported skill should cause changes in the level thresholds for the importing project and subject"() {
+        def project1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1_skills = (1..4).collect {createSkill(1, 1, it, 0, 1, 0, 250) }
+        skillsService.createProjectAndSubjectAndSkills(project1, p1subj1, p1_skills)
+        p1_skills.each { skillsService.exportSkillToCatalog(project1.projectId, it.skillId) }
+
+        def project2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def p2_skills = (1..4).collect {createSkill(2, 1, 3+it, 0, 1, 0, 250) }
+        skillsService.createProjectAndSubjectAndSkills(project2, p2subj1, p2_skills)
+
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, p1_skills[0].skillId)
+
+        List<LevelDefinitionRes> subjectLevelsPreEdit = levelDefinitionStorageService.getLevels(project2.projectId, p2subj1.subjectId)
+        List<LevelDefinitionRes> projectLevelsPreEdit = levelDefinitionStorageService.getLevels(project2.projectId)
+
+        println "subject pre: "+subjectLevelsPreEdit
+        println "project pre: "+projectLevelsPreEdit
+
+        when:
+        p1_skills[0].numPerformToCompletion = 5
+        skillsService.createSkills([p1_skills[0]])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        List<LevelDefinitionRes> subjectLevelsPostEdit = levelDefinitionStorageService.getLevels(project2.projectId, p2subj1.subjectId)
+        List<LevelDefinitionRes> projectLevelsPostEdit = levelDefinitionStorageService.getLevels(project2.projectId)
+
+        println "subject post: "+subjectLevelsPostEdit
+        println "project post: "+projectLevelsPostEdit
+
+        then:
+        subjectLevelsPreEdit[0].pointsFrom == 125
+        subjectLevelsPreEdit[1].pointsFrom == 312
+        subjectLevelsPreEdit[2].pointsFrom == 562
+        subjectLevelsPreEdit[3].pointsFrom == 837
+        subjectLevelsPreEdit[4].pointsFrom == 1150
+        projectLevelsPreEdit[0].pointsFrom == 125
+        projectLevelsPreEdit[1].pointsFrom == 312
+        projectLevelsPreEdit[2].pointsFrom == 562
+        projectLevelsPreEdit[3].pointsFrom == 837
+        projectLevelsPreEdit[4].pointsFrom == 1150
+        subjectLevelsPostEdit[0].pointsFrom == 225
+        subjectLevelsPostEdit[0].pointsFrom == 225
+    }
+
+    def "points awarded for imported skill must have last earned date"() {
+        def project1 = createProject(1)
+        def project2 = createProject(2)
+
+        def p1subj1 = createSubject(1, 1)
+        def p2subj1 = createSubject(2, 1)
+
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 50)
+
+        def p2skill1 = createSkill(2, 1, 55, 0, 1, 0, 100)
+
+        skillsService.createProject(project1)
+        skillsService.createProject(project2)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p2subj1)
+
+        skillsService.createSkill(skill)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(p2skill1)
+
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.finalizeSkillsImportFromCatalog(project2.projectId, true)
+
+        def user = getRandomUsers(1)[0]
+
+        when:
+        Date date = new Date()
+        skillsService.addSkill([projectId: project1.projectId, skillId: skill.skillId], user, date)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        def subjectUsers = skillsService.getSubjectUsers(project2.projectId, p2subj1.subjectId)
+
+        then:
+        subjectUsers.data[0].userId == user
+        subjectUsers.data[0].lastUpdated == DTF.print(date.time)
     }
 
 }

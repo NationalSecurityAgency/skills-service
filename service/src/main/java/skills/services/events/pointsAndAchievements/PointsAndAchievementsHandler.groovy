@@ -23,7 +23,9 @@ import org.springframework.stereotype.Component
 import skills.services.LevelDefinitionStorageService
 import skills.services.events.CompletionItem
 import skills.services.events.SkillDate
+import skills.services.events.SkillEventResult
 import skills.storage.model.SkillDefMin
+import skills.storage.model.UserAchievement
 import skills.storage.repos.SkillEventsSupportRepo
 import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
@@ -76,5 +78,26 @@ class PointsAndAchievementsHandler {
         PointsAndAchievementsBuilder.PointsAndAchievementsResult result = builder.build()
         saver.save(result.dataToSave)
         return result.completionItems
+    }
+
+    @Profile
+    void documentSkillAchieved(String userId, SkillDefMin skillDefinition, SkillEventResult res, SkillDate skillDate) {
+        Date achievedOn = getAchievedOnDate(userId, skillDefinition, skillDate)
+        UserAchievement skillAchieved = new UserAchievement(userId: userId.toLowerCase(), projectId: skillDefinition.projectId, skillId: skillDefinition.skillId, skillRefId: skillDefinition?.id,
+                pointsWhenAchieved: skillDefinition.totalPoints, achievedOn: achievedOn)
+        achievedLevelRepo.save(skillAchieved)
+        res.completed.add(new CompletionItem(type: CompletionItem.CompletionItemType.Skill, id: skillDefinition.skillId, name: skillDefinition.name))
+    }
+
+    @Profile
+    private Date getAchievedOnDate(String userId, SkillDefMin skillDefinition, SkillDate skillDate) {
+        if (!skillDate.isProvided) {
+            return skillDate.date
+        }
+        Date achievedOn = skillEventsSupportRepo.getUserPerformedSkillLatestDate(userId.toLowerCase(), skillDefinition.projectId, skillDefinition.skillId)
+        if (!achievedOn || skillDate.date.after(achievedOn)) {
+            achievedOn = skillDate.date
+        }
+        return achievedOn
     }
 }

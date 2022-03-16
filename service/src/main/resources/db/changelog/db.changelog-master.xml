@@ -6,6 +6,13 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
+    <property name="task_data_type" value="mediumblob" dbms="h2"/>
+    <property name="task_data_type" value="bytea" dbms="postgresql"/>
+    <property name="task_name_type" value="varchar(100)" dbms="h2"/>
+    <property name="task_name_type" value="text" dbms="postgresql"/>
+    <property name="task_instance_type" value="varchar(100)" dbms="h2"/>
+    <property name="task_instance_type" value="text" dbms="postgresql"/>
+
     <changeSet id="1" author="skills team">
 
         <!-- ============================================================================
@@ -1579,5 +1586,49 @@
             <column name="lock" type="varchar(255)" value="catalog_skill_update_lock"/>
         </insert>
 
+    </changeSet>
+
+    <changeSet id="22" author="skills team">
+        <createTable tableName="scheduled_tasks">
+            <column name="task_name" type="${task_name_type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="task_instance" type="${task_instance_type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="task_data" type="${task_data_type}"/>
+            <!-- library wants the field defined as timestamptz, which is recommended against by postgres, hopefully this will work instead -->
+            <column name="execution_time" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="picked" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column name="picked_by" type="text"/>
+            <column name="last_success" type="datetime"/>
+            <column name="last_failure" type="datetime"/>
+            <column name="consecutive_failures" type="int"/>
+            <column name="last_heartbeat" type="datetime"/>
+            <column name="version" type="bigint"/>
+        </createTable>
+        <addPrimaryKey tableName="scheduled_tasks" columnNames="task_name, task_instance"/>
+    </changeSet>
+
+    <changeSet id="23" author="skills team">
+        <sql dbms="postgresql">
+            create index index_user_performed_skill_skill_id_like on user_performed_skill (lower(skill_id) varchar_pattern_ops);
+            create index index_user_performed_skill_skill_id_lower on user_performed_skill (lower(skill_id));
+            create index index_user_events_project_id_lower on user_events (lower(project_id));
+            create index index_skill_definition_project_id_lower on skill_definition (lower(project_id));
+            create index index_settings_project_id_lower on settings (lower(project_id));
+            create index index_project_definition_name_like on project_definition (lower(name) varchar_pattern_ops);
+            create index index_project_definition_name_lower on project_definition (lower(name));
+            create index index_user_performed_skill_user_id_like on user_performed_skill (lower(user_id) varchar_pattern_ops);
+            create index index_user_performed_skill_user_id_lower on user_performed_skill (lower(user_id));
+            create index index_user_tags_value_like on user_tags (lower(value) varchar_pattern_ops);
+            create index index_user_tags_value_lower on user_tags (lower(value));
+            create index index_user_attrs_user_id_for_display_like on user_attrs (lower(user_id_for_display) varchar_pattern_ops);
+            create index index_user_attrs_user_id_for_display_lower on user_attrs (lower(user_id_for_display));
+        </sql>
     </changeSet>
 </databaseChangeLog>

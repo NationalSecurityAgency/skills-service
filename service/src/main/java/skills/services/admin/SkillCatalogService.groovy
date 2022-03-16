@@ -15,6 +15,7 @@
  */
 package skills.services.admin
 
+import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
@@ -26,32 +27,18 @@ import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.CatalogSkill
+import skills.controller.request.model.ImportedSkillUpdate
 import skills.controller.request.model.SkillImportRequest
-import skills.controller.result.model.CatalogSkillRes
-import skills.controller.result.model.ExportedSkillRes
-import skills.controller.result.model.ExportedSkillStats
-import skills.controller.result.model.ExportedSkillUser
-import skills.controller.result.model.ExportedSkillsStats
-import skills.controller.result.model.ImportedSkillStats
-import skills.controller.result.model.ProjectNameAwareSkillDefRes
-import skills.controller.result.model.SkillDefRes
-import skills.controller.result.model.ExportableToCatalogValidationResult
-import skills.services.LockingService
+import skills.controller.request.model.SkillRequest
+import skills.controller.result.model.*
 import skills.services.RuleSetDefGraphService
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.accessors.SkillDefAccessor
-import skills.storage.model.ExportedSkill
-import skills.storage.model.ExportedSkillTiny
-import skills.storage.model.ImportExportStats
-import skills.storage.model.QueuedSkillUpdate
-import skills.storage.model.SkillDef
-import skills.storage.model.SkillDefMin
-import skills.storage.model.SkillDefWithExtra
-import skills.storage.model.SkillRelDef
+import skills.storage.model.*
 import skills.storage.repos.ExportedSkillRepo
-import skills.storage.repos.QueuedSkillUpdateRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillDefWithExtraRepo
+import skills.storage.repos.SkillRelDefRepo
 import skills.utils.Props
 
 @Service
@@ -73,20 +60,19 @@ class SkillCatalogService {
     SkillDefRepo skillDefRepo
 
     @Autowired
+    SkillRelDefRepo skillRelDefRepo
+
+    @Autowired
     RuleSetDefGraphService relationshipService
 
     @Autowired
     SkillsAdminService skillsAdminService
 
     @Autowired
-    QueuedSkillUpdateRepo queuedSkillUpdateRepo
-
-    @Autowired
-    LockingService lockingService
-
-    @Autowired
     SkillDefWithExtraRepo skillDefWithExtraRepo
 
+    @Autowired
+    SkillCatalogFinalizationService skillCatalogFinalizationService
 
     @Transactional(readOnly = true)
     TotalCountAwareResult<ProjectNameAwareSkillDefRes> getSkillsAvailableInCatalog(String projectId, String projectNameSearch, String subjectNameSearch, String skillNameSearch, PageRequest pageable) {
@@ -224,32 +210,30 @@ class SkillCatalogService {
 
     @Transactional
     void exportSkillToCatalog(String projectId, List<String> skillIds) {
+
         skillIds?.each { String skillId ->
             try {
                 exportSkillToCatalog(projectId, skillId)
             } catch (Exception throwable) {
                 if (throwable instanceof SkillException) {
-                    throw  throwable
+                    throw throwable
                 }
                 throw new SkillException("Failed to export batch, the failure was for the skillId [${skillId}]", throwable, projectId, skillId)
             }
         }
     }
 
-    @Transactional
-    void importSkillFromCatalog(String projectIdFrom, String skillIdFrom, String projectIdTo, String subjectIdTo) {
+    @Transactional(readOnly = true)
+    public boolean isSkillImportedFromCatalog(String projectId, String skillId) {
+        return skillDefRepo.isImportedFromCatalog(projectId, skillId)
+    }
+
+    private void importSkillFromCatalog(String projectIdFrom, String skillIdFrom, String projectIdTo, SkillDef subjectTo) {
         boolean inCatalog = isAvailableInCatalog(projectIdFrom, skillIdFrom)
         SkillsValidator.isTrue(inCatalog, "Skill [${skillIdFrom}] from project [${projectIdFrom}] has not been shared to the catalog and may not be imported")
         projDefAccessor.getProjDef(projectIdFrom)
-        projDefAccessor.getProjDef(projectIdTo)
+
         SkillDefWithExtra original = skillAccessor.getSkillDefWithExtra(projectIdFrom, skillIdFrom)
-
-        SkillDef.ContainerType subjectType = SkillDef.ContainerType.Subject
-        SkillDef subject = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectIdTo, subjectIdTo, subjectType)
-
-        if (!subject) {
-            throw new SkillException("Requested parent skill id [${subjectIdTo}] doesn't exist for type [${subjectType}].", projectIdTo, subjectIdTo)
-        }
 
         if (skillDefRepo.existsByProjectIdAndSkillIdAllIgnoreCase(projectIdTo, skillIdFrom)) {
             throw new SkillException("Cannot import Skill from catalog, [${skillIdFrom}] already exists in Project", projectIdTo, skillIdFrom)
@@ -266,21 +250,54 @@ class SkillCatalogService {
         copy.readOnly = 'true'
         copy.copiedFromProjectId = projectIdFrom
         copy.copiedFrom = original.id
-        copy.subjectId = subject.skillId
+        copy.subjectId = subjectTo.skillId
         copy.version = skillsAdminService.findLatestSkillVersion(projectIdTo)
         copy.numPerformToCompletion = numToCompletion
         copy.selfReportingType = original.selfReportingType?.toString()
+        copy.enabled = Boolean.FALSE.toString()
 
         skillsAdminService.saveSkill(copy.skillId, copy)
     }
 
     @Transactional
+    @Profile
     void importSkillsFromCatalog(String projectIdTo, String subjectIdTo, List<CatalogSkill> listOfSkills) {
+        if (skillCatalogFinalizationService.getCurrentState(projectIdTo) == SkillCatalogFinalizationService.FinalizeState.RUNNING) {
+            throw new SkillException("Cannot import skills in the middle of the finalization process", projectIdTo)
+        }
+        log.info("Import skills into the catalog. projectIdTo=[{}], subjectIdTo=[{}], listOfSkills={}", projectIdTo, subjectIdTo, listOfSkills)
+        // validate
+        projDefAccessor.getProjDef(projectIdTo)
+
+        SkillDef.ContainerType subjectType = SkillDef.ContainerType.Subject
+        SkillDef subjectTo = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectIdTo, subjectIdTo, subjectType)
+
+        if (!subjectTo) {
+            throw new SkillException("Requested parent skill id [${subjectIdTo}] doesn't exist for type [${subjectType}].", projectIdTo, subjectIdTo)
+        }
+
+        Set<String> validateProjectIds = new HashSet<>()
         listOfSkills?.each {
-            importSkillFromCatalog(it.projectId, it.skillId, projectIdTo, subjectIdTo)
+            if (!validateProjectIds.contains(it.projectId)) {
+                projDefAccessor.getProjDef(it.projectId)
+                validateProjectIds.add(it.projectId)
+            }
+
+            importSkillFromCatalog(it.projectId, it.skillId, projectIdTo, subjectTo)
         }
     }
 
+    void requestFinalizationOfImportedSkills(String projectId) {
+         skillCatalogFinalizationService.requestFinalizationOfImportedSkills(projectId)
+    }
+
+    CatalogFinalizeInfoResult getFinalizeInfo(String projectId) {
+        int numDisabled = skillDefRepo.countByProjectIdAndEnabledAndCopiedFromIsNotNull(projectId, Boolean.FALSE.toString())
+        boolean isRunning = skillCatalogFinalizationService.getCurrentState(projectId) == SkillCatalogFinalizationService.FinalizeState.RUNNING
+        return new CatalogFinalizeInfoResult(projectId: projectId, numSkillsToFinalize: numDisabled, isRunning: isRunning)
+    }
+
+    @Profile
     @Transactional(readOnly=true)
     boolean isAvailableInCatalog(String projectId, String skillId) {
         // can add sharing restriction checks here in the future
@@ -381,33 +398,28 @@ class SkillCatalogService {
     }
 
     @Transactional
-    void distributeCatalogSkillUpdates() {
-        lockingService.lockForUpdatingCatalogSkills()
-        // queued skill update needs to include
-        Iterable<QueuedSkillUpdate> queuedSkillUpdates = queuedSkillUpdateRepo.findAll()
-
-        log.debug("found [${queuedSkillUpdates?.size()}] updated catalog skills")
-        queuedSkillUpdates.groupBy { it.skill.id }.each{key, value ->
-            SkillDefWithExtra og = value?.first()?.skill
-            List<SkillDefWithExtra> related = getRelatedSkills(og)
-            log.debug("found [${related?.size()}] imported skills based off of [${og.skillId}]")
-            related?.each { SkillDefWithExtra imported ->
-                ReplicatedSkillUpdateRequest copy = new ReplicatedSkillUpdateRequest()
-                Props.copy(og, copy)
-                copy.copiedFrom = og.id
-                copy.projectId = imported.projectId
-                copy.copiedFromProjectId = og.projectId
-                copy.readOnly = Boolean.TRUE.toString()
-                copy.version = imported.version
-                copy.numPerformToCompletion = og.totalPoints / og.pointIncrement
-                copy.subjectId = relationshipService.getParentSkill(imported.id).skillId
-                copy.selfReportingType = og.selfReportingType?.toString()
-                skillsAdminService.saveSkill(imported.skillId, copy)
-            }
+    void distributeCatalogSkillUpdates(String projectId, String catalogSkillId, Integer rawId) {
+        Optional<SkillDefWithExtra> opt = skillDefWithExtraRepo.findById(rawId)
+        if (opt.isEmpty()) {
+            log.warn("scheduled update for [${projectId} - ${catalogSkillId} - ${rawId}] cannot be performed as the specified catalog skill does not exist")
+            return
         }
+        SkillDefWithExtra og = opt.get()
+        List<SkillDefWithExtra> related = getRelatedSkills(og)
 
-        if (queuedSkillUpdates) {
-            queuedSkillUpdateRepo.deleteAll(queuedSkillUpdates)
+        log.debug("found [{}] imported skills based off of [{}]", related?.size(), og.skillId)
+        related?.each { SkillDefWithExtra imported ->
+            ReplicatedSkillUpdateRequest copy = new ReplicatedSkillUpdateRequest()
+            Props.copy(og, copy)
+            copy.copiedFrom = og.id
+            copy.projectId = imported.projectId
+            copy.copiedFromProjectId = og.projectId
+            copy.readOnly = Boolean.TRUE.toString()
+            copy.version = imported.version
+            copy.numPerformToCompletion = og.totalPoints / og.pointIncrement
+            copy.subjectId = skillRelDefRepo.findSubjectSkillIdByChildId(imported.id)
+            copy.selfReportingType = og.selfReportingType?.toString()
+            skillsAdminService.saveSkill(imported.skillId, copy)
         }
     }
 
@@ -435,6 +447,30 @@ class SkillCatalogService {
     @Transactional(readOnly = true)
     List<String> getSkillIdsInCatalog(String projectId, List<String> skillIds) {
         exportedSkillRepo.doSkillsExistInCatalog(projectId, skillIds)
+    }
+
+    @Transactional
+    void updateImportedSkill(String projectId, String skillId, ImportedSkillUpdate importedSkillUpdate) {
+        SkillDefWithExtra skillDefWithExtra = skillAccessor.getSkillDefWithExtra(projectId, skillId, [SkillDef.ContainerType.Skill])
+        SkillDef subject = relationshipService.getParentSkill(skillDefWithExtra.id)
+        SkillRequest skillRequest = new SkillRequest(
+                pointIncrement: importedSkillUpdate.pointIncrement, // update
+
+                skillId: skillDefWithExtra.skillId,
+                projectId: skillDefWithExtra.projectId,
+                subjectId: subject.skillId,
+                name: skillDefWithExtra.name,
+                pointIncrementInterval: skillDefWithExtra.pointIncrementInterval,
+                numMaxOccurrencesIncrementInterval: skillDefWithExtra.numMaxOccurrencesIncrementInterval,
+                numPerformToCompletion: (skillDefWithExtra.totalPoints / skillDefWithExtra.pointIncrement),
+                version: skillDefWithExtra.version,
+                description: skillDefWithExtra.description,
+                helpUrl: skillDefWithExtra.helpUrl,
+                selfReportingType: skillDefWithExtra.selfReportingType,
+                enabled: skillDefWithExtra.enabled,
+        )
+        skillsAdminService.saveSkill(skillDefWithExtra.skillId, skillRequest, false)
+
     }
 
     private static PageRequest convertForCatalogSkills(PageRequest pageRequest) {

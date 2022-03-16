@@ -15,6 +15,9 @@
  */
 package skills.controller.result.model
 
+import groovy.transform.ToString
+
+@ToString(includes = ["level", "percent", "pointsFrom", "pointsTo"], includeNames = true)
 class LevelDefinitionRes {
     String projectId
 

@@ -28,6 +28,7 @@ import skills.controller.request.model.SubjectRequest
 import skills.controller.result.model.SubjectResult
 import skills.services.*
 import skills.storage.model.ProjDef
+import skills.storage.model.SkillCounts
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefParent
 import skills.storage.model.SkillDefWithExtra
@@ -200,9 +201,21 @@ class SubjAdminService {
                 helpUrl: InputSanitizer.unsanitizeUrl(skillDef.helpUrl)
         )
 
-        res.numSkills = calculateNumChildSkills(skillDef)
-        res.numGroups = calculateNumGroups(skillDef)
+        SkillCounts skillCounts = getSkillsStatsForSubjects(skillDef)
+
+        res.numGroups = skillCounts.getEnabledGroupsCount()  ?: 0
+        res.numGroupsDisabled = skillCounts.getDisabledGroupsCount() ?: 0
+
+        res.numSkills = skillCounts.getEnabledSkillsCount() ?: 0
+        res.numSkillsDisabled = skillCounts.getDisabledSkillsCount() ?: 0
+        res.numSkillsImportedAndDisabled = skillCounts.getDisabledImportedSkillsCount() ?: 0
+
         return res
+    }
+
+    @Profile
+    private SkillCounts getSkillsStatsForSubjects(SkillDefWithExtra skillDef) {
+        skillDefRepo.getSkillsCountsForParentId(skillDef.id)
     }
 
     @Transactional
@@ -221,7 +234,7 @@ class SubjAdminService {
 
     @Profile
     private long calculateNumChildSkills(SkillDefParent skillDef) {
-        long skillCount = skillDefRepo.countActiveChildSkillsByIdAndRelationshipType(skillDef.id, SkillRelDef.RelationshipType.RuleSetDefinition)
+        long skillCount = skillDefRepo.countChildSkillsByIdAndRelationshipTypeAndEnabled(skillDef.id, SkillRelDef.RelationshipType.RuleSetDefinition, "true")
         skillCount += skillDefRepo.countActiveGroupChildSkillsForSubject(skillDef.id)
         return skillCount
     }

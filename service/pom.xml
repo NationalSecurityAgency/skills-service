@@ -160,6 +160,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.github.kagkarlsson</groupId>
+            <artifactId>db-scheduler-spring-boot-starter</artifactId>
+            <version>${db-scheduler.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-access</artifactId>
         </dependency>
@@ -567,7 +573,10 @@
                 <version>3.0</version>
                 <configuration>
                     <header>${basedir}/../license-add/LICENSE-HEADER.txt</header>
-                    <validHeaders>${basedir}/../license-add/LICENSE-HEADER_2021.txt</validHeaders>
+                    <validHeaders>
+                        <validHeader>${basedir}/../license-add/LICENSE-HEADER_2021.txt</validHeader>
+                        <validHeader>${basedir}/../license-add/LICENSE-HEADER_2022.txt</validHeader>
+                    </validHeaders>
                     <excludes>
                         <exclude>**/*.xml</exclude>
                         <exclude>**/*.jks</exclude>

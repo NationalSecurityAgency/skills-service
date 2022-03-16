@@ -15,12 +15,14 @@
  */
 package skills.storage.repos.nativeSql
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Conditional
 import org.springframework.stereotype.Service
 import skills.controller.request.model.QueryUsersCriteriaRequest
 import skills.controller.request.model.SubjectLevelQueryRequest
 import skills.storage.model.QueryUsersCriteria
 import skills.storage.model.SkillDef
+import skills.storage.repos.UserPointsRepo
 
 import javax.persistence.EntityManager
 import javax.persistence.PersistenceContext
@@ -33,6 +35,9 @@ class PostgresQlNativeRepo implements NativeQueriesRepo {
 
     @PersistenceContext
     EntityManager entityManager;
+
+    @Autowired
+    UserPointsRepo userPointsRepo
 
     @Override
     void decrementPointsForDeletedSkill(String projectId, String deletedSkillId, String parentSubjectSkillId) {
@@ -140,8 +145,11 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
                 FROM 
                     user_performed_skill
                 WHERE 
-                    skill_id = :skillId
-                    AND project_id = :projectId
+                    skill_ref_id in (
+                        select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id 
+                        from skill_definition 
+                        where type = 'Skill' and project_id = :projectId and skill_id = :skillId
+                    )
                 GROUP BY 
                     user_id
             )
@@ -174,7 +182,11 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
                     FROM 
                         user_performed_skill
                     WHERE 
-                        skill_id = :skillId AND project_id = :projectId 
+                        skill_ref_id in (
+                            select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id 
+                            from skill_definition 
+                            where type = 'Skill' and project_id = :projectId and skill_id = :skillId
+                        )
                     GROUP BY 
                         user_id, DATE(performed_on)
                 )
@@ -200,7 +212,7 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
 
 
     @Override
-    void updatePointTotalWhenOccurrencesAreDecreased(String projectId, String subjectId, String skillId, int pointIncrement, int numOccurrences) {
+    void updatePointTotalWhenOccurrencesAreDecreased(String projectId, String subjectId, String skillId, int pointIncrement, int newOccurrences, int previousOccurrences) {
         subjectId = subjectId ?: '';
         String q = '''
             WITH
@@ -215,13 +227,13 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
                         FROM user_performed_skill
                         where project_id = :projectId and skill_id = :skillId
                     ) rank_filter
-                    WHERE RANK > :numOccurrences
+                    WHERE RANK >= :newOccurrences
                     group by user_id
                 )
             UPDATE 
                 user_points points
             SET 
-                points = points - (eventsRes.eventCount * :pointIncrement) 
+                points = points - :pointsDelta 
             FROM
                 eventsRes
             WHERE
@@ -234,8 +246,8 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
         query.setParameter("projectId", projectId);
         query.setParameter("skillId", skillId)
         query.setParameter("subjectId", subjectId)
-        query.setParameter("numOccurrences", numOccurrences)
-        query.setParameter("pointIncrement", pointIncrement)
+        query.setParameter("newOccurrences", newOccurrences)
+        query.setParameter("pointsDelta", (previousOccurrences - newOccurrences) * pointIncrement)
         query.executeUpdate()
     }
 
@@ -630,5 +642,25 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
         QueryUserCriteriaHelper.setSelectUserIdParams(query, queryUsersCriteria)
 
         return query.getResultStream()
+    }
+
+    @Override
+    void updateUserPointsForASkill(String projectId, String skillId) {
+        userPointsRepo.updateUserPointsForASkill(projectId, skillId)
+    }
+
+    @Override
+    void updateUserPointsHistoryForASkill(String projectId, String skillId) {
+        userPointsRepo.updateUserPointsHistoryForASkill(projectId, skillId)
+    }
+
+    @Override
+    void updateUserPointsForSubjectOrGroup(String projectId, String skillId) {
+        userPointsRepo.updateSubjectOrGroupUserPoints(projectId, skillId)
+    }
+
+    @Override
+    void updateUserPointsHistoryForProject(String projectId) {
+        userPointsRepo.updateUserPointsHistoryForProject(projectId)
     }
 }

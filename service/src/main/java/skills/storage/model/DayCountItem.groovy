@@ -17,21 +17,8 @@ package skills.storage.model
 
 import groovy.transform.ToString
 
-@ToString
-class DayCountItem {
-    Date day
-    Long count
-    String projectId // optional, used when counting items for multiple projects in the same query
-
-    DayCountItem(Date day, Long count){
-        this.day = day
-        this.count = count
-    }
-
-    DayCountItem(String projectId, Date day, Long count){
-        this.projectId = projectId
-        this.day = day
-        this.count = count
-    }
-
+interface DayCountItem {
+    Date getDay()
+    Long getCount()
+    String getProjectId() // optional, used when counting items for multiple projects in the same query
 }

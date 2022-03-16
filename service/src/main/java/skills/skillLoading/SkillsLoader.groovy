@@ -335,7 +335,7 @@ class SkillsLoader {
 
     @Transactional(readOnly = true)
     List<SkillGlobalBadgeSummary> loadGlobalBadgeSummaries(String userId, String projectId, Integer version = Integer.MAX_VALUE){
-        List<SkillDefWithExtra> badgeDefs = skillDefWithExtraRepo.findAllByProjectIdAndType(null, SkillDef.ContainerType.GlobalBadge)
+        List<SkillDefWithExtra> badgeDefs = skillDefWithExtraRepo.findAllByProjectIdAndTypeAndEnabled(null, SkillDef.ContainerType.GlobalBadge, Boolean.TRUE.toString())
         if ( version >= 0 ) {
             badgeDefs = badgeDefs.findAll { it.version <= version }
         }
@@ -945,6 +945,14 @@ class SkillsLoader {
         if (!skillDef) {
             throw new SkillExceptionBuilder()
                     .msg("Skill definition with id [${skillId}] doesn't exist")
+                    .userId(userId)
+                    .projectId(projectId)
+                    .skillId(skillId)
+                    .build()
+        }
+        if (!skillDef.enabled?.equalsIgnoreCase("true")) {
+            throw new SkillExceptionBuilder()
+                    .msg("Skill with id [${skillId}] is not enabled")
                     .userId(userId)
                     .projectId(projectId)
                     .skillId(skillId)

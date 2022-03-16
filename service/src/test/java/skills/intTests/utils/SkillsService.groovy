@@ -28,6 +28,8 @@ class SkillsService {
     CertificateRegistry certificateRegistry = null
     Options handlebarOptions = null
 
+    WaitForAsyncTasksCompletion waitForAsyncTasksCompletion //optionally configured
+
     SkillsService() {
         wsHelper = new WSHelper().init()
     }
@@ -420,12 +422,17 @@ class SkillsService {
         wsHelper.adminGet(getSkillUrl(props.projectId, props.subjectId, props.skillId), props)
     }
 
-    def getSkillsForProject(String projectId, String optionalSkillNameQuery = "", boolean excludeImportedSkills = false) {
+    def getSkillsForProject(String projectId, String optionalSkillNameQuery = "", boolean excludeImportedSkills = false, boolean includeDisabled = false) {
         String query = optionalSkillNameQuery ? "?skillNameQuery=${optionalSkillNameQuery}" : ''
         if (excludeImportedSkills) {
             String append = "excludeImportedSkills=true"
             query = query.contains("?") ? "${query}&${append}" : "${query}?${append}"
         }
+        if (includeDisabled) {
+            String append = "includeDisabled=true"
+            query = query.contains("?") ? "${query}&${append}" : "${query}?${append}"
+        }
+
         wsHelper.adminGet("/projects/${projectId}/skills${query}")
     }
 
@@ -1253,8 +1260,37 @@ class SkillsService {
         return wsHelper.adminPost("/projects/${importIntoProjectId}/subjects/${importIntoSubjectId}/import", catalogSkills)
     }
 
+    def bulkImportSkillsFromCatalogAndFinalize(String importIntoProjectId, String importIntoSubjectId, List<Map> catalogSkills) {
+        def res = wsHelper.adminPost("/projects/${importIntoProjectId}/subjects/${importIntoSubjectId}/import", catalogSkills)
+        finalizeSkillsImportFromCatalog(importIntoProjectId)
+        return res
+    }
+
+    def updateImportedSkill(String projectId, String skillId, Integer pointIncrement) {
+        return wsHelper.adminPatch("/projects/${projectId}/import/skills/${skillId}", [pointIncrement: pointIncrement])
+    }
+
+    def finalizeSkillsImportFromCatalog(String projectId, boolean waitForFinalizationToComplete = true) {
+        def res = wsHelper.adminPost("/projects/${projectId}/catalog/finalize", [])
+        if (waitForFinalizationToComplete) {
+            waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        }
+        return res
+    }
+
+    def getCatalogFinalizeInfo(String projectId) {
+        def res = wsHelper.adminGet("/projects/${projectId}/catalog/finalize/info")
+        return res
+    }
+
     def importSkillFromCatalog(String importIntoProjectId, String importIntoSubjectId, String catalogSkillProjectId, String catalogSkillSkillId) {
-        return wsHelper.adminPost("/projects/${importIntoProjectId}/subjects/${importIntoSubjectId}/import/${catalogSkillProjectId}/${catalogSkillSkillId}", [:])
+        return this.bulkImportSkillsFromCatalog(importIntoProjectId, importIntoSubjectId, [[projectId: catalogSkillProjectId, skillId: catalogSkillSkillId]])
+    }
+
+    def importSkillFromCatalogAndFinalize(String importIntoProjectId, String importIntoSubjectId, String catalogSkillProjectId, String catalogSkillSkillId) {
+        def res = this.bulkImportSkillsFromCatalog(importIntoProjectId, importIntoSubjectId, [[projectId: catalogSkillProjectId, skillId: catalogSkillSkillId]])
+        finalizeSkillsImportFromCatalog(importIntoProjectId)
+        return res
     }
 
     def bulkExportSkillsToCatalog(String projectId, List<String> skillIds) {

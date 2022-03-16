@@ -15,6 +15,7 @@
  */
 package skills.storage.accessors
 
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -32,6 +33,9 @@ class ProjDefAccessor {
 
     @Transactional()
     ProjDef getProjDef(String projectId) {
+        if (StringUtils.isBlank(projectId)) {
+            throw new SkillException("Bad project id parameter, [${projectId}] was provided", ErrorCode.BadParam)
+        }
         ProjDef projDef = projDefRepo.findByProjectIdIgnoreCase(projectId)
         if (!projDef) {
             throw new SkillException("Failed to find project [$projectId]", projectId, null, ErrorCode.ProjectNotFound)

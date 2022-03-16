@@ -93,6 +93,7 @@ skills:
     expireUnusedProjectsOlderThan: 180
     expirationGracePeriod: 7
     projectExpirationSchedule: "0 4 0 * * *"
+    taskSchedulingDelayInSeconds: 5
     ui:
       dashboardVersion: @pom.version@
       buildTimestamp: @maven.build.timestamp@
@@ -145,6 +146,8 @@ skills:
 #  level:
 #    org.hibernate: INFO
 #    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+db-scheduler:
+  threads: 3
 ---
 spring:
   profiles: default

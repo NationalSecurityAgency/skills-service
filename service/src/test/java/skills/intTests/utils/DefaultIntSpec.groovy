@@ -21,6 +21,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
+import org.springframework.jdbc.core.JdbcTemplate
 import skills.SpringBootApp
 import skills.storage.model.UserAttrs
 import skills.storage.repos.NotificationsRepo
@@ -28,6 +29,9 @@ import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SettingRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAttrsRepo
+import skills.storage.repos.UserEventsRepo
+import skills.storage.repos.UserPerformedSkillRepo
+import skills.storage.repos.UserPointsRepo
 import spock.lang.Specification
 
 import javax.annotation.PostConstruct
@@ -72,6 +76,18 @@ class DefaultIntSpec extends Specification {
     @Autowired(required=false)
     CertificateRegistry certificateRegistry
 
+    @Autowired
+    WaitForAsyncTasksCompletion waitForAsyncTasksCompletion
+
+    @Autowired
+    UserPointsRepo userPointsRepo
+
+    @Autowired
+    UserPerformedSkillRepo userPerformedSkillRepo
+
+    @Autowired
+    UserEventsRepo userEventsRepo
+
     private UserUtil userUtil
 
     @PostConstruct
@@ -105,6 +121,7 @@ class DefaultIntSpec extends Specification {
             }
         }
 
+        waitForAsyncTasksCompletion.clearScheduledTaskTable()
         skillsService = createService()
     }
 
@@ -113,6 +130,7 @@ class DefaultIntSpec extends Specification {
             log.info('Stopping email service')
             greenMail.stop()
         }
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         String msg = "\n-------------------------------------------------------------\n" +
                 "END: [${specificationContext.currentIteration.name}]\n" +
                 "-------------------------------------------------------------"
@@ -158,7 +176,9 @@ class DefaultIntSpec extends Specification {
             url = url.replace("http://", "https://")
         }
 
-        new SkillsService(username, password, firstName, lastName, url, pkiEnabled != null ? certificateRegistry : null)
+        SkillsService res = new SkillsService(username, password, firstName, lastName, url, pkiEnabled != null ? certificateRegistry : null)
+        res.waitForAsyncTasksCompletion = waitForAsyncTasksCompletion
+        return res
     }
 
     SkillsService createSupervisor(){

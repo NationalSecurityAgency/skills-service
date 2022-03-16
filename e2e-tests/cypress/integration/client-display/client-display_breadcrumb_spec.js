@@ -140,6 +140,12 @@ describe('Client Display Breadcrumb Tests', () => {
             name: 'Badge 1'
         });
         cy.request('POST', '/admin/projects/proj1/badge/badge1/skills/skill1')
+        cy.request('POST', '/admin/projects/proj1/badges/badge1', {
+            projectId: 'proj1',
+            badgeId: 'badge1',
+            name: 'Badge 1',
+            enabled: true,
+        });
 
         // setup cross-project dependency
         cy.createProject(2)
@@ -161,6 +167,7 @@ describe('Client Display Breadcrumb Tests', () => {
         cy.assignSkillToGlobalBadge(1, 2)
         cy.assignSkillToGlobalBadge(1, 3)
         cy.assignSkillToGlobalBadge(1, 4)
+        cy.enableGlobalBadge(1)
 
         // log back in as the project owner
         cy.loginAsProxyUser();

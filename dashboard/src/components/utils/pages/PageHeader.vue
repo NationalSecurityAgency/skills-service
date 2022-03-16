@@ -42,12 +42,16 @@ limitations under the License.
                           <i :class="stat.icon" style="font-size: 2.2rem;"></i>
                         </div>
                       </div>
+                      <div v-if="stat.disabledCount && stat.disabledCount > 0" style="font-size: 0.9rem" class="text-left">
+                          <b-badge variant="warning" :data-cy="`pageHeaderStat_${stat.label}_disabledCount`">{{stat.disabledCount}}</b-badge> <span class="text-left text-secondary text-uppercase" style="font-size: 0.8rem">disabled</span>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
+          <slot name="footer"></slot>
         </div>
       </loading-container>
     </div>

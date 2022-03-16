@@ -21,6 +21,7 @@ class ProjectResult extends SimpleProjectResult{
 
     int numSubjects
     int numSkills
+    int numSkillsDisabled
     int numGroups
     int numBadges
 

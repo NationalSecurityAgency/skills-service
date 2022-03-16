@@ -32,27 +32,39 @@ class LockingService {
     SkillsDBLockRepo skillsDBLockRepo
 
     SkillsDBLock lockGlobalSettings() {
-        return skillsDBLockRepo.findByLock("global_settings_lock")
+        SkillsDBLock res = skillsDBLockRepo.findByLock("global_settings_lock")
+        assert res
+        return res
     }
 
     SkillsDBLock lockProjects() {
-        return skillsDBLockRepo.findByLock("projects_lock")
+        SkillsDBLock res = skillsDBLockRepo.findByLock("projects_lock")
+        assert res
+        return res
     }
 
     SkillsDBLock lockGlobalBadges() {
-        return skillsDBLockRepo.findByLock("global_badges_lock")
+        SkillsDBLock res = skillsDBLockRepo.findByLock("global_badges_lock")
+        assert res
+        return res
     }
 
     SkillsDBLock lockEventCompaction() {
-        return skillsDBLockRepo.findByLock("event_compaction_lock")
+        SkillsDBLock res = skillsDBLockRepo.findByLock("event_compaction_lock")
+        assert res
+        return res
     }
 
     SkillsDBLock lockForNotifying() {
-        return skillsDBLockRepo.findByLock("notifier_lock")
+        SkillsDBLock res = skillsDBLockRepo.findByLock("notifier_lock")
+        assert res
+        return res
     }
 
     SkillsDBLock lockForUpdatingCatalogSkills() {
-        return skillsDBLockRepo.findByLock('catalog_skill_update_lock')
+        SkillsDBLock res = skillsDBLockRepo.findByLock('catalog_skill_update_lock')
+        assert res
+        return res
     }
 
     ProjDef lockProject(String projectId) {
@@ -69,11 +81,31 @@ class LockingService {
     }
 
     SkillsDBLock lockForProjectExpiration() {
-        return skillsDBLockRepo.findByLock("project_expiration_lock")
+        SkillsDBLock res = skillsDBLockRepo.findByLock("project_expiration_lock")
+        assert res
+        return res
     }
 
     SkillsDBLock lockForCreateOrUpdateUser() {
-        return skillsDBLockRepo.findByLock("create_or_update_user")
+        SkillsDBLock res = skillsDBLockRepo.findByLock("create_or_update_user")
+        assert res
+        return res
     }
+
+    SkillsDBLock lockForUserProject(String userId, String projectId) {
+        String key = userId+projectId
+        SkillsDBLock lock = skillsDBLockRepo.findByLock(key)
+        if (!lock) {
+            lock = new SkillsDBLock(lock: key)
+            try {
+                skillsDBLockRepo.save(lock)
+            } catch (Throwable t) {}
+            lock = skillsDBLockRepo.findByLock(key)
+            assert lock
+        }
+
+        return lock
+    }
+
 
 }

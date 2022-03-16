@@ -747,7 +747,7 @@ describe('Accessibility Tests', () => {
       cy.customLighthouse();
       cy.customA11y();
 
-      cy.createSkillsGroup(1, 1, 1, { numSkillsRequired: -1, enabled: false });
+      cy.createSkillsGroup(1, 1, 1, { numSkillsRequired: -1, enabled: true });
       cy.addSkillToGroup(1, 1, 1, 33, { pointIncrement: 11, numPerformToCompletion: 2 });
       cy.visit('/administrator/projects/proj1/subjects/subj1');
       cy.injectAxe()

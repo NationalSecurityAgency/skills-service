@@ -31,31 +31,130 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
     // find an "exact" performed event;
     // may have more than 1 event with the same exact timestamp, this happens when multiple events may fall
     // within configured time window and client send the same timestamp (example UI calendar control)
+    @Query('''select u from UserPerformedSkill u
+              where 
+              u.skillRefId in (
+                select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id from SkillDef s
+                where s.projectId = ?1 and
+                s.skillId = ?2 and
+                s.enabled = 'true'
+              ) and
+              u.userId = ?3 and
+              u.performedOn = ?4''')
     @Nullable
     List<UserPerformedSkill> findAllByProjectIdAndSkillIdAndUserIdAndPerformedOn(String projectId, String skillId, String userId, Date performedOn)
 
     void deleteByProjectIdAndSkillId(String projectId, String skillId)
 
-    Long countByUserIdAndProjectId(String userId, String projectId)
+    @Query('''select count(u.id) from UserPerformedSkill u
+              where 
+              u.skillRefId in (
+                select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id from SkillDef s
+                where s.projectId = ?2 and
+                s.enabled = 'true' and
+                lower(s.skillId) like lower(concat('%',?3,'%')) 
+              ) and
+              u.userId = ?1''')
     Long countByUserIdAndProjectIdAndSkillIdIgnoreCaseContaining(String userId, String projectId, String skillId)
+
+    @Query('''select count(u.id) from UserPerformedSkill u
+              where 
+              u.skillRefId in (
+                select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id from SkillDef s
+                where s.projectId = ?2 and
+                s.enabled = 'true'
+              ) and
+              u.userId = ?1''')
+    Long countByUserIdAndProjectId(String userId, String projectId)
+
+    @Query('''select count(u.id) from UserPerformedSkill u
+              where 
+              u.skillRefId in (
+                select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id from SkillDef s
+                where s.projectId = ?2 and
+                s.skillId = ?3 and
+                s.enabled = 'true'
+              ) and
+              u.userId = ?1''')
     Long countByUserIdAndProjectIdAndSkillId(String userId, String projectId, String skillId)
+
+    @Query('''select count(u.id) from UserPerformedSkill u
+              where 
+              u.skillRefId in (
+                select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id from SkillDef s
+                where s.projectId = ?2 and
+                s.skillId = ?3 and
+                s.enabled = 'true'
+              ) and
+              u.userId = ?1 and 
+              u.performedOn > ?4 and
+              u.performedOn < ?5''')
     Long countByUserIdAndProjectIdAndSkillIdAndPerformedOnGreaterThanAndPerformedOnLessThan(String userId, String projectId, String skillId, Date startDate, Date endDate)
 
-    @Query("SELECT DISTINCT(p.userId) from UserPerformedSkill p where p.projectId=?1 and lower(p.userId) LIKE %?2% order by p.userId asc" )
+    @Query('''SELECT DISTINCT(p.userId) from UserPerformedSkill p where 
+                p.skillRefId in (
+                    select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id from SkillDef s 
+                    where s.projectId=?1 and
+                    s.enabled = 'true'
+                 )
+                and lower(p.userId) LIKE %?2% order by p.userId asc''' )
     List<String> findDistinctUserIdsForProject(String projectId, String userIdQuery, Pageable pageable)
 
     @Query("SELECT DISTINCT(p.userId) from UserPerformedSkill p where lower(p.userId) LIKE %?1% order by p.userId asc" )
     List<String> findDistinctUserIds(String userIdQuery, Pageable pageable)
 
     Boolean existsByUserId(String userId)
+
+    @Query('''select true from UserPerformedSkill up 
+                where up.skillRefId in (
+                    select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id 
+                    from SkillDef s 
+                    where s.projectId=?2 and
+                    s.enabled = 'true'
+                ) and
+                up.userId = ?1''')
     Boolean existsByProjectIdAndUserId(String userId, String projectId)
 
+    @Query('''select u from UserPerformedSkill u
+              where 
+              u.skillRefId in (
+                select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id from SkillDef s
+                where s.projectId = ?2 and
+                s.enabled = 'true' and
+                lower(s.skillId) like lower(concat('%',?3,'%'))
+              ) and
+              u.userId = ?1''')
     List<UserPerformedSkill> findByUserIdAndProjectIdAndSkillIdIgnoreCaseContaining(String userId, String projectId, String skillId, Pageable pageable)
 
-    @Query('SELECT COUNT(DISTINCT p.skillId) from UserPerformedSkill p where p.projectId=?1 and p.userId = ?2')
+    @Query('''select u from UserPerformedSkill u
+              where 
+              u.skillRefId in (
+                select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id from SkillDef s
+                where s.projectId = ?2 and
+                s.enabled = 'true'
+              ) and
+              u.userId = ?1''')
+    List<UserPerformedSkill> findByUserIdAndProjectId(String userId, String projectId, Pageable pageable)
+
+    @Query('''SELECT COUNT(DISTINCT p.skillId) from UserPerformedSkill p where p.userId = ?2 
+            and p.skillRefId in (
+                select case when copiedFrom is not null then copiedFrom else id end as id 
+                from SkillDef 
+                where type = 'Skill' and projectId = ?1 and
+                enabled = 'true'
+            )'''
+    )
     Integer countDistinctSkillIdByProjectIdAndUserId(String projectId, String userId)
 
-    @Query('SELECT COUNT(DISTINCT p.userId) from UserPerformedSkill p where p.projectId=?1 and p.skillId = ?2')
+    @Query('''SELECT COUNT(DISTINCT p.userId) from UserPerformedSkill p 
+                where p.skillRefId in (
+                    select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id
+                    from SkillDef s
+                    where 
+                    s.projectId=?1 and 
+                    s.skillId = ?2 and
+                    s.enabled = 'true'
+                )''')
     Integer countDistinctUserIdByProjectIdAndSkillId(String projectId, String skillId)
 
     @Query(''' select DISTINCT(sdParent)
@@ -64,53 +163,103 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
         where 
             srd.parent=sdParent.id and 
             srd.child=sdChild.id and
-            sdChild.projectId=?2 and 
-            sdChild.skillId=?3 and 
+            sdChild.id in (
+                select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id from SkillDef s 
+                where
+                s.projectId=?2 and
+                type = 'Skill' and
+                s.skillId=?3 and
+                s.enabled = 'true'
+            ) and 
             srd.type='Dependence' ''')
     List<SkillDef> findPerformedParentSkills(String userId, String projectId, String skillId)
 
     @Nullable
-    @Query('''select new skills.storage.model.DayCountItem(CAST(ups.performedOn as date), SUM(sdChild.pointIncrement))
-    from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild, UserPerformedSkill ups
-      where
-          sdParent.projectId = :projectId and
-          sdChild.projectId = :projectId and
-          srd.parent=sdParent.id and 
-          srd.child=sdChild.id and
-          sdChild.id = ups.skillRefId and 
-          ups.userId=:userId and
-          (sdParent.skillId=:skillId 
-            OR sdParent.skillId in (select sdGroup.skillId
-                                    from SkillDef sdGroup,
-                                         SkillDef sdSubject,
-                                         SkillRelDef srd
-                                     where sdGroup.id = srd.child
-                                       and srd.parent = sdSubject.id
-                                       and sdSubject.skillId=:skillId)
-            OR :skillId is null) and
-          sdChild.version<=:version and
-          srd.type IN ('RuleSetDefinition', 'SkillsGroupRequirement')
-          and ups.skillRefId NOT IN (select up.skillRefId from UserPoints up where up.contributesToSkillsGroup = 'false' and up.userId=:userId and up.projectId = :projectId)
-       group by CAST(ups.performedOn as date)''')
-    List<DayCountItem> calculatePointHistoryByProjectIdAndUserIdAndVersion(@Param('projectId') String projectId,
+    @Query(value = '''
+        WITH skills AS (
+            select case when child.copied_from_skill_ref is not null then child.copied_from_skill_ref else child.id end as id,
+                   child.point_increment                                                                                as pointIncrement
+            from skill_definition parent,
+                 skill_relationship_definition rel,
+                 skill_definition child
+            where parent.project_id = :projectId
+              and parent.skill_id = :skillId
+              and rel.parent_ref_id = parent.id
+              and rel.child_ref_id = child.id
+              and rel.type in ('RuleSetDefinition', 'SkillsGroupRequirement')
+              and child.type = 'Skill'
+              and child.version <= :version
+              and child.enabled = 'true'
+        )
+        select CAST(ups.performed_on as date) as day, SUM(skills.pointIncrement) as count
+        from user_performed_skill ups,
+             skills
+        where ups.user_id = :userId
+          and ups.skill_ref_id = skills.id
+          and ups.skill_ref_id NOT IN (select up.skill_ref_id
+                               from user_points up
+                               where up.contributes_to_skills_group = 'false'
+                                 and up.user_id = :userId
+                                 and up.project_Id = :projectId)
+        group by CAST(ups.performed_on as date)''', nativeQuery = true)
+    List<DayCountItem> calculatePointHistoryForSubject(@Param('projectId') String projectId,
                                                                            @Param('userId') String userId,
-                                                                           @Nullable @Param('skillId') String skillId,
+                                                                           @Param('skillId') String skillId,
                                                                            @Param('version') Integer version)
 
-    @Query('''select new skills.storage.model.DayCountItem(CAST(ups.performedOn as date), count(ups.id))
+    @Nullable
+    @Query(value = '''
+        WITH skills AS (
+            select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id,
+                   point_increment as pointIncrement
+            from skill_definition child
+            where project_id = :projectId
+              and type = 'Skill'
+              and version <= :version
+              and enabled = 'true'
+        )
+        select CAST(ups.performed_on as date) as day, SUM(skills.pointIncrement) as count
+        from user_performed_skill ups,
+             skills
+        where ups.user_id = :userId
+          and ups.skill_ref_id = skills.id
+          and ups.skill_ref_id NOT IN (select up.skill_ref_id
+                               from user_points up
+                               where up.contributes_to_skills_group = 'false'
+                                 and up.user_id = :userId
+                                 and up.project_Id = :projectId)
+        group by CAST(ups.performed_on as date)''', nativeQuery = true)
+    List<DayCountItem> calculatePointHistoryForProject(@Param('projectId') String projectId,
+                                                       @Param('userId') String userId,
+                                                       @Param('version') Integer version)
+
+    @Query('''select CAST(ups.performedOn as date) as day, count(ups.id) as count
         from UserPerformedSkill ups
         where
-        ups.projectId = :projectId and
-        ups.skillId=:skillId
+        ups.skillRefId in (
+            select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id
+            from SkillDef s
+            where
+            s.type = 'Skill' and
+            s.projectId = :projectId and
+            s.skillId = :skillId and
+            s.enabled = 'true'
+        )
         group by CAST(ups.performedOn as date)
     ''')
     List<DayCountItem> countsByDay(@Param('projectId') String projectId, @Param('skillId') String skillId)
 
-    @Query('''select new skills.storage.model.DayCountItem(CAST(ups.performedOn as date), count(ups.id))
+    @Query('''select CAST(ups.performedOn as date) as day, count(ups.id) as count
         from UserPerformedSkill ups
         where
-        ups.projectId = :projectId and
-        ups.skillId=:skillId and
+        ups.skillRefId in (
+            select case when copiedFrom is not null then copiedFrom else id end as id 
+            from SkillDef 
+            where type = 'Skill' and 
+            skillId = :skillId and 
+            projectId = :projectId and
+            enabled = 'true'
+        ) and
         ups.performedOn > :from
         group by CAST(ups.performedOn as date)
     ''')

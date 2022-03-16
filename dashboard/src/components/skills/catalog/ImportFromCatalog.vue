@@ -21,13 +21,19 @@ limitations under the License.
            @hide="publishHidden">
     <skills-spinner :is-loading="loading"/>
 
-    <no-content2 v-if="!loading && emptyCatalog" class="mt-4 mb-5"
+    <no-content2 v-if="!loading && emptyCatalog && !isInFinalizeState" class="mt-4 mb-5"
+                 icon="fas fa-user-clock"
                  title="Nothing Available for Import" data-cy="catalogSkillImportModal-NoData">
       When other projects export Skills to the Catalog then they will be available here
       to be imported.
     </no-content2>
 
-    <div v-if="!loading && !emptyCatalog">
+    <no-content2 v-if="!loading && isInFinalizeState" class="mt-4 mb-5"
+                 title="Finalization in Progress" data-cy="catalogSkillImport-finalizationInProcess">
+      Cannot import while imported skills are being finalized. Unfortunately will have to wait, thank you for the patience!
+    </no-content2>
+
+    <div v-if="!loading && !emptyCatalog && !isInFinalizeState">
       <div class="row px-3 pt-1">
         <div class="col-md border-right">
           <b-form-group label="Skill Name:" label-for="skill-name-filter" label-class="text-muted">
@@ -100,22 +106,16 @@ limitations under the License.
 
         <template v-slot:cell(skillId)="data">
           <skill-already-existing-warning :skill="data.item"/>
+          <import-checkbox
+            :skill-name="data.item.name"
+            :skill-id="data.item.skillId"
+            :project-id="data.item.projectId"
+            :disabled="data.item.alreadyHasThisSkillId || data.item.alreadyHasThisName"
+            :selected="isSelected(data.item)"
+            @importSelection="handleImportSelection($event, data.item)"
+            @input="updateActionsDisableStatus"
+          />
 
-          <div class="text-primary">
-            <b-form-checkbox
-              :disabled="data.item.alreadyHasThisSkillId || data.item.alreadyHasThisName"
-              :id="`${data.item.projectId}-${data.item.skillId}`"
-              v-model="data.item.selected"
-              :name="`checkbox_${data.item.projectId}_${data.item.skillId}`"
-              :value="true"
-              :unchecked-value="false"
-              :inline="true"
-              v-on:input="updateActionsDisableStatus"
-              :data-cy="`skillSelect_${data.item.projectId}-${data.item.skillId}`"
-            >
-              <span>{{ data.item.name }}</span>
-            </b-form-checkbox>
-          </div>
           <div class="sub-info">
             <span>ID:</span> {{ data.item.skillId }}
           </div>
@@ -168,8 +168,9 @@ limitations under the License.
 
     <div slot="modal-footer" class="w-100">
       <b-button v-if="!emptyCatalog" variant="success" size="sm" class="float-right ml-2"
-                @click="importSkills" data-cy="importBtn" :disabled="importDisabled"><i
+                @click="importSkills" data-cy="importBtn" :disabled="importDisabled || validatingImport"><i
         class="far fa-arrow-alt-circle-down"></i> Import <b-badge variant="primary" data-cy="numSelectedSkills">{{ numSelectedSkills }}</b-badge>
+        <b-spinner v-if="validatingImport" small label="Small Spinner" class="ml-1"></b-spinner>
       </b-button>
       <b-button v-if="!emptyCatalog" variant="secondary" size="sm" class="float-right" @click="close"
                 data-cy="closeButton">
@@ -186,11 +187,13 @@ limitations under the License.
 
 <script>
   import SkillAlreadyExistingWarning from '@/components/skills/catalog/SkillAlreadyExistingWarning';
+  import SettingsService from '@/components/settings/SettingsService';
   import CatalogService from './CatalogService';
   import SkillsBTable from '../../utils/table/SkillsBTable';
   import NoContent2 from '../../utils/NoContent2';
   import SkillsSpinner from '../../utils/SkillsSpinner';
   import SkillToImportInfo from './SkillToImportInfo';
+  import ImportCheckbox from './ImportCheckbox';
 
   export default {
     name: 'ImportFromCatalog',
@@ -200,6 +203,7 @@ limitations under the License.
       SkillsSpinner,
       NoContent2,
       SkillsBTable,
+      ImportCheckbox,
     },
     props: {
       value: {
@@ -214,7 +218,9 @@ limitations under the License.
     data() {
       return {
         show: this.value,
-        loading: false,
+        loading: true,
+        isInFinalizeState: false,
+        validatingImport: false,
         initialLoadHadData: false,
         importDisabled: true,
         numSelectedSkills: 0,
@@ -223,6 +229,7 @@ limitations under the License.
           projectName: '',
           subjectName: '',
         },
+        selected: { },
         table: {
           options: {
             busy: false,
@@ -266,7 +273,10 @@ limitations under the License.
       };
     },
     mounted() {
-      this.loadData(true);
+      this.loadFinalizationState()
+        .then(() => {
+          this.loadData(true);
+        });
     },
     watch: {
       show(newValue) {
@@ -285,11 +295,38 @@ limitations under the License.
       },
     },
     methods: {
+      loadFinalizationState() {
+        return SettingsService.getProjectSetting(this.$route.params.projectId, 'catalog.finalize.state')
+          .then((res) => {
+            this.isInFinalizeState = res && res.value === 'RUNNING';
+          });
+      },
       doesSkillIdAlreadyExist(skillId) {
         return this.currentProjectSkills.find((skill) => skill.skillId.toUpperCase() === skillId.toUpperCase()) !== undefined;
       },
       doesSkillNameAlreadyExist(name) {
         return this.currentProjectSkills.find((skill) => skill.name.toUpperCase() === name.toUpperCase()) !== undefined;
+      },
+      isSelected(dataItem) {
+        if (dataItem.selected === true) {
+          return true;
+        }
+        const key = this.dataItemKey(dataItem);
+        return this.selected[key]?.selected === true;
+      },
+      toggleSelected(changeEvent, dataItem) {
+        const { selected } = changeEvent;
+        // eslint-disable-next-line no-param-reassign
+        dataItem.selected = selected;
+        const key = this.dataItemKey(dataItem);
+        if (selected === true) {
+          this.$set(this.selected, key, { projectId: dataItem.projectId, skillId: dataItem.skillId, selected: true });
+        } else {
+          this.$delete(this.selected, key);
+        }
+      },
+      dataItemKey(dataItem) {
+        return `${dataItem.projectId}_${dataItem.skillId}`;
       },
       loadData(isInitial = undefined) {
         if (isInitial === true) {
@@ -350,23 +387,36 @@ limitations under the License.
         this.loadData();
       },
       updateActionsDisableStatus() {
-        this.numSelectedSkills = this.table.items.reduce((total, item) => (item.selected ? total + 1 : total), 0);
+        this.numSelectedSkills = Object.values(this.selected).reduce((total, item) => (item.selected === true ? total + 1 : total), 0);
         this.importDisabled = this.numSelectedSkills === 0;
       },
       importSkills() {
-        const selected = this.table.items.filter((item) => item.selected);
-        const projAndSkillIds = selected.map((skill) => ({
-          projectId: skill.projectId,
-          skillId: skill.skillId,
-        }));
-        this.$emit('to-import', projAndSkillIds);
-        this.show = false;
+        this.validatingImport = true;
+        this.loadFinalizationState()
+          .then(() => {
+            if (!this.isInFinalizeState) {
+              const selected = Object.values(this.selected).filter((item) => item.selected);
+              const projAndSkillIds = selected.map((skill) => ({
+                projectId: skill.projectId,
+                skillId: skill.skillId,
+              }));
+              this.$emit('to-import', projAndSkillIds);
+              this.show = false;
+            } else {
+              this.changeSelectionForAll(false);
+            }
+          }).finally(() => {
+            this.validatingImport = false;
+          });
       },
       changeSelectionForAll(selectedValue) {
         this.table.items.forEach((item) => {
-          // eslint-disable-next-line no-param-reassign
-          item.selected = selectedValue;
+          this.toggleSelected({ selected: selectedValue }, item);
         });
+        this.updateActionsDisableStatus();
+      },
+      handleImportSelection(event, dataItem) {
+        this.toggleSelected(event, dataItem);
         this.updateActionsDisableStatus();
       },
       reset() {

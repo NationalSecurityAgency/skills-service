@@ -86,6 +86,9 @@ class AdminController {
     SkillsAdminService skillsAdminService
 
     @Autowired
+    SaveSkillService saveSkillService
+
+    @Autowired
     SkillsGroupAdminService skillsGroupAdminService
 
     @Autowired
@@ -506,13 +509,11 @@ class AdminController {
             skillRequest.description = InputSanitizer.sanitize(skillRequest.description)
             skillRequest.helpUrl = InputSanitizer.sanitizeUrl(skillRequest.helpUrl)
 
-            // subject skill are always enabled; don't trust the client and override enabled
-            // alternative approach was to validate that "true" is provided but that was/is a very intrusive change;
-            // we may reconsider in the future if we deiced to support enable/disabled for skills
-            skillRequest.enabled = "true"
+            // default to enabled
+            skillRequest.enabled = skillRequest.enabled  == null ? "true" : skillRequest.enabled
         }
 
-        skillsAdminService.saveSkill(skillId, skillRequest, true, groupId)
+        saveSkillService.saveSkillAndSchedulePropagationToImportedSkills(skillId, skillRequest, true, groupId)
     }
 
     @GetMapping(value = '/projects/{projectId}/latestVersion', produces = 'application/json')
@@ -649,11 +650,13 @@ class AdminController {
     List<SkillDefSkinnyRes> getAllSkillsForProject(
             @PathVariable("projectId") String projectId,
             @RequestParam(required = false, value = "skillNameQuery") String skillNameQuery,
-            @RequestParam(required = false, value = "excludeImportedSkills") Boolean excludeImportedSkills) {
+            @RequestParam(required = false, value = "excludeImportedSkills") Boolean excludeImportedSkills,
+            @RequestParam(required = false, value = "includeDisabled", defaultValue = "false") Boolean includeDisabled) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
 
         boolean excludeImportedSkillsBol = excludeImportedSkills
-        List<SkillDefSkinnyRes> res = skillsAdminService.getSkinnySkills(projectId, skillNameQuery ?: '', excludeImportedSkillsBol)
+        boolean includeDisabledBool = includeDisabled
+        List<SkillDefSkinnyRes> res = skillsAdminService.getSkinnySkills(projectId, skillNameQuery ?: '', excludeImportedSkillsBol, includeDisabledBool)
         return res
     }
 
@@ -1121,29 +1124,42 @@ class AdminController {
         return RequestResult.success()
     }
 
-    @RequestMapping(value="/projects/{projectId}/subjects/{subjectId}/import/{fromProjectId}/{fromSkillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
-    SkillDefRes importSkillFromCatalog(@PathVariable("projectId") String projectId,
-                                       @PathVariable("subjectId") String subjectId,
-                                       @PathVariable("fromProjectId") String fromProjectId,
-                                       @PathVariable("fromSkillId") String fromSkillId) {
-        SkillsValidator.isNotBlank(projectId, "projectId")
-        SkillsValidator.isNotBlank(projectId, "subjectId")
-        SkillsValidator.isNotBlank(projectId, "fromProjectId")
-        SkillsValidator.isNotBlank(projectId, "fromSkillId")
-        skillCatalogService.importSkillFromCatalog(fromProjectId, fromSkillId, projectId, subjectId)
-    }
-
     @RequestMapping(value="/projects/{projectId}/subjects/{subjectId}/import", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
     RequestResult bulkImportSkillFromCatalog(@PathVariable("projectId") String projectId,
                                        @PathVariable("subjectId") String subjectId,
                                        @RequestBody List<CatalogSkill> bulkImport) {
         SkillsValidator.isNotBlank(projectId, "projectId")
-        SkillsValidator.isNotBlank(projectId, "subjectId")
+        SkillsValidator.isNotBlank(subjectId, "subjectId")
         SkillsValidator.isTrue(bulkImport?.size() <= maxBulkImport, "Bulk imports are limited to no more than ${maxBulkImport} Skills at once", projectId)
         skillCatalogService.importSkillsFromCatalog(projectId, subjectId, bulkImport)
         RequestResult success = RequestResult.success()
         success.explanation = "imported [${bulkImport?.size()}] skills from the catalog into [${projectId}] - [${subjectId}]"
         return success
+    }
+
+    @RequestMapping(value="/projects/{projectId}/import/skills/{skillId}", method = [RequestMethod.PATCH], produces = "application/json")
+    RequestResult updatedImportedSkill(@PathVariable("projectId") String projectId,
+                                             @PathVariable("skillId") String skillId,
+                                             @RequestBody ImportedSkillUpdate update) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        SkillsValidator.isNotBlank(skillId, "skillId")
+        skillCatalogService.updateImportedSkill(projectId, skillId, update)
+        return RequestResult.success()
+    }
+
+    @RequestMapping(value="/projects/{projectId}/catalog/finalize", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
+    RequestResult finalizeSkillsImport(@PathVariable("projectId") String projectId) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        skillCatalogService.requestFinalizationOfImportedSkills(projectId)
+        RequestResult success = RequestResult.success()
+        success.explanation = "Finalized skills import from the catalog into [${projectId}]"
+        return success
+    }
+
+    @RequestMapping(value="/projects/{projectId}/catalog/finalize/info", method = [RequestMethod.GET], produces = "application/json")
+    CatalogFinalizeInfoResult getCatalogFinalizeInfo(@PathVariable("projectId") String projectId) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        return skillCatalogService.getFinalizeInfo(projectId)
     }
 
     @RequestMapping(value="/projects/{projectId}/skills/catalog", method=RequestMethod.GET, produces = "application/json")

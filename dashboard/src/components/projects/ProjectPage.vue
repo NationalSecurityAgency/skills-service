@@ -45,6 +45,9 @@ limitations under the License.
           </b-button>
         </b-button-group>
       </div>
+      <div slot="footer">
+        <import-finalize-alert />
+      </div>
     </page-header>
 
     <navigation v-if="!isLoading" :nav-items="[
@@ -74,6 +77,7 @@ limitations under the License.
   import { createNamespacedHelpers } from 'vuex';
   import dayjs from '@/common-components/DayJsCustomizer';
   import ProjectDates from '@/components/projects/ProjectDates';
+  import ImportFinalizeAlert from '@/components/skills/catalog/ImportFinalizeAlert';
   import Navigation from '../utils/Navigation';
   import PageHeader from '../utils/pages/PageHeader';
   import EditProject from './EditProject';
@@ -84,6 +88,7 @@ limitations under the License.
   export default {
     name: 'ProjectPage',
     components: {
+      ImportFinalizeAlert,
       ProjectDates,
       PageHeader,
       Navigation,
@@ -118,6 +123,7 @@ limitations under the License.
           }, {
             label: 'Skills',
             count: this.project.numSkills,
+            disabledCount: this.project.numSkillsDisabled,
             icon: 'fas fa-graduation-cap skills-color-skills',
           }, {
             label: 'Points',

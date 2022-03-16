@@ -111,8 +111,7 @@ class EmailNotifierSpecs extends DefaultIntSpec {
 </head>
 </html>
 ''')
-
-        notificationsRepo.count() == 0
+        assert WaitFor.wait {  notificationsRepo.count() == 0 }
     }
 
     def "send email with headers and footers configured"() {

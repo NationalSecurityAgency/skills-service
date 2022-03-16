@@ -59,6 +59,16 @@ before(function () {
 });
 
 beforeEach(function () {
+    // this will abort XHR requests from previous test
+    // https://github.com/cypress-io/cypress/issues/216#issuecomment-247361529
+    // cy.visit('');
+    cy.window().then((win) => {
+        if (win && win.location) {
+            cy.log('setting win.location.href to blank')
+            win.location.href = 'about:blank'
+        }
+    })
+
     let disable = Cypress.env('disableResetDb');
 
     if (!disable) {

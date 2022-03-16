@@ -16,6 +16,7 @@
 package skills.services
 
 import skills.storage.model.DayCountItem
+import skills.storage.model.DayCount
 
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -66,7 +67,7 @@ class ZeroFillDayCountItemUtil {
             LocalDateTime ldt = n.toLocalDateTime()
             for (int i = startAt; i < daysBetween; i++) {
                 Date fill = ldt.minusDays(i).toDate()
-                fills.add(new DayCountItem(projectId, fill, 0))
+                fills.add(new DayCount(projectId, fill, 0))
             }
         } else if (!daily && (daysBetween > 7 || nInclusive)){
             // since we force the start date to be based on start of week this should work cleanly
@@ -75,7 +76,7 @@ class ZeroFillDayCountItemUtil {
             LocalDateTime ldt = n.toLocalDateTime()
             for (int i = startAt; i < fillWeeks; i++) {
                 Date fill = ldt.minusWeeks(i).toDate()
-                fills.add(new DayCountItem(projectId, fill, 0))
+                fills.add(new DayCount(projectId, fill, 0))
             }
         }
 

@@ -34,6 +34,7 @@ import javax.persistence.Table
 import javax.persistence.Temporal
 import javax.persistence.TemporalType
 
+@Deprecated
 @Entity
 @Table(name="skill_updated_queue")
 @ToString(includeNames = true)

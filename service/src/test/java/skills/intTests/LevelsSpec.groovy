@@ -19,7 +19,9 @@ import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.http.ResponseEntity
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
+import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import spock.lang.IgnoreRest
 import spock.lang.Specification
 
 class LevelsSpec extends  DefaultIntSpec{
@@ -1197,6 +1199,106 @@ class LevelsSpec extends  DefaultIntSpec{
         levels
         levels.size() == 1
         levels[0].pointsFrom == 999999
+    }
+
+    def "levels should not reflect unfinalized imported skills"() {
+        def proj2 = SkillsFactory.createProject(2)
+        def subj2 = SkillsFactory.createSubject(2, 2)
+        def exported = SkillsFactory.createSkillsStartingAt(5, 101, 2, 2, 100)
+        skillsService.createProject(proj2)
+        skillsService.createSubject(subj2)
+        skillsService.createSkills(exported)
+
+        when:
+        def levelsBeforeImport = skillsService.getLevels(projId, null).sort(){ it.level }
+        def subjectLevelsBeforeImport = skillsService.getLevels(projId, subject).sort(){ it.level }
+
+        exported.each {
+            skillsService.exportSkillToCatalog(it.projectId, it.skillId)
+            skillsService.importSkillFromCatalog(projId, subject, it.projectId, it.skillId)
+        }
+
+        def levelsAfterImport = skillsService.getLevels(projId, null).sort() { it.level }
+        def subjectLevelsAfterImport = skillsService.getLevels(projId, subject).sort(){ it.level }
+
+        skillsService.finalizeSkillsImportFromCatalog(projId, true)
+
+        def levelsAfterFinalize = skillsService.getLevels(projId, null).sort(){ it.level }
+        def subjectLevelsAfterFinalize = skillsService.getLevels(projId, subject).sort(){ it.level }
+
+        exported.each {
+            skillsService.deleteSkill([projectId: projId, subjectId: subject, skillId: it.skillId])
+        }
+
+        def levelsAfterRemoval = skillsService.getLevels(projId, null).sort() {it.level}
+        def subjectLevelsAfterRemoval = skillsService.getLevels(projId, subject).sort() {it.level}
+
+        then:
+        levelsBeforeImport[0].pointsFrom == levelsAfterImport[0].pointsFrom
+        levelsBeforeImport[0].pointsTo == levelsAfterImport[0].pointsTo
+        levelsBeforeImport[1].pointsFrom == levelsAfterImport[1].pointsFrom
+        levelsBeforeImport[1].pointsTo == levelsAfterImport[1].pointsTo
+        levelsBeforeImport[2].pointsFrom == levelsAfterImport[2].pointsFrom
+        levelsBeforeImport[2].pointsTo == levelsAfterImport[2].pointsTo
+        levelsBeforeImport[3].pointsFrom == levelsAfterImport[3].pointsFrom
+        levelsBeforeImport[3].pointsTo == levelsAfterImport[3].pointsTo
+        levelsBeforeImport[4].pointsFrom == levelsAfterImport[4].pointsFrom
+        levelsBeforeImport[4].pointsTo == levelsAfterImport[4].pointsTo
+
+        subjectLevelsBeforeImport[0].pointsFrom == subjectLevelsAfterImport[0].pointsFrom
+        subjectLevelsBeforeImport[0].pointsTo == subjectLevelsAfterImport[0].pointsTo
+        subjectLevelsBeforeImport[1].pointsFrom == subjectLevelsAfterImport[1].pointsFrom
+        subjectLevelsBeforeImport[1].pointsTo == subjectLevelsAfterImport[1].pointsTo
+        subjectLevelsBeforeImport[2].pointsFrom == subjectLevelsAfterImport[2].pointsFrom
+        subjectLevelsBeforeImport[2].pointsTo == subjectLevelsAfterImport[2].pointsTo
+        subjectLevelsBeforeImport[3].pointsFrom == subjectLevelsAfterImport[3].pointsFrom
+        subjectLevelsBeforeImport[3].pointsTo == subjectLevelsAfterImport[3].pointsTo
+        subjectLevelsBeforeImport[4].pointsFrom == subjectLevelsAfterImport[4].pointsFrom
+        subjectLevelsBeforeImport[4].pointsTo == subjectLevelsAfterImport[4].pointsTo
+
+        levelsAfterImport[0].pointsFrom < levelsAfterFinalize[0].pointsFrom
+        levelsAfterImport[0].pointsTo < levelsAfterFinalize[0].pointsTo
+        levelsAfterImport[1].pointsFrom < levelsAfterFinalize[1].pointsFrom
+        levelsAfterImport[1].pointsTo < levelsAfterFinalize[1].pointsTo
+        levelsAfterImport[2].pointsFrom < levelsAfterFinalize[2].pointsFrom
+        levelsAfterImport[2].pointsTo < levelsAfterFinalize[2].pointsTo
+        levelsAfterImport[3].pointsFrom < levelsAfterFinalize[3].pointsFrom
+        levelsAfterImport[3].pointsTo < levelsAfterFinalize[3].pointsTo
+        levelsAfterImport[4].pointsFrom < levelsAfterFinalize[4].pointsFrom
+        levelsAfterImport[4].pointsTo == levelsAfterFinalize[4].pointsTo
+
+        subjectLevelsAfterImport[0].pointsFrom < subjectLevelsAfterFinalize[0].pointsFrom
+        subjectLevelsAfterImport[0].pointsTo < subjectLevelsAfterFinalize[0].pointsTo
+        subjectLevelsAfterImport[1].pointsFrom < subjectLevelsAfterFinalize[1].pointsFrom
+        subjectLevelsAfterImport[1].pointsTo < subjectLevelsAfterFinalize[1].pointsTo
+        subjectLevelsAfterImport[2].pointsFrom < subjectLevelsAfterFinalize[2].pointsFrom
+        subjectLevelsAfterImport[2].pointsTo < subjectLevelsAfterFinalize[2].pointsTo
+        subjectLevelsAfterImport[3].pointsFrom < subjectLevelsAfterFinalize[3].pointsFrom
+        subjectLevelsAfterImport[3].pointsTo < subjectLevelsAfterFinalize[3].pointsTo
+        subjectLevelsAfterImport[4].pointsFrom < subjectLevelsAfterFinalize[4].pointsFrom
+        subjectLevelsAfterImport[4].pointsTo == subjectLevelsAfterFinalize[4].pointsTo
+
+        levelsBeforeImport[0].pointsFrom == levelsAfterRemoval[0].pointsFrom
+        levelsBeforeImport[0].pointsTo == levelsAfterRemoval[0].pointsTo
+        levelsBeforeImport[1].pointsFrom == levelsAfterRemoval[1].pointsFrom
+        levelsBeforeImport[1].pointsTo == levelsAfterRemoval[1].pointsTo
+        levelsBeforeImport[2].pointsFrom == levelsAfterRemoval[2].pointsFrom
+        levelsBeforeImport[2].pointsTo == levelsAfterRemoval[2].pointsTo
+        levelsBeforeImport[3].pointsFrom == levelsAfterRemoval[3].pointsFrom
+        levelsBeforeImport[3].pointsTo == levelsAfterRemoval[3].pointsTo
+        levelsBeforeImport[4].pointsFrom == levelsAfterRemoval[4].pointsFrom
+        levelsBeforeImport[4].pointsTo == levelsAfterRemoval[4].pointsTo
+
+        subjectLevelsBeforeImport[0].pointsFrom == subjectLevelsAfterRemoval[0].pointsFrom
+        subjectLevelsBeforeImport[0].pointsTo == subjectLevelsAfterRemoval[0].pointsTo
+        subjectLevelsBeforeImport[1].pointsFrom == subjectLevelsAfterRemoval[1].pointsFrom
+        subjectLevelsBeforeImport[1].pointsTo == subjectLevelsAfterRemoval[1].pointsTo
+        subjectLevelsBeforeImport[2].pointsFrom == subjectLevelsAfterRemoval[2].pointsFrom
+        subjectLevelsBeforeImport[2].pointsTo == subjectLevelsAfterRemoval[2].pointsTo
+        subjectLevelsBeforeImport[3].pointsFrom == subjectLevelsAfterRemoval[3].pointsFrom
+        subjectLevelsBeforeImport[3].pointsTo == subjectLevelsAfterRemoval[3].pointsTo
+        subjectLevelsBeforeImport[4].pointsFrom == subjectLevelsAfterRemoval[4].pointsFrom
+        subjectLevelsBeforeImport[4].pointsTo == subjectLevelsAfterRemoval[4].pointsTo
     }
 
     private List<List<String>> setupProjectWithSkills(List<String> subjects = ['testSubject1', 'testSubject2']) {

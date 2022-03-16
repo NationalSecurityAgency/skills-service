@@ -15,9 +15,13 @@
  */
 package skills.intTests.reportSkills
 
+import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import skills.storage.model.UserAchievement
+import skills.storage.repos.UserAchievedLevelRepo
+import spock.lang.IgnoreRest
 
 class ReportSkills_BadgeSkillsSpecs extends DefaultIntSpec {
 
@@ -186,6 +190,8 @@ class ReportSkills_BadgeSkillsSpecs extends DefaultIntSpec {
         requiredSkillsIds.each { String skillId ->
             skillsService.assignSkillToBadge(projectId: projId, badgeId: badge.badgeId, skillId: skillId)
         }
+        badge.enabled = true
+        skillsService.createBadge(badge)
 
         def resSkill1 = skillsService.addSkill([projectId: projId, skillId: skill1.skillId], "someuser", threeWeeksAgo).body
         def resSkill3 = skillsService.addSkill([projectId: projId, skillId: skill3.skillId], "someuser",threeWeeksAgo).body
@@ -272,17 +278,74 @@ class ReportSkills_BadgeSkillsSpecs extends DefaultIntSpec {
         skillsService.addSkill([skillId: skills.get(1).skillId, projectId: proj.projectId], "user1", new Date())
 
         when:
-        def user1SummaryBeforeEnable = skillsService.getBadgeSummary("user1", proj.projectId, badge.badgeId)
         skillsService.updateBadge([projectId: proj.projectId, badgeId: badge.badgeId, enabled: true, name: badge.name], badge.badgeId)
 
         def user1Summary = skillsService.getBadgeSummary("user1", proj.projectId, badge.badgeId)
         def user2Summary = skillsService.getBadgeSummary("user2", proj.projectId, badge.badgeId)
 
         then:
-        !user1SummaryBeforeEnable.badgeAchieved
         user1Summary.badgeAchieved
         !user2Summary.badgeAchieved
     }
+
+    def "badge awarded to users with requirements after enabling when dependencies include skills imported from catalog"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(10)
+        def badge = SkillsFactory.createBadge()
+
+        def proj2 = SkillsFactory.createProject(2)
+        def subj2 = SkillsFactory.createSubject(2, 2)
+        def toImport = SkillsFactory.createSkillsStartingAt(10, 11, 2, 2)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        skillsService.createProject(proj2)
+        skillsService.createSubject(subj2)
+        skillsService.createSkills(toImport)
+
+        toImport.each {
+            skillsService.exportSkillToCatalog(it.projectId, it.skillId)
+            skillsService.importSkillFromCatalog(proj.projectId, subj.subjectId, it.projectId, it.skillId)
+        }
+        skillsService.finalizeSkillsImportFromCatalog(proj.projectId, true)
+
+        badge.enabled = false
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(0).skillId])
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(1).skillId])
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: toImport[0].skillId])
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: toImport[1].skillId])
+
+        skillsService.addSkill([skillId: skills.get(0).skillId, projectId: proj.projectId], "user1", new Date())
+        skillsService.addSkill([skillId: skills.get(0).skillId, projectId: proj.projectId], "user2", new Date())
+        skillsService.addSkill([skillId: skills.get(1).skillId, projectId: proj.projectId], "user1", new Date())
+        skillsService.addSkill([skillId: toImport[0].skillId, projectId: proj2.projectId], "user1", new Date())
+        skillsService.addSkill([skillId: toImport[1].skillId, projectId: proj2.projectId], "user1", new Date())
+
+        skillsService.addSkill([skillId: skills.get(0).skillId, projectId: proj.projectId], "user3", new Date())
+        skillsService.addSkill([skillId: skills.get(1).skillId, projectId: proj.projectId], "user3", new Date())
+        skillsService.addSkill([skillId: toImport[0].skillId, projectId: proj2.projectId], "user3", new Date())
+
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        when:
+        skillsService.updateBadge([projectId: proj.projectId, badgeId: badge.badgeId, enabled: true, name: badge.name], badge.badgeId)
+
+        def user1Summary = skillsService.getBadgeSummary("user1", proj.projectId, badge.badgeId)
+        def user2Summary = skillsService.getBadgeSummary("user2", proj.projectId, badge.badgeId)
+        def user3Summary = skillsService.getBadgeSummary("user3", proj.projectId, badge.badgeId)
+
+        then:
+        user1Summary.badgeAchieved
+        !user2Summary.badgeAchieved
+        !user3Summary.badgeAchieved
+    }
+
+    @Autowired
+    UserAchievedLevelRepo userAchievedLevelRepo
 
     def "badge awarded to users with requirements after enabling, does not impact other badges"() {
         def proj = SkillsFactory.createProject()
@@ -304,6 +367,8 @@ class ReportSkills_BadgeSkillsSpecs extends DefaultIntSpec {
 
         skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge2.badgeId, skillId: skills[0].skillId])
         skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge2.badgeId, skillId: skills[5].skillId])
+        badge2.enabled = true
+        skillsService.createBadge(badge2)
 
         skillsService.addSkill([skillId: skills.get(0).skillId, projectId: proj.projectId], "user1", new Date())
         skillsService.addSkill([skillId: skills.get(0).skillId, projectId: proj.projectId], "user2", new Date())
@@ -312,8 +377,9 @@ class ReportSkills_BadgeSkillsSpecs extends DefaultIntSpec {
         skillsService.addSkill([skillId: skills[0].skillId, projectId: proj.projectId], "user3", new Date())
 
         when:
-        def user1SummaryBeforeEnable = skillsService.getBadgeSummary("user1", proj.projectId, badge.badgeId)
+        List<UserAchievement> achievementsBefore = userAchievedLevelRepo.findAllByUserAndProjectIds("user1", [proj.projectId])
         skillsService.updateBadge([projectId: proj.projectId, badgeId: badge.badgeId, enabled: true, name: badge.name], badge.badgeId)
+        List<UserAchievement> achievementsAfter = userAchievedLevelRepo.findAllByUserAndProjectIds("user1", [proj.projectId])
 
         def user1Summary = skillsService.getBadgeSummary("user1", proj.projectId, badge.badgeId)
         def user1SummaryBadge2 = skillsService.getBadgeSummary("user1", proj.projectId, badge2.badgeId)
@@ -322,7 +388,9 @@ class ReportSkills_BadgeSkillsSpecs extends DefaultIntSpec {
         def user3SummaryBadge2 = skillsService.getBadgeSummary("user3", proj.projectId, badge2.badgeId)
 
         then:
-        !user1SummaryBeforeEnable.badgeAchieved
+        !achievementsBefore.find( { it.skillId == badge.badgeId})
+        achievementsAfter.find( { it.skillId == badge.badgeId})
+
         user1Summary.badgeAchieved
         !user1SummaryBadge2.badgeAchieved
         !user2Summary.badgeAchieved
@@ -358,20 +426,21 @@ class ReportSkills_BadgeSkillsSpecs extends DefaultIntSpec {
         skillsService.addSkill([skillId: skills.get(1).skillId, projectId: proj.projectId], "user2", new Date()-35)
 
         when:
-        def user1SummaryBeforeEnable = skillsService.getBadgeSummary("user1", proj.projectId, badge.badgeId)
-
+        List<UserAchievement> achievementsBefore = userAchievedLevelRepo.findAllByUserAndProjectIds("user1", [proj.projectId])
         skillsService.updateBadge([projectId: proj.projectId,
                                    badgeId: badge.badgeId,
                                    enabled: true,
                                    name: badge.name,
                                    startDate: twoWeeksAgo,
                                    endDate: nextWeek], badge.badgeId)
+        List<UserAchievement> achievementsAfter = userAchievedLevelRepo.findAllByUserAndProjectIds("user1", [proj.projectId])
 
         def user1Summary = skillsService.getBadgeSummary("user1", proj.projectId, badge.badgeId)
         def user2Summary = skillsService.getBadgeSummary("user2", proj.projectId, badge.badgeId)
 
         then:
-        !user1SummaryBeforeEnable.badgeAchieved
+        !achievementsBefore.find( { it.skillId == badge.badgeId})
+        achievementsAfter.find( { it.skillId == badge.badgeId})
         user1Summary.badgeAchieved
         !user2Summary.badgeAchieved
     }
@@ -391,6 +460,9 @@ class ReportSkills_BadgeSkillsSpecs extends DefaultIntSpec {
         skillsService.createBadge(badge)
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge.badgeId, skillId: skill1.skillId])
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge.badgeId, skillId: skill2.skillId])
+        badge.enabled = true
+        skillsService.createBadge(badge)
+
 
         skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u123", new Date())
         skillsService.addSkill([projectId: proj1.projectId, skillId: skill2.skillId], "u123", new Date())
@@ -438,6 +510,8 @@ class ReportSkills_BadgeSkillsSpecs extends DefaultIntSpec {
         skillsService.createBadge(badge)
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge.badgeId, skillId: skill1.skillId])
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge.badgeId, skillId: skill2.skillId])
+        badge.enabled = true
+        skillsService.createBadge(badge)
 
         skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u123", new Date())
         skillsService.addSkill([projectId: proj1.projectId, skillId: skill2.skillId], "u124", new Date())

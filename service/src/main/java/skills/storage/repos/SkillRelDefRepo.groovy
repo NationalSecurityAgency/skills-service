@@ -24,18 +24,34 @@ import skills.storage.model.SkillRelDef
 interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
     List<SkillRelDef> findAllByChildAndType(SkillDef child, SkillRelDef.RelationshipType type)
 
-    List<SkillRelDef> findAllByChildAndTypeIn(SkillDef child, List<SkillRelDef.RelationshipType> types)
-
     @Query('''SELECT srd from SkillRelDef srd where srd.child.id=?1 and srd.type=?2''')
     List<SkillRelDef> findAllByChildIdAndType(Integer childId, SkillRelDef.RelationshipType type)
 
-    @Query('''SELECT srd from SkillRelDef srd where srd.child.id=?1 and srd.type in ?2''')
-    List<SkillRelDef> findAllByChildIdAndTypeIn(Integer childId, List<SkillRelDef.RelationshipType> types)
+    @Nullable
+    @Query('''SELECT parent 
+            from SkillRelDef srd, SkillDef parent 
+            where 
+                srd.child.id=?1 
+                and srd.type in ?2
+                and srd.parent = parent''')
+    List<SkillDef> findParentByChildIdAndTypes(Integer childId, List<SkillRelDef.RelationshipType> types)
 
     SkillRelDef findByChildAndParentAndType(SkillDef child, SkillDef parent, SkillRelDef.RelationshipType type)
     List<SkillRelDef> findAllByParentAndType(SkillDef parent, SkillRelDef.RelationshipType type)
-    List<SkillRelDef> findAllByParentAndTypeIn(SkillDef parent, List<SkillRelDef.RelationshipType> types)
 
+    @Query('''SELECT child 
+            from SkillRelDef srd, SkillDef child 
+            where 
+                srd.parent.id=?1 
+                and srd.type in ?2
+                and srd.child = child''')
+    List<SkillDef> findChildrenByParent(Integer parentId, List<SkillRelDef.RelationshipType> types)
+
+    @Query('''SELECT sd1.skillId 
+        from SkillDef sd1, SkillRelDef srd 
+        where sd1 = srd.parent and sd1.type = 'Subject'
+              and srd.child.id = ?1''')
+    String findSubjectSkillIdByChildId(Integer childId)
 
     @Query(value = '''select count(srd.id) from SkillRelDef srd where srd.child.skillId=?1 and srd.type='BadgeRequirement' and srd.parent.type = 'GlobalBadge' ''')
     Integer getSkillUsedInGlobalBadgeCount(String skillId)

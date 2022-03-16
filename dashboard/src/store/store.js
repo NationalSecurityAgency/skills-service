@@ -25,7 +25,9 @@ import projConfig from './modules/projConfig';
 import libVersion from './modules/libVersion';
 import access from './modules/access';
 import skills from './modules/skills';
+import subjectSkills from './modules/subjectSkills';
 import myProgress from './modules/myProgress';
+import finalizeInfo from './modules/finalizeInfo';
 
 Vue.use(Vuex);
 
@@ -70,6 +72,8 @@ export default new Vuex.Store({
     libVersion,
     access,
     skills,
+    subjectSkills,
     myProgress,
+    finalizeInfo,
   },
 });

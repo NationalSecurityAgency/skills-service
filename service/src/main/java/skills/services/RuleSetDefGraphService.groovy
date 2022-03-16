@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillException
+import skills.controller.exceptions.SkillExceptionBuilder
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.SkillRelDef
@@ -43,17 +44,14 @@ class RuleSetDefGraphService {
 
     @Transactional
     SkillDef getParentSkill(SkillDef skillDef) {
-        List<SkillRelDef> parents = skillRelDefRepo.findAllByChildAndTypeIn(skillDef, [RelationshipType.RuleSetDefinition, RelationshipType.SkillsGroupRequirement])
-        // assume that I only have one parent
-        SkillDef parent = parents.first().parent
-        return parent
+        return getParentSkill(skillDef.id)
     }
 
     @Transactional
     SkillDef getParentSkill(Integer childId) {
-        List<SkillRelDef> parents = skillRelDefRepo.findAllByChildIdAndTypeIn(childId, [RelationshipType.RuleSetDefinition, RelationshipType.SkillsGroupRequirement])
+        List<SkillDef> parents = skillRelDefRepo.findParentByChildIdAndTypes(childId, [RelationshipType.RuleSetDefinition, RelationshipType.SkillsGroupRequirement])
         // assume that I only have one parent
-        SkillDef parent = parents.first().parent
+        SkillDef parent = parents.first()
         return parent
     }
 
@@ -90,14 +88,19 @@ class RuleSetDefGraphService {
 
     @Transactional
     void assignGraphRelationship(String projectId, String skillId, SkillDef.ContainerType skillType,
-                                 String relationshipSkillId, RelationshipType relationshipType) {
-        assignGraphRelationship(projectId, skillId, skillType, projectId, relationshipSkillId, relationshipType)
+                                 String relationshipSkillId, RelationshipType relationshipType, boolean validateEnabled = false) {
+        assignGraphRelationship(projectId, skillId, skillType, projectId, relationshipSkillId, relationshipType, validateEnabled)
     }
     @Transactional
     void assignGraphRelationship(String projectId, String skillId, SkillDef.ContainerType skillType,
-                                 String relationshipProjectId, String relationshipSkillId, RelationshipType relationshipType) {
+                                 String relationshipProjectId, String relationshipSkillId, RelationshipType relationshipType, boolean validateEnabled = false) {
         SkillDef skill1 = skillDefAccessor.getSkillDef(projectId, skillId, [skillType])
         SkillDef skill2 = skillDefAccessor.getSkillDef(relationshipProjectId, relationshipSkillId)
+        if (validateEnabled && !skill2.enabled?.equalsIgnoreCase("true")) {
+            throw new SkillExceptionBuilder()
+                    .msg("Skill [${skill2.skillId}] is not enabled")
+                    .projectId(projectId).skillId(skillId).build()
+        }
         skillRelDefRepo.save(new SkillRelDef(parent: skill1, child: skill2, type: relationshipType))
     }
 

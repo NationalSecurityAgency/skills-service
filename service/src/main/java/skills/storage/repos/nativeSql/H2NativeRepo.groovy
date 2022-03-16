@@ -16,12 +16,12 @@
 package skills.storage.repos.nativeSql
 
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Conditional
 import org.springframework.stereotype.Service
-import skills.controller.request.model.QueryUsersCriteriaRequest
-import skills.controller.request.model.SubjectLevelQueryRequest
 import skills.storage.model.QueryUsersCriteria
 import skills.storage.model.SkillDef
+import skills.storage.repos.UserPointsRepo
 
 import javax.persistence.EntityManager
 import javax.persistence.PersistenceContext
@@ -35,6 +35,9 @@ class H2NativeRepo implements NativeQueriesRepo {
 
     @PersistenceContext
     EntityManager entityManager;
+
+    @Autowired
+    UserPointsRepo userPointsRepo
 
     @Override
     void decrementPointsForDeletedSkill(String projectId, String deletedSkillId, String parentSubjectSkillId) {
@@ -147,8 +150,11 @@ class H2NativeRepo implements NativeQueriesRepo {
             FROM 
                 user_performed_skill
             WHERE 
-                skill_id = :skillId
-                AND project_id = :projectId
+                skill_ref_id in (
+                    select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id 
+                    from skill_definition 
+                    where type = 'Skill' and project_id = :projectId and skill_id = :skillId
+                )
             GROUP BY 
                 user_id
            '''
@@ -219,7 +225,11 @@ class H2NativeRepo implements NativeQueriesRepo {
             FROM
                 user_performed_skill
             WHERE
-                skill_id = :skillId AND project_id = :projectId
+                skill_ref_id in (
+                    select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id 
+                    from skill_definition 
+                    where type = 'Skill' and project_id = :projectId and skill_id = :skillId
+                )
             GROUP BY
                 user_id, FORMATDATETIME(performed_on,'yyyy-MM-dd')
            '''
@@ -240,7 +250,7 @@ class H2NativeRepo implements NativeQueriesRepo {
     }
 
     @Override
-    void updatePointTotalWhenOccurrencesAreDecreased(String projectId, String subjectId, String skillId, int pointIncrement, int numOccurrences) {
+    void updatePointTotalWhenOccurrencesAreDecreased(String projectId, String subjectId, String skillId, int pointIncrement, int newOccurrences, int numOccurrences) {
         List<PerformedSkillEventCount> eventCounts = getGroupedEventCountsByUserId(projectId, skillId)
         List<PerformedSkillEventCount> eventsCountsToEdit = eventCounts.findAll({ it.eventCount > numOccurrences })
 
@@ -832,5 +842,26 @@ class H2NativeRepo implements NativeQueriesRepo {
         return query.getResultStream()
     }
 
+    @Override
+    void updateUserPointsForASkill(String projectId, String skillId) {
+        userPointsRepo.updateUserPointsForASkillInH2(projectId, skillId)
+    }
 
+    @Override
+    void updateUserPointsHistoryForASkill(String projectId, String skillId) {
+        userPointsRepo.updateUserPointsHistoryForASkillInH2(projectId, skillId)
+        userPointsRepo.removeUserPointsThatDoNotExistForASkillInH2(projectId, skillId)
+    }
+
+    @Override
+    void updateUserPointsForSubjectOrGroup(String projectId, String skillId) {
+        userPointsRepo.updateSubjectOrGroupUserPointsInH2(projectId, skillId)
+        userPointsRepo.removeUserPointsThatDoNotExistForSubjectOrGroupInH2(projectId, skillId)
+    }
+
+    @Override
+    void updateUserPointsHistoryForProject(String projectId) {
+        userPointsRepo.updateUserPointsHistoryForProjectInH2(projectId)
+        userPointsRepo.removeUserPointsThatDoNotExistForProjectInH2(projectId)
+    }
 }

@@ -27,6 +27,9 @@ limitations under the License.
           <span class="">Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
         </b-button>
       </div>
+      <div slot="footer">
+        <import-finalize-alert />
+      </div>
     </page-header>
 
     <navigation v-if="!isLoading" :nav-items="[
@@ -46,6 +49,7 @@ limitations under the License.
 
 <script>
   import { createNamespacedHelpers } from 'vuex';
+  import ImportFinalizeAlert from '@/components/skills/catalog/ImportFinalizeAlert';
   import Navigation from '../utils/Navigation';
   import PageHeader from '../utils/pages/PageHeader';
   import EditSubject from './EditSubject';
@@ -56,6 +60,7 @@ limitations under the License.
   export default {
     name: 'SubjectPage',
     components: {
+      ImportFinalizeAlert,
       PageHeader,
       Navigation,
       EditSubject,
@@ -90,10 +95,12 @@ limitations under the License.
           stats: [{
             label: 'Groups',
             count: this.subject.numGroups,
+            disabledCount: this.subject.numGroupsDisabled,
             icon: 'fas fa-layer-group skills-color-groups',
           }, {
             label: 'Skills',
             count: this.subject.numSkills,
+            disabledCount: this.subject.numSkillsDisabled,
             icon: 'fas fa-graduation-cap skills-color-skills',
           }, {
             label: 'Points',

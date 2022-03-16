@@ -42,8 +42,10 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
         cy.createSubject(1, 1);
         cy.importSkillFromCatalog(1, 1, 2, 1)
         cy.createSkill(1, 1, 4, { description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.' });
-        cy.importSkillFromCatalog(1, 1, 2, 2)
-        cy.importSkillFromCatalog(1, 1, 2, 3)
+        cy.bulkImportSkillFromCatalogAndFinalize(1, 1, [
+            { projNum: 2, skillNum: 2 },
+            { projNum: 2, skillNum: 3 },
+        ])
 
         cy.createSkillsGroup(1, 1, 5);
         cy.addSkillToGroup(1, 1, 5, 6);
@@ -80,8 +82,10 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
 
         cy.createProject(1)
         cy.createSubject(1, 1);
-        cy.importSkillFromCatalog(1, 1, 2, 1)
-        cy.importSkillFromCatalog(1, 1, 2, 2)
+        cy.bulkImportSkillFromCatalogAndFinalize(1, 1, [
+            { projNum: 2, skillNum: 1 },
+            { projNum: 2, skillNum: 2 },
+        ])
         cy.createSkill(1, 1, 3)
 
         cy.cdVisit('/');
@@ -149,7 +153,9 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
 
         cy.createProject(1)
         cy.createSubject(1, 1);
-        cy.importSkillFromCatalog(1, 1, 2, 1)
+        cy.bulkImportSkillFromCatalogAndFinalize(1, 1, [
+            { projNum: 2, skillNum: 1 },
+        ])
 
         cy.cdVisit('/');
         cy.cdClickSubj(0);
@@ -166,6 +172,8 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
             .contains('Congrats! You just earned 100 points!')
         cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]')
             .contains('100 / 200 Points')
+
+        cy.waitForBackendAsyncTasksToComplete()
 
         cy.cdClickSkill(0);
         cy.get('[data-cy="selfReportBtn"]')
@@ -186,7 +194,9 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
 
         cy.createProject(1)
         cy.createSubject(1, 1);
-        cy.importSkillFromCatalog(1, 1, 2, 1)
+        cy.bulkImportSkillFromCatalogAndFinalize(1, 1, [
+            { projNum: 2, skillNum: 1 },
+        ])
 
         cy.cdVisit('/');
         cy.cdClickSubj(0);
@@ -215,8 +225,10 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
 
         cy.createProject(1)
         cy.createSubject(1, 1);
-        cy.importSkillFromCatalog(1, 1, 2, 1)
-        cy.importSkillFromCatalog(1, 1, 2, 2)
+        cy.bulkImportSkillFromCatalogAndFinalize(1, 1, [
+            { projNum: 2, skillNum: 1 },
+            { projNum: 2, skillNum: 2 },
+        ])
 
         cy.cdVisit('/');
         cy.cdClickSubj(0);
@@ -249,8 +261,10 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
 
         cy.createProject(1)
         cy.createSubject(1, 1);
-        cy.importSkillFromCatalog(1, 1, 2, 1)
-        cy.importSkillFromCatalog(1, 1, 2, 2)
+        cy.bulkImportSkillFromCatalogAndFinalize(1, 1, [
+            { projNum: 2, skillNum: 1 },
+            { projNum: 2, skillNum: 2 },
+        ])
 
         cy.cdVisit('/');
         cy.cdClickSubj(0);
@@ -258,7 +272,7 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
         cy.get('[data-cy="skillDescription-skill1"] [data-cy="selfReportBtn"]')
 
         cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now');
-        cy.wait(3000)
+        cy.waitForBackendAsyncTasksToComplete()
 
         cy.get('[data-cy="skillDescription-skill1"] [data-cy="selfReportBtn"]').click();
         cy.get('[data-cy="selfReportSubmitBtn"] ').click();
@@ -266,7 +280,7 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
 
         cy.cdClickSkill(1);
         cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
-        cy.wait(3000)
+        cy.waitForBackendAsyncTasksToComplete()
         cy.get('[data-cy="selfReportBtn"]').click();
         cy.get('[data-cy="selfReportSubmitBtn"] ').click();
         cy.get('[data-cy="selfReportError"]').contains('This skill was already submitted for approval and is still pending approval')
@@ -282,8 +296,10 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
 
         cy.createProject(1)
         cy.createSubject(1, 1);
-        cy.importSkillFromCatalog(1, 1, 2, 1)
-        cy.importSkillFromCatalog(1, 1, 2, 2)
+        cy.bulkImportSkillFromCatalogAndFinalize(1, 1, [
+            { projNum: 2, skillNum: 1 },
+            { projNum: 2, skillNum: 2 },
+        ])
 
         cy.cdVisit('/');
         cy.cdClickSubj(0);
@@ -291,9 +307,9 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
         cy.get('[data-cy="skillDescription-skill1"] [data-cy="selfReportBtn"]')
 
         cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now');
-        cy.wait(3000)
+        cy.waitForBackendAsyncTasksToComplete()
         cy.approveRequest(2)
-        cy.wait(3000)
+        cy.waitForBackendAsyncTasksToComplete()
 
         cy.get('[data-cy="skillDescription-skill1"] [data-cy="selfReportBtn"]').click();
         cy.get('[data-cy="selfReportSubmitBtn"] ').click();
@@ -301,9 +317,9 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
 
         cy.cdClickSkill(1);
         cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
-        cy.wait(3000)
+        cy.waitForBackendAsyncTasksToComplete()
         cy.approveRequest(2)
-        cy.wait(3000)
+        cy.waitForBackendAsyncTasksToComplete()
         cy.get('[data-cy="selfReportBtn"]').click();
         cy.get('[data-cy="selfReportSubmitBtn"] ').click();
         cy.get('[data-cy="selfReportError"]').contains('This skill reached its maximum points')

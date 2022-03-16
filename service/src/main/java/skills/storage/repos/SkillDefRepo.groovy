@@ -16,18 +16,18 @@
 package skills.storage.repos
 
 import org.springframework.data.domain.Pageable
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
 import skills.storage.model.BadgeCount
 import skills.storage.model.ImportExportStats
+import skills.storage.model.SkillCounts
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillDef.ContainerType
 import skills.storage.model.SkillDefMin
-import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.SkillRelDef.RelationshipType
-
-import java.util.stream.Stream
 
 interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
 
@@ -82,8 +82,9 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
             (srd.type = 'RuleSetDefinition' or srd.type = 'GroupSkillToSubject') and subjectDef.type = 'Subject' and 
             s.projectId = ?1 and s.type = ?2 and
             (s.copiedFromProjectId is null or 'true' = ?4) and
-            upper(s.name) like UPPER(CONCAT('%', ?3, '%'))''')
-    List<SkillDefSkinny> findAllSkinnySelectByProjectIdAndType(String id, SkillDef.ContainerType type, String skillNameQuery, String includeCatalogImportedSkills)
+            (s.enabled = 'true' or 'true' = ?5) and
+            lower(s.name) like lower(CONCAT('%', ?3, '%'))''')
+    List<SkillDefSkinny> findAllSkinnySelectByProjectIdAndType(String id, SkillDef.ContainerType type, String skillNameQuery, String includeCatalogImportedSkills, String includeDisabled)
 
     @Nullable
     @Query('''SELECT         
@@ -106,7 +107,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         where
         subjectDef = srd.parent and s = srd.child and 
         srd.type = 'RuleSetDefinition' and subjectDef.type = 'Subject' and  
-        s.type = ?1 and upper(s.name) like UPPER(CONCAT('%', ?2, '%'))''')
+        s.type = ?1 and lower(s.name) like lower(CONCAT('%', ?2, '%'))''')
     List<SkillDefPartial> findAllByTypeAndNameLike(SkillDef.ContainerType type, String name)
 
 
@@ -131,11 +132,15 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         where
         subjectDef = srd.parent and s = srd.child and 
         srd.type = 'RuleSetDefinition' and subjectDef.type = 'Subject' and  
-        s.type = ?1 and upper(s.name) like UPPER(CONCAT('%', ?2, '%')) and
+        s.type = ?1 and lower(s.name) like lower(CONCAT('%', ?2, '%')) and
         s.readOnly != true''')
     List<SkillDefPartial> findAllByTypeAndNameLikeNoImportedSkills(SkillDef.ContainerType type, String name)
 
     List<SkillDef> findAllByProjectIdAndType(@Nullable String id, SkillDef.ContainerType type)
+
+    @Nullable
+    List<SkillDef> findAllByProjectIdAndTypeAndEnabledAndCopiedFromIsNotNull(@Nullable String id, SkillDef.ContainerType type, String enabled)
+
     @Nullable
     SkillDef findByProjectIdAndSkillIdIgnoreCaseAndType(@Nullable String id, String skillId, SkillDef.ContainerType type)
     @Nullable
@@ -198,6 +203,25 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
             where r.parent.id=?1 and c.id = r.child and r.type=?2 and c.type = 'Skill' and c.enabled = 'true'
         ''')
     long countActiveChildSkillsByIdAndRelationshipType(Integer parentSkillRefId, RelationshipType relationshipType)
+
+    @Query('''select count(c) 
+            from SkillRelDef r, SkillDef c 
+            where r.parent.id=?1 and c.id = r.child and r.type=?2 and c.type = 'Skill' and c.enabled = ?3
+        ''')
+    long countChildSkillsByIdAndRelationshipTypeAndEnabled(Integer parentSkillRefId, RelationshipType relationshipType, String enabled)
+
+    @Query('''select
+            sum(case when c.enabled = 'true' and  c.type = 'Skill' then 1 end) as enabledSkillsCount,
+            sum(case when c.enabled = 'false' and  c.type = 'Skill' then 1 end) as disabledSkillsCount,
+            sum(case when c.enabled = 'false' and  c.type = 'Skill' and c.copiedFrom is not null then 1 end) as disabledImportedSkillsCount,
+            sum(case when c.enabled = 'true' and  c.type = 'SkillsGroup' then 1 end) as enabledGroupsCount,
+            sum(case when c.enabled = 'false' and  c.type = 'SkillsGroup' then 1 end) as disabledGroupsCount
+            from SkillRelDef r, SkillDef c 
+            where r.parent.id=?1 and c.id = r.child and r.type in ('RuleSetDefinition', 'GroupSkillToSubject')
+        ''')
+    SkillCounts getSkillsCountsForParentId(Integer parentSkillRefId)
+
+    long countByProjectIdAndEnabledAndCopiedFromIsNotNull(String projectId, String enabled)
 
     @Query(value='''select count(sd) 
         from SkillRelDef srd, SkillDef sd
@@ -294,6 +318,10 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
 
     @Query("SELECT DISTINCT s.version from SkillDef s where s.projectId=?1 ORDER BY s.version ASC")
     List<Integer> getUniqueVersionList(String projectId)
+
+
+    @Query("SELECT s.id from SkillDef s where s.projectId=?1 and s.skillId=?2 and s.type=?3")
+    Integer getIdByProjectIdAndSkillIdAndType(String projectId, String skillId, ContainerType containerType)
 
     @Query(value='''SELECT count(sd)
         from SkillDef sd 
@@ -448,7 +476,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         s.copiedFrom as copiedFrom,
         s.copiedFromProjectId as copiedFromProjectId,
         s.readOnly as readOnly
-        from SkillDef s where s.copiedFrom = ?1
+        from SkillDef s where s.copiedFrom = ?1 and s.enabled = 'true'
     ''')
     List<SkillDefMin> findSkillDefMinCopiedFrom(int skillRefId)
 
@@ -483,4 +511,40 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         from SkillDef sd where sd.copiedFromProjectId is not null
     ''')
     ImportExportStats getImportedSKillStats(String projectId)
+
+    @Modifying
+    @Query(value = '''update project_definition
+        set total_points = (
+            select case when sum(total_points) is not null then sum(total_points) else 0 end as totalPoints
+            from skill_definition
+            where project_id = :projectId
+              and type = 'Subject'
+              and enabled = 'true')
+        where project_id = :projectId''', nativeQuery = true)
+    void updateProjectsTotalPoints(@Param('projectId') String projectId)
+
+    @Modifying
+    @Query(value = '''update skill_definition subject
+        set total_points = (
+            select case when sum(skill.total_points) is not null then sum(skill.total_points) else 0 end as totalPoints
+            from skill_relationship_definition rel,
+                 skill_definition skill
+            where subject.id = rel.parent_ref_id
+              and skill.id = rel.child_ref_id
+              and rel.type in ('GroupSkillToSubject', 'RuleSetDefinition')
+              and subject.project_id = :projectId
+              and subject.skill_id = :subjectId
+              and subject.type = 'Subject'
+              and skill.type = 'Skill'
+              and skill.enabled = 'true')
+        where subject.project_id = :projectId
+          and subject.skill_id = :subjectId
+          and subject.type = 'Subject' 
+          ''', nativeQuery = true)
+    void updateSubjectTotalPoints(@Param('projectId') String projectId, @Param('subjectId') String subjectId)
+
+    @Query(value = '''
+         select exists (select 1 from skill_definition where project_id = :projectId and skill_id = :skillId and read_only = 'true') as isReadOnly
+    ''', nativeQuery = true)
+    boolean isImportedFromCatalog(@Param('projectId') String projectId, @Param('skillId') String skillId)
 }

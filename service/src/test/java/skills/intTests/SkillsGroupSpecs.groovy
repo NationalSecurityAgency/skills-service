@@ -1328,16 +1328,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         def groupEnabled = skillsService.getSkill(skillsGroup)
         def child1Enabled = skillsService.getSkill(children[0])
         def child2Enabled = skillsService.getSkill(children[1])
-
-        skillsGroup.enabled = 'false'
-        skillsService.updateSkill(skillsGroup, null)
-
-        def groupSkillsDisabled = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
-        def subjSkillsDisabled = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
-        def groupDisabled = skillsService.getSkill(skillsGroup)
-        def child1Disabled = skillsService.getSkill(children[0])
-        def child2Disabled = skillsService.getSkill(children[1])
-
         then:
         groupSkillsInitial.every { it.enabled == false }
         subjSkillsInitial.every { it.enabled == false }
@@ -1350,15 +1340,9 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         groupEnabled.enabled == true
         child1Enabled.enabled == true
         child2Enabled.enabled == true
-
-        groupSkillsDisabled.every { it.enabled == false }
-        subjSkillsDisabled.every { it.enabled == false }
-        groupDisabled.enabled == false
-        child1Disabled.enabled == false
-        child2Disabled.enabled == false
     }
 
-    void "skills under SkillsGroup are returned in project's skills endpoint" () {
+    void "enabled skills under SkillsGroup are returned in project's skills endpoint" () {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skillsGroup = SkillsFactory.createSkillsGroup()
@@ -1376,12 +1360,20 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         when:
         def res = skillsService.getSkillsForProject(proj.projectId)
 
+        skillsGroup.enabled = true
+        skillsService.createSkill(skillsGroup)
+
+        def res1 = skillsService.getSkillsForProject(proj.projectId)
+
         then:
-        res.size() == 3
-        res.collect { it.skillId }.sort() == [ allSkills[1].skillId, allSkills[2].skillId, allSkills[3].skillId, ]
+        res.size() == 1
+        res.collect { it.skillId }.sort() == [ allSkills[3].skillId, ]
+
+        res1.size() == 3
+        res1.collect { it.skillId }.sort() == [ allSkills[1].skillId, allSkills[2].skillId, allSkills[3].skillId, ]
     }
 
-    void "skills under SkillsGroup are available to be used as dependencies" () {
+    void "enabled skills under SkillsGroup are available to be used as dependencies" () {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skillsGroup = SkillsFactory.createSkillsGroup()
@@ -1399,9 +1391,17 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         when:
         def res = skillsService.getSkillsAvailableForDependency(proj.projectId)
 
+        skillsGroup.enabled = true
+        skillsService.createSkill(skillsGroup)
+
+        def res1 = skillsService.getSkillsAvailableForDependency(proj.projectId)
+
         then:
-        res.size() == 3
-        res.collect { it.skillId }.sort() == [ allSkills[1].skillId, allSkills[2].skillId, allSkills[3].skillId, ]
+        res.size() == 1
+        res.collect { it.skillId }.sort() == [allSkills[3].skillId, ]
+
+        res1.size() == 3
+        res1.collect { it.skillId }.sort() == [ allSkills[1].skillId, allSkills[2].skillId, allSkills[3].skillId, ]
     }
 
     @Autowired
@@ -1626,5 +1626,38 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         approvalsHistoryPg1.totalCount == 2
         approvalsHistoryPg1.count == 2
         approvalsHistoryPg1.data.size() == 2
+    }
+
+    def "cannot disable a group once it has been enabled"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skillsGroup = SkillsFactory.createSkillsGroup()
+        def allSkills = SkillsFactory.createSkills(4) // first one is group
+        allSkills[1].selfReportingType = SkillDef.SelfReportingType.Approval
+        allSkills[2].selfReportingType = SkillDef.SelfReportingType.Approval
+        allSkills[1].pointIncrement = 1
+        allSkills[2].pointIncrement = 1
+        allSkills[3].pointIncrement = 500
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[1])
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[2])
+        skillsService.createSkill(allSkills[3])
+
+        skillsGroup.enabled = 'true'
+        skillsService.updateSkill(skillsGroup, null)
+
+        when:
+        skillsGroup.enabled = 'false'
+        skillsService.updateSkill(skillsGroup, null)
+        def result = skillsService.getSkill([projectId: proj.projectId, subjectId: subj.subjectId, skillId: skillsGroupId])
+        println result
+
+        then:
+        def e = thrown(Exception)
+        e.message.contains("Cannot disable SkillsGroup [skill1] once it has been enabled")
     }
 }

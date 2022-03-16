@@ -69,7 +69,7 @@ class CreatedResourceLimitsValidator {
     }
 
     void validateNumSkillsCreated(SkillDef subject){
-        long skillCount = skillDefRepo.countActiveChildSkillsByIdAndRelationshipType(subject.id, SkillRelDef.RelationshipType.RuleSetDefinition)
+        long skillCount = skillDefRepo.countChildSkillsByIdAndRelationshipTypeAndEnabled(subject.id, SkillRelDef.RelationshipType.RuleSetDefinition, "true")
         skillCount += skillDefRepo.countActiveGroupChildSkillsForSubject(subject.id)
         if(skillCount >= maxSkillsPerSubject){
             throw new SkillException("Each Subject is limited to [${maxSkillsPerSubject}] Skills", ErrorCode.MaxSkillsThreshold)
@@ -85,7 +85,7 @@ class CreatedResourceLimitsValidator {
      * @param toBeEnabledGroupSkills
      */
     void validateNumSkillsCreated(SkillDef subject, Integer toBeEnabledGroupSkills){
-        long skillCount = skillDefRepo.countActiveChildSkillsByIdAndRelationshipType(subject.id, SkillRelDef.RelationshipType.RuleSetDefinition)
+        long skillCount = skillDefRepo.countChildSkillsByIdAndRelationshipTypeAndEnabled(subject.id, SkillRelDef.RelationshipType.RuleSetDefinition, "true")
         skillCount += skillDefRepo.countActiveGroupChildSkillsForSubject(subject.id)
         skillCount += toBeEnabledGroupSkills
 

@@ -90,7 +90,7 @@ class UserEventService {
         }
 
         Validate.isTrue(ALLOWABLE_CONTAINER_TYPES.contains(skillDef.type), "Unsupported ContainerType [${skillDef.type}]")
-
+        //TODO: fix all these
         List<DayCountItem> results
         Integer rawId = skillDef.id
         if (EventType.DAILY == eventType) {
@@ -103,7 +103,7 @@ class UserEventService {
             results = convertResults(stream, eventType, start)
         } else {
             start = StartDateUtil.computeStartDate(start, EventType.WEEKLY)
-            Stream<WeekCount> stream
+            Stream<WeekCountItem> stream
             if (SkillDef.ContainerType.Skill == skillDef.type) {
                 stream = userEventsRepo.getEventCountForSkillGroupedByWeek(rawId, start)
             } else {
@@ -137,6 +137,7 @@ class UserEventService {
         Validate.isTrue(ALLOWABLE_CONTAINER_TYPES.contains(skillDef.type), "Unsupported ContainerType [${skillDef.type}]")
 
         List<DayCountItem> results
+        //only applicable to skills
         Integer rawId = skillDef.id
 
         if (EventType.DAILY == eventType) {
@@ -149,7 +150,7 @@ class UserEventService {
             results = convertResults(stream, eventType, start)
         } else {
             start = StartDateUtil.computeStartDate(start, EventType.WEEKLY)
-            Stream<WeekCount> stream
+            Stream<WeekCountItem> stream
             if (SkillDef.ContainerType.Skill == skillDef.type) {
                 stream = userEventsRepo.getDistinctUserCountForSkillGroupedByWeek(rawId, start)
             } else {
@@ -182,7 +183,7 @@ class UserEventService {
             results = convertResults(stream, eventType, start, [projectId])
         } else {
             start = StartDateUtil.computeStartDate(start, EventType.WEEKLY)
-            Stream<WeekCount> stream = userEventsRepo.getEventCountForProjectGroupedByWeek(projectId, start)
+            Stream<WeekCountItem> stream = userEventsRepo.getEventCountForProjectGroupedByWeek(projectId, start)
             results = convertResults(stream, start)
         }
 
@@ -205,14 +206,13 @@ class UserEventService {
     @Transactional(readOnly = true)
     List<DayCountItem> getUserEventCountsForUser(String userId, Date start, List<String> projectIds) {
         EventType eventType = determineAppropriateEventType(start)
-
         List<DayCountItem> results
         if (EventType.DAILY == eventType) {
             Stream<DayCountItem> stream = userEventsRepo.getEventCountForUser(userId, start, eventType, projectIds)
             results = convertResults(stream, eventType, start, projectIds)
         } else {
             start = StartDateUtil.computeStartDate(start, EventType.WEEKLY)
-            Stream<WeekCount> stream = userEventsRepo.getEventCountForUserGroupedByWeek(userId, start, projectIds)
+            Stream<WeekCountItem> stream = userEventsRepo.getEventCountForUserGroupedByWeek(userId, start, projectIds)
             results = convertResults(stream, start, projectIds)
         }
 
@@ -224,6 +224,10 @@ class UserEventService {
      * setting, in which case results are grouped by week where DayCountItem.start refers to the start-of-week (Sunday) for that week's
      * distinct user counts.
      *
+     * NOTE: There is the potential that DayCountItems returned by this method will have a different projectId than the
+     * one specified. In the event that the specified projectId has imported skills from the catalog, events relating to those
+     * skills will be returned as a DayCountItem where projectId = the EXPORTING projectId
+     *
      * @param projectId
      * @param start
      * @return
@@ -231,14 +235,13 @@ class UserEventService {
     @Transactional(readOnly = true)
     List<DayCountItem> getDistinctUserCountsForProject(String projectId, Date start) {
         EventType eventType = determineAppropriateEventType(start)
-
         List<DayCountItem> results
         if (EventType.DAILY == eventType) {
             Stream<DayCountItem> stream = userEventsRepo.getDistinctUserCountForProject(projectId, start, eventType)
             results = convertResults(stream, eventType, start, [projectId])
         } else {
             start = StartDateUtil.computeStartDate(start, EventType.WEEKLY)
-            Stream<WeekCount> stream = userEventsRepo.getDistinctUserCountForProjectGroupedByWeek(projectId, start)
+            Stream<WeekCountItem> stream = userEventsRepo.getDistinctUserCountForProjectGroupedByWeek(projectId, start)
 
             results = convertResults(stream, start)
         }
@@ -351,7 +354,7 @@ class UserEventService {
                     if (it.day.toLocalDate().getDayOfWeek() != DayOfWeek.SUNDAY) {
                         //we have to fix the day to align with the start of the week as there can be gaps in the daily data
                         //this happens when daily metrics are grouped into weekly in the query
-                        it.day = StartDateUtil.computeStartDate(it.day, EventType.WEEKLY)
+                        it = new DayCount(it.projectId, StartDateUtil.computeStartDate(it.day, EventType.WEEKLY), it.count)
                     }
                 }
 
@@ -384,7 +387,7 @@ class UserEventService {
     }
 
     @CompileStatic
-    private List<DayCountItem> convertResults(Stream<WeekCount> stream, Date startOfQueryRange, List<String> projectIds=[]) {
+    private List<DayCountItem> convertResults(Stream<WeekCountItem> stream, Date startOfQueryRange, List<String> projectIds=[]) {
         // initialize counts for all passed in project id's so there will be zero counts added for projects with no events yet
         Map<String, PerProjectCounts> perProjectCounts = projectIds.collectEntries {projectId ->
             [projectId, new PerProjectCounts(lastDate: StartDateUtil.computeStartDate(new Date(), EventType.WEEKLY))]
@@ -393,7 +396,7 @@ class UserEventService {
         try {
             stream.forEach({
                 Date day = WeekNumberUtil.getStartOfWeekFromWeekNumber(it.weekNumber).atStartOfDay().toDate()
-                DayCountItem dci = new DayCountItem(it.projectId, day, it.count)
+                DayCount dci = new DayCount(it.projectId, day, it.count)
 
                 PerProjectCounts perProject = perProjectCounts.get(it.projectId)
                 if (!perProject) {

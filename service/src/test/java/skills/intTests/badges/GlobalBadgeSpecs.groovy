@@ -15,14 +15,18 @@
  */
 package skills.intTests.badges
 
-
+import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
-import spock.lang.IgnoreRest
+import skills.storage.model.UserAchievement
+import skills.storage.repos.UserAchievedLevelRepo
 
 class GlobalBadgeSpecs extends DefaultIntSpec {
+
+    @Autowired
+    UserAchievedLevelRepo userAchievedLevelRepo
 
     SkillsService supervisorService
 
@@ -56,8 +60,6 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         skillsService.createSkills(subj2Skills)
         skillsService.createSkills(subj3Skills)
 
-        badge.enabled = 'true'
-        badge2.enabled = 'true'
         supervisorService.createGlobalBadge(badge)
         supervisorService.createGlobalBadge(badge2)
         supervisorService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, level: "3")
@@ -66,6 +68,11 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         // Adding level 1 and skills[3] to badge 2, the level is achieved but the skill is not so the badge should not be awarded
         supervisorService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge2.badgeId, level: "1")
         supervisorService.assignSkillToGlobalBadge(proj.projectId, badge2.badgeId, skills[2].skillId.toString())
+
+        badge.enabled = "true"
+        badge2.enabled = "true"
+        supervisorService.createGlobalBadge(badge)
+        supervisorService.createGlobalBadge(badge2)
 
         when:
         skillsService.addSkill(['projectId': proj.projectId, skillId: skills[0].skillId], "user1", new Date()).body.completed
@@ -124,10 +131,12 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         skillsService.createSkills(subj2Skills)
         skillsService.createSkills(subj3Skills)
 
-        badge.enabled = 'true'
         supervisorService.createGlobalBadge(badge)
         supervisorService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, level: "1")
         supervisorService.assignSkillToGlobalBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[4].skillId])
+
+        badge.enabled = 'true'
+        supervisorService.createGlobalBadge(badge)
 
         when:
         skillsService.addSkill(['projectId': proj.projectId, skillId: skills[0].skillId], "user1", new Date()).body.completed
@@ -163,10 +172,12 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj2)
         skillsService.createSkills(skills)
         skillsService.createSkills(subj2Skills)
+
+        supervisorService.createGlobalBadge(badge)
+        supervisorService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, level: "1")
+
         badge.enabled = 'true'
         supervisorService.createGlobalBadge(badge)
-
-        supervisorService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, level: "1")
 
         when:
         def res1 = skillsService.addSkill(['projectId': proj.projectId, skillId: skills[0].skillId], "user1", new Date())
@@ -197,11 +208,13 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj2)
         skillsService.createSkills(skills)
         skillsService.createSkills(subj2Skills)
-        badge.enabled = 'true'
         supervisorService.createGlobalBadge(badge)
 
         supervisorService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, level: "1")
         supervisorService.updateGlobalBadge(badge) // can only enable after initial creation
+
+        badge.enabled = 'true'
+        supervisorService.createGlobalBadge(badge)
 
         when:
         skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[0].skillId], "user1", new Date())
@@ -339,56 +352,22 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
 
         badge.enabled = 'false'
         supervisorService.createGlobalBadge(badge)
-        def summaryBeforeEnabling = skillsService.getBadgeSummary(user, proj.projectId,  badge.badgeId,-1, true)
-
-        supervisorService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, level: "5")
-
 
         when:
+        List<UserAchievement> achievementsBefore = userAchievedLevelRepo.findAll()
+        supervisorService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, level: "5")
 
         badge.enabled = 'true'
         supervisorService.createGlobalBadge(badge)
+        List<UserAchievement> achievementsAfter = userAchievedLevelRepo.findAll()
 
         def summary = skillsService.getBadgeSummary(user, proj.projectId,  badge.badgeId,-1, true)
 
         then:
-        !summaryBeforeEnabling.badgeAchieved
+        !achievementsBefore.find( { it.skillId == badge.badgeId})
+        !achievementsAfter.find( { it.skillId == badge.badgeId})
+
         !summary.badgeAchieved
     }
 
-    def "changing project level satisfies global badge level dependency"(){
-        def proj = SkillsFactory.createProject()
-
-        def subj = SkillsFactory.createSubject()
-        def subj2 = SkillsFactory.createSubject(1, 2)
-        def badge = SkillsFactory.createBadge()
-
-        //subj1 skills
-        List<Map> skills = SkillsFactory.createSkills(3, 1, 1, 40)
-        List<Map> subj2Skills = SkillsFactory.createSkills(20, 1, 2, 200)
-
-        skillsService.createProject(proj)
-        skillsService.createSubject(subj)
-        skillsService.createSubject(subj2)
-        skillsService.createSkills(skills)
-        skillsService.createSkills(subj2Skills)
-        badge.enabled = 'true'
-        supervisorService.createGlobalBadge(badge)
-
-        supervisorService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, level: "5")
-
-        when:
-        skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[0].skillId], "user1", new Date())
-        skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[1].skillId], "user1", new Date())
-        def result = skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[2].skillId], "user1", new Date())
-
-        supervisorService.changeProjectLevelOnGlobalBadge([projectId: proj.projectId, badgeId: badge.badgeId, currentLevel: "5", newLevel: "1"])
-
-        def badgeSummary = skillsService.getBadgeSummary("user1", proj.projectId, badge.badgeId, -1, true)
-        println badgeSummary
-        then:
-        !result.body.completed.find{ it.type == 'GlobalBadge' }
-        badgeSummary.projectLevelsAndSkillsSummaries[0].projectLevel.requiredLevel == 1
-        badgeSummary.badgeAchieved == true
-    }
 }

@@ -180,7 +180,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
     int countAchievedGlobalSkills(String userId, String skillId, SkillRelDef.RelationshipType type)
 
 
-    @Query(value = '''select new skills.storage.model.DayCountItem(ua.created, count(ua))
+    @Query(value = '''select ua.created as day, count(ua) as count
       from SkillDef skillDef, UserAchievement ua 
       where 
         ua.level is null and 
@@ -234,12 +234,6 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
             )
     )''', nativeQuery = true)
     BadgeCount countAchievedProductionBadgesForUser(@Param('userId') String userId)
-
-
-    //TEMPTEMPTEMP
-    @Query(value='''select ua.* from skill_definition skillDef, user_achievement ua where ua.level IS null AND ua.user_id = ?1 AND skillDef.skill_id = ua.skill_id''', nativeQuery=true)
-    List<UserAchievement> temptemp(@Param('userId') String userId)
-    //TEMPTEMPTEMP
 
     @Query(value = '''select EXTRACT(MONTH FROM ua.created) as label, count(*) countRes
       from skill_definition skillDef, user_achievement ua 
@@ -317,8 +311,8 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
                 ua.projectId = :projectId and
                 ua.achievedOn >= :fromDate and
                 ua.achievedOn <= :toDate and 
-                upper(uAttrs.userIdForDisplay) like UPPER(CONCAT('%', :userNameFilter, '%')) and
-                (upper(sd.name) like UPPER(CONCAT('%', :skillNameFilter, '%')) OR (:skillNameFilter = 'ALL')) and
+                lower(uAttrs.userIdForDisplay) like lower(CONCAT('%', :userNameFilter, '%')) and
+                (lower(sd.name) like lower(CONCAT('%', :skillNameFilter, '%')) OR (:skillNameFilter = 'ALL')) and
                 (ua.level >= :level OR (:level = -1)) and
                 (sd.type in (:types) OR (:disableTypes = 'true') OR (ua.skillId is null AND (:includeOverallType = 'true'))) and 
                 (ua.skillId is not null OR (:includeOverallType = 'true'))
@@ -341,8 +335,8 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
                 ua.projectId = :projectId and
                 ua.achievedOn >= :fromDate and
                 ua.achievedOn <= :toDate and 
-                upper(uAttrs.userIdForDisplay) like UPPER(CONCAT('%', :userNameFilter, '%')) and
-                (upper(sd.name) like UPPER(CONCAT('%', :skillNameFilter, '%')) OR (:skillNameFilter = 'ALL')) and
+                lower(uAttrs.userIdForDisplay) like lower(CONCAT('%', :userNameFilter, '%')) and
+                (lower(sd.name) like lower(CONCAT('%', :skillNameFilter, '%')) OR (:skillNameFilter = 'ALL')) and
                 (ua.level >= :level OR (:level = -1)) and
                 (sd.type in (:types) OR (:disableTypes = 'true') OR (ua.skillId is null AND (:includeOverallType = 'true'))) and 
                 (ua.skillId is not null OR (:includeOverallType = 'true'))
@@ -406,7 +400,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
             @Param("skillId") String skillId
     )
 
-    @Query('''select new skills.storage.model.DayCountItem(ua.achievedOn, count(ua.id))
+    @Query('''select ua.achievedOn as day, count(ua.id) as count
             from UserAchievement as ua 
             where 
                 ua.skillId = :skillId and
@@ -450,7 +444,15 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
                 on achievements.skill_id = sd.skillId
             left join (
                 select skill_id, count(distinct user_id) as userInProgress, max(performed_on) as lastPerformed from user_performed_skill
-                where project_id = :projectId
+                where 
+                skill_ref_id in (
+                    select case when skill.copied_from_skill_ref is not null then skill.copied_from_skill_ref else skill.id end as id
+                    from skill_definition skill
+                    where
+                    skill.project_id = :projectId
+                    and skill.type = 'Skill'
+                    and skill.enabled = 'true'
+                )      
                 group by skill_id
             ) performedSkills
                 on sd.skillId = performedSkills.skill_id
@@ -497,4 +499,15 @@ where ua.projectId = :projectId and ua.skillId = :skillId
             ) 
     ''')
     AchievedSkillsCount countAchievedProductionSkillsForUserByDayWeekMonth(@Param('userId') String userId)
+
+    @Modifying
+    @Query(value = '''INSERT INTO user_achievement(user_id, project_id, skill_id, skill_ref_id, points_when_achieved, achieved_on)
+            SELECT ua.user_id, toDef.project_id, toDef.skill_id, toDef.id, ua.points_when_achieved, ua.achieved_on
+            FROM user_achievement ua, skill_definition toDef
+            WHERE
+                  toDef.project_id = :toProjectId and 
+                  toDef.skill_id = ua.skill_id and
+                  ua.skill_ref_id in (:fromSkillRefIds)
+            ''', nativeQuery = true)
+    void copySkillAchievementsToTheImportedProjects(@Param('toProjectId') String toProjectId, @Param('fromSkillRefIds') List<Integer> fromSkillRefIds)
 }

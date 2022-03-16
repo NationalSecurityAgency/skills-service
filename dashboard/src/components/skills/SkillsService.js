@@ -58,8 +58,11 @@ export default {
       .then((response) => response.data);
   },
   getProjectSkills(projectId, skillNameQuery = null) {
-    const query = skillNameQuery ? `?skillNameQuery=${encodeURIComponent(skillNameQuery)}` : '';
-    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/skills${query}`)
+    let params = '?includeDisabled=true';
+    if (skillNameQuery) {
+      params = `${params}&skillNameQuery=${encodeURIComponent(skillNameQuery)}`;
+    }
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/skills${params}`)
       .then((response) => response.data);
   },
   getProjectSkillsWithoutImportedSkills(projectId) {
@@ -82,6 +85,10 @@ export default {
 
     return axios.post(url, copy, { handleError: false })
       .then(() => this.getSkillDetails(skill.projectId, skill.subjectId, skill.skillId));
+  },
+  updateImportedSkill(skill) {
+    const url = `/admin/projects/${encodeURIComponent(skill.projectId)}/import/skills/${encodeURIComponent(skill.skillId)}`;
+    return axios.patch(url, { pointIncrement: skill.pointIncrement }).then((res) => res.data);
   },
   syncSkillsPoints(projectId, subjectId, groupId, skillsPointsSyncRequest) {
     const url = `/admin/projects/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}/groups/${encodeURIComponent(groupId)}/skills`;

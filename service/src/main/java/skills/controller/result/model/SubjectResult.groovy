@@ -31,7 +31,10 @@ class SubjectResult {
     String description
 
     int numSkills
+    int numSkillsDisabled
+    int numSkillsImportedAndDisabled
     int numGroups
+    int numGroupsDisabled
     int numUsers
     int pointsPercentage
 
