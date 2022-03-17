@@ -241,5 +241,40 @@ describe('Skills Exported to Catalog Tests', () => {
             [{ colIndex: 1,  value: 'Subject 2' }],
         ], 25);
     })
+
+    it('Change exported skills attributes - imported attributes are updated', () => {
+        cy.intercept('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('saveSkill1');
+
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2);
+        cy.exportSkillToCatalog(1, 1, 1);
+
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.importSkillFromCatalog(2, 1, 1, 1)
+        cy.finalizeCatalogImport(2)
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="editSkillButton_skill1"]').click()
+        cy.get('[data-cy="skillName"]').type('A');
+        cy.get('[data-cy="skillPointIncrement"]').clear().type('66');
+        cy.get('[data-cy="numPerformToCompletion"]').clear().type('7');
+        cy.get('[data-cy="saveSkillButton"]').click();
+        cy.wait('@saveSkill1')
+        cy.get('[data-cy="nameCell_skill1"]').contains('Very Great Skill 1A')
+        cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Points').click()
+        cy.get('[data-cy="totalPointsCell_skill1"]').contains('66 pts x 7 repetitions')
+
+        // now let's check the imported skill
+        cy.get('[data-cy="breadcrumb-Projects"]').click();
+        cy.get('[data-cy="projCard_proj2_manageLink"]').click();
+        cy.waitForBackendAsyncTasksToComplete();
+        cy.get('[data-cy="manageBtn_subj1"]').click();
+        cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Points').click()
+        // occurrences are synced but not points
+        cy.get('[data-cy="totalPointsCell_skill1"]').contains('100 pts x 7 repetitions')
+        cy.get('[data-cy="nameCell_skill1"]').contains('Very Great Skill 1A')
+    })
 });
+
 

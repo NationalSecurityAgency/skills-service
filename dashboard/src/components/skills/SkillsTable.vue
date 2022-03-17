@@ -587,7 +587,7 @@ limitations under the License.
       },
       editSkill(itemToEdit) {
         this.currentlyFocusedSkillId = itemToEdit.skillId;
-        if (itemToEdit.isCatalogSkill) {
+        if (itemToEdit.isCatalogSkill && itemToEdit.catalogType === 'imported') {
           this.editImportedSkillInfo = {
             show: true,
             skill: itemToEdit,
