@@ -34,12 +34,20 @@ limitations under the License.
       </loading-container>
       <div id="dependency-graph" style="height: 800px"></div>
     </simple-card>
+
+    <share-skills-with-other-projects :project-id="this.$route.params.projectId" class="mt-4"/>
+
+    <shared-skills-from-other-projects :project-id="this.$route.params.projectId" class="my-4"/>
   </div>
 </template>
 
 <script>
   import 'vis-network/styles/vis-network.css';
   import { Network } from 'vis-network';
+  import ShareSkillsWithOtherProjects
+    from '@/components/skills/crossProjects/ShareSkillsWithOtherProjects';
+  import SharedSkillsFromOtherProjects
+    from '@/components/skills/crossProjects/SharedSkillsFromOtherProjects';
   import SkillsService from '../SkillsService';
   import LoadingContainer from '../../utils/LoadingContainer';
   import GraphNodeSortMethodSelector from './GraphNodeSortMethodSelector';
@@ -52,6 +60,8 @@ limitations under the License.
   export default {
     name: 'FullDependencyGraph',
     components: {
+      SharedSkillsFromOtherProjects,
+      ShareSkillsWithOtherProjects,
       SimpleCard,
       SubPageHeader,
       GraphLegend,
