@@ -54,6 +54,26 @@ describe('Projects Tests', () => {
     cy.contains('ID: MyNewtestProject')
   });
 
+  it('Ampersand in project name', () => {
+    cy.intercept('GET', '/app/projects').as('loadProjects');
+    cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
+
+    cy.intercept('POST', '/app/projects/MyNewtestProject').as('postNewProject');
+
+    cy.visit('/administrator/');
+    cy.wait('@loadUserInfo');
+    cy.wait('@loadProjects');
+
+    cy.clickButton('Project');
+    cy.get('[data-cy="projectName"]').type("My New & test Project")
+    cy.clickSave();
+
+    cy.wait('@postNewProject');
+
+    cy.contains('My New & test Project')
+    cy.contains('ID: MyNewtestProject')
+  });
+
   it('Provide clear instructions how to create a new project - root user', function () {
     cy.logout();
     cy.fixture('vars.json').then((vars) => {

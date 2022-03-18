@@ -136,4 +136,21 @@ class InputSanitizerSpec extends Specification{
         sanitized == "http://foo%20space%20bar.foo"
     }
 
+    def "un-sanitize naked ampersand"() {
+        when:
+        def unsani = InputSanitizer.unsanitizeName(InputSanitizer.sanitize("A & B"))
+
+        then:
+        unsani == "A & B"
+        unsani != "A &amp; B"
+    }
+
+    def "un-sanitize ampersand as part of tag entity"() {
+        when:
+        def unsani = InputSanitizer.unsanitizeName(InputSanitizer.sanitize("foooo &lt;script type=\"javascript\"&gt;alert('danger');&lt;/script&gt; barrr"))
+
+        then:
+        unsani == "foooo &lt;script type=\"javascript\"&gt;alert('danger');&lt;/script&gt; barrr"
+    }
+
 }

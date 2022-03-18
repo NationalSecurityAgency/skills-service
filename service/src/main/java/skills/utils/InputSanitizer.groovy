@@ -35,6 +35,7 @@ class InputSanitizer {
 
     private static final Pattern GT = ~/&gt;/
     private static final Pattern AMP = ~/&amp;/
+    private static final Pattern PURE_AMP = ~/\s&amp;\s/
     private static final Pattern SPACE = ~/\s/
 
     static String sanitize(String input) {
@@ -133,5 +134,19 @@ class InputSanitizer {
         }
 
         return GT.matcher(input).replaceAll(">")
+    }
+
+    /**
+     * Replaces a html ampersand entity that has no preceeding or proceeding characters
+     * with a plain &
+     * @param name
+     * @return
+     */
+    static String unsanitizeName(String input) {
+        if (!input) {
+            return input
+        }
+
+        return PURE_AMP.matcher(input).replaceAll(" & ")
     }
 }
