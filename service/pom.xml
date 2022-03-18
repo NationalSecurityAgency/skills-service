@@ -5,7 +5,7 @@
     <parent>
         <artifactId>skills-service-parent</artifactId>
         <groupId>skill-tree</groupId>
-        <version>1.8.12-SNAPSHOT</version>
+        <version>1.8.11-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -221,7 +221,7 @@
         <dependency>
             <groupId>dev.skilltreeplatform</groupId>
             <artifactId>call-stack-profiler</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.5</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.logging.log4j</groupId>
