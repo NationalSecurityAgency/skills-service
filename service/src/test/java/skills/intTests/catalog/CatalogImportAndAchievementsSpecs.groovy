@@ -395,16 +395,16 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
         user0.size() == 14
         user0.findAll { !it.day && it.skillId == proj1.s1_skills[0].skillId }.collect { it.points } == [200]
         user0.findAll { it.day && it.skillId == proj1.s1_skills[0].skillId }.collect { it.day.format("yyyy/MM/dd") }.sort() == [dates[1].format("yyyy/MM/dd"), dates[0].format("yyyy/MM/dd")]
-        user0.findAll { it.day && it.skillId == proj1.s1_skills[0].skillId }.collect { it.points } == [100, 100]
+        user0.findAll { it.day && it.skillId == proj1.s1_skills[0].skillId }.sort { it.day }.collect { it.points } == [100, 100]
         user0.findAll { !it.day && it.skillId == proj1.s1.subjectId }.collect { it.points } == [400]
         user0.findAll { it.day && it.skillId == proj1.s1.subjectId }.sort { it.day }.collect { it.day.format("yyyy/MM/dd") }.sort() == [dates[2].format("yyyy/MM/dd"), dates[1].format("yyyy/MM/dd"), dates[0].format("yyyy/MM/dd")]
-        user0.findAll { it.day && it.skillId == proj1.s1.subjectId }.collect { it.points } == [100, 200, 100]
+        user0.findAll { it.day && it.skillId == proj1.s1.subjectId }.sort { it.day }.collect { it.points } == [100, 200, 100]
         user0.findAll { !it.day && !it.skillId }.collect { it.points } == [400]
         user0.findAll { it.day && !it.skillId }.collect { it.day.format("yyyy/MM/dd") }.sort() == [dates[2].format("yyyy/MM/dd"), dates[1].format("yyyy/MM/dd"), dates[0].format("yyyy/MM/dd")]
-        user0.findAll { it.day && !it.skillId }.sort { it.day }.collect { it.points } == [100, 200, 100]
+        user0.findAll { it.day && !it.skillId }.sort { it.day }.sort { it.day }.collect { it.points } == [100, 200, 100]
         user0.findAll { !it.day && it.skillId == proj1.s1_skills[1].skillId }.collect { it.points } == [200]
         user0.findAll { it.day && it.skillId == proj1.s1_skills[1].skillId }.collect { it.day.format("yyyy/MM/dd") }.sort() == [dates[2].format("yyyy/MM/dd"), dates[1].format("yyyy/MM/dd")]
-        user0.findAll { it.day && it.skillId == proj1.s1_skills[1].skillId }.collect { it.points } == [100, 100]
+        user0.findAll { it.day && it.skillId == proj1.s1_skills[1].skillId }.sort { it.day }.collect { it.points } == [100, 100]
     }
 
     private List<Integer> getLevels(String user, String projectId, Integer skillRefId = null) {

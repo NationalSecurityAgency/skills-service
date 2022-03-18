@@ -58,7 +58,7 @@ limitations under the License.
     <edit-skill-group v-if="editGroupInfo.show" v-model="editGroupInfo.show" :group="editGroupInfo.group" :is-edit="false"
                       @group-saved="skillCreatedOrUpdated" @hidden="focusOnNewGroupButton"/>
     <import-from-catalog v-if="importCatalog.show" v-model="importCatalog.show" :current-project-skills="skills"
-                         @to-import="importFromCatalog"/>
+                         @to-import="importFromCatalog" @hidden="focusOnImportFromCatalogButton"/>
   </div>
 </template>
 
@@ -129,6 +129,9 @@ limitations under the License.
       focusOnNewGroupButton() {
         this.focusOn(this.$refs.newGroupButton);
       },
+      focusOnImportFromCatalogButton() {
+        this.focusOn(this.$refs.importFromCatalogBtn);
+      },
       focusOn(ref) {
         this.$nextTick(() => {
           if (ref) {
@@ -136,10 +139,14 @@ limitations under the License.
           }
         });
       },
-      loadSkills() {
+      loadSkills(focusOnImportBtnAfter = false) {
         this.loadSubjectSkills({ projectId: this.projectId, subjectId: this.subjectId })
           .then((skills) => {
             this.skills = skills;
+        }).finally(() => {
+          if (focusOnImportBtnAfter) {
+            this.focusOnImportFromCatalogButton();
+          }
         });
       },
       skillDeleted(skill) {
@@ -151,7 +158,7 @@ limitations under the License.
         this.setLoadingSubjectSkills(true);
         CatalogService.bulkImport(this.$route.params.projectId, this.$route.params.subjectId, skillsInfoToImport)
           .then(() => {
-            this.loadSkills();
+            this.loadSkills(true);
             this.loadSubjectDetailsState({ projectId: this.projectId, subjectId: this.subject.subjectId });
             this.loadFinalizeInfo({ projectId: this.projectId });
           });
