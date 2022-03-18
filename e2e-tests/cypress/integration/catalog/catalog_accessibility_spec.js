@@ -115,4 +115,29 @@ describe('Catalog Accessibility Tests', () => {
         cy.get('[data-cy=clearSelectedSkillsBtn]').should('have.focus');
     });
 
+    it('set focus to the Select All button after export is done even if modal is closed with X', () => {
+        cy.createSkill(1, 1, 1);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1/');
+
+        cy.get('[data-cy=selectAllSkillsBtn]').should('not.have.focus');
+
+        cy.get('[data-cy="skillSelect-skill1"]').click({force: true});
+        cy.get('[data-cy="skillSelect-skill1"]').should('be.checked')
+        cy.get('[data-cy="skillActionsBtn"] button').should('be.enabled');
+        cy.get('[data-cy="skillActionsNumSelected"]').should('have.text', '1');
+
+        cy.get('[data-cy="skillActionsBtn"] button').click();
+        cy.get('[data-cy="skillExportToCatalogBtn"]').click();
+
+        cy.contains('This will export Skill with id [skill1]');
+
+        cy.get('[data-cy="exportToCatalogButton"]').click();
+        cy.get('[class="modal-content"] [aria-label="Close"]').click();
+        cy.get('[data-cy="skillSelect-skill1"]').should('not.be.checked')
+        cy.get('[data-cy="skillActionsBtn"] button').should('be.disabled');
+        cy.get('[data-cy="skillActionsNumSelected"]').should('have.text', '0');
+        cy.get('[data-cy=selectAllSkillsBtn]').should('have.focus');
+    });
+
 });

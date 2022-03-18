@@ -286,7 +286,7 @@ limitations under the License.
     <edit-skill-group v-if="editGroupInfo.show" v-model="editGroupInfo.show" :group="editGroupInfo.group" :is-edit="editGroupInfo.isEdit"
                       @group-saved="skillCreatedOrUpdated" @hidden="handleFocus"/>
     <export-to-catalog v-if="exportToCatalogInfo.show" v-model="exportToCatalogInfo.show" :skills="exportToCatalogInfo.skills"
-                       @exported="handleSkillsExportedToCatalog" @hidden="focusAfterExportModalIsClosed"/>
+                       @exported="handleSkillsExportedToCatalog" @hidden="handleExportModalIsClosed"/>
     <removal-validation v-if="deleteSkillInfo.show" v-model="deleteSkillInfo.show" @do-remove="doDeleteSkill">
       <p>
         This will remove <span class="text-primary font-weight-bold">{{ deleteSkillInfo.skill.name}}</span> <span class="text-secondary">(<span class="font-italic">ID:</span> {{ deleteSkillInfo.skill.skillId }})</span>.
@@ -652,7 +652,6 @@ limitations under the License.
           }
           return skill;
         });
-        this.changeSelectionForAll(false);
       },
       updateImportedSkill(skill) {
         const item1Index = this.skills.findIndex((item) => item.skillId === skill.skillId);
@@ -819,11 +818,12 @@ limitations under the License.
           tableData[tableData.length - 1].disabledDownButton = true;
         }
       },
-      focusAfterExportModalIsClosed(res) {
+      handleExportModalIsClosed(res) {
         if (res.cancelled) {
           this.focusOn(this.$refs.clearSelectionBtn);
         } else {
           this.focusOn(this.$refs.selectAllBtn);
+          this.changeSelectionForAll(false);
         }
       },
       focusOn(ref) {

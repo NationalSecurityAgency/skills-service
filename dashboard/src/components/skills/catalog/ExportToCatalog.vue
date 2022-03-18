@@ -16,7 +16,7 @@ limitations under the License.
 <template>
   <b-modal :id="firstSkillId" size="md" :title="`Export Skill to the Catalog`" v-model="show"
            :no-close-on-backdrop="true" :centered="true"
-           header-bg-variant="info" header-text-variant="light" no-fade role="dialog" @hide="publishHidden"
+           header-bg-variant="info" header-text-variant="light" no-fade role="dialog" @hide="cancel"
            aria-label="'Export Skill to the Catalog'">
 
     <div v-if="loadingData" class="mb-5">
@@ -92,7 +92,7 @@ limitations under the License.
                 data-cy="exportToCatalogButton">
         Export
       </b-button>
-      <b-button variant="secondary" size="sm" class="float-right mr-2" @click="close" data-cy="closeButton">
+      <b-button variant="secondary" size="sm" class="float-right mr-2" @click="cancel" data-cy="closeButton">
         Cancel
       </b-button>
     </div>
@@ -145,16 +145,20 @@ limitations under the License.
       },
     },
     methods: {
+      cancel(e) {
+        this.show = false;
+        this.publishHidden(e, true && !this.state.exported);
+      },
       close(e) {
         this.show = false;
-        this.publishHidden(e);
+        this.publishHidden(e, false);
       },
-      publishHidden(e) {
+      publishHidden(e, cancelled) {
         if (this.state.exported) {
           const res = this.skillsFiltered.map((skill) => ({ ...skill, sharedToCatalog: true }));
           this.$emit('exported', res);
         }
-        this.$emit('hidden', { ...e, cancelled: !this.state.exported });
+        this.$emit('hidden', { ...e, cancelled });
       },
       handleExport() {
         this.state.exporting = true;
