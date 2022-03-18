@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <metrics-card id="shared-skills-with-others-panel" title="Eligible for the dependencies in other projects"
+  <metrics-card id="shared-skills-with-others-panel" title="Can be added as dependencies in other Projects"
                 :no-padding="true" data-cy="shareSkillsWithOtherProjectsCard">
       <loading-container :is-loading="loading.sharedSkillsInit || loading.allSkills">
         <div class="row px-3 py-1">

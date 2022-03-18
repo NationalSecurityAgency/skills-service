@@ -44,12 +44,7 @@ describe('Metrics Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy=subjectNumUsersPerLevelOverTime]');
     });
 
-    it('subjects - num users per level over time - subject has no data', {
-        retries: {
-            runMode: 0,
-            openMode: 0
-        }
-    },() => {
+    it('subjects - num users per level over time - subject has no data',() => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
@@ -72,12 +67,7 @@ describe('Metrics Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy=subjectNumUsersPerLevelOverTime]');
     });
 
-    it('subjects - num users per level over time - subject has little data', {
-        retries: {
-            runMode: 0,
-            openMode: 0
-        }
-    },() => {
+    it('subjects - num users per level over time - subject has little data',() => {
         cy.intercept('/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1')
             .as('getLevelsOverTimeData');
 
@@ -138,12 +128,7 @@ describe('Metrics Tests', () => {
         return series;
     }
 
-    it('subjects - num users per level over time - multiple levels', {
-        retries: {
-            runMode: 0,
-            openMode: 0
-        }
-    },() => {
+    it('subjects - num users per level over time - multiple levels',() => {
         cy.intercept('/admin/projects/proj1/subjects',
           {
             statusCode: 200,
@@ -187,12 +172,7 @@ describe('Metrics Tests', () => {
     });
 
 
-    it('subjects - num users per level over time - multiple levels with same # of users for all the achieved levels', {
-        retries: {
-            runMode: 0,
-            openMode: 0
-        }
-    },() => {
+    it('subjects - num users per level over time - multiple levels with same # of users for all the achieved levels',() => {
         cy.intercept('/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1')
             .as('getLevelsOverTimeData');
 
@@ -247,12 +227,7 @@ describe('Metrics Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy=subjectNumUsersPerLevelOverTime]');
     });
 
-    it('subjects - num users per level over time - long history', {
-        retries: {
-            runMode: 0,
-            openMode: 0
-        }
-    },() => {
+    it('subjects - num users per level over time - long history',() => {
         cy.intercept('/admin/projects/proj1/subjects',
           {
             statusCode: 200,
@@ -302,12 +277,7 @@ describe('Metrics Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy=subjectNumUsersPerLevelOverTime]');
     });
 
-    it('subjects - num users per level over time - many levels', {
-        retries: {
-            runMode: 0,
-            openMode: 0
-        }
-    },() => {
+    it('subjects - num users per level over time - many levels',() => {
         cy.intercept('/admin/projects/proj1/subjects',
           {
             statusCode: 200,
@@ -352,12 +322,7 @@ describe('Metrics Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy=subjectNumUsersPerLevelOverTime]');
     });
 
-    it('subjects - num users per level over time - higher levels have more users than lower', {
-        retries: {
-            runMode: 0,
-            openMode: 0
-        }
-    },() => {
+    it('subjects - num users per level over time - higher levels have more users than lower',() => {
         cy.intercept('/admin/projects/proj1/subjects',
           {
             statusCode: 200,
@@ -402,12 +367,7 @@ describe('Metrics Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy=subjectNumUsersPerLevelOverTime]');
     });
 
-    it('subjects - num users per level', {
-        retries: {
-            runMode: 0,
-            openMode: 0
-        }
-    },() => {
+    it('subjects - num users per level',() => {
         cy.intercept('/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder').as('getChartData');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -483,12 +443,7 @@ describe('Metrics Tests', () => {
         return res;
     }
 
-    it('subjects - num users per level - typical 6 subjects', {
-        retries: {
-            runMode: 0,
-            openMode: 0
-        }
-    },() => {
+    it('subjects - num users per level - typical 6 subjects',() => {
         cy.intercept('/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder',
           {
             statusCode: 200,
@@ -511,12 +466,7 @@ describe('Metrics Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy=userCountsBySubjectMetric]');
     })
 
-    it('subjects - num users per level - many subjects', {
-        retries: {
-            runMode: 0,
-            openMode: 0
-        }
-    },() => {
+    it('subjects - num users per level - many subjects',() => {
         const response = [];
         for (let i=0; i < 15; i+=1) {
             response.push(createSubjectObj(`Subject # ${i}`, [1265,852,493,625,293]))
@@ -537,12 +487,7 @@ describe('Metrics Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy=userCountsBySubjectMetric]');
     })
 
-    it('subjects - num users per level - many levels', {
-        retries: {
-            runMode: 0,
-            openMode: 0
-        }
-    },() => {
+    it('subjects - num users per level - many levels',() => {
         const response = [];
         for (let i=0; i < 6; i+=1) {
             response.push(createSubjectObj(`Subject # ${i}`, [1265,852,493,625,293,392,293,983,1923,1209]))
@@ -564,12 +509,7 @@ describe('Metrics Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy=userCountsBySubjectMetric]');
     })
 
-    it('subjects - num users per level - empty', {
-        retries: {
-            runMode: 0,
-            openMode: 0
-        }
-    },() => {
+    it('subjects - num users per level - empty',() => {
         const body = [];
         cy.intercept('/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder',
           {
