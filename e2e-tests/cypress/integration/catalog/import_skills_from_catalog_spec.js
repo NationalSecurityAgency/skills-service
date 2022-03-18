@@ -402,7 +402,7 @@ describe('Import skills from Catalog Tests', () => {
         cy.get('[data-cy="numSelectedSkills"]').should('have.text', '0');
     })
 
-    it('do not allow to cross-project share for the catalog imported skills', () => {
+    it('do not allow to cross-project deps for the catalog imported skills', () => {
         cy.createSkill(1, 1, 1);
         cy.exportSkillToCatalog(1, 1, 1);
 
@@ -411,7 +411,7 @@ describe('Import skills from Catalog Tests', () => {
         cy.createSkill(2, 1, 2);
         cy.importSkillFromCatalog(2, 1, 1, 1)
 
-        cy.visit('/administrator/projects/proj2/cross Project');
+        cy.visit('/administrator/projects/proj2/dependencies');
         cy.get('[data-cy="skillSelector"]').click();
         cy.get('[data-cy="skillsSelectionItem-proj2-skill2"]')
         cy.get('[data-cy="skillsSelectionItem-proj2-skill1"]').should('not.exist') // imported skill

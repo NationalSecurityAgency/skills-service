@@ -99,10 +99,10 @@ describe('Cross-project Skills Tests', () => {
 
     it('share skill with another project', () => {
         cy.visit('/administrator/projects/proj1');
-        cy.clickNav('Cross Projects');
+        cy.clickNav('Dependencies');
 
-        cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]').contains('Share Skills With Other Projects');
-        cy.get('[data-cy="skillsSharedWithMeCard"]').contains('No Shared Skills Yet');
+        cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]').contains('Can be added as dependencies in other Projects');
+        cy.get('[data-cy="skillsSharedWithMeCard"]').contains('No Skills Available Yet...');
 
         cy.shareSkill('1', '2');
 
@@ -110,13 +110,13 @@ describe('Cross-project Skills Tests', () => {
             [{ colIndex: 0,  value: 'Very Great Skill # 1' }, { colIndex: 1,  value: 'Project 2' }],
         ], 5, true, null, false);
 
-        cy.get('[data-cy="skillsSharedWithMeCard"]').contains('No Shared Skills Yet');
+        cy.get('[data-cy="skillsSharedWithMeCard"]').contains('No Skills Available Yet...');
 
         // -------------------------
         // Project 2 should see the skill
         cy.visit('/administrator/projects/proj2');
-        cy.clickNav('Cross Projects');
-        cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]').contains('Share Skills With Other Projects');
+        cy.clickNav('Dependencies');
+        cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]').contains('Can be added as dependencies in other Projects');
 
         cy.validateTable(sharedWithMeTableSelector, [
             [{ colIndex: 0,  value: 'Very Great Skill # 1' }, { colIndex: 1,  value: 'Project 1' }],
@@ -131,9 +131,9 @@ describe('Cross-project Skills Tests', () => {
         // -------------------------
         // Project 3 should not see the shared skill
         cy.visit('/administrator/projects/proj3');
-        cy.clickNav('Cross Projects');
-        cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]').contains('Share Skills With Other Projects');
-        cy.get('[data-cy="skillsSharedWithMeCard"]').contains('No Shared Skills Yet');
+        cy.clickNav('Dependencies');
+        cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]').contains('Can be added as dependencies in other Projects');
+        cy.get('[data-cy="skillsSharedWithMeCard"]').contains('No Skills Available Yet...');
 
         cy.visit('/administrator/projects/proj3/subjects/subj3/skills/skill4/dependencies');
         cy.contains('No Dependencies Yet');
@@ -144,10 +144,10 @@ describe('Cross-project Skills Tests', () => {
 
     it('share with all projects', () => {
         cy.visit('/administrator/projects/proj1');
-        cy.clickNav('Cross Projects');
+        cy.clickNav('Dependencies');
 
-        cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]').contains('Share Skills With Other Projects');
-        cy.get('[data-cy="skillsSharedWithMeCard"]').contains('No Shared Skills Yet');
+        cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]').contains('Can be added as dependencies in other Projects');
+        cy.get('[data-cy="skillsSharedWithMeCard"]').contains('No Skills Available Yet...');
 
         cy.get('[data-cy="shareButton"').should('be.disabled');
         cy.get('[data-cy="skillSelector"]').click().type('1{enter}');
@@ -161,13 +161,13 @@ describe('Cross-project Skills Tests', () => {
             [{ colIndex: 0,  value: 'Very Great Skill # 1' }, { colIndex: 1,  value: 'All Projects' }],
         ], 5, true, null, false);
 
-        cy.get('[data-cy="skillsSharedWithMeCard"]').contains('No Shared Skills Yet');
+        cy.get('[data-cy="skillsSharedWithMeCard"]').contains('No Skills Available Yet...');
 
         // -------------------------
         // Project 2 should see the skill
         cy.visit('/administrator/projects/proj2');
-        cy.clickNav('Cross Projects');
-        cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]').contains('Share Skills With Other Projects');
+        cy.clickNav('Dependencies');
+        cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]').contains('Can be added as dependencies in other Projects');
 
         cy.validateTable(sharedWithMeTableSelector, [
             [{ colIndex: 0,  value: 'Very Great Skill # 1' }, { colIndex: 1,  value: 'Project 1' }],
@@ -182,8 +182,8 @@ describe('Cross-project Skills Tests', () => {
         // -------------------------
         // Project 3 should see the shared skill
         cy.visit('/administrator/projects/proj3');
-        cy.clickNav('Cross Projects');
-        cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]').contains('Share Skills With Other Projects');
+        cy.clickNav('Dependencies');
+        cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]').contains('Can be added as dependencies in other Projects');
 
         cy.validateTable(sharedWithMeTableSelector, [
             [{ colIndex: 0,  value: 'Very Great Skill # 1' }, { colIndex: 1,  value: 'Project 1' }],
@@ -198,10 +198,10 @@ describe('Cross-project Skills Tests', () => {
 
     it('remove share', () => {
         cy.visit('/administrator/projects/proj1');
-        cy.clickNav('Cross Projects');
+        cy.clickNav('Dependencies');
 
-        cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]').contains('Share Skills With Other Projects');
-        cy.get('[data-cy="skillsSharedWithMeCard"]').contains('No Shared Skills Yet');
+        cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]').contains('Can be added as dependencies in other Projects');
+        cy.get('[data-cy="skillsSharedWithMeCard"]').contains('No Skills Available Yet...');
 
         cy.shareSkill('1', '2');
         cy.validateTable(sharedWithOtherTableSelector, [
@@ -223,8 +223,8 @@ describe('Cross-project Skills Tests', () => {
         // -------------------------
         // Project 2 should see the skill2 but not skill1
         cy.visit('/administrator/projects/proj2');
-        cy.clickNav('Cross Projects');
-        cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]').contains('Share Skills With Other Projects');
+        cy.clickNav('Dependencies');
+        cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]').contains('Can be added as dependencies in other Projects');
 
         cy.validateTable(sharedWithMeTableSelector, [
             [{ colIndex: 0,  value: 'Very Great Skill # 2' }, { colIndex: 1,  value: 'Project 1' }],

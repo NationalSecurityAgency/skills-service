@@ -232,7 +232,7 @@ describe('Breadcrumb Navigation Tests', () => {
 
     it('Cross Project', () => {
         cy.intercept('GET', '/admin/projects/proj1/shared').as('loadSharedSkills');
-        cy.visit('/administrator/projects/proj1/cross%20Project');
+        cy.visit('/administrator/projects/proj1/dependencies');
         cy.wait('@loadSharedSkills');
         cy.get('[data-cy=breadcrumb-proj1]').click();
         cy.wait('@loadProject');

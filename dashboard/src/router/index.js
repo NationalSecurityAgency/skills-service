@@ -67,7 +67,6 @@ const SystemSettings = () => import(/* webpackChunkName: 'systemSettings' */'@//
 const SkillDependencies = () => import(/* webpackChunkName: 'skillDependencies' */'@//components/skills/dependencies/SkillDependencies');
 const AddSkillEvent = () => import(/* webpackChunkName: 'addSKillEvent' */'@//components/skills/AddSkillEvent');
 const InceptionSkills = () => import(/* webpackChunkName: 'inceptionSkills' */'@//components/inception/InceptionSkills');
-const CrossProjectsSkills = () => import(/* webpackChunkName: 'crossProjectsSkills' */'@//components/skills/crossProjects/CrossProjectsSkills');
 const ClientDisplayPreview = () => import(/* webpackChunkName: 'clientDisplayPreview' */'@//components/users/ClientDisplayPreview');
 const MultipleProjectsMetricsPage = () => import(/* webpackChunkName: 'multipleProjectsMetricsPage' */'@//components/metrics/multipleProjects/MultipleProjectsMetricsPage');
 const MetricsOnSubjectPage = () => import(/* webpackChunkName: 'MetricsOnSubjectPage' */ '@//components/metrics/subject/MetricsOnSubjectPage');
@@ -315,11 +314,6 @@ const router = new Router({
         path: 'dependencies',
         component: FullDependencyGraph,
         meta: { requiresAuth: true, reportSkillId: 'VisitProjectDependencies' },
-      }, {
-        name: 'CrossProjectsSkills',
-        path: 'cross%20Project',
-        component: CrossProjectsSkills,
-        meta: { requiresAuth: true, reportSkillId: 'VisitProjectCrossProjectSkills' },
       }, {
         name: 'ProjectUsers',
         path: 'users',
