@@ -15,14 +15,14 @@ limitations under the License.
 */
 <template>
   <metrics-card id="shared-skills-from-others-panel"
-    title="Skills Shared From Other Projects" :no-padding="true"
+    title="Eligible for dependency from other projects" :no-padding="true"
                 data-cy="skillsSharedWithMeCard">
       <loading-container :is-loading="loading">
         <div v-if="sharedSkills && sharedSkills.length > 0" class="my-4">
           <shared-skills-table :shared-skills="sharedSkills" :disable-delete="true"></shared-skills-table>
         </div>
         <div v-else class="my-5">
-          <no-content2 title="No Shared Skills Yet..." icon="far fa-handshake"
+          <no-content2 title="No Skills Available Yet..." icon="far fa-handshake"
                        message="Coordinate with other projects to share skills with this project."></no-content2>
         </div>
 

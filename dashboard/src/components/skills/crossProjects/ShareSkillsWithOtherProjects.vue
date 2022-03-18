@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <metrics-card id="shared-skills-with-others-panel" title="Share Skills With Other Projects"
+  <metrics-card id="shared-skills-with-others-panel" title="Eligible for the dependencies in other projects"
                 :no-padding="true" data-cy="shareSkillsWithOtherProjectsCard">
       <loading-container :is-loading="loading.sharedSkillsInit || loading.allSkills">
         <div class="row px-3 py-1">
@@ -57,8 +57,8 @@ limitations under the License.
                                  v-on:skill-removed="deleteSharedSkill"></shared-skills-table>
           </div>
           <div v-else>
-            <no-content2 title="Share Skills With Other Projects" icon="fas fa-share-alt" class="my-5"
-                         message="To start sharing skills please select a skill and then the project that you want to share this skill with."/>
+            <no-content2 title="Not Selected Yet..." icon="fas fa-share-alt" class="my-5"
+                         message="To make your project's skills eligible please select a skill and then the project that you want to share this skill with."/>
           </div>
         </loading-container>
 
