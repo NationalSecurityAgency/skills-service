@@ -154,7 +154,7 @@ limitations under the License.
           const res = this.skillsFiltered.map((skill) => ({ ...skill, sharedToCatalog: true }));
           this.$emit('exported', res);
         }
-        this.$emit('hidden', { ...e });
+        this.$emit('hidden', { ...e, cancelled: !this.state.exported });
       },
       handleExport() {
         this.state.exporting = true;

@@ -37,18 +37,21 @@ limitations under the License.
               </b-button-group>
 
               <b-button-group class="d-inline-block mt-2 text-right">
-                <b-button variant="outline-info" @click="changeSelectionForAll(true)"
+                <b-button variant="outline-info" ref="selectAllBtn"
+                          @click="changeSelectionForAll(true)"
                           data-cy="selectAllSkillsBtn" class=""><i
                   class="fa fa-check-square"/><span class="d-none d-sm-inline"> Select All </span>
                 </b-button>
-                <b-button variant="outline-info" @click="changeSelectionForAll(false)"
+                <b-button variant="outline-info" ref="clearSelectionBtn"
+                          @click="changeSelectionForAll(false)"
                           data-cy="clearSelectedSkillsBtn" class=""><i class="far fa-square"></i>
                   <span class="d-none d-sm-inline"> Clear</span>
                 </b-button>
               </b-button-group>
             </div>
             <div class="col text-right">
-              <b-dropdown id="dropdown-right" right variant="outline-info" class="mr-3 mt-2" :disabled="actionsDisable"
+              <b-dropdown id="tableActionsBtn" ref="tableActionsBtn" right variant="outline-info" class="mr-3 mt-2"
+                          :disabled="actionsDisable"
                           data-cy="skillActionsBtn">
                 <template #button-content>
                   <i class="fas fa-tools"></i> Action <b-badge variant="info" data-cy="skillActionsNumSelected">{{ numSelectedSkills }}</b-badge>
@@ -283,7 +286,7 @@ limitations under the License.
     <edit-skill-group v-if="editGroupInfo.show" v-model="editGroupInfo.show" :group="editGroupInfo.group" :is-edit="editGroupInfo.isEdit"
                       @group-saved="skillCreatedOrUpdated" @hidden="handleFocus"/>
     <export-to-catalog v-if="exportToCatalogInfo.show" v-model="exportToCatalogInfo.show" :skills="exportToCatalogInfo.skills"
-                       @exported="handleSkillsExportedToCatalog" @hidden="changeSelectionForAll(false)"/>
+                       @exported="handleSkillsExportedToCatalog" @hidden="focusAfterExportModalIsClosed"/>
     <removal-validation v-if="deleteSkillInfo.show" v-model="deleteSkillInfo.show" @do-remove="doDeleteSkill">
       <p>
         This will remove <span class="text-primary font-weight-bold">{{ deleteSkillInfo.skill.name}}</span> <span class="text-secondary">(<span class="font-italic">ID:</span> {{ deleteSkillInfo.skill.skillId }})</span>.
@@ -649,6 +652,7 @@ limitations under the License.
           }
           return skill;
         });
+        this.changeSelectionForAll(false);
       },
       updateImportedSkill(skill) {
         const item1Index = this.skills.findIndex((item) => item.skillId === skill.skillId);
@@ -814,6 +818,20 @@ limitations under the License.
           tableData[0].disabledUpButton = true;
           tableData[tableData.length - 1].disabledDownButton = true;
         }
+      },
+      focusAfterExportModalIsClosed(res) {
+        if (res.cancelled) {
+          this.focusOn(this.$refs.clearSelectionBtn);
+        } else {
+          this.focusOn(this.$refs.selectAllBtn);
+        }
+      },
+      focusOn(ref) {
+        this.$nextTick(() => {
+          if (ref) {
+            ref.focus();
+          }
+        });
       },
       handleFocus(args = null) {
         // this event is called from the EditSkill components callback and from
