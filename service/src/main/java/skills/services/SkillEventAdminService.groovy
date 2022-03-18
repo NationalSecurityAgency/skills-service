@@ -16,9 +16,12 @@
 package skills.services
 
 import callStack.profiler.Profile
+import callStack.utils.CachedThreadPool
+import callStack.utils.ThreadPoolUtils
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfoService
@@ -31,6 +34,9 @@ import skills.storage.accessors.ProjDefAccessor
 import skills.storage.model.*
 import skills.storage.repos.*
 import skills.utils.MetricsLogger
+
+import javax.annotation.PostConstruct
+import java.util.concurrent.Callable
 
 @Component
 @Slf4j
@@ -78,19 +84,37 @@ class SkillEventAdminService {
     @Autowired
     SkillCatalogService skillCatalogService
 
+    @Value('#{"${skills.bulkUserLookup.minNumOfThreads:1}"}')
+    Integer minNumOfThreads
+
+    @Value('#{"${skills.bulkUserLookup.maxNumOfThreads:10}"}')
+    Integer maxNumOfThreads
+
+    private CachedThreadPool pool
+
+    @PostConstruct
+    void init() {
+        pool = new CachedThreadPool('user-lookup', minNumOfThreads, maxNumOfThreads)
+    }
+
     @Profile
     BulkSkillEventResult bulkReportSkills(String projectId, String skillId, List<String> userIds, Date incomingSkillDate) {
         // collect userIds outside of the DB transaction
-        List<String> requestedUserIds = []
-        List<String> userIdsErrored = []
-        for (String requestedUserId : userIds) {
-            try {
-                requestedUserIds += userInfoService.getUserName(requestedUserId, false)
-            } catch (Exception e) {
-                log.warn("Error reporting skillId [${projectId}], [${skillId}] for user [${requestedUserId}]: [${e.message}]")
-                userIdsErrored += requestedUserId
+        final List<String> userIdsErrored = []
+        List<Callable<String>> listToSubmit = userIds.collect { final requestedUserId ->
+            ThreadPoolUtils.callable {
+                String userId
+                try {
+                    userId = userInfoService.getUserName(requestedUserId, false)
+                } catch (Exception e) {
+                    log.warn("Error reporting skillId [${projectId}], [${skillId}] for user [${requestedUserId}]: [${e.message}]")
+                    userIdsErrored.add(requestedUserId)
+                }
+                return userId
             }
         }
+        List<String> requestedUserIds = pool.submitAndGetResults(listToSubmit)
+
         // report all skills as a single transaction
         Map<String, SkillEventResult> results = bulkReportSkillsInternal(projectId, skillId, requestedUserIds, incomingSkillDate)
 
