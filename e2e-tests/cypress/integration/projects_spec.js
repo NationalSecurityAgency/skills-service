@@ -739,6 +739,8 @@ describe('Projects Tests', () => {
   });
 
   it('Project stats should all be the same size when they wrap', () => {
+    cy.setResolution([1440, 900]); //original issue presented when stat cards wrapped to another row
+
     cy.request('POST', '/app/projects/abcdeghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxy', {
       projectId: 'abcdeghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxy',
       name: "abcdeghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxy"
@@ -748,15 +750,19 @@ describe('Projects Tests', () => {
     cy.visit('/administrator/projects/abcdeghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxy/');
     cy.wait('@loadProj');
     cy.wait('@loadInception');
-    cy.setResolution([1440, 900]); //original issue presented when stat cards wrapped to another row
-    cy.wait(200);
+
+    cy.contains('No Subjects Yet');
+    cy.get('[data-cy="pageHeader"]').contains('ID: abcdeghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxy')
+    cy.wait(2000);
+    cy.get('[data-cy="pageHeader"] .container-fluid').should('have.length', 1);
+    cy.matchSnapshotImageForElement('[data-cy="pageHeader"] .container-fluid')
+
     cy.get('[data-cy=pageHeaderStat]').first().invoke('width').then((val)=>{
       cy.get('[data-cy=pageHeaderStat]').eq(1).invoke('width').should('eq', val);
       cy.get('[data-cy=pageHeaderStat]').eq(2).invoke('width').should('eq', val);
       cy.get('[data-cy=pageHeaderStat]').eq(3).invoke('width').should('eq', val);
       cy.get('[data-cy=pageHeaderStat]').eq(4).invoke('width').should('eq', val);
     });
-    cy.get('[data-cy=pageHeader]').matchImageSnapshot();
   });
 
   it('Created and Last Reported Skill data should be visible on projects page', () => {
