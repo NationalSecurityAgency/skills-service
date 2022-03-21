@@ -702,6 +702,19 @@ describe('Client Display Tests', () => {
     cy.get('[data-cy="gb_proj1"]').contains('Stage 1')
     cy.contains('Level').should('not.exist');
   });
+
+  it('verify correct # of stars on subject card', () => {
+    cy.request('PUT', '/admin/projects/proj1/subjects/subj1/levels/next', {
+      percent: "99",
+      "iconClass": "fas fa-user-ninja",
+    });
+    cy.intercept('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
+    cy.cdVisit('/');
+    cy.wait('@pointHistoryChart');
+    cy.contains('Overall Points');
+    cy.get('[data-cy=subjectTile]').eq(0).contains('Subject 1')
+    cy.get('[data-cy=subjectTile]').eq(0).find('span.fa.fa-star').should('have.length', 6)
+  });
 });
 
 

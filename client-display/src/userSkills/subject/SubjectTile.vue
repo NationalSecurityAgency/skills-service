@@ -22,7 +22,7 @@ limitations under the License.
 
       <i :class="subject.iconClass" class="d-inline-block subject-tile-icon"/>
       <h2 class="skill-tile-label text-primary pt-1">{{ levelDisplayName }} {{ subject.skillsLevel }}</h2>
-      <star-progress :number-complete="subject.skillsLevel" class="py-1"/>
+      <star-progress :number-complete="subject.skillsLevel" :totalNumLevels="subject.totalLevels" class="py-1"/>
 
       <div class="row">
         <div class="col-3">
