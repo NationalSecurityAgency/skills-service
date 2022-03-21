@@ -227,7 +227,7 @@
         <dependency>
             <groupId>dev.skilltreeplatform</groupId>
             <artifactId>call-stack-profiler</artifactId>
-            <version>1.1.5</version>
+            <version>1.1.6</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.logging.log4j</groupId>
