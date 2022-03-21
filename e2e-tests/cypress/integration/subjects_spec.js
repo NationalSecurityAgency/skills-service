@@ -65,6 +65,25 @@ describe('Subjects Tests', () => {
         cy.contains('ID: Lotsofspecial')
     });
 
+  it('create subject with ampersand', () => {
+    const providedName = "I am & a subject";
+    cy.intercept('POST', `/admin/projects/proj1/subjects/**`).as('postNewSubject');
+    cy.intercept('POST', '/admin/projects/proj1/subjectNameExists').as('nameExists');
+    cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+
+    cy.visit('/administrator/projects/proj1');
+    cy.wait('@loadSubjects');
+    cy.clickButton('Subject');
+
+    cy.get('#subjName').type(providedName);
+    cy.wait('@nameExists');
+
+    cy.clickSave();
+    cy.wait('@postNewSubject');
+
+    cy.contains('I am & a subject')
+  });
+
     it('create subject using enter key', () => {
         const expectedId = 'LotsofspecialPcharsSubject';
         const providedName = "!L@o#t$s of %s^p&e*c(i)/?#a_l++_|}{P c'ha'rs";

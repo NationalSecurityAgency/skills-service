@@ -28,7 +28,6 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestBody
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
-import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.SkillImportRequest
 import skills.controller.request.model.PointSyncPatchRequest
@@ -38,7 +37,6 @@ import skills.controller.result.model.SkillDefRes
 import skills.controller.result.model.SkillDefSkinnyRes
 import skills.services.*
 import skills.storage.accessors.SkillDefAccessor
-import skills.storage.model.QueuedSkillUpdate
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDef.SelfReportingType
 import skills.storage.model.SkillDefWithExtra
@@ -49,7 +47,6 @@ import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillDefWithExtraRepo
 import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.UserPointsRepo
-import skills.tasks.TaskSchedulerService
 import skills.utils.InputSanitizer
 import skills.utils.Props
 
@@ -681,6 +678,7 @@ class SkillsAdminService {
         skills.controller.result.model.SkillDefRes res = new skills.controller.result.model.SkillDefRes()
         Props.copy(skillDef, res)
         res.numPerformToCompletion = skillDef.totalPoints / res.pointIncrement
+        res.name = InputSanitizer.unsanitizeName(res.name)
         return res
     }
 
@@ -707,6 +705,7 @@ class SkillsAdminService {
             res.groupName = skillsGroup.name
             res.groupId = skillsGroup.skillId
         }
+        res.name = InputSanitizer.unsanitizeName(res.name)
 
         return res
     }
@@ -717,7 +716,7 @@ class SkillsAdminService {
         SkillDefSkinnyRes res = new SkillDefSkinnyRes(
                 skillId: skinny.skillId,
                 projectId: skinny.projectId,
-                name: skinny.name,
+                name: InputSanitizer.unsanitizeName(skinny.name),
                 subjectId: skinny.subjectSkillId,
                 subjectName: skinny.subjectName,
                 version: skinny.version,
@@ -734,7 +733,7 @@ class SkillsAdminService {
         SkillDefPartialRes res = new SkillDefPartialRes(
                 skillId: partial.skillId,
                 projectId: partial.projectId,
-                name: partial.name,
+                name: InputSanitizer.unsanitizeName(partial.name),
                 subjectId: partial.subjectSkillId,
                 subjectName: partial.subjectName,
                 pointIncrement: partial.pointIncrement,

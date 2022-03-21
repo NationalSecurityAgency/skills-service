@@ -264,7 +264,7 @@ class BadgeAdminService {
         BadgeResult res = new BadgeResult(
                 badgeId: skillDef.skillId,
                 projectId: skillDef.projectId,
-                name: skillDef.name,
+                name: InputSanitizer.unsanitizeName(skillDef.name),
                 description: InputSanitizer.unsanitizeForMarkdown(skillDef.description),
                 displayOrder: skillDef.displayOrder,
                 iconClass: skillDef.iconClass,

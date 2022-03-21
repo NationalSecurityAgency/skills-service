@@ -53,6 +53,7 @@ import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserEventsRepo
 import skills.storage.repos.UserRepo
 import skills.utils.ClientSecretGenerator
+import skills.utils.InputSanitizer
 import skills.utils.Props
 
 @Service
@@ -444,7 +445,9 @@ class ProjAdminService {
     private ProjectResult convert(ProjSummaryResult definition, Map<String, Integer> projectIdSortOrder, Set<String> pinnedProjectIds = []) {
         Integer order = projectIdSortOrder?.get(definition.getProjectId())
         ProjectResult res = new ProjectResult(
-                projectId: definition.getProjectId(), name: definition.getName(), totalPoints: definition.getTotalPoints(),
+                projectId: definition.getProjectId(),
+                name: InputSanitizer.unsanitizeName(definition.getName()),
+                totalPoints: definition.getTotalPoints(),
                 numSubjects: definition.getNumSubjects(),
                 numGroups: definition.getNumGroups(),
                 displayOrder: order != null ? order : 0,
