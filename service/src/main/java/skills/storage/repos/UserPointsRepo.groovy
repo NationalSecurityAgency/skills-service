@@ -358,7 +358,11 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     // Postgresql is 10 fold faster with the nested query over COUNT(DISTINCT)
     // using user_performed_skill table as it has less records than user_points
     @Query(value ='''SELECT COUNT(*)
-        FROM (SELECT DISTINCT usr.user_id FROM user_performed_skill usr where usr.project_id = ?1) AS temp''',
+        FROM (
+            SELECT DISTINCT usr.user_id FROM user_performed_skill usr  WHERE usr.skill_ref_id in (
+                    select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id from skill_definition where type = 'Skill' and project_id = ?1
+                )
+            ) AS temp''',
             nativeQuery = true)
     Long countDistinctUserIdByProjectId(String projectId)
 
