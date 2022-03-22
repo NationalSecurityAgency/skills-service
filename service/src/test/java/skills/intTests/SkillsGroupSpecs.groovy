@@ -15,15 +15,14 @@
  */
 package skills.intTests
 
-import groovy.json.JsonOutput
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
+import skills.storage.model.UserPoints
 import skills.storage.repos.SkillRelDefRepo
-import spock.lang.IgnoreRest
 
 class SkillsGroupSpecs extends DefaultIntSpec {
 
@@ -1454,8 +1453,8 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         skillsService.updateSkill(skillsGroup, null)
 
         List<String> users = getRandomUsers(7)
-        println skillsService.addSkill([projectId: proj.projectId, skillId: allSkills[1].skillId], users.first(), new Date(), "Please approve this 1!")
-        println skillsService.addSkill([projectId: proj.projectId, skillId: allSkills[2].skillId], users.first(), new Date(), "Please approve this 2!")
+        skillsService.addSkill([projectId: proj.projectId, skillId: allSkills[1].skillId], users.first(), new Date(), "Please approve this 1!")
+        skillsService.addSkill([projectId: proj.projectId, skillId: allSkills[2].skillId], users.first(), new Date(), "Please approve this 2!")
 
         when:
         def res = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
@@ -1578,7 +1577,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
 
         def s1 = skillsService.getSkill(allSkills[1])
         def s2 = skillsService.getSkill(allSkills[2])
-        println JsonOutput.toJson(s1)
         then:
         s1.groupId == "newCoolId"
         s2.groupId == "newCoolId"
@@ -1607,8 +1605,8 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         skillsService.updateSkill(skillsGroup, null)
 
         List<String> users = getRandomUsers(7)
-        println skillsService.addSkill([projectId: proj.projectId, skillId: allSkills[1].skillId], users.first(), new Date(), "Please approve this 1!")
-        println skillsService.addSkill([projectId: proj.projectId, skillId: allSkills[2].skillId], users.first(), new Date(), "Please approve this 2!")
+        skillsService.addSkill([projectId: proj.projectId, skillId: allSkills[1].skillId], users.first(), new Date(), "Please approve this 1!")
+        skillsService.addSkill([projectId: proj.projectId, skillId: allSkills[2].skillId], users.first(), new Date(), "Please approve this 2!")
 
         when:
         def res = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
@@ -1653,11 +1651,170 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         when:
         skillsGroup.enabled = 'false'
         skillsService.updateSkill(skillsGroup, null)
-        def result = skillsService.getSkill([projectId: proj.projectId, subjectId: subj.subjectId, skillId: skillsGroupId])
-        println result
+        skillsService.getSkill([projectId: proj.projectId, subjectId: subj.subjectId, skillId: skillsGroupId])
 
         then:
         def e = thrown(Exception)
         e.message.contains("Cannot disable SkillsGroup [skill1] once it has been enabled")
+    }
+
+    def "removing an event for a skill under a group must adjust users group, subject and project points"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skillsGroup = SkillsFactory.createSkillsGroup()
+        def allSkills = SkillsFactory.createSkills(20) // first one is group
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+
+        // first group
+        allSkills[1].pointIncrement = 100
+        allSkills[1].numPerformToCompletion = 10
+        allSkills[2].pointIncrement = 100
+        allSkills[2].numPerformToCompletion = 10
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[1])
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[2])
+        skillsService.createSkill(allSkills[3])
+        skillsGroup.enabled = 'true'
+        skillsService.updateSkill(skillsGroup, null)
+
+        // 2nd group
+        allSkills[4].pointIncrement = 33
+        allSkills[4].numPerformToCompletion = 10
+        allSkills[4].pointIncrementInterval = 0
+        allSkills[5].pointIncrement = 33
+        allSkills[5].numPerformToCompletion = 10
+        allSkills[5].pointIncrementInterval = 0
+        allSkills[6].pointIncrement = 33
+        allSkills[6].numPerformToCompletion = 10
+        allSkills[6].pointIncrementInterval = 0
+        def skillsGroup2 = SkillsFactory.createSkillsGroup(1, 1, 30)
+        String skillsGroupId1 = skillsGroup2.skillId
+        skillsService.createSkill(skillsGroup2)
+        skillsService.assignSkillToSkillsGroup(skillsGroupId1, allSkills[4])
+        skillsService.assignSkillToSkillsGroup(skillsGroupId1, allSkills[5])
+        skillsService.assignSkillToSkillsGroup(skillsGroupId1, allSkills[6])
+        skillsGroup2.enabled = 'true'
+        skillsService.updateSkill(skillsGroup2, null)
+
+        // 2nd subject
+        def subj2 = SkillsFactory.createSubject(1, 2)
+        def subj2_skills = SkillsFactory.createSkills(11, 1, 2)
+        skillsService.createSubject(subj2)
+        skillsService.createSkills(subj2_skills)
+
+        List<String> users = getRandomUsers(1)
+        List<Date> dates = (1..12).collect { new Date() -it }.sort()
+        List<Date> days = dates.collect { new Date(it.time).clearTime() }
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: allSkills[1].skillId], users.first(), dates[0])
+        skillsService.addSkill([projectId: proj.projectId, skillId: allSkills[1].skillId], users.first(), dates[1])
+        skillsService.addSkill([projectId: proj.projectId, skillId: allSkills[1].skillId], users.first(), dates[2])
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: allSkills[2].skillId], users.first(), dates[0])
+        skillsService.addSkill([projectId: proj.projectId, skillId: allSkills[2].skillId], users.first(), dates[1])
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: allSkills[5].skillId], users.first(), dates[2])
+        skillsService.addSkill([projectId: proj.projectId, skillId: allSkills[5].skillId], users.first(), dates[3])
+        skillsService.addSkill([projectId: proj.projectId, skillId: allSkills[5].skillId], users.first(), dates[3])
+        skillsService.addSkill([projectId: proj.projectId, skillId: allSkills[5].skillId], users.first(), dates[4])
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: allSkills[6].skillId], users.first(), dates[4])
+        skillsService.addSkill([projectId: proj.projectId, skillId: allSkills[6].skillId], users.first(), dates[4])
+        skillsService.addSkill([projectId: proj.projectId, skillId: allSkills[6].skillId], users.first(), dates[4])
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[1].skillId], users.first(), dates[0])
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[2].skillId], users.first(), dates[1])
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[3].skillId], users.first(), dates[2])
+
+        Closure<List<UserPoints>> getPoints = { String user, String projectId, String skillId, boolean isHistory ->
+            List<UserPoints> points = userPointsRepo.findAll()
+                    .findAll({ it.userId == user && it.projectId == projectId && it.skillId == skillId && (isHistory ? it.day : !it.day)})
+                    .sort({ it.day })
+            return points
+        }
+
+        when:
+        List<UserPoints> u0_s1_t0 = getPoints.call(users[0], proj.projectId, allSkills[1].skillId, false)
+        List<UserPoints> u0_s2_t0 = getPoints.call(users[0], proj.projectId, allSkills[2].skillId, false)
+        List<UserPoints> u0_g1_t0 = getPoints.call(users[0], proj.projectId, skillsGroup.skillId, false)
+        List<UserPoints> u0_g2_t0 = getPoints.call(users[0], proj.projectId, skillsGroup2.skillId, false)
+        List<UserPoints> u0_subj1_t0 = getPoints.call(users[0], proj.projectId, subj.subjectId, false)
+        List<UserPoints> u0_subj2_t0 = getPoints.call(users[0], proj.projectId, subj2.subjectId, false)
+        List<UserPoints> u0_p1_t0 = getPoints.call(users[0], proj.projectId, null, false)
+
+        List<UserPoints> u0_s1_hist_t0 = getPoints.call(users[0], proj.projectId, allSkills[1].skillId, true)
+        List<UserPoints> u0_s2_hist_t0 = getPoints.call(users[0], proj.projectId, allSkills[2].skillId, true)
+        List<UserPoints> u0_g1_hist_t0 = getPoints.call(users[0], proj.projectId, skillsGroup.skillId, true)
+        List<UserPoints> u0_g2_hist_t0 = getPoints.call(users[0], proj.projectId, skillsGroup2.skillId, true)
+        List<UserPoints> u0_subj1_hist_t0 = getPoints.call(users[0], proj.projectId, subj.subjectId, true)
+        List<UserPoints> u0_subj2_hist_t0 = getPoints.call(users[0], proj.projectId, subj2.subjectId, true)
+        List<UserPoints> u0_p1_hist_t0 = getPoints.call(users[0], proj.projectId, null, true)
+
+        skillsService.deleteSkillEvent([projectId: proj.projectId, skillId: allSkills[1].skillId, userId: users[0], timestamp: dates[1].time] )
+
+        List<UserPoints> u0_s1_t1 = getPoints.call(users[0], proj.projectId, allSkills[1].skillId, false)
+        List<UserPoints> u0_s2_t1 = getPoints.call(users[0], proj.projectId, allSkills[2].skillId, false)
+        List<UserPoints> u0_g1_t1 = getPoints.call(users[0], proj.projectId, skillsGroup.skillId, false)
+        List<UserPoints> u0_g2_t1 = getPoints.call(users[0], proj.projectId, skillsGroup2.skillId, false)
+        List<UserPoints> u0_subj1_t1 = getPoints.call(users[0], proj.projectId, subj.subjectId, false)
+        List<UserPoints> u0_subj2_t1 = getPoints.call(users[0], proj.projectId, subj2.subjectId, false)
+        List<UserPoints> u0_p1_t1 = getPoints.call(users[0], proj.projectId, null, false)
+
+        List<UserPoints> u0_s1_hist_t1 = getPoints.call(users[0], proj.projectId, allSkills[1].skillId, true)
+        List<UserPoints> u0_s2_hist_t1 = getPoints.call(users[0], proj.projectId, allSkills[2].skillId, true)
+        List<UserPoints> u0_g1_hist_t1 = getPoints.call(users[0], proj.projectId, skillsGroup.skillId, true)
+        List<UserPoints> u0_g2_hist_t1 = getPoints.call(users[0], proj.projectId, skillsGroup2.skillId, true)
+        List<UserPoints> u0_subj1_hist_t1 = getPoints.call(users[0], proj.projectId, subj.subjectId, true)
+        List<UserPoints> u0_subj2_hist_t1 = getPoints.call(users[0], proj.projectId, subj2.subjectId, true)
+        List<UserPoints> u0_p1_hist_t1 = getPoints.call(users[0], proj.projectId, null, true)
+
+        then:
+        u0_s1_t0.points == [300]
+        u0_s2_t0.points == [200]
+        u0_g1_t0.points == [500]
+        u0_g2_t0.points == [231]
+        u0_subj1_t0.points == [500 + 231]
+        u0_subj2_t0.points == [30]
+        u0_p1_t0.points == [500 + 231 + 30]
+
+        u0_s1_hist_t0.points == [100, 100, 100]
+        u0_s1_hist_t0.day == [days[0], days[1], days[2],]
+        u0_s2_hist_t0.points == [100, 100]
+        u0_s2_hist_t0.day == [days[0], days[1]]
+        u0_g1_hist_t0.points == [200, 200, 100]
+        u0_g1_hist_t0.day == [days[0], days[1], days[2],]
+        u0_g2_hist_t0.points == [33, 66, 132]
+        u0_g2_hist_t0.day == [days[2], days[3], days[4],]
+        u0_subj1_hist_t0.points == [200, 200, 100 + 33, 66, 132]
+        u0_subj1_hist_t0.day == [days[0], days[1], days[2], days[3], days[4],]
+        u0_subj2_hist_t0.points == [10, 10, 10]
+        u0_subj2_hist_t0.day == [days[0], days[1], days[2]]
+        u0_p1_hist_t0.points == [200 + 10, 200 + 10, 100 + 10 + 33, 66, 132]
+        u0_p1_hist_t0.day == [days[0], days[1], days[2], days[3], days[4],]
+
+        u0_s1_t1.points == [200]
+        u0_s2_t1.points == [200]
+        u0_g1_t1.points == [400]
+        u0_g2_t1.points == [231]
+        u0_subj1_t1.points == [400 + 231]
+        u0_subj2_t1.points == [30]
+        u0_p1_t1.points == [400 + 231 + 30]
+
+        u0_s1_hist_t1.points == [100, 100]
+        u0_s1_hist_t1.day == [days[0], days[2],]
+        u0_s2_hist_t1.points == [100, 100]
+        u0_s2_hist_t1.day == [days[0], days[1],]
+        u0_g1_hist_t1.points == [200, 100, 100]
+        u0_g1_hist_t1.day == [days[0], days[1], days[2],]
+        u0_g2_hist_t1.points == [33, 66, 132]
+        u0_g2_hist_t1.day == [days[2], days[3], days[4],]
+        u0_subj1_hist_t1.points == [200, 100, 100 + 33, 66, 132]
+        u0_subj1_hist_t1.day == [days[0], days[1], days[2], days[3], days[4],]
+        u0_subj2_hist_t1.points == [10, 10, 10]
+        u0_subj2_hist_t1.day == [days[0], days[1], days[2]]
+        u0_p1_hist_t1.points == [200 + 10 , 100 + 10 , 100 + 10 + 33, 66, 132 ]
+        u0_p1_hist_t1.day == [days[0], days[1], days[2], days[3], days[4],]
     }
 }

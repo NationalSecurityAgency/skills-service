@@ -45,7 +45,7 @@ class AchievedBadgeHandler {
 
     @Profile
     void checkForBadges(SkillEventResult res, String userId, SkillDefMin currentSkillDef, SkillDate skillDate) {
-        List<SkillDefMin> parents = skillEventsSupportRepo.findParentSkillsByChildIdAndType(currentSkillDef.id, SkillRelDef.RelationshipType.BadgeRequirement)
+        List<SkillDefMin> parents = skillEventsSupportRepo.findParentSkillsByChildIdAndType(currentSkillDef.id, [SkillRelDef.RelationshipType.BadgeRequirement])
 
         parents.each { SkillDefMin skillDefMin ->
             if (skillDefMin.type == SkillDef.ContainerType.Badge && BadgeUtils.withinActiveTimeframe(skillDefMin) &&

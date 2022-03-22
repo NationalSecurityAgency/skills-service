@@ -261,8 +261,8 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
         where
             s.id = srd.parent and  
             srd.child.id=?1 and 
-            srd.type=?2''')
-    List<SkillDefMin> findParentSkillsByChildIdAndType(Integer childId, SkillRelDef.RelationshipType type)
+            srd.type in (?2)''')
+    List<SkillDefMin> findParentSkillsByChildIdAndType(Integer childId, List<SkillRelDef.RelationshipType> type)
 
 
     @Query('''SELECT 

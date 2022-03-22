@@ -302,7 +302,9 @@ class SkillEventAdminService {
                                                SkillDefMin currentDef,
                                                SkillDefMin requesterDef,
                                                String userId) {
-        if (currentDef.type == SkillDef.ContainerType.Subject) {
+        if (currentDef.type == SkillDef.ContainerType.SkillsGroup) {
+            updateUserPoints(userId, requesterDef, incomingSkillDate, currentDef.skillId)
+        } else if (currentDef.type == SkillDef.ContainerType.Subject) {
             UserPoints updatedPoints = updateUserPoints(userId, requesterDef, incomingSkillDate, currentDef.skillId)
 
             List<LevelDef> levelDefs = skillEventsSupportRepo.findLevelsBySkillId(currentDef.id)
@@ -311,7 +313,8 @@ class SkillEventAdminService {
             calculateLevels(levelInfo, updatedPoints, userId)
         }
 
-        List<SkillDefMin> parentsRels = skillEventsSupportRepo.findParentSkillsByChildIdAndType(currentDef.id, SkillRelDef.RelationshipType.RuleSetDefinition)
+        List<SkillDefMin> parentsRels = skillEventsSupportRepo
+                .findParentSkillsByChildIdAndType(currentDef.id, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
         parentsRels?.each {
             updateByTraversingUpSkillDefs(incomingSkillDate, res, it, requesterDef, userId)
         }

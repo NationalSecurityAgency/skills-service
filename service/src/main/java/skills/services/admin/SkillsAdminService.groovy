@@ -427,7 +427,6 @@ class SkillsAdminService {
             // must update point increment first then deal with changes in the occurrences;
             // changes in the occurrences will use the newly updated point increment
             if (pointIncrementDelta != 0 && occurrencesDelta >= 0) {
-//                userPointsManagement.handlePointIncrementUpdate(savedSkill.projectId, subjectId, savedSkill.skillId, pointIncrementDelta)
                 userPointsManagement.adjustUserPointsAfterModification(savedSkill)
             }
 
@@ -435,7 +434,6 @@ class SkillsAdminService {
                 // order is CRITICAL HERE
                 // Must remove UserPerformedSkill events before updating points
                 userPointsManagement.removeExtraEntriesOfUserPerformedSkillByUser(savedSkill.projectId, savedSkill.skillId, currentOccurrences + occurrencesDelta)
-//                userPointsManagement.updatePointsWhenOccurrencesAreDecreased(savedSkill.projectId, subjectId, savedSkill.skillId, savedSkill.pointIncrement, newOccurrences, currentOccurrences)
                 userPointsManagement.adjustUserPointsAfterModification(savedSkill)
                 //identify what badge (or badges) this skill belongs to.
                 //if any, look for users who qualify for the badge now after this change is persisted See BadgeAdminService.identifyUsersMeetingBadgeRequirements
