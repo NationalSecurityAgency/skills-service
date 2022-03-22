@@ -100,23 +100,10 @@ class SkillEventAdminService {
     @Profile
     BulkSkillEventResult bulkReportSkills(String projectId, String skillId, List<String> userIds, Date incomingSkillDate) {
         // collect userIds outside of the DB transaction
-        final List<String> userIdsErrored = []
-        List<Callable<String>> listToSubmit = userIds.collect { final requestedUserId ->
-            ThreadPoolUtils.callable {
-                String userId
-                try {
-                    userId = userInfoService.getUserName(requestedUserId, false)
-                } catch (Exception e) {
-                    log.warn("Error reporting skillId [${projectId}], [${skillId}] for user [${requestedUserId}]: [${e.message}]")
-                    userIdsErrored.add(requestedUserId)
-                }
-                return userId
-            }
-        }
-        List<String> requestedUserIds = pool.submitAndGetResults(listToSubmit)
+        BulkUserLookupResult res = bulkLookupUserNames(userIds, projectId, skillId)
 
         // report all skills as a single transaction
-        Map<String, SkillEventResult> results = bulkReportSkillsInternal(projectId, skillId, requestedUserIds, incomingSkillDate)
+        Map<String, SkillEventResult> results = bulkReportSkillsInternal(projectId, skillId, res.requestedUserIds, incomingSkillDate)
 
         // perform notification and metrics logging
         performBulkReportSkillNotifications(results)
@@ -127,11 +114,31 @@ class SkillEventAdminService {
                 name: results.values().first().name,
                 userIdsAppliedCount: results.values().count { it.skillApplied },
                 userIdsNotAppliedCount: results.values().count { !it.skillApplied },
-                userIdsErrored: userIdsErrored,
+                userIdsErrored: res.userIdsErrored,
         )
 
         log.debug("Completed bulk skill report [${bulkResult}]")
         return bulkResult
+    }
+
+    @Profile
+    BulkUserLookupResult bulkLookupUserNames(List<String> userIds, String projectId, String skillId) {
+        BulkUserLookupResult res = new BulkUserLookupResult()
+        List<Callable<String>> listToSubmit = userIds.collect { final requestedUserId ->
+            ThreadPoolUtils.callable {
+                String userId
+                try {
+                    userId = userInfoService.getUserName(requestedUserId, false)
+                } catch (Exception e) {
+                    log.warn("Error reporting skillId [${projectId}], [${skillId}] for user [${requestedUserId}]: [${e.message}]")
+                    res.userIdsErrored.add(requestedUserId)
+                }
+                return userId
+            }
+        }
+        res.requestedUserIds = pool.submitAndGetResults(listToSubmit)
+
+        return res
     }
 
     @Profile
@@ -339,4 +346,8 @@ class SkillEventAdminService {
         return skillDefinition
     }
 
+    static class BulkUserLookupResult {
+        List<String> requestedUserIds
+        List<String> userIdsErrored = []
+    }
 }
