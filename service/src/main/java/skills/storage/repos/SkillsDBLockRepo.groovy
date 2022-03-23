@@ -17,14 +17,12 @@ package skills.storage.repos
 
 import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Query
-import org.springframework.data.jpa.repository.QueryHints
 import org.springframework.data.repository.CrudRepository
 import org.springframework.lang.Nullable
 import skills.storage.model.ProjDef
 import skills.storage.model.SkillsDBLock
 
 import javax.persistence.LockModeType
-import javax.persistence.QueryHint
 
 interface SkillsDBLockRepo extends CrudRepository<SkillsDBLock, Integer> {
 

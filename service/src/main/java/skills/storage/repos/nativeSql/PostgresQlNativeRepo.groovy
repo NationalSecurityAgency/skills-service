@@ -18,16 +18,12 @@ package skills.storage.repos.nativeSql
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Conditional
 import org.springframework.stereotype.Service
-import skills.controller.request.model.QueryUsersCriteriaRequest
-import skills.controller.request.model.SubjectLevelQueryRequest
 import skills.storage.model.QueryUsersCriteria
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillsDBLock
-import skills.storage.repos.SkillsDBLockRepo
 import skills.storage.repos.UserPointsRepo
 
 import javax.persistence.EntityManager
-import javax.persistence.LockModeType
 import javax.persistence.ParameterMode
 import javax.persistence.PersistenceContext
 import javax.persistence.Query
