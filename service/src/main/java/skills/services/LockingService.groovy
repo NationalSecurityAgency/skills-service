@@ -16,20 +16,24 @@
 package skills.services
 
 import groovy.transform.CompileStatic
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import skills.storage.model.ProjDef
 import skills.storage.model.SkillsDBLock
-import skills.storage.model.UserAttrs
-import skills.storage.model.UserPoints
 import skills.storage.repos.SkillsDBLockRepo
+import skills.storage.repos.nativeSql.NativeQueriesRepo
 
+@Slf4j
 @Service
 @CompileStatic
 class LockingService {
 
     @Autowired
     SkillsDBLockRepo skillsDBLockRepo
+
+    @Autowired
+    NativeQueriesRepo nativeQueriesRepo
 
     SkillsDBLock lockGlobalSettings() {
         SkillsDBLock res = skillsDBLockRepo.findByLock("global_settings_lock")
@@ -94,16 +98,7 @@ class LockingService {
 
     SkillsDBLock lockForUserProject(String userId, String projectId) {
         String key = userId+projectId
-        SkillsDBLock lock = skillsDBLockRepo.findByLock(key)
-        if (!lock) {
-            lock = new SkillsDBLock(lock: key)
-            try {
-                skillsDBLockRepo.save(lock)
-            } catch (Throwable t) {}
-            lock = skillsDBLockRepo.findByLock(key)
-            assert lock
-        }
-
+        SkillsDBLock lock = nativeQueriesRepo.insertLockOrSelectExisting(key)
         return lock
     }
 

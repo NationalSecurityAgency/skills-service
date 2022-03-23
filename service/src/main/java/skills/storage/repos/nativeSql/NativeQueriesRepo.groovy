@@ -19,6 +19,7 @@ import org.springframework.data.repository.query.Param
 import skills.controller.request.model.QueryUsersCriteriaRequest
 import skills.storage.model.QueryUsersCriteria
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillsDBLock
 
 import java.util.stream.Stream
 
@@ -68,5 +69,7 @@ interface NativeQueriesRepo {
     void updateUserPointsForSubjectOrGroup(String projectId, String skillId)
 
     void updateUserPointsHistoryForProject(String projectId)
+
+    SkillsDBLock insertLockOrSelectExisting(String lockKey)
 }
 

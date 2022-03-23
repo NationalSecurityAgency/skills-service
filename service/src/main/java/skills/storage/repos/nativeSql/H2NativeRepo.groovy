@@ -19,8 +19,12 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Conditional
 import org.springframework.stereotype.Service
+import org.springframework.transaction.TransactionManager
+import org.springframework.transaction.support.TransactionTemplate
 import skills.storage.model.QueryUsersCriteria
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillsDBLock
+import skills.storage.repos.SkillsDBLockRepo
 import skills.storage.repos.UserPointsRepo
 
 import javax.persistence.EntityManager
@@ -38,6 +42,12 @@ class H2NativeRepo implements NativeQueriesRepo {
 
     @Autowired
     UserPointsRepo userPointsRepo
+
+    @Autowired
+    SkillsDBLockRepo skillsDBLockRepo
+
+    @Autowired
+    TransactionManager transactionManager
 
     @Override
     void decrementPointsForDeletedSkill(String projectId, String deletedSkillId, String parentSubjectSkillId) {
@@ -863,5 +873,29 @@ class H2NativeRepo implements NativeQueriesRepo {
     void updateUserPointsHistoryForProject(String projectId) {
         userPointsRepo.updateUserPointsHistoryForProjectInH2(projectId)
         userPointsRepo.removeUserPointsThatDoNotExistForProjectInH2(projectId)
+    }
+
+    @Override
+    SkillsDBLock insertLockOrSelectExisting(String lockKey) {
+        SkillsDBLock lock = skillsDBLockRepo.findByLock(lockKey)
+        if (!lock) {
+            lock = new SkillsDBLock(lock: lockKey)
+            try {
+                // we have to execute the save in a new transaction as another
+                // thread might have inserted the lock row after the above and may be holding
+                // a pessmisitic_write lock which results in an exception being thrown by the save call
+                // if save isn't performed in a separate transaction, the current session becomes invalidated
+                TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager)
+                transactionTemplate.setPropagationBehaviorName("PROPAGATION_REQUIRES_NEW")
+                transactionTemplate.execute({
+                    skillsDBLockRepo.save(lock)
+                })
+            } catch (Throwable t) {}
+            //this second find is necessary so that the pessmisitc_write lock blocks access to this row until the lock is released
+            lock = skillsDBLockRepo.findByLock(lockKey)
+            assert lock
+        }
+
+        return lock
     }
 }

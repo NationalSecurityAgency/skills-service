@@ -18,13 +18,13 @@ package skills.storage.repos.nativeSql
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Conditional
 import org.springframework.stereotype.Service
-import skills.controller.request.model.QueryUsersCriteriaRequest
-import skills.controller.request.model.SubjectLevelQueryRequest
 import skills.storage.model.QueryUsersCriteria
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillsDBLock
 import skills.storage.repos.UserPointsRepo
 
 import javax.persistence.EntityManager
+import javax.persistence.ParameterMode
 import javax.persistence.PersistenceContext
 import javax.persistence.Query
 import java.util.stream.Stream
@@ -662,5 +662,14 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
     @Override
     void updateUserPointsHistoryForProject(String projectId) {
         userPointsRepo.updateUserPointsHistoryForProject(projectId)
+    }
+
+    @Override
+    SkillsDBLock insertLockOrSelectExisting(String lockKey) {
+        Query query = entityManager.createStoredProcedureQuery("f_select_lock_and_insert", SkillsDBLock)
+                        .registerStoredProcedureParameter("_lockKey", String, ParameterMode.IN)
+        query.setParameter("_lockKey", lockKey)
+        SkillsDBLock dbLock = query.getSingleResult()
+        return dbLock
     }
 }
