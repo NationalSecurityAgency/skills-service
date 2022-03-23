@@ -15,15 +15,32 @@
  */
 package skills.services
 
+import org.hibernate.Session
+import org.hibernate.SessionFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.TransactionStatus
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.support.TransactionCallback
+import org.springframework.transaction.support.TransactionSynchronizationManager
+import org.springframework.transaction.support.TransactionTemplate
 import skills.intTests.utils.DefaultIntSpec
 import skills.storage.model.SkillsDBLock
+import spock.lang.IgnoreRest
+
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicLong
+import java.util.function.Consumer
 
 class LockingServiceSpec extends DefaultIntSpec {
 
     @Autowired
     LockingService lockingService
+
+    @Autowired
+    private PlatformTransactionManager transactionManager;
 
     @Transactional
     def "lock global settings"() {
@@ -77,6 +94,64 @@ class LockingServiceSpec extends DefaultIntSpec {
 
         then:
         lock
+    }
+
+    def "test concurrent locks for user project"() {
+        ExecutorService service = Executors.newFixedThreadPool(2)
+        AtomicLong t1Start = new AtomicLong()
+        AtomicLong t2Start = new AtomicLong()
+
+        long sleepTime = 2500
+
+        Runnable longRunning = new Runnable() {
+            @Override
+            void run() {
+                TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager)
+                transactionTemplate.setPropagationBehaviorName("PROPAGATION_REQUIRES_NEW")
+                transactionTemplate.execute(new TransactionCallback<Boolean>() {
+                    @Override
+                    Boolean doInTransaction(TransactionStatus status) {
+                        SkillsDBLock lock = lockingService.lockForUserProject("aUser", "aProject")
+                        t1Start.set(System.currentTimeMillis())
+                        Thread.currentThread().sleep(sleepTime)
+                        return true;
+                    }
+                })
+            }
+        }
+
+        Runnable immediate = new Runnable() {
+            @Override
+            void run() {
+                TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager)
+                transactionTemplate.setPropagationBehaviorName("PROPAGATION_REQUIRES_NEW")
+                boolean result = transactionTemplate.execute(new TransactionCallback<Boolean>() {
+                    @Override
+                    Boolean doInTransaction(TransactionStatus status) {
+                            try {
+                                SkillsDBLock lock = lockingService.lockForUserProject("aUser", "aProject")
+                                t2Start.set(System.currentTimeMillis())
+                                return true
+                            } catch (e) {
+                                e.printStackTrace()
+                            }
+                    }
+                })
+                assert result
+            }
+        }
+
+        when:
+
+        service.submit(longRunning)
+        Thread.currentThread().sleep(50)
+        service.submit(immediate)
+        service.shutdown()
+        service.awaitTermination(sleepTime*4, TimeUnit.MILLISECONDS)
+
+        then:
+        service.isTerminated()
+        t2Start.get() > t1Start.get()+sleepTime
     }
 
 

@@ -1631,4 +1631,39 @@
             create index index_user_attrs_user_id_for_display_lower on user_attrs (lower(user_id_for_display));
         </sql>
     </changeSet>
+
+    <changeSet id="24" author="skills team">
+        <sql dbms="postgresql" endDelimiter=";" splitStatements="false">
+            CREATE FUNCTION f_select_lock_and_insert(
+                _lockKey varchar,
+                OUT id integer,
+                OUT lock character varying(255),
+                OUT created timestamp without time zone,
+                OUT updated timestamp without time zone
+            )
+            AS $func$
+            #variable_conflict use_column
+            BEGIN
+            LOOP
+                SELECT sdl.id, sdl.lock, sdl.created, sdl.updated
+                FROM   skills_db_locks sdl
+                WHERE  sdl.lock = _lockKey
+                FOR UPDATE
+                INTO id, lock, created, updated;
+
+                EXIT WHEN FOUND;
+
+                INSERT INTO skills_db_locks AS l (lock)
+                VALUES (_lockKey)
+                ON CONFLICT (lock) DO NOTHING
+                RETURNING l.id, l.lock, l.created, l.updated
+                INTO id, lock, created, updated;
+
+                EXIT WHEN FOUND;
+            END LOOP;
+            END;
+            $func$
+            LANGUAGE plpgsql;
+        </sql>
+    </changeSet>
 </databaseChangeLog>
