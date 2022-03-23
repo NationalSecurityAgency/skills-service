@@ -30,6 +30,7 @@ import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.SkillDefRepo
+import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -2600,6 +2601,66 @@ class CatalogSkillTests extends CatalogIntSpec {
         then:
         subjectUsers.data[0].userId == user
         subjectUsers.data[0].lastUpdated == DTF.print(date.time)
+    }
+
+    def "project users should take into account users of imported skills"() {
+        def project1 = createProject(1)
+        def project2 = createProject(2)
+
+        def p1subj1 = createSubject(1, 1)
+        def p2subj1 = createSubject(2, 1)
+
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 50)
+
+        def skill3 = createSkill(2, 1, 3, 0, 1, 0, 100)
+
+        skillsService.createProject(project1)
+        skillsService.createProject(project2)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p2subj1)
+
+        skillsService.createSkill(skill)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(skill3)
+
+        def users = getRandomUsers(6)
+        def importUsers = users.subList(0, 5)
+        importUsers.eachWithIndex { user, index ->
+            def skillId = ''
+            if (index % 2 == 0) {
+                skillId = skill.skillId
+            } else {
+                skillId = skill2.skillId
+            }
+            skillsService.addSkill([projectId: project1.projectId, skillId: skillId], user)
+        }
+
+        def projectNativeUser = users.last()
+
+        skillsService.addSkill([projectId: project2.projectId, skillId: skill3.skillId], projectNativeUser)
+
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill2.skillId)
+        skillsService.finalizeSkillsImportFromCatalog(project2.projectId)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        when:
+        def projectUsers = skillsService.getProjectUsers(project2.projectId)
+        println projectUsers
+
+        then:
+        projectUsers.count == 6
+        projectUsers.totalCount == 6
+        projectUsers.data.size() == 6
+        projectUsers.data.find {it.userId == users[0]}
+        projectUsers.data.find {it.userId == users[1]}
+        projectUsers.data.find {it.userId == users[2]}
+        projectUsers.data.find {it.userId == users[3]}
+        projectUsers.data.find {it.userId == users[4]}
+        projectUsers.data.find {it.userId == users[5]}
     }
 
 }
