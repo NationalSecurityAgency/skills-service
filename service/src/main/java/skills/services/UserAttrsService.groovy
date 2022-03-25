@@ -68,19 +68,28 @@ class UserAttrsService {
             updateUserTags = shouldUpdateUserTags(userAttrs)
 
             if (log.isTraceEnabled()) {
-                log.trace('UserInfo/UserAttrs: \n\tfirstName [{}/{}]\n\tlastName [{}]/[{}]\n\temail [{}]/[{}]\n\tuserDn [{}]/[{}]\n\tnickname [{}]/[{}]\n\tusernameForDisplay [{}]/[{}]\n\tlandingPage [{}]/[{}]',
-                        userInfo.firstName, userAttrs.firstName,
-                        userInfo.lastName, userAttrs.lastName,
-                        userInfo.email, userAttrs.email,
-                        userInfo.userDn, userAttrs.dn,
-                        userInfo.nickname, userAttrs.nickname,
-                        userInfo.usernameForDisplay, userAttrs.userIdForDisplay,
-                )
-                log.trace('Updating UserAttrs [{}], UserTags [{}]', updateUserAttrs, updateUserTags)
+                use(TimeCategory) {
+                    log.trace('UserInfo/UserAttrs [{}]: \n\tfirstName [{}/{}]\n\tlastName [{}]/[{}]\n\temail [{}]/[{}]\n\tuserDn [{}]/[{}]\n\tnickname [{}]/[{}]\n\tusernameForDisplay [{}]/[{}]\n\tuserTagDate [{}]/[{}]',
+                            userId,
+                            userInfo.firstName, userAttrs.firstName,
+                            userInfo.lastName, userAttrs.lastName,
+                            userInfo.email, userAttrs.email,
+                            userInfo.userDn, userAttrs.dn,
+                            userInfo.nickname, userAttrs.nickname,
+                            userInfo.usernameForDisplay, userAttrs.userIdForDisplay,
+                            userAttrs.userTagsLastUpdated, attrsAndUserTagsUpdateIntervalDays.days.ago
+                    )
+                    log.trace('Should Update [{}] UserAttrs [{}], UserTags [{}]', userId, updateUserAttrs, updateUserTags)
+                }
             }
         }
+        return updateIfNecessary(updateUserTags, updateUserAttrs, userId, userAttrs, userInfo)
+    }
+
+    @Profile
+    private UserAttrs updateIfNecessary(boolean updateUserTags, boolean updateUserAttrs, String userId, UserAttrs userAttrs, UserInfo userInfo) {
         if (updateUserTags || updateUserAttrs) {
-            lockingService.lockForCreateOrUpdateUser()
+            lockUser(userId)
             if (!userAttrs.id) {
                 // this is an insert, reload UserAttrs to verify that another request has not already inserted
                 UserAttrs userAttrs2 = loadUserAttrsFromLocalDb(userId)
@@ -91,7 +100,8 @@ class UserAttrsService {
                 }
             }
         }
-        if (updateUserAttrs) {
+        // if updateUserTags = true, we need to update userAttrs regardless b/c the userTagsLastUpdated is stored there
+        if (updateUserAttrs || updateUserTags) {
             populate(userAttrs, userInfo, updateUserTags)
             saveUserAttrsInLocalDb(userAttrs)
         }
@@ -101,6 +111,13 @@ class UserAttrsService {
         return userAttrs
     }
 
+    @Profile
+    private void lockUser(String userId) {
+        log.debug("locking user [{}]", userId)
+        lockingService.lockUser(userId)
+    }
+
+    @Profile
     private void replaceUserTags(String userId, UserInfo userInfo) {
         userTagsRepository.deleteByUserId(userId)
         List<UserTag> userTags = userInfo.userTags.collect { new UserTag(userId: userId, key: it.key, value: it.value) }
@@ -109,6 +126,7 @@ class UserAttrsService {
         }
     }
 
+    @Profile
     private boolean shouldUpdateUserAttrs(UserInfo userInfo, UserAttrs userAttrs) {
         return  (userInfo.firstName && userAttrs.firstName != userInfo.firstName) ||
                 (userInfo.lastName && userAttrs.lastName != userInfo.lastName) ||
@@ -119,6 +137,7 @@ class UserAttrsService {
                 (userInfo.usernameForDisplay && userAttrs.userIdForDisplay != userInfo.usernameForDisplay)
     }
 
+    @Profile
     private boolean shouldUpdateUserTags(UserAttrs userAttrs) {
         use(TimeCategory) {
             return userAttrs.userTagsLastUpdated.before(attrsAndUserTagsUpdateIntervalDays.days.ago)
@@ -153,6 +172,7 @@ class UserAttrsService {
         }
     }
 
+    @Profile
     UserAttrs findByUserId(String userId) {
         return loadUserAttrsFromLocalDb(userId)
     }

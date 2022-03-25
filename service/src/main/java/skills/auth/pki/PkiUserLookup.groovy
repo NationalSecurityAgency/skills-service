@@ -33,6 +33,7 @@ import skills.auth.UserInfo
 import skills.controller.exceptions.SkillException
 
 import javax.annotation.PostConstruct
+import javax.annotation.PreDestroy
 import java.util.concurrent.TimeUnit
 
 @Component
@@ -63,6 +64,8 @@ class PkiUserLookup {
 
     LoadingCache userInfoCache
 
+    private Timer timer
+
     @PostConstruct
     void configureCache() {
         userInfoCache = CacheBuilder.newBuilder().expireAfterWrite(cacheExpirationHours, TimeUnit.HOURS).maximumSize(cacheMaxSize).recordStats().build(new CacheLoader<String, UserInfo>() {
@@ -73,6 +76,24 @@ class PkiUserLookup {
                 return userInfo
             }
         })
+
+        if (log.isDebugEnabled()) {
+            timer = new Timer()
+            timer.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                void run() {
+                    printCacheStats()
+                }
+            }, TimeUnit.MINUTES.toMillis(5), TimeUnit.MINUTES.toMillis(5))
+        }
+    }
+
+    @PreDestroy
+    void destroy(){
+        if (timer != null) {
+            timer.cancel();
+            timer.purge();
+        }
     }
 
     @Profile
@@ -83,7 +104,7 @@ class PkiUserLookup {
 
     void printCacheStats() {
         CacheStats stats = userInfoCache.stats()
-        log.info("\n\nCacheStats: \n${stats}\n\n")
+        log.debug("\n\nCacheStats: \n${stats}\n\n")
     }
 
     @Profile

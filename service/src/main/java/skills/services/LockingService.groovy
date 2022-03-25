@@ -81,7 +81,7 @@ class LockingService {
      */
     Integer lockUser(String userId) {
         assert userId
-        return skillsDBLockRepo.findUserAttrsByUserId(userId?.toLowerCase())
+        return skillsDBLockRepo.findUserAttrsByUserId("update_${userId?.toLowerCase()}")
     }
 
     SkillsDBLock lockForProjectExpiration() {
