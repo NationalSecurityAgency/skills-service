@@ -16,6 +16,7 @@
 package skills.storage.repos
 
 import org.springframework.data.jpa.repository.Lock
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.lang.Nullable
@@ -44,4 +45,7 @@ interface SkillsDBLockRepo extends CrudRepository<SkillsDBLock, Integer> {
             attrs.userId = ?1''')
     Integer findUserAttrsByUserId(String userId)
 
+    @Modifying
+    @Query(value="delete from skills_db_locks where created < ?1  and expires='true'", nativeQuery=true)
+    void deleteByCreatedBeforeAndExpires(Date date)
 }
