@@ -22,7 +22,9 @@ import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
 import org.aspectj.lang.reflect.CodeSignature
+import org.aspectj.lang.reflect.MethodSignature
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
@@ -33,6 +35,7 @@ import javax.servlet.http.HttpServletRequest
 @Component
 @Slf4j
 @CompileStatic
+@ConfigurationProperties("skills.prof")
 class CallStackProfAspect {
 
     @Value('#{"${skills.prof.enabled:false}"}')
@@ -43,6 +46,9 @@ class CallStackProfAspect {
 
     @Value('#{"${skills.prof.serverTimingAPI.enabled:false}"}')
     boolean serverTimeApiEnabled
+
+    // override default minMillisToPrint value for specific endpoints
+    Map<String,Integer> endpoints = [:]
 
     @Around("@within(EnableCallStackProf) || @annotation(EnableCallStackProf)")
     Object profile(ProceedingJoinPoint joinPoint) {
@@ -60,7 +66,7 @@ class CallStackProfAspect {
             CProf.stop(profileName)
         }
 
-        if (CProf.rootEvent.getRuntimeInMillis() > minMillisToPrint) {
+        if (CProf.rootEvent.getRuntimeInMillis() > getMinMillisToPrintValue(joinPoint)) {
             log.info("\nProfiling Endpoint: {}\n{}", getServletRequestPath(), CProf.prettyPrint())
         }
         return retVal
@@ -103,4 +109,14 @@ class CallStackProfAspect {
         return  builder.toString()
     }
 
+    private Integer getMinMillisToPrintValue(ProceedingJoinPoint joinPoint) {
+        Integer retVal = minMillisToPrint
+        if (joinPoint.signature instanceof MethodSignature) {
+            String methodName = ((MethodSignature) joinPoint.getSignature())?.method?.name
+            if (endpoints.containsKey(methodName)) {
+                retVal = endpoints[methodName]
+            }
+        }
+        return retVal
+    }
 }
