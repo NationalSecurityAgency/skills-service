@@ -36,49 +36,42 @@ class LockingService {
     @Autowired
     NativeQueriesRepo nativeQueriesRepo
 
-    @Transactional
     SkillsDBLock lockGlobalSettings() {
         SkillsDBLock res = skillsDBLockRepo.findByLock("global_settings_lock")
         assert res
         return res
     }
 
-    @Transactional
     SkillsDBLock lockProjects() {
         SkillsDBLock res = skillsDBLockRepo.findByLock("projects_lock")
         assert res
         return res
     }
 
-    @Transactional
     SkillsDBLock lockGlobalBadges() {
         SkillsDBLock res = skillsDBLockRepo.findByLock("global_badges_lock")
         assert res
         return res
     }
 
-    @Transactional
     SkillsDBLock lockEventCompaction() {
         SkillsDBLock res = skillsDBLockRepo.findByLock("event_compaction_lock")
         assert res
         return res
     }
 
-    @Transactional
     SkillsDBLock lockForNotifying() {
         SkillsDBLock res = skillsDBLockRepo.findByLock("notifier_lock")
         assert res
         return res
     }
 
-    @Transactional
     SkillsDBLock lockForUpdatingCatalogSkills() {
         SkillsDBLock res = skillsDBLockRepo.findByLock('catalog_skill_update_lock')
         assert res
         return res
     }
 
-    @Transactional
     ProjDef lockProject(String projectId) {
         assert projectId
         return skillsDBLockRepo.findByProjectIdIgnoreCase(projectId)
@@ -87,27 +80,23 @@ class LockingService {
     /**
      * PESSIMISTIC_WRITE Lock - returns user's db id
      */
-    @Transactional
     Integer lockUser(String userId) {
         assert userId
         return skillsDBLockRepo.findUserAttrsByUserId(userId?.toLowerCase())
     }
 
-    @Transactional
     SkillsDBLock lockForProjectExpiration() {
         SkillsDBLock res = skillsDBLockRepo.findByLock("project_expiration_lock")
         assert res
         return res
     }
 
-    @Transactional
     SkillsDBLock lockForCreateOrUpdateUser() {
         SkillsDBLock res = skillsDBLockRepo.findByLock("create_or_update_user")
         assert res
         return res
     }
 
-    @Transactional
     SkillsDBLock lockForUserProject(String userId, String projectId) {
         String key = userId+projectId
         SkillsDBLock lock = nativeQueriesRepo.insertLockOrSelectExisting(key)
@@ -118,5 +107,4 @@ class LockingService {
     void deleteLocksOlderThan(Date date) {
         skillsDBLockRepo.deleteByCreatedBeforeAndExpires(date)
     }
-
 }

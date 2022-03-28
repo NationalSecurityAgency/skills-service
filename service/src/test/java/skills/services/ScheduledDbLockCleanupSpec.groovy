@@ -17,11 +17,10 @@ package skills.services
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.transaction.annotation.Transactional
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.TransactionHelper
 import skills.storage.model.SkillsDBLock
 import skills.storage.repos.SkillsDBLockRepo
-import skills.storage.repos.nativeSql.NativeQueriesRepo
 
 class ScheduledDbLockCleanupSpec extends DefaultIntSpec {
 
@@ -40,8 +39,11 @@ class ScheduledDbLockCleanupSpec extends DefaultIntSpec {
     @Autowired
     ScheduledUserTokenCleanup cleanup
 
-    def "test ScheduledDbLockCleanup"() {
-        SkillsDBLock lock = createExpiringLock()
+    @Autowired
+    TransactionHelper transactionHelper
+
+    def "test ScheduledDbLockCleanup will delete expired locks"() {
+        SkillsDBLock lock = createExpiredLock()
         assert skillsDBLockRepo.findById(lock.id).isPresent()
 
         when:
@@ -51,10 +53,28 @@ class ScheduledDbLockCleanupSpec extends DefaultIntSpec {
         !skillsDBLockRepo.findById(lock.id).isPresent()
     }
 
-    @Transactional
-    SkillsDBLock createExpiringLock() {
-        SkillsDBLock lock =  lockingService.lockForUserProject("user", "project")
-        jdbcTemplate.execute("update skills_db_locks set created = '${(new Date()-15).format("yyyy-MM-dd")}'")
-        return lock
+    def "test ScheduledDbLockCleanup will not delete non-expired locks"() {
+        SkillsDBLock lock = createNonExpiredLock()
+        assert skillsDBLockRepo.findById(lock.id).isPresent()
+
+        when:
+        scheduledDbLockCleanup.cleanupExpiredLocks()
+
+        then:
+        skillsDBLockRepo.findById(lock.id).isPresent()
+    }
+
+    SkillsDBLock createExpiredLock() {
+        return transactionHelper.doInTransaction {
+            SkillsDBLock lock = lockingService.lockForUserProject("user", "project")
+            jdbcTemplate.execute("update skills_db_locks set created = '${(new Date()-15).format("yyyy-MM-dd")}'")
+            return lock
+        }
+    }
+
+    SkillsDBLock createNonExpiredLock() {
+        return transactionHelper.doInTransaction {
+            return lockingService.lockForUserProject("user", "project")
+        }
     }
 }
