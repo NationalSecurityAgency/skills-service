@@ -75,12 +75,11 @@ interface NativeQueriesRepo {
 
     SkillsDBLock insertLockOrSelectExisting(String lockKey)
 
-    //TEMP
     List<ProjectUser> findDistinctProjectUsersByProjectIdAndSubjectIdAndUserIdLike(String projectId,
                                                                                    String subjectId,
                                                                                    String userId,
                                                                                    Pageable pageable)
-    
+
     Long countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(String projectId, String subjectId, String userId)
 
     Long countDistinctUsersByProjectIdAndSubjectId(String projectId, String subjectId)

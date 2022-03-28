@@ -61,6 +61,9 @@ class AdminUsersService {
     @Autowired
     UserEventService userEventService
 
+    @Autowired
+    NativeQueriesRepo nativeQueriesRepo
+
     List<TimestampCountItem> getUsage(String projectId, String skillId, Date start) {
         Date startDate = LocalDateTime.of(start.toLocalDate(), LocalTime.MIN).toDate()
 
@@ -196,9 +199,6 @@ class AdminUsersService {
         return result
     }
 
-    @Autowired
-    NativeQueriesRepo nativeQueriesRepo
-
     TableResult loadUsersPageForSubject(String projectId, String subjectId, String query, PageRequest pageRequest) {
         TableResult result = new TableResult()
         if (!subjectId) {
@@ -213,15 +213,13 @@ class AdminUsersService {
             if (!projectUsers) {
                 result.count = 0
             } else if (query) {
-                result.count = userPointsRepo.countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(projectId, subjectId, query)
+                result.count = nativeQueriesRepo.countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(projectId, subjectId, query)
             } else {
                 result.count = totalProjectUsersWithSkills
             }
         }
         return result
     }
-
-
 
     @Transactional
     UserInfoRes getUserForProject(String projectId, String userId) {

@@ -49,6 +49,7 @@ import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillDefWithExtraRepo
 import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.UserPointsRepo
+import skills.storage.repos.nativeSql.NativeQueriesRepo
 import skills.utils.InputSanitizer
 import skills.utils.Props
 
@@ -607,7 +608,7 @@ class SkillsAdminService {
         if (!includeGroupChildren) {
             res = skillRelDefRepo.getSkillsWithCatalogStatus(projectId, subject.skillId)
         } else {
-            res = skillRelDefRepo.getSkillsWithCatalogStatusExplodeSkillGroups(projectId, subject.skillId)
+            res = nativeQueriesRepo.getSkillsWithCatalogStatusExplodeSkillGroups(projectId, subject.skillId)
         }
         return res.collect { convertToSkillDefPartialRes(it) }.sort({ it.displayOrder })
     }
