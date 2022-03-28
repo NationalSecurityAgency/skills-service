@@ -28,9 +28,7 @@ import skills.services.events.SkillDate
 import skills.services.events.SkillEventResult
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefMin
-import skills.storage.model.SkillRelDef
 import skills.storage.repos.SkillDefRepo
-import skills.storage.repos.SkillRelDefRepo
 
 @Component
 @Slf4j
@@ -88,6 +86,6 @@ class ImportedSkillsAchievementsHandler {
     @Profile
     private void lockTransaction(String userId, String project) {
         log.debug("locking user [{}]-[{}]", userId, project)
-        lockingService.lockForUserProject(userId, project)
+        lockingService.lockForImportedSkillPropagation(userId, project)
     }
 }

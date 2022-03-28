@@ -19,6 +19,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
+import skills.services.admin.SkillCatalogFinalizationService
 
 @Component
 @Slf4j
@@ -28,7 +29,7 @@ class WaitForAsyncTasksCompletion {
     JdbcTemplate jdbcTemplate
 
     boolean waitForAllScheduleTasks(long waitInMs = 30000) {
-        log.info("Waiting for all scheduled task to complete")
+        log.info("Waiting up to [{}] for all scheduled task to complete", waitInMs)
         Closure<Integer> numRecords = {
             return jdbcTemplate.queryForObject("select count(*) from scheduled_tasks", Integer.class)
         }
@@ -38,10 +39,27 @@ class WaitForAsyncTasksCompletion {
             Thread.sleep(250)
             log.trace("Still waiting on [{}] tasks to finish", lastNumRecords)
             if ( System.currentTimeMillis() - start > waitInMs ){
-                throw new IllegalStateException("Scheduled tasks took too long to complete. Still [${lastNumRecords}] tasks left!")
+                throw new IllegalStateException("Scheduled tasks took too long to complete. Waited for [${waitInMs}]ms, still [${lastNumRecords}] tasks left!")
             }
         }
         log.info("All scheduled task completed!")
+    }
+
+    boolean waitFinalizationToCompleteByCheckingStatus(SkillsService skillsService, String projectId, long waitInMs = 30000) {
+        log.info("Waiting up to [{}] for the Catalog Finalization task to complete for [{}]", waitInMs, projectId)
+        Closure<Integer> getStatus = {
+            def setting = skillsService.getSetting(projectId, SkillCatalogFinalizationService.PROJ_FINALIZE_STATE_PROP)
+            return setting.value
+        }
+        long start = System.currentTimeMillis()
+        while (getStatus.call() == SkillCatalogFinalizationService.FinalizeState.RUNNING.toString()) {
+            Thread.sleep(250)
+            log.trace("Still waiting on finalization for [{}] to finish", projectId)
+            if ( System.currentTimeMillis() - start > waitInMs ){
+                throw new IllegalStateException("Catalog finalization for [${projectId}] took too long to complete. Waited for [${waitInMs}]ms!")
+            }
+        }
+        log.info("Completed finalization for [{}]", projectId)
     }
 
     void clearScheduledTaskTable() {

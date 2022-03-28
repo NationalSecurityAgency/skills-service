@@ -28,6 +28,7 @@ import skills.storage.repos.NotificationsRepo
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SettingRepo
 import skills.storage.repos.SkillDefRepo
+import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserEventsRepo
 import skills.storage.repos.UserPerformedSkillRepo
@@ -87,6 +88,9 @@ class DefaultIntSpec extends Specification {
 
     @Autowired
     UserEventsRepo userEventsRepo
+
+    @Autowired
+    UserAchievedLevelRepo userAchievedRepo
 
     private UserUtil userUtil
 

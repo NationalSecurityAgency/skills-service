@@ -19,19 +19,22 @@ import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.ProjectSettingsRequest
 import skills.controller.result.model.SettingsResult
 import skills.services.RuleSetDefGraphService
+import skills.services.events.SkillDate
+import skills.services.events.pointsAndAchievements.ImportedSkillsAchievementsHandler
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.model.SkillDef
-import skills.storage.repos.SkillDefRepo
-import skills.storage.repos.SkillRelDefRepo
-import skills.storage.repos.UserAchievedLevelRepo
-import skills.storage.repos.UserPointsRepo
+import skills.storage.model.SkillDefMin
+import skills.storage.model.UserAchievement
+import skills.storage.model.UserPerformedSkill
+import skills.storage.repos.*
 import skills.storage.repos.nativeSql.NativeQueriesRepo
 import skills.tasks.TaskSchedulerService
 import skills.tasks.config.TaskConfig
@@ -62,12 +65,18 @@ class SkillCatalogFinalizationService {
     UserAchievedLevelRepo userAchievedLevelRepo
 
     @Autowired
+    UserPerformedSkillRepo userPerformedSkillRepo
+
+    @Autowired
     TaskSchedulerService taskSchedulerService
+
+    @Autowired
+    ImportedSkillsAchievementsHandler importedSkillsAchievementsHandler
 
     @Autowired
     SettingsService settingsService
 
-    final String PROJ_FINALIZE_STATE_PROP = "catalog.finalize.state"
+    final static String PROJ_FINALIZE_STATE_PROP = "catalog.finalize.state"
     static enum FinalizeState {
         NOT_RUNNING, RUNNING, COMPLETED, FAILED
     }
@@ -83,17 +92,25 @@ class SkillCatalogFinalizationService {
         taskSchedulerService.scheduleCatalogImportFinalization(projectId)
     }
 
+    static class FinalizeCatalogSkillsImportResult {
+        long start
+        long end
+        List<Integer> skillRefIds
+    }
     @Transactional
     @Profile
-    void finalizeCatalogSkillsImport(String projectId) {
+    FinalizeCatalogSkillsImportResult finalizeCatalogSkillsImport(String projectId) {
+        long start = System.currentTimeMillis()
+        log.info("Finalizing imported skills for [{}]", projectId)
+        List<Integer> finalizedSkillIds = []
         try {
-            log.info("Finalizing imported skills for [{}]", projectId)
             projDefAccessor.getProjDef(projectId) // validate
             List<SkillDef> disabledImportedSkills = skillDefRepo.findAllByProjectIdAndTypeAndEnabledAndCopiedFromIsNotNull(projectId, SkillDef.ContainerType.Skill, Boolean.FALSE.toString())
 
             if (disabledImportedSkills) {
                 disabledImportedSkills.each {
                     it.enabled = Boolean.TRUE.toString()
+                    finalizedSkillIds.add(it.id)
                 }
                 skillDefRepo.saveAll(disabledImportedSkills)
 
@@ -109,7 +126,9 @@ class SkillCatalogFinalizationService {
                 List<Integer> skillRefIds = disabledImportedSkills.collect { it.copiedFrom }
 
                 // 1. copy skill pints and achievements
+                log.info("Copying [{}] skills UserPoints to the imported project [{}]", skillRefIds.size(), projectId)
                 userPointsRepo.copySkillUserPointsToTheImportedProjects(projectId, skillRefIds)
+                log.info("Copying [{}] skills achievements to the imported project [{}]", skillRefIds.size(), projectId)
                 userAchievedLevelRepo.copySkillAchievementsToTheImportedProjects(projectId, skillRefIds)
                 log.info("Completed import of skill's points and achievements for [{}] skills to [{}] project", skillRefIds.size(), projectId)
 
@@ -118,27 +137,68 @@ class SkillCatalogFinalizationService {
 
                 // 2. for each subject (1) create user points for new users (2) update existing (3) caluclate achievements
                 subjects.each { SkillDef subject ->
+                    log.info("Creating UserPoints for the new users for [{}-{}] subject", projectId, subject.skillId)
                     userPointsRepo.createSubjectUserPointsForTheNewUsers(projectId, subject.skillId)
+                    log.info("Updating UserPoints for the existing users for [{}-{}] subject", projectId, subject.skillId)
                     nativeQueriesRepo.updateUserPointsForSubjectOrGroup(projectId, subject.skillId)
 
+                    log.info("Identifying subject level achievements for [{}-{}] subject", projectId, subject.skillId)
                     nativeQueriesRepo.identifyAndAddSubjectLevelAchievements(subject.projectId, subject.skillId, pointsBased)
                     log.info("Completed import for subject. projectIdTo=[{}], subjectIdTo=[{}]", projectId, subject.skillId)
                 }
 
                 // 3. for the project (1) create user points for new users (2) update existing (3) caluclate achievements
+                log.info("Creating UserPoints for the new users for [{}] project", projectId)
                 userPointsRepo.createProjectUserPointsForTheNewUsers(projectId)
+                log.info("Updating UserPoints for the existing users for [{}] project", projectId)
                 nativeQueriesRepo.updateUserPointsHistoryForProject(projectId)
+                log.info("Identifying and adding project level achievements for [{}] project, pointsBased=[{}]", projectId, pointsBased)
                 nativeQueriesRepo.identifyAndAddProjectLevelAchievements(projectId, pointsBased)
-                log.info("Completed import of project's points and achievements for [{}] project", skillRefIds.size(), projectId)
+                log.info("Completed import of points and achievements for [{}] skills for project [{}]", skillRefIds.size(), projectId)
             } else {
                 log.warn("Finalize was called for [{}] projectId but there were no disabled skills", projectId)
             }
 
             updateState(projectId, FinalizeState.COMPLETED)
-            log.info("Completed finalizing imported skills for [{}]", projectId)
         } catch (Throwable t) {
             updateState(projectId, FinalizeState.FAILED)
             throw new TaskConfig.DoNotRetryAsyncTaskException("Failed to finazlie [${projectId}] project", t)
+        }
+
+        long end = System.currentTimeMillis()
+        log.info("Completed finalizing imported skills for [{}]", projectId)
+        return new FinalizeCatalogSkillsImportResult(start: start, end:end, skillRefIds: finalizedSkillIds)
+    }
+
+    @Transactional
+    @Profile
+    void applyEventsThatWereReportedDuringTheFinalizationRun(List<Integer> finalizedSkillIds, long startOfFinalization, long endOfFinalization) {
+        if (finalizedSkillIds) {
+            String dateFormat = "yyyy-MM-dd HH:mm:ss,SSS"
+            Date start = new Date(startOfFinalization)
+            Date end = new Date(endOfFinalization)
+            List<Integer> originalSkillIds = skillDefRepo.findOriginalCopiedFromSkillRefIdsByIdIn(finalizedSkillIds)
+            log.info("Handling Events that were reporting during the finalization runs for [{}] skills between [{}] => [{}]", originalSkillIds.size(), start.format(dateFormat), end.format(dateFormat))
+            originalSkillIds.each { Integer skillRefId ->
+                List<UserPerformedSkill> foundEvents = userPerformedSkillRepo.findAllBySkillRefIdWithinTimeRange(skillRefId, start, end)
+                if (foundEvents) {
+                    SkillDefMin skill = skillDefRepo.findSkillDefMinById(skillRefId)
+                    log.info("Processing [{}] missed events for skill [{}] between [{}] and [{}]", foundEvents.size(), skill.skillId, start, end)
+                    foundEvents.each {
+                        log.info("Processing missed event skill=[{}], created=[{}], userId=[{}]", it.skillId, it.created.format(dateFormat), it.userId)
+                        List<UserAchievement> userAchievements = userAchievedLevelRepo.findAllByUserIdAndProjectIdAndSkillId(it.userId, it.projectId, it.skillId)
+                        boolean thisRequestCompletedOriginalSkill = false
+                        if (userAchievements) {
+                            UserAchievement userAchievement = userAchievements.first()
+                            thisRequestCompletedOriginalSkill = userAchievement.achievedOn.time == it.performedOn.time
+                        }
+                        SkillDate skillDate = new SkillDate(date: new Date(it.performedOn.time), isProvided: true)
+                        importedSkillsAchievementsHandler.handleAchievementsForImportedSkills(it.userId, skill, skillDate, thisRequestCompletedOriginalSkill)
+                    }
+                } else {
+                    log.info("Handling Events that were reporting during the finalization: Found 0 events for skillRefId=[{}]. Nothing to do", skillRefId)
+                }
+            }
         }
     }
 
