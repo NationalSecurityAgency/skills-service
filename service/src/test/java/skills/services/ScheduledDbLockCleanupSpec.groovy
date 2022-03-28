@@ -66,7 +66,7 @@ class ScheduledDbLockCleanupSpec extends DefaultIntSpec {
 
     SkillsDBLock createExpiredLock() {
         return transactionHelper.doInTransaction {
-            SkillsDBLock lock = lockingService.lockForUserProject("user", "project")
+            SkillsDBLock lock = lockingService.lockForSkillReporting("user", "project")
             jdbcTemplate.execute("update skills_db_locks set created = '${(new Date()-15).format("yyyy-MM-dd")}'")
             return lock
         }
@@ -74,7 +74,7 @@ class ScheduledDbLockCleanupSpec extends DefaultIntSpec {
 
     SkillsDBLock createNonExpiredLock() {
         return transactionHelper.doInTransaction {
-            return lockingService.lockForUserProject("user", "project")
+            return lockingService.lockForSkillReporting("user", "project")
         }
     }
 }
