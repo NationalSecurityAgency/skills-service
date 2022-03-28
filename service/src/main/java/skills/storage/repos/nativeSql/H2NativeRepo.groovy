@@ -879,7 +879,7 @@ class H2NativeRepo implements NativeQueriesRepo {
     SkillsDBLock insertLockOrSelectExisting(String lockKey) {
         SkillsDBLock lock = skillsDBLockRepo.findByLock(lockKey)
         if (!lock) {
-            lock = new SkillsDBLock(lock: lockKey)
+            lock = new SkillsDBLock(lock: lockKey, expires: true)
             try {
                 // we have to execute the save in a new transaction as another
                 // thread might have inserted the lock row after the above and may be holding
@@ -890,7 +890,9 @@ class H2NativeRepo implements NativeQueriesRepo {
                 transactionTemplate.execute({
                     skillsDBLockRepo.save(lock)
                 })
-            } catch (Throwable t) {}
+            } catch (Throwable t) {
+                t.printStackTrace()
+            }
             //this second find is necessary so that the pessmisitc_write lock blocks access to this row until the lock is released
             lock = skillsDBLockRepo.findByLock(lockKey)
             assert lock

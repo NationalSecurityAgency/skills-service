@@ -15,8 +15,7 @@
  */
 package skills.storage.model
 
-import groovy.transform.ToString
-import org.hibernate.annotations.Where
+import skills.storage.converters.BooleanConverter
 
 import javax.persistence.*
 
@@ -29,4 +28,7 @@ class SkillsDBLock implements Serializable {
     Integer id
 
     String lock
+
+    @Convert(converter= BooleanConverter)
+    Boolean expires
 }

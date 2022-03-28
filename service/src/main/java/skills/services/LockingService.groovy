@@ -19,6 +19,7 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import skills.storage.model.ProjDef
 import skills.storage.model.SkillsDBLock
 import skills.storage.repos.SkillsDBLockRepo
@@ -108,5 +109,8 @@ class LockingService {
         return lock
     }
 
-
+    @Transactional
+    void deleteLocksOlderThan(Date date) {
+        skillsDBLockRepo.deleteByCreatedBeforeAndExpires(date)
+    }
 }
