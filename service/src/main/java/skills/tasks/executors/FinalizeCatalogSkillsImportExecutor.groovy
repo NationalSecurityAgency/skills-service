@@ -32,11 +32,11 @@ class FinalizeCatalogSkillsImportExecutor implements VoidExecutionHandler<Catalo
     @Autowired
     SkillCatalogFinalizationService skillCatalogFinalizationService
 
-    @Transactional
     @Override
     void execute(TaskInstance<CatalogFinalizeRequest> taskInstance, ExecutionContext executionContext) {
         CatalogFinalizeRequest data = taskInstance.getData()
         log.debug("running async FinalizeCatalogSkillsImportExecutor for [{}]", data.projectId)
-        skillCatalogFinalizationService.finalizeCatalogSkillsImport(data.projectId)
+        SkillCatalogFinalizationService.FinalizeCatalogSkillsImportResult res = skillCatalogFinalizationService.finalizeCatalogSkillsImport(data.projectId)
+        skillCatalogFinalizationService.applyEventsThatWereReportedDuringTheFinalizationRun(res.skillRefIds, res.start, res.end)
     }
 }

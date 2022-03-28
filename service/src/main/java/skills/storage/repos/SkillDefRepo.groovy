@@ -480,6 +480,9 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     ''')
     List<SkillDefMin> findSkillDefMinCopiedFrom(int skillRefId)
 
+    @Query(value = '''select exists(select 1 from skill_definition where copied_from_skill_ref=?1 and enabled = 'true')''', nativeQuery = true)
+    Boolean isSkillImportedAndEnabledInOtherProjects(Integer skillRefId)
+
     @Query('''
         select s.id as id,
         s.projectId as projectId,
@@ -499,6 +502,12 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         from SkillDef s where s.id = ?1
     ''')
     SkillDefMin findSkillDefMinById(int id)
+
+    @Query('''
+        select distinct(s.copiedFrom) as copiedFrom
+        from SkillDef s where s.id in (?1)
+    ''')
+    List<Integer> findOriginalCopiedFromSkillRefIdsByIdIn(List<Integer> ids)
 
     @Query('''
           select s from SkillDef s where s.projectId = ?1 and s.readOnly = true  

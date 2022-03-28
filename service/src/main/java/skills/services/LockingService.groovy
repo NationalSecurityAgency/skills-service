@@ -20,6 +20,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.controller.exceptions.SkillException
 import skills.storage.model.ProjDef
 import skills.storage.model.SkillsDBLock
 import skills.storage.repos.SkillsDBLockRepo
@@ -103,8 +104,14 @@ class LockingService {
         return res
     }
 
-    SkillsDBLock lockForUserProject(String userId, String projectId) {
-        String key = userId+projectId
+    SkillsDBLock lockForSkillReporting(String userId, String projectId) {
+        String key = "reportSkill_" + userId + projectId
+        SkillsDBLock lock = nativeQueriesRepo.insertLockOrSelectExisting(key)
+        return lock
+    }
+
+    SkillsDBLock lockForImportedSkillPropagation(String userId, String projectId) {
+        String key = "propagateSkill_" + userId + projectId
         SkillsDBLock lock = nativeQueriesRepo.insertLockOrSelectExisting(key)
         return lock
     }

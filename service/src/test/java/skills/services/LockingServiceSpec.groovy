@@ -15,24 +15,20 @@
  */
 package skills.services
 
-import org.hibernate.Session
-import org.hibernate.SessionFactory
+
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionStatus
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.support.TransactionCallback
-import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.transaction.support.TransactionTemplate
 import skills.intTests.utils.DefaultIntSpec
 import skills.storage.model.SkillsDBLock
-import spock.lang.IgnoreRest
 
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
-import java.util.function.Consumer
 
 class LockingServiceSpec extends DefaultIntSpec {
 
@@ -90,7 +86,16 @@ class LockingServiceSpec extends DefaultIntSpec {
     @Transactional
     def "lock for user project"() {
         when:
-        SkillsDBLock lock = lockingService.lockForUserProject("user", "project")
+        SkillsDBLock lock = lockingService.lockForImportedSkillPropagation("user", "project")
+
+        then:
+        lock
+    }
+
+    @Transactional
+    def "lock for skill reporting"() {
+        when:
+        SkillsDBLock lock = lockingService.lockForSkillReporting("user", "project")
 
         then:
         lock
@@ -111,7 +116,7 @@ class LockingServiceSpec extends DefaultIntSpec {
                 transactionTemplate.execute(new TransactionCallback<Boolean>() {
                     @Override
                     Boolean doInTransaction(TransactionStatus status) {
-                        SkillsDBLock lock = lockingService.lockForUserProject("aUser", "aProject")
+                        SkillsDBLock lock = lockingService.lockForImportedSkillPropagation("aUser", "aProject")
                         t1Start.set(System.currentTimeMillis())
                         Thread.currentThread().sleep(sleepTime)
                         return true;
@@ -129,7 +134,7 @@ class LockingServiceSpec extends DefaultIntSpec {
                     @Override
                     Boolean doInTransaction(TransactionStatus status) {
                             try {
-                                SkillsDBLock lock = lockingService.lockForUserProject("aUser", "aProject")
+                                SkillsDBLock lock = lockingService.lockForImportedSkillPropagation("aUser", "aProject")
                                 t2Start.set(System.currentTimeMillis())
                                 return true
                             } catch (e) {

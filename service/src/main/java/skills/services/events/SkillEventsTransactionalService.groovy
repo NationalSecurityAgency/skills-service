@@ -20,6 +20,7 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
@@ -211,7 +212,7 @@ class SkillEventsTransactionalService {
          * Check if skill needs to be applied, if so then we'll need to db-lock to enforce cross-service lock;
          * once transaction is locked must redo all of the checks
          */
-        lockTransaction(userId)
+        lockTransaction(userId, projectId)
 
         final boolean isApprovalRequest = approvalParams && !approvalParams.disableChecks &&
                 skillDefinition.getSelfReportingType() == SkillDef.SelfReportingType.Approval
@@ -268,7 +269,10 @@ class SkillEventsTransactionalService {
         }
 
         if (isCatalogSkill) {
-            taskSchedulerService.scheduleImportedSkillAchievement(projectId, skillId, userId, skillDefinition.id, skillDate, requestedSkillCompleted)
+            boolean isImported = skillDefRepo.isSkillImportedAndEnabledInOtherProjects(skillDefinition.id)
+            if (isImported) {
+                taskSchedulerService.scheduleImportedSkillAchievement(projectId, skillId, userId, skillDefinition.id, skillDate, requestedSkillCompleted)
+            }
         }
 
         return res
@@ -280,9 +284,9 @@ class SkillEventsTransactionalService {
     }
 
     @Profile
-    private void lockTransaction(String userId) {
-        log.debug("locking user [{}]", userId)
-        lockingService.lockUser(userId)
+    private void lockTransaction(String userId, String projectId) {
+        log.debug("locking user-project [{}-{}]", userId, projectId)
+        lockingService.lockForSkillReporting(userId, projectId)
     }
 
     @Profile

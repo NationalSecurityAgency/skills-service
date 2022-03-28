@@ -47,7 +47,7 @@ class ImportedSkillAchievementTaskExecutor implements VoidExecutionHandler<Impor
     @Override
     void execute(TaskInstance<ImportedSkillAchievement> taskInstance, ExecutionContext executionContext) {
         def data = taskInstance.getData()
-        log.debug("running imported skill achievement scheduled task for [{}-{}, {}]", data.projectId, data.skillId, data.userId)
+        log.debug("running imported skill achievement scheduled task for [{}-{}, {}], uuid=[{}]", data.projectId, data.skillId, data.userId, data.uuid)
         SkillDefMin min = getSkill(data.rawSkillId)
         importedSkillsAchievementsHandler.handleAchievementsForImportedSkills(data.userId, min, data.incomingSkillDate, data.thisRequestCompletedOriginalSkill)
     }
