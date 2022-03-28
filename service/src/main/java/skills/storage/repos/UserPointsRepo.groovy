@@ -389,12 +389,14 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 max(ua.user_id_for_display) as userIdForDisplay 
             FROM user_points up
             LEFT JOIN (
-                SELECT user_id, 
-                max(performed_on) AS performedOn 
+                SELECT upa.user_id, 
+                max(upa.performed_on) AS performedOn 
                 FROM user_performed_skill upa 
-                WHERE upa.project_id=?1 
-                GROUP BY user_id
-                ) upa ON upa.user_id = up.user_id
+                WHERE upa.skill_ref_id in (
+                    select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id from skill_definition where type = 'Skill' and project_id = ?1
+                )
+                GROUP BY upa.user_id
+            ) upa ON upa.user_id = up.user_id
             JOIN user_attrs ua ON ua.user_id=up.user_id
             WHERE 
                 up.project_id=?1 and 
@@ -410,6 +412,62 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
         FROM (SELECT DISTINCT up.user_id from user_points up where up.project_id=?1 and up.skill_id in (?2) and up.day is null) AS temp''',
             nativeQuery = true)
     Long countDistinctUserIdByProjectIdAndSkillIdIn(String projectId, List<String> skillIds)
+
+    @Query(value='''
+        WITH RECURSIVE subj_skills (parentId, childId) AS (
+            SELECT s.parent_ref_id AS parentId, s.child_ref_id AS childId 
+            FROM
+            skill_relationship_definition s, skill_definition sd
+            WHERE
+            sd.skill_id = :subjectId AND
+            sd.project_id = :projectId AND
+            s.parent_ref_id = sd.id
+            
+            UNION ALL
+            
+            SELECT childId AS parentId, s.child_ref_id AS childId
+            FROM
+            skill_relationship_definition s
+            INNER JOIN subj_skills on childId = s.parent_ref_id
+        )
+        SELECT COUNT(*)
+        FROM (
+            SELECT DISTINCT up.user_id 
+            from user_points up, user_attrs usattr 
+            where 
+                up.user_id = usattr.user_id and
+                up.project_id=:projectId and 
+                up.skill_ref_id in (select childId from subj_skills) and 
+                (lower(CONCAT(usattr.first_name, ' ', usattr.last_name, ' (', usattr.user_id_for_display, ')')) like lower(CONCAT('%', :userId, '%')) OR
+                 lower(usattr.user_id_for_display) like lower(CONCAT('%', :userId, '%'))) and   
+                up.day is null
+        ) AS temp
+    ''', nativeQuery = true)
+    Long countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(@Param("projectId") String projectId, @Param("subjectId") String subjectId, @Param("userId") String userId)
+
+    @Query(value='''
+        WITH RECURSIVE subj_skills (parentId, childId) AS (
+            SELECT s.parent_ref_id AS parentId, s.child_ref_id AS childId 
+            FROM
+            skill_relationship_definition s, skill_definition sd
+            WHERE
+            sd.skill_id = :subjectId AND
+            sd.project_id = :projectId AND
+            s.parent_ref_id = sd.id
+            
+            UNION ALL
+            
+            SELECT childId AS parentId, s.child_ref_id AS childId
+            FROM
+            skill_relationship_definition s
+            INNER JOIN subj_skills on childId = s.parent_ref_id
+        )
+        SELECT COUNT(*)
+        FROM (
+            SELECT DISTINCT up.user_id from user_points up where up.project_id=:projectId and up.skill_ref_id in (select childId from subj_skills) and up.day is null
+        ) AS temp
+    ''', nativeQuery = true)
+    Long countDistinctUsersByProjectIdAndSubjectId(@Param("projectId") String projectId, @Param("subjectId") String subjectId)
 
     @Query(value='''SELECT COUNT(*)
         FROM (SELECT DISTINCT up.user_id 
@@ -436,14 +494,14 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 max(ua.user_id_for_display) as userIdForDisplay 
             FROM user_points up
             LEFT JOIN (
-                SELECT user_id, 
-                max(performed_on) AS performedOn 
+                SELECT upa.user_id, 
+                max(upa.performed_on) AS performedOn 
                 FROM user_performed_skill upa 
                 WHERE upa.skill_ref_id in (
                     select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id from skill_definition where type = 'Skill' and project_id = ?1 and upa.skill_id in (?2)
                 )
-                GROUP BY user_id
-                ) upa ON upa.user_id = up.user_id
+                GROUP BY upa.user_id
+            ) upa ON upa.user_id = up.user_id
             JOIN user_attrs ua ON ua.user_id=up.user_id
             WHERE 
                 up.project_id=?1 and 
@@ -454,6 +512,59 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 up.day is null 
             GROUP BY up.user_id''', nativeQuery = true)
     List<ProjectUser> findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLike(String projectId, List<String> skillIds, String userId, Pageable pageable)
+
+    @Nullable
+    @Query(value='''
+        WITH RECURSIVE subj_skills (parentId, childId) AS (
+            SELECT s.parent_ref_id AS parentId, s.child_ref_id AS childId 
+            FROM
+            skill_relationship_definition s, skill_definition sd
+            WHERE
+            sd.skill_id = :subjectId AND
+            sd.project_id = :projectId AND
+            s.parent_ref_id = sd.id
+            
+            UNION ALL
+            
+            SELECT childId AS parentId, s.child_ref_id AS childId
+            FROM
+            skill_relationship_definition s
+            INNER JOIN subj_skills on childId = s.parent_ref_id
+        )
+
+        SELECT 
+            up.user_id as userId, 
+            max(upa.performedOn) as lastUpdated, 
+            sum(up.points) as totalPoints,
+            max(ua.first_name) as firstName,
+            max(ua.last_name) as lastName,
+            max(ua.dn) as dn,
+            max(ua.email) as email,
+            max(ua.user_id_for_display) as userIdForDisplay 
+        FROM user_points up
+        LEFT JOIN (
+            SELECT upa.user_id, 
+            max(upa.performed_on) AS performedOn 
+            FROM user_performed_skill upa 
+            WHERE upa.skill_ref_id in (
+                select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id from skill_definition where type = 'Skill' and project_id = :projectId and exists (select 1 from subj_skills s_s where s_s.childId = id)
+            )
+            GROUP BY upa.user_id
+        ) upa ON upa.user_id = up.user_id
+        JOIN user_attrs ua ON ua.user_id=up.user_id
+        WHERE 
+            up.project_id=:projectId and 
+            exists (select 1 from subj_skills s_s where s_s.childId = up.skill_ref_id) and 
+            (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT('%', :userId, '%'))  OR
+             lower(ua.user_id_for_display) like lower(CONCAT('%', :userId, '%'))
+            ) and 
+            up.day is null 
+        GROUP BY up.user_id
+    ''', nativeQuery = true)
+    List<ProjectUser> findDistinctProjectUsersByProjectIdAndSubjectIdAndUserIdLike(@Param("projectId") String projectId,
+                                                                                   @Param("subjectId") String subjectId,
+                                                                                   @Param("userId") String userId,
+                                                                                   Pageable pageable)
 
     @Nullable
     @Query('SELECT up.points from UserPoints up where up.projectId=?1 and up.userId=?2 and up.skillRefId=?3 and up.day is null')

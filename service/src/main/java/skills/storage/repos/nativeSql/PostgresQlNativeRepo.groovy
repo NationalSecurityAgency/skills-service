@@ -17,10 +17,14 @@ package skills.storage.repos.nativeSql
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Conditional
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import skills.controller.result.model.ProjectUser
 import skills.storage.model.QueryUsersCriteria
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillDefPartial
 import skills.storage.model.SkillsDBLock
+import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.UserPointsRepo
 
 import javax.persistence.EntityManager
@@ -38,6 +42,9 @@ class PostgresQlNativeRepo implements NativeQueriesRepo {
 
     @Autowired
     UserPointsRepo userPointsRepo
+
+    @Autowired
+    SkillRelDefRepo skillRelDefRepo
 
     @Override
     void decrementPointsForDeletedSkill(String projectId, String deletedSkillId, String parentSubjectSkillId) {
@@ -671,5 +678,25 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
         query.setParameter("_lockKey", lockKey)
         SkillsDBLock dbLock = query.getSingleResult()
         return dbLock
+    }
+
+    @Override
+    List<ProjectUser> findDistinctProjectUsersByProjectIdAndSubjectIdAndUserIdLike(String projectId, String subjectId, String userId, Pageable pageable) {
+        userPointsRepo.findDistinctProjectUsersByProjectIdAndSubjectIdAndUserIdLike(projectId, subjectId, usserId, pageable)
+    }
+
+    @Override
+    Long countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(String projectId, String subjectId, String userId) {
+        userPointsRepo.countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(projectId, subjectId, userId)
+    }
+
+    @Override
+    Long countDistinctUsersByProjectIdAndSubjectId(String projectId, String subjectId) {
+        userPointsRepo.countDistinctUsersByProjectIdAndSubjectId(projectId, subjectId)
+    }
+
+    @Override
+    List<SkillDefPartial> getSkillsWithCatalogStatusExplodeSkillGroups(String projectId, String subjectId) {
+        skillRelDefRepo.getSkillsWithCatalogStatusExplodeSkillGroups(projectId, subjectId)
     }
 }

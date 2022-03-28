@@ -107,6 +107,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results2.data.get(0).totalPoints == 35
     }
 
+    @IgnoreRest
     def 'get subject users when project exists'() {
         when:
         def results1 = skillsService.getSubjectUsers(projId, subjects.get(0))
@@ -466,6 +467,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         skillUsersThreeOccurrences.data[0].totalPoints == 30
     }
 
+    @IgnoreRest
     def 'subject users total points should not be a multiple of the actual total'() {
         def project = SkillsFactory.createProject(99)
         def subject = SkillsFactory.createSubject(99)

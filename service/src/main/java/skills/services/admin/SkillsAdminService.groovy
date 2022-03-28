@@ -39,6 +39,8 @@ import skills.services.*
 import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDef.SelfReportingType
+import skills.storage.model.SkillDefPartial
+import skills.storage.model.SkillDefSkinny
 import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.SkillRelDef
 import skills.storage.repos.ProjDefRepo
@@ -577,7 +579,7 @@ class SkillsAdminService {
             throw new SkillException("${type} [${skillId}] doesn't exist.", projectId, null, code)
         }
 
-        List<SkillDefRepo.SkillDefPartial> res
+        List<SkillDefPartial> res
         if (type == SkillDef.ContainerType.GlobalBadge) {
             res = skillRelDefRepo.getGlobalChildrenPartial(parent.skillId, relationshipType)
         } else {
@@ -586,22 +588,33 @@ class SkillsAdminService {
         return res.collect { convertToSkillDefPartialRes(it) }.sort({ it.displayOrder })
     }
 
+    /**
+     * Return sthe skills for a subject to include a status indiciating whether or not the skill has been exported to the skill catalog
+     * @param projectId projectId
+     * @param subjectId subjectId
+     * @param includeGroupChildren - if true, will include the skills that fall underneath Skill Groups as opposed to just the skill representing the group
+     * @return
+     */
     @Transactional(readOnly = true)
-    List<SkillDefPartialRes> getSkillsForSubjectWithCatalogStatus(String projectId, String subjectId) {
+    List<SkillDefPartialRes> getSkillsForSubjectWithCatalogStatus(String projectId, String subjectId, boolean includeGroupChildren=false) {
         SkillDef subject = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, subjectId, SkillDef.ContainerType.Subject)
         if (!subject) {
             ErrorCode code = ErrorCode.SubjectNotFound
             throw new SkillException("Subject [${subjectId}] doesn't exist.", projectId, null, code)
         }
 
-        List<SkillDefRepo.SkillDefPartial> res
-        res = skillRelDefRepo.getSkillsWithCatalogStatus(projectId, subject.skillId)
+        List<SkillDefPartial> res
+        if (!includeGroupChildren) {
+            res = skillRelDefRepo.getSkillsWithCatalogStatus(projectId, subject.skillId)
+        } else {
+            res = skillRelDefRepo.getSkillsWithCatalogStatusExplodeSkillGroups(projectId, subject.skillId)
+        }
         return res.collect { convertToSkillDefPartialRes(it) }.sort({ it.displayOrder })
     }
 
     @Transactional(readOnly = true)
     List<SkillDefSkinnyRes> getSkinnySkills(String projectId, String skillNameQuery, boolean excludeImportedSkills = false, boolean includeDisabled = false) {
-        List<SkillDefRepo.SkillDefSkinny> data = loadSkinnySkills(projectId, skillNameQuery, excludeImportedSkills, includeDisabled)
+        List<SkillDefSkinny> data = loadSkinnySkills(projectId, skillNameQuery, excludeImportedSkills, includeDisabled)
         List<SkillDefPartialRes> res = data.collect { convertToSkillDefSkinnyRes(it) }?.sort({ it.skillId })
         return res
     }
@@ -710,7 +723,7 @@ class SkillsAdminService {
 
     @CompileStatic
     @Profile
-    private SkillDefSkinnyRes convertToSkillDefSkinnyRes(SkillDefRepo.SkillDefSkinny skinny) {
+    private SkillDefSkinnyRes convertToSkillDefSkinnyRes(SkillDefSkinny skinny) {
         SkillDefSkinnyRes res = new SkillDefSkinnyRes(
                 skillId: skinny.skillId,
                 projectId: skinny.projectId,
@@ -727,7 +740,7 @@ class SkillsAdminService {
 
     @CompileStatic
     @Profile
-    private SkillDefPartialRes convertToSkillDefPartialRes(SkillDefRepo.SkillDefPartial partial, boolean loadNumUsers = false) {
+    private SkillDefPartialRes convertToSkillDefPartialRes(SkillDefPartial partial, boolean loadNumUsers = false) {
         SkillDefPartialRes res = new SkillDefPartialRes(
                 skillId: partial.skillId,
                 projectId: partial.projectId,
@@ -760,7 +773,7 @@ class SkillsAdminService {
         res.numMaxOccurrencesIncrementInterval = partial.numMaxOccurrencesIncrementInterval
 
         if (loadNumUsers) {
-            res.numUsers = calculateDistinctUsersForSkill((SkillDefRepo.SkillDefPartial)partial)
+            res.numUsers = calculateDistinctUsersForSkill((SkillDefPartial)partial)
         }
 
         if (partial.skillType == SkillDef.ContainerType.SkillsGroup) {
@@ -782,17 +795,17 @@ class SkillsAdminService {
     }
 
     @Profile
-    private int calculateDistinctUsersForSkill(SkillDefRepo.SkillDefPartial partial) {
+    private int calculateDistinctUsersForSkill(SkillDefPartial partial) {
         skillDefRepo.calculateDistinctUsersForASingleSkill(partial.projectId, partial.skillId)
     }
 
     @Profile
-    private List<SkillDefRepo.SkillDefSkinny> loadSkinnySkills(String projectId, String skillNameQuery, boolean excludeImportedSkills = false, boolean includeDisabled = false) {
+    private List<SkillDefSkinny> loadSkinnySkills(String projectId, String skillNameQuery, boolean excludeImportedSkills = false, boolean includeDisabled = false) {
         skillDefRepo.findAllSkinnySelectByProjectIdAndType(projectId, SkillDef.ContainerType.Skill, skillNameQuery, (!excludeImportedSkills).toString(), includeDisabled.toString())
     }
 
     @Profile
-    private List<SkillDefRepo.SkillDefSkinny> loadSkinnySkills(String projectId) {
+    private List<SkillDefSkinny> loadSkinnySkills(String projectId) {
         this.loadSkinnySkills(projectId, '')
     }
 

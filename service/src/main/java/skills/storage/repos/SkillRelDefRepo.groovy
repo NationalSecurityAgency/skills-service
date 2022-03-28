@@ -17,8 +17,10 @@ package skills.storage.repos
 
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
+import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillDefPartial
 import skills.storage.model.SkillRelDef
 
 interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
@@ -97,7 +99,7 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         left join ProjDef pd on sd2.copiedFromProjectId = pd.projectId
         where sd1 = srd.parent and sd2 = srd.child and srd.type=?3 
               and sd1.projectId=?1 and sd1.skillId=?2''')
-    List<SkillDefRepo.SkillDefPartial> getChildrenPartial(String projectId, String parentSkillId, SkillRelDef.RelationshipType type)
+    List<SkillDefPartial> getChildrenPartial(String projectId, String parentSkillId, SkillRelDef.RelationshipType type)
 
     @Query('''select 
         sd2.id as id,
@@ -127,7 +129,54 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         where sd1 = srd.parent and sd2 = srd.child and srd.type='RuleSetDefinition' 
               and sd1.projectId=?1 and sd1.skillId=?2
     ''')
-    List<SkillDefRepo.SkillDefPartial> getSkillsWithCatalogStatus(String projectId, String subjectId)
+    List<SkillDefPartial> getSkillsWithCatalogStatus(String projectId, String subjectId)
+
+    @Query(value='''
+        WITH RECURSIVE subj_skills (parentId, childId) AS (
+            SELECT s.parent_ref_id AS parentId, s.child_ref_id AS childId 
+            FROM
+            skill_relationship_definition s, skill_definition sd
+            WHERE
+            sd.skill_id = :subjectId AND
+            sd.project_id = :projectId AND
+            s.parent_ref_id = sd.id
+            
+            UNION ALL
+            
+            SELECT childId AS parentId, s.child_ref_id AS childId
+            FROM
+            skill_relationship_definition s
+            INNER JOIN subj_skills on childId = s.parent_ref_id
+        )
+            
+        SELECT 
+        sd2.id AS id,
+        sd2.name AS name, 
+        sd2.skill_id AS skillId, 
+        sd2.project_id AS projectId, 
+        sd2.version AS version,
+        sd2.point_increment AS pointIncrement,
+        sd2.point_increment_interval AS pointIncrementInterval,
+        sd2.increment_interval_max_occurrences AS numMaxOccurrencesIncrementInterval,
+        sd2.total_points AS totalPoints,
+        sd2.type AS skillType,
+        sd2.display_order AS displayOrder,
+        sd2.created AS created,
+        sd2.updated AS updated,
+        sd2.self_reporting_type AS selfReportingType,
+        sd2.enabled AS enabled,
+        sd2.num_skills_required AS numSkillsRequired,
+        sd2.copied_from_skill_ref AS copiedFrom,
+        CASE WHEN sd2.read_only = 'true' THEN true ELSE false END AS readOnly,
+        sd2.copied_from_project_id AS copiedFromProjectId,
+        pd.name AS copiedFromProjectName,
+        CASE WHEN es.id IS NOT NULL THEN true ELSE false END AS sharedToCatalog
+        FROM skill_definition sd2 
+        LEFT JOIN project_definition pd ON sd2.copied_from_project_id = pd.project_id
+        LEFT JOIN exported_skills es ON es.skill_ref_id = sd2.id
+        WHERE EXISTS (SELECT 1 FROM subj_skills WHERE childId = sd2.id)
+    ''', nativeQuery = true)
+    List<SkillDefPartial> getSkillsWithCatalogStatusExplodeSkillGroups(@Param("projectId") String projectId, @Param("subjectId") String subjectId)
 
     @Query('''SELECT 
         sd2.id as id,
@@ -147,7 +196,7 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         from SkillDef sd1, SkillDef sd2, SkillRelDef srd 
         where sd1 = srd.parent and sd2 = srd.child and srd.type=?2 
               and sd1.projectId is null and sd1.skillId=?1''')
-    List<SkillDefRepo.SkillDefPartial> getGlobalChildrenPartial(String parentSkillId, SkillRelDef.RelationshipType type)
+    List<SkillDefPartial> getGlobalChildrenPartial(String parentSkillId, SkillRelDef.RelationshipType type)
 
     @Query('''SELECT sd2 
         from SkillDef sd1, SkillDef sd2, SkillRelDef srd 
@@ -167,17 +216,6 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
     @Nullable
     @Query(value= '''select srd.parent from SkillRelDef srd where srd.child.skillId=?1 and srd.type=?2 and srd.parent.type=?3 ''')
     List<SkillDef> findAllChildrenByChildSkillIdAndRelationshipTypeAndParentType(String skillId, SkillRelDef.RelationshipType relType, SkillDef.ContainerType parentType)
-
-
-    static interface SkillDefSkinny {
-        Integer getId()
-        String getProjectId()
-        String getName()
-        String getSkillId()
-        Integer getVersion()
-        Integer getDisplayOrder()
-        Date getCreated()
-    }
 
     /**
      * mapping directly to entity is slow, we can save over a second in latency by mapping attributes explicitly

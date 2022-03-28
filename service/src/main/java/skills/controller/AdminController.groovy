@@ -794,9 +794,7 @@ class AdminController {
         SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
 
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
-        List<SkillDefPartialRes> subjectSkills = getSkills(projectId, subjectId)
-        List<String> skillIds = subjectSkills.collect { it.skillId }
-        return adminUsersService.loadUsersPage(projectId, skillIds, query, pageRequest)
+        return adminUsersService.loadUsersPageForSubject(projectId, subjectId, query, pageRequest)
     }
 
     @GetMapping(value = "/projects/{projectId}/skills/{skillId}/users", produces = MediaType.APPLICATION_JSON_VALUE)

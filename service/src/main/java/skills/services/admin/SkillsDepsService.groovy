@@ -32,6 +32,7 @@ import skills.controller.result.model.SkillsGraphRes
 import skills.services.DependencyValidator
 import skills.services.RuleSetDefGraphService
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillDefSkinny
 import skills.storage.model.SkillRelDef
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.accessors.SkillDefAccessor
@@ -113,7 +114,7 @@ class SkillsDepsService {
 
     @Transactional(readOnly = true)
     List<SkillDefForDependencyRes> getSkillsAvailableForDependency(String projectId) {
-        List<SkillDefRepo.SkillDefSkinny> res = skillDefRepo.findAllSkinnySelectByProjectIdAndType(projectId, SkillDef.ContainerType.Skill, "", Boolean.TRUE.toString(), Boolean.FALSE.toString())
+        List<SkillDefSkinny> res = skillDefRepo.findAllSkinnySelectByProjectIdAndType(projectId, SkillDef.ContainerType.Skill, "", Boolean.TRUE.toString(), Boolean.FALSE.toString())
         List<SkillDefForDependencyRes> finalRes = res.collect {
             new SkillDefForDependencyRes(
                     skillId: it.skillId, name: it.name, projectId: it.projectId, version: it.version

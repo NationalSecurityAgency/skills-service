@@ -15,6 +15,8 @@
  */
 package skills.intTests
 
+import org.joda.time.format.DateTimeFormat
+import org.joda.time.format.DateTimeFormatter
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
@@ -23,8 +25,19 @@ import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 import skills.storage.model.UserPoints
 import skills.storage.repos.SkillRelDefRepo
+import spock.lang.IgnoreRest
+
+import static skills.intTests.utils.SkillsFactory.createProject
+import static skills.intTests.utils.SkillsFactory.createProject
+import static skills.intTests.utils.SkillsFactory.createSkill
+import static skills.intTests.utils.SkillsFactory.createSkill
+import static skills.intTests.utils.SkillsFactory.createSkill
+import static skills.intTests.utils.SkillsFactory.createSubject
+import static skills.intTests.utils.SkillsFactory.createSubject
 
 class SkillsGroupSpecs extends DefaultIntSpec {
+
+    DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").withZoneUTC()
 
     void "create and get initial SkillsGroup" () {
         def proj = SkillsFactory.createProject()
@@ -1816,5 +1829,36 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         u0_subj2_hist_t1.day == [days[0], days[1], days[2]]
         u0_p1_hist_t1.points == [200 + 10 , 100 + 10 , 100 + 10 + 33, 66, 132 ]
         u0_p1_hist_t1.day == [days[0], days[1], days[2], days[3], days[4],]
+    }
+
+    def "points awarded for group skill must have last earned date when fetching subject users"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skillsGroup = SkillsFactory.createSkillsGroup()
+        def allSkills = SkillsFactory.createSkills(4) // first one is group
+        allSkills[1].pointIncrement = 100
+        allSkills[2].pointIncrement = 100
+        allSkills[3].pointIncrement = 100
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[1])
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[2])
+        skillsService.createSkill(allSkills[3])
+
+        skillsGroup.enabled = 'true'
+        skillsService.updateSkill(skillsGroup, null)
+        def user = getRandomUsers(1)[0]
+
+        when:
+        Date date = new Date()
+        skillsService.addSkill([projectId: proj.projectId, skillId: allSkills[1].skillId], user, date)
+        def subjectUsers = skillsService.getSubjectUsers(proj.projectId, subj.subjectId)
+
+        then:
+        subjectUsers.data[0].userId == user
+        subjectUsers.data[0].lastUpdated == DTF.print(date.time)
     }
 }
