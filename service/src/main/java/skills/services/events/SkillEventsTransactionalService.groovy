@@ -174,6 +174,7 @@ class SkillEventsTransactionalService {
         }
     }
 
+    @Profile
     @Transactional
     SkillEventResult reportSkillInternal(String projectId, String skillId, String userId, Date incomingSkillDateParam, SkillApprovalParams approvalParams = SkillEventsService.defaultSkillApprovalParams) {
         assert projectId

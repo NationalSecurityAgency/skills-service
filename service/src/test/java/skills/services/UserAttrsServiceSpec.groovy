@@ -253,13 +253,13 @@ class UserAttrsServiceSpec extends DefaultIntSpec {
         userAttrsService.attrsAndUserTagsUpdateIntervalDays = 7
 
         when:
-        userAttrsService.saveUserAttrs(userId, userInfo)
+        Date userTagsLastUpdated1 = userAttrsService.saveUserAttrs(userId, userInfo).userTagsLastUpdated
         List<UserTag> foundUserTags1 = userTagRepo.findAllByUserId(userId?.toLowerCase())
 
         // remove a userTag and update another
         userInfo.userTags.remove('Organization')
         userInfo.userTags.put('Agency', 'DEF')
-        userAttrsService.saveUserAttrs(userId, userInfo)
+        Date userTagsLastUpdated2 = userAttrsService.saveUserAttrs(userId, userInfo).userTagsLastUpdated
         List<UserTag> foundUserTags2 = userTagRepo.findAllByUserId(userId?.toLowerCase())
 
         then:
@@ -273,6 +273,8 @@ class UserAttrsServiceSpec extends DefaultIntSpec {
         foundUserTags2.size() == 2
         foundUserTags2.find { it.key == 'Organization' && it.value  == 'XYZ'}
         foundUserTags2.find { it.key == 'Agency' && it.value  == 'ABC'}
+
+        userTagsLastUpdated1 == userTagsLastUpdated2
     }
 
     def "userTags will be updated if userTagsLastUpdated is before attrsAndUserTagsUpdateIntervalDays"() {
@@ -290,7 +292,7 @@ class UserAttrsServiceSpec extends DefaultIntSpec {
         userAttrsService.attrsAndUserTagsUpdateIntervalDays = 7
 
         when:
-        userAttrsService.saveUserAttrs(userId, userInfo)
+        Date userTagsLastUpdated1 = userAttrsService.saveUserAttrs(userId, userInfo).userTagsLastUpdated
         List<UserTag> foundUserTags1 = userTagRepo.findAllByUserId(userId?.toLowerCase())
 
         // force userTagsLastUpdated date to be before attrsAndUserTagsUpdateIntervalDays
@@ -301,7 +303,7 @@ class UserAttrsServiceSpec extends DefaultIntSpec {
         // remove a userTag and update another
         userInfo.userTags.remove('Organization')
         userInfo.userTags.put('Agency', 'DEF')
-        userAttrsService.saveUserAttrs(userId, userInfo)
+        Date userTagsLastUpdated2 = userAttrsService.saveUserAttrs(userId, userInfo).userTagsLastUpdated
         List<UserTag> foundUserTags2 = userTagRepo.findAllByUserId(userId?.toLowerCase())
 
         then:
@@ -314,5 +316,7 @@ class UserAttrsServiceSpec extends DefaultIntSpec {
         assert foundUserTags2
         foundUserTags2.size() == 1
         foundUserTags2.find { it.key == 'Agency' && it.value  == 'DEF'}
+
+        userTagsLastUpdated1 < userTagsLastUpdated2
     }
 }
