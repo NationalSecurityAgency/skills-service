@@ -22,8 +22,8 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsService
 import spock.lang.IgnoreIf
 
-@SpringBootTest(properties = ['skills.config.sameSiteNoneEnabled=false'], webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
-class SameSiteCookieAttrDisabled extends DefaultIntSpec {
+@SpringBootTest(properties = ['skills.config.sameSiteNoneEnabled=false','skills.h2.port=9094'], webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
+class SameSiteCookieAttrDisabledSpec extends DefaultIntSpec {
 
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "SameSite=None attribute is not on the Set-Cookie header" () {

@@ -24,7 +24,7 @@ import skills.profile.CallStackProfAspect
 import skills.utils.LoggerHelper
 import spock.lang.Specification
 
-@SpringBootTest(properties = ['skills.prof.endpoints.slowMethod2=2000'],
+@SpringBootTest(properties = ['skills.prof.endpoints.slowMethod2=2000', 'skills.h2.port=9093'],
         webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
 class EnableCallStackProfSpec extends Specification {
 
