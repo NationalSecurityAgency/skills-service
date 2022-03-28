@@ -32,6 +32,7 @@ import skills.controller.request.model.SkillImportRequest
 import skills.controller.request.model.SkillRequest
 import skills.controller.result.model.*
 import skills.services.RuleSetDefGraphService
+import skills.services.events.pointsAndAchievements.InsufficientPointsValidator
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.*
@@ -72,7 +73,10 @@ class SkillCatalogService {
     SkillDefWithExtraRepo skillDefWithExtraRepo
 
     @Autowired
-    SkillCatalogFinalizationService skillCatalogFinalizationService
+    SkillCatalogFinalizationService skillCatalogFinalizationService\
+
+    @Autowired
+    InsufficientPointsValidator insufficientPointsValidator
 
     @Transactional(readOnly = true)
     TotalCountAwareResult<ProjectNameAwareSkillDefRes> getSkillsAvailableInCatalog(String projectId, String projectNameSearch, String subjectNameSearch, String skillNameSearch, PageRequest pageable) {
@@ -288,7 +292,11 @@ class SkillCatalogService {
     }
 
     void requestFinalizationOfImportedSkills(String projectId) {
-         skillCatalogFinalizationService.requestFinalizationOfImportedSkills(projectId)
+        insufficientPointsValidator.validateProjectPoints()
+        // validate the project has the minimum points
+        // will also need to check each subject for which there are imported skills
+        // and validate that the subject with imported skills also has sufficient points
+        skillCatalogFinalizationService.requestFinalizationOfImportedSkills(projectId)
     }
 
     CatalogFinalizeInfoResult getFinalizeInfo(String projectId) {

@@ -2663,4 +2663,82 @@ class CatalogSkillTests extends CatalogIntSpec {
         projectUsers.data.find {it.userId == users[5]}
     }
 
+    @IgnoreRest
+    def "finalization of imports on project with insufficient points should fail"() {
+        def project1 = createProject(1)
+        def project2 = createProject(2)
+
+        def p1subj1 = createSubject(1, 1)
+        def p2subj1 = createSubject(2, 1)
+
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 5)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 5)
+
+        def p2skill1 = createSkill(2, 1, 3, 0, 1, 0, 10)
+
+        skillsService.createProject(project1)
+        skillsService.createProject(project2)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p2subj1)
+
+        skillsService.createSkill(skill)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(p2skill1)
+
+
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill2.skillId)
+
+        when:
+        skillsService.finalizeSkillsImportFromCatalog(project2.projectId)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        then:
+        def e = thrown(Exception)
+        e.message.contains("fooooooo")
+
+
+    }
+
+    @IgnoreRest
+    def "finalization of imports where subjects with imported skills have insufficient points should fail"() {
+        def project1 = createProject(1)
+        def project2 = createProject(2)
+
+        def p1subj1 = createSubject(1, 1)
+        def p2subj1 = createSubject(2, 1)
+        def p2subj2 = createSubject(2, 2)
+
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 5)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 5)
+
+        def p2skill1 = createSkill(2, 2, 3, 0, 1, 0, 200)
+
+        skillsService.createProject(project1)
+        skillsService.createProject(project2)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p2subj1)
+        skillsService.createSubject(p2subj2)
+
+        skillsService.createSkill(skill)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(p2skill1)
+
+
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill2.skillId)
+
+        when:
+        skillsService.finalizeSkillsImportFromCatalog(project2.projectId)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        then:
+        def e = thrown(Exception)
+        e.message.contains("fooooooo")
+    }
+
 }
