@@ -1649,25 +1649,26 @@
                 OUT id integer,
                 OUT lock character varying(255),
                 OUT created timestamp without time zone,
-                OUT updated timestamp without time zone
+                OUT updated timestamp without time zone,
+                OUT expires character varying(255)
             )
             AS $func$
             #variable_conflict use_column
             BEGIN
             LOOP
-                SELECT sdl.id, sdl.lock, sdl.created, sdl.updated
+                SELECT sdl.id, sdl.lock, sdl.created, sdl.updated, sdl.expires
                 FROM   skills_db_locks sdl
                 WHERE  sdl.lock = _lockKey
                 FOR UPDATE
-                INTO id, lock, created, updated;
+                INTO id, lock, created, updated, expires;
 
                 EXIT WHEN FOUND;
 
                 INSERT INTO skills_db_locks AS l (lock, expires)
                 VALUES (_lockKey, 'true')
                 ON CONFLICT (lock) DO NOTHING
-                RETURNING l.id, l.lock, l.created, l.updated
-                INTO id, lock, created, updated;
+                RETURNING l.id, l.lock, l.created, l.updated, l.expires
+                INTO id, lock, created, updated, expires;
 
                 EXIT WHEN FOUND;
             END LOOP;
