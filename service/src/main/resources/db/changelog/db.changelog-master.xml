@@ -1633,6 +1633,16 @@
     </changeSet>
 
     <changeSet id="24" author="skills team">
+        <addColumn tableName="skills_db_locks">
+            <column name="expires" type="varchar(255)" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <sql>
+            UPDATE skills_db_locks SET expires = 'false';
+        </sql>
+
         <sql dbms="postgresql" endDelimiter=";" splitStatements="false">
             CREATE FUNCTION f_select_lock_and_insert(
                 _lockKey varchar,
@@ -1653,8 +1663,8 @@
 
                 EXIT WHEN FOUND;
 
-                INSERT INTO skills_db_locks AS l (lock)
-                VALUES (_lockKey)
+                INSERT INTO skills_db_locks AS l (lock, expires)
+                VALUES (_lockKey, 'true')
                 ON CONFLICT (lock) DO NOTHING
                 RETURNING l.id, l.lock, l.created, l.updated
                 INTO id, lock, created, updated;
