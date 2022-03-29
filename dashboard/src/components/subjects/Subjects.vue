@@ -20,13 +20,13 @@ limitations under the License.
                      :aria-label="'new subject'"/>
     <loading-container v-bind:is-loading="isLoading">
       <jump-to-skill />
-      <div v-if="subjects && subjects.length" class="row justify-content-center" id="subjectCards">
+      <div v-if="subjects && subjects.length" class="row justify-content-center" id="subjectCards" data-cy="subjectCards">
           <div v-for="(subject) of subjects" :key="subject.subjectId" :id="subject.subjectId" class="col-lg-4 mb-3"
-               style="min-width: 23rem;">
+               style="min-width: 23rem;" :data-cy="`${subject.subjectId}_card`">
             <div class="h-100">
               <b-overlay :show="sortOrder.loading" rounded="sm" opacity="0.4" class="h-100">
                 <template #overlay>
-                  <div class="text-center"  :data-cy="`${subject.subjectId}_overlayShown`">
+                  <div class="text-center" :data-cy="`${subject.subjectId}_overlayShown`">
                     <div v-if="subject.subjectId===sortOrder.loadingSubjectId" data-cy="updatingSortMsg">
                       <div class="text-info text-uppercase mb-1">Updating sort order!</div>
                       <b-spinner label="Loading..." style="width: 3rem; height: 3rem;" variant="info"/>

@@ -25,6 +25,32 @@ describe('Single Skill and Catalog Tests', () => {
     const navDepsSelector = '[data-cy="nav-Dependencies"]';
     const navAddEventSelector = '[data-cy="nav-Add Event"]';
 
+    it('verify subject cards are aligned properly when one subject has disabled skills and another does not', () => {
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2);
+        cy.createSkill(1, 1, 3);
+        cy.exportSkillToCatalog(1, 1, 1);
+        cy.exportSkillToCatalog(1, 1, 2);
+        cy.exportSkillToCatalog(1, 1, 3);
+
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSubject(2, 2);
+        cy.createSkill(2, 1, 4);
+
+        cy.importSkillFromCatalog(2, 1, 1, 1);
+
+        cy.visit('/administrator/projects/proj2');
+
+        cy.get('[data-cy="subj1_card"]').then(($el1) => {
+            cy.get('[data-cy="subj2_card"]').should(($el2) => {
+                expect($el2).to.have.css('height', `${$el1.height()}px`);
+            })
+        })
+
+        cy.matchSnapshotImageForElement('[data-cy=subjectCards]', 'Subject Cards one with disabled skill one without');
+    });
+
     it('drill down to a skill after creation', () => {
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
