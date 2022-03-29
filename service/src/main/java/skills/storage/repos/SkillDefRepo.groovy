@@ -27,39 +27,11 @@ import skills.storage.model.SkillCounts
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDef.ContainerType
 import skills.storage.model.SkillDefMin
+import skills.storage.model.SkillDefPartial
+import skills.storage.model.SkillDefSkinny
 import skills.storage.model.SkillRelDef.RelationshipType
 
 interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
-
-    static interface SkillDefSkinny {
-        Integer getId()
-        String getProjectId()
-        String getSubjectSkillId()
-        String getSubjectName()
-        String getName()
-        String getSkillId()
-        Integer getVersion()
-        Integer getDisplayOrder()
-        Date getCreated()
-        Integer getTotalPoints()
-    }
-
-    static interface SkillDefPartial extends SkillDefSkinny {
-        Integer getPointIncrement()
-        Integer getPointIncrementInterval()
-        Integer getNumMaxOccurrencesIncrementInterval()
-        String getIconClass()
-        SkillDef.ContainerType getSkillType()
-        Date getUpdated()
-        SkillDef.SelfReportingType getSelfReportingType()
-        String getEnabled()
-        Integer getNumSkillsRequired()
-        Integer getCopiedFrom()
-        String getCopiedFromProjectId()
-        Boolean getReadOnly()
-        String getCopiedFromProjectName()
-        Boolean getSharedToCatalog()
-    }
 
     /**
      * Need to create a custom query with limited fields as having many fields is slow,

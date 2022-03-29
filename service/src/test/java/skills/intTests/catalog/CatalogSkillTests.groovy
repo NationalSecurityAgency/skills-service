@@ -2564,7 +2564,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         subjectLevelsPostEdit[0].pointsFrom == 225
     }
 
-    def "points awarded for imported skill must have last earned date"() {
+    def "points awarded for imported skill must have last earned date when fetching users"() {
         def project1 = createProject(1)
         def project2 = createProject(2)
 
@@ -2588,8 +2588,6 @@ class CatalogSkillTests extends CatalogIntSpec {
         skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
 
         skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
-        skillsService.finalizeSkillsImportFromCatalog(project2.projectId, true)
-
         def user = getRandomUsers(1)[0]
 
         when:

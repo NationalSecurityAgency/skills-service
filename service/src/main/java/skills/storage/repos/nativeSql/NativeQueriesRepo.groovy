@@ -15,10 +15,13 @@
  */
 package skills.storage.repos.nativeSql
 
+import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.query.Param
 import skills.controller.request.model.QueryUsersCriteriaRequest
+import skills.controller.result.model.ProjectUser
 import skills.storage.model.QueryUsersCriteria
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillDefPartial
 import skills.storage.model.SkillsDBLock
 
 import java.util.stream.Stream
@@ -71,5 +74,16 @@ interface NativeQueriesRepo {
     void updateUserPointsHistoryForProject(String projectId)
 
     SkillsDBLock insertLockOrSelectExisting(String lockKey)
+
+    List<ProjectUser> findDistinctProjectUsersByProjectIdAndSubjectIdAndUserIdLike(String projectId,
+                                                                                   String subjectId,
+                                                                                   String userId,
+                                                                                   Pageable pageable)
+
+    Long countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(String projectId, String subjectId, String userId)
+
+    Long countDistinctUsersByProjectIdAndSubjectId(String projectId, String subjectId)
+
+    List<SkillDefPartial> getSkillsWithCatalogStatusExplodeSkillGroups(String projectId, String subjectId)
 }
 

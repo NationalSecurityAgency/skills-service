@@ -18,12 +18,21 @@ package skills.storage.repos.nativeSql
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Conditional
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.TransactionManager
 import org.springframework.transaction.support.TransactionTemplate
+import skills.controller.exceptions.ErrorCode
+import skills.controller.exceptions.SkillException
+import skills.controller.result.model.ProjectUser
 import skills.storage.model.QueryUsersCriteria
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillDefPartial
+import skills.storage.model.SkillRelDef
 import skills.storage.model.SkillsDBLock
+import skills.storage.repos.SkillDefRepo
+import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.SkillsDBLockRepo
 import skills.storage.repos.UserPointsRepo
 
@@ -44,7 +53,13 @@ class H2NativeRepo implements NativeQueriesRepo {
     UserPointsRepo userPointsRepo
 
     @Autowired
+    SkillDefRepo skillDefRepo
+
+    @Autowired
     SkillsDBLockRepo skillsDBLockRepo
+
+    @Autowired
+    SkillRelDefRepo skillRelDefRepo
 
     @Autowired
     TransactionManager transactionManager
@@ -899,5 +914,93 @@ class H2NativeRepo implements NativeQueriesRepo {
         }
 
         return lock
+    }
+
+    @Override
+    List<ProjectUser> findDistinctProjectUsersByProjectIdAndSubjectIdAndUserIdLike(String projectId,
+                                                                                   String subjectId,
+                                                                                   String userIdQuery,
+                                                                                   Pageable pageable) {
+
+        if (!skillDefRepo.existsByProjectIdAndSkillIdAndTypeInAllIgnoreCase(projectId, subjectId, [SkillDef.ContainerType.Subject])) {
+            ErrorCode code = ErrorCode.SubjectNotFound
+            throw new SkillException("Subject [${subjectId}] doesn't exist.", projectId, null, code)
+        }
+
+        List<SkillDefPartial> skills = skillRelDefRepo.getSkillsWithCatalogStatus(projectId, subjectId)
+        List<String> subjectSkillIds = []
+        skills?.each {
+            subjectSkillIds.add(it.skillId)
+            if (it.skillType == SkillDef.ContainerType.SkillsGroup) {
+                skillRelDefRepo.getChildrenPartial(projectId, it.skillId, SkillRelDef.RelationshipType.SkillsGroupRequirement)?.each { SkillDefPartial groupSkill ->
+                    subjectSkillIds.add(groupSkill.skillId)
+                }
+            }
+        }
+
+       return  userPointsRepo.findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLike(projectId, subjectSkillIds, userIdQuery, pageable)
+    }
+
+    @Override
+    Long countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(String projectId, String subjectId, String userIdQuery) {
+
+        if (!skillDefRepo.existsByProjectIdAndSkillIdAndTypeInAllIgnoreCase(projectId, subjectId, [SkillDef.ContainerType.Subject])) {
+            ErrorCode code = ErrorCode.SubjectNotFound
+            throw new SkillException("Subject [${subjectId}] doesn't exist.", projectId, null, code)
+        }
+
+        List<SkillDefPartial> skills = skillRelDefRepo.getSkillsWithCatalogStatus(projectId, subjectId)
+        List<String> subjectSkillIds = []
+        skills?.each {
+            subjectSkillIds.add(it.skillId)
+            if (it.skillType == SkillDef.ContainerType.SkillsGroup) {
+                skillRelDefRepo.getChildrenPartial(projectId, it.skilLId, SkillRelDef.RelationshipType.SkillsGroupRequirement)?.each { SkillDefPartial groupSkill ->
+                    subjectSkillIds.add(groupSkill.skillId)
+                }
+            }
+        }
+
+        return userPointsRepo.countDistinctUserIdByProjectIdAndSkillIdInAndUserIdLike(projectId, subjectSkillIds, userIdQuery)
+    }
+
+    @Override
+    Long countDistinctUsersByProjectIdAndSubjectId(String projectId, String subjectId) {
+        if (!skillDefRepo.existsByProjectIdAndSkillIdAndTypeInAllIgnoreCase(projectId, subjectId, [SkillDef.ContainerType.Subject])) {
+            ErrorCode code = ErrorCode.SubjectNotFound
+            throw new SkillException("Subject [${subjectId}] doesn't exist.", projectId, null, code)
+        }
+
+        List<SkillDefPartial> skills = skillRelDefRepo.getSkillsWithCatalogStatus(projectId, subjectId)
+        List<String> subjectSkillIds = []
+        skills?.each {
+            subjectSkillIds.add(it.skillId)
+            if (it.skillType == SkillDef.ContainerType.SkillsGroup) {
+                skillRelDefRepo.getChildrenPartial(projectId, it.skillId, SkillRelDef.RelationshipType.SkillsGroupRequirement)?.each { SkillDefPartial groupSkill ->
+                    subjectSkillIds.add(groupSkill.skillId)
+                }
+            }
+        }
+
+        return userPointsRepo.countDistinctUserIdByProjectIdAndSkillIdIn(projectId, subjectSkillIds)
+    }
+
+    @Override
+    List<SkillDefPartial> getSkillsWithCatalogStatusExplodeSkillGroups(String projectId, String subjectId) {
+        if (!skillDefRepo.existsByProjectIdAndSkillIdAndTypeInAllIgnoreCase(projectId, subjectId, [SkillDef.ContainerType.Subject])) {
+            ErrorCode code = ErrorCode.SubjectNotFound
+            throw new SkillException("Subject [${subjectId}] doesn't exist.", projectId, null, code)
+        }
+
+        List<SkillDefPartial> skills = skillRelDefRepo.getSkillsWithCatalogStatus(projectId, subjectId)
+        List<SkillDefPartial> all = []
+        skills?.each {
+            all.add(it)
+            if (it.skillType == SkillDef.ContainerType.SkillsGroup) {
+                skillRelDefRepo.getChildrenPartial(projectId, it.skilLId, SkillRelDef.RelationshipType.SkillsGroupRequirement)?.each { SkillDefPartial groupSkill ->
+                    all.add(groupSkill)
+                }
+            }
+        }
+        return all
     }
 }

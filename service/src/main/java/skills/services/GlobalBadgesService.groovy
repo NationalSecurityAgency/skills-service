@@ -40,8 +40,6 @@ import skills.storage.model.*
 import skills.storage.model.SkillRelDef.RelationshipType
 import skills.storage.repos.*
 
-import static skills.storage.repos.SkillDefRepo.SkillDefPartial
-
 @Service
 @Slf4j
 class GlobalBadgesService {

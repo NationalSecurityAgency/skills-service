@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.storage.model.ProjDef
+import skills.storage.model.SkillDefPartial
 import skills.storage.model.SkillRelDef
 import skills.storage.repos.LevelDefRepo
 import skills.storage.repos.ProjDefRepo
@@ -118,13 +119,13 @@ class DataCleanupSpecs extends DefaultIntSpec {
         skillsService.createSkills(skills)
 
         skillsService.assignDependency([projectId: project.projectId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(1).skillId])
-        List<SkillDefRepo.SkillDefPartial> beforeDelete = relDefRepo.getChildrenPartial( project.projectId, skills.get(0).skillId, SkillRelDef.RelationshipType.Dependence)
+        List<SkillDefPartial> beforeDelete = relDefRepo.getChildrenPartial( project.projectId, skills.get(0).skillId, SkillRelDef.RelationshipType.Dependence)
         assert beforeDelete.size() == 1
 
         when:
         skillsService.deleteSkill([projectId: project.projectId, subjectId: subject.subjectId, skillId: skills.get(1).skillId,])
         then:
-        List<SkillDefRepo.SkillDefPartial> afterDelete = relDefRepo.getChildrenPartial( project.projectId, skills.get(0).skillId, SkillRelDef.RelationshipType.Dependence)
+        List<SkillDefPartial> afterDelete = relDefRepo.getChildrenPartial( project.projectId, skills.get(0).skillId, SkillRelDef.RelationshipType.Dependence)
         assert afterDelete.size() == 0
     }
 }

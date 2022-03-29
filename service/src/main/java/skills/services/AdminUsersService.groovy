@@ -32,6 +32,7 @@ import skills.storage.model.UserPoints
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPointsRepo
 import skills.storage.repos.UserTagRepo
+import skills.storage.repos.nativeSql.NativeQueriesRepo
 
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -59,6 +60,9 @@ class AdminUsersService {
 
     @Autowired
     UserEventService userEventService
+
+    @Autowired
+    NativeQueriesRepo nativeQueriesRepo
 
     List<TimestampCountItem> getUsage(String projectId, String skillId, Date start) {
         Date startDate = LocalDateTime.of(start.toLocalDate(), LocalTime.MIN).toDate()
@@ -188,6 +192,28 @@ class AdminUsersService {
                 result.count = 0
             } else if (query) {
                 result.count = userPointsRepo.countDistinctUserIdByProjectIdAndSkillIdInAndUserIdLike(projectId, skillIds, query)
+            } else {
+                result.count = totalProjectUsersWithSkills
+            }
+        }
+        return result
+    }
+
+    TableResult loadUsersPageForSubject(String projectId, String subjectId, String query, PageRequest pageRequest) {
+        TableResult result = new TableResult()
+        if (!subjectId) {
+            return result
+        }
+        Long totalProjectUsersWithSkills = nativeQueriesRepo.countDistinctUsersByProjectIdAndSubjectId(projectId, subjectId)
+        if (totalProjectUsersWithSkills) {
+            query = query ? query.trim() : ''
+            result.totalCount = totalProjectUsersWithSkills
+            List<ProjectUser> projectUsers = nativeQueriesRepo.findDistinctProjectUsersByProjectIdAndSubjectIdAndUserIdLike(projectId, subjectId, query, pageRequest)
+            result.data = projectUsers
+            if (!projectUsers) {
+                result.count = 0
+            } else if (query) {
+                result.count = nativeQueriesRepo.countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(projectId, subjectId, query)
             } else {
                 result.count = totalProjectUsersWithSkills
             }
