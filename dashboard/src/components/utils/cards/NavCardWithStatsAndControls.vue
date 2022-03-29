@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <div class="card h-100">
-    <div class="card-body">
+    <div class="card-body d-flex flex-column">
       <div class="row mb-2 nav-cards-header">
         <div class="col">
           <div class="media">
@@ -40,23 +40,23 @@ limitations under the License.
         <slot name="underTitle"></slot>
       </div>
 
-      <div class="row text-center justify-content-center">
-        <div v-for="(stat) in options.stats" :key="stat.label" class="col my-3" style="min-width: 10rem;">
-          <div :data-cy="`pagePreviewCardStat_${stat.label}`" class="border rounded stat-card h-100">
-            <i :class="stat.icon"></i>
-            <p class="text-uppercase text-muted count-label">{{ stat.label }}</p>
-            <strong class="h4" data-cy="statNum">{{ stat.count | number }}</strong>
-            <i v-if="stat.warn" class="fas fa-exclamation-circle text-warning ml-1" style="font-size: 1.5rem;" v-b-tooltip.hover="stat.warnMsg" data-cy="warning"/>
-            <div v-if="stat.disabledCount && stat.disabledCount > 0" style="font-size: 0.9rem">
-              <b-badge variant="warning" :data-cy="`pagePreviewCardStat_${stat.label}_disabled`">{{stat.disabledCount}}</b-badge> <span class="text-left text-secondary text-uppercase" style="font-size: 0.8rem">disabled</span>
+        <div class="row text-center justify-content-center flex-grow-1">
+          <div v-for="(stat) in options.stats" :key="stat.label" class="col my-3" style="min-width: 10rem;">
+            <div :data-cy="`pagePreviewCardStat_${stat.label}`" class="border rounded stat-card h-100">
+              <i :class="stat.icon"></i>
+              <p class="text-uppercase text-muted count-label">{{ stat.label }}</p>
+              <strong class="h4" data-cy="statNum">{{ stat.count | number }}</strong>
+              <i v-if="stat.warn" class="fas fa-exclamation-circle text-warning ml-1" style="font-size: 1.5rem;" v-b-tooltip.hover="stat.warnMsg" data-cy="warning"/>
+              <div v-if="stat.disabledCount && stat.disabledCount > 0" style="font-size: 0.9rem">
+                <b-badge variant="warning" :data-cy="`pagePreviewCardStat_${stat.label}_disabled`">{{stat.disabledCount}}</b-badge> <span class="text-left text-secondary text-uppercase" style="font-size: 0.8rem">disabled</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div>
-        <slot name="footer"></slot>
-      </div>
+        <div>
+          <slot name="footer"></slot>
+        </div>
 
       <div v-if="!disableSortControl"
         @mouseover="overSortControl = true"

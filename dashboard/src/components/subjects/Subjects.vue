@@ -21,21 +21,23 @@ limitations under the License.
     <loading-container v-bind:is-loading="isLoading">
       <jump-to-skill />
       <div v-if="subjects && subjects.length" class="row justify-content-center" id="subjectCards">
-        <div v-for="(subject) of subjects" :key="subject.subjectId" :id="subject.subjectId" class="col-lg-4 mb-3"
-             style="min-width: 23rem;">
-          <b-overlay :show="sortOrder.loading" rounded="sm" opacity="0.4">
-            <template #overlay>
-              <div class="text-center"  :data-cy="`${subject.subjectId}_overlayShown`">
-                <div v-if="subject.subjectId===sortOrder.loadingSubjectId" data-cy="updatingSortMsg">
-                  <div class="text-info text-uppercase mb-1">Updating sort order!</div>
-                  <b-spinner label="Loading..." style="width: 3rem; height: 3rem;" variant="info"/>
-                </div>
-              </div>
-            </template>
+          <div v-for="(subject) of subjects" :key="subject.subjectId" :id="subject.subjectId" class="col-lg-4 mb-3"
+               style="min-width: 23rem;">
+            <div class="h-100">
+              <b-overlay :show="sortOrder.loading" rounded="sm" opacity="0.4" class="h-100">
+                <template #overlay>
+                  <div class="text-center"  :data-cy="`${subject.subjectId}_overlayShown`">
+                    <div v-if="subject.subjectId===sortOrder.loadingSubjectId" data-cy="updatingSortMsg">
+                      <div class="text-info text-uppercase mb-1">Updating sort order!</div>
+                      <b-spinner label="Loading..." style="width: 3rem; height: 3rem;" variant="info"/>
+                    </div>
+                  </div>
+                </template>
 
-            <subject :subject="subject" v-on:subject-deleted="deleteSubject" :disable-sort-control="subjects.length === 1" />
-          </b-overlay>
-        </div>
+                <subject :subject="subject" v-on:subject-deleted="deleteSubject" :disable-sort-control="subjects.length === 1" />
+              </b-overlay>
+            </div>
+          </div>
       </div>
 
       <no-content2 v-else class="mt-4"
