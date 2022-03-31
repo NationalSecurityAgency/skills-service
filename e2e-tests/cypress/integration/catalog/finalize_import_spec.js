@@ -24,7 +24,7 @@ describe('Finalize Imported Skills Tests', () => {
         cy.createSubject(1, 1);
     });
 
-    it('finalize imported skills', () => {
+    it.only('finalize imported skills', () => {
         cy.createProject(2);
         cy.createSubject(2, 1);
         cy.createSkill(2, 1, 1);

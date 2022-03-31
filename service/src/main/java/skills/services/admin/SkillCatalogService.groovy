@@ -18,6 +18,7 @@ package skills.services.admin
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
@@ -37,9 +38,11 @@ import skills.storage.accessors.ProjDefAccessor
 import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.*
 import skills.storage.repos.ExportedSkillRepo
+import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillDefWithExtraRepo
 import skills.storage.repos.SkillRelDefRepo
+import skills.storage.repos.nativeSql.NativeQueriesRepo
 import skills.utils.Props
 
 @Service
@@ -47,6 +50,12 @@ import skills.utils.Props
 class SkillCatalogService {
 
     private static final Set<String> aliasUnnecessary = Set.of("projectName", "subjectName", "subjectId", "exportedOn")
+
+    @Value('#{"${skills.config.ui.minimumSubjectPoints}"}')
+    int minimumSubjectPoints
+
+    @Value('#{"${skills.config.ui.minimumProjectPoints}"}')
+    int minimumProjectPoints
 
     @Autowired
     ExportedSkillRepo exportedSkillRepo
@@ -77,6 +86,12 @@ class SkillCatalogService {
 
     @Autowired
     InsufficientPointsValidator insufficientPointsValidator
+
+    @Autowired
+    ProjDefRepo projDefRepo
+
+    @Autowired
+    NativeQueriesRepo nativeQueriesRepo
 
     @Transactional(readOnly = true)
     TotalCountAwareResult<ProjectNameAwareSkillDefRes> getSkillsAvailableInCatalog(String projectId, String projectNameSearch, String subjectNameSearch, String skillNameSearch, PageRequest pageable) {
@@ -292,10 +307,14 @@ class SkillCatalogService {
     }
 
     void requestFinalizationOfImportedSkills(String projectId) {
-        insufficientPointsValidator.validateProjectPoints()
-        // validate the project has the minimum points
-        // will also need to check each subject for which there are imported skills
-        // and validate that the subject with imported skills also has sufficient points
+        ProjectTotalPoints projectTotalPoints = projDefRepo.getProjectTotalPointsIncPendingFinalization(projectId)
+        insufficientPointsValidator.validateProjectPoints(projectTotalPoints.totalIncPendingFinalized, projectTotalPoints.projectId)
+
+        List<SubjectTotalPoints> subjectTotalPoints = skillRelDefRepo.getSubjectTotalPointsIncPendingFinalization(projectId)
+        subjectTotalPoints?.each {
+            insufficientPointsValidator.validateSubjectPoints(it.totalIncPendingFinalized, projectId, it.subjectId)
+        }
+
         skillCatalogFinalizationService.requestFinalizationOfImportedSkills(projectId)
     }
 
@@ -479,6 +498,38 @@ class SkillCatalogService {
         )
         skillsAdminService.saveSkill(skillDefWithExtra.skillId, skillRequest, false)
 
+    }
+
+    @Transactional(readOnly=true)
+    public PointsIncludingNotFinalized getTotalPointsIncludingPendingFinalization(String projectId) {
+        if (!projDefRepo.existsByProjectIdIgnoreCase(projectId)) {
+            throw new SkillException("Project with id [${projectId}] does NOT exist")
+        }
+
+        ProjectTotalPoints projectTotalPoints = projDefRepo.getProjectTotalPointsIncPendingFinalization(projectId)
+        //TODO: subject with zero points isn't being included....figure that out.
+        List<SubjectTotalPoints> subjectTotalPoints = skillRelDefRepo.getSubjectTotalPointsIncPendingFinalization(projectId)
+
+        PointsIncludingNotFinalized pointsIncludingPendingFinalized = new PointsIncludingNotFinalized(projectId: projectId)
+        pointsIncludingPendingFinalized.projectTotalPoints = projectTotalPoints.totalIncPendingFinalized
+        pointsIncludingPendingFinalized.projectName = projectTotalPoints.name
+
+        if (projectTotalPoints.totalIncPendingFinalized < minimumProjectPoints) {
+            pointsIncludingPendingFinalized.insufficientProjectPoints = true
+        }
+
+        if (subjectTotalPoints) {
+            subjectTotalPoints.each {
+                SubjectTotalPointsIncNotFinalized converted = new SubjectTotalPointsIncNotFinalized(subjectId: it.subjectId, subjectName: it.name, totalPoints: it.totalIncPendingFinalized)
+                if (converted.totalPoints < minimumSubjectPoints) {
+                    pointsIncludingPendingFinalized.subjectsWithInsufficientPoints << converted
+                } else {
+                    pointsIncludingPendingFinalized.subjectsMeetingMinimumPoints << converted
+                }
+            }
+        }
+
+        return pointsIncludingPendingFinalized
     }
 
     private static PageRequest convertForCatalogSkills(PageRequest pageRequest) {

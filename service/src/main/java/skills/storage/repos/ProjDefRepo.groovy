@@ -18,11 +18,13 @@ package skills.storage.repos
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
+import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
 import skills.storage.model.ProjDef
 import skills.storage.model.ProjSummaryResult
 import skills.storage.model.ProjectLastTouched
 import skills.storage.model.ProjectSummaryResult
+import skills.storage.model.ProjectTotalPoints
 
 interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
 
@@ -422,5 +424,17 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
             WHERE pd.projectId = ?1
     ''')
     ProjectSummaryResult getProjectName(String projectId)
+
+    @Query(value='''
+        select max(pd.project_id) as projectId, max(pd.name) as name, (sum(sd.total_points)+max(pd.total_points)) as totalIncPendingFinalized 
+        from skill_definition sd 
+        join project_definition pd on pd.project_id = sd.project_id
+        where 
+        sd.project_id = :projectId and
+        sd.type = 'Skill' and 
+        sd.enabled = 'false' and 
+        sd.copied_from_project_id is not null
+        group by sd.project_id''', nativeQuery = true)
+    ProjectTotalPoints getProjectTotalPointsIncPendingFinalization(@Param("projectId") String projectId)
 
 }

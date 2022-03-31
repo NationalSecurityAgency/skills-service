@@ -36,7 +36,7 @@ class LoadedDataValidator {
 
         loadedData.parentDefs.each { SkillEventsSupportRepo.TinySkillDef parentSkillDef ->
             if (parentSkillDef.type == SkillDef.ContainerType.Subject) {
-                insufficientPointsValidator.validateSubjectPoints(parentSkillDef.totalPoints, loadedData.projectId, loadedData.userId)
+                insufficientPointsValidator.validateSubjectPoints(parentSkillDef.totalPoints, loadedData.projectId, parentSkillDef.skillId, loadedData.userId)
             }
         }
 

@@ -17,9 +17,11 @@ package skills.storage.repos
 
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
+import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
+import skills.storage.model.SubjectTotalPoints
 
 interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
     List<SkillRelDef> findAllByChildAndType(SkillDef child, SkillRelDef.RelationshipType type)
@@ -202,4 +204,35 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         where sd1 = srd.parent and sd2 = srd.child and srd.type=?2 
               and sd1.projectId=?1''')
     List<Object[]> getGraph(String projectId, SkillRelDef.RelationshipType type)
+
+
+    @Query(value='''
+        WITH RECURSIVE subj_skills (parentId, childId) AS (
+            SELECT s.parent_ref_id AS parentId, s.child_ref_id AS childId 
+            FROM
+            skill_relationship_definition s, skill_definition sd
+            WHERE
+            sd.project_id = :projectId AND
+            s.parent_ref_id = sd.id
+            
+            UNION ALL
+            
+            SELECT childId AS parentId, s.child_ref_id AS childId
+            FROM
+            skill_relationship_definition s
+            INNER JOIN subj_skills on childId = s.parent_ref_id
+        )
+        
+        select subject.skill_id as subjectId, max(subject.name) as name, sum(disabledSkill.total_points+subject.total_points) as totalIncPendingFinalized from
+        skill_definition disabledSkill
+        join subj_skills subject_mapping on subject_mapping.childId = disabledSkill.id
+        join skill_definition subject on subject.id = subject_mapping.parentId
+        where disabledSkill.project_id = :projectId and
+        disabledSkill.enabled = 'false' and
+        disabledSkill.type = 'Skill' and
+        disabledSkill.copied_from_project_id is not null
+        
+        group by subject.skill_id
+    ''', nativeQuery=true)
+    List<SubjectTotalPoints> getSubjectTotalPointsIncPendingFinalization(@Param("projectId") String projectId)
 }

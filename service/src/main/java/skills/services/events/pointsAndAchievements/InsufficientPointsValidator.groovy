@@ -46,11 +46,12 @@ class InsufficientPointsValidator {
         }
     }
 
-    void validateSubjectPoints(int subjectDefPoints, String projectId, String userId = null) {
+    void validateSubjectPoints(int subjectDefPoints, String projectId, String subjectId, String userId = null) {
         if (subjectDefPoints < minimumSubjectPoints) {
             SkillExceptionBuilder builder = new SkillExceptionBuilder()
                     .msg("Insufficient Subject points, skill achievement is disallowed")
                     .projectId(projectId)
+                    .skillId(subjectId)
                     .errorCode(ErrorCode.InsufficientSubjectPoints)
             if (userId) {
                 builder.userId(userId)
@@ -58,4 +59,5 @@ class InsufficientPointsValidator {
             throw builder.build()
         }
     }
+
 }
