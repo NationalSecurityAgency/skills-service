@@ -62,7 +62,7 @@ class PointsAndAchievementsHandler {
 
     @Profile
     List<CompletionItem> updatePointsAndAchievements(String userId, SkillDefMin skillDef, SkillDate incomingSkillDate){
-        LoadedData loadedData = dataLoader.loadData(skillDef.projectId, userId, incomingSkillDate, skillDef)
+        LoadedData loadedData = dataLoader.loadData(skillDef.projectId, userId, skillDef)
 
         PointsAndAchievementsBuilder builder = new PointsAndAchievementsBuilder(
                 userId: userId,

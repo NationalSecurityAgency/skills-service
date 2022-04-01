@@ -52,7 +52,6 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
         Integer getId()
         Integer getSkillRefId()
         Integer getPoints()
-        Date getDay()
     }
 
     static interface TinyUserAchievement {
@@ -79,27 +78,23 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
     @Query('''SELECT
         up.id as id,
         up.skillRefId as skillRefId,
-        up.points as points,
-        up.day as day
+        up.points as points
         from UserPoints up
         where
             up.projectId=?1 and  
             up.userId=?2 and
-            (up.skillRefId in (?3) or up.skillRefId is null) and 
-            (up.day=?4 or up.day is null)''')
-    List<TinyUserPoints> findTinyUserPointsProjectIdAndUserIdAndSkillsAndDay(String projectId, String usedId, List<Integer> skillRefIds, Date day)
+            (up.skillRefId in (?3) or up.skillRefId is null)''')
+    List<TinyUserPoints> findTinyUserPointsProjectIdAndUserIdAndSkills(String projectId, String usedId, List<Integer> skillRefIds)
 
     @Query('''SELECT
         up.id as id,
         up.skillRefId as skillRefId,
-        up.points as points,
-        up.day as day
+        up.points as points
         from UserPoints up, SkillRelDef srd
         where
             up.userId=?1 and  
             up.skillRefId = srd.child and  
-            srd.parent.id=?2 and 
-            up.day is null''')
+            srd.parent.id=?2''')
     List<TinyUserPoints> findTotalTinyUserPointsByUserIdAndParentId(String usedId, Integer parentId)
 
     @Query('''SELECT

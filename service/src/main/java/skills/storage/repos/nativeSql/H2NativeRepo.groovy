@@ -19,7 +19,6 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Conditional
 import org.springframework.data.domain.Pageable
-import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.TransactionManager
 import org.springframework.transaction.support.TransactionTemplate
@@ -71,7 +70,6 @@ class H2NativeRepo implements NativeQueriesRepo {
         SELECT b.id, b.points - a.points as points
         FROM user_points a, user_points b
         WHERE a.user_id = b.user_id
-          and (a.day = b.day OR (a.day is null and b.day is null))
           and a.skill_id = :deletedSkillId
           and (b.skill_id = :parentSubjectSkillId or b.skill_id is null)
           and b.project_id = :projectId
@@ -89,7 +87,7 @@ class H2NativeRepo implements NativeQueriesRepo {
         String q = '''
         merge into USER_POINTS (id, points) key (id)
     select points.id, sum.sumPoints
-    from (select user_id sumUserId, day sumDay, SUM(pointsInner.points) sumPoints
+    from (select user_id sumUserId, SUM(pointsInner.points) sumPoints
           from user_points pointsInner
                    join skill_definition definition
                         on pointsInner.project_id = definition.project_id and
@@ -97,10 +95,9 @@ class H2NativeRepo implements NativeQueriesRepo {
                            definition.type = :subjectType
           where pointsInner.project_id = :projectId
             and definition.project_id = :projectId
-          group by user_id, day) sum,
+          group by user_id) sum,
          user_points points
     where sum.sumUserId = points.user_id
-      and (sum.sumDay = points.day OR (sum.sumDay is null and points.day is null))
       and points.skill_id is null
       and points.project_id = :projectId'''.toString()
 
@@ -198,7 +195,6 @@ class H2NativeRepo implements NativeQueriesRepo {
                 points = points + (:eventCount * :incrementDelta)
             WHERE
                 points.user_id = :userId
-                AND points.day IS NULL
                 AND points.project_id=:projectId
                 AND (points.skill_id = :subjectId OR points.skill_id = :skillId OR points.skill_id IS NULL)
         '''
@@ -213,34 +209,6 @@ class H2NativeRepo implements NativeQueriesRepo {
             updateQ.setParameter("incrementDelta", incrementDelta)
             updateQ.executeUpdate()
         }
-    }
-
-    void updatePointHistoryForSkill(String projectId, String subjectId, String skillId, int incrementDelta) {
-        List<PerformedSkillEventCount> eventCounts = getGroupedEventCountsByUserIdAndDate(projectId, skillId)
-
-        String updateSql = '''
-            UPDATE 
-                user_points points
-            SET 
-                points = points + (:eventCount * :incrementDelta) 
-            WHERE
-                points.user_id = :userId
-                AND points.day = :performedOn
-                AND points.project_id = :projectId
-                AND (points.skill_id = :subjectId OR points.skill_id = :skillId OR points.skill_id IS NULL)
-        '''
-        eventCounts?.each {
-            Query updateQ = entityManager.createNativeQuery(updateSql)
-            updateQ.setParameter("eventCount", it.eventCount)
-            updateQ.setParameter("userId", it.userId)
-            updateQ.setParameter("projectId", projectId)
-            updateQ.setParameter("skillId", skillId)
-            updateQ.setParameter("subjectId", subjectId)
-            updateQ.setParameter("performedOn", it.performedOn)
-            updateQ.setParameter("incrementDelta", incrementDelta)
-            updateQ.executeUpdate()
-        }
-
     }
 
     private List<PerformedSkillEventCount> getGroupedEventCountsByUserIdAndDate(String projectId, String skillId) {
@@ -286,7 +254,6 @@ class H2NativeRepo implements NativeQueriesRepo {
                 points = points - :decrementDelta
             WHERE
                 points.user_id = :userId
-                AND points.day IS NULL
                 AND points.project_id=:projectId
                 AND (points.skill_id = :subjectId OR points.skill_id = :skillId OR points.skill_id IS NULL)
         '''
@@ -320,52 +287,6 @@ class H2NativeRepo implements NativeQueriesRepo {
             new PerformedSkillEventCount(userId: it[0], eventCount: it[1])
         }
         return eventCounts
-    }
-
-    @Override
-    void updatePointHistoryWhenOccurrencesAreDecreased(String projectId, String subjectId, String skillId, int pointIncrement, int numOccurrences) {
-
-        List<PerformedSkillEventCount> eventCounts = getGroupedEventCountsByUserId(projectId, skillId)
-        List<PerformedSkillEventCount> eventsCountsToEdit = eventCounts.findAll({ it.eventCount > numOccurrences })
-
-        String getRowsToRemoveSql = '''SELECT id, FORMATDATETIME(performed_on,'yyyy-MM-dd') FROM user_performed_skill 
-                WHERE 
-                    project_id = :projectId and 
-                    skill_id = :skillId and 
-                    user_id = :userId
-                ORDER BY performed_on DESC
-                limit :numToRemove'''
-
-        String updateSql = '''
-            UPDATE 
-                user_points points
-            SET 
-                points = points - :decrementDelta 
-            WHERE
-                points.user_id = :userId
-                AND points.day = :performedOn
-                AND points.project_id = :projectId
-                AND (points.skill_id = :subjectId OR points.skill_id = :skillId OR points.skill_id IS NULL)
-        '''
-
-        eventsCountsToEdit?.each { eventCountItem ->
-            Query query = entityManager.createNativeQuery(getRowsToRemoveSql)
-            query.setParameter("userId", eventCountItem.userId)
-            query.setParameter("projectId", projectId)
-            query.setParameter("skillId", skillId)
-            query.setParameter("numToRemove", (eventCountItem.eventCount - numOccurrences))
-            // group by date
-            query.getResultList().groupBy { it[1] }.each {
-                Query updateQ = entityManager.createNativeQuery(updateSql)
-                updateQ.setParameter("userId", eventCountItem.userId)
-                updateQ.setParameter("projectId", projectId)
-                updateQ.setParameter("skillId", skillId)
-                updateQ.setParameter("subjectId", subjectId)
-                updateQ.setParameter("performedOn", it.key)
-                updateQ.setParameter("decrementDelta", it.value.size() * pointIncrement)
-                updateQ.executeUpdate()
-            }
-        }
     }
 
     @Override
@@ -645,7 +566,7 @@ class H2NativeRepo implements NativeQueriesRepo {
         Query userTotalsQ = entityManager.createNativeQuery('''
             SELECT user_id, MAX(points) as totalPoints 
             FROM user_points
-            WHERE project_id = :projectId AND skill_id = :skillId AND day is null 
+            WHERE project_id = :projectId AND skill_id = :skillId 
             GROUP BY user_id
         ''')
         userTotalsQ.setParameter("projectId", projectId)
@@ -745,7 +666,7 @@ class H2NativeRepo implements NativeQueriesRepo {
         Query userTotals = entityManager.createNativeQuery('''
             SELECT user_id, MAX(points) as totalPoints
             FROM user_points
-            WHERE project_id = :projectId AND skill_id is null AND day is null GROUP BY user_id
+            WHERE project_id = :projectId AND skill_id is null GROUP BY user_id
         ''')
         userTotals.setParameter("projectId", projectId)
         List<Object> users = userTotals.getResultList()
@@ -872,11 +793,6 @@ class H2NativeRepo implements NativeQueriesRepo {
         userPointsRepo.updateUserPointsForASkillInH2(projectId, skillId)
     }
 
-    @Override
-    void updateUserPointsHistoryForASkill(String projectId, String skillId) {
-        userPointsRepo.updateUserPointsHistoryForASkillInH2(projectId, skillId)
-        userPointsRepo.removeUserPointsThatDoNotExistForASkillInH2(projectId, skillId)
-    }
 
     @Override
     void updateUserPointsForSubjectOrGroup(String projectId, String skillId) {
@@ -885,8 +801,8 @@ class H2NativeRepo implements NativeQueriesRepo {
     }
 
     @Override
-    void updateUserPointsHistoryForProject(String projectId) {
-        userPointsRepo.updateUserPointsHistoryForProjectInH2(projectId)
+    void updateUserPointsForProject(String projectId) {
+        userPointsRepo.updateUserPointsForProjectInH2(projectId)
         userPointsRepo.removeUserPointsThatDoNotExistForProjectInH2(projectId)
     }
 

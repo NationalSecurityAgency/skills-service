@@ -46,9 +46,6 @@ class UserPoints {
 
     int points
 
-    @Temporal(TemporalType.DATE)
-    Date day // documents which day points are for; null indicates overall points rather than a single day
-
     @Temporal(TemporalType.TIMESTAMP)
     @CreatedDate
     Date created

@@ -231,7 +231,7 @@ class SkillEventServiceUnitSpecs extends Specification {
 
         UserAchievement ua = new UserAchievement(projectId: "proj", level: 1, created: new Date())
         userAchievedLevelRepo.findAllByUserIdAndNotifiedOrderByCreatedAsc(_, _) >> [ua]
-        userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay("proj", null, _) >> null
+        userPointsRepo.findByProjectIdAndUserIdAndSkillId("proj", null, _) >> null
 
         when:
 

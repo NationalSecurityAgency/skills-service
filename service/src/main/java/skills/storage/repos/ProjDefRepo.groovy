@@ -389,14 +389,13 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                    pd.projectId as projectId,
                    pd.name as projectName,
                    COALESCE(up.points, 0) as points,
-                   (SELECT COALESCE(count(*), 1) FROM UserPoints WHERE projectId = pd.projectId and skillId is NULL and day IS NULL) as totalUsers,
-                   (SELECT COALESCE(count(*)+1, 1) FROM UserPoints WHERE projectId = pd.projectId and skillId is NULL and day IS NULL and points > up.points) as rank,
+                   (SELECT COALESCE(count(*), 1) FROM UserPoints WHERE projectId = pd.projectId and skillId is NULL) as totalUsers,
+                   (SELECT COALESCE(count(*)+1, 1) FROM UserPoints WHERE projectId = pd.projectId and skillId is NULL and points > up.points) as rank,
                    pd.totalPoints as totalPoints,
                    ss.value as orderVal
             FROM Setting s, Setting ss, Users uu, ProjDef pd
             LEFT JOIN UserPoints up on pd.projectId = up.projectId and
-                  up.userId=?1 and
-                  up.day is null and up.skillId is null
+                  up.userId=?1 and up.skillId is null
             WHERE (s.setting = 'production.mode.enabled' and s.projectId = pd.projectId and s.value = 'true') and 
                 (ss.setting = 'my_project' and uu.userId=?1 and uu.id = ss.userRefId and ss.projectId = pd.projectId)
             GROUP BY up.points, pd.projectId, pd.name, pd.id, ss.value

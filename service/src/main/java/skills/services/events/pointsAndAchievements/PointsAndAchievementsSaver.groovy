@@ -58,7 +58,7 @@ class PointsAndAchievementsSaver {
         List<SkillEventsSupportRepo.TinyUserPoints> toAddPointsTo = dataToSave.toAddPointsTo
         if (isPartOfSkillsGroupWithLessThanAllRequired(dataToSave)) {
             // do not add points to overall group, subject, or project yet, will be done in handleSkillsGroupUserPoints
-            toAddPointsTo = toAddPointsTo.findAll {it.day || (it.skillRefId && it.skillRefId != dataToSave.skillsGroupDefId && it.skillRefId != dataToSave.subjectDefId) }
+            toAddPointsTo = toAddPointsTo.findAll {it.skillRefId && it.skillRefId != dataToSave.skillsGroupDefId && it.skillRefId != dataToSave.subjectDefId }
         }
         toAddPointsTo.each {
             skillEventsSupportRepo.addUserPoints(it.id, dataToSave.pointIncrement)
@@ -94,7 +94,7 @@ class PointsAndAchievementsSaver {
                 newSkillsGroupPoints += it.points
             }
 
-            List<SkillEventsSupportRepo.TinyUserPoints> toAddPointsTo = dataToSave.toAddPointsTo.findAll { !it.day && (!it.skillRefId || it.skillRefId == skillsGroupDefId || it.skillRefId == subjectDefId) }
+            List<SkillEventsSupportRepo.TinyUserPoints> toAddPointsTo = dataToSave.toAddPointsTo.findAll { !it.skillRefId || it.skillRefId == skillsGroupDefId || it.skillRefId == subjectDefId }
             Integer existingSkillsGroupPoints = dataToSave.toAddPointsTo.find { it.skillRefId == skillsGroupDefId }?.points ?: 0
             Integer pointsToAddOrSubtract = 0
             if (existingSkillsGroupPoints > newSkillsGroupPoints) {

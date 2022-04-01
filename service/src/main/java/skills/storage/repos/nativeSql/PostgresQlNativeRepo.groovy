@@ -51,7 +51,7 @@ class PostgresQlNativeRepo implements NativeQueriesRepo {
         String q = '''
         UPDATE user_points b set points = b.points - a.points
         FROM user_points a
-        WHERE a.user_id = b.user_id and (a.day = b.day OR (a.day is null and b.day is null))
+        WHERE a.user_id = b.user_id
             and a.project_id = :projectId and a.skill_id= :deletedSkillId and (b.skill_id= :parentSubjectSkillId or b.skill_id is null) and b.project_id = :projectId'''.toString()
 
         Query query = entityManager.createNativeQuery(q);
@@ -68,16 +68,15 @@ class PostgresQlNativeRepo implements NativeQueriesRepo {
 FROM (
     select
         user_id                 sumUserId,
-        day                     sumDay,
         SUM(pointsInner.points) sumPoints
     from user_points pointsInner
              join skill_definition definition
                   on pointsInner.project_id = definition.project_id and pointsInner.skill_id = definition.skill_id and
                      definition.type = :subjectType
     where pointsInner.project_id = :projectId and definition.project_id = :projectId
-    group by user_id, day
+    group by user_id
 ) AS sum
-where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay is null and points.day is null)) and points.skill_id is null and points.project_id = :projectId'''.toString()
+where sum.sumUserId = points.user_id and points.skill_id is null and points.project_id = :projectId'''.toString()
 
         Query query = entityManager.createNativeQuery(q);
         query.setParameter("projectId", projectId);
@@ -168,46 +167,8 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
             eventsRes
         WHERE 
             eventsRes.user_id = points.user_id
-            AND points.day IS NULL 
             AND points.project_id=:projectId 
             AND (points.skill_id = :subjectId OR points.skill_id = :skillId OR points.skill_id IS NULL)'''
-
-        Query query = entityManager.createNativeQuery(q);
-        query.setParameter("projectId", projectId);
-        query.setParameter("skillId", skillId)
-        query.setParameter("subjectId", subjectId)
-        query.setParameter("incrementDelta", incrementDelta)
-        query.executeUpdate()
-    }
-
-    void updatePointHistoryForSkill(String projectId, String subjectId, String skillId, int incrementDelta) {
-        String q = '''
-            WITH
-                eventsRes AS (
-                    SELECT 
-                        user_id, DATE(performed_on) performedOn, COUNT(id) eventCount
-                    FROM 
-                        user_performed_skill
-                    WHERE 
-                        skill_ref_id in (
-                            select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id 
-                            from skill_definition 
-                            where type = 'Skill' and project_id = :projectId and skill_id = :skillId
-                        )
-                    GROUP BY 
-                        user_id, DATE(performed_on)
-                )
-            UPDATE 
-                user_points points
-            SET 
-                points = points + (eventsRes.eventCount * :incrementDelta) 
-            FROM
-                eventsRes
-            WHERE
-                eventsRes.user_id = points.user_id
-                AND eventsRes.performedOn = points.day
-                AND points.project_id = :projectId
-                AND (points.skill_id = :subjectId OR points.skill_id = :skillId OR points.skill_id IS NULL)'''
 
         Query query = entityManager.createNativeQuery(q);
         query.setParameter("projectId", projectId);
@@ -245,7 +206,6 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
                 eventsRes
             WHERE
                 eventsRes.user_id = points.user_id
-                AND points.day IS NULL 
                 AND points.project_id=:projectId 
                 AND (points.skill_id = :subjectId OR points.skill_id = :skillId OR points.skill_id IS NULL)'''
 
@@ -255,46 +215,6 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
         query.setParameter("subjectId", subjectId)
         query.setParameter("newOccurrences", newOccurrences)
         query.setParameter("pointsDelta", (previousOccurrences - newOccurrences) * pointIncrement)
-        query.executeUpdate()
-    }
-
-    @Override
-    void updatePointHistoryWhenOccurrencesAreDecreased(String projectId, String subjectId, String skillId, int pointIncrement, int numOccurrences) {
-        subjectId = subjectId ?: ''
-        String q = '''
-            WITH
-                eventsRes AS (
-                    SELECT rank_filter.user_id, DATE(performed_on) performedOn, count(rank_filter.id) eventCount
-                    FROM (
-                        SELECT user_performed_skill.id, user_performed_skill.user_id, user_performed_skill.performed_on,
-                            rank() OVER (
-                                PARTITION BY user_id
-                                ORDER BY created DESC
-                            )
-                        FROM user_performed_skill
-                        where project_id = :projectId and skill_id = :skillId
-                    ) rank_filter
-                    WHERE RANK > :numOccurrences
-                    group by user_id, DATE(performed_on)
-                )
-            UPDATE 
-                user_points points
-            SET 
-                points = points - (eventsRes.eventCount * :pointIncrement) 
-            FROM
-                eventsRes
-            WHERE
-                eventsRes.user_id = points.user_id
-                AND eventsRes.performedOn = points.day
-                AND points.project_id = :projectId
-                AND (points.skill_id = :subjectId OR points.skill_id = :skillId OR points.skill_id IS NULL)'''
-
-        Query query = entityManager.createNativeQuery(q);
-        query.setParameter("projectId", projectId);
-        query.setParameter("skillId", skillId)
-        query.setParameter("subjectId", subjectId)
-        query.setParameter("numOccurrences", numOccurrences)
-        query.setParameter("pointIncrement", pointIncrement)
         query.executeUpdate()
     }
 
@@ -522,7 +442,7 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
         user_totals AS (
             SELECT user_id, MAX(points) as totalPoints 
             FROM user_points
-            WHERE project_id = :projectId AND skill_id = :skillId AND day is null 
+            WHERE project_id = :projectId AND skill_id = :skillId 
             GROUP BY user_id
         )
         INSERT INTO user_achievement (user_id, skill_id, skill_ref_id, level, points_when_achieved, project_id, notified)
@@ -570,7 +490,7 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
         user_totals AS (
             SELECT user_id, MAX(points) AS totalPoints 
             FROM user_points 
-            WHERE project_id = :projectId AND skill_id is null AND day is null GROUP BY user_id
+            WHERE project_id = :projectId AND skill_id is null GROUP BY user_id
         )
         INSERT INTO user_achievement (user_id, level, points_when_achieved, project_id, notified)
         SELECT user_totals.user_id, project_levels.level, user_totals.totalPoints, '''+"'$projectId', 'false'"+
@@ -657,18 +577,13 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
     }
 
     @Override
-    void updateUserPointsHistoryForASkill(String projectId, String skillId) {
-        userPointsRepo.updateUserPointsHistoryForASkill(projectId, skillId)
-    }
-
-    @Override
     void updateUserPointsForSubjectOrGroup(String projectId, String skillId) {
         userPointsRepo.updateSubjectOrGroupUserPoints(projectId, skillId)
     }
 
     @Override
-    void updateUserPointsHistoryForProject(String projectId) {
-        userPointsRepo.updateUserPointsHistoryForProject(projectId)
+    void updateUserPointsForProject(String projectId) {
+        userPointsRepo.updateUserPointsForProject(projectId)
     }
 
     @Override

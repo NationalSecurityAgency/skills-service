@@ -65,7 +65,7 @@ class ApplyEventsThatWereReportedDuringTheFinalizationSpecs extends CatalogIntSp
         assert skillDef
 
         Closure<Integer> getPoints = { String userParam, String projectId, String skillId ->
-            List<UserPoints> points = userPointsRepo.findAll().findAll({it.userId == userParam && it.projectId == projectId && it.skillId == skillId && !it.day })
+            List<UserPoints> points = userPointsRepo.findAll().findAll({it.userId == userParam && it.projectId == projectId && it.skillId == skillId })
             if (points) {
                 assert points.size() == 1
             }
@@ -131,7 +131,7 @@ class ApplyEventsThatWereReportedDuringTheFinalizationSpecs extends CatalogIntSp
         assert skillDef
 
         Closure<Integer> getPoints = { String userParam, String projectId, String skillId ->
-            List<UserPoints> points = userPointsRepo.findAll().findAll({it.userId == userParam && it.projectId == projectId && it.skillId == skillId && !it.day })
+            List<UserPoints> points = userPointsRepo.findAll().findAll({it.userId == userParam && it.projectId == projectId && it.skillId == skillId })
             if (points) {
                 assert points.size() == 1
             }

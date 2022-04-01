@@ -21,7 +21,6 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.services.admin.SkillsGroupAdminService
-import skills.services.events.SkillDate
 import skills.storage.model.LevelDefInterface
 import skills.storage.model.SkillDefMin
 import skills.storage.model.SkillDef
@@ -43,7 +42,7 @@ class PointsAndAchievementsDataLoader {
     SkillsGroupAdminService skillsGroupAdminService
 
     @Profile
-    LoadedData loadData(String projectId, String userId, SkillDate incomingSkillDate, SkillDefMin skillDef){
+    LoadedData loadData(String projectId, String userId, SkillDefMin skillDef){
         List<SkillEventsSupportRepo.TinySkillDef> parentDefs = loadParents(skillDef)
 
         // handle skills group with less than all skills required
@@ -68,7 +67,7 @@ class PointsAndAchievementsDataLoader {
 
         List<Integer> skillRefIds = [skillDef.id]
         skillRefIds.addAll(parentDefs.collect { it.id })
-        List<SkillEventsSupportRepo.TinyUserPoints> tinyUserPoints = loadPoints(projectId, userId, skillRefIds, incomingSkillDate.date)
+        List<SkillEventsSupportRepo.TinyUserPoints> tinyUserPoints = loadPoints(projectId, userId, skillRefIds)
 
         SkillEventsSupportRepo.TinyProjectDef tinyProjectDef = loadProject(projectId)
         List<Integer> parentIds = parentDefs.collect { it.id }
@@ -100,8 +99,8 @@ class PointsAndAchievementsDataLoader {
     }
 
     @Profile
-    private List<SkillEventsSupportRepo.TinyUserPoints> loadPoints(String projectId, String userId, List<Integer> skillRefIds, Date incomingSkillDate) {
-        skillEventsSupportRepo.findTinyUserPointsProjectIdAndUserIdAndSkillsAndDay(projectId, userId, skillRefIds, incomingSkillDate)
+    private List<SkillEventsSupportRepo.TinyUserPoints> loadPoints(String projectId, String userId, List<Integer> skillRefIds) {
+        skillEventsSupportRepo.findTinyUserPointsProjectIdAndUserIdAndSkills(projectId, userId, skillRefIds)
     }
 
     @Profile

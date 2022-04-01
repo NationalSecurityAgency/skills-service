@@ -92,7 +92,7 @@ class ReportSkillsTransactionSpecs extends DefaultIntSpec {
             assert it.points == skills[0].numPerformToCompletion * skills[0].pointIncrement
         }
 
-        List<String> userPointsAsStrs = userPoints.collect { "${it.projectId}-${it.userId}-${it.skillId}-${it.day}".toString() }
+        List<String> userPointsAsStrs = userPoints.collect { "${it.projectId}-${it.userId}-${it.skillId}".toString() }
         userPointsAsStrs.sort() == userPointsAsStrs.unique().sort()
 
         // validate that duplicate skills events were not inserted
@@ -159,7 +159,7 @@ class ReportSkillsTransactionSpecs extends DefaultIntSpec {
         List res = getUserPointsFromDB(proj.projectId, skills)
         then:
         skillEventResult.body.skillApplied
-        res.size() == 2
+        res.size() == 1
     }
 
     @Rollback(false)

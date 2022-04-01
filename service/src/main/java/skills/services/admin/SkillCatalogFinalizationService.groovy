@@ -19,7 +19,6 @@ import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.ProjectSettingsRequest
@@ -151,7 +150,7 @@ class SkillCatalogFinalizationService {
                 log.info("Creating UserPoints for the new users for [{}] project", projectId)
                 userPointsRepo.createProjectUserPointsForTheNewUsers(projectId)
                 log.info("Updating UserPoints for the existing users for [{}] project", projectId)
-                nativeQueriesRepo.updateUserPointsHistoryForProject(projectId)
+                nativeQueriesRepo.updateUserPointsForProject(projectId)
                 log.info("Identifying and adding project level achievements for [{}] project, pointsBased=[{}]", projectId, pointsBased)
                 nativeQueriesRepo.identifyAndAddProjectLevelAchievements(projectId, pointsBased)
                 log.info("Completed import of points and achievements for [{}] skills for project [{}]", skillRefIds.size(), projectId)
@@ -162,7 +161,7 @@ class SkillCatalogFinalizationService {
             updateState(projectId, FinalizeState.COMPLETED)
         } catch (Throwable t) {
             updateState(projectId, FinalizeState.FAILED)
-            throw new TaskConfig.DoNotRetryAsyncTaskException("Failed to finazlie [${projectId}] project", t)
+            throw new TaskConfig.DoNotRetryAsyncTaskException("Failed to finalize [${projectId}] project", t)
         }
 
         long end = System.currentTimeMillis()

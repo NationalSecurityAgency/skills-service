@@ -31,7 +31,6 @@ import skills.storage.model.SkillDef
 import skills.storage.model.UserPoints
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPointsRepo
-import skills.storage.repos.UserTagRepo
 import skills.storage.repos.nativeSql.NativeQueriesRepo
 
 import java.time.LocalDate
@@ -39,8 +38,6 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.Month
 import java.time.format.TextStyle
-
-import static org.springframework.data.domain.Sort.Direction.ASC
 
 @Service
 @Slf4j
@@ -224,7 +221,7 @@ class AdminUsersService {
     @Transactional
     UserInfoRes getUserForProject(String projectId, String userId) {
         // check to see if the user actually achieved any points against this project
-        UserPoints userPoints = userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay(projectId, userId, null, null)
+        UserPoints userPoints = userPointsRepo.findByProjectIdAndUserIdAndSkillId(projectId, userId, null)
         if (!userPoints) {
             return null
         }

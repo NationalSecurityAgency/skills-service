@@ -16,6 +16,7 @@
 package skills.storage.repos
 
 import groovy.transform.CompileStatic
+import org.apache.commons.lang3.ObjectUtils
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
@@ -33,11 +34,11 @@ import java.time.LocalDateTime
 interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
 
     @Nullable
-    UserPoints findByProjectIdAndUserIdAndSkillIdAndDay(String projectId, String userId, @Nullable String skillId, @Nullable Date day)
+    UserPoints findByProjectIdAndUserIdAndSkillId(String projectId, String userId, @Nullable String skillId)
 
     @Modifying
-    @Query(value = '''INSERT INTO user_points(user_id, project_id, skill_id, skill_ref_id, points, day)
-            SELECT up.user_id, toDef.project_id, toDef.skill_id, toDef.id, up.points, up.day
+    @Query(value = '''INSERT INTO user_points(user_id, project_id, skill_id, skill_ref_id, points)
+            SELECT up.user_id, toDef.project_id, toDef.skill_id, toDef.id, up.points
             FROM user_points up, skill_definition toDef
             WHERE
                   toDef.project_id = :toProjectId and 
@@ -47,21 +48,21 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     void copySkillUserPointsToTheImportedProjects(@Param('toProjectId') String toProjectId, @Param('fromSkillRefIds') List<Integer> fromSkillRefIds)
 
     @Modifying
-    @Query(value = '''INSERT INTO user_points(user_id, day, points, project_id)
-            SELECT up.user_id, up.day, sum(points) as points, max(up.project_id) as project_id
+    @Query(value = '''INSERT INTO user_points(user_id, points, project_id)
+            SELECT up.user_id, sum(points) as points, max(up.project_id) as project_id
             FROM user_points up, skill_definition sd
             WHERE
                     up.project_id = :toProjectId and
                     sd.project_id = :toProjectId and sd.id = up.skill_ref_id and sd.type = 'Skill'
-            and not exists (select 1 from user_points innerUP where up.project_id = innerUP.project_id and up.user_id = innerUP.user_id and innerUP.skill_id is null and (up.day=innerUP.day or (up.day is null and innerUP.day is null)))
-            group by up.user_id, up.day;
+            and not exists (select 1 from user_points innerUP where up.project_id = innerUP.project_id and up.user_id = innerUP.user_id and innerUP.skill_id is null)
+            group by up.user_id;
             ''', nativeQuery = true)
     void createProjectUserPointsForTheNewUsers(@Param('toProjectId') String toProjectId)
 
 
     @Modifying
-    @Query(value = '''INSERT INTO user_points(user_id, day, points, project_id, skill_id, skill_ref_id)
-        SELECT up.user_id, up.day, sum(points) as points, max(up.project_id) as project_id, max(subject.skill_id) as skill_id, max(subject.id) as skill_ref_id
+    @Query(value = '''INSERT INTO user_points(user_id, points, project_id, skill_id, skill_ref_id)
+        SELECT up.user_id, sum(points) as points, max(up.project_id) as project_id, max(subject.skill_id) as skill_id, max(subject.id) as skill_ref_id
         FROM user_points up, skill_definition subject, skill_relationship_definition srd, skill_definition sd
         WHERE
           up.project_id = :toProjectId
@@ -74,18 +75,17 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
               up.project_id = innerUP.project_id
               and innerUP.skill_id = :toSubjectId
               and up.user_id = innerUP.user_id
-              and (up.day=innerUP.day or (up.day is null and innerUP.day is null))
           )
-        group by up.user_id, up.day;
+        group by up.user_id;
             ''', nativeQuery = true)
     void createSubjectUserPointsForTheNewUsers(@Param('toProjectId') String toProjectId, @Param('toSubjectId') String toSubjectId)
 
     @Nullable
-    @Query('''SELECT p.points as points from UserPoints p where p.projectId=?1 and p.userId=?2 and p.day is null and p.skillId is null''')
+    @Query('''SELECT p.points as points from UserPoints p where p.projectId=?1 and p.userId=?2 and p.skillId is null''')
     Integer findPointsByProjectIdAndUserId(String projectId, String userId)
 
     @Nullable
-    @Query('''SELECT p.points as points from UserPoints p where p.projectId=?1 and p.userId=?2 and p.skillId=?3 and p.day is null''')
+    @Query('''SELECT p.points as points from UserPoints p where p.projectId=?1 and p.userId=?2 and p.skillId=?3''')
     Integer findPointsByProjectIdAndUserIdAndSkillId(String projectId, String userId, String skillId)
 
 
@@ -111,7 +111,6 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     p.userId = uAttrs.userId and
                     p.projectId=?1 and 
                     p.skillId is null and 
-                    p.day is null and
                     p.userId not in ?2 and
                     p.userId not in 
                         (select u.userId from Setting s, User u where 
@@ -135,7 +134,6 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     p.userId = uAttrs.userId and
                     p.projectId=?1 and 
                     p.skillId=?2 and 
-                    p.day is null and 
                     p.userId not in ?3 and
                     p.userId not in 
                         (select u.userId from Setting s, User u where 
@@ -159,8 +157,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     p.userId = uAttrs.userId and
                     p.projectId=?1 and 
                     p.skillId=?2 and
-                    (p.points<?3 OR (p.points=?3 and uAttrs.created>?4)) and
-                    p.day is null
+                    (p.points<?3 OR (p.points=?3 and uAttrs.created>?4))
             ''')
     List<RankedUserRes> findUsersForLeaderboardPointsLessOrEqual(String projectId, String subjectId, Integer points, LocalDateTime usrCreated, Pageable pageable)
 
@@ -177,8 +174,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     p.projectId=?1 and 
                     p.skillId is null and
                     p.points<=?2 and
-                    (p.points<?2 OR (p.points=?2 and uAttrs.created>?3)) and
-                    p.day is null
+                    (p.points<?2 OR (p.points=?2 and uAttrs.created>?3))
             ''')
     List<RankedUserRes> findUsersForLeaderboardPointsLessOrEqual(String projectId, Integer points, LocalDateTime usrCreated, Pageable pageable)
 
@@ -194,8 +190,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     p.userId = uAttrs.userId and
                     p.projectId=?1 and 
                     p.skillId=?2 and
-                    (p.points>?3 OR (p.points=?3 and uAttrs.created<?4)) and
-                    p.day is null
+                    (p.points>?3 OR (p.points=?3 and uAttrs.created<?4))
             ''')
     List<RankedUserRes> findUsersForLeaderboardPointsMoreOrEqual(String projectId, String subjectId, Integer points, LocalDateTime userCreateDate, Pageable pageable)
 
@@ -211,12 +206,11 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     p.userId = uAttrs.userId and
                     p.projectId=?1 and 
                     p.skillId is null and
-                    (p.points>?2 OR (p.points=?2 and uAttrs.created<?3)) and
-                    p.day is null
+                    (p.points>?2 OR (p.points=?2 and uAttrs.created<?3))
             ''')
     List<RankedUserRes>  findUsersForLeaderboardPointsMoreOrEqual(String projectId, Integer points, LocalDateTime createdDate, Pageable pageable)
 
-    long countByProjectIdAndSkillIdAndDay(String projectId, @Nullable String skillId, @Nullable Date day)
+    long countByProjectIdAndSkillId(String projectId, @Nullable String skillId)
 
     void deleteByProjectIdAndSkillId(String projectId, String skillId)
 
@@ -225,7 +219,6 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             p.projectId=?1 and 
             p.skillId=?2 and 
             p.points > ?3 and 
-            p.day is null and 
             p.userId not in ?4 and 
             p.userId not in 
                 (select u.userId from Setting s, User u where 
@@ -240,7 +233,6 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             p.projectId=?1 and 
             p.skillId is null and 
             p.points > ?2 and 
-            p.day is null and
             p.userId not in ?3 and 
             p.userId not in 
                 (select u.userId from Setting s, User u where 
@@ -255,46 +247,65 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             p.userId = ua.userId and 
             p.projectId=?1 and 
             p.skillId=?2 and 
-            (p.points > ?3 OR (p.points = ?3 and ua.created < ?4)) and 
-            p.day is null''' )
+            (p.points > ?3 OR (p.points = ?3 and ua.created < ?4))''' )
     Integer calculateNumUsersWithHigherScoreAndIfScoreTheSameThenAfterUserCreateDate(String projectId, String skillId, int points, LocalDateTime created)
 
     @Query('''SELECT count(p) from UserPoints p, UserAttrs ua where
             p.userId = ua.userId and 
             p.projectId=?1 and 
             p.skillId is null and 
-            (p.points > ?2 OR (p.points = ?2 and ua.created < ?3)) and 
-            p.day is null''')
+            (p.points > ?2 OR (p.points = ?2 and ua.created < ?3))''')
     Integer calculateNumUsersWithHigherScoreAndIfScoreTheSameThenAfterUserCreateDate(String projectId, int points, LocalDateTime created)
 
-    List<UserPoints> findByProjectIdAndSkillIdAndPointsGreaterThanAndDayIsNull(String projectId, @Nullable String skillId, int points, Pageable pageable)
-    List<UserPoints> findByProjectIdAndSkillIdAndPointsLessThanAndDayIsNull(String projectId, @Nullable String skillId, int points, Pageable pageable)
+    List<UserPoints> findByProjectIdAndSkillIdAndPointsGreaterThan(String projectId, @Nullable String skillId, int points, Pageable pageable)
+    List<UserPoints> findByProjectIdAndSkillIdAndPointsLessThan(String projectId, @Nullable String skillId, int points, Pageable pageable)
 
-    /**
-     *  NOTE: this is query is identical to the below query the only difference is userPoints.day=?5, if you change this query you MUST change the one below
-     *
-     *  the reason for duplication is that when null is provided for the 'day' parameter JPA doesn't properly generate SQL statement, I am guessing the bug is because
-     *  the parameter is withing left join clause and they didn't handle that properly
-     */
-    @Query('''select sdChild, userPoints
-    from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
-    left join UserPoints userPoints on sdChild.projectId = userPoints.projectId and sdChild.skillId = userPoints.skillId and userPoints.day=?6 and userPoints.userId=?1
-      where srd.parent=sdParent.id and  srd.child=sdChild.id and sdChild.enabled = 'true' and
-      sdParent.projectId=?2 and sdParent.skillId=?3 and srd.type in ?4 and sdChild.version<=?5''')
-    List<Object []> findChildrenAndTheirUserPoints(String userId, String projectId, String skillId, List<SkillRelDef.RelationshipType> types, Integer version, Date day)
 
-    /**
-     *  NOTE: this is query is identical to the below query the only difference is userPoints.day=?5, if you change this query you MUST change the one below
-     *
-     *  the reason for duplication is that when null is provided for the 'day' parameter JPA doesn't properly generate SQL statement, I am guessing the bug is because
-     *  the parameter is withing left join clause and they didn't handle that properly
-     */
-    @Query('''select sdChild, userPoints
-    from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
-    left join UserPoints userPoints on sdChild.projectId = userPoints.projectId and sdChild.skillId = userPoints.skillId and userPoints.day=?5 and userPoints.userId=?1
-      where srd.parent=sdParent.id and  srd.child=sdChild.id and sdChild.enabled = 'true' and
-      sdParent.projectId is null and sdParent.skillId=?2 and srd.type in ?3 and sdChild.version<=?4''')
-    List<Object []> findGlobalChildrenAndTheirUserPoints(String userId, String skillId, List<SkillRelDef.RelationshipType> types, Integer version, Date day)
+    static interface SkillRefIdWithPoints {
+        Integer getSkillRefId()
+        Integer getPoints()
+    }
+
+    @Query(value ='''WITH skills AS (
+                select case when child.copied_from_skill_ref is not null then child.copied_from_skill_ref else child.id end as id,
+                       child.point_increment as point_increment
+                from skill_relationship_definition rel,
+                     skill_definition child
+                where rel.parent_ref_id = :parentSkillRefId
+                  and rel.child_ref_id = child.id
+                  and rel.type in :relationshipTypes
+                  and child.type = 'Skill'
+                  and child.enabled = 'true'
+                  and child.version <= :version
+            )
+            select up.skill_ref_id skillRefId, sum(skills.point_increment) points
+            from user_performed_skill up,
+                 skills
+            where up.user_id =:userId
+              and up.skill_ref_id = skills.id
+              and DATE_TRUNC('DAY', up.performed_on) = :day
+            group by up.skill_ref_id''', nativeQuery = true)
+    List<SkillRefIdWithPoints> calculatePointsForChildSkillsForADay(@Param("userId") String userId,
+                                                        @Param("parentSkillRefId") Integer parentSkillRefId,
+                                                        @Param("relationshipTypes") List<String> relationshipTypes,
+                                                        @Param("version") Integer version,
+                                                        @Param("day") Date day)
+
+
+
+    @Nullable
+    @Query(value ='''select sum(sd.point_increment) points
+            from user_performed_skill up,
+                 skill_definition sd
+            where up.user_id =:userId
+              and up.skill_ref_id = :skillRefId
+              and up.skill_ref_id = sd.id
+              and DATE_TRUNC('DAY', up.performed_on) = :day 
+            group by up.skill_ref_id''', nativeQuery = true)
+    Integer calculatePointsForSingleSkillForADay(@Param("userId") String userId,
+                                                 @Param("skillRefId") Integer skillRefId,
+                                                 @Param("day") Date day)
+
 
     /**
      *  NOTE: this is query is identical to the above query the only difference is 'userPoints.day is null', if you change this query you MUST change the one above
@@ -304,7 +315,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
      */
     @Query('''select sdChild, userPoints, pd.name
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
-    left join UserPoints userPoints on sdChild.projectId = userPoints.projectId and sdChild.skillId = userPoints.skillId and userPoints.day is null and userPoints.userId=?1
+    left join UserPoints userPoints on sdChild.projectId = userPoints.projectId and sdChild.skillId = userPoints.skillId and userPoints.userId=?1
     left join ProjDef pd on sdChild.copiedFromProjectId = pd.projectId
       where srd.parent=sdParent.id and  srd.child=sdChild.id and sdChild.enabled = 'true' and
       sdParent.projectId=?2 and sdParent.skillId=?3 and srd.type in ?4 and sdChild.version<=?5 ''')
@@ -319,7 +330,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
      */
     @Query('''select sdChild, userPoints
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
-    left join UserPoints userPoints on sdChild.projectId = userPoints.projectId and sdChild.skillId = userPoints.skillId and userPoints.day is null and userPoints.userId=?1
+    left join UserPoints userPoints on sdChild.projectId = userPoints.projectId and sdChild.skillId = userPoints.skillId and userPoints.userId=?1
       where srd.parent=sdParent.id and  srd.child=sdChild.id and sdChild.enabled = 'true' and
       sdParent.projectId is null and sdParent.skillId=?2 and srd.type in ?3 and sdChild.version<=?4''')
     List<Object []> findGlobalChildrenAndTheirUserPoints(String userId, String skillId, List<SkillRelDef.RelationshipType> types, Integer version)
@@ -349,12 +360,6 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
         Integer getChildId()
         Integer getAchievementId()
     }
-
-    @Query('''select up.day as day, count(up) as count
-    from UserPoints up where up.projectId=?1 and up.day>=?2 and up.skillId is null and up.day is not null group by up.day
-    ''')
-    List<DayCountItem> findDistinctUserCountsByProject(String projectId, Date mustBeAfterThisDate)
-
     // Postgresql is 10 fold faster with the nested query over COUNT(DISTINCT)
     // using user_performed_skill table as it has less records than user_points
     @Query(value ='''SELECT COUNT(*)
@@ -403,13 +408,12 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT(\'%\', ?2, \'%\'))  OR
                  lower(ua.user_id_for_display) like lower(CONCAT('%', ?2, '%'))
                 ) and 
-                up.day is null and 
                 up.skill_id is null 
             GROUP BY up.user_id''', nativeQuery = true)
     List<ProjectUser> findDistinctProjectUsersAndUserIdLike(String projectId, String query, Pageable pageable)
 
     @Query(value='''SELECT COUNT(*)
-        FROM (SELECT DISTINCT up.user_id from user_points up where up.project_id=?1 and up.skill_id in (?2) and up.day is null) AS temp''',
+        FROM (SELECT DISTINCT up.user_id from user_points up where up.project_id=?1 and up.skill_id in (?2)) AS temp''',
             nativeQuery = true)
     Long countDistinctUserIdByProjectIdAndSkillIdIn(String projectId, List<String> skillIds)
 
@@ -439,8 +443,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 up.project_id=:projectId and 
                 up.skill_ref_id in (select childId from subj_skills) and 
                 (lower(CONCAT(usattr.first_name, ' ', usattr.last_name, ' (', usattr.user_id_for_display, ')')) like lower(CONCAT('%', :userId, '%')) OR
-                 lower(usattr.user_id_for_display) like lower(CONCAT('%', :userId, '%'))) and   
-                up.day is null
+                 lower(usattr.user_id_for_display) like lower(CONCAT('%', :userId, '%')))
         ) AS temp
     ''', nativeQuery = true)
     Long countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(@Param("projectId") String projectId, @Param("subjectId") String subjectId, @Param("userId") String userId)
@@ -464,7 +467,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
         )
         SELECT COUNT(*)
         FROM (
-            SELECT DISTINCT up.user_id from user_points up where up.project_id=:projectId and up.skill_ref_id in (select childId from subj_skills) and up.day is null
+            SELECT DISTINCT up.user_id from user_points up where up.project_id=:projectId and up.skill_ref_id in (select childId from subj_skills)
         ) AS temp
     ''', nativeQuery = true)
     Long countDistinctUsersByProjectIdAndSubjectId(@Param("projectId") String projectId, @Param("subjectId") String subjectId)
@@ -477,8 +480,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 up.project_id=?1 and 
                 up.skill_id in (?2) and 
                 (lower(CONCAT(usattr.first_name, ' ', usattr.last_name, ' (', usattr.user_id_for_display, ')')) like lower(CONCAT('%', ?3, '%')) OR
-                 lower(usattr.user_id_for_display) like lower(CONCAT('%', ?3, '%'))) and   
-                up.day is null) 
+                 lower(usattr.user_id_for_display) like lower(CONCAT('%', ?3, '%')))) 
             AS temp''',
             nativeQuery = true)
     Long countDistinctUserIdByProjectIdAndSkillIdInAndUserIdLike(String projectId, List<String> skillIds, String query)
@@ -508,8 +510,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 up.skill_id in (?2) and 
                 (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT('%', ?3, '%'))  OR
                  lower(ua.user_id_for_display) like lower(CONCAT('%', ?3, '%'))
-                ) and 
-                up.day is null 
+                ) 
             GROUP BY up.user_id''', nativeQuery = true)
     List<ProjectUser> findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLike(String projectId, List<String> skillIds, String userId, Pageable pageable)
 
@@ -557,8 +558,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             exists (select 1 from subj_skills s_s where s_s.childId = up.skill_ref_id) and 
             (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT('%', :userId, '%'))  OR
              lower(ua.user_id_for_display) like lower(CONCAT('%', :userId, '%'))
-            ) and 
-            up.day is null 
+            ) 
         GROUP BY up.user_id
     ''', nativeQuery = true)
     List<ProjectUser> findDistinctProjectUsersByProjectIdAndSubjectIdAndUserIdLike(@Param("projectId") String projectId,
@@ -567,16 +567,33 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                                                                                    Pageable pageable)
 
     @Nullable
-    @Query('SELECT up.points from UserPoints up where up.projectId=?1 and up.userId=?2 and up.skillRefId=?3 and up.day is null')
+    @Query('SELECT up.points from UserPoints up where up.projectId=?1 and up.userId=?2 and up.skillRefId=?3')
     Integer getPointsByProjectIdAndUserIdAndSkillRefId(String projectId, String userId, @Nullable Integer skillRefId)
 
     @Nullable
-    @Query('SELECT up.points from UserPoints up where up.projectId=?1 and up.userId=?2 and up.skillRefId is null and up.day is null')
+    @Query('SELECT up.points from UserPoints up where up.projectId=?1 and up.userId=?2 and up.skillRefId is null')
     Integer getPointsByProjectIdAndUserId(String projectId, String userId)
 
     @Nullable
-    @Query('SELECT up.points from UserPoints up where up.projectId=?1 and up.userId=?2 and up.skillRefId=?3 and up.day=?4')
-    Integer getPointsByProjectIdAndUserIdAndSkillRefIdAndDay(String projectId, String userId, Integer skillRefId, Date day)
+    @Query(value ='''WITH skills AS (
+                select case when child.copied_from_skill_ref is not null then child.copied_from_skill_ref else child.id end as id,
+                       child.point_increment as point_increment
+                from skill_relationship_definition rel,
+                     skill_definition child
+                where rel.parent_ref_id = :parentSkillRefId
+                  and rel.child_ref_id = child.id
+                  and rel.type in ('RuleSetDefinition', 'SkillsGroupRequirement')
+                  and child.type = 'Skill'
+                  and child.enabled = 'true'
+                  and child.version <= :version
+            )
+            select sum(skills.point_increment)
+            from user_performed_skill up,
+                 skills
+            where up.user_id =:userId
+              and up.skill_ref_id = skills.id
+              and DATE_TRUNC('DAY', up.performed_on) = :day ''', nativeQuery = true)
+    Integer getParentsPointsForAGivenDay(@Param("userId") String userId, @Param("parentSkillRefId") Integer parentSkillRefId, @Param("day") Date day, @Param("version") Integer version)
 
     @Modifying
     @Query(value = '''UPDATE 
@@ -590,7 +607,6 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                                 OR up.skill_id=?3 
                                 OR up.skill_id IS NULL
                             ) 
-                        AND up.day IS NULL 
                         AND EXISTS 
                             (
                                 SELECT 1 FROM user_achievement ua 
@@ -617,7 +633,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             UPDATE user_points
             SET points = userPoints.newPoints
             FROM userPoints
-            where userPoints.user_id = user_points.user_id and project_id = :projectId and skill_id = :skillId and day is null''', nativeQuery=true)
+            where userPoints.user_id = user_points.user_id and project_id = :projectId and skill_id = :skillId''', nativeQuery=true)
     void updateUserPointsForASkill(@Param("projectId") String projectId, @Param("skillId") String skillId)
 
     @Modifying
@@ -638,8 +654,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             SET points = (select userPoints.newPoints from userPoints where userPoints.user_id = user_points.user_id)
             where project_id = :projectId
                 and skill_id = :skillId
-                and day is null and
-                exists( select * from userPoints where userPoints.user_id = user_points.user_id)''', nativeQuery=true)
+                and exists( select * from userPoints where userPoints.user_id = user_points.user_id)''', nativeQuery=true)
     void updateUserPointsForASkillInH2(@Param("projectId") String projectId, @Param("skillId") String skillId)
 
 
@@ -669,7 +684,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             UPDATE user_points
             SET points = userPoints.newPoints
             FROM userPoints
-            where userPoints.user_id = user_points.user_id and project_id = :projectId and skill_id = :skillId and day is null''', nativeQuery=true)
+            where userPoints.user_id = user_points.user_id and project_id = :projectId and skill_id = :skillId''', nativeQuery=true)
     void updateUserPointsForASubjectOrGroup(@Param("projectId") String projectId, @Param("skillId") String skillId)
 
     @Modifying
@@ -692,128 +707,26 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             UPDATE user_points
             SET points = userPoints.newPoints
             FROM userPoints
-            where userPoints.user_id = user_points.user_id and project_id = :projectId and skill_id is null and day is null''', nativeQuery=true)
+            where userPoints.user_id = user_points.user_id and project_id = :projectId and skill_id is null''', nativeQuery=true)
     void updateUserPointsForAProject(@Param("projectId") String projectId)
 
     @Modifying
     @Query(value = '''
-              WITH skill AS (
-                    select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id,
-                           point_increment                                                                    as pointIncrement
-                    from skill_definition
-                    where project_id = :projectId
-                      and skill_id = :skillId
-                ),
-                points as (
-                    SELECT ups.user_id as userId, DATE(ups.performed_on) as pointsDay, sum(skill.pointIncrement) as newPoints
-                    FROM user_performed_skill ups,
-                         skill
-                    where ups.skill_ref_id = skill.id
-                    group by ups.user_id, DATE(ups.performed_on)
-                ),
-                userPointsRowsToRemove as (
-                    select up.id
-                    from user_points up
-                             left join points on (up.day = points.pointsDay and up.user_id = points.userId)
-                    where up.project_id = :projectId
-                      and up.skill_id = :skillId
-                      and up.day is not null
-                      and points.userId is null
-                ),
-                updateDateHistory as (
-                    update user_points up1 set points = points.newPoints
-                         from points
-                    where up1.user_id = points.userId
-                      and up1.day = points.pointsDay
-                      and up1.project_id = :projectId
-                      and up1.skill_id = :skillId
-                )
-                delete from user_points where id in (select id from userPointsRowsToRemove);''', nativeQuery=true)
-    void updateUserPointsHistoryForASkill(@Param("projectId") String projectId, @Param("skillId") String skillId)
-
-
-    @Modifying
-    @Query(value = '''
-              WITH skill AS (
-                    select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id,
-                           point_increment                                                                    as pointIncrement
-                    from skill_definition
-                    where project_id = :projectId
-                      and skill_id = :skillId
-                ),
-                     userPoints as (
-                         SELECT ups.user_id                         as userId,
-                                DATE_TRUNC('day', ups.performed_on) as pointsDay,
-                                sum(skill.pointIncrement)           as newPoints
-                         FROM user_performed_skill ups,
-                              skill
-                         where ups.skill_ref_id = skill.id
-                         group by ups.user_id, DATE_TRUNC('day', ups.performed_on)
-                     )
-                UPDATE user_points up1
-                SET points = (select userPoints.newPoints
-                              from userPoints
-                              where userPoints.userId = up1.user_id
-                                and  DATE_TRUNC('day', up1.day) =  DATE_TRUNC('day', userPoints.pointsDay))
-                where up1.project_id = :projectId
-                  and up1.skill_id = :skillId and
-                    exists(select *
-                              from userPoints
-                              where userPoints.userId = up1.user_id
-                                and  DATE_TRUNC('day', up1.day) =  DATE_TRUNC('day', userPoints.pointsDay) );''', nativeQuery=true)
-    void updateUserPointsHistoryForASkillInH2(@Param("projectId") String projectId, @Param("skillId") String skillId)
-
-    @Modifying
-    @Query(value = '''
-              WITH skill AS (
-                    select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id,
-                           point_increment                                                                    as pointIncrement
-                    from skill_definition
-                    where project_id = :projectId
-                      and skill_id = :skillId
-                ),
-                     userPoints as (
-                         SELECT ups.user_id                         as userId,
-                                DATE_TRUNC('day', ups.performed_on) as pointsDay,
-                                sum(skill.pointIncrement)           as newPoints
-                         FROM user_performed_skill ups,
-                              skill
-                         where ups.skill_ref_id = skill.id
-                         group by ups.user_id, DATE_TRUNC('day', ups.performed_on)
-                     ),
-                     userPointsRowsToRemove as (
-                         select up.id
-                         from user_points up
-                                  left join userPoints on (DATE_TRUNC('day', up.day) = DATE_TRUNC('day', userPoints.pointsDay) and up.user_id = userPoints.userId)
-                         where up.project_id = :projectId
-                           and up.skill_id = :skillId
-                           and up.day is not null
-                           and userPoints.userId is null
-                     )
-                delete
-                from user_points
-                where id in (select id from userPointsRowsToRemove)''', nativeQuery=true)
-    void removeUserPointsThatDoNotExistForASkillInH2(@Param("projectId") String projectId, @Param("skillId") String skillId)
-
-    @Modifying
-    @Query(value = '''
                WITH pointsToUpdate as (
-                    select up.user_id, up.day, sum(up.points) as newPoints
+                    select up.user_id, sum(up.points) as newPoints
                     from skill_definition sd,
                     user_points up
                     where sd.id = up.skill_ref_id
                             and sd.project_id = :projectId
                     and sd.type = 'Subject'
                     and sd.enabled = 'true'
-                    group by up.user_id, up.day
+                    group by up.user_id
                 ),
                 idsToRemove as (
                      select up.id
                      from user_points up
-                              left join pointsToUpdate on (
-                                  (up.day = pointsToUpdate.day) and up.user_id = pointsToUpdate.user_id)
+                              left join pointsToUpdate on (up.user_id = pointsToUpdate.user_id)
                      where up.project_id = :projectId
-                       and up.day is not null
                        and pointsToUpdate.user_id is null
                 ),
                 removeUserPoints as (
@@ -822,54 +735,49 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 update user_points up set points = pointsToUpdate.newPoints
                         from pointsToUpdate
                 where up.user_id = pointsToUpdate.user_id
-                and (up.day = pointsToUpdate.day or (up.day is null and pointsToUpdate.day is null))
                 and up.project_id = :projectId and up.skill_id is null;''', nativeQuery=true)
-    void updateUserPointsHistoryForProject(@Param("projectId") String projectId)
+    void updateUserPointsForProject(@Param("projectId") String projectId)
 
     @Modifying
     @Query(value = '''
                WITH pointsToUpdate as (
-                    select up.user_id, up.day, sum(up.points) as newPoints
+                    select up.user_id, sum(up.points) as newPoints
                     from skill_definition sd,
                          user_points up
                     where sd.id = up.skill_ref_id
                       and sd.project_id = :projectId
                       and sd.type = 'Subject'
                       and sd.enabled = 'true'
-                    group by up.user_id, up.day
+                    group by up.user_id
                 )
                 update user_points up
                 set points = (select pointsToUpdate.newPoints
                               from pointsToUpdate
-                              where up.user_id = pointsToUpdate.user_id
-                                and (up.day = pointsToUpdate.day or (up.day is null and pointsToUpdate.day is null)))
+                              where up.user_id = pointsToUpdate.user_id)
                 where up.project_id = :projectId
                   and up.skill_id is null
                   and exists(select *
                              from pointsToUpdate
-                             where up.user_id = pointsToUpdate.user_id
-                               and (up.day = pointsToUpdate.day or (up.day is null and pointsToUpdate.day is null)));''', nativeQuery=true)
-    void updateUserPointsHistoryForProjectInH2(@Param("projectId") String projectId)
+                             where up.user_id = pointsToUpdate.user_id);''', nativeQuery=true)
+    void updateUserPointsForProjectInH2(@Param("projectId") String projectId)
 
     @Modifying
     @Query(value = '''
                WITH pointsToUpdate as (
-                    select up.user_id, up.day, sum(up.points) as newPoints
+                    select up.user_id, sum(up.points) as newPoints
                     from skill_definition sd,
                          user_points up
                     where sd.id = up.skill_ref_id
                       and sd.project_id = :projectId
                       and sd.type = 'Subject'
                       and sd.enabled = 'true'
-                    group by up.user_id, up.day
+                    group by up.user_id
                 ),
                 idsToRemove as (
                      select up.id
                      from user_points up
-                              left join pointsToUpdate on (
-                                  (up.day = pointsToUpdate.day) and up.user_id = pointsToUpdate.user_id)
+                              left join pointsToUpdate on (up.user_id = pointsToUpdate.user_id)
                      where up.project_id = :projectId
-                       and up.day is not null
                        and pointsToUpdate.user_id is null
                 )
                 delete from user_points where id in (select id from idsToRemove)''', nativeQuery=true)
@@ -878,7 +786,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     @Modifying
     @Query(value = '''
              WITH pointsToUpdate as (
-                select up.user_id userId, up.day as pointsDay, sum(up.points) as newPoints
+                select up.user_id userId, sum(up.points) as newPoints
                 from skill_definition parent,
                      skill_relationship_definition rel,
                      skill_definition child,
@@ -891,16 +799,14 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                   and child.type = 'Skill'
                   and child.enabled = 'true'
                   and child.id = up.skill_ref_id
-                group by up.user_id, up.day
+                group by up.user_id
             ),
             idsToRemove as (
                  select up.id
                  from user_points up
-                          left join pointsToUpdate on (
-                              (up.day = pointsToUpdate.pointsDay) and up.user_id = pointsToUpdate.userId)
+                          left join pointsToUpdate on (up.user_id = pointsToUpdate.userId)
                  where up.project_id = :projectId
                    and up.skill_id = :skillId
-                   and up.day is not null
                    and pointsToUpdate.userId is null
             ),
             removeUserPoints as (
@@ -909,7 +815,6 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             update user_points up set points = pointsToUpdate.newPoints
             from pointsToUpdate
             where up.user_id = pointsToUpdate.userId
-              and (up.day = pointsToUpdate.pointsDay or (up.day is null and pointsToUpdate.pointsDay is null))
               and up.project_id = :projectId and up.skill_id = :skillId''', nativeQuery=true)
     void updateSubjectOrGroupUserPoints(@Param("projectId") String projectId, @Param("skillId") String skillId)
 
@@ -917,7 +822,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     @Modifying
     @Query(value = '''
              WITH pointsToUpdate as (
-                select up.user_id userId, up.day as pointsDay, sum(up.points) as newPoints
+                select up.user_id userId, sum(up.points) as newPoints
                 from skill_definition parent,
                      skill_relationship_definition rel,
                      skill_definition child,
@@ -930,17 +835,17 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                   and child.type = 'Skill'
                   and child.enabled = 'true'
                   and child.id = up.skill_ref_id
-                group by up.user_id, up.day
+                group by up.user_id
             )
-            update user_points up set points = (select pointsToUpdate.newPoints from pointsToUpdate where pointsToUpdate.userId = up.user_id and (up.day = pointsToUpdate.pointsDay or (up.day is null and pointsToUpdate.pointsDay is null)))
+            update user_points up set points = (select pointsToUpdate.newPoints from pointsToUpdate where pointsToUpdate.userId = up.user_id)
             where up.project_id = :projectId and up.skill_id = :skillId
-              and exists (select * from pointsToUpdate where pointsToUpdate.userId = up.user_id and (up.day = pointsToUpdate.pointsDay or (up.day is null and pointsToUpdate.pointsDay is null)));''', nativeQuery=true)
+              and exists (select * from pointsToUpdate where pointsToUpdate.userId = up.user_id);''', nativeQuery=true)
     void updateSubjectOrGroupUserPointsInH2(@Param("projectId") String projectId, @Param("skillId") String skillId)
 
     @Modifying
     @Query(value = '''
              WITH pointsToUpdate as (
-                select up.user_id userId, up.day as pointsDay, sum(up.points) as newPoints
+                select up.user_id userId, sum(up.points) as newPoints
                 from skill_definition parent,
                      skill_relationship_definition rel,
                      skill_definition child,
@@ -953,16 +858,14 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                   and child.type = 'Skill'
                   and child.enabled = 'true'
                   and child.id = up.skill_ref_id
-                group by up.user_id, up.day
+                group by up.user_id
             ),
                  idsToRemove as (
                      select up.id
                      from user_points up
-                              left join pointsToUpdate on (
-                             (up.day = pointsToUpdate.pointsDay) and up.user_id = pointsToUpdate.userId)
+                              left join pointsToUpdate on (up.user_id = pointsToUpdate.userId)
                      where up.project_id = :projectId
                        and up.skill_id = :skillId
-                       and up.day is not null
                        and pointsToUpdate.userId is null
                  )
           delete from user_points where id in (select id from idsToRemove)''', nativeQuery=true)

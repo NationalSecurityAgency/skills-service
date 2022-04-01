@@ -103,7 +103,7 @@ class UserAdminService {
     @Transactional(readOnly = true)
     UserSkillsStats getUserSkillsStats(String projectId, String userId) {
         int numSkills =  performedSkillRepository.countDistinctSkillIdByProjectIdAndUserId(projectId, userId)
-        UserPoints userPoints = userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay(projectId, userId, null, null)
+        UserPoints userPoints = userPointsRepo.findByProjectIdAndUserIdAndSkillId(projectId, userId, null)
         return new UserSkillsStats(numSkills: numSkills, userTotalPoints: userPoints?.points ?: 0 )
     }
 }

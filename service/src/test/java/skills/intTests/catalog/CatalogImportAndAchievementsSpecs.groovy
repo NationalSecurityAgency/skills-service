@@ -26,6 +26,7 @@ import skills.storage.model.UserPerformedSkill
 import skills.storage.model.UserPoints
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
+import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -265,7 +266,7 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
         println JsonOutput.toJson(allPoints2)
         then:
         !allPoints1
-        allPoints2.collect { it.projectId } == [proj1.p.projectId, proj1.p.projectId]
+        allPoints2.collect { it.projectId } == [proj1.p.projectId]
     }
 
     def "user_events and user_performed_skill rows are only created for the original skill"() {
@@ -392,19 +393,11 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
         !userPoints_import0
         userPoints_import1
         List<UserPoints> user0 = userPoints_import1.findAll( { it.userId == users[0] })
-        user0.size() == 14
-        user0.findAll { !it.day && it.skillId == proj1.s1_skills[0].skillId }.collect { it.points } == [200]
-        user0.findAll { it.day && it.skillId == proj1.s1_skills[0].skillId }.collect { it.day.format("yyyy/MM/dd") }.sort() == [dates[1].format("yyyy/MM/dd"), dates[0].format("yyyy/MM/dd")]
-        user0.findAll { it.day && it.skillId == proj1.s1_skills[0].skillId }.sort { it.day }.collect { it.points } == [100, 100]
-        user0.findAll { !it.day && it.skillId == proj1.s1.subjectId }.collect { it.points } == [400]
-        user0.findAll { it.day && it.skillId == proj1.s1.subjectId }.sort { it.day }.collect { it.day.format("yyyy/MM/dd") }.sort() == [dates[2].format("yyyy/MM/dd"), dates[1].format("yyyy/MM/dd"), dates[0].format("yyyy/MM/dd")]
-        user0.findAll { it.day && it.skillId == proj1.s1.subjectId }.sort { it.day }.collect { it.points } == [100, 200, 100]
-        user0.findAll { !it.day && !it.skillId }.collect { it.points } == [400]
-        user0.findAll { it.day && !it.skillId }.collect { it.day.format("yyyy/MM/dd") }.sort() == [dates[2].format("yyyy/MM/dd"), dates[1].format("yyyy/MM/dd"), dates[0].format("yyyy/MM/dd")]
-        user0.findAll { it.day && !it.skillId }.sort { it.day }.sort { it.day }.collect { it.points } == [100, 200, 100]
-        user0.findAll { !it.day && it.skillId == proj1.s1_skills[1].skillId }.collect { it.points } == [200]
-        user0.findAll { it.day && it.skillId == proj1.s1_skills[1].skillId }.collect { it.day.format("yyyy/MM/dd") }.sort() == [dates[2].format("yyyy/MM/dd"), dates[1].format("yyyy/MM/dd")]
-        user0.findAll { it.day && it.skillId == proj1.s1_skills[1].skillId }.sort { it.day }.collect { it.points } == [100, 100]
+        user0.size() == 4
+        user0.findAll { it.skillId == proj1.s1_skills[0].skillId }.collect { it.points } == [200]
+        user0.findAll { it.skillId == proj1.s1.subjectId }.collect { it.points } == [400]
+        user0.findAll { !it.skillId }.collect { it.points } == [400]
+        user0.findAll { it.skillId == proj1.s1_skills[1].skillId }.collect { it.points } == [200]
     }
 
     private List<Integer> getLevels(String user, String projectId, Integer skillRefId = null) {
@@ -1461,46 +1454,46 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
         (1..10).each {skillsService.addSkill(project2.s2_skills[1], users[2], new Date() - it) }
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 
-        Closure<UserPoints> getPoints = { String user, String projectId, String skillId, Date day ->
-            List<UserPoints> points = userPointsRepo.findAll().findAll({it.userId == user && it.projectId == projectId && it.skillId == skillId && it.day == day })
+        Closure<UserPoints> getPoints = { String user, String projectId, String skillId ->
+            List<UserPoints> points = userPointsRepo.findAll().findAll({it.userId == user && it.projectId == projectId && it.skillId == skillId })
             assert points.size() == 1
             return points[0]
         }
 
         when:
         // original skill
-        UserPoints user0_p1skill0Pts_t0 = getPoints.call(users[0], project1.p.projectId, project1.s1_skills[0].skillId, null)
-        UserPoints user0_p1skill1Pts_t0 = getPoints.call(users[0], project1.p.projectId, project1.s1_skills[1].skillId, null)
-        UserPoints user0_p1S1Pts_t0 = getPoints.call(users[0], project1.p.projectId, project1.s1.subjectId, null)
-        UserPoints user0_p1Pts_t0 = getPoints.call(users[0], project1.p.projectId, null, null)
+        UserPoints user0_p1skill0Pts_t0 = getPoints.call(users[0], project1.p.projectId, project1.s1_skills[0].skillId)
+        UserPoints user0_p1skill1Pts_t0 = getPoints.call(users[0], project1.p.projectId, project1.s1_skills[1].skillId)
+        UserPoints user0_p1S1Pts_t0 = getPoints.call(users[0], project1.p.projectId, project1.s1.subjectId)
+        UserPoints user0_p1Pts_t0 = getPoints.call(users[0], project1.p.projectId, null)
 
         // imported skill
-        UserPoints user0_p2skill0Pts_t0 = getPoints.call(users[0], project2.p.projectId, project1.s1_skills[0].skillId, null)
-        UserPoints user0_p2skill1Pts_t0 = getPoints.call(users[0], project2.p.projectId, project1.s1_skills[1].skillId, null)
-        UserPoints user0_p2S1skill1Pts_t0 = getPoints.call(users[0], project2.p.projectId, project2.s1_skills[1].skillId, null)
-        UserPoints user0_p2S2skill1Pts_t0 = getPoints.call(users[0], project2.p.projectId, project2.s2_skills[1].skillId, null)
-        UserPoints user0_p2S1Pts_t0 = getPoints.call(users[0], project2.p.projectId, project2.s1.subjectId, null)
-        UserPoints user0_p2S2Pts_t0 = getPoints.call(users[0], project2.p.projectId, project2.s2.subjectId, null)
-        UserPoints user0_p2Pts_t0 = getPoints.call(users[0], project2.p.projectId, null, null)
+        UserPoints user0_p2skill0Pts_t0 = getPoints.call(users[0], project2.p.projectId, project1.s1_skills[0].skillId)
+        UserPoints user0_p2skill1Pts_t0 = getPoints.call(users[0], project2.p.projectId, project1.s1_skills[1].skillId)
+        UserPoints user0_p2S1skill1Pts_t0 = getPoints.call(users[0], project2.p.projectId, project2.s1_skills[1].skillId)
+        UserPoints user0_p2S2skill1Pts_t0 = getPoints.call(users[0], project2.p.projectId, project2.s2_skills[1].skillId)
+        UserPoints user0_p2S1Pts_t0 = getPoints.call(users[0], project2.p.projectId, project2.s1.subjectId)
+        UserPoints user0_p2S2Pts_t0 = getPoints.call(users[0], project2.p.projectId, project2.s2.subjectId)
+        UserPoints user0_p2Pts_t0 = getPoints.call(users[0], project2.p.projectId, null)
 
         project1.s1_skills[0].numPerformToCompletion = 7
         skillsService.createSkill(project1.s1_skills[0])
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 
         // original skill
-        UserPoints user0_p1skill0Pts_t1 = getPoints.call(users[0], project1.p.projectId, project1.s1_skills[0].skillId, null)
-        UserPoints user0_p1skill1Pts_t1 = getPoints.call(users[0], project1.p.projectId, project1.s1_skills[1].skillId, null)
-        UserPoints user0_p1S1Pts_t1 = getPoints.call(users[0], project1.p.projectId, project1.s1.subjectId, null)
-        UserPoints user0_p1Pts_t1 = getPoints.call(users[0], project1.p.projectId, null, null)
+        UserPoints user0_p1skill0Pts_t1 = getPoints.call(users[0], project1.p.projectId, project1.s1_skills[0].skillId)
+        UserPoints user0_p1skill1Pts_t1 = getPoints.call(users[0], project1.p.projectId, project1.s1_skills[1].skillId)
+        UserPoints user0_p1S1Pts_t1 = getPoints.call(users[0], project1.p.projectId, project1.s1.subjectId)
+        UserPoints user0_p1Pts_t1 = getPoints.call(users[0], project1.p.projectId, null)
 
         // imported skill
-        UserPoints user0_p2skill0Pts_t1 = getPoints.call(users[0], project2.p.projectId, project1.s1_skills[0].skillId, null)
-        UserPoints user0_p2skill1Pts_t1 = getPoints.call(users[0], project2.p.projectId, project1.s1_skills[1].skillId, null)
-        UserPoints user0_p2S1skill1Pts_t1 = getPoints.call(users[0], project2.p.projectId, project2.s1_skills[1].skillId, null)
-        UserPoints user0_p2S2skill1Pts_t1 = getPoints.call(users[0], project2.p.projectId, project2.s2_skills[1].skillId, null)
-        UserPoints user0_p2S1Pts_t1 = getPoints.call(users[0], project2.p.projectId, project2.s1.subjectId, null)
-        UserPoints user0_p2S2Pts_t1 = getPoints.call(users[0], project2.p.projectId, project2.s2.subjectId, null)
-        UserPoints user0_p2Pts_t1 = getPoints.call(users[0], project2.p.projectId, null, null)
+        UserPoints user0_p2skill0Pts_t1 = getPoints.call(users[0], project2.p.projectId, project1.s1_skills[0].skillId)
+        UserPoints user0_p2skill1Pts_t1 = getPoints.call(users[0], project2.p.projectId, project1.s1_skills[1].skillId)
+        UserPoints user0_p2S1skill1Pts_t1 = getPoints.call(users[0], project2.p.projectId, project2.s1_skills[1].skillId)
+        UserPoints user0_p2S2skill1Pts_t1 = getPoints.call(users[0], project2.p.projectId, project2.s2_skills[1].skillId)
+        UserPoints user0_p2S1Pts_t1 = getPoints.call(users[0], project2.p.projectId, project2.s1.subjectId)
+        UserPoints user0_p2S2Pts_t1 = getPoints.call(users[0], project2.p.projectId, project2.s2.subjectId)
+        UserPoints user0_p2Pts_t1 = getPoints.call(users[0], project2.p.projectId, null)
 
         then:
         // imported skill
@@ -1576,293 +1569,6 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
         u0_sk1_t0.collect { it.performedOn } == [dates[1], dates[2], dates[3], dates[4], dates[5]]
         u0_sk1_t1.collect { it.performedOn } == [dates[1], dates[2], dates[3], dates[4], dates[5]]
     }
-
-
-    def "decrease in number of occurrences in the original skill removes user points history records and updates subject's and project's point history"() {
-        def project1 = createProjWithCatalogSkills(1, 10)
-        def project2 = createProjWithCatalogSkills(2, 8)
-        def project3 = createProjWithCatalogSkills(8)
-
-        skillsService.bulkImportSkillsFromCatalogAndFinalize(project2.p.projectId, project2.s1.subjectId,
-                project1.s1_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
-
-        List<String> users = getRandomUsers(3)
-        List<Date> dates = (1..12).collect { new Date() -it }
-        List<Date> days = dates.collect { new Date(it.time).clearTime() }
-        (1..8).each {skillsService.addSkill(project1.s1_skills[0], users[0], dates[it]) }
-        (1..5).each {skillsService.addSkill(project1.s1_skills[1], users[0], dates[it]) }
-        (1..4).each {skillsService.addSkill(project2.s1_skills[1], users[0], dates[it]) }
-        (1..7).each {skillsService.addSkill(project2.s2_skills[1], users[0], dates[it]) }
-
-        // muddle the water with other users
-        (1..3).each {skillsService.addSkill(project1.s1_skills[0], users[1], dates[it]) }
-        (1..8).each {skillsService.addSkill(project1.s1_skills[1], users[1], dates[it]) }
-        (1..9).each {skillsService.addSkill(project2.s1_skills[1], users[2], dates[it]) }
-        (1..10).each {skillsService.addSkill(project2.s2_skills[1], users[2], dates[it]) }
-        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
-
-        Closure<List<UserPoints>> getPoints = { String user, String projectId, String skillId ->
-            List<UserPoints> points = userPointsRepo.findAll().findAll({it.userId == user && it.projectId == projectId && it.skillId == skillId && it.day })
-            return points.sort({ it.day }).reverse()
-        }
-
-        when:
-        // original skill
-        List<UserPoints> u0_p1_s0_t0 = getPoints.call(users[0], project1.p.projectId, project1.s1_skills[0].skillId)
-        List<UserPoints> u0_p1_s1_t0 = getPoints.call(users[0], project1.p.projectId, project1.s1.subjectId)
-        List<UserPoints> u0_p1_t0 = getPoints.call(users[0], project1.p.projectId, null)
-
-        // imported skill
-        List<UserPoints> u0_p2_s0_t0 = getPoints.call(users[0], project2.p.projectId, project1.s1_skills[0].skillId)
-        List<UserPoints> u0_p2_s1_t0 = getPoints.call(users[0], project2.p.projectId, project2.s1.subjectId)
-        List<UserPoints> u0_p2_t0 = getPoints.call(users[0], project2.p.projectId, null)
-
-        project1.s1_skills[0].numPerformToCompletion = 7
-        skillsService.createSkill(project1.s1_skills[0])
-        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
-
-        // original skill
-        List<UserPoints> u0_p1_s0_t1 = getPoints.call(users[0], project1.p.projectId, project1.s1_skills[0].skillId)
-        List<UserPoints> u0_p1_s1_t1 = getPoints.call(users[0], project1.p.projectId, project1.s1.subjectId)
-        List<UserPoints> u0_p1_t1 = getPoints.call(users[0], project1.p.projectId, null)
-
-        // imported skill
-        List<UserPoints> u0_p2_s0_t1 = getPoints.call(users[0], project2.p.projectId, project1.s1_skills[0].skillId)
-        List<UserPoints> u0_p2_s1_t1 = getPoints.call(users[0], project2.p.projectId, project2.s1.subjectId)
-        List<UserPoints> u0_p2_t1 = getPoints.call(users[0], project2.p.projectId, null)
-
-        then:
-        // original before
-        u0_p1_s0_t0.collect { it.points } == [100, 100, 100, 100, 100, 100, 100, 100,]
-        u0_p1_s0_t0.collect { it.day } == [days[1], days[2], days[3], days[4], days[5], days[6], days[7], days[8]]
-
-        u0_p1_s1_t0.collect { it.points } == [200, 200, 200, 200, 200, 100, 100, 100,]
-        u0_p1_s1_t0.collect { it.day } == [days[1], days[2], days[3], days[4], days[5], days[6], days[7], days[8]]
-
-        u0_p1_t0.collect { it.points } == [200, 200, 200, 200, 200, 100, 100, 100,]
-        u0_p1_t0.collect { it.day } == [days[1], days[2], days[3], days[4], days[5], days[6], days[7], days[8]]
-
-        // original after
-        u0_p1_s0_t1.collect { it.day } == [days[2], days[3], days[4], days[5], days[6], days[7], days[8]]
-        u0_p1_s0_t1.collect { it.points } == [100, 100, 100, 100, 100, 100, 100, ]
-
-        u0_p1_s1_t1.collect { it.points } == [100, 200, 200, 200, 200, 100, 100, 100,]
-        u0_p1_s1_t1.collect { it.day } == [days[1], days[2], days[3], days[4], days[5], days[6], days[7], days[8]]
-
-        u0_p1_t1.collect { it.points } == [100, 200, 200, 200, 200, 100, 100, 100,]
-        u0_p1_t1.collect { it.day } == [days[1], days[2], days[3], days[4], days[5], days[6], days[7], days[8]]
-
-        // imported before
-        u0_p2_s0_t0.collect { it.points } == [100, 100, 100, 100, 100, 100, 100, 100,]
-        u0_p2_s0_t0.collect { it.day } == [days[1], days[2], days[3], days[4], days[5], days[6], days[7], days[8]]
-
-        u0_p2_s1_t0.collect { it.points } == [300, 300, 300, 300, 200, 100, 100, 100,]
-        u0_p2_s1_t0.collect { it.day } == [days[1], days[2], days[3], days[4], days[5], days[6], days[7], days[8]]
-
-        u0_p2_t0.collect { it.points } == [400, 400, 400, 400, 300, 200, 200, 100,]
-        u0_p2_t0.collect { it.day } == [days[1], days[2], days[3], days[4], days[5], days[6], days[7], days[8]]
-
-        // imported after
-        u0_p2_s0_t1.collect { it.day } == [days[2], days[3], days[4], days[5], days[6], days[7], days[8]]
-        u0_p2_s0_t1.collect { it.points } == [100, 100, 100, 100, 100, 100, 100, ]
-
-        u0_p2_s1_t1.collect { it.points } == [200, 300, 300, 300, 200, 100, 100, 100,]
-        u0_p2_s1_t1.collect { it.day } == [days[1], days[2], days[3], days[4], days[5], days[6], days[7], days[8]]
-
-        u0_p2_t1.collect { it.points } == [300, 400, 400, 400, 300, 200, 200, 100,]
-        u0_p2_t1.collect { it.day } == [days[1], days[2], days[3], days[4], days[5], days[6], days[7], days[8]]
-    }
-
-    def "decrease in number of occurrences in the original skill removes user points history records for subject's and project's point history"() {
-        def project1 = createProjWithCatalogSkills(1, 10)
-        def project2 = createProjWithCatalogSkills(2, 8)
-        def project3 = createProjWithCatalogSkills(8)
-
-        skillsService.bulkImportSkillsFromCatalogAndFinalize(project2.p.projectId, project2.s1.subjectId,
-                project1.s1_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
-
-        List<String> users = getRandomUsers(3)
-        List<Date> dates = (1..12).collect { new Date() -it }
-        List<Date> days = dates.collect { new Date(it.time).clearTime() }
-        (1..8).each {skillsService.addSkill(project1.s1_skills[0], users[0], dates[it]) }
-        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
-
-        Closure<List<UserPoints>> getPoints = { String user, String projectId, String skillId ->
-            List<UserPoints> points = userPointsRepo.findAll().findAll({it.userId == user && it.projectId == projectId && it.skillId == skillId && it.day })
-            return points.sort({ it.day }).reverse()
-        }
-
-        when:
-        // original skill
-        List<UserPoints> u0_p1_s0_t0 = getPoints.call(users[0], project1.p.projectId, project1.s1_skills[0].skillId)
-        List<UserPoints> u0_p1_s1_t0 = getPoints.call(users[0], project1.p.projectId, project1.s1.subjectId)
-        List<UserPoints> u0_p1_t0 = getPoints.call(users[0], project1.p.projectId, null)
-
-        // imported skill
-        List<UserPoints> u0_p2_s0_t0 = getPoints.call(users[0], project2.p.projectId, project1.s1_skills[0].skillId)
-        List<UserPoints> u0_p2_s1_t0 = getPoints.call(users[0], project2.p.projectId, project2.s1.subjectId)
-        List<UserPoints> u0_p2_t0 = getPoints.call(users[0], project2.p.projectId, null)
-
-        project1.s1_skills[0].numPerformToCompletion = 7
-        skillsService.createSkill(project1.s1_skills[0])
-        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
-
-        // original skill
-        List<UserPoints> u0_p1_s0_t1 = getPoints.call(users[0], project1.p.projectId, project1.s1_skills[0].skillId)
-        List<UserPoints> u0_p1_s1_t1 = getPoints.call(users[0], project1.p.projectId, project1.s1.subjectId)
-        List<UserPoints> u0_p1_t1 = getPoints.call(users[0], project1.p.projectId, null)
-
-        // imported skill
-        List<UserPoints> u0_p2_s0_t1 = getPoints.call(users[0], project2.p.projectId, project1.s1_skills[0].skillId)
-        List<UserPoints> u0_p2_s1_t1 = getPoints.call(users[0], project2.p.projectId, project2.s1.subjectId)
-        List<UserPoints> u0_p2_t1 = getPoints.call(users[0], project2.p.projectId, null)
-
-        then:
-        // original before
-        u0_p1_s0_t0.collect { it.points } == [100, 100, 100, 100, 100, 100, 100, 100,]
-        u0_p1_s0_t0.collect { it.day } == [days[1], days[2], days[3], days[4], days[5], days[6], days[7], days[8]]
-
-        u0_p1_s1_t0.collect { it.points } == [100, 100, 100, 100, 100, 100, 100, 100,]
-        u0_p1_s1_t0.collect { it.day } == [days[1], days[2], days[3], days[4], days[5], days[6], days[7], days[8]]
-
-        u0_p1_t0.collect { it.points } == [100, 100, 100, 100, 100, 100, 100, 100,]
-        u0_p1_t0.collect { it.day } == [days[1], days[2], days[3], days[4], days[5], days[6], days[7], days[8]]
-
-        // original after
-        u0_p1_s0_t1.collect { it.day } == [days[2], days[3], days[4], days[5], days[6], days[7], days[8]]
-        u0_p1_s0_t1.collect { it.points } == [100, 100, 100, 100, 100, 100, 100, ]
-
-        u0_p1_s1_t1.collect { it.points } == [100, 100, 100, 100, 100, 100, 100, ]
-        u0_p1_s1_t1.collect { it.day } == [days[2], days[3], days[4], days[5], days[6], days[7], days[8]]
-
-        u0_p1_t1.collect { it.points } == [100, 100, 100, 100, 100, 100, 100, ]
-        u0_p1_t1.collect { it.day } == [ days[2], days[3], days[4], days[5], days[6], days[7], days[8]]
-
-        // imported before
-        u0_p2_s0_t0.collect { it.points } == [100, 100, 100, 100, 100, 100, 100, 100,]
-        u0_p2_s0_t0.collect { it.day } == [days[1], days[2], days[3], days[4], days[5], days[6], days[7], days[8]]
-
-        u0_p2_s1_t0.collect { it.points } == [100, 100, 100, 100, 100, 100, 100, 100,]
-        u0_p2_s1_t0.collect { it.day } == [days[1], days[2], days[3], days[4], days[5], days[6], days[7], days[8]]
-
-        u0_p2_t0.collect { it.points } == [100, 100, 100, 100, 100, 100, 100, 100,]
-        u0_p2_t0.collect { it.day } == [days[1], days[2], days[3], days[4], days[5], days[6], days[7], days[8]]
-
-        // imported after
-        u0_p2_s0_t1.collect { it.day } == [days[2], days[3], days[4], days[5], days[6], days[7], days[8]]
-        u0_p2_s0_t1.collect { it.points } == [100, 100, 100, 100, 100, 100, 100, ]
-
-        u0_p2_s1_t1.collect { it.points } == [100, 100, 100, 100, 100, 100, 100, ]
-        u0_p2_s1_t1.collect { it.day } == [ days[2], days[3], days[4], days[5], days[6], days[7], days[8]]
-
-        u0_p2_t1.collect { it.points } == [100, 100, 100, 100, 100, 100, 100, ]
-        u0_p2_t1.collect { it.day } == [ days[2], days[3], days[4], days[5], days[6], days[7], days[8]]
-    }
-
-    def "decrease in number of occurrences in the original updates users' skill, subject and project point history"() {
-        def project1 = createProjWithCatalogSkills(1, 10, true)
-        def project2 = createProjWithCatalogSkills(2, 8, true)
-
-        skillsService.bulkImportSkillsFromCatalogAndFinalize(project2.p.projectId, project2.s1.subjectId,
-                project1.s1_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
-
-        List<String> users = getRandomUsers(3)
-        List<Date> dates = (1..12).collect { new Date() -it }.reverse()
-        List<Date> days = dates.collect { new Date(it.time).clearTime() }
-        skillsService.addSkill(project1.s1_skills[0], users[0], dates[1])
-        skillsService.addSkill(project1.s1_skills[0], users[0], dates[2])
-        skillsService.addSkill(project1.s1_skills[0], users[0], new Date(dates[2].time + 1))
-        skillsService.addSkill(project1.s1_skills[0], users[0], dates[3])
-        skillsService.addSkill(project1.s1_skills[0], users[0], new Date(dates[3].time + 1)) // can't be the same milli
-        skillsService.addSkill(project1.s1_skills[0], users[0], new Date(dates[3].time + 2)) // can't be the same milli
-        skillsService.addSkill(project1.s1_skills[0], users[0], dates[4])
-        skillsService.addSkill(project1.s1_skills[0], users[0], new Date(dates[4].time + 1)) // can't be teh same milli
-        (1..5).each {skillsService.addSkill(project1.s1_skills[1], users[0], dates[it]) }
-        (1..4).each {skillsService.addSkill(project2.s1_skills[1], users[0], dates[it]) }
-        (1..7).each {skillsService.addSkill(project2.s2_skills[1], users[0], dates[it]) }
-
-        // muddle the water with other users
-        (1..3).each {skillsService.addSkill(project1.s1_skills[0], users[1], dates[it]) }
-        (1..8).each {skillsService.addSkill(project1.s1_skills[1], users[1], dates[it]) }
-        (1..9).each {skillsService.addSkill(project2.s1_skills[1], users[2], dates[it]) }
-        (1..10).each {skillsService.addSkill(project2.s2_skills[1], users[2], dates[it]) }
-        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
-
-        Closure<List<UserPoints>> getPoints = { String user, String projectId, String skillId ->
-            List<UserPoints> points = userPointsRepo.findAll().findAll({it.userId == user && it.projectId == projectId && it.skillId == skillId && it.day })
-            return points.sort({ it.day })
-        }
-
-        when:
-        // original skill
-        List<UserPoints> u0_p1_s0_t0 = getPoints.call(users[0], project1.p.projectId, project1.s1_skills[0].skillId)
-        List<UserPoints> u0_p1_subj0_t0 = getPoints.call(users[0], project1.p.projectId, project1.s1.subjectId)
-        List<UserPoints> u0_p1_t0 = getPoints.call(users[0], project1.p.projectId, null)
-
-        // imported skill
-        List<UserPoints> u0_p2_s0_t0 = getPoints.call(users[0], project2.p.projectId, project1.s1_skills[0].skillId)
-        List<UserPoints> u0_p2_subj0_t0 = getPoints.call(users[0], project2.p.projectId, project2.s1.subjectId)
-        List<UserPoints> u0_p2_t0 = getPoints.call(users[0], project2.p.projectId, null)
-
-        project1.s1_skills[0].numPerformToCompletion = 7
-        skillsService.createSkill(project1.s1_skills[0])
-        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
-
-        // original skill
-        List<UserPoints> u0_p1_s0_t1 = getPoints.call(users[0], project1.p.projectId, project1.s1_skills[0].skillId)
-        List<UserPoints> u0_p1_subj0_t1 = getPoints.call(users[0], project1.p.projectId, project1.s1.subjectId)
-        List<UserPoints> u0_p1_t1 = getPoints.call(users[0], project1.p.projectId, null)
-
-        // imported skill
-        List<UserPoints> u0_p2_s0_t1 = getPoints.call(users[0], project2.p.projectId, project1.s1_skills[0].skillId)
-        List<UserPoints> u0_p2_subj0_t1 = getPoints.call(users[0], project2.p.projectId, project2.s1.subjectId)
-        List<UserPoints> u0_p2_t1= getPoints.call(users[0], project2.p.projectId, null)
-
-        then:
-        // original before
-        u0_p1_s0_t0.collect { it.day } == [days[1], days[2], days[3], days[4]]
-        u0_p1_s0_t0.collect { it.points } == [100, 200, 300, 200]
-
-        u0_p1_subj0_t0.collect { it.day } == [days[1], days[2], days[3], days[4], days[5]]
-        u0_p1_subj0_t0.collect { it.points } == [100 + 100, 200 + 100, 300 + 100, 200 + 100, 100]
-
-        u0_p1_t0.collect { it.day } == [days[1], days[2], days[3], days[4], days[5]]
-        u0_p1_t0.collect { it.points } == [100 + 100, 200 + 100, 300 + 100, 200 + 100, 100]
-
-        // original after
-        u0_p1_s0_t1.collect { it.day } == [days[1], days[2], days[3], days[4]]
-        u0_p1_s0_t1.collect { it.points } == [100, 200, 300, 100]
-
-        u0_p1_subj0_t1.collect { it.day } == [days[1], days[2], days[3], days[4], days[5]]
-        u0_p1_subj0_t1.collect { it.points } == [100 + 100, 200 + 100, 300 + 100, 100 + 100, 100]
-
-        u0_p1_t1.collect { it.day } == [days[1], days[2], days[3], days[4], days[5]]
-        u0_p1_t1.collect { it.points } == [100 + 100, 200 + 100, 300 + 100, 100 + 100, 100]
-
-        // imported before
-        u0_p2_s0_t0.collect { it.points } == [100, 200, 300, 200]
-        u0_p2_s0_t0.collect { it.day } == [days[1], days[2], days[3], days[4]]
-
-        u0_p2_subj0_t0.collect { it.day } == [days[1], days[2], days[3], days[4], days[5]]
-        u0_p2_subj0_t0.collect { it.points } == [300, 400, 500, 400, 100]
-
-        u0_p2_t0.collect { it.day } == [days[1], days[2], days[3], days[4], days[5], days[6], days[7]]
-        u0_p2_t0.collect { it.points } == [400, 500, 600, 500, 200, 100, 100]
-
-        // imported skill after
-        u0_p2_s0_t1.collect { it.day } == [days[1], days[2], days[3], days[4]]
-        u0_p2_s0_t1.collect { it.points } == [100, 200, 300, 100]
-
-        u0_p2_subj0_t1.collect { it.day } == [days[1], days[2], days[3], days[4], days[5]]
-        u0_p2_subj0_t1.collect { it.points } == [300, 400, 500, 300, 100]
-
-        u0_p2_t1.collect { it.day } == [days[1], days[2], days[3], days[4], days[5], days[6], days[7]]
-        u0_p2_t1.collect { it.points } == [400, 500, 600, 400, 200, 100, 100]
-
-    }
-
-    // user point achievement is removed but subject and project achievement is kept
-    // user points history is updated
 
     def "change in number of points in the imported skill levels up user(s)"() {
         def project1 = createProject(1)
