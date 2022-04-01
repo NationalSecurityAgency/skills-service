@@ -208,31 +208,39 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
 
     @Query(value='''
         WITH RECURSIVE subj_skills (parentId, childId) AS (
-            SELECT s.parent_ref_id AS parentId, s.child_ref_id AS childId 
+            SELECT s.parent_ref_id AS parentId, s.child_ref_id AS childId
             FROM
-            skill_relationship_definition s, skill_definition sd
+                skill_relationship_definition s, skill_definition sd
             WHERE
-            sd.project_id = :projectId AND
-            s.parent_ref_id = sd.id
-            
+                    sd.project_id = :projectId AND
+                    s.parent_ref_id = sd.id
+        
             UNION ALL
-            
+        
             SELECT childId AS parentId, s.child_ref_id AS childId
             FROM
             skill_relationship_definition s
             INNER JOIN subj_skills on childId = s.parent_ref_id
+        ),
+        unfinalized_totals (subjectRefId, totalPoints) AS (
+           SELECT subject.id AS subjectRefId, SUM(disabledSkill.total_points) AS totalPoints
+           FROM
+               skill_definition disabledSkill
+               LEFT JOIN subj_skills subject_mapping ON disabledSkill.id = subject_mapping.childId
+               LEFT JOIN skill_definition subject on subject_mapping.parentId = subject.id
+           WHERE disabledSkill.project_id = :projectId AND
+               disabledSkill.enabled = 'false' AND
+               disabledSkill.type = 'Skill' AND
+               disabledSkill.copied_from_project_id IS NOT NULL
+           GROUP BY subject.id
         )
         
-        select subject.skill_id as subjectId, max(subject.name) as name, sum(disabledSkill.total_points+subject.total_points) as totalIncPendingFinalized from
-        skill_definition disabledSkill
-        join subj_skills subject_mapping on subject_mapping.childId = disabledSkill.id
-        join skill_definition subject on subject.id = subject_mapping.parentId
-        where disabledSkill.project_id = :projectId and
-        disabledSkill.enabled = 'false' and
-        disabledSkill.type = 'Skill' and
-        disabledSkill.copied_from_project_id is not null
-        
-        group by subject.skill_id
+        SELECT sub.skill_id AS subjectId, sub.name AS name, (COALESCE(totalPoints,0)+sub.total_points) AS totalIncPendingFinalized
+        FROM
+            skill_definition sub
+                LEFT JOIN unfinalized_totals uft on sub.id = uft.subjectRefId
+        WHERE sub.project_id = :projectId AND
+        sub.type = 'Subject'
     ''', nativeQuery=true)
     List<SubjectTotalPoints> getSubjectTotalPointsIncPendingFinalization(@Param("projectId") String projectId)
 }

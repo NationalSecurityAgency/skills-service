@@ -32,7 +32,7 @@ limitations under the License.
           <li>Project and subject <b>level</b> achievements are calculated for the users that have points for the imported skills.</li>
         </ul>
       </p>
-      <p v-if="!canFinalize">
+      <p v-if="!canFinalize" data-cy="no-finalize">
         <i class="fas fa-exclamation-circle mr-1 text-warning" aria-hidden="true"/> {{ this.noFinalizeMsg }}
       </p>
     </div>
