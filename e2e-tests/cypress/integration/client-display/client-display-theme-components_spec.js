@@ -156,7 +156,9 @@ describe('Client Display Theme Components Tests', () => {
         cy.get('[data-cy="pointsPerOccurrenceCard"]').contains('100');
         cy.get('[data-cy="timeWindowPts"]').contains('100');
 
-        cy.matchSnapshotImage();
+        cy.matchSnapshotImage(`Client Display Theme Components Tests -- theme info cards border overrides tile border`, {
+            blackout: ['[data-cy="timePassed"]'],
+        });
     });
 
 
