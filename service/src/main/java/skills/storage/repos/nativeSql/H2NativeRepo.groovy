@@ -797,13 +797,11 @@ class H2NativeRepo implements NativeQueriesRepo {
     @Override
     void updateUserPointsForSubjectOrGroup(String projectId, String skillId) {
         userPointsRepo.updateSubjectOrGroupUserPointsInH2(projectId, skillId)
-        userPointsRepo.removeUserPointsThatDoNotExistForSubjectOrGroupInH2(projectId, skillId)
     }
 
     @Override
     void updateUserPointsForProject(String projectId) {
         userPointsRepo.updateUserPointsForProjectInH2(projectId)
-        userPointsRepo.removeUserPointsThatDoNotExistForProjectInH2(projectId)
     }
 
     @Override

@@ -588,16 +588,28 @@ class SkillsLoader {
         // must compute total points so the provided version is taken into account
         // subjectDefinition.totalPoints is total overall regardless of the version
         int totalPoints
+        Integer points
+        Integer todaysPoints
         if (loadSkills) {
             SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, subjectDefinition, version, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
             skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints, false, userId, version)
-            totalPoints = skillsRes ? skillsRes.collect({it.totalPoints}).sum() as Integer: 0
+            totalPoints = skillsRes ? skillsRes.collect({it.totalPoints}).sum() as Integer : 0
+
         } else {
             totalPoints = calculateTotalForSubject(projDef, subjectDefinition, version)
         }
 
-        Integer points = calculatePointsForSubject(projDef, userId, subjectDefinition, version)
-        Integer todaysPoints = calculateTodayPoints(userId, subjectDefinition, version)
+        // pick large enough version = version is not provide;
+        // if version is provided then always calculate All points as versions are not respected for user points, at least as of now
+        if (skillsRes && version >= 500) {
+            points = skillsRes ? skillsRes.collect({ it.points }).sum() as Integer : 0
+            todaysPoints = skillsRes ? skillsRes.collect({ it.todaysPoints }).sum() as Integer : 0
+        } else {
+            points = calculatePointsForSubject(projDef, userId, subjectDefinition)
+            todaysPoints= calculateTodayPoints(userId, subjectDefinition)
+        }
+
+
 
         // convert null result to 0
         points = points ?: 0
@@ -659,13 +671,13 @@ class SkillsLoader {
     }
 
     @Profile
-    private Integer calculateTodayPoints(String userId, SkillDefParent subjectDefinition, int version) {
-        Integer res = userPointsRepo.getParentsPointsForAGivenDay(userId, subjectDefinition.id, new Date().clearTime(), version)
+    private Integer calculateTodayPoints(String userId, SkillDefParent subjectDefinition) {
+        Integer res = userPointsRepo.getParentsPointsForAGivenDay(userId, subjectDefinition.id, new Date().clearTime())
         return res ?: 0
     }
 
     @Profile
-    private Integer calculatePointsForSubject(ProjDef projDef, String userId, SkillDefParent subjectDefinition, int version) {
+    private Integer calculatePointsForSubject(ProjDef projDef, String userId, SkillDefParent subjectDefinition) {
         Integer res = userPointsRepo.getPointsByProjectIdAndUserIdAndSkillRefId(projDef.projectId, userId, subjectDefinition.id)
         return res ?: 0
     }
