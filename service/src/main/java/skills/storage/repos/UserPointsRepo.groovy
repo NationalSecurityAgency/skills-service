@@ -581,7 +581,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                      skill_definition child
                 where rel.parent_ref_id = :parentSkillRefId
                   and rel.child_ref_id = child.id
-                  and rel.type in ('RuleSetDefinition', 'SkillsGroupRequirement')
+                  and rel.type in ('RuleSetDefinition', 'SkillsGroupRequirement', 'GroupSkillToSubject')
                   and child.type = 'Skill'
                   and child.enabled = 'true'
             )
