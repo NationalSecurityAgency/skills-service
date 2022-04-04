@@ -182,7 +182,7 @@ limitations under the License.
         <i class="fas fa-thumbs-up"></i> OK
       </b-button>
 
-      <span v-if="maxSelectionExceeded" class="float-right ml-2 text-danger">
+      <span v-if="maxSelectionExceeded" class="float-right ml-2 text-danger" data-cy="maximum-selected">
         <i class="fas fa-exclamation-circle text-warning"/> {{this.maxExceededMsg}}
       </span>
     </div>
