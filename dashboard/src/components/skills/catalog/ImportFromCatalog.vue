@@ -168,11 +168,11 @@ limitations under the License.
 
     <div slot="modal-footer" class="w-100">
       <b-button v-if="!emptyCatalog" variant="success" size="sm" class="float-right ml-2"
-                @click="importSkills" data-cy="importBtn" :disabled="importDisabled || validatingImport"><i
+                @click="importSkills" data-cy="importBtn" :disabled="importDisabled || validatingImport || maxSelectionExceeded"><i
         class="far fa-arrow-alt-circle-down"></i> Import <b-badge variant="primary" data-cy="numSelectedSkills">{{ numSelectedSkills }}</b-badge>
         <b-spinner v-if="validatingImport" small label="Small Spinner" class="ml-1"></b-spinner>
       </b-button>
-      <b-button v-if="!emptyCatalog" variant="secondary" size="sm" class="float-right" @click="close"
+      <b-button v-if="!emptyCatalog" variant="secondary" size="sm" class="float-right ml-2" @click="close"
                 data-cy="closeButton">
         <i class="fas fa-times"></i> Cancel
       </b-button>
@@ -181,6 +181,10 @@ limitations under the License.
                 data-cy="okButton">
         <i class="fas fa-thumbs-up"></i> OK
       </b-button>
+
+      <span v-if="maxSelectionExceeded" class="float-right ml-2 text-danger">
+        <i class="fas fa-exclamation-circle text-warning"/> {{this.maxExceededMsg}}
+      </span>
     </div>
   </b-modal>
 </template>
@@ -292,6 +296,12 @@ limitations under the License.
       },
       maxProjectNameLength() {
         return this.$store.state.maxProjectNameLength;
+      },
+      maxSelectionExceeded() {
+        return Object.values(this.selected).filter((item) => item.selected).length > this.$store.getters.config.maxSkillsInBulkImport;
+      },
+      maxExceededMsg() {
+        return `cannot import more than ${this.$store.getters.config.maxSkillsInBulkImport} Skills at once`;
       },
     },
     methods: {

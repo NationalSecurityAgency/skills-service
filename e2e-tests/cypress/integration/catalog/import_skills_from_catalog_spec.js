@@ -739,6 +739,116 @@ describe('Import skills from Catalog Tests', () => {
       cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '1');
     });
 
+  it.only('respect maxSkillsInBulkImport configuration', () => {
+    // mix skill names since it's sorted by skillId - this will force different projects in the first page
+    cy.intercept('GET', '/public/config', (req) => {
+      req.reply((res) => {
+        const conf = res.body;
+        conf.maxSkillsInBulkImport = 3;
+        res.send(conf);
+      });
+    }).as('loadConfig')
+
+    cy.createSkill(1, 1, 1);
+    cy.createSkill(1, 1, 6);
+    cy.createSkill(1, 1, 7);
+    cy.createSkill(1, 1, 4);
+    cy.createSkill(1, 1, 5);
+    cy.createSkill(1, 1, 9);
+    cy.createSkill(1, 1, 66);
+    cy.createSkill(1, 1, 67);
+
+    cy.createProject(2);
+    cy.createSubject(2, 1);
+    cy.createSkill(2, 1, 2);
+    cy.createSkill(2, 1, 3);
+    cy.createSkill(2, 1, 8);
+
+    cy.exportSkillToCatalog(1, 1, 1);
+    cy.exportSkillToCatalog(1, 1, 6);
+    cy.exportSkillToCatalog(1, 1, 7);
+    cy.exportSkillToCatalog(1, 1, 4);
+    cy.exportSkillToCatalog(1, 1, 5);
+    cy.exportSkillToCatalog(1, 1, 9)
+    cy.exportSkillToCatalog(1, 1, 66)
+    cy.exportSkillToCatalog(1, 1, 67)
+
+    cy.exportSkillToCatalog(2, 1, 2); // proj 2
+    cy.exportSkillToCatalog(2, 1, 3); // proj 2
+    cy.exportSkillToCatalog(2, 1, 8); // proj 2
+
+    cy.createProject(3);
+    cy.createSubject(3, 1);
+
+    cy.intercept('/admin/projects/proj3/skills/catalog**').as('getCatalogSkills');
+
+    cy.visit('/administrator/projects/');
+    cy.wait('@loadConfig');
+
+   /* cy.get('[data-cy="importFromCatalogBtn"]').click();
+    cy.wait('@getCatalogSkills');
+
+    cy.get('[data-cy="importBtn"]').should('be.disabled');
+    cy.get('[data-cy="numSelectedSkills"]').should('have.text', '0');
+
+    cy.get('[data-cy="skillSelect_proj1-skill1"]').should('not.be.checked')
+    cy.get('[data-cy="skillSelect_proj2-skill2"]').should('not.be.checked')
+    cy.get('[data-cy="skillSelect_proj2-skill3"]').should('not.be.checked')
+    cy.get('[data-cy="skillSelect_proj1-skill4"]').should('not.be.checked')
+    cy.get('[data-cy="skillSelect_proj1-skill5"]').should('not.be.checked')
+
+    cy.get('[data-cy="selectPageOfSkillsBtn"]').click();
+
+    cy.get('[data-cy="skillSelect_proj1-skill1"]').should('be.checked')
+    cy.get('[data-cy="skillSelect_proj2-skill2"]').should('be.checked')
+    cy.get('[data-cy="skillSelect_proj2-skill3"]').should('be.checked')
+    cy.get('[data-cy="skillSelect_proj1-skill4"]').should('be.checked')
+    cy.get('[data-cy="skillSelect_proj1-skill5"]').should('be.checked')
+
+    cy.get('[data-cy="importBtn"]').should('be.enabled');
+    cy.get('[data-cy="numSelectedSkills"]').should('have.text', '5');
+    cy.get('[aria-label="Go to page 2"').click();
+    cy.wait('@getCatalogSkills');
+
+    cy.get('[data-cy="skillSelect_proj1-skill6"]').should('not.be.checked')
+    cy.get('[data-cy="skillSelect_proj1-skill7"]').should('not.be.checked')
+    cy.get('[data-cy="skillSelect_proj2-skill8"]').should('not.be.checked')
+    cy.get('[data-cy="skillSelect_proj1-skill67"]').should('not.be.checked')
+    cy.get('[data-cy="skillSelect_proj1-skill66"]').should('not.be.checked')
+    cy.get('[data-cy="selectPageOfSkillsBtn"]').click();
+    cy.get('[data-cy="importBtn"]').should('be.enabled');
+    cy.get('[data-cy="numSelectedSkills"]').should('have.text', '10');
+    cy.get('[data-cy="skillSelect_proj1-skill6"]').should('be.checked')
+    cy.get('[data-cy="skillSelect_proj1-skill7"]').should('be.checked')
+    cy.get('[data-cy="skillSelect_proj2-skill8"]').should('be.checked')
+    cy.get('[data-cy="skillSelect_proj1-skill67"]').should('be.checked')
+    cy.get('[data-cy="skillSelect_proj1-skill66"]').should('be.checked')
+    cy.get('[aria-label="Go to page 1"').click();
+    cy.wait('@getCatalogSkills');
+    cy.get('[data-cy="skillSelect_proj1-skill1"]').should('be.checked')
+    cy.get('[data-cy="skillSelect_proj2-skill2"]').should('be.checked')
+    cy.get('[data-cy="skillSelect_proj2-skill3"]').should('be.checked')
+    cy.get('[data-cy="skillSelect_proj1-skill4"]').should('be.checked')
+    cy.get('[data-cy="skillSelect_proj1-skill5"]').should('be.checked')
+    cy.get('[data-cy="importBtn"]').click();
+
+    cy.get('[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '10');
+    cy.get('[data-cy="importedBadge-skill1"]')
+    cy.get('[data-cy="importedBadge-skill2"]')
+    cy.get('[data-cy="importedBadge-skill3"]')
+    cy.get('[data-cy="importedBadge-skill4"]')
+    cy.get('[data-cy="importedBadge-skill5"]')
+    cy.get('[data-cy="importedBadge-skill6"]')
+    cy.get('[data-cy="importedBadge-skill7"]')
+    cy.get('[data-cy="importedBadge-skill8"]')
+    cy.get('[data-cy="importedBadge-skill66"]')
+    cy.get('[data-cy="importedBadge-skill67"]')
+
+    // only 3 left after import
+    cy.get('[data-cy="importFromCatalogBtn"]').click();
+    cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '1');*/
+  });
+
     it('clear removes selection of current page', () => {
       // mix skill names since it's sorted by skillId - this will force different projects in the first page
       cy.createSkill(1, 1, 1);
