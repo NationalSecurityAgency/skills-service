@@ -268,7 +268,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
 
     @Query(value ='''WITH skills AS (
                 select case when child.copied_from_skill_ref is not null then child.copied_from_skill_ref else child.id end as id,
-                       child.point_increment as point_increment
+                       child.point_increment as point_increment,
+                       child.id as originalRefId
                 from skill_relationship_definition rel,
                      skill_definition child
                 where rel.parent_ref_id = :parentSkillRefId
@@ -277,13 +278,13 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                   and child.type = 'Skill'
                   and child.enabled = 'true'
             )
-            select up.skill_ref_id skillRefId, sum(skills.point_increment) points
+            select skills.originalRefId skillRefId, sum(skills.point_increment) points
             from user_performed_skill up,
                  skills
             where up.user_id =:userId
               and up.skill_ref_id = skills.id
               and DATE_TRUNC('DAY', up.performed_on) = :day
-            group by up.skill_ref_id''', nativeQuery = true)
+            group by skills.originalRefId''', nativeQuery = true)
     List<SkillRefIdWithPoints> calculatePointsForChildSkillsForADay(@Param("userId") String userId,
                                                         @Param("parentSkillRefId") Integer parentSkillRefId,
                                                         @Param("relationshipTypes") List<String> relationshipTypes,
@@ -619,7 +620,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id,
                        point_increment as pointIncrement
                 from skill_definition
-                where project_id = :projectId and skill_id = :skillId
+                where project_id = :projectId 
+                    and skill_id = :skillId
             ),
             userPoints AS (
                 SELECT ups.user_id, sum(skill.pointIncrement) as newPoints
@@ -692,6 +694,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     user_points up
                     where sd.id = up.skill_ref_id
                           and up.project_id = :projectId
+                          and sd.type = 'Subject'
+                          and sd.enabled = 'true'
                     group by up.user_id
                 )
                 update user_points up set points = pointsToUpdate.newPoints
