@@ -33,6 +33,7 @@ import skills.controller.request.model.SkillImportRequest
 import skills.controller.request.model.SkillRequest
 import skills.controller.result.model.*
 import skills.services.RuleSetDefGraphService
+import skills.services.events.pointsAndAchievements.InsufficientPointsForFinalizationValidator
 import skills.services.events.pointsAndAchievements.InsufficientPointsValidator
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.accessors.SkillDefAccessor
@@ -85,7 +86,7 @@ class SkillCatalogService {
     SkillCatalogFinalizationService skillCatalogFinalizationService\
 
     @Autowired
-    InsufficientPointsValidator insufficientPointsValidator
+    InsufficientPointsForFinalizationValidator insufficientPointsValidator
 
     @Autowired
     ProjDefRepo projDefRepo

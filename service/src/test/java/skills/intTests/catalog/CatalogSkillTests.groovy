@@ -555,6 +555,8 @@ class CatalogSkillTests extends CatalogIntSpec {
         def skill2 = createSkill(1, 1, 2, 0, 1, 0, 10)
         def skill3 = createSkill(1, 1, 3, 0, 1, 0, 10)
 
+        def p2native = createSkill(2, 1, 3, 0, 1, 0, 100)
+
         skillsService.createProject(project1)
         skillsService.createProject(project2)
         skillsService.createProject(project3)
@@ -565,6 +567,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         skillsService.createSkill(skill)
         skillsService.createSkill(skill2)
         skillsService.createSkill(skill3)
+        skillsService.createSkill(p2native)
         skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
         skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
         skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
@@ -1133,6 +1136,8 @@ class CatalogSkillTests extends CatalogIntSpec {
         def skill5 = createSkill(2, 2, 5)
         def skill6 = createSkill(2, 2, 6)
 
+        def p2native = createSkill(2, 2, 99, 0, 1, 0, 100)
+
         skillsService.createProject(project1)
         skillsService.createProject(project2)
         skillsService.createSubject(p1subj1)
@@ -1144,6 +1149,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         skillsService.createSkill(skill4)
         skillsService.createSkill(skill5)
         skillsService.createSkill(skill6)
+        skillsService.createSkill(p2native)
         skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
         skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
         skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
@@ -1162,8 +1168,8 @@ class CatalogSkillTests extends CatalogIntSpec {
         //copiedFromProjectId, copiedFromProjectName, and readOnly are not populated by this endpoint
         skillsForProject.findAll { it.readOnly && it.copiedFromProjectId && it.copiedFromProjectName }.size() == 0
 
-        skills.collect { it.skillId } == ["skill4subj2", "skill5subj2", "skill6subj2", "skill1", "skill2", "skill3"]
-        skillsForProjectWithoutImported.collect { it.skillId } == ["skill4subj2", "skill5subj2", "skill6subj2"]
+        skills.collect { it.skillId } == ["skill4subj2", "skill5subj2", "skill6subj2", "skill99subj2", "skill1", "skill2", "skill3"]
+        skillsForProjectWithoutImported.collect { it.skillId } == ["skill4subj2", "skill5subj2", "skill6subj2", "skill99subj2"]
     }
 
     def "get exported to catalog stats for project"() {
@@ -1173,7 +1179,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         def p1subj1 = createSubject(1, 1)
         def p2subj1 = createSubject(2, 2)
 
-        def skill = createSkill(1, 1, 1, 0, 1, 0, 10)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
         def skill2 = createSkill(1, 1, 2, 0, 1, 0, 10)
         def skill3 = createSkill(1, 1, 3, 0, 1, 0, 10)
 
@@ -1227,7 +1233,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         def p2subj2 = createSubject(2, 3)
         def p4subj1 = createSubject(3, 1)
 
-        def skill = createSkill(1, 1, 1, 0, 1, 0, 10)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
         def skill2 = createSkill(1, 1, 2, 0, 1, 0, 10)
         def skill3 = createSkill(1, 1, 3, 0, 1, 0, 10)
 
@@ -1236,6 +1242,8 @@ class CatalogSkillTests extends CatalogIntSpec {
         def skill6 = createSkill(1, 1, 6)
 
         def skill7 = createSkill(3, 1, 7)
+
+        def p2subj2skill1 = createSkill(2, 3, 99, 0, 1, 0, 100)
 
         skillsService.createProject(project1)
         skillsService.createProject(project2)
@@ -1252,6 +1260,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         skillsService.createSkill(skill5)
         skillsService.createSkill(skill6)
         skillsService.createSkill(skill7)
+        skillsService.createSkill(p2subj2skill1)
 
         when:
 
@@ -1289,7 +1298,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         def p2subj2 = createSubject(2, 3)
         def p3subj1 = createSubject(3, 1)
 
-        def skill = createSkill(1, 1, 1, 0, 1, 0, 10)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
         def skill2 = createSkill(1, 1, 2, 0, 1, 0, 10)
         def skill3 = createSkill(1, 1, 3, 0, 1, 0, 10)
 
@@ -1298,6 +1307,8 @@ class CatalogSkillTests extends CatalogIntSpec {
         def skill6 = createSkill(1, 1, 6)
 
         def skill7 = createSkill(3, 1, 7)
+
+        def p2subj2native = createSkill(2, 3, 1, 0, 1, 0, 100)
 
         skillsService.createProject(project1)
         skillsService.createProject(project2)
@@ -1314,6 +1325,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         skillsService.createSkill(skill5)
         skillsService.createSkill(skill6)
         skillsService.createSkill(skill7)
+        skillsService.createSkill(p2subj2native)
 
         when:
 
@@ -1368,6 +1380,11 @@ class CatalogSkillTests extends CatalogIntSpec {
 
         def skill9 = createSkill(2, 2, 9)
 
+        def p2subj1native = createSkill(2, 2, 1, 0, 1, 0, 900)
+        p2subj1native.name = "skill99"
+        def  p2subj2native= createSkill(2, 3, 1, 0, 1, 0, 900)
+        p2subj2native.name = "skill999"
+
         skillsService.createProject(project1)
         skillsService.createProject(project2)
         skillsService.createProject(project3)
@@ -1385,6 +1402,8 @@ class CatalogSkillTests extends CatalogIntSpec {
         skillsService.createSkill(skill6)
         skillsService.createSkill(skill7)
         skillsService.createSkill(skill9)
+        skillsService.createSkill(p2subj1native)
+        skillsService.createSkill(p2subj2native)
 
         when:
 
@@ -1668,8 +1687,8 @@ class CatalogSkillTests extends CatalogIntSpec {
         def skill3 = createSkill(1, 1, 3, 0, 1, 0, 10)
         def skill4 = createSkill(1, 1, 4, 0, 1, 0, 10)
 
-        def p2skill1 = createSkill(2, 1, 11)
-        def p2skill2 = createSkill(2, 1, 12)
+        def p2skill1 = createSkill(2, 1, 11, 0, 1, 0, 100)
+        def p2skill2 = createSkill(2, 1, 12, 0, 1, 0, 100)
 
         skillsService.createProject(project1)
         skillsService.createProject(project2)
@@ -2696,7 +2715,7 @@ class CatalogSkillTests extends CatalogIntSpec {
 
         then:
         def e = thrown(Exception)
-        e.message.contains("errorCode:InsufficientProjectPoints")
+        e.message.contains("errorCode:InsufficientProjectFinalizationPoints")
 
 
     }
@@ -2746,7 +2765,7 @@ class CatalogSkillTests extends CatalogIntSpec {
 
         then:
         def e = thrown(Exception)
-        e.message.contains("errorCode:InsufficientSubjectPoints")
+        e.message.contains("errorCode:InsufficientSubjectFinalizationPoints")
     }
 
 }

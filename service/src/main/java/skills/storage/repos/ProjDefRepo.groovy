@@ -426,14 +426,14 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
     ProjectSummaryResult getProjectName(String projectId)
 
     @Query(value='''
-        select max(pd.project_id) as projectId, max(pd.name) as name, (sum(sd.total_points)+max(pd.total_points)) as totalIncPendingFinalized 
-        from skill_definition sd 
-        join project_definition pd on pd.project_id = sd.project_id
-        where 
-        sd.project_id = :projectId and
+        select max(pd.project_id) as projectId, max(pd.name) as name, (coalesce (sum(sd.total_points),0)+max(pd.total_points)) as totalIncPendingFinalized 
+        from project_definition pd
+        left join skill_definition sd on sd.project_id = pd.project_id and
         sd.type = 'Skill' and 
         sd.enabled = 'false' and 
         sd.copied_from_project_id is not null
+        where
+        pd.project_id = :projectId
         group by sd.project_id''', nativeQuery = true)
     ProjectTotalPoints getProjectTotalPointsIncPendingFinalization(@Param("projectId") String projectId)
 

@@ -110,7 +110,6 @@ limitations under the License.
             return CatalogService.getTotalPointsIncNotFinalized(this.$route.params.projectId);
           }).then((countData) => {
             this.canFinalize = true;
-            console.log('got countData', countData);
             if (countData.insufficientProjectPoints || countData.subjectsWithInsufficientPoints.length > 0) {
               this.canFinalize = false;
               if (countData.insufficientProjectPoints) {

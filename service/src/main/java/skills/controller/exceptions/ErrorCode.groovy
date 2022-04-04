@@ -31,6 +31,8 @@ enum ErrorCode {
     EmptyBadgeNotAllowed,
     InsufficientProjectPoints,
     InsufficientSubjectPoints,
+    InsufficientProjectFinalizationPoints,
+    InsufficientSubjectFinalizationPoints,
     ReadOnlySkill,
     UserTokenExpired,
     SkillAlreadyInCatalog,
