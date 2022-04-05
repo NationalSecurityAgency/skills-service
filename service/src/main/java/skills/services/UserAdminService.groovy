@@ -104,18 +104,7 @@ class UserAdminService {
     @Transactional(readOnly = true)
     UserSkillsStats getUserSkillsStats(String projectId, String userId) {
         int numSkills =  performedSkillRepository.countDistinctSkillIdByProjectIdAndUserId(projectId, userId)
-        UserPoints userPoints
-        try {
-            userPoints = userPointsRepo.findByProjectIdAndUserIdAndSkillId(projectId, userId, null)
-        } catch (Throwable t) {
-            log.error("------------------------------ " + t?.message)
-            log.error("findByProjectIdAndUserIdAndSkillId return dups for projectId=[${projectId}], userId=[${userId}]")
-            userPointsRepo.findAll().each {
-                log.error(JsonOutput.toJson(it))
-            }
-            log.error("------------------------------")
-            throw t;
-        }
+        UserPoints userPoints = userPointsRepo.findByProjectIdAndUserIdAndSkillId(projectId, userId, null)
         return new UserSkillsStats(numSkills: numSkills, userTotalPoints: userPoints?.points ?: 0 )
     }
 }
