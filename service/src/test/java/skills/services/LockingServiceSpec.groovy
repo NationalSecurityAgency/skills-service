@@ -84,15 +84,6 @@ class LockingServiceSpec extends DefaultIntSpec {
     }
 
     @Transactional
-    def "lock for user project"() {
-        when:
-        SkillsDBLock lock = lockingService.lockForImportedSkillPropagation("user", "project")
-
-        then:
-        lock
-    }
-
-    @Transactional
     def "lock for skill reporting"() {
         when:
         SkillsDBLock lock = lockingService.lockForSkillReporting("user", "project")
@@ -116,7 +107,7 @@ class LockingServiceSpec extends DefaultIntSpec {
                 transactionTemplate.execute(new TransactionCallback<Boolean>() {
                     @Override
                     Boolean doInTransaction(TransactionStatus status) {
-                        SkillsDBLock lock = lockingService.lockForImportedSkillPropagation("aUser", "aProject")
+                        SkillsDBLock lock = lockingService.lockForSkillReporting("aUser", "aProject")
                         t1Start.set(System.currentTimeMillis())
                         Thread.currentThread().sleep(sleepTime)
                         return true;
@@ -134,7 +125,7 @@ class LockingServiceSpec extends DefaultIntSpec {
                     @Override
                     Boolean doInTransaction(TransactionStatus status) {
                             try {
-                                SkillsDBLock lock = lockingService.lockForImportedSkillPropagation("aUser", "aProject")
+                                SkillsDBLock lock = lockingService.lockForSkillReporting("aUser", "aProject")
                                 t2Start.set(System.currentTimeMillis())
                                 return true
                             } catch (e) {
