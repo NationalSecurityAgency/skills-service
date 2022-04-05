@@ -116,6 +116,7 @@ class UserAdminService {
             log.error("------------------------------")
             throw t;
         }
+
         return new UserSkillsStats(numSkills: numSkills, userTotalPoints: userPoints?.points ?: 0 )
     }
 }
