@@ -40,6 +40,7 @@ limitations under the License.
           </b-button>
           <b-button target="_blank" v-if="project" :to="{ name:'MyProjectSkills', params: { projectId: project.projectId } }"
                     data-cy="projectPreview"
+                    v-skills="'PreviewProjectClientDisplay'"
                     variant="outline-primary" :aria-label="'preview client display for project'+project.name">
             <span>Preview</span> <i class="fas fa-eye" style="font-size:1rem;" aria-hidden="true"/>
           </b-button>

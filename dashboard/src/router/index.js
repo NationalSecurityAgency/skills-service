@@ -399,7 +399,7 @@ const router = new Router({
         name: 'SubjectMetrics',
         path: 'metrics',
         component: MetricsOnSubjectPage,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, reportSkillId: 'VisitSubjectMetrics' },
       }],
     },
     {
