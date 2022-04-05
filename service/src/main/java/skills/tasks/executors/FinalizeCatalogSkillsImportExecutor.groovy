@@ -15,13 +15,13 @@
  */
 package skills.tasks.executors
 
+import callStack.profiler.CProf
 import com.github.kagkarlsson.scheduler.task.ExecutionContext
 import com.github.kagkarlsson.scheduler.task.TaskInstance
 import com.github.kagkarlsson.scheduler.task.VoidExecutionHandler
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Transactional
 import skills.services.admin.SkillCatalogFinalizationService
 import skills.tasks.data.CatalogFinalizeRequest
 
@@ -36,7 +36,15 @@ class FinalizeCatalogSkillsImportExecutor implements VoidExecutionHandler<Catalo
     void execute(TaskInstance<CatalogFinalizeRequest> taskInstance, ExecutionContext executionContext) {
         CatalogFinalizeRequest data = taskInstance.getData()
         log.debug("running async FinalizeCatalogSkillsImportExecutor for [{}]", data.projectId)
+
+        CProf.clear()
+        String profName = "${data.projectId}-finalize".toString()
+        CProf.start(profName)
+
         SkillCatalogFinalizationService.FinalizeCatalogSkillsImportResult res = skillCatalogFinalizationService.finalizeCatalogSkillsImport(data.projectId)
         skillCatalogFinalizationService.applyEventsThatWereReportedDuringTheFinalizationRun(res.skillRefIds, res.start, res.end)
+
+        CProf.stop(profName)
+        log.info("Profiled FinalizeCatalogSkillsImportExecutor for [{}]:\n{}", data.projectId, CProf.prettyPrint())
     }
 }

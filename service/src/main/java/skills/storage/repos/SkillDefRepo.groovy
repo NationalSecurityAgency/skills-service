@@ -504,9 +504,9 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
             from skill_definition
             where project_id = :projectId
               and type = 'Subject'
-              and enabled = 'true')
+              and (enabled = 'true' or 'false' = :enabledSkillsOnly ))
         where project_id = :projectId''', nativeQuery = true)
-    void updateProjectsTotalPoints(@Param('projectId') String projectId)
+    void updateProjectsTotalPoints(@Param('projectId') String projectId, @Param('enabledSkillsOnly') Boolean enabledSkillsOnly)
 
     @Modifying
     @Query(value = '''update skill_definition subject
@@ -521,12 +521,12 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
               and subject.skill_id = :subjectId
               and subject.type = 'Subject'
               and skill.type = 'Skill'
-              and skill.enabled = 'true')
+              and (skill.enabled = 'true' or 'false' = :enabledSkillsOnly))
         where subject.project_id = :projectId
           and subject.skill_id = :subjectId
           and subject.type = 'Subject' 
           ''', nativeQuery = true)
-    void updateSubjectTotalPoints(@Param('projectId') String projectId, @Param('subjectId') String subjectId)
+    void updateSubjectTotalPoints(@Param('projectId') String projectId, @Param('subjectId') String subjectId, @Param('enabledSkillsOnly') Boolean enabledSkillsOnly)
 
     @Query(value = '''
          select exists (select 1 from skill_definition where project_id = :projectId and skill_id = :skillId and read_only = 'true') as isReadOnly

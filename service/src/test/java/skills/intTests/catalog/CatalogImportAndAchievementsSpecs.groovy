@@ -20,13 +20,13 @@ import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.SkillsFactory
 import skills.services.LevelDefinitionStorageService
+import skills.services.admin.SkillCatalogTransactionalAccessor
 import skills.storage.model.UserAchievement
 import skills.storage.model.UserEvent
 import skills.storage.model.UserPerformedSkill
 import skills.storage.model.UserPoints
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
-import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -738,6 +738,169 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
         printLevels(project2.projectId, "before import")
         skillsService.bulkImportSkillsFromCatalog(project2.projectId, p2subj1.subjectId, [[ projectId: project1.projectId, skillId: skill.skillId], [projectId: project3.projectId, skillId: skill7.skillId]])
         skillsService.finalizeSkillsImportFromCatalog(project2.projectId)
+        printLevels(project2.projectId, "after import2 (2 skills)")
+
+        Integer proj2_user1Level_import2 = skillsService.getUserLevel(project2.projectId, user)
+        Integer proj2_user2Level_import2 = skillsService.getUserLevel(project2.projectId, user2)
+        def proj2_user1Stats_import2 = skillsService.getUserStats(project2.projectId, user)
+        List<UserAchievement> proj2_user1Achievements_import2 = userAchievedRepo.findAll().findAll { it.userId == user && it.level != null && it.projectId == project2.projectId && it.skillRefId == null}
+        List<UserAchievement> proj2_user1Achievements_subj1_import2 = userAchievedRepo.findAll().findAll { it.userId == user && it.level != null && it.projectId == project2.projectId && it.skillRefId == proj2_subj1_ref_id}
+
+        Integer proj2_user3Level_import2 = skillsService.getUserLevel(project2.projectId, user3)
+        def proj2_user3Stats_import2 = skillsService.getUserStats(project2.projectId, user3)
+        List<UserAchievement> proj2_user3Achievements_import2 = userAchievedRepo.findAll().findAll { it.userId == user3 && it.level != null && it.projectId == project2.projectId && it.skillRefId == null}
+        List<UserAchievement> proj2_user3Achievements_subj1_import2 = userAchievedRepo.findAll().findAll { it.userId == user3 && it.level != null && it.projectId == project2.projectId && it.skillRefId == proj2_subj1_ref_id}
+
+        then:
+        proj2_user1Level_import0 == 1
+        proj2_user2Level_import0 == 1
+        proj2_user1Stats_import0.numSkills == 3
+        proj2_user1Stats_import0.userTotalPoints == 750
+        proj2_user1Achievements_import0.collect { it.level }.sort() == [1]
+        proj2_user1Achievements_subj1_import0.collect { it.level }.sort() == [1]
+        proj2_user3Level_import0 == 3
+        proj2_user3Stats_import0.numSkills == 2
+        proj2_user3Stats_import0.userTotalPoints == 2250
+        proj2_user3Achievements_import0.collect { it.level }.sort() == [1, 2, 3]
+        proj2_user3Achievements_subj1_import0.collect { it.level }.sort() == [1, 2, 3]
+
+        proj2_user1Level_import2 == 4
+        proj2_user2Level_import2 == 1
+        proj2_user1Stats_import2.numSkills == 5
+        proj2_user1Stats_import2.userTotalPoints == 8750
+        proj2_user1Achievements_import2.collect { it.level }.sort() == [1, 2, 3, 4]
+        proj2_user1Achievements_subj1_import2.collect { it.level }.sort() == [1, 2, 3, 4]
+        proj2_user3Level_import2 == 4
+        proj2_user3Stats_import2.numSkills == 4
+        proj2_user3Stats_import2.userTotalPoints == 8500
+        proj2_user3Achievements_import2.collect { it.level }.sort() == [1, 2, 3, 4]
+        proj2_user3Achievements_subj1_import2.collect { it.level }.sort() == [1, 2, 3, 4]
+    }
+
+    @Autowired
+    SkillCatalogTransactionalAccessor skillCatalogTransactionalAccessor
+
+    def "finalization sql statements can be executed multiple times without causing issues"() {
+        def project1 = createProject(1)
+        def project2 = createProject(2)
+        def project3 = createProject(3)
+
+        def p1subj1 = createSubject(1, 1)
+        def p2subj1 = createSubject(2, 1)
+        def p3subj1 = createSubject(3, 1)
+
+        skillsService.createProject(project1)
+        skillsService.createProject(project2)
+        skillsService.createProject(project3)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p2subj1)
+        skillsService.createSubject(p3subj1)
+
+        // project 1
+        def skill = createSkill(1, 1, 1, 0, 5, 0, 250)
+        def skill2 = createSkill(1, 1, 2, 0, 5, 0, 250)
+        def skill3 = createSkill(1, 1, 3, 0, 5, 0, 250)
+        skillsService.createSkill(skill)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(skill3)
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
+
+        // project 2
+        def skill4 = createSkill(2, 1, 4, 0, 5, 0, 250)
+        def skill5 = createSkill(2, 1, 5, 0, 5, 0, 250)
+        def skill6 = createSkill(2, 1, 6, 0, 5, 0, 250)
+        skillsService.createSkill(skill4)
+        skillsService.createSkill(skill5)
+        skillsService.createSkill(skill6)
+        skillsService.exportSkillToCatalog(project2.projectId, skill4.skillId)
+        skillsService.exportSkillToCatalog(project2.projectId, skill5.skillId)
+        skillsService.exportSkillToCatalog(project2.projectId, skill6.skillId)
+
+        // project 3
+        def skill7 = createSkill(3, 1, 7, 0, 5, 0, 1500)
+        def skill8 = createSkill(3, 1, 8, 0, 5, 0, 250)
+        def skill9 = createSkill(3, 1, 9, 0, 5, 0, 250)
+        skillsService.createSkill(skill7)
+        skillsService.createSkill(skill8)
+        skillsService.createSkill(skill9)
+
+        skillsService.exportSkillToCatalog(project3.projectId, skill7.skillId)
+        skillsService.exportSkillToCatalog(project3.projectId, skill8.skillId)
+        skillsService.exportSkillToCatalog(project3.projectId, skill9.skillId)
+
+        def randomUsers = getRandomUsers(3)
+        def user = randomUsers[0]
+        def user2 = randomUsers[1]
+        def user3 = randomUsers[2]
+
+        // user 1
+        skillsService.addSkill([projectId: project2.projectId, skillId: skill4.skillId], user)
+        skillsService.addSkill([projectId: project2.projectId, skillId: skill5.skillId], user)
+        skillsService.addSkill([projectId: project2.projectId, skillId: skill6.skillId], user)
+
+        skillsService.addSkill([projectId: project1.projectId, skillId: skill.skillId], user)
+        skillsService.addSkill([projectId: project1.projectId, skillId: skill.skillId], user)
+
+        5.times {
+            skillsService.addSkill([projectId: project3.projectId, skillId: skill7.skillId], user)
+            skillsService.addSkill([projectId: project3.projectId, skillId: skill8.skillId], user)
+            skillsService.addSkill([projectId: project3.projectId, skillId: skill9.skillId], user)
+        }
+
+        // user 2
+        skillsService.addSkill([projectId: project2.projectId, skillId: skill4.skillId], user2)
+        skillsService.addSkill([projectId: project2.projectId, skillId: skill5.skillId], user2)
+        skillsService.addSkill([projectId: project2.projectId, skillId: skill6.skillId], user2)
+
+        // user 3
+        4.times {
+            skillsService.addSkill([projectId: project2.projectId, skillId: skill4.skillId], user3)
+        }
+        5.times {
+            skillsService.addSkill([projectId: project2.projectId, skillId: skill6.skillId], user3)
+        }
+        skillsService.addSkill([projectId: project3.projectId, skillId: skill9.skillId], user3)
+        4.times {
+            skillsService.addSkill([projectId: project3.projectId, skillId: skill7.skillId], user3)
+        }
+        skillsService.addSkill([projectId: project1.projectId, skillId: skill.skillId], user3)
+        skillsService.addSkill([projectId: project1.projectId, skillId: skill2.skillId], user3)
+        skillsService.addSkill([projectId: project1.projectId, skillId: skill2.skillId], user3)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        Integer proj2_subj1_ref_id = skillDefRepo.findByProjectIdAndSkillId(project2.projectId, p1subj1.subjectId).id
+        when:
+        Integer proj2_user1Level_import0 = skillsService.getUserLevel(project2.projectId, user)
+        Integer proj2_user2Level_import0 = skillsService.getUserLevel(project2.projectId, user2)
+        def proj2_user1Stats_import0 = skillsService.getUserStats(project2.projectId, user)
+        List<UserAchievement> proj2_user1Achievements_import0 = userAchievedRepo.findAll().findAll { it.userId == user && it.level != null && it.projectId == project2.projectId && it.skillRefId == null}
+        List<UserAchievement> proj2_user1Achievements_subj1_import0 = userAchievedRepo.findAll().findAll { it.userId == user && it.level != null && it.projectId == project2.projectId && it.skillRefId == proj2_subj1_ref_id}
+
+        Integer proj2_user3Level_import0 = skillsService.getUserLevel(project2.projectId, user3)
+        def proj2_user3Stats_import0 = skillsService.getUserStats(project2.projectId, user3)
+        List<UserAchievement> proj2_user3Achievements_import0 = userAchievedRepo.findAll().findAll { it.userId == user3 && it.level != null && it.projectId == project2.projectId && it.skillRefId == null}
+        List<UserAchievement> proj2_user3Achievements_subj1_import0 = userAchievedRepo.findAll().findAll { it.userId == user3 && it.level != null && it.projectId == project2.projectId && it.skillRefId == proj2_subj1_ref_id}
+
+        printLevels(project2.projectId, "before import")
+        skillsService.bulkImportSkillsFromCatalog(project2.projectId, p2subj1.subjectId, [[ projectId: project1.projectId, skillId: skill.skillId], [projectId: project3.projectId, skillId: skill7.skillId]])
+        skillsService.finalizeSkillsImportFromCatalog(project2.projectId)
+
+        skillCatalogTransactionalAccessor.updateSubjectTotalPoints(project2.projectId, p2subj1.subjectId)
+        skillCatalogTransactionalAccessor.updateProjectsTotalPoints(project2.projectId)
+        List<Integer> skillRefIds = [[ projectId: project1.projectId, skillId: skill.skillId], [projectId: project3.projectId, skillId: skill7.skillId]].collect({ skillDefRepo.findByProjectIdAndSkillId(it.projectId, it.skillId).id })
+        skillCatalogTransactionalAccessor.copySkillUserPointsToTheImportedProjects(project2.projectId, skillRefIds)
+        skillCatalogTransactionalAccessor.copySkillAchievementsToTheImportedProjects(project2.projectId, skillRefIds)
+
+        skillCatalogTransactionalAccessor.createSubjectUserPointsForTheNewUsers(project2.projectId, p2subj1.subjectId)
+        skillCatalogTransactionalAccessor.updateUserPointsForSubjectOrGroup(project2.projectId, p2subj1.subjectId)
+        skillCatalogTransactionalAccessor.identifyAndAddSubjectLevelAchievements(project2.projectId, p2subj1.subjectId, false)
+
+        skillCatalogTransactionalAccessor.createProjectUserPointsForTheNewUsers(project2.projectId)
+        skillCatalogTransactionalAccessor.updateUserPointsForProject(project2.projectId)
+        skillCatalogTransactionalAccessor.identifyAndAddProjectLevelAchievements(project2.projectId, false)
+
         printLevels(project2.projectId, "after import2 (2 skills)")
 
         Integer proj2_user1Level_import2 = skillsService.getUserLevel(project2.projectId, user)
