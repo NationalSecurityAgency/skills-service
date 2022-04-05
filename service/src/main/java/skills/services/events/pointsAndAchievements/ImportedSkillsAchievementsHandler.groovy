@@ -58,29 +58,18 @@ class ImportedSkillsAchievementsHandler {
             log.debug("userId=[${userId}], skill=[${skill.skillId}], incomingSkillDate=[${incomingSkillDate}], thisRequestCompletedOriginalSkill=[${thisRequestCompletedOriginalSkill}]")
         }
         lockTransaction(userId, skill.projectId)
-        List<SkillDefMin> skills = skillDefRepo.findSkillDefMinCopiedFrom(skill.id)
-        List<SkillDef> subjects = []
-        skills?.each {
-            // handle user points and level achievements
-            pointsAndAchievementsHandler.updatePointsAndAchievements(userId, it, incomingSkillDate)
+        // handle user points and level achievements
+        pointsAndAchievementsHandler.updatePointsAndAchievements(userId, skill, incomingSkillDate)
 
-            if (thisRequestCompletedOriginalSkill) {
-                SkillEventResult mockResForBadgeCheck = new SkillEventResult()
-                pointsAndAchievementsHandler.documentSkillAchieved(userId, it, mockResForBadgeCheck, incomingSkillDate)
-                achievedBadgeHandler.checkForBadges(mockResForBadgeCheck, userId, it, incomingSkillDate)
-            }
-
-            // aggregate subjects
-            SkillDef parent = ruleSetDefGraphService.getParentSkill(it.id)
-            assert parent.type == SkillDef.ContainerType.Subject
-            if (!subjects.find { it.id == parent.id}) {
-                subjects.add(parent)
-            }
+        if (thisRequestCompletedOriginalSkill) {
+            SkillEventResult mockResForBadgeCheck = new SkillEventResult()
+            pointsAndAchievementsHandler.documentSkillAchieved(userId, skill, mockResForBadgeCheck, incomingSkillDate)
+            achievedBadgeHandler.checkForBadges(mockResForBadgeCheck, userId, skill, incomingSkillDate)
         }
 
-        subjects.each {
-            userAchievementsAndPointsManagement.identifyAndAddLevelAchievements(it)
-        }
+        SkillDef subjectDef = ruleSetDefGraphService.getParentSkill(skill.id)
+        assert subjectDef.type == SkillDef.ContainerType.Subject
+        userAchievementsAndPointsManagement.identifyAndAddLevelAchievements(subjectDef)
     }
 
     @Profile

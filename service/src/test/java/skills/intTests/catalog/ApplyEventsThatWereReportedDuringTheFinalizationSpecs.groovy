@@ -78,6 +78,7 @@ class ApplyEventsThatWereReportedDuringTheFinalizationSpecs extends CatalogIntSp
         def projPts_before = getPoints(user, proj2.projectId, null)
 
         skillCatalogFinalizationService.applyEventsThatWereReportedDuringTheFinalizationRun([skillDef.id], start, end)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 
         then:
         skillPts_before == 10 * 4
@@ -152,6 +153,7 @@ class ApplyEventsThatWereReportedDuringTheFinalizationSpecs extends CatalogIntSp
         List<UserAchievement> achievementsBefore = userAchievedRepo.findAll()
 
         skillCatalogFinalizationService.applyEventsThatWereReportedDuringTheFinalizationRun([skillDef.id], start, end)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 
         List<UserAchievement> achievementsAfter = userAchievedRepo.findAll()
 

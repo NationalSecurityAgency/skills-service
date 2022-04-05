@@ -176,12 +176,12 @@ class SkillCatalogFinalizationService {
             String dateFormat = "yyyy-MM-dd HH:mm:ss,SSS"
             Date start = new Date(startOfFinalization)
             Date end = new Date(endOfFinalization)
-            List<Integer> originalSkillIds = skillDefRepo.findOriginalCopiedFromSkillRefIdsByIdIn(finalizedSkillIds)
-            log.info("Handling Events that were reporting during the finalization runs for [{}] skills between [{}] => [{}]", originalSkillIds.size(), start.format(dateFormat), end.format(dateFormat))
-            originalSkillIds.each { Integer skillRefId ->
-                List<UserPerformedSkill> foundEvents = userPerformedSkillRepo.findAllBySkillRefIdWithinTimeRange(skillRefId, start, end)
+            log.info("Handling Events that were reporting during the finalization runs for [{}] skills between [{}] => [{}]", finalizedSkillIds.size(), start.format(dateFormat), end.format(dateFormat))
+            finalizedSkillIds.each { Integer importedSkillRefId ->
+                Integer originalSkillRefId = skillDefRepo.getCopiedFromById(importedSkillRefId)
+                List<UserPerformedSkill> foundEvents = userPerformedSkillRepo.findAllBySkillRefIdWithinTimeRange(originalSkillRefId, start, end)
                 if (foundEvents) {
-                    SkillDefMin skill = skillDefRepo.findSkillDefMinById(skillRefId)
+                    SkillDefMin skill = skillDefRepo.findSkillDefMinById(originalSkillRefId)
                     log.info("Processing [{}] missed events for skill [{}] between [{}] and [{}]", foundEvents.size(), skill.skillId, start, end)
                     foundEvents.each {
                         log.info("Processing missed event skill=[{}], created=[{}], userId=[{}]", it.skillId, it.created.format(dateFormat), it.userId)
@@ -192,10 +192,10 @@ class SkillCatalogFinalizationService {
                             thisRequestCompletedOriginalSkill = userAchievement.achievedOn.time == it.performedOn.time
                         }
                         SkillDate skillDate = new SkillDate(date: new Date(it.performedOn.time), isProvided: true)
-                        importedSkillsAchievementsHandler.handleAchievementsForImportedSkills(it.userId, skill, skillDate, thisRequestCompletedOriginalSkill)
+                        taskSchedulerService.scheduleImportedSkillAchievement(it.userId, importedSkillRefId, skillDate, thisRequestCompletedOriginalSkill)
                     }
                 } else {
-                    log.info("Handling Events that were reporting during the finalization: Found 0 events for skillRefId=[{}]. Nothing to do", skillRefId)
+                    log.info("Handling Events that were reporting during the finalization: Found 0 events for originalSkillRefId=[{}], importedSkillRefId=[{}]. Nothing to do", originalSkillRefId, importedSkillRefId)
                 }
             }
         }
