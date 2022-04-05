@@ -58,6 +58,10 @@ function terminalLog(violations) {
       } ${length === 1 ? 'was' : 'were'} detected`
     )
     if (length > 0 ) {
+        violations.forEach((v) => {
+            cy.log(`Accessibility violation [${v.id}]: ${v.description}`);
+        });
+
         // pluck specific keys to keep the table readable
         const violationData = violations.map(
           ({ id, impact, description, nodes }) => ({
