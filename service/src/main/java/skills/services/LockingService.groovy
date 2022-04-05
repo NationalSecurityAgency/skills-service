@@ -110,12 +110,6 @@ class LockingService {
         return lock
     }
 
-    SkillsDBLock lockForImportedSkillPropagation(String userId, String projectId) {
-        String key = "propagateSkill_" + userId + projectId
-        SkillsDBLock lock = nativeQueriesRepo.insertLockOrSelectExisting(key)
-        return lock
-    }
-
     @Transactional
     void deleteLocksOlderThan(Date date) {
         skillsDBLockRepo.deleteByCreatedBeforeAndExpires(date)

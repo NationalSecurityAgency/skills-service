@@ -86,6 +86,6 @@ class ImportedSkillsAchievementsHandler {
     @Profile
     private void lockTransaction(String userId, String project) {
         log.debug("locking user [{}]-[{}]", userId, project)
-        lockingService.lockForImportedSkillPropagation(userId, project)
+        lockingService.lockForSkillReporting(userId, project)
     }
 }
