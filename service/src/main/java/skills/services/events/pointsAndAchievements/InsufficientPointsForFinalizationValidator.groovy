@@ -25,7 +25,7 @@ import skills.controller.exceptions.SkillExceptionBuilder
 @Component
 @Slf4j
 @CompileStatic
-class InsufficientPointsValidator {
+class InsufficientPointsForFinalizationValidator {
 
     @Value('#{"${skills.config.ui.minimumSubjectPoints}"}')
     int minimumSubjectPoints
@@ -36,9 +36,9 @@ class InsufficientPointsValidator {
     void validateProjectPoints(int projDefPoints, String projectId, String userId = null) {
         if (projDefPoints < minimumProjectPoints) {
             SkillExceptionBuilder builder = new SkillExceptionBuilder()
-                    .msg("Insufficient project points, skill achievement is disallowed")
+                    .msg("Insufficient project points, import finalization is disallowed")
                     .projectId(projectId)
-                    .errorCode(ErrorCode.InsufficientProjectPoints)
+                    .errorCode(ErrorCode.InsufficientProjectFinalizationPoints)
             if (userId) {
                 builder.userId(userId)
             }
@@ -49,10 +49,10 @@ class InsufficientPointsValidator {
     void validateSubjectPoints(int subjectDefPoints, String projectId, String subjectId, String userId = null) {
         if (subjectDefPoints < minimumSubjectPoints) {
             SkillExceptionBuilder builder = new SkillExceptionBuilder()
-                    .msg("Insufficient Subject points, skill achievement is disallowed")
+                    .msg("Insufficient Subject points, import finalization is disallowed")
                     .projectId(projectId)
                     .skillId(subjectId)
-                    .errorCode(ErrorCode.InsufficientSubjectPoints)
+                    .errorCode(ErrorCode.InsufficientSubjectFinalizationPoints)
             if (userId) {
                 builder.userId(userId)
             }

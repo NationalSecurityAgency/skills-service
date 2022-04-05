@@ -845,7 +845,7 @@ Always yours, <br/> -SkillTree Bot
 
         then:
         SkillsClientException skillsClientException = thrown(SkillsClientException)
-        skillsClientException.message.contains("Insufficient Subject points, skill achievement is disallowed, errorCode:InsufficientSubjectPoints, success:false, projectId:${subj.projectId}, skillId:null")
+        skillsClientException.message.contains("Insufficient Subject points, skill achievement is disallowed, errorCode:InsufficientSubjectPoints, success:false, projectId:${subj.projectId}, skillId:${subj.subjectId}")
         skillsClientException.message.contains(userId)
     }
 
@@ -869,7 +869,7 @@ Always yours, <br/> -SkillTree Bot
 
         then:
         SkillsClientException skillsClientException = thrown(SkillsClientException)
-        skillsClientException.message.contains("Insufficient Subject points, skill achievement is disallowed, errorCode:InsufficientSubjectPoints, success:false, projectId:${subj.projectId}, skillId:null")
+        skillsClientException.message.contains("Insufficient Subject points, skill achievement is disallowed, errorCode:InsufficientSubjectPoints, success:false, projectId:${subj.projectId}, skillId:${subj.subjectId}")
         skillsClientException.message.contains(userId)
     }
 }

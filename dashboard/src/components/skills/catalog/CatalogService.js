@@ -63,4 +63,8 @@ export default {
     const url = `/admin/projects/${projectId}/catalog/finalize`;
     return axios.post(url).then((response) => response.data);
   },
+  getTotalPointsIncNotFinalized(projectId) {
+    const url = `/admin/projects/${projectId}/pendingFinalization/pointTotals`;
+    return axios.get(url).then((response) => response.data);
+  },
 };

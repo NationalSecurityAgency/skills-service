@@ -1181,6 +1181,11 @@ class AdminController {
         return tr
     }
 
+    @RequestMapping(value="/projects/{projectId}/pendingFinalization/pointTotals", method=RequestMethod.GET, produces = "application/json")
+    PointsIncludingNotFinalized getPointTotalsIncNotFinalized(@PathVariable("projectId") String projectId) {
+        return skillCatalogService.getTotalPointsIncludingPendingFinalization(projectId)
+    }
+
     @RequestMapping(value = "/projects/{projectId}/skills/exported", method = RequestMethod.GET, produces = "application/json")
     TableResult getExportedSkills(@PathVariable("projectId") String projectId,
                                         @RequestParam int limit,

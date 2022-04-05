@@ -18,6 +18,7 @@ package skills.intTests
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import spock.lang.IgnoreRest
 
 /**
  * Make sure systems behaves well when ruleset definitions don't contain a lot of points
@@ -98,7 +99,7 @@ class TinyAmountOfPointsSpecs extends DefaultIntSpec {
 
         then:
         SkillsClientException skillsClientException = thrown(SkillsClientException)
-        skillsClientException.message.contains("Insufficient Subject points, skill achievement is disallowed, errorCode:InsufficientSubjectPoints, success:false, projectId:${proj1.projectId}, skillId:null".toString())
+        skillsClientException.message.contains("Insufficient Subject points, skill achievement is disallowed, errorCode:InsufficientSubjectPoints, success:false, projectId:${proj1.projectId}, skillId:${proj1_subj2.subjectId}".toString())
         skillsClientException.message.contains("${skillsService.userName}")
     }
 }

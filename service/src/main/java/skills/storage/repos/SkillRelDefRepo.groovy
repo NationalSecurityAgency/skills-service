@@ -22,6 +22,7 @@ import org.springframework.lang.Nullable
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefPartial
 import skills.storage.model.SkillRelDef
+import skills.storage.model.SubjectTotalPoints
 
 interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
     List<SkillRelDef> findAllByChildAndType(SkillDef child, SkillRelDef.RelationshipType type)
@@ -240,4 +241,43 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         where sd1 = srd.parent and sd2 = srd.child and srd.type=?2 
               and sd1.projectId=?1''')
     List<Object[]> getGraph(String projectId, SkillRelDef.RelationshipType type)
+
+
+    @Query(value='''
+        WITH RECURSIVE subj_skills (parentId, childId) AS (
+            SELECT s.parent_ref_id AS parentId, s.child_ref_id AS childId
+            FROM
+                skill_relationship_definition s, skill_definition sd
+            WHERE
+                    sd.project_id = :projectId AND
+                    s.parent_ref_id = sd.id
+        
+            UNION ALL
+        
+            SELECT childId AS parentId, s.child_ref_id AS childId
+            FROM
+            skill_relationship_definition s
+            INNER JOIN subj_skills on childId = s.parent_ref_id
+        ),
+        unfinalized_totals (subjectRefId, totalPoints) AS (
+           SELECT subject.id AS subjectRefId, SUM(disabledSkill.total_points) AS totalPoints
+           FROM
+               skill_definition disabledSkill
+               LEFT JOIN subj_skills subject_mapping ON disabledSkill.id = subject_mapping.childId
+               LEFT JOIN skill_definition subject on subject_mapping.parentId = subject.id
+           WHERE disabledSkill.project_id = :projectId AND
+               disabledSkill.enabled = 'false' AND
+               disabledSkill.type = 'Skill' AND
+               disabledSkill.copied_from_project_id IS NOT NULL
+           GROUP BY subject.id
+        )
+        
+        SELECT sub.skill_id AS subjectId, sub.name AS name, (COALESCE(totalPoints,0)+sub.total_points) AS totalIncPendingFinalized
+        FROM
+            skill_definition sub
+                LEFT JOIN unfinalized_totals uft on sub.id = uft.subjectRefId
+        WHERE sub.project_id = :projectId AND
+        sub.type = 'Subject'
+    ''', nativeQuery=true)
+    List<SubjectTotalPoints> getSubjectTotalPointsIncPendingFinalization(@Param("projectId") String projectId)
 }

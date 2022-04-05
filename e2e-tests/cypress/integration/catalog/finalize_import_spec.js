@@ -439,4 +439,49 @@ describe('Finalize Imported Skills Tests', () => {
         cy.waitForBackendAsyncTasksToComplete();
         cy.get('[data-cy="importFinalizeAlert"]').contains('Successfully finalized 1 imported skill!')
     });
+
+  it('cannot finalize imported skills if point thresholds not met', () => {
+    cy.createProject(2);
+    cy.createSubject(2, 1);
+    cy.createSkill(2, 1, 1, {pointIncrement: 10});
+    cy.createSkill(2, 1, 2, {pointIncrement: 10});
+
+    cy.exportSkillToCatalog(2, 1, 1);
+    cy.exportSkillToCatalog(2, 1, 2);
+
+    cy.bulkImportSkillFromCatalog(1, 1, [
+      { projNum: 2, skillNum: 1 },
+      { projNum: 2, skillNum: 2 },
+    ]);
+
+    cy.intercept('/admin/projects/proj1/pendingFinalization/pointTotals').as('loadPendingPoints');
+    cy.visit('/administrator/projects/proj1')
+    cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').click();
+    cy.wait('@loadPendingPoints');
+    //intercept and wait on count loading
+    cy.get('[data-cy="no-finalize"]').should('exist').contains("Finalization cannot be performed until This is project 1 has at least 100 points. Finalizing currently imported Skills would only bring This is project 1 to 40 points.");
+    cy.get('[data-cy="doPerformFinalizeButton"]').should('be.disabled');
+    cy.get('[data-cy="finalizeCancelButton"]').should('be.enabled');
+    cy.get('[data-cy="finalizeCancelButton"]').click();
+
+    cy.createSubject(1, 2);
+    cy.createSkill(1, 2, 1, {pointIncrement: 25});
+    cy.createSkill(1, 2, 2, {pointIncrement: 25});
+
+    cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').click();
+    cy.wait('@loadPendingPoints');
+    cy.get('[data-cy="no-finalize"]').should('exist').contains('Finalization cannot be performed until Subject 1 has at least 100 points. Finalizing the currently imported skills would only result in Subject 1: 40 points.');
+    cy.get('[data-cy="doPerformFinalizeButton"]').should('be.disabled');
+    cy.get('[data-cy="finalizeCancelButton"]').should('be.enabled');
+
+    cy.get('[data-cy="finalizeCancelButton"]').click();
+
+    cy.createSkill(1, 1, 3, {pointIncrement: 15});
+    cy.createSkill(1, 1, 4, {pointIncrement: 15});
+    cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').click();
+    cy.wait('@loadPendingPoints');
+    cy.get('[data-cy="no-finalize"]').should('not.exist');
+    cy.get('[data-cy="doPerformFinalizeButton"]').should('be.enabled');
+  });
+
 });

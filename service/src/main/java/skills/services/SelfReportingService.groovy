@@ -170,6 +170,6 @@ class SelfReportingService {
     private void validateSufficientPoints(SkillDefMin skillDefinition, String userId) {
         SkillDefRepo.ProjectAndSubjectPoints projectAndSubjectPoints = skillDefRepo.getProjectAndSubjectPoints(skillDefinition.projectId, skillDefinition.skillId)
         insufficientPointsValidator.validateProjectPoints(projectAndSubjectPoints.projectTotalPoints, skillDefinition.projectId, userId)
-        insufficientPointsValidator.validateSubjectPoints(projectAndSubjectPoints.subjectTotalPoints, skillDefinition.projectId, userId)
+        insufficientPointsValidator.validateSubjectPoints(projectAndSubjectPoints.subjectTotalPoints, skillDefinition.projectId, projectAndSubjectPoints.subjectId, userId)
     }
 }

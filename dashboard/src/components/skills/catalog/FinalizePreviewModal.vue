@@ -32,12 +32,15 @@ limitations under the License.
           <li>Project and subject <b>level</b> achievements are calculated for the users that have points for the imported skills.</li>
         </ul>
       </p>
+      <p v-if="!canFinalize" data-cy="no-finalize">
+        <i class="fas fa-exclamation-circle mr-1 text-warning" aria-hidden="true"/> {{ this.noFinalizeMsg }}
+      </p>
     </div>
 
     <div slot="modal-footer" class="w-100">
         <b-button variant="success" size="sm" class="float-right" @click="finalize"
                   data-cy="doPerformFinalizeButton"
-                  :disabled="startedFinalize">
+                  :disabled="startedFinalize || !canFinalize">
           <i class="fas fa-check-double"></i> Let's Finalize! <b-spinner v-if="startedFinalize" label="Loading..." small></b-spinner>
         </b-button>
         <b-button variant="secondary" size="sm" class="float-right mr-2" @click="close"
@@ -66,8 +69,10 @@ limitations under the License.
       return {
         show: this.value,
         loading: true,
+        canFinalize: false,
         finalizeInfo: {},
         startedFinalize: false,
+        noFinalizeMsg: '',
       };
     },
     watch: {
@@ -81,6 +86,12 @@ limitations under the License.
     computed: {
       isPlural() {
         return this.finalizeInfo.numSkillsToFinalize > 1;
+      },
+      minimumPoints() {
+        return this.$store.getters.config.minimumProjectPoints;
+      },
+      minimumSubjectPoints() {
+        return this.$store.getters.config.minimumSubjectPoints;
       },
     },
     methods: {
@@ -96,6 +107,20 @@ limitations under the License.
         CatalogService.getCatalogFinalizeInfo(this.$route.params.projectId)
           .then((res) => {
             this.finalizeInfo = res;
+            return CatalogService.getTotalPointsIncNotFinalized(this.$route.params.projectId);
+          }).then((countData) => {
+            this.canFinalize = true;
+            if (countData.insufficientProjectPoints || countData.subjectsWithInsufficientPoints.length > 0) {
+              this.canFinalize = false;
+              if (countData.insufficientProjectPoints) {
+                this.noFinalizeMsg = `Finalization cannot be performed until ${countData.projectName} has at least ${this.minimumPoints} points. Finalizing currently imported Skills would only bring ${countData.projectName} to ${countData.projectTotalPoints} points.`;
+              } else {
+                const insufficientSubjects = countData.subjectsWithInsufficientPoints.map((c) => c.subjectName).join(', ');
+                const insufficientSubjectsWithPts = countData.subjectsWithInsufficientPoints.map((c) => `${c.subjectName}: ${c.totalPoints} points`).join(', ');
+                this.noFinalizeMsg = `Finalization cannot be performed until ${insufficientSubjects} ${countData.subjectsWithInsufficientPoints.length > 1 ? 'have' : 'has'}
+                at least ${this.minimumSubjectPoints} points. Finalizing the currently imported skills would only result in ${insufficientSubjectsWithPts}.`;
+              }
+            }
           }).finally(() => {
             this.loading = false;
           });

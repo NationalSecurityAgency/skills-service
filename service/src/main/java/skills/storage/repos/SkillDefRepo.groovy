@@ -410,8 +410,9 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     static interface ProjectAndSubjectPoints {
         Integer getProjectTotalPoints()
         Integer getSubjectTotalPoints()
+        String getSubjectId()
     }
-    @Query(value='''SELECT sdParent.totalPoints as subjectTotalPoints, p.totalPoints as projectTotalPoints
+    @Query(value='''SELECT sdParent.totalPoints as subjectTotalPoints, sdParent.skillId as subjectId, p.totalPoints as projectTotalPoints
             from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild, ProjDef  p
             where 
                 sdChild.projectId = p.projectId and 
