@@ -844,5 +844,32 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/dependencies');
         cy.contains('Once a Skill has been exported to the catalog, Dependencies may not be added.');
     });
+
+    it('do not include imported skills in Actions count when selecting all skills in a subject', () => {
+      cy.createSkill(1, 1, 1);
+      cy.createSkill(1, 1, 2);
+      cy.createSkill(1, 1, 3);
+
+      cy.exportSkillToCatalog(1, 1, 1);
+      cy.exportSkillToCatalog(1, 1, 2);
+      cy.exportSkillToCatalog(1, 1, 3);
+
+      cy.createProject(2);
+      cy.createSubject(2, 1);
+      cy.createSkill(2, 1, 11);
+      cy.createSkill(2, 1, 12);
+      cy.createSkill(2, 1, 13);
+      cy.createSkill(2, 1, 14);
+      cy.createSkill(2, 1, 15);
+
+      cy.importSkillFromCatalog(2, 1, 1, 1)
+      cy.importSkillFromCatalog(2, 1, 1, 2)
+      cy.importSkillFromCatalog(2, 1, 1, 3)
+
+      cy.visit('/administrator/projects/proj2/subjects/subj1');
+      cy.get('[data-cy="selectAllSkillsBtn"]').click();
+
+      cy.get('[data-cy=skillActionsNumSelected]').contains('5');
+    });
 });
 
