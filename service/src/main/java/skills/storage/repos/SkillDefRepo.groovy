@@ -453,8 +453,17 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     ''')
     List<SkillDefMin> findSkillDefMinCopiedFrom(int skillRefId)
 
-    @Query(value = '''select exists(select 1 from skill_definition where copied_from_skill_ref=?1 and enabled = 'true')''', nativeQuery = true)
-    Boolean isSkillImportedAndEnabledInOtherProjects(Integer skillRefId)
+    @Nullable
+    @Query('''
+        select s.id as id from SkillDef s where s.copiedFrom = ?1 and s.enabled = 'true'
+    ''')
+    List<Integer> findSkillDefIdsByCopiedFrom(int skillRefId)
+
+    @Nullable
+    @Query('''
+        select s.copiedFrom as id from SkillDef s where s.id = ?1
+    ''')
+    Integer getCopiedFromById(int skillRefId)
 
     @Query('''
         select s.id as id,
@@ -477,12 +486,6 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     SkillDefMin findSkillDefMinById(int id)
 
     @Query('''
-        select distinct(s.copiedFrom) as copiedFrom
-        from SkillDef s where s.id in (?1)
-    ''')
-    List<Integer> findOriginalCopiedFromSkillRefIdsByIdIn(List<Integer> ids)
-
-    @Query('''
           select s from SkillDef s where s.projectId = ?1 and s.readOnly = true  
     ''')
     List<SkillDef> findImportedSkills(String projectId, Pageable pageable)
@@ -501,9 +504,9 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
             from skill_definition
             where project_id = :projectId
               and type = 'Subject'
-              and enabled = 'true')
+              and (enabled = 'true' or 'false' = :enabledSkillsOnly ))
         where project_id = :projectId''', nativeQuery = true)
-    void updateProjectsTotalPoints(@Param('projectId') String projectId)
+    void updateProjectsTotalPoints(@Param('projectId') String projectId, @Param('enabledSkillsOnly') Boolean enabledSkillsOnly)
 
     @Modifying
     @Query(value = '''update skill_definition subject
@@ -518,12 +521,12 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
               and subject.skill_id = :subjectId
               and subject.type = 'Subject'
               and skill.type = 'Skill'
-              and skill.enabled = 'true')
+              and (skill.enabled = 'true' or 'false' = :enabledSkillsOnly))
         where subject.project_id = :projectId
           and subject.skill_id = :subjectId
           and subject.type = 'Subject' 
           ''', nativeQuery = true)
-    void updateSubjectTotalPoints(@Param('projectId') String projectId, @Param('subjectId') String subjectId)
+    void updateSubjectTotalPoints(@Param('projectId') String projectId, @Param('subjectId') String subjectId, @Param('enabledSkillsOnly') Boolean enabledSkillsOnly)
 
     @Query(value = '''
          select exists (select 1 from skill_definition where project_id = :projectId and skill_id = :skillId and read_only = 'true') as isReadOnly

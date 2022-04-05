@@ -21,8 +21,6 @@ class ImportedSkillAchievement {
     String uuid
     String userId
     Integer rawSkillId
-    String projectId
-    String skillId
     SkillDate incomingSkillDate
     boolean thisRequestCompletedOriginalSkill
 }

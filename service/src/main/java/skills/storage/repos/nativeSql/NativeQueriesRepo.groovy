@@ -63,7 +63,7 @@ interface NativeQueriesRepo {
 
     void updateUserPointsForASkill(String projectId, String skillId)
 
-    void updateUserPointsForSubjectOrGroup(String projectId, String skillId)
+    void updateUserPointsForSubjectOrGroup(String projectId, String skillId, Boolean enabledSkillsOnly)
 
     void updateUserPointsForProject(String projectId)
 

@@ -44,6 +44,13 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                   toDef.project_id = :toProjectId and 
                   toDef.skill_id = up.skill_id and
                   up.skill_ref_id in (:fromSkillRefIds)
+                  and not exists (
+                    select 1 from user_points innerUP
+                    where
+                      toDef.project_id = innerUP.project_id
+                      and up.user_id = innerUP.user_id
+                      and toDef.skill_id = innerUP.skill_id
+                  )
             ''', nativeQuery = true)
     void copySkillUserPointsToTheImportedProjects(@Param('toProjectId') String toProjectId, @Param('fromSkillRefIds') List<Integer> fromSkillRefIds)
 
@@ -695,7 +702,6 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     where sd.id = up.skill_ref_id
                           and up.project_id = :projectId
                           and sd.type = 'Subject'
-                          and sd.enabled = 'true'
                     group by up.user_id
                 )
                 update user_points up set points = pointsToUpdate.newPoints
@@ -713,7 +719,6 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     where sd.id = up.skill_ref_id
                       and sd.project_id = :projectId
                       and sd.type = 'Subject'
-                      and sd.enabled = 'true'
                     group by up.user_id
                 )
                 update user_points up
@@ -741,7 +746,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                   and rel.child_ref_id = child.id
                   and rel.type in ('RuleSetDefinition', 'SkillsGroupRequirement')
                   and child.type = 'Skill'
-                  and child.enabled = 'true'
+                  and (child.enabled = 'true' or 'false' = :enabledSkillsOnly)
                   and child.id = up.skill_ref_id
                 group by up.user_id
             )
@@ -749,7 +754,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             from pointsToUpdate
             where up.user_id = pointsToUpdate.userId
               and up.project_id = :projectId and up.skill_id = :skillId''', nativeQuery=true)
-    void updateSubjectOrGroupUserPoints(@Param("projectId") String projectId, @Param("skillId") String skillId)
+    void updateSubjectOrGroupUserPoints(@Param("projectId") String projectId, @Param("skillId") String skillId, @Param('enabledSkillsOnly') Boolean enabledSkillsOnly)
 
 
     @Modifying
@@ -766,13 +771,13 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                   and rel.child_ref_id = child.id
                   and rel.type in ('RuleSetDefinition', 'SkillsGroupRequirement')
                   and child.type = 'Skill'
-                  and child.enabled = 'true'
+                  and (child.enabled = 'true' or 'false' = :enabledSkillsOnly)
                   and child.id = up.skill_ref_id
                 group by up.user_id
             )
             update user_points up set points = (select pointsToUpdate.newPoints from pointsToUpdate where pointsToUpdate.userId = up.user_id)
             where up.project_id = :projectId and up.skill_id = :skillId
               and exists (select * from pointsToUpdate where pointsToUpdate.userId = up.user_id);''', nativeQuery=true)
-    void updateSubjectOrGroupUserPointsInH2(@Param("projectId") String projectId, @Param("skillId") String skillId)
+    void updateSubjectOrGroupUserPointsInH2(@Param("projectId") String projectId, @Param("skillId") String skillId, @Param('enabledSkillsOnly') Boolean enabledSkillsOnly)
 
 }

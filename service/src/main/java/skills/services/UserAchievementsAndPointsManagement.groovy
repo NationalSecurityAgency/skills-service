@@ -80,7 +80,7 @@ class UserAchievementsAndPointsManagement {
             assert parents.size() == 1
             SkillDef parent = parents.first()
             log.info("Updating parent's UserPoints for [{}]-[{}]", parent.projectId, parent.skillId)
-            nativeQueriesRepo.updateUserPointsForSubjectOrGroup(parent.projectId, parent.skillId)
+            nativeQueriesRepo.updateUserPointsForSubjectOrGroup(parent.projectId, parent.skillId, true)
             parents = skillRelDefRepo.findParentByChildIdAndTypes(parent.id, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
         }
 

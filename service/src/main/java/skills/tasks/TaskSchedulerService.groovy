@@ -57,15 +57,13 @@ class TaskSchedulerService {
         )), Instant.now().plusSeconds(schedulingDelaySeconds))
     }
 
-    void scheduleImportedSkillAchievement(String projectId, String skillId, String userId, Integer rawSkillId, SkillDate incomingSkillDate, boolean thisRequestCompletedOriginalSkill) {
+    void scheduleImportedSkillAchievement(String userId, Integer rawSkillId, SkillDate incomingSkillDate, boolean thisRequestCompletedOriginalSkill) {
         String uuid = UUID.randomUUID().toString()
-        String id = "${skillId}-${uuid}"
+        String id = "${rawSkillId}-${uuid}"
         ImportedSkillAchievement importedSkillAchievement = new ImportedSkillAchievement(
                 uuid: uuid,
                 userId: userId,
                 rawSkillId: rawSkillId,
-                projectId: projectId,
-                skillId: skillId,
                 incomingSkillDate: incomingSkillDate,
                 thisRequestCompletedOriginalSkill: thisRequestCompletedOriginalSkill
         )

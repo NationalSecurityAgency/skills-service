@@ -52,7 +52,7 @@ class RuleSetDefinitionScoreUpdater {
             skillDef.totalPoints = total
             skillDefRepo.save(skillDef)
         } else {
-            skillDefRepo.updateSubjectTotalPoints(skillDef.projectId, skillDef.skillId)
+            skillDefRepo.updateSubjectTotalPoints(skillDef.projectId, skillDef.skillId, true)
         }
 
         List<SkillDef> parents = skillRelDefRepo.findParentByChildIdAndTypes(skillDef.id, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
@@ -61,7 +61,7 @@ class RuleSetDefinitionScoreUpdater {
         }
 
         if (skillDef.type == SkillDef.ContainerType.Subject) {
-            skillDefRepo.updateProjectsTotalPoints(skillDef.projectId)
+            skillDefRepo.updateProjectsTotalPoints(skillDef.projectId, true)
         }
     }
 

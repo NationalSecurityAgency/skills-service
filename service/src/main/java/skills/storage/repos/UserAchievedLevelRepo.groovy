@@ -508,6 +508,13 @@ where ua.projectId = :projectId and ua.skillId = :skillId
                   toDef.project_id = :toProjectId and 
                   toDef.skill_id = ua.skill_id and
                   ua.skill_ref_id in (:fromSkillRefIds)
+                  and not exists (
+                            select 1 from user_achievement innerTable
+                            where
+                              toDef.project_id = innerTable.project_id
+                              and ua.user_id = innerTable.user_id
+                              and toDef.skill_id = innerTable.skill_id
+                          )
             ''', nativeQuery = true)
     void copySkillAchievementsToTheImportedProjects(@Param('toProjectId') String toProjectId, @Param('fromSkillRefIds') List<Integer> fromSkillRefIds)
 }

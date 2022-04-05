@@ -267,9 +267,11 @@ class SkillEventsTransactionalService {
         }
 
         if (isCatalogSkill) {
-            boolean isImported = skillDefRepo.isSkillImportedAndEnabledInOtherProjects(skillDefinition.id)
-            if (isImported) {
-                taskSchedulerService.scheduleImportedSkillAchievement(projectId, skillId, userId, skillDefinition.id, skillDate, requestedSkillCompleted)
+            List<Integer> importedSkillIds = skillDefRepo.findSkillDefIdsByCopiedFrom(skillDefinition.id)
+            if (importedSkillIds) {
+                importedSkillIds.each { Integer importedSkillId ->
+                    taskSchedulerService.scheduleImportedSkillAchievement(userId, importedSkillId, skillDate, requestedSkillCompleted)
+                }
             }
         }
 
