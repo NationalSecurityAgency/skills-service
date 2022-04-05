@@ -157,13 +157,6 @@ class InceptionSkills {
                         numPerformToCompletion: 20,
                         description: "Navigate to ``Project -> Badges -> Badge -> Users``",
                 ),
-                new SkillRequest(name: "Visit Badge Metrics", skillId: "VisitBadgeStats", subjectId: subjectProjectId, projectId: inceptionProjectId,
-                        pointIncrement: 2,
-                        pointIncrementInterval: 60 * 12, // 1 work day
-                        numMaxOccurrencesIncrementInterval: 4, // up-to 4 per day
-                        numPerformToCompletion: 20,
-                        description: "Navigate to ``Project -> Badges -> Badge -> Metrics``",
-                ),
                 new SkillRequest(name: "Visit Project Dependencies", skillId: "VisitProjectDependencies", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 5,
                         pointIncrementInterval: 60 * 12, // 1 work day
@@ -333,14 +326,6 @@ Client display will depict project skills profile and users points at that exact
                         numPerformToCompletion: 2,
                         description: "To see a history of user's performed skill events please visit ``Project -> Users -> Select a User -> Performed Skills``. Furthermore you have the ability to remove individual skill events if needed.",
                         helpUrl: "/dashboard/user-guide/users.html#performed-skills"
-                ),
-                new SkillRequest(name: "Visit User Metrics", skillId: "VisitUserStats", subjectId: subjectDashboardId, projectId: inceptionProjectId,
-                        pointIncrement: 10,
-                        pointIncrementInterval: 60 * 12, // 1 work day
-                        numMaxOccurrencesIncrementInterval: 1, // up-to 25 per day
-                        numPerformToCompletion: 2,
-                        description: "Almost every page on the skill's dashboard exposes metrics and statistics about that particular entity/concept. These metrics are very much context aware. As an example, graphs and charts you see on a subject page will be for that specific subject and metrics on the project page will be for the entire project.",
-                        helpUrl: "/dashboard/user-guide/metrics.html",
                 ),
                 new SkillRequest(name: "Visit Markdown Documentation", skillId: "VisitMarkdownDocs", subjectId: subjectDashboardId, projectId: inceptionProjectId,
                         pointIncrement: 10,
