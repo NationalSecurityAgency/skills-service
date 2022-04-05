@@ -36,8 +36,8 @@ export default {
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/settings`)
       .then((remoteRes) => remoteRes.data);
   },
-  getProjectSetting(projectId, setting) {
-    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/settings/${setting}`)
+  getProjectSetting(projectId, setting, handleError = true) {
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/settings/${setting}`, { handleError })
       .then((remoteRes) => remoteRes.data);
   },
   getUserSettings() {

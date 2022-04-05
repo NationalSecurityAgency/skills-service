@@ -130,8 +130,11 @@ limitations under the License.
                 this.finalizeInfo.finalizeCompletedAndFailed = true;
               }
             }
+          })
+          .catch(() => {
+            this.checkFinalizationState();
           });
-        }, 1000);
+        }, 5000);
       },
       areOrIs(numItems) {
         return (numItems > 1) ? 'are' : 'is';
