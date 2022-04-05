@@ -859,7 +859,7 @@ limitations under the License.
       },
       changeSelectionForAll(selectedValue) {
         this.skills = this.skills.map((sk) => {
-          if (sk.isGroupType) {
+          if (sk.isGroupType || sk.isCatalogImportedSkills) {
             return sk;
           }
           return ({ ...sk, selected: selectedValue });
