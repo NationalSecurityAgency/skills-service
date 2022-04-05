@@ -35,11 +35,7 @@ interface NativeQueriesRepo {
 
     void updatePointTotalsForSkill(String projectId, String subjectId, String skillId, int incrementDelta)
 
-    void updatePointHistoryForSkill(String projectId, String subjectId, String skillId, int incrementDelta)
-
     void updatePointTotalWhenOccurrencesAreDecreased(String projectId, String subjectId, String skillId, int pointIncrement, int newOccurrences, int previousOccurrences)
-
-    void updatePointHistoryWhenOccurrencesAreDecreased(String projectId, String subjectId, String skillId, int pointIncrement, int numOccurrences)
 
     void removeExtraEntriesOfUserPerformedSkillByUser(String projectId, String skillId, int numEventsToKeep)
 
@@ -67,11 +63,9 @@ interface NativeQueriesRepo {
 
     void updateUserPointsForASkill(String projectId, String skillId)
 
-    void updateUserPointsHistoryForASkill(String projectId, String skillId)
-
     void updateUserPointsForSubjectOrGroup(String projectId, String skillId)
 
-    void updateUserPointsHistoryForProject(String projectId)
+    void updateUserPointsForProject(String projectId)
 
     SkillsDBLock insertLockOrSelectExisting(String lockKey)
 

@@ -15,7 +15,7 @@
  */
 package skills.intTests.clientDisplay
 
-import groovy.json.JsonOutput
+
 import groovy.time.TimeCategory
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
@@ -28,7 +28,6 @@ import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.SkillDefRepo
-import spock.lang.IgnoreRest
 
 class SingleSkillSummarySpec extends DefaultIntSpec {
 

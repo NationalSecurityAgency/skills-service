@@ -15,16 +15,12 @@
  */
 package skills.intTests
 
-
 import org.joda.time.DateTime
 import org.springframework.http.*
 import skills.controller.result.model.TableResult
 import skills.intTests.utils.*
-import spock.lang.IgnoreRest
 
-import static skills.intTests.utils.SkillsFactory.createProject
-import static skills.intTests.utils.SkillsFactory.createSkill
-import static skills.intTests.utils.SkillsFactory.createSubject
+import static skills.intTests.utils.SkillsFactory.*
 
 class AdminEditSpecs extends DefaultIntSpec {
 

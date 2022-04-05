@@ -22,8 +22,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.skillLoading.model.SkillDependencySummary
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillDefParent
+import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.SkillRelDef
 import skills.storage.model.UserPoints
+import skills.storage.repos.UserPerformedSkillRepo
 import skills.storage.repos.UserPointsRepo
 
 @Component
@@ -36,6 +39,9 @@ class SubjectDataLoader {
 
     @Autowired
     DependencySummaryLoader dependencySummaryLoader
+
+    @Autowired
+    UserPerformedSkillRepo userPerformedSkillRepo
 
 
     static class SkillsAndPoints {
@@ -52,25 +58,21 @@ class SubjectDataLoader {
     }
 
     @Profile
-    SkillsData loadData(String userId, String projectId, String skillId, Integer version = Integer.MAX_VALUE) {
-        return loadData(userId, projectId, skillId, version, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
-    }
-
-    @Profile
-    SkillsData loadData(String userId, String projectId, String skillId, Integer version = Integer.MAX_VALUE, List<SkillRelDef.RelationshipType> relationshipTypes) {
+    SkillsData loadData(String userId,  String projectId, SkillDefParent skillDefWithExtra, Integer version = Integer.MAX_VALUE, List<SkillRelDef.RelationshipType> relationshipTypes) {
+        String skillId = skillDefWithExtra.skillId
         List<SkillDefAndUserPoints> childrenWithUserPoints = loadChildren(userId, projectId, skillId, relationshipTypes, version)
         childrenWithUserPoints = childrenWithUserPoints?.sort({ it.skillDef.displayOrder })
 
-        List<SkillDefAndUserPoints> todaysUserPoints = loadChildren(userId, projectId, skillId, relationshipTypes, version, new Date().clearTime())
+        List<UserPointsRepo.SkillRefIdWithPoints> todaysUserPoints = loadChildrenDayPoints(userId, skillDefWithExtra.id, relationshipTypes, new Date().clearTime())
 
         List<UserPointsRepo.SkillWithChildAndAchievementIndicator> allProjectDepsAndAchievements = loadAllDepsWithAchievementIndicator(userId, projectId, version)
         Map<Integer, List<UserPointsRepo.SkillWithChildAndAchievementIndicator>> byParentId = allProjectDepsAndAchievements.groupBy { it.parentId }
 
         List<SkillsAndPoints> skillsAndPoints = childrenWithUserPoints.collect { SkillDefAndUserPoints skillDefAndUserPoints ->
-            SkillDefAndUserPoints todaysPoints = todaysUserPoints.find({
-                it.skillDef.id == skillDefAndUserPoints.skillDef.id
+            UserPointsRepo.SkillRefIdWithPoints todaysPoints = todaysUserPoints.find({
+                it.skillRefId == skillDefAndUserPoints.skillDef.id
             })
-            int todayPoints = todaysPoints?.points ? todaysPoints.points?.points : 0
+            int todayPoints = todaysPoints?.points ? todaysPoints.points : 0
             int points = skillDefAndUserPoints?.points ? skillDefAndUserPoints.points.points : 0
 
             List<UserPointsRepo.SkillWithChildAndAchievementIndicator> dependents = byParentId[skillDefAndUserPoints.skillDef.id]
@@ -103,11 +105,9 @@ class SubjectDataLoader {
     }
 
     @Profile
-    private List<SkillDefAndUserPoints> loadChildren(String userId, String projectId, String skillId, List<SkillRelDef.RelationshipType> relationshipTypes, Integer version = Integer.MAX_VALUE, Date day = null) {
+    private List<SkillDefAndUserPoints> loadChildren(String userId, String projectId, String skillId, List<SkillRelDef.RelationshipType> relationshipTypes, Integer version = Integer.MAX_VALUE) {
 
-        List<Object[]> childrenWithUserPoints = day ?
-                findChildrenPointsByDay(userId, projectId, skillId, relationshipTypes, version, day) :
-                findChildrenPoints(userId, projectId, skillId, relationshipTypes, version)
+        List<Object[]> childrenWithUserPoints = findChildrenPoints(userId, projectId, skillId, relationshipTypes, version)
 
         List<SkillDefAndUserPoints> res = childrenWithUserPoints.collect {
             UserPoints userPoints = (it.length > 1 ? it[1] : null) as UserPoints
@@ -119,20 +119,17 @@ class SubjectDataLoader {
     }
 
     @Profile
+    private List<UserPointsRepo.SkillRefIdWithPoints> loadChildrenDayPoints(String userId, Integer skillRefId, List<SkillRelDef.RelationshipType> relationshipTypes, Date day) {
+        List<UserPointsRepo.SkillRefIdWithPoints> res = userPointsRepo.calculatePointsForChildSkillsForADay(userId, skillRefId, relationshipTypes.collect { it.toString()}, day)
+        return res
+    }
+
+    @Profile
     private List<Object[]> findChildrenPoints(String userId, String projectId, String skillId, List<SkillRelDef.RelationshipType> relationshipTypes, int version) {
         if (projectId) {
             return userPointsRepo.findChildrenAndTheirUserPoints(userId, projectId, skillId, relationshipTypes, version)
         } else {
             return userPointsRepo.findGlobalChildrenAndTheirUserPoints(userId, skillId, relationshipTypes, version)
-        }
-    }
-
-    @Profile
-    private List<Object[]> findChildrenPointsByDay(String userId, String projectId, String skillId, List<SkillRelDef.RelationshipType> relationshipTypes, int version, Date day) {
-        if (projectId) {
-            return userPointsRepo.findChildrenAndTheirUserPoints(userId, projectId, skillId, relationshipTypes, version, day)
-        } else {
-            return userPointsRepo.findGlobalChildrenAndTheirUserPoints(userId, skillId, relationshipTypes, version, day)
         }
     }
 

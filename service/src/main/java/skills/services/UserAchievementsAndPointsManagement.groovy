@@ -74,7 +74,6 @@ class UserAchievementsAndPointsManagement {
     void adjustUserPointsAfterModification(SkillDef skill) {
         log.info("Updating all UserPoints for [{}]-[{}]", skill.projectId, skill.skillId)
         nativeQueriesRepo.updateUserPointsForASkill(skill.projectId, skill.skillId)
-        nativeQueriesRepo.updateUserPointsHistoryForASkill(skill.projectId, skill.skillId)
 
         List<SkillDef> parents = skillRelDefRepo.findParentByChildIdAndTypes(skill.id, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
         while (parents) {
@@ -86,7 +85,7 @@ class UserAchievementsAndPointsManagement {
         }
 
         log.info("Updating project's UserPoints for [{}]", skill.projectId)
-        nativeQueriesRepo.updateUserPointsHistoryForProject(skill.projectId)
+        nativeQueriesRepo.updateUserPointsForProject(skill.projectId)
     }
 
     @Transactional
@@ -107,7 +106,6 @@ class UserAchievementsAndPointsManagement {
         if (log.isDebugEnabled()){
             log.debug("Updating existing UserPoints. projectId=[${projectId}], subjectId=[${subjectId}], skillId=[${skillId}], incrementDelta=[${incrementDelta}], ")
         }
-        nativeQueriesRepo.updatePointHistoryForSkill(projectId, subjectId, skillId, incrementDelta)
         nativeQueriesRepo.updatePointTotalsForSkill(projectId, subjectId, skillId, incrementDelta)
     }
 
@@ -117,7 +115,6 @@ class UserAchievementsAndPointsManagement {
             log.debug("Update points as occurrences were decreased. projectId=[${projectId}], subjectId=[${subjectId}], skillId=[${skillId}], pointIncrement=[${pointIncrement}], newOccurrences=[$numOccurrences], previousOccurrences=[${previousOccurrences}]")
         }
         nativeQueriesRepo.updatePointTotalWhenOccurrencesAreDecreased(projectId, subjectId, skillId, pointIncrement, newOccurrences, previousOccurrences)
-        nativeQueriesRepo.updatePointHistoryWhenOccurrencesAreDecreased(projectId, subjectId, skillId, pointIncrement, newOccurrences)
     }
 
     @Transactional

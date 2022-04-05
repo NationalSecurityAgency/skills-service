@@ -20,7 +20,6 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
@@ -141,8 +140,7 @@ class SkillEventsTransactionalService {
 
                 CompletionItem completionItem
                 if (it.level != null) {
-                    Date day = it.created.clearTime()
-                    UserPoints points = userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay(it.projectId, userId, it.skillId, day)
+                    UserPoints points = userPointsRepo.findByProjectIdAndUserIdAndSkillId(it.projectId, userId, it.skillId)
 
                     completionItem = new CompletionItem(
                             level: it.level, name: skill?.name ?: "OVERALL",

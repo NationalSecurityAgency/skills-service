@@ -175,7 +175,7 @@ class SkillEventAdminService {
         if (skillDefinitionMin.getCopiedFrom() > 0 || isInCatalog) {
             List<SkillDefMin> related = skillCatalogService.getRelatedSkills(skillDefinitionMin)
             related?.each {
-                updateUserPointsAndAchievementsWhenPerformedSkillRemoved(userId, it, performedSkill.performedOn, numExistingSkills)
+                updateUserPointsAndAchievementsWhenPerformedSkillRemoved(userId, it, numExistingSkills)
             }
         }
 
@@ -189,7 +189,7 @@ class SkillEventAdminService {
             return res
         }
 
-        SkillEventResult skillEventResult = updateUserPointsAndAchievementsWhenPerformedSkillRemoved(userId, skillDefinitionMin, performedSkill.performedOn, numExistingSkills)
+        SkillEventResult skillEventResult = updateUserPointsAndAchievementsWhenPerformedSkillRemoved(userId, skillDefinitionMin, numExistingSkills)
         res.success = skillEventResult.skillApplied
         res.explanation = skillEventResult.explanation
 
@@ -199,8 +199,8 @@ class SkillEventAdminService {
         return res
     }
 
-    private SkillEventResult updateUserPointsAndAchievementsWhenPerformedSkillRemoved(String userId, SkillDefMin skillDefinitionMin, Date performedOn, Long numExistingPerformedSkills) {
-        updateUserPoints(userId, skillDefinitionMin, performedOn, skillDefinitionMin.skillId)
+    private SkillEventResult updateUserPointsAndAchievementsWhenPerformedSkillRemoved(String userId, SkillDefMin skillDefinitionMin, Long numExistingPerformedSkills) {
+        updateUserPoints(userId, skillDefinitionMin, skillDefinitionMin.skillId)
         boolean requestedSkillCompleted = hasReachedMaxPoints(numExistingPerformedSkills, skillDefinitionMin)
         if (requestedSkillCompleted) {
             checkForBadgesAchieved(userId, skillDefinitionMin)
@@ -208,7 +208,7 @@ class SkillEventAdminService {
             achievedLevelRepo.deleteByProjectIdAndSkillIdAndUserIdAndLevel(skillDefinitionMin.projectId, skillDefinitionMin.skillId, userId, null)
         }
         SkillEventResult skillEventResult = new SkillEventResult(projectId: skillDefinitionMin.projectId, skillId: skillDefinitionMin.skillId, name: skillDefinitionMin.name)
-        checkParentGraph(performedOn, skillEventResult, userId, skillDefinitionMin)
+        checkParentGraph(skillEventResult, userId, skillDefinitionMin)
         deleteProjectLevelIfNecessary(skillDefinitionMin.projectId, userId, numExistingPerformedSkills.toInteger())
         return skillEventResult
     }
@@ -279,14 +279,12 @@ class SkillEventAdminService {
         return numSkills * skillDefinition.pointIncrement >= skillDefinition.totalPoints
     }
 
-    private UserPoints updateUserPoints(String userId, SkillDefMin requestedSkill, Date incomingSkillDate, String skillId = null) {
-        doUpdateUserPoints(requestedSkill, userId, incomingSkillDate, skillId)
-        return doUpdateUserPoints(requestedSkill, userId, null, skillId)
+    private UserPoints updateUserPoints(String userId, SkillDefMin requestedSkill, String skillId = null) {
+        return doUpdateUserPoints(requestedSkill, userId, skillId)
     }
 
-    private UserPoints doUpdateUserPoints(SkillDefMin requestedSkill, String userId, Date incomingSkillDate, String skillId) {
-        Date day = incomingSkillDate ? new Date(incomingSkillDate.time).clearTime() : null
-        UserPoints userPoints = userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay(requestedSkill.projectId, userId, skillId, day)
+    private UserPoints doUpdateUserPoints(SkillDefMin requestedSkill, String userId, String skillId) {
+        UserPoints userPoints = userPointsRepo.findByProjectIdAndUserIdAndSkillId(requestedSkill.projectId, userId, skillId)
         userPoints.points -= requestedSkill.pointIncrement
 
         if (userPoints.points <= 0) {
@@ -298,21 +296,21 @@ class SkillEventAdminService {
         return userPoints
     }
 
-    private void checkParentGraph(Date incomingSkillDate, SkillEventResult res, String userId, SkillDefMin skillDef) {
-        updateByTraversingUpSkillDefs(incomingSkillDate, res, skillDef, skillDef, userId)
+    private void checkParentGraph(SkillEventResult res, String userId, SkillDefMin skillDef) {
+        updateByTraversingUpSkillDefs(res, skillDef, skillDef, userId)
 
         // updated project level
-        updateUserPoints(userId, skillDef, incomingSkillDate, null)
+        updateUserPoints(userId, skillDef, null)
     }
 
-    private void updateByTraversingUpSkillDefs(Date incomingSkillDate, SkillEventResult res,
+    private void updateByTraversingUpSkillDefs(SkillEventResult res,
                                                SkillDefMin currentDef,
                                                SkillDefMin requesterDef,
                                                String userId) {
         if (currentDef.type == SkillDef.ContainerType.SkillsGroup) {
-            updateUserPoints(userId, requesterDef, incomingSkillDate, currentDef.skillId)
+            updateUserPoints(userId, requesterDef, currentDef.skillId)
         } else if (currentDef.type == SkillDef.ContainerType.Subject) {
-            UserPoints updatedPoints = updateUserPoints(userId, requesterDef, incomingSkillDate, currentDef.skillId)
+            UserPoints updatedPoints = updateUserPoints(userId, requesterDef, currentDef.skillId)
 
             List<LevelDef> levelDefs = skillEventsSupportRepo.findLevelsBySkillId(currentDef.id)
             int currentScore = updatedPoints.points
@@ -323,7 +321,7 @@ class SkillEventAdminService {
         List<SkillDefMin> parentsRels = skillEventsSupportRepo
                 .findParentSkillsByChildIdAndType(currentDef.id, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
         parentsRels?.each {
-            updateByTraversingUpSkillDefs(incomingSkillDate, res, it, requesterDef, userId)
+            updateByTraversingUpSkillDefs(res, it, requesterDef, userId)
         }
     }
 

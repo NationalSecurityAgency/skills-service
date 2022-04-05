@@ -15,6 +15,7 @@
  */
 package skills.services
 
+import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
@@ -103,7 +104,7 @@ class UserAdminService {
     @Transactional(readOnly = true)
     UserSkillsStats getUserSkillsStats(String projectId, String userId) {
         int numSkills =  performedSkillRepository.countDistinctSkillIdByProjectIdAndUserId(projectId, userId)
-        UserPoints userPoints = userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay(projectId, userId, null, null)
+        UserPoints userPoints = userPointsRepo.findByProjectIdAndUserIdAndSkillId(projectId, userId, null)
         return new UserSkillsStats(numSkills: numSkills, userTotalPoints: userPoints?.points ?: 0 )
     }
 }

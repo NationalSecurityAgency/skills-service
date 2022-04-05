@@ -414,8 +414,8 @@ class SkillsLoader {
             dependencyValidator.validateDependencyEligibility(projectId, skillDef)
         }
 
-        UserPoints points = userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay(crossProjectId ?: projectId, userId, skillId, null)
-        UserPoints todayPoints = userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay(crossProjectId ?: projectId, userId, skillId, new Date().clearTime())
+        UserPoints points = userPointsRepo.findByProjectIdAndUserIdAndSkillId(crossProjectId ?: projectId, userId, skillId)
+        Integer todayPoints = userPointsRepo.calculatePointsForSingleSkillForADay(userId, skillDef.id, new Date().clearTime()) ?: 0
         Date achievedOn = achievedLevelRepository.getAchievedDateByUserIdAndProjectIdAndSkillId(userId, projectId, skillId)
 
         SkillDependencySummary skillDependencySummary
@@ -428,7 +428,7 @@ class SkillsLoader {
         return new SkillSummary(
                 projectId: skillDef.projectId, projectName: projDef.name,
                 skillId: skillDef.skillId, skill: skillDef.name,
-                points: points?.points ?: 0, todaysPoints: todayPoints?.points ?: 0,
+                points: points?.points ?: 0, todaysPoints: todayPoints,
                 pointIncrement: skillDef.pointIncrement, pointIncrementInterval: skillDef.pointIncrementInterval,
                 maxOccurrencesWithinIncrementInterval: skillDef.numMaxOccurrencesIncrementInterval,
                 totalPoints: skillDef.totalPoints,
@@ -588,16 +588,28 @@ class SkillsLoader {
         // must compute total points so the provided version is taken into account
         // subjectDefinition.totalPoints is total overall regardless of the version
         int totalPoints
+        Integer points
+        Integer todaysPoints
         if (loadSkills) {
-            SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, subjectDefinition.skillId, version)
+            SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, subjectDefinition, version, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
             skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints, false, userId, version)
-            totalPoints = skillsRes ? skillsRes.collect({it.totalPoints}).sum() as Integer: 0
+            totalPoints = skillsRes ? skillsRes.collect({it.totalPoints}).sum() as Integer : 0
+
         } else {
             totalPoints = calculateTotalForSubject(projDef, subjectDefinition, version)
         }
 
-        Integer points = calculatePoints(projDef, userId, subjectDefinition, version)
-        Integer todaysPoints = calculateTodayPoints(projDef, userId, subjectDefinition, version)
+        // pick large enough version = version is not provide;
+        // if version is provided then always calculate All points as versions are not respected for user points, at least as of now
+        if (skillsRes && version >= 500) {
+            points = skillsRes ? skillsRes.collect({ it.points }).sum() as Integer : 0
+            todaysPoints = skillsRes ? skillsRes.collect({ it.todaysPoints }).sum() as Integer : 0
+        } else {
+            points = calculatePointsForSubject(projDef, userId, subjectDefinition)
+            todaysPoints= calculateTodayPoints(userId, subjectDefinition)
+        }
+
+
 
         // convert null result to 0
         points = points ?: 0
@@ -659,13 +671,13 @@ class SkillsLoader {
     }
 
     @Profile
-    private Integer calculateTodayPoints(ProjDef projDef, String userId, SkillDefParent subjectDefinition, int version) {
-        Integer res = userPointsRepo.getPointsByProjectIdAndUserIdAndSkillRefIdAndDay(projDef.projectId, userId, subjectDefinition.id, new Date().clearTime())
+    private Integer calculateTodayPoints(String userId, SkillDefParent subjectDefinition) {
+        Integer res = userPointsRepo.getParentsPointsForAGivenDay(userId, subjectDefinition.id, new Date().clearTime())
         return res ?: 0
     }
 
     @Profile
-    private Integer calculatePoints(ProjDef projDef, String userId, SkillDefParent subjectDefinition, int version) {
+    private Integer calculatePointsForSubject(ProjDef projDef, String userId, SkillDefParent subjectDefinition) {
         Integer res = userPointsRepo.getPointsByProjectIdAndUserIdAndSkillRefId(projDef.projectId, userId, subjectDefinition.id)
         return res ?: 0
     }
@@ -681,7 +693,7 @@ class SkillsLoader {
         List<SkillSummaryParent> skillsRes = []
 
         if (loadSkills) {
-            SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef?.projectId, badgeDefinition.skillId, version, [SkillRelDef.RelationshipType.BadgeRequirement])
+            SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef?.projectId, badgeDefinition, version, [SkillRelDef.RelationshipType.BadgeRequirement])
             skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints, true)?.sort({ it.skill?.toLowerCase() })
         }
 
@@ -725,7 +737,7 @@ class SkillsLoader {
         List<SkillSummaryParent> skillsRes = []
 
         if (loadSkills) {
-            SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, null, badgeDefinition.skillId, version, [SkillRelDef.RelationshipType.BadgeRequirement])
+            SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, null, badgeDefinition, version, [SkillRelDef.RelationshipType.BadgeRequirement])
             skillsRes = createSkillSummaries(null, groupChildrenMeta.childrenWithPoints)?.sort({ it.skill?.toLowerCase() })
             if (skillsRes) {
                 // all the skills are "cross-project" if they don't belong to the project that originated this reqest
@@ -859,7 +871,7 @@ class SkillsLoader {
                         numSkillsRequired: skillDef.numSkillsRequired,
                         totalPoints: skillDef.totalPoints,
                 )
-                SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, skillDef.skillId, version, [SkillRelDef.RelationshipType.SkillsGroupRequirement])
+                SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, skillDef, version, [SkillRelDef.RelationshipType.SkillsGroupRequirement])
                 Integer numSkillsRequired = skillsGroupAdminService.getActualNumSkillsRequred(skillDef.numSkillsRequired, skillDef.id)
                 skillsSummary.children = createSkillSummaries(thisProjDef, groupChildrenMeta.childrenWithPoints, false, userId, version)
                 skillsSummary.points = skillsSummary.children ? skillsSummary.children.collect({it.points}).sort().takeRight(numSkillsRequired).sum() as Integer: 0

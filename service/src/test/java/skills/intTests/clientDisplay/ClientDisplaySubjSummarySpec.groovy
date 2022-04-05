@@ -15,10 +15,8 @@
  */
 package skills.intTests.clientDisplay
 
-import groovy.json.JsonOutput
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
-import spock.lang.IgnoreRest
 
 class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
 
@@ -141,5 +139,65 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         summary.skills.collect { it.skillId } == ['skill1', 'skill1subj2', 'skill2subj2', 'skill2',  'skill1subj3', 'skill3',  'skill2subj3']
         summary.skills.collect { it.copiedFromProjectId } == ["TestProject1", null, null, "TestProject1", "TestProject3", "TestProject1", "TestProject3"]
         summary.skills.collect { it.copiedFromProjectName } == ["Test Project#1", null, null, "Test Project#1", "Test Project#3", "Test Project#1", "Test Project#3"]
+    }
+
+    def "subject's points and today's points"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(5, 1, 1, 200)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        String userId = getRandomUsers(1)[0]
+        when:
+        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], userId, new Date() - 2)
+        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(1).skillId], userId, new Date() - 1)
+        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(2).skillId], userId, new Date()) // today
+
+        def summary = skillsService.getSkillSummary(userId, proj1.projectId, proj1_subj.subjectId, -1, false)
+        def summary1 = skillsService.getSkillSummary(userId, proj1.projectId, proj1_subj.subjectId, -1, true)
+        then:
+        summary.points == 600
+        summary.todaysPoints == 200
+
+        summary1.points == 600
+        summary1.todaysPoints == 200
+    }
+
+    def "subject's points and today's points are caclulated for group's skills"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skillsGroup = SkillsFactory.createSkillsGroup()
+        def allSkills = SkillsFactory.createSkills(4) // first one is group
+        allSkills[1].pointIncrement = 100
+        allSkills[2].pointIncrement = 100
+        allSkills[3].pointIncrement = 100
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[1])
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[2])
+        skillsService.createSkill(allSkills[3])
+
+        skillsGroup.enabled = 'true'
+        skillsService.updateSkill(skillsGroup, null)
+
+        String userId = getRandomUsers(1)[0]
+        when:
+        skillsService.addSkill([projectId: proj.projectId, skillId: allSkills[1].skillId], userId, new Date() - 1)
+        skillsService.addSkill([projectId: proj.projectId, skillId: allSkills[2].skillId], userId, new Date()) // today
+
+        def summary = skillsService.getSkillSummary(userId, proj.projectId, subj.subjectId, -1, false)
+        def summary1 = skillsService.getSkillSummary(userId, proj.projectId, subj.subjectId, -1, true)
+        then:
+        summary.points == 200
+        summary.todaysPoints == 100
+
+        summary1.points == 200
+        summary1.todaysPoints == 100
     }
 }

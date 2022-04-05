@@ -96,7 +96,7 @@ class RankingLoader {
             if (optOutInfo.isOptOut()) {
                 throw new SkillException("Leaderboard type of [${LeaderboardRes.Type.tenAroundMe}] is not supported for opted-out users. Requested user is [${userId}]", projectId)
             }
-            int myPoints = userPointsRepository.findByProjectIdAndUserIdAndSkillIdAndDay(projectId, userId, subjectId, null)?.points ?: 0
+            int myPoints = userPointsRepository.findByProjectIdAndUserIdAndSkillId(projectId, userId, subjectId)?.points ?: 0
             int numWithHigherScore = subjectId ?
                     userPointsRepository.calculateNumUsersWithHigherScoreAndIfScoreTheSameThenAfterUserCreateDate(projectId, subjectId, myPoints, userAttrs.created) :
                     userPointsRepository.calculateNumUsersWithHigherScoreAndIfScoreTheSameThenAfterUserCreateDate(projectId, myPoints, userAttrs.created)
@@ -160,7 +160,7 @@ class RankingLoader {
 
         // if user is NOT in the top 10 then artificially add the user on the bottom
         if (!optOut.isPersonalOptOut() && res.size() > 0 && res.size() < 10 && !res.find { it.isItMe }) {
-            int myPoints = userPointsRepository.findByProjectIdAndUserIdAndSkillIdAndDay(projectId, userAttrs.userId, subjectId, null)?.points ?: 0
+            int myPoints = userPointsRepository.findByProjectIdAndUserIdAndSkillId(projectId, userAttrs.userId, subjectId)?.points ?: 0
             res.add(createRankedUserForThisUser(res.size() + 1, userAttrs, myPoints))
         }
         return res
@@ -237,7 +237,7 @@ class RankingLoader {
 
     @Profile
     private long findNumberOfUsers(String projectId, String subjectId) {
-        userPointsRepository.countByProjectIdAndSkillIdAndDay(projectId, subjectId, null)
+        userPointsRepository.countByProjectIdAndSkillId(projectId, subjectId)
     }
 
     SkillsRankingDistribution getRankingDistribution(String projectId, String userId, String subjectId = null) {
@@ -263,7 +263,7 @@ class RankingLoader {
     @CompileStatic
     @Profile
     private UserPoints loadUserPoints(String projectId, String userId, String subjectId) {
-        userPointsRepository.findByProjectIdAndUserIdAndSkillIdAndDay(projectId, userId, subjectId, null)
+        userPointsRepository.findByProjectIdAndUserIdAndSkillId(projectId, userId, subjectId)
     }
 
     @CompileStatic
@@ -275,14 +275,14 @@ class RankingLoader {
     @CompileStatic
     @Profile
     private List<UserPoints> findLowestUserPoints(String projectId, int points, String subjectId) {
-        List<UserPoints> previous = userPointsRepository.findByProjectIdAndSkillIdAndPointsLessThanAndDayIsNull(projectId, subjectId, points, PageRequest.of(0, 1, Sort.Direction.DESC, "points"))
+        List<UserPoints> previous = userPointsRepository.findByProjectIdAndSkillIdAndPointsLessThan(projectId, subjectId, points, PageRequest.of(0, 1, Sort.Direction.DESC, "points"))
         previous
     }
 
     @CompileStatic
     @Profile
     private List<UserPoints> findHighestUserPoints(String projectId, int points, String subjectId) {
-        List<UserPoints> next = userPointsRepository.findByProjectIdAndSkillIdAndPointsGreaterThanAndDayIsNull(projectId, subjectId, points, PageRequest.of(0, 1, Sort.Direction.ASC, "points"))
+        List<UserPoints> next = userPointsRepository.findByProjectIdAndSkillIdAndPointsGreaterThan(projectId, subjectId, points, PageRequest.of(0, 1, Sort.Direction.ASC, "points"))
         next
     }
 

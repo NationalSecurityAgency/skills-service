@@ -171,27 +171,20 @@ class PointsAndAchievementsBuilder {
 
         // add overall user points if it's the first time
         if (!myExistingPoints) {
-            toSave << constructUserPoints(userId, projectId, skillRefId, skillId, null, pointIncrement)
-        }
-
-        // add user points if a record doesn't exist for that day already
-        Date incomingDay = new Date(incomingSkillDate.date.time).clearTime()
-        if (!myExistingPoints?.find { it.getDay() == incomingDay }) {
-            toSave << constructUserPoints(userId, projectId, skillRefId, skillId, incomingDay, pointIncrement)
+            toSave << constructUserPoints(userId, projectId, skillRefId, skillId, pointIncrement)
         }
 
         return toSave
     }
 
 
-    private UserPoints constructUserPoints(String userId, String projectId, Integer skillRefId, String skillId, Date day, Integer pointIncrement) {
+    private UserPoints constructUserPoints(String userId, String projectId, Integer skillRefId, String skillId, Integer pointIncrement) {
         return new UserPoints(
                 userId: userId.toLowerCase(),
                 projectId: projectId,
                 skillId: skillId,
                 skillRefId: skillRefId,
-                points: pointIncrement,
-                day: day)
+                points: pointIncrement)
     }
 
 }

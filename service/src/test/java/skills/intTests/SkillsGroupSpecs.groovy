@@ -25,15 +25,6 @@ import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 import skills.storage.model.UserPoints
 import skills.storage.repos.SkillRelDefRepo
-import spock.lang.IgnoreRest
-
-import static skills.intTests.utils.SkillsFactory.createProject
-import static skills.intTests.utils.SkillsFactory.createProject
-import static skills.intTests.utils.SkillsFactory.createSkill
-import static skills.intTests.utils.SkillsFactory.createSkill
-import static skills.intTests.utils.SkillsFactory.createSkill
-import static skills.intTests.utils.SkillsFactory.createSubject
-import static skills.intTests.utils.SkillsFactory.createSubject
 
 class SkillsGroupSpecs extends DefaultIntSpec {
 
@@ -1741,47 +1732,31 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[2].skillId], users.first(), dates[1])
         skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[3].skillId], users.first(), dates[2])
 
-        Closure<List<UserPoints>> getPoints = { String user, String projectId, String skillId, boolean isHistory ->
+        Closure<List<UserPoints>> getPoints = { String user, String projectId, String skillId ->
             List<UserPoints> points = userPointsRepo.findAll()
-                    .findAll({ it.userId == user && it.projectId == projectId && it.skillId == skillId && (isHistory ? it.day : !it.day)})
+                    .findAll({ it.userId == user && it.projectId == projectId && it.skillId == skillId })
                     .sort({ it.day })
             return points
         }
 
         when:
-        List<UserPoints> u0_s1_t0 = getPoints.call(users[0], proj.projectId, allSkills[1].skillId, false)
-        List<UserPoints> u0_s2_t0 = getPoints.call(users[0], proj.projectId, allSkills[2].skillId, false)
-        List<UserPoints> u0_g1_t0 = getPoints.call(users[0], proj.projectId, skillsGroup.skillId, false)
-        List<UserPoints> u0_g2_t0 = getPoints.call(users[0], proj.projectId, skillsGroup2.skillId, false)
-        List<UserPoints> u0_subj1_t0 = getPoints.call(users[0], proj.projectId, subj.subjectId, false)
-        List<UserPoints> u0_subj2_t0 = getPoints.call(users[0], proj.projectId, subj2.subjectId, false)
-        List<UserPoints> u0_p1_t0 = getPoints.call(users[0], proj.projectId, null, false)
-
-        List<UserPoints> u0_s1_hist_t0 = getPoints.call(users[0], proj.projectId, allSkills[1].skillId, true)
-        List<UserPoints> u0_s2_hist_t0 = getPoints.call(users[0], proj.projectId, allSkills[2].skillId, true)
-        List<UserPoints> u0_g1_hist_t0 = getPoints.call(users[0], proj.projectId, skillsGroup.skillId, true)
-        List<UserPoints> u0_g2_hist_t0 = getPoints.call(users[0], proj.projectId, skillsGroup2.skillId, true)
-        List<UserPoints> u0_subj1_hist_t0 = getPoints.call(users[0], proj.projectId, subj.subjectId, true)
-        List<UserPoints> u0_subj2_hist_t0 = getPoints.call(users[0], proj.projectId, subj2.subjectId, true)
-        List<UserPoints> u0_p1_hist_t0 = getPoints.call(users[0], proj.projectId, null, true)
+        List<UserPoints> u0_s1_t0 = getPoints.call(users[0], proj.projectId, allSkills[1].skillId)
+        List<UserPoints> u0_s2_t0 = getPoints.call(users[0], proj.projectId, allSkills[2].skillId)
+        List<UserPoints> u0_g1_t0 = getPoints.call(users[0], proj.projectId, skillsGroup.skillId)
+        List<UserPoints> u0_g2_t0 = getPoints.call(users[0], proj.projectId, skillsGroup2.skillId)
+        List<UserPoints> u0_subj1_t0 = getPoints.call(users[0], proj.projectId, subj.subjectId)
+        List<UserPoints> u0_subj2_t0 = getPoints.call(users[0], proj.projectId, subj2.subjectId)
+        List<UserPoints> u0_p1_t0 = getPoints.call(users[0], proj.projectId, null)
 
         skillsService.deleteSkillEvent([projectId: proj.projectId, skillId: allSkills[1].skillId, userId: users[0], timestamp: dates[1].time] )
 
-        List<UserPoints> u0_s1_t1 = getPoints.call(users[0], proj.projectId, allSkills[1].skillId, false)
-        List<UserPoints> u0_s2_t1 = getPoints.call(users[0], proj.projectId, allSkills[2].skillId, false)
-        List<UserPoints> u0_g1_t1 = getPoints.call(users[0], proj.projectId, skillsGroup.skillId, false)
-        List<UserPoints> u0_g2_t1 = getPoints.call(users[0], proj.projectId, skillsGroup2.skillId, false)
-        List<UserPoints> u0_subj1_t1 = getPoints.call(users[0], proj.projectId, subj.subjectId, false)
-        List<UserPoints> u0_subj2_t1 = getPoints.call(users[0], proj.projectId, subj2.subjectId, false)
-        List<UserPoints> u0_p1_t1 = getPoints.call(users[0], proj.projectId, null, false)
-
-        List<UserPoints> u0_s1_hist_t1 = getPoints.call(users[0], proj.projectId, allSkills[1].skillId, true)
-        List<UserPoints> u0_s2_hist_t1 = getPoints.call(users[0], proj.projectId, allSkills[2].skillId, true)
-        List<UserPoints> u0_g1_hist_t1 = getPoints.call(users[0], proj.projectId, skillsGroup.skillId, true)
-        List<UserPoints> u0_g2_hist_t1 = getPoints.call(users[0], proj.projectId, skillsGroup2.skillId, true)
-        List<UserPoints> u0_subj1_hist_t1 = getPoints.call(users[0], proj.projectId, subj.subjectId, true)
-        List<UserPoints> u0_subj2_hist_t1 = getPoints.call(users[0], proj.projectId, subj2.subjectId, true)
-        List<UserPoints> u0_p1_hist_t1 = getPoints.call(users[0], proj.projectId, null, true)
+        List<UserPoints> u0_s1_t1 = getPoints.call(users[0], proj.projectId, allSkills[1].skillId)
+        List<UserPoints> u0_s2_t1 = getPoints.call(users[0], proj.projectId, allSkills[2].skillId)
+        List<UserPoints> u0_g1_t1 = getPoints.call(users[0], proj.projectId, skillsGroup.skillId)
+        List<UserPoints> u0_g2_t1 = getPoints.call(users[0], proj.projectId, skillsGroup2.skillId)
+        List<UserPoints> u0_subj1_t1 = getPoints.call(users[0], proj.projectId, subj.subjectId)
+        List<UserPoints> u0_subj2_t1 = getPoints.call(users[0], proj.projectId, subj2.subjectId)
+        List<UserPoints> u0_p1_t1 = getPoints.call(users[0], proj.projectId, null)
 
         then:
         u0_s1_t0.points == [300]
@@ -1792,21 +1767,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         u0_subj2_t0.points == [30]
         u0_p1_t0.points == [500 + 231 + 30]
 
-        u0_s1_hist_t0.points == [100, 100, 100]
-        u0_s1_hist_t0.day == [days[0], days[1], days[2],]
-        u0_s2_hist_t0.points == [100, 100]
-        u0_s2_hist_t0.day == [days[0], days[1]]
-        u0_g1_hist_t0.points == [200, 200, 100]
-        u0_g1_hist_t0.day == [days[0], days[1], days[2],]
-        u0_g2_hist_t0.points == [33, 66, 132]
-        u0_g2_hist_t0.day == [days[2], days[3], days[4],]
-        u0_subj1_hist_t0.points == [200, 200, 100 + 33, 66, 132]
-        u0_subj1_hist_t0.day == [days[0], days[1], days[2], days[3], days[4],]
-        u0_subj2_hist_t0.points == [10, 10, 10]
-        u0_subj2_hist_t0.day == [days[0], days[1], days[2]]
-        u0_p1_hist_t0.points == [200 + 10, 200 + 10, 100 + 10 + 33, 66, 132]
-        u0_p1_hist_t0.day == [days[0], days[1], days[2], days[3], days[4],]
-
         u0_s1_t1.points == [200]
         u0_s2_t1.points == [200]
         u0_g1_t1.points == [400]
@@ -1814,21 +1774,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         u0_subj1_t1.points == [400 + 231]
         u0_subj2_t1.points == [30]
         u0_p1_t1.points == [400 + 231 + 30]
-
-        u0_s1_hist_t1.points == [100, 100]
-        u0_s1_hist_t1.day == [days[0], days[2],]
-        u0_s2_hist_t1.points == [100, 100]
-        u0_s2_hist_t1.day == [days[0], days[1],]
-        u0_g1_hist_t1.points == [200, 100, 100]
-        u0_g1_hist_t1.day == [days[0], days[1], days[2],]
-        u0_g2_hist_t1.points == [33, 66, 132]
-        u0_g2_hist_t1.day == [days[2], days[3], days[4],]
-        u0_subj1_hist_t1.points == [200, 100, 100 + 33, 66, 132]
-        u0_subj1_hist_t1.day == [days[0], days[1], days[2], days[3], days[4],]
-        u0_subj2_hist_t1.points == [10, 10, 10]
-        u0_subj2_hist_t1.day == [days[0], days[1], days[2]]
-        u0_p1_hist_t1.points == [200 + 10 , 100 + 10 , 100 + 10 + 33, 66, 132 ]
-        u0_p1_hist_t1.day == [days[0], days[1], days[2], days[3], days[4],]
     }
 
     def "points awarded for group skill must have last earned date when fetching subject users"() {

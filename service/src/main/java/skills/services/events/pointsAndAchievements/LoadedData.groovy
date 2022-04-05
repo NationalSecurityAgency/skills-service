@@ -45,10 +45,10 @@ class LoadedData {
     SkillEventsSupportRepo.TinyUserPoints getTotalUserPoints(Integer skillRefId) {
         return tinyUserPoints.find({
             if (skillRefId) {
-                return it.getSkillRefId() && it.getSkillRefId() == skillRefId && !it.getDay()
+                return it.getSkillRefId() && it.getSkillRefId() == skillRefId
             }
 
-            return !it.getSkillRefId() && !it.getDay()
+            return !it.getSkillRefId()
         })
     }
 
