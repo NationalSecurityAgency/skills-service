@@ -101,7 +101,7 @@ limitations under the License.
         this.checkFinalizationState();
       },
       getFinalizationState() {
-        return SettingsService.getProjectSetting(this.$route.params.projectId, 'catalog.finalize.state');
+        return SettingsService.getProjectSetting(this.$route.params.projectId, 'catalog.finalize.state', false);
       },
       checkFinalizationState() {
         setTimeout(() => {
