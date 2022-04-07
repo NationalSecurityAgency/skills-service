@@ -102,8 +102,25 @@ class SkillEventAdminService {
         // collect userIds outside of the DB transaction
         BulkUserLookupResult res = bulkLookupUserNames(userIds, projectId, skillId)
 
+        if (!res) {
+            log.warn("No user names for found for userIds [${userIds}]")
+            return new BulkSkillEventResult(
+                    projectId: projectId,
+                    skillId: skillId,
+                    userIdsErrored: userIds,
+            )
+        }
+
         // report all skills as a single transaction
         Map<String, SkillEventResult> results = bulkReportSkillsInternal(projectId, skillId, res.requestedUserIds, incomingSkillDate)
+        if (!results) {
+            log.warn("No skills were report for projectId [${projectId}], skillId [${skillId}], userIds [${userIds}]")
+            return new BulkSkillEventResult(
+                    projectId: projectId,
+                    skillId: skillId,
+                    userIdsErrored: userIds,
+            )
+        }
 
         // perform notification and metrics logging
         performBulkReportSkillNotifications(results)

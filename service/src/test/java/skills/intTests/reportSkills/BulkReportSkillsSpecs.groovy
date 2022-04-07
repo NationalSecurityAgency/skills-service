@@ -76,6 +76,29 @@ class BulkReportSkillsSpecs extends DefaultIntSpec {
         res.body.userIdsErrored[0] == 'doesNotExist'
     }
 
+    @Requires({ env["SPRING_PROFILES_ACTIVE"] == "pki" })
+    def "bulk report skill for multiple users, all invalid users "() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(10,)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        when:
+        List<String> userIds = []
+        userIds.add('doesNotExist1')
+        userIds.add('doesNotExist2')
+        def res = skillsService.bulkAddSkill([projectId: projId, skillId: skills[0].skillId], userIds, new Date())
+
+        then:
+        res.body.userIdsAppliedCount == 0
+        res.body.userIdsNotAppliedCount == 0
+        res.body.userIdsErrored.size() == 2
+        res.body.userIdsErrored.find { it == 'doesNotExist1' }
+        res.body.userIdsErrored.find { it == 'doesNotExist2' }
+    }
 
     def "bulk report skill for multiple users, one skill not applied"() {
         def proj = SkillsFactory.createProject()
