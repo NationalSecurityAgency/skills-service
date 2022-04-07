@@ -58,6 +58,9 @@ class SkillCatalogService {
     @Value('#{"${skills.config.ui.minimumProjectPoints}"}')
     int minimumProjectPoints
 
+    @Value('#{"${skills.config.ui.maxSkillsPerSubject}"}')
+    int maxSubjectSkills
+
     @Autowired
     ExportedSkillRepo exportedSkillRepo
 
@@ -284,6 +287,13 @@ class SkillCatalogService {
     void importSkillsFromCatalog(String projectIdTo, String subjectIdTo, List<CatalogSkill> listOfSkills) {
         if (skillCatalogFinalizationService.getCurrentState(projectIdTo) == SkillCatalogFinalizationService.FinalizeState.RUNNING) {
             throw new SkillException("Cannot import skills in the middle of the finalization process", projectIdTo)
+        }
+
+        int currentSubjectSkillCount = skillRelDefRepo.countSubjectSkillsIncDisabled(projectIdTo, subjectIdTo)
+        if (currentSubjectSkillCount+listOfSkills?.size() > maxSubjectSkills) {
+            throw new SkillException("Each Subject is limited to [${maxSubjectSkills}] Skills, " +
+                    "currently [${subjectIdTo}] has [${currentSubjectSkillCount}] Skills, " +
+                    "importing [${listOfSkills?.size()}] would exceed the maximum", ErrorCode.MaxSkillsThreshold)
         }
         log.info("Import skills into the catalog. projectIdTo=[{}], subjectIdTo=[{}], listOfSkills={}", projectIdTo, subjectIdTo, listOfSkills)
         // validate

@@ -179,6 +179,38 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
     ''', nativeQuery = true)
     List<SkillDefPartial> getSkillsWithCatalogStatusExplodeSkillGroups(@Param("projectId") String projectId, @Param("subjectId") String subjectId)
 
+    /**
+     * Counts all skills within a subject, including disabled group skills as well as imported
+     * skills still pending finalization
+     *
+     * @param projectId
+     * @param subjectId
+     * @return
+     */
+    @Query(value='''
+        WITH RECURSIVE subj_skills (parentId, childId) AS (
+            SELECT s.parent_ref_id AS parentId, s.child_ref_id AS childId 
+            FROM
+            skill_relationship_definition s, skill_definition sd
+            WHERE
+            sd.project_id = :projectId AND   
+            sd.skill_id = :subjectId AND
+            s.parent_ref_id = sd.id
+            
+            UNION ALL
+            
+            SELECT childId AS parentId, s.child_ref_id AS childId
+            FROM
+            skill_relationship_definition s
+            INNER JOIN subj_skills on childId = s.parent_ref_id
+        )
+        
+        SELECT COUNT(ss.id) FROM
+        skill_definition ss WHERE ss.type = 'Skill' AND 
+        EXISTS (SELECT 1 FROM subj_skills WHERE childId = ss.id)
+    ''', nativeQuery = true)
+    int countSubjectSkillsIncDisabled(@Param("projectId") String projectId, @Param("subjectId") String subjectId)
+
     @Query('''SELECT 
         sd2.id as id,
         sd2.name as name, 

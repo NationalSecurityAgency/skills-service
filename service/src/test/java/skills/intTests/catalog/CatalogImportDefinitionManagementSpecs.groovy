@@ -22,6 +22,7 @@ import skills.storage.model.SkillDef
 import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
+import static skills.intTests.utils.SkillsFactory.createSkillsGroup
 
 class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
 
@@ -770,6 +771,122 @@ class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
         then:
         SkillsClientException e = thrown(SkillsClientException)
         e.message.contains("Skill [skillThatDoesNotExist] from project [TestProject1] has not been shared to the catalog")
+    }
+
+    def "cannot import when number of skills to be imported would exceed max skills per subject"() {
+        def project1 = createProjWithCatalogSkills(1)
+        /*
+        def subj1_skills = (1..3).collect {createSkill(projNum, 1, projNum * 10 + it, 0,numPerformToCompletion, 480, 100) }
+        def subj2_skills = (1..3).collect {createSkill(projNum, 2, projNum * 10 + it + 3, 0, numPerformToCompletion, 480, 100) }
+        def subj3_skills = (1..3).collect {createSkill(projNum, 3, projNum * 10 + it + 6, 0, numPerformToCompletion, 480, 100) }
+         */
+
+        def project2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def p2skills = createSkills(99, 2, 1)
+        skillsService.createProject(project2)
+        skillsService.createSubject(p2subj1)
+        skillsService.createSkills(p2skills)
+
+        when:
+        skillsService.bulkImportSkillsFromCatalog(project2.projectId, p2subj1.subjectId,
+                [
+                        [projectId: project1.p.projectId, skillId: project1.s1_skills[0].skillId],
+                        [projectId: project1.p.projectId, skillId: project1.s1_skills[1].skillId],
+                ])
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("Each Subject is limited to [100] Skills, currently [TestSubject1] has [99] Skills, importing [2] would exceed the maximum, errorCode:MaxSkillsThreshold")
+    }
+
+    def "cannot import when number of skills to be imported would exceed max skills per subject including pending finalization skills"() {
+        def project1 = createProjWithCatalogSkills(1)
+
+        def project2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def p2skills = createSkillsStartingAt(95, 9000, 2, 1)
+        skillsService.createProject(project2)
+        skillsService.createSubject(p2subj1)
+        skillsService.createSkills(p2skills)
+        skillsService.bulkImportSkillsFromCatalog(project2.projectId, p2subj1.subjectId,
+                [
+                        [projectId: project1.p.projectId, skillId: project1.s1_skills[0].skillId],
+                        [projectId: project1.p.projectId, skillId: project1.s1_skills[1].skillId],
+                        [projectId: project1.p.projectId, skillId: project1.s1_skills[2].skillId],
+                        [projectId: project1.p.projectId, skillId: project1.s2_skills[0].skillId],
+                ])
+
+        when:
+        skillsService.bulkImportSkillsFromCatalog(project2.projectId, p2subj1.subjectId,
+                [
+                        [projectId: project1.p.projectId, skillId: project1.s2_skills[1].skillId],
+                        [projectId: project1.p.projectId, skillId: project1.s2_skills[2].skillId],
+                ])
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("Each Subject is limited to [100] Skills, currently [TestSubject1] has [99] Skills, importing [2] would exceed the maximum, errorCode:MaxSkillsThreshold")
+    }
+
+    def "cannot import when number of skills to be imported would exceed max skills per subject including group skills"() {
+        def project1 = createProjWithCatalogSkills(1)
+
+        def project2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def p2skills = createSkills(95, 2, 1)
+        def group = createSkillsGroup(2, 1, 10001)
+        def groupSkills = createSkillsStartingAt(4, 1001, 2, 1)
+
+        skillsService.createProject(project2)
+        skillsService.createSubject(p2subj1)
+        skillsService.createSkills(p2skills)
+        skillsService.createSkill(group)
+        groupSkills.each {
+            skillsService.assignSkillToSkillsGroup(group.skillId, it)
+        }
+        group.enabled = 'true'
+        skillsService.updateSkill(group, null)
+
+        when:
+        skillsService.bulkImportSkillsFromCatalog(project2.projectId, p2subj1.subjectId,
+                [
+                        [projectId: project1.p.projectId, skillId: project1.s2_skills[1].skillId],
+                        [projectId: project1.p.projectId, skillId: project1.s2_skills[2].skillId],
+                ])
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("Each Subject is limited to [100] Skills, currently [TestSubject1] has [99] Skills, importing [2] would exceed the maximum, errorCode:MaxSkillsThreshold")
+    }
+
+    def "cannot import when number of skills to be imported would exceed max skills per subject including disabled group skills"() {
+        def project1 = createProjWithCatalogSkills(1)
+
+        def project2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def p2skills = createSkills(95, 2, 1)
+        def group = createSkillsGroup(2, 1, 10001)
+        def groupSkills = createSkillsStartingAt(4, 1001, 2, 1)
+
+        skillsService.createProject(project2)
+        skillsService.createSubject(p2subj1)
+        skillsService.createSkills(p2skills)
+        skillsService.createSkill(group)
+        groupSkills.each {
+            skillsService.assignSkillToSkillsGroup(group.skillId, it)
+        }
+
+        when:
+        skillsService.bulkImportSkillsFromCatalog(project2.projectId, p2subj1.subjectId,
+                [
+                        [projectId: project1.p.projectId, skillId: project1.s2_skills[1].skillId],
+                        [projectId: project1.p.projectId, skillId: project1.s2_skills[2].skillId],
+                ])
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("Each Subject is limited to [100] Skills, currently [TestSubject1] has [99] Skills, importing [2] would exceed the maximum, errorCode:MaxSkillsThreshold")
     }
 
 }

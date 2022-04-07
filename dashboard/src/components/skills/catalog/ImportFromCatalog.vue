@@ -114,6 +114,7 @@ limitations under the License.
             :selected="isSelected(data.item)"
             @importSelection="handleImportSelection($event, data.item)"
             @input="updateActionsDisableStatus"
+            :disableSelection="maxBulkImportExceeded || maxSkillsInSubjectExceeded"
           />
 
           <div class="sub-info">
@@ -168,7 +169,7 @@ limitations under the License.
 
     <div slot="modal-footer" class="w-100">
       <b-button v-if="!emptyCatalog" variant="success" size="sm" class="float-right ml-2"
-                @click="importSkills" data-cy="importBtn" :disabled="importDisabled || validatingImport || maxSelectionExceeded"><i
+                @click="importSkills" data-cy="importBtn" :disabled="importDisabled || validatingImport || maxBulkImportExceeded || maxSkillsInSubjectExceeded"><i
         class="far fa-arrow-alt-circle-down"></i> Import <b-badge variant="primary" data-cy="numSelectedSkills">{{ numSelectedSkills }}</b-badge>
         <b-spinner v-if="validatingImport" small label="Small Spinner" class="ml-1"></b-spinner>
       </b-button>
@@ -182,7 +183,7 @@ limitations under the License.
         <i class="fas fa-thumbs-up"></i> OK
       </b-button>
 
-      <span v-if="maxSelectionExceeded" class="float-right ml-2 text-danger" data-cy="maximum-selected">
+      <span v-if="maxBulkImportExceeded || maxSkillsInSubjectExceeded" class="float-right ml-2 text-danger" data-cy="maximum-selected">
         <i class="fas fa-exclamation-circle text-warning"/> {{this.maxExceededMsg}}
       </span>
     </div>
@@ -297,11 +298,32 @@ limitations under the License.
       maxProjectNameLength() {
         return this.$store.state.maxProjectNameLength;
       },
-      maxSelectionExceeded() {
+      maxBulkImportExceeded() {
         return Object.values(this.selected).filter((item) => item.selected).length > this.$store.getters.config.maxSkillsInBulkImport;
       },
+      maxSkillsInSubjectExceeded() {
+        return Object.values(this.selected).filter((item) => item.selected).length + this.currentSkillCount
+          > this.$store.getters.config.maxSkillsPerSubject;
+      },
+      currentSkillCount() {
+        const initValue = 0;
+        const currentSkills = this.currentProjectSkills || [];
+        const totalCurrentSkills = currentSkills.reduce((previousValue, currentValue) => {
+          if (currentValue.numSkillsInGroup !== null) {
+            return previousValue + currentValue.numSkillsInGroup;
+          }
+          return previousValue + 1;
+        }, initValue);
+        return totalCurrentSkills;
+      },
       maxExceededMsg() {
-        return `cannot import more than ${this.$store.getters.config.maxSkillsInBulkImport} Skills at once`;
+        if (this.maxBulkImportExceeded) {
+          return `cannot import more than ${this.$store.getters.config.maxSkillsInBulkImport} Skills at once`;
+        }
+        if (this.maxSkillsInSubjectExceeded) {
+          return `No more than ${this.$store.getters.config.maxSkillsPerSubject} Skills per Subject are allowed, this project already has ${this.currentSkillCount}`;
+        }
+        return '';
       },
     },
     methods: {
@@ -326,6 +348,9 @@ limitations under the License.
       },
       toggleSelected(changeEvent, dataItem) {
         const { selected } = changeEvent;
+        if (dataItem.alreadyHasThisSkillId || dataItem.alreadyHasThisName) {
+          return;
+        }
         // eslint-disable-next-line no-param-reassign
         dataItem.selected = selected;
         const key = this.dataItemKey(dataItem);
