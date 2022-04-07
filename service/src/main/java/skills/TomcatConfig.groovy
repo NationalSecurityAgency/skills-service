@@ -18,9 +18,12 @@ package skills
 import ch.qos.logback.access.pattern.AccessConverter
 import ch.qos.logback.access.spi.IAccessEvent
 import ch.qos.logback.access.tomcat.LogbackValve
+import org.apache.catalina.connector.Connector
+import org.apache.coyote.http2.Http2Protocol
 import org.apache.tomcat.util.http.Rfc6265CookieProcessor
 import org.apache.tomcat.util.http.SameSiteCookies
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.web.embedded.tomcat.TomcatConnectorCustomizer
 import org.springframework.boot.web.embedded.tomcat.TomcatContextCustomizer
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory
 import org.springframework.boot.web.server.WebServerFactoryCustomizer
@@ -33,6 +36,9 @@ class TomcatConfig implements WebServerFactoryCustomizer<TomcatServletWebServerF
 
     @Value('#{"${server.tomcat.accesslog.enabled:false}"}')
     boolean enabledAccessLog
+
+    @Value('#{"${server.tomcat.disableOverheadThresholds:false}"}')
+    boolean disableOverheadThresholds
 
     // this will force the SameSite=None attribute to be present on the Set-Cookie header.
     // Note that the SameSite=None attribute also requires the Secure attribute to be present
@@ -60,6 +66,20 @@ class TomcatConfig implements WebServerFactoryCustomizer<TomcatServletWebServerF
             // HTTP-based transport fallback options (HTTP polling/streaming)
             valve.setAsyncSupported(true)
             factory.addContextValves(valve)
+        }
+
+        if (disableOverheadThresholds) {
+            factory.addConnectorCustomizers(new TomcatConnectorCustomizer() {
+                @Override
+                void customize(Connector connector) {
+                    Http2Protocol http2Protocol = new Http2Protocol()
+                    http2Protocol.setOverheadCountFactor(0)
+                    http2Protocol.setOverheadDataThreshold(0)
+                    http2Protocol.setOverheadContinuationThreshold(0)
+                    http2Protocol.setOverheadWindowUpdateThreshold(0)
+                    connector.addUpgradeProtocol(http2Protocol)
+                }
+            })
         }
     }
 
