@@ -116,7 +116,7 @@ public class MockUserInfoService {
         ResponseDefinition transform(Request request, ResponseDefinition responseDefinition, FileSource files, Parameters parameters) {
             String dnQuery = request.queryParameter('dn')?.firstValue()
 
-            if (dnQuery?.equalsIgnoreCase('doesNotExist')) {
+            if (dnQuery?.containsIgnoreCase('doesNotExist')) {
                 throw new Exception("Unknown User [${dnQuery}]")
             }
 
