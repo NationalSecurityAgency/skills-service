@@ -743,7 +743,7 @@ describe('Self Report Skills Management Tests', () => {
       cy.get('[data-cy=showLess]').should('not.exist');
       cy.get('[data-cy=showMore]').should('have.length', 2);
       cy.get('[data-cy=smtText]').eq(1).should('not.have.text', msgExpandBtn1);
-      cy.get('[data-cy=smtText]').eq(1).should('have.text', `${msgExpandBtn1.substring(0, 50)}...`);
+      cy.get('[data-cy=smtText]').eq(1).should('have.text', `${msgExpandBtn1.substring(0, 50)}`);
       cy.get('[data-cy=showMore]').eq(1).click();
       cy.get('[data-cy=smtText]').eq(1).should('have.text', msgExpandBtn1);
       cy.get('[data-cy=showLess]').should('have.length', 1);
@@ -751,7 +751,7 @@ describe('Self Report Skills Management Tests', () => {
       cy.get('[data-cy=showLess]').click();
       cy.get('[data-cy=showMore]').should('have.length', 2);
       cy.get('[data-cy=smtText]').eq(1).should('not.have.text', msgExpandBtn1);
-      cy.get('[data-cy=smtText]').eq(1).should('have.text', `${msgExpandBtn1.substring(0, 50)}...`);
+      cy.get('[data-cy=smtText]').eq(1).should('have.text', `${msgExpandBtn1.substring(0, 50)}`);
     });
 
     it('rejection message is limited to configure max size', () => {

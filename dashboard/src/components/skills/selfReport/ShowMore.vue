@@ -15,15 +15,16 @@ limitations under the License.
 */
 <template>
   <div data-cy="showMoreText" class="text-break">
-    <span><span data-cy="smtText">{{toDisplay}}</span>
-      <b-button v-if="truncate" size="xs" variant="outline-info"
+    <span>
+      <span v-if="containsHtml" v-html="toDisplay">html RMM</span><span v-else data-cy="smtText">{{toDisplay}}</span>
+      <b-link v-if="truncate" size="xs" variant="outline-info"
                 class=""
                 @click="displayFullText = !displayFullText"
                 aria-label="Show/Hide truncated text"
                 data-cy="showMoreOrLessBtn">
-        <span v-if="displayFullText" ><i data-cy="showLess" class="fa fa-minus-square"/> less</span>
-        <span v-else><i data-cy="showMore" class="fa fa-plus-square" /> more</span>
-      </b-button>
+        <small v-if="displayFullText" data-cy="showLess"> &lt;&lt; less</small>
+        <small v-else data-cy="showMore"><em>... &gt;&gt; more</em></small>
+      </b-link>
     </span>
   </div>
 
@@ -42,16 +43,19 @@ limitations under the License.
         required: false,
         default: 50,
       },
+      containsHtml: {
+        type: Boolean,
+        required: false,
+      },
     },
     data() {
       return {
-        truncatedText: '',
         slop: 15,
         displayFullText: false,
       };
     },
     mounted() {
-      this.truncatedText = `${this.text.substring(0, 50)}...`;
+      this.displayFullText = this.text.length < this.limit + this.slop;
     },
     computed: {
       truncate() {
@@ -59,9 +63,9 @@ limitations under the License.
       },
       toDisplay() {
         if (this.displayFullText) {
-          return this.text;
+          return `${this.text}`;
         }
-        return this.truncatedText;
+        return `${this.text.substring(0, 50)}`;
       },
     },
   };

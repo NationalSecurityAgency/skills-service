@@ -133,7 +133,7 @@ limitations under the License.
                 </div>
               </div>
 
-              <div class="text-muted ml-4" style="font-size: 0.9rem;">ID: <span v-if="data.item.skillIdHtml" v-html="data.item.skillIdHtml"></span><span v-else>{{ data.item.skillId }}</span></div>
+              <div class="text-muted ml-4" style="font-size: 0.9rem;">ID: <show-more :containsHtml="idContainsHtml(data.item)" :text="getIdText(data.item)"/></div>
 
               <div class="mt-1">
                 <b-button size="sm" @click="data.toggleDetails" variant="outline-info" class="mr-2 py-0 px-1"
@@ -323,6 +323,7 @@ limitations under the License.
   import TimeWindowMixin from './TimeWindowMixin';
   import ChildRowSkillGroupDisplay from './skillsGroup/ChildRowSkillGroupDisplay';
   import EditSkillGroup from './skillsGroup/EditSkillGroup';
+  import ShowMore from './selfReport/ShowMore';
 
   export default {
     name: 'SkillsTable',
@@ -389,6 +390,7 @@ limitations under the License.
       ChildRowSkillsDisplay,
       LoadingContainer,
       NoContent2,
+      ShowMore,
     },
     data() {
       return {
@@ -587,6 +589,16 @@ limitations under the License.
       isToday(timestamp) {
         return dayjs(timestamp)
           .isSame(new Date(), 'day');
+      },
+      idContainsHtml(item) {
+        return !!item.skillIdHtml;
+      },
+      getIdText(item) {
+        let text = item.skillId;
+        if (this.idContainsHtml(item)) {
+          text = item.skillIdHtml;
+        }
+        return text;
       },
       editSkill(itemToEdit) {
         this.currentlyFocusedSkillId = itemToEdit.skillId;
