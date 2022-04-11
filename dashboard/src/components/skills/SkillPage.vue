@@ -17,7 +17,7 @@ limitations under the License.
   <div>
     <page-header :loading="isLoading" :options="headerOptions">
       <div slot="subTitle">
-        <div class="h5 text-muted">ID: <show-more :text="skill ? skill.skillId : 'Loading...'"></show-more></div>
+        <div class="h5 text-muted"><show-more :text="skill ? `ID: ${skill.skillId}` : 'Loading...'"></show-more></div>
         <div class="h5 text-muted" v-if="skill && skill.groupId">
           <span style="font-size: 1rem">Group ID:</span> <span v-b-tooltip.hover="`Name: ${ skill.groupName }`">{{ skill.groupId }}</span>
           <b-badge :data-cy="`disabledGroupBadge-${skill.groupId}`"
