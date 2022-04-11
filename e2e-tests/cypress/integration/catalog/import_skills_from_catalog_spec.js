@@ -386,16 +386,16 @@ describe('Import skills from Catalog Tests', () => {
 
         cy.get('[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '4');
 
-        cy.get('[data-cy="alreadyExistWarning_proj1-skill2"]').contains('Cannot import! Skill ID and name already exist in the project!');
+        cy.get('[data-cy="alreadyExistWarning_proj1-skill2"]').contains('Cannot import! Skill ID and name already exist in this project!');
         cy.get('[data-cy="skillSelect_proj1-skill2"]').should('be.disabled')
 
         cy.get('[data-cy="alreadyExistWarning_proj1-skill3"]').should('not.exist')
         cy.get('[data-cy="skillSelect_proj1-skill3"]').should('be.enabled');
 
-        cy.get('[data-cy="alreadyExistWarning_proj1-skill4"]').contains('Cannot import! Skill ID already exist in the project!');
+        cy.get('[data-cy="alreadyExistWarning_proj1-skill4"]').contains('Cannot import! Skill ID already exists in this project!');
         cy.get('[data-cy="skillSelect_proj1-skill4"]').should('be.disabled');
 
-        cy.get('[data-cy="alreadyExistWarning_proj1-skill5"]').contains('Cannot import! Skill name already exist in the project!');
+        cy.get('[data-cy="alreadyExistWarning_proj1-skill5"]').contains('Cannot import! Skill name already exists in this project!');
         cy.get('[data-cy="skillSelect_proj1-skill5"]').should('be.disabled');
 
         cy.get('[data-cy="importBtn"]').should('be.disabled');
@@ -925,6 +925,146 @@ describe('Import skills from Catalog Tests', () => {
       cy.get('[data-cy="importBtn"]').should('be.disabled');
       cy.get('[data-cy="numSelectedSkills"]').should('have.text', '0');
     });
+
+  it('respect maxSkillsPerSubject configuration', () => {
+    // mix skill names since it's sorted by skillId - this will force different projects in the first page
+    cy.intercept('GET', '/public/config', (req) => {
+      req.reply((res) => {
+        const conf = res.body;
+        conf.maxSkillsInBulkImport = 5;
+        conf.maxSkillsPerSubject = 10;
+        res.send(conf);
+      });
+    }).as('loadConfig')
+
+    cy.createSkill(1, 1, 1);
+    cy.createSkill(1, 1, 4);
+    cy.createSkill(1, 1, 5);
+    cy.createSkill(1, 1, 6);
+    cy.createSkill(1, 1, 7);
+    cy.createSkill(1, 1, 9);
+    cy.createSkill(1, 1, 66);
+    cy.createSkill(1, 1, 67);
+    cy.createSkill(1, 1, 68);
+    cy.createSkill(1, 1, 69);
+
+    cy.createProject(2);
+    cy.createSubject(2, 1);
+    cy.createSkill(2, 1, 2);
+    cy.createSkill(2, 1, 3);
+    cy.createSkill(2, 1, 8);
+    cy.createSkill(2, 1, 10);
+    cy.createSkill(2, 1, 11);
+    cy.createSkill(2, 1, 12);
+
+    cy.exportSkillToCatalog(1, 1, 1);
+    cy.exportSkillToCatalog(1, 1, 6);
+    cy.exportSkillToCatalog(1, 1, 7);
+    cy.exportSkillToCatalog(1, 1, 4);
+    cy.exportSkillToCatalog(1, 1, 5);
+    cy.exportSkillToCatalog(1, 1, 9);
+    cy.exportSkillToCatalog(1, 1, 66);
+    cy.exportSkillToCatalog(1, 1, 67);
+    cy.exportSkillToCatalog(1, 1, 68);
+    cy.exportSkillToCatalog(1, 1, 69);
+
+    cy.intercept('/admin/projects/proj2/skills/catalog**').as('getCatalogSkills');
+
+    cy.visit('/administrator/projects/proj2/subjects/subj1');
+    cy.wait('@loadConfig');
+
+    cy.get('[data-cy="importFromCatalogBtn"]').click();
+    cy.wait('@getCatalogSkills');
+
+    cy.get('[data-cy="importBtn"]').should('be.disabled');
+    cy.get('[data-cy="numSelectedSkills"]').should('have.text', '0');
+
+    cy.get('[data-cy="skillSelect_proj1-skill1"]').click({force:true});
+    cy.get('[data-cy="importBtn"]').should('be.enabled');
+    cy.get('[data-cy="skillSelect_proj1-skill4"]').click({force:true});
+    cy.get('[data-cy="importBtn"]').should('be.enabled');
+    cy.get('[data-cy="skillSelect_proj1-skill5"]').click({force:true});
+    cy.get('[data-cy="importBtn"]').should('be.enabled');
+    cy.get('[data-cy="skillSelect_proj1-skill6"]').click({force:true});
+    cy.get('[data-cy="importBtn"]').should('be.enabled');
+    cy.get('[data-cy="skillSelect_proj1-skill66"]').click({force:true});
+    cy.get('[data-cy="importBtn"]').should('be.disabled');
+    cy.get('[data-cy=maximum-selected]').should('exist').contains('No more than 10 Skills per Subject are allowed, this project already has 6');
+
+    cy.get('[aria-label="Go to page 2"]').click({force:true});
+    cy.wait('@getCatalogSkills');
+    cy.get('[data-cy="importBtn"]').should('be.disabled');
+    cy.get('[data-cy=maximum-selected]').should('exist').contains('No more than 10 Skills per Subject are allowed, this project already has 6');
+    // for some reason two elements with the same aria-label are created in this test, we have to get the 2nd element
+    // or the click event doesn't do anything
+    cy.get('[aria-label="Go to page 1"]').eq(1).click({force:true});
+    cy.wait('@getCatalogSkills');
+    cy.get('[data-cy="skillSelect_proj1-skill66"]').click({force:true});
+    cy.get('[data-cy="importBtn"]').should('be.enabled');
+    cy.get('[data-cy=maximum-selected]').should('not.exist');
+    cy.get('[data-cy=closeButton]').click();
+
+    cy.importSkillFromCatalog(2, 1, 1, 68);
+    cy.importSkillFromCatalog(2, 1, 1, 69);
+    // force skills to be repopulated (which would happen if imports were done via ui)
+    cy.get('[data-cy="nav-Levels"]').click();
+    cy.get('[data-cy="nav-Skills"]').click();
+
+    cy.get('[data-cy="importFromCatalogBtn"]').click();
+    cy.wait('@getCatalogSkills');
+
+    cy.get('[data-cy="importBtn"]').should('be.disabled');
+    cy.get('[data-cy="numSelectedSkills"]').should('have.text', '0');
+
+    cy.get('[data-cy="skillSelect_proj1-skill1"]').click({force:true});
+    cy.get('[data-cy="importBtn"]').should('be.enabled');
+    cy.get('[data-cy="skillSelect_proj1-skill4"]').click({force:true});
+    cy.get('[data-cy="importBtn"]').should('be.enabled');
+    cy.get('[data-cy="skillSelect_proj1-skill66"]').click({force:true});
+    cy.get('[data-cy="importBtn"]').should('be.disabled');
+    cy.get('[data-cy=maximum-selected]').should('exist').contains('No more than 10 Skills per Subject are allowed, this project already has 8');
+
+    cy.get('[aria-label="Go to page 2"]').click();
+    cy.wait('@getCatalogSkills');
+    cy.get('[data-cy="importBtn"]').should('be.disabled');
+    cy.get('[data-cy=maximum-selected]').should('exist').contains('No more than 10 Skills per Subject are allowed, this project already has 8');
+
+    cy.get('[aria-label="Go to page 1"]').eq(1).click();
+    cy.wait('@getCatalogSkills');
+    cy.get('[data-cy="importBtn"]').should('be.disabled');
+    cy.get('[data-cy=maximum-selected]').should('exist').contains('No more than 10 Skills per Subject are allowed, this project already has 8');
+    cy.get('[data-cy="skillSelect_proj1-skill66"]').click({force:true});
+    cy.get('[data-cy="importBtn"]').should('be.enabled');
+    cy.get('[data-cy=maximum-selected]').should('not.exist');
+
+    cy.get('[data-cy=closeButton]').click();
+    cy.createSkillsGroup(2, 1, 1);
+    cy.addSkillToGroup(2, 1, 1, 909);
+    //need to get skills in Skills component to update
+    cy.get('[data-cy=nav-Levels]').click();
+    cy.get('[data-cy=nav-Skills]').click();
+    cy.get('[data-cy="importFromCatalogBtn"]').click();
+    cy.wait('@getCatalogSkills');
+    cy.get('[data-cy="importBtn"]').should('be.disabled');
+    cy.get('[data-cy="numSelectedSkills"]').should('have.text', '0');
+    cy.get('[data-cy="skillSelect_proj1-skill1"]').click({force:true});
+    cy.get('[data-cy="importBtn"]').should('be.enabled');
+    cy.get('[data-cy="skillSelect_proj1-skill4"]').click({force:true});
+    cy.get('[data-cy="importBtn"]').should('be.disabled');
+    cy.get('[data-cy=maximum-selected]').should('exist').contains('No more than 10 Skills per Subject are allowed, this project already has 9');
+
+    cy.get('[aria-label="Go to page 2"]').click();
+    cy.wait('@getCatalogSkills');
+    cy.get('[data-cy="importBtn"]').should('be.disabled');
+    cy.get('[data-cy=maximum-selected]').should('exist').contains('No more than 10 Skills per Subject are allowed, this project already has 9');
+    cy.get('[aria-label="Go to page 1"]').eq(1).click();
+    cy.wait('@getCatalogSkills');
+    cy.get('[data-cy="importBtn"]').should('be.disabled');
+    cy.get('[data-cy=maximum-selected]').should('exist').contains('No more than 10 Skills per Subject are allowed, this project already has 9');
+    cy.get('[data-cy="skillSelect_proj1-skill1"]').click({force:true});
+    cy.get('[data-cy="importBtn"]').should('be.enabled');
+    cy.get('[data-cy=maximum-selected]').should('not.exist');
+  });
 });
 
 

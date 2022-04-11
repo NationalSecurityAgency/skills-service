@@ -150,9 +150,7 @@ limitations under the License.
         });
       },
       skillDeleted(skill) {
-        const index = this.skills.findIndex((item) => item.skillId === skill.skillId);
-        this.skills.splice(index, 1);
-        this.skillsChanged(skill.skillId);
+        this.skillsChanged(skill, true);
       },
       importFromCatalog(skillsInfoToImport) {
         this.setLoadingSubjectSkills(true);
@@ -163,9 +161,21 @@ limitations under the License.
             this.loadFinalizeInfo({ projectId: this.projectId });
           });
       },
-      skillsChanged(skillId) {
+      skillsChanged(skill, deleted = false) {
+        if (!deleted) {
+          const item1Index = this.skills.findIndex((item) => item.skillId === skill.originalSkillId);
+          if (item1Index >= 0) {
+            this.skills.splice(item1Index, 1, skill);
+          } else {
+            this.skills.push(skill);
+          }
+        } else {
+          const index = this.skills.findIndex((item) => item.skillId === skill.skillId);
+          this.skills.splice(index, 1);
+        }
+
         this.loadSubjectDetailsState({ projectId: this.projectId, subjectId: this.subject.subjectId });
-        this.$emit('skills-change', skillId);
+        this.$emit('skills-change', skill.skillId);
       },
       newSkill() {
         this.editSkillInfo = {
