@@ -44,8 +44,8 @@ describe('Skills Tests', () => {
     cy.get('[data-cy=newSkillButton]').click();
 
     // name causes id to be too long
-    const msg = 'Skill ID cannot exceed 50 characters.';
-    const validNameButInvalidId = Array(46).fill('a').join('');
+    const msg = 'Skill ID cannot exceed 100 characters.';
+    const validNameButInvalidId = Array(96).fill('a').join('');
     cy.get('[data-cy=skillName]').click();
     cy.get('[data-cy=skillName]').fill(validNameButInvalidId);
     cy.get('[data-cy=idError]').should('be.visible');
