@@ -820,16 +820,16 @@ describe('Skills Tests', () => {
     cy.get('[data-cy=showMoreText]').should('have.length', 1);
     cy.get('[data-cy=showLess]').should('not.exist');
     cy.get('[data-cy=showMore]').should('have.length', 1);
-    cy.get('[data-cy=smtText]').should('not.have.text', skillId);
-    cy.get('[data-cy=smtText]').should('have.text', `${skillId.substring(0, 50)}`);
+    cy.get('[data-cy=smtText]').should('not.have.text', `ID: ${skillId}`);
+    cy.get('[data-cy=smtText]').should('have.text', `ID: ${skillId.substring(0, 50)}`);
     cy.get('[data-cy=showMore]').click();
-    cy.get('[data-cy=smtText]').should('have.text', skillId);
+    cy.get('[data-cy=smtText]').should('have.text', `ID: ${skillId}`);
     cy.get('[data-cy=showLess]').should('have.length', 1);
     cy.get('[data-cy=showMore]').should('not.exist');
     cy.get('[data-cy=showLess]').click();
     cy.get('[data-cy=showMore]').should('have.length', 1);
-    cy.get('[data-cy=smtText]').should('not.have.text', skillId);
-    cy.get('[data-cy=smtText]').should('have.text', `${skillId.substring(0, 50)}`);
+    cy.get('[data-cy=smtText]').should('not.have.text', `ID: ${skillId}`);
+    cy.get('[data-cy=smtText]').should('have.text', `ID: ${skillId.substring(0, 50)}`);
 
     cy.intercept('GET', `/administrator/projects/proj1/subjects/subj1/skills/${skillId}`).as('loadSkill1');
     cy.visit(`/administrator/projects/proj1/subjects/subj1/skills/${skillId}`);
@@ -838,16 +838,16 @@ describe('Skills Tests', () => {
     cy.get('[data-cy=showMoreText]').should('have.length', 1);
     cy.get('[data-cy=showLess]').should('not.exist');
     cy.get('[data-cy=showMore]').should('have.length', 1);
-    cy.get('[data-cy=smtText]').should('not.have.text', skillId);
-    cy.get('[data-cy=smtText]').should('have.text', `${skillId.substring(0, 50)}`);
+    cy.get('[data-cy=smtText]').should('not.have.text', `ID: ${skillId}`);
+    cy.get('[data-cy=smtText]').should('have.text', `ID: ${skillId.substring(0, 50)}`);
     cy.get('[data-cy=showMore]').click();
-    cy.get('[data-cy=smtText]').should('have.text', skillId);
+    cy.get('[data-cy=smtText]').should('have.text', `ID: ${skillId}`);
     cy.get('[data-cy=showLess]').should('have.length', 1);
     cy.get('[data-cy=showMore]').should('not.exist');
     cy.get('[data-cy=showLess]').click();
     cy.get('[data-cy=showMore]').should('have.length', 1);
-    cy.get('[data-cy=smtText]').should('not.have.text', skillId);
-    cy.get('[data-cy=smtText]').should('have.text', `${skillId.substring(0, 50)}`);
+    cy.get('[data-cy=smtText]').should('not.have.text', `ID: ${skillId}`);
+    cy.get('[data-cy=smtText]').should('have.text', `ID: ${skillId.substring(0, 50)}`);
   });
 
   it('edit skill on page', () => {
