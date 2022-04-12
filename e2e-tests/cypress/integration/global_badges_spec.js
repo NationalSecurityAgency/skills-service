@@ -56,59 +56,13 @@ describe('Global Badges Tests', () => {
     });
 
     it('name causes id to fail validation', () => {
-        cy.intercept('/public/config', {
-            body: {
-                artifactBuildTimestamp: "2022-01-17T14:39:38Z",
-                authMode: "FORM",
-                buildTimestamp: "2022-01-17T14:39:38Z",
-                dashboardVersion: "1.9.0-SNAPSHOT",
-                defaultLandingPage: "progress",
-                descriptionMaxLength: "2000",
-                docsHost: "https://code.nsa.gov/skills-docs",
-                expirationGracePeriod: 7,
-                expireUnusedProjectsOlderThan: 180,
-                maxBadgeNameLength: "50",
-                maxBadgesPerProject: "25",
-                maxDailyUserEvents: "30",
-                maxFirstNameLength: "30",
-                maxIdLength: "50",
-                maxLastNameLength: "30",
-                maxLevelNameLength: "50",
-                maxNicknameLength: "70",
-                maxNumPerformToCompletion: "10000",
-                maxNumPointIncrementMaxOccurrences: "999",
-                maxPasswordLength: "40",
-                maxPointIncrement: "10000",
-                maxProjectNameLength: "50",
-                maxProjectsPerAdmin: "25",
-                maxSelfReportMessageLength: "250",
-                maxSelfReportRejectionMessageLength: "250",
-                maxSkillNameLength: "100",
-                maxSkillVersion: "999",
-                maxSkillsPerSubject: "5",
-                maxSubjectNameLength: "50",
-                maxSubjectsPerProject: "25",
-                maxTimeWindowInMinutes: "43200",
-                minIdLength: "3",
-                minNameLength: "3",
-                minPasswordLength: "8",
-                minUsernameLength: "5",
-                minimumProjectPoints: "100",
-                minimumSubjectPoints: "100",
-                nameValidationMessage: "",
-                nameValidationRegex: "",
-                needToBootstrap: false,
-                numProjectsForTableView: "10",
-                oAuthOnly: false,
-                paragraphValidationMessage: "paragraphs may not contain jabberwocky",
-                paragraphValidationRegex: "^(?i)(?s)((?!jabberwocky).)*$",
-                pointHistoryInDays: "1825",
-                projectMetricsTagCharts: "[{\"key\":\"dutyOrganization\",\"type\":\"pie\",\"title\":\"Users by Org\"},{\"key\":\"adminOrganization\",\"type\":\"bar\",\"title\":\"Users by Agency\"}]",
-                rankingAndProgressViewsEnabled: "true",
-                userSuggestOptions: "ONE,TWO,THREE",
-                verifyEmailAddresses: false,
-            }
-        });
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.maxIdLength = 50;
+                res.send(conf);
+            });
+        }).as('loadConfig')
         cy.intercept('GET', `/supervisor/badges`).as('getGlobalBadges');
         cy.intercept('POST', '/supervisor/badges/name/exists').as('nameExists');
         cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('checkSupervisorRole');
