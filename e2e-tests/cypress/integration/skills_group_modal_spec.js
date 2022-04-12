@@ -221,7 +221,7 @@ describe('Skills Group Modal Tests', () => {
 
     });
 
-    it.only('Skills Group modal - very long skill id should be truncated', () => {
+    it('Skills Group modal - very long skill id should be truncated', () => {
         cy.createSkillsGroup(1, 1, 1, { description: 'first group description' })
         cy.createSkillsGroup(1, 1, 2, { description: 'second group description' })
         cy.createSkillsGroup(1, 1, 3, { description: 'third group description' })
