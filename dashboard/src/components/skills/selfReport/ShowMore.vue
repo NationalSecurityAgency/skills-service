@@ -65,7 +65,7 @@ limitations under the License.
         if (this.displayFullText) {
           return `${this.text}`;
         }
-        return `${this.text.substring(0, 50)}`;
+        return `${this.text.substring(0, this.limit)}`;
       },
     },
   };
