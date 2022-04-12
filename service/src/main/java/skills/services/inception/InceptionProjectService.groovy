@@ -26,6 +26,7 @@ import skills.controller.request.model.ProjectSettingsRequest
 import skills.controller.request.model.SkillRequest
 import skills.controller.request.model.SubjectRequest
 import skills.controller.result.model.SettingsResult
+import skills.controller.result.model.SkillDefSkinnyRes
 import skills.controller.result.model.UserRoleRes
 import skills.services.AccessSettingsStorageService
 import skills.services.admin.ProjAdminService
@@ -76,6 +77,7 @@ class InceptionProjectService {
     void init(ContextRefreshedEvent event) {
         log.info("Context initialized [${event}], checking if Inception skills need to be updated")
         updateSkillsIfNeeded()
+        deleteSkillsIfNeeded()
     }
 
     /**
@@ -162,6 +164,20 @@ class InceptionProjectService {
             if (!settingsResult || settingsResult.value != newHash) {
                 log.info("Skills' MD5 Hash difference was detected (old <> new: [${settingsResult?.value}] <> [${newHash}]. Will update ALL skills")
                 saveSkills()
+            }
+        }
+    }
+
+    private void deleteSkillsIfNeeded() {
+        List<SkillDefSkinnyRes> existingSkills = skillsAdminService.getSkinnySkills(inceptionProjectId, '')
+        List<String> existingSkillIds = existingSkills.collect { it.skillId }
+        List<String> inceptionSkillIds = inceptionSkills.getAllSkills().collect { it.skillId }
+        List<String> skillIdsToDelete = existingSkillIds.minus(inceptionSkillIds)
+        if (skillIdsToDelete) {
+            log.info("Deleting the follow removed Inception skills from the database [{}]", skillIdsToDelete)
+            skillIdsToDelete.each { skillIdToDelete ->
+                SkillDefSkinnyRes skillToDelete = existingSkills.find { it.skillId == skillIdToDelete }
+                skillsAdminService.deleteSkill(inceptionProjectId, skillToDelete.subjectId, skillToDelete.skillId)
             }
         }
     }
