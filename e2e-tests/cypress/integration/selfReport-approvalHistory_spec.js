@@ -118,25 +118,25 @@ describe('Self Report Approval History Tests', () => {
       cy.wait('@loadHistory');
       cy.get('[data-cy=showMore]').should('have.length', 2);
       cy.get('[data-cy=selfReportApprovalHistoryTable] [data-label=Response]').eq(0).find('[data-cy=showMoreText] [data-cy=showMore]').should('be.visible');
-      cy.get('[data-cy=smtText]').eq(0).should('have.text', `${rejectMsg.substr(0, 50)}...`);
+      cy.get('[data-cy=smtText]').eq(0).should('have.text', `${rejectMsg.substr(0, 50)}`);
       cy.get('[data-cy=selfReportApprovalHistoryTable] [data-label=Response]').eq(0).find('[data-cy=showMoreText] [data-cy=showMore]').click();
       cy.get('[data-cy=showMore]').should('have.length', 1);
       cy.get('[data-cy=showLess]').should('have.length', 1);
-      cy.get('[data-cy=smtText]').eq(0).should('have.text', rejectMsg);
+      cy.get('[data-cy=smtText]').eq(0).should('have.text', `${rejectMsg}`);
       cy.get('[data-cy=selfReportApprovalHistoryTable] [data-label=Response]').eq(0).find('[data-cy=showMoreText] [data-cy=showLess]').click();
       cy.get('[data-cy=selfReportApprovalHistoryTable] [data-label=Response]').eq(0).find('[data-cy=showMoreText] [data-cy=showMore]').should('be.visible');
-      cy.get('[data-cy=smtText]').eq(0).should('have.text', `${rejectMsg.substr(0, 50)}...`);
+      cy.get('[data-cy=smtText]').eq(0).should('have.text', `${rejectMsg.substr(0, 50)}`);
 
       cy.log('validating second row');
       cy.get('[data-cy=selfReportApprovalHistoryTable] [data-label=Requested]').eq(1).find('[data-cy=showMoreText] [data-cy=showMore]').should('be.visible');
-      cy.get('[data-cy=smtText]').eq(1).should('have.text', `${requestMsg.substr(0, 50)}...`);
+      cy.get('[data-cy=smtText]').eq(1).should('have.text', `${requestMsg.substr(0, 50)}`);
       cy.get('[data-cy=selfReportApprovalHistoryTable] [data-label=Requested]').eq(1).find('[data-cy=showMoreText] [data-cy=showMore]').click();
       cy.get('[data-cy=showMore]').should('have.length', 1);
       cy.get('[data-cy=showLess]').should('have.length', 1);
-      cy.get('[data-cy=smtText]').eq(1).should('have.text', requestMsg);
+      cy.get('[data-cy=smtText]').eq(1).should('have.text', `${requestMsg}`);
       cy.get('[data-cy=selfReportApprovalHistoryTable] [data-label=Requested]').eq(1).find('[data-cy=showMoreText] [data-cy=showLess]').click();
       cy.get('[data-cy=selfReportApprovalHistoryTable] [data-label=Requested]').eq(1).find('[data-cy=showMoreText] [data-cy=showMore]').should('be.visible');
-      cy.get('[data-cy=smtText]').eq(1).should('have.text', `${requestMsg.substr(0, 50)}...`);
+      cy.get('[data-cy=smtText]').eq(1).should('have.text', `${requestMsg.substr(0, 50)}`);
     });
 
     it('rejected request without explanation', () => {

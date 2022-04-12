@@ -56,7 +56,13 @@ describe('Global Badges Tests', () => {
     });
 
     it('name causes id to fail validation', () => {
-
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.maxIdLength = 50;
+                res.send(conf);
+            });
+        }).as('loadConfig')
         cy.intercept('GET', `/supervisor/badges`).as('getGlobalBadges');
         cy.intercept('POST', '/supervisor/badges/name/exists').as('nameExists');
         cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('checkSupervisorRole');

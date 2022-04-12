@@ -179,6 +179,13 @@ describe('Badges Tests', () => {
     });
 
     it('name causes id to fail validation', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.maxIdLength = 50;
+                res.send(conf);
+            });
+        }).as('loadConfig')
         cy.request('POST', '/admin/projects/proj1/badges/badgeExist', {
             projectId: 'proj1',
             name: "Badge Exist",
@@ -247,8 +254,8 @@ describe('Badges Tests', () => {
         cy.get('[data-cy=idError]').should('not.be.visible');
 
         // id too long
-        msg = 'Badge ID cannot exceed 50 characters';
-        const invalidId = Array(51).fill('a').join('');
+        msg = 'Badge ID cannot exceed 100 characters';
+        const invalidId = Array(101).fill('a').join('');
         cy.getIdField().clear()
         cy.getIdField().click().type(invalidId);
         cy.get('[data-cy=idError]').contains(msg).should('be.visible');

@@ -17,7 +17,7 @@ limitations under the License.
   <div>
     <page-header :loading="isLoading" :options="headerOptions">
       <div slot="subTitle">
-        <div class="h5 text-muted">ID: {{ skill ? skill.skillId : 'Loading...' }}</div>
+        <div class="h5 text-muted"><show-more :limit="54" :text="skill ? `ID: ${skill.skillId}` : 'Loading...'"></show-more></div>
         <div class="h5 text-muted" v-if="skill && skill.groupId">
           <span style="font-size: 1rem">Group ID:</span> <span v-b-tooltip.hover="`Name: ${ skill.groupName }`">{{ skill.groupId }}</span>
           <b-badge :data-cy="`disabledGroupBadge-${skill.groupId}`"
@@ -56,6 +56,7 @@ limitations under the License.
   import Navigation from '../utils/Navigation';
   import PageHeader from '../utils/pages/PageHeader';
   import EditSkill from './EditSkill';
+  import ShowMore from './selfReport/ShowMore';
 
   const subjects = createNamespacedHelpers('subjects');
   const skills = createNamespacedHelpers('skills');
@@ -66,6 +67,7 @@ limitations under the License.
       PageHeader,
       Navigation,
       EditSkill,
+      ShowMore,
     },
     data() {
       return {

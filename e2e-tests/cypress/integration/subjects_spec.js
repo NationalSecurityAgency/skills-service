@@ -116,6 +116,13 @@ describe('Subjects Tests', () => {
     });
 
     it('name causes id to fail validation', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.maxIdLength = 50;
+                res.send(conf);
+            });
+        }).as('loadConfig')
         cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
         cy.intercept('POST', '/admin/projects/proj1/subjectNameExists').as('nameExists');
 

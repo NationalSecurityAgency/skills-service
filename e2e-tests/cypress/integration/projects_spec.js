@@ -383,6 +383,13 @@ describe('Projects Tests', () => {
   })
 
   it('Project ID must be > 3 chars < 50 chars', () => {
+    cy.intercept('GET', '/public/config', (req) => {
+      req.reply((res) => {
+        const conf = res.body;
+        conf.maxIdLength = 50;
+        res.send(conf);
+      });
+    }).as('loadConfig')
     const minLenMsg = 'Project ID cannot be less than 3 characters';
     const maxLenMsg = 'Project ID cannot exceed 50 characters';
     const requiredMsg = 'Project ID is required';

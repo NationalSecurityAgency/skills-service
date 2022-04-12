@@ -44,8 +44,8 @@ describe('Skills Tests', () => {
     cy.get('[data-cy=newSkillButton]').click();
 
     // name causes id to be too long
-    const msg = 'Skill ID cannot exceed 50 characters.';
-    const validNameButInvalidId = Array(46).fill('a').join('');
+    const msg = 'Skill ID cannot exceed 100 characters.';
+    const validNameButInvalidId = Array(96).fill('a').join('');
     cy.get('[data-cy=skillName]').click();
     cy.get('[data-cy=skillName]').fill(validNameButInvalidId);
     cy.get('[data-cy=idError]').should('be.visible');
@@ -795,6 +795,59 @@ describe('Skills Tests', () => {
 
     cy.get('[data-cy="saveSkillButton"]').click()
     cy.contains(`ID: ${encodeURIComponent(providedName)}_blah`)
+  });
+
+  it('very long skill id should be truncated ', () => {
+    cy.intercept('GET', '/admin/projects/proj1/subjects/subj1')
+      .as('loadSubject');
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1');
+    cy.wait('@loadSubject');
+    cy.get('[data-cy="newSkillButton"]').click();
+
+    cy.get('[data-cy="skillName"]').type('Great Name 1 2 33');
+    cy.get('[data-cy="idInputEnableControl"]').contains('Enable').click();
+    cy.get('[data-cy="idInputEnableControl"]').contains('Enabled');
+
+    const fiftyChars = new Array(50).join('A');
+    cy.get('[data-cy="saveSkillButton"]').should('be.enabled');
+    cy.get('[data-cy="idInputValue"]').type(fiftyChars);
+    cy.get('[data-cy="saveSkillButton"]').should('be.enabled');
+
+    cy.get('[data-cy="saveSkillButton"]').click()
+
+    const skillId = `GreatName1233Skill${fiftyChars}`
+    cy.get('[data-cy=showMoreText]').should('have.length', 1);
+    cy.get('[data-cy=showLess]').should('not.exist');
+    cy.get('[data-cy=showMore]').should('have.length', 1);
+    cy.get('[data-cy=smtText]').should('not.have.text', `ID: ${skillId}`);
+    cy.get('[data-cy=smtText]').should('have.text', `ID: ${skillId.substring(0, 50)}`);
+    cy.get('[data-cy=showMore]').click();
+    cy.get('[data-cy=smtText]').should('have.text', `ID: ${skillId}`);
+    cy.get('[data-cy=showLess]').should('have.length', 1);
+    cy.get('[data-cy=showMore]').should('not.exist');
+    cy.get('[data-cy=showLess]').click();
+    cy.get('[data-cy=showMore]').should('have.length', 1);
+    cy.get('[data-cy=smtText]').should('not.have.text', `ID: ${skillId}`);
+    cy.get('[data-cy=smtText]').should('have.text', `ID: ${skillId.substring(0, 50)}`);
+
+    cy.intercept('GET', `/administrator/projects/proj1/subjects/subj1/skills/${skillId}`).as('loadSkill1');
+    cy.visit(`/administrator/projects/proj1/subjects/subj1/skills/${skillId}`);
+    cy.wait('@loadSkill1');
+
+    cy.get('[data-cy=showMoreText]').should('have.length', 1);
+    cy.get('[data-cy=showLess]').should('not.exist');
+    cy.get('[data-cy=showMore]').should('have.length', 1);
+    cy.get('[data-cy=smtText]').should('not.have.text', `ID: ${skillId}`);
+    cy.get('[data-cy=smtText]').should('have.text', `ID: ${skillId.substring(0, 50)}`);
+    cy.get('[data-cy=showMore]').click();
+    cy.get('[data-cy=smtText]').should('have.text', `ID: ${skillId}`);
+    cy.get('[data-cy=showLess]').should('have.length', 1);
+    cy.get('[data-cy=showMore]').should('not.exist');
+    cy.get('[data-cy=showLess]').click();
+    cy.get('[data-cy=showMore]').should('have.length', 1);
+    cy.get('[data-cy=smtText]').should('not.have.text', `ID: ${skillId}`);
+    cy.get('[data-cy=smtText]').should('have.text', `ID: ${skillId.substring(0, 50)}`);
   });
 
   it('edit skill on page', () => {
