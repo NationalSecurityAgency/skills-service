@@ -119,4 +119,66 @@ class InceptionSpecs extends DefaultIntSpec {
         fromDBAfter.name =="some other name"
         fromDBAfter.pointIncrement == 123
     }
+
+    def 'delete skills from the database that have been removed from the code'() {
+
+        List<SkillDef> skills = skillDefRepo.findAllByProjectIdAndType(InceptionProjectService.inceptionProjectId, SkillDef.ContainerType.Skill)
+        SkillDef skillToDelete1 = skills.get(0)
+        SkillDef skillToDelete2 = skills.get(1)
+
+        SkillDef origSkill1 = new SkillDef()
+        Props.copy(skillToDelete1, origSkill1, "childSkills", 'version', 'selfReportType')
+
+        SkillDef origSkill2 = new SkillDef()
+        Props.copy(skillToDelete2, origSkill2, "childSkills", 'version', 'selfReportType')
+
+        skillToDelete1.skillId = 'someOtherSkillId'
+        skillToDelete1.name = "some other name"
+        skillToDelete1.pointIncrement = 123
+        skillDefRepo.save(skillToDelete1)
+
+        skillToDelete2.skillId = 'someOtherSkillId2'
+        skillToDelete2.name = "some other name 2"
+        skillToDelete2.pointIncrement = 1234
+        skillDefRepo.save(skillToDelete2)
+
+        ProjectSettingsRequest skillsMd5Setting = new ProjectSettingsRequest(
+                projectId: InceptionProjectService.inceptionProjectId,
+                setting: CommonSettings.INCEPTION_SKILLS_MD5_HASH,
+                settingGroup: CommonSettings.INCEPTION_SETTING_GROUP,
+                value: "-1"
+        )
+        settingsService.saveSetting(skillsMd5Setting)
+
+        when:
+        SkillDef fromDBBefore1 =  skillDefRepo.findById(skillToDelete1.id).get()
+        assert fromDBBefore1.skillId == 'someOtherSkillId'
+        assert fromDBBefore1.name == "some other name"
+        assert fromDBBefore1.skillId != origSkill1.skillId
+        assert fromDBBefore1.name != origSkill1.name
+        assert fromDBBefore1.pointIncrement != origSkill1.pointIncrement
+
+        SkillDef fromDBBefore2 =  skillDefRepo.findById(skillToDelete2.id).get()
+        assert fromDBBefore2.skillId == 'someOtherSkillId2'
+        assert fromDBBefore2.name == "some other name 2"
+        assert fromDBBefore2.skillId != origSkill2.skillId
+        assert fromDBBefore2.name != origSkill2.name
+        assert fromDBBefore2.pointIncrement != origSkill2.pointIncrement
+
+        inceptionProjectService.init()
+
+        Boolean skill1Deleted = skillDefRepo.findById(skillToDelete1.id).isEmpty()
+        Boolean skill2Deleted = skillDefRepo.findById(skillToDelete2.id).isEmpty()
+        List<SkillDef> inceptionSkillsFromDb = skillDefRepo.findAllByProjectIdAndType(InceptionProjectService.inceptionProjectId, SkillDef.ContainerType.Skill)
+        then:
+        skill1Deleted
+        skill2Deleted
+        inceptionSkillsFromDb.size() == inceptionSkills.getAllSkills().size()
+        !inceptionSkillsFromDb.find { it.skillId == skillToDelete1.skillId }
+        !inceptionSkillsFromDb.find { it.skillId == skillToDelete2.skillId }
+        inceptionSkills.getAllSkills().each { inceptionSkill ->
+            assert inceptionSkillsFromDb.find { it.skillId == inceptionSkill.skillId}
+        }
+    }
+
 }
