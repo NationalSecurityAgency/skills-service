@@ -17,6 +17,7 @@ package skills.intTests
 
 import groovy.json.JsonOutput
 import groovy.time.TimeCategory
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
@@ -28,6 +29,7 @@ import spock.lang.IgnoreRest
 
 import java.text.DateFormat
 
+@Slf4j
 class SkillOccurrencesSpecs extends DefaultIntSpec {
 
     @Autowired
@@ -984,9 +986,11 @@ class SkillOccurrencesSpecs extends DefaultIntSpec {
         assert getPointHistory(userId4, proj2.projectId) == [10, 20, 50]
         assert getPointHistory(userId4, proj2.projectId, proj2_subj.subjectId) == [10, 20, 50]
 
+        printLevels(proj1_skills.get(1).projectId, "Before")
         proj1_skills.get(1).numPerformToCompletion = 3
         proj1_skills.get(1).pointIncrement = 3
         skillsService.createSkill(proj1_skills.get(1))
+        printLevels(proj1_skills.get(1).projectId, "After")
 
         List<UserAchievement> afterAchievements = userAchievementRepo.findAll()
 
@@ -1524,14 +1528,19 @@ class SkillOccurrencesSpecs extends DefaultIntSpec {
         def skill2_1 = SkillsFactory.createSkill(1, 2, 1, 0, 1, 0, 100)
         skillsService.createSkill(skill2_1)
 
+        String dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS"
+        List<Date> dates = [new Date() - 2, new Date() - 3]
         when:
-        skillsService.addSkill([projectId: project.projectId, skillId: skill1_1.skillId], "user1", new Date())
-        skillsService.addSkill([projectId: project.projectId, skillId: skill1_2.skillId], "user2", new Date())
+        skillsService.addSkill([projectId: project.projectId, skillId: skill1_1.skillId], "user1", dates[0])
+        skillsService.addSkill([projectId: project.projectId, skillId: skill1_2.skillId], "user2", dates[1])
         def beforeEditAchievements = userAchievementRepo.findAllByUserAndProjectIds("user1", [project.projectId])
         def beforeEditAchievementsU2 = userAchievementRepo.findAllByUserAndProjectIds("user2", [project.projectId])
+        printLevels(project.projectId, "before")
         skill1_1.numPerformToCompletion = 1
         skillsService.updateSkill(skill1_1, skill1_1.skillId)
         def afterEditAchievements = userAchievementRepo.findAllByUserAndProjectIds("user1", [project.projectId])
+        printLevels(project.projectId, "after")
+        println JsonOutput.prettyPrint(JsonOutput.toJson(afterEditAchievements))
         def afterEditAchievementsU2 = userAchievementRepo.findAllByUserAndProjectIds("user2", [project.projectId])
         //1300 total, levels:
         //1: 130
@@ -1552,9 +1561,8 @@ class SkillOccurrencesSpecs extends DefaultIntSpec {
         afterEditAchievements.size() == 6
         afterEditAchievements.findAll { it.notified == 'false' }.size() == 6
         afterEditAchievements.find { it.projectId == project.projectId && it.skillId == 'skill1' }
-        afterEditAchievements.find { it.projectId == project.projectId && !it.skillId  && it.level == 1 }
-        afterEditAchievements.find { it.projectId == project.projectId && !it.skillId  && it.level == 2 }
-        afterEditAchievements.find { it.projectId == project.projectId && !it.skillId  && it.level == 1 }
+        afterEditAchievements.find { it.projectId == project.projectId && !it.skillId  && it.level == 1 }.achievedOn.format(dateFormat) == dates[0].format(dateFormat)
+        afterEditAchievements.find { it.projectId == project.projectId && !it.skillId  && it.level == 2 }.achievedOn.format(dateFormat) == dates[0].format(dateFormat)
         afterEditAchievements.find { it.projectId == project.projectId && it.skillId == subject.subjectId && it.level == 1 }
         afterEditAchievements.find { it.projectId == project.projectId && it.skillId == subject.subjectId && it.level == 2 }
         afterEditAchievements.find { it.projectId == project.projectId && it.skillId == subject.subjectId && it.level == 3 }
@@ -1635,5 +1643,15 @@ class SkillOccurrencesSpecs extends DefaultIntSpec {
         !afterEditAchievements.find { it.projectId == project.projectId && it.skillId == subject.subjectId && it.level == 3 }
         beforeEditAchievementsU2.size() == 0
         afterEditAchievementsU2.size() == 0
+    }
+
+    private void printLevels(String projectId, String label, String subjectId = null) {
+        StringBuilder stringBuilder = new StringBuilder()
+        stringBuilder.append("------------\n${projectId}${subjectId ? ":${subjectId}" : ""} - ${label}:\n")
+        levelDefinitionStorageService.getLevels(projectId, subjectId).each{
+            stringBuilder.append "  Level ${it.level} : [${it.pointsFrom}]=>[${it.pointsTo}]\n"
+        }
+        stringBuilder.append("-----------\n")
+        log.info(stringBuilder.toString())
     }
 }

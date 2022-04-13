@@ -51,8 +51,13 @@ class RuleSetDefinitionScoreUpdater {
             int total = skillsGroupAdminService.getGroupTotalPoints(children, skillDef.numSkillsRequired)
             skillDef.totalPoints = total
             skillDefRepo.save(skillDef)
-        } else {
-            skillDefRepo.updateSubjectTotalPoints(skillDef.projectId, skillDef.skillId, true)
+        } else if (skillDef.type == SkillDef.ContainerType.Subject){
+            // it's important to update SkillDef object so Hibernate cache is updated as well
+            // as ProjDef object is retrieved later in the execution path
+            Integer totalPoints = skillDefRepo.getSubjectTotalPoints(skillDef.id, true)
+            skillDef.totalPoints = totalPoints
+            skillDefRepo.save(skillDef)
+//            skillDefRepo.updateSubjectTotalPoints(skillDef.projectId, skillDef.skillId, true)
         }
 
         List<SkillDef> parents = skillRelDefRepo.findParentByChildIdAndTypes(skillDef.id, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
@@ -61,7 +66,12 @@ class RuleSetDefinitionScoreUpdater {
         }
 
         if (skillDef.type == SkillDef.ContainerType.Subject) {
-            skillDefRepo.updateProjectsTotalPoints(skillDef.projectId, true)
+            // it's important to update ProjDef object so Hibernate cache is updated as well
+            // as ProjDef object is retrieved later in the execution path
+            Integer projTotalPoints = skillDefRepo.getProjectsTotalPoints(skillDef.projectId, true)
+            ProjDef projDef = projDefRepo.findByProjectId(skillDef.projectId)
+            projDef.totalPoints = projTotalPoints
+            projDefRepo.save(projDef)
         }
     }
 

@@ -142,7 +142,7 @@ class SkillCatalogFinalizationService {
                     skillCatalogTransactionalAccessor.updateUserPointsForSubjectOrGroup(projectId, subject.skillId)
 
                     log.info("Identifying subject level achievements for [{}-{}] subject", projectId, subject.skillId)
-                    skillCatalogTransactionalAccessor.identifyAndAddSubjectLevelAchievements(subject.projectId, subject.skillId, pointsBased)
+                    skillCatalogTransactionalAccessor.identifyAndAddSubjectLevelAchievements(subject.projectId, subject.skillId)
                     log.info("Completed import for subject. projectIdTo=[{}], subjectIdTo=[{}]", projectId, subject.skillId)
                 }
 

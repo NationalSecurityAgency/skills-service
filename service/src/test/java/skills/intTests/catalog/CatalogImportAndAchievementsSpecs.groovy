@@ -27,6 +27,7 @@ import skills.storage.model.UserPerformedSkill
 import skills.storage.model.UserPoints
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
+import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -895,7 +896,7 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
 
         skillCatalogTransactionalAccessor.createSubjectUserPointsForTheNewUsers(project2.projectId, p2subj1.subjectId)
         skillCatalogTransactionalAccessor.updateUserPointsForSubjectOrGroup(project2.projectId, p2subj1.subjectId)
-        skillCatalogTransactionalAccessor.identifyAndAddSubjectLevelAchievements(project2.projectId, p2subj1.subjectId, false)
+        skillCatalogTransactionalAccessor.identifyAndAddSubjectLevelAchievements(project2.projectId, p2subj1.subjectId)
 
         skillCatalogTransactionalAccessor.createProjectUserPointsForTheNewUsers(project2.projectId)
         skillCatalogTransactionalAccessor.updateUserPointsForProject(project2.projectId)
@@ -1958,6 +1959,186 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
         u125pointHistoryAfterEdit.pointsHistory[0].points == 60
         u125pointHistoryAfterEdit.pointsHistory[1].points == 70
         u125pointHistoryAfterEdit.pointsHistory[2].points == 75
+    }
+
+    def "finalization - level achievement dates are assigned to when the level was actually achieved"() {
+        def project1 = createProjWithCatalogSkills(1, 1)
+        def proj2 = SkillsFactory.createProject(2)
+        def p2_subj = SkillsFactory.createSubject(2, 1)
+        def p2_subj2 = SkillsFactory.createSubject(2, 2)
+        def p2_subj3 = SkillsFactory.createSubject(2, 3)
+        skillsService.createProjectAndSubjectAndSkills(proj2, p2_subj, [])
+        skillsService.createSubject(p2_subj2)
+        skillsService.createSubject(p2_subj3)
+
+
+        List<String> users = getRandomUsers(3)
+        List<Date> dates = (1..12).collect { new Date() - it }.reverse()
+        skillsService.addSkill(project1.s1_skills[0], users[0], dates[0])
+        Thread.sleep(10)
+        skillsService.addSkill(project1.s1_skills[1], users[0], dates[1])
+        Thread.sleep(10)
+        skillsService.addSkill(project1.s1_skills[2], users[0], dates[2])
+        Thread.sleep(10)
+        skillsService.addSkill(project1.s2_skills[0], users[0], dates[3])
+        Thread.sleep(10)
+        skillsService.addSkill(project1.s2_skills[1], users[0], dates[4])
+        Thread.sleep(10)
+        skillsService.addSkill(project1.s2_skills[2], users[0], dates[5])
+
+        Thread.sleep(10)
+        skillsService.addSkill(project1.s1_skills[0], users[1], dates[0])
+        Thread.sleep(10)
+        skillsService.addSkill(project1.s1_skills[1], users[1], dates[1])
+        Thread.sleep(10)
+        skillsService.addSkill(project1.s1_skills[2], users[1], dates[2])
+        Thread.sleep(10)
+        skillsService.addSkill(project1.s2_skills[0], users[1], dates[3])
+        Thread.sleep(10)
+        skillsService.addSkill(project1.s2_skills[1], users[1], dates[4])
+        Thread.sleep(10)
+        skillsService.addSkill(project1.s2_skills[2], users[1], dates[5])
+        Thread.sleep(10)
+        skillsService.addSkill(project1.s3_skills[0], users[1], dates[6])
+        Thread.sleep(10)
+        skillsService.addSkill(project1.s3_skills[1], users[1], dates[7])
+        Thread.sleep(10)
+        skillsService.addSkill(project1.s3_skills[2], users[1], dates[8])
+
+
+        List<UserAchievement> userAchievements_proj1 = userAchievedRepo.findAll().findAll {
+            it.skillId == null && it.level != null && it.userId == users[0] && it.projectId == project1.p.projectId }
+        List<UserAchievement> userAchievements_proj1_user1 = userAchievedRepo.findAll().findAll {
+            it.skillId == null && it.level != null && it.userId == users[1] && it.projectId == project1.p.projectId }
+        List<UserAchievement> userAchievements_proj1_subj1 = userAchievedRepo.findAll().findAll {
+            it.skillId == project1.s1.subjectId && it.level != null && it.userId == users[0] && it.projectId == project1.p.projectId }
+        List<UserAchievement> userAchievements_proj1_subj2 = userAchievedRepo.findAll().findAll {
+            it.skillId == project1.s2.subjectId && it.level != null && it.userId == users[0] && it.projectId == project1.p.projectId }
+        List<UserAchievement> userAchievements_proj1_subj3 = userAchievedRepo.findAll().findAll {
+            it.skillId == project1.s3.subjectId && it.level != null && it.userId == users[0] && it.projectId == project1.p.projectId }
+        List<UserAchievement> userAchievements_proj1_user1_subj1 = userAchievedRepo.findAll().findAll {
+            it.skillId == project1.s1.subjectId && it.level != null && it.userId == users[1] && it.projectId == project1.p.projectId }
+        List<UserAchievement> userAchievements_proj1_user1_subj2 = userAchievedRepo.findAll().findAll {
+            it.skillId == project1.s2.subjectId && it.level != null && it.userId == users[1] && it.projectId == project1.p.projectId }
+        List<UserAchievement> userAchievements_proj1_user1_subj3 = userAchievedRepo.findAll().findAll {
+            it.skillId == project1.s3.subjectId && it.level != null && it.userId == users[1] && it.projectId == project1.p.projectId }
+//        println JsonOutput.prettyPrint(JsonOutput.toJson(userAchievements_proj1_subj3))
+
+        when:
+        skillsService.bulkImportSkillsFromCatalog(proj2.projectId, p2_subj.subjectId,
+                project1.s1_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
+        skillsService.bulkImportSkillsFromCatalog(proj2.projectId, p2_subj2.subjectId,
+                project1.s2_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
+        skillsService.bulkImportSkillsFromCatalog(proj2.projectId, p2_subj3.subjectId,
+                project1.s3_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
+        skillsService.finalizeSkillsImportFromCatalog(proj2.projectId)
+
+        List<UserAchievement> userAchievements_proj2 = userAchievedRepo.findAll().findAll {
+            it.skillId == null && it.level != null && it.userId == users[0] && it.projectId == proj2.projectId }
+        List<UserAchievement> userAchievements_proj2_user1 = userAchievedRepo.findAll().findAll {
+            it.skillId == null && it.level != null && it.userId == users[1] && it.projectId == proj2.projectId }
+        List<UserAchievement> userAchievements_proj2_subj1 = userAchievedRepo.findAll().findAll {
+            it.skillId == p2_subj.subjectId && it.level != null && it.userId == users[0] && it.projectId == proj2.projectId }
+        List<UserAchievement> userAchievements_proj2_subj2 = userAchievedRepo.findAll().findAll {
+            it.skillId == p2_subj2.subjectId && it.level != null && it.userId == users[0] && it.projectId == proj2.projectId }
+        List<UserAchievement> userAchievements_proj2_subj3 = userAchievedRepo.findAll().findAll {
+            it.skillId == p2_subj3.subjectId && it.level != null && it.userId == users[0] && it.projectId == proj2.projectId }
+        List<UserAchievement> userAchievements_proj2_user1_subj1 = userAchievedRepo.findAll().findAll {
+            it.skillId == p2_subj.subjectId && it.level != null && it.userId == users[1] && it.projectId == proj2.projectId }
+        List<UserAchievement> userAchievements_proj2_user1_subj2 = userAchievedRepo.findAll().findAll {
+            it.skillId == p2_subj2.subjectId && it.level != null && it.userId == users[1] && it.projectId == proj2.projectId }
+        List<UserAchievement> userAchievements_proj2_user1_subj3 = userAchievedRepo.findAll().findAll {
+            it.skillId == p2_subj3.subjectId && it.level != null && it.userId == users[1] && it.projectId == proj2.projectId }
+//        println JsonOutput.prettyPrint(JsonOutput.toJson(userAchievements_proj2))
+
+        then:
+        userAchievements_proj2.size() == userAchievements_proj1.size()
+        userAchievements_proj2.size() == 3
+        userAchievements_proj2.find { it.level == 1 }.achievedOn == userAchievements_proj1.find { it.level == 1 }.achievedOn
+        userAchievements_proj2.find { it.level == 1 }.pointsWhenAchieved == userAchievements_proj1.find { it.level == 1 }.pointsWhenAchieved
+        userAchievements_proj2.find { it.level == 2 }.achievedOn == userAchievements_proj1.find { it.level == 2 }.achievedOn
+        userAchievements_proj2.find { it.level == 2 }.pointsWhenAchieved == userAchievements_proj1.find { it.level == 2 }.pointsWhenAchieved
+        userAchievements_proj2.find { it.level == 3 }.achievedOn == userAchievements_proj1.find { it.level == 3 }.achievedOn
+        userAchievements_proj2.find { it.level == 3 }.pointsWhenAchieved == userAchievements_proj1.find { it.level == 3 }.pointsWhenAchieved
+
+        userAchievements_proj2_user1.size() == userAchievements_proj1_user1.size()
+        userAchievements_proj2_user1.size() == 5
+        userAchievements_proj2_user1.find { it.level == 1 }.achievedOn == userAchievements_proj1_user1.find { it.level == 1 }.achievedOn
+        userAchievements_proj2_user1.find { it.level == 1 }.pointsWhenAchieved == userAchievements_proj1_user1.find { it.level == 1 }.pointsWhenAchieved
+        userAchievements_proj2_user1.find { it.level == 2 }.achievedOn == userAchievements_proj1_user1.find { it.level == 2 }.achievedOn
+        userAchievements_proj2_user1.find { it.level == 2 }.pointsWhenAchieved == userAchievements_proj1_user1.find { it.level == 2 }.pointsWhenAchieved
+        userAchievements_proj2_user1.find { it.level == 3 }.achievedOn == userAchievements_proj1_user1.find { it.level == 3 }.achievedOn
+        userAchievements_proj2_user1.find { it.level == 3 }.pointsWhenAchieved == userAchievements_proj1_user1.find { it.level == 3 }.pointsWhenAchieved
+        userAchievements_proj2_user1.find { it.level == 4 }.achievedOn == userAchievements_proj1_user1.find { it.level == 4 }.achievedOn
+        userAchievements_proj2_user1.find { it.level == 4 }.pointsWhenAchieved == userAchievements_proj1_user1.find { it.level == 4 }.pointsWhenAchieved
+        userAchievements_proj2_user1.find { it.level == 5 }.achievedOn == userAchievements_proj1_user1.find { it.level == 5 }.achievedOn
+        userAchievements_proj2_user1.find { it.level == 5 }.pointsWhenAchieved == userAchievements_proj1_user1.find { it.level == 5 }.pointsWhenAchieved
+
+        userAchievements_proj1_subj1.size() == userAchievements_proj2_subj1.size()
+        userAchievements_proj1_subj1.size() == 5
+        userAchievements_proj1_subj1.find { it.level == 1 }.achievedOn == userAchievements_proj2_subj1.find { it.level == 1 }.achievedOn
+        userAchievements_proj1_subj1.find { it.level == 1 }.pointsWhenAchieved == userAchievements_proj2_subj1.find { it.level == 1 }.pointsWhenAchieved
+        userAchievements_proj1_subj1.find { it.level == 2 }.achievedOn == userAchievements_proj2_subj1.find { it.level == 2 }.achievedOn
+        userAchievements_proj1_subj1.find { it.level == 2 }.pointsWhenAchieved == userAchievements_proj2_subj1.find { it.level == 2 }.pointsWhenAchieved
+        userAchievements_proj1_subj1.find { it.level == 3 }.achievedOn == userAchievements_proj2_subj1.find { it.level == 3 }.achievedOn
+        userAchievements_proj1_subj1.find { it.level == 3 }.pointsWhenAchieved == userAchievements_proj2_subj1.find { it.level == 3 }.pointsWhenAchieved
+        userAchievements_proj1_subj1.find { it.level == 4 }.achievedOn == userAchievements_proj2_subj1.find { it.level == 4 }.achievedOn
+        userAchievements_proj1_subj1.find { it.level == 4 }.pointsWhenAchieved == userAchievements_proj2_subj1.find { it.level == 4 }.pointsWhenAchieved
+        userAchievements_proj1_subj1.find { it.level == 5 }.achievedOn == userAchievements_proj2_subj1.find { it.level == 5 }.achievedOn
+        userAchievements_proj1_subj1.find { it.level == 5 }.pointsWhenAchieved == userAchievements_proj2_subj1.find { it.level == 5 }.pointsWhenAchieved
+
+        userAchievements_proj1_subj2.size() == userAchievements_proj2_subj2.size()
+        userAchievements_proj1_subj2.size() == 5
+        userAchievements_proj1_subj2.find { it.level == 1 }.achievedOn == userAchievements_proj2_subj2.find { it.level == 1 }.achievedOn
+        userAchievements_proj1_subj2.find { it.level == 1 }.pointsWhenAchieved == userAchievements_proj2_subj2.find { it.level == 1 }.pointsWhenAchieved
+        userAchievements_proj1_subj2.find { it.level == 2 }.achievedOn == userAchievements_proj2_subj2.find { it.level == 2 }.achievedOn
+        userAchievements_proj1_subj2.find { it.level == 2 }.pointsWhenAchieved == userAchievements_proj2_subj2.find { it.level == 2 }.pointsWhenAchieved
+        userAchievements_proj1_subj2.find { it.level == 3 }.achievedOn == userAchievements_proj2_subj2.find { it.level == 3 }.achievedOn
+        userAchievements_proj1_subj2.find { it.level == 3 }.pointsWhenAchieved == userAchievements_proj2_subj2.find { it.level == 3 }.pointsWhenAchieved
+        userAchievements_proj1_subj2.find { it.level == 4 }.achievedOn == userAchievements_proj2_subj2.find { it.level == 4 }.achievedOn
+        userAchievements_proj1_subj2.find { it.level == 4 }.pointsWhenAchieved == userAchievements_proj2_subj2.find { it.level == 4 }.pointsWhenAchieved
+        userAchievements_proj1_subj2.find { it.level == 5 }.achievedOn == userAchievements_proj2_subj2.find { it.level == 5 }.achievedOn
+        userAchievements_proj1_subj2.find { it.level == 5 }.pointsWhenAchieved == userAchievements_proj2_subj2.find { it.level == 5 }.pointsWhenAchieved
+
+        !userAchievements_proj1_subj3
+        !userAchievements_proj2_subj3
+
+        userAchievements_proj2_user1_subj1.size() == userAchievements_proj1_user1_subj1.size()
+        userAchievements_proj2_user1_subj1.size() == 5
+        userAchievements_proj2_user1_subj1.find { it.level == 1 }.achievedOn == userAchievements_proj1_user1_subj1.find { it.level == 1 }.achievedOn
+        userAchievements_proj2_user1_subj1.find { it.level == 1 }.pointsWhenAchieved == userAchievements_proj1_user1_subj1.find { it.level == 1 }.pointsWhenAchieved
+        userAchievements_proj2_user1_subj1.find { it.level == 2 }.achievedOn == userAchievements_proj1_user1_subj1.find { it.level == 2 }.achievedOn
+        userAchievements_proj2_user1_subj1.find { it.level == 2 }.pointsWhenAchieved == userAchievements_proj1_user1_subj1.find { it.level == 2 }.pointsWhenAchieved
+        userAchievements_proj2_user1_subj1.find { it.level == 3 }.achievedOn == userAchievements_proj1_user1_subj1.find { it.level == 3 }.achievedOn
+        userAchievements_proj2_user1_subj1.find { it.level == 3 }.pointsWhenAchieved == userAchievements_proj1_user1_subj1.find { it.level == 3 }.pointsWhenAchieved
+        userAchievements_proj2_user1_subj1.find { it.level == 4 }.achievedOn == userAchievements_proj1_user1_subj1.find { it.level == 4 }.achievedOn
+        userAchievements_proj2_user1_subj1.find { it.level == 4 }.pointsWhenAchieved == userAchievements_proj1_user1_subj1.find { it.level == 4 }.pointsWhenAchieved
+        userAchievements_proj2_user1_subj1.find { it.level == 5 }.achievedOn == userAchievements_proj1_user1_subj1.find { it.level == 5 }.achievedOn
+        userAchievements_proj2_user1_subj1.find { it.level == 5 }.pointsWhenAchieved == userAchievements_proj1_user1_subj1.find { it.level == 5 }.pointsWhenAchieved
+
+        userAchievements_proj2_user1_subj2.size() == 5
+        userAchievements_proj2_user1_subj2.find { it.level == 1 }.achievedOn == userAchievements_proj1_user1_subj2.find { it.level == 1 }.achievedOn
+        userAchievements_proj2_user1_subj2.find { it.level == 1 }.pointsWhenAchieved == userAchievements_proj1_user1_subj2.find { it.level == 1 }.pointsWhenAchieved
+        userAchievements_proj2_user1_subj2.find { it.level == 2 }.achievedOn == userAchievements_proj1_user1_subj2.find { it.level == 2 }.achievedOn
+        userAchievements_proj2_user1_subj2.find { it.level == 2 }.pointsWhenAchieved == userAchievements_proj1_user1_subj2.find { it.level == 2 }.pointsWhenAchieved
+        userAchievements_proj2_user1_subj2.find { it.level == 3 }.achievedOn == userAchievements_proj1_user1_subj2.find { it.level == 3 }.achievedOn
+        userAchievements_proj2_user1_subj2.find { it.level == 3 }.pointsWhenAchieved == userAchievements_proj1_user1_subj2.find { it.level == 3 }.pointsWhenAchieved
+        userAchievements_proj2_user1_subj2.find { it.level == 4 }.achievedOn == userAchievements_proj1_user1_subj2.find { it.level == 4 }.achievedOn
+        userAchievements_proj2_user1_subj2.find { it.level == 4 }.pointsWhenAchieved == userAchievements_proj1_user1_subj2.find { it.level == 4 }.pointsWhenAchieved
+        userAchievements_proj2_user1_subj2.find { it.level == 5 }.achievedOn == userAchievements_proj1_user1_subj2.find { it.level == 5 }.achievedOn
+        userAchievements_proj2_user1_subj2.find { it.level == 5 }.pointsWhenAchieved == userAchievements_proj1_user1_subj2.find { it.level == 5 }.pointsWhenAchieved
+
+        userAchievements_proj2_user1_subj3.size() == 5
+        userAchievements_proj2_user1_subj3.find { it.level == 1 }.achievedOn == userAchievements_proj1_user1_subj3.find { it.level == 1 }.achievedOn
+        userAchievements_proj2_user1_subj3.find { it.level == 1 }.pointsWhenAchieved == userAchievements_proj1_user1_subj3.find { it.level == 1 }.pointsWhenAchieved
+        userAchievements_proj2_user1_subj3.find { it.level == 2 }.achievedOn == userAchievements_proj1_user1_subj3.find { it.level == 2 }.achievedOn
+        userAchievements_proj2_user1_subj3.find { it.level == 2 }.pointsWhenAchieved == userAchievements_proj1_user1_subj3.find { it.level == 2 }.pointsWhenAchieved
+        userAchievements_proj2_user1_subj3.find { it.level == 3 }.achievedOn == userAchievements_proj1_user1_subj3.find { it.level == 3 }.achievedOn
+        userAchievements_proj2_user1_subj3.find { it.level == 3 }.pointsWhenAchieved == userAchievements_proj1_user1_subj3.find { it.level == 3 }.pointsWhenAchieved
+        userAchievements_proj2_user1_subj3.find { it.level == 4 }.achievedOn == userAchievements_proj1_user1_subj3.find { it.level == 4 }.achievedOn
+        userAchievements_proj2_user1_subj3.find { it.level == 4 }.pointsWhenAchieved == userAchievements_proj1_user1_subj3.find { it.level == 4 }.pointsWhenAchieved
+        userAchievements_proj2_user1_subj3.find { it.level == 5 }.achievedOn == userAchievements_proj1_user1_subj3.find { it.level == 5 }.achievedOn
+        userAchievements_proj2_user1_subj3.find { it.level == 5 }.pointsWhenAchieved == userAchievements_proj1_user1_subj3.find { it.level == 5 }.pointsWhenAchieved
     }
 
     private void printLevels(String projectId, String label, String subjectId = null) {

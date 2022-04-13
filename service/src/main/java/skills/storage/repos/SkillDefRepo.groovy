@@ -508,25 +508,23 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         where project_id = :projectId''', nativeQuery = true)
     void updateProjectsTotalPoints(@Param('projectId') String projectId, @Param('enabledSkillsOnly') Boolean enabledSkillsOnly)
 
-    @Modifying
-    @Query(value = '''update skill_definition subject
-        set total_points = (
-            select case when sum(skill.total_points) is not null then sum(skill.total_points) else 0 end as totalPoints
+    @Query(value = '''select case when sum(total_points) is not null then sum(total_points) else 0 end as totalPoints
+            from skill_definition
+            where project_id = :projectId
+              and type = 'Subject'
+              and (enabled = 'true' or 'false' = :enabledSkillsOnly )''', nativeQuery = true)
+    Integer getProjectsTotalPoints(@Param('projectId') String projectId, @Param('enabledSkillsOnly') Boolean enabledSkillsOnly)
+
+    @Query(value = '''select case when sum(skill.total_points) is not null then sum(skill.total_points) else 0 end as totalPoints
             from skill_relationship_definition rel,
                  skill_definition skill
-            where subject.id = rel.parent_ref_id
+            where rel.parent_ref_id = :subjectRefId 
               and skill.id = rel.child_ref_id
               and rel.type in ('GroupSkillToSubject', 'RuleSetDefinition')
-              and subject.project_id = :projectId
-              and subject.skill_id = :subjectId
-              and subject.type = 'Subject'
               and skill.type = 'Skill'
-              and (skill.enabled = 'true' or 'false' = :enabledSkillsOnly))
-        where subject.project_id = :projectId
-          and subject.skill_id = :subjectId
-          and subject.type = 'Subject' 
+              and (skill.enabled = 'true' or 'false' = :enabledSkillsOnly)
           ''', nativeQuery = true)
-    void updateSubjectTotalPoints(@Param('projectId') String projectId, @Param('subjectId') String subjectId, @Param('enabledSkillsOnly') Boolean enabledSkillsOnly)
+    Integer getSubjectTotalPoints(@Param('subjectRefId') Integer subjectRefId, @Param('enabledSkillsOnly') Boolean enabledSkillsOnly)
 
     @Query(value = '''
          select exists (select 1 from skill_definition where project_id = :projectId and skill_id = :skillId and read_only = 'true') as isReadOnly

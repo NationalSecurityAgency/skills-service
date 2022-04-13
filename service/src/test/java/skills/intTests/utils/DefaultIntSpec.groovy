@@ -23,6 +23,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.jdbc.core.JdbcTemplate
 import skills.SpringBootApp
+import skills.services.LevelDefinitionStorageService
 import skills.storage.model.UserAttrs
 import skills.storage.repos.NotificationsRepo
 import skills.storage.repos.ProjDefRepo
@@ -91,6 +92,9 @@ class DefaultIntSpec extends Specification {
 
     @Autowired
     UserAchievedLevelRepo userAchievedRepo
+
+    @Autowired
+    LevelDefinitionStorageService levelDefinitionStorageService
 
     private UserUtil userUtil
 

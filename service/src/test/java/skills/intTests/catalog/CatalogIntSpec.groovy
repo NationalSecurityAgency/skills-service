@@ -46,6 +46,7 @@ class CatalogIntSpec extends DefaultIntSpec {
                 p : proj,
                 s1: subj1,
                 s2: subj2,
+                s3: subj3,
                 s1_skills: subj1_skills,
                 s2_skills: subj2_skills,
                 s3_skills: subj3_skills,

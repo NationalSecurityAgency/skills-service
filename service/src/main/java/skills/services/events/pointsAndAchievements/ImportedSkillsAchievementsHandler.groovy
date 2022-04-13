@@ -66,10 +66,6 @@ class ImportedSkillsAchievementsHandler {
             pointsAndAchievementsHandler.documentSkillAchieved(userId, skill, mockResForBadgeCheck, incomingSkillDate)
             achievedBadgeHandler.checkForBadges(mockResForBadgeCheck, userId, skill, incomingSkillDate)
         }
-
-        SkillDef subjectDef = ruleSetDefGraphService.getParentSkill(skill.id)
-        assert subjectDef.type == SkillDef.ContainerType.Subject
-        userAchievementsAndPointsManagement.identifyAndAddLevelAchievements(subjectDef)
     }
 
     @Profile

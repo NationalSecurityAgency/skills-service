@@ -15,11 +15,13 @@
  */
 package skills.services
 
+import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillsValidator
+import skills.controller.result.model.LevelDefinitionRes
 import skills.controller.result.model.SettingsResult
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
@@ -55,6 +57,9 @@ class UserAchievementsAndPointsManagement {
 
     @Autowired
     SettingsService settingsService
+
+    @Autowired
+    LevelDefinitionStorageService levelDefinitionStorageService
 
     @Transactional
     void handleSkillRemoval(SkillDef skillDef, SkillDef subject) {
@@ -138,11 +143,30 @@ class UserAchievementsAndPointsManagement {
     @Transactional
     void identifyAndAddLevelAchievements(SkillDef subject) {
         assert subject.type == SkillDef.ContainerType.Subject
-        SettingsResult settingsResult = settingsService.getProjectSetting(subject.projectId, Settings.LEVEL_AS_POINTS.settingName)
-        boolean pointsBased = settingsResult ? settingsResult.isEnabled() : false
+        this.identifyAndAddProjectLevelAchievements(subject.projectId)
+        this.identifyAndAddSubjectLevelAchievements(subject)
+    }
 
-        nativeQueriesRepo.identifyAndAddProjectLevelAchievements(subject.projectId, pointsBased)
-        nativeQueriesRepo.identifyAndAddSubjectLevelAchievements(subject.projectId, subject.skillId, pointsBased)
+    @Transactional
+    @Profile
+    void identifyAndAddProjectLevelAchievements(String projectId) {
+        List<LevelDefinitionRes> levels = levelDefinitionStorageService.getLevels(projectId)
+        levels.each {
+            int numUpdated = userAchievedLevelRepo.identifyAndAddProjectLevelAchievementsForALevel(projectId, it.level, it.pointsFrom)
+            log.info("Calculate project's level achievements for projectId=[{}], level=[{}], pointsFromExclusive=[{}]. Num rows updated = [{}]",
+                    projectId, it.level, it.pointsFrom, numUpdated)
+        }
+    }
+
+    @Transactional
+    @Profile
+    void identifyAndAddSubjectLevelAchievements(SkillDef subject) {
+        List<LevelDefinitionRes> levels = levelDefinitionStorageService.getLevels(subject.projectId, subject.skillId)
+        levels.each {
+            int numUpdated = userAchievedLevelRepo.identifyAndAddSubjectLevelAchievementsForALevel(subject.projectId, subject.skillId, subject.id, it.level, it.pointsFrom)
+            log.info("Calculate subject's level achievements for projectId=[{}], subjectId=[{}({})], level=[{}], pointsFromExclusive=[{}]. Num rows updated = [{}]",
+                    subject.projectId, subject.skillId, subject.id, it.level, it.pointsFrom, numUpdated)
+        }
     }
 
     @Transactional
