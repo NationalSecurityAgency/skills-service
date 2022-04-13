@@ -15,6 +15,7 @@
  */
 package skills.services.settings
 
+import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -300,7 +301,18 @@ class SettingsService {
         if (!settings) {
             return []
         }
-        return settings?.collect { convertToRes(it, userId) }
+
+        List<SettingsResult> res = settings?.collect { convertToRes(it, userId) }
+        // surprisingly nulls sporadically appear in the list above (although the data looks right)
+        // remove any nulls and warn if nulls are found
+        // once the issue is found this code can be removed but for now we need a failsafe
+        Boolean hasNulls = res.findAll({ !it }).size() > 0
+        if (hasNulls) {
+            log.error("Found null values in the settings list for [{}] user. The list is: {}", userId, JsonOutput.toJson(res))
+            res = res.findAll({ it })
+        }
+
+        return res
     }
 
     private void applyListeners(Setting previousValue, SettingsRequest incomingValue){
