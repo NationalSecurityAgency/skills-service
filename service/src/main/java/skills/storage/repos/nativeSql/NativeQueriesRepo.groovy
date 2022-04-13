@@ -51,10 +51,6 @@ interface NativeQueriesRepo {
                                                   Date start,
                                                   Date end)
 
-    void identifyAndAddSubjectLevelAchievements(String projectId, String subjectId, boolean pointsBasedLevels);
-
-    void identifyAndAddProjectLevelAchievements(String projectId, boolean pointsBasedLevels);
-
     void createOrUpdateUserEvent(String projectId, Integer skillRefId, String userId, Date start, String type, Integer count, Integer weekNumber)
 
     long countUsers(QueryUsersCriteria queryUsersCriteria)

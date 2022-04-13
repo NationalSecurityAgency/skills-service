@@ -42,7 +42,7 @@ class PointsAndAchievementsBuilder {
     SkillEventsSupportRepo skillEventsSupportRepo
 
 
-    class PointsAndAchievementsResult {
+    static class PointsAndAchievementsResult {
         DataToSave dataToSave
         List<CompletionItem> completionItems
     }

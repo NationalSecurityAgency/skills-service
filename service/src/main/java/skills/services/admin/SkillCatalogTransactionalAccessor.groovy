@@ -19,6 +19,7 @@ import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import skills.services.UserAchievementsAndPointsManagement
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
@@ -43,6 +44,9 @@ class SkillCatalogTransactionalAccessor {
     @Autowired
     NativeQueriesRepo nativeQueriesRepo
 
+    @Autowired
+    UserAchievementsAndPointsManagement userAchievementsAndPointsManagement
+
     @Transactional
     @Profile
     void enableSkills(List<SkillDef> disabledImportedSkills) {
@@ -55,7 +59,10 @@ class SkillCatalogTransactionalAccessor {
     @Transactional
     @Profile
     void updateSubjectTotalPoints(String projectId, String subjectId) {
-        skillDefRepo.updateSubjectTotalPoints(projectId, subjectId, false)
+        SkillDef subjectDef = skillDefRepo.findByProjectIdAndSkillId(projectId, subjectId)
+        Integer totalPoints = skillDefRepo.getSubjectTotalPoints(subjectDef.id, false)
+        subjectDef.totalPoints = totalPoints
+        skillDefRepo.save(subjectDef)
     }
 
     @Transactional
@@ -90,8 +97,9 @@ class SkillCatalogTransactionalAccessor {
 
     @Transactional
     @Profile
-    void identifyAndAddSubjectLevelAchievements(String projectId, String subjectId, boolean pointsBasedLevels) {
-        nativeQueriesRepo.identifyAndAddSubjectLevelAchievements(projectId, subjectId, pointsBasedLevels)
+    void identifyAndAddSubjectLevelAchievements(String projectId, String subjectId) {
+        SkillDef subject = skillDefRepo.findByProjectIdAndSkillId(projectId, subjectId)
+        userAchievementsAndPointsManagement.identifyAndAddSubjectLevelAchievements(subject)
     }
 
     @Transactional
@@ -109,7 +117,7 @@ class SkillCatalogTransactionalAccessor {
     @Transactional
     @Profile
     void identifyAndAddProjectLevelAchievements(String projectId, boolean pointsBasedLevels){
-        nativeQueriesRepo.identifyAndAddProjectLevelAchievements(projectId, pointsBasedLevels)
+        userAchievementsAndPointsManagement.identifyAndAddProjectLevelAchievements(projectId)
     }
 
 }

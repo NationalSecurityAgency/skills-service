@@ -293,6 +293,67 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
                                                                                   @Param('numSkillsRequired') int numSkillsRequired,
                                                                                   @Param('notified') String notified)
 
+
+    @Modifying
+    @Query(value = '''
+        WITH skills as (
+            select case when s.copied_from_skill_ref is not null then s.copied_from_skill_ref else s.id end as id,
+                s.point_increment as point_increment
+            from skill_definition s
+            where s.project_id = :projectId
+                and s.type = 'Skill'
+        )
+        INSERT INTO user_achievement (user_id, level, achieved_on, points_when_achieved, project_id, notified)
+        SELECT user_id, :level, min(performed_on), min(runningSum) points_when_achieved, :projectId, 'false'
+        FROM (
+                 SELECT ups.user_id,
+                        ups.performed_on,
+                        ups.created,
+                        SUM(skills.point_increment) over (partition by user_id order by ups.performed_on, ups.created) as runningSum
+                 FROM user_performed_skill ups, skills
+                 WHERE skills.id = ups.skill_ref_id
+                   and not exists (select 1 from user_achievement ua where ua.user_id = ups.user_id and ua.project_id = :projectId and ua.skill_ref_id is null and ua.level = :level)
+             ) as t
+        where t.runningSum >= :fromPoints
+        group by user_id''', nativeQuery = true)
+    int identifyAndAddProjectLevelAchievementsForALevel(
+            @Param('projectId') String projectId,
+            @Param('level') Integer level,
+            @Param('fromPoints') Integer fromPointsExclusive)
+
+
+    @Modifying
+    @Query(value = '''
+        WITH skills as (
+          select case when child.copied_from_skill_ref is not null then child.copied_from_skill_ref else child.id end as id,
+                 child.point_increment as point_increment
+                    from skill_relationship_definition rel,
+                         skill_definition child
+                    where rel.parent_ref_id = :subjectRefId
+                      and rel.child_ref_id = child.id
+                      and rel.type in ('RuleSetDefinition', 'GroupSkillToSubject')
+                      and child.type = 'Skill'
+        )
+        INSERT INTO user_achievement (user_id, level, achieved_on, points_when_achieved, project_id, skill_id, skill_ref_id, notified)
+        SELECT user_id, :level, min(performed_on), min(runningSum) points_when_achieved, :projectId, :subjectId, :subjectRefId, 'false'
+        FROM (
+                 SELECT ups.user_id,
+                        ups.performed_on,
+                        ups.created,
+                        SUM(skills.point_increment) over (partition by user_id order by ups.performed_on, ups.created) as runningSum
+                 FROM user_performed_skill ups, skills
+                 WHERE skills.id = ups.skill_ref_id
+                   and not exists (select 1 from user_achievement ua where ua.user_id = ups.user_id and ua.project_id = :projectId and ua.skill_ref_id = :subjectRefId and ua.level = :level)
+             ) as t
+        where t.runningSum >= :fromPoints
+        group by user_id''', nativeQuery = true)
+    int identifyAndAddSubjectLevelAchievementsForALevel(
+            @Param('projectId') String projectId,
+            @Param('subjectId') String subjectId,
+            @Param('subjectRefId') Integer subjectRefId,
+            @Param('level') Integer level,
+            @Param('fromPoints') Integer fromPointsExclusive)
+
     static interface AchievementItem {
         Date getAchievedOn()
         String getUserId()
