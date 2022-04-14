@@ -49,7 +49,7 @@ class TaskSchedulerService {
 
     void scheduleCatalogSkillUpdate(String projectId, String catalogSkillId, Integer rawId){
         String id = "${catalogSkillId}-${UUID.randomUUID().toString()}}"
-        log.info("scheduling catalog skill update task [{}] using db-scheduler", id)
+        log.debug("scheduling catalog skill update task [{}] using db-scheduler", id)
         scheduler.schedule(catalogSkillDefinitionUpdatedOneTimeTask.instance(id, new CatalogSkillDefinitionUpdated(
                 rawId: rawId,
                 skillId: catalogSkillId,

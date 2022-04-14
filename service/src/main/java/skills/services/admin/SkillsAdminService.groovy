@@ -162,6 +162,7 @@ class SkillsAdminService {
     }
 
     @Transactional()
+    @Profile
     SaveSkillTmpRes saveSkill(String originalSkillId, SkillRequest skillRequest, boolean performCustomValidation=true, String groupId=null) {
         lockingService.lockProject(skillRequest.projectId)
 
@@ -421,6 +422,7 @@ class SkillsAdminService {
         }
     }
 
+    @Profile
     private void updatePointsAndAchievements(SkillDef savedSkill, String subjectId, int pointIncrementDelta, int occurrencesDelta, int currentOccurrences, int numSkillsRequiredDelta, SkillDef skillsGroupSkillDef, List<SkillDef> groupChildSkills) {
         if (savedSkill.type != SkillDef.ContainerType.SkillsGroup) {
 

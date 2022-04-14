@@ -15,11 +15,14 @@
  */
 package skills.tasks.executors
 
+import callStack.profiler.CProf
+import callStack.profiler.ProfileEvent
 import com.github.kagkarlsson.scheduler.task.ExecutionContext
 import com.github.kagkarlsson.scheduler.task.TaskInstance
 import com.github.kagkarlsson.scheduler.task.VoidExecutionHandler
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import skills.services.admin.SkillCatalogService
@@ -36,11 +39,25 @@ class CatalogSkillUpdatedTaskExecutor implements VoidExecutionHandler<CatalogSki
     @Autowired
     SkillsAdminService skillsAdminService
 
+    @Value('#{"${skills.async.syncCatalogSkillDefinition.prof.minMillisToPrint:2000}"}')
+    int minMillisToPrint
+
     @Transactional
     @Override
     void execute(TaskInstance<CatalogSkillDefinitionUpdated> taskInstance, ExecutionContext executionContext) {
         def data = taskInstance.getData()
-        log.debug("running async CatalogSkillUpdatedTaskExecutor for [{}-{}]", data.projectId, data.skillId)
+        log.debug("Running async CatalogSkillUpdatedTaskExecutor for [{}-{}]", data.projectId, data.skillId)
+
+        CProf.clear()
+        String profName = "skillSync".toString()
+        CProf.start(profName)
+
         skillCatalogService.distributeCatalogSkillUpdates(data.projectId, data.skillId, data.rawId)
+
+        ProfileEvent resProfEvent = CProf.stop(profName)
+        if (resProfEvent.getRuntimeInMillis() > minMillisToPrint) {
+            log.info("Profiled CatalogSkillUpdatedTaskExecutor for projectId=[{}], skillId=[{}]:\n{}", data.projectId, data.skillId, CProf.prettyPrint())
+        }
+        log.debug("Completed async CatalogSkillUpdatedTaskExecutor for [{}-{}]", data.projectId, data.skillId)
     }
 }
