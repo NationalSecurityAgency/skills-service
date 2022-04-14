@@ -65,7 +65,6 @@ class UserAdminService {
         return result
     }
 
-
     @Transactional(readOnly = true)
     List<UserInfoRes> suggestDashboardUsers(String query, boolean includeSelf) {
         query = query ? query.toLowerCase() : ""
@@ -83,7 +82,7 @@ class UserAdminService {
 
     @Transactional(readOnly = true)
     List<String> suggestUsersForProject(String projectId, String userQuery, PageRequest pageRequest) {
-        return performedSkillRepository.findDistinctUserIdsForProject(projectId, userQuery?.toLowerCase(), pageRequest)
+        return userPointsRepo.findDistinctUserIdsForProject(projectId, userQuery?.toLowerCase(), pageRequest)
     }
 
     @Transactional(readOnly = true)

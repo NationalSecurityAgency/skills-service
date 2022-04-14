@@ -217,6 +217,12 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             ''')
     List<RankedUserRes>  findUsersForLeaderboardPointsMoreOrEqual(String projectId, Integer points, LocalDateTime createdDate, Pageable pageable)
 
+    @Query('''SELECT DISTINCT(p.userId) from UserPoints p 
+                where
+                    p.projectId =?1 and
+                    lower(p.userId) LIKE %?2%''' )
+    List<String> findDistinctUserIdsForProject(String projectId, String userIdQuery, Pageable pageable)
+
     long countByProjectIdAndSkillId(String projectId, @Nullable String skillId)
 
     void deleteByProjectIdAndSkillId(String projectId, String skillId)

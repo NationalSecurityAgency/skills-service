@@ -91,15 +91,6 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
               u.performedOn < ?5''')
     Long countByUserIdAndProjectIdAndSkillIdAndPerformedOnGreaterThanAndPerformedOnLessThan(String userId, String projectId, String skillId, Date startDate, Date endDate)
 
-    @Query('''SELECT DISTINCT(p.userId) from UserPerformedSkill p where 
-                p.skillRefId in (
-                    select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id from SkillDef s 
-                    where s.projectId=?1 and
-                    s.enabled = 'true'
-                 )
-                and lower(p.userId) LIKE %?2% order by p.userId asc''' )
-    List<String> findDistinctUserIdsForProject(String projectId, String userIdQuery, Pageable pageable)
-
     @Query("SELECT DISTINCT(p.userId) from UserPerformedSkill p where lower(p.userId) LIKE %?1% order by p.userId asc" )
     List<String> findDistinctUserIds(String userIdQuery, Pageable pageable)
 
