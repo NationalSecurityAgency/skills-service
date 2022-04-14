@@ -92,7 +92,7 @@ class PublicConfigController {
         return res
     }
 
-    @CrossOrigin
+    @CrossOrigin(originPatterns = ['*'])
     @RequestMapping(value = "/clientDisplay/config", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     Map<String,Object> getClientDisplayConfig(@RequestParam(required = false) String projectId){
@@ -114,7 +114,7 @@ class PublicConfigController {
             status: "OK",
     ]
 
-    @CrossOrigin
+    @CrossOrigin(originPatterns = ['*'])
     @RequestMapping(value = "/status", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     def status() {

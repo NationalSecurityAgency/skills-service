@@ -19,7 +19,6 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Conditional
-import org.springframework.context.annotation.DependsOn
 import org.springframework.context.annotation.Lazy
 import org.springframework.core.annotation.Order
 import org.springframework.messaging.Message
@@ -35,7 +34,6 @@ import org.springframework.security.oauth2.provider.authentication.BearerTokenEx
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetailsSource
 import org.springframework.security.oauth2.provider.authentication.TokenExtractor
-import org.springframework.security.web.UnsupportedOperationExceptionInvocationHandler
 import org.springframework.stereotype.Component
 import skills.auth.SecurityMode
 import skills.auth.form.oauth2.SkillsOAuth2AuthenticationManager
@@ -45,6 +43,8 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletRequestWrapper
 import javax.servlet.http.HttpSession
 import java.lang.reflect.Proxy
+
+import static org.springframework.security.web.FilterInvocation.UnsupportedOperationExceptionInvocationHandler
 
 @Qualifier("WebSocketConfig")
 @Lazy

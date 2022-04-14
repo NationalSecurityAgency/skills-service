@@ -77,7 +77,7 @@ class UserTokenController {
      */
     @RequestMapping(value = "/api/projects/{projectId}/token", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    @CrossOrigin(allowCredentials = 'true')
+    @CrossOrigin(allowCredentials = 'true', originPatterns = ['*'])
     ResponseEntity getSelfUserToken(@PathVariable("projectId") String projectId) {
         Object authentication = SecurityContextHolder.getContext().getAuthentication();
         String userId

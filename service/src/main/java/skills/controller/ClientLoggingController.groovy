@@ -34,7 +34,7 @@ class ClientLoggingController {
 //    Logger.ERROR = defineLogLevel(8, 'ERROR');
 //    Logger.OFF = defineLogLevel(99, 'OFF');
 
-    @CrossOrigin
+    @CrossOrigin(originPatterns = ['*'])
     @RequestMapping(value = "/log", method = [RequestMethod.PUT, RequestMethod.POST])
     @ResponseBody
     boolean writeLog(@RequestBody LogMessage logMessage) {

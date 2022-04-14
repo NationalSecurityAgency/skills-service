@@ -40,6 +40,9 @@ import org.springframework.security.web.firewall.HttpFirewall
 import org.springframework.security.web.firewall.StrictHttpFirewall
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextListener
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.CorsConfigurationSource
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import skills.auth.util.AccessDeniedExplanation
 import skills.auth.util.AccessDeniedExplanationGenerator
 
@@ -120,6 +123,17 @@ class SecurityConfiguration {
                 final AuthenticationException authException) throws IOException {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
         }
+    }
+
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource()
+        CorsConfiguration configuration = new CorsConfiguration()
+        configuration.setAllowedOriginPatterns(['*'])
+        configuration.setAllowCredentials(true)
+        configuration.applyPermitDefaultValues()
+        source.registerCorsConfiguration('/**', configuration)
+        return source
     }
 
     @Bean
