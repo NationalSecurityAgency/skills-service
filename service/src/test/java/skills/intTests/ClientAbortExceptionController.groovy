@@ -25,13 +25,13 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/public")
 class ClientAbortExceptionController {
 
-    static final int _128k = 1024 * 128
+    static final int LOTS_OF_CHARS = (1024 * 128) * 32
 
     @RequestMapping(value = "/longRunningEndpoint", method = [RequestMethod.GET], produces = "application/json")
     @ResponseBody
     String longRunningEndpoint() {
         StringBuilder stringBuilder = new StringBuilder();
-        for (int i = 0; i < _128k; i++) {
+        for (int i = 0; i < LOTS_OF_CHARS; i++) {
             stringBuilder.append(i);
         }
         return stringBuilder.toString();
