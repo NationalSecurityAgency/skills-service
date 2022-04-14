@@ -34,6 +34,8 @@ import org.springframework.security.oauth2.provider.authentication.BearerTokenEx
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetailsSource
 import org.springframework.security.oauth2.provider.authentication.TokenExtractor
+import org.springframework.security.web.FilterInvocation
+
 import org.springframework.stereotype.Component
 import skills.auth.SecurityMode
 import skills.auth.form.oauth2.SkillsOAuth2AuthenticationManager
@@ -43,8 +45,6 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletRequestWrapper
 import javax.servlet.http.HttpSession
 import java.lang.reflect.Proxy
-
-import static org.springframework.security.web.FilterInvocation.UnsupportedOperationExceptionInvocationHandler
 
 @Qualifier("WebSocketConfig")
 @Lazy
@@ -103,7 +103,7 @@ class FormAuthenticationChannelInterceptor implements ChannelInterceptor {
         private static final HttpServletRequest UNSUPPORTED_REQUEST = (HttpServletRequest) Proxy
                 .newProxyInstance(WebSocketHttpServletRequest.class.getClassLoader(),
                         [HttpServletRequest.class] as Class<?>[],
-                        new UnsupportedOperationExceptionInvocationHandler())
+                        new FilterInvocation.UnsupportedOperationExceptionInvocationHandler())
 
         String remoteAddr
         Map<String, Object> attributes = [:]
