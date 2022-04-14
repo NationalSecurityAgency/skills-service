@@ -15,10 +15,10 @@
  */
 package skills.services
 
+import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import skills.services.admin.SkillsGroupAdminService
 import skills.storage.model.ProjDef
