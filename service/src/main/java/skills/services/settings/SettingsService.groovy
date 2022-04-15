@@ -193,13 +193,21 @@ class SettingsService {
     @Transactional(readOnly = true)
     SettingsResult getGlobalSetting(String setting, String settingGroup){
         Setting settingDB = settingsDataAccessor.getGlobalSetting(setting, settingGroup)
-        return convertToRes(settingDB)
+        if (settingDB != null) {
+            return convertToRes(settingDB)
+        } else {
+            log.debug("Global Setting is null for setting [{}], settingGroup [{}], settingDB [{}]", setting, settingGroup, settingDB)
+        }
     }
 
     @Transactional()
     SettingsResult getGlobalSetting(String setting){
         Setting settingDB = settingsDataAccessor.getGlobalSetting(setting)
-        return convertToRes(settingDB)
+        if (settingDB != null) {
+            return convertToRes(settingDB)
+        } else {
+            log.debug("Global Setting is null for setting [{}], settingDB [{}]", setting, settingDB)
+        }
     }
 
     @Transactional(readOnly = true)
@@ -211,7 +219,11 @@ class SettingsService {
     @Transactional()
     SettingsResult getProjectSetting(String projectId, String setting){
         Setting settingDB = settingsDataAccessor.getProjectSetting(projectId, setting)
-        return convertToRes(settingDB)
+        if (settingDB != null) {
+            return convertToRes(settingDB)
+        } else {
+            log.debug("Project Setting is null for projectId [{}], setting [{}], settingDB [{}]", projectId, setting, settingDB)
+        }
     }
 
     @Transactional()
@@ -223,13 +235,21 @@ class SettingsService {
     @Transactional(readOnly = true)
     SettingsResult getUserProjectSetting(String userId, String projectId, String setting, String settingGroup){
         Setting settingDB = settingsDataAccessor.getUserProjectSetting(getUserRefId(userId), projectId, setting, settingGroup)
-        return convertToRes(settingDB)
+        if (settingDB != null) {
+            return convertToRes(settingDB, userId)
+        } else {
+            log.debug("User Project Setting is null for userId [{}], projectId [{}], setting [{}], settingGroup [{}], settingDB [{}]", userId, projectId, setting, settingGroup, settingDB)
+        }
     }
 
     @Transactional(readOnly = true)
     SettingsResult getUserSetting(String userId, String setting, String settingGroup){
         Setting settingDB = settingsDataAccessor.getUserSetting(getUserRefId(userId), setting, settingGroup)
-        return convertToRes(settingDB, userId)
+        if (settingDB != null) {
+            return convertToRes(settingDB, userId)
+        } else {
+            log.debug("User Setting is null for userId [{}], setting [{}], settingGroup [{}], settingDB [{}]", userId, setting, settingGroup, settingDB)
+        }
     }
 
     @Transactional(readOnly = true)
