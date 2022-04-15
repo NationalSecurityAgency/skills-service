@@ -289,6 +289,7 @@ class SettingsService {
      */
     private SettingsResult convertToRes(Setting setting, String userId=null){
         if (!setting) {
+            log.error("Code thinks this setting object is null [{}], groovyTruth [{}], nullCheck [{}]", JsonOutput.toJson(setting), !setting, setting == null)
             return null
         }
         SettingsResult res = new SettingsResult()
@@ -308,7 +309,7 @@ class SettingsService {
         // once the issue is found this code can be removed but for now we need a failsafe
         Boolean hasNulls = res.findAll({ !it }).size() > 0
         if (hasNulls) {
-            log.error("Found null values in the settings list for [{}] user. The list is: {}", userId, JsonOutput.toJson(res))
+            log.error("Found null values in the settings list for [{}] user. fromDB=[{}], converted=[{}]", userId, JsonOutput.toJson(settings), JsonOutput.toJson(res))
             res = res.findAll({ it })
         }
 
