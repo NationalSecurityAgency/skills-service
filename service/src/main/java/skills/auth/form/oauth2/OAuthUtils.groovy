@@ -56,7 +56,7 @@ class OAuthUtils {
         Map claims = oauthDetails.getDecodedDetails()
         if (claims && claims.get(AuthorizationServerConfig.SKILLS_PROXY_USER)) {
             String proxyUserId = claims.get(AuthorizationServerConfig.SKILLS_PROXY_USER)
-            log.info("Loading proxyUser [${proxyUserId}]")
+            log.debug("Loading proxyUser [{}]", proxyUserId)
             UserInfo currentUser = new UserInfo(
                     username: proxyUserId,
                     proxied: true,

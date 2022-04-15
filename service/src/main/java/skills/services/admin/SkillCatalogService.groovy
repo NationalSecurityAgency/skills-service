@@ -397,6 +397,7 @@ class SkillCatalogService {
     }
 
     @Transactional
+    @Profile
     List<SkillDefWithExtra> getRelatedSkills(SkillDefWithExtra skillDefWithExtra) {
         List<SkillDefWithExtra> related = []
         if (isAvailableInCatalog(skillDefWithExtra.projectId, skillDefWithExtra.skillId)) {
@@ -414,6 +415,7 @@ class SkillCatalogService {
     }
 
     @Transactional
+    @Profile
     List<SkillDefMin> getRelatedSkills(SkillDefMin skillDef) {
         List<SkillDefMin> related = []
         if (isAvailableInCatalog(skillDef.projectId, skillDef.skillId)) {

@@ -15,11 +15,14 @@
  */
 package skills.tasks.executors
 
+import callStack.profiler.CProf
+import callStack.profiler.ProfileEvent
 import com.github.kagkarlsson.scheduler.task.ExecutionContext
 import com.github.kagkarlsson.scheduler.task.TaskInstance
 import com.github.kagkarlsson.scheduler.task.VoidExecutionHandler
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -43,13 +46,25 @@ class ImportedSkillAchievementTaskExecutor implements VoidExecutionHandler<Impor
     @Autowired
     LockingService lockingService
 
+    @Value('#{"${skills.async.reportSkill.prof.minMillisToPrint:500}"}')
+    int minMillisToPrint
+
     @Transactional
     @Override
     void execute(TaskInstance<ImportedSkillAchievement> taskInstance, ExecutionContext executionContext) {
         ImportedSkillAchievement data = taskInstance.getData()
         SkillDefMin min = getSkill(data.rawSkillId)
-        log.debug("running imported skill achievement scheduled task for [{}-{}, {}], uuid=[{}]", min.projectId, min.skillId, data.userId, data.uuid)
+        log.debug("Running async imported skill achievement scheduled task for [{}-{}, {}], uuid=[{}]", min.projectId, min.skillId, data.userId, data.uuid)
+
+        CProf.clear()
+        String profName = "asyncReport".toString()
+        CProf.start(profName)
         importedSkillsAchievementsHandler.handleAchievementsForImportedSkills(data.userId, min, data.incomingSkillDate, data.thisRequestCompletedOriginalSkill)
+        ProfileEvent resProfEvent = CProf.stop(profName)
+        if (resProfEvent.getRuntimeInMillis() > minMillisToPrint) {
+            log.info("Profiled ImportedSkillAchievementTaskExecutor for projectId=[{}], skillId=[{}], userId=[{}]:\n{}", min.projectId, min.skillId, data.userId, CProf.prettyPrint())
+        }
+        log.debug("Completed async imported skill achievement scheduled task for [{}-{}, {}], uuid=[{}]", min.projectId, min.skillId, data.userId, data.uuid)
     }
 
     private SkillDefMin getSkill(int id) {

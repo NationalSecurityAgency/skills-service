@@ -15,6 +15,7 @@
  */
 package skills.services
 
+import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -45,6 +46,7 @@ class RuleSetDefinitionScoreUpdater {
     SkillsGroupAdminService skillsGroupAdminService
 
 
+    @Profile
     void updateFromLeaf(SkillDef skillDef) {
         if (skillDef.type == SkillDef.ContainerType.SkillsGroup) {
             List<SkillDef> children = skillRelDefRepo.findChildrenByParent(skillDef.id, [SkillRelDef.RelationshipType.SkillsGroupRequirement])
@@ -57,7 +59,6 @@ class RuleSetDefinitionScoreUpdater {
             Integer totalPoints = skillDefRepo.getSubjectTotalPoints(skillDef.id, true)
             skillDef.totalPoints = totalPoints
             skillDefRepo.save(skillDef)
-//            skillDefRepo.updateSubjectTotalPoints(skillDef.projectId, skillDef.skillId, true)
         }
 
         List<SkillDef> parents = skillRelDefRepo.findParentByChildIdAndTypes(skillDef.id, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])

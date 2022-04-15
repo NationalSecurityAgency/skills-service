@@ -76,6 +76,7 @@ class UserAchievementsAndPointsManagement {
         nativeQueriesRepo.updateOverallScoresBySummingUpAllChildSubjects(subject.projectId, SkillDef.ContainerType.Subject)
     }
 
+    @Profile
     void adjustUserPointsAfterModification(SkillDef skill) {
         log.info("Updating all UserPoints for [{}]-[{}]", skill.projectId, skill.skillId)
         nativeQueriesRepo.updateUserPointsForASkill(skill.projectId, skill.skillId)
@@ -122,6 +123,7 @@ class UserAchievementsAndPointsManagement {
         nativeQueriesRepo.updatePointTotalWhenOccurrencesAreDecreased(projectId, subjectId, skillId, pointIncrement, newOccurrences, previousOccurrences)
     }
 
+    @Profile
     @Transactional
     void removeExtraEntriesOfUserPerformedSkillByUser(String projectId, String skillId, int numEventsToKeep){
         assert numEventsToKeep > 0
@@ -131,6 +133,7 @@ class UserAchievementsAndPointsManagement {
         nativeQueriesRepo.removeExtraEntriesOfUserPerformedSkillByUser(projectId, skillId, numEventsToKeep)
     }
 
+    @Profile
     @Transactional
     void insertUserAchievementWhenDecreaseOfOccurrencesCausesUsersToAchieve(String projectId, String skillId, Integer skillRefId, int numOfOccurrences) {
         assert numOfOccurrences > 0
@@ -140,6 +143,7 @@ class UserAchievementsAndPointsManagement {
         userAchievedLevelRepo.insertUserAchievementWhenDecreaseOfOccurrencesCausesUsersToAchieve(projectId, skillId, skillRefId, numOfOccurrences, Boolean.FALSE.toString())
     }
 
+    @Profile
     @Transactional
     void identifyAndAddLevelAchievements(SkillDef subject) {
         assert subject.type == SkillDef.ContainerType.Subject
@@ -179,6 +183,7 @@ class UserAchievementsAndPointsManagement {
         }
     }
 
+    @Profile
     @Transactional
     void insertUserAchievementWhenDecreaseOfSkillsRequiredCausesUsersToAchieve(String projectId, String groupSkillId, Integer groupSkillRefId, List<String> childSkillIds, int numSkillsRequired) {
         assert numSkillsRequired > 0
@@ -188,6 +193,7 @@ class UserAchievementsAndPointsManagement {
         userAchievedLevelRepo.insertUserAchievementWhenDecreaseOfNumSkillsRequiredCausesUsersToAchieve(projectId, groupSkillId, groupSkillRefId, childSkillIds, numSkillsRequired, Boolean.FALSE.toString())
     }
 
+    @Profile
     @Transactional
     void removeUserAchievementsThatDoNotMeetNewNumberOfOccurrences(String projectId, String skillId, int numOfOccurrences) {
         assert numOfOccurrences > 0
