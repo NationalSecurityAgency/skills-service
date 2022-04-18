@@ -61,7 +61,7 @@ limitations under the License.
     components: { ImportFinalizeProgress, FinalizePreviewModal },
     computed: {
       dashboardSkillsCatalogGuide() {
-        return `${this.$store.getters.config.docsHost}/dashboard/user-guide/skills-groups.html`;
+        return `${this.$store.getters.config.docsHost}/dashboard/user-guide/skills-catalog.html#finalization`;
       },
       ...finalizeInfo.mapGetters([
         'finalizeInfo',
