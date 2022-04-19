@@ -19,10 +19,8 @@ import groovy.json.JsonOutput
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.storage.model.SkillDef
-import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
-import static skills.intTests.utils.SkillsFactory.createSkillsGroup
 
 class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
 
@@ -887,6 +885,78 @@ class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
         then:
         SkillsClientException e = thrown(SkillsClientException)
         e.message.contains("Each Subject is limited to [100] Skills, currently [TestSubject1] has [99] Skills, importing [2] would exceed the maximum, errorCode:MaxSkillsThreshold")
+    }
+
+    def "removing the original skill updates UserPoints and subject/project definition points"() {
+        def project1 = createProjWithCatalogSkills(1)
+
+        def project2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        skillsService.createProjectAndSubjectAndSkills(project2, p2subj1, [])
+        skillsService.bulkImportSkillsFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId,
+                [
+                        [projectId: project1.p.projectId, skillId: project1.s1_skills[0].skillId],
+                        [projectId: project1.p.projectId, skillId: project1.s1_skills[1].skillId],
+                ])
+
+        List<String> users = getRandomUsers(2)
+        skillsService.addSkill(project1.s1_skills[0], users[0])
+        skillsService.addSkill(project1.s1_skills[1], users[0])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        def usr_1_proj2_summary_t0 = skillsService.getSkillSummary(users[0], project2.projectId)
+        println JsonOutput.prettyPrint(JsonOutput.toJson(usr_1_proj2_summary_t0))
+        when:
+        skillsService.deleteSkill(project1.s1_skills[0])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        def usr_1_proj2_summary_t1 = skillsService.getSkillSummary(users[0], project2.projectId)
+//        println JsonOutput.prettyPrint(JsonOutput.toJson(usr_1_proj2_summary_t1))
+        then:
+        usr_1_proj2_summary_t0.totalPoints == 400
+        usr_1_proj2_summary_t0.points == 200
+        usr_1_proj2_summary_t0.subjects[0].totalPoints == 400
+
+        usr_1_proj2_summary_t1.totalPoints == 200
+        usr_1_proj2_summary_t1.points == 100
+        usr_1_proj2_summary_t1.subjects[0].totalPoints == 200
+        projDefRepo.findByProjectId(project2.projectId).totalPoints == 200
+        skillDefRepo.findByProjectIdAndSkillId(project2.projectId, p2subj1.subjectId).totalPoints == 200
+    }
+
+    def "removing the imported skill updates UserPoints and subject/project definition points"() {
+        def project1 = createProjWithCatalogSkills(1)
+
+        def project2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        skillsService.createProjectAndSubjectAndSkills(project2, p2subj1, [])
+        skillsService.bulkImportSkillsFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId,
+                [
+                        [projectId: project1.p.projectId, skillId: project1.s1_skills[0].skillId],
+                        [projectId: project1.p.projectId, skillId: project1.s1_skills[1].skillId],
+                ])
+
+        List<String> users = getRandomUsers(2)
+        skillsService.addSkill(project1.s1_skills[0], users[0])
+        skillsService.addSkill(project1.s1_skills[1], users[0])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        def usr_1_proj2_summary_t0 = skillsService.getSkillSummary(users[0], project2.projectId)
+        println JsonOutput.prettyPrint(JsonOutput.toJson(usr_1_proj2_summary_t0))
+        when:
+        skillsService.deleteSkill([projectId: project2.projectId, subjectId: p2subj1.subjectId, skillId: project1.s1_skills[0].skillId])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        def usr_1_proj2_summary_t1 = skillsService.getSkillSummary(users[0], project2.projectId)
+//        println JsonOutput.prettyPrint(JsonOutput.toJson(usr_1_proj2_summary_t1))
+        then:
+        usr_1_proj2_summary_t0.totalPoints == 400
+        usr_1_proj2_summary_t0.points == 200
+        usr_1_proj2_summary_t0.subjects[0].totalPoints == 400
+
+        usr_1_proj2_summary_t1.totalPoints == 200
+        usr_1_proj2_summary_t1.points == 100
+        usr_1_proj2_summary_t1.subjects[0].totalPoints == 200
+        projDefRepo.findByProjectId(project2.projectId).totalPoints == 200
+        skillDefRepo.findByProjectIdAndSkillId(project2.projectId, p2subj1.subjectId).totalPoints == 200
     }
 
 }

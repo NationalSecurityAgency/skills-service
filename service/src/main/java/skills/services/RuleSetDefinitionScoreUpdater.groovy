@@ -17,7 +17,6 @@ package skills.services
 
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
-import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import skills.services.admin.SkillsGroupAdminService
@@ -27,7 +26,6 @@ import skills.storage.model.SkillRelDef
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillRelDefRepo
-
 
 @Service
 @Slf4j
@@ -49,16 +47,9 @@ class RuleSetDefinitionScoreUpdater {
     @Profile
     void updateFromLeaf(SkillDef skillDef) {
         if (skillDef.type == SkillDef.ContainerType.SkillsGroup) {
-            List<SkillDef> children = skillRelDefRepo.findChildrenByParent(skillDef.id, [SkillRelDef.RelationshipType.SkillsGroupRequirement])
-            int total = skillsGroupAdminService.getGroupTotalPoints(children, skillDef.numSkillsRequired)
-            skillDef.totalPoints = total
-            skillDefRepo.save(skillDef)
+            updateGroupDef(skillDef)
         } else if (skillDef.type == SkillDef.ContainerType.Subject){
-            // it's important to update SkillDef object so Hibernate cache is updated as well
-            // as ProjDef object is retrieved later in the execution path
-            Integer totalPoints = skillDefRepo.getSubjectTotalPoints(skillDef.id, true)
-            skillDef.totalPoints = totalPoints
-            skillDefRepo.save(skillDef)
+            updateSubjectSkillDef(skillDef)
         }
 
         List<SkillDef> parents = skillRelDefRepo.findParentByChildIdAndTypes(skillDef.id, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
@@ -67,50 +58,36 @@ class RuleSetDefinitionScoreUpdater {
         }
 
         if (skillDef.type == SkillDef.ContainerType.Subject) {
-            // it's important to update ProjDef object so Hibernate cache is updated as well
-            // as ProjDef object is retrieved later in the execution path
-            Integer projTotalPoints = skillDefRepo.getProjectsTotalPoints(skillDef.projectId, true)
-            ProjDef projDef = projDefRepo.findByProjectId(skillDef.projectId)
-            projDef.totalPoints = projTotalPoints
-            projDefRepo.save(projDef)
+            updateProjDef(skillDef.projectId)
         }
     }
 
-    void skillToBeRemoved(SkillDef skillDef) {
-        List<SkillDef> parents = skillRelDefRepo.findParentByChildIdAndTypes(skillDef.id, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
-        if (isChildOfDisabledSkillsGroup(skillDef, parents)) {
-            // disabled groups do not contribute to parent total points, just update the group itself
-            SkillDef skillsGroupDef = parents.first()
-            skillsGroupDef.totalPoints = skillsGroupDef.totalPoints - skillDef.totalPoints
-            skillDefRepo.save(skillDef)
-        } else {
-            parents?.each {
-                walkUpAndSubtractFromTotal(it, skillDef.totalPoints)
-            }
-            if(SkillDef.ContainerType.Skill == skillDef.type){
-                ProjDef projDef = projDefRepo.findByProjectId(skillDef.projectId)
-                projDef.totalPoints -= skillDef.totalPoints
-            }
-        }
-    }
-
-    private void walkUpAndSubtractFromTotal(SkillDef skillDef, int pointsToSubtract) {
-        skillDef.totalPoints = skillDef.totalPoints - pointsToSubtract
+    @Profile
+    private void updateGroupDef(SkillDef skillDef) {
+        List<SkillDef> children = skillRelDefRepo.findChildrenByParent(skillDef.id, [SkillRelDef.RelationshipType.SkillsGroupRequirement])
+        int total = skillsGroupAdminService.getGroupTotalPoints(children, skillDef.numSkillsRequired)
+        skillDef.totalPoints = total
         skillDefRepo.save(skillDef)
-
-        List<SkillDef> parents = skillRelDefRepo.findParentByChildIdAndTypes(skillDef.id, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
-        parents?.each {
-            walkUpAndSubtractFromTotal(it, pointsToSubtract)
-        }
     }
 
-    private boolean isChildOfDisabledSkillsGroup(SkillDef skillDef, List<SkillDef> parents) {
-        boolean isSkillsGroupChild = StringUtils.isNotBlank(skillDef.groupId)
-        if (isSkillsGroupChild) {
-            assert parents && parents.size() == 1 && parents.first().type == SkillDef.ContainerType.SkillsGroup && parents.first().skillId == skillDef.groupId
-            SkillDef skillsGroupDef = parents.first()
-            return !Boolean.valueOf(skillsGroupDef.enabled)
-        }
-        return false
+    @Profile
+    void updateProjDef(String projectId) {
+        // it's important to update ProjDef object so Hibernate cache is updated as well
+        // as ProjDef object is retrieved later in the execution path
+        Integer projTotalPoints = skillDefRepo.getProjectsTotalPoints(projectId, true)
+        ProjDef projDef = projDefRepo.findByProjectId(projectId)
+        projDef.totalPoints = projTotalPoints
+        projDefRepo.save(projDef)
     }
+
+    @Profile
+    void updateSubjectSkillDef(SkillDef subjectDef) {
+        assert subjectDef.type == SkillDef.ContainerType.Subject
+        // it's important to update SkillDef object so Hibernate cache is updated as well
+        // as ProjDef object is retrieved later in the execution path
+        Integer totalPoints = skillDefRepo.getSubjectTotalPoints(subjectDef.id, true)
+        subjectDef.totalPoints = totalPoints
+        skillDefRepo.save(subjectDef)
+    }
+
 }

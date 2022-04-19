@@ -49,7 +49,6 @@ import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillDefWithExtraRepo
 import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.UserPointsRepo
-import skills.storage.repos.nativeSql.NativeQueriesRepo
 import skills.utils.InputSanitizer
 import skills.utils.Props
 
@@ -485,10 +484,7 @@ class SkillsAdminService {
         } else {
             throw new SkillException("Unexpected parent type [${parentSkill.type}]")
         }
-
-        //we need to check to see if this skill belongs to any badges, if so we need to look for any users who now qualify
-        //for those badges
-        ruleSetDefinitionScoreUpdater.skillToBeRemoved(skillDefinition)
+        removeCatalogImportedSkills(skillDefinition)
 
         // this MUST happen before the skill was removed as sql relies on the skill to exist
         userPointsManagement.handleSkillRemoval(skillDefinition, subject)
@@ -500,6 +496,8 @@ class SkillsAdminService {
         log.debug("Deleted skill [{}]", skillDefinition.skillId)
 
         // this MUST happen after the skill was removed as sql relies on the skill to be gone
+        ruleSetDefinitionScoreUpdater.updateSubjectSkillDef(subject)
+        ruleSetDefinitionScoreUpdater.updateProjDef(subject.projectId)
         userPointsManagement.identifyAndAddLevelAchievements(subject)
 
         // make sure skills group is still valid and update group's totalPoints
@@ -526,13 +524,16 @@ class SkillsAdminService {
 
         List<SkillDef> siblings = ruleSetDefGraphService.getChildrenSkills(parentSkill, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
         displayOrderService.resetDisplayOrder(siblings)
+    }
 
+    @Profile
+    private void removeCatalogImportedSkills(SkillDef skillDefinition) {
         if (skillCatalogService.isAvailableInCatalog(skillDefinition)) {
             List<SkillDef> related = skillCatalogService.getRelatedSkills(skillDefinition)
             log.info("catalog skill is being deleted, deleting [{}] copies imported into other projects", related?.size())
             related?.each {
-                SkillDef subj = skillRelDefRepo.findAllByChildAndType(it, SkillRelDef.RelationshipType.RuleSetDefinition)
-                deleteSkill(it.projectId, subj.skillId, it.skillId)
+                SkillDef subjectParent = ruleSetDefGraphService.getMySubjectParent(skillDefinition.id)
+                deleteSkill(it.projectId, subjectParent.skillId, it.skillId)
             }
         }
     }
