@@ -404,4 +404,66 @@ class NumberUsersPerTagMetricsBuilderSpec extends DefaultIntSpec {
         res_proj2.items.find { it.value == "blah2"}.count == 1
     }
 
+    def "disabled skills must not produce counts"() {
+
+        def proj = SkillsFactory.createProject()
+        List<Map> skills = SkillsFactory.createSkills(1)
+        skills.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
+
+        def subj = SkillsFactory.createSubject()
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        List<String> users = getRandomUsers(20)
+
+        users.each {
+            skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(0).skillId], it, new Date())
+        }
+
+        String key = "someCoolKey"
+        userTagRepo.save(new UserTag(userId: users[0], key: key, value: "blah" ))
+        userTagRepo.save(new UserTag(userId: users[1], key: key, value: "blah" ))
+        userTagRepo.save(new UserTag(userId: users[2], key: key, value: "blah" ))
+
+        userTagRepo.save(new UserTag(userId: users[0], key: key, value: "blah1" ))
+        userTagRepo.save(new UserTag(userId: users[3], key: key, value: "blah1" ))
+
+        userTagRepo.save(new UserTag(userId: users[4], key: key, value: "blah2" ))
+
+        // other key
+        userTagRepo.save(new UserTag(userId: users[0], key: key + "a", value: "blah" ))
+        userTagRepo.save(new UserTag(userId: users[1], key: key + "a", value: "blah" ))
+        userTagRepo.save(new UserTag(userId: users[2], key: key + "a", value: "blah" ))
+
+
+        Map props = [
+                tagKey: key,
+                currentPage: 1,
+                pageSize: 5,
+                sortDesc: true
+        ]
+
+        def proj2 = SkillsFactory.createProject(2)
+        def proj2_subj = SkillsFactory.createSubject(2, 1)
+        skillsService.createProject(proj2)
+        skillsService.createSubject(proj2_subj)
+
+        skills.each {skillsService.exportSkillToCatalog(it.projectId, it.skillId)}
+        skillsService.bulkImportSkillsFromCatalog(proj2.projectId, proj2_subj.subjectId, skills.collect { [projectId: it.projectId, skillId: it.skillId] })
+
+        when:
+        def res = skillsService.getMetricsData(proj.projectId, metricsId, props)
+        def res_proj2 = skillsService.getMetricsData(proj2.projectId, metricsId, props)
+        then:
+        res.totalNumItems == 3
+        res.items.size() == 3
+        res.items.find { it.value == "blah"}.count == 3
+        res.items.find { it.value == "blah1"}.count == 2
+        res.items.find { it.value == "blah2"}.count == 1
+
+        res_proj2.totalNumItems == 0
+        !res_proj2.items
+    }
 }
