@@ -40,7 +40,13 @@ interface UserTagRepo extends CrudRepository<UserTag, Integer> {
     @Query('''SELECT COUNT(DISTINCT ups.userId) as numUsers, ut.value as tag
         from UserPerformedSkill ups
         join UserTag ut on ut.userId = ups.userId 
-        where ups.projectId=?1 and ut.key = ?2 and LOWER(ut.value) LIKE LOWER(CONCAT('%',?3,'%'))   
+        where ups.skillRefId in (
+                select case when sd.copiedFrom is not null then sd.copiedFrom else sd.id end as id 
+                from SkillDef sd
+                where sd.type = 'Skill' and sd.projectId = ?1
+            ) 
+            and ut.key = ?2 
+            and LOWER(ut.value) LIKE LOWER(CONCAT('%',?3,'%'))   
         group by ut.value''')
     List<UserTagCount> findDistinctUserIdByProjectIdAndUserTag(String projectId, String tagKey, String tagFilter, Pageable pageable)
 
@@ -48,7 +54,13 @@ interface UserTagRepo extends CrudRepository<UserTag, Integer> {
     @Query('''SELECT COUNT(DISTINCT ut.value)
         from UserPerformedSkill ups
         join UserTag ut on ut.userId = ups.userId 
-        where ups.projectId=?1 and ut.key = ?2 and LOWER(ut.value) LIKE LOWER(CONCAT('%',?3,'%'))   ''')
+        where ups.skillRefId in (
+                select case when sd.copiedFrom is not null then sd.copiedFrom else sd.id end as id 
+                from SkillDef sd
+                where sd.type = 'Skill' and sd.projectId = ?1
+            )  
+            and ut.key = ?2 
+            and LOWER(ut.value) LIKE LOWER(CONCAT('%',?3,'%'))   ''')
     Integer countDistinctUserTag(String projectId, String tagKey, String tagFilter)
 
 }
