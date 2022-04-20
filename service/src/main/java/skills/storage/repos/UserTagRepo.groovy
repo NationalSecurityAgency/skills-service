@@ -43,7 +43,7 @@ interface UserTagRepo extends CrudRepository<UserTag, Integer> {
         where ups.skillRefId in (
                 select case when sd.copiedFrom is not null then sd.copiedFrom else sd.id end as id 
                 from SkillDef sd
-                where sd.type = 'Skill' and sd.projectId = ?1
+                where sd.type = 'Skill' and sd.projectId = ?1 and sd.enabled = 'true'
             ) 
             and ut.key = ?2 
             and LOWER(ut.value) LIKE LOWER(CONCAT('%',?3,'%'))   
@@ -57,7 +57,7 @@ interface UserTagRepo extends CrudRepository<UserTag, Integer> {
         where ups.skillRefId in (
                 select case when sd.copiedFrom is not null then sd.copiedFrom else sd.id end as id 
                 from SkillDef sd
-                where sd.type = 'Skill' and sd.projectId = ?1
+                where sd.type = 'Skill' and sd.projectId = ?1 and sd.enabled = 'true'
             )  
             and ut.key = ?2 
             and LOWER(ut.value) LIKE LOWER(CONCAT('%',?3,'%'))   ''')
