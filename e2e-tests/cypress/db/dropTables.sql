@@ -61,3 +61,5 @@ drop table users;
 drop table user_tags;
 
 drop table user_attrs;
+
+drop table scheduled_tasks;
