@@ -350,7 +350,7 @@ class SkillsLoader {
     @Profile
     UserPointHistorySummary loadPointHistorySummary(String projectId, String userId, int showHistoryForNumDays, String skillId = null, Integer version = Integer.MAX_VALUE) {
         List<SkillHistoryPoints> historyPoints = pointsHistoryBuilder.buildHistory(projectId, userId, showHistoryForNumDays, skillId, version)
-        List<Achievement> achievements = loadLevelAchievements(userId, projectId, skillId, historyPoints, showHistoryForNumDays)
+        List<Achievement> achievements = historyPoints ? loadLevelAchievements(userId, projectId, skillId, historyPoints, showHistoryForNumDays) : []
 
         return new UserPointHistorySummary (
                 pointsHistory: historyPoints,
