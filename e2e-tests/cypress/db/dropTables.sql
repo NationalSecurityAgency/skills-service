@@ -61,3 +61,7 @@ drop table users;
 drop table user_tags;
 
 drop table user_attrs;
+
+drop table scheduled_tasks;
+
+drop function IF EXISTS f_select_lock_and_insert;

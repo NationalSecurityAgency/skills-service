@@ -22,15 +22,17 @@ import org.springframework.stereotype.Component
 import skills.SpringBootApp
 import skills.profile.CallStackProfAspect
 import skills.utils.LoggerHelper
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 
 @SpringBootTest(properties = ['skills.prof.endpoints.slowMethod2=2000', 'skills.h2.port=9093'],
         webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
-class EnableCallStackProfSpec extends Specification {
+class EnableCallStackProfIT extends Specification {
 
     @Autowired
     TestController testController
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "Test custom endpoint method minMillisToPrint"() {
 
         LoggerHelper loggerHelper = new LoggerHelper(CallStackProfAspect.class)

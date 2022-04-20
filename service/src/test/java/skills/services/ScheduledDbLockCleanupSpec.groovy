@@ -21,6 +21,7 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.TransactionHelper
 import skills.storage.model.SkillsDBLock
 import skills.storage.repos.SkillsDBLockRepo
+import spock.lang.IgnoreIf
 
 class ScheduledDbLockCleanupSpec extends DefaultIntSpec {
 
@@ -42,6 +43,7 @@ class ScheduledDbLockCleanupSpec extends DefaultIntSpec {
     @Autowired
     TransactionHelper transactionHelper
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "test ScheduledDbLockCleanup will delete expired locks"() {
         SkillsDBLock lock = createExpiredLock()
         assert skillsDBLockRepo.findById(lock.id).isPresent()
@@ -53,6 +55,7 @@ class ScheduledDbLockCleanupSpec extends DefaultIntSpec {
         !skillsDBLockRepo.findById(lock.id).isPresent()
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "test ScheduledDbLockCleanup will not delete non-expired locks"() {
         SkillsDBLock lock = createNonExpiredLock()
         assert skillsDBLockRepo.findById(lock.id).isPresent()
