@@ -155,7 +155,7 @@ limitations under the License.
             },
             {
               key: 'points',
-              label: 'Points (> to <=)',
+              label: 'Points (>= to <)',
               sortable: false,
             },
             {
