@@ -733,7 +733,7 @@ class SkillsAdminService {
                 projectId: skinny.projectId,
                 name: InputSanitizer.unsanitizeName(skinny.name),
                 subjectId: skinny.subjectSkillId,
-                subjectName: skinny.subjectName,
+                subjectName: InputSanitizer.unsanitizeName(skinny.subjectName),
                 version: skinny.version,
                 displayOrder: skinny.displayOrder,
                 created: skinny.created,
@@ -750,7 +750,7 @@ class SkillsAdminService {
                 projectId: partial.projectId,
                 name: InputSanitizer.unsanitizeName(partial.name),
                 subjectId: partial.subjectSkillId,
-                subjectName: partial.subjectName,
+                subjectName: InputSanitizer.unsanitizeName(partial.subjectName),
                 pointIncrement: partial.pointIncrement,
                 pointIncrementInterval: partial.pointIncrementInterval,
                 numMaxOccurrencesIncrementInterval: partial.numMaxOccurrencesIncrementInterval,
@@ -766,7 +766,7 @@ class SkillsAdminService {
                 enabled: Boolean.valueOf(partial.enabled),
                 readOnly: partial.readOnly,
                 copiedFromProjectId: partial.copiedFromProjectId,
-                copiedFromProjectName: partial.copiedFromProjectName,
+                copiedFromProjectName: InputSanitizer.unsanitizeName(partial.copiedFromProjectName),
                 sharedToCatalog: partial.sharedToCatalog
         )
 
