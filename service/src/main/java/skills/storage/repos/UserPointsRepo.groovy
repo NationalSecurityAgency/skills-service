@@ -372,22 +372,13 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
         Integer getChildId()
         Integer getAchievementId()
     }
-    // Postgresql is 10 fold faster with the nested query over COUNT(DISTINCT)
-    // using user_performed_skill table as it has less records than user_points
-    @Query(value ='''SELECT COUNT(*)
-        FROM (
-            SELECT DISTINCT usr.user_id FROM user_performed_skill usr  WHERE usr.skill_ref_id in (
-                    select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id from skill_definition where type = 'Skill' and project_id = ?1
-                )
-            ) AS temp''',
-            nativeQuery = true)
+    @Query(value ='''SELECT COUNT(distinct user_id) from user_points where project_id = ?1''', nativeQuery = true)
     Long countDistinctUserIdByProjectId(String projectId)
 
     @Query(value ='''SELECT COUNT(*)
         FROM (SELECT DISTINCT usattr.user_id 
-                FROM user_performed_skill usr, user_attrs usattr 
-                where 
-                    usr.user_id = usattr.user_id and 
+                FROM user_points usr, user_attrs usattr 
+                where usr.user_id = usattr.user_id and 
                     usr.project_id = ?1 and 
                     (lower(CONCAT(usattr.first_name, ' ', usattr.last_name, ' (', usattr.user_id_for_display, ')')) like lower(CONCAT('%', ?2, '%')) OR
                      lower(usattr.user_id_for_display) like lower(CONCAT('%', ?2, '%')))) 
@@ -410,7 +401,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 max(upa.performed_on) AS performedOn 
                 FROM user_performed_skill upa 
                 WHERE upa.skill_ref_id in (
-                    select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id from skill_definition where type = 'Skill' and project_id = ?1
+                    select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id from skill_definition where type = 'Skill' and project_id = ?1 and enabled = 'true'
                 )
                 GROUP BY upa.user_id
             ) upa ON upa.user_id = up.user_id

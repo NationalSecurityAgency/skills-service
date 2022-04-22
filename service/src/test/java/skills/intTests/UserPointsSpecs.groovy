@@ -67,6 +67,62 @@ class UserPointsSpecs extends DefaultIntSpec {
         results.data.sort {a,b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == DTF.print(threeDaysAgo.time)
     }
 
+    def 'do not return users for disabled imported skills'() {
+        List<String> randos = getRandomUsers(2)
+
+        def project = SkillsFactory.createProject(10)
+        def subject = SkillsFactory.createSubject(10, 1)
+        def skill1 = SkillsFactory.createSkill(10, 1, 1, 0, 10, 0, 100)
+        skillsService.createProjectAndSubjectAndSkills(project, subject, [skill1])
+        skillsService.addSkill(skill1, randos[0])
+
+        def project2 = SkillsFactory.createProject(11)
+        def project2_subject = SkillsFactory.createSubject(11, 1)
+        def project2_skill2 = SkillsFactory.createSkill(11, 1, 2, 0, 10, 0, 100)
+        skillsService.createProjectAndSubjectAndSkills(project2, project2_subject, [project2_skill2])
+        skillsService.addSkill(project2_skill2, randos[1])
+
+        skillsService.exportSkillToCatalog(skill1.projectId, skill1.skillId)
+        skillsService.importSkillFromCatalog(project2.projectId, project2_subject.subjectId, skill1.projectId, skill1.skillId)
+
+        when:
+        def results_t0 = skillsService.getProjectUsers(project2.projectId)
+        def results_subject_t0 = skillsService.getSubjectUsers(project2.projectId, project2_subject.subjectId)
+        def results_skill_t0 = skillsService.getSkillUsers(project2.projectId, skill1.skillId)
+        skillsService.finalizeSkillsImportFromCatalog(project2.projectId)
+        def results_t1 = skillsService.getProjectUsers(project2.projectId)
+        def results_subject_t1 = skillsService.getSubjectUsers(project2.projectId, project2_subject.subjectId)
+        def results_skill_t1 = skillsService.getSkillUsers(project2.projectId, skill1.skillId)
+
+        then:
+        results_t0.count == 1
+        results_t0.totalCount == 1
+        results_t0.data.size() == 1
+        results_t0.data.find { it.userId == randos[1].toLowerCase() }.totalPoints == 100
+        results_subject_t0.count == 1
+        results_subject_t0.totalCount == 1
+        results_subject_t0.data.size() == 1
+        results_subject_t0.data.find { it.userId == randos[1].toLowerCase() }.totalPoints == 100
+        results_skill_t0.count == 0
+        results_skill_t0.totalCount == 0
+        !results_skill_t0.data
+
+        results_t1.count == 2
+        results_t1.totalCount == 2
+        results_t1.data.size() == 2
+        results_t1.data.find { it.userId == randos[1].toLowerCase() }.totalPoints == 100
+        results_t1.data.find { it.userId == randos[0].toLowerCase() }.totalPoints == 100
+        results_subject_t1.count == 2
+        results_subject_t1.totalCount == 2
+        results_subject_t1.data.size() == 2
+        results_subject_t1.data.find { it.userId == randos[1].toLowerCase() }.totalPoints == 100
+        results_subject_t1.data.find { it.userId == randos[0].toLowerCase() }.totalPoints == 100
+        results_skill_t1.count == 1
+        results_skill_t1.totalCount == 1
+        results_skill_t1.data.size() == 1
+        results_skill_t1.data.find { it.userId == randos[0].toLowerCase() }.totalPoints == 100
+    }
+
     def 'get project users with paging'() {
         when:
         def results1 = skillsService.getProjectUsers(projId, 1, 1)
