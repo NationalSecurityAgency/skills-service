@@ -18,7 +18,8 @@ package skills.skillLoading.model
 import groovy.transform.Canonical
 
 @Canonical
-class SkillPerfomed {
+class SkillPerformed {
+    String skillName
     String skillId
     Date performedOn
     boolean importedSkill

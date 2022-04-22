@@ -52,7 +52,10 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
                 select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id from SkillDef s
                 where s.projectId = ?2 and
                 s.enabled = 'true' and
-                lower(s.skillId) like lower(concat('%',?3,'%')) 
+                (
+                    lower(s.skillId) like lower(concat('%',?3,'%'))
+                    OR lower(s.name) like lower(concat('%',?3,'%'))
+                ) 
               ) and
               u.userId = ?1''')
     Long countByUserIdAndProjectIdAndSkillIdIgnoreCaseContaining(String userId, String projectId, String skillId)
@@ -106,16 +109,26 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
                 up.userId = ?1''')
     Boolean existsByProjectIdAndUserId(String userId, String projectId)
 
-    @Query('''select u from UserPerformedSkill u
-              where 
-              u.skillRefId in (
+    static interface PerformedSkillQRes {
+        String getProjectId()
+        String getSkillName()
+        String getSkillId()
+        Date getPerformedOn()
+    }
+    @Query('''select u.projectId as projectId, s.name as skillName, u.skillId as skillId, u.performedOn as performedOn 
+              from UserPerformedSkill u, SkillDef s
+              where u.skillRefId in (
                 select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id from SkillDef s
                 where s.projectId = ?2 and
                 s.enabled = 'true' and
-                lower(s.skillId) like lower(concat('%',?3,'%'))
-              ) and
-              u.userId = ?1''')
-    List<UserPerformedSkill> findByUserIdAndProjectIdAndSkillIdIgnoreCaseContaining(String userId, String projectId, String skillId, Pageable pageable)
+                (
+                    lower(s.skillId) like lower(concat('%',?3,'%')) 
+                    OR lower(s.name) like lower(concat('%',?3,'%'))
+                )
+              ) 
+              and u.userId = ?1
+              and u.skillRefId = s.id''')
+    List<PerformedSkillQRes> findByUserIdAndProjectIdAndSkillIdIgnoreCaseContaining(String userId, String projectId, String skillId, Pageable pageable)
 
     @Query('''select u from UserPerformedSkill u
               where 
