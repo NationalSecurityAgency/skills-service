@@ -44,6 +44,7 @@ import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillDefWithExtraRepo
 import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.nativeSql.NativeQueriesRepo
+import skills.utils.InputSanitizer
 import skills.utils.Props
 
 @Service
@@ -580,8 +581,8 @@ class SkillCatalogService {
     private static ExportedSkillRes convert(ExportedSkillTiny exportedSkillTiny) {
         ExportedSkillRes esr = new ExportedSkillRes()
         esr.skillId = exportedSkillTiny.skillId
-        esr.skillName = exportedSkillTiny.skillName
-        esr.subjectName = exportedSkillTiny.subjectName
+        esr.skillName = InputSanitizer.unsanitizeName(exportedSkillTiny.skillName)
+        esr.subjectName = InputSanitizer.unsanitizeName(exportedSkillTiny.subjectName)
         esr.exportedOn = exportedSkillTiny.exportedOn
         esr.subjectId = exportedSkillTiny.subjectId
         return esr
@@ -592,10 +593,11 @@ class SkillCatalogService {
         CatalogSkillRes partial = new CatalogSkillRes()
         Props.copy(catalogSkill.skill, partial)
         partial.subjectId = catalogSkill.subjectId
-        partial.subjectName = catalogSkill.subjectName
-        partial.projectName = catalogSkill.projectName
+        partial.subjectName = InputSanitizer.unsanitizeName(catalogSkill.subjectName)
+        partial.projectName = InputSanitizer.unsanitizeName(catalogSkill.projectName)
         partial.exportedOn = catalogSkill.exportedOn
         partial.sharedToCatalog = true
+        partial.name = InputSanitizer.unsanitizeName(partial.name)
         partial.numPerformToCompletion = catalogSkill.skill.totalPoints / catalogSkill.skill.pointIncrement
         return partial
     }

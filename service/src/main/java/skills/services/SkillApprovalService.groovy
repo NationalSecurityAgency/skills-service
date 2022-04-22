@@ -36,6 +36,7 @@ import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAttrsRepo
+import skills.utils.InputSanitizer
 
 import java.util.stream.Stream
 
@@ -99,7 +100,7 @@ class SkillApprovalService {
                     projectId: projectId,
                     subjectId: simpleSkillApproval.getSubjectId(),
                     skillId: simpleSkillApproval.getSkillId(),
-                    skillName: simpleSkillApproval.getSkillName(),
+                    skillName: InputSanitizer.unsanitizeName(simpleSkillApproval.getSkillName()),
                     requestedOn: simpleSkillApproval.getRequestedOn().time,
                     approverActionTakenOn: simpleSkillApproval.getApproverActionTakenOn()?.time,
                     rejectedOn: simpleSkillApproval.getRejectedOn()?.time,

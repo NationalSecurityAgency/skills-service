@@ -39,6 +39,7 @@ import skills.storage.accessors.SkillDefAccessor
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.SkillShareDefRepo
+import skills.utils.InputSanitizer
 import skills.utils.Props
 
 import java.util.concurrent.atomic.AtomicInteger
@@ -117,15 +118,22 @@ class SkillsDepsService {
         List<SkillDefSkinny> res = skillDefRepo.findAllSkinnySelectByProjectIdAndType(projectId, SkillDef.ContainerType.Skill, "", Boolean.TRUE.toString(), Boolean.FALSE.toString())
         List<SkillDefForDependencyRes> finalRes = res.collect {
             new SkillDefForDependencyRes(
-                    skillId: it.skillId, name: it.name, projectId: it.projectId, version: it.version
+                skillId: it.skillId,
+                name: InputSanitizer.unsanitizeName(it.name),
+                projectId: it.projectId,
+                version: it.version
             )
         }
         List<SharedSkillResult> sharedSkills = shareSkillsService.getSharedSkillsFromOtherProjects(projectId)
         sharedSkills.each {
             finalRes.add(
-                    new SkillDefForDependencyRes(
-                            skillId: it.skillId, name: it.skillName, projectId: projectId, otherProjectId: it.projectId, otherProjectName: it.projectName
-                    )
+                new SkillDefForDependencyRes(
+                    skillId: it.skillId,
+                    name: InputSanitizer.unsanitizeName(it.skillName),
+                    projectId: projectId,
+                    otherProjectId: it.projectId,
+                    otherProjectName: InputSanitizer.unsanitizeName(it.projectName)
+                )
             )
         }
 
@@ -210,6 +218,7 @@ class SkillsDepsService {
     private SkillDefRes convertToSkillDefRes(SkillDef skillDef) {
         SkillDefRes res = new SkillDefRes()
         Props.copy(skillDef, res)
+        res.name = InputSanitizer.unsanitizeName(res.name)
         res.numPerformToCompletion = skillDef.totalPoints / res.pointIncrement
         return res
     }

@@ -39,6 +39,7 @@ import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.*
 import skills.storage.model.SkillRelDef.RelationshipType
 import skills.storage.repos.*
+import skills.utils.InputSanitizer
 
 @Service
 @Slf4j
@@ -201,7 +202,7 @@ class GlobalBadgesService {
         return globalBadgeLevelDefs.collect { new GlobalBadgeLevelRes(
                 badgeId: it.badgeId,
                 projectId: it.projectId,
-                projectName: it.projectName,
+                projectName: InputSanitizer.unsanitizeName(it.projectName),
                 level: it.level
         ) }
     }
@@ -278,7 +279,7 @@ class GlobalBadgesService {
         List<String> projectIdsAlreadyInBadge = globalBadgeLevelDefRepo.findAllByBadgeId(badgeId).collect { it.projectId }.unique()
         return projDefRepo.findAll().findAll { !(it.projectId in projectIdsAlreadyInBadge) && it.projectId != InceptionProjectService.inceptionProjectId }.collect { definition ->
             ProjectResult res = new ProjectResult(
-                    projectId: definition.projectId, name: definition.name, totalPoints: definition.totalPoints,
+                    projectId: definition.projectId, name: InputSanitizer.unsanitizeName(definition.name), totalPoints: definition.totalPoints,
                     numSubjects: definition.subjects ? definition.subjects.size() : 0,
                     displayOrder: 0,
             )
@@ -331,7 +332,7 @@ class GlobalBadgesService {
     private GlobalBadgeResult convertToBadge(SkillDefWithExtra skillDef, boolean loadRequiredSkills = false) {
         GlobalBadgeResult res = new GlobalBadgeResult(
                 badgeId: skillDef.skillId,
-                name: skillDef.name,
+                name: InputSanitizer.unsanitizeName(skillDef.name),
                 description: skillDef.description,
                 displayOrder: skillDef.displayOrder,
                 iconClass: skillDef.iconClass,
