@@ -102,7 +102,7 @@ describe('Import From Catalog Table Tests', () => {
         cy.validateNoSkillsSelected();
     })
 
-    it ('select pages of skills then clear', () => {
+    it('select pages of skills then clear', () => {
         cy.visit('/administrator/projects/proj3/subjects/subj1');
         cy.get('[data-cy="importFromCatalogBtn"]').click();
 
@@ -293,13 +293,22 @@ describe('Import From Catalog Table Tests', () => {
         cy.get('[data-cy="skillToImportInfo-proj1_skill1"]').contains('Self Report: N/A')
         cy.get('[data-cy="skillToImportInfo-proj1_skill1"]').contains(`Exported: ${moment().format('YYYY-MM-DD')}`)
         cy.get('[data-cy="skillToImportInfo-proj1_skill1"] [data-cy="importedSkillInfoDescription"]').contains('This is the first skill and it is cool')
+        cy.get('[data-cy="skillToImportInfo-proj1_skill1"] [data-cy="projId"]').should('have.text', 'proj1');
+        cy.get('[data-cy="skillToImportInfo-proj1_skill1"] [data-cy="skillId"]').should('have.text', 'skill1');
+        cy.get('[data-cy="skillToImportInfo-proj1_skill1"] [data-cy="totalPts"]').should('have.text', '80');
 
         cy.get('[data-cy="expandDetailsBtn_proj2_skill2"]').click();
         cy.get('[data-cy="skillToImportInfo-proj2_skill2"]').contains('Self Report: Requires Approval')
         cy.get('[data-cy="skillToImportInfo-proj2_skill2"] [data-cy="importedSkillInfoDescription"]').should('not.exist')
+        cy.get('[data-cy="skillToImportInfo-proj2_skill2"] [data-cy="projId"]').should('have.text', 'proj2');
+        cy.get('[data-cy="skillToImportInfo-proj2_skill2"] [data-cy="skillId"]').should('have.text', 'skill2');
+        cy.get('[data-cy="skillToImportInfo-proj2_skill2"] [data-cy="totalPts"]').should('have.text', '105');
 
         cy.get('[data-cy="expandDetailsBtn_proj2_skill3Subj3"]').click();
         cy.get('[data-cy="skillToImportInfo-proj2_skill3Subj3"]').contains('Self Report: Honor System')
+        cy.get('[data-cy="skillToImportInfo-proj2_skill3Subj3"] [data-cy="projId"]').should('have.text', 'proj2');
+        cy.get('[data-cy="skillToImportInfo-proj2_skill3Subj3"] [data-cy="skillId"]').should('have.text', 'skill3Subj3');
+        cy.get('[data-cy="skillToImportInfo-proj2_skill3Subj3"] [data-cy="totalPts"]').should('have.text', '80');
 
         cy.get('[data-cy="expandDetailsBtn_proj1_skill4Subj2"]').click();
         // make sure markdown is not shown
@@ -415,6 +424,29 @@ describe('Import From Catalog Table Tests', () => {
             [{ colIndex: 3,  value: '80' }],
             [{ colIndex: 3,  value: '80' }],
             [{ colIndex: 3,  value: '45' }],
+        ], 5);
+    });
+
+    it('add project filter', () => {
+        cy.visit('/administrator/projects/proj3/subjects/subj1');
+        cy.get('[data-cy="importFromCatalogBtn"]').click();
+        cy.get('[data-cy="importSkillsFromCatalogTable"] tr:nth-child(2) [data-cy="addProjectFilter"]').click();
+        cy.get('[data-cy="projectNameFilter"]').should('have.value', 'This is project 2');
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 1,  value: 'This is project 2' }],
+            [{ colIndex: 1,  value: 'This is project 2' }],
+            [{ colIndex: 1,  value: 'This is project 2' }],
+        ], 5);
+    });
+
+    it('add subject filter', () => {
+        cy.visit('/administrator/projects/proj3/subjects/subj1');
+        cy.get('[data-cy="importFromCatalogBtn"]').click();
+        cy.get('[data-cy="importSkillsFromCatalogTable"] tr:nth-child(3) [data-cy="addSubjectFilter"]').click();
+        cy.get('[data-cy="subjectNameFilter"]').should('have.value', 'Subject 3');
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 2,  value: 'Subject 3' }],
+            [{ colIndex: 2,  value: 'Subject 3' }],
         ], 5);
     });
 
