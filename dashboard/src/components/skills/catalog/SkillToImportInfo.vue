@@ -23,6 +23,21 @@ limitations under the License.
         <i class="fas fa-book text-info"></i> <span class="font-italic">Exported:</span> <span class="text-primary">{{ skill.exportedOn | date }}</span> <span class="text-secondary">({{ skill.exportedOn | timeFromNow }})</span>
       </div>
     </div>
+    <div class="row mt-1">
+      <div class="col">
+        <div>
+          <span class="font-italic">Project ID: </span><span class="text-primary font-weight-bold" data-cy="projId">{{ skill.projectId }}</span>
+        </div>
+        <div>
+          <span class="font-italic">Skill ID: </span><span class="text-primary font-weight-bold" data-cy="skillId">{{ skill.skillId }}</span>
+        </div>
+        <div>
+          <span class="font-italic">Points: </span><span class="text-primary font-weight-bold" data-cy="totalPts">{{ skill.totalPoints}}</span><span> ({{ skill.pointIncrement }} Increment x {{ skill.numPerformToCompletion }} Occurrences)</span>
+        </div>
+      </div>
+      <div class="col-auto">
+      </div>
+    </div>
     <div class="card mt-3">
       <div class="card-header">
         Description
