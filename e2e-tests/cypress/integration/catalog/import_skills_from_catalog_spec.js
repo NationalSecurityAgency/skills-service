@@ -78,8 +78,8 @@ describe('Import skills from Catalog Tests', () => {
 
         cy.get('[data-cy="importFromCatalogBtn"]').click();
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'Very Great Skill 1' }, { colIndex: 1,  value: 'ID: proj2' }],
-            [{ colIndex: 0,  value: 'Very Great Skill 2' }, { colIndex: 1,  value: 'ID: proj2' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 1' }, { colIndex: 1,  value: 'This is project 2' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 2' }, { colIndex: 1,  value: 'This is project 2' }],
         ], 5);
 
         cy.get('[data-cy="importBtn"]').should('be.disabled');
@@ -319,7 +319,7 @@ describe('Import skills from Catalog Tests', () => {
 
         cy.get('[data-cy="importFromCatalogBtn"]').click();
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'Very Great Skill 2' }, { colIndex: 1,  value: 'ID: proj1' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 2' }, { colIndex: 1,  value: 'This is project 1' }],
         ], 5);
         cy.get('[data-cy="alreadyExistWarning_proj1-skill1"]').should('not.exist');
 
@@ -341,9 +341,9 @@ describe('Import skills from Catalog Tests', () => {
 
         cy.get('[data-cy="importFromCatalogBtn"]').click();
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'Very Great Skill 1' }, { colIndex: 1,  value: 'ID: proj1' }],
-            [{ colIndex: 0,  value: 'Very Great Skill 2' }, { colIndex: 1,  value: 'ID: proj1' }],
-            [{ colIndex: 0,  value: 'Very Great Skill 3' }, { colIndex: 1,  value: 'ID: proj1' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 1' }, { colIndex: 1,  value: 'This is project 1' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 2' }, { colIndex: 1,  value: 'This is project 1' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 3' }, { colIndex: 1,  value: 'This is project 1' }],
         ], 5);
         cy.get('[data-cy="alreadyExistWarning_proj1-skill1"]').should('not.exist');
         cy.get('[data-cy="alreadyExistWarning_proj1-skill2"]').should('not.exist');
@@ -353,9 +353,9 @@ describe('Import skills from Catalog Tests', () => {
         cy.visit('/administrator/projects/proj2/subjects/subj1');
         cy.get('[data-cy="importFromCatalogBtn"]').click();
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'Very Great Skill 1' }, { colIndex: 1,  value: 'ID: proj1' }],
-            [{ colIndex: 0,  value: 'Very Great Skill 2' }, { colIndex: 1,  value: 'ID: proj1' }],
-            [{ colIndex: 0,  value: 'Very Great Skill 3' }, { colIndex: 1,  value: 'ID: proj1' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 1' }, { colIndex: 1,  value: 'This is project 1' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 2' }, { colIndex: 1,  value: 'This is project 1' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 3' }, { colIndex: 1,  value: 'This is project 1' }],
         ], 5);
         cy.get('[data-cy="alreadyExistWarning_proj1-skill1"]').should('not.exist');
         cy.get('[data-cy="alreadyExistWarning_proj1-skill2"]').should('not.exist');
@@ -476,8 +476,8 @@ describe('Import skills from Catalog Tests', () => {
 
         cy.get('[data-cy="importFromCatalogBtn"]').click();
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'Very Great Skill 1' }, { colIndex: 1,  value: 'ID: proj2' }],
-            [{ colIndex: 0,  value: 'Very Great Skill 2' }, { colIndex: 1,  value: 'ID: proj2' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 1' }, { colIndex: 1,  value: 'This is project 2' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 2' }, { colIndex: 1,  value: 'This is project 2' }],
         ], 5);
 
         cy.get('[data-cy="importBtn"]').should('be.disabled');
