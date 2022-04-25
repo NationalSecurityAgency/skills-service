@@ -52,10 +52,15 @@ describe('Performed Skills Table Tests', () => {
 
     it('sort by date', () => {
         cy.createSkills(1);
-        cy.report(7);
+        cy.report(12);
         cy.visit('/administrator/projects/proj1/subjects/subj1/users/user1@skills.org/skillEvents');
         // default sort by date desc
         cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-23' }],
+            [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-22' }],
+            [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-21' }],
+            [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-20' }],
+            [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-19' }],
             [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-18' }],
             [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-17' }],
             [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-16' }],
@@ -63,7 +68,7 @@ describe('Performed Skills Table Tests', () => {
             [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-14' }],
             [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-13' }],
             [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-12' }],
-        ], 5);
+        ], 10);
 
         cy.get(`${tableSelector}`).contains('Performed On').click();
         cy.validateTable(tableSelector, [
@@ -74,7 +79,12 @@ describe('Performed Skills Table Tests', () => {
             [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-16' }],
             [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-17' }],
             [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-18' }],
-        ], 5);
+            [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-19' }],
+            [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-20' }],
+            [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-21' }],
+            [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-22' }],
+            [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-23' }],
+        ], 10);
     });
 
     it('validate relative time', () => {
@@ -122,31 +132,41 @@ describe('Performed Skills Table Tests', () => {
 
 
     it('sort by skill id', () => {
-        cy.createSkills(7);
-        cy.report(7, false);
+        cy.createSkills(12);
+        cy.report(12, false);
         cy.visit('/administrator/projects/proj1/subjects/subj1/users/user1@skills.org/skillEvents');
 
         cy.get(`${tableSelector}`).contains('Skill Id').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'skill1' }],
+            [{ colIndex: 0,  value: 'skill10' }],
+            [{ colIndex: 0,  value: 'skill11' }],
+            [{ colIndex: 0,  value: 'skill12' }],
             [{ colIndex: 0,  value: 'skill2' }],
             [{ colIndex: 0,  value: 'skill3' }],
             [{ colIndex: 0,  value: 'skill4' }],
             [{ colIndex: 0,  value: 'skill5' }],
             [{ colIndex: 0,  value: 'skill6' }],
             [{ colIndex: 0,  value: 'skill7' }],
-        ], 5);
+            [{ colIndex: 0,  value: 'skill8' }],
+            [{ colIndex: 0,  value: 'skill9' }],
+        ], 10);
 
         cy.get(`${tableSelector}`).contains('Skill Id').click();
         cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'skill9' }],
+            [{ colIndex: 0,  value: 'skill8' }],
             [{ colIndex: 0,  value: 'skill7' }],
             [{ colIndex: 0,  value: 'skill6' }],
             [{ colIndex: 0,  value: 'skill5' }],
             [{ colIndex: 0,  value: 'skill4' }],
             [{ colIndex: 0,  value: 'skill3' }],
             [{ colIndex: 0,  value: 'skill2' }],
+            [{ colIndex: 0,  value: 'skill12' }],
+            [{ colIndex: 0,  value: 'skill11' }],
+            [{ colIndex: 0,  value: 'skill10' }],
             [{ colIndex: 0,  value: 'skill1' }],
-        ], 5);
+        ], 10);
     });
 
     it('filter by skill id', () => {
