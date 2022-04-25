@@ -23,6 +23,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
+import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -131,6 +132,7 @@ class SecurityConfiguration {
         CorsConfiguration configuration = new CorsConfiguration()
         configuration.setAllowedOriginPatterns(['*'])
         configuration.setAllowCredentials(true)
+        configuration.setAllowedMethods([HttpMethod.GET.name(), HttpMethod.HEAD.name(), HttpMethod.POST.name(), HttpMethod.DELETE.name()])
         configuration.applyPermitDefaultValues()
         source.registerCorsConfiguration('/**', configuration)
         return source
