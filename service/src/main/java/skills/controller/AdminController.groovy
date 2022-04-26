@@ -15,7 +15,7 @@
  */
 package skills.controller
 
-import callStack.profiler.Profile
+
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
@@ -35,6 +35,7 @@ import skills.controller.result.model.*
 import skills.services.*
 import skills.services.admin.*
 import skills.services.events.BulkSkillEventResult
+import skills.services.events.pointsAndAchievements.InsufficientPointsValidator
 import skills.services.inception.InceptionProjectService
 import skills.services.settings.SettingsService
 import skills.services.settings.listeners.ValidationRes
@@ -117,6 +118,9 @@ class AdminController {
 
     @Autowired
     SkillCatalogService skillCatalogService
+
+    @Autowired
+    InsufficientPointsValidator insufficientPointsValidator
 
     @Value('#{"${skills.config.ui.maxSkillsInBulkImport}"}')
     int maxBulkImport
@@ -1060,34 +1064,41 @@ class AdminController {
     }
 
     @RequestMapping(value="/projects/{projectId}/skills/catalog/exists/{skillId}", method = [RequestMethod.POST], produces = "application/json")
-    ExportableToCatalogValidationResult doesSkillAlreadyExistInCatalog(@PathVariable("projectId") String projectId, @PathVariable("skillId") String skillId) {
+    ExportableToCatalogSkillValidationResult doesSkillAlreadyExistInCatalog(@PathVariable("projectId") String projectId, @PathVariable("skillId") String skillId) {
         SkillsValidator.isNotBlank(projectId, "projectId")
         SkillsValidator.isNotBlank(skillId, "skillId")
         boolean isInCatalog = skillCatalogService.isAvailableInCatalog(projectId, skillId)
         if (isInCatalog) {
-            return new ExportableToCatalogValidationResult(skillAlreadyInCatalog: true)
+            return new ExportableToCatalogSkillValidationResult(skillAlreadyInCatalog: true)
         }
 
         boolean isSkillIdInCatalog = skillCatalogService.doesSkillIdAlreadyExistInCatalog(skillId)
         if (isSkillIdInCatalog) {
-            return new ExportableToCatalogValidationResult(skillIdConflictsWithExistingCatalogSkill: true)
+            return new ExportableToCatalogSkillValidationResult(skillIdConflictsWithExistingCatalogSkill: true)
         }
 
         boolean isSkillNameInCatalog = skillCatalogService.doesSkillNameAlreadyExistInCatalog(projectId, skillId)
         if (isSkillNameInCatalog) {
-            return new ExportableToCatalogValidationResult(skillNameConflictsWithExistingCatalogSkill: true)
+            return new ExportableToCatalogSkillValidationResult(skillNameConflictsWithExistingCatalogSkill: true)
         }
 
-        return new ExportableToCatalogValidationResult()
+        return new ExportableToCatalogSkillValidationResult()
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/catalog/exportable", method = [RequestMethod.POST], produces = "application/json")
-    Map<String, ExportableToCatalogValidationResult> areSkillsExportable(@PathVariable("projectId") String projectId, @RequestBody List<String> skillIds) {
+    ExportableToCatalogValidationResult areSkillsExportable(@PathVariable("projectId") String projectId, @RequestBody List<String> skillIds) {
         SkillsValidator.isNotBlank(projectId, "projectId")
         SkillsValidator.isNotEmpty(skillIds, "skillIds")
 
-        List<ExportableToCatalogValidationResult> validationResults = skillCatalogService.canSkillIdsBeExported(projectId, skillIds)
-        return validationResults.collectEntries() { [it.skillId, it]}
+        // assume that all skills are under the same subject
+        boolean hasSufficientSubjectPoints = insufficientPointsValidator.hasSufficientSubjectPointByProjectAndSkillId(projectId, skillIds[0])
+        if (!hasSufficientSubjectPoints) {
+            return new ExportableToCatalogValidationResult(hasSufficientSubjectPoints: hasSufficientSubjectPoints)
+        }
+
+        List<ExportableToCatalogSkillValidationResult> validationResults = skillCatalogService.canSkillIdsBeExported(projectId, skillIds)
+        Map<String, ExportableToCatalogSkillValidationResult> skillsValidationRes = validationResults.collectEntries() { [it.skillId, it]}
+        return new ExportableToCatalogValidationResult(skillsValidationRes: skillsValidationRes)
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/catalog/exist", method = [RequestMethod.POST], produces = "application/json")

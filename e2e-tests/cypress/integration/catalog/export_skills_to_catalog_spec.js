@@ -871,5 +871,20 @@ describe('Export Skills to the Catalog Tests', () => {
 
       cy.get('[data-cy=skillActionsNumSelected]').contains('5');
     });
+
+    it('do not allow to export if the project has insufficient points', () => {
+        cy.createSkill(1, 1, 1, { pointIncrement: 10 });
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.get('[data-cy="skillSelect-skill1"]').click({force: true});
+        cy.get('[data-cy="skillActionsBtn"] button').click();
+        cy.get('[data-cy="skillExportToCatalogBtn"]').click();
+        cy.contains('Export of skills is not allowed until the subject has sufficient points')
+
+        cy.get('[data-cy="exportToCatalogButton"]').should('not.exist')
+        cy.get('[data-cy="closeButton"]').should('not.exist')
+        cy.get('[data-cy="okButton"]').should('be.enabled')
+    });
+
 });
 

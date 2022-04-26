@@ -946,7 +946,6 @@ class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
         skillsService.deleteSkill([projectId: project2.projectId, subjectId: p2subj1.subjectId, skillId: project1.s1_skills[0].skillId])
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         def usr_1_proj2_summary_t1 = skillsService.getSkillSummary(users[0], project2.projectId)
-//        println JsonOutput.prettyPrint(JsonOutput.toJson(usr_1_proj2_summary_t1))
         then:
         usr_1_proj2_summary_t0.totalPoints == 400
         usr_1_proj2_summary_t0.points == 200
@@ -959,4 +958,39 @@ class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
         skillDefRepo.findByProjectIdAndSkillId(project2.projectId, p2subj1.subjectId).totalPoints == 200
     }
 
+    def "do not allow export if the project doesn't have sufficient points"() {
+        def project1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 50)
+
+        skillsService.createProject(project1)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSkill(skill)
+
+        when:
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+        then:
+        SkillsClientException skillsClientException = thrown(SkillsClientException)
+        skillsClientException.message.contains("Insufficient project points, export to catalog is disallowed")
+    }
+
+    def "do not allow export if the subject doesn't have sufficient points"() {
+        def project1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1subj2 = createSubject(1, 2)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 50)
+        def skill2 = createSkill(1, 2, 1, 0, 1, 0, 200)
+
+        skillsService.createProject(project1)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p1subj2)
+        skillsService.createSkill(skill)
+        skillsService.createSkill(skill2)
+
+        when:
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+        then:
+        SkillsClientException skillsClientException = thrown(SkillsClientException)
+        skillsClientException.message.contains("Insufficient Subject points, export to catalog is disallowed")
+    }
 }
