@@ -49,6 +49,10 @@ limitations under the License.
           <span class="text-primary"><i
             class="fas fa-cubes skills-color-subjects"></i> {{ data.label }}</span>
         </template>
+        <template #head(importedProjectCount)="data">
+          <span class="text-primary"><i
+            class="fas fa-tasks skills-color-projects"></i> {{ data.label }}</span>
+        </template>
         <template #head(exportedOn)="data">
           <span class="text-primary"><i
             class="fas fa-clock skills-color-projects"></i> {{ data.label }}</span>
@@ -150,6 +154,11 @@ limitations under the License.
                 label: 'Subject',
                 sortable: true,
                 sortKey: 'subjectName',
+              }, {
+                key: 'importedProjectCount',
+                label: '# of Projects Imported',
+                sortable: true,
+                sortKey: 'importedProjectCount',
               }, {
                 key: 'exportedOn',
                 label: 'Exported On',

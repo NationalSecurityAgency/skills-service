@@ -1137,6 +1137,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
         def skill2 = createSkill(1, 1, 2, 0, 1, 0, 100)
         def skill3 = createSkill(1, 1, 3, 0, 1, 0, 100)
+        def exportedButNotImported = createSkill(1, 1, 4, 0, 1, 0, 10)
 
         def skill4 = createSkill(2, 2, 4, 0, 1, 0, 100)
         def skill5 = createSkill(2, 2, 5, 0, 1, 0, 100)
@@ -1152,6 +1153,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         skillsService.createSkill(skill)
         skillsService.createSkill(skill2)
         skillsService.createSkill(skill3)
+        skillsService.createSkill(exportedButNotImported)
         skillsService.createSkill(skill4)
         skillsService.createSkill(skill5)
         skillsService.createSkill(skill6)
@@ -1159,6 +1161,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
         skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
         skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, exportedButNotImported.skillId)  // this is does not get imported
 
         when:
         skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
@@ -1169,6 +1172,8 @@ class CatalogSkillTests extends CatalogIntSpec {
         def skillsForProject = skillsService.getSkillsForProject(project2.projectId)
         def skillsForProjectWithoutImported = skillsService.getSkillsForProject(project2.projectId, "", true)
 
+        def exportedSkills = skillsService.getExportedSkills(project1.projectId, 6, 1, "subjectName", true)
+
         then:
         skills.findAll { it.readOnly == true && it.copiedFromProjectId == project1.projectId && it.copiedFromProjectName == project1.name }.size() == 3
         //copiedFromProjectId, copiedFromProjectName, and readOnly are not populated by this endpoint
@@ -1176,6 +1181,14 @@ class CatalogSkillTests extends CatalogIntSpec {
 
         skills.collect { it.skillId } == ["skill4subj2", "skill5subj2", "skill6subj2", "skill99subj2", "skill1", "skill2", "skill3"]
         skillsForProjectWithoutImported.collect { it.skillId } == ["skill4subj2", "skill5subj2", "skill6subj2", "skill99subj2"]
+
+        exportedSkills
+        exportedSkills.totalCount == 4
+        exportedSkills.count == 4
+        exportedSkills.data.find { it.skillId == 'skill1' }.importedProjectCount == 1
+        exportedSkills.data.find { it.skillId == 'skill2' }.importedProjectCount == 1
+        exportedSkills.data.find { it.skillId == 'skill3' }.importedProjectCount == 1
+        exportedSkills.data.find { it.skillId == 'skill4' }.importedProjectCount == 0
     }
 
     def "get exported to catalog stats for project"() {
