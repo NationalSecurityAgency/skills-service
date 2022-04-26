@@ -55,13 +55,13 @@ export default {
     if (shareToProjectIds) {
       data = { shareToProjectIds };
     }
-    return axios.post(`/admin/projects/${projectId}/subjects/${subjectId}/share`, data).then((res) => res.data);
+    return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}/share`, data).then((res) => res.data);
   },
   unshareSubject(projectId, subjectId, unshareFromProjectIds) {
     let data = {};
     if (unshareFromProjectIds) {
       data = { unshareFromProjectIds };
     }
-    return axios.post(`/admin/projects/${projectId}/subjects/${subjectId}/unshare`, data).then((res) => res.data);
+    return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}/unshare`, data).then((res) => res.data);
   },
 };
