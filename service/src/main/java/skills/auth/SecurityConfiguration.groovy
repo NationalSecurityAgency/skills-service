@@ -132,7 +132,7 @@ class SecurityConfiguration {
         CorsConfiguration configuration = new CorsConfiguration()
         configuration.setAllowedOriginPatterns(['*'])
         configuration.setAllowCredentials(true)
-        configuration.setAllowedMethods([HttpMethod.GET.name(), HttpMethod.HEAD.name(), HttpMethod.POST.name(), HttpMethod.DELETE.name()])
+        configuration.setAllowedMethods([HttpMethod.GET.name(), HttpMethod.HEAD.name(), HttpMethod.POST.name(), HttpMethod.PUT.name(), HttpMethod.DELETE.name()])
         configuration.applyPermitDefaultValues()
         source.registerCorsConfiguration('/**', configuration)
         return source
