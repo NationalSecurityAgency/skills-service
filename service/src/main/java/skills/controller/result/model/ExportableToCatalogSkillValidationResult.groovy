@@ -15,7 +15,11 @@
  */
 package skills.controller.result.model
 
-class ExportableToCatalogValidationResult {
-    Boolean hasSufficientSubjectPoints = true
-    Map<String, ExportableToCatalogSkillValidationResult> skillsValidationRes
+class ExportableToCatalogSkillValidationResult {
+    String skillId
+    String projectId
+    boolean skillAlreadyInCatalog
+    boolean skillIdConflictsWithExistingCatalogSkill
+    boolean skillNameConflictsWithExistingCatalogSkill
+    boolean hasDependencies
 }

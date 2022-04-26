@@ -90,7 +90,10 @@ class SkillCatalogService {
     SkillCatalogFinalizationService skillCatalogFinalizationService\
 
     @Autowired
-    InsufficientPointsForFinalizationValidator insufficientPointsValidator
+    InsufficientPointsForFinalizationValidator insufficientPointsForFinalizationValidator
+
+    @Autowired
+    InsufficientPointsValidator insufficientPointsValidator
 
     @Autowired
     ProjDefRepo projDefRepo
@@ -116,8 +119,8 @@ class SkillCatalogService {
     }
 
     @Transactional(readOnly = true)
-    List<ExportableToCatalogValidationResult> canSkillIdsBeExported(String projectId, List<String> skillIds) {
-        List<ExportableToCatalogValidationResult> validationResults = []
+    List<ExportableToCatalogSkillValidationResult> canSkillIdsBeExported(String projectId, List<String> skillIds) {
+        List<ExportableToCatalogSkillValidationResult> validationResults = []
         skillIds?.each { String skillId ->
             boolean idConflict = doesSkillIdAlreadyExistInCatalog(skillId)
             SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillId(projectId, skillId)
@@ -125,7 +128,7 @@ class SkillCatalogService {
             boolean nameConflict = doesSkillNameAlreadyExistInCatalog(skillDef.name)
             boolean hasDependencies = countDependencies(skillDef.projectId, skillDef.skillId) > 0
             boolean alreadyInCatalog = isAvailableInCatalog(skillDef)
-            validationResults.add(new ExportableToCatalogValidationResult(
+            validationResults.add(new ExportableToCatalogSkillValidationResult(
                     skillId: skillId,
                     projectId: skillDef.projectId,
                     skillAlreadyInCatalog: alreadyInCatalog,
@@ -189,7 +192,9 @@ class SkillCatalogService {
             throw new SkillException("Skill id [${skillId}] already exists in the catalog. Duplicated skill ids are not allowed", projectId, skillId, ErrorCode.SkillAlreadyInCatalog)
         }
 
-        projDefAccessor.getProjDef(projectId)
+        ProjDef projDef = projDefAccessor.getProjDef(projectId)
+        insufficientPointsValidator.validateProjectPoints(projDef.totalPoints, projDef.projectId, null, ", export to catalog is disallowed")
+
         SkillDefWithExtra skillDef = skillDefWithExtraRepo.findByProjectIdAndSkillId(projectId, skillId)
         if (!skillDef) {
             throw new SkillException("Skill [${skillId}] doesn't exist.", projectId, skillId, ErrorCode.SkillNotFound)
@@ -200,6 +205,8 @@ class SkillCatalogService {
         if (doesSkillNameAlreadyExistInCatalog(skillDef.name)) {
             throw new SkillException("Skill name [${skillDef.name}] already exists in the catalog. Duplicate skill names are not allowed", projectId, skillId, ErrorCode.SkillAlreadyInCatalog)
         }
+        SkillDef mySubject = relationshipService.getMySubjectParent(skillDef.id)
+        insufficientPointsValidator.validateSubjectPoints(mySubject.totalPoints, mySubject.projectId,  mySubject.skillId, null, ", export to catalog is disallowed")
 
         Long dependencies = countDependencies(skillDef.projectId, skillDef.skillId)
         if (dependencies > 0) {
@@ -320,11 +327,11 @@ class SkillCatalogService {
 
     void requestFinalizationOfImportedSkills(String projectId) {
         ProjectTotalPoints projectTotalPoints = projDefRepo.getProjectTotalPointsIncPendingFinalization(projectId)
-        insufficientPointsValidator.validateProjectPoints(projectTotalPoints.totalIncPendingFinalized, projectTotalPoints.projectId)
+        insufficientPointsForFinalizationValidator.validateProjectPoints(projectTotalPoints.totalIncPendingFinalized, projectTotalPoints.projectId)
 
         List<SubjectTotalPoints> subjectTotalPoints = skillRelDefRepo.getSubjectTotalPointsIncPendingFinalization(projectId)
         subjectTotalPoints?.each {
-            insufficientPointsValidator.validateSubjectPoints(it.totalIncPendingFinalized, projectId, it.subjectId)
+            insufficientPointsForFinalizationValidator.validateSubjectPoints(it.totalIncPendingFinalized, projectId, it.subjectId)
         }
 
         skillCatalogFinalizationService.requestFinalizationOfImportedSkills(projectId)

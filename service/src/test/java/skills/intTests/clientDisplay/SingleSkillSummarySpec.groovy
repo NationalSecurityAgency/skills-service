@@ -15,7 +15,6 @@
  */
 package skills.intTests.clientDisplay
 
-
 import groovy.time.TimeCategory
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
@@ -126,7 +125,7 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)
         List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
-        proj1_skills.each{
+        proj1_skills.each {
             it.pointIncrement = 40
         }
 
@@ -173,6 +172,7 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
     }
 
     DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+
     def "achieved date"() {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)
@@ -295,7 +295,7 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         skillsService.rejectSkillApprovals(proj.projectId, approvals.data.collect { it.id }, 'last rejection')
 
 
-        def approvalsHistoryUser1 = skillsService.getApprovalsHistory(proj.projectId, 10, 1, 'requestedOn', false, '',  '', '')
+        def approvalsHistoryUser1 = skillsService.getApprovalsHistory(proj.projectId, 10, 1, 'requestedOn', false, '', '', '')
 
         def summary1 = skillsService.getSingleSkillSummary(users[0], proj.projectId, skills.get(0).skillId)
 
@@ -341,7 +341,7 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         approvals = skillsService.getApprovals(proj.projectId, 7, 1, 'requestedOn', false)
 
 
-        def approvalsHistoryUser1 = skillsService.getApprovalsHistory(proj.projectId, 10, 1, 'requestedOn', false, '',  '', '')
+        def approvalsHistoryUser1 = skillsService.getApprovalsHistory(proj.projectId, 10, 1, 'requestedOn', false, '', '', '')
         def summary1 = skillsService.getSingleSkillSummary(users[0], proj.projectId, skills.get(0).skillId)
 
         then:
@@ -387,7 +387,7 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         skillsService.approve(proj.projectId, approvals.data.collect { it.id })
 
 
-        def approvalsHistoryUser1 = skillsService.getApprovalsHistory(proj.projectId, 10, 1, 'requestedOn', false, '',  '', '')
+        def approvalsHistoryUser1 = skillsService.getApprovalsHistory(proj.projectId, 10, 1, 'requestedOn', false, '', '', '')
 
         def summary1 = skillsService.getSingleSkillSummary(users[0], proj.projectId, skills.get(0).skillId)
 
@@ -422,10 +422,10 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         }
 
         when:
-        skillsService.removeRejectionFromView(proj1.projectId,  approvalsBefore.find { getSkillId(it.skillRefId) == skills.get(3).skillId }.id)
-        List<SkillApproval> approvalsAfterFirstRemoval= skillApprovalRepo.findAll()
+        skillsService.removeRejectionFromView(proj1.projectId, approvalsBefore.find { getSkillId(it.skillRefId) == skills.get(3).skillId }.id)
+        List<SkillApproval> approvalsAfterFirstRemoval = skillApprovalRepo.findAll()
 
-        skillsService.removeRejectionFromView(proj1.projectId,  approvalsBefore.find { getSkillId(it.skillRefId) == skills.get(2).skillId }.id)
+        skillsService.removeRejectionFromView(proj1.projectId, approvalsBefore.find { getSkillId(it.skillRefId) == skills.get(2).skillId }.id)
         List<SkillApproval> approvalsAfter = skillApprovalRepo.findAll()
 
         then:
@@ -467,7 +467,7 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         }
 
         when:
-        skillsService.removeRejectionFromView(proj1.projectId,  approvalsBefore.find { getSkillId(it.skillRefId) == skills.get(2).skillId }.id)
+        skillsService.removeRejectionFromView(proj1.projectId, approvalsBefore.find { getSkillId(it.skillRefId) == skills.get(2).skillId }.id)
 
         then:
         SkillsClientException e = thrown(SkillsClientException)
@@ -493,7 +493,7 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         skillsService.addSkill([projectId: proj1.projectId, skillId: skills.get(3).skillId])
         List<SkillApproval> approvalsBefore = skillApprovalRepo.findAll()
         when:
-        skillsService.removeRejectionFromView(proj1.projectId,  approvalsBefore.find { getSkillId(it.skillRefId) == skills.get(2).skillId }.id)
+        skillsService.removeRejectionFromView(proj1.projectId, approvalsBefore.find { getSkillId(it.skillRefId) == skills.get(2).skillId }.id)
 
         then:
         SkillsClientException e = thrown(SkillsClientException)
@@ -524,7 +524,7 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         skillsService.addSkill([projectId: proj1.projectId, skillId: skills.get(3).skillId])
         List<SkillApproval> approvalsBefore = skillApprovalRepo.findAll()
         when:
-        skillsService.removeRejectionFromView(proj2.projectId,  approvalsBefore.find { getSkillId(it.skillRefId) == skills.get(2).skillId }.id)
+        skillsService.removeRejectionFromView(proj2.projectId, approvalsBefore.find { getSkillId(it.skillRefId) == skills.get(2).skillId }.id)
 
         then:
         SkillsClientException e = thrown(SkillsClientException)
@@ -564,26 +564,26 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], dates[2], "approve 3")
         approvals = skillsService.getApprovals(proj.projectId, 7, 1, 'requestedOn', false)
         skillsService.rejectSkillApprovals(proj.projectId, approvals.data.collect { it.id }, 'sorry but rejected 1')
-        def approvalsHistoryUser1 = skillsService.getApprovalsHistory(proj.projectId, 10, 1, 'requestedOn', false, '',  '', '')
+        def approvalsHistoryUser1 = skillsService.getApprovalsHistory(proj.projectId, 10, 1, 'requestedOn', false, '', '', '')
         def summary1 = skillsService.getSingleSkillSummary(users[0], proj.projectId, skills.get(0).skillId)
 
         Integer rejectionId = approvals.data[0].id
 
         // (2) user accepts the rejection - should disappear from the summary
-        skillsService.removeRejectionFromView(proj.projectId,  rejectionId, users[0])
-        def approvalsHistoryUser2 = skillsService.getApprovalsHistory(proj.projectId, 10, 1, 'requestedOn', false, '',  '', '')
+        skillsService.removeRejectionFromView(proj.projectId, rejectionId, users[0])
+        def approvalsHistoryUser2 = skillsService.getApprovalsHistory(proj.projectId, 10, 1, 'requestedOn', false, '', '', '')
         def summary2 = skillsService.getSingleSkillSummary(users[0], proj.projectId, skills.get(0).skillId)
 
 
         // (3) user submits another request
         skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], dates[1], "approve 4")
-        def approvalsHistoryUser3 = skillsService.getApprovalsHistory(proj.projectId, 10, 1, 'requestedOn', false, '',  '', '')
+        def approvalsHistoryUser3 = skillsService.getApprovalsHistory(proj.projectId, 10, 1, 'requestedOn', false, '', '', '')
         def summary3 = skillsService.getSingleSkillSummary(users[0], proj.projectId, skills.get(0).skillId)
 
         // (4) reject request
         approvals = skillsService.getApprovals(proj.projectId, 7, 1, 'requestedOn', false)
         skillsService.rejectSkillApprovals(proj.projectId, approvals.data.collect { it.id }, 'sorry but rejected 2')
-        def approvalsHistoryUser4 = skillsService.getApprovalsHistory(proj.projectId, 10, 1, 'requestedOn', false, '',  '', '')
+        def approvalsHistoryUser4 = skillsService.getApprovalsHistory(proj.projectId, 10, 1, 'requestedOn', false, '', '', '')
         def summary4 = skillsService.getSingleSkillSummary(users[0], proj.projectId, skills.get(0).skillId)
 
 
@@ -642,7 +642,7 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
 
         def proj3 = SkillsFactory.createProject(3)
         def proj3_subj = SkillsFactory.createSubject(3, 3)
-        List<Map> proj3_skills = SkillsFactory.createSkills(2, 3, 3)
+        List<Map> proj3_skills = SkillsFactory.createSkills(2, 3, 3, 100)
 
         skillsService.createProject(proj3)
         skillsService.createSubject(proj3_subj)
@@ -684,10 +684,9 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         !local2.copiedFromProjectName
     }
 
-    private String getSkillId(Integer skillRefId){
+    private String getSkillId(Integer skillRefId) {
         skillDefRepo.findById(skillRefId).get().skillId
     }
-
 
 
 }
