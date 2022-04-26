@@ -87,7 +87,7 @@ class RuleSetManagementSpecs extends DefaultIntSpec {
 
         def project2 = createProject(2)
         def p2subj1 = createSubject(2, 1)
-        def p2Subj1Skills = [ createSkill(2, 1, 40)]
+        def p2Subj1Skills = [ createSkill(2, 1, 40, 0, 1, 100, 100)]
         skillsService.createProjectAndSubjectAndSkills(project2, p2subj1, p2Subj1Skills)
         skillsService.exportSkillToCatalog(project2.projectId, p2Subj1Skills[0].skillId)
         skillsService.importSkillFromCatalog(project1.projectId, p1subj1.subjectId, project2.projectId, p2Subj1Skills[0].skillId)
