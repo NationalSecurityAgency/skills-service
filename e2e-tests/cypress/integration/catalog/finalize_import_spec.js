@@ -443,11 +443,14 @@ describe('Finalize Imported Skills Tests', () => {
   it('cannot finalize imported skills if point thresholds not met', () => {
     cy.createProject(2);
     cy.createSubject(2, 1);
-    cy.createSkill(2, 1, 1, {pointIncrement: 10});
-    cy.createSkill(2, 1, 2, {pointIncrement: 10});
+    cy.createSkill(2, 1, 1, {pointIncrement: 100});
+    cy.createSkill(2, 1, 2, {pointIncrement: 100});
 
     cy.exportSkillToCatalog(2, 1, 1);
     cy.exportSkillToCatalog(2, 1, 2);
+
+      cy.createSkill(2, 1, 1, {pointIncrement: 10});
+      cy.createSkill(2, 1, 2, {pointIncrement: 10});
 
     cy.bulkImportSkillFromCatalog(1, 1, [
       { projNum: 2, skillNum: 1 },
