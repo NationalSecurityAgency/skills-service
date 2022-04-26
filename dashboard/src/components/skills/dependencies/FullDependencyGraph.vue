@@ -18,8 +18,8 @@ limitations under the License.
     <sub-page-header title="Skill Dependencies"/>
 
     <simple-card data-cy="fullDepsSkillsGraph">
-      <loading-container :is-loading="!isLoading">
-        <div v-if="!this.graph.nodes || this.graph.nodes.length === 0" class="mt-5">
+      <loading-container :is-loading="isLoading">
+        <div v-if="!hasGraphData" class="my-5">
             <no-content2 icon="fa fa-project-diagram" title="No Dependencies Yet..."
                          message="Here you can visualize skill's dependencies for the entire project. However, please navigate to a single skill to add dependencies."></no-content2>
         </div>
@@ -32,7 +32,7 @@ limitations under the License.
           </div>
         </div>
       </loading-container>
-      <div id="dependency-graph" style="height: 800px"></div>
+      <div v-if="showGraph" id="dependency-graph" style="height: 500px"></div>
     </simple-card>
 
     <share-skills-with-other-projects :project-id="this.$route.params.projectId" class="mt-4"/>
@@ -71,7 +71,8 @@ limitations under the License.
     },
     data() {
       return {
-        isLoading: false,
+        isLoading: true,
+        showGraph: true,
         graph: {},
         network: null,
         nodes: {},
@@ -123,11 +124,11 @@ limitations under the License.
         SkillsService.getDependentSkillsGraphForProject(this.$route.params.projectId)
           .then((response) => {
             this.graph = response;
-            this.isLoading = true;
+            this.isLoading = false;
             this.createGraph();
           })
           .finally(() => {
-            this.isLoading = true;
+            this.isLoading = false;
           });
       },
 
@@ -144,8 +145,12 @@ limitations under the License.
         }
 
         const data = this.buildData();
-        const container = document.getElementById('dependency-graph');
-        this.network = new Network(container, data, this.displayOptions);
+        if (this.hasGraphData) {
+          const container = document.getElementById('dependency-graph');
+          this.network = new Network(container, data, this.displayOptions);
+        } else {
+          this.showGraph = false;
+        }
       },
       buildData() {
         const sortedNodes = this.graph.nodes.sort((a, b) => a.id - b.id);
@@ -178,6 +183,11 @@ limitations under the License.
 
         const data = { nodes: this.nodes, edges: this.edges };
         return data;
+      },
+    },
+    computed: {
+      hasGraphData() {
+        return this.graph && this.graph.nodes && this.graph.nodes.length > 0;
       },
     },
   };
