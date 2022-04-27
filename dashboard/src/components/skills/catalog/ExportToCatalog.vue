@@ -33,8 +33,8 @@ limitations under the License.
         <b-overlay v-if="!allSkillsExportedAlready && !state.exported" :show="state.exporting" rounded="sm" opacity="0.5"
                    spinner-variant="info" spinner-type="grow" spinner-small>
           <p v-if="!allSkillsAreDups">
-            This will export <span v-if="isSingleId">Skill with id
-            <b class="text-primary">[{{ firstSkillId }}]</b></span><span v-else><b-badge variant="info">{{ skillsFiltered.length }}</b-badge> Skills</span> to the <b-badge>SkillTree Catalog <i class="fas fa-book" aria-hidden="true" /></b-badge>.
+            This will export <span v-if="isSingleId">
+            <b class="text-primary">[{{ firstSkillName }}]</b> Skill</span><span v-else><b-badge variant="info">{{ skillsFiltered.length }}</b-badge> Skills</span> to the <b-badge>SkillTree Catalog <i class="fas fa-book" aria-hidden="true" /></b-badge>.
             Other project administrators will then be able to import a <b class="text-primary">read-only</b> version of this skill.
           </p>
           <p v-if="numAlreadyExported > 0">
@@ -45,7 +45,7 @@ limitations under the License.
             Cannot export <b-badge variant="primary">{{ notExportableSkills.length }}</b-badge> skill(s):
             <ul>
               <li v-for="dupSkill in notExportableSkillsToShow" :key="dupSkill.skillId" :data-cy="`dupSkill-${dupSkill.skillId}`">
-                {{ dupSkill.name }} <span class="text-secondary font-italic">(ID: {{ dupSkill.skillId}} )</span>
+                {{ dupSkill.name }}
                 <b-badge variant="warning" v-if="dupSkill.skillNameConflictsWithExistingCatalogSkill" class="ml-1">Name Conflict</b-badge>
                 <b-badge variant="warning" v-if="dupSkill.skillIdConflictsWithExistingCatalogSkill" class="ml-1">ID Conflict</b-badge>
                 <b-badge variant="warning" v-if="dupSkill.hasDependencies" class="ml-1"
@@ -75,7 +75,7 @@ limitations under the License.
 
         <p v-if="state.exported">
           <i class="fas fa-check-circle text-success"></i>
-          <span v-if="isSingleId"> Skill with id <b class="text-primary">{{ firstSkillId }}</b> was</span>
+          <span v-if="isSingleId"> Skill [<b class="text-primary">{{ firstSkillName }}</b>] was</span>
           <span v-else><b-badge variant="info" class="ml-2">{{ skillsFiltered.length }}</b-badge>
             Skills were</span>  <span class="text-success font-weight-bold">successfully</span> exported to the catalog!
         </p>
@@ -132,6 +132,7 @@ limitations under the License.
         allSkillsExportedAlready: false,
         isSingleId: false,
         firstSkillId: null,
+        firstSkillName: null,
         allSkillsAreDups: false,
         state: {
           exporting: false,
@@ -202,6 +203,7 @@ limitations under the License.
               this.allSkillsExportedAlready = this.skillsFiltered.length === 0 && this.notExportableSkills.length === 0;
               this.isSingleId = this.skillsFiltered.length === 1;
               this.firstSkillId = this.skillsFiltered && this.skillsFiltered.length > 0 ? this.skillsFiltered[0].skillId : null;
+              this.firstSkillName = this.skillsFiltered && this.skillsFiltered.length > 0 ? this.skillsFiltered[0].name : null;
             }
           }).finally(() => {
             this.loadingData = false;

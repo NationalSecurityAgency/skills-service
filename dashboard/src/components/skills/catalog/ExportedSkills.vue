@@ -65,7 +65,7 @@ limitations under the License.
                 </router-link>
               </div>
               <div class="sub-info">
-                <span>ID:</span> {{ data.item.skillId }}
+                <show-more :text="`ID: ${data.item.skillId}`" :limit="55" />
               </div>
             </div>
             <div class="col-auto ml-auto mr-0">
@@ -95,7 +95,7 @@ limitations under the License.
     </b-card>
 
     <removal-validation v-if="removalValidation.show" v-model="removalValidation.show" @do-remove="doRemoveExportedSkill">
-      <exported-skill-deletion-warning :skill-id="removalValidation.skillToRemove.skillId" />
+      <exported-skill-deletion-warning :skill-id="removalValidation.skillToRemove.skillId" :skill-name="removalValidation.skillToRemove.skillName" />
     </removal-validation>
   </div>
 </template>
@@ -107,10 +107,12 @@ limitations under the License.
   import RemovalValidation from '@/components/utils/modal/RemovalValidation';
   import ExportedSkillDeletionWarning
     from '@/components/skills/catalog/ExportedSkillDeletionWarning';
+  import ShowMore from '@/components/skills/selfReport/ShowMore';
 
   export default {
     name: 'ExportedSkills',
     components: {
+      ShowMore,
       ExportedSkillDeletionWarning,
       RemovalValidation,
       SkillsBTable,

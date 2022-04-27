@@ -29,7 +29,7 @@ limitations under the License.
           <span class="font-italic">Project ID: </span><span class="text-primary font-weight-bold" data-cy="projId">{{ skill.projectId }}</span>
         </div>
         <div>
-          <span class="font-italic">Skill ID: </span><span class="text-primary font-weight-bold" data-cy="skillId">{{ skill.skillId }}</span>
+          <span class="font-italic">Skill ID: </span><span class="text-primary font-weight-bold" data-cy="skillId"><show-more :limit="50" :text="skill.skillId" /></span>
         </div>
         <div>
           <span class="font-italic">Points: </span><span class="text-primary font-weight-bold" data-cy="totalPts">{{ skill.totalPoints}}</span><span> ({{ skill.pointIncrement }} Increment x {{ skill.numPerformToCompletion }} Occurrences)</span>
@@ -53,11 +53,12 @@ limitations under the License.
 </template>
 
 <script>
-  import MarkdownText from '../../utils/MarkdownText';
+  import MarkdownText from '@/components/utils/MarkdownText';
+  import ShowMore from '@/components/skills/selfReport/ShowMore';
 
   export default {
     name: 'SkillToImportInfo',
-    components: { MarkdownText },
+    components: { MarkdownText, ShowMore },
     props: {
       skill: Object,
     },
