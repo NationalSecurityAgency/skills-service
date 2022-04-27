@@ -105,7 +105,7 @@ limitations under the License.
                   :data-cy="`skillSelect-${data.item.skillId}`"
                 >
                     <router-link :data-cy="`manageSkillLink_${data.item.skillId}`" tag="a" :to="{ name:'SkillOverview',
-                                    params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
+                                    params: { projectId: data.item.projectId, subjectId: subjectId, skillId: data.item.skillId }}"
                                :aria-label="`Manage skill ${data.item.name}  via link`">
                     <div class="h5 d-inline-block"><span v-if="data.item.nameHtml" v-html="data.item.nameHtml"></span><span v-else>{{ data.item.name }}</span></div>
                   </router-link>
@@ -117,7 +117,7 @@ limitations under the License.
                 </b-form-checkbox>
                 <div class="d-inline-block" v-if="data.item.isCatalogImportedSkills">
                   <router-link :data-cy="`manageSkillLink_${data.item.skillId}`" tag="a" :to="{ name:'SkillOverview',
-                                      params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
+                                      params: { projectId: data.item.projectId, subjectId: subjectId, skillId: data.item.skillId }}"
                                :aria-label="`Manage skill ${data.item.name}  via link`">
                     <div class="h5 d-inline-block"><span v-if="data.item.nameHtml" v-html="data.item.nameHtml"></span><span v-else>{{ data.item.name }}</span></div>
                   </router-link>
@@ -149,7 +149,7 @@ limitations under the License.
             <div class="col-auto ml-auto mr-0 mt-2">
               <router-link v-if="data.item.isSkillType"
                            :data-cy="`manageSkillBtn_${data.item.skillId}`" :to="{ name:'SkillOverview',
-                                  params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
+                                  params: { projectId: data.item.projectId, subjectId: subjectId, skillId: data.item.skillId }}"
                            :aria-label="`Manage skill ${data.item.name}`"
                            class="btn btn-outline-primary btn-sm">
                 <span v-if="data.item.isCatalogImportedSkills">

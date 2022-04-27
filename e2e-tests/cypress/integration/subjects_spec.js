@@ -937,4 +937,27 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="btn_Subjects"]').click();
         cy.get('[data-cy="rootHelpUrlSetting"]').contains('https://veryDifferentUrl.com')
     });
+
+    it('edit subject id when viewing subject skills should not break breadcrumb bar', () => {
+      cy.createSubject(1, 1)
+      cy.createSkill(1, 1, 1)
+      cy.createSkill(1, 1, 2)
+      cy.createSkill(1, 1, 3)
+      cy.intercept('GET', '/admin/projects/proj1/subjects/subj11111111').as('getNewId');
+      cy.intercept('GET', '/admin/projects/proj1/subjects/subj111111111/skills/skill3 ').as('loadSkill');
+
+      cy.visit('/administrator/projects/proj1/subjects/subj1');
+      cy.get('[data-cy=breadcrumb-subj1]').should('exist');
+      cy.get('[data-cy=btn_edit-subject]').click();
+      cy.contains('Editing Existing Subject').should('be.visible');
+      cy.get('[data-cy=idInputEnableControl] a').click();
+      cy.get('[data-cy=idInputValue]').type("11111111");
+      cy.get('[data-cy=saveSubjectButton]').click();
+      cy.wait('@getNewId');
+      cy.get('[data-cy=manageSkillLink_skill3]').click();
+      cy.wait('@loadSkill');
+      cy.get('[data-cy=breadcrumb-subj1]').should('not.exist');
+      cy.get('[data-cy=breadcrumb-subj111111111]').should('exist');
+
+    });
 });
