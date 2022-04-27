@@ -65,6 +65,44 @@ describe('Skills Exported to Catalog Tests', () => {
         ], 5);
     });
 
+    it('delete skill with url encoded id', () => {
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSubject(2, 2);
+        const skillId = 'tm_eafeafeafeafeSkill%2Ddlajleajljelajelkajlajle';
+        cy.createSkill(2, 1, 1, {skillId});
+        cy.createSkill(2, 2, 2);
+        const exportUrl = `/admin/projects/proj2/skills/${encodeURIComponent(skillId)}/export`;
+        cy.request('POST', exportUrl);
+        cy.wait(1001)
+        cy.exportSkillToCatalog(2, 2, 2);
+
+        cy.visit('/administrator/projects/proj2/skills-catalog');
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Very Great Skill 2 Subj2' }, { colIndex: 1,  value: 'Subject 2' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 1' }, { colIndex: 1,  value: 'Subject 1' }],
+        ], 5);
+
+        cy.get(`[data-cy="deleteSkillButton_${skillId}"]`).click();
+        cy.get('[data-cy="removalSafetyCheckMsg"]').contains(`This will PERMANENTLY remove skill [${skillId}] from the catalog. This skill is currently imported by 0 projects.`)
+        cy.get('[data-cy="removeButton"]').should('be.disabled');
+        cy.get('[data-cy="currentValidationText"]').type('Delete Me1');
+        cy.get('[data-cy="currentValidationText"]').should('have.value', 'Delete Me1');
+        cy.get('[data-cy="removeButton"]').should('be.disabled');
+        cy.get('[data-cy="currentValidationText"]').type('{backspace}');
+        cy.get('[data-cy="removeButton"]').should('be.enabled');
+        cy.get('[data-cy="removeButton"]').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Very Great Skill 2 Subj2' }, { colIndex: 1,  value: 'Subject 2' }],
+        ], 5);
+
+        // refresh and validate
+        cy.visit('/administrator/projects/proj2/skills-catalog');
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Very Great Skill 2 Subj2' }, { colIndex: 1,  value: 'Subject 2' }],
+        ], 5);
+    });
+
     it('Delete warning informs user how many projects imported this skill', () => {
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
