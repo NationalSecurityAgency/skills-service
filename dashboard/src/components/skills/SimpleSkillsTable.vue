@@ -30,6 +30,10 @@ limitations under the License.
         </router-link>
       </template>
 
+      <template #cell(skillId)="data">
+        <show-more :text="data.value" :limit="40" />
+      </template>
+
       <template #cell(totalPoints)="data">
         {{ data.value | number }}
       </template>
@@ -38,11 +42,12 @@ limitations under the License.
 </template>
 
 <script>
+  import ShowMore from '@/components/skills/selfReport/ShowMore';
   import SkillsBTable from '../utils/table/SkillsBTable';
 
   export default {
     name: 'SimpleSkillsTable',
-    components: { SkillsBTable },
+    components: { ShowMore, SkillsBTable },
     props: {
       skills: {
         type: Array,

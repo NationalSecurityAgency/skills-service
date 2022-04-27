@@ -779,7 +779,7 @@ describe('Accessibility Tests', () => {
 
     // Delete from Catalog modal
     cy.get('[data-cy="deleteSkillButton_skill2"]').click()
-    cy.contains('This will PERMANENTLY remove skill [skill2]')
+    cy.contains('This will PERMANENTLY remove [Very Great Skill 2] Skill')
     cy.customLighthouse();
     cy.customA11y();
   });

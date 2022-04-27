@@ -450,4 +450,58 @@ describe('Import From Catalog Table Tests', () => {
         ], 5);
     });
 
+    it('long skill ids must be truncated', () => {
+        const longId = 'eafeafeafeafeSkill%2DdlajleajljelajelkajlajleeafeafeafeafeSkill%2DdlajleajljelajelkajlajleeafeafeafeafeSkill%2Ddlajleajljelajelkajlajle'
+        cy.intercept('GET', '/admin/projects/proj3/skills/catalog*', (req) => {
+            req.reply({
+                body: {
+                    'data': [{
+                        'skillId': longId,
+                        'projectId': 'proj1',
+                        'name': 'eafeafeafeafe',
+                        'subjectId': 'subj1',
+                        'subjectName': 'Subject 1',
+                        'version': 0,
+                        'displayOrder': 5,
+                        'created': '2022-04-26T17:36:23.870+00:00',
+                        'totalPoints': 50,
+                        'pointIncrement': 10,
+                        'pointIncrementInterval': 480,
+                        'numMaxOccurrencesIncrementInterval': 1,
+                        'numPerformToCompletion': 5,
+                        'type': 'Skill',
+                        'updated': '2022-04-26T17:36:41.573+00:00',
+                        'numUsers': 0,
+                        'selfReportingType': null,
+                        'numSkillsInGroup': null,
+                        'numSelfReportSkills': null,
+                        'numSkillsRequired': -1,
+                        'enabled': false,
+                        'groupId': null,
+                        'groupName': null,
+                        'readOnly': false,
+                        'copiedFromProjectId': null,
+                        'copiedFromProjectName': null,
+                        'sharedToCatalog': true,
+                        'containerType': null,
+                        'description': null,
+                        'helpUrl': null,
+                        'projectName': 'This is project 1',
+                        'exportedOn': '2022-04-26T17:36:58.053+00:00'
+                    }],
+                    'count': 1,
+                    'totalCount': 1
+                },
+            });
+        }).as('getCatalogSkills');
+
+        cy.visit('/administrator/projects/proj3/subjects/subj1');
+        cy.get('[data-cy="importFromCatalogBtn"]').click();
+        cy.wait('@getCatalogSkills')
+        cy.get(`[data-cy="expandDetailsBtn_proj1_${longId}"`).click()
+        cy.contains('eafeafeafeafeSkill%2Ddlajleajljelajelkajlajleeafea... >> more')
+    });
+
+
+
 })

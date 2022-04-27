@@ -38,9 +38,9 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.get('[data-cy="skillActionsBtn"] button').click();
         cy.get('[data-cy="skillExportToCatalogBtn"]').click();
 
-        cy.contains('This will export Skill with id [skill1] to the SkillTree Catalog');
+        cy.contains('This will export [Very Great Skill 1] Skill to the SkillTree Catalog');
         cy.get('[data-cy="exportToCatalogButton"]').click();
-        cy.contains('Skill with id skill1 was successfully exported to the catalog!')
+        cy.contains('Skill [Very Great Skill 1] was successfully exported to the catalog!')
         cy.get('[data-cy="exportToCatalogButton"]').should('not.exist')
         cy.get('[data-cy="closeButton"]').should('not.exist')
         cy.get('[data-cy="okButton"]').click()
@@ -709,7 +709,7 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.get('[data-cy="skillSelect-skill4"]').click({force: true});
         cy.get('[data-cy="skillActionsBtn"] button').click();
         cy.get('[data-cy="skillExportToCatalogBtn"]').click();
-        cy.contains('This will export Skill with id [skill4]')
+        cy.contains('This will export [Very Great Skill 4] Skill')
         cy.contains('Cannot export 2 skill(s)')
         cy.get('[data-cy="dupSkill-skill2"]').contains('Something Else')
         cy.get('[data-cy="dupSkill-skill2"]').contains('ID Conflict')
