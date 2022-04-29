@@ -69,9 +69,11 @@ limitations under the License.
           </b-form-checkbox>
 
         </div>
-        <div class="small text-muted">ID: {{ data.item.skillId }}</div>
         <div class="mt-2" style="font-size: 0.9rem;"><span class="text-muted">Note:</span>
-          <show-more :text="data.item.requestMsg" v-if="data.item.requestMsg && data.item.requestMsg.length > 0"/>
+          <show-more v-if="data.item.requestMsg && data.item.requestMsg.length > 0"
+                     :text="data.item.requestMsg"
+                     :is-inline="true"
+                     class="ml-1" />
           <span v-else class="text-muted"> Not supplied</span>
         </div>
 
