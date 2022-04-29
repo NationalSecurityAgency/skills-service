@@ -68,8 +68,16 @@ limitations under the License.
                   <div class="h5 d-inline-block">{{ data.item.skillName }}</div>
                 </router-link>
               </div>
-              <div class="sub-info">
-                <show-more :text="`ID: ${data.item.skillId}`" :limit="55" />
+              <div>
+                <b-button size="sm" variant="outline-info"
+                          class="mr-2 py-0 px-1 mt-1"
+                          @click="data.toggleDetails"
+                          :aria-label="`Expand details for projects that imported ${data.item.skillName}`"
+                          :data-cy="`expandDetailsBtn_${data.item.projectId}_${data.item.skillId}`">
+                  <i v-if="data.detailsShowing" class="fa fa-minus-square"/>
+                  <i v-else class="fa fa-plus-square"/>
+                  Imported Details
+                </b-button>
               </div>
             </div>
             <div class="col-auto ml-auto mr-0">
@@ -77,7 +85,7 @@ limitations under the License.
                 <b-button :id="`deleteSkillButton_${data.item.skillId}`"
                           @click="removeExported(data.item)" variant="outline-primary"
                           :data-cy="`deleteSkillButton_${data.item.skillId}`"
-                          :aria-label="'delete Skill '+data.item.name"
+                          :aria-label="'delete Skill '+data.item.skillName"
                           title="Delete Skill"
                           size="sm">
                   <i class="text-warning fas fa-trash" aria-hidden="true"/>
@@ -88,13 +96,18 @@ limitations under the License.
         </template>
         <template v-slot:cell(subjectName)="data">
           <div class="h5 d-inline-block">{{ data.item.subjectName }}</div>
-          <div class="sub-info">
-            <span>ID:</span> {{ data.item.subjectId }}
-          </div>
+        </template>
+        <template v-slot:cell(importedProjectCount)="data">
+          <div class="h5 d-inline-block">{{ data.item.importedProjectCount }}</div>
         </template>
         <template v-slot:cell(exportedOn)="data">
           <date-cell :value="data.value" />
         </template>
+
+        <template #row-details="row">
+          <imported-skill-info :skill="row.item"></imported-skill-info>
+        </template>
+
       </skills-b-table>
     </b-card>
 
@@ -111,7 +124,7 @@ limitations under the License.
   import RemovalValidation from '@/components/utils/modal/RemovalValidation';
   import ExportedSkillDeletionWarning
     from '@/components/skills/catalog/ExportedSkillDeletionWarning';
-  import ShowMore from '@/components/skills/selfReport/ShowMore';
+  import ImportedSkillInfo from './ImportedSkillInfo';
 
   export default {
     name: 'ExportedSkills',
@@ -121,6 +134,7 @@ limitations under the License.
       RemovalValidation,
       SkillsBTable,
       DateCell,
+      ImportedSkillInfo,
     },
     data() {
       return {
