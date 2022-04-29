@@ -568,6 +568,7 @@ describe('Skills Table Tests', () => {
     });
 
     it('long skill id row controls wrap to the right', () => {
+        cy.viewport(1500, 900);
         cy.log('creating new skill');
         cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/MaximumWidthPainBreakingControlLayoutForReal1Skill', {
             projectId: 'proj1',
@@ -580,14 +581,13 @@ describe('Skills Table Tests', () => {
         cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills').as('loadSkills');
 
         cy.log('visiting subj1 page');
-        cy.viewport(1400, 900);
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.wait('@loadSkills');
 
         //wait for loading
         cy.log('matchSnapshot');
         cy.matchSnapshotImageForElement('.skills-b-table tbody tr:first-of-type td:first-of-type', 'skillsTableFullsize')
-        cy.viewport(1200, 900);
+        cy.viewport(1000, 900);
         cy.wait(400);
         cy.matchSnapshotImageForElement('.skills-b-table tbody tr:first-of-type td:first-of-type', 'skillsTableSmaller')
     });

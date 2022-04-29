@@ -133,7 +133,7 @@ limitations under the License.
                 </div>
               </div>
 
-              <div class="text-muted ml-4" style="font-size: 0.9rem;"><show-more :limit="54" :containsHtml="idContainsHtml(data.item)" :text="getIdText(data.item)"/></div>
+              <div class="text-muted" style="font-size: 0.9rem;" data-cy="skillId"><show-more :limit="54" :containsHtml="idContainsHtml(data.item)" :text="getIdText(data.item)"/></div>
 
               <div class="mt-1">
                 <b-button size="sm" @click="data.toggleDetails" variant="outline-info" class="mr-2 py-0 px-1"
