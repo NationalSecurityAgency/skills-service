@@ -487,4 +487,30 @@ describe('Finalize Imported Skills Tests', () => {
     cy.get('[data-cy="doPerformFinalizeButton"]').should('be.enabled');
   });
 
+    it('Check the point system and warn users when finalizing skills catalog if imported points are outside of the exiting point scheme', () => {
+        cy.createSkill(1, 1, 1, {pointIncrement: 52});
+        cy.createSkill(1, 1, 2, {pointIncrement: 673});
+
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 6, {pointIncrement: 10});
+        cy.createSkill(2, 1, 7, {pointIncrement: 1000});
+        cy.createSkill(2, 1, 8, {pointIncrement: 1000});
+
+        cy.exportSkillToCatalog(2, 1, 6);
+        cy.exportSkillToCatalog(2, 1, 7);
+        cy.exportSkillToCatalog(2, 1, 8);
+
+        cy.bulkImportSkillFromCatalog(1, 1, [
+            { projNum: 2, skillNum: 6 },
+            { projNum: 2, skillNum: 7 },
+            { projNum: 2, skillNum: 8 },
+        ]);
+
+        cy.visit('/administrator/projects/proj1')
+        cy.get('[data-cy="finalizeBtn"]').click();
+        cy.contains('Your project\'s point value ranges from [104] to [1,346]. 3 skills you are importing fall outside of that point value.')
+    });
 });
+
+

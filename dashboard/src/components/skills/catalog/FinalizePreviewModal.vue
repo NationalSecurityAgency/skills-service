@@ -32,6 +32,14 @@ limitations under the License.
           <li>Project and subject <b>level</b> achievements are calculated for the users that have points for the imported skills.</li>
         </ul>
       </p>
+      <p v-if="finalizeInfo.skillsWithOutOfBoundsPoints && finalizeInfo.skillsWithOutOfBoundsPoints.length > 0" class="alert alert-danger">
+        <i class="fas fa-exclamation-triangle"></i> Your project's point value ranges from <span
+        class="text-primary font-weight-bold">[{{ finalizeInfo.projectSkillMinPoints | number }}]</span> to <span class="text-primary font-weight-bold">[{{ finalizeInfo.projectSkillMaxPoints | number }}]</span>.
+        <b-badge variant="info">{{ finalizeInfo.skillsWithOutOfBoundsPoints.length }}</b-badge>
+        skills you are importing fall outside of that point value. This could cause the imported
+        skills to have an outsized impact on the achievements within your Project. Please consider changing the <b>Point
+        Increment</b> of the imported skills.
+      </p>
       <p v-if="!canFinalize" data-cy="no-finalize">
         <i class="fas fa-exclamation-circle mr-1 text-warning" aria-hidden="true"/> {{ this.noFinalizeMsg }}
       </p>
