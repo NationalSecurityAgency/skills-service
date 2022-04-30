@@ -33,7 +33,7 @@ limitations under the License.
         </ul>
       </p>
       <p v-if="finalizeInfo.skillsWithOutOfBoundsPoints && finalizeInfo.skillsWithOutOfBoundsPoints.length > 0" class="alert alert-danger" data-cy="outOfRangeWarning">
-        <i class="fas fa-exclamation-triangle"></i> Your Project skill's point value ranges from <span
+        <i class="fas fa-exclamation-triangle"></i> Your Project skills point values range from <span
         class="text-primary font-weight-bold">[{{ finalizeInfo.projectSkillMinPoints | number }}]</span> to <span class="text-primary font-weight-bold">[{{ finalizeInfo.projectSkillMaxPoints | number }}]</span>.
         <b-badge variant="info">{{ finalizeInfo.skillsWithOutOfBoundsPoints.length | number }}</b-badge>
         skills you are importing fall outside of that point value. This could cause the imported
