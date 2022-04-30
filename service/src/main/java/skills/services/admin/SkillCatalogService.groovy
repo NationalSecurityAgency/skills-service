@@ -340,7 +340,23 @@ class SkillCatalogService {
     CatalogFinalizeInfoResult getFinalizeInfo(String projectId) {
         int numDisabled = skillDefRepo.countByProjectIdAndEnabledAndCopiedFromIsNotNull(projectId, Boolean.FALSE.toString())
         boolean isRunning = skillCatalogFinalizationService.getCurrentState(projectId) == SkillCatalogFinalizationService.FinalizeState.RUNNING
-        return new CatalogFinalizeInfoResult(projectId: projectId, numSkillsToFinalize: numDisabled, isRunning: isRunning)
+        SkillDefRepo.MinMaxPoints points = skillDefRepo.getSkillMinAndMaxTotalPoints(projectId)
+
+        List<SkillWithPointsResult> skillsWithOutOfBoundsPoints = []
+        if (points?.minPoints) {
+            List<SkillDefRepo.SkillWithPoints> skillWithPoints = skillDefRepo.getDisabledSkillsOutOfRange(projectId, points.getMinPoints(), points.getMaxPoints())
+            skillsWithOutOfBoundsPoints = skillWithPoints.collect {
+                new SkillWithPointsResult(skillId: it.skillId, skillName: it.skillName, totalPoints: it.totalPoints)
+            }
+        }
+        return new CatalogFinalizeInfoResult(
+                projectId: projectId,
+                numSkillsToFinalize: numDisabled,
+                isRunning: isRunning,
+                projectSkillMinPoints: points.getMinPoints(),
+                projectSkillMaxPoints: points.getMaxPoints(),
+                skillsWithOutOfBoundsPoints: skillsWithOutOfBoundsPoints
+        )
     }
 
     @Profile

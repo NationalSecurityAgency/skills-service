@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <b-modal id="finalizePreview" size="lg" title="Finalize Imported Skills" v-model="show"
+  <b-modal id="finalizePreview" size="xl" title="Finalize Imported Skills" v-model="show"
            :no-close-on-backdrop="true" :centered="true"
            header-bg-variant="info" header-text-variant="light" no-fade role="dialog" @hide="publishHidden"
            aria-label="'Finalize Imported Skills'">
@@ -31,6 +31,21 @@ limitations under the License.
           <li>Skill points are migrated to this project for <b>all of the users</b> who made progress in the imported skills <i>(in the original project)</i>.</li>
           <li>Project and subject <b>level</b> achievements are calculated for the users that have points for the imported skills.</li>
         </ul>
+      </p>
+      <p v-if="finalizeInfo.skillsWithOutOfBoundsPoints && finalizeInfo.skillsWithOutOfBoundsPoints.length > 0" class="alert alert-danger" data-cy="outOfRangeWarning">
+        <i class="fas fa-exclamation-triangle"></i> Your Project skills point values range from <span
+        class="text-primary font-weight-bold">[{{ finalizeInfo.projectSkillMinPoints | number }}]</span> to <span class="text-primary font-weight-bold">[{{ finalizeInfo.projectSkillMaxPoints | number }}]</span>.
+        <b-badge variant="info">{{ finalizeInfo.skillsWithOutOfBoundsPoints.length | number }}</b-badge>
+        skills you are importing fall outside of that point value. This could cause the imported
+        skills to have an outsized impact on the achievements within your Project. Please consider changing the <b>Point
+        Increment</b> of the imported skills. <b-button size="sm" variant="info"
+                                                        @click="showFinalizeWarningSkillsPointsTable = !showFinalizeWarningSkillsPointsTable"
+                                                        data-cy="viewSkillsWithPtsOutOfRange">View {{ finalizeInfo.skillsWithOutOfBoundsPoints.length | number }} skills</b-button> outside of the point value.
+
+        <finalize-warning-skills-points-table v-if="showFinalizeWarningSkillsPointsTable" class="mt-2"
+                                              :project-skill-min-points="finalizeInfo.projectSkillMinPoints"
+                                              :project-skill-max-points="finalizeInfo.projectSkillMaxPoints"
+                                              :skills-with-out-of-bounds-points="finalizeInfo.skillsWithOutOfBoundsPoints"/>
       </p>
       <p v-if="!canFinalize" data-cy="no-finalize">
         <i class="fas fa-exclamation-circle mr-1 text-warning" aria-hidden="true"/> {{ this.noFinalizeMsg }}
@@ -55,10 +70,11 @@ limitations under the License.
 <script>
   import CatalogService from '@/components/skills/catalog/CatalogService';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
+  import FinalizeWarningSkillsPointsTable from './FinalizeWarningSkillsPointsTable';
 
   export default {
     name: 'FinalizePreviewModal',
-    components: { SkillsSpinner },
+    components: { FinalizeWarningSkillsPointsTable, SkillsSpinner },
     props: {
       value: {
         type: Boolean,
@@ -73,6 +89,7 @@ limitations under the License.
         finalizeInfo: {},
         startedFinalize: false,
         noFinalizeMsg: '',
+        showFinalizeWarningSkillsPointsTable: false,
       };
     },
     watch: {

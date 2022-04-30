@@ -15,19 +15,8 @@
  */
 package skills.controller.result.model
 
-import groovy.transform.Canonical
-
-@Canonical
-class CatalogFinalizeInfoResult {
-
-    String projectId
-
-    Integer numSkillsToFinalize
-
-    Boolean isRunning
-
-    Integer projectSkillMinPoints
-    Integer projectSkillMaxPoints
-    List<SkillWithPointsResult> skillsWithOutOfBoundsPoints
-
+class SkillWithPointsResult {
+    String skillId
+    String skillName
+    Integer totalPoints
 }
