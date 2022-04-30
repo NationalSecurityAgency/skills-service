@@ -509,7 +509,7 @@ describe('Finalize Imported Skills Tests', () => {
 
         cy.visit('/administrator/projects/proj1')
         cy.get('[data-cy="finalizeBtn"]').click();
-        cy.get('[data-cy="outOfRangeWarning"]').contains('Your Project skill\'s point value ranges from [104] to [1,346]. 3 skills you are importing fall outside of that point value.')
+        cy.get('[data-cy="outOfRangeWarning"]').contains('Your Project skills point values range from [104] to [1,346]. 3 skills you are importing fall outside of that point value.')
         cy.get('[data-cy="viewSkillsWithPtsOutOfRange"]').click();
 
         const tableSelector = '[data-cy="skillsWithOutOfBoundsPoints"]';
