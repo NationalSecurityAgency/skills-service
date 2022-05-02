@@ -80,7 +80,6 @@ limitations under the License.
       },
     },
     mounted() {
-      this.getCustomIconCss();
       this.fetchData();
     },
     methods: {
@@ -89,33 +88,6 @@ limitations under the License.
         this.loadUserSkills();
         // this.loadPointsHistory();
         this.loadUserSkillsRanking();
-      },
-      getCustomIconCss() {
-        UserSkillsService.getCustomIconCss()
-          .then((css) => {
-            if (css) {
-              const head = document.getElementsByTagName('head')[0];
-
-              const customIconStyles = document.createElement('style');
-              customIconStyles.id = 'skill-custom-icons';
-              customIconStyles.type = 'text/css';
-              customIconStyles.innerText = css;
-              head.appendChild(customIconStyles);
-            }
-          });
-
-        UserSkillsService.getCustomGlobalIconCss()
-          .then((css) => {
-            if (css) {
-              const head = document.getElementsByTagName('head')[0];
-
-              const customGlobalIconStyles = document.createElement('style');
-              customGlobalIconStyles.id = 'skill-custom-global-icons';
-              customGlobalIconStyles.type = 'text/css';
-              customGlobalIconStyles.innerText = css;
-              head.appendChild(customGlobalIconStyles);
-            }
-          });
       },
     },
   };

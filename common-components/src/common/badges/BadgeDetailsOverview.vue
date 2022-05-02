@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-    <div v-if=badge class="row skills-badge">
+    <div v-if=badge class="row skills-badge" :data-cy="`badge_${badge.badgeId}`">
         <div class="col-lg-2">
             <div class="card mb-2 skills-badge-icon">
                 <div class="card-body">
