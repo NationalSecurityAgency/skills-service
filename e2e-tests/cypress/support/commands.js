@@ -817,3 +817,24 @@ Cypress.Commands.add("validateElementsOrder", (selector, containsValues) => {
         cy.get('@elements').eq(i).contains(value);
     }
 });
+
+Cypress.Commands.add('formRequest', (method, url, formData, onComplete) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open(method, url)
+    xhr.onload = function () { onComplete(xhr) }
+    xhr.onerror = function () { onComplete(xhr) }
+    xhr.send(formData)
+})
+
+Cypress.Commands.add("uploadCustomIcon", (fileName, url) => {
+    const method = 'POST';
+    const fileType = 'image/png';
+    cy.fixture(fileName, 'binary').then( (excelBin) => {
+        const blob = Cypress.Blob.binaryStringToBlob(excelBin, fileType)
+        const formData = new FormData();
+        formData.set('customIcon', blob, fileName);
+        cy.formRequest(method, url, formData, function (response) {
+            expect(response.status).to.eq(200);
+        });
+    });
+});
