@@ -21,4 +21,5 @@ interface ExportedSkillTiny {
     String getSubjectName();
     Date getExportedOn();
     String getSubjectId();
+    Integer getImportedProjectCount();
 }

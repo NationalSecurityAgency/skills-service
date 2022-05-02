@@ -314,28 +314,32 @@ describe('Skills Exported to Catalog Tests', () => {
         cy.get('[data-cy="nameCell_skill1"]').contains('Very Great Skill 1A')
     })
 
-    it('truncate long ids', () => {
-        const longId = 'eafeafeafeafeSkill%2DdlajleajljelajelkajlajleeafeafeafeafeSkill%2DdlajleajljelajelkajlajleeafeafeafeafeSkill%2Ddlajleajljelajelkajlajle'
-        cy.intercept('GET', '/admin/projects/proj1/skills/exported*', (req) => {
-            req.reply({
-                body: {
-                    'data': [{
-                        'skillId': longId,
-                        'skillName': 'Very Great Skill 5',
-                        'subjectName': 'Subject 1',
-                        'exportedOn': '2022-04-27T13:25:46.608+00:00',
-                        'subjectId': 'subj1'
-                    }],
-                    'count': 5,
-                    'totalCount': 5
-                },
-            });
-        }).as('getCatalogSkills');
+    it('View imported details for exported skills', () => {
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2);
+        cy.exportSkillToCatalog(1, 1, 1);
+        cy.exportSkillToCatalog(1, 1, 2);
 
-        cy.visit('/administrator/projects/proj1/skills-catalog');
-        cy.wait('@getCatalogSkills')
-        cy.contains('ID: eafeafeafeafeSkill%2Ddlajleajljelajelkajlajleeafeaf... >> more');
-    });
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.importSkillFromCatalog(2, 1, 1, 1)
+        cy.finalizeCatalogImport(2)
+
+        cy.visit('/administrator/projects/proj1');
+        cy.get('[data-cy="nav-Skill Catalog"]').click();
+        cy.validateTable('[data-cy="exportedSkillsTable"]', [
+            [{ colIndex: 0,  value: 'Very Great Skill 2' }, { colIndex: 2,  value: '0' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 1' }, { colIndex: 2,  value: '1' }],
+        ], 5);
+        cy.get('[data-cy="expandDetailsBtn_proj1_skill2"]').click();
+        cy.get('[data-cy="importSkillInfo-proj1_skill2"').contains('This skill has not been imported by any other projects yet...')
+
+        cy.get('[data-cy="expandDetailsBtn_proj1_skill1"]').click();
+        cy.get('[data-cy="importSkillInfo-proj1_skill1"] [data-cy="importedSkillsTable"]').should('exist')
+        cy.validateTable('[data-cy="importSkillInfo-proj1_skill1"] [data-cy="importedSkillsTable"]', [
+            [{ colIndex: 0,  value: 'This is project 2' }],
+        ],  5, true, null, false);
+    })
 });
 
 

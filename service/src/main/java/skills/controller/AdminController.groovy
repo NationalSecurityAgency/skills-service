@@ -1203,7 +1203,7 @@ class AdminController {
                                         @RequestParam int page,
                                         @RequestParam String orderBy,
                                         @RequestParam Boolean ascending) {
-        TotalCountAwareResult<ExportedSkillRes> res =skillCatalogService.getSkillsExportedByProject(projectId, createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending))
+        TotalCountAwareResult<ExportedSkillRes> res = skillCatalogService.getSkillsExportedByProject(projectId, createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending))
 
         TableResult tr = new TableResult()
         tr.count = res.results?.size()

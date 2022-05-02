@@ -502,7 +502,13 @@ class SkillCatalogService {
         List<SkillDef> copies = skillDefRepo.findSkillsCopiedFrom(es.skill.id)
         copies?.each {
             SkillDef subject = relationshipService.getParentSkill(it)
-            stats.users << new ExportedSkillUser(importingProjectId: it.projectId, importedOn: it.created, importedIntoSubjectId: subject.skillId)
+            stats.users << new ExportedSkillUser(
+                    importingProjectId: it.projectId,
+                    importingProjectName: subject.projDef.name,
+                    importedOn: it.created, importedIntoSubjectId:
+                    subject.skillId,
+                    importedIntoSubjectName: subject.name
+            )
         }
 
         return stats
@@ -608,6 +614,7 @@ class SkillCatalogService {
         esr.subjectName = InputSanitizer.unsanitizeName(exportedSkillTiny.subjectName)
         esr.exportedOn = exportedSkillTiny.exportedOn
         esr.subjectId = exportedSkillTiny.subjectId
+        esr.importedProjectCount = exportedSkillTiny.importedProjectCount
         return esr
     }
 
