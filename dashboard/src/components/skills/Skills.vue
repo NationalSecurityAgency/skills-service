@@ -46,7 +46,7 @@ limitations under the License.
     <loading-container v-bind:is-loading="loadingSubjectSkills">
       <b-card body-class="p-0">
         <skills-table ref="skillsTable"
-          :skills-prop="subjectSkills" :is-top-level="true" :project-id="this.$route.params.projectId" :subject-id="this.$route.params.subjectId"
+          :skills-prop="subjectSkills" :is-top-level="true" :project-id="this.$route.params.projectId" :subject-id="subjectId"
                       v-on:skills-change="skillsChanged"
                       @skill-removed="skillDeleted" />
       </b-card>
@@ -106,6 +106,14 @@ limitations under the License.
           show: false,
         },
       };
+    },
+    watch: {
+      '$route.params.subjectId': function foo(newVal) {
+        // if this is caused by the page being reloaded, mount() will take care of setting this to the proper value
+        // the reassignment here will make sure that any child components that depend on the subjectId properly update in the case
+        // that the subjectId is updated via router.replace caused by editing the id of the currently viewed Subject
+        this.subjectId = newVal;
+      },
     },
     methods: {
       ...mapActions([
