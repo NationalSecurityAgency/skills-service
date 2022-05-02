@@ -313,29 +313,6 @@ describe('Skills Exported to Catalog Tests', () => {
         cy.get('[data-cy="totalPointsCell_skill1"]').contains('100 pts x 7 repetitions')
         cy.get('[data-cy="nameCell_skill1"]').contains('Very Great Skill 1A')
     })
-
-    it('truncate long ids', () => {
-        const longId = 'eafeafeafeafeSkill%2DdlajleajljelajelkajlajleeafeafeafeafeSkill%2DdlajleajljelajelkajlajleeafeafeafeafeSkill%2Ddlajleajljelajelkajlajle'
-        cy.intercept('GET', '/admin/projects/proj1/skills/exported*', (req) => {
-            req.reply({
-                body: {
-                    'data': [{
-                        'skillId': longId,
-                        'skillName': 'Very Great Skill 5',
-                        'subjectName': 'Subject 1',
-                        'exportedOn': '2022-04-27T13:25:46.608+00:00',
-                        'subjectId': 'subj1'
-                    }],
-                    'count': 5,
-                    'totalCount': 5
-                },
-            });
-        }).as('getCatalogSkills');
-
-        cy.visit('/administrator/projects/proj1/skills-catalog');
-        cy.wait('@getCatalogSkills')
-        cy.contains('ID: eafeafeafeafeSkill%2Ddlajleajljelajelkajlajleeafeaf... >> more');
-    });
 });
 
 

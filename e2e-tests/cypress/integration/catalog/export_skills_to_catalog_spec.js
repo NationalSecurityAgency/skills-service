@@ -740,8 +740,8 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.get('[data-cy="breadcrumb-proj2"]').click();
         cy.get('[data-cy="nav-Skill Catalog"]').click();
         cy.validateTable('[data-cy="exportedSkillsTable"]', [
-            [{ colIndex: 0,  value: 'skill5' }],
-            [{ colIndex: 0,  value: 'skill4' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 5' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 4' }],
         ], 5);
     });
 
