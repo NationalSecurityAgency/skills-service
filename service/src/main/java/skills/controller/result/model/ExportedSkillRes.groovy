@@ -21,4 +21,5 @@ class ExportedSkillRes {
     String subjectName
     Date exportedOn
     String subjectId
+    Integer importedProjectCount
 }

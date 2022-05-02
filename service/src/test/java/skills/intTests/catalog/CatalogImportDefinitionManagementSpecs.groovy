@@ -404,6 +404,127 @@ class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
         p3res4.isRunning == false
     }
 
+    def "warn users when finalizing skills catalog if imported points are outside of the exiting point scheme"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def subj1 = SkillsFactory.createSubject(1, 1)
+        def skills = SkillsFactory.createSkills(5, 1, 1)
+        skills[0].pointIncrement = 76
+        skills[1].pointIncrement = 77
+        skills[2].pointIncrement = 150
+        skills[3].pointIncrement = 166
+        skills[4].pointIncrement = 167
+        skillsService.createProjectAndSubjectAndSkills(proj1, subj1, skills)
+        skillsService.exportSkillToCatalog(proj1.projectId, skills[0].skillId)
+        skillsService.exportSkillToCatalog(proj1.projectId, skills[1].skillId)
+        skillsService.exportSkillToCatalog(proj1.projectId, skills[2].skillId)
+        skillsService.exportSkillToCatalog(proj1.projectId, skills[3].skillId)
+        skillsService.exportSkillToCatalog(proj1.projectId, skills[4].skillId)
+
+        def proj2 = SkillsFactory.createProject(2)
+        def subj2 = SkillsFactory.createSubject(2, 2)
+        def skills2 = SkillsFactory.createSkills(3, 2, 2)
+        skills2[0].pointIncrement = 77
+        skills2[1].pointIncrement = 130
+        skills2[2].pointIncrement = 166
+        skillsService.createProjectAndSubjectAndSkills(proj2, subj2, skills2)
+
+        skillsService.importSkillFromCatalog(proj2.projectId, subj2.subjectId, proj1.projectId, skills[0].skillId)
+        skillsService.importSkillFromCatalog(proj2.projectId, subj2.subjectId, proj1.projectId, skills[1].skillId)
+        skillsService.importSkillFromCatalog(proj2.projectId, subj2.subjectId, proj1.projectId, skills[2].skillId)
+        skillsService.importSkillFromCatalog(proj2.projectId, subj2.subjectId, proj1.projectId, skills[3].skillId)
+        skillsService.importSkillFromCatalog(proj2.projectId, subj2.subjectId, proj1.projectId, skills[4].skillId)
+
+        when:
+        def proj2res1 = skillsService.getCatalogFinalizeInfo(proj2.projectId)
+        println JsonOutput.toJson(proj2res1)
+        then:
+        proj2res1.projectId == "TestProject2"
+        proj2res1.numSkillsToFinalize == 5
+        proj2res1.projectSkillMinPoints == 77
+        proj2res1.projectSkillMaxPoints == 166
+        proj2res1.skillsWithOutOfBoundsPoints.size() == 2
+        proj2res1.skillsWithOutOfBoundsPoints.find { it.skillName == skills[0].name }.totalPoints == skills[0].pointIncrement * skills[0].numPerformToCompletion
+        proj2res1.skillsWithOutOfBoundsPoints.find { it.skillName == skills[4].name }.totalPoints == skills[4].pointIncrement * skills[4].numPerformToCompletion
+    }
+
+    def "warn users when finalizing skills catalog if imported points are outside of the exiting point scheme - no local skills means no warning"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def subj1 = SkillsFactory.createSubject(1, 1)
+        def skills = SkillsFactory.createSkills(5, 1, 1)
+        skills[0].pointIncrement = 76
+        skills[1].pointIncrement = 77
+        skills[2].pointIncrement = 150
+        skills[3].pointIncrement = 166
+        skills[4].pointIncrement = 167
+        skillsService.createProjectAndSubjectAndSkills(proj1, subj1, skills)
+        skillsService.exportSkillToCatalog(proj1.projectId, skills[0].skillId)
+        skillsService.exportSkillToCatalog(proj1.projectId, skills[1].skillId)
+        skillsService.exportSkillToCatalog(proj1.projectId, skills[2].skillId)
+        skillsService.exportSkillToCatalog(proj1.projectId, skills[3].skillId)
+        skillsService.exportSkillToCatalog(proj1.projectId, skills[4].skillId)
+
+        def proj2 = SkillsFactory.createProject(2)
+        def subj2 = SkillsFactory.createSubject(2, 2)
+        skillsService.createProjectAndSubjectAndSkills(proj2, subj2, [])
+
+        skillsService.importSkillFromCatalog(proj2.projectId, subj2.subjectId, proj1.projectId, skills[0].skillId)
+        skillsService.importSkillFromCatalog(proj2.projectId, subj2.subjectId, proj1.projectId, skills[1].skillId)
+        skillsService.importSkillFromCatalog(proj2.projectId, subj2.subjectId, proj1.projectId, skills[2].skillId)
+        skillsService.importSkillFromCatalog(proj2.projectId, subj2.subjectId, proj1.projectId, skills[3].skillId)
+        skillsService.importSkillFromCatalog(proj2.projectId, subj2.subjectId, proj1.projectId, skills[4].skillId)
+
+        when:
+        def proj2res1 = skillsService.getCatalogFinalizeInfo(proj2.projectId)
+        println JsonOutput.toJson(proj2res1)
+        then:
+        proj2res1.projectId == "TestProject2"
+        proj2res1.numSkillsToFinalize == 5
+        !proj2res1.projectSkillMinPoints
+        !proj2res1.projectSkillMaxPoints
+        !proj2res1.skillsWithOutOfBoundsPoints
+    }
+
+    def "warn users when finalizing skills catalog if imported points are outside of the exiting point scheme - skills within range"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def subj1 = SkillsFactory.createSubject(1, 1)
+        def skills = SkillsFactory.createSkills(5, 1, 1)
+        skills[0].pointIncrement = 76
+        skills[1].pointIncrement = 77
+        skills[2].pointIncrement = 150
+        skills[3].pointIncrement = 166
+        skills[4].pointIncrement = 167
+        skillsService.createProjectAndSubjectAndSkills(proj1, subj1, skills)
+        skillsService.exportSkillToCatalog(proj1.projectId, skills[0].skillId)
+        skillsService.exportSkillToCatalog(proj1.projectId, skills[1].skillId)
+        skillsService.exportSkillToCatalog(proj1.projectId, skills[2].skillId)
+        skillsService.exportSkillToCatalog(proj1.projectId, skills[3].skillId)
+        skillsService.exportSkillToCatalog(proj1.projectId, skills[4].skillId)
+
+        def proj2 = SkillsFactory.createProject(2)
+        def subj2 = SkillsFactory.createSubject(2, 2)
+        def skills2 = SkillsFactory.createSkills(3, 2, 2)
+        skills2[0].pointIncrement = 76
+        skills2[1].pointIncrement = 130
+        skills2[2].pointIncrement = 167
+        skillsService.createProjectAndSubjectAndSkills(proj2, subj2, skills2)
+
+        skillsService.importSkillFromCatalog(proj2.projectId, subj2.subjectId, proj1.projectId, skills[0].skillId)
+        skillsService.importSkillFromCatalog(proj2.projectId, subj2.subjectId, proj1.projectId, skills[1].skillId)
+        skillsService.importSkillFromCatalog(proj2.projectId, subj2.subjectId, proj1.projectId, skills[2].skillId)
+        skillsService.importSkillFromCatalog(proj2.projectId, subj2.subjectId, proj1.projectId, skills[3].skillId)
+        skillsService.importSkillFromCatalog(proj2.projectId, subj2.subjectId, proj1.projectId, skills[4].skillId)
+
+        when:
+        def proj2res1 = skillsService.getCatalogFinalizeInfo(proj2.projectId)
+        println JsonOutput.toJson(proj2res1)
+        then:
+        proj2res1.projectId == "TestProject2"
+        proj2res1.numSkillsToFinalize == 5
+        proj2res1.projectSkillMinPoints == 76
+        proj2res1.projectSkillMaxPoints == 167
+        !proj2res1.skillsWithOutOfBoundsPoints
+    }
+
     def "cannot import while finalizing"() {
         def project1 = createProjWithCatalogSkills(1)
         def project2 = createProjWithCatalogSkills(2)
@@ -946,7 +1067,6 @@ class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
         skillsService.deleteSkill([projectId: project2.projectId, subjectId: p2subj1.subjectId, skillId: project1.s1_skills[0].skillId])
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         def usr_1_proj2_summary_t1 = skillsService.getSkillSummary(users[0], project2.projectId)
-//        println JsonOutput.prettyPrint(JsonOutput.toJson(usr_1_proj2_summary_t1))
         then:
         usr_1_proj2_summary_t0.totalPoints == 400
         usr_1_proj2_summary_t0.points == 200
@@ -959,4 +1079,39 @@ class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
         skillDefRepo.findByProjectIdAndSkillId(project2.projectId, p2subj1.subjectId).totalPoints == 200
     }
 
+    def "do not allow export if the project doesn't have sufficient points"() {
+        def project1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 50)
+
+        skillsService.createProject(project1)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSkill(skill)
+
+        when:
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+        then:
+        SkillsClientException skillsClientException = thrown(SkillsClientException)
+        skillsClientException.message.contains("Insufficient project points, export to catalog is disallowed")
+    }
+
+    def "do not allow export if the subject doesn't have sufficient points"() {
+        def project1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1subj2 = createSubject(1, 2)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 50)
+        def skill2 = createSkill(1, 2, 1, 0, 1, 0, 200)
+
+        skillsService.createProject(project1)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p1subj2)
+        skillsService.createSkill(skill)
+        skillsService.createSkill(skill2)
+
+        when:
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+        then:
+        SkillsClientException skillsClientException = thrown(SkillsClientException)
+        skillsClientException.message.contains("Insufficient Subject points, export to catalog is disallowed")
+    }
 }

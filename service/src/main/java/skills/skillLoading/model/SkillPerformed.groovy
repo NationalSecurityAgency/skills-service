@@ -13,21 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.controller.result.model
+package skills.skillLoading.model
 
 import groovy.transform.Canonical
 
 @Canonical
-class CatalogFinalizeInfoResult {
-
-    String projectId
-
-    Integer numSkillsToFinalize
-
-    Boolean isRunning
-
-    Integer projectSkillMinPoints
-    Integer projectSkillMaxPoints
-    List<SkillWithPointsResult> skillsWithOutOfBoundsPoints
-
+class SkillPerformed {
+    String skillName
+    String skillId
+    Date performedOn
+    boolean importedSkill
 }

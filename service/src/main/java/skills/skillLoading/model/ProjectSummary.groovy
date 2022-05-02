@@ -17,6 +17,7 @@ package skills.skillLoading.model
 
 import groovy.transform.Canonical
 import skills.storage.model.ProjectSummaryResult
+import skills.utils.InputSanitizer
 
 @Canonical
 class ProjectSummary {
@@ -33,7 +34,7 @@ class ProjectSummary {
     ProjectSummary fromProjectSummaryResult(ProjectSummaryResult projectSummaryResult) {
         this.projectRefId = projectSummaryResult.projectRefId
         this.projectId = projectSummaryResult.projectId
-        this.projectName = projectSummaryResult.projectName
+        this.projectName = InputSanitizer.unsanitizeName(projectSummaryResult.projectName)
         this.points = projectSummaryResult.points ?: 0
         this.totalPoints = projectSummaryResult.totalPoints ?: 0
         // if there are no points, then set totalUsers and rank to totalUsers+1, b/c they are last but not included in the results

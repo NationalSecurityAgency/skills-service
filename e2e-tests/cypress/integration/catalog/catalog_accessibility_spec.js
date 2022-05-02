@@ -82,7 +82,7 @@ describe('Catalog Accessibility Tests', () => {
         cy.get('[data-cy="skillActionsBtn"] button').click();
         cy.get('[data-cy="skillExportToCatalogBtn"]').click();
 
-        cy.contains('This will export Skill with id [skill1]');
+        cy.contains('This will export [Very Great Skill 1] Skill');
 
         cy.get('[data-cy="exportToCatalogButton"]').click();
         cy.get('[data-cy="okButton"]').click();
@@ -107,7 +107,7 @@ describe('Catalog Accessibility Tests', () => {
         cy.get('[data-cy="skillActionsBtn"] button').click();
         cy.get('[data-cy="skillExportToCatalogBtn"]').click();
 
-        cy.contains('This will export Skill with id [skill1]');
+        cy.contains('This will export [Very Great Skill 1] Skill');
         cy.get('[data-cy="closeButton"]').click();
         cy.get('[data-cy="skillSelect-skill1"]').should('be.checked')
         cy.get('[data-cy="skillActionsBtn"] button').should('be.enabled');
@@ -130,7 +130,7 @@ describe('Catalog Accessibility Tests', () => {
         cy.get('[data-cy="skillActionsBtn"] button').click();
         cy.get('[data-cy="skillExportToCatalogBtn"]').click();
 
-        cy.contains('This will export Skill with id [skill1]');
+        cy.contains('This will export [Very Great Skill 1] Skill');
 
         cy.get('[data-cy="exportToCatalogButton"]').click();
         cy.get('[class="modal-content"] [aria-label="Close"]').click();

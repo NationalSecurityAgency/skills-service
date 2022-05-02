@@ -147,6 +147,6 @@ class InputSanitizer {
             return input
         }
 
-        return PURE_AMP.matcher(input).replaceAll(" & ")
+        return AMP.matcher(input).replaceAll("&")
     }
 }

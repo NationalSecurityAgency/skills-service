@@ -726,6 +726,22 @@ class SkillsService {
         wsHelper.apiGet(url)
     }
 
+    def getSingleSkillSummaryForCurrentUser(String projId, String skillId, int version = -1) {
+        String url = "/projects/${projId}/skills/${skillId}/summary"
+        if (version >= 0) {
+            url += "&version=${version}"
+        }
+        wsHelper.apiGet(url)
+    }
+
+    def getSubjectSummaryForCurrentUser(String projId, String subjectId, int version = -1) {
+        String url = "/projects/${projId}/subjects/${subjectId}/summary"
+        if (version >= 0) {
+            url += "&version=${version}"
+        }
+        wsHelper.apiGet(url)
+    }
+
     def getCrossProjectSkillSummary(String userId, String projId, String otherProjectId, String skillId, int version = -1) {
         userId = getUserId(userId)
         String url = "/projects/${projId}/projects/${otherProjectId}/skills/${skillId}/summary?userId=${userId}"
@@ -799,9 +815,9 @@ class SkillsService {
         wsHelper.supervisorGet("/icons/customIcons")
     }
 
-    def getPerformedSkills(String userId, String project, String query = '') {
+    def getPerformedSkills(String userId, String project, String query = '', String orderBy = "performedOn") {
         userId = getUsername(userId)
-        return wsHelper.adminGet("${getProjectUrl(project)}/performedSkills/${userId}?query=${query}&limit=10&ascending=0&page=1&byColumn=0&orderBy=performedOn".toString())
+        return wsHelper.adminGet("${getProjectUrl(project)}/performedSkills/${userId}?query=${query}&limit=10&ascending=0&page=1&byColumn=0&orderBy=${orderBy}".toString())
     }
 
     def getUserInfoForProject(String projectId, String userId){

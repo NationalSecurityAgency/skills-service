@@ -153,7 +153,7 @@ class SkillsLoader {
             String myProjectId = summary.getMyProjectId();
             new AvailableProjectResult(
                     projectId: summary.getProjectId(),
-                    name: summary.getName(),
+                    name: InputSanitizer.unsanitizeName(summary.getName()),
                     totalPoints: summary.getTotalPoints(),
                     numSubjects: summary.getNumSubjects(),
                     numSkills: summary.getNumSkills(),
@@ -270,7 +270,7 @@ class SkillsLoader {
 
         OverallSkillSummary res = new OverallSkillSummary(
                 projectId: projDef.projectId,
-                projectName: projDef.name,
+                projectName: InputSanitizer.unsanitizeName(projDef.name),
                 skillsLevel: skillLevel,
                 totalLevels: levelInfo?.totalNumLevels ?: 0,
                 points: points,
@@ -350,7 +350,7 @@ class SkillsLoader {
     @Profile
     UserPointHistorySummary loadPointHistorySummary(String projectId, String userId, int showHistoryForNumDays, String skillId = null, Integer version = Integer.MAX_VALUE) {
         List<SkillHistoryPoints> historyPoints = pointsHistoryBuilder.buildHistory(projectId, userId, showHistoryForNumDays, skillId, version)
-        List<Achievement> achievements = loadLevelAchievements(userId, projectId, skillId, historyPoints, showHistoryForNumDays)
+        List<Achievement> achievements = historyPoints ? loadLevelAchievements(userId, projectId, skillId, historyPoints, showHistoryForNumDays) : []
 
         return new UserPointHistorySummary (
                 pointsHistory: historyPoints,
@@ -426,10 +426,13 @@ class SkillsLoader {
         SettingsResult helpUrlRootSetting = settingsService.getProjectSetting(crossProjectId ?: projectId, PROP_HELP_URL_ROOT)
         String copiedFromProjectName = skillDef.copiedFromProjectId ? projDefRepo.getProjectName(skillDef.copiedFromProjectId).getProjectName() : null
         return new SkillSummary(
-                projectId: skillDef.projectId, projectName: projDef.name,
-                skillId: skillDef.skillId, skill: skillDef.name,
+                projectId: skillDef.projectId,
+                projectName: InputSanitizer.unsanitizeName(projDef.name),
+                skillId: skillDef.skillId,
+                skill: InputSanitizer.unsanitizeName(skillDef.name),
                 points: points?.points ?: 0, todaysPoints: todayPoints,
-                pointIncrement: skillDef.pointIncrement, pointIncrementInterval: skillDef.pointIncrementInterval,
+                pointIncrement: skillDef.pointIncrement,
+                pointIncrementInterval: skillDef.pointIncrementInterval,
                 maxOccurrencesWithinIncrementInterval: skillDef.numMaxOccurrencesIncrementInterval,
                 totalPoints: skillDef.totalPoints,
                 description: new SkillDescription(
@@ -442,7 +445,7 @@ class SkillsLoader {
                 selfReporting: loadSelfReporting(userId, skillDef),
                 type: skillDef.type,
                 copiedFromProjectId: skillDef.copiedFromProjectId,
-                copiedFromProjectName: copiedFromProjectName,
+                copiedFromProjectName: InputSanitizer.unsanitizeName(copiedFromProjectName),
         )
     }
 
@@ -570,8 +573,8 @@ class SkillsLoader {
 
         List<SkillDependencyInfo.SkillRelationshipItem> deps = graphDBRes.collect {
             new SkillDependencyInfo.SkillRelationship(
-                    skill: new SkillDependencyInfo.SkillRelationshipItem(projectId: it.parentProjectId, projectName: it.parentProjectName, skillId: it.parentSkillId, skillName: it.parentName),
-                    dependsOn: new SkillDependencyInfo.SkillRelationshipItem(projectId: it.childProjectId, projectName: it.childProjectName, skillId: it.childSkillId, skillName: it.childName),
+                    skill: new SkillDependencyInfo.SkillRelationshipItem(projectId: it.parentProjectId, projectName: InputSanitizer.unsanitizeName(it.parentProjectName), skillId: it.parentSkillId, skillName: InputSanitizer.unsanitizeName(it.parentName)),
+                    dependsOn: new SkillDependencyInfo.SkillRelationshipItem(projectId: it.childProjectId, projectName: InputSanitizer.unsanitizeName(it.childProjectName), skillId: it.childSkillId, skillName: InputSanitizer.unsanitizeName(it.childName)),
                     achieved: it.achievementId != null,
                     crossProject: projectId != it.childProjectId
             )
@@ -637,7 +640,7 @@ class SkillsLoader {
         description = InputSanitizer.unsanitizeForMarkdown(description)
 
         return new SkillSubjectSummary(
-                subject: subjectDefinition.name,
+                subject: InputSanitizer.unsanitizeName(subjectDefinition.name),
                 subjectId: subjectDefinition.skillId,
                 description: description,
                 points: points,
@@ -715,7 +718,7 @@ class SkillsLoader {
         String helpUrl = getHelpUrl(helpUrlRootSetting, badgeDefinition.helpUrl)
 
         return new SkillBadgeSummary(
-                badge: badgeDefinition.name,
+                badge: InputSanitizer.unsanitizeName(badgeDefinition.name),
                 badgeId: badgeDefinition.skillId,
                 description: InputSanitizer.unsanitizeForMarkdown(badgeDefinition.description),
                 badgeAchieved: achievements?.size() > 0,
@@ -728,7 +731,7 @@ class SkillsLoader {
                 iconClass: badgeDefinition.iconClass,
                 helpUrl: helpUrl,
                 projectId: badgeDefinition.projectId,
-                projectName: projectName
+                projectName: InputSanitizer.unsanitizeName(projectName)
         )
     }
 
@@ -765,7 +768,7 @@ class SkillsLoader {
         List<GlobalBadgeLevelRes> requiredLevels = globalBadgesService.getGlobalBadgeLevels(badgeDefinition.skillId)
         List<ProjectLevelSummary> projectLevels = []
         for (GlobalBadgeLevelRes requiredLevel : requiredLevels) {
-            ProjectLevelSummary projectLevelSummary = new ProjectLevelSummary(projectId: requiredLevel.projectId, projectName: requiredLevel.projectName, requiredLevel: requiredLevel.level)
+            ProjectLevelSummary projectLevelSummary = new ProjectLevelSummary(projectId: requiredLevel.projectId, projectName: InputSanitizer.unsanitizeName(requiredLevel.projectName), requiredLevel: requiredLevel.level)
             projectLevels.add(projectLevelSummary)
             if (userProjectLevels.containsKey(requiredLevel.projectId)) {
                 Integer achievedProjectLevel = userProjectLevels.get(requiredLevel.projectId)
@@ -793,7 +796,7 @@ class SkillsLoader {
         }
 
         return new SkillGlobalBadgeSummary(
-                badge: badgeDefinition.name,
+                badge: InputSanitizer.unsanitizeName(badgeDefinition.name),
                 badgeId: badgeDefinition.skillId,
                 description: InputSanitizer.unsanitizeForMarkdown(badgeDefinition.description),
                 badgeAchieved: achievements?.size() > 0,
@@ -853,7 +856,7 @@ class SkillsLoader {
                     if (subject.size() == 1) {
                         SkillRelDef subj = subject.first()
                         subjectId = subj.parent.skillId
-                        subjectName = subj.parent.name
+                        subjectName = InputSanitizer.unsanitizeName(subj.parent.name)
                     } else {
                         log.error("Skill [${skillDef.id}] has multiple SkillRelDef parents of type RuleSetDefinition")
                     }
@@ -863,9 +866,9 @@ class SkillsLoader {
             if (skillDef.type == SkillDef.ContainerType.SkillsGroup && Boolean.valueOf(skillDef.enabled)) {
                 SkillsSummaryGroup skillsSummary = new SkillsSummaryGroup(
                         projectId: skillDef.projectId,
-                        projectName: projDef.name,
+                        projectName: InputSanitizer.unsanitizeName(projDef.name),
                         skillId: skillDef.skillId,
-                        skill: skillDef.name,
+                        skill: InputSanitizer.unsanitizeName(skillDef.name),
                         type: skillDef.type,
                         enabled: Boolean.valueOf(skillDef.enabled).toString(),
                         numSkillsRequired: skillDef.numSkillsRequired,
@@ -879,10 +882,14 @@ class SkillsLoader {
                 skillsRes << skillsSummary
             } else if (skillDef.type == SkillDef.ContainerType.Skill) {
                 skillsRes << new SkillSummary(
-                        projectId: skillDef.projectId, projectName: projDef.name,
-                        skillId: skillDef.skillId, skill: skillDef.name,
-                        points: points, todaysPoints: todayPoints,
-                        pointIncrement: skillDef.pointIncrement, pointIncrementInterval: skillDef.pointIncrementInterval,
+                        projectId: skillDef.projectId,
+                        projectName: InputSanitizer.unsanitizeName(projDef.name),
+                        skillId: skillDef.skillId,
+                        skill: InputSanitizer.unsanitizeName(skillDef.name),
+                        points: points,
+                        todaysPoints: todayPoints,
+                        pointIncrement: skillDef.pointIncrement,
+                        pointIncrementInterval: skillDef.pointIncrementInterval,
                         maxOccurrencesWithinIncrementInterval: skillDef.numMaxOccurrencesIncrementInterval,
                         totalPoints: skillDef.totalPoints,
                         dependencyInfo: skillDefAndUserPoints.dependencyInfo,
@@ -891,7 +898,7 @@ class SkillsLoader {
                         subjectId: subjectId,
                         type: skillDef.type,
                         copiedFromProjectId: skillDef.copiedFromProjectId,
-                        copiedFromProjectName: skillDefAndUserPoints.copiedFromProjectName,
+                        copiedFromProjectName: InputSanitizer.unsanitizeName(skillDefAndUserPoints.copiedFromProjectName),
                 )
             }
         }

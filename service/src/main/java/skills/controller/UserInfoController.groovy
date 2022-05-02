@@ -88,7 +88,7 @@ class UserInfoController {
     String defaultLandingPage
 
     @RequestMapping(value = "/userInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    @CrossOrigin(allowCredentials = 'true')
+    @CrossOrigin(allowCredentials = 'true', originPatterns = ['*'])
     ResponseEntity<UserInfoRes> getUserInfo() {
         def res = 'null';
         UserInfo currentUser = loadCurrentUser()

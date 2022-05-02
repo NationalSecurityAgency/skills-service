@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.metrics.builders.ProjectMetricsBuilder
 import skills.storage.repos.UserAchievedLevelRepo
+import skills.utils.InputSanitizer
 
 @Component
 @Slf4j
@@ -50,7 +51,7 @@ class SkillUsageNavigatorMetricsBuilder implements ProjectMetricsBuilder {
             Integer numProgress = it.getNumUsersInProgress() ?: 0
             new SkillUsageNavigatorItem(
                     skillId: it.getSkillId(),
-                    skillName: it.getSkillName(),
+                    skillName: InputSanitizer.unsanitizeName(it.getSkillName()),
                     subjectId: it.getSubjectId(),
                     numUserAchieved: numAchieved,
                     numUsersInProgress: numProgress - numAchieved,

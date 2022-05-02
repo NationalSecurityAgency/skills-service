@@ -22,6 +22,7 @@ import skills.metrics.builders.ProjectMetricsBuilder
 import skills.storage.model.SkillDef
 import skills.storage.repos.LevelDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
+import skills.utils.InputSanitizer
 
 @Component
 @Slf4j
@@ -63,7 +64,7 @@ class NumUsersPerSubjectPerLevelMetricsBuilder implements ProjectMetricsBuilder 
 
             adjustCountsToOnlyCountLastLevel(numUsersPerLevels)
 
-            return new SubjectLevelCounts(subject: it.subject, numUsersPerLevels: numUsersPerLevels)
+            return new SubjectLevelCounts(subject: InputSanitizer.unsanitizeName(it.subject), numUsersPerLevels: numUsersPerLevels)
         }
     }
 

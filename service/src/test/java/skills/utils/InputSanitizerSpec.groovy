@@ -18,6 +18,7 @@ package skills.utils
 
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
+import spock.lang.IgnoreRest
 import spock.lang.Specification
 
 class InputSanitizerSpec extends Specification{
@@ -151,6 +152,25 @@ class InputSanitizerSpec extends Specification{
 
         then:
         unsani == "foooo &lt;script type=\"javascript\"&gt;alert('danger');&lt;/script&gt; barrr"
+    }
+
+    def "sanitize ampersands"() {
+
+        when:
+        def one = InputSanitizer.unsanitizeName(InputSanitizer.sanitize("&&&&"))
+        def two = InputSanitizer.unsanitizeName(InputSanitizer.sanitize("&amp;&lt;"))
+        def three = InputSanitizer.unsanitizeName(InputSanitizer.sanitize("A&B"))
+        def four = InputSanitizer.unsanitizeName(InputSanitizer.sanitize("A & B"))
+        def five = InputSanitizer.unsanitizeName(InputSanitizer.sanitize("A& B"))
+        def six = InputSanitizer.unsanitizeName(InputSanitizer.sanitize("A &B"))
+
+        then:
+        one == "&&&&"
+        two == "&&lt;"
+        three == "A&B"
+        four == "A & B"
+        five == "A& B"
+        six == "A &B"
     }
 
 }

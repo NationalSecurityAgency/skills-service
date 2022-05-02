@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <simple-card id="dependent-skills-graph" data-cy="dependenciesGraph">
-    <div v-if="!this.dependentSkills || this.dependentSkills.length === 0">
+    <div v-if="!hasGraphData">
       <div class="column is-half has-text-centered">
         <no-content2 icon="fa fa-project-diagram" title="No Dependencies Yet..."
                      message="You can manage and visualize skill's dependencies on this page. Please use the dropdown above to start adding dependent skills."></no-content2>
@@ -37,7 +37,7 @@ limitations under the License.
         </div>
       </div>
     </div>
-    <div id="dependent-skills-network" style="height: 500px" role="region" aria-label="skills dependency graph"></div>
+    <div v-if="hasGraphData" id="dependent-skills-network" style="height: 500px" role="region" aria-label="skills dependency graph"></div>
   </simple-card>
 </template>
 
@@ -94,7 +94,7 @@ limitations under the License.
       };
     },
     mounted() {
-      if (this.graph && this.graph.nodes && this.graph.nodes.length > 0) {
+      if (this.hasGraphData) {
         this.createGraph();
       }
     },
@@ -190,6 +190,11 @@ limitations under the License.
           arrows: 'to',
         };
         return { node, edge };
+      },
+    },
+    computed: {
+      hasGraphData() {
+        return this.graph && this.graph.nodes && this.graph.nodes.length > 0;
       },
     },
   };

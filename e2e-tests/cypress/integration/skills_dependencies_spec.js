@@ -204,5 +204,79 @@ describe('Skills Tests', () => {
         cy.get('[data-cy="pageHeader"]').contains('ID: skill3');
     });
 
+    it('long skill id in the table', () => {
+        const longId = 'eafeafeafeafeSkill%2DdlajleajljelajelkajlajleeafeafeafeafeSkill%2DdlajleajljelajelkajlajleeafeafeafeafeSkill%2Ddlajleajljelajelkajlajle'
+        cy.intercept('GET', '/admin/projects/proj1/skills/skill1/dependency/graph', (req) => {
+            req.reply({
+                body: {
+                    'nodes': [{
+                        'id': 1,
+                        'name': 'Skill 1',
+                        'skillId': 'skill1',
+                        'projectId': 'proj1',
+                        'pointIncrement': 50,
+                        'totalPoints': 250,
+                        'type': 'Skill'
+                    }, {
+                        'id': 2,
+                        'name': 'Skill 2',
+                        'skillId': longId,
+                        'projectId': 'proj1',
+                        'pointIncrement': 50,
+                        'totalPoints': 250,
+                        'type': 'Skill'
+                    }, {
+                        'id': 3,
+                        'name': 'Skill 3',
+                        'skillId': 'skill3',
+                        'projectId': 'proj1',
+                        'pointIncrement': 50,
+                        'totalPoints': 250,
+                        'type': 'Skill'
+                    }, {
+                        'id': 4,
+                        'name': 'Skill 4',
+                        'skillId': 'skill4',
+                        'projectId': 'proj1',
+                        'pointIncrement': 50,
+                        'totalPoints': 250,
+                        'type': 'Skill'
+                    }],
+                    'edges': [{
+                        'fromId': 1,
+                        'toId': 2
+                    }, {
+                        'fromId': 1,
+                        'toId': 3
+                    }, {
+                        'fromId': 1,
+                        'toId': 4
+                    }]
+                },
+            });
+        }).as('getGraph');
+        const tableSelector = '[data-cy="simpleSkillsTable"]';
+
+        const numSkills = 5;
+        for (let i = 0; i < numSkills; i += 1) {
+            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${i}`, {
+                projectId: 'proj1',
+                subjectId: "subj1",
+                skillId: `skill${i}`,
+                name: `Skill ${i}`,
+                pointIncrement: '50',
+                numPerformToCompletion: '5'
+            });
+        }
+
+        cy.request('POST', '/admin/projects/proj1/skills/skill1/dependency/skill2')
+        cy.request('POST', '/admin/projects/proj1/skills/skill1/dependency/skill3')
+        cy.request('POST', '/admin/projects/proj1/skills/skill1/dependency/skill4')
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/dependencies');
+        cy.wait('@getGraph');
+        cy.contains('eafeafeafeafeSkill%2Ddlajleajljelajelkaj... >> more');
+    });
+
 
 });

@@ -106,57 +106,68 @@ limitations under the License.
 
         <template v-slot:cell(skillId)="data">
           <skill-already-existing-warning :skill="data.item"/>
-          <import-checkbox
-            :skill-name="data.item.name"
-            :skill-id="data.item.skillId"
-            :project-id="data.item.projectId"
-            :disabled="data.item.alreadyHasThisSkillId || data.item.alreadyHasThisName"
-            :selected="isSelected(data.item)"
-            @importSelection="handleImportSelection($event, data.item)"
-            @input="updateActionsDisableStatus"
-            :disableSelection="maxBulkImportExceeded || maxSkillsInSubjectExceeded"
-          />
-
-          <div class="sub-info">
-            <span>ID:</span> {{ data.item.skillId }}
+          <div class="row">
+            <div class="col">
+              <import-checkbox
+                :skill-name="data.item.name"
+                :skill-id="data.item.skillId"
+                :project-id="data.item.projectId"
+                :disabled="data.item.alreadyHasThisSkillId || data.item.alreadyHasThisName"
+                :selected="isSelected(data.item)"
+                @importSelection="handleImportSelection($event, data.item)"
+                @input="updateActionsDisableStatus"
+                :disableSelection="maxBulkImportExceeded || maxSkillsInSubjectExceeded"
+              />
+            </div>
+            <div class="col-auto">
+              <b-button size="sm" variant="outline-info"
+                        class="mr-2 py-0 px-1 mt-1"
+                        @click="data.toggleDetails"
+                        :aria-label="`Expand details for ${data.item.name}`"
+                        :data-cy="`expandDetailsBtn_${data.item.projectId}_${data.item.skillId}`">
+                <i v-if="data.detailsShowing" class="fa fa-minus-square"/>
+                <i v-else class="fa fa-plus-square"/>
+                Skill Details
+              </b-button>
+            </div>
           </div>
-
-          <b-button size="sm" variant="outline-info"
-                    class="mr-2 py-0 px-1 mt-1"
-                    @click="data.toggleDetails"
-                    :aria-label="`Expand details for ${data.item.name}`"
-                    :data-cy="`expandDetailsBtn_${data.item.projectId}_${data.item.skillId}`">
-            <i v-if="data.detailsShowing" class="fa fa-minus-square"/>
-            <i v-else class="fa fa-plus-square"/>
-            Skill Details
-          </b-button>
         </template>
 
         <template v-slot:cell(projectId)="data">
-          <div class="text-primary">
-            {{ data.item.projectName }}
-          </div>
-          <div class="sub-info">
-            <span>ID:</span> {{ data.item.projectId }}
+          <div class="row">
+            <div class="col">
+              <div class="text-primary">
+                {{ data.item.projectName }}
+              </div>
+            </div>
+            <div class="col-auto text-info">
+              <b-button variant="link"
+                        class="p-0"
+                        @click="setProjectFilter(data.item.projectName)"
+                        aria-label="Filter by Project Name"
+                        data-cy="addProjectFilter">
+                <i class="fas fa-search-plus" aria-hidden="true"></i>
+              </b-button>
+            </div>
           </div>
         </template>
 
         <template v-slot:cell(subjectId)="data">
-          <div class="text-primary">
-            {{ data.item.subjectName }}
-          </div>
-          <div class="sub-info">
-            <span>ID:</span> {{ data.item.subjectId }}
-          </div>
-        </template>
-
-        <template v-slot:cell(totalPoints)="data">
-          <div>
-            {{ data.value }}
-          </div>
-          <div class="sub-info">
-            {{ data.item.pointIncrement }} Increment x {{ data.item.numPerformToCompletion }}
-            Occurrences
+          <div class="row">
+            <div class="col">
+              <div class="text-primary">
+                {{ data.item.subjectName }}
+              </div>
+            </div>
+            <div class="col-auto text-info">
+              <b-button variant="link"
+                        class="p-0"
+                        @click="setSubjectFilter(data.item.subjectName)"
+                        aria-label="Filter by Subject Name"
+                        data-cy="addSubjectFilter">
+                <i class="fas fa-search-plus" aria-hidden="true"></i>
+              </b-button>
+            </div>
           </div>
         </template>
 
@@ -270,7 +281,7 @@ limitations under the License.
               currentPage: 1,
               totalRows: 1,
               pageSize: 5,
-              possiblePageSizes: [5, 10, 15, 20],
+              possiblePageSizes: [5, 10, 15, 25, 50],
             },
           },
           items: [],
@@ -453,6 +464,14 @@ limitations under the License.
       handleImportSelection(event, dataItem) {
         this.toggleSelected(event, dataItem);
         this.updateActionsDisableStatus();
+      },
+      setProjectFilter(projectName) {
+        this.filters.projectName = projectName;
+        this.loadData();
+      },
+      setSubjectFilter(subjectName) {
+        this.filters.subjectName = subjectName;
+        this.loadData();
       },
       reset() {
         this.filters.skillName = '';

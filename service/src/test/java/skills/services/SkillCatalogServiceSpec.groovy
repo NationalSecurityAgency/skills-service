@@ -68,7 +68,7 @@ class SkillCatalogServiceSpec extends DefaultIntSpec {
         subjAdminService.saveSubject("aproject", "asubj", new SubjectRequest(subjectId: "asubj", name: "A subj"))
         subjAdminService.saveSubject("bproject", "bsubj", new SubjectRequest(subjectId: "bsubj", name: "B subj"))
 
-        SkillRequest sr = new SkillRequest(skillId: "fooskill", subjectId: "asubj", projectId: "aproject", pointIncrement: 40, numPerformToCompletion: 3, name: "foo")
+        SkillRequest sr = new SkillRequest(skillId: "fooskill", subjectId: "asubj", projectId: "aproject", pointIncrement: 400, numPerformToCompletion: 3, name: "foo", enabled: "true")
         skillsAdminService.saveSkill("fooskill", sr)
 
         sr.subjectId = "bsubj"

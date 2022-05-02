@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 SkillTree
+ * Copyright 2021 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,11 @@
  */
 package skills.controller.result.model
 
-import groovy.transform.Canonical
-
-@Canonical
-class CatalogFinalizeInfoResult {
-
+class ExportableToCatalogSkillValidationResult {
+    String skillId
     String projectId
-
-    Integer numSkillsToFinalize
-
-    Boolean isRunning
-
-    Integer projectSkillMinPoints
-    Integer projectSkillMaxPoints
-    List<SkillWithPointsResult> skillsWithOutOfBoundsPoints
-
+    boolean skillAlreadyInCatalog
+    boolean skillIdConflictsWithExistingCatalogSkill
+    boolean skillNameConflictsWithExistingCatalogSkill
+    boolean hasDependencies
 }

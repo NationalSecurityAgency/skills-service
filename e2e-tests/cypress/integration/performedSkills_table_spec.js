@@ -52,10 +52,15 @@ describe('Performed Skills Table Tests', () => {
 
     it('sort by date', () => {
         cy.createSkills(1);
-        cy.report(7);
+        cy.report(12);
         cy.visit('/administrator/projects/proj1/subjects/subj1/users/user1@skills.org/skillEvents');
         // default sort by date desc
         cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-23' }],
+            [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-22' }],
+            [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-21' }],
+            [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-20' }],
+            [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-19' }],
             [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-18' }],
             [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-17' }],
             [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-16' }],
@@ -63,7 +68,7 @@ describe('Performed Skills Table Tests', () => {
             [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-14' }],
             [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-13' }],
             [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-12' }],
-        ], 5);
+        ], 10);
 
         cy.get(`${tableSelector}`).contains('Performed On').click();
         cy.validateTable(tableSelector, [
@@ -74,7 +79,12 @@ describe('Performed Skills Table Tests', () => {
             [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-16' }],
             [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-17' }],
             [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-18' }],
-        ], 5);
+            [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-19' }],
+            [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-20' }],
+            [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-21' }],
+            [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-22' }],
+            [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-23' }],
+        ], 10);
     });
 
     it('validate relative time', () => {
@@ -122,33 +132,42 @@ describe('Performed Skills Table Tests', () => {
 
 
     it('sort by skill id', () => {
-        cy.createSkills(7);
-        cy.report(7, false);
+        cy.createSkills(12);
+        cy.report(12, false);
         cy.visit('/administrator/projects/proj1/subjects/subj1/users/user1@skills.org/skillEvents');
 
         cy.get(`${tableSelector}`).contains('Skill Id').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'skill1' }],
+            [{ colIndex: 0,  value: 'skill10' }],
+            [{ colIndex: 0,  value: 'skill11' }],
+            [{ colIndex: 0,  value: 'skill12' }],
             [{ colIndex: 0,  value: 'skill2' }],
             [{ colIndex: 0,  value: 'skill3' }],
             [{ colIndex: 0,  value: 'skill4' }],
             [{ colIndex: 0,  value: 'skill5' }],
             [{ colIndex: 0,  value: 'skill6' }],
             [{ colIndex: 0,  value: 'skill7' }],
-        ], 5);
+            [{ colIndex: 0,  value: 'skill8' }],
+            [{ colIndex: 0,  value: 'skill9' }],
+        ], 10);
 
         cy.get(`${tableSelector}`).contains('Skill Id').click();
         cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'skill9' }],
+            [{ colIndex: 0,  value: 'skill8' }],
             [{ colIndex: 0,  value: 'skill7' }],
             [{ colIndex: 0,  value: 'skill6' }],
             [{ colIndex: 0,  value: 'skill5' }],
             [{ colIndex: 0,  value: 'skill4' }],
             [{ colIndex: 0,  value: 'skill3' }],
             [{ colIndex: 0,  value: 'skill2' }],
+            [{ colIndex: 0,  value: 'skill12' }],
+            [{ colIndex: 0,  value: 'skill11' }],
+            [{ colIndex: 0,  value: 'skill10' }],
             [{ colIndex: 0,  value: 'skill1' }],
-        ], 5);
+        ], 10);
     });
-
 
     it('filter by skill id', () => {
         cy.createSkills(12);
@@ -181,6 +200,61 @@ describe('Performed Skills Table Tests', () => {
         ], 5);
     });
 
+    it('filter by skill name', () => {
+        cy.createSkills(12);
+        cy.report(12, false);
+        cy.visit('/administrator/projects/proj1/subjects/subj1/users/user1@skills.org/skillEvents');
+
+        cy.get('[data-cy="performedSkills-skillIdFilter"]').type('# 12');
+        cy.get('[data-cy="performedSkills-filterBtn"]').click();
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'skill12' }],
+        ], 5);
+    });
+
+    it('filter by using searrch icon', () => {
+        cy.createSkills(12);
+        cy.report(12, false);
+        cy.visit('/administrator/projects/proj1/subjects/subj1/users/user1@skills.org/skillEvents');
+
+        cy.get(`${tableSelector} tr:nth-child(2) [data-cy="addSkillFilter"]`).click();
+        cy.get('[data-cy="performedSkills-skillIdFilter"]').should('have.value', 'Very Great Skill # 11');
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Very Great Skill # 11' }],
+        ], 5);
+    });
+
+    it('collapse long skill ids', () => {
+        cy.createSkills(12);
+        cy.report(12, false);
+
+        cy.intercept('/admin/projects/proj1/performedSkills/user1*',
+            {
+                statusCode: 200,
+                body: {
+                    'data': [{
+                        'skillName': 'Very Great Skill # 12',
+                        'skillId': 'what a crazy long id that comes back it should get truncated sure hope so',
+                        'performedOn': '2020-09-23T11:00:00.000+00:00',
+                        'importedSkill': false
+                    }],
+                    'count': 1,
+                    'totalCount': 1
+                },
+            }).as('getPerformedSkills')
+        cy.visit('/administrator/projects/proj1/subjects/subj1/users/user1@skills.org/skillEvents');
+        cy.wait('@getPerformedSkills');
+
+        cy.validateTable(tableSelector, [
+             [{ colIndex: 0,  value: 'what a crazy long id that comes back it should... >> more' }],
+        ], 5);
+
+        cy.get(`${tableSelector} tr:nth-child(1)`).contains("more").click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'what a crazy long id that comes back it should get truncated sure hope so << less' }],
+        ], 5);
+    });
 
     it('delete skill event', () => {
         cy.createSkills(3);

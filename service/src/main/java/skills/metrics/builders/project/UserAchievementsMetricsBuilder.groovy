@@ -28,6 +28,7 @@ import skills.storage.model.SkillDef
 import skills.storage.model.UserAchievement
 import skills.storage.model.UserAttrs
 import skills.storage.repos.UserAchievedLevelRepo
+import skills.utils.InputSanitizer
 
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -136,7 +137,7 @@ class UserAchievementsMetricsBuilder implements ProjectMetricsBuilder {
         )
 
         if (achievementItem.skillId) {
-            res.name = achievementItem.name
+            res.name = InputSanitizer.unsanitizeName(achievementItem.name)
             res.type = achievementItem.type.toString()
             res.level = achievementItem.level
         }

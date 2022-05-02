@@ -118,7 +118,7 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
 
         def proj3 = SkillsFactory.createProject(3)
         def proj3_subj = SkillsFactory.createSubject(3, 3)
-        List<Map> proj3_skills = SkillsFactory.createSkills(2, 3, 3)
+        List<Map> proj3_skills = SkillsFactory.createSkills(2, 3, 3, 100)
 
         skillsService.createProject(proj3)
         skillsService.createSubject(proj3_subj)

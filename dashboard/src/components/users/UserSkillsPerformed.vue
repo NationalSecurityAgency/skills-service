@@ -20,7 +20,7 @@ limitations under the License.
     <b-card body-class="p-0">
       <div class="row px-3 pt-3">
         <div class="col-12">
-          <b-form-group label="Skill Id Filter" label-class="text-muted">
+          <b-form-group label="Skill Filter" label-class="text-muted">
             <b-input v-model="filters.skillId" v-on:keyup.enter="applyFilters" data-cy="performedSkills-skillIdFilter" aria-label="skill id filter"/>
           </b-form-group>
         </div>
@@ -40,7 +40,28 @@ limitations under the License.
                       @page-size-changed="pageSizeChanged"
                       @sort-changed="sortTable"
                       data-cy="performedSkillsTable">
-
+        <template v-slot:cell(skillId)="data">
+          <div class="row">
+            <div class="col">
+              <div class="text-primary">
+                <span v-if="data.item.skillNameHtml" v-html="data.item.skillNameHtml"></span><span v-else>{{ data.item.skillName }}</span>
+                <b-badge v-if="data.item.importedSkill === true" variant="success" class="text-uppercase ml-1" data-cy="importedTag">Imported</b-badge>
+              </div>
+              <div>
+                <show-more :limit="50" :contains-html="true" :text="`ID: ${data.item.skillIdHtml ? data.item.skillIdHtml : data.item.skillId}`"/>
+              </div>
+            </div>
+            <div class="col-auto text-info">
+              <b-button variant="link"
+                        class="p-0"
+                        @click="setSkillFilter(data.item.skillName)"
+                        aria-label="Filter by Skill Name"
+                        data-cy="addSkillFilter">
+                <i class="fas fa-search-plus" aria-hidden="true"></i>
+              </b-button>
+            </div>
+          </div>
+        </template>
         <template v-slot:cell(performedOn)="data">
           <date-cell :value="data.value" />
         </template>
@@ -60,7 +81,9 @@ limitations under the License.
 
 <script>
   import { createNamespacedHelpers } from 'vuex';
+  import StringHighlighter from '@/common-components/utilities/StringHighlighter';
   import dayjs from '@/common-components/DayJsCustomizer';
+  import ShowMore from '@/components/skills/selfReport/ShowMore';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
   import ToastSupport from '../utils/ToastSupport';
@@ -74,6 +97,7 @@ limitations under the License.
     name: 'UserSkillsPerformed',
     mixins: [MsgBoxMixin, ToastSupport],
     components: {
+      ShowMore,
       DateCell,
       SkillsBTable,
       SubPageHeader,
@@ -116,8 +140,8 @@ limitations under the License.
               server: true,
               currentPage: 1,
               totalRows: 1,
-              pageSize: 5,
-              possiblePageSizes: [5, 10, 15, 20],
+              pageSize: 10,
+              possiblePageSizes: [5, 10, 15, 20, 50],
             },
           },
         },
@@ -172,7 +196,11 @@ limitations under the License.
           byColumn: 0,
           orderBy: this.table.options.sortBy,
         }).then((res) => {
-          this.table.items = res.data;
+          this.table.items = res.data?.map((item) => {
+            const skillNameHtml = item.skillName && this.filters.skillId ? StringHighlighter.highlight(item.skillName, this.filters.skillId) : null;
+            const skillIdHtml = item.skillId && this.filters.skillId ? StringHighlighter.highlight(item.skillId, this.filters.skillId) : null;
+            return { skillNameHtml, skillIdHtml, ...item };
+          });
           this.table.options.pagination.totalRows = res.count;
           this.table.options.busy = false;
         });
@@ -206,6 +234,10 @@ limitations under the License.
           .finally(() => {
             this.isLoading = false;
           });
+      },
+      setSkillFilter(filterValue) {
+        this.filters.skillId = filterValue;
+        this.loadData();
       },
     },
   };

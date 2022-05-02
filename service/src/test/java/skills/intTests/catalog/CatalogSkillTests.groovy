@@ -30,7 +30,6 @@ import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.SkillDefRepo
-import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -551,9 +550,9 @@ class CatalogSkillTests extends CatalogIntSpec {
         def p1subj1 = createSubject(1, 1)
         def p2subj1 = createSubject(2, 1)
         def p3subj1 = createSubject(3, 1)
-        def skill = createSkill(1, 1, 1, 0, 1, 0, 10)
-        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 10)
-        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 10)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 100)
+        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 100)
 
         def p2native = createSkill(2, 1, 3, 0, 1, 0, 100)
 
@@ -571,6 +570,13 @@ class CatalogSkillTests extends CatalogIntSpec {
         skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
         skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
         skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
+
+        skill.pointIncrement = 10
+        skill2.pointIncrement = 10
+        skill3.pointIncrement = 10
+        skillsService.createSkill(skill)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(skill3)
 
         skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
 
@@ -1005,12 +1011,12 @@ class CatalogSkillTests extends CatalogIntSpec {
 
         def p1subj1 = createSubject(1, 1)
         def p1subj2 = createSubject(1, 2)
-        def skill = createSkill(1, 1, 1, 0, 1, 0, 10)
-        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 10)
-        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 10)
-        def skill4 = createSkill(1, 1, 4)
-        def skill5 = createSkill(1, 2, 5)
-        def skill6 = createSkill(1, 2, 6)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 100)
+        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 100)
+        def skill4 = createSkill(1, 1, 40, 0, 1, 0, 100)
+        def skill5 = createSkill(1, 2, 50, 0, 1, 0, 100)
+        def skill6 = createSkill(1, 2, 60, 0, 1, 0, 100)
 
         skillsService.createProject(project1)
         skillsService.createSubject(p1subj1)
@@ -1128,13 +1134,14 @@ class CatalogSkillTests extends CatalogIntSpec {
         def p1subj1 = createSubject(1, 1)
         def p2subj1 = createSubject(2, 2)
 
-        def skill = createSkill(1, 1, 1, 0, 1, 0, 10)
-        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 10)
-        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 10)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 100)
+        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 100)
+        def exportedButNotImported = createSkill(1, 1, 4, 0, 1, 0, 10)
 
-        def skill4 = createSkill(2, 2, 4)
-        def skill5 = createSkill(2, 2, 5)
-        def skill6 = createSkill(2, 2, 6)
+        def skill4 = createSkill(2, 2, 4, 0, 1, 0, 100)
+        def skill5 = createSkill(2, 2, 5, 0, 1, 0, 100)
+        def skill6 = createSkill(2, 2, 6, 0, 1, 0, 100)
 
         def p2native = createSkill(2, 2, 99, 0, 1, 0, 100)
 
@@ -1146,6 +1153,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         skillsService.createSkill(skill)
         skillsService.createSkill(skill2)
         skillsService.createSkill(skill3)
+        skillsService.createSkill(exportedButNotImported)
         skillsService.createSkill(skill4)
         skillsService.createSkill(skill5)
         skillsService.createSkill(skill6)
@@ -1153,6 +1161,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
         skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
         skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, exportedButNotImported.skillId)  // this is does not get imported
 
         when:
         skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
@@ -1163,6 +1172,8 @@ class CatalogSkillTests extends CatalogIntSpec {
         def skillsForProject = skillsService.getSkillsForProject(project2.projectId)
         def skillsForProjectWithoutImported = skillsService.getSkillsForProject(project2.projectId, "", true)
 
+        def exportedSkills = skillsService.getExportedSkills(project1.projectId, 6, 1, "subjectName", true)
+
         then:
         skills.findAll { it.readOnly == true && it.copiedFromProjectId == project1.projectId && it.copiedFromProjectName == project1.name }.size() == 3
         //copiedFromProjectId, copiedFromProjectName, and readOnly are not populated by this endpoint
@@ -1170,6 +1181,14 @@ class CatalogSkillTests extends CatalogIntSpec {
 
         skills.collect { it.skillId } == ["skill4subj2", "skill5subj2", "skill6subj2", "skill99subj2", "skill1", "skill2", "skill3"]
         skillsForProjectWithoutImported.collect { it.skillId } == ["skill4subj2", "skill5subj2", "skill6subj2", "skill99subj2"]
+
+        exportedSkills
+        exportedSkills.totalCount == 4
+        exportedSkills.count == 4
+        exportedSkills.data.find { it.skillId == 'skill1' }.importedProjectCount == 1
+        exportedSkills.data.find { it.skillId == 'skill2' }.importedProjectCount == 1
+        exportedSkills.data.find { it.skillId == 'skill3' }.importedProjectCount == 1
+        exportedSkills.data.find { it.skillId == 'skill4' }.importedProjectCount == 0
     }
 
     def "get exported to catalog stats for project"() {
@@ -1234,14 +1253,14 @@ class CatalogSkillTests extends CatalogIntSpec {
         def p4subj1 = createSubject(3, 1)
 
         def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
-        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 10)
-        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 10)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 100)
+        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 100)
 
-        def skill4 = createSkill(1, 1, 4)
-        def skill5 = createSkill(1, 1, 5)
-        def skill6 = createSkill(1, 1, 6)
+        def skill4 = createSkill(1, 1, 4, 0, 1, 0, 100)
+        def skill5 = createSkill(1, 1, 5, 0, 1, 0, 100)
+        def skill6 = createSkill(1, 1, 6, 0, 1, 0, 100)
 
-        def skill7 = createSkill(3, 1, 7)
+        def skill7 = createSkill(3, 1, 7, 0, 1, 0, 100)
 
         def p2subj2skill1 = createSkill(2, 3, 99, 0, 1, 0, 100)
 
@@ -1299,14 +1318,14 @@ class CatalogSkillTests extends CatalogIntSpec {
         def p3subj1 = createSubject(3, 1)
 
         def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
-        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 10)
-        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 10)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 100)
+        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 100)
 
-        def skill4 = createSkill(1, 1, 4)
-        def skill5 = createSkill(1, 1, 5)
-        def skill6 = createSkill(1, 1, 6)
+        def skill4 = createSkill(1, 1, 4, 0, 1, 0, 100)
+        def skill5 = createSkill(1, 1, 5, 0, 1, 0, 100)
+        def skill6 = createSkill(1, 1, 6, 0, 1, 0, 100)
 
-        def skill7 = createSkill(3, 1, 7)
+        def skill7 = createSkill(3, 1, 7, 0, 1, 0, 100)
 
         def p2subj2native = createSkill(2, 3, 1, 0, 1, 0, 100)
 
@@ -1369,20 +1388,20 @@ class CatalogSkillTests extends CatalogIntSpec {
         def p2subj2 = createSubject(2, 3)
         def p4subj1 = createSubject(3, 1)
 
-        def skill = createSkill(1, 1, 1, 0, 1, 0, 10)
-        def skill2 = createSkill(1, 1, 2, 0, 2, 0, 20)
-        def skill3 = createSkill(1, 2, 3, 0, 3, 0, 30)
-        def skill4 = createSkill(1, 2, 4)
-        def skill5 = createSkill(1, 1, 5)
-        def skill6 = createSkill(1, 1, 6)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 1000)
+        def skill2 = createSkill(1, 1, 2, 0, 2, 0, 2000)
+        def skill3 = createSkill(1, 2, 3, 0, 3, 0, 3000)
+        def skill4 = createSkill(1, 2, 4, 0, 1, 0, 100)
+        def skill5 = createSkill(1, 1, 5, 0, 1, 0, 100)
+        def skill6 = createSkill(1, 1, 6, 0, 1, 0, 100)
 
-        def skill7 = createSkill(3, 1, 7)
+        def skill7 = createSkill(3, 1, 7, 0, 1, 0, 100)
 
-        def skill9 = createSkill(2, 2, 9)
+        def skill9 = createSkill(2, 2, 9, 0, 1, 0, 100)
 
-        def p2subj1native = createSkill(2, 2, 1, 0, 1, 0, 900)
+        def p2subj1native = createSkill(2, 2, 1, 0, 1, 0, 9000)
         p2subj1native.name = "skill99"
-        def  p2subj2native= createSkill(2, 3, 1, 0, 1, 0, 900)
+        def  p2subj2native= createSkill(2, 3, 1, 0, 1, 0, 9000)
         p2subj2native.name = "skill999"
 
         skillsService.createProject(project1)
@@ -1490,9 +1509,9 @@ class CatalogSkillTests extends CatalogIntSpec {
         availableCatalogP3.data[1].projectId == project3.projectId
 
         sortedByPointIncrementAsc.data[5].skillId == skill3.skillId
-        sortedByPointIncrementAsc.data[5].pointIncrement == 30
+        sortedByPointIncrementAsc.data[5].pointIncrement == 3000
         sortedByPointIncrementDesc.data[0].skillId == skill3.skillId
-        sortedByPointIncrementDesc.data[0].pointIncrement == 30
+        sortedByPointIncrementDesc.data[0].pointIncrement == 3000
         sortedByProjectNameAsc.data[0].projectName == project1.name
         sortedByProjectNameAsc.data[5].projectName == project3.name
         sortedByProjectNameDesc.data[0].projectName == project3.name
@@ -1575,13 +1594,13 @@ class CatalogSkillTests extends CatalogIntSpec {
         def p1subj1 = createSubject(1, 1)
         def p2subj1 = createSubject(2, 2)
 
-        def skill = createSkill(1, 1, 1, 0, 1, 0, 10)
-        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 10)
-        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 10)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 100)
+        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 100)
 
-        def skill4 = createSkill(1, 1, 4)
-        def skill5 = createSkill(1, 1, 5)
-        def skill6 = createSkill(1, 1, 6)
+        def skill4 = createSkill(1, 1, 4, 0, 1, 0, 100)
+        def skill5 = createSkill(1, 1, 5, 0, 1, 0, 100)
+        def skill6 = createSkill(1, 1, 6, 0, 1, 0, 100)
 
         skillsService.createProject(project1)
         skillsService.createProject(project2)
@@ -1618,9 +1637,9 @@ class CatalogSkillTests extends CatalogIntSpec {
         def p1subj1 = createSubject(1, 1)
         def p2subj1 = createSubject(2, 2)
 
-        def skill = createSkill(1, 1, 1, 0, 1, 0, 10)
-        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 10)
-        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 10)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 100)
+        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 100)
 
         skillsService.createProject(project1)
         skillsService.createProject(project2)
@@ -1649,9 +1668,9 @@ class CatalogSkillTests extends CatalogIntSpec {
         def p1subj1 = createSubject(1, 1)
         def p2subj1 = createSubject(2, 2)
 
-        def skill = createSkill(1, 1, 1, 0, 1, 0, 10)
-        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 10)
-        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 10)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 100)
+        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 100)
 
         skillsService.createProject(project1)
         skillsService.createProject(project2)
@@ -1682,10 +1701,10 @@ class CatalogSkillTests extends CatalogIntSpec {
         def p1subj1 = createSubject(1, 1)
         def p2subj1 = createSubject(2, 1)
 
-        def skill = createSkill(1, 1, 1, 0, 1, 0, 10)
-        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 10)
-        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 10)
-        def skill4 = createSkill(1, 1, 4, 0, 1, 0, 10)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 100)
+        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 100)
+        def skill4 = createSkill(1, 1, 4, 0, 1, 0, 100)
 
         def p2skill1 = createSkill(2, 1, 11, 0, 1, 0, 100)
         def p2skill2 = createSkill(2, 1, 12, 0, 1, 0, 100)
@@ -1720,10 +1739,10 @@ class CatalogSkillTests extends CatalogIntSpec {
 
         def p1subj1 = createSubject(1, 1)
 
-        def skill = createSkill(1, 1, 1, 0, 1, 0, 10)
-        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 10)
-        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 10)
-        def skill4 = createSkill(1, 1, 4, 0, 1, 0, 10)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 100)
+        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 100)
+        def skill4 = createSkill(1, 1, 4, 0, 1, 0, 100)
 
 
         skillsService.createProject(project1)
@@ -1885,15 +1904,15 @@ class CatalogSkillTests extends CatalogIntSpec {
         def p1subj1 = createSubject(1, 1)
         def p2subj1 = createSubject(2, 1)
 
-        def skill = createSkill(1, 1, 1, 0, 1, 0, 10)
-        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 10)
-        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 10)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 100)
+        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 100)
 
-        def skill4 = createSkill(2, 1, 4)
-        def skill5 = createSkill(2, 1, 5)
-        def skill6 = createSkill(2, 1, 6)
-        def skill7 = createSkill(2, 1, 7)
-        def skill8 = createSkill(2, 1, 8)
+        def skill4 = createSkill(2, 1, 4, 0, 1, 0, 100)
+        def skill5 = createSkill(2, 1, 5, 0, 1, 0, 100)
+        def skill6 = createSkill(2, 1, 6, 0, 1, 0, 100)
+        def skill7 = createSkill(2, 1, 7, 0, 1, 0, 100)
+        def skill8 = createSkill(2, 1, 8, 0, 1, 0, 100)
 
         skillsService.createProject(project1)
         skillsService.createProject(project2)
@@ -1934,35 +1953,35 @@ class CatalogSkillTests extends CatalogIntSpec {
         def p2subj1 = createSubject(2, 1)
         def p3subj1 = createSubject(3, 1)
 
-        def skill = createSkill(1, 1, 1, 0, 1, 0, 10)
-        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 10)
-        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 10)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 100)
+        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 100)
 
-        def skill4 = createSkill(2, 1, 4)
-        def skill5 = createSkill(2, 1, 5)
-        def skill6 = createSkill(2, 1, 6)
-        def skill7 = createSkill(2, 1, 7)
-        def skill8 = createSkill(2, 1, 8)
+        def skill4 = createSkill(2, 1, 4, 0, 1, 0, 100)
+        def skill5 = createSkill(2, 1, 5, 0, 1, 0, 100)
+        def skill6 = createSkill(2, 1, 6, 0, 1, 0, 100)
+        def skill7 = createSkill(2, 1, 7, 0, 1, 0, 100)
+        def skill8 = createSkill(2, 1, 8, 0, 1, 0, 100)
 
-        def p3skill1 = createSkill(3, 1, 1)
+        def p3skill1 = createSkill(3, 1, 1, 0, 1, 0, 100)
         p3skill1.skillId = skill.skillId
         p3skill1.name = 'p3skill1 name'
-        def p3skill2 = createSkill(3, 1, 2)
+        def p3skill2 = createSkill(3, 1, 2, 0, 1, 0, 100)
         p3skill2.skillId = 'p3skill2_skillId'
         p3skill2.name = skill2.name
-        def p3skill3 = createSkill(3, 1, 3)
+        def p3skill3 = createSkill(3, 1, 3, 0, 1, 0, 100)
         p3skill3.skillId = "p3skill3_skillId"
         p3skill3.name = "p3skill3 name"
-        def p3skill4 = createSkill(3, 1, 4)
+        def p3skill4 = createSkill(3, 1, 4, 0, 1, 0, 100)
         p3skill4.skillId = "p3skill4_skillId"
         p3skill4.name = "p3skill4 name"
-        def p3skill5 = createSkill(3, 1, 5)
+        def p3skill5 = createSkill(3, 1, 5, 0, 1, 0, 100)
         p3skill5.skillId = "p3skill5_skillId"
         p3skill5.name = "p3skill5 name"
-        def p3skill6 = createSkill(3, 1, 6)
+        def p3skill6 = createSkill(3, 1, 6, 0, 1, 0, 100)
         p3skill6.skillId = "p3skill6_skillId"
         p3skill6.name = "p3skill6 name"
-        def p3skill7 = createSkill(3, 1, 7)
+        def p3skill7 = createSkill(3, 1, 7, 0, 1, 0, 100)
         p3skill7.skillId = "p3skill7_skillId"
         p3skill7.name = "p3skill7 name"
 
@@ -2003,47 +2022,47 @@ class CatalogSkillTests extends CatalogIntSpec {
         def validationResult = skillsService.areSkillIdsExportable(project3.projectId, [p3skill1.skillId, p3skill2.skillId, p3skill3.skillId, p3skill4.skillId, p3skill5.skillId, p3skill6.skillId, p3skill7.skillId])
 
         then:
-        validationResult[p3skill1.skillId].skillId == p3skill1.skillId
-        validationResult[p3skill1.skillId].skillAlreadyInCatalog == false
-        validationResult[p3skill1.skillId].skillIdConflictsWithExistingCatalogSkill == true
-        validationResult[p3skill1.skillId].skillNameConflictsWithExistingCatalogSkill == false
-        validationResult[p3skill1.skillId].hasDependencies == false
+        validationResult.skillsValidationRes[p3skill1.skillId].skillId == p3skill1.skillId
+        validationResult.skillsValidationRes[p3skill1.skillId].skillAlreadyInCatalog == false
+        validationResult.skillsValidationRes[p3skill1.skillId].skillIdConflictsWithExistingCatalogSkill == true
+        validationResult.skillsValidationRes[p3skill1.skillId].skillNameConflictsWithExistingCatalogSkill == false
+        validationResult.skillsValidationRes[p3skill1.skillId].hasDependencies == false
 
-        validationResult[p3skill2.skillId].skillId == p3skill2.skillId
-        validationResult[p3skill2.skillId].skillAlreadyInCatalog == false
-        validationResult[p3skill2.skillId].skillIdConflictsWithExistingCatalogSkill == false
-        validationResult[p3skill2.skillId].skillNameConflictsWithExistingCatalogSkill == true
-        validationResult[p3skill2.skillId].hasDependencies == false
+        validationResult.skillsValidationRes[p3skill2.skillId].skillId == p3skill2.skillId
+        validationResult.skillsValidationRes[p3skill2.skillId].skillAlreadyInCatalog == false
+        validationResult.skillsValidationRes[p3skill2.skillId].skillIdConflictsWithExistingCatalogSkill == false
+        validationResult.skillsValidationRes[p3skill2.skillId].skillNameConflictsWithExistingCatalogSkill == true
+        validationResult.skillsValidationRes[p3skill2.skillId].hasDependencies == false
 
-        validationResult[p3skill3.skillId].skillId == p3skill3.skillId
-        validationResult[p3skill3.skillId].skillAlreadyInCatalog == false
-        validationResult[p3skill3.skillId].skillIdConflictsWithExistingCatalogSkill == false
-        validationResult[p3skill3.skillId].skillNameConflictsWithExistingCatalogSkill == false
-        validationResult[p3skill3.skillId].hasDependencies == false
+        validationResult.skillsValidationRes[p3skill3.skillId].skillId == p3skill3.skillId
+        validationResult.skillsValidationRes[p3skill3.skillId].skillAlreadyInCatalog == false
+        validationResult.skillsValidationRes[p3skill3.skillId].skillIdConflictsWithExistingCatalogSkill == false
+        validationResult.skillsValidationRes[p3skill3.skillId].skillNameConflictsWithExistingCatalogSkill == false
+        validationResult.skillsValidationRes[p3skill3.skillId].hasDependencies == false
 
-        validationResult[p3skill4.skillId].skillId == p3skill4.skillId
-        validationResult[p3skill4.skillId].skillAlreadyInCatalog == false
-        validationResult[p3skill4.skillId].skillIdConflictsWithExistingCatalogSkill == false
-        validationResult[p3skill4.skillId].skillNameConflictsWithExistingCatalogSkill == false
-        validationResult[p3skill4.skillId].hasDependencies == false
+        validationResult.skillsValidationRes[p3skill4.skillId].skillId == p3skill4.skillId
+        validationResult.skillsValidationRes[p3skill4.skillId].skillAlreadyInCatalog == false
+        validationResult.skillsValidationRes[p3skill4.skillId].skillIdConflictsWithExistingCatalogSkill == false
+        validationResult.skillsValidationRes[p3skill4.skillId].skillNameConflictsWithExistingCatalogSkill == false
+        validationResult.skillsValidationRes[p3skill4.skillId].hasDependencies == false
 
-        validationResult[p3skill5.skillId].skillId == p3skill5.skillId
-        validationResult[p3skill5.skillId].skillAlreadyInCatalog == false
-        validationResult[p3skill5.skillId].skillIdConflictsWithExistingCatalogSkill == false
-        validationResult[p3skill5.skillId].skillNameConflictsWithExistingCatalogSkill == false
-        validationResult[p3skill5.skillId].hasDependencies == false
+        validationResult.skillsValidationRes[p3skill5.skillId].skillId == p3skill5.skillId
+        validationResult.skillsValidationRes[p3skill5.skillId].skillAlreadyInCatalog == false
+        validationResult.skillsValidationRes[p3skill5.skillId].skillIdConflictsWithExistingCatalogSkill == false
+        validationResult.skillsValidationRes[p3skill5.skillId].skillNameConflictsWithExistingCatalogSkill == false
+        validationResult.skillsValidationRes[p3skill5.skillId].hasDependencies == false
 
-        validationResult[p3skill6.skillId].skillId == p3skill6.skillId
-        validationResult[p3skill6.skillId].skillAlreadyInCatalog == false
-        validationResult[p3skill6.skillId].skillIdConflictsWithExistingCatalogSkill == false
-        validationResult[p3skill6.skillId].skillNameConflictsWithExistingCatalogSkill == false
-        validationResult[p3skill6.skillId].hasDependencies == true
+        validationResult.skillsValidationRes[p3skill6.skillId].skillId == p3skill6.skillId
+        validationResult.skillsValidationRes[p3skill6.skillId].skillAlreadyInCatalog == false
+        validationResult.skillsValidationRes[p3skill6.skillId].skillIdConflictsWithExistingCatalogSkill == false
+        validationResult.skillsValidationRes[p3skill6.skillId].skillNameConflictsWithExistingCatalogSkill == false
+        validationResult.skillsValidationRes[p3skill6.skillId].hasDependencies == true
 
-        validationResult[p3skill7.skillId].skillId == p3skill7.skillId
-        validationResult[p3skill7.skillId].skillAlreadyInCatalog == true
-        validationResult[p3skill7.skillId].skillIdConflictsWithExistingCatalogSkill == true
-        validationResult[p3skill7.skillId].skillNameConflictsWithExistingCatalogSkill == true
-        validationResult[p3skill7.skillId].hasDependencies == false
+        validationResult.skillsValidationRes[p3skill7.skillId].skillId == p3skill7.skillId
+        validationResult.skillsValidationRes[p3skill7.skillId].skillAlreadyInCatalog == true
+        validationResult.skillsValidationRes[p3skill7.skillId].skillIdConflictsWithExistingCatalogSkill == true
+        validationResult.skillsValidationRes[p3skill7.skillId].skillNameConflictsWithExistingCatalogSkill == true
+        validationResult.skillsValidationRes[p3skill7.skillId].hasDependencies == false
     }
 
     def "project badges can depend on imported skills" () {
@@ -2689,6 +2708,7 @@ class CatalogSkillTests extends CatalogIntSpec {
 
         def skill = createSkill(1, 1, 1, 0, 1, 0, 5)
         def skill2 = createSkill(1, 1, 2, 0, 1, 0, 5)
+        def skill3 = createSkill(1, 1, 30, 0, 1, 0, 500)
 
         def p2skill1 = createSkill(2, 1, 3, 0, 1, 0, 10)
 
@@ -2699,8 +2719,8 @@ class CatalogSkillTests extends CatalogIntSpec {
 
         skillsService.createSkill(skill)
         skillsService.createSkill(skill2)
+        skillsService.createSkill(skill3)
         skillsService.createSkill(p2skill1)
-
 
         skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
         skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
@@ -2730,6 +2750,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         def skill = createSkill(1, 1, 1, 0, 1, 0, 5)
         def skill2 = createSkill(1, 1, 2, 0, 1, 0, 5)
         def skill3 = createSkill(1, 1, 3, 0, 1, 0, 5)
+        def skill4 = createSkill(1, 1, 40, 0, 1, 0, 500)
 
         def p2skill1 = createSkill(2, 2, 3, 0, 1, 0, 200)
         def p2skill2 = createSkill(2, 1, 33, 0, 1, 0, 90)
@@ -2748,6 +2769,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         skillsService.createSkill(p2skill2)
         skillsService.createSkill(p2skill3)
         skillsService.createSkill(skill3)
+        skillsService.createSkill(skill4)
 
 
         skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)

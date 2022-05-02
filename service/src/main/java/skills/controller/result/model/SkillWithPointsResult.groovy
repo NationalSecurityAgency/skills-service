@@ -13,13 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.skillLoading.model
+package skills.controller.result.model
 
-import groovy.transform.Canonical
-
-@Canonical
-class SkillPerfomed {
+class SkillWithPointsResult {
     String skillId
-    Date performedOn
-    boolean importedSkill
+    String skillName
+    Integer totalPoints
 }

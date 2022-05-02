@@ -49,6 +49,10 @@ limitations under the License.
           <span class="text-primary"><i
             class="fas fa-cubes skills-color-subjects"></i> {{ data.label }}</span>
         </template>
+        <template #head(importedProjectCount)="data">
+          <span class="text-primary"><i
+            class="fas fa-tasks skills-color-projects"></i> {{ data.label }}</span>
+        </template>
         <template #head(exportedOn)="data">
           <span class="text-primary"><i
             class="fas fa-clock skills-color-projects"></i> {{ data.label }}</span>
@@ -64,8 +68,16 @@ limitations under the License.
                   <div class="h5 d-inline-block">{{ data.item.skillName }}</div>
                 </router-link>
               </div>
-              <div class="sub-info">
-                <span>ID:</span> {{ data.item.skillId }}
+              <div>
+                <b-button size="sm" variant="outline-info"
+                          class="mr-2 py-0 px-1 mt-1"
+                          @click="data.toggleDetails"
+                          :aria-label="`Expand details for projects that imported ${data.item.skillName}`"
+                          :data-cy="`expandDetailsBtn_${data.item.projectId}_${data.item.skillId}`">
+                  <i v-if="data.detailsShowing" class="fa fa-minus-square"/>
+                  <i v-else class="fa fa-plus-square"/>
+                  Imported Details
+                </b-button>
               </div>
             </div>
             <div class="col-auto ml-auto mr-0">
@@ -73,7 +85,7 @@ limitations under the License.
                 <b-button :id="`deleteSkillButton_${data.item.skillId}`"
                           @click="removeExported(data.item)" variant="outline-primary"
                           :data-cy="`deleteSkillButton_${data.item.skillId}`"
-                          :aria-label="'delete Skill '+data.item.name"
+                          :aria-label="'delete Skill '+data.item.skillName"
                           title="Delete Skill"
                           size="sm">
                   <i class="text-warning fas fa-trash" aria-hidden="true"/>
@@ -84,18 +96,23 @@ limitations under the License.
         </template>
         <template v-slot:cell(subjectName)="data">
           <div class="h5 d-inline-block">{{ data.item.subjectName }}</div>
-          <div class="sub-info">
-            <span>ID:</span> {{ data.item.subjectId }}
-          </div>
+        </template>
+        <template v-slot:cell(importedProjectCount)="data">
+          <div class="h5 d-inline-block">{{ data.item.importedProjectCount }}</div>
         </template>
         <template v-slot:cell(exportedOn)="data">
           <date-cell :value="data.value" />
         </template>
+
+        <template #row-details="row">
+          <imported-skill-info :skill="row.item"></imported-skill-info>
+        </template>
+
       </skills-b-table>
     </b-card>
 
     <removal-validation v-if="removalValidation.show" v-model="removalValidation.show" @do-remove="doRemoveExportedSkill">
-      <exported-skill-deletion-warning :skill-id="removalValidation.skillToRemove.skillId" />
+      <exported-skill-deletion-warning :skill-id="removalValidation.skillToRemove.skillId" :skill-name="removalValidation.skillToRemove.skillName" />
     </removal-validation>
   </div>
 </template>
@@ -107,6 +124,7 @@ limitations under the License.
   import RemovalValidation from '@/components/utils/modal/RemovalValidation';
   import ExportedSkillDeletionWarning
     from '@/components/skills/catalog/ExportedSkillDeletionWarning';
+  import ImportedSkillInfo from './ImportedSkillInfo';
 
   export default {
     name: 'ExportedSkills',
@@ -115,6 +133,7 @@ limitations under the License.
       RemovalValidation,
       SkillsBTable,
       DateCell,
+      ImportedSkillInfo,
     },
     data() {
       return {
@@ -148,6 +167,11 @@ limitations under the License.
                 label: 'Subject',
                 sortable: true,
                 sortKey: 'subjectName',
+              }, {
+                key: 'importedProjectCount',
+                label: '# of Projects Imported',
+                sortable: true,
+                sortKey: 'importedProjectCount',
               }, {
                 key: 'exportedOn',
                 label: 'Exported On',

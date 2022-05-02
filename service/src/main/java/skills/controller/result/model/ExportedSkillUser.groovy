@@ -20,6 +20,8 @@ import groovy.transform.Canonical
 @Canonical
 class ExportedSkillUser {
     String importingProjectId
+    String importingProjectName
     String importedIntoSubjectId
+    String importedIntoSubjectName
     Date importedOn
 }

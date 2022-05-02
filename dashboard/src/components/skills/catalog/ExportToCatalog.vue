@@ -24,69 +24,71 @@ limitations under the License.
       <div class="h5 text-center text-primary mt-1">Checking Catalog...</div>
     </div>
     <div v-if="!loadingData">
-      <div v-if="allSkillsExportedAlready">
-        All selected <b-badge variant="info">{{ skills.length }}</b-badge> skill(s) are already in the Skill Catalog.
-      </div>
-
-      <b-overlay v-if="!allSkillsExportedAlready && !state.exported" :show="state.exporting" rounded="sm" opacity="0.5"
-                 spinner-variant="info" spinner-type="grow" spinner-small>
-        <p v-if="!allSkillsAreDups">
-          This will export <span v-if="isSingleId">Skill with id
-          <b class="text-primary">[{{ firstSkillId }}]</b></span><span v-else><b-badge variant="info">{{ skillsFiltered.length }}</b-badge> Skills</span> to the <b-badge>SkillTree Catalog <i class="fas fa-book" aria-hidden="true" /></b-badge>.
-          Other project administrators will then be able to import a <b class="text-primary">read-only</b> version of this skill.
-        </p>
-        <p v-if="numAlreadyExported > 0">
-          <span class="font-italic"><i class="fas fa-exclamation-triangle text-warning" /> Note:</span> The are already <b-badge variant="info">{{ numAlreadyExported }}</b-badge> skill(s) in the Skill Catalog from the provided selection.
-        </p>
-
-        <div v-if="notExportableSkills && notExportableSkills.length > 0">
-          Cannot export <b-badge variant="primary">{{ notExportableSkills.length }}</b-badge> skill(s):
-          <ul>
-            <li v-for="dupSkill in notExportableSkillsToShow" :key="dupSkill.skillId" :data-cy="`dupSkill-${dupSkill.skillId}`">
-              {{ dupSkill.name }} <span class="text-secondary font-italic">(ID: {{ dupSkill.skillId}} )</span>
-              <b-badge variant="warning" v-if="dupSkill.skillNameConflictsWithExistingCatalogSkill" class="ml-1">Name Conflict</b-badge>
-              <b-badge variant="warning" v-if="dupSkill.skillIdConflictsWithExistingCatalogSkill" class="ml-1">ID Conflict</b-badge>
-              <b-badge variant="warning" v-if="dupSkill.hasDependencies" class="ml-1"
-                       v-b-tooltip.hover="'Skills that have dependencies cannot be exported to the catalog.'">Has Dependencies</b-badge>
-            </li>
-            <li v-if="notExportableSkills.length > notExportableSkillsToShow.length" data-cy="cantExportTruncatedMsg">
-              <span class="text-primary font-weight-bold">{{ notExportableSkills.length - notExportableSkillsToShow.length }}</span> <span class="font-italic">more items...</span>
-            </li>
-          </ul>
+      <div v-if="insufficientSubjectPoints" class="alert alert-warning"><i class="fas fa-exclamation-circle" /> Export of skills is not allowed until the <b>subject</b> has sufficient points. Must have at least <b-badge>{{  this.$store.getters.config.minimumSubjectPoints }}</b-badge> points!</div>
+      <div v-else>
+        <div v-if="allSkillsExportedAlready">
+          All selected <b-badge variant="info">{{ skills.length }}</b-badge> skill(s) are already in the Skill Catalog.
         </div>
 
-  <!-- Keeping this code for the follow-on ticket-->
-  <!--      <hr/>-->
-  <!--      <div class="h6">Visibility:-->
-  <!--        <b-form-checkbox v-model="visibilityToAllProjects" @change="onVisibilityToAllProjects" class="mt-2 d-inline"-->
-  <!--                         data-cy="shareWithAllProjectsCheckbox">-->
-  <!--          <small>Share With All Projects </small>-->
-  <!--        </b-form-checkbox>-->
-  <!--      </div>-->
-  <!--      <project-selector :project-id="$route.params.projectId" :selected="selectedProject"-->
-  <!--                        v-on:selected="onSelectedProject"-->
-  <!--                        v-on:unselected="onUnSelectedProject"-->
-  <!--                        :only-single-selected-value="true"-->
-  <!--                        :disabled="visibilityToAllProjects">-->
-  <!--      </project-selector>-->
-      </b-overlay>
+        <b-overlay v-if="!allSkillsExportedAlready && !state.exported" :show="state.exporting" rounded="sm" opacity="0.5"
+                   spinner-variant="info" spinner-type="grow" spinner-small>
+          <p v-if="!allSkillsAreDups">
+            This will export <span v-if="isSingleId">
+            <b class="text-primary">[{{ firstSkillName }}]</b> Skill</span><span v-else><b-badge variant="info">{{ skillsFiltered.length }}</b-badge> Skills</span> to the <b-badge>SkillTree Catalog <i class="fas fa-book" aria-hidden="true" /></b-badge>.
+            Other project administrators will then be able to import a <b class="text-primary">read-only</b> version of this skill.
+          </p>
+          <p v-if="numAlreadyExported > 0">
+            <span class="font-italic"><i class="fas fa-exclamation-triangle text-warning" /> Note:</span> The are already <b-badge variant="info">{{ numAlreadyExported }}</b-badge> skill(s) in the Skill Catalog from the provided selection.
+          </p>
 
-      <p v-if="state.exported">
-        <i class="fas fa-check-circle text-success"></i>
-        <span v-if="isSingleId"> Skill with id <b class="text-primary">{{ firstSkillId }}</b> was</span>
-        <span v-else><b-badge variant="info" class="ml-2">{{ skillsFiltered.length }}</b-badge>
-          Skills were</span>  <span class="text-success font-weight-bold">successfully</span> exported to the catalog!
-      </p>
+          <div v-if="notExportableSkills && notExportableSkills.length > 0">
+            Cannot export <b-badge variant="primary">{{ notExportableSkills.length }}</b-badge> skill(s):
+            <ul>
+              <li v-for="dupSkill in notExportableSkillsToShow" :key="dupSkill.skillId" :data-cy="`dupSkill-${dupSkill.skillId}`">
+                {{ dupSkill.name }}
+                <b-badge variant="warning" v-if="dupSkill.skillNameConflictsWithExistingCatalogSkill" class="ml-1">Name Conflict</b-badge>
+                <b-badge variant="warning" v-if="dupSkill.skillIdConflictsWithExistingCatalogSkill" class="ml-1">ID Conflict</b-badge>
+                <b-badge variant="warning" v-if="dupSkill.hasDependencies" class="ml-1"
+                         v-b-tooltip.hover="'Skills that have dependencies cannot be exported to the catalog.'">Has Dependencies</b-badge>
+              </li>
+              <li v-if="notExportableSkills.length > notExportableSkillsToShow.length" data-cy="cantExportTruncatedMsg">
+                <span class="text-primary font-weight-bold">{{ notExportableSkills.length - notExportableSkillsToShow.length }}</span> <span class="font-italic">more items...</span>
+              </li>
+            </ul>
+          </div>
 
+    <!-- Keeping this code for the follow-on ticket-->
+    <!--      <hr/>-->
+    <!--      <div class="h6">Visibility:-->
+    <!--        <b-form-checkbox v-model="visibilityToAllProjects" @change="onVisibilityToAllProjects" class="mt-2 d-inline"-->
+    <!--                         data-cy="shareWithAllProjectsCheckbox">-->
+    <!--          <small>Share With All Projects </small>-->
+    <!--        </b-form-checkbox>-->
+    <!--      </div>-->
+    <!--      <project-selector :project-id="$route.params.projectId" :selected="selectedProject"-->
+    <!--                        v-on:selected="onSelectedProject"-->
+    <!--                        v-on:unselected="onUnSelectedProject"-->
+    <!--                        :only-single-selected-value="true"-->
+    <!--                        :disabled="visibilityToAllProjects">-->
+    <!--      </project-selector>-->
+        </b-overlay>
+
+        <p v-if="state.exported">
+          <i class="fas fa-check-circle text-success"></i>
+          <span v-if="isSingleId"> Skill [<b class="text-primary">{{ firstSkillName }}</b>] was</span>
+          <span v-else><b-badge variant="info" class="ml-2">{{ skillsFiltered.length }}</b-badge>
+            Skills were</span>  <span class="text-success font-weight-bold">successfully</span> exported to the catalog!
+        </p>
+      </div>
     </div>
 
-    <div v-if="allSkillsExportedAlready || state.exported || allSkillsAreDups" slot="modal-footer" class="w-100">
+    <div v-if="allSkillsExportedAlready || state.exported || allSkillsAreDups || insufficientSubjectPoints" slot="modal-footer" class="w-100">
       <b-button variant="secondary" size="sm" class="float-right mr-2" @click="close" data-cy="okButton">
         OK
       </b-button>
     </div>
 
-    <div v-if="!allSkillsExportedAlready && !state.exported && !allSkillsAreDups" slot="modal-footer" class="w-100">
+    <div v-if="!allSkillsExportedAlready && !state.exported && !allSkillsAreDups && !insufficientSubjectPoints" slot="modal-footer" class="w-100">
       <b-button variant="success" size="sm" class="float-right"
                 @click="handleExport"
                 data-cy="exportToCatalogButton">
@@ -122,6 +124,7 @@ limitations under the License.
         loadingData: true,
         visibilityToAllProjects: true,
         selectedProject: null,
+        insufficientSubjectPoints: false,
         skillsFiltered: [],
         notExportableSkills: [],
         notExportableSkillsToShow: [],
@@ -129,6 +132,7 @@ limitations under the License.
         allSkillsExportedAlready: false,
         isSingleId: false,
         firstSkillId: null,
+        firstSkillName: null,
         allSkillsAreDups: false,
         state: {
           exporting: false,
@@ -174,29 +178,33 @@ limitations under the License.
         const skillIds = this.skills.map((skill) => skill.skillId);
         CatalogService.areSkillsExportable(this.$route.params.projectId, skillIds)
           .then((res) => {
-            let enrichedSkills = this.skills.map((skillToUpdate) => {
-              const enhanceWith = res[skillToUpdate.skillId];
-              return ({
-                ...skillToUpdate,
-                hasDependencies: enhanceWith.hasDependencies,
-                skillAlreadyInCatalog: enhanceWith.skillAlreadyInCatalog,
-                skillIdConflictsWithExistingCatalogSkill: enhanceWith.skillIdConflictsWithExistingCatalogSkill,
-                skillNameConflictsWithExistingCatalogSkill: enhanceWith.skillNameConflictsWithExistingCatalogSkill,
+            this.insufficientSubjectPoints = !res.hasSufficientSubjectPoints;
+            if (!this.insufficientSubjectPoints) {
+              let enrichedSkills = this.skills.map((skillToUpdate) => {
+                const enhanceWith = res.skillsValidationRes[skillToUpdate.skillId];
+                return ({
+                  ...skillToUpdate,
+                  hasDependencies: enhanceWith.hasDependencies,
+                  skillAlreadyInCatalog: enhanceWith.skillAlreadyInCatalog,
+                  skillIdConflictsWithExistingCatalogSkill: enhanceWith.skillIdConflictsWithExistingCatalogSkill,
+                  skillNameConflictsWithExistingCatalogSkill: enhanceWith.skillNameConflictsWithExistingCatalogSkill,
+                });
               });
-            });
 
-            // re-filter if another user added to the filter or if the changes was made in another tab
-            enrichedSkills = enrichedSkills.filter((skill) => !skill.skillAlreadyInCatalog);
-            const isExportableSkill = (skill) => !skill.skillIdConflictsWithExistingCatalogSkill && !skill.skillNameConflictsWithExistingCatalogSkill && !skill.hasDependencies;
+              // re-filter if another user added to the filter or if the changes was made in another tab
+              enrichedSkills = enrichedSkills.filter((skill) => !skill.skillAlreadyInCatalog);
+              const isExportableSkill = (skill) => !skill.skillIdConflictsWithExistingCatalogSkill && !skill.skillNameConflictsWithExistingCatalogSkill && !skill.hasDependencies;
 
-            this.notExportableSkills = enrichedSkills.filter((skill) => !isExportableSkill(skill));
-            this.notExportableSkillsToShow = this.notExportableSkills.length > 9 ? this.notExportableSkills.slice(0, 8) : this.notExportableSkills;
-            this.allSkillsAreDups = enrichedSkills.length === this.notExportableSkills.length;
-            this.skillsFiltered = enrichedSkills.filter((skill) => isExportableSkill(skill));
-            this.numAlreadyExported = this.skills.length - this.skillsFiltered.length - this.notExportableSkills.length;
-            this.allSkillsExportedAlready = this.skillsFiltered.length === 0 && this.notExportableSkills.length === 0;
-            this.isSingleId = this.skillsFiltered.length === 1;
-            this.firstSkillId = this.skillsFiltered && this.skillsFiltered.length > 0 ? this.skillsFiltered[0].skillId : null;
+              this.notExportableSkills = enrichedSkills.filter((skill) => !isExportableSkill(skill));
+              this.notExportableSkillsToShow = this.notExportableSkills.length > 9 ? this.notExportableSkills.slice(0, 8) : this.notExportableSkills;
+              this.allSkillsAreDups = enrichedSkills.length === this.notExportableSkills.length;
+              this.skillsFiltered = enrichedSkills.filter((skill) => isExportableSkill(skill));
+              this.numAlreadyExported = this.skills.length - this.skillsFiltered.length - this.notExportableSkills.length;
+              this.allSkillsExportedAlready = this.skillsFiltered.length === 0 && this.notExportableSkills.length === 0;
+              this.isSingleId = this.skillsFiltered.length === 1;
+              this.firstSkillId = this.skillsFiltered && this.skillsFiltered.length > 0 ? this.skillsFiltered[0].skillId : null;
+              this.firstSkillName = this.skillsFiltered && this.skillsFiltered.length > 0 ? this.skillsFiltered[0].name : null;
+            }
           }).finally(() => {
             this.loadingData = false;
           });

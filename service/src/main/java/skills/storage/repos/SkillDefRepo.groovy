@@ -515,6 +515,33 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
               and (enabled = 'true' or 'false' = :enabledSkillsOnly )''', nativeQuery = true)
     Integer getProjectsTotalPoints(@Param('projectId') String projectId, @Param('enabledSkillsOnly') Boolean enabledSkillsOnly)
 
+    static interface MinMaxPoints {
+        Integer getMinPoints()
+        Integer getMaxPoints()
+    }
+
+    @Query(value = '''select min(total_points) as minPoints, max(total_points) as maxPoints
+            from skill_definition
+            where project_id = :projectId
+              and type = 'Skill'
+              and enabled = 'true'
+              ''', nativeQuery = true)
+    MinMaxPoints getSkillMinAndMaxTotalPoints(@Param('projectId') String projectId)
+
+    static interface SkillWithPoints {
+        String getSkillId()
+        String getSkillName()
+        Integer getTotalPoints()
+    }
+    @Query(value = '''select name as skillName, skill_id as skillId, total_points as totalPoints
+            from skill_definition
+            where project_id = :projectId
+              and type = 'Skill'
+              and enabled = 'false'
+              and (total_points < :lessThanExclusive OR total_points > :moreThanExclusive)
+              ''', nativeQuery = true)
+    List<SkillWithPoints> getDisabledSkillsOutOfRange(@Param('projectId') String projectId, @Param('lessThanExclusive') Integer lessThanExclusive, @Param('moreThanExclusive') Integer moreThanExclusive )
+
     @Query(value = '''select case when sum(skill.total_points) is not null then sum(skill.total_points) else 0 end as totalPoints
             from skill_relationship_definition rel,
                  skill_definition skill

@@ -28,15 +28,17 @@ limitations under the License.
       :data-cy="`skillSelect_${logicalId}`"
       :aria-label="`Import Skill ${projectId} ${skillId}`"
     >
-      <span>{{ skillName }}</span>
+      <show-more :text="skillName" :limit="45" />
     </b-form-checkbox>
   </div>
 </template>
 
 <script>
+  import ShowMore from '@/components/skills/selfReport/ShowMore';
 
   export default {
     name: 'ImportCheckbox',
+    components: { ShowMore },
     props: {
       disabled: {
         type: Boolean,

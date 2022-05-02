@@ -15,7 +15,7 @@
  */
 package skills.services
 
-import groovy.json.JsonOutput
+
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
@@ -25,9 +25,8 @@ import skills.auth.UserInfoService
 import skills.controller.result.model.TableResult
 import skills.controller.result.model.UserInfoRes
 import skills.controller.result.model.UserSkillsStats
-import skills.skillLoading.model.SkillPerfomed
+import skills.skillLoading.model.SkillPerformed
 import skills.storage.model.UserAttrs
-import skills.storage.model.UserPerformedSkill
 import skills.storage.model.UserPoints
 import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserPerformedSkillRepo
@@ -55,9 +54,13 @@ class UserAdminService {
         Long totalPerformedSkills = performedSkillRepository.countByUserIdAndProjectId(userId, projectId)
         if(totalPerformedSkills) {
             Long filteredPerformedSkillsCount = performedSkillRepository.countByUserIdAndProjectIdAndSkillIdIgnoreCaseContaining(userId, projectId, query)
-            List<UserPerformedSkill> performedSkills = performedSkillRepository.findByUserIdAndProjectIdAndSkillIdIgnoreCaseContaining(userId, projectId, query, pageRequest)
+            List<UserPerformedSkillRepo.PerformedSkillQRes> performedSkills = performedSkillRepository.findByUserIdAndProjectIdAndSkillIdIgnoreCaseContaining(userId, projectId, query, pageRequest)
             result.data = performedSkills.collect({
-                new SkillPerfomed(skillId: it.skillId, performedOn: it.performedOn, importedSkill: it.projectId != projectId)
+                new SkillPerformed(
+                        skillName: it.getSkillName(),
+                        skillId: it.getSkillId(),
+                        performedOn: it.getPerformedOn(),
+                        importedSkill: it.getProjectId() != projectId)
             })
             result.count = filteredPerformedSkillsCount
         }

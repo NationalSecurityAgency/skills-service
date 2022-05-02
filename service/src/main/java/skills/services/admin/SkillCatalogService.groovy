@@ -44,6 +44,7 @@ import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillDefWithExtraRepo
 import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.nativeSql.NativeQueriesRepo
+import skills.utils.InputSanitizer
 import skills.utils.Props
 
 @Service
@@ -89,7 +90,10 @@ class SkillCatalogService {
     SkillCatalogFinalizationService skillCatalogFinalizationService\
 
     @Autowired
-    InsufficientPointsForFinalizationValidator insufficientPointsValidator
+    InsufficientPointsForFinalizationValidator insufficientPointsForFinalizationValidator
+
+    @Autowired
+    InsufficientPointsValidator insufficientPointsValidator
 
     @Autowired
     ProjDefRepo projDefRepo
@@ -115,8 +119,8 @@ class SkillCatalogService {
     }
 
     @Transactional(readOnly = true)
-    List<ExportableToCatalogValidationResult> canSkillIdsBeExported(String projectId, List<String> skillIds) {
-        List<ExportableToCatalogValidationResult> validationResults = []
+    List<ExportableToCatalogSkillValidationResult> canSkillIdsBeExported(String projectId, List<String> skillIds) {
+        List<ExportableToCatalogSkillValidationResult> validationResults = []
         skillIds?.each { String skillId ->
             boolean idConflict = doesSkillIdAlreadyExistInCatalog(skillId)
             SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillId(projectId, skillId)
@@ -124,7 +128,7 @@ class SkillCatalogService {
             boolean nameConflict = doesSkillNameAlreadyExistInCatalog(skillDef.name)
             boolean hasDependencies = countDependencies(skillDef.projectId, skillDef.skillId) > 0
             boolean alreadyInCatalog = isAvailableInCatalog(skillDef)
-            validationResults.add(new ExportableToCatalogValidationResult(
+            validationResults.add(new ExportableToCatalogSkillValidationResult(
                     skillId: skillId,
                     projectId: skillDef.projectId,
                     skillAlreadyInCatalog: alreadyInCatalog,
@@ -188,7 +192,9 @@ class SkillCatalogService {
             throw new SkillException("Skill id [${skillId}] already exists in the catalog. Duplicated skill ids are not allowed", projectId, skillId, ErrorCode.SkillAlreadyInCatalog)
         }
 
-        projDefAccessor.getProjDef(projectId)
+        ProjDef projDef = projDefAccessor.getProjDef(projectId)
+        insufficientPointsValidator.validateProjectPoints(projDef.totalPoints, projDef.projectId, null, ", export to catalog is disallowed")
+
         SkillDefWithExtra skillDef = skillDefWithExtraRepo.findByProjectIdAndSkillId(projectId, skillId)
         if (!skillDef) {
             throw new SkillException("Skill [${skillId}] doesn't exist.", projectId, skillId, ErrorCode.SkillNotFound)
@@ -199,6 +205,8 @@ class SkillCatalogService {
         if (doesSkillNameAlreadyExistInCatalog(skillDef.name)) {
             throw new SkillException("Skill name [${skillDef.name}] already exists in the catalog. Duplicate skill names are not allowed", projectId, skillId, ErrorCode.SkillAlreadyInCatalog)
         }
+        SkillDef mySubject = relationshipService.getMySubjectParent(skillDef.id)
+        insufficientPointsValidator.validateSubjectPoints(mySubject.totalPoints, mySubject.projectId,  mySubject.skillId, null, ", export to catalog is disallowed")
 
         Long dependencies = countDependencies(skillDef.projectId, skillDef.skillId)
         if (dependencies > 0) {
@@ -319,11 +327,11 @@ class SkillCatalogService {
 
     void requestFinalizationOfImportedSkills(String projectId) {
         ProjectTotalPoints projectTotalPoints = projDefRepo.getProjectTotalPointsIncPendingFinalization(projectId)
-        insufficientPointsValidator.validateProjectPoints(projectTotalPoints.totalIncPendingFinalized, projectTotalPoints.projectId)
+        insufficientPointsForFinalizationValidator.validateProjectPoints(projectTotalPoints.totalIncPendingFinalized, projectTotalPoints.projectId)
 
         List<SubjectTotalPoints> subjectTotalPoints = skillRelDefRepo.getSubjectTotalPointsIncPendingFinalization(projectId)
         subjectTotalPoints?.each {
-            insufficientPointsValidator.validateSubjectPoints(it.totalIncPendingFinalized, projectId, it.subjectId)
+            insufficientPointsForFinalizationValidator.validateSubjectPoints(it.totalIncPendingFinalized, projectId, it.subjectId)
         }
 
         skillCatalogFinalizationService.requestFinalizationOfImportedSkills(projectId)
@@ -332,7 +340,23 @@ class SkillCatalogService {
     CatalogFinalizeInfoResult getFinalizeInfo(String projectId) {
         int numDisabled = skillDefRepo.countByProjectIdAndEnabledAndCopiedFromIsNotNull(projectId, Boolean.FALSE.toString())
         boolean isRunning = skillCatalogFinalizationService.getCurrentState(projectId) == SkillCatalogFinalizationService.FinalizeState.RUNNING
-        return new CatalogFinalizeInfoResult(projectId: projectId, numSkillsToFinalize: numDisabled, isRunning: isRunning)
+        SkillDefRepo.MinMaxPoints points = skillDefRepo.getSkillMinAndMaxTotalPoints(projectId)
+
+        List<SkillWithPointsResult> skillsWithOutOfBoundsPoints = []
+        if (points?.minPoints) {
+            List<SkillDefRepo.SkillWithPoints> skillWithPoints = skillDefRepo.getDisabledSkillsOutOfRange(projectId, points.getMinPoints(), points.getMaxPoints())
+            skillsWithOutOfBoundsPoints = skillWithPoints.collect {
+                new SkillWithPointsResult(skillId: it.skillId, skillName: it.skillName, totalPoints: it.totalPoints)
+            }
+        }
+        return new CatalogFinalizeInfoResult(
+                projectId: projectId,
+                numSkillsToFinalize: numDisabled,
+                isRunning: isRunning,
+                projectSkillMinPoints: points.getMinPoints(),
+                projectSkillMaxPoints: points.getMaxPoints(),
+                skillsWithOutOfBoundsPoints: skillsWithOutOfBoundsPoints
+        )
     }
 
     @Profile
@@ -478,7 +502,13 @@ class SkillCatalogService {
         List<SkillDef> copies = skillDefRepo.findSkillsCopiedFrom(es.skill.id)
         copies?.each {
             SkillDef subject = relationshipService.getParentSkill(it)
-            stats.users << new ExportedSkillUser(importingProjectId: it.projectId, importedOn: it.created, importedIntoSubjectId: subject.skillId)
+            stats.users << new ExportedSkillUser(
+                    importingProjectId: it.projectId,
+                    importingProjectName: subject.projDef.name,
+                    importedOn: it.created, importedIntoSubjectId:
+                    subject.skillId,
+                    importedIntoSubjectName: subject.name
+            )
         }
 
         return stats
@@ -580,10 +610,11 @@ class SkillCatalogService {
     private static ExportedSkillRes convert(ExportedSkillTiny exportedSkillTiny) {
         ExportedSkillRes esr = new ExportedSkillRes()
         esr.skillId = exportedSkillTiny.skillId
-        esr.skillName = exportedSkillTiny.skillName
-        esr.subjectName = exportedSkillTiny.subjectName
+        esr.skillName = InputSanitizer.unsanitizeName(exportedSkillTiny.skillName)
+        esr.subjectName = InputSanitizer.unsanitizeName(exportedSkillTiny.subjectName)
         esr.exportedOn = exportedSkillTiny.exportedOn
         esr.subjectId = exportedSkillTiny.subjectId
+        esr.importedProjectCount = exportedSkillTiny.importedProjectCount
         return esr
     }
 
@@ -592,10 +623,11 @@ class SkillCatalogService {
         CatalogSkillRes partial = new CatalogSkillRes()
         Props.copy(catalogSkill.skill, partial)
         partial.subjectId = catalogSkill.subjectId
-        partial.subjectName = catalogSkill.subjectName
-        partial.projectName = catalogSkill.projectName
+        partial.subjectName = InputSanitizer.unsanitizeName(catalogSkill.subjectName)
+        partial.projectName = InputSanitizer.unsanitizeName(catalogSkill.projectName)
         partial.exportedOn = catalogSkill.exportedOn
         partial.sharedToCatalog = true
+        partial.name = InputSanitizer.unsanitizeName(partial.name)
         partial.numPerformToCompletion = catalogSkill.skill.totalPoints / catalogSkill.skill.pointIncrement
         return partial
     }

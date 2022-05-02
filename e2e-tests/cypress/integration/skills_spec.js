@@ -817,37 +817,37 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="saveSkillButton"]').click()
 
     const skillId = `GreatName1233Skill${fiftyChars}`
-    cy.get('[data-cy=showMoreText]').should('have.length', 1);
-    cy.get('[data-cy=showLess]').should('not.exist');
-    cy.get('[data-cy=showMore]').should('have.length', 1);
-    cy.get('[data-cy=smtText]').should('not.have.text', `ID: ${skillId}`);
-    cy.get('[data-cy=smtText]').should('have.text', `ID: ${skillId.substring(0, 50)}`);
-    cy.get('[data-cy=showMore]').click();
-    cy.get('[data-cy=smtText]').should('have.text', `ID: ${skillId}`);
-    cy.get('[data-cy=showLess]').should('have.length', 1);
-    cy.get('[data-cy=showMore]').should('not.exist');
-    cy.get('[data-cy=showLess]').click();
-    cy.get('[data-cy=showMore]').should('have.length', 1);
-    cy.get('[data-cy=smtText]').should('not.have.text', `ID: ${skillId}`);
-    cy.get('[data-cy=smtText]').should('have.text', `ID: ${skillId.substring(0, 50)}`);
+    cy.get('[data-cy="skillId"] [data-cy=showMoreText]').should('have.length', 1);
+    cy.get('[data-cy="skillId"] [data-cy=showLess]').should('not.exist');
+    cy.get('[data-cy="skillId"] [data-cy=showMore]').should('have.length', 1);
+    cy.get('[data-cy="skillId"] [data-cy=smtText]').should('not.have.text', `ID: ${skillId}`);
+    cy.get('[data-cy="skillId"] [data-cy=smtText]').should('have.text', `ID: ${skillId.substring(0, 50)}`);
+    cy.get('[data-cy="skillId"] [data-cy=showMore]').click();
+    cy.get('[data-cy="skillId"] [data-cy=smtText]').should('have.text', `ID: ${skillId}`);
+    cy.get('[data-cy="skillId"] [data-cy=showLess]').should('have.length', 1);
+    cy.get('[data-cy="skillId"] [data-cy=showMore]').should('not.exist');
+    cy.get('[data-cy="skillId"] [data-cy=showLess]').click();
+    cy.get('[data-cy="skillId"] [data-cy=showMore]').should('have.length', 1);
+    cy.get('[data-cy="skillId"] [data-cy=smtText]').should('not.have.text', `ID: ${skillId}`);
+    cy.get('[data-cy="skillId"] [data-cy=smtText]').should('have.text', `ID: ${skillId.substring(0, 50)}`);
 
     cy.intercept('GET', `/administrator/projects/proj1/subjects/subj1/skills/${skillId}`).as('loadSkill1');
     cy.visit(`/administrator/projects/proj1/subjects/subj1/skills/${skillId}`);
     cy.wait('@loadSkill1');
 
-    cy.get('[data-cy=showMoreText]').should('have.length', 1);
-    cy.get('[data-cy=showLess]').should('not.exist');
-    cy.get('[data-cy=showMore]').should('have.length', 1);
-    cy.get('[data-cy=smtText]').should('not.have.text', `ID: ${skillId}`);
-    cy.get('[data-cy=smtText]').should('have.text', `ID: ${skillId.substring(0, 50)}`);
-    cy.get('[data-cy=showMore]').click();
-    cy.get('[data-cy=smtText]').should('have.text', `ID: ${skillId}`);
-    cy.get('[data-cy=showLess]').should('have.length', 1);
-    cy.get('[data-cy=showMore]').should('not.exist');
-    cy.get('[data-cy=showLess]').click();
-    cy.get('[data-cy=showMore]').should('have.length', 1);
-    cy.get('[data-cy=smtText]').should('not.have.text', `ID: ${skillId}`);
-    cy.get('[data-cy=smtText]').should('have.text', `ID: ${skillId.substring(0, 50)}`);
+    cy.get('[data-cy="skillId"] [data-cy=showMoreText]').should('have.length', 1);
+    cy.get('[data-cy="skillId"] [data-cy=showLess]').should('not.exist');
+    cy.get('[data-cy="skillId"] [data-cy=showMore]').should('have.length', 1);
+    cy.get('[data-cy="skillId"] [data-cy=smtText]').should('not.have.text', `ID: ${skillId}`);
+    cy.get('[data-cy="skillId"] [data-cy=smtText]').should('have.text', `ID: ${skillId.substring(0, 50)}`);
+    cy.get('[data-cy="skillId"] [data-cy=showMore]').click();
+    cy.get('[data-cy="skillId"] [data-cy=smtText]').should('have.text', `ID: ${skillId}`);
+    cy.get('[data-cy="skillId"] [data-cy=showLess]').should('have.length', 1);
+    cy.get('[data-cy="skillId"] [data-cy=showMore]').should('not.exist');
+    cy.get('[data-cy="skillId"] [data-cy=showLess]').click();
+    cy.get('[data-cy="skillId"] [data-cy=showMore]').should('have.length', 1);
+    cy.get('[data-cy="skillId"] [data-cy=smtText]').should('not.have.text', `ID: ${skillId}`);
+    cy.get('[data-cy="skillId"] [data-cy=smtText]').should('have.text', `ID: ${skillId.substring(0, 50)}`);
   });
 
   it('edit skill on page', () => {
@@ -1329,5 +1329,48 @@ describe('Skills Tests', () => {
     cy.wait('@deleteSkill');
     cy.get('[data-cy=pageHeaderStat]').eq(1).should('contain.text', '4');
   });
+
+  it('skills page - long skill names should be truncated', () => {
+    const longName = 'Verylongandinterestingskill;Verylongandinterestingskill;Verylongandinterestingskill;Verylongandinterestingskill;Verylongandinterestingskill;'
+    cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills', (req) => {
+      req.reply({
+        body: [{
+          'skillId': 'skill1',
+          'projectId': 'proj1',
+          'name': longName,
+          'subjectId': null,
+          'subjectName': null,
+          'version': 0,
+          'displayOrder': 1,
+          'created': '2022-04-28T23:48:22.078+00:00',
+          'totalPoints': 200,
+          'pointIncrement': 100,
+          'pointIncrementInterval': 480,
+          'numMaxOccurrencesIncrementInterval': 1,
+          'numPerformToCompletion': 2,
+          'type': 'Skill',
+          'updated': '2022-04-28T23:48:22.078+00:00',
+          'numUsers': 0,
+          'selfReportingType': null,
+          'numSkillsInGroup': null,
+          'numSelfReportSkills': null,
+          'numSkillsRequired': -1,
+          'enabled': true,
+          'groupId': null,
+          'groupName': null,
+          'readOnly': false,
+          'copiedFromProjectId': null,
+          'copiedFromProjectName': null,
+          'sharedToCatalog': false
+        }],
+      });
+    }).as('getSkills');
+
+    cy.createSkill(1, 1, 1);
+    cy.visit('/administrator/projects/proj1/subjects/subj1');
+    cy.wait('@getSkills')
+    cy.contains('Verylongandinterestingskill;Verylongandintere... >> more');
+  });
+
 
 });

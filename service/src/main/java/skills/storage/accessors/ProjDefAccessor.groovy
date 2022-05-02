@@ -45,7 +45,7 @@ class ProjDefAccessor {
 
     @Transactional()
     ProjSummaryResult getProjSummaryResult(String projectId) {
-        ProjSummaryResult projDef = projDefRepo.getSummaryByProjectIdIgnoreCase(projectId)
+        ProjSummaryResult projDef = projDefRepo.getSummaryByProjectId(projectId)
         if (!projDef) {
             throw new SkillException("Failed to find project [$projectId]", projectId, null, ErrorCode.ProjectNotFound)
         }

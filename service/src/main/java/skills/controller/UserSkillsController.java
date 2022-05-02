@@ -51,7 +51,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-@CrossOrigin(allowCredentials = "true")
+@CrossOrigin(allowCredentials = "true", originPatterns = {"*"})
 @RestController
 @RequestMapping("/api")
 @skills.auth.aop.AdminUsersOnlyWhenUserIdSupplied

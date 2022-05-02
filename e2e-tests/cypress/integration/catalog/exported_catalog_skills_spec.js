@@ -46,7 +46,45 @@ describe('Skills Exported to Catalog Tests', () => {
         ], 5);
 
         cy.get('[data-cy="deleteSkillButton_skill1"]').click();
-        cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will PERMANENTLY remove skill [skill1] from the catalog. This skill is currently imported by 0 projects.')
+        cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will PERMANENTLY remove [Very Great Skill 1] Skill from the catalog. This skill is currently imported by 0 projects.')
+        cy.get('[data-cy="removeButton"]').should('be.disabled');
+        cy.get('[data-cy="currentValidationText"]').type('Delete Me1');
+        cy.get('[data-cy="currentValidationText"]').should('have.value', 'Delete Me1');
+        cy.get('[data-cy="removeButton"]').should('be.disabled');
+        cy.get('[data-cy="currentValidationText"]').type('{backspace}');
+        cy.get('[data-cy="removeButton"]').should('be.enabled');
+        cy.get('[data-cy="removeButton"]').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Very Great Skill 2 Subj2' }, { colIndex: 1,  value: 'Subject 2' }],
+        ], 5);
+
+        // refresh and validate
+        cy.visit('/administrator/projects/proj2/skills-catalog');
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Very Great Skill 2 Subj2' }, { colIndex: 1,  value: 'Subject 2' }],
+        ], 5);
+    });
+
+    it('delete skill with url encoded id', () => {
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSubject(2, 2);
+        const skillId = 'tm_eafeafeafeafeSkill%2Ddlajleajljelajelkajlajle';
+        cy.createSkill(2, 1, 1, {skillId});
+        cy.createSkill(2, 2, 2);
+        const exportUrl = `/admin/projects/proj2/skills/${encodeURIComponent(skillId)}/export`;
+        cy.request('POST', exportUrl);
+        cy.wait(1001)
+        cy.exportSkillToCatalog(2, 2, 2);
+
+        cy.visit('/administrator/projects/proj2/skills-catalog');
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Very Great Skill 2 Subj2' }, { colIndex: 1,  value: 'Subject 2' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 1' }, { colIndex: 1,  value: 'Subject 1' }],
+        ], 5);
+
+        cy.get(`[data-cy="deleteSkillButton_${skillId}"]`).click();
+        cy.get('[data-cy="removalSafetyCheckMsg"]').contains(`This will PERMANENTLY remove [Very Great Skill 1] Skill from the catalog. This skill is currently imported by 0 projects.`)
         cy.get('[data-cy="removeButton"]').should('be.disabled');
         cy.get('[data-cy="currentValidationText"]').type('Delete Me1');
         cy.get('[data-cy="currentValidationText"]').should('have.value', 'Delete Me1');
@@ -82,12 +120,12 @@ describe('Skills Exported to Catalog Tests', () => {
 
         cy.visit('/administrator/projects/proj1/skills-catalog');
         cy.get('[data-cy="deleteSkillButton_skill1"]').click();
-        cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will PERMANENTLY remove skill [skill1] from the catalog. This skill is currently imported by 2 projects.')
+        cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will PERMANENTLY remove [Very Great Skill 1] Skill from the catalog. This skill is currently imported by 2 projects.')
         cy.get('[data-cy="removeButton"]').should('be.disabled');
 
         cy.get('[data-cy="closeRemovalSafetyCheck"]').click();
         cy.get('[data-cy="deleteSkillButton_skill2"]').click();
-        cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will PERMANENTLY remove skill [skill2] from the catalog. This skill is currently imported by 1 projects.')
+        cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will PERMANENTLY remove [Very Great Skill 2] Skill from the catalog. This skill is currently imported by 1 projects.')
         cy.get('[data-cy="removeButton"]').should('be.disabled');
     });
 
@@ -274,6 +312,33 @@ describe('Skills Exported to Catalog Tests', () => {
         // occurrences are synced but not points
         cy.get('[data-cy="totalPointsCell_skill1"]').contains('100 pts x 7 repetitions')
         cy.get('[data-cy="nameCell_skill1"]').contains('Very Great Skill 1A')
+    })
+
+    it('View imported details for exported skills', () => {
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2);
+        cy.exportSkillToCatalog(1, 1, 1);
+        cy.exportSkillToCatalog(1, 1, 2);
+
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.importSkillFromCatalog(2, 1, 1, 1)
+        cy.finalizeCatalogImport(2)
+
+        cy.visit('/administrator/projects/proj1');
+        cy.get('[data-cy="nav-Skill Catalog"]').click();
+        cy.validateTable('[data-cy="exportedSkillsTable"]', [
+            [{ colIndex: 0,  value: 'Very Great Skill 2' }, { colIndex: 2,  value: '0' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 1' }, { colIndex: 2,  value: '1' }],
+        ], 5);
+        cy.get('[data-cy="expandDetailsBtn_proj1_skill2"]').click();
+        cy.get('[data-cy="importSkillInfo-proj1_skill2"').contains('This skill has not been imported by any other projects yet...')
+
+        cy.get('[data-cy="expandDetailsBtn_proj1_skill1"]').click();
+        cy.get('[data-cy="importSkillInfo-proj1_skill1"] [data-cy="importedSkillsTable"]').should('exist')
+        cy.validateTable('[data-cy="importSkillInfo-proj1_skill1"] [data-cy="importedSkillsTable"]', [
+            [{ colIndex: 0,  value: 'This is project 2' }],
+        ],  5, true, null, false);
     })
 });
 

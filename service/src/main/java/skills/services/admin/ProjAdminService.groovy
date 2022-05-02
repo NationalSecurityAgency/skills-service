@@ -438,7 +438,7 @@ class ProjAdminService {
             throw new SkillException("Project not found", projectId, null, ErrorCode.ProjectNotFound)
         }
 
-        return mySummary.projectName
+        return InputSanitizer.unsanitizeName(mySummary.projectName)
     }
 
     @Profile
