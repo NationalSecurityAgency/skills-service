@@ -129,7 +129,6 @@ limitations under the License.
   export default {
     name: 'ExportedSkills',
     components: {
-      ShowMore,
       ExportedSkillDeletionWarning,
       RemovalValidation,
       SkillsBTable,
