@@ -121,4 +121,15 @@ class ProjectErrorSpecs extends DefaultIntSpec {
         errorsAfterDelete.data.size() == 1
     }
 
+    def 'project id is case sensitive - return project not found if projectId case does not match'() {
+        def proj = SkillsFactory.createProject()
+        skillsService.createProject(proj)
+
+        when:
+        skillsService.getProject(proj.projectId.toUpperCase())
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.resBody.contains("Failed to find project [${proj.projectId.toUpperCase()}]")
+        e.resBody.contains('"errorCode":"ProjectNotFound"'.toString())
+    }
 }
