@@ -125,20 +125,27 @@ interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, In
     List<SkillDefWithExtra> getSkillsExportedByProject(String projectId, Pageable pageable)
 
     @Nullable
-    @Query('''
-            select es.skill.skillId as skillId, 
-                 es.skill.name as skillName,
-                 es.created as exportedOn,
-                 subject.name as subjectName,
-                 subject.skillId as subjectId,
-                 (select count(distinct sd.projectId) from SkillDef sd where sd.copiedFrom = es.skill.id and sd.enabled = 'true') as importedProjectCount
-             from ExportedSkill es, SkillRelDef srd, SkillDef subject 
-             where es.projectId = ?1 and 
-             subject = srd.parent and
-             srd.type = 'RuleSetDefinition' and
-             subject.type = 'Subject' and 
-             srd.child.id = es.skill.id
-            ''')
+    @Query(value="""
+        select skill.skill_id   as skillId,
+               skill.name       as skillName,
+               es.created       as exportedOn,
+               subject.name     as subjectName,
+               subject.skill_id as subjectId,
+               (count(distinct imported_skills.project_id)) as importedProjectCount
+        from skill_relationship_definition srd,
+             skill_definition subject,
+             skill_definition skill,
+             exported_skills es LEFT JOIN skill_definition imported_skills on (es.skill_ref_id = imported_skills.copied_from_skill_ref and imported_skills.enabled = 'true')
+        where es.exported_from_project_id = ?1
+          and skill.project_id = ?1
+          and es.skill_ref_id = skill.id
+          and skill.id = srd.child_ref_id
+          and subject.id = srd.parent_ref_id
+          and srd.type = 'RuleSetDefinition'
+          and subject.type = 'Subject'
+          and skill.type = 'Skill'
+        group by skillId, skillName, exportedOn, subjectName, subjectId
+    """, nativeQuery=true)
     List<ExportedSkillTiny> getTinySkillsExportedByProject(String projectId, Pageable pageable)
 
     @Query('''select count(es.id) from ExportedSkill es where es.projectId = ?1''')

@@ -153,6 +153,11 @@ describe('Skills Exported to Catalog Tests', () => {
         cy.wait(100)
         cy.exportSkillToCatalog(1, 2, 7);
 
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.importSkillFromCatalog(2, 1, 1, 1)
+        cy.finalizeCatalogImport(2)
+
         cy.visit('/administrator/projects/proj1/skills-catalog');
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'Very Great Skill 7 Subj2' }, { colIndex: 1,  value: 'Subject 2' }],
@@ -217,6 +222,28 @@ describe('Skills Exported to Catalog Tests', () => {
             [{ colIndex: 1,  value: 'Subject 1' }],
             [{ colIndex: 1,  value: 'Subject 1' }],
             [{ colIndex: 1,  value: 'Subject 1' }],
+        ], 5);
+
+        cy.get(`${tableSelector} th`).contains('# of Projects Imported').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 2,  value: '0' }],
+            [{ colIndex: 2,  value: '0' }],
+            [{ colIndex: 2,  value: '0' }],
+            [{ colIndex: 2,  value: '0' }],
+            [{ colIndex: 2,  value: '0' }],
+            [{ colIndex: 2,  value: '0' }],
+            [{ colIndex: 2,  value: '1' }],
+        ], 5);
+
+        cy.get(`${tableSelector} th`).contains('# of Projects Imported').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 2,  value: '1' }],
+            [{ colIndex: 2,  value: '0' }],
+            [{ colIndex: 2,  value: '0' }],
+            [{ colIndex: 2,  value: '0' }],
+            [{ colIndex: 2,  value: '0' }],
+            [{ colIndex: 2,  value: '0' }],
+            [{ colIndex: 2,  value: '0' }],
         ], 5);
     });
 
