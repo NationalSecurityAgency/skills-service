@@ -85,6 +85,7 @@ limitations under the License.
       if (this.isDevelopmentMode()) {
         this.configureDevelopmentMode();
         this.loadConfigs();
+        this.getCustomIconCss();
       } else {
         const handshake = new Postmate.Model({
           updateAuthenticationToken(authToken) {
@@ -137,11 +138,9 @@ limitations under the License.
           document.body.style['overflow-y'] = 'hidden';
 
           this.loadConfigs();
+          this.getCustomIconCss();
         });
       }
-    },
-    mounted() {
-      this.getCustomIconCss();
     },
     methods: {
       loadConfigs() {
