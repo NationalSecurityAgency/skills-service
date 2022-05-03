@@ -344,17 +344,24 @@ describe('Skills Exported to Catalog Tests', () => {
     it('View imported details for exported skills', () => {
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
+        cy.createSkill(1, 1, 3);
         cy.exportSkillToCatalog(1, 1, 1);
         cy.exportSkillToCatalog(1, 1, 2);
+        cy.exportSkillToCatalog(1, 1, 3);
 
         cy.createProject(2);
         cy.createSubject(2, 1);
         cy.importSkillFromCatalog(2, 1, 1, 1)
         cy.finalizeCatalogImport(2)
 
+        cy.createProject(3);
+        cy.createSubject(3, 1);
+        cy.importSkillFromCatalog(3, 1, 1, 3)
+
         cy.visit('/administrator/projects/proj1');
         cy.get('[data-cy="nav-Skill Catalog"]').click();
         cy.validateTable('[data-cy="exportedSkillsTable"]', [
+            [{ colIndex: 0,  value: 'Very Great Skill 3' }, { colIndex: 2,  value: '1' }],
             [{ colIndex: 0,  value: 'Very Great Skill 2' }, { colIndex: 2,  value: '0' }],
             [{ colIndex: 0,  value: 'Very Great Skill 1' }, { colIndex: 2,  value: '1' }],
         ], 5);
@@ -365,6 +372,12 @@ describe('Skills Exported to Catalog Tests', () => {
         cy.get('[data-cy="importSkillInfo-proj1_skill1"] [data-cy="importedSkillsTable"]').should('exist')
         cy.validateTable('[data-cy="importSkillInfo-proj1_skill1"] [data-cy="importedSkillsTable"]', [
             [{ colIndex: 0,  value: 'This is project 2' }],
+        ],  5, true, null, false);
+
+        cy.get('[data-cy="expandDetailsBtn_proj1_skill3"]').click();
+        cy.get('[data-cy="importSkillInfo-proj1_skill3"] [data-cy="importedSkillsTable"]').should('exist')
+        cy.validateTable('[data-cy="importSkillInfo-proj1_skill3"] [data-cy="importedSkillsTable"]', [
+            [{ colIndex: 0,  value: 'This is project 3Disabled' }],
         ],  5, true, null, false);
     })
 });
