@@ -15,13 +15,13 @@
  */
 package skills.controller
 
-
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.jpa.domain.JpaSort
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -1203,7 +1203,7 @@ class AdminController {
                                         @RequestParam int page,
                                         @RequestParam String orderBy,
                                         @RequestParam Boolean ascending) {
-        TotalCountAwareResult<ExportedSkillRes> res = skillCatalogService.getSkillsExportedByProject(projectId, createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending))
+        TotalCountAwareResult<ExportedSkillRes> res = skillCatalogService.getSkillsExportedByProject(projectId, createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending, orderBy=='importedProjectCount'))
 
         TableResult tr = new TableResult()
         tr.count = res.results?.size()
@@ -1239,11 +1239,16 @@ class AdminController {
     }
 
 
-    private static PageRequest createPagingRequestWithValidation(String projectId, int limit, int page, String orderBy, Boolean ascending) {
+    private static PageRequest createPagingRequestWithValidation(String projectId, int limit, int page, String orderBy, Boolean ascending, Boolean useUnsafeSort=false) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isTrue(limit <= 200, "Cannot ask for more than 200 items, provided=[${limit}]", projectId)
         SkillsValidator.isTrue(page >= 0, "Cannot provide negative page. provided =[${page}]", projectId)
-        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
+        PageRequest pageRequest
+        if (useUnsafeSort) {
+            pageRequest = PageRequest.of(page - 1, limit, JpaSort.unsafe(ascending ? ASC : DESC, "(${orderBy})"))
+        } else {
+            pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
+        }
 
         return pageRequest
     }

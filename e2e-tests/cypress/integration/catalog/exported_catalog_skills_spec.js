@@ -278,6 +278,28 @@ describe('Skills Exported to Catalog Tests', () => {
             [{ colIndex: 1,  value: 'Subject 2' }],
             [{ colIndex: 1,  value: 'Subject 2' }],
         ], 25);
+
+        cy.get(`${tableSelector} th`).contains('# of Projects Imported').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 2,  value: '0' }],
+            [{ colIndex: 2,  value: '0' }],
+            [{ colIndex: 2,  value: '0' }],
+            [{ colIndex: 2,  value: '0' }],
+            [{ colIndex: 2,  value: '0' }],
+            [{ colIndex: 2,  value: '0' }],
+            [{ colIndex: 2,  value: '1' }],
+        ], 5);
+
+        cy.get(`${tableSelector} th`).contains('# of Projects Imported').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 2,  value: '1' }],
+            [{ colIndex: 2,  value: '0' }],
+            [{ colIndex: 2,  value: '0' }],
+            [{ colIndex: 2,  value: '0' }],
+            [{ colIndex: 2,  value: '0' }],
+            [{ colIndex: 2,  value: '0' }],
+            [{ colIndex: 2,  value: '0' }],
+        ], 5);
     })
 
     it('Change exported skills attributes - imported attributes are updated', () => {
