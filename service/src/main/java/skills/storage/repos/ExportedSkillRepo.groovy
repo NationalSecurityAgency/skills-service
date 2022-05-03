@@ -135,7 +135,7 @@ interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, In
         from skill_relationship_definition srd,
              skill_definition subject,
              skill_definition skill,
-             exported_skills es LEFT JOIN skill_definition imported_skills on (es.skill_ref_id = imported_skills.copied_from_skill_ref and imported_skills.enabled = 'true')
+             exported_skills es LEFT JOIN skill_definition imported_skills on (es.skill_ref_id = imported_skills.copied_from_skill_ref)
         where es.exported_from_project_id = ?1
           and skill.project_id = ?1
           and es.skill_ref_id = skill.id

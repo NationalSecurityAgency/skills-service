@@ -24,4 +24,5 @@ class ExportedSkillUser {
     String importedIntoSubjectId
     String importedIntoSubjectName
     Date importedOn
+    String enabled
 }
