@@ -20,7 +20,8 @@ limitations under the License.
        role="button"
        aria-roledescription="icon selector button"
        aria-label="icon selector"
-       tabindex="0">
+       tabindex="0"
+       data-cy="iconPicker">
     <div class="card-body text-primary" style="min-height: 4rem;">
       <i
         :class="[selectedIconClass]" />
