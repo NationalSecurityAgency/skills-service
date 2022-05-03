@@ -24,13 +24,14 @@ limitations under the License.
           <span class="text-primary"><i
             class="fas fa-graduation-cap skills-color-skills"/> {{ data.label }}</span>
         </template>
-        <template #head(importedIntoSubjectId)="data">
-          <span class="text-primary"><i
-            class="fas fa-cubes skills-color-subjects"></i> {{ data.label }}</span>
-        </template>
         <template #head(importedOn)="data">
           <span class="text-primary"><i
             class="fas fa-clock skills-color-projects"></i> {{ data.label }}</span>
+        </template>
+
+        <template v-slot:cell(importingProjectName)="data">
+          <span class="ml-2">{{ data.value }}</span>
+          <span v-if="data.item.enabled !== 'true'" class="text-uppercase ml-2"><b-badge variant="warning">Disabled</b-badge></span>
         </template>
 
         <template v-slot:cell(importedOn)="data">

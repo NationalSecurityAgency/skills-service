@@ -507,7 +507,8 @@ class SkillCatalogService {
                     importingProjectName: subject.projDef.name,
                     importedOn: it.created, importedIntoSubjectId:
                     subject.skillId,
-                    importedIntoSubjectName: subject.name
+                    importedIntoSubjectName: subject.name,
+                    enabled: it.enabled,
             )
         }
 
