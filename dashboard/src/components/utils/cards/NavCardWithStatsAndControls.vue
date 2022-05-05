@@ -20,9 +20,11 @@ limitations under the License.
         <div class="col">
           <div class="media">
             <router-link v-if="options.icon" tag="a"
-                         :to="options.navTo" aria-label="Navigate to Skills" data-cy="iconLink">
-              <div class="d-inline-block mr-2 border rounded text-info text-center icon-link" style="min-width: 3.2rem;">
-                <i :class="[`${options.icon}`]" class="m-1"/>
+                         :to="options.navTo" aria-label="Navigate to Skills" data-cy="iconLink" aria-hidden="true"
+                         tabindex="-1">
+              <div class="d-inline-block mr-2 border rounded text-info text-center icon-link" style="min-width: 3.2rem;"
+                   aria-hidden="true">
+                <i :class="[`${options.icon}`]" class="m-1" aria-hidden="true"/>
               </div>
             </router-link>
             <div class="media-body" style="min-width: 0px;">
