@@ -1085,4 +1085,29 @@ describe('Badges Tests', () => {
         cy.get('[data-cy="skillHelpUrl"]');
         cy.get('[data-cy="rootHelpUrlSetting"]').should('not.exist');
     });
+
+    it('create badge with custom icon', () => {
+        cy.intercept({
+            method: 'POST',
+            url: '/admin/projects/proj1/icons/upload',
+        }).as('uploadIcon');
+
+        cy.visit('/administrator/projects/proj1/badges');
+        cy.get('[data-cy="btn_Badges"]').click()
+
+        cy.get('[data-cy="iconPicker"]').click();
+        cy.get('a.nav-link').contains('Custom').click();
+        const filename = 'valid_icon.png';
+        cy.get('input[type=file]').attachFile(filename);
+        cy.wait('@uploadIcon')
+        cy.get('[data-cy="iconPicker"] .proj1-validiconpng');
+        cy.get('[data-cy="badgeName"]').type('customIcon')
+        cy.get('[data-cy="saveBadgeButton"]').click()
+
+        cy.get('[data-cy="badgeCard-customIconBadge"] .proj1-validiconpng');
+
+        // refresh and re-validate
+        cy.visit('/administrator/projects/proj1/badges');
+        cy.get('[data-cy="badgeCard-customIconBadge"] .proj1-validiconpng');
+    });
 });

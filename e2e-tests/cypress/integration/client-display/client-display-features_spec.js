@@ -195,8 +195,22 @@ describe('Client Display Features Tests', () => {
     cy.get('[data-cy=subjectTile]').eq(0).contains('Level 5')
   });
 
+  it('custom icon for badge must display after a refresh', () => {
+    cy.uploadCustomIcon('valid_icon.png', '/admin/projects/proj1/icons/upload')
 
+    cy.createBadge(1, 1)
+    cy.createSubject(1,1)
+    cy.createSkill(1, 1, 1)
+    cy.assignSkillToBadge(1, 1, 1)
+    cy.enableBadge(1, 1, { iconClass: "proj1-validiconpng" })
 
+    cy.cdVisit('/');
+    cy.cdClickBadges();
+    cy.get('[data-cy="badge_badge1"] .proj1-validiconpng')
+
+    cy.cdVisit('/badges');
+    cy.get('[data-cy="badge_badge1"] .proj1-validiconpng')
+  })
 
 
 })
