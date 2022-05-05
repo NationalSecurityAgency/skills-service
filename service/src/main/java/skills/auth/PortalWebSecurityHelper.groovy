@@ -18,19 +18,11 @@ package skills.auth
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.web.util.matcher.AndRequestMatcher
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher
-import org.springframework.security.web.util.matcher.RequestMatcher
 import org.springframework.stereotype.Component
 import skills.storage.model.auth.RoleName
 
-import javax.servlet.http.HttpServletRequest
-
 @Component
 class PortalWebSecurityHelper {
-
-    @Value('#{"${management.server.port:8808}"}')
-    Integer managementPort
 
     @Value('#{"${server.port:8080}"}')
     Integer serverPort
@@ -46,17 +38,10 @@ class PortalWebSecurityHelper {
 
     HttpSecurity configureHttpSecurity(HttpSecurity http) {
 
-        http
-            .csrf().disable()
+        http.csrf().disable()
 
         if (publiclyExposePrometheusMetrics) {
-            Integer port = serverPort
-            if (managementPort) {
-                port = managementPort
-            }
-
-            http.authorizeRequests()
-                    .requestMatchers(forPortAndPath(port, HttpMethod.GET, "${managementPath}/${prometheusPath}")).permitAll()
+            http.authorizeRequests().antMatchers(HttpMethod.GET, "${managementPath}/${prometheusPath}").permitAll()
         }
 
         http.authorizeRequests().antMatchers("/", "/favicon.ico",
@@ -81,18 +66,5 @@ class PortalWebSecurityHelper {
         http.headers().frameOptions().disable()
 
         return http
-    }
-
-    private RequestMatcher forPortAndPath(final int port, final String pathPattern) {
-        return new AndRequestMatcher(forPort(port), new AntPathRequestMatcher(pathPattern));
-    }
-
-    private RequestMatcher forPortAndPath(final int port, final HttpMethod method,
-                                          final String pathPattern) {
-        return new AndRequestMatcher(forPort(port), new AntPathRequestMatcher(pathPattern, method.name()));
-    }
-
-    private RequestMatcher forPort(final int port) {
-        return {HttpServletRequest request -> port == request.getLocalPort()};
     }
 }
