@@ -20,17 +20,17 @@ limitations under the License.
       <span class="sr-only">help menu</span>
     </template>
     <b-dropdown-item :href="officialGuide" target="_blank" style="min-width: 12.5rem;">
-      <span class="text-gray-700"> <i class="fas fa-book skills-color-officialDocs" aria-hidden="true"></i>Official Docs</span>
+      <span class="text-gray-700" aria-label="Link to SkillTree's official documentation"> <i class="fas fa-book skills-color-officialDocs" aria-hidden="true"></i>Official Docs</span>
       <span class="float-right" aria-hidden="true"><i class="fas fa-external-link-alt text-secondary"></i></span>
     </b-dropdown-item>
     <b-dropdown-divider />
     <b-dropdown-group id="dropdown-group-1" header="Guides">
       <b-dropdown-item :href="dashboardGuideUrl" target="_blank">
-        <span class="text-gray-700"> <i class="fas fa-info-circle skills-color-dashboardDocs" aria-hidden="true"/><span class="link-name">Dashboard</span></span>
+        <span class="text-gray-700" aria-label="Link to SkillTree's Dashboard Guide"> <i class="fas fa-info-circle skills-color-dashboardDocs" aria-hidden="true"/><span class="link-name">Dashboard</span></span>
         <span class="float-right" aria-hidden="true"><i class="fas fa-external-link-alt text-secondary"></i></span>
       </b-dropdown-item>
       <b-dropdown-item :href="integrationGuideUrl" target="_blank">
-        <span class="text-gray-700"> <i class="fas fa-hands-helping skills-color-integrationDocs" aria-hidden="true"></i>Integration</span>
+        <span class="text-gray-700" aria-label="Link to SkillTree's Integration Guide"> <i class="fas fa-hands-helping skills-color-integrationDocs" aria-hidden="true"></i>Integration</span>
         <span class="float-right" aria-hidden="true"><i class="fas fa-external-link-alt text-secondary"></i></span>
       </b-dropdown-item>
     </b-dropdown-group>
@@ -38,7 +38,7 @@ limitations under the License.
       <b-dropdown-item v-for="supportLink in supportLinksProps" :key="supportLink.label" :href="supportLink.link"
                        :data-cy="`helpButtonSupportLinkLabel_${supportLink.label}`"
                        target="_blank">
-        <span class="text-gray-700"> <i class="text-primary" :class="supportLink.icon" aria-hidden="true"></i>{{ supportLink.label }}</span>
+        <span class="text-gray-700" :aria-label="`Link to SkillTree's ${supportLink.label}`"> <i class="text-primary" :class="supportLink.icon" aria-hidden="true"></i>{{ supportLink.label }}</span>
         <span class="float-right" aria-hidden="true"><i class="fas fa-external-link-alt text-secondary"></i></span>
       </b-dropdown-item>
     </b-dropdown-group>
