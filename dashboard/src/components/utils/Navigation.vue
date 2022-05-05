@@ -55,7 +55,7 @@ limitations under the License.
                              tag="a"
                              :class="{'text-light': menuSelections.get(navItem.name), 'select-cursor': !menuSelections.get(navItem.name), 'disabled': navItem.isDisabled}"
                              aria-current-value="page">
-                    <div class="text-truncate ml-3" :class="{'mr-4': !collapsed}">
+                    <div class="text-truncate ml-3" :class="{'mr-4': !collapsed}" :aria-label="`Navigate to ${navItem.name} page`">
                         <i :class="navItem.iconClass" class="fas"
                            style="min-width: 1.7rem;" aria-hidden="true"/> <span v-if="!collapsed || smallScreenMode">{{ navItem.name }}</span>
                         <i v-if="navItem.isDisabled" class="fas fa-exclamation-circle text-warning ml-1" />
