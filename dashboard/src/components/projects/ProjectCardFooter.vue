@@ -17,8 +17,10 @@ limitations under the License.
   <div class="text-right">
     <div class="row">
       <div class="col text-left small" data-cy="ProjectCardFooter_issues">
-        <span v-if="!hasIssues"><i class="fas fa-check-circle text-success" style="font-size: 1rem;"></i> No Issues</span>
-        <span v-if="hasIssues"><i class="fas fa-exclamation-triangle text-danger" style="font-size: 1rem;"></i>
+        <span v-if="!hasIssues"><i class="fas fa-check-circle text-success" style="font-size: 1rem;"
+                                   aria-hidden="true"></i> No Issues</span>
+        <span v-if="hasIssues"><i class="fas fa-exclamation-triangle text-danger" style="font-size: 1rem;"
+                                  aria-hidden="true"></i>
           There are <span style="font-size: 1rem;"><b-badge variant="danger">{{ numIssues | number }}</b-badge></span> issues to address </span>
       </div>
       <div class="col text-right" data-cy="projectCreated">
