@@ -68,12 +68,17 @@ limitations under the License.
       </div>
 
       <div v-if="!disableSortControl"
+           :id="`sortControl_${this.project.projectId}`"
+           ref="sortControl"
            @mouseover="overSortControl = true"
            @mouseleave="overSortControl = false"
+           @keyup.down="moveDown"
+           @keyup.up="moveUp"
            @click.prevent.self
            class="position-absolute text-secondary px-2 py-1 sort-control"
+           tabindex="0"
+           :aria-label="`Project Sort Control. Current position for ${project.name} project is ${project.displayOrder}. Press up or down to change the order of the project.`"
            data-cy="sortControlHandle"><i class="fas fa-arrows-alt"></i></div>
-
     </div>
 
     <edit-project v-if="showEditProjectModal" v-model="showEditProjectModal" :project="projectInternal" :is-edit="true"
@@ -212,11 +217,28 @@ limitations under the License.
       },
       keepIt() {
         this.cancellingExpiration = true;
-        ProjectService.cancelUnusedProjectDeletion(this.projectInternal.projectId).then(() => {
-          this.projectInternal.expiring = false;
-        }).finally(() => {
-          this.cancellingExpiration = false;
+        ProjectService.cancelUnusedProjectDeletion(this.projectInternal.projectId)
+          .then(() => {
+            this.projectInternal.expiring = false;
+          })
+          .finally(() => {
+            this.cancellingExpiration = false;
+          });
+      },
+      moveDown() {
+        this.$emit('sort-changed-requested', {
+          projectId: this.project.projectId,
+          direction: 'down',
         });
+      },
+      moveUp() {
+        this.$emit('sort-changed-requested', {
+          projectId: this.project.projectId,
+          direction: 'up',
+        });
+      },
+      focusSortControl() {
+        this.$refs.sortControl.focus();
       },
     },
   };

@@ -45,7 +45,9 @@ limitations under the License.
               </div>
             </template>
             <my-project :project="project" :disable-sort-control="projects.length === 1"
-                      v-on:project-deleted="projectRemoved" v-on:pin-removed="loadProjects" />
+                        :ref="`proj${project.projectId}`"
+                        @sort-changed-requested="updateSortAndReloadProjects"
+                        v-on:project-deleted="projectRemoved" v-on:pin-removed="loadProjects"/>
           </b-overlay>
         </div>
       </div>
@@ -162,7 +164,7 @@ limitations under the License.
       },
       loadProjects() {
         this.isLoading = true;
-        ProjectService.getProjects()
+        return ProjectService.getProjects()
           .then((response) => {
             this.projects = response;
           })
@@ -237,6 +239,32 @@ limitations under the License.
           .finally(() => {
             this.sortOrder.loading = false;
           });
+      },
+      updateSortAndReloadProjects(updateInfo) {
+        const currentIndex = this.projects.sort((a, b) => {
+          if (a.displayOrder > b.displayOrder) {
+            return 1;
+          }
+          if (b.displayOrder > a.displayOrder) {
+            return -1;
+          }
+          return 0;
+        })
+          .findIndex((item) => item.projectId === updateInfo.projectId);
+        const newIndex = updateInfo.direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+        if (newIndex >= 0 && (newIndex) < this.projects.length) {
+          this.isLoading = true;
+          ProjectService.updateProjectDisplaySortOrder(updateInfo.projectId, newIndex)
+            .finally(() => {
+              this.loadProjects()
+                .then(() => {
+                  const foundRef = this.$refs[`proj${updateInfo.projectId}`];
+                  this.$nextTick(() => {
+                    foundRef[0].focusSortControl();
+                  });
+                });
+            });
+        }
       },
       isProgressAndRankingEnabled() {
         return this.$store.getters.config.rankingAndProgressViewsEnabled === true || this.$store.getters.config.rankingAndProgressViewsEnabled === 'true';
