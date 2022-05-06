@@ -21,8 +21,8 @@ limitations under the License.
       <span class="text-primary"> <i class="fas fa-edit pr-1" aria-hidden="true"/>Edit</span>
     </b-dropdown-item>
 
-    <span v-b-tooltip.hover="deleteDisabledText">
-      <b-dropdown-item v-on:click="emit('deleted')" :disabled="isDeleteDisabled" >
+    <span v-b-tooltip.hover="deleteDisabledText" :aria-label="deleteDisabledText">
+      <b-dropdown-item v-on:click="emit('deleted')" :disabled="isDeleteDisabled">
           <span class="text-primary"> <i class="text-warning fas fa-trash pr-1" aria-hidden="true"/> Delete</span>
       </b-dropdown-item>
     </span>

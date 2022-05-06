@@ -201,7 +201,9 @@ limitations under the License.
 
         <template v-slot:cell(timeWindow)="data">
           <div v-if="data.item.isSkillType">{{ timeWindowTitle(data.item) }}
-            <i v-if="!timeWindowHasLength(data.item)" class="fas fa-question-circle text-muted" v-b-tooltip.hover="`${timeWindowDescription(data.item)}`"></i>
+            <i v-if="!timeWindowHasLength(data.item)" class="fas fa-question-circle text-muted"
+               :aria-label="`${timeWindowDescription(data.item)}`"
+               v-b-tooltip.hover="`${timeWindowDescription(data.item)}`"></i>
           </div>
           <div v-if="data.item.isGroupType" class="text-secondary">
             N/A

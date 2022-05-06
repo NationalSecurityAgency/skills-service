@@ -25,6 +25,7 @@ limitations under the License.
             <template #prepend v-if="rootHelpUrlSetting">
               <b-input-group-text><i class="fas fa-cogs mr-1"></i>
                 <span class="text-primary" :class="{ 'stikethrough' : overrideRootHelpUrl}" data-cy="rootHelpUrlSetting"
+                      :aria-label="`Root Help URL was configured in the project's settings. Root Help URL is ${rootHelpUrl}. URLs starting with http or https will not use Root Help URL.`"
                       v-b-tooltip.hover="'Root Help URL was configured in the project\'s settings. URLs starting with http(s) will not use Root Help URL.'">{{ rootHelpUrl }}</span></b-input-group-text>
             </template>
             <b-form-input

@@ -49,7 +49,10 @@ limitations under the License.
               <i :class="stat.icon"></i>
               <p class="text-uppercase text-muted count-label">{{ stat.label }}</p>
               <strong class="h4" data-cy="statNum">{{ stat.count | number }}</strong>
-              <i v-if="stat.warn" class="fas fa-exclamation-circle text-warning ml-1" style="font-size: 1.5rem;" v-b-tooltip.hover="stat.warnMsg" data-cy="warning"/>
+              <i v-if="stat.warn" class="fas fa-exclamation-circle text-warning ml-1" style="font-size: 1.5rem;"
+                 v-b-tooltip.hover="stat.warnMsg"
+                 data-cy="warning"
+                 :aria-label="`Warning: ${stat.warnMsg}`"/>
             </div>
           </div>
         </div>

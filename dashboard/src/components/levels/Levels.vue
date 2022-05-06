@@ -42,6 +42,7 @@ limitations under the License.
         <template v-slot:cell(level)="data">
           {{ data.value }}
           <i v-if="data.item.achievable === false" class="icon-warning fa fa-exclamation-circle text-warning"
+             aria-label="Level is unachievable. Insufficient available points in project."
              v-b-tooltip.hover="'Level is unachievable. Insufficient available points in project.'"/>
         </template>
 
@@ -61,7 +62,8 @@ limitations under the License.
             <span v-if="data.item.pointsTo">{{data.item.pointsTo | number}}</span>
             <span v-else><i class="fas fa-infinity"/></span>
           </span>
-          <span v-else>N/A <span class="text-muted small"><i class="fa fa-exclamation-circle"/> Please create more rules first</span></span>
+          <span v-else aria-label="Points cannot be calculated. Please create more skills first.">N/A <span
+            class="text-muted small"><i class="fa fa-exclamation-circle"/> Please create more skills first</span></span>
         </template>
 
         <template #cell(edit)="data">

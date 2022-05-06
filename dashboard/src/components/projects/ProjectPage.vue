@@ -16,14 +16,21 @@ limitations under the License.
 <template>
   <div>
     <page-header :loading="isLoading" :options="headerOptions">
-      <div slot="banner" v-if="project && project.expiring" data-cy="projectExpiration" class="w-100 text-center alert-danger p-2 mb-3">
-          <span class="mr-2" v-b-tooltip.hover="'This Project has not been used recently, it will  be deleted unless you explicitly retain it'">
-            Project has not been used in over <b>{{this.$store.getters.config.expireUnusedProjectsOlderThan}} days</b> and will be deleted <b>{{ fromExpirationDate() }}</b>.
+      <div slot="banner" v-if="project && project.expiring" data-cy="projectExpiration"
+           class="w-100 text-center alert-danger p-2 mb-3">
+          <span class="mr-2"
+                aria-label="This Project has not been used recently, it will  be deleted unless you explicitly retain it"
+                v-b-tooltip.hover="'This Project has not been used recently, it will  be deleted unless you explicitly retain it'">
+            Project has not been used in over <b>{{ this.$store.getters.config.expireUnusedProjectsOlderThan }} days</b> and will be deleted <b>{{
+              fromExpirationDate()
+            }}</b>.
           </span>
-          <b-button @click="keepIt" data-cy="keepIt" size="sm" variant="alert"
-                    :aria-label="'Keep Project '+ project.name">
-            <span class="d-none d-sm-inline">Keep It</span> <b-spinner v-if="cancellingExpiration" small style="font-size:1rem"/><i v-if="!cancellingExpiration" :class="'fas fa-shield-alt'" style="font-size: 1rem;" aria-hidden="true"/>
-          </b-button>
+        <b-button @click="keepIt" data-cy="keepIt" size="sm" variant="alert"
+                  :aria-label="'Keep Project '+ project.name">
+          <span class="d-none d-sm-inline">Keep It</span>
+          <b-spinner v-if="cancellingExpiration" small style="font-size:1rem"/>
+          <i v-if="!cancellingExpiration" :class="'fas fa-shield-alt'" style="font-size: 1rem;" aria-hidden="true"/>
+        </b-button>
       </div>
       <div slot="subSubTitle" v-if="project">
         <div data-cy="projectCreated">

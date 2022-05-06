@@ -64,6 +64,7 @@ limitations under the License.
 
                 <span v-if="isDirty" class="text-warning ml-2" data-cy="unsavedChangesAlert">
               <i class="fa fa-exclamation-circle"
+                 aria-label="Settings have been changed, do not forget to save"
                  v-b-tooltip.hover="'Settings have been changed, do not forget to save'"/> Unsaved Changes
             </span>
                 <span v-if="!isDirty && showSavedMsg" class="text-success ml-2" data-cy="settingsSavedAlert">

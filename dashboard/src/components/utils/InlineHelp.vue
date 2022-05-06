@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <i class="fas fa-question-circle text-secondary" v-b-tooltip.hover="msg"/>
+  <i class="fas fa-question-circle text-secondary" v-b-tooltip.hover="msg" :aria-label="`Help Message is ${msg}`"/>
 </template>
 
 <script>

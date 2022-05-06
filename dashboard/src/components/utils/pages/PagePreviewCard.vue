@@ -24,7 +24,10 @@ limitations under the License.
             </div>
             <div class="media-body" style="min-width: 0px;">
               <div class="text-truncate text-info mb-0 pb-0 preview-card-title">{{ options.title }}
-              <i v-if="options.warn" class="fas fa-exclamation-circle text-warning ml-1" style="font-size: 1.5rem;" v-b-tooltip.hover="options.warnMsg"/>
+                <i v-if="options.warn" class="fas fa-exclamation-circle text-warning ml-1"
+                   style="font-size: 1.5rem;"
+                   :aria-label="`Warning ${options.warnMsg}`"
+                   v-b-tooltip.hover="options.warnMsg"/>
               </div>
               <div class="text-truncate text-secondary preview-card-subTitle">{{ options.subTitle }}</div>
             </div>
@@ -40,7 +43,10 @@ limitations under the License.
           <div :data-cy="`pagePreviewCardStat_${stat.label}`">
             <p class="text-uppercase text-muted count-label">{{ stat.label }}</p>
             <strong class="h5">{{ stat.count | number }}</strong>
-            <i v-if="stat.warn" class="fas fa-exclamation-circle text-warning ml-1" style="font-size: 1.5rem;" v-b-tooltip.hover="stat.warnMsg"/>
+            <i v-if="stat.warn" class="fas fa-exclamation-circle text-warning ml-1"
+               style="font-size: 1.5rem;"
+               v-b-tooltip.hover="stat.warnMsg"
+               :aria-label="`Warning ${stat.warnMsg}`"/>
           </div>
         </div>
       </div>
