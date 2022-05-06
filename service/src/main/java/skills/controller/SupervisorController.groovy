@@ -30,6 +30,7 @@ import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.BadgeRequest
 import skills.controller.request.model.NameExistsRequest
 import skills.controller.result.model.*
+import skills.dbupgrade.DBUpgradeSafe
 import skills.icons.CustomIconFacade
 import skills.icons.UploadedIcon
 import skills.metrics.MetricsService
@@ -72,6 +73,7 @@ class SupervisorController {
     @Autowired
     MetricsService metricsService
 
+    @DBUpgradeSafe
     @RequestMapping(value = "/badges/name/exists", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     boolean doesBadgeNameExist(@RequestBody() NameExistsRequest nameExistsRequest) {

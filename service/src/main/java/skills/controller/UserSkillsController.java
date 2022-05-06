@@ -34,6 +34,7 @@ import skills.controller.exceptions.SkillsValidator;
 import skills.controller.request.model.SkillEventRequest;
 import skills.controller.request.model.SkillsClientVersionRequest;
 import skills.controller.result.model.RequestResult;
+import skills.dbupgrade.DBUpgradeSafe;
 import skills.icons.CustomIconFacade;
 import skills.services.ProjectErrorService;
 import skills.services.SelfReportingService;
@@ -96,6 +97,7 @@ class UserSkillsController {
         return publicProps.getInt(PublicProps.UiProp.maxSkillVersion);
     }
 
+    @DBUpgradeSafe
     @RequestMapping(value = "/projects/{projectId}/skillsClientVersion", method = {RequestMethod.PUT, RequestMethod.POST}, produces = "application/json")
     @ResponseBody
     RequestResult setSkillsClientVersion(@PathVariable(name = "projectId") String projectId,

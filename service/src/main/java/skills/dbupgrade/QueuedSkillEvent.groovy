@@ -7,4 +7,5 @@ class QueuedSkillEvent {
     String skillId
     String userId
     SkillEventRequest skillEventRequest
+    Date requestTime
 }
