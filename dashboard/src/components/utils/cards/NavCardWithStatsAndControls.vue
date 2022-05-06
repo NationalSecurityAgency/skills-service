@@ -59,8 +59,9 @@ limitations under the License.
                  :aria-label="`Warning: ${stat.warnMsg}`"
                  data-cy="warning"/>
               <div v-if="stat.disabledCount && stat.disabledCount > 0" style="font-size: 0.9rem">
-                <b-badge variant="warning" :data-cy="`pagePreviewCardStat_${stat.label}_disabled`">
-                  {{ stat.disabledCount }}
+                <b-badge variant="warning" :data-cy="`pagePreviewCardStat_${stat.label}_disabled`">{{
+                    stat.disabledCount
+                  }}
                 </b-badge>
                 <span class="text-left text-secondary text-uppercase" style="font-size: 0.8rem">disabled</span>
               </div>
