@@ -22,7 +22,11 @@ limitations under the License.
             <router-link
               :to="{ name:'Subjects', params: { projectId: this.projectInternal.projectId, project: this.projectInternal }}"
               class="text-info mb-0 pb-0 preview-card-title" :title="`${projectInternal.name}`"
-              :data-cy="`projCard_${projectInternal.projectId}_manageLink`"><b-avatar variant="info" icon="people-fill" class="text-uppercase avatar-link"> {{ projectInternal.name.substring(0,2) }}</b-avatar> {{ projectInternal.name }}
+              :data-cy="`projCard_${projectInternal.projectId}_manageLink`">
+              <b-avatar variant="info" icon="people-fill" class="text-uppercase avatar-link" aria-hidden="true">
+                {{ projectInternal.name.substring(0, 2) }}
+              </b-avatar>
+              {{ projectInternal.name }}
             </router-link>
             <div class="text-secondary preview-card-subTitle mt-1 ml-1">ID: {{ projectInternal.projectId }}</div>
           </div>

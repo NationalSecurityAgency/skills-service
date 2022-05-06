@@ -27,13 +27,13 @@ limitations under the License.
     </b-dropdown-text>
     <b-dropdown-divider />
     <b-dropdown-item v-if="isProgressAndRankingEnabled" href="#" :disabled="myProgressLinkDisabled"  @click="gotoMyProgress" data-cy="settingsButton-navToMyProgress">
-      <span class="text-gray-700"> <i class="fas fa-chart-bar skills-color-progressAndRanking" aria-hidden="true"/><span class="link-name">Progress and Rankings</span></span>
+      <span class="text-gray-700"> <i class="fas fa-chart-bar skills-color-progressAndRanking" aria-hidden="true"/><span class="link-name" aria-label="Navigate to Progress and Ranking pages">Progress and Rankings</span></span>
     </b-dropdown-item>
     <b-dropdown-item v-if="isProgressAndRankingEnabled"  href="#" :disabled="adminLinkDisabled"  @click="gotoAdmin" data-cy="settingsButton-navToProjectAdmin">
-      <span class="text-gray-700"> <i class="fas fa-tasks skills-color-projectAdmin" aria-hidden="true"/><span class="link-name">Project Admin</span></span>
+      <span class="text-gray-700"> <i class="fas fa-tasks skills-color-projectAdmin" aria-hidden="true"/><span class="link-name" aria-label="Navigate to Project Admin pages">Project Admin</span></span>
     </b-dropdown-item>
     <b-dropdown-item href="#" :disabled="settingsLinkDisabled" @click="gotoSettings" data-cy="settingsButton-navToSettings">
-      <span class="text-gray-700"> <i class="fas fa-cog skills-color-settings" aria-hidden="true"/><span class="link-name">Settings</span></span>
+      <span class="text-gray-700"> <i class="fas fa-cog skills-color-settings" aria-hidden="true"/><span class="link-name" aria-label="Navigate to the dashboard's settings">Settings</span></span>
     </b-dropdown-item>
     <template v-if="isFormAuthenticatedUser">
       <b-dropdown-divider />

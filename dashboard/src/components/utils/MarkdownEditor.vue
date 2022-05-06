@@ -18,7 +18,7 @@ limitations under the License.
     <b-tabs class="h-100">
       <b-tab active>
         <template slot="title">
-          <i class="fa fa-edit mr-1" aria-hidden="true"/> <span id="markdownEditLabel">Write</span>
+          <i class="fa fa-edit mr-1" aria-hidden="true"/> <span id="markdownEditLabel" :aria-label="`Write ${name} using Markdown`">Write</span>
         </template>
         <div class="mt-2" :style="[!resizable ? {'height':markdownHeight} : {}]">
           <b-form-textarea rows="5" max-rows="5" v-model="valueInternal" @input="dataChanged"
@@ -28,7 +28,7 @@ limitations under the License.
       </b-tab>
       <b-tab>
         <template slot="title">
-          <i class="fa fa-eye mr-1" aria-hidden="true"/> <span>Preview</span>
+          <i class="fa fa-eye mr-1" aria-hidden="true"/> <span :aria-label="`Preview ${name} Markdown rendering`">Preview</span>
         </template>
         <div class="mt-2 border rounded p-3" :style="{'overflow-y':'scroll','height':markdownHeight}" data-cy="markdownEditor-preview">
           <markdown-text v-if="valueInternal" :text="valueInternal"/>
@@ -50,6 +50,10 @@ limitations under the License.
       resizable: {
         type: Boolean,
         default: false,
+      },
+      name: {
+        type: String,
+        default: 'Description',
       },
     },
     data() {
