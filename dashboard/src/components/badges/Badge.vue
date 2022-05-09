@@ -15,15 +15,17 @@ limitations under the License.
 */
 <template>
   <div data-cy="badgeCard">
-    <nav-card-with-stats-and-controls :options="cardOptions" :isLoading="isLoading" :disable-sort-control="disableSortControl"
+    <nav-card-with-stats-and-controls :options="cardOptions" :isLoading="isLoading"
+                                      :disable-sort-control="disableSortControl"
+                                      ref="navCardWithStatsAndControls" @sort-changed-requested="sortRequested"
                                       :data-cy="`badgeCard-${badgeInternal.badgeId}`">
       <div slot="header-top-right">
       </div>
       <div slot="underTitle">
         <card-navigate-and-edit-controls ref="cardNavControls" class="mt-2"
-                               :options="cardOptions.controls"
-                               @edit="showEditBadge=true"
-                               @delete="deleteBadge" />
+                                         :options="cardOptions.controls"
+                                         @edit="showEditBadge=true"
+                                         @delete="deleteBadge"/>
       </div>
       <div slot="footer">
         <i v-if="badgeInternal.endDate" class="fas fa-gem position-absolute" style="font-size: 1rem; top: 1rem; left: 1rem; color: purple" aria-hidden="true"/>
@@ -129,6 +131,7 @@ limitations under the License.
             isFirst: this.badgeInternal.isFirst,
             isLast: this.badgeInternal.isLast,
           },
+          displayOrder: this.badge.displayOrder,
         };
       },
       buildManageLink() {
@@ -170,6 +173,16 @@ limitations under the License.
         }
 
         return msg;
+      },
+      sortRequested(info) {
+        const withId = {
+          ...info,
+          id: this.badge.badgeId,
+        };
+        this.$emit('sort-changed-requested', withId);
+      },
+      focusSortControl() {
+        this.$refs.navCardWithStatsAndControls.focusSortControl();
       },
       handlePublish() {
         if (this.canPublish()) {

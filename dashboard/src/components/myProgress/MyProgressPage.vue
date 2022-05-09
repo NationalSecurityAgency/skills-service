@@ -67,7 +67,7 @@ limitations under the License.
       </b-row>
       <hr/>
       <b-row class="my-4 px-1" id="projectCards">
-        <b-col v-for="(proj) in myProjects" :key="proj.projectName" :id="proj.projectId"
+        <b-col v-for="(proj, index) in myProjects" :key="proj.projectName" :id="proj.projectId"
                cols="12" md="6" xl="4"
                class="mb-2 px-2">
           <b-overlay :show="sortOrderLoading" rounded="sm" opacity="0.4">
@@ -80,9 +80,14 @@ limitations under the License.
               </div>
             </template>
 
-            <router-link :to="{ name:'MyProjectSkills', params: { projectId: proj.projectId, name: proj.projectName } }" tag="a"
+            <router-link :to="{ name:'MyProjectSkills', params: { projectId: proj.projectId, name: proj.projectName } }"
+                         tag="a"
                          class="project-link" :data-cy="`project-link-${proj.projectId}`" tabindex="0">
-              <project-link-card :proj="proj" class="my-summary-card" />
+              <project-link-card
+                :ref="`proj${proj.projectId}`"
+                :display-order="index"
+                @sort-changed-requested="updateSortAndReloadProjects"
+                :proj="proj" class="my-summary-card"/>
             </router-link>
           </b-overlay>
         </b-col>
@@ -127,13 +132,17 @@ limitations under the License.
       };
     },
     mounted() {
-      this.loadMyProgressSummary().finally(() => {
-        this.loading = false;
-        this.enableProjectDropAndDrop();
-      });
+      this.loadSummaryAndEnableSummary();
     },
     methods: {
       ...mapActions(['loadMyProgressSummary']),
+      loadSummaryAndEnableSummary() {
+        return this.loadMyProgressSummary()
+          .finally(() => {
+            this.loading = false;
+            this.enableProjectDropAndDrop();
+          });
+      },
       enableProjectDropAndDrop() {
         if (this.myProjects && this.myProjects.length > 0) {
           const self = this;
@@ -158,6 +167,32 @@ limitations under the License.
           .finally(() => {
             this.sortOrderLoading = false;
           });
+      },
+      updateSortAndReloadProjects(updateInfo) {
+        const currentIndex = this.myProjects.sort((a, b) => {
+          if (a.displayOrder > b.displayOrder) {
+            return 1;
+          }
+          if (b.displayOrder > a.displayOrder) {
+            return -1;
+          }
+          return 0;
+        })
+          .findIndex((item) => item.projectId === updateInfo.projectId);
+        const newIndex = updateInfo.direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+        if (newIndex >= 0 && (newIndex) < this.myProjects.length) {
+          this.loading = true;
+          ProjectService.moveMyProject(updateInfo.projectId, newIndex)
+            .finally(() => {
+              this.loadSummaryAndEnableSummary()
+                .then(() => {
+                  const foundRef = this.$refs[`proj${updateInfo.projectId}`];
+                  this.$nextTick(() => {
+                    foundRef[0].focusSortControl();
+                  });
+                });
+            });
+        }
       },
     },
     computed: {

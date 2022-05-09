@@ -75,11 +75,16 @@ limitations under the License.
         </div>
 
       <div v-if="!disableSortControl"
-        @mouseover="overSortControl = true"
-        @mouseleave="overSortControl = false"
-        @click.prevent.self
-        class="position-absolute text-secondary px-2 py-1 sort-control"
-        data-cy="sortControlHandle"><i class="fas fa-arrows-alt"></i></div>
+           ref="sortControl"
+           @mouseover="overSortControl = true"
+           @mouseleave="overSortControl = false"
+           @keyup.down="moveDown"
+           @keyup.up="moveUp"
+           @click.prevent.self
+           class="position-absolute text-secondary px-2 py-1 sort-control"
+           tabindex="0"
+           :aria-label="`Sort Control. Current position for ${options.title} is ${options.displayOrder}. Press up or down to change the order.`"
+           data-cy="sortControlHandle"><i class="fas fa-arrows-alt"></i></div>
     </div>
   </div>
 </template>
@@ -95,6 +100,7 @@ limitations under the License.
         warnMsg: String,
         subTitle: String,
         stats: {},
+        displayOrder: Number,
       },
       disableSortControl: {
         type: Boolean,
@@ -105,6 +111,21 @@ limitations under the License.
       return {
         overSortControl: false,
       };
+    },
+    methods: {
+      moveDown() {
+        this.$emit('sort-changed-requested', {
+          direction: 'down',
+        });
+      },
+      moveUp() {
+        this.$emit('sort-changed-requested', {
+          direction: 'up',
+        });
+      },
+      focusSortControl() {
+        this.$refs.sortControl.focus();
+      },
     },
   };
 </script>

@@ -1101,13 +1101,73 @@ describe('Badges Tests', () => {
         cy.get('input[type=file]').attachFile(filename);
         cy.wait('@uploadIcon')
         cy.get('[data-cy="iconPicker"] .proj1-validiconpng');
-        cy.get('[data-cy="badgeName"]').type('customIcon')
-        cy.get('[data-cy="saveBadgeButton"]').click()
+        cy.get('[data-cy="badgeName"]')
+            .type('customIcon');
+        cy.get('[data-cy="saveBadgeButton"]')
+            .click();
 
         cy.get('[data-cy="badgeCard-customIconBadge"] .proj1-validiconpng');
 
         // refresh and re-validate
         cy.visit('/administrator/projects/proj1/badges');
         cy.get('[data-cy="badgeCard-customIconBadge"] .proj1-validiconpng');
+    });
+
+    it('change sort order using keyboard', () => {
+        cy.createBadge(1, 1);
+        cy.createBadge(1, 2);
+        cy.createBadge(1, 3);
+
+        const badge1Card = '[data-cy="badgeCard-badge1"] [data-cy="sortControlHandle"]';
+        const badge2Card = '[data-cy="badgeCard-badge2"] [data-cy="sortControlHandle"]';
+
+        cy.visit('/administrator/projects/proj1/badges');
+        cy.validateElementsOrder('[data-cy="badgeCard"] [data-cy="titleLink"]', ['Badge 1', 'Badge 2', 'Badge 3']);
+
+        // move down
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="goLive"]')
+            .tab()
+            .type('{downArrow}');
+        cy.validateElementsOrder('[data-cy="badgeCard"] [data-cy="titleLink"]', ['Badge 2', 'Badge 1', 'Badge 3']);
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="sortControlHandle"]')
+            .should('have.focus');
+
+        // move down
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="goLive"]')
+            .tab()
+            .type('{downArrow}');
+        cy.validateElementsOrder('[data-cy="badgeCard"] [data-cy="titleLink"]', ['Badge 2', 'Badge 3', 'Badge 1']);
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="sortControlHandle"]')
+            .should('have.focus');
+
+        // move down - already the last item
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="goLive"]')
+            .tab()
+            .type('{downArrow}');
+        cy.validateElementsOrder('[data-cy="badgeCard"] [data-cy="titleLink"]', ['Badge 2', 'Badge 3', 'Badge 1']);
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="sortControlHandle"]')
+            .should('have.focus');
+
+        // refresh and validate
+        cy.visit('/administrator/projects/proj1/badges');
+        cy.validateElementsOrder('[data-cy="badgeCard"] [data-cy="titleLink"]', ['Badge 2', 'Badge 3', 'Badge 1']);
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="sortControlHandle"]')
+            .should('not.have.focus');
+
+        // move up
+        cy.get('[data-cy="badgeCard-badge3"] [data-cy="goLive"]')
+            .tab()
+            .type('{upArrow}');
+        cy.validateElementsOrder('[data-cy="badgeCard"] [data-cy="titleLink"]', ['Badge 3', 'Badge 2', 'Badge 1']);
+        cy.get('[data-cy="badgeCard-badge3"] [data-cy="sortControlHandle"]')
+            .should('have.focus');
+
+        // move up - already first
+        cy.get('[data-cy="badgeCard-badge3"] [data-cy="goLive"]')
+            .tab()
+            .type('{upArrow}');
+        cy.validateElementsOrder('[data-cy="badgeCard"] [data-cy="titleLink"]', ['Badge 3', 'Badge 2', 'Badge 1']);
+        cy.get('[data-cy="badgeCard-badge3"] [data-cy="sortControlHandle"]')
+            .should('have.focus');
     });
 });
