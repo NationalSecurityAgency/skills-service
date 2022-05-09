@@ -111,7 +111,7 @@ limitations under the License.
         this.displayNewSubjectModal = true;
       },
       doLoadSubjects() {
-        this.loadSubjects({ projectId: this.$route.params.projectId })
+        return this.loadSubjects({ projectId: this.$route.params.projectId })
           .finally(() => {
             this.isLoading = false;
             this.enableDropAndDrop();
@@ -146,7 +146,7 @@ limitations under the License.
           const { projectId } = this.$route.params;
           SubjectsService.updateSubjectsDisplaySortOrder(projectId, updateInfo.id, newIndex)
             .finally(() => {
-              this.loadSubjects({ projectId })
+              this.doLoadSubjects()
                 .then(() => {
                   this.isLoading = false;
                   const foundRef = this.$refs[`subj${updateInfo.id}`];

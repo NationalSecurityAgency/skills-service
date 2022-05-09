@@ -46,10 +46,16 @@ limitations under the License.
       <div class="position-absolute text-muted d-none small click-indicator" style="right: 15px; bottom: 10px;">Click to View</div>
 
       <div
+        ref="sortControl"
         @mouseover="overSortControl = true"
         @mouseleave="overSortControl = false"
+        @keyup.down="moveDown"
+        @keyup.up="moveUp"
         @click.prevent.self
+        tabindex="0"
         class="position-absolute text-secondary px-2 py-1 sort-control"
+        :aria-label="`Sort Control. Current position for ${proj.projectName} is ${displayOrder}. Press up or down to change the order.`"
+        role="button"
         data-cy="sortControlHandle"><i class="fas fa-arrows-alt"></i></div>
     </b-card>
   </div>
@@ -58,7 +64,7 @@ limitations under the License.
 <script>
   export default {
     name: 'ProjectLinkCard',
-    props: ['proj'],
+    props: ['proj', 'displayOrder'],
     data() {
       return {
         overSortControl: false,
@@ -149,6 +155,21 @@ limitations under the License.
           res = 'success';
         }
         return res;
+      },
+      moveDown() {
+        this.$emit('sort-changed-requested', {
+          projectId: this.proj.projectId,
+          direction: 'down',
+        });
+      },
+      moveUp() {
+        this.$emit('sort-changed-requested', {
+          projectId: this.proj.projectId,
+          direction: 'up',
+        });
+      },
+      focusSortControl() {
+        this.$refs.sortControl.focus();
       },
     },
   };

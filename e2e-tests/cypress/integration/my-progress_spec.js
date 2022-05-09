@@ -601,17 +601,71 @@ describe('Navigation Tests', () => {
     cy.loginAsProxyUser();
     cy.visit('/progress-and-rankings/');
 
-
-    cy.contains('START CUSTOMIZING TODAY!')
+    cy.contains('START CUSTOMIZING TODAY!');
   });
 
+  it('change sort order using keyboard', function () {
+    cy.createProject(3);
+    cy.enableProdMode(3);
+    cy.addToMyProjects(3);
+
+    cy.viewport(1200, 1000);
+
+    cy.visit('/progress-and-rankings');
+    cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 3', 'This is project 2', 'This is project 1']);
+
+    // move down
+    cy.get('[data-cy="project-link-proj3"]')
+        .tab()
+        .type('{downArrow}');
+    cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 2', 'This is project 3', 'This is project 1']);
+    cy.get('[data-cy="project-link-proj3"] [data-cy="sortControlHandle"]')
+        .should('have.focus');
+
+    // move down
+    cy.get('[data-cy="project-link-proj3"]')
+        .tab()
+        .type('{downArrow}');
+    cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 2', 'This is project 1', 'This is project 3']);
+    cy.get('[data-cy="project-link-proj3"] [data-cy="sortControlHandle"]')
+        .should('have.focus');
+
+    // move down - last item already; no action
+    cy.get('[data-cy="project-link-proj3"]')
+        .tab()
+        .type('{downArrow}');
+    cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 2', 'This is project 1', 'This is project 3']);
+    cy.get('[data-cy="project-link-proj3"] [data-cy="sortControlHandle"]')
+        .should('have.focus');
+
+    cy.visit('/progress-and-rankings');
+    cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 2', 'This is project 1', 'This is project 3']);
+    cy.get('[data-cy="project-link-proj3"] [data-cy="sortControlHandle"]')
+        .should('not.have.focus');
+
+    // move up
+    cy.get('[data-cy="project-link-proj1"]')
+        .tab()
+        .type('{upArrow}');
+    cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 1', 'This is project 2', 'This is project 3']);
+    cy.get('[data-cy="project-link-proj1"] [data-cy="sortControlHandle"]')
+        .should('have.focus');
+
+    // move up; first item already - no action
+    cy.get('[data-cy="project-link-proj1"]')
+        .tab()
+        .type('{upArrow}');
+    cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 1', 'This is project 2', 'This is project 3']);
+    cy.get('[data-cy="project-link-proj1"] [data-cy="sortControlHandle"]')
+        .should('have.focus');
+  });
 
   it('sort my projects', function () {
     cy.createProject(3);
     cy.enableProdMode(3);
     cy.addToMyProjects(3);
 
-    cy.viewport(1200, 1000)
+    cy.viewport(1200, 1000);
 
     cy.visit('/progress-and-rankings');
 
