@@ -39,6 +39,7 @@ limitations under the License.
                     <span class="text-muted pr-1">Skill Details:</span>
                     <toggle-button class="" v-model="showDescriptionsInternal" @change="onDetailsToggle"
                                    :color="{ checked: '#007c49', unchecked: '#6b6b6b' }"
+                                   aria-label="Show Skill Details"
                                    :labels="{ checked: 'On', unchecked: 'Off' }" data-cy="toggleSkillDetails"/>
                 </div>
             </div>
