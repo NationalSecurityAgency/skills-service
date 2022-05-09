@@ -78,6 +78,7 @@ limitations under the License.
            class="position-absolute text-secondary px-2 py-1 sort-control"
            tabindex="0"
            :aria-label="`Project Sort Control. Current position for ${project.name} project is ${project.displayOrder}. Press up or down to change the order of the project.`"
+           role="button"
            data-cy="sortControlHandle"><i class="fas fa-arrows-alt"></i></div>
     </div>
 
