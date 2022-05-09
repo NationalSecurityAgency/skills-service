@@ -156,7 +156,7 @@ limitations under the License.
       sortRequested(info) {
         const withId = {
           ...info,
-          id: this.subject.subjectId
+          id: this.subject.subjectId,
         };
         this.$emit('sort-changed-requested', withId);
       },

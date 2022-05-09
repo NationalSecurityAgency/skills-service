@@ -177,7 +177,7 @@ limitations under the License.
       sortRequested(info) {
         const withId = {
           ...info,
-          id: this.badge.badgeId
+          id: this.badge.badgeId,
         };
         this.$emit('sort-changed-requested', withId);
       },
