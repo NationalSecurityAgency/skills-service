@@ -29,8 +29,15 @@ limitations under the License.
             </router-link>
             <div class="media-body" style="min-width: 0px;">
               <div class="text-truncate text-info mb-0 pb-0 preview-card-title">
-                <router-link v-if="options.icon" tag="a" :to="options.navTo" data-cy="titleLink">{{ options.title }}</router-link>
-                <i v-if="options.warn" class="fas fa-exclamation-circle text-warning ml-1" style="font-size: 1.5rem;" v-b-tooltip.hover="options.warnMsg"/>
+                <router-link v-if="options.icon" tag="a" :to="options.navTo" data-cy="titleLink">{{
+                    options.title
+                  }}
+                </router-link>
+                <i v-if="options.warn" class="fas fa-exclamation-circle text-warning ml-1"
+                   style="font-size: 1.5rem;"
+                   role="alert"
+                   :aria-label="`Warning: ${options.warnMsg}`"
+                   v-b-tooltip.hover="options.warnMsg"/>
               </div>
               <div class="text-truncate text-secondary preview-card-subTitle" data-cy="subTitle">{{ options.subTitle }}</div>
             </div>
@@ -48,9 +55,16 @@ limitations under the License.
               <i :class="stat.icon"></i>
               <p class="text-uppercase text-muted count-label">{{ stat.label }}</p>
               <strong class="h4" data-cy="statNum">{{ stat.count | number }}</strong>
-              <i v-if="stat.warn" class="fas fa-exclamation-circle text-warning ml-1" style="font-size: 1.5rem;" v-b-tooltip.hover="stat.warnMsg" data-cy="warning"/>
+              <i v-if="stat.warn" class="fas fa-exclamation-circle text-warning ml-1" style="font-size: 1.5rem;"
+                 v-b-tooltip.hover="stat.warnMsg"
+                 role="alert"
+                 :aria-label="`Warning: ${stat.warnMsg}`"
+                 data-cy="warning"/>
               <div v-if="stat.disabledCount && stat.disabledCount > 0" style="font-size: 0.9rem">
-                <b-badge variant="warning" :data-cy="`pagePreviewCardStat_${stat.label}_disabled`">{{stat.disabledCount}}</b-badge> <span class="text-left text-secondary text-uppercase" style="font-size: 0.8rem">disabled</span>
+                <b-badge variant="warning">
+                  <span :data-cy="`pagePreviewCardStat_${stat.label}_disabled`">{{ stat.disabledCount }}</span>
+                </b-badge>
+                <span class="text-left text-secondary text-uppercase ml-1" style="font-size: 0.8rem">disabled</span>
               </div>
             </div>
           </div>

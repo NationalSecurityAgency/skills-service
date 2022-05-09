@@ -46,6 +46,7 @@ limitations under the License.
               <b-col cols="auto">
                 <b-button variant="outline-info"
                           v-b-tooltip.hover title="Sync other levels"
+                          aria-label="Sync other levels"
                           @click="syncOtherLevels(data.item.minLevel)"
                           data-cy="syncLevelButton">
                   <i class="fas fa-sync"></i>

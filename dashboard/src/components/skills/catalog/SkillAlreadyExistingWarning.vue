@@ -16,7 +16,9 @@ limitations under the License.
 <template>
   <div v-if="skill.alreadyHasThisSkillId || skill.alreadyHasThisName" class="alert alert-warning"
        :data-cy="`alreadyExistWarning_${skill.projectId}-${skill.skillId}`">
-    <i class="fas fa-exclamation-triangle text-danger"></i> <span class="text-danger font-weight-bold">Cannot import!</span> <b>{{ itemThatDoesNotExist }}</b> already
+    <i class="fas fa-exclamation-triangle text-danger"></i> <span class="text-danger font-weight-bold mr-1"
+                                                                  style="font-size: 1.1rem">Cannot import!</span>
+    <b>{{ itemThatDoesNotExist }}</b> already
     {{ this.skill.alreadyHasThisSkillId && this.skill.alreadyHasThisName ? 'exist' : 'exists' }} in this project!
   </div>
 </template>

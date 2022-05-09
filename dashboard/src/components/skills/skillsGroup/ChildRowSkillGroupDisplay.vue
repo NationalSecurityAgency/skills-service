@@ -32,13 +32,16 @@ limitations under the License.
                 <div v-if="!this.group.enabled">
                   <span class="font-italic">Status: </span>
                   <span class="text-uppercase mr-1"><b-badge variant="warning">Disabled</b-badge></span>
-                  <span v-b-tooltip.hover="goLiveToolTipText">
+                  <span v-b-tooltip.hover="goLiveToolTipText" :aria-label="goLiveToolTipText">
                     <b-button variant="outline-info" size="sm" data-cy="goLiveBtn"
                               @click="enableGroup"
                               :disabled="lessThanTwoSkills || goLiveDisabled">
                       <i class="fas fa-glass-cheers"></i> Go Live
                     </b-button>
-                    <i v-if="goLiveDisabled" class="fas fa-exclamation-circle text-warning ml-1 mr-1" style="pointer-events: all; font-size: 1.5rem;" v-b-tooltip.hover="disabledMessage"/>
+                    <i v-if="goLiveDisabled" class="fas fa-exclamation-circle text-warning ml-1 mr-1"
+                       style="pointer-events: all; font-size: 1.5rem;"
+                       :aria-label="disabledMessage"
+                       v-b-tooltip.hover="disabledMessage"/>
                   </span>
                 </div>
               </div>

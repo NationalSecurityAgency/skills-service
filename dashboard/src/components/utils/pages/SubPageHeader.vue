@@ -22,12 +22,15 @@ limitations under the License.
       <div v-if="!isLoading">
         <slot>
           <b-button ref="actionButton" v-if="action" type="button" size="sm" variant="outline-primary"
-                  :class="{'btn':true, 'btn-outline-primary':true, 'disabled':disabledInternal}"
-                  v-on:click="addClicked" :aria-label="ariaLabel ? ariaLabel : action"
-                  :data-cy="`btn_${title}`">
+                    :class="{'btn':true, 'btn-outline-primary':true, 'disabled':disabledInternal}"
+                    v-on:click="addClicked" :aria-label="ariaLabel ? ariaLabel : action"
+                    :data-cy="`btn_${title}`">
             <span class="">{{ action }} </span> <i class="fas fa-plus-circle"/>
           </b-button>
-          <i v-if="disabledInternal" class="fas fa-exclamation-circle text-warning ml-1" style="pointer-events: all; font-size: 1.5rem;" v-b-tooltip.hover="disabledMsg"/>
+          <i v-if="disabledInternal" class="fas fa-exclamation-circle text-warning ml-1"
+             style="pointer-events: all; font-size: 1.5rem;"
+             :aria-label="disabledMsg"
+             v-b-tooltip.hover="disabledMsg"/>
         </slot>
       </div>
     </div>

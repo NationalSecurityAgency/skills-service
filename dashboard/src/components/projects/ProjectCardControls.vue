@@ -36,7 +36,7 @@ limitations under the License.
                   title="Edit Project"
                   data-cy="editProjBtn"><i class="fas fa-edit" aria-hidden="true"/></b-button>
 
-        <span v-b-tooltip.hover="deleteDisabledText">
+        <span v-b-tooltip.hover="deleteDisabledText" :aria-label="deleteDisabledText">
           <b-button variant="outline-primary"
                     class="last-right-group-btn"
                     size="sm"

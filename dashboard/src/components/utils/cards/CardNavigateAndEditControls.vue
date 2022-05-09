@@ -40,7 +40,7 @@ limitations under the License.
                   :title="`Edit ${options.type}`"
                   data-cy="editBtn"><i class="fas fa-edit" aria-hidden="true"/></b-button>
 
-        <span v-b-tooltip.hover="options.deleteDisabledText">
+        <span v-b-tooltip.hover="options.deleteDisabledText" :aria-label="options.deleteDisabledText">
           <b-button variant="outline-primary"
                     class="last-right-group-btn"
                     size="sm"

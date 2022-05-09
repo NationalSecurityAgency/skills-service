@@ -386,17 +386,23 @@ describe('Import skills from Catalog Tests', () => {
 
         cy.get('[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '4');
 
-        cy.get('[data-cy="alreadyExistWarning_proj1-skill2"]').contains('Cannot import! Skill ID and name already exist in this project!');
-        cy.get('[data-cy="skillSelect_proj1-skill2"]').should('be.disabled')
+        cy.get('[data-cy="alreadyExistWarning_proj1-skill2"]')
+            .contains('Cannot import!Skill ID and name already exist in this project!');
+        cy.get('[data-cy="skillSelect_proj1-skill2"]')
+            .should('be.disabled');
 
         cy.get('[data-cy="alreadyExistWarning_proj1-skill3"]').should('not.exist')
         cy.get('[data-cy="skillSelect_proj1-skill3"]').should('be.enabled');
 
-        cy.get('[data-cy="alreadyExistWarning_proj1-skill4"]').contains('Cannot import! Skill ID already exists in this project!');
-        cy.get('[data-cy="skillSelect_proj1-skill4"]').should('be.disabled');
+        cy.get('[data-cy="alreadyExistWarning_proj1-skill4"]')
+            .contains('Cannot import!Skill ID already exists in this project!');
+        cy.get('[data-cy="skillSelect_proj1-skill4"]')
+            .should('be.disabled');
 
-        cy.get('[data-cy="alreadyExistWarning_proj1-skill5"]').contains('Cannot import! Skill name already exists in this project!');
-        cy.get('[data-cy="skillSelect_proj1-skill5"]').should('be.disabled');
+        cy.get('[data-cy="alreadyExistWarning_proj1-skill5"]')
+            .contains('Cannot import!Skill name already exists in this project!');
+        cy.get('[data-cy="skillSelect_proj1-skill5"]')
+            .should('be.disabled');
 
         cy.get('[data-cy="importBtn"]').should('be.disabled');
         cy.get('[data-cy="numSelectedSkills"]').should('have.text', '0');

@@ -17,8 +17,12 @@ limitations under the License.
   <div>
     <sub-page-header ref="subPageHeader" title="Skills" :is-loading="loadingSubjectSkills"
                      :disabled="addSkillDisabled" :disabled-msg="addSkillsDisabledMsg" aria-label="new skill">
-      <i v-if="addSkillDisabled" class="fas fa-exclamation-circle text-warning ml-1 mr-1" style="pointer-events: all; font-size: 1.5rem;" v-b-tooltip.hover="addSkillsDisabledMsg"/>
-      <b-button id="importFromCatalogBtn" ref="importFromCatalogBtn" @click="importCatalog.show=true" variant="outline-primary" size="sm"
+      <i v-if="addSkillDisabled" class="fas fa-exclamation-circle text-warning ml-1 mr-1"
+         style="pointer-events: all; font-size: 1.5rem;"
+         :aria-label="addSkillsDisabledMsg"
+         v-b-tooltip.hover="addSkillsDisabledMsg"/>
+      <b-button id="importFromCatalogBtn" ref="importFromCatalogBtn" @click="importCatalog.show=true"
+                variant="outline-primary" size="sm"
                 aria-label="import from catalog"
                 data-cy="importFromCatalogBtn">
         <span class="">Import</span> <i class="fas fa-book" aria-hidden="true"/>

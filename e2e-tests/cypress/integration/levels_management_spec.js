@@ -42,11 +42,56 @@ describe('Levels Management Tests', () => {
 
         const tableSelector = '[data-cy=levelsTable]'
         const expected = [
-            [{ colIndex: 0,  value: 1 }, { colIndex: 1,  value: '10' }, { colIndex: 2,  value: 'Please create more rules first' }],
-            [{ colIndex: 0,  value: 2 }, { colIndex: 1,  value: '25' }, { colIndex: 2,  value: 'Please create more rules first' }],
-            [{ colIndex: 0,  value: 3 }, { colIndex: 1,  value: '45' }, { colIndex: 2,  value: 'Please create more rules first' }],
-            [{ colIndex: 0,  value: 4 }, { colIndex: 1,  value: '67' }, { colIndex: 2,  value: 'Please create more rules first' }],
-            [{ colIndex: 0,  value: 5 }, { colIndex: 1,  value: '92' }, { colIndex: 2,  value: 'Please create more rules first' }],
+            [{
+                colIndex: 0,
+                value: 1
+            }, {
+                colIndex: 1,
+                value: '10'
+            }, {
+                colIndex: 2,
+                value: 'Please create more skills first'
+            }],
+            [{
+                colIndex: 0,
+                value: 2
+            }, {
+                colIndex: 1,
+                value: '25'
+            }, {
+                colIndex: 2,
+                value: 'Please create more skills first'
+            }],
+            [{
+                colIndex: 0,
+                value: 3
+            }, {
+                colIndex: 1,
+                value: '45'
+            }, {
+                colIndex: 2,
+                value: 'Please create more skills first'
+            }],
+            [{
+                colIndex: 0,
+                value: 4
+            }, {
+                colIndex: 1,
+                value: '67'
+            }, {
+                colIndex: 2,
+                value: 'Please create more skills first'
+            }],
+            [{
+                colIndex: 0,
+                value: 5
+            }, {
+                colIndex: 1,
+                value: '92'
+            }, {
+                colIndex: 2,
+                value: 'Please create more skills first'
+            }],
         ]
         cy.validateTable(tableSelector, expected, 5, true, null, false);
 

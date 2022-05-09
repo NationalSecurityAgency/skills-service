@@ -66,8 +66,11 @@ limitations under the License.
             <div class="col-12 col-lg">
               <div class="form-group mb-1">
                 <label for="pointIncrement">* Point Increment</label>
-                <i v-if="!canEditPoints && canEditPointsMsg && canEditPointsMsg.length > 0" class="fa fa-exclamation-circle text-warning ml-1"
-                   v-b-tooltip.hover="canEditPointsMsg" data-cy="skillPointIncrementDisabledWarning"/>
+                <i v-if="!canEditPoints && canEditPointsMsg && canEditPointsMsg.length > 0"
+                   class="fa fa-exclamation-circle text-warning ml-1"
+                   v-b-tooltip.hover="canEditPointsMsg"
+                   :aria-label="canEditPointsMsg"
+                   data-cy="skillPointIncrementDisabledWarning"/>
                 <ValidationProvider rules="optionalNumeric|required|min_value:1|maxPointIncrement" v-slot="{errors}" name="Point Increment">
                   <input class="form-control" type="text"  v-model="skillInternal.pointIncrement"
                          aria-required="true"
@@ -84,8 +87,11 @@ limitations under the License.
             <div class="col-12 col-lg">
               <div class="form-group mt-2 mt-lg-0">
                 <label for="numPerformToCompletion">* Occurrences to Completion</label>
-                <i v-if="!canEditPoints && canEditPointsMsg && canEditPointsMsg.length > 0" class="fa fa-exclamation-circle text-warning ml-1"
-                   v-b-tooltip.hover="canEditPointsMsg" data-cy="numPerformToCompletionDisabledWarning"/>
+                <i v-if="!canEditPoints && canEditPointsMsg && canEditPointsMsg.length > 0"
+                   class="fa fa-exclamation-circle text-warning ml-1"
+                   v-b-tooltip.hover="canEditPointsMsg"
+                   aria-label="canEditPointsMsg"
+                   data-cy="numPerformToCompletionDisabledWarning"/>
                 <ValidationProvider vid="totalOccurrences" rules="optionalNumeric|required|min_value:1|maxNumPerformToCompletion|moreThanMaxWindowOccurrences:@windowMaxOccurrence" v-slot="{errors}" name="Occurrences to Completion" tag="div">
                   <input class="form-control" type="text" v-model="skillInternal.numPerformToCompletion"
                          data-cy="numPerformToCompletion" aria-required="true" v-on:keyup.enter="handleSubmit(saveSkill)"
