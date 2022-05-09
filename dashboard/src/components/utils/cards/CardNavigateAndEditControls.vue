@@ -38,6 +38,8 @@ limitations under the License.
                   variant="outline-primary"
                   @click="$emit('edit')"
                   :title="`Edit ${options.type}`"
+                  :aria-label="`Edit ${options.type} ${options.name}`"
+                  role="button"
                   data-cy="editBtn"><i class="fas fa-edit" aria-hidden="true"/></b-button>
 
         <span v-b-tooltip.hover="options.deleteDisabledText" :aria-label="options.deleteDisabledText">
@@ -47,6 +49,8 @@ limitations under the License.
                     @click="$emit('delete')"
                     :disabled="options.isDeleteDisabled"
                     :title="`Delete ${options.type}`"
+                    :aria-label="`Delete ${options.type} ${options.name}`"
+                    role="button"
                     data-cy="deleteBtn"><i class="text-warning fas fa-trash" aria-hidden="true"/></b-button>
         </span>
       </b-button-group>
