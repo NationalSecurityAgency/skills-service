@@ -40,6 +40,7 @@ limitations under the License.
                     <toggle-button class="" v-model="showDescriptionsInternal" @change="onDetailsToggle"
                                    :color="{ checked: '#007c49', unchecked: '#6b6b6b' }"
                                    aria-label="Show Skill Details"
+                                   role="button"
                                    :labels="{ checked: 'On', unchecked: 'Off' }" data-cy="toggleSkillDetails"/>
                 </div>
             </div>
