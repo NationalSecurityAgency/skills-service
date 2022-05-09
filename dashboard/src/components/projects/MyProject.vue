@@ -52,6 +52,7 @@ limitations under the License.
               <i v-if="stat.warn" class="fas fa-exclamation-circle text-warning ml-1" style="font-size: 1.5rem;"
                  v-b-tooltip.hover="stat.warnMsg"
                  data-cy="warning"
+                 role="alert"
                  :aria-label="`Warning: ${stat.warnMsg}`"/>
             </div>
           </div>

@@ -23,6 +23,7 @@ limitations under the License.
         <div class="col text-right" data-cy="idInputEnableControl">
           <i class="fas fa-question-circle mr-1 text-secondary"
              aria-label="Enable ID input to override auto-generated value."
+             role="alert"
              v-b-tooltip.hover.left="'Enable to override auto-generated value.'"/>
           <b-link v-if="!canEdit" @click="toggle" aria-label="enable manual ID override">Enable</b-link>
           <span v-else>Enabled <i class="fa fa-check fa-sm text-muted"/></span>

@@ -37,6 +37,7 @@ limitations under the License.
                           <span v-if="stat.warnMsg" class="ml-1">
                             <i class="fa fa-exclamation-circle text-warning"
                                :aria-label="`Warning: ${stat.warnMsg}`"
+                               role="alert"
                                v-b-tooltip.hover="stat.warnMsg"/>
                           </span>
                         </div>
