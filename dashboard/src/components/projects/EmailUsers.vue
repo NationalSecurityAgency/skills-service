@@ -86,7 +86,7 @@ limitations under the License.
                                           data-cy="contactUserCriteria-removeBtn"><i class="fa fa-trash" /><span class="sr-only">delete filter {{tag.display}}</span></b-button>
               </b-badge>
             </div>
-            <h5 class="ml-4 h5 text-uppercase" data-cy="usersMatchingFilters"><b-badge variant="info">{{this.currentCount|number}}</b-badge> Users Selected</h5>
+            <div class="ml-4 h5 text-uppercase" data-cy="usersMatchingFilters"><b-badge variant="info">{{this.currentCount|number}}</b-badge> Users Selected</div>
           </div>
 
           <hr />
