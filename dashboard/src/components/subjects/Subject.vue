@@ -17,7 +17,9 @@ limitations under the License.
   <div class="h-100" data-cy="subjectCard">
     <loading-card :loading="isLoading"/>
     <nav-card-with-stats-and-controls v-if="!isLoading"
+                                      ref="navCardWithStatsAndControls"
                                       :disable-sort-control="disableSortControl"
+                                      @sort-changed-requested="sortRequested"
                                       :options="cardOptions" :data-cy="`subjectCard-${subjectInternal.subjectId}`">
       <div slot="underTitle">
         <card-navigate-and-edit-controls
@@ -116,6 +118,7 @@ limitations under the License.
             showShare: false,
             shareEnabled: !this.alreadyShared,
           },
+          displayOrder: this.subject.displayOrder,
         };
       },
       buildManageNavLink() {
@@ -139,14 +142,26 @@ limitations under the License.
           });
       },
       shareSubject() {
-        SubjectsService.shareSubject(this.subjectInternal.projectId, this.subjectInternal.subjectId).then(() => {
-          this.subjectInternal.exported = true;
-        });
+        SubjectsService.shareSubject(this.subjectInternal.projectId, this.subjectInternal.subjectId)
+          .then(() => {
+            this.subjectInternal.exported = true;
+          });
       },
       unshareSubject() {
-        SubjectsService.unshareSubject(this.subjectInternal.projectId, this.subjectInternal.subjectId).then(() => {
-          this.subjectInternal.exported = false;
-        });
+        SubjectsService.unshareSubject(this.subjectInternal.projectId, this.subjectInternal.subjectId)
+          .then(() => {
+            this.subjectInternal.exported = false;
+          });
+      },
+      sortRequested(info) {
+        const withId = {
+          ...info,
+          id: this.subject.subjectId
+        };
+        this.$emit('sort-changed-requested', withId);
+      },
+      focusSortControl() {
+        this.$refs.navCardWithStatsAndControls.focusSortControl();
       },
       subjectSaved(subject) {
         this.isLoading = true;

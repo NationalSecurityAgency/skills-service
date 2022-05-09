@@ -35,10 +35,11 @@ limitations under the License.
                 </template>
 
                 <badge :badge="badge"
-                     :ref="'badge_'+badge.badgeId"
-                     @badge-updated="saveBadge"
-                     @badge-deleted="deleteBadge"
-                     :disable-sort-control="badges.length === 1"/>
+                       :ref="'badge_'+badge.badgeId"
+                       @badge-updated="saveBadge"
+                       @badge-deleted="deleteBadge"
+                       @sort-changed-requested="updateSortAndReloadSubjects"
+                       :disable-sort-control="badges.length === 1"/>
               </b-overlay>
             </div>
           </div>
@@ -122,7 +123,7 @@ limitations under the License.
         'loadProjectDetailsState',
       ]),
       loadBadges(afterLoad) {
-        BadgesService.getBadges(this.projectId)
+        return BadgesService.getBadges(this.projectId)
           .then((badgesResponse) => {
             this.isLoading = false;
             this.badges = badgesResponse;
@@ -140,6 +141,33 @@ limitations under the License.
             this.isLoading = false;
             this.enableDropAndDrop();
           });
+      },
+      updateSortAndReloadSubjects(updateInfo) {
+        const sortedBadges = this.badges.sort((a, b) => {
+          if (a.displayOrder > b.displayOrder) {
+            return 1;
+          }
+          if (b.displayOrder > a.displayOrder) {
+            return -1;
+          }
+          return 0;
+        });
+        const currentIndex = sortedBadges.findIndex((item) => item.badgeId === updateInfo.id);
+        const newIndex = updateInfo.direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+        if (newIndex >= 0 && (newIndex) < this.badges.length) {
+          this.isLoading = true;
+          BadgesService.updateBadgeDisplaySortOrder(this.projectId, updateInfo.id, newIndex)
+            .finally(() => {
+              this.loadBadges()
+                .then(() => {
+                  this.isLoading = false;
+                  const foundRef = this.$refs[`badge_${updateInfo.id}`];
+                  this.$nextTick(() => {
+                    foundRef[0].focusSortControl();
+                  });
+                });
+            });
+        }
       },
       deleteBadge(badge) {
         this.isLoading = true;

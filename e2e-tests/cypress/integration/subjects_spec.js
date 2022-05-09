@@ -950,14 +950,75 @@ describe('Subjects Tests', () => {
       cy.get('[data-cy=breadcrumb-subj1]').should('exist');
       cy.get('[data-cy=btn_edit-subject]').click();
       cy.contains('Editing Existing Subject').should('be.visible');
-      cy.get('[data-cy=idInputEnableControl] a').click();
-      cy.get('[data-cy=idInputValue]').type("11111111");
-      cy.get('[data-cy=saveSubjectButton]').click();
-      cy.wait('@getNewId');
-      cy.get('[data-cy=manageSkillLink_skill3]').click();
-      cy.wait('@loadSkill');
-      cy.get('[data-cy=breadcrumb-subj1]').should('not.exist');
-      cy.get('[data-cy=breadcrumb-subj111111111]').should('exist');
+        cy.get('[data-cy=idInputEnableControl] a')
+            .click();
+        cy.get('[data-cy=idInputValue]')
+            .type('11111111');
+        cy.get('[data-cy=saveSubjectButton]')
+            .click();
+        cy.wait('@getNewId');
+        cy.get('[data-cy=manageSkillLink_skill3]')
+            .click();
+        cy.wait('@loadSkill');
+        cy.get('[data-cy=breadcrumb-subj1]')
+            .should('not.exist');
+        cy.get('[data-cy=breadcrumb-subj111111111]')
+            .should('exist');
 
+    });
+
+    it('change sort order using keyboard', () => {
+        cy.createSubject(1, 1);
+        cy.createSubject(1, 2);
+        cy.createSubject(1, 3);
+
+        cy.visit('/administrator/projects/proj1');
+        cy.validateElementsOrder('[data-cy="subjectCard"] [data-cy="titleLink"]', ['Subject 1', 'Subject 2', 'Subject 3']);
+
+        // move down
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="deleteBtn"]')
+            .tab()
+            .type('{downArrow}');
+        cy.validateElementsOrder('[data-cy="subjectCard"] [data-cy="titleLink"]', ['Subject 2', 'Subject 1', 'Subject 3']);
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="sortControlHandle"]')
+            .should('have.focus');
+
+        // move down
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="deleteBtn"]')
+            .tab()
+            .type('{downArrow}');
+        cy.validateElementsOrder('[data-cy="subjectCard"] [data-cy="titleLink"]', ['Subject 2', 'Subject 3', 'Subject 1']);
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="sortControlHandle"]')
+            .should('have.focus');
+
+        // move down - already the last item
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="deleteBtn"]')
+            .tab()
+            .type('{downArrow}');
+        cy.validateElementsOrder('[data-cy="subjectCard"] [data-cy="titleLink"]', ['Subject 2', 'Subject 3', 'Subject 1']);
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="sortControlHandle"]')
+            .should('have.focus');
+
+        // refresh and validate
+        cy.visit('/administrator/projects/proj1');
+        cy.validateElementsOrder('[data-cy="subjectCard"] [data-cy="titleLink"]', ['Subject 2', 'Subject 3', 'Subject 1']);
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="sortControlHandle"]')
+            .should('not.have.focus');
+
+        // move up
+        cy.get('[data-cy="subjectCard-subj3"] [data-cy="deleteBtn"]')
+            .tab()
+            .type('{upArrow}');
+        cy.validateElementsOrder('[data-cy="subjectCard"] [data-cy="titleLink"]', ['Subject 3', 'Subject 2', 'Subject 1']);
+        cy.get('[data-cy="subjectCard-subj3"] [data-cy="sortControlHandle"]')
+            .should('have.focus');
+
+        // move up - already first
+        cy.get('[data-cy="subjectCard-subj3"] [data-cy="deleteBtn"]')
+            .tab()
+            .type('{upArrow}');
+        cy.validateElementsOrder('[data-cy="subjectCard"] [data-cy="titleLink"]', ['Subject 3', 'Subject 2', 'Subject 1']);
+        cy.get('[data-cy="subjectCard-subj3"] [data-cy="sortControlHandle"]')
+            .should('have.focus');
     });
 });

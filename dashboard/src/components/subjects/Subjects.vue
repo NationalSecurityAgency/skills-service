@@ -34,7 +34,11 @@ limitations under the License.
                   </div>
                 </template>
 
-                <subject :subject="subject" v-on:subject-deleted="deleteSubject" :disable-sort-control="subjects.length === 1" />
+                <subject :subject="subject"
+                         :ref="`subj${subject.subjectId}`"
+                         @subject-deleted="deleteSubject"
+                         @sort-changed-requested="updateSortAndReloadSubjects"
+                         :disable-sort-control="subjects.length === 1"/>
               </b-overlay>
             </div>
           </div>
@@ -124,6 +128,34 @@ limitations under the License.
                 this.$emit('subjects-changed', subject.subjectId);
               });
           });
+      },
+      updateSortAndReloadSubjects(updateInfo) {
+        const sortedSubjects = this.subjects.sort((a, b) => {
+          if (a.displayOrder > b.displayOrder) {
+            return 1;
+          }
+          if (b.displayOrder > a.displayOrder) {
+            return -1;
+          }
+          return 0;
+        });
+        const currentIndex = sortedSubjects.findIndex((item) => item.subjectId === updateInfo.id);
+        const newIndex = updateInfo.direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+        if (newIndex >= 0 && (newIndex) < this.subjects.length) {
+          this.isLoading = true;
+          const { projectId } = this.$route.params;
+          SubjectsService.updateSubjectsDisplaySortOrder(projectId, updateInfo.id, newIndex)
+            .finally(() => {
+              this.loadSubjects({ projectId })
+                .then(() => {
+                  this.isLoading = false;
+                  const foundRef = this.$refs[`subj${updateInfo.id}`];
+                  this.$nextTick(() => {
+                    foundRef[0].focusSortControl();
+                  });
+                });
+            });
+        }
       },
       subjectAdded(subject) {
         this.displayNewSubjectModal = false;
