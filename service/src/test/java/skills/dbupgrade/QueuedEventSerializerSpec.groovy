@@ -19,6 +19,7 @@ import com.google.common.jimfs.Configuration
 import com.google.common.jimfs.Jimfs
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.SkillEventRequest
+import spock.lang.IgnoreRest
 import spock.lang.Specification
 
 import java.nio.file.FileSystem

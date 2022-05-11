@@ -104,23 +104,23 @@ class QueuedEventSerializer implements AutoCloseable{
 
     private Path getNextFile(Path rootDir) {
         Pattern numberedFiles = Pattern.compile("${baseName}(?:\\.(\\d+))?\\.${extension}")
-        int maxFileCount = 0
+        int currentFileCount = 0
+        boolean existing = false
 
         Files.list(rootDir).each {
             String name = it.getFileName().toString()
             Matcher match = numberedFiles.matcher(name)
             if (match.matches()) {
                 if (match.groupCount() > 0 && match.group(1) != null) {
-                    maxFileCount = Math.max(maxFileCount, Integer.valueOf(match.group(1)))
-                } else if (maxFileCount == 0){
-                    maxFileCount++
+                    currentFileCount = Math.max(currentFileCount, Integer.valueOf(match.group(1)))
                 }
+                existing = true
             }
         }
 
         String finalName = "${baseName}.${extension}"
-        if (maxFileCount > 0) {
-            finalName = "${baseName}.${++maxFileCount}.${extension}"
+        if (existing) {
+            finalName = "${baseName}.${++currentFileCount}.${extension}"
         }
 
         return rootDir.resolve(finalName)
