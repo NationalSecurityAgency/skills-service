@@ -85,7 +85,7 @@ class SerializedEventReader {
     }
 
     private List<Path> getQueuedEventFiles(Path root) {
-        final var jsonSequenceFilesVisitor = new ExtensionFileVisitor(fileExtension)
+        final ExtensionFileVisitor jsonSequenceFilesVisitor = new ExtensionFileVisitor(fileExtension)
         Files.walkFileTree(root, [].toSet(), 1, jsonSequenceFilesVisitor)
         return jsonSequenceFilesVisitor.matchedFiles
     }
