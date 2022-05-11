@@ -302,7 +302,7 @@ class SkillsAdminService {
                 if (!skillsGroupSkillDef) {
                     throw new SkillException("[${groupId}] groupId was not found.".toString(), skillRequest.projectId, skillRequest.skillId, ErrorCode.BadParam)
                 }
-                enabled = skillsGroupSkillDef.enabled
+                enabled = (skillRequest instanceof SkillImportRequest) ? skillRequest.enabled : skillsGroupSkillDef.enabled
             }
             skillDefinition = new SkillDefWithExtra(
                     skillId: skillRequest.skillId,

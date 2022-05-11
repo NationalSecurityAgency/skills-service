@@ -19,8 +19,10 @@ import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import skills.services.RuleSetDefinitionScoreUpdater
 import skills.services.UserAchievementsAndPointsManagement
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillRelDef
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPointsRepo
@@ -47,6 +49,9 @@ class SkillCatalogTransactionalAccessor {
     @Autowired
     UserAchievementsAndPointsManagement userAchievementsAndPointsManagement
 
+    @Autowired
+    RuleSetDefinitionScoreUpdater ruleSetDefinitionScoreUpdater
+
     @Transactional
     @Profile
     void enableSkills(List<SkillDef> disabledImportedSkills) {
@@ -59,10 +64,14 @@ class SkillCatalogTransactionalAccessor {
     @Transactional
     @Profile
     void updateSubjectTotalPoints(String projectId, String subjectId) {
-        SkillDef subjectDef = skillDefRepo.findByProjectIdAndSkillId(projectId, subjectId)
-        Integer totalPoints = skillDefRepo.getSubjectTotalPoints(subjectDef.id, false)
-        subjectDef.totalPoints = totalPoints
-        skillDefRepo.save(subjectDef)
+        ruleSetDefinitionScoreUpdater.updateSubjectTotalPoints(projectId, subjectId, false)
+    }
+
+
+    @Transactional
+    @Profile
+    void updateGroupTotalPoints(String projectId, String groupId) {
+        ruleSetDefinitionScoreUpdater.updateGroupTotalPoints(projectId, groupId, false)
     }
 
     @Transactional

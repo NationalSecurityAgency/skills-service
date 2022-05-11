@@ -31,6 +31,9 @@ import skills.storage.repos.SkillRelDefRepo
 @Slf4j
 class RuleSetDefinitionScoreUpdater {
 
+    private static List<String> SUBJ_TO_SKILL_REL_TYPES = [SkillRelDef.RelationshipType.GroupSkillToSubject, SkillRelDef.RelationshipType.RuleSetDefinition].collect { it.toString() }
+    private static List<String> GROUP_TO_SKILL_REL_TYPES = [SkillRelDef.RelationshipType.SkillsGroupRequirement].collect { it.toString() }
+
     @Autowired
     SkillDefRepo skillDefRepo
 
@@ -81,13 +84,29 @@ class RuleSetDefinitionScoreUpdater {
     }
 
     @Profile
-    void updateSubjectSkillDef(SkillDef subjectDef) {
+    void updateSubjectSkillDef(SkillDef subjectDef, boolean enabledSkillsOnly = true) {
         assert subjectDef.type == SkillDef.ContainerType.Subject
         // it's important to update SkillDef object so Hibernate cache is updated as well
-        // as ProjDef object is retrieved later in the execution path
-        Integer totalPoints = skillDefRepo.getSubjectTotalPoints(subjectDef.id, true)
+        // as SkillDef object is retrieved later in the execution path
+        Integer totalPoints = skillDefRepo.calculateSkillDefTotalPointsBySummingChildPoints(subjectDef.id, SUBJ_TO_SKILL_REL_TYPES, enabledSkillsOnly)
         subjectDef.totalPoints = totalPoints
         skillDefRepo.save(subjectDef)
+    }
+
+    @Profile
+    void updateSubjectTotalPoints(String projectId, String subjectId, boolean enabledSkillsOnly = true) {
+        SkillDef subjectDef = skillDefRepo.findByProjectIdAndSkillId(projectId, subjectId)
+        this.updateSubjectSkillDef(subjectDef, enabledSkillsOnly)
+    }
+
+
+    @Profile
+    void updateGroupTotalPoints(String projectId, String groupId, boolean enabledSkillsOnly = true) {
+        SkillDef groupDef = skillDefRepo.findByProjectIdAndSkillId(projectId, groupId)
+        assert groupDef.type == SkillDef.ContainerType.SkillsGroup
+        Integer totalPoints = skillDefRepo.calculateSkillDefTotalPointsBySummingChildPoints(groupDef.id, GROUP_TO_SKILL_REL_TYPES, enabledSkillsOnly)
+        groupDef.totalPoints = totalPoints
+        skillDefRepo.save(groupDef)
     }
 
 }

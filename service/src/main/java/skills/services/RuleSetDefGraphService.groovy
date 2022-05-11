@@ -57,7 +57,8 @@ class RuleSetDefGraphService {
 
     @Transactional
     SkillDef getMySubjectParent(Integer childId) {
-        List<SkillDef> parents = skillRelDefRepo.findParentByChildIdAndTypes(childId, [RelationshipType.RuleSetDefinition, RelationshipType.GroupSkillToSubject])
+        List<SkillDef> parents = skillRelDefRepo.findParentsByChildIdAndParentContainerTypeAndRelationshipTypes(childId,
+                SkillDef.ContainerType.Subject, [RelationshipType.RuleSetDefinition, RelationshipType.GroupSkillToSubject])
         // assume that I only have one parent
         assert parents.size() == 1
         SkillDef parent = parents.first()

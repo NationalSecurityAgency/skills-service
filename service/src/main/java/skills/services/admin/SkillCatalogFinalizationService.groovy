@@ -112,8 +112,17 @@ class SkillCatalogFinalizationService {
             List<SkillDef> disabledImportedSkills = skillDefRepo.findAllByProjectIdAndTypeAndEnabledAndCopiedFromIsNotNull(projectId, SkillDef.ContainerType.Skill, Boolean.FALSE.toString())
 
             if (disabledImportedSkills) {
+                // update groups points
+                List<SkillDef> groups = disabledImportedSkills
+                        .findAll({ it.groupId != null })
+                        .collect { ruleSetDefGraphService.getParentSkill(it) }
+                        .unique(false) { SkillDef a, SkillDef b -> a.skillId <=> b.skillId }
+                groups.each {
+                    skillCatalogTransactionalAccessor.updateGroupTotalPoints(projectId, it.skillId)
+                }
+
                 // important: must update subject's total points first then project
-                List<SkillDef> subjects = disabledImportedSkills.collect { ruleSetDefGraphService.getParentSkill(it.id) }
+                List<SkillDef> subjects = disabledImportedSkills.collect { ruleSetDefGraphService.getMySubjectParent(it.id) }
                         .unique(false) { SkillDef a, SkillDef b -> a.skillId <=> b.skillId }
                 subjects.each {
                     skillCatalogTransactionalAccessor.updateSubjectTotalPoints(projectId, it.skillId)

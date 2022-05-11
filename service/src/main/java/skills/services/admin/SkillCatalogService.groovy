@@ -259,7 +259,7 @@ class SkillCatalogService {
         return skillDefRepo.isImportedFromCatalog(projectId, skillId)
     }
 
-    private void importSkillFromCatalog(String projectIdFrom, String skillIdFrom, String projectIdTo, SkillDef subjectTo) {
+    private void importSkillFromCatalog(String projectIdFrom, String skillIdFrom, String projectIdTo, SkillDef subjectTo, String groupId) {
         boolean inCatalog = isAvailableInCatalog(projectIdFrom, skillIdFrom)
         SkillsValidator.isTrue(inCatalog, "Skill [${skillIdFrom}] from project [${projectIdFrom}] has not been shared to the catalog and may not be imported")
         projDefAccessor.getProjDef(projectIdFrom)
@@ -287,18 +287,18 @@ class SkillCatalogService {
         copy.selfReportingType = original.selfReportingType?.toString()
         copy.enabled = Boolean.FALSE.toString()
 
-        skillsAdminService.saveSkill(copy.skillId, copy)
+        skillsAdminService.saveSkill(copy.skillId, copy, true, groupId)
     }
 
     @Transactional
     @Profile
-    void importSkillsFromCatalog(String projectIdTo, String subjectIdTo, List<CatalogSkill> listOfSkills) {
+    void importSkillsFromCatalog(String projectIdTo, String subjectIdTo, List<CatalogSkill> listOfSkills, String groupIdTo = null) {
         if (skillCatalogFinalizationService.getCurrentState(projectIdTo) == SkillCatalogFinalizationService.FinalizeState.RUNNING) {
             throw new SkillException("Cannot import skills in the middle of the finalization process", projectIdTo)
         }
 
         int currentSubjectSkillCount = skillRelDefRepo.countSubjectSkillsIncDisabled(projectIdTo, subjectIdTo)
-        if (currentSubjectSkillCount+listOfSkills?.size() > maxSubjectSkills) {
+        if (currentSubjectSkillCount + listOfSkills?.size() > maxSubjectSkills) {
             throw new SkillException("Each Subject is limited to [${maxSubjectSkills}] Skills, " +
                     "currently [${subjectIdTo}] has [${currentSubjectSkillCount}] Skills, " +
                     "importing [${listOfSkills?.size()}] would exceed the maximum", ErrorCode.MaxSkillsThreshold)
@@ -314,6 +314,13 @@ class SkillCatalogService {
             throw new SkillException("Requested parent skill id [${subjectIdTo}] doesn't exist for type [${subjectType}].", projectIdTo, subjectIdTo)
         }
 
+        if (groupIdTo) {
+            // validate group
+            SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillId(projectIdTo, groupIdTo)
+            SkillsValidator.isNotNull(skillDef, "Provided group id [${groupIdTo}] does not exist", projectIdTo)
+            SkillsValidator.isTrue(skillDef.type == SkillDef.ContainerType.SkillsGroup, "Provided group id [${groupIdTo}] does not reference a group", projectIdTo)
+        }
+
         Set<String> validateProjectIds = new HashSet<>()
         listOfSkills?.each {
             if (!validateProjectIds.contains(it.projectId)) {
@@ -321,7 +328,7 @@ class SkillCatalogService {
                 validateProjectIds.add(it.projectId)
             }
 
-            importSkillFromCatalog(it.projectId, it.skillId, projectIdTo, subjectTo)
+            importSkillFromCatalog(it.projectId, it.skillId, projectIdTo, subjectTo, groupIdTo)
         }
     }
 
