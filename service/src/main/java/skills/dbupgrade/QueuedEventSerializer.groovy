@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.ObjectWriter
 import com.fasterxml.jackson.databind.SequenceWriter
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Value
 import skills.controller.exceptions.SkillException
+import skills.controller.exceptions.SkillsValidator
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -30,14 +32,24 @@ class QueuedEventSerializer implements AutoCloseable{
     SequenceWriter sequenceWriter
 
     public QueuedEventSerializer(String baseName, String extension, Path queuedEventDir, BlockingQueue<QueuedSkillEvent> queuedSkillEvents) {
-        this.baseName = baseName
-        this.extension = extension
-        this.queuedEventDir = queuedEventDir
-        this.queuedSkillEvents = queuedSkillEvents
-
+        if (StringUtils.isEmpty(baseName)) {
+            throw new SkillException("baseName is required")
+        }
+        if (StringUtils.isEmpty(extension)) {
+            throw new SkillException("extension is required")
+        }
         if (!Files.isDirectory(queuedEventDir)) {
             throw new SkillException("[${queuedEventDir}] does not exist or is not a directory")
         }
+        if (queuedSkillEvents == null) {
+            throw new SkillException("queuedSkillEvents is required")
+        }
+        this.baseName = baseName
+        this.extension = extension.startsWith(".") ? extension.subSequence(1, extension.length()) : extension
+        this.queuedEventDir = queuedEventDir
+        this.queuedSkillEvents = queuedSkillEvents
+
+
 
         fileWriterService = Executors.newFixedThreadPool(1)
     }
@@ -47,7 +59,7 @@ class QueuedEventSerializer implements AutoCloseable{
         Path outputFile = getNextFile(queuedEventDir)
 
         log.info("writing queued skill events to [{}]", outputFile)
-        sequenceWriter = writer.writeValues(Files.newBufferedWriter(outputFile, StandardOpenOption.APPEND, StandardOpenOption.CREATE))
+        sequenceWriter = writer.writeValues(Files.newBufferedWriter(outputFile,  StandardOpenOption.CREATE, StandardOpenOption.APPEND, StandardOpenOption.WRITE))
 
         fileWriterService.submit(new Runnable() {
             public void run() {
@@ -68,7 +80,7 @@ class QueuedEventSerializer implements AutoCloseable{
     void close() throws Exception {
         if (fileWriterService) {
             fileWriterService.shutdownNow()
-            fileWriterService.awaitTermination(30, TimeUnit.SECONDS)
+            fileWriterService.awaitTermination(5, TimeUnit.SECONDS)
         }
         if (sequenceWriter) {
             sequenceWriter.close()
@@ -76,7 +88,7 @@ class QueuedEventSerializer implements AutoCloseable{
     }
 
     private Path getNextFile(Path rootDir) {
-        Pattern numberedFiles = Pattern.compile("${baseName}(\\.\\d+)?\\.${extension}")
+        Pattern numberedFiles = Pattern.compile("${baseName}(?:\\.(\\d+))?\\.${extension}")
         int maxFileCount = 0
 
         Files.list(rootDir).each {
@@ -84,8 +96,8 @@ class QueuedEventSerializer implements AutoCloseable{
             Matcher match = numberedFiles.matcher(name)
             if (match.matches()) {
                 if (match.groupCount() > 0 && match.group(1) != null) {
-                    maxFileCount = Math.max(maxFileCount+1, Integer.valueOf(match.group(1)))
-                } else {
+                    maxFileCount = Math.max(maxFileCount, Integer.valueOf(match.group(1)))
+                } else if (maxFileCount == 0){
                     maxFileCount++
                 }
             }
@@ -93,7 +105,7 @@ class QueuedEventSerializer implements AutoCloseable{
 
         String finalName = "${baseName}.${extension}"
         if (maxFileCount > 0) {
-            finalName = "${baseName}.${maxFileCount}.${extension}"
+            finalName = "${baseName}.${++maxFileCount}.${extension}"
         }
 
         return rootDir.resolve(finalName)

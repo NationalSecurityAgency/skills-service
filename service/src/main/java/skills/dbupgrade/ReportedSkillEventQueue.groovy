@@ -1,6 +1,5 @@
 package skills.dbupgrade
 
-
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -10,13 +9,11 @@ import skills.controller.exceptions.SkillException
 
 import javax.annotation.PostConstruct
 import javax.annotation.PreDestroy
-import java.nio.file.FileVisitOption
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
-import java.util.stream.Stream
 
 @Slf4j
 @Component

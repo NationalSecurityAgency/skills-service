@@ -71,7 +71,7 @@ class UpgradeSafeUrlDecider {
 
         String urlPattern = allowedUrls.join("|")
         allowedMutationUrls = Pattern.compile(urlPattern)
-        log.info("POST and PUT urls will be checked against [${allowedMutationUrls.pattern()}]")
+        log.debug("POST and PUT urls will be checked against [{}]", allowedMutationUrls.pattern())
 
         String skillEventRequest = "/projects/([^/]+)/skills/([^/]+)"
         if (contextPath) {
@@ -86,7 +86,7 @@ class UpgradeSafeUrlDecider {
         if ((method == HttpMethod.POST || HttpMethod.PUT) && matcher.find()) {
             String projectId = matcher.group(1)
             String skillId = matcher.group(2)
-            log.info("request is reporting a skill event for [${projectId}]-[${skillId}]")
+            log.debug("request is reporting a skill event for [{}]-[{}]", projectId, skillId)
             QueuedSkillEvent queuedSkillEvent = new QueuedSkillEvent(projectId: projectId, skillId: skillId, requestTime: new Date())
             return queuedSkillEvent
         } else {
@@ -96,7 +96,6 @@ class UpgradeSafeUrlDecider {
 
     public boolean isUrlAllowed(String path, HttpMethod method) {
         log.info("checking if http ${method} against [${path}] is allowed")
-        //not working right, certain urls being allowed that don't appear to match the pattern
         if (HttpMethod.PUT == method || HttpMethod.POST == method || HttpMethod.DELETE == method) {
             Matcher matcher = allowedMutationUrls.matcher(path)
             return matcher.find()

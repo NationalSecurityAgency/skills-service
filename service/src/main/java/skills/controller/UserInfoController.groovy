@@ -33,6 +33,7 @@ import skills.controller.request.model.UserSettingsRequest
 import skills.controller.result.model.RequestResult
 import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.UserInfoRes
+import skills.dbupgrade.DBUpgradeSafe
 import skills.services.AccessSettingsStorageService
 import skills.services.UserAdminService
 import skills.services.UserAgreementResult
@@ -192,6 +193,7 @@ class UserInfoController {
     @Autowired
     AccessSettingsStorageService accessSettingsStorageService
 
+    @DBUpgradeSafe
     @RequestMapping(value = "/users/suggestDashboardUsers", method = RequestMethod.POST, produces = "application/json")
     List<UserInfoRes> suggestExistingDashboardUsers(@RequestBody SuggestRequest suggestRequest) {
         return userAdminService.suggestDashboardUsers(suggestRequest.suggestQuery, suggestRequest.includeSelf)
@@ -202,11 +204,13 @@ class UserInfoController {
         return userRepo.findByUserId(userId?.toLowerCase()) != null
     }
 
+    @DBUpgradeSafe
     @RequestMapping(value = "/users/projects/{projectId}/suggestClientUsers", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     List<UserInfoRes> suggestExistingClientUsersForProject(@PathVariable("projectId") String projectId, @RequestBody SuggestRequest suggestRequest) {
         return userAdminService.suggestUsersForProject(projectId, suggestRequest.suggestQuery, PageRequest.of(0, 5)).collect { new UserInfoRes(userId: it) }
     }
 
+    @DBUpgradeSafe
     @RequestMapping(value = "/users/suggestClientUsers/", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     List<UserInfoRes> suggestExistingClientUsers(@RequestBody SuggestRequest suggestRequest) {
         return userAdminService.suggestUsers(suggestRequest.suggestQuery, PageRequest.of(0, 5)).collect { new UserInfoRes(userId: it) }
@@ -222,6 +226,7 @@ class UserInfoController {
         return userAdminService.isValidExistingUserId(userId?.toLowerCase())
     }
 
+    @DBUpgradeSafe
     @RequestMapping(value = "/users/suggestPkiUsers", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     List<UserInfoRes> suggestExistingPkiUsers(@RequestBody SuggestRequest suggestRequest, @RequestParam(value="userSuggestOption", required = false, defaultValue = '') String userSuggestOption ) {
         String query = suggestRequest.suggestQuery

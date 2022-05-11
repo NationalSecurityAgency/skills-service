@@ -2,20 +2,18 @@ package skills.dbupgrade
 
 import com.fasterxml.jackson.databind.MappingIterator
 import com.fasterxml.jackson.databind.json.JsonMapper
-import com.google.common.collect.Streams
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import skills.controller.AddSkillHelper
+import skills.controller.exceptions.SkillException
 import skills.controller.request.model.SkillEventRequest
 
-import java.nio.file.FileVisitOption
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.StandardOpenOption
-import java.util.stream.Stream
+import java.nio.file.*
+import java.nio.file.attribute.BasicFileAttributes
 
 @Slf4j
 class SerializedEventReader {
-    static final String CHECKPOINT_FILE_EXT = "checkpoint"
+
     static final int STATUS_INTERVAL = 1000
 
     AddSkillHelper addSkillHelper
@@ -23,6 +21,18 @@ class SerializedEventReader {
     String fileExtension
 
     public SerializedEventReader(Path fileDir, String fileExtension, AddSkillHelper addSkillHelper) {
+        if (fileDir == null) {
+            throw new SkillException("fileDir is required")
+        }
+        if (StringUtils.isEmpty(fileExtension)) {
+            throw new SkillException("fileExtension is required")
+        }
+        if (addSkillHelper == null) {
+            throw new SkillException("addSkillHelper is required")
+        }
+        if (fileExtension.startsWith(".")) {
+            fileExtension = fileExtension.substring(1, fileExtension.length())
+        }
         this.addSkillHelper = addSkillHelper
         this.fileDir = fileDir
         this.fileExtension = fileExtension
@@ -30,36 +40,25 @@ class SerializedEventReader {
 
     public void run() {
         if (Files.isDirectory(fileDir)) {
-            Stream<Path> files = Files.walk(fileDir, 1, FileVisitOption.FOLLOW_LINKS)
-            Stream<Path> queuedEventFiles = files.filter({ it.toString().endsWithIgnoreCase(fileExtension) })
+            List<Path> queuedEventFiles = getQueuedEventFiles(fileDir)
 
             JsonMapper jsonMapper = new JsonMapper()
             queuedEventFiles.forEach({
+                log.debug("identified queued event file [{}] to process", it.getFileName())
                 processFile(it, jsonMapper)
             })
         }
     }
 
     private void processFile(Path file, JsonMapper jsonMapper) {
-        //move checkpoint handling to it's own utility class
-        Path checkpointFile = fileDir.resolve("${file.getFileName()}.${CHECKPOINT_FILE_EXT}")
-        int startAt = 0
-        if (Files.isReadable(checkpointFile)) {
-            Optional<String> lastLine = Streams.findLast(Files.lines(checkpointFile))
-            lastLine.ifPresent({
-                startAt = Integer.valueOf(it)
-                log.info("reading events from [${checkpointFile}] was interrupted, starting at event [${startAt}]")
-            })
-        }
-
         log.info("processing queued skill event file [${file}]")
-        try (MappingIterator<QueuedSkillEvent> itr = jsonMapper.readerFor(QueuedSkillEvent).readValues(Files.newBufferedReader(file));
-             BufferedWriter checkPointer = Files.newBufferedWriter(checkpointFile, StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
 
+        CheckPointer checkPointer = new CheckPointer(fileDir, file.getFileName().toString())
+        try (MappingIterator<QueuedSkillEvent> itr = jsonMapper.readerFor(QueuedSkillEvent).readValues(Files.newBufferedReader(file))) {
+            int startAt = checkPointer.getLastReadRecord()
             int i = 0
             while (itr.hasNext()) {
-                checkPointer.writeLine("$i")
-                checkPointer.flush()
+                checkPointer.recordRecord(i)
                 i++
                 QueuedSkillEvent queuedSkillEvent = itr.nextValue()
                 if (i >= startAt) {
@@ -71,15 +70,41 @@ class SerializedEventReader {
                         skr.userId = queuedSkillEvent.userId
                     }
                     addSkillHelper.addSkill(queuedSkillEvent.projectId, queuedSkillEvent.skillId, skr)
+                } else {
+                    log.debug("skipping record [{}], last record read before shutdown was [{}]", i, startAt)
                 }
 
                 if (i % STATUS_INTERVAL == 0 && i > 0) {
                     log.info("recovered [$i] events from [${file}] so far")
                 }
-
             }
         }
+
         Files.delete(file)
-        Files.delete(checkpointFile)
+        checkPointer.cleanup()
+    }
+
+    private List<Path> getQueuedEventFiles(Path root) {
+        final var jsonSequenceFilesVisitor = new ExtensionFileVisitor(fileExtension)
+        Files.walkFileTree(root, [].toSet(), 1, jsonSequenceFilesVisitor)
+        return jsonSequenceFilesVisitor.matchedFiles
+    }
+
+    private static class ExtensionFileVisitor extends SimpleFileVisitor<Path> {
+        private final PathMatcher pathMatcher
+        List<Path> matchedFiles = []
+
+        public ExtensionFileVisitor(String extension) {
+            pathMatcher = FileSystems.getDefault().getPathMatcher("glob:*.${extension}")
+        }
+
+        @Override
+        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+                throws IOException {
+            if (pathMatcher.matches(file.getFileName())) {
+                matchedFiles << file
+            }
+            return FileVisitResult.CONTINUE
+        }
     }
 }

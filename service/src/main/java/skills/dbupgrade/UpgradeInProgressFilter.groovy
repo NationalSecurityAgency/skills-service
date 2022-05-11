@@ -35,6 +35,7 @@ import javax.servlet.http.HttpServletResponse
 class UpgradeInProgressFilter extends OncePerRequestFilter {
 
     private static Set<HttpMethod> ALLOWED_METHODS = Sets.newHashSet(HttpMethod.GET, HttpMethod.OPTIONS)
+    public static final String ANONYMOUS_USER = "anonymousUser"
 
     @Autowired
     UpgradeSafeUrlDecider safeUrlDecider
@@ -45,19 +46,14 @@ class UpgradeInProgressFilter extends OncePerRequestFilter {
     @Autowired
     List<HttpMessageConverter> configuredMessageConverters
 
-    @PostConstruct
-    public void init() {
-
-    }
-
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, java.io.IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         final Authentication auth = SecurityContextHolder.getContext()?.getAuthentication()
 
         final HttpMethod method = HttpMethod.resolve(request.getMethod())
         final String uri = request.getRequestURI()
 
-        if (!auth || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+        if (!auth?.isAuthenticated() || ANONYMOUS_USER.equals(auth.getPrincipal())) {
             log.warn("request for [{}] is not authenticated, UpgradeInProgressFilter cannot process", uri)
             filterChain.doFilter(request, response)
             return
@@ -81,13 +77,12 @@ class UpgradeInProgressFilter extends OncePerRequestFilter {
             eventResult.projectId = queuedSkillEvent.projectId
             eventResult.skillId = queuedSkillEvent.skillId
             eventResult.skillApplied = false
-            eventResult.explanation = "A database upgrade is currently in progress. This Skill Event Request has been queued for future application"
+            eventResult.explanation = "A database upgrade is currently in progress. This Skill Event Request has been queued for future application."
             writeResponse(response, eventResult)
         } else if (safeUrlDecider.isUrlAllowed(uri, method)) {
             log.info("request [{}] has been annotated as DBUpgradeSafe and is allowed while db upgrade is in progress", uri)
             filterChain.doFilter(request, response)
         } else {
-            //todo: fix language
             throw new SkillException("${uri} is not allowed, A database upgrade is currently in progress, no training profile modifications are allowed at this time", ErrorCode.DbUpgradeInProgress)
         }
     }
