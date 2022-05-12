@@ -137,19 +137,16 @@ class SkillsAdminService {
             }
         }
 
-        // if enabled, validate and update points and achievements
-        if (Boolean.valueOf(skillsGroupSkillDef.enabled)) {
-            // need to validate skills group
-            skillsGroupAdminService.validateSkillsGroupAndReturnChildren(skillsGroupSkillDef.numSkillsRequired, true, skillsGroupSkillDef.id)
-            groupChildSkills.each {childSkillDef ->
-                final int incrementRequested = pointIncrement
-                final int currentOccurrences = (origAttrs.get(childSkillDef)[0] / origAttrs.get(childSkillDef)[1])
-                final int occurrencesDelta = patchRequest.numPerformToCompletion - currentOccurrences
-                final int pointIncrementDelta = incrementRequested - pointIncrement
-                log.debug("Rebuilding scores for [${}]", childSkillDef.skillId)
-                ruleSetDefinitionScoreUpdater.updateFromLeaf(childSkillDef)
-                updatePointsAndAchievements(childSkillDef, subjectId, pointIncrementDelta, occurrencesDelta, currentOccurrences, 0, skillsGroupSkillDef, groupChildSkills)
-            }
+        // need to validate skills group
+        skillsGroupAdminService.validateSkillsGroupAndReturnChildren(skillsGroupSkillDef.numSkillsRequired, skillsGroupSkillDef.id)
+        groupChildSkills.each { childSkillDef ->
+            final int incrementRequested = pointIncrement
+            final int currentOccurrences = (origAttrs.get(childSkillDef)[0] / origAttrs.get(childSkillDef)[1])
+            final int occurrencesDelta = patchRequest.numPerformToCompletion - currentOccurrences
+            final int pointIncrementDelta = incrementRequested - pointIncrement
+            log.debug("Rebuilding scores for [${}]", childSkillDef.skillId)
+            ruleSetDefinitionScoreUpdater.updateFromLeaf(childSkillDef)
+            updatePointsAndAchievements(childSkillDef, subjectId, pointIncrementDelta, occurrencesDelta, currentOccurrences, 0, skillsGroupSkillDef, groupChildSkills)
         }
     }
 
@@ -356,7 +353,7 @@ class SkillsAdminService {
             if (!skillsGroupSkillDef) {
                 skillsGroupSkillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, groupId, SkillDef.ContainerType.SkillsGroup)
             }
-            groupChildSkills = skillsGroupAdminService.validateSkillsGroupAndReturnChildren(skillsGroupSkillDef.numSkillsRequired, Boolean.valueOf(skillsGroupSkillDef.enabled), skillsGroupSkillDef.id)
+            groupChildSkills = skillsGroupAdminService.validateSkillsGroupAndReturnChildren(skillsGroupSkillDef.numSkillsRequired, skillsGroupSkillDef.id)
         }
 
         if (shouldRebuildScores) {
