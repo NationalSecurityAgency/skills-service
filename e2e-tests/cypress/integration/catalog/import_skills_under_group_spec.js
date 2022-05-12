@@ -21,13 +21,6 @@ describe('Import Skills under a Group Tests', () => {
 
         cy.createProject(1);
         cy.createSubject(1, 1);
-
-        Cypress.Commands.add('createSimpleGroup', (projNum = 1, subjNum = 1, groupNum = 5) => {
-            cy.createSkillsGroup(projNum, subjNum, groupNum);
-            cy.addSkillToGroup(projNum, subjNum, groupNum, groupNum + 1);
-            cy.addSkillToGroup(projNum, subjNum, groupNum, groupNum + 2);
-            cy.createSkillsGroup(projNum, subjNum, groupNum, { enabled: true });
-        });
     });
 
     it('import a skill under a group and finalize', () => {
@@ -39,7 +32,7 @@ describe('Import Skills under a Group Tests', () => {
         cy.exportSkillToCatalog(2, 1, 1);
         cy.exportSkillToCatalog(2, 1, 2);
 
-        cy.createSimpleGroup();
+        cy.createSkillsGroup(1, 1, 5);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1/');
         cy.get('[data-cy="expandDetailsBtn_group5"]')
@@ -63,7 +56,7 @@ describe('Import Skills under a Group Tests', () => {
         cy.get('[data-cy="pageHeaderStat_Skills_disabledCount"]')
             .should('have.text', '1');
         cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]')
-            .should('have.text', '2');
+            .should('have.text', '0');
 
         cy.get('[data-cy="finalizeBtn"]')
             .click();
@@ -80,7 +73,7 @@ describe('Import Skills under a Group Tests', () => {
         cy.get('[data-cy="pageHeaderStat_Skills_disabledCount"]')
             .should('not.exist');
         cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]')
-            .should('have.text', '3');
+            .should('have.text', '1');
 
         cy.get('[data-cy="expandDetailsBtn_group5"]')
             .click();
@@ -90,7 +83,7 @@ describe('Import Skills under a Group Tests', () => {
     });
 
     it('refocus on the import button after the Import modal is closed', () => {
-        cy.createSimpleGroup();
+        cy.createSkillsGroup(1, 1, 5);
         cy.visit('/administrator/projects/proj1/subjects/subj1/');
         cy.get('[data-cy="expandDetailsBtn_group5"]')
             .click();
