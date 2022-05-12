@@ -25,26 +25,6 @@ limitations under the License.
         <div class="row px-3 my-2">
           <div class="col">
             <div class="row align-items-center">
-              <div class="col-lg-auto border-right" data-cy="skillGroupStatus">
-                <div v-if="this.group.enabled">
-                  <span class="font-italic">Status: </span> <span class="text-uppercase"><b-badge variant="success">Live <span class="far fa-check-circle" aria-hidden="true"/></b-badge></span>
-                </div>
-                <div v-if="!this.group.enabled">
-                  <span class="font-italic">Status: </span>
-                  <span class="text-uppercase mr-1"><b-badge variant="warning">Disabled</b-badge></span>
-                  <span v-b-tooltip.hover="goLiveToolTipText" :aria-label="goLiveToolTipText">
-                    <b-button variant="outline-info" size="sm" data-cy="goLiveBtn"
-                              @click="enableGroup"
-                              :disabled="lessThanTwoSkills || goLiveDisabled">
-                      <i class="fas fa-glass-cheers"></i> Go Live
-                    </b-button>
-                    <i v-if="goLiveDisabled" class="fas fa-exclamation-circle text-warning ml-1 mr-1"
-                       style="pointer-events: all; font-size: 1.5rem;"
-                       :aria-label="disabledMessage"
-                       v-b-tooltip.hover="disabledMessage"/>
-                  </span>
-                </div>
-              </div>
               <div class="col-lg mt-2 mt-lg-0" data-cy="requiredSkillsSection">
                 <b-form inline>
                   <span>
@@ -185,15 +165,11 @@ limitations under the License.
       },
       disableDeleteButtonInfo() {
         let res = null;
-        if (this.group.enabled) {
-          if (this.group.numSkillsRequired > 0 && this.group.numSkillsRequired === this.skills.length) {
-            res = {
-              minNumSkills: this.group.numSkillsRequired,
-              tooltip: 'Cannot delete! Cannot go below the number of the required skills.',
-            };
-          } else {
-            res = { minNumSkills: 2, tooltip: 'Cannot delete! Groups that went Live must have at least 2 skill.' };
-          }
+        if (this.group.numSkillsRequired > 0 && this.group.numSkillsRequired === this.skills.length) {
+          res = {
+            minNumSkills: this.group.numSkillsRequired,
+            tooltip: 'Cannot delete! Cannot go below the number of the required skills.',
+          };
         }
         return res;
       },

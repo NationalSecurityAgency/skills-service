@@ -512,10 +512,10 @@ class AdminController {
             propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.descriptionMaxLength, "Skill Description", skillRequest.description)
             skillRequest.description = InputSanitizer.sanitize(skillRequest.description)
             skillRequest.helpUrl = InputSanitizer.sanitizeUrl(skillRequest.helpUrl)
-
-            // default to enabled
-            skillRequest.enabled = skillRequest.enabled  == null ? "true" : skillRequest.enabled
         }
+
+        // default to enabled
+        skillRequest.enabled = skillRequest.enabled == null ? "true" : skillRequest.enabled
 
         saveSkillService.saveSkillAndSchedulePropagationToImportedSkills(skillId, skillRequest, true, groupId)
     }

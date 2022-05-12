@@ -296,13 +296,12 @@ class SkillsAdminService {
 
             Integer highestDisplayOrder = skillDefRepo.calculateChildSkillsHighestDisplayOrder(skillRequest.projectId, groupId ?: parentSkillId)
             int displayOrder = highestDisplayOrder == null ? 1 : highestDisplayOrder + 1
-            String enabled = isSkillsGroup ? Boolean.FALSE.toString() : isEnabledSkillInRequest.toString()
+            String enabled = isEnabledSkillInRequest.toString()
             if (isSkillsGroupChild) {
                 skillsGroupSkillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, groupId, SkillDef.ContainerType.SkillsGroup)
                 if (!skillsGroupSkillDef) {
                     throw new SkillException("[${groupId}] groupId was not found.".toString(), skillRequest.projectId, skillRequest.skillId, ErrorCode.BadParam)
                 }
-                enabled = (skillRequest instanceof SkillImportRequest) ? skillRequest.enabled : skillsGroupSkillDef.enabled
             }
             skillDefinition = new SkillDefWithExtra(
                     skillId: skillRequest.skillId,

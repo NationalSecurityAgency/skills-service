@@ -88,7 +88,6 @@ limitations under the License.
                 <div class="text-success font-weight-bold">
                   <i class="fas fa-layer-group" aria-hidden="true"></i> <span class="text-uppercase">Group</span>
                   <b-badge variant="success" class="ml-2 text-uppercase">{{ data.item.numSkillsInGroup }} skills</b-badge>
-                  <b-badge v-if="!data.item.enabled" variant="warning" class="ml-2 text-uppercase">Disabled</b-badge>
                 </div>
                 <div class="h5 text-primary"><show-more :text="data.item.nameHtml ? data.item.nameHtml : data.item.name" :limit="45" :contains-html="data.item.nameHtml" /></div>
               </div>
