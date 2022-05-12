@@ -22,6 +22,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.AutoConfigurationImportSelector;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.Environment;
@@ -40,7 +41,7 @@ import java.util.TimeZone;
 @EnableScheduling
 @EnableWebSecurity
 @Import(SpringBootApp.SkillsAutoConfigurationImportSelector.class)
-@SpringBootApplication(exclude = { RedisRepositoriesAutoConfiguration.class })
+@SpringBootApplication(exclude = { RedisRepositoriesAutoConfiguration.class, ErrorMvcAutoConfiguration.class })
 @EnableJpaRepositories(basePackages = {"skills.storage.repos"})
 public class SpringBootApp {
 
