@@ -113,7 +113,7 @@ limitations under the License.
 
   const {
     mapActions,
-    mapGetters
+    mapGetters,
   } = createNamespacedHelpers('subjects');
   const finalizeInfo = createNamespacedHelpers('finalizeInfo');
 
@@ -270,7 +270,7 @@ limitations under the License.
         this.numSkills = skillsParam.length;
         this.skills = skillsParam.map((skill) => ({
           ...skill,
-          subjectId: this.group.subjectId
+          subjectId: this.group.subjectId,
         }));
       },
       showNewSkillDialog() {
@@ -398,7 +398,7 @@ limitations under the License.
               });
             this.loadSubjectDetailsState({
               projectId: this.$route.params.projectId,
-              subjectId: this.$route.params.subjectId
+              subjectId: this.$route.params.subjectId,
             });
             this.loadFinalizeInfo({ projectId: this.$route.params.projectId });
           });
