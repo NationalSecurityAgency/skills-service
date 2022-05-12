@@ -36,13 +36,19 @@ export default {
     return axios.post(url, listOfProjectAndSkillIds)
       .then((response) => response.data);
   },
+  bulkImportIntoGroup(projectId, subjectId, groupId, listOfProjectAndSkillIds) {
+    const url = `/admin/projects/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}/groups/${encodeURIComponent(groupId)}/import`;
+    return axios.post(url, listOfProjectAndSkillIds)
+      .then((response) => response.data);
+  },
   getExportedStats(projectId, skillId) {
     const url = `/admin/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}/exported/stats`;
     return axios.get(url)
       .then((response) => response.data);
   },
   removeExportedSkill(projectId, skillId) {
-    return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}/export`).then((response) => response.data);
+    return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}/export`)
+      .then((response) => response.data);
   },
   checkIfSkillExistInCatalog(projectId, skillIdOrName) {
     const url = `/admin/projects/${encodeURIComponent(projectId)}/skills/catalog/exists/${encodeURIComponent(skillIdOrName)}`;
