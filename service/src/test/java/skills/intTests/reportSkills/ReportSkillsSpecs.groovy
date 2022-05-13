@@ -834,6 +834,7 @@ class ReportSkillsSpecs extends DefaultIntSpec {
         skillsService.createSkill(skillsGroup)
         String skillsGroupId = skillsGroup.skillId
         skills.each { skill ->
+            skill.pointIncrement = 100
             skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
         }
 
@@ -841,9 +842,8 @@ class ReportSkillsSpecs extends DefaultIntSpec {
 
         then:
 
-        !res.body.skillApplied
-        res.body.explanation == "This skill belongs to a Skill Group that is not yet enabled"
-        !res.body.completed
+        res.body.skillApplied
+        res.body.explanation == "Skill event was applied"
     }
 
     def "skills from different projects with the same subject id do not intermingle"() {

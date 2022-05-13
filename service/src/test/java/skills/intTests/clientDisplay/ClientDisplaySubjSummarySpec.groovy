@@ -35,14 +35,13 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         // skills group1 - enabled
         def skillsGroup1 = allSkills[3]
         skillsGroup1.type = 'SkillsGroup'
-        skillsGroup1.numSkillsRequired = 2
         skillsService.createSkill(skillsGroup1)
         String skillsGroup1Id = skillsGroup1.skillId
         def group1Children = allSkills[4..6]
         group1Children.each { skill ->
             skillsService.assignSkillToSkillsGroup(skillsGroup1Id, skill)
         }
-        skillsGroup1.enabled = 'true'
+        skillsGroup1.numSkillsRequired = 2
         skillsService.updateSkill(skillsGroup1, null)
 
         // skills group2 - disabled (should not be included in the summary)

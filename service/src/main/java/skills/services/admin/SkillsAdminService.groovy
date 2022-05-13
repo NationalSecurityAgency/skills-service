@@ -219,10 +219,10 @@ class SkillsAdminService {
         List<SkillDef> groupChildSkills = null
         if (isEdit) {
             validateImportedSkillUpdate(skillRequest, skillDefinition)
-            // can't disable a skill/skillgroup once it's been enabled
-            if (isCurrentlyEnabled && (StringUtils.isNotBlank(skillRequest.enabled) && !isEnabledSkillInRequest)) {
-                throw new SkillException("Cannot disable ${skillDefinition.type} [${skillRequest.skillId}] once it has been enabled", skillRequest.projectId, skillRequest.skillId)
-            }
+//            // can't disable a skill/skillgroup once it's been enabled
+//            if (isCurrentlyEnabled && (StringUtils.isNotBlank(skillRequest.enabled) && !isEnabledSkillInRequest)) {
+//                throw new SkillException("Cannot disable ${skillDefinition.type} [${skillRequest.skillId}] once it has been enabled", skillRequest.projectId, skillRequest.skillId)
+//            }
 
             // for updates, use the existing value if it is not set on the skillRequest (null or empty String)
             if (StringUtils.isBlank(skillRequest.enabled)) {
@@ -239,22 +239,10 @@ class SkillsAdminService {
                     numSkillsRequiredDelta = requestedNumSkillsRequired - currentNumSkillsRequired
                 }
 
-                boolean enabledChanged = Boolean.valueOf(skillDefinition.enabled) != isEnabledSkillInRequest
                 boolean skillIdChanged = skillDefinition.skillId != skillRequest.skillId
-                if (enabledChanged || skillIdChanged) {
-                    // validate that the Group's skills won't exceed the maximum allowed when publishing the group
-                    if (isEnabledSkillInRequest) {
-                        String parentSkillId = skillRequest.subjectId
-                        SkillDef groupSubject = skillDefRepo.findByProjectIdAndSkillIdAndType(skillRequest.projectId, parentSkillId, SkillDef.ContainerType.Subject)
-                        assert groupSubject, "Subject [${parentSkillId}] does not exist"
-
-                        createdResourceLimitsValidator.validateNumSkillsCreated(groupSubject, groupChildSkills.size())
-                    }
-                    // need to update child skills:
-                    //   - enabling or disabling
-                    //   - skillId changed
+                if (skillIdChanged) {
+                    // need to update child skills since group skillId changed
                     groupChildSkills.each {
-                        it.enabled = skillRequest.enabled
                         it.groupId = skillRequest.skillId
                     }
                     skillDefRepo.saveAll(groupChildSkills)
@@ -499,7 +487,7 @@ class SkillsAdminService {
         // make sure skills group is still valid and update group's totalPoints
         if (skillDefinition.groupId) {
             assert parentSkill.type == SkillDef.ContainerType.SkillsGroup
-            List<SkillDef> children = skillsGroupAdminService.validateCanDeleteChildSkillAndReturnChildren(parentSkill)
+            List<SkillDef> children = skillsGroupAdminService.getSkillsGroupChildSkills(parentSkill.id)
             if (children.size() == parentSkill.numSkillsRequired) {
                 parentSkill.numSkillsRequired = -1
             }
@@ -508,7 +496,7 @@ class SkillsAdminService {
                 skillDefWithExtraRepo.save(parentSkill)
             }
 
-            if (Boolean.valueOf(parentSkill.enabled)) {
+            if (children) {
                 int numSkillsRequired = parentSkill.numSkillsRequired == -1 ? children.size() : parentSkill.numSkillsRequired
                 userPointsManagement.insertUserAchievementWhenDecreaseOfSkillsRequiredCausesUsersToAchieve(projectId, parentSkill.skillId, parentSkill.id, children.collect { it.skillId }, numSkillsRequired)
             }
