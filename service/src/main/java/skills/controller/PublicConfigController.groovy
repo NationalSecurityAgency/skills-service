@@ -101,6 +101,9 @@ class PublicConfigController {
         res["docsHost"] = docsHost
         res["maxSelfReportMessageLength"] = uiConfigProperties.ui.maxSelfReportMessageLength
         res["levelDisplayName"] = 'Level'
+        if (Boolean.valueOf(uiConfigProperties.dbUpgradeInProgress)) {
+            res["dbUpgradeInProgress"] = uiConfigProperties.dbUpgradeInProgress
+        }
         if (projectId) {
             String customLevelName = settingsService.getProjectSetting(projectId, 'level.displayName')?.value
             if (customLevelName) {

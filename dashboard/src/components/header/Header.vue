@@ -16,6 +16,14 @@ limitations under the License.
 <template>
 
   <div class="bg-white header">
+    <div v-if="isUpgradeInProgress" class="container-fluid p-3 text-center bg-warning mb-1" data-cy="upgradeInProgressWarning">
+      <span class="fa-stack fa-2x" style="vertical-align: middle; font-size:1em;">
+        <i class="fas fa-circle fa-stack-2x"></i>
+        <i class="fas fa-hammer fa-stack-1x fa-inverse"></i>
+      </span>
+      <span class="pl-1">An upgrade is currently in process. Please note that no changes will be permitted until the upgrade is complete.
+      Any reported skills will be queued for application once the upgrade has completed.</span>
+    </div>
     <div class="container-fluid py-3">
       <div class="row">
         <div class="col-sm">
@@ -43,6 +51,7 @@ limitations under the License.
 </template>
 
 <script>
+  import store from '@/store/store';
   import SettingsButton from './SettingsButton';
   import Breadcrumb from './Breadcrumb';
   import InceptionButton from '../inception/InceptionButton';
@@ -59,6 +68,10 @@ limitations under the License.
     computed: {
       isAdminPage() {
         return this.$route && this.$route.meta && this.$route.meta.requiresAuth && !this.$route.meta.nonAdmin;
+      },
+      isUpgradeInProgress() {
+        console.log(`store.getters.config.dbUpgradeInProgress is [${store.getters.config.dbUpgradeInProgress}]`);
+        return store.getters.config.dbUpgradeInProgress === 'true';
       },
     },
     beforeDestroy() {

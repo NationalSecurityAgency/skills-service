@@ -81,6 +81,9 @@ function errorResponseHandler(error) {
       ({ explanation } = error.response.data);
     }
     handlePush({ name: 'NotFoundPage', params: { explanation } });
+  } else if (errorCode === 503 && error?.response?.data?.errorCode === 'DbUpgradeInProgress') {
+    handlePush({ name: 'DbUpgradeInProgressPage' });
+    return Promise.reject(error);
   } else {
     handlePush({ name: 'ErrorPage' });
   }

@@ -22,7 +22,7 @@ import skills.auth.AuthMode
 
 class DBUpgrade {
 
-    static final String DB_UPGRADE_PROPERTY = 'skills.db-upgrade-in-progress'
+    static final String DB_UPGRADE_PROPERTY = 'skills.config.db-upgrade-in-progress'
     static final String DEFAULT = "false"
 
     static class InProgress implements Condition {

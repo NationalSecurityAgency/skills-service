@@ -20,6 +20,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Conditional
 import org.springframework.core.annotation.Order
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.http.converter.HttpMessageConverter
@@ -31,7 +32,6 @@ import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 import skills.auth.UserInfo
 import skills.controller.exceptions.ErrorCode
-import skills.controller.exceptions.SkillException
 import skills.controller.request.model.SkillEventRequest
 import skills.services.events.SkillEventResult
 
@@ -39,6 +39,7 @@ import javax.servlet.FilterChain
 import javax.servlet.ServletException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
+import java.util.concurrent.TimeUnit
 
 @Slf4j
 @Component
@@ -57,6 +58,12 @@ class UpgradeInProgressFilter extends OncePerRequestFilter {
 
     @Autowired
     List<HttpMessageConverter> configuredMessageConverters
+
+    static class DbUpgradeErrBody {
+        String explanation
+        String errorCode = ErrorCode.DbUpgradeInProgress.toString()
+        boolean success = false
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -80,8 +87,9 @@ class UpgradeInProgressFilter extends OncePerRequestFilter {
         UserInfo userInfo = (UserInfo)auth.getPrincipal()
 
         QueuedSkillEvent queuedSkillEvent = safeUrlDecider.isSkillEventReport(uri, method)
+        ServletServerHttpRequest serverHttpRequest = new ServletServerHttpRequest(request)
         if (queuedSkillEvent) {
-            SkillEventRequest skillEventRequest = readEventRequest(request)
+            SkillEventRequest skillEventRequest = readEventRequest(serverHttpRequest)
             queuedSkillEvent.skillEventRequest = skillEventRequest
             queuedSkillEvent.userId = userInfo.username
             skillEventQueue.queueEvent(queuedSkillEvent)
@@ -90,17 +98,26 @@ class UpgradeInProgressFilter extends OncePerRequestFilter {
             eventResult.skillId = queuedSkillEvent.skillId
             eventResult.skillApplied = false
             eventResult.explanation = "A database upgrade is currently in progress. This Skill Event Request has been queued for future application."
-            writeResponse(response, eventResult)
+            boolean success = writeResponse(response, serverHttpRequest, SkillEventResult.class, eventResult)
+            if (!success) {
+                log.error("unable to write response to client request for [{}] with accept headers of [{}]", uri, serverHttpRequest.getHeaders().getAccept())
+            }
         } else if (safeUrlDecider.isUrlAllowed(uri, method)) {
             log.info("request [{}] has been annotated as DBUpgradeSafe and is allowed while db upgrade is in progress", uri)
             filterChain.doFilter(request, response)
         } else {
-            throw new SkillException("${uri} is not allowed, A database upgrade is currently in progress, no training profile modifications are allowed at this time", ErrorCode.DbUpgradeInProgress)
+            log.info("POST/PUT/DELETE request to [{}] is not allowed, user [{}], database upgrade is currently in progress", uri, userInfo.username)
+            DbUpgradeErrBody basicErrBody = new DbUpgradeErrBody(explanation: "A database upgrade is currently in progress, no training profile modifications are allowed at this time.")
+            response.setStatus(503)
+            response.setHeader(HttpHeaders.RETRY_AFTER, TimeUnit.MINUTES.toSeconds(30).toString())
+            boolean success = writeResponse(response, serverHttpRequest, DbUpgradeErrBody.class, basicErrBody)
+            if (!success) {
+                log.error("unable to write response to client request for [{}] with accept headers of [{}]", uri, serverHttpRequest.getHeaders().getAccept())
+            }
         }
     }
 
-    private SkillEventRequest readEventRequest(HttpServletRequest request) {
-        ServletServerHttpRequest serverHttpRequest = new ServletServerHttpRequest(request)
+    private SkillEventRequest readEventRequest(ServletServerHttpRequest serverHttpRequest) {
         MediaType mediaType = serverHttpRequest.getHeaders().getContentType()
 
         for (HttpMessageConverter messageConverter : configuredMessageConverters) {
@@ -111,17 +128,18 @@ class UpgradeInProgressFilter extends OncePerRequestFilter {
         }
     }
 
-    private void writeResponse(HttpServletResponse response, SkillEventResult eventResult) {
+    private boolean writeResponse(HttpServletResponse response, ServletServerHttpRequest serverHttpRequest, Class clazz, Object eventResult) {
         ServletServerHttpResponse serverHttpResponse = new ServletServerHttpResponse(response)
-        List<MediaType> acceptTypes = serverHttpResponse.getHeaders().getAccept()
+        List<MediaType> acceptTypes = serverHttpRequest.getHeaders().getAccept()
         for (MediaType accept : acceptTypes) {
             for (HttpMessageConverter messageConverter : configuredMessageConverters) {
-                if (messageConverter.canWrite(SkillEventResult, accept)) {
+                if (messageConverter.canWrite(clazz, accept)) {
                     messageConverter.write(eventResult, accept, serverHttpResponse)
-                    return
+                    return true
                 }
             }
         }
+        return false
     }
 
 

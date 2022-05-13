@@ -20,6 +20,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.http.converter.HttpMessageConverter
 import org.springframework.mock.web.MockHttpServletRequest
+import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
@@ -28,6 +29,7 @@ import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.SkillEventRequest
 import skills.services.events.SkillEventResult
+import spock.lang.IgnoreRest
 import spock.lang.Specification
 
 import javax.servlet.FilterChain
@@ -46,6 +48,9 @@ class UpgradeInProgressFilterSpec extends Specification {
         def authentication = Mock(Authentication)
         def securityContext = Mock(SecurityContext)
         def userInfo = Mock(UserInfo)
+
+
+        //need to properly mock the HttpServletRequest headers not the spring class as that's created after we run
 
         securityContext.getAuthentication() >> authentication
         authentication.isAuthenticated() >> true
@@ -81,7 +86,6 @@ class UpgradeInProgressFilterSpec extends Specification {
             qe.skillEventRequest.userId == "aUser" &&
             qe.requestTime == requestTime
         })
-        1 * mockResponse.getHeaders("Accept") >> [MediaType.APPLICATION_JSON_VALUE]
         1 * mockMessageConverter.canWrite(SkillEventResult, _) >> true
         1 * mockMessageConverter.write({ SkillEventResult ser ->
             ser.projectId == "foo" &&
@@ -264,11 +268,12 @@ class UpgradeInProgressFilterSpec extends Specification {
         def upgradeSafeUrlDecider = Mock(UpgradeSafeUrlDecider)
         def skillEventQueue = Mock(ReportedSkillEventQueue)
         def mockMessageConverter = Mock(HttpMessageConverter)
-        def mockResponse = Mock(HttpServletResponse )
+        def mockResponse = new MockHttpServletResponse()
         def mockFilterChain = Mock(FilterChain)
         def authentication = Mock(Authentication)
         def securityContext = Mock(SecurityContext)
         def userInfo = Mock(UserInfo)
+        def mockHeaders = Mock(HttpHeaders)
 
         securityContext.getAuthentication() >> authentication
         authentication.isAuthenticated() >> true
@@ -294,8 +299,11 @@ class UpgradeInProgressFilterSpec extends Specification {
         progressFilter.doFilter(mockRequest, mockResponse, mockFilterChain)
 
         then:
-        def e = thrown(SkillException)
-        e.errorCode == ErrorCode.DbUpgradeInProgress
+        1 * mockMessageConverter.canWrite(UpgradeInProgressFilter.DbUpgradeErrBody.class, MediaType.APPLICATION_JSON) >> true
+        1 * mockMessageConverter.write({ UpgradeInProgressFilter.DbUpgradeErrBody it ->
+            it.errorCode == ErrorCode.DbUpgradeInProgress.toString() &&
+            it.explanation == "A database upgrade is currently in progress, no training profile modifications are allowed at this time."
+        }, MediaType.APPLICATION_JSON, _)
     }
 
 

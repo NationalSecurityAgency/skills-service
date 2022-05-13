@@ -88,7 +88,7 @@ class UpgradeSafeUrlDecider {
         allowedMutationUrls = Pattern.compile(urlPattern)
         log.debug("POST and PUT urls will be checked against [{}]", allowedMutationUrls.pattern())
 
-        String skillEventRequest = "/projects/([^/]+)/skills/([^/]+)"
+        String skillEventRequest = "/api/projects/([^/]+)/skills/([^/]+)"
         if (contextPath) {
             skillEventRequest = slashAwareJoin(contextPath, skillEventRequest)
         }
