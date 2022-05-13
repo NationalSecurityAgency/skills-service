@@ -530,7 +530,7 @@ class SkillCatalogService {
     @Transactional
     void updateImportedSkill(String projectId, String skillId, ImportedSkillUpdate importedSkillUpdate) {
         SkillDefWithExtra skillDefWithExtra = skillAccessor.getSkillDefWithExtra(projectId, skillId, [SkillDef.ContainerType.Skill])
-        SkillDef subject = relationshipService.getParentSkill(skillDefWithExtra.id)
+        SkillDef subject = relationshipService.getMySubjectParent(skillDefWithExtra.id)
         SkillRequest skillRequest = new SkillRequest(
                 pointIncrement: importedSkillUpdate.pointIncrement, // update
 

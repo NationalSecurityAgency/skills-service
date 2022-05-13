@@ -17,6 +17,7 @@ package skills.intTests.catalog
 
 import groovy.json.JsonOutput
 import skills.intTests.utils.SkillsFactory
+import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -37,8 +38,6 @@ class CatalogImportDefinitionManagement_SkillsGroupsSpecs extends CatalogIntSpec
         def gSkill2 = createSkill(2, 1, 11, 0, 50)
         skillsService.assignSkillToSkillsGroup(p2skillsGroup.skillId, gSkill1)
         skillsService.assignSkillToSkillsGroup(p2skillsGroup.skillId, gSkill2)
-        p2skillsGroup.enabled = true
-        skillsService.createSkill(p2skillsGroup)
 
         when:
         def project_t0 = skillsService.getProject(p2.projectId)
@@ -97,4 +96,138 @@ class CatalogImportDefinitionManagement_SkillsGroupsSpecs extends CatalogIntSpec
         skillDefRepo.findByProjectIdAndSkillId(p2.projectId, p2skillsGroup.skillId).totalPoints == 1100
     }
 
+    def "Imported Group Skills: skill definition is synchronized"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        skillsService.bulkExportSkillsToCatalog(p1.projectId, p1Skills.collect { it.skillId })
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def p2skillsGroup = SkillsFactory.createSkillsGroup(2, 1, 5)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [p2skillsGroup])
+
+        skillsService.bulkImportSkillsIntoGroupFromCatalog(p2.projectId, p2subj1.subjectId, p2skillsGroup.skillId,
+                p1Skills.collect { [projectId: it.projectId, skillId: it.skillId] })
+        when:
+        def p2skillsGroupSkills_t0 = skillsService.getSkillsForGroup(p2.projectId, p2skillsGroup.skillId)
+
+        p1Skills[0].name = "Other name"
+        skillsService.createSkill(p1Skills[0])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        def p2skillsGroupSkills_t1 = skillsService.getSkillsForGroup(p2.projectId, p2skillsGroup.skillId)
+        then:
+        p2skillsGroupSkills_t0.name == ["Test Skill 1", "Test Skill 2", "Test Skill 3"]
+        p2skillsGroupSkills_t1.name == ["Other name", "Test Skill 2", "Test Skill 3"]
+    }
+
+    def "Imported Group Skills: skill events are propagated"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        skillsService.bulkExportSkillsToCatalog(p1.projectId, p1Skills.collect { it.skillId })
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def p2skillsGroup = SkillsFactory.createSkillsGroup(2, 1, 5)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [p2skillsGroup])
+
+        String user = getRandomUsers(1)[0]
+        skillsService.bulkImportSkillsIntoGroupFromCatalogAndFinalize(p2.projectId, p2subj1.subjectId, p2skillsGroup.skillId,
+                p1Skills.collect { [projectId: it.projectId, skillId: it.skillId] })
+        when:
+        def skill1_t0 = skillsService.getSingleSkillSummary(user, p2.projectId, p1Skills[1].skillId)
+
+        skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[1].skillId], user)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        def skill1_t1 = skillsService.getSingleSkillSummary(user, p2.projectId, p1Skills[1].skillId)
+        then:
+        skill1_t0.points == 0
+        skill1_t1.points == 100
+    }
+
+    def "Imported Group Skills: change point increment on the imported skill"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        skillsService.bulkExportSkillsToCatalog(p1.projectId, p1Skills.collect { it.skillId })
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def p2skillsGroup = SkillsFactory.createSkillsGroup(2, 1, 5)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [p2skillsGroup])
+
+        skillsService.bulkImportSkillsIntoGroupFromCatalogAndFinalize(p2.projectId, p2subj1.subjectId, p2skillsGroup.skillId,
+                p1Skills.collect { [projectId: it.projectId, skillId: it.skillId] })
+        when:
+        def project_t0 = skillsService.getProject(p2.projectId)
+        def subject_t0 = skillsService.getSubject(p2subj1)
+        def skill_t0 = skillsService.getSkill([projectId: p2.projectId, subjectId: p2subj1.subjectId, skillId: p1Skills[1].skillId])
+
+        skillsService.updateImportedSkill(p2.projectId, p1Skills[1].skillId, 453)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        def project_t1 = skillsService.getProject(p2.projectId)
+        def subject_t1 = skillsService.getSubject(p2subj1)
+        def skill_t1 = skillsService.getSkill([projectId: p2.projectId, subjectId: p2subj1.subjectId, skillId: p1Skills[1].skillId])
+        then:
+        project_t0.totalPoints == 300
+        subject_t0.totalPoints == 300
+        skill_t0.totalPoints == 100
+
+        project_t1.totalPoints == 653
+        subject_t1.totalPoints == 653
+        skill_t1.totalPoints == 453
+    }
+
+    def "Imported Group Skills: delete imported skill"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        skillsService.bulkExportSkillsToCatalog(p1.projectId, p1Skills.collect { it.skillId })
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def p2skillsGroup = SkillsFactory.createSkillsGroup(2, 1, 5)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [p2skillsGroup])
+
+        String user = getRandomUsers(1)[0]
+
+        skillsService.bulkImportSkillsIntoGroupFromCatalogAndFinalize(p2.projectId, p2subj1.subjectId, p2skillsGroup.skillId,
+                p1Skills.collect { [projectId: it.projectId, skillId: it.skillId] })
+
+        def project_t0 = skillsService.getProject(p2.projectId)
+        def subject_t0 = skillsService.getSubject(p2subj1)
+
+        skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[1].skillId], user)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        def user_skill1_t0 = skillsService.getSkillSummary(user, p2.projectId, p2subj1.subjectId)
+
+        when:
+        skillsService.deleteSkill([projectId: p2.projectId, subjectId: p2subj1.subjectId, skillId: p1Skills[1].skillId])
+
+        def project_t1 = skillsService.getProject(p2.projectId)
+        def subject_t1 = skillsService.getSubject(p2subj1)
+        def user_skill1_t1 = skillsService.getSkillSummary(user, p2.projectId, p2subj1.subjectId)
+
+        then:
+        project_t0.totalPoints == 300
+        subject_t0.totalPoints == 300
+        user_skill1_t0.points == 100
+        user_skill1_t0.todaysPoints == 100
+        user_skill1_t0.skills[0].children.skill == ['Test Skill 1', 'Test Skill 2', 'Test Skill 3']
+
+        project_t1.totalPoints == 200
+        subject_t1.totalPoints == 200
+        user_skill1_t1.points == 0
+        user_skill1_t1.todaysPoints == 0
+        user_skill1_t1.skills[0].children.skill == ['Test Skill 1', 'Test Skill 3']
+    }
 }
+
