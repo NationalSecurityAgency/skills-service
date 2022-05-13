@@ -15,9 +15,8 @@
  */
 package skills.intTests.catalog
 
-import groovy.json.JsonOutput
+
 import skills.intTests.utils.SkillsFactory
-import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -57,7 +56,6 @@ class CatalogImportDefinitionManagement_SkillsGroupsSpecs extends CatalogIntSpec
         def subjects_t1 = skillsService.getSubjects(p2.projectId)
         def p2subj1Skills_t1 = skillsService.getSkillsForSubject(p2.projectId, p2subj1.subjectId)
         def p2skillsGroupSkills_t1 = skillsService.getSkillsForGroup(p2.projectId, p2skillsGroup.skillId)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(p2skillsGroupSkills_t1))
 
         skillsService.finalizeSkillsImportFromCatalog(p2.projectId)
 
@@ -140,14 +138,19 @@ class CatalogImportDefinitionManagement_SkillsGroupsSpecs extends CatalogIntSpec
                 p1Skills.collect { [projectId: it.projectId, skillId: it.skillId] })
         when:
         def skill1_t0 = skillsService.getSingleSkillSummary(user, p2.projectId, p1Skills[1].skillId)
+        def user_skill1_t0 = skillsService.getSkillSummary(user, p2.projectId, p2subj1.subjectId)
 
         skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[1].skillId], user)
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 
         def skill1_t1 = skillsService.getSingleSkillSummary(user, p2.projectId, p1Skills[1].skillId)
+        def user_skill1_t1 = skillsService.getSkillSummary(user, p2.projectId, p2subj1.subjectId)
         then:
         skill1_t0.points == 0
         skill1_t1.points == 100
+
+        user_skill1_t0.skillsLevel == 0
+        user_skill1_t1.skillsLevel == 2
     }
 
     def "Imported Group Skills: change point increment on the imported skill"() {
@@ -228,6 +231,100 @@ class CatalogImportDefinitionManagement_SkillsGroupsSpecs extends CatalogIntSpec
         user_skill1_t1.points == 0
         user_skill1_t1.todaysPoints == 0
         user_skill1_t1.skills[0].children.skill == ['Test Skill 1', 'Test Skill 3']
+    }
+
+
+    def "Imported Group Skills: delete original skill"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        skillsService.bulkExportSkillsToCatalog(p1.projectId, p1Skills.collect { it.skillId })
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def p2skillsGroup = SkillsFactory.createSkillsGroup(2, 1, 5)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [p2skillsGroup])
+
+        String user = getRandomUsers(1)[0]
+
+        skillsService.bulkImportSkillsIntoGroupFromCatalogAndFinalize(p2.projectId, p2subj1.subjectId, p2skillsGroup.skillId,
+                p1Skills.collect { [projectId: it.projectId, skillId: it.skillId] })
+
+        def project_t0 = skillsService.getProject(p2.projectId)
+        def subject_t0 = skillsService.getSubject(p2subj1)
+
+        skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[1].skillId], user)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        def user_skill1_t0 = skillsService.getSkillSummary(user, p2.projectId, p2subj1.subjectId)
+
+        when:
+        skillsService.deleteSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[1].skillId])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        def project_t1 = skillsService.getProject(p2.projectId)
+        def subject_t1 = skillsService.getSubject(p2subj1)
+        def user_skill1_t1 = skillsService.getSkillSummary(user, p2.projectId, p2subj1.subjectId)
+
+        then:
+        project_t0.totalPoints == 300
+        subject_t0.totalPoints == 300
+        user_skill1_t0.points == 100
+        user_skill1_t0.todaysPoints == 100
+        user_skill1_t0.skills[0].children.skill == ['Test Skill 1', 'Test Skill 2', 'Test Skill 3']
+
+        project_t1.totalPoints == 200
+        subject_t1.totalPoints == 200
+        user_skill1_t1.points == 0
+        user_skill1_t1.todaysPoints == 0
+        user_skill1_t1.skills[0].children.skill == ['Test Skill 1', 'Test Skill 3']
+    }
+
+    def "Imported Group Skills: finalize migrates achievements"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        skillsService.bulkExportSkillsToCatalog(p1.projectId, p1Skills.collect { it.skillId })
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def p2skillsGroup = SkillsFactory.createSkillsGroup(2, 1, 5)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [p2skillsGroup])
+
+        List<String> users = getRandomUsers(3)
+        skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[1].skillId], users[0])
+        skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[0].skillId], users[1])
+        skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[1].skillId], users[1])
+
+        when:
+        def user0_skill1_t0 = skillsService.getSkillSummary(users[0], p2.projectId, p2subj1.subjectId)
+        def user1_skill1_t0 = skillsService.getSkillSummary(users[1], p2.projectId, p2subj1.subjectId)
+
+        skillsService.bulkImportSkillsIntoGroupFromCatalogAndFinalize(p2.projectId, p2subj1.subjectId, p2skillsGroup.skillId,
+                p1Skills.collect { [projectId: it.projectId, skillId: it.skillId] })
+        def user0_skill1_t1 = skillsService.getSkillSummary(users[0], p2.projectId, p2subj1.subjectId)
+        def user1_skill1_t1 = skillsService.getSkillSummary(users[1], p2.projectId, p2subj1.subjectId)
+
+        then:
+        user0_skill1_t0.skillsLevel == 0
+        user0_skill1_t0.points == 0
+        user1_skill1_t0.skillsLevel == 0
+        user1_skill1_t0.points == 0
+
+        user0_skill1_t1.points == 100
+        user0_skill1_t1.skillsLevel == 2
+        def user0_skill1_t1_points = user0_skill1_t1.skills[0].children
+        user0_skill1_t1_points[0].points == 0
+        user0_skill1_t1_points[1].points == 100
+        user0_skill1_t1_points[2].points == 0
+
+        user1_skill1_t1.points == 200
+        user1_skill1_t1.skillsLevel == 3
+        def user1_skill1_t1_points = user1_skill1_t1.skills[0].children
+        user1_skill1_t1_points[0].points == 100
+        user1_skill1_t1_points[1].points == 100
+        user1_skill1_t1_points[2].points == 0
     }
 }
 
