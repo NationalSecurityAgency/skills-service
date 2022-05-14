@@ -15,6 +15,7 @@
  */
 package skills.services.events
 
+import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.event.EventListener
@@ -35,6 +36,7 @@ class SkillEventPublisher {
     @Autowired
     SimpMessagingTemplate messagingTemplate;
 
+    @Profile
     void publishSkillUpdate(SkillEventResult result, String userId) {
         log.debug("Reporting user skill for user [{}}], result [{}}]", userId, result)
         if (brokerAvailable) {
