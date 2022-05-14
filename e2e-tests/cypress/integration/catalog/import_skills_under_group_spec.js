@@ -165,6 +165,120 @@ describe('Import Skills under a Group Tests', () => {
         ], 5, true, null, false);
     });
 
+    it('delete imported skill', () => {
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1);
+        cy.createSkill(2, 1, 2);
+
+        cy.exportSkillToCatalog(2, 1, 1);
+        cy.exportSkillToCatalog(2, 1, 2);
+
+        cy.createSkillsGroup(1, 1, 5);
+        cy.bulkImportSkillsIntoGroupFromCatalog(1, 1, 5, [
+            {
+                projNum: 2,
+                skillNum: 1
+            },
+            {
+                projNum: 2,
+                skillNum: 2
+            },
+        ]);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1/');
+        cy.get('[data-cy="expandDetailsBtn_group5"]')
+            .click();
+        cy.validateTable('[data-cy="ChildRowSkillGroupDisplay_group5"] [data-cy="skillsTable"]', [
+            [{
+                colIndex: 0,
+                value: 'skill2'
+            }],
+            [{
+                colIndex: 0,
+                value: 'skill1'
+            }],
+        ], 5, true, null, false);
+
+        cy.get('[data-cy="deleteSkillButton_skill1"]')
+            .click();
+        cy.get('[data-cy="currentValidationText"]')
+            .type('Delete Me');
+        cy.get('[data-cy="removeButton"]')
+            .click();
+        cy.validateTable('[data-cy="ChildRowSkillGroupDisplay_group5"] [data-cy="skillsTable"]', [
+            [{
+                colIndex: 0,
+                value: 'skill2'
+            }],
+        ], 5, true, null, false);
+    });
+
+    it('view skills details by expanding', () => {
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1);
+        cy.createSkill(2, 1, 2);
+
+        cy.exportSkillToCatalog(2, 1, 1);
+        cy.exportSkillToCatalog(2, 1, 2);
+
+        cy.createSkillsGroup(1, 1, 5);
+        cy.bulkImportSkillsIntoGroupFromCatalog(1, 1, 5, [
+            {
+                projNum: 2,
+                skillNum: 1
+            },
+            {
+                projNum: 2,
+                skillNum: 2
+            },
+        ]);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1/');
+        cy.get('[data-cy="expandDetailsBtn_group5"]')
+            .click();
+        cy.get('[data-cy="expandDetailsBtn_skill1"]')
+            .click();
+        cy.get('[data-cy="childRowDisplay_skill1"]')
+            .contains('was initially defined in the This is project 2 project');
+        cy.get('[data-cy="childRowDisplay_skill1"]')
+            .contains('This skill is disabled because import was not finalized yet.');
+    });
+
+    it('view skills by navigating down', () => {
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1);
+        cy.createSkill(2, 1, 2);
+
+        cy.exportSkillToCatalog(2, 1, 1);
+        cy.exportSkillToCatalog(2, 1, 2);
+
+        cy.createSkillsGroup(1, 1, 5);
+        cy.bulkImportSkillsIntoGroupFromCatalog(1, 1, 5, [
+            {
+                projNum: 2,
+                skillNum: 1
+            },
+            {
+                projNum: 2,
+                skillNum: 2
+            },
+        ]);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1/');
+        cy.get('[data-cy="expandDetailsBtn_group5"]')
+            .click();
+        cy.get('[data-cy="manageSkillBtn_skill1"]')
+            .click();
+        cy.get('[data-cy="pageHeader"]')
+            .contains('ID: skill1');
+        cy.get('[data-cy="childRowDisplay_skill1"]')
+            .contains('was initially defined in the This is project 2 project');
+        cy.get('[data-cy="childRowDisplay_skill1"]')
+            .contains('This skill is disabled because import was not finalized yet.');
+    });
 });
 
 
