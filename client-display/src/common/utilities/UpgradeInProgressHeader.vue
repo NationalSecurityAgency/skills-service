@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div v-if="upgradeInProgress" data-cy="upgradeInProgressHeader">
-    <span class="fa-stack fa-2x" style="vertical-align: middle; font-size:1em;">
+  <div v-if="showHeader" data-cy="upgradeInProgressHeader" class="mb-4">
+    <span class="fa-stack fa-2x" style="vertical-align: middle; font-size:1em;" aria-hidden="true">
         <i class="fas fa-circle fa-stack-2x"></i>
         <i class="fas fa-hammer fa-stack-1x fa-inverse"></i>
       </span>
@@ -24,11 +24,21 @@ limitations under the License.
 </template>
 
 <script>
+
   export default {
     name: 'UpgradeInProgressHeader',
-    computed: {
-      upgradeInProgress() {
-        return this.$store.getters.config && this.$store.getters.config.dbUpgradeInProgress && this.$store.getters.config.dbUpgradeInProgress === 'true';
+    data() {
+      return {
+        showHeader: false,
+      };
+    },
+    watch: {
+      '$store.state.config': {
+        handler(newVal) {
+          this.showHeader = newVal.config && newVal.config.dbUpgradeInProgress && newVal.config.dbUpgradeInProgress === 'true';
+        },
+        immediate: true,
+        deep: true,
       },
     },
   };

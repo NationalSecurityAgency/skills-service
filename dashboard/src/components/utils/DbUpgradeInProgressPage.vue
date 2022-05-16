@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <div class="mt-5 container-fluid" data-cy="upgradeInProgressError">
-    <div class="text-center text-secondary">
+    <div class="text-center text-secondary" aria-hidden="true">
       <span class="fa-stack fa-3x " style="vertical-align: top;">
                       <i class="fas fa-circle fa-stack-2x"></i>
                       <i class="fas fa-hammer fa-stack-1x fa-inverse"></i>
@@ -34,8 +34,7 @@ limitations under the License.
     </div>
 
     <div class="text-center">
-      <b-button href="/" variant="outline-primary" class="p-2"><i class="fas fa-home mr-1"/>Take Me Home</b-button>
-<!--      <b-button class="ml-2 p-2" variant="outline-info"><i class="fas fa-envelope mr-1"></i>Report This Issue</b-button>-->
+      <b-button href="/" variant="outline-primary" class="p-2" aria-label="navigate to home page"><i class="fas fa-home mr-1"/>Take Me Home</b-button>
     </div>
   </div>
 </template>

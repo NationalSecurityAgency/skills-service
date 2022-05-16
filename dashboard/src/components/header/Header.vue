@@ -70,7 +70,6 @@ limitations under the License.
         return this.$route && this.$route.meta && this.$route.meta.requiresAuth && !this.$route.meta.nonAdmin;
       },
       isUpgradeInProgress() {
-        console.log(`store.getters.config.dbUpgradeInProgress is [${store.getters.config.dbUpgradeInProgress}]`);
         return store.getters.config.dbUpgradeInProgress === 'true';
       },
     },
