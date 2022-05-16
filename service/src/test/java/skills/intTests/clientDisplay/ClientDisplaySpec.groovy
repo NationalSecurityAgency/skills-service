@@ -189,6 +189,7 @@ class ClientDisplaySpec extends DefaultIntSpec {
     }
 
     def "disabled skills group do not contribute to the summary"() {
+        // NOTE: this test is likely OBE as of v1.10.X and can likely be removed
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def allSkills = SkillsFactory.createSkills(3)
@@ -197,6 +198,7 @@ class ClientDisplaySpec extends DefaultIntSpec {
 
         def skillsGroup = allSkills[0]
         skillsGroup.type = 'SkillsGroup'
+        skillsGroup.enabled = false
         skillsService.createSkill(skillsGroup)
         String skillsGroupId = skillsGroup.skillId
         def group1Children = allSkills[1..2]

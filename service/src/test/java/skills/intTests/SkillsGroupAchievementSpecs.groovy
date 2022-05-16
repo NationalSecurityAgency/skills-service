@@ -188,6 +188,7 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
     }
 
     def "cannot achieve child skills if group is not enabled"() {
+        // NOTE: this test is likely OBE as of v1.10.X and can likely be removed
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def allSkills = SkillsFactory.createSkills(3)
@@ -196,6 +197,7 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
 
         def skillsGroup = allSkills[0]
         skillsGroup.type = 'SkillsGroup'
+        skillsGroup.enabled = false
         skillsService.createSkill(skillsGroup)
         String skillsGroupId = skillsGroup.skillId
         def groupChildren = allSkills[1..2]
