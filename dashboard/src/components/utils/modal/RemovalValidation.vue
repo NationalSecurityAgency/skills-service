@@ -27,8 +27,13 @@ limitations under the License.
       <hr />
 
       <div>
-        <p>Please type <span class="font-italic font-weight-bold text-primary">{{ validationText }}</span> to permanently remove the record.</p>
-        <b-form-input v-model="currentValidationText" data-cy="currentValidationText" aria-label="Validation Input"></b-form-input>
+        <p
+          :aria-label="`Please type ${validationText} in the input box to permanently remove the record. To complete deletion press 'Yes, Do Remove' button!`">
+          Please type <span class="font-italic font-weight-bold text-primary">{{ validationText }}</span> to permanently
+          remove the record.
+        </p>
+        <b-form-input v-model="currentValidationText" data-cy="currentValidationText"
+                      aria-label="Type 'Delete Me' text here to enable the removal operation. Please make sure that 'D' and 'M' are uppercase."></b-form-input>
       </div>
     </div>
 
