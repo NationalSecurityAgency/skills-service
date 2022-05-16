@@ -34,6 +34,8 @@ limitations under the License.
                   variant="outline-primary"
                   @click="$emit('edit-project')"
                   title="Edit Project"
+                  :aria-label="`Edit Project ${this.project.name}`"
+                  role="button"
                   data-cy="editProjBtn"><i class="fas fa-edit" aria-hidden="true"/></b-button>
 
         <span v-b-tooltip.hover="deleteDisabledText" :aria-label="deleteDisabledText">
@@ -43,6 +45,8 @@ limitations under the License.
                     @click="$emit('delete-project')"
                     :disabled="isDeleteDisabled"
                     title="Delete Project"
+                    :aria-label="`Delete Project ${this.project.name}`"
+                    role="button"
                     data-cy="deleteProjBtn"><i class="text-warning fas fa-trash" aria-hidden="true"/></b-button>
         </span>
       </b-button-group>

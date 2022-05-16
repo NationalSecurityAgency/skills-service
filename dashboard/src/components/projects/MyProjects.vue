@@ -19,14 +19,14 @@ limitations under the License.
                      :disabled="addProjectDisabled" :disabled-msg="addProjectsDisabledMsg">
           <b-button v-if="isRootUser" variant="outline-primary" ref="pinProjectsButton"
                     @click="showSearchProjectModal=true"
+                    aria-label="Pin projects to your Project page"
+                    role="button"
                     size="sm"
-                    aria-label="Pin projects to my view"
                     class="mr-2">
             <span class="d-none d-sm-inline">Pin</span> <i class="fas fa-thumbtack" aria-hidden="true"/>
           </b-button>
           <b-button id="newProjectBtn" ref="newProjButton" @click="editNewProject()" variant="outline-primary" size="sm"
-                    aria-label="Creat new project"
-                    data-cy="newProjectButton">
+                    data-cy="newProjectButton" aria-label="Create new Project" role="button">
             <span class="d-none d-sm-inline">Project</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
           </b-button>
     </sub-page-header>
