@@ -17,8 +17,8 @@ limitations under the License.
   <div :id="tableId">
     <loading-container v-bind:is-loading="isLoading">
       <div v-if="this.skillsOriginal && this.skillsOriginal.length">
-        <div v-if="showSearch">
-          <div class="row px-3 pt-3 mb-0 pb-0">
+        <div>
+          <div v-if="showSearch" class="row px-3 pt-3 mb-0 pb-0">
             <div class="col-12 mb-0 pb-0">
               <b-form-group label="Name Filter" label-class="text-muted">
                 <b-input v-model="table.filter.name" v-on:keyup.enter="applyFilters"
@@ -31,18 +31,24 @@ limitations under the License.
 
           <div class="row pl-3 mb-3">
             <div class="col-auto">
-              <b-button-group class="pr-2 border-right mr-2 d-inline-block mt-2">
-                <b-button variant="outline-primary" @click="applyFilters" data-cy="users-filterBtn"><i class="fa fa-filter"/> Filter</b-button>
-                <b-button variant="outline-primary" @click="reset" data-cy="users-resetBtn"><i class="fa fa-times"/> Reset</b-button>
+              <b-button-group v-if="showSearch" class="pr-2 border-right mr-2 d-inline-block mt-2">
+                <b-button variant="outline-primary" @click="applyFilters" data-cy="users-filterBtn"><i
+                  class="fa fa-filter"/> Filter
+                </b-button>
+                <b-button variant="outline-primary" @click="reset" data-cy="users-resetBtn"><i class="fa fa-times"/>
+                  Reset
+                </b-button>
               </b-button-group>
 
-              <b-button-group class="d-inline-block mt-2 text-right">
+              <b-button-group class="d-inline-block mt-2 text-right" :size="actionsBtnSize">
                 <b-button variant="outline-info" ref="selectAllBtn"
+                          :size="actionsBtnSize"
                           @click="changeSelectionForAll(true)"
                           data-cy="selectAllSkillsBtn" class=""><i
                   class="fa fa-check-square"/><span class="d-none d-sm-inline"> Select All </span>
                 </b-button>
                 <b-button variant="outline-info" ref="clearSelectionBtn"
+                          :size="actionsBtnSize"
                           @click="changeSelectionForAll(false)"
                           data-cy="clearSelectedSkillsBtn" class=""><i class="far fa-square"></i>
                   <span class="d-none d-sm-inline"> Clear</span>
@@ -52,6 +58,7 @@ limitations under the License.
             <div class="col text-right">
               <b-dropdown id="tableActionsBtn" ref="tableActionsBtn" right variant="outline-info" class="mr-3 mt-2"
                           :disabled="actionsDisable"
+                          :size="actionsBtnSize"
                           data-cy="skillActionsBtn">
                 <template #button-content>
                   <i class="fas fa-tools"></i> Action <b-badge variant="info" data-cy="skillActionsNumSelected">{{ numSelectedSkills }}</b-badge>
@@ -138,9 +145,9 @@ limitations under the License.
                 <b-button size="sm" @click="data.toggleDetails" variant="outline-info" class="mr-2 py-0 px-1"
                           :aria-label="`Expand details for ${data.item.name}`"
                           :data-cy="`expandDetailsBtn_${data.item.skillId}`">
-                  <i v-if="data.detailsShowing" class="fa fa-minus-square" />
-                  <i v-else class="fa fa-plus-square" />
-                  Skill Details
+                  <i v-if="data.detailsShowing" class="fa fa-minus-square mr-1"/>
+                  <i v-else class="fa fa-plus-square mr-1"/>
+                  <span v-if="data.item.isGroupType">Group</span><span v-else>Skill</span> Details
                 </b-button>
               </div>
 
@@ -377,6 +384,11 @@ limitations under the License.
         type: Number,
         required: false,
         default: 10,
+      },
+      actionsBtnSize: {
+        type: String,
+        required: false,
+        default: 'md',
       },
     },
     components: {

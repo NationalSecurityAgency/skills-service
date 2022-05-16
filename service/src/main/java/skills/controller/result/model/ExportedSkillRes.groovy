@@ -19,6 +19,7 @@ class ExportedSkillRes {
     String skillId
     String skillName
     String subjectName
+    String groupName
     Date exportedOn
     String subjectId
     Integer importedProjectCount

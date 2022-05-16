@@ -17,9 +17,16 @@ package skills.storage.model
 
 interface ExportedSkillTiny {
     String getSkillId();
+
     String getSkillName();
+
     String getSubjectName();
+
+    String getGroupName();
+
     Date getExportedOn();
+
     String getSubjectId();
+
     Integer getImportedProjectCount();
 }

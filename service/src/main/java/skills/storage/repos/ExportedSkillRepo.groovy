@@ -57,7 +57,7 @@ interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, In
                 es.created as exportedOn 
         from ExportedSkill es
         join ProjDef project on project.projectId = es.projectId
-        join SkillRelDef srd on srd.child = es.skill and srd.type = 'RuleSetDefinition'
+        join SkillRelDef srd on srd.child = es.skill and srd.type in ('RuleSetDefinition', 'GroupSkillToSubject')
         join SkillDef subject on subject = srd.parent and subject.type = 'Subject'
         where 
              es.projectId <> ?1 and
@@ -69,7 +69,7 @@ interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, In
     @Query('''select count(es) 
         from ExportedSkill es
         join ProjDef project on project.projectId = es.projectId
-        join SkillRelDef srd on srd.child = es.skill and srd.type = 'RuleSetDefinition'
+        join SkillRelDef srd on srd.child = es.skill and srd.type in ('RuleSetDefinition', 'GroupSkillToSubject')
         join SkillDef subject on subject = srd.parent and subject.type = 'Subject'
         where 
              es.projectId <> ?1 and
@@ -86,7 +86,7 @@ interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, In
                 es.created as exportedOn 
         from ExportedSkill es
         join ProjDef project on project.projectId = es.projectId
-        join SkillRelDef srd on srd.child = es.skill and srd.type = 'RuleSetDefinition'
+        join SkillRelDef srd on srd.child = es.skill and srd.type in ('RuleSetDefinition', 'GroupSkillToSubject')
         join SkillDef subject on subject = srd.parent and subject.type = 'Subject'
         where
             es.projectId <> :projectId and 
@@ -106,7 +106,7 @@ interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, In
         select count(es.skill)
         from ExportedSkill es
         join ProjDef project on project.projectId = es.projectId
-        join SkillRelDef srd on srd.child = es.skill and srd.type = 'RuleSetDefinition'
+        join SkillRelDef srd on srd.child = es.skill and srd.type in ('RuleSetDefinition', 'GroupSkillToSubject')
         join SkillDef subject on subject = srd.parent and subject.type = 'Subject'
         where
             es.projectId <> :projectId and 
@@ -125,23 +125,24 @@ interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, In
     List<SkillDefWithExtra> getSkillsExportedByProject(String projectId, Pageable pageable)
 
     @Nullable
-    @Query(value="""
+    @Query(value= """
         select skill.skill_id   as skillId,
                skill.name       as skillName,
                es.created       as exportedOn,
                subject.name     as subjectName,
                subject.skill_id as subjectId,
+               group_def.name   as groupName,
                (count(distinct imported_skills.project_id)) as importedProjectCount
         from skill_relationship_definition srd,
              skill_definition subject,
-             skill_definition skill,
+             skill_definition skill LEFT JOIN skill_definition group_def on (skill.group_id = group_def.skill_id and group_def.project_id = ?1),
              exported_skills es LEFT JOIN skill_definition imported_skills on (es.skill_ref_id = imported_skills.copied_from_skill_ref)
         where es.exported_from_project_id = ?1
           and skill.project_id = ?1
           and es.skill_ref_id = skill.id
           and skill.id = srd.child_ref_id
           and subject.id = srd.parent_ref_id
-          and srd.type = 'RuleSetDefinition'
+          and srd.type in ('RuleSetDefinition', 'GroupSkillToSubject')
           and subject.type = 'Subject'
           and skill.type = 'Skill'
         group by skillId, skillName, exportedOn, subjectName, subjectId

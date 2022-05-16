@@ -56,7 +56,8 @@ limitations under the License.
                       variant="outline-info" size="sm"
                       @click="importCatalog.show=true"
                       :data-cy="`importSkillToGroupBtn-${group.skillId}`" class="ml-1">
-              <span class="">Import Skills to Group</span> <i class="fas fa-book" aria-hidden="true"/>
+              <span class="">Import<span class="d-none d-md-inline"> Skills to Group</span></span> <i
+              class="fas fa-book" aria-hidden="true"/>
             </b-button>
             <i v-if="addDisabled" class="fas fa-exclamation-circle text-warning ml-1 mr-1"
                style="pointer-events: all; font-size: 1.5rem;" v-b-tooltip.hover="addDisabledMessage"/>
@@ -65,20 +66,23 @@ limitations under the License.
                       @click="showNewSkillDialog"
                       :disabled="addDisabled"
                       :data-cy="`addSkillToGroupBtn-${group.skillId}`" class="ml-1">
-              <span class="">Add Skill to Group</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
+              <span class=""><span class="d-none d-md-inline">Add </span>Skill<span
+                class="d-none d-md-inline"> to Group</span></span> <i class="fas fa-plus-circle" aria-hidden="true"/>
             </b-button>
           </div>
         </div>
-        <div class="mt-3">
+        <hr class="w-100 mb-1"/>
+        <div class="">
           <skills-table :table-id="`groupSkills_${this.group.skillId}`" :ref="`groupSkills_${this.group.skillId}`"
-                    :skills-prop="skills" :is-top-level="true"
-                    :project-id="this.$route.params.projectId"
-                    :subject-id="this.$route.params.subjectId"
-                    @skill-removed="skillRemoved"
-                    @skills-change="skillChanged"
-                    :disableDeleteButtonsInfo="disableDeleteButtonInfo"
-                    :page-size="this.maxSkillsToShow"
-                    :can-edit-points="canEditPoints" :can-edit-points-msg="canEditPointsMsg()"
+                        :skills-prop="skills" :is-top-level="true"
+                        :project-id="this.$route.params.projectId"
+                        :subject-id="this.$route.params.subjectId"
+                        @skill-removed="skillRemoved"
+                        @skills-change="skillChanged"
+                        :disableDeleteButtonsInfo="disableDeleteButtonInfo"
+                        :page-size="this.maxSkillsToShow"
+                        actions-btn-size="sm"
+                        :can-edit-points="canEditPoints" :can-edit-points-msg="canEditPointsMsg()"
                         :show-search="false" :show-header="false" :show-paging="false"/>
         </div>
       </b-card>
