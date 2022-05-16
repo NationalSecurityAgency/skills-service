@@ -219,11 +219,6 @@ class SkillsAdminService {
         List<SkillDef> groupChildSkills = null
         if (isEdit) {
             validateImportedSkillUpdate(skillRequest, skillDefinition)
-//            // can't disable a skill/skillgroup once it's been enabled
-//            if (isCurrentlyEnabled && (StringUtils.isNotBlank(skillRequest.enabled) && !isEnabledSkillInRequest)) {
-//                throw new SkillException("Cannot disable ${skillDefinition.type} [${skillRequest.skillId}] once it has been enabled", skillRequest.projectId, skillRequest.skillId)
-//            }
-
             // for updates, use the existing value if it is not set on the skillRequest (null or empty String)
             if (StringUtils.isBlank(skillRequest.enabled)) {
                 skillRequest.enabled = skillDefinition.enabled
@@ -231,7 +226,7 @@ class SkillsAdminService {
             if (isSkillsGroup) {
                 // need to update total points for the group
                 groupChildSkills = skillsGroupAdminService.validateSkillsGroupAndReturnChildren(skillRequest, skillDefinition)
-                totalPointsRequested = skillsGroupAdminService.getGroupTotalPoints(groupChildSkills, skillRequest.numSkillsRequired)
+                totalPointsRequested = skillsGroupAdminService.getGroupTotalPoints(groupChildSkills)
 
                 if (isEnabledSkillInRequest && skillDefinition.numSkillsRequired != skillRequest.numSkillsRequired) {
                     int currentNumSkillsRequired = skillDefinition.numSkillsRequired == -1 ? groupChildSkills.size() : skillDefinition.numSkillsRequired
@@ -491,7 +486,7 @@ class SkillsAdminService {
             if (children.size() == parentSkill.numSkillsRequired) {
                 parentSkill.numSkillsRequired = -1
             }
-            parentSkill.totalPoints = skillsGroupAdminService.getGroupTotalPoints(children, parentSkill.numSkillsRequired)
+            parentSkill.totalPoints = skillsGroupAdminService.getGroupTotalPoints(children)
             DataIntegrityExceptionHandlers.skillDataIntegrityViolationExceptionHandler.handle(projectId, skillId) {
                 skillDefWithExtraRepo.save(parentSkill)
             }

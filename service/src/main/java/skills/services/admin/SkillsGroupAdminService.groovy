@@ -144,17 +144,10 @@ class SkillsGroupAdminService {
         return skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, groupId, SkillDef.ContainerType.SkillsGroup)
     }
 
-    int getGroupTotalPoints(List<SkillDef> groupChildSkills, int numSkillsRequired) {
+    int getGroupTotalPoints(List<SkillDef> groupChildSkills) {
         int totalPoints = 0
         if (groupChildSkills) {
-            numSkillsRequired = numSkillsRequired == -1 ? groupChildSkills.size() : numSkillsRequired
-            if (numSkillsRequired == groupChildSkills.size()) {
-                // all skills are required, but can have different totalPoints so add them all up
-                totalPoints = groupChildSkills.collect { it.totalPoints }.sum()
-            } else {
-                // only a subset is required; validation already made sure that all have the same totalPoints so grab first value
-                totalPoints = numSkillsRequired * groupChildSkills.first().totalPoints
-            }
+            totalPoints = groupChildSkills.collect { it.totalPoints }.sum()
         }
         return totalPoints
     }
