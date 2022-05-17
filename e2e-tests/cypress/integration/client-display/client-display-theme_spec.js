@@ -311,7 +311,7 @@ describe('Client Display Tests', () => {
       cy.matchSnapshotImage(snapshotOptions);
     });
 
-    it(`test theming - skill details - ${size}`, () => {
+    it.only(`test theming - skill details - ${size}`, () => {
       cy.setResolution(size);
 
       cy.cdInitProjWithSkills();
