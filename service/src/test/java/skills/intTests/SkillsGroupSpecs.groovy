@@ -286,55 +286,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         groupSkillsAfterThirdMove.collect { it.skillId } == ['skill3', 'skill2', 'skill1']
     }
 
-    void "a SkillsGroup with only 1 required child skill, but must have at least 2 child skills" () {
-        def proj = SkillsFactory.createProject()
-        def subj = SkillsFactory.createSubject()
-        def skills = SkillsFactory.createSkills(2)
-        def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 5)
-        skillsGroup.numSkillsRequired = 1
-
-        skillsService.createProject(proj)
-        skillsService.createSubject(subj)
-        skillsService.createSkill(skillsGroup)
-        String skillsGroupId = skillsGroup.skillId
-        skills.each { skill ->
-            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
-        }
-
-        when:
-        skillsService.updateSkill(skillsGroup, null)
-        def res = skillsService.getSkill(skillsGroup)
-        def groupSkills = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
-        groupSkills.sort() { it.skillId }
-
-        then:
-        res
-        res.skillId == skillsGroup.skillId
-        res.name == skillsGroup.name
-        res.type == skillsGroup.type
-        res.numSkillsInGroup == groupSkills.size()
-        res.numSelfReportSkills == 0
-        res.numSkillsRequired == 1
-        res.enabled == true
-        res.totalPoints == groupSkills[0].totalPoints
-
-        groupSkills.size() == 2
-
-        groupSkills.get(0).skillId == skills.get(0).skillId
-        groupSkills.get(0).projectId == proj.projectId
-        groupSkills.get(0).name == skills.get(0).name
-        groupSkills.get(0).version == skills.get(0).version
-        groupSkills.get(0).displayOrder == 1
-        groupSkills.get(0).totalPoints == skills.get(0).pointIncrement * skills.get(0).numPerformToCompletion
-
-        groupSkills.get(1).skillId == skills.get(1).skillId
-        groupSkills.get(1).projectId == proj.projectId
-        groupSkills.get(1).name == skills.get(1).name
-        groupSkills.get(1).version == skills.get(1).version
-        groupSkills.get(1).displayOrder == 2
-        groupSkills.get(1).totalPoints == skills.get(1).pointIncrement * skills.get(1).numPerformToCompletion
-    }
-
     void "SkillsGroup with < 2 child skills" () {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
@@ -590,19 +541,19 @@ class SkillsGroupSpecs extends DefaultIntSpec {
     void "a SkillsGroup when not all skills are required, but all skills have the same # of points" () {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
-        def skills = SkillsFactory.createSkills(3)
+        def childSkills = SkillsFactory.createSkills(3)
         def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 5)
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
         skillsService.createSkill(skillsGroup)
         String skillsGroupId = skillsGroup.skillId
-        skills.each { skill ->
-            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        childSkills.each { childSkill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, childSkill)
         }
 
         when:
-        skillsGroup.numSkillsRequired = skills.size() - 1
+        skillsGroup.numSkillsRequired = childSkills.size() - 1
         skillsService.updateSkill(skillsGroup, null)
         def res = skillsService.getSkill(skillsGroup)
         def groupSkills = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
@@ -616,31 +567,31 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         res.numSkillsInGroup == groupSkills.size()
         res.numSelfReportSkills == 0
         res.numSkillsRequired == 2
-        res.totalPoints == (skills.get(0).pointIncrement * skills.get(0).numPerformToCompletion) * res.numSkillsRequired
+        res.totalPoints == (childSkills.get(0).pointIncrement * childSkills.get(0).numPerformToCompletion) * childSkills.size()
         res.enabled == true
 
         groupSkills.size() == 3
 
-        groupSkills.get(0).skillId == skills.get(0).skillId
+        groupSkills.get(0).skillId == childSkills.get(0).skillId
         groupSkills.get(0).projectId == proj.projectId
-        groupSkills.get(0).name == skills.get(0).name
-        groupSkills.get(0).version == skills.get(0).version
+        groupSkills.get(0).name == childSkills.get(0).name
+        groupSkills.get(0).version == childSkills.get(0).version
         groupSkills.get(0).displayOrder == 1
-        groupSkills.get(0).totalPoints == skills.get(0).pointIncrement * skills.get(0).numPerformToCompletion
+        groupSkills.get(0).totalPoints == childSkills.get(0).pointIncrement * childSkills.get(0).numPerformToCompletion
 
-        groupSkills.get(1).skillId == skills.get(1).skillId
+        groupSkills.get(1).skillId == childSkills.get(1).skillId
         groupSkills.get(1).projectId == proj.projectId
-        groupSkills.get(1).name == skills.get(1).name
-        groupSkills.get(1).version == skills.get(1).version
+        groupSkills.get(1).name == childSkills.get(1).name
+        groupSkills.get(1).version == childSkills.get(1).version
         groupSkills.get(1).displayOrder == 2
-        groupSkills.get(1).totalPoints == skills.get(0).pointIncrement * skills.get(0).numPerformToCompletion
+        groupSkills.get(1).totalPoints == childSkills.get(0).pointIncrement * childSkills.get(0).numPerformToCompletion
 
-        groupSkills.get(2).skillId == skills.get(2).skillId
+        groupSkills.get(2).skillId == childSkills.get(2).skillId
         groupSkills.get(2).projectId == proj.projectId
-        groupSkills.get(2).name == skills.get(2).name
-        groupSkills.get(2).version == skills.get(2).version
+        groupSkills.get(2).name == childSkills.get(2).name
+        groupSkills.get(2).version == childSkills.get(2).version
         groupSkills.get(2).displayOrder == 3
-        groupSkills.get(2).totalPoints == skills.get(0).pointIncrement * skills.get(0).numPerformToCompletion
+        groupSkills.get(2).totalPoints == childSkills.get(0).pointIncrement * childSkills.get(0).numPerformToCompletion
     }
 
     def "delete SkillsGroup"() {
@@ -832,7 +783,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         pointAfterSecondChild == 20
         pointAfterThirdChild == 30
         pointAfterOneChildDeleted == 20
-        pointAfterNumSkillsRequiredReduced == 10
+        pointAfterNumSkillsRequiredReduced == 20
     }
 
     def "group info is returned for child skill on skill endpoint"() {
@@ -960,17 +911,17 @@ class SkillsGroupSpecs extends DefaultIntSpec {
     void "update multiple skills at the same time" () {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
-        def skills = SkillsFactory.createSkills(3)
+        def childSkills = SkillsFactory.createSkills(3)
         def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 5)
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
         skillsService.createSkill(skillsGroup)
         String skillsGroupId = skillsGroup.skillId
-        skills.each { skill ->
-            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        childSkills.each { chilsSkill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, chilsSkill)
         }
-        skillsGroup.numSkillsRequired = skills.size()-1
+        skillsGroup.numSkillsRequired = childSkills.size()-1
         skillsService.updateSkill(skillsGroup, null)
 
         def resBefore = skillsService.getSkill(skillsGroup)
@@ -979,7 +930,8 @@ class SkillsGroupSpecs extends DefaultIntSpec {
 
         when:
 
-        skillsService.syncPointsForSkillsGroup(proj.projectId, subj.subjectId, skillsGroupId, [pointIncrement: 100, numPerformToCompletion: skills[0].numPerformToCompletion])
+        int newPointIncrement = 100
+        skillsService.syncPointsForSkillsGroup(proj.projectId, subj.subjectId, skillsGroupId, [pointIncrement: newPointIncrement, numPerformToCompletion: childSkills[0].numPerformToCompletion])
 
         def resAfter = skillsService.getSkill(skillsGroup)
         def groupSkillsAfter = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
@@ -994,28 +946,28 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         resBefore.numSelfReportSkills == 0
         resBefore.numSkillsRequired == 2
         resBefore.enabled == true
-        resBefore.totalPoints == 20
+        resBefore.totalPoints == (childSkills.get(0).pointIncrement * childSkills.get(0).numPerformToCompletion) * childSkills.size()
 
         groupSkillsBefore.size() == 3
 
-        groupSkillsBefore.get(0).skillId == skills.get(0).skillId
+        groupSkillsBefore.get(0).skillId == childSkills.get(0).skillId
         groupSkillsBefore.get(0).projectId == proj.projectId
-        groupSkillsBefore.get(0).name == skills.get(0).name
-        groupSkillsBefore.get(0).version == skills.get(0).version
+        groupSkillsBefore.get(0).name == childSkills.get(0).name
+        groupSkillsBefore.get(0).version == childSkills.get(0).version
         groupSkillsBefore.get(0).displayOrder == 1
         groupSkillsBefore.get(0).totalPoints == 10
 
-        groupSkillsBefore.get(1).skillId == skills.get(1).skillId
+        groupSkillsBefore.get(1).skillId == childSkills.get(1).skillId
         groupSkillsBefore.get(1).projectId == proj.projectId
-        groupSkillsBefore.get(1).name == skills.get(1).name
-        groupSkillsBefore.get(1).version == skills.get(1).version
+        groupSkillsBefore.get(1).name == childSkills.get(1).name
+        groupSkillsBefore.get(1).version == childSkills.get(1).version
         groupSkillsBefore.get(1).displayOrder == 2
         groupSkillsBefore.get(1).totalPoints == 10
 
-        groupSkillsBefore.get(2).skillId == skills.get(2).skillId
+        groupSkillsBefore.get(2).skillId == childSkills.get(2).skillId
         groupSkillsBefore.get(2).projectId == proj.projectId
-        groupSkillsBefore.get(2).name == skills.get(2).name
-        groupSkillsBefore.get(2).version == skills.get(2).version
+        groupSkillsBefore.get(2).name == childSkills.get(2).name
+        groupSkillsBefore.get(2).version == childSkills.get(2).version
         groupSkillsBefore.get(2).displayOrder == 3
         groupSkillsBefore.get(2).totalPoints == 10
 
@@ -1027,28 +979,28 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         resAfter.numSelfReportSkills == 0
         resAfter.numSkillsRequired == 2
         resAfter.enabled == true
-        resAfter.totalPoints == 200
+        resAfter.totalPoints == (newPointIncrement * childSkills.get(0).numPerformToCompletion) * childSkills.size()
 
         groupSkillsAfter.size() == 3
 
-        groupSkillsAfter.get(0).skillId == skills.get(0).skillId
+        groupSkillsAfter.get(0).skillId == childSkills.get(0).skillId
         groupSkillsAfter.get(0).projectId == proj.projectId
-        groupSkillsAfter.get(0).name == skills.get(0).name
-        groupSkillsAfter.get(0).version == skills.get(0).version
+        groupSkillsAfter.get(0).name == childSkills.get(0).name
+        groupSkillsAfter.get(0).version == childSkills.get(0).version
         groupSkillsAfter.get(0).displayOrder == 1
         groupSkillsAfter.get(0).totalPoints == 100
 
-        groupSkillsAfter.get(1).skillId == skills.get(1).skillId
+        groupSkillsAfter.get(1).skillId == childSkills.get(1).skillId
         groupSkillsAfter.get(1).projectId == proj.projectId
-        groupSkillsAfter.get(1).name == skills.get(1).name
-        groupSkillsAfter.get(1).version == skills.get(1).version
+        groupSkillsAfter.get(1).name == childSkills.get(1).name
+        groupSkillsAfter.get(1).version == childSkills.get(1).version
         groupSkillsAfter.get(1).displayOrder == 2
         groupSkillsAfter.get(1).totalPoints == 100
 
-        groupSkillsAfter.get(2).skillId == skills.get(2).skillId
+        groupSkillsAfter.get(2).skillId == childSkills.get(2).skillId
         groupSkillsAfter.get(2).projectId == proj.projectId
-        groupSkillsAfter.get(2).name == skills.get(2).name
-        groupSkillsAfter.get(2).version == skills.get(2).version
+        groupSkillsAfter.get(2).name == childSkills.get(2).name
+        groupSkillsAfter.get(2).version == childSkills.get(2).version
         groupSkillsAfter.get(2).displayOrder == 3
         groupSkillsAfter.get(2).totalPoints == 100
     }
