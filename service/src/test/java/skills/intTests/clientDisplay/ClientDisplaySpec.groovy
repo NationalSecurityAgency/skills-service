@@ -246,7 +246,7 @@ class ClientDisplaySpec extends DefaultIntSpec {
         projectSummary.subjects[0].totalPoints == 20
     }
 
-    def "enabled skills group calculate totalPoints based on numSkillsRequired"() {
+    def "skills group calculate totalPoints based on all skills regardless of numSkillsRequired"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def allSkills = SkillsFactory.createSkills(3)
@@ -262,7 +262,6 @@ class ClientDisplaySpec extends DefaultIntSpec {
             skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
         }
         skillsGroup.numSkillsRequired = 1
-        skillsGroup.enabled = 'true'
         skillsService.updateSkill(skillsGroup, null)
 
         when:
@@ -270,10 +269,10 @@ class ClientDisplaySpec extends DefaultIntSpec {
 
         then:
         projectSummary.skillsLevel == 0
-        projectSummary.totalPoints == 10
+        projectSummary.totalPoints == 20
         projectSummary.subjects
         projectSummary.subjects[0].skillsLevel == 0
-        projectSummary.subjects[0].totalPoints == 10
+        projectSummary.subjects[0].totalPoints == 20
     }
 }
 
