@@ -70,11 +70,11 @@ limitations under the License.
            :class="{ 'text-success' : isSkillComplete, 'text-primary': !isSkillComplete }"
            data-cy="skillProgress-ptsOverProgressBard">
         <span v-if="isSkillComplete" :data-cy="`skillCompletedCheck-${skill.skillId}`" class="pr-1"><i class="fa fa-check"/></span>
-        <div v-if="skill.type === 'SkillsGroup'">
+        <div v-if="skill.type === 'SkillsGroup'" class="d-inline">
           <animated-number :num="numChildSkillsComplete"/>
           / {{ numSkillsRequired | number }} Skill{{(numSkillsRequired === 1) ? '' : 's'}}
         </div>
-        <div v-else>
+        <div v-else class="d-inline">
           <animated-number :num="skill.points"/>
           / {{ skill.totalPoints | number }} Points
         </div>
