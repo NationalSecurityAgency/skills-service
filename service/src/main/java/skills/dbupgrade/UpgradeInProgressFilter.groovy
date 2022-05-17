@@ -47,8 +47,10 @@ import java.util.concurrent.TimeUnit
 @Conditional(DBUpgrade.InProgress)
 class UpgradeInProgressFilter extends OncePerRequestFilter {
 
-    private static Set<HttpMethod> ALLOWED_METHODS = Sets.newHashSet(HttpMethod.GET, HttpMethod.OPTIONS)
+    private static final Set<HttpMethod> ALLOWED_METHODS = Sets.newHashSet(HttpMethod.GET, HttpMethod.OPTIONS)
+    private static final MediaType DEFAULT_MEDIA_TYPE = MediaType.APPLICATION_JSON
     public static final String ANONYMOUS_USER = "anonymousUser"
+
 
     @Autowired
     UpgradeSafeUrlDecider safeUrlDecider
@@ -131,6 +133,11 @@ class UpgradeInProgressFilter extends OncePerRequestFilter {
     private boolean writeResponse(HttpServletResponse response, ServletServerHttpRequest serverHttpRequest, Class clazz, Object eventResult) {
         ServletServerHttpResponse serverHttpResponse = new ServletServerHttpResponse(response)
         List<MediaType> acceptTypes = serverHttpRequest.getHeaders().getAccept()
+        if (!acceptTypes){
+            //todo: should we try to use content-type if specified on the original request?
+            acceptTypes = [DEFAULT_MEDIA_TYPE]
+        }
+
         for (MediaType accept : acceptTypes) {
             for (HttpMessageConverter messageConverter : configuredMessageConverters) {
                 if (messageConverter.canWrite(clazz, accept)) {
