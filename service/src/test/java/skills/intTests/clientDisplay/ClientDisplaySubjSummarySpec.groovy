@@ -44,10 +44,9 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         skillsGroup1.numSkillsRequired = 2
         skillsService.updateSkill(skillsGroup1, null)
 
-        // skills group2 - disabled (should not be included in the summary)
         def skillsGroup2 = allSkills[7]
         skillsGroup2.type = 'SkillsGroup'
-        skillsGroup2.enabled = 'false'
+        skillsGroup2.enabled = 'false'  // ignored as of 1.10.X
         skillsService.createSkill(skillsGroup2)
         String skillsGroup2Id = skillsGroup2.skillId
         def group2Children = allSkills[8..9]
@@ -64,7 +63,7 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         summary.skills[3].type == 'SkillsGroup'
         summary.skills[3].enabled == 'true'
         summary.skills[3].numSkillsRequired == 2
-        summary.skills[3].totalPoints == 20  // 2 of 3 skills required, so group totalPoints is 20
+        summary.skills[3].totalPoints == 30  // 2 of 3 skills required, but group totalPoints is sum of all skills (30)
         summary.skills[3].children
         summary.skills[3].children.size() == 3
         summary.skills[3].children.every { it.type == 'Skill' && it.totalPoints == 10 }
