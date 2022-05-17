@@ -131,7 +131,7 @@ interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, In
                es.created       as exportedOn,
                subject.name     as subjectName,
                subject.skill_id as subjectId,
-               group_def.name   as groupName,
+               MAX(group_def.name)   as groupName,
                (count(distinct imported_skills.project_id)) as importedProjectCount
         from skill_relationship_definition srd,
              skill_definition subject,
@@ -145,7 +145,7 @@ interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, In
           and srd.type in ('RuleSetDefinition', 'GroupSkillToSubject')
           and subject.type = 'Subject'
           and skill.type = 'Skill'
-        group by skillId, skillName, exportedOn, subjectName, subjectId, groupName
+        group by skillId, skillName, exportedOn, subjectName, subjectId
     """, nativeQuery=true)
     List<ExportedSkillTiny> getTinySkillsExportedByProject(String projectId, Pageable pageable)
 
