@@ -79,6 +79,9 @@ export default {
             const skillRes = this.addMeta(item);
             if (item.type === 'SkillsGroup' && item.children) {
                 skillRes.children = skillRes.children.map((child) => this.addMeta(child));
+                const numSkillsRequired = skillRes.numSkillsRequired === -1 ? skillRes.children.length : skillRes.numSkillsRequired;
+                const numSkillsCompleted = skillRes.children.filter((childSkill) => childSkill.meta.complete).length;
+                skillRes.meta.complete = numSkillsCompleted >= numSkillsRequired;
             }
 
             return skillRes;

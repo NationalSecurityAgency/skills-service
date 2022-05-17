@@ -69,9 +69,15 @@ limitations under the License.
       <div class="col-auto text-right"
            :class="{ 'text-success' : isSkillComplete, 'text-primary': !isSkillComplete }"
            data-cy="skillProgress-ptsOverProgressBard">
-        <span v-if="isSkillComplete" class="pr-1"><i class="fa fa-check"/></span>
-        <animated-number :num="skill.points"/>
-        / {{ skill.totalPoints | number }} Points
+        <span v-if="isSkillComplete" :data-cy="`skillCompletedCheck-${skill.skillId}`" class="pr-1"><i class="fa fa-check"/></span>
+        <div v-if="skill.type === 'SkillsGroup'">
+          <animated-number :num="numChildSkillsComplete"/>
+          / {{ numSkillsRequired | number }} Skill{{(numSkillsRequired === 1) ? '' : 's'}}
+        </div>
+        <div v-else>
+          <animated-number :num="skill.points"/>
+          / {{ skill.totalPoints | number }} Points
+        </div>
       </div>
     </div>
     <div class="row">
@@ -211,6 +217,18 @@ limitations under the License.
       allowDrillDown() {
         return this.enableDrillDown && this.skill.isSkillType;
       },
+      isSkillsGroupWithChildren() {
+        return this.skill?.isSkillsGroupType && this.skill?.children && this.skill?.children.length > 0;
+      },
+      numChildSkillsComplete() {
+        return this.isSkillsGroupWithChildren ? this.skill.children.filter((childSkill) => childSkill.meta.complete).length : 0;
+      },
+      numSkillsRequired() {
+        if (this.isSkillsGroupWithChildren) {
+          return this.skill.numSkillsRequired === -1 ? this.skill.children.length : this.skill.numSkillsRequired;
+        }
+        return 0;
+      },
     },
     watch: {
       'skill.children': function updateChildSkills() {
@@ -220,7 +238,7 @@ limitations under the License.
     },
     methods: {
       initChildSkills() {
-        if (this.skill.isSkillsGroupType && this.skill?.children && this.skill?.children.length > 0) {
+        if (this.isSkillsGroupWithChildren) {
           this.childSkillsInternal = this.skill.children.map((item) => ({ ...item, childSkill: true }));
         }
       },
