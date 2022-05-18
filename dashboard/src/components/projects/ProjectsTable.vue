@@ -97,6 +97,15 @@ limitations under the License.
           </div>
         </template>
       </skills-b-table>
+
+    <removal-validation v-if="deleteProjectInfo.showDialog" v-model="deleteProjectInfo.showDialog" @do-remove="doDeleteProject">
+      <p>
+        This will remove <span class="text-primary font-weight-bold">{{ deleteProjectInfo.project.name}}</span>.
+      </p>
+      <div>
+        Deletion can not be undone and permanently removes all skill subject definitions, skill definitions and users' performed skills for this Project.
+      </div>
+    </removal-validation>
   </div>
 
 </template>
@@ -107,6 +116,7 @@ limitations under the License.
   import ProjectService from './ProjectService';
   import SkillsBTable from '../utils/table/SkillsBTable';
   import SlimDateCell from '../utils/table/SlimDateCell';
+  import RemovalValidation from '../utils/modal/RemovalValidation';
 
   export default {
     name: 'MyProjects',
@@ -117,6 +127,10 @@ limitations under the License.
         currentlyFocusedProjectId: '',
         projectsInternal: [],
         projectsOriginal: [],
+        deleteProjectInfo: {
+          showDialog: false,
+          project: {},
+        },
         table: {
           options: {
             busy: true,
@@ -178,6 +192,7 @@ limitations under the License.
     components: {
       SkillsBTable,
       SlimDateCell,
+      RemovalValidation,
     },
     mounted() {
       this.projectsInternal = this.projects.map((item) => item);
@@ -208,22 +223,20 @@ limitations under the License.
         return dayjs(timestamp)
           .isSame(new Date(), 'day');
       },
-      deleteProject(project) {
-        ProjectService.checkIfProjectBelongsToGlobalBadge(project.projectId)
+      doDeleteProject() {
+        ProjectService.checkIfProjectBelongsToGlobalBadge(this.deleteProjectInfo.project.projectId)
           .then((belongsToGlobal) => {
             if (belongsToGlobal) {
               const msg = 'Cannot delete this project as it belongs to one or more global badges. Please contact a Supervisor to remove this dependency.';
               this.msgOk(msg, 'Unable to delete');
             } else {
-              const msg = `Project ID [${project.projectId}]. Delete Action can not be undone and permanently removes its skill subject definitions, skill definitions and users' performed skills.`;
-              this.msgConfirm(msg)
-                .then((res) => {
-                  if (res) {
-                    this.$emit('project-deleted', project);
-                  }
-                });
+              this.$emit('project-deleted', this.deleteProjectInfo.project);
             }
           });
+      },
+      deleteProject(project) {
+        this.deleteProjectInfo.project = project;
+        this.deleteProjectInfo.showDialog = true;
       },
       editProject(projectToEdit) {
         this.currentlyFocusedProjectId = projectToEdit.projectId;

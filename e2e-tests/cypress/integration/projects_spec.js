@@ -1070,15 +1070,17 @@ describe('Projects Tests', () => {
     cy.createProject(3);
     cy.visit('/administrator')
     cy.get('[data-cy="projectCard_proj1"] [data-cy="deleteProjBtn"]').click();
-    cy.contains('Project ID [proj1]. Delete Action')
-    cy.contains('YES, Delete It').click();
+    cy.get('[title="Removal Safety Check"]').should('be.visible');
+    cy.get('[data-cy=currentValidationText]').type('Delete Me');
+    cy.get('[data-cy=removeButton]').should('be.enabled').click();
+
     cy.get('[data-cy="projectCard_proj1"]').should('not.exist');
     cy.get('[data-cy="projectCard_proj2"]').should('exist');
     cy.get('[data-cy="projectCard_proj3"]').should('exist');
 
     cy.get('[data-cy="projectCard_proj2"] [data-cy="deleteProjBtn"]').click();
-    cy.contains('Project ID [proj2]. Delete Action')
-    cy.contains('Cancel').click();
+    cy.get('[title="Removal Safety Check"]').should('be.visible');
+    cy.get('[data-cy=closeRemovalSafetyCheck]').click();
     cy.get('[data-cy="projectCard_proj2"]').should('exist');
     cy.get('[data-cy="projectCard_proj3"]').should('exist');
   });

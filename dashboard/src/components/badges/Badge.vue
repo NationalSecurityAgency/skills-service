@@ -45,10 +45,19 @@ limitations under the License.
                     :global="global" @badge-updated="badgeEdited" @hidden="handleHidden"></edit-badge>
       </div>
     </nav-card-with-stats-and-controls>
+    <removal-validation v-if="showDeleteDialog" v-model="showDeleteDialog" @do-remove="doDeleteBadge">
+      <p>
+        This will remove <span class="text-primary font-weight-bold">{{this.badgeInternal.name}}</span>.
+      </p>
+      <div>
+        Badge with id {{this.badgeInternal.badgeId}} will be removed. Deletion can not be undone.
+      </div>
+    </removal-validation>
   </div>
 </template>
 
 <script>
+  import RemovalValidation from '@/components/utils/modal/RemovalValidation';
   import EditBadge from './EditBadge';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
   import CardNavigateAndEditControls from '../utils/cards/CardNavigateAndEditControls';
@@ -56,7 +65,12 @@ limitations under the License.
 
   export default {
     name: 'Badge',
-    components: { NavCardWithStatsAndControls, CardNavigateAndEditControls, EditBadge },
+    components: {
+      NavCardWithStatsAndControls,
+      CardNavigateAndEditControls,
+      EditBadge,
+      RemovalValidation,
+    },
     props: {
       badge: Object,
       global: {
@@ -75,6 +89,7 @@ limitations under the License.
         badgeInternal: { ...this.badge },
         cardOptions: { controls: {} },
         showEditBadge: false,
+        showDeleteDialog: false,
       };
     },
     computed: {
@@ -146,12 +161,10 @@ limitations under the License.
         return link;
       },
       deleteBadge() {
-        const msg = `Deleting Badge Id: ${this.badgeInternal.badgeId} this cannot be undone.`;
-        this.msgConfirm(msg, 'WARNING: Delete Badge').then((res) => {
-          if (res) {
-            this.badgeDeleted();
-          }
-        });
+        this.showDeleteDialog = true;
+      },
+      doDeleteBadge() {
+        this.badgeDeleted();
       },
       badgeEdited(badge) {
         this.$emit('badge-updated', badge);

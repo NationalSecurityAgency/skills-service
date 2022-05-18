@@ -90,6 +90,15 @@ limitations under the License.
 
     <edit-project v-if="showEditProjectModal" v-model="showEditProjectModal" :project="projectInternal" :is-edit="true"
       @project-saved="projectSaved" @hidden="handleHidden"/>
+
+    <removal-validation v-if="deleteProjectInfo.showDialog" v-model="deleteProjectInfo.showDialog" @do-remove="doDeleteProject">
+      <p>
+        This will remove <span class="text-primary font-weight-bold">{{ deleteProjectInfo.project.name}}</span>.
+      </p>
+      <div>
+        Deletion can not be undone and permanently removes all skill subject definitions, skill definitions and users' performed skills for this Project.
+      </div>
+    </removal-validation>
   </div>
 </template>
 
@@ -97,6 +106,7 @@ limitations under the License.
   import dayjs from '@/common-components/DayJsCustomizer';
   import ProjectCardControls from '@/components/projects/ProjectCardControls';
   import ProjectCardFooter from '@/components/projects/ProjectCardFooter';
+  import RemovalValidation from '@/components/utils/modal/RemovalValidation';
   import EditProject from './EditProject';
   import ProjectService from './ProjectService';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
@@ -108,6 +118,7 @@ limitations under the License.
       ProjectCardFooter,
       ProjectCardControls,
       EditProject,
+      RemovalValidation,
     },
     props: ['project', 'disableSortControl'],
     mixins: [MsgBoxMixin],
@@ -121,6 +132,10 @@ limitations under the License.
         deleteProjectDisabled: false,
         deleteProjectToolTip: '',
         cancellingExpiration: false,
+        deleteProjectInfo: {
+          showDialog: false,
+          project: {},
+        },
       };
     },
     mounted() {
@@ -182,22 +197,20 @@ limitations under the License.
             }
           });
       },
-      deleteProject() {
-        ProjectService.checkIfProjectBelongsToGlobalBadge(this.projectInternal.projectId)
+      doDeleteProject() {
+        ProjectService.checkIfProjectBelongsToGlobalBadge(this.deleteProjectInfo.project.projectId)
           .then((belongsToGlobal) => {
             if (belongsToGlobal) {
               const msg = 'Cannot delete this project as it belongs to one or more global badges. Please contact a Supervisor to remove this dependency.';
               this.msgOk(msg, 'Unable to delete');
             } else {
-              const msg = `Project ID [${this.projectInternal.projectId}]. Delete Action can not be undone and permanently removes its skill subject definitions, skill definitions and users' performed skills.`;
-              this.msgConfirm(msg)
-                .then((res) => {
-                  if (res) {
-                    this.$emit('project-deleted', this.projectInternal);
-                  }
-                });
+              this.$emit('project-deleted', this.deleteProjectInfo.project);
             }
           });
+      },
+      deleteProject() {
+        this.deleteProjectInfo.project = this.projectInternal;
+        this.deleteProjectInfo.showDialog = true;
       },
       editProject() {
         this.showEditProjectModal = true;

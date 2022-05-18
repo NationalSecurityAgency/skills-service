@@ -136,7 +136,9 @@ describe('Projects Table Tests', () => {
     ], 10);
 
     cy.get('[data-cy=deleteProjectButton_proj10]').click();
-    cy.contains('YES, Delete It').click();
+    cy.get('[title="Removal Safety Check"]').should('be.visible');
+    cy.get('[data-cy=currentValidationText]').type('Delete Me');
+    cy.get('[data-cy=removeButton]').should('be.enabled').click();
 
     cy.wait('@deleteProject');
 
