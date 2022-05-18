@@ -1079,7 +1079,7 @@ describe('Projects Tests', () => {
     cy.get('[data-cy="projectCard_proj3"]').should('exist');
 
     cy.get('[data-cy="projectCard_proj2"] [data-cy="deleteProjBtn"]').click();
-    cy.get('[data-cy=removalSafetyCheckDialog]').should('be.visible');
+    cy.contains('Removal Safety Check');
     cy.get('[data-cy=closeRemovalSafetyCheck]').click();
     cy.get('[data-cy="projectCard_proj2"]').should('exist');
     cy.get('[data-cy="projectCard_proj3"]').should('exist');
