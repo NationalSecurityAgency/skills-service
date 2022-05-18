@@ -90,9 +90,9 @@ class CatalogExportSkillsUnderGroupSpec extends CatalogIntSpec {
 
         when:
         def p2Exported = skillsService.getExportedSkills(p2.projectId, 10, 1, "exportedOn", true)
-        def p2_sk1_stats = skillsService.getExportedSkillStats(p2.projectId, gSkill1.skillId).users.sort { it.projectId }
-        def p2_sk2_stats = skillsService.getExportedSkillStats(p2.projectId, gSkill2.skillId).users.sort { it.projectId }
-        def p2_sk3_stats = skillsService.getExportedSkillStats(p2.projectId, gSkill3.skillId).users.sort { it.projectId }
+        def p2_sk1_stats = skillsService.getExportedSkillStats(p2.projectId, gSkill1.skillId).users.sort { it.importingProjectId }
+        def p2_sk2_stats = skillsService.getExportedSkillStats(p2.projectId, gSkill2.skillId).users.sort { it.importingProjectId }
+        def p2_sk3_stats = skillsService.getExportedSkillStats(p2.projectId, gSkill3.skillId).users.sort { it.importingProjectId }
         then:
         p2Exported.count == 3
         p2Exported.data.skillName == [gSkill1.name, gSkill2.name, gSkill3.name]
