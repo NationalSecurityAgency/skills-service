@@ -15,9 +15,9 @@ limitations under the License.
 */
 <template>
   <div role="presentation">
-    <vue-announcer/>
     <customizable-header role="region" aria-label="dynamic customizable header"></customizable-header>
     <div id="app" class="">
+      <vue-announcer/>
       <div class="m-0">
         <new-software-version-component role="alert"/>
 
@@ -40,6 +40,7 @@ limitations under the License.
 </template>
 
 <script>
+  import VueAnnouncer from '@vue-a11y/announcer';
   import PkiAppBootstrap from '@//components/access/PkiAppBootstrap';
   import HeaderView from './components/header/Header';
   import LoadingContainer from './components/utils/LoadingContainer';
@@ -50,7 +51,6 @@ limitations under the License.
   import InceptionProgressMessagesMixin from './components/inception/InceptionProgressMessagesMixin';
   import NewSoftwareVersionComponent from './components/header/NewSoftwareVersion';
   import DashboardFooter from './components/header/DashboardFooter';
-  import VueAnnouncer from '@vue-a11y/announcer';
 
   export default {
     name: 'App',

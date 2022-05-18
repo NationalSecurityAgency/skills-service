@@ -427,7 +427,7 @@ limitations under the License.
           // eslint-disable-next-line no-console
           console.error(`unrecognized filter type ${this.currentFilterType}`);
         }
-
+        this.$announcer.polite(`${tag.display} criteria added`);
         this.handleTagAdd(tag);
       },
       handleTagAdd(tag) {
@@ -543,6 +543,7 @@ limitations under the License.
           console.error(`unrecognized user criteria type ${tag.type}`);
         }
         this.removeFromArray(this.tags, (el) => el === tag);
+        this.$announcer.polite(`${tag.display} criteria has been removed`);
         this.updateCount();
       },
       removeFromArray(array, findCallback) {
@@ -554,6 +555,7 @@ limitations under the License.
       },
       updateCount() {
         ProjectService.countUsersMatchingCriteria(this.$route.params.projectId, this.criteria).then((count) => {
+          this.$announcer.polite(`There are ${count} Project Users matching your specified criteria`);
           this.currentCount = count;
         });
       },
