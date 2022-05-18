@@ -68,6 +68,7 @@ limitations under the License.
                   <div class="h5 d-inline-block">{{ data.item.skillName }}</div>
                 </router-link>
               </div>
+              <div v-if="data.item.groupName"><span class="font-italic">Group:</span> {{ data.item.groupName }}</div>
               <div>
                 <b-button size="sm" variant="outline-info"
                           class="mr-2 py-0 px-1 mt-1"

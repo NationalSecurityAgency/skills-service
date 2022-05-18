@@ -56,14 +56,18 @@ limitations under the License.
               </b-button-group>
             </div>
             <div class="col text-right">
-              <b-dropdown id="tableActionsBtn" ref="tableActionsBtn" right variant="outline-info" class="mr-3 mt-2"
+              <b-dropdown :id="`tableActionsBtn_${tableId}`" :ref="`tableActionsBtn_${tableId}`" right
+                          variant="outline-info" class="mr-3 mt-2"
                           :disabled="actionsDisable"
                           :size="actionsBtnSize"
                           data-cy="skillActionsBtn">
                 <template #button-content>
-                  <i class="fas fa-tools"></i> Action <b-badge variant="info" data-cy="skillActionsNumSelected">{{ numSelectedSkills }}</b-badge>
+                  <i class="fas fa-tools"></i> Action
+                  <b-badge variant="info" data-cy="skillActionsNumSelected">{{ numSelectedSkills }}</b-badge>
                 </template>
-                <b-dropdown-item @click="handleExportRequest" data-cy="skillExportToCatalogBtn"><i class="far fa-arrow-alt-circle-up"></i> Export To Catalog</b-dropdown-item>
+                <b-dropdown-item @click="handleExportRequest" data-cy="skillExportToCatalogBtn"><i
+                  class="far fa-arrow-alt-circle-up"></i> Export To Catalog
+                </b-dropdown-item>
               </b-dropdown>
             </div>
           </div>

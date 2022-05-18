@@ -81,6 +81,8 @@ describe('Export Group Skills to the Catalog Tests', () => {
                 value: 'Very Great Skill 22'
             }],
         ], 5);
+        cy.get('[data-cy="nameCell_skill22"]')
+            .contains('Group: Awesome Group 20 Subj1');
     });
 
 });

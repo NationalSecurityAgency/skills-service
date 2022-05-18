@@ -15,7 +15,6 @@
  */
 package skills.intTests.catalog
 
-
 import skills.intTests.utils.SkillsFactory
 
 import static skills.intTests.utils.SkillsFactory.*
@@ -52,6 +51,59 @@ class CatalogExportSkillsUnderGroupSpec extends CatalogIntSpec {
         catalogSkills.data.name == [gSkill1.name, gSkill2.name]
         catalogSkills.data.projectId == [p2.projectId, p2.projectId]
         skillsUnderGroup.sharedToCatalog == [true, true]
+    }
+
+    def "imported stats for the exported group skills"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [])
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def p2skillsGroup = SkillsFactory.createSkillsGroup(2, 1, 5)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [p2skillsGroup])
+        def gSkill1 = createSkill(2, 1, 10, 0, 50)
+        def gSkill2 = createSkill(2, 1, 11, 0, 50)
+        def gSkill3 = createSkill(2, 1, 12, 0, 50)
+        skillsService.assignSkillToSkillsGroup(p2skillsGroup.skillId, gSkill1)
+        skillsService.assignSkillToSkillsGroup(p2skillsGroup.skillId, gSkill2)
+        skillsService.assignSkillToSkillsGroup(p2skillsGroup.skillId, gSkill3)
+
+        def p3 = createProject(3)
+        def p3subj1 = createSubject(3, 1)
+        skillsService.createProjectAndSubjectAndSkills(p3, p3subj1, [])
+
+        def p4 = createProject(4)
+        def p4subj1 = createSubject(4, 1)
+        skillsService.createProjectAndSubjectAndSkills(p4, p4subj1, [])
+
+        skillsService.bulkExportSkillsToCatalog(p2.projectId, [gSkill1, gSkill2, gSkill3].collect { it.skillId })
+
+        skillsService.bulkImportSkillsFromCatalog(p1.projectId, p1subj1.subjectId,
+                [[projectId: p2.projectId, skillId: gSkill1.skillId], [projectId: p2.projectId, skillId: gSkill2.skillId]])
+
+        skillsService.bulkImportSkillsFromCatalogAndFinalize(p3.projectId, p3subj1.subjectId,
+                [[projectId: p2.projectId, skillId: gSkill1.skillId], [projectId: p2.projectId, skillId: gSkill2.skillId], [projectId: p2.projectId, skillId: gSkill3.skillId]])
+
+        skillsService.bulkImportSkillsFromCatalogAndFinalize(p4.projectId, p4subj1.subjectId,
+                [[projectId: p2.projectId, skillId: gSkill1.skillId], [projectId: p2.projectId, skillId: gSkill2.skillId], [projectId: p2.projectId, skillId: gSkill3.skillId]])
+
+        when:
+        def p2Exported = skillsService.getExportedSkills(p2.projectId, 10, 1, "exportedOn", true)
+        def p2_sk1_stats = skillsService.getExportedSkillStats(p2.projectId, gSkill1.skillId).users.sort { it.projectId }
+        def p2_sk2_stats = skillsService.getExportedSkillStats(p2.projectId, gSkill2.skillId).users.sort { it.projectId }
+        def p2_sk3_stats = skillsService.getExportedSkillStats(p2.projectId, gSkill3.skillId).users.sort { it.projectId }
+        then:
+        p2Exported.count == 3
+        p2Exported.data.skillName == [gSkill1.name, gSkill2.name, gSkill3.name]
+        p2Exported.data.importedProjectCount == [3, 3, 2]
+
+        p2_sk1_stats.importingProjectId == [p1.projectId, p3.projectId, p4.projectId]
+        p2_sk1_stats.enabled == ["false", "true", "true"]
+        p2_sk2_stats.importingProjectId == [p1.projectId, p3.projectId, p4.projectId]
+        p2_sk2_stats.enabled == ["false", "true", "true"]
+        p2_sk3_stats.importingProjectId == [p3.projectId, p4.projectId]
+        p2_sk3_stats.enabled == ["true", "true"]
     }
 
     def "import skills that were exported from a group"() {
