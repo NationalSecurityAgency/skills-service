@@ -38,7 +38,7 @@ class CatalogExportSkillsUnderGroupSpec extends CatalogIntSpec {
         when:
         skillsService.bulkExportSkillsToCatalog(p2.projectId, [gSkill1, gSkill2].collect { it.skillId })
 
-        def p2Exported = skillsService.getExportedSkills(p2.projectId, 10, 1, "exportedOn", true)
+        def p2Exported = skillsService.getExportedSkills(p2.projectId, 10, 1, "skillName", true)
         def catalogSkills = skillsService.getCatalogSkills(p1.projectId, 10, 1)
         def skillsUnderGroup = skillsService.getSkillsForGroup(p2.projectId, p2skillsGroup.skillId)
 
@@ -89,14 +89,15 @@ class CatalogExportSkillsUnderGroupSpec extends CatalogIntSpec {
                 [[projectId: p2.projectId, skillId: gSkill1.skillId], [projectId: p2.projectId, skillId: gSkill2.skillId], [projectId: p2.projectId, skillId: gSkill3.skillId]])
 
         when:
-        def p2Exported = skillsService.getExportedSkills(p2.projectId, 10, 1, "exportedOn", true)
+        def p2Exported = skillsService.getExportedSkills(p2.projectId, 10, 1, "skillName", true)
         def p2_sk1_stats = skillsService.getExportedSkillStats(p2.projectId, gSkill1.skillId).users.sort { it.importingProjectId }
         def p2_sk2_stats = skillsService.getExportedSkillStats(p2.projectId, gSkill2.skillId).users.sort { it.importingProjectId }
         def p2_sk3_stats = skillsService.getExportedSkillStats(p2.projectId, gSkill3.skillId).users.sort { it.importingProjectId }
         then:
         p2Exported.count == 3
-        p2Exported.data.skillName == [gSkill1.name, gSkill2.name, gSkill3.name]
-        p2Exported.data.importedProjectCount == [3, 3, 2]
+        def data = p2Exported.data.sort { it.name }
+        data.skillName == [gSkill1.name, gSkill2.name, gSkill3.name]
+        data.importedProjectCount == [3, 3, 2]
 
         p2_sk1_stats.importingProjectId == [p1.projectId, p3.projectId, p4.projectId]
         p2_sk1_stats.enabled == ["false", "true", "true"]
@@ -499,12 +500,12 @@ class CatalogExportSkillsUnderGroupSpec extends CatalogIntSpec {
         skillsService.bulkExportSkillsToCatalog(p2.projectId, [gSkill1, gSkill2].collect { it.skillId })
         when:
 
-        def p2Exported = skillsService.getExportedSkills(p2.projectId, 10, 1, "exportedOn", true)
+        def p2Exported = skillsService.getExportedSkills(p2.projectId, 10, 1, "skillName", true)
         def catalogSkills = skillsService.getCatalogSkills(p1.projectId, 10, 1)
 
         skillsService.removeSkillFromCatalog(p2.projectId, gSkill1.skillId)
 
-        def p2Exported_t1 = skillsService.getExportedSkills(p2.projectId, 10, 1, "exportedOn", true)
+        def p2Exported_t1 = skillsService.getExportedSkills(p2.projectId, 10, 1, "skillName", true)
         def catalogSkills_t1 = skillsService.getCatalogSkills(p1.projectId, 10, 1)
 
         then:
