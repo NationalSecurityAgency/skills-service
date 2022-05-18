@@ -81,7 +81,7 @@ class QueuedEventSerializer implements AutoCloseable{
                 while (!Thread.currentThread().isInterrupted()) {
                     try {
                         QueuedSkillEvent queuedSkillEvent = queuedSkillEvents.take()
-                        log.info("writing queued skill event to SequenceWriter")
+                        log.trace("writing queued skill event to SequenceWriter")
                         sequenceWriter.write(queuedSkillEvent)
                     } catch (InterruptedException interruptedException) {
                         Thread.currentThread().interrupt()
