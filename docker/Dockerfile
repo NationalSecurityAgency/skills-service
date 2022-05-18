@@ -1,9 +1,10 @@
-FROM openjdk:17-jdk-slim-bullseye
+FROM openjdk:18-jdk-slim-bullseye
 
 # install netcat so start script can use nc command to wait for DB to come up
 RUN apt-get update
 RUN apt-get -y install netcat-openbsd
 RUN apt-get -y install wget
+RUN apt-get -y install procps
 
 ARG BUILD_DATE
 ARG VERSION
