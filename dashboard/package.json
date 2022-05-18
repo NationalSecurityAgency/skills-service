@@ -56,7 +56,7 @@
     "vuejs-datepicker": "1.6.2",
     "vuex": "3.6.2",
     "webstomp-client": "1.2.6",
-    "@vue-a11y/announcer": "1.0.6"
+    "@vue-a11y/announcer": "2.1.0"
   },
   "devDependencies": {
     "@babel/core": "7.14.6",
