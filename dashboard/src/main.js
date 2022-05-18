@@ -64,6 +64,7 @@ import InceptionConfigurer from './InceptionConfigurer';
 import 'babel-polyfill';
 import 'matchmedia-polyfill';
 import 'matchmedia-polyfill/matchMedia.addListener';
+import VueAnnouncer from '@vue-a11y/announcer';
 // import './filters/NumberFilter';
 import './filters/TruncateFilter';
 import './filters/DateFilter';
@@ -114,6 +115,7 @@ Vue.component('BIconQuestion', BIconQuestion);
 
 Vue.use(SkillsDirective);
 Vue.use(FiltersPlugin);
+Vue.use(VueAnnouncer);
 
 localize({
   en,
