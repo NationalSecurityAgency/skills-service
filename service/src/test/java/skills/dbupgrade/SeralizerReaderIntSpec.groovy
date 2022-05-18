@@ -19,6 +19,7 @@ import com.google.common.jimfs.Configuration
 import com.google.common.jimfs.Jimfs
 import skills.controller.AddSkillHelper
 import skills.controller.request.model.SkillEventRequest
+import skills.utils.WaitFor
 import spock.lang.Specification
 
 import java.nio.file.FileSystem
@@ -52,6 +53,9 @@ class SeralizerReaderIntSpec extends Specification {
 
         SerializedEventReader serializedEventReader = new SerializedEventReader(processingDirectory, ".jsonsequence", addSkillHelper)
         serializedEventReader.run()
+        WaitFor.wait(750, {
+            return Files.list(processingDirectory).findFirst().isEmpty()
+        })
 
         then:
         1 * addSkillHelper.addSkill("foo", "bar", { SkillEventRequest ser ->
