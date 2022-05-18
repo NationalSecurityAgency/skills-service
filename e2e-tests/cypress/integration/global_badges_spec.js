@@ -156,7 +156,9 @@ describe('Global Badges Tests', () => {
         cy.wait('@checkSupervisorRole');
 
         cy.get('[data-cy=badgeCard-JustABadgeBadge] [data-cy="deleteBtn"]').click();
-        cy.get('.btn-danger').contains('YES, Delete It!').click();
+        cy.contains('Removal Safety Check');
+        cy.get('[data-cy=currentValidationText]').type('Delete Me');
+        cy.get('[data-cy=removeButton]').should('be.enabled').click();
         cy.wait('@deleteGlobalBadge');
         cy.contains('No Badges Yet').should('be.visible');
     });

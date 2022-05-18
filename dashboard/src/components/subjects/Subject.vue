@@ -45,7 +45,7 @@ limitations under the License.
         This will remove <span class="text-primary font-weight-bold">{{ this.subjectInternal.name}}</span>.
       </p>
       <div>
-        Subject with id {{this.subjectInternal.subjectId}} will be removed. Deletion can not be undone and permanently removes its skill definitions and users' performed skills.
+        Subject with id [{{this.subjectInternal.subjectId}}] will be removed. Deletion can not be undone and permanently removes its skill definitions and users' performed skills.
       </div>
     </removal-validation>
   </div>

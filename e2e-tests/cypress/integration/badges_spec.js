@@ -649,7 +649,7 @@ describe('Badges Tests', () => {
         cy.get('[data-cy="badgeCard-badge2"]').should('exist');
 
         cy.get('[data-cy="badgeCard-badge2"] [data-cy="deleteBtn"]').click()
-        cy.get('[title="Removal Safety Check"]').should('be.visible');
+        cy.contains('Removal Safety Check');
         cy.get('[data-cy=currentValidationText]').type('Delete Me');
         cy.get('[data-cy=removeButton]').should('be.enabled').click();
 
@@ -657,7 +657,9 @@ describe('Badges Tests', () => {
         cy.get('[data-cy="badgeCard-badge2"]').should('not.exist');
 
         cy.get('[data-cy="badgeCard-badge1"] [data-cy="deleteBtn"]').click()
-        cy.get('.btn-danger').contains('YES, Delete It!').click();
+        cy.contains('Removal Safety Check');
+        cy.get('[data-cy=currentValidationText]').type('Delete Me');
+        cy.get('[data-cy=removeButton]').should('be.enabled').click();
 
         cy.get('[data-cy="badgeCard-badge1"]').should('not.exist');
         cy.get('[data-cy="badgeCard-badge2"]').should('not.exist');
