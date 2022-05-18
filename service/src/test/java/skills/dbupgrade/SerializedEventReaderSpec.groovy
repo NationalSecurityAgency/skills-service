@@ -23,6 +23,7 @@ import com.google.common.jimfs.Jimfs
 import skills.controller.AddSkillHelper
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.SkillEventRequest
+import skills.utils.WaitFor
 import spock.lang.Specification
 
 import java.nio.file.FileSystem
@@ -52,6 +53,9 @@ class SerializedEventReaderSpec extends Specification {
         when:
         SerializedEventReader serializedEventReader = new SerializedEventReader(processingDirectory, ".jsonsequence", addSkillHelper)
         serializedEventReader.run()
+        WaitFor.wait(750, {
+            return Files.list(processingDirectory).findFirst().isEmpty()
+        })
 
         then:
         1 * addSkillHelper.addSkill("myProject", "mySkill", { SkillEventRequest ser ->
@@ -70,6 +74,7 @@ class SerializedEventReaderSpec extends Specification {
         when:
         SerializedEventReader serializedEventReader = new SerializedEventReader(processingDirectory, ".jsonsequence", addSkillHelper)
         serializedEventReader.run()
+        Thread.sleep(50)
 
         then:
         notThrown(Exception)
@@ -84,6 +89,7 @@ class SerializedEventReaderSpec extends Specification {
         when:
         SerializedEventReader serializedEventReader = new SerializedEventReader(processingDirectory, ".jsonsequence", addSkillHelper)
         serializedEventReader.run()
+        Thread.sleep(50)
 
         then:
         notThrown(Exception)
@@ -102,12 +108,13 @@ class SerializedEventReaderSpec extends Specification {
         when:
         SerializedEventReader serializedEventReader = new SerializedEventReader(processingDirectory, ".jsonsequence", addSkillHelper)
         serializedEventReader.run()
+        Thread.sleep(250)
 
         then:
         notThrown(Exception)
     }
 
-    def "fails of extension is not specified"() {
+    def "fails if extension is not specified"() {
         def addSkillHelper = Mock(AddSkillHelper)
         FileSystem fs = Jimfs.newFileSystem(Configuration.unix())
         Path processingDirectory = fs.getPath("/processDir")
@@ -120,7 +127,7 @@ class SerializedEventReaderSpec extends Specification {
         thrown(SkillException)
     }
 
-    def "fails of add skill helper is not specified"() {
+    def "fails if add skill helper is not specified"() {
         def addSkillHelper = null
         FileSystem fs = Jimfs.newFileSystem(Configuration.unix())
         Path processingDirectory = fs.getPath("/processDir")

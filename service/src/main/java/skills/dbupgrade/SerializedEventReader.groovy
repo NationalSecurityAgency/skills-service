@@ -16,6 +16,7 @@
 package skills.dbupgrade
 
 import com.fasterxml.jackson.databind.MappingIterator
+import com.fasterxml.jackson.databind.ObjectWriter
 import com.fasterxml.jackson.databind.json.JsonMapper
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
@@ -57,17 +58,21 @@ class SerializedEventReader {
         if (Files.isDirectory(fileDir)) {
             List<Path> queuedEventFiles = getQueuedEventFiles(fileDir)
 
-            JsonMapper jsonMapper = new JsonMapper()
-            queuedEventFiles.forEach({
-                log.debug("identified queued event file [{}] to process", it.getFileName())
-                processFile(it, jsonMapper)
-            })
+            if (queuedEventFiles) {
+                Thread.start {
+                    JsonMapper jsonMapper = new JsonMapper()
+                    queuedEventFiles.forEach({
+                        log.debug("identified queued event file [{}] to process", it.getFileName())
+                        processFile(it, jsonMapper)
+                    })
+                }
+            }
         }
     }
 
     private void processFile(Path file, JsonMapper jsonMapper) {
         log.info("processing queued skill event file [${file}]")
-
+        ObjectWriter errorSerializer = jsonMapper.writerFor(QueuedSkillEvent)
         CheckPointer checkPointer = new CheckPointer(fileDir, file.getFileName().toString())
         try (MappingIterator<QueuedSkillEvent> itr = jsonMapper.readerFor(QueuedSkillEvent).readValues(Files.newBufferedReader(file))) {
             int startAt = checkPointer.getLastReadRecord()
@@ -77,14 +82,19 @@ class SerializedEventReader {
                 i++
                 QueuedSkillEvent queuedSkillEvent = itr.nextValue()
                 if (i >= startAt) {
-                    SkillEventRequest skr = queuedSkillEvent.skillEventRequest
-                    if (!skr) {
-                        skr = new SkillEventRequest(userId: queuedSkillEvent.userId)
-                        skr.timestamp = queuedSkillEvent.requestTime.getTime()
-                    } else if (!skr.userId) {
-                        skr.userId = queuedSkillEvent.userId
+                    try {
+                        SkillEventRequest skr = queuedSkillEvent.skillEventRequest
+                        if (!skr) {
+                            skr = new SkillEventRequest(userId: queuedSkillEvent.userId)
+                            skr.timestamp = queuedSkillEvent.requestTime.getTime()
+                        } else if (!skr.userId) {
+                            skr.userId = queuedSkillEvent.userId
+                        }
+                        addSkillHelper.addSkill(queuedSkillEvent.projectId, queuedSkillEvent.skillId, skr)
+                    } catch (Exception e) {
+                        String asStr = errorSerializer.writeValueAsString(queuedSkillEvent)
+                        log.error("unable to add queued event [$asStr]", e)
                     }
-                    addSkillHelper.addSkill(queuedSkillEvent.projectId, queuedSkillEvent.skillId, skr)
                 } else {
                     log.debug("skipping record [{}], last record read before shutdown was [{}]", i, startAt)
                 }
