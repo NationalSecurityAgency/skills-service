@@ -72,7 +72,7 @@ limitations under the License.
         <span v-if="isSkillComplete" :data-cy="`skillCompletedCheck-${skill.skillId}`" class="pr-1"><i class="fa fa-check"/></span>
         <div v-if="skill.type === 'SkillsGroup'" class="d-inline">
           <animated-number :num="numChildSkillsComplete"/>
-          / {{ numSkillsRequired | number }} Skill{{(numSkillsRequired === 1) ? '' : 's'}}
+          / {{ numSkillsRequired | number }} Skill{{(numSkillsRequired === 1) ? '' : 's'}} {{someSkillsAreOptional ? 'Required' : ''}}
         </div>
         <div v-else class="d-inline">
           <animated-number :num="skill.points"/>
@@ -228,6 +228,9 @@ limitations under the License.
           return this.skill.numSkillsRequired === -1 ? this.skill.children.length : this.skill.numSkillsRequired;
         }
         return 0;
+      },
+      someSkillsAreOptional() {
+        return this.isSkillsGroupWithChildren && this.skill.numSkillsRequired !== -1 && this.skill.numSkillsRequired < this.skill.children.length;
       },
     },
     watch: {
