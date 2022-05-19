@@ -98,6 +98,7 @@ class QueuedEventSerializer implements AutoCloseable{
             fileWriterService.awaitTermination(5, TimeUnit.SECONDS)
         }
         if (sequenceWriter) {
+            log.info("finished writing queued events to directory [${queuedEventDir}")
             sequenceWriter.close()
         }
     }

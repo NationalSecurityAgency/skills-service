@@ -59,6 +59,7 @@ class SerializedEventReader {
             List<Path> queuedEventFiles = getQueuedEventFiles(fileDir)
 
             if (queuedEventFiles) {
+                log.info("processing queued skill event files [${queuedEventFiles.join(', ')}]")
                 Thread.start {
                     JsonMapper jsonMapper = new JsonMapper()
                     queuedEventFiles.forEach({
@@ -74,9 +75,10 @@ class SerializedEventReader {
         log.info("processing queued skill event file [${file}]")
         ObjectWriter errorSerializer = jsonMapper.writerFor(QueuedSkillEvent)
         CheckPointer checkPointer = new CheckPointer(fileDir, file.getFileName().toString())
+
+        int i = 0
         try (MappingIterator<QueuedSkillEvent> itr = jsonMapper.readerFor(QueuedSkillEvent).readValues(Files.newBufferedReader(file))) {
             int startAt = checkPointer.getLastReadRecord()
-            int i = 0
             while (itr.hasNext()) {
                 checkPointer.recordRecord(i)
                 i++
@@ -104,7 +106,7 @@ class SerializedEventReader {
                 }
             }
         }
-
+        log.info("finished processing queued skill event file [${file}], recovered [$i] total events")
         Files.delete(file)
         checkPointer.cleanup()
     }
