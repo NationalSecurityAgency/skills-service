@@ -1684,9 +1684,7 @@
         </sql>
     </changeSet>
 
-<!--    TODO: Add this change set in 1.10.0 release;
-              1.9.0 release usage of day column was discontinued, in  1.10 release the column can be dropped-->
-<!--    <changeSet id="26" author="skills team">
+    <changeSet id="26" author="skills team">
         <dropIndex indexName="user_points_proj_skill_user_day"
                    tableName="user_points"/>
         <dropIndex indexName="index_user_points_day"
@@ -1700,6 +1698,5 @@
             <column name="user_id" type="varchar(255)"/>
         </createIndex>
     </changeSet>
-    -->
 
 </databaseChangeLog>
