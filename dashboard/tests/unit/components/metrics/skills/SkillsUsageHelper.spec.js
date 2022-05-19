@@ -366,4 +366,34 @@ describe('SkillsUsageHelper', () => {
       .sort())
       .toEqual(['skill16', 'skill19', 'skill24', 'skill31', 'skill6']);
   });
+
+  it('isOverlookedTag is NOT assigned if the skill has high activity', () => {
+    const skills = [];
+    const numSkills = 50;
+    for (let i = 1; i <= numSkills; i += 1) {
+      skills.push({
+        skillId: `skill${i}`,
+        skillName: `Very Great Skill # ${i}`,
+        numUserAchieved: i,
+        numUsersInProgress: i === 2 ? 100 : i,
+        lastReportedTimestamp: null,
+        lastAchievedTimestamp: null,
+      });
+    }
+    skills.sort(() => Math.random() - 0.5);
+    const resAfter = SkillsUsageHelper.addTags(skills);
+    console.log(JSON.stringify(resAfter, null, 2));
+
+    const highActivityTags = resAfter.filter((item) => item.isHighActivityTag);
+    expect(highActivityTags.map((i) => i.skillId)
+      .sort())
+      .toEqual(['skill2', 'skill47', 'skill48', 'skill49', 'skill50']);
+
+    const taggedSkills = resAfter.filter((item) => item.isOverlookedTag);
+    expect(taggedSkills.length)
+      .toEqual(4);
+    expect(taggedSkills.map((i) => i.skillId)
+      .sort())
+      .toEqual(['skill1', 'skill3', 'skill4', 'skill5']);
+  });
 });
