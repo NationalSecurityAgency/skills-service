@@ -156,7 +156,7 @@ limitations under the License.
       handleHideSubjectEdit() {
         this.showEditSubject = false;
         this.$nextTick(() => {
-          const ref = this.$refs.editSubjectButton;
+          const ref = this.$refs?.editSubjectButton;
           if (ref) {
             ref.focus();
           }

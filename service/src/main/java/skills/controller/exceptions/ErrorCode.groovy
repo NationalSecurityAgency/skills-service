@@ -41,5 +41,6 @@ enum ErrorCode {
     MaxProjectsThreshold,
     MaxBadgesThreshold,
     MaxSkillsThreshold,
-    MaxSubjectsThreshold
+    MaxSubjectsThreshold,
+    DbUpgradeInProgress
 }

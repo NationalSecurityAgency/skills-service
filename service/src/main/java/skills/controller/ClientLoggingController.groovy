@@ -18,6 +18,7 @@ package skills.controller
 import groovy.transform.ToString
 import groovy.util.logging.Slf4j
 import org.springframework.web.bind.annotation.*
+import skills.dbupgrade.DBUpgradeSafe
 import skills.profile.EnableCallStackProf
 
 @RestController
@@ -34,6 +35,7 @@ class ClientLoggingController {
 //    Logger.ERROR = defineLogLevel(8, 'ERROR');
 //    Logger.OFF = defineLogLevel(99, 'OFF');
 
+    @DBUpgradeSafe
     @CrossOrigin(originPatterns = ['*'])
     @RequestMapping(value = "/log", method = [RequestMethod.PUT, RequestMethod.POST])
     @ResponseBody

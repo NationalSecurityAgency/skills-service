@@ -144,7 +144,7 @@ limitations under the License.
       },
       handleFocus() {
         this.$nextTick(() => {
-          this.$refs.subPageHeader.$refs.actionButton.focus();
+          this.$refs?.subPageHeader?.$refs?.actionButton?.focus();
         });
       },
       enableDropAndDrop() {

@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.RestController
 import skills.controller.result.model.ValidationResult
+import skills.dbupgrade.DBUpgradeSafe
 import skills.profile.EnableCallStackProf
 import skills.services.CustomValidationResult
 import skills.services.CustomValidator
@@ -39,6 +40,7 @@ class CustomValidationController {
     @Autowired
     CustomValidator customValidator
 
+    @DBUpgradeSafe
     @RequestMapping(value = "/description", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
     ValidationResult validateDescription(@RequestBody Map<String,String> body){
@@ -47,6 +49,7 @@ class CustomValidationController {
         return validationResult
     }
 
+    @DBUpgradeSafe
     @RequestMapping(value = "/name", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
     ValidationResult validateName(@RequestBody Map<String,String> body){
@@ -55,6 +58,7 @@ class CustomValidationController {
         return validationResult
     }
 
+    @DBUpgradeSafe
     @RequestMapping(value="/url", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
     ValidationResult validateUrl(@RequestBody Map<String, String> body) {

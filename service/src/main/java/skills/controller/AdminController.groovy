@@ -18,6 +18,7 @@ package skills.controller
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
+import org.h2.upgrade.DbUpgrade
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
@@ -32,6 +33,7 @@ import skills.auth.UserInfoService
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.*
 import skills.controller.result.model.*
+import skills.dbupgrade.DBUpgradeSafe
 import skills.services.*
 import skills.services.admin.*
 import skills.services.events.BulkSkillEventResult
@@ -219,6 +221,7 @@ class AdminController {
         return new RequestResult(success: true)
     }
 
+    @DBUpgradeSafe
     @RequestMapping(value = "/projects/{projectId}/subjectNameExists", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     boolean doesSubjectNameExist(@PathVariable("projectId") String projectId,
@@ -229,6 +232,7 @@ class AdminController {
         return subjAdminService.existsBySubjectName(InputSanitizer.sanitize(projectId), InputSanitizer.sanitize(subjectName))
     }
 
+    @DBUpgradeSafe
     @RequestMapping(value = "/projects/{projectId}/badgeNameExists", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     boolean doesBadgeExist(@PathVariable("projectId") String projectId,
@@ -238,6 +242,8 @@ class AdminController {
         SkillsValidator.isNotBlank(badgeName, "Badge Name")
         return badgeAdminService.existsByBadgeName(InputSanitizer.sanitize(projectId), InputSanitizer.sanitize(badgeName))
     }
+
+    @DBUpgradeSafe
     @RequestMapping(value = "/projects/{projectId}/skillNameExists", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     boolean doesSkillNameExist(@PathVariable("projectId") String projectId,
@@ -1063,6 +1069,7 @@ class AdminController {
         return RequestResult.success()
     }
 
+    @DBUpgradeSafe
     @RequestMapping(value="/projects/{projectId}/skills/catalog/exists/{skillId}", method = [RequestMethod.POST], produces = "application/json")
     ExportableToCatalogSkillValidationResult doesSkillAlreadyExistInCatalog(@PathVariable("projectId") String projectId, @PathVariable("skillId") String skillId) {
         SkillsValidator.isNotBlank(projectId, "projectId")

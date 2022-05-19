@@ -28,11 +28,14 @@ class UserSkillsControllerSpec extends Specification {
     def "isRetry is logged properly when true"() {
 
         setup:
-        LoggerHelper loggerHelper = new LoggerHelper(UserSkillsController.class)
+        LoggerHelper loggerHelper = new LoggerHelper(AddSkillHelper.class)
         SkillEventsService skillsManagementFacade = Mock()
         UserInfoService userInfoService = Mock()
         userInfoService.getUserName(_, _) >> 'user1'
-        UserSkillsController userSkillsController = new UserSkillsController(userInfoService: userInfoService, skillsManagementFacade: skillsManagementFacade)
+        AddSkillHelper ash = new AddSkillHelper(userInfoService: userInfoService, skillsManagementFacade: skillsManagementFacade)
+        UserSkillsController userSkillsController = new UserSkillsController(userInfoService: userInfoService,
+                skillsManagementFacade: skillsManagementFacade,
+                addSkillHelper: ash)
 
         when:
         userSkillsController.addSkill('project1', 'skill1', new SkillEventRequest(
@@ -54,11 +57,14 @@ class UserSkillsControllerSpec extends Specification {
     def "isRetry is logged properly when false"() {
 
         setup:
-        LoggerHelper loggerHelper = new LoggerHelper(UserSkillsController.class)
+        LoggerHelper loggerHelper = new LoggerHelper(AddSkillHelper.class)
         SkillEventsService skillsManagementFacade = Mock()
         UserInfoService userInfoService = Mock()
         userInfoService.getUserName(_, _) >> 'user1'
-        UserSkillsController userSkillsController = new UserSkillsController(userInfoService: userInfoService, skillsManagementFacade: skillsManagementFacade)
+        AddSkillHelper ash = new AddSkillHelper(userInfoService: userInfoService, skillsManagementFacade: skillsManagementFacade)
+        UserSkillsController userSkillsController = new UserSkillsController(userInfoService: userInfoService,
+                skillsManagementFacade: skillsManagementFacade,
+                addSkillHelper: ash)
 
         when:
         userSkillsController.addSkill('project1', 'skill1', new SkillEventRequest(
