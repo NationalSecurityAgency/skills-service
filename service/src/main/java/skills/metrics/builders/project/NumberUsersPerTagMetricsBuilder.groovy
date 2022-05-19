@@ -15,8 +15,10 @@
  */
 package skills.metrics.builders.project
 
+import callStack.profiler.Profile
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Component
 import skills.controller.result.model.LabelCountItem
 import skills.metrics.builders.MetricsPagingParamsHelper
@@ -57,17 +59,29 @@ class NumberUsersPerTagMetricsBuilder implements ProjectMetricsBuilder {
         return getUserCountsForTag(projectId, tagKey, currentPage, pageSize, sortDesc, sortBy, tagFilter)
     }
 
-
+    @Profile
     private UsersPerTagRes getUserCountsForTag(String projectId, String tagKey, int currentPage, int pageSize, Boolean sortDesc,  String sortBy, String tagFilter) {
         PageRequest pageRequest = PageRequest.of(currentPage, pageSize, sortDesc ? DESC : ASC, sortBy)
-        List<UserTagRepo.UserTagCount> userTagCounts = userTagRepo.findDistinctUserIdByProjectIdAndUserTag(projectId, tagKey, tagFilter, pageRequest)
+        List<UserTagRepo.UserTagCount> userTagCounts = findDistinctUserIdByProjectIdAndUserTag(projectId, tagKey, tagFilter, pageRequest)
 
-        Integer numDistinctTags = (pageSize > userTagCounts.size() && currentPage == 1) ? userTagCounts.size() : userTagRepo.countDistinctUserTag(projectId, tagKey, tagFilter)
+        Integer numDistinctTags = (pageSize > userTagCounts.size() && currentPage == 1) ? userTagCounts.size() : countDistinctUserTag(projectId, tagKey, tagFilter)
 
-        List<LabelCountItem> items = userTagCounts.collect{
+        List<LabelCountItem> items = userTagCounts.collect {
             new LabelCountItem(value: it.tag, count: it.numUsers)
         }
 
         return new UsersPerTagRes(totalNumItems: numDistinctTags, items: items)
     }
+
+    @Profile
+    private List<UserTagRepo.UserTagCount> findDistinctUserIdByProjectIdAndUserTag(String projectId, String tagKey, String tagFilter, Pageable pageable) {
+        List<UserTagRepo.UserTagCount> userTagCounts = userTagRepo.findDistinctUserIdByProjectIdAndUserTag(projectId, tagKey, tagFilter, pageable)
+        return userTagCounts
+    }
+
+    @Profile
+    private Integer countDistinctUserTag(String projectId, String tagKey, String tagFilter) {
+        return userTagRepo.countDistinctUserTag(projectId, tagKey, tagFilter)
+    }
+
 }

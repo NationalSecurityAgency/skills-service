@@ -37,14 +37,15 @@ interface UserTagRepo extends CrudRepository<UserTag, Integer> {
     }
 
     @Nullable
-    @Query('''SELECT COUNT(DISTINCT ups.userId) as numUsers, ut.value as tag
-        from UserPerformedSkill ups
-        join UserTag ut on ut.userId = ups.userId 
-        where ups.skillRefId in (
+    @Query('''SELECT COUNT(DISTINCT up.userId) as numUsers, ut.value as tag
+        from UserPoints up
+        join UserTag ut on ut.userId = up.userId 
+        where up.skillRefId in (
                 select case when sd.copiedFrom is not null then sd.copiedFrom else sd.id end as id 
                 from SkillDef sd
                 where sd.type = 'Skill' and sd.projectId = ?1 and sd.enabled = 'true'
-            ) 
+            )
+            and up.skillRefId is not null 
             and ut.key = ?2 
             and LOWER(ut.value) LIKE LOWER(CONCAT('%',?3,'%'))   
         group by ut.value''')
@@ -52,13 +53,14 @@ interface UserTagRepo extends CrudRepository<UserTag, Integer> {
 
 
     @Query('''SELECT COUNT(DISTINCT ut.value)
-        from UserPerformedSkill ups
-        join UserTag ut on ut.userId = ups.userId 
-        where ups.skillRefId in (
+        from UserPoints up
+        join UserTag ut on ut.userId = up.userId 
+        where up.skillRefId in (
                 select case when sd.copiedFrom is not null then sd.copiedFrom else sd.id end as id 
                 from SkillDef sd
                 where sd.type = 'Skill' and sd.projectId = ?1 and sd.enabled = 'true'
             )  
+            and up.skillRefId is not null 
             and ut.key = ?2 
             and LOWER(ut.value) LIKE LOWER(CONCAT('%',?3,'%'))   ''')
     Integer countDistinctUserTag(String projectId, String tagKey, String tagFilter)
