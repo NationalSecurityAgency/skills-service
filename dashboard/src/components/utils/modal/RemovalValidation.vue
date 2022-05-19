@@ -32,7 +32,9 @@ limitations under the License.
           Please type <span class="font-italic font-weight-bold text-primary">{{ validationText }}</span> to permanently
           remove the record.
         </p>
-        <b-form-input v-model="currentValidationText" data-cy="currentValidationText"
+        <b-form-input v-model="currentValidationText"
+                      data-cy="currentValidationText"
+                      :autofocus="true"
                       aria-label="Type 'Delete Me' text here to enable the removal operation. Please make sure that 'D' and 'M' are uppercase."></b-form-input>
       </div>
     </div>

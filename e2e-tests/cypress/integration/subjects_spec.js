@@ -660,15 +660,17 @@ describe('Subjects Tests', () => {
 
         cy.get('[data-cy="subjectCard-subj2"] [data-cy="deleteBtn"]').click();
         cy.contains('Subject with id [subj2] will be removed.');
-        cy.contains('YES, Delete It').click();
+        cy.get('[data-cy=currentValidationText]').type('Delete Me');
+        cy.get('[data-cy=removeButton]').should('be.enabled').click();
 
         cy.get('[data-cy="subjectCard-subj1"]').should('exist');
         cy.get('[data-cy="subjectCard-subj2"]').should('not.exist');
         cy.get('[data-cy="subjectCard-subj3"]').should('exist');
 
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="deleteBtn"]').click();
-        cy.contains('Subject with id [subj1] will be removed.');
-        cy.contains('YES, Delete It').click();
+        cy.contains('Removal Safety Check');
+        cy.get('[data-cy=currentValidationText]').type('Delete Me');
+        cy.get('[data-cy=removeButton]').should('be.enabled').click();
 
         cy.get('[data-cy="subjectCard-subj1"]').should('not.exist');
         cy.get('[data-cy="subjectCard-subj2"]').should('not.exist');
@@ -676,7 +678,8 @@ describe('Subjects Tests', () => {
 
         cy.get('[data-cy="subjectCard-subj3"] [data-cy="deleteBtn"]').click();
         cy.contains('Subject with id [subj3] will be removed.');
-        cy.contains('YES, Delete It').click();
+        cy.get('[data-cy=currentValidationText]').type('Delete Me');
+        cy.get('[data-cy=removeButton]').should('be.enabled').click();
 
         cy.get('[data-cy="subjectCard-subj1"]').should('not.exist');
         cy.get('[data-cy="subjectCard-subj2"]').should('not.exist');

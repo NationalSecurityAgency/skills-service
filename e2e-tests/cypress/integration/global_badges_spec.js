@@ -156,7 +156,9 @@ describe('Global Badges Tests', () => {
         cy.wait('@checkSupervisorRole');
 
         cy.get('[data-cy=badgeCard-JustABadgeBadge] [data-cy="deleteBtn"]').click();
-        cy.get('.btn-danger').contains('YES, Delete It!').click();
+        cy.contains('Removal Safety Check');
+        cy.get('[data-cy=currentValidationText]').type('Delete Me');
+        cy.get('[data-cy=removeButton]').should('be.enabled').click();
         cy.wait('@deleteGlobalBadge');
         cy.contains('No Badges Yet').should('be.visible');
     });
@@ -1113,11 +1115,17 @@ describe('Global Badges Tests', () => {
 
         cy.visit('/administrator/');
         cy.get('[data-cy="projectCard_proj1"] [data-cy="deleteProjBtn"]').click();
+        cy.contains('Removal Safety Check');
+        cy.get('[data-cy=currentValidationText]').type('Delete Me');
+        cy.get('[data-cy=removeButton]').should('be.enabled').click();
         cy.contains('Cannot delete this project as it belongs to one or more global badges');
         cy.contains('Ok').click();
 
         cy.get('[data-cy="projectCard_proj2"] [data-cy="deleteProjBtn"]').click();
-        cy.contains('Project ID [proj2]. Delete Action can not be undone');
+        cy.contains('Removal Safety Check');
+        cy.get('[data-cy=currentValidationText]').type('Delete Me');
+        cy.get('[data-cy=removeButton]').should('be.enabled').click();
+        cy.contains('Cannot delete this project as it belongs to one or more global badges').should('not.exist');
     });
 
 

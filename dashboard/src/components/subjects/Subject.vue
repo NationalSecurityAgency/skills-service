@@ -39,10 +39,20 @@ limitations under the License.
 
     <edit-subject v-if="showEditSubject" v-model="showEditSubject" :id="subjectInternal.subjectId"
                   :subject="subjectInternal" :is-edit="true" @subject-saved="subjectSaved" @hidden="hiddenEventHandler"/>
+
+    <removal-validation v-if="showDeleteDialog" v-model="showDeleteDialog" @do-remove="doDeleteSubject">
+      <p>
+        This will remove <span class="text-primary font-weight-bold">{{ this.subjectInternal.name}}</span>.
+      </p>
+      <div>
+        Subject with id [{{this.subjectInternal.subjectId}}] will be removed. Deletion can not be undone and permanently removes its skill definitions and users' performed skills.
+      </div>
+    </removal-validation>
   </div>
 </template>
 
 <script>
+  import RemovalValidation from '@/components/utils/modal/RemovalValidation';
   import EditSubject from './EditSubject';
   import SubjectsService from './SubjectsService';
   import LoadingCard from '../utils/LoadingCard';
@@ -58,11 +68,13 @@ limitations under the License.
       NavCardWithStatsAndControls,
       LoadingCard,
       EditSubject,
+      RemovalValidation,
     },
     props: ['subject', 'disableSortControl'],
     data() {
       return {
         isLoading: false,
+        showDeleteDialog: false,
         showEditSubject: false,
         cardOptions: { controls: {} },
         subjectInternal: { ...this.subject },
@@ -125,19 +137,16 @@ limitations under the License.
         return { name: 'SubjectSkills', params: { projectId: this.subjectInternal.projectId, subjectId: this.subjectInternal.subjectId, subject: this.subjectInternal } };
       },
       deleteSubject() {
+        this.showDeleteDialog = true;
+      },
+      doDeleteSubject() {
         SubjectsService.checkIfSubjectBelongsToGlobalBadge(this.subjectInternal.projectId, this.subjectInternal.subjectId)
           .then((belongsToGlobal) => {
             if (belongsToGlobal) {
               const msg = 'Cannot delete this subject as it belongs to one or more global badges. Please contact a Supervisor to remove this dependency.';
               this.msgOk(msg, 'Unable to delete');
             } else {
-              const msg = `Subject with id [${this.subjectInternal.subjectId}] will be removed. Delete Action can not be undone and permanently removes its skill definitions and users' performed skills.`;
-              this.msgConfirm(msg)
-                .then((res) => {
-                  if (res) {
-                    this.$emit('subject-deleted', this.subjectInternal);
-                  }
-                });
+              this.$emit('subject-deleted', this.subjectInternal);
             }
           });
       },
