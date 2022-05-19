@@ -154,6 +154,8 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
 
         def res = skillsService.addSkill([projectId: projectId, skillId: skillId], userId, new Date())
 
+        List<UserAchievement> groupAchievementsBefore = achievedRepo.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, skillsGroupId)
+
         skillsGroup.numSkillsRequired = 1
         skillsService.updateSkill(skillsGroup, null)
 
@@ -163,6 +165,9 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
         List<UserAchievement> groupAchievements = achievedRepo.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, skillsGroupId)
 
         then:
+        !groupAchievementsBefore
+        groupAchievementsBefore.size() == 0
+
         groupAchievements
         groupAchievements.size() == 1
         groupAchievements[0].userId == userId
@@ -238,6 +243,8 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
         def res1 = skillsService.addSkill([projectId: projectId, skillId: groupChildren[0].skillId], userId, new Date())
         def res2 = skillsService.addSkill([projectId: projectId, skillId: groupChildren[1].skillId], userId, new Date())
 
+        List<UserAchievement> groupAchievementsBefore = achievedRepo.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, skillsGroupId)
+
         skillsService.deleteSkill(groupChildren[2])
 
         assert res1.body.skillApplied
@@ -248,6 +255,9 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
         List<UserAchievement> groupAchievements = achievedRepo.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, skillsGroupId)
 
         then:
+        !groupAchievementsBefore
+        groupAchievementsBefore.size() == 0
+
         groupAchievements
         groupAchievements.size() == 1
         groupAchievements[0].userId == userId
@@ -407,6 +417,7 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
                 assert res.body.completed.find { it.id == skill.skillId }
             }
         }
+        List<UserAchievement> groupAchievementsBefore = achievedRepo.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, skillsGroupId)
 
         groupChildren[1].numPerformToCompletion = 1
         skillsService.updateSkill(groupChildren[1], null)
@@ -415,6 +426,9 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
         List<UserAchievement> groupAchievements = achievedRepo.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, skillsGroupId)
 
         then:
+        !groupAchievementsBefore
+        groupAchievementsBefore.size() == 0
+
         groupAchievements
         groupAchievements.size() == 1
         groupAchievements[0].userId == userId
@@ -466,6 +480,8 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
         assert res.body.skillApplied
         assert !res.body.completed.find { it.id == skill.skillId }
 
+        List<UserAchievement> groupAchievementsBefore = achievedRepo.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, skillsGroupId)
+
         int newPointIncrement = 100
         int newNumPerformToCompletion = 1
         skillsService.syncPointsForSkillsGroup(projectId, subjectId, skillsGroupId, [pointIncrement: newPointIncrement, numPerformToCompletion: newNumPerformToCompletion])
@@ -474,6 +490,9 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
         List<UserAchievement> groupAchievements = achievedRepo.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, skillsGroupId)
 
         then:
+        !groupAchievementsBefore
+        groupAchievementsBefore.size() == 0
+
         groupAchievements
         groupAchievements.size() == 1
         groupAchievements[0].userId == userId
