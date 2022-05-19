@@ -427,7 +427,6 @@ limitations under the License.
           // eslint-disable-next-line no-console
           console.error(`unrecognized filter type ${this.currentFilterType}`);
         }
-        this.$announcer.polite(`${tag.display} criteria added`);
         this.handleTagAdd(tag);
       },
       handleTagAdd(tag) {
@@ -440,6 +439,8 @@ limitations under the License.
           setTimeout(() => { this.alreadyApplied = false; }, 2000);
           return;
         }
+
+        this.$announcer.polite(`adding ${tag.display} criteria`);
         const addTagAndUpdate = () => {
           this.updateCount();
           this.tags.push(tag);
@@ -588,6 +589,7 @@ limitations under the License.
           emailSubject: this.subject,
         }).then(() => {
           this.emailSent = true;
+          this.$announcer.polite('Email has been sent to selected users');
           setTimeout(() => { this.emailSent = false; }, 8000);
         }).finally(() => {
           this.emailing = false;
