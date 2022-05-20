@@ -17,12 +17,22 @@ package skills.dbupgrade
 
 import groovy.util.logging.Slf4j
 import org.reflections.Reflections
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Conditional
+import org.springframework.core.io.Resource
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver
+import org.springframework.core.io.support.ResourcePatternResolver
+import org.springframework.core.type.AnnotationMetadata
+import org.springframework.core.type.MethodMetadata
+import org.springframework.core.type.classreading.MetadataReader
+import org.springframework.core.type.classreading.SimpleMetadataReaderFactory
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import skills.controller.AdminController
 
 import javax.annotation.PostConstruct
 import java.lang.annotation.Annotation
@@ -40,37 +50,34 @@ class UpgradeSafeUrlDecider {
     @Value('#{"${server.servlet.context-path:}"}')
     String contextPath
 
+    @Autowired
+    ApplicationContext applicationContext
+
     Pattern skillEventUrl
 
     @PostConstruct
     public void init() {
-        Reflections reflections = new Reflections("skills.controller")
-        Set<Class<?>> classes = reflections.getTypesAnnotatedWith(RestController)
-
         List<String> allowedUrls = []
-        for (Class<?> clazz : classes) {
-            RequestMapping rca = clazz.getDeclaredAnnotation(RequestMapping)
-            String possibleRootUrl = ""
-            if (rca != null) {
-                possibleRootUrl = getUrl(rca)
-            }
+        SimpleMetadataReaderFactory simpleMetadataReaderFactory = new SimpleMetadataReaderFactory()
+        ResourcePatternResolver scanner = new PathMatchingResourcePatternResolver()
+        Resource[] resources = scanner.getResources("classpath*:/skills/controller/**/*.class")
+        log.debug("found [{}] potential controller Resources", resources)
+        for (Resource r : resources) {
+            MetadataReader metadataReader = simpleMetadataReaderFactory.getMetadataReader(r)
+            def metadata = metadataReader.getAnnotationMetadata()
+            if (metadata.isAnnotated(RestController.class.getName())) {
+                def attrs = metadata.getAllAnnotationAttributes(RequestMapping.class.getName())
+                String possibleRoot = getUrl(attrs)
+                log.debug("identified @RestController class [{}] with possibleRoot mapping [{}]", r.getDescription(), possibleRoot)
 
-            Method[] methods = clazz.getDeclaredMethods()
-            for (Method m : methods) {
-                Annotation[] annotations = m.getDeclaredAnnotations()
-                boolean isUpgradeSafe = false
-                RequestMapping urlMapping
-                for (Annotation annotation : annotations) {
-                    if (annotation instanceof DBUpgradeSafe) {
-                        isUpgradeSafe = true
-                    } else if (annotation instanceof RequestMapping) {
-                        urlMapping = annotation
-                    }
-                }
+                Set<MethodMetadata> methods = metadata.getAnnotatedMethods(RequestMapping.class.getName())
+                Set<MethodMetadata> safeMethods = metadata.getAnnotatedMethods(DBUpgradeSafe.class.getName())
+                log.trace("identified [{}] safe methods on [{}}]", safeMethods.size(), metadata.getClassName())
 
-                if (isUpgradeSafe && urlMapping) {
-                    String url = getUrl(urlMapping)
-                    url = possibleRootUrl+url
+                Collection<MethodMetadata> methodsToMap = safeMethods.intersect(methods)
+                methodsToMap?.each { MethodMetadata requestMappedMethod ->
+                    String url = getUrl(requestMappedMethod.getAnnotationAttributes(RequestMapping.class.getName()))
+                    url = possibleRoot+url
                     url = url.replaceAll("[*]{1,2}", "[^/]+")
                     url = url.replaceAll("\\{[^}]+\\}", "[^/]+")
                     url = url.replaceAll("[?]", "[^/]")
@@ -78,7 +85,8 @@ class UpgradeSafeUrlDecider {
                         url = slashAwareJoin(contextPath, url)
                     }
 
-                    log.info("allowing PUT/POST access to ${url}")
+                    assert url instanceof String
+                    log.info("allowing PUT/POST access to [{}]", url)
                     allowedUrls.add("(?:${url})")
                 }
             }
@@ -118,12 +126,12 @@ class UpgradeSafeUrlDecider {
         return true
     }
 
-    private static String getUrl(RequestMapping requestMapping) {
-        String value = requestMapping.value().join("/")
+    private static String getUrl(Map<String, Object> requestMapping) {
+        String value = requestMapping?["value"]?.flatten()?.join("/")
         if (value == null) {
-            value = requestMapping.path().join("/")
+            value = requestMapping?["path"]?.flatten()?.join("/")
         }
-        return value
+        return value ?: ""
     }
 
     private static String slashAwareJoin(String one, String two) {

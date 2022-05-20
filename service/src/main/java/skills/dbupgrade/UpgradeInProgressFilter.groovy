@@ -105,7 +105,7 @@ class UpgradeInProgressFilter extends OncePerRequestFilter {
                 log.error("unable to write response to client request for [{}] with accept headers of [{}]", uri, serverHttpRequest.getHeaders().getAccept())
             }
         } else if (safeUrlDecider.isUrlAllowed(uri, method)) {
-            log.info("request [{}] has been annotated as DBUpgradeSafe and is allowed while db upgrade is in progress", uri)
+            log.info("[{}] request [{}] has been annotated as DBUpgradeSafe and is allowed while db upgrade is in progress", method, uri)
             filterChain.doFilter(request, response)
         } else {
             log.info("POST/PUT/DELETE request to [{}] is not allowed, user [{}], database upgrade is currently in progress", uri, userInfo.username)
