@@ -440,7 +440,6 @@ limitations under the License.
           return;
         }
 
-        this.$nextTick(() => this.$announcer.polite(`adding ${tag.display} criteria`));
         const addTagAndUpdate = () => {
           this.updateCount();
           this.tags.push(tag);
@@ -556,13 +555,7 @@ limitations under the License.
       },
       updateCount() {
         ProjectService.countUsersMatchingCriteria(this.$route.params.projectId, this.criteria).then((count) => {
-          // give any previous announcements time to run
-          // THIS DOESN'T WORK RIGHT, add criteria details doesn't work with count update, may have to pick one or the other
-          this.$nextTick(() => {
-            this.$nextTick(() => {
-              this.$nextTick(() => this.$announcer.polite(`There are ${count} Project Users matching your specified criteria`));
-            });
-          });
+          this.$nextTick(() => this.$announcer.polite(`There are ${count} Project Users matching your specified criteria`));
           this.currentCount = count;
         });
       },

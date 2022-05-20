@@ -91,27 +91,50 @@ const router = new Router({
     {
       path: '/administrator',
       component: AdminHomePage,
-      meta: { requiresAuth: true },
+      meta: {
+        requiresAuth: true,
+        announcer: {
+          message: 'Project Administrator',
+        },
+      },
       children: [{
         name: 'AdminHomePage',
         path: '',
         component: MyProjects,
-        meta: { requiresAuth: true },
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'Project Administrator',
+          },
+        },
       }, {
         name: 'GlobalBadges',
         path: 'globalBadges',
         component: GlobalBadges,
-        meta: { requiresAuth: true },
+        meta: {
+          requiresAuth: true,
+          message: 'Global Badges',
+        },
       }, {
         name: 'MultipleProjectsMetricsPage',
         path: 'metrics',
         component: MultipleProjectsMetricsPage,
-        meta: { requiresAuth: true },
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'All Projects Metrics',
+          },
+        },
       }, {
         name: 'ContactAdmins',
         path: 'contactAdmins',
         component: EmaillProjectAdmins,
-        meta: { requiresAuth: true },
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'Contact Project Admins',
+          },
+        },
       }],
     },
     {
@@ -120,6 +143,9 @@ const router = new Router({
       component: LoginForm,
       meta: {
         requiresAuth: false,
+        announcer: {
+          message: 'Login',
+        },
       },
     },
     {
@@ -128,6 +154,9 @@ const router = new Router({
       component: RequestAccountForm,
       meta: {
         requiresAuth: false,
+        announcer: {
+          message: 'Request New Account',
+        },
       },
     },
     {
@@ -136,6 +165,9 @@ const router = new Router({
       component: RequestPasswordReset,
       meta: {
         requiresAuth: false,
+        announcer: {
+          message: 'Forgot Password',
+        },
       },
     },
     {
@@ -145,6 +177,9 @@ const router = new Router({
       props: true,
       meta: {
         requiresAuth: false,
+        announcer: {
+          message: 'Reset Password',
+        },
       },
     },
     {
@@ -154,6 +189,9 @@ const router = new Router({
       props: true,
       meta: {
         requiresAuth: false,
+        announcer: {
+          message: 'Request Password Reset',
+        },
       },
     },
     {
@@ -163,6 +201,9 @@ const router = new Router({
       props: true,
       meta: {
         requiresAuth: false,
+        announcer: {
+          message: 'Password Reset Confirmation',
+        },
       },
     },
     {
@@ -171,6 +212,9 @@ const router = new Router({
       component: ResetNotSupportedPage,
       meta: {
         requiresAuth: false,
+        announcer: {
+          message: 'Reset Not Supported',
+        },
       },
     },
     {
@@ -180,6 +224,9 @@ const router = new Router({
       props: true,
       meta: {
         requiresAuth: false,
+        announcer: {
+          message: 'Email Verification Sent',
+        },
       },
     },
     {
@@ -189,6 +236,9 @@ const router = new Router({
       props: true,
       meta: {
         requiresAuth: false,
+        announcer: {
+          message: 'Email Verification Confirmation',
+        },
       },
     },
     {
@@ -198,6 +248,9 @@ const router = new Router({
       props: true,
       meta: {
         requiresAuth: false,
+        announcer: {
+          message: 'Request Email Verification',
+        },
       },
     },
     {
@@ -207,6 +260,9 @@ const router = new Router({
       props: { isRootAccount: true },
       meta: {
         requiresAuth: false,
+        announcer: {
+          message: 'Request Root Account',
+        },
       },
     },
     {
@@ -215,6 +271,9 @@ const router = new Router({
       component: ErrorPage,
       meta: {
         requiresAuth: false,
+        announcer: {
+          message: 'Error Page',
+        },
       },
     },
     {
@@ -224,6 +283,9 @@ const router = new Router({
       props: true,
       meta: {
         requiresAuth: false,
+        announcer: {
+          message: 'Not Authorized',
+        },
       },
     },
     {
@@ -233,64 +295,109 @@ const router = new Router({
       props: true,
       meta: {
         requiresAuth: false,
+        announcer: {
+          message: 'Not Found',
+        },
       },
     },
     {
       path: '/progress-and-rankings',
       component: MyProgress,
-      meta: { requiresAuth: true, nonAdmin: true },
+      meta: {
+        requiresAuth: true,
+        nonAdmin: true,
+        announcer: {
+          message: 'My Progress',
+        },
+      },
       children: [{
         name: 'MyProgressPage',
         path: '',
         component: MyProgressPage,
         meta: {
-          requiresAuth: true, nonAdmin: true,
+          requiresAuth: true,
+          nonAdmin: true,
+          announcer: {
+            message: 'My Processr',
+          },
         },
       }, {
         name: 'MyProjectSkills',
         path: 'projects/:projectId',
         component: MyProjectSkillsPage,
         meta: {
-          requiresAuth: true, nonAdmin: true,
+          requiresAuth: true,
+          nonAdmin: true,
+          announcer: {
+            message: 'My Progress Project',
+          },
         },
       }, {
         name: 'MyUsagePage',
         path: 'my-usage',
         component: MyUsagePage,
         meta: {
-          requiresAuth: true, nonAdmin: true,
+          requiresAuth: true,
+          nonAdmin: true,
+          announcer: {
+            message: 'My Usage',
+          },
         },
       }, {
         name: 'DiscoverProjectsPage',
         path: 'manage-my-projects',
         component: DiscoverProjectsPage,
         meta: {
-          requiresAuth: true, nonAdmin: true,
+          requiresAuth: true,
+          nonAdmin: true,
+          announcer: {
+            message: 'Discover Projects',
+          },
         },
       }, {
         name: 'MyBadges',
         path: 'my-badges',
         component: MyBadges,
         meta: {
-          requiresAuth: true, nonAdmin: true,
+          requiresAuth: true,
+          nonAdmin: true,
+          announcer: {
+            message: 'My Badges',
+          },
         },
       }],
     },
     {
       path: '/',
       component: MyProgress,
-      meta: { requiresAuth: true, nonAdmin: true },
+      meta: {
+        requiresAuth: true,
+        nonAdmin: true,
+        announcer: {
+          message: 'My Progress',
+        },
+      },
     },
     {
       path: '/user-agreement',
       component: UserAgreement,
       name: 'UserAgreement',
-      meta: { requiresAuth: true },
+      meta: {
+        requiresAuth: true,
+        announcer: {
+          message: 'User Agreement',
+        },
+      },
     },
     {
       path: '/administrator/projects/:projectId',
       component: ProjectPage,
-      meta: { requiresAuth: true },
+      meta: {
+        requiresAuth: true,
+        announcer: {
+          message: 'Manage Project',
+        },
+      },
       children: [{
         name: 'Subjects',
         path: '',
@@ -298,47 +405,97 @@ const router = new Router({
         meta: {
           requiresAuth: true,
           reportSkillId: 'VisitSubjects',
+          announcer: {
+            message: 'Project Subjects',
+          },
         },
       }, {
         name: 'Badges',
         path: 'badges',
         component: Badges,
-        meta: { requiresAuth: true, reportSkillId: 'VisitBadges' },
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitBadges',
+          announcer: {
+            message: 'Project Badges',
+          },
+        },
       }, {
         name: 'ProjectLevels',
         path: 'levels',
         component: Levels,
-        meta: { requiresAuth: true, reportSkillId: 'VisitProjectLevels' },
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitProjectLevels',
+          announcer: {
+            message: 'Project Levels',
+          },
+        },
       }, {
         name: 'FullDependencyGraph',
         path: 'dependencies',
         component: FullDependencyGraph,
-        meta: { requiresAuth: true, reportSkillId: 'VisitProjectDependencies' },
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitProjectDependencies',
+          announcer: {
+            message: 'All Project Dependencies',
+          },
+        },
       }, {
         name: 'ProjectUsers',
         path: 'users',
         component: Users,
-        meta: { requiresAuth: true, reportSkillId: 'VisitProjectUsers' },
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitProjectUsers',
+          announcer: {
+            message: 'Project Users',
+          },
+        },
       }, {
         name: 'SelfReport',
         path: 'self-report',
         component: SelfReportStatusPage,
-        meta: { requiresAuth: true, reportSkillId: 'VisitSelfReport' },
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitSelfReport',
+          announcer: {
+            message: 'Manage Project Skill Approval Requests',
+          },
+        },
       }, {
         name: 'SkillsCatalog',
         path: '/administrator/projects/:projectId/skills-catalog',
         component: SkillsCatalog,
-        meta: { requiresAuth: true },
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'Project Skills Catalog',
+          },
+        },
       }, {
         name: 'ProjectAccess',
         path: 'access',
         component: AccessSettings,
-        meta: { requiresAuth: true, reportSkillId: 'VisitProjectAccessManagement' },
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitProjectAccessManagement',
+          announcer: {
+            message: 'Manage Project Access',
+          },
+        },
       }, {
         name: 'ProjectSettings',
         path: 'settings',
         component: ProjectSettings,
-        meta: { requiresAuth: true, reportSkillId: 'VisitProjectSettings' },
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitProjectSettings',
+          announcer: {
+            message: 'Project Settings',
+          },
+        },
       }, {
         name: 'EmailUsers',
         path: 'contact-users',

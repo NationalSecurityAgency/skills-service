@@ -115,7 +115,7 @@ Vue.component('BIconQuestion', BIconQuestion);
 
 Vue.use(SkillsDirective);
 Vue.use(FiltersPlugin);
-Vue.use(VueAnnouncer);
+Vue.use(VueAnnouncer, {}, router);
 
 localize({
   en,
