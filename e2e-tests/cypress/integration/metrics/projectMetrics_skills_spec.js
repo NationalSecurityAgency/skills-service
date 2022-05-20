@@ -321,7 +321,6 @@ describe('Metrics Tests - Skills', () => {
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'Very Great Skill # 3' }, { colIndex: 1,  value: 'Overlooked Skill' }],
             [{ colIndex: 0,  value: 'Very Great Skill # 6' }, { colIndex: 1,  value: 'Overlooked Skill' }],
-            [{ colIndex: 0,  value: 'Very Great Skill # 17' }, { colIndex: 1,  value: 'Overlooked Skill' }],
         ]);
 
         cy.get('[data-cy=skillsNavigator-resetBtn]').click();
@@ -378,11 +377,21 @@ describe('Metrics Tests - Skills', () => {
             [{ colIndex: 0,  value: 'Very Great Skill # 12' }],
         ])
 
-        cy.get('[data-cy=skillsNavigator-skillNameFilter]').clear().type('1');
-        cy.get('[data-cy=skillsNavigator-filters]').contains('Overlooked Skill').click();
+        cy.get('[data-cy=skillsNavigator-skillNameFilter]')
+            .clear()
+            .type('3');
+        cy.get('[data-cy=skillsNavigator-filters]')
+            .contains('Overlooked Skill')
+            .click();
         cy.get('[data-cy=skillsNavigator-filterBtn]').click();
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'Very Great Skill # 17' }, { colIndex: 1,  value: 'Overlooked Skill' }],
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill # 3'
+            }, {
+                colIndex: 1,
+                value: 'Overlooked Skill'
+            }],
         ]);
 
     });
