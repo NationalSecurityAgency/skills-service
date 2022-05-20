@@ -78,6 +78,144 @@ class CatalogSkillTests extends CatalogIntSpec {
         res.data[0].numPerformToCompletion == skill.numPerformToCompletion
     }
 
+    def "catalog skill id already exist locally"() {
+        def project1 = createProject(1)
+        def subj1 = createSubject(1, 1)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 250)
+        def skillA = createSkill(1, 1, 2, 0, 1, 0, 250)
+        skillsService.createProjectAndSubjectAndSkills(project1, subj1, [skill, skillA])
+
+        def project2 = createProject(2)
+        def subj2 = createSubject(2, 1)
+        def skill2 = createSkill(2, 1, 1, 0, 1, 0, 250)
+        skill2.skillId = skill.skillId.toUpperCase()
+        skillsService.createProjectAndSubjectAndSkills(project2, subj2, [skill2])
+
+        when:
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skillA.skillId)
+        def res = skillsService.getCatalogSkills(project2.projectId, 5, 1).data.sort { it.skillId }
+        def resWithSearch = skillsService.getCatalogSkills(project2.projectId, 5, 1, "exportedOn", true, project1.name).data.sort { it.skillId }
+
+        then:
+        res.skillId == [skill.skillId, skillA.skillId]
+        res.skillIdAlreadyExist == [true, false]
+        res.skillNameAlreadyExist == [true, false]
+
+        resWithSearch.skillId == [skill.skillId, skillA.skillId]
+        resWithSearch.skillIdAlreadyExist == [true, false]
+        resWithSearch.skillNameAlreadyExist == [true, false]
+    }
+
+    def "catalog skill name already exist locally"() {
+        def project1 = createProject(1)
+        def subj1 = createSubject(1, 1)
+        def skill = createSkill(1, 1, 10, 0, 1, 0, 250)
+        def skillA = createSkill(1, 1, 11, 0, 1, 0, 250)
+        skillsService.createProjectAndSubjectAndSkills(project1, subj1, [skill, skillA])
+
+        def project2 = createProject(2)
+        def subj2 = createSubject(2, 1)
+        def skill2 = createSkill(2, 1, 1, 0, 1, 0, 250)
+        skill2.name = skill.name.toUpperCase()
+        skillsService.createProjectAndSubjectAndSkills(project2, subj2, [skill2])
+
+        when:
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skillA.skillId)
+        def res = skillsService.getCatalogSkills(project2.projectId, 5, 1).data.sort { it.skillId }
+        def resWithSearch = skillsService.getCatalogSkills(project2.projectId, 5, 1, "exportedOn", true, project1.name).data.sort { it.skillId }
+
+        then:
+        res.skillId == [skill.skillId, skillA.skillId]
+        res.skillIdAlreadyExist == [false, false]
+        res.skillNameAlreadyExist == [true, false]
+
+        resWithSearch.skillId == [skill.skillId, skillA.skillId]
+        resWithSearch.skillIdAlreadyExist == [false, false]
+        resWithSearch.skillNameAlreadyExist == [true, false]
+    }
+
+    def "catalog skill name and id already exist locally"() {
+        def project1 = createProject(1)
+        def subj1 = createSubject(1, 1)
+        def skill = createSkill(1, 1, 10, 0, 1, 0, 250)
+        def skillA = createSkill(1, 1, 11, 0, 1, 0, 250)
+        def skillB = createSkill(1, 1, 12, 0, 1, 0, 250)
+        def skillC = createSkill(1, 1, 13, 0, 1, 0, 250)
+        skillsService.createProjectAndSubjectAndSkills(project1, subj1, [skill, skillA, skillB, skillC])
+
+        def project2 = createProject(2)
+        def subj2 = createSubject(2, 1)
+        def skill2 = createSkill(2, 1, 1, 0, 1, 0, 250)
+        def skill3 = createSkill(2, 1, 2, 0, 1, 0, 250)
+        def skill4 = createSkill(2, 1, 3, 0, 1, 0, 250)
+        skill2.name = skill.name.toUpperCase()
+        skill3.skillId = skillA.skillId.toUpperCase()
+        skill4.skillId = skillB.skillId.toUpperCase()
+        skill4.name = skillB.name.toUpperCase()
+        skillsService.createProjectAndSubjectAndSkills(project2, subj2, [skill2, skill3, skill4])
+
+        when:
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skillA.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skillB.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skillC.skillId)
+        def res = skillsService.getCatalogSkills(project2.projectId, 5, 1).data.sort { it.skillId }
+        def resWithSearch = skillsService.getCatalogSkills(project2.projectId, 5, 1, "exportedOn", true, project1.name).data.sort { it.skillId }
+
+        then:
+        res.skillId == [skill.skillId, skillA.skillId, skillB.skillId, skillC.skillId]
+        res.skillIdAlreadyExist == [false, true, true, false]
+        res.skillNameAlreadyExist == [true, false, true, false]
+
+        resWithSearch.skillId == [skill.skillId, skillA.skillId, skillB.skillId, skillC.skillId]
+        res.skillIdAlreadyExist == [false, true, true, false]
+        resWithSearch.skillNameAlreadyExist == [true, false, true, false]
+    }
+
+    def "catalog skill name and id already exist locally within group skills"() {
+        def project1 = createProject(1)
+        def subj1 = createSubject(1, 1)
+        def skill = createSkill(1, 1, 10, 0, 1, 0, 250)
+        def skillA = createSkill(1, 1, 11, 0, 1, 0, 250)
+        def skillB = createSkill(1, 1, 12, 0, 1, 0, 250)
+        def skillC = createSkill(1, 1, 13, 0, 1, 0, 250)
+        skillsService.createProjectAndSubjectAndSkills(project1, subj1, [skill, skillA, skillB, skillC])
+
+        def project2 = createProject(2)
+        def subj2 = createSubject(2, 1)
+        def p2skillsGroup = SkillsFactory.createSkillsGroup(2, 1, 5)
+        skillsService.createProjectAndSubjectAndSkills(project2, subj2, [p2skillsGroup])
+        def skill2 = createSkill(2, 1, 1, 0, 1, 0, 250)
+        def skill3 = createSkill(2, 1, 2, 0, 1, 0, 250)
+        def skill4 = createSkill(2, 1, 3, 0, 1, 0, 250)
+        skill2.name = skill.name.toUpperCase()
+        skill3.skillId = skillA.skillId.toUpperCase()
+        skill4.skillId = skillB.skillId.toUpperCase()
+        skill4.name = skillB.name.toUpperCase()
+        skillsService.assignSkillToSkillsGroup(p2skillsGroup.skillId, skill2)
+        skillsService.assignSkillToSkillsGroup(p2skillsGroup.skillId, skill3)
+        skillsService.assignSkillToSkillsGroup(p2skillsGroup.skillId, skill4)
+
+        when:
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skillA.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skillB.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skillC.skillId)
+        def res = skillsService.getCatalogSkills(project2.projectId, 5, 1).data.sort { it.skillId }
+        def resWithSearch = skillsService.getCatalogSkills(project2.projectId, 5, 1, "exportedOn", true, project1.name).data.sort { it.skillId }
+
+        then:
+        res.skillId == [skill.skillId, skillA.skillId, skillB.skillId, skillC.skillId]
+        res.skillIdAlreadyExist == [false, true, true, false]
+        res.skillNameAlreadyExist == [true, false, true, false]
+
+        resWithSearch.skillId == [skill.skillId, skillA.skillId, skillB.skillId, skillC.skillId]
+        res.skillIdAlreadyExist == [false, true, true, false]
+        resWithSearch.skillNameAlreadyExist == [true, false, true, false]
+    }
+
     def "bulk export skills to catalog"() {
         def project1 = createProject(1)
         def project2 = createProject(2)

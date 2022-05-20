@@ -17,4 +17,6 @@ package skills.controller.result.model
 
 class CatalogSkillRes extends ProjectNameAwareSkillDefRes{
     Date exportedOn
+    Boolean skillIdAlreadyExist
+    Boolean skillNameAlreadyExist
 }

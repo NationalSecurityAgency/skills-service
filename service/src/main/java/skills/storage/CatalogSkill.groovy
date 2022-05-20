@@ -19,4 +19,8 @@ import skills.storage.model.SubjectAwareSkillDef
 
 interface CatalogSkill extends SubjectAwareSkillDef{
     Date getExportedOn()
+
+    Boolean getSkillIdAlreadyExist()
+
+    Boolean getSkillNameAlreadyExist()
 }

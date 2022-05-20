@@ -113,7 +113,7 @@ class SkillCatalogService {
         }
 
         res.total = exportedSkillRepo.countSkillsInCatalog(projectId)
-        def catalogSkills = exportedSkillRepo.getSkillsInCatalog(projectId, pageable)
+        List<skills.storage.CatalogSkill> catalogSkills = exportedSkillRepo.getSkillsInCatalog(projectId, pageable)
         res.results = catalogSkills?.collect {convert(it)}
         return res
     }
@@ -635,6 +635,8 @@ class SkillCatalogService {
         partial.subjectName = InputSanitizer.unsanitizeName(catalogSkill.subjectName)
         partial.projectName = InputSanitizer.unsanitizeName(catalogSkill.projectName)
         partial.exportedOn = catalogSkill.exportedOn
+        partial.skillIdAlreadyExist = catalogSkill.getSkillIdAlreadyExist()
+        partial.skillNameAlreadyExist = catalogSkill.getSkillNameAlreadyExist()
         partial.sharedToCatalog = true
         partial.name = InputSanitizer.unsanitizeName(partial.name)
         partial.numPerformToCompletion = catalogSkill.skill.totalPoints / catalogSkill.skill.pointIncrement

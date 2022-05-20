@@ -54,11 +54,15 @@ interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, In
                 subject.name as subjectName, 
                 subject.skillId as subjectId,
                 project.name as projectName,
-                es.created as exportedOn 
+                es.created as exportedOn,
+                case when localSkillOnId.skillId is not null then true else false end as skillIdAlreadyExist,
+                case when localSkillOnName.name is not null then true else false end as skillNameAlreadyExist  
         from ExportedSkill es
         join ProjDef project on project.projectId = es.projectId
         join SkillRelDef srd on srd.child = es.skill and srd.type in ('RuleSetDefinition', 'GroupSkillToSubject')
         join SkillDef subject on subject = srd.parent and subject.type = 'Subject'
+        left join SkillDef localSkillOnId on (lower(localSkillOnId.skillId) = lower(es.skill.skillId) and localSkillOnId.projectId = ?1)
+        left join SkillDef localSkillOnName on (lower(localSkillOnName.name) = lower(es.skill.name) and localSkillOnName.projectId = ?1)
         where 
              es.projectId <> ?1 and
              not exists (select 1 from SkillDef sd where sd.projectId = ?1 and sd.copiedFrom = es.skill.id)
@@ -83,11 +87,15 @@ interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, In
                 subject.name as subjectName, 
                 subject.skillId as subjectId,
                 project.name as projectName,
-                es.created as exportedOn 
+                es.created as exportedOn,
+                case when localSkillOnId.skillId is not null then true else false end as skillIdAlreadyExist,
+                case when localSkillOnName.name is not null then true else false end as skillNameAlreadyExist   
         from ExportedSkill es
         join ProjDef project on project.projectId = es.projectId
         join SkillRelDef srd on srd.child = es.skill and srd.type in ('RuleSetDefinition', 'GroupSkillToSubject')
         join SkillDef subject on subject = srd.parent and subject.type = 'Subject'
+        left join SkillDef localSkillOnId on (lower(localSkillOnId.skillId) = lower(es.skill.skillId) and localSkillOnId.projectId = :projectId)
+        left join SkillDef localSkillOnName on (lower(localSkillOnName.name) = lower(es.skill.name) and localSkillOnName.projectId = :projectId)
         where
             es.projectId <> :projectId and 
             not exists (select 1 from SkillDef sd where sd.projectId = :projectId and sd.copiedFrom = es.skill.id) and

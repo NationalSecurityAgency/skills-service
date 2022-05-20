@@ -14,12 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div v-if="skill.alreadyHasThisSkillId || skill.alreadyHasThisName" class="alert alert-warning"
+  <div v-if="skill.skillIdAlreadyExist || skill.skillNameAlreadyExist" class="alert alert-warning"
        :data-cy="`alreadyExistWarning_${skill.projectId}-${skill.skillId}`">
     <i class="fas fa-exclamation-triangle text-danger"></i> <span class="text-danger font-weight-bold mr-1"
                                                                   style="font-size: 1.1rem">Cannot import!</span>
     <b>{{ itemThatDoesNotExist }}</b> already
-    {{ this.skill.alreadyHasThisSkillId && this.skill.alreadyHasThisName ? 'exist' : 'exists' }} in this project!
+    {{ this.skill.skillIdAlreadyExist && this.skill.skillNameAlreadyExist ? 'exist' : 'exists' }} in this project!
   </div>
 </template>
 
@@ -31,11 +31,11 @@ limitations under the License.
     },
     computed: {
       itemThatDoesNotExist() {
-        if (this.skill.alreadyHasThisSkillId && this.skill.alreadyHasThisName) {
+        if (this.skill.skillIdAlreadyExist && this.skill.skillNameAlreadyExist) {
           return 'Skill ID and name';
         }
 
-        if (this.skill.alreadyHasThisSkillId) {
+        if (this.skill.skillIdAlreadyExist) {
           return 'Skill ID';
         }
 
