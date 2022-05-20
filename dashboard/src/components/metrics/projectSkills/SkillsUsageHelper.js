@@ -85,19 +85,23 @@ export default {
       return skills.map((item) => objWithDisabledTags(item));
     }
 
-    const sortedByNumAchieved = skills.map((item) => item.numUserAchieved).sort((a, b) => (a - b));
+    const sortedByNumAchieved = skills.map((item) => item.numUserAchieved)
+      .sort((a, b) => (a - b));
     const topSkill = findTopSkills(sortedByNumAchieved, numIn10Percent);
     const overlookedSkills = findOverlookedSkills(sortedByNumAchieved, numIn10Percent);
     const highActivitySkills = findHighActivitySkills(skills, numIn10Percent);
 
-    return skills.map((item) => ({
-      isTopSkillTag: (enabled && topSkill.enabled && topSkill.minNum <= item.numUserAchieved),
-      isNeverAchievedTag: !item.lastAchievedTimestamp,
-      isNeverReportedTag: !item.lastReportedTimestamp,
-      isOverlookedTag: enabled && overlookedSkills.enabled && item.numUserAchieved <= overlookedSkills.maxNum,
-      isHighActivityTag: enabled && highActivitySkills.enabled && (item.numUsersInProgress >= highActivitySkills.minNum),
-      ...item,
-    }));
+    return skills.map((item) => {
+      const isHighActivityTag = enabled && highActivitySkills.enabled && (item.numUsersInProgress >= highActivitySkills.minNum);
+      return ({
+        isTopSkillTag: (enabled && topSkill.enabled && topSkill.minNum <= item.numUserAchieved),
+        isNeverAchievedTag: !item.lastAchievedTimestamp,
+        isNeverReportedTag: !item.lastReportedTimestamp,
+        isOverlookedTag: enabled && overlookedSkills.enabled && item.numUserAchieved <= overlookedSkills.maxNum && !isHighActivityTag,
+        isHighActivityTag,
+        ...item,
+      });
+    });
   },
   shouldKeep(filters, item) {
     if (filters.name && !item.skillName.toLowerCase().includes(filters.name.toLowerCase())) {
