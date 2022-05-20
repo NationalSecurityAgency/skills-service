@@ -37,7 +37,7 @@ class ReportedSkillEventQueue implements Closeable {
     public static final String FILE_EXT = "jsonsequence"
     static final String BASE_NAME = "queued_skill_events"
 
-    @Value('#{"${skills.db-upgrade-in-progress:false}"}')
+    @Value('#{"${skills.config.db-upgrade-in-progress:false}"}')
     String dbUpgradeInProgress
 
     @Value('#{"${skills.queued-event-path:/tmp}"}')
