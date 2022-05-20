@@ -180,6 +180,8 @@ limitations under the License.
         .catch((err) => {
           if (err && err.response && err.response.data.errorCode === 'MaxSkillsThreshold') {
             this.msgOk(err.response.data.explanation, 'Maximum Skills Reached');
+          } else if (err?.response?.data?.errorCode === 'DbUpgradeInProgress') {
+            this.$router.push({ name: 'DbUpgradeInProgressPage' });
           } else {
             throw err;
           }

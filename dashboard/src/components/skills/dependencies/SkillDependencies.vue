@@ -200,6 +200,8 @@ limitations under the License.
               // force reactivity on children - copy the data trick
               // specifically so the select component removes failed item from its list
               this.skills = this.skills.map((entry) => entry);
+            } else if (e?.response?.data?.errorCode === 'DbUpgradeInProgress') {
+              this.$router.push({ name: 'DbUpgradeInProgressPage' });
             } else {
               const errorMessage = (e.response && e.response.data && e.response.data.message) ? e.response.data.message : undefined;
               this.$router.push({ name: 'ErrorPage', query: { errorMessage } });
