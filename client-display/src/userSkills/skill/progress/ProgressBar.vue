@@ -45,11 +45,7 @@ limitations under the License.
     },
     computed: {
       progress() {
-        let totalPts = Math.trunc((this.skill.points / this.skill.totalPoints) * 100);
-        // this can happen when project admin adjusts skill definition after the points were achieved.
-        if (totalPts > 100) {
-          totalPts = 100;
-        }
+        const totalPts = this.getTotalPoints();
         return {
           total: this.isLocked() && totalPts !== 100 ? 0 : totalPts,
           totalBeforeToday: ((this.skill.points - this.skill.todaysPoints) / this.skill.totalPoints) * 100,
@@ -58,6 +54,18 @@ limitations under the License.
       locked() {
         return this.isLocked();
       },
+      isSkillsGroupWithChildren() {
+        return this.skill?.isSkillsGroupType && this.skill?.children && this.skill?.children.length > 0;
+      },
+      numChildSkillsComplete() {
+        return this.isSkillsGroupWithChildren ? this.skill.children.filter((childSkill) => childSkill.meta.complete).length : 0;
+      },
+      numSkillsRequired() {
+        if (this.isSkillsGroupWithChildren) {
+          return this.skill.numSkillsRequired === -1 ? this.skill.children.length : this.skill.numSkillsRequired;
+        }
+        return 0;
+      },
     },
     methods: {
       progressBarClicked(skill) {
@@ -65,6 +73,19 @@ limitations under the License.
       },
       isLocked() {
         return this.skill.dependencyInfo && !this.skill.dependencyInfo.achieved;
+      },
+      getTotalPoints() {
+        let totalPts;
+        if (this.isSkillsGroupWithChildren) {
+          totalPts = Math.trunc((this.numChildSkillsComplete / this.numSkillsRequired) * 100);
+        } else {
+          totalPts = Math.trunc((this.skill.points / this.skill.totalPoints) * 100);
+        }
+        // this can happen when project admin adjusts skill definition after the points were achieved.
+        if (totalPts > 100) {
+          totalPts = 100;
+        }
+        return totalPts;
       },
     },
   };
