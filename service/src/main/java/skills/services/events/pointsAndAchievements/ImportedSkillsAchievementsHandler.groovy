@@ -24,9 +24,9 @@ import skills.services.LockingService
 import skills.services.RuleSetDefGraphService
 import skills.services.UserAchievementsAndPointsManagement
 import skills.services.events.AchievedBadgeHandler
+import skills.services.events.AchievedSkillsGroupHandler
 import skills.services.events.SkillDate
 import skills.services.events.SkillEventResult
-import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefMin
 import skills.storage.repos.SkillDefRepo
 
@@ -51,6 +51,9 @@ class ImportedSkillsAchievementsHandler {
     AchievedBadgeHandler achievedBadgeHandler
 
     @Autowired
+    AchievedSkillsGroupHandler achievedSkillsGroupHandler
+
+    @Autowired
     LockingService lockingService
 
     void handleAchievementsForImportedSkills(String userId, SkillDefMin skill, SkillDate incomingSkillDate, boolean thisRequestCompletedOriginalSkill) {
@@ -62,9 +65,10 @@ class ImportedSkillsAchievementsHandler {
         pointsAndAchievementsHandler.updatePointsAndAchievements(userId, skill, incomingSkillDate)
 
         if (thisRequestCompletedOriginalSkill) {
-            SkillEventResult mockResForBadgeCheck = new SkillEventResult()
-            pointsAndAchievementsHandler.documentSkillAchieved(userId, skill, mockResForBadgeCheck, incomingSkillDate)
-            achievedBadgeHandler.checkForBadges(mockResForBadgeCheck, userId, skill, incomingSkillDate)
+            SkillEventResult mockResForBadgeAndGroupCheck = new SkillEventResult()
+            pointsAndAchievementsHandler.documentSkillAchieved(userId, skill, mockResForBadgeAndGroupCheck, incomingSkillDate)
+            achievedBadgeHandler.checkForBadges(mockResForBadgeAndGroupCheck, userId, skill, incomingSkillDate)
+            achievedSkillsGroupHandler.checkForSkillsGroup(mockResForBadgeAndGroupCheck, userId, skill, incomingSkillDate)
         }
     }
 

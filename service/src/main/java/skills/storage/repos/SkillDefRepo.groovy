@@ -479,6 +479,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         s.startDate as startDate,
         s.endDate as endDate,
         s.enabled as enabled,
+        s.groupId as groupId,
         s.copiedFrom as copiedFrom,
         s.copiedFromProjectId as copiedFromProjectId,
         s.readOnly as readOnly

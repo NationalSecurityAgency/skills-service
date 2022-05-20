@@ -133,7 +133,7 @@ class SkillCatalogFinalizationService {
                 List<Integer> skillRefIds = disabledImportedSkills.collect { it.copiedFrom }
                 start = System.currentTimeMillis()
 
-                // 1. copy skill pints and achievements
+                // 1. copy skill points and achievements
                 log.info("Copying [{}] skills UserPoints to the imported project [{}]", skillRefIds.size(), projectId)
                 skillCatalogTransactionalAccessor.copySkillUserPointsToTheImportedProjects(projectId, skillRefIds)
                 log.info("Copying [{}] skills achievements to the imported project [{}]", skillRefIds.size(), projectId)
@@ -155,7 +155,7 @@ class SkillCatalogFinalizationService {
                     log.info("Completed import for subject. projectIdTo=[{}], subjectIdTo=[{}]", projectId, subject.skillId)
                 }
 
-                // 3. for the project (1) create user points for new users (2) update existing (3) caluclate achievements
+                // 3. for the project (1) create user points for new users (2) update existing (3) calculate achievements
                 log.info("Creating UserPoints for the new users for [{}] project", projectId)
                 skillCatalogTransactionalAccessor.createProjectUserPointsForTheNewUsers(projectId)
                 log.info("Updating UserPoints for the existing users for [{}] project", projectId)
