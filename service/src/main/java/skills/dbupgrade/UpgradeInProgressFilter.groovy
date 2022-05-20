@@ -94,6 +94,9 @@ class UpgradeInProgressFilter extends OncePerRequestFilter {
             SkillEventRequest skillEventRequest = readEventRequest(serverHttpRequest)
             queuedSkillEvent.skillEventRequest = skillEventRequest
             queuedSkillEvent.userId = userInfo.username
+            if (userInfo.userDn) {
+                queuedSkillEvent.userId = userInfo.userDn
+            }
             skillEventQueue.queueEvent(queuedSkillEvent)
             SkillEventResult eventResult = new SkillEventResult()
             eventResult.projectId = queuedSkillEvent.projectId
