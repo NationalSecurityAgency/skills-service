@@ -440,7 +440,7 @@ limitations under the License.
           return;
         }
 
-        this.$announcer.polite(`adding ${tag.display} criteria`);
+        this.$nextTick(() => this.$announcer.polite(`adding ${tag.display} criteria`));
         const addTagAndUpdate = () => {
           this.updateCount();
           this.tags.push(tag);
@@ -544,7 +544,7 @@ limitations under the License.
           console.error(`unrecognized user criteria type ${tag.type}`);
         }
         this.removeFromArray(this.tags, (el) => el === tag);
-        this.$announcer.polite(`${tag.display} criteria has been removed`);
+        this.$nextTick(() => this.$announcer.polite(`${tag.display} criteria has been removed`));
         this.updateCount();
       },
       removeFromArray(array, findCallback) {
@@ -556,7 +556,13 @@ limitations under the License.
       },
       updateCount() {
         ProjectService.countUsersMatchingCriteria(this.$route.params.projectId, this.criteria).then((count) => {
-          this.$announcer.polite(`There are ${count} Project Users matching your specified criteria`);
+          // give any previous announcements time to run
+          // THIS DOESN'T WORK RIGHT, add criteria details doesn't work with count update, may have to pick one or the other
+          this.$nextTick(() => {
+            this.$nextTick(() => {
+              this.$nextTick(() => this.$announcer.polite(`There are ${count} Project Users matching your specified criteria`));
+            });
+          });
           this.currentCount = count;
         });
       },
