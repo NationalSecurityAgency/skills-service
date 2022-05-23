@@ -119,16 +119,6 @@ class SkillsGroupAdminService {
             if (numSkillsRequired != -1 && numSkillsRequired < 0) {
                 throw new SkillException("Invalid number of skills required for Skill Group [${numSkillsRequired}].")
             }
-            boolean allSkillsRequired = numSkillsRequired == -1 || numSkillsRequired == numChildSkills
-            if (!allSkillsRequired) {
-                int testTotalPointsValue = groupChildSkills.first().totalPoints
-                int testPointIncrementValue = groupChildSkills.first().pointIncrement
-                // if only a subset of skills are required, then all skills must have the same total point value
-                boolean allTotalPointsEqual = groupChildSkills.every { it.totalPoints == testTotalPointsValue && it.pointIncrement == testPointIncrementValue }
-                if (!allTotalPointsEqual) {
-                    throw new SkillException("All skills that belong to the Skill Group must have the same total value when all skills are not required to be completed.")
-                }
-            }
         }
         return groupChildSkills
     }
