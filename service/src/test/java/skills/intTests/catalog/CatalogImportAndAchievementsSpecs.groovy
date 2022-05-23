@@ -27,7 +27,6 @@ import skills.storage.model.UserPerformedSkill
 import skills.storage.model.UserPoints
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
-import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -1380,6 +1379,47 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
 
         sum3.points == 220
         sum3.skills.find { it.skillId == skillsGroupId }.points == 220
+    }
+
+    def "achieve a skill group via a catalog import, skill has already been completed in exported project prior to import"() {
+        def project1 = createProjWithCatalogSkills(1)
+        def project2 = createProjWithCatalogSkills(2)
+
+        def randomUsers = getRandomUsers(3)
+        def user = randomUsers[0]
+
+        // achieve imported child skill
+        skillsService.addSkill([projectId: project1.p.projectId, skillId:project1.s1_skills[0].skillId], user, new Date() - 1)
+        def skill2CompletedRes = skillsService.addSkill([projectId: project1.p.projectId, skillId:project1.s1_skills[0].skillId], user)
+
+        def p2Group1 = createSkillsGroup(2, 1, 77)
+        String skillsGroupId = p2Group1.skillId
+        skillsService.createSkill(p2Group1)
+
+        // add an imported child skill to the group and finalize
+        skillsService.bulkImportSkillsIntoGroupFromCatalogAndFinalize(project2.p.projectId, project1.s2.subjectId, skillsGroupId,
+                [[projectId: project1.p.projectId, skillId: project1.s1_skills[0].skillId]])
+        String importedChildSkillId = project1.s1_skills[0].skillId
+
+
+        when:
+        List<UserAchievement> childSkillAchievements = achievedRepo.findAllByUserIdAndProjectIdAndSkillId(user, project2.p.projectId, importedChildSkillId)
+        List<UserAchievement> groupAchievements = achievedRepo.findAllByUserIdAndProjectIdAndSkillId(user, project2.p.projectId, skillsGroupId)
+
+        then:
+        skill2CompletedRes.body.completed.find { it.type == "Skill" && it.id == importedChildSkillId }
+
+        childSkillAchievements
+        childSkillAchievements.size() == 1
+        childSkillAchievements[0].userId == user
+        childSkillAchievements[0].projectId == project2.p.projectId
+        childSkillAchievements[0].skillId == importedChildSkillId
+
+        groupAchievements
+        groupAchievements.size() == 1
+        groupAchievements[0].userId == user
+        groupAchievements[0].projectId == project2.p.projectId
+        groupAchievements[0].skillId == skillsGroupId
     }
 
     def "achieve a badge via a catalog import"() {

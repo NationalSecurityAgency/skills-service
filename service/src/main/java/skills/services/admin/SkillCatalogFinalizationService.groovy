@@ -140,6 +140,10 @@ class SkillCatalogFinalizationService {
                 skillCatalogTransactionalAccessor.copySkillAchievementsToTheImportedProjects(projectId, skillRefIds)
                 log.info("Completed import of skill's points and achievements for [{}] skills to [{}] project", skillRefIds.size(), projectId)
 
+                log.info("Identifying group achievements for [{}] groups in project [{}]", groups.size(), projectId)
+                skillCatalogTransactionalAccessor.identifyAndAddGroupAchievements(groups)
+                log.info("Completed import of group achievements for [{}] groups in [{}] project", groups.size(), projectId)
+
                 SettingsResult settingsResult = settingsService.getProjectSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
                 boolean pointsBased = settingsResult ? settingsResult.isEnabled() : false
 

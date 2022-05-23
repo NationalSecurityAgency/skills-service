@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service
 import skills.services.RuleSetDefinitionScoreUpdater
 import skills.services.UserAchievementsAndPointsManagement
 import skills.storage.model.SkillDef
-import skills.storage.model.SkillRelDef
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPointsRepo
@@ -51,6 +50,9 @@ class SkillCatalogTransactionalAccessor {
 
     @Autowired
     RuleSetDefinitionScoreUpdater ruleSetDefinitionScoreUpdater
+
+    @Autowired
+    SkillsGroupAdminService skillsGroupAdminService
 
     @Transactional
     @Profile
@@ -102,6 +104,21 @@ class SkillCatalogTransactionalAccessor {
     @Profile
     void updateUserPointsForSubjectOrGroup(String projectId, String skillId) {
         nativeQueriesRepo.updateUserPointsForSubjectOrGroup(projectId, skillId, false)
+    }
+
+    @Transactional
+    @Profile
+    void identifyAndAddGroupAchievements(List<SkillDef> groups) {
+        groups.each { skillsGroupSkillDef ->
+            int numSkillsRequired = skillsGroupAdminService.getActualNumSkillsRequred(skillsGroupSkillDef.numSkillsRequired, skillsGroupSkillDef.id)
+            userAchievedLevelRepo.identifyAndAddGroupAchievements(
+                    skillsGroupSkillDef.projectId,
+                    skillsGroupSkillDef.skillId,
+                    skillsGroupSkillDef.id,
+                    numSkillsRequired,
+                    Boolean.FALSE.toString(),
+            )
+        }
     }
 
     @Transactional
