@@ -500,12 +500,24 @@ const router = new Router({
         name: 'EmailUsers',
         path: 'contact-users',
         component: EmailUsers,
-        meta: { requiresAuth: true, reportSkillId: 'VisitContactUsers' },
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitContactUsers',
+          announcer: {
+            message: 'Contact Project Users',
+          },
+        },
       }, {
         name: 'ProjectErrorsPage',
         path: 'issues',
         component: ProjectErrorsPage,
-        meta: { requiresAuth: true, reportSkillId: 'VisitProjectErrors' },
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitProjectErrors',
+          announcer: {
+            message: 'Project Errors',
+          },
+        },
       }, {
         path: '/administrator/projects/:projectId/metrics',
         component: MetricsPageNav,
@@ -514,22 +526,46 @@ const router = new Router({
           name: 'ProjectMetrics',
           path: '',
           component: ProjectMetrics,
-          meta: { requiresAuth: true, reportSkillId: 'VisitProjectStats' },
+          meta: {
+            requiresAuth: true,
+            reportSkillId: 'VisitProjectStats',
+            announcer: {
+              message: 'Project Metrics',
+            },
+          },
         }, {
           name: 'UsersAndLevelsMetrics',
           path: 'achievements',
           component: UsersAchievementsMetricPage,
-          meta: { requiresAuth: true, reportSkillId: 'VisitProjectUserAchievementMetrics' },
+          meta: {
+            requiresAuth: true,
+            reportSkillId: 'VisitProjectUserAchievementMetrics',
+            announcer: {
+              message: 'Project User And Level Metrics',
+            },
+          },
         }, {
           name: 'SubjectMetricsPage',
           path: 'subjects',
           component: SubjectMetricsPage,
-          meta: { requiresAuth: true, reportSkillId: 'VisitProjectSubjectMetrics' },
+          meta: {
+            requiresAuth: true,
+            reportSkillId: 'VisitProjectSubjectMetrics',
+            announcer: {
+              message: 'Project Subject Metrics',
+            },
+          },
         }, {
           name: 'SkillsMetricsPage',
           path: 'skills',
           component: SkillsMetricsPage,
-          meta: { requiresAuth: true, reportSkillId: 'VisitProjectSkillMetrics' },
+          meta: {
+            requiresAuth: true,
+            reportSkillId: 'VisitProjectSkillMetrics',
+            announcer: {
+              message: 'Project Skill Metrics',
+            },
+          },
         }],
       }],
     },
@@ -541,22 +577,46 @@ const router = new Router({
         name: 'SubjectSkills',
         path: '',
         component: Skills,
-        meta: { requiresAuth: true, reportSkillId: 'VisitSkillsForASubject' },
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitSkillsForASubject',
+          announcer: {
+            message: 'Subject Skills',
+          },
+        },
       }, {
         name: 'SubjectLevels',
         path: 'levels',
         component: Levels,
-        meta: { requiresAuth: true, reportSkillId: 'VisitSubjectLevels' },
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitSubjectLevels',
+          announcer: {
+            message: 'Subject Levels',
+          },
+        },
       }, {
         name: 'SubjectUsers',
         path: 'users',
         component: Users,
-        meta: { requiresAuth: true, reportSkillId: 'VisitSubjectUsers' },
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitSubjectUsers',
+          announcer: {
+            message: 'Subject Users',
+          },
+        },
       }, {
         name: 'SubjectMetrics',
         path: 'metrics',
         component: MetricsOnSubjectPage,
-        meta: { requiresAuth: true, reportSkillId: 'VisitSubjectMetrics' },
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitSubjectMetrics',
+          announcer: {
+            message: 'Subject Metrics',
+          },
+        },
       }],
     },
     {
@@ -567,12 +627,24 @@ const router = new Router({
         name: 'BadgeSkills',
         path: '',
         component: BadgeSkills,
-        meta: { requiresAuth: true, reportSkillId: 'VisitSingleBadgePage' },
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitSingleBadgePage',
+          announcer: {
+            message: 'Badge Skills',
+          },
+        },
       }, {
         name: 'BadgeUsers',
         path: 'users',
         component: Users,
-        meta: { requiresAuth: true, reportSkillId: 'VisitBadgeUsers' },
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitBadgeUsers',
+          announcer: {
+            message: 'Badge Users',
+          },
+        },
       }],
     },
     {
@@ -583,28 +655,58 @@ const router = new Router({
         name: 'SkillOverview',
         path: '',
         component: SkillOverview,
-        meta: { requiresAuth: true, reportSkillId: 'VisitSkillOverview' },
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitSkillOverview',
+          announcer: {
+            message: 'Skill Overview',
+          },
+        },
       }, {
         name: 'SkillDependencies',
         path: 'dependencies',
         component: SkillDependencies,
-        meta: { requiresAuth: true, reportSkillId: 'VisitSkillDependencies' },
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitSkillDependencies',
+          announcer: {
+            message: 'Skill Dependencies',
+          },
+        },
       }, {
         name: 'SkillUsers',
         path: 'users',
         component: Users,
-        meta: { requiresAuth: true, reportSkillId: 'VisitSkillUsers' },
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitSkillUsers',
+          announcer: {
+            message: 'Skill Users',
+          },
+        },
       }, {
         name: 'AddSkillEvent',
         path: 'addSkillEvent',
         component: AddSkillEvent,
-        meta: { requiresAuth: true, breadcrumb: 'Add Skill Event' },
+        meta: {
+          requiresAuth: true,
+          breadcrumb: 'Add Skill Event',
+          announcer: {
+            message: 'Add Skill Event',
+          },
+        },
         props: true,
       }, {
         name: 'SkillMetrics',
         path: 'metrics',
         component: SkillMetricsPage,
-        meta: { requiresAuth: true, reportSkillId: 'VisitSkillStats' },
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitSkillStats',
+          announcer: {
+            message: 'Skill Metrics',
+          },
+        },
       }],
     },
     {
@@ -615,12 +717,24 @@ const router = new Router({
         name: 'ClientDisplayPreview',
         path: '',
         component: ClientDisplayPreview,
-        meta: { requiresAuth: true, reportSkillId: 'VisitClientDisplay' },
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitClientDisplay',
+          announcer: {
+            message: 'Client Display Preview for user',
+          },
+        },
       }, {
         name: 'UserSkillEvents',
         path: 'skillEvents',
         component: UserSkillsPerformed,
-        meta: { requiresAuth: true, reportSkillId: 'VisitUserPerformedSkills' },
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitUserPerformedSkills',
+          announcer: {
+            message: 'User\'s Skill Events',
+          },
+        },
       }],
     },
     {
@@ -631,12 +745,24 @@ const router = new Router({
         name: 'ClientDisplayPreviewSubject',
         path: '',
         component: ClientDisplayPreview,
-        meta: { requiresAuth: true, reportSkillId: 'VisitClientDisplay' },
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitClientDisplay',
+          announcer: {
+            message: 'Client Display Preview for user',
+          },
+        },
       }, {
         name: 'UserSkillEventsSubject',
         path: 'skillEvents',
         component: UserSkillsPerformed,
-        meta: { requiresAuth: true, reportSkillId: 'VisitUserPerformedSkills' },
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitUserPerformedSkills',
+          announcer: {
+            message: 'User\'s Skill Events for Subject',
+          },
+        },
       }],
     },
     {
@@ -647,12 +773,24 @@ const router = new Router({
         name: 'ClientDisplayPreviewSkill',
         path: '',
         component: ClientDisplayPreview,
-        meta: { requiresAuth: true, reportSkillId: 'VisitClientDisplay' },
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitClientDisplay',
+          announcer: {
+            message: 'Client Display Preview for user',
+          },
+        },
       }, {
         name: 'UserSkillEventsSkill',
         path: 'skillEvents',
         component: UserSkillsPerformed,
-        meta: { requiresAuth: true, reportSkillId: 'VisitUserPerformedSkills' },
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitUserPerformedSkills',
+          announcer: {
+            message: 'User\'s Performed Skill Events',
+          },
+        },
       }],
     },
     {
@@ -663,12 +801,24 @@ const router = new Router({
         name: 'ClientDisplayPreviewBadge',
         path: '',
         component: ClientDisplayPreview,
-        meta: { requiresAuth: true, reportSkillId: 'VisitClientDisplay' },
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitClientDisplay',
+          announcer: {
+            message: 'User\'s Badge Client Display Preview',
+          },
+        },
       }, {
         name: 'UserSkillEventsBadge',
         path: 'skillEvents',
         component: UserSkillsPerformed,
-        meta: { requiresAuth: true, reportSkillId: 'VisitUserPerformedSkills' },
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitUserPerformedSkills',
+          announcer: {
+            message: 'User\'s Performed Skill EVents for Badge',
+          },
+        },
       }],
     },
     {
@@ -676,60 +826,123 @@ const router = new Router({
       component: GlobalSettings,
       meta: {
         requiresAuth: true,
+        announcer: {
+          message: 'Skill Tree Settings',
+        },
       },
       children: [{
         name: 'GeneralSettings',
         path: '',
         component: GeneralSettings,
-        meta: { requiresAuth: true, nonAdmin: true, reportSkillId: 'VisitUserSettings' },
+        meta: {
+          requiresAuth: true,
+          nonAdmin: true,
+          reportSkillId: 'VisitUserSettings',
+          announcer: {
+            message: 'General Settings',
+          },
+        },
       }, {
         name: 'Preferences',
         path: 'preferences',
         component: Preferences,
-        meta: { requiresAuth: true, nonAdmin: true, reportSkillId: 'VisitMyPreferences' },
+        meta: {
+          requiresAuth: true,
+          nonAdmin: true,
+          reportSkillId: 'VisitMyPreferences',
+          announcer: {
+            message: 'My Preferences',
+          },
+        },
       }, {
         name: 'SecuritySettings',
         path: 'security',
         component: SecuritySettings,
-        meta: { requiresAuth: true, nonAdmin: true },
+        meta: {
+          requiresAuth: true,
+          nonAdmin: true,
+          announcer: {
+            message: 'Security Settings',
+          },
+        },
       }, {
         name: 'EmailSettings',
         path: 'email',
         component: EmailSettings,
-        meta: { requiresAuth: true, nonAdmin: true },
+        meta: {
+          requiresAuth: true,
+          nonAdmin: true,
+          announcer: {
+            message: 'Email Configuration Settings',
+          },
+        },
       }, {
         name: 'SystemSettings',
         path: 'system',
         component: SystemSettings,
-        meta: { requiresAuth: true, nonAdmin: true },
+        meta: {
+          requiresAuth: true,
+          nonAdmin: true,
+          announcer: {
+            message: 'System Settings',
+          },
+        },
       }],
     },
     {
       path: '/markdown',
       name: 'MarkDownSupport',
       component: GFMDescription,
-      meta: { requiresAuth: true, reportSkillId: 'VisitMarkdownDocs' },
+      meta: {
+        requiresAuth: true,
+        reportSkillId: 'VisitMarkdownDocs',
+        announcer: {
+          message: 'Markdown Help Document',
+        },
+      },
     },
     {
       path: '/administrator/skills',
       name: 'InceptionSkills',
       component: InceptionSkills,
-      meta: { requiresAuth: true, breadcrumb: 'Dashboard Skills', reportSkillId: 'VisitDashboardSkills' },
+      meta: {
+        requiresAuth: true,
+        breadcrumb: 'Dashboard Skills',
+        reportSkillId: 'VisitDashboardSkills',
+        announcer: {
+          message: 'Dashboard Skills',
+        },
+      },
     },
     {
       path: '/administrator/globalBadges/:badgeId',
       component: GlobalBadgePage,
-      meta: { requiresAuth: true },
+      meta: {
+        requiresAuth: true,
+        announcer: {
+          message: 'Global Badge Overview',
+        },
+      },
       children: [{
         name: 'GlobalBadgeSkills',
         path: '',
         component: GlobalBadgeSkills,
-        meta: { requiresAuth: true },
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'Global Badge Skills',
+          },
+        },
       }, {
         name: 'GlobalBadgeLevels',
         path: 'levels',
         component: GlobalBadgeLevels,
-        meta: { requiresAuth: true },
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'Global Badge Levels',
+          },
+        },
       }],
     },
     {
@@ -738,7 +951,12 @@ const router = new Router({
       redirect: {
         name: 'NotFoundPage',
       },
-      meta: { requiresAuth: false },
+      meta: {
+        requiresAuth: false,
+        announcer: {
+          message: 'Page Not Found',
+        },
+      },
     },
   ],
 });
