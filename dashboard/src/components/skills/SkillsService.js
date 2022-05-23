@@ -57,8 +57,8 @@ export default {
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}/skills`)
       .then((response) => response.data);
   },
-  getProjectSkills(projectId, skillNameQuery = null) {
-    let params = '?includeDisabled=true';
+  getProjectSkills(projectId, skillNameQuery = null, includeDisabled = true) {
+    let params = `?includeDisabled=${includeDisabled}`;
     if (skillNameQuery) {
       params = `${params}&skillNameQuery=${encodeURIComponent(skillNameQuery)}`;
     }
