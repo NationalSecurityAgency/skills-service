@@ -337,7 +337,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         exception.message.contains("A Skill Group must have at least 1 required skill.")
     }
 
-    void "a SkillsGroup when not all skills are required, and not all have the same # of points is not allowed" () {
+    void "a SkillsGroup when not all skills are required, and not all have the same # of points is allowed" () {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(2)
@@ -357,13 +357,46 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         when:
         skillsGroup.numSkillsRequired = skills.size()-1
         skillsService.updateSkill(skillsGroup, null)
+        def res = skillsService.getSkill(skillsGroup)
+        def groupSkills = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
+        groupSkills.sort() { it.skillId }
 
         then:
-        def exception = thrown(SkillsClientException)
-        exception.message.contains("All skills that belong to the Skill Group must have the same total value when all skills are not required to be completed.")
+        res
+        res.skillId == skillsGroup.skillId
+        res.name == skillsGroup.name
+        res.type == skillsGroup.type
+        res.numSkillsInGroup == groupSkills.size()
+        res.numSelfReportSkills == 0
+        res.numSkillsRequired == skills.size()-1
+        res.enabled == true
+        res.totalPoints == groupSkills[0].totalPoints + groupSkills[1].totalPoints + groupSkills[2].totalPoints
+
+        groupSkills.size() == 3
+
+        groupSkills.get(0).skillId == skills.get(0).skillId
+        groupSkills.get(0).projectId == proj.projectId
+        groupSkills.get(0).name == skills.get(0).name
+        groupSkills.get(0).version == skills.get(0).version
+        groupSkills.get(0).displayOrder == 1
+        groupSkills.get(0).totalPoints == skills.get(0).pointIncrement * skills.get(0).numPerformToCompletion
+
+        groupSkills.get(1).skillId == skills.get(1).skillId
+        groupSkills.get(1).projectId == proj.projectId
+        groupSkills.get(1).name == skills.get(1).name
+        groupSkills.get(1).version == skills.get(1).version
+        groupSkills.get(1).displayOrder == 2
+        groupSkills.get(1).totalPoints == skills.get(1).pointIncrement * skills.get(1).numPerformToCompletion
+
+        groupSkills.get(2).skillId == skills.get(2).skillId
+        groupSkills.get(2).projectId == proj.projectId
+        groupSkills.get(2).name == skills.get(2).name
+        groupSkills.get(2).version == skills.get(2).version
+        groupSkills.get(2).displayOrder == 3
+        groupSkills.get(2).totalPoints == 100 * skills.get(2).numPerformToCompletion
     }
 
-    void "cannot update a SkillsGroup to have a different # of points when not all skills are required" () {
+    void "can update a SkillsGroup to have a different # of points when not all skills are required" () {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(3)
@@ -385,12 +418,46 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         skill3WithDiffNumPoints.pointIncrement = 100
         skillsService.updateSkill(skill3WithDiffNumPoints, null)
 
+        def res = skillsService.getSkill(skillsGroup)
+        def groupSkills = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
+        groupSkills.sort() { it.skillId }
+
         then:
-        def exception = thrown(SkillsClientException)
-        exception.message.contains("All skills that belong to the Skill Group must have the same total value when all skills are not required to be completed.")
+        res
+        res.skillId == skillsGroup.skillId
+        res.name == skillsGroup.name
+        res.type == skillsGroup.type
+        res.numSkillsInGroup == groupSkills.size()
+        res.numSelfReportSkills == 0
+        res.numSkillsRequired == skills.size()-1
+        res.enabled == true
+        res.totalPoints == groupSkills[0].totalPoints + groupSkills[1].totalPoints + groupSkills[2].totalPoints
+
+        groupSkills.size() == 3
+
+        groupSkills.get(0).skillId == skills.get(0).skillId
+        groupSkills.get(0).projectId == proj.projectId
+        groupSkills.get(0).name == skills.get(0).name
+        groupSkills.get(0).version == skills.get(0).version
+        groupSkills.get(0).displayOrder == 1
+        groupSkills.get(0).totalPoints == skills.get(0).pointIncrement * skills.get(0).numPerformToCompletion
+
+        groupSkills.get(1).skillId == skills.get(1).skillId
+        groupSkills.get(1).projectId == proj.projectId
+        groupSkills.get(1).name == skills.get(1).name
+        groupSkills.get(1).version == skills.get(1).version
+        groupSkills.get(1).displayOrder == 2
+        groupSkills.get(1).totalPoints == skills.get(1).pointIncrement * skills.get(1).numPerformToCompletion
+
+        groupSkills.get(2).skillId == skills.get(2).skillId
+        groupSkills.get(2).projectId == proj.projectId
+        groupSkills.get(2).name == skills.get(2).name
+        groupSkills.get(2).version == skills.get(2).version
+        groupSkills.get(2).displayOrder == 3
+        groupSkills.get(2).totalPoints == 100 * skills.get(2).numPerformToCompletion
     }
 
-    void "cannot update a child skill's points to a value different than the other child skills when not all skills are required" () {
+    void "can update a child skill's points to a value different than the other child skills when not all skills are required" () {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(3)
@@ -407,17 +474,47 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         when:
         skillsGroup.numSkillsRequired = skills.size() - 1
         skillsService.updateSkill(skillsGroup, null)
-        def res = skillsService.getSkill(skillsGroup)
-        def groupSkills = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
-        groupSkills.sort() { it.skillId }
 
         def skillWithDifferentPoints = skills.first()
         skillWithDifferentPoints.pointIncrement = 321
         skillsService.updateSkill(skillWithDifferentPoints, null)
+        def res = skillsService.getSkill(skillsGroup)
+        def groupSkills = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
+        groupSkills.sort() { it.skillId }
 
         then:
-        def exception = thrown(SkillsClientException)
-        exception.message.contains("All skills that belong to the Skill Group must have the same total value when all skills are not required to be completed.")
+        res
+        res.skillId == skillsGroup.skillId
+        res.name == skillsGroup.name
+        res.type == skillsGroup.type
+        res.numSkillsInGroup == groupSkills.size()
+        res.numSelfReportSkills == 0
+        res.numSkillsRequired == skills.size()-1
+        res.enabled == true
+        res.totalPoints == groupSkills[0].totalPoints + groupSkills[1].totalPoints + groupSkills[2].totalPoints
+
+        groupSkills.size() == 3
+
+        groupSkills.get(0).skillId == skills.get(0).skillId
+        groupSkills.get(0).projectId == proj.projectId
+        groupSkills.get(0).name == skills.get(0).name
+        groupSkills.get(0).version == skills.get(0).version
+        groupSkills.get(0).displayOrder == 1
+        groupSkills.get(0).totalPoints == 321 * skills.get(0).numPerformToCompletion
+
+        groupSkills.get(1).skillId == skills.get(1).skillId
+        groupSkills.get(1).projectId == proj.projectId
+        groupSkills.get(1).name == skills.get(1).name
+        groupSkills.get(1).version == skills.get(1).version
+        groupSkills.get(1).displayOrder == 2
+        groupSkills.get(1).totalPoints == skills.get(1).pointIncrement * skills.get(1).numPerformToCompletion
+
+        groupSkills.get(2).skillId == skills.get(2).skillId
+        groupSkills.get(2).projectId == proj.projectId
+        groupSkills.get(2).name == skills.get(2).name
+        groupSkills.get(2).version == skills.get(2).version
+        groupSkills.get(2).displayOrder == 3
+        groupSkills.get(2).totalPoints == skills.get(2).pointIncrement * skills.get(2).numPerformToCompletion
     }
 
     void "a SkillsGroup when all skills are required, and not all skills have the same # of points" () {
