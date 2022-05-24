@@ -115,7 +115,7 @@ class SubjectDataLoader {
                     skillDef: it[0] as SkillDef, points: userPoints, copiedFromProjectName: it.length > 2 ? (String)it[2] : null
             )
         }
-        return res?.sort { it.skillDef.displayOrder }
+        return res?.findAll {it.skillDef.type != SkillDef.ContainerType.SkillsGroup || it.skillDef.totalPoints > 0 }.sort { it.skillDef.displayOrder }
     }
 
     @Profile
