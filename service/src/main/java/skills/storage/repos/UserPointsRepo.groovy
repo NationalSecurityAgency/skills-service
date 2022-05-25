@@ -537,7 +537,9 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             SELECT upa.user_id, 
             max(upa.performed_on) AS performedOn 
             FROM user_performed_skill upa 
-            WHERE upa.skill_ref_id in (select s_s.id from subj_skills s_s)
+            WHERE upa.skill_ref_id in (
+                select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id from skill_definition where type = 'Skill' and project_id = :projectId and exists (select 1 from subj_skills s_s where s_s.id = id)
+            )
             GROUP BY upa.user_id
         ) upa ON upa.user_id = up.user_id
         JOIN user_attrs ua ON ua.user_id=up.user_id
