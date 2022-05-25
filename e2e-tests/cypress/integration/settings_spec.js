@@ -298,9 +298,9 @@ describe('Settings Tests', () => {
         cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
-         cy.get('[data-cy="settings-button"]').click();
-        cy.contains('Settings').click();
-        cy.contains('Email').click();
+        cy.get('[data-cy="settings-button"]').click();
+        cy.get('[data-cy="settingsButton-navToSettings"]').click();
+        cy.get('[data-cy="nav-Email"]').click();
         cy.wait('@loadEmailSettings');
         cy.get$('[data-cy=hostInput]').type('hi')
         cy.get$('[data-cy=hostInput]').clear();
@@ -330,7 +330,7 @@ describe('Settings Tests', () => {
         cy.get$('[data-cy=emailSettingsTest]').click();
         cy.get$('[data-cy=emailSettingsSave]').click();
         //verify that appropriate saved data is loaded when form is loaded again
-        cy.contains('System').click();
+        cy.get('[data-cy="nav-System"]').click();
         cy.visit('/settings/email');
         cy.wait('@loadEmailSettings');
         cy.get('[data-cy=hostInput]').should('have.value', 'localhost');
@@ -349,8 +349,8 @@ describe('Settings Tests', () => {
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
          cy.get('[data-cy="settings-button"]').click();
-        cy.contains('Settings').click();
-        cy.contains('Email').click();
+        cy.get('[data-cy="settingsButton-navToSettings"]').click();
+        cy.get('[data-cy="nav-Email"]').click();
         cy.wait('@loadEmailSettings');
         cy.get$('[data-cy=hostInput]').type('{selectall}localhost');
         //this needs to be an open port that is NOT an smtp server for the purposes of this test
@@ -370,8 +370,8 @@ describe('Settings Tests', () => {
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
          cy.get('[data-cy="settings-button"]').click();
-        cy.contains('Settings').click();
-        cy.contains('System').click();
+        cy.get('[data-cy="settingsButton-navToSettings"]').click();
+        cy.get('[data-cy="nav-System"]').click();
 
         cy.wait('@loadSystemSettings');
         cy.get('[data-cy=resetTokenExpiration]').should('have.value', '2H');
@@ -411,8 +411,8 @@ describe('Settings Tests', () => {
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
          cy.get('[data-cy="settings-button"]').click();
-        cy.contains('Settings').click();
-        cy.contains('System').click();
+        cy.get('[data-cy="settingsButton-navToSettings"]').click();
+        cy.get('[data-cy="nav-System"]').click();;
 
         cy.wait('@loadSystemSettings');
         cy.get('[data-cy=resetTokenExpiration]').should('have.value', '2H');
@@ -439,8 +439,8 @@ describe('Settings Tests', () => {
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
          cy.get('[data-cy="settings-button"]').click();
-        cy.contains('Settings').click();
-        cy.contains('System').click();
+        cy.get('[data-cy="settingsButton-navToSettings"]').click();
+        cy.get('[data-cy="nav-System"]').click();
 
         cy.wait('@loadSystemSettings');
         cy.get('[data-cy=resetTokenExpiration]').should('have.value', '2H');
@@ -469,8 +469,8 @@ describe('Settings Tests', () => {
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
          cy.get('[data-cy="settings-button"]').click();
-        cy.contains('Settings').click();
-        cy.contains('System').click();
+        cy.get('[data-cy="settingsButton-navToSettings"]').click();
+        cy.get('[data-cy="nav-System"]').click();
 
         cy.wait('@loadSystemSettings');
         cy.get('[data-cy=publicUrl]').type('{selectall}http://localhost');
@@ -497,8 +497,8 @@ describe('Settings Tests', () => {
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
          cy.get('[data-cy="settings-button"]').click();
-        cy.contains('Settings').click();
-        cy.contains('System').click();
+        cy.get('[data-cy="settingsButton-navToSettings"]').click();
+        cy.get('[data-cy="nav-System"]').click();
 
         cy.wait('@loadSystemSettings');
         cy.get$('[data-cy=publicUrl]').type('{selectall}http://localhost:8082');
@@ -545,8 +545,8 @@ describe('Settings Tests', () => {
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
          cy.get('[data-cy="settings-button"]').click();
-        cy.contains('Settings').click();
-        cy.contains('System').click();
+        cy.get('[data-cy="settingsButton-navToSettings"]').click();
+        cy.get('[data-cy="nav-System"]').click();;
 
         cy.wait('@loadSystemSettings');
         cy.get$('[data-cy=publicUrl]').type('{selectall}http://localhost:8082');
@@ -737,7 +737,7 @@ describe('Settings Tests', () => {
         cy.visit('/');
 
         cy.navToSettings();
-        cy.contains('Email').click();
+        cy.get('[data-cy="nav-Email"]').click();
         cy.wait('@loadTemplateSettings');
 
         cy.get('[data-cy=htmlEmailHeader]').click().type("aaaaa");
@@ -783,8 +783,8 @@ describe('Settings Tests', () => {
         cy.get('[data-cy=emailTemplateSettingsSave]').should('be.enabled');
 
         cy.get('[data-cy=emailTemplateSettingsSave]').click();
-        cy.contains('Security').click();
-        cy.contains('Email').click();
+        cy.get('[data-cy="nav-Security"]').click();
+        cy.get('[data-cy="nav-Email"]').click();
         cy.wait('@loadTemplateSettings');
         cy.get('[data-cy=htmlEmailHeader]').should('have.value', 'aaaaa');
         cy.get('[data-cy=plaintextEmailHeader]').should('have.value','aaaa');
