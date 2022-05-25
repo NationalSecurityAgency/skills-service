@@ -439,11 +439,9 @@ limitations under the License.
           setTimeout(() => { this.alreadyApplied = false; }, 2000);
           return;
         }
-        // TODO: this isn't working, it's not being announced but the updated count IS being announced
-        this.$nextTick(() => this.$announcer.assertive(`adding criteria ${tag.display}`));
 
         const addTagAndUpdate = () => {
-          this.updateCount();
+          this.updateCount(tag);
           this.tags.push(tag);
           this.resetSelections();
         };
@@ -555,9 +553,13 @@ limitations under the License.
           array.splice(idx, 1);
         }
       },
-      updateCount() {
+      updateCount(latestTag) {
         ProjectService.countUsersMatchingCriteria(this.$route.params.projectId, this.criteria).then((count) => {
-          setTimeout(() => this.$announcer.polite(`There are ${count} Project Users matching your specified criteria`), 1000);
+          let msg = `There are ${count} Project Users matching your specified criteria`;
+          if (latestTag) {
+            msg = `Added criteria ${latestTag.display}, there are ${count} matching Project Users`;
+          }
+          setTimeout(() => this.$announcer.polite(msg), 750);
           this.currentCount = count;
         });
       },
