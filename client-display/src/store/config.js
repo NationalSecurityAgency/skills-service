@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import axios from 'axios';
+import Vue from 'vue';
 
 const getters = {
   config(state) {
@@ -27,6 +28,9 @@ const getters = {
 const mutations = {
   setConfig(state, value) {
     state.config = value;
+  },
+  setDbUpgradeInProgress(state, value) {
+    Vue.set(state.config, 'dbUpgradeInProgress', value);
   },
 };
 
@@ -42,6 +46,11 @@ const actions = {
         resolve(result.data);
       }).catch((error) => reject(error));
     });
+  },
+  updateDbUpgradeInProgressIfDifferent({ commit, state }, incomingValue) {
+    if (state.config && (state.config.dbUpgradeInProgress === undefined || state.config.dbUpgradeInProgress !== incomingValue)) {
+      commit('setDbUpgradeInProgress', incomingValue);
+    }
   },
 };
 

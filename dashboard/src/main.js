@@ -127,6 +127,7 @@ window.axios = require('axios');
 require('./interceptors/errorHandler');
 require('./interceptors/clientVersionInterceptor');
 require('./interceptors/userAgreementInterceptor');
+require('./interceptors/upgradeInProgressInterceptor');
 require('vue-multiselect/dist/vue-multiselect.min.css');
 
 const isActiveProjectIdChange = (to, from) => to.params.projectId !== from.params.projectId;
