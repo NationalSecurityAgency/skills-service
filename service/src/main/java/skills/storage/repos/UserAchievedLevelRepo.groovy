@@ -170,6 +170,14 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
       sdParent.projectId=?2 and sdParent.skillId=?3 and srd.type=?4''')
     int countAchievedChildren(String userId, @Nullable String projectId, String skillId, SkillRelDef.RelationshipType type)
 
+    @Query('''select sum(ua.pointsWhenAchieved) 
+    from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild, UserAchievement ua
+      where 
+      srd.parent=sdParent.id and  srd.child=sdChild.id and
+      sdChild.projectId = ua.projectId and sdChild.skillId = ua.skillId and ua.userId=?1 and 
+      sdParent.projectId=?2 and sdParent.skillId=?3 and srd.type=?4''')
+    int sumAchievedChildrenPoints(String userId, @Nullable String projectId, String skillId, SkillRelDef.RelationshipType type)
+
 
     @Query('''select count(ua) 
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild, UserAchievement ua
@@ -293,6 +301,29 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
                                                                                   @Param('numSkillsRequired') int numSkillsRequired,
                                                                                   @Param('notified') String notified)
 
+    @Query(value = '''INSERT INTO user_achievement(user_id, project_id, skill_id, skill_ref_id, points_when_achieved, notified)
+            SELECT achievementsByUserId.user_id, :projectId, :groupSkillId, :groupSkillRefId, -1, :notified
+            FROM (
+                SELECT user_id, count(id) achievementCount
+                FROM user_achievement
+                WHERE
+                      skill_id IN (select sd.skill_id
+                                    from skill_relationship_definition srd, skill_definition sd
+                                    where srd.parent_ref_id = :groupSkillRefId and sd.id = srd.child_ref_id and srd.type='SkillsGroupRequirement') and
+                      project_id = :projectId
+                GROUP BY user_id
+                ) achievementsByUserId
+            WHERE
+                  achievementsByUserId.achievementCount >= :numSkillsRequired and
+                NOT EXISTS (
+                        SELECT id FROM user_achievement WHERE project_id = :projectId and skill_id = :groupSkillId and user_id = achievementsByUserId.user_id
+                    )''', nativeQuery = true)
+    @Modifying
+    void identifyAndAddGroupAchievements(@Param('projectId') String projectId,
+                                         @Param('groupSkillId') String groupSkillId,
+                                         @Param('groupSkillRefId') Integer groupSkillRefId,
+                                         @Param('numSkillsRequired') int numSkillsRequired,
+                                         @Param('notified') String notified)
 
     @Modifying
     @Query(value = '''

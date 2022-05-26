@@ -43,8 +43,6 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
             skill.pointIncrement = 100
             skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
         }
-        skillsGroup.enabled = 'true'
-        skillsService.updateSkill(skillsGroup, null)
 
         when:
         String userId = 'user1'
@@ -98,7 +96,6 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
             skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
         }
         skillsGroup.numSkillsRequired = 1
-        skillsGroup.enabled = 'true'
         skillsService.updateSkill(skillsGroup, null)
 
         when:
@@ -118,15 +115,16 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
         groupAchievements[0].userId == userId
         groupAchievements[0].projectId == projectId
         groupAchievements[0].skillId == skillsGroupId
+        groupAchievements[0].pointsWhenAchieved == groupChildren.first().pointIncrement * groupChildren.first().numPerformToCompletion
 
         subjectSummary
         subjectSummary.skills
         subjectSummary.skills.size() == 1
         subjectSummary.skills[0].skillId == skillsGroupId
         subjectSummary.skills[0].points == 100
-        subjectSummary.skills[0].totalPoints == 100
+        subjectSummary.skills[0].totalPoints == 100 * groupChildren.size()
         subjectSummary.skills[0].children
-        subjectSummary.skills[0].children.size() == 2
+        subjectSummary.skills[0].children.size() == groupChildren.size()
         subjectSummary.skills[0].children.find { it.skillId = skillId }
         subjectSummary.skills[0].children.find { it.skillId = skillId }.points == 100
         subjectSummary.skills[0].children.find { it.skillId = skillId }.totalPoints == 100
@@ -148,8 +146,6 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
             skill.pointIncrement = 100
             skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
         }
-        skillsGroup.enabled = 'true'
-        skillsService.updateSkill(skillsGroup, null)
 
         when:
         String userId = 'user1'
@@ -158,6 +154,8 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
         String subjectId = subj.subjectId
 
         def res = skillsService.addSkill([projectId: projectId, skillId: skillId], userId, new Date())
+
+        List<UserAchievement> groupAchievementsBefore = achievedRepo.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, skillsGroupId)
 
         skillsGroup.numSkillsRequired = 1
         skillsService.updateSkill(skillsGroup, null)
@@ -168,6 +166,9 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
         List<UserAchievement> groupAchievements = achievedRepo.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, skillsGroupId)
 
         then:
+        !groupAchievementsBefore
+        groupAchievementsBefore.size() == 0
+
         groupAchievements
         groupAchievements.size() == 1
         groupAchievements[0].userId == userId
@@ -179,15 +180,16 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
         subjectSummary.skills.size() == 1
         subjectSummary.skills[0].skillId == skillsGroupId
         subjectSummary.skills[0].points == 100
-        subjectSummary.skills[0].totalPoints == 100
+        subjectSummary.skills[0].totalPoints == 100 * groupChildren.size()
         subjectSummary.skills[0].children
-        subjectSummary.skills[0].children.size() == 2
+        subjectSummary.skills[0].children.size() == groupChildren.size()
         subjectSummary.skills[0].children.find { it.skillId = skillId }
         subjectSummary.skills[0].children.find { it.skillId = skillId }.points == 100
         subjectSummary.skills[0].children.find { it.skillId = skillId }.totalPoints == 100
     }
 
     def "cannot achieve child skills if group is not enabled"() {
+        // NOTE: this test is likely OBE as of v1.10.X and can likely be removed
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def allSkills = SkillsFactory.createSkills(3)
@@ -196,6 +198,7 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
 
         def skillsGroup = allSkills[0]
         skillsGroup.type = 'SkillsGroup'
+        skillsGroup.enabled = false
         skillsService.createSkill(skillsGroup)
         String skillsGroupId = skillsGroup.skillId
         def groupChildren = allSkills[1..2]
@@ -232,8 +235,6 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
             skill.pointIncrement = 100
             skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
         }
-        skillsGroup.enabled = 'true'
-        skillsService.updateSkill(skillsGroup, null)
 
         when:
         String userId = 'user1'
@@ -242,6 +243,8 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
 
         def res1 = skillsService.addSkill([projectId: projectId, skillId: groupChildren[0].skillId], userId, new Date())
         def res2 = skillsService.addSkill([projectId: projectId, skillId: groupChildren[1].skillId], userId, new Date())
+
+        List<UserAchievement> groupAchievementsBefore = achievedRepo.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, skillsGroupId)
 
         skillsService.deleteSkill(groupChildren[2])
 
@@ -253,6 +256,9 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
         List<UserAchievement> groupAchievements = achievedRepo.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, skillsGroupId)
 
         then:
+        !groupAchievementsBefore
+        groupAchievementsBefore.size() == 0
+
         groupAchievements
         groupAchievements.size() == 1
         groupAchievements[0].userId == userId
@@ -291,8 +297,6 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
             skill.pointIncrement = 100
             skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
         }
-        skillsGroup.enabled = 'true'
-        skillsService.updateSkill(skillsGroup, null)
 
         when:
         String userId = 'user1'
@@ -400,8 +404,6 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
             skill.pointIncrement = 100
             skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
         }
-        skillsGroup.enabled = 'true'
-        skillsService.updateSkill(skillsGroup, null)
 
         when:
         String userId = 'user1'
@@ -416,6 +418,7 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
                 assert res.body.completed.find { it.id == skill.skillId }
             }
         }
+        List<UserAchievement> groupAchievementsBefore = achievedRepo.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, skillsGroupId)
 
         groupChildren[1].numPerformToCompletion = 1
         skillsService.updateSkill(groupChildren[1], null)
@@ -424,6 +427,9 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
         List<UserAchievement> groupAchievements = achievedRepo.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, skillsGroupId)
 
         then:
+        !groupAchievementsBefore
+        groupAchievementsBefore.size() == 0
+
         groupAchievements
         groupAchievements.size() == 1
         groupAchievements[0].userId == userId
@@ -463,7 +469,6 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
             skill.numPerformToCompletion = 2
             skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
         }
-        skillsGroup.enabled = 'true'
         skillsGroup.numSkillsRequired = 1
         skillsService.updateSkill(skillsGroup, null)
 
@@ -476,12 +481,19 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
         assert res.body.skillApplied
         assert !res.body.completed.find { it.id == skill.skillId }
 
-        skillsService.syncPointsForSkillsGroup(projectId, subjectId, skillsGroupId, [pointIncrement: 100, numPerformToCompletion: 1])
+        List<UserAchievement> groupAchievementsBefore = achievedRepo.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, skillsGroupId)
+
+        int newPointIncrement = 100
+        int newNumPerformToCompletion = 1
+        skillsService.syncPointsForSkillsGroup(projectId, subjectId, skillsGroupId, [pointIncrement: newPointIncrement, numPerformToCompletion: newNumPerformToCompletion])
 
         def subjectSummary = skillsService.getSkillSummary(userId, projectId, subjectId)
         List<UserAchievement> groupAchievements = achievedRepo.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, skillsGroupId)
 
         then:
+        !groupAchievementsBefore
+        groupAchievementsBefore.size() == 0
+
         groupAchievements
         groupAchievements.size() == 1
         groupAchievements[0].userId == userId
@@ -493,7 +505,7 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
         subjectSummary.skills.size() == 1
         subjectSummary.skills[0].skillId == skillsGroupId
         subjectSummary.skills[0].points == 100
-        subjectSummary.skills[0].totalPoints == 100
+        subjectSummary.skills[0].totalPoints == newPointIncrement * newNumPerformToCompletion * groupChildren.size()
         subjectSummary.skills[0].children
         subjectSummary.skills[0].children.size() == 2
         subjectSummary.skills[0].children.find { it.skillId == groupChildren[0].skillId }
@@ -521,7 +533,6 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
             skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
         }
         skillsGroup.numSkillsRequired = 1
-        skillsGroup.enabled = 'true'
         skillsService.updateSkill(skillsGroup, null)
 
         when:
@@ -549,9 +560,9 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
         subjectSummary.skills.size() == 1
         subjectSummary.skills[0].skillId == skillsGroupId
         subjectSummary.skills[0].points == 100
-        subjectSummary.skills[0].totalPoints == 100
+        subjectSummary.skills[0].totalPoints == groupChildren[0].pointIncrement * groupChildren[0].numPerformToCompletion * groupChildren.size()
         subjectSummary.skills[0].children
-        subjectSummary.skills[0].children.size() == 2
+        subjectSummary.skills[0].children.size() == groupChildren.size()
         subjectSummary.skills[0].children.find { it.skillId = groupChildren[0].skillId }
         subjectSummary.skills[0].children.find { it.skillId = groupChildren[0].skillId }.points == 100
         subjectSummary.skills[0].children.find { it.skillId = groupChildren[0].skillId }.totalPoints == 100

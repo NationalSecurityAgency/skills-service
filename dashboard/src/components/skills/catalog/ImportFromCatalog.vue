@@ -112,7 +112,7 @@ limitations under the License.
                 :skill-name="data.item.name"
                 :skill-id="data.item.skillId"
                 :project-id="data.item.projectId"
-                :disabled="data.item.alreadyHasThisSkillId || data.item.alreadyHasThisName"
+                :disabled="data.item.skillIdAlreadyExist || data.item.skillNameAlreadyExist"
                 :selected="isSelected(data.item)"
                 @importSelection="handleImportSelection($event, data.item)"
                 @input="updateActionsDisableStatus"
@@ -344,12 +344,6 @@ limitations under the License.
             this.isInFinalizeState = res && res.value === 'RUNNING';
           });
       },
-      doesSkillIdAlreadyExist(skillId) {
-        return this.currentProjectSkills.find((skill) => skill.skillId.toUpperCase() === skillId.toUpperCase()) !== undefined;
-      },
-      doesSkillNameAlreadyExist(name) {
-        return this.currentProjectSkills.find((skill) => skill.name.toUpperCase() === name.toUpperCase()) !== undefined;
-      },
       isSelected(dataItem) {
         if (dataItem.selected === true) {
           return true;
@@ -359,7 +353,7 @@ limitations under the License.
       },
       toggleSelected(changeEvent, dataItem) {
         const { selected } = changeEvent;
-        if (dataItem.alreadyHasThisSkillId || dataItem.alreadyHasThisName) {
+        if (dataItem.skillIdAlreadyExist || dataItem.skillNameAlreadyExist) {
           return;
         }
         // eslint-disable-next-line no-param-reassign
@@ -395,8 +389,6 @@ limitations under the License.
               this.table.items = dataSkills.map((item) => ({
                 selected: false,
                 ...item,
-                alreadyHasThisSkillId: this.doesSkillIdAlreadyExist(item.skillId),
-                alreadyHasThisName: this.doesSkillNameAlreadyExist(item.name),
               }));
               this.table.options.pagination.totalRows = res.totalCount;
               if (this.table.items.length > 0) {

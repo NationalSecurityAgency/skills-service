@@ -178,7 +178,7 @@ Cypress.Commands.add("importSkillFromCatalog", (projNum = 2, subjNum = 1, fromPr
     cy.bulkImportSkillFromCatalog(projNum, subjNum, [{ projNum: fromProjNum, skillNum: fromSkillNum}])
 });
 
-Cypress.Commands.add("bulkImportSkillFromCatalog", (projNum = 2, subjNum = 1, projNumAndSkillsNumList) => {
+Cypress.Commands.add('bulkImportSkillFromCatalog', (projNum = 2, subjNum = 1, projNumAndSkillsNumList) => {
     const url = `/admin/projects/proj${projNum}/subjects/subj${subjNum}/import`;
     const params = projNumAndSkillsNumList.map((item) => {
         return {
@@ -189,12 +189,23 @@ Cypress.Commands.add("bulkImportSkillFromCatalog", (projNum = 2, subjNum = 1, pr
     cy.request('POST', url, params);
 });
 
-Cypress.Commands.add("bulkImportSkillFromCatalogAndFinalize", (projNum = 2, subjNum = 1, projNumAndSkillsNumList) => {
-    cy.bulkImportSkillFromCatalog(projNum, subjNum, projNumAndSkillsNumList)
-    cy.finalizeCatalogImport(projNum)
+Cypress.Commands.add('bulkImportSkillsIntoGroupFromCatalog', (projNum = 2, subjNum = 1, groupNum = 1, projNumAndSkillsNumList) => {
+    const url = `/admin/projects/proj${projNum}/subjects/subj${subjNum}/groups/group${groupNum}/import`;
+    const params = projNumAndSkillsNumList.map((item) => {
+        return {
+            projectId: `proj${item.projNum}`,
+            skillId: `skill${item.skillNum}`
+        };
+    });
+    cy.request('POST', url, params);
 });
 
-Cypress.Commands.add("finalizeCatalogImportWithoutWaiting", (projNum = 1) => {
+Cypress.Commands.add('bulkImportSkillFromCatalogAndFinalize', (projNum = 2, subjNum = 1, projNumAndSkillsNumList) => {
+    cy.bulkImportSkillFromCatalog(projNum, subjNum, projNumAndSkillsNumList);
+    cy.finalizeCatalogImport(projNum);
+});
+
+Cypress.Commands.add('finalizeCatalogImportWithoutWaiting', (projNum = 1) => {
     const url = `/admin/projects/proj${projNum}/catalog/finalize`;
     cy.request('POST', url);
 });

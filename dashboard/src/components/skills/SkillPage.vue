@@ -20,10 +20,6 @@ limitations under the License.
         <div class="h5 text-muted" data-cy="skillId"><show-more :limit="54" :text="skill ? `ID: ${skill.skillId}` : 'Loading...'"></show-more></div>
         <div class="h5 text-muted" v-if="skill && skill.groupId">
           <span style="font-size: 1rem">Group ID:</span> <span v-b-tooltip.hover="`Name: ${ skill.groupName }`">{{ skill.groupId }}</span>
-          <b-badge :data-cy="`disabledGroupBadge-${skill.groupId}`"
-            v-b-tooltip.hover="`Group is disabled. Skill will not be visible on the Skills Display`"
-            class="text-uppercase ml-1"
-            style="font-size: 0.8rem" variant="warning" v-if="!skill.enabled">disabled</b-badge>
         </div>
       </div>
       <div slot="subSubTitle" v-if="!isImported">

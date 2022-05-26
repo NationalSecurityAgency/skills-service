@@ -112,8 +112,17 @@ class SkillCatalogFinalizationService {
             List<SkillDef> disabledImportedSkills = skillDefRepo.findAllByProjectIdAndTypeAndEnabledAndCopiedFromIsNotNull(projectId, SkillDef.ContainerType.Skill, Boolean.FALSE.toString())
 
             if (disabledImportedSkills) {
+                // update groups points
+                List<SkillDef> groups = disabledImportedSkills
+                        .findAll({ it.groupId != null })
+                        .collect { ruleSetDefGraphService.getParentSkill(it) }
+                        .unique(false) { SkillDef a, SkillDef b -> a.skillId <=> b.skillId }
+                groups.each {
+                    skillCatalogTransactionalAccessor.updateGroupTotalPoints(projectId, it.skillId)
+                }
+
                 // important: must update subject's total points first then project
-                List<SkillDef> subjects = disabledImportedSkills.collect { ruleSetDefGraphService.getParentSkill(it.id) }
+                List<SkillDef> subjects = disabledImportedSkills.collect { ruleSetDefGraphService.getMySubjectParent(it.id) }
                         .unique(false) { SkillDef a, SkillDef b -> a.skillId <=> b.skillId }
                 subjects.each {
                     skillCatalogTransactionalAccessor.updateSubjectTotalPoints(projectId, it.skillId)
@@ -124,12 +133,16 @@ class SkillCatalogFinalizationService {
                 List<Integer> skillRefIds = disabledImportedSkills.collect { it.copiedFrom }
                 start = System.currentTimeMillis()
 
-                // 1. copy skill pints and achievements
+                // 1. copy skill points and achievements
                 log.info("Copying [{}] skills UserPoints to the imported project [{}]", skillRefIds.size(), projectId)
                 skillCatalogTransactionalAccessor.copySkillUserPointsToTheImportedProjects(projectId, skillRefIds)
                 log.info("Copying [{}] skills achievements to the imported project [{}]", skillRefIds.size(), projectId)
                 skillCatalogTransactionalAccessor.copySkillAchievementsToTheImportedProjects(projectId, skillRefIds)
                 log.info("Completed import of skill's points and achievements for [{}] skills to [{}] project", skillRefIds.size(), projectId)
+
+                log.info("Identifying group achievements for [{}] groups in project [{}]", groups.size(), projectId)
+                skillCatalogTransactionalAccessor.identifyAndAddGroupAchievements(groups)
+                log.info("Completed import of group achievements for [{}] groups in [{}] project", groups.size(), projectId)
 
                 SettingsResult settingsResult = settingsService.getProjectSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
                 boolean pointsBased = settingsResult ? settingsResult.isEnabled() : false
@@ -146,7 +159,7 @@ class SkillCatalogFinalizationService {
                     log.info("Completed import for subject. projectIdTo=[{}], subjectIdTo=[{}]", projectId, subject.skillId)
                 }
 
-                // 3. for the project (1) create user points for new users (2) update existing (3) caluclate achievements
+                // 3. for the project (1) create user points for new users (2) update existing (3) calculate achievements
                 log.info("Creating UserPoints for the new users for [{}] project", projectId)
                 skillCatalogTransactionalAccessor.createProjectUserPointsForTheNewUsers(projectId)
                 log.info("Updating UserPoints for the existing users for [{}] project", projectId)

@@ -189,6 +189,7 @@ class ClientDisplaySpec extends DefaultIntSpec {
     }
 
     def "disabled skills group do not contribute to the summary"() {
+        // NOTE: this test is likely OBE as of v1.10.X and can likely be removed
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def allSkills = SkillsFactory.createSkills(3)
@@ -197,6 +198,7 @@ class ClientDisplaySpec extends DefaultIntSpec {
 
         def skillsGroup = allSkills[0]
         skillsGroup.type = 'SkillsGroup'
+        skillsGroup.enabled = false
         skillsService.createSkill(skillsGroup)
         String skillsGroupId = skillsGroup.skillId
         def group1Children = allSkills[1..2]
@@ -244,7 +246,7 @@ class ClientDisplaySpec extends DefaultIntSpec {
         projectSummary.subjects[0].totalPoints == 20
     }
 
-    def "enabled skills group calculate totalPoints based on numSkillsRequired"() {
+    def "skills group calculate totalPoints based on all skills regardless of numSkillsRequired"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def allSkills = SkillsFactory.createSkills(3)
@@ -260,7 +262,6 @@ class ClientDisplaySpec extends DefaultIntSpec {
             skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
         }
         skillsGroup.numSkillsRequired = 1
-        skillsGroup.enabled = 'true'
         skillsService.updateSkill(skillsGroup, null)
 
         when:
@@ -268,10 +269,10 @@ class ClientDisplaySpec extends DefaultIntSpec {
 
         then:
         projectSummary.skillsLevel == 0
-        projectSummary.totalPoints == 10
+        projectSummary.totalPoints == 20
         projectSummary.subjects
         projectSummary.subjects[0].skillsLevel == 0
-        projectSummary.subjects[0].totalPoints == 10
+        projectSummary.subjects[0].totalPoints == 20
     }
 }
 

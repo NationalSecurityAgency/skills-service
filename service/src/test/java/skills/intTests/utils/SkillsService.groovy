@@ -1276,6 +1276,16 @@ class SkillsService {
         return wsHelper.adminPost("/projects/${importIntoProjectId}/subjects/${importIntoSubjectId}/import", catalogSkills)
     }
 
+    def bulkImportSkillsIntoGroupFromCatalog(String importIntoProjectId, String importIntoSubjectId, String importGroupId, List<Map> catalogSkills) {
+        return wsHelper.adminPost("/projects/${importIntoProjectId}/subjects/${importIntoSubjectId}/groups/${importGroupId}/import", catalogSkills)
+    }
+
+    def bulkImportSkillsIntoGroupFromCatalogAndFinalize(String importIntoProjectId, String importIntoSubjectId, String importGroupId, List<Map> catalogSkills) {
+        def res = bulkImportSkillsIntoGroupFromCatalog(importIntoProjectId, importIntoSubjectId, importGroupId, catalogSkills)
+        finalizeSkillsImportFromCatalog(importIntoProjectId)
+        return res
+    }
+
     def bulkImportSkillsFromCatalogAndFinalize(String importIntoProjectId, String importIntoSubjectId, List<Map> catalogSkills) {
         def res = wsHelper.adminPost("/projects/${importIntoProjectId}/subjects/${importIntoSubjectId}/import", catalogSkills)
         finalizeSkillsImportFromCatalog(importIntoProjectId)

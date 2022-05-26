@@ -19,6 +19,7 @@ import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import skills.services.RuleSetDefinitionScoreUpdater
 import skills.services.UserAchievementsAndPointsManagement
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillDefRepo
@@ -47,6 +48,12 @@ class SkillCatalogTransactionalAccessor {
     @Autowired
     UserAchievementsAndPointsManagement userAchievementsAndPointsManagement
 
+    @Autowired
+    RuleSetDefinitionScoreUpdater ruleSetDefinitionScoreUpdater
+
+    @Autowired
+    SkillsGroupAdminService skillsGroupAdminService
+
     @Transactional
     @Profile
     void enableSkills(List<SkillDef> disabledImportedSkills) {
@@ -59,10 +66,14 @@ class SkillCatalogTransactionalAccessor {
     @Transactional
     @Profile
     void updateSubjectTotalPoints(String projectId, String subjectId) {
-        SkillDef subjectDef = skillDefRepo.findByProjectIdAndSkillId(projectId, subjectId)
-        Integer totalPoints = skillDefRepo.getSubjectTotalPoints(subjectDef.id, false)
-        subjectDef.totalPoints = totalPoints
-        skillDefRepo.save(subjectDef)
+        ruleSetDefinitionScoreUpdater.updateSubjectTotalPoints(projectId, subjectId, false)
+    }
+
+
+    @Transactional
+    @Profile
+    void updateGroupTotalPoints(String projectId, String groupId) {
+        ruleSetDefinitionScoreUpdater.updateGroupTotalPoints(projectId, groupId, false)
     }
 
     @Transactional
@@ -93,6 +104,21 @@ class SkillCatalogTransactionalAccessor {
     @Profile
     void updateUserPointsForSubjectOrGroup(String projectId, String skillId) {
         nativeQueriesRepo.updateUserPointsForSubjectOrGroup(projectId, skillId, false)
+    }
+
+    @Transactional
+    @Profile
+    void identifyAndAddGroupAchievements(List<SkillDef> groups) {
+        groups.each { skillsGroupSkillDef ->
+            int numSkillsRequired = skillsGroupAdminService.getActualNumSkillsRequred(skillsGroupSkillDef.numSkillsRequired, skillsGroupSkillDef.id)
+            userAchievedLevelRepo.identifyAndAddGroupAchievements(
+                    skillsGroupSkillDef.projectId,
+                    skillsGroupSkillDef.skillId,
+                    skillsGroupSkillDef.id,
+                    numSkillsRequired,
+                    Boolean.FALSE.toString(),
+            )
+        }
     }
 
     @Transactional

@@ -57,7 +57,7 @@ class RuleSetManagementSpecs extends DefaultIntSpec {
         subject.totalPoints == 60
     }
 
-    def "stats show enabled/disabled groups and skills"() {
+    def "stats show groups and skills"() {
         def project1 = createProject(1)
         def p1subj1 = createSubject(1, 1)
         def p1Subj1Skills = createSkills(8, 1, 1, 88)
@@ -81,7 +81,6 @@ class RuleSetManagementSpecs extends DefaultIntSpec {
         skillsService.assignSkillToSkillsGroup(skillsGroup2.skillId, createSkill(1, 1, 31))
         skillsService.assignSkillToSkillsGroup(skillsGroup2.skillId, createSkill(1, 1, 32))
         skillsService.assignSkillToSkillsGroup(skillsGroup2.skillId, createSkill(1, 1, 33))
-        skillsGroup2.enabled = 'true'
         skillsService.createSkill(skillsGroup2)
 
 
@@ -97,11 +96,11 @@ class RuleSetManagementSpecs extends DefaultIntSpec {
         def subject2 = skillsService.getSubject(p1subj2)
 
         then:
-        subject1.numSkills == 11
-        subject1.numSkillsDisabled == 4
+        subject1.numSkills == 14
+        subject1.numSkillsDisabled == 1
         subject1.numSkillsImportedAndDisabled == 1
-        subject1.numGroups == 1
-        subject1.numGroupsDisabled == 2
+        subject1.numGroups == 3
+        subject1.numGroupsDisabled == 0
 
         subject2.numSkills == 6
         subject2.numSkillsDisabled == 0

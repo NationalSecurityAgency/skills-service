@@ -249,35 +249,12 @@ describe('Finalize Imported Skills Tests', () => {
         cy.addSkillToGroup(1, 1, 20, 22, { pointIncrement: 10, numPerformToCompletion: 5 });
 
         cy.visit('/administrator/projects/proj1/subjects/subj1')
-        cy.get('[data-cy="pageHeaderStat_Skills_disabledCount"]').should('have.text', '4')
+        cy.get('[data-cy="pageHeaderStat_Skills_disabledCount"]').should('have.text', '2')
         cy.get('[data-cy="importFinalizeAlert"]').contains('There are 2 imported skills in this project')
 
         cy.visit('/administrator/projects/proj1')
-        cy.get('[data-cy="pageHeaderStat_Skills_disabledCount"]').should('have.text', '4')
+        cy.get('[data-cy="pageHeaderStat_Skills_disabledCount"]').should('have.text', '2')
         cy.get('[data-cy="importFinalizeAlert"]').contains('There are 2 imported skills in this project')
-    });
-
-
-    it('non-imported disabled skills must not enable finalize alert', () => {
-        cy.createProject(2);
-        cy.createSubject(2, 1);
-        cy.createSkill(2, 1, 1);
-        cy.createSkill(2, 1, 2);
-
-        cy.exportSkillToCatalog(2, 1, 1);
-        cy.exportSkillToCatalog(2, 1, 2);
-
-        cy.createSkillsGroup(1, 1, 20);
-        cy.addSkillToGroup(1, 1, 20, 21, { pointIncrement: 10, numPerformToCompletion: 5 });
-        cy.addSkillToGroup(1, 1, 20, 22, { pointIncrement: 10, numPerformToCompletion: 5 });
-
-        cy.visit('/administrator/projects/proj1/subjects/subj1')
-        cy.get('[data-cy="pageHeaderStat_Skills_disabledCount"]').should('have.text', '2')
-        cy.get('[data-cy="importFinalizeAlert"]').should('not.exist')
-
-        cy.visit('/administrator/projects/proj1')
-        cy.get('[data-cy="pageHeaderStat_Skills_disabledCount"]').should('have.text', '2')
-        cy.get('[data-cy="importFinalizeAlert"]').should('not.exist')
     });
 
     it('finalize refreshes metric cards on subject page', () => {

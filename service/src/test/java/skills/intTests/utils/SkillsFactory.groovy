@@ -72,10 +72,9 @@ class SkillsFactory {
         return [projectId: getDefaultProjId(projNumber), badgeId: "badge${badgeNumber}".toString(), name: "Test Badge ${badgeNumber}".toString()]
     }
 
-    static createSkillsGroup(int projNumber = 1, int subjNumber = 1l, int groupNumber = 1, numSkillsRequired = -1, enabled = false) {
+    static createSkillsGroup(int projNumber = 1, int subjNumber = 1l, int groupNumber = 1, numSkillsRequired = -1) {
         def skillsGroup = createSkill(projNumber, subjNumber, groupNumber, 0, 0, 0, 0, "SkillsGroup")
         skillsGroup.numSkillsRequired = numSkillsRequired
-        skillsGroup.enabled = enabled
         return skillsGroup
     }
 }

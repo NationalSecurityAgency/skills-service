@@ -324,9 +324,7 @@ class SkillEventAdminService {
                                                SkillDefMin currentDef,
                                                SkillDefMin requesterDef,
                                                String userId) {
-        if (currentDef.type == SkillDef.ContainerType.SkillsGroup) {
-            updateUserPoints(userId, requesterDef, currentDef.skillId)
-        } else if (currentDef.type == SkillDef.ContainerType.Subject) {
+        if (currentDef.type == SkillDef.ContainerType.Subject) {
             UserPoints updatedPoints = updateUserPoints(userId, requesterDef, currentDef.skillId)
 
             List<LevelDef> levelDefs = skillEventsSupportRepo.findLevelsBySkillId(currentDef.id)

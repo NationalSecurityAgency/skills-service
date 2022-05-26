@@ -200,11 +200,6 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
              skills
         where ups.user_id = :userId
           and ups.skill_ref_id = skills.id
-          and ups.skill_ref_id NOT IN (select up.skill_ref_id
-                               from user_points up
-                               where up.contributes_to_skills_group = 'false'
-                                 and up.user_id = :userId
-                                 and up.project_Id = :projectId)
         group by CAST(ups.performed_on as date)''', nativeQuery = true)
     List<DayCountItem> calculatePointHistoryForSubject(@Param('projectId') String projectId,
                                                                            @Param('userId') String userId,
@@ -227,11 +222,6 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
              skills
         where ups.user_id = :userId
           and ups.skill_ref_id = skills.id
-          and ups.skill_ref_id NOT IN (select up.skill_ref_id
-                               from user_points up
-                               where up.contributes_to_skills_group = 'false'
-                                 and up.user_id = :userId
-                                 and up.project_Id = :projectId)
         group by CAST(ups.performed_on as date)''', nativeQuery = true)
     List<DayCountItem> calculatePointHistoryForProject(@Param('projectId') String projectId,
                                                        @Param('userId') String userId,

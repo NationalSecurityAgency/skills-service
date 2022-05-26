@@ -49,7 +49,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         res.type == skillsGroup.type
         res.numSkillsInGroup == 0
         res.numSelfReportSkills == 0
-        res.enabled == false
     }
 
     void "cannot convert an existing Skill To a SkillsGroup " () {
@@ -97,7 +96,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         res.type == skillsGroup.type
         res.numSkillsInGroup == groupSkills.size()
         res.numSelfReportSkills == 0
-        res.enabled == false
 
         groupSkills.size() == 3
 
@@ -129,7 +127,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         subjSkills.get(0).type == skillsGroup.type
         subjSkills.get(0).numSkillsInGroup == groupSkills.size()
         subjSkills.get(0).numSelfReportSkills == 0
-        subjSkills.get(0).enabled == false
     }
 
     void "create and then update SkillsGroup name" () {
@@ -157,7 +154,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         res1.type == skillsGroup.type
         res1.numSkillsInGroup == 0
         res1.numSelfReportSkills == 0
-        res1.enabled == false
 
         res2
         res2.skillId == skillsGroup.skillId
@@ -165,7 +161,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         res2.type == skillsGroup.type
         res2.numSkillsInGroup == 0
         res2.numSelfReportSkills == 0
-        res2.enabled == false
     }
 
     void "create and then update SkillsGroup ID" () {
@@ -193,7 +188,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         res1.type == skillsGroup.type
         res1.numSkillsInGroup == 0
         res1.numSelfReportSkills == 0
-        res1.enabled == false
 
         res2
         res2.skillId == skillsGroup.skillId
@@ -201,10 +195,9 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         res2.type == skillsGroup.type
         res2.numSkillsInGroup == 0
         res2.numSelfReportSkills == 0
-        res2.enabled == false
     }
 
-    void "create and add more than one skill with same total point values to SkillsGroup, then successfully enable" () {
+    void "create and add more than one skill with same total point values to SkillsGroup" () {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(3)
@@ -212,21 +205,16 @@ class SkillsGroupSpecs extends DefaultIntSpec {
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
+
+        when:
         skillsService.createSkill(skillsGroup)
         String skillsGroupId = skillsGroup.skillId
         skills.each { skill ->
             skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
         }
-
-        when:
         def res = skillsService.getSkill(skillsGroup)
         def groupSkills = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
         def subjSkills = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
-        groupSkills.sort() { it.skillId }
-
-        skillsGroup.enabled = 'true'
-        skillsService.updateSkill(skillsGroup, null)
-        def res2 = skillsService.getSkill(skillsGroup)
 
         then:
         res
@@ -235,7 +223,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         res.type == skillsGroup.type
         res.numSkillsInGroup == groupSkills.size()
         res.numSelfReportSkills == 0
-        res.enabled == false
 
         groupSkills.size() == 3
 
@@ -267,15 +254,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         subjSkills.get(0).type == skillsGroup.type
         subjSkills.get(0).numSkillsInGroup == groupSkills.size()
         subjSkills.get(0).numSelfReportSkills == 0
-        subjSkills.get(0).enabled == false
-
-        res2
-        res2.skillId == skillsGroup.skillId
-        res2.name == skillsGroup.name
-        res2.type == skillsGroup.type
-        res2.numSkillsInGroup == groupSkills.size()
-        res2.numSelfReportSkills == 0
-        res2.enabled == true
     }
 
     void "change display order of skills under a group" () {
@@ -308,57 +286,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         groupSkillsAfterThirdMove.collect { it.skillId } == ['skill3', 'skill2', 'skill1']
     }
 
-    void "can enable a SkillsGroup with only 1 required child skill, but must have at least 2 child skills" () {
-        def proj = SkillsFactory.createProject()
-        def subj = SkillsFactory.createSubject()
-        def skills = SkillsFactory.createSkills(2)
-        def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 5)
-        skillsGroup.numSkillsRequired = 1
-
-        skillsService.createProject(proj)
-        skillsService.createSubject(subj)
-        skillsService.createSkill(skillsGroup)
-        String skillsGroupId = skillsGroup.skillId
-        skills.each { skill ->
-            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
-        }
-
-        when:
-        skillsGroup.enabled = 'true'
-        skillsService.updateSkill(skillsGroup, null)
-        def res = skillsService.getSkill(skillsGroup)
-        def groupSkills = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
-        groupSkills.sort() { it.skillId }
-
-        then:
-        res
-        res.skillId == skillsGroup.skillId
-        res.name == skillsGroup.name
-        res.type == skillsGroup.type
-        res.numSkillsInGroup == groupSkills.size()
-        res.numSelfReportSkills == 0
-        res.numSkillsRequired == 1
-        res.enabled == true
-        res.totalPoints == groupSkills[0].totalPoints
-
-        groupSkills.size() == 2
-
-        groupSkills.get(0).skillId == skills.get(0).skillId
-        groupSkills.get(0).projectId == proj.projectId
-        groupSkills.get(0).name == skills.get(0).name
-        groupSkills.get(0).version == skills.get(0).version
-        groupSkills.get(0).displayOrder == 1
-        groupSkills.get(0).totalPoints == skills.get(0).pointIncrement * skills.get(0).numPerformToCompletion
-
-        groupSkills.get(1).skillId == skills.get(1).skillId
-        groupSkills.get(1).projectId == proj.projectId
-        groupSkills.get(1).name == skills.get(1).name
-        groupSkills.get(1).version == skills.get(1).version
-        groupSkills.get(1).displayOrder == 2
-        groupSkills.get(1).totalPoints == skills.get(1).pointIncrement * skills.get(1).numPerformToCompletion
-    }
-
-    void "cannot enable a SkillsGroup with < 2 child skills" () {
+    void "SkillsGroup with < 2 child skills" () {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(1)
@@ -373,20 +301,24 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         }
 
         when:
-        skillsGroup.enabled = 'true'
-        skillsService.updateSkill(skillsGroup, null)
+        def groupSkills = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
 
         then:
-        def exception = thrown(SkillsClientException)
-        exception.message.contains("A Skill Group must have at least 2 skills in order to be enabled.")
+        groupSkills.size() == 1
+
+        groupSkills.get(0).skillId == skills.get(0).skillId
+        groupSkills.get(0).projectId == proj.projectId
+        groupSkills.get(0).name == skills.get(0).name
+        groupSkills.get(0).version == skills.get(0).version
+        groupSkills.get(0).displayOrder == 1
+        groupSkills.get(0).totalPoints == skills.get(0).pointIncrement * skills.get(0).numPerformToCompletion
     }
 
-    void "cannot enable a SkillsGroup with < 1 required skill" () {
+    void "A Skill Group cannot have 0 required skills" () {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(2)
         def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 5)
-        skillsGroup.numSkillsRequired = 0
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -397,15 +329,15 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         }
 
         when:
-        skillsGroup.enabled = 'true'
+        skillsGroup.numSkillsRequired = 0
         skillsService.updateSkill(skillsGroup, null)
 
         then:
         def exception = thrown(SkillsClientException)
-        exception.message.contains("A Skill Group must have at least 1 required skill in order to be enabled.")
+        exception.message.contains("A Skill Group must have at least 1 required skill.")
     }
 
-    void "cannot enable a SkillsGroup when not all skills are required, and not all have the same # of points" () {
+    void "a SkillsGroup when not all skills are required, and not all have the same # of points is allowed" () {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(2)
@@ -413,7 +345,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         skill3WithDiffNumPoints.pointIncrement = 100
         skills.add(skill3WithDiffNumPoints)
         def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 5)
-        skillsGroup.numSkillsRequired = skills.size()-1
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -424,20 +355,52 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         }
 
         when:
-        skillsGroup.enabled = 'true'
+        skillsGroup.numSkillsRequired = skills.size()-1
         skillsService.updateSkill(skillsGroup, null)
+        def res = skillsService.getSkill(skillsGroup)
+        def groupSkills = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
+        groupSkills.sort() { it.skillId }
 
         then:
-        def exception = thrown(SkillsClientException)
-        exception.message.contains("All skills that belong to the Skill Group must have the same total value when all skills are not required to be completed.")
+        res
+        res.skillId == skillsGroup.skillId
+        res.name == skillsGroup.name
+        res.type == skillsGroup.type
+        res.numSkillsInGroup == groupSkills.size()
+        res.numSelfReportSkills == 0
+        res.numSkillsRequired == skills.size()-1
+        res.enabled == true
+        res.totalPoints == groupSkills[0].totalPoints + groupSkills[1].totalPoints + groupSkills[2].totalPoints
+
+        groupSkills.size() == 3
+
+        groupSkills.get(0).skillId == skills.get(0).skillId
+        groupSkills.get(0).projectId == proj.projectId
+        groupSkills.get(0).name == skills.get(0).name
+        groupSkills.get(0).version == skills.get(0).version
+        groupSkills.get(0).displayOrder == 1
+        groupSkills.get(0).totalPoints == skills.get(0).pointIncrement * skills.get(0).numPerformToCompletion
+
+        groupSkills.get(1).skillId == skills.get(1).skillId
+        groupSkills.get(1).projectId == proj.projectId
+        groupSkills.get(1).name == skills.get(1).name
+        groupSkills.get(1).version == skills.get(1).version
+        groupSkills.get(1).displayOrder == 2
+        groupSkills.get(1).totalPoints == skills.get(1).pointIncrement * skills.get(1).numPerformToCompletion
+
+        groupSkills.get(2).skillId == skills.get(2).skillId
+        groupSkills.get(2).projectId == proj.projectId
+        groupSkills.get(2).name == skills.get(2).name
+        groupSkills.get(2).version == skills.get(2).version
+        groupSkills.get(2).displayOrder == 3
+        groupSkills.get(2).totalPoints == 100 * skills.get(2).numPerformToCompletion
     }
 
-    void "cannot update a SkillsGroup to have a different # of points when not all skills are required" () {
+    void "can update a SkillsGroup to have a different # of points when not all skills are required" () {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(3)
         def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 5)
-        skillsGroup.numSkillsRequired = skills.size()-1
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -446,7 +409,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         skills.each { skill ->
             skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
         }
-        skillsGroup.enabled = 'true'
+        skillsGroup.numSkillsRequired = skills.size()-1
         skillsService.updateSkill(skillsGroup, null)
 
         when:
@@ -455,17 +418,50 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         skill3WithDiffNumPoints.pointIncrement = 100
         skillsService.updateSkill(skill3WithDiffNumPoints, null)
 
+        def res = skillsService.getSkill(skillsGroup)
+        def groupSkills = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
+        groupSkills.sort() { it.skillId }
+
         then:
-        def exception = thrown(SkillsClientException)
-        exception.message.contains("All skills that belong to the Skill Group must have the same total value when all skills are not required to be completed.")
+        res
+        res.skillId == skillsGroup.skillId
+        res.name == skillsGroup.name
+        res.type == skillsGroup.type
+        res.numSkillsInGroup == groupSkills.size()
+        res.numSelfReportSkills == 0
+        res.numSkillsRequired == skills.size()-1
+        res.enabled == true
+        res.totalPoints == groupSkills[0].totalPoints + groupSkills[1].totalPoints + groupSkills[2].totalPoints
+
+        groupSkills.size() == 3
+
+        groupSkills.get(0).skillId == skills.get(0).skillId
+        groupSkills.get(0).projectId == proj.projectId
+        groupSkills.get(0).name == skills.get(0).name
+        groupSkills.get(0).version == skills.get(0).version
+        groupSkills.get(0).displayOrder == 1
+        groupSkills.get(0).totalPoints == skills.get(0).pointIncrement * skills.get(0).numPerformToCompletion
+
+        groupSkills.get(1).skillId == skills.get(1).skillId
+        groupSkills.get(1).projectId == proj.projectId
+        groupSkills.get(1).name == skills.get(1).name
+        groupSkills.get(1).version == skills.get(1).version
+        groupSkills.get(1).displayOrder == 2
+        groupSkills.get(1).totalPoints == skills.get(1).pointIncrement * skills.get(1).numPerformToCompletion
+
+        groupSkills.get(2).skillId == skills.get(2).skillId
+        groupSkills.get(2).projectId == proj.projectId
+        groupSkills.get(2).name == skills.get(2).name
+        groupSkills.get(2).version == skills.get(2).version
+        groupSkills.get(2).displayOrder == 3
+        groupSkills.get(2).totalPoints == 100 * skills.get(2).numPerformToCompletion
     }
 
-    void "cannot update a child skill's points to a value different than the other child skills when not all skills are required" () {
+    void "can update a child skill's points to a value different than the other child skills when not all skills are required" () {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(3)
         def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 5)
-        skillsGroup.numSkillsRequired = skills.size() - 1
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -476,22 +472,52 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         }
 
         when:
-        skillsGroup.enabled = 'true'
+        skillsGroup.numSkillsRequired = skills.size() - 1
         skillsService.updateSkill(skillsGroup, null)
-        def res = skillsService.getSkill(skillsGroup)
-        def groupSkills = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
-        groupSkills.sort() { it.skillId }
 
         def skillWithDifferentPoints = skills.first()
         skillWithDifferentPoints.pointIncrement = 321
         skillsService.updateSkill(skillWithDifferentPoints, null)
+        def res = skillsService.getSkill(skillsGroup)
+        def groupSkills = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
+        groupSkills.sort() { it.skillId }
 
         then:
-        def exception = thrown(SkillsClientException)
-        exception.message.contains("All skills that belong to the Skill Group must have the same total value when all skills are not required to be completed.")
+        res
+        res.skillId == skillsGroup.skillId
+        res.name == skillsGroup.name
+        res.type == skillsGroup.type
+        res.numSkillsInGroup == groupSkills.size()
+        res.numSelfReportSkills == 0
+        res.numSkillsRequired == skills.size()-1
+        res.enabled == true
+        res.totalPoints == groupSkills[0].totalPoints + groupSkills[1].totalPoints + groupSkills[2].totalPoints
+
+        groupSkills.size() == 3
+
+        groupSkills.get(0).skillId == skills.get(0).skillId
+        groupSkills.get(0).projectId == proj.projectId
+        groupSkills.get(0).name == skills.get(0).name
+        groupSkills.get(0).version == skills.get(0).version
+        groupSkills.get(0).displayOrder == 1
+        groupSkills.get(0).totalPoints == 321 * skills.get(0).numPerformToCompletion
+
+        groupSkills.get(1).skillId == skills.get(1).skillId
+        groupSkills.get(1).projectId == proj.projectId
+        groupSkills.get(1).name == skills.get(1).name
+        groupSkills.get(1).version == skills.get(1).version
+        groupSkills.get(1).displayOrder == 2
+        groupSkills.get(1).totalPoints == skills.get(1).pointIncrement * skills.get(1).numPerformToCompletion
+
+        groupSkills.get(2).skillId == skills.get(2).skillId
+        groupSkills.get(2).projectId == proj.projectId
+        groupSkills.get(2).name == skills.get(2).name
+        groupSkills.get(2).version == skills.get(2).version
+        groupSkills.get(2).displayOrder == 3
+        groupSkills.get(2).totalPoints == skills.get(2).pointIncrement * skills.get(2).numPerformToCompletion
     }
 
-    void "can enable a SkillsGroup when all skills are required, and not all skills have the same # of points" () {
+    void "a SkillsGroup when all skills are required, and not all skills have the same # of points" () {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(2)
@@ -499,7 +525,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         skill3WithDiffNumPoints.pointIncrement = 100
         skills.add(skill3WithDiffNumPoints)
         def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 5)
-        skillsGroup.numSkillsRequired = skills.size()
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -510,7 +535,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         }
 
         when:
-        skillsGroup.enabled = 'true'
+        skillsGroup.numSkillsRequired = skills.size()
         skillsService.updateSkill(skillsGroup, null)
         def res = skillsService.getSkill(skillsGroup)
         def groupSkills = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
@@ -551,7 +576,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         groupSkills.get(2).totalPoints == 100 * skills.get(2).numPerformToCompletion
     }
 
-    void "can enable a SkillsGroup when numSkillsRequired == -1, and not all skills have the same # of points" () {
+    void "a SkillsGroup when numSkillsRequired == -1, and not all skills have the same # of points" () {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(2)
@@ -570,7 +595,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         }
 
         when:
-        skillsGroup.enabled = 'true'
         skillsService.updateSkill(skillsGroup, null)
         def res = skillsService.getSkill(skillsGroup)
         def groupSkills = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
@@ -611,23 +635,22 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         groupSkills.get(2).totalPoints == 100 * skills.get(2).numPerformToCompletion
     }
 
-    void "can enable a SkillsGroup when not all skills are required, but all skills have the same # of points" () {
+    void "a SkillsGroup when not all skills are required, but all skills have the same # of points" () {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
-        def skills = SkillsFactory.createSkills(3)
+        def childSkills = SkillsFactory.createSkills(3)
         def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 5)
-        skillsGroup.numSkillsRequired = skills.size() - 1
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
         skillsService.createSkill(skillsGroup)
         String skillsGroupId = skillsGroup.skillId
-        skills.each { skill ->
-            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        childSkills.each { childSkill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, childSkill)
         }
 
         when:
-        skillsGroup.enabled = 'true'
+        skillsGroup.numSkillsRequired = childSkills.size() - 1
         skillsService.updateSkill(skillsGroup, null)
         def res = skillsService.getSkill(skillsGroup)
         def groupSkills = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
@@ -641,31 +664,31 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         res.numSkillsInGroup == groupSkills.size()
         res.numSelfReportSkills == 0
         res.numSkillsRequired == 2
-        res.totalPoints == (skills.get(0).pointIncrement * skills.get(0).numPerformToCompletion) * res.numSkillsRequired
+        res.totalPoints == (childSkills.get(0).pointIncrement * childSkills.get(0).numPerformToCompletion) * childSkills.size()
         res.enabled == true
 
         groupSkills.size() == 3
 
-        groupSkills.get(0).skillId == skills.get(0).skillId
+        groupSkills.get(0).skillId == childSkills.get(0).skillId
         groupSkills.get(0).projectId == proj.projectId
-        groupSkills.get(0).name == skills.get(0).name
-        groupSkills.get(0).version == skills.get(0).version
+        groupSkills.get(0).name == childSkills.get(0).name
+        groupSkills.get(0).version == childSkills.get(0).version
         groupSkills.get(0).displayOrder == 1
-        groupSkills.get(0).totalPoints == skills.get(0).pointIncrement * skills.get(0).numPerformToCompletion
+        groupSkills.get(0).totalPoints == childSkills.get(0).pointIncrement * childSkills.get(0).numPerformToCompletion
 
-        groupSkills.get(1).skillId == skills.get(1).skillId
+        groupSkills.get(1).skillId == childSkills.get(1).skillId
         groupSkills.get(1).projectId == proj.projectId
-        groupSkills.get(1).name == skills.get(1).name
-        groupSkills.get(1).version == skills.get(1).version
+        groupSkills.get(1).name == childSkills.get(1).name
+        groupSkills.get(1).version == childSkills.get(1).version
         groupSkills.get(1).displayOrder == 2
-        groupSkills.get(1).totalPoints == skills.get(0).pointIncrement * skills.get(0).numPerformToCompletion
+        groupSkills.get(1).totalPoints == childSkills.get(0).pointIncrement * childSkills.get(0).numPerformToCompletion
 
-        groupSkills.get(2).skillId == skills.get(2).skillId
+        groupSkills.get(2).skillId == childSkills.get(2).skillId
         groupSkills.get(2).projectId == proj.projectId
-        groupSkills.get(2).name == skills.get(2).name
-        groupSkills.get(2).version == skills.get(2).version
+        groupSkills.get(2).name == childSkills.get(2).name
+        groupSkills.get(2).version == childSkills.get(2).version
         groupSkills.get(2).displayOrder == 3
-        groupSkills.get(2).totalPoints == skills.get(0).pointIncrement * skills.get(0).numPerformToCompletion
+        groupSkills.get(2).totalPoints == childSkills.get(0).pointIncrement * childSkills.get(0).numPerformToCompletion
     }
 
     def "delete SkillsGroup"() {
@@ -682,7 +705,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
             skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
         }
         skillsGroup.numSkillsRequired = skills.size() - 1
-        skillsGroup.enabled = 'true'
         skillsService.updateSkill(skillsGroup, null)
 
         def subjSkillsBefore = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
@@ -716,7 +738,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
             skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
         }
         skillsGroup.numSkillsRequired = skills.size() - 1
-        skillsGroup.enabled = 'true'
         skillsService.updateSkill(skillsGroup, null)
 
         def subjSkillsBefore = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
@@ -735,7 +756,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         idsExistAfter.every { !it }
     }
 
-    def "cannot enable a skill group when the number of child skills would cause the maximum skills per subject to be exceeded"() {
+    def "a skill group does not allow the number of child skills to cause the maximum skills per subject to be exceeded"() {
             def proj = SkillsFactory.createProject()
             def subj = SkillsFactory.createSubject()
             def skills = SkillsFactory.createSkills(5)
@@ -744,22 +765,19 @@ class SkillsGroupSpecs extends DefaultIntSpec {
             skillsService.createProject(proj)
             skillsService.createSubject(subj)
             skillsService.createSkill(skillsGroup)
-            String skillsGroupId = skillsGroup.skillId
-            skills.each { skill ->
-                skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
-            }
 
             def otherSkills = SkillsFactory.createSkillsStartingAt(96, 7)
             skillsService.createSkills(otherSkills)
 
             when:
-            skillsGroup.enabled = 'true'
-            skillsService.updateSkill(skillsGroup, null)
-            def res = skillsService.getSkill(skillsGroup)
+            String skillsGroupId = skillsGroup.skillId
+            skills.each { skill ->
+                skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+            }
 
             then:
             def e = thrown(SkillsClientException)
-            e.message.contains('explanation:Each Subject is limited to [100] Skills, enabling the Skill Group would exceed that maximum, errorCode:MaxSkillsThreshold')
+            e.message.contains('explanation:Each Subject is limited to [100] Skills, errorCode:MaxSkillsThreshold')
     }
 
     def "delete SkillsGroup and a child skill and verify proper display order is maintained for both"() {
@@ -777,7 +795,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         group1Children.each { skill ->
             skillsService.assignSkillToSkillsGroup(skillsGroup1Id, skill)
         }
-        skillsGroup1.enabled = 'true'
         skillsService.updateSkill(skillsGroup1, null)
 
         def skillsGroup2 = allSkills[3]
@@ -788,7 +805,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         group2Children.each { skill ->
             skillsService.assignSkillToSkillsGroup(skillsGroup2Id, skill)
         }
-        skillsGroup2.enabled = 'true'
         skillsService.updateSkill(skillsGroup2, null)
 
         def subjSkillsBefore = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
@@ -846,7 +862,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         String skillsGroupId = skillsGroup.skillId
         skillsService.assignSkillToSkillsGroup(skillsGroupId, children[0])
         skillsService.assignSkillToSkillsGroup(skillsGroupId, children[1])
-        skillsGroup.enabled = 'true'
         skillsService.updateSkill(skillsGroup, null)
         int pointAfterSecondChild = skillsService.getSkill(skillsGroup).totalPoints
 
@@ -865,7 +880,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         pointAfterSecondChild == 20
         pointAfterThirdChild == 30
         pointAfterOneChildDeleted == 20
-        pointAfterNumSkillsRequiredReduced == 10
+        pointAfterNumSkillsRequiredReduced == 20
     }
 
     def "group info is returned for child skill on skill endpoint"() {
@@ -877,7 +892,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
 
         def skillsGroup = allSkills[0]
         skillsGroup.type = 'SkillsGroup'
-        skillsGroup.enabled = 'false'
         skillsService.createSkill(skillsGroup)
         def children = allSkills[1..2]
 
@@ -891,12 +905,12 @@ class SkillsGroupSpecs extends DefaultIntSpec {
 
         then:
         res
-        res.enabled == false
+        res.enabled == true
         res.groupName == skillsGroup.name
         res.groupId == skillsGroup.skillId
     }
 
-    def "totalPoints are returned for skills endpoint for disabled group, but not subjects or project"() {
+    def "totalPoints are always included for groups"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def allSkills = SkillsFactory.createSkills(3)
@@ -911,47 +925,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         String skillsGroupId = skillsGroup.skillId
         skillsService.assignSkillToSkillsGroup(skillsGroupId, children[0])
         skillsService.assignSkillToSkillsGroup(skillsGroupId, children[1])
-
-        when:
-
-        int skillsGroupPoints = skillsService.getSkill(skillsGroup).totalPoints
-        def subjects = skillsService.getSubjects(proj.projectId)
-        def projects = skillsService.getProjects()
-        def subjSkills = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
-
-        then:
-        subjSkills
-        subjSkills.size() == 1
-        subjSkills[0].totalPoints == 20
-        skillsGroupPoints == 20
-
-        subjects
-        subjects.size() == 1
-        subjects[0].totalPoints == 0
-
-        projects
-        projects.size() == 1
-        projects[0].totalPoints == 0
-    }
-
-    def "totalPoints on are always included for enabled groups"() {
-        def proj = SkillsFactory.createProject()
-        def subj = SkillsFactory.createSubject()
-        def allSkills = SkillsFactory.createSkills(3)
-        skillsService.createProject(proj)
-        skillsService.createSubject(subj)
-
-        def skillsGroup = allSkills[0]
-        skillsGroup.type = 'SkillsGroup'
-        skillsService.createSkill(skillsGroup)
-        def children = allSkills[1..2]
-
-        String skillsGroupId = skillsGroup.skillId
-        skillsService.assignSkillToSkillsGroup(skillsGroupId, children[0])
-        skillsService.assignSkillToSkillsGroup(skillsGroupId, children[1])
-
-        skillsGroup.enabled = 'true'
-        skillsService.updateSkill(skillsGroup, null)
 
         when:
 
@@ -975,33 +948,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         projects[0].totalPoints == 20
     }
 
-    def "once a skills group is live it cannot have less than 2 skills"() {
-        def proj = SkillsFactory.createProject()
-        def subj = SkillsFactory.createSubject()
-        def allSkills = SkillsFactory.createSkills(3)
-        skillsService.createProject(proj)
-        skillsService.createSubject(subj)
-
-        def skillsGroup = allSkills[0]
-        skillsGroup.type = 'SkillsGroup'
-        skillsService.createSkill(skillsGroup)
-        String skillsGroup1Id = skillsGroup.skillId
-        def group1Children = allSkills[1..2]
-        group1Children.each { skill ->
-            skillsService.assignSkillToSkillsGroup(skillsGroup1Id, skill)
-        }
-        skillsGroup.enabled = 'true'
-        skillsService.updateSkill(skillsGroup, null)
-
-        when:
-        // delete one of the two skills will cause the group to only have one skill left
-        skillsService.deleteSkill(allSkills[2])
-
-        then:
-        def exception = thrown(SkillsClientException)
-        exception.message.contains("A Skill Group must have at least 2 skills in order to be enabled.")
-    }
-
     def "when deleting a child skill, if the numRequired == child.size(), then set numRequired = -1"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
@@ -1017,7 +963,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         group1Children.each { skill ->
             skillsService.assignSkillToSkillsGroup(skillsGroup1Id, skill)
         }
-        skillsGroup.enabled = 'true'
         skillsGroup.numSkillsRequired = 2
         skillsService.updateSkill(skillsGroup, null)
         int numSkillsRequiredBeforeDelete = skillsService.getSkill(skillsGroup).numSkillsRequired
@@ -1033,35 +978,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         numSkillsRequiredAfterDelete == -1
     }
 
-    def "cannot delete a child skill that would cause the group to have less than 2 skills"() {
-        def proj = SkillsFactory.createProject()
-        def subj = SkillsFactory.createSubject()
-        def allSkills = SkillsFactory.createSkills(3)
-        skillsService.createProject(proj)
-        skillsService.createSubject(subj)
-
-        def skillsGroup = allSkills[0]
-        skillsGroup.type = 'SkillsGroup'
-        skillsService.createSkill(skillsGroup)
-        String skillsGroup1Id = skillsGroup.skillId
-        def group1Children = allSkills[1..2]
-        group1Children.each { skill ->
-            skillsService.assignSkillToSkillsGroup(skillsGroup1Id, skill)
-        }
-        skillsGroup.enabled = 'true'
-        skillsService.updateSkill(skillsGroup, null)
-        int numSkillsRequiredBeforeDelete = skillsService.getSkill(skillsGroup).numSkillsRequired
-
-        when:
-        skillsService.deleteSkill(allSkills[2])
-
-        then:
-        numSkillsRequiredBeforeDelete == -1
-        def exception = thrown(SkillsClientException)
-        exception.message.contains("A Skill Group must have at least 2 skills in order to be enabled.")
-    }
-
-    def "can delete a child skill that would cause the group to have less than 2 skills when group is disabled"() {
+    def "can delete a child skill that would cause the group to have less than 2 skills"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def allSkills = SkillsFactory.createSkills(3)
@@ -1076,7 +993,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         group1Children.each { skill ->
             skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
         }
-        skillsGroup.enabled = 'false'
         skillsService.updateSkill(skillsGroup, null)
 
         when:
@@ -1089,132 +1005,20 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         !groupSkillsAfterDelete
     }
 
-    def "deleting child skill of a disabled group will update totalPoints for the group, but not subjects or project"() {
-        def proj = SkillsFactory.createProject()
-        def subj = SkillsFactory.createSubject()
-        def allSkills = SkillsFactory.createSkills(4)
-        skillsService.createProject(proj)
-        skillsService.createSubject(subj)
-
-        def skillsGroup = allSkills[0]
-        skillsGroup.type = 'SkillsGroup'
-        skillsService.createSkill(skillsGroup)
-        def children = allSkills[1..3]
-
-        String skillsGroupId = skillsGroup.skillId
-        skillsService.assignSkillToSkillsGroup(skillsGroupId, children[0])
-        skillsService.assignSkillToSkillsGroup(skillsGroupId, children[1])
-        skillsService.assignSkillToSkillsGroup(skillsGroupId, children[2])
-
-        int skillsGroupPointsBefore = skillsService.getSkill(skillsGroup).totalPoints
-        def subjectsBefore = skillsService.getSubjects(proj.projectId)
-        def projectsBefore = skillsService.getProjects()
-        def subjSkillsBefore = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
-        when:
-
-        skillsService.deleteSkill(children[1])
-
-        int skillsGroupPointsAfter = skillsService.getSkill(skillsGroup).totalPoints
-        def subjectsAfter = skillsService.getSubjects(proj.projectId)
-        def projectsAfter = skillsService.getProjects()
-        def subjSkillsAfter = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
-
-        then:
-        subjSkillsBefore
-        subjSkillsBefore.size() == 1
-        subjSkillsBefore[0].totalPoints == 30
-        skillsGroupPointsBefore == 30
-
-        subjectsBefore
-        subjectsBefore.size() == 1
-        subjectsBefore[0].totalPoints == 0
-
-        projectsBefore
-        projectsBefore.size() == 1
-        projectsBefore[0].totalPoints == 0
-
-
-        subjSkillsAfter
-        subjSkillsAfter.size() == 1
-        subjSkillsAfter[0].totalPoints == 20
-        skillsGroupPointsAfter == 20
-
-        subjectsAfter
-        subjectsAfter.size() == 1
-        subjectsAfter[0].totalPoints == 0
-
-        projectsAfter
-        projectsAfter.size() == 1
-        projectsAfter[0].totalPoints == 0
-    }
-
-    def "numGroups includes enabled groups and numSkills includes child skills for enabled groups child skills but does not include child skills of for disabled groups"() {
-        def proj = SkillsFactory.createProject()
-        def subj = SkillsFactory.createSubject()
-        def allSkills = SkillsFactory.createSkills(7)
-        skillsService.createProject(proj)
-        skillsService.createSubject(subj)
-
-        def skillsGroup1 = allSkills[0]
-        skillsGroup1.type = 'SkillsGroup'
-        skillsService.createSkill(skillsGroup1)
-        def children1 = allSkills[1..2]
-
-        String skillsGroupId1 = skillsGroup1.skillId
-        skillsService.assignSkillToSkillsGroup(skillsGroupId1, children1[0])
-        skillsService.assignSkillToSkillsGroup(skillsGroupId1, children1[1])
-
-        skillsGroup1.enabled = 'true'
-        skillsService.updateSkill(skillsGroup1, null)
-
-        def skillsGroup2 = allSkills[3]
-        skillsGroup2.type = 'SkillsGroup'
-        skillsService.createSkill(skillsGroup2)
-        def children2 = allSkills[4..5]
-
-        String skillsGroupId2 = skillsGroup2.skillId
-        skillsService.assignSkillToSkillsGroup(skillsGroupId2, children2[0])
-        skillsService.assignSkillToSkillsGroup(skillsGroupId2, children2[1])
-
-        skillsGroup2.enabled = 'false'
-        skillsService.updateSkill(skillsGroup2, null)
-
-
-        skillsService.createSkill(allSkills[6])  // regular skill
-
-        when:
-
-        def subjects = skillsService.getSubjects(proj.projectId)
-        def projects = skillsService.getProjects()
-
-        then:
-
-        subjects
-        subjects.size() == 1
-        subjects[0].numSkills == 3  // two group child skills, one regular skill (2 disabled group child skills not included)
-        subjects[0].numGroups == 1  // one enabled, one disabled
-
-        projects
-        projects.size() == 1
-        projects[0].numSkills == 3  // two group child skills, one regular skill (2 disabled group child skills not included)
-        projects[0].numGroups == 1  // one enabled, one disabled
-    }
-
     void "update multiple skills at the same time" () {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
-        def skills = SkillsFactory.createSkills(3)
+        def childSkills = SkillsFactory.createSkills(3)
         def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 5)
-        skillsGroup.numSkillsRequired = skills.size()-1
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
         skillsService.createSkill(skillsGroup)
         String skillsGroupId = skillsGroup.skillId
-        skills.each { skill ->
-            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        childSkills.each { chilsSkill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, chilsSkill)
         }
-        skillsGroup.enabled = 'true'
+        skillsGroup.numSkillsRequired = childSkills.size()-1
         skillsService.updateSkill(skillsGroup, null)
 
         def resBefore = skillsService.getSkill(skillsGroup)
@@ -1223,7 +1027,8 @@ class SkillsGroupSpecs extends DefaultIntSpec {
 
         when:
 
-        skillsService.syncPointsForSkillsGroup(proj.projectId, subj.subjectId, skillsGroupId, [pointIncrement: 100, numPerformToCompletion: skills[0].numPerformToCompletion])
+        int newPointIncrement = 100
+        skillsService.syncPointsForSkillsGroup(proj.projectId, subj.subjectId, skillsGroupId, [pointIncrement: newPointIncrement, numPerformToCompletion: childSkills[0].numPerformToCompletion])
 
         def resAfter = skillsService.getSkill(skillsGroup)
         def groupSkillsAfter = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
@@ -1238,28 +1043,28 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         resBefore.numSelfReportSkills == 0
         resBefore.numSkillsRequired == 2
         resBefore.enabled == true
-        resBefore.totalPoints == 20
+        resBefore.totalPoints == (childSkills.get(0).pointIncrement * childSkills.get(0).numPerformToCompletion) * childSkills.size()
 
         groupSkillsBefore.size() == 3
 
-        groupSkillsBefore.get(0).skillId == skills.get(0).skillId
+        groupSkillsBefore.get(0).skillId == childSkills.get(0).skillId
         groupSkillsBefore.get(0).projectId == proj.projectId
-        groupSkillsBefore.get(0).name == skills.get(0).name
-        groupSkillsBefore.get(0).version == skills.get(0).version
+        groupSkillsBefore.get(0).name == childSkills.get(0).name
+        groupSkillsBefore.get(0).version == childSkills.get(0).version
         groupSkillsBefore.get(0).displayOrder == 1
         groupSkillsBefore.get(0).totalPoints == 10
 
-        groupSkillsBefore.get(1).skillId == skills.get(1).skillId
+        groupSkillsBefore.get(1).skillId == childSkills.get(1).skillId
         groupSkillsBefore.get(1).projectId == proj.projectId
-        groupSkillsBefore.get(1).name == skills.get(1).name
-        groupSkillsBefore.get(1).version == skills.get(1).version
+        groupSkillsBefore.get(1).name == childSkills.get(1).name
+        groupSkillsBefore.get(1).version == childSkills.get(1).version
         groupSkillsBefore.get(1).displayOrder == 2
         groupSkillsBefore.get(1).totalPoints == 10
 
-        groupSkillsBefore.get(2).skillId == skills.get(2).skillId
+        groupSkillsBefore.get(2).skillId == childSkills.get(2).skillId
         groupSkillsBefore.get(2).projectId == proj.projectId
-        groupSkillsBefore.get(2).name == skills.get(2).name
-        groupSkillsBefore.get(2).version == skills.get(2).version
+        groupSkillsBefore.get(2).name == childSkills.get(2).name
+        groupSkillsBefore.get(2).version == childSkills.get(2).version
         groupSkillsBefore.get(2).displayOrder == 3
         groupSkillsBefore.get(2).totalPoints == 10
 
@@ -1271,33 +1076,33 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         resAfter.numSelfReportSkills == 0
         resAfter.numSkillsRequired == 2
         resAfter.enabled == true
-        resAfter.totalPoints == 200
+        resAfter.totalPoints == (newPointIncrement * childSkills.get(0).numPerformToCompletion) * childSkills.size()
 
         groupSkillsAfter.size() == 3
 
-        groupSkillsAfter.get(0).skillId == skills.get(0).skillId
+        groupSkillsAfter.get(0).skillId == childSkills.get(0).skillId
         groupSkillsAfter.get(0).projectId == proj.projectId
-        groupSkillsAfter.get(0).name == skills.get(0).name
-        groupSkillsAfter.get(0).version == skills.get(0).version
+        groupSkillsAfter.get(0).name == childSkills.get(0).name
+        groupSkillsAfter.get(0).version == childSkills.get(0).version
         groupSkillsAfter.get(0).displayOrder == 1
         groupSkillsAfter.get(0).totalPoints == 100
 
-        groupSkillsAfter.get(1).skillId == skills.get(1).skillId
+        groupSkillsAfter.get(1).skillId == childSkills.get(1).skillId
         groupSkillsAfter.get(1).projectId == proj.projectId
-        groupSkillsAfter.get(1).name == skills.get(1).name
-        groupSkillsAfter.get(1).version == skills.get(1).version
+        groupSkillsAfter.get(1).name == childSkills.get(1).name
+        groupSkillsAfter.get(1).version == childSkills.get(1).version
         groupSkillsAfter.get(1).displayOrder == 2
         groupSkillsAfter.get(1).totalPoints == 100
 
-        groupSkillsAfter.get(2).skillId == skills.get(2).skillId
+        groupSkillsAfter.get(2).skillId == childSkills.get(2).skillId
         groupSkillsAfter.get(2).projectId == proj.projectId
-        groupSkillsAfter.get(2).name == skills.get(2).name
-        groupSkillsAfter.get(2).version == skills.get(2).version
+        groupSkillsAfter.get(2).name == childSkills.get(2).name
+        groupSkillsAfter.get(2).version == childSkills.get(2).version
         groupSkillsAfter.get(2).displayOrder == 3
         groupSkillsAfter.get(2).totalPoints == 100
     }
 
-    def "child skills are enabled/disabled with the parent group"() {
+    def "child skills are enabled with the parent group by default"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def allSkills = SkillsFactory.createSkills(3)
@@ -1306,7 +1111,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
 
         def skillsGroup = allSkills[0]
         skillsGroup.type = 'SkillsGroup'
-        skillsGroup.enabled = 'false'
+
         skillsService.createSkill(skillsGroup)
         def children = allSkills[1..2]
 
@@ -1317,26 +1122,12 @@ class SkillsGroupSpecs extends DefaultIntSpec {
 
         when:
 
-        def groupSkillsInitial = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
-        def subjSkillsInitial = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
-        def groupInitial = skillsService.getSkill(skillsGroup)
-        def child1Initial = skillsService.getSkill(children[0])
-        def child2Initial = skillsService.getSkill(children[1])
-
-        skillsGroup.enabled = 'true'
-        skillsService.updateSkill(skillsGroup, null)
-
         def groupSkillsEnabled = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
         def subjSkillsEnabled = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
         def groupEnabled = skillsService.getSkill(skillsGroup)
         def child1Enabled = skillsService.getSkill(children[0])
         def child2Enabled = skillsService.getSkill(children[1])
         then:
-        groupSkillsInitial.every { it.enabled == false }
-        subjSkillsInitial.every { it.enabled == false }
-        groupInitial.enabled == false
-        child1Initial.enabled == false
-        child2Initial.enabled == false
 
         groupSkillsEnabled.every { it.enabled == true }
         subjSkillsEnabled.every { it.enabled == true }
@@ -1345,11 +1136,12 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         child2Enabled.enabled == true
     }
 
-    void "enabled skills under SkillsGroup are returned in project's skills endpoint" () {
+    void "skills under SkillsGroup are returned in project's skills endpoint" () {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
-        def skillsGroup = SkillsFactory.createSkillsGroup()
         def allSkills = SkillsFactory.createSkills(4) // first one is group
+        def skillsGroup = allSkills[0]
+        skillsGroup.type = 'SkillsGroup'
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -1363,24 +1155,17 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         when:
         def res = skillsService.getSkillsForProject(proj.projectId)
 
-        skillsGroup.enabled = true
-        skillsService.createSkill(skillsGroup)
-
-        def res1 = skillsService.getSkillsForProject(proj.projectId)
-
         then:
-        res.size() == 1
-        res.collect { it.skillId }.sort() == [ allSkills[3].skillId, ]
-
-        res1.size() == 3
-        res1.collect { it.skillId }.sort() == [ allSkills[1].skillId, allSkills[2].skillId, allSkills[3].skillId, ]
+        res.size() == 3
+        res.collect { it.skillId }.sort() == [ allSkills[1].skillId, allSkills[2].skillId, allSkills[3].skillId, ]
     }
 
-    void "enabled skills under SkillsGroup are available to be used as dependencies" () {
+    void "skills under SkillsGroup are available to be used as dependencies" () {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
-        def skillsGroup = SkillsFactory.createSkillsGroup()
         def allSkills = SkillsFactory.createSkills(4) // first one is group
+        def skillsGroup = allSkills[0]
+        skillsGroup.type = 'SkillsGroup'
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -1394,17 +1179,10 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         when:
         def res = skillsService.getSkillsAvailableForDependency(proj.projectId)
 
-        skillsGroup.enabled = true
-        skillsService.createSkill(skillsGroup)
-
-        def res1 = skillsService.getSkillsAvailableForDependency(proj.projectId)
-
         then:
-        res.size() == 1
-        res.collect { it.skillId }.sort() == [allSkills[3].skillId, ]
 
-        res1.size() == 3
-        res1.collect { it.skillId }.sort() == [ allSkills[1].skillId, allSkills[2].skillId, allSkills[3].skillId, ]
+        res.size() == 3
+        res.collect { it.skillId }.sort() == [ allSkills[1].skillId, allSkills[2].skillId, allSkills[3].skillId, ]
     }
 
     @Autowired
@@ -1413,8 +1191,9 @@ class SkillsGroupSpecs extends DefaultIntSpec {
     void "subject-to-skill SkillRelDef is removed when skill is deleted" () {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
-        def skillsGroup = SkillsFactory.createSkillsGroup()
         def allSkills = SkillsFactory.createSkills(4) // first one is group
+        def skillsGroup = allSkills[0]
+        skillsGroup.type = 'SkillsGroup'
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -1453,7 +1232,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[1])
         skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[2])
 
-        skillsGroup.enabled = 'true'
         skillsService.updateSkill(skillsGroup, null)
 
         List<String> users = getRandomUsers(7)
@@ -1605,7 +1383,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[2])
         skillsService.createSkill(allSkills[3])
 
-        skillsGroup.enabled = 'true'
         skillsService.updateSkill(skillsGroup, null)
 
         List<String> users = getRandomUsers(7)
@@ -1630,38 +1407,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         approvalsHistoryPg1.data.size() == 2
     }
 
-    def "cannot disable a group once it has been enabled"() {
-        def proj = SkillsFactory.createProject()
-        def subj = SkillsFactory.createSubject()
-        def skillsGroup = SkillsFactory.createSkillsGroup()
-        def allSkills = SkillsFactory.createSkills(4) // first one is group
-        allSkills[1].selfReportingType = SkillDef.SelfReportingType.Approval
-        allSkills[2].selfReportingType = SkillDef.SelfReportingType.Approval
-        allSkills[1].pointIncrement = 1
-        allSkills[2].pointIncrement = 1
-        allSkills[3].pointIncrement = 500
-
-        skillsService.createProject(proj)
-        skillsService.createSubject(subj)
-        skillsService.createSkill(skillsGroup)
-        String skillsGroupId = skillsGroup.skillId
-        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[1])
-        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[2])
-        skillsService.createSkill(allSkills[3])
-
-        skillsGroup.enabled = 'true'
-        skillsService.updateSkill(skillsGroup, null)
-
-        when:
-        skillsGroup.enabled = 'false'
-        skillsService.updateSkill(skillsGroup, null)
-        skillsService.getSkill([projectId: proj.projectId, subjectId: subj.subjectId, skillId: skillsGroupId])
-
-        then:
-        def e = thrown(Exception)
-        e.message.contains("Cannot disable SkillsGroup [skill1] once it has been enabled")
-    }
-
     def "removing an event for a skill under a group must adjust users group, subject and project points"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
@@ -1680,7 +1425,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[1])
         skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[2])
         skillsService.createSkill(allSkills[3])
-        skillsGroup.enabled = 'true'
         skillsService.updateSkill(skillsGroup, null)
 
         // 2nd group
@@ -1699,7 +1443,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         skillsService.assignSkillToSkillsGroup(skillsGroupId1, allSkills[4])
         skillsService.assignSkillToSkillsGroup(skillsGroupId1, allSkills[5])
         skillsService.assignSkillToSkillsGroup(skillsGroupId1, allSkills[6])
-        skillsGroup2.enabled = 'true'
         skillsService.updateSkill(skillsGroup2, null)
 
         // 2nd subject
@@ -1761,16 +1504,16 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         then:
         u0_s1_t0.points == [300]
         u0_s2_t0.points == [200]
-        u0_g1_t0.points == [500]
-        u0_g2_t0.points == [231]
+        !u0_g1_t0.points
+        !u0_g2_t0.points
         u0_subj1_t0.points == [500 + 231]
         u0_subj2_t0.points == [30]
         u0_p1_t0.points == [500 + 231 + 30]
 
         u0_s1_t1.points == [200]
         u0_s2_t1.points == [200]
-        u0_g1_t1.points == [400]
-        u0_g2_t1.points == [231]
+        !u0_g1_t1.points
+        !u0_g2_t1.points
         u0_subj1_t1.points == [400 + 231]
         u0_subj2_t1.points == [30]
         u0_p1_t1.points == [400 + 231 + 30]
@@ -1793,7 +1536,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[2])
         skillsService.createSkill(allSkills[3])
 
-        skillsGroup.enabled = 'true'
         skillsService.updateSkill(skillsGroup, null)
         def user = getRandomUsers(1)[0]
 

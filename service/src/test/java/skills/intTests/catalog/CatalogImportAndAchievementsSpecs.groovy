@@ -27,7 +27,6 @@ import skills.storage.model.UserPerformedSkill
 import skills.storage.model.UserPoints
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
-import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -41,6 +40,9 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
 
     @Autowired
     SkillDefRepo skillDefRepo
+
+    @Autowired
+    UserAchievedLevelRepo achievedRepo
 
     def "reporting original skill event achieves level in all of the imported projects"() {
         def project1 = createProject(1)
@@ -1317,6 +1319,107 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
         proj2_user3Achievements_subj1_import2.collect { it.level }.sort() == [1, 2, 3]
         proj2_user3Achievements_subj2_import2.collect { it.level }.sort() == [1]
         proj2_user3Achievements_subj3_import2.collect { it.level }.sort() == []
+    }
+
+    def "achieve a skill group via a catalog import"() {
+        def project1 = createProjWithCatalogSkills(1)
+        def project2 = createProjWithCatalogSkills(2)
+
+        def p2Group1 = createSkillsGroup(2, 1, 77)
+        String skillsGroupId = p2Group1.skillId
+        skillsService.createSkill(p2Group1)
+
+        // add a regular/non-imported child skill to the group
+        def child1 = SkillsFactory.createSkill(2)
+        String regChildSkillId = child1.skillId
+        child1.numPerformToCompletion = 2
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, child1)
+
+        // add an imported child skill to the group
+        skillsService.bulkImportSkillsIntoGroupFromCatalogAndFinalize(project2.p.projectId, project1.s2.subjectId, skillsGroupId,
+                [[projectId: project1.p.projectId, skillId: project1.s1_skills[0].skillId]])
+        String importedChildSkillId = project1.s1_skills[0].skillId
+
+        def randomUsers = getRandomUsers(3)
+        def user = randomUsers[0]
+
+        when:
+        // achieve non-imported child skill
+        def sum1 = skillsService.getSkillSummary(user, project2.p.projectId, p2Group1.subjectId)
+        skillsService.addSkill(child1, user, new Date() - 1)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        def skill1CompletedRes = skillsService.addSkill(child1, user)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        def sum2 = skillsService.getSkillSummary(user, project2.p.projectId, p2Group1.subjectId)
+
+        // achieve imported child skill
+        skillsService.addSkill([projectId: project1.p.projectId, skillId:project1.s1_skills[0].skillId], user, new Date() - 1)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        def skill2CompletedRes = skillsService.addSkill([projectId: project1.p.projectId, skillId:project1.s1_skills[0].skillId], user)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        def sum3 = skillsService.getSkillSummary(user, project2.p.projectId, p2Group1.subjectId)
+
+        List<UserAchievement> groupAchievements = achievedRepo.findAllByUserIdAndProjectIdAndSkillId(user, project2.p.projectId, skillsGroupId)
+
+        then:
+        skill1CompletedRes.body.completed.find { it.type == "Skill" && it.id == regChildSkillId }
+        skill2CompletedRes.body.completed.find { it.type == "Skill" && it.id == importedChildSkillId }
+
+        groupAchievements
+        groupAchievements.size() == 1
+        groupAchievements[0].userId == user
+        groupAchievements[0].projectId == project2.p.projectId
+        groupAchievements[0].skillId == skillsGroupId
+
+        sum1.points == 0
+        sum1.skills.find { it.skillId == skillsGroupId }.points == 0
+
+        sum2.points == 20
+        sum2.skills.find { it.skillId == skillsGroupId }.points == 20
+
+        sum3.points == 220
+        sum3.skills.find { it.skillId == skillsGroupId }.points == 220
+    }
+
+    def "achieve a skill group via a catalog import, skill has already been completed in exported project prior to import"() {
+        def project1 = createProjWithCatalogSkills(1)
+        def project2 = createProjWithCatalogSkills(2)
+
+        def randomUsers = getRandomUsers(3)
+        def user = randomUsers[0]
+
+        // achieve imported child skill
+        skillsService.addSkill([projectId: project1.p.projectId, skillId:project1.s1_skills[0].skillId], user, new Date() - 1)
+        def skill2CompletedRes = skillsService.addSkill([projectId: project1.p.projectId, skillId:project1.s1_skills[0].skillId], user)
+
+        def p2Group1 = createSkillsGroup(2, 1, 77)
+        String skillsGroupId = p2Group1.skillId
+        skillsService.createSkill(p2Group1)
+
+        // add an imported child skill to the group and finalize
+        skillsService.bulkImportSkillsIntoGroupFromCatalogAndFinalize(project2.p.projectId, project1.s2.subjectId, skillsGroupId,
+                [[projectId: project1.p.projectId, skillId: project1.s1_skills[0].skillId]])
+        String importedChildSkillId = project1.s1_skills[0].skillId
+
+
+        when:
+        List<UserAchievement> childSkillAchievements = achievedRepo.findAllByUserIdAndProjectIdAndSkillId(user, project2.p.projectId, importedChildSkillId)
+        List<UserAchievement> groupAchievements = achievedRepo.findAllByUserIdAndProjectIdAndSkillId(user, project2.p.projectId, skillsGroupId)
+
+        then:
+        skill2CompletedRes.body.completed.find { it.type == "Skill" && it.id == importedChildSkillId }
+
+        childSkillAchievements
+        childSkillAchievements.size() == 1
+        childSkillAchievements[0].userId == user
+        childSkillAchievements[0].projectId == project2.p.projectId
+        childSkillAchievements[0].skillId == importedChildSkillId
+
+        groupAchievements
+        groupAchievements.size() == 1
+        groupAchievements[0].userId == user
+        groupAchievements[0].projectId == project2.p.projectId
+        groupAchievements[0].skillId == skillsGroupId
     }
 
     def "achieve a badge via a catalog import"() {

@@ -137,19 +137,16 @@ class SkillsAdminService {
             }
         }
 
-        // if enabled, validate and update points and achievements
-        if (Boolean.valueOf(skillsGroupSkillDef.enabled)) {
-            // need to validate skills group
-            skillsGroupAdminService.validateSkillsGroupAndReturnChildren(skillsGroupSkillDef.numSkillsRequired, true, skillsGroupSkillDef.id)
-            groupChildSkills.each {childSkillDef ->
-                final int incrementRequested = pointIncrement
-                final int currentOccurrences = (origAttrs.get(childSkillDef)[0] / origAttrs.get(childSkillDef)[1])
-                final int occurrencesDelta = patchRequest.numPerformToCompletion - currentOccurrences
-                final int pointIncrementDelta = incrementRequested - pointIncrement
-                log.debug("Rebuilding scores for [${}]", childSkillDef.skillId)
-                ruleSetDefinitionScoreUpdater.updateFromLeaf(childSkillDef)
-                updatePointsAndAchievements(childSkillDef, subjectId, pointIncrementDelta, occurrencesDelta, currentOccurrences, 0, skillsGroupSkillDef, groupChildSkills)
-            }
+        // need to validate skills group
+        skillsGroupAdminService.validateSkillsGroupAndReturnChildren(skillsGroupSkillDef.numSkillsRequired, skillsGroupSkillDef.id)
+        groupChildSkills.each { childSkillDef ->
+            final int incrementRequested = pointIncrement
+            final int currentOccurrences = (origAttrs.get(childSkillDef)[0] / origAttrs.get(childSkillDef)[1])
+            final int occurrencesDelta = patchRequest.numPerformToCompletion - currentOccurrences
+            final int pointIncrementDelta = incrementRequested - pointIncrement
+            log.debug("Rebuilding scores for [${}]", childSkillDef.skillId)
+            ruleSetDefinitionScoreUpdater.updateFromLeaf(childSkillDef)
+            updatePointsAndAchievements(childSkillDef, subjectId, pointIncrementDelta, occurrencesDelta, currentOccurrences, 0, skillsGroupSkillDef, groupChildSkills)
         }
     }
 
@@ -222,11 +219,6 @@ class SkillsAdminService {
         List<SkillDef> groupChildSkills = null
         if (isEdit) {
             validateImportedSkillUpdate(skillRequest, skillDefinition)
-            // can't disable a skill/skillgroup once it's been enabled
-            if (isCurrentlyEnabled && (StringUtils.isNotBlank(skillRequest.enabled) && !isEnabledSkillInRequest)) {
-                throw new SkillException("Cannot disable ${skillDefinition.type} [${skillRequest.skillId}] once it has been enabled", skillRequest.projectId, skillRequest.skillId)
-            }
-
             // for updates, use the existing value if it is not set on the skillRequest (null or empty String)
             if (StringUtils.isBlank(skillRequest.enabled)) {
                 skillRequest.enabled = skillDefinition.enabled
@@ -234,7 +226,7 @@ class SkillsAdminService {
             if (isSkillsGroup) {
                 // need to update total points for the group
                 groupChildSkills = skillsGroupAdminService.validateSkillsGroupAndReturnChildren(skillRequest, skillDefinition)
-                totalPointsRequested = skillsGroupAdminService.getGroupTotalPoints(groupChildSkills, skillRequest.numSkillsRequired)
+                totalPointsRequested = skillsGroupAdminService.getGroupTotalPoints(groupChildSkills)
 
                 if (isEnabledSkillInRequest && skillDefinition.numSkillsRequired != skillRequest.numSkillsRequired) {
                     int currentNumSkillsRequired = skillDefinition.numSkillsRequired == -1 ? groupChildSkills.size() : skillDefinition.numSkillsRequired
@@ -242,22 +234,10 @@ class SkillsAdminService {
                     numSkillsRequiredDelta = requestedNumSkillsRequired - currentNumSkillsRequired
                 }
 
-                boolean enabledChanged = Boolean.valueOf(skillDefinition.enabled) != isEnabledSkillInRequest
                 boolean skillIdChanged = skillDefinition.skillId != skillRequest.skillId
-                if (enabledChanged || skillIdChanged) {
-                    // validate that the Group's skills won't exceed the maximum allowed when publishing the group
-                    if (isEnabledSkillInRequest) {
-                        String parentSkillId = skillRequest.subjectId
-                        SkillDef groupSubject = skillDefRepo.findByProjectIdAndSkillIdAndType(skillRequest.projectId, parentSkillId, SkillDef.ContainerType.Subject)
-                        assert groupSubject, "Subject [${parentSkillId}] does not exist"
-
-                        createdResourceLimitsValidator.validateNumSkillsCreated(groupSubject, groupChildSkills.size())
-                    }
-                    // need to update child skills:
-                    //   - enabling or disabling
-                    //   - skillId changed
+                if (skillIdChanged) {
+                    // need to update child skills since group skillId changed
                     groupChildSkills.each {
-                        it.enabled = skillRequest.enabled
                         it.groupId = skillRequest.skillId
                     }
                     skillDefRepo.saveAll(groupChildSkills)
@@ -296,13 +276,12 @@ class SkillsAdminService {
 
             Integer highestDisplayOrder = skillDefRepo.calculateChildSkillsHighestDisplayOrder(skillRequest.projectId, groupId ?: parentSkillId)
             int displayOrder = highestDisplayOrder == null ? 1 : highestDisplayOrder + 1
-            String enabled = isSkillsGroup ? Boolean.FALSE.toString() : isEnabledSkillInRequest.toString()
+            String enabled = isEnabledSkillInRequest.toString()
             if (isSkillsGroupChild) {
                 skillsGroupSkillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, groupId, SkillDef.ContainerType.SkillsGroup)
                 if (!skillsGroupSkillDef) {
                     throw new SkillException("[${groupId}] groupId was not found.".toString(), skillRequest.projectId, skillRequest.skillId, ErrorCode.BadParam)
                 }
-                enabled = skillsGroupSkillDef.enabled
             }
             skillDefinition = new SkillDefWithExtra(
                     skillId: skillRequest.skillId,
@@ -357,7 +336,7 @@ class SkillsAdminService {
             if (!skillsGroupSkillDef) {
                 skillsGroupSkillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, groupId, SkillDef.ContainerType.SkillsGroup)
             }
-            groupChildSkills = skillsGroupAdminService.validateSkillsGroupAndReturnChildren(skillsGroupSkillDef.numSkillsRequired, Boolean.valueOf(skillsGroupSkillDef.enabled), skillsGroupSkillDef.id)
+            groupChildSkills = skillsGroupAdminService.validateSkillsGroupAndReturnChildren(skillsGroupSkillDef.numSkillsRequired, skillsGroupSkillDef.id)
         }
 
         if (shouldRebuildScores) {
@@ -503,16 +482,16 @@ class SkillsAdminService {
         // make sure skills group is still valid and update group's totalPoints
         if (skillDefinition.groupId) {
             assert parentSkill.type == SkillDef.ContainerType.SkillsGroup
-            List<SkillDef> children = skillsGroupAdminService.validateCanDeleteChildSkillAndReturnChildren(parentSkill)
+            List<SkillDef> children = skillsGroupAdminService.getSkillsGroupChildSkills(parentSkill.id)
             if (children.size() == parentSkill.numSkillsRequired) {
                 parentSkill.numSkillsRequired = -1
             }
-            parentSkill.totalPoints = skillsGroupAdminService.getGroupTotalPoints(children, parentSkill.numSkillsRequired)
+            parentSkill.totalPoints = skillsGroupAdminService.getGroupTotalPoints(children)
             DataIntegrityExceptionHandlers.skillDataIntegrityViolationExceptionHandler.handle(projectId, skillId) {
                 skillDefWithExtraRepo.save(parentSkill)
             }
 
-            if (Boolean.valueOf(parentSkill.enabled)) {
+            if (children) {
                 int numSkillsRequired = parentSkill.numSkillsRequired == -1 ? children.size() : parentSkill.numSkillsRequired
                 userPointsManagement.insertUserAchievementWhenDecreaseOfSkillsRequiredCausesUsersToAchieve(projectId, parentSkill.skillId, parentSkill.id, children.collect { it.skillId }, numSkillsRequired)
             }

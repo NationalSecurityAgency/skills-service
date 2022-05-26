@@ -512,10 +512,10 @@ class AdminController {
             propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.descriptionMaxLength, "Skill Description", skillRequest.description)
             skillRequest.description = InputSanitizer.sanitize(skillRequest.description)
             skillRequest.helpUrl = InputSanitizer.sanitizeUrl(skillRequest.helpUrl)
-
-            // default to enabled
-            skillRequest.enabled = skillRequest.enabled  == null ? "true" : skillRequest.enabled
         }
+
+        // default to enabled
+        skillRequest.enabled = skillRequest.enabled == null ? "true" : skillRequest.enabled
 
         saveSkillService.saveSkillAndSchedulePropagationToImportedSkills(skillId, skillRequest, true, groupId)
     }
@@ -1135,8 +1135,8 @@ class AdminController {
 
     @RequestMapping(value="/projects/{projectId}/subjects/{subjectId}/import", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
     RequestResult bulkImportSkillFromCatalog(@PathVariable("projectId") String projectId,
-                                       @PathVariable("subjectId") String subjectId,
-                                       @RequestBody List<CatalogSkill> bulkImport) {
+                                             @PathVariable("subjectId") String subjectId,
+                                             @RequestBody List<CatalogSkill> bulkImport) {
         SkillsValidator.isNotBlank(projectId, "projectId")
         SkillsValidator.isNotBlank(subjectId, "subjectId")
         SkillsValidator.isTrue(bulkImport?.size() <= maxBulkImport, "Bulk imports are limited to no more than ${maxBulkImport} Skills at once", projectId)
@@ -1146,10 +1146,27 @@ class AdminController {
         return success
     }
 
-    @RequestMapping(value="/projects/{projectId}/import/skills/{skillId}", method = [RequestMethod.PATCH], produces = "application/json")
+
+    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/groups/{groupId}/import", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
+    RequestResult bulkImportSkillsUnderGroupFromCatalog(@PathVariable("projectId") String projectId,
+                                                        @PathVariable("subjectId") String subjectId,
+                                                        @PathVariable("groupId") String groupId,
+                                                        @RequestBody List<CatalogSkill> bulkImport) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        SkillsValidator.isNotBlank(subjectId, "subjectId")
+        SkillsValidator.isNotBlank(groupId, "groupId")
+        SkillsValidator.isTrue(bulkImport?.size() <= maxBulkImport, "Bulk imports are limited to no more than ${maxBulkImport} Skills at once", projectId)
+        skillCatalogService.importSkillsFromCatalog(projectId, subjectId, bulkImport, groupId)
+        RequestResult success = RequestResult.success()
+        success.explanation = "imported [${bulkImport?.size()}] skills from the catalog into [${projectId}] - [${subjectId}] - [${groupId}]"
+        return success
+    }
+
+
+    @RequestMapping(value = "/projects/{projectId}/import/skills/{skillId}", method = [RequestMethod.PATCH], produces = "application/json")
     RequestResult updatedImportedSkill(@PathVariable("projectId") String projectId,
-                                             @PathVariable("skillId") String skillId,
-                                             @RequestBody ImportedSkillUpdate update) {
+                                       @PathVariable("skillId") String skillId,
+                                       @RequestBody ImportedSkillUpdate update) {
         SkillsValidator.isNotBlank(projectId, "projectId")
         SkillsValidator.isNotBlank(skillId, "skillId")
         skillCatalogService.updateImportedSkill(projectId, skillId, update)

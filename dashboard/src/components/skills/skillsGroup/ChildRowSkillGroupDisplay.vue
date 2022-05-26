@@ -21,30 +21,10 @@ limitations under the License.
         <markdown-text :text="description" />
       </b-card>
 
-      <b-card body-class="p-0 card-bg" >
-        <div class="row px-3 my-2">
-          <div class="col">
+      <b-card body-class="p-0 card-bg">
+        <div class="row px-3 mb-2 mt-1">
+          <div class="col mt-1">
             <div class="row align-items-center">
-              <div class="col-lg-auto border-right" data-cy="skillGroupStatus">
-                <div v-if="this.group.enabled">
-                  <span class="font-italic">Status: </span> <span class="text-uppercase"><b-badge variant="success">Live <span class="far fa-check-circle" aria-hidden="true"/></b-badge></span>
-                </div>
-                <div v-if="!this.group.enabled">
-                  <span class="font-italic">Status: </span>
-                  <span class="text-uppercase mr-1"><b-badge variant="warning">Disabled</b-badge></span>
-                  <span v-b-tooltip.hover="goLiveToolTipText" :aria-label="goLiveToolTipText">
-                    <b-button variant="outline-info" size="sm" data-cy="goLiveBtn"
-                              @click="enableGroup"
-                              :disabled="lessThanTwoSkills || goLiveDisabled">
-                      <i class="fas fa-glass-cheers"></i> Go Live
-                    </b-button>
-                    <i v-if="goLiveDisabled" class="fas fa-exclamation-circle text-warning ml-1 mr-1"
-                       style="pointer-events: all; font-size: 1.5rem;"
-                       :aria-label="disabledMessage"
-                       v-b-tooltip.hover="disabledMessage"/>
-                  </span>
-                </div>
-              </div>
               <div class="col-lg mt-2 mt-lg-0" data-cy="requiredSkillsSection">
                 <b-form inline>
                   <span>
@@ -62,7 +42,8 @@ limitations under the License.
                             @click="showEditRequiredSkillsDialog"
                             :disabled="lessThanTwoSkills"
                             :aria-label="'Edit Number of Required skills for '+ group.name + ' group'"
-                            data-cy="editRequired" class="ml-2"><i class="far fa-edit"  aria-hidden="true"></i></b-button>
+                            data-cy="editRequired" class="ml-2"><i class="far fa-edit"
+                                                                   aria-hidden="true"></i></b-button>
                   </span>
 
                 </b-form>
@@ -70,39 +51,56 @@ limitations under the License.
               </div>
             </div>
           </div>
-          <div class="col-auto text-right">
-            <i v-if="addDisabled" class="fas fa-exclamation-circle text-warning ml-1 mr-1" style="pointer-events: all; font-size: 1.5rem;" v-b-tooltip.hover="addDisabledMessage"/>
-            <b-button :id="`group-${group.skillId}_newSkillBtn`" :ref="`group-${group.skillId}_newSkillBtn`" variant="outline-info" size="sm"
+          <div class="col-auto text-right mt-1">
+            <b-button :id="`group-${group.skillId}_importSkillBtn`" :ref="`group-${group.skillId}_importSkillBtn`"
+                      variant="outline-info" size="sm"
+                      @click="importCatalog.show=true"
+                      :data-cy="`importSkillToGroupBtn-${group.skillId}`" class="ml-1">
+              <span class="">Import<span class="d-none d-md-inline"> Skills to Group</span></span> <i
+              class="fas fa-book" aria-hidden="true"/>
+            </b-button>
+            <i v-if="addDisabled" class="fas fa-exclamation-circle text-warning ml-1 mr-1"
+               style="pointer-events: all; font-size: 1.5rem;" v-b-tooltip.hover="addDisabledMessage"/>
+            <b-button :id="`group-${group.skillId}_newSkillBtn`" :ref="`group-${group.skillId}_newSkillBtn`"
+                      variant="outline-info" size="sm"
                       @click="showNewSkillDialog"
                       :disabled="addDisabled"
-                    :data-cy="`addSkillToGroupBtn-${group.skillId}`" class="ml-1">
-              <span class="">Add Skill to Group</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
+                      :data-cy="`addSkillToGroupBtn-${group.skillId}`" class="ml-1">
+              <span class=""><span class="d-none d-md-inline">Add </span>Skill<span
+                class="d-none d-md-inline"> to Group</span></span> <i class="fas fa-plus-circle" aria-hidden="true"/>
             </b-button>
           </div>
         </div>
-        <div class="mt-3">
+        <hr class="w-100 mb-1"/>
+        <div class="">
           <skills-table :table-id="`groupSkills_${this.group.skillId}`" :ref="`groupSkills_${this.group.skillId}`"
-                    :skills-prop="skills" :is-top-level="true"
-                    :project-id="this.$route.params.projectId"
-                    :subject-id="this.$route.params.subjectId"
-                    @skill-removed="skillRemoved"
-                    @skills-change="skillChanged"
-                    :disableDeleteButtonsInfo="disableDeleteButtonInfo"
-                    :page-size="this.maxSkillsToShow"
-                    :can-edit-points="canEditPoints" :can-edit-points-msg="canEditPointsMsg()"
+                        :skills-prop="skills" :is-top-level="true"
+                        :project-id="this.$route.params.projectId"
+                        :subject-id="this.$route.params.subjectId"
+                        @skill-removed="skillRemoved"
+                        @skills-change="skillChanged"
+                        :disableDeleteButtonsInfo="disableDeleteButtonInfo"
+                        :page-size="this.maxSkillsToShow"
+                        actions-btn-size="sm"
+                        :can-edit-points="canEditPoints" :can-edit-points-msg="canEditPointsMsg()"
                         :show-search="false" :show-header="false" :show-paging="false"/>
         </div>
       </b-card>
     </div>
   </loading-container>
 
-  <edit-skill v-if="editSkillInfo.show" v-model="editSkillInfo.show" :is-copy="editSkillInfo.isCopy" :is-edit="editSkillInfo.isEdit"
-              :project-id="editSkillInfo.skill.projectId" :subject-id="editSkillInfo.skill.subjectId" :group-id="this.group.skillId"
-              :can-edit-points="canEditPoints" :can-edit-points-msg="canEditPointsMsg()" :new-skill-default-values="defaultNewSkillValues()"
+  <edit-skill v-if="editSkillInfo.show" v-model="editSkillInfo.show" :is-copy="editSkillInfo.isCopy"
+              :is-edit="editSkillInfo.isEdit"
+              :project-id="editSkillInfo.skill.projectId" :subject-id="editSkillInfo.skill.subjectId"
+              :group-id="this.group.skillId"
+              :can-edit-points="canEditPoints" :can-edit-points-msg="canEditPointsMsg()"
+              :new-skill-default-values="defaultNewSkillValues()"
               @skill-saved="saveSkill" @hidden="focusOnNewSkillButton"/>
   <edit-num-required-skills v-if="editRequiredSkillsInfo.show" v-model="editRequiredSkillsInfo.show"
                             :group="group" :skills="skills" @group-changed="handleNumRequiredSkillsChanged"
-              @skills-updated="handleSkillsUpdate"/>
+                            @skills-updated="handleSkillsUpdate"/>
+  <import-from-catalog v-if="importCatalog.show" v-model="importCatalog.show" :current-project-skills="skills"
+                       @to-import="importFromCatalog" @hidden="focusOnImportFromCatalogButton"/>
 </div>
 </template>
 
@@ -114,13 +112,20 @@ limitations under the License.
   import MsgBoxMixin from '../../utils/modal/MsgBoxMixin';
   import EditNumRequiredSkills from './EditNumRequiredSkills';
   import MarkdownText from '../../utils/MarkdownText';
+  import ImportFromCatalog from '../catalog/ImportFromCatalog';
+  import CatalogService from '../catalog/CatalogService';
 
-  const { mapActions, mapGetters } = createNamespacedHelpers('subjects');
+  const {
+    mapActions,
+    mapGetters,
+  } = createNamespacedHelpers('subjects');
+  const finalizeInfo = createNamespacedHelpers('finalizeInfo');
 
   export default {
     name: 'ChildRowSkillGroupDisplay',
     mixins: [MsgBoxMixin],
     components: {
+      ImportFromCatalog,
       MarkdownText,
       EditNumRequiredSkills,
       LoadingContainer,
@@ -141,6 +146,9 @@ limitations under the License.
         skills: [],
         description: null,
         editRequiredSkillsInfo: {
+          show: false,
+        },
+        importCatalog: {
           show: false,
         },
       };
@@ -185,15 +193,11 @@ limitations under the License.
       },
       disableDeleteButtonInfo() {
         let res = null;
-        if (this.group.enabled) {
-          if (this.group.numSkillsRequired > 0 && this.group.numSkillsRequired === this.skills.length) {
-            res = {
-              minNumSkills: this.group.numSkillsRequired,
-              tooltip: 'Cannot delete! Cannot go below the number of the required skills.',
-            };
-          } else {
-            res = { minNumSkills: 2, tooltip: 'Cannot delete! Groups that went Live must have at least 2 skill.' };
-          }
+        if (this.group.numSkillsRequired > 0 && this.group.numSkillsRequired === this.skills.length) {
+          res = {
+            minNumSkills: this.group.numSkillsRequired,
+            tooltip: 'Cannot delete! Cannot go below the number of the required skills.',
+          };
         }
         return res;
       },
@@ -231,6 +235,9 @@ limitations under the License.
       ...mapActions([
         'loadSubjectDetailsState',
       ]),
+      ...finalizeInfo.mapActions([
+        'loadFinalizeInfo',
+      ]),
       canEditPointsMsg() {
         return (this.group.numSkillsRequired === -1) ? null : 'Points CANNOT be modified when group\'s number of the required skill is set.';
       },
@@ -241,14 +248,20 @@ limitations under the License.
         SkillsService.getSkillDetails(this.group.projectId, this.group.subjectId, this.group.skillId)
           .then((res) => {
             this.description = res.description;
-          }).finally(() => {
+          })
+          .finally(() => {
             this.loading.details = false;
           });
 
-        SkillsService.getGroupSkills(this.group.projectId, this.group.skillId)
+        this.loadGroupSkills();
+      },
+      loadGroupSkills() {
+        this.loading.skills = true;
+        return SkillsService.getGroupSkills(this.group.projectId, this.group.skillId)
           .then((res) => {
             this.setInternalSkills(res);
-          }).finally(() => {
+          })
+          .finally(() => {
             this.loading.skills = false;
           });
       },
@@ -259,7 +272,10 @@ limitations under the License.
       },
       setInternalSkills(skillsParam) {
         this.numSkills = skillsParam.length;
-        this.skills = skillsParam.map((skill) => ({ ...skill, subjectId: this.group.subjectId }));
+        this.skills = skillsParam.map((skill) => ({
+          ...skill,
+          subjectId: this.group.subjectId,
+        }));
       },
       showNewSkillDialog() {
         this.editSkillInfo = {
@@ -375,6 +391,29 @@ limitations under the License.
           pointIncrement: this.skills[0].pointIncrement,
           numPerformToCompletion: this.skills[0].numPerformToCompletion,
         };
+      },
+      importFromCatalog(skillsInfoToImport) {
+        this.loading.skills = true;
+        CatalogService.bulkImportIntoGroup(this.$route.params.projectId, this.$route.params.subjectId, this.group.skillId, skillsInfoToImport)
+          .then(() => {
+            this.loadGroupSkills()
+              .then(() => {
+                this.focusOnImportFromCatalogButton();
+              });
+            this.loadSubjectDetailsState({
+              projectId: this.$route.params.projectId,
+              subjectId: this.$route.params.subjectId,
+            });
+            this.loadFinalizeInfo({ projectId: this.$route.params.projectId });
+          });
+      },
+      focusOnImportFromCatalogButton() {
+        const ref = this.$refs[`group-${this.group.skillId}_importSkillBtn`];
+        this.$nextTick(() => {
+          if (ref) {
+            ref.focus();
+          }
+        });
       },
     },
   };

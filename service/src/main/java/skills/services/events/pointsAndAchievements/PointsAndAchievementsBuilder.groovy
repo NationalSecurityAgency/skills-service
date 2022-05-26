@@ -62,7 +62,9 @@ class PointsAndAchievementsBuilder {
 
         loadedData.parentDefs.each { SkillEventsSupportRepo.TinySkillDef parentSkillDef ->
             // if needed, create user points for parents
-            dataToSave.toSave.addAll(createUserPointsIfNeeded(parentSkillDef.id, parentSkillDef.skillId))
+            if (parentSkillDef.type != SkillDef.ContainerType.SkillsGroup) {
+                dataToSave.toSave.addAll(createUserPointsIfNeeded(parentSkillDef.id, parentSkillDef.skillId))
+            }
         }
         handleSubjectAchievement(loadedData.parentDefs)
 

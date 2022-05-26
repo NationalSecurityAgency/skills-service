@@ -102,50 +102,22 @@ class SkillsGroupAdminService {
             throw new SkillException("Cannot convert an existing Skill to a Skill Group, or existing Skill Group to Skill.")
         }
         int numSkillsRequired = skillRequest.numSkillsRequired
-        boolean enabled = Boolean.valueOf(skillRequest.enabled)
         Integer skillsGroupIdRef = skillDefinition.id
-        return validateSkillsGroupAndReturnChildren(numSkillsRequired, enabled, skillsGroupIdRef)
+        return validateSkillsGroupAndReturnChildren(numSkillsRequired, skillsGroupIdRef)
     }
 
     @Profile
-    List<SkillDef> validateSkillsGroupAndReturnChildren(Integer numSkillsRequired, boolean enabled, Integer skillsGroupIdRef) {
+    List<SkillDef> validateSkillsGroupAndReturnChildren(Integer numSkillsRequired,Integer skillsGroupIdRef) {
         List<SkillDef> groupChildSkills = getSkillsGroupChildSkills(skillsGroupIdRef)
-        if (enabled) {
-            if (numSkillsRequired == 0) {
-                throw new SkillException("A Skill Group must have at least 1 required skill in order to be enabled.")
-            } else {
-                int numChildSkills = groupChildSkills.size()
-                if (numChildSkills < 2) {
-                    throw new SkillException("A Skill Group must have at least 2 skills in order to be enabled.")
-                }
-                if (numSkillsRequired > numChildSkills) {
-                    throw new SkillException("A Skill Group cannot require more skills than the number of skills that belong to the group.")
-                }
-                if (numSkillsRequired != -1 && numSkillsRequired < 1) {
-                    throw new SkillException("A Skill Group must have at least 1 required skill in order to be enabled.")
-                }
-                boolean allSkillsRequired = numSkillsRequired == -1 || numSkillsRequired == numChildSkills
-                if (!allSkillsRequired) {
-                    int testTotalPointsValue = groupChildSkills.first().totalPoints
-                    int testPointIncrementValue = groupChildSkills.first().pointIncrement
-                    // if only a subset of skills are required, then all skills must have the same total point value
-                    boolean allTotalPointsEqual = groupChildSkills.every { it.totalPoints == testTotalPointsValue && it.pointIncrement == testPointIncrementValue }
-                    if (!allTotalPointsEqual) {
-                        throw new SkillException("All skills that belong to the Skill Group must have the same total value when all skills are not required to be completed.")
-                    }
-                }
+        int numChildSkills = groupChildSkills.size()
+        if (numSkillsRequired == 0 && numChildSkills > 0) {
+            throw new SkillException("A Skill Group must have at least 1 required skill.")
+        } else {
+            if (numSkillsRequired > numChildSkills) {
+                throw new SkillException("A Skill Group cannot require more skills than the number of skills that belong to the group.")
             }
-        }
-        return groupChildSkills
-    }
-
-    @Profile
-    List<SkillDef> validateCanDeleteChildSkillAndReturnChildren(SkillDef parentSkill) {
-        List<SkillDef> groupChildSkills = getSkillsGroupChildSkills(parentSkill.id)
-        if (Boolean.valueOf(parentSkill.enabled)) {
-            int numChildSkills = groupChildSkills.size()
-            if (numChildSkills < 2) {
-                throw new SkillException("A Skill Group must have at least 2 skills in order to be enabled.")
+            if (numSkillsRequired != -1 && numSkillsRequired < 0) {
+                throw new SkillException("Invalid number of skills required for Skill Group [${numSkillsRequired}].")
             }
         }
         return groupChildSkills
@@ -162,17 +134,10 @@ class SkillsGroupAdminService {
         return skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, groupId, SkillDef.ContainerType.SkillsGroup)
     }
 
-    int getGroupTotalPoints(List<SkillDef> groupChildSkills, int numSkillsRequired) {
+    int getGroupTotalPoints(List<SkillDef> groupChildSkills) {
         int totalPoints = 0
         if (groupChildSkills) {
-            numSkillsRequired = numSkillsRequired == -1 ? groupChildSkills.size() : numSkillsRequired
-            if (numSkillsRequired == groupChildSkills.size()) {
-                // all skills are required, but can have different totalPoints so add them all up
-                totalPoints = groupChildSkills.collect { it.totalPoints }.sum()
-            } else {
-                // only a subset is required; validation already made sure that all have the same totalPoints so grab first value
-                totalPoints = numSkillsRequired * groupChildSkills.first().totalPoints
-            }
+            totalPoints = groupChildSkills.collect { it.totalPoints }.sum()
         }
         return totalPoints
     }

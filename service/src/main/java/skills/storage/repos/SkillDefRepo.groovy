@@ -29,6 +29,7 @@ import skills.storage.model.SkillDef.ContainerType
 import skills.storage.model.SkillDefMin
 import skills.storage.model.SkillDefPartial
 import skills.storage.model.SkillDefSkinny
+import skills.storage.model.SkillRelDef
 import skills.storage.model.SkillRelDef.RelationshipType
 
 interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
@@ -478,6 +479,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         s.startDate as startDate,
         s.endDate as endDate,
         s.enabled as enabled,
+        s.groupId as groupId,
         s.copiedFrom as copiedFrom,
         s.copiedFromProjectId as copiedFromProjectId,
         s.readOnly as readOnly
@@ -547,11 +549,13 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
                  skill_definition skill
             where rel.parent_ref_id = :subjectRefId 
               and skill.id = rel.child_ref_id
-              and rel.type in ('GroupSkillToSubject', 'RuleSetDefinition')
+              and rel.type in :relationshipTypes
               and skill.type = 'Skill'
               and (skill.enabled = 'true' or 'false' = :enabledSkillsOnly)
           ''', nativeQuery = true)
-    Integer getSubjectTotalPoints(@Param('subjectRefId') Integer subjectRefId, @Param('enabledSkillsOnly') Boolean enabledSkillsOnly)
+    Integer calculateSkillDefTotalPointsBySummingChildPoints(@Param('subjectRefId') Integer subjectRefId,
+                                                             @Param('relationshipTypes') List<String> relationshipTypeList,
+                                                             @Param('enabledSkillsOnly') Boolean enabledSkillsOnly)
 
     @Query(value = '''
          select exists (select 1 from skill_definition where project_id = :projectId and skill_id = :skillId and read_only = 'true') as isReadOnly
