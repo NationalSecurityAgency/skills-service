@@ -170,6 +170,14 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
       sdParent.projectId=?2 and sdParent.skillId=?3 and srd.type=?4''')
     int countAchievedChildren(String userId, @Nullable String projectId, String skillId, SkillRelDef.RelationshipType type)
 
+    @Query('''select sum(ua.pointsWhenAchieved) 
+    from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild, UserAchievement ua
+      where 
+      srd.parent=sdParent.id and  srd.child=sdChild.id and
+      sdChild.projectId = ua.projectId and sdChild.skillId = ua.skillId and ua.userId=?1 and 
+      sdParent.projectId=?2 and sdParent.skillId=?3 and srd.type=?4''')
+    int sumAchievedChildrenPoints(String userId, @Nullable String projectId, String skillId, SkillRelDef.RelationshipType type)
+
 
     @Query('''select count(ua) 
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild, UserAchievement ua

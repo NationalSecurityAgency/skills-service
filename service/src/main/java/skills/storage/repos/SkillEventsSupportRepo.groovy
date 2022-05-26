@@ -193,10 +193,6 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
     @Query('''update UserPoints up set up.points = up.points + ?2 where up.id = ?1''')
     void addUserPoints(Integer id, int pointsToAdd)
 
-    @Modifying
-    @Query('''update UserPoints up set up.contributesToSkillsGroup = ?2 where up.id = ?1''')
-    void updateContributingFlag(Integer id, String contributesToSkillsGroup)
-
     @Query('''SELECT l from LevelDef l where l.skillRefId = ?1''')
     List<LevelDef> findLevelsBySkillId(Integer skillId)
 
