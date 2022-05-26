@@ -372,14 +372,15 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
         Integer getChildId()
         Integer getAchievementId()
     }
-    @Query(value ='''SELECT COUNT(distinct user_id) from user_points where project_id = ?1''', nativeQuery = true)
+    @Query(value = '''SELECT COUNT(distinct user_id) from user_points where project_id = ?1 and skill_id is null''', nativeQuery = true)
     Long countDistinctUserIdByProjectId(String projectId)
 
-    @Query(value ='''SELECT COUNT(*)
+    @Query(value = '''SELECT COUNT(*)
         FROM (SELECT DISTINCT usattr.user_id 
                 FROM user_points usr, user_attrs usattr 
                 where usr.user_id = usattr.user_id and 
                     usr.project_id = ?1 and 
+                    usr.skill_id is null and 
                     (lower(CONCAT(usattr.first_name, ' ', usattr.last_name, ' (', usattr.user_id_for_display, ')')) like lower(CONCAT('%', ?2, '%')) OR
                      lower(usattr.user_id_for_display) like lower(CONCAT('%', ?2, '%')))) 
                 AS temp''',
@@ -420,22 +421,19 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             nativeQuery = true)
     Long countDistinctUserIdByProjectIdAndSkillIdIn(String projectId, List<String> skillIds)
 
-    @Query(value='''
-        WITH RECURSIVE subj_skills (parentId, childId) AS (
-            SELECT s.parent_ref_id AS parentId, s.child_ref_id AS childId 
-            FROM
-            skill_relationship_definition s, skill_definition sd
-            WHERE
-            sd.skill_id = :subjectId AND
-            sd.project_id = :projectId AND
-            s.parent_ref_id = sd.id
-            
-            UNION ALL
-            
-            SELECT childId AS parentId, s.child_ref_id AS childId
-            FROM
-            skill_relationship_definition s
-            INNER JOIN subj_skills on childId = s.parent_ref_id
+    @Query(value= '''
+        WITH subj_skills AS (
+            select child.id as id
+            from skill_definition parent,
+                 skill_relationship_definition rel,
+                 skill_definition child
+            where parent.project_id = :projectId
+              and parent.skill_id = :subjectId
+              and rel.parent_ref_id = parent.id
+              and rel.child_ref_id = child.id
+              and rel.type in ('RuleSetDefinition', 'GroupSkillToSubject')
+              and child.type = 'Skill'
+              and child.enabled = 'true'
         )
         SELECT COUNT(*)
         FROM (
@@ -443,35 +441,28 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             from user_points up, user_attrs usattr 
             where 
                 up.user_id = usattr.user_id and
-                up.project_id=:projectId and 
-                up.skill_ref_id in (select childId from subj_skills) and 
+                up.skill_ref_id in (select id from subj_skills) and 
                 (lower(CONCAT(usattr.first_name, ' ', usattr.last_name, ' (', usattr.user_id_for_display, ')')) like lower(CONCAT('%', :userId, '%')) OR
                  lower(usattr.user_id_for_display) like lower(CONCAT('%', :userId, '%')))
         ) AS temp
     ''', nativeQuery = true)
     Long countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(@Param("projectId") String projectId, @Param("subjectId") String subjectId, @Param("userId") String userId)
 
-    @Query(value='''
-        WITH RECURSIVE subj_skills (parentId, childId) AS (
-            SELECT s.parent_ref_id AS parentId, s.child_ref_id AS childId 
-            FROM
-            skill_relationship_definition s, skill_definition sd
-            WHERE
-            sd.skill_id = :subjectId AND
-            sd.project_id = :projectId AND
-            s.parent_ref_id = sd.id
-            
-            UNION ALL
-            
-            SELECT childId AS parentId, s.child_ref_id AS childId
-            FROM
-            skill_relationship_definition s
-            INNER JOIN subj_skills on childId = s.parent_ref_id
+    @Query(value= '''
+        WITH skills AS (
+            select child.id as id
+            from skill_definition parent,
+                 skill_relationship_definition rel,
+                 skill_definition child
+            where parent.project_id = :projectId
+              and parent.skill_id = :subjectId
+              and rel.parent_ref_id = parent.id
+              and rel.child_ref_id = child.id
+              and rel.type in ('RuleSetDefinition', 'GroupSkillToSubject')
+              and child.type = 'Skill'
+              and child.enabled = 'true'
         )
-        SELECT COUNT(*)
-        FROM (
-            SELECT DISTINCT up.user_id from user_points up where up.project_id=:projectId and up.skill_ref_id in (select childId from subj_skills)
-        ) AS temp
+        SELECT COUNT(DISTINCT up.user_id) from user_points up where up.skill_ref_id in (select id from skills);
     ''', nativeQuery = true)
     Long countDistinctUsersByProjectIdAndSubjectId(@Param("projectId") String projectId, @Param("subjectId") String subjectId)
 
@@ -518,24 +509,20 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     List<ProjectUser> findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLike(String projectId, List<String> skillIds, String userId, Pageable pageable)
 
     @Nullable
-    @Query(value='''
-        WITH RECURSIVE subj_skills (parentId, childId) AS (
-            SELECT s.parent_ref_id AS parentId, s.child_ref_id AS childId 
-            FROM
-            skill_relationship_definition s, skill_definition sd
-            WHERE
-            sd.skill_id = :subjectId AND
-            sd.project_id = :projectId AND
-            s.parent_ref_id = sd.id
-            
-            UNION ALL
-            
-            SELECT childId AS parentId, s.child_ref_id AS childId
-            FROM
-            skill_relationship_definition s
-            INNER JOIN subj_skills on childId = s.parent_ref_id
+    @Query(value= '''
+         WITH subj_skills AS (
+            select child.id as id
+            from skill_definition parent,
+                 skill_relationship_definition rel,
+                 skill_definition child
+            where parent.project_id = :projectId
+              and parent.skill_id = :subjectId
+              and rel.parent_ref_id = parent.id
+              and rel.child_ref_id = child.id
+              and rel.type in ('RuleSetDefinition', 'GroupSkillToSubject')
+              and child.type = 'Skill'
+              and child.enabled = 'true'
         )
-
         SELECT 
             up.user_id as userId, 
             max(upa.performedOn) as lastUpdated, 
@@ -551,14 +538,13 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             max(upa.performed_on) AS performedOn 
             FROM user_performed_skill upa 
             WHERE upa.skill_ref_id in (
-                select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id from skill_definition where type = 'Skill' and project_id = :projectId and exists (select 1 from subj_skills s_s where s_s.childId = id)
+                select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id from skill_definition where type = 'Skill' and project_id = :projectId and exists (select 1 from subj_skills s_s where s_s.id = id)
             )
             GROUP BY upa.user_id
         ) upa ON upa.user_id = up.user_id
         JOIN user_attrs ua ON ua.user_id=up.user_id
         WHERE 
-            up.project_id=:projectId and 
-            exists (select 1 from subj_skills s_s where s_s.childId = up.skill_ref_id) and 
+            up.skill_ref_id in (select s_s.id from subj_skills s_s) and 
             (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT('%', :userId, '%'))  OR
              lower(ua.user_id_for_display) like lower(CONCAT('%', :userId, '%'))
             ) 
