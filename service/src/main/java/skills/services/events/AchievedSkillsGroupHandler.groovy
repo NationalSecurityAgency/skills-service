@@ -65,7 +65,8 @@ class AchievedSkillsGroupHandler {
                 List<UserAchievement> achievements = achievedLevelRepo.findAllByUserIdAndProjectIdAndSkillId(userId, skillsGroupSkillDef.projectId, skillsGroupSkillDef.skillId)
                 if (!achievements) {
                     Date achievedOn = getAchievedOnDate(userId, skillsGroupSkillDef, skillDate)
-                    UserAchievement groupAchievement = new UserAchievement(userId: userId.toLowerCase(), projectId: skillsGroupSkillDef.projectId, skillId: skillsGroupSkillDef.skillId, skillRefId: skillsGroupSkillDef.id, pointsWhenAchieved: skillsGroupSkillDef.totalPoints, achievedOn: achievedOn)
+                    Integer pointsWhenAchieved = achievedLevelRepo.sumAchievedChildrenPoints(userId, skillsGroupSkillDef.projectId, skillsGroupSkillDef.skillId, SkillRelDef.RelationshipType.SkillsGroupRequirement)
+                    UserAchievement groupAchievement = new UserAchievement(userId: userId.toLowerCase(), projectId: skillsGroupSkillDef.projectId, skillId: skillsGroupSkillDef.skillId, skillRefId: skillsGroupSkillDef.id, pointsWhenAchieved: pointsWhenAchieved, achievedOn: achievedOn)
                     achievedLevelRepo.save(groupAchievement)
                     res.completed.add(new CompletionItem(type: CompletionTypeUtil.getCompletionType(skillsGroupSkillDef.type), id: skillsGroupSkillDef.skillId, name: skillsGroupSkillDef.name))
                 }

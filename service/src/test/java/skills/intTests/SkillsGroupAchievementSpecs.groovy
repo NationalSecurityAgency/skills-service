@@ -115,6 +115,7 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
         groupAchievements[0].userId == userId
         groupAchievements[0].projectId == projectId
         groupAchievements[0].skillId == skillsGroupId
+        groupAchievements[0].pointsWhenAchieved == groupChildren.first().pointIncrement * groupChildren.first().numPerformToCompletion
 
         subjectSummary
         subjectSummary.skills
