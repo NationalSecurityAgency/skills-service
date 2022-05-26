@@ -1504,16 +1504,16 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         then:
         u0_s1_t0.points == [300]
         u0_s2_t0.points == [200]
-        u0_g1_t0.points == [500]
-        u0_g2_t0.points == [231]
+        !u0_g1_t0.points
+        !u0_g2_t0.points
         u0_subj1_t0.points == [500 + 231]
         u0_subj2_t0.points == [30]
         u0_p1_t0.points == [500 + 231 + 30]
 
         u0_s1_t1.points == [200]
         u0_s2_t1.points == [200]
-        u0_g1_t1.points == [400]
-        u0_g2_t1.points == [231]
+        !u0_g1_t1.points
+        !u0_g2_t1.points
         u0_subj1_t1.points == [400 + 231]
         u0_subj2_t1.points == [30]
         u0_p1_t1.points == [400 + 231 + 30]
