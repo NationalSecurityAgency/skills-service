@@ -254,7 +254,7 @@ limitations under the License.
         this.editProject.project = {
           ...projectToEdit,
           originalProjectId: projectToEdit.projectId,
-          isEdit: true
+          isEdit: true,
         };
         this.editProject.show = true;
       },

@@ -205,7 +205,7 @@ limitations under the License.
           isEdit: false,
           project: {
             name: '',
-            projectId: ''
+            projectId: '',
           },
         };
       },
