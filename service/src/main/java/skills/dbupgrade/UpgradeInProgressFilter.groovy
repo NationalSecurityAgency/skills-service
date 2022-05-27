@@ -99,7 +99,7 @@ class UpgradeInProgressFilter extends OncePerRequestFilter {
 
         QueuedSkillEvent queuedSkillEvent = safeUrlDecider.isSkillEventReport(uri, method)
         ServletServerHttpRequest serverHttpRequest = new ServletServerHttpRequest(request)
-        if (queuedSkillEvent) {
+        if (queuedSkillEvent && userInfo) {
             SkillEventRequest skillEventRequest = readEventRequest(serverHttpRequest)
             queuedSkillEvent.skillEventRequest = skillEventRequest
             queuedSkillEvent.userId = userInfo.username
