@@ -22,8 +22,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.result.model.LevelDefinitionRes
-import skills.controller.result.model.SettingsResult
-import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
@@ -81,13 +79,13 @@ class UserAchievementsAndPointsManagement {
         log.info("Updating all UserPoints for [{}]-[{}]", skill.projectId, skill.skillId)
         nativeQueriesRepo.updateUserPointsForASkill(skill.projectId, skill.skillId)
 
-        List<SkillDef> parents = skillRelDefRepo.findParentByChildIdAndTypes(skill.id, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
+        List<SkillDef> parents = skillRelDefRepo.findParentByChildIdAndTypes(skill.id, [SkillRelDef.RelationshipType.RuleSetDefinition])
         while (parents) {
             assert parents.size() == 1
             SkillDef parent = parents.first()
             log.info("Updating parent's UserPoints for [{}]-[{}]", parent.projectId, parent.skillId)
-            nativeQueriesRepo.updateUserPointsForSubjectOrGroup(parent.projectId, parent.skillId, true)
-            parents = skillRelDefRepo.findParentByChildIdAndTypes(parent.id, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
+            nativeQueriesRepo.updateUserPointsForSubject(parent.projectId, parent.skillId, true)
+            parents = skillRelDefRepo.findParentByChildIdAndTypes(parent.id, [SkillRelDef.RelationshipType.RuleSetDefinition])
         }
 
         log.info("Updating project's UserPoints for [{}]", skill.projectId)

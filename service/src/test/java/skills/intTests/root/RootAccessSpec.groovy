@@ -17,16 +17,32 @@ package skills.intTests.root
 
 import groovy.json.JsonOutput
 import org.apache.commons.lang3.RandomStringUtils
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import skills.storage.model.ProjDef
+import skills.storage.model.SkillDef
+import skills.storage.model.UserAchievement
+import skills.storage.model.UserPoints
+import skills.storage.repos.ProjDefRepo
+import skills.storage.repos.SkillDefRepo
+import skills.storage.repos.UserAchievedLevelRepo
 import spock.lang.IgnoreIf
-import spock.lang.IgnoreRest
 import spock.lang.Requires
 
 class RootAccessSpec extends DefaultIntSpec {
+
+    @Autowired
+    UserAchievedLevelRepo achievedRepo
+
+    @Autowired
+    SkillDefRepo skillDefRepo
+
+    @Autowired
+    ProjDefRepo projDefRepo
 
     String ultimateRoot = 'jh@dojo.com'
     SkillsService rootSkillsService
@@ -677,6 +693,148 @@ class RootAccessSpec extends DefaultIntSpec {
         then:
         SkillsClientException skillsClientException = thrown(SkillsClientException)
         skillsClientException.httpStatus == HttpStatus.FORBIDDEN
+    }
+
+    def 'rebuild a projects users user_points, subject and project definition total_points' () {
+        // need to call DefaultIntSpec.getRandomUsers so that tests will work in ssl mode
+        String userId = getRandomUsers(1)[0]
+
+        //we need a different userId from the default root user for this test
+        while (userId.contains("jh@dojo")) {
+            userId = getRandomUsers(1)[0]
+        }
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def allSkills = SkillsFactory.createSkills(4)
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        def skillsGroup = allSkills[0]
+        skillsGroup.type = 'SkillsGroup'
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        def groupChildren = allSkills[1..2]
+        groupChildren.each { skill ->
+            skill.pointIncrement = 100
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+        skillsGroup.numSkillsRequired = 1
+        skillsService.updateSkill(skillsGroup, null)
+
+        // regular skill
+        skillsService.createSkill(allSkills[3])
+
+        String projectId = proj.projectId
+        String subjectId = subj.subjectId
+        String childSkillId1 = groupChildren.first().skillId
+        String childSkillId2 = groupChildren.last().skillId
+
+        def res = skillsService.addSkill([projectId: projectId, skillId: childSkillId1], userId, new Date())
+        assert res.body.skillApplied
+        assert res.body.completed.find { it.id == childSkillId1 }
+
+        res = skillsService.addSkill([projectId: projectId, skillId: childSkillId2], userId, new Date())
+        assert res.body.skillApplied
+        assert res.body.completed.find { it.id == childSkillId2 }
+
+        def subjectSummary = skillsService.getSkillSummary(userId, projectId, subjectId)
+        List<UserAchievement> groupAchievements = achievedRepo.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, skillsGroupId)
+
+        // mess up points and achievements
+        SkillDef groupSkillDef = skillDefRepo.findByProjectIdAndSkillId(projectId, skillsGroupId)
+        groupSkillDef.totalPoints = 123
+        skillDefRepo.save(groupSkillDef)
+        SkillDef groupSkillDef2 = skillDefRepo.findByProjectIdAndSkillId(projectId, skillsGroupId)
+        assert groupSkillDef2.totalPoints == 123
+
+        SkillDef subjectSkillDef = skillDefRepo.findByProjectIdAndSkillId(projectId, subjectId)
+        subjectSkillDef.totalPoints = 456
+        skillDefRepo.save(subjectSkillDef)
+        SkillDef subjectSkillDef2 = skillDefRepo.findByProjectIdAndSkillId(projectId, subjectId)
+        assert subjectSkillDef2.totalPoints == 456
+
+        ProjDef projDef = projDefRepo.findByProjectId(projectId)
+        projDef.totalPoints = 789
+        projDefRepo.save(projDef)
+        ProjDef projDef2 = projDefRepo.findByProjectId(projectId)
+        assert projDef2.totalPoints == 789
+
+        List<UserPoints> userPoints = userPointsRepo.findByProjectIdAndUserId(projectId, userId)
+        assert !userPoints.find { it.skillId == skillsGroupId }
+
+        List<UserAchievement> userAchievements = userAchievedRepo.findAllByUserAndProjectIds(userId, [projectId])
+        assert userAchievements.size() == 13
+        assert userAchievements.find { it.level  == 1 && it.skillId == subjectId }
+        assert userAchievements.find { it.level  == 2 && it.skillId == subjectId }
+        assert userAchievements.find { it.level  == 3 && it.skillId == subjectId }
+        assert userAchievements.find { it.level  == 4 && it.skillId == subjectId }
+        assert userAchievements.find { it.level  == 5 && it.skillId == subjectId }
+        assert userAchievements.find { it.level  == 1 && it.skillId == null }
+        assert userAchievements.find { it.level  == 2 && it.skillId == null }
+        assert userAchievements.find { it.level  == 3 && it.skillId == null }
+        assert userAchievements.find { it.level  == 4 && it.skillId == null }
+        assert userAchievements.find { it.level  == 5 && it.skillId == null }
+        assert userAchievements.find { it.level  == null && it.skillId == skillsGroupId }
+        assert userAchievements.find { it.level  == null && it.skillId == childSkillId1 }
+        assert userAchievements.find { it.level  == null && it.skillId == childSkillId2 }
+
+        // delete level 2 subject and project achievements as well as the skills group
+        userAchievedRepo.delete(userAchievements.find { it.level  == 2 && it.skillId == subjectId })
+        userAchievedRepo.delete(userAchievements.find { it.level  == 2 && it.skillId == null })
+        userAchievedRepo.delete(userAchievements.find { it.level  == null && it.skillId == skillsGroupId })
+
+        List<UserAchievement> userAchievements2 = userAchievedRepo.findAllByUserAndProjectIds(userId, [projectId])
+        assert userAchievements2.size() == 10
+        assert userAchievements2.find { it.level  == 1 && it.skillId == subjectId }
+        assert !userAchievements2.find { it.level  == 2 && it.skillId == subjectId }
+        assert userAchievements2.find { it.level  == 3 && it.skillId == subjectId }
+        assert userAchievements2.find { it.level  == 4 && it.skillId == subjectId }
+        assert userAchievements2.find { it.level  == 5 && it.skillId == subjectId }
+        assert userAchievements2.find { it.level  == 1 && it.skillId == null }
+        assert !userAchievements2.find { it.level  == 2 && it.skillId == null }
+        assert userAchievements2.find { it.level  == 3 && it.skillId == null }
+        assert userAchievements2.find { it.level  == 4 && it.skillId == null }
+        assert userAchievements2.find { it.level  == 5 && it.skillId == null }
+        assert !userAchievements2.find { it.level  == null && it.skillId == skillsGroupId }
+        assert userAchievements2.find { it.level  == null && it.skillId == childSkillId1 }
+        assert userAchievements2.find { it.level  == null && it.skillId == childSkillId2 }
+
+        when:
+        rootSkillsService.rebuildUserAndProjectPoints(projectId)
+
+        List<UserAchievement> userAchievements3 = userAchievedRepo.findAllByUserAndProjectIds(userId, [projectId])
+
+        then:
+        userAchievements3.size() == 13
+        userAchievements3.find { it.level  == 1 && it.skillId == subjectId }
+        userAchievements3.find { it.level  == 2 && it.skillId == subjectId }
+        userAchievements3.find { it.level  == 3 && it.skillId == subjectId }
+        userAchievements3.find { it.level  == 1 && it.skillId == null }
+        userAchievements3.find { it.level  == 2 && it.skillId == null }
+        userAchievements3.find { it.level  == 3 && it.skillId == null }
+        userAchievements3.find { it.level  == null && it.skillId == skillsGroupId }
+        userAchievements3.find { it.level  == null && it.skillId == childSkillId1 }
+        userAchievements3.find { it.level  == null && it.skillId == childSkillId2 }
+
+
+        groupAchievements
+        groupAchievements.size() == 1
+        groupAchievements[0].userId == userId
+        groupAchievements[0].projectId == projectId
+        groupAchievements[0].skillId == skillsGroupId
+        groupAchievements[0].pointsWhenAchieved == groupChildren.first().pointIncrement * groupChildren.first().numPerformToCompletion
+
+        subjectSummary
+        subjectSummary.skills
+        subjectSummary.skills.size() == 2
+        subjectSummary.skills[0].skillId == skillsGroupId
+        subjectSummary.skills[0].points == 100
+        subjectSummary.skills[0].totalPoints == 100 * groupChildren.size()
+        subjectSummary.skills[0].children
+        subjectSummary.skills[0].children.size() == groupChildren.size()
+        subjectSummary.skills[0].children.find { it.skillId = childSkillId1 }
+        subjectSummary.skills[0].children.find { it.skillId = childSkillId1 }.points == 100
+        subjectSummary.skills[0].children.find { it.skillId = childSkillId1 }.totalPoints == 100
     }
 }
 

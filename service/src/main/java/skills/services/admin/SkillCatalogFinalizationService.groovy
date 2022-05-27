@@ -147,12 +147,12 @@ class SkillCatalogFinalizationService {
                 SettingsResult settingsResult = settingsService.getProjectSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
                 boolean pointsBased = settingsResult ? settingsResult.isEnabled() : false
 
-                // 2. for each subject (1) create user points for new users (2) update existing (3) caluclate achievements
+                // 2. for each subject (1) create user points for new users (2) update existing (3) calculate achievements
                 subjects.each { SkillDef subject ->
                     log.info("Creating UserPoints for the new users for [{}-{}] subject", projectId, subject.skillId)
                     skillCatalogTransactionalAccessor.createSubjectUserPointsForTheNewUsers(projectId, subject.skillId)
                     log.info("Updating UserPoints for the existing users for [{}-{}] subject", projectId, subject.skillId)
-                    skillCatalogTransactionalAccessor.updateUserPointsForSubjectOrGroup(projectId, subject.skillId)
+                    skillCatalogTransactionalAccessor.updateUserPointsForSubject(projectId, subject.skillId)
 
                     log.info("Identifying subject level achievements for [{}-{}] subject", projectId, subject.skillId)
                     skillCatalogTransactionalAccessor.identifyAndAddSubjectLevelAchievements(subject.projectId, subject.skillId)

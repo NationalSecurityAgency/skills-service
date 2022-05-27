@@ -488,8 +488,8 @@ where sum.sumUserId = points.user_id and points.skill_id is null and points.proj
     }
 
     @Override
-    void updateUserPointsForSubjectOrGroup(String projectId, String skillId,  Boolean enabledSkillsOnly) {
-        userPointsRepo.updateSubjectOrGroupUserPoints(projectId, skillId, false)
+    void updateUserPointsForSubject(String projectId, String skillId, Boolean enabledSkillsOnly) {
+        userPointsRepo.updateSubjectUserPoints(projectId, skillId, false)
     }
 
     @Override

@@ -321,8 +321,11 @@ class RootController {
         return RequestResult.success()
     }
 
-
-
+    @PostMapping('/rebuildUserAndProjectPoints/{projectId}')
+    RequestResult rebuildUserAndProjectPoints(@PathVariable("projectId") String projectId) {
+        projAdminService.rebuildUserAndProjectPoints(projectId)
+        return RequestResult.success()
+    }
 
     private String getUserId(String userKey) {
         // userKey will be the userId when in FORM authMode, or the DN when in PKI auth mode.

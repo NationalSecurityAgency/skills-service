@@ -102,8 +102,8 @@ class SkillCatalogTransactionalAccessor {
 
     @Transactional
     @Profile
-    void updateUserPointsForSubjectOrGroup(String projectId, String skillId) {
-        nativeQueriesRepo.updateUserPointsForSubjectOrGroup(projectId, skillId, false)
+    void updateUserPointsForSubject(String projectId, String skillId) {
+        nativeQueriesRepo.updateUserPointsForSubject(projectId, skillId, false)
     }
 
     @Transactional

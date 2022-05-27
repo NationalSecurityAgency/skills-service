@@ -616,8 +616,8 @@ class H2NativeRepo implements NativeQueriesRepo {
 
 
     @Override
-    void updateUserPointsForSubjectOrGroup(String projectId, String skillId, Boolean enabledSkillsOnly) {
-        userPointsRepo.updateSubjectOrGroupUserPointsInH2(projectId, skillId, enabledSkillsOnly)
+    void updateUserPointsForSubject(String projectId, String skillId, Boolean enabledSkillsOnly) {
+        userPointsRepo.updateSubjectUserPointsInH2(projectId, skillId, enabledSkillsOnly)
     }
 
     @Override
