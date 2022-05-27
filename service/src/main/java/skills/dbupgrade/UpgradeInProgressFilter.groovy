@@ -28,6 +28,7 @@ import org.springframework.http.server.ServletServerHttpRequest
 import org.springframework.http.server.ServletServerHttpResponse
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.core.userdetails.User
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 import skills.auth.UserInfo
@@ -86,7 +87,15 @@ class UpgradeInProgressFilter extends OncePerRequestFilter {
             return
         }
 
-        UserInfo userInfo = (UserInfo)auth.getPrincipal()
+        Object principal = auth.getPrincipal()
+        UserInfo userInfo = null
+        if (principal instanceof UserInfo) {
+            userInfo = (UserInfo)userInfo
+        } else if (principal instanceof User) {
+            userInfo = new DelegatingUserInfo((User)principal)
+        } else {
+            log.error("Unrecognized Authentication principal [{}]", principal.getClass())
+        }
 
         QueuedSkillEvent queuedSkillEvent = safeUrlDecider.isSkillEventReport(uri, method)
         ServletServerHttpRequest serverHttpRequest = new ServletServerHttpRequest(request)
