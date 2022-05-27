@@ -93,6 +93,7 @@ class UpgradeSafeUrlDecider {
         }
 
         String urlPattern = allowedUrls.join("|")
+        urlPattern += "|(?:/oauth/token)"
         allowedMutationUrls = Pattern.compile(urlPattern)
         log.debug("POST and PUT urls will be checked against [{}]", allowedMutationUrls.pattern())
 

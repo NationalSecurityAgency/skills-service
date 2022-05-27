@@ -56,6 +56,7 @@ class UpgradeSafeUrlDeciderSpec extends Specification {
         "/app/users/projects/foooo/suggestClientUsers" | HttpMethod.POST | true
         "/app/users/suggestClientUsers/" | HttpMethod.POST | true
         "/app/users/suggestPkiUsers" | HttpMethod.POST | true
+        "/oauth/token" | HttpMethod.POST | true
     }
 
     def "skill event reporting is identified"() {
