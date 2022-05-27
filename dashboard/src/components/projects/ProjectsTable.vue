@@ -38,8 +38,9 @@ limitations under the License.
 
         <template v-slot:cell(name)="data">
           <div class="row">
-            <div class="col">
-              <router-link :data-cy="`manageProjLink_${data.item.projectId}`" tag="a" :to="{ name:'Subjects', params: { projectId: data.item.projectId, project: data.item }}"
+            <div class="col" :data-cy="`projCell_${data.item.projectId}`">
+              <router-link :data-cy="`manageProjLink_${data.item.projectId}`" tag="a"
+                           :to="{ name:'Subjects', params: { projectId: data.item.projectId, project: data.item }}"
                            :aria-label="`Manage Project ${data.item.name}  via link`">
                 <div class="h5">{{ data.item.name }}</div>
               </router-link>
@@ -53,7 +54,7 @@ limitations under the License.
                 <span class="d-none d-sm-inline">Manage </span> <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
               </router-link>
               <b-button-group size="sm" class="ml-1">
-                <b-button @click="editProject(data.item)"
+                <b-button @click="showProjectEditModal(data.item)"
                           variant="outline-primary" :data-cy="`editProjectId${data.item.projectId}`"
                           :aria-label="'edit Project '+data.item.name" :ref="'edit_'+data.item.projectId">
                   <i class="fas fa-edit" aria-hidden="true"/>
@@ -98,14 +99,19 @@ limitations under the License.
         </template>
       </skills-b-table>
 
-    <removal-validation v-if="deleteProjectInfo.showDialog" v-model="deleteProjectInfo.showDialog" @do-remove="doDeleteProject">
+    <removal-validation v-if="deleteProjectInfo.showDialog" v-model="deleteProjectInfo.showDialog"
+                        @do-remove="doDeleteProject">
       <p>
-        This will remove <span class="text-primary font-weight-bold">{{ deleteProjectInfo.project.name}}</span>.
+        This will remove <span class="text-primary font-weight-bold">{{ deleteProjectInfo.project.name }}</span>.
       </p>
       <div>
-        Deletion can not be undone and permanently removes all skill subject definitions, skill definitions and users' performed skills for this Project.
+        Deletion can not be undone and permanently removes all skill subject definitions, skill definitions and users'
+        performed skills for this Project.
       </div>
     </removal-validation>
+
+    <edit-project v-if="editProject.show" v-model="editProject.show" :project="editProject.project"
+                  @project-saved="projectEdited" @hidden="handleProjectModalHide" :is-edit="true"/>
   </div>
 
 </template>
@@ -117,9 +123,10 @@ limitations under the License.
   import SkillsBTable from '../utils/table/SkillsBTable';
   import SlimDateCell from '../utils/table/SlimDateCell';
   import RemovalValidation from '../utils/modal/RemovalValidation';
+  import EditProject from './EditProject';
 
   export default {
-    name: 'MyProjects',
+    name: 'ProjectsTable',
     mixins: [MsgBoxMixin],
     props: ['projects'],
     data() {
@@ -129,6 +136,10 @@ limitations under the License.
         projectsOriginal: [],
         deleteProjectInfo: {
           showDialog: false,
+          project: {},
+        },
+        editProject: {
+          show: false,
           project: {},
         },
         table: {
@@ -190,6 +201,7 @@ limitations under the License.
       };
     },
     components: {
+      EditProject,
       SkillsBTable,
       SlimDateCell,
       RemovalValidation,
@@ -238,9 +250,26 @@ limitations under the License.
         this.deleteProjectInfo.project = project;
         this.deleteProjectInfo.showDialog = true;
       },
-      editProject(projectToEdit) {
-        this.currentlyFocusedProjectId = projectToEdit.projectId;
-        this.$emit('edit-project', projectToEdit);
+      showProjectEditModal(projectToEdit) {
+        this.editProject.project = {
+          ...projectToEdit,
+          originalProjectId: projectToEdit.projectId,
+          isEdit: true,
+        };
+        this.editProject.show = true;
+      },
+      projectEdited(editedProject) {
+        this.$emit('project-edited', editedProject);
+      },
+      handleProjectModalHide() {
+        this.focusOnEditButton(this.editProject.project.projectId);
+      },
+      focusOnEditButton(projectId) {
+        const refId = `edit_${projectId}`;
+        const ref = this.$refs[refId];
+        this.$nextTick(() => {
+          ref.focus();
+        });
       },
     },
   };
