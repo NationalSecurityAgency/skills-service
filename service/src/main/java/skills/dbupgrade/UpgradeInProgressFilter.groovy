@@ -120,7 +120,7 @@ class UpgradeInProgressFilter extends OncePerRequestFilter {
             log.info("[{}] request [{}] has been annotated as DBUpgradeSafe and is allowed while db upgrade is in progress", method, uri)
             filterChain.doFilter(request, response)
         } else {
-            log.info("POST/PUT/DELETE request to [{}] is not allowed, user [{}], database upgrade is currently in progress", uri, userInfo.username)
+            log.info("POST/PUT/DELETE request to [{}] is not allowed, user [{}], database upgrade is currently in progress", uri, userInfo?.username)
             DbUpgradeErrBody basicErrBody = new DbUpgradeErrBody(explanation: "A database upgrade is currently in progress, no training profile modifications are allowed at this time.")
             response.setStatus(503)
             response.setHeader(HttpHeaders.RETRY_AFTER, TimeUnit.MINUTES.toSeconds(30).toString())
