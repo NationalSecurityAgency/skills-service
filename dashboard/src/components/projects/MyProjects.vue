@@ -33,7 +33,8 @@ limitations under the License.
 
     <loading-container v-bind:is-loading="isLoading">
       <div v-if="useTableView">
-        <projects-table :projects="projects" @project-deleted="projectRemoved" @edit-project="editProject"></projects-table>
+        <projects-table ref="projectsTable" :projects="projects" @project-deleted="projectRemoved"
+                        @project-edited="projectEdited"></projects-table>
       </div>
       <div v-else id="projectCards">
         <div v-for="project of projects" :key="project.projectId" class="mb-3"  :id="project.projectId">
@@ -185,33 +186,36 @@ limitations under the License.
       },
       projectAdded(project) {
         this.isLoading = true;
-        ProjectService.saveProject(project)
+        return ProjectService.saveProject(project)
           .then(() => {
             if (this.isRootUser) {
-              SettingsService.pinProject(project.projectId)
+              return SettingsService.pinProject(project.projectId)
                 .then(() => {
-                  this.loadProjects();
                   SkillsReporter.reportSkill('CreateProject');
+                  return this.loadProjects();
                 });
-            } else {
-              this.loadProjects();
-              SkillsReporter.reportSkill('CreateProject');
             }
+            SkillsReporter.reportSkill('CreateProject');
+            return this.loadProjects();
           });
       },
       editNewProject() {
         this.newProject = {
           show: true,
           isEdit: false,
-          project: { name: '', projectId: '' },
+          project: {
+            name: '',
+            projectId: ''
+          },
         };
       },
-      editProject(projectToEdit) {
-        this.newProject = {
-          show: true,
-          isEdit: true,
-          project: projectToEdit,
-        };
+      projectEdited(editedProject) {
+        this.projectAdded(editedProject)
+          .then(() => {
+            this.$nextTick(() => {
+              this.$refs.projectsTable.focusOnEditButton(editedProject.projectId);
+            });
+          });
       },
       enableDropAndDrop() {
         if (this.projects && this.projects.length > 0

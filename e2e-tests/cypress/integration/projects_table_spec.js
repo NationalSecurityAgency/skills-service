@@ -165,26 +165,55 @@ describe('Projects Table Tests', () => {
     cy.get('input[data-cy=projectName]').type('{selectall}I Am A Changed Project Name');
     cy.get('button[data-cy=saveProjectButton]').click();
 
-    cy.get('[data-cy="projectsTable-projectFilter"]').type('Changed');
-    cy.get('[data-cy="projectsTable-filterBtn"]').click();
+    cy.get('[data-cy="projectsTable-projectFilter"]')
+        .type('Changed');
+    cy.get('[data-cy="projectsTable-filterBtn"]')
+        .click();
     cy.validateTable(tableSelector, [
-        [{ colIndex: 0,  value: 'proj1' }],
+      [{
+        colIndex: 0,
+        value: 'proj1'
+      }],
     ], 10);
     cy.validateTable(tableSelector, [
-        [{ colIndex: 0,  value: 'I Am A Changed Project Name' }],
+      [{
+        colIndex: 0,
+        value: 'I Am A Changed Project Name'
+      }],
     ], 10);
-    cy.contains('I Am A Changed Project Name').should('be.visible');
+    cy.contains('I Am A Changed Project Name')
+        .should('be.visible');
+  });
+
+  it('Edit existing project id', function () {
+    cy.visit('/administrator/');
+    cy.get('[data-cy=skillsBTableTotalRows]')
+        .should('have.text', '10');
+
+    cy.get('[data-cy=editProjectIdproj1]')
+        .click();
+    cy.get('[data-cy="idInputEnableControl"] a')
+        .click();
+    cy.get('[data-cy="idInputValue"]')
+        .type('A');
+    cy.get('button[data-cy=saveProjectButton]')
+        .click();
+    cy.get('[data-cy="projCell_proj1A"]')
+        .contains('ID: proj1A');
   });
 
   it('Manage existing project using Button', function () {
-    cy.intercept('GET', '/app/projects').as('loadProjects');
-    cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
+    cy.intercept('GET', '/app/projects')
+        .as('loadProjects');
+    cy.intercept('GET', '/app/userInfo')
+        .as('loadUserInfo');
 
     cy.visit('/administrator/');
     cy.wait('@loadUserInfo');
     cy.wait('@loadProjects');
 
-    cy.get('[data-cy="projectsTable"]').should('exist')
+    cy.get('[data-cy="projectsTable"]')
+        .should('exist');
     cy.get('[data-cy=skillsBTableTotalRows]').should('have.text', '10');
 
     cy.get('[data-cy=manageProjBtn_proj1]').click();
@@ -274,15 +303,67 @@ describe('Projects Table Tests', () => {
     cy.get(`${tableSelector}`).contains('Project').click();
     cy.validateTable(tableSelector, [
       [
-        { colIndex: 0,  value: 'proj1' },
-        { colIndex: 1,  value: '1' },
-        { colIndex: 2,  value: '1' },
-        { colIndex: 3,  value: '200' },
-        { colIndex: 4,  value: '0' },
-        { colIndex: 5,  value:'2 months ago' },
+        {
+          colIndex: 0,
+          value: 'proj1'
+        },
+        {
+          colIndex: 1,
+          value: '1'
+        },
+        {
+          colIndex: 2,
+          value: '1'
+        },
+        {
+          colIndex: 3,
+          value: '200'
+        },
+        {
+          colIndex: 4,
+          value: '0'
+        },
+        {
+          colIndex: 5,
+          value: '2 months ago'
+        },
       ],
     ], 1);
+  });
 
+  it('Project Table View: edit focus should be returned to project edit button', () => {
+    cy.visit('/administrator/');
+    cy.get('[data-cy="editProjectIdproj10"]')
+        .click();
+    cy.get('[data-cy="closeProjectButton"]')
+        .click();
+    cy.get('[data-cy="editProjectIdproj10"]')
+        .should('have.focus');
+
+    cy.get('[data-cy="editProjectIdproj9"]')
+        .click();
+    cy.get('body')
+        .type('{esc}{esc}');
+    cy.get('[data-cy="editProjectIdproj9"]')
+        .should('have.focus');
+
+    cy.get('[data-cy="editProjectIdproj8"]')
+        .click();
+    cy.get('[aria-label=Close]')
+        .click();
+    cy.get('[data-cy="editProjectIdproj8"]')
+        .should('have.focus');
+
+    cy.get('[data-cy="editProjectIdproj7"]')
+        .click();
+    cy.get('[data-cy=projectName]')
+        .type('123');
+    cy.get('[data-cy=saveProjectButton]')
+        .click();
+    cy.get('[data-cy="manageProjLink_proj7"]')
+        .contains('This is project 7123');
+    cy.get('[data-cy="editProjectIdproj7"]')
+        .should('have.focus');
   });
 
 });
