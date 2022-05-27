@@ -28,25 +28,18 @@ import skills.auth.UserInfoService
 import skills.auth.UserSkillsGrantedAuthority
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
-import skills.controller.request.model.ActionPatchRequest
-import skills.controller.request.model.AddMyProjectRequest
-import skills.controller.request.model.ProjectRequest
-import skills.controller.request.model.SettingsRequest
-import skills.controller.request.model.UserProjectSettingsRequest
+import skills.controller.request.model.*
 import skills.controller.result.model.CustomIconResult
 import skills.controller.result.model.ProjectResult
 import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.SimpleProjectResult
 import skills.icons.IconCssNameUtil
 import skills.services.*
+import skills.services.settings.Settings
 import skills.services.settings.SettingsService
-import skills.storage.model.CustomIcon
-import skills.storage.model.ProjDef
-import skills.storage.model.ProjSummaryResult
-import skills.storage.model.ProjectSummaryResult
-import skills.storage.model.SkillDef
-import skills.storage.model.auth.RoleName
 import skills.storage.accessors.ProjDefAccessor
+import skills.storage.model.*
+import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.User
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillDefRepo
@@ -112,6 +105,9 @@ class ProjAdminService {
 
     @Autowired
     UserRepo userRepo
+
+    @Autowired
+    SkillCatalogTransactionalAccessor skillCatalogTransactionalAccessor
 
     @Transactional()
     void saveProject(String originalProjectId, ProjectRequest projectRequest, String userIdParam = null) {
@@ -439,6 +435,44 @@ class ProjAdminService {
         }
 
         return InputSanitizer.unsanitizeName(mySummary.projectName)
+    }
+
+    void rebuildUserAndProjectPoints(String projectId) {
+        log.info("Rebuilding user and project points for project [{}]", projectId)
+
+        // update `skill_definition.total_points` for skill groups, subjects and the project
+        log.info("Updating skill_definition.total_points for [{}] project", projectId)
+        List<SkillDef> skillGroups = skillDefRepo.findAllByProjectIdAndType(projectId, SkillDef.ContainerType.SkillsGroup)
+        skillGroups.each { SkillDef skillGroup ->
+            skillCatalogTransactionalAccessor.updateGroupTotalPoints(projectId, skillGroup.skillId)
+        }
+        List<SkillDef> subjects = skillDefRepo.findAllByProjectIdAndType(projectId, SkillDef.ContainerType.Subject)
+        subjects.each { SkillDef subject ->
+            skillCatalogTransactionalAccessor.updateSubjectTotalPoints(projectId, subject.skillId)
+        }
+        skillCatalogTransactionalAccessor.updateProjectsTotalPoints(projectId)
+
+        // update `user_points.points` for all existing users
+        log.info("Updating user_points.points for [{}] project", projectId)
+        subjects.each { subject ->
+            log.info("Updating UserPoints for the existing users for [{}-{}] subject", projectId, subject.skillId)
+            skillCatalogTransactionalAccessor.updateUserPointsForSubject(projectId, subject.skillId)
+
+            log.info("Identifying subject level achievements for [{}-{}] subject", projectId, subject.skillId)
+            skillCatalogTransactionalAccessor.identifyAndAddSubjectLevelAchievements(subject.projectId, subject.skillId)
+        }
+
+        log.info("Identifying group achievements for [{}] groups in project [{}]", skillGroups.size(), projectId)
+        skillCatalogTransactionalAccessor.identifyAndAddGroupAchievements(skillGroups)
+
+        SettingsResult settingsResult = settingsService.getProjectSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
+        boolean pointsBased = settingsResult ? settingsResult.isEnabled() : false
+        log.info("Updating UserPoints for the existing users for [{}] project", projectId)
+        skillCatalogTransactionalAccessor.updateUserPointsForProject(projectId)
+        log.info("Identifying and adding project level achievements for [{}] project, pointsBased=[{}]", projectId, pointsBased)
+        skillCatalogTransactionalAccessor.identifyAndAddProjectLevelAchievements(projectId, pointsBased)
+
+        log.info("Completed rebuilding user and project points for project [{}]", projectId)
     }
 
     @Profile

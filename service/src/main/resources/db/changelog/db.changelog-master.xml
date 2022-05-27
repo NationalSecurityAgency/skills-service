@@ -1699,4 +1699,19 @@
         </createIndex>
     </changeSet>
 
+    <changeSet id="27" author="skills team">
+        <sql dbms="postgresql">
+            delete from user_points up
+            using skill_definition sd
+            where up.project_id = sd.project_id and
+                up.skill_id = sd.skill_id and
+                sd.type = 'SkillsGroup'
+        </sql>
+        <sql>
+            update skill_definition sd
+            set enabled = 'true'
+            where ((sd.type = 'Skill' and sd.group_id is not null) OR sd.type = 'SkillsGroup') and sd.enabled = 'false';
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

@@ -741,7 +741,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                   and parent.skill_id = :skillId
                   and rel.parent_ref_id = parent.id
                   and rel.child_ref_id = child.id
-                  and rel.type in ('RuleSetDefinition', 'SkillsGroupRequirement')
+                  and rel.type = 'RuleSetDefinition'
                   and child.type = 'Skill'
                   and (child.enabled = 'true' or 'false' = :enabledSkillsOnly)
                   and child.id = up.skill_ref_id
@@ -751,8 +751,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             from pointsToUpdate
             where up.user_id = pointsToUpdate.userId
               and up.project_id = :projectId and up.skill_id = :skillId''', nativeQuery=true)
-    void updateSubjectOrGroupUserPoints(@Param("projectId") String projectId, @Param("skillId") String skillId, @Param('enabledSkillsOnly') Boolean enabledSkillsOnly)
-
+    void updateSubjectUserPoints(@Param("projectId") String projectId, @Param("skillId") String skillId, @Param('enabledSkillsOnly') Boolean enabledSkillsOnly)
 
     @Modifying
     @Query(value = '''
@@ -766,7 +765,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                   and parent.skill_id = :skillId
                   and rel.parent_ref_id = parent.id
                   and rel.child_ref_id = child.id
-                  and rel.type in ('RuleSetDefinition', 'SkillsGroupRequirement')
+                  and rel.type = 'RuleSetDefinition'
                   and child.type = 'Skill'
                   and (child.enabled = 'true' or 'false' = :enabledSkillsOnly)
                   and child.id = up.skill_ref_id
@@ -775,6 +774,6 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             update user_points up set points = (select pointsToUpdate.newPoints from pointsToUpdate where pointsToUpdate.userId = up.user_id)
             where up.project_id = :projectId and up.skill_id = :skillId
               and exists (select * from pointsToUpdate where pointsToUpdate.userId = up.user_id);''', nativeQuery=true)
-    void updateSubjectOrGroupUserPointsInH2(@Param("projectId") String projectId, @Param("skillId") String skillId, @Param('enabledSkillsOnly') Boolean enabledSkillsOnly)
+    void updateSubjectUserPointsInH2(@Param("projectId") String projectId, @Param("skillId") String skillId, @Param('enabledSkillsOnly') Boolean enabledSkillsOnly)
 
 }

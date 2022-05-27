@@ -1343,6 +1343,10 @@ class SkillsService {
         return wsHelper.adminPost("/projects/${projectId}/skills/catalog/exportable", skillIds).body
     }
 
+    def rebuildUserAndProjectPoints(String projectId) {
+        return wsHelper.rootPost("/rebuildUserAndProjectPoints/${projectId}")
+    }
+
     private String getProjectUrl(String project) {
         return "/projects/${project}".toString()
     }

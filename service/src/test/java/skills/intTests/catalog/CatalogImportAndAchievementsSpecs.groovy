@@ -897,7 +897,7 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
         skillCatalogTransactionalAccessor.copySkillAchievementsToTheImportedProjects(project2.projectId, skillRefIds)
 
         skillCatalogTransactionalAccessor.createSubjectUserPointsForTheNewUsers(project2.projectId, p2subj1.subjectId)
-        skillCatalogTransactionalAccessor.updateUserPointsForSubjectOrGroup(project2.projectId, p2subj1.subjectId)
+        skillCatalogTransactionalAccessor.updateUserPointsForSubject(project2.projectId, p2subj1.subjectId)
         skillCatalogTransactionalAccessor.identifyAndAddSubjectLevelAchievements(project2.projectId, p2subj1.subjectId)
 
         skillCatalogTransactionalAccessor.createProjectUserPointsForTheNewUsers(project2.projectId)
