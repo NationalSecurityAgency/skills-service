@@ -273,6 +273,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     List<UserPoints> findByProjectIdAndSkillIdAndPointsGreaterThan(String projectId, @Nullable String skillId, int points, Pageable pageable)
     List<UserPoints> findByProjectIdAndSkillIdAndPointsLessThan(String projectId, @Nullable String skillId, int points, Pageable pageable)
 
+    List<UserPoints> findByProjectIdAndUserId(String projectId, String userId)
 
     static interface SkillRefIdWithPoints {
         Integer getSkillRefId()

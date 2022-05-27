@@ -26,6 +26,7 @@ import skills.intTests.utils.SkillsService
 import skills.storage.model.ProjDef
 import skills.storage.model.SkillDef
 import skills.storage.model.UserAchievement
+import skills.storage.model.UserPoints
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
@@ -694,7 +695,7 @@ class RootAccessSpec extends DefaultIntSpec {
         skillsClientException.httpStatus == HttpStatus.FORBIDDEN
     }
 
-    def 'rebuild a projects user points, subject and project definition points' () {
+    def 'rebuild a projects users user_points, subject and project definition total_points' () {
         // need to call DefaultIntSpec.getRandomUsers so that tests will work in ssl mode
         String userId = getRandomUsers(1)[0]
 
@@ -724,11 +725,17 @@ class RootAccessSpec extends DefaultIntSpec {
         skillsService.createSkill(allSkills[3])
 
         String projectId = proj.projectId
-        String childSkillId = groupChildren.first().skillId
         String subjectId = subj.subjectId
-        def res = skillsService.addSkill([projectId: projectId, skillId: childSkillId], userId, new Date())
+        String childSkillId1 = groupChildren.first().skillId
+        String childSkillId2 = groupChildren.last().skillId
+
+        def res = skillsService.addSkill([projectId: projectId, skillId: childSkillId1], userId, new Date())
         assert res.body.skillApplied
-        assert res.body.completed.find { it.id == childSkillId }
+        assert res.body.completed.find { it.id == childSkillId1 }
+
+        res = skillsService.addSkill([projectId: projectId, skillId: childSkillId2], userId, new Date())
+        assert res.body.skillApplied
+        assert res.body.completed.find { it.id == childSkillId2 }
 
         def subjectSummary = skillsService.getSkillSummary(userId, projectId, subjectId)
         List<UserAchievement> groupAchievements = achievedRepo.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, skillsGroupId)
@@ -752,16 +759,24 @@ class RootAccessSpec extends DefaultIntSpec {
         ProjDef projDef2 = projDefRepo.findByProjectId(projectId)
         assert projDef2.totalPoints == 789
 
+        List<UserPoints> userPoints = userPointsRepo.findByProjectIdAndUserId(projectId, userId)
+        assert !userPoints.find { it.skillId == skillsGroupId }
+
         List<UserAchievement> userAchievements = userAchievedRepo.findAllByUserAndProjectIds(userId, [projectId])
-        assert userAchievements.size() == 8
+        assert userAchievements.size() == 13
         assert userAchievements.find { it.level  == 1 && it.skillId == subjectId }
         assert userAchievements.find { it.level  == 2 && it.skillId == subjectId }
         assert userAchievements.find { it.level  == 3 && it.skillId == subjectId }
+        assert userAchievements.find { it.level  == 4 && it.skillId == subjectId }
+        assert userAchievements.find { it.level  == 5 && it.skillId == subjectId }
         assert userAchievements.find { it.level  == 1 && it.skillId == null }
         assert userAchievements.find { it.level  == 2 && it.skillId == null }
         assert userAchievements.find { it.level  == 3 && it.skillId == null }
+        assert userAchievements.find { it.level  == 4 && it.skillId == null }
+        assert userAchievements.find { it.level  == 5 && it.skillId == null }
         assert userAchievements.find { it.level  == null && it.skillId == skillsGroupId }
-        assert userAchievements.find { it.level  == null && it.skillId == childSkillId }
+        assert userAchievements.find { it.level  == null && it.skillId == childSkillId1 }
+        assert userAchievements.find { it.level  == null && it.skillId == childSkillId2 }
 
         // delete level 2 subject and project achievements as well as the skills group
         userAchievedRepo.delete(userAchievements.find { it.level  == 2 && it.skillId == subjectId })
@@ -769,15 +784,20 @@ class RootAccessSpec extends DefaultIntSpec {
         userAchievedRepo.delete(userAchievements.find { it.level  == null && it.skillId == skillsGroupId })
 
         List<UserAchievement> userAchievements2 = userAchievedRepo.findAllByUserAndProjectIds(userId, [projectId])
-        assert userAchievements2.size() == 5
+        assert userAchievements2.size() == 10
         assert userAchievements2.find { it.level  == 1 && it.skillId == subjectId }
         assert !userAchievements2.find { it.level  == 2 && it.skillId == subjectId }
         assert userAchievements2.find { it.level  == 3 && it.skillId == subjectId }
+        assert userAchievements2.find { it.level  == 4 && it.skillId == subjectId }
+        assert userAchievements2.find { it.level  == 5 && it.skillId == subjectId }
         assert userAchievements2.find { it.level  == 1 && it.skillId == null }
         assert !userAchievements2.find { it.level  == 2 && it.skillId == null }
         assert userAchievements2.find { it.level  == 3 && it.skillId == null }
+        assert userAchievements2.find { it.level  == 4 && it.skillId == null }
+        assert userAchievements2.find { it.level  == 5 && it.skillId == null }
         assert !userAchievements2.find { it.level  == null && it.skillId == skillsGroupId }
-        assert userAchievements2.find { it.level  == null && it.skillId == childSkillId }
+        assert userAchievements2.find { it.level  == null && it.skillId == childSkillId1 }
+        assert userAchievements2.find { it.level  == null && it.skillId == childSkillId2 }
 
         when:
         rootSkillsService.rebuildUserAndProjectPoints(projectId)
@@ -785,7 +805,7 @@ class RootAccessSpec extends DefaultIntSpec {
         List<UserAchievement> userAchievements3 = userAchievedRepo.findAllByUserAndProjectIds(userId, [projectId])
 
         then:
-        userAchievements3.size() == 8
+        userAchievements3.size() == 13
         userAchievements3.find { it.level  == 1 && it.skillId == subjectId }
         userAchievements3.find { it.level  == 2 && it.skillId == subjectId }
         userAchievements3.find { it.level  == 3 && it.skillId == subjectId }
@@ -793,7 +813,8 @@ class RootAccessSpec extends DefaultIntSpec {
         userAchievements3.find { it.level  == 2 && it.skillId == null }
         userAchievements3.find { it.level  == 3 && it.skillId == null }
         userAchievements3.find { it.level  == null && it.skillId == skillsGroupId }
-        userAchievements3.find { it.level  == null && it.skillId == childSkillId }
+        userAchievements3.find { it.level  == null && it.skillId == childSkillId1 }
+        userAchievements3.find { it.level  == null && it.skillId == childSkillId2 }
 
 
         groupAchievements
@@ -811,9 +832,9 @@ class RootAccessSpec extends DefaultIntSpec {
         subjectSummary.skills[0].totalPoints == 100 * groupChildren.size()
         subjectSummary.skills[0].children
         subjectSummary.skills[0].children.size() == groupChildren.size()
-        subjectSummary.skills[0].children.find { it.skillId = childSkillId }
-        subjectSummary.skills[0].children.find { it.skillId = childSkillId }.points == 100
-        subjectSummary.skills[0].children.find { it.skillId = childSkillId }.totalPoints == 100
+        subjectSummary.skills[0].children.find { it.skillId = childSkillId1 }
+        subjectSummary.skills[0].children.find { it.skillId = childSkillId1 }.points == 100
+        subjectSummary.skills[0].children.find { it.skillId = childSkillId1 }.totalPoints == 100
     }
 }
 
