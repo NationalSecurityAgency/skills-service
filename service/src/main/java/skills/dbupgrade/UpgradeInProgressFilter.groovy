@@ -88,6 +88,7 @@ class UpgradeInProgressFilter extends OncePerRequestFilter {
         }
 
         Object principal = auth.getPrincipal()
+        log.debug("extracted principal type of [{}]", principal?.getClass())
         UserInfo userInfo = null
         if (principal instanceof UserInfo) {
             userInfo = (UserInfo)userInfo
@@ -99,12 +100,12 @@ class UpgradeInProgressFilter extends OncePerRequestFilter {
 
         QueuedSkillEvent queuedSkillEvent = safeUrlDecider.isSkillEventReport(uri, method)
         ServletServerHttpRequest serverHttpRequest = new ServletServerHttpRequest(request)
-        if (queuedSkillEvent && userInfo) {
+        if (queuedSkillEvent) {
             SkillEventRequest skillEventRequest = readEventRequest(serverHttpRequest)
             queuedSkillEvent.skillEventRequest = skillEventRequest
-            queuedSkillEvent.userId = userInfo.username
-            if (userInfo.userDn) {
-                queuedSkillEvent.userId = userInfo.userDn
+            queuedSkillEvent.userId = userInfo?.username
+            if (userInfo?.userDn) {
+                queuedSkillEvent.userId = userInfo?.userDn
             }
             skillEventQueue.queueEvent(queuedSkillEvent)
             SkillEventResult eventResult = new SkillEventResult()
