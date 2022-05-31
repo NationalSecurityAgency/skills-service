@@ -91,7 +91,7 @@ class UpgradeInProgressFilter extends OncePerRequestFilter {
         log.debug("extracted principal type of [{}]", principal?.getClass())
         UserInfo userInfo = null
         if (principal instanceof UserInfo) {
-            userInfo = (UserInfo)userInfo
+            userInfo = (UserInfo)principal
         } else if (principal instanceof User) {
             userInfo = new DelegatingUserInfo((User)principal)
         } else {
