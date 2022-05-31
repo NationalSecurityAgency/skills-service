@@ -15,12 +15,12 @@
  */
 package skills.intTests
 
+
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
 import spock.lang.IgnoreIf
-import spock.lang.IgnoreRest
 
 class UserInfoSettingsSpecs extends DefaultIntSpec {
 
@@ -279,5 +279,45 @@ class UserInfoSettingsSpecs extends DefaultIntSpec {
 
         u2Results.collect { it.projectId } == [userProj1, userProj2, userProj3]
         projectsU2.collect { it.projectId } == [userProj2, userProj1, userProj3]
+    }
+
+    def 'moving project resets the stored order to start with 0'() {
+        SkillsService user1Service = createService('user1')
+
+        user1Service.createProject([projectId: userProj1, name: 'proj1'])
+        user1Service.createProject([projectId: userProj2, name: 'proj2'])
+        user1Service.createProject([projectId: userProj3, name: 'proj3'])
+
+        when:
+        def res1 = user1Service.getProjects()
+        user1Service.changeProjectDisplayOrder([projectId: userProj1], 1)
+        def res2 = user1Service.getProjects()
+        then:
+        res1.collect { it.projectId } == ["up1", "up2", "up3"]
+        res2.collect { it.projectId } == ["up2", "up1", "up3"]
+        res2.collect { it.displayOrder } == [0, 1, 2]
+    }
+
+    def 'moving project resets the stored order to start with 0 - root user'() {
+        SkillsService user1Service = createService('user1')
+
+        user1Service.grantRoot()
+
+        user1Service.createProject([projectId: userProj1, name: 'proj1'])
+        user1Service.createProject([projectId: userProj2, name: 'proj2'])
+        user1Service.createProject([projectId: userProj3, name: 'proj3'])
+
+        user1Service.pinProject(userProj1)
+        user1Service.pinProject(userProj2)
+        user1Service.pinProject(userProj3)
+
+        when:
+        def res1 = user1Service.getProjects()
+        user1Service.changeProjectDisplayOrder([projectId: userProj1], 1)
+        def res2 = user1Service.getProjects()
+        then:
+        res1.collect { it.projectId } == ["up1", "up2", "up3"]
+        res2.collect { it.projectId } == ["up2", "up1", "up3"]
+        res2.collect { it.displayOrder } == [0, 1, 2]
     }
 }

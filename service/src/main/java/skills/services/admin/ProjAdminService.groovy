@@ -53,7 +53,7 @@ import skills.utils.Props
 @Slf4j
 class ProjAdminService {
 
-    private static final String rootUserPinnedProjectGroup = "pinned_project"
+    static final String rootUserPinnedProjectGroup = "pinned_project"
     private static final String myProjectGroup = "my_projects"
     private static final String myProjectSetting = "my_project"
     public static final String PINNED = "pinned"
@@ -375,8 +375,10 @@ class ProjAdminService {
         if (ActionPatchRequest.ActionType.NewDisplayOrderIndex == projectPatchRequest.action) {
             UserInfo userInfo = userInfoService.getCurrentUser()
             String userId = userInfo.username
-            User user = userRepo.findByUserId(userId.toLowerCase())
-            sortingService.updateDisplayOrderByUsingNewIndex(user.id, projectId, projectPatchRequest)
+            boolean isRootUser = userInfo.authorities?.find() {
+                it instanceof UserSkillsGrantedAuthority && RoleName.ROLE_SUPER_DUPER_USER == it.role?.roleName
+            }
+            sortingService.updateDisplayOrderByUsingNewIndex(userId, isRootUser, projectId, projectPatchRequest)
         }
     }
 
