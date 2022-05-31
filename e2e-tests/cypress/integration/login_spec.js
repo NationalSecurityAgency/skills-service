@@ -30,7 +30,7 @@ describe('Login Tests', () => {
 
     cy.get('#username').type('root@skills.org');
     cy.get('#inputPassword').type('password');
-    cy.contains('Login').click();
+    cy.get('[data-cy=login]').click();
 
     cy.wait('@getProjects')
       .then(({ request, response}) => {
@@ -67,7 +67,7 @@ describe('Login Tests', () => {
 
     cy.get('#username').type('root@skills.org');
     cy.get('#inputPassword').type('password');
-    cy.contains('Login').click();
+    cy.get('[data-cy=login]').click();
 
     cy.wait('@getProjects')
       .then(({ request, response}) => {
@@ -88,7 +88,7 @@ describe('Login Tests', () => {
 
     cy.get('#username').type('root@skills.org');
     cy.get('#inputPassword').type('password1');
-    cy.contains('Login').click();
+    cy.get('[data-cy=login]').click();
     cy.wait('@postPerformLogin');
 
     cy.contains('Invalid');
@@ -99,7 +99,7 @@ describe('Login Tests', () => {
 
     cy.get('#username').type('root1@skills.org');
     cy.get('#inputPassword').type('password');
-    cy.contains('Login').click();
+    cy.get('[data-cy=login]').click();
     cy.wait('@postPerformLogin');
 
     cy.contains('Invalid');
@@ -107,24 +107,24 @@ describe('Login Tests', () => {
 
   it('disabled login - password must be at least 8 characters', () => {
     cy.visit('/administrator/');
-    cy.contains('Login').should('be.disabled');
+    cy.get('[data-cy=login]').should('be.disabled');
 
     const expectedText = 'Password cannot be less than 8 characters.';
 
     cy.get('#username').type('validEmail@skills.org');
     cy.get('#inputPassword').type('1234567');
-    cy.contains('Login').should('be.disabled');
+    cy.get('[data-cy=login]').should('be.disabled');
     cy.contains(expectedText)
 
     cy.get('#inputPassword').clear();
     cy.get('#inputPassword').type('12345678');
-    cy.contains('Login').should('be.enabled');
+    cy.get('[data-cy=login]').should('be.enabled');
     cy.contains(expectedText).should('not.exist');
   })
 
   it('disabled login - password must not exceed 40 characters', () => {
     cy.visit('/administrator/');
-    cy.contains('Login').should('be.disabled');
+    cy.get('[data-cy=login]').should('be.disabled');
 
     const expectedText = 'Password cannot exceed 40 characters';
     const invalidPassword = Array(41).fill('a').join('');
@@ -132,58 +132,58 @@ describe('Login Tests', () => {
 
     cy.get('#username').type('validEmail@skills.org');
     cy.get('#inputPassword').type(invalidPassword);
-    cy.contains('Login').should('be.disabled');
+    cy.get('[data-cy=login]').should('be.disabled');
     cy.contains(expectedText)
 
     cy.get('#inputPassword').clear();
     cy.get('#inputPassword').type(validPassword);
-    cy.contains('Login').should('be.enabled');
+    cy.get('[data-cy=login]').should('be.enabled');
     cy.contains(expectedText).should('not.exist');
   })
 
   it('disabled login - email must be at least 5 chars', () => {
     cy.visit('/administrator/');
-    cy.contains('Login').should('be.disabled');
+    cy.get('[data-cy=login]').should('be.disabled');
 
     const expectedText = 'Email Address cannot be less than 5 characters.';
 
     cy.get('#username').type('v@s');
     cy.get('#inputPassword').type('12345678');
-    cy.contains('Login').should('be.disabled');
+    cy.get('[data-cy=login]').should('be.disabled');
     cy.contains(expectedText);
 
     cy.get('#username').clear();
     cy.get('#username').type('v@s.org');
-    cy.contains('Login').should('be.enabled');
+    cy.get('[data-cy=login]').should('be.enabled');
     cy.contains(expectedText).should('not.exist');
   })
 
   it('disabled login - valid email format', () => {
     cy.visit('/administrator/');
-    cy.contains('Login').should('be.disabled');
+    cy.get('[data-cy=login]').should('be.disabled');
 
     const expectedText = 'Email Address must be a valid email';
 
     cy.get('#username').type('notvalid');
     cy.get('#inputPassword').type('12345678');
-    cy.contains('Login').should('be.disabled');
+    cy.get('[data-cy=login]').should('be.disabled');
     cy.contains(expectedText);
 
     cy.get('#username').clear();
     cy.get('#username').type('almost@dkda');
-    cy.contains('Login').should('be.disabled');
+    cy.get('[data-cy=login]').should('be.disabled');
     cy.contains(expectedText);
 
     cy.get('#username').clear();
     cy.get('#username').type('almost@dkda.org');
-    cy.contains('Login').should('be.enabled');
+    cy.get('[data-cy=login]').should('be.enabled');
     cy.contains(expectedText).should('not.exist');
   })
 
   if (!Cypress.env('oauthMode')) {
     it('OAuth login is not enabled', () => {
       cy.visit('/administrator/');
-      cy.contains('Login').should('be.disabled');
+      cy.get('[data-cy=login]').should('be.disabled');
 
       cy.wait('@getOAuthProviders')
         .then(({request, response}) => {

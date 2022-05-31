@@ -59,6 +59,7 @@ import Vuex from 'vuex';
 import { marked } from 'marked';
 import VueApexCharts from 'vue-apexcharts';
 import FiltersPlugin from '@/common-components/filter/FiltersPlugin';
+import VueAnnouncer from '@vue-a11y/announcer';
 import dayjs from '@/common-components/DayJsCustomizer';
 import InceptionConfigurer from './InceptionConfigurer';
 import 'babel-polyfill';
@@ -114,6 +115,7 @@ Vue.component('BIconQuestion', BIconQuestion);
 
 Vue.use(SkillsDirective);
 Vue.use(FiltersPlugin);
+Vue.use(VueAnnouncer, {}, router);
 
 localize({
   en,

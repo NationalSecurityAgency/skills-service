@@ -427,7 +427,6 @@ limitations under the License.
           // eslint-disable-next-line no-console
           console.error(`unrecognized filter type ${this.currentFilterType}`);
         }
-
         this.handleTagAdd(tag);
       },
       handleTagAdd(tag) {
@@ -440,8 +439,9 @@ limitations under the License.
           setTimeout(() => { this.alreadyApplied = false; }, 2000);
           return;
         }
+
         const addTagAndUpdate = () => {
-          this.updateCount();
+          this.updateCount(tag);
           this.tags.push(tag);
           this.resetSelections();
         };
@@ -543,6 +543,7 @@ limitations under the License.
           console.error(`unrecognized user criteria type ${tag.type}`);
         }
         this.removeFromArray(this.tags, (el) => el === tag);
+        this.$nextTick(() => this.$announcer.polite(`${tag.display} criteria has been removed`));
         this.updateCount();
       },
       removeFromArray(array, findCallback) {
@@ -552,8 +553,13 @@ limitations under the License.
           array.splice(idx, 1);
         }
       },
-      updateCount() {
+      updateCount(latestTag) {
         ProjectService.countUsersMatchingCriteria(this.$route.params.projectId, this.criteria).then((count) => {
+          let msg = `There are ${count} Project Users matching your specified criteria`;
+          if (latestTag) {
+            msg = `Added criteria ${latestTag.display}, there are ${count} matching Project Users`;
+          }
+          setTimeout(() => this.$announcer.polite(msg), 750);
           this.currentCount = count;
         });
       },
@@ -586,6 +592,7 @@ limitations under the License.
           emailSubject: this.subject,
         }).then(() => {
           this.emailSent = true;
+          this.$announcer.polite('Email has been sent to selected users');
           setTimeout(() => { this.emailSent = false; }, 8000);
         }).finally(() => {
           this.emailing = false;

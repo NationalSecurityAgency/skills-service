@@ -15,11 +15,11 @@ limitations under the License.
 */
 <template>
   <div role="presentation">
+    <vue-announcer />
     <customizable-header role="region" aria-label="dynamic customizable header"></customizable-header>
     <div id="app" class="">
       <div class="m-0">
         <new-software-version-component role="alert"/>
-
         <div class="overall-container">
           <pki-app-bootstrap v-if="isPkiAndNeedsToBootstrap || isOAuthOnlyAndNeedsToBootstrap" role="alert"/>
           <loading-container v-else v-bind:is-loading="isLoading" role="presentation">
@@ -33,7 +33,7 @@ limitations under the License.
         </div>
       </div>
     </div>
-    <dashboard-footer/>
+    <dashboard-footer />
     <customizable-footer role="region" aria-label="dynamic customizable footer"></customizable-footer>
   </div>
 </template>
