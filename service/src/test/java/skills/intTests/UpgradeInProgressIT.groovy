@@ -27,7 +27,7 @@ import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 
 @Slf4j
-@SpringBootTest(properties = ['skills.h2.port=9093',
+@SpringBootTest(properties = ['skills.h2.port=9097',
         'skills.config.ui.rankingAndProgressViewsEnabled=false',
         'skills.config.ui.defaultLandingPage=progress',
         'skills.config.db-upgrade-in-progress=true',
