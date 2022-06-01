@@ -21,10 +21,10 @@ limitations under the License.
           <apexchart :name="proj.projectName" type="radialBar" height="200" :options="chartOptions" :series="series"></apexchart>
         </b-col>
         <b-col cols="12" sm="8" class="text-center text-sm-right pr-md-5">
-          <div class="h4 text-uppercase text-truncate" data-cy="project-card-project-name" :title="proj.projectName ">{{ proj.projectName }}</div>
+          <div class="h4 text-uppercase text-truncate" data-cy="project-card-project-name" :aria-label="`Project ${proj.projectName}`" :title="proj.projectName ">{{ proj.projectName }}</div>
           <div class="h5 text-secondary" data-cy="project-card-project-level">{{ proj.levelDisplayName }} {{ proj.level }}</div>
           <div data-cy="project-card-project-rank">
-            <b-badge :variant="rankVariant">Rank: {{ proj.rank | number }} / {{ proj.totalUsers | number}}</b-badge>
+            <b-badge :variant="rankVariant" :aria-label="`Ranked ${proj.rank} out of ${proj.totalUsers} project users`">Rank: {{ proj.rank | number }} / {{ proj.totalUsers | number}}</b-badge>
           </div>
         </b-col>
       </b-row>
@@ -34,14 +34,14 @@ limitations under the License.
              aria-valuemin="0"
              :aria-valuemax="proj.totalPoints"
              :aria-valuenow="proj.points"
-             aria-labelledby="projectProgressLabel"
+             :aria-label="`${proj.points} out of ${proj.totalPoints} available points`"
              class="progress-bar bg-info"
              style="width: 0%;">
         </div>
       </div>
 
       <div class="text-center">
-        <span id="projectProgressLabel" class="small text-center" data-cy="project-card-project-points">{{ proj.points | number }} / {{ proj.totalPoints | number }}</span>
+        <span :id="`projectProgressLabel_${proj.projectId}`" aria-hidden="true" class="small text-center" data-cy="project-card-project-points">{{ proj.points | number }} / {{ proj.totalPoints | number }}</span>
       </div>
       <div class="position-absolute text-muted d-none small click-indicator" style="right: 15px; bottom: 10px;">Click to View</div>
 
