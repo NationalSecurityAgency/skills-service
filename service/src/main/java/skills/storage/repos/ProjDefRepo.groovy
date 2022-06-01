@@ -192,10 +192,10 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
     @Nullable
     List<ProjSummaryResult> getProjectSummariesByUser(String userId)
 
-    @Query(value = "select p from ProjDef p, UserRole u where p.projectId = u.projectId and u.userId=?1")
-    List<ProjDef> getProjectsByUser(String userId)
+    @Query(value = "select u.projectId from UserRole u where u.userId=?1 and u.projectId is not null")
+    List<String> getProjectIdsByUser(String userId)
 
-    @Query(value="""
+    @Query(value = """
                 SELECT 
                     pd.project_id AS projectId,
                     pd.name AS name,

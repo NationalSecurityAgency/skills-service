@@ -15,6 +15,7 @@
  */
 package skills.services
 
+import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -24,19 +25,23 @@ import skills.auth.UserInfoService
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.UserProjectSettingsRequest
-import skills.controller.result.model.ProjectResult
 import skills.controller.result.model.SettingsResult
+import skills.services.admin.ProjAdminService
 import skills.services.settings.SettingsDataAccessor
 import skills.services.settings.SettingsService
 import skills.storage.model.Setting
 import skills.storage.model.auth.User
+import skills.storage.repos.ProjDefRepo
+import skills.storage.repos.SettingRepo
 import skills.storage.repos.UserRepo
 
 @Service
 @Slf4j
 class ProjectSortingService {
 
-    enum Move { UP, DOWN }
+    enum Move {
+        UP, DOWN
+    }
 
     static final String PROJECT_SORT_GROUP = "project_sort_order"
     static final String PROJECT_SORT_SETTING = "project"
@@ -48,6 +53,9 @@ class ProjectSortingService {
     SettingsService settingsService
 
     @Autowired
+    ProjDefRepo projDefRepo
+
+    @Autowired
     UserRepo userRepo
 
     @Autowired
@@ -56,15 +64,18 @@ class ProjectSortingService {
     @Autowired
     LockingService lockingService
 
+    @Autowired
+    SettingRepo settingRepo
+
     @Transactional(readOnly = true)
-    Integer getProjectSortOrder(String projectId){
+    Integer getProjectSortOrder(String projectId) {
         UserInfo userInfo = userInfoService.getCurrentUser()
 
         return getProjectSortOrder(projectId, userInfo.username)
     }
 
     @Transactional(readOnly = true)
-    Integer getProjectSortOrder(String projectId, String userId){
+    Integer getProjectSortOrder(String projectId, String userId) {
 
         SettingsResult setting = settingsService.getUserProjectSetting(userId, projectId, PROJECT_SORT_SETTING, PROJECT_SORT_GROUP)
         if(!setting){
@@ -126,22 +137,40 @@ class ProjectSortingService {
 
 
     @Transactional
-    void updateDisplayOrderByUsingNewIndex(Integer userIdRef, String projectId, ActionPatchRequest patchRequest) {
+    void updateDisplayOrderByUsingNewIndex(String userId, boolean isRootUser, String projectId, ActionPatchRequest patchRequest) {
+        User user = userRepo.findByUserId(userId.toLowerCase())
+
         assert patchRequest.action == ActionPatchRequest.ActionType.NewDisplayOrderIndex
         SkillsValidator.isTrue(patchRequest.newDisplayOrderIndex >= 0, "[newDisplayOrderIndex] param must be >=0 but received [${patchRequest.newDisplayOrderIndex}]", projectId, null)
 
-        List<Setting> settings = settingsDataAccessor.getUserProjectSettingsForGroup(userIdRef, PROJECT_SORT_GROUP)
+        List<String> expectedProjectIds = []
+        if (isRootUser) {
+            List<SettingsResult> pinnedProjectSettings = settingsService.getUserProjectSettingsForGroup(userId.toLowerCase(), ProjAdminService.rootUserPinnedProjectGroup)
+            expectedProjectIds = pinnedProjectSettings.collect { it.projectId }
+        } else {
+            expectedProjectIds = projDefRepo.getProjectIdsByUser(userId.toLowerCase())
+        }
+
+        List<Setting> settings = settingsDataAccessor.getUserProjectSettingsForGroup(user.id, PROJECT_SORT_GROUP)
+        List<Setting> settingsToDelete = settings.findAll { !expectedProjectIds.contains(it.projectId) }
+        settings = settings.findAll { expectedProjectIds.contains(it.projectId) }
         Setting theItem = settings.find({ it.projectId == projectId })
         List<Setting> result = settings.findAll({ it.projectId != projectId }).sort({ it.value.toInteger() })
 
         int newIndex = Math.min(patchRequest.newDisplayOrderIndex, settings.size() - 1)
         result.add(newIndex, theItem)
-        result.eachWithIndex{ Setting entry, int i ->
+        result.eachWithIndex { Setting entry, int i ->
             entry.value = i.toString()
         }
 
         settingsDataAccessor.saveAll(result)
 
+        if (settingsToDelete) {
+            settingsToDelete.each {
+                log.warn("Removing the sort setting that does not have an associated project entry. This must have resulted from a bug when managing sort settings. [{}]", JsonOutput.toJson(it))
+                settingRepo.delete(it)
+            }
+        }
         if (log.isDebugEnabled()) {
             log.debug("Updated display order {}", result.collect { "${it.projectId}=>${it.value}" })
         }
