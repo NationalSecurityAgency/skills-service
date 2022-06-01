@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import skills.services.AccessSettingsStorageService
+import skills.services.admin.ProjAdminService
 import skills.services.inception.InceptionProjectService
 import skills.services.settings.SettingsService
 import skills.storage.model.UserAttrs
@@ -65,6 +66,9 @@ class UserAuthService {
 
     @Autowired
     SettingsService settingsService
+
+    @Autowired
+    ProjAdminService projAdminService
 
     @Value('#{"${skills.authorization.verifyEmailAddresses:false}"}')
     Boolean verifyEmailAddresses
@@ -174,6 +178,8 @@ class UserAuthService {
 
         // super user gets assigned to Inception project
         inceptionProjectService.createInceptionAndAssignUser(userId)
+
+        projAdminService.pinAllExistingProjectsWhereUserIsAdminExceptInception(userId)
     }
 
     @Transactional(readOnly = true)

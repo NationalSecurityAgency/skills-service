@@ -1006,7 +1006,7 @@ class SkillsService {
 
     def addRootRole(String userId) {
         userId = getUserId(userId, false)
-        return wsHelper.rootPut("/addRoot/${userId}")
+        return wsHelper.rootPut("/users/${userId}/roles/ROLE_SUPER_DUPER_USER")
     }
 
     def pinProject(String projectId) {

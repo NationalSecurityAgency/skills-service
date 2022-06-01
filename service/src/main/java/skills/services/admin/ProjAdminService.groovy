@@ -23,6 +23,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.auth.SkillsAuthorizationException
 import skills.auth.UserInfo
 import skills.auth.UserInfoService
 import skills.auth.UserSkillsGrantedAuthority
@@ -35,6 +36,7 @@ import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.SimpleProjectResult
 import skills.icons.IconCssNameUtil
 import skills.services.*
+import skills.services.inception.InceptionProjectService
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.storage.accessors.ProjDefAccessor
@@ -193,15 +195,19 @@ class ProjAdminService {
                 value: projectId
         )
         settingsService.saveSetting(userSettingsRequest, user)
-        sortingService.setNewProjectDisplayOrder(projectId, userInfoService.getCurrentUserId().toLowerCase())
+
+        String userId = user ? user.userId : loadCurrentUser(true)?.username
+        sortingService.setNewProjectDisplayOrder(projectId, userId?.toLowerCase())
     }
 
-    void pinAllExistingProjectsWhereUserIsAdmin(String userId) {
+    void pinAllExistingProjectsWhereUserIsAdminExceptInception(String userId) {
         List<String> existingProjectIdsWhereUserIsAdmin = projDefRepo.getProjectIdsByUser(userId.toLowerCase())
         if (existingProjectIdsWhereUserIsAdmin) {
             User user = userRepo.findByUserId(userId.toLowerCase())
             existingProjectIdsWhereUserIsAdmin.each { projectId ->
-                pinProjectForRootUser(projectId, user)
+                if (projectId != InceptionProjectService.inceptionProjectId) {
+                    pinProjectForRootUser(projectId, user)
+                }
             }
         }
     }
@@ -525,5 +531,14 @@ class ProjAdminService {
     @Profile
     private long countNumSkillsForProject(ProjDef definition) {
         skillDefRepo.countByProjectIdAndType(definition.projectId, SkillDef.ContainerType.Skill)
+    }
+
+    @Profile
+    private UserInfo loadCurrentUser(boolean failIfNoCurrentUser=true) {
+        UserInfo currentUser = userInfoService.getCurrentUser()
+        if (!currentUser && failIfNoCurrentUser) {
+            throw new SkillsAuthorizationException('No current user found')
+        }
+        return currentUser
     }
 }

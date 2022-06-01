@@ -352,12 +352,10 @@ class RootAccessSpec extends DefaultIntSpec {
         def otherRootUserProjects = rootSkillsService.getProjects()
 
         then:
-        prePinProjects.size() == 1
-        prePinProjects.find { it.projectId == 'Inception'}
-        postPinProjects.size() == 3
+        !prePinProjects
+        postPinProjects.size() == 2
         postPinProjects.find { it.projectId == proj3.projectId}
         postPinProjects.find { it.projectId == proj4.projectId}
-        postPinProjects.find { it.projectId == 'Inception'}
         otherRootUserProjects.size() == 2
         otherRootUserProjects.find { it.projectId == proj.projectId }
         otherRootUserProjects.find { it.projectId == proj2.projectId }

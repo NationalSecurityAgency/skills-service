@@ -19,10 +19,7 @@ import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.web.bind.annotation.*
@@ -153,13 +150,6 @@ class RootController {
         return accessSettingsStorageService.isRoot(principal.name)
     }
 
-    @PutMapping('/addRoot/{userKey}')
-    RequestResult addRoot(@PathVariable('userKey') String userKey) {
-        String userId = getUserId(userKey)
-        accessSettingsStorageService.addRoot(userId)
-        return new RequestResult(success: true)
-    }
-
     @DeleteMapping('/deleteRoot/{userId}')
     void deleteRoot(@PathVariable('userId') String userId) {
         SkillsValidator.isTrue(accessSettingsStorageService.getRootAdminCount() > 1, 'At least one root user must exist at all times! Deleting another user will cause no root users to exist!')
@@ -175,11 +165,11 @@ class RootController {
     @PutMapping('/users/{userKey}/roles/{roleName}')
     RequestResult addRole(@PathVariable('userKey') String userKey,
                           @PathVariable("roleName") RoleName roleName) {
+        String userId = getUserId(userKey)
         if (roleName == RoleName.ROLE_SUPER_DUPER_USER) {
-            addRoot(userKey)
-            projAdminService.pinAllExistingProjectsWhereUserIsAdmin(getUserId(userKey))
+            accessSettingsStorageService.addRoot(userId)
+            projAdminService.pinAllExistingProjectsWhereUserIsAdminExceptInception(userId)
         } else {
-            String userId = getUserId(userKey)
             accessSettingsStorageService.addUserRole(userId, null, roleName)
         }
         return new RequestResult(success: true)
