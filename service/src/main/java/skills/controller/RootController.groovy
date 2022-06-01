@@ -177,6 +177,7 @@ class RootController {
                           @PathVariable("roleName") RoleName roleName) {
         if (roleName == RoleName.ROLE_SUPER_DUPER_USER) {
             addRoot(userKey)
+            projAdminService.pinAllExistingProjectsWhereUserIsAdmin(getUserId(userKey))
         } else {
             String userId = getUserId(userKey)
             accessSettingsStorageService.addUserRole(userId, null, roleName)
@@ -190,6 +191,7 @@ class RootController {
         userId = userId?.toLowerCase()
         if (roleName == RoleName.ROLE_SUPER_DUPER_USER) {
             deleteRoot(userId)
+            projAdminService.unpinAllProjectsForRootUser(userId)
         } else {
             userId = getUserId(userId)
             accessSettingsStorageService.deleteUserRole(userId, null, roleName)

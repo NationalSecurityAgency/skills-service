@@ -182,7 +182,7 @@ class ProjAdminService {
     }
 
     @Transactional()
-    void pinProjectForRootUser(String projectId) {
+    void pinProjectForRootUser(String projectId, User user=null) {
         if (!existsByProjectId(projectId)) {
             throw new SkillException("Project with id [${projectId}] does NOT exist")
         }
@@ -192,14 +192,24 @@ class ProjAdminService {
                 setting: PINNED,
                 value: projectId
         )
-        settingsService.saveSetting(userSettingsRequest)
+        settingsService.saveSetting(userSettingsRequest, user)
         sortingService.setNewProjectDisplayOrder(projectId, userInfoService.getCurrentUserId().toLowerCase())
     }
 
+    void pinAllExistingProjectsWhereUserIsAdmin(String userId) {
+        List<String> existingProjectIdsWhereUserIsAdmin = projDefRepo.getProjectIdsByUser(userId.toLowerCase())
+        if (existingProjectIdsWhereUserIsAdmin) {
+            User user = userRepo.findByUserId(userId.toLowerCase())
+            existingProjectIdsWhereUserIsAdmin.each { projectId ->
+                pinProjectForRootUser(projectId, user)
+            }
+        }
+    }
+
     @Transactional()
-    void unpinProjectForRootUser(String projectId) {
+    void unpinProjectForRootUser(String projectId, User user=null) {
         if (existsByProjectId(projectId)) {
-            String currentUserIdLower = userInfoService.getCurrentUserId().toLowerCase()
+            String currentUserIdLower = user ? user.userId.toLowerCase() : userInfoService.getCurrentUserId().toLowerCase()
             settingsService.deleteUserProjectSetting(
                     currentUserIdLower,
                     rootUserPinnedProjectGroup,
@@ -207,6 +217,16 @@ class ProjAdminService {
                     projectId
             )
             sortingService.deleteProjectDisplayOrder(projectId, currentUserIdLower)
+        }
+    }
+    void unpinAllProjectsForRootUser(String userId) {
+        List<SettingsResult> pinnedProjectSettings = settingsService.getUserProjectSettingsForGroup(userId.toLowerCase(), ProjAdminService.rootUserPinnedProjectGroup)
+        List<String> existingPinnedProjectIds = pinnedProjectSettings.collect { it.projectId }
+        if (existingPinnedProjectIds) {
+            User user = userRepo.findByUserId(userId.toLowerCase())
+            existingPinnedProjectIds.each { projectId ->
+                unpinProjectForRootUser(projectId, user)
+            }
         }
     }
 

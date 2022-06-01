@@ -28,7 +28,10 @@ import skills.controller.exceptions.SkillException
 import skills.controller.result.model.RequestResult
 import skills.controller.result.model.UserRoleRes
 import skills.services.AccessSettingsStorageService
+import skills.services.admin.ProjAdminService
 import skills.storage.model.auth.RoleName
+import skills.storage.model.auth.User
+import skills.storage.repos.UserRepo
 
 @RestController
 @RequestMapping("/admin")
@@ -44,6 +47,12 @@ class AccessSettingsController {
 
     @Autowired
     AccessSettingsStorageService accessSettingsStorageService
+
+    @Autowired
+    UserRepo userRepo
+
+    @Autowired
+    ProjAdminService projAdminService
 
     @Value('#{securityConfig.authMode}}')
     skills.auth.AuthMode authMode = skills.auth.AuthMode.DEFAULT_AUTH_MODE
@@ -67,6 +76,14 @@ class AccessSettingsController {
             @PathVariable("projectId") String projectId,
             @PathVariable("userId") String userId, @PathVariable("roleName") RoleName roleName) {
         accessSettingsStorageService.deleteUserRole(userId?.toLowerCase(), projectId, roleName)
+
+        if(roleName == RoleName.ROLE_PROJECT_ADMIN && accessSettingsStorageService.isRoot(userId)) {
+            User user = userRepo.findByUserId(userId.toLowerCase())
+            if (!user) {
+                throw new SkillException("Failed to find user with id [${userId.toLowerCase()}]")
+            }
+            projAdminService.unpinProjectForRootUser(projectId, user)
+        }
         return new RequestResult(success: true)
     }
 
@@ -76,6 +93,14 @@ class AccessSettingsController {
             @PathVariable("userKey") String userKey, @PathVariable("roleName") RoleName roleName) {
         String userId = getUserId(userKey)
         accessSettingsStorageService.addUserRole(userId, projectId, roleName)
+
+        if(roleName == RoleName.ROLE_PROJECT_ADMIN && accessSettingsStorageService.isRoot(userId)) {
+            User user = userRepo.findByUserId(userId.toLowerCase())
+            if (!user) {
+                throw new SkillException("Failed to find user with id [${userId.toLowerCase()}]")
+            }
+            projAdminService.pinProjectForRootUser(projectId, user)
+        }
         return new RequestResult(success: true)
     }
 
