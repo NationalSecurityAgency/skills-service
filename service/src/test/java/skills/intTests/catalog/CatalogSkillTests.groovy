@@ -2823,18 +2823,28 @@ class CatalogSkillTests extends CatalogIntSpec {
 
         when:
         def projectUsers = skillsService.getProjectUsers(project2.projectId)
-        println projectUsers
+        def projectUsers_subj = skillsService.getSubjectUsers(project2.projectId, p2subj1.subjectId)
 
         then:
         projectUsers.count == 6
         projectUsers.totalCount == 6
         projectUsers.data.size() == 6
-        projectUsers.data.find {it.userId == users[0]}
-        projectUsers.data.find {it.userId == users[1]}
-        projectUsers.data.find {it.userId == users[2]}
-        projectUsers.data.find {it.userId == users[3]}
-        projectUsers.data.find {it.userId == users[4]}
-        projectUsers.data.find {it.userId == users[5]}
+        projectUsers.data.find { it.userId == users[0] }
+        projectUsers.data.find { it.userId == users[1] }
+        projectUsers.data.find { it.userId == users[2] }
+        projectUsers.data.find { it.userId == users[3] }
+        projectUsers.data.find { it.userId == users[4] }
+        projectUsers.data.find { it.userId == users[5] }
+
+        projectUsers_subj.count == 6
+        projectUsers_subj.totalCount == 6
+        projectUsers_subj.data.size() == 6
+        projectUsers_subj.data.find { it.userId == users[0] }
+        projectUsers_subj.data.find { it.userId == users[1] }
+        projectUsers_subj.data.find { it.userId == users[2] }
+        projectUsers_subj.data.find { it.userId == users[3] }
+        projectUsers_subj.data.find { it.userId == users[4] }
+        projectUsers_subj.data.find { it.userId == users[5] }
     }
 
     def "finalization of imports on project with insufficient points should fail"() {

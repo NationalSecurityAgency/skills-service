@@ -30,9 +30,12 @@ class UIConfigProperties {
 
     String compactDailyEventsOlderThan
 
+    String dbUpgradeInProgress
+
     @PostConstruct
     public void copyConfigToUi() {
         ui.put("maxDailyUserEvents", compactDailyEventsOlderThan)
+        ui.put("dbUpgradeInProgress", dbUpgradeInProgress)
     }
 
     @PostConstruct

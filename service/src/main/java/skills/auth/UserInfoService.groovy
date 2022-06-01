@@ -65,7 +65,7 @@ class UserInfoService {
     }
 
     String getCurrentUserId() {
-        return getCurrentUser().username
+        return getCurrentUser()?.username
     }
 
     /**

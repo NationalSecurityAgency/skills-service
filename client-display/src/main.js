@@ -52,7 +52,8 @@ Vue.use(TooltipPlugin);
 Vue.use(FormTextareaPlugin);
 Vue.use(FiltersPlugin);
 
-require('@/common/softwareVersion/softwareVersionInterceptor');
+require('@/common/interceptors/softwareVersionInterceptor');
+require('@/common/interceptors/upgradeInProgressInterceptor');
 
 const renderer = {
   link(href, title, text) {

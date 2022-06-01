@@ -458,14 +458,28 @@ describe('Import skills from Catalog Tests', () => {
         cy.createProject(2);
         cy.createSubject(2, 1);
         cy.createSkill(2, 1, 2);
-        cy.importSkillFromCatalog(2, 1, 1, 1)
+        cy.importSkillFromCatalog(2, 1, 1, 1);
 
-        cy.createBadge(2, 1)
+        cy.createBadge(2, 1);
 
         cy.visit('/administrator/projects/proj2/badges/badge1');
-        cy.get('[data-cy="skillsSelector"]').click();
-        cy.get('[data-cy="skillsSelectionItem-proj2-skill2"]')
-        cy.get('[data-cy="skillsSelectionItem-proj2-skill1"]').click() // imported skill
+        cy.get('[data-cy="skillsSelector"]')
+            .click();
+        cy.get('[data-cy="skillsSelectionItem-proj2-skill2"]');
+        cy.get('[data-cy="skillsSelectionItem-proj2-skill1"]')
+            .should('not.exist'); // imported non-finalized skill cannot be added to the badge
+
+        cy.finalizeCatalogImport(2);
+
+        cy.visit('/administrator/projects/proj2/badges/badge1');
+        cy.get('[data-cy="skillsSelector"]')
+            .click();
+        cy.get('[data-cy="skillsSelectionItem-proj2-skill2"]');
+        cy.get('[data-cy="skillsSelectionItem-proj2-skill1"]')
+            .click(); // imported and finalized skill
+        cy.get('[data-cy="simpleSkillsTable"]')
+            .contains('Very Great Skill 1'); // imported skill added to the badge
+
     })
 
 

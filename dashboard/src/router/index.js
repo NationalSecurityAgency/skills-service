@@ -21,6 +21,7 @@ import LoginForm from '@/components/access/Login';
 import RequestAccountForm from '@/components/access/RequestAccess';
 import ProjectPage from '@/components/projects/ProjectPage';
 import ErrorPage from '@/components/utils/ErrorPage';
+import DbUpgradeInProgressPage from '@/components/utils/DbUpgradeInProgressPage';
 import NotAuthorizedPage from '@/components/utils/NotAuthorizedPage';
 import NotFoundPage from '@/components/utils/NotFoundPage';
 import SubjectPage from '@/components/subjects/SubjectPage';
@@ -274,6 +275,14 @@ const router = new Router({
         announcer: {
           message: 'Error Page',
         },
+      },
+    },
+    {
+      path: '/upgrade-in-progress',
+      name: 'DbUpgradeInProgressPage',
+      component: DbUpgradeInProgressPage,
+      meta: {
+        requiresAuth: true,
       },
     },
     {

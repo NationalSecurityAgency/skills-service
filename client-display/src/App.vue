@@ -18,6 +18,7 @@ limitations under the License.
     id="app"
     class="container-fluid skills-display-container py-2"
     :style="appStyleObject" role="main" aria-label="SkillTree Client Display">
+    <upgrade-in-progress-header/>
     <new-software-version-component/>
     <skills-spinner :loading="loadingConfig" />
     <router-view v-if="!loadingConfig"/>
@@ -35,6 +36,7 @@ limitations under the License.
   import store from '@/store/store';
   import NavigationErrorMixin from '@/common/utilities/NavigationErrorMixin';
   import NewSoftwareVersionComponent from '@/common/softwareVersion/NewSoftwareVersion';
+  import UpgradeInProgressHeader from '@/common/utilities/UpgradeInProgressHeader';
   import DevModeMixin from '@/dev/DevModeMixin';
   import ThemeHelper from './common/theme/ThemeHelper';
   import SkillsSpinner from './common/utilities/SkillsSpinner';
@@ -67,7 +69,7 @@ limitations under the License.
 
   export default {
     mixins: [DevModeMixin, NavigationErrorMixin],
-    components: { SkillsSpinner, NewSoftwareVersionComponent },
+    components: { SkillsSpinner, NewSoftwareVersionComponent, UpgradeInProgressHeader },
     data() {
       return {
         appStyleObject: {},

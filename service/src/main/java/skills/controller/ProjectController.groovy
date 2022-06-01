@@ -29,6 +29,7 @@ import skills.controller.request.model.ProjectRequest
 import skills.controller.result.model.CustomIconResult
 import skills.controller.result.model.ProjectResult
 import skills.controller.result.model.RequestResult
+import skills.dbupgrade.DBUpgradeSafe
 import skills.icons.CustomIconFacade
 import skills.profile.EnableCallStackProf
 import skills.services.IdFormatValidator
@@ -106,7 +107,7 @@ class ProjectController {
         return new RequestResult(success: true)
     }
 
-
+    @DBUpgradeSafe
     @RequestMapping(value = "/projectExist", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
     boolean doesProjectExist(@RequestBody ProjectExistsRequest existsRequest) {
