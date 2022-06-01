@@ -147,7 +147,6 @@ class UpgradeInProgressFilter extends OncePerRequestFilter {
         ServletServerHttpResponse serverHttpResponse = new ServletServerHttpResponse(response)
         List<MediaType> acceptTypes = serverHttpRequest.getHeaders().getAccept()
         if (!acceptTypes){
-            //todo: should we try to use content-type if specified on the original request?
             acceptTypes = [DEFAULT_MEDIA_TYPE]
         }
 
