@@ -58,9 +58,10 @@ class ProjectOrderSpecs extends DefaultIntSpec {
         def projects = rootServiceTwo.getProjects()
 
         then:
-        projects.size() == 2
+        projects.size() == 3
         projects.sort() { it.order }[0].projectId == proj3.projectId
-        projects.sort() { it.order }[1].projectId == proj1.projectId
+        projects.sort() { it.order }[1].projectId == 'Inception'
+        projects.sort() { it.order }[2].projectId == proj1.projectId
 
     }
 
