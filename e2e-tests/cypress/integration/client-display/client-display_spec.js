@@ -165,7 +165,7 @@ describe('Client Display Tests', () => {
         cy.customA11y();
     });
 
-    it.only('ability to expand skill details from subject page', () => {
+    it('ability to expand skill details from subject page', () => {
         cy.cdVisit('/')
         cy.injectAxe();
         cy.cdClickSubj(0);
@@ -178,7 +178,7 @@ describe('Client Display Tests', () => {
         cy.customA11y();
     });
 
-    it.only('badge details show skill details focus', () => {
+    it('badge details show skill details focus', () => {
         cy.resetDb();
         cy.fixture('vars.json').then((vars) => {
             if (!Cypress.env('oauthMode')) {
