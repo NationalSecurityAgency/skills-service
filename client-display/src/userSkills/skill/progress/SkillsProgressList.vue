@@ -35,7 +35,7 @@ limitations under the License.
                 <div class="col-md text-left my-2 my-md-0 ml-md-0 pl-md-0">
                   <skills-filter :counts="metaCounts" :filters="filters" @filter-selected="filterSkills" @clear-filter="clearFilters"/>
                 </div>
-                <div class="col-md-auto text-right" >
+                <div class="col-md-auto text-right skill-details-toggle" >
                     <span class="text-muted pr-1">Skill Details:</span>
                     <toggle-button class="" v-model="showDescriptionsInternal" @change="onDetailsToggle"
                                    :color="{ checked: '#007c49', unchecked: '#6b6b6b' }"
@@ -345,6 +345,20 @@ limitations under the License.
 </script>
 
 <style scoped>
+
+.skill-details-toggle > label {
+  border: 2px solid transparent;
+}
+
+.vue-js-switch:focus-within {
+  color: #495057 !important;
+  background-color: #fff !important;
+  border: 2px solid #80bdff !important;
+  border-radius: 11px;
+  box-shadow: 1em 1em 1em rgba(0, 0, 0, 0.4) inset, 0 0 2em rgba(128, 189, 255, 0.8) !important;
+  outline: none;
+}
+
 .separator-border-thick {
   /*border-bottom-color: #f7f7f7 !important;*/
   border-bottom-width: 12px !important;

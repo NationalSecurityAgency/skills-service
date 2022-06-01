@@ -165,15 +165,57 @@ describe('Client Display Tests', () => {
         cy.customA11y();
     });
 
-    it('ability to expand skill details from subject page', () => {
+    it.only('ability to expand skill details from subject page', () => {
         cy.cdVisit('/')
         cy.injectAxe();
         cy.cdClickSubj(0);
+        cy.get('input.v-switch-input').focus();
+        cy.matchSnapshotImageForElement('.skill-details-toggle', 'Skill-Details-Toggle-Focused', snapshotOptions);
         cy.get('[data-cy=toggleSkillDetails]').click()
         cy.contains('Lorem ipsum dolor sit amet')
         // 1 skill is locked
         cy.contains('Skill has 1 direct dependent(s).')
         cy.customA11y();
+    });
+
+    it.only('badge details show skill details focus', () => {
+        cy.resetDb();
+        cy.fixture('vars.json').then((vars) => {
+            if (!Cypress.env('oauthMode')) {
+                cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);
+            }
+        })
+        cy.loginAsProxyUser()
+        cy.createProject(1)
+        cy.createProject(2)
+        cy.createSubject(1, 1)
+        cy.createSubject(2, 1)
+        cy.createSkill(1, 1, 1, {name: 'Search blah skill 1'});
+        cy.createSkill(1, 1, 2, {name: 'is a skill 2'});
+        cy.createSkill(1, 1, 3, {name: 'find Blah other skill 3'});
+        cy.createSkill(1, 1, 4, {name: 'Search nothing skill 4'});
+
+        cy.createSkill(2, 1, 1, {name: 'blah1'});
+        cy.createSkill(2, 1, 2, {name: 'blah2'});
+        cy.createSkill(2, 1, 3, {name: 'blah3'});
+        cy.createSkill(2, 1, 4, {name: 'blah4'});
+
+        cy.loginAsRootUser();
+
+        cy.createGlobalBadge(1);
+        cy.assignSkillToGlobalBadge(1, 1, 1);
+        cy.enableGlobalBadge();
+
+
+        cy.loginAsProxyUser();
+
+        cy.cdVisit('/');
+        cy.cdClickBadges();
+        cy.contains('Global Badge 1');
+        cy.get('[data-cy=badgeDetailsLink_globalBadge1]').click();
+        cy.contains('Global Badge 1').should('be.visible');
+        cy.get('input.v-switch-input').focus();
+        cy.matchSnapshotImageForElement('.skill-details-toggle', 'Badge-Skill-Details-Toggle-Focused', snapshotOptions);
     });
 
     it('internal back button', () => {
