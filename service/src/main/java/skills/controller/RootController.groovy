@@ -150,10 +150,19 @@ class RootController {
         return accessSettingsStorageService.isRoot(principal.name)
     }
 
+    @PutMapping('/addRoot/{userKey}')
+    RequestResult addRoot(@PathVariable('userKey') String userKey) {
+        String userId = getUserId(userKey)
+        accessSettingsStorageService.addRoot(userId)
+        projAdminService.pinAllExistingProjectsWhereUserIsAdminExceptInception(userId)
+        return new RequestResult(success: true)
+    }
+
     @DeleteMapping('/deleteRoot/{userId}')
     void deleteRoot(@PathVariable('userId') String userId) {
         SkillsValidator.isTrue(accessSettingsStorageService.getRootAdminCount() > 1, 'At least one root user must exist at all times! Deleting another user will cause no root users to exist!')
         accessSettingsStorageService.deleteRoot(userId?.toLowerCase())
+        projAdminService.unpinAllProjectsForRootUser(userId)
     }
 
     @GetMapping('/users/roles/{roleName}')
@@ -165,11 +174,10 @@ class RootController {
     @PutMapping('/users/{userKey}/roles/{roleName}')
     RequestResult addRole(@PathVariable('userKey') String userKey,
                           @PathVariable("roleName") RoleName roleName) {
-        String userId = getUserId(userKey)
         if (roleName == RoleName.ROLE_SUPER_DUPER_USER) {
-            accessSettingsStorageService.addRoot(userId)
-            projAdminService.pinAllExistingProjectsWhereUserIsAdminExceptInception(userId)
+            addRoot(userKey)
         } else {
+            String userId = getUserId(userKey)
             accessSettingsStorageService.addUserRole(userId, null, roleName)
         }
         return new RequestResult(success: true)
