@@ -33,7 +33,7 @@ limitations under the License.
                     <ValidationProvider rules="required|minNameLength|maxSubjectNameLength|uniqueName" v-slot="{ errors }" name="Subject Name">
                       <input type="text" class="form-control" id="subjName" @input="updateSubjectId"
                              v-model="subjectInternal.name" v-on:input="updateSubjectId"
-                             v-on:keyup.enter="handleSubmit(updateSubject)"
+                             v-on:keydown.enter="handleSubmit(updateSubject)"
                              v-focus aria-required="true"
                               :aria-invalid="errors && errors.length > 0"
                               aria-errormessage="subjectNameError"
@@ -46,7 +46,7 @@ limitations under the License.
               </div>
 
               <id-input type="text" label="Subject ID" v-model="subjectInternal.subjectId" @can-edit="canAutoGenerateId=!$event"
-                        v-on:keyup.enter.native="handleSubmit(updateSubject)" additional-validation-rules="uniqueId"/>
+                        v-on:keydown.enter.native="handleSubmit(updateSubject)" additional-validation-rules="uniqueId"/>
 
               <div class="mt-2">
                 <label>Description</label>
@@ -57,7 +57,7 @@ limitations under the License.
               </div>
 
               <help-url-input class="mt-3"
-                            v-model="subjectInternal.helpUrl" v-on:keyup.enter.native="handleSubmit(updateSubject)" />
+                            v-model="subjectInternal.helpUrl" v-on:keydown.enter.native="handleSubmit(updateSubject)" />
 
               <p v-if="invalid && overallErrMsg" class="text-center text-danger" role="alert">***{{ overallErrMsg }}***</p>
           </div>

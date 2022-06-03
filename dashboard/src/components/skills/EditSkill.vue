@@ -29,7 +29,7 @@ limitations under the License.
                   <input type="text" class="form-control" id="skillName" @input="updateSkillId"
                          v-model="skillInternal.name" v-focus
                          aria-required="true"
-                         v-on:keyup.enter="handleSubmit(saveSkill)"
+                         v-on:keydown.enter="handleSubmit(saveSkill)"
                          data-cy="skillName"
                          aria-describedby="skillNameError"
                          aria-errormessage="skillNameError"
@@ -41,7 +41,7 @@ limitations under the License.
             <div class="col-12 col-lg">
               <id-input type="text" label="Skill ID" :isSkillId="true" additional-validation-rules="uniqueId"
                         v-model="skillInternal.skillId" @can-edit="canEditSkillId=$event"
-                        v-on:keyup.enter.native="handleSubmit(saveSkill)"/>
+                        v-on:keydown.enter.native="handleSubmit(saveSkill)"/>
             </div>
             <div class="col-12 col-lg-2 mt-2 mt-lg-0">
               <div class="form-group">
@@ -52,7 +52,7 @@ limitations under the License.
                 <ValidationProvider rules="optionalNumeric|min_value:0|maxSkillVersion|maxVersion" v-slot="{errors}" name="Version">
                   <input class="form-control" type="text" id="skillVersion"
                          v-model="skillInternal.version" :disabled="isEdit"
-                        data-cy="skillVersion" v-on:keyup.enter="handleSubmit(saveSkill)"
+                        data-cy="skillVersion" v-on:keydown.enter="handleSubmit(saveSkill)"
                          aria-describedby="skillVersionError"
                          aria-errormessage="skillVersionError"
                          :aria-invalid="errors && errors.length > 0"/>
@@ -74,7 +74,7 @@ limitations under the License.
                 <ValidationProvider rules="optionalNumeric|required|min_value:1|maxPointIncrement" v-slot="{errors}" name="Point Increment">
                   <input class="form-control" type="text"  v-model="skillInternal.pointIncrement"
                          aria-required="true"
-                         data-cy="skillPointIncrement" v-on:keyup.enter="handleSubmit(saveSkill)"
+                         data-cy="skillPointIncrement" v-on:keydown.enter="handleSubmit(saveSkill)"
                          id="pointIncrement"
                          aria-describedby="skillPointIncrementError"
                          aria-errormessage="skillPointIncrementError"
@@ -94,7 +94,7 @@ limitations under the License.
                    data-cy="numPerformToCompletionDisabledWarning"/>
                 <ValidationProvider vid="totalOccurrences" rules="optionalNumeric|required|min_value:1|maxNumPerformToCompletion|moreThanMaxWindowOccurrences:@windowMaxOccurrence" v-slot="{errors}" name="Occurrences to Completion" tag="div">
                   <input class="form-control" type="text" v-model="skillInternal.numPerformToCompletion"
-                         data-cy="numPerformToCompletion" aria-required="true" v-on:keyup.enter="handleSubmit(saveSkill)"
+                         data-cy="numPerformToCompletion" aria-required="true" v-on:keydown.enter="handleSubmit(saveSkill)"
                          id="numPerformToCompletion"
                          aria-describedby="skillOccurrencesError"
                          aria-errormessage="skillOccurrencesError"
@@ -133,7 +133,7 @@ limitations under the License.
                         <input class="form-control d-inline" type="text" v-model="skillInternal.pointIncrementIntervalHrs"
                                value="8" :disabled="!skillInternal.timeWindowEnabled"
                                ref="timeWindowHours" data-cy="timeWindowHours"
-                               v-on:keyup.enter="handleSubmit(saveSkill)"
+                               v-on:keydown.enter="handleSubmit(saveSkill)"
                                id="timeWindowHours" aria-label="time window hours"
                                aria-describedby="skillHoursError" :aria-invalid="errors && errors.length > 0"
                                aria-errormessage="skillHoursError"/>
@@ -149,7 +149,7 @@ limitations under the License.
                       <div class="input-group">
                         <input class="form-control d-inline"  type="text" v-model="skillInternal.pointIncrementIntervalMins"
                                value="0" :disabled="!skillInternal.timeWindowEnabled" ref="timeWindowMinutes" data-cy="timeWindowMinutes"
-                               v-on:keyup.enter="handleSubmit(saveSkill)"
+                               v-on:keydown.enter="handleSubmit(saveSkill)"
                                aria-label="time window minutes"
                                aria-describedby="skillMinutesError"
                                aria-errormessage="skillMinutesError"
@@ -175,7 +175,7 @@ limitations under the License.
 
                     <input class="form-control" type="text" v-model="skillInternal.numPointIncrementMaxOccurrences"
                            :disabled="!skillInternal.timeWindowEnabled" data-cy="maxOccurrences"
-                           v-on:keyup.enter="handleSubmit(saveSkill)"
+                           v-on:keydown.enter="handleSubmit(saveSkill)"
                            id="maxOccurrences"
                            aria-describedby="skillMaxOccurrencesError"
                            aria-errormessage="skillMaxOccurrencesError"
@@ -203,7 +203,7 @@ limitations under the License.
           </div>
 
           <help-url-input class="mt-3"
-            v-model="skillInternal.helpUrl" v-on:keyup.enter.native="handleSubmit(saveSkill)" />
+            v-model="skillInternal.helpUrl" v-on:keydown.enter.native="handleSubmit(saveSkill)" />
 
           <p v-if="invalid && overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
         </b-container>

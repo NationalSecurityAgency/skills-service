@@ -18,7 +18,7 @@ limitations under the License.
       <div class="row px-3 pt-3">
         <div class="col-12">
           <b-form-group label="Projects Filter" label-class="text-muted">
-            <b-input v-model="table.filter.name" v-on:keyup.enter="applyFilters"
+            <b-input v-model="table.filter.name" v-on:keydown.enter="applyFilters"
                      data-cy="projectsTable-projectFilter" aria-label="project name filter"/>
           </b-form-group>
         </div>

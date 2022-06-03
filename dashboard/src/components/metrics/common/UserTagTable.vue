@@ -19,7 +19,7 @@ limitations under the License.
     <div v-if="!isLoading">
       <div class="p-3 row no-gutters">
         <div class="col px-1">
-            <b-input v-model="filters.tag" v-on:keyup.enter="filter" data-cy="userTagTable-tagFilter" aria-label="tag filter"/>
+            <b-input v-model="filters.tag" v-on:keydown.enter="filter" data-cy="userTagTable-tagFilter" aria-label="tag filter"/>
         </div>
         <div class="col-auto px-1">
           <b-button-group class="float-right">
