@@ -197,6 +197,192 @@ describe('Root Pin and Unpin Tests', () => {
     });
   });
 
+  it('Assign a root user as a project admin and verify the project is pinned, then remove admin and verify it is unpinned', () => {
+    cy.request('POST', '/app/projects/proj1', {
+      projectId: 'proj1',
+      name: "one"
+    });
+
+    cy.intercept('PUT', '/admin/projects/proj1/users/root@skills.org/roles/ROLE_PROJECT_ADMIN').as('addAdmin');
+
+    cy.intercept('POST',  'suggestDashboardUsers').as('suggest');
+    cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
+    cy.intercept('GET', '/admin/projects/proj1').as('loadProject');
+
+    cy.visit('/administrator/projects/proj1/access');
+    cy.wait('@loadUserInfo');
+    cy.wait('@loadProject');
+
+    cy.get('[data-cy="existingUserInput"]').type('root');
+    cy.wait('@suggest');
+    cy.contains('root@skills.org').click();
+    cy.clickButton('Add');
+    cy.wait('@addAdmin');
+    cy.wait('@getRolesForRoot')
+
+    cy.logout();
+    cy.fixture('vars.json').then((vars) => {
+      cy.login(vars.rootUser, vars.defaultPass);
+      cy.intercept('GET', '/app/projects').as('default');
+      cy.intercept('GET', '/app/projects?search=one').as('searchOne');
+      cy.intercept('POST', '/root/pin/proj1').as('pinOne');
+      cy.intercept('DELETE', '/root/pin/proj1').as('unpinOne');
+      cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+
+      cy.visit('/administrator/');
+      cy.wait('@default');
+
+      const projectsSelector = '[data-cy=projectCard]';
+      cy.get(projectsSelector).should('have.length', 1).as('projects');
+      cy.contains('one');
+
+    });
+    cy.fixture('vars.json').then((vars) => {
+      cy.logout()
+
+      if (!Cypress.env('oauthMode')) {
+        cy.log('NOT in oauthMode, using form login')
+        cy.login(vars.defaultUser, vars.defaultPass);
+      } else {
+        cy.log('oauthMode, using loginBySingleSignOn')
+        cy.loginBySingleSignOn()
+      }
+
+      cy.visit('/administrator/projects/proj1/access');
+      cy.wait('@loadUserInfo');
+      cy.wait('@loadProject');
+
+      // remove the root user as an admin now
+      const tableSelector = '[data-cy=roleManagerTable]'
+      const rowSelector = `${tableSelector} tbody tr`
+      cy.get(`${tableSelector} [data-cy="removeUserBtn"]`).eq(1).click();
+      cy.contains('YES, Delete It').click();
+
+      cy.get(rowSelector).should('have.length', 1).as('cyRows1');
+      cy.get('@cyRows1').eq(0).find('td').as('rowA');
+      cy.get('@rowA').eq(0).contains('root@skills.org').should('not.exist');
+    });
+
+    cy.fixture('vars.json').then((vars) => {
+      cy.login(vars.rootUser, vars.defaultPass);
+      cy.intercept('GET', '/app/projects').as('default');
+      cy.intercept('GET', '/app/projects?search=one').as('searchOne');
+      cy.intercept('POST', '/root/pin/proj1').as('pinOne');
+      cy.intercept('DELETE', '/root/pin/proj1').as('unpinOne');
+      cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+
+      cy.visit('/administrator/');
+      cy.wait('@default');
+      cy.contains('No Projects Yet...').should('be.visible');
+    });
+  });
+
+  it('Assign root role to a project admin user and verify all projects are pinned', () => {
+    cy.request('POST', '/app/projects/proj1', {
+      projectId: 'proj1',
+      name: "one"
+    });
+    cy.request('POST', '/app/projects/proj2', {
+      projectId: 'proj2',
+      name: "two"
+    });
+
+    cy.request('POST', '/app/projects/proj3', {
+      projectId: 'proj3',
+      name: "three"
+    });
+
+    cy.request('POST', '/app/projects/proj4', {
+      projectId: 'proj4',
+      name: "four"
+    });
+
+    cy.logout();
+    cy.fixture('vars.json').then((vars) => {
+      cy.login(vars.rootUser, vars.defaultPass);
+      cy.intercept('POST', '/root/users/without/role/ROLE_SUPER_DUPER_USER?userSuggestOption=ONE').as('getEligibleForRoot');
+      cy.intercept('PUT', '/root/users/skills@skills.org/roles/ROLE_SUPER_DUPER_USER').as('addRoot');
+      cy.intercept({
+        method: 'GET',
+        url: '/app/projects'
+      }).as('loadProjects');
+      cy.intercept({method: 'GET', url: '/root/isRoot'}).as('checkRoot');
+
+      const rootUsrTableSelector = '[data-cy="rootrm"] [data-cy="roleManagerTable"]';
+      cy.visit('/administrator/');
+      cy.get('[data-cy=subPageHeader]').contains('Projects');
+      cy.get('button.dropdown-toggle').first().click({force: true});
+      cy.contains('Settings').click();
+      cy.wait('@checkRoot');
+      cy.clickNav('Security');
+      cy.validateTable(rootUsrTableSelector, [
+        [{ colIndex: 0,  value: '(root@skills.org)' }],
+      ], 5, true, null, false);
+
+      cy.contains('Enter user id').first().type('sk{enter}');
+      cy.wait('@getEligibleForRoot');
+      cy.contains('skills@skills.org').click();
+      cy.contains('Add').first().click();
+      cy.wait('@addRoot');
+
+      cy.get(`${rootUsrTableSelector} th`).contains('Root User').click();
+      cy.validateTable(rootUsrTableSelector, [
+        [{ colIndex: 0,  value: '(root@skills.org)' }],
+        [{ colIndex: 0,  value: '(skills@skills.org)' }],
+      ], 5, true, null, false);
+    });
+
+    cy.fixture('vars.json').then((vars) => {
+      cy.logout()
+
+      if (!Cypress.env('oauthMode')) {
+        cy.log('NOT in oauthMode, using form login')
+        cy.login(vars.defaultUser, vars.defaultPass);
+      } else {
+        cy.log('oauthMode, using loginBySingleSignOn')
+        cy.loginBySingleSignOn()
+      }
+
+      cy.intercept('GET', '/app/projects').as('default');
+      cy.visit('/administrator/');
+      cy.wait('@default');
+
+      const rowSelector = '[data-cy=pinProjectsSearchResults] tbody tr'
+      const projectsSelector = '[data-cy=projectCard]';
+
+      cy.get(projectsSelector).should('have.length', 4).as('projects');
+      cy.contains('one');
+      cy.contains('two');
+      cy.contains('three');
+      cy.contains('four');
+
+      // verify all projects are pinned except Inception
+      cy.get('[data-cy=subPageHeaderControls]').contains('Pin').click();
+      cy.contains('Search Project Catalog');
+      cy.get('[data-cy=pinProjectsLoadAllButton]').click();
+      cy.get(rowSelector).should('have.length', 5).as('cyRows');
+
+      for (let i = 0; i < 5; i += 1) {
+        let pinState = 'not.exist'
+        let unpinState = 'exist'
+        cy.get('@cyRows')
+          .eq(i)
+          .find('td')
+          .as('rowI');
+        if (i == 1) {
+          // row 1 is the Inception project and should not be auto pinned, all others should be
+          cy.get('@rowI').contains('Inception')
+          pinState = 'exist'
+          unpinState = 'not.exist'
+        }
+        cy.get('@rowI').eq(0).find('[data-cy=pinButton]').should(pinState);
+        cy.get('@rowI').eq(0).find('[data-cy=unpinButton]').should(unpinState);
+      }
+      cy.get('[data-cy=modalDoneButton]').click();
+
+    });
+  });
+
   it('Browse projects catalog - many projects', () => {
 
     for (let i = 0; i < 12; i += 1) {

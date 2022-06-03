@@ -19,10 +19,7 @@ import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.web.bind.annotation.*
@@ -157,6 +154,7 @@ class RootController {
     RequestResult addRoot(@PathVariable('userKey') String userKey) {
         String userId = getUserId(userKey)
         accessSettingsStorageService.addRoot(userId)
+        projAdminService.pinAllExistingProjectsWhereUserIsAdminExceptInception(userId)
         return new RequestResult(success: true)
     }
 
@@ -164,6 +162,7 @@ class RootController {
     void deleteRoot(@PathVariable('userId') String userId) {
         SkillsValidator.isTrue(accessSettingsStorageService.getRootAdminCount() > 1, 'At least one root user must exist at all times! Deleting another user will cause no root users to exist!')
         accessSettingsStorageService.deleteRoot(userId?.toLowerCase())
+        projAdminService.unpinAllProjectsForRootUser(userId)
     }
 
     @GetMapping('/users/roles/{roleName}')
@@ -190,6 +189,7 @@ class RootController {
         userId = userId?.toLowerCase()
         if (roleName == RoleName.ROLE_SUPER_DUPER_USER) {
             deleteRoot(userId)
+            projAdminService.unpinAllProjectsForRootUser(userId)
         } else {
             userId = getUserId(userId)
             accessSettingsStorageService.deleteUserRole(userId, null, roleName)

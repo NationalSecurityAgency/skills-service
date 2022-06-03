@@ -19,10 +19,13 @@ import groovy.json.JsonOutput
 import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
+import skills.controller.result.model.SettingsResult
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import skills.services.admin.ProjAdminService
+import skills.services.settings.SettingsService
 import skills.storage.model.ProjDef
 import skills.storage.model.SkillDef
 import skills.storage.model.UserAchievement
@@ -43,6 +46,9 @@ class RootAccessSpec extends DefaultIntSpec {
 
     @Autowired
     ProjDefRepo projDefRepo
+
+    @Autowired
+    SettingsService settingsService
 
     String ultimateRoot = 'jh@dojo.com'
     SkillsService rootSkillsService
@@ -329,6 +335,53 @@ class RootAccessSpec extends DefaultIntSpec {
         then:
         projects.size() == 1
         projects.find { it.projectId == proj.projectId }
+    }
+
+    def 'a non-root users existing projects are auto-pinned when granted root and unpinned when root is revoked'() {
+        def proj = SkillsFactory.createProject(1)
+        def proj2 = SkillsFactory.createProject(2)
+        def proj3 = SkillsFactory.createProject(3)
+        nonRootSkillsService.createProject(proj)
+        nonRootSkillsService.createProject(proj2)
+        nonRootSkillsService.createProject(proj3)
+
+        def preRootProjects = nonRootSkillsService.getProjects()
+        List<SettingsResult> pinnedProjectSettings = settingsService.getUserProjectSettingsForGroup(nonRootUserId, ProjAdminService.rootUserPinnedProjectGroup)
+        List<String> preRootPinnedProjects = pinnedProjectSettings.collect { it.projectId }
+
+        when:
+
+        rootSkillsService.addRootRole(nonRootUserId)
+        def postRootProjects = nonRootSkillsService.getProjects()
+        pinnedProjectSettings = settingsService.getUserProjectSettingsForGroup(nonRootUserId, ProjAdminService.rootUserPinnedProjectGroup)
+        List<String> postRootPinnedProjects = pinnedProjectSettings.collect { it.projectId }
+
+        rootSkillsService.removeRootRole(nonRootUserId)
+        def postRootRemovalProjects = nonRootSkillsService.getProjects()
+        pinnedProjectSettings = settingsService.getUserProjectSettingsForGroup(nonRootUserId, ProjAdminService.rootUserPinnedProjectGroup)
+        List<String> postRootRemovalPinnedProjects = pinnedProjectSettings.collect { it.projectId }
+
+        then:
+        preRootProjects.size() == 3
+        preRootProjects.find { it.projectId == proj.projectId }
+        preRootProjects.find { it.projectId == proj2.projectId }
+        preRootProjects.find { it.projectId == proj3.projectId }
+        !preRootPinnedProjects
+
+        postRootProjects.size() == 3
+        postRootProjects.find { it.projectId == proj.projectId }
+        postRootProjects.find { it.projectId == proj2.projectId }
+        postRootProjects.find { it.projectId == proj3.projectId }
+        postRootPinnedProjects.size() == 3
+        postRootPinnedProjects.find { proj.projectId }
+        postRootPinnedProjects.find { proj2.projectId }
+        postRootPinnedProjects.find { proj3.projectId }
+
+        postRootRemovalProjects.size() == 3
+        postRootRemovalProjects.find { it.projectId == proj.projectId }
+        postRootRemovalProjects.find { it.projectId == proj2.projectId }
+        postRootRemovalProjects.find { it.projectId == proj3.projectId }
+        !postRootRemovalPinnedProjects
     }
 
     def "pinned projects are unique per root user"() {
