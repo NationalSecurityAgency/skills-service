@@ -306,6 +306,47 @@ describe('Skills Tests', () => {
     cy.contains('ID: Lotsofspecial')
   });
 
+  it('Open new skill dialog with enter key', () => {
+    cy.intercept('GET', '/admin/projects/proj1/subjects/subj1').as('loadSubject');
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1');
+    cy.wait('@loadSubject');
+
+    cy.get('[data-cy=newSkillButton]').focus().realPress("Enter");
+    cy.get('[data-cy="skillName"]').should('have.value', '');
+    cy.get('[data-cy="skillNameError"]').should('have.value', '');
+    cy.get('[data-cy=closeSkillButton]').click();
+    cy.get('[data-cy="titleLink"]').should('not.exist');
+  });
+
+  it('Open edit skill dialog using enter key', function () {
+    const expectedId = 'testSkill';
+    const providedName = "test";
+    cy.intercept('POST', `/admin/projects/proj1/subjects/subj1/skills/${expectedId}`).as('postNewSkill');
+    cy.intercept('POST', `/admin/projects/proj1/skillNameExists`).as('nameExists');
+    cy.intercept('GET', '/admin/projects/proj1/subjects/subj1').as('loadSubject');
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1');
+    cy.wait('@loadSubject');
+    cy.get('[data-cy=newSkillButton]').click();
+    cy.get('#skillName').type(providedName);
+
+    cy.getIdField().should('have.value', expectedId);
+    cy.wait('@nameExists');
+
+    cy.get('#skillName').type('{enter}');
+    cy.wait('@postNewSkill');
+
+    cy.get('[data-cy=editSkillButton_testSkill]').focus();
+    cy.realPress("Enter");
+
+    cy.get('[data-cy="skillName"]').should('have.value', 'test');
+    cy.get('[data-cy="skillNameError"]').should('have.value', '');
+    cy.get('[data-cy=closeSkillButton]').click();
+    cy.contains('test');
+    cy.contains('ID: test');
+  });
+
   it('Add Skill Event', () => {
     cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
       projectId: 'proj1',
