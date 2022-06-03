@@ -105,6 +105,49 @@ describe('Subjects Tests', () => {
         cy.contains('ID: Lotsofspecial')
     });
 
+    it('Open new subject dialog with enter key', () => {
+        cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+
+        cy.visit('/administrator/projects/proj1');
+        cy.wait('@loadSubjects');
+
+        cy.get('[data-cy=btn_Subjects]').focus().realPress("Enter");
+        cy.get('[data-cy="subjectNameInput"]').should('have.value', '');
+        cy.get('#subjectNameError').should('have.value', '');
+        cy.get('[data-cy=closeSubjectButton]').click();
+        cy.get('[data-cy="titleLink"]').should('not.exist');
+    });
+
+    it('Open edit subject dialog using enter key', function () {
+        const expectedId = 'testSubject';
+        const providedName = "test";
+        cy.intercept('POST', `/admin/projects/proj1/subjects/${expectedId}`).as('postNewSubject');
+        cy.intercept('POST', '/admin/projects/proj1/subjectNameExists').as('nameExists');
+        cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+
+        cy.visit('/administrator/projects/proj1');
+        cy.wait('@loadSubjects');
+        cy.clickButton('Subject');
+
+        cy.get('#subjName').type(providedName);
+        cy.wait('@nameExists');
+        cy.getIdField().should('have.value', expectedId);
+
+        cy.get('#subjName').type('{enter}');
+        cy.wait('@postNewSubject');
+
+        cy.contains('ID: test')
+
+        cy.get('[data-cy=editBtn]').focus();
+        cy.realPress("Enter");
+
+        cy.get('[data-cy="subjectNameInput"]').should('have.value', 'test');
+        cy.get('#subjectNameError').should('have.value', '');
+        cy.get('[data-cy=closeSubjectButton]').click();
+        cy.contains('test');
+        cy.contains('ID: test');
+    });
+
     it('close subject dialog', () => {
         cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
 

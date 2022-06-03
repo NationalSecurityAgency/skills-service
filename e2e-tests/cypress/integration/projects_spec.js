@@ -167,7 +167,6 @@ describe('Projects Tests', () => {
     cy.contains('A new subject').should('be.visible');
   });
 
-
   it('Create new project using enter key', function () {
     cy.intercept('GET', '/app/projects').as('loadProjects');
     cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
@@ -186,6 +185,50 @@ describe('Projects Tests', () => {
 
     cy.contains('My New test Project')
     cy.contains('ID: MyNewtestProject')
+  });
+
+  it('Open new project dialog with enter key', () => {
+    cy.intercept('GET', '/app/projects').as('loadProjects');
+    cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
+
+    cy.visit('/administrator/');
+    cy.wait('@loadUserInfo');
+    cy.wait('@loadProjects');
+
+    cy.get('[data-cy=newProjectButton]').focus().realPress("Enter");
+    cy.get('[data-cy="projectName"]').should('have.value', '');
+    cy.get('[data-cy="projectNameError"]').should('have.value', '');
+    cy.get('[data-cy=closeProjectButton]').click();
+    cy.get('[data-cy="projectName"]').should('not.exist');
+  });
+
+  it('Open edit project dialog using enter key', function () {
+    cy.intercept('GET', '/app/projects').as('loadProjects');
+    cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
+
+    cy.intercept('POST', '/app/projects/test').as('postNewProject');
+
+    cy.visit('/administrator/');
+    cy.wait('@loadUserInfo');
+    cy.wait('@loadProjects');
+
+    cy.clickButton('Project');
+    cy.get('[data-cy="projectName"]').type("test")
+    cy.get('[data-cy="projectName"]').type('{enter}')
+
+    cy.wait('@postNewProject');
+
+    cy.contains('test');
+    cy.contains('ID: test');
+
+    cy.get('[data-cy=editProjBtn]').focus();
+    cy.realPress("Enter");
+
+    cy.get('[data-cy="projectName"]').should('have.value', 'test');
+    cy.get('[data-cy="projectNameError"]').should('have.value', '');
+    cy.get('[data-cy=closeProjectButton]').click();
+    cy.contains('test');
+    cy.contains('ID: test');
   });
 
   it('Close new project dialog', () => {

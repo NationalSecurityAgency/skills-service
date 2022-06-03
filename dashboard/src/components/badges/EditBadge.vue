@@ -32,7 +32,7 @@ limitations under the License.
                                     v-slot="{errors}" name="Badge Name">
                   <input v-focus class="form-control" id="badgeName" type="text" v-model="badgeInternal.name"
                          @input="updateBadgeId" aria-required="true" data-cy="badgeName"
-                         v-on:keyup.enter="handleSubmit(updateBadge)"
+                         v-on:keydown.enter="handleSubmit(updateBadge)"
                          :aria-invalid="errors && errors.length > 0"
                          aria-errormessage="badgeNameError"
                          aria-describedby="badgeNameError"/>
@@ -44,7 +44,7 @@ limitations under the License.
           </div>
 
           <id-input type="text" label="Badge ID" v-model="badgeInternal.badgeId" @input="canAutoGenerateId=false"
-                    additional-validation-rules="uniqueId" v-on:keyup.enter.native="handleSubmit(updateBadge)"/>
+                    additional-validation-rules="uniqueId" v-on:keydown.enter.native="handleSubmit(updateBadge)"/>
 
           <div class="mt-2">
             <label>Description</label>
@@ -56,7 +56,7 @@ limitations under the License.
           </div>
 
           <help-url-input class="mt-3"
-                          v-model="badgeInternal.helpUrl" v-on:keyup.enter.native="handleSubmit(updateBadge)" />
+                          v-model="badgeInternal.helpUrl" v-on:keydown.enter.native="handleSubmit(updateBadge)" />
 
           <div v-if="!global" data-cy="gemEditContainer">
             <b-form-checkbox v-model="limitTimeframe" class="mt-4"

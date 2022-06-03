@@ -31,7 +31,7 @@ limitations under the License.
           <input class="form-control" type="text"  v-model="pointIncrement"
                  aria-required="true"
                  data-cy="skillPointIncrement"
-                 v-on:keyup.enter="handleSubmit(saveSkill)"
+                 v-on:keydown.enter="handleSubmit(saveSkill)"
                  id="pointIncrement"
                  aria-describedby="skillPointIncrementError"
                  aria-errormessage="skillPointIncrementError"

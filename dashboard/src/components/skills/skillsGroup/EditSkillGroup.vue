@@ -36,7 +36,7 @@ limitations under the License.
                                   name="Group Name">
                 <input class="form-control" type="text" v-model="internalGroup.name"
                        v-on:input="updateId"
-                       v-on:keyup.enter="handleSubmit(updateGroup)"
+                       v-on:keydown.enter="handleSubmit(updateGroup)"
                        v-focus
                        data-cy="groupName"
                        id="groupNameInput"
@@ -51,7 +51,7 @@ limitations under the License.
           <div class="col-12">
             <id-input type="text" label="Group ID" v-model="internalGroup.skillId"
                       additional-validation-rules="uniqueGroupId" @can-edit="canEditGroupId=$event"
-                      v-on:keyup.enter.native="handleSubmit(updateGroup)"/>
+                      v-on:keydown.enter.native="handleSubmit(updateGroup)"/>
           </div>
         </div>
 

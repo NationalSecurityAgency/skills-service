@@ -21,7 +21,7 @@ limitations under the License.
           <div v-if="showSearch" class="row px-3 pt-3 mb-0 pb-0">
             <div class="col-12 mb-0 pb-0">
               <b-form-group label="Name Filter" label-class="text-muted">
-                <b-input v-model="table.filter.name" v-on:keyup.enter="applyFilters"
+                <b-input v-model="table.filter.name" v-on:keydown.enter="applyFilters"
                          data-cy="skillsTable-skillFilter" aria-label="skill name filter"/>
               </b-form-group>
             </div>
