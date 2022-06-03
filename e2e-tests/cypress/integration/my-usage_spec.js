@@ -126,6 +126,14 @@ describe('My Usage Tests', () => {
 
     });
 
+    it('point history chart - time selector keyboard navigation', () => {
+        cy.visit('/progress-and-rankings/my-usage');
+
+        cy.intercept('GET', '/api/metrics/allProjectsSkillEventsOverTimeMetricsBuilder*').as('loadMetrics');
+        cy.get('.time-length-selector > span').eq(1).type('{enter}');
+        cy.wait('@loadMetrics');
+    });
+
     it('point history chart - only up to 5 projects can be selected', () => {
         cy.visit('/progress-and-rankings/my-usage');
 

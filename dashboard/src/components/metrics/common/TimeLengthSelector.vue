@@ -17,7 +17,7 @@ limitations under the License.
   <span data-cy="timeLengthSelector" class="time-length-selector">
     <b-badge v-for="(item, index) in options" :key="`${item.length}${item.unit}`"
       class="ml-2" :class="{'can-select' : (index !== selectedIndex) }"
-             :variant="getVariant(index)" @click="handleClick(index)">
+             :variant="getVariant(index)" @click="handleClick(index)" @keyup.enter="handleClick(index)" tabindex="0">
       {{ item.length }} {{ item.unit }}
     </b-badge>
   </span>
