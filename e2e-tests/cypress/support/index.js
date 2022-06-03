@@ -32,6 +32,7 @@
 import './commands'
 import 'cypress-axe';
 import 'cypress-plugin-tab';
+import "cypress-real-events/support";
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

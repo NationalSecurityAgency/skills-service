@@ -82,6 +82,7 @@
     "cypress-file-upload": "5.0.2",
     "cypress-image-snapshot": "4.0.1",
     "cypress-plugin-tab": "1.0.5",
+    "cypress-real-events": "1.7.0",
     "cypress-wait-until": "1.7.2",
     "dayjs": "1.10.4",
     "eslint": "7.9.0",
