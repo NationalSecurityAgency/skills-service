@@ -71,7 +71,7 @@ limitations under the License.
               <div class="mt-2">Please click</div>
               <div class="my-2">
                 <b-button id="firstNewProjectBtn" @click="editNewProject()" variant="outline-primary" size="sm"
-                          aria-label="Creat new project"
+                          aria-label="Create new project"
                           data-cy="firstNewProjectButton" class="animate__bounceIn">
                   <span class="d-none d-sm-inline">Project</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
                 </b-button>
