@@ -86,10 +86,10 @@ limitations under the License.
 
       if (this.isDevelopmentMode()) {
         this.loadConfigs()
-            .finally(() => {
-              this.configureDevelopmentMode();
-              this.getCustomIconCss();
-            });
+          .finally(() => {
+            this.configureDevelopmentMode();
+            this.getCustomIconCss();
+          });
       } else {
         const handshake = new Postmate.Model({
           updateAuthenticationToken(authToken) {
@@ -149,9 +149,9 @@ limitations under the License.
     methods: {
       loadConfigs() {
         return store.dispatch('loadConfigState')
-            .finally(() => {
-              this.loadingConfig = false;
-            });
+          .finally(() => {
+            this.loadingConfig = false;
+          });
       },
       handleTheming(theme) {
         if (theme) {
