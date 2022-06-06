@@ -61,6 +61,7 @@ import VueApexCharts from 'vue-apexcharts';
 import VueAnnouncer from '@vue-a11y/announcer';
 import FiltersPlugin from '@/common-components/filter/FiltersPlugin';
 import dayjs from '@/common-components/DayJsCustomizer';
+import PageVisitService from '@/components/PageVisitService';
 import InceptionConfigurer from './InceptionConfigurer';
 import 'babel-polyfill';
 import 'matchmedia-polyfill';
@@ -75,7 +76,6 @@ import './directives/FocusDirective';
 import App from './App';
 import router from './router';
 import store from './store/store';
-import PageVisitService from '@/components/PageVisitService';
 
 Vue.component('apexchart', VueApexCharts);
 Vue.component('ValidationProvider', ValidationProvider);
