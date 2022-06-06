@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div>
+  <div ref="mainFocus">
     <page-header :loading="isLoading" :options="headerOptions">
       <div slot="banner" v-if="project && project.expiring" data-cy="projectExpiration"
            class="w-100 text-center alert-danger p-2 mb-3">

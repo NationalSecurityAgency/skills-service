@@ -25,8 +25,8 @@ limitations under the License.
           <loading-container v-else v-bind:is-loading="isLoading" role="presentation">
             <div v-if="!isLoading">
               <header-view v-if="isAuthenticatedUser && !this.$store.state.showUa" role="banner"/>
-              <div role="main">
-                <router-view/>
+              <div role="main" ref="main" tabindex="-1">
+                <router-view />
               </div>
             </div>
           </loading-container>
@@ -98,6 +98,11 @@ limitations under the License.
       this.registerToDisplayProgress();
     },
     watch: {
+      $route: function routeChanged() {
+        this.$nextTick(() => {
+          this.$refs.main.focus({ preventScroll: true });
+        });
+      },
       activeProjectId() {
         if (this.isAuthenticatedUser) {
           this.addCustomIconCSS();
