@@ -728,7 +728,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                   and parent.skill_id = :skillId
                   and rel.parent_ref_id = parent.id
                   and rel.child_ref_id = child.id
-                  and rel.type = 'RuleSetDefinition'
+                  and rel.type in ('RuleSetDefinition', 'GroupSkillToSubject')
                   and child.type = 'Skill'
                   and (child.enabled = 'true' or 'false' = :enabledSkillsOnly)
                   and child.id = up.skill_ref_id
@@ -752,7 +752,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                   and parent.skill_id = :skillId
                   and rel.parent_ref_id = parent.id
                   and rel.child_ref_id = child.id
-                  and rel.type = 'RuleSetDefinition'
+                  and rel.type in ('RuleSetDefinition', 'GroupSkillToSubject')
                   and child.type = 'Skill'
                   and (child.enabled = 'true' or 'false' = :enabledSkillsOnly)
                   and child.id = up.skill_ref_id
