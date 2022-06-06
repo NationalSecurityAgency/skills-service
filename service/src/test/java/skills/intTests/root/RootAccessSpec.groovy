@@ -34,6 +34,7 @@ import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import spock.lang.IgnoreIf
+import spock.lang.IgnoreRest
 import spock.lang.Requires
 
 class RootAccessSpec extends DefaultIntSpec {
@@ -748,6 +749,7 @@ class RootAccessSpec extends DefaultIntSpec {
         skillsClientException.httpStatus == HttpStatus.FORBIDDEN
     }
 
+    @IgnoreRest
     def 'rebuild a projects users user_points, subject and project definition total_points' () {
         // need to call DefaultIntSpec.getRandomUsers so that tests will work in ssl mode
         String userId = getRandomUsers(1)[0]

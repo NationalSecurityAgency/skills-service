@@ -85,9 +85,11 @@ limitations under the License.
       vm.handleReplace(`${initialRoute}?${queryParams.toString()}${window.location.hash}`);
 
       if (this.isDevelopmentMode()) {
-        this.configureDevelopmentMode();
-        this.loadConfigs();
-        this.getCustomIconCss();
+        this.loadConfigs()
+            .finally(() => {
+              this.configureDevelopmentMode();
+              this.getCustomIconCss();
+            });
       } else {
         const handshake = new Postmate.Model({
           updateAuthenticationToken(authToken) {
@@ -146,9 +148,10 @@ limitations under the License.
     },
     methods: {
       loadConfigs() {
-        store.dispatch('loadConfigState').finally(() => {
-          this.loadingConfig = false;
-        });
+        return store.dispatch('loadConfigState')
+            .finally(() => {
+              this.loadingConfig = false;
+            });
       },
       handleTheming(theme) {
         if (theme) {

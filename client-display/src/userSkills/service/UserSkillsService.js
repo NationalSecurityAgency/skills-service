@@ -220,7 +220,21 @@ export default {
     const body = {
       value: description,
     };
-    return axios.post(`${store.state.serviceUrl}/api/validation/description`, body).then((result) => result.data);
+    return axios.post(`${store.state.serviceUrl}/api/validation/description`, body)
+        .then((result) => result.data);
+  },
+
+  reportPageVisit(path, fullPath) {
+    const domain = (new URL(window.location));
+    axios.put(`${store.state.serviceUrl}/api/pageVisit`, {
+      path,
+      fullPath,
+      hostname: domain.hostname,
+      port: domain.port,
+      protocol: domain.protocol,
+      skillDisplay: true,
+      projectId: store.state.projectId,
+    }, { handleErrorCode: false });
   },
 
   getServicePath() {

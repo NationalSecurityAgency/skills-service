@@ -75,6 +75,7 @@ import './directives/FocusDirective';
 import App from './App';
 import router from './router';
 import store from './store/store';
+import PageVisitService from '@/components/PageVisitService';
 
 Vue.component('apexchart', VueApexCharts);
 Vue.component('ValidationProvider', ValidationProvider);
@@ -206,6 +207,9 @@ router.afterEach((to) => {
       .then(() => {
         SkillsReporter.reportSkill(to.meta.reportSkillId);
       });
+  }
+  if (isPki() || isLoggedIn()) {
+    PageVisitService.reportPageVisit(to.path, to.fullPath);
   }
 });
 

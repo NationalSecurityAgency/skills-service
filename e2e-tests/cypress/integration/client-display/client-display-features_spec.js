@@ -202,15 +202,55 @@ describe('Client Display Features Tests', () => {
     cy.createSubject(1,1)
     cy.createSkill(1, 1, 1)
     cy.assignSkillToBadge(1, 1, 1)
-    cy.enableBadge(1, 1, { iconClass: "proj1-validiconpng" })
+    cy.enableBadge(1, 1, { iconClass: 'proj1-validiconpng' });
 
     cy.cdVisit('/');
     cy.cdClickBadges();
-    cy.get('[data-cy="badge_badge1"] .proj1-validiconpng')
+    cy.get('[data-cy="badge_badge1"] .proj1-validiconpng');
 
     cy.cdVisit('/badges');
-    cy.get('[data-cy="badge_badge1"] .proj1-validiconpng')
+    cy.get('[data-cy="badge_badge1"] .proj1-validiconpng');
   })
 
+  it('ability to enable page visits reporting to the backend', () => {
+    cy.intercept('GET', '/public/clientDisplay/config?projectId=proj1', (req) => {
+      req.reply({
+        body: {
+          enablePageVisitReporting: 'true',
+        },
+      });
+    })
+        .as('getConfig');
+    cy.intercept('PUT', '/api/pageVisit', (req) => {
+      expect(req.body.path)
+          .to
+          .include('/');
+      req.reply({
+        body: {
+          'success': true,
+          'explanation': null
+        },
+      });
+    })
+        .as('pageVisit');
+
+    cy.cdVisit('/');
+    cy.wait('@getConfig');
+    cy.get('[data-cy="subjectTile"]')
+        .contains('Subject 1');
+    cy.wait('@pageVisit');
+  });
+
+  it('by default page visits reporting to the backend must not happen', () => {
+    cy.intercept('GET', '/public/clientDisplay/config?projectId=proj1')
+        .as('getConfig');
+    cy.intercept('PUT', '/api/pageVisit', cy.spy()
+        .as('pageVisit'));
+    cy.cdVisit('/rank');
+    cy.wait('@getConfig');
+    cy.wait(5000);
+    cy.get('@pageVisit')
+        .should('not.have.been.called');
+  });
 
 })

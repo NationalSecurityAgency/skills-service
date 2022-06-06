@@ -77,5 +77,6 @@ class PublicConfigSpecs extends DefaultIntSpec {
         then:
         config
         config.docsHost == "https://code.nsa.gov/skills-docs"
+        config.enablePageVisitReporting == false
     }
 }

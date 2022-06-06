@@ -58,6 +58,9 @@ class PublicConfigController {
     @Value('#{"${skills.config.expireUnusedProjectsOlderThan:180}"}')
     int expireUnusedProjectsOlderThan
 
+    @Value('${skills.config.ui.enablePageVisitReporting:#{false}}')
+    Boolean enablePageVisitReporting
+
     @Autowired
     SettingsService settingsService
 
@@ -110,6 +113,7 @@ class PublicConfigController {
                 res["levelDisplayName"] = customLevelName
             }
         }
+        res['enablePageVisitReporting'] = enablePageVisitReporting
         return res
     }
 
