@@ -25,14 +25,22 @@ import skills.auth.UserAuthService
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import skills.intTests.utils.SkillsService
+import skills.storage.model.UserAttrs
+import skills.storage.model.auth.User
+import skills.storage.repos.UserAttrsRepo
+import skills.storage.repos.UserRepo
 
 @Slf4j
 @SpringBootTest(properties = ['skills.h2.port=9097',
         'skills.config.ui.rankingAndProgressViewsEnabled=false',
         'skills.config.ui.defaultLandingPage=progress',
         'skills.config.db-upgrade-in-progress=true',
-        'skills.authorization.userInfoHealthCheckUri=https://localhost:8182/actuator/health'], webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
-class UpgradeInProgressIT  extends DefaultIntSpec {
+        'skills.authorization.userInfoHealthCheckUri=https://localhost:8189/actuator/health',
+        'skills.authorization.userInfoUri=https://localhost:8189/userInfo?dn={dn}',
+        'skills.authorization.userQueryUri=https://localhost:8189/userQuery?query={query}',
+        ], webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
+class UpgradeInProgressIT extends DefaultIntSpec {
 
     @Autowired
     JdbcTemplate jdbcTemplate
@@ -40,7 +48,21 @@ class UpgradeInProgressIT  extends DefaultIntSpec {
     @Autowired
     UserAuthService userAuthService
 
+    @Autowired
+    UserRepo userRepository
+
+    @Autowired
+    UserAttrsRepo userAttrsRepo
+
     def setup() {
+        if (!userRepository.findByUserId(skillsService.userName.toLowerCase())) {
+            UserAttrs userAttrs = new UserAttrs(userId: skillsService.userName.toLowerCase(),
+                    userIdForDisplay: skillsService.userName.toLowerCase(),
+                    userTagsLastUpdated: new Date())
+            userAttrsRepo.save(userAttrs)
+            User user = new User(userId: skillsService.userName.toLowerCase())
+            userRepository.save(user)
+        }
         userAuthService.grantRoot(skillsService.userName)
         insertData("upgrade_in_progress.sql")
         //projectId SampleProject
@@ -146,6 +168,7 @@ class UpgradeInProgressIT  extends DefaultIntSpec {
     }
 
     def "cannot add skills to existing badge when upgrade mode is enabled"() {
+
         when:
         skillsService.assignSkillToBadge(projectId: "SampleProject", badgeId: "SampleBadgeBadge", skillId: "Skill1Skill")
 
