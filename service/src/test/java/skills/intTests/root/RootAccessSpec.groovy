@@ -752,7 +752,7 @@ class RootAccessSpec extends DefaultIntSpec {
         // need to call DefaultIntSpec.getRandomUsers so that tests will work in ssl mode
         String userId = getRandomUsers(1)[0]
 
-        //we need a different userId from the default root user for this test
+        // we need a different userId from the default root user for this test
         while (userId.contains("jh@dojo")) {
             userId = getRandomUsers(1)[0]
         }
@@ -775,12 +775,14 @@ class RootAccessSpec extends DefaultIntSpec {
         skillsService.updateSkill(skillsGroup, null)
 
         // regular skill
+        allSkills[3].numPerformToCompletion = 2
         skillsService.createSkill(allSkills[3])
 
         String projectId = proj.projectId
         String subjectId = subj.subjectId
         String childSkillId1 = groupChildren.first().skillId
         String childSkillId2 = groupChildren.last().skillId
+        String regSkillId = allSkills[3].skillId
 
         def res = skillsService.addSkill([projectId: projectId, skillId: childSkillId1], userId, new Date())
         assert res.body.skillApplied
@@ -789,6 +791,9 @@ class RootAccessSpec extends DefaultIntSpec {
         res = skillsService.addSkill([projectId: projectId, skillId: childSkillId2], userId, new Date())
         assert res.body.skillApplied
         assert res.body.completed.find { it.id == childSkillId2 }
+
+        res = skillsService.addSkill([projectId: projectId, skillId: regSkillId], userId, new Date())
+        assert res.body.skillApplied
 
         def subjectSummary = skillsService.getSkillSummary(userId, projectId, subjectId)
         List<UserAchievement> groupAchievements = achievedRepo.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, skillsGroupId)
@@ -814,6 +819,15 @@ class RootAccessSpec extends DefaultIntSpec {
 
         List<UserPoints> userPoints = userPointsRepo.findByProjectIdAndUserId(projectId, userId)
         assert !userPoints.find { it.skillId == skillsGroupId }
+        assert userPoints.find { it.skillId == childSkillId1 }.points == 100
+        assert userPoints.find { it.skillId == childSkillId2 }.points == 100
+        assert userPoints.find { it.skillId == regSkillId }.points == 10
+        assert userPoints.find { it.skillId == subjectId }.points == 210
+        assert userPoints.find { it.skillId == null }.points == 210
+
+        UserPoints subjectUserPoints = userPoints.find { it.skillId == subjectId }
+        subjectUserPoints.points = 100
+        userPointsRepo.save(subjectUserPoints)
 
         List<UserAchievement> userAchievements = userAchievedRepo.findAllByUserAndProjectIds(userId, [projectId])
         assert userAchievements.size() == 13
@@ -856,6 +870,9 @@ class RootAccessSpec extends DefaultIntSpec {
         rootSkillsService.rebuildUserAndProjectPoints(projectId)
 
         List<UserAchievement> userAchievements3 = userAchievedRepo.findAllByUserAndProjectIds(userId, [projectId])
+        def subjectSummary2 = skillsService.getSkillSummary(userId, projectId, subjectId)
+        List<UserPoints> userPoints2 = userPointsRepo.findByProjectIdAndUserId(projectId, userId)
+
 
         then:
         userAchievements3.size() == 13
@@ -868,7 +885,6 @@ class RootAccessSpec extends DefaultIntSpec {
         userAchievements3.find { it.level  == null && it.skillId == skillsGroupId }
         userAchievements3.find { it.level  == null && it.skillId == childSkillId1 }
         userAchievements3.find { it.level  == null && it.skillId == childSkillId2 }
-
 
         groupAchievements
         groupAchievements.size() == 1
@@ -888,6 +904,30 @@ class RootAccessSpec extends DefaultIntSpec {
         subjectSummary.skills[0].children.find { it.skillId = childSkillId1 }
         subjectSummary.skills[0].children.find { it.skillId = childSkillId1 }.points == 100
         subjectSummary.skills[0].children.find { it.skillId = childSkillId1 }.totalPoints == 100
+        subjectSummary.skills[0].children.find { it.skillId = childSkillId2 }
+        subjectSummary.skills[0].children.find { it.skillId = childSkillId2 }.points == 100
+        subjectSummary.skills[0].children.find { it.skillId = childSkillId2 }.totalPoints == 100
+
+        subjectSummary2
+        subjectSummary2.skills
+        subjectSummary2.skills.size() == 2
+        subjectSummary2.skills[0].skillId == skillsGroupId
+        subjectSummary2.skills[0].points == 100
+        subjectSummary2.skills[0].totalPoints == 100 * groupChildren.size()
+        subjectSummary2.skills[0].children
+        subjectSummary2.skills[0].children.size() == groupChildren.size()
+        subjectSummary2.skills[0].children.find { it.skillId = childSkillId1 }
+        subjectSummary2.skills[0].children.find { it.skillId = childSkillId1 }.points == 100
+        subjectSummary2.skills[0].children.find { it.skillId = childSkillId1 }.totalPoints == 100
+        subjectSummary2.skills[0].children.find { it.skillId = childSkillId2 }
+        subjectSummary2.skills[0].children.find { it.skillId = childSkillId2 }.points == 100
+        subjectSummary2.skills[0].children.find { it.skillId = childSkillId2 }.totalPoints == 100
+
+        userPoints2.find { it.skillId == childSkillId1 }.points == 100
+        userPoints2.find { it.skillId == childSkillId2 }.points == 100
+        userPoints2.find { it.skillId == regSkillId }.points == 10
+        userPoints2.find { it.skillId == subjectId }.points == 210
+        userPoints2.find { it.skillId == null }.points == 210
     }
 }
 
