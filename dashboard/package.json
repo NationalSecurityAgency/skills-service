@@ -70,6 +70,7 @@
     "@vue/test-utils": "1.2.1",
     "babel-eslint": "10.1.0",
     "babel-jest": "27.0.6",
+    "error-stack-parser": "2.1.3",
     "eslint": "7.31.0",
     "eslint-plugin-vue": "7.14.0",
     "license-check-and-add": "4.0.2",
