@@ -74,7 +74,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
         WHERE
           up.project_id = :toProjectId
           and subject.project_id = :toProjectId and subject.skill_id = :toSubjectId
-          and subject.id = srd.parent_ref_id and sd.id = srd.child_ref_id and srd.type = 'RuleSetDefinition'
+          and subject.id = srd.parent_ref_id and sd.id = srd.child_ref_id and srd.type in ('RuleSetDefinition', 'GroupSkillToSubject')
           and sd.id = up.skill_ref_id
           and not exists (
             select 1 from user_points innerUP
