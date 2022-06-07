@@ -263,7 +263,7 @@ describe('Metrics Tests - Skills', () => {
     });
 
 
-    it('skills table - tag filtering', () => {
+    it.only('skills table - tag filtering', () => {
         // have to make viewport very wide so all the tags are on the same line
         // looks like there is an issue with cypress not being able to click on a tag
         // if it's pushed to the 2nd line
@@ -311,7 +311,7 @@ describe('Metrics Tests - Skills', () => {
         cy.get('[data-cy=metricsNav-Skills]').click();
         cy.wait('@skillUsageNavigatorChartBuilder');
 
-        cy.get('[data-cy=skillsNavigator-filters]').contains('Overlooked Skill').click();
+        cy.get('[data-cy=skillsNavigator-filters]').contains('Overlooked Skill').click({force:true});
         cy.get('[data-cy=skillsNavigator-filterBtn]').click();
 
 
@@ -326,21 +326,21 @@ describe('Metrics Tests - Skills', () => {
         cy.get('[data-cy=skillsNavigator-resetBtn]').click();
         cy.get('[data-cy=skillsBTableTotalRows]').contains(17);
 
-        cy.get('[data-cy=skillsNavigator-filters]').contains('Top Skill').click();
+        cy.get('[data-cy=skillsNavigator-filters]').contains('Top Skill').click({force:true});
         cy.get('[data-cy=skillsNavigator-filterBtn]').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'Very Great Skill # 16' }, { colIndex: 1,  value: 'Top Skill' }],
         ]);
 
-        cy.get('[data-cy=skillsNavigator-filters]').contains('Top Skill').click();
-        cy.get('[data-cy=skillsNavigator-filters]').contains('High Activity').click();
+        cy.get('[data-cy=skillsNavigator-filters]').contains('Top Skill').click({force:true});
+        cy.get('[data-cy=skillsNavigator-filters]').contains('High Activity').click({force:true});
         cy.get('[data-cy=skillsNavigator-filterBtn]').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'Very Great Skill # 17' }, { colIndex: 2,  value: 'High Activity' }],
         ]);
 
-        cy.get('[data-cy=skillsNavigator-filters]').contains('Never Achieved').click();
-        cy.get('[data-cy=skillsNavigator-filters]').contains('High Activity').click();
+        cy.get('[data-cy=skillsNavigator-filters]').contains('Never Achieved').click({force:true});
+        cy.get('[data-cy=skillsNavigator-filters]').contains('High Activity').click({force:true});
         cy.get('[data-cy=skillsNavigator-filterBtn]').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'Very Great Skill # 3' }, { colIndex: 4,  value: 'Never' }],
@@ -348,22 +348,22 @@ describe('Metrics Tests - Skills', () => {
             [{ colIndex: 0,  value: 'Very Great Skill # 17' }, { colIndex: 4,  value: 'Never' }],
         ])
 
-        cy.get('[data-cy=skillsNavigator-filters]').contains('Never Achieved').click();
-        cy.get('[data-cy=skillsNavigator-filters]').contains('Never Reported').click();
+        cy.get('[data-cy=skillsNavigator-filters]').contains('Never Achieved').click({force:true});
+        cy.get('[data-cy=skillsNavigator-filters]').contains('Never Reported').click({force:true});
         cy.get('[data-cy=skillsNavigator-filterBtn]').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'Very Great Skill # 3' }, { colIndex: 3,  value: 'Never' }],
             [{ colIndex: 0,  value: 'Very Great Skill # 6' }, { colIndex: 3,  value: 'Never' }],
         ])
 
-        cy.get('[data-cy=skillsNavigator-filters]').contains('Never Achieved').click();
+        cy.get('[data-cy=skillsNavigator-filters]').contains('Never Achieved').click({force:true});
         cy.get('[data-cy=skillsNavigator-filterBtn]').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'Very Great Skill # 3' }, { colIndex: 3,  value: 'Never' }],
             [{ colIndex: 0,  value: 'Very Great Skill # 6' }, { colIndex: 3,  value: 'Never' }],
         ])
 
-        cy.get('[data-cy=skillsNavigator-filters]').contains('Top Skill').click();
+        cy.get('[data-cy=skillsNavigator-filters]').contains('Top Skill').click({force:true});
         cy.get('[data-cy=skillsNavigator-filterBtn]').click();
 
         cy.get(tableSelector).contains('There are no records to show');
