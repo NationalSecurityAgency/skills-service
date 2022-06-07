@@ -113,14 +113,59 @@ describe('App Features Tests', () => {
        // validate help button
        cy.get('[data-cy="helpButtonSupportLinkLabel_Email Us"]').contains('Email Us');
        cy.get('[data-cy="helpButtonSupportLinkLabel_Email Us"]').should('have.attr', 'href', 'mailto:skilltree@someemail.com')
-       cy.get('[data-cy="helpButtonSupportLinkLabel_Support Center"]').contains('Support Center');
-        cy.get('[data-cy="helpButtonSupportLinkLabel_Support Center"]').should('have.attr', 'href', 'https://skilltreesupport.com')
+        cy.get('[data-cy="helpButtonSupportLinkLabel_Support Center"]')
+            .contains('Support Center');
+        cy.get('[data-cy="helpButtonSupportLinkLabel_Support Center"]')
+            .should('have.attr', 'href', 'https://skilltreesupport.com');
 
-       // validate footer
-       cy.get('[data-cy="dashboardFooter"] [data-cy="supportLink-Email Us"]').contains('Email Us')
-       cy.get('[data-cy="dashboardFooter"] [data-cy="supportLink-Email Us"]').should('have.attr', 'href', 'mailto:skilltree@someemail.com')
-       cy.get('[data-cy="dashboardFooter"] [data-cy="supportLink-Support Center"]').contains('Support Center');
-       cy.get('[data-cy="dashboardFooter"] [data-cy="supportLink-Support Center"]').should('have.attr', 'href', 'https://skilltreesupport.com')
+        // validate footer
+        cy.get('[data-cy="dashboardFooter"] [data-cy="supportLink-Email Us"]')
+            .contains('Email Us');
+        cy.get('[data-cy="dashboardFooter"] [data-cy="supportLink-Email Us"]')
+            .should('have.attr', 'href', 'mailto:skilltree@someemail.com');
+        cy.get('[data-cy="dashboardFooter"] [data-cy="supportLink-Support Center"]')
+            .contains('Support Center');
+        cy.get('[data-cy="dashboardFooter"] [data-cy="supportLink-Support Center"]')
+            .should('have.attr', 'href', 'https://skilltreesupport.com');
+    });
+
+    it('ability to enable page visits reporting to the backend', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply({
+                body: {
+                    enablePageVisitReporting: 'true',
+                },
+            });
+        })
+            .as('getConfig');
+        cy.intercept('PUT', '/api/pageVisit', (req) => {
+            expect(req.body.path)
+                .to
+                .include('/administrator');
+            req.reply({
+                body: {
+                    'success': true,
+                    'explanation': null
+                },
+            });
+        })
+            .as('pageVisit');
+
+        cy.visit('/administrator');
+        cy.wait('@getConfig');
+        cy.wait('@pageVisit');
+    });
+
+    it('by default page visits reporting to the backend must not happen', () => {
+        cy.intercept('GET', '/public/config')
+            .as('getConfig');
+        cy.intercept('PUT', '/api/pageVisit', cy.spy()
+            .as('pageVisit'));
+        cy.visit('/administrator');
+        cy.wait('@getConfig');
+        cy.wait(5000);
+        cy.get('@pageVisit')
+            .should('not.have.been.called');
     });
 
 })

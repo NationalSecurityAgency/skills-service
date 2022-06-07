@@ -31,6 +31,7 @@ import skills.auth.UserInfoService;
 import skills.controller.exceptions.ErrorCode;
 import skills.controller.exceptions.SkillException;
 import skills.controller.exceptions.SkillsValidator;
+import skills.controller.request.model.PageVisitRequest;
 import skills.controller.request.model.SkillEventRequest;
 import skills.controller.request.model.SkillsClientVersionRequest;
 import skills.controller.result.model.RequestResult;
@@ -43,6 +44,7 @@ import skills.services.events.SkillEventsService;
 import skills.skillLoading.RankingLoader;
 import skills.skillLoading.SkillsLoader;
 import skills.skillLoading.model.*;
+import skills.utils.MetricsLogger;
 import skills.utils.RetryUtil;
 
 import javax.servlet.http.HttpServletRequest;
@@ -91,6 +93,9 @@ class UserSkillsController {
 
     @Autowired
     AddSkillHelper addSkillHelper;
+
+    @Autowired
+    MetricsLogger metricsLogger;
 
     private int getProvidedVersionOrReturnDefault(Integer versionParam) {
         if (versionParam != null) {
@@ -381,11 +386,18 @@ class UserSkillsController {
     @ResponseBody
     public LeaderboardRes getSubjectLeaderboard(@PathVariable("projectId") String projectId,
                                                 @PathVariable("subjectId") String subjectId,
-                                         @RequestParam(name = "userId", required = false) String userIdParam,
-                                         @RequestParam(name = "idType", required = false) String idType,
-                                         @RequestParam(name = "type", required = false) LeaderboardRes.Type type) {
+                                                @RequestParam(name = "userId", required = false) String userIdParam,
+                                                @RequestParam(name = "idType", required = false) String idType,
+                                                @RequestParam(name = "type", required = false) LeaderboardRes.Type type) {
         String userId = userInfoService.getUserName(userIdParam, true, idType);
         return rankingLoader.getLeaderboard(projectId, userId, type, subjectId);
     }
 
+    @RequestMapping(value = "/pageVisit", method = {RequestMethod.PUT, RequestMethod.POST}, produces = "application/json")
+    @ResponseBody
+    @Profile
+    public RequestResult pageVisit(@RequestBody(required = true) PageVisitRequest pageVisitRequest) {
+        metricsLogger.logPageVisit(pageVisitRequest);
+        return RequestResult.success();
+    }
 }

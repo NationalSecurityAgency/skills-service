@@ -61,6 +61,7 @@ import VueApexCharts from 'vue-apexcharts';
 import VueAnnouncer from '@vue-a11y/announcer';
 import FiltersPlugin from '@/common-components/filter/FiltersPlugin';
 import dayjs from '@/common-components/DayJsCustomizer';
+import PageVisitService from '@/components/PageVisitService';
 import InceptionConfigurer from './InceptionConfigurer';
 import 'babel-polyfill';
 import 'matchmedia-polyfill';
@@ -206,6 +207,9 @@ router.afterEach((to) => {
       .then(() => {
         SkillsReporter.reportSkill(to.meta.reportSkillId);
       });
+  }
+  if (isPki() || isLoggedIn()) {
+    PageVisitService.reportPageVisit(to.path, to.fullPath);
   }
 });
 

@@ -27,6 +27,7 @@ import GlobalBadgeDetails from '@/userSkills/badge/GlobalBadgeDetails';
 import BadgeDetails from '@/userSkills/badge/BadgeDetails';
 import ErrorPage from '@/userSkills/ErrorPage';
 import store from '@/store/store';
+import UserSkillsService from './userSkills/service/UserSkillsService';
 
 Vue.use(VueRouter);
 
@@ -129,14 +130,18 @@ router.beforeEach((to, from, next) => {
 router.afterEach(debounce((to) => {
   if (process.env.NODE_ENV !== 'development' && store.state.parentFrame) {
     const params = {
-     path: to.path,
-     fullPath: to.fullPath,
-     name: to.name,
-     query: to.query,
-     currentLocation: window.location.toString(),
-     historySize: window.history.length,
+      path: to.path,
+      fullPath: to.fullPath,
+      name: to.name,
+      query: to.query,
+      currentLocation: window.location.toString(),
+      historySize: window.history.length,
     };
     store.state.parentFrame.emit('route-changed', params);
+  }
+  if (store.getters && store.getters.config
+      && (store.getters.config.enablePageVisitReporting === true || store.getters.config.enablePageVisitReporting === 'true')) {
+    UserSkillsService.reportPageVisit(to.path, to.fullPath);
   }
 }, 250));
 

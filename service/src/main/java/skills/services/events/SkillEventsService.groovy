@@ -61,14 +61,7 @@ class SkillEventsService {
         if (notifyIfNotApplied || result.skillApplied) {
             skillEventPublisher.publishSkillUpdate(result, userId)
         }
-        metricsLogger.log([
-                'skillId': skillId,
-                'projectId': projectId,
-                'requestedUserId': userId,
-                'selfReported': StringUtils.isNotEmpty(result.selfReportType).toString(),
-                'selfReportType': result.selfReportType,
-        ])
-
+        metricsLogger.logSkillReported(userId, result)
         return result
     }
 

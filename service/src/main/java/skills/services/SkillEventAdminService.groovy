@@ -236,13 +236,7 @@ class SkillEventAdminService {
             if (result.skillApplied) {
                 skillEventPublisher.publishSkillUpdate(result, userId)
             }
-            metricsLogger.log([
-                    'skillId'        : result.skillId,
-                    'projectId'      : result.projectId,
-                    'requestedUserId': userId,
-                    'selfReported'   : StringUtils.isNotEmpty(result.selfReportType).toString(),
-                    'selfReportType' : result.selfReportType,
-            ])
+            metricsLogger.logSkillReported(userId, result)
         }
     }
 
