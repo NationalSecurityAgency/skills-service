@@ -851,7 +851,7 @@ describe('Accessibility Tests', () => {
     cy.customA11y();
   });
 
-  it.only('content area should have focus after menu navigation', () => {
+  it('content area should have focus after menu navigation', () => {
     cy.visit('/administrator/');
     cy.intercept('GET', '/admin/projects/MyNewtestProject/subjects').as('loadSubjects');
     cy.intercept('GET', '/admin/projects/MyNewtestProject/badges').as('loadBadges');
@@ -868,7 +868,10 @@ describe('Accessibility Tests', () => {
     cy.intercept('GET', '/admin/projects/MyNewtestProject/subjects/subj1/skills').as('loadSubjSkills');
     cy.intercept('GET', '/admin/projects/MyNewtestProject/subjects/subj1/level').as('loadSubjLevels');
     cy.intercept('GET', '/admin/projects/MyNewtestProject/subjects/subj1/users').as('loadSubjUsers');
-
+    cy.intercept('GET', '/admin/projects/MyNewtestProject/subjects/subj1/skills/skill4').as('loadSkill');
+    cy.intercept('GET', '/admin/projects/MyNewtestProject/skills/skill4/dependency/graph').as('loadSkillDependencies');
+    cy.intercept('GET', '/admin/projects/MyNewtestProject/skills/skill4/users*').as('loadSkillUsers');
+    cy.intercept('GET', '/admin/projects/MyNewtestProject/metrics/skillEventsOverTimeChartBuilder').as('loadSkillMetrics');
 
     cy.get('.skills-menu-content').should('have.focus');
     cy.get('[data-cy="projCard_MyNewtestProject_manageLink"]').click();
@@ -922,9 +925,23 @@ describe('Accessibility Tests', () => {
     cy.get('.skills-menu-content').should('have.focus');
     cy.get('[data-cy=nav-Metrics]').click();
     cy.get('.skills-menu-content').should('have.focus');
-
-    //add tests for skill sub menus and view user submenus
-
+    cy.get('[data-cy=nav-Skills]').click();
+    cy.wait('@loadSubjSkills');
+    cy.get('.skills-menu-content').should('have.focus');
+    cy.get('[data-cy="manageSkillBtn_skill4"]').click();
+    cy.wait('@loadSkill');
+    cy.get('.skills-menu-content').should('have.focus');
+    cy.get('[data-cy="nav-Dependencies"]').click();
+    cy.wait('@loadSkillDependencies');
+    cy.get('.skills-menu-content').should('have.focus');
+    cy.get('[data-cy="nav-Users"]').click();
+    cy.wait('@loadSkillUsers');
+    cy.get('.skills-menu-content').should('have.focus');
+    cy.get('[data-cy="nav-Add Event"').click();
+    cy.get('.skills-menu-content').should('have.focus');
+    cy.get('[data-cy="nav-Metrics"]').click();
+    cy.wait('@loadSkillMetrics');
+    cy.get('.skills-menu-content').should('have.focus');
   });
 
 

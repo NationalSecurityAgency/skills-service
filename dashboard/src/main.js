@@ -207,7 +207,6 @@ router.afterEach((to) => {
         SkillsReporter.reportSkill(to.meta.reportSkillId);
       });
   }
-  console.log('navigating to ', this);
 });
 
 const renderer = {
