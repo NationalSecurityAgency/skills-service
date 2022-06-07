@@ -263,7 +263,7 @@ describe('Metrics Tests - Skills', () => {
     });
 
 
-    it.only('skills table - tag filtering', () => {
+    it('skills table - tag filtering', () => {
         // have to make viewport very wide so all the tags are on the same line
         // looks like there is an issue with cypress not being able to click on a tag
         // if it's pushed to the 2nd line
