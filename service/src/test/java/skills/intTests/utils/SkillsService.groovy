@@ -122,6 +122,12 @@ class SkillsService {
         createSkills(skills)
     }
 
+    @Profile
+    def createSubjectAndSkills(Map subjProps, List skills) {
+        createSubject(subjProps)
+        createSkills(skills)
+    }
+
     def createUser(Map props){
         //props: firstName, lastName, email, password
         if (this.certificateRegistry == null) {
