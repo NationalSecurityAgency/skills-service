@@ -299,9 +299,17 @@ describe('Root Pin and Unpin Tests', () => {
 
     cy.logout();
     cy.fixture('vars.json').then((vars) => {
+      let projAdminUser = vars.defaultUser;
+      let projAdminUserPrefix = projAdminUser.substring(0, projAdminUser.indexOf('@'));
+      let projAdminUserId = vars.defaultUser;
+      if (Cypress.env('oauthMode')) {
+        projAdminUser = vars.oauthUser;
+        projAdminUserPrefix = projAdminUser.substring(0, projAdminUser.indexOf('@'));
+        projAdminUserId = `${projAdminUserPrefix}-hydra`;
+      }
       cy.login(vars.rootUser, vars.defaultPass);
       cy.intercept('POST', '/root/users/without/role/ROLE_SUPER_DUPER_USER?userSuggestOption=ONE').as('getEligibleForRoot');
-      cy.intercept('PUT', '/root/users/skills@skills.org/roles/ROLE_SUPER_DUPER_USER').as('addRoot');
+      cy.intercept('PUT', `/root/users/${projAdminUserId}/roles/ROLE_SUPER_DUPER_USER`).as('addRoot');
       cy.intercept({
         method: 'GET',
         url: '/app/projects'
@@ -319,17 +327,24 @@ describe('Root Pin and Unpin Tests', () => {
         [{ colIndex: 0,  value: '(root@skills.org)' }],
       ], 5, true, null, false);
 
-      cy.contains('Enter user id').first().type('sk{enter}');
+      cy.contains('Enter user id').first().type(`${projAdminUserPrefix}{enter}`);
       cy.wait('@getEligibleForRoot');
-      cy.contains('skills@skills.org').click();
+      cy.contains(projAdminUserPrefix).click();
       cy.contains('Add').first().click();
       cy.wait('@addRoot');
 
       cy.get(`${rootUsrTableSelector} th`).contains('Root User').click();
-      cy.validateTable(rootUsrTableSelector, [
-        [{ colIndex: 0,  value: '(root@skills.org)' }],
-        [{ colIndex: 0,  value: '(skills@skills.org)' }],
-      ], 5, true, null, false);
+      if (!Cypress.env('oauthMode')) {
+        cy.validateTable(rootUsrTableSelector, [
+          [{ colIndex: 0,  value: '(root@skills.org)' }],
+          [{ colIndex: 0,  value: `(${projAdminUser})` }],
+        ], 5, true, null, false);
+      } else {
+        cy.validateTable(rootUsrTableSelector, [
+          [{ colIndex: 0,  value: `(${projAdminUserPrefix})` }],
+          [{ colIndex: 0,  value: '(root@skills.org)' }],
+        ], 5, true, null, false);
+      }
     });
 
     cy.fixture('vars.json').then((vars) => {
