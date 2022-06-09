@@ -135,8 +135,10 @@ export default {
 
   reportSkill(skillId, approvalRequestedMsg) {
     let response = null;
+    const userIdParams = this.getUserIdParams();
     response = axios.post(`${store.state.serviceUrl}${this.getServicePath()}/${encodeURIComponent(store.state.projectId)}/skills/${encodeURIComponent(skillId)}`, {
-      params: this.getUserIdAndVersionParams(),
+      userId: userIdParams.userId,
+      idType: userIdParams.idType,
       approvalRequestedMsg,
     }, { handleErrorCode: 400 }).then((result) => result.data);
     return response;
