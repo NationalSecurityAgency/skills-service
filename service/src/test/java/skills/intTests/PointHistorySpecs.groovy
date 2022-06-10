@@ -387,7 +387,6 @@ class PointHistorySpecs extends DefaultIntSpec {
         res2.achievements.find { it.name == "Levels 2, 3, 4" }.points == 500
     }
 
-
     def "SUBJECTS: empty dates should carry points from prevous day"() {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 
@@ -415,13 +414,76 @@ class PointHistorySpecs extends DefaultIntSpec {
         parseDate(res1.pointsHistory.get(0).dayPerformed) ==  dates.get(0).clearTime()
 
         res1.pointsHistory.get(1).points == 30
-        parseDate(res1.pointsHistory.get(1).dayPerformed) ==  dates.get(1).clearTime()
+        parseDate(res1.pointsHistory.get(1).dayPerformed) == dates.get(1).clearTime()
 
         res1.pointsHistory.get(2).points == 30
-        parseDate(res1.pointsHistory.get(2).dayPerformed) ==  dates.get(2).clearTime()
+        parseDate(res1.pointsHistory.get(2).dayPerformed) == dates.get(2).clearTime()
 
         res1.pointsHistory.get(3).points == 30
-        parseDate(res1.pointsHistory.get(3).dayPerformed) ==  dates.get(3).clearTime()
+        parseDate(res1.pointsHistory.get(3).dayPerformed) == dates.get(3).clearTime()
+    }
+
+    def "history considers group skills"() {
+        def proj = SkillsFactory.createProject()
+        def subject = SkillsFactory.createSubject()
+        def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 20)
+
+        List<Map> skills = SkillsFactory.createSkills(2, 1, 1, 50)
+        skills = skills.collect { it.numPerformToCompletion = 2; return it; }
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subject)
+        skillsService.createSkills([skillsGroup])
+        skills.each {
+            skillsService.assignSkillToSkillsGroup(skillsGroup.skillId, it)
+        }
+
+        Date today = new Date()
+        Date yesterday
+        use(TimeCategory) {
+            yesterday = 1.day.ago
+        }
+
+        skillsService.bulkExportSkillsToCatalog(proj.projectId, skills.collect { it.skillId })
+
+        def proj2 = SkillsFactory.createProject(2)
+        def subject2 = SkillsFactory.createSubject(2, 1)
+        def skillsGroup2 = SkillsFactory.createSkillsGroup(2, 1, 40)
+        skillsService.createProjectAndSubjectAndSkills(proj2, subject2, [skillsGroup2])
+        skillsService.bulkImportSkillsIntoGroupFromCatalogAndFinalize(proj2.projectId, subject2.subjectId, skillsGroup2.skillId,
+                [[projectId: proj.projectId, skillId: skills[0].skillId], [projectId: proj.projectId, skillId: skills[1].skillId]])
+
+
+        when:
+        skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId], userId, today)
+        def res = skillsService.getPointHistory(userId, SkillsFactory.defaultProjId)
+
+        skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId], userId, yesterday)
+        def res1 = skillsService.getPointHistory(userId, SkillsFactory.defaultProjId)
+        def res1_subj = skillsService.getPointHistory(userId, SkillsFactory.defaultProjId, subject.subjectId)
+
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        def p2_res1 = skillsService.getPointHistory(userId, proj2.projectId)
+        def p2_res1_subj = skillsService.getPointHistory(userId, proj2.projectId, subject2.subjectId)
+
+        then:
+        !res.pointsHistory
+
+        res1.pointsHistory.size() == 2
+        res1.pointsHistory.points == [50, 100]
+        res1.pointsHistory.dayPerformed.collect { parseDate(it) } == [yesterday.clearTime(), today.clearTime()]
+
+        res1_subj.pointsHistory.size() == 2
+        res1_subj.pointsHistory.points == [50, 100]
+        res1_subj.pointsHistory.dayPerformed.collect { parseDate(it) } == [yesterday.clearTime(), today.clearTime()]
+
+        p2_res1.pointsHistory.size() == 2
+        p2_res1.pointsHistory.points == [50, 100]
+        p2_res1.pointsHistory.dayPerformed.collect { parseDate(it) } == [yesterday.clearTime(), today.clearTime()]
+
+        p2_res1_subj.pointsHistory.size() == 2
+        p2_res1_subj.pointsHistory.points == [50, 100]
+        p2_res1_subj.pointsHistory.dayPerformed.collect { parseDate(it) } == [yesterday.clearTime(), today.clearTime()]
     }
 
     private Date parseDate(String str) {
