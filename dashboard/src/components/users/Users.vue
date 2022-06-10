@@ -143,17 +143,21 @@ limitations under the License.
       },
       applyFilters() {
         this.table.options.pagination.currentPage = 1;
-        this.loadData();
+        this.loadData().then(() => {
+          this.$nextTick(() => this.$announcer.polite(`Users table has been filtered by ${this.filters.userId}`));
+        });
       },
       reset() {
         this.filters.userId = '';
         this.table.options.pagination.currentPage = 1;
-        this.loadData();
+        this.loadData().then(() => {
+          this.$nextTick(() => this.$announcer.polite('Users table filters have been removed'));
+        });
       },
       loadData() {
         this.table.options.busy = true;
         const url = this.getUrl();
-        UsersService.ajaxCall(url, {
+        return UsersService.ajaxCall(url, {
           query: this.filters.userId,
           limit: this.table.options.pagination.pageSize,
           ascending: !this.table.options.sortDesc,

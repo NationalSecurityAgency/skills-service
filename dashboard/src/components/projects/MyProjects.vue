@@ -50,7 +50,7 @@ limitations under the License.
             <my-project :project="project" :disable-sort-control="projects.length === 1"
                         :ref="`proj${project.projectId}`"
                         @sort-changed-requested="updateSortAndReloadProjects"
-                        v-on:project-deleted="projectRemoved" v-on:pin-removed="loadProjects"/>
+                        v-on:project-deleted="projectRemoved" v-on:pin-removed="projectUnpinned"/>
           </b-overlay>
         </div>
       </div>
@@ -166,6 +166,13 @@ limitations under the License.
           this.$refs.pinProjectsButton.focus();
         });
       },
+      projectUnpinned(project) {
+        this.loadProjects().then(() => {
+          this.$nextTick(() => {
+            this.$announcer.polite(`Project ${project.name} has been unpinned from the root user projects view`);
+          });
+        });
+      },
       loadProjects() {
         this.isLoading = true;
         return ProjectService.getProjects()
@@ -182,21 +189,28 @@ limitations under the License.
         ProjectService.deleteProject(project.projectId)
           .then(() => {
             this.loadProjects();
+            this.$announcer.polite(`Project ${project.name} has been deleted`);
           });
       },
       projectAdded(project) {
         this.isLoading = true;
         return ProjectService.saveProject(project)
           .then(() => {
+            const loadProjects = () => {
+              SkillsReporter.reportSkill('CreateProject');
+              this.loadProjects().then(() => {
+                this.$nextTick(() => this.$announcer.polite(`Project ${project.name} has been created`));
+              });
+            };
+
             if (this.isRootUser) {
-              return SettingsService.pinProject(project.projectId)
+              SettingsService.pinProject(project.projectId)
                 .then(() => {
-                  SkillsReporter.reportSkill('CreateProject');
-                  return this.loadProjects();
+                  loadProjects();
                 });
+            } else {
+              loadProjects();
             }
-            SkillsReporter.reportSkill('CreateProject');
-            return this.loadProjects();
           });
       },
       editNewProject() {
@@ -210,12 +224,18 @@ limitations under the License.
         };
       },
       projectEdited(editedProject) {
-        this.projectAdded(editedProject)
-          .then(() => {
+        ProjectService.saveProject(editedProject).then(() => {
+          this.loadProjects().then(() => {
+            this.$refs.projectsTable.focusOnEditButton(editedProject.projectId);
             this.$nextTick(() => {
-              this.$refs.projectsTable.focusOnEditButton(editedProject.projectId);
+              if (editedProject.isEdit) {
+                this.$announcer.polite(`Project ${editedProject.name} has been edited`);
+              } else {
+                this.$announcer.polite(`Project ${editedProject.name} has been created`);
+              }
             });
           });
+        });
       },
       enableDropAndDrop() {
         if (this.projects && this.projects.length > 0

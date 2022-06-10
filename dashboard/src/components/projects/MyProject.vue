@@ -222,6 +222,7 @@ limitations under the License.
             this.projectInternal = res;
             this.pinned = this.projectInternal.pinned;
             this.createCardOptions();
+            this.$announcer.polite(`Project ${project.name} has been successfully edited`);
           })
           .finally(() => {
             this.isLoading = false;

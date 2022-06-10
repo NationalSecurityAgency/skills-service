@@ -681,6 +681,7 @@ limitations under the License.
           }
           return skill;
         });
+        this.$nextTick(() => this.$announcer.polite(`exported ${skills.length} skill${skills.length > 1 ? 's' : ''} to the catalog`));
       },
       updateImportedSkill(skill) {
         const item1Index = this.skills.findIndex((item) => item.skillId === skill.skillId);
@@ -691,6 +692,7 @@ limitations under the License.
           });
       },
       skillCreatedOrUpdated(skill) {
+        console.log('SkillsTable.skillCreatedOrUpdated', skill);
         if (this.skillsOriginal.length === 0) {
           this.isLoading = true;
         } else {
@@ -729,6 +731,10 @@ limitations under the License.
                 this.handleFocus();
               }, 0);
             }
+            const msg = skill.type === 'SkillGroup' ? `Group ${skill.name} has been saved` : `Skill ${skill.name} has been saved`;
+            this.$nextTick(() => {
+              this.$announcer.polite(msg);
+            });
             return createdSkill;
           })
           .catch((err) => {

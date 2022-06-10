@@ -162,6 +162,12 @@ limitations under the License.
               userIdForDisplay: this.currentSelectedUser.userIdForDisplay,
               key: this.currentSelectedUser.userId + new Date().getTime() + data.skillApplied,
             };
+            const { userId } = this.currentSelectedUser;
+            if (!data.skillApplied) {
+              this.$nextTick(() => this.$announcer.polite(`Could not add Skill event for ${userId}, ${data.explanation}`));
+            } else {
+              this.$nextTick(() => this.$announcer.polite(`Skill event has been added for ${userId}`));
+            }
             this.usersAdded.push(historyObj);
             this.currentSelectedUser = null;
           })

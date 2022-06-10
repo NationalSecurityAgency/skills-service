@@ -151,6 +151,9 @@ limitations under the License.
           if (resp.subjectId !== origId) {
             this.$router.replace({ name: this.$route.name, params: { ...this.$route.params, subjectId: resp.subjectId } });
           }
+          this.$nextTick(() => {
+            this.$announcer.polite(`Subject ${subject.name} has been edited`);
+          });
         });
       },
       handleHideSubjectEdit() {

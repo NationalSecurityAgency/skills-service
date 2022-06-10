@@ -126,6 +126,9 @@ limitations under the License.
               .then(() => {
                 this.isLoading = false;
                 this.$emit('subjects-changed', subject.subjectId);
+                this.$nextTick(() => {
+                  this.$announcer.polite(`Subject ${subject.name} has been deleted`);
+                });
               });
           });
       },
@@ -166,7 +169,11 @@ limitations under the License.
             this.loadProjectDetailsState({ projectId: this.projectId });
             this.$emit('subjects-changed', subject.subjectId);
             SkillsReporter.reportSkill('CreateSubject');
-            this.handleFocus();
+            this.handleFocus().then(() => {
+              this.$nextTick(() => {
+                this.$announcer.polite(`Subject ${subject.name} has been saved`);
+              });
+            });
           });
       },
       handleHide(e) {
@@ -175,8 +182,11 @@ limitations under the License.
         }
       },
       handleFocus() {
-        this.$nextTick(() => {
-          this.$refs?.subPageHeader?.$refs?.actionButton?.focus();
+        return new Promise((resolve) => {
+          this.$nextTick(() => {
+            this.$refs?.subPageHeader?.$refs?.actionButton?.focus();
+            resolve();
+          });
         });
       },
       enableDropAndDrop() {

@@ -172,6 +172,8 @@ limitations under the License.
             this.$router.replace({ name: this.$route.name, params: { ...this.$route.params, skillId: this.skill.skillId } });
           }
           this.headerOptions = this.buildHeaderOptions(res);
+        }).then(() => {
+          this.$nextTick(() => this.$announcer.polite(`Skill ${editedSkil.name} has been edited`));
         })
         .catch((err) => {
           if (err && err.response && err.response.data.errorCode === 'MaxSkillsThreshold') {

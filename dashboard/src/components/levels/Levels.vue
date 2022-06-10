@@ -233,20 +233,19 @@ limitations under the License.
       loadLevels() {
         this.table.options.busy = true;
         if (this.$route.params.subjectId) {
-          LevelService.getLevelsForSubject(this.$route.params.projectId, this.$route.params.subjectId)
-            .then((response) => {
-              this.levels = response;
-              this.table.options.busy = false;
-              this.handleFocusOnNextTick();
-            });
-        } else {
-          LevelService.getLevelsForProject(this.$route.params.projectId)
+          return LevelService.getLevelsForSubject(this.$route.params.projectId, this.$route.params.subjectId)
             .then((response) => {
               this.levels = response;
               this.table.options.busy = false;
               this.handleFocusOnNextTick();
             });
         }
+        return LevelService.getLevelsForProject(this.$route.params.projectId)
+          .then((response) => {
+            this.levels = response;
+            this.table.options.busy = false;
+            this.handleFocusOnNextTick();
+          });
       },
       removeLastItem() {
         if (!this.onlyOneLevelLeft) {
@@ -271,7 +270,9 @@ limitations under the License.
           if (res) {
             this.table.options.busy = true;
             this.doRemoveLastItem().then(() => {
-              this.loadLevels();
+              this.loadLevels().then(() => {
+                this.$announcer.polite('Level has been removed');
+              });
             }).catch((error) => {
               if (error?.response?.data) {
                 this.msgOk(error.response.data.explanation, 'Unable to delete');
@@ -322,12 +323,16 @@ limitations under the License.
         if (this.$route.params.subjectId) {
           LevelService.createNewLevelForSubject(this.$route.params.projectId, this.$route.params.subjectId, nextLevelObj)
             .then(() => {
-              this.loadLevels();
+              this.loadLevels().then(() => {
+                this.$nextTick(() => this.$announcer.polite('New Level has been created'));
+              });
             });
         } else {
           LevelService.createNewLevelForProject(this.$route.params.projectId, nextLevelObj)
             .then(() => {
-              this.loadLevels();
+              this.loadLevels().then(() => {
+                this.$nextTick(() => this.$announcer.polite('New Level has been created'));
+              });
             });
         }
       },
@@ -336,12 +341,16 @@ limitations under the License.
         if (this.$route.params.subjectId) {
           LevelService.editLevelForSubject(this.$route.params.projectId, this.$route.params.subjectId, editedLevelObj)
             .then(() => {
-              this.loadLevels();
+              this.loadLevels().then(() => {
+                this.$nextTick(() => this.$announcer.polite(`Level ${editedLevelObj.level} has been saved`));
+              });
             });
         } else {
           LevelService.editLevelForProject(this.$route.params.projectId, editedLevelObj)
             .then(() => {
-              this.loadLevels();
+              this.loadLevels().then(() => {
+                this.$nextTick(() => this.$announcer.polite(`Level ${editedLevelObj.level} has been saved`));
+              });
             });
         }
       },
@@ -352,9 +361,7 @@ limitations under the License.
       },
       handleFocusOnNextTick() {
         if (this.currentlyFocusedLevelId) {
-          this.$nextTick(() => {
-            this.handleFocus({ edit: true });
-          });
+          this.$nextTick(() => this.handleFocus({ edit: true }));
         }
       },
       handleFocus(e) {
