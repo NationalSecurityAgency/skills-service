@@ -190,7 +190,7 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
               and parent.skill_id = :skillId
               and rel.parent_ref_id = parent.id
               and rel.child_ref_id = child.id
-              and rel.type in ('RuleSetDefinition', 'SkillsGroupRequirement')
+              and rel.type in ('RuleSetDefinition', 'GroupSkillToSubject')
               and child.type = 'Skill'
               and child.version <= :version
               and child.enabled = 'true'
