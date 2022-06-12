@@ -311,8 +311,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             from user_performed_skill up,
                  skill_definition sd
             where up.user_id =:userId
-              and up.skill_ref_id = :skillRefId
-              and up.skill_ref_id = sd.id
+              and sd.id = :skillRefId
+              and up.skill_ref_id = (case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end)
               and DATE_TRUNC('DAY', up.performed_on) = :day 
             group by up.skill_ref_id''', nativeQuery = true)
     Integer calculatePointsForSingleSkillForADay(@Param("userId") String userId,
