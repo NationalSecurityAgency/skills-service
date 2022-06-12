@@ -65,7 +65,7 @@ class CatalogSkillTests extends CatalogIntSpec {
 
         when:
         skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
-        def res = skillsService.getCatalogSkills(project2.projectId, 5, 1)
+        def res = skillsService.getCatalogSkills(project2.projectId, 5, 1, "name")
 
         then:
         res
@@ -325,7 +325,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
 
         when:
-        def preEdit = skillsService.getCatalogSkills(project2.projectId, 10, 1)
+        def preEdit = skillsService.getCatalogSkills(project2.projectId, 10, 1, "name")
         def skillNamePreEdit = skill.name
         def skillDescriptionPreEdit = skill.description
         def skillHelpUrlPreEdit = skill.helpUrl
@@ -337,7 +337,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         skill.selfReportingType = SkillDef.SelfReportingType.Approval.toString()
 
         skillsService.updateSkill(skill, skill.skillId)
-        def postEdit = skillsService.getCatalogSkills(project3.projectId, 10, 1)
+        def postEdit = skillsService.getCatalogSkills(project3.projectId, 10, 1, "name")
 
         then:
         preEdit.data[0].name == skillNamePreEdit
