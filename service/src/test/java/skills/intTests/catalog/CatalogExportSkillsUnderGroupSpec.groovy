@@ -39,7 +39,7 @@ class CatalogExportSkillsUnderGroupSpec extends CatalogIntSpec {
         skillsService.bulkExportSkillsToCatalog(p2.projectId, [gSkill1, gSkill2].collect { it.skillId })
 
         def p2Exported = skillsService.getExportedSkills(p2.projectId, 10, 1, "skillName", true)
-        def catalogSkills = skillsService.getCatalogSkills(p1.projectId, 10, 1)
+        def catalogSkills = skillsService.getCatalogSkills(p1.projectId, 10, 1, "name")
         def skillsUnderGroup = skillsService.getSkillsForGroup(p2.projectId, p2skillsGroup.skillId)
 
         then:
@@ -501,12 +501,12 @@ class CatalogExportSkillsUnderGroupSpec extends CatalogIntSpec {
         when:
 
         def p2Exported = skillsService.getExportedSkills(p2.projectId, 10, 1, "skillName", true)
-        def catalogSkills = skillsService.getCatalogSkills(p1.projectId, 10, 1)
+        def catalogSkills = skillsService.getCatalogSkills(p1.projectId, 10, 1, "name")
 
         skillsService.removeSkillFromCatalog(p2.projectId, gSkill1.skillId)
 
         def p2Exported_t1 = skillsService.getExportedSkills(p2.projectId, 10, 1, "skillName", true)
-        def catalogSkills_t1 = skillsService.getCatalogSkills(p1.projectId, 10, 1)
+        def catalogSkills_t1 = skillsService.getCatalogSkills(p1.projectId, 10, 1, "name")
 
         then:
         p2Exported.count == 2

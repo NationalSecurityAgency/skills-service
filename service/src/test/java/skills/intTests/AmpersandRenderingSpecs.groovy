@@ -228,7 +228,7 @@ class AmpersandRenderingSpecs extends DefaultIntSpec {
         skillsService.exportSkillToCatalog(proj3.projectId, skill3.skillId)
         skillsService.exportSkillToCatalog(proj4.projectId, skill4.skillId)
 
-        def catalogSkills = skillsService.getCatalogSkills(importer.projectId, 10, 1)
+        def catalogSkills = skillsService.getCatalogSkills(importer.projectId, 10, 1, "name")
 
         then:
         catalogSkills.data.find { it.name == "A & B" && it.subjectName == "S & B" && it.projectName == "P & B"}
