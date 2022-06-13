@@ -101,7 +101,7 @@ class ProjectController {
         }
 
         projectRequest.projectId = InputSanitizer.sanitize(projectRequest.projectId)
-        projectRequest.name = InputSanitizer.sanitize(projectRequest.name)
+        projectRequest.name = InputSanitizer.sanitize(projectRequest.name)?.trim()
 
         projAdminService.saveProject(null, projectRequest)
         return new RequestResult(success: true)
@@ -112,7 +112,7 @@ class ProjectController {
     @ResponseBody
     boolean doesProjectExist(@RequestBody ProjectExistsRequest existsRequest) {
         String projectId = existsRequest.projectId
-        String projectName = existsRequest.name
+        String projectName = existsRequest.name?.trim()
 
         SkillsValidator.isTrue((projectId || projectName), "One of Project Id or Project Name must be provided.")
         SkillsValidator.isTrue(!(projectId && projectName), "Only Project Id or Project Name may be provided, not both.")

@@ -284,7 +284,7 @@ class SkillsService {
     }
 
     def subjectNameExists(Map props){
-        wsHelper.adminPost("/projects/${props.projectId}/subjectNameExists", [name:props.subjectName])
+        wsHelper.adminPost("/projects/${props.projectId}/subjectNameExists", [name:props.subjectName])?.body
     }
 
     def getSubjectDescriptions(String projectId, String subjectId, String userId = null) {
