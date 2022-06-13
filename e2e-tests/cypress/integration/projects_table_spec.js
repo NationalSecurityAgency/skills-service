@@ -165,10 +165,12 @@ describe('Projects Table Tests', () => {
     cy.get('input[data-cy=projectName]').type('{selectall}I Am A Changed Project Name');
     cy.get('button[data-cy=saveProjectButton]').click();
 
-    cy.get('[data-cy="projectsTable-projectFilter"]')
-        .type('Changed');
-    cy.get('[data-cy="projectsTable-filterBtn"]')
-        .click();
+    /* focus is automatically getting switched back to the edit button which pre-emptively moves the cursor out of the text input field before
+      before the full text has been entered depending on test timing
+     */
+    cy.wait(350);
+    cy.get('[data-cy="projectsTable-projectFilter"]').type('Changed');
+    cy.get('[data-cy="projectsTable-filterBtn"]').click();
     cy.validateTable(tableSelector, [
       [{
         colIndex: 0,
@@ -354,12 +356,16 @@ describe('Projects Table Tests', () => {
     cy.get('[data-cy="editProjectIdproj8"]')
         .should('have.focus');
 
+    cy.intercept('POST', '/admin/projects/proj7').as('nameChange');
+    cy.intercept('GET', '/admin/projects/proj7').as('reload');
     cy.get('[data-cy="editProjectIdproj7"]')
         .click();
     cy.get('[data-cy=projectName]')
         .type('123');
     cy.get('[data-cy=saveProjectButton]')
         .click();
+    cy.wait('@nameChange');
+    cy.wait('@reload');
     cy.get('[data-cy="manageProjLink_proj7"]')
         .contains('This is project 7123');
     cy.get('[data-cy="editProjectIdproj7"]')
