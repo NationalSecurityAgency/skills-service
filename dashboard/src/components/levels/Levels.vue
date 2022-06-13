@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div id="level-def-panel">
+  <div id="level-def-panel" ref="mainFocus">
     <sub-page-header title="Level Definitions">
       <div class="row">
         <div class="col">

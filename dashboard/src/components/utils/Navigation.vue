@@ -67,7 +67,7 @@ limitations under the License.
           </ul>
         </b-collapse>
       </div>
-      <div class="col-md skills-menu-content">
+      <div class="col-md skills-menu-content" ref="content" tabindex="-1">
         <div class="container-fluid pb-4">
           <router-view></router-view>
         </div>
@@ -103,8 +103,14 @@ limitations under the License.
       navItems(newValue) {
         this.buildNewMenuMapWhenPropsChange(newValue);
       },
-      $route: function routeChange() {
-        this.buildNewMenuMapWhenPropsChange(this.navItems);
+      $route: {
+        immediate: true,
+        handler: function routeChange() {
+          this.buildNewMenuMapWhenPropsChange(this.navItems);
+          this.$nextTick(() => {
+            this.$refs.content.focus({ preventScroll: true });
+          });
+        },
       },
     },
     methods: {
@@ -183,6 +189,10 @@ limitations under the License.
     /* this little hack is required to prevent apexcharts from wrapping onto a new line;
     the gist is that they calculate width dynamically and do not work properly with the width of 0*/
     min-width: 1rem;
+  }
+
+  .skills-menu-content:focus {
+    outline: none;
   }
 
 </style>
