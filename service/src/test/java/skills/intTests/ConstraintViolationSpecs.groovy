@@ -20,6 +20,7 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import spock.lang.IgnoreRest
 
 class ConstraintViolationSpecs extends DefaultIntSpec {
 
@@ -143,12 +144,10 @@ class ConstraintViolationSpecs extends DefaultIntSpec {
 
         when:
         def existsOriginal = skillsService.subjectNameExists([projectId: proj.projectId, subjectName: subject.name])
-        def existsWithoutRestrictedCharacters = skillsService.subjectNameExists([projectId: proj.projectId, subjectName: "special 123456789_-#()[]/"])
         def subj = skillsService.getSubject([projectId: proj.projectId, subjectId: subject.subjectId])
 
         then:
         existsOriginal
-        existsWithoutRestrictedCharacters
         subj
         subj.name == 'special 123456789_-#()[]/*%;'
     }

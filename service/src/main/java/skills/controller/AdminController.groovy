@@ -229,7 +229,9 @@ class AdminController {
         String subjectName = existsRequest.name?.trim()
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(subjectName, "Subject Name")
-        return subjAdminService.existsBySubjectName(InputSanitizer.sanitize(projectId), InputSanitizer.sanitize(subjectName))
+
+        def sanitize = InputSanitizer.sanitize(subjectName)
+        return subjAdminService.existsBySubjectName(InputSanitizer.sanitize(projectId), sanitize)
     }
 
     @DBUpgradeSafe
