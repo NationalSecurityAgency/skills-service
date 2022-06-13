@@ -365,7 +365,7 @@ class UserSkillsController {
     public RequestResult removeRejectionFromView(@PathVariable("projectId") String projectId,
                                                  @PathVariable("id") Integer approvalId,
                                                  @RequestParam(name = "userId", required = false) String userIdParam,
-                                                 @RequestParam(name = "type", required = false) String idType) {
+                                                 @RequestParam(name = "idType", required = false) String idType) {
         String userId = userInfoService.getUserName(userIdParam, true, idType);
         selfReportingService.removeRejectionFromView(projectId, userId, approvalId);
 
