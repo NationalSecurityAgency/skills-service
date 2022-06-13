@@ -72,7 +72,7 @@ public class AddSkillHelper {
         }
 
         SkillEventResult result;
-        String userId = userInfoService.getUserName(requestedUserId, false, skillEventRequest.getIdType());
+        String userId = userInfoService.getUserName(requestedUserId, false, skillEventRequest != null ? skillEventRequest.getIdType() : null);
         if (log.isInfoEnabled()) {
             log.info("ReportSkill (ProjectId=[{}], SkillId=[{}], CurrentUser=[{}], RequestUser=[{}], RequestDate=[{}], IsRetry=[{}])",
                     new String[]{projectId, skillId, userInfoService.getCurrentUserId(), requestedUserId, toDateString(requestedTimestamp), isRetry.toString()});
