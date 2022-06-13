@@ -90,11 +90,6 @@ export default {
     const url = `/admin/projects/${encodeURIComponent(skill.projectId)}/import/skills/${encodeURIComponent(skill.skillId)}`;
     return axios.patch(url, { pointIncrement: skill.pointIncrement }).then((res) => res.data);
   },
-  syncSkillsPoints(projectId, subjectId, groupId, skillsPointsSyncRequest) {
-    const url = `/admin/projects/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}/groups/${encodeURIComponent(groupId)}/skills`;
-    return axios.patch(url, skillsPointsSyncRequest)
-      .then(() => this.getGroupSkills(projectId, groupId));
-  },
   deleteSkill(skill) {
     return axios.delete(`/admin/projects/${encodeURIComponent(skill.projectId)}/subjects/${encodeURIComponent(skill.subjectId)}/skills/${encodeURIComponent(skill.skillId)}`)
       .then((res) => res.data);

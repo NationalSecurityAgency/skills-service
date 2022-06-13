@@ -291,7 +291,6 @@ limitations under the License.
 
     <edit-skill v-if="editSkillInfo.show" v-model="editSkillInfo.show" :skillId="editSkillInfo.skill.skillId" :group-id="editSkillInfo.skill.groupId"
                 :is-copy="editSkillInfo.isCopy" :is-edit="editSkillInfo.isEdit"
-                :can-edit-points="canEditPoints" :can-edit-points-msg="canEditPointsMsg"
                 :project-id="projectId" :subject-id="subjectId" @skill-saved="skillCreatedOrUpdated" @hidden="handleFocus"/>
     <edit-imported-skill v-if="editImportedSkillInfo.show" v-model="editImportedSkillInfo.show"
                          :skill="editImportedSkillInfo.skill" @skill-saved="updateImportedSkill" @hidden="handleFocus" />
@@ -363,16 +362,6 @@ limitations under the License.
       disableDeleteButtonsInfo: {
         type: Object,
         default: null,
-      },
-      canEditPoints: {
-        type: Boolean,
-        required: false,
-        default: true,
-      },
-      canEditPointsMsg: {
-        type: String,
-        required: false,
-        default: '',
       },
       disableCopy: {
         type: Boolean,

@@ -114,42 +114,6 @@ class SkillsAdminService {
     @Autowired
     ProjDefRepo projDefRepo
 
-    @Transactional
-    void syncSkillPointsForSkillsGroup(String projectId,
-                                       String subjectId,
-                                       String groupId,
-                                       PointSyncPatchRequest patchRequest) {
-        lockingService.lockProject(projectId)
-
-        SkillDef skillsGroupSkillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, groupId, SkillDef.ContainerType.SkillsGroup)
-        List<SkillDef> groupChildSkills = skillsGroupAdminService.getSkillsGroupChildSkills(skillsGroupSkillDef.id)
-
-        final int totalPointsRequested = patchRequest.pointIncrement * patchRequest.numPerformToCompletion
-        final int pointIncrement = patchRequest.pointIncrement
-
-        def origAttrs = [:]
-        groupChildSkills.each {childSkillDef ->
-            origAttrs.put(childSkillDef, [childSkillDef.totalPoints, childSkillDef.pointIncrement])
-            childSkillDef.pointIncrement = pointIncrement
-            childSkillDef.totalPoints = totalPointsRequested
-            DataIntegrityExceptionHandlers.skillDataIntegrityViolationExceptionHandler.handle(projectId, childSkillDef.skillId) {
-                skillDefWithExtraRepo.save(childSkillDef)
-            }
-        }
-
-        // need to validate skills group
-        skillsGroupAdminService.validateSkillsGroupAndReturnChildren(skillsGroupSkillDef.numSkillsRequired, skillsGroupSkillDef.id)
-        groupChildSkills.each { childSkillDef ->
-            final int incrementRequested = pointIncrement
-            final int currentOccurrences = (origAttrs.get(childSkillDef)[0] / origAttrs.get(childSkillDef)[1])
-            final int occurrencesDelta = patchRequest.numPerformToCompletion - currentOccurrences
-            final int pointIncrementDelta = incrementRequested - pointIncrement
-            log.debug("Rebuilding scores for [${}]", childSkillDef.skillId)
-            ruleSetDefinitionScoreUpdater.updateFromLeaf(childSkillDef)
-            updatePointsAndAchievements(childSkillDef, subjectId, pointIncrementDelta, occurrencesDelta, currentOccurrences, 0, skillsGroupSkillDef, groupChildSkills)
-        }
-    }
-
     protected static class SaveSkillTmpRes {
         boolean isAvailableInCatalog = false
         String projectId
