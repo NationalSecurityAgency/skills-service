@@ -82,7 +82,6 @@ limitations under the License.
                         :disableDeleteButtonsInfo="disableDeleteButtonInfo"
                         :page-size="this.maxSkillsToShow"
                         actions-btn-size="sm"
-                        :can-edit-points="canEditPoints" :can-edit-points-msg="canEditPointsMsg()"
                         :show-search="false" :show-header="false" :show-paging="false"/>
         </div>
       </b-card>
@@ -93,7 +92,6 @@ limitations under the License.
               :is-edit="editSkillInfo.isEdit"
               :project-id="editSkillInfo.skill.projectId" :subject-id="editSkillInfo.skill.subjectId"
               :group-id="this.group.skillId"
-              :can-edit-points="canEditPoints" :can-edit-points-msg="canEditPointsMsg()"
               :new-skill-default-values="defaultNewSkillValues()"
               @skill-saved="saveSkill" @hidden="focusOnNewSkillButton"/>
   <edit-num-required-skills v-if="editRequiredSkillsInfo.show" v-model="editRequiredSkillsInfo.show"
@@ -188,9 +186,6 @@ limitations under the License.
         // -1 == all skills required
         return (this.group.numSkillsRequired < 0);
       },
-      canEditPoints() {
-        return (this.group.numSkillsRequired === -1);
-      },
       disableDeleteButtonInfo() {
         let res = null;
         if (this.group.numSkillsRequired > 0 && this.group.numSkillsRequired === this.skills.length) {
@@ -238,9 +233,6 @@ limitations under the License.
       ...finalizeInfo.mapActions([
         'loadFinalizeInfo',
       ]),
-      canEditPointsMsg() {
-        return (this.group.numSkillsRequired === -1) ? null : 'Points CANNOT be modified when group\'s number of the required skill is set.';
-      },
       loadData() {
         this.loading.skills = true;
         this.loading.details = true;

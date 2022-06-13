@@ -440,22 +440,6 @@ class AdminController {
         return new RequestResult(success: true)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/groups/{groupId}/skills", method = RequestMethod.PATCH)
-    @ResponseBody
-    RequestResult syncSkillPointsForSkillsGroup(@PathVariable("projectId") String projectId,
-                                                @PathVariable("subjectId") String subjectId,
-                                                @PathVariable("groupId") String groupId,
-                                                @RequestBody PointSyncPatchRequest patchRequest) {
-        SkillsValidator.isNotBlank(projectId, "Project Id")
-        SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId, groupId)
-        SkillsValidator.isNotBlank(groupId, "Group Id", projectId)
-        SkillsValidator.isNotNull(patchRequest.pointIncrement, "pointIncrement must be provided", projectId, groupId)
-        SkillsValidator.isNotNull(patchRequest.numPerformToCompletion, "numPerformToCompletion must be provided", projectId, groupId)
-
-        skillsAdminService.syncSkillPointsForSkillsGroup(projectId, subjectId, groupId, patchRequest)
-        return new RequestResult(success: true)
-    }
-
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/groups/{groupId}/skills/{skillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     RequestResult saveSkillAndAssignToSkillsGroup(@PathVariable("projectId") String projectId,
