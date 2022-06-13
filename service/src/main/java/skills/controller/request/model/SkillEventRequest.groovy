@@ -17,6 +17,7 @@ package skills.controller.request.model
 
 class SkillEventRequest {
     String userId
+    String idType
     Long timestamp
     Boolean notifyIfSkillNotApplied = false
     Boolean isRetry = false
