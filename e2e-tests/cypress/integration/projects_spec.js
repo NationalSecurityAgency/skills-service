@@ -54,6 +54,22 @@ describe('Projects Tests', () => {
     cy.contains('ID: MyNewtestProject')
   });
 
+  it.only('Canceling delete dialog should return focus to delete button', () => {
+    cy.request('POST', '/app/projects/proj1', {
+      projectId: 'proj1',
+      name: "proj1"
+    });
+
+    cy.request('POST', '/app/projects/proj2', {
+      projectId: 'proj2',
+      name: "proj2"
+    });
+
+    cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
+    cy.visit('/administrator/');
+    cy.wait('@loadUserInfo');
+  });
+
   it('Ampersand in project name', () => {
     cy.intercept('GET', '/app/projects').as('loadProjects');
     cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
