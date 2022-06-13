@@ -22,6 +22,7 @@ import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import spock.lang.IgnoreIf
+import spock.lang.IgnoreRest
 import spock.lang.Requires
 import spock.lang.Specification
 
@@ -499,5 +500,170 @@ class ValidationSpecs extends DefaultIntSpec {
         SkillsClientException exception = thrown()
         exception.httpStatus == HttpStatus.BAD_REQUEST
         exception.message.contains('[password] must not exceed [40] chars')
+    }
+
+    def "leading and trailing spaces in skill names should not be considered when checking for duplicate skill names"() {
+        def proj = SkillsFactory.createProject(1)
+        skillsService.createProject(proj)
+        def subj = SkillsFactory.createSubject(1)
+        skillsService.createSubject(subj)
+        def skill = SkillsFactory.createSkill(1)
+        skill.name = "Skill"
+        skillsService.createSkill(skill)
+
+        when:
+
+        def leadSpaceIgnored = false
+        def trailingSpaceIgnored = false
+
+        try {
+            def skill2 = SkillsFactory.createSkill(1, 1, 2)
+            skill2.name = " Skill"
+            skillsService.createSkill(skill2)
+        } catch (SkillsClientException ske) {
+            leadSpaceIgnored = ske.message.contains("already exists! Sorry!, errorCode:ConstraintViolation")
+        }
+
+        try {
+            def skill2 = SkillsFactory.createSkill(1, 1, 2)
+            skill2.name = "Skill "
+            skillsService.createSkill(skill2)
+        } catch (SkillsClientException ske) {
+            trailingSpaceIgnored = ske.message.contains("already exists! Sorry!, errorCode:ConstraintViolation")
+        }
+
+        then:
+        leadSpaceIgnored
+        trailingSpaceIgnored
+    }
+
+    def "leading and trailing spaces in skill names should not be considered when checking for duplicate subject names"() {
+        def proj = SkillsFactory.createProject(1)
+        skillsService.createProject(proj)
+        def subj = SkillsFactory.createSubject(1)
+        subj.name = "Subject"
+        skillsService.createSubject(subj)
+
+        when:
+
+        def leadSpaceIgnored = false
+        def trailingSpaceIgnored = false
+
+        try {
+            def subj2 = SkillsFactory.createSubject(1, 2)
+            subj2.name = " Subject"
+            skillsService.createSubject(subj2)
+        } catch (SkillsClientException ske) {
+            leadSpaceIgnored = ske.message.contains("already exists! Sorry!, errorCode:ConstraintViolation")
+        }
+
+        try {
+            def subj2 = SkillsFactory.createSubject(1, 3)
+            subj2.name = "Subject "
+            skillsService.createSubject(subj2)
+        } catch (SkillsClientException ske) {
+            trailingSpaceIgnored = ske.message.contains("already exists! Sorry!, errorCode:ConstraintViolation")
+        }
+
+        then:
+        leadSpaceIgnored
+        trailingSpaceIgnored
+    }
+
+    def "leading and trailing spaces in skill names should not be considered when checking for duplicate badge names"() {
+        def proj = SkillsFactory.createProject(1)
+        skillsService.createProject(proj)
+        def badge = SkillsFactory.createBadge(1)
+        badge.name = "Badge"
+        skillsService.createBadge(badge)
+
+        when:
+
+        def leadSpaceIgnored = false
+        def trailingSpaceIgnored = false
+
+        try {
+            def badge2 = SkillsFactory.createBadge(1, 2)
+            badge2.name = " Badge"
+            skillsService.createBadge(badge2)
+        } catch (SkillsClientException ske) {
+            leadSpaceIgnored = ske.message.contains("already exists! Sorry!, errorCode:ConstraintViolation")
+        }
+
+        try {
+            def badge2 = SkillsFactory.createBadge(1, 3)
+            badge2.name = "Badge "
+            skillsService.createBadge(badge2)
+        } catch (SkillsClientException ske) {
+            trailingSpaceIgnored = ske.message.contains("already exists! Sorry!, errorCode:ConstraintViolation")
+        }
+
+        then:
+        leadSpaceIgnored
+        trailingSpaceIgnored
+    }
+
+    def "leading and trailing spaces in skill names should not be considered when checking for duplicate project names"() {
+        def proj = SkillsFactory.createProject(1)
+        proj.name = "Project"
+        skillsService.createProject(proj)
+
+        when:
+
+        def leadSpaceIgnored = false
+        def trailingSpaceIgnored = false
+
+        try {
+            def proj2 = SkillsFactory.createProject(2)
+            proj2.name = " Project"
+            skillsService.createProject(proj2)
+        } catch (SkillsClientException ske) {
+            leadSpaceIgnored = ske.message.contains("already exists! Sorry!, errorCode:ConstraintViolation")
+        }
+
+        try {
+            def proj2 = SkillsFactory.createProject(3)
+            proj2.name = "Project "
+            skillsService.createProject(proj2)
+        } catch (SkillsClientException ske) {
+            trailingSpaceIgnored = ske.message.contains("already exists! Sorry!, errorCode:ConstraintViolation")
+        }
+
+        then:
+        leadSpaceIgnored
+        trailingSpaceIgnored
+    }
+
+    def "leading and trailing spaces in skill names should not be considered when checking for duplicate global names"() {
+        SkillsService supervisorService = createSupervisor()
+
+        def badge = SkillsFactory.createBadge(1)
+        badge.name = "Badge"
+        supervisorService.createGlobalBadge(badge)
+
+        when:
+
+        def leadSpaceIgnored = false
+        def trailingSpaceIgnored = false
+
+        try {
+            def badge2 = SkillsFactory.createBadge(1, 2)
+            badge2.name = " Badge"
+            supervisorService.createGlobalBadge(badge2)
+        } catch (SkillsClientException ske) {
+            leadSpaceIgnored = ske.message.contains("already exists! Sorry!, errorCode:ConstraintViolation")
+        }
+
+        try {
+            def badge2 = SkillsFactory.createBadge(1, 3)
+            badge2.name = "Badge "
+            supervisorService.createGlobalBadge(badge2)
+        } catch (SkillsClientException ske) {
+            trailingSpaceIgnored = ske.message.contains("already exists! Sorry!, errorCode:ConstraintViolation")
+        }
+
+        then:
+        leadSpaceIgnored
+        trailingSpaceIgnored
     }
 }

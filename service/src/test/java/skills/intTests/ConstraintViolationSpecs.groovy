@@ -66,11 +66,15 @@ class ConstraintViolationSpecs extends DefaultIntSpec {
         when:
         def lowerExists = skillsService.projectNameExists([projectName: proj.name.toLowerCase()])
         def uppperExists = skillsService.projectNameExists([projectName: proj.name.toUpperCase()])
+        def leadingSpaceExists = skillsService.projectNameExists([projectName: " ${proj.name}"])
+        def trailingSpaceExists = skillsService.projectNameExists([projectName: "${proj.name} "])
 
         then:
 
         lowerExists
         uppperExists
+        leadingSpaceExists
+        trailingSpaceExists
     }
 
     def "duplicate project id"() {
@@ -120,10 +124,14 @@ class ConstraintViolationSpecs extends DefaultIntSpec {
         when:
         def lowerExists = skillsService.subjectNameExists([projectId: proj.projectId, subjectName: subject.name.toLowerCase()])
         def upperExists = skillsService.subjectNameExists([projectId: proj.projectId, subjectName: subject.name.toUpperCase()])
+        def leadingSpaceExists = skillsService.subjectNameExists([projectId: proj.projectId, subjectName: " ${subject.name}".toString()])
+        def trailingSpaceExists = skillsService.subjectNameExists([projectId: proj.projectId, subjectName: "${subject.name} ".toString()])
 
         then:
         lowerExists
         upperExists
+        leadingSpaceExists
+        trailingSpaceExists
     }
 
     def "special characters in subject name"() {
@@ -216,10 +224,14 @@ class ConstraintViolationSpecs extends DefaultIntSpec {
         when:
         def lowerExists = skillsService.skillNameExists([projectId: proj.projectId, skillName: skill.name.toLowerCase()])
         def upperExists = skillsService.skillNameExists([projectId: proj.projectId, skillName: skill.name.toUpperCase()])
+        def leadingSpaceExists = skillsService.skillNameExists([projectId: proj.projectId, skillName: " ${skill.name}".toString()])
+        def trailingSpaceExists = skillsService.skillNameExists([projectId: proj.projectId, skillName: "${skill.name} ".toString()])
 
         then:
         lowerExists
         upperExists
+        leadingSpaceExists
+        trailingSpaceExists
     }
 
     def "skill name with special characters"() {
@@ -296,10 +308,33 @@ class ConstraintViolationSpecs extends DefaultIntSpec {
         when:
         def lower = skillsService.badgeNameExists([projectId: proj.projectId, badgeName: badge.name.toLowerCase()])
         def upper = skillsService.badgeNameExists([projectId: proj.projectId, badgeName: badge.name.toUpperCase()])
+        def leadingSpace = skillsService.badgeNameExists([projectId: proj.projectId, badgeName: " ${badge.name}".toString()])
+        def trailingSpace = skillsService.badgeNameExists([projectId: proj.projectId, badgeName: "${badge.name} ".toString()])
 
         then:
         lower
         upper
+        leadingSpace
+        trailingSpace
+    }
+
+    def "global badge name exists"() {
+        Map badge = SkillsFactory.createBadge()
+        SkillsService supervisor = createSupervisor()
+
+        supervisor.createGlobalBadge(badge)
+
+        when:
+        def lower = supervisor.doesGlobalBadgeNameExists(badge.name.toLowerCase())
+        def upper = supervisor.doesGlobalBadgeNameExists(badge.name.toUpperCase())
+        def leadingSpace = supervisor.doesGlobalBadgeNameExists(" ${badge.name}".toString())
+        def trailingSpace = supervisor.doesGlobalBadgeNameExists("${badge.name} ".toString())
+
+        then:
+        lower
+        upper
+        leadingSpace
+        trailingSpace
     }
 
     def "badge name with special characters"() {
