@@ -692,7 +692,6 @@ limitations under the License.
           });
       },
       skillCreatedOrUpdated(skill) {
-        console.log('SkillsTable.skillCreatedOrUpdated', skill);
         if (this.skillsOriginal.length === 0) {
           this.isLoading = true;
         } else {
