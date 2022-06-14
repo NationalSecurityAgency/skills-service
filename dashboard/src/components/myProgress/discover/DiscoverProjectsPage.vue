@@ -270,6 +270,8 @@ aria-label="search for projects to pin"></b-input>
             this.updateCounts();
           }).finally(() => {
             itemRef.loading = false;
+          }).then(() => {
+            this.$nextTick(() => this.$announcer.polite(`${item.name} has been added to my projects`));
           });
       },
       removeFromMyProjects(item) {
@@ -281,6 +283,8 @@ aria-label="search for projects to pin"></b-input>
             this.updateCounts();
           }).finally(() => {
             itemRef.loading = false;
+          }).then(() => {
+            this.$nextTick(() => this.$announcer.polite(`${item.name} has been removed from my projects`));
           });
       },
       updateCounts() {
@@ -303,6 +307,8 @@ aria-label="search for projects to pin"></b-input>
             const nameHtml = `${theName.substring(0, index)}<mark>${theName.substring(index, index + searchStrNormalized.length)}</mark>${theName.substring(index + searchStrNormalized.length)}`;
             return Object.assign(item, { nameHtml });
           });
+          const matchCount = this.projects.length;
+          this.$nextTick(() => this.$announcer.polite(`projects filtered by ${searchString}, there ${matchCount > 1 ? 'are' : 'is'} ${matchCount} matching project${(matchCount > 1 || matchCount === 0) ? 's' : ''}`));
         }
         this.paging.totalRows = this.projects.length;
       },

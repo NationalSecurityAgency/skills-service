@@ -140,7 +140,7 @@ limitations under the License.
           .then(() => {
             this.badgeSkills = this.badgeSkills.filter((item) => `${item.projectId}${item.skillId}` !== `${deletedItem.projectId}${deletedItem.skillId}`);
             this.availableSkills.unshift(deletedItem);
-            this.loadGlobalBadgeDetailsState({ badgeId: this.badgeId });
+            this.loadGlobalBadgeDetailsState({ badgeId: this.badgeId }).then(() => this.$announcer.polite('skill has been removed from global badge'));
             this.loading.skillOp = false;
             this.$emit('skills-changed', deletedItem);
           });
@@ -151,7 +151,7 @@ limitations under the License.
           .then(() => {
             this.badgeSkills.push(newItem);
             this.availableSkills = this.availableSkills.filter((item) => `${item.projectId}${item.skillId}` !== `${newItem.projectId}${newItem.skillId}`);
-            this.loadGlobalBadgeDetailsState({ badgeId: this.badgeId });
+            this.loadGlobalBadgeDetailsState({ badgeId: this.badgeId }).then(() => this.$announcer.polite('skill has been added to global badge'));
             this.loading.skillOp = false;
             this.$emit('skills-changed', newItem);
           });

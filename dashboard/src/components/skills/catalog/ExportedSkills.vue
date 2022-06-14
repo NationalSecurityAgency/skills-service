@@ -217,7 +217,7 @@ limitations under the License.
           page: this.table.options.pagination.currentPage,
           orderBy: this.table.options.sortBy,
         };
-        CatalogService.getSkillsExportedToCatalog(this.projectId, pageParams).then((res) => {
+        return CatalogService.getSkillsExportedToCatalog(this.projectId, pageParams).then((res) => {
           if (res.data) {
             this.exportedSkills = res.data.map((skill) => ({ projectId: this.projectId, ...skill }));
             this.table.options.pagination.totalRows = res.totalCount;
@@ -236,7 +236,9 @@ limitations under the License.
         this.table.options.busy = true;
         CatalogService.removeExportedSkill(this.removalValidation.skillToRemove.projectId, this.removalValidation.skillToRemove.skillId)
           .then(() => {
-            this.loadExported();
+            this.loadExported().then(() => {
+              this.$nextTick(() => this.$announcer.polite('exported skill has been removed from the skill catalog'));
+            });
           });
       },
     },

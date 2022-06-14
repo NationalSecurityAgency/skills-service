@@ -179,7 +179,11 @@ limitations under the License.
             this.subjectInternal = subject;
             this.buildCardOptions();
             this.isLoading = false;
-            this.handleFocus();
+            this.handleFocus().then(() => {
+              this.$nextTick(() => {
+                this.$announcer.polite(`Subject ${subject.name} has been saved`);
+              });
+            });
           })
           .finally(() => {
             this.isLoading = false;
@@ -191,8 +195,11 @@ limitations under the License.
         }
       },
       handleFocus() {
-        this.$nextTick(() => {
-          this.$refs.subjectCardControls.focusOnEdit();
+        return new Promise((resolve) => {
+          this.$nextTick(() => {
+            this.$refs.subjectCardControls.focusOnEdit();
+            resolve();
+          });
         });
       },
     },

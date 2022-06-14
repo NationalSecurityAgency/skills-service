@@ -238,7 +238,7 @@ limitations under the License.
           page: this.table.options.pagination.currentPage,
           orderBy: this.table.options.sortBy,
         };
-        SelfReportService.getApprovals(this.projectId, pageParams)
+        return SelfReportService.getApprovals(this.projectId, pageParams)
           .then((res) => {
             this.table.items = res.data.map((item) => ({ selected: false, ...item }));
             this.table.options.pagination.totalRows = res.count;
@@ -265,7 +265,9 @@ limitations under the License.
         const idsToApprove = this.table.items.filter((item) => item.selected).map((item) => item.id);
         SelfReportService.approve(this.projectId, idsToApprove)
           .then(() => {
-            this.loadApprovals();
+            this.loadApprovals().then(() => {
+              setTimeout(() => this.$announcer.polite(`approved ${idsToApprove.length} skill approval request${idsToApprove.length > 1 ? 's' : ''}`), 0);
+            });
             this.$emit('approval-action', 'approved');
           });
       },
@@ -274,7 +276,9 @@ limitations under the License.
         const ids = this.table.items.filter((item) => item.selected).map((item) => item.id);
         SelfReportService.reject(this.projectId, ids, this.reject.rejectMsg)
           .then(() => {
-            this.loadApprovals();
+            this.loadApprovals().then(() => {
+              setTimeout(() => this.$announcer.polite(`rejected ${ids.length} skill approval request${ids.length > 1 ? 's' : ''}`), 0);
+            });
             this.$emit('approval-action', 'rejected');
           });
       },

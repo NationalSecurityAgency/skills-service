@@ -178,6 +178,9 @@ limitations under the License.
             this.loadProjectDetailsState({ projectId: this.projectId });
             this.$emit('badges-changed', badge.badgeId);
           })
+          .then(() => {
+            setTimeout(() => this.$announcer.polite(`Badge ${badge.name} has been deleted`), 0);
+          })
           .finally(() => {
             this.isLoading = false;
           });
@@ -187,22 +190,24 @@ limitations under the License.
         const requiredIds = badge.requiredSkills.map((item) => item.skillId);
         const badgeReq = { requiredSkillsIds: requiredIds, ...badge };
         const { isEdit } = badge;
-        BadgesService.saveBadge(badgeReq)
-          .then(() => {
-            let afterLoad = null;
-            if (isEdit) {
-              afterLoad = () => {
-                const refKey = `badge_${badgeReq.badgeId}`;
-                const ref = this.$refs[refKey];
-                if (ref) {
-                  ref[0].handleFocus();
-                }
-              };
-            }
-            this.loadBadges(afterLoad);
-            this.loadProjectDetailsState({ projectId: this.projectId });
-            this.$emit('badges-changed', badge.badgeId);
+        BadgesService.saveBadge(badgeReq).then(() => {
+          let afterLoad = null;
+          if (isEdit) {
+            afterLoad = () => {
+              const refKey = `badge_${badgeReq.badgeId}`;
+              const ref = this.$refs[refKey];
+              if (ref) {
+                ref[0].handleFocus();
+              }
+            };
+          }
+          this.loadBadges(afterLoad).then(() => {
+            const msg = isEdit ? 'edited' : 'created';
+            this.$nextTick(() => this.$announcer.polite(`Badge ${badge.name} has been ${msg}`));
           });
+          this.loadProjectDetailsState({ projectId: this.projectId });
+          this.$emit('badges-changed', badge.badgeId);
+        });
         if (badge.startDate) {
           SkillsReporter.reportSkill('CreateGem');
         } else {

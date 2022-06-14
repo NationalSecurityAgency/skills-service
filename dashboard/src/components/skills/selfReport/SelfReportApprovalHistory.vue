@@ -200,6 +200,7 @@ limitations under the License.
                 const approverUserIdHtml = approverUserIdFilterFilterExist ? this.highlight(item.approverUserIdForDisplay, pageParams.approverUserIdFilter) : null;
                 return Object.assign(item, { skillNameHtml, userIdHtml, approverUserIdHtml });
               });
+              this.$nextTick(() => this.$announcer.polite(`skill approval history has been filtered by selected criteria, there are ${res.count} total results`));
             }
 
             this.items = approvals;

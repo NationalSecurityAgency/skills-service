@@ -99,7 +99,7 @@ limitations under the License.
     },
     methods: {
       loadBadges(afterLoad) {
-        GlobalBadgeService.getBadges()
+        return GlobalBadgeService.getBadges()
           .then((badgesResponse) => {
             const badges = badgesResponse;
             if (badges && badges.length) {
@@ -149,7 +149,9 @@ limitations under the License.
                 }
               };
             }
-            this.loadBadges(afterLoad);
+            this.loadBadges(afterLoad).then(() => {
+              this.$nextTick(() => this.$nextTick(() => this.$announcer.polite(`a global badge has been ${isEdit ? 'saved' : 'created'}`)));
+            });
             this.$emit('global-badges-changed', badge.badgeId);
           });
       },
