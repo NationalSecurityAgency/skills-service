@@ -366,5 +366,16 @@ describe('Projects Table Tests', () => {
         .should('have.focus');
   });
 
+  it('Canceling delete dialog should return focus to delete button when projects are presented in table view', () => {
+
+    cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
+    cy.visit('/administrator/');
+    cy.wait('@loadUserInfo');
+    cy.get('[data-cy=deleteProjectButton_proj10]').click();
+    cy.get('[data-cy=closeRemovalSafetyCheck]').click();
+    cy.wait(200);
+    cy.get('[data-cy=deleteProjectButton_proj10]').should('have.focus');
+  });
+
 });
 

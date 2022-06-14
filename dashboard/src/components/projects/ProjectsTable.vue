@@ -61,7 +61,7 @@ limitations under the License.
                 </b-button>
                 <b-button @click="deleteProject(data.item)" variant="outline-primary"
                           :data-cy="`deleteProjectButton_${data.item.projectId}`"
-                          :aria-label="'delete Project '+data.item.name">
+                          :aria-label="'delete Project '+data.item.name" :ref="'delete_'+data.item.projectId">
                   <i class="text-warning fas fa-trash" aria-hidden="true"/>
                 </b-button>
               </b-button-group>
@@ -100,7 +100,7 @@ limitations under the License.
       </skills-b-table>
 
     <removal-validation v-if="deleteProjectInfo.showDialog" v-model="deleteProjectInfo.showDialog"
-                        @do-remove="doDeleteProject">
+                        @do-remove="doDeleteProject" @hidden="focusOnDeleteButton">
       <p>
         This will remove <span class="text-primary font-weight-bold">{{ deleteProjectInfo.project.name }}</span>.
       </p>
@@ -245,6 +245,17 @@ limitations under the License.
               this.$emit('project-deleted', this.deleteProjectInfo.project);
             }
           });
+      },
+      focusOnDeleteButton() {
+        if (this.deleteProjectInfo.project) {
+          const refId = `delete_${this.deleteProjectInfo.project.projectId}`;
+          const ref = this.$refs[refId];
+          this.$nextTick(() => {
+            if (ref) {
+              ref.focus();
+            }
+          });
+        }
       },
       deleteProject(project) {
         this.deleteProjectInfo.project = project;
