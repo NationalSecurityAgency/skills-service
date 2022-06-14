@@ -21,6 +21,7 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "5.15.3",
     "@skilltree/skills-client-vue": "3.4.1",
+    "@vue-a11y/announcer": "2.1.0",
     "animate.css": "4.1.1",
     "apexcharts": "3.27.2",
     "axios": "0.21.2",
@@ -50,13 +51,13 @@
     "vue-radial-progress": "0.3.2",
     "vue-router": "3.4.9",
     "vue-scrollto": "2.20.0",
+    "vue-select": "3.18.3",
     "vue-simple-progress": "1.1.1",
     "vue-simple-spinner": "1.2.10",
     "vue-virtual-scroll-list": "2.3.2",
     "vuejs-datepicker": "1.6.2",
     "vuex": "3.6.2",
-    "webstomp-client": "1.2.6",
-    "@vue-a11y/announcer": "2.1.0"
+    "webstomp-client": "1.2.6"
   },
   "devDependencies": {
     "@babel/core": "7.14.6",

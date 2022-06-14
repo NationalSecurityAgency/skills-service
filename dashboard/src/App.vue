@@ -141,6 +141,7 @@ limitations under the License.
   @import '../node_modules/material-icons/iconfont/material-icons.css';
   @import '../node_modules/material-icons/css/material-icons.css';
   @import '../node_modules/animate.css/animate.css';
+  @import '../node_modules/vue-select/dist/vue-select.css';
   @import './styles/utils.css';
 
   #app {
@@ -154,6 +155,10 @@ limitations under the License.
   /* vue-table-2s bug? - "Filter:" label is not left aligned, this is a workaround */
   .vue-table-2 .form-inline label {
     justify-content: left !important;
+  }
+
+  :root {
+    --vs-search-input-placeholder-color: #adadad;
   }
 
 </style>
