@@ -65,6 +65,36 @@ describe('Skills Exported to Catalog Tests', () => {
         ], 5);
     });
 
+    it('delete last skill', () => {
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSubject(2, 2);
+        cy.createSkill(2, 1, 1);
+        cy.exportSkillToCatalog(2, 1, 1);
+        cy.wait(1001)
+
+        cy.visit('/administrator/projects/proj2/skills-catalog');
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Very Great Skill 1' }, { colIndex: 1,  value: 'Subject 1' }],
+        ], 5);
+
+        cy.get('[data-cy="deleteSkillButton_skill1"]').click();
+        cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will PERMANENTLY remove [Very Great Skill 1] Skill from the catalog. This skill is currently imported by 0 projects.')
+        cy.get('[data-cy="removeButton"]').should('be.disabled');
+        cy.get('[data-cy="currentValidationText"]').type('Delete Me1');
+        cy.get('[data-cy="currentValidationText"]').should('have.value', 'Delete Me1');
+        cy.get('[data-cy="removeButton"]').should('be.disabled');
+        cy.get('[data-cy="currentValidationText"]').type('{backspace}');
+        cy.get('[data-cy="removeButton"]').should('be.enabled');
+        cy.get('[data-cy="removeButton"]').click();
+
+        cy.get('[data-cy="exportedSkillsTable"]').contains('There are no records to show')
+
+        // refresh and validate
+        cy.visit('/administrator/projects/proj2/skills-catalog');
+        cy.get('[data-cy="exportedSkillsTable"]').contains('There are no records to show')
+    });
+
     it('delete skill with url encoded id', () => {
         cy.createProject(2);
         cy.createSubject(2, 1);

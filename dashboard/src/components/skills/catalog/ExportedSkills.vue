@@ -222,6 +222,7 @@ limitations under the License.
             this.exportedSkills = res.data.map((skill) => ({ projectId: this.projectId, ...skill }));
             this.table.options.pagination.totalRows = res.totalCount;
           } else {
+            this.exportedSkills = null;
             this.table.options.pagination.totalRows = 0;
           }
         }).finally(() => {
