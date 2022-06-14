@@ -77,7 +77,7 @@ class SupervisorController {
     @RequestMapping(value = "/badges/name/exists", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     boolean doesBadgeNameExist(@RequestBody() NameExistsRequest nameExistsRequest) {
-        String badgeName = nameExistsRequest.name
+        String badgeName = nameExistsRequest.name?.trim()
         SkillsValidator.isNotBlank(badgeName, "Badge Name")
         String decodedName = InputSanitizer.sanitize(badgeName)
         return globalBadgesService.existsByBadgeName(decodedName)
@@ -108,7 +108,7 @@ class SupervisorController {
         propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minNameLength, "Badge Name", badgeRequest.name)
         propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.descriptionMaxLength, "Badge Description", badgeRequest.description)
 
-        badgeRequest.name = InputSanitizer.sanitize(badgeRequest.name)
+        badgeRequest.name = InputSanitizer.sanitize(badgeRequest.name)?.trim()
         badgeRequest.badgeId = InputSanitizer.sanitize(badgeRequest.badgeId)
         badgeRequest.description = InputSanitizer.sanitize(badgeRequest.description)
         badgeRequest.helpUrl = InputSanitizer.sanitizeUrl(badgeRequest.helpUrl)

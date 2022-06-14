@@ -147,7 +147,7 @@ class AdminController {
         propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxProjectNameLength, "Project Name", projectRequest.name)
         propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minNameLength, "Project Name", projectRequest.name)
 
-        projectRequest.name = InputSanitizer.sanitize(projectRequest.name)
+        projectRequest.name = InputSanitizer.sanitize(projectRequest.name)?.trim()
         projectRequest.projectId = InputSanitizer.sanitize(projectRequest.projectId)
 
         projAdminService.saveProject(InputSanitizer.sanitize(projectId), projectRequest)
@@ -213,7 +213,7 @@ class AdminController {
 
         subjectRequest.subjectId = InputSanitizer.sanitize(subjectRequest.subjectId)
         subjectRequest.description = InputSanitizer.sanitize(subjectRequest.description)
-        subjectRequest.name = InputSanitizer.sanitize(subjectRequest.name)
+        subjectRequest.name = InputSanitizer.sanitize(subjectRequest.name)?.trim()
         subjectRequest.iconClass = InputSanitizer.sanitize(subjectRequest.iconClass)
         subjectRequest.helpUrl = InputSanitizer.sanitizeUrl(subjectRequest.helpUrl)
 
@@ -226,10 +226,12 @@ class AdminController {
     @ResponseBody
     boolean doesSubjectNameExist(@PathVariable("projectId") String projectId,
                              @RequestBody NameExistsRequest existsRequest) {
-        String subjectName = existsRequest.name
+        String subjectName = existsRequest.name?.trim()
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(subjectName, "Subject Name")
-        return subjAdminService.existsBySubjectName(InputSanitizer.sanitize(projectId), InputSanitizer.sanitize(subjectName))
+
+        def sanitize = InputSanitizer.sanitize(subjectName)
+        return subjAdminService.existsBySubjectName(InputSanitizer.sanitize(projectId), sanitize)
     }
 
     @DBUpgradeSafe
@@ -237,7 +239,7 @@ class AdminController {
     @ResponseBody
     boolean doesBadgeExist(@PathVariable("projectId") String projectId,
                              @RequestBody NameExistsRequest nameExistsRequest) {
-        String badgeName = nameExistsRequest.name
+        String badgeName = nameExistsRequest.name?.trim()
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(badgeName, "Badge Name")
         return badgeAdminService.existsByBadgeName(InputSanitizer.sanitize(projectId), InputSanitizer.sanitize(badgeName))
@@ -248,7 +250,7 @@ class AdminController {
     @ResponseBody
     boolean doesSkillNameExist(@PathVariable("projectId") String projectId,
                            @RequestBody NameExistsRequest existsRequest) {
-        String skillName = existsRequest.name
+        String skillName = existsRequest.name?.trim()
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(skillName, "Skill Name")
         return skillsAdminService.existsBySkillName(InputSanitizer.sanitize(projectId), InputSanitizer.sanitize(skillName))
@@ -326,7 +328,7 @@ class AdminController {
         propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minNameLength, "Badge Name", badgeRequest.name)
         propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.descriptionMaxLength, "Badge Description", badgeRequest.description)
 
-        badgeRequest.name = InputSanitizer.sanitize(badgeRequest.name)
+        badgeRequest.name = InputSanitizer.sanitize(badgeRequest.name)?.trim()
         badgeRequest.badgeId = InputSanitizer.sanitize(badgeRequest.badgeId)
         badgeRequest.description = InputSanitizer.sanitize(badgeRequest.description)
         badgeRequest.helpUrl = InputSanitizer.sanitizeUrl(badgeRequest.helpUrl)
@@ -440,22 +442,6 @@ class AdminController {
         return new RequestResult(success: true)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/groups/{groupId}/skills", method = RequestMethod.PATCH)
-    @ResponseBody
-    RequestResult syncSkillPointsForSkillsGroup(@PathVariable("projectId") String projectId,
-                                                @PathVariable("subjectId") String subjectId,
-                                                @PathVariable("groupId") String groupId,
-                                                @RequestBody PointSyncPatchRequest patchRequest) {
-        SkillsValidator.isNotBlank(projectId, "Project Id")
-        SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId, groupId)
-        SkillsValidator.isNotBlank(groupId, "Group Id", projectId)
-        SkillsValidator.isNotNull(patchRequest.pointIncrement, "pointIncrement must be provided", projectId, groupId)
-        SkillsValidator.isNotNull(patchRequest.numPerformToCompletion, "numPerformToCompletion must be provided", projectId, groupId)
-
-        skillsAdminService.syncSkillPointsForSkillsGroup(projectId, subjectId, groupId, patchRequest)
-        return new RequestResult(success: true)
-    }
-
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/groups/{groupId}/skills/{skillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     RequestResult saveSkillAndAssignToSkillsGroup(@PathVariable("projectId") String projectId,
@@ -491,7 +477,7 @@ class AdminController {
         propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxSkillNameLength, "Skill Name", skillRequest.name)
         propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minNameLength, "Skill Name", skillRequest.name)
 
-        skillRequest.name = InputSanitizer.sanitize(skillRequest.name)
+        skillRequest.name = InputSanitizer.sanitize(skillRequest.name)?.trim()
         skillRequest.projectId = InputSanitizer.sanitize(skillRequest.projectId)
         skillRequest.skillId = InputSanitizer.sanitize(skillRequest.skillId)
         skillRequest.subjectId = InputSanitizer.sanitize(skillRequest.subjectId)

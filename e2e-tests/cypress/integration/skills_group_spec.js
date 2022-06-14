@@ -587,59 +587,6 @@ describe('Skills Group Tests', () => {
         cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="numSkillsInGroup"]`).contains('2')
     });
 
-    it('"Group skills points must be the same" after points were aligned by editing a skill - numPerformToCompletion attribute is different', () => {
-        cy.createSkillsGroup(1, 1, 1);
-        cy.addSkillToGroup(1, 1, 1, 1, { pointIncrement: 10, numPerformToCompletion: 5 });
-        cy.addSkillToGroup(1, 1, 1, 2, { pointIncrement: 10, numPerformToCompletion: 50 });
-        const groupId = 'group1'
-
-        cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
-
-        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="editRequired"]`).click();
-        cy.contains('Group\'s skills points must be the same');
-        cy.get('.modal-footer').contains('Cancel').click();
-
-        cy.get('[data-cy="editSkillButton_skill2"]').click();
-        cy.get('[data-cy="numPerformToCompletion"]').clear().type('5');
-        cy.get('[data-cy="saveSkillButton"]').click();
-        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="editRequired"]`).click();
-        cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).should('have.value','-1');
-        cy.contains('Group\'s skills points must be the same').should('not.exist');
-
-        cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).select('1 out of 2');
-        cy.get('.modal-content').contains('Save').click();
-        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="requiredSkillsNum"]`).contains('1')
-        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="numSkillsInGroup"]`).contains('2')
-    });
-
-    it('"Group skills points must be the same" after points were aligned by editing a skill - pointIncrement attribute is different', () => {
-        cy.createSkillsGroup(1, 1, 1);
-        cy.addSkillToGroup(1, 1, 1, 1, { pointIncrement: 10, numPerformToCompletion: 5 });
-        cy.addSkillToGroup(1, 1, 1, 2, { pointIncrement: 15, numPerformToCompletion: 5 });
-        const groupId = 'group1'
-
-        cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
-
-        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="editRequired"]`).click();
-        cy.contains('Group\'s skills points must be the same');
-        cy.get('.modal-footer').contains('Cancel').click();
-
-        cy.get('[data-cy="editSkillButton_skill2"]').click();
-        cy.get('[data-cy="skillPointIncrement"]').clear().type('10');
-        cy.get('[data-cy="saveSkillButton"]').click();
-        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="editRequired"]`).click();
-        cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).should('have.value','-1');
-        cy.contains('Group\'s skills points must be the same').should('not.exist');
-
-        cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).select('1 out of 2');
-        cy.get('.modal-content').contains('Save').click();
-        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="requiredSkillsNum"]`).contains('1')
-        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="numSkillsInGroup"]`).contains('2')
-    });
-
-
     it('modify number of required skills', () => {
         cy.createSkillsGroup(1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 1);
@@ -729,141 +676,37 @@ describe('Skills Group Tests', () => {
         cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).should('have.value','-1');
     });
 
-    it('when the required skills numSkillsRequired is set edit skills modal must not allow users to change point values', () => {
+    it('save button is disabled until selection is made', () => {
         cy.createSkillsGroup(1, 1, 1);
-        cy.addSkillToGroup(1, 1, 1, 1, { pointIncrement: 20, numPerformToCompletion: 3 });
-        cy.addSkillToGroup(1, 1, 1, 2, { pointIncrement: 20, numPerformToCompletion: 3 });
-        cy.addSkillToGroup(1, 1, 1, 3, { pointIncrement: 20, numPerformToCompletion: 3 });
-        cy.addSkillToGroup(1, 1, 1, 4, { pointIncrement: 20, numPerformToCompletion: 3 });
-        const groupId = 'group1'
+        cy.addSkillToGroup(1, 1, 1, 1, {
+            pointIncrement: 12,
+            numPerformToCompletion: 7
+        });
+        cy.addSkillToGroup(1, 1, 1, 2, {
+            pointIncrement: 50,
+            numPerformToCompletion: 2
+        });
+        cy.addSkillToGroup(1, 1, 1, 3, {
+            pointIncrement: 11,
+            numPerformToCompletion: 5
+        });
+        const groupId = 'group1';
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
+        cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`)
+            .click();
 
-        // set numSkillsRequired
-        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="editRequired"]`).click();
-        cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).contains(3);
-        cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).select('2 out of 4');
-        cy.get('.modal-content').contains('Save').click();
-
-        // verify new skill modal validation
-        cy.get(`[data-cy="addSkillToGroupBtn-${groupId}"]`).click();
-        cy.get('[data-cy="skillPointIncrement"]').should('have.value', 20);
-        cy.get('[data-cy="numPerformToCompletion"]').should('have.value', 3);
-        cy.get('[data-cy="skillPointIncrement"]').should('be.disabled');
-        cy.get('[data-cy="numPerformToCompletion"]').should('be.disabled');
-        cy.get('[data-cy="skillPointIncrementDisabledWarning"]')
-        cy.get('[data-cy="numPerformToCompletionDisabledWarning"]')
-        cy.get('[data-cy="closeSkillButton"]').click();
-
-        // verify edit skill modal
-        cy.get('[data-cy="editSkillButton_skill3"').click();
-        cy.get('[data-cy="skillPointIncrement"]').should('have.value', 20);
-        cy.get('[data-cy="numPerformToCompletion"]').should('have.value', 3);
-        cy.get('[data-cy="skillPointIncrement"]').should('be.disabled');
-        cy.get('[data-cy="numPerformToCompletion"]').should('be.disabled');
-        cy.get('[data-cy="skillPointIncrementDisabledWarning"]')
-        cy.get('[data-cy="numPerformToCompletionDisabledWarning"]')
-
-        // refresh and verify again
-        cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
-
-        // verify new skill modal validation
-        cy.get(`[data-cy="addSkillToGroupBtn-${groupId}"]`).click();
-        cy.get('[data-cy="skillPointIncrement"]').should('have.value', 20);
-        cy.get('[data-cy="numPerformToCompletion"]').should('have.value', 3);
-        cy.get('[data-cy="skillPointIncrement"]').should('be.disabled');
-        cy.get('[data-cy="numPerformToCompletion"]').should('be.disabled');
-        cy.get('[data-cy="skillPointIncrementDisabledWarning"]')
-        cy.get('[data-cy="numPerformToCompletionDisabledWarning"]')
-        cy.get('[data-cy="closeSkillButton"]').click();
-
-        // verify edit skill modal
-        cy.get('[data-cy="editSkillButton_skill3"').click();
-        cy.get('[data-cy="skillPointIncrement"]').should('have.value', 20);
-        cy.get('[data-cy="numPerformToCompletion"]').should('have.value', 3);
-        cy.get('[data-cy="skillPointIncrement"]').should('be.disabled');
-        cy.get('[data-cy="numPerformToCompletion"]').should('be.disabled');
-        cy.get('[data-cy="skillPointIncrementDisabledWarning"]')
-        cy.get('[data-cy="numPerformToCompletionDisabledWarning"]')
-
-    });
-
-    it('required skills can only be modified when all of the underlying skills\' points match', () => {
-        cy.createSkillsGroup(1, 1, 1);
-        cy.addSkillToGroup(1, 1, 1, 1, { pointIncrement: 12, numPerformToCompletion: 7 });
-        cy.addSkillToGroup(1, 1, 1, 2, { pointIncrement: 50, numPerformToCompletion: 2 });
-        cy.addSkillToGroup(1, 1, 1, 3, { pointIncrement: 11, numPerformToCompletion: 5 });
-        const groupId = 'group1'
-
-        cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
-
-        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="editRequired"]`).click();
-
-        // verify defaults
-        cy.get('[data-cy="syncSkillsPointsSection"] [data-cy="pointIncrement"]').should('have.value', 12)
-        cy.get('[data-cy="syncSkillsPointsSection"] [data-cy="numPerformToCompletion"]').should('have.value', 7)
-        cy.get('[data-cy="syncSkillsPointsSection"] [data-cy="totalPoints"]').contains('84')
-
-        // can not add num required
-        cy.get('[data-cy="requiredSkillsNumSelect"]').should('be.disabled')
-
-        // set all skills to
-        cy.get('[data-cy="syncSkillsPointsSection"] [data-cy="pointIncrement"]').clear().type(3);
-        // cy.get('[data-cy="syncSkillsPointsSection"] [data-cy="numPerformToCompletion"]').clear().type(4);
-
-        // save button should be disabled while cancel enabled
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="editRequired"]`)
+            .click();
         cy.get('.modal-footer button').first().should('be.enabled');
         cy.get('.modal-footer button').last().should('be.disabled');
 
-        cy.get('[data-cy="syncBtn"]').click();
-
-        cy.get('[data-cy="requiredSkillsNumSelect"]').should('be.enabled')
-        cy.get('.modal-footer button').first().should('be.enabled');
+        cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`)
+            .select('1 out of 3');
+        cy.get('.modal-footer button')
+            .first()
+            .should('be.enabled');
         cy.get('.modal-footer button').last().should('be.enabled');
-        cy.get('[data-cy="syncSkillsPointsSection"]').should('not.exist');
-
-        // save and validate points are reflected
-        cy.get('.modal-footer button').last().click();
-        cy.get(`[data-cy="ChildRowSkillGroupDisplay_group1"] ${tableSelector} th`).contains('Display Order').click()
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="skillsTable-additionalColumns"]').contains('Points').click();
-
-        cy.validateTable(`[data-cy="ChildRowSkillGroupDisplay_group1"] ${tableSelector}`, [
-            [{ colIndex: 3,  value: '213 pts x 7 repetitions' } ],
-            [{ colIndex: 3,  value: '213 pts x 7 repetitions' } ],
-            [{ colIndex: 3,  value: '213 pts x 7 repetitions' } ],
-        ], 5, true, null, false);
-
-        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="editRequired"]`).click();
-        cy.get('[data-cy="requiredSkillsNumSelect"]').should('be.enabled')
-        // -1 == all skills
-        cy.get('[data-cy="requiredSkillsNumSelect"]').should('have.value', -1);
-        cy.get('.modal-footer button').first().should('be.enabled');
-        cy.get('.modal-footer button').last().should('be.enabled');
-        cy.get('[data-cy="syncSkillsPointsSection"]').should('not.exist');
-
-        // refresh and re-test
-        cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
-
-        cy.get(`[data-cy="ChildRowSkillGroupDisplay_group1"] ${tableSelector} th`).contains('Display Order').click()
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="skillsTable-additionalColumns"]').contains('Points').click();
-
-        cy.validateTable(`[data-cy="ChildRowSkillGroupDisplay_group1"] ${tableSelector}`, [
-            [{ colIndex: 3,  value: '213 pts x 7 repetitions' } ],
-            [{ colIndex: 3,  value: '213 pts x 7 repetitions' } ],
-            [{ colIndex: 3,  value: '213 pts x 7 repetitions' } ],
-        ], 5, true, null, false);
-
-        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="editRequired"]`).click();
-        cy.get('[data-cy="requiredSkillsNumSelect"]').should('be.enabled')
-        // -1 == all skills
-        cy.get('[data-cy="requiredSkillsNumSelect"]').should('have.value', -1);
-        cy.get('.modal-footer button').first().should('be.enabled');
-        cy.get('.modal-footer button').last().should('be.enabled');
-        cy.get('[data-cy="syncSkillsPointsSection"]').should('not.exist');
     });
 
     it('subject overview cards are updated when group is enabled', () => {
@@ -951,52 +794,6 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="pageHeaderStat_Groups"] [data-cy="statValue"]').should('have.text', '1');
         cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '4');
     })
-
-    it('subject overview cards are updated after skill sync', () => {
-        cy.createSkillsGroup(1, 1, 1);
-        cy.addSkillToGroup(1, 1, 1, 1, { pointIncrement: 12, numPerformToCompletion: 7 });
-        cy.addSkillToGroup(1, 1, 1, 2, { pointIncrement: 50, numPerformToCompletion: 2 });
-        cy.addSkillToGroup(1, 1, 1, 3, { pointIncrement: 11, numPerformToCompletion: 5 });
-        cy.createSkillsGroup(1, 1, 1, { enabled: true });
-        const groupId = 'group1'
-
-        cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
-
-        cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '239');
-        cy.get('[data-cy="pageHeaderStat_Groups"] [data-cy="statValue"]').should('have.text', '1');
-        cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '3');
-
-        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="editRequired"]`).click();
-
-        // verify defaults
-        cy.get('[data-cy="syncSkillsPointsSection"] [data-cy="pointIncrement"]').should('have.value', 12)
-        cy.get('[data-cy="syncSkillsPointsSection"] [data-cy="numPerformToCompletion"]').should('have.value', 7)
-        cy.get('[data-cy="syncSkillsPointsSection"] [data-cy="totalPoints"]').contains('84')
-
-        // can not add num required
-        cy.get('[data-cy="requiredSkillsNumSelect"]').should('be.disabled')
-
-        // set all skills to
-        cy.get('[data-cy="syncSkillsPointsSection"] [data-cy="pointIncrement"]').clear().type(50);
-        cy.get('[data-cy="syncSkillsPointsSection"] [data-cy="numPerformToCompletion"]').clear().type(4);
-
-        // save button should be disabled while cancel enabled
-        cy.get('.modal-footer button').first().should('be.enabled');
-        cy.get('.modal-footer button').last().should('be.disabled');
-
-        cy.get('[data-cy="syncBtn"]').click();
-
-        cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '600');
-        cy.get('[data-cy="pageHeaderStat_Groups"] [data-cy="statValue"]').should('have.text', '1');
-        cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '3');
-
-        // refresh and re-validate
-        cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '600');
-        cy.get('[data-cy="pageHeaderStat_Groups"] [data-cy="statValue"]').should('have.text', '1');
-        cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '3');
-    });
 
     it('search and navigate to group\'s skill', () => {
         cy.createSkillsGroup(1, 1, 1);

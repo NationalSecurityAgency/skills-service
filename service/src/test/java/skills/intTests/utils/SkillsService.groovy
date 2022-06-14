@@ -284,7 +284,7 @@ class SkillsService {
     }
 
     def subjectNameExists(Map props){
-        wsHelper.adminPost("/projects/${props.projectId}/subjectNameExists", [name:props.subjectName])
+        wsHelper.adminPost("/projects/${props.projectId}/subjectNameExists", [name:props.subjectName])?.body
     }
 
     def getSubjectDescriptions(String projectId, String subjectId, String userId = null) {
@@ -359,10 +359,6 @@ class SkillsService {
 
     def updateSkill(Map props, String originalSkillId) {
         wsHelper.adminPost(getSkillUrl(props.projectId, props.subjectId, originalSkillId ?: props.skillId), props)
-    }
-
-    def syncPointsForSkillsGroup(String projectId, String subjectId, String groupId, Map props) {
-        wsHelper.adminPatch(getSyncSkillPointsUrl(projectId, subjectId, groupId), props)
     }
 
     def createBadge(Map props, String originalBadgeId = null) {

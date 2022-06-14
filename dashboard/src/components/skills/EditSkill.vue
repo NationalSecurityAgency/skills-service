@@ -66,20 +66,14 @@ limitations under the License.
             <div class="col-12 col-lg">
               <div class="form-group mb-1">
                 <label for="pointIncrement">* Point Increment</label>
-                <i v-if="!canEditPoints && canEditPointsMsg && canEditPointsMsg.length > 0"
-                   class="fa fa-exclamation-circle text-warning ml-1"
-                   v-b-tooltip.hover="canEditPointsMsg"
-                   :aria-label="canEditPointsMsg"
-                   data-cy="skillPointIncrementDisabledWarning"/>
                 <ValidationProvider rules="optionalNumeric|required|min_value:1|maxPointIncrement" v-slot="{errors}" name="Point Increment">
-                  <input class="form-control" type="text"  v-model="skillInternal.pointIncrement"
+                  <input class="form-control" type="text" v-model="skillInternal.pointIncrement"
                          aria-required="true"
                          data-cy="skillPointIncrement" v-on:keydown.enter="handleSubmit(saveSkill)"
                          id="pointIncrement"
                          aria-describedby="skillPointIncrementError"
                          aria-errormessage="skillPointIncrementError"
-                         :aria-invalid="errors && errors.length > 0"
-                         :disabled="!canEditPoints"/>
+                         :aria-invalid="errors && errors.length > 0"/>
                   <small class="form-text text-danger" data-cy="skillPointIncrementError" id="skillPointIncrementError">{{ errors[0] }}</small>
                 </ValidationProvider>
               </div>
@@ -87,19 +81,15 @@ limitations under the License.
             <div class="col-12 col-lg">
               <div class="form-group mt-2 mt-lg-0">
                 <label for="numPerformToCompletion">* Occurrences to Completion</label>
-                <i v-if="!canEditPoints && canEditPointsMsg && canEditPointsMsg.length > 0"
-                   class="fa fa-exclamation-circle text-warning ml-1"
-                   v-b-tooltip.hover="canEditPointsMsg"
-                   aria-label="canEditPointsMsg"
-                   data-cy="numPerformToCompletionDisabledWarning"/>
                 <ValidationProvider vid="totalOccurrences" rules="optionalNumeric|required|min_value:1|maxNumPerformToCompletion|moreThanMaxWindowOccurrences:@windowMaxOccurrence" v-slot="{errors}" name="Occurrences to Completion" tag="div">
-                  <input class="form-control" type="text" v-model="skillInternal.numPerformToCompletion"
-                         data-cy="numPerformToCompletion" aria-required="true" v-on:keydown.enter="handleSubmit(saveSkill)"
+                  <input class="form-control" type="text"
+                         v-model="skillInternal.numPerformToCompletion"
+                         data-cy="numPerformToCompletion" aria-required="true"
+                         v-on:keydown.enter="handleSubmit(saveSkill)"
                          id="numPerformToCompletion"
                          aria-describedby="skillOccurrencesError"
                          aria-errormessage="skillOccurrencesError"
-                         :aria-invalid="errors && errors.length > 0"
-                         :disabled="!canEditPoints"/>
+                         :aria-invalid="errors && errors.length > 0"/>
                   <small class="form-text text-danger" data-cy="skillOccurrencesError" id="skillOccurrencesError">{{ errors[0] }}</small>
                 </ValidationProvider>
               </div>
@@ -292,16 +282,6 @@ limitations under the License.
       value: {
         type: Boolean,
         required: true,
-      },
-      canEditPoints: {
-        type: Boolean,
-        required: false,
-        default: true,
-      },
-      canEditPointsMsg: {
-        type: String,
-        required: false,
-        default: '',
       },
       newSkillDefaultValues: {
         type: Object,
