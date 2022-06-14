@@ -122,6 +122,7 @@ limitations under the License.
                       <div class="input-group">
                         <input class="form-control d-inline" type="text" v-model="skillInternal.pointIncrementIntervalHrs"
                                value="8" :disabled="!skillInternal.timeWindowEnabled"
+                               :aria-required="skillInternal.timeWindowEnabled"
                                ref="timeWindowHours" data-cy="timeWindowHours"
                                v-on:keydown.enter="handleSubmit(saveSkill)"
                                id="timeWindowHours" aria-label="time window hours"
@@ -140,6 +141,7 @@ limitations under the License.
                         <input class="form-control d-inline"  type="text" v-model="skillInternal.pointIncrementIntervalMins"
                                value="0" :disabled="!skillInternal.timeWindowEnabled" ref="timeWindowMinutes" data-cy="timeWindowMinutes"
                                v-on:keydown.enter="handleSubmit(saveSkill)"
+                               :aria-required="skillInternal.timeWindowEnabled"
                                aria-label="time window minutes"
                                aria-describedby="skillMinutesError"
                                aria-errormessage="skillMinutesError"
@@ -156,7 +158,7 @@ limitations under the License.
               </div>
             </div>
             <div class="col-12 col-lg">
-              <ValidationProvider vid="windowMaxOccurrence" rules="optionalNumeric|min_value:1|lessThanTotalOccurrences:@totalOccurrences|maxNumPointIncrementMaxOccurrences" v-slot="{errors}" name="Window's Max Occurrences">
+              <ValidationProvider vid="windowMaxOccurrence" rules="optionalNumeric|required|min_value:1|lessThanTotalOccurrences:@totalOccurrences|maxNumPointIncrementMaxOccurrences" v-slot="{errors}" name="Window's Max Occurrences">
                 <div class="form-group">
                   <label for="maxOccurrences">Window's Max Occurrences
                     <inline-help
@@ -167,6 +169,7 @@ limitations under the License.
                            :disabled="!skillInternal.timeWindowEnabled" data-cy="maxOccurrences"
                            v-on:keydown.enter="handleSubmit(saveSkill)"
                            id="maxOccurrences"
+                           :aria-required="skillInternal.timeWindowEnabled"
                            aria-describedby="skillMaxOccurrencesError"
                            aria-errormessage="skillMaxOccurrencesError"
                            :aria-invalid="errors && errors.length > 0"/>

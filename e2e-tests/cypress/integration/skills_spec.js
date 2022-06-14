@@ -70,7 +70,7 @@ describe('Skills Tests', () => {
       cy.get('[data-cy=closeSkillButton]').should('not.exist');
     });
 
-  it('validation', () => {
+  it.only('validation', () => {
     cy.intercept('POST', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('postNewSkill');
     cy.intercept('GET', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('getSkill');
     cy.intercept('POST', '/api/validation/url').as('customUrlValidation');
@@ -136,6 +136,9 @@ describe('Skills Tests', () => {
     cy.get('[data-cy=saveSkillButton]').should('be.disabled');
     cy.get('[data-cy=numPerformToCompletion]').type('{selectall}1000000');
     cy.get('[data-cy=skillOccurrencesError]').contains('Occurrences to Completion cannot exceed 10000.').should('be.visible');
+    cy.get('[data-cy=saveSkillButton]').should('be.disabled');
+    cy.get('[data-cy=maxOccurrences]').type('{selectall}{del}');
+    cy.get('[data-cy=skillMaxOccurrencesError]').contains('Window\'s Max Occurrences is required').should('be.visible');
     cy.get('[data-cy=saveSkillButton]').should('be.disabled');
     cy.get('[data-cy=maxOccurrences]').type('{selectall}5')
     cy.get('[data-cy=numPerformToCompletion]').type('{selectall}3');
