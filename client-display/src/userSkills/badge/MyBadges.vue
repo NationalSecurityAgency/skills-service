@@ -14,16 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-    <div class="card h-100" @click.stop="openMyBadges"
-         :class="{ 'skills-navigable-item': !isSummaryOnly }" data-cy="myBadges">
-        <div class="card-header">
-            <h6 class="card-title mb-0 text-uppercase">My Badges</h6>
-        </div>
-        <div class="card-body">
+  <div class="card h-100" @click.stop="openMyBadges" @keydown.enter="openMyBadges"
+       :class="{ 'skills-navigable-item': !isSummaryOnly }" data-cy="myBadges"
+       tabindex="0">
+    <div class="card-header">
+      <h6 class="card-title mb-0 text-uppercase">My Badges</h6>
+    </div>
+    <div class="card-body">
             <span class="fa-stack skills-icon user-rank-stack">
                 <i class="fa fa-award fa-stack-2x watermark-icon"/>
                 <strong class="fa-stack-1x text-primary user-rank-text">
-                  {{ numBadgesCompleted }} <span>Badge{{(numBadgesCompleted > 1 || numBadgesCompleted == 0) ? 's' : ''}}</span>
+                  {{
+                    numBadgesCompleted
+                  }} <span>Badge{{ (numBadgesCompleted > 1 || numBadgesCompleted == 0) ? 's' : '' }}</span>
                 </strong>
             </span>
         </div>
