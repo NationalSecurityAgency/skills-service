@@ -14,16 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-    <div @click="progressBarClicked">
-        <vertical-progress v-if="progress.total === 100"
-                           total-progress-bar-color="#28a745" before-today-bar-color="#28a745"
-                           :total-progress="progress.total"
-                           :total-progress-before-today="progress.totalBeforeToday"
-                           :bar-size="barSize"/>
-        <vertical-progress v-if="skill.points !== skill.totalPoints && progress.total !== 100"
-                           :total-progress="progress.total"
-                           :total-progress-before-today="progress.totalBeforeToday" :is-locked="locked" :is-clickable="isClickable"
-                           :bar-size="barSize"/>
+    <div @click="progressBarClicked" @keydown.enter="progressBarClicked">
+      <vertical-progress v-if="progress.total === 100"
+                         total-progress-bar-color="#28a745" before-today-bar-color="#28a745"
+                         :total-progress="progress.total"
+                         :total-progress-before-today="progress.totalBeforeToday"
+                         :bar-size="barSize"/>
+      <vertical-progress v-if="skill.points !== skill.totalPoints && progress.total !== 100"
+                         :total-progress="progress.total"
+                         :total-progress-before-today="progress.totalBeforeToday" :is-locked="locked"
+                         :is-clickable="isClickable"
+                         :bar-size="barSize"/>
     </div>
 </template>
 

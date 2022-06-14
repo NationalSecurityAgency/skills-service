@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="card h-100 skills-my-rank" @click.stop="openMyRankDetails()"
-       :class="{ 'skills-navigable-item': !isSummaryOnly }" data-cy="myRank">
+  <div class="card h-100 skills-my-rank" @click.stop="openMyRankDetails()" @keydown.enter="openMyRankDetails"
+       :class="{ 'skills-navigable-item': !isSummaryOnly }" data-cy="myRank" tabindex="0">
     <div class="card-header">
       <h3 class="h6 card-title mb-0 text-uppercase">My Rank</h3>
     </div>

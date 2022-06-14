@@ -32,7 +32,12 @@ limitations under the License.
 
     <div class="row">
       <div class="col text-md-left">
-        <div class="h4" @click="skillClicked" :class="{ 'skill-name-url' : allowDrillDown }" data-cy="skillProgressTitle">
+        <div class="h4"
+             @click="skillClicked"
+             @keydown.enter="skillClicked"
+             :class="{ 'skill-name-url' : allowDrillDown }" data-cy="skillProgressTitle"
+             :tabindex="`${skill.isSkillType ? 0 : -1}`"
+             :aria-label="`${skill.isSkillType ? `Navigate to ${skill.skill}` : skill.skill }`">
           <div class="d-inline-block skills-theme-primary-color" :class="{ 'text-success' : skill.isSkillsGroupType,
                                           'text-info' : skill.isSkillType && !skill.childSkill,
                                           'text-secondary' : skill.childSkill }">
@@ -40,7 +45,8 @@ limitations under the License.
               <span v-if="skill.isSkillsGroupType"><i class="fas fa-layer-group mr-1 overflow-hidden"></i></span>
               <div class="text-truncate d-inline-block">
                 <span class="mr-1">
-                  <i v-if="!skill.copiedFromProjectId && !skill.isSkillsGroupType" class="fas fa-graduation-cap text-secondary"></i>
+                  <i v-if="!skill.copiedFromProjectId && !skill.isSkillsGroupType"
+                     class="fas fa-graduation-cap text-secondary"></i>
                   <i v-if="skill.copiedFromProjectId" class="fas fa-book text-secondary"></i>
                 </span>
                 <span v-if="!skill.skillHtml">{{ skill.skill }}</span>

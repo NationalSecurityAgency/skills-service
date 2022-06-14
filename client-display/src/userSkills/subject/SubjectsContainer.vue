@@ -23,8 +23,9 @@ limitations under the License.
     </div>
     <div v-else class="row">
       <div v-for="(subject, index) in subjects" :key="`unique-subject-${index}`"
-        class="btn user-skill-subject-tile col-md-4"
-        @click="openUserSkillSubject(subject, index)" >
+           class="btn user-skill-subject-tile col-md-4"
+           @click="openUserSkillSubject(subject, index)"
+           @keydown.enter="openUserSkillSubject(subject, index)">
         <subject-tile :subject="subject"/>
       </div>
     </div>

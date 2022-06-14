@@ -20,6 +20,8 @@ limitations under the License.
              :variant="getVariant(item)"
              :class="{'click-me-cursor' : item.value !== value}"
              @click="updateValue(item.value)"
+             @keydown.enter="updateValue(item.value)"
+             tabindex="0"
              data-cy="badge-selector">{{ item.label }}</b-badge>
   </span>
 </template>
