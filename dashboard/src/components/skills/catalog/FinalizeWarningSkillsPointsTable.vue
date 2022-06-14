@@ -15,7 +15,8 @@ limitations under the License.
 */
 <template>
   <b-card body-class="m-0 p-0">
-    <skills-b-table :options="options" :items="skillsWithOutOfBoundsPoints" data-cy="skillsWithOutOfBoundsPoints">
+    <skills-b-table :options="options" :items="skillsWithOutOfBoundsPoints"
+                    data-cy="skillsWithOutOfBoundsPoints">
       <template #head(totalPoints)="data">
           <span class="text-danger"><i
             class="fas fa-exclamation-circle"/> {{ data.label }}</span>
@@ -71,9 +72,9 @@ limitations under the License.
           ],
           pagination: {
             currentPage: 1,
-            totalRows: 1,
+            totalRows: this.skillsWithOutOfBoundsPoints.length,
             pageSize: 3,
-            possiblePageSizes: [2, 5],
+            possiblePageSizes: [3, 5],
           },
         },
       };
