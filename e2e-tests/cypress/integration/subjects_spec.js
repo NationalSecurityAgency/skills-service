@@ -593,7 +593,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="saveSubjectButton"]').should('be.enabled');
     });
 
-    it.only('edit in place', () => {
+    it('edit in place', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
