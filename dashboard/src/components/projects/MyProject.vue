@@ -91,7 +91,7 @@ limitations under the License.
     <edit-project v-if="showEditProjectModal" v-model="showEditProjectModal" :project="projectInternal" :is-edit="true"
       @project-saved="projectSaved" @hidden="handleHidden"/>
 
-    <removal-validation v-if="deleteProjectInfo.showDialog" v-model="deleteProjectInfo.showDialog" @do-remove="doDeleteProject">
+    <removal-validation v-if="deleteProjectInfo.showDialog" v-model="deleteProjectInfo.showDialog" @do-remove="doDeleteProject" @hidden="handleDeleteCancelled">
       <p>
         This will remove <span class="text-primary font-weight-bold">{{ deleteProjectInfo.project.name}}</span>.
       </p>
@@ -260,6 +260,9 @@ limitations under the License.
       },
       focusSortControl() {
         this.$refs.sortControl.focus();
+      },
+      handleDeleteCancelled() {
+        this.$refs.cardControls.focusOnDelete();
       },
     },
   };

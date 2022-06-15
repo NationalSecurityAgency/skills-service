@@ -40,6 +40,7 @@ limitations under the License.
 
         <span v-b-tooltip.hover="deleteDisabledText" :aria-label="deleteDisabledText">
           <b-button variant="outline-primary"
+                    ref="deleteBtn"
                     class="last-right-group-btn"
                     size="sm"
                     @click="$emit('delete-project')"
@@ -71,6 +72,9 @@ limitations under the License.
     methods: {
       focusOnEdit() {
         this.$refs.editBtn.focus();
+      },
+      focusOnDelete() {
+        this.$nextTick(() => this.$refs.deleteBtn.focus());
       },
     },
   };
