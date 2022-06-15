@@ -593,7 +593,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="saveSubjectButton"]').should('be.enabled');
     });
 
-    it('edit in place', () => {
+    it.only('edit in place', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
@@ -623,6 +623,7 @@ describe('Subjects Tests', () => {
         cy.get('input[data-cy=subjectNameInput]').type('{selectall}Edited Subject Name');
         cy.get('[data-cy=saveSubjectButton]').click();
         cy.wait('@saveSubject1');
+        cy.wait(200);
         cy.get('[data-cy=btn_edit-subject]').should('have.focus');
         cy.contains('SUBJECT: Subject 1').should('not.exist');
         cy.contains('SUBJECT: Edited Subject Name').should('be.visible');
@@ -634,6 +635,7 @@ describe('Subjects Tests', () => {
         cy.get('input[data-cy=idInputValue]').type('{selectall}entirelyNewId');
         cy.get('[data-cy=saveSubjectButton]').click();
         cy.wait('@saveSubject1');
+        cy.wait(200);
         cy.get('[data-cy=btn_edit-subject]').should('have.focus');
         cy.contains('SUBJECT: Edited Subject Name').should('be.visible');
         cy.contains('ID: subj1').should('not.exist');
