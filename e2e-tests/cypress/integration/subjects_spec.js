@@ -1067,4 +1067,21 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="subjectCard-subj3"] [data-cy="sortControlHandle"]')
             .should('have.focus');
     });
+
+    it('cancelling subject delete dialog should return focus to delete button', () => {
+        cy.createSubject(1, 1)
+        cy.createSubject(1, 2)
+        cy.createSubject(1, 3)
+        cy.createSubject(1, 4)
+        cy.createSubject(1, 5)
+
+        cy.intercept('GET', '/admin/projects/proj1/subjects').as('getSubjects');
+        cy.visit('/administrator/projects/proj1');
+        cy.wait('@getSubjects');
+
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="deleteBtn"]').click();
+        cy.contains('Removal Safety Check');
+        cy.get('[data-cy=closeRemovalSafetyCheck]').click();
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="deleteBtn"]').should('have.focus');
+    });
 });

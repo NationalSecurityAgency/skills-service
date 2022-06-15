@@ -45,7 +45,7 @@ limitations under the License.
                     :global="global" @badge-updated="badgeEdited" @hidden="handleHidden"></edit-badge>
       </div>
     </nav-card-with-stats-and-controls>
-    <removal-validation v-if="showDeleteDialog" v-model="showDeleteDialog" @do-remove="doDeleteBadge">
+    <removal-validation v-if="showDeleteDialog" v-model="showDeleteDialog" @do-remove="doDeleteBadge" @hidden="handleDeleteCancelled">
       <p>
         This will remove <span class="text-primary font-weight-bold">{{this.badgeInternal.name}}</span>.
       </p>
@@ -233,6 +233,11 @@ limitations under the License.
       handleFocus() {
         this.$nextTick(() => {
           this.$refs.cardNavControls.focusOnEdit();
+        });
+      },
+      handleDeleteCancelled() {
+        this.$nextTick(() => {
+          this.$refs.cardNavControls.focusOnDelete();
         });
       },
     },

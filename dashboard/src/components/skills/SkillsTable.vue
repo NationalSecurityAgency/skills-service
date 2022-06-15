@@ -186,6 +186,7 @@ limitations under the License.
                 </b-button>
                 <span :id="`deleteSkillButton-wrapper_${data.item.skillId}`" class="d-inline-block" tabindex="0">
                   <b-button :id="`deleteSkillButton_${data.item.skillId}`"
+                            :ref="`deleteSkillButton_${data.item.skillId}`"
                             @click="deleteSkill(data.item)" variant="outline-primary"
                             :data-cy="`deleteSkillButton_${data.item.skillId}`"
                             :aria-label="'delete Skill '+data.item.name"
@@ -298,7 +299,8 @@ limitations under the License.
                       @group-saved="skillCreatedOrUpdated" @hidden="handleFocus"/>
     <export-to-catalog v-if="exportToCatalogInfo.show" v-model="exportToCatalogInfo.show" :skills="exportToCatalogInfo.skills"
                        @exported="handleSkillsExportedToCatalog" @hidden="handleExportModalIsClosed"/>
-    <removal-validation v-if="deleteSkillInfo.show" v-model="deleteSkillInfo.show" @do-remove="doDeleteSkill">
+
+    <removal-validation v-if="deleteSkillInfo.show" v-model="deleteSkillInfo.show" @do-remove="doDeleteSkill" @hidden="handleDeleteCancelled">
       <p>
         This will remove <span class="text-primary font-weight-bold">{{ deleteSkillInfo.skill.name}}</span>.
       </p>
@@ -894,6 +896,13 @@ limitations under the License.
       handleExportRequest() {
         this.exportToCatalogInfo.skills = this.skills.filter((item) => item.selected);
         this.exportToCatalogInfo.show = true;
+      },
+      handleDeleteCancelled() {
+        if (this.deleteSkillInfo.skill) {
+          const refId = `deleteSkillButton_${this.deleteSkillInfo.skill.skillId}`;
+          const ref = this.$refs[refId];
+          this.focusOn(ref);
+        }
       },
     },
   };
