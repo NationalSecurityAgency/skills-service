@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div id="skills-selector">
+  <div id="project-selector">
     <v-select :options="projects" placeholder="Select Project..." label="name"
               v-on:search="searchChanged" v-on:input="inputChanged" :loading="isLoading">
       <template #option="{ name, projectId }">

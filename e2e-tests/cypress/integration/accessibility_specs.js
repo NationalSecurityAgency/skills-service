@@ -525,10 +525,15 @@ describe('Accessibility Tests', () => {
     cy.contains('No Levels Added Yet');
     cy.customLighthouse();
 
-    cy.get('.multiselect__select').eq(0).click();
-    cy.get('.multiselect__element').eq(0).click();
-    cy.get('.multiselect__select').eq(1).click();
-    cy.get('.multiselect__element').eq(1).click();
+
+    cy.get('#project-selector').click();
+    cy.get('#project-selector .vs__dropdown-option').eq(0).click();
+    cy.get('#level-selector').click();
+    cy.get('#level-selector .vs__dropdown-option').eq(1).click();
+    // cy.get('.multiselect__select').eq(0).click();
+    // cy.get('.multiselect__element').eq(0).click();
+    // cy.get('.multiselect__select').eq(1).click();
+    // cy.get('.multiselect__element').eq(1).click();
 
     cy.get('[data-cy=addGlobalBadgeLevel]').click();
     cy.customA11y();
