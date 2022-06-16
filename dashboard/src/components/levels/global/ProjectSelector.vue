@@ -15,8 +15,13 @@ limitations under the License.
 */
 <template>
   <div id="project-selector">
-    <v-select :options="projects" placeholder="Select Project..." label="name"
-              v-on:search="searchChanged" v-on:input="inputChanged" :loading="isLoading">
+    <v-select :options="projects"
+              placeholder="Select Project..."
+              :filterable="internalSearch"
+              label="name"
+              v-on:search="searchChanged"
+              v-on:input="inputChanged"
+              :loading="isLoading">
       <template #option="{ name, projectId }">
         <h6>{{ name }}</h6>
         <div class="text-secondary">ID: {{ projectId }}</div>

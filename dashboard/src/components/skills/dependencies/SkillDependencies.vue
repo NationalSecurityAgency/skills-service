@@ -29,25 +29,25 @@ limitations under the License.
         <div class="p-3" v-if="!skill.sharedToCatalog">
           <skills-selector2 :options="allSkills" :selected="skills" v-on:added="skillAdded" v-on:removed="skillDeleted"
             data-cy="depsSelector">
-            <template slot="dropdown-item" slot-scope="{ props }">
+            <template #dropdown-item="{ option }">
               <div class="media" data-cy="skillsSelector">
                 <div class="d-inline-block mt-1 mr-3">
-                  <i v-if="props.option.otherProjectId" class="fas fa-w-16 fa-handshake text-hc"></i>
+                  <i v-if="option.otherProjectId" class="fas fa-w-16 fa-handshake text-hc"></i>
                   <i v-else class="fas fa-w-16 fa-list-alt text-info"></i>
                 </div>
                 <div class="media-body">
-                  <strong class="mb-2"><span v-if="props.option.otherProjectId" class="">{{props.option.otherProjectName}} : </span>
-                    {{ props.option.name }}</strong>
+                  <strong class="mb-2"><span v-if="option.otherProjectId" class="">{{option.otherProjectName}} : </span>
+                    {{ option.name }}</strong>
                   <div style="font-size: 0.95rem;" class="row text-secondary">
                     <div class="col-md">
-                      <span class="font-italic">ID:</span> <span class="ml-1" data-cy="skillsSelector-skillId">{{props.option.skillId}}</span>
+                      <span class="font-italic">ID:</span> <span class="ml-1" data-cy="skillsSelector-skillId">{{option.skillId}}</span>
                     </div>
                     <div class="col-md">
-                      <span v-if="props.option.otherProjectId" class="text-warning ml-3">** Shared Skill **</span>
+                      <span v-if="option.otherProjectId" class="text-warning ml-3">** Shared Skill **</span>
                       <span v-else class="ml-2">
                         <span class="font-italic">Version:</span>
-                        <span class="ml-1">{{props.option.version}}</span>
-                        <span v-if="props.option.version > skill.version" class="text-danger ml-3"><br class="d-lg-none"/>** Not Eligible due to later version**</span>
+                        <span class="ml-1">{{option.version}}</span>
+                        <span v-if="option.version > skill.version" class="text-danger ml-3"><br class="d-lg-none"/>** Not Eligible due to later version**</span>
                       </span>
                     </div>
                   </div>

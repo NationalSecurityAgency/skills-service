@@ -15,27 +15,31 @@ limitations under the License.
 */
 <template>
   <div id="project-selector" data-cy="projectSelector">
-    <!-- see https://github.com/shentao/vue-multiselect/issues/421 for explanation of :blockKeys-->
-    <multiselect v-model="selectedValue" placeholder="Search for a project..."
-                 :options="projects" :multiple="!onlySingleSelectedValue" :taggable="false" :blockKeys="['Delete']"
-                 :hide-selected="true" label="name" track-by="id" v-on:select="onSelected" v-on:remove="onRemoved"
-                 @search-change="search" :loading="isLoading" :internal-search="false"
-                 :clear-on-select="false" :disabled="disabled">
-      <template slot="option" slot-scope="props">
-        <h6>{{ props.option.name }}</h6>
-        <div class="text-secondary">ID: {{props.option.projectId}}</div>
+    <v-select v-model="selectedValue"
+              :options="projects"
+              :multiple="!onlySingleSelectedValue"
+              :filterable="false"
+              placeholder="Search for a project..."
+              label="name"
+              v-on:search="search"
+              v-on:input="inputChanged"
+              :loading="isLoading"
+              :disabled="disabled">
+      <template #option="{ name, projectId }">
+        <h6>{{ name }}</h6>
+        <div class="text-secondary">ID: {{ projectId }}</div>
       </template>
-    </multiselect>
+    </v-select>
   </div>
 </template>
 
 <script>
-  import Multiselect from 'vue-multiselect';
+  import vSelect from 'vue-select';
   import ProjectService from '../../projects/ProjectService';
 
   export default {
     name: 'ProjectSelector',
-    components: { Multiselect },
+    components: { vSelect },
     props: {
       projectId: String,
       selected: Object,
@@ -70,6 +74,13 @@ limitations under the License.
       },
       onRemoved(item) {
         this.$emit('unselected', item);
+      },
+      inputChanged(inputItem) {
+        if (inputItem != null) {
+          this.onSelected(inputItem);
+        } else {
+          this.onRemoved(null);
+        }
       },
       search(query) {
         this.isLoading = true;

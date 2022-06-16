@@ -15,55 +15,59 @@ limitations under the License.
 */
 <template>
   <div id="skills-selector" class="skills-selector">
-
-    <!-- see https://github.com/shentao/vue-multiselect/issues/421 for explanation of :blockKeys-->
-    <multiselect v-model="selectedInternal" :placeholder="placeholder" :select-label="selectLabel"
-                 :options="optionsInternal" :multiple="multipleSelection" :taggable="false" :blockKeys="['Delete']"
-                 :hide-selected="true" label="name" track-by="entryId" :is-loading="isLoading"
-                 v-on:select="added" v-on:search-change="searchChanged" :internal-search="internalSearch"
-                 data-cy="skillsSelector">
-      <template slot="option" slot-scope="props">
-        <slot name="dropdown-item" v-bind:props="props">
-          <div :data-cy="`skillsSelectionItem-${props.option.projectId}-${props.option.skillId}`">
-            <div class="h5 text-info" data-cy="skillsSelector-skillName">{{ props.option.name }}</div>
+    <v-select :options="optionsInternal"
+              v-model="selectedInternal"
+              :placeholder="placeholder"
+              :multiple="multipleSelection"
+              :filterable="internalSearch"
+              label="name"
+              v-on:search="searchChanged"
+              v-on:option:selected="added"
+              v-on:option:deselecting="considerRemoval"
+              :loading="isLoading">
+      <template #option="option">
+        <slot name="dropdown-item" :option="option">
+          <div :data-cy="`skillsSelectionItem-${option.projectId}-${option.skillId}`">
+            <div class="h5 text-info" data-cy="skillsSelector-skillName">{{ option.name }}</div>
             <div class="" style="font-size: 0.8rem;">
               <span>
-                <span v-if="showProject" data-cy="skillsSelectionItem-projectId"><span class="text-uppercase mr-1 font-italic">Project ID:</span><span class="font-weight-bold" data-cy="skillsSelector-projectId">{{props.option.projectId}}</span></span>
-                <span v-if="!showProject" data-cy="skillsSelectionItem-skillId"><span class="text-uppercase mr-1 font-italic">ID:</span><span class="font-weight-bold" data-cy="skillsSelector-skillId">{{props.option.skillId}}</span></span>
+                <span v-if="showProject" data-cy="skillsSelectionItem-projectId"><span class="text-uppercase mr-1 font-italic">Project ID:</span><span class="font-weight-bold" data-cy="skillsSelector-projectId">{{option.projectId}}</span></span>
+                <span v-if="!showProject" data-cy="skillsSelectionItem-skillId"><span class="text-uppercase mr-1 font-italic">ID:</span><span class="font-weight-bold" data-cy="skillsSelector-skillId">{{option.skillId}}</span></span>
               </span>
               <span class="mx-2">|</span>
-              <span class="text-uppercase mr-1 font-italic" data-cy="skillsSelectionItem-subjectId">Subject:</span><span class="font-weight-bold" data-cy="skillsSelector-subjectName">{{props.option.subjectName}}</span>
+              <span class="text-uppercase mr-1 font-italic" data-cy="skillsSelectionItem-subjectId">Subject:</span><span class="font-weight-bold" data-cy="skillsSelector-subjectName">{{option.subjectName}}</span>
             </div>
           </div>
         </slot>
       </template>
-      <template slot="tag" slot-scope="{ option, remove }">
-        <span class="selected-tag mr-2 border rounded p-1">
-          <span>{{ option.name }}</span>
-          <span class="border rounded ml-1 remove-x" v-on:click.stop="considerRemoval(option, remove)">❌</span>
-        </span>
+      <template #selected-option-container="{ option }">
+        <div style="display: flex; align-items: baseline">
+          <span class="selected-tag ml-2 mt-2 border rounded p-1">
+            <span>{{ option.name }}</span>
+            <span class="border rounded ml-1 remove-x" v-on:click.stop="considerRemoval(option)">❌</span>
+          </span>
+        </div>
       </template>
-      <template v-if="afterListSlotText" slot="afterList">
-        <h6 class="ml-1"> {{ this.afterListSlotText }}</h6>
+      <template v-if="afterListSlotText" #list-footer>
+        <li>
+          <h6 class="ml-1"> {{ afterListSlotText }}</h6>
+        </li>
       </template>
-      <template slot="noOptions">
+      <template #no-options>
         <span v-if="emptyWithoutSearch && !internalSearch"><i class="fas fa-search"/> Type to <span class="font-weight-bold">search</span> for skills...</span>
         <span v-else>List is empty!</span>
       </template>
-      <template slot="placeholder">
-        <span class="text-secondary"><i v-if="placeholderIcon" :class="placeholderIcon"></i> {{ placeholder }}</span>
-      </template>
-    </multiselect>
+    </v-select>
   </div>
 </template>
 
 <script>
-  import Multiselect from 'vue-multiselect';
+  import vSelect from 'vue-select';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
 
   export default {
     name: 'SkillsSelector2',
-    components: { Multiselect },
+    components: { vSelect },
     mixins: [MsgBoxMixin],
     props: {
       options: {
@@ -141,32 +145,41 @@ limitations under the License.
       setOptionsInternal() {
         if (this.options) {
           this.optionsInternal = this.options.map((entry) => ({ entryId: `${entry.projectId}_${entry.skillId}`, ...entry }));
+          if (this.selected) {
+            // removed already selected items
+            this.optionsInternal = this.optionsInternal.filter((el) => !this.selected.some((sel) => `${sel.projectId}_${sel.skillId}` === el.entryId));
+          }
         }
       },
-      considerRemoval(removedItem, removeMethod) {
+      considerRemoval(removedItem) {
         const msg = `Are you sure you want to remove "${removedItem.name}"?`;
         this.msgConfirm(msg, 'WARNING', 'Yes, Please!').then((res) => {
           if (res) {
-            this.removed(removedItem, removeMethod);
+            this.removed(removedItem);
           }
         });
       },
-      removed(removedItem, removeMethod) {
-        removeMethod(removedItem);
+      removed(removedItem) {
         this.$emit('removed', removedItem);
       },
       added(addedItem) {
-        this.$emit('added', addedItem);
+        if (this.multipleSelection) {
+          this.$emit('added', addedItem[addedItem.length - 1]);
+        } else {
+          this.$emit('added', addedItem);
+        }
       },
-      searchChanged(query) {
-        this.$emit('search-change', query);
+      searchChanged(query, loadingFunction) {
+        this.$emit('search-change', query, loadingFunction);
       },
     },
   };
 </script>
 
 <style scoped>
-
+  .selected-tag {
+    font-size: 14px;
+  }
 </style>
 
 <style>
