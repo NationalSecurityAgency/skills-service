@@ -623,6 +623,7 @@ describe('Subjects Tests', () => {
         cy.get('input[data-cy=subjectNameInput]').type('{selectall}Edited Subject Name');
         cy.get('[data-cy=saveSubjectButton]').click();
         cy.wait('@saveSubject1');
+        cy.contains('Editing Existing Subject').should('not.exist');
         cy.wait(200);
         cy.get('[data-cy=btn_edit-subject]').should('have.focus');
         cy.contains('SUBJECT: Subject 1').should('not.exist');
@@ -635,6 +636,7 @@ describe('Subjects Tests', () => {
         cy.get('input[data-cy=idInputValue]').type('{selectall}entirelyNewId');
         cy.get('[data-cy=saveSubjectButton]').click();
         cy.wait('@saveSubject1');
+        cy.contains('Editing Existing Subject').should('not.exist');
         cy.wait(200);
         cy.get('[data-cy=btn_edit-subject]').should('have.focus');
         cy.contains('SUBJECT: Edited Subject Name').should('be.visible');
