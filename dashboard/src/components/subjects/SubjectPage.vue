@@ -159,7 +159,7 @@ limitations under the License.
       handleHideSubjectEdit() {
         this.showEditSubject = false;
         // if the id is edited, the route is reloaded which causes the focus to be moved to the container element
-        // as such, if we want the edit button receive focus after the id has been altereted, we need to double
+        // as such, if we want the edit button receive focus after the id has been altered, we need to double
         // the nextTick wait.
         this.$nextTick(() => {
           this.$nextTick(() => {

@@ -46,6 +46,31 @@ describe('Skills Table Tests', () => {
         cy.contains('No Skills Yet');
     });
 
+    it('cancelling delete confirmation should return focus to delete button', () => {
+        const numSkills = 3;
+        for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
+            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
+                projectId: 'proj1',
+                subjectId: 'subj1',
+                skillId: `skill${skillsCounter}`,
+                name: `Very Great Skill # ${skillsCounter}`,
+                pointIncrement: '150',
+                numPerformToCompletion: skillsCounter < 3 ? '1' : '200',
+            });
+        };
+
+        cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills').as('getSkills');
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.wait('@getSkills');
+
+        cy.get('[data-cy=deleteSkillButton_skill2]').click();
+        cy.contains('Removal Safety Check').should('exist');
+        cy.get('[data-cy=closeRemovalSafetyCheck]').click();
+        cy.contains('Removal Safety Check').should("not.exist");
+        cy.wait(200);
+        cy.get('[data-cy=deleteSkillButton_skill2]').should('have.focus');
+    });
+
     it('copy existing skill', () => {
         cy.intercept('POST', '/admin/projects/proj1/subjects/subj1/skills/copy_of_skill2').as('saveSkill');
         cy.intercept('POST', '/api/validation/description').as('validateDescription');
