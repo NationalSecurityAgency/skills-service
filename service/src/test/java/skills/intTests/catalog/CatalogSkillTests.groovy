@@ -30,6 +30,7 @@ import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.SkillDefRepo
+import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -2936,4 +2937,37 @@ class CatalogSkillTests extends CatalogIntSpec {
         e.message.contains("errorCode:InsufficientSubjectFinalizationPoints")
     }
 
+    def "exported skill usage stats should work when skill has been imported under a group"() {
+        def project1 = createProject(1)
+        def project2 = createProject(2)
+
+        def p1subj1 = createSubject(1, 1)
+        def p2subj1 = createSubject(2, 1)
+        def p2sub1g1 = createSkillsGroup(2, 1, 55)
+
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 150)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 150)
+
+        skillsService.createProject(project1)
+        skillsService.createProject(project2)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p2subj1)
+        skillsService.createSkill(p2sub1g1)
+        skillsService.createSkill(skill)
+        skillsService.createSkill(skill2)
+
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+        skillsService.bulkImportSkillsIntoGroupFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, p2sub1g1.skillId, [
+                [
+                        "projectId": project1.projectId,
+                        "skillId": skill.skillId
+                ]
+        ])
+
+        when:
+        def stats = skillsService.getExportedSkillStats(project1.projectId, skill.skillId)
+
+        then:
+        stats
+    }
 }
