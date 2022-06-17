@@ -24,12 +24,14 @@ import skills.controller.exceptions.SkillException
 import skills.controller.result.model.UserRoleRes
 import skills.notify.EmailNotifier
 import skills.notify.Notifier
+import skills.services.admin.SkillCatalogService
 import skills.services.events.SkillEventsService
 import skills.services.events.pointsAndAchievements.InsufficientPointsValidator
 import skills.services.settings.SettingsService
 import skills.storage.model.Notification
 import skills.storage.model.ProjDef
 import skills.storage.model.SkillApproval
+import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefMin
 import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName
@@ -72,6 +74,9 @@ class SelfReportingService {
 
     @Autowired
     SkillDefRepo skillDefRepo
+
+    @Autowired
+    SkillCatalogService catalogService
 
     SkillEventsService.AppliedCheckRes requestApproval(String userId, SkillDefMin skillDefinition, Date performedOn, String requestMsg) {
 
@@ -148,10 +153,14 @@ class SelfReportingService {
         Optional<SkillApproval> existing = skillApprovalRepo.findById(approvalId)
         if (existing.isPresent()) {
             SkillApproval approval = existing.get();
+            //if the skill represented by approval.skillRefId is shared to the catalog
+            //get the original project id, however we also need to check to see if projectId is in the
+            //list of projects that have imported that skill?
+
             if (approval.userId != userId) {
                 throw new SkillException("SkillApproval record for id [${approvalId}] has userId that does not match provided userId. Provided userId=[${userId}]", projectId);
             }
-            if (approval.projectId != projectId) {
+            if (!isProjectIdValid(projectId, approval)) {
                 throw new SkillException("SkillApproval record for id [${approvalId}] has projectId that does not match provided projectId. Provided projectId=[${projectId}]", projectId);
             }
             if (!approval.rejectedOn) {
@@ -165,6 +174,25 @@ class SelfReportingService {
             log.warn("Failed to find existing approval with id of [${approvalId}]. Could be a bug OR could be that it was removed by another admin or in a different tab:" +
                     " projectId=[${projectId}], userId=[${userId}], approvalId=[${approvalId}]")
         }
+    }
+
+    private boolean isProjectIdValid(String projectId, SkillApproval approval) {
+        if (projectId == approval.projectId) {
+            return true;
+        }
+        Optional<SkillDef> skillDef = skillDefRepo.findById(approval.skillRefId)
+        //don't expect this to happen  but guard against just in case
+        if (!skillDef.isPresent()) {
+            log.error("attempt to acknowledge approval rejection [{}] for skill that no longer exists [{}]", approval.id, approval.skillRefId)
+            throw new SkillException("invalid skill")
+        }
+        if (catalogService.isAvailableInCatalog(skillDef.get())) {
+            List<SkillDefMin> importedCopies = catalogService.getSkillsCopiedFrom(skillDef.get().id)
+            if (importedCopies.find() {it.projectId == projectId}) {
+                return true
+            }
+        }
+        return false
     }
 
     private void validateSufficientPoints(SkillDefMin skillDefinition, String userId) {
