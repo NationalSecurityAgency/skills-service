@@ -60,6 +60,29 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     List<SkillDefSkinny> findAllSkinnySelectByProjectIdAndType(String id, SkillDef.ContainerType type, String skillNameQuery, String includeCatalogImportedSkills, String includeDisabled)
 
     @Nullable
+    @Query('''SELECT
+        s.id as id,
+        s.name as name,
+        s.skillId as skillId,
+        subjectDef.skillId as subjectSkillId,
+        subjectDef.name as subjectName,
+        s.projectId as projectId,
+        s.displayOrder as displayOrder,
+        s.created as created,
+        s.version as version,
+        s.totalPoints as totalPoints
+        from SkillDef s, SkillDef subjectDef, SkillRelDef srd
+         where
+            s.projectId = ?1 
+            and s.skillId = ?2
+            and subjectDef = srd.parent 
+            and s = srd.child 
+            and srd.type in ('RuleSetDefinition', 'GroupSkillToSubject')
+            and subjectDef.type = 'Subject'
+            ''')
+    SkillDefSkinny getSkinnySkill(String projectId, String skillId)
+
+    @Nullable
     @Query('''SELECT         
         s.id as id,
         s.name as name, 
@@ -561,4 +584,9 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
          select exists (select 1 from skill_definition where project_id = :projectId and skill_id = :skillId and read_only = 'true') as isReadOnly
     ''', nativeQuery = true)
     boolean isImportedFromCatalog(@Param('projectId') String projectId, @Param('skillId') String skillId)
+
+    @Query(value = '''
+         select skill_id from skill_definition where project_id = ?1 and copied_from_skill_ref = ?2
+    ''', nativeQuery = true)
+    List<String> getSkillIdsOfReusedSkillsForAGivenSkill(String projectId, Integer originalSkillRef)
 }

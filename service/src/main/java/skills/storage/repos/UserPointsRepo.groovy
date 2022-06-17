@@ -42,7 +42,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             FROM user_points up, skill_definition toDef
             WHERE
                   toDef.project_id = :toProjectId and 
-                  toDef.skill_id = up.skill_id and
+                  toDef.copied_from_skill_ref = up.skill_ref_id and
                   up.skill_ref_id in (:fromSkillRefIds)
                   and not exists (
                     select 1 from user_points innerUP

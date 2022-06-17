@@ -1321,6 +1321,14 @@ class SkillsService {
         return res
     }
 
+    def reuseSkillInAnotherSubject(String projectId, String skillId, String otherSubjectId) {
+        return reuseSkills(projectId, [skillId], otherSubjectId)
+    }
+
+    def reuseSkills(String projectId, List<String> skillIds, String otherSubjectId, String otherGroupId = null) {
+        return wsHelper.adminPost("/projects/${projectId}/skills/reuse", [subjectId: otherSubjectId, skillIds: skillIds, groupId: otherGroupId])
+    }
+
     def bulkExportSkillsToCatalog(String projectId, List<String> skillIds) {
         return wsHelper.adminPost("/projects/${projectId}/skills/export", skillIds)
     }

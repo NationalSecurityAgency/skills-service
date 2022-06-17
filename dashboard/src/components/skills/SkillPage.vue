@@ -32,9 +32,15 @@ limitations under the License.
           </b-button>
         </b-button-group>
       </div>
-      <div slot="right-of-header" v-if="!isLoading && (skill.sharedToCatalog || isImported)" class="d-inline h5">
-        <b-badge v-if="skill.sharedToCatalog" class="ml-2" data-cy="exportedBadge"><i class="fas fa-book"></i> EXPORTED</b-badge>
-        <b-badge v-if="isImported" class="ml-2" variant="success" data-cy="importedBadge"><i class="fas fa-book"></i> IMPORTED</b-badge>
+      <div slot="right-of-header" v-if="!isLoading && (skill.sharedToCatalog || isImported)"
+           class="d-inline h5">
+        <b-badge v-if="skill.sharedToCatalog" class="ml-2" data-cy="exportedBadge"><i
+          class="fas fa-book"></i> EXPORTED
+        </b-badge>
+        <b-badge v-if="isImported" class="ml-2" variant="success" data-cy="importedBadge">
+          <span v-if="skill.reusedSkill"><i class="fas fa-recycle"></i> Reused</span>
+          <span v-else><i class="fas fa-book"></i> IMPORTED</span>
+        </b-badge>
         <b-badge v-if="!skill.enabled" class="ml-2" data-cy="disabledSkillBadge"> DISABLED</b-badge>
       </div>
     </page-header>

@@ -36,6 +36,7 @@ import skills.controller.result.model.SkillDefPartialRes
 import skills.controller.result.model.SkillDefRes
 import skills.controller.result.model.SkillDefSkinnyRes
 import skills.services.*
+import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDef.SelfReportingType
@@ -567,6 +568,13 @@ class SkillsAdminService {
     }
 
     @Transactional(readOnly = true)
+    SkillDefSkinnyRes getSkinnySkill(String projectId, String skillId) {
+        SkillDefSkinny data = loadSkinnySkill(projectId, skillId)
+        SkillDefSkinnyRes res = convertToSkillDefSkinnyRes(data)
+        return res
+    }
+
+    @Transactional(readOnly = true)
     SkillDefRes getSkill(String projectId, String subjectId, String skillId) {
         SkillDefWithExtra res = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(projectId, skillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
         if (!res) {
@@ -654,7 +662,7 @@ class SkillsAdminService {
         if (skillDef.type == SkillDef.ContainerType.SkillsGroup) {
             List<SkillDef> groupChildSkills = skillsGroupAdminService.getSkillsGroupChildSkills(skillDef.getId())
             res.numSkillsInGroup = groupChildSkills.size()
-            res.numSelfReportSkills = groupChildSkills.count( {it.selfReportingType })?.intValue()
+            res.numSelfReportSkills = groupChildSkills.count({ it.selfReportingType })?.intValue()
             res.enabled = Boolean.valueOf(skillDef.enabled)
         }
         if (skillDef.groupId) {
@@ -664,6 +672,8 @@ class SkillsAdminService {
             res.groupId = skillsGroup.skillId
         }
         res.name = InputSanitizer.unsanitizeName(res.name)
+        res.reusedSkill = SkillReuseIdUtil.isTagged(res.skillId)
+        res.name = SkillReuseIdUtil.removeTag(res.name)
 
         return res
     }
@@ -688,10 +698,12 @@ class SkillsAdminService {
     @CompileStatic
     @Profile
     private SkillDefPartialRes convertToSkillDefPartialRes(SkillDefPartial partial, boolean loadNumUsers = false) {
+        boolean reusedSkill = SkillReuseIdUtil.isTagged(partial.skillId)
+        String unsanitizeName = InputSanitizer.unsanitizeName(partial.name)
         SkillDefPartialRes res = new SkillDefPartialRes(
                 skillId: partial.skillId,
                 projectId: partial.projectId,
-                name: InputSanitizer.unsanitizeName(partial.name),
+                name: reusedSkill ? SkillReuseIdUtil.removeTag(unsanitizeName) : unsanitizeName,
                 subjectId: partial.subjectSkillId,
                 subjectName: InputSanitizer.unsanitizeName(partial.subjectName),
                 pointIncrement: partial.pointIncrement,
@@ -710,7 +722,8 @@ class SkillsAdminService {
                 readOnly: partial.readOnly,
                 copiedFromProjectId: partial.copiedFromProjectId,
                 copiedFromProjectName: InputSanitizer.unsanitizeName(partial.copiedFromProjectName),
-                sharedToCatalog: partial.sharedToCatalog
+                sharedToCatalog: partial.sharedToCatalog,
+                reusedSkill: reusedSkill,
         )
 
         if (partial.skillType == SkillDef.ContainerType.Skill) {
@@ -752,11 +765,16 @@ class SkillsAdminService {
     }
 
     @Profile
+    private SkillDefSkinny loadSkinnySkill(String projectId, String skillId) {
+        return skillDefRepo.getSkinnySkill(projectId, skillId)
+    }
+
+    @Profile
     private List<SkillDefSkinny> loadSkinnySkills(String projectId) {
         this.loadSkinnySkills(projectId, '')
     }
 
-    private void validateSkillVersion(SkillRequest skillRequest){
+    private void validateSkillVersion(SkillRequest skillRequest) {
         int latestSkillVersion = findLatestSkillVersion(skillRequest.projectId)
         if (skillRequest.version > (latestSkillVersion + 1)) {
             throw new SkillException("Latest skill version is [${latestSkillVersion}]; max supported version is latest+1 but provided [${skillRequest.version}] version", skillRequest.projectId, skillRequest.skillId, skills.controller.exceptions.ErrorCode.BadParam)

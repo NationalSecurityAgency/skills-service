@@ -37,6 +37,10 @@ export default {
         return this.enhanceWithTimeWindow(skill);
       });
   },
+  getSkillInfo(projectId, skillId) {
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}`)
+      .then((response) => response.data);
+  },
   enhanceWithTimeWindow(skill) {
     const copy = { ...skill };
 
@@ -86,9 +90,17 @@ export default {
     return axios.post(url, copy, { handleError: false })
       .then(() => this.getSkillDetails(skill.projectId, skill.subjectId, skill.skillId));
   },
+  reuseSkillInAnotherSubject(projectId, skillIds, newSubjectId) {
+    const url = `/admin/projects/${encodeURIComponent(projectId)}/skills/reuse`;
+    return axios.post(url, {
+      subjectId: newSubjectId,
+      skillIds
+    });
+  },
   updateImportedSkill(skill) {
     const url = `/admin/projects/${encodeURIComponent(skill.projectId)}/import/skills/${encodeURIComponent(skill.skillId)}`;
-    return axios.patch(url, { pointIncrement: skill.pointIncrement }).then((res) => res.data);
+    return axios.patch(url, { pointIncrement: skill.pointIncrement })
+      .then((res) => res.data);
   },
   deleteSkill(skill) {
     return axios.delete(`/admin/projects/${encodeURIComponent(skill.projectId)}/subjects/${encodeURIComponent(skill.subjectId)}/skills/${encodeURIComponent(skill.skillId)}`)

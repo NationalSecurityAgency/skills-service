@@ -18,7 +18,6 @@ package skills.controller
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
-import org.h2.upgrade.DbUpgrade
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
@@ -36,6 +35,7 @@ import skills.controller.result.model.*
 import skills.dbupgrade.DBUpgradeSafe
 import skills.services.*
 import skills.services.admin.*
+import skills.services.admin.skillReuse.SkillReuseService
 import skills.services.events.BulkSkillEventResult
 import skills.services.events.pointsAndAchievements.InsufficientPointsValidator
 import skills.services.inception.InceptionProjectService
@@ -120,6 +120,9 @@ class AdminController {
 
     @Autowired
     SkillCatalogService skillCatalogService
+
+    @Autowired
+    SkillReuseService skillReuseService
 
     @Autowired
     InsufficientPointsValidator insufficientPointsValidator
@@ -653,6 +656,16 @@ class AdminController {
         boolean excludeImportedSkillsBol = excludeImportedSkills
         boolean includeDisabledBool = includeDisabled
         List<SkillDefSkinnyRes> res = skillsAdminService.getSkinnySkills(projectId, skillNameQuery ?: '', excludeImportedSkillsBol, includeDisabledBool)
+        return res
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    SkillDefSkinnyRes getSkillInfo(
+            @PathVariable("projectId") String projectId,
+            @PathVariable("skillId") String skillId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(skillId, "Skill Id")
+        SkillDefSkinnyRes res = skillsAdminService.getSkinnySkill(projectId, skillId)
         return res
     }
 
@@ -1280,6 +1293,19 @@ class AdminController {
         SkillsValidator.isTrue(userIds.size() <= maxUserIdsForBulkSkillReporting, "number of userIds cannot exceed ${maxUserIdsForBulkSkillReporting}", projectId, skillId)
 
         return skillEventService.bulkReportSkills(projectId, skillId, userIds, new Date(requestedTimestamp))
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/reuse", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
+    RequestResult reuseASkill(@PathVariable("projectId") String projectId,
+                              @RequestBody SkillReuseRequest skillReuseRequest) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        SkillsValidator.isNotEmpty(skillReuseRequest.skillIds, "skillReuseRequest.skillIds")
+        SkillsValidator.isNotBlank(skillReuseRequest.subjectId, "skillReuseRequest.subjectId")
+
+        skillReuseService.reuseSkill(projectId, skillReuseRequest)
+        RequestResult success = RequestResult.success()
+        success.explanation = "Successfully reused skills"
+        return success
     }
 
 }

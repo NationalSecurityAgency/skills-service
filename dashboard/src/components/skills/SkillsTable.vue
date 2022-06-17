@@ -63,10 +63,16 @@ limitations under the License.
                           data-cy="skillActionsBtn">
                 <template #button-content>
                   <i class="fas fa-tools"></i> Action
-                  <b-badge variant="info" data-cy="skillActionsNumSelected">{{ numSelectedSkills }}</b-badge>
+                  <b-badge variant="info" data-cy="skillActionsNumSelected">{{
+                      numSelectedSkills
+                    }}
+                  </b-badge>
                 </template>
                 <b-dropdown-item @click="handleExportRequest" data-cy="skillExportToCatalogBtn"><i
                   class="far fa-arrow-alt-circle-up"></i> Export To Catalog
+                </b-dropdown-item>
+                <b-dropdown-item @click="handleSkillReuseRequest" data-cy="skillReuseBtn"><i
+                  class="fas fa-recycle"></i> Reuse in the Project
                 </b-dropdown-item>
               </b-dropdown>
             </div>
@@ -104,7 +110,8 @@ limitations under the License.
                 <div class="h5 text-primary"><show-more :text="data.item.nameHtml ? data.item.nameHtml : data.item.name" :limit="45" :contains-html="data.item.nameHtml" /></div>
               </div>
               <div v-if="data.item.isSkillType">
-                <i class="fas fa-book mr-1 text-success" v-if="data.item.isCatalogImportedSkills"/>
+                <i class="fas fa-book mr-1 text-success"
+                   v-if="data.item.isCatalogImportedSkills && !data.item.reusedSkill"/>
                 <b-form-checkbox v-if="!data.item.isCatalogImportedSkills"
                   :id="`${data.item.projectId}-${data.item.skillId}`"
                   v-model="data.item.selected"
@@ -133,8 +140,11 @@ limitations under the License.
                     <div class="h5 d-inline-block"><show-more :text="data.item.nameHtml ? data.item.nameHtml : data.item.name" :limit="45" :contains-html="data.item.nameHtml" /></div>
                   </router-link>
                   <div class="h6 ml-2 d-inline-block">
-                    <b-badge variant="success" class="text-uppercase" :data-cy="`importedBadge-${data.item.skillId}`">
-                      <span><i class="fas fa-book"></i> Imported</span>
+                    <b-badge variant="success" class="text-uppercase"
+                             :data-cy="`importedBadge-${data.item.skillId}`">
+                      <span v-if="data.item.reusedSkill"><i
+                        class="fas fa-recycle"></i> Reused</span>
+                      <span v-else><i class="fas fa-book"></i> Imported</span>
                     </b-badge>
                     <b-badge v-if="!data.item.enabled" variant="warning" class="text-uppercase ml-1"
                              :data-cy="`disabledBadge-${data.item.skillId}`">
@@ -171,9 +181,11 @@ limitations under the License.
                 </span>
               </router-link>
               <b-button-group size="sm" class="ml-1">
-                <b-button @click="editSkill(data.item)"
-                          variant="outline-primary" :data-cy="`editSkillButton_${data.item.skillId}`"
-                          :aria-label="'edit Skill '+data.item.name" :ref="`edit_${data.item.skillId}`"
+                <b-button v-if="!data.item.reusedSkill" @click="editSkill(data.item)"
+                          variant="outline-primary"
+                          :data-cy="`editSkillButton_${data.item.skillId}`"
+                          :aria-label="'edit Skill '+data.item.name"
+                          :ref="`edit_${data.item.skillId}`"
                           title="Edit Skill" b-tooltip.hover="Edit Skill">
                   <i class="fas fa-edit" aria-hidden="true"/>
                 </b-button>
@@ -193,7 +205,7 @@ limitations under the License.
                             :aria-label="'delete Skill '+data.item.name"
                             title="Delete Skill"
                             size="sm"
-                            class="delete-btn-border-fix"
+                            :class="{'delete-btn-border-fix' : !data.item.reusedSkill }"
                             :disabled="deleteButtonsDisabled">
                     <i class="text-warning fas fa-trash" aria-hidden="true"/>
                   </b-button>
@@ -223,9 +235,10 @@ limitations under the License.
         </template>
 
         <template v-slot:cell(catalogType)="data">
-          <div v-if="data.item.isCatalogImportedSkills">
+          <div v-if="data.item.isCatalogImportedSkills && !data.item.reusedSkill">
             <b-badge variant="success"><i class="fas fa-book"></i> IMPORTED</b-badge>
-            <p class="text-secondary">Imported from <span class="text-primary font-weight-bold">{{ data.item.copiedFromProjectName }}</span></p>
+            <p class="text-secondary">Imported from <span
+              class="text-primary font-weight-bold">{{ data.item.copiedFromProjectName }}</span></p>
           </div>
           <div v-if="data.item.sharedToCatalog">
             <b-badge variant="secondary"><i class="fas fa-book"></i> EXPORTED</b-badge>
@@ -291,25 +304,38 @@ limitations under the License.
                  message="Projects are composed of Subjects which are made of Skills and a single skill defines a training unit within the gamification framework."/>
     </loading-container>
 
-    <edit-skill v-if="editSkillInfo.show" v-model="editSkillInfo.show" :skillId="editSkillInfo.skill.skillId" :group-id="editSkillInfo.skill.groupId"
+    <edit-skill v-if="editSkillInfo.show" v-model="editSkillInfo.show"
+                :skillId="editSkillInfo.skill.skillId" :group-id="editSkillInfo.skill.groupId"
                 :is-copy="editSkillInfo.isCopy" :is-edit="editSkillInfo.isEdit"
-                :project-id="projectId" :subject-id="subjectId" @skill-saved="skillCreatedOrUpdated" @hidden="handleFocus"/>
+                :project-id="projectId" :subject-id="subjectId" @skill-saved="skillCreatedOrUpdated"
+                @hidden="handleFocus"/>
     <edit-imported-skill v-if="editImportedSkillInfo.show" v-model="editImportedSkillInfo.show"
-                         :skill="editImportedSkillInfo.skill" @skill-saved="updateImportedSkill" @hidden="handleFocus" />
-    <edit-skill-group v-if="editGroupInfo.show" v-model="editGroupInfo.show" :group="editGroupInfo.group" :is-edit="editGroupInfo.isEdit"
+                         :skill="editImportedSkillInfo.skill" @skill-saved="updateImportedSkill"
+                         @hidden="handleFocus"/>
+    <edit-skill-group v-if="editGroupInfo.show" v-model="editGroupInfo.show"
+                      :group="editGroupInfo.group" :is-edit="editGroupInfo.isEdit"
                       @group-saved="skillCreatedOrUpdated" @hidden="handleFocus"/>
-    <export-to-catalog v-if="exportToCatalogInfo.show" v-model="exportToCatalogInfo.show" :skills="exportToCatalogInfo.skills"
-                       @exported="handleSkillsExportedToCatalog" @hidden="handleExportModalIsClosed"/>
-
-    <removal-validation v-if="deleteSkillInfo.show" v-model="deleteSkillInfo.show" @do-remove="doDeleteSkill" @hidden="handleDeleteCancelled">
+    <export-to-catalog v-if="exportToCatalogInfo.show" v-model="exportToCatalogInfo.show"
+                       :skills="exportToCatalogInfo.skills"
+                       @exported="handleSkillsExportedToCatalog"
+                       @hidden="handleExportModalIsClosed"/>
+    <reuse-skills-modal v-if="reuseSkillsInfo.show" v-model="reuseSkillsInfo.show"
+                        :skills="reuseSkillsInfo.skills"
+                        @hidden="handleExportModalIsClosed"/>
+    <removal-validation v-if="deleteSkillInfo.show" v-model="deleteSkillInfo.show"
+                        @do-remove="doDeleteSkill" @hidden="handleDeleteCancelled">
       <p>
-        This will remove <span class="text-primary font-weight-bold">{{ deleteSkillInfo.skill.name}}</span>.
+        This will remove <span
+        class="text-primary font-weight-bold">{{ deleteSkillInfo.skill.name }}</span>.
       </p>
       <div v-if="deleteSkillInfo.skill.isSkillType">
-        Delete Action <b class="text-danger">CANNOT</b> be undone and permanently removes users' performed skills and any dependency associations.
+        Delete Action <b class="text-danger">CANNOT</b> be undone and permanently removes users'
+        performed skills and any dependency associations.
       </div>
       <div v-if="deleteSkillInfo.skill.isGroupType">
-        Delete Action <b class="text-danger">CANNOT</b> be undone and will permanently remove all of the group's skills. All the associated users' performed skills and any dependency associations will also be removed.
+        Delete Action <b class="text-danger">CANNOT</b> be undone and will permanently remove all of
+        the group's skills. All the associated users' performed skills and any dependency
+        associations will also be removed.
       </div>
       <div class="alert alert-info mt-3" v-if="deleteSkillInfo.skill.sharedToCatalog">
         <exported-skill-deletion-warning :skill-id="deleteSkillInfo.skill.skillId"
@@ -339,6 +365,7 @@ limitations under the License.
   import ChildRowSkillGroupDisplay from './skillsGroup/ChildRowSkillGroupDisplay';
   import EditSkillGroup from './skillsGroup/EditSkillGroup';
   import ShowMore from './selfReport/ShowMore';
+  import ReuseSkillsModal from '@/components/skills/reuseSkills/ReuseSkillsModal';
 
   export default {
     name: 'SkillsTable',
@@ -390,6 +417,7 @@ limitations under the License.
       },
     },
     components: {
+      ReuseSkillsModal,
       EditImportedSkill,
       ExportedSkillDeletionWarning,
       RemovalValidation,
@@ -425,6 +453,10 @@ limitations under the License.
           group: {},
         },
         exportToCatalogInfo: {
+          show: false,
+          skills: [],
+        },
+        reuseSkillsInfo: {
           show: false,
           skills: [],
         },
@@ -893,13 +925,20 @@ limitations under the License.
           if (sk.isGroupType || sk.isCatalogImportedSkills) {
             return sk;
           }
-          return ({ ...sk, selected: selectedValue });
+          return ({
+            ...sk,
+            selected: selectedValue
+          });
         });
         this.updateActionsDisableStatus();
       },
       handleExportRequest() {
         this.exportToCatalogInfo.skills = this.skills.filter((item) => item.selected);
         this.exportToCatalogInfo.show = true;
+      },
+      handleSkillReuseRequest() {
+        this.reuseSkillsInfo.skills = this.skills.filter((item) => item.selected);
+        this.reuseSkillsInfo.show = true;
       },
       handleDeleteCancelled() {
         if (this.deleteSkillInfo.skill) {

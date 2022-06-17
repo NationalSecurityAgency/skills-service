@@ -33,6 +33,7 @@ import skills.controller.request.model.SkillImportRequest
 import skills.controller.request.model.SkillRequest
 import skills.controller.result.model.*
 import skills.services.RuleSetDefGraphService
+import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.events.pointsAndAchievements.InsufficientPointsForFinalizationValidator
 import skills.services.events.pointsAndAchievements.InsufficientPointsValidator
 import skills.storage.accessors.ProjDefAccessor
@@ -259,19 +260,33 @@ class SkillCatalogService {
         return skillDefRepo.isImportedFromCatalog(projectId, skillId)
     }
 
-    private void importSkillFromCatalog(String projectIdFrom, String skillIdFrom, String projectIdTo, SkillDef subjectTo, String groupId) {
-        boolean inCatalog = isAvailableInCatalog(projectIdFrom, skillIdFrom)
-        SkillsValidator.isTrue(inCatalog, "Skill [${skillIdFrom}] from project [${projectIdFrom}] has not been shared to the catalog and may not be imported")
+    private Integer getNextReuseTagCount(String projectIdTo, SkillDefWithExtra original) {
+        List<String> existingImportedSkillIds = skillDefRepo.getSkillIdsOfReusedSkillsForAGivenSkill(projectIdTo, original.id)
+        if (!existingImportedSkillIds) {
+            return 0
+        }
+        Integer maxValue = existingImportedSkillIds.collect { SkillReuseIdUtil.extractReuseCounter(it) }.max()
+        return maxValue + 1
+    }
+
+    void importSkillFromCatalog(String projectIdFrom, String skillIdFrom, String projectIdTo, SkillDef subjectTo, String groupId, boolean isReusedSkill = false) {
+        if (!isReusedSkill) {
+            boolean inCatalog = isAvailableInCatalog(projectIdFrom, skillIdFrom)
+            SkillsValidator.isTrue(inCatalog, "Skill [${skillIdFrom}] from project [${projectIdFrom}] has not been shared to the catalog and may not be imported")
+        }
         projDefAccessor.getProjDef(projectIdFrom)
 
         SkillDefWithExtra original = skillAccessor.getSkillDefWithExtra(projectIdFrom, skillIdFrom)
 
-        if (skillDefRepo.existsByProjectIdAndSkillIdAllIgnoreCase(projectIdTo, skillIdFrom)) {
-            throw new SkillException("Cannot import Skill from catalog, [${skillIdFrom}] already exists in Project", projectIdTo, skillIdFrom)
+        Integer reuseCounter = getNextReuseTagCount(projectIdTo, original)
+        String newName = isReusedSkill ? SkillReuseIdUtil.addTag(original.name, reuseCounter) : original.name
+        String newSkillId = isReusedSkill ? SkillReuseIdUtil.addTag(original.skillId, reuseCounter) : original.skillId
+        if (skillDefRepo.existsByProjectIdAndSkillIdAllIgnoreCase(projectIdTo, newSkillId)) {
+            throw new SkillException("Cannot import Skill from catalog, [${newSkillId}] already exists in Project", projectIdTo, skillIdFrom)
         }
 
-        if (skillDefRepo.existsByProjectIdAndNameAndTypeAllIgnoreCase(projectIdTo, original.name, SkillDef.ContainerType.Skill)) {
-            throw new SkillException("Cannot import Skill from catalog, [${original.name}] already exists in Project", projectIdTo, skillIdFrom)
+        if (skillDefRepo.existsByProjectIdAndNameAndTypeAllIgnoreCase(projectIdTo, newName, SkillDef.ContainerType.Skill)) {
+            throw new SkillException("Cannot import Skill from catalog, [${newName}] already exists in Project", projectIdTo, skillIdFrom)
         }
 
         SkillImportRequest copy = new SkillImportRequest()
@@ -286,13 +301,15 @@ class SkillCatalogService {
         copy.numPerformToCompletion = numToCompletion
         copy.selfReportingType = original.selfReportingType?.toString()
         copy.enabled = Boolean.FALSE.toString()
+        copy.name = newName
+        copy.skillId = newSkillId
 
         skillsAdminService.saveSkill(copy.skillId, copy, true, groupId)
     }
 
     @Transactional
     @Profile
-    void importSkillsFromCatalog(String projectIdTo, String subjectIdTo, List<CatalogSkill> listOfSkills, String groupIdTo = null) {
+    void importSkillsFromCatalog(String projectIdTo, String subjectIdTo, List<CatalogSkill> listOfSkills, String groupIdTo = null, boolean isReusedSkill = false) {
         if (skillCatalogFinalizationService.getCurrentState(projectIdTo) == SkillCatalogFinalizationService.FinalizeState.RUNNING) {
             throw new SkillException("Cannot import skills in the middle of the finalization process", projectIdTo)
         }
@@ -328,7 +345,7 @@ class SkillCatalogService {
                 validateProjectIds.add(it.projectId)
             }
 
-            importSkillFromCatalog(it.projectId, it.skillId, projectIdTo, subjectTo, groupIdTo)
+            importSkillFromCatalog(it.projectId, it.skillId, projectIdTo, subjectTo, groupIdTo, isReusedSkill)
         }
     }
 
