@@ -145,7 +145,7 @@ limitations under the License.
       publishHidden(e, cancelled) {
         this.$emit('hidden', {
           ...e,
-          cancelled
+          cancelled,
         });
       },
       loadSubjects() {

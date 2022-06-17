@@ -94,7 +94,7 @@ export default {
     const url = `/admin/projects/${encodeURIComponent(projectId)}/skills/reuse`;
     return axios.post(url, {
       subjectId: newSubjectId,
-      skillIds
+      skillIds,
     });
   },
   updateImportedSkill(skill) {

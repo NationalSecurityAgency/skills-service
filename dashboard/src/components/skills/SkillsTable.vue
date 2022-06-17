@@ -927,7 +927,7 @@ limitations under the License.
           }
           return ({
             ...sk,
-            selected: selectedValue
+            selected: selectedValue,
           });
         });
         this.updateActionsDisableStatus();
