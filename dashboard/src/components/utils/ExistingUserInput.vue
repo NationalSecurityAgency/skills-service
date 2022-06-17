@@ -178,6 +178,7 @@ limitations under the License.
     },
     methods: {
       suggestUsers: debounce(function debouncedSuggestUsers(query) {
+        this.creatingTag = this.canEnterNewUser && query;
         this.isFetching = true;
         let q = query;
         const postBody = {};
@@ -212,7 +213,6 @@ limitations under the License.
           });
       }, 200),
       createTag(newTag) {
-        this.creatingTag = true;
         const tag = {
           userId: newTag,
           label: newTag,
@@ -222,7 +222,6 @@ limitations under the License.
       addTag(tag) {
         this.userQuery = tag;
         this.suggestions.push(tag);
-        this.creatingTag = false;
       },
       getUserIdForDisplay(user) {
         if (!user.userIdForDisplay) {
