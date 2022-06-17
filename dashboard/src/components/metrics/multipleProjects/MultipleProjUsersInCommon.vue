@@ -208,8 +208,7 @@ limitations under the License.
             refProj.loadingLevels = false;
           });
       },
-      projRemoved(removedItem) {
-        console.log(`removedItem [${removedItem}]`);
+      projRemoved() {
         this.clearRes();
       },
       rebuildFields() {
