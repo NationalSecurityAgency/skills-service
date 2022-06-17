@@ -624,7 +624,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy=saveSubjectButton]').click();
         cy.wait('@saveSubject1');
         cy.contains('Editing Existing Subject').should('not.exist');
-        cy.wait(200);
+        cy.wait(300);
         cy.get('[data-cy=btn_edit-subject]').should('have.focus');
         cy.contains('SUBJECT: Subject 1').should('not.exist');
         cy.contains('SUBJECT: Edited Subject Name').should('be.visible');
@@ -637,8 +637,10 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy=saveSubjectButton]').click();
         cy.wait('@saveSubject1');
         cy.contains('Editing Existing Subject').should('not.exist');
-        cy.wait(200);
-        cy.get('[data-cy=btn_edit-subject]').should('have.focus');
+        cy.wait(300);
+        // because the route changed due to the id being edited, focus is returned to the main content area
+        cy.get('[data-cy=btn_edit-subject]').should('not.have.focus');
+        cy.get('.skills-menu-content').should('have.focus');
         cy.contains('SUBJECT: Edited Subject Name').should('be.visible');
         cy.contains('ID: subj1').should('not.exist');
         cy.get('[data-cy=breadcrumb-subj1]').should('not.exist');
