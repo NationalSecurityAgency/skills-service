@@ -1308,5 +1308,12 @@ class AdminController {
         return success
     }
 
+    @RequestMapping(value = "/projects/{projectId}/reused/{parentSkillId}/skills", method = RequestMethod.GET, produces = "application/json")
+    List<SkillDefSkinnyRes> getReusedSkills(@PathVariable("projectId") String projectId, @PathVariable("parentSkillId") String parentSkillId) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        SkillsValidator.isNotBlank(parentSkillId, "parentSkillId")
+        return skillReuseService.getReusedSkills(projectId, parentSkillId)
+    }
+
 }
 

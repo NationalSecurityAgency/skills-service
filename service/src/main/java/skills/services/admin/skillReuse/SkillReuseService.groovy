@@ -19,11 +19,17 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.bind.annotation.PathVariable
 import skills.controller.request.model.CatalogSkill
 import skills.controller.request.model.SkillReuseRequest
+import skills.controller.result.model.SkillDefPartialRes
+import skills.controller.result.model.SkillDefSkinnyRes
 import skills.services.admin.SkillCatalogFinalizationService
 import skills.services.admin.SkillCatalogService
 import skills.storage.accessors.SkillDefAccessor
+import skills.storage.model.SkillDefSkinny
+import skills.storage.repos.SkillDefRepo
+import skills.utils.InputSanitizer
 
 @Service
 @Slf4j
@@ -38,6 +44,9 @@ class SkillReuseService {
     @Autowired
     SkillCatalogFinalizationService finalizationService
 
+    @Autowired
+    SkillDefRepo skillDefRepo
+
     @Transactional
     void reuseSkill(String projectId, SkillReuseRequest skillReuseRequest) {
         // import
@@ -45,5 +54,24 @@ class SkillReuseService {
         skillCatalogService.importSkillsFromCatalog(projectId, skillReuseRequest.subjectId, listOfSkills, skillReuseRequest.groupId, true)
         // finalize
         finalizationService.finalizeCatalogSkillsImport(projectId)
+    }
+
+    @Transactional(readOnly = true)
+    List<SkillDefSkinnyRes> getReusedSkills(String projectId, String parentSkillId) {
+        List<SkillDefSkinny> data = skillDefRepo.findChildReusedSkills(projectId, parentSkillId)
+        List<SkillDefPartialRes> res = data.collect { SkillDefSkinny skinny ->
+            new SkillDefSkinnyRes(
+                    skillId: skinny.skillId,
+                    projectId: skinny.projectId,
+                    name: SkillReuseIdUtil.removeTag(InputSanitizer.unsanitizeName(skinny.name)),
+                    subjectId: skinny.subjectSkillId,
+                    subjectName: InputSanitizer.unsanitizeName(skinny.subjectName),
+                    version: skinny.version,
+                    displayOrder: skinny.displayOrder,
+                    created: skinny.created,
+                    totalPoints: skinny.totalPoints,
+            )
+        }?.sort({ it.skillId })
+        return res
     }
 }

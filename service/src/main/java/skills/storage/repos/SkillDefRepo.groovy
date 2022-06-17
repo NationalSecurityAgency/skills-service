@@ -589,4 +589,29 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
          select skill_id from skill_definition where project_id = ?1 and copied_from_skill_ref = ?2
     ''', nativeQuery = true)
     List<String> getSkillIdsOfReusedSkillsForAGivenSkill(String projectId, Integer originalSkillRef)
+
+
+    @Query('''SELECT
+        s.id as id,
+        s.name as name,
+        s.skillId as skillId,
+        parentDef.skillId as subjectSkillId,
+        parentDef.name as subjectName,
+        s.projectId as projectId,
+        s.displayOrder as displayOrder,
+        s.created as created,
+        s.version as version,
+        s.totalPoints as totalPoints
+        from SkillDef s, SkillDef parentDef, SkillRelDef srd
+         where
+            parentDef.projectId = ?1
+            and parentDef.skillId = ?2 
+            and parentDef = srd.parent 
+            and s = srd.child 
+            and srd.type = 'RuleSetDefinition' 
+            and parentDef.type in ('Subject', 'SkillsGroup')
+            and s.type = 'Skill'
+            and s.skillId like '%STREUSESKILLST%'
+            ''')
+    List<SkillDefSkinny> findChildReusedSkills(String projectId, String parentId)
 }

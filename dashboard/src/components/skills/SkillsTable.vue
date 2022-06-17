@@ -72,7 +72,8 @@ limitations under the License.
                   class="far fa-arrow-alt-circle-up"></i> Export To Catalog
                 </b-dropdown-item>
                 <b-dropdown-item @click="handleSkillReuseRequest" data-cy="skillReuseBtn"><i
-                  class="fas fa-recycle"></i> Reuse in the Project
+                  class="fas fa-recycle"></i> Reuse in <span class="text-primary">this</span>
+                  Project
                 </b-dropdown-item>
               </b-dropdown>
             </div>
@@ -353,6 +354,7 @@ limitations under the License.
   import RemovalValidation from '@/components/utils/modal/RemovalValidation';
   import ExportedSkillDeletionWarning from '@/components/skills/catalog/ExportedSkillDeletionWarning';
   import EditImportedSkill from '@/components/skills/skillsGroup/EditImportedSkill';
+  import ReuseSkillsModal from '@/components/skills/reuseSkills/ReuseSkillsModal';
   import EditSkill from './EditSkill';
   import NoContent2 from '../utils/NoContent2';
   import ChildRowSkillsDisplay from './ChildRowSkillsDisplay';
@@ -365,7 +367,6 @@ limitations under the License.
   import ChildRowSkillGroupDisplay from './skillsGroup/ChildRowSkillGroupDisplay';
   import EditSkillGroup from './skillsGroup/EditSkillGroup';
   import ShowMore from './selfReport/ShowMore';
-  import ReuseSkillsModal from '@/components/skills/reuseSkills/ReuseSkillsModal';
 
   export default {
     name: 'SkillsTable',

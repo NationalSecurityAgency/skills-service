@@ -179,7 +179,6 @@ limitations under the License.
     },
     computed: {
       skillId() {
-        console.log(this.skillInfo.skillId);
         return SkillReuseIdUtil.removeTag(this.skillInfo.skillId);
       },
       totalPoints() {

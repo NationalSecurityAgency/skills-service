@@ -1329,6 +1329,11 @@ class SkillsService {
         return wsHelper.adminPost("/projects/${projectId}/skills/reuse", [subjectId: otherSubjectId, skillIds: skillIds, groupId: otherGroupId])
     }
 
+    def getReusedSkills(String projectId, String parentSkillId) {
+        String url = "/projects/${projectId}/reused/${parentSkillId}/skills"
+        return wsHelper.adminGet(url)
+    }
+
     def bulkExportSkillsToCatalog(String projectId, List<String> skillIds) {
         return wsHelper.adminPost("/projects/${projectId}/skills/export", skillIds)
     }

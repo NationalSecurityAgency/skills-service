@@ -15,9 +15,10 @@
  */
 package skills.intTests.skillReuse
 
-
+import groovy.json.JsonOutput
 import skills.intTests.catalog.CatalogIntSpec
 import skills.services.admin.skillReuse.SkillReuseIdUtil
+import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -227,6 +228,27 @@ class SkillReuseManagementSpec extends CatalogIntSpec {
         skill2.skill == p1Skills[0].name
         !skill2.copiedFromProjectId
         !skill2.copiedFromProjectName
+    }
+
+    def "get reused skills for a subject"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1subj2 = createSubject(1, 2)
+        def p1Skills = createSkills(3, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        def p1SkillsSubj2 = createSkills(3, 1, 2, 100)
+        skillsService.createSubject(p1subj2)
+        skillsService.createSkills(p1SkillsSubj2)
+
+        when:
+        skillsService.reuseSkillInAnotherSubject(p1.projectId, p1Skills[0].skillId, p1subj2.subjectId)
+
+        def reusedSubj1 = skillsService.getReusedSkills(p1.projectId, p1subj1.subjectId)
+        def reusedSubj2 = skillsService.getReusedSkills(p1.projectId, p1subj2.subjectId)
+
+        then:
+        !reusedSubj1
+        reusedSubj2.name == ["Test Skill 1"]
     }
 
 }
