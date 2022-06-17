@@ -278,9 +278,15 @@ class SkillCatalogService {
 
         SkillDefWithExtra original = skillAccessor.getSkillDefWithExtra(projectIdFrom, skillIdFrom)
 
-        Integer reuseCounter = getNextReuseTagCount(projectIdTo, original)
-        String newName = isReusedSkill ? SkillReuseIdUtil.addTag(original.name, reuseCounter) : original.name
-        String newSkillId = isReusedSkill ? SkillReuseIdUtil.addTag(original.skillId, reuseCounter) : original.skillId
+        String newName = original.name
+        String newSkillId = original.skillId
+
+        if (isReusedSkill) {
+            Integer reuseCounter = getNextReuseTagCount(projectIdTo, original)
+            newName = SkillReuseIdUtil.addTag(original.name, reuseCounter)
+            newSkillId = SkillReuseIdUtil.addTag(original.skillId, reuseCounter)
+        }
+
         if (skillDefRepo.existsByProjectIdAndSkillIdAllIgnoreCase(projectIdTo, newSkillId)) {
             throw new SkillException("Cannot import Skill from catalog, [${newSkillId}] already exists in Project", projectIdTo, skillIdFrom)
         }

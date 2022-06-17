@@ -322,6 +322,7 @@ limitations under the License.
                        @hidden="handleExportModalIsClosed"/>
     <reuse-skills-modal v-if="reuseSkillsInfo.show" v-model="reuseSkillsInfo.show"
                         :skills="reuseSkillsInfo.skills"
+                        @reused="handleSkillsReused"
                         @hidden="handleExportModalIsClosed"/>
     <removal-validation v-if="deleteSkillInfo.show" v-model="deleteSkillInfo.show"
                         @do-remove="doDeleteSkill" @hidden="handleDeleteCancelled">
@@ -710,6 +711,9 @@ limitations under the License.
           return skill;
         });
         this.$nextTick(() => this.$announcer.polite(`exported ${skills.length} skill${skills.length > 1 ? 's' : ''} to the catalog`));
+      },
+      handleSkillsReused() {
+        this.changeSelectionForAll(false);
       },
       updateImportedSkill(skill) {
         const item1Index = this.skills.findIndex((item) => item.skillId === skill.skillId);

@@ -42,9 +42,24 @@ limitations under the License.
           Preview:
         </div>
         <b-card class="mt-2">
-          <b-badge variant="info">{{ skills.length }}</b-badge>
-          skill{{ plural }} will be reused in the
-          <span class="text-primary font-weight-bold">{{ selectedDestination.name }}</span> subject.
+          <div v-if="skillsForReuse.available.length > 0">
+            <b-badge variant="info">{{ skillsForReuse.available.length }}</b-badge>
+            skill{{ plural(skillsForReuse.available) }} will be reused in the
+            <span class="text-primary font-weight-bold">{{ selectedDestination.name }}</span>
+            subject.
+            <div>
+              <b-badge variant="warning">{{ skillsForReuse.alreadyExist.length }}</b-badge>
+              selected skill{{ plural(skillsForReuse.alreadyExist) }} <span
+              class="text-primary font-weight-bold">already</span> been reused!
+            </div>
+          </div>
+          <div v-else>
+            <i class="fas fa-exclamation-triangle text-warning mr-2"/>
+            <span class="text-warning font-weight-bold">All</span> of the selected skills already
+            been reused in the <span
+            class="text-primary font-weight-bold">{{ selectedDestination.name }}</span> subject.
+            Please cancel and select different skills.
+          </div>
         </b-card>
       </div>
 
@@ -55,8 +70,8 @@ limitations under the License.
         </div>
         <b-card class="mt-2">
           <span class="text-success">Successfully</span> reused
-          <b-badge variant="info">{{ skills.length }}</b-badge>
-          skill{{ plural }}.
+          <b-badge variant="info">{{ skillsForReuse.available.length }}</b-badge>
+          skill{{ plural(skillsForReuse.available) }}.
         </b-card>
       </div>
     </div>
@@ -64,7 +79,7 @@ limitations under the License.
     <div slot="modal-footer" class="w-100">
       <b-button v-if="!state.reUseComplete" variant="success" size="sm" class="float-right"
                 @click="initiateReuse"
-                :disabled="!selectedDestination || state.reUseInProgress"
+                :disabled="!selectedDestination || state.reUseInProgress || (skillsForReuse.available && skillsForReuse.available.length === 0)"
                 data-cy="reuseButton">
         Reuse
       </b-button>
@@ -75,7 +90,7 @@ limitations under the License.
       </b-button>
 
       <b-button v-if="state.reUseComplete" variant="success" size="sm" class="float-right mr-2"
-                @click="cancel"
+                @click="close"
                 data-cy="okButton">
         OK
       </b-button>
@@ -112,6 +127,11 @@ limitations under the License.
           reUseInProgress: false,
           reUseComplete: false,
         },
+        skillsForReuse: {
+          available: [],
+          alreadyExist: [],
+          allAlreadyExist: [],
+        },
       };
     },
     mounted() {
@@ -126,6 +146,10 @@ limitations under the License.
       cancel(e) {
         this.show = false;
         this.publishHidden(e, true);
+      },
+      close(e) {
+        this.show = false;
+        this.publishHidden(e, false);
       },
       publishHidden(e, cancelled) {
         this.$emit('hidden', {
@@ -145,20 +169,29 @@ limitations under the License.
       },
       initiateReuse() {
         this.state.reUseInProgress = true;
-        const skillIds = this.skills.map((sk) => sk.skillId);
+        const skillIds = this.skillsForReuse.available.map((sk) => sk.skillId);
         SkillsService.reuseSkillInAnotherSubject(this.$route.params.projectId, skillIds, this.selectedDestination.subjectId)
           .then(() => {
             this.state.reUseInProgress = false;
             this.state.reUseComplete = true;
+            this.$emit('reused', skillIds);
           });
       },
       selectDestination(selection) {
+        this.loadingData = true;
         this.selectedDestination = selection;
+        SkillsService.getReusedSkills(this.$route.params.projectId, this.selectedDestination.subjectId)
+          .then((res) => {
+            this.skillsForReuse.allAlreadyExist = res;
+            this.skillsForReuse.alreadyExist = this.skills.filter((skill) => res.find((e) => e.name === skill.name));
+            this.skillsForReuse.available = this.skills.filter((skill) => !res.find((e) => e.name === skill.name));
+          })
+          .finally(() => {
+            this.loadingData = false;
+          });
       },
-    },
-    computed: {
-      plural() {
-        return this.skills.length > 1 ? 's' : '';
+      plural(arr) {
+        return arr && arr.length > 1 ? 's' : '';
       },
     },
   };
