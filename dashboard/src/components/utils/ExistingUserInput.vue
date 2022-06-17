@@ -220,7 +220,6 @@ limitations under the License.
         return tag;
       },
       addTag(tag) {
-        console.log(`adding new tag [${tag}]`);
         this.userQuery = tag;
         this.suggestions.push(tag);
         this.creatingTag = false;
