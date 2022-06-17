@@ -24,7 +24,8 @@ limitations under the License.
               v-on:search="searchChanged"
               v-on:option:selected="added"
               v-on:option:deselecting="considerRemoval"
-              :loading="isLoading">
+              :loading="isLoading"
+              data-cy="skillsSelector">
       <template #option="option">
         <slot name="dropdown-item" :option="option">
           <div :data-cy="`skillsSelectionItem-${option.projectId}-${option.skillId}`">
@@ -54,8 +55,8 @@ limitations under the License.
         </li>
       </template>
       <template #no-options>
-        <span v-if="emptyWithoutSearch && !internalSearch"><i class="fas fa-search"/> Type to <span class="font-weight-bold">search</span> for skills...</span>
-        <span v-else>List is empty!</span>
+        <span v-if="emptyWithoutSearch && !internalSearch && !currentSearch"><i class="fas fa-search"/> Type to <span class="font-weight-bold">search</span> for skills...</span>
+        <span v-else>No elements found. Consider changing the search query</span>
       </template>
     </v-select>
   </div>
@@ -119,6 +120,7 @@ limitations under the License.
         selectedInternal: [],
         optionsInternal: [],
         multipleSelection: true,
+        currentSearch: '',
       };
     },
     mounted() {
@@ -170,6 +172,7 @@ limitations under the License.
         }
       },
       searchChanged(query, loadingFunction) {
+        this.currentSearch = query;
         this.$emit('search-change', query, loadingFunction);
       },
     },

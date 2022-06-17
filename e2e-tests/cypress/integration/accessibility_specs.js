@@ -514,12 +514,12 @@ describe('Accessibility Tests', () => {
     cy.get('[data-cy=badgeName]').type('global badge');
     cy.get('[data-cy=saveBadgeButton]').click();
     cy.contains('Manage').click();
-    cy.contains('This is 1');
     cy.customLighthouse();
     cy.customA11y();
 
-    cy.get('.multiselect__select').click();
-    cy.get('.multiselect__element').eq(0).click();
+    cy.get('#skills-selector').click();
+    cy.contains('This is 1');
+    cy.get('#skills-selector .vs__dropdown-option').eq(0).click();
     cy.customA11y();
     cy.get('[data-cy=nav-Levels]').click();
     cy.contains('No Levels Added Yet');

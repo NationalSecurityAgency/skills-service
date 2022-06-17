@@ -420,7 +420,7 @@ describe('Badges Tests', () => {
 
         cy.get('[data-cy=manageBtn_TestBadgeBadge]').click();
         cy.get('#skills-selector').click();
-        cy.get('#skills-selector input[type=text]').type('{enter}');
+        cy.get('#skills-selector .vs__dropdown-option').eq(0).click();
         cy.contains('.router-link-active', 'Badges').click();
 
         cy.contains('Test Badge');
@@ -460,7 +460,7 @@ describe('Badges Tests', () => {
 
         cy.get('[data-cy=manageBtn_TestBadgeBadge]').click();
         cy.get('#skills-selector').click();
-        cy.get('#skills-selector input[type=text]').type('{enter}');
+        cy.get('#skills-selector .vs__dropdown-option').eq(0).click();
         cy.contains('.router-link-active', 'Badges').click();
 
         cy.contains('Test Badge');
@@ -498,7 +498,7 @@ describe('Badges Tests', () => {
         cy.wait('@loadBadges');
         cy.get('[data-cy=manageBtn_TestBadgeBadge]').click();
         cy.get('#skills-selector').click();
-        cy.get('#skills-selector input[type=text]').type('{enter}');
+        cy.get('#skills-selector .vs__dropdown-option').eq(0).click();
         cy.contains('.router-link-active', 'Badges').click();
         cy.contains('Test Badge').should('exist');
         cy.get('[data-cy=badgeStatus]').contains('Status: Disabled').should('exist');
@@ -533,7 +533,7 @@ describe('Badges Tests', () => {
         cy.wait('@loadBadges');
         cy.get('[data-cy=manageBtn_TestBadgeBadge]').click();
         cy.get('#skills-selector').click();
-        cy.get('#skills-selector input[type=text]').type('{enter}');
+        cy.get('#skills-selector .vs__dropdown-option').eq(0).click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'Skill 1' }, { colIndex: 1,  value: 'skill1' }],
         ], 5);
