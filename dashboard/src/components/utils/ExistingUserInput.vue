@@ -19,12 +19,25 @@ limitations under the License.
       <b-dropdown-item-button v-for="opt in userSuggestOptions" :key="opt.value" :active="opt.value === selectedSuggestOption" @click="selectedSuggestOption=opt.value">{{opt.value}}</b-dropdown-item-button>
     </b-dropdown>
 
-    <multiselect v-model="userQuery" :placeholder="placeholder" tag-placeholder="Enter to select"
-                 :options="suggestions" :multiple="allowMultipleSelections" :taggable="canEnterNewUser" @tag="addTag"
-                 :hide-selected="true" track-by="userId" label="label"
-                 @search-change="suggestUsers" @open="suggestUsers" :loading="isFetching" :internal-search="false"
-                 :clear-on-select="true" :class="{'col': (userSuggestOptions && userSuggestOptions.length > 0)}">
-    </multiselect>
+    <v-select :options="suggestions"
+              v-model="userQuery"
+              :placeholder="placeholder"
+              :multiple="allowMultipleSelections"
+              :taggable="canEnterNewUser"
+              :pushTags="false"
+              label="label"
+              @open="suggestUsers"
+              @search="suggestUsers"
+              @option:created="addTag"
+              :createOption="createTag"
+              :loading="isFetching"
+              :class="{'col': (userSuggestOptions && userSuggestOptions.length > 0)}">
+      <template v-if="creatingTag" #list-footer>
+        <li>
+          <h6 class="ml-1">Enter to select</h6>
+        </li>
+      </template>
+    </v-select>
 
     <p class="text-danger" v-show="validate && theError">{{ theError }}</p>
   </div>
@@ -33,7 +46,7 @@ limitations under the License.
 <script>
   import axios from 'axios';
   import debounce from 'lodash.debounce';
-  import Multiselect from 'vue-multiselect';
+  import vSelect from 'vue-select';
   import RequestOrderMixin from './RequestOrderMixin';
 
   // user type constants
@@ -45,7 +58,7 @@ limitations under the License.
   export default {
     name: 'ExistingUserInput',
     mixins: [RequestOrderMixin],
-    components: { Multiselect },
+    components: { vSelect },
     props: {
       fieldLabel: {
         default: 'Skills User',
@@ -119,6 +132,7 @@ limitations under the License.
         userQuery: this.value,
         userSuggestOptions: [],
         selectedSuggestOption: null,
+        creatingTag: false,
       };
     },
     computed: {
@@ -197,15 +211,20 @@ limitations under the License.
             this.isFetching = false;
           });
       }, 200),
-      addTag(newTag) {
+      createTag(newTag) {
+        this.creatingTag = true;
         const tag = {
           userId: newTag,
           label: newTag,
         };
+        return tag;
+      },
+      addTag(tag) {
+        console.log(`adding new tag [${tag}]`);
         this.userQuery = tag;
         this.suggestions.push(tag);
+        this.creatingTag = false;
       },
-
       getUserIdForDisplay(user) {
         if (!user.userIdForDisplay) {
           return user.userId;
