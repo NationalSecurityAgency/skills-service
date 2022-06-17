@@ -19,11 +19,16 @@ import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
+import skills.controller.exceptions.SkillsValidator
+import skills.controller.request.model.UserProjectSettingsRequest
+import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.UserRoleRes
 import skills.notify.EmailNotifier
 import skills.notify.Notifier
+import skills.services.admin.ProjAdminService
 import skills.services.events.SkillEventsService
 import skills.services.events.pointsAndAchievements.InsufficientPointsValidator
 import skills.services.settings.SettingsService
@@ -36,12 +41,14 @@ import skills.storage.model.auth.RoleName
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.SkillDefRepo
-import skills.storage.repos.SkillEventsSupportRepo
 import skills.storage.repos.UserAttrsRepo
 
 @Service
 @Slf4j
 class SelfReportingService {
+
+    public static final String SETTING_GROUP = "self.report"
+    public static final String SUBSCRIBED_TO_EMAILS_SETTING = 'approval.emails.subscribed'
 
     @Autowired
     SkillApprovalRepo skillApprovalRepo
@@ -72,6 +79,12 @@ class SelfReportingService {
 
     @Autowired
     SkillDefRepo skillDefRepo
+
+    @Autowired
+    UserInfoService userInfoService
+
+    @Autowired
+    ProjAdminService projAdminService
 
     SkillEventsService.AppliedCheckRes requestApproval(String userId, SkillDefMin skillDefinition, Date performedOn, String requestMsg) {
 
@@ -113,6 +126,33 @@ class SelfReportingService {
         }
 
         return res
+    }
+
+    public void subscribeCurrentUserToApprovalRequestEmails(String projectId) {
+        setApprovalEmailSubscriptionForCurrentUser(projectId, true)
+    }
+
+    public void unsubscribeCurrentUserFromApprovalRequestEmails(String projectId) {
+        setApprovalEmailSubscriptionForCurrentUser(projectId, false)
+    }
+
+    public Boolean getApprovalRequestEmailSubscriptionStatus(String projectId) {
+        SettingsResult settingsResult = settingsService.getUserProjectSetting(userInfoService.getCurrentUserId(), projectId, SUBSCRIBED_TO_EMAILS_SETTING, SETTING_GROUP)
+        return settingsResult && Boolean.valueOf(settingsResult.value)
+    }
+
+    private void setApprovalEmailSubscriptionForCurrentUser(String projectId, Boolean subscribed=true) {
+        if (!projAdminService.existsByProjectId(projectId)) {
+            throw new SkillException("Project with id [${projectId}] does NOT exist")
+        }
+        UserProjectSettingsRequest userProjectSettingsRequest = new UserProjectSettingsRequest(
+                projectId: projectId,
+                setting: SUBSCRIBED_TO_EMAILS_SETTING,
+                settingGroup: SETTING_GROUP,
+                value: subscribed.toString()
+        )
+
+        settingsService.saveSetting(userProjectSettingsRequest)
     }
 
     private void sentNotifications(SkillDefMin skillDefinition, String userId, String requestMsg) {

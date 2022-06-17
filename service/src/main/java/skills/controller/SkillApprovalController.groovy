@@ -21,16 +21,19 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
+import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.SkillApprovalRejection
 import skills.controller.request.model.SkillApprovalRequest
+import skills.controller.request.model.UserProjectSettingsRequest
 import skills.controller.result.model.LabelCountItem
 import skills.controller.result.model.RequestResult
 import skills.controller.result.model.TableResult
 import skills.services.CustomValidationResult
 import skills.services.CustomValidator
+import skills.services.SelfReportingService
 import skills.services.SkillApprovalService
 
 import static org.springframework.data.domain.Sort.Direction.ASC
@@ -47,6 +50,9 @@ class SkillApprovalController {
 
     @Autowired
     CustomValidator customValidator
+
+    @Autowired
+    SelfReportingService selfReportingService
 
     @RequestMapping(value = "/projects/{projectId}/approvals", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -129,6 +135,24 @@ class SkillApprovalController {
         SkillsValidator.isNotBlank(skillId, "Skill Id")
 
         return skillApprovalService.getSkillApprovalsStats(projectId, skillId)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/approvalEmails/unsubscribe", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    RequestResult unsubscribeFromApprovalEmails(@PathVariable("projectId") String projectId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        selfReportingService.unsubscribeCurrentUserFromApprovalRequestEmails(projectId)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/approvalEmails/subscribe", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    RequestResult subscribeToApprovalEmails(@PathVariable("projectId") String projectId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        selfReportingService.subscribeCurrentUserToApprovalRequestEmails(projectId);
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/approvalEmails/isSubscribed", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    Boolean isUserSubscribed(@PathVariable("projectId") String projectId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        selfReportingService.getApprovalRequestEmailSubscriptionStatus(projectId);
     }
 
 }

@@ -28,6 +28,19 @@ limitations under the License.
         <b-button variant="outline-info" @click="changeSelectionForAll(false)" data-cy="clearSelectedApprovalsBtn" class="mt-1"><i class="far fa-square"></i> Clear</b-button>
       </div>
       <div class="col text-right">
+        <div class="col col-md-3 text-secondary" id="unsubscribe">
+          Unsubscribe from approval emails:
+          <inline-help
+            :msg="unsubscribeHelpMsg"/>
+        </div>
+        <b-form-checkbox v-model="emailUnsubscribed"
+                         name="check-button"
+                         v-on:input="toggleUnsubscribe"
+                         aria-labelledby="unsubscribe"
+                         data-cy="unsubscribeSwitch"
+                         switch>
+          {{ emailUnsubscribed }}
+        </b-form-checkbox>
         <b-button variant="outline-danger" @click="reject.showModal=true" data-cy="rejectBtn" class="mt-1" :disabled="actionsDisabled"><i class="fa fa-times-circle"/> Reject</b-button>
         <b-button variant="outline-success" @click="approve" data-cy="approveBtn" class="mt-1 ml-2" :disabled="actionsDisabled"><i class="fa fa-check"/> Approve</b-button>
       </div>
@@ -168,6 +181,7 @@ limitations under the License.
       return {
         projectId: this.$route.params.projectId,
         actionsDisabled: true,
+        emailUnsubscribed: false,
         reject: {
           showModal: false,
           rejectMsg: '',
@@ -212,6 +226,14 @@ limitations under the License.
     },
     mounted() {
       this.loadApprovals();
+    },
+    computed: {
+      unsubscribeHelpMsg() {
+        if (this.emailUnsubscribed) {
+          return 'Change to false to receive Skill Approval request emails';
+        }
+        return 'Change to true to unsubscribe from all Skill Approval request emails';
+      },
     },
     methods: {
       pageChanged(pageNum) {
@@ -281,6 +303,13 @@ limitations under the License.
             });
             this.$emit('approval-action', 'rejected');
           });
+      },
+      toggleUnsubscribe() {
+        if (this.emailUnsubscribed) {
+          // re-enable subscription
+        } else {
+          // unsubscribe
+        }
       },
     },
   };
