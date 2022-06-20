@@ -522,12 +522,12 @@ describe('Projects Tests', () => {
     cy.wait('@loadUserInfo');
     cy.wait('@loadProject');
 
-    cy.contains('Enter user id').type('bar');
+    cy.get('[data-cy="existingUserInput"]').click().type('bar');
     cy.wait('@suggest');
     //cy.pause();
     //cy.get('.multiselect__input').type('{enter}');
     // cy.get('.multiselect__option multiselect__option--highlight').click();
-    cy.get('.multiselect__element').click();
+    cy.get('[data-cy="existingUserInput"] .vs__dropdown-option').eq(0).click({force: true});
     cy.clickButton('Add');
     cy.wait('@addAdmin');
     cy.get('.alert-danger').contains('User was not found');
@@ -561,9 +561,9 @@ describe('Projects Tests', () => {
     cy.wait('@loadUserInfo');
     cy.wait('@loadProject');
 
-    cy.contains('Enter user id').type('bar');
+    cy.get('[data-cy="existingUserInput"]').click().type('bar{enter}');
     cy.wait('@suggest');
-    cy.get('.multiselect__input').type('{enter}');
+    cy.get('[data-cy="existingUserInput"]').click().type('{enter}');
     cy.clickButton('Add');
     cy.wait('@addAdmin');
     cy.get('[data-cy="errorPage"]').contains('Tiny-bit of an error!');
@@ -585,7 +585,7 @@ describe('Projects Tests', () => {
     cy.wait('@loadUserInfo');
     cy.wait('@loadProject');
 
-    cy.contains('Enter user id').type('{enter}');
+    cy.get('[data-cy="existingUserInput"]').type('{enter}');
     cy.wait('@suggest');
     cy.contains('root@skills.org').click();
     cy.clickButton('Add');
@@ -654,7 +654,7 @@ describe('Projects Tests', () => {
     cy.wait('@loadUserInfo');
     cy.wait('@loadProject');
 
-    cy.contains('Enter user id').type('root/bar{enter}');
+    cy.get('[data-cy="existingUserInput"]').click().type('root/bar{enter}');
     cy.wait('@suggest');
   });
 

@@ -416,11 +416,10 @@ describe('Accessibility Tests', () => {
     cy.customA11y();
 
     cy.get('[data-cy="nav-Add Event"]').click();
-    cy.contains('Enter user id');
     cy.customLighthouse();
     cy.customA11y();
-    cy.get('.multiselect__select').click();
-    cy.get('.multiselect__element').eq(0).click();
+    cy.get('[data-cy="userIdInput"]').click();
+    cy.get('[data-cy="userIdInput"] .vs__dropdown-option').eq(0).click();
     cy.get('[data-cy="eventDatePicker"]').click()
     cy.get('.vdp-datepicker__calendar .prev').first().click()
     cy.get('.vdp-datepicker__calendar .prev').first().click()

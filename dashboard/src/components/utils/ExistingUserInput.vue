@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="existingUserInput row no-gutters">
+  <div class="existingUserInput row no-gutters" data-cy="existingUserInput">
     <b-dropdown v-if="userSuggestOptions && userSuggestOptions.length > 0" variant="split" :text="selectedSuggestOption" class="col-auto">
       <b-dropdown-item-button v-for="opt in userSuggestOptions" :key="opt.value" :active="opt.value === selectedSuggestOption" @click="selectedSuggestOption=opt.value">{{opt.value}}</b-dropdown-item-button>
     </b-dropdown>
