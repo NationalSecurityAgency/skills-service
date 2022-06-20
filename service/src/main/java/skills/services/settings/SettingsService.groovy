@@ -239,6 +239,7 @@ class SettingsService {
             return convertToRes(settingDB, userId)
         } else {
             log.debug("User Project Setting is null for userId [{}], projectId [{}], setting [{}], settingGroup [{}], settingDB [{}]", userId, projectId, setting, settingGroup, settingDB)
+            return null
         }
     }
 

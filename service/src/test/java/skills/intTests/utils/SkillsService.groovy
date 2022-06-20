@@ -1349,6 +1349,18 @@ class SkillsService {
         return wsHelper.rootPost("/rebuildUserAndProjectPoints/${projectId}")
     }
 
+    def unsubscribeFromSelfApprovalRequestEmails(String projectId) {
+        return wsHelper.adminPost("/projects/${projectId}/approvalEmails/unsubscribe", [:])
+    }
+
+    def subscribeToSelfApprovalRequestEmails(String projectId) {
+        return wsHelper.adminPost("/projects/${projectId}/approvalEmails/subscribe", [:])
+    }
+
+    def isSubscribedToSelfApprovalRequestEmails(String projectId) {
+        return wsHelper.adminGet("/projects/${projectId}/approvalEmails/isSubscribed")
+    }
+
     private String getProjectUrl(String project) {
         return "/projects/${project}".toString()
     }

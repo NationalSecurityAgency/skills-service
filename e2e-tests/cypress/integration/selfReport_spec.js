@@ -906,5 +906,56 @@ describe('Self Report Skills Management Tests', () => {
     });
 
 
+    it('should be able to unsubscribe from approval request emails', () => {
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval', pointIncrement: '100' });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval', pointIncrement: '220' });
+        cy.createSkill(1, 1, 3, { selfReportingType: 'Approval', pointIncrement: '180' });
+        cy.reportSkill(1, 1, 'user1Good@skills.org', '2020-09-12 11:00')
+        cy.reportSkill(1, 2, 'user2Good@skills.org', '2020-09-13 11:00')
+        cy.reportSkill(1, 3, 'user3Good@skills.org', '2020-09-14 11:00')
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1, { selfReportingType: 'Approval', pointIncrement: '100' })
+        cy.reportSkill(2, 1, 'user1Good@skills.org', '2020-09-12 11:00')
+
+        cy.intercept('GET', '/admin/projects/**/approvalEmails/isSubscribed').as('isSubscribed');
+        cy.intercept('POST', '/admin/projects/proj1/approvalEmails/unsubscribe').as('unsubscribe');
+        cy.intercept('POST', '/admin/projects/proj1/approvalEmails/subscribe').as('subscribe');
+        cy.intercept('/public/isFeatureSupported?feature=emailservice', 'true');
+
+        cy.visit('/administrator/projects/proj1/self-report');
+        cy.wait('@isSubscribed');
+        cy.contains('Subscribed').should('be.visible');
+        cy.get('[data-cy=unsubscribeSwitch]').should('be.checked');
+        cy.get('[data-cy=unsubscribeContainer] .custom-control-label').click();
+        cy.wait('@unsubscribe')
+        cy.contains('Unsubscribed').should('be.visible');
+        cy.get('[data-cy=unsubscribeSwitch]').should('not.be.checked');
+
+        //setting should be per project
+        cy.visit('/administrator/projects/proj2/self-report')
+        cy.wait('@isSubscribed');
+        cy.contains('Subscribed').should('be.visible');
+        cy.get('[data-cy=unsubscribeSwitch]').should('be.checked');
+
+        cy.visit('/administrator/projects/proj1/self-report');
+        cy.wait('@isSubscribed');
+        cy.contains('Unsubscribed').should('be.visible');
+        cy.get('[data-cy=unsubscribeSwitch]').should('not.be.checked');
+    })
+
+    it('approval request email subscription toggle should not be visible if email is not configured', () => {
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval', pointIncrement: '100' });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval', pointIncrement: '220' });
+        cy.createSkill(1, 1, 3, { selfReportingType: 'Approval', pointIncrement: '180' });
+        cy.reportSkill(1, 1, 'user1Good@skills.org', '2020-09-12 11:00')
+        cy.reportSkill(1, 2, 'user2Good@skills.org', '2020-09-13 11:00')
+        cy.reportSkill(1, 3, 'user3Good@skills.org', '2020-09-14 11:00')
+        cy.intercept('/public/isFeatureSupported?feature=emailservice', 'false');
+
+        cy.visit('/administrator/projects/proj1/self-report');
+        cy.get('[data-cy=unsubscribeContainer]').should('not.exist');
+    });
+
 });
 

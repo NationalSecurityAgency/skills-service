@@ -18,6 +18,7 @@ package skills.services
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
@@ -46,6 +47,9 @@ import skills.storage.repos.UserAttrsRepo
 @Service
 @Slf4j
 class SelfReportingService {
+
+    @Value('#{"${skills.selfReport.noEmailableAdmins.create-project-issue:true}"}')
+    boolean createProjectIssue
 
     public static final String SETTING_GROUP = "self.report"
     public static final String SUBSCRIBED_TO_EMAILS_SETTING = 'approval.emails.subscribed'
@@ -85,6 +89,9 @@ class SelfReportingService {
 
     @Autowired
     ProjAdminService projAdminService
+
+    @Autowired
+    ProjectErrorService projectErrorService;
 
     SkillEventsService.AppliedCheckRes requestApproval(String userId, SkillDefMin skillDefinition, Date performedOn, String requestMsg) {
 
@@ -137,8 +144,17 @@ class SelfReportingService {
     }
 
     public Boolean getApprovalRequestEmailSubscriptionStatus(String projectId) {
-        SettingsResult settingsResult = settingsService.getUserProjectSetting(userInfoService.getCurrentUserId(), projectId, SUBSCRIBED_TO_EMAILS_SETTING, SETTING_GROUP)
-        return settingsResult && Boolean.valueOf(settingsResult.value)
+        return getApprovalRequestEmailSubscriptionStatus(projectId, userInfoService.getCurrentUserId())
+    }
+
+    public Boolean getApprovalRequestEmailSubscriptionStatus(String projectId, String userId) {
+        SettingsResult settingsResult = settingsService.getUserProjectSetting(userId, projectId, SUBSCRIBED_TO_EMAILS_SETTING, SETTING_GROUP)
+        //default to true if setting doesn't exist
+        boolean isSubscribed = true
+        if (settingsResult) {
+            isSubscribed = Boolean.valueOf(settingsResult.value)
+        }
+        return isSubscribed
     }
 
     private void setApprovalEmailSubscriptionForCurrentUser(String projectId, Boolean subscribed=true) {
@@ -163,24 +179,45 @@ class SelfReportingService {
 
         List<UserRoleRes> userRoleRes = accessSettingsStorageService.getUserRolesForProjectId(skillDefinition.projectId)
                 .findAll { it.roleName == RoleName.ROLE_PROJECT_ADMIN }
-        ProjDef projDef = projDefRepo.findByProjectId(skillDefinition.projectId)
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(userId)
-        Notifier.NotificationRequest request = new Notifier.NotificationRequest(
-                userIds: userRoleRes.collect { it.userId },
-                type: Notification.Type.SkillApprovalRequested.toString(),
-                keyValParams: [
-                        userRequesting: userAttrs.userIdForDisplay,
-                        numPoints     : skillDefinition.pointIncrement,
-                        skillName     : skillDefinition.name,
-                        approveUrl    : "${publicUrl}administrator/projects/${skillDefinition.projectId}/self-report",
-                        skillId       : skillDefinition.skillId,
-                        requestMsg    : requestMsg,
-                        projectId     : skillDefinition.projectId,
-                        publicUrl     : publicUrl,
-                        projectName   : projDef.name
-                ],
-        )
-        notifier.sendNotification(request)
+
+        String projectId = skillDefinition.projectId
+        userRoleRes = removeAdminsWhoHaveUnsubscribed(userRoleRes, projectId)
+
+        if (!userRoleRes) {
+            if (createProjectIssue) {
+                projectErrorService.noEmailableAdminsForSkillApprovalRequest(projectId)
+            }
+            log.warn("There are no users with ROLE_PROJECT_ADMIN for project [{}] who are subscribed to skill approval request emails", projectId)
+        }
+
+        if (userRoleRes) {
+            ProjDef projDef = projDefRepo.findByProjectId(skillDefinition.projectId)
+            UserAttrs userAttrs = userAttrsRepo.findByUserId(userId)
+            Notifier.NotificationRequest request = new Notifier.NotificationRequest(
+                    userIds: userRoleRes.collect { it.userId },
+                    type: Notification.Type.SkillApprovalRequested.toString(),
+                    keyValParams: [
+                            userRequesting: userAttrs.userIdForDisplay,
+                            numPoints     : skillDefinition.pointIncrement,
+                            skillName     : skillDefinition.name,
+                            approveUrl    : "${publicUrl}administrator/projects/${skillDefinition.projectId}/self-report",
+                            skillId       : skillDefinition.skillId,
+                            requestMsg    : requestMsg,
+                            projectId     : skillDefinition.projectId,
+                            publicUrl     : publicUrl,
+                            projectName   : projDef.name
+                    ],
+            )
+            notifier.sendNotification(request)
+        }
+    }
+
+    private List<UserRoleRes> removeAdminsWhoHaveUnsubscribed(List<UserRoleRes> userRolesList, String projectId) {
+        List<UserRoleRes> emailableAdmins = userRolesList.findAll() {
+            getApprovalRequestEmailSubscriptionStatus(projectId, it.userId)
+        }
+
+        return emailableAdmins
     }
 
     void removeRejectionFromView(String projectId, String userId, Integer approvalId) {

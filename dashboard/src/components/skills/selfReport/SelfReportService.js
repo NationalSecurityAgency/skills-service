@@ -49,4 +49,13 @@ export default {
   isEmailServiceSupported() {
     return axios.get('/public/isFeatureSupported?feature=emailservice').then((response) => response.data);
   },
+  isUserSubscribedToEmails(projectId) {
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/approvalEmails/isSubscribed`).then((response) => response.data);
+  },
+  subscribeUserToEmails(projectId) {
+    return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/approvalEmails/subscribe`).then((response) => response.data);
+  },
+  unsubscribeUserFromEmails(projectId) {
+    return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/approvalEmails/unsubscribe`).then((response) => response.data);
+  },
 };
