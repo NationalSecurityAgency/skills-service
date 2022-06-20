@@ -19,7 +19,7 @@ limitations under the License.
     <div>
       <v-select :options="projects.available"
                 v-model="projects.selected"
-                :loading="projects.loading"
+                :loading="loading"
                 :multiple="true"
                 label="name"
                 placeholder="Select option"
