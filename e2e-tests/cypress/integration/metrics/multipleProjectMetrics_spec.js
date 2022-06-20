@@ -169,7 +169,7 @@ describe('Multiple Project Metrics', () => {
         cy.visit('/administrator/');
         cy.clickNav('Metrics');
 
-        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector] .multiselect__tag').should('have.length', 4).as('selected');
+        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector] .vs__selected').should('have.length', 4).as('selected');
         cy.get('@selected').eq(0).contains('Inception');
 
         // validate x axis
@@ -205,7 +205,7 @@ describe('Multiple Project Metrics', () => {
         cy.visit('/administrator/');
         cy.clickNav('Metrics');
 
-        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector]  .multiselect__tag-icon').should('have.length', 4).as('removeBtns');
+        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector]  .vs__deselect').should('have.length', 4).as('removeBtns');
         cy.get('@removeBtns').eq(1).click()
         cy.get('@removeBtns').eq(1).click()
         cy.get('@removeBtns').eq(1).click()
@@ -213,23 +213,11 @@ describe('Multiple Project Metrics', () => {
         cy.trainingProf().contains('Need more projects');
     });
 
-    it('Project definitions comparison allows up to 5 projects', () => {
-        cy.viewport('macbook-11');
-        cy.visit('/administrator/');
-        cy.clickNav('Metrics');
-
-        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector]').click()
-        cy.trainingProf().contains('Grand Project 4').click()
-        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector]').click()
-
-        cy.trainingProf().contains('Maximum of 5 options selected');
-    });
-
     it('Project definitions comparison - remove project', () => {
         cy.visit('/administrator/');
         cy.clickNav('Metrics');
 
-        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector]  .multiselect__tag-icon').should('have.length', 4).as('removeBtns');
+        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector]  .vs__deselect').should('have.length', 4).as('removeBtns');
         cy.get('@removeBtns').eq(2).click()
 
         // validate x axis

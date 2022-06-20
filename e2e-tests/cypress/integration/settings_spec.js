@@ -51,7 +51,7 @@ describe('Settings Tests', () => {
             [{ colIndex: 0,  value: '(root@skills.org)' }],
         ], 5, true, null, false);
 
-        cy.contains('Enter user id').first().type('sk{enter}');
+        cy.get('[data-cy="existingUserInput"]').first().click().type('sk{enter}');
         cy.wait('@getEligibleForRoot');
         cy.contains('skills@skills.org').click();
         cy.contains('Add').first().click();
