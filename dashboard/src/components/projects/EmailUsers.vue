@@ -39,11 +39,13 @@ limitations under the License.
                 <b-overlay :show="loading.skills || loading.badges || loading.subjects" rounded="sm" opacity="0.5"
                            spinner-variant="info" spinner-type="grow" spinner-small>
                   <template v-if="currentFilterType && currentFilterType !== 'project'">
-
-                    <multiselect ref="select" v-model="selectedItem" :options="ids" label="name" :searchable="true"
-                                 :loading="isLoading" trackBy="name"
-                                :placeholder="selectText" :multiple="false"/>
-
+                    <v-select ref="select"
+                              :options="ids"
+                              v-model="selectedItem"
+                              :loading="isLoading"
+                              label="name"
+                              :placeholder="selectText">
+                    </v-select>
                    <b-form-group label="Achieved" label-for="achieved-button" label-class="text-muted" v-show="currentFilterType && currentFilterType==='skill'"
                                  class="mt-4" :disabled="criteria.allProjectUsers">
                       <b-form-checkbox v-model="skills.achieved"
@@ -122,7 +124,7 @@ limitations under the License.
 </template>
 
 <script>
-  import Multiselect from 'vue-multiselect';
+  import vSelect from 'vue-select';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import SkillsService from '../skills/SkillsService';
@@ -149,7 +151,7 @@ limitations under the License.
     components: {
       SubPageHeader,
       MarkdownEditor,
-      Multiselect,
+      vSelect,
     },
     mixins: [MsgBoxMixin],
     data() {
