@@ -111,12 +111,4 @@ limitations under the License.
 </script>
 
 <style>
-  #skills-selector .multiselect{
-    z-index: 99;
-  }
-
-  #skills-selector .multiselect__tag {
-    background-color: lightblue;
-    color: black;
-  }
 </style>

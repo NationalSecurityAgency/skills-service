@@ -95,8 +95,4 @@ limitations under the License.
 </script>
 
 <style>
-  #project-selector .multiselect__tag {
-    background-color: lightblue;
-    color: black;
-  }
 </style>
