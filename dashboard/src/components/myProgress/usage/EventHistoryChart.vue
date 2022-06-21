@@ -26,7 +26,13 @@ limitations under the License.
                 :multiple="true"
                 label="projectName"
                 placeholder="Select option"
+                :selectable="() => projects.selected.length < 5"
                 data-cy="eventHistoryChartProjectSelector">
+        <template v-if="afterListSlotText" #list-footer>
+          <li>
+            <h6 class="ml-1"> {{ afterListSlotText }}</h6>
+          </li>
+        </template>
       </v-select>
       <metrics-overlay :loading="loading" :has-data="hasData" :no-data-msg="noDataMessage">
         <apexchart type="line" height="350"
@@ -176,6 +182,12 @@ limitations under the License.
           return 'Please select at least one project from the list above.';
         }
         return 'There are no events for the selected project(s) and time period.';
+      },
+      afterListSlotText() {
+        if (this.projects.selected.length >= 5) {
+          return 'Maximum of 5 options selected. First remove a selected option to select another.';
+        }
+        return '';
       },
     },
     watch: {

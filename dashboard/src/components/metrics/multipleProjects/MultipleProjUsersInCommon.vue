@@ -24,9 +24,15 @@ limitations under the License.
                   :multiple="true"
                   label="name"
                   placeholder="Select option"
+                  :selectable="() => projects.selected.length < 5"
                   v-on:option:selected="projAdded"
                   v-on:option:deselecting="projRemoved"
                   data-cy="projectSelector">
+          <template v-if="afterListSlotText" #list-footer>
+            <li>
+              <h6 class="ml-1"> {{ afterListSlotText }}</h6>
+            </li>
+          </template>
         </v-select>
       </div>
       <div class="my-3">
@@ -171,6 +177,12 @@ limitations under the License.
       },
       enoughOverallProjects() {
         return this.availableProjects && this.availableProjects.length >= 2;
+      },
+      afterListSlotText() {
+        if (this.projects.selected.length >= 5) {
+          return 'Maximum of 5 options selected. First remove a selected option to select another.';
+        }
+        return '';
       },
     },
     mounted() {

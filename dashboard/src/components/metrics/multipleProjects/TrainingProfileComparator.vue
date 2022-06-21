@@ -23,7 +23,13 @@ limitations under the License.
                 :multiple="true"
                 label="name"
                 placeholder="Select option"
+                :selectable="() => projects.selected.length < 5"
                 data-cy="trainingProfileComparatorProjectSelector">
+        <template v-if="afterListSlotText" #list-footer>
+          <li>
+            <h6 class="ml-1"> {{ afterListSlotText }}</h6>
+          </li>
+        </template>
       </v-select>
       <div v-if="!loading && enoughProjectsSelected" class="mt-4">
       <b-row>
@@ -115,6 +121,12 @@ limitations under the License.
       },
       enoughProjectsSelected() {
         return this.projects.selected && this.projects.selected.length >= 2;
+      },
+      afterListSlotText() {
+        if (this.projects.selected.length >= 5) {
+          return 'Maximum of 5 options selected. First remove a selected option to select another.';
+        }
+        return '';
       },
     },
     watch: {

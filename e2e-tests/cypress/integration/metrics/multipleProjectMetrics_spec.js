@@ -213,6 +213,18 @@ describe('Multiple Project Metrics', () => {
         cy.trainingProf().contains('Need more projects');
     });
 
+    it('Project definitions comparison allows up to 5 projects', () => {
+        cy.viewport('macbook-11');
+        cy.visit('/administrator/');
+        cy.clickNav('Metrics');
+
+        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector]').click()
+        cy.trainingProf().contains('Grand Project 4').click()
+        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector]').click()
+
+        cy.trainingProf().contains('Maximum of 5 options selected');
+    });
+
     it('Project definitions comparison - remove project', () => {
         cy.visit('/administrator/');
         cy.clickNav('Metrics');
@@ -293,20 +305,19 @@ describe('Multiple Project Metrics', () => {
         cy.usrsInCommon('[data-cy=findUsersBtn]').should('be.enabled');
     });
 
-    // it('only support up to five projects', () => {
-    //     cy.visit('/administrator/');
-    //     cy.clickNav('Metrics');
-    //     cy.usrsInCommon().contains('No Projects Selected');
-    //
-    //     for (let i=0; i<5; i+= 1) {
-    //         cy.usrsInCommon('[data-cy=projectSelector]').click();
-    //         cy.usrsInCommon().contains(`Grand Project ${i}`).click();
-    //     }
-    //
-    //     cy.usrsInCommon('[data-cy=projectSelector]').click();
-    //     cy.usrsInCommon().contains("Maximum of 5 options selected")
-    //     cy.usrsInCommon().contains(`Grand Project 5`).should('not.exist')
-    // });
+    it('only support up to five projects', () => {
+        cy.visit('/administrator/');
+        cy.clickNav('Metrics');
+        cy.usrsInCommon().contains('No Projects Selected');
+
+        for (let i=0; i<5; i+= 1) {
+            cy.usrsInCommon('[data-cy=projectSelector]').click();
+            cy.usrsInCommon().contains(`Grand Project ${i}`).click();
+        }
+
+        cy.usrsInCommon('[data-cy=projectSelector]').click();
+        cy.usrsInCommon().contains("Maximum of 5 options selected")
+    });
 
     it('sync levels', () => {
         cy.visit('/administrator/');
