@@ -293,6 +293,21 @@ describe('Multiple Project Metrics', () => {
         cy.usrsInCommon('[data-cy=findUsersBtn]').should('be.enabled');
     });
 
+    // it('only support up to five projects', () => {
+    //     cy.visit('/administrator/');
+    //     cy.clickNav('Metrics');
+    //     cy.usrsInCommon().contains('No Projects Selected');
+    //
+    //     for (let i=0; i<5; i+= 1) {
+    //         cy.usrsInCommon('[data-cy=projectSelector]').click();
+    //         cy.usrsInCommon().contains(`Grand Project ${i}`).click();
+    //     }
+    //
+    //     cy.usrsInCommon('[data-cy=projectSelector]').click();
+    //     cy.usrsInCommon().contains("Maximum of 5 options selected")
+    //     cy.usrsInCommon().contains(`Grand Project 5`).should('not.exist')
+    // });
+
     it('sync levels', () => {
         cy.visit('/administrator/');
         cy.clickNav('Metrics');

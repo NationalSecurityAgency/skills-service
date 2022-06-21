@@ -182,8 +182,7 @@ limitations under the License.
       'projects.selected': function rebuild() {
         this.props.projIds = this.projects.selected.map((project) => project.projectId);
         this.loadData();
-        this.projects.available = this.availableProjects.map((proj) => ({ ...proj }));
-        this.projects.available = this.projects.available.filter((el) => !this.projects.selected.some((sel) => sel.projectId === el.projectId));
+        this.projects.available = this.availableProjects.map((proj) => ({ ...proj })).filter((el) => !this.projects.selected.some((sel) => sel.projectId === el.projectId));
       },
     },
     methods: {
@@ -208,7 +207,7 @@ limitations under the License.
                 this.hasData = true;
                 this.series = response.map((item) => {
                   const ret = {};
-                  ret.project = this.projects.available.find(({ projectId }) => projectId === item.project);
+                  ret.project = this.availableProjects.find(({ projectId }) => projectId === item.project);
                   ret.name = ret.project.projectName;
                   ret.data = item.countsByDay.map((it) => [it.timestamp, it.num]);
                   return ret;

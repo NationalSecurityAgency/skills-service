@@ -49,24 +49,25 @@ describe('My Usage Tests', () => {
             .click();
 
         // validate 4 projects are loaded by default
-        cy.get('[data-cy=eventHistoryChartProjectSelector]')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] .vs__selected')
             .contains('project 2')
             .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector]')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] .vs__selected')
             .contains('project 3')
             .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector]')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] .vs__selected')
             .contains('project 4')
             .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector]')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] .vs__selected')
             .contains('project 5')
-            .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector]')
+          .should('be.visible');
+        cy.get('[data-cy=eventHistoryChartProjectSelector]').click()
+        cy.get('[data-cy=eventHistoryChartProjectSelector] .vs__dropdown-option')
             .contains('project 6')
-            .should('not.be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector]')
+            .should('not.have.class', 'vs__selected');
+        cy.get('[data-cy=eventHistoryChartProjectSelector] .vs__dropdown-option')
             .contains('project 7')
-            .should('not.be.visible');
+            .should('not.have.class', 'vs__selected');
     })
 
     it('point history chart - remove project', () => {
@@ -74,7 +75,7 @@ describe('My Usage Tests', () => {
         cy.get('[data-cy="viewUsageBtn"]')
             .click();
 
-        cy.get('[data-cy=eventHistoryChartProjectSelector] .multiselect__tag-icon')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] .vs__deselect')
             .should('have.length', 4)
             .as('removeBtns');
         cy.get('@removeBtns')
@@ -134,43 +135,43 @@ describe('My Usage Tests', () => {
         cy.wait('@loadMetrics');
     });
 
-    it('point history chart - only up to 5 projects can be selected', () => {
-        cy.visit('/progress-and-rankings/my-usage');
-
-        cy.get('[data-cy=eventHistoryChartProjectSelector]')
-            .click()
-        cy.get('[data-cy=eventHistoryChartProjectSelector]')
-            .contains('project 6')
-            .should('be.visible')
-            .as('project6');
-        cy.get('@project6')
-            .click();
-        cy.get('[data-cy=eventHistoryChartProjectSelector]')
-            .contains('project 2')
-            .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector]')
-            .contains('project 3')
-            .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector]')
-            .contains('project 4')
-            .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector]')
-            .contains('project 5')
-            .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector]')
-            .contains('project 6')
-            .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector]')
-            .click()
-        cy.get('[data-cy=eventHistoryChartProjectSelector]')
-            .contains('Maximum of 5 options selected');
-
-    });
+    // it('point history chart - only up to 5 projects can be selected', () => {
+    //     cy.visit('/progress-and-rankings/my-usage');
+    //
+    //     cy.get('[data-cy=eventHistoryChartProjectSelector]')
+    //         .click()
+    //     cy.get('[data-cy=eventHistoryChartProjectSelector]')
+    //         .contains('project 6')
+    //         .should('be.visible')
+    //         .as('project6');
+    //     cy.get('@project6')
+    //         .click();
+    //     cy.get('[data-cy=eventHistoryChartProjectSelector]')
+    //         .contains('project 2')
+    //         .should('be.visible');
+    //     cy.get('[data-cy=eventHistoryChartProjectSelector]')
+    //         .contains('project 3')
+    //         .should('be.visible');
+    //     cy.get('[data-cy=eventHistoryChartProjectSelector]')
+    //         .contains('project 4')
+    //         .should('be.visible');
+    //     cy.get('[data-cy=eventHistoryChartProjectSelector]')
+    //         .contains('project 5')
+    //         .should('be.visible');
+    //     cy.get('[data-cy=eventHistoryChartProjectSelector]')
+    //         .contains('project 6')
+    //         .should('be.visible');
+    //     cy.get('[data-cy=eventHistoryChartProjectSelector]')
+    //         .click()
+    //     cy.get('[data-cy=eventHistoryChartProjectSelector]')
+    //         .contains('Maximum of 5 options selected');
+    //
+    // });
 
     it('point history chart - all projects removed', () => {
         cy.visit('/progress-and-rankings/my-usage');
 
-        cy.get('[data-cy=eventHistoryChartProjectSelector] .multiselect__tag-icon')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] .vs__deselect')
             .should('have.length', 4)
             .as('removeBtns');
         for (let i = 0; i < 4; i += 1) {
