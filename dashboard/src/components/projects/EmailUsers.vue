@@ -44,7 +44,8 @@ limitations under the License.
                               v-model="selectedItem"
                               :loading="isLoading"
                               label="name"
-                              :placeholder="selectText">
+                              :placeholder="selectText"
+                              data-cy="filter-selector">
                     </v-select>
                    <b-form-group label="Achieved" label-for="achieved-button" label-class="text-muted" v-show="currentFilterType && currentFilterType==='skill'"
                                  class="mt-4" :disabled="criteria.allProjectUsers">

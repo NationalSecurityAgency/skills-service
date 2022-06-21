@@ -81,21 +81,23 @@ describe('My Usage Tests', () => {
         cy.get('@removeBtns')
             .eq(2)
             .click()
-        cy.get('[data-cy=eventHistoryChartProjectSelector]')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] .vs__selected')
             .contains('project 2')
             .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector]')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] .vs__selected')
             .contains('project 3')
             .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector]')
-            .contains('project 4')
-            .should('not.be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector]')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] .vs__selected')
             .contains('project 5')
             .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector]')
-            .contains('project 6')
-            .should('not.be.visible');
+
+        cy.get('[data-cy=eventHistoryChartProjectSelector]').click()
+        cy.get('[data-cy=eventHistoryChartProjectSelector] .vs__dropdown-option')
+          .contains('project 4')
+          .should('not.have.class', 'vs__selected');
+        cy.get('[data-cy=eventHistoryChartProjectSelector] .vs__dropdown-option')
+          .contains('project 6')
+          .should('not.have.class', 'vs__selected');
     });
 
     it('point history chart - add project', () => {
@@ -187,7 +189,7 @@ describe('My Usage Tests', () => {
     it('point history chart - projects with no user events', () => {
         cy.visit('/progress-and-rankings/my-usage');
 
-        cy.get('[data-cy=eventHistoryChartProjectSelector] .multiselect__tag-icon')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] .vs__deselect')
             .should('have.length', 4)
             .as('removeBtns');
         for (let i = 0; i < 4; i += 1) {
@@ -209,11 +211,11 @@ describe('My Usage Tests', () => {
             .should('be.visible');
         cy.get('[data-cy=eventHistoryChartProjectSelector]')
             .contains('project 3')
-            .should('not.be.visible');
+            .should('not.have.class', 'vs__selected');
         cy.get('[data-cy=eventHistoryChartProjectSelector]')
             .contains('project 4')
-            .should('not.be.visible');
-        // cy.get('[data-cy=eventHistoryChartProjectSelector]').click()
+            .should('not.have.class', 'vs__selected');
+        cy.get('[data-cy=eventHistoryChartProjectSelector]').click()
         cy.get('[data-cy=eventHistoryChart]')
             .contains('There are no events for the selected project(s) and time period.');
     });
