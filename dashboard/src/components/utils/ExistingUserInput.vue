@@ -32,10 +32,13 @@ limitations under the License.
               :createOption="createTag"
               :loading="isFetching"
               :class="{'col': (userSuggestOptions && userSuggestOptions.length > 0)}">
-      <template v-if="creatingTag" #list-footer>
-        <li>
-          <h6 class="ml-1">Enter to select</h6>
-        </li>
+      <template v-if="creatingTag" #option="{ userId }">
+        <div class="position-relative">
+          <h6>{{ userId }}</h6>
+          <div v-if="userId == currentTagValue" class="position-absolute text-light small click-indicator" style="right: 5px; bottom: 0px;">
+            Enter to Select
+          </div>
+        </div>
       </template>
     </v-select>
 
@@ -133,6 +136,7 @@ limitations under the License.
         userSuggestOptions: [],
         selectedSuggestOption: null,
         creatingTag: false,
+        currentTagValue: '',
       };
     },
     computed: {
@@ -179,6 +183,7 @@ limitations under the License.
     methods: {
       suggestUsers: debounce(function debouncedSuggestUsers(query) {
         this.creatingTag = this.canEnterNewUser && query;
+        this.currentTagValue = query;
         this.isFetching = true;
         let q = query;
         const postBody = {};
