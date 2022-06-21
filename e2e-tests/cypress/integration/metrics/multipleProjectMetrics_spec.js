@@ -293,21 +293,6 @@ describe('Multiple Project Metrics', () => {
         cy.usrsInCommon('[data-cy=findUsersBtn]').should('be.enabled');
     });
 
-    it('only support up to five projects', () => {
-        cy.visit('/administrator/');
-        cy.clickNav('Metrics');
-        cy.usrsInCommon().contains('No Projects Selected');
-
-        for (let i=0; i<5; i+= 1) {
-            cy.usrsInCommon('[data-cy=projectSelector]').click();
-            cy.usrsInCommon().contains(`Grand Project ${i}`).click();
-        }
-
-        cy.usrsInCommon('[data-cy=projectSelector]').click();
-        cy.usrsInCommon().contains("Maximum of 5 options selected")
-        cy.usrsInCommon().contains(`Grand Project 5`).should('not.exist')
-    });
-
     it('sync levels', () => {
         cy.visit('/administrator/');
         cy.clickNav('Metrics');
@@ -566,7 +551,7 @@ describe('Multiple Project Metrics', () => {
         cy.get('@headers').eq(2).contains('Grand Project 5')
         cy.get('@headers').eq(3).contains('Grand Project 4')
 
-        cy.usrsInCommon('[data-cy=projectSelector] .multiselect__tag-icon').should('have.length', 3).as('removeBtns');
+        cy.usrsInCommon('[data-cy=projectSelector] .vs__deselect').should('have.length', 3).as('removeBtns');
         cy.get('@removeBtns').eq(1).click()
 
         cy.get('[data-cy=findUsersBtn]').click();
@@ -600,7 +585,7 @@ describe('Multiple Project Metrics', () => {
         cy.get('@headers').eq(2).contains('Grand Project 5')
         cy.get('@headers').eq(3).contains('Grand Project 4')
 
-        cy.get(`${multiProjSel} [data-cy=projectSelector] .multiselect__tag-icon`).should('have.length', 3).as('removeBtns');
+        cy.get(`${multiProjSel} [data-cy=projectSelector] .vs__deselect`).should('have.length', 3).as('removeBtns');
         cy.get('@removeBtns').eq(1).click()
         cy.get(resTable).should('not.exist')
     });
