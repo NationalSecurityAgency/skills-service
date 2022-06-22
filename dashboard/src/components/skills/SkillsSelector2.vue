@@ -46,7 +46,7 @@ limitations under the License.
           <span class="selected-tag ml-2 mt-2 border rounded p-1">
             <span>{{ option.name }}</span>
             <span class="border rounded ml-1 remove-x"
-                  :aria-label="`click or enter key to remove ${option.name}`"
+                  :aria-label="`remove ${option.name} skill option button`"
                   tabindex="0"
                   v-on:keyup.enter="considerRemoval(option)"
                   v-on:click.stop="considerRemoval(option)">❌
