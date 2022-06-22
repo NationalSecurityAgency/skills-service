@@ -45,7 +45,12 @@ limitations under the License.
         <div style="display: flex; align-items: baseline">
           <span class="selected-tag ml-2 mt-2 border rounded p-1">
             <span>{{ option.name }}</span>
-            <span class="border rounded ml-1 remove-x" v-on:click.stop="considerRemoval(option)">❌</span>
+            <span class="border rounded ml-1 remove-x"
+                  :aria-label="`remove ${option.name} skill option button`"
+                  tabindex="0"
+                  v-on:keyup.enter="considerRemoval(option)"
+                  v-on:click.stop="considerRemoval(option)">❌
+            </span>
           </span>
         </div>
       </template>

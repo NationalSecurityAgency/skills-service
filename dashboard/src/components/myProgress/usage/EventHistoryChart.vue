@@ -28,9 +28,9 @@ limitations under the License.
                 placeholder="Select option"
                 :selectable="() => projects.selected.length < 5"
                 data-cy="eventHistoryChartProjectSelector">
-        <template v-if="afterListSlotText" #list-footer>
+        <template v-if="beforeListSlotText" #list-header>
           <li>
-            <h6 class="ml-1"> {{ afterListSlotText }}</h6>
+            <h6 class="ml-1"> {{ beforeListSlotText }}</h6>
           </li>
         </template>
       </v-select>
@@ -183,7 +183,7 @@ limitations under the License.
         }
         return 'There are no events for the selected project(s) and time period.';
       },
-      afterListSlotText() {
+      beforeListSlotText() {
         if (this.projects.selected.length >= 5) {
           return 'Maximum of 5 options selected. First remove a selected option to select another.';
         }
