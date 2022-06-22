@@ -131,7 +131,6 @@ require('./interceptors/errorHandler');
 require('./interceptors/clientVersionInterceptor');
 require('./interceptors/userAgreementInterceptor');
 require('./interceptors/upgradeInProgressInterceptor');
-require('vue-multiselect/dist/vue-multiselect.min.css');
 
 const isActiveProjectIdChange = (to, from) => to.params.projectId !== from.params.projectId;
 const isAdminPage = (route) => route.path.startsWith('/administrator');

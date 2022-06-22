@@ -327,7 +327,7 @@ describe('Root Pin and Unpin Tests', () => {
         [{ colIndex: 0,  value: '(root@skills.org)' }],
       ], 5, true, null, false);
 
-      cy.contains('Enter user id').first().type(`${projAdminUserPrefix}{enter}`);
+      cy.get('[data-cy="existingUserInput"]').first().click().type(`${projAdminUserPrefix}{enter}`);
       cy.wait('@getEligibleForRoot');
       cy.contains(projAdminUserPrefix).click();
       cy.contains('Add').first().click();

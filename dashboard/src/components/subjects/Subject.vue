@@ -40,7 +40,7 @@ limitations under the License.
     <edit-subject v-if="showEditSubject" v-model="showEditSubject" :id="subjectInternal.subjectId"
                   :subject="subjectInternal" :is-edit="true" @subject-saved="subjectSaved" @hidden="hiddenEventHandler"/>
 
-    <removal-validation v-if="showDeleteDialog" v-model="showDeleteDialog" @do-remove="doDeleteSubject">
+    <removal-validation v-if="showDeleteDialog" v-model="showDeleteDialog" @do-remove="doDeleteSubject" @hidden="handleDeleteCancelled">
       <p>
         This will remove <span class="text-primary font-weight-bold">{{ this.subjectInternal.name}}</span>.
       </p>
@@ -200,6 +200,11 @@ limitations under the License.
             this.$refs.subjectCardControls.focusOnEdit();
             resolve();
           });
+        });
+      },
+      handleDeleteCancelled() {
+        this.$nextTick(() => {
+          this.$refs.subjectCardControls.focusOnDelete();
         });
       },
     },

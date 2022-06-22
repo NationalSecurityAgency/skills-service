@@ -51,7 +51,7 @@ describe('Settings Tests', () => {
             [{ colIndex: 0,  value: '(root@skills.org)' }],
         ], 5, true, null, false);
 
-        cy.contains('Enter user id').first().type('sk{enter}');
+        cy.get('[data-cy="existingUserInput"]').first().click().type('sk{enter}');
         cy.wait('@getEligibleForRoot');
         cy.contains('skills@skills.org').click();
         cy.contains('Add').first().click();
@@ -119,7 +119,7 @@ describe('Settings Tests', () => {
             [{ colIndex: 0,  value: '(root@skills.org)' }],
         ], 5, true, null, false);
 
-        cy.contains('Enter user id').first().type('sk/foo{enter}');
+        cy.get('[data-cy="existingUserInput"]').first().click().type('sk/foo{enter}');
         cy.wait('@getEligibleForRoot');
     });
 
@@ -143,7 +143,7 @@ describe('Settings Tests', () => {
             [{ colIndex: 0,  value: '(root@skills.org)' }],
         ], 5, true, null, false);
 
-        cy.contains('Enter user id').first().type('{enter}');
+        cy.get('[data-cy="existingUserInput"]').first().type('{enter}');
         cy.wait('@getEligibleForRoot');
         cy.contains('skills@skills.org').click();
         cy.contains('Add').first().click();
@@ -177,7 +177,7 @@ describe('Settings Tests', () => {
         cy.wait('@checkRoot');
         cy.clickNav('Security');
 
-        cy.get('[data-cy=supervisorrm]  div.multiselect__tags').type('root');
+        cy.get('[data-cy=supervisorrm] input.vs__search').click().type('root');
         cy.wait('@getEligibleForSupervisor');
         cy.get('[data-cy=supervisorrm]').contains('root@skills.org').click();
         cy.get('[data-cy=supervisorrm]').contains('Add').click();
@@ -201,15 +201,15 @@ describe('Settings Tests', () => {
 
         cy.visit('/settings/security');
 
-        cy.get('[data-cy=supervisorrm]  div.multiselect__tags').type('root');
+        cy.get('[data-cy=supervisorrm] input.vs__search').click().type('root');
         cy.wait('@getEligibleForSupervisor');
         cy.get('[data-cy=supervisorrm]').contains('root@skills.org').click();
         cy.get('[data-cy=supervisorrm]').contains('Add').click();
         cy.wait('@addSupervisor');
 
-        cy.get('[data-cy=supervisorrm]  div.multiselect__tags').type('root');
+        cy.get('[data-cy=supervisorrm] input.vs__search').click().type('skills');
         cy.wait('@getEligibleForSupervisor');
-        cy.get('[data-cy=supervisorrm]').contains('skills@skills.org').click();
+        cy.get('[data-cy=supervisorrm]').contains('skills@skills.org').click({force: true});
         cy.get('[data-cy=supervisorrm]').contains('Add').click();
         cy.wait('@addSupervisor');
 
@@ -255,7 +255,7 @@ describe('Settings Tests', () => {
         cy.contains('Settings').click();
         cy.wait('@checkRoot');
         cy.clickNav('Security');
-        cy.get('[data-cy=supervisorrm]  div.multiselect__tags').type('root');
+        cy.get('[data-cy=supervisorrm] input.vs__search').click().type('blah');
         cy.wait('@getEligibleForSupervisor');
         cy.get('[data-cy=supervisorrm]').contains('blah@skills.org').click();
         cy.get('[data-cy=supervisorrm]').contains('Add').click();
@@ -288,7 +288,7 @@ describe('Settings Tests', () => {
         cy.contains('Settings').click();
         cy.wait('@checkRoot');
         cy.contains('Security').click();
-        cy.get('[data-cy=supervisorrm]  div.multiselect__tags').type('foo/bar{enter}');
+        cy.get('[data-cy=supervisorrm] input.vs__search').click().type('sk/foo{enter}');
         cy.wait('@getEligibleForSupervisor');
     });
 

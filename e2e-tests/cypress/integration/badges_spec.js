@@ -420,7 +420,7 @@ describe('Badges Tests', () => {
 
         cy.get('[data-cy=manageBtn_TestBadgeBadge]').click();
         cy.get('#skills-selector').click();
-        cy.get('#skills-selector input[type=text]').type('{enter}');
+        cy.get('#skills-selector .vs__dropdown-option').eq(0).click();
         cy.contains('.router-link-active', 'Badges').click();
 
         cy.contains('Test Badge');
@@ -460,7 +460,7 @@ describe('Badges Tests', () => {
 
         cy.get('[data-cy=manageBtn_TestBadgeBadge]').click();
         cy.get('#skills-selector').click();
-        cy.get('#skills-selector input[type=text]').type('{enter}');
+        cy.get('#skills-selector .vs__dropdown-option').eq(0).click();
         cy.contains('.router-link-active', 'Badges').click();
 
         cy.contains('Test Badge');
@@ -498,7 +498,7 @@ describe('Badges Tests', () => {
         cy.wait('@loadBadges');
         cy.get('[data-cy=manageBtn_TestBadgeBadge]').click();
         cy.get('#skills-selector').click();
-        cy.get('#skills-selector input[type=text]').type('{enter}');
+        cy.get('#skills-selector .vs__dropdown-option').eq(0).click();
         cy.contains('.router-link-active', 'Badges').click();
         cy.contains('Test Badge').should('exist');
         cy.get('[data-cy=badgeStatus]').contains('Status: Disabled').should('exist');
@@ -533,7 +533,7 @@ describe('Badges Tests', () => {
         cy.wait('@loadBadges');
         cy.get('[data-cy=manageBtn_TestBadgeBadge]').click();
         cy.get('#skills-selector').click();
-        cy.get('#skills-selector input[type=text]').type('{enter}');
+        cy.get('#skills-selector .vs__dropdown-option').eq(0).click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'Skill 1' }, { colIndex: 1,  value: 'skill1' }],
         ], 5);
@@ -1173,5 +1173,24 @@ describe('Badges Tests', () => {
         cy.validateElementsOrder('[data-cy="badgeCard"] [data-cy="titleLink"]', ['Badge 3', 'Badge 2', 'Badge 1']);
         cy.get('[data-cy="badgeCard-badge3"] [data-cy="sortControlHandle"]')
             .should('have.focus');
+    });
+
+    it('cancelling delete dialog should return focus to delete button', () => {
+        cy.createBadge(1, 1);
+        cy.createBadge(1, 2);
+        cy.createBadge(1, 3);
+        cy.createBadge(1, 4);
+        cy.createBadge(1, 5);
+
+        cy.intercept('GET', '/admin/projects/proj1/badges').as('getBadges');
+        cy.visit('/administrator/projects/proj1/badges');
+        cy.wait('@getBadges');
+
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy="deleteBtn"]').click();
+        cy.contains('Removal Safety Check');
+        cy.get('[data-cy=closeRemovalSafetyCheck]').click();
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy="deleteBtn"]').should('have.focus');
+
+
     });
 });

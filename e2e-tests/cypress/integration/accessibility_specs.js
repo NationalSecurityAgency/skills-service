@@ -416,11 +416,10 @@ describe('Accessibility Tests', () => {
     cy.customA11y();
 
     cy.get('[data-cy="nav-Add Event"]').click();
-    cy.contains('Enter user id');
     cy.customLighthouse();
     cy.customA11y();
-    cy.get('.multiselect__select').click();
-    cy.get('.multiselect__element').eq(0).click();
+    cy.get('[data-cy="userIdInput"]').click();
+    cy.get('[data-cy="userIdInput"] .vs__dropdown-option').eq(0).click();
     cy.get('[data-cy="eventDatePicker"]').click()
     cy.get('.vdp-datepicker__calendar .prev').first().click()
     cy.get('.vdp-datepicker__calendar .prev').first().click()
@@ -514,21 +513,26 @@ describe('Accessibility Tests', () => {
     cy.get('[data-cy=badgeName]').type('global badge');
     cy.get('[data-cy=saveBadgeButton]').click();
     cy.contains('Manage').click();
-    cy.contains('This is 1');
     cy.customLighthouse();
     cy.customA11y();
 
-    cy.get('.multiselect__select').click();
-    cy.get('.multiselect__element').eq(0).click();
+    cy.get('#skills-selector').click();
+    cy.contains('This is 1');
+    cy.get('#skills-selector .vs__dropdown-option').eq(0).click();
     cy.customA11y();
     cy.get('[data-cy=nav-Levels]').click();
     cy.contains('No Levels Added Yet');
     cy.customLighthouse();
 
-    cy.get('.multiselect__select').eq(0).click();
-    cy.get('.multiselect__element').eq(0).click();
-    cy.get('.multiselect__select').eq(1).click();
-    cy.get('.multiselect__element').eq(1).click();
+
+    cy.get('#project-selector').click();
+    cy.get('#project-selector .vs__dropdown-option').eq(0).click();
+    cy.get('#level-selector').click();
+    cy.get('#level-selector .vs__dropdown-option').eq(1).click();
+    // cy.get('.multiselect__select').eq(0).click();
+    // cy.get('.multiselect__element').eq(0).click();
+    // cy.get('.multiselect__select').eq(1).click();
+    // cy.get('.multiselect__element').eq(1).click();
 
     cy.get('[data-cy=addGlobalBadgeLevel]').click();
     cy.customA11y();

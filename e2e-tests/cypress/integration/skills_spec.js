@@ -382,31 +382,33 @@ describe('Skills Tests', () => {
     cy.contains('TWO').click();
     cy.get('.existingUserInput button').contains('TWO');
 
-    cy.contains('Enter user id').type('foo{enter}');
+    cy.get('[data-cy="userIdInput"]').click().type('foo{enter}');
     cy.wait('@suggestUsers');
     cy.clickButton('Add');
     cy.wait('@addSkillEvent');
     cy.get('.text-success', {timeout: 5 * 1000}).contains('Added points for');
     cy.get('.text-success', {timeout: 5 * 1000}).contains('[foo]');
 
-    cy.contains('Enter user id').type('bar{enter}');
+    cy.get('[data-cy="userIdInput"]').click().type('bar{enter}');
     cy.wait('@suggestUsers');
     cy.clickButton('Add');
     cy.wait('@addSkillEvent');
     cy.get('.text-success', {timeout: 5 * 1000}).contains('Added points for');
     cy.get('.text-success', {timeout: 5 * 1000}).contains('[bar]');
 
-    cy.contains('Enter user id').type('baz{enter}');
+    cy.get('[data-cy="userIdInput"]').click().type('baz{enter}');
     cy.wait('@suggestUsers');
     cy.clickButton('Add');
     cy.wait('@addSkillEvent');
     cy.get('.text-success', {timeout: 5 * 1000}).contains('Added points for');
     cy.get('.text-success', {timeout: 5 * 1000}).contains('[baz]');
 
-    cy.contains('Enter user id').type('fo');
+    cy.get('[data-cy="userIdInput"]').click().type('fo{enter}');
     cy.wait('@suggestUsers');
-    cy.get('li.multiselect__element').contains('foo').click();
+    cy.get('[data-cy="userIdInput"]').click();
+    cy.get('[data-cy="userIdInput"] .vs__dropdown-option').contains('foo').click({force: true});
   });
+
   it('Add Skill Event for days in past correctly does not subtract one day from selected date', () => {
     cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
       projectId: 'proj1',
@@ -440,7 +442,7 @@ describe('Skills Tests', () => {
     cy.contains('Add Event').click();
 
     cy.contains('ONE').click();
-    cy.contains('Enter user id').type('foo{enter}');
+    cy.get('[data-cy="userIdInput"]').click().type('foo{enter}');
     // cy.wait('@suggestUsers');
 
     const date = dayjs().subtract(1, 'month').date(10)
@@ -488,7 +490,7 @@ describe('Skills Tests', () => {
     cy.contains('TWO').click();
     cy.get('.existingUserInput button').contains('TWO');
 
-    cy.contains('Enter user id').type('foo/bar{enter}');
+    cy.get('[data-cy="userIdInput"]').click().type('foo/bar{enter}');
     cy.wait('@suggestUsers');
   });
 
@@ -521,7 +523,7 @@ describe('Skills Tests', () => {
 
     cy.contains('Add Event').click();
 
-    cy.contains('Enter user id').type('foo{enter}');
+    cy.get('[data-cy="userIdInput"]').click().type('foo{enter}');
 
     cy.clickButton('Add');
     cy.wait('@addUser');
@@ -1235,7 +1237,7 @@ describe('Skills Tests', () => {
 
 
     cy.visit('/administrator/projects/proj1/');
-    cy.get('[data-cy="skillsSelector"]').contains('Search and Navigate directly to a skill').should('be.visible')
+    cy.get('input.vs__search').invoke('attr', 'placeholder').should('contain', 'Search and Navigate directly to a skill')
     cy.get('[data-cy="skillsSelector"]').click();
     cy.get('[data-cy="skillsSelector"]').contains('Type to search for skills').should('be.visible')
     cy.get('[data-cy="skillsSelector"]').type('sUbJ2')
@@ -1261,7 +1263,7 @@ describe('Skills Tests', () => {
 
     // search produces no results
     cy.visit('/administrator/projects/proj1/');
-    cy.get('[data-cy="skillsSelector"]').contains('Search and Navigate directly to a skill').should('be.visible')
+    // cy.get('[data-cy="skillsSelector"]').contains('Search and Navigate directly to a skill').should('be.visible')
     cy.get('[data-cy="skillsSelector"]').type('sUbJ2*kd')
     cy.get('[data-cy="skillsSelector"]').contains('No elements found. Consider changing the search query').should('be.visible')
 

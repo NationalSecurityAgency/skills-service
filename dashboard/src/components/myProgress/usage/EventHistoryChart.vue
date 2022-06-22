@@ -20,14 +20,20 @@ limitations under the License.
         <span class="text-muted ml-2">|</span>
         <time-length-selector ref="timeLengthSelector" :options="timeSelectorOptions" @time-selected="updateTimeRange"/>
       </template>
-      <multiselect v-model="projects.selected"
-                  :options="projects.available"
-                  label="projectName"
-                  :multiple="true"
-                  track-by="projectId"
-                  :hide-selected="true"
-                  :max="5"
-                  data-cy="eventHistoryChartProjectSelector"/>
+      <v-select :options="projects.available"
+                v-model="projects.selected"
+                :loading="loading"
+                :multiple="true"
+                label="projectName"
+                placeholder="Select option"
+                :selectable="() => projects.selected.length < 5"
+                data-cy="eventHistoryChartProjectSelector">
+        <template v-if="afterListSlotText" #list-footer>
+          <li>
+            <h6 class="ml-1"> {{ afterListSlotText }}</h6>
+          </li>
+        </template>
+      </v-select>
       <metrics-overlay :loading="loading" :has-data="hasData" :no-data-msg="noDataMessage">
         <apexchart type="line" height="350"
                   :ref="chartId"
@@ -40,7 +46,7 @@ limitations under the License.
 </template>
 
 <script>
-  import Multiselect from 'vue-multiselect';
+  import vSelect from 'vue-select';
   import dayjs from '@/common-components/DayJsCustomizer';
   import numberFormatter from '@//filters/NumberFilter';
   import MetricsCard from '../../metrics/utils/MetricsCard';
@@ -51,7 +57,7 @@ limitations under the License.
   export default {
     name: 'EventHistoryChart',
     components: {
-      MetricsCard, MetricsOverlay, TimeLengthSelector, Multiselect,
+      MetricsCard, MetricsOverlay, TimeLengthSelector, vSelect,
     },
     props: {
       availableProjects: {
@@ -163,7 +169,7 @@ limitations under the License.
     },
     computed: {
       enoughOverallProjects() {
-        return this.projects.available && this.projects.available.length > 0;
+        return this.availableProjects && this.availableProjects.length > 0;
       },
       enoughProjectsSelected() {
         return this.projects.selected && this.projects.selected.length > 0;
@@ -177,11 +183,18 @@ limitations under the License.
         }
         return 'There are no events for the selected project(s) and time period.';
       },
+      afterListSlotText() {
+        if (this.projects.selected.length >= 5) {
+          return 'Maximum of 5 options selected. First remove a selected option to select another.';
+        }
+        return '';
+      },
     },
     watch: {
       'projects.selected': function rebuild() {
         this.props.projIds = this.projects.selected.map((project) => project.projectId);
         this.loadData();
+        this.projects.available = this.availableProjects.map((proj) => ({ ...proj })).filter((el) => !this.projects.selected.some((sel) => sel.projectId === el.projectId));
       },
     },
     methods: {
@@ -206,7 +219,7 @@ limitations under the License.
                 this.hasData = true;
                 this.series = response.map((item) => {
                   const ret = {};
-                  ret.project = this.projects.available.find(({ projectId }) => projectId === item.project);
+                  ret.project = this.availableProjects.find(({ projectId }) => projectId === item.project);
                   ret.name = ret.project.projectName;
                   ret.data = item.countsByDay.map((it) => [it.timestamp, it.num]);
                   return ret;

@@ -2970,4 +2970,55 @@ class CatalogSkillTests extends CatalogIntSpec {
         then:
         stats
     }
+  
+    def "acknowledging approval request rejection on importing project should not cause error"() {
+        def project1 = createProject(1)
+        def project2 = createProject(2)
+        def project3 = createProject(3)
+
+        def p1subj1 = createSubject(1, 1)
+        def p2subj1 = createSubject(2, 1)
+        def p3subj1 = createSubject(3, 1)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 10)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 10)
+        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 10)
+
+        skill.pointIncrement = 200
+        skill.numPerformToCompletion = 1
+        skill.selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(project1)
+        skillsService.createProject(project2)
+        skillsService.createProject(project3)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p2subj1)
+        skillsService.createSubject(p3subj1)
+
+        skillsService.createSkill(skill)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(skill3)
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
+        skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
+
+        skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+
+        when:
+        def user = getRandomUsers(1)[0]
+        def res = skillsService.addSkill([projectId: project1.projectId, skillId: skill.skillId], user)
+        assert res.body.explanation == "Skill was submitted for approval"
+
+        def p1Approvals = skillsService.getApprovals(project1.projectId, 7, 1, 'requestedOn', false)
+        skillsService.rejectSkillApprovals(project1.projectId, [p1Approvals.data[0].id])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        skillsService.removeRejectionFromView(project2.projectId, p1Approvals.data[0].id, user)
+
+        def p2Approvals = skillsService.getApprovals(project2.projectId, 7, 1, 'requestedOn', false)
+        p1Approvals = skillsService.getApprovals(project1.projectId, 7, 1, 'requestedOn', false)
+
+        then:
+        p1Approvals.count == 0
+        p2Approvals.count == 0
+    }
+
 }
