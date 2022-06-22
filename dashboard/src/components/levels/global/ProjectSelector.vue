@@ -16,6 +16,7 @@ limitations under the License.
 <template>
   <div id="project-selector">
     <v-select :options="projects"
+              v-model="selectedInternal"
               placeholder="Select Project..."
               :filterable="internalSearch"
               label="name"
