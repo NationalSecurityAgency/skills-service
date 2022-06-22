@@ -508,13 +508,17 @@ class SkillCatalogService {
         stats.users = []
         List<SkillDef> copies = skillDefRepo.findSkillsCopiedFrom(es.skill.id)
         copies?.each {
-            SkillDef subject = relationshipService.getParentSkill(it)
+            SkillDef maybeSubject = relationshipService.getParentSkill(it)
+            if (maybeSubject.type == SkillDef.ContainerType.SkillsGroup) {
+                maybeSubject = relationshipService.getParentSkill(maybeSubject)
+                assert maybeSubject && maybeSubject.type == SkillDef.ContainerType.Subject, "a group should always be contained by a subject"
+            }
             stats.users << new ExportedSkillUser(
                     importingProjectId: it.projectId,
-                    importingProjectName: subject.projDef.name,
+                    importingProjectName: maybeSubject.projDef.name,
                     importedOn: it.created, importedIntoSubjectId:
-                    subject.skillId,
-                    importedIntoSubjectName: subject.name,
+                    maybeSubject.skillId,
+                    importedIntoSubjectName: maybeSubject.name,
                     enabled: it.enabled,
             )
         }
