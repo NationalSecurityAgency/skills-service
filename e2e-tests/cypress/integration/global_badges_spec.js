@@ -227,7 +227,7 @@ describe('Global Badges Tests', () => {
       cy.clickNav('Badges');
       cy.wait('@getBadges');
       cy.get('[data-cy="manageBtn_a_badge"]').click();
-      cy.get('.multiselect__tags').click();
+      cy.get('#skills-selector').click();
       cy.get('[data-cy="skillsSelectionItem-proj2-skill1"]').click();
       cy.validateTable(tableSelector, [
           [{ colIndex: 0,  value: 'proj2' }, { colIndex: 1,  value: 'This is 1' }, { colIndex: 2,  value: 'skill1' }],
@@ -236,30 +236,27 @@ describe('Global Badges Tests', () => {
       cy.clickNav('Levels');
       cy.wait('@getAvailableLevels');
 
-      cy.get('#skills-selector').first().click();
-      cy.get('.multiselect__tags input').first().type('proj2{enter}');
+      cy.get('#project-selector').click().type('proj2{enter}');
 
-      cy.get('#level-selector').last().click();
       cy.wait('@getLevels');
-      cy.get('.multiselect__tags input').last().type('5{enter}');
+      cy.get('#level-selector').click().type('5{enter}');
 
       cy.contains('Add').click();
       cy.validateTable(levelsTableSelector, [
           [{ colIndex: 0,  value: 'proj2' }, { colIndex: 1,  value: '5' }],
       ], 5);
 
-
       cy.get('[data-label=Level]').contains('5');
       cy.intercept('/api/projects/Inception/skills/AddOrModifyLevels').as('modifyLevel');
       cy.get('[data-cy=editProjectLevelButton_proj2]').should('be.visible').click();
       cy.contains('Change Required Level for proj2').should('be.visible');
       cy.get('#existingLevel').should('have.value', 5);
-      cy.get('#proj2___BV_modal_content_ div.multiselect__select').click();
-      cy.get('.multiselect__element').should('have.length', 6);
-      cy.get('.multiselect__element').eq(5).click();
+      cy.get('#newLevel').click();
+      cy.get('#newLevel .vs__dropdown-option').should('have.length', 5);
+      cy.get('#newLevel .vs__dropdown-option').eq(4).click();
       cy.get('[data-cy=saveLevelButton]').should('be.disabled');
-      cy.get('#proj2___BV_modal_content_ div.multiselect__select').click();
-      cy.get('.multiselect__element').eq(1).click();
+      cy.get('#newLevel').click();
+      cy.get('#newLevel .vs__dropdown-option').eq(0).click();
       cy.get('[data-cy=saveLevelButton]').should('be.enabled');
       cy.get('[data-cy=saveLevelButton]').click();
       cy.wait('@modifyLevel');
@@ -358,7 +355,7 @@ describe('Global Badges Tests', () => {
 
         cy.clickNav('Badges');
         cy.contains('Manage').click();
-        cy.get('.multiselect__tags').click();
+        cy.get('#skills-selector').click();
         cy.get('[data-cy="skillsSelectionItem-proj1-skill1"]').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'proj1' }, { colIndex: 1,  value: 'This is 1' }],
@@ -421,7 +418,7 @@ describe('Global Badges Tests', () => {
 
         cy.contains('Test Badge').should('exist');
         cy.contains('Manage').click();
-        cy.get('.multiselect__tags').click();
+        cy.get('#skills-selector').click();
         cy.get('[data-cy="skillsSelectionItem-proj1-skill1"]').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'proj1' }, { colIndex: 1,  value: 'This is 1' }],
@@ -511,7 +508,7 @@ describe('Global Badges Tests', () => {
         cy.contains('Manage').click();
 
         cy.wait('@availableSkills');
-        cy.get('.multiselect__tags').click();
+        cy.get('#skills-selector').click();
         cy.get('[data-cy="skillsSelectionItem-proj1-skill1"]').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'proj1' }, { colIndex: 1,  value: 'This is 1' }, { colIndex: 2,  value: 'skill1' }],
@@ -522,13 +519,10 @@ describe('Global Badges Tests', () => {
         cy.wait('@availableProjects');
         cy.wait('@badgeInfo');
 
-        cy.get('.multiselect__tags').first().click({force:true});
-        cy.get('.multiselect__tags input').first().type('proj2{enter}');
+        cy.get('#project-selector').click().type('proj2{enter}');
 
         cy.wait('@proj2Levels');
-
-        cy.get('.multiselect__tags').last().click({force: true});
-        cy.get('.multiselect__tags input').last().type('5{enter}');
+        cy.get('#level-selector').click().type('5{enter}');
 
         cy.contains('Add').click();
         cy.get('#simple-levels-table').should('be.visible');
@@ -617,7 +611,7 @@ describe('Global Badges Tests', () => {
         cy.contains('A Badge').should('exist');
         cy.contains('Manage').click();
         //wahat to wait on....
-        cy.get('.multiselect__tags').click();
+        cy.get('#skills-selector').click();
         cy.get('[data-cy="skillsSelectionItem-proj2-skill1"]').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'proj2' }, { colIndex: 1,  value: 'This is 1' }, { colIndex: 2,  value: 'skill1' }],
@@ -626,11 +620,9 @@ describe('Global Badges Tests', () => {
         cy.clickNav('Levels');
         cy.wait('@getAvailableLevels');
 
-        cy.get('.multiselect__tags').first().click({force: true});
-        cy.get('.multiselect__tags input').first().type('proj2{enter}');
+        cy.get('#project-selector').click().type('proj2{enter}');
 
-        cy.get('.multiselect__tags').last().click();
-        cy.get('.multiselect__tags input').last().type('5{enter}');
+        cy.get('#level-selector').click().type('5{enter}');
 
         cy.contains('Add').click();
         cy.validateTable(levelsTableSelector, [
@@ -1085,19 +1077,17 @@ describe('Global Badges Tests', () => {
             expect(loc.pathname).to.eq('/administrator/globalBadges/a_new_id/');
         });
 
-        cy.get('.multiselect__tags').click();
+        cy.get('#skills-selector').click();
         cy.get('[data-cy="skillsSelectionItem-proj2-skill1"]').click();
         cy.get('button[data-cy=deleteSkill_skill1]').click();
         cy.contains('YES, Delete It!').click();
 
         cy.clickNav('Levels');
         cy.wait('@getAvailableLevels');
-        cy.get('.multiselect__select').eq(0).click({force:true});
-        cy.contains('ID: proj2').click();
+        cy.get('#project-selector').click().type('proj2{enter}');
 
-        cy.get('#level-selector').last().click();
         cy.wait('@getLevels');
-        cy.get('.multiselect__tags input').last().type('5{enter}');
+        cy.get('#level-selector').click().type('5{enter}');
 
         cy.contains('Add').click();
         cy.get('[data-cy=deleteLevelBtn_proj2-5]').should('exist');

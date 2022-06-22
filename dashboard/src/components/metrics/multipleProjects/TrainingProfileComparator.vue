@@ -16,16 +16,22 @@ limitations under the License.
 <template>
   <metrics-card title="Project definitions comparison" data-cy="trainingProfileComparator">
 
-    <div v-if="!loading && enoughProjectsSelected">
-      <multiselect v-model="projects.selected"
-                 :options="projects.available"
-                 label="name"
-                 :multiple="true"
-                 track-by="projectId"
-                 :hide-selected="true"
-                 :max="5"
-                 data-cy="trainingProfileComparatorProjectSelector"/>
-      <div class="mt-4">
+    <div>
+      <v-select :options="projects.available"
+                v-model="projects.selected"
+                :loading="loading"
+                :multiple="true"
+                label="name"
+                placeholder="Select option"
+                :selectable="() => projects.selected.length < 5"
+                data-cy="trainingProfileComparatorProjectSelector">
+        <template v-if="afterListSlotText" #list-footer>
+          <li>
+            <h6 class="ml-1"> {{ afterListSlotText }}</h6>
+          </li>
+        </template>
+      </v-select>
+      <div v-if="!loading && enoughProjectsSelected" class="mt-4">
       <b-row>
         <b-col xl class="charts-content">
           <training-profile-comparison-chart :series="numSkillsChart.series" :labels="numSkillsChart.labels"
@@ -65,7 +71,7 @@ limitations under the License.
 </template>
 
 <script>
-  import Multiselect from 'vue-multiselect';
+  import vSelect from 'vue-select';
   import MetricsCard from '../utils/MetricsCard';
   import TrainingProfileComparisonChart from './TrainingProfileComparisonChart';
   import NoContent2 from '../../utils/NoContent2';
@@ -73,7 +79,7 @@ limitations under the License.
   export default {
     name: 'TrainingProfileComparator',
     components: {
-      NoContent2, TrainingProfileComparisonChart, MetricsCard, Multiselect,
+      NoContent2, TrainingProfileComparisonChart, MetricsCard, vSelect,
     },
     props: ['availableProjects'],
     data() {
@@ -111,10 +117,16 @@ limitations under the License.
     },
     computed: {
       enoughOverallProjects() {
-        return this.projects.available && this.projects.available.length >= 2;
+        return this.availableProjects && this.availableProjects.length >= 2;
       },
       enoughProjectsSelected() {
         return this.projects.selected && this.projects.selected.length >= 2;
+      },
+      afterListSlotText() {
+        if (this.projects.selected.length >= 5) {
+          return 'Maximum of 5 options selected. First remove a selected option to select another.';
+        }
+        return '';
       },
     },
     watch: {
@@ -135,6 +147,9 @@ limitations under the License.
 
         this.numSubjectsChart.labels = this.projects.selected.map((proj) => proj.name);
         this.numSubjectsChart.series = this.projects.selected.map((proj) => proj.numSubjects);
+
+        this.projects.available = this.availableProjects.map((proj) => ({ ...proj }));
+        this.projects.available = this.projects.available.filter((el) => !this.projects.selected.some((sel) => sel.projectId === el.projectId));
 
         this.loading = false;
       },

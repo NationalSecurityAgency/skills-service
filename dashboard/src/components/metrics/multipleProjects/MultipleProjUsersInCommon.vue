@@ -18,16 +18,22 @@ limitations under the License.
     <skills-spinner :is-loading="projects.loading" class="mb-5"/>
     <div v-if="enoughOverallProjects && !projects.loading">
       <div class="p-2 px-4">
-        <multiselect v-model="projects.selected"
-                   :options="projects.available"
-                   label="name"
-                   :multiple="true"
-                   track-by="projectId"
-                   :hide-selected="true"
-                   :max="5"
-                   v-on:select="projAdded"
-                   v-on:remove="projRemoved"
-                   data-cy="projectSelector"/>
+        <v-select :options="projects.available"
+                  v-model="projects.selected"
+                  :loading="projects.loading"
+                  :multiple="true"
+                  label="name"
+                  placeholder="Select option"
+                  :selectable="() => projects.selected.length < 5"
+                  v-on:option:selected="projAdded"
+                  v-on:option:deselecting="projRemoved"
+                  data-cy="projectSelector">
+          <template v-if="afterListSlotText" #list-footer>
+            <li>
+              <h6 class="ml-1"> {{ afterListSlotText }}</h6>
+            </li>
+          </template>
+        </v-select>
       </div>
       <div class="my-3">
       <no-content2 v-if="!atLeast1Proj" title="No Projects Selected"
@@ -103,7 +109,7 @@ limitations under the License.
 </template>
 
 <script>
-  import Multiselect from 'vue-multiselect';
+  import vSelect from 'vue-select';
   import MetricsCard from '../utils/MetricsCard';
   import NoContent2 from '../../utils/NoContent2';
   import SkillsBTable from '../../utils/table/SkillsBTable';
@@ -117,10 +123,10 @@ limitations under the License.
     components: {
       LevelBadge,
       SkillsSpinner,
-      Multiselect,
       SkillsBTable,
       NoContent2,
       MetricsCard,
+      vSelect,
     },
     props: ['availableProjects'],
     data() {
@@ -170,7 +176,13 @@ limitations under the License.
         return this.results && this.results.length > 0;
       },
       enoughOverallProjects() {
-        return this.projects.available && this.projects.available.length >= 2;
+        return this.availableProjects && this.availableProjects.length >= 2;
+      },
+      afterListSlotText() {
+        if (this.projects.selected.length >= 5) {
+          return 'Maximum of 5 options selected. First remove a selected option to select another.';
+        }
+        return '';
       },
     },
     mounted() {
@@ -197,11 +209,11 @@ limitations under the License.
         this.resultTableOptions.pagination.currentPage = 1;
         this.locateUsers();
       },
-      projAdded(proj) {
+      projAdded(addedItem) {
         this.clearRes();
 
-        const refProj = proj;
-        SupervisorService.getProjectLevels(proj.projectId)
+        const refProj = addedItem[addedItem.length - 1];
+        SupervisorService.getProjectLevels(refProj.projectId)
           .then((res) => {
             refProj.availableLevels = res.map((r) => r.level);
           }).finally(() => {
@@ -223,6 +235,8 @@ limitations under the License.
           label: 'User',
           sortable: true,
         });
+        this.loadProjects();
+        this.projects.available = this.projects.available.filter((el) => !this.projects.selected.some((sel) => sel.projectId === el.projectId));
       },
       clearRes() {
         this.results = [];

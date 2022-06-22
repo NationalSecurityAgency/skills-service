@@ -64,8 +64,8 @@ describe('Skills Tests', () => {
 
         cy.get('div#menu-collapse-control li').contains('Dependencies').click();
 
-        cy.get('.multiselect__tags').click();
-        cy.get('.multiselect__tags input').type('{enter}')
+        cy.get('[data-cy="depsSelector"]').click();
+        cy.get('[data-cy="depsSelector"] .vs__dropdown-option').eq(0).click();
 
         cy.wait('@addDependencyError')
         cy.get('div .alert').contains('Error! Request could not be completed! Error Adding Dependency');
@@ -95,8 +95,7 @@ describe('Skills Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill2/dependencies');
         cy.contains('No Dependencies Yet');
 
-        cy.get('.multiselect__tags').click();
-        cy.get('.multiselect__tags input').type('Skill 1{enter}')
+        cy.get('[data-cy="depsSelector"]').click().type('Skill 1{enter}')
 
         cy.contains('Error! Request could not be completed! Discovered circular dependency [proj1:skill2 -> proj1:skill1 -> proj1:skill2]');
     });
@@ -117,8 +116,7 @@ describe('Skills Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/dependencies');
         cy.contains('No Dependencies Yet');
 
-        cy.get('.multiselect__tags').click();
-        cy.get('.multiselect__tags input').type('Skill 2{enter}')
+        cy.get('[data-cy="depsSelector"]').click().type('Skill 2{enter}');
 
         const tableSelector = '[data-cy="simpleSkillsTable"]';
         cy.validateTable(tableSelector, [
@@ -126,8 +124,7 @@ describe('Skills Tests', () => {
         ], 5);
 
 
-        cy.get('.multiselect__tags').click();
-        cy.get('.multiselect__tags input').type('Skill 3{enter}')
+        cy.get('[data-cy="depsSelector"]').click().type('Skill 3{enter}');
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'Skill 2' }, { colIndex: 1,  value: 'skill2' }],
             [{ colIndex: 0,  value: 'Skill 3' }, { colIndex: 1,  value: 'skill3' }],

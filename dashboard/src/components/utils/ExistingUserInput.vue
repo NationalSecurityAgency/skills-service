@@ -14,17 +14,33 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="existingUserInput row no-gutters">
+  <div class="existingUserInput row no-gutters" data-cy="existingUserInput">
     <b-dropdown v-if="userSuggestOptions && userSuggestOptions.length > 0" variant="split" :text="selectedSuggestOption" class="col-auto">
       <b-dropdown-item-button v-for="opt in userSuggestOptions" :key="opt.value" :active="opt.value === selectedSuggestOption" @click="selectedSuggestOption=opt.value">{{opt.value}}</b-dropdown-item-button>
     </b-dropdown>
 
-    <multiselect v-model="userQuery" :placeholder="placeholder" tag-placeholder="Enter to select"
-                 :options="suggestions" :multiple="allowMultipleSelections" :taggable="canEnterNewUser" @tag="addTag"
-                 :hide-selected="true" track-by="userId" label="label"
-                 @search-change="suggestUsers" @open="suggestUsers" :loading="isFetching" :internal-search="false"
-                 :clear-on-select="true" :class="{'col': (userSuggestOptions && userSuggestOptions.length > 0)}">
-    </multiselect>
+    <v-select :options="suggestions"
+              v-model="userQuery"
+              :placeholder="placeholder"
+              :multiple="allowMultipleSelections"
+              :taggable="canEnterNewUser"
+              :pushTags="false"
+              label="label"
+              @open="suggestUsers"
+              @search="suggestUsers"
+              @option:created="addTag"
+              :createOption="createTag"
+              :loading="isFetching"
+              :class="{'col': (userSuggestOptions && userSuggestOptions.length > 0)}">
+      <template v-if="creatingTag" #option="{ userId }">
+        <div class="position-relative">
+          <h6>{{ userId }}</h6>
+          <div v-if="userId == currentTagValue" class="position-absolute text-light small click-indicator" style="right: 5px; bottom: 0px;">
+            Enter to Select
+          </div>
+        </div>
+      </template>
+    </v-select>
 
     <p class="text-danger" v-show="validate && theError">{{ theError }}</p>
   </div>
@@ -33,7 +49,7 @@ limitations under the License.
 <script>
   import axios from 'axios';
   import debounce from 'lodash.debounce';
-  import Multiselect from 'vue-multiselect';
+  import vSelect from 'vue-select';
   import RequestOrderMixin from './RequestOrderMixin';
 
   // user type constants
@@ -45,7 +61,7 @@ limitations under the License.
   export default {
     name: 'ExistingUserInput',
     mixins: [RequestOrderMixin],
-    components: { Multiselect },
+    components: { vSelect },
     props: {
       fieldLabel: {
         default: 'Skills User',
@@ -119,6 +135,8 @@ limitations under the License.
         userQuery: this.value,
         userSuggestOptions: [],
         selectedSuggestOption: null,
+        creatingTag: false,
+        currentTagValue: '',
       };
     },
     computed: {
@@ -164,6 +182,8 @@ limitations under the License.
     },
     methods: {
       suggestUsers: debounce(function debouncedSuggestUsers(query) {
+        this.creatingTag = this.canEnterNewUser && query;
+        this.currentTagValue = query;
         this.isFetching = true;
         let q = query;
         const postBody = {};
@@ -197,15 +217,17 @@ limitations under the License.
             this.isFetching = false;
           });
       }, 200),
-      addTag(newTag) {
+      createTag(newTag) {
         const tag = {
           userId: newTag,
           label: newTag,
         };
+        return tag;
+      },
+      addTag(tag) {
         this.userQuery = tag;
         this.suggestions.push(tag);
       },
-
       getUserIdForDisplay(user) {
         if (!user.userIdForDisplay) {
           return user.userId;
@@ -239,8 +261,4 @@ limitations under the License.
 </script>
 
 <style>
-  .existingUserInput .multiselect__content-wrapper {
-    background: #f8f9fa;
-    border-color: #b1b1b1;
-  }
 </style>

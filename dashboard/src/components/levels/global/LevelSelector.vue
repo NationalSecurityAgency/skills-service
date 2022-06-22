@@ -15,20 +15,19 @@ limitations under the License.
 */
 <template>
   <div id="level-selector">
-
-    <multiselect :disabled="disabled" v-model="selectedInternal" :options="projectLevels"
-                 :show-labels="false" :hide-selected="true" :is-loading="isLoading"
-                 :placeholder="placeholder" v-on:select="selected"></multiselect>
+    <v-select :disabled="disabled" v-model="selectedInternal" :options="projectLevels"
+              :placeholder="placeholder" v-on:input="inputChanged" :loading="isLoading">
+    </v-select>
   </div>
 </template>
 
 <script>
-  import Multiselect from 'vue-multiselect';
+  import vSelect from 'vue-select';
   import GlobalBadgeService from '../../badges/global/GlobalBadgeService';
 
   export default {
     name: 'LevelSelector',
-    components: { Multiselect },
+    components: { vSelect },
     props: {
       value: {
         type: Number,
@@ -92,17 +91,16 @@ limitations under the License.
       selected(selectedItem) {
         this.$emit('input', selectedItem);
       },
+      inputChanged(inputItem) {
+        if (inputItem != null) {
+          this.selected(inputItem);
+        } else {
+          this.removed(null);
+        }
+      },
     },
   };
 </script>
 
 <style>
-  #skills-selector .multiselect{
-    z-index: 99;
-  }
-
-  #skills-selector .multiselect__tag {
-    background-color: lightblue;
-    color: black;
-  }
 </style>
