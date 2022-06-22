@@ -31,6 +31,7 @@ limitations under the License.
               @option:created="addTag"
               :createOption="createTag"
               :loading="isFetching"
+              class="flex-grow-1"
               :class="{'col': (userSuggestOptions && userSuggestOptions.length > 0)}">
       <template v-if="creatingTag" #option="{ userId }">
         <div class="position-relative">
