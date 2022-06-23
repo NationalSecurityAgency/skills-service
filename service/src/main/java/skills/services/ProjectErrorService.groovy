@@ -49,6 +49,19 @@ class ProjectErrorService {
     }
 
     @Transactional
+    public void noEmailableAdminsForSkillApprovalRequest(String projectId) {
+        final String err = "No Skill Request Approvers configured to receive approval emails"
+        ProjectError error = errorRepo.findByProjectIdAndErrorTypeAndError(projectId, ProjectError.ErrorType.NoEmailableApprovers, err)
+        if (!error) {
+            error = new ProjectError(projectId: projectId, errorType: ProjectError.ErrorType.NoEmailableApprovers,  error: err, created: new Date(), count: 0)
+        }
+        error.count += 1
+        error.lastSeen = new Date()
+
+        errorRepo.save(error)
+    }
+
+    @Transactional
     public void deleteError(String projectId, String errorType, String err) {
         ProjectError.ErrorType type
         try {

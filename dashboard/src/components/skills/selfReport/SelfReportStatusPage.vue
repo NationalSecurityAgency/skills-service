@@ -23,7 +23,7 @@ limitations under the License.
         <i class="fa fa-exclamation-triangle" aria-hidden="true"/> Please note that email notifications are currently disabled. Email configuration has not been performed on this instance of SkillTree. Please contact the root administrator.
       </div>
       <div v-if="hasSkillsWithApprovals()">
-        <self-report-approval class="mt-3" @approval-action="handleApprovalAction"/>
+        <self-report-approval class="mt-3" @approval-action="handleApprovalAction" :email-enabled="!showEmailServiceWarning"/>
         <self-report-approval-history ref="selfReportApprovalHistory" class="mt-3"/>
       </div>
       <no-content2 v-else title="No Skills Require Approval" data-cy="noApprovalTableMsg"

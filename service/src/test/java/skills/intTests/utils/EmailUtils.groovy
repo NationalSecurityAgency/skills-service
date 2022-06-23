@@ -43,6 +43,17 @@ class EmailUtils {
         return convert(msg)
     }
 
+    static Set<String> getAllUniqueRecipients(GreenMail greenMail) {
+        def recip = []
+        greenMail.getReceivedMessages().each {
+            it.getAllRecipients().each {
+                recip << it.toString()
+            }
+        }
+
+        return recip.toSet()
+    }
+
     static EmailRes convert(MimeMessage msg) {
         EmailRes emailRes = new EmailRes()
         emailRes.subj = msg.subject

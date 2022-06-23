@@ -16,7 +16,23 @@ limitations under the License.
 <template>
   <b-card body-class="p-0 mt-3">
     <template #header>
-      <div class="h6 mb-0 font-weight-bold">Self Reported Skills Required Approval</div>
+      <div class="row">
+        <div class="col h6 mb-0 font-weight-bold">Self Reported Skills Requiring Approval</div>
+        <div class="col text-right" v-if="isEmailEnabled" data-cy="unsubscribeContainer">
+          <inline-help
+            msg="Configure whether or not you will receive self reported skill approval request emails."/>
+          <b-form-checkbox v-model="emailSubscribed"
+                           name="unsubscribe-toggle"
+                           class="ml-2 mt-2"
+                           style="display: inline-block"
+                           v-on:input="toggleUnsubscribe"
+                           :aria-label="unsubscribeHelpMsg"
+                           data-cy="unsubscribeSwitch"
+                           switch>
+            {{ emailSubscribed ? 'Subscribed' : 'Unsubscribed' }}
+          </b-form-checkbox>
+        </div>
+      </div>
     </template>
     <div class="row px-3 mb-3 mt-2">
       <div class="col">
@@ -28,7 +44,7 @@ limitations under the License.
         <b-button variant="outline-info" @click="changeSelectionForAll(false)" data-cy="clearSelectedApprovalsBtn" class="mt-1"><i class="far fa-square"></i> Clear</b-button>
       </div>
       <div class="col text-right">
-        <b-button variant="outline-danger" @click="reject.showModal=true" data-cy="rejectBtn" class="mt-1" :disabled="actionsDisabled"><i class="fa fa-times-circle"/> Reject</b-button>
+        <b-button variant="outline-danger" @click="reject.showModal=true" data-cy="rejectBtn" class="mt-1 ml-2" :disabled="actionsDisabled"><i class="fa fa-times-circle"/> Reject</b-button>
         <b-button variant="outline-success" @click="approve" data-cy="approveBtn" class="mt-1 ml-2" :disabled="actionsDisabled"><i class="fa fa-check"/> Approve</b-button>
       </div>
     </div>
@@ -155,6 +171,7 @@ limitations under the License.
   import SelfReportService from './SelfReportService';
   import ChildRowSkillsDisplay from '../ChildRowSkillsDisplay';
   import ShowMore from './ShowMore';
+  import InlineHelp from '../../utils/InlineHelp';
 
   export default {
     name: 'SelfReportApproval',
@@ -163,11 +180,20 @@ limitations under the License.
       DateCell,
       SkillsBTable,
       ShowMore,
+      InlineHelp,
+    },
+    props: {
+      emailEnabled: {
+        type: Boolean,
+        required: false,
+      },
     },
     data() {
       return {
         projectId: this.$route.params.projectId,
         actionsDisabled: true,
+        emailSubscribed: true,
+        isEmailEnabled: this.emailEnabled,
         reject: {
           showModal: false,
           rejectMsg: '',
@@ -212,6 +238,25 @@ limitations under the License.
     },
     mounted() {
       this.loadApprovals();
+      if (this.isEmailEnabled) {
+        this.checkEmailSubscriptionStatus();
+      }
+    },
+    computed: {
+      unsubscribeHelpMsg() {
+        if (this.emailSubscribed) {
+          return 'Change to Unsubscribed to unsubscribe from all Skill Approval request emails';
+        }
+        return 'Change to Subscribed to receive Skill Approval request emails';
+      },
+    },
+    watch: {
+      emailEnabled(newVal) {
+        this.isEmailEnabled = newVal;
+        if (this.isEmailEnabled) {
+          this.checkEmailSubscriptionStatus();
+        }
+      },
     },
     methods: {
       pageChanged(pageNum) {
@@ -281,6 +326,26 @@ limitations under the License.
             });
             this.$emit('approval-action', 'rejected');
           });
+      },
+      checkEmailSubscriptionStatus() {
+        SelfReportService.isUserSubscribedToEmails(this.projectId).then((respData) => {
+          this.emailSubscribed = respData;
+        });
+      },
+      toggleUnsubscribe() {
+        if (this.emailSubscribed) {
+          SelfReportService.subscribeUserToEmails(this.projectId).then(() => {
+            this.$nextTick(() => {
+              this.$announcer.polite('You have subscribed to self-report approval request emails for this project');
+            });
+          });
+        } else {
+          SelfReportService.unsubscribeUserFromEmails(this.projectId).then(() => {
+            this.$nextTick(() => {
+              this.$announcer.polite('You have unsubscribed from self-report approval request emails for this project');
+            });
+          });
+        }
       },
     },
   };
