@@ -623,6 +623,8 @@ describe('Subjects Tests', () => {
         cy.get('input[data-cy=subjectNameInput]').type('{selectall}Edited Subject Name');
         cy.get('[data-cy=saveSubjectButton]').click();
         cy.wait('@saveSubject1');
+        cy.contains('Editing Existing Subject').should('not.exist');
+        cy.wait(300);
         cy.get('[data-cy=btn_edit-subject]').should('have.focus');
         cy.contains('SUBJECT: Subject 1').should('not.exist');
         cy.contains('SUBJECT: Edited Subject Name').should('be.visible');
@@ -634,7 +636,11 @@ describe('Subjects Tests', () => {
         cy.get('input[data-cy=idInputValue]').type('{selectall}entirelyNewId');
         cy.get('[data-cy=saveSubjectButton]').click();
         cy.wait('@saveSubject1');
-        cy.get('[data-cy=btn_edit-subject]').should('have.focus');
+        cy.contains('Editing Existing Subject').should('not.exist');
+        cy.wait(300);
+        // because the route changed due to the id being edited, focus is returned to the main content area
+        cy.get('[data-cy=btn_edit-subject]').should('not.have.focus');
+        cy.get('.skills-menu-content').should('have.focus');
         cy.contains('SUBJECT: Edited Subject Name').should('be.visible');
         cy.contains('ID: subj1').should('not.exist');
         cy.get('[data-cy=breadcrumb-subj1]').should('not.exist');
@@ -1066,5 +1072,22 @@ describe('Subjects Tests', () => {
         cy.validateElementsOrder('[data-cy="subjectCard"] [data-cy="titleLink"]', ['Subject 3', 'Subject 2', 'Subject 1']);
         cy.get('[data-cy="subjectCard-subj3"] [data-cy="sortControlHandle"]')
             .should('have.focus');
+    });
+
+    it('cancelling subject delete dialog should return focus to delete button', () => {
+        cy.createSubject(1, 1)
+        cy.createSubject(1, 2)
+        cy.createSubject(1, 3)
+        cy.createSubject(1, 4)
+        cy.createSubject(1, 5)
+
+        cy.intercept('GET', '/admin/projects/proj1/subjects').as('getSubjects');
+        cy.visit('/administrator/projects/proj1');
+        cy.wait('@getSubjects');
+
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="deleteBtn"]').click();
+        cy.contains('Removal Safety Check');
+        cy.get('[data-cy=closeRemovalSafetyCheck]').click();
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="deleteBtn"]').should('have.focus');
     });
 });

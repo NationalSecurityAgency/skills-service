@@ -40,7 +40,7 @@ limitations under the License.
     components: { SkillsSelector2 },
     data() {
       return {
-        loading: true,
+        loading: false,
         availableSkills: [],
         search: '',
       };

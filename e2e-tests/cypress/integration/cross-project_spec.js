@@ -87,10 +87,10 @@ describe('Cross-project Skills Tests', () => {
 
         Cypress.Commands.add('shareSkill', (skillText, projText) => {
             cy.get('[data-cy="shareButton"').should('be.disabled');
-            cy.get('[data-cy="skillSelector"]').click().type(`${skillText}{enter}`);
+            cy.get('[data-cy="skillSelector"]').click().type(`${skillText}`).type('{enter}');
             cy.get('[data-cy="shareButton"').should('be.disabled');
 
-            cy.get('[data-cy="projectSelector"]').click().type(`${projText}{enter}`);
+            cy.get('[data-cy="projectSelector"]').click().type(`${projText}`).type('{enter}');
             cy.get('[data-cy="shareButton"').should('be.enabled');
 
             cy.get('[data-cy="shareButton"').click();

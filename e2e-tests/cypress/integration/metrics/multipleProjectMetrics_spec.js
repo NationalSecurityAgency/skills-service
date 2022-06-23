@@ -169,7 +169,7 @@ describe('Multiple Project Metrics', () => {
         cy.visit('/administrator/');
         cy.clickNav('Metrics');
 
-        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector] .multiselect__tag').should('have.length', 4).as('selected');
+        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector] .vs__selected').should('have.length', 4).as('selected');
         cy.get('@selected').eq(0).contains('Inception');
 
         // validate x axis
@@ -205,7 +205,7 @@ describe('Multiple Project Metrics', () => {
         cy.visit('/administrator/');
         cy.clickNav('Metrics');
 
-        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector]  .multiselect__tag-icon').should('have.length', 4).as('removeBtns');
+        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector]  .vs__deselect').should('have.length', 4).as('removeBtns');
         cy.get('@removeBtns').eq(1).click()
         cy.get('@removeBtns').eq(1).click()
         cy.get('@removeBtns').eq(1).click()
@@ -229,7 +229,7 @@ describe('Multiple Project Metrics', () => {
         cy.visit('/administrator/');
         cy.clickNav('Metrics');
 
-        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector]  .multiselect__tag-icon').should('have.length', 4).as('removeBtns');
+        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector]  .vs__deselect').should('have.length', 4).as('removeBtns');
         cy.get('@removeBtns').eq(2).click()
 
         // validate x axis
@@ -317,7 +317,6 @@ describe('Multiple Project Metrics', () => {
 
         cy.usrsInCommon('[data-cy=projectSelector]').click();
         cy.usrsInCommon().contains("Maximum of 5 options selected")
-        cy.usrsInCommon().contains(`Grand Project 5`).should('not.exist')
     });
 
     it('sync levels', () => {
@@ -578,7 +577,7 @@ describe('Multiple Project Metrics', () => {
         cy.get('@headers').eq(2).contains('Grand Project 5')
         cy.get('@headers').eq(3).contains('Grand Project 4')
 
-        cy.usrsInCommon('[data-cy=projectSelector] .multiselect__tag-icon').should('have.length', 3).as('removeBtns');
+        cy.usrsInCommon('[data-cy=projectSelector] .vs__deselect').should('have.length', 3).as('removeBtns');
         cy.get('@removeBtns').eq(1).click()
 
         cy.get('[data-cy=findUsersBtn]').click();
@@ -612,7 +611,7 @@ describe('Multiple Project Metrics', () => {
         cy.get('@headers').eq(2).contains('Grand Project 5')
         cy.get('@headers').eq(3).contains('Grand Project 4')
 
-        cy.get(`${multiProjSel} [data-cy=projectSelector] .multiselect__tag-icon`).should('have.length', 3).as('removeBtns');
+        cy.get(`${multiProjSel} [data-cy=projectSelector] .vs__deselect`).should('have.length', 3).as('removeBtns');
         cy.get('@removeBtns').eq(1).click()
         cy.get(resTable).should('not.exist')
     });

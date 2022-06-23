@@ -155,8 +155,7 @@ describe('Contact Project Users Specs', () => {
 
         cy.get('[data-cy=badgeFilter]').click({force:true});
         cy.wait(200);
-        cy.get('.multiselect__tags').click();
-        cy.get('.multiselect__tags input').eq(0).type('Badge 1{enter}');
+        cy.get('[data-cy=filter-selector]').click().type('Badge 1{enter}');
         cy.get('[data-cy=emailUsers-addBtn]').should('be.enabled');
         cy.get('[data-cy=emailUsers-addBtn]').click();
         cy.wait('@updateCount');
@@ -171,8 +170,7 @@ describe('Contact Project Users Specs', () => {
 
         cy.get('[data-cy=subjectFilter]').click({force:true});
         cy.wait(200);
-        cy.get('.multiselect__tags').click();
-        cy.get('.multiselect__tags input').eq(0).type('Subject 1{enter}');
+        cy.get('[data-cy=filter-selector]').click().type('Subject 1{enter}');
         cy.wait('@getSubjectLevels');
         cy.get('[data-cy=emailUsers-addBtn]').should('be.disabled');
         cy.get('[data-cy=emailUsers-levelsInput]').select('1');
@@ -187,8 +185,7 @@ describe('Contact Project Users Specs', () => {
         cy.wait(200);
         cy.get('[data-cy=subjectFilter]').click({force:true});
         cy.wait(200);
-        cy.get('.multiselect__tags').click();
-        cy.get('.multiselect__tags input').eq(0).type('Subject 1{enter}');
+        cy.get('[data-cy=filter-selector]').click().type('Subject 1{enter}');
         cy.wait('@getSubjectLevels');
         cy.get('[data-cy=emailUsers-levelsInput]').select('2');
         cy.get('[data-cy=emailUsers-addBtn]').should('be.enabled');
@@ -204,8 +201,7 @@ describe('Contact Project Users Specs', () => {
         cy.get('[data-cy=skillFilter]').click({force:true});
         cy.wait(200);
         cy.get('[data-cy=emailUsers-levelsInput]').should('be.disabled');
-        cy.get('.multiselect__tags').click();
-        cy.get('.multiselect__tags input').eq(0).type('Skill 1{enter}');
+        cy.get('[data-cy=filter-selector]').click().type('Skill 1{enter}');
         cy.get('[data-cy=emailUsers-addBtn]').should('be.enabled');
         cy.get('[data-cy=emailUsers-addBtn]').click();
         cy.wait('@updateCount');
@@ -217,8 +213,7 @@ describe('Contact Project Users Specs', () => {
         cy.get('[data-cy=skillFilter]').click({force:true});
         cy.wait(200);
         cy.get('[data-cy=emailUsers-levelsInput]').should('be.disabled');
-        cy.get('.multiselect__tags').click();
-        cy.get('.multiselect__tags input').eq(0).type('Skill 1{enter}');
+        cy.get('[data-cy=filter-selector]').click().type('Skill 1{enter}');
         cy.get('[data-cy=skillAchievedSwitch]').click({force:true});
         cy.get('[data-cy=emailUsers-addBtn]').should('be.enabled');
         cy.get('[data-cy=emailUsers-addBtn]').click();
@@ -226,8 +221,7 @@ describe('Contact Project Users Specs', () => {
         cy.contains('Not Achieved Skill Skill 1').should('be.visible');
         cy.get('[data-cy=usersMatchingFilters] .badge-info').should('have.text', '2');
 
-        cy.get('.multiselect__tags').click();
-        cy.get('.multiselect__tags input').eq(0).type('Skill 1{enter}');
+        cy.get('[data-cy=filter-selector]').click().type('Skill 1{enter}');
         cy.get('[data-cy=skillAchievedSwitch]').click({force:true});
         cy.get('[data-cy=emailUsers-addBtn]').should('be.enabled');
         cy.get('[data-cy=emailUsers-addBtn]').click();
@@ -236,8 +230,7 @@ describe('Contact Project Users Specs', () => {
 
 
         const addSkillCriteria = (skillName) => {
-            cy.get('.multiselect__tags').click();
-            cy.get('.multiselect__tags input').eq(0).type(`${skillName}{enter}`);
+            cy.get('[data-cy=filter-selector]').click().type(`${skillName}{enter}`);
             cy.get('[data-cy=emailUsers-addBtn]').click();
         }
 
