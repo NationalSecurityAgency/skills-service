@@ -66,10 +66,13 @@ class SecurityConfiguration {
     @Value('#{"${skills.authorization.allowUrlEncodedPercent:false}"}')
     Boolean allowUrlEncodedPercent
 
-    @Value('#{"${skills.authorization.allowUrlEncodedPercent:false}"}')
+    @Value('#{"${skills.authorization.allowUrlEncodedForwardSlash:false}"}')
     Boolean allowUrlEncodedForwardSlash
 
-    @Value('#{"${skills.authorization.allowUrlEncodedPercent:false}"}')
+    @Value('#{"${skills.authorization.allowUrlEncodedDoubleForwardSlash:false}"}')
+    Boolean allowUrlEncodedDoubleForwardSlash
+
+    @Value('#{"${skills.authorization.allowUrlEncodedBackSlash:false}"}')
     Boolean allowUrlEncodedBackSlash
 
     @Component
@@ -173,6 +176,7 @@ class SecurityConfiguration {
         StrictHttpFirewall strictHttpFirewall = new StrictHttpFirewall()
         strictHttpFirewall.setAllowUrlEncodedPercent(allowUrlEncodedPercent)
         strictHttpFirewall.setAllowUrlEncodedSlash(allowUrlEncodedForwardSlash)
+        strictHttpFirewall.setAllowUrlEncodedDoubleSlash(allowUrlEncodedDoubleForwardSlash)
         strictHttpFirewall.setAllowBackSlash(allowUrlEncodedBackSlash)
         return strictHttpFirewall
     }
