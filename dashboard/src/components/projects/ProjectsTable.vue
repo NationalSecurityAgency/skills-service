@@ -148,6 +148,7 @@ limitations under the License.
             bordered: false,
             outlined: true,
             stacked: 'md',
+            tableDescription: 'Projects',
             fields: [
               {
                 key: 'name',

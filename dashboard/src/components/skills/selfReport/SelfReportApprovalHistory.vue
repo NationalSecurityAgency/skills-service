@@ -128,6 +128,7 @@ limitations under the License.
           stacked: 'md',
           sortBy: 'approverActionTakenOn',
           sortDesc: true,
+          tableDescription: 'Self Reported Skills History',
           fields: [
             {
               key: 'skillName',

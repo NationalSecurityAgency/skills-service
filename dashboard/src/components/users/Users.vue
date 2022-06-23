@@ -93,6 +93,7 @@ limitations under the License.
             stacked: 'md',
             sortBy: 'lastUpdated',
             sortDesc: true,
+            tableDescription: 'Users',
             fields: [
               {
                 key: 'userId',

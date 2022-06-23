@@ -70,6 +70,7 @@ limitations under the License.
             stacked: 'md',
             bordered: true,
             outlined: true,
+            tableDescription: 'Imported Skill Details',
             pagination: {
               remove: true,
             },

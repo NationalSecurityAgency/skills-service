@@ -182,6 +182,7 @@ limitations under the License.
             sortBy: 'requestedOn',
             sortDesc: true,
             emptyText: 'Nothing to approve',
+            tableDescription: 'Self Reported Skills',
             fields: [
               {
                 key: 'request',

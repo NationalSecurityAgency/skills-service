@@ -344,6 +344,7 @@ limitations under the License.
     props: {
       projectId: String,
       subjectId: String,
+      subjectName: String,
       skillsProp: Array,
       showSearch: {
         type: Boolean,
@@ -489,6 +490,7 @@ limitations under the License.
               pageSize: this.pageSize,
               possiblePageSizes: [10, 15, 25],
             },
+            tableDescription: `Skills for subject ${this.subjectName}`,
           },
         },
         sortButtonEnabled: false,

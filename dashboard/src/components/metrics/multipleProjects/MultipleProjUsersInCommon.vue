@@ -39,8 +39,14 @@ limitations under the License.
       <no-content2 v-if="!atLeast1Proj" title="No Projects Selected"
                    message="Please select at least 2 projects using search above then click 'Find Users' button below"></no-content2>
 
-        <b-table v-if="atLeast1Proj" striped :items="projects.selected" :fields="fields" stacked="md"
-                 :no-sort-reset="true" data-cy="multiProjectUsersInCommon-inputProjs">
+        <b-table v-if="atLeast1Proj"
+                 striped
+                 :items="projects.selected"
+                 :fields="fields"
+                 stacked="md"
+                 :no-sort-reset="true"
+                 aria-label="Find users across multiple projects"
+                 data-cy="multiProjectUsersInCommon-inputProjs">
           <template v-slot:cell(minLevel)="data">
             <b-row>
               <b-col>
@@ -80,8 +86,13 @@ limitations under the License.
       </div>
 
       <skills-b-table v-if="hasResults || resultsLoaded"
-                      :items="results" :options="resultTableOptions"
-                      @sort-changed="sortTable" @page-changed="pageChanged" @page-size-changed="pageSizeChanged"
+                      :items="results"
+                      :options="resultTableOptions"
+                      @sort-changed="sortTable"
+                      @page-changed="pageChanged"
+                      @page-size-changed="pageSizeChanged"
+                      tabindex="0"
+                      aria-label="Find users across multiple projects results"
                       data-cy="usersInCommonResultTable">
         <template v-slot:cell(0)="data">
           <level-badge :level="data.value" />

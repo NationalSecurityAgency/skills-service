@@ -254,6 +254,7 @@ limitations under the License.
             stacked: 'md',
             sortBy: 'skillId',
             sortDesc: false,
+            tableDescription: 'Skills',
             fields: [
               {
                 key: 'skillId',

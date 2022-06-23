@@ -150,6 +150,7 @@ limitations under the License.
             sortDesc: true,
             busy: true,
             stacked: 'md',
+            tableDescription: 'Exported Skills',
             pagination: {
               server: true,
               currentPage: 1,

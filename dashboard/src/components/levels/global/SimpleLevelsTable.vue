@@ -75,6 +75,7 @@ limitations under the License.
               pageSize: 5,
               possiblePageSizes: [5, 10, 15, 20],
             },
+            tableDescription: 'Project Levels',
           },
         },
       };

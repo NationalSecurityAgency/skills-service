@@ -92,6 +92,7 @@ limitations under the License.
               pageSize: 10,
               removePerPage: true,
             },
+            tableDescription: `${this.tagChart.title} Users`,
           },
         },
       };
