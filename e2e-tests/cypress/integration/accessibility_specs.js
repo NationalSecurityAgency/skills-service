@@ -505,7 +505,7 @@ describe('Accessibility Tests', () => {
     cy.request('PUT', `/root/users/root@skills.org/roles/ROLE_SUPERVISOR`);
     cy.visit('/administrator');
     cy.injectAxe()
-    cy.get('[data-cy=nav-Badges]').click();
+    cy.get('[data-cy="nav-Global Badges"]').click();
     cy.customLighthouse();
     cy.customA11y();
 
