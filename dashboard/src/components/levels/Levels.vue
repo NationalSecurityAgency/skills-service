@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <div id="level-def-panel" ref="mainFocus">
-    <sub-page-header title="Level Definitions">
+    <sub-page-header title="Levels">
       <div class="row">
         <div class="col">
           <b-tooltip target="remove-button" title="You must retain at least one level." :disabled="!onlyOneLevelLeft"></b-tooltip>
