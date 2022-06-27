@@ -83,6 +83,7 @@ limitations under the License.
               @input="updateColumns"
               v-model="table.extraColumns.selected"
               :options="table.extraColumns.options"
+              aria-label="Select to display additional columns"
               name="Skills Table Additional Columns"
             ></b-form-checkbox-group>
         </div>
