@@ -69,6 +69,7 @@ limitations under the License.
                 <ValidationProvider rules="optionalNumeric|required|min_value:1|maxPointIncrement" v-slot="{errors}" name="Point Increment">
                   <input class="form-control" type="text" v-model="skillInternal.pointIncrement"
                          aria-required="true"
+                         :aria-label="`Point Increment values must range between 1 and ${maxPointIncrement}`"
                          data-cy="skillPointIncrement" v-on:keydown.enter="handleSubmit(saveSkill)"
                          id="pointIncrement"
                          aria-describedby="skillPointIncrementError"
@@ -89,6 +90,7 @@ limitations under the License.
                          id="numPerformToCompletion"
                          aria-describedby="skillOccurrencesError"
                          aria-errormessage="skillOccurrencesError"
+                         :aria-label="`Occurrences to Completion values must range between 1 and ${maxPointIncrement}`"
                          :aria-invalid="errors && errors.length > 0"/>
                   <small class="form-text text-danger" data-cy="skillOccurrencesError" id="skillOccurrencesError">{{ errors[0] }}</small>
                 </ValidationProvider>
@@ -362,6 +364,12 @@ limitations under the License.
       },
       maxTimeWindowMessage() {
         return `Time Window must be less then ${this.$store.getters.config.maxTimeWindowInMinutes / 60} hours`;
+      },
+      maxNumPerformToCompletion() {
+        return this.$store.getters.config.maxNumPerformToCompletion;
+      },
+      maxPointIncrement() {
+        return this.$store.getters.config.maxPointIncrement;
       },
     },
     watch: {
