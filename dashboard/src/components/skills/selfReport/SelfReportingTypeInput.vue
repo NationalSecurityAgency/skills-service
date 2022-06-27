@@ -16,10 +16,12 @@ limitations under the License.
 <template>
   <div class="row mb-2">
     <div class="col-12 col-lg-auto">
+      <label for="self-report-checkbox">
       <b-form-checkbox data-cy="selfReportEnableCheckbox" id="self-report-checkbox"
                        class="d-inline" v-model="selfReport.enabled"
                        v-on:input="updatedSelfReportingStatus"/>
-      Self Reporting <inline-help msg="Check to enable self-reporting of this skill by users"/>:
+      Self Reporting <inline-help msg="Check to enable self-reporting of this skill by users"/>
+      </label>
     </div>
     <div class="col-12 col-lg-auto">
       <b-form-group v-slot="{ ariaDescribedby }" class="m-0 p-0">
