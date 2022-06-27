@@ -125,7 +125,7 @@ limitations under the License.
                                :aria-required="skillInternal.timeWindowEnabled"
                                ref="timeWindowHours" data-cy="timeWindowHours"
                                v-on:keydown.enter="handleSubmit(saveSkill)"
-                               id="timeWindowHours" aria-label="time window hours"
+                               id="timeWindowHours" :aria-label="`time window hours ${maxTimeWindowMessage}`"
                                aria-describedby="skillHoursError" :aria-invalid="errors && errors.length > 0"
                                aria-errormessage="skillHoursError"/>
                         <div class="input-group-append">
@@ -360,6 +360,9 @@ limitations under the License.
       title() {
         return this.isEdit ? 'Editing Existing Skill' : 'New Skill';
       },
+      maxTimeWindowMessage() {
+        return `Time Window must be less then ${this.$store.getters.config.maxTimeWindowInMinutes / 60} hours`;
+      },
     },
     watch: {
       show(newValue) {
@@ -461,14 +464,14 @@ limitations under the License.
         };
 
         extend('hoursMaxTimeWindow', {
-          message: () => `Time Window must be less then ${self.$store.getters.config.maxTimeWindowInMinutes / 60} hours`,
+          message: () => this.maxTimeWindowMessage,
           params: ['target'],
           validate(value, { target }) {
             return validateWindow(value, target, 'hoursMaxTimeWindow');
           },
         });
         extend('minutesMaxTimeWindow', {
-          message: () => `Time Window must be less then ${self.$store.getters.config.maxTimeWindowInMinutes / 60} hours`,
+          message: () => this.maxTimeWindowMessage,
           params: ['target'],
           validate(value, { target }) {
             return validateWindow(target, value, 'minutesMaxTimeWindow');
