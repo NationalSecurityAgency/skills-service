@@ -18,7 +18,7 @@ limitations under the License.
         <skills-spinner :loading="loading"/>
 
         <div v-if="!loading">
-            <skills-title>Badges</skills-title>
+            <skills-title>My Badges</skills-title>
 
             <my-badges-details data-cy="achievedBadges" :badges="achievedBadges" :badgeRouterLinkGenerator="genLink"></my-badges-details>
             <badges-catalog class="mt-3"
