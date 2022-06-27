@@ -126,6 +126,7 @@ limitations under the License.
             pagination: {
               remove: true,
             },
+            tableDescription: `${this.roleDescription} table`,
           },
         },
       };

@@ -97,6 +97,7 @@ limitations under the License.
             bordered: false,
             outlined: true,
             stacked: 'md',
+            tableDescription: 'Skills',
             fields,
             pagination: {
               currentPage: 1,

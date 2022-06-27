@@ -119,6 +119,7 @@ limitations under the License.
             stacked: 'md',
             sortBy: 'performedOn',
             sortDesc: true,
+            tableDescription: 'User\'s Skill Events',
             fields: [
               {
                 key: 'skillId',

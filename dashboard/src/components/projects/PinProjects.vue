@@ -58,6 +58,7 @@ limitations under the License.
                        :sort-by.sync="sortBy"
                        :sort-desc.sync="sortDesc"
                        :no-sort-reset="true"
+                       aria-label="Projects"
                        data-cy="pinProjectsSearchResults">
 
                 <template #cell(name)="data">

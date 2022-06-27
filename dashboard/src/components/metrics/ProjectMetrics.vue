@@ -22,9 +22,17 @@ limitations under the License.
     </div>
     <div v-if="tagCharts" class="row" data-cy="userTagCharts">
       <div class="col-12 col-md-6 mt-2" v-for="(tagChart, index) in tagCharts" :key="`${tagChart.key}-${index}`">
-        <div  v-if="index > 0 && index % 2 == 0" class="w-100"></div>
-        <user-tag-table v-if="tagChart.type === 'table'" class="h-100" :tag-chart="tagChart" />
-        <user-tag-chart v-if="tagChart.type !== 'table'" class="h-100" :chart-type="tagChart.type" :tag-key="tagChart.key" :title="tagChart.title"/>
+        <div v-if="index > 0 && index % 2 == 0" class="w-100"></div>
+        <user-tag-table v-if="tagChart.type === 'table'"
+                        class="h-100"
+                        :tag-chart="tagChart"
+                        tabindex="0" />
+        <user-tag-chart v-if="tagChart.type !== 'table'"
+                        class="h-100"
+                        :chart-type="tagChart.type"
+                        :tag-key="tagChart.key"
+                        :title="tagChart.title"
+                        tabindex="0" />
       </div>
     </div>
   </div>

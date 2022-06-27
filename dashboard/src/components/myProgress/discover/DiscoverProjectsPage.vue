@@ -77,6 +77,7 @@ aria-label="search for projects to pin"></b-input>
                  :sort-desc.sync="sortDesc"
                  :no-sort-reset="true"
                  :show-empty="true"
+                 aria-label="Projects"
                  data-cy="discoverProjectsTable">
           <template #head(name)="data">
             <span class="text-primary"><i class="fas fa-list-alt skills-color-projects" /> {{ data.label }}</span>

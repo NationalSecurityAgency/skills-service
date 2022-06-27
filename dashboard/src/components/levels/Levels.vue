@@ -89,6 +89,7 @@ limitations under the License.
 </template>
 
 <script>
+  import { createNamespacedHelpers } from 'vuex';
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
 
@@ -97,6 +98,9 @@ limitations under the License.
   import LevelService from './LevelService';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
+
+  const projectsStore = createNamespacedHelpers('projects');
+  const subjectsStore = createNamespacedHelpers('subjects');
 
   export default {
     name: 'Levels',
@@ -132,6 +136,7 @@ limitations under the License.
             pagination: {
               remove: true,
             },
+            tableDescription: `Skills for subject ${this.tableDescription}`,
           },
         },
       };
@@ -168,6 +173,7 @@ limitations under the License.
             },
           ];
           this.table.options.fields = fields;
+          this.table.options.tableDescription = this.tableDescription;
 
           const pointsEnabled = data && (data.value === true || data.value === 'true');
           if (pointsEnabled) {
@@ -182,6 +188,18 @@ limitations under the License.
       this.loadLevels();
     },
     computed: {
+      ...projectsStore.mapGetters([
+        'project',
+      ]),
+      ...subjectsStore.mapGetters([
+        'subject',
+      ]),
+      tableDescription() {
+        if (this.$route.params.subjectId) {
+          return `Subject ${this.subject.name} Levels`;
+        }
+        return `Project ${this.project.name} Levels`;
+      },
       bounds() {
         const bounds = {
           previous: null,
@@ -230,6 +248,12 @@ limitations under the License.
       },
     },
     methods: {
+      ...projectsStore.mapActions([
+        'loadProjectDetailsState',
+      ]),
+      ...subjectsStore.mapActions([
+        'loadSubjectDetailsState',
+      ]),
       loadLevels() {
         this.table.options.busy = true;
         if (this.$route.params.subjectId) {

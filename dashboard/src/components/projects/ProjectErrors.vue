@@ -108,6 +108,7 @@ limitations under the License.
             sortDesc: true,
             busy: true,
             stacked: 'md',
+            tableDescription: 'Project Errors',
             pagination: {
               server: true,
               currentPage: 1,

@@ -211,6 +211,7 @@ limitations under the License.
             pageSize: 5,
             possiblePageSizes: [5, 10, 15, 20, 50],
           },
+          tableDescription: 'User Achievement Results',
         },
         items: [],
       };

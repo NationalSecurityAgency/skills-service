@@ -50,7 +50,8 @@ limitations under the License.
     <loading-container v-bind:is-loading="loadingSubjectSkills">
       <b-card body-class="p-0">
         <skills-table ref="skillsTable"
-          :skills-prop="subjectSkills" :is-top-level="true" :project-id="this.$route.params.projectId" :subject-id="subjectId"
+          :skills-prop="subjectSkills" :is-top-level="true" :project-id="this.$route.params.projectId"
+                      :subject-id="subjectId" :subject-name="subjectName"
                       v-on:skills-change="skillsChanged"
                       @skill-removed="skillDeleted" />
       </b-card>
@@ -237,6 +238,9 @@ limitations under the License.
           return `The maximum number of Skills allowed is ${this.$store.getters.config.maxSkillsPerSubject}`;
         }
         return '';
+      },
+      subjectName() {
+        return this.subject.name;
       },
     },
   };
