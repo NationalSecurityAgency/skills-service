@@ -137,7 +137,7 @@ describe('Users skills-display Breadcrumb Tests', () => {
         cy.visit(`/administrator/projects/proj1/users/${proxyUser}/?skillsClientDisplayPath=/rank`)
         cy.contains("Client Display");
         cy.contains(`ID: ${Cypress.env('proxyUser')}`);
-        cy.dashboardCd().contains('Rank Overview');
+        cy.dashboardCd().contains('My Rank');
 
         cy.get('[data-cy=breadcrumb-Rank]').should('exist');
         cy.get('[data-cy=breadcrumb-Rank]').should('not.have.attr', 'href');

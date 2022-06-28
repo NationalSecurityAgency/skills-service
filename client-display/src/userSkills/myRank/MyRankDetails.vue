@@ -18,7 +18,7 @@ limitations under the License.
         <skills-spinner v-if='loading' :loading="loading" class="mt-5"></skills-spinner>
 
         <div v-if='!loading'>
-            <skills-title>Rank Overview</skills-title>
+            <skills-title>My Rank</skills-title>
             <div class='row text-center mt-2'>
 
                 <my-rank-detail-stat-card

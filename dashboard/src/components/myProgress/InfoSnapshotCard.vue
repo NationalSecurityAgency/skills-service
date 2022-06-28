@@ -40,7 +40,7 @@ limitations under the License.
             <span v-else data-cy="info-snap-footer" class="text-nowrap" title="Great job, you have contributed to all projects!">Great job, you have contributed to all projects!</span>
           </b-col>
           <b-col cols="auto">
-            <span class="float-right"><b-button :to="{ name: 'MyUsagePage', params: { projects } }" variant="outline-info" size="sm" data-cy="viewUsageBtn"><i class="fas fa-chart-line"/> Usage</b-button></span>
+            <span class="float-right"><b-button :to="{ name: 'MyUsagePage', params: { projects } }" variant="outline-info" size="sm" data-cy="viewUsageBtn"><i class="fas fa-chart-line"/> My Usage</b-button></span>
           </b-col>
         </b-row>
       </b-col>

@@ -194,7 +194,7 @@ describe('Client Display Breadcrumb Tests', () => {
     it('test breadcrumbs starting on Rank page', () => {
         // Go to Project Rank page
         cy.cdVisit('/rank');
-        cy.contains('Rank Overview');
+        cy.contains('My Rank');
         cy.get('[data-cy=breadcrumb-Rank]').should('exist');
         cy.get('[data-cy=breadcrumb-Rank]').should('not.have.attr', 'href');
         cy.get('[data-cy=breadcrumb-Overview]').should('exist');
@@ -259,7 +259,7 @@ describe('Client Display Breadcrumb Tests', () => {
     it('test breadcrumbs starting on Subject Rank page', () => {
         // Go to Subject Rank page
         cy.cdVisit('/subjects/subj1/rank');
-        cy.contains('Rank Overview');
+        cy.contains('My Rank');
         cy.get('[data-cy=breadcrumb-Rank]').should('exist');
         cy.get('[data-cy=breadcrumb-Rank]').should('not.have.attr', 'href');
         cy.get('[data-cy=breadcrumb-Overview]').should('exist');
