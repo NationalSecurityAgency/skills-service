@@ -140,7 +140,7 @@ describe('Navigation Tests', () => {
 
     // navigate to Rank Overview and that it does NOT contains the internal back button
     cy.dashboardCd().find('[data-cy=myRank]').click();
-    cy.dashboardCd().contains('Rank Overview');
+    cy.dashboardCd().contains('My Rank');
     cy.dashboardCd().find('[data-cy=back]').should('not.exist');
 
     // click the browser back button and verify that we are still in the
