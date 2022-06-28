@@ -224,7 +224,7 @@ describe('Global Badges Tests', () => {
       cy.intercept('GET', '/supervisor/badges/a_badge/projects/available').as('getAvailableLevels');
 
       cy.visit('/administrator/');
-      cy.clickNav('Badges');
+      cy.clickNav('Global Badges');
       cy.wait('@getBadges');
       cy.get('[data-cy="manageBtn_a_badge"]').click();
       cy.get('#skills-selector').click();
@@ -277,7 +277,7 @@ describe('Global Badges Tests', () => {
         cy.intercept('GET', `/supervisor/badges`).as('getGlobalBadges');
 
         cy.visit('/administrator/');
-        cy.clickNav('Badges');
+        cy.clickNav('Global Badges');
         cy.wait('@getGlobalBadges');
         cy.contains('No Badges Yet');
     });
@@ -302,7 +302,7 @@ describe('Global Badges Tests', () => {
         cy.clickSave();
         cy.wait('@postGlobalBadge');
 
-        cy.clickNav('Badges');
+        cy.clickNav('Global Badges');
 
         cy.contains('Test Badge').should('exist');
         cy.get('[data-cy=badgeStatus]').contains('Status: Disabled').should('exist');
@@ -353,7 +353,7 @@ describe('Global Badges Tests', () => {
         cy.clickSave();
         cy.wait('@postGlobalBadge');
 
-        cy.clickNav('Badges');
+        cy.clickNav('Global Badges');
         cy.contains('Manage').click();
         cy.get('#skills-selector').click();
         cy.get('[data-cy="skillsSelectionItem-proj1-skill1"]').click();
@@ -493,7 +493,7 @@ describe('Global Badges Tests', () => {
 
         cy.visit('/administrator/');
 
-        cy.clickNav('Badges');
+        cy.clickNav('Global Badges');
         cy.wait('@getGlobalBadges');
 
         cy.clickButton('Badge');
@@ -597,7 +597,7 @@ describe('Global Badges Tests', () => {
 
         cy.visit('/administrator/');
 
-        cy.clickNav('Badges');
+        cy.clickNav('Global Badges');
         cy.wait('@getGlobalBadges');
 
         cy.clickButton('Badge');
@@ -656,7 +656,7 @@ describe('Global Badges Tests', () => {
         cy.intercept('GET', `/supervisor/badges`).as('getGlobalBadges');
 
         cy.visit('/administrator/');
-        cy.clickNav('Badges');
+        cy.clickNav('Global Badges');
         cy.wait('@getGlobalBadges');
 
         cy.get('[aria-label="new global badge"]').click();
@@ -932,7 +932,7 @@ describe('Global Badges Tests', () => {
         cy.intercept('GET', `/supervisor/badges`).as('getGlobalBadges');
 
         cy.visit('/administrator/');
-        cy.clickNav('Badges');
+        cy.clickNav('Global Badges');
         cy.wait('@getGlobalBadges');
 
         cy.get('[data-cy="badgeCard-badge1"] [data-cy=editBtn]').click()

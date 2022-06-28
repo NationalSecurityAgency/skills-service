@@ -60,7 +60,7 @@ limitations under the License.
 
         if (this.isSupervisor || this.isRoot) {
           items.push({
-            name: 'Badges',
+            name: 'Global Badges',
             iconClass: 'fa-globe-americas skills-color-badges',
             page: 'GlobalBadges',
           });
