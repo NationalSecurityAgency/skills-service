@@ -17,7 +17,9 @@ limitations under the License.
   <div>
     <page-header :loading="isLoading" :options="headerOptions">
       <div slot="subTitle">
-        <div class="h5 text-muted" data-cy="skillId"><show-more :limit="54" :text="skill ? `ID: ${skill.skillId}` : 'Loading...'"></show-more></div>
+        <div class="h5 text-muted" data-cy="skillId">
+          <show-more :limit="54" :text="getSkillId(skill)"></show-more>
+        </div>
         <div class="h5 text-muted" v-if="skill && skill.groupId">
           <span style="font-size: 1rem">Group ID:</span> <span v-b-tooltip.hover="`Name: ${ skill.groupName }`">{{ skill.groupId }}</span>
         </div>
@@ -54,6 +56,7 @@ limitations under the License.
 
 <script>
   import { createNamespacedHelpers } from 'vuex';
+  import SkillReuseIdUtil from '@/components/utils/SkillReuseIdUtil';
   import SkillsService from './SkillsService';
   import Navigation from '../utils/Navigation';
   import PageHeader from '../utils/pages/PageHeader';
@@ -210,16 +213,20 @@ limitations under the License.
         });
       },
       buildHeaderOptions(skill) {
+        const skillId = skill?.skillId ? SkillReuseIdUtil.removeTag(skill.skillId) : '';
         return {
           icon: 'fas fa-graduation-cap skills-color-skills',
           title: `SKILL: ${skill?.name}`,
-          subTitle: `ID: ${skill?.skillId} | GROUP ID: ${skill?.groupId}`,
+          subTitle: `ID: ${skillId} | GROUP ID: ${skill?.groupId}`,
           stats: [{
             label: 'Points',
             count: skill?.totalPoints,
             icon: 'far fa-arrow-alt-circle-up skills-color-points',
           }],
         };
+      },
+      getSkillId(skill) {
+        return skill ? `ID: ${SkillReuseIdUtil.removeTag(skill.skillId)}` : 'Loading...';
       },
     },
   };

@@ -138,7 +138,10 @@ limitations under the License.
                   <router-link :data-cy="`manageSkillLink_${data.item.skillId}`" tag="a" :to="{ name:'SkillOverview',
                                       params: { projectId: data.item.projectId, subjectId: subjectId, skillId: data.item.skillId }}"
                                :aria-label="`Manage skill ${data.item.name}  via link`">
-                    <div class="h5 d-inline-block"><show-more :text="data.item.nameHtml ? data.item.nameHtml : data.item.name" :limit="45" :contains-html="data.item.nameHtml" /></div>
+                    <div class="h5 d-inline-block">
+                      <show-more :text="data.item.nameHtml ? data.item.nameHtml : data.item.name"
+                                 :limit="45" :contains-html="nameContainsHtml(data.item)"/>
+                    </div>
                   </router-link>
                   <div class="h6 ml-2 d-inline-block">
                     <b-badge variant="success" class="text-uppercase"
@@ -351,6 +354,7 @@ limitations under the License.
   import { SkillsReporter } from '@skilltree/skills-client-vue';
   import dayjs from '@/common-components/DayJsCustomizer';
   import StringHighlighter from '@/common-components/utilities/StringHighlighter';
+  import SkillReuseIdUtil from '@/components/utils/SkillReuseIdUtil';
   import ExportToCatalog from '@/components/skills/catalog/ExportToCatalog';
   import RemovalValidation from '@/components/utils/modal/RemovalValidation';
   import ExportedSkillDeletionWarning from '@/components/skills/catalog/ExportedSkillDeletionWarning';
@@ -610,8 +614,12 @@ limitations under the License.
             return false;
           })?.map((item) => {
             const nameHtml = StringHighlighter.highlight(item.name, filter);
-            const skillIdHtml = StringHighlighter.highlight(item.skillId, filter);
-            return { nameHtml, skillIdHtml, ...item };
+            const skillId = SkillReuseIdUtil.removeTag(item.skillId);
+            const skillIdHtml = StringHighlighter.highlight(skillId, filter);
+            return {
+              nameHtml,
+              skillIdHtml, ...item
+            };
           });
         } else {
           this.reset();
@@ -639,8 +647,12 @@ limitations under the License.
       idContainsHtml(item) {
         return !!item.skillIdHtml;
       },
+      nameContainsHtml(item) {
+        return !!item.nameHtml;
+      },
       getIdText(item) {
-        let text = `ID: ${item.skillId}`;
+        const skillId = SkillReuseIdUtil.removeTag(item.skillId);
+        let text = `ID: ${skillId}`;
         if (this.idContainsHtml(item)) {
           text = `ID: ${item.skillIdHtml}`;
         }

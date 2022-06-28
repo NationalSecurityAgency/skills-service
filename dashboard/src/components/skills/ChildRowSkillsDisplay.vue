@@ -28,7 +28,7 @@ limitations under the License.
         skillInfo.copiedFromProjectName
       }}</b> project
     </div>
-    <div v-if="isReused" class="mt-3 alert alert-info" header="Skill Catalog">
+    <div v-if="isReused" class="mt-3 alert alert-info" header="Skill Catalog" data-cy="reusedAlert">
       This skill was
       <b-badge class="text-uppercase"><i class="fas fa-recycle"></i> reused</b-badge>
       from another skill in this project.
@@ -36,7 +36,7 @@ limitations under the License.
       <b-badge>Read-Only</b-badge>
       and can only be edited from this
       <link-to-skill-page v-if="skillId" :project-id="skillInfo.projectId" :skill-id="skillId"
-                          link-label="Original Skill"/>
+                          link-label="Original Skill" data-cy="linkToTheOriginalSkill"/>
       .
     </div>
     <div v-if="isImported && isDisabled" class="mt-3 alert alert-warning" header="Skill Catalog">

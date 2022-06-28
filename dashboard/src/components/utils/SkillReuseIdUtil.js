@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 export default class SkillReuseIdUtil {
+  static tagRegex() {
+    return /(.*)STREUSESKILLST[\d]+/g;
+  }
+
   static isTagged(val) {
-    if (val && val.endsWith('STREUSESKILLST')) {
+    if (val && val.match(this.tagRegex())) {
       return true;
     }
     return false;
@@ -23,7 +27,9 @@ export default class SkillReuseIdUtil {
 
   static removeTag(val) {
     if (this.isTagged(val)) {
-      return val.substring(0, val.length - 14);
+      const arr = this.tagRegex()
+        .exec(val);
+      return arr[1];
     }
     return val;
   }
