@@ -25,7 +25,7 @@ limitations under the License.
           <b-col>
             <div class="card p-0 m-0">
               <div class="card-body mt-2 mb-0 p-0">
-                <h1 class="h4 text-uppercase text-center">User Agreement</h1>
+                <div class="h4 text-uppercase text-center">User Agreement</div>
               </div>
             </div>
           </b-col>

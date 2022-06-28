@@ -24,7 +24,7 @@ limitations under the License.
       </div>
       <div class="w-100"></div>
       <div class="col pt-2">
-        <h2 class="h3">{{ title }}</h2>
+        <div class="h3">{{ title }}</div>
       </div>
       <div class="w-100"></div>
       <div class="col">

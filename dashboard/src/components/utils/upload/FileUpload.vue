@@ -16,7 +16,7 @@ limitations under the License.
 <template>
   <div class="uploadContainer">
     <form enctype="multipart/form-data" novalidate>
-      <h1 slot="title"></h1>
+      <div class="h1" slot="title"></div>
       <div class="dropbox">
         <input type="file"
                :name="name"

@@ -18,7 +18,7 @@ limitations under the License.
     <div class="card-body">
       <div class="row">
         <div class="col">
-          <h5 class="text-uppercase text-muted card-title small mb-1">{{ title }}</h5>
+          <div class="h5 text-uppercase text-muted card-title small mb-1">{{ title }}</div>
           <span class="h4 font-weight-bold mb-0" data-cy="statCardValue">
             <span v-if="calculateTimeFromNow"><span v-if="statNum">{{ statNum | timeFromNow }}</span><span v-else>Never</span></span>
             <span v-else>{{ statNum | number }}</span>

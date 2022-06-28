@@ -22,7 +22,7 @@ limitations under the License.
                     </span>
     </div>
     <div class="text-center text-secondary">
-      <h4 class="">Resource Not Found</h4>
+      <div class="h4">Resource Not Found</div>
     </div>
 
     <div class="container-fluid">

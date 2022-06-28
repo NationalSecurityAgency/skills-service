@@ -19,9 +19,9 @@ limitations under the License.
       <div class="col-md-6 mt-3">
         <div class="text-center mt-5">
           <i class="fa fa-users fa-4x text-secondary"></i>
-          <h2 class="mt-4 text-info">
+          <div class="h2 mt-4 text-info">
             <span>Reset Account Password</span>
-          </h2>
+          </div>
         </div>
         <ValidationObserver ref="resetForm" v-slot="{invalid, handleSubmit}" slim>
           <form @submit.prevent="handleSubmit(changePassword)">

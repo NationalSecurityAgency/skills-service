@@ -30,7 +30,7 @@ limitations under the License.
                   data-cy="projectSelector">
           <template v-if="beforeListSlotText" #list-header>
             <li>
-              <h6 class="ml-1"> {{ beforeListSlotText }}</h6>
+              <div class="h6 ml-1"> {{ beforeListSlotText }}</div>
             </li>
           </template>
         </v-select>

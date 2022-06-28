@@ -17,7 +17,7 @@ limitations under the License.
   <div class="container">
     <div id="gfmDescription" class="card">
       <div class="card-header bg-info" @cancel-clicked="$parent.close()">
-        <h4 class="text-white">Markdown Syntax</h4>
+        <div class="h4 text-white">Markdown Syntax</div>
       </div>
 
       <div class="card-body">
@@ -25,7 +25,7 @@ limitations under the License.
           <p class="card-title">Descriptions support GFM (Git Flavored Markdown). Some limited examples of the supported
             formatting are:</p>
 
-          <h3>Headers</h3>
+          <div class="h3">Headers</div>
           <pre class="bg-light"><code>
         # H1
         ## H2
@@ -35,7 +35,7 @@ limitations under the License.
         ###### H6
         </code></pre>
 
-          <h3>Emphasis</h3>
+          <div class="h3">Emphasis</div>
           <pre class="bg-light"><code>
         italics: *italicized* or _italicized_
         bold: **bolded** or __bolded__
@@ -43,12 +43,12 @@ limitations under the License.
         strikethrough: ~~struck~~
         </code></pre>
 
-          <h3>Inline</h3>
+          <div class="h3">Inline</div>
           <pre class="bg-light"><code>
         Inline `code` has `back-ticks around` it.
         </code></pre>
 
-          <h3>Multiline</h3>
+          <div class="h3">Multiline</div>
           Use ``` for multiline support:
           <pre class="bg-light"><code>
         ```
@@ -57,7 +57,7 @@ limitations under the License.
         ```
           </code></pre>
 
-          <h3>Lists</h3>
+          <div class="h3">Lists</div>
           <p>Ordered Lists:</p>
           <pre class="bg-light"><code>
         1. Item one
@@ -81,23 +81,23 @@ limitations under the License.
         * Item
         </code></pre>
 
-          <h3>
+          <div class="h3">
             Links
-          </h3>
+          </div>
           <pre class="bg-light"><code>
         [in line link](https://www.somewebsite.com)
         </code></pre>
 
-          <h3>
+          <div class="h3">
             Blockquotes
-          </h3>
+          </div>
           <pre class="bg-light"><code>
         > This is a block quote
         </code></pre>
 
-          <h3>
+          <div class="h3">
             Horizontal rule
-          </h3>
+          </div>
           <pre class="bg-light"><code>
         Use three or more dashes, asterisks, or underscores to generate a horizontal rule line
 
@@ -109,9 +109,9 @@ limitations under the License.
         ***
         </code></pre>
 
-          <h3>
+          <div class="h3">
             Emojis
-          </h3>
+          </div>
           Emojis are supported, for example:
           <pre class="bg-light"><code>
         :star: :star: :star: :star:

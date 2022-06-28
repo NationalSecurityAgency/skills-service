@@ -22,7 +22,7 @@ limitations under the License.
                     </span>
     </div>
     <div class="text-center text-secondary">
-      <h4 class="">A database upgrade is in progress!</h4>
+      <div class="h4">A database upgrade is in progress!</div>
     </div>
 
     <div class="row justify-content-center text-info mt-3">

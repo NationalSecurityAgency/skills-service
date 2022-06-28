@@ -19,9 +19,9 @@ limitations under the License.
       <div class="col-md-6 mt-3">
         <div class="text-center mt-5">
           <logo1 />
-          <h3 class="mt-4 text-primary">
+          <div class="h3 mt-4 text-primary">
             New <span v-if="isRootAccount">Root </span>Account
-          </h3>
+          </div>
         </div>
         <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit}" slim>
           <form @submit.prevent="handleSubmit(login)">

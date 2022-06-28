@@ -24,12 +24,12 @@ limitations under the License.
               v-on:input="inputChanged"
               :loading="isLoading">
       <template #option="{ name, projectId }">
-        <h6>{{ name }}</h6>
+        <div class="h6">{{ name }}</div>
         <div class="text-secondary">ID: {{ projectId }}</div>
       </template>
       <template v-if="afterListSlotText" #list-footer>
         <li>
-          <h6 class="ml-1"> {{ afterListSlotText }}</h6>
+          <div class="h6 ml-1"> {{ afterListSlotText }}</div>
         </li>
       </template>
     </v-select>
