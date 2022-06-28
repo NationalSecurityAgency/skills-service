@@ -39,66 +39,102 @@ const router = new VueRouter({
       name: 'home',
       component: SkillsEntry,
       props: true,
+      meta: {
+        title: 'Overview',
+      },
     },
     {
       path: '',
       name: 'error',
       component: ErrorPage,
       props: true,
+      meta: {
+        title: 'Error',
+      },
     },
     {
       path: '/subjects/:subjectId',
       component: SubjectDetails,
       name: 'subjectDetails',
       props: true,
+      meta: {
+        title: 'Subject Overview',
+      },
     },
     {
       path: '/badges',
       component: BadgesDetails,
       name: 'badges',
       props: true,
+      meta: {
+        title: 'Badges Overview',
+      },
     },
     {
       path: '/badges/:badgeId',
       component: BadgeDetails,
       name: 'badgeDetails',
       props: true,
+      meta: {
+        title: 'Badge Details',
+      },
     },
     {
       path: '/badges/global/:badgeId',
       component: GlobalBadgeDetails,
       name: 'globalBadgeDetails',
       props: true,
+      meta: {
+        title: 'Global Badge Details',
+      },
     },
     {
       path: '/subjects/:subjectId/skills/:skillId',
       component: SkillDetails,
       name: 'skillDetails',
+      meta: {
+        title: 'Skill Details',
+      },
     },
     {
       path: '/subjects/:subjectId/skills/:skillId/crossProject/:crossProjectId/:dependentSkillId',
       component: SkillDetails,
       name: 'crossProjectSkillDetails',
+      meta: {
+        title: 'Cross Project Skill Details',
+      },
     },
     {
       path: '/subjects/:subjectId/skills/:skillId/dependency/:dependentSkillId',
       component: SkillDetails,
       name: 'dependentSkillDetails',
+      meta: {
+        title: 'Dependant Skill Details',
+      },
     },
     {
       path: '/badges/:badgeId/skills/:skillId',
       component: SkillDetails,
       name: 'badgeSkillDetails',
+      meta: {
+        title: 'Badge Skill Details',
+      },
     },
     {
       path: '//badges/global/:badgeId/skills/:skillId',
       component: SkillDetails,
       name: 'globalBadgeSkillDetails',
+      meta: {
+        title: 'Global Badge Skill Details',
+      },
     },
     {
       path: '/rank',
       component: MyRankDetails,
       name: 'myRankDetails',
+      meta: {
+        title: 'My Rank',
+      },
       props: true,
     },
     {
@@ -106,10 +142,16 @@ const router = new VueRouter({
       component: MyRankDetails,
       name: 'subjectRankDetails',
       props: true,
+      meta: {
+        title: 'My Subject Rank',
+      },
     },
     {
       path: '*',
       component: SkillsEntry,
+      meta: {
+        title: 'Overview',
+      },
     },
   ],
 });
@@ -127,7 +169,22 @@ router.beforeEach((to, from, next) => {
   }
 });
 
+let siteTitle;
 router.afterEach(debounce((to) => {
+  // Use next tick to handle router history correctly
+  // see: https://github.com/vuejs/vue-router/issues/914#issuecomment-384477609
+  if (to && to.meta && to.meta.title) {
+    if (!siteTitle) {
+      siteTitle = document.title;
+    }
+    Vue.nextTick(() => {
+      if (siteTitle) {
+        document.title = `${siteTitle} - ${to.meta.title}`;
+      } else {
+        document.title = to.meta.title;
+      }
+    });
+  }
   if (process.env.NODE_ENV !== 'development' && store.state.parentFrame) {
     const params = {
       path: to.path,
