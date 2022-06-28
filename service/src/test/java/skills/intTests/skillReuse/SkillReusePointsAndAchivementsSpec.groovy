@@ -15,10 +15,9 @@
  */
 package skills.intTests.skillReuse
 
-import groovy.json.JsonOutput
+
 import skills.intTests.catalog.CatalogIntSpec
 import skills.services.admin.skillReuse.SkillReuseIdUtil
-import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -194,7 +193,6 @@ class SkillReusePointsAndAchivementsSpec extends CatalogIntSpec {
         def subj2 = skillsService.getSkillSummary(user, p1.projectId, p1subj2.subjectId)
         def skill = skillsService.getSingleSkillSummary(user, p1.projectId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0))
 
-        println JsonOutput.toJson(subj2)
         then:
         proj.totalPoints == 2000
         proj.points == 600
@@ -320,5 +318,297 @@ class SkillReusePointsAndAchivementsSpec extends CatalogIntSpec {
         skill2.points == 300
         skill2.totalPoints == 500
         skill2.todaysPoints == 100
+    }
+
+    def "updating original skill increases user points and user's levels"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1subj2 = createSubject(1, 2)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        skillsService.createSubject(p1subj2)
+
+        def p1Skills_subj2 = createSkills(1, 1, 2, 100, 5)
+        skillsService.createSkills(p1Skills_subj2)
+
+        String user = getRandomUsers(1)[0]
+        skillsService.reuseSkillInAnotherSubject(p1.projectId, p1Skills[0].skillId, p1subj2.subjectId)
+        skillsService.addSkill(p1Skills[0], user, new Date() - 2)
+        skillsService.addSkill(p1Skills[0], user, new Date() - 1)
+        skillsService.addSkill(p1Skills[0], user)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        when:
+        def proj = skillsService.getSkillSummary(user, p1.projectId)
+        def subj2 = skillsService.getSkillSummary(user, p1.projectId, p1subj2.subjectId)
+        def skill = skillsService.getSingleSkillSummary(user, p1.projectId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0))
+
+        p1Skills[0].pointIncrement = 1000
+        p1Skills[0].numPerformToCompletion = 6
+        skillsService.createSkill(p1Skills[0])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        def proj_after = skillsService.getSkillSummary(user, p1.projectId)
+        def subj2_after = skillsService.getSkillSummary(user, p1.projectId, p1subj2.subjectId)
+        def skill_after = skillsService.getSingleSkillSummary(user, p1.projectId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0))
+
+        then:
+        proj.totalPoints == 2500
+        proj.points == 600
+        proj.skillsLevel == 1
+        proj.subjects[0].todaysPoints == 100
+        proj.subjects[0].points == 300
+        proj.subjects[0].totalPoints == 1500
+        proj.subjects[1].todaysPoints == 100
+        proj.subjects[1].points == 300
+        proj.subjects[1].totalPoints == 1000
+
+        subj2.totalPoints == 1000
+        subj2.points == 300
+        subj2.todaysPoints == 100
+        subj2.skillsLevel == 2
+        subj2.skills.size() == 2
+        subj2.skills[0].skillId == p1Skills_subj2[0].skillId
+        subj2.skills[0].points == 0
+        subj2.skills[0].totalPoints == 500
+        subj2.skills[0].todaysPoints == 0
+        subj2.skills[1].skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        subj2.skills[1].points == 300
+        subj2.skills[1].totalPoints == 500
+        subj2.skills[1].todaysPoints == 100
+
+        skill.skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        skill.points == 300
+        skill.totalPoints == 500
+        skill.todaysPoints == 100
+
+        // after
+        proj_after.totalPoints == 13500
+        proj_after.points == 6000
+        proj_after.skillsLevel == 2
+        proj_after.subjects[0].todaysPoints == 1000
+        proj_after.subjects[0].points == 3000
+        proj_after.subjects[0].totalPoints == 7000
+        proj_after.subjects[1].todaysPoints == 1000
+        proj_after.subjects[1].points == 3000
+        proj_after.subjects[1].totalPoints == 6500
+
+        subj2_after.totalPoints == 6000 + 500
+        subj2_after.points == 3000
+        subj2_after.todaysPoints == 1000
+        subj2_after.skillsLevel == 3
+        subj2_after.skills.size() == 2
+        subj2_after.skills[0].skillId == p1Skills_subj2[0].skillId
+        subj2_after.skills[0].points == 0
+        subj2_after.skills[0].totalPoints == 500
+        subj2_after.skills[0].todaysPoints == 0
+        subj2_after.skills[1].skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        subj2_after.skills[1].points == 3000
+        subj2_after.skills[1].totalPoints == 6000
+        subj2_after.skills[1].todaysPoints == 1000
+
+        skill_after.skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        skill_after.totalPoints == 6000
+        skill_after.points == 3000
+        skill_after.todaysPoints == 1000
+
+        userPointsRepo.findPointsByProjectIdAndUserIdAndSkillId(p1Skills[0].projectId, user, p1Skills[0].skillId) == 3000
+        userPointsRepo.findPointsByProjectIdAndUserIdAndSkillId(p1Skills[0].projectId, user, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)) == 3000
+        userPointsRepo.findPointsByProjectIdAndUserIdAndSkillId(p1Skills[0].projectId, user, p1subj1.subjectId) == 3000
+        userPointsRepo.findPointsByProjectIdAndUserIdAndSkillId(p1Skills[0].projectId, user, p1subj2.subjectId) == 3000
+        userPointsRepo.findPointsByProjectIdAndUserId(p1Skills[0].projectId, user) == 6000
+    }
+
+    def "updating original skill's pointIncrement increases user points and user's levels"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1subj2 = createSubject(1, 2)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        skillsService.createSubject(p1subj2)
+
+        def p1Skills_subj2 = createSkills(1, 1, 2, 100, 5)
+        skillsService.createSkills(p1Skills_subj2)
+
+        String user = getRandomUsers(1)[0]
+        skillsService.reuseSkillInAnotherSubject(p1.projectId, p1Skills[0].skillId, p1subj2.subjectId)
+        skillsService.addSkill(p1Skills[0], user, new Date() - 2)
+        skillsService.addSkill(p1Skills[0], user, new Date() - 1)
+        skillsService.addSkill(p1Skills[0], user)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        when:
+        def proj = skillsService.getSkillSummary(user, p1.projectId)
+        def subj2 = skillsService.getSkillSummary(user, p1.projectId, p1subj2.subjectId)
+        def skill = skillsService.getSingleSkillSummary(user, p1.projectId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0))
+
+        p1Skills[0].pointIncrement = 1000
+        skillsService.createSkill(p1Skills[0])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        def proj_after = skillsService.getSkillSummary(user, p1.projectId)
+        def subj2_after = skillsService.getSkillSummary(user, p1.projectId, p1subj2.subjectId)
+        def skill_after = skillsService.getSingleSkillSummary(user, p1.projectId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0))
+
+        then:
+        proj.totalPoints == 2500
+        proj.points == 600
+        proj.skillsLevel == 1
+        proj.subjects[0].todaysPoints == 100
+        proj.subjects[0].points == 300
+        proj.subjects[0].totalPoints == 1500
+        proj.subjects[1].todaysPoints == 100
+        proj.subjects[1].points == 300
+        proj.subjects[1].totalPoints == 1000
+
+        subj2.totalPoints == 1000
+        subj2.points == 300
+        subj2.todaysPoints == 100
+        subj2.skillsLevel == 2
+        subj2.skills.size() == 2
+        subj2.skills[0].skillId == p1Skills_subj2[0].skillId
+        subj2.skills[0].points == 0
+        subj2.skills[0].totalPoints == 500
+        subj2.skills[0].todaysPoints == 0
+        subj2.skills[1].skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        subj2.skills[1].points == 300
+        subj2.skills[1].totalPoints == 500
+        subj2.skills[1].todaysPoints == 100
+
+        skill.skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        skill.points == 300
+        skill.totalPoints == 500
+        skill.todaysPoints == 100
+
+        // after
+        proj_after.totalPoints == 11500
+        proj_after.points == 6000
+        proj_after.skillsLevel == 3
+        proj_after.subjects[0].todaysPoints == 1000
+        proj_after.subjects[0].points == 3000
+        proj_after.subjects[0].totalPoints == 6000
+        proj_after.subjects[1].todaysPoints == 1000
+        proj_after.subjects[1].points == 3000
+        proj_after.subjects[1].totalPoints == 5500
+
+        subj2_after.totalPoints == 5000 + 500
+        subj2_after.points == 3000
+        subj2_after.todaysPoints == 1000
+        subj2_after.skillsLevel == 3
+        subj2_after.skills.size() == 2
+        subj2_after.skills[0].skillId == p1Skills_subj2[0].skillId
+        subj2_after.skills[0].points == 0
+        subj2_after.skills[0].totalPoints == 500
+        subj2_after.skills[0].todaysPoints == 0
+        subj2_after.skills[1].skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        subj2_after.skills[1].points == 3000
+        subj2_after.skills[1].totalPoints == 5000
+        subj2_after.skills[1].todaysPoints == 1000
+
+        skill_after.skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        skill_after.totalPoints == 5000
+        skill_after.points == 3000
+        skill_after.todaysPoints == 1000
+
+        userPointsRepo.findPointsByProjectIdAndUserIdAndSkillId(p1Skills[0].projectId, user, p1Skills[0].skillId) == 3000
+        userPointsRepo.findPointsByProjectIdAndUserIdAndSkillId(p1Skills[0].projectId, user, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)) == 3000
+        userPointsRepo.findPointsByProjectIdAndUserIdAndSkillId(p1Skills[0].projectId, user, p1subj1.subjectId) == 3000
+        userPointsRepo.findPointsByProjectIdAndUserIdAndSkillId(p1Skills[0].projectId, user, p1subj2.subjectId) == 3000
+        userPointsRepo.findPointsByProjectIdAndUserId(p1Skills[0].projectId, user) == 6000
+    }
+
+    def "updating original skill's numPerformToCompletion increases user's levels"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1subj2 = createSubject(1, 2)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        skillsService.createSubject(p1subj2)
+
+        def p1Skills_subj2 = createSkills(1, 1, 2, 100, 5)
+        skillsService.createSkills(p1Skills_subj2)
+
+        String user = getRandomUsers(1)[0]
+        skillsService.reuseSkillInAnotherSubject(p1.projectId, p1Skills[0].skillId, p1subj2.subjectId)
+        skillsService.addSkill(p1Skills[0], user, new Date() - 2)
+        skillsService.addSkill(p1Skills[0], user, new Date() - 1)
+        skillsService.addSkill(p1Skills[0], user)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        when:
+        def proj = skillsService.getSkillSummary(user, p1.projectId)
+        def subj2 = skillsService.getSkillSummary(user, p1.projectId, p1subj2.subjectId)
+        def skill = skillsService.getSingleSkillSummary(user, p1.projectId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0))
+
+        p1Skills[0].numPerformToCompletion = 3
+        skillsService.createSkill(p1Skills[0])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        def proj_after = skillsService.getSkillSummary(user, p1.projectId)
+        def subj2_after = skillsService.getSkillSummary(user, p1.projectId, p1subj2.subjectId)
+        def skill_after = skillsService.getSingleSkillSummary(user, p1.projectId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0))
+
+        then:
+        proj.totalPoints == 2500
+        proj.points == 600
+        proj.skillsLevel == 1
+        proj.subjects[0].todaysPoints == 100
+        proj.subjects[0].points == 300
+        proj.subjects[0].totalPoints == 1500
+        proj.subjects[1].todaysPoints == 100
+        proj.subjects[1].points == 300
+        proj.subjects[1].totalPoints == 1000
+
+        subj2.totalPoints == 1000
+        subj2.points == 300
+        subj2.todaysPoints == 100
+        subj2.skillsLevel == 2
+        subj2.skills.size() == 2
+        subj2.skills[0].skillId == p1Skills_subj2[0].skillId
+        subj2.skills[0].points == 0
+        subj2.skills[0].totalPoints == 500
+        subj2.skills[0].todaysPoints == 0
+        subj2.skills[1].skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        subj2.skills[1].points == 300
+        subj2.skills[1].totalPoints == 500
+        subj2.skills[1].todaysPoints == 100
+
+        skill.skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        skill.points == 300
+        skill.totalPoints == 500
+        skill.todaysPoints == 100
+
+        // after
+        proj_after.totalPoints == 2100
+        proj_after.points == 600
+        proj_after.skillsLevel == 2
+        proj_after.subjects[0].todaysPoints == 100
+        proj_after.subjects[0].points == 300
+        proj_after.subjects[0].totalPoints == 1300
+        proj_after.subjects[1].todaysPoints == 100
+        proj_after.subjects[1].points == 300
+        proj_after.subjects[1].totalPoints == 800
+
+        subj2_after.totalPoints == 300 + 500
+        subj2_after.points == 300
+        subj2_after.todaysPoints == 100
+        subj2_after.skillsLevel == 2
+        subj2_after.skills.size() == 2
+        subj2_after.skills[0].skillId == p1Skills_subj2[0].skillId
+        subj2_after.skills[0].points == 0
+        subj2_after.skills[0].totalPoints == 500
+        subj2_after.skills[0].todaysPoints == 0
+        subj2_after.skills[1].skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        subj2_after.skills[1].points == 300
+        subj2_after.skills[1].totalPoints == 300
+        subj2_after.skills[1].todaysPoints == 100
+
+        skill_after.skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        skill_after.totalPoints == 300
+        skill_after.points == 300
+        skill_after.todaysPoints == 100
+
+        userPointsRepo.findPointsByProjectIdAndUserIdAndSkillId(p1Skills[0].projectId, user, p1Skills[0].skillId) == 300
+        userPointsRepo.findPointsByProjectIdAndUserIdAndSkillId(p1Skills[0].projectId, user, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)) == 300
+        userPointsRepo.findPointsByProjectIdAndUserIdAndSkillId(p1Skills[0].projectId, user, p1subj1.subjectId) == 300
+        userPointsRepo.findPointsByProjectIdAndUserIdAndSkillId(p1Skills[0].projectId, user, p1subj2.subjectId) == 300
+        userPointsRepo.findPointsByProjectIdAndUserId(p1Skills[0].projectId, user) == 600
     }
 }

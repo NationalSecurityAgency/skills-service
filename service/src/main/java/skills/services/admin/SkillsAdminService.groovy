@@ -116,7 +116,8 @@ class SkillsAdminService {
     ProjDefRepo projDefRepo
 
     protected static class SaveSkillTmpRes {
-        boolean isAvailableInCatalog = false
+        // because of the skill re-use it could be imported but NOT available in the catalog
+        boolean isImportedByOtherProjects = false
         String projectId
         String skillId
         Integer skillRefId
@@ -215,13 +216,17 @@ class SkillsAdminService {
             pointIncrementDelta = isSkillsGroup ? 0 : incrementRequested - skillDefinition.pointIncrement
 
             if (skillRequest instanceof ReplicatedSkillUpdateRequest) {
-                //once a skill has been imported into a project, we don't want to update that imported
-                //version's point increment as importing users are allowed to scale the total points
-                //to be in line with their project's point layout. However, we do need to update the number of occurrences
-                //on imported skills if that changes on the original exported skill
-                skillRequest.pointIncrement = skillDefinition.pointIncrement
+
+                // point increment is mutated in case of re-used skills
+                if (!SkillReuseIdUtil.isTagged(skillRequest.skillId)) {
+                    //once a skill has been imported into a project, we don't want to update that imported
+                    //version's point increment as importing users are allowed to scale the total points
+                    //to be in line with their project's point layout. However, we do need to update the number of occurrences
+                    //on imported skills if that changes on the original exported skill
+                    skillRequest.pointIncrement = skillDefinition.pointIncrement
+                    pointIncrementDelta = 0
+                }
                 totalPointsRequested = skillRequest.pointIncrement * skillRequest.numPerformToCompletion
-                pointIncrementDelta = 0
             }
 
             Props.copy(skillRequest, skillDefinition, "childSkills", 'version', 'selfReportType')
@@ -323,7 +328,7 @@ class SkillsAdminService {
                         groupChildSkills
                 )
             }
-            saveSkillTmpRes.isAvailableInCatalog = skillCatalogService.isAvailableInCatalog(savedSkill.projectId, savedSkill.skillId)
+            saveSkillTmpRes.isImportedByOtherProjects = skillDefRepo.isCatalogSkillImportedByOtherProjects(savedSkill.id)
         }
 
         log.debug("Saved [{}]", savedSkill)

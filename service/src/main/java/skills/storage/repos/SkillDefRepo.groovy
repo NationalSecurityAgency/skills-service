@@ -483,6 +483,11 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     ''')
     List<Integer> findSkillDefIdsByCopiedFrom(int skillRefId)
 
+    @Query('''
+        select count(s.id) > 0 from SkillDef s where s.copiedFrom = ?1
+    ''')
+    Boolean isCatalogSkillImportedByOtherProjects(int skillRefId)
+
     @Nullable
     @Query('''
         select s.copiedFrom as id from SkillDef s where s.id = ?1

@@ -15,10 +15,10 @@
  */
 package skills.intTests.skillReuse
 
-import groovy.json.JsonOutput
+
 import skills.intTests.catalog.CatalogIntSpec
 import skills.services.admin.skillReuse.SkillReuseIdUtil
-import spock.lang.IgnoreRest
+import skills.storage.model.SkillDef
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -251,4 +251,101 @@ class SkillReuseManagementSpec extends CatalogIntSpec {
         reusedSubj2.name == ["Test Skill 1"]
     }
 
+    def "skill modifications are propagated to the re-used skill"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1subj2 = createSubject(1, 2)
+        def p1Skills = createSkills(3, 1, 1, 100)
+
+        p1Skills[0].description = "Original Desc"
+        p1Skills[0].helpUrl = "http://veryOriginal.com"
+        p1Skills[0].skillId = "originalSkillId"
+        p1Skills[0].name = "Original Name"
+        p1Skills[0].pointIncrement = 33
+        p1Skills[0].numPerformToCompletion = 6
+        p1Skills[0].pointIncrementInterval = 520
+        p1Skills[0].numMaxOccurrencesIncrementInterval = 2
+
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        skillsService.createSubject(p1subj2)
+
+        skillsService.reuseSkillInAnotherSubject(p1.projectId, p1Skills[0].skillId, p1subj2.subjectId)
+        String user = getRandomUsers(1)[0]
+        when:
+        def subj2_before = skillsService.getSkillSummary(user, p1.projectId, p1subj2.subjectId)
+        def subj2_desc_before = skillsService.getSubjectDescriptions(p1.projectId, p1subj2.subjectId, user)
+        def projStat_before = skillsService.getProject(p1.projectId)
+        def subjStats_before = skillsService.getSubject(p1subj2)
+        def subjSkills_before = skillsService.getSkillsForSubject(p1.projectId, p1subj2.subjectId)
+
+        String originalSkillId = p1Skills[0].skillId
+        p1Skills[0].name = "New Name"
+        p1Skills[0].description = "New Desc"
+        p1Skills[0].helpUrl = "http://sonew.com"
+        p1Skills[0].skillId = "newSkillId"
+        p1Skills[0].pointIncrement = 22
+        p1Skills[0].numPerformToCompletion = 10
+        p1Skills[0].pointIncrementInterval = 600
+        p1Skills[0].numMaxOccurrencesIncrementInterval = 1
+        p1Skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+        skillsService.updateSkill(p1Skills[0], originalSkillId)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        def subj2 = skillsService.getSkillSummary(user, p1.projectId, p1subj2.subjectId)
+        def subj2_desc = skillsService.getSubjectDescriptions(p1.projectId, p1subj2.subjectId, user)
+        def projStat = skillsService.getProject(p1.projectId)
+        def subjStats = skillsService.getSubject(p1subj2)
+        def subjSkills = skillsService.getSkillsForSubject(p1.projectId, p1subj2.subjectId)
+
+        then:
+        subj2_before.skills[0].skill == "Original Name"
+        subj2_before.skills[0].skillId == SkillReuseIdUtil.addTag("originalSkillId", 0)
+        subj2_before.skills[0].totalPoints == 6 * 33
+        subj2_before.skills[0].pointIncrementInterval == 520
+        subj2_before.skills[0].maxOccurrencesWithinIncrementInterval == 2
+        subj2_desc_before[0].description == "Original Desc"
+        subj2_desc_before[0].href == "http://veryOriginal.com"
+        !subj2_desc_before[0].selfReporting.enabled
+
+        projStat_before.numSubjects == 2
+        projStat_before.numSkills == 4
+        projStat_before.totalPoints == 200 + ((6 * 33) * 2)
+
+        subjStats_before.numSkills == 1
+        subjStats_before.totalPoints == 6 * 33
+
+        subjSkills_before.size() == 1
+        subjSkills_before[0].skillId == SkillReuseIdUtil.addTag("originalSkillId", 0)
+        subjSkills_before[0].name == "Original Name"
+        subjSkills_before[0].reusedSkill
+        subjSkills_before[0].totalPoints == 6 * 33
+        subjSkills_before[0].pointIncrementInterval == 520
+        subjSkills_before[0].numMaxOccurrencesIncrementInterval == 2
+
+        // after
+        subj2.skills[0].skill == "New Name"
+        subj2.skills[0].skillId == SkillReuseIdUtil.addTag("newSkillId", 0)
+        subj2.skills[0].totalPoints == 10 * 22
+        subj2.skills[0].pointIncrementInterval == 600
+        subj2.skills[0].maxOccurrencesWithinIncrementInterval == 1
+        subj2_desc[0].description == "New Desc"
+        subj2_desc[0].href == "http://sonew.com"
+        subj2_desc[0].selfReporting.enabled
+        subj2_desc[0].selfReporting.type == "Approval"
+
+        projStat.numSubjects == 2
+        projStat.numSkills == 4
+        projStat.totalPoints == 200 + (10 * 22 * 2)
+
+        subjStats.numSkills == 1
+        subjStats.totalPoints == 10 * 22
+
+        subjSkills.size() == 1
+        subjSkills[0].skillId == SkillReuseIdUtil.addTag("newSkillId", 0)
+        subjSkills[0].name == "New Name"
+        subjSkills[0].reusedSkill
+        subjSkills[0].totalPoints == 10 * 22
+        subjSkills[0].pointIncrementInterval == 600
+        subjSkills[0].numMaxOccurrencesIncrementInterval == 1
+    }
 }

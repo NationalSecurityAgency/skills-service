@@ -453,10 +453,8 @@ class SkillCatalogService {
     @Transactional
     @Profile
     List<SkillDefWithExtra> getRelatedSkills(SkillDefWithExtra skillDefWithExtra) {
-        List<SkillDefWithExtra> related = []
-        if (isAvailableInCatalog(skillDefWithExtra.projectId, skillDefWithExtra.skillId)) {
-            related = skillDefWithExtraRepo.findSkillsCopiedFrom(skillDefWithExtra.id)
-        } else if (skillDefWithExtra.copiedFrom != null) {
+        List<SkillDefWithExtra> related = skillDefWithExtraRepo.findSkillsCopiedFrom(skillDefWithExtra.id)
+        if (!related && skillDefWithExtra.copiedFrom != null) {
             related = skillDefWithExtraRepo.findSkillsCopiedFrom(skillDefWithExtra.copiedFrom)
             related = related?.findAll { it.id != skillDefWithExtra.id }
             SkillDefWithExtra og = skillDefWithExtraRepo.findById(skillDefWithExtra.copiedFrom)
@@ -513,6 +511,11 @@ class SkillCatalogService {
             copy.numPerformToCompletion = og.totalPoints / og.pointIncrement
             copy.subjectId = skillRelDefRepo.findSubjectSkillIdByChildId(imported.id)
             copy.selfReportingType = og.selfReportingType?.toString()
+            if (SkillReuseIdUtil.isTagged(imported.skillId)) {
+                Integer reuseCounter = SkillReuseIdUtil.extractReuseCounter(imported.skillId)
+                copy.skillId = SkillReuseIdUtil.addTag(og.skillId, reuseCounter)
+                copy.name = SkillReuseIdUtil.addTag(og.name, reuseCounter)
+            }
             skillsAdminService.saveSkill(imported.skillId, copy)
         }
     }
