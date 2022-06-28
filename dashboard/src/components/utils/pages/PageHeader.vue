@@ -21,7 +21,7 @@ limitations under the License.
           <slot name="banner"></slot>
           <div class="row">
             <div :class="titleCss">
-              <div class="h3"><i v-if="options.icon" class="has-text-link" :class="options.icon"/> {{ options.title }}<slot name="right-of-header"></slot></div>
+              <h1 class="h3"><i v-if="options.icon" class="has-text-link" :class="options.icon"/> {{ options.title }}<slot name="right-of-header"></slot></h1>
               <slot name="subTitle"><div class="h5 text-muted">{{ options.subTitle }}</div></slot>
               <slot name="subSubTitle"></slot>
             </div>
