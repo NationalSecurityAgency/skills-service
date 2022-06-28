@@ -59,13 +59,13 @@ Cypress.Commands.add("cdClickSkill", (skillIndex, useProgressBar = true) => {
 
 Cypress.Commands.add("cdClickRank", () => {
     cy.get('[data-cy=myRank]').click();
-    cy.contains('Rank Overview');
+    cy.contains('My Rank');
     cy.validatePoweredBy();
 });
 
 Cypress.Commands.add("cdClickBadges", () => {
     cy.get('[data-cy=myBadges]').click()
-    cy.contains('Badges');
+    cy.contains('My Badges');
     cy.validatePoweredBy();
 });
 

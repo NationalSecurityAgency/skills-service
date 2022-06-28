@@ -133,7 +133,7 @@ describe('My Progress Breadcrumb Tests', () => {
   it('test breadcrumbs starting on Rank page', function () {
     cy.visit('/administrator/skills?skillsClientDisplayPath=/rank');
 
-    cy.dashboardCd().contains('Rank Overview');
+    cy.dashboardCd().contains('My Rank');
     cy.get('[data-cy="breadcrumb-Projects"]').should('be.visible');
 
     cy.get('[data-cy=breadcrumb-Rank]').should('exist');
@@ -227,7 +227,7 @@ describe('My Progress Breadcrumb Tests', () => {
   it('test breadcrumbs starting on Subject Rank page', function () {
     cy.visit('/administrator/skills?skillsClientDisplayPath=/subjects/Dashboard/rank');
 
-    cy.dashboardCd().contains('Rank Overview');
+    cy.dashboardCd().contains('My Rank');
     cy.get('[data-cy="breadcrumb-Projects"]').should('be.visible');
 
     cy.get('[data-cy=breadcrumb-Rank]').should('exist');
