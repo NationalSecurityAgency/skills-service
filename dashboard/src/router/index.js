@@ -327,7 +327,7 @@ const router = new Router({
           requiresAuth: true,
           nonAdmin: true,
           announcer: {
-            message: 'My Processr',
+            message: 'My Progress',
           },
         },
       }, {

@@ -200,6 +200,7 @@ router.beforeEach((to, from, next) => {
   }
 });
 
+const DEFAULT_TITLE = 'SkillTree Dashboard';
 router.afterEach((to) => {
   if (to.meta.reportSkillId) {
     SkillsConfiguration.afterConfigure()
@@ -210,6 +211,15 @@ router.afterEach((to) => {
   if (isPki() || isLoggedIn()) {
     PageVisitService.reportPageVisit(to.path, to.fullPath);
   }
+  // Use next tick to handle router history correctly
+  // see: https://github.com/vuejs/vue-router/issues/914#issuecomment-384477609
+  Vue.nextTick(() => {
+    let newTitle = DEFAULT_TITLE;
+    if (to && to.meta && to.meta.announcer && to.meta.announcer.message) {
+      newTitle = `${DEFAULT_TITLE} - ${to.meta.announcer.message}`;
+    }
+    document.title = newTitle;
+  });
 });
 
 const renderer = {
