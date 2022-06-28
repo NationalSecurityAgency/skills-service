@@ -1315,5 +1315,12 @@ class AdminController {
         return skillReuseService.getReusedSkills(projectId, parentSkillId)
     }
 
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/reuse/destinations", method = RequestMethod.GET, produces = "application/json")
+    List<SkillReuseDestination> getReuseDestinationsForASkill(@PathVariable("projectId") String projectId, @PathVariable("skillId") String skillId) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        SkillsValidator.isNotBlank(skillId, "skillId")
+        return skillReuseService.getReuseDestinationsForASkill(projectId, skillId)
+    }
+
 }
 

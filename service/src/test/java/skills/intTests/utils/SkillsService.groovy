@@ -1334,6 +1334,11 @@ class SkillsService {
         return wsHelper.adminGet(url)
     }
 
+    def getReuseDestinationsForASkill(String projectId, String skillId) {
+        String url = "/projects/${projectId}/skills/${skillId}/reuse/destinations"
+        return wsHelper.adminGet(url)
+    }
+
     def bulkExportSkillsToCatalog(String projectId, List<String> skillIds) {
         return wsHelper.adminPost("/projects/${projectId}/skills/export", skillIds)
     }

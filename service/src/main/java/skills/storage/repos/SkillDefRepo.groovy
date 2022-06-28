@@ -133,6 +133,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     List<SkillDefPartial> findAllByTypeAndNameLikeNoImportedSkills(SkillDef.ContainerType type, String name)
 
     List<SkillDef> findAllByProjectIdAndType(@Nullable String id, SkillDef.ContainerType type)
+    List<SkillDef> findAllByProjectIdAndTypeIn(@Nullable String id, List<SkillDef.ContainerType> type)
 
     @Nullable
     List<SkillDef> findAllByProjectIdAndTypeAndEnabledAndCopiedFromIsNotNull(@Nullable String id, SkillDef.ContainerType type, String enabled)

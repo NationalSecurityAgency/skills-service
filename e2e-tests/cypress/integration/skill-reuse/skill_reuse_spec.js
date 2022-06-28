@@ -127,4 +127,11 @@ describe('Skill Reuse Tests', () => {
         cy.get('[data-cy="manageSkillLink_skill3STREUSESKILLST0"]')
             .should('not.exist');
     });
+
+    it('search reused skills', () => {
+        cy.createSkill(1, 1, 2);
+        cy.createSkill(1, 1, 3);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj2');
+    });
 });

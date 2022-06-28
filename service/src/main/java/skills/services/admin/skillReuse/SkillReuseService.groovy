@@ -24,11 +24,16 @@ import skills.controller.request.model.CatalogSkill
 import skills.controller.request.model.SkillReuseRequest
 import skills.controller.result.model.SkillDefPartialRes
 import skills.controller.result.model.SkillDefSkinnyRes
+import skills.controller.result.model.SkillReuseDestination
+import skills.services.RuleSetDefGraphService
 import skills.services.admin.SkillCatalogFinalizationService
 import skills.services.admin.SkillCatalogService
 import skills.storage.accessors.SkillDefAccessor
+import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefSkinny
+import skills.storage.model.SkillRelDef
 import skills.storage.repos.SkillDefRepo
+import skills.storage.repos.SkillRelDefRepo
 import skills.utils.InputSanitizer
 
 @Service
@@ -46,6 +51,12 @@ class SkillReuseService {
 
     @Autowired
     SkillDefRepo skillDefRepo
+
+    @Autowired
+    SkillRelDefRepo skillRelDefRepo
+
+    @Autowired
+    RuleSetDefGraphService ruleSetDefGraphService
 
     @Transactional
     void reuseSkill(String projectId, SkillReuseRequest skillReuseRequest) {
@@ -73,5 +84,29 @@ class SkillReuseService {
             )
         }?.sort({ it.skillId })
         return res
+    }
+
+    @Transactional(readOnly = true)
+    List<SkillReuseDestination> getReuseDestinationsForASkill(String projectId, String skillId) {
+        SkillDef skill = skillAccessor.getSkillDef(projectId, skillId, [SkillDef.ContainerType.Skill])
+        List<SkillDef> parentsToExclude = skillRelDefRepo.findParentByChildIdAndTypes(skill.id, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
+        List<SkillDef> allDestSkillDefs = skillDefRepo.findAllByProjectIdAndTypeIn(projectId, [SkillDef.ContainerType.Subject, SkillDef.ContainerType.SkillsGroup])
+        List<SkillDef> availableSkillDefs = allDestSkillDefs.findAll({ SkillDef s1 -> !parentsToExclude.find { SkillDef s2 -> s1.skillId == s2.skillId } })
+        return availableSkillDefs.collect {
+            SkillDef subj, group
+            if (it.type == SkillDef.ContainerType.Subject) {
+                subj = it
+            } else if (it.type == SkillDef.ContainerType.SkillsGroup) {
+                subj = ruleSetDefGraphService.getMySubjectParent(it.id)
+                group = it
+            } else {
+                throw new IllegalStateException("Unknown type [${it.type}]")
+            }
+            new SkillReuseDestination(
+                    subjectName: subj.name,
+                    subjectId: subj.skillId,
+                    groupName: group?.name,
+                    groupId: group?.skillId)
+        }
     }
 }
