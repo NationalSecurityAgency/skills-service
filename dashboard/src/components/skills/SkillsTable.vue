@@ -618,7 +618,8 @@ limitations under the License.
             const skillIdHtml = StringHighlighter.highlight(skillId, filter);
             return {
               nameHtml,
-              skillIdHtml, ...item
+              skillIdHtml,
+              ...item,
             };
           });
         } else {
