@@ -63,9 +63,8 @@ limitations under the License.
                           data-cy="skillActionsBtn">
                 <template #button-content>
                   <i class="fas fa-tools"></i> Action
-                  <b-badge variant="info" data-cy="skillActionsNumSelected">{{
-                      numSelectedSkills
-                    }}
+                  <b-badge variant="info" data-cy="skillActionsNumSelected">
+                    <span>{{ numSelectedSkills }}</span>
                   </b-badge>
                 </template>
                 <b-dropdown-item @click="handleExportRequest" data-cy="skillExportToCatalogBtn"><i
