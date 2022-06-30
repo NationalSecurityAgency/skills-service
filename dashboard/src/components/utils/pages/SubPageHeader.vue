@@ -16,7 +16,7 @@ limitations under the License.
 <template>
   <div class="row bg-white border-bottom py-2 mb-3 text-center" data-cy="subPageHeader">
     <div class="col-sm-6 col-md-7 text-sm-left">
-      <div class="h4 text-uppercase">{{ title }}</div>
+      <h1 class="h4 text-uppercase">{{ title }}</h1>
     </div>
     <div class="col-sm-6 col-md-5 pt-0 text-sm-right" data-cy="subPageHeaderControls">
       <div v-if="!isLoading">
