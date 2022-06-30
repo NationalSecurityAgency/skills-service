@@ -36,7 +36,7 @@ limitations under the License.
                  aria-describedby="skillPointIncrementError"
                  aria-errormessage="skillPointIncrementError"
                  :aria-invalid="errors && errors.length > 0"/>
-          <small class="form-text text-danger" data-cy="skillPointIncrementError" id="skillPointIncrementError">{{ errors[0] }}</small>
+          <small role="alert" class="form-text text-danger" data-cy="skillPointIncrementError" id="skillPointIncrementError">{{ errors[0] }}</small>
         </ValidationProvider>
       </div>
 

@@ -31,8 +31,11 @@ limitations under the License.
                             :load-immediately="true"
                             id="newLevel"
                             :project-id="projectId"
+                            aria-errormessage="newLevelError"
+                            aria-describedby="newLevelError"
+                            :aria-invalid="errors && errors.length > 0"
                             placeholder="select new project level"></level-selector>
-            <small class="form-text text-danger" v-show="errors[0]" data-cy="newLevelError" id="newLevelError">{{ errors[0] }}</small>
+            <small role="alert" class="form-text text-danger" v-show="errors[0]" data-cy="newLevelError" id="newLevelError">{{ errors[0] }}</small>
           </ValidationProvider>
       </b-container>
       <div slot="modal-footer" class="w-100">

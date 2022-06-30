@@ -33,8 +33,8 @@ limitations under the License.
                           id="htmlEmailHeader"
                           :aria-invalid="errors && errors.length > 0"
                           aria-errormessage="htmlEmailHeaderError" aria-describedby="htmlEmailHeaderError"/>
-                  <p class="text-danger" v-show="errors[0]" data-cy="htmlEmailHeaderError" id="htmlEmailHeaderError">{{errors[0]}}</p>
-                  <p class="text-danger"
+                  <p role="alert" class="text-danger" v-show="errors[0]" data-cy="htmlEmailHeaderError" id="htmlEmailHeaderError">{{errors[0]}}</p>
+                  <p role="alert" class="text-danger"
                      v-show="!errors[0] && htmlHeaderRequired && !htmlHeader"
                      data-cy="htmlEmailHeaderRequired">HTML Header is required</p>
               </ValidationProvider>
@@ -55,8 +55,8 @@ limitations under the License.
                           id="plaintextEmailHeader"
                           :aria-invalid="errors && errors.length > 0"
                           aria-errormessage="plaintextEmailHeaderError" aria-describedby="plaintextEmailHeaderError"/>
-                  <p class="text-danger" v-show="errors[0]" data-cy="plaintextEmailHeaderError" id="plaintextEmailHeaderError">{{errors[0]}}</p>
-                  <p class="text-danger"
+                  <p role="alert" class="text-danger" v-show="errors[0]" data-cy="plaintextEmailHeaderError" id="plaintextEmailHeaderError">{{errors[0]}}</p>
+                  <p role="alert" class="text-danger"
                      v-show="!errors[0] && plaintextHeaderRequired && !plainTextHeader"
                      data-cy="plaintextEmailHeaderRequired">Plaintext Header is required</p>
               </ValidationProvider>
@@ -82,8 +82,8 @@ limitations under the License.
                         id="htmlEmailFooter"
                         :aria-invalid="errors && errors.length > 0"
                         aria-errormessage="htmlEmailFooterError" aria-describedby="htmlEmailFooterError"/>
-                <p class="text-danger" v-show="errors[0]" data-cy="htmlEmailFooterError" id="htmlEmailFooterError">{{errors[0]}}</p>
-                <p class="text-danger"
+                <p role="alert" class="text-danger" v-show="errors[0]" data-cy="htmlEmailFooterError" id="htmlEmailFooterError">{{errors[0]}}</p>
+                <p role="alert" class="text-danger"
                    v-show="!errors[0] && htmlFooterRequired && !htmlFooter"
                    data-cy="htmlEmailFooterRequired">HTML Footer is required</p>
               </ValidationProvider>
@@ -104,8 +104,8 @@ limitations under the License.
                         id="plaintextEmailFooter"
                         :aria-invalid="errors && errors.length > 0"
                         aria-errormessage="plaintextEmailFooterError" aria-describedby="plaintextEmailFooterError"/>
-                <p class="text-danger" v-show="errors[0]" data-cy="plaintextEmailFooterError" id="plaintextEmailFooterError">{{errors[0]}}</p>
-                <p class="text-danger"
+                <p role="alert" class="text-danger" v-show="errors[0]" data-cy="plaintextEmailFooterError" id="plaintextEmailFooterError">{{errors[0]}}</p>
+                <p role="alert" class="text-danger"
                    v-show="!errors[0] && plaintextFooterRequired && !plainTextFooter"
                    data-cy="plaintextEmailFooterRequired">Plaintext Footer is required</p>
               </ValidationProvider>

@@ -43,7 +43,7 @@ limitations under the License.
                        :aria-invalid="errors && errors.length > 0"
                        aria-errormessage="groupNameError"
                        aria-describedby="groupNameError"/>
-                <small class="form-text text-danger" data-cy="groupNameError" id="groupNameError">{{ errors[0] }}</small>
+                <small role="alert" class="form-text text-danger" data-cy="groupNameError" id="groupNameError">{{ errors[0] }}</small>
               </ValidationProvider>
             </div>
           </div>
@@ -59,8 +59,13 @@ limitations under the License.
           <label class="label">Description</label>
           <div class="control">
             <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{errors}" name="Group Description">
-              <markdown-editor v-if="internalGroup" v-model="internalGroup.description" data-cy="groupDescription"/>
-              <small class="form-text text-danger" data-cy="groupDescriptionError">{{ errors[0] }}</small>
+              <markdown-editor v-if="internalGroup"
+                               v-model="internalGroup.description"
+                               :aria-invalid="errors && errors.length > 0"
+                               aria-errormessage="groupDescriptionError"
+                               aria-describedby="groupDescriptionError"
+                               data-cy="groupDescription"/>
+              <small role="alert" id="groupDescriptionError" class="form-text text-danger" data-cy="groupDescriptionError">{{ errors[0] }}</small>
             </ValidationProvider>
           </div>
         </div>

@@ -36,7 +36,7 @@ limitations under the License.
                          :aria-invalid="errors && errors.length > 0"
                          aria-errormessage="badgeNameError"
                          aria-describedby="badgeNameError"/>
-                  <small class="form-text text-danger" v-show="errors[0]" data-cy="badgeNameError" id="badgeNameError">{{ errors[0] }}
+                  <small role="alert" class="form-text text-danger" v-show="errors[0]" data-cy="badgeNameError" id="badgeNameError">{{ errors[0] }}
                   </small>
                 </ValidationProvider>
               </div>
@@ -51,7 +51,7 @@ limitations under the License.
             <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{errors}"
                                 name="Badge Description">
               <markdown-editor v-model="badgeInternal.description" @input="updateDescription"></markdown-editor>
-              <small class="form-text text-danger mb-3" data-cy="badgeDescriptionError">{{ errors[0] }}</small>
+              <small role="alert" class="form-text text-danger mb-3" data-cy="badgeDescriptionError">{{ errors[0] }}</small>
             </ValidationProvider>
           </div>
 
@@ -75,7 +75,7 @@ limitations under the License.
                     <datepicker :inline="true" v-model="badgeInternal.startDate" name="startDate"
                                 key="gemFrom" data-cy="startDatePicker"
                                 aria-required="true"></datepicker>
-                    <small class="form-text text-danger" v-show="errors[0]" data-cy="startDateError">{{ errors[0] }}
+                    <small role="alert" class="form-text text-danger" v-show="errors[0]" data-cy="startDateError">{{ errors[0] }}
                     </small>
                   </ValidationProvider>
                 </b-col>
@@ -85,7 +85,7 @@ limitations under the License.
                                       ref="endDateValidationProvider">
                     <datepicker :inline="true" v-model="badgeInternal.endDate" name="endDate"
                                 key="gemTo" data-cy="endDatePicker" aria-required="true"></datepicker>
-                    <small class="form-text text-danger" v-show="errors[0]" data-cy="endDateError">{{
+                    <small role="alert" class="form-text text-danger" v-show="errors[0]" data-cy="endDateError">{{
                         errors[0]
                       }}</small>
                   </ValidationProvider>

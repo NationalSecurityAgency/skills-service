@@ -25,22 +25,34 @@ limitations under the License.
           <div class="col-6 col-md border-right">
             <ValidationProvider rules="dateOrder" v-slot="{errors}" name="From Date"
                                 ref="fromDateValidationProvider">
-              <b-form-group label="From Date:" label-for="from-date-filter" label-class="text-muted">
-                <b-form-datepicker aria-label="from date filter" id="from-date-filter" v-model="fromDayFilter" class="mb-2" data-cy="achievementsNavigator-fromDateInput">
+              <b-form-group label="From Date:" label-for="from-date-filter"
+                            label-class="text-muted">
+                <b-form-datepicker aria-label="from date filter" id="from-date-filter"
+                                   v-model="fromDayFilter" class="mb-2"
+                                   aria-errormessage="fromDateError"
+                                   aria-describedby="fromDateError"
+                                   :aria-invalid="errors && errors.length > 0"
+                                   data-cy="achievementsNavigator-fromDateInput">
                 </b-form-datepicker>
               </b-form-group>
-                <small class="form-text text-danger" v-show="errors[0]" data-cy="fromDateError">{{ errors[0] }}
-                </small>
+              <small role="alert" id="fromDateError" class="form-text text-danger" v-show="errors[0]"
+                     data-cy="fromDateError">{{ errors[0] }}
+              </small>
             </ValidationProvider>
           </div>
           <div class="col-6 col-md">
             <ValidationProvider rules="dateOrder" v-slot="{errors}" name="To Date"
                                 ref="toDateValidationProvider">
               <b-form-group label="To Date:" label-for="to-date-filter" label-class="text-muted">
-                <b-form-datepicker aria-label="to date filter" id="to-date-filter" v-model="toDayFilter" class="mb-2" data-cy="achievementsNavigator-toDateInput">
+                <b-form-datepicker aria-label="to date filter" id="to-date-filter"
+                                   v-model="toDayFilter" class="mb-2"
+                                   aria-errormessage="toDateError"
+                                   aria-describedby="toDateError"
+                                   :aria-invalid="errors && errors.length > 0"
+                                   data-cy="achievementsNavigator-toDateInput">
                 </b-form-datepicker>
               </b-form-group>
-              <small class="form-text text-danger" v-show="errors[0]" data-cy="toDateError">{{
+              <small role="alert" id="toDateError" class="form-text text-danger" v-show="errors[0]" data-cy="toDateError">{{
                   errors[0]
                 }}</small>
             </ValidationProvider>
