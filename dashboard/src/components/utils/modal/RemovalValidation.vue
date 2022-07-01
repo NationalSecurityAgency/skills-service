@@ -35,6 +35,7 @@ limitations under the License.
         <b-form-input v-model="currentValidationText"
                       data-cy="currentValidationText"
                       :autofocus="true"
+                      aria-required="true"
                       aria-label="Type 'Delete Me' text here to enable the removal operation. Please make sure that 'D' and 'M' are uppercase."></b-form-input>
       </div>
     </div>
