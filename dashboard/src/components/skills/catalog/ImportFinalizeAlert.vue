@@ -60,7 +60,7 @@ limitations under the License.
     name: 'ImportFinalizeAlert',
     components: {
       LengthyOperationProgressBar,
-      FinalizePreviewModal
+      FinalizePreviewModal,
     },
     computed: {
       dashboardSkillsCatalogGuide() {

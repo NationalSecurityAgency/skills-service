@@ -162,7 +162,7 @@ limitations under the License.
     name: 'ReuseSkillsModal',
     components: {
       LengthyOperationProgressBar,
-      SkillsSpinner
+      SkillsSpinner,
     },
     props: {
       skills: {
