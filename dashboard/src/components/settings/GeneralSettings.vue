@@ -31,7 +31,7 @@ limitations under the License.
                           :aria-invalid="errors && errors.length > 0"
                           aria-errormessage="firstnameError" aria-describedby="firstnameError"/>
                 </div>
-                <p class="text-danger" v-show="errors[0]" id="firstnameError">{{ errors[0]}}</p>
+                <p role="alert" class="text-danger" v-show="errors[0]" id="firstnameError">{{ errors[0]}}</p>
               </ValidationProvider>
 
               <label class="mt-2" for="profileLastName">* Last Name</label>
@@ -42,7 +42,7 @@ limitations under the License.
                       :aria-invalid="errors && errors.length > 0"
                       aria-errormessage="lastnameError" aria-describedby="lastnameError"/>
                 </div>
-                <p class="text-danger" v-show="errors[0]" id="lastnameError">{{ errors[0]}}</p>
+                <p role="alert" class="text-danger" v-show="errors[0]" id="lastnameError">{{ errors[0]}}</p>
               </ValidationProvider>
             </div>
             <label class="mt-2" for="profileNickname">Nickname</label>
@@ -53,7 +53,7 @@ limitations under the License.
                     :aria-invalid="errors && errors.length > 0"
                     aria-errormessage="nicknameError" aria-describedby="nicknameError"/>
               </div>
-              <p class="text-danger" v-show="errors[0]" id="nicknameError">{{ errors[0]}}</p>
+              <p role="alert" class="text-danger" v-show="errors[0]" id="nicknameError">{{ errors[0]}}</p>
             </ValidationProvider>
 
             <div class="mt-2">

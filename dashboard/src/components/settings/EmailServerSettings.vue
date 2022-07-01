@@ -24,7 +24,7 @@ limitations under the License.
                   :aria-invalid="errors && errors.length > 0"
                   aria-errormessage="hostError" aria-describedby="hostError"
                   id="emailHost"/>
-          <p class="text-danger" v-show="errors[0]" data-cy="hostError" id="hostError">{{errors[0]}}</p>
+          <p role="alert" class="text-danger" v-show="errors[0]" data-cy="hostError" id="hostError">{{errors[0]}}</p>
         </ValidationProvider>
       </div>
       <div class="form-group">
@@ -35,7 +35,7 @@ limitations under the License.
                   :aria-invalid="errors && errors.length > 0"
                   aria-errormessage="portError" aria-describedby="portError"
                   id="emailPort"/>
-          <p class="text-danger" v-show="errors[0]" data-cy="portError" id="portError">{{errors[0] }}</p>
+          <p role="alert" class="text-danger" v-show="errors[0]" data-cy="portError" id="portError">{{errors[0] }}</p>
         </ValidationProvider>
       </div>
       <div class="form-group">
@@ -46,7 +46,7 @@ limitations under the License.
                   :aria-invalid="errors && errors.length > 0"
                   aria-errormessage="protocolError" aria-describedby="protocolError"
                   id="emailProtocol"/>
-          <p class="text-danger" v-show="errors[0]" data-cy="protocolError" id="protocolError">{{
+          <p role="alert" class="text-danger" v-show="errors[0]" data-cy="protocolError" id="protocolError">{{
             errors[0] }}</p>
         </ValidationProvider>
       </div>
@@ -69,7 +69,7 @@ limitations under the License.
                    :aria-invalid="errors && errors.length > 0"
                     aria-errormessage="emailUsernameError" aria-describedby="emailUsernameError"
                     id="emailUsername"/>
-            <p class="text-danger" v-show="errors[0]" data-cy="emailUsernameError" id="emailUsernameError">{{errors[0]}}</p>
+            <p role="alert" class="text-danger" v-show="errors[0]" data-cy="emailUsernameError" id="emailUsernameError">{{errors[0]}}</p>
           </ValidationProvider>
         </div>
         <div class="form-group">
@@ -80,7 +80,7 @@ limitations under the License.
                     :aria-invalid="errors && errors.length > 0"
                     aria-errormessage="emailPasswordError" aria-describedby="emailPasswordError"
                     id="emailPassword"/>
-            <p class="text-danger" v-show="errors[0]" data-cy="emailPasswordError" id="emailPasswordError">{{errors[0]}}</p>
+            <p role="alert" class="text-danger" v-show="errors[0]" data-cy="emailPasswordError" id="emailPasswordError">{{errors[0]}}</p>
           </ValidationProvider>
         </div>
       </div>

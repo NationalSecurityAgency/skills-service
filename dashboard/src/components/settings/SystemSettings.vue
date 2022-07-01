@@ -31,7 +31,7 @@ limitations under the License.
                     id="publicUrl"
                     :aria-invalid="errors && errors.length > 0"
                     aria-errormessage="publicUrlError" aria-describedby="publicUrlError"/>
-              <p class="text-danger" v-show="errors[0]" id="publicUrlError" data-cy="publicUrlError">{{errors[0]}}</p>
+              <p role="alert" class="text-danger" v-show="errors[0]" id="publicUrlError" data-cy="publicUrlError">{{errors[0]}}</p>
             </ValidationProvider>
           </div>
           <div class="form-group">
@@ -43,7 +43,7 @@ limitations under the License.
                       :aria-invalid="errors && errors.length > 0"
                       aria-errormessage="resetTokenExpirationError" aria-describedby="resetTokenExpirationError"/>
               <small class="text-info" id="resetTokenExpirationFormat">supports ISO 8601 time duration format, e.g., 2H, 30M, 1H30M, 1M42S, etc</small>
-              <p class="text-danger" v-show="errors[0]" data-cy="resetTokenExpirationError" id="resetTokenExpirationError">{{errors[0]}}</p>
+              <p role="alert" class="text-danger" v-show="errors[0]" data-cy="resetTokenExpirationError" id="resetTokenExpirationError">{{errors[0]}}</p>
             </ValidationProvider>
           </div>
           <div class="form-group">
@@ -53,7 +53,7 @@ limitations under the License.
                      data-cy="fromEmail" id="fromEmail"
                     :aria-invalid="errors && errors.length  > 0"
                     aria-errormessage="fromEmailError" aria-describedby="fromEmailError"/>
-              <p class="text-danger" v-show="errors[0]" data-cy="fromEmailError" id="fromEmailError">{{errors[0]}}</p>
+              <p role="alert" class="text-danger" v-show="errors[0]" data-cy="fromEmailError" id="fromEmailError">{{errors[0]}}</p>
             </ValidationProvider>
           </div>
 
@@ -64,7 +64,7 @@ limitations under the License.
                   id="customHeader"
                   :aria-invalid="errors && errors.length > 0"
                   aria-errormessage="customHeaderError" aria-describedby="customHeaderError"/>
-              <p class="text-danger" v-show="errors[0]" data-cy="customHeaderError" id="customHeaderError">{{errors[0]}}</p>
+              <p role="alert" class="text-danger" v-show="errors[0]" data-cy="customHeaderError" id="customHeaderError">{{errors[0]}}</p>
             </ValidationProvider>
           </div>
 
@@ -75,7 +75,7 @@ limitations under the License.
                         id="customFooter"
                         :aria-invalid="errors && errors.length > 0"
                         aria-errormessage="customFooterError" aria-describedby="customFooterError"/>
-              <p class="text-danger" v-show="errors[0]" data-cy="customFooterError" id="customFooterError">{{errors[0]}}</p>
+              <p role="alert" class="text-danger" v-show="errors[0]" data-cy="customFooterError" id="customFooterError">{{errors[0]}}</p>
             </ValidationProvider>
           </div>
 
@@ -83,8 +83,14 @@ limitations under the License.
             <label>User Agreement</label>
             <ValidationProvider rules="noscript" v-slot="{errors}"
                                 name="User Agreement">
-              <markdown-editor v-model="userAgreement" @input="updateUserAgreement" :resizable="true"></markdown-editor>
-              <small class="form-text text-danger mb-3" data-cy="userAgreement">{{ errors[0] }}</small>
+              <markdown-editor v-model="userAgreement"
+                               @input="updateUserAgreement"
+                               :resizable="true"
+                               aria-errormessage="userAgreementError"
+                               aria-describedby="userAgreementError"
+                               :aria-invalid="errors && errors.length > 0">
+              </markdown-editor>
+              <small role="alert" id="userAgreementError" class="form-text text-danger mb-3" data-cy="userAgreement">{{ errors[0] }}</small>
             </ValidationProvider>
           </div>
 

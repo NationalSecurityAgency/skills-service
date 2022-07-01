@@ -30,16 +30,18 @@ limitations under the License.
                 <div class="media-body">
                   <div class="form-group">
                     <label for="subjName">Subject Name</label>
-                    <ValidationProvider rules="required|minNameLength|maxSubjectNameLength|uniqueName" v-slot="{ errors }" name="Subject Name">
+                    <ValidationProvider
+                      rules="required|minNameLength|maxSubjectNameLength|uniqueName"
+                      v-slot="{ errors }" name="Subject Name">
                       <input type="text" class="form-control" id="subjName" @input="updateSubjectId"
                              v-model="subjectInternal.name" v-on:input="updateSubjectId"
                              v-on:keydown.enter="handleSubmit(updateSubject)"
                              v-focus aria-required="true"
-                              :aria-invalid="errors && errors.length > 0"
-                              aria-errormessage="subjectNameError"
-                              aria-describedby="subjectNameError"
-                              data-cy="subjectNameInput">
-                      <small class="form-text text-danger" id="subjectNameError">{{ errors[0] }}</small>
+                             :aria-invalid="errors && errors.length > 0"
+                             aria-errormessage="subjectNameError"
+                             aria-describedby="subjectNameError"
+                             data-cy="subjectNameInput">
+                      <small role="alert" class="form-text text-danger" id="subjectNameError">{{errors[0]}}</small>
                     </ValidationProvider>
                   </div>
                 </div>
@@ -51,8 +53,11 @@ limitations under the License.
               <div class="mt-2">
                 <label>Description</label>
                 <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{ errors }" name="Subject Description">
-                  <markdown-editor v-model="subjectInternal.description"/>
-                  <small class="form-text text-danger" data-cy="subjectDescError">{{ errors[0] }}</small>
+                  <markdown-editor v-model="subjectInternal.description"
+                                   aria-errormessage="subjectDescError"
+                                   aria-describedby="subjectDescError"
+                                   :aria-invalid="errors && errors.length > 0"/>
+                  <small role="alert" id="subjectDescError" class="form-text text-danger" data-cy="subjectDescError">{{ errors[0] }}</small>
                 </ValidationProvider>
               </div>
 

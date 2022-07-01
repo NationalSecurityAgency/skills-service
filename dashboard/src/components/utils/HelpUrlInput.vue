@@ -35,7 +35,7 @@ limitations under the License.
               aria-errormessage="skillHelpUrlError"
               :aria-invalid="(errors && errors.length > 0)"></b-form-input>
           </b-input-group>
-        <small class="form-text text-danger" id="skillHelpUrlError"
+        <small role="alert" class="form-text text-danger" id="skillHelpUrlError"
                data-cy="skillHelpUrlError">{{ errors[0] }}</small>
       </ValidationProvider>
   </div>

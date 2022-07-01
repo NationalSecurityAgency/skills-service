@@ -21,9 +21,15 @@ limitations under the License.
         <div id="add-user-div" class="row mt-2 mb-4">
           <div class="col-12 col-md-6 pb-2 pb-md-0">
             <ValidationProvider name="User Id" v-slot="{errors}" rules="userNoSpaceInUserIdInNonPkiMode">
-              <existing-user-input :project-id="projectId" v-model="currentSelectedUser" :can-enter-new-user="!pkiAuthenticated"
-                                   name="User Id" data-cy="userIdInput"/>
-              <small class="form-text text-danger" v-show="errors[0]">{{ errors[0]}}</small>
+              <existing-user-input :project-id="projectId"
+                                   v-model="currentSelectedUser"
+                                   :can-enter-new-user="!pkiAuthenticated"
+                                   name="User Id"
+                                   aria-errormessage="userIdInputError"
+                                   aria-describedby="userIdInputError"
+                                   :aria-invalid="errors && errors.length > 0"
+                                   data-cy="userIdInput"/>
+              <small role="alert" id="userIdInputError" class="form-text text-danger" v-show="errors[0]">{{ errors[0]}}</small>
             </ValidationProvider>
           </div>
           <div class="col-auto">

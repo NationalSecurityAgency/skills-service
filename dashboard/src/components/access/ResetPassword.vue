@@ -31,24 +31,33 @@ limitations under the License.
                   <label for="email" class="text-secondary font-weight-bold">* Email</label>
                   <ValidationProvider name="Email" :debounce=500 rules="required|email" v-slot="{errors}">
                     <input class="form-control" type="text" v-model="resetFields.email" id="email" :disabled="resetInProgress"
-                           name="email" data-cy="resetPasswordEmail" aria-required="true"/>
-                    <small class="form-text text-danger" v-show="errors[0]">{{ errors[0]}}</small>
+                           name="email" data-cy="resetPasswordEmail" aria-required="true"
+                           :aria-invalid="errors && errors.length > 0"
+                           aria-errormessage="emailError"
+                           aria-describedby="emailError"/>
+                    <small id="emailError" role="alert" class="form-text text-danger" v-show="errors[0]">{{ errors[0]}}</small>
                   </ValidationProvider>
                 </div>
                 <div class="form-group">
                   <label for="password" class="text-secondary font-weight-bold">* New Password</label>
                   <ValidationProvider vid="password" name="New Password" :debounce=500 rules="required|minPasswordLength|maxPasswordLength" v-slot="{errors}">
                     <input class="form-control" type="password" v-model="resetFields.password" id="password" :disabled="resetInProgress"
-                           name="password" data-cy="resetPasswordNewPassword" aria-required="true"/>
-                    <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
+                           name="password" data-cy="resetPasswordNewPassword" aria-required="true"
+                           :aria-invalid="errors && errors.length > 0"
+                           aria-errormessage="passwordError"
+                           aria-describedby="passwordError"/>
+                    <small id="passwordError" role="alert" class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
                   </ValidationProvider>
                 </div>
                 <div class="form-group">
                   <label for="password_confirmation" class="text-secondary font-weight-bold">* Confirm New Password</label>
                   <ValidationProvider name="Confirm New Password" :debounce=500 rules="required|confirmed:password" v-slot="{errors}">
                     <input class="form-control" type="password" v-model="passwordConfirmation" id="password_confirmation" :disabled="resetInProgress"
-                           name="password_confirmation" data-cy="resetPasswordConfirm" aria-required="true"/>
-                    <small class="form-text text-danger" v-show="errors[0]">{{ errors[0]}}</small>
+                           name="password_confirmation" data-cy="resetPasswordConfirm" aria-required="true"
+                           :aria-invalid="errors && errors.length > 0"
+                           aria-errormessage="passwordConfirmError"
+                           aria-describedby="passwordConfirmError"/>
+                    <small id="passwordConfirmError" role="alert" class="form-text text-danger" v-show="errors[0]">{{ errors[0]}}</small>
                   </ValidationProvider>
                 </div>
                 <small class="text-danger" v-if="resetFailed" data-cy="resetError">{{remoteError}}</small>

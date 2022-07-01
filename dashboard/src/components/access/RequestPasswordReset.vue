@@ -36,7 +36,7 @@ limitations under the License.
                          v-model="username"
                          data-cy="forgotPasswordEmail"
                         aria-required="true">
-                    <small id="emailHelp" class="form-text text-danger" v-show="errors[0]">{{
+                    <small id="emailHelp" role="alert" class="form-text text-danger" v-show="errors[0]">{{
                       errors[0] }}
                     </small>
                     <small class="text-danger" v-if="serverError" data-cy="resetFailedError" role="alert">{{ serverError }}</small>

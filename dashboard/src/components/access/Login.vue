@@ -45,7 +45,7 @@ limitations under the License.
                            aria-describedby="emailHelp"
                            v-model="loginFields.username">
                   </div>
-                  <small id="emailHelp" class="form-text text-danger" v-show="errors[0]">{{
+                  <small role="alert" id="emailHelp" class="form-text text-danger" v-show="errors[0]">{{
                     errors[0]}}
                   </small>
                 </ValidationProvider>
@@ -71,7 +71,7 @@ limitations under the License.
                            aria-describedby="passwordHelp"
                            @animationstart="onAnimationStart">
                   </div>
-                  <small id="passwordHelp" class="form-text text-danger" v-show="errors[0]">{{
+                  <small role="alert" id="passwordHelp" class="form-text text-danger" v-show="errors[0]">{{
                     errors[0]}}
                   </small>
                 </ValidationProvider>

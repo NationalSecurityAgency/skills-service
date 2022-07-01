@@ -35,7 +35,7 @@ limitations under the License.
               aria-errormessage="idError"
               aria-describedby="idError"
              data-cy="idInputValue">
-      <small class="form-text text-danger" data-cy="idError" id="idError">{{ errors[0]}}</small>
+      <small role="alert" class="form-text text-danger" data-cy="idError" id="idError">{{ errors[0]}}</small>
     </div>
   </ValidationProvider>
 </template>

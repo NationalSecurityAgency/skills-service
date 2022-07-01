@@ -34,7 +34,7 @@ limitations under the License.
                          aria-describedby="skillNameError"
                          aria-errormessage="skillNameError"
                          :aria-invalid="errors && errors.length > 0">
-                  <small class="form-text text-danger" data-cy="skillNameError" id="skillNameError">{{ errors[0] }}</small>
+                  <small role="alert" class="form-text text-danger" data-cy="skillNameError" id="skillNameError">{{ errors[0] }}</small>
                 </ValidationProvider>
               </div>
             </div>
@@ -52,11 +52,11 @@ limitations under the License.
                 <ValidationProvider rules="optionalNumeric|min_value:0|maxSkillVersion|maxVersion" v-slot="{errors}" name="Version">
                   <input class="form-control" type="text" id="skillVersion"
                          v-model="skillInternal.version" :disabled="isEdit"
-                        data-cy="skillVersion" v-on:keydown.enter="handleSubmit(saveSkill)"
+                         data-cy="skillVersion" v-on:keydown.enter="handleSubmit(saveSkill)"
                          aria-describedby="skillVersionError"
                          aria-errormessage="skillVersionError"
                          :aria-invalid="errors && errors.length > 0"/>
-                  <small class="form-text text-danger" data-cy="skillVersionError" id="skillVersionError">{{ errors[0] }}</small>
+                  <small role="alert" class="form-text text-danger" data-cy="skillVersionError" id="skillVersionError">{{ errors[0] }}</small>
                 </ValidationProvider>
               </div>
             </div>
@@ -75,7 +75,7 @@ limitations under the License.
                          aria-describedby="skillPointIncrementError"
                          aria-errormessage="skillPointIncrementError"
                          :aria-invalid="errors && errors.length > 0"/>
-                  <small class="form-text text-danger" data-cy="skillPointIncrementError" id="skillPointIncrementError">{{ errors[0] }}</small>
+                  <small role="alert" class="form-text text-danger" data-cy="skillPointIncrementError" id="skillPointIncrementError">{{ errors[0] }}</small>
                 </ValidationProvider>
               </div>
             </div>
@@ -92,7 +92,7 @@ limitations under the License.
                          aria-errormessage="skillOccurrencesError"
                          :aria-label="`Occurrences to Completion values must range between 1 and ${maxPointIncrement}`"
                          :aria-invalid="errors && errors.length > 0"/>
-                  <small class="form-text text-danger" data-cy="skillOccurrencesError" id="skillOccurrencesError">{{ errors[0] }}</small>
+                  <small role="alert" class="form-text text-danger" data-cy="skillOccurrencesError" id="skillOccurrencesError">{{ errors[0] }}</small>
                 </ValidationProvider>
               </div>
             </div>
@@ -134,7 +134,7 @@ limitations under the License.
                           <span class="input-group-text" id="hours-append">Hours</span>
                         </div>
                       </div>
-                      <small class="form-text text-danger" data-cy="skillHoursError" id="skillHoursError">{{ errors[0] }}</small>
+                      <small role="alert" class="form-text text-danger" data-cy="skillHoursError" id="skillHoursError">{{ errors[0] }}</small>
                     </ValidationProvider>
                   </div>
                   <div class="col-12 col-sm">
@@ -152,7 +152,7 @@ limitations under the License.
                           <span class="input-group-text" id="minutes-append">Minutes</span>
                         </div>
                       </div>
-                      <small class="form-text text-danger" data-cy="skillMinutesError" id="skillMinutesError">{{ errors[0] }}</small>
+                      <small role="alert" class="form-text text-danger" data-cy="skillMinutesError" id="skillMinutesError">{{ errors[0] }}</small>
                     </ValidationProvider>
                   </div>
                 </div>
@@ -175,7 +175,7 @@ limitations under the License.
                            aria-describedby="skillMaxOccurrencesError"
                            aria-errormessage="skillMaxOccurrencesError"
                            :aria-invalid="errors && errors.length > 0"/>
-                    <small class="form-text text-danger" data-cy="skillMaxOccurrencesError" id="skillMaxOccurrencesError">{{ errors[0] }}</small>
+                    <small role="alert" class="form-text text-danger" data-cy="skillMaxOccurrencesError" id="skillMaxOccurrencesError">{{ errors[0] }}</small>
                 </div>
               </ValidationProvider>
             </div>
@@ -192,7 +192,7 @@ limitations under the License.
             <div class="control">
               <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{errors}" name="Skill Description">
                 <markdown-editor v-if="skillInternal" v-model="skillInternal.description" data-cy="skillDescription"/>
-                <small class="form-text text-danger" data-cy="skillDescriptionError">{{ errors[0] }}</small>
+                <small role="alert" class="form-text text-danger" data-cy="skillDescriptionError">{{ errors[0] }}</small>
               </ValidationProvider>
             </div>
           </div>
