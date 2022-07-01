@@ -311,7 +311,8 @@ limitations under the License.
         Delete Action <b class="text-danger">CANNOT</b> be undone and will permanently remove all of the group's skills. All the associated users' performed skills and any dependency associations will also be removed.
       </div>
       <div class="alert alert-info mt-3" v-if="deleteSkillInfo.skill.sharedToCatalog">
-      <exported-skill-deletion-warning :skill-id="deleteSkillInfo.skill.skillId" />
+        <exported-skill-deletion-warning :skill-id="deleteSkillInfo.skill.skillId"
+                                         :skill-name="deleteSkillInfo.skill.name"/>
       </div>
     </removal-validation>
   </div>

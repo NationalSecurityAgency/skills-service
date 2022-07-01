@@ -326,5 +326,49 @@ class CatalogImportDefinitionManagement_SkillsGroupsSpecs extends CatalogIntSpec
         user1_skill1_t1_points[1].points == 100
         user1_skill1_t1_points[2].points == 0
     }
+
+    def "delete group skill that was exported and then imported in another project's group"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+
+        def p1skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 50)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [p1skillsGroup])
+        def p1Skills = createSkills(3, 1, 1, 100)
+        p1Skills.each {
+            skillsService.assignSkillToSkillsGroup(p1skillsGroup.skillId, it)
+        }
+        skillsService.bulkExportSkillsToCatalog(p1.projectId, p1Skills.collect { it.skillId })
+
+        def p2 = createProject(2)
+        def p2subj2 = createSubject(2, 2)
+        def p2skillsGroup = SkillsFactory.createSkillsGroup(2, 2, 5)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj2, [p2skillsGroup])
+
+        List<String> users = getRandomUsers(3)
+        skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[1].skillId], users[0])
+        skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[0].skillId], users[1])
+        skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[1].skillId], users[1])
+
+        skillsService.bulkImportSkillsIntoGroupFromCatalogAndFinalize(p2.projectId, p2subj2.subjectId, p2skillsGroup.skillId,
+                p1Skills.collect { [projectId: it.projectId, skillId: it.skillId] })
+
+        when:
+        def p1_subj1_t0 = skillsService.getSkillSummary(users[1], p1.projectId, p1subj1.subjectId)
+        def p2_subj2_t0 = skillsService.getSkillSummary(users[1], p2.projectId, p2subj2.subjectId)
+        skillsService.deleteSkill(p1Skills[0])
+        def p1_subj1_t1 = skillsService.getSkillSummary(users[1], p1.projectId, p1subj1.subjectId)
+        def p2_subj2_t1 = skillsService.getSkillSummary(users[1], p2.projectId, p2subj2.subjectId)
+        then:
+        p1_subj1_t0.points == 200
+        p1_subj1_t0.skills[0].children.skillId.sort() == [p1Skills[0].skillId, p1Skills[1].skillId, p1Skills[2].skillId]
+        p2_subj2_t0.points == 200
+        p2_subj2_t0.skills[0].children.skillId.sort() == [p1Skills[0].skillId, p1Skills[1].skillId, p1Skills[2].skillId]
+
+        p1_subj1_t1.points == 100
+        p1_subj1_t1.skills[0].children.skillId.sort() == [p1Skills[1].skillId, p1Skills[2].skillId]
+        p2_subj2_t1.points == 100
+        p2_subj2_t1.skills[0].children.skillId.sort() == [p1Skills[1].skillId, p1Skills[2].skillId]
+    }
 }
+
 
