@@ -19,7 +19,7 @@ limitations under the License.
     <div class="col col-md-8 col-lg-7 col-xl-4 mt-3" style="min-width: 20rem;">
       <div class="mt-5">
         <logo1 />
-        <h3 class="mt-4 text-primary">Reset Password For SkillTree Dashboard</h3>
+        <div class="h3 mt-4 text-primary">Reset Password For SkillTree Dashboard</div>
       </div>
       <ValidationObserver ref="resetForm" v-slot="{invalid, handleSubmit}" slim>
         <form @submit.prevent="handleSubmit(reset)">

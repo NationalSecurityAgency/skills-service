@@ -19,7 +19,7 @@ limitations under the License.
     <div class="col col-md-8 col-lg-7 col-xl-4 mt-3" style="min-width: 20rem;">
       <div class="mt-5">
         <logo1 />
-        <h4 class="mt-4 text-primary">Password Reset not currently enabled</h4>
+        <div class="h4 mt-4 text-primary">Password Reset not currently enabled</div>
       </div>
       <div class="card text-left">
         <div class="card-body p-4">

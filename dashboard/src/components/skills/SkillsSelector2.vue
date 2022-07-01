@@ -56,7 +56,7 @@ limitations under the License.
       </template>
       <template v-if="afterListSlotText" #list-footer>
         <li>
-          <h6 class="ml-1"> {{ afterListSlotText }}</h6>
+          <div class="h6 ml-1"> {{ afterListSlotText }}</div>
         </li>
       </template>
       <template #no-options>

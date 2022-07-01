@@ -19,7 +19,7 @@ limitations under the License.
     <div class="col col-md-8 col-lg-7 col-xl-4 mt-3" style="min-width: 20rem;">
       <div class="mt-5" data-cy="confirmEmailTitle">
         <logo1 />
-        <h3 class="mt-4 text-primary">Email Verification is Required!</h3>
+        <div class="h3 mt-4 text-primary">Email Verification is Required!</div>
       </div>
       <div class="card text-left" data-cy="confirmEmailExplanation">
         <div class="card-body p-4">

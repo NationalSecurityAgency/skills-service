@@ -16,7 +16,7 @@ limitations under the License.
 <template>
   <div>
     <img src="/static/img/skilltree_logo.png" style="height: 7rem;" alt="SkillTree logo"/>
-    <h6 class="text-muted">Micro-Learning Gamification Platform</h6>
+    <div class="h6 text-muted">Micro-Learning Gamification Platform</div>
   </div>
 </template>
 

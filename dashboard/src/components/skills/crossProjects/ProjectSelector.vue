@@ -26,7 +26,7 @@ limitations under the License.
               :loading="isLoading"
               :disabled="disabled">
       <template #option="{ name, projectId }">
-        <h6>{{ name }}</h6>
+        <div class="h6">{{ name }}</div>
         <div class="text-secondary">ID: {{ projectId }}</div>
       </template>
     </v-select>

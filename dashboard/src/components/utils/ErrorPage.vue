@@ -22,7 +22,7 @@ limitations under the License.
                     </span>
     </div>
     <div class="text-center text-secondary">
-      <h4 class="">Tiny-bit of an error!</h4>
+      <div class="h4">Tiny-bit of an error!</div>
     </div>
 
     <div class="row justify-content-center text-danger mt-3">

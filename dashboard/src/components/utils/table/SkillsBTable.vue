@@ -57,7 +57,7 @@ limitations under the License.
           <div class="mb-2">
             <i class="fas fa-dragon fa-3x border border-info rounded p-4 bg-light text-muted" />
           </div>
-          <h4 class="align-middle">{{ options.emptyText ? options.emptyText : scope.emptyText }}</h4>
+          <div class="h4 align-middle">{{ options.emptyText ? options.emptyText : scope.emptyText }}</div>
         </div>
       </template>
 

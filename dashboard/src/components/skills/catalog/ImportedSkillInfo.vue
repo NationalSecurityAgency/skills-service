@@ -40,7 +40,7 @@ limitations under the License.
       </skills-b-table>
     </div>
     <div v-else>
-      <h6>This skill has not been imported by any other projects yet...</h6>
+      <div class="h6">This skill has not been imported by any other projects yet...</div>
     </div>
   </div>
 </template>
