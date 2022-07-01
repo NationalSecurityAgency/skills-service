@@ -22,7 +22,7 @@ limitations under the License.
     <b-spinner v-if="loading" style="width: 1rem; height: 1rem;" variant="primary" label="Spinning"
                type="grow"></b-spinner>
     <b-badge v-if="!loading" variant="info">{{ importedByNumProj }}</b-badge>
-    project{{ importedByNumProj > 1 ? 's' : '' }}.
+    project{{ importedByNumProj === 1 ? '' : 's' }}.
   </p>
 
   <p>
