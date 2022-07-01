@@ -102,6 +102,11 @@ export default {
     return axios.get(url)
       .then((response) => response.data);
   },
+  getReuseDestinationsForASkill(projectId, skillId) {
+    const url = `/admin//projects/${projectId}/skills/${skillId}/reuse/destinations`;
+    return axios.get(url)
+      .then((response) => response.data);
+  },
   updateImportedSkill(skill) {
     const url = `/admin/projects/${encodeURIComponent(skill.projectId)}/import/skills/${encodeURIComponent(skill.skillId)}`;
     return axios.patch(url, { pointIncrement: skill.pointIncrement })

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <b-modal :id="firstSkillId" size="md" :title="`Reuse Skills in this Project`" v-model="show"
+  <b-modal :id="firstSkillId" size="lg" :title="`Reuse Skills in this Project`" v-model="show"
            :no-close-on-backdrop="true" :centered="true"
            header-bg-variant="info" header-text-variant="light" no-fade role="dialog" @hide="cancel"
            aria-label="'Reuse Skills in this project'">
@@ -25,15 +25,51 @@ limitations under the License.
         <b-avatar><b>1</b></b-avatar>
         Select Destination:
         <b-list-group class="mt-2">
-          <b-list-group-item v-for="dest in destinations" :key="dest.subjectId">
-            <span class="font-italic">Subject:</span><span
-            class="text-primary ml-2 font-weight-bold">{{ dest.name }}</span>
-            <b-button size="sm" class="float-right text-uppercase" variant="info"
-                      @click="selectDestination(dest)">
-              <i class="fas fa-check-circle"/> Select
-            </b-button>
+          <b-list-group-item v-for="dest in destinations.currentPage"
+                             :key="`${dest.subjectId}-${dest.groupId}`">
+            <div class="row">
+              <div class="col">
+                <div v-if="!dest.groupId">
+                  <span class="font-italic">Subject:</span>
+                  <span class="text-primary ml-2 font-weight-bold">{{ dest.subjectName }}</span>
+                </div>
+                <div v-if="dest.groupId">
+                  <div>
+                    <span class="font-italic">Group:</span>
+                    <span class="text-primary ml-2 font-weight-bold">{{ dest.groupName }}</span>
+                  </div>
+                  <div>
+                    <span class="font-italic">In subject:</span> {{ dest.subjectName }}
+                  </div>
+                </div>
+              </div>
+              <div class="col-auto">
+                <b-button size="sm" class="float-right text-uppercase" variant="info"
+                          @click="selectDestination(dest)">
+                  <i class="fas fa-check-circle"/> Select
+                </b-button>
+              </div>
+            </div>
           </b-list-group-item>
         </b-list-group>
+
+        <div class="row align-items-center">
+          <div class="col-md text-center text-md-left">
+            <!--            <span class="text-muted">Total Rows:</span> <strong data-cy="">{{ destinations.all.length }}</strong>-->
+          </div>
+          <div class="col-md my-3 my-md-0 pt-2">
+            <b-pagination
+              v-model="destinations.currentPageNum"
+              @change="updateDestinationPage"
+              :total-rows="destinations.all.length"
+              :per-page="destinations.perPageNum"
+              aria-controls="Page Controls for skill reuse destination"
+            ></b-pagination>
+          </div>
+          <div class="col-md text-center text-md-right">
+          </div>
+        </div>
+
       </div>
 
       <div id="step2" v-if="selectedDestination && !state.reUseComplete">
@@ -99,7 +135,6 @@ limitations under the License.
 </template>
 
 <script>
-  import SubjectsService from '@/components/subjects/SubjectsService';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import SkillsService from '@/components/skills/SkillsService';
 
@@ -121,7 +156,12 @@ limitations under the License.
         show: this.value,
         loadingData: true,
         firstSkillId: null,
-        destinations: [],
+        destinations: {
+          all: [],
+          currentPage: [],
+          perPageNum: 4,
+          currentPageNum: 1,
+        },
         selectedDestination: null,
         state: {
           reUseInProgress: false,
@@ -158,14 +198,25 @@ limitations under the License.
         });
       },
       loadSubjects() {
-        SubjectsService.getSubjects(this.$route.params.projectId)
-          .then((subjects) => {
-            const otherSubjects = subjects.filter((subj) => subj.subjectId !== this.$route.params.subjectId);
-            this.destinations = otherSubjects;
+        SkillsService.getReuseDestinationsForASkill(this.$route.params.projectId, this.skills[0].skillId)
+          .then((res) => {
+            this.destinations.all = res;
+            this.updateDestinationPage(this.destinations.currentPageNum);
           })
           .finally(() => {
             this.loadingData = false;
           });
+      },
+      updateDestinationPage(pageNum) {
+        const totalItemsNum = this.destinations.all.length;
+        const startIndex = Math.max(0, this.destinations.perPageNum * pageNum - this.destinations.perPageNum);
+        const endIndex = Math.min(this.destinations.perPageNum * pageNum, totalItemsNum);
+        this.destinations.currentPageNum = pageNum;
+        console.log(`currentPageNum: ${pageNum}`);
+        console.log(`totalItemsNum: ${totalItemsNum}`);
+        console.log(`startIndex: ${startIndex}`);
+        console.log(`endIndex: ${endIndex}`);
+        this.destinations.currentPage = this.destinations.all.slice(startIndex, endIndex);
       },
       initiateReuse() {
         this.state.reUseInProgress = true;

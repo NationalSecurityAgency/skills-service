@@ -131,6 +131,16 @@ describe('Skill Reuse Tests', () => {
     it('search reused skills', () => {
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
+        cy.createSubject(1, 3);
+        cy.createSubject(1, 4);
+        cy.createSubject(1, 5);
+
+        cy.createSkillsGroup(1, 1, 11);
+        cy.createSkillsGroup(1, 1, 12);
+        cy.createSkillsGroup(1, 2, 13);
+        cy.createSkillsGroup(1, 3, 14);
+        cy.createSkillsGroup(1, 3, 15);
+        cy.createSkillsGroup(1, 3, 16);
 
         cy.visit('/administrator/projects/proj1/subjects/subj2');
     });
