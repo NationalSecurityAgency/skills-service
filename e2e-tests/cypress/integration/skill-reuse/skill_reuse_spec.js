@@ -128,7 +128,7 @@ describe('Skill Reuse Tests', () => {
             .should('not.exist');
     });
 
-    it('search reused skills', () => {
+    it.only('search reused skills', () => {
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
         cy.createSubject(1, 3);
@@ -142,6 +142,21 @@ describe('Skill Reuse Tests', () => {
         cy.createSkillsGroup(1, 3, 15);
         cy.createSkillsGroup(1, 3, 16);
 
-        cy.visit('/administrator/projects/proj1/subjects/subj2');
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="skillSelect-skill3"]')
+            .click({ force: true });
+        cy.get('[data-cy="skillActionsBtn"]')
+            .click();
+        cy.get('[data-cy="skillReuseBtn"]')
+            .click();
+        cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj3"]')
+            .click();
+        cy.get('[ data-cy="reuseSkillsModalStep1"]')
+            .should('not.exist');
+
+        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+            .contains('1 skill will be reused in the [Subject 3] subject.');
+        cy.get('[data-cy="reuseButton"]')
+            .click();
     });
 });

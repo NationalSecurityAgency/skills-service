@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    https://www.apache.org/licenses/LICENSE-2.0
+https://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,7 +21,8 @@ limitations under the License.
     <skills-spinner :is-loading="loadingData"/>
 
     <div v-if="!loadingData">
-      <div id="step1" v-if="!selectedDestination">
+      <div id="step1" v-if="!selectedDestination && !state.reUseInProgress"
+           data-cy="reuseSkillsModalStep1">
         <b-avatar><b>1</b></b-avatar>
         Select Destination:
         <b-list-group class="mt-2">
@@ -45,7 +46,8 @@ limitations under the License.
               </div>
               <div class="col-auto">
                 <b-button size="sm" class="float-right text-uppercase" variant="info"
-                          @click="selectDestination(dest)">
+                          @click="selectDestination(dest)"
+                          :data-cy="`selectDest_subj${dest.subjectId}${dest.groupId ? dest.groupId : ''}`">
                   <i class="fas fa-check-circle"/> Select
                 </b-button>
               </div>
@@ -72,7 +74,8 @@ limitations under the License.
 
       </div>
 
-      <div id="step2" v-if="selectedDestination && !state.reUseComplete">
+      <div id="step2" v-if="selectedDestination && !state.reUseComplete && !state.reUseInProgress"
+           data-cy="reuseSkillsModalStep2">
         <div>
           <b-avatar><b>2</b></b-avatar>
           Preview:
@@ -81,9 +84,11 @@ limitations under the License.
           <div v-if="skillsForReuse.available.length > 0">
             <b-badge variant="info">{{ skillsForReuse.available.length }}</b-badge>
             skill{{ plural(skillsForReuse.available) }} will be reused in the
-            <span class="text-primary font-weight-bold">{{ selectedDestination.name }}</span>
+            <span class="text-primary font-weight-bold">[{{
+                selectedDestination.subjectName
+              }}]</span>
             subject.
-            <div>
+            <div v-if="skillsForReuse.alreadyExist.length > 0">
               <b-badge variant="warning">{{ skillsForReuse.alreadyExist.length }}</b-badge>
               selected skill{{ plural(skillsForReuse.alreadyExist) }} <span
               class="text-primary font-weight-bold">already</span> been reused!
@@ -96,6 +101,19 @@ limitations under the License.
             class="text-primary font-weight-bold">{{ selectedDestination.name }}</span> subject.
             Please cancel and select different skills.
           </div>
+        </b-card>
+      </div>
+
+      <div v-if="state.reUseInProgress">
+        <div>
+          <b-avatar><b>2A</b></b-avatar>
+          In Progress:
+        </div>
+        <b-card class="mt-2">
+          Working very hard to reuse
+          <b-badge variant="info">{{ skillsForReuse.available.length }}</b-badge>
+          skill{{ skillsForReuse.available.length > 1 ? 's' : '' }}. This may take several minutes.
+          <lengthy-operation-progress-bar name="Finalize" class="mb-3 mt-1"/>
         </b-card>
       </div>
 
@@ -115,12 +133,13 @@ limitations under the License.
     <div slot="modal-footer" class="w-100">
       <b-button v-if="!state.reUseComplete" variant="success" size="sm" class="float-right"
                 @click="initiateReuse"
-                :disabled="!selectedDestination || state.reUseInProgress || (skillsForReuse.available && skillsForReuse.available.length === 0)"
+                :disabled="!selectedDestination || state.reUseInProgress || (skillsForReuse.available && skillsForReuse.available.length === 0) || state.reUseInProgress"
                 data-cy="reuseButton">
         Reuse
       </b-button>
       <b-button v-if="!state.reUseComplete" variant="secondary" size="sm" class="float-right mr-2"
                 @click="cancel"
+                :disabled="state.reUseInProgress"
                 data-cy="closeButton">
         Cancel
       </b-button>
@@ -137,10 +156,14 @@ limitations under the License.
 <script>
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import SkillsService from '@/components/skills/SkillsService';
+  import LengthyOperationProgressBar from '@/components/utils/LengthyOperationProgressBar';
 
   export default {
     name: 'ReuseSkillsModal',
-    components: { SkillsSpinner },
+    components: {
+      LengthyOperationProgressBar,
+      SkillsSpinner
+    },
     props: {
       skills: {
         type: Array,
@@ -212,10 +235,6 @@ limitations under the License.
         const startIndex = Math.max(0, this.destinations.perPageNum * pageNum - this.destinations.perPageNum);
         const endIndex = Math.min(this.destinations.perPageNum * pageNum, totalItemsNum);
         this.destinations.currentPageNum = pageNum;
-        console.log(`currentPageNum: ${pageNum}`);
-        console.log(`totalItemsNum: ${totalItemsNum}`);
-        console.log(`startIndex: ${startIndex}`);
-        console.log(`endIndex: ${endIndex}`);
         this.destinations.currentPage = this.destinations.all.slice(startIndex, endIndex);
       },
       initiateReuse() {
