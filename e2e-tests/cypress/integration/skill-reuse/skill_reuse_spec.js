@@ -128,7 +128,7 @@ describe('Skill Reuse Tests', () => {
             .should('not.exist');
     });
 
-    it.only('search reused skills', () => {
+    it('search reused skills', () => {
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
         cy.createSubject(1, 3);
@@ -158,5 +158,16 @@ describe('Skill Reuse Tests', () => {
             .contains('1 skill will be reused in the [Subject 3] subject.');
         cy.get('[data-cy="reuseButton"]')
             .click();
+        cy.get('[data-cy="reuseSkillsModalStep3"]')
+            .contains('Successfully reused 1 skill.');
+        cy.get('[data-cy="okButton"]')
+            .click();
+
+        cy.get('[data-cy="breadcrumb-proj1"]')
+            .click();
+        cy.get('[data-cy="manageBtn_subj3"]')
+            .click();
+        cy.get('[data-cy="importedBadge-skill3STREUSESKILLST0"]')
+            .contains('Reused');
     });
 });

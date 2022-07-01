@@ -117,7 +117,7 @@ limitations under the License.
         </b-card>
       </div>
 
-      <div id="step3" v-if="state.reUseComplete">
+      <div id="step3" v-if="state.reUseComplete" data-cy="reuseSkillsModalStep3">
         <div>
           <b-avatar><b>3</b></b-avatar>
           Acknowledgement:
