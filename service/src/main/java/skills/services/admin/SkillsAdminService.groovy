@@ -475,7 +475,7 @@ class SkillsAdminService {
             List<SkillDef> related = skillCatalogService.getRelatedSkills(skillDefinition)
             log.info("catalog skill is being deleted, deleting [{}] copies imported into other projects", related?.size())
             related?.each {
-                SkillDef subjectParent = ruleSetDefGraphService.getMySubjectParent(skillDefinition.id)
+                SkillDef subjectParent = ruleSetDefGraphService.getMySubjectParent(it.id)
                 deleteSkill(it.projectId, subjectParent.skillId, it.skillId)
             }
         }

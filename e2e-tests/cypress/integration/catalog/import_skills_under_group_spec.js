@@ -279,6 +279,41 @@ describe('Import Skills under a Group Tests', () => {
         cy.get('[data-cy="childRowDisplay_skill1"]')
             .contains('This skill is disabled because import was not finalized yet.');
     });
+
+    it('delete group skill that was exported and then imported in another project\'s group', () => {
+        cy.createSubject(1, 1);
+        cy.createSkillsGroup(1, 1, 5);
+        cy.addSkillToGroup(1, 1, 5, 21, {
+            pointIncrement: 100,
+            numPerformToCompletion: 5
+        });
+        cy.exportSkillToCatalog(1, 1, 21);
+
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkillsGroup(2, 1, 1);
+        cy.bulkImportSkillsIntoGroupFromCatalog(2, 1, 1, [
+            {
+                projNum: 1,
+                skillNum: 21
+            },
+        ]);
+        cy.finalizeCatalogImport(2);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="expandDetailsBtn_group5"]')
+            .click();
+        cy.get('[data-cy="deleteSkillButton_skill21"]')
+            .click();
+        cy.get('[data-cy="removalSafetyCheckMsg"]')
+            .contains('This will PERMANENTLY remove [Very Great Skill 21] Skill from the catalog');
+        cy.get('[data-cy="currentValidationText"]')
+            .type('Delete Me');
+        cy.get('[data-cy="removeButton"]')
+            .click();
+        cy.get('[data-cy="deleteSkillButton_skill21"]')
+            .should('not.exist');
+    });
 });
 
 
