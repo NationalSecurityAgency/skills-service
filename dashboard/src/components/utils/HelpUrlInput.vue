@@ -32,7 +32,7 @@ limitations under the License.
                       id="rootHelpUrlHelp"
                       :aria-label="`Root Help URL was configured in the project's settings. Root Help URL is ${rootHelpUrl}. URLs starting with http or https will not use Root Help URL.`"
                       tabindex="0"
-                      @keydown.esc="handleEscape"/>
+                      @keydown.esc="handleEscape">{{ rootHelpUrl }}</span>
 
                 <b-tooltip target="rootHelpUrlHelp"
                            title="Root Help URL was configured in the project's settings. URLs starting with http(s) will not use Root Help URL."
