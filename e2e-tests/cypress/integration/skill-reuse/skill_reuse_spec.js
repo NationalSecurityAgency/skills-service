@@ -128,7 +128,7 @@ describe('Skill Reuse Tests', () => {
             .should('not.exist');
     });
 
-    it('search reused skills', () => {
+    it('reuse skill into a subject', () => {
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
         cy.createSubject(1, 3);

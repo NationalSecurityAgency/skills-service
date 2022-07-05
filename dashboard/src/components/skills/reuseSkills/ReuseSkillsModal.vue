@@ -23,55 +23,62 @@ limitations under the License.
     <div v-if="!loadingData">
       <div id="step1" v-if="!selectedDestination && !state.reUseInProgress"
            data-cy="reuseSkillsModalStep1">
-        <b-avatar><b>1</b></b-avatar>
-        Select Destination:
-        <b-list-group class="mt-2">
-          <b-list-group-item v-for="dest in destinations.currentPage"
-                             :key="`${dest.subjectId}-${dest.groupId}`">
-            <div class="row">
-              <div class="col">
-                <div v-if="!dest.groupId">
-                  <span class="font-italic">Subject:</span>
-                  <span class="text-primary ml-2 font-weight-bold">{{ dest.subjectName }}</span>
+        <div v-if="destinations.all && destinations.all.length > 0">
+          <b-avatar><b>1</b></b-avatar>
+          Select Destination:
+          <b-list-group class="mt-2" data-cy="destinationList">
+            <b-list-group-item v-for="(dest, index) in destinations.currentPage"
+                               :key="`${dest.subjectId}-${dest.groupId}`"
+                               :data-cy="`destItem-${index}`">
+              <div class="row">
+                <div class="col">
+                  <div v-if="!dest.groupId">
+                    <span class="font-italic">Subject:</span>
+                    <span class="text-primary ml-2 font-weight-bold">{{ dest.subjectName }}</span>
+                  </div>
+                  <div v-if="dest.groupId">
+                    <div>
+                      <span class="font-italic">Group:</span>
+                      <span class="text-primary ml-2 font-weight-bold">{{ dest.groupName }}</span>
+                    </div>
+                    <div>
+                      <span class="font-italic">In subject:</span> {{ dest.subjectName }}
+                    </div>
+                  </div>
                 </div>
-                <div v-if="dest.groupId">
-                  <div>
-                    <span class="font-italic">Group:</span>
-                    <span class="text-primary ml-2 font-weight-bold">{{ dest.groupName }}</span>
-                  </div>
-                  <div>
-                    <span class="font-italic">In subject:</span> {{ dest.subjectName }}
-                  </div>
+                <div class="col-auto">
+                  <b-button size="sm" class="float-right text-uppercase" variant="info"
+                            @click="selectDestination(dest)"
+                            :data-cy="`selectDest_subj${dest.subjectId}${dest.groupId ? dest.groupId : ''}`">
+                    <i class="fas fa-check-circle"/> Select
+                  </b-button>
                 </div>
               </div>
-              <div class="col-auto">
-                <b-button size="sm" class="float-right text-uppercase" variant="info"
-                          @click="selectDestination(dest)"
-                          :data-cy="`selectDest_subj${dest.subjectId}${dest.groupId ? dest.groupId : ''}`">
-                  <i class="fas fa-check-circle"/> Select
-                </b-button>
-              </div>
-            </div>
-          </b-list-group-item>
-        </b-list-group>
+            </b-list-group-item>
+          </b-list-group>
 
-        <div class="row align-items-center">
-          <div class="col-md text-center text-md-left">
-            <!--            <span class="text-muted">Total Rows:</span> <strong data-cy="">{{ destinations.all.length }}</strong>-->
-          </div>
-          <div class="col-md my-3 my-md-0 pt-2">
-            <b-pagination
-              v-model="destinations.currentPageNum"
-              @change="updateDestinationPage"
-              :total-rows="destinations.all.length"
-              :per-page="destinations.perPageNum"
-              aria-controls="Page Controls for skill reuse destination"
-            ></b-pagination>
-          </div>
-          <div class="col-md text-center text-md-right">
+          <div class="row align-items-center"
+               v-if="destinations.all.length > destinations.currentPage.length">
+            <div class="col-md text-center text-md-left">
+            </div>
+            <div class="col-md my-3 my-md-0 pt-2">
+              <b-pagination
+                v-model="destinations.currentPageNum"
+                @change="updateDestinationPage"
+                :total-rows="destinations.all.length"
+                :per-page="destinations.perPageNum"
+                aria-controls="Page Controls for skill reuse destination"
+                data-cy="destListPagingControl"
+              ></b-pagination>
+            </div>
+            <div class="col-md text-center text-md-right">
+            </div>
           </div>
         </div>
-
+        <div v-else>
+          <no-content2 title="No Destinations"
+                       message="There are no Subjects or Groups that this skill can be re-used in. Please create subjects and/or groups if you want to re-use skills."/>
+        </div>
       </div>
 
       <div id="step2" v-if="selectedDestination && !state.reUseComplete && !state.reUseInProgress"
@@ -157,10 +164,12 @@ limitations under the License.
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import SkillsService from '@/components/skills/SkillsService';
   import LengthyOperationProgressBar from '@/components/utils/LengthyOperationProgressBar';
+  import NoContent2 from '@/components/utils/NoContent2';
 
   export default {
     name: 'ReuseSkillsModal',
     components: {
+      NoContent2,
       LengthyOperationProgressBar,
       SkillsSpinner,
     },
@@ -233,7 +242,8 @@ limitations under the License.
       updateDestinationPage(pageNum) {
         const totalItemsNum = this.destinations.all.length;
         const startIndex = Math.max(0, this.destinations.perPageNum * pageNum - this.destinations.perPageNum);
-        const endIndex = Math.min(this.destinations.perPageNum * pageNum, totalItemsNum);
+        const perPageNum = totalItemsNum <= this.destinations.perPageNum + 1 ? this.destinations.perPageNum + 1 : this.destinations.perPageNum;
+        const endIndex = Math.min(perPageNum * pageNum, totalItemsNum);
         this.destinations.currentPageNum = pageNum;
         this.destinations.currentPage = this.destinations.all.slice(startIndex, endIndex);
       },
