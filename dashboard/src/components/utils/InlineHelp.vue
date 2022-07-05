@@ -15,11 +15,16 @@ limitations under the License.
 */
 <template>
   <span>
-    <i :id="targetId"
+    <i v-if="tabIndex" :id="targetId"
        class="fas fa-question-circle text-secondary"
        :aria-label="`Help Message is ${msg}`"
        role="alert"
        tabindex="0"
+       @keydown.esc="handleEscape"/>
+    <i v-else :id="targetId"
+       class="fas fa-question-circle text-secondary"
+       :aria-label="`Help Message is ${msg}`"
+       role="alert"
        @keydown.esc="handleEscape"/>
 
     <b-tooltip :target="targetId"
@@ -37,6 +42,10 @@ limitations under the License.
       targetId: {
         type: String,
         default: 'helpMsg',
+      },
+      tabIndex: {
+        type: Boolean,
+        default: true,
       },
       nextFocusEl: HTMLElement,
     },

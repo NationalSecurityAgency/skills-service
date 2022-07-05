@@ -23,7 +23,7 @@ limitations under the License.
               <div data-cy="htmlHeaderTitle">
                 <span class="label" v-show="htmlHeaderRequired" :class="hHeaderTitleClass">* </span>
                 <label class="label" for="htmlEmailHeader">
-                  HTML Header <inline-help target-id="htmlEmailHeaderHelp" msg="HTML (and in-line css) to display as a header for outgoing emails"/>
+                  HTML Header <inline-help :tab-index="false" target-id="htmlEmailHeaderHelp" msg="HTML (and in-line css) to display as a header for outgoing emails"/>
                 </label>
               </div>
             </template>
@@ -45,7 +45,7 @@ limitations under the License.
               <div data-cy="ptHeaderTitle">
                 <span class="label" v-show="plaintextHeaderRequired" :class="pHeaderTitleClass">* </span>
                 <label class="label" for="plaintextEmailHeader">
-                  Plaintext Header <inline-help target-id="plaintextEmailHeaderHelp" msg="Plaintext to display as a header for outgoing emails"/>
+                  Plaintext Header <inline-help :tab-index="false" target-id="plaintextEmailHeaderHelp" msg="Plaintext to display as a header for outgoing emails"/>
                 </label>
               </div>
             </template>
@@ -72,7 +72,7 @@ limitations under the License.
               <div data-cy="htmlFooterTitle">
                 <span class="label" v-if="htmlFooterRequired" :class="hFooterTitleClass">* </span>
                 <label class="label" for="htmlEmailFooter">
-                  HTML Footer <inline-help target-id="htmlEmailFooterHelp" msg="HTML (and in-line css) to display as a footer for outgoing emails"/>
+                  HTML Footer <inline-help :tab-index="false" target-id="htmlEmailFooterHelp" msg="HTML (and in-line css) to display as a footer for outgoing emails"/>
                 </label>
               </div>
             </template>
@@ -94,7 +94,7 @@ limitations under the License.
               <div data-cy="ptFooterTitle">
                 <span class="label" v-if="plaintextFooterRequired" :class="pFooterTitleClass">* </span>
                 <label class="label" for="plaintextEmailFooter">
-                  Plaintext Footer <inline-help target-id="plaintextEmailFooterHelp" msg="Plaintext to display as a footer for outgoing emails"/>
+                  Plaintext Footer <inline-help :tab-index="false" target-id="plaintextEmailFooterHelp" msg="Plaintext to display as a footer for outgoing emails"/>
                 </label>
               </div>
             </template>
