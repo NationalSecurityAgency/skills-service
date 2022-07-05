@@ -51,7 +51,10 @@ limitations under the License.
           <div class="col-12">
             <id-input type="text" label="Group ID" v-model="internalGroup.skillId"
                       additional-validation-rules="uniqueGroupId" @can-edit="canEditGroupId=$event"
-                      v-on:keydown.enter.native="handleSubmit(updateGroup)"/>
+                      v-on:keydown.enter.native="handleSubmit(updateGroup)"
+                      :next-focus-el="previousFocus"
+                      @shown="tooltipShowing=true"
+                      @hidden="tooltipShowing=false"/>
           </div>
         </div>
 
@@ -123,6 +126,9 @@ limitations under the License.
           skillId: '',
           projectId: '',
         },
+        currentFocus: null,
+        previousFocus: null,
+        tooltipShowing: false,
       };
     },
     created() {
@@ -143,6 +149,7 @@ limitations under the License.
             this.isLoading = false;
           });
       }
+      document.addEventListener('focusin', this.trackFocus);
     },
     computed: {
       title() {
@@ -155,6 +162,10 @@ limitations under the License.
       },
     },
     methods: {
+      trackFocus() {
+        this.previousFocus = this.currentFocus;
+        this.currentFocus = document.activeElement;
+      },
       handleIdToggle(canEdit) {
         this.canEditGroupId = canEdit;
       },
@@ -185,7 +196,11 @@ limitations under the License.
         }
       },
       publishHidden(e) {
-        this.$emit('hidden', e);
+        if (this.tooltipShowing) {
+          e.preventDefault();
+        } else {
+          this.$emit('hidden', e);
+        }
       },
       registerValidation() {
         const self = this;

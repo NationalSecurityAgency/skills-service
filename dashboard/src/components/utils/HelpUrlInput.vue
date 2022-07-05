@@ -17,7 +17,11 @@ limitations under the License.
   <div class="form-group">
     <label for="skillHelpUrl">Help URL/Path
       <inline-help v-if="$route.params.projectId"
-        msg="If project level 'Root Help Url' is specified then this path will be relative to 'Root Help Url'"/>
+                   target-id="helpUrlHelp"
+                   :next-focus-el="nextFocusEl"
+                   @shown="tooltipShown"
+                   @hidden="tooltipHidden"
+                   msg="If project level 'Root Help Url' is specified then this path will be relative to 'Root Help Url'"/>
     </label>
       <ValidationProvider rules="help_url|customUrlValidator" v-slot="{errors}"
                           name="Help URL/Path">
@@ -25,8 +29,17 @@ limitations under the License.
             <template #prepend v-if="rootHelpUrlSetting">
               <b-input-group-text><i class="fas fa-cogs mr-1"></i>
                 <span class="text-primary" :class="{ 'stikethrough' : overrideRootHelpUrl}" data-cy="rootHelpUrlSetting"
+                      id="rootHelpUrlHelp"
                       :aria-label="`Root Help URL was configured in the project's settings. Root Help URL is ${rootHelpUrl}. URLs starting with http or https will not use Root Help URL.`"
-                      v-b-tooltip.hover="'Root Help URL was configured in the project\'s settings. URLs starting with http(s) will not use Root Help URL.'">{{ rootHelpUrl }}</span></b-input-group-text>
+                      tabindex="0"
+                      @keydown.esc="handleEscape"/>
+
+                <b-tooltip target="rootHelpUrlHelp"
+                           title="Root Help URL was configured in the project's settings. URLs starting with http(s) will not use Root Help URL."
+                           @shown="tooltipShown"
+                           @hidden="tooltipHidden"/>
+
+              </b-input-group-text>
             </template>
             <b-form-input
               id="skillHelpUrl"
@@ -63,6 +76,7 @@ limitations under the License.
     },
     props: {
       value: String,
+      nextFocusEl: HTMLElement,
     },
     data() {
       return {
@@ -89,6 +103,18 @@ limitations under the License.
     watch: {
       internalValue(newVal) {
         this.$emit('input', newVal);
+      },
+    },
+    methods: {
+      tooltipShown(e) {
+        this.$emit('shown', e);
+      },
+      tooltipHidden(e) {
+        this.$emit('hidden', e);
+      },
+      handleEscape() {
+        document.activeElement.blur();
+        this.nextFocusEl?.focus();
       },
     },
   };

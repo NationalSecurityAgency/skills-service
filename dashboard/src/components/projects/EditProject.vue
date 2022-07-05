@@ -49,7 +49,10 @@ limitations under the License.
           <div class="col-12">
             <id-input type="text" label="Project ID" v-model="internalProject.projectId"
                       additional-validation-rules="uniqueId" @can-edit="canEditProjectId=$event"
-                      v-on:keydown.enter.native="handleSubmit(updateProject)"/>
+                      v-on:keydown.enter.native="handleSubmit(updateProject)"
+                      :next-focus-el="previousFocus"
+                      @shown="tooltipShowing=true"
+                      @hidden="tooltipShowing=false"/>
           </div>
         </div>
 
@@ -90,6 +93,9 @@ limitations under the License.
           name: '',
           projectId: '',
         },
+        currentFocus: null,
+        previousFocus: null,
+        tooltipShowing: false,
       };
     },
     created() {
@@ -100,6 +106,7 @@ limitations under the License.
         name: this.project.name,
         projectId: this.project.projectId,
       };
+      document.addEventListener('focusin', this.trackFocus);
     },
     computed: {
       title() {
@@ -112,6 +119,10 @@ limitations under the License.
       },
     },
     methods: {
+      trackFocus() {
+        this.previousFocus = this.currentFocus;
+        this.currentFocus = document.activeElement;
+      },
       handleIdToggle(canEdit) {
         this.canEditProjectId = canEdit;
       },
@@ -131,7 +142,11 @@ limitations under the License.
         }
       },
       publishHidden(e) {
-        this.$emit('hidden', e);
+        if (this.tooltipShowing) {
+          e.preventDefault();
+        } else {
+          this.$emit('hidden', e);
+        }
       },
       registerValidation() {
         const self = this;

@@ -44,7 +44,10 @@ limitations under the License.
           </div>
 
           <id-input type="text" label="Badge ID" v-model="badgeInternal.badgeId" @input="canAutoGenerateId=false"
-                    additional-validation-rules="uniqueId" v-on:keydown.enter.native="handleSubmit(updateBadge)"/>
+                    additional-validation-rules="uniqueId" v-on:keydown.enter.native="handleSubmit(updateBadge)"
+                    :next-focus-el="previousFocus"
+                    @shown="tooltipShowing=true"
+                    @hidden="tooltipShowing=false"/>
 
           <div class="mt-2">
             <label>Description</label>
@@ -56,6 +59,9 @@ limitations under the License.
           </div>
 
           <help-url-input class="mt-3"
+                          :next-focus-el="previousFocus"
+                          @shown="tooltipShowing=true"
+                          @hidden="tooltipShowing=false"
                           v-model="badgeInternal.helpUrl" v-on:keydown.enter.native="handleSubmit(updateBadge)" />
 
           <div v-if="!global" data-cy="gemEditContainer">
@@ -63,6 +69,10 @@ limitations under the License.
                              @change="onEnableGemFeature" data-cy="enableGemCheckbox">
               Enable Gem Feature
               <inline-help
+                target-id="gemFeatureHelp"
+                :next-focus-el="previousFocus"
+                @shown="tooltipShowing=true"
+                @hidden="tooltipShowing=false"
                 msg="The Gem feature allows for the badge to only be achievable during the specified time frame."/>
             </b-form-checkbox>
 
@@ -168,10 +178,16 @@ limitations under the License.
         limitTimeframe: limitedTimeframe,
         show: this.value,
         displayIconManager: false,
+        currentFocus: null,
+        previousFocus: null,
+        tooltipShowing: false,
       };
     },
     created() {
       this.assignCustomValidation();
+    },
+    mounted() {
+      document.addEventListener('focusin', this.trackFocus);
     },
     computed: {
       title() {
@@ -184,12 +200,20 @@ limitations under the License.
       },
     },
     methods: {
+      trackFocus() {
+        this.previousFocus = this.currentFocus;
+        this.currentFocus = document.activeElement;
+      },
       closeMe(e) {
         this.show = false;
         this.publishHidden(e);
       },
       publishHidden(e) {
-        this.$emit('hidden', e);
+        if (this.tooltipShowing) {
+          e.preventDefault();
+        } else {
+          this.$emit('hidden', e);
+        }
       },
       updateDescription(event) {
         this.badgeInternal.description = event;

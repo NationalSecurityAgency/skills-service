@@ -20,7 +20,11 @@ limitations under the License.
       <b-form-checkbox data-cy="selfReportEnableCheckbox" id="self-report-checkbox"
                        class="d-inline" v-model="selfReport.enabled"
                        v-on:input="updatedSelfReportingStatus"/>
-      Self Reporting <inline-help msg="Check to enable self-reporting of this skill by users"/>
+      Self Reporting <inline-help msg="Check to enable self-reporting of this skill by users"
+                                  target-id="selfReportHelp"
+                                  :next-focus-el="nextFocusEl"
+                                  @shown="tooltipShown"
+                                  @hidden="tooltipHidden"/>
       </label>
     </div>
     <div class="col-12 col-lg-auto">
@@ -74,6 +78,7 @@ limitations under the License.
       value: String,
       skill: Object,
       isEdit: Boolean,
+      nextFocusEl: HTMLElement,
     },
     data() {
       return {
@@ -158,6 +163,12 @@ limitations under the License.
             this.selfReport.approvals.showWarning = false;
           }
         }
+      },
+      tooltipShown(e) {
+        this.$emit('shown', e);
+      },
+      tooltipHidden(e) {
+        this.$emit('hidden', e);
       },
     },
   };

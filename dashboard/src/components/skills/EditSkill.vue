@@ -41,12 +41,19 @@ limitations under the License.
             <div class="col-12 col-lg">
               <id-input type="text" label="Skill ID" :isSkillId="true" additional-validation-rules="uniqueId"
                         v-model="skillInternal.skillId" @can-edit="canEditSkillId=$event"
+                        :next-focus-el="previousFocus"
+                        @shown="tooltipShowing=true"
+                        @hidden="tooltipShowing=false"
                         v-on:keydown.enter.native="handleSubmit(saveSkill)"/>
             </div>
             <div class="col-12 col-lg-2 mt-2 mt-lg-0">
               <div class="form-group">
                 <label for="skillVersion">Version
                   <inline-help
+                    target-id="skillVersionHelp"
+                    :next-focus-el="previousFocus"
+                    @shown="tooltipShowing=true"
+                    @hidden="tooltipShowing=false"
                     msg="An optional version for this skill to allow filtering of available skills for different versions of an application"/>
                 </label>
                 <ValidationProvider rules="optionalNumeric|min_value:0|maxSkillVersion|maxVersion" v-slot="{errors}" name="Version">
@@ -99,7 +106,12 @@ limitations under the License.
             <div class="col-12 col-lg-3">
               <div class="form-group">
                 <label>Total Points
-                  <inline-help msg="Derived and can't be entered directly. Total Points = Increment x Occurrences."/>
+                  <inline-help
+                    target-id="totalPointsHelp"
+                    :next-focus-el="previousFocus"
+                    @shown="tooltipShowing=true"
+                    @hidden="tooltipShowing=false"
+                    msg="Derived and can't be entered directly. Total Points = Increment x Occurrences."/>
                 </label>
                 <div class="input-group">
                   <div class="input-group-prepend">
@@ -115,7 +127,12 @@ limitations under the License.
             <div class="col-12 col-lg">
               <div class="form-group">
                 <label><b-form-checkbox data-cy="timeWindowCheckbox" id="checkbox-1" class="d-inline" v-model="skillInternal.timeWindowEnabled" v-on:input="resetTimeWindow"/>Time Window
-                  <inline-help msg="Uncheck to disable. When disabled skill events are applied immediately."/>
+                  <inline-help
+                    target-id="timeWindowHelp"
+                    :next-focus-el="previousFocus"
+                    @shown="tooltipShowing=true"
+                    @hidden="tooltipShowing=false"
+                    msg="Uncheck to disable. When disabled skill events are applied immediately."/>
 
                 </label>
                 <div class="row">
@@ -164,6 +181,10 @@ limitations under the License.
                 <div class="form-group">
                   <label for="maxOccurrences">Window's Max Occurrences
                     <inline-help
+                      target-id="maxOccurrencesHelp"
+                      :next-focus-el="previousFocus"
+                      @shown="tooltipShowing=true"
+                      @hidden="tooltipShowing=false"
                       msg="Once this Max Occurrences has been reached, points will not be incremented until outside of the configured Time Window."/>
                   </label>
 
@@ -183,7 +204,12 @@ limitations under the License.
 
             <hr class="mt-0"/>
 
-            <self-reporting-type-input v-model="skillInternal.selfReportingType" :skill="skillInternal" :is-edit="isEdit"/>
+            <self-reporting-type-input v-model="skillInternal.selfReportingType"
+                                       :skill="skillInternal"
+                                       :is-edit="isEdit"
+                                       :next-focus-el="previousFocus"
+                                       @shown="tooltipShowing=true"
+                                       @hidden="tooltipShowing=false"/>
 
             <hr class="mt-0"/>
 
@@ -198,7 +224,11 @@ limitations under the License.
           </div>
 
           <help-url-input class="mt-3"
-            v-model="skillInternal.helpUrl" v-on:keydown.enter.native="handleSubmit(saveSkill)" />
+                          :next-focus-el="previousFocus"
+                          @shown="tooltipShowing=true"
+                          @hidden="tooltipShowing=false"
+                          v-model="skillInternal.helpUrl"
+                          v-on:keydown.enter.native="handleSubmit(saveSkill)" />
 
           <p v-if="invalid && overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
         </b-container>
@@ -295,6 +325,9 @@ limitations under the License.
     },
     data() {
       return {
+        currentFocus: null,
+        previousFocus: null,
+        tooltipShowing: false,
         isLoadingSkillDetails: true,
         skillInternal: {
           skillId: '',
@@ -345,6 +378,7 @@ limitations under the License.
         this.loadSelfReportProjectSetting();
       }
       this.setupValidation();
+      document.addEventListener('focusin', this.trackFocus);
     },
     computed: {
       isLoading() {
@@ -378,12 +412,20 @@ limitations under the License.
       },
     },
     methods: {
+      trackFocus() {
+        this.previousFocus = this.currentFocus;
+        this.currentFocus = document.activeElement;
+      },
       close(e) {
         this.show = false;
         this.publishHidden(e);
       },
       publishHidden(e) {
-        this.$emit('hidden', { updated: this.isEdit, ...e });
+        if (this.tooltipShowing) {
+          e.preventDefault();
+        } else {
+          this.$emit('hidden', { updated: this.isEdit, ...e });
+        }
       },
       setupValidation() {
         const self = this;

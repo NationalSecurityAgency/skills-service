@@ -22,9 +22,17 @@ limitations under the License.
         </div>
         <div class="col text-right" data-cy="idInputEnableControl">
           <i class="fas fa-question-circle mr-1 text-secondary"
+             id="idInputHelp"
              aria-label="Enable ID input to override auto-generated value."
              role="alert"
-             v-b-tooltip.hover.left="'Enable to override auto-generated value.'"/>
+             tabindex="0"
+             @keydown.esc="handleEscape"/>
+
+          <b-tooltip target="idInputHelp"
+                     title="Enable to override auto-generated value."
+                     placement="left"
+                     @shown="tooltipShown"
+                     @hidden="tooltipHidden"/>
           <b-link v-if="!canEdit" @click="toggle" aria-label="enable manual ID override">Enable</b-link>
           <span v-else>Enabled <i class="fa fa-check fa-sm text-muted"/></span>
         </div>
@@ -61,6 +69,7 @@ limitations under the License.
         default: false,
       },
       additionalValidationRules: [String],
+      nextFocusEl: HTMLElement,
     },
     data() {
       return {
@@ -81,6 +90,16 @@ limitations under the License.
       },
       dataChanged() {
         this.$emit('input', this.internalValue);
+      },
+      tooltipShown(e) {
+        this.$emit('shown', e);
+      },
+      tooltipHidden(e) {
+        this.$emit('hidden', e);
+      },
+      handleEscape() {
+        document.activeElement.blur();
+        this.nextFocusEl?.focus();
       },
       validateOnChange: debounce(function validate(val) {
         if (this.$refs.idVp) {

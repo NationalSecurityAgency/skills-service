@@ -14,8 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <i class="fas fa-question-circle text-secondary" v-b-tooltip.hover="msg" :aria-label="`Help Message is ${msg}`"
-     role="alert"/>
+  <span>
+    <i :id="targetId"
+       class="fas fa-question-circle text-secondary"
+       :aria-label="`Help Message is ${msg}`"
+       role="alert"
+       tabindex="0"
+       @keydown.esc="handleEscape"/>
+
+    <b-tooltip :target="targetId"
+               :title="msg"
+               @shown="tooltipShown"
+               @hidden="tooltipHidden"/>
+  </span>
 </template>
 
 <script>
@@ -23,6 +34,23 @@ limitations under the License.
     name: 'InlineHelp',
     props: {
       msg: String,
+      targetId: {
+        type: String,
+        default: 'helpMsg',
+      },
+      nextFocusEl: HTMLElement,
+    },
+    methods: {
+      tooltipShown(e) {
+        this.$emit('shown', e);
+      },
+      tooltipHidden(e) {
+        this.$emit('hidden', e);
+      },
+      handleEscape() {
+        document.activeElement.blur();
+        this.nextFocusEl?.focus();
+      },
     },
   };
 </script>
