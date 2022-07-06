@@ -22,6 +22,7 @@ limitations under the License.
           <div class="col col-md-3 text-secondary" id="productionModeEnabledLabel">
             Discoverable:
             <inline-help
+              target-id="productionModeEnabledHelp"
               msg="Change to true for this project to be discoverable in the 'Progress and Ranking' page for all SkillTree users."/>
           </div>
           <div class="col">
@@ -40,6 +41,7 @@ limitations under the License.
           <div class="col col-md-3 text-secondary" id="pointsForLevelsLabel">
             Use Points For Levels:
             <inline-help
+              target-id="pointsForLevelsHelp"
               msg="Change to true to calculate levels based on explicit point values instead of percentages."/>
           </div>
           <div class="col">
@@ -58,6 +60,7 @@ limitations under the License.
           <div class="col col-md-3 text-secondary" id="levelDisplayTextLabel">
             Level Display Text:
             <inline-help
+              target-id="levelDisplayTextHelp"
               msg='The word "Level" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
           </div>
           <div class="col">
@@ -70,6 +73,7 @@ limitations under the License.
           <div class="col col-md-3 text-secondary" id="rootHelpUrlLabel">
             Root Help Url:
             <inline-help
+              target-id="rootHelpUrlHelp"
               msg="Optional root for Skills' 'Help Url' parameter. When configured 'Help Url' can use relative path to this root."/>
           </div>
           <div class="col">
@@ -91,6 +95,7 @@ limitations under the License.
                              data-cy="selfReportSwitch"
                              switch>
               Disable/Enable <inline-help
+              target-id="selfReportSwitchHelp"
               msg="Will serve as a default when creating new skills."/>
             </b-form-checkbox>
 
@@ -115,6 +120,7 @@ limitations under the License.
           <div class="col col-md-3 text-secondary" id="rankAndLeaderboardOptOutLabel">
             Rank Opt-Out for ALL Admins:
             <inline-help
+              target-id="rankAndLeaderboardOptOutHelp"
               msg="Change to true and all of the project's admins will not be shown on the Leaderboard or assigned a rank"/>
           </div>
           <div class="col">

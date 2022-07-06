@@ -48,7 +48,10 @@ limitations under the License.
               </div>
 
               <id-input type="text" label="Subject ID" v-model="subjectInternal.subjectId" @can-edit="canAutoGenerateId=!$event"
-                        v-on:keydown.enter.native="handleSubmit(updateSubject)" additional-validation-rules="uniqueId"/>
+                        v-on:keydown.enter.native="handleSubmit(updateSubject)" additional-validation-rules="uniqueId"
+                        :next-focus-el="previousFocus"
+                        @shown="tooltipShowing=true"
+                        @hidden="tooltipShowing=false"/>
 
               <div class="mt-2">
                 <label>Description</label>
@@ -62,7 +65,11 @@ limitations under the License.
               </div>
 
               <help-url-input class="mt-3"
-                            v-model="subjectInternal.helpUrl" v-on:keydown.enter.native="handleSubmit(updateSubject)" />
+                              :next-focus-el="previousFocus"
+                              @shown="tooltipShowing=true"
+                              @hidden="tooltipShowing=false"
+                              v-model="subjectInternal.helpUrl"
+                              v-on:keydown.enter.native="handleSubmit(updateSubject)" />
 
               <p v-if="invalid && overallErrMsg" class="text-center text-danger" role="alert">***{{ overallErrMsg }}***</p>
           </div>
@@ -123,10 +130,16 @@ limitations under the License.
         overallErrMsg: '',
         show: this.value,
         displayIconManager: false,
+        currentFocus: null,
+        previousFocus: null,
+        tooltipShowing: false,
       };
     },
     created() {
       this.assignCustomValidation();
+    },
+    mounted() {
+      document.addEventListener('focusin', this.trackFocus);
     },
     watch: {
       show(newValue) {
@@ -139,8 +152,16 @@ limitations under the License.
       },
     },
     methods: {
+      trackFocus() {
+        this.previousFocus = this.currentFocus;
+        this.currentFocus = document.activeElement;
+      },
       publishHidden(e) {
-        this.$emit('hidden', e);
+        if (this.tooltipShowing) {
+          e.preventDefault();
+        } else {
+          this.$emit('hidden', e);
+        }
       },
       close(e) {
         this.show = false;

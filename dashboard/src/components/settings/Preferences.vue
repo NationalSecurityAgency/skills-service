@@ -25,6 +25,7 @@ limitations under the License.
                 <template v-slot:label>
                   <i class="fas fa-home" aria-hidden="true"></i> Default Home Page:
                   <inline-help
+                    target-id="defaultHomePageHelp"
                     msg="Select which page you would to be displayed when first visiting the SkillTree dashboard."/>
                 </template>
                 <b-form-radio-group
@@ -41,6 +42,7 @@ limitations under the License.
             <div data-cy="rankOptOut">
               <i class="fas fa-users-slash" aria-hidden="true"></i> <span id="rankAndLeaderboardOptOutLabel">Rank and Leaderboard Opt-Out:</span>
               <inline-help
+                target-id="rankOptOutHelp"
                 msg="Change to true and you will not be shown on the Leaderboard or assigned a rank"/>
               <b-form-checkbox v-model="settings.rankAndLeaderboardOptOut.value"
                                name="check-button"
