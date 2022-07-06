@@ -16,6 +16,7 @@ limitations under the License.
 <template>
   <div
     id="app"
+    ref="content" tabindex="-1"
     class="container-fluid skills-display-container py-2"
     :style="appStyleObject" role="main" aria-label="SkillTree Client Display">
     <upgrade-in-progress-header/>
@@ -208,6 +209,16 @@ limitations under the License.
           });
       },
     },
+    watch: {
+      $route: {
+        immediate: true,
+        handler: function routeChange() {
+          this.$nextTick(() => {
+            this.$refs.content.focus({ preventScroll: true });
+          });
+        },
+      },
+    },
   };
 </script>
 
@@ -219,6 +230,7 @@ limitations under the License.
 
   .skills-display-container {
     max-width: 1140px;
+    outline: none;
   }
 
   #app {
