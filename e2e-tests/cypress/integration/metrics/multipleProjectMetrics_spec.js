@@ -310,8 +310,8 @@ describe('Multiple Project Metrics', () => {
         cy.clickNav('Metrics');
         cy.usrsInCommon().contains('No Projects Selected');
 
+        cy.usrsInCommon('[data-cy=projectSelector]').click();
         for (let i=0; i<5; i+= 1) {
-            cy.usrsInCommon('[data-cy=projectSelector]').click();
             cy.usrsInCommon().contains(`Grand Project ${i}`).click();
         }
 
@@ -324,8 +324,8 @@ describe('Multiple Project Metrics', () => {
         cy.clickNav('Metrics');
         cy.usrsInCommon().contains('No Projects Selected');
 
+        cy.usrsInCommon('[data-cy=projectSelector]').click();
         for (let i=0; i<5; i+= 1) {
-            cy.usrsInCommon('[data-cy=projectSelector]').click();
             cy.usrsInCommon().contains(`Grand Project ${i}`).click();
         }
 
@@ -352,8 +352,8 @@ describe('Multiple Project Metrics', () => {
         cy.clickNav('Metrics');
         cy.usrsInCommon().contains('No Projects Selected');
 
+        cy.usrsInCommon('[data-cy=projectSelector]').click();
         for (let i = 0; i < 5; i += 1) {
-            cy.usrsInCommon('[data-cy=projectSelector]').click();
             cy.usrsInCommon().contains(`Grand Project ${i}`).click();
         }
 
