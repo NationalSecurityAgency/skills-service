@@ -245,7 +245,7 @@ limitations under the License.
         const perPageNum = totalItemsNum <= this.destinations.perPageNum + 1 ? this.destinations.perPageNum + 1 : this.destinations.perPageNum;
         const endIndex = Math.min(perPageNum * pageNum, totalItemsNum);
         this.destinations.currentPageNum = pageNum;
-        this.destinations.currentPage = this.destinations.all.slice(startIndex, endIndex);
+        this.destinations.currentPage = this.destinations.all ? this.destinations.all.slice(startIndex, endIndex) : [];
       },
       initiateReuse() {
         this.state.reUseInProgress = true;
