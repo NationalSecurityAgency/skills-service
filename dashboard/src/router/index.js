@@ -114,7 +114,9 @@ const router = new Router({
         component: GlobalBadges,
         meta: {
           requiresAuth: true,
-          message: 'Global Badges',
+          announcer: {
+            message: 'Global Badges',
+          },
         },
       }, {
         name: 'MultipleProjectsMetricsPage',
