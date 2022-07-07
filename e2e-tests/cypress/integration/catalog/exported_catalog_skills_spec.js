@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var moment = require('moment-timezone');
 
 describe('Skills Exported to Catalog Tests', () => {
 
@@ -154,9 +153,12 @@ describe('Skills Exported to Catalog Tests', () => {
         cy.get('[data-cy="removeButton"]').should('be.disabled');
 
         cy.get('[data-cy="closeRemovalSafetyCheck"]').click();
-        cy.get('[data-cy="deleteSkillButton_skill2"]').click();
-        cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will PERMANENTLY remove [Very Great Skill 2] Skill from the catalog. This skill is currently imported by 1 projects.')
-        cy.get('[data-cy="removeButton"]').should('be.disabled');
+        cy.get('[data-cy="deleteSkillButton_skill2"]')
+            .click();
+        cy.get('[data-cy="removalSafetyCheckMsg"]')
+            .contains('This will PERMANENTLY remove [Very Great Skill 2] Skill from the catalog. This skill is currently imported by 1 project.');
+        cy.get('[data-cy="removeButton"]')
+            .should('be.disabled');
     });
 
     it('Exported skill sorting and paging', () => {
