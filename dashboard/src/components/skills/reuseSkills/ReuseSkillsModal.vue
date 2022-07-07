@@ -161,6 +161,7 @@ limitations under the License.
 </template>
 
 <script>
+  import { Logger } from '@skilltree/skills-client-vue';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import SkillsService from '@/components/skills/SkillsService';
   import LengthyOperationProgressBar from '@/components/utils/LengthyOperationProgressBar';
@@ -232,6 +233,7 @@ limitations under the License.
       loadSubjects() {
         SkillsService.getReuseDestinationsForASkill(this.$route.params.projectId, this.skills[0].skillId)
           .then((res) => {
+            Logger.warn(`SkillsService.getReuseDestinationsForASkill(${this.$route.params.projectId}, ${this.skills[0].skillId}): ${JSON.stringify(res)}`);
             this.destinations.all = res;
             this.updateDestinationPage(this.destinations.currentPageNum);
           })
@@ -245,6 +247,7 @@ limitations under the License.
         const perPageNum = totalItemsNum <= this.destinations.perPageNum + 1 ? this.destinations.perPageNum + 1 : this.destinations.perPageNum;
         const endIndex = Math.min(perPageNum * pageNum, totalItemsNum);
         this.destinations.currentPageNum = pageNum;
+        Logger.warn(`before slice: ${JSON.stringify(this.destinations.all)}`);
         this.destinations.currentPage = this.destinations.all ? this.destinations.all.slice(startIndex, endIndex) : [];
       },
       initiateReuse() {

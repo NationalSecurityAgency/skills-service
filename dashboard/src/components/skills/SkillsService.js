@@ -103,7 +103,7 @@ export default {
       .then((response) => response.data);
   },
   getReuseDestinationsForASkill(projectId, skillId) {
-    const url = `/admin//projects/${projectId}/skills/${skillId}/reuse/destinations`;
+    const url = `/admin/projects/${projectId}/skills/${skillId}/reuse/destinations`;
     return axios.get(url)
       .then((response) => response.data);
   },
