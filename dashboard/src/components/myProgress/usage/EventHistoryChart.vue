@@ -24,6 +24,7 @@ limitations under the License.
                 v-model="projects.selected"
                 :loading="loading"
                 :multiple="true"
+                :close-on-select="false"
                 label="projectName"
                 placeholder="Select option"
                 :selectable="() => projects.selected.length < 5"
