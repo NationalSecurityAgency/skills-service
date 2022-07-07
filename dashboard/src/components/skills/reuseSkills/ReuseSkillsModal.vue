@@ -91,10 +91,18 @@ limitations under the License.
           <div v-if="skillsForReuse.available.length > 0">
             <b-badge variant="info">{{ skillsForReuse.available.length }}</b-badge>
             skill{{ plural(skillsForReuse.available) }} will be reused in the
-            <span class="text-primary font-weight-bold">[{{
-                selectedDestination.subjectName
-              }}]</span>
-            subject.
+            <span v-if="selectedDestination.groupName">
+              <span class="text-primary font-weight-bold">[{{
+                  selectedDestination.groupName
+                }}]</span>
+              group.
+            </span>
+            <span v-else>
+              <span class="text-primary font-weight-bold">[{{
+                  selectedDestination.subjectName
+                }}]</span>
+              subject.
+            </span>
             <div v-if="skillsForReuse.alreadyExist.length > 0">
               <b-badge variant="warning">{{ skillsForReuse.alreadyExist.length }}</b-badge>
               selected skill{{ plural(skillsForReuse.alreadyExist) }} <span
@@ -233,7 +241,7 @@ limitations under the License.
       loadSubjects() {
         SkillsService.getReuseDestinationsForASkill(this.$route.params.projectId, this.skills[0].skillId)
           .then((res) => {
-            Logger.warn(`SkillsService.getReuseDestinationsForASkill(${this.$route.params.projectId}, ${this.skills[0].skillId}): ${JSON.stringify(res)}`);
+            Logger.info(`SkillsService.getReuseDestinationsForASkill(${this.$route.params.projectId}, ${this.skills[0].skillId}): ${JSON.stringify(res)}`);
             this.destinations.all = res;
             this.updateDestinationPage(this.destinations.currentPageNum);
           })
@@ -247,13 +255,13 @@ limitations under the License.
         const perPageNum = totalItemsNum <= this.destinations.perPageNum + 1 ? this.destinations.perPageNum + 1 : this.destinations.perPageNum;
         const endIndex = Math.min(perPageNum * pageNum, totalItemsNum);
         this.destinations.currentPageNum = pageNum;
-        Logger.warn(`before slice: ${JSON.stringify(this.destinations.all)}`);
+        Logger.info(`before slice: ${JSON.stringify(this.destinations.all)}`);
         this.destinations.currentPage = this.destinations.all ? this.destinations.all.slice(startIndex, endIndex) : [];
       },
       initiateReuse() {
         this.state.reUseInProgress = true;
         const skillIds = this.skillsForReuse.available.map((sk) => sk.skillId);
-        SkillsService.reuseSkillInAnotherSubject(this.$route.params.projectId, skillIds, this.selectedDestination.subjectId)
+        SkillsService.reuseSkillInAnotherSubject(this.$route.params.projectId, skillIds, this.selectedDestination.subjectId, this.selectedDestination.groupId)
           .then(() => {
             this.state.reUseInProgress = false;
             this.state.reUseComplete = true;

@@ -90,10 +90,11 @@ export default {
     return axios.post(url, copy, { handleError: false })
       .then(() => this.getSkillDetails(skill.projectId, skill.subjectId, skill.skillId));
   },
-  reuseSkillInAnotherSubject(projectId, skillIds, newSubjectId) {
+  reuseSkillInAnotherSubject(projectId, skillIds, newSubjectId, newGroupId = null) {
     const url = `/admin/projects/${encodeURIComponent(projectId)}/skills/reuse`;
     return axios.post(url, {
       subjectId: newSubjectId,
+      groupId: newGroupId,
       skillIds,
     });
   },

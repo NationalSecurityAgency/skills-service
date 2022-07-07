@@ -170,4 +170,33 @@ describe('Skill Reuse Tests', () => {
         cy.get('[data-cy="importedBadge-skill3STREUSESKILLST0"]')
             .contains('Reused');
     });
+
+    it('reuse skill into a group under the same subject', () => {
+        cy.createSkill(1, 1, 2);
+        cy.createSkill(1, 1, 3);
+
+        cy.createSkillsGroup(1, 1, 11);
+        cy.createSkillsGroup(1, 1, 12);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="selectAllSkillsBtn"]')
+            .click();
+        cy.get('[data-cy="skillActionsBtn"]')
+            .click();
+        cy.get('[data-cy="skillReuseBtn"]')
+            .click();
+        cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj1group11"]')
+            .click();
+        cy.get('[ data-cy="reuseSkillsModalStep1"]')
+            .should('not.exist');
+
+        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+            .contains('3 skills will be reused in the [Awesome Group 11 Subj1] group');
+        cy.get('[data-cy="reuseButton"]')
+            .click();
+        cy.get('[data-cy="reuseSkillsModalStep3"]')
+            .contains('Successfully reused 3 skills');
+        cy.get('[data-cy="okButton"]')
+            .click();
+    });
 });
