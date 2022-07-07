@@ -614,7 +614,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
             and parentDef.skillId = ?2 
             and parentDef = srd.parent 
             and s = srd.child 
-            and srd.type = 'RuleSetDefinition' 
+            and srd.type in ('RuleSetDefinition', 'SkillsGroupRequirement') 
             and parentDef.type in ('Subject', 'SkillsGroup')
             and s.type = 'Skill'
             and s.skillId like '%STREUSESKILLST%'

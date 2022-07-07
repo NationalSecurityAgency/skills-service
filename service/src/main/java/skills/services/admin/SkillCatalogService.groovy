@@ -435,24 +435,16 @@ class SkillCatalogService {
 
     @Transactional
     List<SkillDef> getRelatedSkills(SkillDef skillDef) {
-        List<SkillDef> related = []
-        if (isAvailableInCatalog(skillDef.projectId, skillDef.skillId)) {
-            related = skillDefRepo.findSkillsCopiedFrom(skillDef.id)
-        } else if (skillDef.copiedFrom != null) {
-            related = skillDefRepo.findSkillsCopiedFrom(skillDef.copiedFrom)
-            related = related?.findAll { it.id != skillDef.id }
-            SkillDef og = skillDefRepo.findById(skillDef.copiedFrom)
-            if (og) {
-                related.add(og)
-            }
-        }
-
-        return related
+        return this.doGetRelatedSkills(skillDef)
     }
 
     @Transactional
-    @Profile
     List<SkillDefWithExtra> getRelatedSkills(SkillDefWithExtra skillDefWithExtra) {
+        return this.doGetRelatedSkills(skillDefWithExtra)
+    }
+
+    @Profile
+    private List<SkillDefWithExtra> doGetRelatedSkills(SkillDefParent skillDefWithExtra) {
         List<SkillDefWithExtra> related = skillDefWithExtraRepo.findSkillsCopiedFrom(skillDefWithExtra.id)
         if (!related && skillDefWithExtra.copiedFrom != null) {
             related = skillDefWithExtraRepo.findSkillsCopiedFrom(skillDefWithExtra.copiedFrom)

@@ -477,13 +477,11 @@ class SkillsAdminService {
 
     @Profile
     private void removeCatalogImportedSkills(SkillDef skillDefinition) {
-        if (skillCatalogService.isAvailableInCatalog(skillDefinition)) {
-            List<SkillDef> related = skillCatalogService.getRelatedSkills(skillDefinition)
-            log.info("catalog skill is being deleted, deleting [{}] copies imported into other projects", related?.size())
-            related?.each {
-                SkillDef subjectParent = ruleSetDefGraphService.getMySubjectParent(it.id)
-                deleteSkill(it.projectId, subjectParent.skillId, it.skillId)
-            }
+        List<SkillDefWithExtra> related = skillDefWithExtraRepo.findSkillsCopiedFrom(skillDefinition.id)
+        log.info("catalog skill is being deleted, deleting [{}] copies imported into other projects", related?.size())
+        related?.each {
+            SkillDef subjectParent = ruleSetDefGraphService.getMySubjectParent(it.id)
+            deleteSkill(it.projectId, subjectParent.skillId, it.skillId)
         }
     }
 
