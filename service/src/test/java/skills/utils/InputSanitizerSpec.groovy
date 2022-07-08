@@ -137,6 +137,24 @@ class InputSanitizerSpec extends Specification{
         sanitized == "http://foo%20space%20bar.foo"
     }
 
+    def "sanitize url with space in fragment"() {
+        when:
+        def sanitized = InputSanitizer.sanitizeUrl("http://foo.foo#bar%20baz")
+
+        then:
+        sanitized == "http://foo.foo#bar%20baz"
+        sanitized != "http://foo.foo#bar baz"
+    }
+
+    def "un-sanitize url with space in fragment"() {
+        when:
+        def unsani = InputSanitizer.unsanitizeUrl(InputSanitizer.sanitizeUrl("http://foo.foo#bar%20baz"))
+
+        then:
+        unsani == "http://foo.foo#bar%20baz"
+        unsani != "http://foo.foo#bar baz"
+    }
+
     def "un-sanitize naked ampersand"() {
         when:
         def unsani = InputSanitizer.unsanitizeName(InputSanitizer.sanitize("A & B"))
