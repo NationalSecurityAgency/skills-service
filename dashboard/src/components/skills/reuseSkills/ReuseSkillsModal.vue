@@ -267,7 +267,7 @@ limitations under the License.
             this.state.reUseComplete = true;
             this.$emit('reused', {
               destination: this.selectedDestination,
-              reusedSkills: this.skillsForReuse.available
+              reusedSkills: this.skillsForReuse.available,
             });
           });
       },

@@ -194,7 +194,7 @@ limitations under the License.
       updateSubjectStats() {
         this.loadSubjectDetailsState({
           projectId: this.projectId,
-          subjectId: this.subject.subjectId
+          subjectId: this.subject.subjectId,
         });
       },
       newSkill() {
