@@ -265,7 +265,10 @@ limitations under the License.
           .then(() => {
             this.state.reUseInProgress = false;
             this.state.reUseComplete = true;
-            this.$emit('reused', skillIds);
+            this.$emit('reused', {
+              destination: this.selectedDestination,
+              reusedSkills: this.skillsForReuse.available
+            });
           });
       },
       selectDestination(selection) {

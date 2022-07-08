@@ -50,9 +50,10 @@ limitations under the License.
     <loading-container v-bind:is-loading="loadingSubjectSkills">
       <b-card body-class="p-0">
         <skills-table ref="skillsTable"
-          :skills-prop="subjectSkills" :is-top-level="true" :project-id="this.$route.params.projectId"
+                      :skills-prop="subjectSkills" :is-top-level="true" :project-id="this.$route.params.projectId"
                       :subject-id="subjectId" :subject-name="subjectName"
                       v-on:skills-change="skillsChanged"
+                      @update-subj-stats="updateSubjectStats"
                       @skill-removed="skillDeleted" />
       </b-card>
     </loading-container>
@@ -187,8 +188,14 @@ limitations under the License.
           this.skills.splice(index, 1);
         }
 
-        this.loadSubjectDetailsState({ projectId: this.projectId, subjectId: this.subject.subjectId });
+        this.updateSubjectStats();
         this.$emit('skills-change', skill.skillId);
+      },
+      updateSubjectStats() {
+        this.loadSubjectDetailsState({
+          projectId: this.projectId,
+          subjectId: this.subject.subjectId
+        });
       },
       newSkill() {
         this.editSkillInfo = {

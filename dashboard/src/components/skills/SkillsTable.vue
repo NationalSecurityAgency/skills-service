@@ -105,7 +105,9 @@ limitations under the License.
               <div v-if="data.item.isGroupType">
                 <div class="text-success font-weight-bold">
                   <i class="fas fa-layer-group" aria-hidden="true"></i> <span class="text-uppercase">Group</span>
-                  <b-badge variant="success" class="ml-2 text-uppercase">{{ data.item.numSkillsInGroup }} skills</b-badge>
+                  <b-badge variant="success" class="ml-2 text-uppercase" data-cy="numSkillsInGroup">
+                    {{ data.item.numSkillsInGroup }} skills
+                  </b-badge>
                 </div>
                 <div class="h5 text-primary"><show-more :text="data.item.nameHtml ? data.item.nameHtml : data.item.name" :limit="45" :contains-html="data.item.nameHtml" /></div>
               </div>
@@ -295,6 +297,7 @@ limitations under the License.
         <template #row-details="row">
             <child-row-skill-group-display v-if="row.item.isGroupType" :group="row.item"
                                            :add-skill-disabled="addSkillDisabled"
+                                           @skills-reused="handleSkillsReused"
                                            @group-changed="groupChanged(row, arguments[0])"/>
             <ChildRowSkillsDisplay v-if="row.item.isSkillType" :project-id="projectId" :subject-id="subjectId" v-skills-onMount="'ExpandSkillDetailsSkillsPage'"
                                    :parent-skill-id="row.item.skillId" :refresh-counter="row.item.refreshCounter"
@@ -724,7 +727,20 @@ limitations under the License.
         });
         this.$nextTick(() => this.$announcer.polite(`exported ${skills.length} skill${skills.length > 1 ? 's' : ''} to the catalog`));
       },
-      handleSkillsReused() {
+      handleSkillsReused(reused) {
+        if (reused.destination.groupId) {
+          const foundIndex = this.skills.findIndex((item) => item.skillId === reused.destination.groupId);
+          if (foundIndex > 0) {
+            const groupToUpdate = this.skills[foundIndex];
+            groupToUpdate.numSkillsInGroup += reused.reusedSkills.length;
+            const pointsToAdd = reused.reusedSkills.map((sk) => sk.totalPoints)
+              .reduce((a, b) => a + b, 0);
+            groupToUpdate.totalPoints += pointsToAdd;
+            this.skills.splice(foundIndex, 1, groupToUpdate);
+          }
+          this.$emit('update-subj-stats');
+          this.$emit('skills-reused', reused);
+        }
         this.changeSelectionForAll(false);
       },
       updateImportedSkill(skill) {

@@ -17,7 +17,7 @@ import dayjs from 'dayjs';
 
 const moment = require('moment-timezone');
 
-describe('Skill Reuse Tests', () => {
+describe('Skill Reuse Modal Tests', () => {
 
     beforeEach(() => {
         cy.createProject(1);
