@@ -14,155 +14,172 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div>
-    <sub-page-header title="Project Settings"/>
-    <simple-card>
-      <loading-container :is-loading="isLoading">
-        <div v-if="isProgressAndRankingEnabled" class="row" data-cy="productionModeSetting">
-          <div class="col col-md-3 text-secondary" id="productionModeEnabledLabel">
-            Discoverable:
-            <inline-help
-              target-id="productionModeEnabledHelp"
-              msg="Change to true for this project to be discoverable in the 'Progress and Ranking' page for all SkillTree users."/>
+  <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit }" slim>
+    <div>
+      <sub-page-header title="Project Settings"/>
+      <simple-card>
+        <loading-container :is-loading="isLoading">
+          <div v-if="isProgressAndRankingEnabled" class="row" data-cy="productionModeSetting">
+            <div class="col col-md-3 text-secondary" id="productionModeEnabledLabel">
+              Discoverable:
+              <inline-help
+                target-id="productionModeEnabledHelp"
+                msg="Change to true for this project to be discoverable in the 'Progress and Ranking' page for all SkillTree users."/>
+            </div>
+            <div class="col">
+              <b-form-checkbox v-model="settings.productionModeEnabled.value"
+                               name="check-button"
+                               v-on:input="productionModeEnabledChanged"
+                               aria-labelledby="productionModeEnabledLabel"
+                               data-cy="productionModeEnabledSwitch"
+                               switch>
+                {{ settings.productionModeEnabled.value }}
+              </b-form-checkbox>
+            </div>
           </div>
-          <div class="col">
-            <b-form-checkbox v-model="settings.productionModeEnabled.value"
-                             name="check-button"
-                             v-on:input="productionModeEnabledChanged"
-                             aria-labelledby="productionModeEnabledLabel"
-                             data-cy="productionModeEnabledSwitch"
-                             switch>
-              {{ settings.productionModeEnabled.value }}
-            </b-form-checkbox>
-          </div>
-        </div>
 
-        <div class="row mt-3">
-          <div class="col col-md-3 text-secondary" id="pointsForLevelsLabel">
-            Use Points For Levels:
-            <inline-help
-              target-id="pointsForLevelsHelp"
-              msg="Change to true to calculate levels based on explicit point values instead of percentages."/>
+          <div class="row mt-3">
+            <div class="col col-md-3 text-secondary" id="pointsForLevelsLabel">
+              Use Points For Levels:
+              <inline-help
+                target-id="pointsForLevelsHelp"
+                msg="Change to true to calculate levels based on explicit point values instead of percentages."/>
+            </div>
+            <div class="col">
+              <b-form-checkbox v-model="settings.levelPointsEnabled.value"
+                               name="check-button"
+                               v-on:input="levelPointsEnabledChanged"
+                               aria-labelledby="pointsForLevelsLabel"
+                               data-cy="usePointsForLevelsSwitch"
+                               switch>
+                {{ settings.levelPointsEnabled.value }}
+              </b-form-checkbox>
+            </div>
           </div>
-          <div class="col">
-            <b-form-checkbox v-model="settings.levelPointsEnabled.value"
-                             name="check-button"
-                             v-on:input="levelPointsEnabledChanged"
-                             aria-labelledby="pointsForLevelsLabel"
-                             data-cy="usePointsForLevelsSwitch"
-                             switch>
-              {{ settings.levelPointsEnabled.value }}
-            </b-form-checkbox>
-          </div>
-        </div>
 
-        <div class="row mt-3">
-          <div class="col col-md-3 text-secondary" id="levelDisplayTextLabel">
-            Level Display Text:
-            <inline-help
-              target-id="levelDisplayTextHelp"
-              msg='The word "Level" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+          <div class="row mt-3">
+            <div class="col col-md-3 text-secondary" id="levelDisplayTextLabel">
+              Level Display Text:
+              <inline-help
+                target-id="levelDisplayTextHelp"
+                msg='The word "Level" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+            </div>
+            <div class="col">
+              <b-form-input v-model="settings.levelDisplayName.value" data-cy="levelDisplayTextInput"
+                            v-on:input="levelDisplayNameChanged" aria-labelledby="levelDisplayTextLabel"></b-form-input>
+            </div>
           </div>
-          <div class="col">
-            <b-form-input v-model="settings.levelDisplayName.value" data-cy="levelDisplayTextInput"
-                          v-on:input="levelDisplayNameChanged" aria-labelledby="levelDisplayTextLabel"></b-form-input>
+
+          <ValidationProvider rules="help_url|customUrlValidator" v-slot="{errors}"
+                              name="Root Help Url">
+            <div class="row mt-3">
+              <div class="col col-md-3 text-secondary" id="rootHelpUrlLabel">
+                Root Help Url:
+                <inline-help
+                  target-id="rootHelpUrlHelp"
+                  msg="Optional root for Skills' 'Help Url' parameter. When configured 'Help Url' can use relative path to this root."/>
+              </div>
+              <div class="col">
+                <b-form-input v-model="settings.helpUrlHost.value"
+                              placeholder="http://www.HelpArticlesHost.com"
+                              data-cy="rootHelpUrlInput"
+                              v-on:input="helpUrlHostChanged"
+                              aria-describedby="rootHelpUrlError"
+                              aria-errormessage="rootHelpUrlError"
+                              aria-labelledby="rootHelpUrlLabel">
+                </b-form-input>
+              </div>
+            </div>
+            <div v-if="errors && errors.length > 0" class="row">
+              <div class="col">
+                <small role="alert" class="form-text text-danger" id="rootHelpUrlError"
+                       data-cy="rootHelpUrlError">{{ errors[0] }}</small>
+              </div>
+            </div>
+          </ValidationProvider>
+
+          <div class="row mt-3">
+            <div class="col col-md-3 text-secondary" id="selfReportLabel">
+              Self Report Default:
+            </div>
+            <div class="col">
+              <b-form-checkbox v-model="selfReport.enabled"
+                               name="check-button"
+                               v-on:input="selfReportingControl"
+                               aria-labelledby="pointsForLevelsLabel"
+                               data-cy="selfReportSwitch"
+                               switch>
+                Disable/Enable <inline-help
+                target-id="selfReportSwitchHelp"
+                msg="Will serve as a default when creating new skills."/>
+              </b-form-checkbox>
+
+              <b-card class="mt-1">
+                <b-form-group  label="Approval Type:" v-slot="{ ariaDescribedby }">
+                  <b-form-radio-group
+                    id="self-reporting-type"
+                    v-model="selfReport.selected"
+                    :options="selfReport.options"
+                    v-on:input="selfReportingTypeChanged"
+                    :aria-describedby="ariaDescribedby"
+                    name="Self Reporting Options"
+                    data-cy="selfReportTypeSelector"
+                    stacked
+                  ></b-form-radio-group>
+                </b-form-group>
+              </b-card>
+            </div>
           </div>
-        </div>
 
-        <div class="row mt-3">
-          <div class="col col-md-3 text-secondary" id="rootHelpUrlLabel">
-            Root Help Url:
-            <inline-help
-              target-id="rootHelpUrlHelp"
-              msg="Optional root for Skills' 'Help Url' parameter. When configured 'Help Url' can use relative path to this root."/>
+          <div class="row mt-3">
+            <div class="col col-md-3 text-secondary" id="rankAndLeaderboardOptOutLabel">
+              Rank Opt-Out for ALL Admins:
+              <inline-help
+                target-id="rankAndLeaderboardOptOutHelp"
+                msg="Change to true and all of the project's admins will not be shown on the Leaderboard or assigned a rank"/>
+            </div>
+            <div class="col">
+              <b-form-checkbox v-model="settings.rankAndLeaderboardOptOut.value"
+                               name="check-button"
+                               v-on:input="rankAndLeaderboardOptOutChanged"
+                               aria-labelledby="rankAndLeaderboardOptOutLabel"
+                               data-cy="rankAndLeaderboardOptOutSwitch"
+                               switch>
+                {{ settings.rankAndLeaderboardOptOut.value }}
+              </b-form-checkbox>
+            </div>
           </div>
-          <div class="col">
-            <b-form-input v-model="settings.helpUrlHost.value" placeholder="http://www.HelpArticlesHost.com"
-                          data-cy="rootHelpUrlInput"
-                          v-on:input="helpUrlHostChanged" aria-labelledby="rootHelpUrlLabel"></b-form-input>
+
+          <hr/>
+
+          <p v-if="errMsg" class="text-center text-danger mt-3" role="alert">***{{ errMsg }}***</p>
+
+          <div class="row">
+            <div class="col">
+              <b-button variant="outline-success" @click="handleSubmit(save)" :disabled="invalid || !isDirty" data-cy="saveSettingsBtn">
+                Save <i class="fas fa-arrow-circle-right"/>
+              </b-button>
+
+              <span v-if="isDirty" class="text-warning ml-2" data-cy="unsavedChangesAlert">
+                <i class="fa fa-exclamation-circle"
+                   aria-label="Settings have been changed, do not forget to save"
+                   v-b-tooltip.hover="'Settings have been changed, do not forget to save'"/> Unsaved Changes
+              </span>
+              <span v-if="!isDirty && showSavedMsg" class="text-success ml-2" data-cy="settingsSavedAlert">
+                <i class="fa fa-check" />
+                Settings Updated!
+              </span>
+            </div>
           </div>
-        </div>
+        </loading-container>
+      </simple-card>
 
-        <div class="row mt-3">
-          <div class="col col-md-3 text-secondary" id="selfReportLabel">
-            Self Report Default:
-          </div>
-          <div class="col">
-            <b-form-checkbox v-model="selfReport.enabled"
-                             name="check-button"
-                             v-on:input="selfReportingControl"
-                             aria-labelledby="pointsForLevelsLabel"
-                             data-cy="selfReportSwitch"
-                             switch>
-              Disable/Enable <inline-help
-              target-id="selfReportSwitchHelp"
-              msg="Will serve as a default when creating new skills."/>
-            </b-form-checkbox>
-
-            <b-card class="mt-1">
-              <b-form-group  label="Approval Type:" v-slot="{ ariaDescribedby }">
-                <b-form-radio-group
-                  id="self-reporting-type"
-                  v-model="selfReport.selected"
-                  :options="selfReport.options"
-                  v-on:input="selfReportingTypeChanged"
-                  :aria-describedby="ariaDescribedby"
-                  name="Self Reporting Options"
-                  data-cy="selfReportTypeSelector"
-                  stacked
-                ></b-form-radio-group>
-              </b-form-group>
-            </b-card>
-          </div>
-        </div>
-
-        <div class="row mt-3">
-          <div class="col col-md-3 text-secondary" id="rankAndLeaderboardOptOutLabel">
-            Rank Opt-Out for ALL Admins:
-            <inline-help
-              target-id="rankAndLeaderboardOptOutHelp"
-              msg="Change to true and all of the project's admins will not be shown on the Leaderboard or assigned a rank"/>
-          </div>
-          <div class="col">
-            <b-form-checkbox v-model="settings.rankAndLeaderboardOptOut.value"
-                             name="check-button"
-                             v-on:input="rankAndLeaderboardOptOutChanged"
-                             aria-labelledby="rankAndLeaderboardOptOutLabel"
-                             data-cy="rankAndLeaderboardOptOutSwitch"
-                             switch>
-              {{ settings.rankAndLeaderboardOptOut.value }}
-            </b-form-checkbox>
-          </div>
-        </div>
-
-        <hr/>
-
-        <p v-if="errMsg" class="text-center text-danger mt-3" role="alert">***{{ errMsg }}***</p>
-
-        <div class="row">
-          <div class="col">
-            <b-button variant="outline-success" @click="save" :disabled="!isDirty" data-cy="saveSettingsBtn">
-              Save <i class="fas fa-arrow-circle-right"/>
-            </b-button>
-
-            <span v-if="isDirty" class="text-warning ml-2" data-cy="unsavedChangesAlert">
-              <i class="fa fa-exclamation-circle"
-                 aria-label="Settings have been changed, do not forget to save"
-                 v-b-tooltip.hover="'Settings have been changed, do not forget to save'"/> Unsaved Changes
-            </span>
-            <span v-if="!isDirty && showSavedMsg" class="text-success ml-2" data-cy="settingsSavedAlert">
-              <i class="fa fa-check" />
-              Settings Updated!
-            </span>
-          </div>
-        </div>
-      </loading-container>
-    </simple-card>
-
-  </div>
+    </div>
+  </ValidationObserver>
 </template>
 
 <script>
+  import { extend, ValidationProvider } from 'vee-validate';
   import { SkillsReporter } from '@skilltree/skills-client-vue';
   import SettingService from './SettingsService';
   import SubPageHeader from '../utils/pages/SubPageHeader';
@@ -170,6 +187,16 @@ limitations under the License.
   import InlineHelp from '../utils/InlineHelp';
   import LoadingContainer from '../utils/LoadingContainer';
   import ToastSupport from '../utils/ToastSupport';
+
+  extend('help_url', {
+    message: (field) => `${field} must start with "http(s)"`,
+    validate(value) {
+      if (!value) {
+        return true;
+      }
+      return value.startsWith('http') || value.startsWith('https');
+    },
+  });
 
   export default {
     name: 'ProjectSettings',
@@ -179,6 +206,7 @@ limitations under the License.
       InlineHelp,
       SimpleCard,
       SubPageHeader,
+      ValidationProvider,
     },
     data() {
       return {
@@ -313,19 +341,26 @@ limitations under the License.
           });
       },
       save() {
-        const dirtyChanges = Object.values(this.settings).filter((item) => item.dirty);
-        if (dirtyChanges) {
-          this.isLoading = true;
-          SettingService.checkSettingsValidity(this.$route.params.projectId, dirtyChanges)
-            .then((res) => {
-              if (res.valid) {
-                this.saveSettings(dirtyChanges);
-              } else {
-                this.errMsg = res.explanation;
-                this.isLoading = false;
+        this.$refs.observer.validate()
+          .then((res1) => {
+            if (!res1) {
+              this.errMsg = 'Form did NOT pass validation, please fix and try to Save again';
+            } else {
+              const dirtyChanges = Object.values(this.settings).filter((item) => item.dirty);
+              if (dirtyChanges) {
+                this.isLoading = true;
+                SettingService.checkSettingsValidity(this.$route.params.projectId, dirtyChanges)
+                  .then((res) => {
+                    if (res.valid) {
+                      this.saveSettings(dirtyChanges);
+                    } else {
+                      this.errMsg = res.explanation;
+                      this.isLoading = false;
+                    }
+                  });
               }
-            });
-        }
+            }
+          });
       },
       saveSettings(dirtyChanges) {
         SettingService.saveSettings(this.$route.params.projectId, dirtyChanges)
