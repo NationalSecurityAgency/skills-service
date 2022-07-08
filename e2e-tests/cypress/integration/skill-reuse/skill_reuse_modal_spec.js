@@ -394,7 +394,7 @@ describe('Skill Reuse Modal Tests', () => {
             .should('not.exist');
     });
 
-    it.only('multiple skills - some are already reused in the group', () => {
+    it('multiple skills - some are already reused in the group', () => {
         cy.createSkill(1, 1, 6);
         cy.createSkill(1, 1, 7);
         cy.createSkill(1, 1, 8);
