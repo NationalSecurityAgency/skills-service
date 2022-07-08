@@ -171,13 +171,13 @@ describe('Skill Reuse Modal Tests', () => {
         cy.get('[data-cy="destinationList"] .list-group-item')
             .should('have.length', 4);
         cy.get('[data-cy="destinationList"] [data-cy="destItem-0"]')
-            .contains('Subject 2');
+            .contains('Awesome Group 11 Subj1');
         cy.get('[data-cy="destinationList"] [data-cy="destItem-1"]')
-            .contains('Subject 3');
+            .contains('Awesome Group 12 Subj1');
         cy.get('[data-cy="destinationList"] [data-cy="destItem-2"]')
-            .contains('Subject 4');
+            .contains('Subject 2');
         cy.get('[data-cy="destinationList"] [data-cy="destItem-3"]')
-            .contains('Subject 5');
+            .contains('Awesome Group 13 Subj2');
         cy.get('[data-cy="reuseButton"]')
             .should('be.disabled');
         cy.get('[data-cy="closeButton"]')
@@ -190,13 +190,13 @@ describe('Skill Reuse Modal Tests', () => {
         cy.get('[data-cy="destinationList"] .list-group-item')
             .should('have.length', 4);
         cy.get('[data-cy="destinationList"] [data-cy="destItem-0"]')
-            .contains('Awesome Group 11 Subj1');
+            .contains('Subject 3');
         cy.get('[data-cy="destinationList"] [data-cy="destItem-1"]')
-            .contains('Awesome Group 12 Subj1');
-        cy.get('[data-cy="destinationList"] [data-cy="destItem-2"]')
-            .contains('Awesome Group 13 Subj2');
-        cy.get('[data-cy="destinationList"] [data-cy="destItem-3"]')
             .contains('Awesome Group 14 Subj3');
+        cy.get('[data-cy="destinationList"] [data-cy="destItem-2"]')
+            .contains('Awesome Group 15 Subj3');
+        cy.get('[data-cy="destinationList"] [data-cy="destItem-3"]')
+            .contains('Awesome Group 16 Subj3');
         cy.get('[data-cy="reuseButton"]')
             .should('be.disabled');
         cy.get('[data-cy="closeButton"]')
@@ -209,9 +209,9 @@ describe('Skill Reuse Modal Tests', () => {
         cy.get('[data-cy="destinationList"] .list-group-item')
             .should('have.length', 2);
         cy.get('[data-cy="destinationList"] [data-cy="destItem-0"]')
-            .contains('Awesome Group 15 Subj3');
+            .contains('Subject 4');
         cy.get('[data-cy="destinationList"] [data-cy="destItem-1"]')
-            .contains('Awesome Group 16 Subj3');
+            .contains('Subject 5');
         cy.get('[data-cy="reuseButton"]')
             .should('be.disabled');
         cy.get('[data-cy="closeButton"]')

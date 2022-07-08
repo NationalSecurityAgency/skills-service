@@ -107,6 +107,6 @@ class SkillReuseService {
                     subjectId: subj.skillId,
                     groupName: group?.name,
                     groupId: group?.skillId)
-        }
+        }.sort({ "${it.subjectId}${it.groupId ?: '_'}" })
     }
 }

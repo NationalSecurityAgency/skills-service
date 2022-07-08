@@ -32,17 +32,29 @@ limitations under the License.
                                :data-cy="`destItem-${index}`">
               <div class="row">
                 <div class="col">
-                  <div v-if="!dest.groupId">
-                    <span class="font-italic">Subject:</span>
-                    <span class="text-primary ml-2 font-weight-bold">{{ dest.subjectName }}</span>
-                  </div>
-                  <div v-if="dest.groupId">
-                    <div>
-                      <span class="font-italic">Group:</span>
-                      <span class="text-primary ml-2 font-weight-bold">{{ dest.groupName }}</span>
+                  <div class="row">
+                    <div class="col-auto m-0 px-2 text-primary" style="font-size: 1.5rem">
+                      <i v-if="dest.groupId" class="fas fa-layer-group"/>
+                      <i v-else class="fas fa-cubes"/>
                     </div>
-                    <div>
-                      <span class="font-italic">In subject:</span> {{ dest.subjectName }}
+                    <div class="col px-0 py-1">
+                      <div v-if="!dest.groupId">
+                        <span class="font-italic">Subject:</span>
+                        <span class="text-primary ml-2 font-weight-bold">{{
+                            dest.subjectName
+                          }}</span>
+                      </div>
+                      <div v-if="dest.groupId">
+                        <div>
+                          <span class="font-italic">Group:</span>
+                          <span class="text-primary ml-2 font-weight-bold">{{
+                              dest.groupName
+                            }}</span>
+                        </div>
+                        <div>
+                          <span class="font-italic">In subject:</span> {{ dest.subjectName }}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
