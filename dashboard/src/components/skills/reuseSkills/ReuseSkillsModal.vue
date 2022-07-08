@@ -286,7 +286,8 @@ limitations under the License.
       selectDestination(selection) {
         this.loadingData = true;
         this.selectedDestination = selection;
-        SkillsService.getReusedSkills(this.$route.params.projectId, this.selectedDestination.subjectId)
+        const parentId = this.selectedDestination.groupId ? this.selectedDestination.groupId : this.selectedDestination.subjectId;
+        SkillsService.getReusedSkills(this.$route.params.projectId, parentId)
           .then((res) => {
             this.skillsForReuse.allAlreadyExist = res;
             this.skillsForReuse.alreadyExist = this.skills.filter((skill) => res.find((e) => e.name === skill.name));

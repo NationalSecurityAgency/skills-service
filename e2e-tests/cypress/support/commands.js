@@ -862,3 +862,14 @@ Cypress.Commands.add('reuseSkillIntoAnotherSubject', (projNum, skillNum, toSubjN
         skillIds: [`skill${skillNum}`]
     });
 });
+
+Cypress.Commands.add('reuseSkillIntoAnotherGroup', (projNum, skillNum, toSubjNum, groupNum) => {
+    cy.log(groupNum);
+    const groupId = `group${groupNum}${toSubjNum > 1 ? `Subj${toSubjNum}` : ''}`;
+    const url = `/admin/projects/proj${projNum}/skills/reuse`;
+    cy.request('POST', url, {
+        subjectId: `subj${toSubjNum}`,
+        groupId,
+        skillIds: [`skill${skillNum}`]
+    });
+});

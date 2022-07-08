@@ -15,11 +15,13 @@
  */
 package skills.services.admin.skillReuse
 
+import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.bind.annotation.PathVariable
+import skills.controller.exceptions.ErrorCode
+import skills.controller.exceptions.SkillException
 import skills.controller.request.model.CatalogSkill
 import skills.controller.request.model.SkillReuseRequest
 import skills.controller.result.model.SkillDefPartialRes
@@ -58,13 +60,48 @@ class SkillReuseService {
     @Autowired
     RuleSetDefGraphService ruleSetDefGraphService
 
+    @Autowired
+    SkillDefAccessor skillDefAccessor
+
     @Transactional
+    @Profile
     void reuseSkill(String projectId, SkillReuseRequest skillReuseRequest) {
+        // validate
+        validateParentIsNotDestination(projectId, skillReuseRequest)
+        validateNoAlreadyReusedInDestination(skillReuseRequest, projectId)
+
         // import
         List<CatalogSkill> listOfSkills = skillReuseRequest.skillIds.collect { new CatalogSkill(projectId: projectId, skillId: it) }
         skillCatalogService.importSkillsFromCatalog(projectId, skillReuseRequest.subjectId, listOfSkills, skillReuseRequest.groupId, true)
         // finalize
         finalizationService.finalizeCatalogSkillsImport(projectId)
+    }
+
+    @Profile
+    private void validateNoAlreadyReusedInDestination(SkillReuseRequest skillReuseRequest, String projectId) {
+        String parentSkillId = skillReuseRequest.groupId ?: skillReuseRequest.subjectId
+        List<SkillDefSkinnyRes> alreadyReused = getReusedSkills(projectId, parentSkillId)
+        List<String> reusedSkillIds = alreadyReused.collect { SkillReuseIdUtil.removeTag(it.skillId) }
+        List<String> reusedProvidedSkills = skillReuseRequest.skillIds.findAll({ reusedSkillIds.contains(it) })
+        if (reusedProvidedSkills) {
+            throw new SkillException("Skill with skillIds of ${reusedProvidedSkills} are already reused in [${parentSkillId}]", projectId, null, ErrorCode.BadParam)
+        }
+    }
+
+    @Profile
+    private void validateParentIsNotDestination(String projectId, SkillReuseRequest skillReuseRequest) {
+        SkillDef skillToReuse = skillDefAccessor.getSkillDef(projectId, skillReuseRequest.skillIds[0])
+        if (!skillReuseRequest.groupId) {
+            SkillDef subject = ruleSetDefGraphService.getMySubjectParent(skillToReuse.id)
+            if (subject.skillId == skillReuseRequest.subjectId) {
+                throw new SkillException("Not allowed to reuse skill into the same subject [${skillReuseRequest.subjectId}]", projectId, skillToReuse.skillId, ErrorCode.BadParam)
+            }
+        } else {
+            SkillDef group = ruleSetDefGraphService.getParentSkill(skillToReuse)
+            if (group.skillId == skillReuseRequest.groupId) {
+                throw new SkillException("Not allowed to reuse skill into the same group [${skillReuseRequest.groupId}]", projectId, skillToReuse.skillId, ErrorCode.BadParam)
+            }
+        }
     }
 
     @Transactional(readOnly = true)
