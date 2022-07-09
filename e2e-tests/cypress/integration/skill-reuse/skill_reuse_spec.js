@@ -149,6 +149,8 @@ describe('Skill Reuse Tests', () => {
             .click();
         cy.get('[data-cy="skillReuseBtn"]')
             .click();
+        cy.get('[data-cy="destListPagingControl"] [aria-label="Go to page 2"]')
+            .click();
         cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj3"]')
             .click();
         cy.get('[ data-cy="reuseSkillsModalStep1"]')

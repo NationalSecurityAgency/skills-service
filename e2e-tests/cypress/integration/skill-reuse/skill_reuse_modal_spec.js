@@ -267,7 +267,6 @@ describe('Skill Reuse Modal Tests', () => {
     it('1 skill - already reused', () => {
         cy.createSubject(1, 2);
         cy.reuseSkillIntoAnotherSubject(1, 1, 2);
-        cy.reuseSkillIntoAnotherSubject(1, 1, 2);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="skillSelect-skill1"]')
