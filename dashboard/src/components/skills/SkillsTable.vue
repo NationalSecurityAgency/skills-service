@@ -345,6 +345,7 @@ limitations under the License.
   import RemovalValidation from '@/components/utils/modal/RemovalValidation';
   import EditImportedSkill from '@/components/skills/skillsGroup/EditImportedSkill';
   import ReuseSkillsModal from '@/components/skills/reuseSkills/ReuseSkillsModal';
+  import SkillRemovalValidation from '@/components/skills/SkillRemovalValidation';
   import EditSkill from './EditSkill';
   import NoContent2 from '../utils/NoContent2';
   import ChildRowSkillsDisplay from './ChildRowSkillsDisplay';
@@ -357,7 +358,6 @@ limitations under the License.
   import ChildRowSkillGroupDisplay from './skillsGroup/ChildRowSkillGroupDisplay';
   import EditSkillGroup from './skillsGroup/EditSkillGroup';
   import ShowMore from './selfReport/ShowMore';
-  import SkillRemovalValidation from '@/components/skills/SkillRemovalValidation';
 
   export default {
     name: 'SkillsTable',
