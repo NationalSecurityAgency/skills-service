@@ -70,7 +70,7 @@ limitations under the License.
             </div>
           </div>
 
-          <ValidationProvider rules="help_url|customUrlValidator" v-slot="{errors}"
+          <ValidationProvider rules="root_help_url|customUrlValidator" v-slot="{errors}"
                               name="Root Help Url">
             <div class="row mt-3">
               <div class="col col-md-3 text-secondary" id="rootHelpUrlLabel">
@@ -188,7 +188,7 @@ limitations under the License.
   import LoadingContainer from '../utils/LoadingContainer';
   import ToastSupport from '../utils/ToastSupport';
 
-  extend('help_url', {
+  extend('root_help_url', {
     message: (field) => `${field} must start with "http(s)"`,
     validate(value) {
       if (!value) {
