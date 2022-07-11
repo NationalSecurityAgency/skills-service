@@ -173,4 +173,66 @@ describe('Skill Reuse Tests', () => {
             .contains('Reused');
     });
 
+    it('remove the reused skill', () => {
+        cy.reuseSkillIntoAnotherSubject(1, 1, 2);
+        cy.visit('/administrator/projects/proj1/subjects/subj2');
+        cy.get('[data-cy="deleteSkillButton_skill1STREUSESKILLST0"]')
+            .click();
+        cy.get('[data-cy="removalSafetyCheckMsg"]')
+            .contains('this action will only remove the reused skill');
+        cy.get('[data-cy="currentValidationText"]')
+            .type('Delete Me');
+        cy.get('[data-cy="removeButton"]')
+            .click();
+        cy.get('[data-cy="noContent"]')
+            .contains('No Skills Yet');
+        cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]')
+            .should('have.text', '0');
+        cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]')
+            .should('have.text', '0');
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="deleteSkillButton_skill1"]')
+            .click();
+        cy.contains('This will remove Very Great Skill 1');
+        cy.get('[data-cy="removalSafetyCheckMsg"]')
+            .contains('Deleting this skill will also remove its reused copies')
+            .should('not.exist');
+    });
+
+    it('remove the original skill', () => {
+        cy.reuseSkillIntoAnotherSubject(1, 1, 2);
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="deleteSkillButton_skill1"]')
+            .click();
+        cy.get('[data-cy="removalSafetyCheckMsg"]')
+            .contains('Deleting this skill will also remove its reused copies');
+        cy.get('[data-cy="currentValidationText"]')
+            .type('Delete Me');
+        cy.get('[data-cy="removeButton"]')
+            .click();
+        cy.get('[data-cy="noContent"]')
+            .contains('No Skills Yet');
+        cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]')
+            .should('have.text', '0');
+        cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]')
+            .should('have.text', '0');
+
+        cy.visit('/administrator/projects/proj1/subjects/subj2');
+        cy.get('[data-cy="noContent"]')
+            .contains('No Skills Yet');
+    });
+
+    it('remove warning when skill is reused and imported', () => {
+        cy.exportSkillToCatalog(1, 1, 1);
+        cy.reuseSkillIntoAnotherSubject(1, 1, 2);
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="deleteSkillButton_skill1"]')
+            .click();
+        cy.get('[data-cy="removalSafetyCheckMsg"]')
+            .contains('This will PERMANENTLY remove [Very Great Skill 1] Skill from the catalog');
+        cy.get('[data-cy="removalSafetyCheckMsg"]')
+            .contains('Deleting this skill will also remove its reused copies');
+    });
+
 });

@@ -45,8 +45,13 @@ describe('Skills Exported to Catalog Tests', () => {
         ], 5);
 
         cy.get('[data-cy="deleteSkillButton_skill1"]').click();
-        cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will PERMANENTLY remove [Very Great Skill 1] Skill from the catalog. This skill is currently imported by 0 projects.')
-        cy.get('[data-cy="removeButton"]').should('be.disabled');
+        cy.get('[data-cy="removalSafetyCheckMsg"]')
+            .contains('This will PERMANENTLY remove [Very Great Skill 1] Skill from the catalog. This skill is currently imported by 0 projects.');
+        cy.get('[data-cy="removalSafetyCheckMsg"]')
+            .contains('This action CANNOT be undone')
+            .should('not.exist');
+        cy.get('[data-cy="removeButton"]')
+            .should('be.disabled');
         cy.get('[data-cy="currentValidationText"]').type('Delete Me1');
         cy.get('[data-cy="currentValidationText"]').should('have.value', 'Delete Me1');
         cy.get('[data-cy="removeButton"]').should('be.disabled');

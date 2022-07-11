@@ -19,7 +19,7 @@ limitations under the License.
       <div v-if="this.skillsOriginal && this.skillsOriginal.length">
         <div>
           <div v-if="showSearch" class="row px-3 pt-3 mb-0 pb-0">
-            <div class="col-12 mb-0 pb  -0">
+            <div class="col-12 mb-0 pb-0">
               <b-form-group label="Name Filter" label-class="text-muted">
                 <b-input v-model="table.filter.name" v-on:keydown.enter="applyFilters"
                          data-cy="skillsTable-skillFilter" aria-label="Filter skills by name"/>
@@ -331,23 +331,7 @@ limitations under the License.
                         @hidden="handleExportModalIsClosed"/>
     <removal-validation v-if="deleteSkillInfo.show" v-model="deleteSkillInfo.show"
                         @do-remove="doDeleteSkill" @hidden="handleDeleteCancelled">
-      <p>
-        This will remove <span
-        class="text-primary font-weight-bold">{{ deleteSkillInfo.skill.name }}</span>.
-      </p>
-      <div v-if="deleteSkillInfo.skill.isSkillType">
-        Delete Action <b class="text-danger">CANNOT</b> be undone and permanently removes users'
-        performed skills and any dependency associations.
-      </div>
-      <div v-if="deleteSkillInfo.skill.isGroupType">
-        Delete Action <b class="text-danger">CANNOT</b> be undone and will permanently remove all of
-        the group's skills. All the associated users' performed skills and any dependency
-        associations will also be removed.
-      </div>
-      <div class="alert alert-info mt-3" v-if="deleteSkillInfo.skill.sharedToCatalog">
-        <exported-skill-deletion-warning :skill-id="deleteSkillInfo.skill.skillId"
-                                         :skill-name="deleteSkillInfo.skill.name"/>
-      </div>
+      <skill-removal-validation :delete-skill-info="deleteSkillInfo"/>
     </removal-validation>
   </div>
 </template>
@@ -359,7 +343,6 @@ limitations under the License.
   import SkillReuseIdUtil from '@/components/utils/SkillReuseIdUtil';
   import ExportToCatalog from '@/components/skills/catalog/ExportToCatalog';
   import RemovalValidation from '@/components/utils/modal/RemovalValidation';
-  import ExportedSkillDeletionWarning from '@/components/skills/catalog/ExportedSkillDeletionWarning';
   import EditImportedSkill from '@/components/skills/skillsGroup/EditImportedSkill';
   import ReuseSkillsModal from '@/components/skills/reuseSkills/ReuseSkillsModal';
   import EditSkill from './EditSkill';
@@ -374,6 +357,7 @@ limitations under the License.
   import ChildRowSkillGroupDisplay from './skillsGroup/ChildRowSkillGroupDisplay';
   import EditSkillGroup from './skillsGroup/EditSkillGroup';
   import ShowMore from './selfReport/ShowMore';
+  import SkillRemovalValidation from '@/components/skills/SkillRemovalValidation';
 
   export default {
     name: 'SkillsTable',
@@ -425,9 +409,9 @@ limitations under the License.
       },
     },
     components: {
+      SkillRemovalValidation,
       ReuseSkillsModal,
       EditImportedSkill,
-      ExportedSkillDeletionWarning,
       RemovalValidation,
       ExportToCatalog,
       EditSkillGroup,

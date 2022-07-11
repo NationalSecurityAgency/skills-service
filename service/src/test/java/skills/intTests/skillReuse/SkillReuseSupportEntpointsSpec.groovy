@@ -156,5 +156,77 @@ class SkillReuseSupportEntpointsSpec extends CatalogIntSpec {
         dest[1].groupName == s1_g2.name
     }
 
+    def "get reused skill usage stats"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1subj2 = createSubject(1, 2)
+        def p1subj3 = createSubject(1, 3)
+        def p1subj4 = createSubject(1, 4)
+        def p1Skills = createSkills(3, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        skillsService.createSubject(p1subj2)
+        skillsService.createSubject(p1subj3)
+        def p1Skills_subj3 = createSkills(1, 1, 3, 100)
+        skillsService.createSkills(p1Skills_subj3)
+        skillsService.createSubject(p1subj4)
+
+        skillsService.reuseSkillInAnotherSubject(p1.projectId, p1Skills[0].skillId, p1subj2.subjectId)
+        skillsService.reuseSkillInAnotherSubject(p1.projectId, p1Skills[0].skillId, p1subj3.subjectId)
+        skillsService.reuseSkillInAnotherSubject(p1.projectId, p1Skills[0].skillId, p1subj4.subjectId)
+
+        when:
+        def res = skillsService.getExportedSkillStats(p1.projectId, p1Skills[0].skillId)
+        def res1 = skillsService.getExportedSkillStats(p1.projectId, p1Skills[1].skillId)
+        then:
+        res.projectId == p1.projectId
+        res.skillId == p1Skills[0].skillId
+        !res.isExported
+        !res.users
+        !res.exportedOn
+        res.isReusedLocally
+
+        res1.projectId == p1.projectId
+        res1.skillId == p1Skills[1].skillId
+        !res1.isExported
+        !res1.users
+        !res1.exportedOn
+        !res1.isReusedLocally
+    }
+
+    def "get reused group skill usage stats"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1subj1g1 = createSkillsGroup(1, 1, 11)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [p1subj1g1])
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        p1Skills.each {
+            skillsService.assignSkillToSkillsGroup(p1subj1g1.skillId, it)
+        }
+
+        def p1subj2 = createSubject(1, 2)
+        skillsService.createSubject(p1subj2)
+        def p1subj2g2 = createSkillsGroup(1, 2, 22)
+        skillsService.createSkill(p1subj2g2)
+
+        skillsService.reuseSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId, p1subj2g2.skillId)
+
+        when:
+        def res = skillsService.getExportedSkillStats(p1.projectId, p1Skills[0].skillId)
+        def res1 = skillsService.getExportedSkillStats(p1.projectId, p1Skills[1].skillId)
+        then:
+        res.projectId == p1.projectId
+        res.skillId == p1Skills[0].skillId
+        !res.isExported
+        !res.users
+        !res.exportedOn
+        res.isReusedLocally
+
+        res1.projectId == p1.projectId
+        res1.skillId == p1Skills[1].skillId
+        !res1.isExported
+        !res1.users
+        !res1.exportedOn
+        !res1.isReusedLocally
+    }
 
 }

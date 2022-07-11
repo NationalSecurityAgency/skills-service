@@ -514,31 +514,35 @@ class SkillCatalogService {
 
     @Transactional
     ExportedSkillStats getExportedSkillStats(String projectId, String skillId) {
-        if (!isAvailableInCatalog(projectId, skillId)) {
-            throw new SkillException("Skill is not shared to the catalog", projectId, skillId)
-        }
+        ExportedSkillStats stats = new ExportedSkillStats(
+                projectId: projectId,
+                skillId: skillId,
+                isExported: false,
+                isReusedLocally: false,
+                users: [])
 
-        ExportedSkillStats stats = new ExportedSkillStats()
-        ExportedSkill es = exportedSkillRepo.getCatalogSkill(projectId, skillId)
-        stats.projectId = projectId
-        stats.skillId = skillId
-        stats.exportedOn = es.created
-        stats.users = []
-        List<SkillDef> copies = skillDefRepo.findSkillsCopiedFrom(es.skill.id)
-        copies?.each {
-            SkillDef maybeSubject = relationshipService.getParentSkill(it)
-            if (maybeSubject.type == SkillDef.ContainerType.SkillsGroup) {
-                maybeSubject = relationshipService.getParentSkill(maybeSubject)
-                assert maybeSubject && maybeSubject.type == SkillDef.ContainerType.Subject, "a group should always be contained by a subject"
-            }
+        SkillDef skill = skillAccessor.getSkillDef(projectId, skillId)
+        List<SkillDefWithExtra> copies = skillDefWithExtraRepo.findSkillsCopiedFrom(skill.id)
+        if (!copies) {
+            return stats
+        }
+        stats.isReusedLocally = copies.find({ it.projectId == projectId })
+        copies.findAll { it.projectId != projectId }.each {
+            SkillDef mySubject = relationshipService.getMySubjectParent(it.id)
             stats.users << new ExportedSkillUser(
                     importingProjectId: it.projectId,
-                    importingProjectName: maybeSubject.projDef.name,
-                    importedOn: it.created, importedIntoSubjectId:
-                    maybeSubject.skillId,
-                    importedIntoSubjectName: maybeSubject.name,
+                    importingProjectName: mySubject.projDef.name,
+                    importedOn: it.created,
+                    importedIntoSubjectId: mySubject.skillId,
+                    importedIntoSubjectName: mySubject.name,
                     enabled: it.enabled,
             )
+        }
+
+        ExportedSkill es = exportedSkillRepo.getCatalogSkill(projectId, skillId)
+        if (es) {
+            stats.exportedOn = es.created
+            stats.isExported = true
         }
 
         return stats
