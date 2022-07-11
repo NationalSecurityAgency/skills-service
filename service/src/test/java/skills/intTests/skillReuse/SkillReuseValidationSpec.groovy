@@ -18,6 +18,7 @@ package skills.intTests.skillReuse
 import skills.intTests.catalog.CatalogIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import skills.services.admin.skillReuse.SkillReuseIdUtil
 import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
@@ -85,6 +86,60 @@ class SkillReuseValidationSpec extends CatalogIntSpec {
         then:
         SkillsClientException ex = thrown(SkillsClientException)
         ex.message.contains("Skill with skillIds of [skill1] are already reused in [skill11]")
+    }
+
+    def "cannot create group skill with the reuse tag in its skillId"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1subj1g1 = createSkillsGroup(1, 1, 11)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [p1subj1g1].flatten())
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        p1Skills[0].skillId = "skill${SkillReuseIdUtil.REUSE_TAG}".toString()
+        when:
+        skillsService.assignSkillToSkillsGroup(p1subj1g1.skillId, p1Skills[0])
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.message.contains("Skill ID must not contain reuse tag")
+    }
+
+    def "cannot create group skill with the reuse tag in its name"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1subj1g1 = createSkillsGroup(1, 1, 11)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [p1subj1g1].flatten())
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        p1Skills[0].name = "skill ${SkillReuseIdUtil.REUSE_TAG}".toString()
+        when:
+        skillsService.assignSkillToSkillsGroup(p1subj1g1.skillId, p1Skills[0])
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.message.contains("Skill Name must not contain reuse tag")
+    }
+
+    def "cannot create skill with the reuse tag in its skillId"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [].flatten())
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        p1Skills[0].skillId = "sk${SkillReuseIdUtil.REUSE_TAG}blja".toString()
+        when:
+        skillsService.createSkill(p1Skills[0])
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.message.contains("Skill ID must not contain reuse tag")
+    }
+
+    def "cannot create skill with the reuse tag in its name"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [].flatten())
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        p1Skills[0].name = "${SkillReuseIdUtil.REUSE_TAG} blja".toString()
+        when:
+        skillsService.createSkill(p1Skills[0])
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.message.contains("Skill Name must not contain reuse tag")
     }
 
 }

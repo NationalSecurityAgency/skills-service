@@ -35,6 +35,7 @@ import skills.controller.result.model.*
 import skills.dbupgrade.DBUpgradeSafe
 import skills.services.*
 import skills.services.admin.*
+import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.admin.skillReuse.SkillReuseService
 import skills.services.events.BulkSkillEventResult
 import skills.services.events.pointsAndAchievements.InsufficientPointsValidator
@@ -468,9 +469,11 @@ class AdminController {
         SkillsValidator.isFirstOrMustEqualToSecond(skillRequest.subjectId, subjectId, "Subject Id")
         skillRequest.subjectId = skillRequest.subjectId ?: subjectId
         skillRequest.skillId = skillRequest.skillId ?: skillId
+        SkillsValidator.isTrue(!skillRequest.skillId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "Skill ID must not contain reuse tag", projectId, skillId)
+        SkillsValidator.isTrue(!skillRequest.name?.toUpperCase()?.contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "Skill Name must not contain reuse tag", projectId, skillId)
 
         // if type is not provided then we default to skill
-        skillRequest.type = skillRequest.type ?:  SkillDef.ContainerType.Skill.toString()
+        skillRequest.type = skillRequest.type ?: SkillDef.ContainerType.Skill.toString()
         Boolean isBasicSkill = skillRequest.type == SkillDef.ContainerType.Skill.toString()
 
         IdFormatValidator.validate(skillRequest.skillId, isBasicSkill)
