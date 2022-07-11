@@ -58,7 +58,7 @@ limitations under the License.
     name: 'SkillRemovalValidation',
     components: {
       SkillsSpinner,
-      ExportedSkillDeletionWarning
+      ExportedSkillDeletionWarning,
     },
     props: {
       deleteSkillInfo: Object,
