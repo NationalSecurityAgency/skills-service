@@ -567,6 +567,14 @@ class SkillsAdminService {
     List<SkillDefSkinnyRes> getSkinnySkills(String projectId, String skillNameQuery, boolean excludeImportedSkills = false, boolean includeDisabled = false) {
         List<SkillDefSkinny> data = loadSkinnySkills(projectId, skillNameQuery, excludeImportedSkills, includeDisabled)
         List<SkillDefPartialRes> res = data.collect { convertToSkillDefSkinnyRes(it) }?.sort({ it.skillId })
+
+        // do not hit on the reuse tag
+        if (StringUtils.isNoneBlank(skillNameQuery)) {
+            Boolean hasReusedSkills = res.find { SkillReuseIdUtil.isTagged(it.skillId) }
+            if (hasReusedSkills) {
+                res = res.findAll { it.name.toUpperCase().contains(skillNameQuery.toUpperCase()) }
+            }
+        }
         return res
     }
 
@@ -684,10 +692,11 @@ class SkillsAdminService {
     @CompileStatic
     @Profile
     private SkillDefSkinnyRes convertToSkillDefSkinnyRes(SkillDefSkinny skinny) {
+        String unsanitizedName = InputSanitizer.unsanitizeName(skinny.name)
         SkillDefSkinnyRes res = new SkillDefSkinnyRes(
                 skillId: skinny.skillId,
                 projectId: skinny.projectId,
-                name: InputSanitizer.unsanitizeName(skinny.name),
+                name: SkillReuseIdUtil.removeTag(unsanitizedName),
                 subjectId: skinny.subjectSkillId,
                 subjectName: InputSanitizer.unsanitizeName(skinny.subjectName),
                 version: skinny.version,
