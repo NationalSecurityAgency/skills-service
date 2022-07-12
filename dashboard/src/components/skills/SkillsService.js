@@ -61,10 +61,13 @@ export default {
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}/skills`)
       .then((response) => response.data);
   },
-  getProjectSkills(projectId, skillNameQuery = null, includeDisabled = true) {
+  getProjectSkills(projectId, skillNameQuery = null, includeDisabled = true, excludeReusedSkills = false) {
     let params = `?includeDisabled=${includeDisabled}`;
     if (skillNameQuery) {
       params = `${params}&skillNameQuery=${encodeURIComponent(skillNameQuery)}`;
+    }
+    if (excludeReusedSkills) {
+      params = `${params}&excludeReusedSkills=${excludeReusedSkills}`;
     }
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/skills${params}`)
       .then((response) => response.data);

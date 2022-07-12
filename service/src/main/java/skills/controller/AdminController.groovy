@@ -349,6 +349,7 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
+        SkillsValidator.isTrue(!skillId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "Skill ID must not contain reuse tag", projectId, skillId)
 
         badgeAdminService.addSkillToBadge(projectId, badgeId, skillId)
         return new RequestResult(success: true)
@@ -653,12 +654,16 @@ class AdminController {
             @PathVariable("projectId") String projectId,
             @RequestParam(required = false, value = "skillNameQuery") String skillNameQuery,
             @RequestParam(required = false, value = "excludeImportedSkills") Boolean excludeImportedSkills,
+            @RequestParam(required = false, value = "excludeReusedSkills") Boolean excludeReusedSkills,
             @RequestParam(required = false, value = "includeDisabled", defaultValue = "false") Boolean includeDisabled) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
 
         boolean excludeImportedSkillsBol = excludeImportedSkills
         boolean includeDisabledBool = includeDisabled
         List<SkillDefSkinnyRes> res = skillsAdminService.getSkinnySkills(projectId, skillNameQuery ?: '', excludeImportedSkillsBol, includeDisabledBool)
+        if (excludeReusedSkills) {
+            res = res.findAll { !it.isReused }
+        }
         return res
     }
 

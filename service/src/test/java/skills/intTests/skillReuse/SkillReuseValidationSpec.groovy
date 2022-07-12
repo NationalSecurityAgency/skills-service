@@ -142,4 +142,24 @@ class SkillReuseValidationSpec extends CatalogIntSpec {
         ex.message.contains("Skill Name must not contain reuse tag")
     }
 
+    def "reused skill cannot be added as a badge dependency"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        def p1subj2 = createSubject(1, 2)
+        skillsService.createSubject(p1subj2)
+
+        skillsService.reuseSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId)
+
+        def badge = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge)
+
+        when:
+        skillsService.assignSkillToBadge(p1.projectId, badge.badgeId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0))
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.message.contains("Skill ID must not contain reuse tag")
+    }
+
 }

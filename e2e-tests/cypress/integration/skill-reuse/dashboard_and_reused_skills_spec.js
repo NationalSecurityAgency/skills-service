@@ -79,4 +79,21 @@ describe('Skill Reuse and Dashboard Tests', () => {
             .contains('Awesome Group 12 Subj1');
     });
 
+    it('reused skills must be available for badges', () => {
+        cy.reuseSkillIntoAnotherSubject(1, 1, 2);
+        cy.createSkillsGroup(1, 1, 12);
+        cy.reuseSkillIntoAnotherGroup(1, 1, 1, 12);
+        cy.createBadge(1, 1);
+
+        cy.visit('/administrator/projects/proj1/badges/badge1');
+        cy.get('[data-cy="skillsSelector"]')
+            .click();
+        cy.get('[data-cy="skillsSelector"] [data-cy="skillsSelector-skillId"]')
+            .should('have.length', 1)
+            .as('skillIds');
+        cy.get('@skillIds')
+            .eq(0)
+            .contains('skill1');
+    });
+
 });

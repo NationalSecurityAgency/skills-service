@@ -85,5 +85,21 @@ class VariousEndpoinsAndSkillReuseSpec extends CatalogIntSpec {
         skills1.isReused == [false, true]
     }
 
+    def "get skills for project without reused skills"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1subj2 = createSubject(1, 2)
+        def p1Skills = createSkills(1, 1, 1, 100, 5)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        skillsService.createSubject(p1subj2)
+        skillsService.reuseSkillInAnotherSubject(p1.projectId, p1Skills[0].skillId, p1subj2.subjectId)
+
+        when:
+        def skills = skillsService.getSkillsForProject(p1.projectId, "", false, false, true)
+        then:
+        skills.isReused == [false]
+        skills.skillId == [p1Skills[0].skillId]
+    }
+
 }
 
