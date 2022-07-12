@@ -793,5 +793,61 @@ describe('Settings Tests', () => {
 
     });
 
+    it('root help url validation', () => {
+        cy.intercept('POST', '/admin/projects/proj1/settings').as('setSettings')
+        cy.request('POST', '/app/projects/proj1', {
+            projectId: 'proj1',
+            name: "proj1"
+        })
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: 'skill1',
+            name: `This is 1`,
+            type: 'Skill',
+            pointIncrement: 500,
+            numPerformToCompletion: 1,
+            pointIncrementInterval: 0,
+            numMaxOccurrencesIncrementInterval: -1,
+            version: 0,
+        });
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill2`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: 'skill2',
+            name: `This is 2`,
+            type: 'Skill',
+            pointIncrement: 500,
+            numPerformToCompletion: 1,
+            pointIncrementInterval: 0,
+            numMaxOccurrencesIncrementInterval: -1,
+            version: 0,
+        });
+
+        cy.visit('/administrator/projects/proj1/');
+        cy.clickNav('Settings');
+        cy.get('[data-cy=levelDisplayTextInput]').click();
+        cy.get('[data-cy=levelDisplayTextInput]').type('s');
+        cy.get('[data-cy=saveSettingsBtn]').should('be.enabled');
+
+        cy.get('[data-cy=rootHelpUrlInput]').clear().type('javascript:alert("uh oh");');
+        cy.get('[data-cy=rootHelpUrlError]').should('be.visible');
+        cy.get('[data-cy=rootHelpUrlError]').should('have.text', 'Root Help Url must start with "http(s)"');
+        cy.get('[data-cy=saveSettingsBtn]').should('be.disabled');
+        cy.get('[data-cy=rootHelpUrlInput]').clear().type('/foo?p1=v1&p2=v2');
+        cy.get('[data-cy=rootHelpUrlError]').should('have.text', 'Root Help Url must start with "http(s)"');
+        cy.get('[data-cy=saveSettingsBtn]').should('be.disabled');
+        cy.get('[data-cy=rootHelpUrlInput]').clear().type('http://foo.bar?p1=v1&p2=v2');
+        cy.get('[data-cy=rootHelpUrlError]').should('not.exist');
+        cy.get('[data-cy=saveSettingsBtn]').should('be.enabled');
+        cy.get('[data-cy=rootHelpUrlInput]').clear().type('https://foo.bar?p1=v1&p2=v2');
+        cy.get('[data-cy=rootHelpUrlError]').should('not.exist');
+        cy.get('[data-cy=saveSettingsBtn]').should('be.enabled');
+    });
 });
 
