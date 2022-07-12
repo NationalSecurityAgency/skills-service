@@ -48,7 +48,8 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         s.displayOrder as displayOrder,
         s.created as created,
         s.version as version,
-        s.totalPoints as totalPoints
+        s.totalPoints as totalPoints,
+        s.groupId as groupId
         from SkillDef s, SkillDef subjectDef, SkillRelDef srd
          where
             subjectDef = srd.parent and s = srd.child and 

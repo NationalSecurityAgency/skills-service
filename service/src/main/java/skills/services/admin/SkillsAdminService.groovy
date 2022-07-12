@@ -566,11 +566,11 @@ class SkillsAdminService {
     @Transactional(readOnly = true)
     List<SkillDefSkinnyRes> getSkinnySkills(String projectId, String skillNameQuery, boolean excludeImportedSkills = false, boolean includeDisabled = false) {
         List<SkillDefSkinny> data = loadSkinnySkills(projectId, skillNameQuery, excludeImportedSkills, includeDisabled)
-        List<SkillDefPartialRes> res = data.collect { convertToSkillDefSkinnyRes(it) }?.sort({ it.skillId })
+        List<SkillDefSkinnyRes> res = data.collect { convertToSkillDefSkinnyRes(it) }?.sort({ it.skillId })
 
         // do not hit on the reuse tag
         if (StringUtils.isNoneBlank(skillNameQuery)) {
-            Boolean hasReusedSkills = res.find { SkillReuseIdUtil.isTagged(it.skillId) }
+            Boolean hasReusedSkills = res.find { it.isReused }
             if (hasReusedSkills) {
                 res = res.findAll { it.name.toUpperCase().contains(skillNameQuery.toUpperCase()) }
             }
@@ -693,6 +693,7 @@ class SkillsAdminService {
     @Profile
     private SkillDefSkinnyRes convertToSkillDefSkinnyRes(SkillDefSkinny skinny) {
         String unsanitizedName = InputSanitizer.unsanitizeName(skinny.name)
+        String groupName = skinny.groupId ? skillDefAccessor.getSkillDef(skinny.projectId, skinny.groupId).name : null
         SkillDefSkinnyRes res = new SkillDefSkinnyRes(
                 skillId: skinny.skillId,
                 projectId: skinny.projectId,
@@ -703,6 +704,9 @@ class SkillsAdminService {
                 displayOrder: skinny.displayOrder,
                 created: skinny.created,
                 totalPoints: skinny.totalPoints,
+                isReused: SkillReuseIdUtil.isTagged(skinny.skillId),
+                groupName: groupName,
+                groupId: skinny.groupId,
         )
         return res;
     }

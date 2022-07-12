@@ -1,0 +1,82 @@
+/*
+ * Copyright 2020 SkillTree
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import dayjs from 'dayjs';
+
+const moment = require('moment-timezone');
+
+describe('Skill Reuse and Dashboard Tests', () => {
+
+    beforeEach(() => {
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+        cy.createSubject(1, 2);
+    });
+
+    it('Search and Navigate directly to a skill properly labels reused skills', () => {
+        cy.reuseSkillIntoAnotherSubject(1, 1, 2);
+        cy.createSkillsGroup(1, 1, 12);
+        cy.reuseSkillIntoAnotherGroup(1, 1, 1, 12);
+
+        cy.visit('/administrator/projects/proj1/');
+
+        cy.get('input.vs__search')
+            .invoke('attr', 'placeholder')
+            .should('contain', 'Search and Navigate directly to a skill');
+        cy.get('[data-cy="skillsSelector"]')
+            .click();
+        cy.get('[data-cy="skillsSelector"]')
+            .contains('Type to search for skills')
+            .should('be.visible');
+        cy.get('[data-cy="skillsSelector"]')
+            .type('s');
+
+        cy.get('[data-cy="skillsSelector"] [data-cy="skillsSelector-skillId"]')
+            .should('have.length', 3)
+            .as('skillIds');
+        cy.get('@skillIds')
+            .eq(0)
+            .contains('skill1');
+        cy.get('@skillIds')
+            .eq(1)
+            .contains('skill1');
+        cy.get('@skillIds')
+            .eq(2)
+            .contains('skill1');
+
+        cy.get('[data-cy="skillsSelector"] [data-cy="skillsSelector-skillName"]')
+            .should('have.length', 3)
+            .as('skillIds');
+        cy.get('@skillIds')
+            .eq(0)
+            .find('[data-cy="reusedBadge"]')
+            .should('not.exist');
+        cy.get('@skillIds')
+            .eq(1)
+            .find('[data-cy="reusedBadge"]');
+        cy.get('@skillIds')
+            .eq(2)
+            .find('[data-cy="reusedBadge"]');
+
+        cy.get('[data-cy="skillsSelector"] [data-cy="skillsSelector-groupName"]')
+            .should('have.length', 1)
+            .as('skillIds');
+        cy.get('@skillIds')
+            .eq(0)
+            .contains('Awesome Group 12 Subj1');
+    });
+
+});

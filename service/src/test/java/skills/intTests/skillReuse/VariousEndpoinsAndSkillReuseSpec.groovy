@@ -15,10 +15,9 @@
  */
 package skills.intTests.skillReuse
 
+import groovy.json.JsonOutput
 import skills.intTests.catalog.CatalogIntSpec
-import skills.intTests.utils.SkillsClientException
 import skills.services.admin.skillReuse.SkillReuseIdUtil
-import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -38,6 +37,7 @@ class VariousEndpoinsAndSkillReuseSpec extends CatalogIntSpec {
         then:
         skills.size() == 2
         skills.name == [p1Skills[0].name, p1Skills[0].name]
+        skills.isReused == [false, true]
         skills.skillId == [p1Skills[0].skillId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)]
     }
 
@@ -56,6 +56,34 @@ class VariousEndpoinsAndSkillReuseSpec extends CatalogIntSpec {
         then:
         !skills
         skills1.name == [p1Skills[0].name, p1Skills[0].name]
+        skills1.isReused == [false, true]
+    }
+
+    def "get skills for project - return reused info for group skills"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1subj1g1 = createSkillsGroup(1, 1, 11)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [p1subj1g1])
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        p1Skills.each {
+            skillsService.assignSkillToSkillsGroup(p1subj1g1.skillId, it)
+        }
+
+        def p1subj2 = createSubject(1, 2)
+        skillsService.createSubject(p1subj2)
+        def p1subj2g2 = createSkillsGroup(1, 2, 22)
+        skillsService.createSkill(p1subj2g2)
+
+        skillsService.reuseSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId, p1subj2g2.skillId)
+
+        when:
+        def skills1 = skillsService.getSkillsForProject(p1.projectId, p1Skills[0].name)
+        println JsonOutput.prettyPrint(JsonOutput.toJson(skills1))
+        then:
+        skills1.groupName == [p1subj1g1.name, p1subj2g2.name]
+        skills1.groupId == [p1subj1g1.skillId, p1subj2g2.skillId]
+        skills1.isReused == [false, true]
     }
 
 }
+
