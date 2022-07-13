@@ -51,8 +51,9 @@ limitations under the License.
 
     <skills-b-table :items="items" :options="tableOptions" data-cy="skillsNavigator-table">
       <template v-slot:cell(skillName)="data">
-        <span class="ml-2">{{ data.value }}</span>
-
+        <span class="ml-2">{{ data.value }} <b-badge v-if="data.item.isReusedSkill"
+                                                     variant="success" class="text-uppercase"><i
+          class="fas fa-recycle"></i> Reused</b-badge></span>
         <b-button-group class="float-right">
           <b-button target="_blank" :to="{ name: 'SkillOverview', params: { projectId: projectId, subjectId: data.item.subjectId, skillId: data.item.skillId } }"
                     variant="outline-info" size="sm" class="text-secondary"

@@ -170,4 +170,70 @@ describe('Skill Reuse and Dashboard Tests', () => {
         cy.waitForBackendAsyncTasksToComplete();
     });
 
+    it('skill metrics should support reused skills', () => {
+        // cy.createSkill(1, 1, 10);
+
+        // cy.createSkillsGroup(1, 1, 12);
+        // cy.reuseSkillIntoAnotherGroup(1, 1, 1, 12);
+
+        cy.reportSkill(1, 1, 'user1');
+        cy.reportSkill(1, 1, 'user0');
+
+        const dateFormat = 'YYYY-MM-DD HH:mm';
+        cy.reportSkill(1, 1, 'user2', moment.utc()
+            .subtract(2, 'days')
+            .format(dateFormat));
+        cy.reportSkill(1, 1, 'user2', moment.utc()
+            .subtract(1, 'days')
+            .format(dateFormat));
+        cy.reportSkill(1, 1, 'user3', moment.utc()
+            .subtract(2, 'days')
+            .format(dateFormat));
+        cy.reportSkill(1, 1, 'user3', moment.utc()
+            .subtract(1, 'days')
+            .format(dateFormat));
+        cy.reportSkill(1, 1, 'user4', moment.utc()
+            .subtract(2, 'days')
+            .format(dateFormat));
+        cy.reportSkill(1, 1, 'user4', moment.utc()
+            .subtract(1, 'days')
+            .format(dateFormat));
+
+        cy.reuseSkillIntoAnotherSubject(1, 1, 2);
+        // cy.waitForBackendAsyncTasksToComplete();
+
+        cy.visit('/administrator/projects/proj1/');
+        cy.clickNav('Metrics');
+        cy.get('[data-cy=metricsNav-Skills]')
+            .click();
+        const tableSelector = '[data-cy=skillsNavigator-table]';
+
+        const expectedSkillNames = [
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill 1'
+            }, {
+                colIndex: 1,
+                value: 3
+            }, {
+                colIndex: 2,
+                value: 2
+            },],
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill 1'
+            }, {
+                colIndex: 0,
+                value: 'Reused'
+            }, {
+                colIndex: 1,
+                value: 3
+            }, {
+                colIndex: 2,
+                value: 2
+            },],
+        ];
+        cy.validateTable(tableSelector, expectedSkillNames);
+    });
+
 });
