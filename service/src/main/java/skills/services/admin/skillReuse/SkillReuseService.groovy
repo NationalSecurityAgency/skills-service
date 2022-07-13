@@ -63,18 +63,38 @@ class SkillReuseService {
     @Autowired
     SkillDefAccessor skillDefAccessor
 
+    @Autowired
+    SkillCatalogFinalizationService skillCatalogFinalizationService
+
     @Transactional
     @Profile
     void reuseSkill(String projectId, SkillReuseRequest skillReuseRequest) {
         // validate
         validateParentIsNotDestination(projectId, skillReuseRequest)
         validateNoAlreadyReusedInDestination(skillReuseRequest, projectId)
+        validateNotInFinalizationState(projectId)
+        validateFinalizationIsNotPending(projectId)
 
         // import
         List<CatalogSkill> listOfSkills = skillReuseRequest.skillIds.collect { new CatalogSkill(projectId: projectId, skillId: it) }
         skillCatalogService.importSkillsFromCatalog(projectId, skillReuseRequest.subjectId, listOfSkills, skillReuseRequest.groupId, true)
         // finalize
         finalizationService.finalizeCatalogSkillsImport(projectId)
+    }
+
+    @Profile
+    private void validateNotInFinalizationState(String projectId) {
+        if (skillCatalogFinalizationService.getCurrentState(projectId) == SkillCatalogFinalizationService.FinalizeState.RUNNING) {
+            throw new SkillException("Cannot reuse skills while finalization is running", projectId)
+        }
+    }
+
+    @Profile
+    private void validateFinalizationIsNotPending(String projectId) {
+        List<SkillDef> pendingSkills = skillDefRepo.findAllByProjectIdAndTypeAndEnabledAndCopiedFromIsNotNull(projectId, SkillDef.ContainerType.Skill, Boolean.FALSE.toString())
+        if (pendingSkills) {
+            throw new SkillException("Cannot reuse skills while finalization is pending", projectId)
+        }
     }
 
     @Profile

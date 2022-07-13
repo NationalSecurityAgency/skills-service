@@ -253,5 +253,55 @@ class SkillReuseValidationSpec extends CatalogIntSpec {
         ex.message.contains("Skill ID must not contain reuse tag")
     }
 
+    def "cannot reuse if a finalization is running"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        def p1subj2 = createSubject(1, 2)
+        skillsService.createSubject(p1subj2)
+        def p2Skills = createSkills(3, 1, 2, 100, 5)
+        skillsService.createSkills(p2Skills)
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def p2skills = createSkills(10, 2, 1, 100, 5)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, p2skills)
+        def p2ExportedSkills = p2skills[3..7]
+        p2ExportedSkills.each { skillsService.exportSkillToCatalog(it.projectId, it.skillId) }
+
+        skillsService.bulkImportSkillsFromCatalog(p1.projectId, p1subj1.subjectId, p2ExportedSkills.collect { [projectId: it.projectId, skillId: it.skillId] })
+
+        when:
+        skillsService.finalizeSkillsImportFromCatalog(p1.projectId, false)
+        skillsService.reuseSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId)
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.message.contains("Cannot reuse skills while finalization is running")
+    }
+
+    def "cannot reuse if a finalization is pending"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        def p1subj2 = createSubject(1, 2)
+        skillsService.createSubject(p1subj2)
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def p2skills = createSkills(10, 2, 1, 100, 5)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, p2skills)
+        def p2ExportedSkills = p2skills[3..7]
+        p2ExportedSkills.each { skillsService.exportSkillToCatalog(it.projectId, it.skillId) }
+
+        skillsService.bulkImportSkillsFromCatalog(p1.projectId, p1subj1.subjectId, p2ExportedSkills.collect { [projectId: it.projectId, skillId: it.skillId] })
+
+        when:
+        skillsService.reuseSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId)
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.message.contains("Cannot reuse skills while finalization is pending")
+    }
 
 }

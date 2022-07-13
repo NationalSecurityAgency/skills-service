@@ -113,4 +113,61 @@ describe('Skill Reuse and Dashboard Tests', () => {
             .contains('skill1');
     });
 
+    it('cannot initiate reuse when finalization is pending', () => {
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2);
+        cy.exportSkillToCatalog(1, 1, 1);
+        cy.exportSkillToCatalog(1, 1, 2);
+
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSubject(2, 2);
+        cy.createSkill(2, 1, 11);
+
+        cy.importSkillFromCatalog(2, 1, 1, 1);
+        cy.importSkillFromCatalog(2, 1, 1, 2);
+
+        cy.visit('/administrator/projects/proj2/subjects/subj1/');
+        cy.get('[data-cy="skillSelect-skill11"]')
+            .click({ force: true });
+        cy.get('[data-cy="skillActionsBtn"]')
+            .click();
+        cy.get('[data-cy="skillReuseBtn"]')
+            .click();
+        cy.get('[data-cy="reuseModalContent"]')
+            .contains('Cannot initiate skill reuse while skill finalization is pending');
+    });
+
+    it.only('cannot initiate reuse when finalization is running', () => {
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2);
+        cy.exportSkillToCatalog(1, 1, 1);
+        cy.exportSkillToCatalog(1, 1, 2);
+
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSubject(2, 2);
+        cy.createSkill(2, 1, 11);
+        cy.createSkill(2, 2, 22);
+
+        cy.importSkillFromCatalog(2, 1, 1, 1);
+        cy.importSkillFromCatalog(2, 1, 1, 2);
+
+        cy.visit('/administrator/projects/proj2/subjects/subj1/');
+        cy.get('[data-cy="skillSelect-skill11"]');
+        cy.get('[data-cy="finalizeBtn"]')
+            .click();
+        cy.get('[data-cy="doPerformFinalizeButton"]')
+            .click();
+        cy.get('[data-cy="skillSelect-skill11"]')
+            .click({ force: true });
+        cy.get('[data-cy="skillActionsBtn"]')
+            .click();
+        cy.get('[data-cy="skillReuseBtn"]')
+            .click();
+        cy.get('[data-cy="reuseModalContent"]')
+            .contains('Cannot initiate skill reuse while skill finalization is pending');
+        cy.waitForBackendAsyncTasksToComplete();
+    });
+
 });

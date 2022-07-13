@@ -18,142 +18,147 @@ limitations under the License.
            :no-close-on-backdrop="true" :centered="true"
            header-bg-variant="info" header-text-variant="light" no-fade role="dialog" @hide="cancel"
            aria-label="'Reuse Skills in this project'">
-    <skills-spinner :is-loading="loadingData"/>
+    <skills-spinner :is-loading="isLoading"/>
 
-    <div v-if="!loadingData">
-      <div id="step1" v-if="!selectedDestination && !state.reUseInProgress"
-           data-cy="reuseSkillsModalStep1">
-        <div v-if="destinations.all && destinations.all.length > 0">
-          <b-avatar><b>1</b></b-avatar>
-          Select Destination:
-          <b-list-group class="mt-2" data-cy="destinationList">
-            <b-list-group-item v-for="(dest, index) in destinations.currentPage"
-                               :key="`${dest.subjectId}-${dest.groupId}`"
-                               :data-cy="`destItem-${index}`">
-              <div class="row">
-                <div class="col">
-                  <div class="row">
-                    <div class="col-auto m-0 px-2 text-primary" style="font-size: 1.5rem">
-                      <i v-if="dest.groupId" class="fas fa-layer-group"/>
-                      <i v-else class="fas fa-cubes"/>
-                    </div>
-                    <div class="col px-0 py-1">
-                      <div v-if="!dest.groupId">
-                        <span class="font-italic">Subject:</span>
-                        <span class="text-primary ml-2 font-weight-bold">{{
-                            dest.subjectName
-                          }}</span>
+    <div v-if="!isLoading" data-cy="reuseModalContent">
+      <no-content2 v-if="importFinalizePending" title="Cannot reuse"
+                   message="Cannot initiate skill reuse while skill finalization is pending."/>
+      <div v-if="!importFinalizePending">
+        <div id="step1" v-if="!selectedDestination && !state.reUseInProgress"
+             data-cy="reuseSkillsModalStep1">
+          <div v-if="destinations.all && destinations.all.length > 0">
+            <b-avatar><b>1</b></b-avatar>
+            Select Destination:
+            <b-list-group class="mt-2" data-cy="destinationList">
+              <b-list-group-item v-for="(dest, index) in destinations.currentPage"
+                                 :key="`${dest.subjectId}-${dest.groupId}`"
+                                 :data-cy="`destItem-${index}`">
+                <div class="row">
+                  <div class="col">
+                    <div class="row">
+                      <div class="col-auto m-0 px-2 text-primary" style="font-size: 1.5rem">
+                        <i v-if="dest.groupId" class="fas fa-layer-group"/>
+                        <i v-else class="fas fa-cubes"/>
                       </div>
-                      <div v-if="dest.groupId">
-                        <div>
-                          <span class="font-italic">Group:</span>
+                      <div class="col px-0 py-1">
+                        <div v-if="!dest.groupId">
+                          <span class="font-italic">Subject:</span>
                           <span class="text-primary ml-2 font-weight-bold">{{
-                              dest.groupName
+                              dest.subjectName
                             }}</span>
                         </div>
-                        <div>
-                          <span class="font-italic">In subject:</span> {{ dest.subjectName }}
+                        <div v-if="dest.groupId">
+                          <div>
+                            <span class="font-italic">Group:</span>
+                            <span class="text-primary ml-2 font-weight-bold">{{
+                                dest.groupName
+                              }}</span>
+                          </div>
+                          <div>
+                            <span class="font-italic">In subject:</span> {{ dest.subjectName }}
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
+                  <div class="col-auto">
+                    <b-button size="sm" class="float-right text-uppercase" variant="info"
+                              @click="selectDestination(dest)"
+                              :data-cy="`selectDest_subj${dest.subjectId}${dest.groupId ? dest.groupId : ''}`">
+                      <i class="fas fa-check-circle"/> Select
+                    </b-button>
+                  </div>
                 </div>
-                <div class="col-auto">
-                  <b-button size="sm" class="float-right text-uppercase" variant="info"
-                            @click="selectDestination(dest)"
-                            :data-cy="`selectDest_subj${dest.subjectId}${dest.groupId ? dest.groupId : ''}`">
-                    <i class="fas fa-check-circle"/> Select
-                  </b-button>
-                </div>
+              </b-list-group-item>
+            </b-list-group>
+
+            <div class="row align-items-center"
+                 v-if="destinations.all.length > destinations.currentPage.length">
+              <div class="col-md text-center text-md-left">
               </div>
-            </b-list-group-item>
-          </b-list-group>
-
-          <div class="row align-items-center"
-               v-if="destinations.all.length > destinations.currentPage.length">
-            <div class="col-md text-center text-md-left">
-            </div>
-            <div class="col-md my-3 my-md-0 pt-2">
-              <b-pagination
-                v-model="destinations.currentPageNum"
-                @change="updateDestinationPage"
-                :total-rows="destinations.all.length"
-                :per-page="destinations.perPageNum"
-                aria-controls="Page Controls for skill reuse destination"
-                data-cy="destListPagingControl"
-              ></b-pagination>
-            </div>
-            <div class="col-md text-center text-md-right">
-            </div>
-          </div>
-        </div>
-        <div v-else>
-          <no-content2 title="No Destinations"
-                       message="There are no Subjects or Groups that this skill can be re-used in. Please create subjects and/or groups if you want to re-use skills."/>
-        </div>
-      </div>
-
-      <div id="step2" v-if="selectedDestination && !state.reUseComplete && !state.reUseInProgress"
-           data-cy="reuseSkillsModalStep2">
-        <div>
-          <b-avatar><b>2</b></b-avatar>
-          Preview:
-        </div>
-        <b-card class="mt-2">
-          <div v-if="skillsForReuse.available.length > 0">
-            <b-badge variant="info">{{ skillsForReuse.available.length }}</b-badge>
-            skill{{ plural(skillsForReuse.available) }} will be reused in the
-            <span v-if="selectedDestination.groupName">
-              <span class="text-primary font-weight-bold">[{{
-                  selectedDestination.groupName
-                }}]</span>
-              group.
-            </span>
-            <span v-else>
-              <span class="text-primary font-weight-bold">[{{
-                  selectedDestination.subjectName
-                }}]</span>
-              subject.
-            </span>
-            <div v-if="skillsForReuse.alreadyExist.length > 0">
-              <b-badge variant="warning">{{ skillsForReuse.alreadyExist.length }}</b-badge>
-              selected skill{{ plural(skillsForReuse.alreadyExist) }} <span
-              class="text-primary font-weight-bold">already</span> been reused!
+              <div class="col-md my-3 my-md-0 pt-2">
+                <b-pagination
+                  v-model="destinations.currentPageNum"
+                  @change="updateDestinationPage"
+                  :total-rows="destinations.all.length"
+                  :per-page="destinations.perPageNum"
+                  aria-controls="Page Controls for skill reuse destination"
+                  data-cy="destListPagingControl"
+                ></b-pagination>
+              </div>
+              <div class="col-md text-center text-md-right">
+              </div>
             </div>
           </div>
           <div v-else>
-            <i class="fas fa-exclamation-triangle text-warning mr-2"/>
-            <span class="text-warning font-weight-bold">All</span> of the selected skills already
-            been reused in the <span
-            class="text-primary font-weight-bold">{{ selectedDestination.name }}</span> subject.
-            Please cancel and select different skills.
+            <no-content2 title="No Destinations"
+                         message="There are no Subjects or Groups that this skill can be re-used in. Please create subjects and/or groups if you want to re-use skills."/>
           </div>
-        </b-card>
-      </div>
-
-      <div v-if="state.reUseInProgress">
-        <div>
-          <b-avatar><b>2A</b></b-avatar>
-          In Progress:
         </div>
-        <b-card class="mt-2">
-          Working very hard to reuse
-          <b-badge variant="info">{{ skillsForReuse.available.length }}</b-badge>
-          skill{{ skillsForReuse.available.length > 1 ? 's' : '' }}. This may take several minutes.
-          <lengthy-operation-progress-bar name="Finalize" class="mb-3 mt-1"/>
-        </b-card>
-      </div>
 
-      <div id="step3" v-if="state.reUseComplete" data-cy="reuseSkillsModalStep3">
-        <div>
-          <b-avatar><b>3</b></b-avatar>
-          Acknowledgement:
+        <div id="step2" v-if="selectedDestination && !state.reUseComplete && !state.reUseInProgress"
+             data-cy="reuseSkillsModalStep2">
+          <div>
+            <b-avatar><b>2</b></b-avatar>
+            Preview:
+          </div>
+          <b-card class="mt-2">
+            <div v-if="skillsForReuse.available.length > 0">
+              <b-badge variant="info">{{ skillsForReuse.available.length }}</b-badge>
+              skill{{ plural(skillsForReuse.available) }} will be reused in the
+              <span v-if="selectedDestination.groupName">
+                <span class="text-primary font-weight-bold">[{{
+                    selectedDestination.groupName
+                  }}]</span>
+                group.
+              </span>
+              <span v-else>
+                <span class="text-primary font-weight-bold">[{{
+                    selectedDestination.subjectName
+                  }}]</span>
+                subject.
+              </span>
+              <div v-if="skillsForReuse.alreadyExist.length > 0">
+                <b-badge variant="warning">{{ skillsForReuse.alreadyExist.length }}</b-badge>
+                selected skill{{ plural(skillsForReuse.alreadyExist) }} <span
+                class="text-primary font-weight-bold">already</span> been reused!
+              </div>
+            </div>
+            <div v-else>
+              <i class="fas fa-exclamation-triangle text-warning mr-2"/>
+              <span class="text-warning font-weight-bold">All</span> of the selected skills already
+              been reused in the <span
+              class="text-primary font-weight-bold">{{ selectedDestination.name }}</span> subject.
+              Please cancel and select different skills.
+            </div>
+          </b-card>
         </div>
-        <b-card class="mt-2">
-          <span class="text-success">Successfully</span> reused
-          <b-badge variant="info">{{ skillsForReuse.available.length }}</b-badge>
-          skill{{ plural(skillsForReuse.available) }}.
-        </b-card>
+
+        <div v-if="state.reUseInProgress">
+          <div>
+            <b-avatar><b>2A</b></b-avatar>
+            In Progress:
+          </div>
+          <b-card class="mt-2">
+            Working very hard to reuse
+            <b-badge variant="info">{{ skillsForReuse.available.length }}</b-badge>
+            skill{{ skillsForReuse.available.length > 1 ? 's' : '' }}. This may take several
+            minutes.
+            <lengthy-operation-progress-bar name="Finalize" class="mb-3 mt-1"/>
+          </b-card>
+        </div>
+
+        <div id="step3" v-if="state.reUseComplete" data-cy="reuseSkillsModalStep3">
+          <div>
+            <b-avatar><b>3</b></b-avatar>
+            Acknowledgement:
+          </div>
+          <b-card class="mt-2">
+            <span class="text-success">Successfully</span> reused
+            <b-badge variant="info">{{ skillsForReuse.available.length }}</b-badge>
+            skill{{ plural(skillsForReuse.available) }}.
+          </b-card>
+        </div>
       </div>
     </div>
 
@@ -186,6 +191,7 @@ limitations under the License.
   import SkillsService from '@/components/skills/SkillsService';
   import LengthyOperationProgressBar from '@/components/utils/LengthyOperationProgressBar';
   import NoContent2 from '@/components/utils/NoContent2';
+  import CatalogService from '@/components/skills/catalog/CatalogService';
 
   export default {
     name: 'ReuseSkillsModal',
@@ -207,7 +213,11 @@ limitations under the License.
     data() {
       return {
         show: this.value,
-        loadingData: true,
+        loading: {
+          subjects: true,
+          reusedSkills: false,
+          finalizationInfo: true,
+        },
         firstSkillId: null,
         destinations: {
           all: [],
@@ -225,14 +235,24 @@ limitations under the License.
           alreadyExist: [],
           allAlreadyExist: [],
         },
+        finalizeInfo: {},
       };
     },
     mounted() {
       this.loadSubjects();
+      this.loadFinalizeInfo();
     },
     watch: {
       show(newValue) {
         this.$emit('input', newValue);
+      },
+    },
+    computed: {
+      isLoading() {
+        return this.loading.subjects || this.loading.reusedSkills || this.loading.finalizationInfo;
+      },
+      importFinalizePending() {
+        return this.finalizeInfo && this.finalizeInfo.numSkillsToFinalize && this.finalizeInfo.numSkillsToFinalize > 0;
       },
     },
     methods: {
@@ -258,7 +278,16 @@ limitations under the License.
             this.updateDestinationPage(this.destinations.currentPageNum);
           })
           .finally(() => {
-            this.loadingData = false;
+            this.loading.subjects = false;
+          });
+      },
+      loadFinalizeInfo() {
+        CatalogService.getCatalogFinalizeInfo(this.$route.params.projectId)
+          .then((res) => {
+            this.finalizeInfo = res;
+          })
+          .finally(() => {
+            this.loading.finalizationInfo = false;
           });
       },
       updateDestinationPage(pageNum) {
@@ -284,7 +313,7 @@ limitations under the License.
           });
       },
       selectDestination(selection) {
-        this.loadingData = true;
+        this.loading.reusedSkills = true;
         this.selectedDestination = selection;
         const parentId = this.selectedDestination.groupId ? this.selectedDestination.groupId : this.selectedDestination.subjectId;
         SkillsService.getReusedSkills(this.$route.params.projectId, parentId)
@@ -294,7 +323,7 @@ limitations under the License.
             this.skillsForReuse.available = this.skills.filter((skill) => !res.find((e) => e.name === skill.name));
           })
           .finally(() => {
-            this.loadingData = false;
+            this.loading.reusedSkills = false;
           });
       },
       plural(arr) {
