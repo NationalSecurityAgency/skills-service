@@ -154,6 +154,7 @@ class RootController {
     RequestResult addRoot(@PathVariable('userKey') String userKey) {
         String userId = getUserId(userKey)
         accessSettingsStorageService.addRoot(userId)
+        contactUsersService.sendEmail("Test email", "Test email", userId)
         projAdminService.pinAllExistingProjectsWhereUserIsAdminExceptInception(userId)
         return new RequestResult(success: true)
     }
@@ -307,7 +308,7 @@ class RootController {
         SkillsValidator.isNotBlank(contactUsersRequest?.emailSubject, "emailSubject")
         SkillsValidator.isNotBlank(contactUsersRequest?.emailBody, "emailBody")
         String userId = userInfoService.getCurrentUserId()
-        contactUsersService.previewEmail(contactUsersRequest.emailSubject, contactUsersRequest.emailBody, userId)
+        contactUsersService.sendEmail(contactUsersRequest.emailSubject, contactUsersRequest.emailBody, userId)
         return RequestResult.success()
     }
 

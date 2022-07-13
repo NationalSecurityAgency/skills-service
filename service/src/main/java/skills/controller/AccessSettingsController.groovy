@@ -25,9 +25,11 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.client.RestClientException
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
+import skills.controller.request.model.ContactUsersRequest
 import skills.controller.result.model.RequestResult
 import skills.controller.result.model.UserRoleRes
 import skills.services.AccessSettingsStorageService
+import skills.services.ContactUsersService
 import skills.services.admin.ProjAdminService
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.User
@@ -53,6 +55,9 @@ class AccessSettingsController {
 
     @Autowired
     ProjAdminService projAdminService
+
+    @Autowired
+    ContactUsersService contactUsersService
 
     @Value('#{securityConfig.authMode}}')
     skills.auth.AuthMode authMode = skills.auth.AuthMode.DEFAULT_AUTH_MODE
@@ -93,6 +98,10 @@ class AccessSettingsController {
             @PathVariable("userKey") String userKey, @PathVariable("roleName") RoleName roleName) {
         String userId = getUserId(userKey)
         accessSettingsStorageService.addUserRole(userId, projectId, roleName)
+
+        if(roleName == RoleName.ROLE_PROJECT_ADMIN) {
+            contactUsersService.sendEmail("Test email", "Test email", userId)
+        }
 
         if(roleName == RoleName.ROLE_PROJECT_ADMIN && accessSettingsStorageService.isRoot(userId)) {
             User user = userRepo.findByUserId(userId.toLowerCase())
