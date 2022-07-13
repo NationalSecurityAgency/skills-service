@@ -18,6 +18,7 @@ package skills.intTests.skillReuse
 import skills.intTests.catalog.CatalogIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import skills.intTests.utils.SkillsService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
 import spock.lang.IgnoreRest
 
@@ -161,5 +162,96 @@ class SkillReuseValidationSpec extends CatalogIntSpec {
         SkillsClientException ex = thrown(SkillsClientException)
         ex.message.contains("Skill ID must not contain reuse tag")
     }
+
+    def "reused skill cannot be added as a global badge dependency"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        def p1subj2 = createSubject(1, 2)
+        skillsService.createSubject(p1subj2)
+
+        skillsService.reuseSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId)
+
+        SkillsService supervisorService = createSupervisor()
+        def badge = SkillsFactory.createBadge(1, 1)
+        supervisorService.createGlobalBadge(badge)
+
+        when:
+        supervisorService.assignSkillToGlobalBadge(p1.projectId, badge.badgeId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0))
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.message.contains("Skill ID must not contain reuse tag")
+    }
+
+    def "reused skill cannot be assigned as a dependency"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        def p1subj2 = createSubject(1, 2)
+        skillsService.createSubject(p1subj2)
+
+        skillsService.reuseSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId)
+
+        when:
+        skillsService.assignDependency([projectId: p1.projectId, skillId: p1Skills.get(1).skillId, dependentSkillId: SkillReuseIdUtil.addTag(p1Skills.get(0).skillId, 0), throwExceptionOnFailure: true])
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.message.contains("Skill ID must not contain reuse tag")
+    }
+
+    def "reused skill cannot be assigned as a cross-project dependency"() {
+        def p1 = createProject(1)
+        skillsService.createProject(p1)
+        when:
+        skillsService.shareSkill(p1.projectId, SkillReuseIdUtil.addTag("valu", 1), "other")
+        skillsService.assignDependency([projectId         : p1.projectId, skillId: SkillReuseIdUtil.addTag("first", 2),
+                                        dependentProjectId: "other", dependentSkillId: "second",])
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.message.contains("Skill ID must not contain reuse tag")
+    }
+
+    def "reused skill cannot be in a cross-project dependency as dependentSkillId"() {
+        def p1 = createProject(1)
+        skillsService.createProject(p1)
+        when:
+        skillsService.shareSkill(p1.projectId, SkillReuseIdUtil.addTag("valu", 1), "other")
+        skillsService.assignDependency([projectId         : p1.projectId, skillId: "blah",
+                                        dependentProjectId: "other", dependentSkillId: SkillReuseIdUtil.addTag("first", 2),])
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.message.contains("Skill ID must not contain reuse tag")
+    }
+
+    def "reused skill cannot be shared for a cross-project dependency"() {
+        def p1 = createProject(1)
+        skillsService.createProject(p1)
+        when:
+        skillsService.shareSkill(p1.projectId, SkillReuseIdUtil.addTag("valu", 1), "other")
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.message.contains("Skill ID must not contain reuse tag")
+    }
+
+
+    def "reused skill cannot be assigned as a dependentSkillId"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        def p1subj2 = createSubject(1, 2)
+        skillsService.createSubject(p1subj2)
+
+        skillsService.reuseSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId)
+
+        when:
+        skillsService.assignDependency([projectId: p1.projectId, skillId: SkillReuseIdUtil.addTag(p1Skills.get(0).skillId, 0), dependentSkillId: p1Skills.get(1).skillId, throwExceptionOnFailure: true])
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.message.contains("Skill ID must not contain reuse tag")
+    }
+
 
 }

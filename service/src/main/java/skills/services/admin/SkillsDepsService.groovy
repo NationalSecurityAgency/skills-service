@@ -31,6 +31,7 @@ import skills.controller.result.model.SkillDefRes
 import skills.controller.result.model.SkillsGraphRes
 import skills.services.DependencyValidator
 import skills.services.RuleSetDefGraphService
+import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefSkinny
 import skills.storage.model.SkillRelDef
@@ -116,12 +117,14 @@ class SkillsDepsService {
     @Transactional(readOnly = true)
     List<SkillDefForDependencyRes> getSkillsAvailableForDependency(String projectId) {
         List<SkillDefSkinny> res = skillDefRepo.findAllSkinnySelectByProjectIdAndType(projectId, SkillDef.ContainerType.Skill, "", Boolean.TRUE.toString(), Boolean.FALSE.toString())
+        // remove reused skills
+        res = res.findAll { !SkillReuseIdUtil.isTagged(it.skillId) }
         List<SkillDefForDependencyRes> finalRes = res.collect {
             new SkillDefForDependencyRes(
-                skillId: it.skillId,
-                name: InputSanitizer.unsanitizeName(it.name),
-                projectId: it.projectId,
-                version: it.version
+                    skillId: it.skillId,
+                    name: InputSanitizer.unsanitizeName(it.name),
+                    projectId: it.projectId,
+                    version: it.version
             )
         }
         List<SharedSkillResult> sharedSkills = shareSkillsService.getSharedSkillsFromOtherProjects(projectId)

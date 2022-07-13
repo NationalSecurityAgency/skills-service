@@ -540,6 +540,8 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(dependentSkillId, "Dependent Skill Id", projectId)
         SkillsValidator.isNotBlank(dependencySkillId, "Dependency Skill Id", projectId)
+        SkillsValidator.isTrue(!dependentSkillId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "Skill ID must not contain reuse tag", projectId, dependentSkillId)
+        SkillsValidator.isTrue(!dependencySkillId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "Skill ID must not contain reuse tag", projectId, dependencySkillId)
 
         skillsDepsService.assignSkillDependency(projectId, dependentSkillId, dependencySkillId)
         return new RequestResult(success: true)
@@ -556,6 +558,8 @@ class AdminController {
         SkillsValidator.isNotBlank(dependencySkillId, "Dependent Skill Id", projectId)
         SkillsValidator.isNotBlank(dependencyProjectId, "Dependency Project Id", projectId)
         SkillsValidator.isNotBlank(dependentSkillId, "Dependency Skill Id", projectId)
+        SkillsValidator.isTrue(!dependentSkillId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "Skill ID must not contain reuse tag", projectId, dependentSkillId)
+        SkillsValidator.isTrue(!dependencySkillId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "Skill ID must not contain reuse tag", projectId, dependencySkillId)
 
         skillsDepsService.assignSkillDependency(projectId, dependentSkillId, dependencySkillId, dependencyProjectId)
         return new RequestResult(success: true)
@@ -867,6 +871,7 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
         SkillsValidator.isNotBlank(sharedProjectId, "Shared Project Id", projectId)
+        SkillsValidator.isTrue(!skillId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "Skill ID must not contain reuse tag", projectId, skillId)
 
         shareSkillsService.shareSkillToExternalProject(projectId, skillId, sharedProjectId)
     }
