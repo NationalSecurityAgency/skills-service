@@ -138,7 +138,7 @@ describe('Skill Reuse and Dashboard Tests', () => {
             .contains('Cannot initiate skill reuse while skill finalization is pending');
     });
 
-    it.only('cannot initiate reuse when finalization is running', () => {
+    it('cannot initiate reuse when finalization is running', () => {
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
         cy.exportSkillToCatalog(1, 1, 1);
