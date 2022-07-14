@@ -56,9 +56,6 @@ class AccessSettingsController {
     @Autowired
     ProjAdminService projAdminService
 
-    @Autowired
-    ContactUsersService contactUsersService
-
     @Value('#{securityConfig.authMode}}')
     skills.auth.AuthMode authMode = skills.auth.AuthMode.DEFAULT_AUTH_MODE
 
@@ -98,10 +95,6 @@ class AccessSettingsController {
             @PathVariable("userKey") String userKey, @PathVariable("roleName") RoleName roleName) {
         String userId = getUserId(userKey)
         accessSettingsStorageService.addUserRole(userId, projectId, roleName)
-
-        if(roleName == RoleName.ROLE_PROJECT_ADMIN) {
-            contactUsersService.sendEmail("Test email", "Test email", userId)
-        }
 
         if(roleName == RoleName.ROLE_PROJECT_ADMIN && accessSettingsStorageService.isRoot(userId)) {
             User user = userRepo.findByUserId(userId.toLowerCase())

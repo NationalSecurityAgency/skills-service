@@ -26,23 +26,18 @@ class EmailUserOnRoleAddSpecs extends DefaultIntSpec {
 
     def setup() {
         startEmailServer()
-
         rootServiceOne = createRootSkillService()
-        if (!rootServiceOne.rootUsers) {
-            rootServiceOne.grantRoot()
-        }
     }
 
     def "contact user when added as admin"() {
         def users = getRandomUsers(2, true)
-
         SkillsService proj1Serv = createService(users[0])
 
         def proj1 = SkillsFactory.createProject(1)
 
         proj1Serv.createProject(proj1)
         createService(users[1])
-
+        greenMail.purgeEmailFromAllMailboxes()
         proj1Serv.addUserRole(users[1], proj1.projectId, "ROLE_PROJECT_ADMIN")
 
         when:
@@ -52,22 +47,21 @@ class EmailUserOnRoleAddSpecs extends DefaultIntSpec {
 
         then:
         count == 3
-        messages.size() == 1
+        messages.size() > 0
         messages.find { it.recipients.find {it.contains(users[1])}}
-        messages[0].subj == "Test email"
-        messages[0].plainText == "Test email"
+        messages[1].subj == "Test email"
+        messages[1].plainText == "Test email"
     }
 
     def "contact user when added as root"() {
         def users = getRandomUsers(2, true)
-
         SkillsService proj1Serv = createService(users[0])
 
         def proj1 = SkillsFactory.createProject(1)
 
         proj1Serv.createProject(proj1)
         createService(users[1])
-
+        greenMail.purgeEmailFromAllMailboxes()
         rootServiceOne.addRootRole(users[1])
 
         when:
@@ -77,7 +71,7 @@ class EmailUserOnRoleAddSpecs extends DefaultIntSpec {
 
         then:
         count == 3
-        messages.size() == 1
+        messages.size() > 0
         messages.find { it.recipients.find {it.contains(users[1])}}
         messages[0].subj == "Test email"
         messages[0].plainText == "Test email"

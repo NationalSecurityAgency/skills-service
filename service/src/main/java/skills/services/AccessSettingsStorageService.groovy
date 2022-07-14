@@ -79,6 +79,8 @@ class AccessSettingsStorageService {
     @Autowired
     UserAttrsService userAttrsService
 
+    @Autowired
+    ContactUsersService contactUsersService
 
     @Value('#{"${skills.config.ui.defaultLandingPage:admin}"}')
     String defaultLandingPage
@@ -157,6 +159,7 @@ class AccessSettingsStorageService {
     @Transactional
     UserRoleRes addRoot(String userId) {
         UserRole userRole = addUserRoleInternal(userId, null, RoleName.ROLE_SUPER_DUPER_USER)
+        contactUsersService.sendEmail("Test email", "Test email", userId)
         User user = userRepository.findByUserId(userId)
         if (!(user?.roles?.find {it.projectId == null && it.roleName == RoleName.ROLE_SUPERVISOR})) {
             addUserRoleInternal(userId, null, RoleName.ROLE_SUPERVISOR)
@@ -206,6 +209,9 @@ class AccessSettingsStorageService {
     @Transactional()
     UserRoleRes addUserRole(String userId, String projectId, RoleName roleName) {
         UserRole role = addUserRoleInternal(userId, projectId, roleName)
+        if(roleName == RoleName.ROLE_PROJECT_ADMIN) {
+            contactUsersService.sendEmail("Test email", "Test email", userId)
+        }
         return convert(role)
     }
 
