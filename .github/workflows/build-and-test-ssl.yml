@@ -60,7 +60,7 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Build skills-service
-        run: mvn --batch-mode install
+        run: mvn --batch-mode install -Dtest=SelfReportApprovalRequestEmailNotificationSpecs
         env:
           SPRING_PROFILES_ACTIVE: pki
 
@@ -118,7 +118,7 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Build skills-service
-        run: mvn --batch-mode test -Dspring.datasource.url=jdbc:postgresql://localhost:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword
+        run: mvn --batch-mode test -Dtest=SelfReportApprovalRequestEmailNotificationSpecs -Dspring.datasource.url=jdbc:postgresql://localhost:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword
         env:
           SPRING_PROFILES_ACTIVE: pki
 

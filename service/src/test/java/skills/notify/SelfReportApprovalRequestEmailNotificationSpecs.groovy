@@ -80,6 +80,7 @@ class SelfReportApprovalRequestEmailNotificationSpecs extends DefaultIntSpec {
         }
 
         userSpecificServiceInstances.each {
+            log.info("Adding user [${it.userName}] as admin to project [${proj.projectId}]")
             skillsService.addProjectAdmin(proj.projectId, it.userName)
         }
 
