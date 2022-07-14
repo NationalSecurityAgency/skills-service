@@ -453,6 +453,9 @@ class ContactUsersServiceSpec extends DefaultIntSpec {
         String user2Email = userAttrsService.findByUserId(users[2].toLowerCase())?.email
         String user3Email = userAttrsService.findByUserId(users[3].toLowerCase())?.email
 
+        WaitFor.wait { greenMail.getReceivedMessages().size() >= 0 }
+        greenMail.purgeEmailFromAllMailboxes()
+
         when:
         skillsService.contactProjectUsers(proj.projectId, emailSubject, emailBody, false, [skill6.skillId])
 
@@ -538,6 +541,9 @@ limitations under the License.
 
         def proj = SkillsFactory.createProject(1)
         service.createProject(proj)
+
+        WaitFor.wait { greenMail.getReceivedMessages().size() > 0 }
+        greenMail.purgeEmailFromAllMailboxes()
 
         when:
         service.previewEmail(proj.projectId,"a subject", "**body**")
