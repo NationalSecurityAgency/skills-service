@@ -45,8 +45,8 @@ limitations under the License.
                 <p role="alert" class="text-danger" v-show="errors[0]" id="lastnameError">{{ errors[0]}}</p>
               </ValidationProvider>
             </div>
-            <label class="mt-2" for="profileNickname">Nickname</label>
-            <ValidationProvider name="Nickname" :debounce=500 v-slot="{errors}" rules="maxNicknameLength">
+            <label class="mt-2" for="profileNickname">Primary Name</label>
+            <ValidationProvider name="Primary Name" :debounce=500 v-slot="{errors}" rules="maxNicknameLength">
               <div class="input-group">
                 <input class="form-control" type="text" v-model="loginFields.nickname" name="nickname"
                     id="profileNickname"
