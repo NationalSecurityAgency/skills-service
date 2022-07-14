@@ -403,6 +403,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
                 ua.projectId = :projectId and
                 ua.achievedOn >= :fromDate and
                 ua.achievedOn <= :toDate and 
+                (ua.skillId not like '%STREUSESKILLST%' OR ua.skillId is null) and
                 lower(uAttrs.userIdForDisplay) like lower(CONCAT('%', :userNameFilter, '%')) and
                 (lower(sd.name) like lower(CONCAT('%', :skillNameFilter, '%')) OR (:skillNameFilter = 'ALL')) and
                 (ua.level >= :level OR (:level = -1)) and
@@ -427,6 +428,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
                 ua.projectId = :projectId and
                 ua.achievedOn >= :fromDate and
                 ua.achievedOn <= :toDate and 
+                (ua.skillId not like '%STREUSESKILLST%' OR ua.skillId is null) and
                 lower(uAttrs.userIdForDisplay) like lower(CONCAT('%', :userNameFilter, '%')) and
                 (lower(sd.name) like lower(CONCAT('%', :skillNameFilter, '%')) OR (:skillNameFilter = 'ALL')) and
                 (ua.level >= :level OR (:level = -1)) and
