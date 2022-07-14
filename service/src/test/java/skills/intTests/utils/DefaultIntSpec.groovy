@@ -208,12 +208,15 @@ class DefaultIntSpec extends Specification {
      * of test p12 certificates available if in pki mode
      * @return
      */
-    List<String> getRandomUsers(int numUsers, boolean createEmail = false) {
+    List<String> getRandomUsers(int numUsers, boolean createEmail = false, List<String> exclude=[DEFAULT_ROOT_USER_ID]) {
         //create email addresses for the users automatically?
-        List<String> userIds =  userUtil.getUsers(numUsers+1)
-        String rootId = userIds.find { it.equalsIgnoreCase(DEFAULT_ROOT_USER_ID) }
-        userIds.remove(rootId)
-        if (userIds.size() > numUsers) {
+        List<String> userIds =  userUtil.getUsers(numUsers+exclude.size())
+        exclude.each { userToExclude ->
+            String idToRemove = userIds.find { it.equalsIgnoreCase(userToExclude) }
+            userIds.remove(idToRemove)
+        }
+
+        while (userIds.size() > numUsers) {
             userIds.pop()
         }
         if (createEmail) {
