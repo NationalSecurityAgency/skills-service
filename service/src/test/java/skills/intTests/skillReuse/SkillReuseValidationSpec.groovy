@@ -304,4 +304,21 @@ class SkillReuseValidationSpec extends CatalogIntSpec {
         ex.message.contains("Cannot reuse skills while finalization is pending")
     }
 
+    def "cannot report skill events to reused skills"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        def p1subj2 = createSubject(1, 2)
+        skillsService.createSubject(p1subj2)
+
+        skillsService.reuseSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId)
+
+        when:
+        skillsService.addSkill([projectId: p1.projectId, skillId: SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)], "user", new Date() - 1)
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.message.contains("Skills imported from the catalog can only be reported if the original skill is configured for Self Reporting")
+    }
+
 }

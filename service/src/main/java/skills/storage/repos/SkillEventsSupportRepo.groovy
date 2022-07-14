@@ -132,6 +132,27 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
         s.selfReportingType as selfReportingType,
         s.copiedFrom as copiedFrom,
         s.copiedFromProjectId as copiedFromProjectId,
+        s.readOnly as readOnly,
+        s.groupId as groupId,
+        s.numSkillsRequired as numSkillsRequired
+        from SkillDef s where s.id = ?1''')
+    @Nullable
+    SkillDefMin findBySkillRefId(Integer skillRefId)
+
+    @Query('''SELECT
+        s.id as id,
+        s.projectId as projectId,
+        s.skillId as skillId,
+        s.name as name,
+        s.pointIncrement as pointIncrement,
+        s.pointIncrementInterval as pointIncrementInterval,
+        s.numMaxOccurrencesIncrementInterval as numMaxOccurrencesIncrementInterval,
+        s.totalPoints as totalPoints,
+        s.type as type,
+        s.enabled as enabled,
+        s.selfReportingType as selfReportingType,
+        s.copiedFrom as copiedFrom,
+        s.copiedFromProjectId as copiedFromProjectId,
         s.readOnly as readOnly
         from SkillDef s where ( :projectId is null OR s.projectId = :projectId ) and s.skillId=:skillId''')
     @Nullable

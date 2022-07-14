@@ -52,7 +52,7 @@ class UsagePostAchievementMetricsBuilder implements ProjectMetricsBuilder{
             throw new SkillException("Skill does not exist", projectId, skillId, ErrorCode.SkillNotFound)
         }
         Long countOfDistinctUsersPostAchievement = userEventsRepo.countOfUsersUsingSkillAfterAchievement(skillDef.id, 1) ?: 0
-        Long countOfDistinctUsersWhoAchievedSkill = userAchievedLevelRepo.countDisinctUsersAchievingSkill(projectId, skillId) ?: 0
+        Long countOfDistinctUsersWhoAchievedSkill = userAchievedLevelRepo.countDistinctUsersAchievingSkill(projectId, skillId) ?: 0
 
         if (Math.max(countOfDistinctUsersPostAchievement, countOfDistinctUsersWhoAchievedSkill) > 0) {
             return ["totalUsersAchieved": countOfDistinctUsersWhoAchievedSkill, "usersPostAchievement": countOfDistinctUsersPostAchievement]

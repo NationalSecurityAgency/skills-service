@@ -187,7 +187,9 @@ class SkillEventsTransactionalService {
         }
         if (skillDefinition.selfReportingType && skillDefinition.copiedFromProjectId) {
             projectId = skillDefinition.copiedFromProjectId
-            skillDefinition = getSkillDef(userId, projectId, skillId)
+            skillDefinition = getCopiedFromSkillDef(skillDefinition, skillId)
+            // override it as reused skill's id will not match
+            skillId = skillDefinition.skillId
         }
         SkillEventResult res = new SkillEventResult(projectId: projectId, skillId: skillId, name: skillDefinition.name, selfReportType: skillDefinition.getSelfReportingType()?.toString())
 
@@ -346,6 +348,21 @@ class SkillEventsTransactionalService {
                     .projectId(projectId).skillId(skillId).userId(userId).build()
         }
         return skillDefinition
+    }
+
+    @Profile
+    private SkillDefMin getCopiedFromSkillDef(SkillDefMin skillDef, String userId) {
+        SkillDefMin res = skillEventsSupportRepo.findBySkillRefId(skillDef.copiedFrom)
+        if (!res) {
+            throw new SkillExceptionBuilder()
+                    .msg("Failed to report skill event because copied from skill definition does not exist.")
+                    .logLevel(SkillException.SkillExceptionLogLevel.WARN)
+                    .printStackTrace(false)
+                    .doNotRetry(true)
+                    .errorCode(ErrorCode.SkillNotFound)
+                    .projectId(skillDef.projectId).skillId(skillDef.skillId).userId(userId).build()
+        }
+        return res
     }
 
     private boolean hasReachedMaxPoints(long numSkills, SkillDefMin skillDefinition) {

@@ -170,37 +170,37 @@ describe('Skill Reuse and Dashboard Tests', () => {
         cy.waitForBackendAsyncTasksToComplete();
     });
 
-    it('skill metrics should support reused skills', () => {
+    it.only('skill metrics should support reused skills', () => {
         // cy.createSkill(1, 1, 10);
 
         // cy.createSkillsGroup(1, 1, 12);
         // cy.reuseSkillIntoAnotherGroup(1, 1, 1, 12);
+        cy.reuseSkillIntoAnotherSubject(1, 1, 2);
 
         cy.reportSkill(1, 1, 'user1');
         cy.reportSkill(1, 1, 'user0');
 
         const dateFormat = 'YYYY-MM-DD HH:mm';
         cy.reportSkill(1, 1, 'user2', moment.utc()
-            .subtract(2, 'days')
+            .subtract(1, 'days')
             .format(dateFormat));
         cy.reportSkill(1, 1, 'user2', moment.utc()
-            .subtract(1, 'days')
-            .format(dateFormat));
-        cy.reportSkill(1, 1, 'user3', moment.utc()
             .subtract(2, 'days')
             .format(dateFormat));
         cy.reportSkill(1, 1, 'user3', moment.utc()
-            .subtract(1, 'days')
+            .subtract(3, 'days')
+            .format(dateFormat));
+        cy.reportSkill(1, 1, 'user3', moment.utc()
+            .subtract(5, 'days')
             .format(dateFormat));
         cy.reportSkill(1, 1, 'user4', moment.utc()
-            .subtract(2, 'days')
+            .subtract(5, 'days')
             .format(dateFormat));
         cy.reportSkill(1, 1, 'user4', moment.utc()
-            .subtract(1, 'days')
+            .subtract(6, 'days')
             .format(dateFormat));
 
-        cy.reuseSkillIntoAnotherSubject(1, 1, 2);
-        // cy.waitForBackendAsyncTasksToComplete();
+        cy.waitForBackendAsyncTasksToComplete();
 
         cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');

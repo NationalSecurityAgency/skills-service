@@ -470,7 +470,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
               where ua.projectId = :projectId and
               ua.skillId = :skillId
     ''')
-    Long countDisinctUsersAchievingSkill(@Param("projectId")String projectId, @Param("skillId") String skillId)
+    Long countDistinctUsersAchievingSkill(@Param("projectId") String projectId, @Param("skillId") String skillId)
 
 
     static interface SkillDayUserCount {
