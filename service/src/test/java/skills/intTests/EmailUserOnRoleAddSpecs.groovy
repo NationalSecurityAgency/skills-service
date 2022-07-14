@@ -37,43 +37,36 @@ class EmailUserOnRoleAddSpecs extends DefaultIntSpec {
 
         proj1Serv.createProject(proj1)
         createService(users[1])
-        greenMail.purgeEmailFromAllMailboxes()
         proj1Serv.addUserRole(users[1], proj1.projectId, "ROLE_PROJECT_ADMIN")
 
         when:
-        def count = rootServiceOne.countAllProjectAdminsWithEmail()
-        WaitFor.wait { greenMail.getReceivedMessages().size() >= 1 }
+        WaitFor.wait { greenMail.getReceivedMessages().size() >= 2 }
         def messages = EmailUtils.getEmails(greenMail)
 
         then:
-        count == 3
         messages.size() > 0
-        messages.find { it.recipients.find {it.contains(users[1])}}
-        messages[1].subj == "Test email"
-        messages[1].plainText == "Test email"
+        def message = messages.find {it.recipients.find {it.contains(users[1])}}
+        message.subj == "SkillTree - You've been added as an admin"
+        message.plainText == "You've been added as an admin on a project"
     }
 
     def "contact user when added as root"() {
         def users = getRandomUsers(2, true)
         SkillsService proj1Serv = createService(users[0])
-
-        def proj1 = SkillsFactory.createProject(1)
+        def proj1 = SkillsFactory.createProject(2)
 
         proj1Serv.createProject(proj1)
         createService(users[1])
-        greenMail.purgeEmailFromAllMailboxes()
         rootServiceOne.addRootRole(users[1])
 
         when:
-        def count = rootServiceOne.countAllProjectAdminsWithEmail()
-        WaitFor.wait { greenMail.getReceivedMessages().size() >= 1 }
+        WaitFor.wait { greenMail.getReceivedMessages().size() >= 3 }
         def messages = EmailUtils.getEmails(greenMail)
 
         then:
-        count == 3
         messages.size() > 0
-        messages.find { it.recipients.find {it.contains(users[1])}}
-        messages[0].subj == "Test email"
-        messages[0].plainText == "Test email"
+        def message = messages.find {it.recipients.find {it.contains(users[1])}}
+        message.subj == "SkillTree - You've been added as root"
+        message.plainText == "You've been added as a root user to a project"
     }
 }

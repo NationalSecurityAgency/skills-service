@@ -159,7 +159,7 @@ class AccessSettingsStorageService {
     @Transactional
     UserRoleRes addRoot(String userId) {
         UserRole userRole = addUserRoleInternal(userId, null, RoleName.ROLE_SUPER_DUPER_USER)
-        contactUsersService.sendEmail("Test email", "Test email", userId)
+        contactUsersService.sendEmail("SkillTree - You've been added as root", "You've been added as a root user to a project", userId)
         User user = userRepository.findByUserId(userId)
         if (!(user?.roles?.find {it.projectId == null && it.roleName == RoleName.ROLE_SUPERVISOR})) {
             addUserRoleInternal(userId, null, RoleName.ROLE_SUPERVISOR)
@@ -210,7 +210,7 @@ class AccessSettingsStorageService {
     UserRoleRes addUserRole(String userId, String projectId, RoleName roleName) {
         UserRole role = addUserRoleInternal(userId, projectId, roleName)
         if(roleName == RoleName.ROLE_PROJECT_ADMIN) {
-            contactUsersService.sendEmail("Test email", "Test email", userId)
+            contactUsersService.sendEmail("SkillTree - You've been added as an admin", "You've been added as an admin on a project", userId)
         }
         return convert(role)
     }
