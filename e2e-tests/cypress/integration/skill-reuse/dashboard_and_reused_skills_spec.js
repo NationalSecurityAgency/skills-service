@@ -170,7 +170,7 @@ describe('Skill Reuse and Dashboard Tests', () => {
         cy.waitForBackendAsyncTasksToComplete();
     });
 
-    it.only('skill metrics should support reused skills', () => {
+    it('skill metrics should support reused skills', () => {
         // cy.createSkill(1, 1, 10);
 
         // cy.createSkillsGroup(1, 1, 12);
