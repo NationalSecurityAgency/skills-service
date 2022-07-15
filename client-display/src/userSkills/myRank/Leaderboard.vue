@@ -194,9 +194,14 @@ limitations under the License.
       },
       getUser(item) {
         if (store.state.authToken === 'pki') {
-          return `${item.lastName}, ${item.firstName} (${item.userId})`;
+          return this.isEmpty(item.nickname)
+            ? `${item.firstName} ${item.lastName} (${item.userId})`
+            : `${item.nickname} (${item.userId})`;
         }
         return item.userId;
+      },
+      isEmpty(s) {
+        return (!s || typeof s !== 'string' || !s.trim());
       },
     },
   };

@@ -96,6 +96,7 @@ class InputSanitizer {
                 }
             }
             if (fragment) {
+                fragment = SPACE.matcher(fragment).replaceAll("%20")
                 reassembled.append("#").append(fragment)
             }
 

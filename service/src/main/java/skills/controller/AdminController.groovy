@@ -18,7 +18,6 @@ package skills.controller
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
-import org.h2.upgrade.DbUpgrade
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
@@ -36,6 +35,8 @@ import skills.controller.result.model.*
 import skills.dbupgrade.DBUpgradeSafe
 import skills.services.*
 import skills.services.admin.*
+import skills.services.admin.skillReuse.SkillReuseIdUtil
+import skills.services.admin.skillReuse.SkillReuseService
 import skills.services.events.BulkSkillEventResult
 import skills.services.events.pointsAndAchievements.InsufficientPointsValidator
 import skills.services.inception.InceptionProjectService
@@ -120,6 +121,9 @@ class AdminController {
 
     @Autowired
     SkillCatalogService skillCatalogService
+
+    @Autowired
+    SkillReuseService skillReuseService
 
     @Autowired
     InsufficientPointsValidator insufficientPointsValidator
@@ -345,6 +349,7 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
+        SkillsValidator.isTrue(!skillId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "Skill ID must not contain reuse tag", projectId, skillId)
 
         badgeAdminService.addSkillToBadge(projectId, badgeId, skillId)
         return new RequestResult(success: true)
@@ -465,9 +470,11 @@ class AdminController {
         SkillsValidator.isFirstOrMustEqualToSecond(skillRequest.subjectId, subjectId, "Subject Id")
         skillRequest.subjectId = skillRequest.subjectId ?: subjectId
         skillRequest.skillId = skillRequest.skillId ?: skillId
+        SkillsValidator.isTrue(!skillRequest.skillId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "Skill ID must not contain reuse tag", projectId, skillId)
+        SkillsValidator.isTrue(!skillRequest.name?.toUpperCase()?.contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "Skill Name must not contain reuse tag", projectId, skillId)
 
         // if type is not provided then we default to skill
-        skillRequest.type = skillRequest.type ?:  SkillDef.ContainerType.Skill.toString()
+        skillRequest.type = skillRequest.type ?: SkillDef.ContainerType.Skill.toString()
         Boolean isBasicSkill = skillRequest.type == SkillDef.ContainerType.Skill.toString()
 
         IdFormatValidator.validate(skillRequest.skillId, isBasicSkill)
@@ -533,6 +540,8 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(dependentSkillId, "Dependent Skill Id", projectId)
         SkillsValidator.isNotBlank(dependencySkillId, "Dependency Skill Id", projectId)
+        SkillsValidator.isTrue(!dependentSkillId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "Skill ID must not contain reuse tag", projectId, dependentSkillId)
+        SkillsValidator.isTrue(!dependencySkillId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "Skill ID must not contain reuse tag", projectId, dependencySkillId)
 
         skillsDepsService.assignSkillDependency(projectId, dependentSkillId, dependencySkillId)
         return new RequestResult(success: true)
@@ -549,6 +558,8 @@ class AdminController {
         SkillsValidator.isNotBlank(dependencySkillId, "Dependent Skill Id", projectId)
         SkillsValidator.isNotBlank(dependencyProjectId, "Dependency Project Id", projectId)
         SkillsValidator.isNotBlank(dependentSkillId, "Dependency Skill Id", projectId)
+        SkillsValidator.isTrue(!dependentSkillId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "Skill ID must not contain reuse tag", projectId, dependentSkillId)
+        SkillsValidator.isTrue(!dependencySkillId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "Skill ID must not contain reuse tag", projectId, dependencySkillId)
 
         skillsDepsService.assignSkillDependency(projectId, dependentSkillId, dependencySkillId, dependencyProjectId)
         return new RequestResult(success: true)
@@ -647,12 +658,26 @@ class AdminController {
             @PathVariable("projectId") String projectId,
             @RequestParam(required = false, value = "skillNameQuery") String skillNameQuery,
             @RequestParam(required = false, value = "excludeImportedSkills") Boolean excludeImportedSkills,
+            @RequestParam(required = false, value = "excludeReusedSkills") Boolean excludeReusedSkills,
             @RequestParam(required = false, value = "includeDisabled", defaultValue = "false") Boolean includeDisabled) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
 
         boolean excludeImportedSkillsBol = excludeImportedSkills
         boolean includeDisabledBool = includeDisabled
         List<SkillDefSkinnyRes> res = skillsAdminService.getSkinnySkills(projectId, skillNameQuery ?: '', excludeImportedSkillsBol, includeDisabledBool)
+        if (excludeReusedSkills) {
+            res = res.findAll { !it.isReused }
+        }
+        return res
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    SkillDefSkinnyRes getSkillInfo(
+            @PathVariable("projectId") String projectId,
+            @PathVariable("skillId") String skillId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(skillId, "Skill Id")
+        SkillDefSkinnyRes res = skillsAdminService.getSkinnySkill(projectId, skillId)
         return res
     }
 
@@ -846,6 +871,7 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
         SkillsValidator.isNotBlank(sharedProjectId, "Shared Project Id", projectId)
+        SkillsValidator.isTrue(!skillId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "Skill ID must not contain reuse tag", projectId, skillId)
 
         shareSkillsService.shareSkillToExternalProject(projectId, skillId, sharedProjectId)
     }
@@ -1280,6 +1306,33 @@ class AdminController {
         SkillsValidator.isTrue(userIds.size() <= maxUserIdsForBulkSkillReporting, "number of userIds cannot exceed ${maxUserIdsForBulkSkillReporting}", projectId, skillId)
 
         return skillEventService.bulkReportSkills(projectId, skillId, userIds, new Date(requestedTimestamp))
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/reuse", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
+    RequestResult reuseASkill(@PathVariable("projectId") String projectId,
+                              @RequestBody SkillReuseRequest skillReuseRequest) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        SkillsValidator.isNotEmpty(skillReuseRequest.skillIds, "skillReuseRequest.skillIds")
+        SkillsValidator.isNotBlank(skillReuseRequest.subjectId, "skillReuseRequest.subjectId")
+
+        skillReuseService.reuseSkill(projectId, skillReuseRequest)
+        RequestResult success = RequestResult.success()
+        success.explanation = "Successfully reused skills"
+        return success
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/reused/{parentSkillId}/skills", method = RequestMethod.GET, produces = "application/json")
+    List<SkillDefSkinnyRes> getReusedSkills(@PathVariable("projectId") String projectId, @PathVariable("parentSkillId") String parentSkillId) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        SkillsValidator.isNotBlank(parentSkillId, "parentSkillId")
+        return skillReuseService.getReusedSkills(projectId, parentSkillId)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/reuse/destinations", method = RequestMethod.GET, produces = "application/json")
+    List<SkillReuseDestination> getReuseDestinationsForASkill(@PathVariable("projectId") String projectId, @PathVariable("skillId") String skillId) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        SkillsValidator.isNotBlank(skillId, "skillId")
+        return skillReuseService.getReuseDestinationsForASkill(projectId, skillId)
     }
 
 }

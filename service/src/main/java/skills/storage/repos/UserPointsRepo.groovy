@@ -42,7 +42,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             FROM user_points up, skill_definition toDef
             WHERE
                   toDef.project_id = :toProjectId and 
-                  toDef.skill_id = up.skill_id and
+                  toDef.copied_from_skill_ref = up.skill_ref_id and
                   up.skill_ref_id in (:fromSkillRefIds)
                   and not exists (
                     select 1 from user_points innerUP
@@ -101,6 +101,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
         String getUserIdForDisplay()
         String getUserFirstName()
         String getUserLastName()
+        String getUserNickname()
         Integer getPoints()
         LocalDateTime getUserFirstSeenTimestamp()
     }
@@ -112,6 +113,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     uAttrs.userIdForDisplay as userIdForDisplay,
                     uAttrs.firstName as userFirstName,
                     uAttrs.lastName as userLastName,
+                    uAttrs.nickname as userNickname,
                     uAttrs.created as userFirstSeenTimestamp
                 from UserPoints p, UserAttrs uAttrs
                 where
@@ -135,6 +137,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     uAttrs.userIdForDisplay as userIdForDisplay,
                     uAttrs.firstName as userFirstName,
                     uAttrs.lastName as userLastName,
+                    uAttrs.nickname as userNickname,
                     uAttrs.created as userFirstSeenTimestamp
                 from UserPoints p, UserAttrs uAttrs
                 where
@@ -158,6 +161,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     uAttrs.userIdForDisplay as userIdForDisplay,
                     uAttrs.firstName as userFirstName,
                     uAttrs.lastName as userLastName,
+                    uAttrs.nickname as userNickname,
                     uAttrs.created as userFirstSeenTimestamp
                 from UserPoints p, UserAttrs uAttrs
                 where
@@ -174,6 +178,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     uAttrs.userIdForDisplay as userIdForDisplay,
                     uAttrs.firstName as userFirstName,
                     uAttrs.lastName as userLastName,
+                    uAttrs.nickname as userNickname,
                     uAttrs.created as userFirstSeenTimestamp
                 from UserPoints p, UserAttrs uAttrs
                 where
@@ -191,6 +196,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     uAttrs.userIdForDisplay as userIdForDisplay,
                     uAttrs.firstName as userFirstName,
                     uAttrs.lastName as userLastName,
+                    uAttrs.nickname as userNickname,
                     uAttrs.created as userFirstSeenTimestamp
                 from UserPoints p, UserAttrs uAttrs
                 where
@@ -207,6 +213,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     uAttrs.userIdForDisplay as userIdForDisplay,
                     uAttrs.firstName as userFirstName,
                     uAttrs.lastName as userLastName,
+                    uAttrs.nickname as userNickname,
                     uAttrs.created as userFirstSeenTimestamp
                 from UserPoints p, UserAttrs uAttrs
                 where
@@ -495,7 +502,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 max(upa.performed_on) AS performedOn 
                 FROM user_performed_skill upa 
                 WHERE upa.skill_ref_id in (
-                    select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id from skill_definition where type = 'Skill' and project_id = ?1 and upa.skill_id in (?2)
+                    select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id from skill_definition sd where type = 'Skill' and sd.project_id = ?1 and sd.skill_id in (?2)
                 )
                 GROUP BY upa.user_id
             ) upa ON upa.user_id = up.user_id

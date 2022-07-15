@@ -17,7 +17,9 @@ limitations under the License.
   <div>
     <page-header :loading="isLoading" :options="headerOptions">
       <div slot="subTitle">
-        <div class="h5 text-muted" data-cy="skillId"><show-more :limit="54" :text="skill ? `ID: ${skill.skillId}` : 'Loading...'"></show-more></div>
+        <div class="h5 text-muted" data-cy="skillId">
+          <show-more :limit="54" :text="getSkillId(skill)"></show-more>
+        </div>
         <div class="h5 text-muted" v-if="skill && skill.groupId">
           <span style="font-size: 1rem">Group ID:</span> <span v-b-tooltip.hover="`Name: ${ skill.groupName }`">{{ skill.groupId }}</span>
         </div>
@@ -32,9 +34,15 @@ limitations under the License.
           </b-button>
         </b-button-group>
       </div>
-      <div slot="right-of-header" v-if="!isLoading && (skill.sharedToCatalog || isImported)" class="d-inline h5">
-        <b-badge v-if="skill.sharedToCatalog" class="ml-2" data-cy="exportedBadge"><i class="fas fa-book"></i> EXPORTED</b-badge>
-        <b-badge v-if="isImported" class="ml-2" variant="success" data-cy="importedBadge"><i class="fas fa-book"></i> IMPORTED</b-badge>
+      <div slot="right-of-header" v-if="!isLoading && (skill.sharedToCatalog || isImported)"
+           class="d-inline h5">
+        <b-badge v-if="skill.sharedToCatalog" class="ml-2" data-cy="exportedBadge"><i
+          class="fas fa-book"></i> EXPORTED
+        </b-badge>
+        <b-badge v-if="isImported" class="ml-2" variant="success" data-cy="importedBadge">
+          <span v-if="skill.reusedSkill"><i class="fas fa-recycle"></i> Reused</span>
+          <span v-else><i class="fas fa-book"></i> IMPORTED</span>
+        </b-badge>
         <b-badge v-if="!skill.enabled" class="ml-2" data-cy="disabledSkillBadge"> DISABLED</b-badge>
       </div>
     </page-header>
@@ -48,6 +56,7 @@ limitations under the License.
 
 <script>
   import { createNamespacedHelpers } from 'vuex';
+  import SkillReuseIdUtil from '@/components/utils/SkillReuseIdUtil';
   import SkillsService from './SkillsService';
   import Navigation from '../utils/Navigation';
   import PageHeader from '../utils/pages/PageHeader';
@@ -204,16 +213,20 @@ limitations under the License.
         });
       },
       buildHeaderOptions(skill) {
+        const skillId = skill?.skillId ? SkillReuseIdUtil.removeTag(skill.skillId) : '';
         return {
           icon: 'fas fa-graduation-cap skills-color-skills',
           title: `SKILL: ${skill?.name}`,
-          subTitle: `ID: ${skill?.skillId} | GROUP ID: ${skill?.groupId}`,
+          subTitle: `ID: ${skillId} | GROUP ID: ${skill?.groupId}`,
           stats: [{
             label: 'Points',
             count: skill?.totalPoints,
             icon: 'far fa-arrow-alt-circle-up skills-color-points',
           }],
         };
+      },
+      getSkillId(skill) {
+        return skill ? `ID: ${SkillReuseIdUtil.removeTag(skill.skillId)}` : 'Loading...';
       },
     },
   };

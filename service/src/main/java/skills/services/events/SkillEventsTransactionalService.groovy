@@ -187,10 +187,10 @@ class SkillEventsTransactionalService {
         }
         if (skillDefinition.selfReportingType && skillDefinition.copiedFromProjectId) {
             projectId = skillDefinition.copiedFromProjectId
-            skillDefinition = getSkillDef(userId, projectId, skillId)
+            skillDefinition = getCopiedFromSkillDef(skillDefinition, skillId)
+            // override it as reused skill's id will not match
+            skillId = skillDefinition.skillId
         }
-        final boolean isCatalogSkill = skillCatalogService.isAvailableInCatalog(skillDefinition.projectId, skillDefinition.skillId)
-
         SkillEventResult res = new SkillEventResult(projectId: projectId, skillId: skillId, name: skillDefinition.name, selfReportType: skillDefinition.getSelfReportingType()?.toString())
 
         long numExistingSkills = getNumExistingSkills(userId, projectId, skillId)
@@ -199,7 +199,7 @@ class SkillEventsTransactionalService {
             // record event should happen AFTER the lock OR if it does not need the lock;
             // otherwise there is a chance of a deadlock (although unlikely); this can happen because record event
             // mutates the row - so that row is locked in addition to the explicit lock
-            recordEvent(skillDefinition, userId, skillDate, isCatalogSkill)
+            recordEvent(skillDefinition, userId, skillDate)
 
             res.skillApplied = checkRes.skillApplied
             res.explanation = checkRes.explanation
@@ -219,7 +219,7 @@ class SkillEventsTransactionalService {
             // record event should happen AFTER the lock OR if it does not need the lock;
             // otherwise there is a chance of a deadlock (although unlikely); this can happen because record event
             // mutates the row - so that row is locked in addition to the explicit lock
-            recordEvent(skillDefinition, userId, skillDate, isCatalogSkill)
+            recordEvent(skillDefinition, userId, skillDate)
         }
         numExistingSkills = getNumExistingSkills(userId, projectId, skillId)
         checkRes = checkIfSkillApplied(userId, numExistingSkills, skillDate.date, skillDefinition)
@@ -266,20 +266,23 @@ class SkillEventsTransactionalService {
             achievedGlobalBadgeHandler.checkForGlobalBadges(res, userId, skillDefinition.projectId, skillDefinition)
         }
 
-        if (isCatalogSkill) {
-            List<Integer> importedSkillIds = skillDefRepo.findSkillDefIdsByCopiedFrom(skillDefinition.id)
-            if (importedSkillIds) {
-                importedSkillIds.each { Integer importedSkillId ->
-                    taskSchedulerService.scheduleImportedSkillAchievement(userId, importedSkillId, skillDate, requestedSkillCompleted)
-                }
-            }
-        }
+        scheduleImportedSkills(skillDefinition, userId, skillDate, requestedSkillCompleted)
 
         return res
     }
 
     @Profile
-    private void recordEvent(SkillDefMin skillDefinition, String userId, SkillDate skillDate, boolean isCatalogSkill=false) {
+    private void scheduleImportedSkills(SkillDefMin skillDefinition, String userId, SkillDate skillDate, boolean requestedSkillCompleted) {
+        List<Integer> importedSkillIds = skillDefRepo.findSkillDefIdsByCopiedFrom(skillDefinition.id)
+        if (importedSkillIds) {
+            importedSkillIds.each { Integer importedSkillId ->
+                taskSchedulerService.scheduleImportedSkillAchievement(userId, importedSkillId, skillDate, requestedSkillCompleted)
+            }
+        }
+    }
+
+    @Profile
+    private void recordEvent(SkillDefMin skillDefinition, String userId, SkillDate skillDate) {
         userEventService.recordEvent(skillDefinition.projectId, skillDefinition.id, userId, skillDate.date)
     }
 
@@ -345,6 +348,21 @@ class SkillEventsTransactionalService {
                     .projectId(projectId).skillId(skillId).userId(userId).build()
         }
         return skillDefinition
+    }
+
+    @Profile
+    private SkillDefMin getCopiedFromSkillDef(SkillDefMin skillDef, String userId) {
+        SkillDefMin res = skillEventsSupportRepo.findBySkillRefId(skillDef.copiedFrom)
+        if (!res) {
+            throw new SkillExceptionBuilder()
+                    .msg("Failed to report skill event because copied from skill definition does not exist.")
+                    .logLevel(SkillException.SkillExceptionLogLevel.WARN)
+                    .printStackTrace(false)
+                    .doNotRetry(true)
+                    .errorCode(ErrorCode.SkillNotFound)
+                    .projectId(skillDef.projectId).skillId(skillDef.skillId).userId(userId).build()
+        }
+        return res
     }
 
     private boolean hasReachedMaxPoints(long numSkills, SkillDefMin skillDefinition) {

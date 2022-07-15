@@ -58,7 +58,7 @@ class SelfReportApprovalRequestEmailNotificationSpecs extends DefaultIntSpec {
 
     def "project admins who are unsubscribed do not receive emails"() {
 
-        def users = getRandomUsers(6, true)
+        def users = getRandomUsers(6, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
 
         def proj = SkillsFactory.createProject(1)
         def subj = SkillsFactory.createSubject(1, 1)
@@ -116,7 +116,7 @@ class SelfReportApprovalRequestEmailNotificationSpecs extends DefaultIntSpec {
     }
 
     def "Project Error is created if a project has no subscribed project administrators"() {
-        def users = getRandomUsers(6, true)
+        def users = getRandomUsers(6, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
 
         def proj = SkillsFactory.createProject(1)
         def subj = SkillsFactory.createSubject(1, 1)

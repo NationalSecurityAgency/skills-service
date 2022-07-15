@@ -195,7 +195,7 @@ class UnusedProjectExpirationSpecs extends DefaultIntSpec{
         Date flagForExpiration = new Date()
         expirationService.flagOldProjects(flagForExpiration)
 
-        String otherUser = getRandomUsers(1).first()
+        String otherUser = getRandomUsers(1, false, ['skills@skills.org', DEFAULT_ROOT_USER_ID]).first()
 
         createService(otherUser)
         skillsService.addProjectAdmin(proj1.projectId, otherUser)

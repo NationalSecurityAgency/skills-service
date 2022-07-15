@@ -227,7 +227,9 @@ export default {
   },
 
   reportPageVisit(path, fullPath) {
-    const domain = (new URL(window.location));
+    const domain = (window.location !== window.parent.location)
+      ? new URL(document.referrer)
+      : new URL(document.location.href);
     axios.put(`${store.state.serviceUrl}/api/pageVisit`, {
       path,
       fullPath,

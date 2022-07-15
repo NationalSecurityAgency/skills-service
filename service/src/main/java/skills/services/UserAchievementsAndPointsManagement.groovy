@@ -79,14 +79,9 @@ class UserAchievementsAndPointsManagement {
         log.info("Updating all UserPoints for [{}]-[{}]", skill.projectId, skill.skillId)
         nativeQueriesRepo.updateUserPointsForASkill(skill.projectId, skill.skillId)
 
-        List<SkillDef> parents = skillRelDefRepo.findParentByChildIdAndTypes(skill.id, [SkillRelDef.RelationshipType.RuleSetDefinition])
-        while (parents) {
-            assert parents.size() == 1
-            SkillDef parent = parents.first()
-            log.info("Updating parent's UserPoints for [{}]-[{}]", parent.projectId, parent.skillId)
-            nativeQueriesRepo.updateUserPointsForSubject(parent.projectId, parent.skillId, true)
-            parents = skillRelDefRepo.findParentByChildIdAndTypes(parent.id, [SkillRelDef.RelationshipType.RuleSetDefinition])
-        }
+        SkillDef subject = ruleSetDefGraphService.getMySubjectParent(skill.id)
+        log.info("Updating subject's UserPoints for [{}]-[{}]", subject.projectId, subject.skillId)
+        nativeQueriesRepo.updateUserPointsForSubject(subject.projectId, subject.skillId, true)
 
         log.info("Updating project's UserPoints for [{}]", skill.projectId)
         nativeQueriesRepo.updateUserPointsForProject(skill.projectId)

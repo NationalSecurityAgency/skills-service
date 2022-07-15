@@ -34,7 +34,7 @@ class SaveSkillService {
     void saveSkillAndSchedulePropagationToImportedSkills(String originalSkillId, SkillRequest skillRequest, boolean performCustomValidation=true, String groupId=null) {
         SkillsAdminService.SaveSkillTmpRes saveSkillTmpRes =
                 skillsAdminService.saveSkill(originalSkillId, skillRequest, performCustomValidation, groupId)
-        if (saveSkillTmpRes.isAvailableInCatalog) {
+        if (saveSkillTmpRes.isImportedByOtherProjects) {
             // IMPORTANT: must schedule once transaction that saves skill committed; logic in the async propagation relies on the completion of the original skill modification
             taskSchedulerService.scheduleCatalogSkillUpdate(saveSkillTmpRes.projectId, saveSkillTmpRes.skillId, saveSkillTmpRes.skillRefId)
         }

@@ -19,8 +19,10 @@ import groovy.transform.Canonical
 
 @Canonical
 class ExportedSkillStats {
+    Boolean isExported
     String projectId
     String skillId
     Date exportedOn
     List<ExportedSkillUser> users
+    Boolean isReusedLocally
 }

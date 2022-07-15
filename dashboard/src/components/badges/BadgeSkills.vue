@@ -103,7 +103,7 @@ limitations under the License.
           });
       },
       loadAvailableBadgeSkills() {
-        SkillsService.getProjectSkills(this.projectId, null, false)
+        SkillsService.getProjectSkills(this.projectId, null, false, true)
           .then((loadedSkills) => {
             const badgeSkillIds = this.badgeSkills.map((item) => item.skillId);
             this.availableSkills = loadedSkills.filter((item) => !badgeSkillIds.includes(item.skillId));

@@ -113,7 +113,7 @@ limitations under the License.
     </b-card>
 
     <removal-validation v-if="removalValidation.show" v-model="removalValidation.show" @do-remove="doRemoveExportedSkill">
-      <exported-skill-deletion-warning :skill-id="removalValidation.skillToRemove.skillId" :skill-name="removalValidation.skillToRemove.skillName" />
+      <exported-skill-removal-validation :skill-to-remove="removalValidation.skillToRemove"/>
     </removal-validation>
   </div>
 </template>
@@ -123,14 +123,14 @@ limitations under the License.
   import CatalogService from '@/components/skills/catalog/CatalogService';
   import DateCell from '@/components/utils/table/DateCell';
   import RemovalValidation from '@/components/utils/modal/RemovalValidation';
-  import ExportedSkillDeletionWarning
-    from '@/components/skills/catalog/ExportedSkillDeletionWarning';
-  import ImportedSkillInfo from './ImportedSkillInfo';
+  import ExportedSkillRemovalValidation
+    from '@/components/skills/catalog/ExportedSkillRemovalValidation';
+  import ImportedSkillInfo from '@/components/skills/catalog/ImportedSkillInfo';
 
   export default {
     name: 'ExportedSkills',
     components: {
-      ExportedSkillDeletionWarning,
+      ExportedSkillRemovalValidation,
       RemovalValidation,
       SkillsBTable,
       DateCell,

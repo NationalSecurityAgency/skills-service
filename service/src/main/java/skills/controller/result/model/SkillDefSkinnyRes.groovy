@@ -34,4 +34,9 @@ class SkillDefSkinnyRes {
     Date created
 
     Integer totalPoints
+
+    Boolean isReused
+
+    String groupName
+    String groupId
 }

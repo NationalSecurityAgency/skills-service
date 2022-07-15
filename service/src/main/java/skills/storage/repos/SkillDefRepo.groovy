@@ -48,7 +48,8 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         s.displayOrder as displayOrder,
         s.created as created,
         s.version as version,
-        s.totalPoints as totalPoints
+        s.totalPoints as totalPoints,
+        s.groupId as groupId
         from SkillDef s, SkillDef subjectDef, SkillRelDef srd
          where
             subjectDef = srd.parent and s = srd.child and 
@@ -58,6 +59,29 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
             (s.enabled = 'true' or 'true' = ?5) and
             lower(s.name) like lower(CONCAT('%', ?3, '%'))''')
     List<SkillDefSkinny> findAllSkinnySelectByProjectIdAndType(String id, SkillDef.ContainerType type, String skillNameQuery, String includeCatalogImportedSkills, String includeDisabled)
+
+    @Nullable
+    @Query('''SELECT
+        s.id as id,
+        s.name as name,
+        s.skillId as skillId,
+        subjectDef.skillId as subjectSkillId,
+        subjectDef.name as subjectName,
+        s.projectId as projectId,
+        s.displayOrder as displayOrder,
+        s.created as created,
+        s.version as version,
+        s.totalPoints as totalPoints
+        from SkillDef s, SkillDef subjectDef, SkillRelDef srd
+         where
+            s.projectId = ?1 
+            and s.skillId = ?2
+            and subjectDef = srd.parent 
+            and s = srd.child 
+            and srd.type in ('RuleSetDefinition', 'GroupSkillToSubject')
+            and subjectDef.type = 'Subject'
+            ''')
+    SkillDefSkinny getSkinnySkill(String projectId, String skillId)
 
     @Nullable
     @Query('''SELECT         
@@ -110,6 +134,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     List<SkillDefPartial> findAllByTypeAndNameLikeNoImportedSkills(SkillDef.ContainerType type, String name)
 
     List<SkillDef> findAllByProjectIdAndType(@Nullable String id, SkillDef.ContainerType type)
+    List<SkillDef> findAllByProjectIdAndTypeIn(@Nullable String id, List<SkillDef.ContainerType> type)
 
     @Nullable
     List<SkillDef> findAllByProjectIdAndTypeAndEnabledAndCopiedFromIsNotNull(@Nullable String id, SkillDef.ContainerType type, String enabled)
@@ -460,6 +485,11 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     ''')
     List<Integer> findSkillDefIdsByCopiedFrom(int skillRefId)
 
+    @Query('''
+        select count(s.id) > 0 from SkillDef s where s.copiedFrom = ?1
+    ''')
+    Boolean isCatalogSkillImportedByOtherProjects(int skillRefId)
+
     @Nullable
     @Query('''
         select s.copiedFrom as id from SkillDef s where s.id = ?1
@@ -561,4 +591,34 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
          select exists (select 1 from skill_definition where project_id = :projectId and skill_id = :skillId and read_only = 'true') as isReadOnly
     ''', nativeQuery = true)
     boolean isImportedFromCatalog(@Param('projectId') String projectId, @Param('skillId') String skillId)
+
+    @Query(value = '''
+         select skill_id from skill_definition where project_id = ?1 and copied_from_skill_ref = ?2
+    ''', nativeQuery = true)
+    List<String> getSkillIdsOfReusedSkillsForAGivenSkill(String projectId, Integer originalSkillRef)
+
+
+    @Query('''SELECT
+        s.id as id,
+        s.name as name,
+        s.skillId as skillId,
+        parentDef.skillId as subjectSkillId,
+        parentDef.name as subjectName,
+        s.projectId as projectId,
+        s.displayOrder as displayOrder,
+        s.created as created,
+        s.version as version,
+        s.totalPoints as totalPoints
+        from SkillDef s, SkillDef parentDef, SkillRelDef srd
+         where
+            parentDef.projectId = ?1
+            and parentDef.skillId = ?2 
+            and parentDef = srd.parent 
+            and s = srd.child 
+            and srd.type in ('RuleSetDefinition', 'SkillsGroupRequirement') 
+            and parentDef.type in ('Subject', 'SkillsGroup')
+            and s.type = 'Skill'
+            and s.skillId like '%STREUSESKILLST%'
+            ''')
+    List<SkillDefSkinny> findChildReusedSkills(String projectId, String parentId)
 }

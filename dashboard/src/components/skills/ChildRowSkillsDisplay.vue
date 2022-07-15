@@ -14,22 +14,42 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <loading-container class="child-row" v-bind:is-loading="loading.skills" :data-cy="`childRowDisplay_${skillInfo.skillId}`">
+  <loading-container class="child-row" v-bind:is-loading="loading.skills"
+                     :data-cy="`childRowDisplay_${skillInfo.skillId}`">
 
     <div v-if="isImported" class="mt-3 alert alert-info" header="Skill Catalog">
-      This skill was <b>imported</b> from the <b-badge class=""><i class="fas fa-book"></i> CATALOG</b-badge> and was initially
+      This skill was <b>imported</b> from the
+      <b-badge class=""><i class="fas fa-book"></i> CATALOG</b-badge>
+      and was initially
       defined in the <b class="text-primary">{{ skillInfo.copiedFromProjectName }}</b> project.
-      This skill is <b-badge>Read-Only</b-badge> and can only be edited in the <b class="text-primary">{{ skillInfo.copiedFromProjectName }}</b> project
+      This skill is
+      <b-badge>Read-Only</b-badge>
+      and can only be edited in the <b class="text-primary">{{
+        skillInfo.copiedFromProjectName
+      }}</b> project
+    </div>
+    <div v-if="isReused" class="mt-3 alert alert-info" header="Skill Catalog" data-cy="reusedAlert">
+      This skill is a
+      <b-badge class="text-uppercase"><i class="fas fa-recycle"></i> reused</b-badge>
+      copy
+      of another skill in this project and can only be edited from the
+      <link-to-skill-page v-if="skillId" :project-id="skillInfo.projectId" :skill-id="skillId"
+                          link-label="Original Skill" data-cy="linkToTheOriginalSkill"/>
+      .
     </div>
     <div v-if="isImported && isDisabled" class="mt-3 alert alert-warning" header="Skill Catalog">
-      <i class="fas fa-exclamation-circle"></i> This skill is <b>disabled</b> because import was not finalized yet.
+      <i class="fas fa-exclamation-circle"></i> This skill is <b>disabled</b> because import was not
+      finalized yet.
     </div>
     <div class="row">
       <div class="col-12 col-md-6 mt-2">
-        <media-info-card :title="`${totalPoints} Points`" icon-class="fas fa-calculator text-success"
+        <media-info-card :title="`${totalPoints} Points`"
+                         icon-class="fas fa-calculator text-success"
                          data-cy="skillOverviewTotalpoints">
-          <strong>{{ skillInfo.pointIncrement | number }}</strong> points <i class="fa fa-times text-muted" aria-hidden="true"/>
-          <strong> {{ skillInfo.numPerformToCompletion | number }}</strong> repetition<span v-if="skillInfo.numPerformToCompletion>1">s</span> to Completion
+          <strong>{{ skillInfo.pointIncrement | number }}</strong> points <i
+          class="fa fa-times text-muted" aria-hidden="true"/>
+          <strong> {{ skillInfo.numPerformToCompletion | number }}</strong> repetition<span
+          v-if="skillInfo.numPerformToCompletion>1">s</span> to Completion
         </media-info-card>
       </div>
       <div class="col-12 col-md-6 mt-2">
@@ -99,6 +119,8 @@ limitations under the License.
 </template>
 
 <script>
+  import SkillReuseIdUtil from '@/components/utils/SkillReuseIdUtil';
+  import LinkToSkillPage from '@/components/utils/LinkToSkillPage';
   import LoadingContainer from '../utils/LoadingContainer';
   import SkillsService from './SkillsService';
   import MediaInfoCard from '../utils/cards/MediaInfoCard';
@@ -109,7 +131,12 @@ limitations under the License.
   export default {
     name: 'ChildRowSkillsDisplay',
     mixins: [TimeWindowMixin],
-    components: { MarkdownText, MediaInfoCard, LoadingContainer },
+    components: {
+      LinkToSkillPage,
+      MarkdownText,
+      MediaInfoCard,
+      LoadingContainer,
+    },
     props: {
       projectId: {
         type: String,
@@ -149,6 +176,9 @@ limitations under the License.
       },
     },
     computed: {
+      skillId() {
+        return SkillReuseIdUtil.removeTag(this.skillInfo.skillId);
+      },
       totalPoints() {
         return NumberFilter(this.skillInfo.totalPoints);
       },
@@ -192,7 +222,10 @@ limitations under the License.
         return this.skillInfo.helpUrl;
       },
       isImported() {
-        return this.skillInfo && this.skillInfo.copiedFromProjectId && this.skillInfo.copiedFromProjectId.length > 0;
+        return this.skillInfo && this.skillInfo.copiedFromProjectId && this.skillInfo.copiedFromProjectId.length > 0 && !this.skillInfo.reusedSkill;
+      },
+      isReused() {
+        return this.skillInfo && this.skillInfo.reusedSkill;
       },
       isDisabled() {
         return this.skillInfo && !this.skillInfo.enabled;

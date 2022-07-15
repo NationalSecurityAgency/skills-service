@@ -206,7 +206,7 @@ class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj)
         skillsService.createSkills(skills)
 
-        String otherUser = getRandomUsers(1).first()
+        String otherUser = getRandomUsers(1, false, ['skills@skills.org', DEFAULT_ROOT_USER_ID]).first()
 
         createService(otherUser)
         skillsService.addProjectAdmin(proj.projectId, otherUser)

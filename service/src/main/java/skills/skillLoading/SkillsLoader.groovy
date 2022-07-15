@@ -35,6 +35,7 @@ import skills.services.DependencyValidator
 import skills.services.GlobalBadgesService
 import skills.services.LevelDefinitionStorageService
 import skills.services.admin.SkillsGroupAdminService
+import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.settings.SettingsService
 import skills.settings.CommonSettings
 import skills.skillLoading.model.*
@@ -425,11 +426,14 @@ class SkillsLoader {
 
         SettingsResult helpUrlRootSetting = settingsService.getProjectSetting(crossProjectId ?: projectId, PROP_HELP_URL_ROOT)
         String copiedFromProjectName = skillDef.copiedFromProjectId ? projDefRepo.getProjectName(skillDef.copiedFromProjectId).getProjectName() : null
+
+        String unsanitizedName = InputSanitizer.unsanitizeName(skillDef.name)
+        boolean isReusedSkill = SkillReuseIdUtil.isTagged(unsanitizedName)
         return new SkillSummary(
                 projectId: skillDef.projectId,
                 projectName: InputSanitizer.unsanitizeName(projDef.name),
                 skillId: skillDef.skillId,
-                skill: InputSanitizer.unsanitizeName(skillDef.name),
+                skill: isReusedSkill ? SkillReuseIdUtil.removeTag(unsanitizedName) : unsanitizedName,
                 points: points?.points ?: 0, todaysPoints: todayPoints,
                 pointIncrement: skillDef.pointIncrement,
                 pointIncrementInterval: skillDef.pointIncrementInterval,
@@ -444,8 +448,8 @@ class SkillsLoader {
                 achievedOn: achievedOn,
                 selfReporting: loadSelfReporting(userId, skillDef),
                 type: skillDef.type,
-                copiedFromProjectId: skillDef.copiedFromProjectId,
-                copiedFromProjectName: InputSanitizer.unsanitizeName(copiedFromProjectName),
+                copiedFromProjectId: isReusedSkill ? null : skillDef.copiedFromProjectId,
+                copiedFromProjectName: isReusedSkill ? null : InputSanitizer.unsanitizeName(copiedFromProjectName),
         )
     }
 
@@ -881,11 +885,13 @@ class SkillsLoader {
                 skillsSummary.todaysPoints = skillsSummary.children ? skillsSummary.children.collect({it.todaysPoints}).sort().takeRight(numSkillsRequired).sum() as Integer: 0
                 skillsRes << skillsSummary
             } else if (skillDef.type == SkillDef.ContainerType.Skill) {
+                boolean isReusedSkill = SkillReuseIdUtil.isTagged(skillDef.skillId)
+                String unsanitizedName = InputSanitizer.unsanitizeName(skillDef.name)
                 skillsRes << new SkillSummary(
                         projectId: skillDef.projectId,
                         projectName: InputSanitizer.unsanitizeName(projDef.name),
                         skillId: skillDef.skillId,
-                        skill: InputSanitizer.unsanitizeName(skillDef.name),
+                        skill: isReusedSkill ? SkillReuseIdUtil.removeTag(unsanitizedName) : unsanitizedName,
                         points: points,
                         todaysPoints: todayPoints,
                         pointIncrement: skillDef.pointIncrement,
@@ -897,8 +903,8 @@ class SkillsLoader {
                         subjectName: subjectName,
                         subjectId: subjectId,
                         type: skillDef.type,
-                        copiedFromProjectId: skillDef.copiedFromProjectId,
-                        copiedFromProjectName: InputSanitizer.unsanitizeName(skillDefAndUserPoints.copiedFromProjectName),
+                        copiedFromProjectId: !isReusedSkill ? skillDef.copiedFromProjectId : null,
+                        copiedFromProjectName: !isReusedSkill ? InputSanitizer.unsanitizeName(skillDefAndUserPoints.copiedFromProjectName) : null,
                 )
             }
         }
