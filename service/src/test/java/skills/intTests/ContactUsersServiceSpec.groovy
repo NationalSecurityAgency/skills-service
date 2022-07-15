@@ -453,9 +453,6 @@ class ContactUsersServiceSpec extends DefaultIntSpec {
         String user2Email = userAttrsService.findByUserId(users[2].toLowerCase())?.email
         String user3Email = userAttrsService.findByUserId(users[3].toLowerCase())?.email
 
-        WaitFor.wait { greenMail.getReceivedMessages().size() >= 0 }
-        greenMail.purgeEmailFromAllMailboxes()
-
         when:
         skillsService.contactProjectUsers(proj.projectId, emailSubject, emailBody, false, [skill6.skillId])
 
@@ -464,9 +461,9 @@ class ContactUsersServiceSpec extends DefaultIntSpec {
         def messages = EmailUtils.getEmails(greenMail)
 
         then:
-        messages.find { it.recipients.size() == 1 && it.recipients[0].contains(user2Email) }
-        messages.find { it.recipients.size() == 1 && it.recipients[0].contains(user3Email) }
-        messages[0].html.replaceAll('\r\n', '\n') == '''<!--
+        def user2Message = messages.find { it.recipients.size() == 1 && it.recipients[0].contains(user2Email) }
+        def user3Message = messages.find { it.recipients.size() == 1 && it.recipients[0].contains(user3Email) }
+        user2Message.html.replaceAll('\r\n', '\n') == '''<!--
 Copyright 2020 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -500,7 +497,7 @@ limitations under the License.
 </body>
 </html>'''.replaceAll('\r\n', '\n')
 
-        messages[1].html.replaceAll('\r\n', '\n') == '''<!--
+        user3Message.html.replaceAll('\r\n', '\n') == '''<!--
 Copyright 2020 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
