@@ -195,7 +195,7 @@ limitations under the License.
       getUser(item) {
         if (store.state.authToken === 'pki') {
           return this.isEmpty(item.nickname)
-            ? `${item.lastName}, ${item.firstName} (${item.userId})`
+            ? `${item.firstName} ${item.lastName} (${item.userId})`
             : `${item.nickname} (${item.userId})`;
         }
         return item.userId;
