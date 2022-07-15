@@ -461,9 +461,9 @@ class ContactUsersServiceSpec extends DefaultIntSpec {
         def messages = EmailUtils.getEmails(greenMail)
 
         then:
-        def user2Message = messages.find { it.recipients.size() == 1 && it.recipients[0].contains(user2Email) }
-        def user3Message = messages.find { it.recipients.size() == 1 && it.recipients[0].contains(user3Email) }
-        user2Message.html.replaceAll('\r\n', '\n') == '''<!--
+        messages.find { it.recipients.size() == 1 && it.recipients[0].contains(user2Email) }
+        messages.find { it.recipients.size() == 1 && it.recipients[0].contains(user3Email) }
+        messages[0].html.replaceAll('\r\n', '\n') == '''<!--
 Copyright 2020 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -497,7 +497,7 @@ limitations under the License.
 </body>
 </html>'''.replaceAll('\r\n', '\n')
 
-        user3Message.html.replaceAll('\r\n', '\n') == '''<!--
+        messages[1].html.replaceAll('\r\n', '\n') == '''<!--
 Copyright 2020 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
