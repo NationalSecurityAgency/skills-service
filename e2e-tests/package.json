@@ -89,7 +89,7 @@
     "fake-smtp-server": "0.8.0",
     "license-check-and-add": "4.0.2",
     "license-checker": "25.0.1",
-    "moment": "2.29.2",
+    "moment": "2.29.4",
     "moment-timezone": "0.5.33",
     "number-format.js": "2.0.9",
     "object-scan": "14.0.0",
