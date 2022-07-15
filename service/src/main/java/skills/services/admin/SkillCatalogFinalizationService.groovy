@@ -137,7 +137,7 @@ class SkillCatalogFinalizationService {
                 log.info("Copying [{}] skills UserPoints to the imported project [{}]", skillRefIds.size(), projectId)
                 skillCatalogTransactionalAccessor.copySkillUserPointsToTheImportedProjects(projectId, skillRefIds)
                 log.info("Copying [{}] skills achievements to the imported project [{}]", skillRefIds.size(), projectId)
-                skillCatalogTransactionalAccessor.copySkillAchievementsToTheImportedProjects(projectId, skillRefIds)
+                skillCatalogTransactionalAccessor.copySkillAchievementsToTheImportedProjects(skillRefIds)
                 log.info("Completed import of skill's points and achievements for [{}] skills to [{}] project", skillRefIds.size(), projectId)
 
                 log.info("Identifying group achievements for [{}] groups in project [{}]", groups.size(), projectId)

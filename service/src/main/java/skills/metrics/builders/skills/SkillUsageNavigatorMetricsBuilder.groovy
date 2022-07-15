@@ -19,6 +19,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.metrics.builders.ProjectMetricsBuilder
+import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.utils.InputSanitizer
 
@@ -42,6 +43,7 @@ class SkillUsageNavigatorMetricsBuilder implements ProjectMetricsBuilder {
         Integer numUsersInProgress
         Long lastReportedTimestamp
         Long lastAchievedTimestamp
+        Boolean isReusedSkill
     }
 
     List<SkillUsageNavigatorItem> build(String projectId, String chartId, Map<String, String> props) {
@@ -51,13 +53,14 @@ class SkillUsageNavigatorMetricsBuilder implements ProjectMetricsBuilder {
             Integer numProgress = it.getNumUsersInProgress() ?: 0
             new SkillUsageNavigatorItem(
                     skillId: it.getSkillId(),
-                    skillName: InputSanitizer.unsanitizeName(it.getSkillName()),
+                    skillName: SkillReuseIdUtil.removeTag(InputSanitizer.unsanitizeName(it.getSkillName())),
                     subjectId: it.getSubjectId(),
                     numUserAchieved: numAchieved,
                     numUsersInProgress: numProgress - numAchieved,
                     lastReportedTimestamp: it.getLastReported()?.time,
-                    lastAchievedTimestamp: it.getLastAchieved()?.time
+                    lastAchievedTimestamp: it.getLastAchieved()?.time,
+                    isReusedSkill: SkillReuseIdUtil.isTagged(it.skillId),
             )
-        }
+        }?.sort({ it.skillId })
     }
 }

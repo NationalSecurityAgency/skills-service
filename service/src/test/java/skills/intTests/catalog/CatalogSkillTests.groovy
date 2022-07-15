@@ -30,7 +30,6 @@ import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.SkillDefRepo
-import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -1444,6 +1443,22 @@ class CatalogSkillTests extends CatalogIntSpec {
         threeImportsDifferentSubjects.numberOfSkillsImported == 3
         fourImporstTwoProjectsTwoSubjects.numberOfProjectsImportedFrom == 2
         fourImporstTwoProjectsTwoSubjects.numberOfSkillsImported == 4
+    }
+
+    def "get exported skill usage stats - skill not exported or reused"() {
+        def project1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
+        skillsService.createProjectAndSubjectAndSkills(project1, p1subj1, [skill])
+        when:
+        def res = skillsService.getExportedSkillStats(project1.projectId, skill.skillId)
+        then:
+        res.projectId == project1.projectId
+        res.skillId == skill.skillId
+        !res.isExported
+        !res.users
+        !res.exportedOn
+        !res.isReusedLocally
     }
 
     def "get exported skill usage stats"() {

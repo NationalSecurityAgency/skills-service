@@ -37,27 +37,27 @@ class SkillsFactory {
     }
 
     static Map createSkill(int projNumber = 1, int subjNumber = 1, int skillNumber = 1, int version = 0, int numPerformToCompletion = 1, pointIncrementInterval = 480, pointIncrement = 10, type="Skill") {
-        return [projectId: getDefaultProjId(projNumber), subjectId: getSubjectId(subjNumber),
-                skillId: "skill${skillNumber}${subjNumber > 1 ? "subj" + subjNumber : ""}".toString(),
-                name     : "Test Skill ${skillNumber}${subjNumber > 1 ? " Subject" + subjNumber : "" }".toString(),
-                type     : type, pointIncrement: pointIncrement, numPerformToCompletion: numPerformToCompletion,
+        return [projectId             : getDefaultProjId(projNumber), subjectId: getSubjectId(subjNumber),
+                skillId               : "skill${skillNumber}${subjNumber > 1 ? "subj" + subjNumber : ""}".toString(),
+                name                  : "Test Skill ${skillNumber}${subjNumber > 1 ? " Subject" + subjNumber : ""}".toString(),
+                type                  : type, pointIncrement: pointIncrement, numPerformToCompletion: numPerformToCompletion,
                 pointIncrementInterval: pointIncrementInterval, numMaxOccurrencesIncrementInterval: 1,
-                description: "This skill [skill${skillNumber}] belongs to project [${getDefaultProjId(projNumber)}]".toString(),
-                helpUrl: "http://veryhelpfulwebsite-${skillNumber}".toString(),
-                version  : version]
+                description           : "This skill [skill${skillNumber}] belongs to project [${getDefaultProjId(projNumber)}]".toString(),
+                helpUrl               : "http://veryhelpfulwebsite-${skillNumber}".toString(),
+                version               : version]
     }
 
-    static List<Map> createSkills(int numSkills, int projNumber = 1, int subjNumer = 1l, int pointIncrement = 10) {
-        return (1..numSkills).collect { createSkill(projNumber, subjNumer, it, 0, 1, 480, pointIncrement) }
+    static List<Map> createSkills(int numSkills, int projNumber = 1, int subjNumer = 1l, int pointIncrement = 10, int numPerformToCompletion = 1) {
+        return (1..numSkills).collect { createSkill(projNumber, subjNumer, it, 0, numPerformToCompletion, 480, pointIncrement) }
     }
 
     static List<Map> createSkillsStartingAt(int numSkills, int startingSkillNumber, int projNumber = 1, int subjNumer = 1l, int pointIncrement = 10) {
-        return (startingSkillNumber..numSkills+startingSkillNumber-1).collect { createSkill(projNumber, subjNumer, it, 0, 1, 480, pointIncrement) }
+        return (startingSkillNumber..numSkills + startingSkillNumber - 1).collect { createSkill(projNumber, subjNumer, it, 0, 1, 480, pointIncrement) }
     }
 
     static List<Map> createSkillsWithDifferentVersions(List<Integer> skillVersions, int projNumber = 1, int subjNumber = 1) {
         int num = 1
-        return skillVersions.collect { createSkill(projNumber, subjNumber, num++, it)}
+        return skillVersions.collect { createSkill(projNumber, subjNumber, num++, it) }
     }
 
     static createProject(int projNumber = 1) {

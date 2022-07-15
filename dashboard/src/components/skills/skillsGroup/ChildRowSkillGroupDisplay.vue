@@ -79,6 +79,7 @@ limitations under the License.
                         :subject-id="this.$route.params.subjectId"
                         @skill-removed="skillRemoved"
                         @skills-change="skillChanged"
+                        @skills-reused="skillReused"
                         :disableDeleteButtonsInfo="disableDeleteButtonInfo"
                         :page-size="this.maxSkillsToShow"
                         actions-btn-size="sm"
@@ -306,6 +307,9 @@ limitations under the License.
         };
         this.$emit('group-changed', updatedGroup);
         this.refreshSubjectState();
+      },
+      skillReused(reused) {
+        this.$emit('skills-reused', reused);
       },
       skillChanged(skill) {
         const item1Index = this.skills.findIndex((item) => item.skillId === skill.originalSkillId);

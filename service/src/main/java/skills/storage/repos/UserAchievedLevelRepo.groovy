@@ -403,6 +403,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
                 ua.projectId = :projectId and
                 ua.achievedOn >= :fromDate and
                 ua.achievedOn <= :toDate and 
+                (ua.skillId not like '%STREUSESKILLST%' OR ua.skillId is null) and
                 lower(uAttrs.userIdForDisplay) like lower(CONCAT('%', :userNameFilter, '%')) and
                 (lower(sd.name) like lower(CONCAT('%', :skillNameFilter, '%')) OR (:skillNameFilter = 'ALL')) and
                 (ua.level >= :level OR (:level = -1)) and
@@ -427,6 +428,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
                 ua.projectId = :projectId and
                 ua.achievedOn >= :fromDate and
                 ua.achievedOn <= :toDate and 
+                (ua.skillId not like '%STREUSESKILLST%' OR ua.skillId is null) and
                 lower(uAttrs.userIdForDisplay) like lower(CONCAT('%', :userNameFilter, '%')) and
                 (lower(sd.name) like lower(CONCAT('%', :skillNameFilter, '%')) OR (:skillNameFilter = 'ALL')) and
                 (ua.level >= :level OR (:level = -1)) and
@@ -468,7 +470,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
               where ua.projectId = :projectId and
               ua.skillId = :skillId
     ''')
-    Long countDisinctUsersAchievingSkill(@Param("projectId")String projectId, @Param("skillId") String skillId)
+    Long countDistinctUsersAchievingSkill(@Param("projectId") String projectId, @Param("skillId") String skillId)
 
 
     static interface SkillDayUserCount {
@@ -526,7 +528,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
                 select skill.skill_id as skillId, skill.name as name, subj.skill_id as subjId
                 from skill_definition skill, skill_definition subj, skill_relationship_definition rel
                 where
-                      subj.id = rel.parent_ref_id and skill.id = rel.child_ref_id and rel.type = 'RuleSetDefinition' and
+                      subj.id = rel.parent_ref_id and skill.id = rel.child_ref_id and rel.type in ('RuleSetDefinition', 'GroupSkillToSubject') and
                       subj.project_id = :projectId and subj.type = 'Subject' and
                       skill.project_id = :projectId and skill.type = 'Skill'
                 ) sd
@@ -535,17 +537,14 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
             ) achievements
                 on achievements.skill_id = sd.skillId
             left join (
-                select skill_id, count(distinct user_id) as userInProgress, max(performed_on) as lastPerformed from user_performed_skill
-                where 
-                skill_ref_id in (
-                    select case when skill.copied_from_skill_ref is not null then skill.copied_from_skill_ref else skill.id end as id
-                    from skill_definition skill
-                    where
-                    skill.project_id = :projectId
-                    and skill.type = 'Skill'
-                    and skill.enabled = 'true'
-                )      
-                group by skill_id
+                select skill.skill_id, count(distinct ups.user_id) as userInProgress, max(ups.performed_on) as lastPerformed
+                from skill_definition skill,
+                     user_performed_skill ups
+                where skill.project_id = :projectId
+                  and skill.type = 'Skill'
+                  and skill.enabled = 'true'
+                  and ups.skill_ref_id = case when skill.copied_from_skill_ref is not null then skill.copied_from_skill_ref else skill.id end
+                group by skill.skill_id
             ) performedSkills
                 on sd.skillId = performedSkills.skill_id
            ''', nativeQuery = true)
@@ -595,18 +594,17 @@ where ua.projectId = :projectId and ua.skillId = :skillId
     @Modifying
     @Query(value = '''INSERT INTO user_achievement(user_id, project_id, skill_id, skill_ref_id, points_when_achieved, achieved_on)
             SELECT ua.user_id, toDef.project_id, toDef.skill_id, toDef.id, ua.points_when_achieved, ua.achieved_on
-            FROM user_achievement ua, skill_definition toDef
-            WHERE
-                  toDef.project_id = :toProjectId and 
-                  toDef.skill_id = ua.skill_id and
-                  ua.skill_ref_id in (:fromSkillRefIds)
-                  and not exists (
-                            select 1 from user_achievement innerTable
-                            where
-                              toDef.project_id = innerTable.project_id
-                              and ua.user_id = innerTable.user_id
-                              and toDef.skill_id = innerTable.skill_id
-                          )
+            FROM user_achievement ua,
+                 skill_definition toDef
+            WHERE toDef.copied_from_skill_ref = ua.skill_ref_id
+              and ua.skill_ref_id in (:fromSkillRefIds)
+              and not exists(
+                    select 1
+                    from user_achievement innerTable
+                    where toDef.project_id = innerTable.project_id
+                      and ua.user_id = innerTable.user_id
+                      and toDef.skill_id = innerTable.skill_id
+                )
             ''', nativeQuery = true)
-    void copySkillAchievementsToTheImportedProjects(@Param('toProjectId') String toProjectId, @Param('fromSkillRefIds') List<Integer> fromSkillRefIds)
+    void copySkillAchievementsToTheImportedProjects(@Param('fromSkillRefIds') List<Integer> fromSkillRefIds)
 }

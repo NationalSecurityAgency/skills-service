@@ -29,14 +29,34 @@ limitations under the License.
       <template #option="option">
         <slot name="dropdown-item" :option="option">
           <div :data-cy="`skillsSelectionItem-${option.projectId}-${option.skillId}`">
-            <div class="h5 text-info" data-cy="skillsSelector-skillName">{{ option.name }}</div>
+            <div class="h5 text-info" data-cy="skillsSelector-skillName">{{ option.name }}
+              <b-badge v-if="option.isReused" variant="success" size="sm" class="text-uppercase"
+                       data-cy="reusedBadge"
+                       style="font-size: 0.85rem !important;"><i class="fas fa-recycle"></i> reused
+              </b-badge>
+            </div>
             <div class="" style="font-size: 0.8rem;">
               <span>
-                <span v-if="showProject" data-cy="skillsSelectionItem-projectId"><span class="text-uppercase mr-1 font-italic">Project ID:</span><span class="font-weight-bold" data-cy="skillsSelector-projectId">{{option.projectId}}</span></span>
-                <span v-if="!showProject" data-cy="skillsSelectionItem-skillId"><span class="text-uppercase mr-1 font-italic">ID:</span><span class="font-weight-bold" data-cy="skillsSelector-skillId">{{option.skillId}}</span></span>
+                <span v-if="showProject" data-cy="skillsSelectionItem-projectId"><span
+                  class="text-uppercase mr-1 font-italic">Project ID:</span><span
+                  class="font-weight-bold"
+                  data-cy="skillsSelector-projectId">{{ option.projectId }}</span></span>
+                <span v-if="!showProject" data-cy="skillsSelectionItem-skillId"><span
+                  class="text-uppercase mr-1 font-italic">ID:</span><span class="font-weight-bold"
+                                                                          data-cy="skillsSelector-skillId">{{
+                    removeReuseTag(option.skillId)
+                  }}</span></span>
               </span>
               <span class="mx-2">|</span>
-              <span class="text-uppercase mr-1 font-italic" data-cy="skillsSelectionItem-subjectId">Subject:</span><span class="font-weight-bold" data-cy="skillsSelector-subjectName">{{option.subjectName}}</span>
+              <span class="text-uppercase mr-1 font-italic" data-cy="skillsSelectionItem-subjectId">Subject:</span><span
+              class="font-weight-bold"
+              data-cy="skillsSelector-subjectName">{{ option.subjectName }}</span>
+              <span v-if="option.groupName">
+                <span class="mx-2">|</span>
+                <span class="text-uppercase mr-1 font-italic" data-cy="skillsSelectionItem-group">Group:</span><span
+                class="font-weight-bold"
+                data-cy="skillsSelector-groupName">{{ option.groupName }}</span>
+              </span>
             </div>
           </div>
         </slot>
@@ -69,6 +89,7 @@ limitations under the License.
 
 <script>
   import vSelect from 'vue-select';
+  import SkillReuseIdUtil from '@/components/utils/SkillReuseIdUtil';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
 
   export default {
@@ -144,6 +165,9 @@ limitations under the License.
       },
     },
     methods: {
+      removeReuseTag(val) {
+        return SkillReuseIdUtil.removeTag(val);
+      },
       setSelectedInternal() {
         if (this.selected) {
           this.selectedInternal = this.selected.map((entry) => ({ entryId: `${entry.projectId}_${entry.skillId}`, ...entry }));

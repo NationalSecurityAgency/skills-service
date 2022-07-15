@@ -15,15 +15,12 @@
  */
 package skills.intTests.metrics.skills
 
-
 import groovy.time.TimeCategory
-import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.metrics.builders.MetricsParams
-import skills.storage.repos.UserAchievedLevelRepo
-import skills.storage.repos.UserPointsRepo
-import spock.lang.IgnoreRest
+
+import static skills.intTests.utils.SkillsFactory.*
 
 class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
 
@@ -75,6 +72,80 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
         skillsService.createSkills(skills)
+
+        List<Date> days
+
+        use(TimeCategory) {
+            days = (5..0).collect { int day -> day.days.ago }
+            days.eachWithIndex { Date date, int index ->
+                users.subList(0, index).each { String user ->
+                    skills.subList(0, index).each { skill ->
+                        skillsService.addSkill([projectId: proj.projectId, skillId: skill.skillId], user, date)
+                    }
+                }
+            }
+        }
+
+        Map props = [:]
+        props[MetricsParams.P_SKILL_ID] = skills[0].skillId
+
+        when:
+        def res = skillsService.getMetricsData(proj.projectId, metricsId, props)
+
+        then:
+        res.size() == 10
+        def skill1 = res.find { it.skillId == 'skill1' }
+        skill1.subjectId == subj.subjectId
+        skill1.numUserAchieved == 1
+        skill1.numUsersInProgress == 4
+        new Date(skill1.lastReportedTimestamp) == days[5]
+        new Date(skill1.lastAchievedTimestamp) == days[5]
+
+        def skill2 = res.find { it.skillId == 'skill2' }
+        skill2.numUserAchieved == 0
+        skill2.numUsersInProgress == 5
+        new Date(skill2.lastReportedTimestamp) == days[5]
+        !skill2.lastAchievedTimestamp
+
+        def skill3 = res.find { it.skillId == 'skill3' }
+        skill3.numUserAchieved == 0
+        skill3.numUsersInProgress == 5
+        new Date(skill3.lastReportedTimestamp) == days[5]
+        !skill3.lastAchievedTimestamp
+
+        def skill4 = res.find { it.skillId == 'skill4' }
+        skill4.numUserAchieved == 0
+        skill4.numUsersInProgress == 5
+        new Date(skill4.lastReportedTimestamp) == days[5]
+        !skill4.lastAchievedTimestamp
+
+        def skill5 = res.find { it.skillId == 'skill5' }
+        skill5.numUserAchieved == 0
+        skill5.numUsersInProgress == 5
+        new Date(skill5.lastReportedTimestamp) == days[5]
+        !skill5.lastAchievedTimestamp
+
+        def skill6 = res.find { it.skillId == 'skill6' }
+        skill6.numUserAchieved == 0
+        skill6.numUsersInProgress == 0
+        !skill6.lastReportedTimestamp
+        !skill6.lastAchievedTimestamp
+    }
+
+    def "group skills with usage and achievements"() {
+        List<String> users = getRandomUsers(10)
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def group = SkillsFactory.createSkillsGroup(1, 1, 22)
+        List<Map> skills = SkillsFactory.createSkills(10)
+        skills.each { it.pointIncrement = 100; it.numPerformToCompletion = 5 }
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills([group])
+        skills.each {
+            skillsService.assignSkillToSkillsGroup(group.skillId, it)
+        }
 
         List<Date> days
 
@@ -358,5 +429,90 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
         skill6.numUsersInProgress == 0
         !skill6.lastReportedTimestamp
         !skill6.lastAchievedTimestamp
+    }
+
+    def "metrics endpoint returns proper counts for imported skills"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 2)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        p1Skills.each {
+            skillsService.exportSkillToCatalog(it.projectId, it.skillId)
+        }
+
+        def p2 = createProject(2)
+        def p2subj2 = createSubject(2, 2)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj2, [])
+
+        skillsService.bulkImportSkillsFromCatalogAndFinalize(p2.projectId, p2subj2.subjectId,
+                [[projectId: p1.projectId, skillId: p1Skills[0].skillId]])
+
+        List<Date> dates = (5..1).collect { new Date() - it }
+        List<String> users = getRandomUsers(5)
+        skillsService.addSkill(p1Skills[0], users[0], dates[4])
+
+        skillsService.addSkill(p1Skills[0], users[1], dates[0])
+        skillsService.addSkill(p1Skills[0], users[1], dates[1])
+
+        skillsService.addSkill(p1Skills[0], users[2], dates[2])
+        skillsService.addSkill(p1Skills[0], users[2], dates[3])
+
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        Map props = [:]
+        when:
+        def res = skillsService.getMetricsData(p2.projectId, "skillUsageNavigatorChartBuilder", props)
+        then:
+        res.skillName == [p1Skills[0].name]
+        res.skillId == [p1Skills[0].skillId]
+        res.isReusedSkill == [false]
+        res.numUsersInProgress == [1]
+        res.numUserAchieved == [2]
+        res.lastReportedTimestamp == [dates[4].time]
+        res.lastAchievedTimestamp == [dates[3].time]
+    }
+
+    def "metrics endpoint returns proper counts for imported group skills"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1subj1g1 = createSkillsGroup(1, 1, 11)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [p1subj1g1])
+        def p1Skills = createSkills(3, 1, 1, 100, 2)
+        p1Skills.each {
+            skillsService.assignSkillToSkillsGroup(p1subj1g1.skillId, it)
+            skillsService.exportSkillToCatalog(it.projectId, it.skillId)
+        }
+
+        def p2 = createProject(2)
+        def p2subj2 = createSubject(2, 2)
+        def p2subj2g2 = createSkillsGroup(2, 2, 22)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj2, [p2subj2g2])
+
+        skillsService.bulkImportSkillsIntoGroupFromCatalogAndFinalize(p2.projectId, p2subj2.subjectId, p2subj2g2.skillId,
+                [[projectId: p1.projectId, skillId: p1Skills[0].skillId]])
+
+        List<Date> dates = (5..1).collect { new Date() - it }
+        List<String> users = getRandomUsers(5)
+        skillsService.addSkill(p1Skills[0], users[0], dates[4])
+
+        skillsService.addSkill(p1Skills[0], users[1], dates[0])
+        skillsService.addSkill(p1Skills[0], users[1], dates[1])
+
+        skillsService.addSkill(p1Skills[0], users[2], dates[2])
+        skillsService.addSkill(p1Skills[0], users[2], dates[3])
+
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        Map props = [:]
+        when:
+        def res = skillsService.getMetricsData(p2.projectId, "skillUsageNavigatorChartBuilder", props)
+        then:
+        res.skillName == [p1Skills[0].name]
+        res.skillId == [p1Skills[0].skillId]
+        res.isReusedSkill == [false]
+        res.numUsersInProgress == [1]
+        res.numUserAchieved == [2]
+        res.lastReportedTimestamp == [dates[4].time]
+        res.lastAchievedTimestamp == [dates[3].time]
     }
 }

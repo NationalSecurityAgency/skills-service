@@ -36,6 +36,7 @@ import skills.controller.result.model.SkillDefPartialRes
 import skills.controller.result.model.SkillDefRes
 import skills.controller.result.model.SkillDefSkinnyRes
 import skills.services.*
+import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDef.SelfReportingType
@@ -115,7 +116,8 @@ class SkillsAdminService {
     ProjDefRepo projDefRepo
 
     protected static class SaveSkillTmpRes {
-        boolean isAvailableInCatalog = false
+        // because of the skill re-use it could be imported but NOT available in the catalog
+        boolean isImportedByOtherProjects = false
         String projectId
         String skillId
         Integer skillRefId
@@ -214,13 +216,17 @@ class SkillsAdminService {
             pointIncrementDelta = isSkillsGroup ? 0 : incrementRequested - skillDefinition.pointIncrement
 
             if (skillRequest instanceof ReplicatedSkillUpdateRequest) {
-                //once a skill has been imported into a project, we don't want to update that imported
-                //version's point increment as importing users are allowed to scale the total points
-                //to be in line with their project's point layout. However, we do need to update the number of occurrences
-                //on imported skills if that changes on the original exported skill
-                skillRequest.pointIncrement = skillDefinition.pointIncrement
+
+                // point increment is mutated in case of re-used skills
+                if (!SkillReuseIdUtil.isTagged(skillRequest.skillId)) {
+                    //once a skill has been imported into a project, we don't want to update that imported
+                    //version's point increment as importing users are allowed to scale the total points
+                    //to be in line with their project's point layout. However, we do need to update the number of occurrences
+                    //on imported skills if that changes on the original exported skill
+                    skillRequest.pointIncrement = skillDefinition.pointIncrement
+                    pointIncrementDelta = 0
+                }
                 totalPointsRequested = skillRequest.pointIncrement * skillRequest.numPerformToCompletion
-                pointIncrementDelta = 0
             }
 
             Props.copy(skillRequest, skillDefinition, "childSkills", 'version', 'selfReportType')
@@ -322,7 +328,7 @@ class SkillsAdminService {
                         groupChildSkills
                 )
             }
-            saveSkillTmpRes.isAvailableInCatalog = skillCatalogService.isAvailableInCatalog(savedSkill.projectId, savedSkill.skillId)
+            saveSkillTmpRes.isImportedByOtherProjects = skillDefRepo.isCatalogSkillImportedByOtherProjects(savedSkill.id)
         }
 
         log.debug("Saved [{}]", savedSkill)
@@ -471,13 +477,11 @@ class SkillsAdminService {
 
     @Profile
     private void removeCatalogImportedSkills(SkillDef skillDefinition) {
-        if (skillCatalogService.isAvailableInCatalog(skillDefinition)) {
-            List<SkillDef> related = skillCatalogService.getRelatedSkills(skillDefinition)
-            log.info("catalog skill is being deleted, deleting [{}] copies imported into other projects", related?.size())
-            related?.each {
-                SkillDef subjectParent = ruleSetDefGraphService.getMySubjectParent(it.id)
-                deleteSkill(it.projectId, subjectParent.skillId, it.skillId)
-            }
+        List<SkillDefWithExtra> related = skillDefWithExtraRepo.findSkillsCopiedFrom(skillDefinition.id)
+        log.info("catalog skill is being deleted, deleting [{}] copies imported into other projects", related?.size())
+        related?.each {
+            SkillDef subjectParent = ruleSetDefGraphService.getMySubjectParent(it.id)
+            deleteSkill(it.projectId, subjectParent.skillId, it.skillId)
         }
     }
 
@@ -562,7 +566,22 @@ class SkillsAdminService {
     @Transactional(readOnly = true)
     List<SkillDefSkinnyRes> getSkinnySkills(String projectId, String skillNameQuery, boolean excludeImportedSkills = false, boolean includeDisabled = false) {
         List<SkillDefSkinny> data = loadSkinnySkills(projectId, skillNameQuery, excludeImportedSkills, includeDisabled)
-        List<SkillDefPartialRes> res = data.collect { convertToSkillDefSkinnyRes(it) }?.sort({ it.skillId })
+        List<SkillDefSkinnyRes> res = data.collect { convertToSkillDefSkinnyRes(it) }?.sort({ it.skillId })
+
+        // do not hit on the reuse tag
+        if (StringUtils.isNoneBlank(skillNameQuery)) {
+            Boolean hasReusedSkills = res.find { it.isReused }
+            if (hasReusedSkills) {
+                res = res.findAll { it.name.toUpperCase().contains(skillNameQuery.toUpperCase()) }
+            }
+        }
+        return res
+    }
+
+    @Transactional(readOnly = true)
+    SkillDefSkinnyRes getSkinnySkill(String projectId, String skillId) {
+        SkillDefSkinny data = loadSkinnySkill(projectId, skillId)
+        SkillDefSkinnyRes res = convertToSkillDefSkinnyRes(data)
         return res
     }
 
@@ -654,7 +673,7 @@ class SkillsAdminService {
         if (skillDef.type == SkillDef.ContainerType.SkillsGroup) {
             List<SkillDef> groupChildSkills = skillsGroupAdminService.getSkillsGroupChildSkills(skillDef.getId())
             res.numSkillsInGroup = groupChildSkills.size()
-            res.numSelfReportSkills = groupChildSkills.count( {it.selfReportingType })?.intValue()
+            res.numSelfReportSkills = groupChildSkills.count({ it.selfReportingType })?.intValue()
             res.enabled = Boolean.valueOf(skillDef.enabled)
         }
         if (skillDef.groupId) {
@@ -664,6 +683,8 @@ class SkillsAdminService {
             res.groupId = skillsGroup.skillId
         }
         res.name = InputSanitizer.unsanitizeName(res.name)
+        res.reusedSkill = SkillReuseIdUtil.isTagged(res.skillId)
+        res.name = SkillReuseIdUtil.removeTag(res.name)
 
         return res
     }
@@ -671,16 +692,21 @@ class SkillsAdminService {
     @CompileStatic
     @Profile
     private SkillDefSkinnyRes convertToSkillDefSkinnyRes(SkillDefSkinny skinny) {
+        String unsanitizedName = InputSanitizer.unsanitizeName(skinny.name)
+        String groupName = skinny.groupId ? skillDefAccessor.getSkillDef(skinny.projectId, skinny.groupId).name : null
         SkillDefSkinnyRes res = new SkillDefSkinnyRes(
                 skillId: skinny.skillId,
                 projectId: skinny.projectId,
-                name: InputSanitizer.unsanitizeName(skinny.name),
+                name: SkillReuseIdUtil.removeTag(unsanitizedName),
                 subjectId: skinny.subjectSkillId,
                 subjectName: InputSanitizer.unsanitizeName(skinny.subjectName),
                 version: skinny.version,
                 displayOrder: skinny.displayOrder,
                 created: skinny.created,
                 totalPoints: skinny.totalPoints,
+                isReused: SkillReuseIdUtil.isTagged(skinny.skillId),
+                groupName: groupName,
+                groupId: skinny.groupId,
         )
         return res;
     }
@@ -688,10 +714,12 @@ class SkillsAdminService {
     @CompileStatic
     @Profile
     private SkillDefPartialRes convertToSkillDefPartialRes(SkillDefPartial partial, boolean loadNumUsers = false) {
+        boolean reusedSkill = SkillReuseIdUtil.isTagged(partial.skillId)
+        String unsanitizeName = InputSanitizer.unsanitizeName(partial.name)
         SkillDefPartialRes res = new SkillDefPartialRes(
                 skillId: partial.skillId,
                 projectId: partial.projectId,
-                name: InputSanitizer.unsanitizeName(partial.name),
+                name: reusedSkill ? SkillReuseIdUtil.removeTag(unsanitizeName) : unsanitizeName,
                 subjectId: partial.subjectSkillId,
                 subjectName: InputSanitizer.unsanitizeName(partial.subjectName),
                 pointIncrement: partial.pointIncrement,
@@ -710,7 +738,8 @@ class SkillsAdminService {
                 readOnly: partial.readOnly,
                 copiedFromProjectId: partial.copiedFromProjectId,
                 copiedFromProjectName: InputSanitizer.unsanitizeName(partial.copiedFromProjectName),
-                sharedToCatalog: partial.sharedToCatalog
+                sharedToCatalog: partial.sharedToCatalog,
+                reusedSkill: reusedSkill,
         )
 
         if (partial.skillType == SkillDef.ContainerType.Skill) {
@@ -752,11 +781,16 @@ class SkillsAdminService {
     }
 
     @Profile
+    private SkillDefSkinny loadSkinnySkill(String projectId, String skillId) {
+        return skillDefRepo.getSkinnySkill(projectId, skillId)
+    }
+
+    @Profile
     private List<SkillDefSkinny> loadSkinnySkills(String projectId) {
         this.loadSkinnySkills(projectId, '')
     }
 
-    private void validateSkillVersion(SkillRequest skillRequest){
+    private void validateSkillVersion(SkillRequest skillRequest) {
         int latestSkillVersion = findLatestSkillVersion(skillRequest.projectId)
         if (skillRequest.version > (latestSkillVersion + 1)) {
             throw new SkillException("Latest skill version is [${latestSkillVersion}]; max supported version is latest+1 but provided [${skillRequest.version}] version", skillRequest.projectId, skillRequest.skillId, skills.controller.exceptions.ErrorCode.BadParam)

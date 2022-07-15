@@ -29,7 +29,7 @@ limitations under the License.
       <b-badge variant="info">{{ finalizeInfo.numSkillsToFinalize }}</b-badge>
       imported skill{{ sOrNone(finalizeInfo.numSkillsToFinalize) }}! The process may take a few
       minutes.
-      <import-finalize-progress />
+      <lengthy-operation-progress-bar name="Finalize" class="mb-3"/>
     </b-alert>
     <b-alert :show="!finalizeInfo.finalizeSuccessfullyCompleted && !finalizeInfo.finalizeCompletedAndFailed && !finalizeInfo.finalizeIsRunning" variant="warning">
       <i class="fas fa-exclamation-circle"></i> There
@@ -49,7 +49,7 @@ limitations under the License.
   import { createNamespacedHelpers } from 'vuex';
   import FinalizePreviewModal from '@/components/skills/catalog/FinalizePreviewModal';
   import SettingsService from '@/components/settings/SettingsService';
-  import ImportFinalizeProgress from '@/components/skills/catalog/ImportFinalizeProgress';
+  import LengthyOperationProgressBar from '@/components/utils/LengthyOperationProgressBar';
 
   const subjectSkills = createNamespacedHelpers('subjectSkills');
   const subjects = createNamespacedHelpers('subjects');
@@ -58,7 +58,10 @@ limitations under the License.
 
   export default {
     name: 'ImportFinalizeAlert',
-    components: { ImportFinalizeProgress, FinalizePreviewModal },
+    components: {
+      LengthyOperationProgressBar,
+      FinalizePreviewModal,
+    },
     computed: {
       dashboardSkillsCatalogGuide() {
         return `${this.$store.getters.config.docsHost}/dashboard/user-guide/skills-catalog.html#finalization`;

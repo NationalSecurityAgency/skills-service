@@ -33,6 +33,7 @@ import skills.services.admin.DataIntegrityExceptionHandlers
 import skills.services.admin.DisplayOrderService
 import skills.services.admin.SkillsAdminService
 import skills.services.admin.SkillsDepsService
+import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.inception.InceptionProjectService
 import skills.services.settings.SettingsService
 import skills.storage.accessors.SkillDefAccessor
@@ -122,7 +123,9 @@ class GlobalBadgesService {
     @Transactional()
     void addSkillToBadge(String badgeId, String projectId, String skillId) {
         SkillDef skillDef = skillDefAccessor.getSkillDef(projectId, skillId)
+        SkillsValidator.isTrue(!skillId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "Skill ID must not contain reuse tag", projectId, skillId)
         SkillsValidator.isTrue(!skillDef.readOnly, "Imported Skills may not be added as Global Badge Dependencies", projectId, skillId)
+
         assignGraphRelationship(badgeId, SkillDef.ContainerType.GlobalBadge, projectId, skillId, RelationshipType.BadgeRequirement)
     }
 

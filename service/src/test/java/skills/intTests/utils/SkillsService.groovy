@@ -424,7 +424,7 @@ class SkillsService {
         wsHelper.adminGet(getSkillUrl(props.projectId, props.subjectId, props.skillId), props)
     }
 
-    def getSkillsForProject(String projectId, String optionalSkillNameQuery = "", boolean excludeImportedSkills = false, boolean includeDisabled = false) {
+    def getSkillsForProject(String projectId, String optionalSkillNameQuery = "", boolean excludeImportedSkills = false, boolean includeDisabled = false, boolean excludeReusedSkills = false) {
         String query = optionalSkillNameQuery ? "?skillNameQuery=${optionalSkillNameQuery}" : ''
         if (excludeImportedSkills) {
             String append = "excludeImportedSkills=true"
@@ -432,6 +432,10 @@ class SkillsService {
         }
         if (includeDisabled) {
             String append = "includeDisabled=true"
+            query = query.contains("?") ? "${query}&${append}" : "${query}?${append}"
+        }
+        if (excludeReusedSkills) {
+            String append = "excludeReusedSkills=true"
             query = query.contains("?") ? "${query}&${append}" : "${query}?${append}"
         }
 
@@ -1319,6 +1323,24 @@ class SkillsService {
         def res = this.bulkImportSkillsFromCatalog(importIntoProjectId, importIntoSubjectId, [[projectId: catalogSkillProjectId, skillId: catalogSkillSkillId]])
         finalizeSkillsImportFromCatalog(importIntoProjectId)
         return res
+    }
+
+    def reuseSkillInAnotherSubject(String projectId, String skillId, String otherSubjectId) {
+        return reuseSkills(projectId, [skillId], otherSubjectId)
+    }
+
+    def reuseSkills(String projectId, List<String> skillIds, String otherSubjectId, String otherGroupId = null) {
+        return wsHelper.adminPost("/projects/${projectId}/skills/reuse", [subjectId: otherSubjectId, skillIds: skillIds, groupId: otherGroupId])
+    }
+
+    def getReusedSkills(String projectId, String parentSkillId) {
+        String url = "/projects/${projectId}/reused/${parentSkillId}/skills"
+        return wsHelper.adminGet(url)
+    }
+
+    def getReuseDestinationsForASkill(String projectId, String skillId) {
+        String url = "/projects/${projectId}/skills/${skillId}/reuse/destinations"
+        return wsHelper.adminGet(url)
     }
 
     def bulkExportSkillsToCatalog(String projectId, List<String> skillIds) {

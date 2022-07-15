@@ -842,12 +842,34 @@ Cypress.Commands.add('formRequest', (method, url, formData, onComplete) => {
 Cypress.Commands.add("uploadCustomIcon", (fileName, url) => {
     const method = 'POST';
     const fileType = 'image/png';
-    cy.fixture(fileName, 'binary').then( (excelBin) => {
-        const blob = Cypress.Blob.binaryStringToBlob(excelBin, fileType)
-        const formData = new FormData();
-        formData.set('customIcon', blob, fileName);
-        cy.formRequest(method, url, formData, function (response) {
-            expect(response.status).to.eq(200);
+    cy.fixture(fileName, 'binary')
+        .then((excelBin) => {
+            const blob = Cypress.Blob.binaryStringToBlob(excelBin, fileType);
+            const formData = new FormData();
+            formData.set('customIcon', blob, fileName);
+            cy.formRequest(method, url, formData, function (response) {
+                expect(response.status)
+                    .to
+                    .eq(200);
+            });
         });
+});
+
+Cypress.Commands.add('reuseSkillIntoAnotherSubject', (projNum, skillNum, toSubjNum) => {
+    const url = `/admin/projects/proj${projNum}/skills/reuse`;
+    cy.request('POST', url, {
+        subjectId: `subj${toSubjNum}`,
+        skillIds: [`skill${skillNum}`]
+    });
+});
+
+Cypress.Commands.add('reuseSkillIntoAnotherGroup', (projNum, skillNum, toSubjNum, groupNum) => {
+    cy.log(groupNum);
+    const groupId = `group${groupNum}${toSubjNum > 1 ? `Subj${toSubjNum}` : ''}`;
+    const url = `/admin/projects/proj${projNum}/skills/reuse`;
+    cy.request('POST', url, {
+        subjectId: `subj${toSubjNum}`,
+        groupId,
+        skillIds: [`skill${skillNum}`]
     });
 });

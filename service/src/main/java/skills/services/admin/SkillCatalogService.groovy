@@ -33,6 +33,7 @@ import skills.controller.request.model.SkillImportRequest
 import skills.controller.request.model.SkillRequest
 import skills.controller.result.model.*
 import skills.services.RuleSetDefGraphService
+import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.events.pointsAndAchievements.InsufficientPointsForFinalizationValidator
 import skills.services.events.pointsAndAchievements.InsufficientPointsValidator
 import skills.storage.accessors.ProjDefAccessor
@@ -259,19 +260,39 @@ class SkillCatalogService {
         return skillDefRepo.isImportedFromCatalog(projectId, skillId)
     }
 
-    private void importSkillFromCatalog(String projectIdFrom, String skillIdFrom, String projectIdTo, SkillDef subjectTo, String groupId) {
-        boolean inCatalog = isAvailableInCatalog(projectIdFrom, skillIdFrom)
-        SkillsValidator.isTrue(inCatalog, "Skill [${skillIdFrom}] from project [${projectIdFrom}] has not been shared to the catalog and may not be imported")
+    private Integer getNextReuseTagCount(String projectIdTo, SkillDefWithExtra original) {
+        List<String> existingImportedSkillIds = skillDefRepo.getSkillIdsOfReusedSkillsForAGivenSkill(projectIdTo, original.id)
+        if (!existingImportedSkillIds) {
+            return 0
+        }
+        Integer maxValue = existingImportedSkillIds.collect { SkillReuseIdUtil.extractReuseCounter(it) }.max()
+        return maxValue + 1
+    }
+
+    void importSkillFromCatalog(String projectIdFrom, String skillIdFrom, String projectIdTo, SkillDef subjectTo, String groupId, boolean isReusedSkill = false) {
+        if (!isReusedSkill) {
+            boolean inCatalog = isAvailableInCatalog(projectIdFrom, skillIdFrom)
+            SkillsValidator.isTrue(inCatalog, "Skill [${skillIdFrom}] from project [${projectIdFrom}] has not been shared to the catalog and may not be imported")
+        }
         projDefAccessor.getProjDef(projectIdFrom)
 
         SkillDefWithExtra original = skillAccessor.getSkillDefWithExtra(projectIdFrom, skillIdFrom)
 
-        if (skillDefRepo.existsByProjectIdAndSkillIdAllIgnoreCase(projectIdTo, skillIdFrom)) {
-            throw new SkillException("Cannot import Skill from catalog, [${skillIdFrom}] already exists in Project", projectIdTo, skillIdFrom)
+        String newName = original.name
+        String newSkillId = original.skillId
+
+        if (isReusedSkill) {
+            Integer reuseCounter = getNextReuseTagCount(projectIdTo, original)
+            newName = SkillReuseIdUtil.addTag(original.name, reuseCounter)
+            newSkillId = SkillReuseIdUtil.addTag(original.skillId, reuseCounter)
         }
 
-        if (skillDefRepo.existsByProjectIdAndNameAndTypeAllIgnoreCase(projectIdTo, original.name, SkillDef.ContainerType.Skill)) {
-            throw new SkillException("Cannot import Skill from catalog, [${original.name}] already exists in Project", projectIdTo, skillIdFrom)
+        if (skillDefRepo.existsByProjectIdAndSkillIdAllIgnoreCase(projectIdTo, newSkillId)) {
+            throw new SkillException("Cannot import Skill from catalog, [${newSkillId}] already exists in Project", projectIdTo, skillIdFrom)
+        }
+
+        if (skillDefRepo.existsByProjectIdAndNameAndTypeAllIgnoreCase(projectIdTo, newName, SkillDef.ContainerType.Skill)) {
+            throw new SkillException("Cannot import Skill from catalog, [${newName}] already exists in Project", projectIdTo, skillIdFrom)
         }
 
         SkillImportRequest copy = new SkillImportRequest()
@@ -286,13 +307,15 @@ class SkillCatalogService {
         copy.numPerformToCompletion = numToCompletion
         copy.selfReportingType = original.selfReportingType?.toString()
         copy.enabled = Boolean.FALSE.toString()
+        copy.name = newName
+        copy.skillId = newSkillId
 
         skillsAdminService.saveSkill(copy.skillId, copy, true, groupId)
     }
 
     @Transactional
     @Profile
-    void importSkillsFromCatalog(String projectIdTo, String subjectIdTo, List<CatalogSkill> listOfSkills, String groupIdTo = null) {
+    void importSkillsFromCatalog(String projectIdTo, String subjectIdTo, List<CatalogSkill> listOfSkills, String groupIdTo = null, boolean isReusedSkill = false) {
         if (skillCatalogFinalizationService.getCurrentState(projectIdTo) == SkillCatalogFinalizationService.FinalizeState.RUNNING) {
             throw new SkillException("Cannot import skills in the middle of the finalization process", projectIdTo)
         }
@@ -328,7 +351,7 @@ class SkillCatalogService {
                 validateProjectIds.add(it.projectId)
             }
 
-            importSkillFromCatalog(it.projectId, it.skillId, projectIdTo, subjectTo, groupIdTo)
+            importSkillFromCatalog(it.projectId, it.skillId, projectIdTo, subjectTo, groupIdTo, isReusedSkill)
         }
     }
 
@@ -412,28 +435,18 @@ class SkillCatalogService {
 
     @Transactional
     List<SkillDef> getRelatedSkills(SkillDef skillDef) {
-        List<SkillDef> related = []
-        if (isAvailableInCatalog(skillDef.projectId, skillDef.skillId)) {
-            related = skillDefRepo.findSkillsCopiedFrom(skillDef.id)
-        } else if (skillDef.copiedFrom != null) {
-            related = skillDefRepo.findSkillsCopiedFrom(skillDef.copiedFrom)
-            related = related?.findAll { it.id != skillDef.id }
-            SkillDef og = skillDefRepo.findById(skillDef.copiedFrom)
-            if (og) {
-                related.add(og)
-            }
-        }
-
-        return related
+        return this.doGetRelatedSkills(skillDef)
     }
 
     @Transactional
-    @Profile
     List<SkillDefWithExtra> getRelatedSkills(SkillDefWithExtra skillDefWithExtra) {
-        List<SkillDefWithExtra> related = []
-        if (isAvailableInCatalog(skillDefWithExtra.projectId, skillDefWithExtra.skillId)) {
-            related = skillDefWithExtraRepo.findSkillsCopiedFrom(skillDefWithExtra.id)
-        } else if (skillDefWithExtra.copiedFrom != null) {
+        return this.doGetRelatedSkills(skillDefWithExtra)
+    }
+
+    @Profile
+    private List<SkillDefWithExtra> doGetRelatedSkills(SkillDefParent skillDefWithExtra) {
+        List<SkillDefWithExtra> related = skillDefWithExtraRepo.findSkillsCopiedFrom(skillDefWithExtra.id)
+        if (!related && skillDefWithExtra.copiedFrom != null) {
             related = skillDefWithExtraRepo.findSkillsCopiedFrom(skillDefWithExtra.copiedFrom)
             related = related?.findAll { it.id != skillDefWithExtra.id }
             SkillDefWithExtra og = skillDefWithExtraRepo.findById(skillDefWithExtra.copiedFrom)
@@ -490,37 +503,46 @@ class SkillCatalogService {
             copy.numPerformToCompletion = og.totalPoints / og.pointIncrement
             copy.subjectId = skillRelDefRepo.findSubjectSkillIdByChildId(imported.id)
             copy.selfReportingType = og.selfReportingType?.toString()
+            if (SkillReuseIdUtil.isTagged(imported.skillId)) {
+                Integer reuseCounter = SkillReuseIdUtil.extractReuseCounter(imported.skillId)
+                copy.skillId = SkillReuseIdUtil.addTag(og.skillId, reuseCounter)
+                copy.name = SkillReuseIdUtil.addTag(og.name, reuseCounter)
+            }
             skillsAdminService.saveSkill(imported.skillId, copy)
         }
     }
 
     @Transactional
     ExportedSkillStats getExportedSkillStats(String projectId, String skillId) {
-        if (!isAvailableInCatalog(projectId, skillId)) {
-            throw new SkillException("Skill is not shared to the catalog", projectId, skillId)
-        }
+        ExportedSkillStats stats = new ExportedSkillStats(
+                projectId: projectId,
+                skillId: skillId,
+                isExported: false,
+                isReusedLocally: false,
+                users: [])
 
-        ExportedSkillStats stats = new ExportedSkillStats()
-        ExportedSkill es = exportedSkillRepo.getCatalogSkill(projectId, skillId)
-        stats.projectId = projectId
-        stats.skillId = skillId
-        stats.exportedOn = es.created
-        stats.users = []
-        List<SkillDef> copies = skillDefRepo.findSkillsCopiedFrom(es.skill.id)
-        copies?.each {
-            SkillDef maybeSubject = relationshipService.getParentSkill(it)
-            if (maybeSubject.type == SkillDef.ContainerType.SkillsGroup) {
-                maybeSubject = relationshipService.getParentSkill(maybeSubject)
-                assert maybeSubject && maybeSubject.type == SkillDef.ContainerType.Subject, "a group should always be contained by a subject"
-            }
+        SkillDef skill = skillAccessor.getSkillDef(projectId, skillId)
+        List<SkillDefWithExtra> copies = skillDefWithExtraRepo.findSkillsCopiedFrom(skill.id)
+        if (!copies) {
+            return stats
+        }
+        stats.isReusedLocally = copies.find({ it.projectId == projectId })
+        copies.findAll { it.projectId != projectId }.each {
+            SkillDef mySubject = relationshipService.getMySubjectParent(it.id)
             stats.users << new ExportedSkillUser(
                     importingProjectId: it.projectId,
-                    importingProjectName: maybeSubject.projDef.name,
-                    importedOn: it.created, importedIntoSubjectId:
-                    maybeSubject.skillId,
-                    importedIntoSubjectName: maybeSubject.name,
+                    importingProjectName: mySubject.projDef.name,
+                    importedOn: it.created,
+                    importedIntoSubjectId: mySubject.skillId,
+                    importedIntoSubjectName: mySubject.name,
                     enabled: it.enabled,
             )
+        }
+
+        ExportedSkill es = exportedSkillRepo.getCatalogSkill(projectId, skillId)
+        if (es) {
+            stats.exportedOn = es.created
+            stats.isExported = true
         }
 
         return stats

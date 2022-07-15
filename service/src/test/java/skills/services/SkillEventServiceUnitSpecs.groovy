@@ -15,6 +15,7 @@
  */
 package skills.services
 
+
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.messaging.simp.broker.BrokerAvailabilityEvent
 import skills.services.admin.SkillCatalogService
@@ -23,10 +24,7 @@ import skills.services.events.pointsAndAchievements.PointsAndAchievementsHandler
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefMin
 import skills.storage.model.UserAchievement
-import skills.storage.repos.SkillEventsSupportRepo
-import skills.storage.repos.UserAchievedLevelRepo
-import skills.storage.repos.UserPerformedSkillRepo
-import skills.storage.repos.UserPointsRepo
+import skills.storage.repos.*
 import skills.utils.LoggerHelper
 import skills.utils.MetricsLogger
 import spock.lang.Specification
@@ -52,6 +50,7 @@ class SkillEventServiceUnitSpecs extends Specification {
         UserEventService mockUserEventService = Mock()
         AchievedSkillsGroupHandler mockAchievedSkillsGroupHandler = Mock()
         SkillCatalogService mockCatalogService = Mock()
+        SkillDefRepo skillDefRepo = Mock()
 
         SkillEventsTransactionalService skillEventsTransactionalService = new SkillEventsTransactionalService(
                 skillEventPublisher: mockSkillEventPublisher,
@@ -66,7 +65,8 @@ class SkillEventServiceUnitSpecs extends Specification {
                 achievedGlobalBadgeHandler: mockAchievedGlobalBadgeHandler,
                 userEventService: mockUserEventService,
                 achievedSkillsGroupHandler: mockAchievedSkillsGroupHandler,
-                skillCatalogService: mockCatalogService
+                skillCatalogService: mockCatalogService,
+                skillDefRepo: skillDefRepo
         )
         SkillEventsService skillEventsService = new SkillEventsService(
                 skillEventPublisher: mockSkillEventPublisher,

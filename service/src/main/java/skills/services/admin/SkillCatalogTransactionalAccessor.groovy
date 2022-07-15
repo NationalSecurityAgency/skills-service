@@ -90,8 +90,8 @@ class SkillCatalogTransactionalAccessor {
 
     @Transactional
     @Profile
-    void copySkillAchievementsToTheImportedProjects(String toProjectId, List<Integer> fromSkillRefIds){
-        userAchievedLevelRepo.copySkillAchievementsToTheImportedProjects(toProjectId, fromSkillRefIds)
+    void copySkillAchievementsToTheImportedProjects(List<Integer> fromSkillRefIds) {
+        userAchievedLevelRepo.copySkillAchievementsToTheImportedProjects(fromSkillRefIds)
     }
 
     @Transactional
