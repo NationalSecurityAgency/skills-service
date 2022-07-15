@@ -198,9 +198,7 @@ limitations under the License.
             ? `${item.firstName} ${item.lastName} (${item.userId})`
             : `${item.nickname} (${item.userId})`;
         }
-        return this.isEmpty(item.nickname)
-            ? item.userId
-            : `${item.nickname} (${item.userId})`;
+        return item.userId;
       },
       isEmpty(s) {
         return (!s || typeof s !== 'string' || !s.trim());
