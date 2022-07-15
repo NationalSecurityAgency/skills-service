@@ -15,7 +15,7 @@
  */
 package skills.intTests.metrics.project
 
-import groovy.json.JsonOutput
+
 import groovy.json.JsonSlurper
 import groovy.time.TimeCategory
 import skills.intTests.utils.DefaultIntSpec
@@ -25,7 +25,6 @@ import skills.metrics.builders.MetricsPagingParamsHelper
 import skills.metrics.builders.MetricsParams
 import skills.storage.model.SkillDef
 import spock.lang.IgnoreIf
-import spock.lang.IgnoreRest
 import spock.lang.Shared
 
 class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
@@ -264,6 +263,12 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
 
         skillsService.createSubject(subj1)
         skillsService.createSkills(skillsSubj1)
+
+        def proj2 = SkillsFactory.createProject(2)
+        def proj2_subj = SkillsFactory.createSubject(2, 1)
+        List<Map> proj2_skills = SkillsFactory.createSkills(5, 2, 1)
+        proj2_skills[0].skillId = skills[0].skillId
+        skillsService.createProjectAndSubjectAndSkills(proj2, proj2_subj, proj2_skills)
 
         List<String> users = new ArrayList<>(getRandomUsers(4))
         List<String> usersCopy = new ArrayList<>(users)

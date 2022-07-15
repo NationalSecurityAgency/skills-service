@@ -397,7 +397,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
 
     @Query('''select ua.achievedOn as achievedOn, ua.userId as userId, ua.level as level, ua.skillId as skillId,
             sd.name as name, sd.type as type, uAttrs.userIdForDisplay as userIdForDisplay
-            from UserAchievement ua, UserAttrs uAttrs left join SkillDef sd on ua.skillId = sd.skillId 
+            from UserAchievement ua, UserAttrs uAttrs left join SkillDef sd on ua.skillRefId = sd.id 
             where 
                 ua.userId = uAttrs.userId and
                 ua.projectId = :projectId and
@@ -422,7 +422,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
             @Param("includeOverallType") String includeOverallType,
             @Param("pageable") Pageable pageable)
 
-    @Query('''select count(uAttrs) from UserAchievement ua, UserAttrs uAttrs left join SkillDef sd on ua.skillId = sd.skillId 
+    @Query('''select count(uAttrs) from UserAchievement ua, UserAttrs uAttrs left join SkillDef sd on ua.skillRefId = sd.id 
             where 
                 ua.userId = uAttrs.userId and
                 ua.projectId = :projectId and
