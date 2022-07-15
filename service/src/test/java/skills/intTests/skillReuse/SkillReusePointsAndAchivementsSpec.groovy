@@ -611,7 +611,7 @@ class SkillReusePointsAndAchivementsSpec extends CatalogIntSpec {
         userPointsRepo.findPointsByProjectIdAndUserId(p1Skills[0].projectId, user) == 600
     }
 
-    def "skill events can be reported to a self reported group skill - Honor System"() {
+    def "skill events can be reported to a self reported skill - Honor System"() {
         def p1 = createProject(1)
         def p1subj1 = createSubject(1, 1)
         def p1subj2 = createSubject(1, 2)
@@ -674,6 +674,255 @@ class SkillReusePointsAndAchivementsSpec extends CatalogIntSpec {
         skill1.todaysPoints == 100
         subj1.skills.find { it.skillId == p1Skills[1].skillId }.points == 0
         subj1.skills.find { it.skillId == p1Skills[2].skillId }.points == 0
+
+        skillOrig.skillId == p1Skills[0].skillId
+        skillOrig.points == 300
+        skillOrig.totalPoints == 500
+        skillOrig.todaysPoints == 100
+    }
+
+
+    def "skill events can be reported to a self reported group skill - Honor System"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1subj1g1 = createSkillsGroup(1, 1, 11)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [p1subj1g1])
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        p1Skills.each {
+            it.selfReportingType = SkillDef.SelfReportingType.HonorSystem
+        }
+        p1Skills.each {
+            skillsService.assignSkillToSkillsGroup(p1subj1g1.skillId, it)
+        }
+
+        def p1subj2 = createSubject(1, 2)
+        skillsService.createSubject(p1subj2)
+        def p1subj2g2 = createSkillsGroup(1, 2, 22)
+        skillsService.createSkill(p1subj2g2)
+
+        String user = getRandomUsers(1)[0]
+        when:
+        skillsService.reuseSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId, p1subj2g2.skillId)
+
+        skillsService.addSkill([projectId: p1Skills[0].projectId, skillId: SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)], user, new Date() - 2)
+        skillsService.addSkill([projectId: p1Skills[0].projectId, skillId: SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)], user, new Date() - 1)
+        skillsService.addSkill([projectId: p1Skills[0].projectId, skillId: SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)], user)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        def proj = skillsService.getSkillSummary(user, p1.projectId)
+        def subj2 = skillsService.getSkillSummary(user, p1.projectId, p1subj2.subjectId)
+        def skillReused = skillsService.getSingleSkillSummary(user, p1.projectId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0))
+        def subj1 = skillsService.getSkillSummary(user, p1.projectId, p1subj1.subjectId)
+        def skillOrig = skillsService.getSingleSkillSummary(user, p1.projectId, p1Skills[0].skillId)
+        then:
+        proj.points == 600
+        proj.todaysPoints == 200
+        proj.totalPoints == 2000
+        proj.skillsLevel == 2
+        proj.subjects[0].todaysPoints == 100
+        proj.subjects[0].points == 300
+        proj.subjects[0].totalPoints == 1500
+        proj.subjects[1].todaysPoints == 100
+        proj.subjects[1].points == 300
+        proj.subjects[1].totalPoints == 500
+
+        subj2.totalPoints == 500
+        subj2.points == 300
+        subj2.todaysPoints == 100
+        subj2.skillsLevel == 3
+        subj2.skills.size() == 1
+        subj2.skills[0].children.size() == 1
+        subj2.skills[0].children[0].skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        subj2.skills[0].children[0].points == 300
+        subj2.skills[0].children[0].totalPoints == 500
+        subj2.skills[0].children[0].todaysPoints == 100
+
+        skillReused.skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        skillReused.points == 300
+        skillReused.totalPoints == 500
+        skillReused.todaysPoints == 100
+
+        subj1.totalPoints == 1500
+        subj1.points == 300
+        subj1.todaysPoints == 100
+        subj1.skillsLevel == 1
+        subj1.skills.size() == 1
+        subj1.skills[0].children.size() == 3
+        def skill1 = subj1.skills[0].children.find { it.skillId == p1Skills[0].skillId }
+        skill1.points == 300
+        skill1.totalPoints == 500
+        skill1.todaysPoints == 100
+        subj1.skills[0].children.find { it.skillId == p1Skills[1].skillId }.points == 0
+        subj1.skills[0].children.find { it.skillId == p1Skills[2].skillId }.points == 0
+
+        skillOrig.skillId == p1Skills[0].skillId
+        skillOrig.points == 300
+        skillOrig.totalPoints == 500
+        skillOrig.todaysPoints == 100
+    }
+
+    def "skill events can be reported to a self reported skill - Approval System"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1subj2 = createSubject(1, 2)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        p1Skills.each {
+            it.selfReportingType = SkillDef.SelfReportingType.Approval
+        }
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        skillsService.createSubject(p1subj2)
+
+        String user = getRandomUsers(1)[0]
+        when:
+        skillsService.reuseSkillInAnotherSubject(p1.projectId, p1Skills[0].skillId, p1subj2.subjectId)
+
+        def approve = {
+            def approvalsEndpointRes = skillsService.getApprovals(p1.projectId, 5, 1, 'requestedOn', false)
+            List<Integer> ids = approvalsEndpointRes.data.collect { it.id }
+            assert ids
+            skillsService.approve(p1.projectId, ids)
+        }
+        skillsService.addSkill([projectId: p1Skills[0].projectId, skillId: SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)], user, new Date() - 2)
+        approve()
+        skillsService.addSkill([projectId: p1Skills[0].projectId, skillId: SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)], user, new Date() - 1)
+        approve()
+        skillsService.addSkill([projectId: p1Skills[0].projectId, skillId: SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)], user)
+        approve()
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        def proj = skillsService.getSkillSummary(user, p1.projectId)
+        def subj2 = skillsService.getSkillSummary(user, p1.projectId, p1subj2.subjectId)
+        def skillReused = skillsService.getSingleSkillSummary(user, p1.projectId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0))
+        def subj1 = skillsService.getSkillSummary(user, p1.projectId, p1subj1.subjectId)
+        def skillOrig = skillsService.getSingleSkillSummary(user, p1.projectId, p1Skills[0].skillId)
+        then:
+        skillOrig.skillId == p1Skills[0].skillId
+        skillOrig.points == 300
+        skillOrig.totalPoints == 500
+        skillOrig.todaysPoints == 100
+
+        skillReused.skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        skillReused.points == 300
+        skillReused.totalPoints == 500
+        skillReused.todaysPoints == 100
+
+        proj.points == 600
+        proj.todaysPoints == 200
+        proj.totalPoints == 2000
+        proj.skillsLevel == 2
+        proj.subjects[0].todaysPoints == 100
+        proj.subjects[0].points == 300
+        proj.subjects[0].totalPoints == 1500
+        proj.subjects[1].todaysPoints == 100
+        proj.subjects[1].points == 300
+        proj.subjects[1].totalPoints == 500
+
+        subj2.totalPoints == 500
+        subj2.points == 300
+        subj2.todaysPoints == 100
+        subj2.skillsLevel == 3
+        subj2.skills.size() == 1
+        subj2.skills[0].skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        subj2.skills[0].points == 300
+        subj2.skills[0].totalPoints == 500
+        subj2.skills[0].todaysPoints == 100
+
+        subj1.totalPoints == 1500
+        subj1.points == 300
+        subj1.todaysPoints == 100
+        subj1.skillsLevel == 1
+        subj1.skills.size() == 3
+        def skill1 = subj1.skills.find { it.skillId == p1Skills[0].skillId }
+        skill1.points == 300
+        skill1.totalPoints == 500
+        skill1.todaysPoints == 100
+        subj1.skills.find { it.skillId == p1Skills[1].skillId }.points == 0
+        subj1.skills.find { it.skillId == p1Skills[2].skillId }.points == 0
+
+
+    }
+
+    def "skill events can be reported to a self reported group skill - Approval System"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1subj1g1 = createSkillsGroup(1, 1, 11)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [p1subj1g1])
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        p1Skills.each {
+            it.selfReportingType = SkillDef.SelfReportingType.Approval
+        }
+        p1Skills.each {
+            skillsService.assignSkillToSkillsGroup(p1subj1g1.skillId, it)
+        }
+
+        def p1subj2 = createSubject(1, 2)
+        skillsService.createSubject(p1subj2)
+        def p1subj2g2 = createSkillsGroup(1, 2, 22)
+        skillsService.createSkill(p1subj2g2)
+
+        String user = getRandomUsers(1)[0]
+        when:
+        skillsService.reuseSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId, p1subj2g2.skillId)
+
+        def approve = {
+            def approvalsEndpointRes = skillsService.getApprovals(p1.projectId, 5, 1, 'requestedOn', false)
+            List<Integer> ids = approvalsEndpointRes.data.collect { it.id }
+            assert ids
+            skillsService.approve(p1.projectId, ids)
+        }
+        skillsService.addSkill([projectId: p1Skills[0].projectId, skillId: SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)], user, new Date() - 2)
+        approve()
+        skillsService.addSkill([projectId: p1Skills[0].projectId, skillId: SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)], user, new Date() - 1)
+        approve()
+        skillsService.addSkill([projectId: p1Skills[0].projectId, skillId: SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)], user)
+        approve()
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        def proj = skillsService.getSkillSummary(user, p1.projectId)
+        def subj2 = skillsService.getSkillSummary(user, p1.projectId, p1subj2.subjectId)
+        def skillReused = skillsService.getSingleSkillSummary(user, p1.projectId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0))
+        def subj1 = skillsService.getSkillSummary(user, p1.projectId, p1subj1.subjectId)
+        def skillOrig = skillsService.getSingleSkillSummary(user, p1.projectId, p1Skills[0].skillId)
+        then:
+        proj.points == 600
+        proj.todaysPoints == 200
+        proj.totalPoints == 2000
+        proj.skillsLevel == 2
+        proj.subjects[0].todaysPoints == 100
+        proj.subjects[0].points == 300
+        proj.subjects[0].totalPoints == 1500
+        proj.subjects[1].todaysPoints == 100
+        proj.subjects[1].points == 300
+        proj.subjects[1].totalPoints == 500
+
+        subj2.totalPoints == 500
+        subj2.points == 300
+        subj2.todaysPoints == 100
+        subj2.skillsLevel == 3
+        subj2.skills.size() == 1
+        subj2.skills[0].children.size() == 1
+        subj2.skills[0].children[0].skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        subj2.skills[0].children[0].points == 300
+        subj2.skills[0].children[0].totalPoints == 500
+        subj2.skills[0].children[0].todaysPoints == 100
+
+        skillReused.skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        skillReused.points == 300
+        skillReused.totalPoints == 500
+        skillReused.todaysPoints == 100
+
+        subj1.totalPoints == 1500
+        subj1.points == 300
+        subj1.todaysPoints == 100
+        subj1.skillsLevel == 1
+        subj1.skills.size() == 1
+        subj1.skills[0].children.size() == 3
+        def skill1 = subj1.skills[0].children.find { it.skillId == p1Skills[0].skillId }
+        skill1.points == 300
+        skill1.totalPoints == 500
+        skill1.todaysPoints == 100
+        subj1.skills[0].children.find { it.skillId == p1Skills[1].skillId }.points == 0
+        subj1.skills[0].children.find { it.skillId == p1Skills[2].skillId }.points == 0
 
         skillOrig.skillId == p1Skills[0].skillId
         skillOrig.points == 300
