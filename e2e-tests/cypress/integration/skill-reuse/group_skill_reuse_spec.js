@@ -71,6 +71,38 @@ describe('Group Skill Reuse Tests', () => {
             .contains('Reused');
     });
 
+    it('1 skill - already reused', () => {
+        cy.createSkillsGroup(1, 1, 12);
+        cy.reuseSkillIntoAnotherGroup(1, 1, 1, 12);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="skillSelect-skill1"]')
+            .click({ force: true });
+        cy.get('[data-cy="skillActionsBtn"]')
+            .click();
+        cy.get('[data-cy="skillReuseBtn"]')
+            .click();
+        cy.get('[data-cy="reuseButton"]')
+            .should('be.disabled');
+        cy.get('[data-cy="closeButton"]')
+            .should('be.enabled');
+        cy.get('[data-cy="okButton"]')
+            .should('not.exist');
+
+        // test all skills have been reused in a subject
+        cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj1group12"]')
+            .click();
+        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+            .contains('All of the selected skills have already been reused in the Awesome Group 12 Subj1 group');
+        cy.get('[data-cy="reuseButton"]')
+            .should('be.disabled');
+        cy.get('[data-cy="closeButton"]')
+            .should('be.enabled');
+        cy.get('[data-cy="okButton"]')
+            .should('not.exist');
+
+    });
+
     it('reuse skill into a group under a different subject', () => {
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);

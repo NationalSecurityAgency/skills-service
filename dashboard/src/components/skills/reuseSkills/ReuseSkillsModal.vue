@@ -92,7 +92,7 @@ limitations under the License.
           </div>
           <div v-else>
             <no-content2 title="No Destinations"
-                         message="There are no Subjects or Groups that this skill can be re-used in. Please create subjects and/or groups if you want to re-use skills."/>
+                         message="There are no Subjects or Groups that this skill can be reused in. Please create subjects and/or groups if you want to reuse skills."/>
           </div>
         </div>
 
@@ -120,15 +120,19 @@ limitations under the License.
               </span>
               <div v-if="skillsForReuse.alreadyExist.length > 0">
                 <b-badge variant="warning">{{ skillsForReuse.alreadyExist.length }}</b-badge>
-                selected skill{{ plural(skillsForReuse.alreadyExist) }} <span
+                selected skill{{ pluralWithHave(skillsForReuse.alreadyExist) }} <span
                 class="text-primary font-weight-bold">already</span> been reused!
               </div>
             </div>
             <div v-else>
               <i class="fas fa-exclamation-triangle text-warning mr-2"/>
-              <span class="text-warning font-weight-bold">All</span> of the selected skills already
-              been reused in the <span
-              class="text-primary font-weight-bold">{{ selectedDestination.name }}</span> subject.
+              <span class="text-warning font-weight-bold">All</span> of the selected skills have
+              already
+              been reused in the
+              <span v-if="selectedDestination.groupName"><span
+                class="text-primary font-weight-bold">{{ selectedDestination.groupName }} </span> group</span>
+              <span v-else><span
+                class="text-primary font-weight-bold">{{ selectedDestination.subjectName }} </span> subject</span>.
               Please cancel and select different skills.
             </div>
           </b-card>
@@ -186,7 +190,6 @@ limitations under the License.
 </template>
 
 <script>
-  // import { Logger } from '@skilltree/skills-client-vue';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import SkillsService from '@/components/skills/SkillsService';
   import LengthyOperationProgressBar from '@/components/utils/LengthyOperationProgressBar';
@@ -273,7 +276,6 @@ limitations under the License.
       loadSubjects() {
         SkillsService.getReuseDestinationsForASkill(this.$route.params.projectId, this.skills[0].skillId)
           .then((res) => {
-            // Logger.info(`SkillsService.getReuseDestinationsForASkill(${this.$route.params.projectId}, ${this.skills[0].skillId}): ${JSON.stringify(res)}`);
             this.destinations.all = res;
             this.updateDestinationPage(this.destinations.currentPageNum);
           })
@@ -296,7 +298,6 @@ limitations under the License.
         const perPageNum = totalItemsNum <= this.destinations.perPageNum + 1 ? this.destinations.perPageNum + 1 : this.destinations.perPageNum;
         const endIndex = Math.min(perPageNum * pageNum, totalItemsNum);
         this.destinations.currentPageNum = pageNum;
-        // Logger.info(`before slice: ${JSON.stringify(this.destinations.all)}`);
         this.destinations.currentPage = this.destinations.all ? this.destinations.all.slice(startIndex, endIndex) : [];
       },
       initiateReuse() {
@@ -328,6 +329,9 @@ limitations under the License.
       },
       plural(arr) {
         return arr && arr.length > 1 ? 's' : '';
+      },
+      pluralWithHave(arr) {
+        return arr && arr.length > 1 ? 's have' : ' has';
       },
     },
   };

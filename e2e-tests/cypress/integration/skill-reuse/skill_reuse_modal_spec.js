@@ -13,10 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import dayjs from 'dayjs';
-
-const moment = require('moment-timezone');
-
 describe('Skill Reuse Modal Tests', () => {
 
     beforeEach(() => {
@@ -285,7 +281,7 @@ describe('Skill Reuse Modal Tests', () => {
         cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
             .click();
         cy.get('[ data-cy="reuseSkillsModalStep2"]')
-            .contains('All of the selected skills already been reused in the subject');
+            .contains('All of the selected skills have already been reused in the Subject 2 subject');
         cy.get('[data-cy="reuseButton"]')
             .should('be.disabled');
         cy.get('[data-cy="closeButton"]')
@@ -367,7 +363,7 @@ describe('Skill Reuse Modal Tests', () => {
         cy.get('[ data-cy="reuseSkillsModalStep2"]')
             .contains('2 skills will be reused in the [Subject 2] subject.');
         cy.get('[ data-cy="reuseSkillsModalStep2"]')
-            .contains('2 selected skills already been reused!');
+            .contains('2 selected skills have already been reused!');
 
         cy.get('[data-cy="reuseButton"]')
             .should('be.enabled');
@@ -420,7 +416,7 @@ describe('Skill Reuse Modal Tests', () => {
         cy.get('[ data-cy="reuseSkillsModalStep2"]')
             .contains('3 skills will be reused in the [Awesome Group 12 Subj1] group.');
         cy.get('[ data-cy="reuseSkillsModalStep2"]')
-            .contains('2 selected skills already been reused!');
+            .contains('2 selected skills have already been reused!');
 
         cy.get('[data-cy="reuseButton"]')
             .should('be.enabled');
