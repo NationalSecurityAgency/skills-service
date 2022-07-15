@@ -200,6 +200,9 @@ class UnusedProjectExpirationSpecs extends DefaultIntSpec{
         createService(otherUser)
         skillsService.addProjectAdmin(proj1.projectId, otherUser)
 
+        WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
+        greenMail.purgeEmailFromAllMailboxes()
+
         UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserId(skillsService.userName)
         UserAttrs otherProjectAdminUserAttrs = userAttrsRepo.findByUserId(otherUser)
         UserAttrs rootUserUserAttrs = userAttrsRepo.findByUserId(DEFAULT_ROOT_USER_ID.toLowerCase())

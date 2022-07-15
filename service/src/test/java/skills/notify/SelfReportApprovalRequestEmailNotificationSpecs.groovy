@@ -83,6 +83,9 @@ class SelfReportApprovalRequestEmailNotificationSpecs extends DefaultIntSpec {
             skillsService.addProjectAdmin(proj.projectId, it.userName)
         }
 
+        WaitFor.wait { greenMail.getReceivedMessages().size() == userSpecificServiceInstances.size() }
+        greenMail.purgeEmailFromAllMailboxes()
+
         //unsubscribe the first 4 users
         userSpecificServiceInstances.subList(0, 4).each {
             it.unsubscribeFromSelfApprovalRequestEmails(proj.projectId)

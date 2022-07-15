@@ -211,6 +211,9 @@ class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
         createService(otherUser)
         skillsService.addProjectAdmin(proj.projectId, otherUser)
 
+        WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
+        greenMail.purgeEmailFromAllMailboxes()
+
         UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserId(skillsService.userName)
         UserAttrs otherProjectAdminUserAttrs = userAttrsRepo.findByUserId(otherUser)
 
