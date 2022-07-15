@@ -84,7 +84,7 @@ class SelfReportApprovalRequestEmailNotificationSpecs extends DefaultIntSpec {
         }
 
         // Adding an admin sends an e-mail, so purge the mailboxes before continuing
-        WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
+        WaitFor.wait { greenMail.getReceivedMessages().size() == 3 }
         greenMail.purgeEmailFromAllMailboxes()
 
         //unsubscribe the first 4 users

@@ -575,7 +575,7 @@ Always yours, <br/> -SkillTree Bot
         def res1 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date1, "Please approve this again!")
         def approvalsEndpointResAfter = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
 
-        assert WaitFor.wait { greenMail.getReceivedMessages().size() == 3 }
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() >= 2 }
         int deniedEmailIdx = greenMail.getReceivedMessages().findIndexOf {it.subject.contains('Denied') }
         EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail, deniedEmailIdx)
 
