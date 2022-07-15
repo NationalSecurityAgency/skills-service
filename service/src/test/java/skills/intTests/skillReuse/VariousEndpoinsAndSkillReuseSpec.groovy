@@ -384,6 +384,44 @@ class VariousEndpoinsAndSkillReuseSpec extends CatalogIntSpec {
         res.items.userId == [users[1], users[2]]
     }
 
+    def "reused skills must not be considered in catalog status"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1subj1g1 = createSkillsGroup(1, 1, 11)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [p1subj1g1])
+        def p1Skills = createSkills(3, 1, 1, 100, 2)
+        p1Skills.each {
+            skillsService.assignSkillToSkillsGroup(p1subj1g1.skillId, it)
+        }
+
+        def p1subj2 = createSubject(1, 2)
+        skillsService.createSubject(p1subj2)
+        def p1subj2g2 = createSkillsGroup(1, 2, 22)
+        skillsService.createSkill(p1subj2g2)
+
+        skillsService.reuseSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId, p1subj2g2.skillId)
+        skillsService.exportSkillToCatalog(p1.projectId, p1Skills[0].skillId)
+        skillsService.exportSkillToCatalog(p1.projectId, p1Skills[1].skillId)
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [])
+        skillsService.importSkillFromCatalogAndFinalize(p2.projectId, p2subj1.subjectId, p1.projectId, p1Skills[1].skillId)
+
+        when:
+        def p2Exported = skillsService.getExportedSkills(p1.projectId, 10, 1, "skillName", true)
+
+        def skill1Stats = skillsService.getExportedSkillStats(p1.projectId, p1Skills[0].skillId)
+        def skill2Stats = skillsService.getExportedSkillStats(p1.projectId, p1Skills[1].skillId)
+        then:
+        p2Exported.count == 2
+        p2Exported.data.skillName == [p1Skills[0].name, p1Skills[1].name]
+        p2Exported.data.importedProjectCount == [0, 1]
+
+        skill2Stats.users.importingProjectId == [p2.projectId]
+        !skill1Stats.users.importingProjectId
+    }
+
 
 }
 
