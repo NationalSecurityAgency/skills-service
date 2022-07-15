@@ -101,6 +101,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
         String getUserIdForDisplay()
         String getUserFirstName()
         String getUserLastName()
+        String getUserNickname()
         Integer getPoints()
         LocalDateTime getUserFirstSeenTimestamp()
     }
@@ -112,6 +113,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     uAttrs.userIdForDisplay as userIdForDisplay,
                     uAttrs.firstName as userFirstName,
                     uAttrs.lastName as userLastName,
+                    uAttrs.nickname as userNickname,
                     uAttrs.created as userFirstSeenTimestamp
                 from UserPoints p, UserAttrs uAttrs
                 where
@@ -135,6 +137,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     uAttrs.userIdForDisplay as userIdForDisplay,
                     uAttrs.firstName as userFirstName,
                     uAttrs.lastName as userLastName,
+                    uAttrs.nickname as userNickname,
                     uAttrs.created as userFirstSeenTimestamp
                 from UserPoints p, UserAttrs uAttrs
                 where
@@ -158,6 +161,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     uAttrs.userIdForDisplay as userIdForDisplay,
                     uAttrs.firstName as userFirstName,
                     uAttrs.lastName as userLastName,
+                    uAttrs.nickname as userNickname,
                     uAttrs.created as userFirstSeenTimestamp
                 from UserPoints p, UserAttrs uAttrs
                 where
@@ -174,6 +178,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     uAttrs.userIdForDisplay as userIdForDisplay,
                     uAttrs.firstName as userFirstName,
                     uAttrs.lastName as userLastName,
+                    uAttrs.nickname as userNickname,
                     uAttrs.created as userFirstSeenTimestamp
                 from UserPoints p, UserAttrs uAttrs
                 where
@@ -191,6 +196,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     uAttrs.userIdForDisplay as userIdForDisplay,
                     uAttrs.firstName as userFirstName,
                     uAttrs.lastName as userLastName,
+                    uAttrs.nickname as userNickname,
                     uAttrs.created as userFirstSeenTimestamp
                 from UserPoints p, UserAttrs uAttrs
                 where
@@ -207,6 +213,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     uAttrs.userIdForDisplay as userIdForDisplay,
                     uAttrs.firstName as userFirstName,
                     uAttrs.lastName as userLastName,
+                    uAttrs.nickname as userNickname,
                     uAttrs.created as userFirstSeenTimestamp
                 from UserPoints p, UserAttrs uAttrs
                 where

@@ -24,6 +24,7 @@ class RankedUserRes {
     boolean isItMe = false
     String firstName
     String lastName
+    String nickname
     Integer points
     Long userFirstSeenTimestamp
 }

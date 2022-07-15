@@ -174,6 +174,7 @@ class RankingLoader {
                     userId: it.getUserIdForDisplay(),
                     firstName: it.getUserFirstName(),
                     lastName: it.getUserLastName(),
+                    nickname: it.getUserNickname(),
                     points: it.getPoints(),
                     userFirstSeenTimestamp: it.getUserFirstSeenTimestamp()?.toInstant(ZoneOffset.UTC)?.toEpochMilli(),
                     isItMe: it.getUserId() == userId,
