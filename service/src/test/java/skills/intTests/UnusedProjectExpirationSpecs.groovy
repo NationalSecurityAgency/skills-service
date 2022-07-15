@@ -200,10 +200,6 @@ class UnusedProjectExpirationSpecs extends DefaultIntSpec{
         createService(otherUser)
         skillsService.addProjectAdmin(proj1.projectId, otherUser)
 
-        // Adding users as admins sends out e-mails, so we must purge these e-mails before continuing
-        WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
-        greenMail.purgeEmailFromAllMailboxes()
-
         UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserId(skillsService.userName)
         UserAttrs otherProjectAdminUserAttrs = userAttrsRepo.findByUserId(otherUser)
         UserAttrs rootUserUserAttrs = userAttrsRepo.findByUserId(DEFAULT_ROOT_USER_ID.toLowerCase())

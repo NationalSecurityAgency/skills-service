@@ -154,6 +154,7 @@ class RootController {
     RequestResult addRoot(@PathVariable('userKey') String userKey) {
         String userId = getUserId(userKey)
         accessSettingsStorageService.addRoot(userId)
+        contactUsersService.sendEmail("SkillTree - You've been added as root", "You've been added as a root user to a project", userId)
         projAdminService.pinAllExistingProjectsWhereUserIsAdminExceptInception(userId)
         return new RequestResult(success: true)
     }

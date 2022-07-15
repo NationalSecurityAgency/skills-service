@@ -68,10 +68,6 @@ class ContactProjectAdminsSpec extends DefaultIntSpec {
         proj1Serv.addSkill(skill, users[9])
         proj1Serv.addSkill(skill, users[10])
 
-        // Adding users as admins sends out e-mails, so we must purge these e-mails before continuing
-        WaitFor.wait { greenMail.getReceivedMessages().size() == 3 }
-        greenMail.purgeEmailFromAllMailboxes()
-
         when:
         def count = rootServiceOne.countAllProjectAdminsWithEmail()
         rootServiceOne.contactAllProjectAdmins("test subject", "# test email body")
