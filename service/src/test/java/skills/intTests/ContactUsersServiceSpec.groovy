@@ -539,9 +539,6 @@ limitations under the License.
         def proj = SkillsFactory.createProject(1)
         service.createProject(proj)
 
-        WaitFor.wait { greenMail.getReceivedMessages().size() > 0 }
-        greenMail.purgeEmailFromAllMailboxes()
-
         when:
         service.previewEmail(proj.projectId,"a subject", "**body**")
 

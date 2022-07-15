@@ -74,9 +74,6 @@ class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj)
         skillsService.createSkills(skills)
 
-        WaitFor.wait { greenMail.getReceivedMessages().size() > 0 }
-        greenMail.purgeEmailFromAllMailboxes()
-
         Date date = new Date() - 60
         when:
         def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "user0", date, "Please approve this!")
@@ -153,9 +150,6 @@ class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
         skillsService.createSkills(skills)
-
-        WaitFor.wait { greenMail.getReceivedMessages().size() > 0 }
-        greenMail.purgeEmailFromAllMailboxes()
 
         Date date = new Date() - 60
         when:
@@ -249,9 +243,6 @@ class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
         skillsService.createSkills(skills)
-
-        WaitFor.wait { greenMail.getReceivedMessages().size() > 0 }
-        greenMail.purgeEmailFromAllMailboxes()
 
         Date date = new Date() - 60
         when:
@@ -393,9 +384,6 @@ SkillTree Bot'''
 
         UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserId(skillsService.userName)
         UserAttrs userRequestingPtsAttrs = userAttrsRepo.findByUserId(user)
-
-        WaitFor.wait { greenMail.getReceivedMessages().size() > 0 }
-        greenMail.purgeEmailFromAllMailboxes()
 
         when:
         def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date, "Please approve this!")
@@ -705,9 +693,6 @@ Always yours, <br/> -SkillTree Bot
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
         skillsService.createSkills(skills)
-
-        WaitFor.wait { greenMail.getReceivedMessages().size() > 0 }
-        greenMail.purgeEmailFromAllMailboxes()
 
         Date date = new Date() - 60
         Date date1 = new Date() - 30
