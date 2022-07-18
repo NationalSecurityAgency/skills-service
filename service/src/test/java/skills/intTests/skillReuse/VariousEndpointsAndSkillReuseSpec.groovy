@@ -121,7 +121,7 @@ class VariousEndpointsAndSkillReuseSpec extends CatalogIntSpec {
         skills.skillId == [p1Skills[0].skillId]
     }
 
-    def "metrics endpoint returns proper counts for reused skills"() {
+    def "metrics skill endpoint ignores reused skills"() {
         def p1 = createProject(1)
         def p1subj1 = createSubject(1, 1)
         def p1Skills = createSkills(3, 1, 1, 100, 2)
@@ -147,50 +147,16 @@ class VariousEndpointsAndSkillReuseSpec extends CatalogIntSpec {
         when:
         def res = skillsService.getMetricsData(p1.projectId, "skillUsageNavigatorChartBuilder", props)
         then:
-        res.skillName == [p1Skills[0].name, p1Skills[0].name, p1Skills[1].name, p1Skills[2].name]
-        res.skillId == [p1Skills[0].skillId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0), p1Skills[1].skillId, p1Skills[2].skillId,]
-        res.isReusedSkill == [false, true, false, false]
-        res.numUsersInProgress == [1, 1, 0, 0]
-        res.numUserAchieved == [2, 2, 0, 0]
-        res.lastReportedTimestamp == [dates[4].time, dates[4].time, null, null]
-        res.lastAchievedTimestamp == [dates[3].time, dates[3].time, null, null]
+        res.skillName == [p1Skills[0].name, p1Skills[1].name, p1Skills[2].name]
+        res.skillId == [p1Skills[0].skillId, p1Skills[1].skillId, p1Skills[2].skillId,]
+        res.isReusedSkill == [false, false, false]
+        res.numUsersInProgress == [1, 0, 0]
+        res.numUserAchieved == [2, 0, 0]
+        res.lastReportedTimestamp == [dates[4].time, null, null]
+        res.lastAchievedTimestamp == [dates[3].time, null, null]
     }
 
-    def "metrics endpoint returns proper counts for reused skills - skill events report then skill is reused"() {
-        def p1 = createProject(1)
-        def p1subj1 = createSubject(1, 1)
-        def p1Skills = createSkills(3, 1, 1, 100, 2)
-        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
-
-        def p1subj2 = createSubject(1, 2)
-        skillsService.createSubject(p1subj2)
-
-        List<Date> dates = (5..1).collect { new Date() - it }
-        List<String> users = getRandomUsers(5)
-        skillsService.addSkill(p1Skills[0], users[0], dates[4])
-
-        skillsService.addSkill(p1Skills[0], users[1], dates[0])
-        skillsService.addSkill(p1Skills[0], users[1], dates[1])
-
-        skillsService.addSkill(p1Skills[0], users[2], dates[2])
-        skillsService.addSkill(p1Skills[0], users[2], dates[3])
-
-        skillsService.reuseSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId)
-
-        Map props = [:]
-        when:
-        def res = skillsService.getMetricsData(p1.projectId, "skillUsageNavigatorChartBuilder", props)
-        then:
-        res.skillName == [p1Skills[0].name, p1Skills[0].name, p1Skills[1].name, p1Skills[2].name]
-        res.skillId == [p1Skills[0].skillId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0), p1Skills[1].skillId, p1Skills[2].skillId,]
-        res.isReusedSkill == [false, true, false, false]
-        res.numUsersInProgress == [1, 1, 0, 0]
-        res.numUserAchieved == [2, 2, 0, 0]
-        res.lastReportedTimestamp == [dates[4].time, dates[4].time, null, null]
-        res.lastAchievedTimestamp == [dates[3].time, dates[3].time, null, null]
-    }
-
-    def "metrics endpoint returns proper counts for reused group skills"() {
+    def "metrics endpoint ignores reused group skills"() {
         def p1 = createProject(1)
         def p1subj1 = createSubject(1, 1)
         def p1subj1g1 = createSkillsGroup(1, 1, 11)
@@ -222,13 +188,13 @@ class VariousEndpointsAndSkillReuseSpec extends CatalogIntSpec {
         when:
         def res = skillsService.getMetricsData(p1.projectId, "skillUsageNavigatorChartBuilder", props)
         then:
-        res.skillName == [p1Skills[0].name, p1Skills[0].name, p1Skills[1].name, p1Skills[2].name]
-        res.skillId == [p1Skills[0].skillId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0), p1Skills[1].skillId, p1Skills[2].skillId,]
-        res.isReusedSkill == [false, true, false, false]
-        res.numUsersInProgress == [1, 1, 0, 0]
-        res.numUserAchieved == [2, 2, 0, 0]
-        res.lastReportedTimestamp == [dates[4].time, dates[4].time, null, null]
-        res.lastAchievedTimestamp == [dates[3].time, dates[3].time, null, null]
+        res.skillName == [p1Skills[0].name, p1Skills[1].name, p1Skills[2].name]
+        res.skillId == [p1Skills[0].skillId, p1Skills[1].skillId, p1Skills[2].skillId,]
+        res.isReusedSkill == [false, false, false]
+        res.numUsersInProgress == [1, 0, 0]
+        res.numUserAchieved == [2, 0, 0]
+        res.lastReportedTimestamp == [dates[4].time, null, null]
+        res.lastAchievedTimestamp == [dates[3].time, null, null]
     }
 
     def "users endpoints for reused skills"() {
@@ -422,6 +388,43 @@ class VariousEndpointsAndSkillReuseSpec extends CatalogIntSpec {
         !skill1Stats.users.importingProjectId
     }
 
+    def "return reused skills and points from project's stats endpoint"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1subj1g1 = createSkillsGroup(1, 1, 11)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [p1subj1g1])
+        def p1Skills = createSkills(3, 1, 1, 100, 2)
+        p1Skills.each {
+            skillsService.assignSkillToSkillsGroup(p1subj1g1.skillId, it)
+        }
+
+        def p1subj2 = createSubject(1, 2)
+        skillsService.createSubject(p1subj2)
+        def p1subj2g2 = createSkillsGroup(1, 2, 22)
+        skillsService.createSkill(p1subj2g2)
+
+        skillsService.reuseSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId, p1subj2g2.skillId)
+
+        when:
+        def projStats = skillsService.getProject(p1.projectId)
+        def subj1Stats = skillsService.getSubject(p1subj1)
+        def subj2Stats = skillsService.getSubject(p1subj2)
+        then:
+        projStats.numSkills == 3
+        projStats.numSkillsReused == 1
+        projStats.totalPointsReused == 200
+        projStats.totalPoints == 600
+
+        subj1Stats.numSkills == 3
+        subj1Stats.numSkillsReused == 0
+        subj1Stats.totalPointsReused == 0
+        subj1Stats.totalPoints == 600
+
+        subj2Stats.numSkills == 0
+        subj2Stats.numSkillsReused == 1
+        subj2Stats.totalPointsReused == 200
+        subj2Stats.totalPoints == 0
+    }
 
 }
 

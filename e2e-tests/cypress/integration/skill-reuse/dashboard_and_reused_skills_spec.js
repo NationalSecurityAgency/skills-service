@@ -236,4 +236,58 @@ describe('Skill Reuse and Dashboard Tests', () => {
         cy.validateTable(tableSelector, expectedSkillNames);
     });
 
+    it('display disabled and reused counts in a stats card', () => {
+        cy.reuseSkillIntoAnotherSubject(1, 1, 2);
+
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 10);
+        cy.createSkill(2, 1, 11);
+        cy.exportSkillToCatalog(2, 1, 10);
+        cy.exportSkillToCatalog(2, 1, 11);
+
+        cy.importSkillFromCatalog(1, 1, 2, 10);
+        cy.importSkillFromCatalog(1, 1, 2, 11);
+
+        cy.visit('/administrator/projects/proj1/');
+        cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]')
+            .should('have.text', '1');
+        cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]')
+            .should('have.text', '200');
+        cy.get('[data-cy="pageHeaderStats_Skills_reused"]')
+            .should('have.text', '1');
+        cy.get('[data-cy="pageHeaderStats_Skills_disabled"]')
+            .should('have.text', '2');
+        cy.get('[data-cy="pageHeaderStats_Points_reused"]')
+            .should('have.text', '200');
+
+        cy.get('[data-cy="manageBtn_subj1"]')
+            .click();
+        cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]')
+            .should('have.text', '1');
+        cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]')
+            .should('have.text', '200');
+        cy.get('[data-cy="pageHeaderStats_Skills_reused"]')
+            .should('not.exist');
+        cy.get('[data-cy="pageHeaderStats_Skills_disabled"]')
+            .should('have.text', '2');
+        cy.get('[data-cy="pageHeaderStats_Points_reused"]')
+            .should('not.exist');
+
+        cy.get('[data-cy="breadcrumb-proj1"]')
+            .click();
+        cy.get('[data-cy="manageBtn_subj2"]')
+            .click();
+        cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]')
+            .should('have.text', '0');
+        cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]')
+            .should('have.text', '0');
+        cy.get('[data-cy="pageHeaderStats_Skills_reused"]')
+            .should('have.text', '1');
+        cy.get('[data-cy="pageHeaderStats_Skills_disabled"]')
+            .should('not.exist');
+        cy.get('[data-cy="pageHeaderStats_Points_reused"]')
+            .should('have.text', '200');
+    });
+
 });

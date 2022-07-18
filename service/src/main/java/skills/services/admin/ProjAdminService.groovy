@@ -509,7 +509,7 @@ class ProjAdminService {
         ProjectResult res = new ProjectResult(
                 projectId: definition.getProjectId(),
                 name: InputSanitizer.unsanitizeName(definition.getName()),
-                totalPoints: definition.getTotalPoints(),
+                totalPoints: definition.getTotalPoints() - (definition.getTotalPointsReused() ?: 0),
                 numSubjects: definition.getNumSubjects(),
                 numGroups: definition.getNumGroups(),
                 displayOrder: order != null ? order : 0,
@@ -517,7 +517,9 @@ class ProjAdminService {
                 created: definition.getCreated(),
                 expiring: definition.getExpiring(),
                 expirationTriggered: definition.getExpirationTriggered(),
-                numSkillsDisabled: definition.getNumSkillsDisabled()
+                numSkillsDisabled: definition.getNumSkillsDisabled(),
+                numSkillsReused: definition.getNumSkillsReused() ?: 0,
+                totalPointsReused: definition.getTotalPointsReused() ?: 0,
         )
         res.numBadges = definition.numBadges
         res.numSkills = definition.numSkills

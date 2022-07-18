@@ -248,13 +248,17 @@ describe('Finalize Imported Skills Tests', () => {
     cy.addSkillToGroup(1, 1, 20, 21, {pointIncrement: 10, numPerformToCompletion: 5});
     cy.addSkillToGroup(1, 1, 20, 22, {pointIncrement: 10, numPerformToCompletion: 5});
 
-    cy.visit('/administrator/projects/proj1/subjects/subj1')
-    cy.get('[data-cy="pageHeaderStat_Skills_disabledCount"]').should('have.text', '2')
-    cy.get('[data-cy="importFinalizeAlert"]').contains('There are 2 imported skills in this project')
+    cy.visit('/administrator/projects/proj1/subjects/subj1');
+    cy.get('[data-cy="pageHeaderStats_Skills_disabled"]')
+        .should('have.text', '2');
+    cy.get('[data-cy="importFinalizeAlert"]')
+        .contains('There are 2 imported skills in this project');
 
-    cy.visit('/administrator/projects/proj1')
-    cy.get('[data-cy="pageHeaderStat_Skills_disabledCount"]').should('have.text', '2')
-    cy.get('[data-cy="importFinalizeAlert"]').contains('There are 2 imported skills in this project')
+    cy.visit('/administrator/projects/proj1');
+    cy.get('[data-cy="pageHeaderStats_Skills_disabled"]')
+        .should('have.text', '2');
+    cy.get('[data-cy="importFinalizeAlert"]')
+        .contains('There are 2 imported skills in this project');
   });
 
   it('finalize refreshes metric cards on subject page', () => {
@@ -272,8 +276,10 @@ describe('Finalize Imported Skills Tests', () => {
     ])
 
     cy.visit('/administrator/projects/proj1/subjects/subj1')
-    cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '0')
-    cy.get('[data-cy="pageHeaderStat_Skills_disabledCount"]').should('have.text', '2')
+    cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]')
+        .should('have.text', '0');
+    cy.get('[data-cy="pageHeaderStats_Skills_disabled"]')
+        .should('have.text', '2');
 
 
     cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]').click();
@@ -285,8 +291,10 @@ describe('Finalize Imported Skills Tests', () => {
     cy.get('[data-cy="importFinalizeAlert"]').contains('Finalizing 2 imported skills')
     cy.waitForBackendAsyncTasksToComplete();
     cy.get('[data-cy="importFinalizeAlert"]').contains('Successfully finalized 2 imported skills!')
-    cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '2')
-    cy.get('[data-cy="pageHeaderStat_Skills_disabledCount"]').should('not.exist')
+    cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]')
+        .should('have.text', '2');
+    cy.get('[data-cy="pageHeaderStats_Skills_disabled"]')
+        .should('not.exist');
   });
 
   it('finalize refreshes metric cards on project page', () => {
@@ -304,8 +312,10 @@ describe('Finalize Imported Skills Tests', () => {
     ])
 
     cy.visit('/administrator/projects/proj1')
-    cy.get('[data-cy="pagePreviewCardStat_# Skills"] [data-cy="statNum"]').should('have.text', '0')
-    cy.get('[data-cy="pageHeaderStat_Skills_disabledCount"]').should('have.text', '2')
+    cy.get('[data-cy="pagePreviewCardStat_# Skills"] [data-cy="statNum"]')
+        .should('have.text', '0');
+    cy.get('[data-cy="pageHeaderStats_Skills_disabled"]')
+        .should('have.text', '2');
 
     cy.get('[data-cy="pagePreviewCardStat_# Skills"] [data-cy="statNum"]').should('have.text', '0')
     cy.get('[data-cy="pagePreviewCardStat_# Skills_disabled"]').should('have.text', '2')
@@ -320,8 +330,10 @@ describe('Finalize Imported Skills Tests', () => {
     cy.waitForBackendAsyncTasksToComplete();
     cy.get('[data-cy="importFinalizeAlert"]').contains('Successfully finalized 2 imported skills!')
 
-    cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '2')
-    cy.get('[data-cy="pageHeaderStat_Skills_disabledCount"]').should('not.exist')
+    cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]')
+        .should('have.text', '2');
+    cy.get('[data-cy="pageHeaderStats_Skills_disabled"]')
+        .should('not.exist');
 
     cy.get('[data-cy="pagePreviewCardStat_# Skills"] [data-cy="statNum"]').should('have.text', '2')
     cy.get('[data-cy="pagePreviewCardStat_# Skills_disabled"]').should('not.exist')
