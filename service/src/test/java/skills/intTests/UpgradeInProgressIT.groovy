@@ -25,7 +25,7 @@ import skills.auth.UserAuthService
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
-import skills.intTests.utils.SkillsService
+import skills.intTests.utils.TransactionHelper
 import skills.storage.model.UserAttrs
 import skills.storage.model.auth.User
 import skills.storage.repos.UserAttrsRepo
@@ -44,6 +44,9 @@ class UpgradeInProgressIT extends DefaultIntSpec {
 
     @Autowired
     JdbcTemplate jdbcTemplate
+
+    @Autowired
+    TransactionHelper transactionHelper
 
     @Autowired
     UserAuthService userAuthService
@@ -73,8 +76,10 @@ class UpgradeInProgressIT extends DefaultIntSpec {
     }
 
     private insertData(String sqlFilePath) {
-        new ClassPathResource(sqlFilePath).getFile().eachLine { sqlStmt ->
-            jdbcTemplate.execute(sqlStmt)
+        transactionHelper.doInTransaction {
+            new ClassPathResource(sqlFilePath).getFile().eachLine { sqlStmt ->
+                jdbcTemplate.execute(sqlStmt)
+            }
         }
     }
 

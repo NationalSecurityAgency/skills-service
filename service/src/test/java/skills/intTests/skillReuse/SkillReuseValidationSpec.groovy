@@ -315,7 +315,7 @@ class SkillReuseValidationSpec extends CatalogIntSpec {
         skillsService.reuseSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId)
 
         when:
-        skillsService.addSkill([projectId: p1.projectId, skillId: SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)], "user", new Date() - 1)
+        skillsService.addSkill([projectId: p1.projectId, skillId: SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)], getRandomUsers(1)[0], new Date() - 1)
         then:
         SkillsClientException ex = thrown(SkillsClientException)
         ex.message.contains("Skills imported from the catalog can only be reported if the original skill is configured for Self Reporting")
