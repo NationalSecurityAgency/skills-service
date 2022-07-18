@@ -90,5 +90,52 @@ describe('Client Display Leaderboard Tests', () => {
             .should('contain.text', '100 Points');
     });
 
+    it('nickname displayed in leaderboard', () => {
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+
+        cy.intercept('GET', '/api/projects/proj1/leaderboard?type=topTen', (req) => {
+            req.reply((res) => {
+                const leaderboard = res.body;
+                leaderboard.rankedUsers[0].nickname = 'John Doe';
+                res.send(leaderboard);
+            });
+        }).as('getLeaderboard')
+
+        const user = Cypress.env('proxyUser');
+        cy.log(`user is: [${user}]`)
+        cy.reportSkill(1, 1, user, '2021-02-24 10:00');
+
+        cy.cdVisit('/');
+        cy.contains('Overall Points');
+        cy.cdClickRank();
+        cy.wait('@getLeaderboard');
+
+        cy.get(tableSelector)
+          .contains('Loading...')
+          .should('not.exist');
+        cy.get(rowSelector)
+          .should('have.length', 1)
+          .as('cyRows');
+
+        cy.get('@cyRows')
+          .eq(0)
+          .find('td')
+          .as('row');
+        cy.get('@row')
+          .eq(0)
+          .should('contain.text', `1`);
+        const userToValidate = Cypress.env('oauthMode') ? 'foo' : user;
+        cy.get('@row')
+          .eq(1)
+          .should('contain.text', userToValidate);
+        cy.get('@row')
+          .eq(2)
+          .should('contain.text', '100 Points');
+
+        cy.get('[data-cy="userColumn"]').contains('John Doe (user0)');
+    });
+
 });
 
