@@ -73,7 +73,7 @@ limitations under the License.
           </div>
         </template>
         <template v-slot:cell(user)="data">
-          <div class="text-left mt-2 bigger-text">
+          <div class="text-left mt-2 bigger-text" data-cy="userColumn">
             <i class="fas fa-user-circle text-dark skills-theme-primary-color" style="font-size: 1.8rem;"></i> <span class="align-text-bottom text-info skills-theme-primary-color">{{ getUser(data.item) }}</span>
             <i v-if="data.item.rank <=3" class="fas fa-medal ml-2" :class="medalClass(data.item)"></i>
             <span v-if="data.item.isItMe" class="align-text-bottom ml-2" ><span class="h5"><b-badge><i class="far fa-hand-point-left"></i> You!</b-badge></span></span>
@@ -198,7 +198,9 @@ limitations under the License.
             ? `${item.firstName} ${item.lastName} (${item.userId})`
             : `${item.nickname} (${item.userId})`;
         }
-        return item.userId;
+        return this.isEmpty(item.nickname)
+          ? item.userId
+          : `${item.nickname} (${item.userId})`;
       },
       isEmpty(s) {
         return (!s || typeof s !== 'string' || !s.trim());
