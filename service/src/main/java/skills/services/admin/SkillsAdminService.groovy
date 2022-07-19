@@ -433,7 +433,14 @@ class SkillsAdminService {
         } else {
             throw new SkillException("Unexpected parent type [${parentSkill.type}]")
         }
-        removeCatalogImportedSkills(skillDefinition)
+        if (skillDefinition.type == SkillDef.ContainerType.SkillsGroup) {
+            List<SkillDef> childSkills = ruleSetDefGraphService.getChildrenSkills(skillDefinition, [SkillRelDef.RelationshipType.SkillsGroupRequirement])
+            childSkills.each {
+                removeCatalogImportedSkills(it)
+            }
+        } else {
+            removeCatalogImportedSkills(skillDefinition)
+        }
 
         // this MUST happen before the skill was removed as sql relies on the skill to exist
         userPointsManagement.handleSkillRemoval(skillDefinition, subject)
@@ -476,7 +483,7 @@ class SkillsAdminService {
     }
 
     @Profile
-    private void removeCatalogImportedSkills(SkillDef skillDefinition) {
+    void removeCatalogImportedSkills(SkillDef skillDefinition) {
         List<SkillDefWithExtra> related = skillDefWithExtraRepo.findSkillsCopiedFrom(skillDefinition.id)
         log.info("catalog skill is being deleted, deleting [{}] copies imported into other projects", related?.size())
         related?.each {

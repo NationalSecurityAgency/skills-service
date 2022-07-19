@@ -80,6 +80,9 @@ class SubjAdminService {
     @Autowired
     DisplayOrderService displayOrderService
 
+    @Autowired
+    SkillsAdminService skillsAdminService
+
     @Transactional()
     void saveSubject(String projectId, String origSubjectId, SubjectRequest subjectRequest, boolean performCustomValidation = true) {
         lockingService.lockProject(projectId)
@@ -153,6 +156,11 @@ class SubjAdminService {
 
         if (globalBadgesService.isSubjectUsedInGlobalBadge(subjectDefinition)) {
             throw new SkillException("Subject with id [${subjectId}] cannot be deleted as it is currently referenced by one or more global badges")
+        }
+
+        List<SkillDef> allSubjectSkills = ruleSetDefGraphService.getChildrenSkills(subjectDefinition, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.GroupSkillToSubject])
+        allSubjectSkills.each {
+            skillsAdminService.removeCatalogImportedSkills(it)
         }
 
         ruleSetDefGraphService.deleteSkillWithItsDescendants(subjectDefinition)
