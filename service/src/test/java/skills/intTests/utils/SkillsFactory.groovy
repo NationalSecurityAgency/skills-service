@@ -36,9 +36,17 @@ class SkillsFactory {
         return "Test Subject #${subjNumber}".toString()
     }
 
+    static String getSkillId(int skillNumber = 1, int subjNumber = 1) {
+        return "skill${skillNumber}${subjNumber > 1 ? "subj" + subjNumber : ""}".toString()
+    }
+
+    static getBadgeId(int badgeNumber = 1) {
+        return "badge${badgeNumber}".toString()
+    }
+
     static Map createSkill(int projNumber = 1, int subjNumber = 1, int skillNumber = 1, int version = 0, int numPerformToCompletion = 1, pointIncrementInterval = 480, pointIncrement = 10, type="Skill") {
         return [projectId             : getDefaultProjId(projNumber), subjectId: getSubjectId(subjNumber),
-                skillId               : "skill${skillNumber}${subjNumber > 1 ? "subj" + subjNumber : ""}".toString(),
+                skillId               : getSkillId(skillNumber, subjNumber),
                 name                  : "Test Skill ${skillNumber}${subjNumber > 1 ? " Subject" + subjNumber : ""}".toString(),
                 type                  : type, pointIncrement: pointIncrement, numPerformToCompletion: numPerformToCompletion,
                 pointIncrementInterval: pointIncrementInterval, numMaxOccurrencesIncrementInterval: 1,
@@ -69,7 +77,7 @@ class SkillsFactory {
     }
 
     static createBadge(int projNumber = 1, int badgeNumber = 1) {
-        return [projectId: getDefaultProjId(projNumber), badgeId: "badge${badgeNumber}".toString(), name: "Test Badge ${badgeNumber}".toString()]
+        return [projectId: getDefaultProjId(projNumber), badgeId: getBadgeId(badgeNumber), name: "Test Badge ${badgeNumber}".toString()]
     }
 
     static createSkillsGroup(int projNumber = 1, int subjNumber = 1l, int groupNumber = 1, numSkillsRequired = -1) {
