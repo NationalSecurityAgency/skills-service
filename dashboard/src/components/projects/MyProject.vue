@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div data-cy="projectCard">
+  <div data-cy="projectCard" class="h-100">
     <div class="card h-100" :data-cy="`projectCard_${projectInternal.projectId}`">
       <div class="card-body">
         <div class="row mb-2">
@@ -46,16 +46,32 @@ limitations under the License.
         </div>
 
         <div class="row text-center justify-content-center">
-          <div v-for="(stat) in stats" :key="stat.label" class="col my-3" style="min-width: 10rem;">
-            <div :data-cy="`pagePreviewCardStat_${stat.label}`" class="border rounded stat-card">
+          <div v-for="(stat) in stats" :key="stat.label" class="col" style="min-width: 10rem;">
+            <div :data-cy="`pagePreviewCardStat_${stat.label}`"
+                 class="border rounded stat-card h-100">
               <i :class="stat.icon"></i>
-              <p class="text-uppercase text-muted count-label">{{ stat.label }}</p>
+              <div class="text-uppercase text-muted count-label">{{ stat.label }}</div>
               <strong class="h4" data-cy="statNum">{{ stat.count | number }}</strong>
-              <i v-if="stat.warn" class="fas fa-exclamation-circle text-warning ml-1" style="font-size: 1.5rem;"
+              <i v-if="stat.warn" class="fas fa-exclamation-circle text-warning ml-1"
+                 style="font-size: 1.5rem;"
                  v-b-tooltip.hover="stat.warnMsg"
                  data-cy="warning"
                  role="alert"
                  :aria-label="`Warning: ${stat.warnMsg}`"/>
+
+              <div v-if="stat.secondaryStats">
+                <div v-for="secCount in stat.secondaryStats" :key="secCount.label">
+                  <div v-if="secCount.count > 0" style="font-size: 0.9rem">
+                    <b-badge :variant="`${secCount.badgeVariant}`"
+                             :data-cy="`pagePreviewCardStat_${stat.label}_${secCount.label}`">
+                      <span>{{ secCount.count }}</span>
+                    </b-badge>
+                    <span class="text-left text-secondary text-uppercase ml-1"
+                          style="font-size: 0.8rem">{{ secCount.label }}</span>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
         </div>
@@ -176,12 +192,26 @@ limitations under the License.
           label: 'Skills',
           count: this.projectInternal.numSkills,
           icon: 'fas fa-graduation-cap skills-color-skills',
+          secondaryStats: [{
+            label: 'reused',
+            count: this.projectInternal.numSkillsReused,
+            badgeVariant: 'info',
+          }, {
+            label: 'disabled',
+            count: this.projectInternal.numSkillsDisabled,
+            badgeVariant: 'warning',
+          }],
         }, {
           label: 'Points',
           count: this.projectInternal.totalPoints,
-          warn: this.projectInternal.totalPoints < this.minimumPoints,
+          warn: (this.projectInternal.totalPoints + this.projectInternal.totalPointsReused) < this.minimumPoints,
           warnMsg: 'Project has insufficient points assigned. Skills cannot be achieved until project has at least 100 points.',
           icon: 'far fa-arrow-alt-circle-up skills-color-points',
+          secondaryStats: [{
+            label: 'reused',
+            count: this.projectInternal.totalPointsReused,
+            badgeVariant: 'info',
+          }],
         }, {
           label: 'Badges',
           count: this.projectInternal.numBadges,

@@ -170,7 +170,7 @@ describe('Skill Reuse and Dashboard Tests', () => {
         cy.waitForBackendAsyncTasksToComplete();
     });
 
-    it('display disabled and reused counts in a stats card', () => {
+    it('display disabled and reused counts on a subject page stats card', () => {
         cy.reuseSkillIntoAnotherSubject(1, 1, 2);
 
         cy.createProject(2);
