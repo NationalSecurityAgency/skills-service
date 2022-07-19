@@ -78,14 +78,7 @@ limitations under the License.
   import ProjectService from '../projects/ProjectService';
   import NavigationErrorMixin from '../utils/NavigationErrorMixin';
 
-  const disabledDates = (date) => date > new Date();
   const skills = createNamespacedHelpers('skills');
-
-  const datePickerState = {
-    disabledDates: {
-      customPredictor: disabledDates,
-    },
-  };
 
   export default {
     name: 'AddSkillEvent',
@@ -113,12 +106,13 @@ limitations under the License.
         currentSelectedUser: null,
         projectTotalPoints: 0,
         pkiAuthenticated: false,
-        datePickerState,
+        skillHistoryLimit: null,
       };
     },
     mounted() {
       this.loadProject();
       this.pkiAuthenticated = this.$store.getters.isPkiAuthenticated;
+      this.skillHistoryLimit = this.$store.getters.config.skillHistoryInDays;
     },
     computed: {
       ...skills.mapGetters([
@@ -127,6 +121,16 @@ limitations under the License.
       reversedUsersAdded: function reversedUsersAdded() {
         return this.usersAdded.map((e) => e)
           .reverse();
+      },
+      datePickerState() {
+        const today = new Date();
+        const historyLimit = new Date();
+        historyLimit.setDate(historyLimit.getDate() - this.skillHistoryLimit);
+        return {
+          disabledDates: {
+            customPredictor: (date) => date > today || date < historyLimit,
+          },
+        };
       },
       minimumPoints() {
         return this.$store.getters.config.minimumProjectPoints;

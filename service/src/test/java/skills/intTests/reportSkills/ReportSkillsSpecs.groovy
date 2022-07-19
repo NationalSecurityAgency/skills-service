@@ -17,6 +17,8 @@ package skills.intTests.reportSkills
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.test.context.SpringBootTest
 import skills.intTests.utils.*
 import skills.storage.model.UserAchievement
 import skills.storage.repos.UserAchievedLevelRepo
@@ -1040,6 +1042,23 @@ class ReportSkillsSpecs extends DefaultIntSpec {
         then:
         SkillsClientException ex = thrown()
         ex.message.contains("Skill Events may not be in the future")
+    }
+
+    def "Skill Events may not be reported for times beyond the maximum history limit"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(10, )
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        when:
+        def res = skillsService.addSkill([projectId: projId, skillId: skills[0].skillId], "usera", new Date().minus(46))
+
+        then:
+        SkillsClientException ex = thrown()
+        ex.message.contains("Skill Events may not be older than")
     }
 
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })

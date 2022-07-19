@@ -51,7 +51,7 @@ public class AddSkillHelper {
     @Autowired
     ProjectErrorService projectErrorService;
 
-    public SkillEventResult addSkill(String projectId, String skillId, SkillEventRequest skillEventRequest) {
+    public SkillEventResult addSkill(String projectId, String skillId, SkillEventRequest skillEventRequest, Integer maxDaysBackForSkill) {
         String requestedUserId = skillEventRequest != null ? skillEventRequest.getUserId() : null;
         Long requestedTimestamp = skillEventRequest != null ? skillEventRequest.getTimestamp() : null;
         Boolean notifyIfSkillNotApplied = skillEventRequest != null ? skillEventRequest.getNotifyIfSkillNotApplied() : false;
@@ -60,9 +60,15 @@ public class AddSkillHelper {
         Date incomingDate = null;
 
         if (skillEventRequest != null && requestedTimestamp != null && requestedTimestamp > 0) {
+            Long currentTime = System.currentTimeMillis();
             //let's account for some possible clock drift
-            SkillsValidator.isTrue(requestedTimestamp <= (System.currentTimeMillis() + 30000), "Skill Events may not be in the future", projectId, skillId);
+            SkillsValidator.isTrue(requestedTimestamp <= (currentTime + 30000), "Skill Events may not be in the future", projectId, skillId);
             incomingDate = new Date(requestedTimestamp);
+            if( maxDaysBackForSkill != null && maxDaysBackForSkill > 0 ) {
+                Long daysBackInMilliseconds = Long.valueOf(maxDaysBackForSkill) * 24 * 60 * 60 * 1000;
+                Long maximumDayBack = currentTime - daysBackInMilliseconds;
+                SkillsValidator.isTrue(requestedTimestamp >= maximumDayBack, String.format("Skill Events may not be older than %d days", maxDaysBackForSkill), projectId, skillId);
+            }
         }
 
         if (skillEventRequest != null && skillEventRequest.getApprovalRequestedMsg() != null) {
