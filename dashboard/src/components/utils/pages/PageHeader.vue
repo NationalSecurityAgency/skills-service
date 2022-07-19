@@ -51,9 +51,9 @@ limitations under the License.
                                class="text-left">
                             <b-badge :variant="`${secCount.badgeVariant}`"
                                      :data-cy="`pageHeaderStats_${stat.label}_${secCount.label}`">
-                              {{ secCount.count }}
+                              <span>{{ secCount.count }}</span>
                             </b-badge>
-                            <span class="text-left text-secondary text-uppercase"
+                            <span class="text-left text-secondary text-uppercase ml-1"
                                   style="font-size: 0.8rem">{{ secCount.label }}</span>
                           </div>
                         </div>
