@@ -75,6 +75,17 @@ class SubjectDataLoader {
             int todayPoints = todaysPoints?.points ? todaysPoints.points : 0
             int points = skillDefAndUserPoints?.points ? skillDefAndUserPoints.points.points : 0
 
+            if (skillDefAndUserPoints.skillDef.copiedFrom != null && skillDefAndUserPoints.skillDef.selfReportingType) {
+                // because of the catalog's async nature when self-approval honor skill is submitted todaysPoints and points are not consistent on the imported side
+                // this is because todaysPoints are calculated from UserPerformedSkill but points come from UserPoints; UserPerformedSkill
+                // is shared in the catalog exported/imported skills but UserPoints are duplicated and asynchronously synced
+                if (todayPoints > points) {
+                    // this will at least account for 1 event that have not been propagated and make it a bit more consistent
+                    // it mostly likely will account for the first event only unless multiple skill events are submitted in the same day
+                    points = points + skillDefAndUserPoints.skillDef.pointIncrement
+                }
+            }
+
             List<UserPointsRepo.SkillWithChildAndAchievementIndicator> dependents = byParentId[skillDefAndUserPoints.skillDef.id]
             SkillDependencySummary dependencyInfo
             if (dependents) {

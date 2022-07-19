@@ -479,5 +479,39 @@ class VariousEndpointsAndSkillReuseSpec extends CatalogIntSpec {
         projects[0].numSkillsReused == 1
         projects[0].totalPointsReused == 200
     }
+
+    def "due to async propagation of the reused skills client display endpoints may not return extra today's points for the honor skills"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 2)
+        p1Skills.each {
+            it.selfReportingType = SkillDef.SelfReportingType.HonorSystem
+        }
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def p1subj2 = createSubject(1, 2)
+        skillsService.createSubject(p1subj2)
+
+        skillsService.reuseSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId)
+        List<Date> dates = (5..1).collect { new Date() - it }
+        List<String> users = getRandomUsers(5)
+
+        skillsService.addSkill([projectId: p1Skills[0].projectId, skillId: SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)], users[0], new Date())
+        // today
+
+        when:
+        def res = skillsService.getSkillSummary(users[0], p1.projectId, p1subj2.subjectId, -1, true)
+        def skillRes = skillsService.getSingleSkillSummary(users[0], p1.projectId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0))
+        println JsonOutput.prettyPrint(JsonOutput.toJson(res))
+        then:
+        res.points == 100
+        res.todaysPoints == 100
+
+        res.skills[0].points == 100
+        res.skills[0].todaysPoints == 100
+
+        skillRes.points == 100
+        skillRes.todaysPoints == 100
+    }
 }
 
