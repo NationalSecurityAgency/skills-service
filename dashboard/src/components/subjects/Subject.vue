@@ -111,14 +111,27 @@ limitations under the License.
           stats: [{
             label: '# Skills',
             count: this.subjectInternal.numSkills,
-            disabledCount: this.subjectInternal.numSkillsDisabled,
             icon: 'fas fa-graduation-cap skills-color-skills',
+            secondaryStats: [{
+              label: 'reused',
+              count: this.subjectInternal.numSkillsReused,
+              badgeVariant: 'info',
+            }, {
+              label: 'disabled',
+              count: this.subjectInternal.numSkillsDisabled,
+              badgeVariant: 'warning',
+            }],
           }, {
             label: 'Points',
             count: this.subjectInternal.totalPoints,
-            warn: this.subjectInternal.totalPoints < this.minimumPoints,
-            warnMsg: this.subjectInternal.totalPoints < this.minimumPoints ? `Subject has insufficient points assigned. Skills cannot be achieved until subject has at least ${this.minimumPoints} points.` : null,
+            warn: (this.subjectInternal.totalPoints + this.subjectInternal.totalPointsReused) < this.minimumPoints,
+            warnMsg: (this.subjectInternal.totalPoints + this.subjectInternal.totalPointsReused) < this.minimumPoints ? `Subject has insufficient points assigned. Skills cannot be achieved until subject has at least ${this.minimumPoints} points.` : null,
             icon: 'far fa-arrow-alt-circle-up skills-color-points',
+            secondaryStats: [{
+              label: 'reused',
+              count: this.subjectInternal.totalPointsReused,
+              badgeVariant: 'info',
+            }],
           }],
           controls: {
             navTo: this.buildManageNavLink(),

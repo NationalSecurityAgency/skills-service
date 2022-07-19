@@ -170,7 +170,7 @@ describe('Skill Reuse and Dashboard Tests', () => {
         cy.waitForBackendAsyncTasksToComplete();
     });
 
-    it('display disabled and reused counts in a stats card', () => {
+    it('display disabled and reused counts on a subject page stats card', () => {
         cy.reuseSkillIntoAnotherSubject(1, 1, 2);
 
         cy.createProject(2);
@@ -193,6 +193,26 @@ describe('Skill Reuse and Dashboard Tests', () => {
         cy.get('[data-cy="pageHeaderStats_Skills_disabled"]')
             .should('have.text', '2');
         cy.get('[data-cy="pageHeaderStats_Points_reused"]')
+            .should('have.text', '200');
+
+        cy.get('[data-cy="subj1_card"] [data-cy="pagePreviewCardStat_# Skills"] [data-cy="statNum"]')
+            .should('have.text', 1);
+        cy.get('[data-cy="subj1_card"] [data-cy="pagePreviewCardStat_Points"] [data-cy="statNum"]')
+            .should('have.text', 200);
+        cy.get('[data-cy="subj1_card"] [data-cy="pagePreviewCardStat_# Skills_reused"]')
+            .should('not.exist');
+        cy.get('[data-cy="subj1_card"] [data-cy="pagePreviewCardStat_Points_reused"]')
+            .should('not.exist');
+        cy.get('[data-cy="subj1_card"] [data-cy="pagePreviewCardStat_# Skills_disabled"]')
+            .should('have.text', '2');
+
+        cy.get('[data-cy="subj2_card"] [data-cy="pagePreviewCardStat_# Skills"] [data-cy="statNum"]')
+            .should('have.text', 0);
+        cy.get('[data-cy="subj2_card"] [data-cy="pagePreviewCardStat_Points"] [data-cy="statNum"]')
+            .should('have.text', 0);
+        cy.get('[data-cy="subj2_card"] [data-cy="pagePreviewCardStat_# Skills_reused"]')
+            .should('have.text', '1');
+        cy.get('[data-cy="subj2_card"] [data-cy="pagePreviewCardStat_Points_reused"]')
             .should('have.text', '200');
 
         cy.get('[data-cy="manageBtn_subj1"]')
@@ -222,6 +242,78 @@ describe('Skill Reuse and Dashboard Tests', () => {
             .should('not.exist');
         cy.get('[data-cy="pageHeaderStats_Points_reused"]')
             .should('have.text', '200');
+    });
+
+    it('display disabled and reused counts on a project(s) page stats card', () => {
+        cy.reuseSkillIntoAnotherSubject(1, 1, 2);
+
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 10);
+        cy.createSkill(2, 1, 11);
+        cy.exportSkillToCatalog(2, 1, 10);
+        cy.exportSkillToCatalog(2, 1, 11);
+
+        cy.importSkillFromCatalog(1, 1, 2, 10);
+        cy.importSkillFromCatalog(1, 1, 2, 11);
+
+        cy.visit('/administrator/');
+        cy.get('[data-cy="projectCard_proj1"] [data-cy="pagePreviewCardStat_Skills"] [data-cy="statNum"]')
+            .should('have.text', '1');
+        cy.get('[data-cy="projectCard_proj1"] [data-cy="pagePreviewCardStat_Skills_disabled"]')
+            .should('have.text', '2');
+        cy.get('[data-cy="projectCard_proj1"] [data-cy="pagePreviewCardStat_Skills_reused"]')
+            .should('have.text', '1');
+
+        cy.get('[data-cy="projectCard_proj1"] [data-cy="pagePreviewCardStat_Points"] [data-cy="statNum"]')
+            .should('have.text', '200');
+        cy.get('[data-cy="projectCard_proj1"] [data-cy="pagePreviewCardStat_Points_disabled"]')
+            .should('not.exist');
+        cy.get('[data-cy="projectCard_proj1"] [data-cy="pagePreviewCardStat_Points_reused"]')
+            .should('have.text', '200');
+
+        cy.get('[data-cy="projectCard_proj2"] [data-cy="pagePreviewCardStat_Skills"] [data-cy="statNum"]')
+            .should('have.text', '2');
+        cy.get('[data-cy="projectCard_proj2"] [data-cy="pagePreviewCardStat_Skills_disabled"]')
+            .should('not.exist');
+        cy.get('[data-cy="projectCard_proj2"] [data-cy="pagePreviewCardStat_Skills_reused"]')
+            .should('not.exist');
+
+        cy.get('[data-cy="projectCard_proj2"] [data-cy="pagePreviewCardStat_Points"] [data-cy="statNum"]')
+            .should('have.text', '400');
+        cy.get('[data-cy="projectCard_proj2"] [data-cy="pagePreviewCardStat_Points_disabled"]')
+            .should('not.exist');
+        cy.get('[data-cy="projectCard_proj2"] [data-cy="pagePreviewCardStat_Points_reused"]')
+            .should('not.exist');
+
+        cy.get('[data-cy="projCard_proj1_manageLink"]')
+            .click();
+        cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]')
+            .should('have.text', '1');
+        cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]')
+            .should('have.text', '200');
+        cy.get('[data-cy="pageHeaderStats_Skills_reused"]')
+            .should('have.text', '1');
+        cy.get('[data-cy="pageHeaderStats_Skills_disabled"]')
+            .should('have.text', '2');
+        cy.get('[data-cy="pageHeaderStats_Points_reused"]')
+            .should('have.text', '200');
+
+        cy.get('[data-cy="breadcrumb-Projects"]')
+            .click();
+        cy.get('[data-cy="projCard_proj2_manageLink"]')
+            .click();
+        cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]')
+            .should('have.text', '2');
+        cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]')
+            .should('have.text', '400');
+        cy.get('[data-cy="pageHeaderStats_Skills_reused"]')
+            .should('not.exist');
+        cy.get('[data-cy="pageHeaderStats_Skills_disabled"]')
+            .should('not.exist');
+        cy.get('[data-cy="pageHeaderStats_Points_reused"]')
+            .should('not.exist');
+
     });
 
 });

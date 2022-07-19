@@ -19,6 +19,7 @@ import groovy.json.JsonOutput
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
 import skills.intTests.catalog.CatalogIntSpec
+import skills.intTests.utils.SkillsService
 import skills.metrics.builders.MetricsPagingParamsHelper
 import skills.metrics.builders.MetricsParams
 import skills.services.admin.skillReuse.SkillReuseIdUtil
@@ -406,6 +407,7 @@ class VariousEndpointsAndSkillReuseSpec extends CatalogIntSpec {
         skillsService.reuseSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId, p1subj2g2.skillId)
 
         when:
+        def projects = skillsService.getProjects()
         def projStats = skillsService.getProject(p1.projectId)
         def subj1Stats = skillsService.getSubject(p1subj1)
         def subj2Stats = skillsService.getSubject(p1subj2)
@@ -424,7 +426,58 @@ class VariousEndpointsAndSkillReuseSpec extends CatalogIntSpec {
         subj2Stats.numSkillsReused == 1
         subj2Stats.totalPointsReused == 200
         subj2Stats.totalPoints == 0
+
+        projects[0].numSkills == 3
+        projects[0].totalPoints == 600
+        projects[0].numSkillsReused == 1
+        projects[0].totalPointsReused == 200
     }
 
+    def "return reused skills and points from project's stats endpoint - root user"() {
+        SkillsService rootSkillsService = createRootSkillService()
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1subj1g1 = createSkillsGroup(1, 1, 11)
+        rootSkillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [p1subj1g1])
+        def p1Skills = createSkills(3, 1, 1, 100, 2)
+        p1Skills.each {
+            rootSkillsService.assignSkillToSkillsGroup(p1subj1g1.skillId, it)
+        }
+
+        def p1subj2 = createSubject(1, 2)
+        rootSkillsService.createSubject(p1subj2)
+        def p1subj2g2 = createSkillsGroup(1, 2, 22)
+        rootSkillsService.createSkill(p1subj2g2)
+
+        rootSkillsService.reuseSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId, p1subj2g2.skillId)
+
+        rootSkillsService.pinProject(p1.projectId)
+
+        when:
+        def projects = rootSkillsService.getProjects()
+        def projStats = rootSkillsService.getProject(p1.projectId)
+        def subj1Stats = rootSkillsService.getSubject(p1subj1)
+        def subj2Stats = rootSkillsService.getSubject(p1subj2)
+        then:
+        projStats.numSkills == 3
+        projStats.numSkillsReused == 1
+        projStats.totalPointsReused == 200
+        projStats.totalPoints == 600
+
+        subj1Stats.numSkills == 3
+        subj1Stats.numSkillsReused == 0
+        subj1Stats.totalPointsReused == 0
+        subj1Stats.totalPoints == 600
+
+        subj2Stats.numSkills == 0
+        subj2Stats.numSkillsReused == 1
+        subj2Stats.totalPointsReused == 200
+        subj2Stats.totalPoints == 0
+
+        projects[0].numSkills == 3
+        projects[0].totalPoints == 600
+        projects[0].numSkillsReused == 1
+        projects[0].totalPointsReused == 200
+    }
 }
 
