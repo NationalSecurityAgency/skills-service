@@ -99,6 +99,7 @@ describe('Client Display Leaderboard Tests', () => {
             req.reply((res) => {
                 const leaderboard = res.body;
                 leaderboard.rankedUsers[0].nickname = 'John Doe';
+                leaderboard.rankedUsers[0].userId = 'user0'
                 res.send(leaderboard);
             });
         }).as('getLeaderboard')
