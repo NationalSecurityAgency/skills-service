@@ -108,6 +108,8 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                     COALESCE(subjects.subjectCount, 0) AS numSubjects,
                     COALESCE(groups.groupCount, 0) AS numGroups,
                     CAST(COALESCE(expiration.expiringUnused, 'false') AS BOOLEAN) as expiring,
+                    COALESCE(reusedSkills.reusedSkillCount, 0) AS numSkillsReused,
+                    COALESCE(reusedSkills.reusedTotalPoints, 0) AS totalPointsReused,
                     expiration.expirationTriggeredDate as expirationTriggered,
                     events.latest AS lastReportedSkill,
                     pd.created,
@@ -116,7 +118,8 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                          LEFT JOIN (SELECT max(project_id) as project_id, MAX(event_time) AS latest FROM user_events where LOWER(project_id) = LOWER(?1)) events ON events.project_id = pd.project_id
                          LEFT JOIN (SELECT max(project_id) as project_id, COUNT(id) AS errorCount FROM project_error where LOWER(project_id) = LOWER(?1)) errors ON errors.project_id = pd.project_id
                          LEFT JOIN (SELECT max(project_id) as project_id, COUNT(id) AS skillCount, MAX(updated) as skillUpdated FROM skill_definition WHERE type = 'Skill' and enabled = 'false' and LOWER(project_id) = LOWER(?1)) disabledSkills ON disabledSkills.project_id = pd.project_id
-                         LEFT JOIN (SELECT max(project_id) AS project_id, COUNT(id) AS skillCount, MAX(updated) as skillUpdated FROM skill_definition WHERE type = 'Skill' and enabled = 'true' and LOWER(project_id) = LOWER(?1)) skills ON skills.project_id = pd.project_id
+                         LEFT JOIN (SELECT max(project_id) AS project_id, COUNT(id) AS skillCount, MAX(updated) as skillUpdated FROM skill_definition WHERE type = 'Skill' and enabled = 'true' and skill_id not like '%STREUSESKILLST%' and LOWER(project_id) = LOWER(?1)) skills ON skills.project_id = pd.project_id
+                         LEFT JOIN (SELECT max(project_id) AS project_id, COUNT(id) AS reusedSkillCount, SUM(total_points) as reusedTotalPoints FROM skill_definition WHERE type = 'Skill' and enabled = 'true' and skill_id like '%STREUSESKILLST%' and LOWER(project_id) = LOWER(?1)) reusedSkills ON skills.project_id = pd.project_id
                          LEFT JOIN (SELECT max(project_id) AS project_id, COUNT(id) AS badgeCount, MAX(updated) as badgeUpdated FROM skill_definition WHERE type = 'Badge' and LOWER(project_id) = LOWER(?1)) badges ON badges.project_id = pd.project_id
                          LEFT JOIN (SELECT max(project_id) AS project_id, COUNT(id) AS subjectCount, MAX(updated) as subjectUpdated FROM skill_definition WHERE type = 'Subject' and LOWER(project_id) = LOWER(?1)) subjects ON subjects.project_id = pd.project_id
                          LEFT JOIN (SELECT max(project_id) AS project_id, COUNT(id) AS groupCount FROM skill_definition WHERE type = 'SkillsGroup' and enabled = 'true' and LOWER(project_id) = LOWER(?1)) groups ON groups.project_id = pd.project_id

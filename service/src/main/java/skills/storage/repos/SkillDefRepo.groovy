@@ -213,7 +213,9 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
             sum(case when c.enabled = 'false' and  c.type = 'Skill' then 1 end) as disabledSkillsCount,
             sum(case when c.enabled = 'false' and  c.type = 'Skill' and c.copiedFrom is not null then 1 end) as disabledImportedSkillsCount,
             sum(case when c.enabled = 'true' and  c.type = 'SkillsGroup' then 1 end) as enabledGroupsCount,
-            sum(case when c.enabled = 'false' and  c.type = 'SkillsGroup' then 1 end) as disabledGroupsCount
+            sum(case when c.enabled = 'false' and  c.type = 'SkillsGroup' then 1 end) as disabledGroupsCount,
+            sum(case when skill_id like '%STREUSESKILLST%' and  c.type = 'Skill' then 1 end) as numSkillsReused,
+            sum(case when skill_id like '%STREUSESKILLST%' and  c.type = 'Skill' then c.totalPoints end) as totalPointsReused
             from SkillRelDef r, SkillDef c 
             where r.parent.id=?1 and c.id = r.child and r.type in ('RuleSetDefinition', 'GroupSkillToSubject')
         ''')

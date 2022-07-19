@@ -41,8 +41,10 @@ class SkillReuseManagementSpec extends CatalogIntSpec {
 
         then:
         projStat.numSubjects == 2
-        projStat.numSkills == 4
-        projStat.totalPoints == 400
+        projStat.numSkills == 3
+        projStat.totalPoints == 300
+        projStat.numSkillsReused == 1
+        projStat.totalPointsReused == 100
 
         subjSkills.size() == 1
         subjSkills[0].skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
@@ -50,8 +52,10 @@ class SkillReuseManagementSpec extends CatalogIntSpec {
         subjSkills[0].reusedSkill
         subjSkills[0].totalPoints == 100
 
-        subjStats.numSkills == 1
-        subjStats.totalPoints == 100
+        subjStats.numSkills == 0
+        subjStats.totalPoints == 0
+        subjStats.numSkillsReused == 1
+        subjStats.totalPointsReused == 100
 
         skillAdminInfo.reusedSkill
         skillAdminInfo.skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
@@ -88,8 +92,11 @@ class SkillReuseManagementSpec extends CatalogIntSpec {
 
         then:
         projStat.numSubjects == 4
-        projStat.numSkills == 7
-        projStat.totalPoints == 700
+        projStat.numSkills == 4
+        projStat.totalPoints == 400
+        projStat.numSkillsReused == 3
+        projStat.totalPointsReused == 300
+
 
         subjSkills.size() == 1
         subjSkills[0].skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
@@ -97,14 +104,20 @@ class SkillReuseManagementSpec extends CatalogIntSpec {
         subjSkills[0].reusedSkill
         subjSkills[0].totalPoints == 100
 
-        subjStats2.numSkills == 1
-        subjStats2.totalPoints == 100
+        subjStats2.numSkills == 0
+        subjStats2.totalPoints == 0
+        subjStats2.numSkillsReused == 1
+        subjStats2.totalPointsReused == 100
 
-        subjStats3.numSkills == 2
-        subjStats3.totalPoints == 200
+        subjStats3.numSkills == 1
+        subjStats3.totalPoints == 100
+        subjStats3.numSkillsReused == 1
+        subjStats3.totalPointsReused == 100
 
-        subjStats4.numSkills == 1
-        subjStats4.totalPoints == 100
+        subjStats4.numSkills == 0
+        subjStats4.totalPoints == 0
+        subjStats4.numSkillsReused == 1
+        subjStats4.totalPointsReused == 100
 
         skillAdminInfo.reusedSkill
         skillAdminInfo.skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
@@ -307,11 +320,15 @@ class SkillReuseManagementSpec extends CatalogIntSpec {
         !subj2_desc_before[0].selfReporting.enabled
 
         projStat_before.numSubjects == 2
-        projStat_before.numSkills == 4
-        projStat_before.totalPoints == 200 + ((6 * 33) * 2)
+        projStat_before.numSkills == 3
+        projStat_before.totalPoints == 200 + (6 * 33)
+        projStat_before.numSkillsReused == 1
+        projStat_before.totalPointsReused == (6 * 33)
 
-        subjStats_before.numSkills == 1
-        subjStats_before.totalPoints == 6 * 33
+        subjStats_before.numSkills == 0
+        subjStats_before.totalPoints == 0
+        subjStats_before.numSkillsReused == 1
+        subjStats_before.totalPointsReused == (6 * 33)
 
         subjSkills_before.size() == 1
         subjSkills_before[0].skillId == SkillReuseIdUtil.addTag("originalSkillId", 0)
@@ -333,11 +350,15 @@ class SkillReuseManagementSpec extends CatalogIntSpec {
         subj2_desc[0].selfReporting.type == "Approval"
 
         projStat.numSubjects == 2
-        projStat.numSkills == 4
-        projStat.totalPoints == 200 + (10 * 22 * 2)
+        projStat.numSkills == 3
+        projStat.totalPoints == 200 + (10 * 22)
+        projStat.numSkillsReused == 1
+        projStat.totalPointsReused == (10 * 22)
 
-        subjStats.numSkills == 1
-        subjStats.totalPoints == 10 * 22
+        subjStats.numSkills == 0
+        subjStats.totalPoints == 0
+        subjStats.numSkillsReused == 1
+        subjStats.totalPointsReused == (10 * 22)
 
         subjSkills.size() == 1
         subjSkills[0].skillId == SkillReuseIdUtil.addTag("newSkillId", 0)
@@ -390,8 +411,10 @@ class SkillReuseManagementSpec extends CatalogIntSpec {
 
         then:
         projStat.numSubjects == 4
-        projStat.numSkills == 7
-        projStat.totalPoints == 700
+        projStat.numSkills == 4
+        projStat.numSkillsReused == 3
+        projStat.totalPoints == 400
+        projStat.totalPointsReused == 300
 
         subjSkills.size() == 1
         subjSkills[0].skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
@@ -402,14 +425,20 @@ class SkillReuseManagementSpec extends CatalogIntSpec {
         subjStats1.numSkills == 3
         subjStats1.totalPoints == 300
 
-        subjStats2.numSkills == 1
-        subjStats2.totalPoints == 100
+        subjStats2.numSkills == 0
+        subjStats2.numSkillsReused == 1
+        subjStats2.totalPoints == 0
+        subjStats2.totalPointsReused == 100
 
-        subjStats3.numSkills == 2
-        subjStats3.totalPoints == 200
+        subjStats3.numSkills == 1
+        subjStats3.numSkillsReused == 1
+        subjStats3.totalPoints == 100
+        subjStats3.totalPointsReused == 100
 
-        subjStats4.numSkills == 1
-        subjStats4.totalPoints == 100
+        subjStats4.numSkills == 0
+        subjStats4.numSkillsReused == 1
+        subjStats4.totalPoints == 0
+        subjStats4.totalPointsReused == 100
 
         skillAdminInfo.reusedSkill
         skillAdminInfo.skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
@@ -425,8 +454,10 @@ class SkillReuseManagementSpec extends CatalogIntSpec {
 
         // after
         projStat_after.numSubjects == 4
-        projStat_after.numSkills == 6
-        projStat_after.totalPoints == 600
+        projStat_after.numSkills == 4
+        projStat_after.numSkillsReused == 2
+        projStat_after.totalPoints == 400
+        projStat_after.totalPointsReused == 200
 
         subjSkills_after.size() == 0
 
@@ -435,12 +466,18 @@ class SkillReuseManagementSpec extends CatalogIntSpec {
 
         subjStats2_after.numSkills == 0
         subjStats2_after.totalPoints == 0
+        subjStats2_after.numSkillsReused == 0
+        subjStats2_after.totalPointsReused == 0
 
-        subjStats3_after.numSkills == 2
-        subjStats3_after.totalPoints == 200
+        subjStats3_after.numSkills == 1
+        subjStats3_after.totalPoints == 100
+        subjStats3_after.numSkillsReused == 1
+        subjStats3_after.totalPointsReused == 100
 
-        subjStats4_after.numSkills == 1
-        subjStats4_after.totalPoints == 100
+        subjStats4_after.numSkills == 0
+        subjStats4_after.totalPoints == 0
+        subjStats4_after.numSkillsReused == 1
+        subjStats4_after.totalPointsReused == 100
 
         skillAdminInfo1_after.reusedSkill
         skillAdminInfo1_after.skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 1)
@@ -493,8 +530,10 @@ class SkillReuseManagementSpec extends CatalogIntSpec {
 
         then:
         projStat.numSubjects == 4
-        projStat.numSkills == 7
-        projStat.totalPoints == 700
+        projStat.numSkills == 4
+        projStat.totalPoints == 400
+        projStat.numSkillsReused == 3
+        projStat.totalPointsReused == 300
 
         subj1Skills.skillId == [p1Skills[0].skillId, p1Skills[1].skillId, p1Skills[2].skillId]
 
@@ -506,15 +545,23 @@ class SkillReuseManagementSpec extends CatalogIntSpec {
 
         subjStats1.numSkills == 3
         subjStats1.totalPoints == 300
+        subjStats1.numSkillsReused == 0
+        subjStats1.totalPointsReused == 0
 
-        subjStats2.numSkills == 1
-        subjStats2.totalPoints == 100
+        subjStats2.numSkills == 0
+        subjStats2.totalPoints == 0
+        subjStats2.numSkillsReused == 1
+        subjStats2.totalPointsReused == 100
 
-        subjStats3.numSkills == 2
-        subjStats3.totalPoints == 200
+        subjStats3.numSkills == 1
+        subjStats3.totalPoints == 100
+        subjStats3.numSkillsReused == 1
+        subjStats3.totalPointsReused == 100
 
-        subjStats4.numSkills == 1
-        subjStats4.totalPoints == 100
+        subjStats4.numSkills == 0
+        subjStats4.totalPoints == 0
+        subjStats4.numSkillsReused == 1
+        subjStats4.totalPointsReused == 100
 
         skillAdminInfo.reusedSkill
         skillAdminInfo.skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
@@ -532,6 +579,8 @@ class SkillReuseManagementSpec extends CatalogIntSpec {
         projStat_after.numSubjects == 4
         projStat_after.numSkills == 3
         projStat_after.totalPoints == 300
+        projStat_after.numSkillsReused == 0
+        projStat_after.totalPointsReused == 0
 
         subj1Skills_after.skillId == [p1Skills[1].skillId, p1Skills[2].skillId]
 
@@ -539,15 +588,23 @@ class SkillReuseManagementSpec extends CatalogIntSpec {
 
         subjStats1_after.numSkills == 2
         subjStats1_after.totalPoints == 200
+        subjStats1_after.numSkillsReused == 0
+        subjStats1_after.totalPointsReused == 0
 
         subjStats2_after.numSkills == 0
         subjStats2_after.totalPoints == 0
+        subjStats2_after.numSkillsReused == 0
+        subjStats2_after.totalPointsReused == 0
 
         subjStats3_after.numSkills == 1
         subjStats3_after.totalPoints == 100
+        subjStats3_after.numSkillsReused == 0
+        subjStats3_after.totalPointsReused == 0
 
         subjStats4_after.numSkills == 0
         subjStats4_after.totalPoints == 0
+        subjStats4_after.numSkillsReused == 0
+        subjStats4_after.totalPointsReused == 0
     }
 
 }

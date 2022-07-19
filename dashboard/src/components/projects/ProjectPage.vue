@@ -130,13 +130,26 @@ limitations under the License.
           }, {
             label: 'Skills',
             count: this.project.numSkills,
-            disabledCount: this.project.numSkillsDisabled,
+            secondaryStats: [{
+              label: 'reused',
+              count: this.project.numSkillsReused,
+              badgeVariant: 'info',
+            }, {
+              label: 'disabled',
+              count: this.project.numSkillsDisabled,
+              badgeVariant: 'warning',
+            }],
             icon: 'fas fa-graduation-cap skills-color-skills',
           }, {
             label: 'Points',
             count: this.project.totalPoints,
             warnMsg: this.project.totalPoints < this.minimumPoints ? 'Project has insufficient points assigned. Skills cannot be achieved until project has at least 100 points.' : null,
             icon: 'far fa-arrow-alt-circle-up skills-color-points',
+            secondaryStats: [{
+              label: 'reused',
+              count: this.project.totalPointsReused,
+              badgeVariant: 'info',
+            }],
           }, {
             label: 'Badges',
             count: this.project.numBadges,

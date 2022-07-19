@@ -530,7 +530,8 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
                 where
                       subj.id = rel.parent_ref_id and skill.id = rel.child_ref_id and rel.type in ('RuleSetDefinition', 'GroupSkillToSubject') and
                       subj.project_id = :projectId and subj.type = 'Subject' and
-                      skill.project_id = :projectId and skill.type = 'Skill'
+                      skill.project_id = :projectId and skill.type = 'Skill' and 
+                      skill.skill_id not like '%STREUSESKILLST%'
                 ) sd
             left join (
                 select skill_id, count(distinct user_id) as usersAchieved, max(achieved_on) as lastAchieved from user_achievement where project_id = :projectId group by skill_id

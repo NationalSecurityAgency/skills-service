@@ -43,4 +43,7 @@ class SubjectResult {
     String iconClass
 
     String helpUrl
+
+    int numSkillsReused
+    int totalPointsReused
 }
