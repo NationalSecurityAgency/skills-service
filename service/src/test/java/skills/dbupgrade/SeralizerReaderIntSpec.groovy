@@ -60,10 +60,10 @@ class SeralizerReaderIntSpec extends Specification {
         then:
         1 * addSkillHelper.addSkill("foo", "bar", { SkillEventRequest ser ->
             ser.userId == "anotherUser"
-        })
+        }, null)
         1 * addSkillHelper.addSkill("fff", "bbb", { SkillEventRequest ser ->
             ser.userId == "uuu"
-        })
+        }, null)
 
     }
 }
