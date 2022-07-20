@@ -118,22 +118,26 @@ limitations under the License.
                   }}]</span>
                 subject.
               </span>
-              <div v-if="skillsForReuse.alreadyExist.length > 0">
-                <b-badge variant="warning">{{ skillsForReuse.alreadyExist.length }}</b-badge>
-                selected skill{{ pluralWithHave(skillsForReuse.alreadyExist) }} <span
-                class="text-primary font-weight-bold">already</span> been reused!
-              </div>
             </div>
             <div v-else>
               <i class="fas fa-exclamation-triangle text-warning mr-2"/>
-              <span class="text-warning font-weight-bold">All</span> of the selected skills have
-              already
-              been reused in the
+              Selected skills are NOT available for reuse in the
               <span v-if="selectedDestination.groupName"><span
                 class="text-primary font-weight-bold">{{ selectedDestination.groupName }} </span> group</span>
               <span v-else><span
                 class="text-primary font-weight-bold">{{ selectedDestination.subjectName }} </span> subject</span>.
               Please cancel and select different skills.
+            </div>
+            <div v-if="skillsForReuse.alreadyExist.length > 0">
+              <b-badge variant="warning">{{ skillsForReuse.alreadyExist.length }}</b-badge>
+              selected skill{{ pluralWithHave(skillsForReuse.alreadyExist) }} <span
+              class="text-primary font-weight-bold">already</span> been reused in that <span
+              v-if="selectedDestination.groupName">group</span><span v-else>subject</span>!
+            </div>
+            <div v-if="skillsForReuse.skillsWithDeps.length > 0">
+              <b-badge variant="warning">{{ skillsForReuse.skillsWithDeps.length }}</b-badge>
+              selected skill{{ pluralWithHave(skillsForReuse.skillsWithDeps) }} other skill
+              dependencies, reusing skills with dependencies is not allowed!
             </div>
           </b-card>
         </div>
@@ -220,6 +224,7 @@ limitations under the License.
           subjects: true,
           reusedSkills: false,
           finalizationInfo: true,
+          dependencyInfo: false,
         },
         firstSkillId: null,
         destinations: {
@@ -237,6 +242,7 @@ limitations under the License.
           available: [],
           alreadyExist: [],
           allAlreadyExist: [],
+          skillsWithDeps: [],
         },
         finalizeInfo: {},
       };
@@ -252,7 +258,7 @@ limitations under the License.
     },
     computed: {
       isLoading() {
-        return this.loading.subjects || this.loading.reusedSkills || this.loading.finalizationInfo;
+        return this.loading.subjects || this.loading.reusedSkills || this.loading.finalizationInfo || this.loading.dependencyInfo;
       },
       importFinalizePending() {
         return this.finalizeInfo && this.finalizeInfo.numSkillsToFinalize && this.finalizeInfo.numSkillsToFinalize > 0;
@@ -322,9 +328,24 @@ limitations under the License.
             this.skillsForReuse.allAlreadyExist = res;
             this.skillsForReuse.alreadyExist = this.skills.filter((skill) => res.find((e) => e.name === skill.name));
             this.skillsForReuse.available = this.skills.filter((skill) => !res.find((e) => e.name === skill.name));
+            if (this.skillsForReuse.available.length > 0) {
+              this.loadDependencyInfo();
+            }
           })
           .finally(() => {
             this.loading.reusedSkills = false;
+          });
+      },
+      loadDependencyInfo() {
+        this.loading.dependencyInfo = true;
+        SkillsService.checkSkillsForDeps(this.$route.params.projectId, this.skillsForReuse.available.map((item) => item.skillId))
+          .then((res) => {
+            const withDeps = res.filter((item) => item.hasDependency);
+            this.skillsForReuse.skillsWithDeps = this.skillsForReuse.available.filter((skill) => withDeps.find((e) => e.skillId === skill.skillId));
+            this.skillsForReuse.available = this.skillsForReuse.available.filter((skill) => !withDeps.find((e) => e.skillId === skill.skillId));
+          })
+          .finally(() => {
+            this.loading.dependencyInfo = false;
           });
       },
       plural(arr) {

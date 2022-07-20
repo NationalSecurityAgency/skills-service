@@ -386,6 +386,11 @@ class SkillsService {
         wsHelper.adminPost(url, props, throwExceptionOnFailure)
     }
 
+    def checkIfSkillsHaveDependencies(String projectId, List<String> skillIds) {
+        String url = "/projects/${projectId}/hasDependency"
+        return wsHelper.adminPost(url, [skillIds: skillIds]).body
+    }
+
     def removeDependency(Map props) {
         String url = getSkillDependencyUrl(props)
         wsHelper.adminDelete(url, props)

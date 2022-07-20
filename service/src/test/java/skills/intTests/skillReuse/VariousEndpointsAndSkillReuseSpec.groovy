@@ -480,6 +480,25 @@ class VariousEndpointsAndSkillReuseSpec extends CatalogIntSpec {
         projects[0].totalPointsReused == 200
     }
 
+    def "endpoint to check whether skills have dependencies"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 2)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def p1subj2 = createSubject(1, 2)
+        skillsService.createSubject(p1subj2)
+
+        skillsService.assignDependency([projectId: p1.projectId, skillId: p1Skills.get(0).skillId, dependentSkillId: p1Skills.get(1).skillId])
+
+        when:
+        def res = skillsService.checkIfSkillsHaveDependencies(p1.projectId, p1Skills.collect { it.skillId })
+        println JsonOutput.prettyPrint(JsonOutput.toJson(res))
+        then:
+        res.skillId == [p1Skills[0].skillId, p1Skills[1].skillId, p1Skills[2].skillId]
+        res.hasDependency == [true, false, false]
+    }
+
     def "due to async propagation of the reused skills client display endpoints may not return extra today's points for the honor skills"() {
         def p1 = createProject(1)
         def p1subj1 = createSubject(1, 1)

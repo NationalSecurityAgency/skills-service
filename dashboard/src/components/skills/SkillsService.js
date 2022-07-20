@@ -111,6 +111,11 @@ export default {
     return axios.get(url)
       .then((response) => response.data);
   },
+  checkSkillsForDeps(projectId, skillIds) {
+    const url = `/admin/projects/${projectId}/hasDependency`;
+    return axios.post(url, { skillIds })
+      .then((response) => response.data);
+  },
   updateImportedSkill(skill) {
     const url = `/admin/projects/${encodeURIComponent(skill.projectId)}/import/skills/${encodeURIComponent(skill.skillId)}`;
     return axios.patch(url, { pointIncrement: skill.pointIncrement })
