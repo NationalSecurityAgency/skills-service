@@ -539,7 +539,6 @@ class VariousEndpointsAndSkillReuseSpec extends CatalogIntSpec {
         when:
         def res = skillsService.getSkillSummary(users[0], p1.projectId, p1subj2.subjectId, -1, true)
         def skillRes = skillsService.getSingleSkillSummary(users[0], p1.projectId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0))
-        println JsonOutput.prettyPrint(JsonOutput.toJson(res))
         then:
         res.points == 100
         res.todaysPoints == 100
