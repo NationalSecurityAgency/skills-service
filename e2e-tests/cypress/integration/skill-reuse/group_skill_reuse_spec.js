@@ -97,7 +97,9 @@ describe('Group Skill Reuse Tests', () => {
         cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj1group12"]')
             .click();
         cy.get('[ data-cy="reuseSkillsModalStep2"]')
-            .contains('All of the selected skills have already been reused in the Awesome Group 12 Subj1 group');
+            .contains('Selected skills are NOT available for reuse in the Awesome Group 12 Subj1 group');
+        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+            .contains('1 selected skill has already been reused in that group');
         cy.get('[data-cy="reuseButton"]')
             .should('be.disabled');
         cy.get('[data-cy="closeButton"]')

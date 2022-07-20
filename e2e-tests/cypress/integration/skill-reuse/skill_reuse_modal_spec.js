@@ -281,7 +281,7 @@ describe('Skill Reuse Modal Tests', () => {
         cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
             .click();
         cy.get('[ data-cy="reuseSkillsModalStep2"]')
-            .contains('All of the selected skills have already been reused in the Subject 2 subject');
+            .contains('Selected skills are NOT available for reuse in the Subject 2 subject');
         cy.get('[data-cy="reuseButton"]')
             .should('be.disabled');
         cy.get('[data-cy="closeButton"]')
@@ -363,7 +363,7 @@ describe('Skill Reuse Modal Tests', () => {
         cy.get('[ data-cy="reuseSkillsModalStep2"]')
             .contains('2 skills will be reused in the [Subject 2] subject.');
         cy.get('[ data-cy="reuseSkillsModalStep2"]')
-            .contains('2 selected skills have already been reused!');
+            .contains('2 selected skills have already been reused');
 
         cy.get('[data-cy="reuseButton"]')
             .should('be.enabled');
@@ -416,7 +416,7 @@ describe('Skill Reuse Modal Tests', () => {
         cy.get('[ data-cy="reuseSkillsModalStep2"]')
             .contains('3 skills will be reused in the [Awesome Group 12 Subj1] group.');
         cy.get('[ data-cy="reuseSkillsModalStep2"]')
-            .contains('2 selected skills have already been reused!');
+            .contains('2 selected skills have already been reused');
 
         cy.get('[data-cy="reuseButton"]')
             .should('be.enabled');
@@ -437,6 +437,163 @@ describe('Skill Reuse Modal Tests', () => {
             .should('be.enabled');
 
         cy.get('[data-cy="okButton"]')
+            .click();
+        cy.get('[data-cy="reuseSkillsModalStep3"]')
+            .should('not.exist');
+    });
+
+    it('skills with dependencies cannot be reused', () => {
+        cy.createSubject(1, 2);
+        cy.createSkill(1, 1, 3);
+        cy.assignDep(1, 1, 3);
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="selectAllSkillsBtn"]')
+            .click();
+        cy.get('[data-cy="skillActionsBtn"]')
+            .click();
+        cy.get('[data-cy="skillReuseBtn"]')
+            .click();
+
+        cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
+            .click();
+        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+            .contains('1 skill will be reused in the [Subject 2] subject.');
+        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+            .contains('1 selected skill has other skill dependencies');
+
+        cy.get('[data-cy="reuseButton"]')
+            .should('be.enabled');
+        cy.get('[data-cy="closeButton"]')
+            .should('be.enabled');
+        cy.get('[data-cy="okButton"]')
+            .should('not.exist');
+
+        cy.get('[data-cy="reuseButton"]')
+            .click();
+        cy.get('[data-cy="reuseSkillsModalStep3"]')
+            .contains('Successfully reused 1 skill.');
+        cy.get('[data-cy="reuseButton"]')
+            .should('not.exist');
+        cy.get('[data-cy="closeButton"]')
+            .should('not.exist');
+        cy.get('[data-cy="okButton"]')
+            .should('be.enabled');
+
+        cy.get('[data-cy="okButton"]')
+            .click();
+        cy.get('[data-cy="reuseSkillsModalStep3"]')
+            .should('not.exist');
+
+        // now none of the skills available for reuse
+        cy.get('[data-cy="selectAllSkillsBtn"]')
+            .click();
+        cy.get('[data-cy="skillActionsBtn"]')
+            .click();
+        cy.get('[data-cy="skillReuseBtn"]')
+            .click();
+
+        cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
+            .click();
+        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+            .contains('Selected skills are NOT available for reuse in the Subject 2 subject');
+        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+            .contains('1 selected skill has already been reused in that subject');
+        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+            .contains('1 selected skill has other skill dependencies');
+        cy.get('[data-cy="reuseButton"]')
+            .should('not.enabled');
+        cy.get('[data-cy="closeButton"]')
+            .should('be.enabled');
+        cy.get('[data-cy="okButton"]')
+            .should('not.exist');
+        cy.get('[data-cy="closeButton"]')
+            .click();
+        cy.get('[data-cy="reuseSkillsModalStep3"]')
+            .should('not.exist');
+
+        // validate skill was actually reused
+        cy.get('[data-cy="breadcrumb-proj1"]')
+            .click();
+        cy.get('[data-cy="manageBtn_subj2"]')
+            .click();
+        cy.get('[data-cy="importedBadge-skill3STREUSESKILLST0"]');
+    });
+
+    it('skills with dependencies cannot be reused - plural', () => {
+        cy.createSubject(1, 2);
+        cy.createSkill(1, 1, 3);
+        cy.createSkill(1, 1, 4);
+        cy.createSkill(1, 1, 5);
+        cy.assignDep(1, 1, 3);
+        cy.assignDep(1, 3, 4);
+
+        cy.reuseSkillIntoAnotherSubject(1, 4, 2);
+        cy.reuseSkillIntoAnotherSubject(1, 5, 2);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.get('[data-cy="selectAllSkillsBtn"]')
+            .click();
+        cy.get('[data-cy="skillActionsBtn"]')
+            .click();
+        cy.get('[data-cy="skillReuseBtn"]')
+            .click();
+
+        cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
+            .click();
+        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+            .contains('Selected skills are NOT available for reuse in the Subject 2 subject');
+        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+            .contains('2 selected skills have already been reused in that subject');
+        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+            .contains('2 selected skills have other skill dependencies');
+        cy.get('[data-cy="reuseButton"]')
+            .should('not.enabled');
+        cy.get('[data-cy="closeButton"]')
+            .should('be.enabled');
+        cy.get('[data-cy="okButton"]')
+            .should('not.exist');
+        cy.get('[data-cy="closeButton"]')
+            .click();
+        cy.get('[data-cy="reuseSkillsModalStep3"]')
+            .should('not.exist');
+    });
+
+    it('skills with dependencies cannot be reused into a group - plural', () => {
+        cy.createSkill(1, 1, 3);
+        cy.createSkill(1, 1, 4);
+        cy.createSkill(1, 1, 5);
+        cy.assignDep(1, 1, 3);
+        cy.assignDep(1, 3, 4);
+
+        cy.createSkillsGroup(1, 1, 12);
+        cy.reuseSkillIntoAnotherGroup(1, 4, 1, 12);
+        cy.reuseSkillIntoAnotherGroup(1, 5, 1, 12);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.get('[data-cy="selectAllSkillsBtn"]')
+            .click();
+        cy.get('[data-cy="skillActionsBtn"]')
+            .click();
+        cy.get('[data-cy="skillReuseBtn"]')
+            .click();
+
+        cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj1group12"]')
+            .click();
+        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+            .contains('Selected skills are NOT available for reuse in the Awesome Group 12 Subj1 group');
+        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+            .contains('2 selected skills have already been reused in that group');
+        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+            .contains('2 selected skills have other skill dependencies');
+        cy.get('[data-cy="reuseButton"]')
+            .should('not.enabled');
+        cy.get('[data-cy="closeButton"]')
+            .should('be.enabled');
+        cy.get('[data-cy="okButton"]')
+            .should('not.exist');
+        cy.get('[data-cy="closeButton"]')
             .click();
         cy.get('[data-cy="reuseSkillsModalStep3"]')
             .should('not.exist');

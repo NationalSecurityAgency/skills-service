@@ -26,9 +26,16 @@ limitations under the License.
                      title="Exported to the Catalog"
                      message="Once a Skill has been exported to the catalog, Dependencies may not be added."></no-content2>
 
-        <div class="p-3" v-if="!skill.sharedToCatalog">
-          <skills-selector2 :options="allSkills" :selected="skills" v-on:added="skillAdded" v-on:removed="skillDeleted"
-            data-cy="depsSelector">
+        <no-content2 v-if="skill.thisSkillWasReusedElsewhere"
+                     class="mt-5 pt-5"
+                     icon="fas fa-recycle"
+                     title="Skill was Reused"
+                     message="Once a Skill has been reused, Dependencies may not be added."></no-content2>
+
+        <div class="p-3" v-if="!skill.sharedToCatalog && !skill.thisSkillWasReusedElsewhere">
+          <skills-selector2 :options="allSkills" :selected="skills" v-on:added="skillAdded"
+                            v-on:removed="skillDeleted"
+                            data-cy="depsSelector">
             <template #dropdown-item="{ option }">
               <div class="media" data-cy="skillsSelector">
                 <div class="d-inline-block mt-1 mr-3">
@@ -36,7 +43,8 @@ limitations under the License.
                   <i v-else class="fas fa-w-16 fa-list-alt text-info"></i>
                 </div>
                 <div class="media-body">
-                  <strong class="mb-2"><span v-if="option.otherProjectId" class="">{{option.otherProjectName}} : </span>
+                  <strong class="mb-2"><span v-if="option.otherProjectId"
+                                             class="">{{ option.otherProjectName }} : </span>
                     {{ option.name }}</strong>
                   <div style="font-size: 0.95rem;" class="row text-secondary">
                     <div class="col-md">

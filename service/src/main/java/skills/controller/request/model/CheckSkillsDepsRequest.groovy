@@ -13,19 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.controller.result.model
+package skills.controller.request.model
 
-import skills.storage.model.SkillDef
+import groovy.transform.Canonical
 
-class SkillDefRes extends SkillDefPartialRes {
-    // optional: in case of the container, indicate what type of container it is (ex. subject)
-    String containerType
-
-    String description
-
-    String helpUrl
-
-    SkillDef.SelfReportingType selfReportingType
-
-    Boolean thisSkillWasReusedElsewhere
+@Canonical
+class CheckSkillsDepsRequest {
+    List<String> skillIds
 }

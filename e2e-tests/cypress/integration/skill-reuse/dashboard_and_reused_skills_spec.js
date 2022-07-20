@@ -316,4 +316,23 @@ describe('Skill Reuse and Dashboard Tests', () => {
 
     });
 
+    it('cannot add dependencies to a reused skill', () => {
+        cy.reuseSkillIntoAnotherSubject(1, 1, 2);
+        cy.createSkill(1, 1, 3);
+
+        const expectedMsg = 'Once a Skill has been reused, Dependencies may not be added.';
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/dependencies');
+        cy.get('[data-cy="noContent"]')
+            .contains(expectedMsg);
+
+        // navigate down
+        cy.visit('/administrator/projects/proj1/subjects/subj1/');
+        cy.get('[data-cy="manageSkillBtn_skill1"]')
+            .click();
+        cy.clickNav('Dependencies');
+        cy.get('[data-cy="noContent"]')
+            .contains(expectedMsg);
+    });
+
 });
