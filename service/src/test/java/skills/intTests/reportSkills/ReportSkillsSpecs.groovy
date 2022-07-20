@@ -1054,7 +1054,7 @@ class ReportSkillsSpecs extends DefaultIntSpec {
         skillsService.createSkills(skills)
 
         when:
-        def res = skillsService.addSkill([projectId: projId, skillId: skills[0].skillId], "usera", new Date().minus(46))
+        def res = skillsService.addSkill([projectId: projId, skillId: skills[0].skillId], "usera", new Date().minus(2000))
 
         then:
         SkillsClientException ex = thrown()
