@@ -94,6 +94,9 @@ class SkillsDepsService {
         if (skillCatalogService.isAvailableInCatalog(dependent)) {
             throw new SkillException("Skill [${dependent.skillId}] has been shared to the catalog. Dependencies cannot be added to a skill shared to the catalog.", projectId, dependentSkillId, ErrorCode.DependenciesNotAllowed)
         }
+        if (skillDefRepo.wasThisSkillReusedElsewhere(dependent.id)) {
+            throw new SkillException("Skill [${dependent.skillId}] was reused in another subject or group. Dependencies cannot be added to a skill that was reused.", projectId, dependentSkillId, ErrorCode.DependenciesNotAllowed)
+        }
 
         if (dependendencyProjectId) {
             dependencyValidator.validateDependencyEligibility(projectId, dependency)

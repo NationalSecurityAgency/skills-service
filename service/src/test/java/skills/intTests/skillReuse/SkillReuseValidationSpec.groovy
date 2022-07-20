@@ -336,4 +336,22 @@ class SkillReuseValidationSpec extends CatalogIntSpec {
         SkillsClientException ex = thrown(SkillsClientException)
         ex.message.contains("Skill must have no dependencies in order to reuse; the skill [skill1] has [1] dependencie(s)")
     }
+
+    def "do not allow to add dependency if skill is already reused in another subject/group"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        def p1subj2 = createSubject(1, 2)
+        skillsService.createSubject(p1subj2)
+
+        skillsService.reuseSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId)
+
+        when:
+        skillsService.assignDependency([projectId: p1.projectId, skillId: p1Skills.get(0).skillId, dependentSkillId: p1Skills.get(1).skillId, throwExceptionOnFailure: true])
+
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.message.contains("Skill [skill1] was reused in another subject or group. Dependencies cannot be added to a skill that was reused")
+    }
 }

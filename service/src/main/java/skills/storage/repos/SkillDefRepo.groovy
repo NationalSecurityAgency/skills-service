@@ -21,15 +21,8 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
-import skills.storage.model.BadgeCount
-import skills.storage.model.ImportExportStats
-import skills.storage.model.SkillCounts
-import skills.storage.model.SkillDef
+import skills.storage.model.*
 import skills.storage.model.SkillDef.ContainerType
-import skills.storage.model.SkillDefMin
-import skills.storage.model.SkillDefPartial
-import skills.storage.model.SkillDefSkinny
-import skills.storage.model.SkillRelDef
 import skills.storage.model.SkillRelDef.RelationshipType
 
 interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
@@ -623,4 +616,8 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
             and s.skillId like '%STREUSESKILLST%'
             ''')
     List<SkillDefSkinny> findChildReusedSkills(String projectId, String parentId)
+
+    @Nullable
+    @Query('''select count(s) > 0 from SkillDefWithExtra s where s.copiedFrom = ?1 and s.skillId like '%STREUSESKILLST%' ''')
+    Boolean wasThisSkillReusedElsewhere(int skillRefId)
 }

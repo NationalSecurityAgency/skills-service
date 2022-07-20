@@ -604,6 +604,8 @@ class SkillsAdminService {
         if (finalRes.copiedFromProjectId) {
             finalRes.copiedFromProjectName = projDefRepo.getProjectName(finalRes.copiedFromProjectId)?.projectName
         }
+
+        finalRes.thisSkillWasReusedElsewhere = skillDefRepo.wasThisSkillReusedElsewhere(res.id)
         return finalRes
     }
 
