@@ -59,9 +59,12 @@ describe('Client Display Leaderboard Tests', () => {
         cy.createProject(1);
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1);
-        const user = Cypress.env('proxyUser');
-        cy.log(`user is: [${user}]`)
-        cy.reportSkill(1, 1, user, '2021-02-24 10:00');
+
+        const proxyUser = Cypress.env('proxyUser');
+        const userToValidate = Cypress.env('oauthMode') ? 'foo' : proxyUser;
+        cy.log(`user is: [${proxyUser}]`)
+
+        cy.reportSkill(1, 1, proxyUser, '2021-02-24 10:00');
 
         cy.cdVisit('/');
         cy.contains('Overall Points');
@@ -81,7 +84,6 @@ describe('Client Display Leaderboard Tests', () => {
         cy.get('@row')
             .eq(0)
             .should('contain.text', `1`);
-        const userToValidate = Cypress.env('oauthMode') ? 'foo' : user;
         cy.get('@row')
             .eq(1)
             .should('contain.text', userToValidate);
@@ -95,18 +97,19 @@ describe('Client Display Leaderboard Tests', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1);
 
+        const proxyUser = Cypress.env('proxyUser');
+        const userToValidate = Cypress.env('oauthMode') ? 'foo' : proxyUser;
+        cy.log(`user is: [${proxyUser}]`)
+        
         cy.intercept('GET', '/api/projects/proj1/leaderboard?type=topTen', (req) => {
             req.reply((res) => {
                 const leaderboard = res.body;
-                leaderboard.rankedUsers[0].nickname = 'John Doe';
-                leaderboard.rankedUsers[0].userId = 'user0'
+                leaderboard.rankedUsers.find(el => el.userId === userToValidate).nickname = 'John Doe';
                 res.send(leaderboard);
             });
         }).as('getLeaderboard')
 
-        const user = Cypress.env('proxyUser');
-        cy.log(`user is: [${user}]`)
-        cy.reportSkill(1, 1, user, '2021-02-24 10:00');
+        cy.reportSkill(1, 1, proxyUser, '2021-02-24 10:00');
 
         cy.cdVisit('/');
         cy.contains('Overall Points');
@@ -127,15 +130,14 @@ describe('Client Display Leaderboard Tests', () => {
         cy.get('@row')
           .eq(0)
           .should('contain.text', `1`);
-        const userToValidate = Cypress.env('oauthMode') ? 'foo' : user;
         cy.get('@row')
           .eq(1)
-          .should('contain.text', userToValidate);
+          .should('contain.text', `John Doe (${userToValidate})`);
         cy.get('@row')
           .eq(2)
           .should('contain.text', '100 Points');
 
-        cy.get('[data-cy="userColumn"]').contains('John Doe (user0)');
+        cy.get('[data-cy="userColumn"]').contains(`John Doe (${userToValidate})`);
     });
 
 });
