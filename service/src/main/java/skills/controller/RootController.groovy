@@ -47,6 +47,7 @@ import skills.settings.EmailConfigurationResult
 import skills.settings.EmailConnectionInfo
 import skills.settings.EmailSettingsService
 import skills.settings.SystemSettings
+import skills.storage.model.ProjDef
 import skills.storage.model.UserTag
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.UserTagRepo
@@ -154,7 +155,7 @@ class RootController {
     RequestResult addRoot(@PathVariable('userKey') String userKey) {
         String userId = getUserId(userKey)
         accessSettingsStorageService.addRoot(userId)
-        contactUsersService.sendEmail("SkillTree - You've been added as root", "You've been added as a root user to a project", userId)
+        contactUsersService.sendEmail("SkillTree - You've been added as root", "You've been added as a root user to SkillTree", userId)
         projAdminService.pinAllExistingProjectsWhereUserIsAdminExceptInception(userId)
         return new RequestResult(success: true)
     }

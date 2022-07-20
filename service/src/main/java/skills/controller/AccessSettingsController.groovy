@@ -31,6 +31,8 @@ import skills.controller.result.model.UserRoleRes
 import skills.services.AccessSettingsStorageService
 import skills.services.ContactUsersService
 import skills.services.admin.ProjAdminService
+import skills.storage.accessors.ProjDefAccessor
+import skills.storage.model.ProjDef
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.User
 import skills.storage.repos.UserRepo
@@ -55,6 +57,9 @@ class AccessSettingsController {
 
     @Autowired
     ProjAdminService projAdminService
+
+    @Autowired
+    ProjDefAccessor projDefAccessor
 
     @Autowired
     ContactUsersService contactUsersService
@@ -100,7 +105,9 @@ class AccessSettingsController {
         accessSettingsStorageService.addUserRole(userId, projectId, roleName)
 
         if(roleName == RoleName.ROLE_PROJECT_ADMIN) {
-            contactUsersService.sendEmail("SkillTree - You've been added as an admin", "You've been added as an admin on a project", userId)
+            ProjDef project = projDefAccessor.getProjDef(projectId)
+            def emailBody = "You've been added as an admin on the project " + project.name
+            contactUsersService.sendEmail("SkillTree - You've been added as an admin", emailBody, userId)
         }
 
         if(roleName == RoleName.ROLE_PROJECT_ADMIN && accessSettingsStorageService.isRoot(userId)) {

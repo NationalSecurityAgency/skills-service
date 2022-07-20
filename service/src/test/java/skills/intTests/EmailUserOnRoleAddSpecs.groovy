@@ -47,7 +47,7 @@ class EmailUserOnRoleAddSpecs extends DefaultIntSpec {
         messages.size() > 0
         def message = messages.find {it.recipients.find {it.contains(users[1])}}
         message.subj == "SkillTree - You've been added as an admin"
-        message.plainText == "You've been added as an admin on a project"
+        message.plainText == "You've been added as an admin on the project Test Project#1"
     }
 
     def "contact user when added as root"() {
@@ -67,6 +67,6 @@ class EmailUserOnRoleAddSpecs extends DefaultIntSpec {
         messages.size() > 0
         def message = messages.find {it.recipients.find {it.contains(users[1])}}
         message.subj == "SkillTree - You've been added as root"
-        message.plainText == "You've been added as a root user to a project"
+        message.plainText == "You've been added as a root user to SkillTree"
     }
 }
