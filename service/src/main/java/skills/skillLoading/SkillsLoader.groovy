@@ -479,6 +479,7 @@ class SkillsLoader {
                 approvalId: skillApproval?.getId(),
                 enabled: enabled,
                 type: skillDef.selfReportingType,
+                justificationRequired: Boolean.valueOf(skillDef.justificationRequired),
                 requestedOn: skillApproval?.requestedOn?.time,
                 rejectedOn: skillApproval?.rejectedOn?.time,
                 rejectionMsg: skillApproval?.rejectionMsg
@@ -559,6 +560,7 @@ class SkillsLoader {
                 selfReporting: new SelfReportingInfo(
                         approvalId: skillApproval?.getSkillApproval()?.getId(),
                         type: it.getSelfReportingType(),
+                        justificationRequired: Boolean.valueOf(it.justificationRequired),
                         enabled: it.getSelfReportingType() != null,
                         requestedOn: skillApproval?.getSkillApproval()?.getRequestedOn()?.time,
                         rejectedOn: skillApproval?.getSkillApproval()?.getRejectedOn()?.time,
@@ -912,7 +914,7 @@ class SkillsLoader {
                         maxOccurrencesWithinIncrementInterval: skillDef.numMaxOccurrencesIncrementInterval,
                         totalPoints: skillDef.totalPoints,
                         dependencyInfo: skillDefAndUserPoints.dependencyInfo,
-                        selfReporting: skillDef.selfReportingType ? new SelfReportingInfo(enabled: true, type: skillDef.selfReportingType) : null,
+                        selfReporting: skillDef.selfReportingType ? new SelfReportingInfo(enabled: true, type: skillDef.selfReportingType, justificationRequired: Boolean.valueOf(skillDef.justificationRequired)) : null,
                         subjectName: subjectName,
                         subjectId: subjectId,
                         type: skillDef.type,

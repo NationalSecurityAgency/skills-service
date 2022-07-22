@@ -1714,4 +1714,11 @@
         </sql>
     </changeSet>
 
+    <changeSet id="28" author="skills team">
+        <addColumn tableName="skill_definition">
+            <column name="justification_required" type="varchar(255)" defaultValueBoolean="false"/>
+        </addColumn>
+    </changeSet>
+
+
 </databaseChangeLog>
