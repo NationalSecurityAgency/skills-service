@@ -335,6 +335,27 @@ describe('Skill Reuse and Dashboard Tests', () => {
             .contains(expectedMsg);
     });
 
+    it('format points on reused stat card', () => {
+        cy.createSkill(1, 1, 3, { pointIncrement: 1345 });
+        cy.reuseSkillIntoAnotherSubject(1, 3, 2);
+
+        cy.visit('/administrator/');
+        cy.get('[data-cy="pagePreviewCardStat_Points_reused"]')
+            .should('have.text', '2,690');
+
+        cy.get('[data-cy="projCard_proj1_manageBtn"]')
+            .click();
+        cy.get('[data-cy="pageHeaderStats_Points_reused"]')
+            .should('have.text', '2,690');
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="pagePreviewCardStat_Points_reused"]')
+            .should('have.text', '2,690');
+
+        cy.get('[data-cy="manageBtn_subj2"]')
+            .click();
+        cy.get('[data-cy="pageHeaderStats_Points_reused"]')
+            .should('have.text', '2,690');
+    });
+
     it('verify that Add Event is not disabled when navigation from the reused skill to the original skill', () => {
         cy.createSkill(1, 1, 3, { pointIncrement: 10 });
         cy.reuseSkillIntoAnotherSubject(1, 3, 2);
