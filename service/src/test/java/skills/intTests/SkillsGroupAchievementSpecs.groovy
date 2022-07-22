@@ -20,6 +20,7 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.storage.model.UserAchievement
+import skills.storage.model.UserPoints
 import skills.storage.repos.UserAchievedLevelRepo
 
 class SkillsGroupAchievementSpecs extends DefaultIntSpec {
@@ -452,61 +453,6 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
         subjectSummary.skills[0].children.find { it.skillId == groupChildren[1].skillId }.totalPoints == 100
     }
 
-    def "cannot earn more points than the skills group numSkillsRequired will allow"() {
-        def proj = SkillsFactory.createProject()
-        def subj = SkillsFactory.createSubject()
-        def allSkills = SkillsFactory.createSkills(3)
-        skillsService.createProject(proj)
-        skillsService.createSubject(subj)
-
-        def skillsGroup = allSkills[0]
-        skillsGroup.type = 'SkillsGroup'
-        skillsService.createSkill(skillsGroup)
-        String skillsGroupId = skillsGroup.skillId
-        def groupChildren = allSkills[1..2]
-        groupChildren.each { skill ->
-            skill.pointIncrement = 100
-            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
-        }
-        skillsGroup.numSkillsRequired = 1
-        skillsService.updateSkill(skillsGroup, null)
-
-        when:
-        String userId = 'user1'
-        String projectId = proj.projectId
-        String subjectId = subj.subjectId
-        groupChildren.each { skill ->
-            def res = skillsService.addSkill([projectId: projectId, skillId: skill.skillId], userId, new Date())
-            assert res.body.skillApplied
-            assert res.body.completed.find { it.id == skill.skillId }
-        }
-
-        def subjectSummary = skillsService.getSkillSummary(userId, projectId, subjectId)
-        List<UserAchievement> groupAchievements = achievedRepo.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, skillsGroupId)
-
-        then:
-        groupAchievements
-        groupAchievements.size() == 1
-        groupAchievements[0].userId == userId
-        groupAchievements[0].projectId == projectId
-        groupAchievements[0].skillId == skillsGroupId
-
-        subjectSummary
-        subjectSummary.skills
-        subjectSummary.skills.size() == 1
-        subjectSummary.skills[0].skillId == skillsGroupId
-        subjectSummary.skills[0].points == 100
-        subjectSummary.skills[0].totalPoints == groupChildren[0].pointIncrement * groupChildren[0].numPerformToCompletion * groupChildren.size()
-        subjectSummary.skills[0].children
-        subjectSummary.skills[0].children.size() == groupChildren.size()
-        subjectSummary.skills[0].children.find { it.skillId = groupChildren[0].skillId }
-        subjectSummary.skills[0].children.find { it.skillId = groupChildren[0].skillId }.points == 100
-        subjectSummary.skills[0].children.find { it.skillId = groupChildren[0].skillId }.totalPoints == 100
-        subjectSummary.skills[0].children.find { it.skillId = groupChildren[1].skillId }
-        subjectSummary.skills[0].children.find { it.skillId = groupChildren[1].skillId }.points == 100
-        subjectSummary.skills[0].children.find { it.skillId = groupChildren[1].skillId }.totalPoints == 100
-    }
-
     def "cannot add skill for a skills group itself"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
@@ -534,6 +480,49 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
         then:
         def exception = thrown(SkillsClientException)
         exception.message.contains("Failed to report skill event because skill definition does not exist") // only looks for skillDef.type == SkillDef.ContainerType.Skill
+    }
+
+    def "achieve all skills points in a group with optional skills"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def allSkills = SkillsFactory.createSkills(3)
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+
+        def skillsGroup = allSkills[0]
+        skillsGroup.type = 'SkillsGroup'
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        def groupChildren = allSkills[1..2]
+        groupChildren.each { skill ->
+            skill.pointIncrement = 100
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+        skillsGroup.numSkillsRequired = 1
+        skillsService.updateSkill(skillsGroup, null)
+
+        String userId = getRandomUsers(1).first()
+
+        when:
+        assert skillsService.addSkill(allSkills[1], userId, new Date()).body.skillApplied
+        assert skillsService.addSkill(allSkills[2], userId, new Date()).body.skillApplied
+        def subjectSummary = skillsService.getSkillSummary(userId, proj.projectId, subj.subjectId)
+        def projectSummary = skillsService.getSkillSummary(userId, proj.projectId)
+        List<UserPoints> userPoints = userPointsRepo.findAll()
+
+        then:
+        userPoints.find { it.skillId == allSkills[1].skillId }.points == 100
+        userPoints.find { it.skillId == allSkills[2].skillId }.points == 100
+        !userPoints.find { it.skillId == allSkills[0].skillId } // no UserPonts for group
+        userPoints.find { it.skillId == subj.subjectId }.points == 200
+        userPoints.find { !it.skillId }.points == 200
+
+        subjectSummary.skills[0].children.points == [100, 100]
+        subjectSummary.skills[0].points == 200
+        subjectSummary.points == 200
+
+        projectSummary.points == 200
+        projectSummary.subjects.points == [200]
     }
 
 }
