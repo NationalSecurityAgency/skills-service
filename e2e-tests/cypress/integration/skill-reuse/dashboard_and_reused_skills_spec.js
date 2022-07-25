@@ -335,4 +335,22 @@ describe('Skill Reuse and Dashboard Tests', () => {
             .contains(expectedMsg);
     });
 
+    it('verify that Add Event is not disabled when navigation from the reused skill to the original skill', () => {
+        cy.createSkill(1, 1, 3, { pointIncrement: 10 });
+        cy.reuseSkillIntoAnotherSubject(1, 3, 2);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj2/skills/skill3STREUSESKILLST0');
+        cy.get('[data-cy="linkToTheOriginalSkill"]')
+            .click();
+        cy.clickNav('Add Event');
+
+        cy.get('[data-cy="userIdInput"]')
+            .click()
+            .type('foo{enter}');
+        cy.get('[data-cy="addSkillEventButton"]')
+            .click();
+
+        cy.contains('Added points for [foo]');
+    });
+
 });
