@@ -20,7 +20,7 @@ import groovy.transform.ToString
 
 @Canonical
 @ToString(includePackage = false)
-class SkillReuseRequest {
+class SkillsActionRequest {
     String subjectId
     String groupId
     List<String> skillIds

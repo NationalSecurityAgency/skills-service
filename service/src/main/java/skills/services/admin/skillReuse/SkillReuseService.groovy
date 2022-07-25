@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.CatalogSkill
-import skills.controller.request.model.SkillReuseRequest
+import skills.controller.request.model.SkillsActionRequest
 import skills.controller.result.model.SkillDefPartialRes
 import skills.controller.result.model.SkillDefSkinnyRes
 import skills.controller.result.model.SkillReuseDestination
@@ -68,7 +68,7 @@ class SkillReuseService {
 
     @Transactional
     @Profile
-    void reuseSkill(String projectId, SkillReuseRequest skillReuseRequest) {
+    void reuseSkill(String projectId, SkillsActionRequest skillReuseRequest) {
         // validate
         validateParentIsNotDestination(projectId, skillReuseRequest)
         validateNoAlreadyReusedInDestination(skillReuseRequest, projectId)
@@ -99,7 +99,7 @@ class SkillReuseService {
     }
 
     @Profile
-    private void validateNoAlreadyReusedInDestination(SkillReuseRequest skillReuseRequest, String projectId) {
+    private void validateNoAlreadyReusedInDestination(SkillsActionRequest skillReuseRequest, String projectId) {
         String parentSkillId = skillReuseRequest.groupId ?: skillReuseRequest.subjectId
         List<SkillDefSkinnyRes> alreadyReused = getReusedSkills(projectId, parentSkillId)
         List<String> reusedSkillIds = alreadyReused.collect { SkillReuseIdUtil.removeTag(it.skillId) }
@@ -110,7 +110,7 @@ class SkillReuseService {
     }
 
     @Profile
-    private void validateParentIsNotDestination(String projectId, SkillReuseRequest skillReuseRequest) {
+    private void validateParentIsNotDestination(String projectId, SkillsActionRequest skillReuseRequest) {
         SkillDef skillToReuse = skillDefAccessor.getSkillDef(projectId, skillReuseRequest.skillIds[0])
         if (!skillReuseRequest.groupId) {
             SkillDef subject = ruleSetDefGraphService.getMySubjectParent(skillToReuse.id)
@@ -126,7 +126,7 @@ class SkillReuseService {
     }
 
     @Profile
-    private void validateSkillsHaveNoDeps(String projectId, SkillReuseRequest skillReuseRequest) {
+    private void validateSkillsHaveNoDeps(String projectId, SkillsActionRequest skillReuseRequest) {
         skillReuseRequest.skillIds.each {
             Long dependencies = ruleSetDefGraphService.countChildrenSkills(projectId, it, [SkillRelDef.RelationshipType.Dependence])
             if (dependencies && dependencies > 0) {

@@ -49,6 +49,7 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
                 and srd.parent = parent''')
     List<SkillDef> findParentsByChildIdAndParentContainerTypeAndRelationshipTypes(Integer childId, SkillDef.ContainerType parentContainerType, List<SkillRelDef.RelationshipType> types)
 
+    @Nullable
     SkillRelDef findByChildAndParentAndType(SkillDef child, SkillDef parent, SkillRelDef.RelationshipType type)
 
     List<SkillRelDef> findAllByParentAndType(SkillDef parent, SkillRelDef.RelationshipType type)
