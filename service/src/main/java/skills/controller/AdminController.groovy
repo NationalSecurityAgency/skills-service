@@ -1078,7 +1078,7 @@ class AdminController {
         SkillsValidator.isNotBlank(contactUsersRequest?.emailSubject, "emailSubject")
         SkillsValidator.isNotBlank(contactUsersRequest?.emailBody, "emailBody")
         String userId = userInfoService.getCurrentUserId()
-        contactUsersService.previewEmail(contactUsersRequest.emailSubject, contactUsersRequest.emailBody, userId)
+        contactUsersService.sendEmail(contactUsersRequest.emailSubject, contactUsersRequest.emailBody, userId)
         return RequestResult.success()
     }
 

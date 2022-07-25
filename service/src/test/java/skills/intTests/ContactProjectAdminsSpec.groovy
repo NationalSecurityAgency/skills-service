@@ -62,6 +62,9 @@ class ContactProjectAdminsSpec extends DefaultIntSpec {
         proj2Serv.addUserRole(users[4], proj2.projectId, "ROLE_PROJECT_ADMIN")
         proj3Serv.addUserRole(users[5], proj3.projectId, "ROLE_PROJECT_ADMIN")
 
+        WaitFor.wait { greenMail.getReceivedMessages().size() == 3 }
+        greenMail.purgeEmailFromAllMailboxes()
+
         proj1Serv.addSkill(skill, users[6])
         proj1Serv.addSkill(skill, users[7])
         proj1Serv.addSkill(skill, users[8])
