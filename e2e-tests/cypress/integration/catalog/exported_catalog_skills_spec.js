@@ -285,6 +285,7 @@ describe('Skills Exported to Catalog Tests', () => {
     });
 
     it('Select larger page', () => {
+
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
