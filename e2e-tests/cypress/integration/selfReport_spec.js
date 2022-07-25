@@ -238,7 +238,7 @@ describe('Self Report Skills Management Tests', () => {
         cy.get('[data-cy="justificationRequiredCheckbox"]').should('not.be.checked');
     });
 
-    it.only('create skill - project level default of Approval and Require Justification', () => {
+    it('create skill - project level default of Approval and Require Justification', () => {
         cy.visit('/administrator/projects/proj1/settings');
         cy.get('[data-cy="selfReportSwitch"]').check({force: true});
         cy.get('[data-cy="justificationRequiredCheckbox"]').click({force:true})
