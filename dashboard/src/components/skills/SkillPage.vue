@@ -155,7 +155,7 @@ limitations under the License.
         const {
           projectId,
           subjectId,
-          skillId
+          skillId,
         } = this.$route.params;
         this.loadSkill({
           projectId,
