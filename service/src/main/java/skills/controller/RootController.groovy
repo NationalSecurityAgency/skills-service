@@ -40,6 +40,7 @@ import skills.controller.result.model.UserRoleRes
 import skills.profile.EnableCallStackProf
 import skills.services.AccessSettingsStorageService
 import skills.services.ContactUsersService
+import skills.services.FeatureService
 import skills.services.SystemSettingsService
 import skills.services.admin.ProjAdminService
 import skills.services.settings.SettingsService
@@ -94,6 +95,9 @@ class RootController {
 
     @Autowired
     UserTagRepo userTagRepo
+
+    @Autowired
+    FeatureService featureService
 
     @GetMapping('/rootUsers')
     @ResponseBody
@@ -155,7 +159,14 @@ class RootController {
     RequestResult addRoot(@PathVariable('userKey') String userKey) {
         String userId = getUserId(userKey)
         accessSettingsStorageService.addRoot(userId)
-        contactUsersService.sendEmail("SkillTree - You've been added as root", "You've been added as a root user to SkillTree", userId)
+        String publicUrl = featureService.getPublicUrl()
+
+        def emailBody = "Congratulations! You've been just added as a Root Administrator for the [SkillTree Dashboard](${publicUrl}administrator).\n\n" +
+                "The Root role is meant for administering the dashboard itself and not any specific project. Users with the Root role can view the Inception project." +
+                "Users with the Root role can also assign Supervisor and Root roles to other dashboard users. Thank you for being part of the SkillTree Community!\n\n" +
+                "Always yours,\n\n" +
+                "-SkillTree Bot"
+        contactUsersService.sendEmail("SkillTree - You've been added as root", emailBody, userId)
         projAdminService.pinAllExistingProjectsWhereUserIsAdminExceptInception(userId)
         return new RequestResult(success: true)
     }

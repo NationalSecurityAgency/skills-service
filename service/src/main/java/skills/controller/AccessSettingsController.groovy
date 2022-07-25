@@ -30,6 +30,7 @@ import skills.controller.result.model.RequestResult
 import skills.controller.result.model.UserRoleRes
 import skills.services.AccessSettingsStorageService
 import skills.services.ContactUsersService
+import skills.services.FeatureService
 import skills.services.admin.ProjAdminService
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.model.ProjDef
@@ -63,6 +64,9 @@ class AccessSettingsController {
 
     @Autowired
     ContactUsersService contactUsersService
+
+    @Autowired
+    FeatureService featureService
 
     @Value('#{securityConfig.authMode}}')
     skills.auth.AuthMode authMode = skills.auth.AuthMode.DEFAULT_AUTH_MODE
@@ -106,7 +110,14 @@ class AccessSettingsController {
 
         if(roleName == RoleName.ROLE_PROJECT_ADMIN) {
             ProjDef project = projDefAccessor.getProjDef(projectId)
-            def emailBody = "You've been added as an admin on the project " + project.name
+            String publicUrl = featureService.getPublicUrl()
+
+            def emailBody = "Congratulations!  You've just been added as a Project Administrator for the SkillTree project [${project.name}](${publicUrl}administrator/projects/${project.projectId}).\n\n" +
+                            "The Project administrator role enables management of the training profile for this project such as creating and " +
+                            "modifying subjects, skills and badges.  Thank you for being part of the SkillTree Community!\n\n" +
+                            "Always yours,\n\n" +
+                            "-SkillTree Bot"
+
             contactUsersService.sendEmail("SkillTree - You've been added as an admin", emailBody, userId)
         }
 
