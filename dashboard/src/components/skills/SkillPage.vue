@@ -133,7 +133,7 @@ limitations under the License.
       // but components will never get cached - caching maybe important for components that want to update
       // the url so the state can be re-build later (example include browsing a map or dependency graph in our case)
       '$route.params.skillId': function skillChange() {
-        this.loadData(true);
+        this.loadData();
       },
     },
     methods: {
@@ -150,7 +150,7 @@ limitations under the License.
         // should only enable edit button if dirty, isn't currently
         this.showEdit = true;
       },
-      loadData(reloadSubject = false) {
+      loadData() {
         this.isLoading = true;
         const {
           projectId,
@@ -164,7 +164,7 @@ limitations under the License.
         })
           .then(() => {
             this.headerOptions = this.buildHeaderOptions(this.skill);
-            if (this.subject && !reloadSubject) {
+            if (this.subject && (this.subject.subjectId === subjectId)) {
               this.isLoading = false;
             } else {
               this.loadSubjectDetailsState({
