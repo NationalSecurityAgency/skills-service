@@ -320,10 +320,12 @@ describe('Settings Tests', () => {
         cy.get$('[data-cy=emailSettingsSave]').should('be.disabled');
         cy.get$('[data-cy=protocolInput]').type('{selectall}smtp');
 
-//        cy.get('[data-cy=publicUrlError]').should('be.visible');
-//        cy.get('[data-cy=publicUrlError]').contains('Public URL is required').should('be.visible');
+        cy.get$('[data-cy=publicUrlInput]').type('test');
+        cy.get$('[data-cy=publicUrlInput]').clear();
+        cy.get('[data-cy=publicUrlError]').should('be.visible');
+        cy.get('[data-cy=publicUrlError]').contains('Public URL is required').should('be.visible');
         cy.get$('[data-cy=publicUrlInput]').type('{selectall}http://localhost:8082');
-//        cy.get('[data-cy=publicUrlError]').should('not.be.visible');
+        cy.get('[data-cy=publicUrlError]').should('not.be.visible');
         cy.get$('[data-cy=fromEmailInput]').type('{selectall}foo@skilltree.madeup');
 
         cy.get$('[data-cy=tlsSwitch]').next('.custom-control-label').click();
@@ -416,9 +418,7 @@ describe('Settings Tests', () => {
 
         cy.wait('@loadSystemSettings');
         cy.get('[data-cy=resetTokenExpiration]').should('have.value', '2H');
-        cy.get$('[data-cy=publicUrl]').type('{selectall}http://localhost:8082');
         cy.get$('[data-cy=resetTokenExpiration]').type('{selectall}2H25M22S');
-        cy.get$('[data-cy=fromEmail]').type('{selectall}foo@skilltree.madeup');
         cy.get$('[data-cy=customHeader]').type('{selectall}<div id="customHeaderDiv" style="font-size:3em;color:red"><script src="somewhere"/>HEADER</div>');
         cy.get$('[data-cy=customFooter]').type('{selectall}<div id="customFooterDiv" style="font-size:3em;color:red"><script type="text/javascript">alert("foo");</script>FOOTER</div>');
         cy.get('[data-cy=customHeaderError]').should('be.visible');
@@ -444,9 +444,7 @@ describe('Settings Tests', () => {
 
         cy.wait('@loadSystemSettings');
         cy.get('[data-cy=resetTokenExpiration]').should('have.value', '2H');
-        cy.get$('[data-cy=publicUrl]').type('{selectall}http://localhost:8082');
         cy.get$('[data-cy=resetTokenExpiration]').type('{selectall}2H25M22S');
-        cy.get$('[data-cy=fromEmail]').type('{selectall}foo@skilltree.madeup');
         cy.get$('[data-cy=customHeader]').clear().fill(_3001);
         cy.get$('[data-cy=customFooter]').clear().fill(_3001);
         cy.get('[data-cy=customHeaderError]').should('be.visible');
@@ -473,20 +471,20 @@ describe('Settings Tests', () => {
         cy.get('[data-cy="nav-Email"]').click();
 
         cy.wait('@loadEmailSettings');
-        cy.get('[data-cy=publicUrl]').type('{selectall}http://localhost');
-        cy.get('[data-cy=resetTokenExpiration]').should('have.value', '2H');
-        cy.get$('[data-cy=fromEmail]').type('{selectall}foo');
+        cy.get$('[data-cy=hostInput]').type('{selectall}localhost');
+        cy.get('[data-cy=publicUrlInput]').type('{selectall}http://localhost');
+        cy.get$('[data-cy=fromEmailInput]').type('{selectall}foo');
         cy.get('[data-cy=fromEmailError]').should('be.visible');
         cy.get('[data-cy=fromEmailError]').contains('From Email must be a valid email');
-//        cy.get('[data-cy=saveSystemSettings]').should('be.disabled');
-        cy.get$('[data-cy=fromEmail]').type('{selectall}foo@');
+        cy.get('[data-cy=emailSettingsSave]').should('be.disabled');
+        cy.get$('[data-cy=fromEmailInput]').type('{selectall}foo@');
         cy.get('[data-cy=fromEmailError]').should('be.visible');
         cy.get('[data-cy=fromEmailError]').contains('From Email must be a valid email');
-        cy.get('[data-cy=saveSystemSettings]').should('be.disabled');
-        cy.get$('[data-cy=fromEmail]').type('{selectall}foo@localhost.madeup');
+        cy.get('[data-cy=emailSettingsSave]').should('be.disabled');
+        cy.get$('[data-cy=fromEmailInput]').type('{selectall}foo@localhost.madeup');
         cy.get('[data-cy=fromEmailError]').should('not.be.visible');
         cy.get('[data-cy=fromEmailError]').should('not.be.visible');
-//        cy.get('[data-cy=saveSystemSettings]').should('not.be.disabled');
+        cy.get('[data-cy=emailSettingsSave]').should('not.be.disabled');
     });
 
     it('custom header/footer should be full width', () => {
@@ -501,7 +499,6 @@ describe('Settings Tests', () => {
         cy.get('[data-cy="nav-System"]').click();
 
         cy.wait('@loadSystemSettings');
-        cy.get$('[data-cy=publicUrl]').type('{selectall}http://localhost:8082');
         cy.get$('[data-cy=customHeader').type('{selectall}<div id="customHeaderDiv" style="font-size:3em;color:red">HEADER</div>');
         cy.get$('[data-cy=customFooter').type('{selectall}<div id="customFooterDiv" style="font-size:3em;color:red">FOOTER</div>');
         cy.get$('[data-cy=saveSystemSettings]').click();
@@ -549,7 +546,6 @@ describe('Settings Tests', () => {
         cy.get('[data-cy="nav-System"]').click();;
 
         cy.wait('@loadSystemSettings');
-        cy.get$('[data-cy=publicUrl]').type('{selectall}http://localhost:8082');
         cy.get$('[data-cy=customHeader').type('<div id="customHeaderDiv"><span id="chVersion">{{release.version}}</span> <span id="chBuildDate">{{build.date}}</span></div>', {parseSpecialCharSequences: false});
         cy.get$('[data-cy=customFooter').type('<div id="customFooterDiv"><span id="cfVersion">{{release.version}}</span> <span id="cfBuildDate">{{build.date}}</span></div>', {parseSpecialCharSequences: false});
         cy.get$('[data-cy=saveSystemSettings]').click();
