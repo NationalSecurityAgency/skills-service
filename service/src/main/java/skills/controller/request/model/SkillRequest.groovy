@@ -50,4 +50,7 @@ class SkillRequest {
     // the following props only apply when type == SkillsGroup
     int numSkillsRequired = -1
     String enabled
+
+    // true/false - whether or not a justification is required - self report approval skills only
+    String justificationRequired
 }

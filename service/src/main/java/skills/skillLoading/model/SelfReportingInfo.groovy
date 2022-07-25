@@ -22,6 +22,7 @@ class SelfReportingInfo {
     Integer approvalId
 
     boolean enabled
+    boolean justificationRequired
     SkillDef.SelfReportingType type
 
     // only applicable to when selfReportingType == SelfReportingType.Approval

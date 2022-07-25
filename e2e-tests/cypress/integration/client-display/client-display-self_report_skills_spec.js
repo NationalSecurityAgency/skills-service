@@ -223,6 +223,51 @@ describe('Client Display Self Report Skills Tests', () => {
     cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('50 / 100 Points')
   });
 
+  it('self report approval justification required', () => {
+    cy.createSkill(1, 1, 1, {selfReportingType : 'Approval', pointIncrement: 50,  pointIncrementInterval: 0, justificationRequired: true, });
+    cy.cdVisit('/');
+    cy.cdClickSubj(0);
+    cy.cdClickSkill(0);
+
+    cy.get('[data-cy="selfReportBtn"]').click();
+    cy.get('[data-cy="selfReportSkillMsg"]').contains('This skill requires approval. Submit with a message and it will enter an approval queue.')
+    cy.get('[data-cy="selfReportSubmitBtn"]').should('be.disabled');
+
+    cy.get('[data-cy="selfReportMsgInput"]').type('some val');
+    cy.get('[data-cy="selfReportMsgInput_errMsg"]').should('not.exist')
+    cy.get('[data-cy="selfReportSubmitBtn"]').should('be.enabled');
+
+    cy.get('[data-cy="selfReportSubmitBtn"]').click();
+
+    cy.get('[data-cy="selfReportAlert"]').contains("This skill requires approval from a project administrator. Now let's play the waiting game! ")
+    cy.get('[data-cy="selfReportBtn"]').should('be.disabled');
+    cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').contains('0');
+    cy.get('[data-cy="pendingApprovalStatus"]').contains('Pending Approval')
+    cy.get('[data-cy="pendingApprovalStatus"]').contains('Submitted a few seconds ago')
+
+    // refresh the page and validate that submit button is disabled and approval status is still displayed
+    cy.cdVisit('/');
+    cy.cdClickSubj(0);
+    cy.cdClickSkill(0);
+    cy.get('[data-cy="selfReportBtn"]').should('be.disabled');
+    cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').contains('0');
+    cy.get('[data-cy="pendingApprovalStatus"]').contains('Pending Approval')
+    cy.get('[data-cy="pendingApprovalStatus"]').contains('Submitted a few seconds ago')
+
+    // approve and then visit page again
+    cy.approveRequest();
+    cy.cdVisit('/');
+    cy.cdClickSubj(0);
+    cy.cdClickSkill(0);
+
+    cy.get('[data-cy="selfReportBtn"]').should('be.enabled');
+    cy.get('[data-cy="pendingApprovalStatus"]').should('not.exist');
+    cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').contains('50');
+    cy.get('[data-cy="pointsAchievedTodayCard"] [data-cy="progressInfoCardTitle"]').contains('50');
+    cy.get('[data-cy="pointsPerOccurrenceCard"] [data-cy="progressInfoCardTitle"]').contains('50');
+    cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('50 / 100 Points')
+  });
+
   it('self report - skill was submitted for approval', () => {
     cy.createSkill(1, 1, 1, {selfReportingType : 'Approval'});
     cy.submitForApproval()

@@ -37,7 +37,26 @@ limitations under the License.
           name="Self Reporting Options"
           aria-label="Self Reporting Options"
           data-cy="selfReportTypeSelector"
-        ></b-form-radio-group>
+          stacked
+        >
+          <template #first>
+            <div class="row m-0">
+              <b-form-radio class="mr-2" value="Approval" :disabled="!selfReport.enabled">Approval Queue</b-form-radio>
+              <span class="text-muted mr-3 ml-2">|</span>
+              <label for="self-report-checkbox" class="m-0">
+                <b-form-checkbox data-cy="justificationRequiredCheckbox" id="justification-required-checkbox"
+                                 class="d-inline" v-model="selfReport.justificationRequired"
+                                 :disabled="!approvalSelected || !selfReport.enabled" @input="justificationRequiredChanged"/>
+                <span class="font-italic">Justification Required </span><inline-help
+                                          msg="Check to require users to submit a justification when self-reporting this skill"
+                                          target-id="justificationRequired"
+                                          :next-focus-el="nextFocusEl"
+                                          @shown="tooltipShown"
+                                          @hidden="tooltipHidden"/>
+              </label>
+            </div>
+          </template>
+        </b-form-radio-group>
       </b-form-group>
     </div>
     <div class="col-12 pt-1" v-if="selfReport.approvals.showWarning" data-cy="selfReportingTypeWarning">
@@ -86,9 +105,10 @@ limitations under the License.
           originalSelfReportingType: this.skill.selfReportingType,
           loading: true,
           enabled: false,
+          justificationRequired: false,
           selected: 'Approval',
           options: [
-            { text: 'Approval Queue', value: 'Approval', disabled: true },
+            // { text: 'Approval Queue', value: 'Approval', disabled: true },
             { text: 'Honor System', value: 'HonorSystem', disabled: true },
           ],
           approvals: {
@@ -106,8 +126,8 @@ limitations under the License.
         this.updatedSelfReportingStatus(true);
         this.selfReport.selected = this.value;
       }
-
       this.selfReport.originalSelfReportingType = this.skill.selfReportingType;
+      this.selfReport.justificationRequired = this.skill.justificationRequired;
     },
     watch: {
       'selfReport.selected': function selfReportSelectionChanged() {
@@ -135,6 +155,9 @@ limitations under the License.
       selectionChanged() {
         this.handleSelfReportingWarning();
         this.$emit('input', this.selfReport.selected);
+      },
+      justificationRequiredChanged(justificationRequired) {
+        this.$emit('justificationRequiredChanged', justificationRequired);
       },
       handleSelfReportingWarning() {
         if (this.isEdit) {
@@ -169,6 +192,11 @@ limitations under the License.
       },
       tooltipHidden(e) {
         this.$emit('hidden', e);
+      },
+    },
+    computed: {
+      approvalSelected() {
+        return this.selfReport.selected === 'Approval';
       },
     },
   };

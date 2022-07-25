@@ -179,6 +179,7 @@ class SkillsAdminService {
         final int currentOccurrences = isEdit && !isSkillsGroup ? (skillDefinition.totalPoints / skillDefinition.pointIncrement) : -1
         final SelfReportingType selfReportingType = skillRequest.selfReportingType && !isSkillsGroup ? SkillDef.SelfReportingType.valueOf(skillRequest.selfReportingType) : null;
         final boolean isEnabledSkillInRequest = Boolean.valueOf(skillRequest.enabled)
+        final boolean isJustificationRequiredInRequest = Boolean.valueOf(skillRequest.justificationRequired)
 
         SkillDef subject = null
         SkillDef skillsGroupSkillDef = null
@@ -188,6 +189,9 @@ class SkillsAdminService {
             // for updates, use the existing value if it is not set on the skillRequest (null or empty String)
             if (StringUtils.isBlank(skillRequest.enabled)) {
                 skillRequest.enabled = skillDefinition.enabled
+            }
+            if (StringUtils.isBlank(skillRequest.justificationRequired)) {
+                skillRequest.justificationRequired = skillDefinition.justificationRequired
             }
             if (isSkillsGroup) {
                 // need to update total points for the group
@@ -247,6 +251,7 @@ class SkillsAdminService {
             Integer highestDisplayOrder = skillDefRepo.calculateChildSkillsHighestDisplayOrder(skillRequest.projectId, groupId ?: parentSkillId)
             int displayOrder = highestDisplayOrder == null ? 1 : highestDisplayOrder + 1
             String enabled = isEnabledSkillInRequest.toString()
+            String justificationRequired = isJustificationRequiredInRequest.toString()
             if (isSkillsGroupChild) {
                 skillsGroupSkillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, groupId, SkillDef.ContainerType.SkillsGroup)
                 if (!skillsGroupSkillDef) {
@@ -270,6 +275,7 @@ class SkillsAdminService {
                     numSkillsRequired: skillRequest.numSkillsRequired,
                     enabled: enabled,
                     groupId: groupId,
+                    justificationRequired: justificationRequired,
             )
 
             if (skillRequest instanceof SkillImportRequest) {
@@ -674,6 +680,7 @@ class SkillsAdminService {
         SkillDefRes res = new SkillDefRes()
         Props.copy(skillDef, res)
         res.enabled = skillDef.enabled == "true" ? true : false
+        res.justificationRequired = Boolean.valueOf(skillDef.justificationRequired)
         res.description = InputSanitizer.unsanitizeForMarkdown(res.description)
         res.helpUrl = InputSanitizer.unsanitizeUrl(res.helpUrl)
         if (skillDef.type == SkillDef.ContainerType.Skill) {

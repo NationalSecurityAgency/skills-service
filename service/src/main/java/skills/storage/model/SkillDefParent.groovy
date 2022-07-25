@@ -91,4 +91,7 @@ class SkillDefParent {
 
     @Column(name="copied_from_project_id")
     String copiedFromProjectId
+
+    // true/false - whether or not a justification is required - self report approval skills only
+    String justificationRequired
 }
