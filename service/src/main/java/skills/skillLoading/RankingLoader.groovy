@@ -132,7 +132,7 @@ class RankingLoader {
 
     private RankedUserRes createRankedUserForThisUser(int rank, UserAttrs userAttrs, int myPoints) {
         new RankedUserRes(rank: rank, userId: userAttrs.userIdForDisplay, firstName: userAttrs.firstName, lastName: userAttrs.lastName,
-                isItMe: true, points: myPoints, userFirstSeenTimestamp: userAttrs.created.toInstant(ZoneOffset.UTC).toEpochMilli())
+                nickname: userAttrs.nickname, isItMe: true, points: myPoints, userFirstSeenTimestamp: userAttrs.created.toInstant(ZoneOffset.UTC).toEpochMilli())
     }
 
     private Integer getAvailablePoints(String projectId, String subjectId) {

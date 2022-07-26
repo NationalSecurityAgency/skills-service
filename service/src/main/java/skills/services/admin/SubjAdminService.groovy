@@ -80,6 +80,9 @@ class SubjAdminService {
     @Autowired
     DisplayOrderService displayOrderService
 
+    @Autowired
+    SkillsAdminService skillsAdminService
+
     @Transactional()
     void saveSubject(String projectId, String origSubjectId, SubjectRequest subjectRequest, boolean performCustomValidation = true) {
         lockingService.lockProject(projectId)
@@ -155,6 +158,11 @@ class SubjAdminService {
             throw new SkillException("Subject with id [${subjectId}] cannot be deleted as it is currently referenced by one or more global badges")
         }
 
+        List<SkillDef> allSubjectSkills = ruleSetDefGraphService.getChildrenSkills(subjectDefinition, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.GroupSkillToSubject])
+        allSubjectSkills.each {
+            skillsAdminService.removeCatalogImportedSkills(it)
+        }
+
         ruleSetDefGraphService.deleteSkillWithItsDescendants(subjectDefinition)
 
         ProjDef projDef = projDefAccessor.getProjDef(projectId)
@@ -198,17 +206,23 @@ class SubjAdminService {
                 displayOrder: skillDef.displayOrder,
                 totalPoints: skillDef.totalPoints,
                 iconClass: skillDef.iconClass,
-                helpUrl: InputSanitizer.unsanitizeUrl(skillDef.helpUrl)
+                helpUrl: InputSanitizer.unsanitizeUrl(skillDef.helpUrl),
         )
 
         SkillCounts skillCounts = getSkillsStatsForSubjects(skillDef)
 
-        res.numGroups = skillCounts.getEnabledGroupsCount()  ?: 0
+        res.numGroups = skillCounts.getEnabledGroupsCount() ?: 0
         res.numGroupsDisabled = skillCounts.getDisabledGroupsCount() ?: 0
 
         res.numSkills = skillCounts.getEnabledSkillsCount() ?: 0
         res.numSkillsDisabled = skillCounts.getDisabledSkillsCount() ?: 0
         res.numSkillsImportedAndDisabled = skillCounts.getDisabledImportedSkillsCount() ?: 0
+
+        res.numSkillsReused = skillCounts.getNumSkillsReused() ?: 0
+        res.totalPointsReused = skillCounts.getTotalPointsReused() ?: 0
+
+        res.numSkills -= res.numSkillsReused
+        res.totalPoints -= res.totalPointsReused
 
         return res
     }
@@ -230,18 +244,6 @@ class SubjAdminService {
     @Transactional(readOnly = true)
     boolean existsBySubjectName(String projectId, String subjectName) {
         return skillDefRepo.existsByProjectIdAndNameAndTypeAllIgnoreCase(projectId, subjectName, SkillDef.ContainerType.Subject)
-    }
-
-    @Profile
-    private long calculateNumChildSkills(SkillDefParent skillDef) {
-        long skillCount = skillDefRepo.countChildSkillsByIdAndRelationshipTypeAndEnabled(skillDef.id, SkillRelDef.RelationshipType.RuleSetDefinition, "true")
-        skillCount += skillDefRepo.countActiveGroupChildSkillsForSubject(skillDef.id)
-        return skillCount
-    }
-
-    @Profile
-    private long calculateNumGroups(SkillDefParent skillDef) {
-        skillDefRepo.countActiveGroupsForSubject(skillDef.id)
     }
 
     @Profile

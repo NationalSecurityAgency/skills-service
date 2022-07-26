@@ -102,7 +102,8 @@ limitations under the License.
         ref="selfReportModal"
         :skill="skillInternal"
         :is-approval-required="isApprovalRequired"
-        :is-honor-system="isHonorSystem" />
+        :is-honor-system="isHonorSystem"
+        :is-justitification-required="isJustificationRequired" />
 
     <b-modal id="clearRejectionMsgDialog"
              title="CLEAR APPROVAL REJECTION"
@@ -175,6 +176,9 @@ limitations under the License.
       },
       isApprovalRequired() {
         return this.skillInternal.selfReporting && this.skillInternal.selfReporting.type === 'Approval';
+      },
+      isJustificationRequired() {
+        return this.skillInternal.selfReporting && this.skillInternal.selfReporting.justificationRequired;
       },
       isRejected() {
         const res = this.skillInternal.selfReporting && this.skillInternal.selfReporting.rejectedOn !== null && this.skillInternal.selfReporting.rejectedOn !== undefined;

@@ -29,8 +29,8 @@ limitations under the License.
         <p class="h5" v-if="isHonorSystem">This skill can be submitted under the <b class="text-success">Honor
           System</b> and <b class="text-success">{{ skill.pointIncrement }}</b> points will be awarded right away!
         </p>
-        <p class="h5" v-if="isApprovalRequired">This skill requires <b class="text-info">approval</b>. Submit with an
-          <span class="text-muted">optional</span> message and it will enter an approval queue.</p>
+        <p class="h5" v-if="isApprovalRequired">This skill requires <b class="text-info">approval</b>. Submit with {{ isJustitificationRequired ? 'a' : 'an' }}
+          <span v-if="!isJustitificationRequired" class="text-muted">optional</span> message and it will enter an approval queue.</p>
       </div>
     </div>
     <b-form-textarea type="text" id="approvalRequiredMsg" @input="validate"
@@ -38,8 +38,8 @@ limitations under the License.
            rows="2"
            data-cy="selfReportMsgInput"
            aria-describedby="reportSkillMsg"
-           aria-label="Optional request approval message"
-           class="form-control" placeholder="Message (optional)"/>
+           :aria-label="isJustitificationRequired ? 'Optional request approval message' : 'Required request approval message'"
+           class="form-control" :placeholder="`Message (${isJustitificationRequired ? 'required' : 'optional'})`"/>
     <div v-if="isApprovalRequired" :class="{ 'float-right':true, 'text-small': true, 'text-danger': charactersRemaining < 0 }" data-cy="charactersRemaining">{{charactersRemaining}} characters remaining <i v-if="charactersRemaining < 0" class="fas fa-exclamation-circle"/></div>
     <span v-if="inputInvalid" class="text-small text-danger" data-cy="selfReportMsgInput_errMsg"><i class="fas fa-exclamation-circle"/> {{ inputInvalidExplanation }}</span>
     <template #modal-footer>
@@ -65,6 +65,7 @@ limitations under the License.
     props: {
       isHonorSystem: Boolean,
       isApprovalRequired: Boolean,
+      isJustitificationRequired: Boolean,
       skill: Object,
     },
     data() {
@@ -79,6 +80,10 @@ limitations under the License.
     computed: {
       messageValid() {
         if (this.inputInvalid) {
+          return false;
+        }
+
+        if (this.isJustitificationRequired && (!this.approvalRequestedMsg || this.approvalRequestedMsg.length <= 0)) {
           return false;
         }
 

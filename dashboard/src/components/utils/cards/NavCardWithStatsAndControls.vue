@@ -51,20 +51,28 @@ limitations under the License.
 
         <div class="row text-center justify-content-center flex-grow-1">
           <div v-for="(stat) in options.stats" :key="stat.label" class="col my-3" style="min-width: 10rem;">
-            <div :data-cy="`pagePreviewCardStat_${stat.label}`" class="border rounded stat-card h-100">
+            <div :data-cy="`pagePreviewCardStat_${stat.label}`"
+                 class="border rounded stat-card h-100">
               <i :class="stat.icon"></i>
               <p class="text-uppercase text-muted count-label">{{ stat.label }}</p>
               <strong class="h4" data-cy="statNum">{{ stat.count | number }}</strong>
-              <i v-if="stat.warn" class="fas fa-exclamation-circle text-warning ml-1" style="font-size: 1.5rem;"
+              <i v-if="stat.warn" class="fas fa-exclamation-circle text-warning ml-1"
+                 style="font-size: 1.5rem;"
                  v-b-tooltip.hover="stat.warnMsg"
                  role="alert"
                  :aria-label="`Warning: ${stat.warnMsg}`"
                  data-cy="warning"/>
-              <div v-if="stat.disabledCount && stat.disabledCount > 0" style="font-size: 0.9rem">
-                <b-badge variant="warning">
-                  <span :data-cy="`pagePreviewCardStat_${stat.label}_disabled`">{{ stat.disabledCount }}</span>
-                </b-badge>
-                <span class="text-left text-secondary text-uppercase ml-1" style="font-size: 0.8rem">disabled</span>
+              <div v-if="stat.secondaryStats">
+                <div v-for="secCount in stat.secondaryStats" :key="secCount.label">
+                  <div v-if="secCount.count > 0" style="font-size: 0.9rem">
+                    <b-badge :variant="`${secCount.badgeVariant}`"
+                             :data-cy="`pagePreviewCardStat_${stat.label}_${secCount.label}`">
+                      <span>{{ secCount.count }}</span>
+                    </b-badge>
+                    <span class="text-left text-secondary text-uppercase ml-1"
+                          style="font-size: 0.8rem">{{ secCount.label }}</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

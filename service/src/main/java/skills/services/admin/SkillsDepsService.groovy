@@ -28,6 +28,7 @@ import skills.controller.result.model.DependencyCheckResult
 import skills.controller.result.model.SharedSkillResult
 import skills.controller.result.model.SkillDefGraphRes
 import skills.controller.result.model.SkillDefRes
+import skills.controller.result.model.SkillDepResult
 import skills.controller.result.model.SkillsGraphRes
 import skills.services.DependencyValidator
 import skills.services.RuleSetDefGraphService
@@ -76,6 +77,15 @@ class SkillsDepsService {
     @Autowired
     SkillCatalogService skillCatalogService
 
+    @Transactional(readOnly = true)
+    List<SkillDepResult> checkIfSkillsHaveDeps(String projectId, List<String> skillIds) {
+        List<SkillRelDefRepo.SkillIdAndCount> skillIdsAndCounts = skillRelDefRepo.countChildrenForMultipleSkillIds(projectId, skillIds, [SkillRelDef.RelationshipType.Dependence])
+        return skillIds.collect { String skillId ->
+            SkillRelDefRepo.SkillIdAndCount found = skillIdsAndCounts.find { it.skillId == skillId }
+            new SkillDepResult(skillId: skillId, hasDependency: found != null)
+        }?.sort { it.skillId }
+    }
+
     @Transactional()
     void assignSkillDependency(String projectId, String dependentSkillId, String dependencySkillId, String dependendencyProjectId = null) {
         SkillDef dependent = skillDefAccessor.getSkillDef(projectId, dependentSkillId)
@@ -83,6 +93,9 @@ class SkillsDepsService {
 
         if (skillCatalogService.isAvailableInCatalog(dependent)) {
             throw new SkillException("Skill [${dependent.skillId}] has been shared to the catalog. Dependencies cannot be added to a skill shared to the catalog.", projectId, dependentSkillId, ErrorCode.DependenciesNotAllowed)
+        }
+        if (skillDefRepo.wasThisSkillReusedElsewhere(dependent.id)) {
+            throw new SkillException("Skill [${dependent.skillId}] was reused in another subject or group. Dependencies cannot be added to a skill that was reused.", projectId, dependentSkillId, ErrorCode.DependenciesNotAllowed)
         }
 
         if (dependendencyProjectId) {

@@ -100,14 +100,27 @@ limitations under the License.
           }, {
             label: 'Skills',
             count: this.subject.numSkills,
-            disabledCount: this.subject.numSkillsDisabled,
             icon: 'fas fa-graduation-cap skills-color-skills',
+            secondaryStats: [{
+              label: 'reused',
+              count: this.subject.numSkillsReused,
+              badgeVariant: 'info',
+            }, {
+              label: 'disabled',
+              count: this.subject.numSkillsDisabled,
+              badgeVariant: 'warning',
+            }],
           }, {
             label: 'Points',
             count: this.subject.totalPoints,
             warn: this.subject.totalPoints < this.minimumPoints,
-            warnMsg: this.subject.totalPoints < this.minimumPoints ? `Subject has insufficient points assigned. Skills cannot be achieved until subject has at least ${this.minimumPoints} points.` : null,
+            warnMsg: (this.subject.totalPoints + this.subject.totalPointsReused) < this.minimumPoints ? `Subject has insufficient points assigned. Skills cannot be achieved until subject has at least ${this.minimumPoints} points.` : null,
             icon: 'far fa-arrow-alt-circle-up skills-color-points',
+            secondaryStats: [{
+              label: 'reused',
+              count: this.subject.totalPointsReused,
+              badgeVariant: 'info',
+            }],
           }],
         };
       },

@@ -74,6 +74,7 @@ class SkillReuseService {
         validateNoAlreadyReusedInDestination(skillReuseRequest, projectId)
         validateNotInFinalizationState(projectId)
         validateFinalizationIsNotPending(projectId)
+        validateSkillsHaveNoDeps(projectId, skillReuseRequest)
 
         // import
         List<CatalogSkill> listOfSkills = skillReuseRequest.skillIds.collect { new CatalogSkill(projectId: projectId, skillId: it) }
@@ -120,6 +121,16 @@ class SkillReuseService {
             SkillDef group = ruleSetDefGraphService.getParentSkill(skillToReuse)
             if (group.skillId == skillReuseRequest.groupId) {
                 throw new SkillException("Not allowed to reuse skill into the same group [${skillReuseRequest.groupId}]", projectId, skillToReuse.skillId, ErrorCode.BadParam)
+            }
+        }
+    }
+
+    @Profile
+    private void validateSkillsHaveNoDeps(String projectId, SkillReuseRequest skillReuseRequest) {
+        skillReuseRequest.skillIds.each {
+            Long dependencies = ruleSetDefGraphService.countChildrenSkills(projectId, it, [SkillRelDef.RelationshipType.Dependence])
+            if (dependencies && dependencies > 0) {
+                throw new SkillException("Skill must have no dependencies in order to reuse; the skill [${it}] has [${dependencies}] dependencie(s)", projectId, it, ErrorCode.BadParam)
             }
         }
     }

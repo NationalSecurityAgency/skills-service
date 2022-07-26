@@ -61,9 +61,13 @@ describe('Group Skill Reuse Tests', () => {
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="importedBadge-skill3STREUSESKILLST0"]');
 
         cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]')
-            .should('have.text', '6');
+            .should('have.text', '3');
+        cy.get('[data-cy="pageHeaderStats_Skills_reused"]')
+            .should('have.text', '3');
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]')
-            .should('have.text', '1,200');
+            .should('have.text', '600');
+        cy.get('[data-cy="pageHeaderStats_Points_reused"]')
+            .should('have.text', '600');
 
         cy.get('[data-cy="manageSkillBtn_skill3STREUSESKILLST0"]')
             .click();
@@ -93,7 +97,9 @@ describe('Group Skill Reuse Tests', () => {
         cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj1group12"]')
             .click();
         cy.get('[ data-cy="reuseSkillsModalStep2"]')
-            .contains('All of the selected skills have already been reused in the Awesome Group 12 Subj1 group');
+            .contains('Selected skills are NOT available for reuse in the Awesome Group 12 Subj1 group');
+        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+            .contains('1 selected skill has already been reused in that group');
         cy.get('[data-cy="reuseButton"]')
             .should('be.disabled');
         cy.get('[data-cy="closeButton"]')
@@ -145,8 +151,12 @@ describe('Group Skill Reuse Tests', () => {
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11Subj2"] [data-cy="importedBadge-skill3STREUSESKILLST0"]');
 
         cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]')
+            .should('have.text', '0');
+        cy.get('[data-cy="pageHeaderStats_Skills_reused"]')
             .should('have.text', '3');
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]')
+            .should('have.text', '0');
+        cy.get('[data-cy="pageHeaderStats_Points_reused"]')
             .should('have.text', '600');
     });
 
@@ -195,8 +205,12 @@ describe('Group Skill Reuse Tests', () => {
             .contains('Reused');
 
         cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]')
+            .should('have.text', '0');
+        cy.get('[data-cy="pageHeaderStats_Skills_reused"]')
             .should('have.text', '2');
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]')
+            .should('have.text', '0');
+        cy.get('[data-cy="pageHeaderStats_Points_reused"]')
             .should('have.text', '400');
 
         const tableSelector = '[data-cy="ChildRowSkillGroupDisplay_group12Subj2"] [data-cy="skillsTable"]';
@@ -256,9 +270,13 @@ describe('Group Skill Reuse Tests', () => {
             .contains('Reused');
 
         cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]')
-            .should('have.text', '5');
+            .should('have.text', '3');
+        cy.get('[data-cy="pageHeaderStats_Skills_reused"]')
+            .should('have.text', '2');
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]')
-            .should('have.text', '1,000');
+            .should('have.text', '600');
+        cy.get('[data-cy="pageHeaderStats_Points_reused"]')
+            .should('have.text', '400');
 
         const tableSelector = '[data-cy="ChildRowSkillGroupDisplay_group12"] [data-cy="skillsTable"]';
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group12"] [data-cy="skillsTable-additionalColumns"]')
@@ -306,9 +324,13 @@ describe('Group Skill Reuse Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]')
-            .should('have.text', '2');
+            .should('have.text', '1');
+        cy.get('[data-cy="pageHeaderStats_Skills_reused"]')
+            .should('have.text', '1');
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]')
-            .should('have.text', '400');
+            .should('have.text', '200');
+        cy.get('[data-cy="pageHeaderStats_Points_reused"]')
+            .should('have.text', '200');
 
         cy.get('[data-cy="expandDetailsBtn_group12"]')
             .click();
@@ -324,8 +346,12 @@ describe('Group Skill Reuse Tests', () => {
             .contains('No Skills Yet');
         cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]')
             .should('have.text', '1');
+        cy.get('[data-cy="pageHeaderStats_Skills_reused"]')
+            .should('not.exist');
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]')
             .should('have.text', '200');
+        cy.get('[data-cy="pageHeaderStats_Points_reused"]')
+            .should('not.exist');
         cy.get('[data-cy="manageSkillLink_skill1"]');
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');

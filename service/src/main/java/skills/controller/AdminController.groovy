@@ -547,6 +547,16 @@ class AdminController {
         return new RequestResult(success: true)
     }
 
+    @RequestMapping(value = "/projects/{projectId}/hasDependency", method = [RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    List<SkillDepResult> doSkillsHaveDependency(@PathVariable("projectId") String projectId,
+                                                @RequestBody CheckSkillsDepsRequest checkSkillsDepsRequest) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotEmpty(checkSkillsDepsRequest?.skillIds, "Skill Ids", projectId)
+
+        return skillsDepsService.checkIfSkillsHaveDeps(projectId, checkSkillsDepsRequest?.skillIds)
+    }
+
 
     @RequestMapping(value = "/projects/{projectId}/skills/{dependentSkillId}/dependency/projects/{dependencyProjectId}/skills/{dependencySkillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -1068,7 +1078,7 @@ class AdminController {
         SkillsValidator.isNotBlank(contactUsersRequest?.emailSubject, "emailSubject")
         SkillsValidator.isNotBlank(contactUsersRequest?.emailBody, "emailBody")
         String userId = userInfoService.getCurrentUserId()
-        contactUsersService.previewEmail(contactUsersRequest.emailSubject, contactUsersRequest.emailBody, userId)
+        contactUsersService.sendEmail(contactUsersRequest.emailSubject, contactUsersRequest.emailBody, userId)
         return RequestResult.success()
     }
 

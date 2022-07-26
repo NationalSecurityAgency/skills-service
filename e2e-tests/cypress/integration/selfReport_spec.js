@@ -65,6 +65,19 @@ describe('Self Report Skills Management Tests', () => {
         cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
 
+        cy.get('[data-cy="justificationRequiredCheckbox"]').should('not.be.checked');
+
+        cy.get('[data-cy="justificationRequiredCheckbox"]').click({force:true})
+        cy.get('[data-cy="justificationRequiredCheckbox"]').should('be.checked');
+
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
+        cy.get('[data-cy="unsavedChangesAlert"]').contains('Unsaved Changes');
+
+        cy.get('[data-cy="saveSettingsBtn"]').click();
+        cy.get('[data-cy="settingsSavedAlert"]').contains('Settings Updated');
+        cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+
         // refresh and check that the values persisted
         cy.visit('/administrator/projects/proj1/settings');
         cy.get('[data-cy="selfReportSwitch"]').should('be.checked');
@@ -85,9 +98,11 @@ describe('Self Report Skills Management Tests', () => {
         cy.visit('/administrator/projects/proj1/settings');
         cy.get('[data-cy="selfReportSwitch"]').should('not.be.checked');
         cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.disabled');
+        cy.get('[data-cy="justificationRequiredCheckbox"]').should('be.disabled');
         cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('be.disabled');
         cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.checked');
         cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('not.be.checked');
+        cy.get('[data-cy="justificationRequiredCheckbox"]').should('be.checked');
         cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist');
         cy.get('[data-cy="settingsSavedAlert"]').should('not.exist');
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
@@ -217,10 +232,29 @@ describe('Self Report Skills Management Tests', () => {
         cy.get('[data-cy="selfReportEnableCheckbox"]').should('be.checked');
         cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.enabled');
         cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('be.enabled');
+        cy.get('[data-cy="justificationRequiredCheckbox"]').should('be.enabled');
         cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.checked');
         cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('not.be.checked');
+        cy.get('[data-cy="justificationRequiredCheckbox"]').should('not.be.checked');
     });
 
+    it('create skill - project level default of Approval and Require Justification', () => {
+        cy.visit('/administrator/projects/proj1/settings');
+        cy.get('[data-cy="selfReportSwitch"]').check({force: true});
+        cy.get('[data-cy="justificationRequiredCheckbox"]').click({force:true})
+        cy.get('[data-cy="saveSettingsBtn"]').click();
+        cy.get('[data-cy="settingsSavedAlert"]').contains('Settings Updated');
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="newSkillButton"]').click();
+        cy.get('[data-cy="selfReportEnableCheckbox"]').should('be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.enabled');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('be.enabled');
+        cy.get('[data-cy="justificationRequiredCheckbox"]').should('be.enabled');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('not.be.checked');
+        cy.get('[data-cy="justificationRequiredCheckbox"]').should('be.checked');
+    });
 
     it('edit skills - approval -> warnings', () => {
         cy.createSkill(1, 1, 1, { selfReportingType: 'Approval', name: 'Approval 1' });

@@ -209,7 +209,9 @@ limitations under the License.
                                        :is-edit="isEdit"
                                        :next-focus-el="previousFocus"
                                        @shown="tooltipShowing=true"
-                                       @hidden="tooltipShowing=false"/>
+                                       @hidden="tooltipShowing=false"
+                                       @justificationRequiredChanged="updateJustificationRequired"
+            />
 
             <hr class="mt-0"/>
 
@@ -427,6 +429,9 @@ limitations under the License.
           this.$emit('hidden', { updated: this.isEdit, ...e });
         }
       },
+      updateJustificationRequired(value) {
+        this.skillInternal.justificationRequired = value;
+      },
       setupValidation() {
         const self = this;
         extend('uniqueName', {
@@ -578,10 +583,17 @@ limitations under the License.
           });
       },
       loadSelfReportProjectSetting() {
-        SettingsService.getProjectSetting(this.projectId, 'selfReport.type')
-          .then((res) => {
-            if (res) {
-              this.skillInternal.selfReportingType = res.value;
+        SettingsService.getSettingsForProject(this.projectId)
+          .then((response) => {
+            if (response) {
+              const selfReportingTypeSetting = response.find((item) => item.setting === 'selfReport.type');
+              if (selfReportingTypeSetting) {
+                this.skillInternal.selfReportingType = selfReportingTypeSetting.value;
+              }
+              const selfReportingJustificationSetting = response.find((item) => item.setting === 'selfReport.justificationRequired');
+              if (selfReportingJustificationSetting) {
+                this.skillInternal.justificationRequired = selfReportingJustificationSetting.value;
+              }
             }
             this.selfReport.loading = false;
           });

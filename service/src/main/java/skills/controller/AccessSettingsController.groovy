@@ -25,10 +25,15 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.client.RestClientException
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
+import skills.controller.request.model.ContactUsersRequest
 import skills.controller.result.model.RequestResult
 import skills.controller.result.model.UserRoleRes
 import skills.services.AccessSettingsStorageService
+import skills.services.ContactUsersService
+import skills.services.FeatureService
 import skills.services.admin.ProjAdminService
+import skills.storage.accessors.ProjDefAccessor
+import skills.storage.model.ProjDef
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.User
 import skills.storage.repos.UserRepo
@@ -53,6 +58,15 @@ class AccessSettingsController {
 
     @Autowired
     ProjAdminService projAdminService
+
+    @Autowired
+    ProjDefAccessor projDefAccessor
+
+    @Autowired
+    ContactUsersService contactUsersService
+
+    @Autowired
+    FeatureService featureService
 
     @Value('#{securityConfig.authMode}}')
     skills.auth.AuthMode authMode = skills.auth.AuthMode.DEFAULT_AUTH_MODE
@@ -93,6 +107,19 @@ class AccessSettingsController {
             @PathVariable("userKey") String userKey, @PathVariable("roleName") RoleName roleName) {
         String userId = getUserId(userKey)
         accessSettingsStorageService.addUserRole(userId, projectId, roleName)
+
+        if(roleName == RoleName.ROLE_PROJECT_ADMIN) {
+            ProjDef project = projDefAccessor.getProjDef(projectId)
+            String publicUrl = featureService.getPublicUrl()
+
+            def emailBody = "Congratulations!  You've just been added as a Project Administrator for the SkillTree project [${project.name}](${publicUrl}administrator/projects/${project.projectId}).\n\n" +
+                            "The Project administrator role enables management of the training profile for this project such as creating and " +
+                            "modifying subjects, skills and badges.  Thank you for being part of the SkillTree Community!\n\n" +
+                            "Always yours,\n\n" +
+                            "-SkillTree Bot"
+
+            contactUsersService.sendEmail("SkillTree - You've been added as an admin", emailBody, userId)
+        }
 
         if(roleName == RoleName.ROLE_PROJECT_ADMIN && accessSettingsStorageService.isRoot(userId)) {
             User user = userRepo.findByUserId(userId.toLowerCase())

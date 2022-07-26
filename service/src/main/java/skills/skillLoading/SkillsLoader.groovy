@@ -411,13 +411,26 @@ class SkillsLoader {
         ProjDef projDef = getProjDef(userId, crossProjectId ?: projectId)
         SkillDefWithExtra skillDef = getSkillDefWithExtra(userId, crossProjectId ?: projectId, skillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
 
-        if(crossProjectId) {
+        if (crossProjectId) {
             dependencyValidator.validateDependencyEligibility(projectId, skillDef)
         }
 
-        UserPoints points = userPointsRepo.findByProjectIdAndUserIdAndSkillId(crossProjectId ?: projectId, userId, skillId)
+        UserPoints up = userPointsRepo.findByProjectIdAndUserIdAndSkillId(crossProjectId ?: projectId, userId, skillId)
+        Integer points = up ? up.points : 0
         Integer todayPoints = userPointsRepo.calculatePointsForSingleSkillForADay(userId, skillDef.id, new Date().clearTime()) ?: 0
         Date achievedOn = achievedLevelRepository.getAchievedDateByUserIdAndProjectIdAndSkillId(userId, projectId, skillId)
+
+
+        if (skillDef.copiedFrom != null && skillDef.selfReportingType) {
+            // because of the catalog's async nature when self-approval honor skill is submitted todaysPoints and points are not consistent on the imported side
+            // this is because todaysPoints are calculated from UserPerformedSkill but points come from UserPoints; UserPerformedSkill
+            // is shared in the catalog exported/imported skills but UserPoints are duplicated and asynchronously synced
+            if (todayPoints > points) {
+                // this will at least account for 1 event that have not been propagated and make it a bit more consistent
+                // it mostly likely will account for the first event only unless multiple skill events are submitted in the same day
+                points = points + skillDef.pointIncrement
+            }
+        }
 
         SkillDependencySummary skillDependencySummary
         if (!crossProjectId) {
@@ -434,7 +447,7 @@ class SkillsLoader {
                 projectName: InputSanitizer.unsanitizeName(projDef.name),
                 skillId: skillDef.skillId,
                 skill: isReusedSkill ? SkillReuseIdUtil.removeTag(unsanitizedName) : unsanitizedName,
-                points: points?.points ?: 0, todaysPoints: todayPoints,
+                points: points, todaysPoints: todayPoints,
                 pointIncrement: skillDef.pointIncrement,
                 pointIncrementInterval: skillDef.pointIncrementInterval,
                 maxOccurrencesWithinIncrementInterval: skillDef.numMaxOccurrencesIncrementInterval,
@@ -466,6 +479,7 @@ class SkillsLoader {
                 approvalId: skillApproval?.getId(),
                 enabled: enabled,
                 type: skillDef.selfReportingType,
+                justificationRequired: Boolean.valueOf(skillDef.justificationRequired),
                 requestedOn: skillApproval?.requestedOn?.time,
                 rejectedOn: skillApproval?.rejectedOn?.time,
                 rejectionMsg: skillApproval?.rejectionMsg
@@ -546,6 +560,7 @@ class SkillsLoader {
                 selfReporting: new SelfReportingInfo(
                         approvalId: skillApproval?.getSkillApproval()?.getId(),
                         type: it.getSelfReportingType(),
+                        justificationRequired: Boolean.valueOf(it.justificationRequired),
                         enabled: it.getSelfReportingType() != null,
                         requestedOn: skillApproval?.getSkillApproval()?.getRequestedOn()?.time,
                         rejectedOn: skillApproval?.getSkillApproval()?.getRejectedOn()?.time,
@@ -899,7 +914,7 @@ class SkillsLoader {
                         maxOccurrencesWithinIncrementInterval: skillDef.numMaxOccurrencesIncrementInterval,
                         totalPoints: skillDef.totalPoints,
                         dependencyInfo: skillDefAndUserPoints.dependencyInfo,
-                        selfReporting: skillDef.selfReportingType ? new SelfReportingInfo(enabled: true, type: skillDef.selfReportingType) : null,
+                        selfReporting: skillDef.selfReportingType ? new SelfReportingInfo(enabled: true, type: skillDef.selfReportingType, justificationRequired: Boolean.valueOf(skillDef.justificationRequired)) : null,
                         subjectName: subjectName,
                         subjectId: subjectId,
                         type: skillDef.type,
