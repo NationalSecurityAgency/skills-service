@@ -17,7 +17,7 @@ limitations under the License.
   <ValidationObserver ref="observer" v-slot="{invalid, pristine}" slim>
     <div>
           <div class="form-group">
-            <label class="label" for="emailInfo.publicUrl">* Public URL <InlineHelp target-id="publicUrlHelp" msg="Because it is possible for the SkillTree dashboard
+            <label class="label" for="publicUrl">* Public URL <InlineHelp target-id="publicUrlHelp" msg="Because it is possible for the SkillTree dashboard
             to be deployed behind a load balancer or proxy, it is necessary to configure the public url so that email
             based communications from the system can provide valid links back to the SkillTree dashboard."/></label>
             <ValidationProvider rules="required" name="Public URL" v-slot="{ errors }" :debounce=500>
@@ -30,7 +30,7 @@ limitations under the License.
             </ValidationProvider>
           </div>
           <div class="form-group">
-            <label class="label" for="emailInfo.fromEmail">From Email <InlineHelp target-id="fromEmailHelp" msg="The From email address used in all email originating from the SkillTree application"/></label>
+            <label class="label" for="fromEmail">* From Email <InlineHelp target-id="fromEmailHelp" msg="The From email address used in all email originating from the SkillTree application"/></label>
             <ValidationProvider :rules="{email:{require_tld:false,allow_ip_domain:true}}" name="From Email" v-slot="{ errors }" :debounce=500>
               <input class="form-control" type="text" v-model="emailInfo.fromEmail" name="fromEmail"
                      data-cy="fromEmailInput" id="fromEmail"
