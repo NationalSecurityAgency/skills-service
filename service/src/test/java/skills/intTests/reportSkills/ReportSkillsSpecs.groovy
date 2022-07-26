@@ -33,6 +33,9 @@ class ReportSkillsSpecs extends DefaultIntSpec {
 
     List<String> sampleUserIds // loaded from system props
 
+    @Value('#{"${skills.config.ui.skillHistoryInDays:1825}"}')
+    Integer maxDaysBackForSkill;
+
     def setup() {
         skillsService.deleteProjectIfExist(projId)
         sampleUserIds = System.getProperty("sampleUserIds", "tom|||dick|||harry")?.split("\\|\\|\\|").sort()
@@ -1058,7 +1061,8 @@ class ReportSkillsSpecs extends DefaultIntSpec {
 
         then:
         SkillsClientException ex = thrown()
-        ex.message.contains("Skill Events may not be older than")
+        def errorMessage = "Skill Events may not be older than " + maxDaysBackForSkill + " days"
+        ex.message.contains(errorMessage)
     }
 
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
