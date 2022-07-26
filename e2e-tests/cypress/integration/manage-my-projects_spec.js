@@ -56,7 +56,7 @@ describe('Manage My Projects Tests', () => {
     });
   });
 
-  it.only('display a message when there are no projects in prod-mode', function () {
+  it('display a message when there are no projects in prod-mode', function () {
     for (let i = 1; i <= 3; i += 1) {
       cy.createProject(i);
     }
