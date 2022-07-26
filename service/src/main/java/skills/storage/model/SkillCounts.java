@@ -17,8 +17,16 @@ package skills.storage.model;
 
 public interface SkillCounts {
     Integer getEnabledSkillsCount();
+
     Integer getDisabledSkillsCount();
+
     Integer getDisabledImportedSkillsCount();
+
     Integer getEnabledGroupsCount();
+
     Integer getDisabledGroupsCount();
+
+    Integer getNumSkillsReused();
+
+    Integer getTotalPointsReused();
 }

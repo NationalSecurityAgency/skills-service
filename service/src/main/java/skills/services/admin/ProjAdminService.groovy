@@ -111,6 +111,9 @@ class ProjAdminService {
     @Autowired
     SkillCatalogTransactionalAccessor skillCatalogTransactionalAccessor
 
+    @Autowired
+    SkillsAdminService skillsAdminService
+
     @Transactional()
     void saveProject(String originalProjectId, ProjectRequest projectRequest, String userIdParam = null) {
         assert projectRequest?.projectId
@@ -177,6 +180,11 @@ class ProjAdminService {
 
         if (globalBadgesService.isProjectUsedInGlobalBadge(projectId)) {
             throw new SkillException("Project with id [${projectId}] cannot be deleted as it is currently referenced by one or more global badges")
+        }
+
+        List<SkillDef> childSkills = skillDefRepo.findAllByProjectIdAndType(projectId, SkillDef.ContainerType.Skill)
+        childSkills.each {
+            skillsAdminService.removeCatalogImportedSkills(it)
         }
 
         projDefRepo.deleteByProjectIdIgnoreCase(projectId)
@@ -509,7 +517,7 @@ class ProjAdminService {
         ProjectResult res = new ProjectResult(
                 projectId: definition.getProjectId(),
                 name: InputSanitizer.unsanitizeName(definition.getName()),
-                totalPoints: definition.getTotalPoints(),
+                totalPoints: definition.getTotalPoints() - (definition.getTotalPointsReused() ?: 0),
                 numSubjects: definition.getNumSubjects(),
                 numGroups: definition.getNumGroups(),
                 displayOrder: order != null ? order : 0,
@@ -517,7 +525,9 @@ class ProjAdminService {
                 created: definition.getCreated(),
                 expiring: definition.getExpiring(),
                 expirationTriggered: definition.getExpirationTriggered(),
-                numSkillsDisabled: definition.getNumSkillsDisabled()
+                numSkillsDisabled: definition.getNumSkillsDisabled(),
+                numSkillsReused: definition.getNumSkillsReused() ?: 0,
+                totalPointsReused: definition.getTotalPointsReused() ?: 0,
         )
         res.numBadges = definition.numBadges
         res.numSkills = definition.numSkills

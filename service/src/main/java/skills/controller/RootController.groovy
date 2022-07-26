@@ -40,6 +40,7 @@ import skills.controller.result.model.UserRoleRes
 import skills.profile.EnableCallStackProf
 import skills.services.AccessSettingsStorageService
 import skills.services.ContactUsersService
+import skills.services.FeatureService
 import skills.services.SystemSettingsService
 import skills.services.admin.ProjAdminService
 import skills.services.settings.SettingsService
@@ -47,6 +48,7 @@ import skills.settings.EmailConfigurationResult
 import skills.settings.EmailConnectionInfo
 import skills.settings.EmailSettingsService
 import skills.settings.SystemSettings
+import skills.storage.model.ProjDef
 import skills.storage.model.UserTag
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.UserTagRepo
@@ -93,6 +95,9 @@ class RootController {
 
     @Autowired
     UserTagRepo userTagRepo
+
+    @Autowired
+    FeatureService featureService
 
     @GetMapping('/rootUsers')
     @ResponseBody
@@ -154,6 +159,14 @@ class RootController {
     RequestResult addRoot(@PathVariable('userKey') String userKey) {
         String userId = getUserId(userKey)
         accessSettingsStorageService.addRoot(userId)
+        String publicUrl = featureService.getPublicUrl()
+
+        def emailBody = "Congratulations! You've been just added as a Root Administrator for the [SkillTree Dashboard](${publicUrl}administrator).\n\n" +
+                "The Root role is meant for administering the dashboard itself and not any specific project. Users with the Root role can view the Inception project." +
+                "Users with the Root role can also assign Supervisor and Root roles to other dashboard users. Thank you for being part of the SkillTree Community!\n\n" +
+                "Always yours,\n\n" +
+                "-SkillTree Bot"
+        contactUsersService.sendEmail("SkillTree - You've been added as root", emailBody, userId)
         projAdminService.pinAllExistingProjectsWhereUserIsAdminExceptInception(userId)
         return new RequestResult(success: true)
     }
@@ -307,7 +320,7 @@ class RootController {
         SkillsValidator.isNotBlank(contactUsersRequest?.emailSubject, "emailSubject")
         SkillsValidator.isNotBlank(contactUsersRequest?.emailBody, "emailBody")
         String userId = userInfoService.getCurrentUserId()
-        contactUsersService.previewEmail(contactUsersRequest.emailSubject, contactUsersRequest.emailBody, userId)
+        contactUsersService.sendEmail(contactUsersRequest.emailSubject, contactUsersRequest.emailBody, userId)
         return RequestResult.success()
     }
 

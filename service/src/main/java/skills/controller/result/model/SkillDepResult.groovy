@@ -15,17 +15,10 @@
  */
 package skills.controller.result.model
 
-import skills.storage.model.SkillDef
+import groovy.transform.Canonical
 
-class SkillDefRes extends SkillDefPartialRes {
-    // optional: in case of the container, indicate what type of container it is (ex. subject)
-    String containerType
-
-    String description
-
-    String helpUrl
-
-    SkillDef.SelfReportingType selfReportingType
-
-    Boolean thisSkillWasReusedElsewhere
+@Canonical
+class SkillDepResult {
+    String skillId
+    boolean hasDependency
 }

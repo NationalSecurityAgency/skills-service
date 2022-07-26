@@ -18,14 +18,6 @@ import utcPlugin from 'dayjs/plugin/utc';
 
 dayjs.extend(utcPlugin);
 
-const snapshotOptions = {
-  blackout: ['[data-cy=projectCreated]', '[data-cy=projectLastReportedSkill]'],
-  failureThreshold: 0.03, // threshold for entire image
-  failureThresholdType: 'percent', // percent of image or number of pixels
-  customDiffConfig: { threshold: 0.01 }, // threshold for each pixel
-  capture: 'fullPage', // When fullPage, the application under test is captured in its entirety from top to bottom.
-};
-
 describe('Project Expiration Tests', () => {
   it('Project Expiration Projects Display', () => {
     const markedExpired = dayjs().utc().subtract(5, 'days').format('YYYY-MM-DD[T]HH:mm:ss[Z]')
@@ -58,7 +50,6 @@ describe('Project Expiration Tests', () => {
     cy.get('[data-cy=projectExpiration]').should('be.visible');
     cy.get('[data-cy=projectExpiration]').contains('Project has not been used in over 180 days and will be deleted in 2 days');
     cy.get('button[data-cy=keepIt]').should('be.visible');
-    cy.matchSnapshotImageForElement('[data-cy=projectCard]', 'Project-Expiration-MyProjects', snapshotOptions);
     cy.get('button[data-cy=keepIt]').click();
     cy.wait('@stopExpiration');
     cy.get('[data-cy=projectExpiration]').should('not.exist');
@@ -120,7 +111,6 @@ describe('Project Expiration Tests', () => {
     cy.get('[data-cy=projectExpiration]').should('be.visible');
     cy.get('[data-cy=projectExpiration]').contains('Project has not been used in over 180 days and will be deleted in 2 days');
     cy.get('button[data-cy=keepIt]').should('be.visible');
-    cy.matchSnapshotImageForElement('[data-cy=pageHeader]', 'Project-Expiration-ProjectPage', snapshotOptions);
     cy.get('button[data-cy=keepIt]').click();
     cy.wait('@stopExpiration');
     cy.contains('PROJECT: This is project 1');

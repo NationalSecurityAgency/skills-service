@@ -18,14 +18,21 @@ package skills.intTests
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.core.io.ClassPathResource
 import org.springframework.jdbc.core.JdbcTemplate
 import skills.SpringBootApp
 import skills.auth.UserAuthService
+import skills.controller.request.model.BadgeRequest
+import skills.controller.request.model.ProjectRequest
+import skills.controller.request.model.SkillRequest
+import skills.controller.request.model.SubjectRequest
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
-import skills.intTests.utils.SkillsService
+import skills.intTests.utils.TransactionHelper
+import skills.services.admin.BadgeAdminService
+import skills.services.admin.ProjAdminService
+import skills.services.admin.SkillsAdminService
+import skills.services.admin.SubjAdminService
 import skills.storage.model.UserAttrs
 import skills.storage.model.auth.User
 import skills.storage.repos.UserAttrsRepo
@@ -46,6 +53,9 @@ class UpgradeInProgressIT extends DefaultIntSpec {
     JdbcTemplate jdbcTemplate
 
     @Autowired
+    TransactionHelper transactionHelper
+
+    @Autowired
     UserAuthService userAuthService
 
     @Autowired
@@ -53,6 +63,18 @@ class UpgradeInProgressIT extends DefaultIntSpec {
 
     @Autowired
     UserAttrsRepo userAttrsRepo
+
+    @Autowired
+    ProjAdminService projAdminService
+
+    @Autowired
+    SubjAdminService subjAdminService
+
+    @Autowired
+    BadgeAdminService badgeAdminService
+
+    @Autowired
+    SkillsAdminService skillsAdminService
 
     def setup() {
         if (!userRepository.findByUserId(skillsService.userName.toLowerCase())) {
@@ -64,18 +86,15 @@ class UpgradeInProgressIT extends DefaultIntSpec {
             userRepository.save(user)
         }
         userAuthService.grantRoot(skillsService.userName)
-        insertData("upgrade_in_progress.sql")
-        //projectId SampleProject
-        //Skill3Skill - approval
-        //Skill1Skill
-        //Skill2Skill - honor system
-        //Subject1Subject
-    }
+        SkillsFactory.createProject(8)
+        SkillsFactory.createSubject(8, 8)
+        SkillsFactory.createSkill(8, 8, 8)
+        SkillsFactory.createBadge(8, 8)
 
-    private insertData(String sqlFilePath) {
-        new ClassPathResource(sqlFilePath).getFile().eachLine { sqlStmt ->
-            jdbcTemplate.execute(sqlStmt)
-        }
+        projAdminService.saveProject('SampleProject', new ProjectRequest('SampleProject', 'Sample Project'), skillsService.userName)
+        subjAdminService.saveSubject('SampleProject', 'Subject1Subject', new SubjectRequest('Subject1Subject', 'Subject 1 Subject', 'blah', 'icon', 'helpUrl'))
+        skillsAdminService.saveSkill('Skill1Skill', new SkillRequest('Skill1Skill', 'Subject1Subject', 'SampleProject', 'Skill1 Skill', 100, 60*8, 1, 1))
+        badgeAdminService.saveBadge('SampleProject', 'SampleBadgeBadge', new BadgeRequest('SampleBadgeBadge', 'SampleBadge Badge', 'blah', 'icon'))
     }
 
     def "cannot create new project when upgrade mode is enabled"() {

@@ -79,7 +79,6 @@ class AccessSettingsStorageService {
     @Autowired
     UserAttrsService userAttrsService
 
-
     @Value('#{"${skills.config.ui.defaultLandingPage:admin}"}')
     String defaultLandingPage
 

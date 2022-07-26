@@ -43,4 +43,8 @@ public interface ProjSummaryResult {
     public abstract Date getExpirationTriggered();
 
     public abstract Boolean getExpiring();
+
+    public abstract Integer getNumSkillsReused();
+
+    public abstract Integer getTotalPointsReused();
 }

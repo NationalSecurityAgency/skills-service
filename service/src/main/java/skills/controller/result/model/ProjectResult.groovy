@@ -36,4 +36,7 @@ class ProjectResult extends SimpleProjectResult{
 
     boolean expiring
     Date expirationTriggered
+
+    int numSkillsReused
+    int totalPointsReused
 }

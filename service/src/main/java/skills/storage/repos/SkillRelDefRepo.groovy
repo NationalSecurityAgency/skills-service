@@ -255,12 +255,23 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
               and sd1.projectId=?1 and sd1.skillId=?2''')
     Long countChildren(@Nullable projectId, String parentSkillId, List<SkillRelDef.RelationshipType> types)
 
+    static interface SkillIdAndCount {
+        String getSkillId()
+
+        Long getCount()
+    }
+
+    @Query('''select sd1.skillId as skillId, count(sd2) as count from SkillDef sd1, SkillDef sd2, SkillRelDef srd 
+        where sd1 = srd.parent and sd2 = srd.child and srd.type in ?3 
+              and sd1.projectId=?1 and sd1.skillId in (?2) group by sd1.skillId''')
+    List<SkillIdAndCount> countChildrenForMultipleSkillIds(@Nullable projectId, List<String> parentSkillIds, List<SkillRelDef.RelationshipType> types)
+
     @Nullable
     @Query(value = '''select srd.parent from SkillRelDef srd where srd.child.skillId=?1 and srd.type='BadgeRequirement' and srd.parent.type = 'GlobalBadge' ''')
     SkillDef findGlobalBadgeByChildSkillId(String skillId)
 
     @Nullable
-    @Query(value= '''select srd.parent from SkillRelDef srd where srd.child.skillId=?1 and srd.type=?2 and srd.parent.type=?3 ''')
+    @Query(value = '''select srd.parent from SkillRelDef srd where srd.child.skillId=?1 and srd.type=?2 and srd.parent.type=?3 ''')
     List<SkillDef> findAllChildrenByChildSkillIdAndRelationshipTypeAndParentType(String skillId, SkillRelDef.RelationshipType relType, SkillDef.ContainerType parentType)
 
     /**

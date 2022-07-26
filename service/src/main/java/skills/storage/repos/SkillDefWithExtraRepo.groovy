@@ -49,9 +49,10 @@ interface SkillDefWithExtraRepo extends PagingAndSortingRepository<SkillDefWithE
         Integer getCopiedFrom()
         SkillDef.ContainerType getType()
         String getEnabled()
+        String getJustificationRequired()
     }
 
-    @Query(value='''SELECT c.skillId as skillId, c.description as description, c.helpUrl as helpUrl, ua.achievedOn as achievedOn, c.selfReportingType as selfReportingType, c.type as type, c.enabled as enabled, c.copiedFrom as copiedFrom
+    @Query(value='''SELECT c.skillId as skillId, c.description as description, c.helpUrl as helpUrl, ua.achievedOn as achievedOn, c.selfReportingType as selfReportingType, c.type as type, c.justificationRequired as justificationRequired, c.enabled as enabled, c.copiedFrom as copiedFrom
         from SkillDefWithExtra s, SkillRelDef r, SkillDefWithExtra c
         left join UserAchievement ua on c.skillId = ua.skillId and c.projectId = ua.projectId and ua.userId=?5
         where 
@@ -62,7 +63,7 @@ interface SkillDefWithExtraRepo extends PagingAndSortingRepository<SkillDefWithE
     ''')
     List<SkillDescDBRes> findAllChildSkillsDescriptions(String projectId, String parentSkillId, SkillRelDef.RelationshipType relationshipType, int version, String userId)
 
-    @Query(value='''SELECT c.skillId as skillId, c.description as description, c.helpUrl as helpUrl, ua.achievedOn as achievedOn, c.selfReportingType as selfReportingType, c.type as type
+    @Query(value='''SELECT c.skillId as skillId, c.description as description, c.helpUrl as helpUrl, ua.achievedOn as achievedOn, c.selfReportingType as selfReportingType, c.type as type, c.justificationRequired as justificationRequired
         from SkillDefWithExtra s, SkillRelDef r, SkillDefWithExtra c
         left join UserAchievement ua on c.skillId = ua.skillId and c.projectId = ua.projectId and ua.userId=?5
         where 

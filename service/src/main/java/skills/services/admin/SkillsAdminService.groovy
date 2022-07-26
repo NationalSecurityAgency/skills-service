@@ -179,6 +179,7 @@ class SkillsAdminService {
         final int currentOccurrences = isEdit && !isSkillsGroup ? (skillDefinition.totalPoints / skillDefinition.pointIncrement) : -1
         final SelfReportingType selfReportingType = skillRequest.selfReportingType && !isSkillsGroup ? SkillDef.SelfReportingType.valueOf(skillRequest.selfReportingType) : null;
         final boolean isEnabledSkillInRequest = Boolean.valueOf(skillRequest.enabled)
+        final boolean isJustificationRequiredInRequest = Boolean.valueOf(skillRequest.justificationRequired)
 
         SkillDef subject = null
         SkillDef skillsGroupSkillDef = null
@@ -188,6 +189,9 @@ class SkillsAdminService {
             // for updates, use the existing value if it is not set on the skillRequest (null or empty String)
             if (StringUtils.isBlank(skillRequest.enabled)) {
                 skillRequest.enabled = skillDefinition.enabled
+            }
+            if (StringUtils.isBlank(skillRequest.justificationRequired)) {
+                skillRequest.justificationRequired = skillDefinition.justificationRequired
             }
             if (isSkillsGroup) {
                 // need to update total points for the group
@@ -247,6 +251,7 @@ class SkillsAdminService {
             Integer highestDisplayOrder = skillDefRepo.calculateChildSkillsHighestDisplayOrder(skillRequest.projectId, groupId ?: parentSkillId)
             int displayOrder = highestDisplayOrder == null ? 1 : highestDisplayOrder + 1
             String enabled = isEnabledSkillInRequest.toString()
+            String justificationRequired = isJustificationRequiredInRequest.toString()
             if (isSkillsGroupChild) {
                 skillsGroupSkillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, groupId, SkillDef.ContainerType.SkillsGroup)
                 if (!skillsGroupSkillDef) {
@@ -270,6 +275,7 @@ class SkillsAdminService {
                     numSkillsRequired: skillRequest.numSkillsRequired,
                     enabled: enabled,
                     groupId: groupId,
+                    justificationRequired: justificationRequired,
             )
 
             if (skillRequest instanceof SkillImportRequest) {
@@ -433,7 +439,14 @@ class SkillsAdminService {
         } else {
             throw new SkillException("Unexpected parent type [${parentSkill.type}]")
         }
-        removeCatalogImportedSkills(skillDefinition)
+        if (skillDefinition.type == SkillDef.ContainerType.SkillsGroup) {
+            List<SkillDef> childSkills = ruleSetDefGraphService.getChildrenSkills(skillDefinition, [SkillRelDef.RelationshipType.SkillsGroupRequirement])
+            childSkills.each {
+                removeCatalogImportedSkills(it)
+            }
+        } else {
+            removeCatalogImportedSkills(skillDefinition)
+        }
 
         // this MUST happen before the skill was removed as sql relies on the skill to exist
         userPointsManagement.handleSkillRemoval(skillDefinition, subject)
@@ -476,7 +489,7 @@ class SkillsAdminService {
     }
 
     @Profile
-    private void removeCatalogImportedSkills(SkillDef skillDefinition) {
+    void removeCatalogImportedSkills(SkillDef skillDefinition) {
         List<SkillDefWithExtra> related = skillDefWithExtraRepo.findSkillsCopiedFrom(skillDefinition.id)
         log.info("catalog skill is being deleted, deleting [{}] copies imported into other projects", related?.size())
         related?.each {
@@ -597,6 +610,8 @@ class SkillsAdminService {
         if (finalRes.copiedFromProjectId) {
             finalRes.copiedFromProjectName = projDefRepo.getProjectName(finalRes.copiedFromProjectId)?.projectName
         }
+
+        finalRes.thisSkillWasReusedElsewhere = skillDefRepo.wasThisSkillReusedElsewhere(res.id)
         return finalRes
     }
 
@@ -665,6 +680,7 @@ class SkillsAdminService {
         SkillDefRes res = new SkillDefRes()
         Props.copy(skillDef, res)
         res.enabled = skillDef.enabled == "true" ? true : false
+        res.justificationRequired = Boolean.valueOf(skillDef.justificationRequired)
         res.description = InputSanitizer.unsanitizeForMarkdown(res.description)
         res.helpUrl = InputSanitizer.unsanitizeUrl(res.helpUrl)
         if (skillDef.type == SkillDef.ContainerType.Skill) {

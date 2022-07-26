@@ -21,15 +21,8 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
-import skills.storage.model.BadgeCount
-import skills.storage.model.ImportExportStats
-import skills.storage.model.SkillCounts
-import skills.storage.model.SkillDef
+import skills.storage.model.*
 import skills.storage.model.SkillDef.ContainerType
-import skills.storage.model.SkillDefMin
-import skills.storage.model.SkillDefPartial
-import skills.storage.model.SkillDefSkinny
-import skills.storage.model.SkillRelDef
 import skills.storage.model.SkillRelDef.RelationshipType
 
 interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
@@ -213,7 +206,9 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
             sum(case when c.enabled = 'false' and  c.type = 'Skill' then 1 end) as disabledSkillsCount,
             sum(case when c.enabled = 'false' and  c.type = 'Skill' and c.copiedFrom is not null then 1 end) as disabledImportedSkillsCount,
             sum(case when c.enabled = 'true' and  c.type = 'SkillsGroup' then 1 end) as enabledGroupsCount,
-            sum(case when c.enabled = 'false' and  c.type = 'SkillsGroup' then 1 end) as disabledGroupsCount
+            sum(case when c.enabled = 'false' and  c.type = 'SkillsGroup' then 1 end) as disabledGroupsCount,
+            sum(case when skill_id like '%STREUSESKILLST%' and  c.type = 'Skill' then 1 end) as numSkillsReused,
+            sum(case when skill_id like '%STREUSESKILLST%' and  c.type = 'Skill' then c.totalPoints end) as totalPointsReused
             from SkillRelDef r, SkillDef c 
             where r.parent.id=?1 and c.id = r.child and r.type in ('RuleSetDefinition', 'GroupSkillToSubject')
         ''')
@@ -621,4 +616,8 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
             and s.skillId like '%STREUSESKILLST%'
             ''')
     List<SkillDefSkinny> findChildReusedSkills(String projectId, String parentId)
+
+    @Nullable
+    @Query('''select count(s) > 0 from SkillDefWithExtra s where s.copiedFrom = ?1 and s.skillId like '%STREUSESKILLST%' ''')
+    Boolean wasThisSkillReusedElsewhere(int skillRefId)
 }

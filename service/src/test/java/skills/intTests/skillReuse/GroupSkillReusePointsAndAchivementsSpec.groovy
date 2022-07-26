@@ -397,21 +397,11 @@ class GroupSkillReusePointsAndAchivementsSpec extends CatalogIntSpec {
 
         Map props = [:]
         when:
-        def res = skillsService.getMetricsData(p1.projectId, "skillUsageNavigatorChartBuilder", props)
         List<UserAchievement> skillAchievements = userAchievedRepo.findAll().findAll({ it.skillId && !it.level })
-        println JsonOutput.prettyPrint(JsonOutput.toJson(skillAchievements))
         then:
         skillAchievements.projectId.sort() == [p1.projectId, p1.projectId, p1.projectId, p1.projectId]
         skillAchievements.skillId.sort() == [p1Skills[0].skillId, p1Skills[0].skillId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0), SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)]
         skillAchievements.userId.sort() == [users[1], users[1], users[2], users[2]].sort()
-
-        res.skillName == [p1Skills[0].name, p1Skills[0].name, p1Skills[1].name, p1Skills[2].name]
-        res.skillId == [p1Skills[0].skillId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0), p1Skills[1].skillId, p1Skills[2].skillId]
-        res.isReusedSkill == [false, true, false, false]
-        res.numUsersInProgress == [1, 1, 0, 0]
-        res.numUserAchieved == [2, 2, 0, 0]
-        res.lastReportedTimestamp == [dates[4].time, dates[4].time, null, null]
-        res.lastAchievedTimestamp == [dates[3].time, dates[3].time, null, null]
     }
 
     def "updating original skill increases user points and user's levels"() {

@@ -53,7 +53,7 @@ describe('Import Skills under a Group Tests', () => {
 
         cy.get('[data-cy="importFinalizeAlert"]')
             .contains('There is 1 imported skill in this project that is not yet finalized');
-        cy.get('[data-cy="pageHeaderStat_Skills_disabledCount"]')
+        cy.get('[data-cy="pageHeaderStats_Skills_disabled"]')
             .should('have.text', '1');
         cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]')
             .should('have.text', '0');
@@ -70,7 +70,7 @@ describe('Import Skills under a Group Tests', () => {
         cy.waitForBackendAsyncTasksToComplete();
         cy.get('[data-cy="importFinalizeAlert"]')
             .contains('Successfully finalized 1 imported skill!');
-        cy.get('[data-cy="pageHeaderStat_Skills_disabledCount"]')
+        cy.get('[data-cy="pageHeaderStats_Skills_disabled"]')
             .should('not.exist');
         cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]')
             .should('have.text', '1');
