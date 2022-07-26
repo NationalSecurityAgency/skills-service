@@ -365,6 +365,8 @@ describe('Settings Tests', () => {
         //this needs to be an open port that is NOT an smtp server for the purposes of this test
         cy.get$('[data-cy=portInput]').type('{selectall}8080');
         cy.get$('[data-cy=protocolInput]').type('{selectall}smtp');
+        cy.get$('[data-cy=publicUrlInput]').type('test');
+        cy.get$('[data-cy=fromEmailInput]').type('{selectall}foo@skilltree.madeup');
 
         cy.get$('[data-cy=emailSettingsSave]').click();
         cy.wait(12*1000);
