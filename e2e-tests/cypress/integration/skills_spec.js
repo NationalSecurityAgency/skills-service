@@ -1418,5 +1418,36 @@ describe('Skills Tests', () => {
     cy.contains('Verylongandinterestingskill;Verylongandintere... >> more');
   });
 
+  it('Add Skill Event - user names cannot have spaces', () => {
+    cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
+      projectId: 'proj1',
+      subjectId: "subj1",
+      skillId: "skill1",
+      name: "Skill 1",
+      pointIncrement: '50',
+      numPerformToCompletion: '5'
+    });
+
+    cy.intercept({
+      method: 'GET',
+      url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
+    }).as('loadSkill');
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
+    cy.wait('@loadSkill');
+    cy.contains('Add Event').click();
+
+    const expectedErrMsg = 'User Id may not contain spaces';
+    const userIdSelector = '[data-cy=userIdInput]';
+    const eventDatePicker = '[data-cy=eventDatePicker]'
+    const addButtonSelector = '[data-cy=addSkillEventButton]';
+
+    cy.get(eventDatePicker).click()
+    cy.get('[class="day__month_btn up"]').click()
+    cy.get('[class="month__year_btn up"]').click()
+    cy.get('[class="vdp-datepicker__calendar"]').filter(':visible').get('[class="prev"]').filter(':visible').click().click()
+    cy.get('[class="cell year disabled"]').should('have.length', 10)
+
+  });
 
 });
