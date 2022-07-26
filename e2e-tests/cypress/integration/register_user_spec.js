@@ -41,6 +41,22 @@ describe('Register Dashboard Users', () => {
     cy.get('[data-cy="breadcrumb-Progress And Rankings"]').should('be.visible');
   });
 
+  it.only('register dashboard user redirects to previous page', () => {
+    cy.visit('/settings');
+    cy.contains('Don\'t have a SkillTree account')
+    cy.get('[data-cy="signUpButton"]').click();
+    cy.contains('New Account')
+    cy.get('#firstName').type("Robert")
+    cy.get('#lastName').type("Smith")
+    cy.get('#email').type("rob.smith@madeup.org")
+    cy.get('#password').type("password")
+    cy.get('#password_confirmation').type("password")
+    cy.get('[data-cy="createAccountButton"]').click();
+
+    cy.get('[data-cy="breadcrumb-Settings"]').should('be.visible');
+  });
+
+
   it('register dashboard validation', () => {
     cy.visit('/request-account');
     cy.contains('New Account')

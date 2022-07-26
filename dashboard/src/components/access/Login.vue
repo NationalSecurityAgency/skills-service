@@ -86,7 +86,7 @@ limitations under the License.
 
               <hr/>
               <p class="text-center"><small>Don't have a SkillTree account?
-                <strong><b-link @click="requestAccountPage">Sign up</b-link></strong>
+                <strong><b-link data-cy="signUpButton" @click="requestAccountPage">Sign up</b-link></strong>
               </small>
               </p>
             </div>
@@ -183,10 +183,10 @@ limitations under the License.
         this.errors?.clear();
       },
       requestAccountPage() {
-        this.handlePush({ name: 'RequestAccount' });
+        this.handlePush({ name: 'RequestAccount', query: this.$route.query });
       },
       forgotPassword() {
-        this.handlePush({ name: 'ForgotPassword' });
+        this.handlePush({ name: 'ForgotPassword', query: this.$route.query });
       },
       onAnimationStart(event) {
         // required to work around chrome auto-fill issue (see see https://stackoverflow.com/a/41530164)
