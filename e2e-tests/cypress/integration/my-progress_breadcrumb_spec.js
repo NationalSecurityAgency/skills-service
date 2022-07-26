@@ -145,9 +145,11 @@ describe('My Progress Breadcrumb Tests', () => {
 
   it('test breadcrumbs starting on Progress and Rankings page', function () {
     cy.visit('/');
+    cy.title().should('eq', 'SkillTree Dashboard - Progress And Rankings');
 
     cy.get('[data-cy=project-link-proj1]').click()
     cy.wait('@pointHistoryChart');
+    cy.title().should('eq', 'SkillTree Dashboard - Progress And Rankings Project');
 
     cy.dashboardCd().contains('Overall Points');
     cy.get('[data-cy="breadcrumb-Progress And Rankings"]').should('be.visible');

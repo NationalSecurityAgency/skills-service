@@ -56,13 +56,15 @@ describe('Manage My Projects Tests', () => {
     });
   });
 
-  it('display a message when there are no projects in prod-mode', function () {
+  it.only('display a message when there are no projects in prod-mode', function () {
     for (let i = 1; i <= 3; i += 1) {
       cy.createProject(i);
     }
 
     cy.visit('/progress-and-rankings');
     cy.get('[data-cy="manageMyProjsBtn"]').click();
+    cy.title().should('eq', 'SkillTree Dashboard - Manage My Projects');
+
     cy.contains('No Discoverable Projects');
     cy.contains('Projects can be created and managed from the "Project Admin" view')
   });
