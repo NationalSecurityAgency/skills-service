@@ -219,10 +219,27 @@ class SkillCatalogFinalizationService {
         }
     }
 
+
+    @Profile
+    void validateNotInFinalizationState(String projectId, String msg) {
+        if (getCurrentState(projectId) == SkillCatalogFinalizationService.FinalizeState.RUNNING) {
+            throw new SkillException(msg, projectId)
+        }
+    }
+
+    @Profile
+    void validateFinalizationIsNotPending(String projectId, String msg) {
+        List<SkillDef> pendingSkills = skillDefRepo.findAllByProjectIdAndTypeAndEnabledAndCopiedFromIsNotNull(projectId, SkillDef.ContainerType.Skill, Boolean.FALSE.toString())
+        if (pendingSkills) {
+            throw new SkillException(msg, projectId)
+        }
+    }
+
     FinalizeState getCurrentState(String projectId) {
         SettingsResult res = settingsService.getProjectSetting(projectId, PROJ_FINALIZE_STATE_PROP)
         return res?.value ? FinalizeState.valueOf(res?.value) : FinalizeState.NOT_RUNNING
     }
+
     private void updateState(String projectId, FinalizeState state) {
         ProjectSettingsRequest startedState = new ProjectSettingsRequest(
                 projectId: projectId,
