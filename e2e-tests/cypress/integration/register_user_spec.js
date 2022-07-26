@@ -41,7 +41,7 @@ describe('Register Dashboard Users', () => {
     cy.get('[data-cy="breadcrumb-Progress And Rankings"]').should('be.visible');
   });
 
-  it.only('register dashboard user redirects to previous page', () => {
+  it('register dashboard user redirects to previous page', () => {
     cy.visit('/settings');
     cy.contains('Don\'t have a SkillTree account')
     cy.get('[data-cy="signUpButton"]').click();
