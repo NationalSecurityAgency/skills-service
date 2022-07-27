@@ -116,7 +116,7 @@ limitations under the License.
                   <div class="control">
                     <div class="row">
                       <div class="col text-right">
-                        <button type="submit" class="btn btn-outline-hc" :disabled="invalid || missingRequiredValues() || createInProgress">
+                        <button type="submit" data-cy="createAccountButton" class="btn btn-outline-hc" :disabled="invalid || missingRequiredValues() || createInProgress">
                           Create Account <i v-if="!createInProgress" class="fas fa-arrow-circle-right"/>
                           <b-spinner v-if="createInProgress" label="Loading..." style="width: 1rem; height: 1rem;" variant="hc"/>
                         </button>
@@ -156,7 +156,6 @@ limitations under the License.
     </div>
   </div>
 </template>
-aria-describedby=
 <script>
   import { extend } from 'vee-validate';
   import { required, email, confirmed } from 'vee-validate/dist/rules';
@@ -206,6 +205,8 @@ aria-describedby=
         this.$store.dispatch('signup', { isRootAccount: this.isRootAccount, ...this.loginFields }).then(() => {
           if (this.verifyEmailAddresses) {
             this.handlePush({ name: 'EmailVerificationSent', params: { email: this.loginFields.email } });
+          } else if (this.$route.query.redirect) {
+            this.handlePush(this.$route.query.redirect);
           } else if (!this.isProgressAndRankingEnabled()) {
             this.handlePush({ name: 'AdminHomePage' });
           } else {
