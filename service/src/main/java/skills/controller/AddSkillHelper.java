@@ -17,6 +17,8 @@ package skills.controller;
 
 import callStack.profiler.CProf;
 import groovy.lang.Closure;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
@@ -51,7 +53,7 @@ public class AddSkillHelper {
     @Autowired
     ProjectErrorService projectErrorService;
 
-    public SkillEventResult addSkill(String projectId, String skillId, SkillEventRequest skillEventRequest) {
+    public SkillEventResult addSkill(String projectId, String skillId, SkillEventRequest skillEventRequest, Integer maxDaysBackForSkill) {
         String requestedUserId = skillEventRequest != null ? skillEventRequest.getUserId() : null;
         Long requestedTimestamp = skillEventRequest != null ? skillEventRequest.getTimestamp() : null;
         Boolean notifyIfSkillNotApplied = skillEventRequest != null ? skillEventRequest.getNotifyIfSkillNotApplied() : false;
@@ -60,9 +62,19 @@ public class AddSkillHelper {
         Date incomingDate = null;
 
         if (skillEventRequest != null && requestedTimestamp != null && requestedTimestamp > 0) {
+            Long currentTime = System.currentTimeMillis();
             //let's account for some possible clock drift
-            SkillsValidator.isTrue(requestedTimestamp <= (System.currentTimeMillis() + 30000), "Skill Events may not be in the future", projectId, skillId);
+            SkillsValidator.isTrue(requestedTimestamp <= (currentTime + 30000), "Skill Events may not be in the future", projectId, skillId);
             incomingDate = new Date(requestedTimestamp);
+            if( maxDaysBackForSkill != null && maxDaysBackForSkill > 0 ) {
+                DateTime requestedTime = new DateTime(requestedTimestamp);
+                DateTime now = new DateTime(currentTime);
+                int diff = Days.daysBetween(requestedTime, now).getDays();
+
+                if( diff > maxDaysBackForSkill ) {
+                    throw new SkillException(String.format("Skill Events may not be older than %d days", maxDaysBackForSkill), projectId, skillId);
+                }
+            }
         }
 
         if (skillEventRequest != null && skillEventRequest.getApprovalRequestedMsg() != null) {

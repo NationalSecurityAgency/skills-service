@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectWriter
 import com.fasterxml.jackson.databind.json.JsonMapper
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
+import org.springframework.beans.factory.annotation.Value
 import skills.controller.AddSkillHelper
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.SkillEventRequest
@@ -35,6 +36,9 @@ class SerializedEventReader {
     AddSkillHelper addSkillHelper
     Path fileDir
     String fileExtension
+
+    @Value('#{"${skills.config.ui.skillHistoryInDays:1825}"}')
+    Integer maxDaysBackForSkill;
 
     public SerializedEventReader(Path fileDir, String fileExtension, AddSkillHelper addSkillHelper) {
         if (fileDir == null) {
@@ -92,7 +96,7 @@ class SerializedEventReader {
                         } else if (!skr.userId) {
                             skr.userId = queuedSkillEvent.userId
                         }
-                        addSkillHelper.addSkill(queuedSkillEvent.projectId, queuedSkillEvent.skillId, skr)
+                        addSkillHelper.addSkill(queuedSkillEvent.projectId, queuedSkillEvent.skillId, skr, maxDaysBackForSkill)
                     } catch (Exception e) {
                         String asStr = errorSerializer.writeValueAsString(queuedSkillEvent)
                         log.error("unable to add queued event [$asStr]", e)

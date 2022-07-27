@@ -60,10 +60,10 @@ class SerializedEventReaderSpec extends Specification {
         then:
         1 * addSkillHelper.addSkill("myProject", "mySkill", { SkillEventRequest ser ->
             ser.userId == "user1"
-        })
+        }, null)
         1 * addSkillHelper.addSkill("yourProject", "yourSkill", { SkillEventRequest ser ->
             ser.userId == "user3"
-        })
+        }, null)
     }
 
     def "configured directory doesn't have to exist"() {
