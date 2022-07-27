@@ -72,7 +72,7 @@ public class AddSkillHelper {
                 int diff = Days.daysBetween(requestedTime, now).getDays();
 
                 if( diff > maxDaysBackForSkill ) {
-                    throw new SkillException(String.format("Skill Events may not be older than %d days", maxDaysBackForSkill));
+                    throw new SkillException(String.format("Skill Events may not be older than %d days", maxDaysBackForSkill), projectId, skillId);
                 }
             }
         }
