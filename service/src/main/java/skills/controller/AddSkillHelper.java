@@ -17,6 +17,8 @@ package skills.controller;
 
 import callStack.profiler.CProf;
 import groovy.lang.Closure;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
@@ -65,9 +67,13 @@ public class AddSkillHelper {
             SkillsValidator.isTrue(requestedTimestamp <= (currentTime + 30000), "Skill Events may not be in the future", projectId, skillId);
             incomingDate = new Date(requestedTimestamp);
             if( maxDaysBackForSkill != null && maxDaysBackForSkill > 0 ) {
-                Long daysBackInMilliseconds = Long.valueOf(maxDaysBackForSkill) * 24 * 60 * 60 * 1000;
-                Long maximumDayBack = currentTime - daysBackInMilliseconds;
-                SkillsValidator.isTrue(requestedTimestamp >= maximumDayBack, String.format("Skill Events may not be older than %d days", maxDaysBackForSkill), projectId, skillId);
+                DateTime requestedTime = new DateTime(requestedTimestamp);
+                DateTime now = new DateTime(currentTime);
+                int diff = Days.daysBetween(requestedTime, now).getDays();
+
+                if( diff > maxDaysBackForSkill ) {
+                    throw new SkillException(String.format("Skill Events may not be older than %d days", maxDaysBackForSkill));
+                }
             }
         }
 

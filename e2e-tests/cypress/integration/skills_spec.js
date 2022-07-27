@@ -1418,29 +1418,12 @@ describe('Skills Tests', () => {
     cy.contains('Verylongandinterestingskill;Verylongandintere... >> more');
   });
 
-  it('Add Skill Event - user names cannot have spaces', () => {
-    cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
-      projectId: 'proj1',
-      subjectId: "subj1",
-      skillId: "skill1",
-      name: "Skill 1",
-      pointIncrement: '50',
-      numPerformToCompletion: '5'
-    });
-
-    cy.intercept({
-      method: 'GET',
-      url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
-    }).as('loadSkill');
-
+  it('Add Skill Event - skill date can not be too far in the past', () => {
+    cy.createSkill(1, 1, 1);
     cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
-    cy.wait('@loadSkill');
-    cy.contains('Add Event').click();
+    cy.get('[data-cy="nav-Add Event"]', { timeout: 30000 }).click();
 
-    const expectedErrMsg = 'User Id may not contain spaces';
-    const userIdSelector = '[data-cy=userIdInput]';
     const eventDatePicker = '[data-cy=eventDatePicker]'
-    const addButtonSelector = '[data-cy=addSkillEventButton]';
 
     cy.get(eventDatePicker).click()
     cy.get('[class="day__month_btn up"]').click()
