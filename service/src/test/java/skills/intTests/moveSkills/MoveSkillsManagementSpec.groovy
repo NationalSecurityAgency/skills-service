@@ -15,6 +15,7 @@
  */
 package skills.intTests.moveSkills
 
+import groovy.json.JsonOutput
 import org.junit.Ignore
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
@@ -588,5 +589,248 @@ class MoveSkillsManagementSpec extends DefaultIntSpec {
         assert graph.edges.collect { "${it.fromId}->${it.toId}" }.sort() == expectedGraphRel.collect {
             "${skill0IdMap0_before.get(it.from)}->${skill0IdMap0_before.get(it.to)}"
         }
+    }
+
+    def "badge skills are retained after the move from subject into another subject"() {
+        def p1 = createProject(1)
+
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def p1subj2 = createSubject(1, 2)
+        skillsService.createSubject(p1subj2)
+
+        def badge = createBadge(1, 1)
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge(p1.projectId, badge.badgeId, p1Skills[0].skillId)
+        skillsService.assignSkillToBadge(p1.projectId, badge.badgeId, p1Skills[1].skillId)
+        badge.enabled = true
+        skillsService.updateBadge(badge, badge.badgeId)
+
+        String userId = getRandomUsers(1)[0]
+        when:
+        def badgeSummaryBefore = skillsService.getBadgeSummary(userId, p1.projectId, badge.badgeId)
+        skillsService.moveSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId)
+        def badgeSummaryAfter = skillsService.getBadgeSummary(userId, p1.projectId, badge.badgeId)
+        then:
+        badgeSummaryBefore.numTotalSkills == 2
+        badgeSummaryBefore.skills.skillId == [p1Skills[0].skillId, p1Skills[1].skillId]
+        badgeSummaryAfter.numTotalSkills == 2
+        badgeSummaryAfter.skills.skillId == [p1Skills[0].skillId, p1Skills[1].skillId]
+    }
+
+    def "badge skills are retained after the move from group into a group under another subject"() {
+        def p1 = createProject(1)
+
+        def p1subj1 = createSubject(1, 1)
+        def p1subj1g1 = createSkillsGroup(1, 1, 8)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [])
+        skillsService.createSkill(p1subj1g1)
+        def p1Skills = createSkills(3, 1, 1, 100)
+        p1Skills.each {
+            skillsService.assignSkillToSkillsGroup(p1subj1g1.skillId, it)
+        }
+
+        def p1subj2 = createSubject(1, 2)
+        skillsService.createSubject(p1subj2)
+        def p1subj2g1 = createSkillsGroup(1, 2, 8)
+        skillsService.createSkill(p1subj2g1)
+
+        def badge = createBadge(1, 1)
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge(p1.projectId, badge.badgeId, p1Skills[0].skillId)
+        skillsService.assignSkillToBadge(p1.projectId, badge.badgeId, p1Skills[1].skillId)
+        badge.enabled = true
+        skillsService.updateBadge(badge, badge.badgeId)
+
+        String userId = getRandomUsers(1)[0]
+        when:
+        def badgeSummaryBefore = skillsService.getBadgeSummary(userId, p1.projectId, badge.badgeId)
+        skillsService.moveSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId)
+        def badgeSummaryAfter = skillsService.getBadgeSummary(userId, p1.projectId, badge.badgeId)
+        then:
+        badgeSummaryBefore.numTotalSkills == 2
+        badgeSummaryBefore.skills.skillId == [p1Skills[0].skillId, p1Skills[1].skillId]
+        badgeSummaryAfter.numTotalSkills == 2
+        badgeSummaryAfter.skills.skillId == [p1Skills[0].skillId, p1Skills[1].skillId]
+    }
+
+    def "cross-project deps are retained after the skill is moved from subject to another subject"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        def proj1_subj2 = SkillsFactory.createSubject(1, 2)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj1, proj1_subj, proj1_skills)
+        skillsService.createSubject(proj1_subj2)
+
+        def proj2 = SkillsFactory.createProject(2)
+        def proj2_subj = SkillsFactory.createSubject(2, 3)
+        def proj2_subj2 = SkillsFactory.createSubject(2, 4)
+        List<Map> proj2_skills = SkillsFactory.createSkills(2, 2, 3)
+        skillsService.createProjectAndSubjectAndSkills(proj2, proj2_subj, proj2_skills)
+        skillsService.createSubject(proj2_subj2)
+
+        skillsService.shareSkill(proj1.projectId, proj1_skills.get(0).skillId, proj2.projectId)
+        skillsService.assignDependency([projectId         : proj2.projectId, skillId: proj2_skills.get(0).skillId,
+                                        dependentProjectId: proj1.projectId, dependentSkillId: proj1_skills.get(0).skillId,])
+
+        String user = getRandomUsers(1)[0]
+        when:
+        def deps_t0 = skillsService.getSkillDependencyInfo(user, proj2.projectId, proj2_skills.get(0).skillId)
+        skillsService.moveSkills(proj1.projectId, [proj1_skills[0].skillId], proj1_subj2.subjectId)
+        def deps_t1 = skillsService.getSkillDependencyInfo(user, proj2.projectId, proj2_skills.get(0).skillId)
+        skillsService.moveSkills(proj2.projectId, [proj2_skills[0].skillId], proj2_subj2.subjectId)
+        def deps_t2 = skillsService.getSkillDependencyInfo(user, proj2.projectId, proj2_skills.get(0).skillId)
+        then:
+        deps_t0.dependencies.dependsOn.skillId == [proj1_skills.get(0).skillId]
+        deps_t0.dependencies.dependsOn.projectId == [proj1_skills.get(0).projectId]
+
+        deps_t1.dependencies.dependsOn.skillId == [proj1_skills.get(0).skillId]
+        deps_t1.dependencies.dependsOn.projectId == [proj1_skills.get(0).projectId]
+
+        deps_t2.dependencies.dependsOn.skillId == [proj1_skills.get(0).skillId]
+        deps_t2.dependencies.dependsOn.projectId == [proj1_skills.get(0).projectId]
+    }
+
+    def "cross-project deps are retained after the skill is moved from group to another group"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        def proj1_subj2 = SkillsFactory.createSubject(1, 2)
+        def proj1_subj1_group1 = SkillsFactory.createSkillsGroup(1, 1, 11)
+        def proj1_subj2_group2 = SkillsFactory.createSkillsGroup(1, 2, 22)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj1, proj1_subj, [proj1_subj1_group1])
+        proj1_skills.each {
+            skillsService.assignSkillToSkillsGroup(proj1_subj1_group1.skillId, it)
+        }
+        skillsService.createSubject(proj1_subj2)
+        skillsService.createSkill(proj1_subj2_group2)
+
+        def proj2 = SkillsFactory.createProject(2)
+        def proj2_subj = SkillsFactory.createSubject(2, 3)
+        def proj2_subj2 = SkillsFactory.createSubject(2, 4)
+        def proj2_subj1_group1 = SkillsFactory.createSkillsGroup(2, 3, 33)
+        def proj2_subj2_group2 = SkillsFactory.createSkillsGroup(2, 4, 44)
+        List<Map> proj2_skills = SkillsFactory.createSkills(2, 2, 3)
+        skillsService.createProjectAndSubjectAndSkills(proj2, proj2_subj, [proj2_subj1_group1])
+        proj2_skills.each {
+            skillsService.assignSkillToSkillsGroup(proj2_subj1_group1.skillId, it)
+        }
+        skillsService.createSubject(proj2_subj2)
+        skillsService.createSkill(proj2_subj2_group2)
+
+        skillsService.shareSkill(proj1.projectId, proj1_skills.get(0).skillId, proj2.projectId)
+        skillsService.assignDependency([projectId         : proj2.projectId, skillId: proj2_skills.get(0).skillId,
+                                        dependentProjectId: proj1.projectId, dependentSkillId: proj1_skills.get(0).skillId,])
+
+        String user = getRandomUsers(1)[0]
+        when:
+        def deps_t0 = skillsService.getSkillDependencyInfo(user, proj2.projectId, proj2_skills.get(0).skillId)
+        skillsService.moveSkills(proj1.projectId, [proj1_skills[0].skillId], proj1_subj2.subjectId, proj1_subj2_group2.skillId)
+        def deps_t1 = skillsService.getSkillDependencyInfo(user, proj2.projectId, proj2_skills.get(0).skillId)
+        skillsService.moveSkills(proj2.projectId, [proj2_skills[0].skillId], proj2_subj2.subjectId, proj2_subj2_group2.skillId)
+        def deps_t2 = skillsService.getSkillDependencyInfo(user, proj2.projectId, proj2_skills.get(0).skillId)
+        then:
+        deps_t0.dependencies.dependsOn.skillId == [proj1_skills.get(0).skillId]
+        deps_t0.dependencies.dependsOn.projectId == [proj1_skills.get(0).projectId]
+
+        deps_t1.dependencies.dependsOn.skillId == [proj1_skills.get(0).skillId]
+        deps_t1.dependencies.dependsOn.projectId == [proj1_skills.get(0).projectId]
+
+        deps_t2.dependencies.dependsOn.skillId == [proj1_skills.get(0).skillId]
+        deps_t2.dependencies.dependsOn.projectId == [proj1_skills.get(0).projectId]
+    }
+
+    def "skill exported to the catalog continues to work after skills is moved between groups"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1skillsGroup1 = SkillsFactory.createSkillsGroup(1, 1, 25)
+        def p1Skills = createSkills(3, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [p1skillsGroup1])
+        p1Skills.each { skillsService.assignSkillToSkillsGroup(p1skillsGroup1.skillId, it) }
+        def p1subj2 = createSubject(1, 2)
+        def p1skillsGroup2 = SkillsFactory.createSkillsGroup(1, 2, 50)
+        skillsService.createSubject(p1subj2)
+        skillsService.createSkill(p1skillsGroup2)
+        skillsService.bulkExportSkillsToCatalog(p1.projectId, p1Skills.collect { it.skillId })
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 2)
+        def p2skillsGroup = SkillsFactory.createSkillsGroup(2, 2, 5)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [p2skillsGroup])
+        def p2Skills = createSkills(2, 2, 2, 100)
+        p2Skills.each { skillsService.assignSkillToSkillsGroup(p2skillsGroup.skillId, it) }
+
+        skillsService.bulkImportSkillsIntoGroupFromCatalogAndFinalize(p2.projectId, p2subj1.subjectId, p2skillsGroup.skillId,
+                [[projectId: p1.projectId, skillId: p1Skills[0].skillId]])
+
+        when:
+        def p2skillsGroupSkills_t1 = skillsService.getSkillsForGroup(p2.projectId, p2skillsGroup.skillId)
+        def exportedSkills_t1 = skillsService.getExportedSkills(p1.projectId, 10, 1, "skillName", true)
+        skillsService.moveSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId, p1skillsGroup2.skillId)
+
+        def p2skillsGroupSkills_t2 = skillsService.getSkillsForGroup(p2.projectId, p2skillsGroup.skillId)
+        def exportedSkills_t2 = skillsService.getExportedSkills(p1.projectId, 10, 1, "skillName", true)
+
+        p1Skills[0].subjectId = p1subj2.subjectId
+        p1Skills[0].name = "What a cool name"
+        skillsService.createSkill(p1Skills[0])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        def updatedImportedSkill = skillsService.getSkill([projectId: p2.projectId, subjectId: p2subj1.subjectId, skillId: p1Skills[0].skillId])
+
+        then:
+        p2skillsGroupSkills_t1.skillId == [p2Skills[0].skillId, p2Skills[1].skillId, p1Skills[0].skillId]
+        p2skillsGroupSkills_t2.skillId == [p2Skills[0].skillId, p2Skills[1].skillId, p1Skills[0].skillId]
+
+        exportedSkills_t1.data.skillId == [p1Skills[0].skillId, p1Skills[1].skillId, p1Skills[2].skillId]
+        exportedSkills_t2.data.skillId == [p1Skills[0].skillId, p1Skills[1].skillId, p1Skills[2].skillId]
+
+        updatedImportedSkill.name == "What a cool name"
+    }
+
+    def "skill exported to the catalog continues to work after skills is moved between subjects"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        def p1subj2 = createSubject(1, 2)
+        skillsService.createSubject(p1subj2)
+        skillsService.bulkExportSkillsToCatalog(p1.projectId, p1Skills.collect { it.skillId })
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 2)
+        def p2skillsGroup = SkillsFactory.createSkillsGroup(2, 2, 5)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [p2skillsGroup])
+        def p2Skills = createSkills(2, 2, 2, 100)
+        p2Skills.each { skillsService.assignSkillToSkillsGroup(p2skillsGroup.skillId, it) }
+
+        skillsService.bulkImportSkillsIntoGroupFromCatalogAndFinalize(p2.projectId, p2subj1.subjectId, p2skillsGroup.skillId,
+                [[projectId: p1.projectId, skillId: p1Skills[0].skillId]])
+
+        when:
+        def p2skillsGroupSkills_t1 = skillsService.getSkillsForGroup(p2.projectId, p2skillsGroup.skillId)
+        def exportedSkills_t1 = skillsService.getExportedSkills(p1.projectId, 10, 1, "skillName", true)
+        skillsService.moveSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId)
+
+        def p2skillsGroupSkills_t2 = skillsService.getSkillsForGroup(p2.projectId, p2skillsGroup.skillId)
+        def exportedSkills_t2 = skillsService.getExportedSkills(p1.projectId, 10, 1, "skillName", true)
+
+        p1Skills[0].subjectId = p1subj2.subjectId
+        p1Skills[0].name = "What a cool name"
+        skillsService.createSkill(p1Skills[0])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        def updatedImportedSkill = skillsService.getSkill([projectId: p2.projectId, subjectId: p2subj1.subjectId, skillId: p1Skills[0].skillId])
+
+        then:
+        p2skillsGroupSkills_t1.skillId == [p2Skills[0].skillId, p2Skills[1].skillId, p1Skills[0].skillId]
+        p2skillsGroupSkills_t2.skillId == [p2Skills[0].skillId, p2Skills[1].skillId, p1Skills[0].skillId]
+
+        exportedSkills_t1.data.skillId == [p1Skills[0].skillId, p1Skills[1].skillId, p1Skills[2].skillId]
+        exportedSkills_t2.data.skillId == [p1Skills[0].skillId, p1Skills[1].skillId, p1Skills[2].skillId]
+
+        updatedImportedSkill.name == "What a cool name"
     }
 }
