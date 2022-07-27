@@ -56,10 +56,16 @@ class SkillsMoveService {
         // validate
         skillCatalogFinalizationService.validateNotInFinalizationState(projectId, "Cannot move skills while finalization is running")
         skillCatalogFinalizationService.validateFinalizationIsNotPending(projectId, "Cannot move skills while finalization is pending")
-//        validateSkillsHaveNoDeps(projectId, skillReuseRequest)
 
-        boolean isGroupDest = skillReuseRequest.groupId
+        SkillDef origParentSkill = moveDefinitionToDestParent(projectId, skillReuseRequest)
+        SkillDef destSubj = updateDestDefinitionPoints(projectId, skillReuseRequest)
+        updateOrigDefinitionPoints(projectId, origParentSkill, destSubj)
+    }
+
+    @Profile
+    private SkillDef moveDefinitionToDestParent(String projectId, SkillsActionRequest skillReuseRequest) {
         String parentSkillId = skillReuseRequest.groupId ?: skillReuseRequest.subjectId
+        boolean isGroupDest = skillReuseRequest.groupId
 
         SkillDef origParentSkill
         skillReuseRequest.skillIds.each { String skillId ->
@@ -99,19 +105,11 @@ class SkillsMoveService {
                 ruleSetDefGraphService.assignGraphRelationship(projectId, skillReuseRequest.subjectId, SkillDef.ContainerType.Subject, projectId, skillId, SkillRelDef.RelationshipType.RuleSetDefinition)
             }
         }
+        return origParentSkill
+    }
 
-        // update points for the destination group and/or subject
-        SkillDef destSubj
-        if (isGroupDest) {
-            SkillDef group = skillDefAccessor.getSkillDef(projectId, skillReuseRequest.groupId)
-            skillCatalogTransactionalAccessor.updateGroupTotalPoints(projectId, skillReuseRequest.groupId)
-            destSubj = ruleSetDefGraphService.getParentSkill(group.id)
-            skillCatalogTransactionalAccessor.updateSubjectTotalPoints(projectId, destSubj.skillId)
-        } else {
-            destSubj = skillDefAccessor.getSkillDef(projectId, skillReuseRequest.subjectId, [SkillDef.ContainerType.Subject])
-            skillCatalogTransactionalAccessor.updateSubjectTotalPoints(projectId, destSubj.skillId)
-        }
-
+    @Profile
+    private void updateOrigDefinitionPoints(String projectId, SkillDef origParentSkill, SkillDef destSubj) {
         // update points for the origination group and/or subject
         // optimization - handle the case where skill was moved from a group to its parent subject
         if (destSubj.skillId != origParentSkill.skillId) {
@@ -123,7 +121,23 @@ class SkillsMoveService {
                 skillCatalogTransactionalAccessor.updateSubjectTotalPoints(projectId, origParentSkill.skillId)
             }
         }
+    }
 
+    @Profile
+    private SkillDef updateDestDefinitionPoints(String projectId, SkillsActionRequest skillReuseRequest) {
+        boolean isGroupDest = skillReuseRequest.groupId
+
+        SkillDef destSubj
+        if (isGroupDest) {
+            SkillDef group = skillDefAccessor.getSkillDef(projectId, skillReuseRequest.groupId)
+            skillCatalogTransactionalAccessor.updateGroupTotalPoints(projectId, skillReuseRequest.groupId)
+            destSubj = ruleSetDefGraphService.getParentSkill(group.id)
+            skillCatalogTransactionalAccessor.updateSubjectTotalPoints(projectId, destSubj.skillId)
+        } else {
+            destSubj = skillDefAccessor.getSkillDef(projectId, skillReuseRequest.subjectId, [SkillDef.ContainerType.Subject])
+            skillCatalogTransactionalAccessor.updateSubjectTotalPoints(projectId, destSubj.skillId)
+        }
+        return destSubj
     }
 
 }
