@@ -243,7 +243,7 @@ limitations under the License.
         });
       },
       missingRequiredValues() {
-        return !this.isAuthValid() || !this.emailInfo.host || !this.emailInfo.port || !this.emailInfo.protocol;
+        return !this.isAuthValid() || !this.emailInfo.host || !this.emailInfo.port || !this.emailInfo.protocol || !this.emailInfo.publicUrl || !this.emailInfo.fromEmail;
       },
       isAuthValid() {
         return !this.emailInfo.authEnabled || (this.emailInfo.username && this.emailInfo.password);
