@@ -17,7 +17,7 @@ limitations under the License.
     <div>
         <div v-if="showNewVersionAlert" class="mt-2 mb-3 card-body skills-page-title-text-color card rounded bg-white text-info">
             <h5>
-                <i class="fas fa-exclamation-circle"></i> New Skills Software Version is Available!! Please refresh the page.
+                <i class="fas fa-exclamation-circle"></i> New SkillTree Software Version is Available!! Please refresh the page.
             </h5>
         </div>
     </div>

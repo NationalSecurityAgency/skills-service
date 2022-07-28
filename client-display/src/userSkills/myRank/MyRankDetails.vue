@@ -82,7 +82,7 @@ limitations under the License.
                         <span v-if="myRank">
                             <span v-if="numUsersBehindMe <= 0">
                                 <h4 class="mb-2">Earn those point riches!</h4>
-                                <div class="">Earn skills and you will pass your fellow app users in no time!</div>
+                                <div class="">Earn {{ skillDisplayName }} and you will pass your fellow app users in no time!</div>
                             </span>
                             <span v-else>
                                 <h4 class="mb-2"><strong>{{ numUsersBehindMe | number }}</strong> reasons to celebrate</h4>
