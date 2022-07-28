@@ -31,6 +31,7 @@ import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 import skills.storage.repos.SkillRelDefRepo
+import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPointsRepo
 
 @Service
@@ -58,29 +59,80 @@ class SkillsMoveService {
     @Autowired
     UserAchievementsAndPointsManagement userAchievementsAndPointsManagement
 
+    @Autowired
+    UserAchievedLevelRepo userAchievedLevelRepo
+
     @Transactional
     @Profile
     void moveSkills(String projectId, SkillsActionRequest skillReuseRequest) {
-        // validate
         skillCatalogFinalizationService.validateNotInFinalizationState(projectId, "Cannot move skills while finalization is running")
         skillCatalogFinalizationService.validateFinalizationIsNotPending(projectId, "Cannot move skills while finalization is pending")
 
+        // Please note that order is important as achievements calculations relied on points being updated first
         SkillDef origParentSkill = moveDefinitionToDestParent(projectId, skillReuseRequest)
         SkillDef destSubj = updateDestDefinitionPoints(projectId, skillReuseRequest)
         updateOrigDefinitionPoints(projectId, origParentSkill, destSubj)
 
         SkillDef origSubj = origParentSkill.type == SkillDef.ContainerType.SkillsGroup ? ruleSetDefGraphService.getParentSkill(origParentSkill.id) : origParentSkill
-        userPointsRepo.removeSubjectUserPointsForNonExistentSkillDef(projectId, origSubj.skillId)
-        skillCatalogTransactionalAccessor.updateUserPointsForSubject(projectId, origSubj.skillId)
 
-        skillCatalogTransactionalAccessor.createSubjectUserPointsForTheNewUsers(projectId, destSubj.skillId)
-        skillCatalogTransactionalAccessor.updateUserPointsForSubject(projectId, destSubj.skillId)
+        // points and achievements do not need to be updated if skill remains within the same subject
+        if (origSubj.skillId != destSubj.skillId) {
+            updateUserPointsInOrigSubject(projectId, origSubj)
+            updateUserPointsInDestSubject(projectId, destSubj)
 
+            updateOrigSubjectUserLevelAchievements(origSubj)
+            updateDestSubjectUserLevelAchievements(destSubj)
+        }
+
+        handleEmptyOrigGroup(origParentSkill)
+        handleDestGroupAchievements(projectId, skillReuseRequest)
+    }
+
+    @Profile
+    private void handleDestGroupAchievements(String projectId, SkillsActionRequest skillReuseRequest) {
+        if (skillReuseRequest.groupId) {
+            SkillDef group = skillDefAccessor.getSkillDef(projectId, skillReuseRequest.groupId)
+            skillCatalogTransactionalAccessor.identifyAndAddGroupAchievements([group])
+        }
+    }
+
+    @Profile
+    private handleEmptyOrigGroup(SkillDef origParentSkill) {
+        if (origParentSkill.type == SkillDef.ContainerType.SkillsGroup) {
+            Long numChildren = skillRelDefRepo.countChildren(origParentSkill.projectId, origParentSkill.skillId, [SkillRelDef.RelationshipType.SkillsGroupRequirement])
+            if (numChildren == 0) {
+                userAchievedLevelRepo.deleteByProjectIdAndSkillId(origParentSkill.projectId, origParentSkill.skillId)
+            }
+        }
+    }
+
+    @Profile
+    private void updateDestSubjectUserLevelAchievements(SkillDef destSubj) {
+        userAchievementsAndPointsManagement.removeSubjectLevelAchievementsIfUsersDoNotQualify(destSubj)
+        skillCatalogTransactionalAccessor.identifyAndAddSubjectLevelAchievements(destSubj.projectId, destSubj.skillId)
+    }
+
+    @Profile
+    private void updateOrigSubjectUserLevelAchievements(SkillDef origSubj) {
         userAchievementsAndPointsManagement.removeSubjectLevelAchievementsIfUsersDoNotQualify(origSubj)
         skillCatalogTransactionalAccessor.identifyAndAddSubjectLevelAchievements(origSubj.projectId, origSubj.skillId)
+    }
 
-//        userAchievementsAndPointsManagement.removeSubjectLevelAchievementsIfUsersDoNotQualify(destSubj)
-        skillCatalogTransactionalAccessor.identifyAndAddSubjectLevelAchievements(destSubj.projectId, destSubj.skillId)
+    @Profile
+    private void updateUserPointsInDestSubject(String projectId, SkillDef destSubj) {
+        skillCatalogTransactionalAccessor.createSubjectUserPointsForTheNewUsers(projectId, destSubj.skillId)
+        skillCatalogTransactionalAccessor.updateUserPointsForSubject(projectId, destSubj.skillId)
+    }
+
+    @Profile
+    private void updateUserPointsInOrigSubject(String projectId, SkillDef origSubj) {
+        removeSubjectUserPointsForNonExistentSkillDef(projectId, origSubj)
+        skillCatalogTransactionalAccessor.updateUserPointsForSubject(projectId, origSubj.skillId)
+    }
+
+    @Profile
+    private removeSubjectUserPointsForNonExistentSkillDef(String projectId, SkillDef origSubj) {
+        userPointsRepo.removeSubjectUserPointsForNonExistentSkillDef(projectId, origSubj.skillId)
     }
 
     @Profile
