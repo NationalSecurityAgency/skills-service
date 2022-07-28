@@ -18,7 +18,7 @@ limitations under the License.
     <div v-if="!(subjects && subjects.length > 0)" class="card">
       <div class="card-body">
         <no-data-yet class="my-2"
-                     :title="`${this.subjectDisplayName} have not been added yet.`"
+                     :title="`${this.subjectDisplayName}s have not been added yet.`"
                      :sub-title="`Please contact this ${this.projectDisplayName.toLowerCase()}'s administrator.`"/>
       </div>
     </div>
