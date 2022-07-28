@@ -71,7 +71,7 @@ limitations under the License.
           break;
         case 'subject':
         case 'skill':
-          summaryObject.title = this.type === 'skill' ? 'Points Earned Toward Skill' : 'Points Earned for this Subject';
+          summaryObject.title = this.type === 'skill' ? `Points Earned Toward ${this.skillDisplayName}` : `Points Earned for this ${this.subjectDisplayName}`;
           summaryObject.overallPoints = this.userSkills.points;
           summaryObject.todaysPoints = this.userSkills.todaysPoints;
           break;

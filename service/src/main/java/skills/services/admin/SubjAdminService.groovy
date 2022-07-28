@@ -157,6 +157,10 @@ class SubjAdminService {
         if (globalBadgesService.isSubjectUsedInGlobalBadge(subjectDefinition)) {
             throw new SkillException("Subject with id [${subjectId}] cannot be deleted as it is currently referenced by one or more global badges")
         }
+        List<SkillDef> subjectSkills = skillDefRepo.findChildSkillsByIdAndRelationshipType(subjectDefinition.id, SkillRelDef.RelationshipType.RuleSetDefinition)
+        subjectSkills.each {
+            skillsAdminService.removeCatalogImportedSkills(it)
+        }
 
         List<SkillDef> allSubjectSkills = ruleSetDefGraphService.getChildrenSkills(subjectDefinition, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.GroupSkillToSubject])
         allSubjectSkills.each {

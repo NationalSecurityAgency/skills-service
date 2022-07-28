@@ -17,12 +17,12 @@ limitations under the License.
   <div v-if="skill.copiedFromProjectId" class="alert alert-info" style="font-size: 1rem;" data-cy="catalogImportStatus">
     <i class="fas fa-exclamation-circle"></i>
     <span v-if="skill.selfReporting && skill.selfReporting.enabled">
-      This skill is originally defined in <span class="font-weight-bold font-italic">{{ skill.copiedFromProjectName }}</span> and re-used in this project!
-      This skill can can be self-reported via the <span class="font-weight-bold">"I did it"</span> button below.
+      This {{ skillDisplayName.toLowerCase() }} is originally defined in <span class="font-weight-bold font-italic">{{ skill.copiedFromProjectName }}</span> and re-used in this {{ projectDisplayName.toLowerCase() }}!
+      This {{ skillDisplayName.toLowerCase() }} can can be self-reported via the <span class="font-weight-bold">"I did it"</span> button below.
     </span>
     <span v-else>
-      This skill is originally defined in <span class="font-weight-bold font-italic">{{ skill.copiedFromProjectName }}</span> and re-used in this project!
-      Navigate to <span class="font-weight-bold font-italic">{{ skill.copiedFromProjectName }}</span> project to perform <span class="font-weight-bold font-italic">{{ skill.skill }}</span> skill.
+      This {{ skillDisplayName.toLowerCase() }} is originally defined in <span class="font-weight-bold font-italic">{{ skill.copiedFromProjectName }}</span> and re-used in this {{ projectDisplayName.toLowerCase() }}!
+      Navigate to <span class="font-weight-bold font-italic">{{ skill.copiedFromProjectName }}</span> {{ projectDisplayName.toLowerCase() }} to perform <span class="font-weight-bold font-italic">{{ skill.skill }}</span> {{ skillDisplayName.toLowerCase() }}.
     </span>
   </div>
 </template>

@@ -103,11 +103,31 @@ class PublicConfigController {
         Map<String,String> res = new HashMap<>()
         res["docsHost"] = docsHost
         res["maxSelfReportMessageLength"] = uiConfigProperties.ui.maxSelfReportMessageLength
+        res["projectDisplayName"] = 'Project'
+        res["subjectDisplayName"] = 'Subject'
+        res["groupDisplayName"] = 'Group'
+        res["skillDisplayName"] = 'Skill'
         res["levelDisplayName"] = 'Level'
         if (Boolean.valueOf(uiConfigProperties.dbUpgradeInProgress)) {
             res["dbUpgradeInProgress"] = uiConfigProperties.dbUpgradeInProgress
         }
         if (projectId) {
+            String customProjectName = settingsService.getProjectSetting(projectId, 'project.displayName')?.value
+            if (customProjectName) {
+                res["projectDisplayName"] = customProjectName
+            }
+            String customSubjectName = settingsService.getProjectSetting(projectId, 'subject.displayName')?.value
+            if (customSubjectName) {
+                res["subjectDisplayName"] = customSubjectName
+            }
+            String customGroupName = settingsService.getProjectSetting(projectId, 'group.displayName')?.value
+            if (customGroupName) {
+                res["groupDisplayName"] = customGroupName
+            }
+            String customSkillName = settingsService.getProjectSetting(projectId, 'skill.displayName')?.value
+            if (customSkillName) {
+                res["skillDisplayName"] = customSkillName
+            }
             String customLevelName = settingsService.getProjectSetting(projectId, 'level.displayName')?.value
             if (customLevelName) {
                 res["levelDisplayName"] = customLevelName

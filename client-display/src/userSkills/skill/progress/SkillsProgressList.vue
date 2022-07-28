@@ -21,8 +21,8 @@ limitations under the License.
                   <div class="d-flex">
                     <b-form-input @input="searchSkills" style="padding-right: 2.3rem;"
                                   v-model="searchString"
-                                  placeholder="Search skills"
-                                  aria-label="Search skills"
+                                  :placeholder="`Search ${this.skillDisplayName}s`"
+                                  :aria-label="`Search ${this.skillDisplayName}s`"
                                   data-cy="skillsSearchInput"></b-form-input>
                     <b-button v-if="searchString && searchString.length > 0" @click="clearSearch"
                               class="position-absolute skills-theme-btn" variant="outline-info" style="right: 0rem;"
@@ -36,10 +36,10 @@ limitations under the License.
                   <skills-filter :counts="metaCounts" :filters="filters" @filter-selected="filterSkills" @clear-filter="clearFilters"/>
                 </div>
                 <div class="col-md-auto text-right skill-details-toggle" >
-                    <span class="text-muted pr-1">Skill Details:</span>
+                    <span class="text-muted pr-1">{{ skillDisplayName }} Details:</span>
                     <toggle-button class="" v-model="showDescriptionsInternal" @change="onDetailsToggle"
                                    :color="{ checked: '#007c49', unchecked: '#6b6b6b' }"
-                                   aria-label="Show Skill Details"
+                                   :aria-label="`Show ${this.skillDisplayName} Details`"
                                    :labels="{ checked: 'On', unchecked: 'Off' }" data-cy="toggleSkillDetails"/>
                 </div>
             </div>
@@ -74,11 +74,12 @@ limitations under the License.
                   </div>
                 </div>
                 <no-data-yet v-if="!(skillsInternal && skillsInternal.length > 0) && searchString" class="my-5"
-                             icon="fas fa-search-minus fa-5x"
-                           title="No results" :sub-title="`Please refine [${searchString}] search${(this.filterId) ? ' and/or clear the selected filter' : ''}`"/>
+                             icon="fas fa-search-minus fa-5x" title="No results"
+                             :sub-title="`Please refine [${searchString}] search${(this.filterId) ? ' and/or clear the selected filter' : ''}`"/>
 
                 <no-data-yet v-if="!(skillsInternalOrig && skillsInternalOrig.length > 0) && showNoDataMsg" class="my-5"
-                        title="Skills have not been added yet." sub-title="Please contact this project's administrator."/>
+                             :title="`${this.skillDisplayName}s have not been added yet.`"
+                             :sub-title="`Please contact this ${this.projectDisplayName.toLowerCase()}'s administrator.`"/>
             </div>
         </div>
     </div>

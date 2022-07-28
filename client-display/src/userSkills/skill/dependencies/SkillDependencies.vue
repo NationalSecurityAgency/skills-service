@@ -258,7 +258,7 @@ limitations under the License.
         return `${projectId}_${skillId}`;
       },
       getLabel(skill, isCrossProject) {
-        const label = isCrossProject ? `CROSS-PROJECT SKILL\n<b>${skill.projectName}</b>\n${skill.skillName}` : skill.skillName;
+        const label = isCrossProject ? `CROSS-${this.projectDisplayName().toUpperCase()} SKILL\n<b>${skill.projectName}</b>\n${skill.skillName}` : skill.skillName;
         return label;
       },
       isDependency() {

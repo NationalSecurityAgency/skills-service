@@ -110,7 +110,7 @@ limitations under the License.
           {
             icon: 'fas fa-list-alt',
             id: 'projectBadges',
-            html: 'Project Badges',
+            html: `${this.projectDisplayName} Badges`,
             count: 0,
             filter: (badge) => badge.projectId,
           },
