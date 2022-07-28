@@ -21,7 +21,7 @@ limitations under the License.
                   <div class="d-flex">
                     <b-form-input @input="searchSkills" style="padding-right: 2.3rem;"
                                   v-model="searchString"
-                                  :placeholder="`Search ${this.skillDisplayName}s`"
+                                  :placeholder="`Search ${this.skillDisplayName.toLowerCase()}s`"
                                   :aria-label="`Search ${this.skillDisplayName}s`"
                                   data-cy="skillsSearchInput"></b-form-input>
                     <b-button v-if="searchString && searchString.length > 0" @click="clearSearch"

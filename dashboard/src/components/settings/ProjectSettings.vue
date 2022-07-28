@@ -160,8 +160,8 @@ limitations under the License.
               Custom Labels:
             </div>
             <div class="col">
-              <b-form-checkbox v-model="showCustomLabelsConfig"
-                               name="check-button"
+              <b-form-checkbox name="check-button"
+                               v-b-toggle.customLabelsCollapse
                                v-on:input="customLabelsControl"
                                aria-labelledby="customLabelsLabel"
                                data-cy="customLabelsSwitch"
@@ -171,7 +171,7 @@ limitations under the License.
                 msg="Enabling allows for setting custom labels in the Skills Display component"/>
               </b-form-checkbox>
 
-              <b-collapse id="customLabelsCollapse" v-model="showCustomLabelsConfig">
+              <b-collapse id="customLabelsCollapse" :visible="showCustomLabelsConfig">
                 <b-card class="mt-1">
                   <div class="row">
                     <div class="col col-md-3 text-secondary" id="projectDisplayTextLabel">
