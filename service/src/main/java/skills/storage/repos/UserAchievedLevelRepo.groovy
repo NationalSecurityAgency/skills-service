@@ -385,13 +385,36 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
             @Param('level') Integer level,
             @Param('fromPoints') Integer fromPointsExclusive)
 
+
+    @Modifying
+    @Query(value = '''delete
+                from user_achievement uaOuter
+                where uaOuter.id = ANY (select ua.id
+                        from user_achievement ua
+                                 left join user_points up
+                                           on (ua.skill_ref_id = up.skill_ref_id and ua.user_id = up.user_id)
+                        where ua.skill_ref_id = :subjectRefId
+                          and ua.level = :level
+                          and (up.points < :fromPoints or up.points is null)
+                        )''', nativeQuery = true)
+    int removeSubjectLevelAchievementsIfUsersDoNotQualify(
+            @Param('subjectRefId') Integer subjectRefId,
+            @Param('level') Integer level,
+            @Param('fromPoints') Integer fromPointsExclusive)
+
     static interface AchievementItem {
         Date getAchievedOn()
+
         String getUserId()
+
         Integer getLevel()
+
         String getSkillId()
+
         String getName()
+
         SkillDef.ContainerType getType()
+
         String getUserIdForDisplay()
     }
 

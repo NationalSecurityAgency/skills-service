@@ -15,11 +15,9 @@
  */
 package skills.intTests.moveSkills
 
-import groovy.json.JsonOutput
-import org.junit.Ignore
+
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
-import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 

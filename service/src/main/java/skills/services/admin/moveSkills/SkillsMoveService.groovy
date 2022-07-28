@@ -24,12 +24,14 @@ import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.SkillsActionRequest
 import skills.services.RuleSetDefGraphService
+import skills.services.UserAchievementsAndPointsManagement
 import skills.services.admin.SkillCatalogFinalizationService
 import skills.services.admin.SkillCatalogTransactionalAccessor
 import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 import skills.storage.repos.SkillRelDefRepo
+import skills.storage.repos.UserPointsRepo
 
 @Service
 @Slf4j
@@ -50,6 +52,12 @@ class SkillsMoveService {
     @Autowired
     SkillCatalogFinalizationService skillCatalogFinalizationService
 
+    @Autowired
+    UserPointsRepo userPointsRepo
+
+    @Autowired
+    UserAchievementsAndPointsManagement userAchievementsAndPointsManagement
+
     @Transactional
     @Profile
     void moveSkills(String projectId, SkillsActionRequest skillReuseRequest) {
@@ -60,6 +68,19 @@ class SkillsMoveService {
         SkillDef origParentSkill = moveDefinitionToDestParent(projectId, skillReuseRequest)
         SkillDef destSubj = updateDestDefinitionPoints(projectId, skillReuseRequest)
         updateOrigDefinitionPoints(projectId, origParentSkill, destSubj)
+
+        SkillDef origSubj = origParentSkill.type == SkillDef.ContainerType.SkillsGroup ? ruleSetDefGraphService.getParentSkill(origParentSkill.id) : origParentSkill
+        userPointsRepo.removeSubjectUserPointsForNonExistentSkillDef(projectId, origSubj.skillId)
+        skillCatalogTransactionalAccessor.updateUserPointsForSubject(projectId, origSubj.skillId)
+
+        skillCatalogTransactionalAccessor.createSubjectUserPointsForTheNewUsers(projectId, destSubj.skillId)
+        skillCatalogTransactionalAccessor.updateUserPointsForSubject(projectId, destSubj.skillId)
+
+        userAchievementsAndPointsManagement.removeSubjectLevelAchievementsIfUsersDoNotQualify(origSubj)
+        skillCatalogTransactionalAccessor.identifyAndAddSubjectLevelAchievements(origSubj.projectId, origSubj.skillId)
+
+//        userAchievementsAndPointsManagement.removeSubjectLevelAchievementsIfUsersDoNotQualify(destSubj)
+        skillCatalogTransactionalAccessor.identifyAndAddSubjectLevelAchievements(destSubj.projectId, destSubj.skillId)
     }
 
     @Profile
