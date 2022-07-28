@@ -64,7 +64,9 @@ class EmailIsNotConfiguredSpecs extends DefaultIntSpec {
                 "port"       : 3923,
                 "protocol"   : "smtp",
                 "authEnabled": false,
-                "tlsEnabled" : false
+                "tlsEnabled" : false,
+                "publicUrl"  : "http://localhost:${localPort}/".toString(),
+                "fromEmail"  : "resetspec@skilltreetests"
         ])
         emailNotifier.sendNotification(new Notifier.NotificationRequest(
                 userIds: [rootSkillsService.userName],
