@@ -22,19 +22,6 @@ limitations under the License.
       <ValidationObserver ref="observer" v-slot="{invalid, pristine}" slim>
         <div class="card-body">
           <div class="form-group">
-            <label class="label" for="publicUrl">* Public URL <InlineHelp target-id="publicUrlHelp" msg="Because it is possible for the SkillTree dashboard
-            to be deployed behind a load balancer or proxy, it is necessary to configure the public url so that email
-            based communications from the system can provide valid links back to the SkillTree dashboard."/></label>
-            <ValidationProvider rules="required" name="Public URL" v-slot="{ errors }" :debounce=500>
-              <input class="form-control" type="text" v-model="publicUrl" name="publicUrl"
-                     data-cy="publicUrl" aria-required="true"
-                    id="publicUrl"
-                    :aria-invalid="errors && errors.length > 0"
-                    aria-errormessage="publicUrlError" aria-describedby="publicUrlError"/>
-              <p role="alert" class="text-danger" v-show="errors[0]" id="publicUrlError" data-cy="publicUrlError">{{errors[0]}}</p>
-            </ValidationProvider>
-          </div>
-          <div class="form-group">
             <label class="label" for="resetTokenExpiration">* Token Expiration <InlineHelp target-id="resetTokenExpirationHelp" msg="How long password reset and email confirmation tokens remain valid before they expire"/></label>
             <ValidationProvider rules="required|iso8601" name="Token Expiration" v-slot="{ errors }" :debounce=500>
               <input class="form-control" type="text" v-model="resetTokenExpiration" name="resetTokenExpiration"
@@ -44,16 +31,6 @@ limitations under the License.
                       aria-errormessage="resetTokenExpirationError" aria-describedby="resetTokenExpirationError"/>
               <small class="text-info" id="resetTokenExpirationFormat">supports ISO 8601 time duration format, e.g., 2H, 30M, 1H30M, 1M42S, etc</small>
               <p role="alert" class="text-danger" v-show="errors[0]" data-cy="resetTokenExpirationError" id="resetTokenExpirationError">{{errors[0]}}</p>
-            </ValidationProvider>
-          </div>
-          <div class="form-group">
-            <label class="label" for="fromEmail">From Email <InlineHelp target-id="fromEmailHelp" msg="The From email address used in all email originating from the SkillTree application"/></label>
-            <ValidationProvider :rules="{email:{require_tld:false,allow_ip_domain:true}}" name="From Email" v-slot="{ errors }" :debounce=500>
-              <input class="form-control" type="text" v-model="fromEmail" name="fromEmail"
-                     data-cy="fromEmail" id="fromEmail"
-                    :aria-invalid="errors && errors.length  > 0"
-                    aria-errormessage="fromEmailError" aria-describedby="fromEmailError"/>
-              <p role="alert" class="text-danger" v-show="errors[0]" data-cy="fromEmailError" id="fromEmailError">{{errors[0]}}</p>
             </ValidationProvider>
           </div>
 
@@ -131,9 +108,7 @@ limitations under the License.
     },
     data() {
       return {
-        publicUrl: '',
         resetTokenExpiration: '2H',
-        fromEmail: 'no_reply@skilltree',
         isSaving: false,
         overallErrMsg: '',
         customHeader: '',
@@ -151,8 +126,6 @@ limitations under the License.
             this.isSaving = true;
 
             const {
-              publicUrl,
-              fromEmail,
               customHeader,
               customFooter,
               userAgreement,
@@ -163,9 +136,7 @@ limitations under the License.
             }
 
             SettingsService.saveSystemSettings({
-              publicUrl,
               resetTokenExpiration,
-              fromEmail,
               customHeader,
               customFooter,
               userAgreement,
@@ -185,13 +156,10 @@ limitations under the License.
       loadSystemSettings() {
         SettingsService.loadSystemSettings().then((resp) => {
           if (resp) {
-            this.publicUrl = resp.publicUrl;
             if (resp.resetTokenExpiration) {
               this.resetTokenExpiration = resp.resetTokenExpiration.replace('PT', '');
             }
-            if (this.fromEmail) {
-              this.fromEmail = resp.fromEmail;
-            }
+
             if (resp.customHeader) {
               this.customHeader = resp.customHeader;
             }
