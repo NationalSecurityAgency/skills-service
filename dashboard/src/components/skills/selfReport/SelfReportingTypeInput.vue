@@ -50,7 +50,7 @@ limitations under the License.
                                  :disabled="!approvalSelected || !selfReport.enabled"
                                  aria-labelledby="justificationRequiredLabel"
                                  @input="justificationRequiredChanged"/>
-                <span id="justificationRequiredLabel" class="font-italic">Justification Required </span><inline-help
+                <span id="justificationRequiredLabel" class="font-italic" :class="{ 'text-secondary': !approvalSelected || !selfReport.enabled}">Justification Required </span><inline-help
                                           msg="Check to require users to submit a justification when self-reporting this skill"
                                           target-id="justificationRequired"
                                           :next-focus-el="nextFocusEl"
