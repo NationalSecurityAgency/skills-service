@@ -144,7 +144,7 @@ describe('Move Skills Tests', () => {
             .click();
 
         cy.get('[data-cy="nameCell_group11"] [data-cy="numSkillsInGroup"]')
-            .should('have.text', '2 skills');
+            .should('have.text', '1 skill');
         cy.get('[data-cy="expandDetailsBtn_group11"]')
             .click();
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill6"]')

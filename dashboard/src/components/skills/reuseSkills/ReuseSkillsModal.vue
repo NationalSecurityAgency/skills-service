@@ -23,7 +23,7 @@ limitations under the License.
 
     <div v-if="!isLoading" data-cy="reuseModalContent">
       <no-content2 v-if="importFinalizePending" :title="`Cannot ${actionName}`"
-                   :message="`Cannot initiate skill ${actionName} while skill finalization is pending.`"/>
+                   :message="`Cannot initiate skill ${actionNameLowerCase} while skill finalization is pending.`"/>
       <div v-if="!importFinalizePending">
         <div id="step1" v-if="!selectedDestination && !state.reUseInProgress"
              data-cy="reuseSkillsModalStep1">
@@ -123,7 +123,7 @@ limitations under the License.
             </div>
             <div v-else>
               <i class="fas fa-exclamation-triangle text-warning mr-2"/>
-              Selected skills are NOT available for the {{ actionName }} {{ actionDirection }} the
+              Selected skills can NOT be {{ actionNameInPast }} {{ actionDirection }} the
               <span v-if="selectedDestination.groupName"><span
                 class="text-primary font-weight-bold">{{ selectedDestination.groupName }} </span> group</span>
               <span v-else><span
@@ -291,6 +291,9 @@ limitations under the License.
       actionName() {
         return this.textCustomization.actionName;
       },
+      actionNameLowerCase() {
+        return this.textCustomization.actionName.toLowerCase();
+      },
       actionDirection() {
         return this.textCustomization.actionDirection;
       },
@@ -306,9 +309,10 @@ limitations under the License.
             destination: this.selectedDestination,
             reusedSkills: this.skillsForReuse.available,
           });
+        } else {
+          this.publishHidden(e, false);
         }
         this.show = false;
-        this.publishHidden(e, false);
       },
       publishHidden(e, cancelled) {
         this.$emit('hidden', {

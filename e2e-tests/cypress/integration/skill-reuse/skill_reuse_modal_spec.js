@@ -281,7 +281,7 @@ describe('Skill Reuse Modal Tests', () => {
         cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
             .click();
         cy.get('[ data-cy="reuseSkillsModalStep2"]')
-            .contains('Selected skills are NOT available for reuse in the Subject 2 subject');
+            .contains('Selected skills can NOT be reused in the Subject 2 subject');
         cy.get('[data-cy="reuseButton"]')
             .should('be.disabled');
         cy.get('[data-cy="closeButton"]')
@@ -495,7 +495,7 @@ describe('Skill Reuse Modal Tests', () => {
         cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
             .click();
         cy.get('[ data-cy="reuseSkillsModalStep2"]')
-            .contains('Selected skills are NOT available for reuse in the Subject 2 subject');
+            .contains('Selected skills can NOT be reused in the Subject 2 subject');
         cy.get('[ data-cy="reuseSkillsModalStep2"]')
             .contains('1 selected skill has already been reused in that subject');
         cy.get('[ data-cy="reuseSkillsModalStep2"]')
@@ -542,7 +542,7 @@ describe('Skill Reuse Modal Tests', () => {
         cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
             .click();
         cy.get('[ data-cy="reuseSkillsModalStep2"]')
-            .contains('Selected skills are NOT available for reuse in the Subject 2 subject');
+            .contains('Selected skills can NOT be reused in the Subject 2 subject');
         cy.get('[ data-cy="reuseSkillsModalStep2"]')
             .contains('2 selected skills have already been reused in that subject');
         cy.get('[ data-cy="reuseSkillsModalStep2"]')
@@ -582,7 +582,7 @@ describe('Skill Reuse Modal Tests', () => {
         cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj1group12"]')
             .click();
         cy.get('[ data-cy="reuseSkillsModalStep2"]')
-            .contains('Selected skills are NOT available for reuse in the Awesome Group 12 Subj1 group');
+            .contains('Selected skills can NOT be reused in the Awesome Group 12 Subj1 group');
         cy.get('[ data-cy="reuseSkillsModalStep2"]')
             .contains('2 selected skills have already been reused in that group');
         cy.get('[ data-cy="reuseSkillsModalStep2"]')
