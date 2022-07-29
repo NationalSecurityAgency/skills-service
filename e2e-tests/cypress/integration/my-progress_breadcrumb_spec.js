@@ -337,7 +337,7 @@ describe('My Progress Breadcrumb Tests', () => {
     cy.get('[data-cy=breadcrumb-item]').eq(2).should('contain.text', 'Subject: subj1');
     cy.get('[data-cy=breadcrumb-item]').eq(3).should('contain.text', 'Skill: skill3');
     cy.get('[data-cy=breadcrumb-item]').eq(4).should('contain.text', 'Dependency: skill1');
-    cy.dashboardCd().contains('Cross-project Skill');
+    cy.dashboardCd().contains('cross-project skill');
 
     // back to skill page
     cy.get('[data-cy=breadcrumb-skill3]').click();

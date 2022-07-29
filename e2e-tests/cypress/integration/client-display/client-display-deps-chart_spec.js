@@ -48,7 +48,7 @@ describe('Client Display Dependencies Tests', () => {
         cy.viewport(1280, 1280)
     })
 
-    it('Deps Chart - make sure drill down via click works', () => {
+    it.only('Deps Chart - make sure drill down via click works', () => {
         const numSkills = 9;
         for (let i = 0; i < numSkills; i += 1) {
             cy.createSkill(1, 1, i, { name: `This is a very long name. yet is it ${i}`})
@@ -74,7 +74,7 @@ describe('Client Display Dependencies Tests', () => {
         cy.clickOnNode(425, 460);
         cy.contains('Project: This is project 2');
         cy.contains('Very Great Skill 1');
-        cy.contains('Cross-project Skill');
+        cy.contains('cross-project skill');
 
         cy.cdVisit('/subjects/subj1/skills/skill1');
         cy.clickOnNode(550, 93);
