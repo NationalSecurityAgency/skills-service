@@ -829,6 +829,7 @@ describe('Settings Tests', () => {
 
         cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Settings');
+        cy.get('[data-cy="customLabelsSwitch"').click({force: true});
         cy.get('[data-cy=levelDisplayTextInput]').click();
         cy.get('[data-cy=levelDisplayTextInput]').type('s');
         cy.get('[data-cy=saveSettingsBtn]').should('be.enabled');
