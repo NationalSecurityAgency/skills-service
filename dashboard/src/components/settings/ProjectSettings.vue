@@ -164,15 +164,15 @@ limitations under the License.
                 msg="Enabling allows for setting custom labels in the Skills Display component"/>
             </div>
             <div class="col">
-              <b-form-checkbox name="check-button"
-                               v-on:input="customLabelsControl"
+              <b-form-checkbox v-model="showCustomLabelsConfigToggle"
+                               name="check-button"
                                aria-labelledby="customLabelsLabel"
                                data-cy="customLabelsSwitch"
                                switch>
                 {{ showCustomLabelsConfigLabel }}
               </b-form-checkbox>
 
-              <b-collapse id="customLabelsCollapse" :visible="shouldShowCustomLabelsConfig">
+              <b-collapse id="customLabelsCollapse" :visible="showCustomLabelsConfigToggle">
                 <b-card class="mt-1">
                   <div class="row">
                     <div class="col col-md-3 text-secondary" id="projectDisplayTextLabel">
@@ -416,7 +416,7 @@ limitations under the License.
           || this.settings.levelDisplayName.value !== 'Level' || this.settings.levelDisplayName.dirty;
       },
       showCustomLabelsConfigLabel() {
-        if (this.shouldShowCustomLabelsConfig) {
+        if (this.showCustomLabelsConfigToggle) {
           return 'Enabled';
         }
         return 'Disabled';
@@ -444,9 +444,6 @@ limitations under the License.
           this.settings.selfReportType.value = '';
         }
         this.settings.selfReportType.dirty = `${this.settings.selfReportType.value}` !== `${this.settings.selfReportType.lastLoadedValue}`;
-      },
-      customLabelsControl(checked) {
-        this.showCustomLabelsConfigToggle = checked;
       },
       productionModeEnabledChanged(value) {
         this.settings.productionModeEnabled.dirty = `${value}` !== `${this.settings.productionModeEnabled.lastLoadedValue}`;
@@ -502,6 +499,7 @@ limitations under the License.
                 }
               });
             }
+            this.showCustomLabelsConfigToggle = this.shouldShowCustomLabelsConfig;
           })
           .finally(() => {
             this.isLoading = false;
