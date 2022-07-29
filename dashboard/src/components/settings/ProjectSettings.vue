@@ -88,6 +88,9 @@ limitations under the License.
           <div class="row mt-3">
             <div class="col col-md-3 text-secondary" id="selfReportLabel">
               Self Report Default:
+              <inline-help
+                target-id="selfReportSwitchHelp"
+                msg="Will serve as a default when creating new skills."/>
             </div>
             <div class="col">
               <b-form-checkbox v-model="selfReport.enabled"
@@ -96,9 +99,7 @@ limitations under the License.
                                aria-labelledby="selfReportLabel"
                                data-cy="selfReportSwitch"
                                switch>
-                Disable/Enable <inline-help
-                target-id="selfReportSwitchHelp"
-                msg="Will serve as a default when creating new skills."/>
+                {{ selfReportingEnabledLabel }}
               </b-form-checkbox>
 
               <b-card class="mt-1">
@@ -158,20 +159,20 @@ limitations under the License.
           <div class="row mt-3">
             <div class="col col-md-3 text-secondary" id="customLabelsLabel">
               Custom Labels:
+              <inline-help
+                target-id="customLabelsSwitchHelp"
+                msg="Enabling allows for setting custom labels in the Skills Display component"/>
             </div>
             <div class="col">
               <b-form-checkbox name="check-button"
-                               v-b-toggle.customLabelsCollapse
                                v-on:input="customLabelsControl"
                                aria-labelledby="customLabelsLabel"
                                data-cy="customLabelsSwitch"
                                switch>
-                Disable/Enable <inline-help
-                target-id="customLabelsSwitchHelp"
-                msg="Enabling allows for setting custom labels in the Skills Display component"/>
+                {{ showCustomLabelsConfigLabel }}
               </b-form-checkbox>
 
-              <b-collapse id="customLabelsCollapse" :visible="showCustomLabelsConfig">
+              <b-collapse id="customLabelsCollapse" :visible="shouldShowCustomLabelsConfig">
                 <b-card class="mt-1">
                   <div class="row">
                     <div class="col col-md-3 text-secondary" id="projectDisplayTextLabel">
@@ -406,13 +407,25 @@ limitations under the License.
       approvalSelected() {
         return this.selfReport.selected === 'Approval';
       },
-      showCustomLabelsConfig() {
+      shouldShowCustomLabelsConfig() {
         return this.showCustomLabelsConfigToggle
           || this.settings.projectDisplayName.value !== 'Project' || this.settings.projectDisplayName.dirty
           || this.settings.subjectDisplayName.value !== 'Subject' || this.settings.subjectDisplayName.dirty
           || this.settings.groupDisplayName.value !== 'Group' || this.settings.groupDisplayName.dirty
           || this.settings.skillDisplayName.value !== 'Skill' || this.settings.skillDisplayName.dirty
           || this.settings.levelDisplayName.value !== 'Level' || this.settings.levelDisplayName.dirty;
+      },
+      showCustomLabelsConfigLabel() {
+        if (this.shouldShowCustomLabelsConfig) {
+          return 'Enabled';
+        }
+        return 'Disabled';
+      },
+      selfReportingEnabledLabel() {
+        if (this.selfReport.enabled) {
+          return 'Enabled';
+        }
+        return 'Disabled';
       },
     },
     methods: {
