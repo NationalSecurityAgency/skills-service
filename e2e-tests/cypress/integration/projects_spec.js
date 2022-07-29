@@ -1072,6 +1072,8 @@ describe('Projects Tests', () => {
   it('project-level settings: set custom level name', () => {
     cy.createProject(1);
     cy.visit('/administrator/projects/proj1/settings')
+
+    cy.get('[data-cy="customLabelsSwitch"').click({force: true});
     cy.get('[data-cy="levelDisplayTextInput"]').should('have.value', 'Level');
     cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
     cy.get('[data-cy="settingsSavedAlert"]').should('not.exist')
