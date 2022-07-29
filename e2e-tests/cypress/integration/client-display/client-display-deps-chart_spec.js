@@ -48,7 +48,7 @@ describe('Client Display Dependencies Tests', () => {
         cy.viewport(1280, 1280)
     })
 
-    it.only('Deps Chart - make sure drill down via click works', () => {
+    it('Deps Chart - make sure drill down via click works', () => {
         const numSkills = 9;
         for (let i = 0; i < numSkills; i += 1) {
             cy.createSkill(1, 1, i, { name: `This is a very long name. yet is it ${i}`})
