@@ -198,6 +198,44 @@ class GroupSkillReuseManagementSpec extends CatalogIntSpec {
         skillAdminInfo.name == p1Skills[0].name
     }
 
+    def "reuse group skill in its parent subject"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1subj1g1 = createSkillsGroup(1, 1, 8)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [])
+        skillsService.createSkill(p1subj1g1)
+        def p1Skills = createSkills(3, 1, 1, 100)
+        p1Skills.each {
+            skillsService.assignSkillToSkillsGroup(p1subj1g1.skillId, it)
+        }
+
+        when:
+        skillsService.reuseSkills(p1.projectId, [p1Skills[0].skillId], p1subj1.subjectId)
+
+        def projStat = skillsService.getProject(p1.projectId)
+        def subjectSkills = skillsService.getSkillsForSubject(p1.projectId, p1subj1.subjectId)
+        def subjStats = skillsService.getSubject(p1subj1)
+        def skillAdminInfo = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)])
+
+        then:
+        projStat.numSubjects == 1
+        projStat.numSkills == 3
+        projStat.totalPoints == 300
+        projStat.numSkillsReused == 1
+        projStat.totalPointsReused == 100
+
+        subjectSkills.skillId == [p1subj1g1.skillId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)]
+
+        subjStats.numSkills == 3
+        subjStats.totalPoints == 300
+        subjStats.numSkillsReused == 1
+        subjStats.totalPointsReused == 100
+
+        skillAdminInfo.reusedSkill
+        skillAdminInfo.skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        skillAdminInfo.name == p1Skills[0].name
+    }
+
     def "reuse skill in multiple groups"() {
         def p1 = createProject(1)
         def p1subj1 = createSubject(1, 1)

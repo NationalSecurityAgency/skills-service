@@ -831,4 +831,66 @@ class MoveSkillsManagementSpec extends DefaultIntSpec {
 
         updatedImportedSkill.name == "What a cool name"
     }
+
+    def "display order is updated after skills moved from subject into another subject"() {
+        def p1 = createProject(1)
+
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(5, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def p1subj2 = createSubject(1, 2)
+        skillsService.createSubject(p1subj2)
+        def p1SkillsSubj2 = createSkills(2, 1, 2, 100)
+        skillsService.createSkills(p1SkillsSubj2)
+
+        when:
+        skillsService.moveSkills(p1.projectId, [p1Skills[1].skillId, p1Skills[2].skillId], p1subj2.subjectId)
+        def subj1Skills = skillsService.getSkillsForSubject(p1.projectId, p1subj1.subjectId).sort { it.displayOrder }
+        def subj2Skills = skillsService.getSkillsForSubject(p1.projectId, p1subj2.subjectId).sort { it.displayOrder }
+
+        then:
+        subj1Skills.skillId == [p1Skills[0].skillId, p1Skills[3].skillId, p1Skills[4].skillId]
+        subj1Skills.displayOrder == [1, 2, 3]
+
+        subj2Skills.skillId == [p1SkillsSubj2[0].skillId, p1SkillsSubj2[1].skillId, p1Skills[1].skillId, p1Skills[2].skillId]
+        subj2Skills.displayOrder == [1, 2, 3, 4]
+
+    }
+
+    def "display order is updated after skills moved from group into a group under another subject"() {
+        def p1 = createProject(1)
+
+        def p1subj1 = createSubject(1, 1)
+        def p1subj1g1 = createSkillsGroup(1, 1, 8)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [])
+        skillsService.createSkill(p1subj1g1)
+        def p1Skills = createSkills(5, 1, 1, 100)
+        p1Skills.each {
+            skillsService.assignSkillToSkillsGroup(p1subj1g1.skillId, it)
+        }
+
+        def p1subj2 = createSubject(1, 2)
+        skillsService.createSubject(p1subj2)
+        def p1subj2g1 = createSkillsGroup(1, 2, 8)
+        skillsService.createSkill(p1subj2g1)
+        def p1SkillsGroup2 = createSkills(2, 1, 2, 100)
+        p1SkillsGroup2.each {
+            skillsService.assignSkillToSkillsGroup(p1subj2g1.skillId, it)
+        }
+
+        when:
+        skillsService.moveSkills(p1.projectId, [p1Skills[1].skillId, p1Skills[2].skillId], p1subj2.subjectId, p1subj2g1.skillId)
+
+        then:
+        def group1Skills = skillsService.getSkillsForGroup(p1.projectId, p1subj1g1.skillId).sort { it.displayOrder }
+        def group2Skills = skillsService.getSkillsForGroup(p1.projectId, p1subj2g1.skillId).sort { it.displayOrder }
+
+        then:
+        group1Skills.skillId == [p1Skills[0].skillId, p1Skills[3].skillId, p1Skills[4].skillId]
+        group1Skills.displayOrder == [1, 2, 3]
+
+        group2Skills.skillId == [p1SkillsGroup2[0].skillId, p1SkillsGroup2[1].skillId, p1Skills[1].skillId, p1Skills[2].skillId]
+        group2Skills.displayOrder == [1, 2, 3, 4]
+    }
 }

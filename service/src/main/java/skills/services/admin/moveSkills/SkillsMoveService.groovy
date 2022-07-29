@@ -25,11 +25,13 @@ import skills.controller.exceptions.SkillException
 import skills.controller.request.model.SkillsActionRequest
 import skills.services.RuleSetDefGraphService
 import skills.services.UserAchievementsAndPointsManagement
+import skills.services.admin.DisplayOrderService
 import skills.services.admin.SkillCatalogFinalizationService
 import skills.services.admin.SkillCatalogTransactionalAccessor
 import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
+import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPointsRepo
@@ -40,6 +42,9 @@ class SkillsMoveService {
 
     @Autowired
     SkillRelDefRepo skillRelDefRepo
+
+    @Autowired
+    SkillDefRepo skillDefRepo
 
     @Autowired
     RuleSetDefGraphService ruleSetDefGraphService
@@ -61,6 +66,9 @@ class SkillsMoveService {
 
     @Autowired
     UserAchievedLevelRepo userAchievedLevelRepo
+
+    @Autowired
+    DisplayOrderService displayOrderService
 
     @Transactional
     @Profile
@@ -137,18 +145,23 @@ class SkillsMoveService {
 
     @Profile
     private SkillDef moveDefinitionToDestParent(String projectId, SkillsActionRequest skillReuseRequest) {
-        String parentSkillId = skillReuseRequest.groupId ?: skillReuseRequest.subjectId
+        String destParentSkillId = skillReuseRequest.groupId ?: skillReuseRequest.subjectId
         boolean isGroupDest = skillReuseRequest.groupId
 
         SkillDef origParentSkill
         skillReuseRequest.skillIds.each { String skillId ->
             SkillDef skillToMove = skillDefAccessor.getSkillDef(projectId, skillId)
+            // make display order very high so the skills are added at the end of the display order
+            // please note that display order will be reset at the end
+            skillToMove.displayOrder = skillToMove.displayOrder + 10000 // no way someone has 10k skills
+            skillDefRepo.save(skillToMove)
+
             SkillDef parentSkill = ruleSetDefGraphService.getParentSkill(skillToMove.id)
             if (origParentSkill && origParentSkill.skillId != parentSkill.skillId) {
                 throw new SkillException("All moved skills must come from the same parent. But 2 parents were found: [${origParentSkill.skillId}] and [${parentSkill.skillId}] ", projectId, skillId, ErrorCode.BadParam)
             }
-            if (parentSkill.skillId == parentSkillId) {
-                throw new SkillException("Skill with id [$skillId] already exist under [$parentSkillId]", projectId, skillId, ErrorCode.BadParam)
+            if (parentSkill.skillId == destParentSkillId) {
+                throw new SkillException("Skill with id [$skillId] already exist under [$destParentSkillId]", projectId, skillId, ErrorCode.BadParam)
             }
             origParentSkill = parentSkill
 
@@ -178,7 +191,17 @@ class SkillsMoveService {
                 ruleSetDefGraphService.assignGraphRelationship(projectId, skillReuseRequest.subjectId, SkillDef.ContainerType.Subject, projectId, skillId, SkillRelDef.RelationshipType.RuleSetDefinition)
             }
         }
+
+        resetDisplayOrder(origParentSkill, destParentSkillId)
         return origParentSkill
+    }
+
+    private void resetDisplayOrder(SkillDef origParentSkill, String parentSkillId) {
+        List<SkillDef> siblingsOrig = ruleSetDefGraphService.getChildrenSkills(origParentSkill, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
+        displayOrderService.resetDisplayOrder(siblingsOrig)
+        SkillDef desParent = skillDefAccessor.getSkillDef(origParentSkill.projectId, parentSkillId, [SkillDef.ContainerType.Subject, SkillDef.ContainerType.SkillsGroup])
+        List<SkillDef> siblingsDest = ruleSetDefGraphService.getChildrenSkills(desParent, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
+        displayOrderService.resetDisplayOrder(siblingsDest)
     }
 
     @Profile

@@ -648,4 +648,28 @@ describe('Skill Reuse Modal Tests', () => {
             .should('have.focus');
     });
 
+    it('successful reuse from a group should focus on the Select All button of its parent table', () => {
+        cy.createSubject(1, 2);
+        cy.createSkillsGroup(1, 1, 11);
+        cy.addSkillToGroup(1, 1, 11, 6);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="expandDetailsBtn_group11"]')
+            .click();
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillSelect-skill6"]')
+            .click({ force: true });
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]')
+            .click();
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillReuseBtn"]')
+            .click();
+        cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
+            .click();
+        cy.get('[data-cy="reuseButton"]')
+            .click();
+        cy.get('[data-cy="okButton"]')
+            .click();
+        cy.get('[data-cy="selectAllSkillsBtn"]')
+            .should('have.focus');
+    });
+
 });

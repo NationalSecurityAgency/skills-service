@@ -752,8 +752,10 @@ limitations under the License.
                 this.$nextTick(() => {
                   // cannot use this.$refs as the SkillsTable component will be fully reloaded
                   // due to the this.loadSubjectSkills call
-                  document.getElementById(`selectAllBtn_${this.tableId}`)
-                    .focus();
+                  const element = document.getElementById('selectAllBtn_skillsTable');
+                  if (element) {
+                    element.focus();
+                  }
                 });
               });
           });

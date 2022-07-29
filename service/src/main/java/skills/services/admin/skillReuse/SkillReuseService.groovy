@@ -96,17 +96,11 @@ class SkillReuseService {
 
     @Profile
     private void validateParentIsNotDestination(String projectId, SkillsActionRequest skillReuseRequest) {
+        String destParentId = skillReuseRequest.groupId ?: skillReuseRequest.subjectId
         SkillDef skillToReuse = skillDefAccessor.getSkillDef(projectId, skillReuseRequest.skillIds[0])
-        if (!skillReuseRequest.groupId) {
-            SkillDef subject = ruleSetDefGraphService.getMySubjectParent(skillToReuse.id)
-            if (subject.skillId == skillReuseRequest.subjectId) {
-                throw new SkillException("Not allowed to reuse skill into the same subject [${skillReuseRequest.subjectId}]", projectId, skillToReuse.skillId, ErrorCode.BadParam)
-            }
-        } else {
-            SkillDef group = ruleSetDefGraphService.getParentSkill(skillToReuse)
-            if (group.skillId == skillReuseRequest.groupId) {
-                throw new SkillException("Not allowed to reuse skill into the same group [${skillReuseRequest.groupId}]", projectId, skillToReuse.skillId, ErrorCode.BadParam)
-            }
+        SkillDef parent = ruleSetDefGraphService.getParentSkill(skillToReuse)
+        if (parent.skillId == destParentId) {
+            throw new SkillException("Not allowed to reuse skill into the same ${skillReuseRequest.groupId ? 'group' : 'subject'} [${destParentId}]", projectId, skillToReuse.skillId, ErrorCode.BadParam)
         }
     }
 
