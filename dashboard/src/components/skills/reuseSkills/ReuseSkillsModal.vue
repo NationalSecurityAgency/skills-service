@@ -24,7 +24,10 @@ limitations under the License.
     <div v-if="!isLoading" data-cy="reuseModalContent">
       <no-content2 v-if="importFinalizePending" :title="`Cannot ${actionName}`"
                    :message="`Cannot initiate skill ${actionNameLowerCase} while skill finalization is pending.`"/>
-      <div v-if="!importFinalizePending">
+      <no-content2 v-if="state.skillsWereMovedOrReusedAlready" title="Please Refresh"
+                   message="Skills were moved or reused in another browser tab OR modified by another project administrator. Please refresh the page."/>
+
+      <div v-if="!importFinalizePending && !state.skillsWereMovedOrReusedAlready">
         <div id="step1" v-if="!selectedDestination && !state.reUseInProgress"
              data-cy="reuseSkillsModalStep1">
           <div v-if="destinations.all && destinations.all.length > 0">
@@ -92,8 +95,8 @@ limitations under the License.
             </div>
           </div>
           <div v-else>
-            <no-content2 title="No Destinations"
-                         :message="`There are no Subjects or Groups that this skill can be ${actionNameInPast} ${actionDirection}. Please create subjects and/or groups if you want to ${actionName} skills.`"/>
+            <no-content2 title="No Destinations Available"
+                         :message="`There are no Subjects or Groups that this skill can be ${actionNameInPast} ${actionDirection}. Please create additional subjects and/or groups if you want to ${actionNameLowerCase} skills.`"/>
           </div>
         </div>
 
@@ -201,9 +204,11 @@ limitations under the License.
   import LengthyOperationProgressBar from '@/components/utils/LengthyOperationProgressBar';
   import NoContent2 from '@/components/utils/NoContent2';
   import CatalogService from '@/components/skills/catalog/CatalogService';
+  import NavigationErrorMixin from '@/components/utils/NavigationErrorMixin';
 
   export default {
     name: 'ReuseSkillsModal',
+    mixins: [NavigationErrorMixin],
     components: {
       NoContent2,
       LengthyOperationProgressBar,
@@ -253,6 +258,7 @@ limitations under the License.
         state: {
           reUseInProgress: false,
           reUseComplete: false,
+          skillsWereMovedOrReusedAlready: false,
         },
         skillsForReuse: {
           available: [],
@@ -321,13 +327,21 @@ limitations under the License.
         });
       },
       loadSubjects() {
-        SkillsService.getReuseDestinationsForASkill(this.$route.params.projectId, this.skills[0].skillId)
-          .then((res) => {
-            this.destinations.all = res;
-            this.updateDestinationPage(this.destinations.currentPageNum);
-          })
-          .finally(() => {
-            this.loading.subjects = false;
+        SkillsService.getSkillInfo(this.$route.params.projectId, this.skills[0].skillId)
+          .then((skillInfo) => {
+            if (skillInfo.subjectId !== this.$route.params.subjectId) {
+              this.state.skillsWereMovedOrReusedAlready = true;
+              this.loading.subjects = false;
+            } else {
+              SkillsService.getReuseDestinationsForASkill(this.$route.params.projectId, this.skills[0].skillId)
+                .then((res) => {
+                  this.destinations.all = res;
+                  this.updateDestinationPage(this.destinations.currentPageNum);
+                })
+                .finally(() => {
+                  this.loading.subjects = false;
+                });
+            }
           });
       },
       loadFinalizeInfo() {
@@ -351,9 +365,22 @@ limitations under the License.
         this.state.reUseInProgress = true;
         const skillIds = this.skillsForReuse.available.map((sk) => sk.skillId);
         if (this.isMoveType) {
-          SkillsService.moveSkills(this.$route.params.projectId, skillIds, this.selectedDestination.subjectId, this.selectedDestination.groupId)
+          SkillsService.moveSkills(this.$route.params.projectId, skillIds, this.selectedDestination.subjectId, this.selectedDestination.groupId, false)
             .then(() => {
               this.handleActionCompleting();
+            })
+            .catch((e) => {
+              if (e.response.data && e.response.data.explanation && e.response.data.explanation.includes('All moved skills must come from the same parent')) {
+                this.state.reUseInProgress = false;
+                this.state.skillsWereMovedOrReusedAlready = true;
+                this.selectedDestination = null;
+              } else {
+                const errorMessage = (e.response && e.response.data && e.response.data.explanation) ? e.response.data.explanation : undefined;
+                this.handlePush({
+                  name: 'ErrorPage',
+                  query: { errorMessage }
+                });
+              }
             });
         } else {
           SkillsService.reuseSkillInAnotherSubject(this.$route.params.projectId, skillIds, this.selectedDestination.subjectId, this.selectedDestination.groupId)
@@ -384,16 +411,18 @@ limitations under the License.
           });
       },
       loadDependencyInfo() {
-        this.loading.dependencyInfo = true;
-        SkillsService.checkSkillsForDeps(this.$route.params.projectId, this.skillsForReuse.available.map((item) => item.skillId))
-          .then((res) => {
-            const withDeps = res.filter((item) => item.hasDependency);
-            this.skillsForReuse.skillsWithDeps = this.skillsForReuse.available.filter((skill) => withDeps.find((e) => e.skillId === skill.skillId));
-            this.skillsForReuse.available = this.skillsForReuse.available.filter((skill) => !withDeps.find((e) => e.skillId === skill.skillId));
-          })
-          .finally(() => {
-            this.loading.dependencyInfo = false;
-          });
+        if (this.isReuseType) {
+          this.loading.dependencyInfo = true;
+          SkillsService.checkSkillsForDeps(this.$route.params.projectId, this.skillsForReuse.available.map((item) => item.skillId))
+            .then((res) => {
+              const withDeps = res.filter((item) => item.hasDependency);
+              this.skillsForReuse.skillsWithDeps = this.skillsForReuse.available.filter((skill) => withDeps.find((e) => e.skillId === skill.skillId));
+              this.skillsForReuse.available = this.skillsForReuse.available.filter((skill) => !withDeps.find((e) => e.skillId === skill.skillId));
+            })
+            .finally(() => {
+              this.loading.dependencyInfo = false;
+            });
+        }
       },
       plural(arr) {
         return arr && arr.length > 1 ? 's' : '';

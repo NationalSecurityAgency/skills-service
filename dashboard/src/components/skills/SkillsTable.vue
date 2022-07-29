@@ -752,7 +752,11 @@ limitations under the License.
                 this.$nextTick(() => {
                   // cannot use this.$refs as the SkillsTable component will be fully reloaded
                   // due to the this.loadSubjectSkills call
-                  const element = document.getElementById('selectAllBtn_skillsTable');
+                  let element = document.getElementById('selectAllBtn_skillsTable');
+                  if (!element) {
+                    // this can happen when all skills were moved and now the table is gone since there is no skills left
+                    element = document.getElementById('newSkillBtn');
+                  }
                   if (element) {
                     element.focus();
                   }

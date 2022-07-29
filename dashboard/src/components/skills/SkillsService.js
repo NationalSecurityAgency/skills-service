@@ -101,13 +101,13 @@ export default {
       skillIds,
     });
   },
-  moveSkills(projectId, skillIds, newSubjectId, newGroupId = null) {
+  moveSkills(projectId, skillIds, newSubjectId, newGroupId = null, handleError = true) {
     const url = `/admin/projects/${encodeURIComponent(projectId)}/skills/move`;
     return axios.post(url, {
       subjectId: newSubjectId,
       groupId: newGroupId,
       skillIds,
-    });
+    }, { handleError });
   },
   getReusedSkills(projectId, parentSkillId) {
     const url = `/admin/projects/${projectId}/reused/${parentSkillId}/skills`;

@@ -13,10 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import dayjs from 'dayjs';
-
-const moment = require('moment-timezone');
-
 describe('Move Skills Tests', () => {
 
     beforeEach(() => {
@@ -401,6 +397,73 @@ describe('Move Skills Tests', () => {
             .should('have.text', '5');
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]')
             .should('have.text', '1,000');
+    });
+
+    it('move skills with deps from subject into a subject', () => {
+        cy.createSkill(1, 1, 2);
+        cy.createSkill(1, 1, 3);
+        cy.assignDep(1, 1, 3);
+        cy.createSubject(1, 3);
+        cy.createSubject(1, 4);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        // must exist initially
+        cy.get('[data-cy="manageSkillLink_skill1"]');
+        cy.get('[data-cy="manageSkillLink_skill2"]');
+        cy.get('[data-cy="manageSkillLink_skill3"]');
+
+        cy.get('[data-cy="skillSelect-skill1"]')
+            .click({ force: true });
+        cy.get('[data-cy="skillSelect-skill2"]')
+            .click({ force: true });
+        cy.get('[data-cy="skillActionsBtn"]')
+            .click();
+        cy.get('[data-cy="skillMoveBtn"]')
+            .click();
+
+        // step 1
+        cy.get('[ data-cy="reuseSkillsModalStep1"]');
+        cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj3"]')
+            .click();
+        cy.get('[ data-cy="reuseSkillsModalStep1"]')
+            .should('not.exist');
+
+        // step 2
+        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+            .contains('2 skills will be moved to the [Subject 3] subject.');
+        cy.get('[data-cy="reuseButton"]')
+            .click();
+
+        // step 3
+        cy.get('[data-cy="reuseSkillsModalStep3"]')
+            .contains('Successfully moved 2 skills');
+        cy.get('[data-cy="okButton"]')
+            .click();
+
+        cy.get('[data-cy="manageSkillLink_skill1"]')
+            .should('not.exist');
+        cy.get('[data-cy="manageSkillLink_skill2"]')
+            .should('not.exist');
+        cy.get('[data-cy="manageSkillLink_skill3"]');
+
+        cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]')
+            .should('have.text', '1');
+        cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]')
+            .should('have.text', '200');
+
+        cy.get('[data-cy="breadcrumb-proj1"]')
+            .click();
+        cy.get('[data-cy="manageBtn_subj3"]')
+            .click();
+        cy.get('[data-cy="manageSkillLink_skill1"]');
+        cy.get('[data-cy="manageSkillLink_skill2"]');
+        cy.get('[data-cy="manageSkillLink_skill3"]')
+            .should('not.exist');
+        cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]')
+            .should('have.text', '2');
+        cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]')
+            .should('have.text', '400');
     });
 
 });
