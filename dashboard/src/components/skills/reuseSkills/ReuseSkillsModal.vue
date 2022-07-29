@@ -378,7 +378,7 @@ limitations under the License.
                 const errorMessage = (e.response && e.response.data && e.response.data.explanation) ? e.response.data.explanation : undefined;
                 this.handlePush({
                   name: 'ErrorPage',
-                  query: { errorMessage }
+                  query: { errorMessage },
                 });
               }
             });
