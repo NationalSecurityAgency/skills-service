@@ -311,7 +311,7 @@ limitations under the License.
       },
       close(e) {
         if (this.state.reUseComplete) {
-          this.$emit('reused', {
+          this.$emit('action-success', {
             destination: this.selectedDestination,
             reusedSkills: this.skillsForReuse.available,
           });

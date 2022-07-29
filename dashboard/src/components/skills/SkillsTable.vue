@@ -303,7 +303,7 @@ limitations under the License.
         <template #row-details="row">
             <child-row-skill-group-display v-if="row.item.isGroupType" :group="row.item"
                                            :add-skill-disabled="addSkillDisabled"
-                                           @skills-reused="handleSkillsAreMoved"
+                                           @skills-reused="handleSkillsAreReusedOrMoved"
                                            @group-changed="groupChanged(row, arguments[0])"/>
             <ChildRowSkillsDisplay v-if="row.item.isSkillType" :project-id="projectId" :subject-id="subjectId" v-skills-onMount="'ExpandSkillDetailsSkillsPage'"
                                    :parent-skill-id="row.item.skillId" :refresh-counter="row.item.refreshCounter"
@@ -331,17 +331,17 @@ limitations under the License.
                        :skills="exportToCatalogInfo.skills"
                        @exported="handleSkillsExportedToCatalog"
                        @hidden="handleExportModalIsClosed"/>
-    <reuse-skills-modal id="reuseSkillsModal" v-if="reuseSkillsInfo.show"
-                        v-model="reuseSkillsInfo.show"
-                        :skills="reuseSkillsInfo.skills"
-                        @reused="handleSkillsAreMoved"
-                        @hidden="handleExportModalIsClosed"/>
-    <reuse-skills-modal id="moveSkillsModal" v-if="moveSkillsInfo.show"
-                        v-model="moveSkillsInfo.show"
-                        :skills="moveSkillsInfo.skills"
-                        type="move"
-                        @reused="handleSkillsAreMoved"
-                        @hidden="handleExportModalIsClosed"/>
+    <reuse-or-move-skills-modal id="reuseSkillsModal" v-if="reuseSkillsInfo.show"
+                                v-model="reuseSkillsInfo.show"
+                                :skills="reuseSkillsInfo.skills"
+                                @action-success="handleSkillsAreReusedOrMoved"
+                                @hidden="handleExportModalIsClosed"/>
+    <reuse-or-move-skills-modal id="moveSkillsModal" v-if="moveSkillsInfo.show"
+                                v-model="moveSkillsInfo.show"
+                                :skills="moveSkillsInfo.skills"
+                                type="move"
+                                @action-success="handleSkillsAreReusedOrMoved"
+                                @hidden="handleExportModalIsClosed"/>
     <removal-validation v-if="deleteSkillInfo.show" v-model="deleteSkillInfo.show"
                         @do-remove="doDeleteSkill" @hidden="handleDeleteCancelled">
       <skill-removal-validation :delete-skill-info="deleteSkillInfo"/>
@@ -358,7 +358,7 @@ limitations under the License.
   import ExportToCatalog from '@/components/skills/catalog/ExportToCatalog';
   import RemovalValidation from '@/components/utils/modal/RemovalValidation';
   import EditImportedSkill from '@/components/skills/skillsGroup/EditImportedSkill';
-  import ReuseSkillsModal from '@/components/skills/reuseSkills/ReuseSkillsModal';
+  import ReuseOrMoveSkillsModal from '@/components/skills/reuseSkills/ReuseOrMoveSkillsModal';
   import SkillRemovalValidation from '@/components/skills/SkillRemovalValidation';
   import EditSkill from './EditSkill';
   import NoContent2 from '../utils/NoContent2';
@@ -427,7 +427,7 @@ limitations under the License.
     },
     components: {
       SkillRemovalValidation,
-      ReuseSkillsModal,
+      ReuseOrMoveSkillsModal,
       EditImportedSkill,
       RemovalValidation,
       ExportToCatalog,
@@ -738,7 +738,7 @@ limitations under the License.
         });
         this.$nextTick(() => this.$announcer.polite(`exported ${skills.length} skill${skills.length > 1 ? 's' : ''} to the catalog`));
       },
-      handleSkillsAreMoved() {
+      handleSkillsAreReusedOrMoved() {
         this.loadSubjectSkills({
           projectId: this.projectId,
           subjectId: this.subjectId,
