@@ -208,6 +208,13 @@ describe('Root Pin and Unpin Tests', () => {
     cy.intercept('POST',  'suggestDashboardUsers').as('suggest');
     cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
     cy.intercept('GET', '/admin/projects/proj1').as('loadProject');
+    cy.intercept('GET', '/admin/projects/proj1/userRoles/ROLE_PROJECT_ADMIN**').as('loadProjectAdmins');
+
+    cy.intercept('GET', '/app/projects').as('default');
+    cy.intercept('GET', '/app/projects?search=one').as('searchOne');
+    cy.intercept('POST', '/root/pin/proj1').as('pinOne');
+    cy.intercept('DELETE', '/root/pin/proj1').as('unpinOne');
+    cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
 
     cy.visit('/administrator/projects/proj1/access');
     cy.wait('@loadUserInfo');
@@ -219,15 +226,11 @@ describe('Root Pin and Unpin Tests', () => {
     cy.clickButton('Add');
     cy.wait('@addAdmin');
     cy.wait('@getRolesForRoot')
+    cy.wait('@loadProjectAdmins');
 
     cy.logout();
     cy.fixture('vars.json').then((vars) => {
       cy.login(vars.rootUser, vars.defaultPass);
-      cy.intercept('GET', '/app/projects').as('default');
-      cy.intercept('GET', '/app/projects?search=one').as('searchOne');
-      cy.intercept('POST', '/root/pin/proj1').as('pinOne');
-      cy.intercept('DELETE', '/root/pin/proj1').as('unpinOne');
-      cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
 
       cy.visit('/administrator/');
       cy.wait('@default');
@@ -236,8 +239,6 @@ describe('Root Pin and Unpin Tests', () => {
       cy.get(projectsSelector).should('have.length', 1).as('projects');
       cy.contains('one');
 
-    });
-    cy.fixture('vars.json').then((vars) => {
       cy.logout()
 
       if (!Cypress.env('oauthMode')) {
@@ -248,28 +249,25 @@ describe('Root Pin and Unpin Tests', () => {
         cy.loginBySingleSignOn()
       }
 
+      cy.log('visiting proj1 access page');
       cy.visit('/administrator/projects/proj1/access');
       cy.wait('@loadUserInfo');
       cy.wait('@loadProject');
+      cy.wait('@loadProjectAdmins');
 
       // remove the root user as an admin now
       const tableSelector = '[data-cy=roleManagerTable]'
       const rowSelector = `${tableSelector} tbody tr`
-      cy.get(`${tableSelector} [data-cy="removeUserBtn"]`).eq(1).click();
+      cy.log('removing user');
+      cy.get(`${tableSelector} [data-cy="removeUserBtn"]`).eq(0).click();
       cy.contains('YES, Delete It').click();
-
+      cy.wait('@loadProjectAdmins');
       cy.get(rowSelector).should('have.length', 1).as('cyRows1');
       cy.get('@cyRows1').eq(0).find('td').as('rowA');
       cy.get('@rowA').eq(0).contains('root@skills.org').should('not.exist');
-    });
+      cy.logout();
 
-    cy.fixture('vars.json').then((vars) => {
       cy.login(vars.rootUser, vars.defaultPass);
-      cy.intercept('GET', '/app/projects').as('default');
-      cy.intercept('GET', '/app/projects?search=one').as('searchOne');
-      cy.intercept('POST', '/root/pin/proj1').as('pinOne');
-      cy.intercept('DELETE', '/root/pin/proj1').as('unpinOne');
-      cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
 
       cy.visit('/administrator/');
       cy.wait('@default');
@@ -333,8 +331,8 @@ describe('Root Pin and Unpin Tests', () => {
       cy.contains('Add').first().click();
       cy.wait('@addRoot');
 
-      cy.get(`${rootUsrTableSelector} th`).contains('Root User').click();
       if (!Cypress.env('oauthMode')) {
+        cy.log('not oauthMode, expecting ascending sort with root user first');
         cy.validateTable(rootUsrTableSelector, [
           [{ colIndex: 0,  value: '(root@skills.org)' }],
           [{ colIndex: 0,  value: `(${projAdminUser})` }],
@@ -345,9 +343,7 @@ describe('Root Pin and Unpin Tests', () => {
           [{ colIndex: 0,  value: '(root@skills.org)' }],
         ], 5, true, null, false);
       }
-    });
 
-    cy.fixture('vars.json').then((vars) => {
       cy.logout()
 
       if (!Cypress.env('oauthMode')) {

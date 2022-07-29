@@ -29,19 +29,33 @@ limitations under the License.
           msg="Multiple skills versions can be defined if you have multiple versions of your application deployed." />
       </b-form>
     </sub-page-header>
-    <skills-display
-      :options="configuration"
-      :version="selectedVersion"
-      :user-id="userIdParam"
-      :theme="theme"
-      ref="skillsDisplayRef"
-      @route-changed="skillsDisplayRouteChanged"/>
+    <loading-container :is-loading="checkingAccess">
+      <skills-display
+        v-if="canAccess"
+        :options="configuration"
+        :version="selectedVersion"
+        :user-id="userIdParam"
+        :theme="theme"
+        ref="skillsDisplayRef"
+        @route-changed="skillsDisplayRouteChanged"/>
+      <div v-else class="container">
+        <div class="row justify-content-center">
+          <div class="col-md-6 mt-3">
+            <div class="text-center mt-5">
+              <div class="h2"><i class="fas fa-user-slash fa-2x" aria-hidden="true"/> Access Revoked</div>
+              <div>This user's access was previously revoked, their Client Display is disabled until they are granted access. </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </loading-container>
   </div>
 
 </template>
 
 <script>
   import { SkillsDisplay, SkillsReporter } from '@skilltree/skills-client-vue';
+  import LoadingContainer from '@/components/utils/LoadingContainer';
   import SkillsDisplayOptionsMixin from '../myProgress/SkillsDisplayOptionsMixin';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import UsersService from './UsersService';
@@ -54,11 +68,14 @@ limitations under the License.
       InlineHelp,
       SubPageHeader,
       SkillsDisplay,
+      LoadingContainer,
     },
     data() {
       return {
         projectId: '',
         userIdParam: '',
+        canAccess: true,
+        checkingAccess: true,
         loading: {
           userInfo: true,
           availableVersions: true,
@@ -108,7 +125,21 @@ limitations under the License.
           this.loading.availableVersions = false;
         });
     },
+    mounted() {
+      if (this.isInviteOnly) {
+        this.canAccess = false;
+        UsersService.canAccess(this.projectId, this.userIdParam).then((res) => {
+          this.canAccess = res === true;
+          this.checkingAccess = false;
+        });
+      } else {
+        this.checkingAccess = false;
+      }
+    },
     computed: {
+      isInviteOnly() {
+        return this.$store.getters.projConfig.invite_only === 'true';
+      },
       configuration() {
         return {
           projectId: this.projectId,

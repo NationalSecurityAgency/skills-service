@@ -16,7 +16,7 @@ limitations under the License.
 <template>
   <div data-cy="showMoreText" class="text-break" :class="{'d-inline-block' : isInline}">
     <span>
-      <span v-if="containsHtml" v-html="toDisplay">html RMM</span><span v-else data-cy="smtText">{{toDisplay}}</span>
+      <span v-if="containsHtml" v-html="toDisplay"></span><span v-else data-cy="smtText">{{toDisplay}}</span>
       <b-link v-if="truncate" size="xs" variant="outline-info"
                 class=""
                 @click="displayFullText = !displayFullText"

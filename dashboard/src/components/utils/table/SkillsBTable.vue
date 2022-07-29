@@ -70,7 +70,7 @@ limitations under the License.
       </template>
 
     </b-table>
-    <div v-if="!options.busy && !options.pagination.remove" class="row m-1 p-0 align-items-center">
+    <div v-if="!options.busy && !options.pagination.remove && !this.hidePaging" class="row m-1 p-0 align-items-center">
       <div class="col-md text-center text-md-left">
         <span class="text-muted">Total Rows:</span> <strong data-cy="skillsBTableTotalRows">{{ totalRows | number }}</strong>
       </div>
@@ -125,6 +125,16 @@ limitations under the License.
       },
       totalRows() {
         return this.options.pagination.server ? this.options.pagination.totalRows : this.items.length;
+      },
+      hidePaging() {
+        if (this.options.pagination) {
+          const minPageSizeAvailable = this.options.pagination.possiblePageSizes ? Math.min(...this.options.pagination.possiblePageSizes) : this.options.pagination.pageSize;
+          return this.options.pagination.hideUnnecessary === true
+            && this.totalRows <= this.items.length
+            && this.totalRows <= minPageSizeAvailable
+            && this.currentPageInternal === 1;
+        }
+        return false;
       },
     },
     methods: {

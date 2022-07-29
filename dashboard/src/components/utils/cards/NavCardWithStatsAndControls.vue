@@ -67,7 +67,7 @@ limitations under the License.
                   <div v-if="secCount.count > 0" style="font-size: 0.9rem">
                     <b-badge :variant="`${secCount.badgeVariant}`"
                              :data-cy="`pagePreviewCardStat_${stat.label}_${secCount.label}`">
-                      <span>{{ secCount.count | number }}</span>
+                      <span>{{ secCount.count }}</span>
                     </b-badge>
                     <span class="text-left text-secondary text-uppercase ml-1"
                           style="font-size: 0.8rem">{{ secCount.label }}</span>

@@ -594,8 +594,10 @@ describe('Projects Tests', () => {
 
     const rowSelector = '[data-cy=roleManagerTable] tbody tr'
     cy.get(rowSelector).should('have.length', 2).as('cyRows');
+    cy.get('@cyRows').eq(0).find('td').as('row1');
     cy.get('@cyRows').eq(1).find('td').as('row2');
-    cy.get('@row2').eq(0).contains('root@skills.org');
+    cy.get('@row1').eq(0).contains('root@skills.org');
+    cy.get('@row2').eq(0).contains('skills@skills.org');
   });
 
   it('Add and Remove Admin', () => {
@@ -625,11 +627,11 @@ describe('Projects Tests', () => {
     const tableSelector = '[data-cy=roleManagerTable]'
     const rowSelector = `${tableSelector} tbody tr`
     cy.get(rowSelector).should('have.length', 2).as('cyRows');
-    cy.get('@cyRows').eq(1).find('td').as('row2');
-    cy.get('@row2').eq(0).contains('root@skills.org');
+    cy.get('@cyRows').eq(0).find('td').as('row1');
+    cy.get('@row1').eq(0).contains('root@skills.org');
 
     // remove the other user now
-    cy.get(`${tableSelector} [data-cy="removeUserBtn"]`).eq(1).click();
+    cy.get(`${tableSelector} [data-cy="removeUserBtn"]`).eq(0).click();
     cy.contains('YES, Delete It').click();
 
     cy.get(rowSelector).should('have.length', 1).as('cyRows1');
@@ -1119,6 +1121,34 @@ describe('Projects Tests', () => {
     cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
   });
 
+  it('project-level settings: project visibility', () => {
+    cy.createProject(1);
+    cy.intercept('GET', '/admin/projects/proj1/settings').as('getSettings');
+    cy.intercept('POST', '/admin/projects/proj1/settings').as('saveSettings');
+    cy.visit('/administrator/projects/proj1/settings')
+    cy.wait('@getSettings');
+    cy.get('[data-cy="pageHeaderStat_Visibility"]').should('include.text', 'PUBLIC(Not Discoverable)');
+
+    cy.get('[data-cy="projectVisibilitySelector"]').select('dpr');
+    cy.get('[data-cy="saveSettingsBtn"').click();
+    cy.wait('@saveSettings');
+    cy.wait('@getSettings');
+    cy.get('[data-cy="pageHeaderStat_Visibility"]').should('include.text', 'PUBLIC(Discoverable)');
+
+    cy.get('[data-cy="projectVisibilitySelector"]').select('pio');
+    cy.get('.modal-content').should('be.visible').should('include.text', 'Changing to Invite Only').should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users.');
+    cy.clickButton('Ok');
+    cy.get('[data-cy="saveSettingsBtn"').click({force: true});
+    cy.wait('@saveSettings');
+    cy.wait('@getSettings');
+    cy.get('[data-cy="pageHeaderStat_Visibility"]').should('include.text', 'PRIVATE(Invite Only)');
+
+    cy.get('[data-cy="nav-Access"').click();
+    cy.wait(200);
+    cy.get('[data-cy="pageHeaderStat_Visibility"]').should('include.text', 'PRIVATE(Invite Only)');
+  });
+
+
   it('navigate to subjects by click on project name', () => {
     cy.createProject(1);
     cy.visit('/administrator')
@@ -1310,6 +1340,91 @@ describe('Projects Tests', () => {
     cy.validateElementsOrder('[data-cy="projectCard"]', ['This is project 3', 'This is project 2', 'This is project 1']);
     cy.get('[data-cy="projectCard_proj3"] [data-cy="sortControlHandle"]')
         .should('have.focus');
+  });
+
+  it('invite only project full flow', () => {
+    cy.createProject(1);
+    cy.intercept('GET', '/admin/projects/proj1/settings').as('getSettings');
+    cy.intercept('POST', '/admin/projects/proj1/settings').as('saveSettings');
+    cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice').as('emailSupported');
+    cy.intercept('POST', '/admin/projects/proj1/invite', (req) => {
+      req.reply((res) => {
+        const result = res.body;
+        result.successful = ['abc@cba.org'];
+        result.unsuccessful = ['bsmith@fake.email'];
+        res.send(result);
+      });
+    }).as('sendInvites');
+    cy.intercept('GET', '/api/myprojects/proj1/name').as('getName');
+    cy.intercept('GET', '/api/projects/proj1/token').as('getToken');
+    cy.intercept('GET', '/admin/projects/proj1/userRoles/ROLE_PRIVATE_PROJECT_USER*').as('getApprovedUsers');
+    cy.intercept('DELETE', '/admin/projects/proj1/users/*/roles/ROLE_PRIVATE_PROJECT_USER').as('removeAccess');
+
+    cy.visit('/administrator/projects/proj1/settings')
+    cy.wait('@getSettings');
+
+    cy.get('[data-cy="projectVisibilitySelector"]').select('pio');
+    cy.get('.modal-content').should('be.visible').should('include.text', 'Changing to Invite Only').should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users.');
+    cy.clickButton('Ok');
+    cy.get('[data-cy="saveSettingsBtn"').click({force: true});
+    cy.wait('@saveSettings');
+    cy.wait('@getSettings');
+    cy.get('[data-cy="nav-Access"').click();
+    cy.wait('@emailSupported');
+    cy.get('[data-cy="inviteExpirationSelect"]').select('PT30M');
+    cy.get('[data-cy=addEmails]').should('be.disabled');
+    cy.get('[data-cy="sendInvites-btn"]').should('be.disabled');
+    cy.get('[data-cy="inviteEmailInput"]').type('foo;@bar;abc@cba.org;Bob Smith <bsmith@fake.email>');
+    cy.get('[data-cy=addEmails]').click();
+    cy.get('[data-cy=invalidEmails]').should('be.visible').should('include.text', 'Unable to add the following invalid email recipients: foo, @bar');
+    cy.get('[data-cy=inviteRecipient]').eq(0).should('include.text', 'abc@cba.org');
+    cy.get('[data-cy=inviteRecipient]').eq(1).should('include.text', 'bsmith@fake.email');
+    cy.get('[data-cy="sendInvites-btn"]').should('be.enabled').click();
+    cy.wait('@sendInvites');
+    cy.get('[data-cy=failedEmails]').should('be.visible').should('include.text','Unable to send invites to: bsmith@fake.email');
+    cy.logout();
+    cy.wait(2000); //wait for invite only cache to clear
+
+    cy.getLinkFromEmail().then((inviteLink) => {
+      cy.register('uuuuuu', 'password', false);
+      cy.logout();
+      cy.login('uuuuuu', 'password');
+
+      cy.visit('/progress-and-rankings/projects/proj1');
+      cy.contains('User Not Authorized').should('be.visible');
+
+      cy.visit(inviteLink);
+      cy.get('[data-cy=joinProject]').should('be.visible');
+      cy.get('[data-cy=breadcrumb-item]').contains('Join Project This is project 1').should('be.visible');
+      cy.get('[data-cy=joinProject]').click();
+      cy.get('[data-cy=project-link-proj1]')
+          .should('be.visible')
+          .should('have.attr', 'href', '/progress-and-rankings/projects/proj1')
+          .contains('This is project 1').should('be.visible');
+      cy.wait(10*1000); //wait for countdown timer
+      cy.wait('@getToken');
+      cy.dashboardCd().contains('My Level');
+      cy.logout();
+
+      cy.fixture('vars.json').then((vars) => {
+        cy.login(vars.defaultUser, vars.defaultPass);
+        cy.visit('/administrator/projects/proj1/access')
+        cy.wait('@emailSupported');
+        cy.wait('@getApprovedUsers');
+        cy.get('[data-cy=privateProjectUsersTable]').contains('uuuuuu').should('be.visible');
+        cy.get('[data-cy="privateProjectUsersTable_revokeUserAccessBtn"]').click();
+        cy.contains('Are you sure you want to revoke uuuuuu\'s access to this Project? uuuuuu\'s achievements will NOT be deleted, however uuuuuu will no longer be able to access the training profile.').should('be.visible');
+        cy.clickButton('Yes, revoke access!');
+        cy.wait('@removeAccess');
+        cy.wait('@getApprovedUsers');
+        cy.get('[data-cy=privateProjectUsersTable]').contains('uuuuuu').should('not.exist');
+        cy.logout();
+        cy.login('uuuuuu', 'password');
+
+        cy.visit('/progress-and-rankings/projects/proj1');
+        cy.contains('User Not Authorized').should('be.visible');
+      });
+    });
 
   });
 

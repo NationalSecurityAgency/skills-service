@@ -133,7 +133,6 @@ skills:
       maxNumPointIncrementMaxOccurrences: 999
       userSuggestOptions:
       pointHistoryInDays: 1825
-      skillHistoryInDays: 1825
       rankingAndProgressViewsEnabled: false
       defaultLandingPage: "admin"
       maxSelfReportMessageLength: 250
@@ -141,6 +140,7 @@ skills:
       artifactBuildTimestamp: @maven.build.timestamp@
       maxSkillsInBulkImport: 50
       enablePageVisitReporting: false
+      maxProjectInviteEmails: 50
     client:
       loggingEnabled: false
       loggingLevel: DEBUG

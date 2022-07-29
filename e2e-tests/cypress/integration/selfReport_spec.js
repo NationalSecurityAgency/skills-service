@@ -881,6 +881,8 @@ describe('Self Report Skills Management Tests', () => {
     });
 
     it('warn if email service is not configured', () => {
+        cy.intercept('/public/isFeatureSupported?feature=emailservice', 'false');
+
         cy.createSkill(1, 1, 4, { selfReportingType: 'Approval' });
         cy.createSkill(1, 1, 5, { selfReportingType: 'HonorSystem' });
         cy.createSkill(1, 1, 6);

@@ -42,5 +42,8 @@ enum ErrorCode {
     MaxBadgesThreshold,
     MaxSkillsThreshold,
     MaxSubjectsThreshold,
-    DbUpgradeInProgress
+    DbUpgradeInProgress,
+    ExpiredInvitationCode,
+    InvalidInvitationCode,
+    ClaimedInvitationCode,
 }

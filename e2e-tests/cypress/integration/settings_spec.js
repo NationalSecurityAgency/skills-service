@@ -31,8 +31,7 @@ describe('Settings Tests', () => {
     const rootUsrTableSelector = '[data-cy="rootrm"] [data-cy="roleManagerTable"]';
     const supervisorTableSelector = '[data-cy="supervisorrm"] [data-cy="roleManagerTable"]';
 
-    it('Add and remove Root User', () => {
-
+    it('paging controls are visible if number of records are larger then smallest page size', () => {
         cy.intercept('POST', '/root/users/without/role/ROLE_SUPER_DUPER_USER?userSuggestOption=ONE').as('getEligibleForRoot');
         cy.intercept('PUT', '/root/users/skills@skills.org/roles/ROLE_SUPER_DUPER_USER').as('addRoot');
         cy.intercept({
@@ -40,6 +39,22 @@ describe('Settings Tests', () => {
             url: '/app/projects'
         }).as('loadProjects');
         cy.intercept({method: 'GET', url: '/root/isRoot'}).as('checkRoot');
+        cy.intercept('GET', '/root/users/roles/ROLE_SUPER_DUPER_USER**', (req) => {
+            req.reply((res) => {
+                const pagingResult = {
+                    count: 5,
+                    data: [
+                        { userId: 'one@one', userIdForDisplay: 'one@one', firstName: 'one', lastName: 'one' },
+                        { userId: 'two@two', userIdForDisplay: 'two@one', firstName: 'two', lastName: 'two' },
+                        { userId: 'three@three', userIdForDisplay: 'three@one', firstName: 'three', lastName: 'three' },
+                        { userId: 'four@four', userIdForDisplay: 'four@one', firstName: 'four', lastName: 'four' },
+                        { userId: 'five@five', userIdForDisplay: 'five@one', firstName: 'five', lastName: 'five' },
+                    ],
+                    totalCount: 15
+                };
+                res.send(pagingResult);
+            });
+        }).as('loadRootUsers');
 
         cy.visit('/administrator/');
         cy.get('[data-cy=subPageHeader]').contains('Projects');
@@ -47,21 +62,51 @@ describe('Settings Tests', () => {
         cy.contains('Settings').click();
         cy.wait('@checkRoot');
         cy.clickNav('Security');
+        cy.wait('@loadRootUsers');
+        cy.get('[data-cy=skillsBTableTotalRows]').should('have.text', '15');
+        cy.get('[data-cy=skillsBTablePaging] .page-item').should('have.length', 7);
+    });
+
+    it('Add and remove Root User', () => {
+        cy.intercept('POST', '/root/users/without/role/ROLE_SUPER_DUPER_USER?userSuggestOption=ONE').as('getEligibleForRoot');
+        cy.intercept('PUT', '/root/users/skills@skills.org/roles/ROLE_SUPER_DUPER_USER').as('addRoot');
+        cy.intercept({
+            method: 'GET',
+            url: '/app/projects'
+        }).as('loadProjects');
+        cy.intercept({method: 'GET', url: '/root/isRoot'}).as('checkRoot');
+        cy.intercept('DELETE', '/root/users/*/roles/ROLE_SUPER_DUPER_USER').as('deleteRootUser');
+        cy.intercept('GET', '/root/users/roles/ROLE_SUPER_DUPER_USER**').as('loadRootUsers');
+
+        cy.visit('/administrator/');
+        cy.get('[data-cy=subPageHeader]').contains('Projects');
+        cy.get('button.dropdown-toggle').first().click({force: true});
+        cy.contains('Settings').click();
+        cy.wait('@checkRoot');
+        cy.clickNav('Security');
+        cy.wait('@loadRootUsers');
         cy.validateTable(rootUsrTableSelector, [
             [{ colIndex: 0,  value: '(root@skills.org)' }],
         ], 5, true, null, false);
 
         cy.get('[data-cy="existingUserInput"]').first().click().type('sk{enter}');
         cy.wait('@getEligibleForRoot');
-        cy.contains('skills@skills.org').click();
+        cy.contains('skills@skills.org').click({force:true});
         cy.contains('Add').first().click();
         cy.wait('@addRoot');
 
+        cy.log('validating sort on Root User column');
         cy.get(`${rootUsrTableSelector} th`).contains('Root User').click();
+        // sort should now be ascending false
+        cy.wait('@loadRootUsers');
         cy.validateTable(rootUsrTableSelector, [
-            [{ colIndex: 0,  value: '(root@skills.org)' }],
             [{ colIndex: 0,  value: '(skills@skills.org)' }],
+            [{ colIndex: 0,  value: '(root@skills.org)' }],
         ], 5, true, null, false);
+
+        // reset sort to ascending true
+        cy.get(`${rootUsrTableSelector} th`).contains('Root User').click();
+        cy.wait('@loadRootUsers');
 
         // attempt to remove myself - no go
         cy.get(`${rootUsrTableSelector} [data-cy="removeUserBtn"]`).eq(0).should('be.disabled');
@@ -83,6 +128,7 @@ describe('Settings Tests', () => {
         // remove the other user now
         cy.get(`${rootUsrTableSelector} [data-cy="removeUserBtn"]`).eq(1).click();
         cy.contains('YES, Delete It').click();
+        cy.wait('@deleteRootUser');
         cy.validateTable(rootUsrTableSelector, [
             [{ colIndex: 0,  value: '(root@skills.org)' }],
         ], 5, true, null, false);
@@ -149,11 +195,17 @@ describe('Settings Tests', () => {
         cy.contains('Add').first().click();
         cy.wait('@addRoot');
 
-        cy.get(`${rootUsrTableSelector} th`).contains('Root User').click();
+        // default sort order is userId asc
         cy.validateTable(rootUsrTableSelector, [
             [{ colIndex: 0,  value: '(root@skills.org)' }],
             [{ colIndex: 0,  value: '(skills@skills.org)' }],
         ], 5, true, null, false);;
+
+        cy.get(`${rootUsrTableSelector} th`).contains('Root User').click();
+        cy.validateTable(rootUsrTableSelector, [
+            [{ colIndex: 0,  value: '(skills@skills.org)' }],
+            [{ colIndex: 0,  value: '(root@skills.org)' }],
+        ], 5, true, null, false);
     });
 
     it('Add Supervisor User', () => {
@@ -320,13 +372,6 @@ describe('Settings Tests', () => {
         cy.get$('[data-cy=emailSettingsSave]').should('be.disabled');
         cy.get$('[data-cy=protocolInput]').type('{selectall}smtp');
 
-        cy.get$('[data-cy=publicUrlInput]').type('test');
-        cy.get$('[data-cy=publicUrlInput]').clear();
-        cy.get('[data-cy=publicUrlError]').should('be.visible');
-        cy.get('[data-cy=publicUrlError]').contains('Public URL is required').should('be.visible');
-        cy.get$('[data-cy=publicUrlInput]').type('{selectall}http://localhost:8082');
-        cy.get('[data-cy=publicUrlError]').should('not.be.visible');
-        cy.get$('[data-cy=fromEmailInput]').type('{selectall}foo@skilltree.madeup');
 
         cy.get$('[data-cy=tlsSwitch]').next('.custom-control-label').click();
         cy.get$('[data-cy=authSwitch]').next('.custom-control-label').click();
@@ -347,8 +392,6 @@ describe('Settings Tests', () => {
         cy.get('[data-cy=authSwitch]').should('have.value', 'true');
         cy.get('[data-cy=emailUsername]').should('have.value', 'username');
         cy.get('[data-cy=emailPassword]').should('have.value', 'password');
-        cy.get('[data-cy=publicUrlInput]').should('have.value', 'http://localhost:8082');
-        cy.get('[data-cy=fromEmailInput]').should('have.value', 'foo@skilltree.madeup');
     });
 
     it('Email Settings reasonable timeout', () => {
@@ -365,8 +408,6 @@ describe('Settings Tests', () => {
         //this needs to be an open port that is NOT an smtp server for the purposes of this test
         cy.get$('[data-cy=portInput]').type('{selectall}8080');
         cy.get$('[data-cy=protocolInput]').type('{selectall}smtp');
-        cy.get$('[data-cy=publicUrlInput]').type('test');
-        cy.get$('[data-cy=fromEmailInput]').type('{selectall}foo@skilltree.madeup');
 
         cy.get$('[data-cy=emailSettingsSave]').click();
         cy.wait(12*1000);
@@ -386,7 +427,13 @@ describe('Settings Tests', () => {
 
         cy.wait('@loadSystemSettings');
         cy.get('[data-cy=resetTokenExpiration]').should('have.value', '2H');
+        cy.get('[data-cy=publicUrl]').clear();
+        cy.get('[data-cy=publicUrlError]').should('be.visible');
+        cy.get('[data-cy=publicUrlError]').contains('Public URL is required').should('be.visible');
+        cy.get$('[data-cy=publicUrl]').type('{selectall}http://localhost:8082');
         cy.get$('[data-cy=resetTokenExpiration]').type('{selectall}2H25M22S');
+        cy.get('[data-cy=publicUrlError]').should('not.be.visible');
+        cy.get$('[data-cy=fromEmail]').type('{selectall}foo@skilltree.madeup');
         cy.get$('[data-cy=customHeader').type('{selectall}<div id="customHeaderDiv" style="font-size:3em;color:red">HEADER</div>');
         cy.get$('[data-cy=customFooter').type('{selectall}<div id="customFooterDiv" style="font-size:3em;color:red">FOOTER</div>');
         cy.get$('[data-cy=saveSystemSettings]').click();
@@ -395,7 +442,9 @@ describe('Settings Tests', () => {
         cy.get('#customFooterDiv').contains('FOOTER');
         cy.visit('/settings/system');
         cy.wait('@loadSystemSettings');
+        cy.get('[data-cy=publicUrl]').should('have.value', 'http://localhost:8082');
         cy.get('[data-cy=resetTokenExpiration]').should('have.value', '2H25M22S');
+        cy.get('[data-cy=fromEmail]').should('have.value', 'foo@skilltree.madeup');
         cy.get('[data-cy=customHeader').should('have.value','<div id="customHeaderDiv" style="font-size:3em;color:red">HEADER</div>');
         cy.get('[data-cy=customFooter').should('have.value','<div id="customFooterDiv" style="font-size:3em;color:red">FOOTER</div>');
 
@@ -420,7 +469,9 @@ describe('Settings Tests', () => {
 
         cy.wait('@loadSystemSettings');
         cy.get('[data-cy=resetTokenExpiration]').should('have.value', '2H');
+        cy.get$('[data-cy=publicUrl]').type('{selectall}http://localhost:8082');
         cy.get$('[data-cy=resetTokenExpiration]').type('{selectall}2H25M22S');
+        cy.get$('[data-cy=fromEmail]').type('{selectall}foo@skilltree.madeup');
         cy.get$('[data-cy=customHeader]').type('{selectall}<div id="customHeaderDiv" style="font-size:3em;color:red"><script src="somewhere"/>HEADER</div>');
         cy.get$('[data-cy=customFooter]').type('{selectall}<div id="customFooterDiv" style="font-size:3em;color:red"><script type="text/javascript">alert("foo");</script>FOOTER</div>');
         cy.get('[data-cy=customHeaderError]').should('be.visible');
@@ -446,7 +497,9 @@ describe('Settings Tests', () => {
 
         cy.wait('@loadSystemSettings');
         cy.get('[data-cy=resetTokenExpiration]').should('have.value', '2H');
+        cy.get$('[data-cy=publicUrl]').type('{selectall}http://localhost:8082');
         cy.get$('[data-cy=resetTokenExpiration]').type('{selectall}2H25M22S');
+        cy.get$('[data-cy=fromEmail]').type('{selectall}foo@skilltree.madeup');
         cy.get$('[data-cy=customHeader]').clear().fill(_3001);
         cy.get$('[data-cy=customFooter]').clear().fill(_3001);
         cy.get('[data-cy=customHeaderError]').should('be.visible');
@@ -463,30 +516,30 @@ describe('Settings Tests', () => {
 
     it('from email validation', () => {
 
-        cy.intercept('GET', '/root/getEmailSettings').as('loadEmailSettings');
+        cy.intercept('GET', '/root/getSystemSettings').as('loadSystemSettings');
         cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
         cy.intercept('GET', '/public/config').as('loadConfig');
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
-        cy.get('[data-cy="settings-button"]').click();
+         cy.get('[data-cy="settings-button"]').click();
         cy.get('[data-cy="settingsButton-navToSettings"]').click();
-        cy.get('[data-cy="nav-Email"]').click();
+        cy.get('[data-cy="nav-System"]').click();
 
-        cy.wait('@loadEmailSettings');
-        cy.get$('[data-cy=hostInput]').type('{selectall}localhost');
-        cy.get('[data-cy=publicUrlInput]').type('{selectall}http://localhost');
-        cy.get$('[data-cy=fromEmailInput]').type('{selectall}foo');
+        cy.wait('@loadSystemSettings');
+        cy.get('[data-cy=publicUrl]').type('{selectall}http://localhost');
+        cy.get('[data-cy=resetTokenExpiration]').should('have.value', '2H');
+        cy.get$('[data-cy=fromEmail]').type('{selectall}foo');
         cy.get('[data-cy=fromEmailError]').should('be.visible');
         cy.get('[data-cy=fromEmailError]').contains('From Email must be a valid email');
-        cy.get('[data-cy=emailSettingsSave]').should('be.disabled');
-        cy.get$('[data-cy=fromEmailInput]').type('{selectall}foo@');
+        cy.get('[data-cy=saveSystemSettings]').should('be.disabled');
+        cy.get$('[data-cy=fromEmail]').type('{selectall}foo@');
         cy.get('[data-cy=fromEmailError]').should('be.visible');
         cy.get('[data-cy=fromEmailError]').contains('From Email must be a valid email');
-        cy.get('[data-cy=emailSettingsSave]').should('be.disabled');
-        cy.get$('[data-cy=fromEmailInput]').type('{selectall}foo@localhost.madeup');
+        cy.get('[data-cy=saveSystemSettings]').should('be.disabled');
+        cy.get$('[data-cy=fromEmail]').type('{selectall}foo@localhost.madeup');
         cy.get('[data-cy=fromEmailError]').should('not.be.visible');
         cy.get('[data-cy=fromEmailError]').should('not.be.visible');
-        cy.get('[data-cy=emailSettingsSave]').should('not.be.disabled');
+        cy.get('[data-cy=saveSystemSettings]').should('not.be.disabled');
     });
 
     it('custom header/footer should be full width', () => {
@@ -501,6 +554,7 @@ describe('Settings Tests', () => {
         cy.get('[data-cy="nav-System"]').click();
 
         cy.wait('@loadSystemSettings');
+        cy.get$('[data-cy=publicUrl]').type('{selectall}http://localhost:8082');
         cy.get$('[data-cy=customHeader').type('{selectall}<div id="customHeaderDiv" style="font-size:3em;color:red">HEADER</div>');
         cy.get$('[data-cy=customFooter').type('{selectall}<div id="customFooterDiv" style="font-size:3em;color:red">FOOTER</div>');
         cy.get$('[data-cy=saveSystemSettings]').click();
@@ -548,6 +602,7 @@ describe('Settings Tests', () => {
         cy.get('[data-cy="nav-System"]').click();;
 
         cy.wait('@loadSystemSettings');
+        cy.get$('[data-cy=publicUrl]').type('{selectall}http://localhost:8082');
         cy.get$('[data-cy=customHeader').type('<div id="customHeaderDiv"><span id="chVersion">{{release.version}}</span> <span id="chBuildDate">{{build.date}}</span></div>', {parseSpecialCharSequences: false});
         cy.get$('[data-cy=customFooter').type('<div id="customFooterDiv"><span id="cfVersion">{{release.version}}</span> <span id="cfBuildDate">{{build.date}}</span></div>', {parseSpecialCharSequences: false});
         cy.get$('[data-cy=saveSystemSettings]').click();

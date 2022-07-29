@@ -29,6 +29,7 @@ limitations under the License.
         <div v-if="allSkillsExportedAlready">
           All selected <b-badge variant="info">{{ skills.length }}</b-badge> skill(s) are already in the Skill Catalog.
         </div>
+        <div v-else-if="showInviteOnlyWarning" class="alert alert-warning"><i class="fas fa-exclamation-circle"/> This project is defined as Invite Only, exporting skills will make those skills available to users who have not been invited to this project.</div>
 
         <b-overlay v-if="!allSkillsExportedAlready && !state.exported" :show="state.exporting" rounded="sm" opacity="0.5"
                    spinner-variant="info" spinner-type="grow" spinner-small>
@@ -117,6 +118,11 @@ limitations under the License.
       value: {
         type: Boolean,
         required: true,
+      },
+      showInviteOnlyWarning: {
+        type: Boolean,
+        required: false,
+        default: false,
       },
     },
     data() {

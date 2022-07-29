@@ -14,29 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit }" slim>
-    <div>
-      <sub-page-header title="Project Settings"/>
-      <simple-card>
-        <loading-container :is-loading="isLoading">
-          <div v-if="isProgressAndRankingEnabled" class="row" data-cy="productionModeSetting">
-            <div class="col col-md-3 text-secondary" id="productionModeEnabledLabel">
-              Discoverable:
-              <inline-help
-                target-id="productionModeEnabledHelp"
-                msg="Change to true for this project to be discoverable in the 'Progress and Ranking' page for all SkillTree users."/>
-            </div>
-            <div class="col">
-              <b-form-checkbox v-model="settings.productionModeEnabled.value"
-                               name="check-button"
-                               v-on:input="productionModeEnabledChanged"
-                               aria-labelledby="productionModeEnabledLabel"
-                               data-cy="productionModeEnabledSwitch"
-                               switch>
-                {{ settings.productionModeEnabled.value }}
-              </b-form-checkbox>
-            </div>
+  <ValidationObserver ref="observer" v-slot="{ invalid, handleSubmit }" slim>
+  <div>
+    <sub-page-header title="Project Settings"/>
+    <simple-card>
+      <loading-container :is-loading="isLoading">
+        <div class="row" data-cy="projectVisibility">
+          <div class="col col-md-3 text-secondary" id="projectVisibilityLabel">
+            Project Visibility: <inline-help target-id="projectVisibilityHelp" :msg="projectVisibilityHelpMsg" />
           </div>
+          <div class="col">
+            <b-form-select v-model="settings.projectVisibility.value"
+                           :options="projectVisibilityOptions"
+                           @input="projectVisibilityChanged"
+                           aria-labelledby="projectVisibilityLabel"
+                           data-cy="projectVisibilitySelector" required/>
+          </div>
+        </div>
 
           <div class="row mt-3">
             <div class="col col-md-3 text-secondary" id="pointsForLevelsLabel">
@@ -130,14 +124,11 @@ limitations under the License.
                       <div class="row m-0">
                         <b-form-radio class="mr-2" value="Approval" :disabled="!selfReport.enabled">Approval Queue (reviewed by project admins first)</b-form-radio>
                         <span class="text-muted mr-3 ml-2">|</span>
-                        <label class="m-0">
-                          <b-form-checkbox data-cy="justificationRequiredCheckbox"
-                                           class="d-inline"
-                                           v-model="settings.selfReportJustificationRequired.value"
-                                           :disabled="!approvalSelected || !selfReport.enabled"
-                                           aria-labelledby="justificationRequiredLabel"
-                                           @input="justificationRequiredChanged"/>
-                          <span id="justificationRequiredLabel" class="font-italic" :class="{ 'text-secondary': !approvalSelected || !selfReport.enabled}">Justification Required </span><inline-help
+                        <label for="self-report-checkbox" class="m-0">
+                          <b-form-checkbox data-cy="justificationRequiredCheckbox" id="justification-required-checkbox"
+                                           class="d-inline" v-model="settings.selfReportJustificationRequired.value"
+                                           :disabled="!approvalSelected || !selfReport.enabled" @input="justificationRequiredChanged"/>
+                          <span class="font-italic" :class="{ 'text-secondary': !approvalSelected || !selfReport.enabled}">Justification Required </span><inline-help
                           msg="Check to require users to submit a justification when self-reporting this skill"
                           target-id="justificationRequired"/>
                         </label>
@@ -199,12 +190,17 @@ limitations under the License.
 <script>
   import { extend, ValidationProvider } from 'vee-validate';
   import { SkillsReporter } from '@skilltree/skills-client-vue';
+  import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
   import SettingService from './SettingsService';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import SimpleCard from '../utils/cards/SimpleCard';
   import InlineHelp from '../utils/InlineHelp';
   import LoadingContainer from '../utils/LoadingContainer';
   import ToastSupport from '../utils/ToastSupport';
+
+  const publicNotDiscoverable = 'pnd';
+  const discoverableProgressAndRanking = 'dpr';
+  const privateInviteOnly = 'pio';
 
   extend('root_help_url', {
     message: (field) => `${field} must start with "http(s)"`,
@@ -218,7 +214,7 @@ limitations under the License.
 
   export default {
     name: 'ProjectSettings',
-    mixins: [ToastSupport],
+    mixins: [ToastSupport, MsgBoxMixin],
     components: {
       LoadingContainer,
       InlineHelp,
@@ -239,9 +235,23 @@ limitations under the License.
           ],
         },
         settings: {
+          projectVisibility: {
+            value: 'pnd',
+            setting: 'synthetic.project_visibility',
+            lastLoadedValue: 'pnd',
+            dirty: false,
+            projectId: this.$route.params.projectId,
+          },
           productionModeEnabled: {
             value: 'false',
             setting: 'production.mode.enabled',
+            lastLoadedValue: 'false',
+            dirty: false,
+            projectId: this.$route.params.projectId,
+          },
+          inviteOnlyProject: {
+            value: 'false',
+            setting: 'invite_only',
             lastLoadedValue: 'false',
             dirty: false,
             projectId: this.$route.params.projectId,
@@ -299,13 +309,39 @@ limitations under the License.
     computed: {
       isDirty() {
         const foundDirty = Object.values(this.settings).find((item) => item.dirty);
-        return foundDirty;
+        return !!foundDirty;
       },
       isProgressAndRankingEnabled() {
         return this.$store.getters.config.rankingAndProgressViewsEnabled === true || this.$store.getters.config.rankingAndProgressViewsEnabled === 'true';
       },
       approvalSelected() {
         return this.selfReport.selected === 'Approval';
+      },
+      projectVisibilityOptions() {
+        const opts = [
+          { value: publicNotDiscoverable, text: 'Public Not Discoverable' },
+          { value: privateInviteOnly, text: 'Private Invite Only' },
+        ];
+        if (this.isProgressAndRankingEnabled) {
+          opts.push({ value: discoverableProgressAndRanking, text: 'Discoverable on Progress And Ranking' });
+        }
+        return opts;
+      },
+      projectVisibilityHelpMsg() {
+        if (this.isProgressAndRankingEnabled) {
+          return 'Public Not Discoverable (default) projects can be accessed directly but are not discoverable on the Progress and Ranking page. '
+            + 'Discoverable on Progress and Ranking projects can be accessed directly and are selectable on the Progress and Ranking page. '
+            + 'Private Invite Only projects may ONLY be accessed by users who have been issued a specific project invite. ';
+        }
+        return 'Public Not Discoverable (default) projects can be accessed directly by any user. '
+          + 'Private Invite Only projects may ONLY be accessed by users who have been issued a specific project invite. ';
+      },
+    },
+    watch: {
+      isDirty(newVal, oldVal) {
+        if (newVal === false && oldVal === true && this.errMsg !== null) {
+          this.errMsg = null;
+        }
       },
     },
     methods: {
@@ -331,6 +367,9 @@ limitations under the License.
       rankAndLeaderboardOptOutChanged(value) {
         this.settings.rankAndLeaderboardOptOut.dirty = `${value}` !== `${this.settings.rankAndLeaderboardOptOut.lastLoadedValue}`;
       },
+      inviteOnlyProjectChanged(value) {
+        this.settings.inviteOnlyProject.dirty = `${value}` !== `${this.settings.inviteOnlyProject.lastLoadedValue}`;
+      },
       selfReportingTypeChanged(value) {
         this.settings.selfReportType.value = value;
         this.settings.selfReportType.dirty = `${this.settings.selfReportType.value}` !== `${this.settings.selfReportType.lastLoadedValue}`;
@@ -347,10 +386,35 @@ limitations under the License.
       levelDisplayNameChanged(value) {
         this.settings.levelDisplayName.dirty = `${value}` !== `${this.settings.levelDisplayName.lastLoadedValue}`;
       },
+      projectVisibilityChanged(value) {
+        const dirty = `${value}` !== `${this.settings.projectVisibility.lastLoadedValue}`;
+        this.settings.projectVisibility.dirty = dirty;
+        if (dirty) {
+          if (value === publicNotDiscoverable) {
+            this.settings.inviteOnlyProject.value = 'false';
+            this.settings.productionModeEnabled.value = 'false';
+          } else if (value === privateInviteOnly) {
+            this.settings.inviteOnlyProject.value = 'true';
+            this.settings.productionModeEnabled.value = 'false';
+            this.msgOk('Changing this Project to Invite Only '
+              + 'will restrict access to the training profile and '
+              + 'skill reporting to only invited users.', 'Changing to Invite Only');
+          } else if (value === discoverableProgressAndRanking) {
+            this.settings.inviteOnlyProject.value = 'false';
+            this.settings.productionModeEnabled.value = 'true';
+          }
+        } else {
+          this.settings.inviteOnlyProject.value = this.settings.inviteOnlyProject.lastLoadedValue;
+          this.settings.productionModeEnabled.value = this.settings.productionModeEnabled.lastLoadedValue;
+        }
+        this.inviteOnlyProjectChanged(this.settings.inviteOnlyProject.value);
+        this.productionModeEnabledChanged(this.settings.productionModeEnabled.value);
+      },
       loadSettings() {
         SettingService.getSettingsForProject(this.$route.params.projectId)
           .then((response) => {
             if (response) {
+              this.setSyntheticSetting(response);
               const entries = Object.entries(this.settings);
               entries.forEach((entry) => {
                 const [key, value] = entry;
@@ -372,13 +436,27 @@ limitations under the License.
             this.isLoading = false;
           });
       },
+      setSyntheticSetting(settingsResponse) {
+        const productionMode = settingsResponse.find((setting) => setting.setting === 'production.mode.enabled');
+        const inviteOnly = settingsResponse.find((setting) => setting.setting === 'invite_only');
+
+        let selectedValue = publicNotDiscoverable;
+        if (inviteOnly?.value === 'true') {
+          selectedValue = privateInviteOnly;
+        } else if (productionMode?.value === 'true') {
+          selectedValue = discoverableProgressAndRanking;
+        }
+        this.settings.projectVisibility.lastLoadedValue = selectedValue;
+        this.settings.projectVisibility.value = selectedValue;
+        this.settings.projectVisibility.dirty = false;
+      },
       save() {
         this.$refs.observer.validate()
           .then((res1) => {
             if (!res1) {
               this.errMsg = 'Form did NOT pass validation, please fix and try to Save again';
             } else {
-              const dirtyChanges = Object.values(this.settings).filter((item) => item.dirty);
+              const dirtyChanges = Object.values(this.settings).filter((item) => item.dirty && !item.setting.startsWith('synthetic.'));
               if (dirtyChanges) {
                 this.isLoading = true;
                 SettingService.checkSettingsValidity(this.$route.params.projectId, dirtyChanges)
@@ -398,11 +476,17 @@ limitations under the License.
         SettingService.saveSettings(this.$route.params.projectId, dirtyChanges)
           .then(() => {
             this.showSavedMsg = true;
-            setTimeout(() => { this.showSavedMsg = false; }, 4000);
+            this.$announcer.polite('Project Settings have been successfully saved');
+            setTimeout(() => {
+              this.showSavedMsg = false;
+            }, 4000);
             const entries = Object.entries(this.settings);
             entries.forEach((entry) => {
               const [key, value] = entry;
-              this.settings[key] = Object.assign(value, { dirty: false, lastLoadedValue: value.value });
+              this.settings[key] = Object.assign(value, {
+                dirty: false,
+                lastLoadedValue: value.value,
+              });
               if (value.setting === this.settings.helpUrlHost.setting && value.value && value.value.length > 0) {
                 SkillsReporter.reportSkill('ConfigureProjectRootHelpUrl');
               }

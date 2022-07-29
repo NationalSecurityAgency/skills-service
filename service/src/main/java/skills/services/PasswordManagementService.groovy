@@ -17,7 +17,6 @@ package skills.services
 
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
-import org.apache.commons.lang3.time.DurationFormatUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Conditional
 import org.springframework.stereotype.Component
@@ -35,10 +34,8 @@ import skills.storage.model.UserAttrs
 import skills.storage.model.auth.User
 import skills.storage.model.auth.UserToken
 import skills.storage.repos.PasswordResetTokenRepo
-
-import java.time.Duration
-import java.time.LocalDateTime
-import java.time.ZoneId
+import skills.utils.Expiration
+import skills.utils.ExpirationUtils
 
 @Slf4j
 @Component
@@ -93,16 +90,12 @@ class PasswordManagementService {
         UserToken token = tokenRepo.findByUserIdAndType(user.userId, type)
 
         SettingsResult expirationSetting = settingsService.getGlobalSetting(Settings.GLOBAL_RESET_TOKEN_EXPIRATION.settingName)
-        Duration expirationDuration = null
+        String duration = DEFAULT_TOKEN_EXPIRATION
         if(expirationSetting) {
-            expirationDuration = Duration.parse(expirationSetting.value)
-        } else {
-            expirationDuration = Duration.parse(DEFAULT_TOKEN_EXPIRATION)
+            duration = expirationSetting.value
         }
 
-        String validFor = DurationFormatUtils.formatDurationWords(expirationDuration.toMillis(), true, true)
-        LocalDateTime expires = LocalDateTime.now()
-        expires = expirationDuration.addTo(expires)
+        Expiration expiration = ExpirationUtils.getExpiration(duration)
 
         if (!token) {
             token = new UserToken()
@@ -111,7 +104,7 @@ class PasswordManagementService {
         }
 
         token.setToken(UUID.randomUUID().toString())
-        token.setExpires(Date.from(expires.atZone(ZoneId.systemDefault()).toInstant()))
+        token.setExpires(expiration.expiresOn)
         tokenRepo.save(token)
         UserAttrs attrs = attrsService.findByUserId(user.userId)
 
@@ -148,7 +141,7 @@ class PasswordManagementService {
         templateContext.setVariable("recipientName", name)
         templateContext.setVariable("email", email)
         templateContext.setVariable("senderName", "The team")
-        templateContext.setVariable("validTime", validFor)
+        templateContext.setVariable("validTime", expiration.validFor)
         templateContext.setVariable("publicUrl", url)
         templateContext.setVariable("token", token.token)
         templateContext.setVariable("htmlHeader", formatting.htmlHeader)

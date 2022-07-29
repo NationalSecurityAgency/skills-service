@@ -33,7 +33,8 @@ limitations under the License.
                       <div class="d-flex flex-row">
                         <div class="text-left mr-auto" :data-cy="`pageHeaderStat_${stat.label}`">
                           <div class="h5 card-title text-uppercase text-muted mb-0 small">{{stat.label}}</div>
-                          <span class="h5 font-weight-bold mb-0" data-cy="statValue">{{ stat.count | number}}</span>
+                          <div v-if="stat.preformatted" v-html="stat.preformatted"></div>
+                          <span v-else class="h5 font-weight-bold mb-0" data-cy="statValue">{{ stat.count | number}}</span>
                           <span v-if="stat.warnMsg" class="ml-1">
                             <i class="fa fa-exclamation-circle text-warning"
                                :aria-label="`Warning: ${stat.warnMsg}`"
@@ -51,7 +52,7 @@ limitations under the License.
                                class="text-left">
                             <b-badge :variant="`${secCount.badgeVariant}`"
                                      :data-cy="`pageHeaderStats_${stat.label}_${secCount.label}`">
-                              <span>{{ secCount.count | number }}</span>
+                              <span>{{ secCount.count }}</span>
                             </b-badge>
                             <span class="text-left text-secondary text-uppercase ml-1"
                                   style="font-size: 0.8rem">{{ secCount.label }}</span>

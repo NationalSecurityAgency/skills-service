@@ -21,7 +21,10 @@ import com.github.kagkarlsson.scheduler.task.ExecutionComplete
 import com.github.kagkarlsson.scheduler.task.ExecutionOperations
 import com.github.kagkarlsson.scheduler.task.FailureHandler
 import com.github.kagkarlsson.scheduler.task.helper.OneTimeTask
+import com.github.kagkarlsson.scheduler.task.helper.RecurringTask
 import com.github.kagkarlsson.scheduler.task.helper.Tasks
+import com.github.kagkarlsson.scheduler.task.schedule.FixedDelay
+import com.github.kagkarlsson.scheduler.task.schedule.Schedules
 import groovy.util.logging.Slf4j
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -32,9 +35,11 @@ import skills.tasks.JsonSerializer
 import skills.tasks.data.CatalogFinalizeRequest
 import skills.tasks.data.CatalogSkillDefinitionUpdated
 import skills.tasks.data.ImportedSkillAchievement
+import skills.tasks.data.ProjectInviteCleanup
 import skills.tasks.executors.CatalogSkillUpdatedTaskExecutor
 import skills.tasks.executors.FinalizeCatalogSkillsImportExecutor
 import skills.tasks.executors.ImportedSkillAchievementTaskExecutor
+import skills.tasks.executors.ProjectInviteCleanupTaskExecutor
 
 import java.time.Duration
 
@@ -50,6 +55,9 @@ class TaskConfig {
 
     @Value('#{"${skills.config.exponentialBackOffRate:2}"}')
     int exponentialBackOffRate
+
+    @Value('#{"${skills.config.inviteCleanupSchedule:DAILY|23:30}"}')
+    String projectInviteCleanupSchedule
 
     @Bean
     DbSchedulerCustomizer customizer() {
@@ -121,6 +129,13 @@ class TaskConfig {
                         new FailureHandler.ExponentialBackoffFailureHandler(Duration.ofSeconds(exponentialBackOffSeconds), exponentialBackOffRate)))
                 )
                 .execute(finalizeCatalogSkillsImportExecutor)
+    }
+
+    @Bean
+    RecurringTask<ProjectInviteCleanup> cleanupProjectInvitesTask(ProjectInviteCleanupTaskExecutor projectInviteCleanupTaskExecutor) {
+        //recurring tasks are automatically picked up by the scheduler
+        //TODO: extract the scheduleString to be configurable based off of a config property to facilitate testing
+        return Tasks.recurring("project-invite-cleanup", Schedules.parseSchedule("DAILY|23:30")).execute(projectInviteCleanupTaskExecutor)
     }
 
 }

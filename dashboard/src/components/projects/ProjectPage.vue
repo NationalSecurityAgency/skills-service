@@ -115,18 +115,35 @@ limitations under the License.
       ...mapGetters([
         'project',
       ]),
+      isInviteOnly() {
+        return this.$store.getters.projConfig.invite_only === 'true';
+      },
+      isDiscoverable() {
+        return this.$store.getters.projConfig['production.mode.enabled'] === 'true';
+      },
       headerOptions() {
-        if (!this.project) {
+        if (!this.project || !this.$store.getters.projConfig) {
           return {};
         }
+        let visibilityIcon = 'fas fa-lock-open';
+        let visibilityDescription = 'Not Discoverable';
+        let visibilityType = 'PUBLIC';
+        if (this.isInviteOnly) {
+          visibilityDescription = 'Invite Only';
+          visibilityIcon = 'fas fa-lock';
+          visibilityType = 'PRIVATE';
+        } else if (this.isDiscoverable) {
+          visibilityDescription = 'Discoverable';
+        }
+
         return {
           icon: 'fas fa-list-alt skills-color-projects',
           title: `PROJECT: ${this.project.name}`,
           subTitle: `ID: ${this.project.projectId}`,
           stats: [{
-            label: 'Subjects',
-            count: this.project.numSubjects,
-            icon: 'fas fa-cubes skills-color-subjects',
+            label: 'Visibility',
+            preformatted: `<div class="h5 font-weight-bold mb-0">${visibilityType}</div><div class="text-secondary">(${visibilityDescription})</div>`,
+            icon: `${visibilityIcon} skills-color-visibility`,
           }, {
             label: 'Skills',
             count: this.project.numSkills,

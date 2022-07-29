@@ -12,4 +12,4 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 -- creating Inception project is expensive so lets not delete it
-select count(*) from scheduled_tasks;
+select count(*) from scheduled_tasks where task_name != 'project-invite-cleanup';

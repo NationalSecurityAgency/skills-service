@@ -20,17 +20,27 @@ limitations under the License.
       <role-manager :project="project"/>
     </metrics-card>
 
+    <metrics-card v-if="privateProject && emailEnabled" title="Invite Users" data-cy="inviteUser" :no-padding="true" class="my-4">
+      <invite-users-to-project ref="inviteUsers" :project-id="project.projectId"/>
+    </metrics-card>
+    <metrics-card v-if="privateProject" title="Revoke Access" data-cy="revokeAccess" :no-padding="true" class="my-4">
+      <revoke-user-access />
+    </metrics-card>
+
     <trusted-client-props v-if="showTrustedClientProps" :project-id="project.projectId" class="my-4"/>
   </loading-container>
 </template>
 
 <script>
+  import InviteUsersToProject from '@/components/access/InviteUsersToProject';
+  import RevokeUserAccess from '@/components/access/RevokeUserAccess';
   import MetricsCard from '../metrics/utils/MetricsCard';
   import RoleManager from './RoleManager';
   import TrustedClientProps from './TrustedClientProps';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import ProjectService from '../projects/ProjectService';
   import LoadingContainer from '../utils/LoadingContainer';
+  import SettingsService from '../settings/SettingsService';
 
   export default {
     name: 'AccessSettings',
@@ -40,11 +50,15 @@ limitations under the License.
       SubPageHeader,
       RoleManager,
       TrustedClientProps,
+      InviteUsersToProject,
+      RevokeUserAccess,
     },
     data() {
       return {
         isLoading: true,
         project: {},
+        privateProject: false,
+        emailEnabled: false,
       };
     },
     computed: {
@@ -52,10 +66,31 @@ limitations under the License.
         return (!this.$store.getters.isPkiAuthenticated);
       },
     },
+    beforeRouteLeave(to, from, next) {
+      if (this.$refs.inviteUsers && this.$refs.inviteUsers.canDiscard) {
+        this.$refs.inviteUsers.canDiscard().then((discard) => {
+          if (discard) {
+            next();
+          } else {
+            next(false);
+          }
+        });
+      } else {
+        next();
+      }
+    },
     mounted() {
       ProjectService.getProjectDetails(this.$route.params.projectId)
         .then((res) => {
           this.project = res;
+        })
+        .then(() => SettingsService.getProjectSetting(this.$route.params.projectId, 'invite_only'))
+        .then((setting) => {
+          this.privateProject = setting?.enabled;
+        })
+        .then(() => ProjectService.isEmailServiceSupported())
+        .then((emailEnabled) => {
+          this.emailEnabled = emailEnabled;
         })
         .finally(() => {
           this.isLoading = false;
