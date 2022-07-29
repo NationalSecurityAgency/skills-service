@@ -101,6 +101,14 @@ export default {
       skillIds,
     });
   },
+  moveSkills(projectId, skillIds, newSubjectId, newGroupId = null) {
+    const url = `/admin/projects/${encodeURIComponent(projectId)}/skills/move`;
+    return axios.post(url, {
+      subjectId: newSubjectId,
+      groupId: newGroupId,
+      skillIds,
+    });
+  },
   getReusedSkills(projectId, parentSkillId) {
     const url = `/admin/projects/${projectId}/reused/${parentSkillId}/skills`;
     return axios.get(url)

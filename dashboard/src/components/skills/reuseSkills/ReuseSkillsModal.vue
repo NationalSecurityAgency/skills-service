@@ -14,15 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <b-modal :id="firstSkillId" size="lg" :title="`Reuse Skills in this Project`" v-model="show"
+  <b-modal :id="firstSkillId" size="lg" :title="`${actionName} Skills in this Project`"
+           v-model="show"
            :no-close-on-backdrop="true" :centered="true"
            header-bg-variant="info" header-text-variant="light" no-fade role="dialog" @hide="cancel"
            aria-label="'Reuse Skills in this project'">
     <skills-spinner :is-loading="isLoading"/>
 
     <div v-if="!isLoading" data-cy="reuseModalContent">
-      <no-content2 v-if="importFinalizePending" title="Cannot reuse"
-                   message="Cannot initiate skill reuse while skill finalization is pending."/>
+      <no-content2 v-if="importFinalizePending" :title="`Cannot ${actionName}`"
+                   :message="`Cannot initiate skill ${actionName} while skill finalization is pending.`"/>
       <div v-if="!importFinalizePending">
         <div id="step1" v-if="!selectedDestination && !state.reUseInProgress"
              data-cy="reuseSkillsModalStep1">
@@ -82,7 +83,7 @@ limitations under the License.
                   @change="updateDestinationPage"
                   :total-rows="destinations.all.length"
                   :per-page="destinations.perPageNum"
-                  aria-controls="Page Controls for skill reuse destination"
+                  :aria-controls="`Page Controls for skill ${actionName} destination`"
                   data-cy="destListPagingControl"
                 ></b-pagination>
               </div>
@@ -92,7 +93,7 @@ limitations under the License.
           </div>
           <div v-else>
             <no-content2 title="No Destinations"
-                         message="There are no Subjects or Groups that this skill can be reused in. Please create subjects and/or groups if you want to reuse skills."/>
+                         :message="`There are no Subjects or Groups that this skill can be ${actionNameInPast} ${actionDirection}. Please create subjects and/or groups if you want to ${actionName} skills.`"/>
           </div>
         </div>
 
@@ -105,7 +106,8 @@ limitations under the License.
           <b-card class="mt-2">
             <div v-if="skillsForReuse.available.length > 0">
               <b-badge variant="info">{{ skillsForReuse.available.length }}</b-badge>
-              skill{{ plural(skillsForReuse.available) }} will be reused in the
+              skill{{ plural(skillsForReuse.available) }} will be {{ actionNameInPast }}
+              {{ actionDirection }} the
               <span v-if="selectedDestination.groupName">
                 <span class="text-primary font-weight-bold">[{{
                     selectedDestination.groupName
@@ -121,7 +123,7 @@ limitations under the License.
             </div>
             <div v-else>
               <i class="fas fa-exclamation-triangle text-warning mr-2"/>
-              Selected skills are NOT available for reuse in the
+              Selected skills are NOT available for the {{ actionName }} {{ actionDirection }} the
               <span v-if="selectedDestination.groupName"><span
                 class="text-primary font-weight-bold">{{ selectedDestination.groupName }} </span> group</span>
               <span v-else><span
@@ -148,7 +150,7 @@ limitations under the License.
             In Progress:
           </div>
           <b-card class="mt-2">
-            Working very hard to reuse
+            Working very hard to {{ actionName }}
             <b-badge variant="info">{{ skillsForReuse.available.length }}</b-badge>
             skill{{ skillsForReuse.available.length > 1 ? 's' : '' }}. This may take several
             minutes.
@@ -162,7 +164,7 @@ limitations under the License.
             Acknowledgement:
           </div>
           <b-card class="mt-2">
-            <span class="text-success">Successfully</span> reused
+            <span class="text-success">Successfully</span> {{ actionNameInPast }}
             <b-badge variant="info">{{ skillsForReuse.available.length }}</b-badge>
             skill{{ plural(skillsForReuse.available) }}.
           </b-card>
@@ -175,7 +177,7 @@ limitations under the License.
                 @click="initiateReuse"
                 :disabled="!selectedDestination || state.reUseInProgress || (skillsForReuse.available && skillsForReuse.available.length === 0) || state.reUseInProgress"
                 data-cy="reuseButton">
-        Reuse
+        {{ actionName }}
       </b-button>
       <b-button v-if="!state.reUseComplete" variant="secondary" size="sm" class="float-right mr-2"
                 @click="cancel"
@@ -216,10 +218,24 @@ limitations under the License.
         type: Boolean,
         required: true,
       },
+      type: {
+        type: String,
+        required: false,
+        default: 'reuse',
+        validator(value) {
+          return ['reuse', 'move'].includes(value);
+        },
+      },
     },
     data() {
       return {
         show: this.value,
+        isReuseType: this.type === 'reuse',
+        isMoveType: this.type === 'move',
+        textCustomization: {
+          actionName: 'Reuse',
+          actionDirection: 'in',
+        },
         loading: {
           subjects: true,
           reusedSkills: false,
@@ -248,6 +264,12 @@ limitations under the License.
       };
     },
     mounted() {
+      if (this.type === 'move') {
+        this.textCustomization = {
+          actionName: 'Move',
+          actionDirection: 'to',
+        };
+      }
       this.loadSubjects();
       this.loadFinalizeInfo();
     },
@@ -263,6 +285,15 @@ limitations under the License.
       importFinalizePending() {
         return this.finalizeInfo && this.finalizeInfo.numSkillsToFinalize && this.finalizeInfo.numSkillsToFinalize > 0;
       },
+      actionNameInPast() {
+        return `${this.textCustomization.actionName.toLowerCase()}d`;
+      },
+      actionName() {
+        return this.textCustomization.actionName;
+      },
+      actionDirection() {
+        return this.textCustomization.actionDirection;
+      },
     },
     methods: {
       cancel(e) {
@@ -270,6 +301,12 @@ limitations under the License.
         this.publishHidden(e, true);
       },
       close(e) {
+        if (this.state.reUseComplete) {
+          this.$emit('reused', {
+            destination: this.selectedDestination,
+            reusedSkills: this.skillsForReuse.available,
+          });
+        }
         this.show = false;
         this.publishHidden(e, false);
       },
@@ -309,15 +346,21 @@ limitations under the License.
       initiateReuse() {
         this.state.reUseInProgress = true;
         const skillIds = this.skillsForReuse.available.map((sk) => sk.skillId);
-        SkillsService.reuseSkillInAnotherSubject(this.$route.params.projectId, skillIds, this.selectedDestination.subjectId, this.selectedDestination.groupId)
-          .then(() => {
-            this.state.reUseInProgress = false;
-            this.state.reUseComplete = true;
-            this.$emit('reused', {
-              destination: this.selectedDestination,
-              reusedSkills: this.skillsForReuse.available,
+        if (this.isMoveType) {
+          SkillsService.moveSkills(this.$route.params.projectId, skillIds, this.selectedDestination.subjectId, this.selectedDestination.groupId)
+            .then(() => {
+              this.handleActionCompleting();
             });
-          });
+        } else {
+          SkillsService.reuseSkillInAnotherSubject(this.$route.params.projectId, skillIds, this.selectedDestination.subjectId, this.selectedDestination.groupId)
+            .then(() => {
+              this.handleActionCompleting();
+            });
+        }
+      },
+      handleActionCompleting() {
+        this.state.reUseInProgress = false;
+        this.state.reUseComplete = true;
       },
       selectDestination(selection) {
         this.loading.reusedSkills = true;
