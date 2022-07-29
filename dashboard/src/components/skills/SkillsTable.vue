@@ -41,7 +41,7 @@ limitations under the License.
               </b-button-group>
 
               <b-button-group class="d-inline-block mt-2 text-right" :size="actionsBtnSize">
-                <b-button id="selectAllBtn" variant="outline-info" ref="selectAllBtn"
+                <b-button :id="`selectAllBtn_${tableId}`" variant="outline-info" ref="selectAllBtn"
                           :size="actionsBtnSize"
                           @click="changeSelectionForAll(true)"
                           data-cy="selectAllSkillsBtn" class=""><i
@@ -752,7 +752,7 @@ limitations under the License.
                 this.$nextTick(() => {
                   // cannot use this.$refs as the SkillsTable component will be fully reloaded
                   // due to the this.loadSubjectSkills call
-                  document.getElementById('selectAllBtn')
+                  document.getElementById(`selectAllBtn_${this.tableId}`)
                     .focus();
                 });
               });
