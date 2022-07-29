@@ -741,12 +741,12 @@ limitations under the License.
       handleSkillsAreMoved() {
         this.loadSubjectSkills({
           projectId: this.projectId,
-          subjectId: this.subjectId
+          subjectId: this.subjectId,
         })
           .then(() => {
             this.loadSubjectDetailsState({
               projectId: this.projectId,
-              subjectId: this.subjectId
+              subjectId: this.subjectId,
             });
           });
       },
