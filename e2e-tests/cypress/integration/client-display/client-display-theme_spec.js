@@ -328,7 +328,7 @@ describe('Client Display Tests', () => {
       cy.matchSnapshotImage(snapshotOptions);
     });
 
-    it(`test theming - new version notification  - ${size}`, () => {
+    it.only(`test theming - new version notification  - ${size}`, () => {
       cy.setResolution(size);
       cy.intercept(/\/api\/projects\/proj1\/rank$/,
         {
