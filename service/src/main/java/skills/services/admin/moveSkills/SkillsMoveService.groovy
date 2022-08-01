@@ -27,7 +27,7 @@ import skills.services.RuleSetDefGraphService
 import skills.services.UserAchievementsAndPointsManagement
 import skills.services.admin.DisplayOrderService
 import skills.services.admin.SkillCatalogFinalizationService
-import skills.services.admin.SkillCatalogTransactionalAccessor
+import skills.services.admin.BatchOperationsTransactionalAccessor
 import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
@@ -53,7 +53,7 @@ class SkillsMoveService {
     SkillDefAccessor skillDefAccessor
 
     @Autowired
-    SkillCatalogTransactionalAccessor skillCatalogTransactionalAccessor
+    BatchOperationsTransactionalAccessor batchOperationsTransactionalAccessor
 
     @Autowired
     SkillCatalogFinalizationService skillCatalogFinalizationService
@@ -100,7 +100,7 @@ class SkillsMoveService {
     private void handleDestGroupAchievements(String projectId, SkillsActionRequest skillReuseRequest) {
         if (skillReuseRequest.groupId) {
             SkillDef group = skillDefAccessor.getSkillDef(projectId, skillReuseRequest.groupId)
-            skillCatalogTransactionalAccessor.identifyAndAddGroupAchievements([group])
+            batchOperationsTransactionalAccessor.identifyAndAddGroupAchievements([group])
         }
     }
 
@@ -117,25 +117,25 @@ class SkillsMoveService {
     @Profile
     private void updateDestSubjectUserLevelAchievements(SkillDef destSubj) {
         userAchievementsAndPointsManagement.removeSubjectLevelAchievementsIfUsersDoNotQualify(destSubj)
-        skillCatalogTransactionalAccessor.identifyAndAddSubjectLevelAchievements(destSubj.projectId, destSubj.skillId)
+        batchOperationsTransactionalAccessor.identifyAndAddSubjectLevelAchievements(destSubj.projectId, destSubj.skillId)
     }
 
     @Profile
     private void updateOrigSubjectUserLevelAchievements(SkillDef origSubj) {
         userAchievementsAndPointsManagement.removeSubjectLevelAchievementsIfUsersDoNotQualify(origSubj)
-        skillCatalogTransactionalAccessor.identifyAndAddSubjectLevelAchievements(origSubj.projectId, origSubj.skillId)
+        batchOperationsTransactionalAccessor.identifyAndAddSubjectLevelAchievements(origSubj.projectId, origSubj.skillId)
     }
 
     @Profile
     private void updateUserPointsInDestSubject(String projectId, SkillDef destSubj) {
-        skillCatalogTransactionalAccessor.createSubjectUserPointsForTheNewUsers(projectId, destSubj.skillId)
-        skillCatalogTransactionalAccessor.updateUserPointsForSubject(projectId, destSubj.skillId)
+        batchOperationsTransactionalAccessor.createSubjectUserPointsForTheNewUsers(projectId, destSubj.skillId)
+        batchOperationsTransactionalAccessor.updateUserPointsForSubject(projectId, destSubj.skillId)
     }
 
     @Profile
     private void updateUserPointsInOrigSubject(String projectId, SkillDef origSubj) {
         removeSubjectUserPointsForNonExistentSkillDef(projectId, origSubj)
-        skillCatalogTransactionalAccessor.updateUserPointsForSubject(projectId, origSubj.skillId)
+        batchOperationsTransactionalAccessor.updateUserPointsForSubject(projectId, origSubj.skillId)
     }
 
     @Profile
@@ -161,7 +161,7 @@ class SkillsMoveService {
                 throw new SkillException("All moved skills must come from the same parent. But 2 parents were found: [${origParentSkill.skillId}] and [${parentSkill.skillId}] ", projectId, skillId, ErrorCode.BadParam)
             }
             if (parentSkill.skillId == destParentSkillId) {
-                throw new SkillException("Skill with id [$skillId] already exist under [$destParentSkillId]", projectId, skillId, ErrorCode.BadParam)
+                throw new SkillException("Skill with id [$skillId] already exists under [$destParentSkillId]", projectId, skillId, ErrorCode.BadParam)
             }
             origParentSkill = parentSkill
 
@@ -210,11 +210,11 @@ class SkillsMoveService {
         // optimization - handle the case where skill was moved from a group to its parent subject
         if (destSubj.skillId != origParentSkill.skillId) {
             if (origParentSkill.type == SkillDef.ContainerType.SkillsGroup) {
-                skillCatalogTransactionalAccessor.updateGroupTotalPoints(projectId, origParentSkill.skillId)
+                batchOperationsTransactionalAccessor.updateGroupTotalPoints(projectId, origParentSkill.skillId)
                 SkillDef subject = ruleSetDefGraphService.getParentSkill(origParentSkill.id)
-                skillCatalogTransactionalAccessor.updateSubjectTotalPoints(projectId, subject.skillId)
+                batchOperationsTransactionalAccessor.updateSubjectTotalPoints(projectId, subject.skillId)
             } else {
-                skillCatalogTransactionalAccessor.updateSubjectTotalPoints(projectId, origParentSkill.skillId)
+                batchOperationsTransactionalAccessor.updateSubjectTotalPoints(projectId, origParentSkill.skillId)
             }
         }
     }
@@ -226,12 +226,12 @@ class SkillsMoveService {
         SkillDef destSubj
         if (isGroupDest) {
             SkillDef group = skillDefAccessor.getSkillDef(projectId, skillReuseRequest.groupId)
-            skillCatalogTransactionalAccessor.updateGroupTotalPoints(projectId, skillReuseRequest.groupId)
+            batchOperationsTransactionalAccessor.updateGroupTotalPoints(projectId, skillReuseRequest.groupId)
             destSubj = ruleSetDefGraphService.getParentSkill(group.id)
-            skillCatalogTransactionalAccessor.updateSubjectTotalPoints(projectId, destSubj.skillId)
+            batchOperationsTransactionalAccessor.updateSubjectTotalPoints(projectId, destSubj.skillId)
         } else {
             destSubj = skillDefAccessor.getSkillDef(projectId, skillReuseRequest.subjectId, [SkillDef.ContainerType.Subject])
-            skillCatalogTransactionalAccessor.updateSubjectTotalPoints(projectId, destSubj.skillId)
+            batchOperationsTransactionalAccessor.updateSubjectTotalPoints(projectId, destSubj.skillId)
         }
         return destSubj
     }

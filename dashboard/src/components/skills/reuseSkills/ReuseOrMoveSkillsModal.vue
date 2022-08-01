@@ -25,7 +25,8 @@ limitations under the License.
       <no-content2 v-if="importFinalizePending" :title="`Cannot ${actionName}`"
                    :message="`Cannot initiate skill ${actionNameLowerCase} while skill finalization is pending.`"/>
       <no-content2 v-if="state.skillsWereMovedOrReusedAlready" title="Please Refresh"
-                   message="Skills were moved or reused in another browser tab OR modified by another project administrator. Please refresh the page."/>
+                   :show-refresh-action="true"
+                   message="Skills were moved or reused in another browser tab OR modified by another project administrator."/>
 
       <div v-if="!importFinalizePending && !state.skillsWereMovedOrReusedAlready">
         <div id="step1" v-if="!selectedDestination && !state.reUseInProgress"

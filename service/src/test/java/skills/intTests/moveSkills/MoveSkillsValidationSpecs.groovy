@@ -37,7 +37,7 @@ class MoveSkillsValidationSpecs extends DefaultIntSpec {
         skillsService.moveSkills(p1.projectId, [p1Skills[0].skillId], p1subj1.subjectId, p1subj1g1.skillId)
         then:
         SkillsClientException ex = thrown(SkillsClientException)
-        ex.message.contains("Skill with id [${p1Skills[0].skillId}] already exist under [${p1subj1g1.skillId}]")
+        ex.message.contains("Skill with id [${p1Skills[0].skillId}] already exists under [${p1subj1g1.skillId}]")
     }
 
     def "validate skill is not already in the subject"() {
@@ -50,7 +50,7 @@ class MoveSkillsValidationSpecs extends DefaultIntSpec {
         skillsService.moveSkills(p1.projectId, [p1Skills[0].skillId], p1subj1.subjectId)
         then:
         SkillsClientException ex = thrown(SkillsClientException)
-        ex.message.contains("Skill with id [${p1Skills[0].skillId}] already exist under [${p1subj1.subjectId}]")
+        ex.message.contains("Skill with id [${p1Skills[0].skillId}] already exists under [${p1subj1.subjectId}]")
     }
 
     def "all skill ids that are moved must come from the same parent"() {
@@ -69,7 +69,7 @@ class MoveSkillsValidationSpecs extends DefaultIntSpec {
         skillsService.moveSkills(p1.projectId, [p1Skills[0].skillId, p1SkillsSubj2[0].skillId], p1subj1.subjectId)
         then:
         SkillsClientException ex = thrown(SkillsClientException)
-        ex.message.contains("Skill with id [${p1Skills[0].skillId}] already exist under [${p1subj1.subjectId}]")
+        ex.message.contains("Skill with id [${p1Skills[0].skillId}] already exists under [${p1subj1.subjectId}]")
     }
 
     def "cannot move if a finalization is pending"() {

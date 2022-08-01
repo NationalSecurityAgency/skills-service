@@ -76,7 +76,7 @@ class SkillCatalogFinalizationService {
     SettingsService settingsService
 
     @Autowired
-    SkillCatalogTransactionalAccessor skillCatalogTransactionalAccessor
+    BatchOperationsTransactionalAccessor batchOperationsTransactionalAccessor
 
     final static String PROJ_FINALIZE_STATE_PROP = "catalog.finalize.state"
     static enum FinalizeState {
@@ -118,16 +118,16 @@ class SkillCatalogFinalizationService {
                         .collect { ruleSetDefGraphService.getParentSkill(it) }
                         .unique(false) { SkillDef a, SkillDef b -> a.skillId <=> b.skillId }
                 groups.each {
-                    skillCatalogTransactionalAccessor.updateGroupTotalPoints(projectId, it.skillId)
+                    batchOperationsTransactionalAccessor.updateGroupTotalPoints(projectId, it.skillId)
                 }
 
                 // important: must update subject's total points first then project
                 List<SkillDef> subjects = disabledImportedSkills.collect { ruleSetDefGraphService.getMySubjectParent(it.id) }
                         .unique(false) { SkillDef a, SkillDef b -> a.skillId <=> b.skillId }
                 subjects.each {
-                    skillCatalogTransactionalAccessor.updateSubjectTotalPoints(projectId, it.skillId)
+                    batchOperationsTransactionalAccessor.updateSubjectTotalPoints(projectId, it.skillId)
                 }
-                skillCatalogTransactionalAccessor.updateProjectsTotalPoints(projectId)
+                batchOperationsTransactionalAccessor.updateProjectsTotalPoints(projectId)
                 log.info("Updated totalPoints attribute for [{}] project", projectId)
 
                 List<Integer> skillRefIds = disabledImportedSkills.collect { it.copiedFrom }
@@ -135,13 +135,13 @@ class SkillCatalogFinalizationService {
 
                 // 1. copy skill points and achievements
                 log.info("Copying [{}] skills UserPoints to the imported project [{}]", skillRefIds.size(), projectId)
-                skillCatalogTransactionalAccessor.copySkillUserPointsToTheImportedProjects(projectId, skillRefIds)
+                batchOperationsTransactionalAccessor.copySkillUserPointsToTheImportedProjects(projectId, skillRefIds)
                 log.info("Copying [{}] skills achievements to the imported project [{}]", skillRefIds.size(), projectId)
-                skillCatalogTransactionalAccessor.copySkillAchievementsToTheImportedProjects(skillRefIds)
+                batchOperationsTransactionalAccessor.copySkillAchievementsToTheImportedProjects(skillRefIds)
                 log.info("Completed import of skill's points and achievements for [{}] skills to [{}] project", skillRefIds.size(), projectId)
 
                 log.info("Identifying group achievements for [{}] groups in project [{}]", groups.size(), projectId)
-                skillCatalogTransactionalAccessor.identifyAndAddGroupAchievements(groups)
+                batchOperationsTransactionalAccessor.identifyAndAddGroupAchievements(groups)
                 log.info("Completed import of group achievements for [{}] groups in [{}] project", groups.size(), projectId)
 
                 SettingsResult settingsResult = settingsService.getProjectSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
@@ -150,26 +150,26 @@ class SkillCatalogFinalizationService {
                 // 2. for each subject (1) create user points for new users (2) update existing (3) calculate achievements
                 subjects.each { SkillDef subject ->
                     log.info("Creating UserPoints for the new users for [{}-{}] subject", projectId, subject.skillId)
-                    skillCatalogTransactionalAccessor.createSubjectUserPointsForTheNewUsers(projectId, subject.skillId)
+                    batchOperationsTransactionalAccessor.createSubjectUserPointsForTheNewUsers(projectId, subject.skillId)
                     log.info("Updating UserPoints for the existing users for [{}-{}] subject", projectId, subject.skillId)
-                    skillCatalogTransactionalAccessor.updateUserPointsForSubject(projectId, subject.skillId)
+                    batchOperationsTransactionalAccessor.updateUserPointsForSubject(projectId, subject.skillId)
 
                     log.info("Identifying subject level achievements for [{}-{}] subject", projectId, subject.skillId)
-                    skillCatalogTransactionalAccessor.identifyAndAddSubjectLevelAchievements(subject.projectId, subject.skillId)
+                    batchOperationsTransactionalAccessor.identifyAndAddSubjectLevelAchievements(subject.projectId, subject.skillId)
                     log.info("Completed import for subject. projectIdTo=[{}], subjectIdTo=[{}]", projectId, subject.skillId)
                 }
 
                 // 3. for the project (1) create user points for new users (2) update existing (3) calculate achievements
                 log.info("Creating UserPoints for the new users for [{}] project", projectId)
-                skillCatalogTransactionalAccessor.createProjectUserPointsForTheNewUsers(projectId)
+                batchOperationsTransactionalAccessor.createProjectUserPointsForTheNewUsers(projectId)
                 log.info("Updating UserPoints for the existing users for [{}] project", projectId)
-                skillCatalogTransactionalAccessor.updateUserPointsForProject(projectId)
+                batchOperationsTransactionalAccessor.updateUserPointsForProject(projectId)
                 log.info("Identifying and adding project level achievements for [{}] project, pointsBased=[{}]", projectId, pointsBased)
-                skillCatalogTransactionalAccessor.identifyAndAddProjectLevelAchievements(projectId, pointsBased)
+                batchOperationsTransactionalAccessor.identifyAndAddProjectLevelAchievements(projectId, pointsBased)
                 log.info("Completed import of points and achievements for [{}] skills for project [{}]", skillRefIds.size(), projectId)
 
                 finalizedSkillIds = disabledImportedSkills.collect {it.id }
-                skillCatalogTransactionalAccessor.enableSkills(disabledImportedSkills)
+                batchOperationsTransactionalAccessor.enableSkills(disabledImportedSkills)
             } else {
                 log.warn("Finalize was called for [{}] projectId but there were no disabled skills", projectId)
             }

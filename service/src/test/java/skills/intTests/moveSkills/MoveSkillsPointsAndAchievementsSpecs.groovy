@@ -943,7 +943,7 @@ class MoveSkillsPointsAndAchievementsSpecs extends DefaultIntSpec {
         userAchievedRepo.findAllByUserIdAndProjectIdAndSkillId(user1, p1.projectId, p1Skills[2].skillId)
     }
 
-    def "when skills are moved inot an empty group - group achievement is awarded to users that achieved all of those skills"() {
+    def "when skills are moved into an empty group - group achievement is awarded to users that achieved all of those skills"() {
         def p1 = createProject(1)
 
         def p1subj1 = createSubject(1, 1)
