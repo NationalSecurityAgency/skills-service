@@ -41,7 +41,7 @@ limitations under the License.
               </b-button-group>
 
               <b-button-group class="d-inline-block mt-2 text-right" :size="actionsBtnSize">
-                <b-button variant="outline-info" ref="selectAllBtn"
+                <b-button :id="`selectAllBtn_${tableId}`" variant="outline-info" ref="selectAllBtn"
                           :size="actionsBtnSize"
                           @click="changeSelectionForAll(true)"
                           data-cy="selectAllSkillsBtn" class=""><i
@@ -56,8 +56,9 @@ limitations under the License.
               </b-button-group>
             </div>
             <div class="col text-right">
-              <b-dropdown :id="`tableActionsBtn_${tableId}`" :ref="`tableActionsBtn_${tableId}`" right
-                          variant="outline-info" class="mr-3 mt-2"
+              <b-dropdown :id="`tableActionsBtn_${tableId}`" :ref="`tableActionsBtn_${tableId}`"
+                          right
+                          variant="outline-info" class="mr-3 mt-2 skillActions"
                           :disabled="actionsDisable"
                           :size="actionsBtnSize"
                           data-cy="skillActionsBtn">
@@ -73,6 +74,9 @@ limitations under the License.
                 <b-dropdown-item @click="handleSkillReuseRequest" data-cy="skillReuseBtn"><i
                   class="fas fa-recycle"></i> Reuse in <span class="text-primary">this</span>
                   Project
+                </b-dropdown-item>
+                <b-dropdown-item @click="handleSkillMoveRequest" data-cy="skillMoveBtn"><i
+                  class="fas fa-shipping-fast"></i> Move Skills
                 </b-dropdown-item>
               </b-dropdown>
             </div>
@@ -106,7 +110,9 @@ limitations under the License.
                 <div class="text-success font-weight-bold">
                   <i class="fas fa-layer-group" aria-hidden="true"></i> <span class="text-uppercase">Group</span>
                   <b-badge variant="success" class="ml-2 text-uppercase" data-cy="numSkillsInGroup">
-                    {{ data.item.numSkillsInGroup }} skills
+                    <span>{{
+                        data.item.numSkillsInGroup
+                      }} skill{{ data.item.numSkillsInGroup === 1 ? '' : 's' }}</span>
                   </b-badge>
                 </div>
                 <div class="h5 text-primary"><show-more :text="data.item.nameHtml ? data.item.nameHtml : data.item.name" :limit="45" :contains-html="data.item.nameHtml" /></div>
@@ -297,7 +303,7 @@ limitations under the License.
         <template #row-details="row">
             <child-row-skill-group-display v-if="row.item.isGroupType" :group="row.item"
                                            :add-skill-disabled="addSkillDisabled"
-                                           @skills-reused="handleSkillsReused"
+                                           @skills-reused="handleSkillsAreReusedOrMoved"
                                            @group-changed="groupChanged(row, arguments[0])"/>
             <ChildRowSkillsDisplay v-if="row.item.isSkillType" :project-id="projectId" :subject-id="subjectId" v-skills-onMount="'ExpandSkillDetailsSkillsPage'"
                                    :parent-skill-id="row.item.skillId" :refresh-counter="row.item.refreshCounter"
@@ -325,10 +331,17 @@ limitations under the License.
                        :skills="exportToCatalogInfo.skills"
                        @exported="handleSkillsExportedToCatalog"
                        @hidden="handleExportModalIsClosed"/>
-    <reuse-skills-modal v-if="reuseSkillsInfo.show" v-model="reuseSkillsInfo.show"
-                        :skills="reuseSkillsInfo.skills"
-                        @reused="handleSkillsReused"
-                        @hidden="handleExportModalIsClosed"/>
+    <reuse-or-move-skills-modal id="reuseSkillsModal" v-if="reuseSkillsInfo.show"
+                                v-model="reuseSkillsInfo.show"
+                                :skills="reuseSkillsInfo.skills"
+                                @action-success="handleSkillsAreReusedOrMoved"
+                                @hidden="handleExportModalIsClosed"/>
+    <reuse-or-move-skills-modal id="moveSkillsModal" v-if="moveSkillsInfo.show"
+                                v-model="moveSkillsInfo.show"
+                                :skills="moveSkillsInfo.skills"
+                                type="move"
+                                @action-success="handleSkillsAreReusedOrMoved"
+                                @hidden="handleExportModalIsClosed"/>
     <removal-validation v-if="deleteSkillInfo.show" v-model="deleteSkillInfo.show"
                         @do-remove="doDeleteSkill" @hidden="handleDeleteCancelled">
       <skill-removal-validation :delete-skill-info="deleteSkillInfo"/>
@@ -337,6 +350,7 @@ limitations under the License.
 </template>
 
 <script>
+  import { createNamespacedHelpers } from 'vuex';
   import { SkillsReporter } from '@skilltree/skills-client-vue';
   import dayjs from '@/common-components/DayJsCustomizer';
   import StringHighlighter from '@/common-components/utilities/StringHighlighter';
@@ -344,7 +358,7 @@ limitations under the License.
   import ExportToCatalog from '@/components/skills/catalog/ExportToCatalog';
   import RemovalValidation from '@/components/utils/modal/RemovalValidation';
   import EditImportedSkill from '@/components/skills/skillsGroup/EditImportedSkill';
-  import ReuseSkillsModal from '@/components/skills/reuseSkills/ReuseSkillsModal';
+  import ReuseOrMoveSkillsModal from '@/components/skills/reuseSkills/ReuseOrMoveSkillsModal';
   import SkillRemovalValidation from '@/components/skills/SkillRemovalValidation';
   import EditSkill from './EditSkill';
   import NoContent2 from '../utils/NoContent2';
@@ -358,6 +372,9 @@ limitations under the License.
   import ChildRowSkillGroupDisplay from './skillsGroup/ChildRowSkillGroupDisplay';
   import EditSkillGroup from './skillsGroup/EditSkillGroup';
   import ShowMore from './selfReport/ShowMore';
+
+  const subjects = createNamespacedHelpers('subjects');
+  const subjectSkills = createNamespacedHelpers('subjectSkills');
 
   export default {
     name: 'SkillsTable',
@@ -410,7 +427,7 @@ limitations under the License.
     },
     components: {
       SkillRemovalValidation,
-      ReuseSkillsModal,
+      ReuseOrMoveSkillsModal,
       EditImportedSkill,
       RemovalValidation,
       ExportToCatalog,
@@ -449,6 +466,10 @@ limitations under the License.
           skills: [],
         },
         reuseSkillsInfo: {
+          show: false,
+          skills: [],
+        },
+        moveSkillsInfo: {
           show: false,
           skills: [],
         },
@@ -551,6 +572,12 @@ limitations under the License.
       },
     },
     methods: {
+      ...subjectSkills.mapActions([
+        'loadSubjectSkills',
+      ]),
+      ...subjects.mapActions([
+        'loadSubjectDetailsState',
+      ]),
       updateColumns(newList) {
         const extraColLookup = {
           totalPoints: {
@@ -711,21 +738,31 @@ limitations under the License.
         });
         this.$nextTick(() => this.$announcer.polite(`exported ${skills.length} skill${skills.length > 1 ? 's' : ''} to the catalog`));
       },
-      handleSkillsReused(reused) {
-        if (reused.destination.groupId) {
-          const foundIndex = this.skills.findIndex((item) => item.skillId === reused.destination.groupId);
-          if (foundIndex > 0) {
-            const groupToUpdate = this.skills[foundIndex];
-            groupToUpdate.numSkillsInGroup += reused.reusedSkills.length;
-            const pointsToAdd = reused.reusedSkills.map((sk) => sk.totalPoints)
-              .reduce((a, b) => a + b, 0);
-            groupToUpdate.totalPoints += pointsToAdd;
-            this.skills.splice(foundIndex, 1, groupToUpdate);
-          }
-          this.$emit('update-subj-stats');
-          this.$emit('skills-reused', reused);
-        }
-        this.changeSelectionForAll(false);
+      handleSkillsAreReusedOrMoved() {
+        this.loadSubjectSkills({
+          projectId: this.projectId,
+          subjectId: this.subjectId,
+        })
+          .then(() => {
+            this.loadSubjectDetailsState({
+              projectId: this.projectId,
+              subjectId: this.subjectId,
+            })
+              .then(() => {
+                this.$nextTick(() => {
+                  // cannot use this.$refs as the SkillsTable component will be fully reloaded
+                  // due to the this.loadSubjectSkills call
+                  let element = document.getElementById('selectAllBtn_skillsTable');
+                  if (!element) {
+                    // this can happen when all skills were moved and now the table is gone since there is no skills left
+                    element = document.getElementById('newSkillBtn');
+                  }
+                  if (element) {
+                    element.focus();
+                  }
+                });
+              });
+          });
       },
       updateImportedSkill(skill) {
         const item1Index = this.skills.findIndex((item) => item.skillId === skill.skillId);
@@ -957,6 +994,10 @@ limitations under the License.
         this.reuseSkillsInfo.skills = this.skills.filter((item) => item.selected);
         this.reuseSkillsInfo.show = true;
       },
+      handleSkillMoveRequest() {
+        this.moveSkillsInfo.skills = this.skills.filter((item) => item.selected);
+        this.moveSkillsInfo.show = true;
+      },
       handleDeleteCancelled() {
         if (this.deleteSkillInfo.skill) {
           const refId = `deleteSkillButton_${this.deleteSkillInfo.skill.skillId}`;
@@ -973,5 +1014,9 @@ limitations under the License.
   border-top-left-radius: 0px !important;;
   border-bottom-left-radius: 0px !important;;
   border-left: none !important;
+}
+
+.skillActions i {
+  min-width: 1.2rem;
 }
 </style>

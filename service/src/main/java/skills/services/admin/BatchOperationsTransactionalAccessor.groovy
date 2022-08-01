@@ -31,7 +31,7 @@ import javax.transaction.Transactional
 
 @Service
 @Slf4j
-class SkillCatalogTransactionalAccessor {
+class BatchOperationsTransactionalAccessor {
 
     @Autowired
     SkillDefRepo skillDefRepo

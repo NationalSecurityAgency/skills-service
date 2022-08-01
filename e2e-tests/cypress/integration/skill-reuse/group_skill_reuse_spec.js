@@ -97,7 +97,7 @@ describe('Group Skill Reuse Tests', () => {
         cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj1group12"]')
             .click();
         cy.get('[ data-cy="reuseSkillsModalStep2"]')
-            .contains('Selected skills are NOT available for reuse in the Awesome Group 12 Subj1 group');
+            .contains('Selected skills can NOT be reused in the Awesome Group 12 Subj1 group');
         cy.get('[ data-cy="reuseSkillsModalStep2"]')
             .contains('1 selected skill has already been reused in that group');
         cy.get('[data-cy="reuseButton"]')
@@ -300,6 +300,8 @@ describe('Group Skill Reuse Tests', () => {
             .click();
         cy.get('[data-cy="skillsTable-additionalColumns"]')
             .contains('Points')
+            .click();
+        cy.get('[data-cy="expandDetailsBtn_group11"]')
             .click();
         cy.validateTable('[data-cy="skillsTable"]', [
             [{

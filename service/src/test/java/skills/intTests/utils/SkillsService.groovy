@@ -1348,6 +1348,10 @@ class SkillsService {
         return wsHelper.adminGet(url)
     }
 
+    def moveSkills(String projectId, List<String> skillIds, String otherSubjectId, String otherGroupId = null) {
+        return wsHelper.adminPost("/projects/${projectId}/skills/move", [subjectId: otherSubjectId, skillIds: skillIds, groupId: otherGroupId])
+    }
+
     def bulkExportSkillsToCatalog(String projectId, List<String> skillIds) {
         return wsHelper.adminPost("/projects/${projectId}/skills/export", skillIds)
     }

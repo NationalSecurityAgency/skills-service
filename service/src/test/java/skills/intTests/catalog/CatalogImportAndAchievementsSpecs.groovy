@@ -20,7 +20,7 @@ import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.SkillsFactory
 import skills.services.LevelDefinitionStorageService
-import skills.services.admin.SkillCatalogTransactionalAccessor
+import skills.services.admin.BatchOperationsTransactionalAccessor
 import skills.storage.model.UserAchievement
 import skills.storage.model.UserEvent
 import skills.storage.model.UserPerformedSkill
@@ -781,7 +781,7 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
     }
 
     @Autowired
-    SkillCatalogTransactionalAccessor skillCatalogTransactionalAccessor
+    BatchOperationsTransactionalAccessor batchOperationsTransactionalAccessor
 
     def "finalization sql statements can be executed multiple times without causing issues"() {
         def project1 = createProject(1)
@@ -883,34 +883,34 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
 
         Integer proj2_user3Level_import0 = skillsService.getUserLevel(project2.projectId, user3)
         def proj2_user3Stats_import0 = skillsService.getUserStats(project2.projectId, user3)
-        List<UserAchievement> proj2_user3Achievements_import0 = userAchievedRepo.findAll().findAll { it.userId == user3 && it.level != null && it.projectId == project2.projectId && it.skillRefId == null}
-        List<UserAchievement> proj2_user3Achievements_subj1_import0 = userAchievedRepo.findAll().findAll { it.userId == user3 && it.level != null && it.projectId == project2.projectId && it.skillRefId == proj2_subj1_ref_id}
+        List<UserAchievement> proj2_user3Achievements_import0 = userAchievedRepo.findAll().findAll { it.userId == user3 && it.level != null && it.projectId == project2.projectId && it.skillRefId == null }
+        List<UserAchievement> proj2_user3Achievements_subj1_import0 = userAchievedRepo.findAll().findAll { it.userId == user3 && it.level != null && it.projectId == project2.projectId && it.skillRefId == proj2_subj1_ref_id }
 
         printLevels(project2.projectId, "before import")
-        skillsService.bulkImportSkillsFromCatalog(project2.projectId, p2subj1.subjectId, [[ projectId: project1.projectId, skillId: skill.skillId], [projectId: project3.projectId, skillId: skill7.skillId]])
+        skillsService.bulkImportSkillsFromCatalog(project2.projectId, p2subj1.subjectId, [[projectId: project1.projectId, skillId: skill.skillId], [projectId: project3.projectId, skillId: skill7.skillId]])
         skillsService.finalizeSkillsImportFromCatalog(project2.projectId)
 
-        skillCatalogTransactionalAccessor.updateSubjectTotalPoints(project2.projectId, p2subj1.subjectId)
-        skillCatalogTransactionalAccessor.updateProjectsTotalPoints(project2.projectId)
-        List<Integer> skillRefIds = [[ projectId: project1.projectId, skillId: skill.skillId], [projectId: project3.projectId, skillId: skill7.skillId]].collect({ skillDefRepo.findByProjectIdAndSkillId(it.projectId, it.skillId).id })
-        skillCatalogTransactionalAccessor.copySkillUserPointsToTheImportedProjects(project2.projectId, skillRefIds)
-        skillCatalogTransactionalAccessor.copySkillAchievementsToTheImportedProjects(skillRefIds)
+        batchOperationsTransactionalAccessor.updateSubjectTotalPoints(project2.projectId, p2subj1.subjectId)
+        batchOperationsTransactionalAccessor.updateProjectsTotalPoints(project2.projectId)
+        List<Integer> skillRefIds = [[projectId: project1.projectId, skillId: skill.skillId], [projectId: project3.projectId, skillId: skill7.skillId]].collect({ skillDefRepo.findByProjectIdAndSkillId(it.projectId, it.skillId).id })
+        batchOperationsTransactionalAccessor.copySkillUserPointsToTheImportedProjects(project2.projectId, skillRefIds)
+        batchOperationsTransactionalAccessor.copySkillAchievementsToTheImportedProjects(skillRefIds)
 
-        skillCatalogTransactionalAccessor.createSubjectUserPointsForTheNewUsers(project2.projectId, p2subj1.subjectId)
-        skillCatalogTransactionalAccessor.updateUserPointsForSubject(project2.projectId, p2subj1.subjectId)
-        skillCatalogTransactionalAccessor.identifyAndAddSubjectLevelAchievements(project2.projectId, p2subj1.subjectId)
+        batchOperationsTransactionalAccessor.createSubjectUserPointsForTheNewUsers(project2.projectId, p2subj1.subjectId)
+        batchOperationsTransactionalAccessor.updateUserPointsForSubject(project2.projectId, p2subj1.subjectId)
+        batchOperationsTransactionalAccessor.identifyAndAddSubjectLevelAchievements(project2.projectId, p2subj1.subjectId)
 
-        skillCatalogTransactionalAccessor.createProjectUserPointsForTheNewUsers(project2.projectId)
-        skillCatalogTransactionalAccessor.updateUserPointsForProject(project2.projectId)
-        skillCatalogTransactionalAccessor.identifyAndAddProjectLevelAchievements(project2.projectId, false)
+        batchOperationsTransactionalAccessor.createProjectUserPointsForTheNewUsers(project2.projectId)
+        batchOperationsTransactionalAccessor.updateUserPointsForProject(project2.projectId)
+        batchOperationsTransactionalAccessor.identifyAndAddProjectLevelAchievements(project2.projectId, false)
 
         printLevels(project2.projectId, "after import2 (2 skills)")
 
         Integer proj2_user1Level_import2 = skillsService.getUserLevel(project2.projectId, user)
         Integer proj2_user2Level_import2 = skillsService.getUserLevel(project2.projectId, user2)
         def proj2_user1Stats_import2 = skillsService.getUserStats(project2.projectId, user)
-        List<UserAchievement> proj2_user1Achievements_import2 = userAchievedRepo.findAll().findAll { it.userId == user && it.level != null && it.projectId == project2.projectId && it.skillRefId == null}
-        List<UserAchievement> proj2_user1Achievements_subj1_import2 = userAchievedRepo.findAll().findAll { it.userId == user && it.level != null && it.projectId == project2.projectId && it.skillRefId == proj2_subj1_ref_id}
+        List<UserAchievement> proj2_user1Achievements_import2 = userAchievedRepo.findAll().findAll { it.userId == user && it.level != null && it.projectId == project2.projectId && it.skillRefId == null }
+        List<UserAchievement> proj2_user1Achievements_subj1_import2 = userAchievedRepo.findAll().findAll { it.userId == user && it.level != null && it.projectId == project2.projectId && it.skillRefId == proj2_subj1_ref_id }
 
         Integer proj2_user3Level_import2 = skillsService.getUserLevel(project2.projectId, user3)
         def proj2_user3Stats_import2 = skillsService.getUserStats(project2.projectId, user3)
