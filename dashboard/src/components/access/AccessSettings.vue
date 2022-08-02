@@ -17,13 +17,18 @@ limitations under the License.
   <loading-container v-bind:is-loading="isLoading">
     <sub-page-header title="Access Management"/>
     <metrics-card title="Project Administrators" data-cy="projectAdmins" :no-padding="true">
-      <role-manager :project="project"/>
+      <role-manager :project="project" :add-user-label="'Add Administrator'" :add-role-confirmation="addUserConfirmationConfig"/>
     </metrics-card>
 
-    <metrics-card v-if="privateProject && emailEnabled" title="Invite Users" data-cy="inviteUser" :no-padding="true" class="my-4">
-      <invite-users-to-project ref="inviteUsers" :project-id="project.projectId"/>
+    <metrics-card v-if="privateProject" title="Project User: Invite" data-cy="inviteUser" :no-padding="true" class="my-4">
+      <b-overlay :show="!emailEnabled">
+          <div slot="overlay" class="alert alert-warning mt-2" data-cy="inviteUsers_emailServiceWarning">
+            <i class="fa fa-exclamation-triangle" aria-hidden="true"/> Please note that email notifications are currently disabled. Email configuration has not been performed on this instance of SkillTree. Please contact the root administrator.
+          </div>
+          <invite-users-to-project ref="inviteUsers" :project-id="project.projectId"/>
+      </b-overlay>
     </metrics-card>
-    <metrics-card v-if="privateProject" title="Revoke Access" data-cy="revokeAccess" :no-padding="true" class="my-4">
+    <metrics-card v-if="privateProject" title="Project User: Revoke" data-cy="revokeAccess" :no-padding="true" class="my-4">
       <revoke-user-access />
     </metrics-card>
 
@@ -64,6 +69,16 @@ limitations under the License.
     computed: {
       showTrustedClientProps() {
         return (!this.$store.getters.isPkiAuthenticated);
+      },
+      addUserConfirmationConfig() {
+        if (this.privateProject) {
+          return {
+            msgText: 'The selected user will be added as an Administrator for this project and will be able to edit/add/delete all aspects of the Project.',
+            titleText: 'Add Project Administrator?',
+            okBtnText: 'Add Administrator!',
+          };
+        }
+        return null;
       },
     },
     beforeRouteLeave(to, from, next) {

@@ -21,6 +21,7 @@ limitations under the License.
         <label class="text-secondary" id="inviteExpirationLabel">
           Invite Expiration:
           <inline-help
+            target-id="inviteExpirationHelp"
             msg="How long the project invite will be valid for before it expires."/>
         </label>
         <b-form-select v-model="expirationTime"
@@ -33,7 +34,8 @@ limitations under the License.
         <label class="text-secondary" id="inviteEmailLabel">
           Email Addresses:
           <inline-help
-            msg="Email Addresses of users to invite to access this project. Must be unique as each email address will be sent a one-time use invite token."/>
+            target-id="emailAddresesHelp"
+            msg="Email Addresses of users to invite to access this project. Must be unique as each email address will be sent a one-time use invite token. Comma separated, semi-colon separated, and one email per line input formats are supported."/>
         </label>
         <b-form-textarea v-model="currentEmails"
                          rows="5"
@@ -160,7 +162,7 @@ limitations under the License.
             const isValid = this.isValidEmail(email);
             if (!isValid) {
               invalid.push(pmail);
-            } else {
+            } else if (!this.inviteRecipients.find((invited) => invited === email)) {
               successful += 1;
               this.inviteRecipients.push(email);
             }

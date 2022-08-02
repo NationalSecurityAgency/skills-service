@@ -16,14 +16,19 @@
 package skills.intTests.inviteOnly
 
 import com.google.common.collect.Sets
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import skills.storage.repos.UserRoleRepo
 import skills.utils.WaitFor
 import spock.lang.IgnoreRest
 
 class InviteGenerationSpec extends InviteOnlyBaseSpec {
+
+    @Autowired
+    UserRoleRepo userRoleRepo
 
     def "Can generate more than one invite at once"() {
         def proj = SkillsFactory.createProject(99)

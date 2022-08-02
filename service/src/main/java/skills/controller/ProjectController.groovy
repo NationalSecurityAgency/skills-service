@@ -120,10 +120,8 @@ class ProjectController {
     RequestResult joinProject(@PathVariable("id") String projectId, @PathVariable("invite_code") String inviteCode) {
         SkillsValidator.isNotBlank(projectId, "projectId")
         SkillsValidator.isNotBlank(inviteCode, "invite_code", projectId)
-        //
         inviteOnlyProjectService.joinProject(inviteCode, projectId)
         return RequestResult.success()
-//        response.sendRedirect("/progress-and-rankings/projects/${projectId}")
     }
 
     @RequestMapping(value = "/projects/{id}/validateInvite/{invite_code}", method = RequestMethod.GET, produces = "application/json")

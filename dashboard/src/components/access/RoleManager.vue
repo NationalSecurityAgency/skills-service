@@ -23,7 +23,7 @@ limitations under the License.
       <div class="col-12 pt-3">
         <b-button variant="outline-hc" @click="addUserRole" :disabled="!selectedUser"
                   class="h-100" v-skills="'AddAdmin'">
-          Add User <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"
+          {{ addUserLabel }} <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"
                  aria-hidden="true"></i>
         </b-button>
       </div>
@@ -102,6 +102,19 @@ limitations under the License.
       id: {
         type: String,
         default: 'add-user-div',
+      },
+      addUserLabel: {
+        type: String,
+        required: false,
+        default: 'Add User',
+      },
+      addRoleConfirmation: {
+        type: Object,
+        required: false,
+        default: null,
+        validator(value) {
+          return value.msgText && value.titleText && value.okBtnText;
+        },
       },
     },
     data() {
@@ -206,6 +219,17 @@ limitations under the License.
         return this.$store.getters.userInfo && userId !== this.$store.getters.userInfo.userId;
       },
       addUserRole() {
+        if (this.addRoleConfirmation) {
+          this.msgConfirm(this.addRoleConfirmation.msgText, this.addRoleConfirmation.titleText, this.addRoleConfirmation.okBtnText).then((ok) => {
+            if (ok) {
+              this.doAddUserRole();
+            }
+          });
+        } else {
+          this.doAddUserRole();
+        }
+      },
+      doAddUserRole() {
         this.isSaving = true;
         this.table.options.busy = true;
         const pkiAuthenticated = this.$store.getters.isPkiAuthenticated;

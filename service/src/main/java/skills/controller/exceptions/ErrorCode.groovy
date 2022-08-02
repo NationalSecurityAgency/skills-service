@@ -46,4 +46,5 @@ enum ErrorCode {
     ExpiredInvitationCode,
     InvalidInvitationCode,
     ClaimedInvitationCode,
+    UserRoleAlreadyAssigned,
 }

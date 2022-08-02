@@ -60,7 +60,7 @@ class InviteOnlyProjectAccessDecisionVoter extends RoleVoter {
     @Value('#{"${skills.config.privateProject.cache-expiration-time:PT5M}"}')
     String privateProjectsCacheExpirationTime="PT5M"
 
-    @Value('#{"${skills.config.privateProject.cache-refresh-time:PT90S}"}')
+    @Value('#{"${skills.config.privateProject.cache-refresh-time:PT30S}"}')
     String privateProjectCacheRefreshTime="PT90S"
 
     @Autowired

@@ -23,11 +23,10 @@ limitations under the License.
 </head>
 <body>
 <div th:remove="tag" th:utext="${htmlHeader}" th:if= "${htmlHeader != null}">[[${htmlHeader}]]</div>
-<p>You have been invited to join Project [[${projectName}]]. Please use the link below to accept the invitation. The link will be valid for [[${validTime}]].</p>
-<p><a th:href="@{${publicUrl}+'join-project/'+${projectId}+'/'+${inviteCode}+'?pn='+${projectName}}">Join Project</a></p>
-<p>Regards,</p>
+<p>You have been invited to join the [[${projectName}]] project. Please use the link below to accept the invitation. The link will be valid for [[${validTime}]].</p>
+<p><a th:href="@{${publicUrl}+'join-project/'+${projectId}+'/'+${inviteCode}+'?pn='+${projectName}}">Join [[${projectName}]]</a></p>
 <p>
-    <em>[[${senderName}]] at SkillTree</em> <br />
+    Always yours, <br/> -SkillTree Bot
 </p>
 <div th:remove="tag" th:utext="${htmlFooter}" th:if= "${htmlFooter != null}">[[${htmlFooter}]]</div>
 </body>

@@ -24,7 +24,9 @@ import org.springframework.transaction.annotation.Transactional
 import org.thymeleaf.context.Context
 import skills.auth.AuthMode
 import skills.auth.GrantedAuthoritiesUpdater
+import skills.auth.UserInfo
 import skills.auth.UserInfoService
+import skills.auth.UserSkillsGrantedAuthority
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
@@ -185,7 +187,9 @@ class InviteOnlyProjectService {
      */
     @Transactional
     void joinProject(String token, String projectId) {
-        String userId = userInfoService.getCurrentUserId()
+        UserInfo userInfo = userInfoService.getCurrentUser()
+        String userId = userInfo?.getUsername()
+
         ProjectAccessToken projectAccessToken = projectAccessTokenRepo.findByTokenAndProjectId(token, projectId)
         if (!projectAccessToken) {
             log.warn("user [{}] has attempted to use invite code [{}] for project [{}], this code does not exist", userId, token, projectId)
@@ -200,6 +204,12 @@ class InviteOnlyProjectService {
         if (projectAccessToken.claimed != null) {
             log.warn("user [{}] has attempted to use already claimed invite code [{}] for project [{}]", userId, token, projectId)
             throw new SkillException("Invitation Code has already been used", projectId, null, ErrorCode.ClaimedInvitationCode)
+        }
+
+        if (userInfo?.authorities?.find {it instanceof UserSkillsGrantedAuthority
+                && it.getRole().roleName == RoleName.ROLE_PRIVATE_PROJECT_USER && it.getRole().projectId == projectId }) {
+            log.info("user [{}] has previously joined project [{}], ignoring new join request", userId, projectId)
+            return
         }
 
         UserRole newRole = accessSettingsStorageService.addUserRoleReturnRaw(userId, projectId, RoleName.ROLE_PRIVATE_PROJECT_USER)
@@ -256,7 +266,6 @@ class InviteOnlyProjectService {
                     ProjectInvite invite = generateProjectInviteToken(projectId, created, duration)
 
                     Context templateContext = new Context()
-                    templateContext.setVariable("senderName", "The team")
                     templateContext.setVariable("validTime", invite.validFor)
                     templateContext.setVariable("inviteCode", invite.token)
                     templateContext.setVariable("projectId", invite.projectId)

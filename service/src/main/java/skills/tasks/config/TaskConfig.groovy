@@ -134,8 +134,7 @@ class TaskConfig {
     @Bean
     RecurringTask<ProjectInviteCleanup> cleanupProjectInvitesTask(ProjectInviteCleanupTaskExecutor projectInviteCleanupTaskExecutor) {
         //recurring tasks are automatically picked up by the scheduler
-        //TODO: extract the scheduleString to be configurable based off of a config property to facilitate testing
-        return Tasks.recurring("project-invite-cleanup", Schedules.parseSchedule("DAILY|23:30")).execute(projectInviteCleanupTaskExecutor)
+        return Tasks.recurring("project-invite-cleanup", Schedules.parseSchedule(projectInviteCleanupSchedule)).execute(projectInviteCleanupTaskExecutor)
     }
 
 }
