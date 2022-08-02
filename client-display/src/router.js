@@ -167,10 +167,13 @@ const router = new VueRouter({
 
 const isWildcardMatch = (matched) => matched.filter((item) => item.path === '*').length > 0;
 const getMetaTitle = (to) => {
-  let metaTitle = to.meta.title.replaceAll(projectPlaceholderRegex, store.getters.config.projectDisplayName);
-  metaTitle = metaTitle.replaceAll(subjectPlaceholderRegex, store.getters.config.subjectDisplayName);
-  metaTitle = metaTitle.replaceAll(groupPlaceholderRegex, store.getters.config.groupDisplayName);
-  return metaTitle.replaceAll(skillPlaceholderRegex, store.getters.config.skillDisplayName);
+  if (store.getters && store.getters.config) {
+    let metaTitle = to.meta.title.replaceAll(projectPlaceholderRegex, store.getters.config.projectDisplayName);
+    metaTitle = metaTitle.replaceAll(subjectPlaceholderRegex, store.getters.config.subjectDisplayName);
+    metaTitle = metaTitle.replaceAll(groupPlaceholderRegex, store.getters.config.groupDisplayName);
+    return metaTitle.replaceAll(skillPlaceholderRegex, store.getters.config.skillDisplayName);
+  }
+  return to.meta.title;
 };
 
 router.beforeEach((to, from, next) => {

@@ -32,19 +32,22 @@ limitations under the License.
                         class="col-md-3 mb-2 mb-md-0"
                         icon-class="fas fa-trophy"
                         :label="`My ${this.levelDisplayName}`"
-                        :value="rankingDistribution.myLevel"/>
+                        :value="rankingDistribution.myLevel"
+                        data-cy="myRankLevelStatCard"/>
 
                 <my-rank-detail-stat-card
                         class="col-md-3 mb-2 mb-md-0"
                         icon-class="fas fa-user-plus"
                         label="My Points"
-                        :value="rankingDistribution.myPoints"/>
+                        :value="rankingDistribution.myPoints"
+                        data-cy="myRankPointsStatCard"/>
 
                 <my-rank-detail-stat-card
                         class="col-md-3 mb-2 mb-md-0"
                         icon-class="fas fa-user-friends"
                         label="Total Users"
-                        :value="totalNumUsers"/>
+                        :value="totalNumUsers"
+                        data-cy="myRankTotalUsersStatCard"/>
 
             </div>
 

@@ -35,7 +35,7 @@ limitations under the License.
                 <div class="col-md text-left my-2 my-md-0 ml-md-0 pl-md-0">
                   <skills-filter :counts="metaCounts" :filters="filters" @filter-selected="filterSkills" @clear-filter="clearFilters"/>
                 </div>
-                <div class="col-md-auto text-right skill-details-toggle" >
+                <div class="col-md-auto text-right skill-details-toggle" data-cy="skillDetailsToggle">
                     <span class="text-muted pr-1">{{ skillDisplayName }} Details:</span>
                     <toggle-button class="" v-model="showDescriptionsInternal" @change="onDetailsToggle"
                                    :color="{ checked: '#007c49', unchecked: '#6b6b6b' }"
