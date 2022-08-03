@@ -15,12 +15,15 @@
  */
 package skills.controller.result.model
 
+import groovy.transform.EqualsAndHashCode
 import skills.storage.model.SkillDef
 
+@EqualsAndHashCode(includes = ['id'])
 class SkillDefGraphRes {
     Integer id
     String name
     String skillId
+    String subjectId
     String projectId
     Integer pointIncrement
     Integer totalPoints
