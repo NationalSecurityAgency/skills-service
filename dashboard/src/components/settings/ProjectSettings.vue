@@ -52,7 +52,7 @@ limitations under the License.
                                aria-labelledby="pointsForLevelsLabel"
                                data-cy="usePointsForLevelsSwitch"
                                switch>
-                {{ settings.levelPointsEnabled.value }}
+                {{ usePointsForLevelsLabel }}
               </b-form-checkbox>
             </div>
           </div>
@@ -151,7 +151,7 @@ limitations under the License.
                                aria-labelledby="rankAndLeaderboardOptOutLabel"
                                data-cy="rankAndLeaderboardOptOutSwitch"
                                switch>
-                {{ settings.rankAndLeaderboardOptOut.value }}
+                {{ rankOptOutLabel }}
               </b-form-checkbox>
             </div>
           </div>
@@ -174,7 +174,7 @@ limitations under the License.
 
               <b-collapse id="customLabelsCollapse" :visible="showCustomLabelsConfigToggle">
                 <b-card class="mt-1">
-                  <div class="row">
+                  <div class="row mb-1">
                     <div class="col col-md-3 text-secondary" id="projectDisplayTextLabel">
                       Project Display Text:
                       <inline-help
@@ -186,7 +186,7 @@ limitations under the License.
                                     v-on:input="projectDisplayNameChanged" aria-labelledby="projectDisplayTextLabel"></b-form-input>
                     </div>
                   </div>
-                  <div class="row">
+                  <div class="row mb-1">
                     <div class="col col-md-3 text-secondary" id="subjectDisplayTextLabel">
                       Subject Display Text:
                       <inline-help
@@ -198,7 +198,7 @@ limitations under the License.
                                     v-on:input="subjectDisplayNameChanged" aria-labelledby="subjectDisplayTextLabel"></b-form-input>
                     </div>
                   </div>
-                  <div class="row">
+                  <div class="row mb-1">
                     <div class="col col-md-3 text-secondary" id="groupDisplayTextLabel">
                       Group Display Text:
                       <inline-help
@@ -210,7 +210,7 @@ limitations under the License.
                                     v-on:input="groupDisplayNameChanged" aria-labelledby="groupDisplayTextLabel"></b-form-input>
                     </div>
                   </div>
-                  <div class="row">
+                  <div class="row mb-1">
                     <div class="col col-md-3 text-secondary" id="skillDisplayTextLabel">
                       Skill Display Text:
                       <inline-help
@@ -423,6 +423,18 @@ limitations under the License.
       },
       selfReportingEnabledLabel() {
         if (this.selfReport.enabled) {
+          return 'Enabled';
+        }
+        return 'Disabled';
+      },
+      rankOptOutLabel() {
+        if (this.settings.rankAndLeaderboardOptOut.value) {
+          return 'Enabled';
+        }
+        return 'Disabled';
+      },
+      usePointsForLevelsLabel() {
+        if (this.settings.levelPointsEnabled.value) {
           return 'Enabled';
         }
         return 'Disabled';
