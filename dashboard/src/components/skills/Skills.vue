@@ -53,7 +53,6 @@ limitations under the License.
                       :skills-prop="subjectSkills" :is-top-level="true" :project-id="this.$route.params.projectId"
                       :subject-id="subjectId" :subject-name="subjectName"
                       v-on:skills-change="skillsChanged"
-                      @update-subj-stats="updateSubjectStats"
                       @skill-removed="skillDeleted" />
       </b-card>
     </loading-container>

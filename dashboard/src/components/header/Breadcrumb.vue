@@ -43,6 +43,8 @@ limitations under the License.
 </template>
 
 <script>
+  import SettingsService from '../settings/SettingsService';
+
   const projectAndRankingPathItem = 'progress-and-rankings';
   export default {
     name: 'Breadcrumb',
@@ -52,6 +54,11 @@ limitations under the License.
         idsToExcludeFromPath: ['subjects', 'skills', 'projects', 'crossProject', 'dependency', 'global'],
         keysToExcludeFromPath: [],
         ignoreNext: false,
+        projectDisplayName: 'Project',
+        subjectDisplayName: 'Subject',
+        groupDisplayName: 'Group',
+        skillDisplayName: 'Skill',
+        currentProjectId: null,
       };
     },
     mounted() {
@@ -87,6 +94,38 @@ limitations under the License.
         this.$router.push(to);
       },
       build() {
+        this.handleCustomLabels().then(() => {
+          this.buildBreadcrumb();
+        });
+      },
+      handleCustomLabels() {
+        return new Promise((resolve) => {
+          const isProgressAndRankingsProject = this.$route.name === 'MyProjectSkills';
+          if (isProgressAndRankingsProject) {
+            const currentProjectId = this.$route.params.projectId;
+            if (this.currentProjectId !== currentProjectId) {
+              SettingsService.getClientDisplayConfig(currentProjectId).then((response) => {
+                this.projectDisplayName = response.projectDisplayName;
+                this.subjectDisplayName = response.subjectDisplayName;
+                this.groupDisplayName = response.groupDisplayName;
+                this.skillDisplayName = response.skillDisplayName;
+                this.currentProjectId = currentProjectId;
+                resolve();
+              });
+            } else {
+              resolve();
+            }
+          } else {
+            this.projectDisplayName = 'Project';
+            this.subjectDisplayName = 'Subject';
+            this.groupDisplayName = 'Group';
+            this.skillDisplayName = 'Skill';
+            this.currentProjectId = null;
+            resolve();
+          }
+        });
+      },
+      buildBreadcrumb() {
         const newItems = [];
         let res = this.dashboardPathParts;
         if (this.hasSkillsClientDisplayPath) {
@@ -163,7 +202,22 @@ limitations under the License.
       },
       prepKey(key) {
         const res = key.endsWith('s') ? key.substring(0, key.length - 1) : key;
-        return this.capitalize(res);
+        return this.capitalize(this.substituteCustomLabels(res));
+      },
+      substituteCustomLabels(label) {
+        if (label.toLowerCase() === 'project') {
+          return this.projectDisplayName;
+        }
+        if (label.toLowerCase() === 'subject') {
+          return this.subjectDisplayName;
+        }
+        if (label.toLowerCase() === 'group') {
+          return this.groupDisplayName;
+        }
+        if (label.toLowerCase() === 'skill') {
+          return this.skillDisplayName;
+        }
+        return label;
       },
       hyphenToCamelCase(value) {
         return value.replace(/-([a-z])/g, (g) => ` ${g[1].toUpperCase()}`);

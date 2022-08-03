@@ -152,23 +152,29 @@ limitations under the License.
       },
       loadData() {
         this.isLoading = true;
-        const { projectId, subjectId } = this.$route.params;
+        const {
+          projectId,
+          subjectId,
+          skillId,
+        } = this.$route.params;
         this.loadSkill({
-          projectId: this.$route.params.projectId,
-          subjectId: this.$route.params.subjectId,
-          skillId: this.$route.params.skillId,
-        }).then(() => {
-          this.headerOptions = this.buildHeaderOptions(this.skill);
-          if (this.subject) {
-            this.isLoading = false;
-          } else {
-            this.loadSubjectDetailsState({
-              projectId,
-              subjectId,
-            }).then(() => {
+          projectId,
+          subjectId,
+          skillId,
+        })
+          .then(() => {
+            this.headerOptions = this.buildHeaderOptions(this.skill);
+            if (this.subject && (this.subject.subjectId === subjectId)) {
               this.isLoading = false;
-            });
-          }
+            } else {
+              this.loadSubjectDetailsState({
+                projectId,
+                subjectId,
+              })
+                .then(() => {
+                  this.isLoading = false;
+                });
+            }
         });
       },
       skillEdited(editedSkil) {

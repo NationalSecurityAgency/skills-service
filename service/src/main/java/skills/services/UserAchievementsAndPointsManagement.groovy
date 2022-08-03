@@ -24,7 +24,6 @@ import skills.controller.exceptions.SkillsValidator
 import skills.controller.result.model.LevelDefinitionRes
 import skills.services.settings.SettingsService
 import skills.storage.model.SkillDef
-import skills.storage.model.SkillRelDef
 import skills.storage.repos.*
 import skills.storage.repos.nativeSql.NativeQueriesRepo
 
@@ -176,11 +175,28 @@ class UserAchievementsAndPointsManagement {
         }
     }
 
+    @Transactional
+    @Profile
+    void removeSubjectLevelAchievementsIfUsersDoNotQualify(SkillDef subject) {
+        List<LevelDefinitionRes> levels = levelDefinitionStorageService.getLevels(subject.projectId, subject.skillId)
+        boolean skillsDefined = levels[0].pointsFrom != null
+        if (skillsDefined) {
+            levels.each {
+                int numUpdated = userAchievedLevelRepo.removeSubjectLevelAchievementsIfUsersDoNotQualify(subject.id, it.level, it.pointsFrom)
+                log.info("Remove subject's level achievements for projectId=[{}], subjectId=[{}({})], level=[{}], pointsFromExclusive=[{}]. Num rows updated = [{}]",
+                        subject.projectId, subject.skillId, subject.id, it.level, it.pointsFrom, numUpdated)
+            }
+        } else {
+            int numDeleted = userAchievedLevelRepo.deleteAllBySkillRefId(subject.id)
+            log.info("There are no skills defined for projectId=[{}], subjectId=[{}({})]. Removed [{}] subject achievements", subject.projectId, subject.skillId, subject.id, numDeleted)
+        }
+    }
+
     @Profile
     @Transactional
     void insertUserAchievementWhenDecreaseOfSkillsRequiredCausesUsersToAchieve(String projectId, String groupSkillId, Integer groupSkillRefId, List<String> childSkillIds, int numSkillsRequired) {
         assert numSkillsRequired > 0
-        if (log.isDebugEnabled()){
+        if (log.isDebugEnabled()) {
             log.debug("Insert User Achievements. projectId=[${projectId}], skillId=[${groupSkillId}], skillRefId=[${groupSkillRefId}], childSkillIds=[${childSkillIds}] numSkillsRequired=[$numSkillsRequired]")
         }
         userAchievedLevelRepo.insertUserAchievementWhenDecreaseOfNumSkillsRequiredCausesUsersToAchieve(projectId, groupSkillId, groupSkillRefId, childSkillIds, numSkillsRequired, Boolean.FALSE.toString())

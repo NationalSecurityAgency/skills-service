@@ -19,7 +19,7 @@ limitations under the License.
         <i class="fas fa-circle fa-stack-2x"></i>
         <i class="fas fa-hammer fa-stack-1x fa-inverse"></i>
       </span>
-    <span class="pl-1">An upgrade is currently in process. Please note that any reported skills will be queued until the upgrade has completed, as such your profile may not reflect your most recent skill achievements.</span>
+    <span class="pl-1">An upgrade is currently in process. Please note that any reported {{ skillDisplayName }} will be queued until the upgrade has completed, as such your profile may not reflect your most recent {{ skillDisplayName }} achievements.</span>
   </div>
 </template>
 

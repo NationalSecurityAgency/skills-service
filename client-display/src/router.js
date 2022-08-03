@@ -31,6 +31,15 @@ import UserSkillsService from './userSkills/service/UserSkillsService';
 
 Vue.use(VueRouter);
 
+const projectPlaceholder = '##PROJECT##';
+const projectPlaceholderRegex = new RegExp(projectPlaceholder, 'g');
+const subjectPlaceholder = '##SUBJECT##';
+const subjectPlaceholderRegex = new RegExp(subjectPlaceholder, 'g');
+const groupPlaceholder = '##GROUP##';
+const groupPlaceholderRegex = new RegExp(groupPlaceholder, 'g');
+const skillPlaceholder = '##SKILL##';
+const skillPlaceholderRegex = new RegExp(skillPlaceholder, 'g');
+
 const router = new VueRouter({
   mode: 'abstract',
   routes: [
@@ -58,7 +67,7 @@ const router = new VueRouter({
       name: 'subjectDetails',
       props: true,
       meta: {
-        title: 'Subject Overview',
+        title: `${subjectPlaceholder} Overview`,
       },
     },
     {
@@ -93,7 +102,7 @@ const router = new VueRouter({
       component: SkillDetails,
       name: 'skillDetails',
       meta: {
-        title: 'Skill Details',
+        title: `${skillPlaceholder}} Details`,
       },
     },
     {
@@ -101,7 +110,7 @@ const router = new VueRouter({
       component: SkillDetails,
       name: 'crossProjectSkillDetails',
       meta: {
-        title: 'Cross Project Skill Details',
+        title: `Cross ${projectPlaceholder} ${skillPlaceholder} Details`,
       },
     },
     {
@@ -109,7 +118,7 @@ const router = new VueRouter({
       component: SkillDetails,
       name: 'dependentSkillDetails',
       meta: {
-        title: 'Dependant Skill Details',
+        title: `Dependant ${skillPlaceholder} Details`,
       },
     },
     {
@@ -117,7 +126,7 @@ const router = new VueRouter({
       component: SkillDetails,
       name: 'badgeSkillDetails',
       meta: {
-        title: 'Badge Skill Details',
+        title: `Badge ${skillPlaceholder} Details`,
       },
     },
     {
@@ -125,7 +134,7 @@ const router = new VueRouter({
       component: SkillDetails,
       name: 'globalBadgeSkillDetails',
       meta: {
-        title: 'Global Badge Skill Details',
+        title: `Global Badge ${skillPlaceholder} Details`,
       },
     },
     {
@@ -143,7 +152,7 @@ const router = new VueRouter({
       name: 'subjectRankDetails',
       props: true,
       meta: {
-        title: 'My Subject Rank',
+        title: `My ${subjectPlaceholder} Rank`,
       },
     },
     {
@@ -157,6 +166,15 @@ const router = new VueRouter({
 });
 
 const isWildcardMatch = (matched) => matched.filter((item) => item.path === '*').length > 0;
+const getMetaTitle = (to) => {
+  if (store.getters && store.getters.config) {
+    let metaTitle = to.meta.title.replaceAll(projectPlaceholderRegex, store.getters.config.projectDisplayName);
+    metaTitle = metaTitle.replaceAll(subjectPlaceholderRegex, store.getters.config.subjectDisplayName);
+    metaTitle = metaTitle.replaceAll(groupPlaceholderRegex, store.getters.config.groupDisplayName);
+    return metaTitle.replaceAll(skillPlaceholderRegex, store.getters.config.skillDisplayName);
+  }
+  return to.meta.title;
+};
 
 router.beforeEach((to, from, next) => {
   if (store.state.internalBackButton && !to.params.previousRoute && to.meta.setPreviousRoute !== false && !isWildcardMatch(to.matched)) {
@@ -174,14 +192,15 @@ router.afterEach(debounce((to) => {
   // Use next tick to handle router history correctly
   // see: https://github.com/vuejs/vue-router/issues/914#issuecomment-384477609
   if (to && to.meta && to.meta.title) {
+    const metaTitle = getMetaTitle(to);
     if (!siteTitle) {
       siteTitle = document.title;
     }
     Vue.nextTick(() => {
       if (siteTitle) {
-        document.title = `${siteTitle} - ${to.meta.title}`;
+        document.title = `${siteTitle} - ${metaTitle}`;
       } else {
-        document.title = to.meta.title;
+        document.title = metaTitle;
       }
     });
   }

@@ -744,8 +744,31 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             update user_points up set points = pointsToUpdate.newPoints
             from pointsToUpdate
             where up.user_id = pointsToUpdate.userId
-              and up.project_id = :projectId and up.skill_id = :skillId''', nativeQuery=true)
+              and up.project_id = :projectId and up.skill_id = :skillId''', nativeQuery = true)
     void updateSubjectUserPoints(@Param("projectId") String projectId, @Param("skillId") String skillId, @Param('enabledSkillsOnly') Boolean enabledSkillsOnly)
+
+    @Modifying
+    @Query(value = '''delete from user_points up 
+            where 
+                up.project_id = :projectId
+                and up.skill_id = :subjectId
+                and up.user_id not in (
+                     select up.user_id userId
+                        from skill_definition parent,
+                             skill_relationship_definition rel,
+                             skill_definition child,
+                             user_points up
+                        where parent.project_id = :projectId
+                          and parent.skill_id = :subjectId
+                          and rel.parent_ref_id = parent.id
+                          and rel.child_ref_id = child.id
+                          and rel.type in ('RuleSetDefinition', 'GroupSkillToSubject')
+                          and child.type = 'Skill'
+                          and child.id = up.skill_ref_id
+                        group by up.user_id
+                )
+            ''', nativeQuery = true)
+    void removeSubjectUserPointsForNonExistentSkillDef(@Param("projectId") String projectId, @Param("subjectId") String subjectId)
 
     @Modifying
     @Query(value = '''

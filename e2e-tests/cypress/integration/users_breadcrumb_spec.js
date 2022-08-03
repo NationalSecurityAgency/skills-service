@@ -265,7 +265,7 @@ describe('Users skills-display Breadcrumb Tests', () => {
         cy.contains("Client Display");
         cy.contains(`ID: ${Cypress.env('proxyUser')}`);
         cy.dashboardCd().contains('Shared skill 1');
-        cy.dashboardCd().contains('Cross-project Skill');
+        cy.dashboardCd().contains('cross-project skill');
 
         cy.get('[data-cy=breadcrumb-skill1]').should('exist');
         cy.get('[data-cy=breadcrumb-skill1]').should('not.have.attr', 'href');

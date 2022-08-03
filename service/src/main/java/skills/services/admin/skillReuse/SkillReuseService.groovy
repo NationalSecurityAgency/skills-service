@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.CatalogSkill
-import skills.controller.request.model.SkillReuseRequest
+import skills.controller.request.model.SkillsActionRequest
 import skills.controller.result.model.SkillDefPartialRes
 import skills.controller.result.model.SkillDefSkinnyRes
 import skills.controller.result.model.SkillReuseDestination
@@ -68,12 +68,12 @@ class SkillReuseService {
 
     @Transactional
     @Profile
-    void reuseSkill(String projectId, SkillReuseRequest skillReuseRequest) {
+    void reuseSkill(String projectId, SkillsActionRequest skillReuseRequest) {
         // validate
         validateParentIsNotDestination(projectId, skillReuseRequest)
         validateNoAlreadyReusedInDestination(skillReuseRequest, projectId)
-        validateNotInFinalizationState(projectId)
-        validateFinalizationIsNotPending(projectId)
+        skillCatalogFinalizationService.validateNotInFinalizationState(projectId, "Cannot reuse skills while finalization is running")
+        skillCatalogFinalizationService.validateFinalizationIsNotPending(projectId, "Cannot reuse skills while finalization is pending")
         validateSkillsHaveNoDeps(projectId, skillReuseRequest)
 
         // import
@@ -84,22 +84,7 @@ class SkillReuseService {
     }
 
     @Profile
-    private void validateNotInFinalizationState(String projectId) {
-        if (skillCatalogFinalizationService.getCurrentState(projectId) == SkillCatalogFinalizationService.FinalizeState.RUNNING) {
-            throw new SkillException("Cannot reuse skills while finalization is running", projectId)
-        }
-    }
-
-    @Profile
-    private void validateFinalizationIsNotPending(String projectId) {
-        List<SkillDef> pendingSkills = skillDefRepo.findAllByProjectIdAndTypeAndEnabledAndCopiedFromIsNotNull(projectId, SkillDef.ContainerType.Skill, Boolean.FALSE.toString())
-        if (pendingSkills) {
-            throw new SkillException("Cannot reuse skills while finalization is pending", projectId)
-        }
-    }
-
-    @Profile
-    private void validateNoAlreadyReusedInDestination(SkillReuseRequest skillReuseRequest, String projectId) {
+    private void validateNoAlreadyReusedInDestination(SkillsActionRequest skillReuseRequest, String projectId) {
         String parentSkillId = skillReuseRequest.groupId ?: skillReuseRequest.subjectId
         List<SkillDefSkinnyRes> alreadyReused = getReusedSkills(projectId, parentSkillId)
         List<String> reusedSkillIds = alreadyReused.collect { SkillReuseIdUtil.removeTag(it.skillId) }
@@ -110,23 +95,17 @@ class SkillReuseService {
     }
 
     @Profile
-    private void validateParentIsNotDestination(String projectId, SkillReuseRequest skillReuseRequest) {
+    private void validateParentIsNotDestination(String projectId, SkillsActionRequest skillReuseRequest) {
+        String destParentId = skillReuseRequest.groupId ?: skillReuseRequest.subjectId
         SkillDef skillToReuse = skillDefAccessor.getSkillDef(projectId, skillReuseRequest.skillIds[0])
-        if (!skillReuseRequest.groupId) {
-            SkillDef subject = ruleSetDefGraphService.getMySubjectParent(skillToReuse.id)
-            if (subject.skillId == skillReuseRequest.subjectId) {
-                throw new SkillException("Not allowed to reuse skill into the same subject [${skillReuseRequest.subjectId}]", projectId, skillToReuse.skillId, ErrorCode.BadParam)
-            }
-        } else {
-            SkillDef group = ruleSetDefGraphService.getParentSkill(skillToReuse)
-            if (group.skillId == skillReuseRequest.groupId) {
-                throw new SkillException("Not allowed to reuse skill into the same group [${skillReuseRequest.groupId}]", projectId, skillToReuse.skillId, ErrorCode.BadParam)
-            }
+        SkillDef parent = ruleSetDefGraphService.getParentSkill(skillToReuse)
+        if (parent.skillId == destParentId) {
+            throw new SkillException("Not allowed to reuse skill into the same ${skillReuseRequest.groupId ? 'group' : 'subject'} [${destParentId}]", projectId, skillToReuse.skillId, ErrorCode.BadParam)
         }
     }
 
     @Profile
-    private void validateSkillsHaveNoDeps(String projectId, SkillReuseRequest skillReuseRequest) {
+    private void validateSkillsHaveNoDeps(String projectId, SkillsActionRequest skillReuseRequest) {
         skillReuseRequest.skillIds.each {
             Long dependencies = ruleSetDefGraphService.countChildrenSkills(projectId, it, [SkillRelDef.RelationshipType.Dependence])
             if (dependencies && dependencies > 0) {

@@ -329,7 +329,7 @@ const router = new Router({
           requiresAuth: true,
           nonAdmin: true,
           announcer: {
-            message: 'My Progress',
+            message: 'Progress And Rankings',
           },
         },
       }, {
@@ -340,7 +340,7 @@ const router = new Router({
           requiresAuth: true,
           nonAdmin: true,
           announcer: {
-            message: 'My Progress Project',
+            message: 'Progress And Rankings Project',
           },
         },
       }, {
@@ -362,7 +362,7 @@ const router = new Router({
           requiresAuth: true,
           nonAdmin: true,
           announcer: {
-            message: 'Discover Projects',
+            message: 'Manage My Projects',
           },
         },
       }, {

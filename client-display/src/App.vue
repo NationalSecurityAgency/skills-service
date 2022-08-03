@@ -60,6 +60,18 @@ limitations under the License.
           onHeightChanged();
         },
         computed: {
+          projectDisplayName() {
+            return store.getters.projectDisplayName;
+          },
+          subjectDisplayName() {
+            return store.getters.subjectDisplayName;
+          },
+          groupDisplayName() {
+            return store.getters.groupDisplayName;
+          },
+          skillDisplayName() {
+            return store.getters.skillDisplayName;
+          },
           levelDisplayName() {
             return store.getters.levelDisplayName;
           },

@@ -20,6 +20,18 @@ const getters = {
   config(state) {
     return state.config;
   },
+  projectDisplayName(state) {
+    return state.config.projectDisplayName || 'Project';
+  },
+  subjectDisplayName(state) {
+    return state.config.subjectDisplayName || 'Subject';
+  },
+  groupDisplayName(state) {
+    return state.config.groupDisplayName || 'Group';
+  },
+  skillDisplayName(state) {
+    return state.config.skillDisplayName || 'Skill';
+  },
   levelDisplayName(state) {
     return state.config.levelDisplayName || 'Level';
   },
