@@ -231,7 +231,7 @@ class SkillsDepsService {
     }
 
     @Profile
-    private SkillDefRes convertToSkillDefRes(SkillDefGraphRes skillDef) {
+    SkillDefRes convertToSkillDefRes(SkillDefGraphRes skillDef) {
         SkillDefRes res = new SkillDefRes()
         Props.copy(skillDef, res)
         res.name = InputSanitizer.unsanitizeName(res.name)
@@ -239,16 +239,17 @@ class SkillsDepsService {
         return res
     }
 
-//    @Profile
-//    private SkillDefRes convertToSkillDefRes(SkillDefWithExtra skillDef) {
-//        SkillDefRes res = new SkillDefRes()
-//        Props.copy(skillDef, res)
-//        res.numPerformToCompletion = skillDef.totalPoints / res.pointIncrement
-//        return res
-//    }
+    @Profile
+    SkillDefRes convertToSkillDefRes(SkillDef skillDef) {
+        SkillDefRes res = new SkillDefRes()
+        Props.copy(skillDef, res)
+        res.name = InputSanitizer.unsanitizeName(res.name)
+        res.numPerformToCompletion = skillDef.totalPoints / res.pointIncrement
+        return res
+    }
 
     @Profile
-    private List<GraphSkillDefEdge> loadGraphEdges(String projectId, SkillRelDef.RelationshipType type){
+    private List<GraphSkillDefEdge> loadGraphEdges(String projectId, SkillRelDef.RelationshipType type) {
         List<Object[]> edges = skillRelDefRepo.getGraph(projectId, type)
 
         return edges.collect({
