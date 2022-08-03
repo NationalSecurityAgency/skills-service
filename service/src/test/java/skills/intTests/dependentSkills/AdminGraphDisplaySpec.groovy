@@ -15,6 +15,7 @@
  */
 package skills.intTests.dependentSkills
 
+
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 
@@ -52,8 +53,66 @@ class AdminGraphDisplaySpec extends DefaultIntSpec {
         graph.nodes.collect { it.skillId }.sort() == [skills.get(0).skillId, skills.get(1).skillId,]
 
         graph.edges.size() == 1
-        graph.edges.get(0).fromId == graph.nodes.find{ it.skillId == skills.get(0).skillId}.id
-        graph.edges.get(0).toId == graph.nodes.find{ it.skillId == skills.get(1).skillId}.id
+        graph.edges.get(0).fromId == graph.nodes.find { it.skillId == skills.get(0).skillId }.id
+        graph.edges.get(0).toId == graph.nodes.find { it.skillId == skills.get(1).skillId }.id
+        graph.nodes.subjectId == [subject.subjectId, subject.subjectId]
+    }
+
+    def "simple project graph with 2 nodes - different subjects"() {
+        List<Map> skills = SkillsFactory.createSkills(1)
+        List<Map> skills_subj2 = SkillsFactory.createSkills(1, 1, 2)
+        def subject = SkillsFactory.createSubject()
+        def subject2 = SkillsFactory.createSubject(1, 2)
+
+        skillsService.createProject(SkillsFactory.createProject())
+        skillsService.createSubject(subject)
+        skillsService.createSubject(subject2)
+        skillsService.createSkills(skills)
+        skillsService.createSkills(skills_subj2)
+
+        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills_subj2.get(0).skillId])
+
+        when:
+        def graph = skillsService.getDependencyGraph(SkillsFactory.defaultProjId)
+
+        then:
+        graph.edges.size() == 1
+        graph.edges.get(0).fromId == graph.nodes.find { it.skillId == skills.get(0).skillId }.id
+        graph.edges.get(0).toId == graph.nodes.find { it.skillId == skills_subj2.get(0).skillId }.id
+        graph.nodes.sort { it.subjectId }.subjectId == [subject.subjectId, subject2.subjectId]
+        graph.nodes.sort { it.subjectId }.skillId == [skills.get(0).skillId, skills_subj2.get(0).skillId]
+    }
+
+    def "simple project graph with 2 nodes - different subjects - group skills"() {
+        List<Map> skills = SkillsFactory.createSkills(1)
+        List<Map> skills_subj2 = SkillsFactory.createSkills(1, 1, 2)
+        def subject = SkillsFactory.createSubject()
+        def subject2 = SkillsFactory.createSubject(1, 2)
+        def group1 = SkillsFactory.createSkillsGroup(1, 1, 10)
+        def group2 = SkillsFactory.createSkillsGroup(1, 2, 11)
+
+        skillsService.createProject(SkillsFactory.createProject())
+        skillsService.createSubject(subject)
+        skillsService.createSubject(subject2)
+        skillsService.createSkills([group1, group2])
+        skills.each {
+            skillsService.assignSkillToSkillsGroup(group1.skillId, it)
+        }
+        skills_subj2.each {
+            skillsService.assignSkillToSkillsGroup(group2.skillId, it)
+        }
+
+        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills_subj2.get(0).skillId])
+
+        when:
+        def graph = skillsService.getDependencyGraph(SkillsFactory.defaultProjId)
+
+        then:
+        graph.edges.size() == 1
+        graph.edges.get(0).fromId == graph.nodes.find { it.skillId == skills.get(0).skillId }.id
+        graph.edges.get(0).toId == graph.nodes.find { it.skillId == skills_subj2.get(0).skillId }.id
+        graph.nodes.sort { it.subjectId }.subjectId == [subject.subjectId, subject2.subjectId]
+        graph.nodes.sort { it.subjectId }.skillId == [skills.get(0).skillId, skills_subj2.get(0).skillId]
     }
 
     def "project graph with rich hierarchy"() {

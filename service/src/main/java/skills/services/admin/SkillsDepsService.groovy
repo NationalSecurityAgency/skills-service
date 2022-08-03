@@ -157,8 +157,8 @@ class SkillsDepsService {
     }
 
     private static class GraphSkillDefEdge {
-        SkillDef from
-        SkillDef to
+        SkillDefGraphRes from
+        SkillDefGraphRes to
     }
 
     @Transactional(readOnly = true)
@@ -182,16 +182,16 @@ class SkillsDepsService {
         return convertToSkillsGraphRes(collectedRes)
     }
 
-    private static Comparator<SkillDef> skillDefComparator = new Comparator<SkillDef>() {
+    private static Comparator<SkillDefGraphRes> skillDefComparator = new Comparator<SkillDefGraphRes>() {
         @Override
-        int compare(SkillDef o1, SkillDef o2) {
+        int compare(SkillDefGraphRes o1, SkillDefGraphRes o2) {
             return o1.id.compareTo(o2.id)
         }
     }
 
     private SkillsGraphRes convertToSkillsGraphRes(List<GraphSkillDefEdge> edges) {
         AtomicInteger idCounter = new AtomicInteger(0)
-        Map<SkillDef, Integer> distinctNodesWithIdLookup = new TreeMap(skillDefComparator)
+        Map<SkillDefGraphRes, Integer> distinctNodesWithIdLookup = new TreeMap(skillDefComparator)
         List<SkillsGraphRes.Edge> edgesRes = []
         edges.each {
             int fromId = getIdInsertIfNeeded(distinctNodesWithIdLookup, it.from, idCounter)
@@ -221,7 +221,7 @@ class SkillsDepsService {
         }
     }
 
-    private Integer getIdInsertIfNeeded(Map<SkillDef, Integer> distinctNodesWithIdLookup, SkillDef item, AtomicInteger idCounter) {
+    private Integer getIdInsertIfNeeded(Map<SkillDefGraphRes, Integer> distinctNodesWithIdLookup, SkillDefGraphRes item, AtomicInteger idCounter) {
         Integer resultId = distinctNodesWithIdLookup.get(item)
         if (resultId == null) {
             resultId = idCounter.incrementAndGet()
@@ -231,7 +231,7 @@ class SkillsDepsService {
     }
 
     @Profile
-    private SkillDefRes convertToSkillDefRes(SkillDef skillDef) {
+    private SkillDefRes convertToSkillDefRes(SkillDefGraphRes skillDef) {
         SkillDefRes res = new SkillDefRes()
         Props.copy(skillDef, res)
         res.name = InputSanitizer.unsanitizeName(res.name)
@@ -254,24 +254,26 @@ class SkillsDepsService {
         return edges.collect({
             //   mapping directly to entity is slow, we can save over a second in latency by mapping attributes explicitly
 
-            SkillDef from = new SkillDef(
+            SkillDefGraphRes from = new SkillDefGraphRes(
                     id: it[0],
                     name: it[1],
                     skillId: it[2],
-                    projectId: it[3],
-                    pointIncrement: it[4],
-                    totalPoints: it[5],
-                    type: it[6],
+                    subjectId: it[3],
+                    projectId: it[4],
+                    pointIncrement: it[5],
+                    totalPoints: it[6],
+                    type: it[7],
             )
 
-            SkillDef to = new SkillDef(
-                    id: it[7],
-                    name: it[8],
-                    skillId: it[9],
-                    projectId: it[10],
-                    pointIncrement: it[11],
-                    totalPoints: it[12],
-                    type: it[13],
+            SkillDefGraphRes to = new SkillDefGraphRes(
+                    id: it[8],
+                    name: it[9],
+                    skillId: it[10],
+                    subjectId: it[11],
+                    projectId: it[12],
+                    pointIncrement: it[13],
+                    totalPoints: it[14],
+                    type: it[15],
             )
 
             new GraphSkillDefEdge(from: from, to: to)
