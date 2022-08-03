@@ -65,6 +65,7 @@ limitations under the License.
   import NoDataYet from '@/common-components/utilities/NoDataYet';
   import BadgesFilter from '@/common-components/utilities/ListFilterMenu';
   import BadgeCatalogItem from './BadgeCatalogItem';
+  import store from '../../store/store';
 
   export default {
     name: 'BadgesCatalog',
@@ -110,7 +111,7 @@ limitations under the License.
           {
             icon: 'fas fa-list-alt',
             id: 'projectBadges',
-            html: 'Project Badges',
+            html: `${store.getters.projectDisplayName} Badges`,
             count: 0,
             filter: (badge) => badge.projectId,
           },

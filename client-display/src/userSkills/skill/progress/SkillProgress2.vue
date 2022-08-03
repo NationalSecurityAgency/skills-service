@@ -17,17 +17,17 @@ limitations under the License.
   <div class="text-left" data-cy="skillProgress">
     <div v-if="skill.crossProject" class="row border-bottom mb-3 text-primary text-center">
       <div class="col-md-6 text-md-left">
-        <div class="h4"><span class="text-muted">Project:</span> {{ skill.projectName }}</div>
+        <div class="h4"><span class="text-muted">{{ projectDisplayName }}:</span> {{ skill.projectName }}</div>
       </div>
       <div class="col-md-6 text-md-right text-success text-uppercase">
-        <div class="h5"><i class="fa fa-vector-square"/> Cross-project Skill</div>
+        <div class="h5"><i class="fa fa-vector-square"/> Cross-{{ projectDisplayName }} {{ skillDisplayName }}</div>
       </div>
     </div>
 
     <div v-if="skill.crossProject && !isSkillComplete" class="alert alert-primary text-center" role="alert">
-      This is a cross-project skill! In order to complete this skill please visit <strong>{{
+      This is a cross-{{ projectDisplayName.toLowerCase() }} {{ skillDisplayName.toLowerCase() }}! In order to complete this {{ skillDisplayName.toLowerCase() }} please visit <strong>{{
         skill.projectName
-      }}</strong> project! Happy playing!!
+      }}</strong> {{ projectDisplayName.toLowerCase() }}! Happy playing!!
     </div>
 
     <div class="row">
@@ -59,7 +59,8 @@ limitations under the License.
 
               <div v-if="skill.isSkillsGroupType && skill.numSkillsRequired > 0 && skill.numSkillsRequired < skill.children.length"
                    v-b-tooltip.hover
-                   title="A Group allows a Skill to be defined by the collection of other Skills within a Project. A Skill Group can require the completion of some or all of the included Skills before the group be achieved."
+                   :title="`A ${this.groupDisplayName} allows a ${this.skillDisplayName} to be defined by the collection ` +
+                    `of other ${this.skillDisplayName}s within a ${this.projectDisplayName}. A ${this.skillDisplayName} Group can require the completion of some or all of the included ${this.skillDisplayName}s before the group be achieved.`"
                    class="ml-2 d-inline-block border rounded p-1 text-primary border-success overflow-hidden"
                    style="font-size: 0.9rem"
                    data-cy="groupSkillsRequiredBadge">
@@ -108,7 +109,7 @@ limitations under the License.
         </div>
 
         <p v-if="skill.subjectName" class="text-secondary mt-3">
-          Subject: {{ skill.subjectName }}
+          {{ subjectDisplayName }}: {{ skill.subjectName }}
         </p>
 
         <achievement-date v-if="skill.achievedOn" :date="skill.achievedOn" class="mt-2"/>

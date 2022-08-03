@@ -47,13 +47,13 @@ Cypress.Commands.add("cdClickSubj", (subjIndex, expectedTitle) => {
     }
 });
 
-Cypress.Commands.add("cdClickSkill", (skillIndex, useProgressBar = true) => {
+Cypress.Commands.add("cdClickSkill", (skillIndex, useProgressBar = true, skillLabel = 'Skill') => {
     if (useProgressBar) {
         cy.get(`[data-cy="skillProgress_index-${skillIndex}"] [data-cy="skillProgressBar"]`).click();
     } else {
         cy.get(`[data-cy="skillProgress_index-${skillIndex}"] [data-cy="skillProgressTitle"]`).click();
     }
-    cy.contains('Skill Overview')
+    cy.contains(`${skillLabel} Overview`)
     cy.validatePoweredBy();
 });
 
