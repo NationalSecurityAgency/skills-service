@@ -55,9 +55,9 @@ limitations under the License.
                   v-b-tooltip="{ title: navItem.msg ? navItem.msg : navItem.name, placement: 'right', variant: 'primary', disabled: !collapsed && !navItem.isDisabled }"
                   :class="[isExactActive && 'bg-primary']">
                   <a :href="href"
-                     @click="navigate"
+                     @click="(e) => { emitCollapsed(); navigate(e); }"
                      :class="[isExactActive && 'text-light', !isExactActive && 'select-cursor', navItem.isDisabled && 'disabled', isActive && 'router-link-active', isExactActive && 'router-link-exact-active']"
-                     aria-current-value="page">
+                     :aria-current="isExactActive ? 'page' : false">
                     <div class="text-truncate ml-3" :class="{'mr-4': !collapsed}" :aria-label="`Navigate to ${navItem.name} page`">
                       <i :class="navItem.iconClass" class="fas"
                          style="min-width: 1.7rem;" aria-hidden="true"/> <span v-if="!collapsed || smallScreenMode">{{ navItem.name }}</span>
@@ -121,6 +121,12 @@ limitations under the License.
       },
       handleResize() {
         this.windowWidth = window.innerWidth;
+      },
+      emitCollapsed() {
+        if (this.smallScreenMode) {
+          // eslint-disable-next-line no-use-before-define
+          this.$root.$emit('bv::toggle::collapse', 'menu-collapse-control');
+        }
       },
     },
     computed: {
