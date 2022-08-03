@@ -187,7 +187,8 @@ class UserAchievementsAndPointsManagement {
                         subject.projectId, subject.skillId, subject.id, it.level, it.pointsFrom, numUpdated)
             }
         } else {
-            log.info("Subject achievement removal will not be performed as there are no skills defined for projectId=[{}], subjectId=[{}]", subject.projectId, subject.skillId,)
+            int numDeleted = userAchievedLevelRepo.deleteAllBySkillRefId(subject.id)
+            log.info("There are no skills defined for projectId=[{}], subjectId=[{}({})]. Removed [{}] subject achievements", subject.projectId, subject.skillId, subject.id, numDeleted)
         }
     }
 
