@@ -62,6 +62,19 @@ class ProjectErrorService {
     }
 
     @Transactional
+    public void clientVersionOutOfDate(String projectId, userVersion, clientVersion) {
+        final String err = "The version used (${userVersion}) is out of date (latest is ${clientVersion}).  Please consider upgrading the client version."
+        ProjectError error = errorRepo.findByProjectIdAndErrorTypeAndError(projectId, ProjectError.ErrorType.VersionOutOfDate, err)
+        if (!error) {
+            error = new ProjectError(projectId: projectId, errorType: ProjectError.ErrorType.VersionOutOfDate,  error: err, created: new Date(), count: 0)
+        }
+        error.count += 1
+        error.lastSeen = new Date()
+
+        errorRepo.save(error)
+    }
+
+    @Transactional
     public void deleteError(String projectId, String errorType, String err) {
         ProjectError.ErrorType type
         try {

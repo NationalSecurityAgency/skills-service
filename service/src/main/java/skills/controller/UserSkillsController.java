@@ -18,13 +18,19 @@ package skills.controller;
 import callStack.profiler.CProf;
 import callStack.profiler.Profile;
 import groovy.lang.Closure;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 import skills.PublicProps;
 import skills.auth.UserInfoService;
@@ -48,11 +54,17 @@ import skills.utils.MetricsLogger;
 import skills.utils.RetryUtil;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import static org.springframework.data.domain.Sort.Direction.ASC;
+import static org.springframework.data.domain.Sort.Direction.DESC;
 
 @CrossOrigin(allowCredentials = "true", originPatterns = {"*"})
 @RestController
@@ -94,6 +106,9 @@ class UserSkillsController {
     @Value("${skills.config.ui.skillHistoryInDays:1825}")
     Integer maxDaysBackForSkill;
 
+    @Value("classpath:client-version.json")
+    Resource resourceFile;
+
     @Autowired
     AddSkillHelper addSkillHelper;
 
@@ -106,6 +121,41 @@ class UserSkillsController {
         }
 
         return publicProps.getInt(PublicProps.UiProp.maxSkillVersion);
+    }
+
+    private String getCurrentVersion() {
+        File file;
+        String data = "";
+
+        try {
+            file = resourceFile.getFile();
+            data = FileUtils.readFileToString(file, "UTF-8");
+        }
+        catch(Exception e) {
+            log.info("Failed to read file");
+        }
+
+        return data;
+    }
+
+    private void compareClientVersions(String userVersion, String projectId) {
+        String currentVersion = getCurrentVersion();
+
+        if(!currentVersion.isBlank()) {
+            if(!userVersion.equals(currentVersion)) {
+                String [] currentVersionInfo = currentVersion.split("-");
+                String [] userVersionInfo = userVersion.split("-");
+
+                // Compare version numbers
+                ComparableVersion current = new ComparableVersion(currentVersionInfo[3]);
+                ComparableVersion user = new ComparableVersion(userVersionInfo[3]);
+
+                if(user.compareTo(current) < 0) {
+                    projectErrorService.clientVersionOutOfDate(projectId, userVersion, currentVersionInfo[3]);
+                }
+
+            }
+        }
     }
 
     @DBUpgradeSafe
@@ -121,6 +171,9 @@ class UserSkillsController {
                 "projectId ["+projectId+"], " +
                 "User-Agent ["+userAgent+"], " +
                 "remoteIp ["+remoteIp+"]");
+
+        compareClientVersions(skillsClientVersion.getSkillsClientVersion(), projectId);
+
         return RequestResult.success();
     }
 

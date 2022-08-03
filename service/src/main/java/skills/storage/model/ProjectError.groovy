@@ -29,7 +29,7 @@ class ProjectError implements Serializable {
 
 
     static enum ErrorType {
-        SkillNotFound, NoEmailableApprovers
+        SkillNotFound, NoEmailableApprovers, VersionOutOfDate
     };
 
     @Id
