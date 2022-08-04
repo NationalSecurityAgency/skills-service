@@ -235,7 +235,6 @@ limitations under the License.
                   },
                 };
                 return Object.assign(entry, {
-                  subjectId: this.skill.subjectId,
                   disabledStatus: disableInfo,
                   isFromAnotherProject: externalProject,
                 });

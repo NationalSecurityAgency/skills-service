@@ -178,27 +178,23 @@ describe('Skills Tests', () => {
     });
 
     it('ability to navigate to skills that this skill depends on', () => {
-        const tableSelector = '[data-cy="simpleSkillsTable"]';
+        cy.createSubject(1, 2);
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 2, 2);
+        cy.createSkill(1, 2, 3);
+        cy.createSkill(1, 2, 4);
+        cy.createSkill(1, 2, 5);
 
-        const numSkills = 5;
-        for (let i = 0; i < numSkills; i += 1) {
-            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${i}`, {
-                projectId: 'proj1',
-                subjectId: "subj1",
-                skillId: `skill${i}`,
-                name: `Skill ${i}`,
-                pointIncrement: '50',
-                numPerformToCompletion: '5'
-            });
-        }
-
-        cy.request('POST', '/admin/projects/proj1/skills/skill1/dependency/skill2')
-        cy.request('POST', '/admin/projects/proj1/skills/skill1/dependency/skill3')
-        cy.request('POST', '/admin/projects/proj1/skills/skill1/dependency/skill4')
+        cy.request('POST', '/admin/projects/proj1/skills/skill1/dependency/skill2Subj2');
+        cy.request('POST', '/admin/projects/proj1/skills/skill1/dependency/skill3Subj2');
+        cy.request('POST', '/admin/projects/proj1/skills/skill1/dependency/skill4Subj2');
 
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/dependencies');
-        cy.get('[data-cy="manage_skill3"]').click();
-        cy.get('[data-cy="pageHeader"]').contains('ID: skill3');
+        cy.get('[data-cy="manage_skill3Subj2"]')
+            .click();
+        cy.get('[data-cy="pageHeader"]')
+            .contains('ID: skill3Subj2');
+        cy.get('[data-cy="breadcrumb-subj2"]');
     });
 
     it('long skill id in the table', () => {
@@ -274,6 +270,5 @@ describe('Skills Tests', () => {
         cy.wait('@getGraph');
         cy.contains('eafeafeafeafeSkill%2Ddlajleajljelajelkaj... >> more');
     });
-
 
 });
