@@ -16,27 +16,35 @@
 package skills.intTests
 
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
-import skills.controller.result.model.ProjectError
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
-import skills.services.ProjectErrorService
+import skills.services.VersionService
 
 class ClientVersionSpecs extends DefaultIntSpec {
 
     @Autowired
-    ProjectErrorService projectErrorService;
+    VersionService versionService;
 
-    def "report skills-client version"() {
+    String currentVersion
+
+    def setup() {
+        currentVersion = versionService.getCurrentVersion();
+    }
+
+    def "report current skills-client version"() {
         def proj = SkillsFactory.createProject(1)
         skillsService.createProject(proj)
+
         when:
-        def result = skillsService.reportClientVersion(proj.projectId, "@skilltree/skills-client-fake-1.0.0")
+        def result = skillsService.reportClientVersion(proj.projectId, currentVersion)
+
         then:
         result
         result.statusCode == HttpStatus.OK
         result.body.success == true
+        def errors = skillsService.getProjectErrors(proj.projectId, 10, 1, "errorType", true)
+        errors.count == 0
     }
 
     def "out of date version logs an error"() {
@@ -44,11 +52,40 @@ class ClientVersionSpecs extends DefaultIntSpec {
         skillsService.createProject(proj)
         when:
         def result = skillsService.reportClientVersion(proj.projectId, "@skilltree/skills-client-fake-1.0.0")
+
         then:
-        PageRequest pageRequest = PageRequest.of(1 - 1, 10)
-        projectErrorService.countOfErrorsForProject(proj.projectId) == 1
-        ProjectError err = projectErrorService.getAllErrorsForProject(proj.projectId, pageRequest).getData().get(0)
-        err.error.contains("The version used (@skilltree/skills-client-fake-1.0.0) is out of date")
-        err.errorType == "VersionOutOfDate"
+        def errors = skillsService.getProjectErrors(proj.projectId, 10, 1, "errorType", true)
+        errors.count == 1
+        errors.data[0].errorType == "VersionOutOfDate"
+        errors.data[0].error.contains("The version used (@skilltree/skills-client-fake-1.0.0) is out of date")
+    }
+
+    def "Reporting same out of date version multiple times only logs one error"() {
+        def proj = SkillsFactory.createProject(1)
+        skillsService.createProject(proj)
+
+        when:
+        def result = skillsService.reportClientVersion(proj.projectId, "@skilltree/skills-client-fake-1.0.0")
+        result = skillsService.reportClientVersion(proj.projectId, "@skilltree/skills-client-fake-1.0.0")
+        result = skillsService.reportClientVersion(proj.projectId, "@skilltree/skills-client-fake-1.0.0")
+
+        then:
+        def errors = skillsService.getProjectErrors(proj.projectId, 10, 1, "errorType", true)
+        errors.count == 1
+    }
+
+    def "Reporting multiple different out of date versions produce multiple errors"() {
+        def proj = SkillsFactory.createProject(1)
+        skillsService.createProject(proj)
+
+        when:
+        def result = skillsService.reportClientVersion(proj.projectId, "@skilltree/skills-client-fake-1.0.0")
+        result = skillsService.reportClientVersion(proj.projectId, "@skilltree/skills-client-fake-1.2.3")
+        result = skillsService.reportClientVersion(proj.projectId, "@skilltree/skills-client-framework-1.0.0")
+        result = skillsService.reportClientVersion(proj.projectId, currentVersion)
+
+        then:
+        def errors = skillsService.getProjectErrors(proj.projectId, 10, 1, "errorType", true)
+        errors.count == 3
     }
 }

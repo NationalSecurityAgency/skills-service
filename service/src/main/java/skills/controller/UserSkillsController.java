@@ -45,6 +45,7 @@ import skills.dbupgrade.DBUpgradeSafe;
 import skills.icons.CustomIconFacade;
 import skills.services.ProjectErrorService;
 import skills.services.SelfReportingService;
+import skills.services.VersionService;
 import skills.services.events.SkillEventResult;
 import skills.services.events.SkillEventsService;
 import skills.skillLoading.RankingLoader;
@@ -97,17 +98,11 @@ class UserSkillsController {
     @Autowired
     SelfReportingService selfReportingService;
 
-    @Autowired
-    ProjectErrorService projectErrorService;
-
     @Value("${skills.config.ui.pointHistoryInDays:1825}")
     Integer maxDaysBack;
 
     @Value("${skills.config.ui.skillHistoryInDays:1825}")
     Integer maxDaysBackForSkill;
-
-    @Value("classpath:client-version.json")
-    Resource resourceFile;
 
     @Autowired
     AddSkillHelper addSkillHelper;
@@ -115,47 +110,15 @@ class UserSkillsController {
     @Autowired
     MetricsLogger metricsLogger;
 
+    @Autowired
+    VersionService versionService;
+
     private int getProvidedVersionOrReturnDefault(Integer versionParam) {
         if (versionParam != null) {
             return versionParam;
         }
 
         return publicProps.getInt(PublicProps.UiProp.maxSkillVersion);
-    }
-
-    private String getCurrentVersion() {
-        File file;
-        String data = "";
-
-        try {
-            file = resourceFile.getFile();
-            data = FileUtils.readFileToString(file, "UTF-8");
-        }
-        catch(Exception e) {
-            log.info("Failed to read file");
-        }
-
-        return data;
-    }
-
-    private void compareClientVersions(String userVersion, String projectId) {
-        String currentVersion = getCurrentVersion();
-
-        if(!currentVersion.isBlank()) {
-            if(!userVersion.equals(currentVersion)) {
-                String [] currentVersionInfo = currentVersion.split("-");
-                String [] userVersionInfo = userVersion.split("-");
-
-                // Compare version numbers
-                ComparableVersion current = new ComparableVersion(currentVersionInfo[3]);
-                ComparableVersion user = new ComparableVersion(userVersionInfo[3]);
-
-                if(user.compareTo(current) < 0) {
-                    projectErrorService.clientVersionOutOfDate(projectId, userVersion, currentVersionInfo[3]);
-                }
-
-            }
-        }
     }
 
     @DBUpgradeSafe
@@ -172,7 +135,7 @@ class UserSkillsController {
                 "User-Agent ["+userAgent+"], " +
                 "remoteIp ["+remoteIp+"]");
 
-        compareClientVersions(skillsClientVersion.getSkillsClientVersion(), projectId);
+        versionService.compareClientVersions(skillsClientVersion.getSkillsClientVersion(), projectId);
 
         return RequestResult.success();
     }
