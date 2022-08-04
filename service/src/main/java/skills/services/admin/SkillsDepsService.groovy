@@ -156,7 +156,7 @@ class SkillsDepsService {
         return finalRes
     }
 
-    private static class GraphSkillDefEdge {
+    static class GraphSkillDefEdge {
         SkillDefGraphRes from
         SkillDefGraphRes to
     }

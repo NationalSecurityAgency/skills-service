@@ -19,6 +19,9 @@ package skills.intTests.copyProject
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.services.admin.skillReuse.SkillReuseIdUtil
+import skills.services.settings.Settings
+import skills.skillLoading.RankingLoader
+import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -146,6 +149,67 @@ class CopyProjectSpecs extends DefaultIntSpec {
 
         copiedSubj1UpdatedLevels.percent == subj1UpdatedLevels.percent
         copiedSubj2UpdatedLevels.percent == subj2UpdatedLevels.percent
+    }
+
+    def "subject attributes are properly copied"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        p1subj1.description = "Very important Stuff"
+        p1subj1.helpUrl = "http://www.greatlink.com"
+        p1subj1.iconClass = "fas fa-address-card"
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [])
+
+        when:
+        def projToCopy = createProject(2)
+        skillsService.copyProject(p1.projectId, projToCopy)
+
+        def copiedSubjs = skillsService.getSubjects(projToCopy.projectId)
+        then:
+        copiedSubjs.subjectId == [p1subj1.subjectId]
+        def copiedSubj = copiedSubjs[0]
+        copiedSubj.name == p1subj1.name
+        copiedSubj.description == p1subj1.description
+        copiedSubj.helpUrl == p1subj1.helpUrl
+        copiedSubj.iconClass == p1subj1.iconClass
+    }
+
+    def "settings are copied"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [])
+
+        skillsService.addOrUpdateProjectSetting(p1.projectId, RankingLoader.PROJ_ADMINS_RANK_AND_LEADERBOARD_OPT_OUT_PREF, true.toString())
+        skillsService.addOrUpdateProjectSetting(p1.projectId, "project.displayName", "blah")
+
+        when:
+        def projToCopy = createProject(2)
+        skillsService.copyProject(p1.projectId, projToCopy)
+
+        def copiedSettings = skillsService.getProjectSettings(projToCopy.projectId).sort { it.setting }
+        then:
+        copiedSettings.projectId == [projToCopy.projectId, projToCopy.projectId]
+        copiedSettings.setting == [RankingLoader.PROJ_ADMINS_RANK_AND_LEADERBOARD_OPT_OUT_PREF, "project.displayName"]
+        copiedSettings.value == ["true", "blah"]
+    }
+
+    def "copied project should n ot be discoverable by default"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [])
+
+        skillsService.addOrUpdateProjectSetting(p1.projectId, RankingLoader.PROJ_ADMINS_RANK_AND_LEADERBOARD_OPT_OUT_PREF, true.toString())
+        skillsService.addOrUpdateProjectSetting(p1.projectId, Settings.PRODUCTION_MODE.settingName, true.toString())
+        skillsService.addOrUpdateProjectSetting(p1.projectId, "project.displayName", "blah")
+
+        when:
+        def projToCopy = createProject(2)
+        skillsService.copyProject(p1.projectId, projToCopy)
+
+        def copiedSettings = skillsService.getProjectSettings(projToCopy.projectId).sort { it.setting }
+        then:
+        copiedSettings.projectId == [projToCopy.projectId, projToCopy.projectId]
+        copiedSettings.setting == [RankingLoader.PROJ_ADMINS_RANK_AND_LEADERBOARD_OPT_OUT_PREF, "project.displayName"]
+        copiedSettings.value == ["true", "blah"]
     }
 
     static class Edge {

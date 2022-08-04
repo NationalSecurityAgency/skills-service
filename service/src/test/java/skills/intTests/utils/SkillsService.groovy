@@ -1183,11 +1183,11 @@ class SkillsService {
 
     def addOrUpdateProjectSetting(String projectId, String setting, String value) {
         Map params = [
-                setting: setting,
-                value: value,
+                setting  : setting,
+                value    : value,
                 projectId: projectId,
         ]
-        return wsHelper.adminPost("/projects/${projectId}/settings", [ params ])
+        return wsHelper.adminPost("/projects/${projectId}/settings", [params])
     }
 
     def getProjectSettings(String projectId) {
@@ -1202,7 +1202,7 @@ class SkillsService {
         return wsHelper.rootPost('/saveSystemSettings',
                 [publicUrl: publicUrl,
                  resetTokenExpiration: resetTokenExpiration,
-                 fromEmail: fromEmail,
+                 fromEmail           : fromEmail,
                  customHeader: customHeader,
                  customFooter: customFooter])
     }

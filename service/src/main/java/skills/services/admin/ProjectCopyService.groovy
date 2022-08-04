@@ -18,6 +18,7 @@ package skills.services.admin
 import callStack.profiler.Profile
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -28,10 +29,12 @@ import skills.controller.request.model.BadgeRequest
 import skills.controller.request.model.EditLevelRequest
 import skills.controller.request.model.NextLevelRequest
 import skills.controller.request.model.ProjectRequest
+import skills.controller.request.model.ProjectSettingsRequest
 import skills.controller.request.model.SkillRequest
 import skills.controller.request.model.SkillsActionRequest
 import skills.controller.request.model.SubjectRequest
 import skills.controller.result.model.LevelDefinitionRes
+import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.SkillDefPartialRes
 import skills.services.AccessSettingsStorageService
 import skills.services.CreatedResourceLimitsValidator
@@ -40,7 +43,11 @@ import skills.services.CustomValidator
 import skills.services.LevelDefinitionStorageService
 import skills.services.LockingService
 import skills.services.admin.skillReuse.SkillReuseService
+import skills.services.settings.Settings
+import skills.services.settings.SettingsDataAccessor
+import skills.services.settings.SettingsService
 import skills.storage.model.ProjDef
+import skills.storage.model.Setting
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.SkillRelDef
@@ -103,6 +110,9 @@ class ProjectCopyService {
     @Autowired
     LevelDefinitionStorageService levelDefinitionStorageService
 
+    @Autowired
+    SettingsService settingsService
+
     @Transactional
     @Profile
     void copyProject(String originalProjectId, ProjectRequest projectRequest, String userIdParam = null) {
@@ -112,7 +122,7 @@ class ProjectCopyService {
         validate(projectRequest, userIdParam)
 
         ProjDef toProj = saveToProject(projectRequest)
-
+        saveProjectSettings(fromProject, toProj)
         updateLevels(fromProject, toProj)
 
         List<SkillInfo> allCollectedSkills = []
@@ -120,6 +130,24 @@ class ProjectCopyService {
         saveBadgesAndTheirSkills(fromProject, toProj)
         saveDependencies(fromProject, toProj)
         saveReusedSkills(allCollectedSkills, fromProject, toProj)
+    }
+
+    @Profile
+    private void saveProjectSettings(ProjDef fromProject, toProj) {
+        List<SettingsResult> settings = settingsService.loadSettingsForProject(fromProject.projectId)
+        settings.each { SettingsResult fromSetting ->
+            // copied projects should not be discoverable by default therefore should not carry this setting forward
+            boolean discoverableProject = fromSetting.setting == Settings.PRODUCTION_MODE.settingName && fromSetting.value == Boolean.TRUE.toString()
+            if (!discoverableProject) {
+                ProjectSettingsRequest projectSettingsRequest = new ProjectSettingsRequest(
+                        projectId: toProj.projectId,
+                        settingGroup: fromSetting.settingGroup,
+                        setting: fromSetting.setting,
+                        value: fromSetting.value,
+                )
+                settingsService.saveSetting(projectSettingsRequest)
+            }
+        }
     }
 
     @Profile
