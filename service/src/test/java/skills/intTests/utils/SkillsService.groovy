@@ -105,13 +105,21 @@ class SkillsService {
         wsHelper.appPost(getProjectUrl(originalProjectId ?: props.projectId), props)
     }
 
+    @Profile
+    def copyProject(String fromProjId, Map toProjProps) {
+        wsHelper.adminPost("/projects/${fromProjId}/copy".toString(), toProjProps)
+    }
+
     static String PROD_MODE = Settings.PRODUCTION_MODE.settingName
+
     def enableProdMode(proj) {
         setProdMode(proj, true)
     }
+
     def disableProdMode(proj) {
         setProdMode(proj, false)
     }
+
     def setProdMode(proj, boolean isProd) {
         this.changeSetting(proj.projectId, PROD_MODE, [projectId: proj.projectId, setting: PROD_MODE, value: isProd.toString()])
     }

@@ -249,7 +249,7 @@ class SkillsDepsService {
     }
 
     @Profile
-    private List<GraphSkillDefEdge> loadGraphEdges(String projectId, SkillRelDef.RelationshipType type) {
+    List<GraphSkillDefEdge> loadGraphEdges(String projectId, SkillRelDef.RelationshipType type) {
         List<Object[]> edges = skillRelDefRepo.getGraph(projectId, type)
 
         return edges.collect({

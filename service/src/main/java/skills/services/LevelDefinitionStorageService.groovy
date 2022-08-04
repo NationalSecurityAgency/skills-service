@@ -301,7 +301,7 @@ class LevelDefinitionStorageService {
                 throw ske
             }
 
-            levelDefinitionRepository.deleteById(removed.id)
+            levelDefinitionRepository.delete(removed)
             log.debug("Deleted last level [{}]", removed)
             //now we have to null out the toPoints of the 2nd to last level
             if(existingDefinitions.size() > 1){
