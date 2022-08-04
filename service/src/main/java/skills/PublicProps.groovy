@@ -46,6 +46,7 @@ class PublicProps {
         maxSkillNameLength,
         maxSubjectNameLength,
         maxLevelNameLength,
+        maxCustomLabelLength,
         minIdLength,
         maxIdLength,
         maxSkillVersion,

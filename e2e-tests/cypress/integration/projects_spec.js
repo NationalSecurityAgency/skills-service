@@ -1069,7 +1069,7 @@ describe('Projects Tests', () => {
     cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
   });
 
-  it('project-level settings: set custom level name', () => {
+  it('project-level settings: set custom labels', () => {
     cy.createProject(1);
     cy.visit('/administrator/projects/proj1/settings')
 
@@ -1153,6 +1153,37 @@ describe('Projects Tests', () => {
     cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
     cy.get('[data-cy="settingsSavedAlert"]').should('not.exist')
     cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+
+    cy.get('[data-cy=projectDisplayTextInput]').clear().type('123456789012345678901234567890123456789012345678901')
+    cy.get('[data-cy=projectDisplayTextError]').contains('Project Display Text cannot exceed 50 characters.').should('be.visible');
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+    cy.get('[data-cy=projectDisplayTextInput]').clear()
+    cy.get('[data-cy=projectDisplayTextError]').should('not.exist')
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
+    cy.get('[data-cy=subjectDisplayTextInput]').clear().type('123456789012345678901234567890123456789012345678901')
+    cy.get('[data-cy=subjectDisplayTextError]').contains('Subject Display Text cannot exceed 50 characters.').should('be.visible');
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+    cy.get('[data-cy=subjectDisplayTextInput]').clear()
+    cy.get('[data-cy=subjectDisplayTextError]').should('not.exist')
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
+    cy.get('[data-cy=groupDisplayTextInput]').clear().type('123456789012345678901234567890123456789012345678901')
+    cy.get('[data-cy=groupDisplayTextError]').contains('Group Display Text cannot exceed 50 characters.').should('be.visible');
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+    cy.get('[data-cy=groupDisplayTextInput]').clear()
+    cy.get('[data-cy=groupDisplayTextError]').should('not.exist')
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
+    cy.get('[data-cy=skillDisplayTextInput]').clear().type('123456789012345678901234567890123456789012345678901')
+    cy.get('[data-cy=skillDisplayTextError]').contains('Skill Display Text cannot exceed 50 characters.').should('be.visible');
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+    cy.get('[data-cy=skillDisplayTextInput]').clear()
+    cy.get('[data-cy=skillDisplayTextError]').should('not.exist')
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
+    cy.get('[data-cy=levelDisplayTextInput]').clear().type('123456789012345678901234567890123456789012345678901')
+    cy.get('[data-cy=levelDisplayTextError]').contains('Level Display Text cannot exceed 50 characters.').should('be.visible');
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+    cy.get('[data-cy=levelDisplayTextInput]').clear()
+    cy.get('[data-cy=levelDisplayTextError]').should('not.exist')
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
   });
 
   it('navigate to subjects by click on project name', () => {

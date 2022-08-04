@@ -174,66 +174,127 @@ limitations under the License.
 
               <b-collapse id="customLabelsCollapse" :visible="showCustomLabelsConfigToggle">
                 <b-card class="mt-1">
-                  <div class="row mb-1">
-                    <div class="col col-md-3 text-secondary" id="projectDisplayTextLabel">
-                      Project Display Text:
-                      <inline-help
-                        target-id="projectDisplayTextHelp"
-                        msg='The word "Project" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                  <ValidationProvider rules="maxCustomLabelLength" v-slot="{errors}"
+                                      name="Project Display Text">
+                    <div class="row mb-1">
+                      <div class="col col-md-3 text-secondary" id="projectDisplayTextLabel">
+                        Project Display Text:
+                        <inline-help
+                          target-id="projectDisplayTextHelp"
+                          msg='The word "Project" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                      </div>
+                      <div class="col">
+                        <b-form-input v-model="settings.projectDisplayName.value"
+                                      data-cy="projectDisplayTextInput"
+                                      v-on:input="projectDisplayNameChanged"
+                                      aria-labelledby="projectDisplayTextLabel">
+                        </b-form-input>
+                      </div>
                     </div>
-                    <div class="col">
-                      <b-form-input v-model="settings.projectDisplayName.value" data-cy="projectDisplayTextInput"
-                                    v-on:input="projectDisplayNameChanged" aria-labelledby="projectDisplayTextLabel"></b-form-input>
+                    <div v-if="errors && errors.length > 0" class="row">
+                      <div class="col">
+                        <small role="alert" class="form-text text-danger" id="projectDisplayTextError"
+                               data-cy="projectDisplayTextError">{{ errors[0] }}</small>
+                      </div>
                     </div>
-                  </div>
-                  <div class="row mb-1">
-                    <div class="col col-md-3 text-secondary" id="subjectDisplayTextLabel">
-                      Subject Display Text:
-                      <inline-help
-                        target-id="subjectDisplayTextHelp"
-                        msg='The word "Subject" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                  </ValidationProvider>
+                  <ValidationProvider rules="maxCustomLabelLength" v-slot="{errors}"
+                                      name="Subject Display Text">
+                    <div class="row mb-1">
+                      <div class="col col-md-3 text-secondary" id="subjectDisplayTextLabel">
+                        Subject Display Text:
+                        <inline-help
+                          target-id="subjectDisplayTextHelp"
+                          msg='The word "Subject" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                      </div>
+                      <div class="col">
+                        <b-form-input v-model="settings.subjectDisplayName.value"
+                                      data-cy="subjectDisplayTextInput"
+                                      v-on:input="subjectDisplayNameChanged"
+                                      aria-labelledby="subjectDisplayTextLabel">
+                        </b-form-input>
+                      </div>
                     </div>
-                    <div class="col">
-                      <b-form-input v-model="settings.subjectDisplayName.value" data-cy="subjectDisplayTextInput"
-                                    v-on:input="subjectDisplayNameChanged" aria-labelledby="subjectDisplayTextLabel"></b-form-input>
+                    <div v-if="errors && errors.length > 0" class="row">
+                      <div class="col">
+                        <small role="alert" class="form-text text-danger" id="subjectDisplayTextError"
+                               data-cy="subjectDisplayTextError">{{ errors[0] }}</small>
+                      </div>
                     </div>
-                  </div>
-                  <div class="row mb-1">
-                    <div class="col col-md-3 text-secondary" id="groupDisplayTextLabel">
-                      Group Display Text:
-                      <inline-help
-                        target-id="groupDisplayTextHelp"
-                        msg='The word "Group" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                  </ValidationProvider>
+                  <ValidationProvider rules="maxCustomLabelLength" v-slot="{errors}"
+                                      name="Group Display Text">
+                    <div class="row mb-1">
+                      <div class="col col-md-3 text-secondary" id="groupDisplayTextLabel">
+                        Group Display Text:
+                        <inline-help
+                          target-id="groupDisplayTextHelp"
+                          msg='The word "Group" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                      </div>
+                      <div class="col">
+                        <b-form-input v-model="settings.groupDisplayName.value"
+                                      data-cy="groupDisplayTextInput"
+                                      v-on:input="groupDisplayNameChanged"
+                                      aria-labelledby="groupDisplayTextLabel">
+                        </b-form-input>
+                      </div>
                     </div>
-                    <div class="col">
-                      <b-form-input v-model="settings.groupDisplayName.value" data-cy="groupDisplayTextInput"
-                                    v-on:input="groupDisplayNameChanged" aria-labelledby="groupDisplayTextLabel"></b-form-input>
+                    <div v-if="errors && errors.length > 0" class="row">
+                      <div class="col">
+                        <small role="alert" class="form-text text-danger" id="groupDisplayTextError"
+                               data-cy="groupDisplayTextError">{{ errors[0] }}</small>
+                      </div>
                     </div>
-                  </div>
-                  <div class="row mb-1">
-                    <div class="col col-md-3 text-secondary" id="skillDisplayTextLabel">
-                      Skill Display Text:
-                      <inline-help
-                        target-id="skillDisplayTextHelp"
-                        msg='The word "Skill" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                  </ValidationProvider>
+
+                  <ValidationProvider rules="maxCustomLabelLength" v-slot="{errors}"
+                                      name="Skill Display Text">
+                    <div class="row mb-1">
+                      <div class="col col-md-3 text-secondary" id="skillDisplayTextLabel">
+                        Skill Display Text:
+                        <inline-help
+                          target-id="skillDisplayTextHelp"
+                          msg='The word "Skill" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                      </div>
+                      <div class="col">
+                        <b-form-input v-model="settings.skillDisplayName.value"
+                                      data-cy="skillDisplayTextInput"
+                                      v-on:input="skillDisplayNameChanged"
+                                      aria-labelledby="skillDisplayTextLabel">
+                        </b-form-input>
+                      </div>
                     </div>
-                    <div class="col">
-                      <b-form-input v-model="settings.skillDisplayName.value" data-cy="skillDisplayTextInput"
-                                    v-on:input="skillDisplayNameChanged" aria-labelledby="skillDisplayTextLabel"></b-form-input>
+                    <div v-if="errors && errors.length > 0" class="row">
+                      <div class="col">
+                        <small role="alert" class="form-text text-danger" id="skillDisplayTextError"
+                               data-cy="skillDisplayTextError">{{ errors[0] }}</small>
+                      </div>
                     </div>
-                  </div>
-                  <div class="row">
-                    <div class="col col-md-3 text-secondary" id="levelDisplayTextLabel">
-                      Level Display Text:
-                      <inline-help
-                        target-id="levelDisplayTextHelp"
-                        msg='The word "Level" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                  </ValidationProvider>
+                  <ValidationProvider rules="maxCustomLabelLength" v-slot="{errors}"
+                                      name="Level Display Text">
+                    <div class="row">
+                      <div class="col col-md-3 text-secondary" id="levelDisplayTextLabel">
+                        Level Display Text:
+                        <inline-help
+                          target-id="levelDisplayTextHelp"
+                          msg='The word "Level" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                      </div>
+                      <div class="col">
+                        <b-form-input v-model="settings.levelDisplayName.value"
+                                      data-cy="levelDisplayTextInput"
+                                      v-on:input="levelDisplayNameChanged"
+                                      aria-labelledby="levelDisplayTextLabel">
+                        </b-form-input>
+                      </div>
                     </div>
-                    <div class="col">
-                      <b-form-input v-model="settings.levelDisplayName.value" data-cy="levelDisplayTextInput"
-                                    v-on:input="levelDisplayNameChanged" aria-labelledby="levelDisplayTextLabel"></b-form-input>
+                    <div v-if="errors && errors.length > 0" class="row">
+                      <div class="col">
+                        <small role="alert" class="form-text text-danger" id="levelDisplayTextError"
+                               data-cy="levelDisplayTextError">{{ errors[0] }}</small>
+                      </div>
                     </div>
-                  </div>
+                  </ValidationProvider>
                 </b-card>
               </b-collapse>
             </div>
