@@ -1127,13 +1127,16 @@ describe('Projects Tests', () => {
     cy.intercept('POST', '/admin/projects/proj1/settings').as('saveSettings');
     cy.visit('/administrator/projects/proj1/settings')
     cy.wait('@getSettings');
-    cy.get('[data-cy="pageHeaderStat_Visibility"]').should('include.text', 'PUBLIC(Not Discoverable)');
+    cy.get('[data-cy="pageHeaderStat"]').eq(0).should('include.text', 'PUBLIC');
+    cy.get('[data-cy="pageHeaderStat"]').eq(0).should('include.text', 'Not Discoverable');
 
     cy.get('[data-cy="projectVisibilitySelector"]').select('dpr');
     cy.get('[data-cy="saveSettingsBtn"').click();
     cy.wait('@saveSettings');
     cy.wait('@getSettings');
-    cy.get('[data-cy="pageHeaderStat_Visibility"]').should('include.text', 'PUBLIC(Discoverable)');
+    cy.get('[data-cy="pageHeaderStat"]').eq(0).should('include.text', 'PUBLIC');
+    cy.get('[data-cy="pageHeaderStat"]').eq(0).should('include.text', 'Discoverable');
+    cy.get('[data-cy="pageHeaderStat"]').eq(0).should('not.include.text', 'Not Discoverable');
 
     cy.get('[data-cy="projectVisibilitySelector"]').select('pio');
     cy.get('.modal-content').should('be.visible').should('include.text', 'Changing to Invite Only').should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users.');
@@ -1141,11 +1144,13 @@ describe('Projects Tests', () => {
     cy.get('[data-cy="saveSettingsBtn"').click({force: true});
     cy.wait('@saveSettings');
     cy.wait('@getSettings');
-    cy.get('[data-cy="pageHeaderStat_Visibility"]').should('include.text', 'PRIVATE(Invite Only)');
+    cy.get('[data-cy="pageHeaderStat"]').eq(0).should('include.text', 'PRIVATE');
+    cy.get('[data-cy="pageHeaderStat"]').eq(0).should('include.text', 'Invite Only');
 
     cy.get('[data-cy="nav-Access"').click();
     cy.wait(200);
-    cy.get('[data-cy="pageHeaderStat_Visibility"]').should('include.text', 'PRIVATE(Invite Only)');
+    cy.get('[data-cy="pageHeaderStat"]').eq(0).should('include.text', 'PRIVATE');
+    cy.get('[data-cy="pageHeaderStat"]').eq(0).should('include.text', 'Invite Only');
   });
 
 
