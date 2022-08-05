@@ -144,7 +144,7 @@ limitations under the License.
 
         return AccessService.getUserRolesForProject(this.$route.params.projectId, 'ROLE_PRIVATE_PROJECT_USER', pageParams).then((res) => {
           this.table.items = res.data;
-          this.table.options.pagination.totalRows = res.count;
+          this.table.options.pagination.totalRows = res.totalCount;
           this.table.options.busy = false;
         });
       },

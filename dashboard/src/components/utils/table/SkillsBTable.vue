@@ -70,7 +70,7 @@ limitations under the License.
       </template>
 
     </b-table>
-    <div v-if="!options.busy && !options.pagination.remove && !this.hidePaging" class="row m-1 p-0 align-items-center">
+    <div v-if="!options.busy && !options.pagination.remove && !hidePaging" class="row m-1 p-0 align-items-center">
       <div class="col-md text-center text-md-left">
         <span class="text-muted">Total Rows:</span> <strong data-cy="skillsBTableTotalRows">{{ totalRows | number }}</strong>
       </div>

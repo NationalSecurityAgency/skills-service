@@ -55,7 +55,7 @@ limitations under the License.
                   v-b-tooltip="{ title: navItem.msg ? navItem.msg : navItem.name, placement: 'right', variant: 'primary', disabled: !collapsed && !navItem.isDisabled }"
                   :class="[isExactActive && 'bg-primary']">
                   <a :href="href"
-                     @click="(e) => { emitCollapsed(); navigate(e); }"
+                     @click="(e) => { conditionalCollapse(); navigate(e); }"
                      :class="[isExactActive && 'text-light', !isExactActive && 'select-cursor', navItem.isDisabled && 'disabled', isActive && 'router-link-active', isExactActive && 'router-link-exact-active']"
                      :aria-current="isExactActive ? 'page' : false">
                     <div class="text-truncate ml-3" :class="{'mr-4': !collapsed}" :aria-label="`Navigate to ${navItem.name} page`">
@@ -122,7 +122,7 @@ limitations under the License.
       handleResize() {
         this.windowWidth = window.innerWidth;
       },
-      emitCollapsed() {
+      conditionalCollapse() {
         if (this.smallScreenMode) {
           // eslint-disable-next-line no-use-before-define
           this.$root.$emit('bv::toggle::collapse', 'menu-collapse-control');
