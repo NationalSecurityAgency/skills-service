@@ -732,5 +732,22 @@ describe('Navigation Tests', () => {
     // proj2 has default level name ("Level")
     cy.get('[data-cy=project-link-proj2]').find('[data-cy=project-card-project-level]').contains('Level');
   });
+
+  it('My Progress page - verify custom project label', function () {
+    // set custom level display name for proj1
+    cy.loginAsRootUser();
+    cy.request('POST', '/admin/projects/proj1/settings', [{
+      value: 'Work Role',
+      setting: 'project.displayName',
+      projectId: 'proj1',
+    }])
+
+    cy.loginAsProxyUser();
+    cy.visit('/progress-and-rankings/');
+    cy.get('[data-cy=project-link-proj1]').click()
+
+    // proj1 has custom level name ("Work Role")
+    cy.get('[data-cy=title]').contains('WORK ROLE: This is project 1');
+  });
 });
 
