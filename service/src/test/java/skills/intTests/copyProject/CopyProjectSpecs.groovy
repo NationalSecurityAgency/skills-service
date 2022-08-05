@@ -421,10 +421,408 @@ class CopyProjectSpecs extends DefaultIntSpec {
         !copiedSkill3.thisSkillWasReusedElsewhere
     }
 
-    // group attributes are copied
-    // skills display order is presereved
-    // version is reset to 0
-    // group with partial req
+    def "skill display order is copied"() {
+        def p1 = createProject(1)
+
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        skillsService.moveSkillDown(p1Skills[0])
+
+        when:
+        def originalSkills = skillsService.getSkillsForSubject(p1.projectId, p1subj1.subjectId).sort { it.displayOrder }
+        def projToCopy = createProject(2)
+        skillsService.copyProject(p1.projectId, projToCopy)
+
+        def copiedSkills = skillsService.getSkillsForSubject(projToCopy.projectId, p1subj1.subjectId).sort { it.displayOrder }
+
+        then:
+        originalSkills.skillId == [p1Skills[1].skillId, p1Skills[0].skillId, p1Skills[2].skillId]
+        copiedSkills.skillId == [p1Skills[1].skillId, p1Skills[0].skillId, p1Skills[2].skillId]
+        copiedSkills.displayOrder == [1, 2, 3]
+    }
+
+    def "copied skill version must be reset to 0"() {
+        def p1 = createProject(1)
+
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100)
+        p1Skills[0].version = 0
+        p1Skills[1].version = 1
+        p1Skills[2].version = 2
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        when:
+        def originalSkills = skillsService.getSkillsForSubject(p1.projectId, p1subj1.subjectId).sort { it.displayOrder }
+        def projToCopy = createProject(2)
+        skillsService.copyProject(p1.projectId, projToCopy)
+
+        def copiedSkills = skillsService.getSkillsForSubject(projToCopy.projectId, p1subj1.subjectId).sort { it.displayOrder }
+
+        then:
+        originalSkills.version == [0, 1, 2]
+        copiedSkills.version == [0, 0, 0]
+    }
+
+    def "group attributes are properly copied"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def skill1 = createSkill(1, 1, 22, 0, 12, 512, 18,)
+        def skill2 = createSkill(1, 1, 23, 0, 12, 512, 18,)
+
+        def group1 = createSkillsGroup(1, 1, 4)
+        group1.description = "blah 1"
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [group1])
+        skillsService.assignSkillToSkillsGroup(group1.skillId, skill1)
+        skillsService.assignSkillToSkillsGroup(group1.skillId, skill2)
+        group1.numSkillsRequired = 1
+        skillsService.createSkill(group1)
+
+        def group2 = createSkillsGroup(1, 1, 5)
+        group2.description = "something else"
+        skillsService.createSkill(group2)
+
+        when:
+        def projToCopy = createProject(2)
+        skillsService.copyProject(p1.projectId, projToCopy)
+
+        def original1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: group1.skillId])
+        def original2 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: group2.skillId])
+
+        def copied1 = skillsService.getSkill([projectId: projToCopy.projectId, subjectId: p1subj1.subjectId, skillId: group1.skillId])
+        def copied2 = skillsService.getSkill([projectId: projToCopy.projectId, subjectId: p1subj1.subjectId, skillId: group2.skillId])
+
+        then:
+        original1.description == group1.description
+        copied1.description == group1.description
+        copied1.skillId == group1.skillId
+        copied1.name == group1.name
+        copied1.type == SkillDef.ContainerType.SkillsGroup.toString()
+        copied1.totalPoints == (18 * 12) * 2
+        copied1.numSkillsRequired == 1
+
+        original2.description == group2.description
+        copied2.description == group2.description
+        copied2.skillId == group2.skillId
+        copied2.name == group2.name
+        copied2.type == SkillDef.ContainerType.SkillsGroup.toString()
+        copied2.totalPoints == 0
+        copied2.numSkillsRequired == -1
+
+    }
+
+    def "badge properties are copied"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def skills = createSkills(6, 1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, skills)
+
+        def badge1 = createBadge(1, 1)
+        badge1.description = "blah 1"
+        badge1.helpUrl = "http://www.greatlink.com"
+        badge1.iconClass = "fas fa-adjust"
+        skillsService.createBadge(badge1)
+        skills[0..2].each {
+            skillsService.assignSkillToBadge(p1.projectId, badge1.badgeId, it.skillId)
+        }
+        badge1.enabled = true
+        skillsService.createBadge(badge1)
+
+        def badge2 = createBadge(1, 2)
+        badge2.description = "blah 1"
+        badge2.helpUrl = "http://www.someotherlink.com"
+        Date oneWeekAgo = new Date() - 7
+        Date oneWeekInTheFuture = new Date() + 7
+        badge2.startDate = oneWeekAgo
+        badge2.endDate = oneWeekInTheFuture
+        skillsService.createBadge(badge2)
+        skills[2..5].each {
+            skillsService.assignSkillToBadge(p1.projectId, badge2.badgeId, it.skillId)
+        }
+
+        when:
+        def projToCopy = createProject(2)
+        skillsService.copyProject(p1.projectId, projToCopy)
+
+        def copied1 = skillsService.getBadge([projectId: projToCopy.projectId, badgeId: badge1.badgeId])
+        def copied2 = skillsService.getBadge([projectId: projToCopy.projectId, badgeId: badge2.badgeId])
+
+        then:
+        copied1.description == badge1.description
+        copied1.badgeId == badge1.badgeId
+        copied1.name == badge1.name
+        copied1.helpUrl == badge1.helpUrl
+        copied1.numSkills == 3
+        copied1.totalPoints == 10 * 3
+        copied1.enabled == "true"
+        copied1.iconClass == badge1.iconClass
+        !copied1.startDate
+        !copied1.endDate
+
+        copied2.description == badge2.description
+        copied2.badgeId == badge2.badgeId
+        copied2.name == badge2.name
+        copied2.helpUrl == badge2.helpUrl
+        copied2.numSkills == 4
+        copied2.totalPoints == 10 * 4
+        copied2.enabled == "false"
+        copied2.startDate == oneWeekAgo.format("MM-dd-yyy")
+        copied2.endDate == oneWeekInTheFuture.format("MM-dd-yyy")
+        copied2.iconClass == "fa fa-question-circle" // default
+    }
+
+    def "badge display order is copied"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def skills = createSkills(6, 1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, skills)
+
+        def badge1 = createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        def badge2 = createBadge(1, 2)
+        skillsService.createBadge(badge2)
+        def badge3 = createBadge(1, 3)
+        skillsService.createBadge(badge3)
+
+        skillsService.changeBadgeDisplayOrder(badge3, 0)
+
+        when:
+        def projToCopy = createProject(2)
+        skillsService.copyProject(p1.projectId, projToCopy)
+
+        def orig = skillsService.getBadges(p1.projectId).sort { it.displayOrder }
+        def copied1 = skillsService.getBadges(projToCopy.projectId).sort { it.displayOrder }
+
+        then:
+        orig.badgeId == [badge3.badgeId, badge1.badgeId, badge2.badgeId]
+        copied1.badgeId == [badge3.badgeId, badge1.badgeId, badge2.badgeId]
+        copied1.displayOrder == [1, 2, 3]
+    }
+
+    def "validate dependencies were copied"() {
+        def p1 = createProject(1)
+        skillsService.createProject(p1)
+
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(10, 1, 1, 100)
+        def group1 = createSkillsGroup(1, 1, 22)
+        def group2 = createSkillsGroup(1, 1, 33)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSkills([p1Skills[0..3], group1, group2].flatten())
+        p1Skills[4..9].each {
+            skillsService.assignSkillToSkillsGroup(group1.skillId, it)
+        }
+
+        def p1subj2 = createSubject(1, 2)
+        def p1SkillsSubj2 = createSkills(5, 1, 2, 22)
+        def group3 = createSkillsGroup(1, 2, 33)
+        skillsService.createSubject(p1subj2)
+        skillsService.createSkills([p1SkillsSubj2[0..2], group3].flatten())
+        p1SkillsSubj2[3..4].each {
+            skillsService.assignSkillToSkillsGroup(group3.skillId, it)
+        }
+
+        skillsService.assignDependency([projectId: p1.projectId, skillId: p1Skills.get(0).skillId, dependentSkillId: p1Skills.get(2).skillId])
+        skillsService.assignDependency([projectId: p1.projectId, skillId: p1Skills.get(2).skillId, dependentSkillId: p1Skills.get(5).skillId])
+        skillsService.assignDependency([projectId: p1.projectId, skillId: p1Skills.get(3).skillId, dependentSkillId: p1SkillsSubj2.get(0).skillId])
+        skillsService.assignDependency([projectId: p1.projectId, skillId: p1Skills.get(3).skillId, dependentSkillId: p1SkillsSubj2.get(4).skillId])
+
+        when:
+        def projToCopy = createProject(2)
+        skillsService.copyProject(p1.projectId, projToCopy)
+        def copiedDeps = skillsService.getDependencyGraph(projToCopy.projectId)
+        then:
+        validateGraph(copiedDeps, [
+                new Edge(from: p1Skills[0].skillId, to: p1Skills[2].skillId),
+                new Edge(from: p1Skills[2].skillId, to: p1Skills[5].skillId),
+                new Edge(from: p1Skills[3].skillId, to: p1SkillsSubj2[0].skillId),
+                new Edge(from: p1Skills[3].skillId, to: p1SkillsSubj2[4].skillId),
+        ])
+    }
+
+    def "validate reused skills were copied"() {
+        def p1 = createProject(1)
+        skillsService.createProject(p1)
+
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(10, 1, 1, 100)
+        p1Skills[0].description = "blah blah blah"
+        p1Skills[0].helpUrl = "/ok/that/is/good"
+        p1Skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+        p1Skills[0].justificationRequired = true
+
+        p1Skills[1].description = "something else"
+        p1Skills[1].helpUrl = "http://www.djleaje.org"
+        p1Skills[1].selfReportingType = SkillDef.SelfReportingType.HonorSystem
+        p1Skills[1].justificationRequired = false
+
+        def group1 = createSkillsGroup(1, 1, 22)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSkills([p1Skills[0..3], group1].flatten())
+        p1Skills[4..9].each {
+            skillsService.assignSkillToSkillsGroup(group1.skillId, it)
+        }
+
+        def p1subj2 = createSubject(1, 2)
+        def group3 = createSkillsGroup(1, 2, 33)
+        skillsService.createSubject(p1subj2)
+        skillsService.createSkills([group3])
+
+        // group in the same subject
+        skillsService.reuseSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId, group1.skillId)
+        // different subject
+        skillsService.reuseSkills(p1.projectId, [p1Skills[1].skillId], p1subj2.subjectId)
+        // group in a different subject
+        skillsService.reuseSkills(p1.projectId, [p1Skills[7].skillId], p1subj2.subjectId, group3.skillId)
+
+        when:
+        def projToCopy = createProject(2)
+        skillsService.copyProject(p1.projectId, projToCopy)
+
+        def copiedGroup1Skills = skillsService.getSkillsForGroup(projToCopy.projectId, group1.skillId)
+        def originalReusedSkillInGroup1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[0].skillId])
+        def copiedReusedSkillInGroup1 = skillsService.getSkill([projectId: projToCopy.projectId, subjectId: p1subj1.subjectId, skillId: SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)])
+
+        def copiedSubj2Skills = skillsService.getSkillsForSubject(projToCopy.projectId, p1subj2.subjectId)
+        def copiedGroup3Skills = skillsService.getSkillsForGroup(projToCopy.projectId, group3.skillId)
+
+        def originalReusedSkillInSubj2 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[1].skillId])
+        def copiedReusedSkillInSubj2 = skillsService.getSkill([projectId: projToCopy.projectId, subjectId: p1subj1.subjectId, skillId: SkillReuseIdUtil.addTag(p1Skills[1].skillId, 0)])
+
+        println JsonOutput.prettyPrint(JsonOutput.toJson(copiedReusedSkillInGroup1))
+        then:
+        copiedGroup1Skills.skillId == [p1Skills[4..9].skillId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)].flatten()
+
+        copiedReusedSkillInGroup1.skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        copiedReusedSkillInGroup1.name == p1Skills[0].name
+        copiedReusedSkillInGroup1.reusedSkill == true
+        copiedReusedSkillInGroup1.groupId == group1.skillId
+        copiedReusedSkillInGroup1.pointIncrement == originalReusedSkillInGroup1.pointIncrement
+        copiedReusedSkillInGroup1.pointIncrementInterval == originalReusedSkillInGroup1.pointIncrementInterval
+        copiedReusedSkillInGroup1.numMaxOccurrencesIncrementInterval == originalReusedSkillInGroup1.numMaxOccurrencesIncrementInterval
+        copiedReusedSkillInGroup1.numPerformToCompletion == originalReusedSkillInGroup1.numPerformToCompletion
+        copiedReusedSkillInGroup1.type == originalReusedSkillInGroup1.type
+        copiedReusedSkillInGroup1.enabled == true
+        copiedReusedSkillInGroup1.description == originalReusedSkillInGroup1.description
+        copiedReusedSkillInGroup1.helpUrl == originalReusedSkillInGroup1.helpUrl
+        copiedReusedSkillInGroup1.selfReportingType == originalReusedSkillInGroup1.selfReportingType
+        copiedReusedSkillInGroup1.justificationRequired == originalReusedSkillInGroup1.justificationRequired
+
+        copiedSubj2Skills.skillId == [group3.skillId, SkillReuseIdUtil.addTag(p1Skills[1].skillId, 0)]
+        copiedGroup3Skills.skillId == [SkillReuseIdUtil.addTag(p1Skills[7].skillId, 0)]
+
+        copiedReusedSkillInSubj2.skillId == SkillReuseIdUtil.addTag(p1Skills[1].skillId, 0)
+        copiedReusedSkillInSubj2.name == p1Skills[1].name
+        copiedReusedSkillInSubj2.reusedSkill == true
+        !copiedReusedSkillInSubj2.groupId
+        copiedReusedSkillInSubj2.pointIncrement == originalReusedSkillInSubj2.pointIncrement
+        copiedReusedSkillInSubj2.pointIncrementInterval == originalReusedSkillInSubj2.pointIncrementInterval
+        copiedReusedSkillInSubj2.numMaxOccurrencesIncrementInterval == originalReusedSkillInSubj2.numMaxOccurrencesIncrementInterval
+        copiedReusedSkillInSubj2.numPerformToCompletion == originalReusedSkillInSubj2.numPerformToCompletion
+        copiedReusedSkillInSubj2.type == originalReusedSkillInSubj2.type
+        copiedReusedSkillInSubj2.enabled == true
+        copiedReusedSkillInSubj2.description == originalReusedSkillInSubj2.description
+        copiedReusedSkillInSubj2.helpUrl == originalReusedSkillInSubj2.helpUrl
+        copiedReusedSkillInSubj2.selfReportingType == originalReusedSkillInSubj2.selfReportingType
+        copiedReusedSkillInSubj2.justificationRequired == originalReusedSkillInSubj2.justificationRequired
+    }
+
+    def "do not copy disabled imported skills"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        skillsService.bulkExportSkillsToCatalog(p1.projectId, p1Skills.collect { it.skillId })
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def p2skillsGroup = SkillsFactory.createSkillsGroup(2, 1, 5)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [p2skillsGroup])
+        def gSkill1 = createSkill(2, 1, 10, 0, 50)
+        def gSkill2 = createSkill(2, 1, 11, 0, 50)
+        skillsService.assignSkillToSkillsGroup(p2skillsGroup.skillId, gSkill1)
+        skillsService.assignSkillToSkillsGroup(p2skillsGroup.skillId, gSkill2)
+
+        skillsService.bulkImportSkillsIntoGroupFromCatalog(p2.projectId, p2subj1.subjectId, p2skillsGroup.skillId,
+                [[projectId: p1.projectId, skillId: p1Skills[0].skillId]])
+        skillsService.bulkImportSkillsFromCatalog(p2.projectId, p2subj1.subjectId,
+                [[projectId: p1.projectId, skillId: p1Skills[1].skillId]])
+
+        when:
+        def projToCopy = createProject(3)
+        skillsService.copyProject(p2.projectId, projToCopy)
+
+        def origProjStats = skillsService.getProject(p2.projectId)
+        def copiedProjStats = skillsService.getProject(projToCopy.projectId)
+
+        def originalSubj = skillsService.getSkillsForSubject(p2.projectId, p2subj1.subjectId)
+        def copiedSubj = skillsService.getSkillsForSubject(projToCopy.projectId, p2subj1.subjectId)
+
+        def originalGroup = skillsService.getSkillsForGroup(p2.projectId, p2skillsGroup.skillId)
+        def copiedGroup = skillsService.getSkillsForGroup(projToCopy.projectId, p2skillsGroup.skillId)
+
+        then:
+        origProjStats.numSkills == 2
+        origProjStats.numSkillsDisabled == 2
+
+        copiedProjStats.numSkills == 2
+        copiedProjStats.numSkillsDisabled == 0
+
+        originalSubj.skillId == [p2skillsGroup.skillId, p1Skills[1].skillId]
+        copiedSubj.skillId == [p2skillsGroup.skillId]
+
+        originalGroup.skillId == [gSkill1.skillId, gSkill2.skillId, p1Skills[0].skillId]
+        copiedGroup.skillId == [gSkill1.skillId, gSkill2.skillId]
+    }
+
+    def "do not copy finalized imported skills"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        skillsService.bulkExportSkillsToCatalog(p1.projectId, p1Skills.collect { it.skillId })
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def p2skillsGroup = SkillsFactory.createSkillsGroup(2, 1, 5)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [p2skillsGroup])
+        def gSkill1 = createSkill(2, 1, 10, 0, 50)
+        def gSkill2 = createSkill(2, 1, 11, 0, 50)
+        skillsService.assignSkillToSkillsGroup(p2skillsGroup.skillId, gSkill1)
+        skillsService.assignSkillToSkillsGroup(p2skillsGroup.skillId, gSkill2)
+
+        skillsService.bulkImportSkillsIntoGroupFromCatalogAndFinalize(p2.projectId, p2subj1.subjectId, p2skillsGroup.skillId,
+                [[projectId: p1.projectId, skillId: p1Skills[0].skillId]])
+        skillsService.bulkImportSkillsFromCatalogAndFinalize(p2.projectId, p2subj1.subjectId,
+                [[projectId: p1.projectId, skillId: p1Skills[1].skillId]])
+
+        when:
+        def projToCopy = createProject(3)
+        skillsService.copyProject(p2.projectId, projToCopy)
+
+        def origProjStats = skillsService.getProject(p2.projectId)
+        def copiedProjStats = skillsService.getProject(projToCopy.projectId)
+
+        def originalSubj = skillsService.getSkillsForSubject(p2.projectId, p2subj1.subjectId)
+        def copiedSubj = skillsService.getSkillsForSubject(projToCopy.projectId, p2subj1.subjectId)
+
+        def originalGroup = skillsService.getSkillsForGroup(p2.projectId, p2skillsGroup.skillId)
+        def copiedGroup = skillsService.getSkillsForGroup(projToCopy.projectId, p2skillsGroup.skillId)
+
+        then:
+        origProjStats.numSkills == 4
+        origProjStats.numSkillsDisabled == 0
+
+        copiedProjStats.numSkills == 2
+        copiedProjStats.numSkillsDisabled == 0
+
+        originalSubj.skillId == [p2skillsGroup.skillId, p1Skills[1].skillId]
+        copiedSubj.skillId == [p2skillsGroup.skillId]
+
+        originalGroup.skillId == [gSkill1.skillId, gSkill2.skillId, p1Skills[0].skillId]
+        copiedGroup.skillId == [gSkill1.skillId, gSkill2.skillId]
+    }
 
     static class Edge {
         String from
@@ -435,6 +833,6 @@ class CopyProjectSpecs extends DefaultIntSpec {
         def skill0IdMap0_before = graph.nodes.collectEntries { [it.skillId, it.id] }
         assert graph.edges.collect { "${it.fromId}->${it.toId}" }.sort() == expectedGraphRel.collect {
             "${skill0IdMap0_before.get(it.from)}->${skill0IdMap0_before.get(it.to)}"
-        }
+        }.sort()
     }
 }

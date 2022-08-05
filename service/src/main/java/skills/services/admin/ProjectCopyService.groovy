@@ -241,14 +241,20 @@ class ProjectCopyService {
     @Profile
     private void saveBadgesAndTheirSkills(ProjDef fromProject, ProjDef toProj) {
         List<SkillDefWithExtra> badges = skillDefWithExtraRepo.findAllByProjectIdAndType(fromProject.projectId, SkillDef.ContainerType.Badge)
-        badges.each { SkillDefWithExtra fromBadge ->
+        badges.sort { it.displayOrder }.each { SkillDefWithExtra fromBadge ->
             BadgeRequest badgeRequest = new BadgeRequest()
             Props.copy(fromBadge, badgeRequest)
             badgeRequest.badgeId = fromBadge.skillId
+            badgeRequest.enabled = Boolean.FALSE.toString()
             badgeAdminService.saveBadge(toProj.projectId, fromBadge.skillId, badgeRequest)
             List<SkillDefPartialRes> badgeSkills = skillsAdminService.getSkillsForBadge(fromProject.projectId, fromBadge.skillId)
             badgeSkills.each { SkillDefPartialRes fromBadgeSkill ->
                 badgeAdminService.addSkillToBadge(toProj.projectId, badgeRequest.badgeId, fromBadgeSkill.skillId)
+            }
+            // must enable it after the skills were added
+            if (fromBadge.enabled == Boolean.TRUE.toString()) {
+                badgeRequest.enabled = fromBadge.enabled
+                badgeAdminService.saveBadge(toProj.projectId, fromBadge.skillId, badgeRequest)
             }
         }
     }
@@ -285,6 +291,7 @@ class ProjectCopyService {
                     skillRequest.projectId = desProjectId
                     skillRequest.subjectId = subjectId
                     skillRequest.type = fromSkill.type?.toString()
+                    skillRequest.version = 0
                     skillRequest.selfReportingType = fromSkill.selfReportingType?.toString()
                     if (fromSkill.type != SkillDef.ContainerType.SkillsGroup) {
                         skillRequest.numPerformToCompletion = fromSkill.totalPoints / fromSkill.pointIncrement
