@@ -193,7 +193,7 @@ class ProjectCopyService {
     }
 
     private static class SkillInfo {
-        SkillDef skillDef
+        SkillDefWithExtra skillDef
         String subjectId
         String groupId
     }
@@ -273,18 +273,19 @@ class ProjectCopyService {
     @Profile
     private void createSkills(String originalProjectId, String desProjectId, String subjectId, List<SkillInfo> allCollectedSkills, String groupId = null) {
         String parentId = groupId ?: subjectId
-        List<SkillDef> skillDefs = skillRelDefRepo.getChildren(originalProjectId, parentId,
+        List<SkillDefWithExtra> skillDefs = skillRelDefRepo.getChildrenWithExtraAttrs(originalProjectId, parentId,
                 [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
 
         allCollectedSkills.addAll(skillDefs.collect { new SkillInfo(skillDef: it, subjectId: subjectId, groupId: groupId) })
         skillDefs?.findAll { it.enabled == "true" && (!it.copiedFrom) }
                 .sort { it.displayOrder }
-                .each { SkillDef fromSkill ->
+                .each { SkillDefWithExtra fromSkill ->
                     SkillRequest skillRequest = new SkillRequest()
                     Props.copy(fromSkill, skillRequest)
                     skillRequest.projectId = desProjectId
                     skillRequest.subjectId = subjectId
-                    skillRequest.type = fromSkill.type.toString()
+                    skillRequest.type = fromSkill.type?.toString()
+                    skillRequest.selfReportingType = fromSkill.selfReportingType?.toString()
                     if (fromSkill.type != SkillDef.ContainerType.SkillsGroup) {
                         skillRequest.numPerformToCompletion = fromSkill.totalPoints / fromSkill.pointIncrement
                     }
