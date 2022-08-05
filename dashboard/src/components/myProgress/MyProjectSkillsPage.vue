@@ -44,7 +44,7 @@ limitations under the License.
         theme: {
           disableSkillTreeBrand: true,
           disableBreadcrumb: true,
-          landingPageTitle: null,
+          landingPageTitle: '',
           maxWidth: '100%',
           backgroundColor: '#f8f9fe',
           pageTitle: {
