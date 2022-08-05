@@ -142,7 +142,8 @@ limitations under the License.
           subTitle: `ID: ${this.project.projectId}`,
           stats: [{
             label: 'Visibility',
-            preformatted: `<div class="h5 font-weight-bold mb-0">${visibilityType}</div><div class="text-secondary">(${visibilityDescription})</div>`,
+            preformatted: `<div class="h5 font-weight-bold mb-0">${visibilityType}</div>`,
+            secondaryPreformatted: `<div class="text-secondary text-uppercase text-truncate" style="font-size:0.8rem;margin-top:0.1em;">${visibilityDescription}</div>`,
             icon: `${visibilityIcon} skills-color-visibility`,
           }, {
             label: 'Skills',
