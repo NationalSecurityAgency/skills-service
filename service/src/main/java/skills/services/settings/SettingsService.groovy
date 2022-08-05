@@ -17,14 +17,17 @@ package skills.services.settings
 
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.PublicProps
 import skills.auth.AuthMode
 import skills.auth.SkillsAuthorizationException
 import skills.auth.UserInfo
 import skills.auth.UserInfoService
+import skills.controller.PublicPropsBasedValidator
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.*
 import skills.controller.result.model.SettingsResult
@@ -57,6 +60,9 @@ class SettingsService {
     @Autowired
     List<SettingChangedListener> listeners = [];
 
+    @Autowired
+    PublicPropsBasedValidator propsBasedValidator
+
     @Transactional
     void saveSettings(List<SettingsRequest> request, User user=null) {
         request.each {
@@ -86,6 +92,7 @@ class SettingsService {
 
     @Transactional
     SettingsResult saveSetting(SettingsRequest request, User user=null) {
+        validateSettingRequest(request)
         Integer userRefId = user ? user.id : getUserRefId(request)
         String userId = user ? user.userId : loadCurrentUser(isUserSettingRequest(request))?.username
         lockTransaction(request, userId)
@@ -106,6 +113,13 @@ class SettingsService {
         log.debug("saved [{}]", setting)
 
         return convertToRes(setting)
+    }
+
+    private void validateSettingRequest(SettingsRequest request) {
+        if (request instanceof ProjectSettingsRequest && request.setting.endsWith('.displayName')) {
+            String fieldName = StringUtils.capitalize(StringUtils.split(request.setting, '.')[0])
+            propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxCustomLabelLength, "${fieldName} Display Text", request.value)
+        }
     }
 
     private void lockTransaction(SettingsRequest request, String userId) {

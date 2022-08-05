@@ -1176,6 +1176,10 @@ class SkillsService {
         return wsHelper.adminPost("/projects/${projectId}/settings", [ params ])
     }
 
+    def getProjectSettings(String projectId) {
+        return wsHelper.adminGet("/projects/${projectId}/settings")
+    }
+
     def getEmailSettings() {
         return wsHelper.rootGet('/getEmailSettings')
     }
