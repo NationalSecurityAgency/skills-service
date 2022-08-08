@@ -131,7 +131,7 @@ describe('Client Display Skills Filtering Tests', () => {
 
     cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
     cy.get('[data-cy="filter_complete"]').click();
-    cy.get('[data-cy="selectedFilter"]').contains('Completed skills')
+    cy.get('[data-cy="selectedFilter"]').contains('Completed Skills')
     cy.get('[data-cy="skillProgress_index-0"]').contains('Very Great Skill 1')
     cy.get('[data-cy="skillProgress_index-1"]').contains('Very Great Skill 3')
     cy.get('[data-cy="skillProgress_index-2"]').should('not.exist')
