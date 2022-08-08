@@ -24,9 +24,11 @@ limitations under the License.
               <span>Join Project</span>
             </h2>
             <div v-if="!joined">
-              <div>
-                Great News! You have been invited to join the {{ projectName }} Project. {{ projectName }} is a gamified micro-learning experience
-                built using the SkillTree platform. Explore {{ projectName }} to see how you can earn points and achievements!
+              <div class="mb-2">
+                <p>Great News! You have been invited to join the <span class="text-primary font-weight-bold">{{ projectName }}</span> Project.</p>
+                <p><span class="text-primary font-weight-bold">{{ projectName }}</span> is a gamified micro-learning experience
+                built using the SkillTree platform. Explore <span class="text-primary font-weight-bold">{{ projectName }}</span> to see how you can earn points and achievements!
+                </p>
               </div>
               <div>
                 <b-button @click="join()" variant="outline-primary" :disabled="inviteInvalid"
