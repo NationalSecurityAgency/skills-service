@@ -28,6 +28,7 @@ limitations under the License.
   import { SkillsDisplay } from '@skilltree/skills-client-vue';
   import MyProgressService from '@/components/myProgress/MyProgressService';
   import SkillsDisplayOptionsMixin from './SkillsDisplayOptionsMixin';
+  import SettingsService from '../settings/SettingsService';
 
   export default {
     name: 'MyProjectSkillsPage',
@@ -38,11 +39,12 @@ limitations under the License.
     data() {
       return {
         projectId: this.$route.params.projectId,
+        projectDisplayName: 'PROJECT',
         skillsVersion: 2147483647, // max int
         theme: {
           disableSkillTreeBrand: true,
           disableBreadcrumb: true,
-          landingPageTitle: `PROJECT: ${this.$route.params.name ? this.$route.params.name : this.$route.params.projectId}`,
+          landingPageTitle: '',
           maxWidth: '100%',
           backgroundColor: '#f8f9fe',
           pageTitle: {
@@ -98,13 +100,18 @@ limitations under the License.
       };
     },
     mounted() {
-      if (!this.$route.params.name) {
-        MyProgressService.findProjectName(this.projectId).then((res) => {
-          if (res) {
-            this.$set(this.theme, 'landingPageTitle', `PROJECT: ${res.name}`);
-          }
-        });
-      }
+      SettingsService.getClientDisplayConfig(this.projectId).then((response) => {
+        this.projectDisplayName = response.projectDisplayName?.toUpperCase();
+        if (!this.$route.params.name) {
+          MyProgressService.findProjectName(this.projectId).then((res) => {
+            if (res) {
+              this.$set(this.theme, 'landingPageTitle', `${this.projectDisplayName}: ${res.name}`);
+            }
+          });
+        } else {
+          this.$set(this.theme, 'landingPageTitle', `${this.projectDisplayName}: ${this.$route.params.name}`);
+        }
+      });
     },
     computed: {
       themeObj() {
