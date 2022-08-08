@@ -747,7 +747,7 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=project-link-proj1]').click()
 
     // proj1 has custom level name ("Work Role")
-    cy.get('[data-cy=title]').contains('WORK ROLE: This is project 1');
+    cy.dashboardCd().find('[data-cy=title]').contains('WORK ROLE: This is project 1');
   });
 });
 
