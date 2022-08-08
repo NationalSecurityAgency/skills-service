@@ -1071,16 +1071,32 @@ describe('Projects Tests', () => {
     cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
   });
 
-  it('project-level settings: set custom level name', () => {
+  it('project-level settings: set custom labels', () => {
     cy.createProject(1);
     cy.visit('/administrator/projects/proj1/settings')
+
+    cy.get('[data-cy="customLabelsSwitch"').should('not.be.checked');
+    cy.get('[data-cy="customLabelsSwitch"').click({force: true});
+    cy.get('[data-cy="customLabelsSwitch"').should('be.checked');
+    cy.get('[data-cy="projectDisplayTextInput"]').should('have.value', 'Project');
+    cy.get('[data-cy="subjectDisplayTextInput"]').should('have.value', 'Subject');
+    cy.get('[data-cy="groupDisplayTextInput"]').should('have.value', 'Group');
+    cy.get('[data-cy="skillDisplayTextInput"]').should('have.value', 'Skill');
     cy.get('[data-cy="levelDisplayTextInput"]').should('have.value', 'Level');
     cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
     cy.get('[data-cy="settingsSavedAlert"]').should('not.exist')
     cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
 
+    cy.get('[data-cy=projectDisplayTextInput]').clear().type('Work Role')
+    cy.get('[data-cy=subjectDisplayTextInput]').clear().type('Competency')
+    cy.get('[data-cy=groupDisplayTextInput]').clear().type('KSA')
+    cy.get('[data-cy=skillDisplayTextInput]').clear().type('Course')
     cy.get('[data-cy=levelDisplayTextInput]').clear().type('Stage')
 
+    cy.get('[data-cy="projectDisplayTextInput"]').should('have.value', 'Work Role');
+    cy.get('[data-cy="subjectDisplayTextInput"]').should('have.value', 'Competency');
+    cy.get('[data-cy="groupDisplayTextInput"]').should('have.value', 'KSA');
+    cy.get('[data-cy="skillDisplayTextInput"]').should('have.value', 'Course');
     cy.get('[data-cy="levelDisplayTextInput"]').should('have.value', 'Stage');
     cy.get('[data-cy="unsavedChangesAlert"]').contains('Unsaved Changes')
     cy.get('[data-cy="settingsSavedAlert"]').should('not.exist')
@@ -1094,14 +1110,27 @@ describe('Projects Tests', () => {
     // refresh
     cy.visit('/administrator/projects/proj1/settings')
 
+    cy.get('[data-cy="customLabelsSwitch"').should('be.checked');
+    cy.get('[data-cy="projectDisplayTextInput"]').should('have.value', 'Work Role');
+    cy.get('[data-cy="subjectDisplayTextInput"]').should('have.value', 'Competency');
+    cy.get('[data-cy="groupDisplayTextInput"]').should('have.value', 'KSA');
+    cy.get('[data-cy="skillDisplayTextInput"]').should('have.value', 'Course');
     cy.get('[data-cy="levelDisplayTextInput"]').should('have.value', 'Stage');
     cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
     cy.get('[data-cy="settingsSavedAlert"]').should('not.exist')
     cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
 
     // set back to default
+    cy.get('[data-cy=projectDisplayTextInput]').clear()
+    cy.get('[data-cy=subjectDisplayTextInput]').clear()
+    cy.get('[data-cy=groupDisplayTextInput]').clear()
+    cy.get('[data-cy=skillDisplayTextInput]').clear()
     cy.get('[data-cy=levelDisplayTextInput]').clear()
 
+    cy.get('[data-cy="projectDisplayTextInput"]').should('have.value', '');
+    cy.get('[data-cy="subjectDisplayTextInput"]').should('have.value', '');
+    cy.get('[data-cy="groupDisplayTextInput"]').should('have.value', '');
+    cy.get('[data-cy="skillDisplayTextInput"]').should('have.value', '');
     cy.get('[data-cy="levelDisplayTextInput"]').should('have.value', '');
     cy.get('[data-cy="unsavedChangesAlert"]').contains('Unsaved Changes')
     cy.get('[data-cy="settingsSavedAlert"]').should('not.exist')
@@ -1115,10 +1144,48 @@ describe('Projects Tests', () => {
     // refresh, validate default is back
     cy.visit('/administrator/projects/proj1/settings')
 
+    cy.get('[data-cy="customLabelsSwitch"').should('not.be.checked');
+    cy.get('[data-cy="customLabelsSwitch"').click({force: true});
+    cy.get('[data-cy="customLabelsSwitch"').should('be.checked');
+    cy.get('[data-cy="projectDisplayTextInput"]').should('have.value', 'Project');
+    cy.get('[data-cy="subjectDisplayTextInput"]').should('have.value', 'Subject');
+    cy.get('[data-cy="groupDisplayTextInput"]').should('have.value', 'Group');
+    cy.get('[data-cy="skillDisplayTextInput"]').should('have.value', 'Skill');
     cy.get('[data-cy="levelDisplayTextInput"]').should('have.value', 'Level');
     cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
     cy.get('[data-cy="settingsSavedAlert"]').should('not.exist')
     cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+
+    cy.get('[data-cy=projectDisplayTextInput]').clear().type('123456789012345678901234567890123456789012345678901')
+    cy.get('[data-cy=projectDisplayTextError]').contains('Project Display Text cannot exceed 50 characters.').should('be.visible');
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+    cy.get('[data-cy=projectDisplayTextInput]').clear()
+    cy.get('[data-cy=projectDisplayTextError]').should('not.exist')
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
+    cy.get('[data-cy=subjectDisplayTextInput]').clear().type('123456789012345678901234567890123456789012345678901')
+    cy.get('[data-cy=subjectDisplayTextError]').contains('Subject Display Text cannot exceed 50 characters.').should('be.visible');
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+    cy.get('[data-cy=subjectDisplayTextInput]').clear()
+    cy.get('[data-cy=subjectDisplayTextError]').should('not.exist')
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
+    cy.get('[data-cy=groupDisplayTextInput]').clear().type('123456789012345678901234567890123456789012345678901')
+    cy.get('[data-cy=groupDisplayTextError]').contains('Group Display Text cannot exceed 50 characters.').should('be.visible');
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+    cy.get('[data-cy=groupDisplayTextInput]').clear()
+    cy.get('[data-cy=groupDisplayTextError]').should('not.exist')
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
+    cy.get('[data-cy=skillDisplayTextInput]').clear().type('123456789012345678901234567890123456789012345678901')
+    cy.get('[data-cy=skillDisplayTextError]').contains('Skill Display Text cannot exceed 50 characters.').should('be.visible');
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+    cy.get('[data-cy=skillDisplayTextInput]').clear()
+    cy.get('[data-cy=skillDisplayTextError]').should('not.exist')
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
+    cy.get('[data-cy=levelDisplayTextInput]').clear().type('123456789012345678901234567890123456789012345678901')
+    cy.get('[data-cy=levelDisplayTextError]').contains('Level Display Text cannot exceed 50 characters.').should('be.visible');
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+    cy.get('[data-cy=levelDisplayTextInput]').clear()
+    cy.get('[data-cy=levelDisplayTextError]').should('not.exist')
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
   });
 
   it('project-level settings: project visibility', () => {

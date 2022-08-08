@@ -34,6 +34,15 @@ limitations under the License.
         </slot>
       </div>
     </div>
+    <div v-if="showRefreshAction" class="row justify-content-center mt-3">
+      <div class="col col-md-8 col-lg-7 col-xl-5 no-content">
+        Please
+        <b-button variant="info" @click="refresh" class="text-uppercase" size="sm"
+                  data-cy="refreshBtn"><i class="fas fa-redo-alt"></i> refresh
+        </b-button>
+        the page.
+      </div>
+    </div>
   </div>
 </template>
 
@@ -57,6 +66,15 @@ limitations under the License.
       iconColor: {
         type: String,
         default: 'text-secondary',
+      },
+      showRefreshAction: {
+        type: Boolean,
+        default: false,
+      },
+    },
+    methods: {
+      refresh() {
+        window.location.reload();
       },
     },
   };

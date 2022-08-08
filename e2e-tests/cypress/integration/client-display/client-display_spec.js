@@ -683,80 +683,18 @@ describe('Client Display Tests', () => {
       cy.get('.skills-badge').contains('100% Complete');
     });
 
-  it('set custom Level name', () => {
-    cy.loginAsRootUser();
-
-    cy.createGlobalBadge(1);
-    cy.assignSkillToGlobalBadge(1, 1, 1);
-    cy.assignProjectToGlobalBadge(1, 1)
-    cy.enableGlobalBadge();
-    cy.fixture('vars.json').then((vars) => {
-      cy.logout()
-
-      if (!Cypress.env('oauthMode')) {
-        cy.log('NOT in oauthMode, using form login')
-        cy.login(vars.defaultUser, vars.defaultPass);
-      } else {
-        cy.log('oauthMode, using loginBySingleSignOn')
-        cy.loginBySingleSignOn()
-      }
+    it('verify correct # of stars on subject card', () => {
+      cy.request('PUT', '/admin/projects/proj1/subjects/subj1/levels/next', {
+        percent: "99",
+        "iconClass": "fas fa-user-ninja",
+      });
+      cy.intercept('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
+      cy.cdVisit('/');
+      cy.wait('@pointHistoryChart');
+      cy.contains('Overall Points');
+      cy.get('[data-cy=subjectTile]').eq(0).contains('Subject 1')
+      cy.get('[data-cy=subjectTile]').eq(0).find('span.fa.fa-star').should('have.length', 6)
     });
-
-    cy.request('POST', '/admin/projects/proj1/settings', [{
-      value: 'Stage',
-      setting: 'level.displayName',
-      projectId: 'proj1',
-    }])
-
-    cy.intercept('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
-    cy.cdVisit('/');
-    cy.wait('@pointHistoryChart');
-
-    cy.contains('Stage 3 Progress');
-    cy.contains('My Stage');
-    cy.get('[data-cy="overallLevelDesc"]').contains('Stage 2 out of 5')
-    cy.get('[data-cy="subjectTile"]').contains('Next Stage')
-    cy.get('[data-cy="subjectTile"]').contains('Stage 2')
-    cy.get('[data-cy="subjectTile"]').contains('Stage 0')
-    cy.contains('Level').should('not.exist');
-
-    cy.cdClickRank();
-    cy.contains('My Stage');
-    cy.get('[data-cy="levelBreakdownChart"]').contains('Stage Breakdown')
-    cy.get('[data-cy="levelBreakdownChart"]').contains('You are Stage 2!')
-    cy.contains('Level').should('not.exist');
-
-    cy.get('[data-cy=breadcrumb-Overview]').click();
-    cy.cdClickSubj(0);
-    cy.contains('Stage 3 Progress');
-    cy.contains('My Stage');
-    cy.contains('Level').should('not.exist');
-
-    cy.cdClickRank();
-    cy.contains('My Stage');
-    cy.get('[data-cy="levelBreakdownChart"]').contains('Stage Breakdown')
-    cy.get('[data-cy="levelBreakdownChart"]').contains('You are Stage 2!')
-    cy.contains('Level').should('not.exist');
-
-    cy.get('[data-cy=breadcrumb-Overview]').click();
-    cy.cdClickBadges();
-    cy.cdVisit('/badges/global/globalBadge1');
-    cy.get('[data-cy="gb_proj1"]').contains('Stage 1')
-    cy.contains('Level').should('not.exist');
-  });
-
-  it('verify correct # of stars on subject card', () => {
-    cy.request('PUT', '/admin/projects/proj1/subjects/subj1/levels/next', {
-      percent: "99",
-      "iconClass": "fas fa-user-ninja",
-    });
-    cy.intercept('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
-    cy.cdVisit('/');
-    cy.wait('@pointHistoryChart');
-    cy.contains('Overall Points');
-    cy.get('[data-cy=subjectTile]').eq(0).contains('Subject 1')
-    cy.get('[data-cy=subjectTile]').eq(0).find('span.fa.fa-star').should('have.length', 6)
-  });
 });
 
 

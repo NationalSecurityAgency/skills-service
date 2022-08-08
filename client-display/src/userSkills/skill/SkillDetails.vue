@@ -16,7 +16,7 @@ limitations under the License.
 <template>
     <div class="text-primary">
         <div v-if="!loading.dependencies && !loading.skill">
-            <skills-title>Skill Overview</skills-title>
+            <skills-title>{{ skillDisplayName }} Overview</skills-title>
             <div class="card">
               <div class="card-body text-center text-sm-left">
                 <skill-progress2 :skill="skill" @points-earned="onPointsEarned" />

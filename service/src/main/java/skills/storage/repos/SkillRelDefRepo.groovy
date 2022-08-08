@@ -49,6 +49,7 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
                 and srd.parent = parent''')
     List<SkillDef> findParentsByChildIdAndParentContainerTypeAndRelationshipTypes(Integer childId, SkillDef.ContainerType parentContainerType, List<SkillRelDef.RelationshipType> types)
 
+    @Nullable
     SkillRelDef findByChildAndParentAndType(SkillDef child, SkillDef parent, SkillRelDef.RelationshipType type)
 
     List<SkillRelDef> findAllByParentAndType(SkillDef parent, SkillRelDef.RelationshipType type)
@@ -280,22 +281,31 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
     @Query('''select 
         sd1.id as id,
         sd1.name as name, 
-        sd1.skillId as skillId, 
+        sd1.skillId as skillId,
+        subj1.skillId as subjectId, 
         sd1.projectId as projectId, 
         sd1.pointIncrement as pointIncrement,
         sd1.totalPoints as totalPoints,
         sd1.type as skillType,
-         
+        
         sd2.id as id,
         sd2.name as name, 
         sd2.skillId as skillId, 
+        subj2.skillId as subjectId,
         sd2.projectId as projectId, 
         sd2.pointIncrement as pointIncrement,
         sd2.totalPoints as totalPoints,
         sd2.type as skillType
-        from SkillDef sd1, SkillDef sd2, SkillRelDef srd 
-        where sd1 = srd.parent and sd2 = srd.child and srd.type=?2 
-              and sd1.projectId=?1''')
+        from SkillDef sd1, SkillDef sd2, SkillRelDef srd, 
+             SkillDef subj1, SkillRelDef subj1Rel,
+             SkillDef subj2, SkillRelDef subj2Rel  
+        where sd1 = srd.parent 
+            and sd2 = srd.child
+            and srd.type=?2 
+            and sd1.projectId=?1
+            and subj1 = subj1Rel.parent and subj1Rel.child = sd1 and subj1Rel.type in ('RuleSetDefinition', 'GroupSkillToSubject')
+            and subj2 = subj2Rel.parent and subj2Rel.child = sd2 and subj2Rel.type in ('RuleSetDefinition', 'GroupSkillToSubject')
+        ''')
     List<Object[]> getGraph(String projectId, SkillRelDef.RelationshipType type)
 
 

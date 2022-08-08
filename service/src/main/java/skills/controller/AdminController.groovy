@@ -36,6 +36,7 @@ import skills.controller.result.model.*
 import skills.dbupgrade.DBUpgradeSafe
 import skills.services.*
 import skills.services.admin.*
+import skills.services.admin.moveSkills.SkillsMoveService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.admin.skillReuse.SkillReuseService
 import skills.services.events.BulkSkillEventResult
@@ -130,6 +131,9 @@ class AdminController {
 
     @Autowired
     SkillReuseService skillReuseService
+
+    @Autowired
+    SkillsMoveService skillsMoveService
 
     @Autowired
     InsufficientPointsValidator insufficientPointsValidator
@@ -1371,7 +1375,7 @@ class AdminController {
 
     @RequestMapping(value = "/projects/{projectId}/skills/reuse", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
     RequestResult reuseASkill(@PathVariable("projectId") String projectId,
-                              @RequestBody SkillReuseRequest skillReuseRequest) {
+                              @RequestBody SkillsActionRequest skillReuseRequest) {
         SkillsValidator.isNotBlank(projectId, "projectId")
         SkillsValidator.isNotEmpty(skillReuseRequest.skillIds, "skillReuseRequest.skillIds")
         SkillsValidator.isNotBlank(skillReuseRequest.subjectId, "skillReuseRequest.subjectId")
@@ -1394,6 +1398,20 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "projectId")
         SkillsValidator.isNotBlank(skillId, "skillId")
         return skillReuseService.getReuseDestinationsForASkill(projectId, skillId)
+    }
+
+
+    @RequestMapping(value = "/projects/{projectId}/skills/move", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
+    RequestResult moveSkills(@PathVariable("projectId") String projectId,
+                             @RequestBody SkillsActionRequest skillReuseRequest) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        SkillsValidator.isNotEmpty(skillReuseRequest.skillIds, "skillReuseRequest.skillIds")
+        SkillsValidator.isNotBlank(skillReuseRequest.subjectId, "skillReuseRequest.subjectId")
+
+        skillsMoveService.moveSkills(projectId, skillReuseRequest)
+        RequestResult success = RequestResult.success()
+        success.explanation = "Successfully reused skills"
+        return success
     }
 
 }

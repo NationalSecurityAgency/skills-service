@@ -39,6 +39,7 @@ target
 rebel.xml
 rebel.xml.lock
 package-lock.json
+client-version.json
 service/src/main/resources/public/**
 
 .vscode

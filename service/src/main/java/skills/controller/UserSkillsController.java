@@ -15,9 +15,7 @@
  */
 package skills.controller;
 
-import callStack.profiler.CProf;
 import callStack.profiler.Profile;
-import groovy.lang.Closure;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -28,29 +26,24 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import skills.PublicProps;
 import skills.auth.UserInfoService;
-import skills.controller.exceptions.ErrorCode;
-import skills.controller.exceptions.SkillException;
-import skills.controller.exceptions.SkillsValidator;
 import skills.controller.request.model.PageVisitRequest;
 import skills.controller.request.model.SkillEventRequest;
 import skills.controller.request.model.SkillsClientVersionRequest;
 import skills.controller.result.model.RequestResult;
 import skills.dbupgrade.DBUpgradeSafe;
 import skills.icons.CustomIconFacade;
-import skills.services.ProjectErrorService;
 import skills.services.SelfReportingService;
+import skills.services.VersionService;
 import skills.services.events.SkillEventResult;
 import skills.services.events.SkillEventsService;
 import skills.skillLoading.RankingLoader;
 import skills.skillLoading.SkillsLoader;
 import skills.skillLoading.model.*;
 import skills.utils.MetricsLogger;
-import skills.utils.RetryUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -85,9 +78,6 @@ class UserSkillsController {
     @Autowired
     SelfReportingService selfReportingService;
 
-    @Autowired
-    ProjectErrorService projectErrorService;
-
     @Value("${skills.config.ui.pointHistoryInDays:1825}")
     Integer maxDaysBack;
 
@@ -96,6 +86,9 @@ class UserSkillsController {
 
     @Autowired
     MetricsLogger metricsLogger;
+
+    @Autowired
+    VersionService versionService;
 
     private int getProvidedVersionOrReturnDefault(Integer versionParam) {
         if (versionParam != null) {
@@ -118,6 +111,9 @@ class UserSkillsController {
                 "projectId ["+projectId+"], " +
                 "User-Agent ["+userAgent+"], " +
                 "remoteIp ["+remoteIp+"]");
+
+        versionService.compareClientVersions(skillsClientVersion.getSkillsClientVersion(), projectId);
+
         return RequestResult.success();
     }
 

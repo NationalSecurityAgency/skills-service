@@ -335,7 +335,7 @@ describe('My Progress Breadcrumb Tests', () => {
     cy.get('[data-cy=breadcrumb-item]').eq(2).should('contain.text', 'Subject: subj1');
     cy.get('[data-cy=breadcrumb-item]').eq(3).should('contain.text', 'Skill: skill3');
     cy.get('[data-cy=breadcrumb-item]').eq(4).should('contain.text', 'Dependency: skill1');
-    cy.dashboardCd().contains('Cross-project Skill');
+    cy.dashboardCd().contains('cross-project skill');
 
     // back to skill page
     cy.get('[data-cy=breadcrumb-skill3]').click();
@@ -415,6 +415,219 @@ describe('My Progress Breadcrumb Tests', () => {
     // back to Overview page
     cy.get('[data-cy=breadcrumb-proj1]').click();
     cy.dashboardCd().contains('Overall Points');
+  });
+
+  it('test breadcrumbs with custom labels', function () {
+    // log in as project admin and set custom labels
+    cy.fixture('vars.json').then((vars) => {
+      cy.logout()
+      if (!Cypress.env('oauthMode')) {
+        cy.log('NOT in oauthMode, using form login')
+        cy.login(vars.defaultUser, vars.defaultPass);
+      } else {
+        cy.log('oauthMode, using loginBySingleSignOn')
+        cy.loginBySingleSignOn()
+      }
+    });
+    cy.request('POST', '/admin/projects/proj1/settings', [
+      {
+        value: 'Work Role',
+        setting: 'project.displayName',
+        projectId: 'proj1',
+      },
+      {
+        value: 'Competency',
+        setting: 'subject.displayName',
+        projectId: 'proj1',
+      },
+      {
+        value: 'KSA',
+        setting: 'group.displayName',
+        projectId: 'proj1',
+      },
+      {
+        value: 'Course',
+        setting: 'skill.displayName',
+        projectId: 'proj1',
+      },
+      {
+        value: 'Stage',
+        setting: 'level.displayName',
+        projectId: 'proj1',
+      },
+    ])
+
+    // log back in as the proxy user to test client display breadcrumbs
+    cy.fixture('vars.json').then((vars) => {
+      cy.request('POST', '/logout');
+      cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);
+      cy.loginAsProxyUser()
+    });
+
+    // progress and rankings page
+    cy.visit('/');
+    cy.get('[data-cy=project-link-proj1]').click()
+    cy.wait('@pointHistoryChart');
+
+    cy.dashboardCd().contains('Overall Points');
+    cy.get('[data-cy="breadcrumb-Progress And Rankings"]').should('be.visible');
+    cy.get('[data-cy=breadcrumb-proj1]').should('be.visible');
+    cy.get('[data-cy=breadcrumb-proj1]').should('exist');
+    cy.get('[data-cy=breadcrumb-proj1]').should('not.have.attr', 'href');
+    cy.get('[data-cy=breadcrumb-bar]').contains('Work Role: proj1').should('be.visible');
+
+    cy.visit('/progress-and-rankings/projects/proj1/?skillsClientDisplayPath=/rank');
+
+    // overall rank page
+    cy.dashboardCd().contains('My Rank');
+    cy.get('[data-cy="breadcrumb-Progress And Rankings"]').should('be.visible');
+    cy.get('[data-cy=breadcrumb-Rank]').should('exist');
+    cy.get('[data-cy=breadcrumb-Rank]').should('not.have.attr', 'href');
+    cy.get('[data-cy=breadcrumb-proj1]').should('exist');
+    cy.get('[data-cy=breadcrumb-proj1]').should('have.attr', 'href');
+    cy.get('[data-cy=breadcrumb-bar]').contains(new RegExp(/^Progress And Rankings.*Work Role: proj1.*Rank.*$/)).should('be.visible');
+
+    cy.get('[data-cy=breadcrumb-item]').its('length').should('eq', 3);
+    cy.get('[data-cy=breadcrumb-item]').eq(0).should('contain.text', 'Progress And Rankings');
+    cy.get('[data-cy=breadcrumb-item]').eq(1).should('contain.text', 'Work Role: proj1');
+    cy.get('[data-cy=breadcrumb-item]').eq(2).should('contain.text', 'Rank');
+
+    // subject page
+    cy.visit('/progress-and-rankings/projects/proj1/?skillsClientDisplayPath=/subjects/subj1');
+    cy.dashboardCd().contains('Subject 1');
+    cy.get('[data-cy="breadcrumb-Progress And Rankings"]').should('be.visible');
+
+    cy.get('[data-cy=breadcrumb-subj1]').should('exist');
+    cy.get('[data-cy=breadcrumb-subj1]').should('not.have.attr', 'href');
+    cy.get('[data-cy=breadcrumb-proj1]').should('exist');
+    cy.get('[data-cy=breadcrumb-proj1]').should('have.attr', 'href');
+    cy.get('[data-cy=breadcrumb-bar]').contains(new RegExp(/^Progress And Rankings.*Work Role: proj1.*Competency:\s+subj1.*$/)).should('be.visible');
+
+    cy.get('[data-cy=breadcrumb-item]').its('length').should('eq', 3);
+    cy.get('[data-cy=breadcrumb-item]').eq(0).should('contain.text', 'Progress And Rankings');
+    cy.get('[data-cy=breadcrumb-item]').eq(1).should('contain.text', 'Work Role: proj1');
+    cy.get('[data-cy=breadcrumb-item]').eq(2).should('contain.text', 'Competency: subj1');
+
+    // subject rank page
+    cy.visit('/progress-and-rankings/projects/proj1/?skillsClientDisplayPath=/subjects/subj1/rank');
+    cy.dashboardCd().contains('My Rank');
+    cy.get('[data-cy="breadcrumb-Progress And Rankings"]').should('be.visible');
+
+    cy.get('[data-cy=breadcrumb-Rank]').should('exist');
+    cy.get('[data-cy=breadcrumb-Rank]').should('not.have.attr', 'href');
+    cy.get('[data-cy=breadcrumb-subj1]').should('exist');
+    cy.get('[data-cy=breadcrumb-subj1]').should('have.attr', 'href');
+    cy.get('[data-cy=breadcrumb-proj1]').should('exist');
+    cy.get('[data-cy=breadcrumb-proj1]').should('have.attr', 'href');
+    cy.get('[data-cy=breadcrumb-bar]').contains(new RegExp(/^Progress And Rankings.*Work Role: proj1.*Competency:\s+subj1.*Rank$/)).should('be.visible');
+
+    cy.get('[data-cy=breadcrumb-item]').its('length').should('eq', 4);
+    cy.get('[data-cy=breadcrumb-item]').eq(0).should('contain.text', 'Progress And Rankings');
+    cy.get('[data-cy=breadcrumb-item]').eq(1).should('contain.text', 'Work Role: proj1');
+    cy.get('[data-cy=breadcrumb-item]').eq(2).should('contain.text', 'Competency: subj1');
+    cy.get('[data-cy=breadcrumb-item]').eq(3).should('contain.text', 'Rank');
+
+    // skill page
+    cy.visit('/progress-and-rankings/projects/proj1/?skillsClientDisplayPath=/subjects/subj1/skills/skill1');
+    cy.dashboardCd().contains('Very Great Skill 1');
+    cy.get('[data-cy="breadcrumb-Progress And Rankings"]').should('be.visible');
+
+    cy.get('[data-cy=breadcrumb-skill1]').should('exist');
+    cy.get('[data-cy=breadcrumb-skill1]').should('not.have.attr', 'href');
+    cy.get('[data-cy=breadcrumb-subj1]').should('exist');
+    cy.get('[data-cy=breadcrumb-subj1]').should('have.attr', 'href');
+    cy.get('[data-cy=breadcrumb-proj1]').should('exist');
+    cy.get('[data-cy=breadcrumb-proj1]').should('have.attr', 'href');
+    cy.get('[data-cy=breadcrumb-bar]').contains(new RegExp(/^Progress And Rankings.*Work Role: proj1.*Competency:\s+subj1.*Course:\s+skill1$/)).should('be.visible');
+
+    cy.get('[data-cy=breadcrumb-item]').its('length').should('eq', 4);
+    cy.get('[data-cy=breadcrumb-item]').eq(0).should('contain.text', 'Progress And Rankings');
+    cy.get('[data-cy=breadcrumb-item]').eq(1).should('contain.text', 'Work Role: proj1');
+    cy.get('[data-cy=breadcrumb-item]').eq(2).should('contain.text', 'Competency: subj1');
+    cy.get('[data-cy=breadcrumb-item]').eq(3).should('contain.text', 'Course: skill1');
+
+    // cross project dependency
+    cy.visit('/progress-and-rankings/projects/proj1/?skillsClientDisplayPath=/subjects/subj1/skills/skill3/crossProject/proj2/skill1');
+    cy.get('[data-cy=breadcrumb-skill1]').should('exist');
+    cy.get('[data-cy=breadcrumb-skill1]').should('not.have.attr', 'href');
+    cy.get('[data-cy=breadcrumb-subj1]').should('exist');
+    cy.get('[data-cy=breadcrumb-subj1]').should('have.attr', 'href');
+    cy.get('[data-cy=breadcrumb-proj1]').should('exist');
+    cy.get('[data-cy=breadcrumb-proj1]').should('have.attr', 'href');
+    cy.get('[data-cy=breadcrumb-bar]').contains(new RegExp(/^Progress And Rankings.*Work Role: proj1.*Competency:\s+subj1.*Course:\s+skill3.*Dependency:\s+skill1$/)).should('be.visible');
+
+    cy.get('[data-cy=breadcrumb-item]').its('length').should('eq', 5);
+    cy.get('[data-cy=breadcrumb-item]').eq(0).should('contain.text', 'Progress And Rankings');
+    cy.get('[data-cy=breadcrumb-item]').eq(1).should('contain.text', 'Work Role: proj1');
+    cy.get('[data-cy=breadcrumb-item]').eq(2).should('contain.text', 'Competency: subj1');
+    cy.get('[data-cy=breadcrumb-item]').eq(3).should('contain.text', 'Course: skill3');
+    cy.get('[data-cy=breadcrumb-item]').eq(4).should('contain.text', 'Dependency: skill1');
+    cy.dashboardCd().contains('Cross-Work Role Course');
+
+    // internal dependency
+    cy.visit('/progress-and-rankings/projects/proj1/?skillsClientDisplayPath=/subjects/subj1/skills/skill4/dependency/skill2');
+    cy.get('[data-cy=breadcrumb-skill2]').should('exist');
+    cy.get('[data-cy=breadcrumb-skill2]').should('not.have.attr', 'href');
+    cy.get('[data-cy=breadcrumb-subj1]').should('exist');
+    cy.get('[data-cy=breadcrumb-subj1]').should('have.attr', 'href');
+    cy.get('[data-cy=breadcrumb-proj1]').should('exist');
+    cy.get('[data-cy=breadcrumb-proj1]').should('have.attr', 'href');
+    cy.get('[data-cy=breadcrumb-bar]').contains(new RegExp(/^Progress And Rankings.*Work Role: proj1.*Competency:\s+subj1.*Course:\s+skill4.*Dependency:\s+skill2$/)).should('be.visible');
+
+    cy.get('[data-cy=breadcrumb-item]').its('length').should('eq', 5);
+    cy.get('[data-cy=breadcrumb-item]').eq(0).should('contain.text', 'Progress And Rankings');
+    cy.get('[data-cy=breadcrumb-item]').eq(1).should('contain.text', 'Work Role: proj1');
+    cy.get('[data-cy=breadcrumb-item]').eq(2).should('contain.text', 'Competency: subj1');
+    cy.get('[data-cy=breadcrumb-item]').eq(3).should('contain.text', 'Course: skill4');
+    cy.get('[data-cy=breadcrumb-item]').eq(4).should('contain.text', 'Dependency: skill2');
+
+    // Go to Badges page
+    cy.visit('/progress-and-rankings/projects/proj1/?skillsClientDisplayPath=/badges');
+    cy.dashboardCd().contains('Badges');
+    cy.get('[data-cy=breadcrumb-Badges]').should('exist');
+    cy.get('[data-cy=breadcrumb-Badges]').should('not.have.attr', 'href');
+    cy.get('[data-cy=breadcrumb-proj1]').should('exist');
+    cy.get('[data-cy=breadcrumb-proj1]').should('have.attr', 'href');
+    cy.get('[data-cy=breadcrumb-bar]').contains(new RegExp(/^Progress And Rankings.*Work Role: proj1.*Badges.*$/)).should('be.visible');
+
+    cy.get('[data-cy=breadcrumb-item]').its('length').should('eq', 3);
+    cy.get('[data-cy=breadcrumb-item]').eq(0).should('contain.text', 'Progress And Rankings');
+    cy.get('[data-cy=breadcrumb-item]').eq(1).should('contain.text', 'Work Role: proj1');
+    cy.get('[data-cy=breadcrumb-item]').eq(2).should('contain.text', 'Badges');
+
+    // Go to regular badge page
+    cy.visit('/progress-and-rankings/projects/proj1/?skillsClientDisplayPath=/badges/badge1');
+    cy.dashboardCd().contains('Badge 1');
+    cy.get('[data-cy=breadcrumb-badge1]').should('exist');
+    cy.get('[data-cy=breadcrumb-badge1]').should('not.have.attr', 'href');
+    cy.get('[data-cy=breadcrumb-Badges]').should('exist');
+    cy.get('[data-cy=breadcrumb-Badges]').should('have.attr', 'href');
+    cy.get('[data-cy=breadcrumb-proj1]').should('exist');
+    cy.get('[data-cy=breadcrumb-proj1]').should('have.attr', 'href');
+    cy.get('[data-cy=breadcrumb-bar]').contains(new RegExp(/^Progress And Rankings.*Work Role: proj1.*Badges.*Badge:\s+badge1$/)).should('be.visible');
+    cy.get('[data-cy=breadcrumb-item]').its('length').should('eq', 4);
+    cy.get('[data-cy=breadcrumb-item]').eq(0).should('contain.text', 'Progress And Rankings');
+    cy.get('[data-cy=breadcrumb-item]').eq(1).should('contain.text', 'Work Role: proj1');
+    cy.get('[data-cy=breadcrumb-item]').eq(2).should('contain.text', 'Badges');
+    cy.get('[data-cy=breadcrumb-item]').eq(3).should('contain.text', 'Badge: badge1');
+
+    // global badge page
+    cy.visit('/progress-and-rankings/projects/proj1/?skillsClientDisplayPath=/badges/global/globalBadge1');
+    cy.dashboardCd().contains('Global Badge 1');
+    cy.get('[data-cy=breadcrumb-globalBadge1]').should('exist');
+    cy.get('[data-cy=breadcrumb-globalBadge1]').should('not.have.attr', 'href');
+    cy.get('[data-cy=breadcrumb-Badges]').should('exist');
+    cy.get('[data-cy=breadcrumb-Badges]').should('have.attr', 'href');
+    cy.get('[data-cy=breadcrumb-proj1]').should('exist');
+    cy.get('[data-cy=breadcrumb-proj1]').should('have.attr', 'href');
+    cy.get('[data-cy=breadcrumb-bar]').contains(new RegExp(/^Progress And Rankings.*Work Role: proj1.*Badges.*Badge:\s+globalBadge1$/)).should('be.visible');
+
+    cy.get('[data-cy=breadcrumb-item]').its('length').should('eq', 4);
+    cy.get('[data-cy=breadcrumb-item]').eq(0).should('contain.text', 'Progress And Rankings');
+    cy.get('[data-cy=breadcrumb-item]').eq(1).should('contain.text', 'Work Role: proj1');
+    cy.get('[data-cy=breadcrumb-item]').eq(2).should('contain.text', 'Badges');
+    cy.get('[data-cy=breadcrumb-item]').eq(3).should('contain.text', 'Badge: globalBadge1');
+
   });
 
 });

@@ -1182,6 +1182,10 @@ class SkillsService {
         return wsHelper.adminPost("/projects/${projectId}/settings", [ params ])
     }
 
+    def getProjectSettings(String projectId) {
+        return wsHelper.adminGet("/projects/${projectId}/settings")
+    }
+
     def getEmailSettings() {
         return wsHelper.rootGet('/getEmailSettings')
     }
@@ -1352,6 +1356,10 @@ class SkillsService {
     def getReuseDestinationsForASkill(String projectId, String skillId) {
         String url = "/projects/${projectId}/skills/${skillId}/reuse/destinations"
         return wsHelper.adminGet(url)
+    }
+
+    def moveSkills(String projectId, List<String> skillIds, String otherSubjectId, String otherGroupId = null) {
+        return wsHelper.adminPost("/projects/${projectId}/skills/move", [subjectId: otherSubjectId, skillIds: skillIds, groupId: otherGroupId])
     }
 
     def bulkExportSkillsToCatalog(String projectId, List<String> skillIds) {

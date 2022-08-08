@@ -32,13 +32,14 @@ limitations under the License.
 </template>
 
 <script>
+  import store from '../../store/store';
 
   export default {
     name: 'SelfReportInfoCard',
     data() {
       return {
         title: 'Approval is required',
-        description: 'Once reported this skill will go into an approval queue.',
+        description: `Once reported this ${store.getters.projectDisplayName} will go into an approval queue.`,
       };
     },
   };

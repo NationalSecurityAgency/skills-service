@@ -16,7 +16,8 @@
     "lint": "vue-cli-service lint",
     "test:e2e": "vue-cli-service test:e2e",
     "test:unit": "vue-cli-service test:unit",
-    "setup:common": "npx symlink-dir ../common-components/src/common src/common-components"
+    "setup:common": "npx symlink-dir ../common-components/src/common src/common-components",
+    "getDashboardVersion": "node ../scripts/getDashboardVersion.js"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "5.15.3",

@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <b-modal id="reportSkillModal"
-           title="REPORT SKILL"
+           :title="`REPORT ${this.skillDisplayName.toUpperCase()}`"
            ok-title="Submit"
            :no-close-on-backdrop="true"
            v-model="modalVisible">
@@ -26,10 +26,10 @@ limitations under the License.
         <i v-if="isApprovalRequired" class="fas fa-thumbs-up text-info" style="font-size: 3rem"></i>
       </div>
       <div class="col">
-        <p class="h5" v-if="isHonorSystem">This skill can be submitted under the <b class="text-success">Honor
+        <p class="h5" v-if="isHonorSystem">This {{ skillDisplayName.toLowerCase() }} can be submitted under the <b class="text-success">Honor
           System</b> and <b class="text-success">{{ skill.pointIncrement }}</b> points will be awarded right away!
         </p>
-        <p class="h5" v-if="isApprovalRequired">This skill requires <b class="text-info">approval</b>. Submit with {{ isJustitificationRequired ? 'a' : 'an' }}
+        <p class="h5" v-if="isApprovalRequired">This {{ skillDisplayName.toLowerCase() }} requires <b class="text-info">approval</b>. Submit with {{ isJustitificationRequired ? 'a' : 'an' }}
           <span v-if="!isJustitificationRequired" class="text-muted">optional</span> message and it will enter an approval queue.</p>
       </div>
     </div>

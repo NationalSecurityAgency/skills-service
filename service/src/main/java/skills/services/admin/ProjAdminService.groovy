@@ -109,7 +109,7 @@ class ProjAdminService {
     UserRepo userRepo
 
     @Autowired
-    SkillCatalogTransactionalAccessor skillCatalogTransactionalAccessor
+    BatchOperationsTransactionalAccessor batchOperationsTransactionalAccessor
 
     @Autowired
     SkillsAdminService skillsAdminService
@@ -480,33 +480,33 @@ class ProjAdminService {
         log.info("Updating skill_definition.total_points for [{}] project", projectId)
         List<SkillDef> skillGroups = skillDefRepo.findAllByProjectIdAndType(projectId, SkillDef.ContainerType.SkillsGroup)
         skillGroups.each { SkillDef skillGroup ->
-            skillCatalogTransactionalAccessor.updateGroupTotalPoints(projectId, skillGroup.skillId)
+            batchOperationsTransactionalAccessor.updateGroupTotalPoints(projectId, skillGroup.skillId)
         }
         List<SkillDef> subjects = skillDefRepo.findAllByProjectIdAndType(projectId, SkillDef.ContainerType.Subject)
         subjects.each { SkillDef subject ->
-            skillCatalogTransactionalAccessor.updateSubjectTotalPoints(projectId, subject.skillId)
+            batchOperationsTransactionalAccessor.updateSubjectTotalPoints(projectId, subject.skillId)
         }
-        skillCatalogTransactionalAccessor.updateProjectsTotalPoints(projectId)
+        batchOperationsTransactionalAccessor.updateProjectsTotalPoints(projectId)
 
         // update `user_points.points` for all existing users
         log.info("Updating user_points.points for [{}] project", projectId)
         subjects.each { subject ->
             log.info("Updating UserPoints for the existing users for [{}-{}] subject", projectId, subject.skillId)
-            skillCatalogTransactionalAccessor.updateUserPointsForSubject(projectId, subject.skillId)
+            batchOperationsTransactionalAccessor.updateUserPointsForSubject(projectId, subject.skillId)
 
             log.info("Identifying subject level achievements for [{}-{}] subject", projectId, subject.skillId)
-            skillCatalogTransactionalAccessor.identifyAndAddSubjectLevelAchievements(subject.projectId, subject.skillId)
+            batchOperationsTransactionalAccessor.identifyAndAddSubjectLevelAchievements(subject.projectId, subject.skillId)
         }
 
         log.info("Identifying group achievements for [{}] groups in project [{}]", skillGroups.size(), projectId)
-        skillCatalogTransactionalAccessor.identifyAndAddGroupAchievements(skillGroups)
+        batchOperationsTransactionalAccessor.identifyAndAddGroupAchievements(skillGroups)
 
         SettingsResult settingsResult = settingsService.getProjectSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
         boolean pointsBased = settingsResult ? settingsResult.isEnabled() : false
         log.info("Updating UserPoints for the existing users for [{}] project", projectId)
-        skillCatalogTransactionalAccessor.updateUserPointsForProject(projectId)
+        batchOperationsTransactionalAccessor.updateUserPointsForProject(projectId)
         log.info("Identifying and adding project level achievements for [{}] project, pointsBased=[{}]", projectId, pointsBased)
-        skillCatalogTransactionalAccessor.identifyAndAddProjectLevelAchievements(projectId, pointsBased)
+        batchOperationsTransactionalAccessor.identifyAndAddProjectLevelAchievements(projectId, pointsBased)
 
         log.info("Completed rebuilding user and project points for project [{}]", projectId)
     }

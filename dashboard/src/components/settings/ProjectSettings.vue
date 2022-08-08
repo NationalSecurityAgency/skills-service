@@ -46,21 +46,8 @@ limitations under the License.
                                aria-labelledby="pointsForLevelsLabel"
                                data-cy="usePointsForLevelsSwitch"
                                switch>
-                {{ settings.levelPointsEnabled.value }}
+                {{ usePointsForLevelsLabel }}
               </b-form-checkbox>
-            </div>
-          </div>
-
-          <div class="row mt-3">
-            <div class="col col-md-3 text-secondary" id="levelDisplayTextLabel">
-              Level Display Text:
-              <inline-help
-                target-id="levelDisplayTextHelp"
-                msg='The word "Level" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
-            </div>
-            <div class="col">
-              <b-form-input v-model="settings.levelDisplayName.value" data-cy="levelDisplayTextInput"
-                            v-on:input="levelDisplayNameChanged" aria-labelledby="levelDisplayTextLabel"></b-form-input>
             </div>
           </div>
 
@@ -95,17 +82,18 @@ limitations under the License.
           <div class="row mt-3">
             <div class="col col-md-3 text-secondary" id="selfReportLabel">
               Self Report Default:
+              <inline-help
+                target-id="selfReportSwitchHelp"
+                msg="Will serve as a default when creating new skills."/>
             </div>
             <div class="col">
               <b-form-checkbox v-model="selfReport.enabled"
                                name="check-button"
                                v-on:input="selfReportingControl"
-                               aria-labelledby="pointsForLevelsLabel"
+                               aria-labelledby="selfReportLabel"
                                data-cy="selfReportSwitch"
                                switch>
-                Disable/Enable <inline-help
-                target-id="selfReportSwitchHelp"
-                msg="Will serve as a default when creating new skills."/>
+                {{ selfReportingEnabledLabel }}
               </b-form-checkbox>
 
               <b-card class="mt-1">
@@ -154,8 +142,152 @@ limitations under the License.
                                aria-labelledby="rankAndLeaderboardOptOutLabel"
                                data-cy="rankAndLeaderboardOptOutSwitch"
                                switch>
-                {{ settings.rankAndLeaderboardOptOut.value }}
+                {{ rankOptOutLabel }}
               </b-form-checkbox>
+            </div>
+          </div>
+
+          <div class="row mt-3">
+            <div class="col col-md-3 text-secondary" id="customLabelsLabel">
+              Custom Labels:
+              <inline-help
+                target-id="customLabelsSwitchHelp"
+                msg="Enabling allows for setting custom labels in the Skills Display component"/>
+            </div>
+            <div class="col">
+              <b-form-checkbox v-model="showCustomLabelsConfigToggle"
+                               name="check-button"
+                               aria-labelledby="customLabelsLabel"
+                               data-cy="customLabelsSwitch"
+                               switch>
+                {{ showCustomLabelsConfigLabel }}
+              </b-form-checkbox>
+
+              <b-collapse id="customLabelsCollapse" :visible="showCustomLabelsConfigToggle">
+                <b-card class="mt-1">
+                  <ValidationProvider rules="maxCustomLabelLength" v-slot="{errors}"
+                                      name="Project Display Text">
+                    <div class="row mb-1">
+                      <div class="col col-md-3 text-secondary" id="projectDisplayTextLabel">
+                        Project Display Text:
+                        <inline-help
+                          target-id="projectDisplayTextHelp"
+                          msg='The word "Project" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                      </div>
+                      <div class="col">
+                        <b-form-input v-model="settings.projectDisplayName.value"
+                                      data-cy="projectDisplayTextInput"
+                                      v-on:input="projectDisplayNameChanged"
+                                      aria-labelledby="projectDisplayTextLabel">
+                        </b-form-input>
+                      </div>
+                    </div>
+                    <div v-if="errors && errors.length > 0" class="row">
+                      <div class="col">
+                        <small role="alert" class="form-text text-danger" id="projectDisplayTextError"
+                               data-cy="projectDisplayTextError">{{ errors[0] }}</small>
+                      </div>
+                    </div>
+                  </ValidationProvider>
+                  <ValidationProvider rules="maxCustomLabelLength" v-slot="{errors}"
+                                      name="Subject Display Text">
+                    <div class="row mb-1">
+                      <div class="col col-md-3 text-secondary" id="subjectDisplayTextLabel">
+                        Subject Display Text:
+                        <inline-help
+                          target-id="subjectDisplayTextHelp"
+                          msg='The word "Subject" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                      </div>
+                      <div class="col">
+                        <b-form-input v-model="settings.subjectDisplayName.value"
+                                      data-cy="subjectDisplayTextInput"
+                                      v-on:input="subjectDisplayNameChanged"
+                                      aria-labelledby="subjectDisplayTextLabel">
+                        </b-form-input>
+                      </div>
+                    </div>
+                    <div v-if="errors && errors.length > 0" class="row">
+                      <div class="col">
+                        <small role="alert" class="form-text text-danger" id="subjectDisplayTextError"
+                               data-cy="subjectDisplayTextError">{{ errors[0] }}</small>
+                      </div>
+                    </div>
+                  </ValidationProvider>
+                  <ValidationProvider rules="maxCustomLabelLength" v-slot="{errors}"
+                                      name="Group Display Text">
+                    <div class="row mb-1">
+                      <div class="col col-md-3 text-secondary" id="groupDisplayTextLabel">
+                        Group Display Text:
+                        <inline-help
+                          target-id="groupDisplayTextHelp"
+                          msg='The word "Group" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                      </div>
+                      <div class="col">
+                        <b-form-input v-model="settings.groupDisplayName.value"
+                                      data-cy="groupDisplayTextInput"
+                                      v-on:input="groupDisplayNameChanged"
+                                      aria-labelledby="groupDisplayTextLabel">
+                        </b-form-input>
+                      </div>
+                    </div>
+                    <div v-if="errors && errors.length > 0" class="row">
+                      <div class="col">
+                        <small role="alert" class="form-text text-danger" id="groupDisplayTextError"
+                               data-cy="groupDisplayTextError">{{ errors[0] }}</small>
+                      </div>
+                    </div>
+                  </ValidationProvider>
+
+                  <ValidationProvider rules="maxCustomLabelLength" v-slot="{errors}"
+                                      name="Skill Display Text">
+                    <div class="row mb-1">
+                      <div class="col col-md-3 text-secondary" id="skillDisplayTextLabel">
+                        Skill Display Text:
+                        <inline-help
+                          target-id="skillDisplayTextHelp"
+                          msg='The word "Skill" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                      </div>
+                      <div class="col">
+                        <b-form-input v-model="settings.skillDisplayName.value"
+                                      data-cy="skillDisplayTextInput"
+                                      v-on:input="skillDisplayNameChanged"
+                                      aria-labelledby="skillDisplayTextLabel">
+                        </b-form-input>
+                      </div>
+                    </div>
+                    <div v-if="errors && errors.length > 0" class="row">
+                      <div class="col">
+                        <small role="alert" class="form-text text-danger" id="skillDisplayTextError"
+                               data-cy="skillDisplayTextError">{{ errors[0] }}</small>
+                      </div>
+                    </div>
+                  </ValidationProvider>
+                  <ValidationProvider rules="maxCustomLabelLength" v-slot="{errors}"
+                                      name="Level Display Text">
+                    <div class="row">
+                      <div class="col col-md-3 text-secondary" id="levelDisplayTextLabel">
+                        Level Display Text:
+                        <inline-help
+                          target-id="levelDisplayTextHelp"
+                          msg='The word "Level" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                      </div>
+                      <div class="col">
+                        <b-form-input v-model="settings.levelDisplayName.value"
+                                      data-cy="levelDisplayTextInput"
+                                      v-on:input="levelDisplayNameChanged"
+                                      aria-labelledby="levelDisplayTextLabel">
+                        </b-form-input>
+                      </div>
+                    </div>
+                    <div v-if="errors && errors.length > 0" class="row">
+                      <div class="col">
+                        <small role="alert" class="form-text text-danger" id="levelDisplayTextError"
+                               data-cy="levelDisplayTextError">{{ errors[0] }}</small>
+                      </div>
+                    </div>
+                  </ValidationProvider>
+                </b-card>
+              </b-collapse>
             </div>
           </div>
 
@@ -225,6 +357,7 @@ limitations under the License.
     data() {
       return {
         isLoading: true,
+        showCustomLabelsConfigToggle: false,
         selfReport: {
           enabled: false,
           justificationRequired: false,
@@ -291,6 +424,34 @@ limitations under the License.
             dirty: false,
             projectId: this.$route.params.projectId,
           },
+          projectDisplayName: {
+            value: 'Project',
+            setting: 'project.displayName',
+            lastLoadedValue: 'Project',
+            dirty: false,
+            projectId: this.$route.params.projectId,
+          },
+          subjectDisplayName: {
+            value: 'Subject',
+            setting: 'subject.displayName',
+            lastLoadedValue: 'Subject',
+            dirty: false,
+            projectId: this.$route.params.projectId,
+          },
+          groupDisplayName: {
+            value: 'Group',
+            setting: 'group.displayName',
+            lastLoadedValue: 'Group',
+            dirty: false,
+            projectId: this.$route.params.projectId,
+          },
+          skillDisplayName: {
+            value: 'Skill',
+            setting: 'skill.displayName',
+            lastLoadedValue: 'Skill',
+            dirty: false,
+            projectId: this.$route.params.projectId,
+          },
           levelDisplayName: {
             value: 'Level',
             setting: 'level.displayName',
@@ -316,6 +477,38 @@ limitations under the License.
       },
       approvalSelected() {
         return this.selfReport.selected === 'Approval';
+      },
+      shouldShowCustomLabelsConfig() {
+        return this.showCustomLabelsConfigToggle
+          || this.settings.projectDisplayName.value !== 'Project' || this.settings.projectDisplayName.dirty
+          || this.settings.subjectDisplayName.value !== 'Subject' || this.settings.subjectDisplayName.dirty
+          || this.settings.groupDisplayName.value !== 'Group' || this.settings.groupDisplayName.dirty
+          || this.settings.skillDisplayName.value !== 'Skill' || this.settings.skillDisplayName.dirty
+          || this.settings.levelDisplayName.value !== 'Level' || this.settings.levelDisplayName.dirty;
+      },
+      showCustomLabelsConfigLabel() {
+        if (this.showCustomLabelsConfigToggle) {
+          return 'Enabled';
+        }
+        return 'Disabled';
+      },
+      selfReportingEnabledLabel() {
+        if (this.selfReport.enabled) {
+          return 'Enabled';
+        }
+        return 'Disabled';
+      },
+      rankOptOutLabel() {
+        if (this.settings.rankAndLeaderboardOptOut.value) {
+          return 'Enabled';
+        }
+        return 'Disabled';
+      },
+      usePointsForLevelsLabel() {
+        if (this.settings.levelPointsEnabled.value) {
+          return 'Enabled';
+        }
+        return 'Disabled';
       },
       projectVisibilityOptions() {
         const opts = [
@@ -383,6 +576,18 @@ limitations under the License.
       helpUrlHostChanged(value) {
         this.settings.helpUrlHost.dirty = `${value}` !== `${this.settings.helpUrlHost.lastLoadedValue}`;
       },
+      projectDisplayNameChanged(value) {
+        this.settings.projectDisplayName.dirty = `${value}` !== `${this.settings.projectDisplayName.lastLoadedValue}`;
+      },
+      subjectDisplayNameChanged(value) {
+        this.settings.subjectDisplayName.dirty = `${value}` !== `${this.settings.subjectDisplayName.lastLoadedValue}`;
+      },
+      groupDisplayNameChanged(value) {
+        this.settings.groupDisplayName.dirty = `${value}` !== `${this.settings.groupDisplayName.lastLoadedValue}`;
+      },
+      skillDisplayNameChanged(value) {
+        this.settings.skillDisplayName.dirty = `${value}` !== `${this.settings.skillDisplayName.lastLoadedValue}`;
+      },
       levelDisplayNameChanged(value) {
         this.settings.levelDisplayName.dirty = `${value}` !== `${this.settings.levelDisplayName.lastLoadedValue}`;
       },
@@ -431,6 +636,7 @@ limitations under the License.
                 }
               });
             }
+            this.showCustomLabelsConfigToggle = this.shouldShowCustomLabelsConfig;
           })
           .finally(() => {
             this.isLoading = false;

@@ -145,7 +145,7 @@ describe('Client Display Accessibility tests', () => {
     cy.wait('@getSubjectSummary')
     cy.wait('@pointHistoryChart');
 
-    cy.contains('New Skills Software Version is Available')
+    cy.contains('New SkillTree Software Version is Available')
 
     cy.wait(500) //need to wait on the pointHistoryChart to complete rendering before running a11y
     cy.customA11y();
@@ -153,7 +153,7 @@ describe('Client Display Accessibility tests', () => {
 
     cy.cdVisit('/');
     cy.contains('Overall Points');
-    cy.contains('New Skills Software Version is Available').should('not.exist')
+    cy.contains('New SkillTree Software Version is Available').should('not.exist')
   });
 
   it('skill with self reporting', () => {

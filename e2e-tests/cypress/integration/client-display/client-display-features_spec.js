@@ -66,7 +66,7 @@ describe('Client Display Features Tests', () => {
     cy.wait('@getSubjectSummary')
     cy.wait('@pointHistoryChart');
 
-    cy.contains('New Skills Software Version is Available')
+    cy.contains('New SkillTree Software Version is Available')
 
     cy.wait(500) //need to wait on the pointHistoryChart to complete rendering before running a11y
     cy.customA11y();

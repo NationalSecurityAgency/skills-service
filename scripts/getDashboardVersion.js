@@ -13,27 +13,21 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-    <div class="mb-2">
-        <span class="text-muted">This {{ skillDisplayName }} has <b>{{ userSkill.dependencyInfo.numDirectDependents}}</b> direct dependent(s).
-            Click <i class="fas fa-lock icon"></i> to see its dependencies.</span>
-    </div>
-</template>
 
-<script>
-  export default {
-    name: 'SkillIsLockedMessage',
-    props: {
-      userSkill: {
-        type: Object,
-        required: true,
-      },
-    },
-  };
-</script>
+var pjson = require('../dashboard/package.json');
+var fs = require('fs');
 
-<style scoped>
-    .icon {
-        color: #5d5d5d;
+var dependencies = pjson.dependencies;
+var dependencyKeys = Object.keys(dependencies);
+var skillsClient = dependencyKeys.find((value) => {
+    return value.includes("@skilltree/skills-client-");
+});
+var version = dependencies[skillsClient];
+
+var versionString = skillsClient + '-' + version;
+
+fs.writeFile('../service/src/main/resources/client-version.json', versionString, function (err) {
+    if (err) {
+        return console.log(err);
     }
-</style>
+})

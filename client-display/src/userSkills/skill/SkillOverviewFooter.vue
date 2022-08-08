@@ -73,7 +73,7 @@ limitations under the License.
         <div class="col">
           <div v-if="isPointsEarned">
             <i class="fas fa-birthday-cake text-success mr-2" style="font-size: 1.5rem"></i> Congrats! You just earned <span
-              class="text-success font-weight-bold">{{ selfReport.res.pointsEarned }}</span> points<span v-if="isCompleted"> and <b>completed</b> the skill</span>!
+              class="text-success font-weight-bold">{{ selfReport.res.pointsEarned }}</span> points<span v-if="isCompleted"> and <b>completed</b> the {{ skillDisplayName.toLowerCase() }}</span>!
           </div>
           <div v-if="!isPointsEarned && (this.isAlreadyPerformed() || !isApprovalRequired)">
             <i class="fas fa-cloud-sun-rain mr-2 text-info" style="font-size: 1.5rem"></i> <span> <b class="text-info">Unfortunately</b> no points.</span>
@@ -85,7 +85,7 @@ limitations under the License.
               <i class="fas fa-user-clock mr-2 text-info" style="font-size: 1.5rem"></i> <b>Submitted successfully!</b>
             </div>
             <div class="mt-1">
-              This skill <b class="text-info">requires approval</b> from a project administrator. Now let's play the waiting game!
+              This {{ skillDisplayName.toLowerCase() }} <b class="text-info">requires approval</b> from a {{ projectDisplayName.toLowerCase() }} administrator. Now let's play the waiting game!
             </div>
           </div>
         </div>
