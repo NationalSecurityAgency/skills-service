@@ -929,4 +929,469 @@ class SkillReusePointsAndAchivementsSpec extends CatalogIntSpec {
         skillOrig.totalPoints == 500
         skillOrig.todaysPoints == 100
     }
+
+    def "remove skill event from a skill under subject"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def p1subj2 = createSubject(1, 2)
+        skillsService.createSubject(p1subj2)
+
+        String user = getRandomUsers(1)[0]
+
+        List<Date> dates = [new Date() - 2, new Date() - 1, new Date()]
+        skillsService.reuseSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId)
+        skillsService.addSkill([projectId: p1Skills[0].projectId, skillId: p1Skills[0].skillId], user, dates[0])
+        skillsService.addSkill([projectId: p1Skills[0].projectId, skillId: p1Skills[0].skillId], user, dates[1])
+        skillsService.addSkill([projectId: p1Skills[0].projectId, skillId: p1Skills[0].skillId], user, dates[2])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        when:
+        def proj = skillsService.getSkillSummary(user, p1.projectId)
+        def subj1 = skillsService.getSkillSummary(user, p1.projectId, p1subj1.subjectId)
+        def subj2 = skillsService.getSkillSummary(user, p1.projectId, p1subj2.subjectId)
+        def skillOrig = skillsService.getSingleSkillSummary(user, p1.projectId, p1Skills[0].skillId)
+        def skillReused = skillsService.getSingleSkillSummary(user, p1.projectId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0))
+
+        skillsService.deleteSkillEvent([projectId: p1.projectId, skillId: p1Skills[0].skillId, userId: user, timestamp: dates[1].time])
+
+        def proj_t1 = skillsService.getSkillSummary(user, p1.projectId)
+        def subj1_t1 = skillsService.getSkillSummary(user, p1.projectId, p1subj1.subjectId)
+        def subj2_t1 = skillsService.getSkillSummary(user, p1.projectId, p1subj2.subjectId)
+        def skillOrig_t1 = skillsService.getSingleSkillSummary(user, p1.projectId, p1Skills[0].skillId)
+        def skillReused_t1 = skillsService.getSingleSkillSummary(user, p1.projectId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0))
+
+        skillsService.deleteSkillEvent([projectId: p1.projectId, skillId: p1Skills[0].skillId, userId: user, timestamp: dates[2].time])
+
+        def proj_t2 = skillsService.getSkillSummary(user, p1.projectId)
+        def subj1_t2 = skillsService.getSkillSummary(user, p1.projectId, p1subj1.subjectId)
+        def subj2_t2 = skillsService.getSkillSummary(user, p1.projectId, p1subj2.subjectId)
+        def skillOrig_t2 = skillsService.getSingleSkillSummary(user, p1.projectId, p1Skills[0].skillId)
+        def skillReused_t2 = skillsService.getSingleSkillSummary(user, p1.projectId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0))
+
+        skillsService.deleteSkillEvent([projectId: p1.projectId, skillId: p1Skills[0].skillId, userId: user, timestamp: dates[0].time])
+
+        def proj_t3 = skillsService.getSkillSummary(user, p1.projectId)
+        def subj1_t3 = skillsService.getSkillSummary(user, p1.projectId, p1subj1.subjectId)
+        def subj2_t3 = skillsService.getSkillSummary(user, p1.projectId, p1subj2.subjectId)
+        def skillOrig_t3 = skillsService.getSingleSkillSummary(user, p1.projectId, p1Skills[0].skillId)
+        def skillReused_t3 = skillsService.getSingleSkillSummary(user, p1.projectId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0))
+
+        then:
+        proj.points == 600
+        proj.todaysPoints == 200
+        proj.totalPoints == 2000
+        proj.skillsLevel == 2
+        proj.subjects[0].todaysPoints == 100
+        proj.subjects[0].points == 300
+        proj.subjects[0].totalPoints == 1500
+        proj.subjects[1].todaysPoints == 100
+        proj.subjects[1].points == 300
+        proj.subjects[1].totalPoints == 500
+
+        subj2.totalPoints == 500
+        subj2.points == 300
+        subj2.todaysPoints == 100
+        subj2.skillsLevel == 3
+        subj2.skills.size() == 1
+        subj2.skills.size() == 1
+        subj2.skills[0].skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        subj2.skills[0].points == 300
+        subj2.skills[0].totalPoints == 500
+        subj2.skills[0].todaysPoints == 100
+
+        skillReused.skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        skillReused.points == 300
+        skillReused.totalPoints == 500
+        skillReused.todaysPoints == 100
+
+        subj1.totalPoints == 1500
+        subj1.points == 300
+        subj1.todaysPoints == 100
+        subj1.skillsLevel == 1
+        subj1.skills.size() == 3
+        def skill1 = subj1.skills.find { it.skillId == p1Skills[0].skillId }
+        skill1.points == 300
+        skill1.totalPoints == 500
+        skill1.todaysPoints == 100
+        subj1.skills.find { it.skillId == p1Skills[1].skillId }.points == 0
+        subj1.skills.find { it.skillId == p1Skills[2].skillId }.points == 0
+
+        skillOrig.skillId == p1Skills[0].skillId
+        skillOrig.points == 300
+        skillOrig.totalPoints == 500
+        skillOrig.todaysPoints == 100
+
+        // after deletion
+        proj_t1.points == 400
+        proj_t1.todaysPoints == 200
+        proj_t1.totalPoints == 2000
+        proj_t1.skillsLevel == 1
+        proj_t1.subjects[0].todaysPoints == 100
+        proj_t1.subjects[0].points == 200
+        proj_t1.subjects[0].totalPoints == 1500
+        proj_t1.subjects[1].todaysPoints == 100
+        proj_t1.subjects[1].points == 200
+        proj_t1.subjects[1].totalPoints == 500
+
+        subj2_t1.totalPoints == 500
+        subj2_t1.points == 200
+        subj2_t1.todaysPoints == 100
+        subj2_t1.skillsLevel == 2
+        subj2_t1.skills.size() == 1
+        subj2_t1.skills[0].skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        subj2_t1.skills[0].points == 200
+        subj2_t1.skills[0].totalPoints == 500
+        subj2_t1.skills[0].todaysPoints == 100
+
+        skillReused_t1.skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        skillReused_t1.points == 200
+        skillReused_t1.totalPoints == 500
+        skillReused_t1.todaysPoints == 100
+
+        subj1_t1.totalPoints == 1500
+        subj1_t1.points == 200
+        subj1_t1.todaysPoints == 100
+        subj1_t1.skillsLevel == 1
+        subj1_t1.skills.size() == 3
+        def skill1_t1 = subj1_t1.skills.find { it.skillId == p1Skills[0].skillId }
+        skill1_t1.points == 200
+        skill1_t1.totalPoints == 500
+        skill1_t1.todaysPoints == 100
+        subj1_t1.skills.find { it.skillId == p1Skills[1].skillId }.points == 0
+        subj1_t1.skills.find { it.skillId == p1Skills[2].skillId }.points == 0
+
+        skillOrig_t1.skillId == p1Skills[0].skillId
+        skillOrig_t1.points == 200
+        skillOrig_t1.totalPoints == 500
+        skillOrig_t1.todaysPoints == 100
+
+        // after 2nd deletion
+        proj_t2.points == 200
+        proj_t2.todaysPoints == 0
+        proj_t2.totalPoints == 2000
+        proj_t2.skillsLevel == 1
+        proj_t2.subjects[0].todaysPoints == 0
+        proj_t2.subjects[0].points == 100
+        proj_t2.subjects[0].totalPoints == 1500
+        proj_t2.subjects[1].todaysPoints == 0
+        proj_t2.subjects[1].points == 100
+        proj_t2.subjects[1].totalPoints == 500
+
+        subj2_t2.totalPoints == 500
+        subj2_t2.points == 100
+        subj2_t2.todaysPoints == 0
+        subj2_t2.skillsLevel == 1
+        subj2_t2.skills.size() == 1
+        subj2_t2.skills[0].skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        subj2_t2.skills[0].points == 100
+        subj2_t2.skills[0].totalPoints == 500
+        subj2_t2.skills[0].todaysPoints == 0
+
+        skillReused_t2.skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        skillReused_t2.points == 100
+        skillReused_t2.totalPoints == 500
+        skillReused_t2.todaysPoints == 0
+
+        subj1_t2.totalPoints == 1500
+        subj1_t2.points == 100
+        subj1_t2.todaysPoints == 0
+        subj1_t2.skillsLevel == 0
+        subj1_t2.skills.size() == 3
+        def skill1_t2 = subj1_t2.skills.find { it.skillId == p1Skills[0].skillId }
+        skill1_t2.points == 100
+        skill1_t2.totalPoints == 500
+        skill1_t2.todaysPoints == 0
+        subj1_t2.skills.find { it.skillId == p1Skills[1].skillId }.points == 0
+        subj1_t2.skills.find { it.skillId == p1Skills[2].skillId }.points == 0
+
+        skillOrig_t2.skillId == p1Skills[0].skillId
+        skillOrig_t2.points == 100
+        skillOrig_t2.totalPoints == 500
+        skillOrig_t2.todaysPoints == 0
+
+        // after 3rd deletion
+        proj_t3.points == 0
+        proj_t3.todaysPoints == 0
+        proj_t3.totalPoints == 2000
+        proj_t3.skillsLevel == 0
+        proj_t3.subjects[0].todaysPoints == 0
+        proj_t3.subjects[0].points == 0
+        proj_t3.subjects[0].totalPoints == 1500
+        proj_t3.subjects[1].todaysPoints == 0
+        proj_t3.subjects[1].points == 0
+        proj_t3.subjects[1].totalPoints == 500
+
+        subj2_t3.totalPoints == 500
+        subj2_t3.points == 0
+        subj2_t3.todaysPoints == 0
+        subj2_t3.skillsLevel == 0
+        subj2_t3.skills.size() == 1
+        subj2_t3.skills[0].skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        subj2_t3.skills[0].points == 0
+        subj2_t3.skills[0].totalPoints == 500
+        subj2_t3.skills[0].todaysPoints == 0
+
+        skillReused_t3.skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        skillReused_t3.points == 0
+        skillReused_t3.totalPoints == 500
+        skillReused_t3.todaysPoints == 0
+
+        subj1_t3.totalPoints == 1500
+        subj1_t3.points == 0
+        subj1_t3.todaysPoints == 0
+        subj1_t3.skillsLevel == 0
+        subj1_t3.skills.size() == 3
+        def skill1_t3 = subj1_t3.skills.find { it.skillId == p1Skills[0].skillId }
+        skill1_t3.points == 0
+        skill1_t3.totalPoints == 500
+        skill1_t3.todaysPoints == 0
+        subj1_t3.skills.find { it.skillId == p1Skills[1].skillId }.points == 0
+        subj1_t3.skills.find { it.skillId == p1Skills[2].skillId }.points == 0
+
+        skillOrig_t3.skillId == p1Skills[0].skillId
+        skillOrig_t3.points == 0
+        skillOrig_t3.totalPoints == 500
+        skillOrig_t3.todaysPoints == 0
+    }
+
+    def "remove skill event from a skill under group"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1subj1g1 = createSkillsGroup(1, 1, 11)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [p1subj1g1])
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        p1Skills.each {
+            skillsService.assignSkillToSkillsGroup(p1subj1g1.skillId, it)
+        }
+
+        def p1subj2 = createSubject(1, 2)
+        skillsService.createSubject(p1subj2)
+        def p1subj2g2 = createSkillsGroup(1, 2, 22)
+        skillsService.createSkill(p1subj2g2)
+
+        String user = getRandomUsers(1)[0]
+
+        List<Date> dates = [new Date() - 2, new Date() - 1, new Date()]
+        skillsService.reuseSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId, p1subj2g2.skillId)
+        skillsService.addSkill([projectId: p1Skills[0].projectId, skillId: p1Skills[0].skillId], user, dates[0])
+        skillsService.addSkill([projectId: p1Skills[0].projectId, skillId: p1Skills[0].skillId], user, dates[1])
+        skillsService.addSkill([projectId: p1Skills[0].projectId, skillId: p1Skills[0].skillId], user, dates[2])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        when:
+        def proj = skillsService.getSkillSummary(user, p1.projectId)
+        def subj1 = skillsService.getSkillSummary(user, p1.projectId, p1subj1.subjectId)
+        def subj2 = skillsService.getSkillSummary(user, p1.projectId, p1subj2.subjectId)
+        def skillOrig = skillsService.getSingleSkillSummary(user, p1.projectId, p1Skills[0].skillId)
+        def skillReused = skillsService.getSingleSkillSummary(user, p1.projectId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0))
+
+        skillsService.deleteSkillEvent([projectId: p1.projectId, skillId: p1Skills[0].skillId, userId: user, timestamp: dates[1].time])
+
+        def proj_t1 = skillsService.getSkillSummary(user, p1.projectId)
+        def subj1_t1 = skillsService.getSkillSummary(user, p1.projectId, p1subj1.subjectId)
+        def subj2_t1 = skillsService.getSkillSummary(user, p1.projectId, p1subj2.subjectId)
+        def skillOrig_t1 = skillsService.getSingleSkillSummary(user, p1.projectId, p1Skills[0].skillId)
+        def skillReused_t1 = skillsService.getSingleSkillSummary(user, p1.projectId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0))
+
+        skillsService.deleteSkillEvent([projectId: p1.projectId, skillId: p1Skills[0].skillId, userId: user, timestamp: dates[2].time])
+
+        def proj_t2 = skillsService.getSkillSummary(user, p1.projectId)
+        def subj1_t2 = skillsService.getSkillSummary(user, p1.projectId, p1subj1.subjectId)
+        def subj2_t2 = skillsService.getSkillSummary(user, p1.projectId, p1subj2.subjectId)
+        def skillOrig_t2 = skillsService.getSingleSkillSummary(user, p1.projectId, p1Skills[0].skillId)
+        def skillReused_t2 = skillsService.getSingleSkillSummary(user, p1.projectId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0))
+
+        skillsService.deleteSkillEvent([projectId: p1.projectId, skillId: p1Skills[0].skillId, userId: user, timestamp: dates[0].time])
+
+        def proj_t3 = skillsService.getSkillSummary(user, p1.projectId)
+        def subj1_t3 = skillsService.getSkillSummary(user, p1.projectId, p1subj1.subjectId)
+        def subj2_t3 = skillsService.getSkillSummary(user, p1.projectId, p1subj2.subjectId)
+        def skillOrig_t3 = skillsService.getSingleSkillSummary(user, p1.projectId, p1Skills[0].skillId)
+        def skillReused_t3 = skillsService.getSingleSkillSummary(user, p1.projectId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0))
+
+        then:
+        proj.points == 600
+        proj.todaysPoints == 200
+        proj.totalPoints == 2000
+        proj.skillsLevel == 2
+        proj.subjects[0].todaysPoints == 100
+        proj.subjects[0].points == 300
+        proj.subjects[0].totalPoints == 1500
+        proj.subjects[1].todaysPoints == 100
+        proj.subjects[1].points == 300
+        proj.subjects[1].totalPoints == 500
+
+        subj2.totalPoints == 500
+        subj2.points == 300
+        subj2.todaysPoints == 100
+        subj2.skillsLevel == 3
+        subj2.skills.size() == 1
+        subj2.skills[0].children.size() == 1
+        subj2.skills[0].children[0].skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        subj2.skills[0].children[0].points == 300
+        subj2.skills[0].children[0].totalPoints == 500
+        subj2.skills[0].children[0].todaysPoints == 100
+
+        skillReused.skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        skillReused.points == 300
+        skillReused.totalPoints == 500
+        skillReused.todaysPoints == 100
+
+        subj1.totalPoints == 1500
+        subj1.points == 300
+        subj1.todaysPoints == 100
+        subj1.skillsLevel == 1
+        subj1.skills.size() == 1
+        subj1.skills[0].children.size() == 3
+        def skill1 = subj1.skills[0].children.find { it.skillId == p1Skills[0].skillId }
+        skill1.points == 300
+        skill1.totalPoints == 500
+        skill1.todaysPoints == 100
+        subj1.skills[0].children.find { it.skillId == p1Skills[1].skillId }.points == 0
+        subj1.skills[0].children.find { it.skillId == p1Skills[2].skillId }.points == 0
+
+        skillOrig.skillId == p1Skills[0].skillId
+        skillOrig.points == 300
+        skillOrig.totalPoints == 500
+        skillOrig.todaysPoints == 100
+
+        // after deletion
+        proj_t1.points == 400
+        proj_t1.todaysPoints == 200
+        proj_t1.totalPoints == 2000
+        proj_t1.skillsLevel == 1
+        proj_t1.subjects[0].todaysPoints == 100
+        proj_t1.subjects[0].points == 200
+        proj_t1.subjects[0].totalPoints == 1500
+        proj_t1.subjects[1].todaysPoints == 100
+        proj_t1.subjects[1].points == 200
+        proj_t1.subjects[1].totalPoints == 500
+
+        subj2_t1.totalPoints == 500
+        subj2_t1.points == 200
+        subj2_t1.todaysPoints == 100
+        subj2_t1.skillsLevel == 2
+        subj2_t1.skills.size() == 1
+        subj2_t1.skills[0].children.size() == 1
+        subj2_t1.skills[0].children[0].skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        subj2_t1.skills[0].children[0].points == 200
+        subj2_t1.skills[0].children[0].totalPoints == 500
+        subj2_t1.skills[0].children[0].todaysPoints == 100
+
+        skillReused_t1.skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        skillReused_t1.points == 200
+        skillReused_t1.totalPoints == 500
+        skillReused_t1.todaysPoints == 100
+
+        subj1_t1.totalPoints == 1500
+        subj1_t1.points == 200
+        subj1_t1.todaysPoints == 100
+        subj1_t1.skillsLevel == 1
+        subj1_t1.skills.size() == 1
+        subj1_t1.skills[0].children.size() == 3
+        def skill1_t1 = subj1_t1.skills[0].children.find { it.skillId == p1Skills[0].skillId }
+        skill1_t1.points == 200
+        skill1_t1.totalPoints == 500
+        skill1_t1.todaysPoints == 100
+        subj1_t1.skills[0].children.find { it.skillId == p1Skills[1].skillId }.points == 0
+        subj1_t1.skills[0].children.find { it.skillId == p1Skills[2].skillId }.points == 0
+
+        skillOrig_t1.skillId == p1Skills[0].skillId
+        skillOrig_t1.points == 200
+        skillOrig_t1.totalPoints == 500
+        skillOrig_t1.todaysPoints == 100
+
+        // after 2nd deletion
+        proj_t2.points == 200
+        proj_t2.todaysPoints == 0
+        proj_t2.totalPoints == 2000
+        proj_t2.skillsLevel == 1
+        proj_t2.subjects[0].todaysPoints == 0
+        proj_t2.subjects[0].points == 100
+        proj_t2.subjects[0].totalPoints == 1500
+        proj_t2.subjects[1].todaysPoints == 0
+        proj_t2.subjects[1].points == 100
+        proj_t2.subjects[1].totalPoints == 500
+
+        subj2_t2.totalPoints == 500
+        subj2_t2.points == 100
+        subj2_t2.todaysPoints == 0
+        subj2_t2.skillsLevel == 1
+        subj2_t2.skills.size() == 1
+        subj2_t2.skills[0].children.size() == 1
+        subj2_t2.skills[0].children[0].skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        subj2_t2.skills[0].children[0].points == 100
+        subj2_t2.skills[0].children[0].totalPoints == 500
+        subj2_t2.skills[0].children[0].todaysPoints == 0
+
+        skillReused_t2.skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        skillReused_t2.points == 100
+        skillReused_t2.totalPoints == 500
+        skillReused_t2.todaysPoints == 0
+
+        subj1_t2.totalPoints == 1500
+        subj1_t2.points == 100
+        subj1_t2.todaysPoints == 0
+        subj1_t2.skillsLevel == 0
+        subj1_t2.skills.size() == 1
+        subj1_t2.skills[0].children.size() == 3
+        def skill1_t2 = subj1_t2.skills[0].children.find { it.skillId == p1Skills[0].skillId }
+        skill1_t2.points == 100
+        skill1_t2.totalPoints == 500
+        skill1_t2.todaysPoints == 0
+        subj1_t2.skills[0].children.find { it.skillId == p1Skills[1].skillId }.points == 0
+        subj1_t2.skills[0].children.find { it.skillId == p1Skills[2].skillId }.points == 0
+
+        skillOrig_t2.skillId == p1Skills[0].skillId
+        skillOrig_t2.points == 100
+        skillOrig_t2.totalPoints == 500
+        skillOrig_t2.todaysPoints == 0
+
+        // after 3rd deletion
+        proj_t3.points == 0
+        proj_t3.todaysPoints == 0
+        proj_t3.totalPoints == 2000
+        proj_t3.skillsLevel == 0
+        proj_t3.subjects[0].todaysPoints == 0
+        proj_t3.subjects[0].points == 0
+        proj_t3.subjects[0].totalPoints == 1500
+        proj_t3.subjects[1].todaysPoints == 0
+        proj_t3.subjects[1].points == 0
+        proj_t3.subjects[1].totalPoints == 500
+
+        subj2_t3.totalPoints == 500
+        subj2_t3.points == 0
+        subj2_t3.todaysPoints == 0
+        subj2_t3.skillsLevel == 0
+        subj2_t3.skills.size() == 1
+        subj2_t3.skills[0].children.size() == 1
+        subj2_t3.skills[0].children[0].skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        subj2_t3.skills[0].children[0].points == 0
+        subj2_t3.skills[0].children[0].totalPoints == 500
+        subj2_t3.skills[0].children[0].todaysPoints == 0
+
+        skillReused_t3.skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        skillReused_t3.points == 0
+        skillReused_t3.totalPoints == 500
+        skillReused_t3.todaysPoints == 0
+
+        subj1_t3.totalPoints == 1500
+        subj1_t3.points == 0
+        subj1_t3.todaysPoints == 0
+        subj1_t3.skillsLevel == 0
+        subj1_t3.skills.size() == 1
+        subj1_t3.skills[0].children.size() == 3
+        def skill1_t3 = subj1_t3.skills[0].children.find { it.skillId == p1Skills[0].skillId }
+        skill1_t3.points == 0
+        skill1_t3.totalPoints == 500
+        skill1_t3.todaysPoints == 0
+        subj1_t3.skills[0].children.find { it.skillId == p1Skills[1].skillId }.points == 0
+        subj1_t3.skills[0].children.find { it.skillId == p1Skills[2].skillId }.points == 0
+
+        skillOrig_t3.skillId == p1Skills[0].skillId
+        skillOrig_t3.points == 0
+        skillOrig_t3.totalPoints == 500
+        skillOrig_t3.todaysPoints == 0
+    }
 }

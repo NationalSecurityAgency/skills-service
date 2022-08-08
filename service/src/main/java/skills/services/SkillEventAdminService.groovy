@@ -19,7 +19,6 @@ import callStack.profiler.Profile
 import callStack.utils.CachedThreadPool
 import callStack.utils.ThreadPoolUtils
 import groovy.util.logging.Slf4j
-import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -83,6 +82,9 @@ class SkillEventAdminService {
 
     @Autowired
     SkillCatalogService skillCatalogService
+
+    @Autowired
+    SkillDefRepo skillDefRepo
 
     @Value('#{"${skills.bulkUserLookup.minNumOfThreads:1}"}')
     Integer minNumOfThreads
@@ -185,12 +187,13 @@ class SkillEventAdminService {
         log.debug("Deleting skill [{}] for user [{}]", performedSkill, userId)
 
         SkillDefMin skillDefinitionMin = getSkillDef(projectId, skillId)
-        Long numExistingSkills = performedSkillRepository.countByUserIdAndProjectIdAndSkillId(userId, skillDefinitionMin.projectId, skillDefinitionMin.skillId) ?: 0 // account for null
+        Long numExistingSkills = performedSkillRepository.countByUserIdAndProjectIdAndSkillId(userId, skillDefinitionMin.projectId, skillDefinitionMin.skillId) ?: 0
+        // account for null
 
         // handle catalog
-        final boolean isInCatalog = skillCatalogService.isAvailableInCatalog(skillDefinitionMin.projectId, skillDefinitionMin.skillId)
-        if (skillDefinitionMin.getCopiedFrom() > 0 || isInCatalog) {
-            List<SkillDefMin> related = skillCatalogService.getRelatedSkills(skillDefinitionMin)
+        List<SkillDefWithExtra> related = skillDefRepo.findSkillDefMinCopiedFrom(skillDefinitionMin.id)
+        if (related) {
+            log.info("Propagating event deletion to the catalog skills - [{}] copies imported", related?.size())
             related?.each {
                 updateUserPointsAndAchievementsWhenPerformedSkillRemoved(userId, it, numExistingSkills)
             }
@@ -217,6 +220,8 @@ class SkillEventAdminService {
     }
 
     private SkillEventResult updateUserPointsAndAchievementsWhenPerformedSkillRemoved(String userId, SkillDefMin skillDefinitionMin, Long numExistingPerformedSkills) {
+        log.info("Updating points and achievements after skill was removed for userId=[{}], projectId=[{}], skillId=[{}], numExistingPerformedSkills=[{}]",
+                userId, skillDefinitionMin.projectId, skillDefinitionMin.skillId, numExistingPerformedSkills)
         updateUserPoints(userId, skillDefinitionMin, skillDefinitionMin.skillId)
         boolean requestedSkillCompleted = hasReachedMaxPoints(numExistingPerformedSkills, skillDefinitionMin)
         if (requestedSkillCompleted) {
