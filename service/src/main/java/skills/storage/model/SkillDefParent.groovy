@@ -60,10 +60,6 @@ class SkillDefParent {
     @Temporal(TemporalType.TIMESTAMP)
     Date endDate  // optional, used for "gem" badges only currently
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name="skillRefId", insertable = false, updatable = false)
-    List<LevelDef> levelDefinitions
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="projRefId")
     ProjDef projDef

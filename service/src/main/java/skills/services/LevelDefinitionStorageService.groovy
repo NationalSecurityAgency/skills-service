@@ -70,7 +70,8 @@ class LevelDefinitionStorageService {
 
     @Profile
     LevelInfo getLevelInfo(SkillDefParent skillDefinition, int currentScore) {
-        return getLevelInfo(skillDefinition.projectId, skillDefinition.levelDefinitions, skillDefinition.totalPoints, currentScore)
+        List<LevelDef> levelDefs = getSubjectLevelDefs(skillDefinition)
+        return getLevelInfo(skillDefinition.projectId, levelDefs, skillDefinition.totalPoints, currentScore)
     }
 
     @Profile
@@ -98,10 +99,11 @@ class LevelDefinitionStorageService {
         SettingsResult setting = settingsService.getProjectSetting(skillDefinition.projectId, Settings.LEVEL_AS_POINTS.settingName)
 
         List<Integer> levelScores = []
+        List<LevelDef> levelDefs = getSubjectLevelDefs(skillDefinition)
         if(setting?.isEnabled()){
-            levelScores = loadPointsLevels(skillDefinition.levelDefinitions)
+            levelScores = loadPointsLevels(levelDefs)
         } else {
-            levelScores = loadPercentLevels(skillDefinition.levelDefinitions, skillDefinition.totalPoints)
+            levelScores = loadPercentLevels(levelDefs, skillDefinition.totalPoints)
         }
         return calculatePointsRequiredForLevel(levelScores, level)
     }
@@ -124,6 +126,11 @@ class LevelDefinitionStorageService {
         levelDefinitionRepository.findAllByProjectRefId(projDef.id)
     }
 
+    @Profile
+    private List<LevelDef> getSubjectLevelDefs(SkillDefParent skillDef) {
+        levelDefinitionRepository.findAllBySkillRefId(skillDef.id)
+    }
+
     private List<Integer> loadPercentLevels(List<LevelDefInterface> levelDefinitions, int currentScore) {
         List<Integer> levelScores = levelDefinitions.sort({ it.level }).collect {
             return (int) (currentScore * (it.percent / 100d))
@@ -131,7 +138,7 @@ class LevelDefinitionStorageService {
         return levelScores
     }
 
-    private List<Integer> loadPointsLevels(List<LevelDefInterface> levelDefinitions){
+    private List<Integer> loadPointsLevels(List<LevelDefInterface> levelDefinitions) {
         List<Integer> levelScores = levelDefinitions.sort({ it.level }).collect {
             return it.pointsFrom
         }
@@ -207,7 +214,8 @@ class LevelDefinitionStorageService {
 
     @Transactional
     List<LevelDefinitionRes> getLevelsDefRes(SkillDef skillDef) {
-        return doGetLevelsDefRes(skillDef.levelDefinitions, skillDef.totalPoints, skillDef.projectId, skillDef.skillId)
+        List<LevelDef> levelDefs = getSubjectLevelDefs(skillDefinition)
+        return doGetLevelsDefRes(levelDefs, skillDef.totalPoints, skillDef.projectId, skillDef.skillId)
     }
 
     private List<LevelDefinitionRes> doGetLevelsDefRes(List<LevelDef> levelDefinitions, int totalPoints, String projectId, String skillId = null) {
@@ -258,7 +266,7 @@ class LevelDefinitionStorageService {
             if(!skillDef){
                 throw new skills.controller.exceptions.SkillException("Failed to find Ability for project", projectId, skillId)
             }
-            res = new LevelDefRes(levels: skillDef.levelDefinitions?.sort({it.level}), projectId: skillDef.projectId, skillId: skillDef.skillId, totalPoints: skillDef.totalPoints)
+            res = new LevelDefRes(levels: getSubjectLevelDefs(skillDef)?.sort({ it.level }), projectId: skillDef.projectId, skillId: skillDef.skillId, totalPoints: skillDef.totalPoints)
         } else {
             ProjDef projDef = projDefRepo.findByProjectId(projectId)
             if(!projDef){
@@ -454,7 +462,7 @@ class LevelDefinitionStorageService {
             log.debug("creating default level {}", levelDef)
             res << levelDef
         }
-        if(setting?.isEnabled()){
+        if (setting?.isEnabled()) {
             new LevelUtils().convertToPoints(res, LevelUtils.defaultTotalPointsGuess)
         }
 
@@ -463,5 +471,9 @@ class LevelDefinitionStorageService {
 
     int maxProjectLevel(ProjDef projDef) {
         return getProjLevelDefs(projDef).size()
+    }
+
+    int maxSubjectLevel(SkillDefParent skill) {
+        return getSubjectLevelDefs(skill).size()
     }
 }

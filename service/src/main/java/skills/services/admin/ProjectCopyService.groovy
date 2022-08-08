@@ -123,10 +123,11 @@ class ProjectCopyService {
 
         ProjDef toProj = saveToProject(projectRequest)
         saveProjectSettings(fromProject, toProj)
-        updateLevels(fromProject, toProj)
 
         List<SkillInfo> allCollectedSkills = []
         saveSubjectsAndSkills(projectRequest, fromProject, toProj, allCollectedSkills)
+        updateProjectAndSubjectLevels(fromProject, toProj)
+
         saveBadgesAndTheirSkills(fromProject, toProj)
         saveDependencies(fromProject, toProj)
         saveReusedSkills(allCollectedSkills, fromProject, toProj)
@@ -138,7 +139,8 @@ class ProjectCopyService {
         settings.each { SettingsResult fromSetting ->
             // copied projects should not be discoverable by default therefore should not carry this setting forward
             boolean discoverableProject = fromSetting.setting == Settings.PRODUCTION_MODE.settingName && fromSetting.value == Boolean.TRUE.toString()
-            if (!discoverableProject) {
+            boolean isLevelsAsPtsSetting = fromSetting.setting == Settings.LEVEL_AS_POINTS.settingName && fromSetting.value == Boolean.TRUE.toString()
+            if (!discoverableProject && !isLevelsAsPtsSetting) {
                 ProjectSettingsRequest projectSettingsRequest = new ProjectSettingsRequest(
                         projectId: toProj.projectId,
                         settingGroup: fromSetting.settingGroup,
@@ -148,6 +150,29 @@ class ProjectCopyService {
                 settingsService.saveSetting(projectSettingsRequest)
             }
         }
+    }
+
+    @Profile
+    private void updateProjectAndSubjectLevels(ProjDef fromProject, ProjDef toProj) {
+        SettingsResult levelAsPointsSetting = settingsService.loadSettingsForProject(fromProject.projectId).find {
+            it.setting == Settings.LEVEL_AS_POINTS.settingName && it.value == Boolean.TRUE.toString()
+        }
+        if (levelAsPointsSetting) {
+            ProjectSettingsRequest projectSettingsRequest = new ProjectSettingsRequest(
+                    projectId: toProj.projectId,
+                    settingGroup: levelAsPointsSetting.settingGroup,
+                    setting: levelAsPointsSetting.setting,
+                    value: levelAsPointsSetting.value,
+            )
+            settingsService.saveSetting(projectSettingsRequest)
+        }
+        updateLevels(fromProject, toProj)
+
+        List<SkillDefWithExtra> fromSubjects = skillDefWithExtraRepo.findAllByProjectIdAndType(fromProject.projectId, SkillDef.ContainerType.Subject)
+        fromSubjects?.findAll { it.enabled }
+                .each { SkillDefWithExtra fromSubj ->
+                    updateLevels(fromProject, toProj, fromSubj.skillId)
+                }
     }
 
     @Profile
@@ -166,31 +191,32 @@ class ProjectCopyService {
                 }
             }
         }
-        fromLevels.eachWithIndex { LevelDefinitionRes fromlevel, int i ->
-            if (i < existingLevels.size()) {
-                LevelDefinitionRes toLevel = existingLevels[i]
-                EditLevelRequest editLevelRequest = new EditLevelRequest(
-                        percent: fromlevel.percent,
-                        name: fromlevel.name,
-                        iconClass: fromlevel.iconClass,
-                        level: fromlevel.level,
-                        pointsFrom: fromlevel.pointsFrom,
-                        pointsTo: fromlevel.pointsTo,
-                )
-                levelDefinitionStorageService.editLevel(toProj.projectId, editLevelRequest, fromlevel.level, subjectId)
-                log.debug("PROJ COPY: [{}]=[{}] subj[{}] - edited level to [{}]", fromProject.projectId, toProj.projectId, subjectId, JsonOutput.toJson(editLevelRequest))
-            } else {
-                NextLevelRequest nextLevelRequest = new NextLevelRequest(
-                        percent: fromlevel.percent,
-                        points: fromlevel.pointsFrom,
-                        name: fromlevel.name,
-                        iconClass: fromlevel.iconClass,
-                )
-                levelDefinitionStorageService.addNextLevel(toProj.projectId, nextLevelRequest, subjectId)
-                log.debug("PROJ COPY: [{}]=[{}] subj[{}] - new level [{}]", fromProject.projectId, toProj.projectId, subjectId, JsonOutput.toJson(nextLevelRequest))
-            }
+        List<LevelDefinitionRes> levelsToUpdate = fromLevels.findAll { it.level <= existingLevels.size() }.sort({ it.level }).reverse()
+        List<LevelDefinitionRes> levelsToCreate = fromLevels.findAll { it.level > existingLevels.size() }.sort({ it.level })
+        levelsToUpdate.eachWithIndex { LevelDefinitionRes fromLevel, int index ->
+            EditLevelRequest editLevelRequest = new EditLevelRequest(
+                    percent: fromLevel.percent,
+                    name: fromLevel.name,
+                    iconClass: fromLevel.iconClass,
+                    level: fromLevel.level,
+                    pointsFrom: fromLevel.pointsFrom,
+                    pointsTo: (index > 0) ? fromLevel.pointsTo : null, // levels are reversed and the highest level must always have pointTo=null
+            )
+            levelDefinitionStorageService.editLevel(toProj.projectId, editLevelRequest, fromLevel.level, subjectId)
+            log.debug("PROJ COPY: [{}]=[{}] subj[{}] - edited level to [{}]", fromProject.projectId, toProj.projectId, subjectId, JsonOutput.toJson(editLevelRequest))
+        }
+        levelsToCreate.each { LevelDefinitionRes fromlevel ->
+            NextLevelRequest nextLevelRequest = new NextLevelRequest(
+                    percent: fromlevel.percent,
+                    points: fromlevel.pointsFrom,
+                    name: fromlevel.name,
+                    iconClass: fromlevel.iconClass,
+            )
+            levelDefinitionStorageService.addNextLevel(toProj.projectId, nextLevelRequest, subjectId)
+            log.debug("PROJ COPY: [{}]=[{}] subj[{}] - new level [{}]", fromProject.projectId, toProj.projectId, subjectId, JsonOutput.toJson(nextLevelRequest))
         }
     }
+
 
     private static class SkillInfo {
         SkillDefWithExtra skillDef
@@ -270,8 +296,6 @@ class ProjectCopyService {
                     toSubj.subjectId = fromSubj.skillId
                     subjAdminService.saveSubject(projectRequest.projectId, fromSubj.skillId, toSubj)
                     log.info("PROJ COPY: [{}]=[{}] subj[{}] - created new subject")
-                    updateLevels(fromProject, toProj, fromSubj.skillId)
-
                     createSkills(fromProject.projectId, toProj.projectId, toSubj.subjectId, allCollectedSkills)
                 }
     }
@@ -330,4 +354,5 @@ class ProjectCopyService {
         serviceValidatorHelper.validateProjectIdDoesNotExist(projectRequest.projectId)
         serviceValidatorHelper.validateProjectNameDoesNotExist(projectRequest.name, projectRequest.projectId)
     }
+
 }

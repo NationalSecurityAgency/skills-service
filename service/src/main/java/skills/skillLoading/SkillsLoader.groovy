@@ -937,7 +937,7 @@ class SkillsLoader {
 
         int maxLevel = Integer.MAX_VALUE
         if(subjectDef){
-            maxLevel = subjectDef.levelDefinitions.size()
+            maxLevel = levelDefService.maxSubjectLevel(subjectDef)
         }else{
             maxLevel = levelDefService.maxProjectLevel(projDef)
         }
