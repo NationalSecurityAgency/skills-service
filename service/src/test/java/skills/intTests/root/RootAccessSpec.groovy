@@ -939,7 +939,7 @@ class RootAccessSpec extends DefaultIntSpec {
         user1SubjectSummary.skills
         user1SubjectSummary.skills.size() == 2
         user1SubjectSummary.skills[0].skillId == skillsGroupId
-        user1SubjectSummary.skills[0].points == 100 * groupChildren.size()
+        user1SubjectSummary.skills[0].points == 100
         user1SubjectSummary.skills[0].totalPoints == 100 * groupChildren.size()
         user1SubjectSummary.skills[0].children
         user1SubjectSummary.skills[0].children.size() == groupChildren.size()
@@ -972,7 +972,7 @@ class RootAccessSpec extends DefaultIntSpec {
         user2SubjectSummary.skills
         user2SubjectSummary.skills.size() == 2
         user2SubjectSummary.skills[0].skillId == skillsGroupId
-        user2SubjectSummary.skills[0].points == 100 * groupChildren.size()
+        user2SubjectSummary.skills[0].points == 100
         user2SubjectSummary.skills[0].totalPoints == 100 * groupChildren.size()
         user2SubjectSummary.skills[0].children
         user2SubjectSummary.skills[0].children.size() == groupChildren.size()
@@ -1005,7 +1005,7 @@ class RootAccessSpec extends DefaultIntSpec {
         user3SubjectSummary.skills
         user3SubjectSummary.skills.size() == 2
         user3SubjectSummary.skills[0].skillId == skillsGroupId
-        user3SubjectSummary.skills[0].points == 100 * groupChildren.size()
+        user3SubjectSummary.skills[0].points == 100
         user3SubjectSummary.skills[0].totalPoints == 100 * groupChildren.size()
         user3SubjectSummary.skills[0].children
         user3SubjectSummary.skills[0].children.size() == groupChildren.size()

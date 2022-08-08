@@ -17,7 +17,19 @@ limitations under the License.
   <loading-container v-bind:is-loading="isLoading">
     <sub-page-header title="Access Management"/>
     <metrics-card title="Project Administrators" data-cy="projectAdmins" :no-padding="true">
-      <role-manager :project="project"/>
+      <role-manager :project="project" :add-user-label="'Add Administrator'" :add-role-confirmation="addUserConfirmationConfig"/>
+    </metrics-card>
+
+    <metrics-card v-if="privateProject" title="Project User: Invite" data-cy="inviteUser" :no-padding="true" class="my-4">
+      <b-overlay :show="!emailEnabled">
+          <div slot="overlay" class="alert alert-warning mt-2" data-cy="inviteUsers_emailServiceWarning">
+            <i class="fa fa-exclamation-triangle" aria-hidden="true"/> Please note that email notifications are currently disabled. Email configuration has not been performed on this instance of SkillTree. Please contact the root administrator.
+          </div>
+          <invite-users-to-project ref="inviteUsers" :project-id="project.projectId"/>
+      </b-overlay>
+    </metrics-card>
+    <metrics-card v-if="privateProject" title="Project User: Revoke" data-cy="revokeAccess" :no-padding="true" class="my-4">
+      <revoke-user-access />
     </metrics-card>
 
     <trusted-client-props v-if="showTrustedClientProps" :project-id="project.projectId" class="my-4"/>
@@ -25,12 +37,15 @@ limitations under the License.
 </template>
 
 <script>
+  import InviteUsersToProject from '@/components/access/InviteUsersToProject';
+  import RevokeUserAccess from '@/components/access/RevokeUserAccess';
   import MetricsCard from '../metrics/utils/MetricsCard';
   import RoleManager from './RoleManager';
   import TrustedClientProps from './TrustedClientProps';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import ProjectService from '../projects/ProjectService';
   import LoadingContainer from '../utils/LoadingContainer';
+  import SettingsService from '../settings/SettingsService';
 
   export default {
     name: 'AccessSettings',
@@ -40,22 +55,57 @@ limitations under the License.
       SubPageHeader,
       RoleManager,
       TrustedClientProps,
+      InviteUsersToProject,
+      RevokeUserAccess,
     },
     data() {
       return {
         isLoading: true,
         project: {},
+        privateProject: false,
+        emailEnabled: false,
       };
     },
     computed: {
       showTrustedClientProps() {
         return (!this.$store.getters.isPkiAuthenticated);
       },
+      addUserConfirmationConfig() {
+        if (this.privateProject) {
+          return {
+            msgText: 'The selected user will be added as an Administrator for this project and will be able to edit/add/delete all aspects of the Project.',
+            titleText: 'Add Project Administrator?',
+            okBtnText: 'Add Administrator!',
+          };
+        }
+        return null;
+      },
+    },
+    beforeRouteLeave(to, from, next) {
+      if (this.$refs.inviteUsers && this.$refs.inviteUsers.canDiscard) {
+        this.$refs.inviteUsers.canDiscard().then((discard) => {
+          if (discard) {
+            next();
+          } else {
+            next(false);
+          }
+        });
+      } else {
+        next();
+      }
     },
     mounted() {
       ProjectService.getProjectDetails(this.$route.params.projectId)
         .then((res) => {
           this.project = res;
+        })
+        .then(() => SettingsService.getProjectSetting(this.$route.params.projectId, 'invite_only'))
+        .then((setting) => {
+          this.privateProject = setting?.enabled;
+        })
+        .then(() => ProjectService.isEmailServiceSupported())
+        .then((emailEnabled) => {
+          this.emailEnabled = emailEnabled;
         })
         .finally(() => {
           this.isLoading = false;

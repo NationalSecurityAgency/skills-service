@@ -121,6 +121,13 @@ class UserAuthService {
         return createUserInfo(userAndUserAttrs.user, userAndUserAttrs.userAttrs)
     }
 
+    @Transactional
+    @Profile
+    UserInfo getOrCreate(UserInfo userInfo) {
+        AccessSettingsStorageService.UserAndUserAttrsHolder userAndUserAttrs = accessSettingsStorageService.getOrCreate(userInfo)
+        return createUserInfo(userAndUserAttrs.user, userAndUserAttrs.userAttrs)
+    }
+
     void autologin(UserInfo userInfo, String password) {
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userInfo, password, userInfo.getAuthorities())
         authenticationManager.authenticate(usernamePasswordAuthenticationToken)
@@ -159,8 +166,8 @@ class UserAuthService {
     HttpServletRequest getServletRequest() {
         HttpServletRequest httpServletRequest
         try {
-            ServletRequestAttributes currentRequestAttributes = RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes
-            httpServletRequest = currentRequestAttributes.getRequest()
+            ServletRequestAttributes currentRequestAttributes = RequestContextHolder.getRequestAttributes() as ServletRequestAttributes
+            httpServletRequest = currentRequestAttributes?.getRequest()
         } catch (Exception e) {
             log.warn("Unable to access current HttpServletRequest. Error Recieved [$e]", e)
         }

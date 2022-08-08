@@ -488,12 +488,11 @@ describe('Accessibility Tests', () => {
     cy.get('[data-cy=nav-Email]').click();
     cy.contains('Email Connection Settings');
     cy.contains('TLS Disabled');
-    cy.contains('Public URL');
     cy.customLighthouse();
     cy.customA11y();
 
     cy.get('[data-cy=nav-System]').click();
-    cy.contains('Token Expiration');
+    cy.contains('Public URL');
     cy.customLighthouse();
     cy.customA11y();
   });
@@ -857,39 +856,31 @@ describe('Accessibility Tests', () => {
   });
 
   it('skills-display content area should have focus after navigating from Progress & Ranking page', () => {
-    const getIframeBody = () => {
-      // get the iframe > document > body
-      // and retry until the body element is not empty
-      return cy
-        .get('iframe')
-        .its('0.contentDocument.body').should('not.be.empty')
-        // wraps "body" DOM element to allow
-        // chaining more Cypress commands, like ".find(...)"
-        // https://on.cypress.io/wrap
-        .then(cy.wrap)
-    };
-
+    cy.intercept('/progress-and-rankings/projects/MyNewtestProject** ').as('load');
     cy.visit('/progress-and-rankings/projects/MyNewtestProject');
     cy.get('[data-cy="breadcrumb-Progress And Rankings"]').contains('Progress And Rankings').should('be.visible');
 
-    cy.dashboardCd().contains('Overall Points');
-    getIframeBody().find('.skills-display-container').should('have.focus');
+    cy.wrapIframe().contains('Overall Points').should('exist');
+    cy.wrapIframe().find('.skills-display-container').should('have.focus');
+    cy.wrapIframe().find('[data-cy=myRank]').click();
 
-    cy.dashboardCd().find('[data-cy=myRank]').click();
-    cy.dashboardCd().contains('My Rank');
-    getIframeBody().find('.skills-display-container').should('have.focus');
+    cy.wrapIframe().contains('My Rank').should('exist');
+    cy.wrapIframe().find('.skills-display-container').should('have.focus');
 
-    cy.get('[data-cy="breadcrumb-MyNewtestProject"]').click()
-    cy.dashboardCd().contains('Overall Points');
-    getIframeBody().find('.skills-display-container').should('have.focus');
+    cy.get('[data-cy="breadcrumb-MyNewtestProject"]').should('be.visible');
+    cy.get('[data-cy="breadcrumb-MyNewtestProject"]').should('be.visible').then(el => expect(Cypress.dom.isAttached(el)).to.be.true);
+    cy.wait(500);
+    cy.get$('[data-cy="breadcrumb-MyNewtestProject"]').click();
+    cy.wrapIframe().contains('Overall Points').should('exist');
+    cy.wrapIframe().find('.skills-display-container').should('have.focus');
+    cy.wrapIframe().find('[data-cy="subjectTile"]').should('be.visible');
+    cy.wrapIframe().find('[data-cy="subjectTile"]').click();
+    cy.wrapIframe().contains('Subject 1').should('exist');
+    cy.wrapIframe().find('.skills-display-container').should('have.focus');
+    cy.wrapIframe().find('[data-cy="skillProgress_index-0"]').click()
 
-    cy.dashboardCd().find('[data-cy="subjectTile"]').click();
-    cy.dashboardCd().contains('Subject 1');
-    getIframeBody().find('.skills-display-container').should('have.focus');
-
-    cy.dashboardCd().find('[data-cy="skillProgress_index-0"]').click()
-    cy.dashboardCd().contains('This is 1');
-    getIframeBody().find('.skills-display-container').should('have.focus');
+    cy.wrapIframe().contains('This is 1').should('exist');
+    cy.wrapIframe().find('.skills-display-container').should('have.focus');
   });
 
   it('content area should have focus after menu navigation', () => {

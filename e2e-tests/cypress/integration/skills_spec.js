@@ -1418,19 +1418,5 @@ describe('Skills Tests', () => {
     cy.contains('Verylongandinterestingskill;Verylongandintere... >> more');
   });
 
-  it('Add Skill Event - skill date can not be too far in the past', () => {
-    cy.createSkill(1, 1, 1);
-    cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
-    cy.get('[data-cy="nav-Add Event"]', { timeout: 30000 }).click();
-
-    const eventDatePicker = '[data-cy=eventDatePicker]'
-
-    cy.get(eventDatePicker).click()
-    cy.get('[class="day__month_btn up"]').click()
-    cy.get('[class="month__year_btn up"]').click()
-    cy.get('[class="vdp-datepicker__calendar"]').filter(':visible').get('[class="prev"]').filter(':visible').click().click()
-    cy.get('[class="cell year disabled"]').should('have.length', 10)
-
-  });
 
 });

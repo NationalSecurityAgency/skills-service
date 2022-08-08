@@ -19,6 +19,8 @@ import callStack.profiler.Profile
 import com.github.jknack.handlebars.Options
 import groovy.util.logging.Slf4j
 import org.apache.commons.codec.net.URLCodec
+import org.springframework.core.io.Resource
+import skills.services.settings.Settings
 
 @Slf4j
 class SkillsService {
@@ -1033,8 +1035,8 @@ class SkillsService {
         return wsHelper.rootPost(url, [suggestQuery: usernameQuery])?.body
     }
 
-    def getUsersWithRole(String role) {
-        return wsHelper.rootGet("/users/roles/${role}")
+    def getUsersWithRole(String role, int limit=10, int page=1, String orderBy="userId", boolean ascending=true) {
+        return wsHelper.rootGet("/users/roles/${role}?limit=${limit}&page=${page}&orderBy=${orderBy}&ascending=${ascending}").data
     }
 
     def removeRootRole(String userId) {
@@ -1063,6 +1065,10 @@ class SkillsService {
     def removeSupervisorRole(String userId) {
         userId = getUserId(userId)
         return wsHelper.rootDelete("/users/${userId}/roles/ROLE_SUPERVISOR")
+    }
+
+    def revokeInviteOnlyProjectAccess(String projectId, String userId) {
+        return wsHelper.adminDelete("/projects/${projectId}/users/${userId}/roles/ROLE_PRIVATE_PROJECT_USER")
     }
 
     def addOrUpdateGlobalSetting(String setting, Map value) {
@@ -1396,6 +1402,30 @@ class SkillsService {
         return wsHelper.adminGet("/projects/${projectId}/approvalEmails/isSubscribed")
     }
 
+    /**
+     * Invites users to join invite only project by sending an email with a one time use
+     * invitation code to each user in the specified request
+     * @param projectId
+     * @param invites - [ validityDuration: "", recipients: [] ]
+     */
+    def inviteUsersToProject(String projectId, Map invites) {
+        def result = wsHelper.adminPost("/projects/${projectId}/invite", invites)
+        def body = result.body
+        return body
+    }
+
+    /**
+     * Adds the currently authenticated user to the specified invite-only project
+     * if the supplied invite token hasn't expired, hasn't already been used,
+     * and is for the specified projectId
+     *
+     * @param projectId
+     * @param inviteToken
+     */
+    def joinProject(String projectId, String inviteToken) {
+       return wsHelper.appPost("/projects/${projectId}/join/${inviteToken}", null)
+    }
+
     private String getProjectUrl(String project) {
         return "/projects/${project}".toString()
     }
@@ -1463,7 +1493,11 @@ class SkillsService {
 
 
     private String getUserLevelForProjectUrl(String project, String userId){
-        return "${getProjectUrl(project)}/level?userId=${userId}".toString()
+        if (userId) {
+            return "${getProjectUrl(project)}/level?userId=${userId}".toString()
+        } else {
+            return "${getProjectUrl(project)}/level".toString()
+        }
     }
 
     private String getDeleteLevelUrl(String project, String subject){
@@ -1529,5 +1563,3 @@ class SkillsService {
 
 }
 
-import org.springframework.core.io.Resource
-import skills.services.settings.Settings

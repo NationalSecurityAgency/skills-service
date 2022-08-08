@@ -81,9 +81,6 @@ class UserSkillsController {
     @Value("${skills.config.ui.pointHistoryInDays:1825}")
     Integer maxDaysBack;
 
-    @Value("${skills.config.ui.skillHistoryInDays:1825}")
-    Integer maxDaysBackForSkill;
-
     @Autowired
     AddSkillHelper addSkillHelper;
 
@@ -284,7 +281,7 @@ class UserSkillsController {
     public SkillEventResult addSkill(@PathVariable("projectId") String projectId,
                                      @PathVariable("skillId") String skillId,
                                      @RequestBody(required = false) SkillEventRequest skillEventRequest) {
-        return addSkillHelper.addSkill(projectId, skillId, skillEventRequest, maxDaysBackForSkill);
+        return addSkillHelper.addSkill(projectId, skillId, skillEventRequest);
     }
 
     @RequestMapping(value = "/projects/{projectId}/rank", method = RequestMethod.GET, produces = "application/json")

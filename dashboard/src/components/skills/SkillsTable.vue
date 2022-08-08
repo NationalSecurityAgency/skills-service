@@ -115,7 +115,7 @@ limitations under the License.
                       }} skill{{ data.item.numSkillsInGroup === 1 ? '' : 's' }}</span>
                   </b-badge>
                 </div>
-                <div class="h5 text-primary"><show-more :text="data.item.nameHtml ? data.item.nameHtml : data.item.name" :limit="45" :contains-html="data.item.nameHtml" /></div>
+                <div class="h5 text-primary"><show-more :text="data.item.nameHtml ? data.item.nameHtml : data.item.name" :limit="45" :contains-html="!!data.item.nameHtml" /></div>
               </div>
               <div v-if="data.item.isSkillType">
                 <i class="fas fa-book mr-1 text-success"
@@ -133,7 +133,7 @@ limitations under the License.
                     <router-link :data-cy="`manageSkillLink_${data.item.skillId}`" tag="a" :to="{ name:'SkillOverview',
                                     params: { projectId: data.item.projectId, subjectId: subjectId, skillId: data.item.skillId }}"
                                :aria-label="`Manage skill ${data.item.name}  via link`">
-                    <div class="h5 d-inline-block"><show-more :text="data.item.nameHtml ? data.item.nameHtml : data.item.name" :limit="45" :contains-html="data.item.nameHtml" /></div>
+                    <div class="h5 d-inline-block"><show-more :text="data.item.nameHtml ? data.item.nameHtml : data.item.name" :limit="45" :contains-html="!!data.item.nameHtml" /></div>
                   </router-link>
                   <div v-if="data.item.sharedToCatalog" class="h6 ml-2 d-inline-block" :data-cy="`exportedBadge-${data.item.skillId}`">
                     <b-badge variant="secondary" class="text-uppercase">
@@ -330,7 +330,8 @@ limitations under the License.
     <export-to-catalog v-if="exportToCatalogInfo.show" v-model="exportToCatalogInfo.show"
                        :skills="exportToCatalogInfo.skills"
                        @exported="handleSkillsExportedToCatalog"
-                       @hidden="handleExportModalIsClosed"/>
+                       @hidden="handleExportModalIsClosed"
+                       :show-invite-only-warning="this.inviteOnlyProject"/>
     <reuse-or-move-skills-modal id="reuseSkillsModal" v-if="reuseSkillsInfo.show"
                                 v-model="reuseSkillsInfo.show"
                                 :skills="reuseSkillsInfo.skills"
@@ -359,6 +360,7 @@ limitations under the License.
   import RemovalValidation from '@/components/utils/modal/RemovalValidation';
   import EditImportedSkill from '@/components/skills/skillsGroup/EditImportedSkill';
   import ReuseOrMoveSkillsModal from '@/components/skills/reuseSkills/ReuseOrMoveSkillsModal';
+  import SettingsService from '@/components/settings/SettingsService';
   import SkillRemovalValidation from '@/components/skills/SkillRemovalValidation';
   import EditSkill from './EditSkill';
   import NoContent2 from '../utils/NoContent2';
@@ -446,6 +448,7 @@ limitations under the License.
         currentlyFocusedSkillId: '',
         copyDisabled: this.disableCopy,
         copyDisabledMsg: this.disableCopyMsg,
+        inviteOnlyProject: false,
         editSkillInfo: {
           isEdit: false,
           isCopy: false,
@@ -532,6 +535,7 @@ limitations under the License.
             ],
             pagination: {
               remove: !this.showPaging,
+              hideUnnecessary: true,
               currentPage: 1,
               totalRows: 1,
               pageSize: this.pageSize,
@@ -545,6 +549,10 @@ limitations under the License.
     },
     mounted() {
       this.loadDataFromParams(this.skillsProp);
+      SettingsService.getProjectSetting(this.$route.params.projectId, 'invite_only')
+        .then((setting) => {
+          this.inviteOnlyProject = Boolean(setting?.enabled);
+        });
     },
     computed: {
       deleteButtonsDisabled() {

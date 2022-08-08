@@ -195,7 +195,7 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                 LEFT JOIN (SELECT project_id, COUNT(id) AS subjectCount FROM skill_definition WHERE type = 'Subject' GROUP BY project_id) subjects ON subjects.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS groupCount FROM skill_definition WHERE type = 'SkillsGroup' and enabled = 'true' GROUP BY project_id) groups ON groups.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, value AS expiringUnused, updated as expirationTriggeredDate FROM settings WHERE type = 'Project' AND setting = 'expiration.expiring.unused' AND value = 'true') expiration ON expiration.project_id = pd.project_id
-                JOIN user_roles ur on ur.project_id = pd.project_id
+                JOIN user_roles ur on (ur.project_id = pd.project_id AND ur.role_name = 'ROLE_PROJECT_ADMIN')
                 WHERE ur.user_id = ?1
             """, nativeQuery = true)
     @Nullable
@@ -333,7 +333,15 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                 LEFT JOIN (SELECT project_id, COUNT(id) AS subjectCount, MAX(updated) AS subjectUpdated FROM skill_definition WHERE type = 'Subject' GROUP BY project_id) subjects ON subjects.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS groupCount FROM skill_definition WHERE type = 'SkillsGroup' and enabled = 'true' GROUP BY project_id) groups ON groups.project_id = pd.project_id
                 LEFT JOIN (SELECT ss.project_id as myProjectId FROM settings ss, users uu WHERE ss.setting = 'my_project' and uu.user_id=?1 and uu.id = ss.user_ref_id) theSettings ON theSettings.myProjectId = pd.project_id
-                WHERE pd.project_id = s.project_id and s.setting = 'production.mode.enabled' and s.value = 'true'
+                WHERE pd.project_id = s.project_id and 
+                      (
+                          (s.setting = 'production.mode.enabled' and s.value = 'true') or
+                          (s.setting = 'invite_only' and s.value = 'true' and exists 
+                              (
+                                select 1 from user_roles ur where ur.user_id = ?1 and ur.project_id = s.project_id and ur.role_name = 'ROLE_PRIVATE_PROJECT_USER'
+                              )
+                            )
+                    )
                 ORDER BY projectId
             """, nativeQuery = true)
     @Nullable
@@ -379,7 +387,7 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
             FROM Setting s, Setting ss, Users uu, ProjDef pd
             LEFT JOIN UserPoints up on pd.projectId = up.projectId and
                   up.userId=?1 and up.skillId is null
-            WHERE (s.setting = 'production.mode.enabled' and s.projectId = pd.projectId and s.value = 'true') and 
+            WHERE ((s.setting = 'production.mode.enabled' or s.setting = 'invite_only') and s.projectId = pd.projectId and s.value = 'true') and 
                 (ss.setting = 'my_project' and uu.userId=?1 and uu.id = ss.userRefId and ss.projectId = pd.projectId)
             GROUP BY up.points, pd.projectId, pd.name, pd.id, ss.value
     ''')

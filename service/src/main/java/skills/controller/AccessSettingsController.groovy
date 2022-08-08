@@ -18,6 +18,7 @@ package skills.controller
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.data.domain.PageRequest
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
@@ -26,7 +27,9 @@ import org.springframework.web.client.RestClientException
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.ContactUsersRequest
+import skills.controller.exceptions.SkillsValidator
 import skills.controller.result.model.RequestResult
+import skills.controller.result.model.TableResult
 import skills.controller.result.model.UserRoleRes
 import skills.services.AccessSettingsStorageService
 import skills.services.ContactUsersService
@@ -37,6 +40,9 @@ import skills.storage.model.ProjDef
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.User
 import skills.storage.repos.UserRepo
+
+import static org.springframework.data.domain.Sort.Direction.ASC
+import static org.springframework.data.domain.Sort.Direction.DESC
 
 @RestController
 @RequestMapping("/admin")
@@ -75,6 +81,19 @@ class AccessSettingsController {
     @ResponseBody
     List<UserRoleRes> getProjectUserRoles(@PathVariable("projectId") String projectId) {
         return accessSettingsStorageService.getUserRolesForProjectId(projectId)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/userRoles/{roleName}", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    TableResult getProjectUserRolesWithPaging(@PathVariable("projectId") String projectId, @PathVariable("roleName") String roleName,
+                                              @RequestParam int limit,
+                                              @RequestParam int page,
+                                              @RequestParam String orderBy,
+                                              @RequestParam Boolean ascending,
+                                            @RequestParam(required = false, defaultValue = "") String query) {
+        SkillsValidator.isNotBlank(roleName, "Role Name")
+        PageRequest pageRequest = createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending)
+        return accessSettingsStorageService.getUserRolesForProjectId(projectId, roleName, query, pageRequest)
     }
 
     @RequestMapping(value = "/projects/{projectId}/users/{userId}/roles", method = RequestMethod.GET)
@@ -148,6 +167,15 @@ class AccessSettingsController {
         } else {
             return userKey?.toLowerCase()
         }
+    }
+
+    private PageRequest createPagingRequestWithValidation(String projectId, int limit, int page, String orderBy, Boolean ascending) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isTrue(limit <= 200, "Cannot ask for more than 200 items, provided=[${limit}]", projectId)
+        SkillsValidator.isTrue(page >= 0, "Cannot provide negative page. provided =[${page}]", projectId)
+        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
+
+        return pageRequest
     }
 
 }

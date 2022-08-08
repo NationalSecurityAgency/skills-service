@@ -28,7 +28,4 @@ class EmailConnectionInfo {
     String password
     boolean authEnabled = false
     boolean tlsEnabled = false
-    String publicUrl
-    //from address used in all outgoing emails from the system
-    String fromEmail
 }

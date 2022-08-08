@@ -45,25 +45,27 @@ limitations under the License.
         <!-- bootstrap didn't handle vertical menus well so rolling out our own-->
         <b-collapse id="menu-collapse-control" :visible="!smallScreenMode">
           <ul class="p-0" style="list-style: none;">
-            <li class="mb-1 p-2 text-primary"
-                v-for="(navItem) of navItems"
-                :key="navItem.name"
-                :data-cy="`nav-${navItem.name}`"
-                v-b-tooltip="{ title: navItem.msg ? navItem.msg : navItem.name, placement: 'right', variant: 'primary', disabled: !collapsed && !navItem.isDisabled }"
-                :class="{'bg-primary': menuSelections.get(navItem.name)}">
-                <router-link :to="{ name: navItem.page }"
-                             @click.native="()=>{navigate(navItem.name)}"
-                             @keypress.enter="()=>{navigate(navItem.name)}"
-                             tag="a"
-                             :class="{'text-light': menuSelections.get(navItem.name), 'select-cursor': !menuSelections.get(navItem.name), 'disabled': navItem.isDisabled}"
-                             aria-current-value="page">
+            <router-link v-for="(navItem) of navItems"
+                         :key="navItem.name"
+                         :to="{ name: navItem.page }"
+                          v-slot="{ href, navigate, isActive, isExactActive }"
+                          custom>
+              <li class="mb-1 p-2 text-primary"
+                  :data-cy="`nav-${navItem.name}`"
+                  v-b-tooltip="{ title: navItem.msg ? navItem.msg : navItem.name, placement: 'right', variant: 'primary', disabled: !collapsed && !navItem.isDisabled }"
+                  :class="[isExactActive && 'bg-primary']">
+                  <a :href="href"
+                     @click="(e) => { conditionalCollapse(); navigate(e); }"
+                     :class="[isExactActive && 'text-light', !isExactActive && 'select-cursor', navItem.isDisabled && 'disabled', isActive && 'router-link-active', isExactActive && 'router-link-exact-active']"
+                     :aria-current="isExactActive ? 'page' : false">
                     <div class="text-truncate ml-3" :class="{'mr-4': !collapsed}" :aria-label="`Navigate to ${navItem.name} page`">
-                        <i :class="navItem.iconClass" class="fas"
-                           style="min-width: 1.7rem;" aria-hidden="true"/> <span v-if="!collapsed || smallScreenMode">{{ navItem.name }}</span>
-                        <i v-if="navItem.isDisabled" class="fas fa-exclamation-circle text-warning ml-1" />
+                      <i :class="navItem.iconClass" class="fas"
+                         style="min-width: 1.7rem;" aria-hidden="true"/> <span v-if="!collapsed || smallScreenMode">{{ navItem.name }}</span>
+                      <i v-if="navItem.isDisabled" class="fas fa-exclamation-circle text-warning ml-1" />
                     </div>
-                </router-link>
-            </li>
+                  </a>
+              </li>
+            </router-link>
           </ul>
         </b-collapse>
       </div>
@@ -88,7 +90,6 @@ limitations under the License.
       };
     },
     created() {
-      this.buildNewMenuMapWhenPropsChange(this.navItems);
       window.addEventListener('resize', this.handleResize);
       this.handleResize();
     },
@@ -99,14 +100,9 @@ limitations under the License.
       window.removeEventListener('resize', this.handleResize);
     },
     watch: {
-      // must watch the input because the user is allowed to modify the menu any time
-      navItems(newValue) {
-        this.buildNewMenuMapWhenPropsChange(newValue);
-      },
       $route: {
         immediate: true,
         handler: function routeChange() {
-          this.buildNewMenuMapWhenPropsChange(this.navItems);
           this.$nextTick(() => {
             this.$refs.content.focus({ preventScroll: true });
           });
@@ -123,42 +119,14 @@ limitations under the License.
         this.collapsed = !this.collapsed;
         localStorage.skillsNavCollapsed = this.collapsed;
       },
-      navigate(selectedKey) {
+      handleResize() {
+        this.windowWidth = window.innerWidth;
+      },
+      conditionalCollapse() {
         if (this.smallScreenMode) {
           // eslint-disable-next-line no-use-before-define
           this.$root.$emit('bv::toggle::collapse', 'menu-collapse-control');
         }
-        const menuSelectionsTemp = this.buildNewMenuMap(selectedKey);
-        this.menuSelections = menuSelectionsTemp;
-      },
-      buildNewMenuMapWhenPropsChange(navigationItems) {
-        const routeName = this.$route.name;
-        if (navigationItems && navigationItems.length > 0) {
-          let navItem = navigationItems.find((item) => item.page === routeName);
-          if (!navItem) {
-            // Backup strategy:
-            // try parent by comparing path to the router item's name
-            const splitPath = this.$route.path.split('/');
-            if (splitPath.length > 2) {
-              const parentRouteName = splitPath[splitPath.length - 2];
-              navItem = navigationItems.find((item) => item.name.toLowerCase() === parentRouteName.toLowerCase());
-            }
-          }
-
-          this.menuSelections = this.buildNewMenuMap(navItem ? navItem.name : navigationItems[0].name);
-        }
-      },
-      buildNewMenuMap(selectedKey) {
-        const menuSelectionsTemp = new Map();
-        this.navItems.forEach((navItem) => {
-          menuSelectionsTemp.set(navItem.name, false);
-        });
-        menuSelectionsTemp.set(selectedKey, true);
-
-        return menuSelectionsTemp;
-      },
-      handleResize() {
-        this.windowWidth = window.innerWidth;
       },
     },
     computed: {

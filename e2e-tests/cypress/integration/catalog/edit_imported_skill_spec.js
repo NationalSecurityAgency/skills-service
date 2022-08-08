@@ -48,7 +48,9 @@ describe('Edit Imported Skill Tests', () => {
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'skill2' }, { colIndex: 3,  value: '200' }],
             [{ colIndex: 0,  value: 'skill1' }, { colIndex: 3,  value: '2,002' }],
-        ], 5);
+        ], 5, false, null, false);
+        cy.get(`${tableSelector} tbody tr`).should('have.length', 2);
+
         cy.get('[data-cy="editSkillButton_skill1"]').click();
         cy.contains('You can change the Point Increment')
         cy.get('[data-cy="skillPointIncrement"]').should('have.value', '1001')
@@ -60,7 +62,9 @@ describe('Edit Imported Skill Tests', () => {
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'skill2' }, { colIndex: 3,  value: '200' }],
             [{ colIndex: 0,  value: 'skill1' }, { colIndex: 3,  value: '2,002' }],
-        ], 5);
+        ], 5, false, null, false);
+        cy.get(`${tableSelector} tbody tr`).should('have.length', 2);
+
         cy.get('[data-cy="editSkillButton_skill1"]').click();
         cy.contains('You can change the Point Increment')
         cy.get('[data-cy="skillPointIncrement"]').should('have.value', '1001')
@@ -120,7 +124,8 @@ describe('Edit Imported Skill Tests', () => {
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'skill2' }, { colIndex: 3,  value: '200' }],
             [{ colIndex: 0,  value: 'skill1' }, { colIndex: 3,  value: '200' }],
-        ], 5);
+        ], 5, false, null, false);
+        cy.get(`${tableSelector} tbody tr`).should('have.length', 2);
 
         cy.get('[data-cy="editSkillButton_skill1"]').click();
         cy.get('[data-cy="skillPointIncrement"]').type('1')
@@ -128,7 +133,8 @@ describe('Edit Imported Skill Tests', () => {
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'skill2' }, { colIndex: 3,  value: '200' }],
             [{ colIndex: 0,  value: 'skill1' }, { colIndex: 3,  value: '200' }],
-        ], 5);
+        ], 5, false, null, false);
+        cy.get(`${tableSelector} tbody tr`).should('have.length', 2);
     });
 
     it('edit after finalizing', () => {
@@ -157,7 +163,8 @@ describe('Edit Imported Skill Tests', () => {
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'skill2' }, { colIndex: 3,  value: '200' }],
             [{ colIndex: 0,  value: 'skill1' }, { colIndex: 3,  value: '2,002' }],
-        ], 5);
+        ], 5, false, null, false);
+        cy.get(`${tableSelector} tbody tr`).should('have.length', 2);
         cy.get('[data-cy="editSkillButton_skill1"]').click();
         cy.contains('You can change the Point Increment')
         cy.get('[data-cy="skillPointIncrement"]').should('have.value', '1001')

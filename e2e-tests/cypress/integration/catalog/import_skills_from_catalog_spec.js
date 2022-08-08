@@ -80,28 +80,29 @@ describe('Import skills from Catalog Tests', () => {
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'Very Great Skill 1' }, { colIndex: 1,  value: 'This is project 2' }],
             [{ colIndex: 0,  value: 'Very Great Skill 2' }, { colIndex: 1,  value: 'This is project 2' }],
-        ], 5);
+        ], 5, false, null, false);
+        cy.get(`${tableSelector} tbody tr`).should('have.length', 2);
 
         cy.get('[data-cy="importBtn"]').should('be.disabled');
         cy.get('[data-cy="skillSelect_proj2-skill1"]').check({force: true})
         cy.get('[data-cy="importBtn"]').should('be.enabled');
 
         cy.get('[data-cy="importBtn"]').click();
-        cy.get('[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '1');
         cy.get('[data-cy="importedBadge-skill1"]')
         cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Catalog').click();
         cy.validateTable('[data-cy="skillsTable"]', [
             [{ colIndex: 3,  value: 'Imported from This is project 2' }],
-        ])
+        ], 5, false, null, false)
+        cy.get('[data-cy="skillsTable"] tbody tr').should('have.length', 1);
 
         // refresh and re-validate
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '1');
         cy.get('[data-cy="importedBadge-skill1"]')
         cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Catalog').click();
         cy.validateTable('[data-cy="skillsTable"]', [
             [{ colIndex: 3,  value: 'Imported from This is project 2' }],
-        ])
+        ], 5, false, null, false);
+        cy.get('[data-cy="skillsTable"] tbody tr').should('have.length', 1);
     });
 
 
@@ -122,7 +123,7 @@ describe('Import skills from Catalog Tests', () => {
         cy.get('[data-cy="numSelectedSkills"]').should('have.text', '1');
         cy.get('[data-cy="importBtn"]').click();
 
-        cy.get('[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '2');
+        cy.get('[data-cy="skillsTable"] tbody tr').should('have.length', '2');
         cy.get('[data-cy="importedBadge-skill1"]')
         cy.get('[data-cy="importedBadge-skill2"]')
 
@@ -148,7 +149,7 @@ describe('Import skills from Catalog Tests', () => {
         cy.get('[data-cy="closeButton"]').click();
         cy.get('.modal-content').should('not.exist')
 
-        cy.get('[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '1');
+        cy.get('[data-cy="skillsTable"] tbody tr').should('have.length', '1');
         cy.get('[data-cy="importedBadge-skill1"]')
         cy.get('[data-cy="importedBadge-skill2"]').should('not.exist')
     })
@@ -177,7 +178,7 @@ describe('Import skills from Catalog Tests', () => {
         cy.importSkillFromCatalog(3, 1, 2, 4)
 
         cy.visit('/administrator/projects/proj3/subjects/subj1');
-        cy.get('[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '4');
+        cy.get('[data-cy="skillsTable"] tbody tr').should('have.length', '4');
 
         cy.get('[data-cy="expandDetailsBtn_skill3"]').click();
         cy.get('[data-cy="childRowDisplay_skill3"]').contains('This skill was imported')
@@ -242,7 +243,7 @@ describe('Import skills from Catalog Tests', () => {
 
         cy.get('[data-cy="importBtn"]').click();
 
-        cy.get('[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '5');
+        cy.get('[data-cy="skillsTable"] tbody tr').should('have.length', '5');
         cy.get('[data-cy="importedBadge-skill1"]')
         cy.get('[data-cy="importedBadge-skill2"]')
         cy.get('[data-cy="importedBadge-skill3"]')
@@ -274,14 +275,13 @@ describe('Import skills from Catalog Tests', () => {
         cy.get('[data-cy="importFromCatalogBtn"]').click();
 
         cy.get('[data-cy="skillNameFilter"]').type('find{enter}')
-        cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '3')
+        cy.get(`${tableSelector} tbody tr`).should('have.length', '3')
 
         cy.get('[data-cy="skillSelect_proj1-skill4"]').check({force: true})
         cy.get('[data-cy="importBtn"]').click();
 
-        cy.get(`[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]`).should('have.text', '1')
+        cy.get(`[data-cy="skillsTable"] tbody tr`).should('have.length', '1')
         cy.get('[data-cy="importedBadge-skill4"]')
-
     });
 
     it('remove imported skill should re-appear in the import table', () => {
@@ -300,7 +300,7 @@ describe('Import skills from Catalog Tests', () => {
         cy.importSkillFromCatalog(2, 1, 1, 3)
 
         cy.visit('/administrator/projects/proj2/subjects/subj1');
-        cy.get(`[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]`).should('have.text', '3')
+        cy.get(`[data-cy="skillsTable"] tbody tr`).should('have.length', '3')
         cy.get('[data-cy="importedBadge-skill1"]')
         cy.get('[data-cy="importedBadge-skill2"]')
         cy.get('[data-cy="importedBadge-skill3"]')
@@ -312,7 +312,7 @@ describe('Import skills from Catalog Tests', () => {
 
         cy.get('[data-cy="deleteSkillButton_skill2"]').click()
         cy.acceptRemovalSafetyCheck()
-        cy.get(`[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]`).should('have.text', '2')
+        cy.get(`[data-cy="skillsTable"] tbody tr`).should('have.length', '2')
         cy.get('[data-cy="importedBadge-skill1"]')
         cy.get('[data-cy="importedBadge-skill2"]').should('not.exist')
         cy.get('[data-cy="importedBadge-skill3"]')
@@ -320,14 +320,15 @@ describe('Import skills from Catalog Tests', () => {
         cy.get('[data-cy="importFromCatalogBtn"]').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'Very Great Skill 2' }, { colIndex: 1,  value: 'This is project 1' }],
-        ], 5);
+        ], 5, false, null, false);
+        cy.get(`${tableSelector} tbody tr`).should('have.length', 1);
         cy.get('[data-cy="alreadyExistWarning_proj1-skill1"]').should('not.exist');
 
         cy.get('[data-cy="closeButton"]').click();
 
         cy.get('[data-cy="deleteSkillButton_skill3"]').click()
         cy.acceptRemovalSafetyCheck()
-        cy.get(`[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]`).should('have.text', '1')
+        cy.get(`[data-cy="skillsTable"] tbody tr`).should('have.length', '1')
         cy.get('[data-cy="importedBadge-skill1"]')
         cy.get('[data-cy="importedBadge-skill2"]').should('not.exist')
         cy.get('[data-cy="importedBadge-skill3"]').should('not.exist')
@@ -344,7 +345,8 @@ describe('Import skills from Catalog Tests', () => {
             [{ colIndex: 0,  value: 'Very Great Skill 1' }, { colIndex: 1,  value: 'This is project 1' }],
             [{ colIndex: 0,  value: 'Very Great Skill 2' }, { colIndex: 1,  value: 'This is project 1' }],
             [{ colIndex: 0,  value: 'Very Great Skill 3' }, { colIndex: 1,  value: 'This is project 1' }],
-        ], 5);
+        ], 5, false, null, false);
+        cy.get(`${tableSelector} tbody tr`).should('have.length', 3);
         cy.get('[data-cy="alreadyExistWarning_proj1-skill1"]').should('not.exist');
         cy.get('[data-cy="alreadyExistWarning_proj1-skill2"]').should('not.exist');
         cy.get('[data-cy="alreadyExistWarning_proj1-skill3"]').should('not.exist');
@@ -356,7 +358,8 @@ describe('Import skills from Catalog Tests', () => {
             [{ colIndex: 0,  value: 'Very Great Skill 1' }, { colIndex: 1,  value: 'This is project 1' }],
             [{ colIndex: 0,  value: 'Very Great Skill 2' }, { colIndex: 1,  value: 'This is project 1' }],
             [{ colIndex: 0,  value: 'Very Great Skill 3' }, { colIndex: 1,  value: 'This is project 1' }],
-        ], 5);
+        ], 5, false, null, false);
+        cy.get(`${tableSelector} tbody tr`).should('have.length', 3);
         cy.get('[data-cy="alreadyExistWarning_proj1-skill1"]').should('not.exist');
         cy.get('[data-cy="alreadyExistWarning_proj1-skill2"]').should('not.exist');
         cy.get('[data-cy="alreadyExistWarning_proj1-skill3"]').should('not.exist');
@@ -384,7 +387,7 @@ describe('Import skills from Catalog Tests', () => {
         cy.visit('/administrator/projects/proj2/subjects/subj1');
         cy.get('[data-cy="importFromCatalogBtn"]').click();
 
-        cy.get('[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '4');
+        cy.get('[data-cy="skillsTable"] tbody tr').should('have.length', '4');
 
         cy.get('[data-cy="alreadyExistWarning_proj1-skill2"]')
             .contains('Cannot import!Skill ID and name already exist in this project!');
@@ -498,7 +501,8 @@ describe('Import skills from Catalog Tests', () => {
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'Very Great Skill 1' }, { colIndex: 1,  value: 'This is project 2' }],
             [{ colIndex: 0,  value: 'Very Great Skill 2' }, { colIndex: 1,  value: 'This is project 2' }],
-        ], 5);
+        ], 5, false, null, false);
+        cy.get(`${tableSelector} tbody tr`).should('have.length', 2);
 
         cy.get('[data-cy="importBtn"]').should('be.disabled');
         cy.get('[data-cy="skillSelect_proj2-skill1"]').check({force: true})
@@ -506,14 +510,14 @@ describe('Import skills from Catalog Tests', () => {
         cy.get('[data-cy="importBtn"]').should('be.enabled');
 
         cy.get('[data-cy="importBtn"]').click();
-        cy.get('[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '2');
+        cy.get('[data-cy="skillsTable"] tbody tr').should('have.length', '2');
         cy.get('[data-cy="disabledBadge-skill2"]')
         cy.get('[data-cy="disabledBadge-skill1"]')
         cy.get('[data-cy="importFinalizeAlert"]').contains('There are 2 imported skills in this project that are not yet finalized.')
 
         // refresh at subject level and validate
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '2');
+        cy.get('[data-cy="skillsTable"] tbody tr').should('have.length', '2');
         cy.get('[data-cy="disabledBadge-skill2"]')
         cy.get('[data-cy="disabledBadge-skill1"]')
         cy.get('[data-cy="importFinalizeAlert"]').contains('There are 2 imported skills in this project that are not yet finalized.')
@@ -528,7 +532,7 @@ describe('Import skills from Catalog Tests', () => {
 
         // navigate down from the project and validate
         cy.get('[data-cy="manageBtn_subj1"]').click()
-        cy.get('[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '2');
+        cy.get('[data-cy="skillsTable"] tbody tr').should('have.length', '2');
         cy.get('[data-cy="disabledBadge-skill2"]')
         cy.get('[data-cy="disabledBadge-skill1"]')
         cy.get('[data-cy="importFinalizeAlert"]').contains('There are 2 imported skills in this project that are not yet finalized.')
@@ -538,7 +542,7 @@ describe('Import skills from Catalog Tests', () => {
         cy.get('[data-cy="projCard_proj1_manageBtn"]').click()
         cy.get('[data-cy="importFinalizeAlert"]').contains('There are 2 imported skills in this project that are not yet finalized.')
         cy.get('[data-cy="manageBtn_subj1"]').click()
-        cy.get('[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '2');
+        cy.get('[data-cy="skillsTable"] tbody tr').should('have.length', '2');
         cy.get('[data-cy="disabledBadge-skill2"]')
         cy.get('[data-cy="disabledBadge-skill1"]')
         cy.get('[data-cy="importFinalizeAlert"]').contains('There are 2 imported skills in this project that are not yet finalized.')
@@ -742,7 +746,7 @@ describe('Import skills from Catalog Tests', () => {
       cy.get('[data-cy="skillSelect_proj1-skill5"]').should('be.checked')
       cy.get('[data-cy="importBtn"]').click();
 
-      cy.get('[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '10');
+      cy.get('[data-cy="skillsTable"] tbody tr').should('have.length', '10');
       cy.get('[data-cy="importedBadge-skill1"]')
       cy.get('[data-cy="importedBadge-skill2"]')
       cy.get('[data-cy="importedBadge-skill3"]')
@@ -756,7 +760,7 @@ describe('Import skills from Catalog Tests', () => {
 
       // only 3 left after import
       cy.get('[data-cy="importFromCatalogBtn"]').click();
-      cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '1');
+      cy.get(`${tableSelector} tbody tr`).should('have.length', '1');
     });
 
   it('respect maxSkillsInBulkImport configuration', () => {
@@ -1017,7 +1021,7 @@ describe('Import skills from Catalog Tests', () => {
     cy.get('[data-cy=maximum-selected]').should('exist').contains('No more than 10 Skills per Subject are allowed, this project already has 6');
     // for some reason two elements with the same aria-label are created in this test, we have to get the 2nd element
     // or the click event doesn't do anything
-    cy.get('[aria-label="Go to page 1"]').eq(1).click({force:true});
+    cy.get('[aria-label="Go to page 1"]').click({force:true});
     cy.wait('@getCatalogSkills');
     cy.get('[data-cy="skillSelect_proj1-skill66"]').click({force:true});
     cy.get('[data-cy="importBtn"]').should('be.enabled');
@@ -1049,7 +1053,7 @@ describe('Import skills from Catalog Tests', () => {
     cy.get('[data-cy="importBtn"]').should('be.disabled');
     cy.get('[data-cy=maximum-selected]').should('exist').contains('No more than 10 Skills per Subject are allowed, this project already has 8');
 
-    cy.get('[aria-label="Go to page 1"]').eq(1).click();
+    cy.get('[aria-label="Go to page 1"]').click();
     cy.wait('@getCatalogSkills');
     cy.get('[data-cy="importBtn"]').should('be.disabled');
     cy.get('[data-cy=maximum-selected]').should('exist').contains('No more than 10 Skills per Subject are allowed, this project already has 8');
@@ -1077,7 +1081,7 @@ describe('Import skills from Catalog Tests', () => {
     cy.wait('@getCatalogSkills');
     cy.get('[data-cy="importBtn"]').should('be.disabled');
     cy.get('[data-cy=maximum-selected]').should('exist').contains('No more than 10 Skills per Subject are allowed, this project already has 9');
-    cy.get('[aria-label="Go to page 1"]').eq(1).click();
+    cy.get('[aria-label="Go to page 1"]').click();
     cy.wait('@getCatalogSkills');
     cy.get('[data-cy="importBtn"]').should('be.disabled');
     cy.get('[data-cy=maximum-selected]').should('exist').contains('No more than 10 Skills per Subject are allowed, this project already has 9');

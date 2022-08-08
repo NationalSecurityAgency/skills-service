@@ -133,6 +133,11 @@ limitations under the License.
         }
         let key = null;
 
+        if (typeof this.$route.meta.breadcrumb === 'function') {
+          this.items = this.$route.meta.breadcrumb(this.$route);
+          return;
+        }
+
         const lastItemInPathCustomName = this.$route.meta.breadcrumb;
 
         res.forEach((item, index) => {

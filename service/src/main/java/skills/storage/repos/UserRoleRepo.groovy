@@ -15,6 +15,7 @@
  */
 package skills.storage.repos
 
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
@@ -38,6 +39,23 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
             ur.userId = ua.userId and 
             ur.projectId = ?1''')
     List<UserRoleWithAttrs> findRoleWithAttrsByProjectId(String projectId)
+
+    @Query('''SELECT ur as role, ua as attrs
+        from UserRole ur, UserAttrs ua 
+        where
+            ur.userId = ua.userId and 
+            ur.projectId = ?1 and
+            ur.roleName = ?2 and
+            ur.userId like lower(CONCAT('%', ?3, '%'))''')
+    List<UserRoleWithAttrs> findRoleWithAttrsByProjectIdAndRoleNameAndUserIdLike(String projectId, RoleName roleName, String userIdQuery, PageRequest pageRequest)
+
+    @Query('''SELECT count(ur.id) from UserRole ur, UserAttrs ua 
+            where
+                ur.userId = ua.userId and
+                ur.projectId = ?1 and
+                ur.roleName = ?2 and
+                ur.userId like lower(CONCAT('%', ?3, '%'))''')
+    Integer countRoleWithAttrsByProjectIdAndRoleNameAndUserIdLike(String projectId, RoleName roleName, String userIdQuery)
 
     @Query('''SELECT ur as role, ua as attrs
         from UserRole ur, UserAttrs ua 
@@ -73,6 +91,20 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
             ur.userId = ua.userId and 
             ur.roleName = ?1''')
     List<UserRoleWithAttrs> findAllByRoleName(RoleName roleName)
+
+    @Query('''SELECT ur as role, ua as attrs
+        from UserRole ur, UserAttrs ua 
+        where
+            ur.userId = ua.userId and 
+            ur.roleName = ?1''')
+    List<UserRoleWithAttrs> findAllByRoleNameWithPaging(RoleName roleName, PageRequest pageRequest)
+
+    @Query('''SELECT count(ur.id)
+        from UserRole ur, UserAttrs ua 
+        where
+            ur.userId = ua.userId and 
+            ur.roleName = ?1''')
+    Integer countAllByRoleName(RoleName roleName)
 
     @Query('''SELECT ur as role, ua as attrs
         from UserRole ur, UserAttrs ua 

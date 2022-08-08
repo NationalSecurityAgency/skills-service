@@ -55,7 +55,8 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.validateTable(tableSelector, [
             [{ colIndex: 3,  value: 'N/A' }],
             [{ colIndex: 3,  value: 'Exported' }],
-        ], 5);
+        ], 5, false, null, false);
+        cy.get(`${tableSelector} tbody tr`).should('have.length', 2);
 
         // refresh and re-validate
         cy.visit('/administrator/projects/proj1/subjects/subj1');
@@ -67,7 +68,8 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.validateTable(tableSelector, [
             [{ colIndex: 3,  value: 'N/A' }],
             [{ colIndex: 3,  value: 'Exported' }],
-        ], 5);
+        ], 5, false, null, false);
+        cy.get(`${tableSelector} tbody tr`).should('have.length', 2);
     });
 
     it('export multiple skill', () => {

@@ -19,6 +19,7 @@ import groovy.transform.ToString
 import org.hibernate.annotations.Where
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import skills.storage.converters.BooleanConverter
 
 import javax.persistence.*
 
@@ -61,4 +62,5 @@ class ProjDef implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
     Date updated
+
 }

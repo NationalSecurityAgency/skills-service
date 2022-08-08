@@ -78,9 +78,29 @@ beforeEach(function () {
     } else {
         cy.log('Disabled [cy.resetDb()] in beforeEach')
     }
-
+    cy.resetEmail();
     cy.fixture('vars.json').then((vars) => {
         cy.logout()
+        cy.login(vars.rootUser, vars.defaultPass);
+        cy.log('configuring email');
+        cy.request({
+            method: 'POST',
+            url: '/root/saveSystemSettings',
+            body: {
+                publicUrl: 'http://localhost:8082/',
+                fromEmail: 'noreploy@skilltreeemail.org',
+            }
+        });
+        cy.request({
+            method: 'POST',
+            url: '/root/saveEmailSettings',
+            body: {
+                host: 'localhost',
+                port: 1026,
+                'protocol': 'smtp'
+            },
+        });
+        cy.logout();
 
         if (!Cypress.env('verifyEmail')) {
             if (!Cypress.env('oauthMode')) {
