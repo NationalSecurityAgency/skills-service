@@ -182,6 +182,13 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
              order by c.displayOrder desc''')
     List<SkillDef> findPreviousSkillDefs(String projectId, String skillId, int beforeDisplayOrder, List<RelationshipType> relationshipType, Pageable pageable)
 
+    @Query(value='''SELECT c 
+        from SkillDef s, SkillRelDef r, SkillDef c 
+        where  
+             s.projectId=?1 and s.skillId=?2 and c.displayOrder=?3 
+             order by c.displayOrder asc''')
+    List<SkillDef> getSkillDefByDisplayOrder(String projectId, String skillId, int afterDisplayOrder, Pageable pageable)
+
     int countByProjectIdAndType(@Nullable String projectId, SkillDef.ContainerType type)
 
     @Query('''select count(s) from SkillDef s 

@@ -28,4 +28,7 @@ class SkillDefRes extends SkillDefPartialRes {
     SkillDef.SelfReportingType selfReportingType
 
     Boolean thisSkillWasReusedElsewhere
+
+    String nextSkillId
+    String prevSkillId
 }

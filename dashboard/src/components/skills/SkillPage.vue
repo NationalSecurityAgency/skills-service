@@ -20,6 +20,8 @@ limitations under the License.
         <div class="h5 text-muted" data-cy="skillId">
           <show-more :limit="54" :text="getSkillId(skill)"></show-more>
         </div>
+                              <div style="float:right">Next {{skill.skillId}}</div>
+                              <div style="float:right">Prev</div>
         <div class="h5 text-muted" v-if="skill && skill.groupId">
           <span style="font-size: 1rem">Group ID:</span> <span v-b-tooltip.hover="`Name: ${ skill.groupName }`">{{ skill.groupId }}</span>
         </div>
@@ -46,11 +48,11 @@ limitations under the License.
         <b-badge v-if="!skill.enabled" class="ml-2" data-cy="disabledSkillBadge"> DISABLED</b-badge>
       </div>
     </page-header>
-
     <navigation :nav-items="navItems">
     </navigation>
     <edit-skill v-if="showEdit" v-model="showEdit" :skillId="skill.skillId" :is-copy="false" :is-edit="true"
                 :project-id="this.$route.params.projectId" :subject-id="this.$route.params.subjectId" @skill-saved="skillEdited" @hidden="handleHide"/>
+
   </div>
 </template>
 
