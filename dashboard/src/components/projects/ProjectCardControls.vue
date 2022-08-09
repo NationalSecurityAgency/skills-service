@@ -38,6 +38,15 @@ limitations under the License.
                   role="button"
                   data-cy="editProjBtn"><i class="fas fa-edit" aria-hidden="true"/></b-button>
 
+        <b-button ref="copyBtn"
+                  size="sm"
+                  variant="outline-primary"
+                  @click="$emit('copy-project')"
+                  title="Copy Project"
+                  :aria-label="`Copy Project ${this.project.name}`"
+                  role="button"
+                  data-cy="copyProjBtn"><i class="fas fa-copy" aria-hidden="true"/></b-button>
+
         <span v-b-tooltip.hover="deleteDisabledText" :aria-label="deleteDisabledText">
           <b-button variant="outline-primary"
                     ref="deleteBtn"
@@ -72,6 +81,9 @@ limitations under the License.
     methods: {
       focusOnEdit() {
         this.$refs.editBtn.focus();
+      },
+      focusOnCopy() {
+        this.$refs.copyBtn.focus();
       },
       focusOnDelete() {
         this.$nextTick(() => this.$refs.deleteBtn.focus());

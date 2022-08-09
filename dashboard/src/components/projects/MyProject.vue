@@ -38,6 +38,7 @@ limitations under the License.
               ref="cardControls"
               :project="projectInternal"
               @edit-project="editProject"
+              @copy-project="copyProject"
               @delete-project="deleteProject"
               @unpin-project="unpin"
               :is-delete-disabled="deleteProjectDisabled"
@@ -104,15 +105,26 @@ limitations under the License.
            data-cy="sortControlHandle"><i class="fas fa-arrows-alt"></i></div>
     </div>
 
-    <edit-project v-if="showEditProjectModal" v-model="showEditProjectModal" :project="projectInternal" :is-edit="true"
-      @project-saved="projectSaved" @hidden="handleHidden"/>
+    <edit-project id="editProjectModal" v-if="showEditProjectModal" v-model="showEditProjectModal"
+                  :project="projectInternal" :is-edit="true"
+                  @project-saved="projectSaved" @hidden="handleHidden"/>
+    <edit-project id="copyProjectModal" v-if="copyProjectInfo.showModal"
+                  v-model="copyProjectInfo.showModal"
+                  :project="copyProjectInfo.newProject"
+                  :is-edit="false"
+                  :is-copy="true"
+                  @project-saved="projectCopied"
+                  @hidden="handleCopyModalIsHidden"/>
 
-    <removal-validation v-if="deleteProjectInfo.showDialog" v-model="deleteProjectInfo.showDialog" @do-remove="doDeleteProject" @hidden="handleDeleteCancelled">
+    <removal-validation v-if="deleteProjectInfo.showDialog" v-model="deleteProjectInfo.showDialog"
+                        @do-remove="doDeleteProject" @hidden="handleDeleteCancelled">
       <p>
-        This will remove <span class="text-primary font-weight-bold">{{ deleteProjectInfo.project.name}}</span>.
+        This will remove <span
+        class="text-primary font-weight-bold">{{ deleteProjectInfo.project.name }}</span>.
       </p>
       <div>
-        Deletion can not be undone and permanently removes all skill subject definitions, skill definitions and users' performed skills for this Project.
+        Deletion can not be undone and permanently removes all skill subject definitions, skill
+        definitions and users' performed skills for this Project.
       </div>
     </removal-validation>
   </div>
@@ -152,6 +164,10 @@ limitations under the License.
           showDialog: false,
           project: {},
         },
+        copyProjectInfo: {
+          showModal: false,
+          newProject: {},
+        },
       };
     },
     mounted() {
@@ -176,11 +192,20 @@ limitations under the License.
     },
     methods: {
       fromExpirationDate() {
-        return dayjs().startOf('day').to(dayjs(this.expirationDate));
+        return dayjs()
+          .startOf('day')
+          .to(dayjs(this.expirationDate));
       },
       handleHidden() {
         this.$nextTick(() => {
           this.$refs.cardControls.focusOnEdit();
+        });
+      },
+      handleCopyModalIsHidden() {
+        this.$nextTick(() => {
+          if (this.$refs && this.$refs.cardControls) {
+            this.$refs.cardControls.focusOnCopy();
+          }
         });
       },
       createCardOptions() {
@@ -244,6 +269,15 @@ limitations under the License.
       },
       editProject() {
         this.showEditProjectModal = true;
+      },
+      copyProject() {
+        this.copyProjectInfo.showModal = true;
+      },
+      projectCopied(project) {
+        this.$emit('copy-project', {
+          originalProjectId: this.projectInternal.projectId,
+          newProject: project
+        });
       },
       projectSaved(project) {
         this.isLoading = true;

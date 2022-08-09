@@ -15,41 +15,53 @@ limitations under the License.
 */
 <template>
   <div>
-    <sub-page-header title="Projects" action="Project"
-                     :disabled="addProjectDisabled" :disabled-msg="addProjectsDisabledMsg">
-          <b-button v-if="isRootUser" variant="outline-primary" ref="pinProjectsButton"
-                    @click="showSearchProjectModal=true"
-                    aria-label="Pin projects to your Project page"
-                    role="button"
-                    size="sm"
-                    class="mr-2">
-            <span class="d-none d-sm-inline">Pin</span> <i class="fas fa-thumbtack" aria-hidden="true"/>
-          </b-button>
-          <b-button id="newProjectBtn" ref="newProjButton" @click="editNewProject()" variant="outline-primary" size="sm"
-                    data-cy="newProjectButton" aria-label="Create new Project" role="button">
+    <sub-page-header title="Projects" action="Project">
+      <b-button v-if="isRootUser" variant="outline-primary" ref="pinProjectsButton"
+                @click="showSearchProjectModal=true"
+                aria-label="Pin projects to your Project page"
+                role="button"
+                size="sm"
+                class="mr-2">
+        <span class="d-none d-sm-inline">Pin</span> <i class="fas fa-thumbtack" aria-hidden="true"/>
+      </b-button>
+      <b-button id="newProjectBtn" ref="newProjButton" @click="editNewProject()"
+                variant="outline-primary" size="sm"
+                :disabled="addProjectDisabled"
+                data-cy="newProjectButton" aria-label="Create new Project" role="button">
             <span class="d-none d-sm-inline">Project</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
           </b-button>
     </sub-page-header>
 
     <loading-container v-bind:is-loading="isLoading">
+      <div v-if="addProjectDisabled" class="alert alert-warning" data-cy="addProjectDisabled">
+        <i class="fas fa-exclamation-circle"/> Cannot create or copy projects -
+        {{ addProjectsDisabledMsg }}
+      </div>
+
       <div v-if="useTableView">
         <projects-table ref="projectsTable" :projects="projects" @project-deleted="projectRemoved"
+                        @copy-project="copyProject"
+                        :copy-project-disabled="addProjectDisabled"
                         @project-edited="projectEdited"></projects-table>
       </div>
       <div v-else id="projectCards">
-        <div v-for="project of projects" :key="project.projectId" class="mb-3"  :id="project.projectId">
+        <div v-for="project of projects" :key="project.projectId" class="mb-3"
+             :id="project.projectId">
           <b-overlay :show="sortOrder.loading" rounded="sm" opacity="0.4">
             <template #overlay>
               <div class="text-center" :data-cy="`${project.projectId}_overlayShown`">
-                <div v-if="project.projectId===sortOrder.loadingProjectId" data-cy="updatingSortMsg">
+                <div v-if="project.projectId===sortOrder.loadingProjectId"
+                     data-cy="updatingSortMsg">
                   <div class="text-info text-uppercase mb-1">Updating sort order!</div>
                   <b-spinner label="Loading..." style="width: 3rem; height: 3rem;" variant="info"/>
                 </div>
               </div>
             </template>
-            <my-project :project="project" :disable-sort-control="projects.length === 1"
+            <my-project :id="`proj${project.projectId}`" tabindex="-1"
+                        :project="project" :disable-sort-control="projects.length === 1"
                         :ref="`proj${project.projectId}`"
                         @sort-changed-requested="updateSortAndReloadProjects"
+                        @copy-project="copyProject"
                         v-on:project-deleted="projectRemoved" v-on:pin-removed="projectUnpinned"/>
           </b-overlay>
         </div>
@@ -192,15 +204,27 @@ limitations under the License.
             this.$announcer.polite(`Project ${project.name} has been deleted`);
           });
       },
+      copyProject(projectInfo) {
+        this.isLoading = true;
+        ProjectService.copyProject(projectInfo.originalProjectId, projectInfo.newProject)
+          .then(() => {
+            this.loadProjects()
+              .then(() => {
+                this.focusOnProjectCard(projectInfo.newProject.projectId);
+              });
+            this.$announcer.polite(`Project ${projectInfo.newProject.name} was copied`);
+          });
+      },
       projectAdded(project) {
         this.isLoading = true;
         return ProjectService.saveProject(project)
           .then(() => {
             const loadProjects = () => {
               SkillsReporter.reportSkill('CreateProject');
-              this.loadProjects().then(() => {
-                this.$nextTick(() => this.$announcer.polite(`Project ${project.name} has been created`));
-              });
+              this.loadProjects()
+                .then(() => {
+                  this.$nextTick(() => this.$announcer.polite(`Project ${project.name} has been created`));
+                });
             };
 
             if (this.isRootUser) {
@@ -295,6 +319,14 @@ limitations under the License.
       },
       isProgressAndRankingEnabled() {
         return this.$store.getters.config.rankingAndProgressViewsEnabled === true || this.$store.getters.config.rankingAndProgressViewsEnabled === 'true';
+      },
+      focusOnProjectCard(projectId) {
+        this.$nextTick(() => {
+          const projCard = document.getElementById(`proj${projectId}`);
+          if (projCard) {
+            projCard.focus();
+          }
+        });
       },
     },
   };

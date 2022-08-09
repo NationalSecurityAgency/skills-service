@@ -28,7 +28,7 @@ limitations under the License.
         <div class="row">
           <div class="col-12">
             <div class="form-group">
-              <label for="projectIdInput">* Project Name</label>
+              <label for="projectIdInput">* {{ nameLabelTxt }}</label>
               <ValidationProvider rules="required|minNameLength|maxProjectNameLength|uniqueName|customNameValidator"
                                   v-slot="{errors}"
                                   name="Project Name">
@@ -47,7 +47,7 @@ limitations under the License.
           </div>
 
           <div class="col-12">
-            <id-input type="text" label="Project ID" v-model="internalProject.projectId"
+            <id-input type="text" :label="idLabelTxt" v-model="internalProject.projectId"
                       additional-validation-rules="uniqueId" @can-edit="canEditProjectId=$event"
                       v-on:keydown.enter.native="handleSubmit(updateProject)"
                       :next-focus-el="previousFocus"
@@ -63,7 +63,7 @@ limitations under the License.
         <b-button variant="success" size="sm" class="float-right" @click="handleSubmit(updateProject)"
                   :disabled="invalid"
                   data-cy="saveProjectButton">
-          Save
+          <span>{{ saveBtnTxt }}</span>
         </b-button>
         <b-button variant="secondary" size="sm" class="float-right mr-2" @click="close" data-cy="closeProjectButton">
           Cancel
@@ -82,11 +82,14 @@ limitations under the License.
   export default {
     name: 'EditProject',
     components: { IdInput },
-    props: ['project', 'isEdit', 'value'],
+    props: ['project', 'isEdit', 'value', 'isCopy'],
     data() {
       return {
         show: this.value,
-        internalProject: { originalProjectId: this.project.projectId, isEdit: this.isEdit, ...this.project },
+        internalProject: {
+          originalProjectId: this.project.projectId,
+          isEdit: this.isEdit, ...this.project
+        },
         canEditProjectId: false,
         overallErrMsg: '',
         original: {
@@ -110,7 +113,19 @@ limitations under the License.
     },
     computed: {
       title() {
+        if (this.isCopy) {
+          return 'Copy Project';
+        }
         return this.isEdit ? 'Editing Existing Project' : 'New Project';
+      },
+      saveBtnTxt() {
+        return this.isCopy ? 'Copy Project' : 'Save';
+      },
+      nameLabelTxt() {
+        return this.isCopy ? 'New Project Name' : 'Project Name';
+      },
+      idLabelTxt() {
+        return this.isCopy ? 'New Project ID' : 'Project ID';
       },
     },
     watch: {
