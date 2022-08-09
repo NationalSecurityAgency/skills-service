@@ -23,6 +23,7 @@ import skills.storage.model.SkillDef.ContainerType
 interface LevelDefRepo extends CrudRepository<LevelDef, Integer>{
 
     List<LevelDef> findAllByProjectRefId(Integer projectId)
+    List<LevelDef> findAllBySkillRefId(Integer skillRefId)
 
     static interface SubjectLevelCount {
         String getSubject()

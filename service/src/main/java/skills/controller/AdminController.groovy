@@ -82,10 +82,16 @@ class AdminController {
     PublicPropsBasedValidator propsBasedValidator
 
     @Autowired
+    ControllerPropsValidatorAndSanitizer controllerPropsValidatorAndSanitizer
+
+    @Autowired
     ProjAdminService projAdminService
 
     @Autowired
     SubjAdminService subjAdminService
+
+    @Autowired
+    ProjectCopyService projectCopyService
 
     @Autowired
     BadgeAdminService badgeAdminService
@@ -150,27 +156,19 @@ class AdminController {
 
     @RequestMapping(value = "/projects/{id}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
-    RequestResult saveProject(@PathVariable("id") String projectId, @RequestBody skills.controller.request.model.ProjectRequest projectRequest) {
-        SkillsValidator.isNotBlank(projectId, "Project Id")
-        SkillsValidator.isNotBlank(projectRequest.projectId, "Project Id")
-        SkillsValidator.isNotBlank(projectRequest.name, " Name")
+    RequestResult saveProject(@PathVariable("id") String projectId, @RequestBody ProjectRequest projectRequest) {
+        projectRequest = controllerPropsValidatorAndSanitizer.validateAndSanitizeProjectRequest(projectRequest)
+        projectId = controllerPropsValidatorAndSanitizer.validateAndSanitizeProjectId(projectId)
+        projAdminService.saveProject(projectId, projectRequest)
+        return new RequestResult(success: true)
+    }
 
-        IdFormatValidator.validate(projectId)
-        IdFormatValidator.validate(projectRequest.projectId)
-
-        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxIdLength, "Project Id", projectId)
-        propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minIdLength, "Project Id", projectId)
-
-        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxIdLength, "Project Id", projectRequest.projectId)
-        propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minIdLength, "Project Id", projectRequest.projectId)
-
-        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxProjectNameLength, "Project Name", projectRequest.name)
-        propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minNameLength, "Project Name", projectRequest.name)
-
-        projectRequest.name = InputSanitizer.sanitize(projectRequest.name)?.trim()
-        projectRequest.projectId = InputSanitizer.sanitize(projectRequest.projectId)
-
-        projAdminService.saveProject(InputSanitizer.sanitize(projectId), projectRequest)
+    @RequestMapping(value = "/projects/{id}/copy", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @ResponseBody
+    RequestResult copyProject(@PathVariable("id") String projectId, @RequestBody skills.controller.request.model.ProjectRequest projectRequest) {
+        projectRequest = controllerPropsValidatorAndSanitizer.validateAndSanitizeProjectRequest(projectRequest)
+        projectId = controllerPropsValidatorAndSanitizer.validateAndSanitizeProjectId(projectId)
+        projectCopyService.copyProject(projectId, projectRequest)
         return new RequestResult(success: true)
     }
 
@@ -1413,6 +1411,7 @@ class AdminController {
         success.explanation = "Successfully reused skills"
         return success
     }
+
 
 }
 

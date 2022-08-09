@@ -37,7 +37,7 @@ limitations under the License.
                       data-cy="projectsTable">
 
         <template v-slot:cell(name)="data">
-          <div class="row">
+          <div class="row" :id="`proj${data.item.projectId}`" tabindex="-1">
             <div class="col" :data-cy="`projCell_${data.item.projectId}`">
               <router-link :data-cy="`manageProjLink_${data.item.projectId}`" tag="a"
                            :to="{ name:'Subjects', params: { projectId: data.item.projectId, project: data.item }}"
@@ -56,12 +56,20 @@ limitations under the License.
               <b-button-group size="sm" class="ml-1">
                 <b-button @click="showProjectEditModal(data.item)"
                           variant="outline-primary" :data-cy="`editProjectId${data.item.projectId}`"
-                          :aria-label="'edit Project '+data.item.name" :ref="'edit_'+data.item.projectId">
+                          :aria-label="'edit Project '+data.item.name"
+                          :ref="'edit_'+data.item.projectId">
                   <i class="fas fa-edit" aria-hidden="true"/>
+                </b-button>
+                <b-button @click="showProjectCopyModal(data.item)" :disabled="copyProjectDisabled"
+                          variant="outline-primary" :data-cy="`copyProjectId${data.item.projectId}`"
+                          :aria-label="'copy Project '+data.item.name"
+                          :ref="'copy_'+data.item.projectId">
+                  <i class="fas fa-copy" aria-hidden="true"/>
                 </b-button>
                 <b-button @click="deleteProject(data.item)" variant="outline-primary"
                           :data-cy="`deleteProjectButton_${data.item.projectId}`"
-                          :aria-label="'delete Project '+data.item.name" :ref="'delete_'+data.item.projectId">
+                          :aria-label="'delete Project '+data.item.name"
+                          :ref="'delete_'+data.item.projectId">
                   <i class="text-warning fas fa-trash" aria-hidden="true"/>
                 </b-button>
               </b-button-group>
@@ -102,16 +110,26 @@ limitations under the License.
     <removal-validation v-if="deleteProjectInfo.showDialog" v-model="deleteProjectInfo.showDialog"
                         @do-remove="doDeleteProject" @hidden="focusOnDeleteButton">
       <p>
-        This will remove <span class="text-primary font-weight-bold">{{ deleteProjectInfo.project.name }}</span>.
+        This will remove <span
+        class="text-primary font-weight-bold">{{ deleteProjectInfo.project.name }}</span>.
       </p>
       <div>
-        Deletion can not be undone and permanently removes all skill subject definitions, skill definitions and users'
+        Deletion can not be undone and permanently removes all skill subject definitions, skill
+        definitions and users'
         performed skills for this Project.
       </div>
     </removal-validation>
 
-    <edit-project v-if="editProject.show" v-model="editProject.show" :project="editProject.project"
+    <edit-project id="editProjectModal" v-if="editProject.show" v-model="editProject.show"
+                  :project="editProject.project"
                   @project-saved="projectEdited" @hidden="handleProjectModalHide" :is-edit="true"/>
+    <edit-project id="copyProjectModal" v-if="copyProjectInfo.show"
+                  v-model="copyProjectInfo.show"
+                  :project="copyProjectInfo.project"
+                  :is-edit="false"
+                  :is-copy="true"
+                  @project-saved="projectCopied"
+                  @hidden="handleCopyModalIsHidden"/>
   </div>
 
 </template>
@@ -128,7 +146,7 @@ limitations under the License.
   export default {
     name: 'ProjectsTable',
     mixins: [MsgBoxMixin],
-    props: ['projects'],
+    props: ['projects', 'copyProjectDisabled'],
     data() {
       return {
         currentlyFocusedProjectId: '',
@@ -141,6 +159,11 @@ limitations under the License.
         editProject: {
           show: false,
           project: {},
+        },
+        copyProjectInfo: {
+          show: false,
+          project: {},
+          originalProjectId: null,
         },
         table: {
           options: {
@@ -270,11 +293,30 @@ limitations under the License.
         };
         this.editProject.show = true;
       },
+      showProjectCopyModal(projectToCopy) {
+        this.copyProjectInfo.originalProjectId = projectToCopy.projectId;
+        this.copyProjectInfo.show = true;
+      },
       projectEdited(editedProject) {
         this.$emit('project-edited', editedProject);
       },
+      projectCopied(project) {
+        this.$emit('copy-project', {
+          originalProjectId: this.copyProjectInfo.originalProjectId,
+          newProject: project,
+        });
+      },
       handleProjectModalHide() {
         this.focusOnEditButton(this.editProject.project.projectId);
+      },
+      handleCopyModalIsHidden() {
+        const refId = `copy_${this.copyProjectInfo.originalProjectId}`;
+        const ref = this.$refs[refId];
+        this.$nextTick(() => {
+          if (ref) {
+            ref.focus();
+          }
+        });
       },
       focusOnEditButton(projectId) {
         const refId = `edit_${projectId}`;

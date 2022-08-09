@@ -20,6 +20,8 @@ import org.springframework.stereotype.Component
 import skills.PublicProps
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
+import skills.controller.request.model.ProjectRequest
+import skills.services.IdFormatValidator
 
 @Component
 class PublicPropsBasedValidator {
@@ -49,5 +51,13 @@ class PublicPropsBasedValidator {
         if (value > maxVal) {
             throw new SkillException("[${fieldName}] must be <= [${maxVal}]")
         }
+    }
+
+    void validateProjectRequest(ProjectRequest projectRequest) {
+        validateMaxStrLength(PublicProps.UiProp.maxIdLength, "Project Id", projectRequest.projectId)
+        validateMinStrLength(PublicProps.UiProp.minIdLength, "Project Id", projectRequest.projectId)
+
+        validateMaxStrLength(PublicProps.UiProp.maxProjectNameLength, "Project Name", projectRequest.name)
+        validateMinStrLength(PublicProps.UiProp.minNameLength, "Project Name", projectRequest.name)
     }
 }

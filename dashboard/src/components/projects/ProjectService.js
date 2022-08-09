@@ -67,7 +67,10 @@ export default {
       .then((response) => response.data);
   },
   updateProjectDisplaySortOrder(projectId, newDisplayOrderIndex) {
-    return axios.patch(`/admin/projects/${encodeURIComponent(projectId)}`, { action: 'NewDisplayOrderIndex', newDisplayOrderIndex });
+    return axios.patch(`/admin/projects/${encodeURIComponent(projectId)}`, {
+      action: 'NewDisplayOrderIndex',
+      newDisplayOrderIndex,
+    });
   },
   saveProject(project) {
     if (project.isEdit) {
@@ -76,6 +79,10 @@ export default {
     }
     return axios.post(`/app/projects/${encodeURIComponent(project.projectId)}`, project)
       .then(() => this.getProject(project.projectId));
+  },
+  copyProject(oringinalProjectId, newProject) {
+    return axios.post(`/admin/projects/${encodeURIComponent(oringinalProjectId)}/copy`, newProject)
+      .then((res) => res.data);
   },
   deleteProject(projectId) {
     return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}`);

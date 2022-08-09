@@ -21,6 +21,7 @@ import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefPartial
+import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.SkillRelDef
 import skills.storage.model.SubjectTotalPoints
 
@@ -250,6 +251,12 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         where sd1 = srd.parent and sd2 = srd.child and srd.type in ?3 
               and sd1.projectId=?1 and sd1.skillId=?2''')
     List<SkillDef> getChildren(@Nullable String projectId, String parentSkillId, List<SkillRelDef.RelationshipType> types)
+
+    @Query('''SELECT sd2 
+        from SkillDef sd1, SkillDefWithExtra sd2, SkillRelDef srd 
+        where sd1 = srd.parent and sd2 = srd.child and srd.type in ?3 
+              and sd1.projectId=?1 and sd1.skillId=?2''')
+    List<SkillDefWithExtra> getChildrenWithExtraAttrs(@Nullable String projectId, String parentSkillId, List<SkillRelDef.RelationshipType> types)
 
     @Query('''select count(sd2) from SkillDef sd1, SkillDef sd2, SkillRelDef srd 
         where sd1 = srd.parent and sd2 = srd.child and srd.type in ?3 

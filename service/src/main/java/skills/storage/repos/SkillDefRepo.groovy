@@ -126,7 +126,16 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         s.readOnly != true''')
     List<SkillDefPartial> findAllByTypeAndNameLikeNoImportedSkills(SkillDef.ContainerType type, String name)
 
+    @Nullable
+    @Query('''select max(displayOrder) from SkillDef where projectId = ?1 and type = ?2''')
+    Integer getMaxDisplayOrderByProjectIdAndType(String projectId, SkillDef.ContainerType type)
+
+    @Nullable
+    @Query('''select max(displayOrder) from SkillDef where projectId is null and type = ?1''')
+    Integer getMaxDisplayOrderByTypeAndProjectIdIsNull(SkillDef.ContainerType type)
+
     List<SkillDef> findAllByProjectIdAndType(@Nullable String id, SkillDef.ContainerType type)
+
     List<SkillDef> findAllByProjectIdAndTypeIn(@Nullable String id, List<SkillDef.ContainerType> type)
 
     @Nullable
@@ -134,6 +143,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
 
     @Nullable
     SkillDef findByProjectIdAndSkillIdIgnoreCaseAndType(@Nullable String id, String skillId, SkillDef.ContainerType type)
+
     @Nullable
     SkillDef findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(@Nullable String id, String skillId, List<SkillDef.ContainerType> types)
     @Nullable
