@@ -15,14 +15,13 @@
  */
 package skills.intTests.copyProject
 
-import groovy.json.JsonOutput
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
+import skills.intTests.utils.SkillsService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.settings.Settings
 import skills.skillLoading.RankingLoader
 import skills.storage.model.SkillDef
-import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -283,6 +282,36 @@ class CopyProjectSpecs extends DefaultIntSpec {
 
     }
 
+    def "group with multiple skills and partial requirement of most skills is properly copied"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def skills = createSkills(10, 1, 1, 100)
+        def group1 = createSkillsGroup(1, 1, 40)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [group1])
+        skills.each {
+            skillsService.assignSkillToSkillsGroup(group1.skillId, it)
+        }
+        group1.numSkillsRequired = 9
+        skillsService.createSkill(group1)
+
+        when:
+        def projToCopy = createProject(2)
+        skillsService.copyProject(p1.projectId, projToCopy)
+
+        def original1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: group1.skillId])
+
+        def copied1 = skillsService.getSkill([projectId: projToCopy.projectId, subjectId: p1subj1.subjectId, skillId: group1.skillId])
+
+        then:
+        original1.description == group1.description
+        copied1.description == group1.description
+        copied1.skillId == group1.skillId
+        copied1.name == group1.name
+        copied1.type == SkillDef.ContainerType.SkillsGroup.toString()
+        copied1.totalPoints == (10 * 100)
+        copied1.numSkillsRequired == 9
+    }
+
     def "badge properties are copied"() {
         def p1 = createProject(1)
         def p1subj1 = createSubject(1, 1)
@@ -410,6 +439,22 @@ class CopyProjectSpecs extends DefaultIntSpec {
                 new Edge(from: p1Skills[3].skillId, to: p1SkillsSubj2[0].skillId),
                 new Edge(from: p1Skills[3].skillId, to: p1SkillsSubj2[4].skillId),
         ])
+    }
+
+    def "projects copied by a root user must be pinned to the user"() {
+        SkillsService rootUser = createRootSkillService()
+        def p1 = createProject(1)
+        rootUser.createProject(p1)
+        // UI pins - so have to simulate
+        rootUser.pinProject(p1.projectId)
+
+        when:
+        def projToCopy = createProject(2)
+        rootUser.copyProject(p1.projectId, projToCopy)
+
+        def projects = rootUser.getProjects()
+        then:
+        projects.projectId == [p1.projectId, projToCopy.projectId]
     }
 
     static class Edge {

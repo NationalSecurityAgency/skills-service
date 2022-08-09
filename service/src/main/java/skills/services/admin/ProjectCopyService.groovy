@@ -22,7 +22,9 @@ import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.auth.UserInfo
 import skills.auth.UserInfoService
+import skills.auth.UserSkillsGrantedAuthority
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.BadgeRequest
@@ -115,14 +117,16 @@ class ProjectCopyService {
 
     @Transactional
     @Profile
-    void copyProject(String originalProjectId, ProjectRequest projectRequest, String userIdParam = null) {
+    void copyProject(String originalProjectId, ProjectRequest projectRequest) {
         lockingService.lockProjects()
 
         ProjDef fromProject = loadProject(originalProjectId)
-        validate(projectRequest, userIdParam)
+        validate(projectRequest)
 
         ProjDef toProj = saveToProject(projectRequest)
         saveProjectSettings(fromProject, toProj)
+
+        pinProjectForRootUser(toProj)
 
         List<SkillInfo> allCollectedSkills = []
         saveSubjectsAndSkills(projectRequest, fromProject, toProj, allCollectedSkills)
@@ -131,6 +135,17 @@ class ProjectCopyService {
         saveBadgesAndTheirSkills(fromProject, toProj)
         saveDependencies(fromProject, toProj)
         saveReusedSkills(allCollectedSkills, fromProject, toProj)
+    }
+
+    @Profile
+    private void pinProjectForRootUser(ProjDef toProj) {
+        UserInfo userInfo = userInfoService.getCurrentUser()
+        boolean isRoot = userInfo.authorities?.find() {
+            it instanceof UserSkillsGrantedAuthority && RoleName.ROLE_SUPER_DUPER_USER == it.role?.roleName
+        }
+        if (isRoot) {
+            projAdminService.pinProjectForRootUser(toProj.projectId)
+        }
     }
 
     @Profile
@@ -321,9 +336,19 @@ class ProjectCopyService {
                         skillRequest.numPerformToCompletion = fromSkill.totalPoints / fromSkill.pointIncrement
                     }
 
+                    // group partial requirement must be set after skills are added
+                    Integer groupNumSkillsRequired = -1
+                    if (fromSkill.type == SkillDef.ContainerType.SkillsGroup) {
+                        groupNumSkillsRequired = fromSkill.numSkillsRequired
+                        skillRequest.numSkillsRequired = -1
+                    }
                     skillsAdminService.saveSkill(fromSkill.skillId, skillRequest, true, groupId)
                     if (fromSkill.type == SkillDef.ContainerType.SkillsGroup) {
                         createSkills(originalProjectId, desProjectId, subjectId, allCollectedSkills, fromSkill.skillId)
+                    }
+                    if (groupNumSkillsRequired > 0) {
+                        skillRequest.numSkillsRequired = groupNumSkillsRequired
+                        skillsAdminService.saveSkill(fromSkill.skillId, skillRequest, true, groupId)
                     }
                 }
     }
@@ -345,12 +370,12 @@ class ProjectCopyService {
     }
 
     @Profile
-    private void validate(ProjectRequest projectRequest, String userIdParam) {
+    private void validate(ProjectRequest projectRequest) {
         CustomValidationResult customValidationResult = customValidator.validate(projectRequest)
         if (!customValidationResult.valid) {
             throw new SkillException(customValidationResult.msg)
         }
-        createdResourceLimitsValidator.validateNumProjectsCreated(userIdParam ?: userInfoService.getCurrentUserId())
+        createdResourceLimitsValidator.validateNumProjectsCreated(userInfoService.getCurrentUserId())
         serviceValidatorHelper.validateProjectIdDoesNotExist(projectRequest.projectId)
         serviceValidatorHelper.validateProjectNameDoesNotExist(projectRequest.name, projectRequest.projectId)
     }
