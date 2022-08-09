@@ -303,7 +303,7 @@ limitations under the License.
       projectCopied(project) {
         this.$emit('copy-project', {
           originalProjectId: this.copyProjectInfo.originalProjectId,
-          newProject: project
+          newProject: project,
         });
       },
       handleProjectModalHide() {

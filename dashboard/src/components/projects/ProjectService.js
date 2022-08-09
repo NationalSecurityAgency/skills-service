@@ -69,7 +69,7 @@ export default {
   updateProjectDisplaySortOrder(projectId, newDisplayOrderIndex) {
     return axios.patch(`/admin/projects/${encodeURIComponent(projectId)}`, {
       action: 'NewDisplayOrderIndex',
-      newDisplayOrderIndex
+      newDisplayOrderIndex,
     });
   },
   saveProject(project) {

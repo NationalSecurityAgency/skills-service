@@ -276,7 +276,7 @@ limitations under the License.
       projectCopied(project) {
         this.$emit('copy-project', {
           originalProjectId: this.projectInternal.projectId,
-          newProject: project
+          newProject: project,
         });
       },
       projectSaved(project) {

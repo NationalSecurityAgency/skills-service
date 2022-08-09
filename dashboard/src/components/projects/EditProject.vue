@@ -88,7 +88,8 @@ limitations under the License.
         show: this.value,
         internalProject: {
           originalProjectId: this.project.projectId,
-          isEdit: this.isEdit, ...this.project
+          isEdit: this.isEdit,
+          ...this.project,
         },
         canEditProjectId: false,
         overallErrMsg: '',
