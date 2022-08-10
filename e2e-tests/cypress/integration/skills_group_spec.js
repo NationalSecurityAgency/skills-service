@@ -56,13 +56,15 @@ describe('Skills Group Tests', () => {
         cy.createGroupViaUI('Blah');
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'Blah' }, { colIndex: 0,  value: 'ID: BlahGroup' }, { colIndex: 1, value: '1' }],
-        ], 5);
+        ], 5, false, null, false);
+        cy.get(`${tableSelector} tbody tr`).should('have.length', 1);
 
         cy.createGroupViaUI('another');
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'another' }, { colIndex: 0,  value: 'ID: anotherGroup' }, { colIndex: 1, value: '2' }],
             [{ colIndex: 0,  value: 'Blah' }, { colIndex: 0,  value: 'ID: BlahGroup' }, { colIndex: 1, value: '1' }],
-        ], 5);
+        ], 5, false, null, false);
+        cy.get(`${tableSelector} tbody tr`).should('have.length', 2);
     });
 
     it('create group with description', () => {
@@ -132,7 +134,8 @@ describe('Skills Group Tests', () => {
             [{ colIndex: 0,  value: 'skill1' },  { colIndex: 1, value: '3' }],
             [{ colIndex: 0,  value: 'group3' },  { colIndex: 1, value: '4' }],
             [{ colIndex: 0,  value: 'skill2' },  { colIndex: 1, value: '5' }],
-        ], 5);
+        ],  5, false, null, false);
+        cy.get(`${tableSelector} tbody tr`).should('have.length', 5);
 
         cy.get('[data-cy="deleteSkillButton_group2"]').click();
         cy.acceptRemovalSafetyCheck();
@@ -142,7 +145,8 @@ describe('Skills Group Tests', () => {
             [{ colIndex: 0,  value: 'skill1' },  { colIndex: 1, value: '2' }],
             [{ colIndex: 0,  value: 'group3' },  { colIndex: 1, value: '3' }],
             [{ colIndex: 0,  value: 'skill2' },  { colIndex: 1, value: '4' }],
-        ], 5);
+        ],  5, false, null, false);
+        cy.get(`${tableSelector} tbody tr`).should('have.length', 4);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get(`${tableSelector} th`).contains('Display Order').click()
@@ -151,7 +155,8 @@ describe('Skills Group Tests', () => {
             [{ colIndex: 0,  value: 'skill1' },  { colIndex: 1, value: '2' }],
             [{ colIndex: 0,  value: 'group3' },  { colIndex: 1, value: '3' }],
             [{ colIndex: 0,  value: 'skill2' },  { colIndex: 1, value: '4' }],
-        ], 5);
+        ],  5, false, null, false);
+        cy.get(`${tableSelector} tbody tr`).should('have.length', 4);
     });
 
     it('change display order', () => {
@@ -173,7 +178,8 @@ describe('Skills Group Tests', () => {
             [{ colIndex: 0,  value: 'Very Great Skill 1' },  { colIndex: 1, value: '3' }],
             [{ colIndex: 0,  value: 'Very Great Skill 2' },  { colIndex: 1, value: '4' }],
             [{ colIndex: 0,  value: 'Awesome Group 3' },  { colIndex: 1, value: '5' }],
-        ], 5);
+        ], 5, false, null, false);
+        cy.get(`${tableSelector} tbody tr`).should('have.length', 5);
 
         cy.get('[data-cy="orderMoveDown_group1"]').should('be.enabled');
         cy.get('[data-cy="orderMoveUp_group1"]').should('be.enabled');
@@ -200,7 +206,8 @@ describe('Skills Group Tests', () => {
             [{ colIndex: 0,  value: 'Very Great Skill 1' },  { colIndex: 1, value: '3' }],
             [{ colIndex: 0,  value: 'Very Great Skill 2' },  { colIndex: 1, value: '4' }],
             [{ colIndex: 0,  value: 'Awesome Group 3' },  { colIndex: 1, value: '5' }],
-        ], 5);
+        ], 5, false, null, false);
+        cy.get(`${tableSelector} tbody tr`).should('have.length', 5);
 
         cy.get('[data-cy="orderMoveDown_group1"]').should('be.enabled');
         cy.get('[data-cy="orderMoveUp_group1"]').should('be.enabled');
@@ -306,7 +313,8 @@ describe('Skills Group Tests', () => {
             [{ colIndex: 0,  value: 'group1' },  { colIndex: 3, value: '400from 2 skills' }, { colIndex: 4, value: 'N/A' }, { colIndex: 5, value: 'N/A' }, { colIndex: 6, value: '0' }],
             [{ colIndex: 0,  value: 'group2' },  { colIndex: 3, value: '0from 0 skills' }],
             [{ colIndex: 0,  value: 'group3' },  { colIndex: 3, value: '200from 1 skill' }],
-        ], 5);
+        ], 5, false, null, false);
+        cy.get(`${tableSelector} tbody tr`).should('have.length', 3);
     });
 
     it('total points in additional column are incremented when skills are added', () => {

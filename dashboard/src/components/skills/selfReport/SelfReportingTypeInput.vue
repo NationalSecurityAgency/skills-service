@@ -43,14 +43,11 @@ limitations under the License.
             <div class="row m-0">
               <b-form-radio class="mr-2" value="Approval" :disabled="!selfReport.enabled">Approval Queue</b-form-radio>
               <span class="text-muted mr-3 ml-2">|</span>
-              <label class="m-0">
-                <b-form-checkbox data-cy="justificationRequiredCheckbox"
-                                 class="d-inline"
-                                 v-model="selfReport.justificationRequired"
-                                 :disabled="!approvalSelected || !selfReport.enabled"
-                                 aria-labelledby="justificationRequiredLabel"
-                                 @input="justificationRequiredChanged"/>
-                <span id="justificationRequiredLabel" class="font-italic" :class="{ 'text-secondary': !approvalSelected || !selfReport.enabled}">Justification Required </span><inline-help
+              <label for="self-report-checkbox" class="m-0">
+                <b-form-checkbox data-cy="justificationRequiredCheckbox" id="justification-required-checkbox"
+                                 class="d-inline" v-model="selfReport.justificationRequired"
+                                 :disabled="!approvalSelected || !selfReport.enabled" @input="justificationRequiredChanged"/>
+                <span class="font-italic">Justification Required </span><inline-help
                                           msg="Check to require users to submit a justification when self-reporting this skill"
                                           target-id="justificationRequired"
                                           :next-focus-el="nextFocusEl"

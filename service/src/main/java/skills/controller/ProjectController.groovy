@@ -24,19 +24,24 @@ import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
+import skills.controller.request.model.InviteTokenValidationRequest
 import skills.controller.request.model.ProjectExistsRequest
 import skills.controller.request.model.ProjectRequest
 import skills.controller.result.model.CustomIconResult
+import skills.controller.result.model.InviteTokenValidationResponse
 import skills.controller.result.model.ProjectResult
 import skills.controller.result.model.RequestResult
 import skills.dbupgrade.DBUpgradeSafe
 import skills.icons.CustomIconFacade
 import skills.profile.EnableCallStackProf
 import skills.services.IdFormatValidator
+import skills.services.admin.InviteOnlyProjectService
 import skills.services.admin.ProjAdminService
 import skills.services.admin.ShareSkillsService
 import skills.services.admin.SkillsAdminService
 import skills.utils.InputSanitizer
+
+import javax.servlet.http.HttpServletResponse
 
 @RestController
 @RequestMapping("/app")
@@ -61,6 +66,9 @@ class ProjectController {
 
     @Autowired
     SkillsAdminService skillsAdminService
+
+    @Autowired
+    InviteOnlyProjectService inviteOnlyProjectService
 
     static final RESERVERED_PROJECT_ID = ShareSkillsService.ALL_SKILLS_PROJECTS
 
@@ -105,6 +113,23 @@ class ProjectController {
 
         projAdminService.saveProject(null, projectRequest)
         return new RequestResult(success: true)
+    }
+
+    @RequestMapping(value = "/projects/{id}/join/{invite_code}", method = RequestMethod.POST, produces = "application/json")
+    @ResponseBody
+    RequestResult joinProject(@PathVariable("id") String projectId, @PathVariable("invite_code") String inviteCode) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        SkillsValidator.isNotBlank(inviteCode, "invite_code", projectId)
+        inviteOnlyProjectService.joinProject(inviteCode, projectId)
+        return RequestResult.success()
+    }
+
+    @RequestMapping(value = "/projects/{id}/validateInvite/{invite_code}", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    InviteTokenValidationResponse validateProjectInvite(@PathVariable("id") String projectId, @PathVariable("invite_code") String inviteCode) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        SkillsValidator.isNotBlank(inviteCode, "inviteCode")
+        return inviteOnlyProjectService.validateInvite(inviteCode, projectId)
     }
 
     @DBUpgradeSafe

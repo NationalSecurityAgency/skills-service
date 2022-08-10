@@ -114,6 +114,9 @@ class ProjAdminService {
     @Autowired
     SkillsAdminService skillsAdminService
 
+    @Autowired
+    ServiceValidatorHelper serviceValidatorHelper
+
     @Transactional()
     void saveProject(String originalProjectId, ProjectRequest projectRequest, String userIdParam = null) {
         assert projectRequest?.projectId
@@ -128,16 +131,10 @@ class ProjAdminService {
 
         ProjDef projectDefinition = originalProjectId ? projDefRepo.findByProjectIdIgnoreCase(originalProjectId) : null
         if (!projectDefinition || !projectRequest.projectId.equalsIgnoreCase(originalProjectId)) {
-            ProjDef idExist = projDefRepo.findByProjectIdIgnoreCase(projectRequest.projectId)
-            if (idExist) {
-                throw new SkillException("Project with id [${projectRequest.projectId}] already exists! Sorry!", projectRequest.projectId, null, ErrorCode.ConstraintViolation)
-            }
+            serviceValidatorHelper.validateProjectIdDoesNotExist(projectRequest.projectId)
         }
         if (!projectDefinition || !projectRequest.name.equalsIgnoreCase(projectDefinition.name)) {
-            ProjDef nameExist = projDefRepo.findByNameIgnoreCase(projectRequest.name)
-            if (nameExist) {
-                throw new SkillException("Project with name [${projectRequest.name}] already exists! Sorry!", projectRequest.projectId, null, ErrorCode.ConstraintViolation)
-            }
+            serviceValidatorHelper.validateProjectNameDoesNotExist(projectRequest.name, projectRequest.projectId)
         }
         if (projectDefinition) {
             Props.copy(projectRequest, projectDefinition)
@@ -166,8 +163,9 @@ class ProjAdminService {
 
             levelDefService.createDefault(projectRequest.projectId, projectDefinition)
 
-            accessSettingsStorageService.addUserRole(userIdParam ?: userInfoService.getCurrentUserId(), projectRequest.projectId, RoleName.ROLE_PROJECT_ADMIN)
-            log.debug("Added user role [{}]", RoleName.ROLE_PROJECT_ADMIN)
+            String userId = userIdParam ?: userInfoService.getCurrentUserId()
+            accessSettingsStorageService.addUserRole(userId, projectRequest.projectId, RoleName.ROLE_PROJECT_ADMIN)
+            log.debug("Added user role [{}] to [{}]", RoleName.ROLE_PROJECT_ADMIN, userId)
         }
     }
 

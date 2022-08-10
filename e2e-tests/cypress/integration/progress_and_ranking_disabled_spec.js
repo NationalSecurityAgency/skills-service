@@ -60,7 +60,8 @@ describe('Project and Ranking Views are disabled Tests', () => {
         cy.createProject(1);
 
         cy.visit('/administrator/projects/proj1/settings');
-        cy.get('[ data-cy="productionModeSetting"]').should('exist');
+        cy.contains('[data-cy=projectVisibilitySelector]', 'Discoverable on Progress And Ranking').should('exist');
+        // cy.get('[ data-cy="productionModeSetting"]').should('exist');
         cy.intercept('GET', '/public/config', (req) => {
             req.reply({
                 body: {
@@ -71,8 +72,9 @@ describe('Project and Ranking Views are disabled Tests', () => {
 
         cy.visit('/administrator/projects/proj1/settings');
         cy.wait('@getConfig')
+        cy.contains('[data-cy=projectVisibilitySelector]', 'Discoverable on Progress And Ranking').should('not.exist');
 
-        cy.get('[ data-cy="productionModeSetting"]').should('not.exist');
+        // cy.get('[ data-cy="productionModeSetting"]').should('not.exist');
     });
 
     it('do not show Progress and Ranking in the breadcrumb when those views are disabled', function () {

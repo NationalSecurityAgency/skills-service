@@ -63,8 +63,6 @@ describe('Manage My Projects Tests', () => {
 
     cy.visit('/progress-and-rankings');
     cy.get('[data-cy="manageMyProjsBtn"]').click();
-    cy.title().should('eq', 'SkillTree Dashboard - Manage My Projects');
-
     cy.contains('No Discoverable Projects');
     cy.contains('Projects can be created and managed from the "Project Admin" view')
   });

@@ -25,7 +25,6 @@ import org.springframework.stereotype.Service
 import skills.controller.request.model.GlobalSettingsRequest
 import skills.controller.request.model.SettingsRequest
 import skills.controller.result.model.SettingsResult
-import skills.services.SystemSettingsService
 import skills.services.settings.SettingsService
 
 import javax.mail.MessagingException
@@ -58,15 +57,8 @@ class EmailSettingsService {
     @Autowired
     SettingsService settingsService
 
-    @Autowired
-    SystemSettingsService systemSettingsService
-
     EmailConfigurationResult updateConnectionInfo(EmailConnectionInfo emailConnectionInfo) {
         EmailConfigurationResult configurationSuccessful = configureMailSender(emailConnectionInfo)
-        SystemSettings settings = systemSettingsService.get()
-        settings.publicUrl = emailConnectionInfo.publicUrl
-        settings.fromEmail = emailConnectionInfo.fromEmail
-        systemSettingsService.save(settings)
         storeSettings(emailConnectionInfo)
         return configurationSuccessful;
     }
@@ -146,10 +138,6 @@ class EmailSettingsService {
     EmailConnectionInfo convert(List<SettingsResult> emailGroupSettings) {
         EmailConnectionInfo info = new EmailConnectionInfo()
         if (emailGroupSettings) {
-            SystemSettings settings = systemSettingsService.get()
-            info.publicUrl = settings.publicUrl
-            info.fromEmail = settings.fromEmail
-
             def mappedSettings = emailGroupSettings.collectEntries() {
                 [it.setting, it.value]
             }

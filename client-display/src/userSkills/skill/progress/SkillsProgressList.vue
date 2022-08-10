@@ -94,6 +94,7 @@ limitations under the License.
   import StringHighlighter from '@/common-components/utilities/StringHighlighter';
   import SkillProgress2 from './SkillProgress2';
   import SkillEnricherUtil from '../../utils/SkillEnricherUtil';
+  import store from '../../../store/store';
 
   const updateSkillForLoadedDescription = (skills, desc) => {
     let foundSkill = null;
@@ -169,31 +170,31 @@ limitations under the License.
           {
             icon: 'fas fa-battery-empty',
             id: 'withoutProgress',
-            html: 'Skills <b>without</b> progress',
+            html: `${store.getters.skillDisplayName}s <b>without</b> progress`,
             count: 0,
           },
           {
             icon: 'far fa-calendar-check',
             id: 'withPointsToday',
-            html: 'Skills with points earned <b>today</b>',
+            html: `${store.getters.skillDisplayName}s with points earned <b>today</b>`,
             count: 0,
           },
           {
             icon: 'far fa-check-circle',
             id: 'complete',
-            html: '<b>Completed</b> skills',
+            html: `<b>Completed</b> ${store.getters.skillDisplayName}s`,
             count: 0,
           },
           {
             icon: 'fas fa-laptop',
             id: 'selfReported',
-            html: '<b>Self</b> Reported Skills',
+            html: `<b>Self</b> Reported ${store.getters.skillDisplayName}s`,
             count: 0,
           },
           {
             icon: 'fas fa-running',
             id: 'inProgress',
-            html: 'Skills <b>in progress</b>',
+            html: `${store.getters.skillDisplayName}s <b>in progress</b>`,
             count: 0,
           },
         ],

@@ -56,6 +56,7 @@ import EmailUsers from '@//components/projects/EmailUsers';
 import EmaillProjectAdmins from '@//components/projects/EmailProjectAdmins';
 import MyBadges from '@//components/myProgress/badges/MyBadges';
 import SkillsCatalog from '@//components/skills/catalog/SkillsCatalog';
+import JoinProject from '@/components/access/JoinProject';
 
 const GlobalBadgePage = () => import(/* webpackChunkName: 'globalBadgePage' */'@/components/badges/global/GlobalBadgePage');
 const GlobalBadgeSkills = () => import(/* webpackChunkName: 'globalBadgeSkills' */'@//components/badges/global/GlobalBadgeSkills');
@@ -312,6 +313,23 @@ const router = new Router({
       },
     },
     {
+      path: '/join-project/:pid/:inviteToken',
+      name: 'JoinProject',
+      component: JoinProject,
+      props: (route) => ({ ...route.params, projectName: route.query.pn }),
+      meta: {
+        requiresAuth: true,
+        nonAdmin: true,
+        breadcrumb: (route) => [{
+            value: `Join Project ${route.query.pn}`,
+            url: `/join-project/${route.params.pid}/${route.params.inviteToken}?pn=${route.query.pn}`,
+          }],
+        announcer: {
+          message: 'Join Project',
+        },
+      },
+    },
+    {
       path: '/progress-and-rankings',
       component: MyProgress,
       meta: {
@@ -329,7 +347,7 @@ const router = new Router({
           requiresAuth: true,
           nonAdmin: true,
           announcer: {
-            message: 'Progress And Rankings',
+            message: 'My Progress',
           },
         },
       }, {
@@ -340,7 +358,7 @@ const router = new Router({
           requiresAuth: true,
           nonAdmin: true,
           announcer: {
-            message: 'Progress And Rankings Project',
+            message: 'My Progress Project',
           },
         },
       }, {
@@ -362,7 +380,7 @@ const router = new Router({
           requiresAuth: true,
           nonAdmin: true,
           announcer: {
-            message: 'Manage My Projects',
+            message: 'Discover Projects',
           },
         },
       }, {

@@ -29,6 +29,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import skills.PublicProps
 import skills.auth.UserInfoService
+import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.*
 import skills.controller.result.model.*
@@ -41,6 +42,8 @@ import skills.services.admin.skillReuse.SkillReuseService
 import skills.services.events.BulkSkillEventResult
 import skills.services.events.pointsAndAchievements.InsufficientPointsValidator
 import skills.services.inception.InceptionProjectService
+import skills.services.settings.ProjectSettingsValidator
+import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.services.settings.listeners.ValidationRes
 import skills.storage.model.SkillDef
@@ -79,10 +82,16 @@ class AdminController {
     PublicPropsBasedValidator propsBasedValidator
 
     @Autowired
+    ControllerPropsValidatorAndSanitizer controllerPropsValidatorAndSanitizer
+
+    @Autowired
     ProjAdminService projAdminService
 
     @Autowired
     SubjAdminService subjAdminService
+
+    @Autowired
+    ProjectCopyService projectCopyService
 
     @Autowired
     BadgeAdminService badgeAdminService
@@ -101,6 +110,9 @@ class AdminController {
 
     @Autowired
     ShareSkillsService shareSkillsService
+
+    @Autowired
+    ProjectSettingsValidator projectSettingsValidator
 
     @Value('#{"${skills.config.ui.maxTimeWindowInMinutes}"}')
     int maxTimeWindowInMinutes
@@ -132,34 +144,43 @@ class AdminController {
     @Autowired
     InsufficientPointsValidator insufficientPointsValidator
 
+    @Autowired
+    InviteOnlyProjectService inviteOnlyProjectService
+
     @Value('#{"${skills.config.ui.maxSkillsInBulkImport}"}')
     int maxBulkImport
+
+    @Value('#{"${skills.config.ui.maxProjectInviteEmails:50}"}')
+    int maxInviteEmails
 
 
     @RequestMapping(value = "/projects/{id}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
-    RequestResult saveProject(@PathVariable("id") String projectId, @RequestBody skills.controller.request.model.ProjectRequest projectRequest) {
-        SkillsValidator.isNotBlank(projectId, "Project Id")
-        SkillsValidator.isNotBlank(projectRequest.projectId, "Project Id")
-        SkillsValidator.isNotBlank(projectRequest.name, " Name")
-
-        IdFormatValidator.validate(projectId)
-        IdFormatValidator.validate(projectRequest.projectId)
-
-        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxIdLength, "Project Id", projectId)
-        propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minIdLength, "Project Id", projectId)
-
-        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxIdLength, "Project Id", projectRequest.projectId)
-        propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minIdLength, "Project Id", projectRequest.projectId)
-
-        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxProjectNameLength, "Project Name", projectRequest.name)
-        propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minNameLength, "Project Name", projectRequest.name)
-
-        projectRequest.name = InputSanitizer.sanitize(projectRequest.name)?.trim()
-        projectRequest.projectId = InputSanitizer.sanitize(projectRequest.projectId)
-
-        projAdminService.saveProject(InputSanitizer.sanitize(projectId), projectRequest)
+    RequestResult saveProject(@PathVariable("id") String projectId, @RequestBody ProjectRequest projectRequest) {
+        projectRequest = controllerPropsValidatorAndSanitizer.validateAndSanitizeProjectRequest(projectRequest)
+        projectId = controllerPropsValidatorAndSanitizer.validateAndSanitizeProjectId(projectId)
+        projAdminService.saveProject(projectId, projectRequest)
         return new RequestResult(success: true)
+    }
+
+    @RequestMapping(value = "/projects/{id}/copy", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @ResponseBody
+    RequestResult copyProject(@PathVariable("id") String projectId, @RequestBody skills.controller.request.model.ProjectRequest projectRequest) {
+        projectRequest = controllerPropsValidatorAndSanitizer.validateAndSanitizeProjectRequest(projectRequest)
+        projectId = controllerPropsValidatorAndSanitizer.validateAndSanitizeProjectId(projectId)
+        projectCopyService.copyProject(projectId, projectRequest)
+        return new RequestResult(success: true)
+    }
+
+    @RequestMapping(value = "/projects/{id}/invite", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @ResponseBody
+    InviteUsersResult generateInvite(@PathVariable("id") String projectId, @RequestBody ProjectInviteRequest inviteRequest) {
+        SkillsValidator.isNotBlank(projectId, "Project ID")
+        SkillsValidator.isTrue(!inviteRequest?.recipients?.isEmpty(), "at least one email is required")
+        SkillsValidator.isTrue(inviteRequest?.recipients?.size() <= maxInviteEmails, "No more than ${maxInviteEmails} project invites may  be sent at one time")
+
+        InviteUsersResult res = inviteOnlyProjectService.inviteUsers(projectId, inviteRequest.recipients, inviteRequest.validityDuration)
+        return res
     }
 
     @RequestMapping(value="/projects/{id}/cancelExpiration")
@@ -809,6 +830,20 @@ class AdminController {
         return adminUsersService.loadUsersPage(projectId, query, pageRequest)
     }
 
+    @GetMapping(value="/projects/{projectId}/{userId}/canAccess", produces='application/json')
+    @ResponseBody
+    @CompileStatic
+    Boolean canUserAccess(@PathVariable("projectId") String projectId, @PathVariable("userId") String userId,
+                          @RequestParam(required=false, value="idType") String idType) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(userId, "User ID")
+
+        if (inviteOnlyProjectService.isInviteOnlyProject(projectId)) {
+            return inviteOnlyProjectService.canUserAccess(projectId, userId, idType)
+        }
+        return Boolean.TRUE
+    }
+
     @RequestMapping(value = "/projects/{projectId}/users/{userId}", method = RequestMethod.GET)
     UserInfoRes getUserInfo(
             @PathVariable("projectId") String projectId,
@@ -942,6 +977,7 @@ class AdminController {
         SkillsValidator.isTrue(projectId == value.projectId, "Project Id must equal", projectId)
         SkillsValidator.isTrue(setting == value.setting, "Setting Id must equal", projectId)
 
+        projectSettingsValidator.validate(value)
         if (StringUtils.isBlank(value?.value)) {
             settingsService.deleteProjectSetting(setting)
         } else {
@@ -956,6 +992,17 @@ class AdminController {
         SkillsValidator.isNotNull(values, "Settings")
 
         ValidationRes validationRes = settingsService.isValid(values)
+
+        if (validationRes.isValid) {
+            try {
+                projectSettingsValidator.validate(values)
+            } catch (SkillException ske) {
+                validationRes.isValid = false
+                String msg = ske.getMessage()
+                validationRes.explanation = msg.replaceAll(Settings.PRODUCTION_MODE.settingName, "Discoverable").replaceAll(Settings.INVITE_ONLY_PROJECT.settingName, "Invite Only")
+            }
+        }
+
         return [
                 success: true,
                 valid: validationRes.isValid,
@@ -967,6 +1014,8 @@ class AdminController {
     RequestResult saveProjectSettings(@PathVariable("projectId") String projectId, @RequestBody List<ProjectSettingsRequest> values) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotNull(values, "Settings")
+
+        projectSettingsValidator.validate(values)
 
         List<ProjectSettingsRequest> toDelete = values.findAll { StringUtils.isBlank(it.value)}
         if (toDelete) {
@@ -1362,6 +1411,7 @@ class AdminController {
         success.explanation = "Successfully reused skills"
         return success
     }
+
 
 }
 

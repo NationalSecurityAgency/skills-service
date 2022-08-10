@@ -295,7 +295,9 @@ class BadgeAdminService {
     }
 
     private Integer getBadgeDisplayOrder(ProjDef projDef, SkillDef.ContainerType type) {
-        Integer lastDisplayOrder = getBadgesInternal(projDef, type)?.collect({ it.displayOrder })?.max()
+        Integer lastDisplayOrder = (type == SkillDef.ContainerType.GlobalBadge) ?
+                skillDefRepo.getMaxDisplayOrderByTypeAndProjectIdIsNull(SkillDef.ContainerType.GlobalBadge) :
+                skillDefRepo.getMaxDisplayOrderByProjectIdAndType(projDef.projectId, SkillDef.ContainerType.Badge)
         int displayOrder = lastDisplayOrder != null ? lastDisplayOrder + 1 : 1
         return displayOrder
     }
@@ -305,7 +307,7 @@ class BadgeAdminService {
         if (type == SkillDef.ContainerType.GlobalBadge) {
             badges = skillDefRepo.findAllByProjectIdAndType(null, SkillDef.ContainerType.GlobalBadge)
         } else {
-            badges  = projDef.badges
+            badges = skillDefRepo.findAllByProjectIdAndType(projDef.projectId, SkillDef.ContainerType.Badge)
         }
         return badges
     }

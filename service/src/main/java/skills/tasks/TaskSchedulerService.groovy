@@ -17,6 +17,7 @@ package skills.tasks
 
 import com.github.kagkarlsson.scheduler.Scheduler
 import com.github.kagkarlsson.scheduler.task.helper.OneTimeTask
+import com.github.kagkarlsson.scheduler.task.helper.RecurringTask
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -25,7 +26,9 @@ import skills.services.events.SkillDate
 import skills.tasks.data.CatalogFinalizeRequest
 import skills.tasks.data.CatalogSkillDefinitionUpdated
 import skills.tasks.data.ImportedSkillAchievement
+import skills.tasks.data.ProjectInviteCleanup
 
+import javax.annotation.PostConstruct
 import java.time.Instant
 
 @Service

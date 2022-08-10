@@ -1715,6 +1715,42 @@
     </changeSet>
 
     <changeSet id="28" author="skills team">
+        <createTable tableName="project_access_token">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="proj_ref_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="token" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expires" type="DATETIME" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="claimed" type="DATETIME">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <createIndex indexName="index_project_access_token_token"
+                     tableName="project_access_token" unique="true">
+            <column name="token" type="varchar(255)"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseColumnNames="proj_ref_id"
+                                 baseTableName="project_access_token"
+                                 constraintName="fk_project_access_token_proj_ref_id_project_definition_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="project_definition"/>
+    </changeSet>
+
+    <changeSet id="29" author="skills team">
         <addColumn tableName="skill_definition">
             <column name="justification_required" type="varchar(255)" defaultValueBoolean="false"/>
         </addColumn>

@@ -17,8 +17,10 @@ package skills.services
 
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.data.domain.PageRequest
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.stereotype.Service
@@ -29,6 +31,7 @@ import skills.auth.pki.PkiUserLookup
 import skills.controller.UserInfoController
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
+import skills.controller.result.model.TableResult
 import skills.controller.result.model.UserInfoRes
 import skills.controller.result.model.UserRoleRes
 import skills.services.inception.InceptionProjectService
@@ -89,6 +92,20 @@ class AccessSettingsStorageService {
     }
 
     @Transactional(readOnly = true)
+    TableResult getUserRolesForProjectId(String projectId, String roleName, String userIdQuery, PageRequest pagingRequest) {
+        //account for userId query
+        RoleName rn = RoleName.valueOf(roleName)
+        TableResult tableResult = new TableResult()
+        tableResult.totalCount = userRoleRepository.countRoleWithAttrsByProjectIdAndRoleNameAndUserIdLike(projectId, rn, userIdQuery)
+        if (tableResult.totalCount > 0) {
+            List<UserRoleRepo.UserRoleWithAttrs> res = userRoleRepository.findRoleWithAttrsByProjectIdAndRoleNameAndUserIdLike(projectId, rn, userIdQuery, pagingRequest)
+            tableResult.data = res.collect { convert(it) }
+            tableResult.count = res?.size()
+        }
+        return tableResult
+    }
+
+    @Transactional(readOnly = true)
     List<UserRoleRes> getUserRolesForProjectIdAndUserId(String projectId, String userId) {
         List<UserRoleRepo.UserRoleWithAttrs> res = userRoleRepository.findAllByProjectIdAndUserId(projectId, userId)
         return res.collect { convert(it) }
@@ -110,6 +127,18 @@ class AccessSettingsStorageService {
     getUserRolesWithRole(RoleName roleName) {
         List<UserRoleRepo.UserRoleWithAttrs> roles = userRoleRepository.findAllByRoleName(roleName)
         return roles.collect { convert(it) }
+    }
+
+    @Transactional(readOnly = true)
+    TableResult getUserRolesWithRole(RoleName roleName, PageRequest pageRequest) {
+        TableResult tableResult = new TableResult()
+        tableResult.totalCount = userRoleRepository.countAllByRoleName(roleName)
+        if (tableResult.totalCount > 0) {
+            List<UserRoleRepo.UserRoleWithAttrs> roles = userRoleRepository.findAllByRoleNameWithPaging(roleName, pageRequest)
+            tableResult.data = roles.collect { convert(it) }
+            tableResult.count = roles?.size()
+        }
+        return tableResult
     }
 
     @Transactional(readOnly = true)
@@ -208,6 +237,12 @@ class AccessSettingsStorageService {
         return convert(role)
     }
 
+    @Transactional()
+    UserRole addUserRoleReturnRaw(String userId, String projectId, RoleName roleName) {
+        UserRole role = addUserRoleInternal(userId, projectId, roleName)
+        return role
+    }
+
     private UserRole addUserRoleInternal(String userId, String projectId, RoleName roleName) {
         log.debug('Creating user-role for ID [{}] and role [{}] on project [{}]', userId, roleName, projectId)
         String userIdLower = userId?.toLowerCase()
@@ -256,6 +291,31 @@ class AccessSettingsStorageService {
             user = createNewUser(userInfo)
         }
         return new UserAndUserAttrsHolder(user: user, userAttrs: userAttrs)
+    }
+
+    /**
+     * Retreives the existing User and UserAttrs or creates a new one if they do not
+     * already exist. This method DOES NOT update any attributes on existing records
+     * @param userInfo
+     * @return
+     */
+    @Transactional()
+    @Profile
+    UserAndUserAttrsHolder getOrCreate(UserInfo userInfo) {
+        userInfoValidator.validate(userInfo)
+        String userId = userInfo.username?.toLowerCase()
+        UserAttrs userAttrs = userAttrsService.getOrCreate(userId, userInfo)
+
+        User user = loadUserFromLocalDb(userId)
+
+        if (user) {
+            new UserAndUserAttrsHolder(user: user, userAttrs: userAttrs)
+        } else {
+            // create new user with APP_USER role
+            log.debug("Creating new app user for ID [{}], DN [{}]", userInfo.username, userInfo.userDn)
+            user = createNewUser(userInfo)
+            return new UserAndUserAttrsHolder(user: user, userAttrs: userAttrs)
+        }
     }
 
     @Profile
@@ -314,7 +374,8 @@ class AccessSettingsStorageService {
         if ( !user.userId?.equalsIgnoreCase(userInfo.username) ||
                 (!(user.password == null && userInfo?.password == null) && !user.password?.equalsIgnoreCase(userInfo?.password))) {
             user.userId = userInfo.username?.toLowerCase()
-            user.password = userInfo.password
+            //don't overwrite an existing password with blank
+            user.password = StringUtils.defaultIfBlank(userInfo.password, user.password)
             userRepository.save(user)
         }
     }
@@ -349,7 +410,7 @@ class AccessSettingsStorageService {
                 roleName: input.role.roleName,
                 firstName: input.attrs.firstName,
                 lastName: input.attrs.lastName,
-                email: input.attrs.email
+                email: input.attrs.email,
         )
         return res
     }

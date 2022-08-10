@@ -125,6 +125,7 @@ skills:
       maxSkillNameLength: 100
       maxSubjectNameLength: 50
       maxLevelNameLength: 50
+      maxCustomLabelLength: 50
       minIdLength: 3
       maxIdLength: 50
       maxSkillVersion: 999
@@ -133,7 +134,6 @@ skills:
       maxNumPointIncrementMaxOccurrences: 999
       userSuggestOptions:
       pointHistoryInDays: 1825
-      skillHistoryInDays: 1825
       rankingAndProgressViewsEnabled: false
       defaultLandingPage: "admin"
       maxSelfReportMessageLength: 250
@@ -141,6 +141,7 @@ skills:
       artifactBuildTimestamp: @maven.build.timestamp@
       maxSkillsInBulkImport: 50
       enablePageVisitReporting: false
+      maxProjectInviteEmails: 50
     client:
       loggingEnabled: false
       loggingLevel: DEBUG

@@ -16,13 +16,13 @@
 import axios from 'axios';
 
 export default {
-  getUserRoles(projectId, roleName) {
+  getUserRoles(projectId, roleName, params) {
     if (projectId) {
-      return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/userRoles`)
+      return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/userRoles/${encodeURIComponent(roleName)}`, { params })
         .then((response) => response.data);
     }
     if (roleName === 'ROLE_SUPER_DUPER_USER' || roleName === 'ROLE_SUPERVISOR') {
-      return axios.get(`/root/users/roles/${roleName}`)
+      return axios.get(`/root/users/roles/${roleName}`, { params })
         .then((response) => response.data);
     }
     throw new Error(`unexpected user role [${roleName}]`);
@@ -91,5 +91,17 @@ export default {
   },
   userEmailIsVerified(email) {
     return axios.get(`/userEmailIsVerified/${email}`).then((response) => response.data);
+  },
+  sendProjectInvites(projectId, inviteRequest) {
+    return axios.post(`/admin/projects/${projectId}/invite`, inviteRequest).then((response) => response.data);
+  },
+  isInviteValid(projectId, inviteToken) {
+    return axios.get(`/app/projects/${projectId}/validateInvite/${inviteToken}`).then((response) => response.data);
+  },
+  joinProject(projectId, inviteToken) {
+    return axios.post(`/app/projects/${encodeURIComponent(projectId)}/join/${inviteToken}`).then((response) => response.data);
+  },
+  getUserRolesForProject(projectId, roleName, params) {
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/userRoles/${encodeURIComponent(roleName)}`, { params }).then((resp) => resp.data);
   },
 };

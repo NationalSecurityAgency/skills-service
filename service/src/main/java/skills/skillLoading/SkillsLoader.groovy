@@ -144,7 +144,6 @@ class SkillsLoader {
         return res
     }
 
-
     @Profile
     @Transactional(readOnly = true)
     List<AvailableProjectResult> getAvailableForMyProjects(String userId) {
@@ -896,7 +895,7 @@ class SkillsLoader {
                 SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, skillDef, version, [SkillRelDef.RelationshipType.SkillsGroupRequirement])
                 Integer numSkillsRequired = skillsGroupAdminService.getActualNumSkillsRequred(skillDef.numSkillsRequired, skillDef.id)
                 skillsSummary.children = createSkillSummaries(thisProjDef, groupChildrenMeta.childrenWithPoints, false, userId, version)
-                skillsSummary.points = skillsSummary.children ? skillsSummary.children.collect({ it.points }).sum() as Integer : 0
+                skillsSummary.points = skillsSummary.children ? skillsSummary.children.collect({it.points}).sort().takeRight(numSkillsRequired).sum() as Integer: 0
                 skillsSummary.todaysPoints = skillsSummary.children ? skillsSummary.children.collect({it.todaysPoints}).sort().takeRight(numSkillsRequired).sum() as Integer: 0
                 skillsRes << skillsSummary
             } else if (skillDef.type == SkillDef.ContainerType.Skill) {
@@ -938,7 +937,7 @@ class SkillsLoader {
 
         int maxLevel = Integer.MAX_VALUE
         if(subjectDef){
-            maxLevel = subjectDef.levelDefinitions.size()
+            maxLevel = levelDefService.maxSubjectLevel(subjectDef)
         }else{
             maxLevel = levelDefService.maxProjectLevel(projDef)
         }

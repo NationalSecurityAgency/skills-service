@@ -60,9 +60,16 @@ class OAuthUtils {
             UserInfo currentUser = new UserInfo(
                     username: proxyUserId,
                     proxied: true,
-                    proxyingSystemId: auth.principal
+                    proxyingSystemId: auth.principal,
+                    firstName: "${proxyUserId.substring(0,1)}.",
+                    lastName: proxyUserId
             )
-            // Create new Authentication using UserInfo
+
+            // create/update the UserInfo to remain consistent with other auth mechanisms
+            // this flow needs to something akin to getOrCreateIfNotExists WITHOUT update
+            currentUser = userAuthService.getOrCreate(currentUser)
+            currentUser.proxyingSystemId = auth.principal
+
             skillsAuth = new UsernamePasswordAuthenticationToken(currentUser, null, currentUser.authorities)
         } else {
             throw new InvalidTokenException("client_credentials grant_type must specify $AuthorizationServerConfig.SKILLS_PROXY_USER field")

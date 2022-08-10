@@ -86,6 +86,22 @@ class UserAttrsService {
         return updateIfNecessary(updateUserTags, updateUserAttrs, userId, userAttrs, userInfo)
     }
 
+    @Transactional
+    @Profile
+    UserAttrs getOrCreate(String userId, UserInfo userInfo) {
+        validateUserId(userId)
+
+        UserAttrs userAttrs = loadUserAttrsFromLocalDb(userId)
+
+        if (!userAttrs) {
+            // no userAttrs existed, creating for the first time
+            userAttrs = new UserAttrs(userId: userId?.toLowerCase(), userIdForDisplay: userId, userTagsLastUpdated: new Date())
+            return updateIfNecessary(false, true, userId, userAttrs, userInfo)
+        }
+
+        return loadUserAttrsFromLocalDb(userId)
+    }
+
     @Profile
     private UserAttrs updateIfNecessary(boolean updateUserTags, boolean updateUserAttrs, String userId, UserAttrs userAttrs, UserInfo userInfo) {
         if (updateUserTags || updateUserAttrs) {

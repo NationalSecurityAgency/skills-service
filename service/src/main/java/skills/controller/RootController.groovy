@@ -19,6 +19,7 @@ import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
@@ -35,6 +36,7 @@ import skills.controller.request.model.UserTagRequest
 import skills.controller.result.model.ProjectResult
 import skills.controller.result.model.RequestResult
 import skills.controller.result.model.SettingsResult
+import skills.controller.result.model.TableResult
 import skills.controller.result.model.UserInfoRes
 import skills.controller.result.model.UserRoleRes
 import skills.profile.EnableCallStackProf
@@ -56,6 +58,9 @@ import skills.storage.repos.UserTagRepo
 import javax.xml.bind.DatatypeConverter
 import java.security.MessageDigest
 import java.security.Principal
+
+import static org.springframework.data.domain.Sort.Direction.ASC
+import static org.springframework.data.domain.Sort.Direction.DESC
 
 @RestController
 @RequestMapping('/root')
@@ -180,8 +185,13 @@ class RootController {
 
     @GetMapping('/users/roles/{roleName}')
     @ResponseBody
-    List<UserRoleRes> getUserRolesWithRole(@PathVariable("roleName") RoleName roleName) {
-        return accessSettingsStorageService.getUserRolesWithRole(roleName)
+    TableResult getUserRolesWithRole(@PathVariable("roleName") RoleName roleName,
+                                     @RequestParam int limit,
+                                     @RequestParam int page,
+                                     @RequestParam String orderBy,
+                                     @RequestParam Boolean ascending) {
+        PageRequest pagingRequest = createPagingRequest(limit, page, orderBy, ascending)
+        return accessSettingsStorageService.getUserRolesWithRole(roleName, pagingRequest)
     }
 
     @PutMapping('/users/{userKey}/roles/{roleName}')
@@ -355,5 +365,13 @@ class RootController {
         } else {
             return userKey
         }
+    }
+
+    private static PageRequest createPagingRequest(int limit, int page, String orderBy, Boolean ascending) {
+        SkillsValidator.isTrue(limit <= 200, "Cannot ask for more than 200 items, provided=[${limit}]")
+        SkillsValidator.isTrue(page >= 0, "Cannot provide negative page. provided =[${page}]")
+        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
+
+        return pageRequest
     }
 }

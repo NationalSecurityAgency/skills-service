@@ -15,8 +15,10 @@
  */
 package skills.auth
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpMethod
+import org.springframework.security.access.AccessDecisionManager
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.stereotype.Component
 import skills.storage.model.auth.RoleName
@@ -35,6 +37,9 @@ class PortalWebSecurityHelper {
 
     @Value('#{"${management.endpoints.web.path-mapping.prometheus:prometheus}"}')
     String prometheusPath
+
+    @Autowired
+    AccessDecisionManager accessDecisionManager
 
     HttpSecurity configureHttpSecurity(HttpSecurity http) {
 
@@ -62,7 +67,7 @@ class PortalWebSecurityHelper {
             .antMatchers('/root/isRoot').hasAnyAuthority(RoleName.values().collect {it.name()}.toArray(new String[0]))
             .antMatchers('/root/**').hasRole('SUPER_DUPER_USER')
             .antMatchers("/${managementPath}/**").hasRole('SUPER_DUPER_USER')
-            .anyRequest().authenticated()
+            .anyRequest().authenticated().accessDecisionManager(accessDecisionManager)
         http.headers().frameOptions().disable()
 
         return http

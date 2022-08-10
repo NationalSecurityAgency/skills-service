@@ -72,24 +72,20 @@ class LevelPointsSettingListener implements SettingChangedListener{
             levelUtils.convertToPoints(levelDefs, project.totalPoints)
             levelDefRepo.saveAll(levelDefs)
             project.subjects?.each{
-                levelUtils.convertToPoints(it.levelDefinitions, it.totalPoints == 0 ? LevelUtils.defaultTotalPointsGuess : it.totalPoints)
-                it.levelDefinitions.each { LevelDef level ->
-                    levelDefRepo.save(level)
-                }
+                List<LevelDef> subjectLevelDefs = levelDefRepo.findAllBySkillRefId(it.id)
+                levelUtils.convertToPoints(subjectLevelDefs, it.totalPoints == 0 ? LevelUtils.defaultTotalPointsGuess : it.totalPoints)
+                levelDefRepo.saveAll(subjectLevelDefs)
             }
         }else if(!setting.isEnabled()){
             log.info("converting all levels for project [${setting.projectId}] (including skill levels) to percentages")
             List<LevelDef> levelDefs = levelDefRepo.findAllByProjectRefId(project.id)
             levelUtils.convertToPercentage(levelDefs, project.totalPoints)
             levelDefRepo.saveAll(levelDefs)
-            project.subjects?.each{
-                log.info("converting level definitions ${it.levelDefinitions} for subject ${it}")
-                //conditions we need to handle:
-                levelUtils.convertToPercentage(it.levelDefinitions, it.totalPoints)
-                it.levelDefinitions.each{ LevelDef level ->
-                    levelDefRepo.save(level)
-                }
-
+            project.subjects?.each {
+                List<LevelDef> subjectLevelDefs = levelDefRepo.findAllBySkillRefId(it.id)
+                log.info("converting level definitions ${subjectLevelDefs} for subject ${it}")
+                levelUtils.convertToPercentage(subjectLevelDefs, it.totalPoints)
+                levelDefRepo.saveAll(subjectLevelDefs)
             }
         }
     }

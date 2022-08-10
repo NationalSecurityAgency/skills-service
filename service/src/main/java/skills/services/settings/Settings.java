@@ -26,7 +26,8 @@ public enum Settings {
     GLOBAL_CUSTOM_FOOTER("custom_footer"),
     GLOBAL_USER_AGREEMENT("user_agreement"),
     GLOBAL_USER_AGREEMENT_VERSION("user_agreement_version"),
-    USER_VIEWED_USER_AGREEMENT("viewed_user_agreement");
+    USER_VIEWED_USER_AGREEMENT("viewed_user_agreement"),
+    INVITE_ONLY_PROJECT("invite_only");
 
 
     private String settingName;

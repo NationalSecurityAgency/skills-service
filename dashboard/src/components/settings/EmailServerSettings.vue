@@ -16,29 +16,6 @@ limitations under the License.
 <template>
   <ValidationObserver ref="observer" v-slot="{invalid, pristine}" slim>
     <div>
-          <div class="form-group">
-            <label class="label" for="publicUrl">* Public URL <InlineHelp target-id="publicUrlHelp" msg="Because it is possible for the SkillTree dashboard
-            to be deployed behind a load balancer or proxy, it is necessary to configure the public url so that email
-            based communications from the system can provide valid links back to the SkillTree dashboard."/></label>
-            <ValidationProvider rules="required" name="Public URL" v-slot="{ errors }" :debounce=500>
-              <input class="form-control" type="text" v-model="emailInfo.publicUrl" name="publicUrl"
-                     data-cy="publicUrlInput" aria-required="true"
-                    id="publicUrl"
-                    :aria-invalid="errors && errors.length > 0"
-                    aria-errormessage="publicUrlError" aria-describedby="publicUrlError"/>
-              <p role="alert" class="text-danger" v-show="errors[0]" id="publicUrlError" data-cy="publicUrlError">{{errors[0]}}</p>
-            </ValidationProvider>
-          </div>
-          <div class="form-group">
-            <label class="label" for="fromEmail">* From Email <InlineHelp target-id="fromEmailHelp" msg="The From email address used in all email originating from the SkillTree application"/></label>
-            <ValidationProvider :rules="{email:{require_tld:false,allow_ip_domain:true}}" name="From Email" v-slot="{ errors }" :debounce=500>
-              <input class="form-control" type="text" v-model="emailInfo.fromEmail" name="fromEmail"
-                     data-cy="fromEmailInput" id="fromEmail"
-                    :aria-invalid="errors && errors.length  > 0"
-                    aria-errormessage="fromEmailError" aria-describedby="fromEmailError"/>
-              <p role="alert" class="text-danger" v-show="errors[0]" data-cy="fromEmailError" id="fromEmailError">{{errors[0]}}</p>
-            </ValidationProvider>
-          </div>
       <div class="form-group">
         <label class="label" for="emailHost">* Host</label>
         <ValidationProvider name="Host" :debounce=500 v-slot="{errors}" rules="required">
@@ -135,7 +112,6 @@ limitations under the License.
   import { min_value, max_value } from 'vee-validate/dist/rules';
   import SettingsService from './SettingsService';
   import ToastSupport from '../utils/ToastSupport';
-  import InlineHelp from '../utils/InlineHelp';
 
   extend('min_value', {
     // eslint-disable-next-line camelcase
@@ -151,9 +127,6 @@ limitations under the License.
   export default {
     name: 'EmailServerSettings',
     mixins: [ToastSupport],
-    components: {
-      InlineHelp,
-    },
     data() {
       return {
         emailInfo: {
@@ -164,8 +137,6 @@ limitations under the License.
           password: '',
           authEnabled: false,
           tlsEnabled: false,
-          publicUrl: '',
-          fromEmail: 'no_reply@skilltree',
         },
         isTesting: false,
         isSaving: false,
@@ -243,7 +214,7 @@ limitations under the License.
         });
       },
       missingRequiredValues() {
-        return !this.isAuthValid() || !this.emailInfo.host || !this.emailInfo.port || !this.emailInfo.protocol || !this.emailInfo.publicUrl || !this.emailInfo.fromEmail;
+        return !this.isAuthValid() || !this.emailInfo.host || !this.emailInfo.port || !this.emailInfo.protocol;
       },
       isAuthValid() {
         return !this.emailInfo.authEnabled || (this.emailInfo.username && this.emailInfo.password);

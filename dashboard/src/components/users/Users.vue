@@ -80,6 +80,7 @@ limitations under the License.
       return {
         loading: true,
         initialLoad: true,
+        inviteOnlyProject: false,
         data: [],
         filters: {
           userId: '',

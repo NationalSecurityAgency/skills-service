@@ -50,6 +50,8 @@
         <micrometer-registry.version>1.8.1</micrometer-registry.version>
 
         <db-scheduler.version>10.5</db-scheduler.version>
+
+        <caffeine.version>3.1.1</caffeine.version>
     </properties>
 
     <parent>

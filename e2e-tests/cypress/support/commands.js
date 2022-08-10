@@ -557,6 +557,26 @@ Cypress.Commands.add('clearDb', () => {
     }
 });
 
+Cypress.Commands.add('createInviteOnly', () => {
+    const db = LookupUtil.getDb();
+
+    // first call to npm fails, looks like this may be the bug: https://github.com/cypress-io/cypress/issues/6081
+    cy.exec('npm version', {failOnNonZeroExit: false})
+    if (db && db === 'postgres') {
+        cy.exec('npm run backend:setupInviteOnly:postgres', {failOnNonZeroExit: false}).then((res) => {
+            cy.log(res.stdout);
+            cy.log(res.stderr);
+            cy.log(res.code);
+        });
+    } else {
+        cy.exec('npm run backend:setupInviteOnly', {failOnNonZeroExit: false}).then((res) => {
+           cy.log(res.stdout);
+           cy.log(res.stderr);
+           cy.log(res.code);
+        });
+    }
+})
+
 Cypress.Commands.add('waitForBackendAsyncTasksToComplete', () => {
     const db = LookupUtil.getDb();
 
