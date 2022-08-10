@@ -50,6 +50,8 @@ drop table custom_icons;
 
 drop table project_error;
 
+drop table project_access_token;
+
 drop table project_definition;
 
 drop table user_token;
