@@ -15,6 +15,7 @@
  */
 package skills.services
 
+import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
@@ -194,6 +195,7 @@ class SkillApprovalService {
         ]
     }
 
+    @Profile
     void modifyApprovalsWhenSelfReportingTypeChanged(SkillDefWithExtra existing, SkillDef.SelfReportingType incomingType) {
         if (existing.selfReportingType == incomingType) {
             return;

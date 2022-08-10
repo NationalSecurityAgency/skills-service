@@ -15,6 +15,7 @@
  */
 package skills.services
 
+import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Value
@@ -78,6 +79,7 @@ class CustomValidator {
         return validateDescriptionAndName(subjectRequest.description, subjectRequest.name)
     }
 
+    @Profile
     CustomValidationResult validate(SkillRequest skillRequest) {
         return validateDescriptionAndName(skillRequest.description, skillRequest.name)
     }

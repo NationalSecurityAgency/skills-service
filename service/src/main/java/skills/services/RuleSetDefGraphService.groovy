@@ -15,6 +15,7 @@
  */
 package skills.services
 
+import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -97,6 +98,7 @@ class RuleSetDefGraphService {
         skillDefRepo.deleteAll(toDelete)
     }
 
+    @Profile
     @Transactional
     void assignGraphRelationship(String projectId, String skillId, SkillDef.ContainerType skillType,
                                  String relationshipSkillId, RelationshipType relationshipType, boolean validateEnabled = false) {

@@ -99,8 +99,14 @@ limitations under the License.
 
     <edit-project v-if="newProject.show" v-model="newProject.show" :project="newProject.project"
                   @project-saved="projectAdded" @hidden="handleHide" :is-edit="newProject.isEdit"/>
-    <pin-projects v-if="showSearchProjectModal" v-model="showSearchProjectModal" @done="pinModalClosed"/>
-
+    <pin-projects v-if="showSearchProjectModal" v-model="showSearchProjectModal"
+                  @done="pinModalClosed"/>
+    <lengthy-operation-progress-bar-modal v-if="copyProgressModal.show"
+                                          v-model="copyProgressModal.show"
+                                          :is-complete="copyProgressModal.isComplete"
+                                          @operation-done="loadProjectsAfterCopy"
+                                          title="Copying Project's Training Profile"
+                                          success-message="Project was successfully copied, please enjoy!"/>
   </div>
 
 </template>
@@ -117,6 +123,8 @@ limitations under the License.
   import PinProjects from './PinProjects';
   import ProjectsTable from './ProjectsTable';
   import SettingsService from '../settings/SettingsService';
+  import LengthyOperationProgressBarModal
+    from '@/components/utils/modal/LengthyOperationProgressBarModal';
 
   export default {
     name: 'MyProjects',
@@ -127,16 +135,25 @@ limitations under the License.
         newProject: {
           show: false,
           isEdit: false,
-          project: { name: '', projectId: '' },
+          project: {
+            name: '',
+            projectId: ''
+          },
         },
         showSearchProjectModal: false,
         sortOrder: {
           loading: false,
           loadingProjectId: '-1',
         },
+        copyProgressModal: {
+          show: false,
+          isComplete: false,
+          copiedProjectId: '',
+        },
       };
     },
     components: {
+      LengthyOperationProgressBarModal,
       PinProjects,
       NoContent2,
       SubPageHeader,
@@ -205,14 +222,20 @@ limitations under the License.
           });
       },
       copyProject(projectInfo) {
-        this.isLoading = true;
+        this.copyProgressModal.isComplete = false;
+        this.copyProgressModal.copiedProjectId = '';
+        this.copyProgressModal.show = true;
         ProjectService.copyProject(projectInfo.originalProjectId, projectInfo.newProject)
           .then(() => {
-            this.loadProjects()
-              .then(() => {
-                this.focusOnProjectCard(projectInfo.newProject.projectId);
-              });
+            this.copyProgressModal.copiedProjectId = projectInfo.newProject.projectId;
+            this.copyProgressModal.isComplete = true;
             this.$announcer.polite(`Project ${projectInfo.newProject.name} was copied`);
+          });
+      },
+      loadProjectsAfterCopy() {
+        this.loadProjects()
+          .then(() => {
+            this.focusOnProjectCard(this.copyProgressModal.copiedProjectId);
           });
       },
       projectAdded(project) {

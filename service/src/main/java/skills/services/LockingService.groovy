@@ -15,6 +15,7 @@
  */
 package skills.services
 
+import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
@@ -73,6 +74,7 @@ class LockingService {
         return res
     }
 
+    @Profile
     ProjDef lockProject(String projectId) {
         assert projectId
         return skillsDBLockRepo.findByProjectIdIgnoreCase(projectId)
