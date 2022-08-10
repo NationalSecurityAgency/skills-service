@@ -26,7 +26,7 @@ var version = dependencies[skillsClient];
 
 var versionString = skillsClient + '-' + version;
 
-fs.writeFile('../service/src/main/resources/client-version.json', versionString, function (err) {
+fs.writeFile('../service/src/main/resources/client-version', versionString, function (err) {
     if (err) {
         return console.log(err);
     }
