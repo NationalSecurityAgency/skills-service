@@ -114,15 +114,15 @@ limitations under the License.
 <script>
   import Sortable from 'sortablejs';
   import { SkillsReporter } from '@skilltree/skills-client-vue';
-  import MyProject from './MyProject';
-  import EditProject from './EditProject';
-  import LoadingContainer from '../utils/LoadingContainer';
-  import ProjectService from './ProjectService';
-  import SubPageHeader from '../utils/pages/SubPageHeader';
-  import NoContent2 from '../utils/NoContent2';
-  import PinProjects from './PinProjects';
-  import ProjectsTable from './ProjectsTable';
-  import SettingsService from '../settings/SettingsService';
+  import MyProject from '@/components/projects/MyProject';
+  import EditProject from '@/components/projects/EditProject';
+  import LoadingContainer from '@/components/utils/LoadingContainer';
+  import ProjectService from '@/components/projects/ProjectService';
+  import SubPageHeader from '@/components/utils/pages/SubPageHeader';
+  import NoContent2 from '@/components/utils/NoContent2';
+  import PinProjects from '@/components/projects/PinProjects';
+  import ProjectsTable from '@/components/projects/ProjectsTable';
+  import SettingsService from '@/components/settings/SettingsService';
   import LengthyOperationProgressBarModal
     from '@/components/utils/modal/LengthyOperationProgressBarModal';
 
