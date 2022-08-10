@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <b-progress :max="max" :height="height" :variant="variant">
-    <b-progress-bar :value="current" :aria-labelledby="`${name} Progress`"></b-progress-bar>
+  <b-progress :max="max" :height="height" :variant="variant" :animated="animated">
+    <b-progress-bar :value="current" :aria-label="`${name} Progress`"></b-progress-bar>
   </b-progress>
 </template>
 
@@ -39,6 +39,10 @@ limitations under the License.
       height: {
         type: String,
         default: '6px',
+      },
+      animated: {
+        type: Boolean,
+        default: false,
       },
     },
     data() {
