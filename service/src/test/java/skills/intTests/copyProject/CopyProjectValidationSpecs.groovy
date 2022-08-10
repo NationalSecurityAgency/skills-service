@@ -18,6 +18,7 @@ package skills.intTests.copyProject
 import org.springframework.beans.factory.annotation.Value
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
+import spock.lang.IgnoreIf
 
 import static skills.intTests.utils.SkillsFactory.createProject
 
@@ -50,6 +51,8 @@ class CopyProjectValidationSpecs extends DefaultIntSpec {
         ex.message.contains("Project with id [${p1.projectId}] already exists")
     }
 
+    // pki throws  403 – Forbidden instead
+    @IgnoreIf({ env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "validate project to copy exist"() {
         def p1 = createProject(1)
         when:
