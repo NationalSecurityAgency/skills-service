@@ -441,6 +441,57 @@ class CopyProjectSpecs extends DefaultIntSpec {
         ])
     }
 
+    def "validate cross-project dependencies are NOT copied"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        proj1_skills.each {
+            it.pointIncrement = 40
+        }
+
+        def proj2 = SkillsFactory.createProject(2)
+        def proj2_subj = SkillsFactory.createSubject(2, 2)
+        List<Map> proj2_skills = SkillsFactory.createSkills(2, 2, 2)
+        proj2_skills.each {
+            it.pointIncrement = 50
+        }
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        skillsService.createProject(proj2)
+        skillsService.createSubject(proj2_subj)
+        skillsService.createSkills(proj2_skills)
+
+        skillsService.shareSkill(proj1.projectId, proj1_skills.get(0).skillId, proj2.projectId)
+        skillsService.assignDependency([projectId         : proj2.projectId, skillId: proj2_skills.get(0).skillId,
+                                        dependentProjectId: proj1.projectId, dependentSkillId: proj1_skills.get(0).skillId,])
+
+        when:
+        // proj2 copy
+        def proj2ToCopy = createProject(3)
+        skillsService.copyProject(proj2.projectId, proj2ToCopy)
+
+        // proj1 copy
+        def proj1ToCopy = createProject(4)
+        skillsService.copyProject(proj1.projectId, proj1ToCopy)
+
+        def copiedDeps = skillsService.getDependencyGraph(proj2ToCopy.projectId)
+        def copiedDeps1 = skillsService.getDependencyGraph(proj1ToCopy.projectId)
+        def originalDeps = skillsService.getDependencyGraph(proj2.projectId)
+        then:
+        !copiedDeps.edges
+        !copiedDeps.nodes
+
+        !copiedDeps1.edges
+        !copiedDeps1.nodes
+
+        validateGraph(originalDeps, [
+                new Edge(from: proj2_skills.get(0).skillId, to: proj1_skills.get(0).skillId),
+        ])
+    }
+
     def "projects copied by a root user must be pinned to the user"() {
         SkillsService rootUser = createRootSkillService()
         def p1 = createProject(1)
