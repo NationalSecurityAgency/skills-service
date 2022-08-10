@@ -1429,7 +1429,19 @@ describe('Projects Tests', () => {
     }).as('sendInvites');
     cy.intercept('GET', '/api/myprojects/proj1/name').as('getName');
     cy.intercept('GET', '/api/projects/proj1/token').as('getToken');
-    cy.intercept('GET', '/admin/projects/proj1/userRoles/ROLE_PRIVATE_PROJECT_USER*').as('getApprovedUsers');
+    const userIdForDisplay = 'highlander'
+    cy.intercept('GET', '/admin/projects/proj1/userRoles/ROLE_PRIVATE_PROJECT_USER*', (req) => {
+      req.reply((res) => {
+        const payload = res.body;
+        if (payload.data && payload.data.length > 0) {
+          const userInfo = payload.data.find(el => el.userId === 'uuuuuu')
+          if (userInfo) {
+            userInfo.userIdForDisplay = userIdForDisplay;
+          }
+        }
+        res.send(payload);
+      });
+    }).as('getApprovedUsers');
     cy.intercept('DELETE', '/admin/projects/proj1/users/*/roles/ROLE_PRIVATE_PROJECT_USER').as('removeAccess');
 
     cy.visit('/administrator/projects/proj1/settings')
@@ -1460,20 +1472,11 @@ describe('Projects Tests', () => {
     cy.getLinkFromEmail().then((inviteLink) => {
       cy.register('uuuuuu', 'password', false);
       cy.logout();
-
-      cy.intercept('GET', '/app/userInfo', (req) => {
-        req.reply((res) => {
-          const userInfo = res.body;
-          userInfo.userIdForDisplay = 'BLAH DE DAH';
-          res.send(userInfo);
-        });
-      }).as('loadUserInfo');
       cy.login('uuuuuu', 'password');
 
       cy.visit('/progress-and-rankings/projects/proj1');
-      // cy.contains('User Not Authorized').should('be.visible');
+      cy.contains('User Not Authorized').should('be.visible');
 
-      cy.log('CISITING LINK')
       cy.visit(inviteLink);
       cy.get('[data-cy=joinProject]').should('be.visible');
       cy.get('[data-cy=breadcrumb-item]').contains('Join Project This is project 1').should('be.visible');
@@ -1492,13 +1495,13 @@ describe('Projects Tests', () => {
         cy.visit('/administrator/projects/proj1/access')
         cy.wait('@emailSupported');
         cy.wait('@getApprovedUsers');
-        cy.get('[data-cy=privateProjectUsersTable]').contains('uuuuuu').should('be.visible');
+        cy.get('[data-cy=privateProjectUsersTable]').contains(userIdForDisplay).should('be.visible');
         cy.get('[data-cy="privateProjectUsersTable_revokeUserAccessBtn"]').click();
-        cy.contains('Are you sure you want to revoke uuuuuu\'s access to this Project? uuuuuu\'s achievements will NOT be deleted, however uuuuuu will no longer be able to access the training profile.').should('be.visible');
+        cy.contains(`Are you sure you want to revoke ${userIdForDisplay}'s access to this Project? ${userIdForDisplay}'s achievements will NOT be deleted, however ${userIdForDisplay} will no longer be able to access the training profile.`).should('be.visible');
         cy.clickButton('Yes, revoke access!');
         cy.wait('@removeAccess');
         cy.wait('@getApprovedUsers');
-        cy.get('[data-cy=privateProjectUsersTable]').contains('uuuuuu').should('not.exist');
+        cy.get('[data-cy=privateProjectUsersTable]').contains(userIdForDisplay).should('not.exist');
         cy.logout();
         cy.login('uuuuuu', 'password');
 
