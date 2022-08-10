@@ -274,7 +274,10 @@ class ProjectCopyService {
     @Profile
     private void saveDependencies(ProjDef fromProject, toProj) {
         List<SkillsDepsService.GraphSkillDefEdge> edges = skillsDepsService.loadGraphEdges(fromProject.projectId, SkillRelDef.RelationshipType.Dependence)
-        edges.each {
+        List<SkillsDepsService.GraphSkillDefEdge> localOnlyEdges = edges.findAll { SkillsDepsService.GraphSkillDefEdge graphSkillDefEdge ->
+            graphSkillDefEdge.to.projectId == fromProject.projectId && graphSkillDefEdge.from.projectId == fromProject.projectId
+        }
+        localOnlyEdges.each {
             skillsDepsService.assignSkillDependency(toProj.projectId, it.from.skillId, it.to.skillId)
         }
     }
