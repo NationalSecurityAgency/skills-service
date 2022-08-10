@@ -613,8 +613,12 @@ class SkillsAdminService {
 
         List<SkillDef> nextSkills = skillDefRepo.getSkillDefByDisplayOrder(projectId, skillId, finalRes.displayOrder + 1, PageRequest.of(0, 1))
         List<SkillDef> prevSkills = skillDefRepo.getSkillDefByDisplayOrder(projectId, skillId, finalRes.displayOrder - 1, PageRequest.of(0, 1))
-        finalRes.nextSkillId = nextSkills[0].skillId
-        finalRes.prevSkillId = prevSkills[0].skillId
+        if(nextSkills.size() > 0) {
+            finalRes.nextSkillId = nextSkills[0].skillId
+        }
+        if(prevSkills.size() > 0) {
+            finalRes.prevSkillId = prevSkills[0].skillId
+        }
         finalRes.thisSkillWasReusedElsewhere = skillDefRepo.wasThisSkillReusedElsewhere(res.id)
         return finalRes
     }
