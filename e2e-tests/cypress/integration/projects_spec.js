@@ -1414,7 +1414,7 @@ describe('Projects Tests', () => {
         .should('have.focus');
   });
 
-  it('invite only project full flow', () => {
+  it.only('invite only project full flow', () => {
     cy.createProject(1);
     cy.intercept('GET', '/admin/projects/proj1/settings').as('getSettings');
     cy.intercept('POST', '/admin/projects/proj1/settings').as('saveSettings');
@@ -1460,11 +1460,20 @@ describe('Projects Tests', () => {
     cy.getLinkFromEmail().then((inviteLink) => {
       cy.register('uuuuuu', 'password', false);
       cy.logout();
+
+      cy.intercept('GET', '/app/userInfo', (req) => {
+        req.reply((res) => {
+          const userInfo = res.body;
+          userInfo.userIdForDisplay = 'BLAH DE DAH';
+          res.send(userInfo);
+        });
+      }).as('loadUserInfo');
       cy.login('uuuuuu', 'password');
 
       cy.visit('/progress-and-rankings/projects/proj1');
-      cy.contains('User Not Authorized').should('be.visible');
+      // cy.contains('User Not Authorized').should('be.visible');
 
+      cy.log('CISITING LINK')
       cy.visit(inviteLink);
       cy.get('[data-cy=joinProject]').should('be.visible');
       cy.get('[data-cy=breadcrumb-item]').contains('Join Project This is project 1').should('be.visible');
