@@ -105,8 +105,9 @@ limitations under the License.
                                           v-model="copyProgressModal.show"
                                           :is-complete="copyProgressModal.isComplete"
                                           @operation-done="loadProjectsAfterCopy"
-                                          title="Copying Project's Training Profile"
-                                          success-message="Project was successfully copied, please enjoy!"/>
+                                          title="Copying Project"
+                                          progress-message="Copying Project's Training Profile"
+                                          success-message="Project's training profile was successfully copied, please enjoy!"/>
   </div>
 
 </template>
