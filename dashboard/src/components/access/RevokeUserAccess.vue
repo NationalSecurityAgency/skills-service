@@ -42,7 +42,7 @@ limitations under the License.
           {{ getUserDisplay(data.item) }}
 
           <b-button-group class="float-right">
-            <b-button @click="revokeAccess(data.value)"
+            <b-button @click="revokeAccess(data.value, getUserDisplay(data.item))"
                       variant="outline-info" size="sm" class="text-secondary"
                       v-b-tooltip.hover="'Remove user access to project'"
                       :aria-label="`Remove project access for ${getUserDisplay(data.item)}`"
@@ -148,16 +148,16 @@ limitations under the License.
           this.table.options.busy = false;
         });
       },
-      revokeAccess(userId) {
-        const msg = `Are you sure you want to revoke ${userId}'s access to this Project? ${userId}'s achievements will NOT be deleted,
-        however ${userId} will no longer be able to access the training profile.`;
+      revokeAccess(userId, userIdForDisplay) {
+        const msg = `Are you sure you want to revoke ${userIdForDisplay}'s access to this Project? ${userIdForDisplay}'s achievements will NOT be deleted,
+        however ${userIdForDisplay} will no longer be able to access the training profile.`;
         this.msgConfirm(msg, 'Revoke Access', 'Yes, revoke access!').then((ok) => {
           if (ok) {
             this.table.options.busy = true;
             AccessService.deleteUserRole(this.$route.params.projectId, userId, 'ROLE_PRIVATE_PROJECT_USER').then(() => {
               this.loadData();
               this.$nextTick(() => {
-                this.$announcer.polite(`Revoked project access for user ${userId}`);
+                this.$announcer.polite(`Revoked project access for user ${userIdForDisplay}`);
               });
             }).finally(() => {
               this.table.options.busy = false;

@@ -38,6 +38,10 @@ describe('Copy Project Tests', () => {
             .should('have.text', 'Copy Project');
         cy.get('[data-cy="saveProjectButton"]')
             .click();
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="successMessage"]')
+            .contains('Project\'s training profile was successfully copied');
+        cy.get('[data-cy="allDoneBtn"]')
+            .click();
         cy.get('[id="projNewProject"]')
             .should('have.focus');
 
@@ -91,6 +95,24 @@ describe('Copy Project Tests', () => {
         cy.get('[data-cy="manageSkillBtn_skill2"]');
     });
 
+    it('focus is returned after modal close button is clicked', () => {
+        cy.createProject(2); // another project in the mix
+
+        cy.visit('/administrator/');
+        cy.get('[data-cy="projectCard_proj1"] [data-cy="copyProjBtn"]')
+            .click();
+        cy.get('[data-cy="projectName"]')
+            .type('New Project');
+        cy.get('[data-cy="saveProjectButton"]')
+            .click();
+        cy.get('[data-cy="allDoneBtn"]')
+            .should('exist');
+        cy.get('.modal-content [aria-label="Close"]')
+            .click();
+        cy.get('[id="projNewProject"]')
+            .should('have.focus');
+    });
+
     it('canceling copy modal should return focus to the copy button', () => {
         cy.createProject(2); // another project in the mix
 
@@ -122,6 +144,7 @@ describe('Copy Project Tests', () => {
             .should('be.disabled');
     });
 
+
     it('projects table: copy project', () => {
         for (let i = 2; i <= 18; i += 1) {
             cy.createProject(i);
@@ -143,6 +166,8 @@ describe('Copy Project Tests', () => {
             .should('have.text', 'Copy Project');
         cy.get('[data-cy="saveProjectButton"]')
             .click();
+        cy.get('[data-cy="allDoneBtn"]')
+            .click();
         cy.get('[id="projNewProject"]')
             .should('have.focus');
 
@@ -153,6 +178,31 @@ describe('Copy Project Tests', () => {
             .click();
         cy.get('[data-cy="manageSkillBtn_skill1"]');
         cy.get('[data-cy="manageSkillBtn_skill2"]');
+    });
+
+    it('project copy cause view to switch to a table', () => {
+        for (let i = 2; i <= 9; i += 1) {
+            cy.createProject(i);
+        }
+        cy.visit('/administrator/');
+        // verify that cards are shown
+        cy.get('[data-cy="projectCard_proj1"]');
+
+        cy.get('[data-cy="projectCard_proj1"] [data-cy="copyProjBtn"]')
+            .click();
+        cy.get('[data-cy="projectName"]')
+            .type('New Project');
+        cy.get('[data-cy="saveProjectButton"]')
+            .click();
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="successMessage"]')
+            .contains('Project\'s training profile was successfully copied');
+        cy.get('[data-cy="allDoneBtn"]')
+            .click();
+        cy.get('[id="projNewProject"]')
+            .should('have.focus');
+
+        // verify it is now table view
+        cy.get('[data-cy="projCell_NewProject"]');
     });
 
     it('project table: canceling copy modal should return focus to the copy button', () => {

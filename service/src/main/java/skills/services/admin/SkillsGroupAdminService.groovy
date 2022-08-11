@@ -77,6 +77,7 @@ class SkillsGroupAdminService {
     @Autowired
     SkillRelDefRepo skillRelDefRepo
 
+    @Profile
     @Transactional()
     void addSkillToSkillsGroup(String projectId, String skillsGroupId, String skillId) {
         ruleSetDefGraphService.assignGraphRelationship(projectId, skillsGroupId, SkillDef.ContainerType.SkillsGroup, skillId, SkillRelDef.RelationshipType.SkillsGroupRequirement)
@@ -134,6 +135,7 @@ class SkillsGroupAdminService {
         return skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, groupId, SkillDef.ContainerType.SkillsGroup)
     }
 
+    @Profile
     int getGroupTotalPoints(List<SkillDef> groupChildSkills) {
         int totalPoints = 0
         if (groupChildSkills) {

@@ -814,6 +814,7 @@ class SkillsAdminService {
         this.loadSkinnySkills(projectId, '')
     }
 
+    @Profile
     private void validateSkillVersion(SkillRequest skillRequest) {
         int latestSkillVersion = findLatestSkillVersion(skillRequest.projectId)
         if (skillRequest.version > (latestSkillVersion + 1)) {
@@ -821,6 +822,7 @@ class SkillsAdminService {
         }
     }
 
+    @Profile
     private void assignToParent(SkillRequest skillRequest, SkillDef savedSkill, SkillDef parent=null) {
         String parentSkillId = skillRequest.subjectId
         SkillDef.ContainerType containerType = SkillDef.ContainerType.Subject

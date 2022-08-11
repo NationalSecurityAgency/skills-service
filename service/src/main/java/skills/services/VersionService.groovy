@@ -31,20 +31,21 @@ class VersionService {
     @Autowired
     ProjectErrorService projectErrorService;
 
-    @Value("classpath:client-version.json")
+    @Value("classpath:client-version")
     Resource resourceFile;
 
     @Memoized
     public String getCurrentVersion() {
-        File file;
+        InputStream file;
         String data = "";
 
         try {
-            file = resourceFile.getFile();
-            data = FileUtils.readFileToString(file, "UTF-8");
+            file = resourceFile.getInputStream();
+            data = file.getText("UTF-8");
         }
-        catch(Exception e) {
-            log.info("Failed to read file");
+        catch(IOException e) {
+            log.info("Failed to read file from the classpath");
+            throw e;
         }
 
         return data;
