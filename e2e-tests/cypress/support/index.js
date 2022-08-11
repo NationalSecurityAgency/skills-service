@@ -85,16 +85,10 @@ beforeEach(function () {
         cy.log('configuring email');
         cy.request({
             method: 'POST',
-            url: '/root/saveSystemSettings',
+            url: '/root/saveEmailSettings',
             body: {
                 publicUrl: 'http://localhost:8082/',
                 fromEmail: 'noreploy@skilltreeemail.org',
-            }
-        });
-        cy.request({
-            method: 'POST',
-            url: '/root/saveEmailSettings',
-            body: {
                 host: 'localhost',
                 port: 1026,
                 'protocol': 'smtp'
