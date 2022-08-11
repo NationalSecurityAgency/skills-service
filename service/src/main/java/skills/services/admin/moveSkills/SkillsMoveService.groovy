@@ -177,6 +177,13 @@ class SkillsMoveService {
                 if (!moveSkillBetweenGroupsInTheSameSubject) {
                     ruleSetDefGraphService.removeGraphRelationship(projectId, subject.skillId, SkillDef.ContainerType.Subject, projectId, skillId, SkillRelDef.RelationshipType.GroupSkillToSubject)
                 }
+                if (parentSkill.numSkillsRequired > 0) {
+                    Long numSkillsInGroup = ruleSetDefGraphService.countChildrenSkills(projectId, parentSkill.skillId, [SkillRelDef.RelationshipType.SkillsGroupRequirement])
+                    if (numSkillsInGroup <= parentSkill.numSkillsRequired) {
+                        // -1 is the default = ALL
+                        parentSkill.numSkillsRequired = -1
+                    }
+                }
             } else {
                 ruleSetDefGraphService.removeGraphRelationship(projectId, parentSkill.skillId, SkillDef.ContainerType.Subject, projectId, skillId, SkillRelDef.RelationshipType.RuleSetDefinition)
             }

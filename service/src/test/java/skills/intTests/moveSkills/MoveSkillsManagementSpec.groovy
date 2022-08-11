@@ -15,7 +15,6 @@
  */
 package skills.intTests.moveSkills
 
-
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 
@@ -892,5 +891,97 @@ class MoveSkillsManagementSpec extends DefaultIntSpec {
 
         group2Skills.skillId == [p1SkillsGroup2[0].skillId, p1SkillsGroup2[1].skillId, p1Skills[1].skillId, p1Skills[2].skillId]
         group2Skills.displayOrder == [1, 2, 3, 4]
+    }
+
+    def "when skills moved out of a group AND (numSkillsRequired == # remaining); then reset numSkillsRequired to ALL"() {
+        def p1 = createProject(1)
+
+        def p1subj1 = createSubject(1, 1)
+        def p1subj1g1 = createSkillsGroup(1, 1, 8)
+        def p1subj1g2 = createSkillsGroup(1, 1, 9)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [p1subj1g1, p1subj1g2])
+        def p1Skills = createSkills(3, 1, 1, 100)
+        p1Skills.each {
+            skillsService.assignSkillToSkillsGroup(p1subj1g1.skillId, it)
+        }
+        p1subj1g1.numSkillsRequired = 2
+        skillsService.createSkill(p1subj1g1)
+
+        when:
+        skillsService.moveSkills(p1.projectId, [p1Skills[0].skillId], p1subj1g1.subjectId, p1subj1g2.skillId)
+        def subj1Skills = skillsService.getSkillsForSubject(p1.projectId, p1subj1.subjectId)
+        def group = subj1Skills.find { it.skillId == p1subj1g1.skillId }
+        then:
+        group.numSkillsRequired == -1
+        group.numSkillsInGroup == 2
+    }
+
+    def "when skills moved out of a group AND (numSkillsRequired > # remaining); then reset numSkillsRequired to ALL"() {
+        def p1 = createProject(1)
+
+        def p1subj1 = createSubject(1, 1)
+        def p1subj1g1 = createSkillsGroup(1, 1, 8)
+        def p1subj1g2 = createSkillsGroup(1, 1, 9)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [p1subj1g1, p1subj1g2])
+        def p1Skills = createSkills(3, 1, 1, 100)
+        p1Skills.each {
+            skillsService.assignSkillToSkillsGroup(p1subj1g1.skillId, it)
+        }
+        p1subj1g1.numSkillsRequired = 2
+        skillsService.createSkill(p1subj1g1)
+
+        when:
+        skillsService.moveSkills(p1.projectId, [p1Skills[0].skillId, p1Skills[1].skillId], p1subj1g1.subjectId, p1subj1g2.skillId)
+        def subj1Skills = skillsService.getSkillsForSubject(p1.projectId, p1subj1.subjectId)
+        def group = subj1Skills.find { it.skillId == p1subj1g1.skillId }
+        then:
+        group.numSkillsRequired == -1
+        group.numSkillsInGroup == 1
+    }
+
+    def "when all skills moved out of a group then reset numSkillsRequired to ALL"() {
+        def p1 = createProject(1)
+
+        def p1subj1 = createSubject(1, 1)
+        def p1subj1g1 = createSkillsGroup(1, 1, 8)
+        def p1subj1g2 = createSkillsGroup(1, 1, 9)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [p1subj1g1, p1subj1g2])
+        def p1Skills = createSkills(3, 1, 1, 100)
+        p1Skills.each {
+            skillsService.assignSkillToSkillsGroup(p1subj1g1.skillId, it)
+        }
+        p1subj1g1.numSkillsRequired = 2
+        skillsService.createSkill(p1subj1g1)
+
+        when:
+        skillsService.moveSkills(p1.projectId, [p1Skills[0].skillId, p1Skills[1].skillId, p1Skills[2].skillId], p1subj1g1.subjectId, p1subj1g2.skillId)
+        def subj1Skills = skillsService.getSkillsForSubject(p1.projectId, p1subj1.subjectId)
+        def group = subj1Skills.find { it.skillId == p1subj1g1.skillId }
+        then:
+        group.numSkillsRequired == -1
+        group.numSkillsInGroup == 0
+    }
+
+    def "when skills moved out of a group AND (numSkillsRequired < # remaining); then preserve numSkillsRequired"() {
+        def p1 = createProject(1)
+
+        def p1subj1 = createSubject(1, 1)
+        def p1subj1g1 = createSkillsGroup(1, 1, 8)
+        def p1subj1g2 = createSkillsGroup(1, 1, 9)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [p1subj1g1, p1subj1g2])
+        def p1Skills = createSkills(4, 1, 1, 100)
+        p1Skills.each {
+            skillsService.assignSkillToSkillsGroup(p1subj1g1.skillId, it)
+        }
+        p1subj1g1.numSkillsRequired = 2
+        skillsService.createSkill(p1subj1g1)
+
+        when:
+        skillsService.moveSkills(p1.projectId, [p1Skills[0].skillId], p1subj1g1.subjectId, p1subj1g2.skillId)
+        def subj1Skills = skillsService.getSkillsForSubject(p1.projectId, p1subj1.subjectId)
+        def group = subj1Skills.find { it.skillId == p1subj1g1.skillId }
+        then:
+        group.numSkillsRequired == 2
+        group.numSkillsInGroup == 3
     }
 }

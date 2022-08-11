@@ -466,4 +466,67 @@ describe('Move Skills Tests', () => {
             .should('have.text', '400');
     });
 
+    it('move ALL skills from a group with partial requirement then add a skill to a group', () => {
+        cy.createSkillsGroup(1, 1, 11);
+        cy.addSkillToGroup(1, 1, 11, 6);
+        cy.addSkillToGroup(1, 1, 11, 7);
+        cy.addSkillToGroup(1, 1, 11, 8);
+        cy.createSkillsGroup(1, 1, 11, { numSkillsRequired: 2 });
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.get('[data-cy="expandDetailsBtn_group11"]')
+            .click();
+        // must exist initially
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill6"]');
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill7"]');
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill8"]');
+
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillSelect-skill6"]')
+            .click({ force: true });
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillSelect-skill7"]')
+            .click({ force: true });
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillSelect-skill8"]')
+            .click({ force: true });
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]')
+            .click();
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillMoveBtn"]')
+            .click();
+
+        // step 1
+        cy.get('[data-cy="reuseSkillsModalStep1"]');
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj1"]')
+            .click();
+        cy.get('[data-cy="reuseSkillsModalStep1"]')
+            .should('not.exist');
+
+        // step 2
+        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+            .contains('3 skills will be moved to the [Subject 1] subject.');
+        cy.get('[data-cy="reuseButton"]')
+            .click();
+
+        // step 3
+        cy.get('[data-cy="reuseSkillsModalStep3"]')
+            .contains('Successfully moved 3 skills');
+        cy.get('[data-cy="okButton"]')
+            .click();
+
+        cy.get('[data-cy="nameCell_group11"] [data-cy="numSkillsInGroup"]')
+            .should('have.text', '0 skills');
+        cy.get('[data-cy="expandDetailsBtn_group11"]')
+            .click();
+        cy.get('[data-cy="addSkillToGroupBtn-group11"]')
+            .click();
+        cy.get('[data-cy="skillName"]')
+            .type('new skill');
+        cy.get('[data-cy="saveSkillButton"]')
+            .click();
+
+        // validate skill was created
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_newskillSkill"]');
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="requiredAllSkills"]');
+
+    });
+
 });
