@@ -197,7 +197,7 @@ describe('Root Pin and Unpin Tests', () => {
     });
   });
 
-  it('Assign a root user as a project admin and verify the project is pinned, then remove admin and verify it is unpinned', () => {
+  it.only('Assign a root user as a project admin and verify the project is pinned, then remove admin and verify it is unpinned', () => {
     cy.request('POST', '/app/projects/proj1', {
       projectId: 'proj1',
       name: "one"
@@ -259,7 +259,12 @@ describe('Root Pin and Unpin Tests', () => {
       const tableSelector = '[data-cy=roleManagerTable]'
       const rowSelector = `${tableSelector} tbody tr`
       cy.log('removing user');
-      cy.get(`${tableSelector} [data-cy="removeUserBtn"]`).eq(0).click();
+      if (!Cypress.env('oauthMode')) {
+        cy.get(`${tableSelector} [data-cy="removeUserBtn"]`).eq(0).click();
+      } else {
+        // in oauth mode the default user name is different which affects how the users are sorted
+        cy.get(`${tableSelector} [data-cy="removeUserBtn"]`).eq(1).click();
+      }
       cy.contains('YES, Delete It').click();
       cy.wait('@loadProjectAdmins');
       cy.get(rowSelector).should('have.length', 1).as('cyRows1');
