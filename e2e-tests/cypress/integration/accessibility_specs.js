@@ -488,11 +488,12 @@ describe('Accessibility Tests', () => {
     cy.get('[data-cy=nav-Email]').click();
     cy.contains('Email Connection Settings');
     cy.contains('TLS Disabled');
+    cy.contains('Public URL');
     cy.customLighthouse();
     cy.customA11y();
 
     cy.get('[data-cy=nav-System]').click();
-    cy.contains('Public URL');
+    cy.contains('Token Expiration');
     cy.customLighthouse();
     cy.customA11y();
   });

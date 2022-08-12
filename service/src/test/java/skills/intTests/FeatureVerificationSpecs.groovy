@@ -99,22 +99,15 @@ class FeatureVerificationSpecs extends DefaultIntSpec {
 
         when:
         assert !skillsService.isFeatureEnabled("emailservice")
-        rootSkillsService.addOrUpdateGlobalSetting("public_url",
-                ["setting": "public_url", "value": "http://localhost:${localPort}/".toString()])
-
-        assert !skillsService.isFeatureEnabled("emailservice")
-
-        rootSkillsService.addOrUpdateGlobalSetting("from_email",
-                ["setting": "from_email", "value": "resetspec@skilltreetests".toString()])
-
-        assert !skillsService.isFeatureEnabled("emailservice")
 
         rootSkillsService.getWsHelper().rootPost("/saveEmailSettings", [
                 "host"       : "localhost",
                 "port"       : 3923,
                 "protocol"   : "smtp",
                 "authEnabled": false,
-                "tlsEnabled" : false
+                "tlsEnabled" : false,
+                "publicUrl"  : "http://localhost:${localPort}/".toString(),
+                "fromEmail"  : "resetspec@skilltreetests"
         ])
 
         then:
