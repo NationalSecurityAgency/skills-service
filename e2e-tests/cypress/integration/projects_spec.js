@@ -1592,107 +1592,238 @@ describe('Projects Tests', () => {
     //try navigate away with recipients that have not yet been sent
     cy.get('[data-cy="nav-Issues"').click();
     cy.get('[data-cy="nav-Issues"]').should('not.have.class', 'bg-primary');
-    cy.get('[data-cy="nav-Access"]').should('have.class', 'bg-primary');
-    cy.contains('Discard Recipients?').should('be.visible');
-    cy.contains("Let's Go!").click();
+    cy.get('[data-cy="nav-Access"]')
+        .should('have.class', 'bg-primary');
+    cy.contains('Discard Recipients?')
+        .should('be.visible');
+    cy.contains('Let\'s Go!')
+        .click();
     //navigation should proceed
     cy.wait('@loadIssues');
-    cy.contains('Project Issues').should('be.visible');
-    cy.get('[data-cy="nav-Access"]').should('not.have.class', 'bg-primary');
-    cy.get('[data-cy="nav-Issues"]').should('have.class', 'bg-primary');
+    cy.contains('Project Issues')
+        .should('be.visible');
+    cy.get('[data-cy="nav-Access"]')
+        .should('not.have.class', 'bg-primary');
+    cy.get('[data-cy="nav-Issues"]')
+        .should('have.class', 'bg-primary');
   });
 
-  it('revoke access should support paging when users exceed minimum page size', () => {
-    cy.createInviteOnly();
-    cy.intercept('GET', '/admin/projects/TestInviteOnlyProject1/settings').as('getSettings');
-    cy.intercept('POST', '/admin/projects/TestInviteOnlyProject1/settings').as('saveSettings');
-    cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice').as('emailSupported');
-    cy.intercept('GET', '/api/myprojects/TestInviteOnlyProject1/name').as('getName');
-    cy.intercept('GET', '/api/projects/TestInviteOnlyProject1/token').as('getToken');
-    cy.intercept('GET', '/admin/projects/TestInviteOnlyProject1/userRoles/ROLE_PRIVATE_PROJECT_USER*').as('getApprovedUsers');
-    cy.intercept('DELETE', '/admin/projects/TestInviteOnlyProject1/users/*/roles/ROLE_PRIVATE_PROJECT_USER').as('revokeUser');
+  if (!Cypress.env('oauthMode')) {
+    it('revoke access should support paging when users exceed minimum page size', () => {
+      cy.createInviteOnly();
+      cy.intercept('GET', '/admin/projects/TestInviteOnlyProject1/settings')
+          .as('getSettings');
+      cy.intercept('POST', '/admin/projects/TestInviteOnlyProject1/settings')
+          .as('saveSettings');
+      cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice')
+          .as('emailSupported');
+      cy.intercept('GET', '/api/myprojects/TestInviteOnlyProject1/name')
+          .as('getName');
+      cy.intercept('GET', '/api/projects/TestInviteOnlyProject1/token')
+          .as('getToken');
+      cy.intercept('GET', '/admin/projects/TestInviteOnlyProject1/userRoles/ROLE_PRIVATE_PROJECT_USER*')
+          .as('getApprovedUsers');
+      cy.intercept('DELETE', '/admin/projects/TestInviteOnlyProject1/users/*/roles/ROLE_PRIVATE_PROJECT_USER')
+          .as('revokeUser');
 
-    cy.visit('/administrator/projects/TestInviteOnlyProject1/access')
-    cy.wait('@emailSupported');
-    cy.wait('@getApprovedUsers');
-    const tableSelector = '[data-cy=privateProjectUsersTable]';
-    cy.validateTable(tableSelector, [
-      [{ colIndex: 0,  value: 'user9@skills.org' }],
-      [{ colIndex: 0,  value: 'user8@skills.org' }],
-      [{ colIndex: 0,  value: 'user7@skills.org' }],
-      [{ colIndex: 0,  value: 'user6@skills.org' }],
-      [{ colIndex: 0,  value: 'user55@skills.org' }],
-      [{ colIndex: 0,  value: 'user3@skills.org' }],
-      [{ colIndex: 0,  value: 'user2@skills.org' }],
-      [{ colIndex: 0,  value: 'user22@skills.org' }],
-      [{ colIndex: 0,  value: 'user1@skills.org' }],
-    ], 5);
+      cy.visit('/administrator/projects/TestInviteOnlyProject1/access');
+      cy.wait('@emailSupported');
+      cy.wait('@getApprovedUsers');
+      const tableSelector = '[data-cy=privateProjectUsersTable]';
+      cy.validateTable(tableSelector, [
+        [{
+          colIndex: 0,
+          value: 'user9@skills.org'
+        }],
+        [{
+          colIndex: 0,
+          value: 'user8@skills.org'
+        }],
+        [{
+          colIndex: 0,
+          value: 'user7@skills.org'
+        }],
+        [{
+          colIndex: 0,
+          value: 'user6@skills.org'
+        }],
+        [{
+          colIndex: 0,
+          value: 'user55@skills.org'
+        }],
+        [{
+          colIndex: 0,
+          value: 'user3@skills.org'
+        }],
+        [{
+          colIndex: 0,
+          value: 'user2@skills.org'
+        }],
+        [{
+          colIndex: 0,
+          value: 'user22@skills.org'
+        }],
+        [{
+          colIndex: 0,
+          value: 'user1@skills.org'
+        }],
+      ], 5);
 
-    cy.get('[data-cy="privateProjectUsers-userIdFilter"]').type('user2');
-    cy.get('[data-cy="privateProjectUsers-filterBtn"]').click();
-    cy.wait('@getApprovedUsers');
-    cy.validateTable(tableSelector, [
-      [{ colIndex: 0,  value: 'user2@skills.org' }],
-      [{ colIndex: 0,  value: 'user22@skills.org' }],
-    ], 5, true, null, false);
-    cy.get(`${tableSelector} [data-cy=skillsBTableTotalRows]`).should('not.exist');
-    cy.get(`${tableSelector} tbody [role="row"]`).should('have.length', '2');
+      cy.get('[data-cy="privateProjectUsers-userIdFilter"]')
+          .type('user2');
+      cy.get('[data-cy="privateProjectUsers-filterBtn"]')
+          .click();
+      cy.wait('@getApprovedUsers');
+      cy.validateTable(tableSelector, [
+        [{
+          colIndex: 0,
+          value: 'user2@skills.org'
+        }],
+        [{
+          colIndex: 0,
+          value: 'user22@skills.org'
+        }],
+      ], 5, true, null, false);
+      cy.get(`${tableSelector} [data-cy=skillsBTableTotalRows]`)
+          .should('not.exist');
+      cy.get(`${tableSelector} tbody [role="row"]`)
+          .should('have.length', '2');
 
-    cy.get('[data-cy=privateProjectUsers-resetBtn]').click();
-    cy.wait('@getApprovedUsers');
-    cy.validateTable(tableSelector, [
-      [{ colIndex: 0,  value: 'user9@skills.org' }],
-      [{ colIndex: 0,  value: 'user8@skills.org' }],
-      [{ colIndex: 0,  value: 'user7@skills.org' }],
-      [{ colIndex: 0,  value: 'user6@skills.org' }],
-      [{ colIndex: 0,  value: 'user55@skills.org' }],
-      [{ colIndex: 0,  value: 'user3@skills.org' }],
-      [{ colIndex: 0,  value: 'user2@skills.org' }],
-      [{ colIndex: 0,  value: 'user22@skills.org' }],
-      [{ colIndex: 0,  value: 'user1@skills.org' }],
-    ], 5);
+      cy.get('[data-cy=privateProjectUsers-resetBtn]')
+          .click();
+      cy.wait('@getApprovedUsers');
+      cy.validateTable(tableSelector, [
+        [{
+          colIndex: 0,
+          value: 'user9@skills.org'
+        }],
+        [{
+          colIndex: 0,
+          value: 'user8@skills.org'
+        }],
+        [{
+          colIndex: 0,
+          value: 'user7@skills.org'
+        }],
+        [{
+          colIndex: 0,
+          value: 'user6@skills.org'
+        }],
+        [{
+          colIndex: 0,
+          value: 'user55@skills.org'
+        }],
+        [{
+          colIndex: 0,
+          value: 'user3@skills.org'
+        }],
+        [{
+          colIndex: 0,
+          value: 'user2@skills.org'
+        }],
+        [{
+          colIndex: 0,
+          value: 'user22@skills.org'
+        }],
+        [{
+          colIndex: 0,
+          value: 'user1@skills.org'
+        }],
+      ], 5);
 
-    cy.get('[data-cy=privateProjectUsersTable_revokeUserAccessBtn]').eq(0).click();
-    cy.contains('Yes, revoke access!').click();
-    cy.wait('@revokeUser');
-    cy.validateTable(tableSelector, [
-      [{ colIndex: 0,  value: 'user2@skills.org' }],
-      [{ colIndex: 0,  value: 'user22@skills.org' }],
-      [{ colIndex: 0,  value: 'user1@skills.org' }],
-    ], 5, true, null, false);
-    cy.get('[data-cy=skillsBTableTotalRows]').should('have.text', '8');
+      cy.get('[data-cy=privateProjectUsersTable_revokeUserAccessBtn]')
+          .eq(0)
+          .click();
+      cy.contains('Yes, revoke access!')
+          .click();
+      cy.wait('@revokeUser');
+      cy.validateTable(tableSelector, [
+        [{
+          colIndex: 0,
+          value: 'user2@skills.org'
+        }],
+        [{
+          colIndex: 0,
+          value: 'user22@skills.org'
+        }],
+        [{
+          colIndex: 0,
+          value: 'user1@skills.org'
+        }],
+      ], 5, true, null, false);
+      cy.get('[data-cy=skillsBTableTotalRows]')
+          .should('have.text', '8');
 
-    cy.get('[data-cy=privateProjectUsersTable_revokeUserAccessBtn]').eq(0).click();
-    cy.contains('Cancel').click();
-    cy.validateTable(tableSelector, [
-      [{ colIndex: 0,  value: 'user2@skills.org' }],
-      [{ colIndex: 0,  value: 'user22@skills.org' }],
-      [{ colIndex: 0,  value: 'user1@skills.org' }],
-    ], 5, true, null, false);
-    cy.get('[data-cy=skillsBTableTotalRows]').should('have.text', '8');
+      cy.get('[data-cy=privateProjectUsersTable_revokeUserAccessBtn]')
+          .eq(0)
+          .click();
+      cy.contains('Cancel')
+          .click();
+      cy.validateTable(tableSelector, [
+        [{
+          colIndex: 0,
+          value: 'user2@skills.org'
+        }],
+        [{
+          colIndex: 0,
+          value: 'user22@skills.org'
+        }],
+        [{
+          colIndex: 0,
+          value: 'user1@skills.org'
+        }],
+      ], 5, true, null, false);
+      cy.get('[data-cy=skillsBTableTotalRows]')
+          .should('have.text', '8');
 
-    cy.get('[data-cy=privateProjectUsersTable_revokeUserAccessBtn]').eq(0).click();
-    cy.contains('Yes, revoke access!').click();
-    cy.wait('@revokeUser');
+      cy.get('[data-cy=privateProjectUsersTable_revokeUserAccessBtn]')
+          .eq(0)
+          .click();
+      cy.contains('Yes, revoke access!')
+          .click();
+      cy.wait('@revokeUser');
 
-    cy.get('[data-cy=privateProjectUsersTable_revokeUserAccessBtn]').eq(0).click();
-    cy.contains('Yes, revoke access!').click();
-    cy.wait('@revokeUser');
+      cy.get('[data-cy=privateProjectUsersTable_revokeUserAccessBtn]')
+          .eq(0)
+          .click();
+      cy.contains('Yes, revoke access!')
+          .click();
+      cy.wait('@revokeUser');
 
-    cy.get('[data-cy=privateProjectUsersTable_revokeUserAccessBtn]').eq(0).click();
-    cy.contains('Yes, revoke access!').click();
-    cy.wait('@revokeUser');
+      cy.get('[data-cy=privateProjectUsersTable_revokeUserAccessBtn]')
+          .eq(0)
+          .click();
+      cy.contains('Yes, revoke access!')
+          .click();
+      cy.wait('@revokeUser');
 
-    cy.validateTable(tableSelector, [
-      [{ colIndex: 0,  value: 'user9@skills.org' }],
-      [{ colIndex: 0,  value: 'user8@skills.org' }],
-      [{ colIndex: 0,  value: 'user7@skills.org' }],
-      [{ colIndex: 0,  value: 'user6@skills.org' }],
-      [{ colIndex: 0,  value: 'user55@skills.org' }],
-    ], 5, false, null, false);
-    cy.get('[data-cy=skillsBTableTotalRows]').should('not.exist');
+      cy.validateTable(tableSelector, [
+        [{
+          colIndex: 0,
+          value: 'user9@skills.org'
+        }],
+        [{
+          colIndex: 0,
+          value: 'user8@skills.org'
+        }],
+        [{
+          colIndex: 0,
+          value: 'user7@skills.org'
+        }],
+        [{
+          colIndex: 0,
+          value: 'user6@skills.org'
+        }],
+        [{
+          colIndex: 0,
+          value: 'user55@skills.org'
+        }],
+      ], 5, false, null, false);
+      cy.get('[data-cy=skillsBTableTotalRows]')
+          .should('not.exist');
 
-  });
+    });
+  }
 
 });
 
