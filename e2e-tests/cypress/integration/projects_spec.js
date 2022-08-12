@@ -594,10 +594,18 @@ describe('Projects Tests', () => {
 
     const rowSelector = '[data-cy=roleManagerTable] tbody tr'
     cy.get(rowSelector).should('have.length', 2).as('cyRows');
-    cy.get('@cyRows').eq(0).find('td').as('row1');
-    cy.get('@cyRows').eq(1).find('td').as('row2');
-    cy.get('@row1').eq(0).contains('root@skills.org');
-    cy.get('@row2').eq(0).contains('skills@skills.org');
+    if (!Cypress.env('oauthMode')) {
+      cy.get('@cyRows').eq(0).find('td').as('row1');
+      cy.get('@cyRows').eq(1).find('td').as('row2');
+      cy.get('@row1').eq(0).contains('root@skills.org');
+      cy.get('@row2').eq(0).contains('skills@skills.org');
+    } else {
+      // the default user in oauth mode is different and results in a different sorting order
+      cy.get('@cyRows').eq(0).find('td').as('row1');
+      cy.get('@cyRows').eq(1).find('td').as('row2');
+      cy.get('@row1').eq(0).contains('foo bar');
+      cy.get('@row2').eq(0).contains('root@skills.org');
+    }
   });
 
   it('Add and Remove Admin', () => {
@@ -627,16 +635,31 @@ describe('Projects Tests', () => {
     const tableSelector = '[data-cy=roleManagerTable]'
     const rowSelector = `${tableSelector} tbody tr`
     cy.get(rowSelector).should('have.length', 2).as('cyRows');
-    cy.get('@cyRows').eq(0).find('td').as('row1');
-    cy.get('@row1').eq(0).contains('root@skills.org');
 
-    // remove the other user now
-    cy.get(`${tableSelector} [data-cy="removeUserBtn"]`).eq(0).click();
-    cy.contains('YES, Delete It').click();
+    if (!Cypress.env('oauthMode')) {
+      cy.get('@cyRows').eq(0).find('td').as('row1');
+      cy.get('@row1').eq(0).contains('root@skills.org');
 
-    cy.get(rowSelector).should('have.length', 1).as('cyRows1');
-    cy.get('@cyRows1').eq(0).find('td').as('rowA');
-    cy.get('@rowA').eq(0).contains('root@skills.org').should('not.exist');
+      // remove the other user now
+      cy.get(`${tableSelector} [data-cy="removeUserBtn"]`).eq(0).click();
+      cy.contains('YES, Delete It').click();
+
+      cy.get(rowSelector).should('have.length', 1).as('cyRows1');
+      cy.get('@cyRows1').eq(0).find('td').as('rowA');
+      cy.get('@rowA').eq(0).contains('root@skills.org').should('not.exist');
+    } else {
+      // in oauth mode the initial user has a different username which sorts lower than the root user in the default asc sort
+      cy.get('@cyRows').eq(1).find('td').as('row1');
+      cy.get('@row1').eq(1).contains('root@skills.org');
+
+      // remove the other user now
+      cy.get(`${tableSelector} [data-cy="removeUserBtn"]`).eq(1).click();
+      cy.contains('YES, Delete It').click();
+
+      cy.get(rowSelector).should('have.length', 1).as('cyRows1');
+      cy.get('@cyRows1').eq(0).find('td').as('rowA');
+      cy.get('@rowA').eq(0).contains('root@skills.org').should('not.exist');
+    }
   });
 
   it('Add Admin - forward slash character does not cause error', () => {

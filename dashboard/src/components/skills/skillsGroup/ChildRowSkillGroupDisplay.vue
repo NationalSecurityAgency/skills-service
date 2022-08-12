@@ -31,7 +31,9 @@ limitations under the License.
                     <span class="mr-1 font-italic">Required: </span>
                     <span v-if="!allSkillsRequired">
                       <b-badge variant="info" data-cy="requiredSkillsNum">{{ requiredSkillsNum }}</b-badge>
-                      <span class="ml-1">out <b-badge data-cy="numSkillsInGroup">{{ group.numSkillsInGroup }}</b-badge> skills</span>
+                      <span class="ml-1">out of <b-badge data-cy="numSkillsInGroup">{{
+                          group.numSkillsInGroup
+                        }}</b-badge> skills</span>
                     </span>
                     <span v-if="allSkillsRequired" data-cy="requiredAllSkills">
                       <b-badge variant="info" class="text-uppercase">all skills</b-badge>
@@ -380,7 +382,7 @@ limitations under the License.
           });
       },
       defaultNewSkillValues() {
-        if (this.group.numSkillsRequired === -1) {
+        if (this.group.numSkillsRequired === -1 || !this.skills || this.skills.length === 0) {
           return null;
         }
         return {
