@@ -28,6 +28,20 @@ limitations under the License.
         <div v-else>
             <skills-spinner :loading="loading.dependencies || loading.skill" class="mt-5"/>
         </div>
+      <div class="pageControl">
+        <button @click="prevButtonClicked" v-if="skill && this.$route.params.prevSkill" type="button" class="btn btn-outline-info skills-theme-btn m-0 prevButton" data-cy="prevSkill"
+          aria-label="previous skill">
+          <i class="fas fa-arrow-left"></i>
+          Previous Skill
+          <span class="sr-only">Previous Skill</span>
+        </button>
+        <button @click="nextButtonClicked" v-if="skill && this.$route.params.nextSkill" type="button" class="btn btn-outline-info skills-theme-btn m-0 nextButton" data-cy="nextSkill"
+          aria-label="next skill">
+          Next Skill
+          <i class="fas fa-arrow-right"></i>
+          <span class="sr-only">Next Skill</span>
+        </button>
+      </div>
     </div>
 </template>
 
@@ -36,10 +50,12 @@ limitations under the License.
   import SkillsSpinner from '@/common/utilities/SkillsSpinner';
   import SkillsTitle from '@/common/utilities/SkillsTitle';
   import SkillProgress2 from '@/userSkills/skill/progress/SkillProgress2';
+  import NavigationErrorMixin from '@/common/utilities/NavigationErrorMixin';
   import SkillEnricherUtil from '../utils/SkillEnricherUtil';
 
   export default {
     name: 'SkillDetails',
+    mixins: [NavigationErrorMixin],
     components: {
       SkillsTitle,
       'skill-dependencies': () => import(/* webpackChunkName: 'skillDependencies' */'@/userSkills/skill/dependencies/SkillDependencies'),
@@ -98,10 +114,35 @@ limitations under the License.
         const routeName = this.$route.name;
         return routeName === 'dependentSkillDetails' || routeName === 'crossProjectSkillDetails';
       },
+      prevButtonClicked() {
+        const params = { skillId: this.prevSkill };
+        this.handlePush({
+          name: 'skillDetails',
+          params,
+        });
+      },
+      nextButtonClicked() {
+        const params = { skillId: this.nextSkill };
+        this.handlePush({
+          name: 'skillDetails',
+          params,
+        });
+      },
     },
   };
 </script>
 
 <style scoped>
+.pageControl {
+  width: 100%;
+  margin-top: 5px;
+}
 
+.prevButton {
+  float: left;
+}
+
+.nextButton {
+  float: right;
+}
 </style>
