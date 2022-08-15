@@ -54,7 +54,7 @@ class VersionService {
             log.info("Successfully loaded the client-version file (version ${data})");
         }
         catch(IOException e) {
-            log.error("Failed to read the client-version file");
+            log.error("Failed to read the client-version file", e);
             throw e;
         }
 
