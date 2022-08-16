@@ -192,7 +192,7 @@ const actions = {
   },
   configureSkillsClientForInception({
                                       state,
-                                      getters: gettersParam
+                                      getters: gettersParam,
                                     }) {
     if (state.userInfo) {
       const projectId = 'Inception';
