@@ -15,7 +15,6 @@
  */
 package skills.intTests.copyProject
 
-
 import skills.intTests.utils.DefaultIntSpec
 
 import static skills.intTests.utils.SkillsFactory.*
@@ -419,6 +418,56 @@ class CopyProjectAndSubjectLevelsSpecs extends DefaultIntSpec {
         p2LevelsSubj2.iconClass == ["fas fa-user-ninja", "fas fa-user-ninja", "fas fa-user-ninja", "fas fa-user-ninja"]
         p2LevelsSubj2.name == ["White Belt", "Blue Belt", "Purple Belt", "Brown Belt"]
         p2LevelsSubj2.achievable == [true, true, true, true]
+    }
+
+    def "project exist as % based but then switched to the level-based and more skills are created"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1subj1Skills = createSkills(2, 1, 1, 10, 5)
+        def p1subj2 = createSubject(1, 2)
+
+        skillsService.createProject(p1)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p1subj2)
+        skillsService.createSkills(p1subj1Skills)
+
+        skillsService.changeSetting(p1.projectId, projectPointsSetting, [projectId: p1.projectId, setting: projectPointsSetting, value: Boolean.TRUE.toString()])
+
+        def p1subj2Skills = createSkills(2, 1, 2, 100, 5)
+        skillsService.createSkills(p1subj2Skills)
+
+        when:
+        def projToCopy = createProject(2)
+        skillsService.copyProject(p1.projectId, projToCopy)
+
+        def p2LevelsSubj1 = skillsService.getLevels(projToCopy.projectId, p1subj1.subjectId).sort() { it.level }
+        def p2LevelsSubj2 = skillsService.getLevels(projToCopy.projectId, p1subj2.subjectId).sort() { it.level }
+        def projLevels = skillsService.getLevels(projToCopy.projectId).sort() { it.level }
+
+        then:
+        p2LevelsSubj1.level == [1, 2, 3, 4, 5]
+        p2LevelsSubj1.percent == [10, 25, 45, 67, 92]
+        p2LevelsSubj1.pointsFrom == [10, 25, 45, 67, 92]
+        p2LevelsSubj1.pointsTo == [25, 45, 67, 92, null]
+        p2LevelsSubj1.iconClass == ["fas fa-user-ninja", "fas fa-user-ninja", "fas fa-user-ninja", "fas fa-user-ninja", "fas fa-user-ninja"]
+        p2LevelsSubj1.name == ["White Belt", "Blue Belt", "Purple Belt", "Brown Belt", "Black Belt"]
+        p2LevelsSubj1.achievable == [true, true, true, true, true]
+
+        p2LevelsSubj2.level == [1, 2, 3, 4, 5]
+        p2LevelsSubj2.percent == [10, 25, 45, 67, 92]
+        p2LevelsSubj2.pointsFrom == [100, 250, 450, 670, 920]
+        p2LevelsSubj2.pointsTo == [250, 450, 670, 920, null]
+        p2LevelsSubj2.iconClass == ["fas fa-user-ninja", "fas fa-user-ninja", "fas fa-user-ninja", "fas fa-user-ninja", "fas fa-user-ninja"]
+        p2LevelsSubj2.name == ["White Belt", "Blue Belt", "Purple Belt", "Brown Belt", "Black Belt"]
+        p2LevelsSubj2.achievable == [true, true, true, true, true]
+
+        projLevels.level == [1, 2, 3, 4, 5]
+        projLevels.percent == [10, 25, 45, 67, 92]
+        projLevels.pointsFrom == [10, 25, 45, 67, 92]
+        projLevels.pointsTo == [25, 45, 67, 92, null]
+        projLevels.iconClass == ["fas fa-user-ninja", "fas fa-user-ninja", "fas fa-user-ninja", "fas fa-user-ninja", "fas fa-user-ninja"]
+        projLevels.name == ["White Belt", "Blue Belt", "Purple Belt", "Brown Belt", "Black Belt"]
+        projLevels.achievable == [true, true, true, true, true]
     }
 }
 
