@@ -172,6 +172,20 @@ class UserSkillsController {
      * Note: skill version is not applicable to a single skill;
      * there is no reason exclude dependency skills as the system will not allow to dependent skills with later version
      */
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/summary", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    public SkillSummary getSkillSummary(@PathVariable("projectId") String projectId,
+                                        @PathVariable("skillId") String skillId,
+                                        @RequestParam(name = "userId", required = false) String userIdParam,
+                                        @RequestParam(name = "idType", required = false) String idType) {
+        String userId = userInfoService.getUserName(userIdParam, true, idType);
+        return skillsLoader.loadSkillSummary(projectId, userId, null, skillId, null);
+    }
+
+    /**
+     * Note: skill version is not applicable to a single skill;
+     * there is no reason exclude dependency skills as the system will not allow to dependent skills with later version
+     */
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/skills/{skillId}/summary", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     public SkillSummary getSkillSummary(@PathVariable("projectId") String projectId,
@@ -181,6 +195,21 @@ class UserSkillsController {
                                         @RequestParam(name = "idType", required = false) String idType) {
         String userId = userInfoService.getUserName(userIdParam, true, idType);
         return skillsLoader.loadSkillSummary(projectId, userId, null, skillId, subjectId);
+    }
+
+    /**
+     * Note: skill version is not applicable to a single skill;
+     * there is no reason exclude dependency skills as the system will not allow to dependent skills with later version
+     */
+    @RequestMapping(value = "/projects/{projectId}/projects/{crossProjectId}/skills/{skillId}/summary", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    public SkillSummary getCrossProjectSkillSummary(@PathVariable("projectId") String projectId,
+                                                    @PathVariable("crossProjectId") String crossProjectId,
+                                                    @PathVariable("skillId") String skillId,
+                                                    @RequestParam(name = "userId", required = false) String userIdParam,
+                                                    @RequestParam(name = "idType", required = false) String idType) {
+        String userId = userInfoService.getUserName(userIdParam, true, idType);
+        return skillsLoader.loadSkillSummary(projectId, userId, crossProjectId, skillId, null);
     }
 
     /**

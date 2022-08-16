@@ -413,17 +413,20 @@ class SkillsLoader {
     SkillSummary loadSkillSummary(String projectId, String userId, String crossProjectId, String skillId, String subjectId) {
         ProjDef projDef = getProjDef(userId, crossProjectId ?: projectId)
         SkillDefWithExtra skillDef = getSkillDefWithExtra(userId, crossProjectId ?: projectId, skillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
-        SkillSubjectSummary subject = loadSubject(projectId, userId, subjectId, publicProps.getInt(PublicProps.UiProp.maxSkillVersion), true)
-
-        int currentSkillIndex = subject.skills.findIndexOf( it -> it.skillId == skillId );
 
         String nextSkillId;
         String prevSkillId;
-        if(currentSkillIndex > 0) {
-            prevSkillId = subject.skills[currentSkillIndex - 1].skillId;
-        }
-        if(currentSkillIndex < subject.skills.size() - 1) {
-            nextSkillId = subject.skills[currentSkillIndex + 1].skillId;
+
+        if(subjectId) {
+            SkillSubjectSummary subject = loadSubject(projectId, userId, subjectId, publicProps.getInt(PublicProps.UiProp.maxSkillVersion), true)
+
+            int currentSkillIndex = subject.skills.findIndexOf(it -> it.skillId == skillId);
+            if (currentSkillIndex > 0) {
+                prevSkillId = subject.skills[currentSkillIndex - 1].skillId;
+            }
+            if (currentSkillIndex < subject.skills.size() - 1) {
+                nextSkillId = subject.skills[currentSkillIndex + 1].skillId;
+            }
         }
 
         if (crossProjectId) {
