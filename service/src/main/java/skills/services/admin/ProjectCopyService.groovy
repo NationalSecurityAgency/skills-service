@@ -194,7 +194,10 @@ class ProjectCopyService {
     private void updateLevels(ProjDef fromProject, ProjDef toProj, String subjectId = null) {
         List<LevelDefinitionRes> fromLevels = levelDefinitionStorageService.getLevels(fromProject.projectId, subjectId).sort({ it.level })
         List<LevelDefinitionRes> existingLevels = levelDefinitionStorageService.getLevels(toProj.projectId, subjectId).sort({ it.level })
-        int levelsToRemove = Math.max(0, existingLevels.size() - fromLevels.size())
+
+        // remove all the levels but the first one - this will resolve any weird issue with updates where points cannot overlap between levels
+        int levelsToKeep = 1
+        int levelsToRemove = existingLevels.size() - levelsToKeep
 
         if (levelsToRemove > 0) {
             (levelsToRemove).times {
@@ -206,8 +209,8 @@ class ProjectCopyService {
                 }
             }
         }
-        List<LevelDefinitionRes> levelsToUpdate = fromLevels.findAll { it.level <= existingLevels.size() }.sort({ it.level }).reverse()
-        List<LevelDefinitionRes> levelsToCreate = fromLevels.findAll { it.level > existingLevels.size() }.sort({ it.level })
+        List<LevelDefinitionRes> levelsToUpdate = fromLevels.findAll { it.level <= levelsToKeep }.sort({ it.level }).reverse()
+        List<LevelDefinitionRes> levelsToCreate = fromLevels.findAll { it.level > levelsToKeep }.sort({ it.level })
         levelsToUpdate.eachWithIndex { LevelDefinitionRes fromLevel, int index ->
             EditLevelRequest editLevelRequest = new EditLevelRequest(
                     percent: fromLevel.percent,
@@ -227,6 +230,7 @@ class ProjectCopyService {
                     name: fromlevel.name,
                     iconClass: fromlevel.iconClass,
             )
+
             levelDefinitionStorageService.addNextLevel(toProj.projectId, nextLevelRequest, subjectId)
             log.debug("PROJ COPY: [{}]=[{}] subj[{}] - new level [{}]", fromProject.projectId, toProj.projectId, subjectId, JsonOutput.toJson(nextLevelRequest))
         }
