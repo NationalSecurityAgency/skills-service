@@ -86,10 +86,10 @@ export default {
     }).then((result) => result.data);
   },
 
-  getSkillSummary(skillId, optionalCrossProjectId) {
-    let url = `${store.state.serviceUrl}${this.getServicePath()}/${encodeURIComponent(store.state.projectId)}/skills/${encodeURIComponent(skillId)}/summary`;
+  getSkillSummary(skillId, optionalCrossProjectId, subjectId) {
+    let url = `${store.state.serviceUrl}${this.getServicePath()}/${encodeURIComponent(store.state.projectId)}/subjects/${subjectId}/skills/${encodeURIComponent(skillId)}/summary`;
     if (optionalCrossProjectId) {
-      url = `${store.state.serviceUrl}${this.getServicePath()}/${encodeURIComponent(store.state.projectId)}/projects/${encodeURIComponent(optionalCrossProjectId)}/skills/${encodeURIComponent(skillId)}/summary`;
+      url = `${store.state.serviceUrl}${this.getServicePath()}/${encodeURIComponent(store.state.projectId)}/projects/${encodeURIComponent(optionalCrossProjectId)}/subjects/${subjectId}/skills/${encodeURIComponent(skillId)}/summary`;
     }
     return axios.get(url, {
       params: this.getUserIdParams(),

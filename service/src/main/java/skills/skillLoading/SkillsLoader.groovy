@@ -26,6 +26,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import skills.PublicProps
 import skills.controller.exceptions.SkillExceptionBuilder
 import skills.controller.result.model.AvailableProjectResult
 import skills.controller.result.model.GlobalBadgeLevelRes
@@ -62,6 +63,9 @@ class SkillsLoader {
 
     @Autowired
     ProjDefRepo projDefRepo
+
+    @Autowired
+    private PublicProps publicProps;
 
     @Autowired
     SkillDefRepo skillDefRepo
@@ -406,21 +410,21 @@ class SkillsLoader {
     }
 
     @Transactional(readOnly = true)
-    SkillSummary loadSkillSummary(String projectId, String userId, String crossProjectId, String skillId) {
+    SkillSummary loadSkillSummary(String projectId, String userId, String crossProjectId, String skillId, String subjectId) {
         ProjDef projDef = getProjDef(userId, crossProjectId ?: projectId)
         SkillDefWithExtra skillDef = getSkillDefWithExtra(userId, crossProjectId ?: projectId, skillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
+        SkillSubjectSummary subject = loadSubject(projectId, userId, subjectId, publicProps.getInt(PublicProps.UiProp.maxSkillVersion), true)
+
+        int currentSkillIndex = subject.skills.findIndexOf( it -> it.skillId == skillId );
+
         String nextSkillId;
         String prevSkillId;
-// skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(projectId, skillId, containerTypes)
-
-//        List<SkillDef> nextSkills = skillDefRepo.getSkillDefByDisplayOrder(crossProjectId ?: projectId, (skillDef.displayOrder + 1), PageRequest.of(0, 1))
-//        List<SkillDef> prevSkills = skillDefRepo.getSkillDefByDisplayOrder(crossProjectId ?: projectId, (skillDef.displayOrder - 1), PageRequest.of(0, 1))
-//        if(nextSkills.size() > 0) {
-//            nextSkillId = nextSkills[0].skillId
-//        }
-//        if(prevSkills.size() > 0) {
-//            prevSkillId = prevSkills[0].skillId
-//        }
+        if(currentSkillIndex > 0) {
+            prevSkillId = subject.skills[currentSkillIndex - 1].skillId;
+        }
+        if(currentSkillIndex < subject.skills.size() - 1) {
+            nextSkillId = subject.skills[currentSkillIndex + 1].skillId;
+        }
 
         if (crossProjectId) {
             dependencyValidator.validateDependencyEligibility(projectId, skillDef)

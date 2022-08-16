@@ -29,13 +29,13 @@ limitations under the License.
             <skills-spinner :loading="loading.dependencies || loading.skill" class="mt-5"/>
         </div>
       <div class="pageControl">
-        <button @click="prevButtonClicked" v-if="skill && this.$route.params.prevSkill" type="button" class="btn btn-outline-info skills-theme-btn m-0 prevButton" data-cy="prevSkill"
+        <button @click="prevButtonClicked" v-if="skill && skill.prevSkillId" type="button" class="btn btn-outline-info skills-theme-btn m-0 prevButton" data-cy="prevSkill"
           aria-label="previous skill">
           <i class="fas fa-arrow-left"></i>
           Previous Skill
           <span class="sr-only">Previous Skill</span>
         </button>
-        <button @click="nextButtonClicked" v-if="skill && this.$route.params.nextSkill" type="button" class="btn btn-outline-info skills-theme-btn m-0 nextButton" data-cy="nextSkill"
+        <button @click="nextButtonClicked" v-if="skill && skill.nextSkillId" type="button" class="btn btn-outline-info skills-theme-btn m-0 nextButton" data-cy="nextSkill"
           aria-label="next skill">
           Next Skill
           <i class="fas fa-arrow-right"></i>
@@ -101,7 +101,7 @@ limitations under the License.
       },
       loadSkillSummary() {
         const skillId = this.isDependency() ? this.$route.params.dependentSkillId : this.$route.params.skillId;
-        UserSkillsService.getSkillSummary(skillId, this.$route.params.crossProjectId)
+        UserSkillsService.getSkillSummary(skillId, this.$route.params.crossProjectId, this.$route.params.subjectId)
           .then((res) => {
             this.skill = res;
             this.loading.skill = false;
@@ -115,14 +115,14 @@ limitations under the License.
         return routeName === 'dependentSkillDetails' || routeName === 'crossProjectSkillDetails';
       },
       prevButtonClicked() {
-        const params = { skillId: this.prevSkill };
+        const params = { skillId: this.skill.prevSkillId };
         this.handlePush({
           name: 'skillDetails',
           params,
         });
       },
       nextButtonClicked() {
-        const params = { skillId: this.nextSkill };
+        const params = { skillId: this.skill.nextSkillId };
         this.handlePush({
           name: 'skillDetails',
           params,
