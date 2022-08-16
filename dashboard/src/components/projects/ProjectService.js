@@ -57,13 +57,19 @@ export default {
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/errors`, { params }).then((response) => response.data);
   },
   deleteProjectError(projectId, errorType, reportedSkillid) {
-    return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}/errors/${errorType}/${encodeURIComponent(reportedSkillid)}`).then((response) => response.data);
+    return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}/errors/${errorType}/${encodeURIComponent(reportedSkillid)}`)
+      .then((response) => response.data);
   },
   deleteAllProjectErrors(projectId) {
-    return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}/errors`).then((response) => response.data);
+    return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}/errors`)
+      .then((response) => response.data);
   },
   getProjectDetails(projectId) {
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}`)
+      .then((response) => response.data);
+  },
+  geLatestSkillEventForProject(projectId) {
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/lastSkillEvent`)
       .then((response) => response.data);
   },
   updateProjectDisplaySortOrder(projectId, newDisplayOrderIndex) {
