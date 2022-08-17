@@ -82,9 +82,9 @@ limitations under the License.
     mixins: [MsgBoxMixin, NavigationErrorMixin],
     components: { SkillsBTable, ExistingUserInput },
     props: {
-      project: {
-        type: Object,
-        default: () => ({}),
+      projectId: {
+        type: String,
+        default: null,
       },
       role: {
         type: String,
@@ -184,7 +184,7 @@ limitations under the License.
           page: this.table.options.pagination.currentPage,
           orderBy: this.table.options.sortBy,
         };
-        AccessService.getUserRoles(this.project.projectId, this.role, pageParams)
+        AccessService.getUserRoles(this.projectId, this.role, pageParams)
           .then((result) => {
             this.table.options.busy = false;
             this.data = result.data;
@@ -234,7 +234,7 @@ limitations under the License.
         this.table.options.busy = true;
         const pkiAuthenticated = this.$store.getters.isPkiAuthenticated;
 
-        AccessService.saveUserRole(this.project.projectId, this.selectedUser, this.role, pkiAuthenticated)
+        AccessService.saveUserRole(this.projectId, this.selectedUser, this.role, pkiAuthenticated)
           .then(() => {
             this.$emit('role-added', { userId: this.selectedUser.userId, role: this.role });
             this.loadData();
