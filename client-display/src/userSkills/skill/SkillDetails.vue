@@ -18,6 +18,20 @@ limitations under the License.
         <div v-if="!loading.dependencies && !loading.skill">
             <skills-title>{{ skillDisplayName }} Overview</skills-title>
             <div class="card">
+              <div class="pageControl" v-if="skill && (skill.prevSkillId || skill.nextSkillId)">
+                <button @click="prevButtonClicked" v-if="skill.prevSkillId" type="button" class="btn btn-outline-info skills-theme-btn m-0 prevButton" data-cy="prevSkill"
+                  aria-label="previous skill">
+                  <i class="fas fa-arrow-alt-circle-left"></i>
+                  Previous
+                  <span class="sr-only">Previous</span>
+                </button>
+                <button @click="nextButtonClicked" v-if="skill.nextSkillId" type="button" class="btn btn-outline-info skills-theme-btn m-0 nextButton" data-cy="nextSkill"
+                  aria-label="next skill">
+                  Next
+                  <i class="fas fa-arrow-alt-circle-right"></i>
+                  <span class="sr-only">Next</span>
+                </button>
+              </div>
               <div class="card-body text-center text-sm-left">
                 <skill-progress2 :skill="skill" @points-earned="onPointsEarned" />
               </div>
@@ -28,20 +42,6 @@ limitations under the License.
         <div v-else>
             <skills-spinner :loading="loading.dependencies || loading.skill" class="mt-5"/>
         </div>
-      <div class="pageControl">
-        <button @click="prevButtonClicked" v-if="skill && skill.prevSkillId" type="button" class="btn btn-outline-info skills-theme-btn m-0 prevButton" data-cy="prevSkill"
-          aria-label="previous skill">
-          <i class="fas fa-arrow-left"></i>
-          Previous Skill
-          <span class="sr-only">Previous Skill</span>
-        </button>
-        <button @click="nextButtonClicked" v-if="skill && skill.nextSkillId" type="button" class="btn btn-outline-info skills-theme-btn m-0 nextButton" data-cy="nextSkill"
-          aria-label="next skill">
-          Next Skill
-          <i class="fas fa-arrow-right"></i>
-          <span class="sr-only">Next Skill</span>
-        </button>
-      </div>
     </div>
 </template>
 
@@ -135,7 +135,9 @@ limitations under the License.
 <style scoped>
 .pageControl {
   width: 100%;
-  margin-top: 5px;
+  padding-left: 20px;
+  padding-top: 8px;
+  padding-right: 20px;
 }
 
 .prevButton {
