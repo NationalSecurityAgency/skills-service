@@ -67,7 +67,7 @@ class UserInfoService {
 
     @Profile
     boolean isCurrentUserASuperDuperUser() {
-        boolean isRootUser = this.currentUser.authorities?.find() {
+        boolean isRootUser = this.currentUser?.authorities?.find() {
             it instanceof UserSkillsGrantedAuthority && RoleName.ROLE_SUPER_DUPER_USER == it.role?.roleName
         }
         return isRootUser
