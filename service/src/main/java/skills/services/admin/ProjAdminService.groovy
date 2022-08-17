@@ -153,7 +153,9 @@ class ProjAdminService {
                     clientSecret: clientSecret)
             log.debug("Created project [{}]", projectDefinition)
 
-            createdResourceLimitsValidator.validateNumProjectsCreated(userIdParam ?: userInfoService.getCurrentUserId())
+            if (!userInfoService.isCurrentUserASuperDuperUser()) {
+                createdResourceLimitsValidator.validateNumProjectsCreated(userIdParam ?: userInfoService.getCurrentUserId())
+            }
 
             DataIntegrityExceptionHandlers.dataIntegrityViolationExceptionHandler.handle(projectDefinition.projectId) {
                 projectDefinition = projDefRepo.save(projectDefinition)

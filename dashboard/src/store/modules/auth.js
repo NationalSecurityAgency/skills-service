@@ -190,6 +190,27 @@ const actions = {
         .catch((error) => reject(error));
     });
   },
+  configureSkillsClientForInception({
+                                      state,
+                                      getters: gettersParam,
+                                    }) {
+    if (state.userInfo) {
+      const projectId = 'Inception';
+      const serviceUrl = window.location.origin;
+      let authenticator;
+      if (gettersParam.isPkiAuthenticated) {
+        authenticator = 'pki';
+      } else {
+        authenticator = `/app/projects/${encodeURIComponent(projectId)}/users/${encodeURIComponent(gettersParam.userInfo.userId)}/token`;
+      }
+
+      SkillsConfiguration.configure({
+        serviceUrl,
+        projectId,
+        authenticator,
+      });
+    }
+  },
 };
 
 const state = {

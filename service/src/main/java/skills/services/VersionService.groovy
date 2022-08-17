@@ -25,6 +25,8 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.Resource
 import org.springframework.stereotype.Service
 
+import javax.annotation.PostConstruct
+
 @Service
 @Slf4j
 class VersionService {
@@ -34,17 +36,25 @@ class VersionService {
     @Value("classpath:client-version")
     Resource resourceFile;
 
+    String currentVersion;
+
+    @PostConstruct
+    void init() {
+        currentVersion = loadCurrentVersionFile();
+    }
+
     @Memoized
-    public String getCurrentVersion() {
+    public String loadCurrentVersionFile() {
         InputStream file;
         String data = "";
 
         try {
             file = resourceFile.getInputStream();
             data = file.getText("UTF-8");
+            log.info("Successfully loaded the client-version file (version ${data})");
         }
         catch(IOException e) {
-            log.info("Failed to read file from the classpath");
+            log.error("Failed to read the client-version file", e);
             throw e;
         }
 
@@ -52,8 +62,6 @@ class VersionService {
     }
 
     public void compareClientVersions(String userVersion, String projectId) {
-        String currentVersion = getCurrentVersion();
-
         if(!currentVersion.isBlank()) {
             if(!userVersion.equals(currentVersion)) {
                 String [] currentVersionInfo = currentVersion.split("-");

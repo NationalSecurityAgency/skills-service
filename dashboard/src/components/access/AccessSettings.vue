@@ -17,7 +17,8 @@ limitations under the License.
   <loading-container v-bind:is-loading="isLoading">
     <sub-page-header title="Access Management"/>
     <metrics-card title="Project Administrators" data-cy="projectAdmins" :no-padding="true">
-      <role-manager :project="project" :add-user-label="'Add Administrator'" :add-role-confirmation="addUserConfirmationConfig"/>
+      <role-manager :project-id="projectId" :add-user-label="'Add Administrator'"
+                    :add-role-confirmation="addUserConfirmationConfig"/>
     </metrics-card>
 
     <metrics-card v-if="privateProject" title="Project User: Invite" data-cy="inviteUser" :no-padding="true" class="my-4">
@@ -25,14 +26,14 @@ limitations under the License.
           <div slot="overlay" class="alert alert-warning mt-2" data-cy="inviteUsers_emailServiceWarning">
             <i class="fa fa-exclamation-triangle" aria-hidden="true"/> Please note that email notifications are currently disabled. Email configuration has not been performed on this instance of SkillTree. Please contact the root administrator.
           </div>
-          <invite-users-to-project ref="inviteUsers" :project-id="project.projectId"/>
+        <invite-users-to-project ref="inviteUsers" :project-id="projectId"/>
       </b-overlay>
     </metrics-card>
     <metrics-card v-if="privateProject" title="Project User: Revoke" data-cy="revokeAccess" :no-padding="true" class="my-4">
       <revoke-user-access />
     </metrics-card>
 
-    <trusted-client-props v-if="showTrustedClientProps" :project-id="project.projectId" class="my-4"/>
+    <trusted-client-props v-if="showTrustedClientProps" :project-id="projectId" class="my-4"/>
   </loading-container>
 </template>
 
@@ -61,9 +62,9 @@ limitations under the License.
     data() {
       return {
         isLoading: true,
-        project: {},
         privateProject: false,
         emailEnabled: false,
+        projectId: this.$route.params.projectId,
       };
     },
     computed: {
@@ -95,11 +96,7 @@ limitations under the License.
       }
     },
     mounted() {
-      ProjectService.getProjectDetails(this.$route.params.projectId)
-        .then((res) => {
-          this.project = res;
-        })
-        .then(() => SettingsService.getProjectSetting(this.$route.params.projectId, 'invite_only'))
+      SettingsService.getProjectSetting(this.$route.params.projectId, 'invite_only')
         .then((setting) => {
           this.privateProject = setting?.enabled;
         })

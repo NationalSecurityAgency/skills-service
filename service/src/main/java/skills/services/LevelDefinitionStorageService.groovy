@@ -395,7 +395,7 @@ class LevelDefinitionStorageService {
         }
 
         if(asPoints) {
-            int max = existingDefinitions.levels.collect({ it.pointsTo }).max()
+            int max = existingDefinitions.levels.collect({ it.pointsTo == null ? it.pointsFrom : it.pointsTo }).max()
             if (max >= nextLevelRequest.points) {
                 throw new SkillException("Provided [${nextLevelRequest.points}] points must be > than existing [${max}] points", projectId, skillId)
             }

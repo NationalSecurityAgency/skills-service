@@ -203,6 +203,7 @@ limitations under the License.
       login() {
         this.createInProgress = true;
         this.$store.dispatch('signup', { isRootAccount: this.isRootAccount, ...this.loginFields }).then(() => {
+          this.$store.dispatch('configureSkillsClientForInception');
           if (this.verifyEmailAddresses) {
             this.handlePush({ name: 'EmailVerificationSent', params: { email: this.loginFields.email } });
           } else if (this.$route.query.redirect) {

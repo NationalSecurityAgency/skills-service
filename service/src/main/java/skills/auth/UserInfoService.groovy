@@ -28,6 +28,7 @@ import skills.auth.pki.PkiUserLookup
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.services.UserAttrsService
+import skills.storage.model.auth.RoleName
 import skills.utils.RetryUtil
 
 @Component
@@ -64,6 +65,14 @@ class UserInfoService {
         return currentUser
     }
 
+    @Profile
+    boolean isCurrentUserASuperDuperUser() {
+        boolean isRootUser = this.currentUser?.authorities?.find() {
+            it instanceof UserSkillsGrantedAuthority && RoleName.ROLE_SUPER_DUPER_USER == it.role?.roleName
+        }
+        return isRootUser
+    }
+
     String getCurrentUserId() {
         return getCurrentUser()?.username
     }
@@ -71,7 +80,7 @@ class UserInfoService {
     /**
      * Abstracts dealing with PKI vs Password/Form modes when user id param is provided
      */
-    String getUserName(String userIdParam, boolean retry=true, String idType=DN_IDTYPE) {
+    String getUserName(String userIdParam, boolean retry = true, String idType = DN_IDTYPE) {
         return RetryUtil.withRetry(3) {
             return doGetUserName(userIdParam, retry, idType)
         }
