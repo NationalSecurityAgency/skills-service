@@ -135,9 +135,7 @@ limitations under the License.
 <style scoped>
 .pageControl {
   width: 100%;
-  padding-left: 20px;
-  padding-top: 8px;
-  padding-right: 20px;
+  padding: 8px 20px 0px;
 }
 
 .prevButton {
