@@ -909,32 +909,11 @@ describe('Projects Tests', () => {
     cy.wait('@getProjects');
     cy.wait('@loadInception');
 
-    cy.get('[data-cy=projectCreated]').should('be.visible').contains('Today');
-    cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('Never');
-
-    const now = dayjs().utc();
-    cy.reportSkill('my_project_123', 1, 'user@skills.org', now.subtract(1, 'year').format('YYYY-MM-DD HH:mm'), false);
-
-    cy.visit('/administrator/');
-    cy.wait('@getProjects');
-    cy.wait('@loadInception');
-    cy.get('[data-cy=projectCreated]').should('be.visible').contains('Today');
-    cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('a year ago');
-
-    cy.reportSkill('my_project_123', 1, 'user@skills.org', now.subtract(2, 'months').format('YYYY-MM-DD HH:mm'), false);
-    cy.visit('/administrator/');
-    cy.wait('@getProjects');
-    cy.wait('@loadInception');
-    cy.get('[data-cy=projectCreated]').should('be.visible').contains('Today');
-    cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('2 months ago');
-
-    cy.reportSkill('my_project_123', 1, 'user@skills.org', now.subtract(7, 'days').utc().format('YYYY-MM-DD HH:mm'), false);
-
-    cy.visit('/administrator/');
-    cy.wait('@getProjects');
-    cy.wait('@loadInception');
-    cy.get('[data-cy=projectCreated]').should('be.visible').contains('Today');
-    cy.get('[data-cy=projectLastReportedSkill]').should('be.visible').contains('7 days ago');
+    cy.get('[data-cy=projectCreated]')
+        .should('be.visible')
+        .contains('Today');
+    cy.get('[data-cy=projectLastReportedSkill]')
+        .should('not.exist');
   });
 
   it('Created and Last Reported Skill data should be visible on project page', () => {

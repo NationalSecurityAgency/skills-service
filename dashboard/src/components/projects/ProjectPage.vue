@@ -34,7 +34,7 @@ limitations under the License.
       </div>
       <div slot="subSubTitle" v-if="project">
         <div data-cy="projectCreated">
-          <project-dates :created="project.created" :last-reported-skill="project.lastReportedSkill" />
+          <project-dates :created="project.created" :load-last-reported-date="true"/>
         </div>
         <b-button-group class="mt-3" size="sm">
           <b-button @click="displayEditProject"

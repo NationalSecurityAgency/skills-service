@@ -92,9 +92,6 @@ limitations under the License.
         <template v-slot:cell(numErrors)="data">
           {{ data.value | number }}
         </template>
-        <template v-slot:cell(lastReportedSkill)="data">
-          <slim-date-cell :value="data.value" :fromStartOfDay="true"/>
-        </template>
 
         <template v-slot:cell(created)="data">
           <div>
@@ -139,7 +136,6 @@ limitations under the License.
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
   import ProjectService from './ProjectService';
   import SkillsBTable from '../utils/table/SkillsBTable';
-  import SlimDateCell from '../utils/table/SlimDateCell';
   import RemovalValidation from '../utils/modal/RemovalValidation';
   import EditProject from './EditProject';
 
@@ -199,11 +195,6 @@ limitations under the License.
                 sortable: true,
               },
               {
-                key: 'lastReportedSkill',
-                label: 'Last Reported Skill',
-                sortable: true,
-              },
-              {
                 key: 'created',
                 label: 'Created',
                 sortable: true,
@@ -227,7 +218,6 @@ limitations under the License.
     components: {
       EditProject,
       SkillsBTable,
-      SlimDateCell,
       RemovalValidation,
     },
     mounted() {

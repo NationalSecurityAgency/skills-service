@@ -24,7 +24,7 @@ limitations under the License.
           There are <span style="font-size: 1rem;"><b-badge variant="danger">{{ numIssues | number }}</b-badge></span> issues to address </span>
       </div>
       <div class="col text-right" data-cy="projectCreated">
-        <project-dates :created="project.created" :last-reported-skill="project.lastReportedSkill" />
+        <project-dates :created="project.created"/>
       </div>
     </div>
   </div>

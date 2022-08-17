@@ -325,10 +325,6 @@ describe('Projects Table Tests', () => {
           colIndex: 4,
           value: '0'
         },
-        {
-          colIndex: 5,
-          value: '2 months ago'
-        },
       ],
     ], 1);
   });

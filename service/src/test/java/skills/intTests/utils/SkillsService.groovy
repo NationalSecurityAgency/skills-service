@@ -895,6 +895,10 @@ class SkillsService {
         return wsHelper.adminGet("/projects/${projectId}/users/${userId}/stats".toString())
     }
 
+    def getLastSkillEventForProject(String projectId) {
+        return wsHelper.adminGet("/projects/${projectId}/lastSkillEvent".toString())
+    }
+
     def getSkillUsers(String projectId, String skillId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = '') {
         return wsHelper.adminGet("${getSkillUrl(projectId, null, skillId)}/users?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}".toString())
     }
