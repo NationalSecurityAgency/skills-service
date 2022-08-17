@@ -484,15 +484,31 @@ class AdminEditSpecs extends DefaultIntSpec {
         skillsAfter.data.collect { it.skillId }.sort() == ["TestSkill47", "skill2"]
     }
 
-    def "Project creation limited per user"(){
+    static int expectedMaxProjects = 25
+
+    def "Project creation limited per user"() {
         when:
-        (1..26).each {
+        (1..(expectedMaxProjects + 1)).each {
             def proj = SkillsFactory.createProject(it)
             skillsService.createProject(proj)
         }
         then:
         SkillsClientException e = thrown()
         e.message.contains "Each user is limited to [25] Projects"
+    }
+
+    def "user with root role can have unlimited # of projects"() {
+        SkillsService rootUser = createRootSkillService()
+        when:
+        (1..(expectedMaxProjects + 5)).each {
+            def proj = SkillsFactory.createProject(it)
+            rootUser.createProject(proj)
+            // UI pins - so let's simulate
+            rootUser.pinProject(proj.projectId)
+        }
+        def projects = rootUser.getProjects()
+        then:
+        projects.size() == expectedMaxProjects + 5
     }
 
     def "Subject creation limited per project"() {
