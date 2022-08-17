@@ -909,7 +909,7 @@ describe('Badges Tests', () => {
         cy.get('[data-cy="badgeCard-badge2"] [data-cy="editBtn"]')
             .click();
         cy.get('input[data-cy=badgeName]')
-            .type('{selectall}Updated Badge Name');
+            .type('{selectall}Updated Name');
         cy.get('button[data-cy=saveBadgeButton]')
             .click();
 
@@ -919,7 +919,7 @@ describe('Badges Tests', () => {
             .contains('ID: badge1');
 
         cy.get('[data-cy="badgeCard-badge2"] [data-cy="titleLink"]')
-            .contains('Updated Badge Name');
+            .contains('Updated Name');
         cy.get('[data-cy="badgeCard-badge2"] [data-cy="subTitle"]')
             .contains('ID: badge2');
     });

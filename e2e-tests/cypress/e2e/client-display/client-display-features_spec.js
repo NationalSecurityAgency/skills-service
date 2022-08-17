@@ -37,7 +37,7 @@ describe('Client Display Features Tests', () => {
     });
 
     it('display new version banner when software is updated', () => {
-        cy.intercept('/api/projects/proj1/subjects/subj1/summary', (req) => {
+        cy.intercept('/api/projects/proj1/subjects/subj1/summary*', (req) => {
             req.reply((res) => {
                 res.send(200, {
                     'subject': 'Subject 1',

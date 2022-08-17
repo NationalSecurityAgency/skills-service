@@ -36,7 +36,7 @@ describe('User Agreement Specs', ()=> {
        });
 
        cy.intercept('GET', '/app/userAgreement').as('loadUserAgreement');
-       cy.intercept('GET', '/admin/projects/projBanana/').as('loadProject');
+       cy.intercept('GET', '/admin/projects/projBanana').as('loadProject');
        cy.intercept('POST', '/app/userInfo/settings').as('acknowledgeUa');
        cy.intercept('POST', '/logout').as('logout');
        cy.logout();

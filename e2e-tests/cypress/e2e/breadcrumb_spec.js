@@ -85,7 +85,7 @@ describe('Breadcrumb Navigation Tests', () => {
             url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
         })
             .as('loadSkill');
-        cy.intercept('GET', '/admin/projects/proj1/skills/skill1/users')
+        cy.intercept('GET', '/admin/projects/proj1/skills/skill1/users*')
             .as('loadSkillUsers');
         cy.intercept('GET', '/admin/projects/proj1/skills/skill1/dependency/graph')
             .as('loadSkillGraph');
@@ -407,7 +407,7 @@ describe('Breadcrumb Navigation Tests', () => {
     });
 
     it('Metrics', () => {
-        cy.intercept('GET', '/admin/projects/proj1/metrics/distinctUsersOverTimeForProject')
+        cy.intercept('GET', '/admin/projects/proj1/metrics/distinctUsersOverTimeForProject*')
             .as('loadMetrics');
         cy.visit('/administrator/projects/proj1/metrics');
         cy.wait('@loadMetrics');
@@ -423,7 +423,7 @@ describe('Breadcrumb Navigation Tests', () => {
     });
 
     it('Issues', () => {
-        cy.intercept('GET', '/admin/projects/proj1/errors')
+        cy.intercept('GET', '/admin/projects/proj1/errors*')
             .as('loadErrors');
         cy.visit('/administrator/projects/proj1/issues');
         cy.wait('@loadErrors');
@@ -439,7 +439,7 @@ describe('Breadcrumb Navigation Tests', () => {
     });
 
     it('Access', () => {
-        cy.intercept('GET', '/admin/projects/proj1/userRoles')
+        cy.intercept('GET', '/admin/projects/proj1/userRoles/**')
             .as('loadUserRoles');
         cy.visit('/administrator/projects/proj1/access');
         cy.wait('@loadUserRoles');

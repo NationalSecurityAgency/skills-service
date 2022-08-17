@@ -1124,9 +1124,9 @@ describe('Settings Tests', () => {
     });
 
     it('Landing Page preference', () => {
-        cy.intercept('POST', '/app/userInfo')
+        cy.intercept('POST', '/app/userInfo/**')
             .as('saveUserInfo');
-        cy.intercept('GET', '/app/userInfo')
+        cy.intercept('GET', '/app/userInfo/**')
             .as('loadUserInfo');
         cy.intercept('/app/projects')
             .as('loadProjects');

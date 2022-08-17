@@ -326,7 +326,7 @@ describe('Root Pin and Unpin Tests', () => {
         cy.intercept('PUT', '/admin/projects/proj1/users/root@skills.org/roles/ROLE_PROJECT_ADMIN')
             .as('addAdmin');
 
-        cy.intercept('POST', 'suggestDashboardUsers')
+        cy.intercept('POST', '*suggestDashboardUsers*')
             .as('suggest');
         cy.intercept('GET', '/app/userInfo')
             .as('loadUserInfo');
@@ -357,7 +357,6 @@ describe('Root Pin and Unpin Tests', () => {
             .click();
         cy.clickButton('Add');
         cy.wait('@addAdmin');
-        cy.wait('@getRolesForRoot');
         cy.wait('@loadProjectAdmins');
 
         cy.logout();

@@ -34,7 +34,7 @@ describe('Projects Tests', () => {
             .as('getProjectsCustomIcons');
         cy.intercept('GET', '/app/userInfo')
             .as('getUserInfo');
-        cy.intercept('/admin/projects/proj1/users/root@skills.org/roles')
+        cy.intercept('/admin/projects/proj1/users/root@skills.org/roles*')
             .as('getRolesForRoot');
     });
 
@@ -796,7 +796,7 @@ describe('Projects Tests', () => {
         cy.intercept('PUT', '/admin/projects/proj1/users/root@skills.org/roles/ROLE_PROJECT_ADMIN')
             .as('addAdmin');
 
-        cy.intercept('POST', 'suggestDashboardUsers')
+        cy.intercept('POST', '*suggestDashboardUsers*')
             .as('suggest');
         cy.intercept('GET', '/app/userInfo')
             .as('loadUserInfo');
@@ -814,7 +814,6 @@ describe('Projects Tests', () => {
             .click();
         cy.clickButton('Add');
         cy.wait('@addAdmin');
-        cy.wait('@getRolesForRoot');
 
         const rowSelector = '[data-cy=roleManagerTable] tbody tr';
         cy.get(rowSelector)
@@ -863,7 +862,7 @@ describe('Projects Tests', () => {
         cy.intercept('PUT', '/admin/projects/proj1/users/root@skills.org/roles/ROLE_PROJECT_ADMIN')
             .as('addAdmin');
 
-        cy.intercept('POST', 'suggestDashboardUsers')
+        cy.intercept('POST', '*suggestDashboardUsers*')
             .as('suggest');
         cy.intercept('GET', '/app/userInfo')
             .as('loadUserInfo');
@@ -881,7 +880,6 @@ describe('Projects Tests', () => {
             .click();
         cy.clickButton('Add');
         cy.wait('@addAdmin');
-        cy.wait('@getRolesForRoot');
 
         const tableSelector = '[data-cy=roleManagerTable]';
         const rowSelector = `${tableSelector} tbody tr`;
@@ -956,7 +954,7 @@ describe('Projects Tests', () => {
         cy.intercept('PUT', '/admin/projects/proj1/users/root@skills.org/roles/ROLE_PROJECT_ADMIN')
             .as('addAdmin');
 
-        cy.intercept('POST', 'suggestDashboardUsers')
+        cy.intercept('POST', '*suggestDashboardUsers*')
             .as('suggest');
         cy.intercept('GET', '/app/userInfo')
             .as('loadUserInfo');
@@ -1213,7 +1211,7 @@ describe('Projects Tests', () => {
             .as('loadUserInfo');
         cy.intercept('GET', '/admin/projects/proj1')
             .as('loadProject');
-        cy.intercept('GET', '/admin/projects/proj1/userRoles')
+        cy.intercept('GET', '/admin/projects/proj1/userRoles/*')
             .as('loadUserRoles');
 
         cy.visit('/administrator/projects/proj1/access');

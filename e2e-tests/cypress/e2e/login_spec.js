@@ -18,7 +18,7 @@ describe('Login Tests', () => {
     beforeEach(() => {
         cy.logout();
 
-        cy.intercept('GET', '/app/projects')
+        cy.intercept('GET', '/app/projects/**')
             .as('getProjects')
             .intercept('GET', '/api/icons/customIconCss')
             .as('getProjectsCustomIcons')

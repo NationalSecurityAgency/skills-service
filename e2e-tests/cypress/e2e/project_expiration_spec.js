@@ -92,7 +92,7 @@ describe('Project Expiration Tests', () => {
             'levelsArePoints': false,
             'expiring': true,
             'expirationTriggered': markedExpired,
-        }, [],
+        },
             {
                 'projectId': 'proj1',
                 'name': 'Proj 1',
@@ -132,7 +132,7 @@ describe('Project Expiration Tests', () => {
         cy.get('button[data-cy=keepIt]')
             .click();
         cy.wait('@stopExpiration');
-        cy.contains('PROJECT: This is project 1');
+        cy.contains('PROJECT: Proj 1');
         cy.get('[data-cy=projectExpiration]')
             .should('not.exist');
         cy.get('button[data-cy=keepIt]')

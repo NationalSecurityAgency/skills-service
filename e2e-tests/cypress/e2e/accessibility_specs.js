@@ -397,7 +397,7 @@ describe('Accessibility Tests', () => {
         cy.customA11y();
 
         // --- Issues page ---
-        cy.intercept('GET', '/admin/projects/MyNewtestProject/errors')
+        cy.intercept('GET', '/admin/projects/MyNewtestProject/errors*')
             .as('getErrors');
         cy.get('[data-cy=nav-Issues]')
             .click();
@@ -1163,15 +1163,15 @@ describe('Accessibility Tests', () => {
             .as('loadContactUsers');
         cy.intercept('GET', '/admin/projects/MyNewtestProject/errors*')
             .as('loadErrors');
-        cy.intercept('GET', '/admin/projects/MyNewtestProject/userRoles')
+        cy.intercept('GET', '/admin/projects/MyNewtestProject/userRoles/*')
             .as('loadAccess');
         cy.intercept('GET', '/admin/projects/MyNewtestProject/settings')
             .as('loadSettings');
         cy.intercept('GET', '/admin/projects/MyNewtestProject/subjects/subj1/skills')
             .as('loadSubjSkills');
-        cy.intercept('GET', '/admin/projects/MyNewtestProject/subjects/subj1/level')
+        cy.intercept('GET', '/admin/projects/MyNewtestProject/subjects/subj1/levels')
             .as('loadSubjLevels');
-        cy.intercept('GET', '/admin/projects/MyNewtestProject/subjects/subj1/users')
+        cy.intercept('GET', '/admin/projects/MyNewtestProject/subjects/subj1/users*')
             .as('loadSubjUsers');
         cy.intercept('GET', '/admin/projects/MyNewtestProject/subjects/subj1/skills/skill4')
             .as('loadSkill');
@@ -1179,7 +1179,7 @@ describe('Accessibility Tests', () => {
             .as('loadSkillDependencies');
         cy.intercept('GET', '/admin/projects/MyNewtestProject/skills/skill4/users*')
             .as('loadSkillUsers');
-        cy.intercept('GET', '/admin/projects/MyNewtestProject/metrics/skillEventsOverTimeChartBuilder')
+        cy.intercept('GET', '/admin/projects/MyNewtestProject/metrics/skillEventsOverTimeChartBuilder*')
             .as('loadSkillMetrics');
 
         cy.get('.skills-menu-content')
