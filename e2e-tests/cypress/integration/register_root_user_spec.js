@@ -89,15 +89,30 @@ describe('Register Root Users', () => {
     cy.wait('@getConfig');
     cy.contains('New Root Account')
 
-    cy.get('#firstName').type("Robert")
-    cy.get('#lastName').type("Smith")
-    cy.get('#email').type(username)
-    cy.get('#password').type(pass)
-    cy.get('#password_confirmation').type("password")
-    cy.contains('Create Account').click()
+    cy.get('#firstName')
+        .type('Robert');
+    cy.get('#lastName')
+        .type('Smith');
+    cy.get('#email')
+        .type(username);
+    cy.get('#password')
+        .type(pass);
+    cy.get('#password_confirmation')
+        .type('password');
+    cy.contains('Create Account')
+        .click();
 
     // if rankingAndProgressViewsEnabled are disabled then always navigate to admin page
-    cy.url().should('include', '/administrator')
+    cy.url()
+        .should('include', '/administrator');
+
+    cy.get('[data-cy="newProjectButton"]')
+        .click();
+    cy.get('[data-cy="projectName"]')
+        .type('New Project');
+    cy.get('[data-cy="saveProjectButton"]')
+        .click();
+    cy.get('[data-cy="projCard_NewProject_manageLink"]');
   });
 
 
