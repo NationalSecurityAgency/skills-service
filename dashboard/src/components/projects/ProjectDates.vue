@@ -52,7 +52,7 @@ limitations under the License.
     methods: {
       doLoadDate() {
         if (this.loadLastReportedDate) {
-          ProjectService.geLatestSkillEventForProject(this.$route.params.projectId)
+          ProjectService.getLatestSkillEventForProject(this.$route.params.projectId)
             .then((res) => {
               this.lastReportedSkill = res.lastReportedSkillDate;
             })

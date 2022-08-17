@@ -68,7 +68,7 @@ export default {
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}`)
       .then((response) => response.data);
   },
-  geLatestSkillEventForProject(projectId) {
+  getLatestSkillEventForProject(projectId) {
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/lastSkillEvent`)
       .then((response) => response.data);
   },
