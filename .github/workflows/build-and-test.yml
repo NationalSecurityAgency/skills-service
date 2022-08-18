@@ -161,12 +161,13 @@ jobs:
     - name: Prep Services for Cypress tests
       run: |
         cd e2e-tests
+        ls
         npm install
         npm run cyServices:start
         cd ..
 
     - name: Run Cypress tests
-      uses: cypress-io/github-action@v2
+      uses: cypress-io/github-action@v4
       with:
         working-directory: e2e-tests
         record: true
