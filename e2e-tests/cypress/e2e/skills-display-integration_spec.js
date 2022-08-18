@@ -158,7 +158,7 @@ describe('Navigation Tests', () => {
         cy.createSkill(1, 1, 3);
         cy.createSkill(1, 1, 4);
 
-        cy.intercept('GET', '/api/projects/proj1/pointHistory')
+        cy.intercept('GET', '/api/projects/proj1/pointHistory*')
             .as('pointHistoryChart');
 
         cy.visit('/');

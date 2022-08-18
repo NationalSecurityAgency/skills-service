@@ -995,7 +995,7 @@ describe('Subjects Tests', () => {
       cy.createSkill(1, 1, 1)
       cy.createSkill(1, 1, 2)
       cy.createSkill(1, 1, 3)
-      cy.intercept('GET', '/admin/projects/proj1/subjects/subj11111111').as('getNewId');
+      cy.intercept('GET', '/admin/projects/proj1/subjects/subj111111111').as('getNewId');
       cy.intercept('GET', '/admin/projects/proj1/subjects/subj111111111/skills/skill3 ').as('loadSkill');
 
       cy.visit('/administrator/projects/proj1/subjects/subj1');

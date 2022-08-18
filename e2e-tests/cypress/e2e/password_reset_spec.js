@@ -53,8 +53,8 @@ describe('Password Reset Tests', () => {
             url: '/performPasswordReset'
         })
             .as('performReset');
-        cy.intercept('GET', '/app/projects')
-            .as('getProjects');
+        cy.intercept('GET', '/api/myProgressSummary')
+            .as('myProgressSummary');
         cy.intercept('GET', '/app/userInfo')
             .as('getUserInfo');
     });
@@ -101,7 +101,7 @@ describe('Password Reset Tests', () => {
                     .type('password2');
                 cy.get('[data-cy=login]')
                     .click();
-                cy.wait('@getProjects');
+                cy.wait('@myProgressSummary');
                 cy.wait('@getUserInfo');
 
                 cy.get('[data-cy="breadcrumb-Progress And Rankings"]')

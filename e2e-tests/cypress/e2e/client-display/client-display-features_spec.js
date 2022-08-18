@@ -82,30 +82,25 @@ describe('Client Display Features Tests', () => {
 
     it('do not display new version banner if lib version in headers is older than lib version in local storage', () => {
         const mockedLibVersion = dateFormatter(new Date() - 1000 * 60 * 60 * 24 * 5);
-        cy.intercept({
-            path: '/api/projects/proj1/subjects/subj1/summary*',
-            statusCode: 200,
-        }, {
-            body: {
-                'subject': 'Subject 1',
-                'subjectId': 'subj1',
-                'description': 'Description',
-                'skillsLevel': 0,
-                'totalLevels': 5,
-                'points': 0,
-                'totalPoints': 0,
-                'todaysPoints': 0,
-                'levelPoints': 0,
-                'levelTotalPoints': 0,
-                'skills': [],
-                'iconClass': 'fa fa-question-circle',
-                'helpUrl': 'http://doHelpOnThisSubject.com'
-            },
-            headers: {
-                'skills-client-lib-version': mockedLibVersion,
-            },
-        })
-            .as('getSubjectSummary');
+        cy.intercept('/api/projects/proj1/subjects/subj1/summary*', (req) => {
+            req.reply((res) => {
+                res.send(200, {
+                    'subject': 'Subject 1',
+                    'subjectId': 'subj1',
+                    'description': 'Description',
+                    'skillsLevel': 0,
+                    'totalLevels': 5,
+                    'points': 0,
+                    'totalPoints': 0,
+                    'todaysPoints': 0,
+                    'levelPoints': 0,
+                    'levelTotalPoints': 0,
+                    'skills': [],
+                    'iconClass': 'fa fa-question-circle',
+                    'helpUrl': 'http://doHelpOnThisSubject.com'
+                }, { 'skills-client-lib-version': mockedLibVersion });
+            });
+        }) .as('getSubjectSummary');
 
         cy.intercept({
             path: '/api/projects/proj1/subjects/subj1/rank',
