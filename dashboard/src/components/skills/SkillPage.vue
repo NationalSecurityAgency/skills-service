@@ -20,18 +20,6 @@ limitations under the License.
         <div class="h5 text-muted" data-cy="skillId">
           <show-more :limit="54" :text="getSkillId(skill)"></show-more>
         </div>
-        <router-link v-if="skill && skill.prevSkillId" :id="skill.prevSkillId" :to="{ name:'SkillOverview',
-                params: { projectId: this.$route.params.projectId, subjectId: this.$route.params.subjectId, skillId: skill.prevSkillId }}"
-                     class="btn btn-sm btn-outline-hc ml-2"
-                     :data-cy="`manage_${skill.prevSkillId}`">
-          Previous
-        </router-link>
-        <router-link v-if="skill && skill.nextSkillId" :id="skill.nextSkillId" :to="{ name:'SkillOverview',
-                params: { projectId: this.$route.params.projectId, subjectId: this.$route.params.subjectId, skillId: skill.nextSkillId }}"
-                     class="btn btn-sm btn-outline-hc ml-2"
-                     :data-cy="`manage_${skill.nextSkillId}`">
-          Next
-        </router-link>
         <div class="h5 text-muted" v-if="skill && skill.groupId">
           <span style="font-size: 1rem">Group ID:</span> <span v-b-tooltip.hover="`Name: ${ skill.groupName }`">{{ skill.groupId }}</span>
         </div>
