@@ -161,27 +161,17 @@ describe('Settings Tests', () => {
         cy.wait('@addRoot');
 
         cy.log('validating sort on Root User column');
-        cy.get(`${rootUsrTableSelector} th`)
-            .contains('Root User')
-            .click();
-        // sort should now be ascending false
         cy.wait('@loadRootUsers');
         cy.validateTable(rootUsrTableSelector, [
             [{
                 colIndex: 0,
-                value: '(skills@skills.org)'
+                value: '(root@skills.org)'
             }],
             [{
                 colIndex: 0,
-                value: '(root@skills.org)'
+                value: '(skills@skills.org)'
             }],
         ], 5, true, null, false);
-
-        // reset sort to ascending true
-        cy.get(`${rootUsrTableSelector} th`)
-            .contains('Root User')
-            .click();
-        cy.wait('@loadRootUsers');
 
         // attempt to remove myself - no go
         cy.get(`${rootUsrTableSelector} [data-cy="removeUserBtn"]`)

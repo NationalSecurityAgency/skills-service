@@ -913,15 +913,18 @@ describe('Badges Tests', () => {
         cy.get('button[data-cy=saveBadgeButton]')
             .click();
 
+        cy.get('button[data-cy=saveBadgeButton]').should('not.exist');
+        cy.wait('@loadBadges')
+
         cy.get('[data-cy="badgeCard-badge1"] [data-cy="titleLink"]')
             .contains('Badge 1');
         cy.get('[data-cy="badgeCard-badge1"] [data-cy="subTitle"]')
             .contains('ID: badge1');
 
-        cy.get('[data-cy="badgeCard-badge2"] [data-cy="titleLink"]')
-            .contains('Updated Name');
         cy.get('[data-cy="badgeCard-badge2"] [data-cy="subTitle"]')
             .contains('ID: badge2');
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy="titleLink"]')
+            .contains('Updated Name');
     });
 
     it('delete badge', () => {
