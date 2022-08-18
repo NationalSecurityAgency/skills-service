@@ -31,6 +31,7 @@ import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.*
 import skills.controller.result.model.CustomIconResult
+import skills.controller.result.model.LatestEvent
 import skills.controller.result.model.ProjectResult
 import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.SimpleProjectResult
@@ -544,11 +545,16 @@ class ProjAdminService {
     }
 
     @Profile
-    private UserInfo loadCurrentUser(boolean failIfNoCurrentUser=true) {
+    private UserInfo loadCurrentUser(boolean failIfNoCurrentUser = true) {
         UserInfo currentUser = userInfoService.getCurrentUser()
         if (!currentUser && failIfNoCurrentUser) {
             throw new SkillsAuthorizationException('No current user found')
         }
         return currentUser
+    }
+
+    LatestEvent getLastReportedSkillEvent(String projectId) {
+        Date date = eventsRepo.getLatestEventDateForProject(projectId)
+        new LatestEvent(lastReportedSkillDate: date)
     }
 }

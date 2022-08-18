@@ -15,7 +15,10 @@ limitations under the License.
 */
 <template>
 <div>
-  <skills-display
+  <div v-if="isLoadingSettings" class="d-flex justify-content-center mt-1">
+    <b-spinner variant="primary" type="grow" label="Spinning"></b-spinner>
+  </div>
+  <skills-display v-if="!isLoadingSettings"
     :options="options"
     :version="skillsVersion"
     :theme="themeObj"
@@ -27,8 +30,8 @@ limitations under the License.
 <script>
   import { SkillsDisplay } from '@skilltree/skills-client-vue';
   import MyProgressService from '@/components/myProgress/MyProgressService';
-  import SkillsDisplayOptionsMixin from './SkillsDisplayOptionsMixin';
-  import SettingsService from '../settings/SettingsService';
+  import SkillsDisplayOptionsMixin from '@/components/myProgress/SkillsDisplayOptionsMixin';
+  import SettingsService from '@/components/settings/SettingsService';
 
   export default {
     name: 'MyProjectSkillsPage',
@@ -38,6 +41,7 @@ limitations under the License.
     },
     data() {
       return {
+        isLoadingSettings: true,
         projectId: this.$route.params.projectId,
         projectDisplayName: 'PROJECT',
         skillsVersion: 2147483647, // max int
@@ -100,6 +104,7 @@ limitations under the License.
       };
     },
     mounted() {
+      this.isLoadingSettings = true;
       SettingsService.getClientDisplayConfig(this.projectId).then((response) => {
         this.projectDisplayName = response.projectDisplayName?.toUpperCase();
         if (!this.$route.params.name) {
@@ -111,6 +116,8 @@ limitations under the License.
         } else {
           this.$set(this.theme, 'landingPageTitle', `${this.projectDisplayName}: ${this.$route.params.name}`);
         }
+      }).finally(() => {
+        this.isLoadingSettings = false;
       });
     },
     computed: {

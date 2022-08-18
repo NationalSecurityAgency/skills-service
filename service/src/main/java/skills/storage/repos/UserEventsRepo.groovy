@@ -469,4 +469,10 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
         )  AS counts GROUP BY counts.countBucket;
     ''', nativeQuery = true)
     public List<LabeledCount> binnedUserCountsForSkillUsagePostAchievement(@Param("skillRefId") Integer skillRefId)
+
+    @Nullable
+    @Query(value = '''
+        SELECT max(event_time) FROM user_events where project_id = ?1
+    ''', nativeQuery = true)
+    Date getLatestEventDateForProject(String projectId)
 }

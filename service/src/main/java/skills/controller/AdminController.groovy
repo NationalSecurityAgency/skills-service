@@ -1412,6 +1412,12 @@ class AdminController {
         return success
     }
 
+    @RequestMapping(value = "/projects/{projectId}/lastSkillEvent", method = RequestMethod.GET, produces = "application/json")
+    LatestEvent getLatestEventForProject(@PathVariable("projectId") String projectId) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        return projAdminService.getLastReportedSkillEvent(projectId)
+    }
+
 
 }
 
