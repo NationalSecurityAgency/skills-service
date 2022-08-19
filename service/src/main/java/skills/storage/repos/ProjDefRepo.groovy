@@ -44,13 +44,11 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                     COALESCE(groups.groupCount, 0) AS numGroups,
                     CAST(COALESCE(expiration.expiringUnused, 'false') AS BOOLEAN) as expiring,
                     expiration.expirationTriggeredDate as expirationTriggered,
-                    events.latest AS lastReportedSkill,
                     reusedSkills.skillCount AS numSkillsReused,
                     reusedSkills.totalPoints AS totalPointsReused, 
                     pd.created,
                     GREATEST(skills.skillUpdated, badges.badgeUpdated, subjects.subjectUpdated, pd.updated) as lastEdited
                 FROM project_definition pd
-                LEFT JOIN (SELECT project_id, MAX(event_time) AS latest FROM user_events GROUP BY project_id) events ON events.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS errorCount FROM project_error GROUP BY project_id) errors ON errors.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS skillCount, MAX(updated) AS skillUpdated FROM skill_definition WHERE type = 'Skill' and skill_id not like '%STREUSESKILLST%' and enabled = 'true' GROUP BY project_id) skills ON skills.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS skillCount, SUM(total_points) AS totalPoints FROM skill_definition WHERE type = 'Skill' and skill_id like '%STREUSESKILLST%' and enabled = 'true' GROUP BY project_id) reusedSkills ON reusedSkills.project_id = pd.project_id

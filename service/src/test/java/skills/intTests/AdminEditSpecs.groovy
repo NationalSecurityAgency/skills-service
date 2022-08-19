@@ -527,6 +527,25 @@ class AdminEditSpecs extends DefaultIntSpec {
         e.message.contains "Each Project is limited to [25] Subjects"
     }
 
+    def "lastReportedSkill is not populated for get projects"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def subj = SkillsFactory.createSubject(1, 1)
+        def skills = SkillsFactory.createSkills(2, 1, 1, 100, 2)
+        skillsService.createProjectAndSubjectAndSkills(proj1, subj, skills)
+
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skills[0].skillId])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.pinProject(proj1.projectId)
+        when:
+        def projectsForRoot = rootUser.getProjects()
+        def projectsRegUser = skillsService.getProjects()
+
+        then:
+        projectsRegUser.lastReportedSkill == [null]
+        projectsForRoot.lastReportedSkill == [null]
+    }
+
+
     def "Badge creation limited per project"() {
         def proj1 = SkillsFactory.createProject(1)
         skillsService.createProject(proj1)
