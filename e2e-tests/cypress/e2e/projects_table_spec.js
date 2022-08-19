@@ -20,7 +20,7 @@ dayjs.extend(utcPlugin);
 
 describe('Projects Table Tests', () => {
     const tableSelector = '[data-cy=projectsTable]';
-
+    const numProjCreated = 10;
     beforeEach(() => {
         cy.intercept('GET', '/app/projects')
             .as('getProjects');
@@ -31,7 +31,7 @@ describe('Projects Table Tests', () => {
         cy.intercept('/admin/projects/proj1/users/root@skills.org/roles')
             .as('getRolesForRoot');
 
-        for (let i = 1; i <= 10; i += 1) {
+        for (let i = 1; i <= numProjCreated; i += 1) {
             cy.createProject(i);
         }
     });
@@ -589,6 +589,63 @@ describe('Projects Table Tests', () => {
         cy.wait(200);
         cy.get('[data-cy=deleteProjectButton_proj10]')
             .should('have.focus');
+    });
+
+    const maxNumProjects = 25;
+    it('projects table validation: user cannot create more than configured max projects', () => {
+        for (let i = numProjCreated + 1; i <= maxNumProjects; i += 1) {
+            cy.createProject(i);
+        }
+        cy.visit('/administrator/');
+        cy.get('[data-cy="addProjectDisabled"]')
+            .contains('Cannot create or copy projects - The maximum number of Projects allowed is 25');
+        cy.get('[data-cy="newProjectButton"]')
+            .should('be.disabled');
+        cy.get('[data-cy="copyProjectIdproj25"]')
+            .should('be.disabled');
+        cy.get('[data-cy="copyProjectIdproj24"]')
+            .should('be.disabled');
+        cy.get('[data-cy="copyProjectIdproj23"]')
+            .should('be.disabled');
+    });
+
+    it('root user can create unlimited number of projects', () => {
+        cy.logout();
+        cy.fixture('vars.json')
+            .then((vars) => {
+                cy.login(vars.rootUser, vars.defaultPass);
+            });
+        for (let i = numProjCreated + 1; i <= maxNumProjects; i += 1) {
+            cy.createProject(i);
+        }
+        for (let i = 1; i <= maxNumProjects; i += 1) {
+            cy.request('POST', `/root/pin/proj${i}`, {});
+        }
+        cy.visit('/administrator/');
+        cy.get('[data-cy="copyProjectIdproj25"]')
+        cy.get('[data-cy="addProjectDisabled"]').should('not.exist')
+        cy.get('[data-cy="newProjectButton"]').should('be.enabled');
+        cy.get('[data-cy="copyProjectIdproj25"]')
+            .should('be.enabled');
+        cy.get('[data-cy="copyProjectIdproj24"]')
+            .should('be.enabled');
+        cy.get('[data-cy="copyProjectIdproj23"]')
+            .should('be.enabled');
+
+        // save new project as root
+        cy.get('[data-cy="newProjectButton"]').click()
+        cy.get('[data-cy="projectName"]')
+            .type('NewProj');
+        cy.get('[data-cy="saveProjectButton"]').click();
+        cy.get('[data-cy="manageProjLink_NewProj"]')
+
+        // copy project as root
+        cy.get('[data-cy="copyProjectIdproj25"]').click();
+        cy.get('[data-cy="projectName"]')
+            .type('Copy Proj');
+        cy.get('[data-cy="saveProjectButton"]').click();
+        cy.get('[data-cy="allDoneBtn"]').click();
+        cy.get('[data-cy="manageProjLink_CopyProj"]')
     });
 
 });
