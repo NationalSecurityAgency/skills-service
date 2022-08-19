@@ -70,6 +70,7 @@ limitations under the License.
                           :data-cy="`skillProgress_index-${index}`"
                           @points-earned="onPointsEarned"
                           :child-skill-highlight-string="searchString"
+                          :lastSeenSkill="lastSeenSkill"
                       />
                     </div>
                   </div>
@@ -168,6 +169,7 @@ limitations under the License.
         descriptionsLoaded: false,
         skillsInternal: [],
         skillsInternalOrig: [],
+        lastSeenSkill: null,
         filters: [
           {
             icon: 'fas fa-battery-empty',
@@ -226,6 +228,8 @@ limitations under the License.
       });
 
       this.skillsInternalOrig = this.skillsInternal.map((item) => ({ ...item, children: item.children?.map((child) => ({ ...child })) }));
+
+      this.lastSeenSkill = localStorage.getItem('lastSeenSkill');
     },
     methods: {
       updateMetaCountsForSkillRes(skillRes) {

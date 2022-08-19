@@ -51,6 +51,9 @@ limitations under the License.
                 </span>
                 <span v-if="!skill.skillHtml">{{ skill.skill }}</span>
                 <span v-if="skill.skillHtml" v-html="skill.skillHtml"></span>
+                <span v-if="isLastSeenSkill" id="lastSeenIndicator" style="margin-left: 10px;">
+                  <i class="fas fa-eye"></i>
+                </span>
               </div>
               <div v-if="skill.copiedFromProjectId" class="text-truncate d-inline-block ml-2"
                    style="max-width: 15rem;"><span class="text-secondary font-italic"> in </span>
@@ -210,6 +213,10 @@ limitations under the License.
         type: String,
         default: '',
       },
+      lastSeenSkill: {
+        type: String,
+        default: null,
+      },
     },
     data() {
       return {
@@ -219,6 +226,13 @@ limitations under the License.
     mounted() {
       this.initChildSkills();
       this.highlightChildSkillName();
+
+      if (this.isLastSeenSkill) {
+        const lastSeenIndicator = document.getElementById('lastSeenIndicator');
+        if (lastSeenIndicator) {
+          lastSeenIndicator.scrollIntoView();
+        }
+      }
     },
     computed: {
       locked() {
@@ -244,6 +258,9 @@ limitations under the License.
       },
       someSkillsAreOptional() {
         return this.isSkillsGroupWithChildren && this.skill.numSkillsRequired !== -1 && this.skill.numSkillsRequired < this.skill.children.length;
+      },
+      isLastSeenSkill() {
+        return this.lastSeenSkill === this.skill.skillId;
       },
     },
     watch: {
@@ -278,6 +295,7 @@ limitations under the License.
         if (this.allowDrillDown) {
           const route = this.getSkillDetailsRoute();
           const params = this.getParams();
+          localStorage.setItem('lastSeenSkill', this.skill.skillId);
           this.handlePush({
             name: route,
             params,
