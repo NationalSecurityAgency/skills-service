@@ -29,6 +29,8 @@ import skills.skillLoading.model.UsersPerLevel
 import skills.storage.model.DayCountItem
 import skills.storage.model.SkillDef
 import skills.storage.model.UserPoints
+import skills.storage.repos.ProjDefRepo
+import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPointsRepo
 import skills.storage.repos.nativeSql.NativeQueriesRepo
@@ -45,6 +47,12 @@ class AdminUsersService {
 
     @Autowired
     UserPointsRepo userPointsRepo
+
+    @Autowired
+    ProjDefRepo projDefRepo
+
+    @Autowired
+    SkillDefRepo skillDefRepo
 
     @Autowired
     UserAchievedLevelRepo userAchievedRepo
@@ -145,8 +153,9 @@ class AdminUsersService {
         }
     }
 
-    TableResult loadUsersPage(String projectId, String query, PageRequest pageRequest) {
-        TableResult result = new TableResult()
+    TableResultWithTotalPoints loadUsersPage(String projectId, String query, PageRequest pageRequest) {
+        TableResultWithTotalPoints result = new TableResultWithTotalPoints()
+        result.totalPoints = projDefRepo.getTotalPointsByProjectId(projectId) ?: 0
         Long totalProjectUsers = countTotalProjUsers(projectId)
         if (totalProjectUsers) {
             query = query ? query.trim() : ''
@@ -174,11 +183,12 @@ class AdminUsersService {
         userPointsRepo.countDistinctUserIdByProjectId(projectId)
     }
 
-    TableResult loadUsersPage(String projectId, List<String> skillIds, String query, PageRequest pageRequest) {
-        TableResult result = new TableResult()
+    TableResultWithTotalPoints loadUsersPage(String projectId, String parentSkillId, List<String> skillIds, String query, PageRequest pageRequest) {
+        TableResultWithTotalPoints result = new TableResultWithTotalPoints()
         if (!skillIds) {
             return result
         }
+        result.totalPoints = skillDefRepo.getTotalPointsByProjectIdAndSkillId(projectId, parentSkillId) ?: 0
         Long totalProjectUsersWithSkills = userPointsRepo.countDistinctUserIdByProjectIdAndSkillIdIn(projectId, skillIds)
         if (totalProjectUsersWithSkills) {
             query = query ? query.trim() : ''
@@ -196,11 +206,12 @@ class AdminUsersService {
         return result
     }
 
-    TableResult loadUsersPageForSubject(String projectId, String subjectId, String query, PageRequest pageRequest) {
-        TableResult result = new TableResult()
+    TableResultWithTotalPoints loadUsersPageForSubject(String projectId, String subjectId, String query, PageRequest pageRequest) {
+        TableResultWithTotalPoints result = new TableResultWithTotalPoints()
         if (!subjectId) {
             return result
         }
+        result.totalPoints = skillDefRepo.getTotalPointsByProjectIdAndSkillId(projectId, subjectId) ?: 0
         Long totalProjectUsersWithSkills = nativeQueriesRepo.countDistinctUsersByProjectIdAndSubjectId(projectId, subjectId)
         if (totalProjectUsersWithSkills) {
             query = query ? query.trim() : ''

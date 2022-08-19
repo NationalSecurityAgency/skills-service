@@ -630,4 +630,10 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     @Nullable
     @Query('''select count(s) > 0 from SkillDefWithExtra s where s.copiedFrom = ?1 and s.skillId like '%STREUSESKILLST%' ''')
     Boolean wasThisSkillReusedElsewhere(int skillRefId)
+
+
+    @Nullable
+    @Query('''SELECT sd.totalPoints FROM SkillDef sd WHERE sd.projectId = ?1 and sd.skillId = ?2''')
+    Integer getTotalPointsByProjectIdAndSkillId(String projectId, String skillId)
+
 }
