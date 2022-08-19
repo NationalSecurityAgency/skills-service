@@ -636,4 +636,8 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     @Query('''SELECT sd.totalPoints FROM SkillDef sd WHERE sd.projectId = ?1 and sd.skillId = ?2''')
     Integer getTotalPointsByProjectIdAndSkillId(String projectId, String skillId)
 
+    @Nullable
+    @Query('''SELECT sum(sd.totalPoints) FROM SkillDef sd WHERE sd.projectId = ?1 and sd.skillId in ?2''')
+    Integer getTotalPointsSumForSkills(String projectId, List<String> skillId)
+
 }

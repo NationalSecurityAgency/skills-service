@@ -542,4 +542,60 @@ describe('Users Tests', () => {
         ], 5);
     });
 
+
+    it('users with various progress', () => {
+        cy.createSkill(1, 1, 3,  { pointIncrement: '1111', numPerformToCompletion: '10', pointIncrementInterval: 0 })
+        cy.createSubject(1, 2)
+        cy.createSkill(1, 2, 1,  { pointIncrement: '777', numPerformToCompletion: '6', pointIncrementInterval: 0 })
+        cy.createSkill(1, 2, 2,  { pointIncrement: '333', numPerformToCompletion: '10', pointIncrementInterval: 0 })
+        cy.createSkill(1, 2, 3,  { pointIncrement: '666', numPerformToCompletion: '6', pointIncrementInterval: 0 })
+        cy.createBadge(1, 1);
+        cy.assignSkillToBadge(1, 1, 3);
+        cy.assignSkillToBadge(1, 1, 1, 2);
+        cy.assignSkillToBadge(1, 1, 2, 2);
+        cy.assignSkillToBadge(1, 1, 3, 2);
+
+        cy.intercept('/admin/projects/proj1/users?query=*').as('getUsers');
+
+        for (let i = 0; i < 6; i += 1) {
+            for (let j = 0; j < 6; j += 1) {
+                const userId = `user${j}@skills.org`
+                cy.log(`Adding events for ${userId}`);
+                cy.doReportSkill({ project: 1, skill: 1, subjNum: 2, userId })
+                if (j > 1) {
+                    cy.doReportSkill({ project: 1, skill: 3, subjNum: 1, userId })
+                }
+                if (j > 2) {
+                    cy.doReportSkill({ project: 1, skill: 2, subjNum: 2, userId })
+                }
+            }
+
+            // cy.request('POST', `/api/projects/proj1/skills/skill1`, {
+            //     userId: `user${charToAdd}@skills.org`,
+            //     timestamp: m.clone().add(i, 'day').format('x')
+            // });
+        }
+        cy.visit('/administrator/projects/proj1/users');
+        cy.wait('@getUsers')
+
+        // cy.get(`${tableSelector}`).contains('User Id').click();
+        // cy.get('[data-cy="skillsBTablePaging"]').contains('2').click();
+        // cy.wait('@getUsers')
+        //
+        // cy.validateTable(tableSelector, [
+        //     [{ colIndex: 0,  value: 'userf@skills.org' }],
+        // ], 1, true, 6);
+        //
+        // cy.get('[data-cy="users-resetBtn"]').click();
+        // cy.wait('@getUsers')
+        //
+        // cy.validateTable(tableSelector, [
+        //     [{ colIndex: 0,  value: 'usera@skills.org' }],
+        //     [{ colIndex: 0,  value: 'userb@skills.org' }],
+        //     [{ colIndex: 0,  value: 'userc@skills.org' }],
+        //     [{ colIndex: 0,  value: 'userd@skills.org' }],
+        //     [{ colIndex: 0,  value: 'usere@skills.org' }],
+        // ], 5, true, 6);
+    });
+
 })

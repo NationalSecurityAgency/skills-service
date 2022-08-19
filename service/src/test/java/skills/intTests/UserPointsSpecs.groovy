@@ -22,7 +22,6 @@ import org.joda.time.format.DateTimeFormatter
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
-import spock.lang.IgnoreRest
 
 class UserPointsSpecs extends DefaultIntSpec {
 
@@ -57,6 +56,7 @@ class UserPointsSpecs extends DefaultIntSpec {
 
         then:
         results
+        results.totalPoints == 9 * 35
         results.count == 2
         results.totalCount == 2
         results.data.size() == 2
@@ -100,6 +100,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results_t0.data.size() == 1
         results_t0.data.find { it.userId == randos[1].toLowerCase() }.totalPoints == 100
         results_subject_t0.count == 1
+        results_subject_t0.totalPoints == 1000
         results_subject_t0.totalCount == 1
         results_subject_t0.data.size() == 1
         results_subject_t0.data.find { it.userId == randos[1].toLowerCase() }.totalPoints == 100
@@ -113,11 +114,13 @@ class UserPointsSpecs extends DefaultIntSpec {
         results_t1.data.find { it.userId == randos[1].toLowerCase() }.totalPoints == 100
         results_t1.data.find { it.userId == randos[0].toLowerCase() }.totalPoints == 100
         results_subject_t1.count == 2
+        results_subject_t1.totalPoints == 2000
         results_subject_t1.totalCount == 2
         results_subject_t1.data.size() == 2
         results_subject_t1.data.find { it.userId == randos[1].toLowerCase() }.totalPoints == 100
         results_subject_t1.data.find { it.userId == randos[0].toLowerCase() }.totalPoints == 100
         results_skill_t1.count == 1
+        results_skill_t1.totalPoints == 1000
         results_skill_t1.totalCount == 1
         results_skill_t1.data.size() == 1
         results_skill_t1.data.find { it.userId == randos[0].toLowerCase() }.totalPoints == 100
@@ -263,6 +266,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.data.size() == 1
         results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
         results1.data.get(0).totalPoints == 35
+        results1.totalPoints == 35
     }
 
     def "user updated date is updated when a skill is achieved"() {

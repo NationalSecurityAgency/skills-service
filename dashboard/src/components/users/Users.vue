@@ -71,7 +71,7 @@ limitations under the License.
               <span class="text-primary font-weight-bold">{{ data.value | number }}</span> / <span class="font-italic">{{ totalPoints | number }}</span>
             </div>
           </div>
-          <b-progress :max="15000" class="mb-3" height="5px" variant="info">
+          <b-progress :max="totalPoints" class="mb-3" height="5px" variant="info">
             <b-progress-bar :value="data.value"  :aria-labelledby="`points_${data.item.userId}`"></b-progress-bar>
           </b-progress>
         </template>

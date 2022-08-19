@@ -183,12 +183,12 @@ class AdminUsersService {
         userPointsRepo.countDistinctUserIdByProjectId(projectId)
     }
 
-    TableResultWithTotalPoints loadUsersPage(String projectId, String parentSkillId, List<String> skillIds, String query, PageRequest pageRequest) {
+    TableResultWithTotalPoints loadUsersPage(String projectId, List<String> skillIds, String query, PageRequest pageRequest) {
         TableResultWithTotalPoints result = new TableResultWithTotalPoints()
         if (!skillIds) {
             return result
         }
-        result.totalPoints = skillDefRepo.getTotalPointsByProjectIdAndSkillId(projectId, parentSkillId) ?: 0
+        result.totalPoints = skillDefRepo.getTotalPointsSumForSkills(projectId, skillIds) ?: 0
         Long totalProjectUsersWithSkills = userPointsRepo.countDistinctUserIdByProjectIdAndSkillIdIn(projectId, skillIds)
         if (totalProjectUsersWithSkills) {
             query = query ? query.trim() : ''

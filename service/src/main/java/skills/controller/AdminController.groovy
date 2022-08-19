@@ -880,7 +880,7 @@ class AdminController {
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
 
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
-        return adminUsersService.loadUsersPage(projectId, skillId, Collections.singletonList(skillId), query, pageRequest)
+        return adminUsersService.loadUsersPage(projectId, Collections.singletonList(skillId), query, pageRequest)
     }
 
     @GetMapping(value = "/projects/{projectId}/badges/{badgeId}/users", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -901,7 +901,7 @@ class AdminController {
         if (!skillIds) {
             return new TableResult()
         }
-        return adminUsersService.loadUsersPage(projectId, badgeId, skillIds, query, pageRequest)
+        return adminUsersService.loadUsersPage(projectId, skillIds, query, pageRequest)
     }
 
     @RequestMapping(value = "/projects/{projectId}/badge/{badgeId}/skills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
