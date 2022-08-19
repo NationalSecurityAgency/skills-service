@@ -382,7 +382,9 @@ class ProjectCopyService {
         if (!customValidationResult.valid) {
             throw new SkillException(customValidationResult.msg)
         }
-        createdResourceLimitsValidator.validateNumProjectsCreated(userInfoService.getCurrentUserId())
+        if (!userInfoService.isCurrentUserASuperDuperUser()){
+            createdResourceLimitsValidator.validateNumProjectsCreated(userInfoService.getCurrentUserId())
+        }
         serviceValidatorHelper.validateProjectIdDoesNotExist(projectRequest.projectId)
         serviceValidatorHelper.validateProjectNameDoesNotExist(projectRequest.name, projectRequest.projectId)
     }
