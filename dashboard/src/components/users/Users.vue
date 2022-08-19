@@ -63,16 +63,16 @@ limitations under the License.
           </b-button-group>
         </template>
         <template v-slot:cell(totalPoints)="data">
-          <div class="row">
+          <div class="row" :data-cy="`usr_progress-${data.item.userId}`">
             <div class="col-auto">
-              <span class="font-weight-bold text-primary">{{ calcPercent(data.value) }}%</span>
+              <span class="font-weight-bold text-primary" data-cy="progressPercent">{{ calcPercent(data.value) }}%</span>
             </div>
             <div class="col text-right">
-              <span class="text-primary font-weight-bold">{{ data.value | number }}</span> / <span class="font-italic">{{ totalPoints | number }}</span>
+              <span class="text-primary font-weight-bold" data-cy="progressCurrentPoints">{{ data.value | number }}</span> / <span class="font-italic" data-cy="progressTotalPoints">{{ totalPoints | number }}</span>
             </div>
           </div>
           <b-progress :max="totalPoints" class="mb-3" height="5px" variant="info">
-            <b-progress-bar :value="data.value"  :aria-labelledby="`points_${data.item.userId}`"></b-progress-bar>
+            <b-progress-bar :value="data.value"  :aria-label="`Progress for ${data.item.userId} user`"></b-progress-bar>
           </b-progress>
         </template>
         <template v-slot:cell(lastUpdated)="data">
