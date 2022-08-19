@@ -224,21 +224,4 @@ describe('Copy Project Tests', () => {
             .should('have.focus');
     });
 
-    it('projects table validation: user cannot create more than configured max projects', () => {
-        for (let i = 2; i <= 25; i += 1) {
-            cy.createProject(i);
-        }
-        cy.visit('/administrator/');
-        cy.get('[data-cy="addProjectDisabled"]')
-            .contains('Cannot create or copy projects - The maximum number of Projects allowed is 25');
-        cy.get('[data-cy="newProjectButton"]')
-            .should('be.disabled');
-        cy.get('[data-cy="copyProjectIdproj25"]')
-            .should('be.disabled');
-        cy.get('[data-cy="copyProjectIdproj24"]')
-            .should('be.disabled');
-        cy.get('[data-cy="copyProjectIdproj23"]')
-            .should('be.disabled');
-    });
-
 });

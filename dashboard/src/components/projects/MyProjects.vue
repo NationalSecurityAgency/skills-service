@@ -168,7 +168,7 @@ limitations under the License.
     },
     computed: {
       addProjectDisabled() {
-        return this.projects && this.$store.getters.config && this.projects.length >= this.$store.getters.config.maxProjectsPerAdmin;
+        return this.projects && this.$store.getters.config && this.projects.length >= this.$store.getters.config.maxProjectsPerAdmin && !this.$store.getters['access/isRoot'];
       },
       addProjectsDisabledMsg() {
         if (this.$store.getters.config) {
