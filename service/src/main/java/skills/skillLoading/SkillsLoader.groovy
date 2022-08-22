@@ -418,14 +418,14 @@ class SkillsLoader {
         String prevSkillId;
 
         if(subjectId) {
-            SkillSubjectSummary subject = loadSubject(projectId, userId, subjectId, publicProps.getInt(PublicProps.UiProp.maxSkillVersion), true)
+            List<SkillDef> previousSkill = skillDefRepo.findSkillDefByDisplayOrder(projectId, subjectId, skillDef.displayOrder - 1, PageRequest.of(0, 1));
+            List<SkillDef> nextSkill = skillDefRepo.findSkillDefByDisplayOrder(projectId, subjectId, skillDef.displayOrder + 1, PageRequest.of(0, 1));
 
-            int currentSkillIndex = subject.skills.findIndexOf(it -> it.skillId == skillId);
-            if (currentSkillIndex > 0) {
-                prevSkillId = subject.skills[currentSkillIndex - 1].skillId;
+            if(previousSkill.size() > 0) {
+                prevSkillId = previousSkill[0].getSkillId();
             }
-            if (currentSkillIndex < subject.skills.size() - 1) {
-                nextSkillId = subject.skills[currentSkillIndex + 1].skillId;
+            if(nextSkill.size() > 0) {
+                nextSkillId = nextSkill[0].getSkillId();
             }
         }
 
