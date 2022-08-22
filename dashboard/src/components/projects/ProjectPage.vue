@@ -51,6 +51,14 @@ limitations under the License.
                     variant="outline-primary" :aria-label="'preview client display for project'+project.name">
             <span>Preview</span> <i class="fas fa-eye" style="font-size:1rem;" aria-hidden="true"/>
           </b-button>
+          <b-button v-if="isDiscoverable"
+                    ref="shareProjectButton"
+                    @click="copyAndDisplayShareProjInfo"
+                    data-cy="shareProjBtn"
+                    variant="outline-primary"
+                    :aria-label="`Share ${project.name} with new users`">
+            <span>Share</span> <i class="fas fa-share-alt" style="font-size:1rem;" aria-hidden="true"/>
+          </b-button>
         </b-button-group>
       </div>
       <div slot="footer">
@@ -76,6 +84,9 @@ limitations under the License.
 
     <edit-project v-if="editProject" v-model="editProject" :project="project" :is-edit="true"
                   @project-saved="projectSaved" @hidden="editProjectHidden"/>
+    <project-share-modal v-if="shareProjModal" v-model="shareProjModal"
+                           :share-url="shareUrl"
+                           @hidden="focusOnShareButton"/>
   </div>
 
 </template>
@@ -85,16 +96,18 @@ limitations under the License.
   import dayjs from '@/common-components/DayJsCustomizer';
   import ProjectDates from '@/components/projects/ProjectDates';
   import ImportFinalizeAlert from '@/components/skills/catalog/ImportFinalizeAlert';
-  import Navigation from '../utils/Navigation';
-  import PageHeader from '../utils/pages/PageHeader';
-  import EditProject from './EditProject';
-  import ProjectService from './ProjectService';
+  import Navigation from '@/components/utils/Navigation';
+  import PageHeader from '@/components/utils/pages/PageHeader';
+  import EditProject from '@/components/projects/EditProject';
+  import ProjectService from '@/components/projects/ProjectService';
+  import ProjectShareModal from '@/components/projects/ProjectShareModal';
 
   const { mapActions, mapGetters, mapMutations } = createNamespacedHelpers('projects');
 
   export default {
     name: 'ProjectPage',
     components: {
+      ProjectShareModal,
       ImportFinalizeAlert,
       ProjectDates,
       PageHeader,
@@ -106,6 +119,8 @@ limitations under the License.
         isLoading: true,
         cancellingExpiration: false,
         editProject: false,
+        shareProjModal: false,
+        shareUrl: '',
       };
     },
     mounted() {
@@ -116,10 +131,10 @@ limitations under the License.
         'project',
       ]),
       isInviteOnly() {
-        return this.$store.getters.projConfig.invite_only === 'true';
+        return this.$store.getters.projConfig && this.$store.getters.projConfig.invite_only === 'true';
       },
       isDiscoverable() {
-        return this.$store.getters.projConfig['production.mode.enabled'] === 'true';
+        return this.$store.getters.projConfig && this.$store.getters.projConfig['production.mode.enabled'] === 'true';
       },
       headerOptions() {
         if (!this.project || !this.$store.getters.projConfig) {
@@ -198,6 +213,13 @@ limitations under the License.
       ...mapMutations([
         'setProject',
       ]),
+      copyAndDisplayShareProjInfo() {
+        const host = window.location.origin;
+        this.shareUrl = `${host}/progress-and-rankings/projects/${this.project.projectId}?invited=true`;
+        navigator.clipboard.writeText(this.shareUrl).then(() => {
+          this.shareProjModal = true;
+        });
+      },
       fromExpirationDate() {
         return dayjs().startOf('day').to(dayjs(this.expirationDate));
       },
@@ -220,6 +242,14 @@ limitations under the License.
         this.editProject = false;
         this.$nextTick(() => {
           const ref = this.$refs.editProjectButton;
+          if (ref) {
+            ref.focus();
+          }
+        });
+      },
+      focusOnShareButton() {
+        this.$nextTick(() => {
+          const ref = this.$refs.shareProjectButton;
           if (ref) {
             ref.focus();
           }

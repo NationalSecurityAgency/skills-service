@@ -32,6 +32,7 @@ limitations under the License.
   import MyProgressService from '@/components/myProgress/MyProgressService';
   import SkillsDisplayOptionsMixin from '@/components/myProgress/SkillsDisplayOptionsMixin';
   import SettingsService from '@/components/settings/SettingsService';
+  import ProjectService from '@/components/projects/ProjectService';
 
   export default {
     name: 'MyProjectSkillsPage',
@@ -119,6 +120,7 @@ limitations under the License.
       }).finally(() => {
         this.isLoadingSettings = false;
       });
+      this.handleProjInvitation();
     },
     computed: {
       themeObj() {
@@ -140,6 +142,14 @@ limitations under the License.
         }
 
         return this.theme;
+      },
+    },
+    methods: {
+      handleProjInvitation() {
+        const isInvited = this.$route.query.invited;
+        if (isInvited) {
+          ProjectService.addToMyProjects(this.projectId);
+        }
       },
     },
   };
