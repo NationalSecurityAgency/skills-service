@@ -53,8 +53,8 @@ describe('Verify Email Tests', () => {
         url: '/verifyEmail'
       }).as('verifyEmail');
 
-      cy.intercept('GET', '/app/projects').as('getProjects')
-      cy.intercept('GET', '/app/userInfo').as('getUserInfo')
+      cy.intercept('GET', '/app/projects/**').as('getProjects')
+      cy.intercept('GET', '/app/userInfo/**').as('getUserInfo')
     });
 
     it('register dashboard and confirm email address', () => {
