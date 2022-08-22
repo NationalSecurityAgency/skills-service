@@ -419,4 +419,8 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
         group by sd.project_id''', nativeQuery = true)
     ProjectTotalPoints getProjectTotalPointsIncPendingFinalization(@Param("projectId") String projectId)
 
+    @Nullable
+    @Query('''SELECT pd.totalPoints FROM ProjDef pd WHERE pd.projectId = ?1''')
+    Integer getTotalPointsByProjectId(String projectId)
+
 }

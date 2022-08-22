@@ -289,8 +289,12 @@ Cypress.Commands.add("enableBadge", (projNum = 1, badgeNum = 1, overrideProps = 
     }, overrideProps));
 });
 
-Cypress.Commands.add("assignSkillToBadge", (projNum = 1, badgeNum = 1, skillNum = 1) => {
-    cy.request('POST', `/admin/projects/proj${projNum}/badge/badge${badgeNum}/skills/skill${skillNum}`)
+Cypress.Commands.add("assignSkillToBadge", (projNum = 1, badgeNum = 1, skillNum = 1, subjNum = 1) => {
+    let skillId = `skill${skillNum}`;
+    if (subjNum > 1){
+        skillId = `${skillId}Subj${subjNum}`;
+    }
+    cy.request('POST', `/admin/projects/proj${projNum}/badge/badge${badgeNum}/skills/${skillId}`)
 });
 
 Cypress.Commands.add("createGlobalBadge", (badgeNum = 1, overrideProps = {}) => {

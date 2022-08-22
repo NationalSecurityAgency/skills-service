@@ -818,7 +818,7 @@ class AdminController {
     @GetMapping(value = "/projects/{projectId}/users", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @CompileStatic
-    TableResult getProjectUsers(@PathVariable("projectId") String projectId,
+    TableResultWithTotalPoints getProjectUsers(@PathVariable("projectId") String projectId,
                                 @RequestParam String query,
                                 @RequestParam int limit,
                                 @RequestParam int page,
@@ -853,7 +853,7 @@ class AdminController {
 
     @GetMapping(value = "/projects/{projectId}/subjects/{subjectId}/users", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    TableResult getSubjectUsers(@PathVariable("projectId") String projectId,
+    TableResultWithTotalPoints getSubjectUsers(@PathVariable("projectId") String projectId,
                                 @PathVariable("subjectId") String subjectId,
                                 @RequestParam String query,
                                 @RequestParam int limit,
@@ -869,7 +869,7 @@ class AdminController {
 
     @GetMapping(value = "/projects/{projectId}/skills/{skillId}/users", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    TableResult getSkillUsers(@PathVariable("projectId") String projectId,
+    TableResultWithTotalPoints getSkillUsers(@PathVariable("projectId") String projectId,
                               @PathVariable("skillId") String skillId,
                               @RequestParam String query,
                               @RequestParam int limit,

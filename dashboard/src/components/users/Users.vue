@@ -40,6 +40,16 @@ limitations under the License.
                       @page-size-changed="pageSizeChanged"
                       @sort-changed="sortTable"
                       data-cy="usersTable">
+        <template #head(userId)="data">
+          <span class="text-primary"><i class="fas fa-user skills-color-users"></i> {{ data.label }}</span>
+        </template>
+        <template #head(totalPoints)="data">
+          <span class="text-primary"><i class="far fa-arrow-alt-circle-up skills-color-points"></i> {{ data.label }}</span>
+        </template>
+        <template #head(lastUpdated)="data">
+          <span class="text-primary"><i class="far fa-clock skills-color-events"></i> {{ data.label }}</span>
+        </template>
+
         <template v-slot:cell(userId)="data">
           {{ getUserDisplay(data.item) }}
 
@@ -53,7 +63,17 @@ limitations under the License.
           </b-button-group>
         </template>
         <template v-slot:cell(totalPoints)="data">
-          {{ data.value | number }}
+          <div class="row" :data-cy="`usr_progress-${data.item.userId}`">
+            <div class="col-auto">
+              <span class="font-weight-bold text-primary" data-cy="progressPercent">{{ calcPercent(data.value) }}%</span>
+            </div>
+            <div class="col text-right">
+              <span class="text-primary font-weight-bold" data-cy="progressCurrentPoints">{{ data.value | number }}</span> / <span class="font-italic" data-cy="progressTotalPoints">{{ totalPoints | number }}</span>
+            </div>
+          </div>
+          <b-progress :max="totalPoints" class="mb-3" height="5px" variant="info">
+            <b-progress-bar :value="data.value"  :aria-label="`Progress for ${data.item.userId} user`"></b-progress-bar>
+          </b-progress>
         </template>
         <template v-slot:cell(lastUpdated)="data">
           <date-cell :value="data.value" />
@@ -85,6 +105,7 @@ limitations under the License.
         filters: {
           userId: '',
         },
+        totalPoints: 0,
         table: {
           items: [],
           options: {
@@ -103,7 +124,7 @@ limitations under the License.
               },
               {
                 key: 'totalPoints',
-                label: 'Total Points',
+                label: 'Progress',
                 sortable: true,
               },
               {
@@ -127,6 +148,12 @@ limitations under the License.
       this.loadData();
     },
     methods: {
+      calcPercent(userPoints) {
+        if (!this.totalPoints) {
+          return 'N/A';
+        }
+        return Math.trunc((userPoints / this.totalPoints) * 100);
+      },
       pageChanged(pageNum) {
         this.table.options.pagination.currentPage = pageNum;
         this.loadData();
@@ -169,6 +196,7 @@ limitations under the License.
         }).then((res) => {
           this.table.items = res.data;
           this.table.options.pagination.totalRows = res.count;
+          this.totalPoints = res.totalPoints;
           this.table.options.busy = false;
         });
       },

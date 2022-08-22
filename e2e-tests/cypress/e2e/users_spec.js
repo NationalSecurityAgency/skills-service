@@ -91,7 +91,7 @@ describe('Users Tests', () => {
             [{ colIndex: 0,  value: 'user0@skills.org' }, { colIndex: 1,  value: '4,500' }],
         ], 5);
 
-        cy.get(`${tableSelector}`).contains('Total Points').click();
+        cy.get(`${tableSelector}`).contains('Progress').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'user0@skills.org' }, { colIndex: 1,  value: '4,500' }],
             [{ colIndex: 0,  value: 'user1@skills.org' }, { colIndex: 1,  value: '6,000' }],
@@ -101,7 +101,7 @@ describe('Users Tests', () => {
             [{ colIndex: 0,  value: 'user5@skills.org' }, { colIndex: 1,  value: '12,000' }],
         ], 5);
 
-        cy.get(`${tableSelector}`).contains('Total Points').click();
+        cy.get(`${tableSelector}`).contains('Progress').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'user5@skills.org' }, { colIndex: 1,  value: '12,000' }],
             [{ colIndex: 0,  value: 'user4@skills.org' }, { colIndex: 1,  value: '10,500' }],
@@ -123,6 +123,7 @@ describe('Users Tests', () => {
 
         cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Users');
+        cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', '12')
 
         cy.get(`${tableSelector}`).contains('User Id').click();
         cy.validateTable(tableSelector, [
@@ -540,6 +541,108 @@ describe('Users Tests', () => {
             [{ colIndex: 0,  value: 'usere@skills.org' }],
             [{ colIndex: 0,  value: 'userd@skills.org' }],
         ], 5);
+    });
+
+    it('users with various progress', () => {
+        cy.createSkill(1, 1, 3,  { pointIncrement: '1111', numPerformToCompletion: '10', pointIncrementInterval: 0 })
+        cy.createSubject(1, 2)
+        cy.createSkill(1, 2, 1,  { pointIncrement: '777', numPerformToCompletion: '6', pointIncrementInterval: 0 })
+        cy.createSkill(1, 2, 2,  { pointIncrement: '333', numPerformToCompletion: '10', pointIncrementInterval: 0 })
+        cy.createSkill(1, 2, 3,  { pointIncrement: '666', numPerformToCompletion: '6', pointIncrementInterval: 0 })
+        cy.createBadge(1, 1);
+        cy.assignSkillToBadge(1, 1, 3);
+        cy.assignSkillToBadge(1, 1, 1, 2);
+        cy.assignSkillToBadge(1, 1, 2, 2);
+        cy.assignSkillToBadge(1, 1, 3, 2);
+
+        cy.intercept('/admin/projects/proj1/users*').as('getUsers');
+        cy.intercept('/admin/projects/proj1/subjects/subj2/users*').as('getSubjUsers');
+        cy.intercept('/admin/projects/proj1/skills/skill1Subj2/users*').as('getSkill1Users');
+        cy.intercept('/admin/projects/proj1/badges/badge1/users*').as('getBadgeUsers');
+
+        for (let i = 0; i < 6; i += 1) {
+            for (let j = 0; j < 6; j += 1) {
+                const userId = `user${j}@skills.org`
+                cy.log(`Adding events for ${userId}`);
+                cy.doReportSkill({ project: 1, skill: 1, subjNum: 2, userId })
+                if (j > 1) {
+                    cy.doReportSkill({ project: 1, skill: 3, subjNum: 1, userId })
+                }
+                if (j > 2) {
+                    cy.doReportSkill({ project: 1, skill: 2, subjNum: 2, userId })
+                }
+            }
+        }
+
+        // validate project's users
+        cy.visit('/administrator/projects/proj1/users');
+        cy.wait('@getUsers')
+        cy.get('[data-cy="skillsBTablePageSize"]').select('10');
+        cy.wait('@getUsers')
+        cy.get(`${tableSelector}`).contains('User Id').click();
+        cy.wait('@getUsers')
+
+        cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressPercent"]').should('have.text', '12%')
+        cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressCurrentPoints"]').should('have.text', '4,662')
+        cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressTotalPoints"]').should('have.text', '38,098')
+
+        cy.get('[data-cy="usr_progress-user2@skills.org"] [data-cy="progressPercent"]').should('have.text', '29%')
+        cy.get('[data-cy="usr_progress-user2@skills.org"] [data-cy="progressCurrentPoints"]').should('have.text', '11,328')
+        cy.get('[data-cy="usr_progress-user2@skills.org"] [data-cy="progressTotalPoints"]').should('have.text', '38,098')
+
+        cy.get('[data-cy="usr_progress-user3@skills.org"] [data-cy="progressPercent"]').should('have.text', '34%')
+        cy.get('[data-cy="usr_progress-user3@skills.org"] [data-cy="progressCurrentPoints"]').should('have.text', '13,326')
+        cy.get('[data-cy="usr_progress-user3@skills.org"] [data-cy="progressTotalPoints"]').should('have.text', '38,098')
+
+        // validate subject's users
+        cy.visit('/administrator/projects/proj1/subjects/subj2/users');
+        cy.wait('@getSubjUsers');
+        cy.get('[data-cy="skillsBTablePageSize"]').select('20');
+        cy.wait('@getSubjUsers');
+        cy.get(`${tableSelector}`).contains('User Id').click();
+        cy.wait('@getSubjUsers');
+
+        cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressPercent"]').should('have.text', '38%')
+        cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressCurrentPoints"]').should('have.text', '4,662')
+        cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressTotalPoints"]').should('have.text', '11,988')
+
+        cy.get('[data-cy="usr_progress-user3@skills.org"] [data-cy="progressPercent"]').should('have.text', '55%')
+        cy.get('[data-cy="usr_progress-user3@skills.org"] [data-cy="progressCurrentPoints"]').should('have.text', '6,660')
+        cy.get('[data-cy="usr_progress-user3@skills.org"] [data-cy="progressTotalPoints"]').should('have.text', '11,988')
+
+        // validate skill where users have 100%
+        cy.clickNav('Skills');
+        cy.get('[data-cy="manageSkillBtn_skill1Subj2"]').click();
+        cy.clickNav('Users');
+        cy.wait('@getSkill1Users')
+        cy.get('[data-cy="skillsBTablePageSize"]').select('10');
+        cy.wait('@getSkill1Users')
+        cy.get(`${tableSelector}`).contains('User Id').click();
+        cy.wait('@getSkill1Users')
+
+        cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressPercent"]').should('have.text', '100%')
+        cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressCurrentPoints"]').should('have.text', '4,662')
+        cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressTotalPoints"]').should('have.text', '4,662')
+
+        cy.get('[data-cy="usr_progress-user3@skills.org"] [data-cy="progressPercent"]').should('have.text', '100%')
+        cy.get('[data-cy="usr_progress-user3@skills.org"] [data-cy="progressCurrentPoints"]').should('have.text', '4,662')
+        cy.get('[data-cy="usr_progress-user3@skills.org"] [data-cy="progressTotalPoints"]').should('have.text', '4,662')
+
+        // validate badge's users
+        cy.visit('/administrator/projects/proj1/badges/badge1/users');
+        cy.wait('@getBadgeUsers');
+        cy.get('[data-cy="skillsBTablePageSize"]').select('20');
+        cy.wait('@getBadgeUsers');
+        cy.get(`${tableSelector}`).contains('User Id').click();
+        cy.wait('@getBadgeUsers');
+
+        cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressPercent"]').should('have.text', '20%')
+        cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressCurrentPoints"]').should('have.text', '4,662')
+        cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressTotalPoints"]').should('have.text', '23,098')
+
+        cy.get('[data-cy="usr_progress-user3@skills.org"] [data-cy="progressPercent"]').should('have.text', '57%')
+        cy.get('[data-cy="usr_progress-user3@skills.org"] [data-cy="progressCurrentPoints"]').should('have.text', '13,326')
+        cy.get('[data-cy="usr_progress-user3@skills.org"] [data-cy="progressTotalPoints"]').should('have.text', '23,098')
     });
 
 })
