@@ -25,35 +25,51 @@ describe('Copy Invite URL Tests', () => {
 
     const proj1Url = '/progress-and-rankings/projects/proj1'
     const proj1Share = `${proj1Url}?invited=true`
-    const expectedProj1URL = `http://localhost:8082${proj1Share}`
-    const expectedProj2URL = 'http://localhost:8082/progress-and-rankings/projects/proj2?invited=true'
 
     it('retrieve share url', () => {
         cy.visit('/administrator/projects/proj1')
         cy.contains('No Subjects Yet')
+        cy.location().then((loc) => {
+            const expectedProj1URL = `${loc.origin}${proj1Share}`
+            const expectedProj2URL = `${loc.origin}/progress-and-rankings/projects/proj2?invited=true`
 
-        // by default cypress uses simulated events that are initiated from JS; these simulated events are
-        // not trusted for "copy to clipboard" operations - must use "real events"
-        cy.get('[data-cy="shareProjBtn"]').realClick()
-        cy.get('[data-cy="projShareUrl"]').should('have.value', expectedProj1URL)
-        cy.get('[data-cy="shareProjOkBtn"]').click();
+            // by default cypress uses simulated events that are initiated from JS; these simulated events are
+            // not trusted for "copy to clipboard" operations - must use "real events"
+            cy.get('[data-cy="shareProjBtn"]')
+                .realClick()
 
-        cy.get('[data-cy="projShareUrl"]').should('not.exist')
-        cy.window().its('navigator.clipboard')
-            .invoke('readText').should('equal', expectedProj1URL)
+            cy.get('[data-cy="projShareUrl"]')
+                .should('have.value', expectedProj1URL)
+            cy.get('[data-cy="shareProjOkBtn"]')
+                .click();
 
+            cy.get('[data-cy="projShareUrl"]')
+                .should('not.exist')
+            cy.window()
+                .its('navigator.clipboard')
+                .invoke('readText')
+                .should('equal', expectedProj1URL)
 
-        cy.get('[data-cy="breadcrumb-Projects"]').click()
-        cy.get('[data-cy="projCard_proj2_manageBtn"]').click()
+            cy.get('[data-cy="breadcrumb-Projects"]')
+                .click()
+            cy.get('[data-cy="projCard_proj2_manageBtn"]')
+                .click()
 
-        cy.get('[data-cy="shareProjBtn"]').realClick();
-        cy.contains('URL was copied!')
-        cy.get('[data-cy="projShareUrl"]').should('have.value', expectedProj2URL)
+            cy.get('[data-cy="shareProjBtn"]')
+                .realClick();
+            cy.contains('URL was copied!')
+            cy.get('[data-cy="projShareUrl"]')
+                .should('have.value', expectedProj2URL)
 
-        cy.get('[data-cy="shareProjOkBtn"]').click();
-        cy.get('[data-cy="projShareUrl"]').should('not.exist')
-        cy.window().its('navigator.clipboard')
-            .invoke('readText').should('equal', expectedProj2URL)
+            cy.get('[data-cy="shareProjOkBtn"]')
+                .click();
+            cy.get('[data-cy="projShareUrl"]')
+                .should('not.exist')
+            cy.window()
+                .its('navigator.clipboard')
+                .invoke('readText')
+                .should('equal', expectedProj2URL)
+        });
     });
 
     it('share button does not exist for non-discoverable projects', () => {
