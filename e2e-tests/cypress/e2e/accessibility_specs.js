@@ -834,6 +834,8 @@ describe('Accessibility Tests', () => {
         cy.reportSkill(1, 2, 'user9', '2020-09-14 11:00');
 
         cy.visit('/administrator/projects/proj1/self-report');
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', 2)
+        cy.get('[data-cy="selfReportApprovalHistoryTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', 7)
         cy.injectAxe();
 
         cy.customLighthouse();
