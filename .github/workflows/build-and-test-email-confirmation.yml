@@ -75,7 +75,7 @@ jobs:
         parallel: false
         group: 'skills-service with Email Confirmation'
         tag: "${{ github.workflow }}"
-        spec: cypress/integration/verify_email_spec.js
+        spec: cypress/e2e/verify_email_spec.js
         env: verifyEmail=true
       env:
         # pass the Dashboard record key as an environment variable
