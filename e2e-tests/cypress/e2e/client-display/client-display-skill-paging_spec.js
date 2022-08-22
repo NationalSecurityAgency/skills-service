@@ -51,4 +51,67 @@ describe('Client Display Skills Navigation', () => {
         cy.get('[data-cy="prevSkill"]').should('not.exist');
         cy.get('[data-cy="nextSkill"]').should('exist');
     });
+
+    it('navigate between skills, starting from a skill', () => {
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2);
+        cy.createSkill(1, 1, 3);
+
+        cy.cdVisit('/subjects/subj1/skills/skill2');
+
+        cy.get('[data-cy="skillProgressTitle"').contains('Very Great Skill 2');
+        cy.get('[data-cy="prevSkill"]').should('exist');
+        cy.get('[data-cy="nextSkill"]').should('exist');
+        cy.get('[data-cy="nextSkill"]').click();
+
+        cy.get('[data-cy="skillProgressTitle"').contains('Very Great Skill 3');
+        cy.get('[data-cy="prevSkill"]').should('exist');
+        cy.get('[data-cy="nextSkill"]').should('not.exist');
+        cy.get('[data-cy="prevSkill"]').click();
+
+        cy.get('[data-cy="skillProgressTitle"').contains('Very Great Skill 2');
+        cy.get('[data-cy="prevSkill"]').should('exist');
+        cy.get('[data-cy="nextSkill"]').should('exist');
+        cy.get('[data-cy="prevSkill"]').click();
+
+        cy.get('[data-cy="skillProgressTitle"').contains('Very Great Skill 1');
+        cy.get('[data-cy="prevSkill"]').should('not.exist');
+        cy.get('[data-cy="nextSkill"]').should('exist');
+    });
+
+    it('navigate between skills, starting from the last skill', () => {
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2);
+        cy.createSkill(1, 1, 3);
+
+        cy.cdVisit('/subjects/subj1/skills/skill3');
+
+        cy.get('[data-cy="skillProgressTitle"').contains('Very Great Skill 3');
+        cy.get('[data-cy="prevSkill"]').should('exist');
+        cy.get('[data-cy="nextSkill"]').should('not.exist');
+        cy.get('[data-cy="prevSkill"]').click();
+
+        cy.get('[data-cy="skillProgressTitle"').contains('Very Great Skill 2');
+        cy.get('[data-cy="prevSkill"]').should('exist');
+        cy.get('[data-cy="nextSkill"]').should('exist');
+        cy.get('[data-cy="prevSkill"]').click();
+
+        cy.get('[data-cy="skillProgressTitle"').contains('Very Great Skill 1');
+        cy.get('[data-cy="prevSkill"]').should('not.exist');
+        cy.get('[data-cy="nextSkill"]').should('exist');
+        cy.get('[data-cy="nextSkill"]').click();
+
+        cy.get('[data-cy="skillProgressTitle"').contains('Very Great Skill 2');
+        cy.get('[data-cy="prevSkill"]').should('exist');
+        cy.get('[data-cy="nextSkill"]').should('exist');
+        cy.get('[data-cy="nextSkill"]').click();
+
+        cy.get('[data-cy="skillProgressTitle"').contains('Very Great Skill 3');
+        cy.get('[data-cy="prevSkill"]').should('exist');
+        cy.get('[data-cy="nextSkill"]').should('not.exist');
+    });
 });
