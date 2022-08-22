@@ -784,8 +784,8 @@ Cypress.Commands.add('validateTable', (tableSelector, expected, pageSize = 5, on
     }
 
     if (validateTotalRows) {
-        cy.get('[data-cy=skillsBTableTotalRows]')
-            .contains(numRows);
+        cy.get(`${tableSelector} [data-cy=skillsBTableTotalRows]`)
+            .should('have.text', numRows);
     }
 
     cy.get(rowSelector).should('have.length', Math.min(pageSize, numRows)).as('cyRows');
