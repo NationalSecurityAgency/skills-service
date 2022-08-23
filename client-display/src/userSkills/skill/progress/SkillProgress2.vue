@@ -51,9 +51,6 @@ limitations under the License.
                 </span>
                 <span v-if="!skill.skillHtml">{{ skill.skill }}</span>
                 <span v-if="skill.skillHtml" v-html="skill.skillHtml"></span>
-                <span v-if="isLastSeenSkill" id="lastSeenIndicator" style="margin-left: 10px;">
-                  <i class="fas fa-eye"></i>
-                </span>
               </div>
               <div v-if="skill.copiedFromProjectId" class="text-truncate d-inline-block ml-2"
                    style="max-width: 15rem;"><span class="text-secondary font-italic"> in </span>
@@ -70,6 +67,9 @@ limitations under the License.
                 <span class="">Requires </span> <b-badge variant="success">{{ skill.numSkillsRequired }}</b-badge> <span class="font-italic">out of</span> <b-badge variant="secondary">{{ skill.children.length }}</b-badge> skills
               </div>
 
+              <b-badge v-if="isLastSeenSkill" id="lastSeenIndicator" variant="info" style="font-size: 0.9rem" class="ml-2 overflow-hidden">
+                <i class="fas fa-eye"></i> Last Viewed
+              </b-badge>
               <b-badge v-if="skill.selfReporting && skill.selfReporting.enabled"
                   variant="success" style="font-size: 0.9rem" class="ml-2 overflow-hidden"><i class="fas fa-check-circle"></i> Self Reportable</b-badge>
             </div>
@@ -229,7 +229,7 @@ limitations under the License.
 
       if (this.isLastSeenSkill) {
         const lastSeenIndicator = document.getElementById('lastSeenIndicator');
-        if (lastSeenIndicator) {
+        if (lastSeenIndicator && this.$route.params.jumpToLastSeen) {
           lastSeenIndicator.scrollIntoView();
         }
       }
