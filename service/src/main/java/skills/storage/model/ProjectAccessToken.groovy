@@ -43,6 +43,8 @@ class ProjectAccessToken implements Serializable {
 
     Date claimed
 
+    String recipientEmail
+
     boolean isValid() {
         expires?.after(new Date())
     }

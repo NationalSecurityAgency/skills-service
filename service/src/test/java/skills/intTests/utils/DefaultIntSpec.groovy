@@ -184,7 +184,27 @@ class DefaultIntSpec extends Specification {
             url = url.replace("http://", "https://")
         }
 
-        SkillsService res = new SkillsService(username, password, firstName, lastName, url, pkiEnabled != null ? certificateRegistry : null)
+        SkillsService.UseParams userParams = new SkillsService.UseParams(
+                username: username,
+                password: password,
+                firstName: firstName,
+                lastName: lastName
+        )
+        SkillsService res = new SkillsService(userParams, url, pkiEnabled != null ? certificateRegistry : null)
+        res.waitForAsyncTasksCompletion = waitForAsyncTasksCompletion
+        return res
+    }
+
+    SkillsService createService(
+            SkillsService.UseParams userParams,
+            String url = "http://localhost:${localPort}".toString()){
+
+        boolean pkiEnabled = mockUserInfoService != null
+        if (pkiEnabled) {
+            url = url.replace("http://", "https://")
+        }
+
+        SkillsService res = new SkillsService(userParams, url, pkiEnabled != null ? certificateRegistry : null)
         res.waitForAsyncTasksCompletion = waitForAsyncTasksCompletion
         return res
     }

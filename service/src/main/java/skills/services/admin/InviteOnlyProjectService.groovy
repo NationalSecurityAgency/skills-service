@@ -63,6 +63,9 @@ class InviteOnlyProjectService {
     private static final int MAX_GENERATION_ATTEMPTS = 5
     private static final String INVITE_TEMPLATE = "project_invitation.html"
 
+    @Value('#{"${skills.authorization.invite.validateEmail:false}"}')
+    Boolean validateInviteEmail
+
     @Value('#{"${skills.config.ui.rankingAndProgressViewsEnabled}"}')
     Boolean progressAndRankingEnabled
 
@@ -76,7 +79,7 @@ class InviteOnlyProjectService {
     ProjDefRepo projDefRepo
 
     @Autowired
-    UserRoleRepo userRoleRepo
+    UserRoleRepo userRoleRepoa
 
     @Autowired
     InviteCodeGenerator codeGenerator
@@ -110,14 +113,15 @@ class InviteOnlyProjectService {
     /**
      * Generates an invite token for a specific project
      *
-     * @param projectId the projectId for which this invite token is valid
+     * @param projectId - the projectId for which this invite token is valid
+     * @param email - the email recipient for this specific invite token
      * @param created - defaults to current date, allows the same create date to be use for bulk invites
      * @param validDuration duration iso 8601 duration for how long the invite token will be valid, defaults to PT24H if not provided
      * @return
      * @throws skills.controller.exceptions.SkillException if the specified projectId does not exist or the project is not configured for invite only
      */
     @Transactional
-    ProjectInvite generateProjectInviteToken(String projectId, Date created=new Date(), String validDuration=DEFAULT_DURATION) {
+    ProjectInvite generateProjectInviteToken(String projectId, String email, Date created=new Date(), String validDuration=DEFAULT_DURATION) {
         boolean enabled = featureService.isEmailServiceFeatureEnabled()
         SkillsValidator.isTrue(enabled, "Project Invites can only be used if email has been configured for this instance", projectId)
 
@@ -137,7 +141,8 @@ class InviteOnlyProjectService {
         accessToken.token = code
         accessToken.project = projDef
         accessToken.expires = expiration.expiresOn
-        accessToken.created = new Date()
+        accessToken.created = created
+        accessToken.recipientEmail = email;
         accessToken = projectAccessTokenRepo.save(accessToken)
 
         ProjectInvite invite = new ProjectInvite()
@@ -145,6 +150,7 @@ class InviteOnlyProjectService {
         invite.projectName = projDef.name
         invite.validFor = expiration.validFor
         invite.token = accessToken.token
+        invite.recipientEmail = email
 
         log.info("user [{}] has generated invite token [{}] for project [{}]", currentUser, code, projectId)
         return invite
@@ -159,6 +165,7 @@ class InviteOnlyProjectService {
     InviteTokenValidationResponse validateInvite(String token, String projectId) {
         SkillsValidator.isNotBlank(projectId, "projectId")
         SkillsValidator.isNotBlank(token, "inviteToken")
+
         ProjectAccessToken projectAccessToken = projectAccessTokenRepo.findByTokenAndProjectId(token, projectId)
         InviteTokenValidationResponse response = new InviteTokenValidationResponse()
         response.projectId = projectId
@@ -168,9 +175,13 @@ class InviteOnlyProjectService {
         } else if(!projectAccessToken.isValid()) {
             response.valid = false
             response.message = "Project Invite has expired"
+        } else if(validateInviteEmail && userInfoService.getCurrentUser()?.email != projectAccessToken.recipientEmail) {
+            response.valid = false
+            response.message = "Project Invite is for a different user"
         } else {
             response.valid = true
         }
+
         return response
     }
 
@@ -204,6 +215,11 @@ class InviteOnlyProjectService {
         if (projectAccessToken.claimed != null) {
             log.warn("user [{}] has attempted to use already claimed invite code [{}] for project [{}]", userId, token, projectId)
             throw new SkillException("Invitation Code has already been used", projectId, null, ErrorCode.ClaimedInvitationCode)
+        }
+
+        if (validateInviteEmail && userInfo?.email != projectAccessToken.recipientEmail) {
+            log.warn("User [{}] with email [{}] is trying to use an invite code that was sent to [{}]", userId, userInfo.email, projectAccessToken.recipientEmail)
+            throw new SkillException("Invitation Code is for a different user", projectId, null, ErrorCode.NotYourInvitationCode)
         }
 
         if (userInfo?.authorities?.find {it instanceof UserSkillsGrantedAuthority
@@ -263,7 +279,7 @@ class InviteOnlyProjectService {
             if (VALID_EMAIL.matcher(it).matches()) {
                 try {
                     String email = it
-                    ProjectInvite invite = generateProjectInviteToken(projectId, created, duration)
+                    ProjectInvite invite = generateProjectInviteToken(projectId, email, created, duration)
 
                     Context templateContext = new Context()
                     templateContext.setVariable("validTime", invite.validFor)

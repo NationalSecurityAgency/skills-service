@@ -15,13 +15,22 @@
  */
 package skills.intTests.inviteOnly
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import skills.intTests.utils.SkillsService
+import skills.services.admin.InviteOnlyProjectService
 import skills.utils.WaitFor
-import spock.lang.IgnoreRest
 
 class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
+
+    @Autowired
+    InviteOnlyProjectService inviteOnlyProjectService
+
+    def setup() {
+        inviteOnlyProjectService.validateInviteEmail = false
+    }
 
     def "cannot access a project that has been configured for invite only without accepting invite"() {
         def proj = SkillsFactory.createProject(99)
@@ -372,5 +381,76 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         err.httpStatus == HttpStatus.FORBIDDEN
     }
 
+    def "if email validation is enabled, cannot use invite code generated for another user"() {
+        inviteOnlyProjectService.validateInviteEmail = true
+
+        def proj = SkillsFactory.createProject(99)
+        def subj = SkillsFactory.createSubject(99)
+        def skill = SkillsFactory.createSkill(99, 1)
+        skill.pointIncrement = 200
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skill)
+        skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
+
+        def users = getRandomUsers(2, true)
+        def userService = createService(users[0])
+
+        when:
+        def u1Email = userAttrsRepo.findEmailByUserId(users[1])
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: [u1Email]])
+        WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
+
+        def email = greenMail.getReceivedMessages()
+        String inviteCode = extractInviteFromEmail(email[0].content.toString())
+        userService.joinProject(proj.projectId, inviteCode)
+
+        then:
+        def e = thrown(SkillsClientException)
+        e.message.contains("explanation:Invitation Code is for a different user, errorCode:NotYourInvitationCode, success:false")
+
+        cleanup:
+        inviteOnlyProjectService.validateInviteEmail = false
+    }
+
+    def "if email validation is enabled, can use invite code generated for joining user"() {
+        inviteOnlyProjectService.validateInviteEmail = true
+
+        def proj = SkillsFactory.createProject(99)
+        def subj = SkillsFactory.createSubject(99)
+        def skill = SkillsFactory.createSkill(99, 1)
+        skill.pointIncrement = 200
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skill)
+        skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
+
+        def users = getRandomUsers(2, true)
+
+        when:
+        String addy = userAttrsRepo.findEmailByUserId(users[0])
+        SkillsService.UseParams params = new SkillsService.UseParams(
+                username: users[0],
+                email: addy
+        )
+        def userService = createService(params)
+
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: [addy]])
+        WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
+
+        def email = greenMail.getReceivedMessages()
+        println email
+        println userAttrsRepo.findEmailByUserId(users[0])
+        String inviteCode = extractInviteFromEmail(email[0].content.toString())
+        def res = userService.joinProject(proj.projectId, inviteCode)
+
+        then:
+        res.success == true
+
+        cleanup:
+        inviteOnlyProjectService.validateInviteEmail = false
+    }
 
 }
