@@ -418,14 +418,14 @@ class SkillsLoader {
         String prevSkillId;
 
         if(subjectId) {
-            List<SkillDef> previousSkill = skillDefRepo.findSkillDefByDisplayOrder(projectId, subjectId, skillDef.displayOrder - 1, PageRequest.of(0, 1));
-            List<SkillDef> nextSkill = skillDefRepo.findSkillDefByDisplayOrder(projectId, subjectId, skillDef.displayOrder + 1, PageRequest.of(0, 1));
+            SkillDef previousSkill = skillDefRepo.findSkillDefByDisplayOrder(projectId, subjectId, skillDef.displayOrder - 1);
+            SkillDef nextSkill = skillDefRepo.findSkillDefByDisplayOrder(projectId, subjectId, skillDef.displayOrder + 1);
 
-            if(previousSkill.size() > 0) {
-                prevSkillId = previousSkill[0].getSkillId();
+            if(previousSkill) {
+                prevSkillId = previousSkill.skillId;
             }
-            if(nextSkill.size() > 0) {
-                nextSkillId = nextSkill[0].getSkillId();
+            if(nextSkill) {
+                nextSkillId = nextSkill.skillId;
             }
         }
 
