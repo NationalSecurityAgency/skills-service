@@ -44,7 +44,9 @@ class SkillsOrderSpecs extends DefaultIntSpec {
         def afterMove = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
         then:
         beforeMove.collect({it.skillId}) == ["skill1", "skill2", "skill3", "skill4", "skill5"]
+        beforeMove.collect({it.displayOrder}) == [1, 2, 3, 4, 5]
         afterMove.collect({it.skillId}) == ["skill2", "skill1", "skill3", "skill4", "skill5"]
+        afterMove.collect({it.displayOrder}) == [1, 2, 3, 4, 5]
     }
 
     def "should not be able to move down the last skill"() {
@@ -64,7 +66,9 @@ class SkillsOrderSpecs extends DefaultIntSpec {
         def afterMove = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
         then:
         beforeMove.collect({it.skillId}) == ["skill1", "skill2", "skill3", "skill4", "skill5"]
+        beforeMove.collect({it.displayOrder}) == [1, 2, 3, 4, 5]
         afterMove.collect({it.skillId}) == ["skill2", "skill1", "skill3", "skill4", "skill5"]
+        afterMove.collect({it.displayOrder}) == [1, 2, 3, 4, 5]
     }
 
     def "should not be able to move the first skill up"() {
@@ -74,7 +78,9 @@ class SkillsOrderSpecs extends DefaultIntSpec {
         then:
         thrown(SkillsClientException)
         beforeMove.collect({it.skillId}) == ["skill1", "skill2", "skill3", "skill4", "skill5"]
-        skillsService.getSkillsForSubject(proj.projectId, subj.subjectId).collect({it.skillId}) == ["skill1", "skill2", "skill3", "skill4", "skill5"]
+        def afterMove = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
+        afterMove.collect({it.skillId}) == ["skill1", "skill2", "skill3", "skill4", "skill5"]
+        afterMove.collect({it.displayOrder}) == [1, 2, 3, 4, 5]
     }
 
     def "attempt to move skill that doesn't exist"(){
@@ -85,4 +91,44 @@ class SkillsOrderSpecs extends DefaultIntSpec {
         e.message.contains("Failed to find skillId")
     }
 
+    def "display order is correct when skill is deleted from the middle"() {
+        when:
+        skillsService.deleteSkill(skills.get(2))
+        then:
+        skillsService.getSkillsForSubject(proj.projectId, subj.subjectId).collect({it.displayOrder}) == [1, 2, 3, 4]
+    }
+
+    def "display order is correct when skill is deleted from the beginning"() {
+        when:
+        skillsService.deleteSkill(skills.get(0))
+        then:
+        skillsService.getSkillsForSubject(proj.projectId, subj.subjectId).collect({it.displayOrder}) == [1, 2, 3, 4]
+    }
+
+    def "display order is correct when skill is deleted from the end"() {
+        when:
+        skillsService.deleteSkill(skills.get(4))
+        then:
+        skillsService.getSkillsForSubject(proj.projectId, subj.subjectId).collect({it.displayOrder}) == [1, 2, 3, 4]
+    }
+
+    def "display order is correct when skill is added"() {
+        when:
+        def newSkill = SkillsFactory.createSkill(1, 1, 6)
+        skillsService.createSkill(newSkill)
+        then:
+        skillsService.getSkillsForSubject(proj.projectId, subj.subjectId).collect({it.displayOrder}) == [1, 2, 3, 4, 5, 6]
+    }
+
+    def "display order is correct when skill is added and other skill is deleted"() {
+        when:
+        def newSkill = SkillsFactory.createSkill(1, 1, 6)
+        skillsService.createSkill(newSkill)
+        skillsService.deleteSkill(skills.get(0))
+        skillsService.deleteSkill(skills.get(3))
+        then:
+        def modifiedSkills = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
+        modifiedSkills.collect({it.displayOrder}) == [1, 2, 3, 4]
+        modifiedSkills.collect({it.skillId}) == ['skill2', 'skill3', 'skill5', 'skill6']
+    }
 }
