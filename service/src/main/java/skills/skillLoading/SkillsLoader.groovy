@@ -26,6 +26,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import skills.PublicProps
 import skills.controller.exceptions.SkillExceptionBuilder
 import skills.controller.result.model.AvailableProjectResult
 import skills.controller.result.model.GlobalBadgeLevelRes
@@ -62,6 +63,9 @@ class SkillsLoader {
 
     @Autowired
     ProjDefRepo projDefRepo
+
+    @Autowired
+    private PublicProps publicProps;
 
     @Autowired
     SkillDefRepo skillDefRepo
@@ -406,9 +410,24 @@ class SkillsLoader {
     }
 
     @Transactional(readOnly = true)
-    SkillSummary loadSkillSummary(String projectId, String userId, String crossProjectId, String skillId) {
+    SkillSummary loadSkillSummary(String projectId, String userId, String crossProjectId, String skillId, String subjectId) {
         ProjDef projDef = getProjDef(userId, crossProjectId ?: projectId)
         SkillDefWithExtra skillDef = getSkillDefWithExtra(userId, crossProjectId ?: projectId, skillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
+
+        String nextSkillId;
+        String prevSkillId;
+
+        if(subjectId) {
+            SkillDef previousSkill = skillDefRepo.findSkillDefByDisplayOrder(projectId, subjectId, skillDef.displayOrder - 1);
+            SkillDef nextSkill = skillDefRepo.findSkillDefByDisplayOrder(projectId, subjectId, skillDef.displayOrder + 1);
+
+            if(previousSkill) {
+                prevSkillId = previousSkill.skillId;
+            }
+            if(nextSkill) {
+                nextSkillId = nextSkill.skillId;
+            }
+        }
 
         if (crossProjectId) {
             dependencyValidator.validateDependencyEligibility(projectId, skillDef)
@@ -445,6 +464,8 @@ class SkillsLoader {
                 projectId: skillDef.projectId,
                 projectName: InputSanitizer.unsanitizeName(projDef.name),
                 skillId: skillDef.skillId,
+                prevSkillId: prevSkillId,
+                nextSkillId: nextSkillId,
                 skill: isReusedSkill ? SkillReuseIdUtil.removeTag(unsanitizedName) : unsanitizedName,
                 points: points, todaysPoints: todayPoints,
                 pointIncrement: skillDef.pointIncrement,
@@ -981,6 +1002,7 @@ class SkillsLoader {
 
     private SkillDefWithExtra getSkillDefWithExtra(String userId, String projectId, String skillId, List<SkillDef.ContainerType> containerTypes) {
         SkillDefWithExtra skillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(projectId, skillId, containerTypes)
+
         if (!skillDef) {
             throw new SkillExceptionBuilder()
                     .msg("Skill definition with id [${skillId}] doesn't exist")

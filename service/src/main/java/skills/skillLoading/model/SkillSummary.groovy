@@ -32,4 +32,6 @@ class SkillSummary extends SkillSummaryParent {
 
     String subjectName
     String subjectId
+    String nextSkillId
+    String prevSkillId
 }
