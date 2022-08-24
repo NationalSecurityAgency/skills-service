@@ -641,7 +641,7 @@ class H2NativeRepo implements NativeQueriesRepo {
                     skillsDBLockRepo.save(lock)
                 })
             } catch (Throwable t) {
-                t.printStackTrace()
+                log.debug("failed to insert key [{}]", t, lockKey)
             }
             //this second find is necessary so that the pessmisitc_write lock blocks access to this row until the lock is released
             lock = skillsDBLockRepo.findByLock(lockKey)
