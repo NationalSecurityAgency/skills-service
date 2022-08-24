@@ -84,6 +84,7 @@ class SelfReportApprovalRequestEmailNotificationSpecs extends DefaultIntSpec {
         }
 
         WaitFor.wait { greenMail.getReceivedMessages().size() == userSpecificServiceInstances.size() }
+        greenMail.getReceivedMessages().subject == (1..5).collect { "SkillTree - You've been added as an admin"}
         greenMail.purgeEmailFromAllMailboxes()
 
         //unsubscribe the first 4 users
@@ -106,7 +107,7 @@ class SelfReportApprovalRequestEmailNotificationSpecs extends DefaultIntSpec {
         assert WaitFor.wait { greenMail.getReceivedMessages().size() > 2 }
 
         then:
-        greenMail.getReceivedMessages().length == 3
+        greenMail.getReceivedMessages().subject == (1..3).collect { "SkillTree Points Requested"}
         Set<String> allUniqueRecipients = EmailUtils.getAllUniqueRecipients(greenMail)
         allUniqueRecipients.find {it.contains(users[3])}
         allUniqueRecipients.find {it.contains(users[4])}
