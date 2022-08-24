@@ -93,6 +93,7 @@ limitations under the License.
         this.skill = {};
         this.loadDependencies();
         this.loadSkillSummary();
+        this.updateLastSeen();
       },
       loadDependencies() {
         if (!this.$route.params.crossProjectId) {
@@ -134,6 +135,21 @@ limitations under the License.
           name: 'skillDetails',
           params,
         });
+      },
+      updateLastSeen() {
+        let seenSkills = JSON.parse(localStorage.getItem('lastSeenSkills'));
+        const { projectId, subjectId, skillId } = this.$route.params;
+        if (!seenSkills) {
+          seenSkills = {};
+          seenSkills[projectId] = {};
+          seenSkills[projectId][subjectId] = {
+            lastSeenSkill: null,
+            skillHistory: {},
+          };
+        }
+        seenSkills[projectId][subjectId].lastSeenSkill = skillId;
+        seenSkills[projectId][subjectId].skillHistory[skillId] = new Date();
+        localStorage.setItem('lastSeenSkills', JSON.stringify(seenSkills));
       },
     },
   };

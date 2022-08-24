@@ -88,6 +88,9 @@ limitations under the License.
           <animated-number :num="skill.points"/>
           / {{ skill.totalPoints | number }} Points
         </div>
+        <div v-if="this.skillHasLastSeenDate()">
+          Last Viewed: {{ this.getFormattedDate() }}
+        </div>
       </div>
     </div>
     <div class="row">
@@ -169,6 +172,11 @@ limitations under the License.
   import CatalogImportStatus from '@/userSkills/skill/progress/CatalogImportStatus';
   import SkillOverviewFooter from '@/userSkills/skill/SkillOverviewFooter';
   import AnimatedNumber from '@/userSkills/skill/progress/AnimatedNumber';
+  import dayjs from '@/common-components/DayJsCustomizer';
+  import Vue from 'vue';
+  import VueScrollTo from 'vue-scrollto';
+
+  Vue.use(VueScrollTo);
 
   export default {
     name: 'SkillProgress2',
@@ -213,8 +221,8 @@ limitations under the License.
         type: String,
         default: '',
       },
-      lastSeenSkill: {
-        type: String,
+      lastSeenSkills: {
+        type: Object,
         default: null,
       },
     },
@@ -228,10 +236,7 @@ limitations under the License.
       this.highlightChildSkillName();
 
       if (this.isLastSeenSkill) {
-        const lastSeenIndicator = document.getElementById('lastSeenIndicator');
-        if (lastSeenIndicator && this.$route.params.jumpToLastSeen) {
-          lastSeenIndicator.scrollIntoView();
-        }
+        this.scrollToLastSeenSkill();
       }
     },
     computed: {
@@ -260,7 +265,10 @@ limitations under the License.
         return this.isSkillsGroupWithChildren && this.skill.numSkillsRequired !== -1 && this.skill.numSkillsRequired < this.skill.children.length;
       },
       isLastSeenSkill() {
-        return this.lastSeenSkill === this.skill.skillId;
+        if (this.lastSeenSkills && this.lastSeenSkills[this.skill.projectId] && this.lastSeenSkills[this.skill.projectId][this.subjectId]) {
+          return this.lastSeenSkills[this.skill.projectId][this.subjectId].lastSeenSkill === this.skill.skillId;
+        }
+        return false;
       },
     },
     watch: {
@@ -295,7 +303,7 @@ limitations under the License.
         if (this.allowDrillDown) {
           const route = this.getSkillDetailsRoute();
           const params = this.getParams();
-          localStorage.setItem('lastSeenSkill', this.skill.skillId);
+
           this.handlePush({
             name: route,
             params,
@@ -313,6 +321,7 @@ limitations under the License.
         if (this.skill.crossProject && this.skill.projectId) {
           params.crossProjectId = this.skill.projectId;
         }
+        params.projectId = this.skill.projectId;
         return params;
       },
       getSkillDetailsRoute() {
@@ -323,6 +332,26 @@ limitations under the License.
           route = 'globalBadgeSkillDetails';
         }
         return route;
+      },
+      skillHasLastSeenDate() {
+        if (this.skill.projectId && this.subjectId && this.lastSeenSkills[this.skill.projectId] && this.lastSeenSkills[this.skill.projectId][this.subjectId] && this.lastSeenSkills[this.skill.projectId][this.subjectId].skillHistory[this.skill.skillId]) {
+          return true;
+        }
+        return false;
+      },
+      getFormattedDate() {
+        return dayjs(this.lastSeenSkills[this.skill.projectId][this.subjectId].skillHistory[this.skill.skillId]).fromNow();
+      },
+      scrollToLastSeenSkill() {
+        const lastSeenIndicator = document.getElementById('lastSeenIndicator');
+        if (lastSeenIndicator && this.$route.params.jumpToLastSeen) {
+          VueScrollTo.scrollTo('#lastSeenIndicator', 750, {
+            y: true,
+            x: false,
+            easing: 'ease-in',
+            offset: -25,
+          });
+        }
       },
     },
   };

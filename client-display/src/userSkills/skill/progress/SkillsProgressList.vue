@@ -70,7 +70,7 @@ limitations under the License.
                           :data-cy="`skillProgress_index-${index}`"
                           @points-earned="onPointsEarned"
                           :child-skill-highlight-string="searchString"
-                          :lastSeenSkill="lastSeenSkill"
+                          :lastSeenSkills="lastSeenSkills"
                       />
                     </div>
                   </div>
@@ -228,10 +228,18 @@ limitations under the License.
       });
 
       this.skillsInternalOrig = this.skillsInternal.map((item) => ({ ...item, children: item.children?.map((child) => ({ ...child })) }));
-
-      this.lastSeenSkill = localStorage.getItem('lastSeenSkill');
+      this.getLastSeenSkills();
     },
     methods: {
+      getLastSeenSkills() {
+        let lastSeen = JSON.parse(localStorage.getItem('lastSeenSkills'));
+
+        if (!lastSeen) {
+          lastSeen = {};
+        }
+
+        this.lastSeenSkills = lastSeen;
+      },
       updateMetaCountsForSkillRes(skillRes) {
         if (skillRes.isSkillsGroupType) {
           skillRes.children.forEach((childItem) => {
