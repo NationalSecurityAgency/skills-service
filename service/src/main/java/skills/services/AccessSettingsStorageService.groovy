@@ -313,7 +313,14 @@ class AccessSettingsStorageService {
         } else {
             // create new user with APP_USER role
             log.debug("Creating new app user for ID [{}], DN [{}]", userInfo.username, userInfo.userDn)
-            user = createNewUser(userInfo)
+            userAttrsService.lockUser(userId)
+            user = loadUserFromLocalDb(userId)
+            if (!user) {
+                user = createNewUser(userInfo)
+                log.debug("Created new user for ID [{}], DN [{}]", userInfo.username, userInfo.userDn)
+            } else {
+                log.debug("Was going to create but already exist for ID [{}], DN [{}]", userInfo.username, userInfo.userDn)
+            }
             return new UserAndUserAttrsHolder(user: user, userAttrs: userAttrs)
         }
     }

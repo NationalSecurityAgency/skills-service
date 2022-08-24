@@ -128,7 +128,7 @@ class UserAttrsService {
     }
 
     @Profile
-    private void lockUser(String userId) {
+    void lockUser(String userId) {
         log.debug("locking user [{}]", userId)
         lockingService.lockForUserCreateOrUpdate(userId)
     }
