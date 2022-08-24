@@ -453,4 +453,43 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         inviteOnlyProjectService.validateInviteEmail = false
     }
 
+    def "if email validation is enabled, can use invite code generated for joining user even if case does not match"() {
+        inviteOnlyProjectService.validateInviteEmail = true
+
+        def proj = SkillsFactory.createProject(99)
+        def subj = SkillsFactory.createSubject(99)
+        def skill = SkillsFactory.createSkill(99, 1)
+        skill.pointIncrement = 200
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skill)
+        skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
+
+        def users = getRandomUsers(2, true)
+
+        when:
+        String addy = userAttrsRepo.findEmailByUserId(users[0])
+        SkillsService.UseParams params = new SkillsService.UseParams(
+                username: users[0],
+                email: addy
+        )
+        def userService = createService(params)
+
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: [addy.toUpperCase()]])
+        WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
+
+        def email = greenMail.getReceivedMessages()
+        println email
+        println userAttrsRepo.findEmailByUserId(users[0])
+        String inviteCode = extractInviteFromEmail(email[0].content.toString())
+        def res = userService.joinProject(proj.projectId, inviteCode)
+
+        then:
+        res.success == true
+
+        cleanup:
+        inviteOnlyProjectService.validateInviteEmail = false
+    }
+
 }

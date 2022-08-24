@@ -16,6 +16,7 @@
 package skills.services.admin
 
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.Validate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -105,10 +106,8 @@ class InviteOnlyProjectService {
     @Autowired
     SettingsDataAccessor settingsDataAccessor
 
-
     // email validation regex as defined by RFC 5322
     private static final Pattern VALID_EMAIL = ~/^[a-zA-Z0-9_!#$%&'*+\/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$/
-
 
     /**
      * Generates an invite token for a specific project
@@ -175,7 +174,7 @@ class InviteOnlyProjectService {
         } else if(!projectAccessToken.isValid()) {
             response.valid = false
             response.message = "Project Invite has expired"
-        } else if(validateInviteEmail && userInfoService.getCurrentUser()?.email != projectAccessToken.recipientEmail) {
+        } else if(validateInviteEmail && !StringUtils.equalsIgnoreCase(userInfoService.getCurrentUser()?.email, projectAccessToken.recipientEmail)) {
             response.valid = false
             response.message = "Project Invite is for a different user"
         } else {
@@ -217,7 +216,7 @@ class InviteOnlyProjectService {
             throw new SkillException("Invitation Code has already been used", projectId, null, ErrorCode.ClaimedInvitationCode)
         }
 
-        if (validateInviteEmail && userInfo?.email != projectAccessToken.recipientEmail) {
+        if (validateInviteEmail && !StringUtils.equalsIgnoreCase(userInfo?.email, projectAccessToken.recipientEmail)) {
             log.warn("User [{}] with email [{}] is trying to use an invite code that was sent to [{}]", userId, userInfo.email, projectAccessToken.recipientEmail)
             throw new SkillException("Invitation Code is for a different user", projectId, null, ErrorCode.NotYourInvitationCode)
         }

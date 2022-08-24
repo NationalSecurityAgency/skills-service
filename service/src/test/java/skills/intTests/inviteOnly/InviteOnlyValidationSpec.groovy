@@ -101,6 +101,43 @@ class InviteOnlyValidationSpec extends InviteOnlyBaseSpec {
         inviteOnlyProjectService.validateInviteEmail = false
     }
 
+    def "email validation should be case insensitive"() {
+        inviteOnlyProjectService.validateInviteEmail = true
+
+        def proj = SkillsFactory.createProject(99)
+        def subj = SkillsFactory.createSubject(99)
+        def skill = SkillsFactory.createSkill(99, 1)
+        skill.pointIncrement = 200
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skill)
+        skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
+
+        def users = getRandomUsers(2, true)
+
+        when:
+        def u0email = userAttrsRepo.findEmailByUserId(users[0])
+        SkillsService.UseParams params = new SkillsService.UseParams(
+                username: users[0],
+                email: u0email
+        )
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: [u0email.toUpperCase()]])
+        WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
+
+        def email = greenMail.getReceivedMessages()
+        String inviteCode = extractInviteFromEmail(email[0].content.toString())
+        def userService = createService(params)
+        def resp = userService.validateInvite(proj.projectId, inviteCode)
+
+        then:
+        resp.projectId == proj.projectId
+        resp.valid == true
+
+        cleanup:
+        inviteOnlyProjectService.validateInviteEmail = false
+    }
+
     def "invite code validation returns false if invite code is expired"() {
         def proj = SkillsFactory.createProject(99)
         def subj = SkillsFactory.createSubject(99)
