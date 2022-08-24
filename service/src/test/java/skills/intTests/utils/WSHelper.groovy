@@ -50,6 +50,7 @@ class WSHelper {
 
     String firstName = 'Skills'
     String lastName = 'Test'
+    String email = null
 
     CertificateRegistry certificateRegistry
 
@@ -80,7 +81,7 @@ class WSHelper {
 
         restTemplateWrapper = new RestTemplateWrapper(restTemplate, pkiAuth)
         oAuthRestTemplate = restTemplate
-        restTemplateWrapper.auth(skillsService, username, password, firstName, lastName)
+        restTemplateWrapper.auth(skillsService, username, password, firstName, lastName, email)
         return this
     }
 

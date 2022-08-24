@@ -108,9 +108,9 @@ class RestTemplateWrapper extends RestTemplate {
                 .build()
     }
 
-    void auth(String skillsServiceUrl, String username, String password, String firstName, lastName) {
+    void auth(String skillsServiceUrl, String username, String password, String firstName, String lastName, String email=null) {
         if(!this.pkiAuth) {
-            boolean accountCreated = createAccount(skillsServiceUrl, username, password, firstName, lastName)
+            boolean accountCreated = createAccount(skillsServiceUrl, username, password, firstName, lastName, email)
             if (!accountCreated) {
                 HttpHeaders headers = new HttpHeaders()
                 headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -129,7 +129,7 @@ class RestTemplateWrapper extends RestTemplate {
         }
         authenticated = true
     }
-    private boolean createAccount(String skillsServiceUrl, String username, String password, String firstName, String lastName) {
+    private boolean createAccount(String skillsServiceUrl, String username, String password, String firstName, String lastName, String email=null) {
         boolean accountCreated = false
         ResponseEntity<String> userExistsResponse = restTemplate.getForEntity("${skillsServiceUrl}/app/users/validExistingDashboardUserId/{userId}", String, username)
         boolean userExists = Boolean.valueOf(userExistsResponse.body)
@@ -141,6 +141,11 @@ class RestTemplateWrapper extends RestTemplate {
                     password : password,
                     usernameForDisplay: "$username for display".toString()
             ]
+
+            if (email != null) {
+                userInfo.email = email
+            }
+
             ResponseEntity response = putForEntity(skillsServiceUrl + '/createAccount', userInfo)
             if ( response.statusCode != HttpStatus.OK) {
                 throw new SkillsClientException(response.body, skillsServiceUrl, response.statusCode)
