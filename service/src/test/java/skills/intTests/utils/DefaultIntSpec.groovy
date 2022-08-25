@@ -246,7 +246,7 @@ class DefaultIntSpec extends Specification {
                         UserAttrs userAttrs = new UserAttrs()
                         userAttrs.userId = it
                         userAttrs.userIdForDisplay = it
-                        userAttrs.email = "${it}@email.foo"
+                        userAttrs.email = EmailUtils.generateEmaillAddressFor(it)
                         userAttrs.firstName = "${it.toUpperCase()}_first"
                         userAttrs.lastName = "${it.toUpperCase()}_last"
                         userAttrs.userTagsLastUpdated = new Date()

@@ -151,7 +151,7 @@ class InviteOnlyProjectService {
         invite.token = accessToken.token
         invite.recipientEmail = email
 
-        log.info("user [{}] has generated invite token [{}] for project [{}]", currentUser, code, projectId)
+        log.info("user [{}] has generated invite token [{}] for project [{}] for recipient [{}]", currentUser, code, projectId, email)
         return invite
     }
 
@@ -169,15 +169,21 @@ class InviteOnlyProjectService {
         InviteTokenValidationResponse response = new InviteTokenValidationResponse()
         response.projectId = projectId
         if (!projectAccessToken) {
+            log.debug("requested token [{}] for projectId [{}] does not exist", token, projectId)
             response.valid = false
             response.message = "Invalid Project Invite"
         } else if(!projectAccessToken.isValid()) {
+            log.debug("token [{}] for projectId [{}] with expiration date [{}] is not valid", token, projectId, projectAccessToken.expires)
             response.valid = false
             response.message = "Project Invite has expired"
         } else if(validateInviteEmail && !StringUtils.equalsIgnoreCase(userInfoService.getCurrentUser()?.email, projectAccessToken.recipientEmail)) {
+            log.debug("currentUser with email [{}] does not match email [{}] that token was generated with", userInfoService.getCurrentUser()?.email, projectAccessToken.recipientEmail)
             response.valid = false
             response.message = "Project Invite is for a different user"
         } else {
+            if (log.isDebugEnabled()) {
+                log.debug("token [{}] for projectId [{}] with recipient email [{}] and expiration [{}] is valid for user [{}]", token, projectId, projectAccessToken.recipientEmail, projectAccessToken.expires, userInfoService.getCurrentUser()?.email)
+            }
             response.valid = true
         }
 
