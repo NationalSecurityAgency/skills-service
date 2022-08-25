@@ -129,6 +129,8 @@ Cypress.on('fail', (err) => {
 
 Cypress.on('command:start', ({ attributes }) => {
     if (attributes.type === 'parent') {
-        attributes.name = `[${moment.utc().toISOString()}] ${attributes.name} `
+        Cypress.log({
+            name: `[${moment.utc().toISOString()}] ${attributes.name} ----------`,
+        })
     }
 });
