@@ -121,3 +121,14 @@ afterEach(function () {
     });
 });
 
+Cypress.on('fail', (err) => {
+    console.error(err)
+    err.message = `on [${moment.utc().toISOString()}] \n ${err.message}`
+    throw err
+});
+
+Cypress.on('command:start', ({ attributes }) => {
+    if (attributes.type === 'parent') {
+        attributes.name = `[${moment.utc().toISOString()}] ${attributes.name} `
+    }
+});
