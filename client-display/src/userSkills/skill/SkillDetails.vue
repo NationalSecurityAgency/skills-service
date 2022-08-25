@@ -54,6 +54,7 @@ limitations under the License.
   import SkillProgress2 from '@/userSkills/skill/progress/SkillProgress2';
   import NavigationErrorMixin from '@/common/utilities/NavigationErrorMixin';
   import SkillEnricherUtil from '../utils/SkillEnricherUtil';
+  import SkillHistoryUtil from '../utils/SkillHistoryUtil';
 
   export default {
     name: 'SkillDetails',
@@ -123,33 +124,22 @@ limitations under the License.
         return routeName === 'dependentSkillDetails' || routeName === 'crossProjectSkillDetails';
       },
       prevButtonClicked() {
-        const params = { skillId: this.skill.prevSkillId };
+        const params = { skillId: this.skill.prevSkillId, projectId: this.$route.params.projectId };
         this.handlePush({
           name: 'skillDetails',
           params,
         });
       },
       nextButtonClicked() {
-        const params = { skillId: this.skill.nextSkillId };
+        const params = { skillId: this.skill.nextSkillId, projectId: this.$route.params.projectId };
         this.handlePush({
           name: 'skillDetails',
           params,
         });
       },
       updateLastSeen() {
-        let seenSkills = JSON.parse(localStorage.getItem('lastSeenSkills'));
         const { projectId, subjectId, skillId } = this.$route.params;
-        if (!seenSkills) {
-          seenSkills = {};
-          seenSkills[projectId] = {};
-          seenSkills[projectId][subjectId] = {
-            lastSeenSkill: null,
-            skillHistory: {},
-          };
-        }
-        seenSkills[projectId][subjectId].lastSeenSkill = skillId;
-        seenSkills[projectId][subjectId].skillHistory[skillId] = new Date();
-        localStorage.setItem('lastSeenSkills', JSON.stringify(seenSkills));
+        SkillHistoryUtil.updateSkillHistory(projectId, subjectId, skillId);
       },
     },
   };

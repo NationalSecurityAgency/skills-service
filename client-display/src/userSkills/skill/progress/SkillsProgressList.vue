@@ -96,6 +96,7 @@ limitations under the License.
   import StringHighlighter from '@/common-components/utilities/StringHighlighter';
   import SkillProgress2 from './SkillProgress2';
   import SkillEnricherUtil from '../../utils/SkillEnricherUtil';
+  import SkillHistoryUtil from '../../utils/SkillHistoryUtil';
   import store from '../../../store/store';
 
   const updateSkillForLoadedDescription = (skills, desc) => {
@@ -228,18 +229,9 @@ limitations under the License.
       });
 
       this.skillsInternalOrig = this.skillsInternal.map((item) => ({ ...item, children: item.children?.map((child) => ({ ...child })) }));
-      this.getLastSeenSkills();
+      this.lastSeenSkills = SkillHistoryUtil.loadSkillHistory();
     },
     methods: {
-      getLastSeenSkills() {
-        let lastSeen = JSON.parse(localStorage.getItem('lastSeenSkills'));
-
-        if (!lastSeen) {
-          lastSeen = {};
-        }
-
-        this.lastSeenSkills = lastSeen;
-      },
       updateMetaCountsForSkillRes(skillRes) {
         if (skillRes.isSkillsGroupType) {
           skillRes.children.forEach((childItem) => {
