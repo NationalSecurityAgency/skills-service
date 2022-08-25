@@ -97,9 +97,16 @@ limitations under the License.
       loadAssignedBadgeSkills() {
         SkillsService.getBadgeSkills(this.projectId, this.badgeId)
           .then((loadedSkills) => {
-            this.badgeSkills = loadedSkills;
+            // in case of 403 request is still resolved but redirected to an error page
+            // this avoids JS errors in console
+            const validRequest = Array.isArray(loadedSkills);
+            if (validRequest) {
+              this.badgeSkills = loadedSkills;
+            }
             this.loading.badgeSkills = false;
-            this.loadAvailableBadgeSkills();
+            if (validRequest) {
+              this.loadAvailableBadgeSkills();
+            }
           });
       },
       loadAvailableBadgeSkills() {
@@ -130,6 +137,8 @@ limitations under the License.
         SkillsService.removeSkillFromBadge(this.projectId, this.badgeId, deletedItem.skillId)
           .then(() => {
             this.badgeSkills = this.badgeSkills.filter((entry) => entry.skillId !== deletedItem.skillId);
+            console.log('skillDeleted setting badgeSkills:');
+            console.log(this.badgeSkills);
             this.availableSkills.unshift(deletedItem);
             this.loadBadgeDetailsState({ projectId: this.projectId, badgeId: this.badgeId });
             this.loading.skillOp = false;
