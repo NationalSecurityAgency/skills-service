@@ -137,8 +137,6 @@ limitations under the License.
         SkillsService.removeSkillFromBadge(this.projectId, this.badgeId, deletedItem.skillId)
           .then(() => {
             this.badgeSkills = this.badgeSkills.filter((entry) => entry.skillId !== deletedItem.skillId);
-            console.log('skillDeleted setting badgeSkills:');
-            console.log(this.badgeSkills);
             this.availableSkills.unshift(deletedItem);
             this.loadBadgeDetailsState({ projectId: this.projectId, badgeId: this.badgeId });
             this.loading.skillOp = false;
