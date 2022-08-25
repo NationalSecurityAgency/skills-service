@@ -50,10 +50,15 @@ limitations under the License.
             <div class="col-auto ml-auto mr-0">
               <router-link :data-cy="`manageProjBtn_${data.item.projectId}`" :to="{ name:'Subjects', params: { projectId: data.item.projectId, project: data.item }}"
                            :aria-label="`Manage Project ${data.item.name}`"
-                           class="btn btn-outline-primary btn-sm">
+                           class="btn btn-outline-primary btn-sm mr-2">
                 <span class="d-none d-sm-inline">Manage </span> <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
               </router-link>
-              <b-button-group size="sm" class="ml-1">
+              <b-button v-if="isRootUser" class="mr-2" @click="unpin(data.item)" data-cy="unpin" size="sm"
+                        variant="outline-primary" :aria-label="'remove pin for project '+ data.item.name"
+                        :aria-pressed="data.item.pinned">
+                <span class="d-none d-sm-inline">Unpin</span> <i class="fas fa-ban" style="font-size: 1rem;" aria-hidden="true"/>
+              </b-button>
+              <b-button-group size="sm" class="ml-0">
                 <b-button @click="showProjectEditModal(data.item)"
                           variant="outline-primary" :data-cy="`editProjectId${data.item.projectId}`"
                           :aria-label="'edit Project '+data.item.name"
@@ -138,6 +143,7 @@ limitations under the License.
   import SkillsBTable from '../utils/table/SkillsBTable';
   import RemovalValidation from '../utils/modal/RemovalValidation';
   import EditProject from './EditProject';
+  import SettingsService from '../settings/SettingsService';
 
   export default {
     name: 'ProjectsTable',
@@ -226,6 +232,11 @@ limitations under the License.
       this.table.options.pagination.totalRows = this.projects.length;
       this.table.options.busy = false;
     },
+    computed: {
+      isRootUser() {
+        return this.$store.getters['access/isRoot'];
+      },
+    },
     methods: {
       applyFilters() {
         if (this.table.filter.name && this.table.filter.name.length > 0) {
@@ -307,6 +318,12 @@ limitations under the License.
             ref.focus();
           }
         });
+      },
+      unpin(project) {
+        SettingsService.unpinProject(project.projectId)
+          .then(() => {
+            this.$emit('pin-removed', project);
+          });
       },
       focusOnEditButton(projectId) {
         const refId = `edit_${projectId}`;
