@@ -318,6 +318,21 @@ class AccessSettingsStorageService {
         }
     }
 
+    @Transactional(readOnly=true)
+    @Profile
+    UserAndUserAttrsHolder get(UserInfo userInfo) {
+        userInfoValidator.validate(userInfo)
+        String userId = userInfo.username?.toLowerCase()
+        UserAttrs userAttrs = userAttrsService.getOrCreate(userId, userInfo)
+
+        User user = loadUserFromLocalDb(userId)
+
+        if (user) {
+            return new UserAndUserAttrsHolder(user: user, userAttrs: userAttrs)
+        }
+        return null
+    }
+
     @Profile
     private User loadUserFromLocalDb(String userId) {
         return userRepository.findByUserId(userId.toLowerCase())

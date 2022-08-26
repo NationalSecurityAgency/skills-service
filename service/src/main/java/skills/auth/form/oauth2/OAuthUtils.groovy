@@ -65,10 +65,12 @@ class OAuthUtils {
                     lastName: proxyUserId
             )
 
-            // create/update the UserInfo to remain consistent with other auth mechanisms
-            // this flow needs to something akin to getOrCreateIfNotExists WITHOUT update
-            currentUser = userAuthService.getOrCreate(currentUser)
-            currentUser.proxyingSystemId = auth.principal
+            // if the user exists, make sure to load them so that user roles are populated
+            UserInfo existingUser = userAuthService.get(currentUser)
+            if (existingUser) {
+                currentUser = userAuthService.getOrCreate(currentUser)
+                currentUser.proxyingSystemId = auth.principal
+            }
 
             skillsAuth = new UsernamePasswordAuthenticationToken(currentUser, null, currentUser.authorities)
         } else {
