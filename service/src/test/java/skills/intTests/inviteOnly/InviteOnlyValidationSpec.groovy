@@ -16,10 +16,12 @@
 package skills.intTests.inviteOnly
 
 import org.springframework.beans.factory.annotation.Autowired
+import skills.intTests.utils.EmailUtils
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.services.admin.InviteOnlyProjectService
 import skills.utils.WaitFor
+import spock.lang.IgnoreRest
 
 class InviteOnlyValidationSpec extends InviteOnlyBaseSpec {
 
@@ -47,7 +49,7 @@ class InviteOnlyValidationSpec extends InviteOnlyBaseSpec {
         def userService = createService(users[0])
 
         when:
-        def u1Email = userAttrsRepo.findEmailByUserId(users[1])
+        def u1Email = EmailUtils.generateEmaillAddressFor(users[1])
         skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: [u1Email]])
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
@@ -62,6 +64,7 @@ class InviteOnlyValidationSpec extends InviteOnlyBaseSpec {
 
         cleanup:
         inviteOnlyProjectService.validateInviteEmail = false
+        greenMail.reset()
     }
 
     def "if email validation is enabled, validate returns true if requesting user is the same as invited user"() {
@@ -80,17 +83,18 @@ class InviteOnlyValidationSpec extends InviteOnlyBaseSpec {
         def users = getRandomUsers(2, true)
 
         when:
-        def u0email = userAttrsRepo.findEmailByUserId(users[0])
+        def u0email = EmailUtils.generateEmaillAddressFor(users[0])
         SkillsService.UseParams params = new SkillsService.UseParams(
                 username: users[0],
                 email: u0email
         )
+        def userService = createService(params)
         skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: [u0email]])
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
         def email = greenMail.getReceivedMessages()
         String inviteCode = extractInviteFromEmail(email[0].content.toString())
-        def userService = createService(params)
+
         def resp = userService.validateInvite(proj.projectId, inviteCode)
 
         then:
@@ -99,6 +103,7 @@ class InviteOnlyValidationSpec extends InviteOnlyBaseSpec {
 
         cleanup:
         inviteOnlyProjectService.validateInviteEmail = false
+        greenMail.reset()
     }
 
     def "email validation should be case insensitive"() {
@@ -117,7 +122,7 @@ class InviteOnlyValidationSpec extends InviteOnlyBaseSpec {
         def users = getRandomUsers(2, true)
 
         when:
-        def u0email = userAttrsRepo.findEmailByUserId(users[0])
+        def u0email = EmailUtils.generateEmaillAddressFor(users[0])
         SkillsService.UseParams params = new SkillsService.UseParams(
                 username: users[0],
                 email: u0email
@@ -153,7 +158,7 @@ class InviteOnlyValidationSpec extends InviteOnlyBaseSpec {
         def userService = createService(users[0])
 
         when:
-        def u1Email = userAttrsRepo.findEmailByUserId(users[1])
+        def u1Email = EmailUtils.generateEmaillAddressFor(users[1])
         skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT1S", recipients: [u1Email]])
         Thread.sleep(1200)
 
@@ -185,7 +190,7 @@ class InviteOnlyValidationSpec extends InviteOnlyBaseSpec {
         def userService = createService(users[0])
 
         when:
-        def u1Email = userAttrsRepo.findEmailByUserId(users[1])
+        def u1Email = EmailUtils.generateEmaillAddressFor(users[1])
         skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT3M", recipients: [u1Email]])
 
         def email = greenMail.getReceivedMessages()

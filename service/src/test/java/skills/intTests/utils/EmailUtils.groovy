@@ -80,4 +80,11 @@ class EmailUtils {
         res = res.replaceAll("[\r\n]", "")
         return res
     }
+
+    static String generateEmaillAddressFor(String userId) {
+        if (userId.contains("@")) {
+            return userId
+        }
+        return "${userId}@email.foo"
+    }
 }

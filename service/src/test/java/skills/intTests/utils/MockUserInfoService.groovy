@@ -21,14 +21,15 @@ import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.common.FileSource
 import com.github.tomakehurst.wiremock.extension.Parameters
 import com.github.tomakehurst.wiremock.extension.ResponseDefinitionTransformer
-import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer
 import com.github.tomakehurst.wiremock.http.Request
 import com.github.tomakehurst.wiremock.http.ResponseDefinition
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Conditional
 import org.springframework.stereotype.Component
 import skills.auth.SecurityMode
+import skills.storage.repos.UserAttrsRepo
 
 import javax.annotation.PostConstruct
 import javax.annotation.PreDestroy;
@@ -44,6 +45,9 @@ public class MockUserInfoService {
 
     @Value('${skills.authorization.userInfoHealthCheckUri}')
     String userInfoHealthCheckUri
+
+    @Autowired
+    UserAttrsRepo userAttrsRepo
 
     static final Map<String, FirstnameLastname> DN_TO_NAME = [
             "cn=jdoe@email.foo, ou=integration tests, o=skilltree test, c=us": new FirstnameLastname("John", "Doe"),
@@ -82,7 +86,7 @@ public class MockUserInfoService {
                 .trustStoreType("JKS")
                 .httpDisabled(true)
                 .needClientAuth(true)
-                .extensions(new UserInfoResponseTransformer()));
+                .extensions(new UserInfoResponseTransformer(userAttrsRepo)));
 
         mockServer.stubFor(any(urlPathEqualTo("/actuator/health")).willReturn(
                 ok()
@@ -111,6 +115,12 @@ public class MockUserInfoService {
     }
 
     public static class UserInfoResponseTransformer extends ResponseDefinitionTransformer {
+
+        UserAttrsRepo userAttrsRepo
+
+        public UserInfoResponseTransformer(UserAttrsRepo userAttrsRepo) {
+            this.userAttrsRepo = userAttrsRepo
+        }
 
         @Override
         ResponseDefinition transform(Request request, ResponseDefinition responseDefinition, FileSource files, Parameters parameters) {
@@ -142,9 +152,11 @@ public class MockUserInfoService {
                 lname = configuredNames.lastname
             }
 
-            String email = usernamified
-            if (!email.contains('@')) {
-                email = "${usernamified}@fakeplace"
+            String email = EmailUtils.generateEmaillAddressFor(usernamified)
+
+            def existingEmail = userAttrsRepo.findEmailByUserId(usernamified)
+            if (existingEmail) {
+                email = existingEmail
             }
 
             return new ResponseDefinitionBuilder()

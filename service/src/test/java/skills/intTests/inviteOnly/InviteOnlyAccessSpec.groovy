@@ -17,11 +17,13 @@ package skills.intTests.inviteOnly
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
+import skills.intTests.utils.EmailUtils
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.services.admin.InviteOnlyProjectService
 import skills.utils.WaitFor
+import spock.lang.IgnoreRest
 
 class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
 
@@ -398,7 +400,7 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         def userService = createService(users[0])
 
         when:
-        def u1Email = userAttrsRepo.findEmailByUserId(users[1])
+        def u1Email = EmailUtils.generateEmaillAddressFor(users[1])
         skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: [u1Email]])
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
@@ -430,7 +432,7 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         def users = getRandomUsers(2, true)
 
         when:
-        String addy = userAttrsRepo.findEmailByUserId(users[0])
+        String addy = EmailUtils.generateEmaillAddressFor(users[0])
         SkillsService.UseParams params = new SkillsService.UseParams(
                 username: users[0],
                 email: addy
