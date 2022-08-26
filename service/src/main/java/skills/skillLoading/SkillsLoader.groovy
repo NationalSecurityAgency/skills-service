@@ -418,22 +418,73 @@ class SkillsLoader {
         String prevSkillId;
 
         if(subjectId) {
-            List<List<String>> skills = skillDefRepo.findSkillDefByDisplayOrder(projectId, subjectId);
+            List<DisplayOrderRes> skills = skillDefRepo.findSkillDefByDisplayOrder(projectId, subjectId);
 
-            skills.each({it -> log.info('Row ' + it)})
+            def currentSkill = skills.find({it -> it.getSkillId() == skillId})
 
-            def currentSkill = skills.find({it -> it[0] == skillId})
-            def currentSkillDisplayOrder = currentSkill[1].toInteger();
-            if(currentSkillDisplayOrder > 1 ) {
-                def previousSkill = skills.find({ it -> it[1].toInteger() == (currentSkillDisplayOrder - 1)})
-                if(previousSkill) {
-                    prevSkillId = previousSkill[0];
+            if(currentSkill.type == 'Skill') {
+                // A skill, find the next and prev display orders by searching the skills list
+                if(currentSkill.groupId == null) {
+                    // Not part of a group, find next / prev as normal
+                    if(currentSkill.displayOrder > 1) {
+                        def previousSkill = skills.find({ it -> it.getDisplayOrder() == (currentSkill.displayOrder - 1) && it.getGroupId() == null})
+                        if (previousSkill) {
+                            if(previousSkill.type == 'Skill') {
+                                prevSkillId = previousSkill.skillId;
+                            }
+                            else if(previousSkill.type == 'SkillsGroup') {
+                                def groupSkills = skills.findAll({it -> it.groupId == previousSkill.skillId})
+                                prevSkillId = groupSkills.find({it -> it.displayOrder == groupSkills.size()}).skillId
+                            }
+                        }
+                    }
+                    if(currentSkill.displayOrder < skills.size()) {
+                        def nextSkill = skills.find({ it -> it.getDisplayOrder() == (currentSkill.displayOrder + 1) && it.getGroupId() == null});
+                        if (nextSkill) {
+                            if(nextSkill.type == 'Skill') {
+                                nextSkillId = nextSkill.skillId;
+                            }
+                            else if(nextSkill.type == 'SkillsGroup') {
+                                List<DisplayOrderRes> groupSkills = skills.findAll({it -> it.groupId == nextSkill.skillId})
+                                nextSkillId = groupSkills.find({it -> it.displayOrder == 1}).skillId
+                            }
+                        }
+                    }
                 }
-            }
-            if(currentSkillDisplayOrder < skills.size()) {
-                def nextSkill = skills.find({ it -> it[1].toInteger() == (currentSkillDisplayOrder + 1)});
-                if(nextSkill) {
-                    nextSkillId = nextSkill[0];
+                else {
+                    List<DisplayOrderRes> groupSkills = skills.findAll({it -> it.getGroupId() == currentSkill.groupId})
+                    if(currentSkill.displayOrder > 0) {
+                        def previousSkill = groupSkills.find({ it -> it.getDisplayOrder() == (currentSkill.displayOrder - 1)})
+                        if (previousSkill) {
+                            if(previousSkill.type == 'Skill') {
+                                prevSkillId = previousSkill.skillId;
+                            }
+                        }
+                        else {
+                            if(currentSkill.skillGroupDisplayOrder > 0) {
+                                def previousOutsideSkill = skills.find({it -> it.displayOrder == (currentSkill.skillGroupDisplayOrder - 1) && it.getGroupId() == null})
+                                if(previousOutsideSkill) {
+                                    prevSkillId = previousOutsideSkill.skillId;
+                                }
+                            }
+                        }
+                    }
+                    if(currentSkill.displayOrder <= groupSkills.size()) {
+                        def nextSkill = groupSkills.find({ it -> it.getDisplayOrder() == (currentSkill.displayOrder + 1)});
+                        if (nextSkill) {
+                            if(nextSkill.type == 'Skill') {
+                                nextSkillId = nextSkill.skillId;
+                            }
+                        }
+                        else {
+                            if(currentSkill.skillGroupDisplayOrder < skills.size()) {
+                                def nextOutsideSkill = skills.find({ it -> it.displayOrder == (currentSkill.skillGroupDisplayOrder + 1) && it.getGroupId() == null})
+                                if(nextOutsideSkill) {
+                                    nextSkillId = nextOutsideSkill.skillId;
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
