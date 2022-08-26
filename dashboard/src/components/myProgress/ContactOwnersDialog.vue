@@ -21,14 +21,13 @@ limitations under the License.
            v-model="modalVisible">
     <div id="contactOwnersMsg" class="row p-2" data-cy="contactOwnersMsg">
     <b-form-textarea type="text" id="approvalRequiredMsg" @input="validate"
-                     v-if="isApprovalRequired" v-model="approvalRequestedMsg"
+                    v-model="contactOwnersMsg"
                      rows="2"
                      data-cy="selfReportMsgInput"
                      aria-describedby="reportSkillMsg"
-                     :aria-label="isJustitificationRequired ? 'Optional request approval message' : 'Required request approval message'"
-                     class="form-control" :placeholder="`Message (${isJustitificationRequired ? 'required' : 'optional'})`"/>
-    <div v-if="isApprovalRequired" :class="{ 'float-right':true, 'text-small': true, 'text-danger': charactersRemaining < 0 }" data-cy="charactersRemaining">{{charactersRemaining}} characters remaining <i v-if="charactersRemaining < 0" class="fas fa-exclamation-circle"/></div>
-    <span v-if="inputInvalid" class="text-small text-danger" data-cy="selfReportMsgInput_errMsg"><i class="fas fa-exclamation-circle"/> {{ inputInvalidExplanation }}</span>
+                     :aria-label="'Contact Project Owners'"
+                     class="form-control"/>
+    <div :class="{ 'float-right':true, 'text-small': true, 'text-danger': charactersRemaining < 0 }" data-cy="charactersRemaining">{{charactersRemaining}} characters remaining <i v-if="charactersRemaining < 0" class="fas fa-exclamation-circle"/></div>
     <template #modal-footer>
       <button type="button" class="btn btn-outline-danger text-uppercase" @click="cancel">
         <i class="fas fa-times-circle"></i> Cancel
@@ -42,13 +41,31 @@ limitations under the License.
 </template>
 
 <script>
+
   export default {
     name: 'ContactOwnersDialog',
     data() {
       return {
         modalVisible: false,
       };
-    }
+    },
+    computed: {
+      messageValid() {
+        const maxLength = this.$store.getters.config ? this.$store.getters.config.maxSelfReportMessageLength : -1;
+        if (maxLength === -1) {
+          return true;
+        }
+
+        return this.charactersRemaining >= 0;
+      },
+      charactersRemaining() {
+        // we'll need a config for this?
+        return this.$store.getters.config.maxSelfReportMessageLength - this.approvalRequestedMsg.length;
+      },
+    },
+    methods: {
+
+    },
   };
 </script>
 
