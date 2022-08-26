@@ -323,7 +323,7 @@ class AccessSettingsStorageService {
     UserAndUserAttrsHolder get(UserInfo userInfo) {
         userInfoValidator.validate(userInfo)
         String userId = userInfo.username?.toLowerCase()
-        UserAttrs userAttrs = userAttrsService.getOrCreate(userId, userInfo)
+        UserAttrs userAttrs = userAttrsService.get(userId, userInfo)
 
         User user = loadUserFromLocalDb(userId)
 

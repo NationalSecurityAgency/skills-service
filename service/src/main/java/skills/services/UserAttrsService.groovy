@@ -102,6 +102,15 @@ class UserAttrsService {
         return loadUserAttrsFromLocalDb(userId)
     }
 
+    @Transactional(readOnly = true)
+    @Profile
+    UserAttrs get(String userId, UserInfo userInfo) {
+        validateUserId(userId)
+
+        UserAttrs userAttrs = loadUserAttrsFromLocalDb(userId)
+        return userAttrs
+    }
+
     @Profile
     private UserAttrs updateIfNecessary(boolean updateUserTags, boolean updateUserAttrs, String userId, UserAttrs userAttrs, UserInfo userInfo) {
         if (updateUserTags || updateUserAttrs) {

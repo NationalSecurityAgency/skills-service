@@ -68,7 +68,7 @@ class OAuthUtils {
             // if the user exists, make sure to load them so that user roles are populated
             UserInfo existingUser = userAuthService.get(currentUser)
             if (existingUser) {
-                currentUser = userAuthService.getOrCreate(currentUser)
+                currentUser = existingUser
                 currentUser.proxyingSystemId = auth.principal
             }
 

@@ -128,6 +128,13 @@ class UserAuthService {
         return createUserInfo(userAndUserAttrs.user, userAndUserAttrs.userAttrs)
     }
 
+    /**
+     * Loads information for the specified user from the database but DOES NOT create a user
+     * if no record already exists
+     *
+     * @param userInfo
+     * @return
+     */
     @Transactional(readOnly=true)
     @Profile
     UserInfo get(UserInfo userInfo) {
