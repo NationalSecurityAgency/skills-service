@@ -42,7 +42,10 @@ limitations under the License.
         <projects-table ref="projectsTable" :projects="projects" @project-deleted="projectRemoved"
                         @copy-project="copyProject"
                         :copy-project-disabled="addProjectDisabled"
-                        @project-edited="projectEdited"></projects-table>
+                        @project-edited="projectEdited"
+                        @pin-removed="projectUnpinned">
+
+        </projects-table>
       </div>
       <div v-else id="projectCards">
         <div v-for="project of projects" :key="project.projectId" class="mb-3"
