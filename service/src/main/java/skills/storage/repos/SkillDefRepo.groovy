@@ -196,7 +196,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     @Query(value='''select child.skill_id, child.display_order as displayOrder, skillGroup.display_order, child.group_id
                 from skill_definition subj,
                      skill_relationship_definition rel,
-                     skill_definition child left join skill_definition skillGroup on (child.group_id = skillGroup.skill_id and skillGroup.project_id = ?1)
+                     skill_definition child left join skill_definition skillGroup on (child.group_id = skillGroup.skill_id and skillGroup.project_id = child.project_id)
                 where subj.project_id = ?1
                   and subj.skill_id = ?2
                   and child.type = 'Skill'
