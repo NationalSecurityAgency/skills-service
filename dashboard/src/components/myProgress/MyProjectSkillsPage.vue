@@ -14,17 +14,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-<div>
-  <div v-if="isLoadingSettings" class="d-flex justify-content-center mt-1">
-    <b-spinner variant="primary" type="grow" label="Spinning"></b-spinner>
+  <div>
+    <div v-if="isLoadingSettings" class="d-flex justify-content-center mt-1">
+      <b-spinner variant="primary" type="grow" label="Spinning"></b-spinner>
+    </div>
+    <div class="w-100 text-right pr-3 pt-3" v-if="emailEnabled">
+      <b-button variant="outline-primary" @click="showContact">
+        Contact Project Owners <i aria-hidden="true" class="fas fas fa-mail-bulk"/>
+      </b-button>
+    </div>
+    <skills-display v-if="!isLoadingSettings"
+                    :options="options"
+                    :version="skillsVersion"
+                    :theme="themeObj"
+                    ref="skillsDisplayRef"
+                    @route-changed="skillsDisplayRouteChanged"/>
   </div>
-  <skills-display v-if="!isLoadingSettings"
-    :options="options"
-    :version="skillsVersion"
-    :theme="themeObj"
-    ref="skillsDisplayRef"
-    @route-changed="skillsDisplayRouteChanged"/>
-</div>
 </template>
 
 <script>
@@ -32,7 +37,7 @@ limitations under the License.
   import MyProgressService from '@/components/myProgress/MyProgressService';
   import SkillsDisplayOptionsMixin from '@/components/myProgress/SkillsDisplayOptionsMixin';
   import SettingsService from '@/components/settings/SettingsService';
-  import ProjectService from '@/components/projects/ProjectService';
+  import ProjectService from "@/components/projects/ProjectService";
 
   export default {
     name: 'MyProjectSkillsPage',
@@ -46,6 +51,7 @@ limitations under the License.
         projectId: this.$route.params.projectId,
         projectDisplayName: 'PROJECT',
         skillsVersion: 2147483647, // max int
+        emailEnabled: false,
         theme: {
           disableSkillTreeBrand: true,
           disableBreadcrumb: true,
@@ -59,7 +65,7 @@ limitations under the License.
             borderStyle: 'none none solid none',
             backgroundColor: '#fff',
             textAlign: 'left',
-            padding: '1.6rem 1rem 1.1rem 1rem',
+            padding: '0 1rem 0 1rem',
             margin: '-10px -15px 1.6rem -15px',
           },
           backButton: {
@@ -117,8 +123,13 @@ limitations under the License.
         } else {
           this.$set(this.theme, 'landingPageTitle', `${this.projectDisplayName}: ${this.$route.params.name}`);
         }
-      }).finally(() => {
-        this.isLoadingSettings = false;
+      })
+        .then(() => ProjectService.isEmailServiceSupported())
+        .then((emailEnabled) => {
+          this.emailEnabled = emailEnabled;
+        })
+        .finally(() => {
+          this.isLoadingSettings = false;
       });
       this.handleProjInvitation();
     },
