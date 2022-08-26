@@ -93,8 +93,10 @@ describe('Navigation Tests', () => {
             .contains('This skill requires approval');
 
         cy.visit('/administrator/projects/proj1/self-report');
+        cy.get('[data-cy="expandDetailsBtn_skill4"]').should('exist')
         cy.get('[data-cy="selectPageOfApprovalsBtn"]')
             .click();
+        cy.get('[data-cy="rejectBtn"]').should('be.enabled')
         cy.get('[data-cy="rejectBtn"]')
             .click();
         cy.get('[data-cy="rejectionTitle"]')

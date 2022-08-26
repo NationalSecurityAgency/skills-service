@@ -97,9 +97,16 @@ limitations under the License.
       loadAssignedBadgeSkills() {
         SkillsService.getBadgeSkills(this.projectId, this.badgeId)
           .then((loadedSkills) => {
-            this.badgeSkills = loadedSkills;
+            // in case of 403 request is still resolved but redirected to an error page
+            // this avoids JS errors in console
+            const validRequest = Array.isArray(loadedSkills);
+            if (validRequest) {
+              this.badgeSkills = loadedSkills;
+            }
             this.loading.badgeSkills = false;
-            this.loadAvailableBadgeSkills();
+            if (validRequest) {
+              this.loadAvailableBadgeSkills();
+            }
           });
       },
       loadAvailableBadgeSkills() {
