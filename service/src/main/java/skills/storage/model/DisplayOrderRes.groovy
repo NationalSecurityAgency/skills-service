@@ -20,5 +20,4 @@ interface DisplayOrderRes {
     Integer getDisplayOrder();
     Integer getSkillGroupDisplayOrder();
     String getGroupId();
-    String getType();
 }

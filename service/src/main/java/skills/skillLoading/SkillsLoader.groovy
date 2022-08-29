@@ -419,73 +419,47 @@ class SkillsLoader {
 
         if(subjectId) {
             List<DisplayOrderRes> skills = skillDefRepo.findSkillDefByDisplayOrder(projectId, subjectId);
+            def currentSkill = skills.find({ it -> it.getSkillId() == skillId })
 
-            def currentSkill = skills.find({it -> it.getSkillId() == skillId})
+            if (currentSkill) { // && currentSkill.type == 'Skill'
+                def previousSkill;
+                def nextSkill;
+                def withinSkillGroup = false;
 
-            if(currentSkill.type == 'Skill') {
-                // A skill, find the next and prev display orders by searching the skills list
-                if(currentSkill.groupId == null) {
-                    // Not part of a group, find next / prev as normal
-                    if(currentSkill.displayOrder > 1) {
-                        def previousSkill = skills.find({ it -> it.getDisplayOrder() == (currentSkill.displayOrder - 1) && it.getGroupId() == null})
-                        if (previousSkill) {
-                            if(previousSkill.type == 'Skill') {
-                                prevSkillId = previousSkill.skillId;
-                            }
-                            else if(previousSkill.type == 'SkillsGroup') {
-                                def groupSkills = skills.findAll({it -> it.groupId == previousSkill.skillId})
-                                prevSkillId = groupSkills.find({it -> it.displayOrder == groupSkills.size()}).skillId
-                            }
-                        }
+                if (currentSkill.groupId != null) {
+                    withinSkillGroup = true;
+                }
+
+                previousSkill = skills.find({ it -> it.getDisplayOrder() == (currentSkill.displayOrder - 1) && it.getGroupId() == currentSkill.groupId })
+                nextSkill = skills.find({ it -> it.getDisplayOrder() == (currentSkill.displayOrder + 1) && it.getGroupId() == currentSkill.groupId });
+
+                if(!previousSkill) {
+                    // exit the skill group in reverse
+                    if(withinSkillGroup) {
+                        previousSkill = skills.find({ it -> it.getDisplayOrder() == (currentSkill.skillGroupDisplayOrder - 1) })
                     }
-                    if(currentSkill.displayOrder < skills.size()) {
-                        def nextSkill = skills.find({ it -> it.getDisplayOrder() == (currentSkill.displayOrder + 1) && it.getGroupId() == null});
-                        if (nextSkill) {
-                            if(nextSkill.type == 'Skill') {
-                                nextSkillId = nextSkill.skillId;
-                            }
-                            else if(nextSkill.type == 'SkillsGroup') {
-                                List<DisplayOrderRes> groupSkills = skills.findAll({it -> it.groupId == nextSkill.skillId})
-                                nextSkillId = groupSkills.find({it -> it.displayOrder == 1}).skillId
-                            }
+                    else {
+                        List<DisplayOrderRes> group = skills.findAll({ it -> it.getSkillGroupDisplayOrder() == (currentSkill.displayOrder - 1) && it.groupId != null })
+                        if(group) {
+                            previousSkill = group.last();
                         }
                     }
                 }
-                else {
-                    List<DisplayOrderRes> groupSkills = skills.findAll({it -> it.getGroupId() == currentSkill.groupId})
-                    if(currentSkill.displayOrder > 0) {
-                        def previousSkill = groupSkills.find({ it -> it.getDisplayOrder() == (currentSkill.displayOrder - 1)})
-                        if (previousSkill) {
-                            if(previousSkill.type == 'Skill') {
-                                prevSkillId = previousSkill.skillId;
-                            }
-                        }
-                        else {
-                            if(currentSkill.skillGroupDisplayOrder > 0) {
-                                def previousOutsideSkill = skills.find({it -> it.displayOrder == (currentSkill.skillGroupDisplayOrder - 1) && it.getGroupId() == null})
-                                if(previousOutsideSkill) {
-                                    prevSkillId = previousOutsideSkill.skillId;
-                                }
-                            }
-                        }
+                if(!nextSkill) {
+                    // exit the skill group forward
+                    if(withinSkillGroup) {
+                        nextSkill = skills.find({ it -> it.getDisplayOrder() == (currentSkill.skillGroupDisplayOrder + 1) })
                     }
-                    if(currentSkill.displayOrder <= groupSkills.size()) {
-                        def nextSkill = groupSkills.find({ it -> it.getDisplayOrder() == (currentSkill.displayOrder + 1)});
-                        if (nextSkill) {
-                            if(nextSkill.type == 'Skill') {
-                                nextSkillId = nextSkill.skillId;
-                            }
-                        }
-                        else {
-                            if(currentSkill.skillGroupDisplayOrder < skills.size()) {
-                                def nextOutsideSkill = skills.find({ it -> it.displayOrder == (currentSkill.skillGroupDisplayOrder + 1) && it.getGroupId() == null})
-                                if(nextOutsideSkill) {
-                                    nextSkillId = nextOutsideSkill.skillId;
-                                }
-                            }
+                    else {
+                        List<DisplayOrderRes> group = skills.findAll({ it -> it.getSkillGroupDisplayOrder() == (currentSkill.displayOrder + 1) && it.groupId != null })
+                        if(group) {
+                            nextSkill = group.first()
                         }
                     }
                 }
+
+                prevSkillId = previousSkill?.skillId
+                nextSkillId = nextSkill?.skillId
             }
         }
 
