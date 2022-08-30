@@ -409,6 +409,47 @@ class SkillsLoader {
         Integer points
     }
 
+    private DisplayOrderRes getSkillFromSkillGroup(DisplayOrderRes currentSkill, List<DisplayOrderRes> skills, Boolean prev) {
+        List<DisplayOrderRes> group = skills.findAll({it -> it.groupId == currentSkill.skillId});
+        if(group) {
+            return prev ? group.last() : group.first()
+        }
+        return null
+    }
+
+    private DisplayOrderRes getSkill(Integer displayOrder, List<DisplayOrderRes> skills, List<DisplayOrderRes> filteredSkills, Boolean prev) {
+        DisplayOrderRes newSkill = filteredSkills.find({ it -> it.getDisplayOrder() == displayOrder });
+        if(newSkill?.type == 'SkillsGroup') {
+            newSkill = getSkillFromSkillGroup(newSkill, skills, prev)
+        }
+        return newSkill
+    }
+
+    private String getAdjacentSkillId(Boolean withinSkillGroup, DisplayOrderRes currentSkill, List<DisplayOrderRes> skills, Boolean prev) {
+        def skill
+        def displayOrder = prev ? currentSkill.displayOrder - 1 : currentSkill.displayOrder + 1;
+
+        if(withinSkillGroup) {
+            List <DisplayOrderRes> currentGroup = skills.findAll({it.groupId == currentSkill.groupId});
+            skill = currentGroup.find({ it -> it.displayOrder == displayOrder })
+
+            if(!skill) {
+                displayOrder = prev ? currentSkill.skillGroupDisplayOrder - 1 : currentSkill.skillGroupDisplayOrder + 1;
+
+                def filteredSkills = skills.findAll({it -> it.groupId == null})
+                if(!skill) {
+                    skill = getSkill(displayOrder, skills, filteredSkills, prev)
+                }
+            }
+        }
+        else {
+            def filteredSkills = skills.findAll({it -> it.groupId == null})
+            skill = getSkill(displayOrder, skills, filteredSkills, prev)
+        }
+
+        return skill?.skillId
+    }
+
     @Transactional(readOnly = true)
     SkillSummary loadSkillSummary(String projectId, String userId, String crossProjectId, String skillId, String subjectId) {
         ProjDef projDef = getProjDef(userId, crossProjectId ?: projectId)
@@ -422,75 +463,10 @@ class SkillsLoader {
             def currentSkill = skills.find({ it -> it.getSkillId() == skillId })
 
             if (currentSkill) {
-                def previousSkill;
-                def nextSkill;
                 def withinSkillGroup = currentSkill.groupId != null ? true : false;
-                def previousDisplayOrder = currentSkill.displayOrder - 1;
-                def nextDisplayOrder = currentSkill.displayOrder + 1;
 
-                if(withinSkillGroup) {
-                    List <DisplayOrderRes> currentGroup = skills.findAll({it.groupId == currentSkill.groupId});
-                    previousSkill = currentGroup.find({ it -> it.displayOrder == previousDisplayOrder })
-                    nextSkill = currentGroup.find({ it -> it.displayOrder == nextDisplayOrder });
-
-                    if(!previousSkill || !nextSkill) {
-                        previousDisplayOrder = currentSkill.skillGroupDisplayOrder - 1;
-                        nextDisplayOrder = currentSkill.skillGroupDisplayOrder + 1;
-
-                        def filteredSkills = skills.findAll({it -> it.groupId == null})
-                        if(!previousSkill) {
-                            previousSkill = filteredSkills.find({ it -> it.getDisplayOrder() == previousDisplayOrder })
-                            if(previousSkill?.type == 'SkillsGroup') {
-                                def group = skills.findAll({it -> it.groupId == previousSkill.skillId});
-                                if(group) {
-                                    previousSkill = group.last()
-                                }
-                                else {
-                                    previousSkill = null
-                                }
-                            }
-                        }
-                        if(!nextSkill) {
-                            nextSkill = filteredSkills.find({ it -> it.getDisplayOrder() == nextDisplayOrder });
-                            if(nextSkill?.type == 'SkillsGroup') {
-                                def group = skills.findAll({it -> it.groupId == nextSkill.skillId});
-                                if(group) {
-                                    nextSkill = group.first()
-                                }
-                                else {
-                                    nextSkill = null
-                                }
-                            }
-                        }
-                    }
-                }
-                else {
-                    def filteredSkills = skills.findAll({it -> it.groupId == null})
-                    previousSkill = filteredSkills.find({ it -> it.getDisplayOrder() == previousDisplayOrder })
-                    nextSkill = filteredSkills.find({ it -> it.getDisplayOrder() == nextDisplayOrder });
-
-                    if(previousSkill?.type == 'SkillsGroup') {
-                        def group = skills.findAll({it -> it.groupId == previousSkill.skillId});
-                        if(group) {
-                            previousSkill = group.last()
-                        }
-                        else {
-                            previousSkill = null
-                        }
-                    }
-                    if(nextSkill?.type == 'SkillsGroup') {
-                        def group = skills.findAll({it -> it.groupId == nextSkill.skillId});
-                        if(group) {
-                            nextSkill = group.first()
-                        }
-                        else {
-                            nextSkill = null
-                        }
-                    }
-                }
-
-                prevSkillId = previousSkill?.skillId
-                nextSkillId = nextSkill?.skillId
+                prevSkillId = getAdjacentSkillId(withinSkillGroup, currentSkill, skills, true)
+                nextSkillId = getAdjacentSkillId(withinSkillGroup, currentSkill, skills, false)
             }
         }
 
