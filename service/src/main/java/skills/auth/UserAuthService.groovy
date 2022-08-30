@@ -128,6 +128,23 @@ class UserAuthService {
         return createUserInfo(userAndUserAttrs.user, userAndUserAttrs.userAttrs)
     }
 
+    /**
+     * Loads information for the specified user from the database but DOES NOT create a user
+     * if no record already exists
+     *
+     * @param userInfo
+     * @return
+     */
+    @Transactional(readOnly=true)
+    @Profile
+    UserInfo get(UserInfo userInfo) {
+        AccessSettingsStorageService.UserAndUserAttrsHolder userAndUserAttrs = accessSettingsStorageService.get(userInfo)
+        if (userAndUserAttrs) {
+            return createUserInfo(userAndUserAttrs.user, userAndUserAttrs.userAttrs)
+        }
+        return null
+    }
+
     void autologin(UserInfo userInfo, String password) {
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userInfo, password, userInfo.getAuthorities())
         authenticationManager.authenticate(usernamePasswordAuthenticationToken)

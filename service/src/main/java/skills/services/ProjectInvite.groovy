@@ -20,4 +20,5 @@ class ProjectInvite {
     String projectId
     String projectName
     String validFor
+    String recipientEmail
 }

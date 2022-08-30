@@ -33,6 +33,7 @@ import './commands'
 import 'cypress-axe';
 import 'cypress-plugin-tab';
 import "cypress-real-events/support";
+import moment from 'moment-timezone';
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
@@ -106,10 +107,12 @@ beforeEach(function () {
             }
         }
     });
+    cy.task('logToConsole', `[${Cypress.currentTest.title}] [${moment.utc().toISOString()}] start`)
 });
 
 
 afterEach(function () {
+    cy.task('logToConsole', `[${Cypress.currentTest.title}] [${moment.utc().toISOString()}] end`)
     Cypress.env('hydraAuthenticated', false);
 
     cy.window().then((win) => {
@@ -118,3 +121,16 @@ afterEach(function () {
     });
 });
 
+Cypress.on('fail', (err) => {
+    console.error(err)
+    err.message = `on [${moment.utc().toISOString()}] \n ${err.message}`
+    throw err
+});
+
+Cypress.on('command:start', ({ attributes }) => {
+    if (attributes.type === 'parent') {
+        Cypress.log({
+            name: `[${moment.utc().toISOString()}] ${attributes.name} ----------`,
+        })
+    }
+});

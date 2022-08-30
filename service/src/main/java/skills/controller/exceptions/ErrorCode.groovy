@@ -47,4 +47,5 @@ enum ErrorCode {
     InvalidInvitationCode,
     ClaimedInvitationCode,
     UserRoleAlreadyAssigned,
+    NotYourInvitationCode,
 }

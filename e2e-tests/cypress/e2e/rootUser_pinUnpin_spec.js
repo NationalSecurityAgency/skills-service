@@ -596,6 +596,86 @@ describe('Root Pin and Unpin Tests', () => {
             });
     });
 
+    it('Pin all projects then unpin 1 using projects table', () => {
+      for (let i = 1; i <= 10; i += 1) {
+        cy.createProject(i);
+      }
+      cy.logout();
+      cy.fixture('vars.json').then((vars) => {
+        cy.login(vars.rootUser, vars.defaultPass);
+        cy.intercept('GET', '/app/projects').as('default');
+        cy.intercept('GET', '/app/projects?search=one').as('searchOne');
+        cy.intercept('POST', '/root/pin/proj1').as('pinOne');
+        cy.intercept('DELETE', '/root/pin/proj1').as('unpinOne');
+        cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+
+        cy.visit('/administrator/');
+        //confirm that default project loading returns no projects for root user
+        cy.wait('@default');
+        cy.contains('No Projects Yet...').should('be.visible');
+
+        const rowSelector = '[data-cy=pinProjectsSearchResults] tbody tr'
+        const projectsSelector = '[data-cy=projectCard]';
+
+        // pin all projects
+        cy.get('[data-cy=subPageHeaderControls]').contains('Pin').click();
+        cy.contains('Search Project Catalog');
+        cy.get('[data-cy=pinProjectsLoadAllButton]').click();
+        cy.get(rowSelector).should('have.length', 5).as('cyRows');
+
+        for (let page = 1; page <= 2; page += 1) {
+          cy.get('[data-cy=pinedResultsPaging]').contains(page).click();
+          for (let i = 0; i < 5; i += 1) {
+            cy.get('@cyRows')
+              .eq(i)
+              .find('td')
+              .as('row1');
+            cy.get('@row1')
+              .eq(0)
+              .find('[data-cy=pinButton]')
+              .click();
+            cy.get('@row1').eq(0).find('[data-cy=unpinButton]').should('exist');
+          }
+        }
+        cy.get('[data-cy=modalDoneButton]').click();
+
+        const tableSelector = '[data-cy=projectsTable]'
+        cy.validateTable(tableSelector, [
+          [{ colIndex: 0,  value: 'proj9' }],
+          [{ colIndex: 0,  value: 'proj8' }],
+          [{ colIndex: 0,  value: 'proj7' }],
+          [{ colIndex: 0,  value: 'proj6' }],
+          [{ colIndex: 0,  value: 'proj5' }],
+          [{ colIndex: 0,  value: 'proj4' }],
+          [{ colIndex: 0,  value: 'proj3' }],
+          [{ colIndex: 0,  value: 'proj2' }],
+          [{ colIndex: 0,  value: 'proj1' }],
+          [{ colIndex: 0,  value: 'Inception' }],
+        ], 10);
+
+        // unpin from the table
+        cy.get('[data-cy="projectsTable-projectFilter"]').type('proj1');
+        cy.get('[data-cy="projectsTable-filterBtn"]').click();
+        cy.validateTable(tableSelector, [
+          [{ colIndex: 0,  value: 'proj1' }],
+        ], 10);
+        cy.get('[data-cy=unpin]').click();
+
+        // < 10 projects pinned now, so back to project cards
+        cy.get(projectsSelector).should('have.length', 9).as('projects');
+        cy.contains('Inception');
+        cy.contains('proj9');
+        cy.contains('proj8');
+        cy.contains('proj7');
+        cy.contains('proj6');
+        cy.contains('proj5');
+        cy.contains('proj4');
+        cy.contains('proj3');
+        cy.contains('proj2');
+        cy.contains('proj1').should('not.exist');
+      });
+    });
+
     it('Browse projects catalog - many projects', () => {
 
         for (let i = 0; i < 12; i += 1) {

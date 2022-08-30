@@ -34,7 +34,7 @@ const {
     addMatchImageSnapshotPlugin,
 } = require('cypress-image-snapshot/plugin');
 const { makeBadge, ValidationError } = require('badge-maker');
-
+const moment = require('moment-timezone');
 
 const deleteFolderRecursive = function(path) {
     if (fs.existsSync(path)) {
@@ -143,6 +143,11 @@ module.exports = (on, config) => {
             console.table(message)
 
             return null;
+        },
+        logToConsole(msg) {
+            console.log(msg)
+            // needs to return something
+            return null
         },
     });
 };

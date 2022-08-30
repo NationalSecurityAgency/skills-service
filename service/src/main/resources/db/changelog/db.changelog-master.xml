@@ -1756,5 +1756,11 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="30" author="skills team">
+        <addColumn tableName="project_access_token">
+            <column name="recipient_email" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+
 
 </databaseChangeLog>

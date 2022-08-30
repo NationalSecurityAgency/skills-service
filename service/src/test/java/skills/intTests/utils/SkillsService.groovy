@@ -54,6 +54,18 @@ class SkillsService {
         wsHelper = new WSHelper(username: username, password: password, skillsService: service, firstName: firstName, lastName: lastName, certificateRegistry: certificateRegistry).init(certificateRegistry != null)
     }
 
+    SkillsService(UseParams userParams, String service, CertificateRegistry certificateRegistry) {
+        this.certificateRegistry = certificateRegistry
+        handlebarOptions = new Options.Builder(null, null, null, null, null).build()
+        wsHelper = new WSHelper(username: userParams.username,
+                password: userParams.password,
+                skillsService: service,
+                firstName: userParams.firstName,
+                lastName: userParams.lastName,
+                email: userParams.email,
+                certificateRegistry: certificateRegistry).init(certificateRegistry != null)
+    }
+
     String getClientSecret(String projectId){
         wsHelper.get("/projects/${projectId}/clientSecret", "admin", null, false)
     }
@@ -1447,6 +1459,17 @@ class SkillsService {
        return wsHelper.appPost("/projects/${projectId}/join/${inviteToken}", null)
     }
 
+    /**
+     * Validates the specified project invite token, returns a response with valid: false if the invite token
+     * does not exist, exists for a different project, is expired, or is for a different user
+     * @param projectId
+     * @param inviteToken
+     */
+    def validateInvite(String projectId, String inviteToken) {
+        def resp = wsHelper.appGet("/projects/${projectId}/validateInvite/${inviteToken}")
+        return resp
+    }
+
     private String getProjectUrl(String project) {
         return "/projects/${project}".toString()
     }
@@ -1580,6 +1603,15 @@ class SkillsService {
         } else {
             return DnUsernameHelper.getUsername(getUserId(userId))
         }
+    }
+
+    public static class UseParams {
+        String username = "skills@skills.org"
+        String password = "p@ssw0rd"
+
+        String firstName = 'Skills'
+        String lastName = 'Test'
+        String email = null
     }
 
 }
