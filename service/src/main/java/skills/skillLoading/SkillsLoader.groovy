@@ -421,40 +421,51 @@ class SkillsLoader {
             List<DisplayOrderRes> skills = skillDefRepo.findSkillDefByDisplayOrder(projectId, subjectId);
             def currentSkill = skills.find({ it -> it.getSkillId() == skillId })
 
-            if (currentSkill) { // && currentSkill.type == 'Skill'
+            if (currentSkill) {
                 def previousSkill;
                 def nextSkill;
-                def withinSkillGroup = false;
+                def withinSkillGroup = currentSkill.groupId != null ? true : false;
+                def previousDisplayOrder = currentSkill.displayOrder - 1;
+                def nextDisplayOrder = currentSkill.displayOrder + 1;
 
-                if (currentSkill.groupId != null) {
-                    withinSkillGroup = true;
-                }
+                if(withinSkillGroup) {
+                    List <DisplayOrderRes> currentGroup = skills.findAll({it.groupId == currentSkill.groupId});
+                    previousSkill = currentGroup.find({ it -> it.displayOrder == previousDisplayOrder })
+                    nextSkill = currentGroup.find({ it -> it.displayOrder == nextDisplayOrder });
 
-                previousSkill = skills.find({ it -> it.getDisplayOrder() == (currentSkill.displayOrder - 1) && it.getGroupId() == currentSkill.groupId })
-                nextSkill = skills.find({ it -> it.getDisplayOrder() == (currentSkill.displayOrder + 1) && it.getGroupId() == currentSkill.groupId });
+                    if(!previousSkill || !nextSkill) {
+                        previousDisplayOrder = currentSkill.skillGroupDisplayOrder - 1;
+                        nextDisplayOrder = currentSkill.skillGroupDisplayOrder + 1;
 
-                if(!previousSkill) {
-                    // exit the skill group in reverse
-                    if(withinSkillGroup) {
-                        previousSkill = skills.find({ it -> it.getDisplayOrder() == (currentSkill.skillGroupDisplayOrder - 1) })
-                    }
-                    else {
-                        List<DisplayOrderRes> group = skills.findAll({ it -> it.getSkillGroupDisplayOrder() == (currentSkill.displayOrder - 1) && it.groupId != null })
-                        if(group) {
-                            previousSkill = group.last();
+                        def filteredSkills = skills.findAll({it -> it.groupId == null})
+                        if(!previousSkill) {
+                            previousSkill = filteredSkills.find({ it -> it.getDisplayOrder() == previousDisplayOrder })
+                            if(previousSkill?.type == 'SkillsGroup') {
+                                def group = skills.findAll({it -> it.groupId == previousSkill.skillId});
+                                previousSkill = group.last()
+                            }
+                        }
+                        if(!nextSkill) {
+                            nextSkill = filteredSkills.find({ it -> it.getDisplayOrder() == nextDisplayOrder });
+                            if(nextSkill?.type == 'SkillsGroup') {
+                                def group = skills.findAll({it -> it.groupId == nextSkill.skillId});
+                                nextSkill = group.first()
+                            }
                         }
                     }
                 }
-                if(!nextSkill) {
-                    // exit the skill group forward
-                    if(withinSkillGroup) {
-                        nextSkill = skills.find({ it -> it.getDisplayOrder() == (currentSkill.skillGroupDisplayOrder + 1) })
+                else {
+                    def filteredSkills = skills.findAll({it -> it.groupId == null})
+                    previousSkill = filteredSkills.find({ it -> it.getDisplayOrder() == previousDisplayOrder })
+                    nextSkill = filteredSkills.find({ it -> it.getDisplayOrder() == nextDisplayOrder });
+
+                    if(previousSkill?.type == 'SkillsGroup') {
+                        def group = skills.findAll({it -> it.groupId == previousSkill.skillId});
+                        previousSkill = group.last()
                     }
-                    else {
-                        List<DisplayOrderRes> group = skills.findAll({ it -> it.getSkillGroupDisplayOrder() == (currentSkill.displayOrder + 1) && it.groupId != null })
-                        if(group) {
-                            nextSkill = group.first()
-                        }
+                    if(nextSkill?.type == 'SkillsGroup') {
+                        def group = skills.findAll({it -> it.groupId == nextSkill.skillId});
+                        nextSkill = group.first()
                     }
                 }
 
