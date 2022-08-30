@@ -442,14 +442,24 @@ class SkillsLoader {
                             previousSkill = filteredSkills.find({ it -> it.getDisplayOrder() == previousDisplayOrder })
                             if(previousSkill?.type == 'SkillsGroup') {
                                 def group = skills.findAll({it -> it.groupId == previousSkill.skillId});
-                                previousSkill = group.last()
+                                if(group) {
+                                    previousSkill = group.last()
+                                }
+                                else {
+                                    previousSkill = null
+                                }
                             }
                         }
                         if(!nextSkill) {
                             nextSkill = filteredSkills.find({ it -> it.getDisplayOrder() == nextDisplayOrder });
                             if(nextSkill?.type == 'SkillsGroup') {
                                 def group = skills.findAll({it -> it.groupId == nextSkill.skillId});
-                                nextSkill = group.first()
+                                if(group) {
+                                    nextSkill = group.first()
+                                }
+                                else {
+                                    nextSkill = null
+                                }
                             }
                         }
                     }
@@ -461,11 +471,21 @@ class SkillsLoader {
 
                     if(previousSkill?.type == 'SkillsGroup') {
                         def group = skills.findAll({it -> it.groupId == previousSkill.skillId});
-                        previousSkill = group.last()
+                        if(group) {
+                            previousSkill = group.last()
+                        }
+                        else {
+                            previousSkill = null
+                        }
                     }
                     if(nextSkill?.type == 'SkillsGroup') {
                         def group = skills.findAll({it -> it.groupId == nextSkill.skillId});
-                        nextSkill = group.first()
+                        if(group) {
+                            nextSkill = group.first()
+                        }
+                        else {
+                            nextSkill = null
+                        }
                     }
                 }
 
