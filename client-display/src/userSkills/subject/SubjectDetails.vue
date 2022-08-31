@@ -40,8 +40,9 @@ limitations under the License.
               </div>
             </div>
 
-            <skills-progress-list @points-earned="refreshHeader" :subject="displayData.userSkills"/>
+            <skills-progress-list @points-earned="refreshHeader" :subject="displayData.userSkills" @scrollTo="scrollToLastSeenSkill" />
         </div>
+        <div v-if="!loading.userSkills" id="jumpToButton" @click="scrollToLastSeenSkill"><i class="fas fa-eye"></i></div>
     </section>
 </template>
 
@@ -52,6 +53,10 @@ limitations under the License.
   import SkillsTitle from '@/common/utilities/SkillsTitle';
   import SkillsProgressList from '@/userSkills/skill/progress/SkillsProgressList';
   import SkillsSpinner from '@/common/utilities/SkillsSpinner';
+  import Vue from 'vue';
+  import VueScrollTo from 'vue-scrollto';
+
+  Vue.use(VueScrollTo);
 
   export default {
     mixins: [SkillDisplayDataLoadingMixin],
@@ -97,10 +102,42 @@ limitations under the License.
           });
         }
       },
+      doesLastSeenIndicatorExist() {
+        return document.getElementById('lastSeenIndicator');
+      },
+      scrollToLastSeenSkill() {
+        if (this.doesLastSeenIndicatorExist()) {
+          VueScrollTo.scrollTo('#lastSeenIndicator', 750, {
+            y: true,
+            x: false,
+            easing: 'ease-in',
+            offset: -25,
+          });
+        }
+      },
     },
   };
 </script>
 
 <style>
+#jumpToButton {
+  position: fixed;
+  border: 1px solid #146c75;
+  z-index: 999;
+  bottom: 25px;
+  right: 10px;
+  border-radius: 50px;
+  width: 30px;
+  height: 30px;
+  font-size: 18px;
+  background-color: #146c75;
+  color: #ffffff;
+  cursor: pointer;
+  opacity: .5;
+  padding-top: 2px;
+}
 
+#jumpToButton:hover {
+  opacity: 1;
+}
 </style>

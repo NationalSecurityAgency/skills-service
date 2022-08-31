@@ -173,10 +173,6 @@ limitations under the License.
   import SkillOverviewFooter from '@/userSkills/skill/SkillOverviewFooter';
   import AnimatedNumber from '@/userSkills/skill/progress/AnimatedNumber';
   import dayjs from '@/common-components/DayJsCustomizer';
-  import Vue from 'vue';
-  import VueScrollTo from 'vue-scrollto';
-
-  Vue.use(VueScrollTo);
 
   export default {
     name: 'SkillProgress2',
@@ -235,8 +231,8 @@ limitations under the License.
       this.initChildSkills();
       this.highlightChildSkillName();
 
-      if (this.isLastSeenSkill) {
-        this.scrollToLastSeenSkill();
+      if (this.isLastSeenSkill && this.$route.params.jumpToLastSeen) {
+        this.$emit('scrollTo');
       }
     },
     computed: {
@@ -341,17 +337,6 @@ limitations under the License.
       },
       getFormattedDate() {
         return dayjs(this.lastSeenSkills[this.skill.projectId][this.subjectId].skillHistory[this.skill.skillId]).fromNow();
-      },
-      scrollToLastSeenSkill() {
-        const lastSeenIndicator = document.getElementById('lastSeenIndicator');
-        if (lastSeenIndicator && this.$route.params.jumpToLastSeen) {
-          VueScrollTo.scrollTo('#lastSeenIndicator', 750, {
-            y: true,
-            x: false,
-            easing: 'ease-in',
-            offset: -25,
-          });
-        }
       },
     },
   };

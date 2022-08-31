@@ -71,6 +71,7 @@ limitations under the License.
                           @points-earned="onPointsEarned"
                           :child-skill-highlight-string="searchString"
                           :lastSeenSkills="lastSeenSkills"
+                          @scrollTo="scrollToLastSeenSkill"
                       />
                     </div>
                   </div>
@@ -274,6 +275,9 @@ limitations under the License.
               this.loading = false;
             });
         }
+      },
+      scrollToLastSeenSkill() {
+        this.$emit('scrollTo');
       },
       onPointsEarned(pts, skillId, childSkillId = null) {
         // childSkillId is only provided for SkillsGroup skills
