@@ -31,6 +31,7 @@ class EmailUtils {
         String html
         String plainText
 
+        List<String> fromEmail
     }
 
     static List<EmailRes> getEmails(GreenMail greenMail) {
@@ -69,6 +70,7 @@ class EmailUtils {
             }
         }
 
+        emailRes.fromEmail = msg.getReplyTo().collect { it.toString() }
         return emailRes
     }
 

@@ -13,28 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.notify.builders
+package skills.controller.request.model
 
-
-import skills.storage.model.Notification
-
-interface NotificationEmailBuilder {
-
-    static class Res {
-        String subject
-        String plainText
-        String html
-        String replyToEmail
-        /**
-         * Flag that the builder can be used to indicate that all recipients should be included in a single email
-         * as opposed to sending one email per recipient
-         */
-        boolean singleEmailToAllRecipients
-    }
-
-    String getId()
-
-    Res build(Notification notification, Formatting formatParams)
-
-
+class ContactOwnerRequest {
+    String message
 }

@@ -15,43 +15,98 @@ limitations under the License.
 */
 <template>
   <b-modal id="contactProjectOwners"
-           :title="`Contact ${this.skillDisplayName.toUpperCase()} Owners`"
+           :title="`Contact ${this.projectName} Owners`"
            ok-title="Submit"
            :no-close-on-backdrop="true"
+           @hide="cancel"
+           :busy="sending"
+           :ok-disabled="msgInvalid || !contactOwnersMsg || sendComplete"
+           @ok="contactOwners"
+           header-bg-variant="info"
+           header-text-variant="light"
+           no-fade
+           role="dialog"
+           data-cy="contactProjectOwnerDialog"
            v-model="modalVisible">
-    <div id="contactOwnersMsg" class="row p-2" data-cy="contactOwnersMsg">
-    <b-form-textarea type="text" id="approvalRequiredMsg" @input="validate"
-                    v-model="contactOwnersMsg"
-                     rows="2"
-                     data-cy="selfReportMsgInput"
-                     aria-describedby="reportSkillMsg"
-                     :aria-label="'Contact Project Owners'"
-                     class="form-control"/>
-    <div :class="{ 'float-right':true, 'text-small': true, 'text-danger': charactersRemaining < 0 }" data-cy="charactersRemaining">{{charactersRemaining}} characters remaining <i v-if="charactersRemaining < 0" class="fas fa-exclamation-circle"/></div>
-    <template #modal-footer>
-      <button type="button" class="btn btn-outline-danger text-uppercase" @click="cancel">
-        <i class="fas fa-times-circle"></i> Cancel
-      </button>
-      <button type="button" class="btn btn-outline-success text-uppercase" @click="reportSkill"
-              data-cy="selfReportSubmitBtn" :disabled="!messageValid">
-        <i class="fas fa-arrow-alt-circle-right"></i> Submit
-      </button>
+    <loading-container v-bind:is-loading="sending">
+      <div v-if="!sendComplete" id="contactOwnersMsg" class="row pt-2 pb-2 pl-4 pr-4" data-cy="contactOwnersMsg">
+        <b-form-textarea type="text" id="approvalRequiredMsg"
+                      v-model="contactOwnersMsg"
+                       rows="5"
+                       data-cy="contactOwnersMsgInput"
+                       :aria-label="'Contact Project Owners'"
+                       class="form-control"/>
+        <div :class="{ 'float-right':true, 'text-small': true, 'text-danger': charactersRemaining < 0 }" data-cy="charactersRemaining">{{ charactersRemaining }} characters remaining <i v-if="charactersRemaining < 0" class="fas fa-exclamation-circle"/></div>
+        <span v-if="msgInvalid" class="text-small text-danger" data-cy="contactOwnersInput_errMsg"><i class="fas fa-exclamation-circle"/> {{ msgInvalidMsg }}</span>
+      </div>
+      <div v-if="sendComplete" data-cy="contactOwnerSuccessMsg">
+        <p class="text-center text-success"><i class="fa fa-check" /> Message sent!</p>
+        <p class="text-center">The Project Administrator(s) of {{ projectName }} will be notified of your question via email.</p>
+      </div>
+    </loading-container>
+    <template #modal-footer="{ ok, cancel }">
+      <div class="w-100">
+        <b-button ref="okButton" size="sm" variant="success" class="float-right ml-2" @click="ok()"
+                data-cy="contactOwnersSubmitBtn" :disabled="!messageValid || !contactOwnersMsg || sending">
+          <i class="fas fa-arrow-alt-circle-right"></i> {{ sendComplete ? 'Ok' : 'Submit' }}
+        </b-button>
+        <b-button v-if="!sendComplete" size="sm" variant="secondary"
+                  class="float-right" @click="cancel()" data-cy="cancelBtn">
+          <i class="fas fa-times-circle"></i> Cancel
+        </b-button>
+      </div>
     </template>
   </b-modal>
 </template>
 
 <script>
 
+  import debounce from 'lodash.debounce';
+  import MyProgressService from '@/components/myProgress/MyProgressService';
+  import LoadingContainer from '@/components/utils/LoadingContainer';
+  import CustomValidationService from '../../validators/CustomValidatorsService';
+
   export default {
     name: 'ContactOwnersDialog',
+    props: {
+      projectName: {
+        type: String,
+        required: true,
+      },
+      value: {
+        type: Boolean,
+        required: true,
+      },
+      projectId: {
+        type: String,
+        required: true,
+      },
+    },
+    components: {
+      LoadingContainer,
+    },
     data() {
       return {
-        modalVisible: false,
+        modalVisible: this.value,
+        contactOwnersMsg: '',
+        msgInvalid: false,
+        msgInvalidMsg: '',
+        sending: false,
+        sendComplete: false,
       };
+    },
+    watch: {
+      modalVisible(newValue) {
+        this.$emit('input', newValue);
+      },
     },
     computed: {
       messageValid() {
-        const maxLength = this.$store.getters.config ? this.$store.getters.config.maxSelfReportMessageLength : -1;
+        if (this.msgInvalid) {
+          return false;
+        }
+
+        const maxLength = this.$store.getters.config ? this.$store.getters.config.maxContactOwnersMessageLength : -1;
         if (maxLength === -1) {
           return true;
         }
@@ -59,12 +114,37 @@ limitations under the License.
         return this.charactersRemaining >= 0;
       },
       charactersRemaining() {
-        // we'll need a config for this?
-        return this.$store.getters.config.maxSelfReportMessageLength - this.approvalRequestedMsg.length;
+        return this.$store.getters.config.maxContactOwnersMessageLength - this.contactOwnersMsg.length;
       },
     },
     methods: {
-
+      contactOwners(e) {
+        if (!this.sendComplete) {
+          e.preventDefault();
+          this.sending = true;
+          MyProgressService.contactOwners(this.projectId, this.contactOwnersMsg).then(() => {
+            this.sending = false;
+            this.sendComplete = true;
+            this.$nextTick(() => {
+              this.$announcer.polite(`Message has been sent to owners of project ${this.projectName}`);
+              this.$refs.okButton.focus();
+            });
+          });
+        }
+      },
+      cancel(e) {
+        if (e.trigger !== 'ok' && !this.sendComplete) {
+          this.modalVisible = false;
+          this.$emit('hidden', { ...e });
+        }
+      },
+      validate: debounce(function debouncedValidate() {
+        CustomValidationService.validateDescription(this.contactOwnersMsg)
+          .then((res) => {
+            this.msgInvalid = !res.valid;
+            this.msgInvalidMsg = res.msg;
+          });
+      }, 250),
     },
   };
 </script>

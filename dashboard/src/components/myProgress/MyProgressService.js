@@ -25,4 +25,7 @@ export default {
   findProjectName(projId) {
     return axios.get(`/api/myprojects/${encodeURIComponent(projId)}/name`).then((resp) => resp.data);
   },
+  contactOwners(projId, msg) {
+    return axios.post(`/api/projects/${encodeURIComponent(projId)}/contact`, { message: msg }).then((resp) => resp.data);
+  },
 };

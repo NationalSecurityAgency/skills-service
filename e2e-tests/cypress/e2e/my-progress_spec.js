@@ -1064,5 +1064,41 @@ describe('Navigation Tests', () => {
             .find('[data-cy=title]')
             .contains('WORK ROLE: This is project 1');
     });
+
+    it('Contact project owner', () => {
+        cy.intercept('POST', '/api/projects/*/contact').as('contact');
+        const invalidMsg = new Array(3000).fill('a').join('');
+        cy.loginAsProxyUser();
+        cy.visit('/progress-and-rankings/');
+        cy.get('[data-cy=project-link-proj1]').click();
+        cy.get('[data-cy="contactOwnerBtn"]').should('be.visible').click();
+        cy.get('[data-cy="contactProjectOwnerDialog"]').should('exist');
+        cy.get('[aria-label="Close"]').click();
+        cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist');
+        cy.get('[data-cy="contactOwnerBtn"]').should('be.visible').click();
+        cy.get('[data-cy="cancelBtn"]').click();
+        cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist');
+
+        cy.get('[data-cy="contactOwnerBtn"]').should('be.visible').click();
+        cy.contains('Contact This is project 1 Owners').should('be.visible');
+        cy.get('[data-cy="contactOwnersSubmitBtn"]').should('contain.text', 'Submit');
+        cy.get('[data-cy="contactOwnersSubmitBtn"]').should('be.disabled');
+        cy.get('[data-cy="charactersRemaining"]').should('contain.text', '2500 characters remaining');
+        cy.get('[data-cy="contactOwnersMsgInput"]').click().fill(invalidMsg);
+        cy.get('[data-cy="contactOwnersSubmitBtn"]').should('be.disabled');
+        cy.get('[data-cy="charactersRemaining"]').should('contain.text', '-500 characters remaining');
+        cy.get('[data-cy="contactOwnersMsgInput"]').click().fill('aaa bbb this is a message');
+        cy.get('[data-cy="charactersRemaining"]').should('contain.text', '2475 characters remaining');
+        cy.get('[data-cy="contactOwnersSubmitBtn"]').should('be.enabled');
+        cy.get('[data-cy="contactOwnersSubmitBtn"]').click();
+        cy.wait('@contact');
+        cy.get('[data-cy="cancelBtn"]').should('not.exist');
+        cy.get('[data-cy="contactOwnersSubmitBtn"]').should('contain.text', 'Ok');
+        cy.get('[data-cy="contactOwnerSuccessMsg"]').should('contain.text', 'Message sent!');
+        cy.get('[data-cy="contactOwnerSuccessMsg"]').should('contain.text', 'The Project Administrator(s) of This is project 1 will be notified of your question via email.');
+        cy.get('[data-cy="contactOwnersSubmitBtn"]').click();
+        cy.wait(500); //wait for animations to complete
+        cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist');
+    });
 });
 

@@ -17,17 +17,12 @@ package skills.services.admin
 
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
-import org.apache.commons.lang3.Validate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import org.thymeleaf.context.Context
-import skills.auth.AuthMode
-import skills.auth.GrantedAuthoritiesUpdater
-import skills.auth.UserInfo
-import skills.auth.UserInfoService
-import skills.auth.UserSkillsGrantedAuthority
+import skills.auth.*
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
@@ -35,7 +30,6 @@ import skills.controller.result.model.InviteTokenValidationResponse
 import skills.controller.result.model.InviteUsersResult
 import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.UserRoleRes
-import skills.notify.builders.Formatting
 import skills.services.AccessSettingsStorageService
 import skills.services.EmailSendingService
 import skills.services.FeatureService
@@ -53,8 +47,7 @@ import skills.storage.repos.ProjectAccessTokenRepo
 import skills.storage.repos.UserRoleRepo
 import skills.utils.Expiration
 import skills.utils.ExpirationUtils
-
-import java.util.regex.Pattern
+import skills.utils.PatternsUtil
 
 @Slf4j
 @Component
@@ -105,9 +98,6 @@ class InviteOnlyProjectService {
 
     @Autowired
     SettingsDataAccessor settingsDataAccessor
-
-    // email validation regex as defined by RFC 5322
-    private static final Pattern VALID_EMAIL = ~/^[a-zA-Z0-9_!#$%&'*+\/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$/
 
     /**
      * Generates an invite token for a specific project
@@ -281,7 +271,7 @@ class InviteOnlyProjectService {
 
         Date created = new Date()
         emailAddresses.each {
-            if (VALID_EMAIL.matcher(it).matches()) {
+            if (PatternsUtil.isValidEmail(it)) {
                 try {
                     String email = it
                     ProjectInvite invite = generateProjectInviteToken(projectId, email, created, duration)

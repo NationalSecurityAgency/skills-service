@@ -19,7 +19,7 @@ limitations under the License.
       <b-spinner variant="primary" type="grow" label="Spinning"></b-spinner>
     </div>
     <div class="w-100 text-right pr-3 pt-3" v-if="emailEnabled">
-      <b-button variant="outline-primary" @click="showContact">
+      <b-button variant="outline-primary" @click="showContactOwner" data-cy="contactOwnerBtn">
         Contact Project Owners <i aria-hidden="true" class="fas fas fa-mail-bulk"/>
       </b-button>
     </div>
@@ -29,6 +29,8 @@ limitations under the License.
                     :theme="themeObj"
                     ref="skillsDisplayRef"
                     @route-changed="skillsDisplayRouteChanged"/>
+
+    <contact-owners-dialog v-if="showContact" :project-name="projectName" v-model="showContact" :project-id="projectId"/>
   </div>
 </template>
 
@@ -37,21 +39,25 @@ limitations under the License.
   import MyProgressService from '@/components/myProgress/MyProgressService';
   import SkillsDisplayOptionsMixin from '@/components/myProgress/SkillsDisplayOptionsMixin';
   import SettingsService from '@/components/settings/SettingsService';
-  import ProjectService from "@/components/projects/ProjectService";
+  import ProjectService from '@/components/projects/ProjectService';
+  import ContactOwnersDialog from '@/components/myProgress/ContactOwnersDialog';
 
   export default {
     name: 'MyProjectSkillsPage',
     mixins: [SkillsDisplayOptionsMixin],
     components: {
       SkillsDisplay,
+      ContactOwnersDialog,
     },
     data() {
       return {
         isLoadingSettings: true,
         projectId: this.$route.params.projectId,
         projectDisplayName: 'PROJECT',
+        projectName: 'Project',
         skillsVersion: 2147483647, // max int
         emailEnabled: false,
+        showContact: false,
         theme: {
           disableSkillTreeBrand: true,
           disableBreadcrumb: true,
@@ -65,7 +71,7 @@ limitations under the License.
             borderStyle: 'none none solid none',
             backgroundColor: '#fff',
             textAlign: 'left',
-            padding: '0 1rem 0 1rem',
+            padding: '1.6rem 1rem 1.1rem 1rem',
             margin: '-10px -15px 1.6rem -15px',
           },
           backButton: {
@@ -118,19 +124,26 @@ limitations under the License.
           MyProgressService.findProjectName(this.projectId).then((res) => {
             if (res) {
               this.$set(this.theme, 'landingPageTitle', `${this.projectDisplayName}: ${res.name}`);
+              this.projectName = res.name;
             }
           });
         } else {
           this.$set(this.theme, 'landingPageTitle', `${this.projectDisplayName}: ${this.$route.params.name}`);
+          this.projectName = this.$route.params.name;
         }
       })
         .then(() => ProjectService.isEmailServiceSupported())
         .then((emailEnabled) => {
+          // email enabled should be loaded with initial config and not fetched every time, it's not a setting that's
+          // likely to change regularly
           this.emailEnabled = emailEnabled;
+          if (emailEnabled) {
+            this.$set(this.theme.pageTitle, 'padding', '0 1rem 0 1rem');
+          }
         })
         .finally(() => {
           this.isLoadingSettings = false;
-      });
+        });
       this.handleProjInvitation();
     },
     computed: {
@@ -161,6 +174,9 @@ limitations under the License.
         if (isInvited) {
           ProjectService.addToMyProjects(this.projectId);
         }
+      },
+      showContactOwner() {
+        this.showContact = true;
       },
     },
   };

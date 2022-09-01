@@ -40,6 +40,7 @@ import skills.settings.EmailSettingsService
 import skills.storage.model.Notification
 import skills.storage.repos.NotificationsRepo
 import skills.storage.repos.UserAttrsRepo
+import skills.utils.PatternsUtil
 
 import java.util.concurrent.TimeUnit
 import java.util.stream.Stream
@@ -159,9 +160,7 @@ class EmailNotifier implements Notifier {
         StopWatch stopWatch = new StopWatch()
         stopWatch.start()
 
-        int count = 0
-        int errCount = 0
-        String lastErrMsg
+        DispatchState dispatchState = new DispatchState(prepend: prependToLogs, wrappedLog: log)
 
         streamCreator.call().withCloseable { Stream<Notification> notifications ->
 
@@ -189,30 +188,36 @@ class EmailNotifier implements Notifier {
                 NotificationEmailBuilder.Res emailRes = notificationEmailBuilderManager.build(notification, formatting)
                 assert notification.userId?.size() > 0
 
+                if (PatternsUtil.isValidEmail(emailRes.replyToEmail)) {
+                    fromEmail = emailRes.replyToEmail
+                } else if (emailRes.replyToEmail) {
+                    log.warn("NotificationBuilder produced a replyTo email that is not a valid email address [{}], using the default configured value of [{}]", emailRes.replyToEmail, fromEmail)
+                }
+
+                log.debug("sending notification [{}] to [{}]", emailRes.html, userIds)
                 List<String> failedUserIds = []
 
-                userIds.each {
-                    String email = userAttrs.findEmailByUserId(it)
-                    if (email) {
-                        boolean failed = false;
-                        try {
-                            sendingService.sendEmail(emailRes.subject, email, emailRes.html, emailRes.plainText, notification.requestedOn, senderForBatch, fromEmail)
-                        } catch (Throwable t) {
-                            // don't print the same message over and over again
-                            if (!lastErrMsg?.equalsIgnoreCase(t.message)) {
-                                log.error("${prependToLogs}Failed to send notification with id [${notification.id}] and type [${notification.type}]. Updating notification to retry", t)
-                                lastErrMsg = t.message
+                if (!emailRes.singleEmailToAllRecipients) {
+                    userIds.each {
+                        String email = getEmail(it)
+                        if (email) {
+                            boolean failed = !dispatchState.doWithErrHandling(notification, {
+                                sendingService.sendEmail(emailRes.subject, email, emailRes.html, emailRes.plainText, notification.requestedOn, senderForBatch, fromEmail)
+                            })
+                            if (failed) {
+                                failedUserIds.add(it)
                             }
-                            failed = true;
                         }
-                        if (!failed) {
-                            count++
-                        } else {
-                            failedUserIds.add(it)
-                            errCount++
+                    }
+                } else {
+                    List<String> emails = getEmails(userIds)
+                    if (emails) {
+                        boolean failed = !dispatchState.doWithErrHandling(notification, {
+                            sendingService.sendEmail(emailRes.subject, emails, emailRes.html, emailRes.plainText, notification.requestedOn, senderForBatch, fromEmail)
+                        })
+                        if (failed) {
+                            failedUserIds = userIds
                         }
-                    } else {
-                        log.warn("unable to send notification to recipient [${it}], no email address found")
                     }
                 }
 
@@ -231,10 +236,29 @@ class EmailNotifier implements Notifier {
         }
 
         stopWatch.stop()
-        if (count > 0 || errCount > 0) {
+        if (dispatchState.count > 0 || dispatchState.errCount > 0) {
             int seconds = stopWatch.getTime(TimeUnit.SECONDS)
-            log.info("${prependToLogs}Dispatched [${count}] notification(s) with [${errCount}] error(s) in [${seconds}] seconds")
+            log.info("${prependToLogs}Dispatched [${dispatchState.count}] notification(s) with [${dispatchState.errCount}] error(s) in [${seconds}] seconds")
         }
+    }
+
+    private String getEmail(String userId) {
+        String email = userAttrs.findEmailByUserId(userId)
+        if (!email) {
+            log.warn("unable to send notification to recipient [${userId}], no email address found")
+        }
+        return email
+    }
+
+    private List<String> getEmails(List<String> userIds) {
+        List<String> emails = []
+        userIds?.each {
+            String email = getEmail(it)
+            if (email) {
+                emails.add(email)
+            }
+        }
+        return emails
     }
 
     private boolean removeIfOlderThanConfiguredRetainPeriod(Notification notification) {
@@ -262,7 +286,6 @@ class EmailNotifier implements Notifier {
         String fromEmail
         JavaMailSender mailSender
     }
-
 
 
 }
