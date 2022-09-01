@@ -19,4 +19,5 @@ class SkillsSummaryGroup extends SkillSummaryParent {
     String enabled
     Integer numSkillsRequired
     List<SkillSummaryParent> children
+    SkillDescription description
 }

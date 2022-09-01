@@ -913,6 +913,16 @@ class SkillsLoader {
                         numSkillsRequired: skillDef.numSkillsRequired,
                         totalPoints: skillDef.totalPoints,
                 )
+
+                Boolean groupDescriptionsOn = settingsService.getProjectSetting(skillDef.projectId, 'group-descriptions')?.value
+                if(groupDescriptionsOn) {
+                    def desc = skillDefWithExtraRepo.findDescriptionBySkillId(skillDef.projectId, skillDef.skillId)
+                    skillsSummary.description = new SkillDescription(
+                            skillId: skillDef.skillId,
+                            description: InputSanitizer.unsanitizeForMarkdown(desc)
+                    );
+                }
+
                 SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, skillDef, version, [SkillRelDef.RelationshipType.SkillsGroupRequirement])
                 Integer numSkillsRequired = skillsGroupAdminService.getActualNumSkillsRequred(skillDef.numSkillsRequired, skillDef.id)
                 skillsSummary.children = createSkillSummaries(thisProjDef, groupChildrenMeta.childrenWithPoints, false, userId, version)

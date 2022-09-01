@@ -108,6 +108,7 @@ class PublicConfigController {
         res["groupDisplayName"] = 'Group'
         res["skillDisplayName"] = 'Skill'
         res["levelDisplayName"] = 'Level'
+        res["groupDescriptionsOn"] = false
         if (Boolean.valueOf(uiConfigProperties.dbUpgradeInProgress)) {
             res["dbUpgradeInProgress"] = uiConfigProperties.dbUpgradeInProgress
         }
@@ -131,6 +132,10 @@ class PublicConfigController {
             String customLevelName = settingsService.getProjectSetting(projectId, 'level.displayName')?.value
             if (customLevelName) {
                 res["levelDisplayName"] = customLevelName
+            }
+            Boolean groupDescriptionsOn = settingsService.getProjectSetting(projectId, 'group-descriptions')?.value
+            if (groupDescriptionsOn) {
+                res["groupDescriptionsOn"] = groupDescriptionsOn
             }
         }
         res['enablePageVisitReporting'] = enablePageVisitReporting

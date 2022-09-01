@@ -84,6 +84,11 @@ interface SkillDefWithExtraRepo extends PagingAndSortingRepository<SkillDefWithE
         order by c.skillId asc''')
     List<SkillDescDBRes> findAllGlobalChildSkillsDescriptions(String parentSkillId, SkillRelDef.RelationshipType relationshipType, int version, String userId)
 
+    @Query(value='''SELECT description 
+        from SkillDefWithExtra
+        where projectId=?1 and skillId=?2''')
+    String findDescriptionBySkillId(String projectId, String skillId)
+
     @Query(value='''
         WITH mp AS (
             SELECT s.project_id AS project_id 
