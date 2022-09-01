@@ -18,6 +18,7 @@ var moment = require('moment-timezone');
 describe('Metrics Using User Tags Tests', () => {
 
     const userTagsTableSelector = '[data-cy="userTagsTable"]';
+    const usersTableSelector = '[data-cy=usersTable]'
 
     after(() => {
         Cypress.env('disableResetDb', false);
@@ -350,6 +351,38 @@ describe('Metrics Using User Tags Tests', () => {
                 .contains('tag20')
                 .should('not.exist');
 
+        });
+
+        it('navigate to user tag metrics', () => {
+            cy.visit('/administrator/projects/proj1/');
+            cy.wait('@getConfig');
+
+            cy.clickNav('Metrics');
+            cy.get('[data-cy="userTagTableCard"] [data-cy="metricsCard-header"]').contains('Many Values');
+            cy.get(`${userTagsTableSelector} th`).contains('Best Label');
+            cy.get(`${userTagsTableSelector} th`).contains('# Users');
+
+            cy.get(`${userTagsTableSelector} [data-cy="userTagTable_viewMetricsBtn"]`).first().click();
+
+            cy.get('[data-cy=levelsChart]')
+              .contains('Level 5: 0 users');
+            cy.get('[data-cy=levelsChart]')
+              .contains('Level 4: 0 users');
+            cy.get('[data-cy=levelsChart]')
+              .contains('Level 3: 25 users');
+            cy.get('[data-cy=levelsChart]')
+              .contains('Level 2: 0 users');
+            cy.get('[data-cy=levelsChart]')
+              .contains('Level 1: 0 users');
+
+            cy.intercept('/admin/projects/proj1/userTags/manyValues/tag0/users*').as('getUsers');
+            cy.get(`${usersTableSelector}`).contains('User Id').click();
+            cy.wait('@getUsers')
+
+
+            cy.get('[data-cy="usr_progress-user0"] [data-cy="progressPercent"]').should('have.text', '50%')
+            cy.get('[data-cy="usr_progress-user0"] [data-cy="progressCurrentPoints"]').should('have.text', '100')
+            cy.get('[data-cy="usr_progress-user0"] [data-cy="progressTotalPoints"]').should('have.text', '200')
         });
     }
 });
