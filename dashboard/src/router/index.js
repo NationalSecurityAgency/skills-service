@@ -77,6 +77,7 @@ const SkillsMetricsPage = () => import(/* webpackChunkName: 'SkillsMetricsPage' 
 const SubjectMetricsPage = () => import(/* webpackChunkName: 'SubjectMetricsPage' */'@//components/metrics/projectSubjects/SubjectMetricsPage');
 const UsersAchievementsMetricPage = () => import(/* webpackChunkName: 'UsersAchievementsMetricPage' */'@//components/metrics/projectAchievements/UsersAchievementsMetricPage');
 const ProjectMetrics = () => import(/* webpackChunkName: 'ProjectMetrics' */'@//components/metrics/ProjectMetrics');
+const UserTagMetrics = () => import(/* webpackChunkName: 'UserTagMetrics' */'@//components/metrics/userTags/UserTagMetrics');
 const MetricsPageNav = () => import(/* webpackChunkName: 'MetricsPageNav' */'@//components/metrics/MetricsPageNav');
 const MyProgressPage = () => import(/* webpackChunkName: 'myProgressPage' */'@//components/myProgress/MyProgressPage');
 const MyProgress = () => import(/* webpackChunkName: 'myProgress' */'@//components/myProgress/MyProgress');
@@ -593,6 +594,17 @@ const router = new Router({
             reportSkillId: 'VisitProjectSkillMetrics',
             announcer: {
               message: 'Project Skill Metrics',
+            },
+          },
+        }, {
+          name: 'UserTagMetrics',
+          path: 'userTag/:tagKey/:tagFilter',
+          component: UserTagMetrics,
+          meta: {
+            requiresAuth: true,
+            reportSkillId: 'VisitUserTagMetrics',
+            announcer: {
+              message: 'User Tag Metrics',
             },
           },
         }],

@@ -150,6 +150,12 @@ limitations under the License.
                 key = 'Dependency';
                 return;
               }
+              // treat userTag as a special case
+              if (value === 'userTag') {
+                this.ignoreNext = true;
+                key = res[index + 1];
+                return;
+              }
               if (value === projectAndRankingPathItem && !this.isProgressAndRankingEnabled()) {
                 return;
               }
