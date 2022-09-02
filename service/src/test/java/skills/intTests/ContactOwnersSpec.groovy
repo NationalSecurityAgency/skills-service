@@ -18,13 +18,10 @@ package skills.intTests
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.EmailUtils
-import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.storage.repos.UserRepo
 import skills.utils.WaitFor
-
-import javax.mail.internet.MimeMultipart
 
 class ContactOwnersSpec extends DefaultIntSpec {
 
@@ -86,10 +83,10 @@ class ContactOwnersSpec extends DefaultIntSpec {
         email.recipients.find { it.contains(users[1]) }
         email.recipients.find { it.contains(users[2]) }
         email.recipients.find { it.contains(users[0]) }
-        email.fromEmail.contains( users[3])
-        email.plainText.contains("You have received the following question from user user5 for display about SkillTree Project Test Project#1:")
+        email.fromEmail.find { it.contains(users[3]) }
+        email.plainText.contains("You have received the following question from user ${users[3]} for display about SkillTree Project Test Project#1:")
         email.plainText.contains("a message")
-        email.html.contains('You have received the following question from user user5 for display about SkillTree Project Test Project#1:')
+        email.html.contains("You have received the following question from user ${users[3]} for display about SkillTree Project Test Project#1:")
         email.html.contains("a message")
         email.subj == 'User Question regarding Test Project#1'
     }
