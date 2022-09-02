@@ -525,7 +525,7 @@ limitations under the License.
         return 'Disabled';
       },
       groupDescriptionsLabel() {
-        if (this.settings.groupDescriptions.value) {
+        if (this.settings.groupDescriptions.value === 'true') {
           return 'Enabled';
         }
         return 'Disabled';
