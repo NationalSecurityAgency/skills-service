@@ -188,6 +188,8 @@ describe('Metrics Tests - Achievements', () => {
         cy.intercept('/admin/projects/proj1/metrics/userAchievementsChartBuilder?**')
             .as('userAchievementsChartBuilder');
 
+        cy.intercept('/admin/projects/proj1/token/**').as('getToken');
+
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
@@ -275,6 +277,7 @@ describe('Metrics Tests - Achievements', () => {
             .find('[data-cy=achievementsNavigator-clientDisplayBtn]')
             .click();
 
+        cy.wait('@getToken');
         cy.url()
             .should('include', '/users/user0good@skills.org');
         cy.get('[data-cy=subPageHeader]')
