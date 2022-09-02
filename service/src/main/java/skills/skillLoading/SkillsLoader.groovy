@@ -914,7 +914,8 @@ class SkillsLoader {
                         totalPoints: skillDef.totalPoints,
                 )
 
-                Boolean groupDescriptionsOn = settingsService.getProjectSetting(skillDef.projectId, 'group-descriptions')?.value
+                Boolean groupDescriptionsOn = settingsService.getProjectSetting(skillDef.projectId, 'group-descriptions')?.value?.toBoolean()
+
                 if(groupDescriptionsOn) {
                     def desc = skillDefWithExtraRepo.findDescriptionBySkillId(skillDef.projectId, skillDef.skillId)
                     skillsSummary.description = new SkillDescription(
