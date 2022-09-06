@@ -244,7 +244,7 @@ class DefaultIntSpec extends Specification {
                 if (!it.contains('@')) {
                     try {
                         UserAttrs userAttrs = new UserAttrs()
-                        userAttrs.userId = it
+                        userAttrs.userId = it.toLowerCase()
                         userAttrs.userIdForDisplay = it
                         userAttrs.email = EmailUtils.generateEmaillAddressFor(it)
                         userAttrs.firstName = "${it.toUpperCase()}_first"

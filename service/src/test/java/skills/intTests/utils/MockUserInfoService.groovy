@@ -154,7 +154,7 @@ public class MockUserInfoService {
 
             String email = EmailUtils.generateEmaillAddressFor(usernamified)
 
-            def existingEmail = userAttrsRepo.findEmailByUserId(usernamified)
+            def existingEmail = userAttrsRepo.findEmailByUserId(usernamified.toLowerCase())
             if (existingEmail) {
                 email = existingEmail
             }

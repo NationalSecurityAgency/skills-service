@@ -444,7 +444,7 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
 
         def email = greenMail.getReceivedMessages()
         println email
-        println userAttrsRepo.findEmailByUserId(users[0])
+        println userAttrsRepo.findEmailByUserId(users[0].toLowerCase())
         String inviteCode = extractInviteFromEmail(email[0].content.toString())
         def res = userService.joinProject(proj.projectId, inviteCode)
 
@@ -471,7 +471,7 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         def users = getRandomUsers(2, true)
 
         when:
-        String addy = userAttrsRepo.findEmailByUserId(users[0])
+        String addy = userAttrsRepo.findEmailByUserId(users[0].toLowerCase())
         SkillsService.UseParams params = new SkillsService.UseParams(
                 username: users[0],
                 email: addy
@@ -483,7 +483,7 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
 
         def email = greenMail.getReceivedMessages()
         println email
-        println userAttrsRepo.findEmailByUserId(users[0])
+        println userAttrsRepo.findEmailByUserId(users[0].toLowerCase())
         String inviteCode = extractInviteFromEmail(email[0].content.toString())
         def res = userService.joinProject(proj.projectId, inviteCode)
 
