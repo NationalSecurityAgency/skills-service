@@ -684,6 +684,278 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         !local2.copiedFromProjectName
     }
 
+    def "load single skill summary with subject"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        when:
+        def summary = skillsService.getSingleSkillSummaryWithSubject("user1", proj1.projectId,proj1_subj.subjectId, proj1_skills.get(1).skillId)
+
+        then:
+        !summary.crossProject
+        summary.projectId == proj1.projectId
+        summary.projectName == proj1.name
+        summary.skillId == proj1_skills.get(1).skillId
+        summary.skill == proj1_skills.get(1).name
+        summary.pointIncrement == proj1_skills.get(1).pointIncrement
+        summary.maxOccurrencesWithinIncrementInterval == proj1_skills.get(1).numMaxOccurrencesIncrementInterval
+        summary.totalPoints == proj1_skills.get(1).pointIncrement * proj1_skills.get(1).numPerformToCompletion
+        summary.points == 0
+        summary.todaysPoints == 0
+        summary.description.description == "This skill [skill2] belongs to project [TestProject1]"
+    }
+
+    def "loading the first skill sets nextSkillId but not prevSkillId"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        when:
+        def summary = skillsService.getSingleSkillSummaryWithSubject("user1", proj1.projectId,proj1_subj.subjectId, proj1_skills.get(0).skillId)
+
+        then:
+        summary.prevSkillId == null
+        summary.nextSkillId == 'skill2'
+        summary.skillId == proj1_skills.get(0).skillId
+        summary.skill == proj1_skills.get(0).name
+    }
+
+    def "loading a skill in the middle appropriately sets prev and next skill Ids"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        when:
+        def summary = skillsService.getSingleSkillSummaryWithSubject("user1", proj1.projectId,proj1_subj.subjectId, proj1_skills.get(1).skillId)
+
+        then:
+        summary.prevSkillId == 'skill1'
+        summary.nextSkillId == 'skill3'
+        summary.skillId == proj1_skills.get(1).skillId
+        summary.skill == proj1_skills.get(1).name
+    }
+
+    def "loading the last skill sets prevSkillId but not nextSkillId"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        when:
+        def summary = skillsService.getSingleSkillSummaryWithSubject("user1", proj1.projectId,proj1_subj.subjectId, proj1_skills.get(2).skillId)
+
+        then:
+        summary.prevSkillId == 'skill2'
+        summary.nextSkillId == null
+        summary.skillId == proj1_skills.get(2).skillId
+        summary.skill == proj1_skills.get(2).name
+    }
+
+    def "skills with groups - loading prev/last skillIds"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(10, 1, 1)
+        def p1subj1g1 = SkillsFactory.createSkillsGroup(1, 1, 22)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills[0..2])
+        skillsService.createSkill(p1subj1g1)
+        proj1_skills[3..4].each {
+            skillsService.assignSkillToSkillsGroup(p1subj1g1.skillId, it)
+        }
+        skillsService.createSkills(proj1_skills[5..9])
+
+        when:
+        def summaries = proj1_skills.collect {
+            skillsService.getSingleSkillSummaryWithSubject("user1", proj1.projectId, proj1_subj.subjectId, it.skillId)
+        }
+
+        then:
+        summaries.skillId == [
+                proj1_skills[0].skillId,
+                proj1_skills[1].skillId,
+                proj1_skills[2].skillId,
+                proj1_skills[3].skillId,
+                proj1_skills[4].skillId,
+                proj1_skills[5].skillId,
+                proj1_skills[6].skillId,
+                proj1_skills[7].skillId,
+                proj1_skills[8].skillId,
+                proj1_skills[9].skillId,
+        ]
+        summaries.prevSkillId == [
+                null,
+                proj1_skills[0].skillId,
+                proj1_skills[1].skillId,
+                proj1_skills[2].skillId,
+                proj1_skills[3].skillId,
+                proj1_skills[4].skillId,
+                proj1_skills[5].skillId,
+                proj1_skills[6].skillId,
+                proj1_skills[7].skillId,
+                proj1_skills[8].skillId,
+        ]
+        summaries.nextSkillId == [
+                proj1_skills[1].skillId,
+                proj1_skills[2].skillId,
+                proj1_skills[3].skillId,
+                proj1_skills[4].skillId,
+                proj1_skills[5].skillId,
+                proj1_skills[6].skillId,
+                proj1_skills[7].skillId,
+                proj1_skills[8].skillId,
+                proj1_skills[9].skillId,
+                null
+        ]
+    }
+
+    def "skills with multiple groups (adjacent) - loading prev/last skillIds"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(10, 1, 1)
+        def p1subj1g1 = SkillsFactory.createSkillsGroup(1, 1, 22)
+        def p1subj1g2 = SkillsFactory.createSkillsGroup(1, 1, 25)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills[0..2])
+        skillsService.createSkill(p1subj1g1)
+        skillsService.createSkill(p1subj1g2)
+        proj1_skills[3..4].each {
+            skillsService.assignSkillToSkillsGroup(p1subj1g1.skillId, it)
+        }
+
+        proj1_skills[5..7].each {
+            skillsService.assignSkillToSkillsGroup(p1subj1g2.skillId, it)
+        }
+        skillsService.createSkills(proj1_skills[8..9])
+
+        when:
+        def summaries = proj1_skills.collect {
+            skillsService.getSingleSkillSummaryWithSubject("user1", proj1.projectId, proj1_subj.subjectId, it.skillId)
+        }
+
+        then:
+        summaries.skillId == [
+                proj1_skills[0].skillId,
+                proj1_skills[1].skillId,
+                proj1_skills[2].skillId,
+                proj1_skills[3].skillId,
+                proj1_skills[4].skillId,
+                proj1_skills[5].skillId,
+                proj1_skills[6].skillId,
+                proj1_skills[7].skillId,
+                proj1_skills[8].skillId,
+                proj1_skills[9].skillId,
+        ]
+        summaries.prevSkillId == [
+                null,
+                proj1_skills[0].skillId,
+                proj1_skills[1].skillId,
+                proj1_skills[2].skillId,
+                proj1_skills[3].skillId,
+                proj1_skills[4].skillId,
+                proj1_skills[5].skillId,
+                proj1_skills[6].skillId,
+                proj1_skills[7].skillId,
+                proj1_skills[8].skillId,
+        ]
+        summaries.nextSkillId == [
+                proj1_skills[1].skillId,
+                proj1_skills[2].skillId,
+                proj1_skills[3].skillId,
+                proj1_skills[4].skillId,
+                proj1_skills[5].skillId,
+                proj1_skills[6].skillId,
+                proj1_skills[7].skillId,
+                proj1_skills[8].skillId,
+                proj1_skills[9].skillId,
+                null
+        ]
+    }
+
+    def "skills with multiple groups (not adjacent) - loading prev/last skillIds"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(10, 1, 1)
+        def p1subj1g1 = SkillsFactory.createSkillsGroup(1, 1, 22)
+        def p1subj1g2 = SkillsFactory.createSkillsGroup(1, 1, 25)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills[0..2])
+        skillsService.createSkill(p1subj1g1)
+        skillsService.createSkill(proj1_skills[5])
+        skillsService.createSkill(p1subj1g2)
+        skillsService.createSkills(proj1_skills[8..9])
+        proj1_skills[3..4].each {
+            skillsService.assignSkillToSkillsGroup(p1subj1g1.skillId, it)
+        }
+        proj1_skills[6..7].each {
+            skillsService.assignSkillToSkillsGroup(p1subj1g2.skillId, it)
+        }
+
+        when:
+        def summaries = proj1_skills.collect {
+            skillsService.getSingleSkillSummaryWithSubject("user1", proj1.projectId, proj1_subj.subjectId, it.skillId)
+        }
+
+        then:
+        summaries.skillId == [
+                proj1_skills[0].skillId,
+                proj1_skills[1].skillId,
+                proj1_skills[2].skillId,
+                proj1_skills[3].skillId,
+                proj1_skills[4].skillId,
+                proj1_skills[5].skillId,
+                proj1_skills[6].skillId,
+                proj1_skills[7].skillId,
+                proj1_skills[8].skillId,
+                proj1_skills[9].skillId,
+        ]
+        summaries.prevSkillId == [
+                null,
+                proj1_skills[0].skillId,
+                proj1_skills[1].skillId,
+                proj1_skills[2].skillId,
+                proj1_skills[3].skillId,
+                proj1_skills[4].skillId,
+                proj1_skills[5].skillId,
+                proj1_skills[6].skillId,
+                proj1_skills[7].skillId,
+                proj1_skills[8].skillId,
+        ]
+        summaries.nextSkillId == [
+                proj1_skills[1].skillId,
+                proj1_skills[2].skillId,
+                proj1_skills[3].skillId,
+                proj1_skills[4].skillId,
+                proj1_skills[5].skillId,
+                proj1_skills[6].skillId,
+                proj1_skills[7].skillId,
+                proj1_skills[8].skillId,
+                proj1_skills[9].skillId,
+                null
+        ]
+    }
+
     private String getSkillId(Integer skillRefId) {
         skillDefRepo.findById(skillRefId).get().skillId
     }
