@@ -59,7 +59,7 @@ class InputSanitizer {
         }
 
         try {
-            URI u = new URI(uri)
+            URI u = new URI(handleSpacesInUrl(uri))
             String scheme = u.getScheme()
             String authority = u.getAuthority()
             String userInfo = u.getUserInfo()
@@ -108,6 +108,22 @@ class InputSanitizer {
         }
     }
 
+    private static String handleSpacesInUrl(String url) {
+        String res = url
+        if (url.startsWith("http")) {
+            // 8 is the index after https:// and http://
+            int foundIndex = url.indexOf("/", 8)
+            if (foundIndex > 0) {
+                String firstPart = url.substring(0, foundIndex)
+                String secondPart = url.substring(foundIndex).replaceAll(" ", "%20")
+                res = firstPart + secondPart
+            }
+        } else {
+            res = url.replaceAll(" ", "%20")
+        }
+        return res
+
+    }
 
     /**
      * JSOUP sanitization replaced all ampersands in a url string with the html encoded entity version
