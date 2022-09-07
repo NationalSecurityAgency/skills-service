@@ -904,6 +904,24 @@ class AdminController {
         return adminUsersService.loadUsersPage(projectId, skillIds, query, pageRequest)
     }
 
+    @GetMapping(value = "/projects/{projectId}/userTags/{userTagKey}/{userTagValue}/users", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    TableResultWithTotalPoints getUserTagUsers(@PathVariable("projectId") String projectId,
+                                               @PathVariable("userTagKey") String userTagKey,
+                                               @PathVariable("userTagValue") String userTagValue,
+                                               @RequestParam String query,
+                                               @RequestParam int limit,
+                                               @RequestParam int page,
+                                               @RequestParam String orderBy,
+                                               @RequestParam Boolean ascending) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(userTagKey, "Tag Key", projectId)
+        SkillsValidator.isNotBlank(userTagValue, "Tag Value", projectId)
+
+        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
+        return adminUsersService.loadUsersPage(projectId, userTagKey, userTagValue, query, pageRequest)
+    }
+
     @RequestMapping(value = "/projects/{projectId}/badge/{badgeId}/skills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     List<SkillDefRes> getBadgeSkills(@PathVariable("projectId") String projectId, @PathVariable("badgeId") String badgeId) {

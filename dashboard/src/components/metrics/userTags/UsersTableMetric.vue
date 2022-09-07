@@ -14,27 +14,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="usersTable">
-    <sub-page-header title="Users"/>
-    <b-card body-class="p-0">
+  <metrics-card :title="title" :no-padding="true" data-cy="usersTableMetric" >
       <users-table />
-    </b-card>
-  </div>
+  </metrics-card>
 </template>
 
 <script>
-  import SubPageHeader from '../utils/pages/SubPageHeader';
-  import UsersTable from './UsersTable';
+  import MetricsCard from '../utils/MetricsCard';
+  import UsersTable from '../../users/UsersTable';
 
   export default {
-    name: 'Users',
-    components: {
-      SubPageHeader,
-      UsersTable,
+    name: 'UsersTableMetric',
+    components: { MetricsCard, UsersTable },
+    props: {
+      title: {
+        type: String,
+        required: false,
+        default: 'Users',
+      },
     },
   };
 </script>
 
-<style>
-
+<style scoped>
 </style>

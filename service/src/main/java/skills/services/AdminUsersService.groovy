@@ -145,8 +145,8 @@ class AdminUsersService {
         }
     }
 
-    List<LabelCountItem> getUserCountsPerLevel(String projectId, subjectId = null) {
-        List<UsersPerLevel> levels = rankingLoader.getUserCountsPerLevel(projectId,false, subjectId)
+    List<LabelCountItem> getUserCountsPerLevel(String projectId, subjectId = null, String tagKey = null, String tagFilter = null) {
+        List<UsersPerLevel> levels = rankingLoader.getUserCountsPerLevel(projectId, false, subjectId, tagKey, tagFilter)
 
         return levels.collect{
             new LabelCountItem(value: "Level ${it.level}", count: it.numUsers)
@@ -181,6 +181,29 @@ class AdminUsersService {
     @Profile
     public long countTotalProjUsers(String projectId) {
         userPointsRepo.countDistinctUserIdByProjectId(projectId)
+    }
+
+    TableResultWithTotalPoints loadUsersPage(String projectId, String userTagKey, String userTagValue, String query, PageRequest pageRequest) {
+        TableResultWithTotalPoints result = new TableResultWithTotalPoints()
+        if (!userTagKey || !userTagValue) {
+            return result
+        }
+        result.totalPoints = projDefRepo.getTotalPointsByProjectId(projectId) ?: 0
+        Long totalProjectUsersWithUserTag = userPointsRepo.countDistinctUserIdByProjectIdAndUserTag(projectId, userTagKey, userTagValue)
+        if (totalProjectUsersWithUserTag) {
+            query = query ? query.trim() : ''
+            result.totalCount = totalProjectUsersWithUserTag
+            List<ProjectUser> projectUsers = userPointsRepo.findDistinctProjectUsersByProjectIdAndUserTagAndUserIdLike(projectId, userTagKey, userTagValue, query, pageRequest)
+            result.data = projectUsers
+            if (!projectUsers) {
+                result.count = 0
+            } else if (query) {
+                result.count = userPointsRepo.countDistinctUserIdByProjectIdAndUserTagAndUserIdLike(projectId, userTagKey, userTagValue, query)
+            } else {
+                result.count = totalProjectUsersWithUserTag
+            }
+        }
+        return result
     }
 
     TableResultWithTotalPoints loadUsersPage(String projectId, List<String> skillIds, String query, PageRequest pageRequest) {
