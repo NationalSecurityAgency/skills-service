@@ -76,7 +76,7 @@
     "eslint-plugin-vue": "7.14.0",
     "license-check-and-add": "4.0.2",
     "license-checker": "25.0.1",
-    "moment-timezone": "0.5.33",
+    "moment-timezone": "0.5.37",
     "sass": "1.49.9",
     "sass-loader": "10.2.0",
     "symlink-dir": "^5.0.1",
