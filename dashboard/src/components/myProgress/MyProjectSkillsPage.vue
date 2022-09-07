@@ -18,18 +18,25 @@ limitations under the License.
     <div v-if="isLoadingSettings" class="d-flex justify-content-center mt-1">
       <b-spinner variant="primary" type="grow" label="Spinning"></b-spinner>
     </div>
-    <div class="w-100 text-right pr-3 pt-3" v-if="emailEnabled">
-      <b-button variant="outline-primary" @click="showContactOwner" data-cy="contactOwnerBtn">
-        Contact Project Owners <i aria-hidden="true" class="fas fas fa-mail-bulk"/>
-      </b-button>
+    <div style="position: relative">
+      <div v-if="emailEnabled && !isLoadingSettings && isSkillsDisplayHomePage"
+           :class="{
+              'contact-button-inline': isContactButtonInline,
+              'w-100 text-right pr-3 pt-2 contact-button-on-top': !isContactButtonInline
+           }">
+        <b-button variant="outline-primary"
+                  @click="showContactOwner" data-cy="contactOwnerBtn">
+          Contact Project <i aria-hidden="true" class="fas fas fa-mail-bulk"/>
+        </b-button>
+      </div>
+      <skills-display v-if="!isLoadingSettings"
+                      :options="options"
+                      :version="skillsVersion"
+                      :theme="themeObj"
+                      ref="skillsDisplayRef"
+                      @route-changed="skillsDisplayRouteChanged">
+      </skills-display>
     </div>
-    <skills-display v-if="!isLoadingSettings"
-                    :options="options"
-                    :version="skillsVersion"
-                    :theme="themeObj"
-                    ref="skillsDisplayRef"
-                    @route-changed="skillsDisplayRouteChanged"/>
-
     <contact-owners-dialog v-if="showContact" :project-name="projectName" v-model="showContact" :project-id="projectId"/>
   </div>
 </template>
@@ -52,6 +59,8 @@ limitations under the License.
     data() {
       return {
         isLoadingSettings: true,
+        windowWidth: 0,
+        oneRem: 0,
         projectId: this.$route.params.projectId,
         projectDisplayName: 'PROJECT',
         projectName: 'Project',
@@ -116,6 +125,11 @@ limitations under the License.
         },
       };
     },
+    created() {
+      this.compute1Rem();
+      window.addEventListener('resize', this.handleResize);
+      this.handleResize();
+    },
     mounted() {
       this.isLoadingSettings = true;
       SettingsService.getClientDisplayConfig(this.projectId).then((response) => {
@@ -137,9 +151,6 @@ limitations under the License.
           // email enabled should be loaded with initial config and not fetched every time, it's not a setting that's
           // likely to change regularly
           this.emailEnabled = emailEnabled;
-          if (emailEnabled) {
-            this.$set(this.theme.pageTitle, 'padding', '0 1rem 0 1rem');
-          }
         })
         .finally(() => {
           this.isLoadingSettings = false;
@@ -147,6 +158,14 @@ limitations under the License.
       this.handleProjInvitation();
     },
     computed: {
+      isContactButtonInline() {
+        const currentLen = (this.projectName.length + this.projectDisplayName.length + 5) * 1.2;
+        const titleWidthPx = currentLen * this.oneRem;
+        return this.windowWidth > titleWidthPx;
+      },
+      isSkillsDisplayHomePage() {
+        return this.skillsClientDisplayPath && (this.skillsClientDisplayPath.path === '/' || this.skillsClientDisplayPath.path === undefined);
+      },
       themeObj() {
         if (this.$route.query.classicSkillsDisplay && this.$route.query.classicSkillsDisplay.toLowerCase() === 'true') {
           const res = { ...this.theme };
@@ -178,10 +197,24 @@ limitations under the License.
       showContactOwner() {
         this.showContact = true;
       },
+      handleResize() {
+        this.windowWidth = window.innerWidth;
+      },
+      compute1Rem() {
+        this.oneRem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      },
     },
   };
 </script>
 
 <style scoped>
+.contact-button-inline {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+}
 
+.contact-button-on-top {
+  background-color: #fff !important;
+}
 </style>
