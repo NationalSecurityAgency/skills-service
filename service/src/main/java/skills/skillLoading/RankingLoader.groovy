@@ -289,12 +289,17 @@ class RankingLoader {
 
     @CompileStatic
     @Profile
-    List<UsersPerLevel> getUserCountsPerLevel(String projectId, boolean includeZeroLevel = false, String subjectId = null) {
+    List<UsersPerLevel> getUserCountsPerLevel(String projectId, boolean includeZeroLevel = false, String subjectId = null, String tagKey = null, String tagFilter = null) {
         List<skills.controller.result.model.LevelDefinitionRes> levels = levelDefinitionStorageService.getLevels(projectId, subjectId)
         List<UsersPerLevel> usersPerLevel = !levels ? [] : levels.sort({
             it.level
         }).collect { skills.controller.result.model.LevelDefinitionRes levelMeta ->
-            Integer numUsers = achievedLevelRepository.countByProjectIdAndSkillIdAndLevel(projectId, subjectId, levelMeta.level)
+            Integer numUsers
+            if (tagKey && tagFilter) {
+                numUsers = achievedLevelRepository.countByProjectIdAndSkillIdAndLevelAndUserTag(projectId, levelMeta.level, tagKey, tagFilter)
+            } else {
+                numUsers = achievedLevelRepository.countByProjectIdAndSkillIdAndLevel(projectId, subjectId, levelMeta.level)
+            }
             new UsersPerLevel(level: levelMeta.level, numUsers: numUsers ?: 0)
         }
 
@@ -310,7 +315,12 @@ class RankingLoader {
         }
 
         if (includeZeroLevel) {
-            Integer numUsers = achievedLevelRepository.countByProjectIdAndSkillIdAndLevel(projectId, subjectId, 0)
+            Integer numUsers
+            if (tagKey && tagFilter) {
+                numUsers = achievedLevelRepository.countByProjectIdAndSkillIdAndLevelAndUserTag(projectId, 0, tagKey, tagFilter)
+            } else {
+                numUsers = achievedLevelRepository.countByProjectIdAndSkillIdAndLevel(projectId, subjectId, 0)
+            }
             usersPerLevel.add(0, new UsersPerLevel(level: 0, numUsers: numUsers ?: 0))
         }
 

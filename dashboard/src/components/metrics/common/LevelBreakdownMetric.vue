@@ -139,7 +139,10 @@ limitations under the License.
       // figure out if subjectId is passed based on the context (page it's being loaded from)
       if (this.$route.params.subjectId) {
         props = { subjectId: this.$route.params.subjectId };
+      } else if (this.$route.params.tagKey && this.$route.params.tagFilter) {
+        props = { tagKey: this.$route.params.tagKey, tagFilter: this.$route.params.tagFilter };
       }
+
       MetricsService.loadChart(this.$route.params.projectId, 'numUsersPerLevelChartBuilder', props)
         .then((response) => {
           // sort by level

@@ -409,6 +409,47 @@ class SkillsLoader {
         Integer points
     }
 
+    private DisplayOrderRes getSkillFromSkillGroup(DisplayOrderRes currentSkill, List<DisplayOrderRes> skills, Boolean prev) {
+        List<DisplayOrderRes> group = skills.findAll({it -> it.groupId == currentSkill.skillId});
+        if(group) {
+            return prev ? group.last() : group.first()
+        }
+        return null
+    }
+
+    private DisplayOrderRes getSkill(Integer displayOrder, List<DisplayOrderRes> skills, List<DisplayOrderRes> filteredSkills, Boolean prev) {
+        DisplayOrderRes newSkill = filteredSkills.find({ it -> it.getDisplayOrder() == displayOrder });
+        if(newSkill?.type == SkillDef.ContainerType.SkillsGroup.toString()) {
+            newSkill = getSkillFromSkillGroup(newSkill, skills, prev)
+        }
+        return newSkill
+    }
+
+    private String getAdjacentSkillId(Boolean withinSkillGroup, DisplayOrderRes currentSkill, List<DisplayOrderRes> skills, Boolean prev) {
+        def skill
+        def displayOrder = prev ? currentSkill.displayOrder - 1 : currentSkill.displayOrder + 1;
+
+        if(withinSkillGroup) {
+            List <DisplayOrderRes> currentGroup = skills.findAll({it.groupId == currentSkill.groupId});
+            skill = currentGroup.find({ it -> it.displayOrder == displayOrder })
+
+            if(!skill) {
+                displayOrder = prev ? currentSkill.skillGroupDisplayOrder - 1 : currentSkill.skillGroupDisplayOrder + 1;
+
+                def filteredSkills = skills.findAll({it -> it.groupId == null})
+                if(!skill) {
+                    skill = getSkill(displayOrder, skills, filteredSkills, prev)
+                }
+            }
+        }
+        else {
+            def filteredSkills = skills.findAll({it -> it.groupId == null})
+            skill = getSkill(displayOrder, skills, filteredSkills, prev)
+        }
+
+        return skill?.skillId
+    }
+
     @Transactional(readOnly = true)
     SkillSummary loadSkillSummary(String projectId, String userId, String crossProjectId, String skillId, String subjectId) {
         ProjDef projDef = getProjDef(userId, crossProjectId ?: projectId)
@@ -418,14 +459,14 @@ class SkillsLoader {
         String prevSkillId;
 
         if(subjectId) {
-            SkillDef previousSkill = skillDefRepo.findSkillDefByDisplayOrder(projectId, subjectId, skillDef.displayOrder - 1);
-            SkillDef nextSkill = skillDefRepo.findSkillDefByDisplayOrder(projectId, subjectId, skillDef.displayOrder + 1);
+            List<DisplayOrderRes> skills = skillDefRepo.findDisplayOrderByProjectIdAndSubjectId(projectId, subjectId);
+            def currentSkill = skills.find({ it -> it.getSkillId() == skillId })
 
-            if(previousSkill) {
-                prevSkillId = previousSkill.skillId;
-            }
-            if(nextSkill) {
-                nextSkillId = nextSkill.skillId;
+            if (currentSkill) {
+                def withinSkillGroup = currentSkill.groupId != null ? true : false;
+
+                prevSkillId = getAdjacentSkillId(withinSkillGroup, currentSkill, skills, true)
+                nextSkillId = getAdjacentSkillId(withinSkillGroup, currentSkill, skills, false)
             }
         }
 

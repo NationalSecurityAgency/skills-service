@@ -224,6 +224,13 @@ To achieve these points navigate to ``Project -> Levels``''',
                         numPerformToCompletion: 5,
                         description: "Provide skills metrics at the project level. Highlights overlooked skills and skills with high utilization. To earn points please navigate to ``Project -> Metrics -> Skills``",
                 ),
+                new SkillRequest(name: "Visit Project's User Tag Metrics", skillId: "VisitUserTagMetrics", subjectId: subjectProjectId, projectId: inceptionProjectId,
+                        pointIncrement: 5,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 2, // up-to 2 per day
+                        numPerformToCompletion: 5,
+                        description: "View user metrics for a specific user tag value. To earn points please navigate to ``Project -> Metrics -> then click on a user tag value``",
+                ),
 
                 new SkillRequest(name: "Visit Project Settings", skillId: "VisitProjectSettings", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 15,

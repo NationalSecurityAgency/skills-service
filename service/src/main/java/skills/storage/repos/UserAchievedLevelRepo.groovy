@@ -56,6 +56,17 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
 
     Integer countByProjectIdAndSkillIdAndLevel(String projectId, @Nullable String skillId, int level)
 
+    @Query(value='''
+    SELECT COUNT(distinct ua.userId)
+    FROM UserAchievement ua
+    INNER JOIN UserTag AS ut ON ua.userId = ut.userId
+    WHERE ua.projectId =?1 AND
+          ua.level = ?2 AND
+          ut.key = ?3 AND
+          ut.value = ?4
+    ''')
+    Integer countByProjectIdAndSkillIdAndLevelAndUserTag(String projectId, int level, String userTagKey, String userTagValue)
+
     void deleteByProjectIdAndSkillId(String projectId, String skillId)
     void deleteByProjectIdAndSkillIdAndUserIdAndLevel(String projectId, @Nullable String skillId, String userId, @Nullable Integer level)
 
