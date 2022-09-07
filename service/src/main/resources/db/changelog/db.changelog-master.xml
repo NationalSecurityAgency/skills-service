@@ -1762,5 +1762,12 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="31" author="skills team">
+        <addColumn tableName="project_definition">
+            <!-- optional -->
+            <column name="description" type="text"/>
+        </addColumn>
+    </changeSet>
+
 
 </databaseChangeLog>

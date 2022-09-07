@@ -278,7 +278,7 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                     CAST(COALESCE(expiration.expiringUnused, 'false') AS BOOLEAN) as expiring,
                     expiration.expirationTriggeredDate as expirationTriggered,
                     events.latest AS lastReportedSkill,
-                    pd.created 
+                    pd.created
                 FROM project_definition pd 
                 JOIN settings s on s.project_id = pd.project_id 
                 LEFT JOIN (SELECT project_id, MAX(event_time) AS latest FROM user_events GROUP BY project_id) events ON events.project_id = pd.project_id 
@@ -422,5 +422,9 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
     @Nullable
     @Query('''SELECT pd.totalPoints FROM ProjDef pd WHERE pd.projectId = ?1''')
     Integer getTotalPointsByProjectId(String projectId)
+
+    @Nullable
+    @Query('''select pd.description from ProjDef pd where pd.projectId = :projectId''')
+    String getProjectDescription(@Param("projectId") String projectId)
 
 }

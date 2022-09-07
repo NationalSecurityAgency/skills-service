@@ -19,7 +19,7 @@ limitations under the License.
 
     <div v-if="!loading.userSkills">
       <skills-title :back-button="false" :animate-power-by-label="true">{{ pageTitle }}</skills-title>
-
+      <project-description v-if="!isSummaryOnly && description" :description="description"></project-description>
       <user-skills-header :display-data="displayData" class="mb-3"/>
       <subjects-container v-if="!isSummaryOnly" :subjects="displayData.userSkills.subjects" />
     </div>
@@ -32,6 +32,7 @@ limitations under the License.
   import SubjectsContainer from '@/userSkills/subject/SubjectsContainer';
   import SkillsSpinner from '@/common/utilities/SkillsSpinner';
   import SkillDisplayDataLoadingMixin from '@/userSkills/SkillDisplayDataLoadingMixin';
+  import ProjectDescription from '@/userSkills/ProjectDescription';
 
   import '@/common/filter/NumberFilter';
   import '@/common/filter/PluralFilter';
@@ -46,6 +47,7 @@ limitations under the License.
       SkillsTitle,
       SubjectsContainer,
       SkillsSpinner,
+      ProjectDescription,
     },
     data() {
       return {
@@ -77,6 +79,9 @@ limitations under the License.
           return this.$store.state.themeModule.landingPageTitle;
         }
         return 'User Skills';
+      },
+      description() {
+        return this.displayData?.userSkills?.projectDescription;
       },
     },
     mounted() {

@@ -283,7 +283,8 @@ class SkillsLoader {
                 levelPoints: levelPoints,
                 levelTotalPoints: levelTotalPoints,
                 subjects: subjects,
-                badges: new OverallSkillSummary.BadgeStats(numTotalBadges: numTotalBadges, numBadgesCompleted: numBadgesAchieved, enabled: numTotalBadges > 0)
+                badges: new OverallSkillSummary.BadgeStats(numTotalBadges: numTotalBadges, numBadgesCompleted: numBadgesAchieved, enabled: numTotalBadges > 0),
+                projectDescription: InputSanitizer.unsanitizeForMarkdown(projDef.description)
         )
 
         return res

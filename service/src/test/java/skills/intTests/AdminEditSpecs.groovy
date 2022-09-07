@@ -19,6 +19,7 @@ import org.joda.time.DateTime
 import org.springframework.http.*
 import skills.controller.result.model.TableResult
 import skills.intTests.utils.*
+import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -704,6 +705,17 @@ class AdminEditSpecs extends DefaultIntSpec {
         projectSummaryAfterEdit.subjects[0].points == 110
         projectSummaryAfterEdit.subjects[0].totalPoints == 190
         projectSummaryAfterEdit.subjects[0].todaysPoints == 110
+    }
+
+    def "Prevent injection in Project description"(){
+        when:
+        def proj1 = SkillsFactory.createProject(1)
+        proj1.description = "this is a description <a href='http://somewhere' onclick='doNefariousStuff()'>I'm a link</a>"
+        skillsService.createProject(proj1)
+
+        def projDescription = skillsService.getProjectDescription(proj1.projectId)
+        then:
+        projDescription.description == 'this is a description <a href="http://somewhere" rel="nofollow">I\'m a link</a>'
     }
 
     def "decreasing skill point increment post achievement causes user points to be updated"() {

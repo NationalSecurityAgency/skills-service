@@ -13,41 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.skillLoading.model
+package skills.controller.result.model
 
-import groovy.transform.Canonical
-
-@Canonical
-class OverallSkillSummary {
-
-    String projectName
-
-    int skillsLevel
-    int totalLevels
-
-    int points
-    int totalPoints
-
-    int levelPoints
-    int levelTotalPoints
-
-    int todaysPoints
-
-    // for My Skills page
+class ProjectDescription {
     String projectId
-    int totalUsers
-    int rank
-
-    List<SkillSubjectSummary> subjects
-
-    BadgeStats badges
-
-    static class BadgeStats {
-        int numTotalBadges = 0
-        int numBadgesCompleted = 0
-        boolean enabled = false
-    }
-
-    String projectDescription
+    String description
 }
-
