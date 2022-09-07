@@ -1133,6 +1133,10 @@ class SkillsService {
         return wsHelper.apiPost("/validation/name", [value: description])
     }
 
+    def checkCustomUrlValidation(String url){
+        return wsHelper.apiPost("/validation/url", [value: url])
+    }
+
     def addProjectAdmin(String projectId, String userId) {
         userId = getUserId(userId)
         return wsHelper.adminPut(getAddProjectAdminUrl(projectId, userId))

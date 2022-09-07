@@ -56,6 +56,7 @@ describe('Performed Skills Table Tests', () => {
 
     });
 
+
     it('sort by date', () => {
         cy.createSkills(1);
         cy.report(12);
@@ -333,6 +334,8 @@ describe('Performed Skills Table Tests', () => {
         cy.report(12, false);
         cy.visit('/administrator/projects/proj1/subjects/subj1/users/user1@skills.org/skillEvents');
 
+        cy.get('[data-cy="skillsBTableTotalRows"]')
+            .should('have.text', '12');
         cy.get(`${tableSelector}`)
             .contains('Skill Id')
             .click();
@@ -447,6 +450,8 @@ describe('Performed Skills Table Tests', () => {
         cy.report(12, false);
         cy.visit('/administrator/projects/proj1/subjects/subj1/users/user1@skills.org/skillEvents');
 
+        cy.get('[data-cy="skillsBTableTotalRows"]')
+            .should('have.text', '12')
         cy.get('[data-cy="performedSkills-skillIdFilter"]')
             .type('sKiLl1');
         cy.get('[data-cy="performedSkills-filterBtn"]')
@@ -504,6 +509,8 @@ describe('Performed Skills Table Tests', () => {
         cy.report(12, false);
         cy.visit('/administrator/projects/proj1/subjects/subj1/users/user1@skills.org/skillEvents');
 
+        cy.get('[data-cy="skillsBTableTotalRows"]')
+            .should('have.text', '12')
         cy.get('[data-cy="performedSkills-skillIdFilter"]')
             .type('# 12');
         cy.get('[data-cy="performedSkills-filterBtn"]')
@@ -517,11 +524,13 @@ describe('Performed Skills Table Tests', () => {
         ], 5);
     });
 
-    it('filter by using searrch icon', () => {
+    it('filter by using search icon', () => {
         cy.createSkills(12);
         cy.report(12, false);
         cy.visit('/administrator/projects/proj1/subjects/subj1/users/user1@skills.org/skillEvents');
 
+        cy.get('[data-cy="skillsBTableTotalRows"]')
+            .should('have.text', '12')
         cy.get(`${tableSelector} tr:nth-child(2) [data-cy="addSkillFilter"]`)
             .click();
         cy.get('[data-cy="performedSkills-skillIdFilter"]')

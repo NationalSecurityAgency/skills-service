@@ -961,6 +961,17 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="rootHelpUrlSetting"]').contains('https://someCoolWebsite.com')
     })
 
+    it('subject modal allows Help Url to have spaces', () => {
+        cy.visit('/administrator/projects/proj1/');
+        cy.get('[data-cy="btn_Subjects"]').click();
+        cy.get('[data-cy="subjectNameInput"]').type('subj1')
+        cy.get('[data-cy="skillHelpUrl"]').type('https://someCoolWebsite.com/some url with spaces')
+        cy.get('[data-cy="skillHelpUrlError"]').should('not.be.visible');
+        cy.get('[data-cy="saveSubjectButton"]').click()
+        cy.get('[data-cy="subjectCard-subj1Subject"] [data-cy="editBtn"]').click()
+        cy.get('[data-cy="skillHelpUrl"]').should('have.value', 'https://someCoolWebsite.com/some%20url%20with%20spaces')
+    })
+
     it('root help url is properly set for multiple projects', () => {
         cy.request('POST', '/admin/projects/proj1/settings/help.url.root', {
             projectId: 'proj1',
