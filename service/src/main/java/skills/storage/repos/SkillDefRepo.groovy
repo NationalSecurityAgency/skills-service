@@ -202,7 +202,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
                   and (child.type = 'Skill' or child.type = 'SkillsGroup')
                   and subj.id = rel.parent_ref_id
                   and child.id = rel.child_ref_id''', nativeQuery=true)
-    List<DisplayOrderRes> findSkillDefByDisplayOrder(String projectId, String subjectId)
+    List<DisplayOrderRes> findDisplayOrderByProjectIdAndSubjectId(String projectId, String subjectId)
 
     int countByProjectIdAndType(@Nullable String projectId, SkillDef.ContainerType type)
 

@@ -419,7 +419,7 @@ class SkillsLoader {
 
     private DisplayOrderRes getSkill(Integer displayOrder, List<DisplayOrderRes> skills, List<DisplayOrderRes> filteredSkills, Boolean prev) {
         DisplayOrderRes newSkill = filteredSkills.find({ it -> it.getDisplayOrder() == displayOrder });
-        if(newSkill?.type == 'SkillsGroup') {
+        if(newSkill?.type == SkillDef.ContainerType.SkillsGroup.toString()) {
             newSkill = getSkillFromSkillGroup(newSkill, skills, prev)
         }
         return newSkill
@@ -459,7 +459,7 @@ class SkillsLoader {
         String prevSkillId;
 
         if(subjectId) {
-            List<DisplayOrderRes> skills = skillDefRepo.findSkillDefByDisplayOrder(projectId, subjectId);
+            List<DisplayOrderRes> skills = skillDefRepo.findDisplayOrderByProjectIdAndSubjectId(projectId, subjectId);
             def currentSkill = skills.find({ it -> it.getSkillId() == skillId })
 
             if (currentSkill) {
