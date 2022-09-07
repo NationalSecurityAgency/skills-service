@@ -19,7 +19,7 @@ import org.apache.http.NameValuePair
 import org.apache.http.client.utils.URLEncodedUtils
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import org.jsoup.safety.Whitelist
+import org.jsoup.safety.Safelist
 import org.owasp.encoder.Encode
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
@@ -43,7 +43,7 @@ class InputSanitizer {
             return input;
         }
 
-        return Jsoup.clean(input, "", Whitelist.basic(), print)
+        return Jsoup.clean(input, "", Safelist.basic(), print)
     }
 
     static String sanitizeUrl(String uri) {
