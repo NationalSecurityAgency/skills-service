@@ -15,12 +15,12 @@ limitations under the License.
 */
 <template>
   <div>
-    <div class="row">
+    <div class="row mb-3">
       <div class="col-12">
-        <level-breakdown-metric />
+        <level-breakdown-metric :title="`Overall Levels for ${metricTitle}`" />
       </div>
     </div>
-    <users-table-metric />
+    <users-table-metric :title="`Users for ${metricTitle}`" />
   </div>
 </template>
 
@@ -41,6 +41,18 @@ limitations under the License.
     },
     mounted() {
       this.buildTagCharts();
+    },
+    computed: {
+      metricLabel() {
+        const chartInfo = this.tagCharts?.find((i) => i.key === this.$route.params.tagKey);
+        return chartInfo ? `${chartInfo.title}:` : '';
+      },
+      metricValue() {
+        return this.$route.params.tagFilter;
+      },
+      metricTitle() {
+        return `${this.metricLabel} ${this.metricValue}`;
+      },
     },
     methods: {
       buildTagCharts() {
