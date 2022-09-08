@@ -694,6 +694,9 @@ class SkillsAdminService {
         }
         if (skillDef.groupId) {
             SkillDefWithExtra skillsGroup = skillsGroupAdminService.getSkillsGroup(skillDef.projectId, skillDef.groupId)
+            if (!skillsGroup) {
+                throw new SkillException("Failed to find skill's group with groupId=[${skillDef.groupId}]", skillDef.projectId, skillDef.skillId)
+            }
             res.enabled = Boolean.valueOf(skillDef.enabled)
             res.groupName = skillsGroup.name
             res.groupId = skillsGroup.skillId
