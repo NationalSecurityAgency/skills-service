@@ -1065,8 +1065,10 @@ describe('Navigation Tests', () => {
             .contains('WORK ROLE: This is project 1');
     });
 
-    it('Contact project owner', () => {
+    it.only('Contact project owner', () => {
         cy.intercept('POST', '/api/projects/*/contact').as('contact');
+        cy.intercept('POST', '/api/validation/description').as('validate');
+
         const invalidMsg = new Array(3000).fill('a').join('');
         cy.loginAsProxyUser();
         cy.visit('/progress-and-rankings/');
@@ -1080,13 +1082,19 @@ describe('Navigation Tests', () => {
         cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist');
 
         cy.get('[data-cy="contactOwnerBtn"]').should('be.visible').click();
-        cy.contains('Contact This is project 1 Owners').should('be.visible');
+        cy.contains('Contact This is project 1').should('be.visible');
         cy.get('[data-cy="contactOwnersSubmitBtn"]').should('contain.text', 'Submit');
         cy.get('[data-cy="contactOwnersSubmitBtn"]').should('be.disabled');
         cy.get('[data-cy="charactersRemaining"]').should('contain.text', '2500 characters remaining');
         cy.get('[data-cy="contactOwnersMsgInput"]').click().fill(invalidMsg);
         cy.get('[data-cy="contactOwnersSubmitBtn"]').should('be.disabled');
         cy.get('[data-cy="charactersRemaining"]').should('contain.text', '-500 characters remaining');
+
+        cy.get('[data-cy="contactOwnersMsgInput"]').click().fill('message message jabberwocky jabberwocky message message');
+        cy.wait('@validate');
+        cy.get('[data-cy="contactOwnersSubmitBtn"]').should('be.disabled');
+        cy.get('[data-cy="contactOwnersInput_errMsg"]').should('be.visible');
+        cy.get('[data-cy="contactOwnersInput_errMsg"]').should('contain.text', 'paragraphs may not contain jabberwocky');
         cy.get('[data-cy="contactOwnersMsgInput"]').click().fill('aaa bbb this is a message');
         cy.get('[data-cy="charactersRemaining"]').should('contain.text', '2475 characters remaining');
         cy.get('[data-cy="contactOwnersSubmitBtn"]').should('be.enabled');
@@ -1100,5 +1108,6 @@ describe('Navigation Tests', () => {
         cy.wait(500); //wait for animations to complete
         cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist');
     });
+
 });
 

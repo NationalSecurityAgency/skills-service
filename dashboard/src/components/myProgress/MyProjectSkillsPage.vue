@@ -19,7 +19,7 @@ limitations under the License.
       <b-spinner variant="primary" type="grow" label="Spinning"></b-spinner>
     </div>
     <div style="position: relative">
-      <div v-if="emailEnabled && !isLoadingSettings && isSkillsDisplayHomePage"
+      <div v-if="isEmailEnabled && !isLoadingSettings && isSkillsDisplayHomePage"
            :class="{
               'contact-button-inline': isContactButtonInline,
               'w-100 text-right pr-3 pt-2 contact-button-on-top': !isContactButtonInline
@@ -66,7 +66,6 @@ limitations under the License.
         projectDisplayName: 'PROJECT',
         projectName: 'Project',
         skillsVersion: 2147483647, // max int
-        emailEnabled: false,
         showContact: false,
         theme: {
           disableSkillTreeBrand: true,
