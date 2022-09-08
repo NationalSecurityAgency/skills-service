@@ -395,6 +395,30 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             nativeQuery = true)
     Long countDistinctUserIdByProjectIdAndUserIdLike(String projectId, String userId)
 
+    @Query(value = '''SELECT COUNT(DISTINCT up.user_id)
+        FROM user_points up, user_tags ut
+        WHERE up.user_id = ut.user_id
+          AND up.project_id = ?1
+          AND up.skill_id IS NULL
+          AND ut.key = ?2
+          AND ut.value = ?3''', nativeQuery = true)
+    Long countDistinctUserIdByProjectIdAndUserTag(String projectId, String userTagKey, String userTagValue)
+
+    @Query(value = '''SELECT COUNT(*)
+        FROM (SELECT DISTINCT usattr.user_id 
+                FROM user_points usr, user_attrs usattr, user_tags ut
+                where usr.user_id = usattr.user_id and 
+                      usr.user_id = ut.user_id and 
+                      ut.key = ?2 and
+                      ut.value = ?3 and
+                      usr.project_id = ?1 and 
+                      usr.skill_id is null and 
+                      (lower(CONCAT(usattr.first_name, ' ', usattr.last_name, ' (', usattr.user_id_for_display, ')')) like lower(CONCAT('%', ?4, '%')) OR
+                       lower(usattr.user_id_for_display) like lower(CONCAT('%', ?4, '%')))) 
+                AS temp''',
+            nativeQuery = true)
+    Long countDistinctUserIdByProjectIdAndUserTagAndUserIdLike(String projectId, String userTagKey, String userTagValue, String userId)
+
     @Query(value = '''SELECT 
                 up.user_id as userId, 
                 max(upa.performedOn) as lastUpdated, 
@@ -515,6 +539,38 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 ) 
             GROUP BY up.user_id''', nativeQuery = true)
     List<ProjectUser> findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLike(String projectId, List<String> skillIds, String userId, Pageable pageable)
+
+    @Query(value = '''SELECT 
+                up.user_id as userId, 
+                max(upa.performedOn) as lastUpdated, 
+                sum(up.points) as totalPoints,
+                max(ua.first_name) as firstName,
+                max(ua.last_name) as lastName,
+                max(ua.dn) as dn,
+                max(ua.email) as email,
+                max(ua.user_id_for_display) as userIdForDisplay 
+            FROM user_points up
+            LEFT JOIN (
+                SELECT upa.user_id, 
+                max(upa.performed_on) AS performedOn 
+                FROM user_performed_skill upa 
+                WHERE upa.skill_ref_id in (
+                    select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id from skill_definition where type = 'Skill' and project_id = ?1 and enabled = 'true'
+                )
+                GROUP BY upa.user_id
+            ) upa ON upa.user_id = up.user_id
+            JOIN user_attrs ua ON ua.user_id=up.user_id
+            JOIN user_tags ut ON ut.user_id=up.user_id
+            WHERE 
+                up.project_id=?1 and 
+                ut.key = ?2 and
+                ut.value = ?3 and
+                (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT(\'%\', ?4, \'%\'))  OR
+                 lower(ua.user_id_for_display) like lower(CONCAT('%', ?4, '%'))
+                ) and 
+                up.skill_id is null 
+            GROUP BY up.user_id''', nativeQuery = true)
+    List<ProjectUser> findDistinctProjectUsersByProjectIdAndUserTagAndUserIdLike(String projectId, String userTagKey, String userTagValue, String userId, Pageable pageable)
 
     @Nullable
     @Query(value= '''

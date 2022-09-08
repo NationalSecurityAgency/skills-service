@@ -35,11 +35,15 @@ class NumberUsersPerLevelMetricsBuilder implements ProjectMetricsBuilder {
 
     @Override
     def build(String projectId, String chartId, Map<String, String> props) {
-        String subjectId
+        String subjectId, tagKey, tagFilter
         if (props.containsKey(MetricsParams.P_SUBJECT_ID)) {
             subjectId = MetricsParams.getSubjectId(projectId, chartId, props);
         }
-        List<LabelCountItem> dataItems = adminUsersService.getUserCountsPerLevel(projectId, subjectId)
+        if (props.containsKey(MetricsParams.P_TAG_KEY) && props.containsKey(MetricsParams.P_TAG_FILTER)) {
+            tagKey = MetricsParams.getTagKey(projectId, chartId, props)
+            tagFilter = MetricsParams.getTagFilter(projectId, chartId, props)
+        }
+        List<LabelCountItem> dataItems = adminUsersService.getUserCountsPerLevel(projectId, subjectId, tagKey, tagFilter)
         return dataItems
     }
 }

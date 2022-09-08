@@ -509,6 +509,17 @@ describe('Badges Tests', () => {
         cy.contains('Badge Exist1');
     });
 
+    it('badge modal allows Help Url to have spaces', () => {
+        cy.visit('/administrator/projects/proj1/badges');
+        cy.get('[data-cy="btn_Badges"]').click();
+        cy.get('[data-cy="badgeName"]').type('badge1')
+        cy.get('[data-cy="skillHelpUrl"]').type('https://someCoolWebsite.com/some url with spaces')
+        cy.get('[data-cy="skillHelpUrlError"]').should('not.be.visible');
+        cy.get('[data-cy="saveBadgeButton"]').click()
+        cy.get('[data-cy="badgeCard-badge1Badge"] [data-cy="editBtn"]').click()
+        cy.get('[data-cy="skillHelpUrl"]').should('have.value', 'https://someCoolWebsite.com/some%20url%20with%20spaces')
+    })
+
     it('gem start and end time validation', () => {
         cy.visit('/administrator/projects/proj1/badges');
         cy.clickButton('Badge');

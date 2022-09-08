@@ -1055,6 +1055,20 @@ describe('Skills Tests', () => {
 
   });
 
+  it('skill modal allows Help Url to have spaces', () => {
+    cy.visit('/administrator/projects/proj1/subjects/subj1');
+    cy.get('[data-cy="newSkillButton"]').click();
+    cy.get('[data-cy="skillName"]').type('skill1')
+    cy.get('[data-cy="skillHelpUrl"]').type('https://someCoolWebsite.com/some url with spaces')
+    cy.get('[data-cy="skillHelpUrlError"]').should('not.be.visible');
+    cy.get('[data-cy="saveSkillButton"]').click()
+    cy.get('[data-cy="editSkillButton_skill1Skill"]').click()
+    cy.get('[data-cy="skillHelpUrl"]').should('have.value', 'https://someCoolWebsite.com/some%20url%20with%20spaces')
+    cy.get('[data-cy="closeSkillButton"]').click()
+    cy.get('[data-cy="expandDetailsBtn_skill1Skill"]').click()
+    cy.get('[data-cy="childRowDisplay_skill1Skill"] [data-cy="skillOverviewHelpUrl"]').contains('https://someCoolWebsite.com/some%20url%20with%20spaces')
+  })
+
 
   it('append "Root Help URL" to the "Help Url" if configured', () => {
     cy.request('POST', '/admin/projects/proj1/settings/help.url.root', {

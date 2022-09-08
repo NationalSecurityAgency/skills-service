@@ -767,6 +767,15 @@ class SkillsService {
         wsHelper.apiGet(url)
     }
 
+    def getSingleSkillSummaryWithSubject(String userId, String projectId, String subjectId, String skillId, int version = -1) {
+        userId = getUserId(userId)
+        String url = "/projects/${projectId}/subjects/${subjectId}/skills/${skillId}/summary?userId=${userId}"
+        if (version >= 0) {
+            url += "&version=${version}"
+        }
+        wsHelper.apiGet(url)
+    }
+
     def getSubjectSummaryForCurrentUser(String projId, String subjectId, int version = -1) {
         String url = "/projects/${projId}/subjects/${subjectId}/summary"
         if (version >= 0) {
@@ -1122,6 +1131,10 @@ class SkillsService {
 
     def checkCustomNameValidation(String description){
         return wsHelper.apiPost("/validation/name", [value: description])
+    }
+
+    def checkCustomUrlValidation(String url){
+        return wsHelper.apiPost("/validation/url", [value: url])
     }
 
     def addProjectAdmin(String projectId, String userId) {
