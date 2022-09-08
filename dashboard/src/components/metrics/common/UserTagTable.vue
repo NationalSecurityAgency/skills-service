@@ -38,15 +38,17 @@ limitations under the License.
                       @sort-changed="sortTable"
                       data-cy="userTagsTable">
         <template v-slot:cell(value)="data">
+          <span :data-cy="`cell_tagValue-${data.item.value}`">
           <span v-if="data.item.htmlValue" v-html="data.item.htmlValue"></span><span v-else>{{ data.item.value }}</span>
           <b-button-group class="float-right">
             <b-button :to="{ name: 'UserTagMetrics', params: { projectId: projectId, tagKey: tagKey, tagFilter: data.item.value } }"
                       variant="outline-info" size="sm" class="text-secondary"
-                      v-b-tooltip.hover="'View User Tag Metrics'"
-                      :aria-label="`View metrics for user tag ${data.item.value}`"
+                      v-b-tooltip.hover="'View Metrics'"
+                      :aria-label="`View metrics for ${data.item.value}`"
                       data-cy="userTagTable_viewMetricsBtn"><i class="fa fa-chart-bar"/><span class="sr-only">view user tag metrics</span>
             </b-button>
           </b-button-group>
+          </span>
         </template>
       </skills-b-table>
     </div>

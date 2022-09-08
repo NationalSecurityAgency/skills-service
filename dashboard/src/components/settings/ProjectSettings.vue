@@ -513,16 +513,10 @@ limitations under the License.
           || this.settings.levelDisplayName.value !== 'Level' || this.settings.levelDisplayName.dirty;
       },
       showCustomLabelsConfigLabel() {
-        if (this.showCustomLabelsConfigToggle) {
-          return 'Enabled';
-        }
-        return 'Disabled';
+        return this.formatToggleLabel(this.showCustomLabelsConfigToggle);
       },
       selfReportingEnabledLabel() {
-        if (this.selfReport.enabled) {
-          return 'Enabled';
-        }
-        return 'Disabled';
+        return this.formatToggleLabel(this.selfReport.enabled);
       },
       groupDescriptionsLabel() {
         if (this.settings.groupDescriptions.value === 'true' || this.settings.groupDescriptions.value === true) {
@@ -531,16 +525,10 @@ limitations under the License.
         return 'Disabled';
       },
       rankOptOutLabel() {
-        if (this.settings.rankAndLeaderboardOptOut.value) {
-          return 'Enabled';
-        }
-        return 'Disabled';
+        return this.formatToggleLabel(this.settings.rankAndLeaderboardOptOut.value);
       },
       usePointsForLevelsLabel() {
-        if (this.settings.levelPointsEnabled.value) {
-          return 'Enabled';
-        }
-        return 'Disabled';
+        return this.formatToggleLabel(this.settings.levelPointsEnabled.value);
       },
       projectVisibilityOptions() {
         const opts = [
@@ -576,6 +564,12 @@ limitations under the License.
           copy.disabled = disabled;
           return copy;
         });
+      },
+      formatToggleLabel(value) {
+        if (value === true || value === 'true') {
+          return 'Enabled';
+        }
+        return 'Disabled';
       },
       selfReportingControl(checked) {
         this.updateApprovalType(!checked);

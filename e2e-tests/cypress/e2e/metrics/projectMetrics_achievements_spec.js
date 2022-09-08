@@ -275,6 +275,8 @@ describe('Metrics Tests - Achievements', () => {
             .find('[data-cy=achievementsNavigator-clientDisplayBtn]')
             .click();
 
+        cy.url()
+            .should('include', '/users/user0good@skills.org');
         cy.get('[data-cy=subPageHeader]')
             .contains('Client Display');
         // userId has lowercase "g" while userIdForDisplay has uppercase "G"; this must be userId
