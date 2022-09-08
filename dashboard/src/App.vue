@@ -92,6 +92,7 @@ limitations under the License.
           this.addCustomIconCSS();
         });
         this.$store.dispatch('access/isRoot');
+        this.$store.dispatch('loadEmailEnabled');
       }
     },
     mounted() {

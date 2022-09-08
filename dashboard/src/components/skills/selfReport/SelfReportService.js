@@ -46,9 +46,6 @@ export default {
     return axios.get(url)
       .then((response) => response.data);
   },
-  isEmailServiceSupported() {
-    return axios.get('/public/isFeatureSupported?feature=emailservice').then((response) => response.data);
-  },
   isUserSubscribedToEmails(projectId) {
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/approvalEmails/isSubscribed`).then((response) => response.data);
   },

@@ -22,7 +22,7 @@ limitations under the License.
     </metrics-card>
 
     <metrics-card v-if="privateProject" title="Project User: Invite" data-cy="inviteUser" :no-padding="true" class="my-4">
-      <b-overlay :show="!emailEnabled">
+      <b-overlay :show="!isEmailEnabled">
           <div slot="overlay" class="alert alert-warning mt-2" data-cy="inviteUsers_emailServiceWarning">
             <i class="fa fa-exclamation-triangle" aria-hidden="true"/> Please note that email notifications are currently disabled. Email configuration has not been performed on this instance of SkillTree. Please contact the root administrator.
           </div>
@@ -38,13 +38,13 @@ limitations under the License.
 </template>
 
 <script>
+  import { mapGetters } from 'vuex';
   import InviteUsersToProject from '@/components/access/InviteUsersToProject';
   import RevokeUserAccess from '@/components/access/RevokeUserAccess';
   import MetricsCard from '../metrics/utils/MetricsCard';
   import RoleManager from './RoleManager';
   import TrustedClientProps from './TrustedClientProps';
   import SubPageHeader from '../utils/pages/SubPageHeader';
-  import ProjectService from '../projects/ProjectService';
   import LoadingContainer from '../utils/LoadingContainer';
   import SettingsService from '../settings/SettingsService';
 
@@ -63,11 +63,13 @@ limitations under the License.
       return {
         isLoading: true,
         privateProject: false,
-        emailEnabled: false,
         projectId: this.$route.params.projectId,
       };
     },
     computed: {
+      ...mapGetters([
+        'isEmailEnabled',
+      ]),
       showTrustedClientProps() {
         return (!this.$store.getters.isPkiAuthenticated);
       },
@@ -99,10 +101,6 @@ limitations under the License.
       SettingsService.getProjectSetting(this.$route.params.projectId, 'invite_only')
         .then((setting) => {
           this.privateProject = setting?.enabled;
-        })
-        .then(() => ProjectService.isEmailServiceSupported())
-        .then((emailEnabled) => {
-          this.emailEnabled = emailEnabled;
         })
         .finally(() => {
           this.isLoading = false;

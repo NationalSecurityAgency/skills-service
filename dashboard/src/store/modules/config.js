@@ -23,6 +23,9 @@ const getters = {
   isPkiAuthenticated(state) {
     return state.config.authMode === 'PKI';
   },
+  isEmailEnabled(state) {
+    return state.emailEnabled;
+  },
 };
 
 const mutations = {
@@ -31,6 +34,13 @@ const mutations = {
   },
   setDbUpgradeInProgress(state, value) {
     Vue.set(state.config, 'dbUpgradeInProgress', value);
+  },
+  setEmailEnabled(state, value) {
+    if (value === true) {
+      state.emailEnabled = true;
+    } else {
+      state.emailEnabled = false;
+    }
   },
 };
 
@@ -50,10 +60,20 @@ const actions = {
       commit('setDbUpgradeInProgress', incomingValue);
     }
   },
+  loadEmailEnabled({ commit }) {
+    return new Promise((resolve, reject) => {
+      SettingsService.isEmailServiceSupported()
+        .then((enabled) => {
+          commit('setEmailEnabled', enabled);
+        })
+        .catch((error) => reject(error));
+    });
+  },
 };
 
 const state = {
   config: null,
+  emailEnabled: false,
 };
 
 export default {

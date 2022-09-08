@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <b-modal id="contactProjectOwners"
-           :title="`Contact ${this.projectName} Owners`"
+           :title="`Contact ${this.projectName}`"
            ok-title="Submit"
            :no-close-on-backdrop="true"
            @hide="cancel"
@@ -27,7 +27,8 @@ limitations under the License.
            no-fade
            role="dialog"
            data-cy="contactProjectOwnerDialog"
-           v-model="modalVisible">
+           v-model="modalVisible"
+          size="xl">
     <loading-container v-bind:is-loading="sending">
       <div v-if="!sendComplete" id="contactOwnersMsg" class="row pt-2 pb-2 pl-4 pr-4" data-cy="contactOwnersMsg">
         <b-form-textarea type="text" id="approvalRequiredMsg"
@@ -98,6 +99,11 @@ limitations under the License.
     watch: {
       modalVisible(newValue) {
         this.$emit('input', newValue);
+      },
+      contactOwnersMsg(newValue) {
+        if (newValue?.length > 0) {
+          this.validate();
+        }
       },
     },
     computed: {

@@ -42,6 +42,7 @@ limitations under the License.
 </template>
 
 <script>
+  import { mapGetters } from 'vuex';
   import { SkillsDisplay } from '@skilltree/skills-client-vue';
   import MyProgressService from '@/components/myProgress/MyProgressService';
   import SkillsDisplayOptionsMixin from '@/components/myProgress/SkillsDisplayOptionsMixin';
@@ -146,18 +147,15 @@ limitations under the License.
           this.projectName = this.$route.params.name;
         }
       })
-        .then(() => ProjectService.isEmailServiceSupported())
-        .then((emailEnabled) => {
-          // email enabled should be loaded with initial config and not fetched every time, it's not a setting that's
-          // likely to change regularly
-          this.emailEnabled = emailEnabled;
-        })
         .finally(() => {
           this.isLoadingSettings = false;
         });
       this.handleProjInvitation();
     },
     computed: {
+      ...mapGetters([
+        'isEmailEnabled',
+      ]),
       isContactButtonInline() {
         const currentLen = (this.projectName.length + this.projectDisplayName.length + 5) * 1.2;
         const titleWidthPx = currentLen * this.oneRem;
