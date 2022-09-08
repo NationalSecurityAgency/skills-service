@@ -450,6 +450,26 @@ class SkillsLoader {
         return skill?.skillId
     }
 
+    int sortByDisplayOrder(DisplayOrderRes a, DisplayOrderRes b) {
+        if( a.groupId != null || b.groupId != null ) {
+            if( a.groupId != null && b.groupId != null) {
+                if( a.groupId != b.groupId ) {
+                    return a.skillGroupDisplayOrder <=> b.skillGroupDisplayOrder
+                }
+            }
+            else if (a.groupId != null || b.groupId != null ) {
+                if( a.groupId != null && b.groupId == null ) {
+                    return a.skillGroupDisplayOrder <=> b.displayOrder
+                }
+                else {
+                    return a.displayOrder <=> b.skillGroupDisplayOrder
+                }
+            }
+        }
+
+        return a.displayOrder <=> b.displayOrder
+    }
+
     @Transactional(readOnly = true)
     SkillSummary loadSkillSummary(String projectId, String userId, String crossProjectId, String skillId, String subjectId) {
         ProjDef projDef = getProjDef(userId, crossProjectId ?: projectId)
@@ -459,7 +479,7 @@ class SkillsLoader {
         String prevSkillId;
 
         if(subjectId) {
-            List<DisplayOrderRes> skills = skillDefRepo.findDisplayOrderByProjectIdAndSubjectId(projectId, subjectId);
+            List<DisplayOrderRes> skills = skillDefRepo.findDisplayOrderByProjectIdAndSubjectId(projectId, subjectId)?.sort({a, b -> sortByDisplayOrder(a, b)})
             def currentSkill = skills.find({ it -> it.getSkillId() == skillId })
 
             if (currentSkill) {
