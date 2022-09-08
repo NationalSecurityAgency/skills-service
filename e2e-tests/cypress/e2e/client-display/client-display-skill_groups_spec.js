@@ -835,301 +835,344 @@ describe('Client Display Skills Groups Tests', () => {
             .contains('Skill 2 Desc');
     });
 
-    it('skill attributes are loaded when expanded', () => {
+    it('description are always displayed if setting is enabled', () => {
         cy.createSkillsGroup(1, 1, 1);
-        cy.addSkillToGroup(1, 1, 1, 1, {
-            pointIncrement: 10,
-            numPerformToCompletion: 5,
-            numMaxOccurrencesIncrementInterval: 3
+        cy.addSkillToGroup(1, 1, 1, 1, { description: 'Skill 1 Desc' });
+        cy.addSkillToGroup(1, 1, 1, 2, { description: 'Skill 2 Desc' });
+        cy.createSkillsGroup(1, 1, 1, {
+            numSkillsRequired: 1,
+            description: 'This is where cool description'
         });
-        cy.addSkillToGroup(1, 1, 1, 2, {
-            pointIncrement: 20,
-            numPerformToCompletion: 3
-        });
-        cy.createSkillsGroup(1, 1, 1, { description: 'This is where cool description' });
 
-        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday');
-        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now');
+        cy.createSkillsGroup(1, 1, 2);
+        cy.addSkillToGroup(1, 1, 2, 3, { description: 'Skill 3 Desc' });
+        cy.addSkillToGroup(1, 1, 2, 4, { description: 'Skill 4 Desc' });
+        cy.addSkillToGroup(1, 1, 2, 5, { description: 'Skill 5 Desc' });
+        cy.createSkillsGroup(1, 1, 2, { description: 'Some other cool info' });
 
-        cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'yesterday');
-        cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
+        cy.createSkillsGroup(1, 1, 3);
+        cy.addSkillToGroup(1, 1, 3, 6, { description: 'Skill 6 Desc' });
+        cy.addSkillToGroup(1, 1, 3, 7, { description: 'Skill 7 Desc' });
+        cy.createSkillsGroup(1, 1, 3, { description: '3rd group is OK' });
+
+        cy.request('POST', '/admin/projects/proj1/settings', [
+            {
+                value: 'true',
+                setting: 'group-descriptions',
+                projectId: 'proj1',
+            },
+        ]);
 
         cy.cdVisit('/');
         cy.cdClickSubj(0);
 
-        cy.get('[data-cy=toggleSkillDetails]')
-            .click();
+        cy.get('[data-cy="skillDescription-group1"]')
+            .contains('This is where cool description');
+        cy.get('[data-cy="skillDescription-group2"]')
+            .contains('Some other cool info');
 
-        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
-            .contains('20');
-        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="pointsAchievedTodayCard"] [data-cy="progressInfoCardTitle"]')
-            .contains('10');
-        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="pointsPerOccurrenceCard"] [data-cy="progressInfoCardTitle"]')
-            .contains('10');
-        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="timeWindowPts"] [data-cy="progressInfoCardTitle"]')
-            .contains('30');
-
-        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
-            .contains('40');
-        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="pointsAchievedTodayCard"] [data-cy="progressInfoCardTitle"]')
-            .contains('20');
-        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="pointsPerOccurrenceCard"] [data-cy="progressInfoCardTitle"]')
-            .contains('20');
-        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="timeWindowPts"] [data-cy="progressInfoCardTitle"]')
-            .contains('20');
-    });
-
-    it('achieve self-reporting skills points with honor system - must update progress points and overall subject points', () => {
-        cy.createSkillsGroup(1, 1, 1);
-        cy.addSkillToGroup(1, 1, 1, 1, {
-            pointIncrement: 100,
-            numPerformToCompletion: 2,
-            selfReportingType: 'HonorSystem'
-        });
-        cy.addSkillToGroup(1, 1, 1, 2, {
-            pointIncrement: 50,
-            numPerformToCompletion: 2,
-            selfReportingType: 'HonorSystem'
-        });
-
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
-
-        cy.get('[data-cy="groupSkillsRequiredBadge"]')
-            .should('not.exist');
-        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]')
-            .first()
-            .contains('Awesome Group 1');
-        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .first()
-            .contains('0 / 2 Skills');
-        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="skillProgressTitle"]')
-            .contains('Very Great Skill 1');
-        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('0 / 200 Points');
-        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="skillProgressTitle"]')
-            .contains('Very Great Skill 2');
-        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('0 / 100 Points');
-
-        cy.get('[data-cy=toggleSkillDetails]')
-            .click();
-
-        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="selfReportBtn"]')
-            .click();
-        cy.get('[data-cy="selfReportSkillMsg"]')
-            .contains('This skill can be submitted under the Honor System and 100 points will be awarded right away');
-        cy.get('[data-cy="selfReportSubmitBtn"]')
-            .click();
-        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="selfReportAlert"]')
-            .contains('Congrats! You just earned 100 points');
-
-        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .first()
-            .contains('0 / 2 Skills');
-        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('100 / 200 Points');
-        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('0 / 100 Points');
-
-        cy.get('[data-cy="overallPointsEarnedToday"]')
-            .contains('100 Points earned Today');
-        cy.get('[data-cy="pointsEarnedTodayForTheNextLevel"]')
-            .contains('100 Points earned Today');
-        cy.get('[data-cy="overallLevelDesc"]')
-            .contains('Level 2 out of 5');
-    });
-
-    it('self-reporting skills with honor system - partial skill requirement must be considered when calculating group\'s points', () => {
-        cy.createSkillsGroup(1, 1, 1);
-        cy.addSkillToGroup(1, 1, 1, 1, {
-            pointIncrement: 100,
-            numPerformToCompletion: 2,
-            pointIncrementInterval: 0,
-            selfReportingType: 'HonorSystem'
-        });
-        cy.addSkillToGroup(1, 1, 1, 2, {
-            pointIncrement: 100,
-            numPerformToCompletion: 2,
-            pointIncrementInterval: 0,
-            selfReportingType: 'HonorSystem'
-        });
-        cy.addSkillToGroup(1, 1, 1, 3, {
-            pointIncrement: 100,
-            numPerformToCompletion: 2,
-            pointIncrementInterval: 0,
-            selfReportingType: 'HonorSystem'
-        });
-        cy.createSkillsGroup(1, 1, 1, { numSkillsRequired: 2 });
-
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
-
-        cy.get('[data-cy=toggleSkillDetails]')
-            .click();
-        cy.get('[data-cy="skillProgress_index-0"] [data-cy="groupSkillsRequiredBadge"]')
-            .contains('Requires 2 out of 3 skills');
-
-        cy.reportHonorSkill(1);
-        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('100 / 200 Points');
-        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('0 / 200 Points');
-        cy.get('[data-cy="group-group1_skillProgress-skill3"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('0 / 200 Points');
-        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .first()
-            .contains('0 / 2 Skills');
-
-        cy.reportHonorSkill(2);
-        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('100 / 200 Points');
-        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('100 / 200 Points');
-        cy.get('[data-cy="group-group1_skillProgress-skill3"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('0 / 200 Points');
-        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .first()
-            .contains('0 / 2 Skills');
-
-        cy.reportHonorSkill(3);
-        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('100 / 200 Points');
-        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('100 / 200 Points');
-        cy.get('[data-cy="group-group1_skillProgress-skill3"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('100 / 200 Points');
-        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .first()
-            .contains('0 / 2 Skills');
-
-        cy.reportHonorSkill(2);
-        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('100 / 200 Points');
-        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('200 / 200 Points');
-        cy.get('[data-cy="group-group1_skillProgress-skill3"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('100 / 200 Points');
-        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .first()
-            .contains('1 / 2 Skills');
-
-        // refresh and validate again
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
-        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('100 / 200 Points');
-        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('200 / 200 Points');
-        cy.get('[data-cy="group-group1_skillProgress-skill3"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('100 / 200 Points');
-        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .first()
-            .contains('1 / 2 Skills');
-    });
-
-    it('fixed doubling of skill\'s points when search/filter is used to locate the skill first', () => {
-        cy.createSkill(1, 1, 2);
-        cy.createSkill(1, 1, 3);
-
-        cy.createSkillsGroup(1, 1, 1);
-        cy.addSkillToGroup(1, 1, 1, 4, {
-            pointIncrement: 100,
-            numPerformToCompletion: 2,
-            pointIncrementInterval: 0,
-            selfReportingType: 'HonorSystem'
-        });
-        cy.addSkillToGroup(1, 1, 1, 5, {
-            pointIncrement: 100,
-            numPerformToCompletion: 2,
-            pointIncrementInterval: 0,
-            selfReportingType: 'HonorSystem'
-        });
-        cy.addSkillToGroup(1, 1, 1, 6, {
-            pointIncrement: 100,
-            numPerformToCompletion: 2,
-            pointIncrementInterval: 0,
-            selfReportingType: 'HonorSystem'
-        });
-        cy.createSkillsGroup(1, 1, 1, { numSkillsRequired: 2 });
-
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
-
-        cy.get('[data-cy=toggleSkillDetails]')
-            .click();
-
+        // description persist after filter
         cy.get('[data-cy="skillsSearchInput"]')
-            .type('GrOup');
-
-        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]')
-            .first()
-            .contains('Awesome Group 1');
-        cy.get('[data-cy="group-group1_skillProgress-skill4"] [data-cy="skillProgressTitle"]');
-        cy.get('[data-cy="group-group1_skillProgress-skill5"] [data-cy="skillProgressTitle"]');
-        cy.get('[data-cy="group-group1_skillProgress-skill6"] [data-cy="skillProgressTitle"]');
-
-        cy.reportHonorSkill(4);
-        cy.get('[data-cy="group-group1_skillProgress-skill4"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('100 / 200 Points');
-        cy.get('[data-cy="group-group1_skillProgress-skill5"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('0 / 200 Points');
-        cy.get('[data-cy="group-group1_skillProgress-skill6"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('0 / 200 Points');
-        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .first()
-            .contains('0 / 2 Skills');
-
-        cy.reportHonorSkill(5);
-        cy.get('[data-cy="group-group1_skillProgress-skill4"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('100 / 200 Points');
-        cy.get('[data-cy="group-group1_skillProgress-skill5"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('100 / 200 Points');
-        cy.get('[data-cy="group-group1_skillProgress-skill6"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('0 / 200 Points');
-        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .first()
-            .contains('0 / 2 Skills');
-
-        cy.reportHonorSkill(4);
-        cy.get('[data-cy="group-group1_skillProgress-skill4"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('200 / 200 Points');
-        cy.get('[data-cy="group-group1_skillProgress-skill5"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('100 / 200 Points');
-        cy.get('[data-cy="group-group1_skillProgress-skill6"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('0 / 200 Points');
-        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .first()
-            .contains('1 / 2 Skills');
-
-        cy.get('[data-cy="clearSkillsSearchInput"]')
-            .click();
-        cy.get('[data-cy="skillProgress_index-0"]')
-            .contains('Very Great Skill 2');
-
-        cy.get('[data-cy="group-group1_skillProgress-skill4"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('200 / 200 Points');
-        cy.get('[data-cy="group-group1_skillProgress-skill5"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('100 / 200 Points');
-        cy.get('[data-cy="group-group1_skillProgress-skill6"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('0 / 200 Points');
-        cy.get('[data-cy="skillProgress_index-2"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .first()
-            .contains('1 / 2 Skills');
-
-        // refresh and validate again
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
-        cy.get('[data-cy="group-group1_skillProgress-skill4"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('200 / 200 Points');
-        cy.get('[data-cy="group-group1_skillProgress-skill5"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('100 / 200 Points');
-        cy.get('[data-cy="group-group1_skillProgress-skill6"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('0 / 200 Points');
-        cy.get('[data-cy="skillProgress_index-2"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .first()
-            .contains('1 / 2 Skills');
+            .type('skill 2');
+        cy.get('[data-cy="skillDescription-group1"]')
+            .contains('This is where cool description');
     });
+//
+//    it('skill attributes are loaded when expanded', () => {
+//        cy.createSkillsGroup(1, 1, 1);
+//        cy.addSkillToGroup(1, 1, 1, 1, {
+//            pointIncrement: 10,
+//            numPerformToCompletion: 5,
+//            numMaxOccurrencesIncrementInterval: 3
+//        });
+//        cy.addSkillToGroup(1, 1, 1, 2, {
+//            pointIncrement: 20,
+//            numPerformToCompletion: 3
+//        });
+//        cy.createSkillsGroup(1, 1, 1, { description: 'This is where cool description' });
+//
+//        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday');
+//        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now');
+//
+//        cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'yesterday');
+//        cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
+//
+//        cy.cdVisit('/');
+//        cy.cdClickSubj(0);
+//
+//        cy.get('[data-cy=toggleSkillDetails]')
+//            .click();
+//
+//        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
+//            .contains('20');
+//        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="pointsAchievedTodayCard"] [data-cy="progressInfoCardTitle"]')
+//            .contains('10');
+//        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="pointsPerOccurrenceCard"] [data-cy="progressInfoCardTitle"]')
+//            .contains('10');
+//        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="timeWindowPts"] [data-cy="progressInfoCardTitle"]')
+//            .contains('30');
+//
+//        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
+//            .contains('40');
+//        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="pointsAchievedTodayCard"] [data-cy="progressInfoCardTitle"]')
+//            .contains('20');
+//        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="pointsPerOccurrenceCard"] [data-cy="progressInfoCardTitle"]')
+//            .contains('20');
+//        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="timeWindowPts"] [data-cy="progressInfoCardTitle"]')
+//            .contains('20');
+//    });
+//
+//    it('achieve self-reporting skills points with honor system - must update progress points and overall subject points', () => {
+//        cy.createSkillsGroup(1, 1, 1);
+//        cy.addSkillToGroup(1, 1, 1, 1, {
+//            pointIncrement: 100,
+//            numPerformToCompletion: 2,
+//            selfReportingType: 'HonorSystem'
+//        });
+//        cy.addSkillToGroup(1, 1, 1, 2, {
+//            pointIncrement: 50,
+//            numPerformToCompletion: 2,
+//            selfReportingType: 'HonorSystem'
+//        });
+//
+//        cy.cdVisit('/');
+//        cy.cdClickSubj(0);
+//
+//        cy.get('[data-cy="groupSkillsRequiredBadge"]')
+//            .should('not.exist');
+//        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]')
+//            .first()
+//            .contains('Awesome Group 1');
+//        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .first()
+//            .contains('0 / 2 Skills');
+//        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="skillProgressTitle"]')
+//            .contains('Very Great Skill 1');
+//        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('0 / 200 Points');
+//        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="skillProgressTitle"]')
+//            .contains('Very Great Skill 2');
+//        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('0 / 100 Points');
+//
+//        cy.get('[data-cy=toggleSkillDetails]')
+//            .click();
+//
+//        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="selfReportBtn"]')
+//            .click();
+//        cy.get('[data-cy="selfReportSkillMsg"]')
+//            .contains('This skill can be submitted under the Honor System and 100 points will be awarded right away');
+//        cy.get('[data-cy="selfReportSubmitBtn"]')
+//            .click();
+//        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="selfReportAlert"]')
+//            .contains('Congrats! You just earned 100 points');
+//
+//        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .first()
+//            .contains('0 / 2 Skills');
+//        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('100 / 200 Points');
+//        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('0 / 100 Points');
+//
+//        cy.get('[data-cy="overallPointsEarnedToday"]')
+//            .contains('100 Points earned Today');
+//        cy.get('[data-cy="pointsEarnedTodayForTheNextLevel"]')
+//            .contains('100 Points earned Today');
+//        cy.get('[data-cy="overallLevelDesc"]')
+//            .contains('Level 2 out of 5');
+//    });
+//
+//    it('self-reporting skills with honor system - partial skill requirement must be considered when calculating group\'s points', () => {
+//        cy.createSkillsGroup(1, 1, 1);
+//        cy.addSkillToGroup(1, 1, 1, 1, {
+//            pointIncrement: 100,
+//            numPerformToCompletion: 2,
+//            pointIncrementInterval: 0,
+//            selfReportingType: 'HonorSystem'
+//        });
+//        cy.addSkillToGroup(1, 1, 1, 2, {
+//            pointIncrement: 100,
+//            numPerformToCompletion: 2,
+//            pointIncrementInterval: 0,
+//            selfReportingType: 'HonorSystem'
+//        });
+//        cy.addSkillToGroup(1, 1, 1, 3, {
+//            pointIncrement: 100,
+//            numPerformToCompletion: 2,
+//            pointIncrementInterval: 0,
+//            selfReportingType: 'HonorSystem'
+//        });
+//        cy.createSkillsGroup(1, 1, 1, { numSkillsRequired: 2 });
+//
+//        cy.cdVisit('/');
+//        cy.cdClickSubj(0);
+//
+//        cy.get('[data-cy=toggleSkillDetails]')
+//            .click();
+//        cy.get('[data-cy="skillProgress_index-0"] [data-cy="groupSkillsRequiredBadge"]')
+//            .contains('Requires 2 out of 3 skills');
+//
+//        cy.reportHonorSkill(1);
+//        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('100 / 200 Points');
+//        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('0 / 200 Points');
+//        cy.get('[data-cy="group-group1_skillProgress-skill3"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('0 / 200 Points');
+//        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .first()
+//            .contains('0 / 2 Skills');
+//
+//        cy.reportHonorSkill(2);
+//        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('100 / 200 Points');
+//        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('100 / 200 Points');
+//        cy.get('[data-cy="group-group1_skillProgress-skill3"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('0 / 200 Points');
+//        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .first()
+//            .contains('0 / 2 Skills');
+//
+//        cy.reportHonorSkill(3);
+//        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('100 / 200 Points');
+//        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('100 / 200 Points');
+//        cy.get('[data-cy="group-group1_skillProgress-skill3"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('100 / 200 Points');
+//        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .first()
+//            .contains('0 / 2 Skills');
+//
+//        cy.reportHonorSkill(2);
+//        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('100 / 200 Points');
+//        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('200 / 200 Points');
+//        cy.get('[data-cy="group-group1_skillProgress-skill3"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('100 / 200 Points');
+//        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .first()
+//            .contains('1 / 2 Skills');
+//
+//        // refresh and validate again
+//        cy.cdVisit('/');
+//        cy.cdClickSubj(0);
+//        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('100 / 200 Points');
+//        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('200 / 200 Points');
+//        cy.get('[data-cy="group-group1_skillProgress-skill3"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('100 / 200 Points');
+//        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .first()
+//            .contains('1 / 2 Skills');
+//    });
+//
+//    it('fixed doubling of skill\'s points when search/filter is used to locate the skill first', () => {
+//        cy.createSkill(1, 1, 2);
+//        cy.createSkill(1, 1, 3);
+//
+//        cy.createSkillsGroup(1, 1, 1);
+//        cy.addSkillToGroup(1, 1, 1, 4, {
+//            pointIncrement: 100,
+//            numPerformToCompletion: 2,
+//            pointIncrementInterval: 0,
+//            selfReportingType: 'HonorSystem'
+//        });
+//        cy.addSkillToGroup(1, 1, 1, 5, {
+//            pointIncrement: 100,
+//            numPerformToCompletion: 2,
+//            pointIncrementInterval: 0,
+//            selfReportingType: 'HonorSystem'
+//        });
+//        cy.addSkillToGroup(1, 1, 1, 6, {
+//            pointIncrement: 100,
+//            numPerformToCompletion: 2,
+//            pointIncrementInterval: 0,
+//            selfReportingType: 'HonorSystem'
+//        });
+//        cy.createSkillsGroup(1, 1, 1, { numSkillsRequired: 2 });
+//
+//        cy.cdVisit('/');
+//        cy.cdClickSubj(0);
+//
+//        cy.get('[data-cy=toggleSkillDetails]')
+//            .click();
+//
+//        cy.get('[data-cy="skillsSearchInput"]')
+//            .type('GrOup');
+//
+//        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]')
+//            .first()
+//            .contains('Awesome Group 1');
+//        cy.get('[data-cy="group-group1_skillProgress-skill4"] [data-cy="skillProgressTitle"]');
+//        cy.get('[data-cy="group-group1_skillProgress-skill5"] [data-cy="skillProgressTitle"]');
+//        cy.get('[data-cy="group-group1_skillProgress-skill6"] [data-cy="skillProgressTitle"]');
+//
+//        cy.reportHonorSkill(4);
+//        cy.get('[data-cy="group-group1_skillProgress-skill4"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('100 / 200 Points');
+//        cy.get('[data-cy="group-group1_skillProgress-skill5"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('0 / 200 Points');
+//        cy.get('[data-cy="group-group1_skillProgress-skill6"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('0 / 200 Points');
+//        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .first()
+//            .contains('0 / 2 Skills');
+//
+//        cy.reportHonorSkill(5);
+//        cy.get('[data-cy="group-group1_skillProgress-skill4"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('100 / 200 Points');
+//        cy.get('[data-cy="group-group1_skillProgress-skill5"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('100 / 200 Points');
+//        cy.get('[data-cy="group-group1_skillProgress-skill6"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('0 / 200 Points');
+//        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .first()
+//            .contains('0 / 2 Skills');
+//
+//        cy.reportHonorSkill(4);
+//        cy.get('[data-cy="group-group1_skillProgress-skill4"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('200 / 200 Points');
+//        cy.get('[data-cy="group-group1_skillProgress-skill5"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('100 / 200 Points');
+//        cy.get('[data-cy="group-group1_skillProgress-skill6"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('0 / 200 Points');
+//        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .first()
+//            .contains('1 / 2 Skills');
+//
+//        cy.get('[data-cy="clearSkillsSearchInput"]')
+//            .click();
+//        cy.get('[data-cy="skillProgress_index-0"]')
+//            .contains('Very Great Skill 2');
+//
+//        cy.get('[data-cy="group-group1_skillProgress-skill4"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('200 / 200 Points');
+//        cy.get('[data-cy="group-group1_skillProgress-skill5"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('100 / 200 Points');
+//        cy.get('[data-cy="group-group1_skillProgress-skill6"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('0 / 200 Points');
+//        cy.get('[data-cy="skillProgress_index-2"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .first()
+//            .contains('1 / 2 Skills');
+//
+//        // refresh and validate again
+//        cy.cdVisit('/');
+//        cy.cdClickSubj(0);
+//        cy.get('[data-cy="group-group1_skillProgress-skill4"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('200 / 200 Points');
+//        cy.get('[data-cy="group-group1_skillProgress-skill5"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('100 / 200 Points');
+//        cy.get('[data-cy="group-group1_skillProgress-skill6"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .contains('0 / 200 Points');
+//        cy.get('[data-cy="skillProgress_index-2"] [data-cy="skillProgress-ptsOverProgressBard"]')
+//            .first()
+//            .contains('1 / 2 Skills');
+//    });
 
 });
 
