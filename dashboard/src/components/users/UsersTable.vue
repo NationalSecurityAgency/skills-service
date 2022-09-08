@@ -60,17 +60,26 @@ limitations under the License.
           </b-button-group>
         </template>
         <template v-slot:cell(totalPoints)="data">
-          <div class="row" :data-cy="`usr_progress-${data.item.userId}`">
-            <div class="col-auto">
-              <span class="font-weight-bold text-primary" data-cy="progressPercent">{{ calcPercent(data.value) }}%</span>
+          <div :data-cy="`usr_progress-${data.item.userId}`">
+            <div class="row">
+              <div class="col-auto">
+                <span class="font-weight-bold text-primary" data-cy="progressPercent">{{ calcPercent(data.value) }}%</span>
+              </div>
+              <div class="col text-right">
+                <span class="text-primary font-weight-bold" data-cy="progressCurrentPoints">{{ data.value | number }}</span> / <span class="font-italic" data-cy="progressTotalPoints">{{ totalPoints | number }}</span>
+              </div>
             </div>
-            <div class="col text-right">
-              <span class="text-primary font-weight-bold" data-cy="progressCurrentPoints">{{ data.value | number }}</span> / <span class="font-italic" data-cy="progressTotalPoints">{{ totalPoints | number }}</span>
+            <b-progress :max="totalPoints" class="mb-3" height="5px" variant="info">
+              <b-progress-bar :value="data.value"  :aria-label="`Progress for ${data.item.userId} user`"></b-progress-bar>
+            </b-progress>
+            <div v-if="data.item.userMaxLevel || data.item.userMaxLevel === 0" class="row" data-cy="progressLevels">
+              <div class="col">
+                <i class="fas fa-trophy skills-color-levels" /> <span class="font-italic">Current Level: </span>
+                <span v-if="data.item.userMaxLevel === 0" data-cy="progressCurrentLevel">None</span>
+                <span v-else class="font-weight-bold" data-cy="progressCurrentLevel">{{ data.item.userMaxLevel }}</span>
+              </div>
             </div>
           </div>
-          <b-progress :max="totalPoints" class="mb-3" height="5px" variant="info">
-            <b-progress-bar :value="data.value"  :aria-label="`Progress for ${data.item.userId} user`"></b-progress-bar>
-          </b-progress>
         </template>
         <template v-slot:cell(lastUpdated)="data">
           <date-cell :value="data.value" />
