@@ -519,10 +519,7 @@ limitations under the License.
         return this.formatToggleLabel(this.selfReport.enabled);
       },
       groupDescriptionsLabel() {
-        if (this.settings.groupDescriptions.value === 'true' || this.settings.groupDescriptions.value === true) {
-          return 'Enabled';
-        }
-        return 'Disabled';
+        return this.formatToggleLabel(this.settings.groupDescriptions.value);
       },
       rankOptOutLabel() {
         return this.formatToggleLabel(this.settings.rankAndLeaderboardOptOut.value);
