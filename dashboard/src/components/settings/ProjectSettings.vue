@@ -295,7 +295,7 @@ limitations under the License.
             <div class="col col-md-3 text-secondary" id="groupDescriptions">
               Always Show Group Descriptions:
               <inline-help
-                target-id="groupDescriptions"
+                target-id="groupDescriptionsHelp"
                 msg="Toggle this setting to always show the group's descriptions in this project"/>
             </div>
             <div class="col">
