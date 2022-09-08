@@ -354,6 +354,11 @@ describe('Metrics Using User Tags Tests', () => {
         });
 
         it('navigate to user tag metrics', () => {
+
+            cy.reportSkill(1, 1, 'notInMetrics1', 'now');
+            cy.reportSkill(1, 1, 'notInMetrics2', 'now');
+            cy.reportSkill(1, 1, 'notInMetrics3', 'now');
+
             cy.visit('/administrator/projects/proj1/');
             cy.wait('@getConfig');
 
@@ -383,6 +388,11 @@ describe('Metrics Using User Tags Tests', () => {
             cy.get('[data-cy="usr_progress-user0"] [data-cy="progressPercent"]').should('have.text', '50%')
             cy.get('[data-cy="usr_progress-user0"] [data-cy="progressCurrentPoints"]').should('have.text', '100')
             cy.get('[data-cy="usr_progress-user0"] [data-cy="progressTotalPoints"]').should('have.text', '200')
+            cy.get('[data-cy="usersTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '25')
+
+            cy.get('[data-cy="breadcrumb-Metrics"]').click()
+            cy.get('[data-cy="cell_tagValue-tag5"] [data-cy="userTagTable_viewMetricsBtn"]').click()
+            cy.get('[data-cy="usersTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '20')
         });
     }
 });
