@@ -37,6 +37,7 @@ import skills.services.GlobalBadgesService
 import skills.services.LevelDefinitionStorageService
 import skills.services.admin.SkillsGroupAdminService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
+import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.settings.CommonSettings
 import skills.skillLoading.model.*
@@ -974,6 +975,17 @@ class SkillsLoader {
                         numSkillsRequired: skillDef.numSkillsRequired,
                         totalPoints: skillDef.totalPoints,
                 )
+
+                Boolean groupDescriptionsOn = settingsService.getProjectSetting(skillDef.projectId, Settings.GROUP_DESCRIPTIONS.settingName)?.value?.toBoolean()
+
+                if(groupDescriptionsOn) {
+                    def desc = skillDefWithExtraRepo.findDescriptionBySkillId(skillDef.projectId, skillDef.skillId)
+                    skillsSummary.description = new SkillDescription(
+                            skillId: skillDef.skillId,
+                            description: InputSanitizer.unsanitizeForMarkdown(desc)
+                    );
+                }
+
                 SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, skillDef, version, [SkillRelDef.RelationshipType.SkillsGroupRequirement])
                 Integer numSkillsRequired = skillsGroupAdminService.getActualNumSkillsRequred(skillDef.numSkillsRequired, skillDef.id)
                 skillsSummary.children = createSkillSummaries(thisProjDef, groupChildrenMeta.childrenWithPoints, false, userId, version)

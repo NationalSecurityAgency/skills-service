@@ -27,8 +27,8 @@ public enum Settings {
     GLOBAL_USER_AGREEMENT("user_agreement"),
     GLOBAL_USER_AGREEMENT_VERSION("user_agreement_version"),
     USER_VIEWED_USER_AGREEMENT("viewed_user_agreement"),
-    INVITE_ONLY_PROJECT("invite_only");
-
+    INVITE_ONLY_PROJECT("invite_only"),
+    GROUP_DESCRIPTIONS("group-descriptions");
 
     private String settingName;
 

@@ -291,6 +291,25 @@ limitations under the License.
             </div>
           </div>
 
+          <div class="row mt-3">
+            <div class="col col-md-3 text-secondary" id="groupDescriptions">
+              Always Show Group Descriptions:
+              <inline-help
+                target-id="groupDescriptionsHelp"
+                msg="Toggle this setting to always show the group's descriptions in this project"/>
+            </div>
+            <div class="col">
+              <b-form-checkbox v-model="settings.groupDescriptions.value"
+                               name="check-button"
+                               v-on:input="groupDescriptionsChanged"
+                               aria-labelledby="groupDescriptionsLabel"
+                               data-cy="groupDescriptionsSwitch"
+                               switch>
+                {{ groupDescriptionsLabel }}
+              </b-form-checkbox>
+            </div>
+          </div>
+
           <hr/>
 
           <p v-if="errMsg" class="text-center text-danger mt-3" role="alert">***{{ errMsg }}***</p>
@@ -424,6 +443,13 @@ limitations under the License.
             dirty: false,
             projectId: this.$route.params.projectId,
           },
+          groupDescriptions: {
+            value: false,
+            setting: 'group-descriptions',
+            lastLoadedValue: false,
+            dirty: false,
+            projectId: this.$route.params.projectId,
+          },
           projectDisplayName: {
             value: 'Project',
             setting: 'project.displayName',
@@ -492,6 +518,9 @@ limitations under the License.
       selfReportingEnabledLabel() {
         return this.formatToggleLabel(this.selfReport.enabled);
       },
+      groupDescriptionsLabel() {
+        return this.formatToggleLabel(this.settings.groupDescriptions.value);
+      },
       rankOptOutLabel() {
         return this.formatToggleLabel(this.settings.rankAndLeaderboardOptOut.value);
       },
@@ -553,6 +582,9 @@ limitations under the License.
       },
       rankAndLeaderboardOptOutChanged(value) {
         this.settings.rankAndLeaderboardOptOut.dirty = `${value}` !== `${this.settings.rankAndLeaderboardOptOut.lastLoadedValue}`;
+      },
+      groupDescriptionsChanged(value) {
+        this.settings.groupDescriptions.dirty = `${value}` !== `${this.settings.groupDescriptions.lastLoadedValue}`;
       },
       inviteOnlyProjectChanged(value) {
         this.settings.inviteOnlyProject.dirty = `${value}` !== `${this.settings.inviteOnlyProject.lastLoadedValue}`;

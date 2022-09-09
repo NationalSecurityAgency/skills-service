@@ -94,7 +94,8 @@ limitations under the License.
                       :class="{ 'skills-navigable-item' : allowDrillDown }" data-cy="skillProgressBar"/>
       </div>
     </div>
-    <div v-if="showDescription" :data-cy="`skillDescription-${skill.skillId}`">
+
+    <div v-if="showDescription || (skill.type === 'SkillsGroup' && showGroupDescriptions)" :data-cy="`skillDescription-${skill.skillId}`">
       <div v-if="skill.type === 'SkillsGroup'">
         <p class="skills-text-description text-primary mt-3" style="font-size: 0.9rem;">
           <markdown-text v-if="skill.description && skill.description.description" :text="skill.description.description"/>
@@ -142,6 +143,7 @@ limitations under the License.
             :type="type"
             :enable-drill-down="true"
             :show-description="showDescription"
+            :show-group-descriptions="showGroupDescriptions"
             :data-cy="`group-${skill.skillId}_skillProgress-${childSkill.skillId}`"
             @points-earned="onChildSkillPointsEarned"
         ></skill-progress2>
@@ -183,6 +185,10 @@ limitations under the License.
       showDescription: {
         type: Boolean,
         default: true,
+      },
+      showGroupDescriptions: {
+        type: Boolean,
+        default: false,
       },
       enableDrillDown: {
         type: Boolean,

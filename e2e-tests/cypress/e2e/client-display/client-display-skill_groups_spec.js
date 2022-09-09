@@ -835,6 +835,49 @@ describe('Client Display Skills Groups Tests', () => {
             .contains('Skill 2 Desc');
     });
 
+    it('description are always displayed if setting is enabled', () => {
+        cy.createSkillsGroup(1, 1, 1);
+        cy.addSkillToGroup(1, 1, 1, 1, { description: 'Skill 1 Desc' });
+        cy.addSkillToGroup(1, 1, 1, 2, { description: 'Skill 2 Desc' });
+        cy.createSkillsGroup(1, 1, 1, {
+            numSkillsRequired: 1,
+            description: 'This is where cool description'
+        });
+
+        cy.createSkillsGroup(1, 1, 2);
+        cy.addSkillToGroup(1, 1, 2, 3, { description: 'Skill 3 Desc' });
+        cy.addSkillToGroup(1, 1, 2, 4, { description: 'Skill 4 Desc' });
+        cy.addSkillToGroup(1, 1, 2, 5, { description: 'Skill 5 Desc' });
+        cy.createSkillsGroup(1, 1, 2, { description: 'Some other cool info' });
+
+        cy.createSkillsGroup(1, 1, 3);
+        cy.addSkillToGroup(1, 1, 3, 6, { description: 'Skill 6 Desc' });
+        cy.addSkillToGroup(1, 1, 3, 7, { description: 'Skill 7 Desc' });
+        cy.createSkillsGroup(1, 1, 3, { description: '3rd group is OK' });
+
+        cy.request('POST', '/admin/projects/proj1/settings', [
+            {
+                value: 'true',
+                setting: 'group-descriptions',
+                projectId: 'proj1',
+            },
+        ]);
+
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+
+        cy.get('[data-cy="skillDescription-group1"]')
+            .contains('This is where cool description');
+        cy.get('[data-cy="skillDescription-group2"]')
+            .contains('Some other cool info');
+
+        // description persist after filter
+        cy.get('[data-cy="skillsSearchInput"]')
+            .type('skill 2');
+        cy.get('[data-cy="skillDescription-group1"]')
+            .contains('This is where cool description');
+    });
+
     it('skill attributes are loaded when expanded', () => {
         cy.createSkillsGroup(1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 1, {

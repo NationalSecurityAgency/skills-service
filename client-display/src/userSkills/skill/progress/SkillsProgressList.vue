@@ -66,6 +66,7 @@ limitations under the License.
                           :type="type"
                           :enable-drill-down="true"
                           :show-description="showDescriptionsInternal"
+                          :show-group-descriptions="showGroupDescriptions"
                           :data-cy="`skillProgress_index-${index}`"
                           @points-earned="onPointsEarned"
                           :child-skill-highlight-string="searchString"
@@ -162,6 +163,7 @@ limitations under the License.
         },
         loading: false,
         showDescriptionsInternal: false,
+        showGroupDescriptions: false,
         hasSkills: false,
         descriptionsLoaded: false,
         skillsInternal: [],
@@ -203,6 +205,8 @@ limitations under the License.
     mounted() {
       const theSubject = this.subject;
       this.showDescriptionsInternal = this.showDescriptions;
+      this.showGroupDescriptions = store.getters.config.groupDescriptionsOn;
+
       let filter = () => true;
       if (this.projectId) {
         filter = (s) => s.projectId === this.projectId;

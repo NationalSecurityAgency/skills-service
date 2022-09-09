@@ -17,6 +17,7 @@ package skills.intTests.clientDisplay
 
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
+import skills.storage.model.SkillDef
 
 class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
 
@@ -198,5 +199,40 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
 
         summary1.points == 200
         summary1.todaysPoints == 100
+    }
+
+    def "group descriptions always return when group-descriptions setting is enabled"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skillsGroup = SkillsFactory.createSkillsGroup()
+        def allSkills = SkillsFactory.createSkills(4) // first one is group
+        allSkills[1].pointIncrement = 100
+        allSkills[2].pointIncrement = 100
+        allSkills[3].pointIncrement = 100
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[1])
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[2])
+        skillsService.createSkill(allSkills[3])
+
+        skillsGroup.enabled = 'true'
+        skillsGroup.description = 'Test description for skill'
+        skillsService.updateSkill(skillsGroup, null)
+
+        String userId = getRandomUsers(1)[0]
+        when:
+        def summary = skillsService.getSkillSummary(userId, proj.projectId, subj.subjectId, -1, true)
+        def group = summary.skills.find({ it -> it.type == SkillDef.ContainerType.SkillsGroup.toString()})
+
+        skillsService.addOrUpdateProjectSetting(proj.projectId, 'group-descriptions', 'true')
+        def summary1 = skillsService.getSkillSummary(userId, proj.projectId, subj.subjectId, -1, true)
+        def group1 = summary1.skills.find({ it -> it.type == SkillDef.ContainerType.SkillsGroup.toString()})
+
+        then:
+        group.description == null
+        group1.description.description == 'Test description for skill'
     }
 }
