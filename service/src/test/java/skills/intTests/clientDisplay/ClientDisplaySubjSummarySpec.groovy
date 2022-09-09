@@ -201,7 +201,7 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         summary1.todaysPoints == 100
     }
 
-    def "group descriptions always return when enabled"() {
+    def "group descriptions always return when group-descriptions setting is enabled"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skillsGroup = SkillsFactory.createSkillsGroup()
@@ -224,8 +224,6 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
 
         String userId = getRandomUsers(1)[0]
         when:
-        skillsService.addSkill([projectId: proj.projectId, skillId: allSkills[1].skillId], userId, new Date() - 1)
-        skillsService.addSkill([projectId: proj.projectId, skillId: allSkills[2].skillId], userId, new Date()) // today
         def summary = skillsService.getSkillSummary(userId, proj.projectId, subj.subjectId, -1, true)
         def group = summary.skills.find({ it -> it.type == SkillDef.ContainerType.SkillsGroup.toString()})
 
