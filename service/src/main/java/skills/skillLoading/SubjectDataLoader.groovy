@@ -100,25 +100,28 @@ class SubjectDataLoader {
                     copiedFromProjectName: skillDefAndUserPoints.copiedFromProjectName)
         }
 
-        skillsAndPoints = handleGroupSkills(skillsAndPoints)
+        skillsAndPoints = handleGroupSkills(skillsAndPoints, relationshipTypes)
         new SkillsData(childrenWithPoints: skillsAndPoints)
     }
 
-    private List<SkillsAndPoints> handleGroupSkills(List<SkillsAndPoints> skillsAndPoints) {
-        List<SkillsAndPoints> childrenOfGroups = skillsAndPoints.findAll( { it.skillDef.groupId })
-        List<SkillsAndPoints> res = skillsAndPoints.findAll( { !it.skillDef.groupId })
-        if (childrenOfGroups) {
-            Map<String, List<SkillsAndPoints>> bySkillId = res.groupBy {it.skillDef.skillId}
-            childrenOfGroups.each {
-                SkillsAndPoints parent = bySkillId[it.skillDef.groupId]?.first()
-                if (!parent) {
-                    throw new IllegalStateException("Failed to find group for a skill under that group. groupSkillId=[${it.skillDef.groupId}], childSkillId=[${it.skillDef.skillId}]")
+    private List<SkillsAndPoints> handleGroupSkills(List<SkillsAndPoints> skillsAndPoints, List<SkillRelDef.RelationshipType> relationshipTypes) {
+        if (relationshipTypes.containsAll([SkillRelDef.RelationshipType.SkillsGroupRequirement, SkillRelDef.RelationshipType.GroupSkillToSubject])) {
+            List<SkillsAndPoints> childrenOfGroups = skillsAndPoints.findAll({ it.skillDef.groupId })
+            List<SkillsAndPoints> res = skillsAndPoints.findAll({ !it.skillDef.groupId })
+            if (childrenOfGroups) {
+                Map<String, List<SkillsAndPoints>> bySkillId = res.groupBy { it.skillDef.skillId }
+                childrenOfGroups.each {
+                    SkillsAndPoints parent = bySkillId[it.skillDef.groupId]?.first()
+                    if (!parent) {
+                        throw new IllegalStateException("Failed to find group for a skill under that group. groupSkillId=[${it.skillDef.groupId}], childSkillId=[${it.skillDef.skillId}]")
+                    }
+                    parent.children.add(it)
                 }
-                parent.children.add(it)
             }
-        }
 
-        return res
+            return res
+        }
+        return skillsAndPoints
     }
 
     @Profile
