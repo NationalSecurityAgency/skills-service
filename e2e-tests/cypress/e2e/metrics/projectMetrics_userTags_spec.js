@@ -384,6 +384,8 @@ describe('Metrics Using User Tags Tests', () => {
             cy.get(`${usersTableSelector}`).contains('User Id').click();
             cy.wait('@getUsers')
 
+            cy.get('[data-cy="levelsChart"] [data-cy="metricsCard-header"]').contains('Overall Levels for Best Label: tag0')
+            cy.get('[data-cy="usersTableMetric"] [data-cy="metricsCard-header"]').contains('Users for Best Label: tag0')
 
             cy.get('[data-cy="usr_progress-user0"] [data-cy="progressPercent"]').should('have.text', '50%')
             cy.get('[data-cy="usr_progress-user0"] [data-cy="progressCurrentPoints"]').should('have.text', '100')
