@@ -37,7 +37,6 @@ import skills.services.GlobalBadgesService
 import skills.services.LevelDefinitionStorageService
 import skills.services.admin.SkillsGroupAdminService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
-import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.settings.CommonSettings
 import skills.skillLoading.model.*
@@ -979,17 +978,11 @@ class SkillsLoader {
                         enabled: Boolean.valueOf(skillDef.enabled).toString(),
                         numSkillsRequired: skillDef.numSkillsRequired,
                         totalPoints: skillDef.totalPoints,
+                        description: skillDefAndUserPoints.description ? new SkillDescription(
+                                skillId: skillDef.skillId,
+                                description: InputSanitizer.unsanitizeForMarkdown(skillDefAndUserPoints.description)
+                        ) : null,
                 )
-
-                Boolean groupDescriptionsOn = settingsService.getProjectSetting(skillDef.projectId, Settings.GROUP_DESCRIPTIONS.settingName)?.value?.toBoolean()
-
-                if(groupDescriptionsOn) {
-                    def desc = skillDefWithExtraRepo.findDescriptionBySkillId(skillDef.projectId, skillDef.skillId)
-                    skillsSummary.description = new SkillDescription(
-                            skillId: skillDef.skillId,
-                            description: InputSanitizer.unsanitizeForMarkdown(desc)
-                    );
-                }
 
                 List<SubjectDataLoader.SkillsAndPoints> groupChildren = skillDefAndUserPoints.children
                 Integer numSkillsRequired = skillDef.numSkillsRequired == - 1 ?  groupChildren.size() : skillDef.numSkillsRequired

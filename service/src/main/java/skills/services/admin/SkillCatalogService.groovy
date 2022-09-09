@@ -342,6 +342,10 @@ class SkillCatalogService {
             SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillId(projectIdTo, groupIdTo)
             SkillsValidator.isNotNull(skillDef, "Provided group id [${groupIdTo}] does not exist", projectIdTo)
             SkillsValidator.isTrue(skillDef.type == SkillDef.ContainerType.SkillsGroup, "Provided group id [${groupIdTo}] does not reference a group", projectIdTo)
+
+            // validate the provided groupId is in fact under the provided subject
+            SkillDef parent = relationshipService.getMySubjectParent(skillDef.id)
+            SkillsValidator.isTrue(parent.skillId == subjectIdTo, "Provided group id [${groupIdTo}] belongs to the subject [${parent.skillId}] but provided subject was [${subjectIdTo}]", projectIdTo)
         }
 
         Set<String> validateProjectIds = new HashSet<>()
