@@ -45,7 +45,7 @@ limitations under the License.
     computed: {
       metricLabel() {
         const chartInfo = this.tagCharts?.find((i) => i.key === this.$route.params.tagKey);
-        return chartInfo ? `${chartInfo.title}:` : '';
+        return chartInfo ? `${chartInfo.tagLabel}:` : '';
       },
       metricValue() {
         return this.$route.params.tagFilter;
