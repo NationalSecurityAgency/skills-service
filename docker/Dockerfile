@@ -1,10 +1,11 @@
-FROM openjdk:18-jdk-slim-bullseye
+FROM eclipse-temurin:18.0.2.1_1-jdk-jammy
 
 # install netcat so start script can use nc command to wait for DB to come up
-RUN apt-get update
-RUN apt-get -y install netcat-openbsd
-RUN apt-get -y install wget
-RUN apt-get -y install procps
+RUN apt-get update && apt-get install -y \
+netcat-openbsd \
+wget \
+procps \
+&& rm -rf /var/lib/apt/lists/*
 
 ARG BUILD_DATE
 ARG VERSION

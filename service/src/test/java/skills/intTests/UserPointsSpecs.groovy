@@ -23,6 +23,8 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 
+import static skills.intTests.utils.SkillsFactory.*
+
 class UserPointsSpecs extends DefaultIntSpec {
 
     String projId = SkillsFactory.defaultProjId
@@ -554,6 +556,64 @@ class UserPointsSpecs extends DefaultIntSpec {
         subjectUsersTwoOccurrences.data[0].totalPoints == 20
         subjectUsersThreeOccurrences.data[0].userId == user
         subjectUsersThreeOccurrences.data[0].totalPoints == 30
+    }
+
+    def 'get project users levels'() {
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def skill1 = createSkill(2, 1, 1, 0, 10, 512, 10,)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [skill1])
+
+        def p2subj2 = createSubject(2, 2)
+        def skill2 = createSkill(2, 2, 2, 0, 10, 512, 10,)
+        skillsService.createSubject(p2subj2)
+        skillsService.createSkill(skill2)
+
+        List<String> users = getRandomUsers(10)
+        skillsService.addSkill(skill1, users[0])
+
+        // overall level 1
+        skillsService.addSkill(skill1, users[1], new Date() - 1)
+        skillsService.addSkill(skill2, users[1])
+        skillsService.addSkill(skill1, users[2], new Date() - 1)
+        skillsService.addSkill(skill2, users[2])
+
+        // overall level 2
+        (5..1).each {
+            skillsService.addSkill(skill1, users[3], new Date() - it)
+        }
+
+        // overall level 4
+        (4..1).each {
+            skillsService.addSkill(skill1, users[4], new Date() - it)
+            skillsService.addSkill(skill1, users[5], new Date() - it)
+        }
+        (10..1).each {
+            skillsService.addSkill(skill2, users[4], new Date() - it)
+            skillsService.addSkill(skill2, users[5], new Date() - it)
+        }
+
+        when:
+        def projRes = skillsService.getProjectUsers(p2.projectId)
+        def subjRes = skillsService.getSubjectUsers(p2.projectId, p2subj1.subjectId)
+        def subj2Res = skillsService.getSubjectUsers(p2.projectId, p2subj2.subjectId)
+
+        then:
+        projRes.count == 6
+        projRes.totalCount == 6
+        def data = projRes.data.sort { it.userId }
+        data.userMaxLevel == [0, 1, 1, 2, 4, 4]
+
+        subjRes.count == 6
+        subjRes.totalCount == 6
+        def data1 = subjRes.data.sort { it.userId }
+        data1.userMaxLevel == [1, 1, 1, 3, 2, 2]
+
+        subj2Res.count == 4
+        subj2Res.totalCount == 4
+        def data2 = subj2Res.data.sort { it.userId }
+        data2.userMaxLevel == [1, 1, 5, 5]
+        data2.userId == [users[1], users[2], users[4], users[5]]
     }
 
 }
