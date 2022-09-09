@@ -337,7 +337,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
     left join UserPoints userPoints on sdChild.projectId = userPoints.projectId and sdChild.skillId = userPoints.skillId and userPoints.userId=?1
     left join ProjDef pd on sdChild.copiedFromProjectId = pd.projectId
-      where srd.parent=sdParent.id and  srd.child=sdChild.id and sdChild.enabled = 'true' and
+      where srd.parent=sdParent.id and  srd.child=sdChild.id and (sdChild.enabled = 'true' or sdChild.type = 'SkillsGroup') and
       sdParent.projectId=?2 and sdParent.skillId=?3 and srd.type in ?4 and sdChild.version<=?5 ''')
     List<Object []> findChildrenAndTheirUserPoints(String userId, String projectId, String skillId, List<SkillRelDef.RelationshipType> types, Integer version)
 

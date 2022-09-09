@@ -166,7 +166,8 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         summary1.todaysPoints == 200
     }
 
-    def "subject's points and today's points are caclulated for group's skills"() {
+
+    def "subject's points and today's points are calculated for group's skills"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skillsGroup = SkillsFactory.createSkillsGroup()

@@ -51,6 +51,8 @@ class SubjectDataLoader {
         String copiedFromProjectName
 
         SkillDependencySummary dependencyInfo
+
+        List<SkillsAndPoints> children = []
     }
 
     static class SkillsData {
@@ -97,7 +99,26 @@ class SubjectDataLoader {
             new SkillsAndPoints(skillDef: skillDefAndUserPoints.skillDef, points: points, todaysPoints: todayPoints, dependencyInfo: dependencyInfo,
                     copiedFromProjectName: skillDefAndUserPoints.copiedFromProjectName)
         }
+
+        skillsAndPoints = handleGroupSkills(skillsAndPoints)
         new SkillsData(childrenWithPoints: skillsAndPoints)
+    }
+
+    private List<SkillsAndPoints> handleGroupSkills(List<SkillsAndPoints> skillsAndPoints) {
+        List<SkillsAndPoints> childrenOfGroups = skillsAndPoints.findAll( { it.skillDef.groupId })
+        List<SkillsAndPoints> res = skillsAndPoints.findAll( { !it.skillDef.groupId })
+        if (childrenOfGroups) {
+            Map<String, List<SkillsAndPoints>> bySkillId = res.groupBy {it.skillDef.skillId}
+            childrenOfGroups.each {
+                SkillsAndPoints parent = bySkillId[it.skillDef.groupId]?.first()
+                if (!parent) {
+                    throw new IllegalStateException("Failed to find group for a skill under that group. groupSkillId=[${it.skillDef.groupId}], childSkillId=[${it.skillDef.skillId}]")
+                }
+                parent.children.add(it)
+            }
+        }
+
+        return res
     }
 
     @Profile

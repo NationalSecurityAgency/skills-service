@@ -695,7 +695,12 @@ class SkillsLoader {
         Integer points
         Integer todaysPoints
         if (loadSkills) {
-            SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, subjectDefinition, version, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
+            List<SkillRelDef.RelationshipType> relTypes = [
+                    SkillRelDef.RelationshipType.RuleSetDefinition, // skills under subject
+                    SkillRelDef.RelationshipType.SkillsGroupRequirement, // groups under subject
+                    SkillRelDef.RelationshipType.GroupSkillToSubject, // skills under groups
+            ]
+            SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, subjectDefinition, version, relTypes)
             skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints, false, userId, version)
             totalPoints = skillsRes ? skillsRes.collect({it.totalPoints}).sum() as Integer : 0
 
@@ -986,9 +991,10 @@ class SkillsLoader {
                     );
                 }
 
-                SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, skillDef, version, [SkillRelDef.RelationshipType.SkillsGroupRequirement])
-                Integer numSkillsRequired = skillsGroupAdminService.getActualNumSkillsRequred(skillDef.numSkillsRequired, skillDef.id)
-                skillsSummary.children = createSkillSummaries(thisProjDef, groupChildrenMeta.childrenWithPoints, false, userId, version)
+                List<SubjectDataLoader.SkillsAndPoints> groupChildren = skillDefAndUserPoints.children
+                Integer numSkillsRequired = skillDef.numSkillsRequired == - 1 ?  groupChildren.size() : skillDef.numSkillsRequired
+                skillsSummary.children = createSkillSummaries(thisProjDef, groupChildren, false, userId, version)
+
                 skillsSummary.points = skillsSummary.children ? skillsSummary.children.collect({it.points}).sort().takeRight(numSkillsRequired).sum() as Integer: 0
                 skillsSummary.todaysPoints = skillsSummary.children ? skillsSummary.children.collect({it.todaysPoints}).sort().takeRight(numSkillsRequired).sum() as Integer: 0
                 skillsRes << skillsSummary
