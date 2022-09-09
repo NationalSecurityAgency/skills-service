@@ -27,8 +27,8 @@ limitations under the License.
 
       <div class="row pl-3 mb-3">
         <div class="col">
-          <b-button variant="outline-info" @click="applyFilters" data-cy="users-filterBtn"><i class="fa fa-filter"/> Filter</b-button>
-          <b-button variant="outline-info" @click="reset" class="ml-1" data-cy="users-resetBtn"><i class="fa fa-times"/> Reset</b-button>
+          <b-button variant="outline-info" @click="applyFilters" data-cy="users-filterBtn"><i class="fa fa-filter" aria-hidden="true" /> Filter</b-button>
+          <b-button variant="outline-info" @click="reset" class="ml-1" data-cy="users-resetBtn"><i class="fa fa-times" aria-hidden="true" /> Reset</b-button>
         </div>
       </div>
 
@@ -38,13 +38,13 @@ limitations under the License.
                       @sort-changed="sortTable"
                       data-cy="usersTable">
         <template #head(userId)="data">
-          <span class="text-primary"><i class="fas fa-user skills-color-users"></i> {{ data.label }}</span>
+          <span class="text-primary"><i class="fas fa-user skills-color-users" aria-hidden="true"></i> {{ data.label }}</span>
         </template>
         <template #head(totalPoints)="data">
-          <span class="text-primary"><i class="far fa-arrow-alt-circle-up skills-color-points"></i> {{ data.label }}</span>
+          <span class="text-primary"><i class="far fa-arrow-alt-circle-up skills-color-points" aria-hidden="true"></i> {{ data.label }}</span>
         </template>
         <template #head(lastUpdated)="data">
-          <span class="text-primary"><i class="far fa-clock skills-color-events"></i> {{ data.label }}</span>
+          <span class="text-primary"><i class="far fa-clock skills-color-events" aria-hidden="true"></i> {{ data.label }}</span>
         </template>
 
         <template v-slot:cell(userId)="data">
@@ -55,7 +55,7 @@ limitations under the License.
                       variant="outline-info" size="sm" class="text-secondary"
                       v-b-tooltip.hover="'View User Details'"
                       :aria-label="`View details for user ${getUserDisplay(data.item)}`"
-                      data-cy="usersTable_viewDetailsBtn"><i class="fa fa-user-alt"/><span class="sr-only">view user details</span>
+                      data-cy="usersTable_viewDetailsBtn"><i class="fa fa-user-alt" aria-hidden="true"/><span class="sr-only">view user details</span>
             </b-button>
           </b-button-group>
         </template>
@@ -63,10 +63,14 @@ limitations under the License.
           <div :data-cy="`usr_progress-${data.item.userId}`">
             <div class="row">
               <div class="col-auto">
-                <span class="font-weight-bold text-primary" data-cy="progressPercent">{{ calcPercent(data.value) }}%</span>
+                <span class="font-weight-bold text-primary"
+                      :aria-label="`${calcPercent(data.value)} percent completed`"
+                      data-cy="progressPercent">{{ calcPercent(data.value) }}%</span>
               </div>
               <div class="col text-right">
-                <span class="text-primary font-weight-bold" data-cy="progressCurrentPoints">{{ data.value | number }}</span> / <span class="font-italic" data-cy="progressTotalPoints">{{ totalPoints | number }}</span>
+                <span class="text-primary font-weight-bold"
+                      :aria-label="`${data.value} out of ${totalPoints} total points`"
+                      data-cy="progressCurrentPoints">{{ data.value | number }}</span> / <span class="font-italic" data-cy="progressTotalPoints">{{ totalPoints | number }}</span>
               </div>
             </div>
             <b-progress :max="totalPoints" class="mb-3" height="5px" variant="info">
@@ -74,7 +78,7 @@ limitations under the License.
             </b-progress>
             <div v-if="data.item.userMaxLevel || data.item.userMaxLevel === 0" class="row" data-cy="progressLevels">
               <div class="col">
-                <i class="fas fa-trophy skills-color-levels" /> <span class="font-italic">Current Level: </span>
+                <i class="fas fa-trophy skills-color-levels" aria-hidden="true" /> <span class="font-italic">Current Level: </span>
                 <span v-if="data.item.userMaxLevel === 0" data-cy="progressCurrentLevel">None</span>
                 <span v-else class="font-weight-bold" data-cy="progressCurrentLevel">{{ data.item.userMaxLevel }}</span>
               </div>
