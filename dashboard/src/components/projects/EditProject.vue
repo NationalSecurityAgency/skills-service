@@ -58,13 +58,12 @@ limitations under the License.
         <div class="row">
           <div class="mt-2 col-12">
             <label>Description</label>
-            <loading-container :is-loading="loadingDescription">
+              <skills-spinner :is-loading="loadingDescription"/>
               <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{errors}"
                                   name="Project Description">
                 <markdown-editor v-model="internalProject.description" @input="updateDescription"></markdown-editor>
                 <small role="alert" class="form-text text-danger mb-3" data-cy="projectDescriptionError">{{ errors[0] }}</small>
               </ValidationProvider>
-            </loading-container>
           </div>
         </div>
 
@@ -87,15 +86,15 @@ limitations under the License.
 
 <script>
   import { extend } from 'vee-validate';
+  import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import MarkdownEditor from '@/components/utils/MarkdownEditor';
-  import LoadingContainer from '@/components/utils/LoadingContainer';
   import ProjectService from './ProjectService';
   import IdInput from '../utils/inputForm/IdInput';
   import InputSanitizer from '../utils/InputSanitizer';
 
   export default {
     name: 'EditProject',
-    components: { IdInput, MarkdownEditor, LoadingContainer },
+    components: { IdInput, MarkdownEditor, SkillsSpinner },
     props: ['project', 'isEdit', 'value', 'isCopy'],
     data() {
       return {
