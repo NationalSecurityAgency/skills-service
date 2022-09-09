@@ -478,11 +478,15 @@ class SkillsLoader {
         String nextSkillId;
         String prevSkillId;
         int totalSkills = 0;
+        int orderInGroup = 0;
 
         if(subjectId) {
             List<DisplayOrderRes> skills = skillDefRepo.findDisplayOrderByProjectIdAndSubjectId(projectId, subjectId)?.sort({a, b -> sortByDisplayOrder(a, b)})
             def currentSkill = skills.find({ it -> it.getSkillId() == skillId })
-            totalSkills = skills.findAll{ it.type != 'SkillsGroup' }.size();
+            def orderedGroup = skills.findAll({it.type != 'SkillsGroup'})?.sort({a, b -> sortByDisplayOrder(a, b)});
+            orderInGroup = orderedGroup.findIndexOf({it -> it.skillId == currentSkill.skillId && it.type != 'SkillsGroup'}) + 1;
+            totalSkills = orderedGroup.size();
+
             if (currentSkill) {
                 def withinSkillGroup = currentSkill.groupId != null ? true : false;
 
@@ -528,7 +532,7 @@ class SkillsLoader {
                 skillId: skillDef.skillId,
                 prevSkillId: prevSkillId,
                 nextSkillId: nextSkillId,
-                displayOrder: skillDef.displayOrder,
+                orderInGroup: orderInGroup,
                 totalSkills: totalSkills,
                 skill: isReusedSkill ? SkillReuseIdUtil.removeTag(unsanitizedName) : unsanitizedName,
                 points: points, todaysPoints: todayPoints,

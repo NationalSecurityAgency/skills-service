@@ -824,6 +824,18 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
                 proj1_skills[9].skillId,
                 null
         ]
+        summaries.orderInGroup == [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10
+        ]
     }
 
     def "skills with multiple groups (adjacent) - loading prev/last skillIds"() {
@@ -889,6 +901,18 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
                 proj1_skills[9].skillId,
                 null
         ]
+        summaries.orderInGroup == [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10
+        ]
     }
 
     def "skills with multiple groups (not adjacent) - loading prev/last skillIds"() {
@@ -953,6 +977,18 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
                 proj1_skills[8].skillId,
                 proj1_skills[9].skillId,
                 null
+        ]
+        summaries.orderInGroup == [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10
         ]
     }
 
