@@ -133,7 +133,7 @@ class PublicConfigController {
             if (customLevelName) {
                 res["levelDisplayName"] = customLevelName
             }
-            Boolean groupDescriptionsOn = settingsService.getProjectSetting(projectId, 'group-descriptions')?.value
+            Boolean groupDescriptionsOn = settingsService.getProjectSetting(projectId, Settings.GROUP_DESCRIPTIONS.settingName)?.value
             if (groupDescriptionsOn) {
                 res["groupDescriptionsOn"] = groupDescriptionsOn
             }

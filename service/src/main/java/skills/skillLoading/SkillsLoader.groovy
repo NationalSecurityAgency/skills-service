@@ -37,6 +37,7 @@ import skills.services.GlobalBadgesService
 import skills.services.LevelDefinitionStorageService
 import skills.services.admin.SkillsGroupAdminService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
+import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.settings.CommonSettings
 import skills.skillLoading.model.*
@@ -975,7 +976,7 @@ class SkillsLoader {
                         totalPoints: skillDef.totalPoints,
                 )
 
-                Boolean groupDescriptionsOn = settingsService.getProjectSetting(skillDef.projectId, 'group-descriptions')?.value?.toBoolean()
+                Boolean groupDescriptionsOn = settingsService.getProjectSetting(skillDef.projectId, Settings.GROUP_DESCRIPTIONS.settingName)?.value?.toBoolean()
 
                 if(groupDescriptionsOn) {
                     def desc = skillDefWithExtraRepo.findDescriptionBySkillId(skillDef.projectId, skillDef.skillId)
