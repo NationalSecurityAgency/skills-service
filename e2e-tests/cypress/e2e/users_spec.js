@@ -585,14 +585,17 @@ describe('Users Tests', () => {
         cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressPercent"]').should('have.text', '12%')
         cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressCurrentPoints"]').should('have.text', '4,662')
         cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressTotalPoints"]').should('have.text', '38,098')
+        cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressCurrentLevel"]').should('have.text', '1')
 
         cy.get('[data-cy="usr_progress-user2@skills.org"] [data-cy="progressPercent"]').should('have.text', '29%')
         cy.get('[data-cy="usr_progress-user2@skills.org"] [data-cy="progressCurrentPoints"]').should('have.text', '11,328')
         cy.get('[data-cy="usr_progress-user2@skills.org"] [data-cy="progressTotalPoints"]').should('have.text', '38,098')
+        cy.get('[data-cy="usr_progress-user2@skills.org"] [data-cy="progressCurrentLevel"]').should('have.text', '2')
 
         cy.get('[data-cy="usr_progress-user3@skills.org"] [data-cy="progressPercent"]').should('have.text', '34%')
         cy.get('[data-cy="usr_progress-user3@skills.org"] [data-cy="progressCurrentPoints"]').should('have.text', '13,326')
         cy.get('[data-cy="usr_progress-user3@skills.org"] [data-cy="progressTotalPoints"]').should('have.text', '38,098')
+        cy.get('[data-cy="usr_progress-user3@skills.org"] [data-cy="progressCurrentLevel"]').should('have.text', '2')
 
         // validate subject's users
         cy.visit('/administrator/projects/proj1/subjects/subj2/users');
@@ -605,10 +608,12 @@ describe('Users Tests', () => {
         cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressPercent"]').should('have.text', '38%')
         cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressCurrentPoints"]').should('have.text', '4,662')
         cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressTotalPoints"]').should('have.text', '11,988')
+        cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressCurrentLevel"]').should('have.text', '2')
 
         cy.get('[data-cy="usr_progress-user3@skills.org"] [data-cy="progressPercent"]').should('have.text', '55%')
         cy.get('[data-cy="usr_progress-user3@skills.org"] [data-cy="progressCurrentPoints"]').should('have.text', '6,660')
         cy.get('[data-cy="usr_progress-user3@skills.org"] [data-cy="progressTotalPoints"]').should('have.text', '11,988')
+        cy.get('[data-cy="usr_progress-user3@skills.org"] [data-cy="progressCurrentLevel"]').should('have.text', '3')
 
         // validate skill where users have 100%
         cy.clickNav('Skills');
@@ -623,10 +628,12 @@ describe('Users Tests', () => {
         cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressPercent"]').should('have.text', '100%')
         cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressCurrentPoints"]').should('have.text', '4,662')
         cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressTotalPoints"]').should('have.text', '4,662')
+        cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressLevels"]').should('not.exist')
 
         cy.get('[data-cy="usr_progress-user3@skills.org"] [data-cy="progressPercent"]').should('have.text', '100%')
         cy.get('[data-cy="usr_progress-user3@skills.org"] [data-cy="progressCurrentPoints"]').should('have.text', '4,662')
         cy.get('[data-cy="usr_progress-user3@skills.org"] [data-cy="progressTotalPoints"]').should('have.text', '4,662')
+        cy.get('[data-cy="usr_progress-user3@skills.org"] [data-cy="progressLevels"]').should('not.exist')
 
         // validate badge's users
         cy.visit('/administrator/projects/proj1/badges/badge1/users');
@@ -639,10 +646,29 @@ describe('Users Tests', () => {
         cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressPercent"]').should('have.text', '20%')
         cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressCurrentPoints"]').should('have.text', '4,662')
         cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressTotalPoints"]').should('have.text', '23,098')
+        cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressLevels"]').should('not.exist')
 
         cy.get('[data-cy="usr_progress-user3@skills.org"] [data-cy="progressPercent"]').should('have.text', '57%')
         cy.get('[data-cy="usr_progress-user3@skills.org"] [data-cy="progressCurrentPoints"]').should('have.text', '13,326')
         cy.get('[data-cy="usr_progress-user3@skills.org"] [data-cy="progressTotalPoints"]').should('have.text', '23,098')
+        cy.get('[data-cy="usr_progress-user3@skills.org"] [data-cy="progressLevels"]').should('not.exist')
+    });
+
+    it('users with no levels', () => {
+        cy.createSkill(1, 1, 3,  { pointIncrement: '1111', numPerformToCompletion: '10', pointIncrementInterval: 0 })
+
+        const userId = 'user0'
+        const userId1 = 'user1'
+        cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId })
+
+        cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: userId1 })
+        cy.doReportSkill({ project: 1, skill: 3, subjNum: 1, userId: userId1 })
+
+        cy.visit('/administrator/projects/proj1/users');
+        cy.get('[data-cy="usr_progress-user1"] [data-cy="progressCurrentLevel"]').should('have.text', '1')
+        cy.get('[data-cy="usr_progress-user0"] [data-cy="progressCurrentLevel"]').should('have.text', 'None')
     });
 
 })
+
+

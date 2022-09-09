@@ -427,7 +427,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 max(ua.last_name) as lastName,
                 max(ua.dn) as dn,
                 max(ua.email) as email,
-                max(ua.user_id_for_display) as userIdForDisplay 
+                max(ua.user_id_for_display) as userIdForDisplay,
+                case when max(uAchievement.level) is not null then max(uAchievement.level) else 0 end as userMaxLevel
             FROM user_points up
             LEFT JOIN (
                 SELECT upa.user_id, 
@@ -438,6 +439,14 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 )
                 GROUP BY upa.user_id
             ) upa ON upa.user_id = up.user_id
+            LEFT JOIN (
+                SELECT uAchievement.user_id, max(uAchievement.level) as level
+                FROM user_achievement uAchievement 
+                WHERE uAchievement.project_id = ?1
+                    and uAchievement.skill_id is null
+                    and uAchievement.level is not null
+                GROUP BY uAchievement.user_id
+            ) uAchievement ON uAchievement.user_id = up.user_id
             JOIN user_attrs ua ON ua.user_id=up.user_id
             WHERE 
                 up.project_id=?1 and 
@@ -595,7 +604,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             max(ua.last_name) as lastName,
             max(ua.dn) as dn,
             max(ua.email) as email,
-            max(ua.user_id_for_display) as userIdForDisplay 
+            max(ua.user_id_for_display) as userIdForDisplay,
+            case when max(uAchievement.level) is not null then max(uAchievement.level) else 0 end as userMaxLevel 
         FROM user_points up
         LEFT JOIN (
             SELECT upa.user_id, 
@@ -606,6 +616,14 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             )
             GROUP BY upa.user_id
         ) upa ON upa.user_id = up.user_id
+        LEFT JOIN (
+            SELECT uAchievement.user_id, max(uAchievement.level) as level
+            FROM user_achievement uAchievement 
+            WHERE uAchievement.project_id = :projectId
+                and uAchievement.skill_id = :subjectId
+                and uAchievement.level is not null
+            GROUP BY uAchievement.user_id
+        ) uAchievement ON uAchievement.user_id = up.user_id    
         JOIN user_attrs ua ON ua.user_id=up.user_id
         WHERE 
             up.skill_ref_id in (select s_s.id from subj_skills s_s) and 
