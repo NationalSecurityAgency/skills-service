@@ -883,66 +883,21 @@ describe('Projects Tests', () => {
 
         const tableSelector = '[data-cy=roleManagerTable]';
         const rowSelector = `${tableSelector} tbody tr`;
+
+        cy.get(`${tableSelector} [data-cy="userCell_root@skills.org"]`);
         cy.get(rowSelector)
             .should('have.length', 2)
             .as('cyRows');
 
-        if (!Cypress.env('oauthMode')) {
-            cy.get('@cyRows')
-                .eq(0)
-                .find('td')
-                .as('row1');
-            cy.get('@row1')
-                .eq(0)
-                .contains('root@skills.org');
+        cy.get(`${tableSelector} [data-cy="userCell_root@skills.org"] [data-cy="removeUserBtn"]`)
+            .click();
+        cy.contains('YES, Delete It')
+            .click();
 
-            // remove the other user now
-            cy.get(`${tableSelector} [data-cy="removeUserBtn"]`)
-                .eq(0)
-                .click();
-            cy.contains('YES, Delete It')
-                .click();
-
-            cy.get(rowSelector)
-                .should('have.length', 1)
-                .as('cyRows1');
-            cy.get('@cyRows1')
-                .eq(0)
-                .find('td')
-                .as('rowA');
-            cy.get('@rowA')
-                .eq(0)
-                .contains('root@skills.org')
-                .should('not.exist');
-        } else {
-            // in oauth mode the initial user has a different username which sorts lower than the root user in the default asc sort
-            cy.get('@cyRows')
-                .eq(1)
-                .find('td')
-                .as('row1');
-            cy.get('@row1')
-                .eq(1)
-                .contains('root@skills.org');
-
-            // remove the other user now
-            cy.get(`${tableSelector} [data-cy="removeUserBtn"]`)
-                .eq(1)
-                .click();
-            cy.contains('YES, Delete It')
-                .click();
-
-            cy.get(rowSelector)
-                .should('have.length', 1)
-                .as('cyRows1');
-            cy.get('@cyRows1')
-                .eq(0)
-                .find('td')
-                .as('rowA');
-            cy.get('@rowA')
-                .eq(0)
-                .contains('root@skills.org')
-                .should('not.exist');
-        }
+        cy.get(`${tableSelector} [data-cy="userCell_root@skills.org"]`).should('not.exist')
+        cy.get(rowSelector)
+            .should('have.length', 1)
+            .as('cyRows1');
     });
 
     it('Add Admin - forward slash character does not cause error', () => {
