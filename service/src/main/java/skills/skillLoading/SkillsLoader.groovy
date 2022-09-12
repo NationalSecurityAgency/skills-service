@@ -409,6 +409,22 @@ class SkillsLoader {
         Integer points
     }
 
+    private DisplayOrderRes getNextSkill(List<DisplayOrderRes> skills, Boolean prev, int displayOrder, String groupId) {
+        def skill
+        // There is no next element - i.e. the start/end of the group has been reached, so exit the group
+
+        def isGroupNext = skills.findAll({ it.groupId != groupId && it.getSkillGroupDisplayOrder() == displayOrder})?.sort({a, b -> a.displayOrder <=> b.displayOrder})
+        if(isGroupNext.size() > 0) {
+            // Next item in the row is a group, so grab the first / last element
+            skill = prev ? isGroupNext.last() : isGroupNext.first()
+        }
+        else {
+            skill = skills.find({it -> it.groupId == null && it.displayOrder == displayOrder})
+        }
+
+        return skill
+    }
+
     private String getAdjacentSkillId(Boolean withinSkillGroup, DisplayOrderRes currentSkill, List<DisplayOrderRes> skills, Boolean prev) {
         def skill
         def displayOrder = prev ? currentSkill.displayOrder - 1 : currentSkill.displayOrder + 1;
@@ -421,27 +437,12 @@ class SkillsLoader {
             if(!skill) {
                 // There is no next element - i.e. the start/end of the group has been reached, so exit the group
                 displayOrder = prev ? currentSkill.skillGroupDisplayOrder - 1 : currentSkill.skillGroupDisplayOrder + 1;
-
-                def isGroupNext = skills.findAll({ it.groupId != currentSkill.groupId && it.getSkillGroupDisplayOrder() == displayOrder})?.sort({a, b -> a.displayOrder <=> b.displayOrder})
-                if(isGroupNext.size() > 0) {
-                    // Next item in the row is a group, so grab the first / last element
-                    skill = prev ? isGroupNext.last() : isGroupNext.first()
-                }
-                else {
-                    skill = skills.find({it -> it.groupId == null && it.displayOrder == displayOrder})
-                }
+                skill = getNextSkill(skills, prev, displayOrder, currentSkill.groupId)
             }
         }
         else {
             // Not within a group, so navigate to the next element
-            def isGroupNext = skills.findAll({ it.groupId != currentSkill.groupId && it.getSkillGroupDisplayOrder() == displayOrder})?.sort({a, b -> a.displayOrder <=> b.displayOrder})
-            if(isGroupNext.size() > 0) {
-                // Next item in the row is a group, so grab the first / last element
-                skill = prev ? isGroupNext.last() : isGroupNext.first()
-            }
-            else {
-                skill = skills.find({it -> it.groupId == null && it.displayOrder == displayOrder})
-            }
+            skill = getNextSkill(skills, prev, displayOrder, currentSkill.groupId)
         }
 
         return skill?.skillId
