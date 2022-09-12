@@ -409,42 +409,39 @@ class SkillsLoader {
         Integer points
     }
 
-    private DisplayOrderRes getSkillFromSkillGroup(DisplayOrderRes currentSkill, List<DisplayOrderRes> skills, Boolean prev) {
-        List<DisplayOrderRes> group = skills.findAll({it -> it.groupId == currentSkill.skillId});
-        if(group) {
-            return prev ? group.last() : group.first()
-        }
-        return null
-    }
-
-    private DisplayOrderRes getSkill(Integer displayOrder, List<DisplayOrderRes> skills, List<DisplayOrderRes> filteredSkills, Boolean prev) {
-        DisplayOrderRes newSkill = filteredSkills.find({ it -> it.getDisplayOrder() == displayOrder });
-        if(newSkill?.type == SkillDef.ContainerType.SkillsGroup.toString()) {
-            newSkill = getSkillFromSkillGroup(newSkill, skills, prev)
-        }
-        return newSkill
-    }
-
     private String getAdjacentSkillId(Boolean withinSkillGroup, DisplayOrderRes currentSkill, List<DisplayOrderRes> skills, Boolean prev) {
         def skill
         def displayOrder = prev ? currentSkill.displayOrder - 1 : currentSkill.displayOrder + 1;
 
         if(withinSkillGroup) {
+            // Navigating within a group, so try to find the next element
             List <DisplayOrderRes> currentGroup = skills.findAll({it.groupId == currentSkill.groupId});
             skill = currentGroup.find({ it -> it.displayOrder == displayOrder })
 
             if(!skill) {
+                // There is no next element - i.e. the start/end of the group has been reached, so exit the group
                 displayOrder = prev ? currentSkill.skillGroupDisplayOrder - 1 : currentSkill.skillGroupDisplayOrder + 1;
 
-                def filteredSkills = skills.findAll({it -> it.groupId == null})
-                if(!skill) {
-                    skill = getSkill(displayOrder, skills, filteredSkills, prev)
+                def isGroupNext = skills.findAll({ it.groupId != currentSkill.groupId && it.getSkillGroupDisplayOrder() == displayOrder})?.sort({a, b -> a.displayOrder <=> b.displayOrder})
+                if(isGroupNext.size() > 0) {
+                    // Next item in the row is a group, so grab the first / last element
+                    skill = prev ? isGroupNext.last() : isGroupNext.first()
+                }
+                else {
+                    skill = skills.find({it -> it.groupId == null && it.displayOrder == displayOrder})
                 }
             }
         }
         else {
-            def filteredSkills = skills.findAll({it -> it.groupId == null})
-            skill = getSkill(displayOrder, skills, filteredSkills, prev)
+            // Not within a group, so navigate to the next element
+            def isGroupNext = skills.findAll({ it.groupId != currentSkill.groupId && it.getSkillGroupDisplayOrder() == displayOrder})?.sort({a, b -> a.displayOrder <=> b.displayOrder})
+            if(isGroupNext.size() > 0) {
+                // Next item in the row is a group, so grab the first / last element
+                skill = prev ? isGroupNext.last() : isGroupNext.first()
+            }
+            else {
+                skill = skills.find({it -> it.groupId == null && it.displayOrder == displayOrder})
+            }
         }
 
         return skill?.skillId
@@ -457,7 +454,7 @@ class SkillsLoader {
                     return a.skillGroupDisplayOrder <=> b.skillGroupDisplayOrder
                 }
             }
-            else if (a.groupId != null || b.groupId != null ) {
+            else {
                 if( a.groupId != null && b.groupId == null ) {
                     return a.skillGroupDisplayOrder <=> b.displayOrder
                 }
@@ -483,8 +480,8 @@ class SkillsLoader {
         if(subjectId) {
             List<DisplayOrderRes> skills = skillDefRepo.findDisplayOrderByProjectIdAndSubjectId(projectId, subjectId)?.sort({a, b -> sortByDisplayOrder(a, b)})
             def currentSkill = skills.find({ it -> it.getSkillId() == skillId })
-            def orderedGroup = skills.findAll({it.type != 'SkillsGroup'})?.sort({a, b -> sortByDisplayOrder(a, b)});
-            orderInGroup = orderedGroup.findIndexOf({it -> it.skillId == currentSkill.skillId && it.type != 'SkillsGroup'}) + 1;
+            def orderedGroup = skills?.sort({a, b -> sortByDisplayOrder(a, b)});
+            orderInGroup = orderedGroup.findIndexOf({it -> it.skillId == currentSkill.skillId}) + 1;
             totalSkills = orderedGroup.size();
 
             if (currentSkill) {
