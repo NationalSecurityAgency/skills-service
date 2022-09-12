@@ -14,19 +14,19 @@
 
 name: Continuous Integration
 
-on:
-  push:
-    paths-ignore:
-      - 'README.md'
-      - '.github/workflows/build-and-test-postgres.yml'
-      - '.github/workflows/publish-image-snapshot.yml'
-      - '.gitlab-ci.yml'
-  pull_request:
-    paths-ignore:
-      - 'README.md'
-      - '.github/workflows/build-and-test-postgres.yml'
-      - '.github/workflows/publish-image-snapshot.yml'
-      - '.gitlab-ci.yml'
+#on:
+#  push:
+#    paths-ignore:
+#      - 'README.md'
+#      - '.github/workflows/build-and-test-postgres.yml'
+#      - '.github/workflows/publish-image-snapshot.yml'
+#      - '.gitlab-ci.yml'
+#  pull_request:
+#    paths-ignore:
+#      - 'README.md'
+#      - '.github/workflows/build-and-test-postgres.yml'
+#      - '.github/workflows/publish-image-snapshot.yml'
+#      - '.gitlab-ci.yml'
 
 jobs:
   pre_job:
