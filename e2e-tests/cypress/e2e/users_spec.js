@@ -669,6 +669,66 @@ describe('Users Tests', () => {
         cy.get('[data-cy="usr_progress-user0"] [data-cy="progressCurrentLevel"]').should('have.text', 'None')
     });
 
+    it('show user tag in users table', () => {
+        const res = `
+        {"data":
+            [
+                  {"userIdForDisplay":"skills@evoforge.org","firstName":"Skill","lastName":"Tree","email":"skills@evoforge.org","dn":null,"userId":"skills@evoforge.org","totalPoints":492,"lastUpdated":"2021-03-04T19:22:44.714+00:00","userTag":"tagA"},
+                  {"userIdForDisplay":"skills@evo-forge.org","firstName":"Skill","lastName":"Tree","email":"skills@evoforge.org","dn":null,"userId":"skills@evoforge.org","totalPoints":492,"lastUpdated":"2021-03-04T19:22:44.714+00:00","userTag":"tagB"},
+                  {"userIdForDisplay":"foo-hydra","firstName":"Skill","lastName":"Tree","email":"skills@evoforge.org","dn":null,"userId":"skills@evoforge.org","totalPoints":492,"lastUpdated":"2021-03-04T19:22:44.714+00:00","userTag":"tagC"}
+            ],
+        "count":3,"totalCount":3}`;
+        cy.intercept('/admin/projects/proj1/users?query=*', {
+            statusCode: 200,
+            body: res,
+        }).as('getUsers');
+
+        cy.request('POST', `/api/projects/proj1/skills/skill1`);
+
+        cy.visit('/administrator/projects/proj1/');
+        cy.clickNav('Users');
+        cy.wait('@getUsers')
+
+        cy.get(`${tableSelector} th`).should('have.length', 4)
+        cy.get(`${tableSelector}`).should('contain', 'Org');
+        cy.validateTable(tableSelector, [
+            [{colIndex: 1, value: 'tagA'}],
+            [{colIndex: 1, value: 'tagB'}],
+            [{colIndex: 1, value: 'tagC'}]
+        ], 5);
+    });
+
+    it('do not show user tag in users table when not configured', () => {
+        const res = `
+        {"data":
+            [
+                  {"userIdForDisplay":"skills@evoforge.org","firstName":"Skill","lastName":"Tree","email":"skills@evoforge.org","dn":null,"userId":"skills@evoforge.org","totalPoints":492,"lastUpdated":"2021-03-04T19:22:44.714+00:00","userTag":"tagA"},
+                  {"userIdForDisplay":"skills@evo-forge.org","firstName":"Skill","lastName":"Tree","email":"skills@evoforge.org","dn":null,"userId":"skills@evoforge.org","totalPoints":492,"lastUpdated":"2021-03-04T19:22:44.714+00:00","userTag":"tagB"},
+                  {"userIdForDisplay":"foo-hydra","firstName":"Skill","lastName":"Tree","email":"skills@evoforge.org","dn":null,"userId":"skills@evoforge.org","totalPoints":492,"lastUpdated":"2021-03-04T19:22:44.714+00:00","userTag":"tagC"}
+            ],
+        "count":3,"totalCount":3}`;
+        cy.intercept('/admin/projects/proj1/users?query=*', {
+            statusCode: 200,
+            body: res,
+        }).as('getUsers');
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                delete conf.usersTableAdditionalUserTagKey;
+                delete conf.usersTableAdditionalUserTagLabel;
+                res.send(conf);
+            });
+        }).as('loadConfig');
+
+        cy.request('POST', `/api/projects/proj1/skills/skill1`);
+
+        cy.visit('/administrator/projects/proj1/');
+        cy.wait('@loadConfig')
+        cy.clickNav('Users');
+        cy.wait('@getUsers')
+        cy.get(`${tableSelector} th`).should('have.length', 3)
+        cy.get(`${tableSelector}`).should('not.contain', 'Org');
+    });
 })
 
 
