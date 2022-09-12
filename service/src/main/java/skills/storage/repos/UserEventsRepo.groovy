@@ -346,6 +346,65 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
     """, nativeQuery = true)
     Stream<WeekCountItem> getEventCountForUserGroupedByWeek(@Param("userId") String userId, @Param("start") Date start, @Param("projectIds") List<String> projectIds)
 
+    @Query(value="""
+        select min(all_events.project_id) as projectId, all_events.event_time as day, count(distinct all_events.user_id) as count from 
+        (
+            SELECT uue.user_id AS user_id,
+                   def.project_id AS project_id,
+                   uue.skill_ref_id AS skill_ref_id,
+                   uue.event_time AS event_time,
+                   uue.event_type AS event_type,
+                   uue.count AS count,
+                   uue.week_number AS week_number
+            FROM user_events uue 
+                INNER JOIN (
+                    select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
+                    from skill_definition sd 
+                    where sd.type = 'Skill' 
+                    and sd.project_id = :projectId
+                    and sd.enabled = 'true'
+                ) def ON uue.skill_ref_id = def.id
+                INNER JOIN user_tags AS userTag ON uue.user_id = userTag.user_id
+            WHERE
+                uue.event_time >= :start AND
+                uue.event_type = :#{#type.name()} AND
+                userTag.key = :userTagKey AND
+                userTag.value = :userTagValue
+        ) all_events
+        group by all_events.event_time 
+        order by all_events.event_time desc
+    """, nativeQuery = true)
+    Stream<DayCountItem> getDistinctUserCountForProjectAndUserTag(@Param("projectId") String projectId, @Param("userTagKey") String userTagKey, @Param("userTagValue") String userTagValue, @Param("start") Date start, @Param("type") EventType type)
+
+    @Query(value="""
+        select min(all_events.project_id) as projectId, all_events.week_number as weekNumber, count(distinct all_events.user_id) as count from 
+        (
+            SELECT uue.user_id AS user_id,
+                   def.project_id AS project_id,
+                   uue.skill_ref_id AS skill_ref_id,
+                   uue.event_time AS event_time,
+                   uue.event_type AS event_type,
+                   uue.count AS count,
+                   uue.week_number AS week_number
+            FROM user_events uue 
+                INNER JOIN (
+                    select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
+                    from skill_definition sd 
+                    where sd.type = 'Skill' 
+                    and sd.project_id = :projectId
+                    and sd.enabled = 'true'
+                ) def ON uue.skill_ref_id = def.id
+                INNER JOIN user_tags AS userTag ON uue.user_id = userTag.user_id
+            WHERE
+                uue.event_time >= :start AND
+                userTag.key = :userTagKey AND
+                userTag.value = :userTagValue
+        ) all_events
+        group by all_events.week_number 
+        order by all_events.week_number desc
+    """, nativeQuery = true)
+    Stream<DayCountItem> getDistinctUserCountForProjectAndUserTagGroupedByWeek(@Param("projectId") String projectId, @Param("userTagKey") String userTagKey, @Param("userTagValue") String userTagValue, @Param("start") Date start)
+
 
     @Query(value="""
         select min(all_events.project_id) as projectId, all_events.event_time as day, count(distinct all_events.user_id) as count from 

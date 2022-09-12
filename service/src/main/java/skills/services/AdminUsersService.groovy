@@ -243,7 +243,7 @@ class AdminUsersService {
         if (totalProjectUsersWithSkills) {
             query = query ? query.trim() : ''
             result.totalCount = totalProjectUsersWithSkills
-            List<ProjectUser> projectUsers = nativeQueriesRepo.findDistinctProjectUsersByProjectIdAndSubjectIdAndUserIdLike(projectId, usersTableAdditionalUserTagKey, subjectId, query, pageRequest)
+            List<ProjectUser> projectUsers = userPointsRepo.findDistinctProjectUsersByProjectIdAndSubjectIdAndUserIdLike(projectId, usersTableAdditionalUserTagKey, subjectId, query, pageRequest)
             result.data = projectUsers
             if (!projectUsers) {
                 result.count = 0

@@ -651,31 +651,6 @@ class H2NativeRepo implements NativeQueriesRepo {
         return lock
     }
 
-    @Override
-    List<ProjectUser> findDistinctProjectUsersByProjectIdAndSubjectIdAndUserIdLike(String projectId,
-                                                                                   String usersTableAdditionalUserTagKey,
-                                                                                   String subjectId,
-                                                                                   String userIdQuery,
-                                                                                   Pageable pageable) {
-
-        if (!skillDefRepo.existsByProjectIdAndSkillIdAndTypeInAllIgnoreCase(projectId, subjectId, [SkillDef.ContainerType.Subject])) {
-            ErrorCode code = ErrorCode.SubjectNotFound
-            throw new SkillException("Subject [${subjectId}] doesn't exist.", projectId, null, code)
-        }
-
-        List<SkillDefPartial> skills = skillRelDefRepo.getSkillsWithCatalogStatus(projectId, subjectId)
-        List<String> subjectSkillIds = []
-        skills?.each {
-            subjectSkillIds.add(it.skillId)
-            if (it.skillType == SkillDef.ContainerType.SkillsGroup) {
-                skillRelDefRepo.getChildrenPartial(projectId, it.skillId, SkillRelDef.RelationshipType.SkillsGroupRequirement)?.each { SkillDefPartial groupSkill ->
-                    subjectSkillIds.add(groupSkill.skillId)
-                }
-            }
-        }
-
-       return userPointsRepo.findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLike(projectId, usersTableAdditionalUserTagKey, subjectSkillIds, userIdQuery, pageable)
-    }
 
     @Override
     Long countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(String projectId, String subjectId, String userIdQuery) {
