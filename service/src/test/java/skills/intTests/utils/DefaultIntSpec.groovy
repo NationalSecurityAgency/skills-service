@@ -241,19 +241,17 @@ class DefaultIntSpec extends Specification {
         }
         if (createEmail) {
             userIds?.each {
-                if (!it.contains('@')) {
-                    try {
-                        UserAttrs userAttrs = new UserAttrs()
-                        userAttrs.userId = it.toLowerCase()
-                        userAttrs.userIdForDisplay = it
-                        userAttrs.email = EmailUtils.generateEmaillAddressFor(it)
-                        userAttrs.firstName = "${it.toUpperCase()}_first"
-                        userAttrs.lastName = "${it.toUpperCase()}_last"
-                        userAttrs.userTagsLastUpdated = new Date()
-                        userAttrsRepo.save(userAttrs)
-                    } catch (Exception e) {
-                        throw new RuntimeException("error initializing UserAttrs for [${it}]", e)
-                    }
+                try {
+                    UserAttrs userAttrs = new UserAttrs()
+                    userAttrs.userId = it.toLowerCase()
+                    userAttrs.userIdForDisplay = it
+                    userAttrs.email = it.contains('@') ? it : EmailUtils.generateEmaillAddressFor(it)
+                    userAttrs.firstName = "${it.toUpperCase()}_first"
+                    userAttrs.lastName = "${it.toUpperCase()}_last"
+                    userAttrs.userTagsLastUpdated = new Date()
+                    userAttrsRepo.save(userAttrs)
+                } catch (Exception e) {
+                    throw new RuntimeException("error initializing UserAttrs for [${it}]", e)
                 }
             }
 
