@@ -29,10 +29,14 @@ limitations under the License.
              data-cy="projShareUrl"
              readonly />
       <div class="input-group-append">
-        <div class="input-group-text"><i class="fas fa-copy" aria-hidden="true"/></div>
+        <b-button variant="secondary"
+                  data-cy="copySharedUrl"
+                  @click="copyUrl"
+                  aria-label="Copy project share url"><i class="fas fa-copy" aria-hidden="true"/>
+        </b-button>
       </div>
     </div>
-    <div class="text-center text-success mt-2">
+    <div class="text-center text-success mt-2" :class="{ 'animate__bounceIn': visualEffectUrlWasCopied }">
       <i class="fas fa-check-double" aria-hidden="true"></i> URL was copied!
     </div>
     <div class="text-primary mt-1  text-center">
@@ -62,6 +66,7 @@ limitations under the License.
     data() {
       return {
         show: this.value,
+        visualEffectUrlWasCopied: false,
       };
     },
     watch: {
@@ -69,10 +74,28 @@ limitations under the License.
         this.$emit('input', newValue);
       },
     },
+    mounted() {
+      this.letUserKnowUrlWasCopied();
+    },
     methods: {
       publishHidden(e) {
         this.show = false;
         this.$emit('hidden', { ...e });
+      },
+      copyUrl() {
+        navigator.clipboard.writeText(this.shareUrl)
+          .then(() => {
+            this.letUserKnowUrlWasCopied();
+          });
+      },
+      letUserKnowUrlWasCopied() {
+        this.$nextTick(() => {
+          this.visualEffectUrlWasCopied = true;
+          setTimeout(() => {
+            this.visualEffectUrlWasCopied = false;
+          }, 2000);
+          this.$announcer.polite('Copied project\'s share url');
+        });
       },
     },
   };
