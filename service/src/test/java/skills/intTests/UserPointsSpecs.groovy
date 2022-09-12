@@ -569,7 +569,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         skillsService.createSubject(p2subj2)
         skillsService.createSkill(skill2)
 
-        List<String> users = getRandomUsers(10)
+        List<String> users = getRandomUsers(6)
         skillsService.addSkill(skill1, users[0])
 
         // overall level 1
@@ -601,17 +601,17 @@ class UserPointsSpecs extends DefaultIntSpec {
         then:
         projRes.count == 6
         projRes.totalCount == 6
-        def data = projRes.data.sort { it.userId }
+        def data = users.collect {String usr -> projRes.data.find { it.userId == usr} }
         data.userMaxLevel == [0, 1, 1, 2, 4, 4]
 
         subjRes.count == 6
         subjRes.totalCount == 6
-        def data1 = subjRes.data.sort { it.userId }
+        def data1 = users.collect {String usr -> subjRes.data.find { it.userId == usr} }
         data1.userMaxLevel == [1, 1, 1, 3, 2, 2]
 
         subj2Res.count == 4
         subj2Res.totalCount == 4
-        def data2 = subj2Res.data.sort { it.userId }
+        def data2 = users.collect {String usr -> subj2Res.data.find { it.userId == usr} }
         data2.userMaxLevel == [1, 1, 5, 5]
         data2.userId == [users[1], users[2], users[4], users[5]]
     }
