@@ -827,7 +827,7 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
 
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
-        return adminUsersService.loadUsersPage(projectId, query, pageRequest)
+        return adminUsersService.loadUsersPageForProject(projectId, query, pageRequest)
     }
 
     @GetMapping(value="/projects/{projectId}/{userId}/canAccess", produces='application/json')
@@ -880,7 +880,7 @@ class AdminController {
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
 
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
-        return adminUsersService.loadUsersPage(projectId, Collections.singletonList(skillId), query, pageRequest)
+        return adminUsersService.loadUsersPageForSkills(projectId, Collections.singletonList(skillId), query, pageRequest)
     }
 
     @GetMapping(value = "/projects/{projectId}/badges/{badgeId}/users", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -901,7 +901,7 @@ class AdminController {
         if (!skillIds) {
             return new TableResult()
         }
-        return adminUsersService.loadUsersPage(projectId, skillIds, query, pageRequest)
+        return adminUsersService.loadUsersPageForSkills(projectId, skillIds, query, pageRequest)
     }
 
     @GetMapping(value = "/projects/{projectId}/userTags/{userTagKey}/{userTagValue}/users", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -919,7 +919,7 @@ class AdminController {
         SkillsValidator.isNotBlank(userTagValue, "Tag Value", projectId)
 
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
-        return adminUsersService.loadUsersPage(projectId, userTagKey, userTagValue, query, pageRequest)
+        return adminUsersService.loadUsersPageForUserTag(projectId, userTagKey, userTagValue, query, pageRequest)
     }
 
     @RequestMapping(value = "/projects/{projectId}/badge/{badgeId}/skills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

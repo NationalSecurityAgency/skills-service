@@ -507,6 +507,11 @@ where sum.sumUserId = points.user_id and points.skill_id is null and points.proj
     }
 
     @Override
+    List<ProjectUser> findDistinctProjectUsersByProjectIdAndSubjectIdAndUserIdLike(String projectId, String usersTableAdditionalUserTagKey, String subjectId, String userId, Pageable pageable) {
+        userPointsRepo.findDistinctProjectUsersByProjectIdAndSubjectIdAndUserIdLike(projectId, usersTableAdditionalUserTagKey, subjectId, userId, pageable)
+    }
+
+    @Override
     Long countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(String projectId, String subjectId, String userId) {
         userPointsRepo.countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(projectId, subjectId, userId)
     }

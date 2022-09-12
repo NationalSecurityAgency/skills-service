@@ -25,4 +25,5 @@ interface ProjectUser {
     String getEmail()
     String getUserIdForDisplay()
     Integer getUserMaxLevel()
+    String getUserTag()
 }

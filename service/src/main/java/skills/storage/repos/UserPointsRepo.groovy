@@ -428,7 +428,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 max(ua.dn) as dn,
                 max(ua.email) as email,
                 max(ua.user_id_for_display) as userIdForDisplay,
-                case when max(uAchievement.level) is not null then max(uAchievement.level) else 0 end as userMaxLevel
+                case when max(uAchievement.level) is not null then max(uAchievement.level) else 0 end as userMaxLevel, 
+                max(ut.value) as userTag
             FROM user_points up
             LEFT JOIN (
                 SELECT upa.user_id, 
@@ -448,14 +449,15 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 GROUP BY uAchievement.user_id
             ) uAchievement ON uAchievement.user_id = up.user_id
             JOIN user_attrs ua ON ua.user_id=up.user_id
+            LEFT JOIN (SELECT ut.user_id, max(ut.value) AS value FROM user_tags ut WHERE ut.key = ?2 group by ut.user_id) ut ON ut.user_id=ua.user_id
             WHERE 
                 up.project_id=?1 and 
-                (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT(\'%\', ?2, \'%\'))  OR
-                 lower(ua.user_id_for_display) like lower(CONCAT('%', ?2, '%'))
+                (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT(\'%\', ?3, \'%\'))  OR
+                 lower(ua.user_id_for_display) like lower(CONCAT('%', ?3, '%'))
                 ) and 
                 up.skill_id is null 
             GROUP BY up.user_id''', nativeQuery = true)
-    List<ProjectUser> findDistinctProjectUsersAndUserIdLike(String projectId, String query, Pageable pageable)
+    List<ProjectUser> findDistinctProjectUsersAndUserIdLike(String projectId, String usersTableAdditionalUserTagKey, String query, Pageable pageable)
 
     @Query(value='''SELECT COUNT(*)
         FROM (SELECT DISTINCT up.user_id from user_points up where up.project_id=?1 and up.skill_id in (?2)) AS temp''',
@@ -528,26 +530,28 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 max(ua.last_name) as lastName,
                 max(ua.dn) as dn,
                 max(ua.email) as email,
-                max(ua.user_id_for_display) as userIdForDisplay 
+                max(ua.user_id_for_display) as userIdForDisplay,
+                max(ut.value) as userTag
             FROM user_points up
             LEFT JOIN (
                 SELECT upa.user_id, 
                 max(upa.performed_on) AS performedOn 
                 FROM user_performed_skill upa 
                 WHERE upa.skill_ref_id in (
-                    select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id from skill_definition sd where type = 'Skill' and sd.project_id = ?1 and sd.skill_id in (?2)
+                    select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id from skill_definition sd where type = 'Skill' and sd.project_id = ?1 and sd.skill_id in (?3)
                 )
                 GROUP BY upa.user_id
             ) upa ON upa.user_id = up.user_id
             JOIN user_attrs ua ON ua.user_id=up.user_id
+            LEFT JOIN (SELECT ut.user_id, max(ut.value) AS value FROM user_tags ut WHERE ut.key = ?2 group by ut.user_id) ut ON ut.user_id=ua.user_id
             WHERE 
                 up.project_id=?1 and 
-                up.skill_id in (?2) and 
-                (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT('%', ?3, '%'))  OR
-                 lower(ua.user_id_for_display) like lower(CONCAT('%', ?3, '%'))
+                up.skill_id in (?3) and 
+                (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT('%', ?4, '%'))  OR
+                 lower(ua.user_id_for_display) like lower(CONCAT('%', ?4, '%'))
                 ) 
             GROUP BY up.user_id''', nativeQuery = true)
-    List<ProjectUser> findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLike(String projectId, List<String> skillIds, String userId, Pageable pageable)
+    List<ProjectUser> findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLike(String projectId, String usersTableAdditionalUserTagKey, List<String> skillIds, String userId, Pageable pageable)
 
     @Query(value = '''SELECT 
                 up.user_id as userId, 
@@ -557,7 +561,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 max(ua.last_name) as lastName,
                 max(ua.dn) as dn,
                 max(ua.email) as email,
-                max(ua.user_id_for_display) as userIdForDisplay 
+                max(ua.user_id_for_display) as userIdForDisplay,
+                max(utCol.utColValue) as userTag 
             FROM user_points up
             LEFT JOIN (
                 SELECT upa.user_id, 
@@ -570,16 +575,17 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             ) upa ON upa.user_id = up.user_id
             JOIN user_attrs ua ON ua.user_id=up.user_id
             JOIN user_tags ut ON ut.user_id=up.user_id
+            LEFT JOIN (SELECT utCol.user_id, max(utCol.value) AS utColValue FROM user_tags utCol WHERE utCol.key = ?2 group by utCol.user_id) utCol ON utCol.user_id=ua.user_id
             WHERE 
                 up.project_id=?1 and 
-                ut.key = ?2 and
-                ut.value = ?3 and
-                (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT(\'%\', ?4, \'%\'))  OR
-                 lower(ua.user_id_for_display) like lower(CONCAT('%', ?4, '%'))
+                ut.key = ?3 and
+                ut.value = ?4 and
+                (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT(\'%\', ?5, \'%\'))  OR
+                 lower(ua.user_id_for_display) like lower(CONCAT('%', ?5, '%'))
                 ) and 
                 up.skill_id is null 
             GROUP BY up.user_id''', nativeQuery = true)
-    List<ProjectUser> findDistinctProjectUsersByProjectIdAndUserTagAndUserIdLike(String projectId, String userTagKey, String userTagValue, String userId, Pageable pageable)
+    List<ProjectUser> findDistinctProjectUsersByProjectIdAndUserTagAndUserIdLike(String projectId, String usersTableAdditionalUserTagKey, String userTagKey, String userTagValue, String userId, Pageable pageable)
 
     @Nullable
     @Query(value= '''
@@ -605,7 +611,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             max(ua.dn) as dn,
             max(ua.email) as email,
             max(ua.user_id_for_display) as userIdForDisplay,
-            case when max(uAchievement.level) is not null then max(uAchievement.level) else 0 end as userMaxLevel 
+            case when max(uAchievement.level) is not null then max(uAchievement.level) else 0 end as userMaxLevel, 
+            max(ut.value) as userTag 
         FROM user_points up
         LEFT JOIN (
             SELECT upa.user_id, 
@@ -625,6 +632,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             GROUP BY uAchievement.user_id
         ) uAchievement ON uAchievement.user_id = up.user_id    
         JOIN user_attrs ua ON ua.user_id=up.user_id
+        LEFT JOIN (SELECT ut.user_id, max(ut.value) AS value FROM user_tags ut WHERE ut.key = :usersTableAdditionalUserTagKey group by ut.user_id) ut ON ut.user_id=ua.user_id
         WHERE 
             up.skill_ref_id in (select s_s.id from subj_skills s_s) and 
             (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT('%', :userId, '%'))  OR
@@ -633,6 +641,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
         GROUP BY up.user_id
     ''', nativeQuery = true)
     List<ProjectUser> findDistinctProjectUsersByProjectIdAndSubjectIdAndUserIdLike(@Param("projectId") String projectId,
+                                                                                   @Param("usersTableAdditionalUserTagKey") String usersTableAdditionalUserTagKey,
                                                                                    @Param("subjectId") String subjectId,
                                                                                    @Param("userId") String userId,
                                                                                    Pageable pageable)
