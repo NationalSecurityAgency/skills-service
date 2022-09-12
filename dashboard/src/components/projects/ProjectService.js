@@ -121,9 +121,6 @@ export default {
   contactUsers(projectId, contactUsersRequest) {
     return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/contactUsers`, contactUsersRequest).then((response) => response.data);
   },
-  isEmailServiceSupported() {
-    return axios.get('/public/isFeatureSupported?feature=emailservice').then((response) => response.data);
-  },
   countProjectAdmins() {
     return axios.get('/root/users/countAllProjectAdmins').then((response) => response.data);
   },

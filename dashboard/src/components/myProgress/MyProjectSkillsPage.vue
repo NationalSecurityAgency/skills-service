@@ -14,38 +14,59 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-<div>
-  <div v-if="isLoadingSettings" class="d-flex justify-content-center mt-1">
-    <b-spinner variant="primary" type="grow" label="Spinning"></b-spinner>
+  <div>
+    <div v-if="isLoadingSettings" class="d-flex justify-content-center mt-1">
+      <b-spinner variant="primary" type="grow" label="Spinning"></b-spinner>
+    </div>
+    <div style="position: relative">
+      <div v-if="isEmailEnabled && !isLoadingSettings && isSkillsDisplayHomePage"
+           :class="{
+              'contact-button-inline': isContactButtonInline,
+              'w-100 text-right pr-3 pt-2 contact-button-on-top': !isContactButtonInline
+           }">
+        <b-button variant="outline-primary"
+                  @click="showContactOwner" data-cy="contactOwnerBtn">
+          Contact Project <i aria-hidden="true" class="fas fas fa-mail-bulk"/>
+        </b-button>
+      </div>
+      <skills-display v-if="!isLoadingSettings"
+                      :options="options"
+                      :version="skillsVersion"
+                      :theme="themeObj"
+                      ref="skillsDisplayRef"
+                      @route-changed="skillsDisplayRouteChanged">
+      </skills-display>
+    </div>
+    <contact-owners-dialog v-if="showContact" :project-name="projectName" v-model="showContact" :project-id="projectId"/>
   </div>
-  <skills-display v-if="!isLoadingSettings"
-    :options="options"
-    :version="skillsVersion"
-    :theme="themeObj"
-    ref="skillsDisplayRef"
-    @route-changed="skillsDisplayRouteChanged"/>
-</div>
 </template>
 
 <script>
+  import { mapGetters } from 'vuex';
   import { SkillsDisplay } from '@skilltree/skills-client-vue';
   import MyProgressService from '@/components/myProgress/MyProgressService';
   import SkillsDisplayOptionsMixin from '@/components/myProgress/SkillsDisplayOptionsMixin';
   import SettingsService from '@/components/settings/SettingsService';
   import ProjectService from '@/components/projects/ProjectService';
+  import ContactOwnersDialog from '@/components/myProgress/ContactOwnersDialog';
 
   export default {
     name: 'MyProjectSkillsPage',
     mixins: [SkillsDisplayOptionsMixin],
     components: {
       SkillsDisplay,
+      ContactOwnersDialog,
     },
     data() {
       return {
         isLoadingSettings: true,
+        windowWidth: 0,
+        oneRem: 0,
         projectId: this.$route.params.projectId,
         projectDisplayName: 'PROJECT',
+        projectName: 'Project',
         skillsVersion: 2147483647, // max int
+        showContact: false,
         theme: {
           disableSkillTreeBrand: true,
           disableBreadcrumb: true,
@@ -104,6 +125,11 @@ limitations under the License.
         },
       };
     },
+    created() {
+      this.compute1Rem();
+      window.addEventListener('resize', this.handleResize);
+      this.handleResize();
+    },
     mounted() {
       this.isLoadingSettings = true;
       SettingsService.getClientDisplayConfig(this.projectId).then((response) => {
@@ -112,17 +138,31 @@ limitations under the License.
           MyProgressService.findProjectName(this.projectId).then((res) => {
             if (res) {
               this.$set(this.theme, 'landingPageTitle', `${this.projectDisplayName}: ${res.name}`);
+              this.projectName = res.name;
             }
           });
         } else {
           this.$set(this.theme, 'landingPageTitle', `${this.projectDisplayName}: ${this.$route.params.name}`);
+          this.projectName = this.$route.params.name;
         }
-      }).finally(() => {
-        this.isLoadingSettings = false;
-      });
+      })
+        .finally(() => {
+          this.isLoadingSettings = false;
+        });
       this.handleProjInvitation();
     },
     computed: {
+      ...mapGetters([
+        'isEmailEnabled',
+      ]),
+      isContactButtonInline() {
+        const currentLen = (this.projectName.length + this.projectDisplayName.length + 5) * 1.2;
+        const titleWidthPx = currentLen * this.oneRem;
+        return this.windowWidth > titleWidthPx;
+      },
+      isSkillsDisplayHomePage() {
+        return this.skillsClientDisplayPath && (this.skillsClientDisplayPath.path === '/' || this.skillsClientDisplayPath.path === undefined);
+      },
       themeObj() {
         if (this.$route.query.classicSkillsDisplay && this.$route.query.classicSkillsDisplay.toLowerCase() === 'true') {
           const res = { ...this.theme };
@@ -151,10 +191,27 @@ limitations under the License.
           ProjectService.addToMyProjects(this.projectId);
         }
       },
+      showContactOwner() {
+        this.showContact = true;
+      },
+      handleResize() {
+        this.windowWidth = window.innerWidth;
+      },
+      compute1Rem() {
+        this.oneRem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      },
     },
   };
 </script>
 
 <style scoped>
+.contact-button-inline {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+}
 
+.contact-button-on-top {
+  background-color: #fff !important;
+}
 </style>

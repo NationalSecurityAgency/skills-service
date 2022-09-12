@@ -142,6 +142,7 @@ skills:
       maxSkillsInBulkImport: 50
       enablePageVisitReporting: false
       maxProjectInviteEmails: 50
+      maxContactOwnersMessageLength: 2500
     client:
       loggingEnabled: false
       loggingLevel: DEBUG

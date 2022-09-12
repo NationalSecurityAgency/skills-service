@@ -96,5 +96,7 @@ export default {
     return axios.get(`/public/clientDisplay/config?projectId=${encodeURIComponent(projectId)}`)
       .then((remoteRes) => remoteRes.data);
   },
-
+  isEmailServiceSupported() {
+    return axios.get('/public/isFeatureSupported?feature=emailservice').then((response) => response.data);
+  },
 };

@@ -13,28 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.notify.builders
+package skills.utils
 
+import java.util.regex.Pattern
 
-import skills.storage.model.Notification
+class PatternsUtil {
+    /**
+     * email validation regex as defined by RFC 5322
+     */
+    public static final Pattern VALID_EMAIL = ~/^[a-zA-Z0-9_!#$%&'*+\/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$/
 
-interface NotificationEmailBuilder {
-
-    static class Res {
-        String subject
-        String plainText
-        String html
-        String replyToEmail
-        /**
-         * Flag that the builder can be used to indicate that all recipients should be included in a single email
-         * as opposed to sending one email per recipient
-         */
-        boolean singleEmailToAllRecipients
+    public static boolean isValidEmail(String maybeEmail) {
+        if (!maybeEmail) {
+            return false
+        }
+        return VALID_EMAIL.matcher(maybeEmail).matches()
     }
-
-    String getId()
-
-    Res build(Notification notification, Formatting formatParams)
-
 
 }

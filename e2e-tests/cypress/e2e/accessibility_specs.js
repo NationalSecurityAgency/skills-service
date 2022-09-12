@@ -1161,8 +1161,6 @@ describe('Accessibility Tests', () => {
             .as('loadUsers');
         cy.intercept('GET', '/admin/projects/MyNewtestProject/metrics/distinctUsersOverTimeForProject*')
             .as('loadMetrics');
-        cy.intercept('GET', '/public/isFeatureSupported*')
-            .as('loadContactUsers');
         cy.intercept('GET', '/admin/projects/MyNewtestProject/errors*')
             .as('loadErrors');
         cy.intercept('GET', '/admin/projects/MyNewtestProject/userRoles/*')
@@ -1228,7 +1226,6 @@ describe('Accessibility Tests', () => {
             .should('have.focus');
         cy.get('[data-cy="nav-Contact Users"]')
             .click();
-        cy.wait('@loadContactUsers');
         cy.get('.skills-menu-content')
             .should('have.focus');
         cy.get('[data-cy="nav-Issues"]')

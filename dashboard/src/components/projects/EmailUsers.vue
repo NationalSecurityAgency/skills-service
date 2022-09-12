@@ -125,6 +125,7 @@ limitations under the License.
 </template>
 
 <script>
+  import { mapGetters } from 'vuex';
   import vSelect from 'vue-select';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import MarkdownEditor from '../utils/MarkdownEditor';
@@ -158,7 +159,6 @@ limitations under the License.
     data() {
       return {
         sentMsg: '',
-        emailFeatureConfigured: true,
         maxCriteria: 15,
         alreadyApplied: false,
         currentCount: 0,
@@ -235,12 +235,11 @@ limitations under the License.
       }).finally(() => {
         this.loading.subjects = false;
       });
-
-      ProjectService.isEmailServiceSupported().then((emailEnabled) => {
-        this.emailFeatureConfigured = emailEnabled;
-      });
     },
     computed: {
+      ...mapGetters({
+        emailFeatureConfigured: 'isEmailEnabled',
+      }),
       formattedType() {
         return this.currentFilterType.charAt(0).toUpperCase() + this.currentFilterType.slice(1);
       },

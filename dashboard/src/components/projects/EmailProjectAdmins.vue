@@ -55,6 +55,7 @@ limitations under the License.
 </template>
 
 <script>
+  import { mapGetters } from 'vuex';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import ProjectService from './ProjectService';
@@ -69,7 +70,6 @@ limitations under the License.
     mixins: [MsgBoxMixin],
     data() {
       return {
-        emailFeatureConfigured: true,
         currentCount: 0,
         subject: '',
         body: '',
@@ -79,14 +79,14 @@ limitations under the License.
       };
     },
     mounted() {
-      ProjectService.isEmailServiceSupported().then((emailEnabled) => {
-        this.emailFeatureConfigured = emailEnabled;
-      });
       ProjectService.countProjectAdmins().then((count) => {
         this.currentCount = count;
       });
     },
     computed: {
+      ...mapGetters({
+        emailFeatureConfigured: 'isEmailEnabled',
+      }),
       isEmailDisabled() {
         return !this.body || !this.subject || this.emailing || this.emailSent || this.currentCount < 1;
       },

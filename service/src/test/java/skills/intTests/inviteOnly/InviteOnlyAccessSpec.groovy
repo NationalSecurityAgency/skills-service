@@ -259,6 +259,7 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
 
         def badgeDescription = newService.getBadgeDescriptions(proj.projectId, badge.badgeId, false)
         skillsService.revokeInviteOnlyProjectAccess(proj.projectId, user)
+        Thread.sleep(500)
         def badgeDescription2 = newService.getBadgeDescriptions(proj.projectId, badge.badgeId, false)
 
         then:
@@ -443,8 +444,6 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
         def email = greenMail.getReceivedMessages()
-        println email
-        println userAttrsRepo.findEmailByUserId(users[0].toLowerCase())
         String inviteCode = extractInviteFromEmail(email[0].content.toString())
         def res = userService.joinProject(proj.projectId, inviteCode)
 
@@ -482,8 +481,6 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
         def email = greenMail.getReceivedMessages()
-        println email
-        println userAttrsRepo.findEmailByUserId(users[0].toLowerCase())
         String inviteCode = extractInviteFromEmail(email[0].content.toString())
         def res = userService.joinProject(proj.projectId, inviteCode)
 
@@ -492,6 +489,76 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
 
         cleanup:
         inviteOnlyProjectService.validateInviteEmail = false
+    }
+
+    def "invite only project admins can't be contacted if current user has not been granted access"() {
+        def proj = SkillsFactory.createProject(99)
+        def subj = SkillsFactory.createSubject(99)
+        def skill = SkillsFactory.createSkill(99, 1)
+        skill.pointIncrement = 200
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skill)
+        skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
+
+        def user = getRandomUsers(1, true)[0]
+        def shouldNotBeAbleToContact = createService(new SkillsService.UseParams(
+                username: user,
+                email: EmailUtils.generateEmaillAddressFor(user),
+                firstName: "${user.toUpperCase()}_first",
+                lastName: "${user.toUpperCase()}_last"
+        ))
+
+        when:
+        shouldNotBeAbleToContact.contactProjectOwner(proj.projectId, "this should fail")
+
+        then:
+        def ex = thrown(SkillsClientException)
+        ex.message.contains("HTTP Status 403 – Forbidden")
+    }
+
+    def "invite only project admins can be contacted if current user has access"() {
+        def proj = SkillsFactory.createProject(99)
+        def subj = SkillsFactory.createSubject(99)
+        def skill = SkillsFactory.createSkill(99, 1)
+        skill.pointIncrement = 200
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skill)
+        skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
+
+        def user = getRandomUsers(1, true)[0]
+        def shouldBeAbleToContact = createService(new SkillsService.UseParams(
+                username: user,
+                email: EmailUtils.generateEmaillAddressFor(user),
+                firstName: "${user.toUpperCase()}_first",
+                lastName: "${user.toUpperCase()}_last"
+        ))
+
+
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: [EmailUtils.generateEmaillAddressFor(user)]])
+        WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
+
+        def email = greenMail.getReceivedMessages()[0]
+        def invite = extractInviteFromEmail(email.content)
+
+        shouldBeAbleToContact.joinProject(proj.projectId, invite)
+        greenMail.reset()
+
+        when:
+        shouldBeAbleToContact.contactProjectOwner(proj.projectId, "should work")
+
+        WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
+
+        def contactEmail = EmailUtils.getEmail(greenMail, 0)
+
+        then:
+        contactEmail
+        contactEmail.html.contains("should work")
+        contactEmail.plainText.contains("should work")
+        contactEmail.fromEmail == [EmailUtils.generateEmaillAddressFor(user)]
     }
 
 }

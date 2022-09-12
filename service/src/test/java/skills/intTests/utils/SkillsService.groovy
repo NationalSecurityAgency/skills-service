@@ -1474,6 +1474,10 @@ class SkillsService {
         return resp
     }
 
+    def contactProjectOwner(String projectId, String message) {
+        def resp = wsHelper.apiPost("/projects/${projectId}/contact", ["message": message])
+    }
+
     private String getProjectUrl(String project) {
         return "/projects/${project}".toString()
     }

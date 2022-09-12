@@ -144,6 +144,9 @@ class RestTemplateWrapper extends RestTemplate {
 
             if (email != null) {
                 userInfo.email = email
+                if (email != username) {
+                    userInfo.username = username
+                }
             }
 
             ResponseEntity response = putForEntity(skillsServiceUrl + '/createAccount', userInfo)

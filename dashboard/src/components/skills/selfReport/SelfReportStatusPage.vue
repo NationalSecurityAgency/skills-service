@@ -35,6 +35,7 @@ limitations under the License.
 </template>
 
 <script>
+  import { mapGetters } from 'vuex';
   import SelfReportService from '@/components/skills/selfReport/SelfReportService';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import NoContent2 from '@/components/utils/NoContent2';
@@ -64,6 +65,11 @@ limitations under the License.
     mounted() {
       this.loadData();
     },
+    computed: {
+      ...mapGetters([
+        'isEmailEnabled',
+      ]),
+    },
     methods: {
       handleApprovalAction() {
         this.$refs.selfReportApprovalHistory.loadApprovalsHistory();
@@ -74,14 +80,10 @@ limitations under the License.
           .then((res) => {
             this.selfReportStats = res;
             if (this.hasSkillsWithApprovals()) {
-              SelfReportService.isEmailServiceSupported()
-                .then((isEmailSupported) => {
-                  this.showEmailServiceWarning = !isEmailSupported;
-                  this.loading = false;
-                });
-            } else {
-              this.loading = false;
+              this.showEmailServiceWarning = !this.isEmailEnabled;
             }
+          }).finally(() => {
+            this.loading = false;
           });
       },
       hasSkillsWithApprovals() {

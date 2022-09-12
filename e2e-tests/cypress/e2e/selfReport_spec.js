@@ -1159,7 +1159,11 @@ describe('Self Report Skills Management Tests', () => {
         cy.reportSkill(1, 2, 'user5', '2020-09-12 11:00');
         cy.reportSkill(1, 2, 'user4', '2020-09-13 11:00');
 
+        cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice').as('featureSupported');
+        cy.intercept('GET', '/admin/projects/proj1/approvals**').as('loadApprovals');
         cy.visit('/administrator/projects/proj1/self-report');
+        cy.wait('@featureSupported');
+        cy.wait('@loadApprovals');
 
         cy.get('[data-cy="selectPageOfApprovalsBtn"]')
             .click();
