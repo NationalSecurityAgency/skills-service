@@ -228,7 +228,7 @@ class DefaultIntSpec extends Specification {
      * of test p12 certificates available if in pki mode
      * @return
      */
-    List<String> getRandomUsers(int numUsers, boolean createEmail = false, List<String> exclude=[DEFAULT_ROOT_USER_ID, "skills@skills.org"]) {
+    List<String> getRandomUsers(int numUsers, boolean createEmail = false, List<String> exclude=[DEFAULT_ROOT_USER_ID, SkillsService.UseParams.DEFAULT_USER_NAME]) {
         //create email addresses for the users automatically?
         List<String> userIds =  userUtil.getUsers(numUsers+exclude.size())
         exclude.each { userToExclude ->
@@ -241,19 +241,17 @@ class DefaultIntSpec extends Specification {
         }
         if (createEmail) {
             userIds?.each {
-                if (!it.contains('@')) {
-                    try {
-                        UserAttrs userAttrs = new UserAttrs()
-                        userAttrs.userId = it.toLowerCase()
-                        userAttrs.userIdForDisplay = it
-                        userAttrs.email = EmailUtils.generateEmaillAddressFor(it)
-                        userAttrs.firstName = "${it.toUpperCase()}_first"
-                        userAttrs.lastName = "${it.toUpperCase()}_last"
-                        userAttrs.userTagsLastUpdated = new Date()
-                        userAttrsRepo.save(userAttrs)
-                    } catch (Exception e) {
-                        throw new RuntimeException("error initializing UserAttrs for [${it}]", e)
-                    }
+                try {
+                    UserAttrs userAttrs = new UserAttrs()
+                    userAttrs.userId = it.toLowerCase()
+                    userAttrs.userIdForDisplay = it
+                    userAttrs.email = it.contains('@') ? it : EmailUtils.generateEmaillAddressFor(it)
+                    userAttrs.firstName = "${it.toUpperCase()}_first"
+                    userAttrs.lastName = "${it.toUpperCase()}_last"
+                    userAttrs.userTagsLastUpdated = new Date()
+                    userAttrsRepo.save(userAttrs)
+                } catch (Exception e) {
+                    throw new RuntimeException("error initializing UserAttrs for [${it}]", e)
                 }
             }
 

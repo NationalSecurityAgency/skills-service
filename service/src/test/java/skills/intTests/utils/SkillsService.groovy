@@ -1613,8 +1613,10 @@ class SkillsService {
         }
     }
 
-    public static class UseParams {
-        String username = "skills@skills.org"
+    static class UseParams {
+        static String DEFAULT_USER_NAME = "skills@skills.org";
+
+        String username = DEFAULT_USER_NAME
         String password = "p@ssw0rd"
 
         String firstName = 'Skills'
