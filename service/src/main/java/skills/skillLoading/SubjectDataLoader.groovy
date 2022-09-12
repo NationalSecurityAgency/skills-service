@@ -20,12 +20,15 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import skills.services.settings.Settings
+import skills.services.settings.SettingsService
 import skills.skillLoading.model.SkillDependencySummary
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefParent
 import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.SkillRelDef
 import skills.storage.model.UserPoints
+import skills.storage.repos.SkillDefWithExtraRepo
 import skills.storage.repos.UserPerformedSkillRepo
 import skills.storage.repos.UserPointsRepo
 
@@ -43,14 +46,22 @@ class SubjectDataLoader {
     @Autowired
     UserPerformedSkillRepo userPerformedSkillRepo
 
+    @Autowired
+    SettingsService settingsService
+
+    @Autowired
+    SkillDefWithExtraRepo skillDefWithExtraRepo
 
     static class SkillsAndPoints {
         SkillDef skillDef
         int points
         int todaysPoints
         String copiedFromProjectName
+        String description
 
         SkillDependencySummary dependencyInfo
+
+        List<SkillsAndPoints> children = []
     }
 
     static class SkillsData {
@@ -97,7 +108,53 @@ class SubjectDataLoader {
             new SkillsAndPoints(skillDef: skillDefAndUserPoints.skillDef, points: points, todaysPoints: todayPoints, dependencyInfo: dependencyInfo,
                     copiedFromProjectName: skillDefAndUserPoints.copiedFromProjectName)
         }
+
+        skillsAndPoints = handleGroupSkills(skillsAndPoints, relationshipTypes)
+        skillsAndPoints = handleGroupDescriptions(projectId, skillsAndPoints, relationshipTypes)
         new SkillsData(childrenWithPoints: skillsAndPoints)
+    }
+
+    private List<SkillsAndPoints> handleGroupDescriptions(String projectId, List<SkillsAndPoints> skillsAndPoints, List<SkillRelDef.RelationshipType> relationshipTypes) {
+        if (relationshipTypes.containsAll([SkillRelDef.RelationshipType.SkillsGroupRequirement, SkillRelDef.RelationshipType.GroupSkillToSubject])) {
+            List<SkillsAndPoints> groups = skillsAndPoints.findAll({ it.skillDef.type == SkillDef.ContainerType.SkillsGroup })
+            List<String> groupIds = groups.collect { it.skillDef.skillId }
+            if (groupIds) {
+                Boolean groupDescriptionsOn = settingsService.getProjectSetting(projectId, Settings.GROUP_DESCRIPTIONS.settingName)?.value?.toBoolean()
+                if (groupDescriptionsOn) {
+                    Map<String, List<SkillsAndPoints>> bySkillId = groups.groupBy { it.skillDef.skillId}
+                    List<SkillDefWithExtraRepo.SkillIdAndDesc> loadedDescriptions = skillDefWithExtraRepo.findDescriptionBySkillIdIn(projectId, groupIds)
+                    loadedDescriptions.each {
+                        SkillsAndPoints group = bySkillId[it.getSkillId()]?.first()
+                        if (!group) {
+                            throw new IllegalStateException("Failed locate the group. This is a logic error. lookedFor=[${it.getSkillId()}]")
+                        }
+                        group.description = it.description
+                    }
+                }
+            }
+        }
+        return skillsAndPoints;
+    }
+
+    private List<SkillsAndPoints> handleGroupSkills(List<SkillsAndPoints> skillsAndPoints, List<SkillRelDef.RelationshipType> relationshipTypes) {
+        if (relationshipTypes.containsAll([SkillRelDef.RelationshipType.SkillsGroupRequirement, SkillRelDef.RelationshipType.GroupSkillToSubject])) {
+            List<SkillsAndPoints> res = skillsAndPoints
+            List<SkillsAndPoints> childrenOfGroups = skillsAndPoints.findAll({ it.skillDef.groupId })
+            if (childrenOfGroups) {
+                res = skillsAndPoints.findAll({ !it.skillDef.groupId })
+                Map<String, List<SkillsAndPoints>> bySkillId = res.groupBy { it.skillDef.skillId }
+                childrenOfGroups.each {
+                    SkillsAndPoints parent = bySkillId[it.skillDef.groupId]?.first()
+                    if (!parent) {
+                        throw new IllegalStateException("Failed to find group for a skill under that group. groupSkillId=[${it.skillDef.groupId}], childSkillId=[${it.skillDef.skillId}]")
+                    }
+                    parent.children.add(it)
+                }
+            }
+
+            return res
+        }
+        return skillsAndPoints
     }
 
     @Profile

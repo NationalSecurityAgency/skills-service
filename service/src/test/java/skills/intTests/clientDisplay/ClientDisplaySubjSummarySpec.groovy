@@ -17,7 +17,6 @@ package skills.intTests.clientDisplay
 
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
-import skills.storage.model.SkillDef
 
 class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
 
@@ -166,7 +165,8 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         summary1.todaysPoints == 200
     }
 
-    def "subject's points and today's points are caclulated for group's skills"() {
+
+    def "subject's points and today's points are calculated for group's skills"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skillsGroup = SkillsFactory.createSkillsGroup()
@@ -205,7 +205,12 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skillsGroup = SkillsFactory.createSkillsGroup()
-        def allSkills = SkillsFactory.createSkills(4) // first one is group
+        def skillsGroup2 = SkillsFactory.createSkillsGroup(1, 1, 22)
+        def skillsGroup3 = SkillsFactory.createSkillsGroup(1, 1, 23)
+        skillsGroup.description = 'Test description for skill'
+        skillsGroup2.description = null
+        skillsGroup3.description = 'Group 3 desc'
+        def allSkills = SkillsFactory.createSkills(6) // first one is group
         allSkills[1].pointIncrement = 100
         allSkills[2].pointIncrement = 100
         allSkills[3].pointIncrement = 100
@@ -218,21 +223,32 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[2])
         skillsService.createSkill(allSkills[3])
 
-        skillsGroup.enabled = 'true'
-        skillsGroup.description = 'Test description for skill'
-        skillsService.updateSkill(skillsGroup, null)
+        skillsService.createSkill(skillsGroup2)
+        skillsService.assignSkillToSkillsGroup(skillsGroup2.skillId, allSkills[4])
+        skillsService.createSkill(skillsGroup3)
+        skillsService.assignSkillToSkillsGroup(skillsGroup3.skillId, allSkills[5])
 
         String userId = getRandomUsers(1)[0]
         when:
         def summary = skillsService.getSkillSummary(userId, proj.projectId, subj.subjectId, -1, true)
-        def group = summary.skills.find({ it -> it.type == SkillDef.ContainerType.SkillsGroup.toString()})
+        def group_t0 = summary.skills.find({ it -> it.skillId == skillsGroup.skillId })
+        def group2_t0 = summary.skills.find({ it -> it.skillId == skillsGroup2.skillId })
+        def group3_t0 = summary.skills.find({ it -> it.skillId == skillsGroup3.skillId })
 
         skillsService.addOrUpdateProjectSetting(proj.projectId, 'group-descriptions', 'true')
         def summary1 = skillsService.getSkillSummary(userId, proj.projectId, subj.subjectId, -1, true)
-        def group1 = summary1.skills.find({ it -> it.type == SkillDef.ContainerType.SkillsGroup.toString()})
+        def group_t1 = summary1.skills.find({ it -> it.skillId == skillsGroup.skillId })
+        def group2_t1 = summary1.skills.find({ it -> it.skillId == skillsGroup2.skillId })
+        def group3_t1 = summary1.skills.find({ it -> it.skillId == skillsGroup3.skillId })
 
         then:
-        group.description == null
-        group1.description.description == 'Test description for skill'
+        group_t0.description == null
+        group_t1.description.description == 'Test description for skill'
+
+        group2_t0.description == null
+        group2_t1.description == null
+
+        group3_t0.description == null
+        group3_t1.description.description == 'Group 3 desc'
     }
 }

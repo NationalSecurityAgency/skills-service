@@ -37,7 +37,6 @@ import skills.services.GlobalBadgesService
 import skills.services.LevelDefinitionStorageService
 import skills.services.admin.SkillsGroupAdminService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
-import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.settings.CommonSettings
 import skills.skillLoading.model.*
@@ -695,7 +694,12 @@ class SkillsLoader {
         Integer points
         Integer todaysPoints
         if (loadSkills) {
-            SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, subjectDefinition, version, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
+            List<SkillRelDef.RelationshipType> relTypes = [
+                    SkillRelDef.RelationshipType.RuleSetDefinition, // skills under subject
+                    SkillRelDef.RelationshipType.SkillsGroupRequirement, // groups under subject
+                    SkillRelDef.RelationshipType.GroupSkillToSubject, // skills under groups
+            ]
+            SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, subjectDefinition, version, relTypes)
             skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints, false, userId, version)
             totalPoints = skillsRes ? skillsRes.collect({it.totalPoints}).sum() as Integer : 0
 
@@ -974,21 +978,16 @@ class SkillsLoader {
                         enabled: Boolean.valueOf(skillDef.enabled).toString(),
                         numSkillsRequired: skillDef.numSkillsRequired,
                         totalPoints: skillDef.totalPoints,
+                        description: skillDefAndUserPoints.description ? new SkillDescription(
+                                skillId: skillDef.skillId,
+                                description: InputSanitizer.unsanitizeForMarkdown(skillDefAndUserPoints.description)
+                        ) : null,
                 )
 
-                Boolean groupDescriptionsOn = settingsService.getProjectSetting(skillDef.projectId, Settings.GROUP_DESCRIPTIONS.settingName)?.value?.toBoolean()
+                List<SubjectDataLoader.SkillsAndPoints> groupChildren = skillDefAndUserPoints.children
+                Integer numSkillsRequired = skillDef.numSkillsRequired == - 1 ?  groupChildren.size() : skillDef.numSkillsRequired
+                skillsSummary.children = createSkillSummaries(thisProjDef, groupChildren, false, userId, version)
 
-                if(groupDescriptionsOn) {
-                    def desc = skillDefWithExtraRepo.findDescriptionBySkillId(skillDef.projectId, skillDef.skillId)
-                    skillsSummary.description = new SkillDescription(
-                            skillId: skillDef.skillId,
-                            description: InputSanitizer.unsanitizeForMarkdown(desc)
-                    );
-                }
-
-                SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, skillDef, version, [SkillRelDef.RelationshipType.SkillsGroupRequirement])
-                Integer numSkillsRequired = skillsGroupAdminService.getActualNumSkillsRequred(skillDef.numSkillsRequired, skillDef.id)
-                skillsSummary.children = createSkillSummaries(thisProjDef, groupChildrenMeta.childrenWithPoints, false, userId, version)
                 skillsSummary.points = skillsSummary.children ? skillsSummary.children.collect({it.points}).sort().takeRight(numSkillsRequired).sum() as Integer: 0
                 skillsSummary.todaysPoints = skillsSummary.children ? skillsSummary.children.collect({it.todaysPoints}).sort().takeRight(numSkillsRequired).sum() as Integer: 0
                 skillsRes << skillsSummary

@@ -1325,18 +1325,18 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
         def project1 = createProjWithCatalogSkills(1)
         def project2 = createProjWithCatalogSkills(2)
 
-        def p2Group1 = createSkillsGroup(2, 1, 77)
+        def p2Group1 = createSkillsGroup(2, 2, 77)
         String skillsGroupId = p2Group1.skillId
         skillsService.createSkill(p2Group1)
 
         // add a regular/non-imported child skill to the group
-        def child1 = SkillsFactory.createSkill(2)
+        def child1 = SkillsFactory.createSkill(2, 2)
         String regChildSkillId = child1.skillId
         child1.numPerformToCompletion = 2
         skillsService.assignSkillToSkillsGroup(skillsGroupId, child1)
 
         // add an imported child skill to the group
-        skillsService.bulkImportSkillsIntoGroupFromCatalogAndFinalize(project2.p.projectId, project1.s2.subjectId, skillsGroupId,
+        skillsService.bulkImportSkillsIntoGroupFromCatalogAndFinalize(project2.p.projectId, project2.s2.subjectId, skillsGroupId,
                 [[projectId: project1.p.projectId, skillId: project1.s1_skills[0].skillId]])
         String importedChildSkillId = project1.s1_skills[0].skillId
 
@@ -1392,7 +1392,7 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
         skillsService.addSkill([projectId: project1.p.projectId, skillId:project1.s1_skills[0].skillId], user, new Date() - 1)
         def skill2CompletedRes = skillsService.addSkill([projectId: project1.p.projectId, skillId:project1.s1_skills[0].skillId], user)
 
-        def p2Group1 = createSkillsGroup(2, 1, 77)
+        def p2Group1 = createSkillsGroup(2, 2, 77)
         String skillsGroupId = p2Group1.skillId
         skillsService.createSkill(p2Group1)
 

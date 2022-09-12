@@ -379,7 +379,7 @@ class CopyProjectsSkillsSpecs extends DefaultIntSpec {
         skillsService.createSkills([group3])
 
         // group in the same subject
-        skillsService.reuseSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId, group1.skillId)
+        skillsService.reuseSkills(p1.projectId, [p1Skills[0].skillId], p1subj1.subjectId, group1.skillId)
         // different subject
         skillsService.reuseSkills(p1.projectId, [p1Skills[1].skillId], p1subj2.subjectId)
         // group in a different subject
