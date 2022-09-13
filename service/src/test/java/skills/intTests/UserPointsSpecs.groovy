@@ -37,7 +37,17 @@ class UserPointsSpecs extends DefaultIntSpec {
     Date threeDaysAgo = new Date()-3
     DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").withZoneUTC()
 
+    String ultimateRoot = 'jh@dojo.com'
+    SkillsService rootSkillsService
+    List<String> usersWithTags
+
     def setup(){
+        rootSkillsService = createService(ultimateRoot, 'aaaaaaaa')
+        if (!rootSkillsService.isRoot()) {
+            rootSkillsService.grantRoot()
+        }
+        usersWithTags = getRandomUsers(10)
+
         skillsService.deleteProjectIfExist(projId)
 
         subjects = ['testSubject1', 'testSubject2', 'testSubject3']
@@ -614,6 +624,84 @@ class UserPointsSpecs extends DefaultIntSpec {
         def data2 = users.collect {String usr -> subj2Res.data.find { it.userId == usr} }
         data2.userMaxLevel == [1, 1, 5, 5]
         data2.userId == [users[1], users[2], users[4], users[5]]
+    }
+
+    def 'get project users user tags'() {
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def skill1 = createSkill(2, 1, 1, 0, 10, 512, 10,)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [skill1])
+
+        def p2subj2 = createSubject(2, 2)
+        def skill2 = createSkill(2, 2, 2, 0, 10, 512, 10,)
+        skillsService.createSubject(p2subj2)
+        skillsService.createSkill(skill2)
+
+        def p2Badge1 = createBadge(2, 1)
+        skillsService.addBadge(p2Badge1)
+        skillsService.assignSkillToBadge([projectId: p2Badge1.projectId, badgeId: p2Badge1.badgeId, skillId: skill2.skillId])
+
+        List<String> users = usersWithTags
+        skillsService.addSkill(skill1, users[0])
+
+        // overall level 1
+        skillsService.addSkill(skill1, users[1], new Date() - 1)
+        skillsService.addSkill(skill2, users[1])
+        skillsService.addSkill(skill1, users[2], new Date() - 1)
+        skillsService.addSkill(skill2, users[2])
+
+        // overall level 2
+        (5..1).each {
+            skillsService.addSkill(skill1, users[3], new Date() - it)
+        }
+
+        // overall level 4
+        (4..1).each {
+            skillsService.addSkill(skill1, users[4], new Date() - it)
+            skillsService.addSkill(skill1, users[5], new Date() - it)
+        }
+        (10..1).each {
+            skillsService.addSkill(skill2, users[4], new Date() - it)
+            skillsService.addSkill(skill2, users[5], new Date() - it)
+        }
+
+        usersWithTags[0..5].eachWithIndex { userId, idx ->
+            String tagValue = "tag${idx}"
+            rootSkillsService.saveUserTag(userId, "dutyOrganization", [tagValue]);
+        }
+
+        when:
+        def projRes = skillsService.getProjectUsers(p2.projectId)
+        def subjRes = skillsService.getSubjectUsers(p2.projectId, p2subj1.subjectId)
+        def subj2Res = skillsService.getSubjectUsers(p2.projectId, p2subj2.subjectId)
+        def badgeRes = skillsService.getBadgeUsers(p2.projectId, p2Badge1.badgeId)
+        def skillRes = skillsService.getSkillUsers(p2.projectId, skill2.skillId)
+
+        then:
+        projRes.count == 6
+        projRes.totalCount == 6
+        def data = projRes.data.sort { it.userId }
+        data.userTag == ['tag0', 'tag1', 'tag2', 'tag3', 'tag4', 'tag5']
+
+        subjRes.count == 6
+        subjRes.totalCount == 6
+        def data1 = subjRes.data.sort { it.userId }
+        data1.userTag == ['tag0', 'tag1', 'tag2', 'tag3', 'tag4', 'tag5']
+
+        subj2Res.count == 4
+        subj2Res.totalCount == 4
+        def data2 = subj2Res.data.sort { it.userId }
+        data2.userTag == ['tag1', 'tag2', 'tag4', 'tag5']
+
+        badgeRes.count == 4
+        badgeRes.totalCount == 4
+        def data3 = badgeRes.data.sort { it.userId }
+        data3.userTag == ['tag1', 'tag2', 'tag4', 'tag5']
+
+        skillRes.count == 4
+        skillRes.totalCount == 4
+        def data4 = skillRes.data.sort { it.userId }
+        data4.userTag == ['tag1', 'tag2', 'tag4', 'tag5']
     }
 
 }
