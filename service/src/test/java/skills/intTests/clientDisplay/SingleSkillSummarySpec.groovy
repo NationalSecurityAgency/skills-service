@@ -824,6 +824,18 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
                 proj1_skills[9].skillId,
                 null
         ]
+        summaries.orderInGroup == [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10
+        ]
     }
 
     def "skills with multiple groups (adjacent) - loading prev/last skillIds"() {
@@ -889,6 +901,18 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
                 proj1_skills[9].skillId,
                 null
         ]
+        summaries.orderInGroup == [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10
+        ]
     }
 
     def "skills with multiple groups (not adjacent) - loading prev/last skillIds"() {
@@ -904,11 +928,11 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         skillsService.createSkill(p1subj1g1)
         skillsService.createSkill(proj1_skills[5])
         skillsService.createSkill(p1subj1g2)
-        skillsService.createSkills(proj1_skills[8..9])
+        skillsService.createSkill(proj1_skills[9])
         proj1_skills[3..4].each {
             skillsService.assignSkillToSkillsGroup(p1subj1g1.skillId, it)
         }
-        proj1_skills[6..7].each {
+        proj1_skills[6..8].each {
             skillsService.assignSkillToSkillsGroup(p1subj1g2.skillId, it)
         }
 
@@ -953,6 +977,175 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
                 proj1_skills[8].skillId,
                 proj1_skills[9].skillId,
                 null
+        ]
+        summaries.orderInGroup == [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10
+        ]
+    }
+
+    def "skills are all in groups - loading prev/last skillIds"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(10, 1, 1)
+        def p1subj1g1 = SkillsFactory.createSkillsGroup(1, 1, 22)
+        def p1subj1g2 = SkillsFactory.createSkillsGroup(1, 1, 25)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkill(p1subj1g1)
+        skillsService.createSkill(p1subj1g2)
+        proj1_skills[0..4].each {
+            skillsService.assignSkillToSkillsGroup(p1subj1g1.skillId, it)
+        }
+        proj1_skills[5..9].each {
+            skillsService.assignSkillToSkillsGroup(p1subj1g2.skillId, it)
+        }
+
+        when:
+        def summaries = proj1_skills.collect {
+            skillsService.getSingleSkillSummaryWithSubject("user1", proj1.projectId, proj1_subj.subjectId, it.skillId)
+        }
+
+        then:
+        summaries.skillId == [
+                proj1_skills[0].skillId,
+                proj1_skills[1].skillId,
+                proj1_skills[2].skillId,
+                proj1_skills[3].skillId,
+                proj1_skills[4].skillId,
+                proj1_skills[5].skillId,
+                proj1_skills[6].skillId,
+                proj1_skills[7].skillId,
+                proj1_skills[8].skillId,
+                proj1_skills[9].skillId,
+        ]
+        summaries.prevSkillId == [
+                null,
+                proj1_skills[0].skillId,
+                proj1_skills[1].skillId,
+                proj1_skills[2].skillId,
+                proj1_skills[3].skillId,
+                proj1_skills[4].skillId,
+                proj1_skills[5].skillId,
+                proj1_skills[6].skillId,
+                proj1_skills[7].skillId,
+                proj1_skills[8].skillId,
+        ]
+        summaries.nextSkillId == [
+                proj1_skills[1].skillId,
+                proj1_skills[2].skillId,
+                proj1_skills[3].skillId,
+                proj1_skills[4].skillId,
+                proj1_skills[5].skillId,
+                proj1_skills[6].skillId,
+                proj1_skills[7].skillId,
+                proj1_skills[8].skillId,
+                proj1_skills[9].skillId,
+                null
+        ]
+        summaries.orderInGroup == [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10
+        ]
+    }
+
+    def "skills organized correctly after display orders changed - loading prev/last skillIds"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(10, 1, 1)
+        def p1subj1g1 = SkillsFactory.createSkillsGroup(1, 1, 22)
+        def p1subj1g2 = SkillsFactory.createSkillsGroup(1, 1, 25)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills[0..2])
+        skillsService.createSkill(p1subj1g1)
+        skillsService.createSkill(proj1_skills[5])
+        skillsService.createSkill(p1subj1g2)
+        skillsService.createSkill(proj1_skills[9])
+        proj1_skills[3..4].each {
+            skillsService.assignSkillToSkillsGroup(p1subj1g1.skillId, it)
+        }
+        proj1_skills[6..8].each {
+            skillsService.assignSkillToSkillsGroup(p1subj1g2.skillId, it)
+        }
+
+        skillsService.moveSkillDown(proj1_skills[0])
+        skillsService.moveSkillDown(proj1_skills[0])
+        skillsService.moveSkillDown(proj1_skills[0])
+        skillsService.moveSkillUp(proj1_skills[8])
+        skillsService.moveSkillUp(proj1_skills[8])
+
+        when:
+        def summaries = proj1_skills.collect {
+            skillsService.getSingleSkillSummaryWithSubject("user1", proj1.projectId, proj1_subj.subjectId, it.skillId)
+        }
+
+        then:
+        summaries.skillId == [
+                proj1_skills[0].skillId,
+                proj1_skills[1].skillId,
+                proj1_skills[2].skillId,
+                proj1_skills[3].skillId,
+                proj1_skills[4].skillId,
+                proj1_skills[5].skillId,
+                proj1_skills[6].skillId,
+                proj1_skills[7].skillId,
+                proj1_skills[8].skillId,
+                proj1_skills[9].skillId,
+        ]
+        summaries.prevSkillId == [
+                proj1_skills[4].skillId,
+                null,
+                proj1_skills[1].skillId,
+                proj1_skills[2].skillId,
+                proj1_skills[3].skillId,
+                proj1_skills[0].skillId,
+                proj1_skills[8].skillId,
+                proj1_skills[6].skillId,
+                proj1_skills[5].skillId,
+                proj1_skills[7].skillId,
+        ]
+        summaries.nextSkillId == [
+                proj1_skills[5].skillId,
+                proj1_skills[2].skillId,
+                proj1_skills[3].skillId,
+                proj1_skills[4].skillId,
+                proj1_skills[0].skillId,
+                proj1_skills[8].skillId,
+                proj1_skills[7].skillId,
+                proj1_skills[9].skillId,
+                proj1_skills[6].skillId,
+                null
+        ]
+        summaries.orderInGroup == [
+                5,
+                1,
+                2,
+                3,
+                4,
+                6,
+                8,
+                9,
+                7,
+                10
         ]
     }
 

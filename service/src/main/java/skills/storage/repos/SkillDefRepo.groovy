@@ -199,7 +199,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
                      skill_definition child left join skill_definition skillGroup on (child.group_id = skillGroup.skill_id and skillGroup.project_id = child.project_id)
                 where subj.project_id = ?1
                   and subj.skill_id = ?2
-                  and (child.type = 'Skill' or child.type = 'SkillsGroup')
+                  and child.type = 'Skill'
                   and subj.id = rel.parent_ref_id
                   and child.id = rel.child_ref_id''', nativeQuery=true)
     List<DisplayOrderRes> findDisplayOrderByProjectIdAndSubjectId(String projectId, String subjectId)
