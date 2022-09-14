@@ -78,15 +78,42 @@ function terminalLog(violations) {
 
 addMatchImageSnapshotCommand();
 
-Cypress.Commands.add("matchSnapshotImageForElement", (selector, subject, maybeName, commandOptions) => {
+Cypress.Commands.add("matchSnapshotImageForElement", (selector, maybeNameOtherwiseCommandOptions, commandOptions) => {
     cy.closeToasts();
     cy.wait(500);
-    cy.get(selector).matchImageSnapshot(subject, maybeName, commandOptions);
+
+    const nameAndOptionsPresent = commandOptions;
+    let options = commandOptions ? commandOptions : maybeNameOtherwiseCommandOptions;
+
+    const snapDir = Cypress.env('customSnapshotsDir');
+    if (snapDir) {
+        options = {...options, customSnapshotsDir: snapDir }
+    }
+
+    if (nameAndOptionsPresent) {
+        cy.get(selector).matchImageSnapshot(maybeNameOtherwiseCommandOptions, options);
+    } else {
+        cy.get(selector).matchImageSnapshot(options);
+    }
 })
 
-Cypress.Commands.add("matchSnapshotImage", (subject, maybeName, commandOptions) => {
+Cypress.Commands.add("matchSnapshotImage", (maybeNameOtherwiseCommandOptions, commandOptions) => {
     cy.closeToasts();
-    cy.matchImageSnapshot(subject, maybeName, commandOptions);
+    cy.wait(500);
+
+    const nameAndOptionsPresent = commandOptions;
+    let options = commandOptions ? commandOptions : maybeNameOtherwiseCommandOptions;
+
+    const snapDir = Cypress.env('customSnapshotsDir');
+    if (snapDir) {
+        options = {...options, customSnapshotsDir: snapDir }
+    }
+
+    if (nameAndOptionsPresent) {
+        cy.matchImageSnapshot(maybeNameOtherwiseCommandOptions, options);
+    } else {
+        cy.matchImageSnapshot(options);
+    }
 })
 
 Cypress.Commands.add("enableProdMode", (projNum) => {

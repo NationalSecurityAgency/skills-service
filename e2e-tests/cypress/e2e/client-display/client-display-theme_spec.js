@@ -740,7 +740,7 @@ describe('Client Display Tests', () => {
             '"borderStyle": "none none solid none", ' +
             '"backgroundColor": "%230374ff" }';
         cy.cdVisit(`/?enableTheme=true&themeParam=${pageTitle}`);
-        cy.matchSnapshotImage(snapshotOptions, 'Client Display Tests - theme page title card');
+        cy.matchSnapshotImage('Client Display Tests - theme page title card', snapshotOptions);
     });
 
     it('ability to left align breadcrumb', () => {
