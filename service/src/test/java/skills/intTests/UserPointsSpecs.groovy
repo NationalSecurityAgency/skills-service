@@ -680,27 +680,27 @@ class UserPointsSpecs extends DefaultIntSpec {
         then:
         projRes.count == 6
         projRes.totalCount == 6
-        def data = projRes.data.sort { it.userId }
+        def data = users.collect {String usr -> projRes.data.find { it.userId == usr} }
         data.userTag == ['tag0', 'tag1', 'tag2', 'tag3', 'tag4', 'tag5']
 
         subjRes.count == 6
         subjRes.totalCount == 6
-        def data1 = subjRes.data.sort { it.userId }
+        def data1 = users.collect {String usr -> subjRes.data.find { it.userId == usr} }
         data1.userTag == ['tag0', 'tag1', 'tag2', 'tag3', 'tag4', 'tag5']
 
         subj2Res.count == 4
         subj2Res.totalCount == 4
-        def data2 = subj2Res.data.sort { it.userId }
+        def data2 = users.collect {String usr -> subj2Res.data.find { it.userId == usr} }
         data2.userTag == ['tag1', 'tag2', 'tag4', 'tag5']
 
         badgeRes.count == 4
         badgeRes.totalCount == 4
-        def data3 = badgeRes.data.sort { it.userId }
+        def data3 = users.collect {String usr -> badgeRes.data.find { it.userId == usr} }
         data3.userTag == ['tag1', 'tag2', 'tag4', 'tag5']
 
         skillRes.count == 4
         skillRes.totalCount == 4
-        def data4 = skillRes.data.sort { it.userId }
+        def data4 = users.collect {String usr -> skillRes.data.find { it.userId == usr} }
         data4.userTag == ['tag1', 'tag2', 'tag4', 'tag5']
     }
 
