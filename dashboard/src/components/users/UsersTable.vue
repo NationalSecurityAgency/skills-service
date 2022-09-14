@@ -152,7 +152,19 @@ limitations under the License.
       };
     },
     mounted() {
+      if (this.showUserTagColumn) {
+        this.table.options.fields.splice(1, 0, {
+          key: 'userTag',
+          label: this.$store.getters.config.usersTableAdditionalUserTagLabel,
+          sortable: true,
+        });
+      }
       this.loadData();
+    },
+    computed: {
+      showUserTagColumn() {
+        return !!(this.$store.getters.config.usersTableAdditionalUserTagKey && this.$store.getters.config.usersTableAdditionalUserTagLabel);
+      },
     },
     methods: {
       calcPercent(userPoints) {
