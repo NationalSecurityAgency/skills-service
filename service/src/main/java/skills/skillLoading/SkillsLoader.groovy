@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import skills.PublicProps
 import skills.controller.exceptions.SkillExceptionBuilder
+import skills.controller.request.model.UserProjectSettingsRequest
 import skills.controller.result.model.AvailableProjectResult
 import skills.controller.result.model.GlobalBadgeLevelRes
 import skills.controller.result.model.SettingsResult
@@ -37,6 +38,7 @@ import skills.services.GlobalBadgesService
 import skills.services.LevelDefinitionStorageService
 import skills.services.admin.SkillsGroupAdminService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
+import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.settings.CommonSettings
 import skills.skillLoading.model.*
@@ -554,6 +556,12 @@ class SkillsLoader {
         )
     }
 
+    @Transactional
+    void documentLastViewedSkillId(String projectId, String skillId) {
+        UserProjectSettingsRequest request = new UserProjectSettingsRequest(projectId: projectId, setting: Settings.SKILLS_DISPLAY_LAST_VIEWED_SKILL.settingName, value: skillId)
+        settingsService.saveSetting(request)
+    }
+
     @Profile
     private SelfReportingInfo loadSelfReporting(String userId, SkillDefWithExtra skillDef){
         boolean enabled = skillDef.selfReportingType != null
@@ -1019,6 +1027,7 @@ class SkillsLoader {
                         type: skillDef.type,
                         copiedFromProjectId: !isReusedSkill ? skillDef.copiedFromProjectId : null,
                         copiedFromProjectName: !isReusedSkill ? InputSanitizer.unsanitizeName(skillDefAndUserPoints.copiedFromProjectName) : null,
+                        isLastViewed: skillDefAndUserPoints.isLastViewed
                 )
             }
         }

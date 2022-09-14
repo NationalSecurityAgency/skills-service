@@ -25,9 +25,9 @@ import skills.services.settings.SettingsService
 import skills.skillLoading.model.SkillDependencySummary
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefParent
-import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.SkillRelDef
 import skills.storage.model.UserPoints
+import skills.storage.repos.SettingRepo
 import skills.storage.repos.SkillDefWithExtraRepo
 import skills.storage.repos.UserPerformedSkillRepo
 import skills.storage.repos.UserPointsRepo
@@ -50,6 +50,9 @@ class SubjectDataLoader {
     SettingsService settingsService
 
     @Autowired
+    SettingRepo settingRepo
+
+    @Autowired
     SkillDefWithExtraRepo skillDefWithExtraRepo
 
     static class SkillsAndPoints {
@@ -58,6 +61,7 @@ class SubjectDataLoader {
         int todaysPoints
         String copiedFromProjectName
         String description
+        Boolean isLastViewed
 
         SkillDependencySummary dependencyInfo
 
@@ -109,9 +113,20 @@ class SubjectDataLoader {
                     copiedFromProjectName: skillDefAndUserPoints.copiedFromProjectName)
         }
 
+        updateLastViewedSkill(skillsAndPoints, userId, projectId)
+
         skillsAndPoints = handleGroupSkills(skillsAndPoints, relationshipTypes)
         skillsAndPoints = handleGroupDescriptions(projectId, skillsAndPoints, relationshipTypes)
         new SkillsData(childrenWithPoints: skillsAndPoints)
+    }
+
+    @Profile
+    private void updateLastViewedSkill(List<SkillsAndPoints> skillsAndPoints, String userId, String projectId) {
+        String lastViewedSkillId = settingRepo.findUserSettingValueByUserIdAndSettingAndProjectId(userId, Settings.SKILLS_DISPLAY_LAST_VIEWED_SKILL.settingName, projectId)
+
+        skillsAndPoints.each {
+            it.isLastViewed = lastViewedSkillId && it.skillDef.skillId == lastViewedSkillId
+        }
     }
 
     private List<SkillsAndPoints> handleGroupDescriptions(String projectId, List<SkillsAndPoints> skillsAndPoints, List<SkillRelDef.RelationshipType> relationshipTypes) {

@@ -17,6 +17,7 @@ package skills.intTests.clientDisplay
 
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
+import skills.intTests.utils.SkillsService
 
 class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
 
@@ -251,4 +252,53 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         group3_t0.description == null
         group3_t1.description.description == 'Group 3 desc'
     }
+
+    def "last skill viewed"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skillsGroup = SkillsFactory.createSkillsGroup()
+        def allSkills = SkillsFactory.createSkills(6) // first one is group
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[1])
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[2])
+        skillsService.createSkill(allSkills[3])
+
+        List<String> users = getRandomUsers(2)
+        String userId = [0]
+        String userId1 = [1]
+        SkillsService user1Service = createService(userId)
+        SkillsService user2Service = createService(userId1)
+        when:
+        user2Service.documentVisitedSkillId(proj.projectId, allSkills[3].skillId)
+        def summary = skillsService.getSkillSummary(userId, proj.projectId, subj.subjectId, -1, true)
+        user2Service.documentVisitedSkillId(proj.projectId, allSkills[1].skillId)
+        user1Service.documentVisitedSkillId(proj.projectId, allSkills[3].skillId)
+        def summary_t1 = skillsService.getSkillSummary(userId, proj.projectId, subj.subjectId, -1, true)
+        user2Service.documentVisitedSkillId(proj.projectId, allSkills[3].skillId)
+        user1Service.documentVisitedSkillId(proj.projectId, allSkills[1].skillId)
+        def summary_t2 = skillsService.getSkillSummary(userId, proj.projectId, subj.subjectId, -1, true)
+        user2Service.documentVisitedSkillId(proj.projectId, allSkills[1].skillId)
+        user1Service.documentVisitedSkillId(proj.projectId, allSkills[2].skillId)
+        def summary_t3 = skillsService.getSkillSummary(userId, proj.projectId, subj.subjectId, -1, true)
+
+        then:
+        summary.skills[0].children.isLastViewed == [false, false]
+        summary.skills[1].isLastViewed == false
+
+        summary_t1.skills[0].children.isLastViewed == [false, false]
+        summary_t1.skills[1].isLastViewed == true
+
+        summary_t2.skills[0].children.isLastViewed == [true, false]
+        summary_t2.skills[1].isLastViewed == false
+
+        summary_t3.skills[0].children.isLastViewed == [false, true]
+        summary_t3.skills[1].isLastViewed == false
+
+    }
+
+
 }

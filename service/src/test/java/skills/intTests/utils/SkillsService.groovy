@@ -707,6 +707,11 @@ class SkillsService {
         wsHelper.apiGet(url)
     }
 
+    def documentVisitedSkillId(String projectId, String skillId) {
+        String url = "/projects/${projectId}/skills/visited/${skillId}"
+        wsHelper.apiPost(url, [])
+    }
+
     def getSkillsSummaryForCurrentUser(String projId, int version = -1) {
         String url = "/projects/${projId}/summary"
         if (version >= 0) {

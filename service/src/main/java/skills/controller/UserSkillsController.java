@@ -427,4 +427,13 @@ class UserSkillsController {
         metricsLogger.logPageVisit(pageVisitRequest);
         return RequestResult.success();
     }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/visited/{skillId}", method = {RequestMethod.PUT, RequestMethod.POST}, produces = "application/json")
+    @ResponseBody
+    @Profile
+    public RequestResult updateLastSkillIdViewed(@PathVariable("projectId") String projectId,
+                                                 @PathVariable("skillId") String skillId) {
+        skillsLoader.documentLastViewedSkillId(projectId, skillId);
+        return RequestResult.success();
+    }
 }
