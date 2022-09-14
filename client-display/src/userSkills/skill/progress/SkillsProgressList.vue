@@ -35,6 +35,12 @@ limitations under the License.
                 <div class="col-md text-left my-2 my-md-0 ml-md-0 pl-md-0">
                   <skills-filter :counts="metaCounts" :filters="filters" @filter-selected="filterSkills" @clear-filter="clearFilters"/>
                 </div>
+                <b-button v-if="!loading.userSkills && hasLastSeenSkill" @click="scrollToLastSeenSkill"
+                          class="skills-theme-btn" variant="outline-info"
+                          data-cy="jumpToLastSeenButton">
+                    <i class="fas fa-eye"></i>
+                    <span>Jump to Last Viewed</span>
+                </b-button>
                 <div class="col-md-auto text-right skill-details-toggle" data-cy="skillDetailsToggle">
                     <span class="text-muted pr-1">{{ skillDisplayName }} Details:</span>
                     <toggle-button class="" v-model="showDescriptionsInternal" @change="onDetailsToggle"
@@ -171,7 +177,7 @@ limitations under the License.
         descriptionsLoaded: false,
         skillsInternal: [],
         skillsInternalOrig: [],
-        lastSeenSkill: null,
+        lastSeenSkills: null,
         filters: [
           {
             icon: 'fas fa-battery-empty',
@@ -231,6 +237,11 @@ limitations under the License.
 
       this.skillsInternalOrig = this.skillsInternal.map((item) => ({ ...item, children: item.children?.map((child) => ({ ...child })) }));
       this.lastSeenSkills = SkillHistoryUtil.loadSkillHistory();
+    },
+    computed: {
+      hasLastSeenSkill() {
+        return true;
+      },
     },
     methods: {
       updateMetaCountsForSkillRes(skillRes) {
@@ -376,5 +387,19 @@ limitations under the License.
 .separator-border-thick {
   /*border-bottom-color: #f7f7f7 !important;*/
   border-bottom-width: 12px !important;
+}
+
+#jumpToButton {
+  border: 1px solid #146c75;
+  bottom: 25px;
+  right: 10px;
+  border-radius: 50px;
+  width: 30px;
+  height: 30px;
+  font-size: 18px;
+  background-color: #146c75;
+  color: #ffffff;
+  cursor: pointer;
+  padding-top: 2px;
 }
 </style>

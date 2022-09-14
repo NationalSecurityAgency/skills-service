@@ -88,9 +88,6 @@ limitations under the License.
           <animated-number :num="skill.points"/>
           / {{ skill.totalPoints | number }} Points
         </div>
-        <div v-if="this.skillHasLastSeenDate()">
-          Last Viewed: {{ this.getFormattedDate() }}
-        </div>
       </div>
     </div>
     <div class="row">
@@ -172,7 +169,6 @@ limitations under the License.
   import CatalogImportStatus from '@/userSkills/skill/progress/CatalogImportStatus';
   import SkillOverviewFooter from '@/userSkills/skill/SkillOverviewFooter';
   import AnimatedNumber from '@/userSkills/skill/progress/AnimatedNumber';
-  import dayjs from '@/common-components/DayJsCustomizer';
 
   export default {
     name: 'SkillProgress2',
@@ -328,15 +324,6 @@ limitations under the License.
           route = 'globalBadgeSkillDetails';
         }
         return route;
-      },
-      skillHasLastSeenDate() {
-        if (this.skill.projectId && this.subjectId && this.lastSeenSkills[this.skill.projectId] && this.lastSeenSkills[this.skill.projectId][this.subjectId] && this.lastSeenSkills[this.skill.projectId][this.subjectId].skillHistory[this.skill.skillId]) {
-          return true;
-        }
-        return false;
-      },
-      getFormattedDate() {
-        return dayjs(this.lastSeenSkills[this.skill.projectId][this.subjectId].skillHistory[this.skill.skillId]).fromNow();
       },
     },
   };

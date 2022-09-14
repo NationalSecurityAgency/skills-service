@@ -39,10 +39,8 @@ limitations under the License.
                     </a>
               </div>
             </div>
-
             <skills-progress-list @points-earned="refreshHeader" :subject="displayData.userSkills" @scrollTo="scrollToLastSeenSkill" />
         </div>
-        <div v-if="!loading.userSkills" id="jumpToButton" @click="scrollToLastSeenSkill"><i class="fas fa-eye"></i></div>
     </section>
 </template>
 
@@ -120,24 +118,5 @@ limitations under the License.
 </script>
 
 <style>
-#jumpToButton {
-  position: fixed;
-  border: 1px solid #146c75;
-  z-index: 999;
-  bottom: 25px;
-  right: 10px;
-  border-radius: 50px;
-  width: 30px;
-  height: 30px;
-  font-size: 18px;
-  background-color: #146c75;
-  color: #ffffff;
-  cursor: pointer;
-  opacity: .5;
-  padding-top: 2px;
-}
 
-#jumpToButton:hover {
-  opacity: 1;
-}
 </style>

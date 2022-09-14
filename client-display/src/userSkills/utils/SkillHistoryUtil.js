@@ -22,11 +22,13 @@ export default {
           seenSkills[projectId] = {};
           seenSkills[projectId][subjectId] = {
             lastSeenSkill: null,
-            skillHistory: {},
           };
         }
-        seenSkills[projectId][subjectId].lastSeenSkill = skillId;
-        seenSkills[projectId][subjectId].skillHistory[skillId] = new Date();
+        if (seenSkills[projectId]) {
+          if (seenSkills[projectId][subjectId]) {
+            seenSkills[projectId][subjectId].lastSeenSkill = skillId;
+          }
+        }
         localStorage.setItem('lastSeenSkills', JSON.stringify(seenSkills));
     },
 
