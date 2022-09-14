@@ -308,6 +308,7 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
         // set to project is if this project was added to 'My Projects'
         @Nullable
         String getMyProjectId();
+        boolean getHasDescription();
     }
     @Query(value="""
                 SELECT
@@ -319,7 +320,8 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                     COALESCE(subjects.subjectCount, 0) AS numSubjects,
                     COALESCE(groups.groupCount, 0) AS numGroups,
                     pd.created, 
-                    theSettings.myProjectId AS myProjectId
+                    theSettings.myProjectId AS myProjectId,
+                    case when pd.description is not null then true else false end as hasDescription
                 FROM settings s, project_definition pd
                 LEFT JOIN (SELECT project_id, MAX(event_time) AS latest FROM user_events GROUP BY project_id) events ON events.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS skillCount, MAX(updated) AS skillUpdated FROM skill_definition WHERE type = 'Skill' and enabled = 'true' GROUP BY project_id) skills ON skills.project_id = pd.project_id

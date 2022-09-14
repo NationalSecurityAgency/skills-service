@@ -32,6 +32,24 @@ limitations under the License.
           </div>
         </div>
 
+        <div class="row mt-3">
+          <div class="col col-md-3 text-secondary" id="hideProjectDescriptionLabel">
+            Project Description:
+            <inline-help
+              target-id="hideProjectDescriptionHelp"
+              msg="Determines whether a project description is displayed only in the Progress and Rankings Manage My Projects page, or everywhere that the project is displayed"/>
+          </div>
+          <div class="col">
+            <b-form-select v-model="settings.hideProjectDescription.value"
+                           @input="hideProjectDescriptionChanged"
+                           aria-labelledby="hideProjectDescriptionLabel"
+                           data-cy="hideProjectDescriptionSelector">
+              <b-form-select-option :value="true">Show Project Description everywhere</b-form-select-option>
+              <b-form-select-option :value="false">Only show Project Description in Manage My Projects</b-form-select-option>
+            </b-form-select>
+          </div>
+        </div>
+
           <div class="row mt-3">
             <div class="col col-md-3 text-secondary" id="pointsForLevelsLabel">
               Use Points For Levels:
@@ -485,6 +503,13 @@ limitations under the License.
             dirty: false,
             projectId: this.$route.params.projectId,
           },
+          hideProjectDescription: {
+            value: false,
+            setting: 'show_project_description_everywhere',
+            lastLoadedValue: false,
+            dirty: false,
+            projectId: this.$route.params.projectId,
+          },
         },
         errMsg: null,
         showSavedMsg: false,
@@ -616,6 +641,9 @@ limitations under the License.
       },
       levelDisplayNameChanged(value) {
         this.settings.levelDisplayName.dirty = `${value}` !== `${this.settings.levelDisplayName.lastLoadedValue}`;
+      },
+      hideProjectDescriptionChanged(value) {
+        this.settings.hideProjectDescription.dirty = `${value}` !== `${this.settings.hideProjectDescription.lastLoadedValue}`;
       },
       projectVisibilityChanged(value) {
         const dirty = `${value}` !== `${this.settings.projectVisibility.lastLoadedValue}`;

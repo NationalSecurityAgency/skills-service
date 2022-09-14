@@ -164,6 +164,7 @@ class SkillsLoader {
                     numBadges: summary.getNumBadges(),
                     created: summary.getCreated(),
                     isMyProject: myProjectId != null,
+                    hasDescription: summary.getHasDescription(),
             )
         }
 

@@ -35,6 +35,12 @@ const getters = {
   levelDisplayName(state) {
     return state.config.levelDisplayName || 'Level';
   },
+  displayProjectDescription(state) {
+    if (state.config.displayProjectDescription === null || state.config.displayProjectDescription === '') {
+      return false;
+    }
+    return state.config.displayProjectDescription;
+  },
 };
 
 const mutations = {

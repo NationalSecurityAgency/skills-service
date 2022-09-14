@@ -30,6 +30,7 @@ class ProjectSummary {
     int totalUsers
     int rank
     String levelDisplayName = 'Level'
+    boolean hasDescription
 
     ProjectSummary fromProjectSummaryResult(ProjectSummaryResult projectSummaryResult) {
         this.projectRefId = projectSummaryResult.projectRefId

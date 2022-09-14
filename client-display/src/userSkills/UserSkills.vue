@@ -19,7 +19,7 @@ limitations under the License.
 
     <div v-if="!loading.userSkills">
       <skills-title :back-button="false" :animate-power-by-label="true">{{ pageTitle }}</skills-title>
-      <project-description v-if="!isSummaryOnly && description" :description="description"></project-description>
+      <project-description v-if="!isSummaryOnly && description && displayProjectDescription" :description="description"></project-description>
       <user-skills-header :display-data="displayData" class="mb-3"/>
       <subjects-container v-if="!isSummaryOnly" :subjects="displayData.userSkills.subjects" />
     </div>
@@ -27,6 +27,7 @@ limitations under the License.
 </template>
 
 <script>
+  import { mapGetters } from 'vuex';
   import UserSkillsHeader from '@/userSkills/header/UserSkillsHeader';
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
   import SubjectsContainer from '@/userSkills/subject/SubjectsContainer';
@@ -68,6 +69,9 @@ limitations under the License.
       },
     },
     computed: {
+      ...mapGetters([
+          'displayProjectDescription',
+      ]),
       version() {
         return this.$store.state.version;
       },
