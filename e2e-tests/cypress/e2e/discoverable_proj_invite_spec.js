@@ -72,6 +72,43 @@ describe('Copy Invite URL Tests', () => {
         });
     });
 
+    it('copy value from the share modal', () => {
+        cy.visit('/administrator/projects/proj1')
+        cy.contains('No Subjects Yet')
+        cy.location().then((loc) => {
+            const expectedProj1URL = `${loc.origin}${proj1Share}`
+            const expectedProj2URL = `${loc.origin}/progress-and-rankings/projects/proj2?invited=true`
+
+            // by default cypress uses simulated events that are initiated from JS; these simulated events are
+            // not trusted for "copy to clipboard" operations - must use "real events"
+            cy.get('[data-cy="shareProjBtn"]')
+                .realClick()
+
+            cy.get('[data-cy="projShareUrl"]')
+                .should('have.value', expectedProj1URL)
+            cy.window()
+                .its('navigator.clipboard')
+                .invoke('readText')
+                .should('equal', expectedProj1URL)
+
+            // override copied value
+            cy.window()
+                .its('navigator.clipboard')
+                .invoke('writeText', 'blah')
+            cy.window()
+                .its('navigator.clipboard')
+                .invoke('readText')
+                .should('equal', 'blah')
+
+            cy.get('[data-cy="copySharedUrl"]').click();
+            cy.window()
+                .its('navigator.clipboard')
+                .invoke('readText')
+                .should('equal', expectedProj1URL)
+
+        });
+    });
+
     it('share button does not exist for non-discoverable projects', () => {
         cy.visit('/administrator/projects/proj3')
         cy.contains('No Subjects Yet')
