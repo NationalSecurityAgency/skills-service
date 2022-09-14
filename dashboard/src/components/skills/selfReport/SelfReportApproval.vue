@@ -53,6 +53,7 @@ limitations under the License.
                     @page-changed="pageChanged"
                     @page-size-changed="pageSizeChanged"
                     @sort-changed="sortTable"
+                    id="skillsReportApprovalTable"
                     data-cy="skillsReportApprovalTable">
       <template #head(request)="data">
         <span class="text-primary"><i class="fas fa-hand-pointer skills-color-skills" /> {{ data.label }}</span>

@@ -35,7 +35,7 @@ limitations under the License.
         </div>
       </div>
 
-      <skills-b-table :options="table.options" :items="table.items"
+      <skills-b-table :options="table.options" :items="table.items" id="performedSkillsTable"
                       @page-changed="pageChanged"
                       @page-size-changed="pageSizeChanged"
                       @sort-changed="sortTable"

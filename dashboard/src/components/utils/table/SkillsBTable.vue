@@ -18,8 +18,8 @@ limitations under the License.
     <b-table striped head-variant="light" class="skills-b-table mb-0"
              :items="items"
              :busy="options.busy"
-             :sort-by.sync="options.sortBy"
-             :sort-desc.sync="options.sortDesc"
+             :sort-by.sync="sortBy"
+             :sort-desc.sync="sortDesc"
              :bordered="options.bordered"
              :outlined="options.outlined"
              :fields="this.fieldsInternal"
@@ -96,23 +96,34 @@ limitations under the License.
 </template>
 
 <script>
+  import TableStateUtil from '../TableStateUtil';
+
   let uid = 0;
 
   export default {
     name: 'SkillsBTable',
-    props: ['items', 'options'],
+    props: ['items', 'options', 'id'],
     beforeCreate() {
       this.uid = uid.toString();
       uid += 1;
     },
     mounted() {
       this.updateColumns();
+      if (this.id) {
+        const sorting = TableStateUtil.loadTableState(this.id);
+        if (sorting) {
+          this.sortBy = sorting.sortBy;
+          this.sortDesc = sorting.sortDesc;
+        }
+      }
     },
     data() {
       return {
         fieldsInternal: [],
         currentPageInternal: this.options.pagination.currentPage,
         pageSizeInternal: this.options.pagination.pageSize,
+        sortBy: this.options.sortBy,
+        sortDesc: this.options.sortDesc,
       };
     },
     computed: {
@@ -142,6 +153,10 @@ limitations under the License.
         return !this.items || this.items.length === 0;
       },
       sortingChanged(ctx) {
+        if (this.id) {
+          TableStateUtil.saveTableSortState(this.id, ctx.sortBy, ctx.sortDesc);
+        }
+
         // ctx.sortBy   ==> Field key for sorting by (or null for no sorting)
         // ctx.sortDesc ==> true if sorting descending, false otherwise
         this.currentPageInternal = 1;
