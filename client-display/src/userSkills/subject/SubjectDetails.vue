@@ -101,16 +101,12 @@ limitations under the License.
         }
       },
       doesLastSeenIndicatorExist() {
-        return document.getElementById('lastSeenIndicator');
+        return document.getElementById('lastSeenIndicator') || document.getElementsByClassName('client-display-iframe-1')[0].contentWindow.document.getElementById('lastSeenIndicator');
       },
       scrollToLastSeenSkill() {
-        if (this.doesLastSeenIndicatorExist()) {
-          VueScrollTo.scrollTo('#lastSeenIndicator', 750, {
-            y: true,
-            x: false,
-            easing: 'ease-in',
-            offset: -25,
-          });
+        const element = this.doesLastSeenIndicatorExist();
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
         }
       },
     },

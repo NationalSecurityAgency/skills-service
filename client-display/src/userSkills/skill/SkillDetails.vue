@@ -138,8 +138,8 @@ limitations under the License.
         });
       },
       updateLastSeen() {
-        const { projectId, subjectId, skillId } = this.$route.params;
-        SkillHistoryUtil.updateSkillHistory(projectId, subjectId, skillId);
+        const { projectId, skillId } = this.$route.params;
+        SkillHistoryUtil.updateSkillHistory(projectId, skillId);
       },
     },
   };

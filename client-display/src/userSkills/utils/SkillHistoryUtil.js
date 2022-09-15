@@ -13,23 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import axios from 'axios';
+import store from '@/store/store';
 
 export default {
-    updateSkillHistory(projectId, subjectId, skillId) {
-        let seenSkills = JSON.parse(localStorage.getItem('lastSeenSkills'));
-        if (!seenSkills) {
-          seenSkills = {};
-          seenSkills[projectId] = {};
-          seenSkills[projectId][subjectId] = {
-            lastSeenSkill: null,
-          };
-        }
-        if (seenSkills[projectId]) {
-          if (seenSkills[projectId][subjectId]) {
-            seenSkills[projectId][subjectId].lastSeenSkill = skillId;
-          }
-        }
-        localStorage.setItem('lastSeenSkills', JSON.stringify(seenSkills));
+    updateSkillHistory(projectId, skillId) {
+        return axios.post(`${store.state.serviceUrl}/api/projects/${projectId}/skills/visited/${skillId}`).then((res) => res.data);
     },
 
     loadSkillHistory() {

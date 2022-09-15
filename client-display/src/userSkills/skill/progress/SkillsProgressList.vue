@@ -388,18 +388,4 @@ limitations under the License.
   /*border-bottom-color: #f7f7f7 !important;*/
   border-bottom-width: 12px !important;
 }
-
-#jumpToButton {
-  border: 1px solid #146c75;
-  bottom: 25px;
-  right: 10px;
-  border-radius: 50px;
-  width: 30px;
-  height: 30px;
-  font-size: 18px;
-  background-color: #146c75;
-  color: #ffffff;
-  cursor: pointer;
-  padding-top: 2px;
-}
 </style>
