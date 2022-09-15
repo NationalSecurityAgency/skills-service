@@ -39,7 +39,7 @@ limitations under the License.
                     </a>
               </div>
             </div>
-            <skills-progress-list @points-earned="refreshHeader" :subject="displayData.userSkills" @scrollTo="scrollToLastSeenSkill" />
+            <skills-progress-list @points-earned="refreshHeader" :subject="displayData.userSkills" @scrollTo="scrollToLastViewedSkill" />
         </div>
     </section>
 </template>
@@ -100,11 +100,11 @@ limitations under the License.
           });
         }
       },
-      doesLastSeenIndicatorExist() {
-        return document.getElementById('lastSeenIndicator') || document.getElementsByClassName('client-display-iframe-1')[0].contentWindow.document.getElementById('lastSeenIndicator');
+      doesLastViewedIndicatorExist() {
+        return document.getElementById('lastViewedIndicator') || document.getElementsByClassName('client-display-iframe-1')[0].contentWindow.document.getElementById('lastViewedIndicator');
       },
-      scrollToLastSeenSkill() {
-        const element = this.doesLastSeenIndicatorExist();
+      scrollToLastViewedSkill() {
+        const element = this.doesLastViewedIndicatorExist();
         if (element) {
           element.scrollIntoView({ behavior: 'smooth' });
         }

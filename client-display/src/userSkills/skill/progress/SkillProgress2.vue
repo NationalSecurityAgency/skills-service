@@ -67,7 +67,7 @@ limitations under the License.
                 <span class="">Requires </span> <b-badge variant="success">{{ skill.numSkillsRequired }}</b-badge> <span class="font-italic">out of</span> <b-badge variant="secondary">{{ skill.children.length }}</b-badge> skills
               </div>
 
-              <b-badge v-if="skill.isLastViewed" id="lastSeenIndicator" variant="info" style="font-size: 0.9rem" class="ml-2 overflow-hidden">
+              <b-badge v-if="skill.isLastViewed" id="lastViewedIndicator" variant="info" style="font-size: 0.9rem" class="ml-2 overflow-hidden">
                 <i class="fas fa-eye"></i> Last Viewed
               </b-badge>
               <b-badge v-if="skill.selfReporting && skill.selfReporting.enabled"
@@ -223,7 +223,7 @@ limitations under the License.
       this.initChildSkills();
       this.highlightChildSkillName();
 
-      if (this.skill.isLastViewed && this.$route.params.jumpToLastSeen) {
+      if (this.skill.isLastViewed && this.$route.params.jumpToLastViewed) {
         this.$emit('scrollTo');
       }
     },

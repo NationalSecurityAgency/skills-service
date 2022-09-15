@@ -59,9 +59,9 @@ limitations under the License.
       navigateBack() {
         const previousRoute = this.$route.params.previousRoute || { name: 'home' };
         if (previousRoute.name === 'subjectDetails' && this.$route.name === 'skillDetails') {
-          previousRoute.params.jumpToLastSeen = true;
+          previousRoute.params.jumpToLastViewed = true;
         } else {
-          previousRoute.params.jumpToLastSeen = null;
+          previousRoute.params.jumpToLastViewed = null;
         }
         this.$router.push(previousRoute);
       },

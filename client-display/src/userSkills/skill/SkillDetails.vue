@@ -94,7 +94,7 @@ limitations under the License.
         this.skill = {};
         this.loadDependencies();
         this.loadSkillSummary();
-        this.updateLastSeen();
+        this.updateLastViewed();
       },
       loadDependencies() {
         if (!this.$route.params.crossProjectId) {
@@ -137,7 +137,7 @@ limitations under the License.
           params,
         });
       },
-      updateLastSeen() {
+      updateLastViewed() {
         const { projectId, skillId } = this.$route.params;
         SkillHistoryUtil.updateSkillHistory(projectId, skillId);
       },

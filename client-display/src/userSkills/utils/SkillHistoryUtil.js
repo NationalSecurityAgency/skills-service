@@ -20,15 +20,4 @@ export default {
     updateSkillHistory(projectId, skillId) {
         return axios.post(`${store.state.serviceUrl}/api/projects/${projectId}/skills/visited/${skillId}`).then((res) => res.data);
     },
-
-    loadSkillHistory() {
-        let lastSeen = JSON.parse(localStorage.getItem('lastSeenSkills'));
-
-        if (!lastSeen) {
-          lastSeen = {};
-        }
-
-        return lastSeen;
-    },
-
 };

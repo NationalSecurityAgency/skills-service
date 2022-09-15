@@ -38,10 +38,10 @@ limitations under the License.
                       <skills-filter :counts="metaCounts" :filters="filters" @filter-selected="filterSkills" @clear-filter="clearFilters"/>
                     </div>
                     <div class="d-inline-block">
-                      <b-button v-if="!loading.userSkills && hasLastSeenSkill" @click="scrollToLastSeenSkill"
+                      <b-button v-if="!loading.userSkills && hasLastViewedSkill" @click="scrollToLastViewedSkill"
                                 class="skills-theme-btn d-inline" variant="outline-info"
                                 :aria-label="`Jump to Last Viewed Skill`"
-                                data-cy="jumpToLastSeenButton">
+                                data-cy="jumpToLastViewedButton">
                         <i class="fas fa-eye"></i>
                         Last Viewed
                       </b-button>
@@ -83,8 +83,7 @@ limitations under the License.
                           :data-cy="`skillProgress_index-${index}`"
                           @points-earned="onPointsEarned"
                           :child-skill-highlight-string="searchString"
-                          :lastSeenSkills="lastSeenSkills"
-                          @scrollTo="scrollToLastSeenSkill"
+                          @scrollTo="scrollToLastViewedSkill"
                       />
                     </div>
                   </div>
@@ -110,7 +109,6 @@ limitations under the License.
   import StringHighlighter from '@/common-components/utilities/StringHighlighter';
   import SkillProgress2 from './SkillProgress2';
   import SkillEnricherUtil from '../../utils/SkillEnricherUtil';
-  import SkillHistoryUtil from '../../utils/SkillHistoryUtil';
   import store from '../../../store/store';
 
   const updateSkillForLoadedDescription = (skills, desc) => {
@@ -184,7 +182,6 @@ limitations under the License.
         descriptionsLoaded: false,
         skillsInternal: [],
         skillsInternalOrig: [],
-        lastSeenSkills: null,
         filters: [
           {
             icon: 'fas fa-battery-empty',
@@ -243,10 +240,9 @@ limitations under the License.
       });
 
       this.skillsInternalOrig = this.skillsInternal.map((item) => ({ ...item, children: item.children?.map((child) => ({ ...child })) }));
-      this.lastSeenSkills = SkillHistoryUtil.loadSkillHistory();
     },
     computed: {
-      hasLastSeenSkill() {
+      hasLastViewedSkill() {
         return true;
       },
     },
@@ -294,7 +290,7 @@ limitations under the License.
             });
         }
       },
-      scrollToLastSeenSkill() {
+      scrollToLastViewedSkill() {
         this.$emit('scrollTo');
       },
       onPointsEarned(pts, skillId, childSkillId = null) {
