@@ -51,7 +51,6 @@ limitations under the License.
   import SkillsTitle from '@/common/utilities/SkillsTitle';
   import SkillsProgressList from '@/userSkills/skill/progress/SkillsProgressList';
   import SkillsSpinner from '@/common/utilities/SkillsSpinner';
-  import Vue from 'vue';
 
   export default {
     mixins: [SkillDisplayDataLoadingMixin],
