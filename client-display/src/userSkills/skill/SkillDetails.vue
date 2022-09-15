@@ -25,7 +25,7 @@ limitations under the License.
                   Previous
                   <span class="sr-only">Previous</span>
                 </button>
-                <span style="font-size: 0.9rem;" data-cy="skillOrder"><span class="font-italic">Skill</span> <b>{{ skill.orderInGroup }}</b> <span class="font-italic">of</span> <b>{{ skill.totalSkills }}</b></span>
+                <span style="font-size: 0.9rem;" data-cy="skillOrder"><span class="font-italic">{{ skillDisplayName }}</span> <b>{{ skill.orderInGroup }}</b> <span class="font-italic">of</span> <b>{{ skill.totalSkills }}</b></span>
                 <button @click="nextButtonClicked" v-if="skill.nextSkillId" type="button" class="btn btn-outline-info skills-theme-btn m-0 nextButton" data-cy="nextSkill"
                   aria-label="next skill">
                   Next
@@ -47,6 +47,7 @@ limitations under the License.
 </template>
 
 <script>
+  import store from '@/store/store';
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
   import SkillsSpinner from '@/common/utilities/SkillsSpinner';
   import SkillsTitle from '@/common/utilities/SkillsTitle';
@@ -78,6 +79,11 @@ limitations under the License.
     },
     watch: {
       $route: 'loadData',
+    },
+    computed: {
+      skillDisplayName() {
+        return store.getters.skillDisplayName;
+      },
     },
     methods: {
       loadData() {

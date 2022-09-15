@@ -232,4 +232,23 @@ describe('Client Display Custom Label Tests', () => {
             .contains('This course requires approval from a work role administrator. Now let\'s play the waiting game!');
     });
 
+    it('custom skill label updates page indicator', () => {
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2);
+        cy.createSkill(1, 1, 3);
+
+        cy.request('POST', '/admin/projects/proj1/settings', [
+            {
+                value: 'Course',
+                setting: 'skill.displayName',
+                projectId: 'proj1',
+            },
+        ]);
+
+        cy.cdVisit('/subjects/subj1/skills/skill2');
+        cy.get('[data-cy="skillOrder"]').should('have.text', "Course 2 of 3")
+    });
+
 });
