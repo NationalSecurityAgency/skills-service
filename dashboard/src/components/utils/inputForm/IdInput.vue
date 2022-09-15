@@ -33,7 +33,7 @@ limitations under the License.
                      placement="left"
                      @shown="tooltipShown"
                      @hidden="tooltipHidden"/>
-          <b-link v-if="!canEdit" @click="toggle" aria-label="enable manual ID override">Enable</b-link>
+          <b-link v-if="!canEdit" @click="toggle" aria-label="enable manual ID override" data-cy="enableIdInput">Enable</b-link>
           <span v-else>Enabled <i class="fa fa-check fa-sm text-muted"/></span>
         </div>
       </div>
