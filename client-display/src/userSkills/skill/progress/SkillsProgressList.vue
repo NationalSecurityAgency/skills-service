@@ -33,14 +33,21 @@ limitations under the License.
                   </div>
                 </div>
                 <div class="col-md text-left my-2 my-md-0 ml-md-0 pl-md-0">
-                  <skills-filter :counts="metaCounts" :filters="filters" @filter-selected="filterSkills" @clear-filter="clearFilters"/>
+                  <div class="d-flex">
+                    <div class="d-inline-block" style="min-width: 4rem;">
+                      <skills-filter :counts="metaCounts" :filters="filters" @filter-selected="filterSkills" @clear-filter="clearFilters"/>
+                    </div>
+                    <div class="d-inline-block">
+                      <b-button v-if="!loading.userSkills && hasLastSeenSkill" @click="scrollToLastSeenSkill"
+                                class="skills-theme-btn d-inline" variant="outline-info"
+                                :aria-label="`Jump to Last Viewed Skill`"
+                                data-cy="jumpToLastSeenButton">
+                        <i class="fas fa-eye"></i>
+                        Last Viewed
+                      </b-button>
+                    </div>
+                  </div>
                 </div>
-                <b-button v-if="!loading.userSkills && hasLastSeenSkill" @click="scrollToLastSeenSkill"
-                          class="skills-theme-btn" variant="outline-info"
-                          data-cy="jumpToLastSeenButton">
-                    <i class="fas fa-eye"></i>
-                    <span>Jump to Last Viewed</span>
-                </b-button>
                 <div class="col-md-auto text-right skill-details-toggle" data-cy="skillDetailsToggle">
                     <span class="text-muted pr-1">{{ skillDisplayName }} Details:</span>
                     <toggle-button class="" v-model="showDescriptionsInternal" @change="onDetailsToggle"
