@@ -52,9 +52,6 @@ limitations under the License.
   import SkillsProgressList from '@/userSkills/skill/progress/SkillsProgressList';
   import SkillsSpinner from '@/common/utilities/SkillsSpinner';
   import Vue from 'vue';
-  import VueScrollTo from 'vue-scrollto';
-
-  Vue.use(VueScrollTo);
 
   export default {
     mixins: [SkillDisplayDataLoadingMixin],
@@ -101,7 +98,7 @@ limitations under the License.
         }
       },
       doesLastViewedIndicatorExist() {
-        return document.getElementById('lastViewedIndicator') || document.getElementsByClassName('client-display-iframe-1')[0].contentWindow.document.getElementById('lastViewedIndicator');
+        return document.getElementById('lastViewedIndicator');
       },
       scrollToLastViewedSkill() {
         const element = this.doesLastViewedIndicatorExist();

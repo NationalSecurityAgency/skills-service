@@ -224,7 +224,7 @@ limitations under the License.
       this.highlightChildSkillName();
 
       if (this.skill.isLastViewed && this.$route.params.jumpToLastViewed) {
-        this.$emit('scrollTo');
+        setTimeout(this.scrollToLastViewed, 1500);
       }
     },
     computed: {
@@ -260,6 +260,9 @@ limitations under the License.
       },
     },
     methods: {
+      scrollToLastViewed() {
+        this.$emit('scrollTo');
+      },
       initChildSkills() {
         if (this.isSkillsGroupWithChildren) {
           this.childSkillsInternal = this.skill.children.map((item) => ({ ...item, childSkill: true }));

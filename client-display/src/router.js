@@ -180,7 +180,13 @@ router.beforeEach((to, from, next) => {
   if (store.state.internalBackButton && !to.params.previousRoute && to.meta.setPreviousRoute !== false && !isWildcardMatch(to.matched)) {
     const previousRoute = { ...from };
     const params = { ...to.params, ...{ previousRoute } };
+
+    if (to.name === 'subjectDetails' && from.name === 'skillDetails') {
+      params.jumpToLastViewed = true;
+    }
+
     const updatedTo = { ...to, ...{ params }, replace: true };
+
     next(updatedTo);
   } else {
     next();
