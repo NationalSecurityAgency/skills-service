@@ -75,9 +75,6 @@ describe('Projects Admin Management Tests', () => {
             .click()
             .type('bar');
         cy.wait('@suggest');
-        //cy.pause();
-        //cy.get('.multiselect__input').type('{enter}');
-        // cy.get('.multiselect__option multiselect__option--highlight').click();
         cy.get('[data-cy="existingUserInput"] .vs__dropdown-option')
             .eq(0)
             .click({ force: true });
