@@ -151,7 +151,7 @@ describe('Client Display Theme Components Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="encouragementCards"]', 'infoCards-rank');
     });
 
-    it('theme info cards border overrides tile border', () => {
+    it.only('theme info cards border overrides tile border', () => {
         const url = '/?themeParam=tiles|{%22backgroundColor%22:%22lightgray%22,%22borderColor%22:%22blue%22}&themeParam=textPrimaryColor|black&themeParam=infoCards|{%22borderColor%22:%22purple%22}';
         cy.cdVisit(url);
 

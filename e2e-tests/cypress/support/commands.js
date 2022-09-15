@@ -79,40 +79,38 @@ function terminalLog(violations) {
 addMatchImageSnapshotCommand();
 
 Cypress.Commands.add("matchSnapshotImageForElement", (selector, maybeNameOtherwiseCommandOptions, commandOptions) => {
-    cy.closeToasts();
-    cy.wait(500);
-
-    const nameAndOptionsPresent = commandOptions;
-    let options = commandOptions ? commandOptions : maybeNameOtherwiseCommandOptions;
-
-    const snapDir = Cypress.env('customSnapshotsDir');
-    if (snapDir) {
-        options = {...options, customSnapshotsDir: snapDir }
-    }
-
-    if (nameAndOptionsPresent) {
-        cy.get(selector).matchImageSnapshot(maybeNameOtherwiseCommandOptions, options);
-    } else {
-        cy.get(selector).matchImageSnapshot(options);
-    }
+    cy.doMatchSnapshotImage(maybeNameOtherwiseCommandOptions, commandOptions, selector)
 })
 
 Cypress.Commands.add("matchSnapshotImage", (maybeNameOtherwiseCommandOptions, commandOptions) => {
+    cy.doMatchSnapshotImage(maybeNameOtherwiseCommandOptions, commandOptions, null)
+})
+
+Cypress.Commands.add("doMatchSnapshotImage", (maybeNameOtherwiseCommandOptions, commandOptions, selector) => {
     cy.closeToasts();
     cy.wait(500);
 
-    const nameAndOptionsPresent = commandOptions;
-    let options = commandOptions ? commandOptions : maybeNameOtherwiseCommandOptions;
+    let options = commandOptions ? commandOptions :
+        ((maybeNameOtherwiseCommandOptions && typeof maybeNameOtherwiseCommandOptions === 'object') ? maybeNameOtherwiseCommandOptions : null);
+    const namePresent = maybeNameOtherwiseCommandOptions && typeof maybeNameOtherwiseCommandOptions === 'string'
 
     const snapDir = Cypress.env('customSnapshotsDir');
     if (snapDir) {
         options = {...options, customSnapshotsDir: snapDir }
     }
 
-    if (nameAndOptionsPresent) {
-        cy.matchImageSnapshot(maybeNameOtherwiseCommandOptions, options);
+    if (namePresent) {
+        if (selector) {
+            cy.get(selector).matchImageSnapshot(maybeNameOtherwiseCommandOptions, options);
+        } else {
+            cy.matchImageSnapshot(maybeNameOtherwiseCommandOptions, options);
+        }
     } else {
-        cy.matchImageSnapshot(options);
+        if (selector) {
+            cy.get(selector).matchImageSnapshot(options);
+        } else {
+            cy.matchImageSnapshot(options);
+        }
     }
 })
 

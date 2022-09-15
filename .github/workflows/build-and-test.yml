@@ -191,7 +191,9 @@ jobs:
           ./e2e-tests/cypress/snapshots/**/__diff_output__/*.png
 
     - name: verify that new screenshot snapshots were not created
-      run: npm run verifyThatNewSnapshotsAreNotCreated
+      run: |
+        cd e2e-tests
+        npm run verifyThatNewSnapshotsAreNotCreated
 
   service-against-postgresql:
     needs: pre_job
