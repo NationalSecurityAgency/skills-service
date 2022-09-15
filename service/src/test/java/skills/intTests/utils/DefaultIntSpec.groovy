@@ -25,6 +25,7 @@ import org.springframework.jdbc.core.JdbcTemplate
 import skills.SpringBootApp
 import skills.services.LevelDefinitionStorageService
 import skills.storage.model.UserAttrs
+import skills.storage.repos.ClientPrefRepo
 import skills.storage.repos.NotificationsRepo
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SettingRepo
@@ -95,6 +96,9 @@ class DefaultIntSpec extends Specification {
 
     @Autowired
     LevelDefinitionStorageService levelDefinitionStorageService
+
+    @Autowired
+    ClientPrefRepo clientPrefRepo
 
     private UserUtil userUtil
 

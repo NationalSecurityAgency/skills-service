@@ -20,9 +20,12 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import skills.services.settings.ClientPrefKey
+import skills.services.settings.ClientPrefService
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.skillLoading.model.SkillDependencySummary
+import skills.storage.model.ClientPref
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefParent
 import skills.storage.model.SkillRelDef
@@ -50,7 +53,7 @@ class SubjectDataLoader {
     SettingsService settingsService
 
     @Autowired
-    SettingRepo settingRepo
+    ClientPrefService clientPrefService
 
     @Autowired
     SkillDefWithExtraRepo skillDefWithExtraRepo
@@ -122,10 +125,10 @@ class SubjectDataLoader {
 
     @Profile
     private void updateLastViewedSkill(List<SkillsAndPoints> skillsAndPoints, String userId, String projectId) {
-        String lastViewedSkillId = settingRepo.findUserSettingValueByUserIdAndSettingAndProjectId(userId, Settings.SKILLS_DISPLAY_LAST_VIEWED_SKILL.settingName, projectId)
-
+        ClientPref clientPref = clientPrefService.findPref(ClientPrefKey.LastViewedSkill, userId, projectId)
+        String lastViewedSkillId = clientPref?.value
         skillsAndPoints.each {
-            it.isLastViewed = lastViewedSkillId && it.skillDef.skillId == lastViewedSkillId
+            it.isLastViewed = it.skillDef.skillId == lastViewedSkillId
         }
     }
 

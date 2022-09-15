@@ -15,9 +15,12 @@
  */
 package skills.intTests.clientDisplay
 
+
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import skills.services.settings.ClientPrefKey
+import skills.storage.model.ClientPref
 
 class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
 
@@ -268,8 +271,8 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         skillsService.createSkill(allSkills[3])
 
         List<String> users = getRandomUsers(2)
-        String userId = [0]
-        String userId1 = [1]
+        String userId = users[0]
+        String userId1 = users[1]
         SkillsService user1Service = createService(userId)
         SkillsService user2Service = createService(userId1)
         when:
@@ -298,6 +301,40 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         summary_t3.skills[0].children.isLastViewed == [false, true]
         summary_t3.skills[1].isLastViewed == false
 
+    }
+
+    def "extra entries are cleaned up if more than 1 ClientPref is present for ClientPrefKey.LAST_VIEWED_SKILL"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skillsGroup = SkillsFactory.createSkillsGroup()
+        def allSkills = SkillsFactory.createSkills(6) // first one is group
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[1])
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[2])
+        skillsService.createSkill(allSkills[3])
+
+        List<String> users = getRandomUsers(2)
+        String userId = users[0]
+        SkillsService user1Service = createService(userId)
+
+        clientPrefRepo.save(new ClientPref(key: ClientPrefKey.LastViewedSkill, value: allSkills[0].skillId, projectId: proj.projectId, userId: userId))
+        Thread.sleep(1000)
+        clientPrefRepo.save(new ClientPref(key: ClientPrefKey.LastViewedSkill, value: allSkills[1].skillId, projectId: proj.projectId, userId: userId))
+        Thread.sleep(1000)
+        clientPrefRepo.save(new ClientPref(key: ClientPrefKey.LastViewedSkill, value: allSkills[2].skillId, projectId: proj.projectId, userId: userId))
+
+
+        when:
+        assert clientPrefRepo.findAll().collect { it.value } == [allSkills[0].skillId, allSkills[1].skillId, allSkills[2].skillId]
+        user1Service.documentVisitedSkillId(proj.projectId, allSkills[3].skillId)
+
+        then:
+        // only the latest is kept
+        clientPrefRepo.findAll().collect { it.value } == [allSkills[3].skillId]
     }
 
 

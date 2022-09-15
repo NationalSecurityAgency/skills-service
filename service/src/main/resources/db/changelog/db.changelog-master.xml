@@ -1770,4 +1770,48 @@
     </changeSet>
 
 
+    <changeSet id="31" author="skills team">
+        <createTable tableName="client_preferences">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="key" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="project_id" type="varchar(255)"/>
+            <column name="user_id" type="varchar(255)" />
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="index_client_preferences_project_id"
+                     tableName="client_preferences">
+            <column name="project_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_client_preferences_key"
+                     tableName="client_preferences">
+            <column name="key" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_client_preferences_user_id"
+                     tableName="client_preferences">
+            <column name="user_id" type="varchar(255)"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseColumnNames="project_id"
+                                 baseTableName="client_preferences"
+                                 constraintName="fk_client_preferences_project_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="project_id"
+                                 referencedTableName="project_definition"/>
+    </changeSet>
+
 </databaseChangeLog>

@@ -27,6 +27,9 @@ import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import skills.PublicProps
+import skills.auth.SkillsAuthorizationException
+import skills.auth.UserInfo
+import skills.auth.UserInfoService
 import skills.controller.exceptions.SkillExceptionBuilder
 import skills.controller.request.model.UserProjectSettingsRequest
 import skills.controller.result.model.AvailableProjectResult
@@ -38,6 +41,8 @@ import skills.services.GlobalBadgesService
 import skills.services.LevelDefinitionStorageService
 import skills.services.admin.SkillsGroupAdminService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
+import skills.services.settings.ClientPrefKey
+import skills.services.settings.ClientPrefService
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.settings.CommonSettings
@@ -107,6 +112,9 @@ class SkillsLoader {
 
     @Autowired
     SettingsService settingsService
+
+    @Autowired
+    ClientPrefService clientPrefService
 
     @Autowired
     DependencyValidator dependencyValidator
@@ -556,10 +564,8 @@ class SkillsLoader {
         )
     }
 
-    @Transactional
     void documentLastViewedSkillId(String projectId, String skillId) {
-        UserProjectSettingsRequest request = new UserProjectSettingsRequest(projectId: projectId, setting: Settings.SKILLS_DISPLAY_LAST_VIEWED_SKILL.settingName, value: skillId)
-        settingsService.saveSetting(request)
+        clientPrefService.saveOrUpdateProjPrefForCurrentUser(ClientPrefKey.LastViewedSkill, skillId, projectId)
     }
 
     @Profile
