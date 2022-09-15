@@ -30,7 +30,7 @@ limitations under the License.
               </b-avatar>
               {{ projectInternal.name }}
             </router-link>
-            <div class="text-secondary preview-card-subTitle mt-1 ml-1">ID: {{ projectInternal.projectId }}</div>
+            <div class="text-secondary preview-card-subTitle mt-1 ml-1" data-cy="projectId">ID: {{ projectInternal.projectId }}</div>
           </div>
           <div class="col-md-auto mt-3 mt-md-0">
             <project-card-controls

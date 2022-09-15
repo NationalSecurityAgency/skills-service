@@ -190,6 +190,11 @@ jobs:
           ./e2e-tests/cypress/snapshots/**/**/__diff_output__/*.png
           ./e2e-tests/cypress/snapshots/**/__diff_output__/*.png
 
+    - name: verify that new screenshot snapshots were not created
+      run: |
+        cd e2e-tests
+        npm run verifyThatNewSnapshotsAreNotCreated
+
   service-against-postgresql:
     needs: pre_job
     if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
