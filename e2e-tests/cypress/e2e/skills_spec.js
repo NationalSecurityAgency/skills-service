@@ -1021,7 +1021,7 @@ describe('Skills Tests', () => {
     cy.visit('/administrator/projects/proj1/subjects/subj1/skills/areallylongsubjectnamethatmaywraptoosoonSkill/');
     cy.wait('@loadSkill1');
 
-    cy.matchSnapshotImage('[data-cy=pageHeader]', 'No Premature Name Wrap')
+    cy.matchSnapshotImageForElement('[data-cy=pageHeader]', 'No Premature Name Wrap')
   });
 
 
