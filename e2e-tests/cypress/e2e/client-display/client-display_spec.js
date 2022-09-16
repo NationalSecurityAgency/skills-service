@@ -853,12 +853,18 @@ describe('Client Display Tests', () => {
             .should('have.length', 6);
     });
 
-    it('description is rendered in client-display if configured on project', () => {
+    it.only('description is rendered in client-display if configured on project', () => {
         cy.request('POST', '/admin/projects/proj1', {
             projectId: 'proj1',
             name: 'proj1',
             description: 'I am a description *italic* **bold** foo',
         });
+        cy.request('POST', '/admin/projects/proj1/settings', [{
+            setting: 'show_project_description_everywhere',
+            value: 'true',
+            projectId: 'proj1'
+        }]);
+
 
         cy.cdVisit('/');
         cy.injectAxe();

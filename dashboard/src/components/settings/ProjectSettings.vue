@@ -43,7 +43,7 @@ limitations under the License.
             <b-form-select v-model="settings.hideProjectDescription.value"
                            @input="hideProjectDescriptionChanged"
                            aria-labelledby="hideProjectDescriptionLabel"
-                           data-cy="hideProjectDescriptionSelector">
+                           data-cy="showProjectDescriptionSelector">
               <b-form-select-option :value="true">Show Project Description everywhere</b-form-select-option>
               <b-form-select-option :value="false">Only show Project Description in Manage My Projects</b-form-select-option>
             </b-form-select>

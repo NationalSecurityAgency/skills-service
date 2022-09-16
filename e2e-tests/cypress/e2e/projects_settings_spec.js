@@ -409,4 +409,93 @@ describe('Project Settings Tests', () => {
             .eq(0)
             .should('include.text', 'Invite Only');
     });
+
+    it('project-level settings: project description', () => {
+        cy.createProject(1, { description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque vitae tellus.'});
+
+        cy.createProject(2, { description: '' });
+
+        cy.createProject(3, { description: 'Lorem ipsum dolor sit amet' });
+
+        cy.request('POST', '/admin/projects/proj2/settings', [{
+            setting: 'production.mode.enabled',
+            value: 'true',
+            projectId: 'proj2'
+        }]);
+        cy.request('POST', '/admin/projects/proj2/settings', [{
+            setting: 'show_project_description_everywhere',
+            value: 'true',
+            projectId: 'proj2'
+        }]);
+
+        cy.request('POST', '/admin/projects/proj3/settings', [{
+            setting: 'production.mode.enabled',
+            value: 'true',
+            projectId: 'proj3'
+        }]);
+
+        cy.intercept('GET', '/admin/projects/proj1/settings')
+            .as('p1GetSettings');
+        cy.intercept('POST', '/admin/projects/proj1/settings')
+            .as('p1SaveSettings');
+        cy.intercept('GET', '/admin/projects/proj2/settings')
+            .as('p2GetSettings');
+        cy.intercept('POST', '/admin/projects/proj2/settings')
+            .as('p2SaveSettings');
+
+        cy.intercept('GET', '/api/availableForMyProjects').as('loadMyProjects');
+        cy.intercept('GET', '/admin/projects/proj1/description').as('loadProj1Description');
+
+        cy.visit('/administrator/projects/proj1/settings');
+        cy.wait('@p1GetSettings');
+        cy.get('[data-cy="projectVisibilitySelector"]')
+            .select('dpr');
+        cy.get('[data-cy="showProjectDescriptionSelector"]').find('option:selected').should('have.text', 'Only show Project Description in Manage My Projects');
+        cy.get('[data-cy="showProjectDescriptionSelector"]').select('true');
+        cy.get('[data-cy="saveSettingsBtn"')
+            .click();
+        cy.wait('@p1SaveSettings');
+
+        //make sure that the setting persisted
+        cy.get('[data-cy="nav-Access"]').click();
+        cy.contains('Access Management').should('be.visible');
+        cy.get('[data-cy="nav-Settings"]').click();
+        cy.wait('@p1GetSettings');
+        cy.get('[data-cy="showProjectDescriptionSelector"]').find('option:selected').should('have.text', 'Show Project Description everywhere');
+        //validate that changed value for description display persisted
+
+
+        //validate that the project description expander is only present for proj1 as proj2 has no description defined, proj3 should not have an expander as while it does
+        cy.visit('/progress-and-rankings/manage-my-projects');
+        cy.wait('@loadMyProjects');
+        cy.get('[data-cy="expandDetailsBtn_proj1"]').should('be.visible');
+        cy.get('[data-cy="expandDetailsBtn_proj2"]').should('not.exist');
+        cy.get('[data-cy="expandDetailsBtn_proj3"]').should('be.visible');
+        cy.get('[data-cy="expandDetailsBtn_proj1"]').click();
+        cy.wait('@loadProj1Description');
+        cy.get('[data-cy="proj1_projectDescription"]').should('exist');
+        cy.get('[data-cy="proj1_projectDescription"]').should('contain.text', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque vitae tellus.');
+
+
+        cy.intercept('/progress-and-rankings/projects/proj1** ')
+            .as('loadP1Cd');
+        cy.visit('/progress-and-rankings/projects/proj1');
+        cy.wait('@loadP1Cd');
+        cy.wrapIframe().find('[data-cy="projectDescription"]').should('be.visible');
+        cy.wrapIframe().find('[data-cy="projectDescription"]').should('contain.text', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque vitae tellus.')
+
+        // proj2 has no description defined so it shouldn't be displayed
+        cy.intercept('/progress-and-rankings/projects/proj2** ')
+            .as('loadP2Cd');
+        cy.visit('/progress-and-rankings/projects/proj2');
+        cy.wait('@loadP2Cd');
+        cy.wrapIframe().find('[data-cy="projectDescription"]').should('not.exist');
+
+        // proj3 has a description but is using the default configuration which hides it from display in the client-display
+        cy.intercept('/progress-and-rankings/projects/proj3** ')
+            .as('loadP3Cd');
+        cy.visit('/progress-and-rankings/projects/proj3');
+        cy.wait('@loadP3Cd');
+        cy.wrapIframe().find('[data-cy="projectDescription"]').should('not.exist');
+    });
 });

@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <loading-container :is-loading="loadingDescription" :data-cy="`projectDescriptionRow_${projectId}`">
-    <div class="w-100">
+    <div class="w-100" :data-cy="`${projectId}_projectDescription`">
       <markdown-text :text="description" />
     </div>
   </loading-container>
