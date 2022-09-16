@@ -853,7 +853,7 @@ describe('Client Display Tests', () => {
             .should('have.length', 6);
     });
 
-    it.only('description is rendered in client-display if configured on project', () => {
+    it('description is rendered in client-display if configured on project', () => {
         cy.request('POST', '/admin/projects/proj1', {
             projectId: 'proj1',
             name: 'proj1',
