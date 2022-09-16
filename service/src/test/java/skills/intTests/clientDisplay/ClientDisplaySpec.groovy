@@ -20,6 +20,7 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import spock.lang.IgnoreRest
 
 class ClientDisplaySpec extends DefaultIntSpec {
 
@@ -286,19 +287,6 @@ class ClientDisplaySpec extends DefaultIntSpec {
         def summary = skillsService.getSkillSummary("user1", proj1.projectId)
         then:
         summary.projectDescription == desc
-    }
-
-    def "project summary does not include description if disabled in project settings"() {
-        def proj1 = SkillsFactory.createProject()
-        def desc = "description descraption despaption "
-        proj1.description = desc
-
-        skillsService.createProject(proj1)
-
-        when:
-        def summary = skillsService.getSkillSummary("user1", proj1.projectId)
-        then:
-        !summary.projectDescription == desc
     }
 
 }
