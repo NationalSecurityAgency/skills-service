@@ -125,8 +125,11 @@ class SubjectDataLoader {
 
     @Profile
     private void updateLastViewedSkill(List<SkillsAndPoints> skillsAndPoints, String userId, String projectId) {
-        ClientPref clientPref = clientPrefService.findPref(ClientPrefKey.LastViewedSkill, userId, projectId)
-        String lastViewedSkillId = clientPref?.value
+        String lastViewedSkillId = null
+        if (projectId) {
+            ClientPref clientPref = clientPrefService.findPref(ClientPrefKey.LastViewedSkill, userId, projectId)
+            lastViewedSkillId = clientPref?.value
+        }
         skillsAndPoints.each {
             it.isLastViewed = it.skillDef.skillId == lastViewedSkillId
         }
