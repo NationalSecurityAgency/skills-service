@@ -33,6 +33,7 @@ limitations under the License.
     <div class="row">
       <div class="col text-md-left">
         <div class="h4"
+             :id="`skillProgressTitle-${skill.skillId}`"
              @click="skillClicked"
              @keydown.enter="skillClicked"
              :class="{ 'skill-name-url' : allowDrillDown }" data-cy="skillProgressTitle"
@@ -222,10 +223,6 @@ limitations under the License.
     mounted() {
       this.initChildSkills();
       this.highlightChildSkillName();
-
-      if (this.skill.isLastViewed && this.$route.params.jumpToLastViewed) {
-        setTimeout(this.scrollToLastViewed, 1500);
-      }
     },
     computed: {
       locked() {
@@ -260,9 +257,6 @@ limitations under the License.
       },
     },
     methods: {
-      scrollToLastViewed() {
-        this.$emit('scrollTo');
-      },
       initChildSkills() {
         if (this.isSkillsGroupWithChildren) {
           this.childSkillsInternal = this.skill.children.map((item) => ({ ...item, childSkill: true }));

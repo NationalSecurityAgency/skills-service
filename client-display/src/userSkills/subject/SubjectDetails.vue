@@ -61,6 +61,17 @@ limitations under the License.
       SkillsProgressList,
       SkillsSpinner,
     },
+    beforeRouteEnter(to, from, next) {
+      // console.log(`to.name: ${to.name}, from: ${from.name}`);
+      if (to.name === 'subjectDetails' && from.name === 'skillDetails') {
+        next((vm) => {
+          // eslint-disable-next-line no-param-reassign
+          vm.jumpToLastViewed = true;
+        });
+      } else {
+        next();
+      }
+    },
     watch: {
       $route: 'fetchData',
       displayData: {
@@ -72,6 +83,8 @@ limitations under the License.
     },
     data() {
       return {
+        jumpToLastViewed: false,
+        lastViewedSkillId: null,
         displayDataHeader: this.displayData,
       };
     },
@@ -81,7 +94,11 @@ limitations under the License.
     methods: {
       fetchData() {
         this.resetLoading();
-        this.loadSubject();
+        this.loadSubject().then((res) => {
+          const foundLastViewedSkill = res.skills.find((item) => item.isLastViewed === true);
+          this.lastViewedSkillId = foundLastViewedSkill ? foundLastViewedSkill.skillId : null;
+          setTimeout(() => { this.autoScrollToLastViewedSkill(); }, 400);
+        });
         this.loadUserSkillsRanking();
       },
       refreshHeader(event) {
@@ -96,13 +113,24 @@ limitations under the License.
           });
         }
       },
-      doesLastViewedIndicatorExist() {
-        return document.getElementById('lastViewedIndicator');
+      autoScrollToLastViewedSkill() {
+        if (this.jumpToLastViewed) {
+          this.$nextTick(() => {
+            this.scrollToLastViewedSkill();
+          });
+        }
       },
       scrollToLastViewedSkill() {
-        const element = this.doesLastViewedIndicatorExist();
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth' });
+        if (this.lastViewedSkillId) {
+          const element = document.getElementById(`skillProgressTitle-${this.lastViewedSkillId}`);
+          if (element) {
+            this.$nextTick(() => {
+              element.scrollIntoView({ behavior: 'smooth' });
+              this.$nextTick(() => {
+                element.focus({ preventScroll: true });
+              });
+            });
+          }
         }
       },
     },

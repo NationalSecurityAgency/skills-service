@@ -39,9 +39,10 @@ limitations under the License.
           });
       },
       loadSubject() {
-        this.rawLoadUserSubject(true).then((result) => {
+        return this.rawLoadUserSubject(true).then((result) => {
           this.displayData.userSkills = result;
           this.loading.userSkills = false;
+          return result;
         });
       },
       loadUserSkillsRanking() {
