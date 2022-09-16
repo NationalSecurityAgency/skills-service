@@ -127,7 +127,8 @@ limitations under the License.
             this.$nextTick(() => {
               element.scrollIntoView({ behavior: 'smooth' });
               this.$nextTick(() => {
-                element.focus({ preventScroll: true });
+                const elementFocusOn = document.getElementById(`skillProgressTitle-${this.lastViewedSkillId}`);
+                elementFocusOn.focus({ preventScroll: true });
               });
             });
           }
