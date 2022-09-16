@@ -300,7 +300,7 @@ class ProjectCopyService {
                 badgeAdminService.addSkillToBadge(toProj.projectId, badgeRequest.badgeId, fromBadgeSkill.skillId)
             }
             // must enable it after the skills were added
-            if (fromBadge.enabled == Boolean.TRUE.toString()) {
+            if (fromBadge.enabled == Boolean.TRUE.toString() && badgeSkills) {
                 badgeRequest.enabled = fromBadge.enabled
                 badgeAdminService.saveBadge(toProj.projectId, fromBadge.skillId, badgeRequest)
             }
