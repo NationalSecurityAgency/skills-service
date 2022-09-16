@@ -400,6 +400,44 @@ class CopyProjectSpecs extends DefaultIntSpec {
         copied1.displayOrder == [1, 2, 3]
     }
 
+    def "copy live badge with no skills"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def skills = createSkills(6, 1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, skills)
+
+        def badge1 = createBadge(1, 1)
+        badge1.description = "blah 1"
+        badge1.helpUrl = "http://www.greatlink.com"
+        badge1.iconClass = "fas fa-adjust"
+        skillsService.createBadge(badge1)
+        skills[0..2].each {
+            skillsService.assignSkillToBadge(p1.projectId, badge1.badgeId, it.skillId)
+        }
+        badge1.enabled = true
+        skillsService.createBadge(badge1)
+        skills[0..2].each {
+            skillsService.removeSkillFromBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: it.skillId])
+        }
+
+        when:
+        def projToCopy = createProject(2)
+        skillsService.copyProject(p1.projectId, projToCopy)
+        def copied1 = skillsService.getBadge([projectId: projToCopy.projectId, badgeId: badge1.badgeId])
+
+        then:
+        copied1.description == badge1.description
+        copied1.badgeId == badge1.badgeId
+        copied1.name == badge1.name
+        copied1.helpUrl == badge1.helpUrl
+        copied1.numSkills == 0
+        copied1.totalPoints == 0
+        copied1.enabled == "false"
+        copied1.iconClass == badge1.iconClass
+        !copied1.startDate
+        !copied1.endDate
+    }
+
     def "validate dependencies were copied"() {
         def p1 = createProject(1)
         skillsService.createProject(p1)
