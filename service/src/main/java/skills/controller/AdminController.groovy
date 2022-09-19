@@ -165,7 +165,7 @@ class AdminController {
 
     @RequestMapping(value = "/projects/{id}/copy", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
-    RequestResult copyProject(@PathVariable("id") String projectId, @RequestBody skills.controller.request.model.ProjectRequest projectRequest) {
+    RequestResult copyProject(@PathVariable("id") String projectId, @RequestBody ProjectRequest projectRequest) {
         projectRequest = controllerPropsValidatorAndSanitizer.validateAndSanitizeProjectRequest(projectRequest)
         projectId = controllerPropsValidatorAndSanitizer.validateAndSanitizeProjectId(projectId)
         projectCopyService.copyProject(projectId, projectRequest)
@@ -213,6 +213,13 @@ class AdminController {
     ProjectResult getProject(@PathVariable("id") String projectId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         return projAdminService.getProject(projectId)
+    }
+
+    @RequestMapping(value = "/projects/{id}/description", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    ProjectDescription getProjectDescription(@PathVariable("id") String projectId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        return projAdminService.getProjectDescription(projectId)
     }
 
     @RequestMapping(value = "/projects/{id}/projectSearch", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

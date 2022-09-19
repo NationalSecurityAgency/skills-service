@@ -274,5 +274,20 @@ class ClientDisplaySpec extends DefaultIntSpec {
         projectSummary.subjects[0].skillsLevel == 0
         projectSummary.subjects[0].totalPoints == 20
     }
+
+    def "project summary includes description if set"() {
+        def proj1 = SkillsFactory.createProject()
+        def desc = "description descraption despaption "
+        proj1.description = desc
+
+        skillsService.createProject(proj1)
+        skillsService.addOrUpdateProjectSetting(proj1.projectId, "show_project_description_everywhere", "true")
+
+        when:
+        def summary = skillsService.getSkillSummary("user1", proj1.projectId)
+        then:
+        summary.projectDescription == desc
+    }
+
 }
 

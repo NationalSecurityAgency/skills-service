@@ -278,7 +278,7 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                     CAST(COALESCE(expiration.expiringUnused, 'false') AS BOOLEAN) as expiring,
                     expiration.expirationTriggeredDate as expirationTriggered,
                     events.latest AS lastReportedSkill,
-                    pd.created 
+                    pd.created
                 FROM project_definition pd 
                 JOIN settings s on s.project_id = pd.project_id 
                 LEFT JOIN (SELECT project_id, MAX(event_time) AS latest FROM user_events GROUP BY project_id) events ON events.project_id = pd.project_id 
@@ -308,6 +308,7 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
         // set to project is if this project was added to 'My Projects'
         @Nullable
         String getMyProjectId();
+        boolean getHasDescription();
     }
     @Query(value="""
                 SELECT
@@ -319,7 +320,8 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                     COALESCE(subjects.subjectCount, 0) AS numSubjects,
                     COALESCE(groups.groupCount, 0) AS numGroups,
                     pd.created, 
-                    theSettings.myProjectId AS myProjectId
+                    theSettings.myProjectId AS myProjectId,
+                    case when (pd.description is not null and pd.description <> '' )then true else false end as hasDescription
                 FROM settings s, project_definition pd
                 LEFT JOIN (SELECT project_id, MAX(event_time) AS latest FROM user_events GROUP BY project_id) events ON events.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS skillCount, MAX(updated) AS skillUpdated FROM skill_definition WHERE type = 'Skill' and enabled = 'true' GROUP BY project_id) skills ON skills.project_id = pd.project_id
@@ -422,5 +424,9 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
     @Nullable
     @Query('''SELECT pd.totalPoints FROM ProjDef pd WHERE pd.projectId = ?1''')
     Integer getTotalPointsByProjectId(String projectId)
+
+    @Nullable
+    @Query('''select pd.description from ProjDef pd where pd.projectId = :projectId''')
+    String getProjectDescription(@Param("projectId") String projectId)
 
 }

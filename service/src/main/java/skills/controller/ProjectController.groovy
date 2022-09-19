@@ -110,6 +110,7 @@ class ProjectController {
 
         projectRequest.projectId = InputSanitizer.sanitize(projectRequest.projectId)
         projectRequest.name = InputSanitizer.sanitize(projectRequest.name)?.trim()
+        projectRequest.description = InputSanitizer.sanitize(projectRequest.description)
 
         projAdminService.saveProject(null, projectRequest)
         return new RequestResult(success: true)

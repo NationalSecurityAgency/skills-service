@@ -389,5 +389,51 @@ describe('Projects Tests', () => {
         cy.matchSnapshotImage(`project-page-iphone6`, snapshotOptions);
     });
 
+    it('project description is retained after editing', () => {
+        cy.createProject(1);
+        cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+        cy.intercept('GET', '/admin/projects/proj1/description').as('loadDescription');
+        cy.intercept('POST', '/api/validation/description').as('validateDescription');
+        cy.intercept('POST', '/admin/projects/proj1').as('saveProject');
+
+        // validate that edit on both /projects and /project/projId view retain edits to description
+        cy.visit('/administrator/projects/proj1');
+        cy.wait('@loadSubjects');
+        cy.get('[data-cy="btn_edit-project"]').click();
+        cy.wait('@loadDescription');
+        cy.get('[data-cy="markdownEditorInput"]').should('be.empty');
+        cy.get('[data-cy="markdownEditorInput"]').click().type('I am a description');
+        cy.get('[data-cy="saveProjectButton"]').should('be.enabled');
+        cy.get('[data-cy="saveProjectButton"]').click();
+        cy.wait('@saveProject');
+        cy.get('[data-cy="btn_edit-project"]').click();
+        cy.wait('@loadDescription');
+        cy.get('[data-cy="markdownEditorInput"]').should('have.value', 'I am a description');
+        cy.get('[data-cy="markdownEditorInput"]').click().type('jabberwocky jabberwocky jabberwocky');
+        cy.wait('@validateDescription');
+        cy.get('[data-cy="projectDescriptionError"]').should('be.visible');
+        cy.get('[data-cy="projectDescriptionError"]').should('contain.text', 'Project Description - paragraphs may not contain jabberwocky.');
+        cy.get('[data-cy="saveProjectButton"]').should('be.disabled');
+        cy.get('[data-cy="markdownEditorInput"]').click().type('{selectall}I am a description sans jw');
+        cy.wait('@validateDescription');
+        cy.get('[data-cy="projectDescriptionError"]').should('not.be.visible');
+        cy.get('[data-cy="saveProjectButton"]').should('be.enabled');
+        cy.get('[data-cy="saveProjectButton"]').click();
+        cy.wait('@saveProject');
+        cy.visit('/administrator/');
+        cy.contains('This is project 1');
+        cy.get('[data-cy="editProjBtn"]').click();
+        cy.wait('@loadDescription');
+        cy.get('[data-cy="markdownEditorInput"]').should('have.value', 'I am a description sans jw');
+        cy.get('[data-cy="markdownEditorInput"]').click().type('{selectall}Am I a description?');
+        cy.get('[data-cy="saveProjectButton"]').should('be.enabled');
+        cy.get('[data-cy="saveProjectButton"]').click();
+        cy.wait('@saveProject');
+        cy.contains('This is project 1');
+        cy.get('[data-cy="editProjBtn"]').click();
+        cy.wait('@loadDescription');
+        cy.get('[data-cy="markdownEditorInput"]').should('have.value', 'Am I a description?');
+    });
+
 });
 

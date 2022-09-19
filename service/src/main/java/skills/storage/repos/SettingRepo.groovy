@@ -27,6 +27,9 @@ interface SettingRepo extends CrudRepository<Setting, Integer> {
     Setting findByTypeAndUserRefIdAndProjectIdAndSettingGroupAndSetting(Setting.SettingType type, @Nullable Integer userRefId, @Nullable String projectId, @Nullable String settingGroup, String setting)
 
     @Nullable
+    List<Setting> findByTypeAndUserRefIdAndProjectIdAndSettingGroupAndSettingIn(Setting.SettingType type, @Nullable Integer userRefId, @Nullable String projectId, @Nullable String settingGroup, List<String> settings)
+
+    @Nullable
     List<Setting> findAllByTypeAndUserRefIdAndSettingGroup(Setting.SettingType type, Integer userRefId, String settingGroup)
 
     @Nullable

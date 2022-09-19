@@ -133,4 +133,7 @@ export default {
   rootPreviewEmail(email) {
     return axios.post('/root/users/previewEmail', email).then((response) => response.data);
   },
+  loadDescription(projectId) {
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/description`).then((response) => response.data);
+  },
 };

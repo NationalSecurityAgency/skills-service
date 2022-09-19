@@ -27,4 +27,6 @@ class AvailableProjectResult {
 
     boolean isMyProject
 
+    boolean hasDescription
+
 }
