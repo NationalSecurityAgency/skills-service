@@ -26,7 +26,7 @@ limitations under the License.
       <ValidationProvider rules="help_url|customUrlValidator" v-slot="{errors}"
                           name="Help URL/Path">
           <b-input-group>
-            <template #prepend v-if="rootHelpUrlSetting">
+            <template #prepend v-if="projConfigRootHelpUrl">
               <b-input-group-text><i class="fas fa-cogs mr-1"></i>
                 <span class="text-primary" :class="{ 'stikethrough' : overrideRootHelpUrl}" data-cy="rootHelpUrlSetting"
                       id="rootHelpUrlHelp"
@@ -56,6 +56,7 @@ limitations under the License.
 
 <script>
   import { extend, ValidationProvider } from 'vee-validate';
+  import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
   import InlineHelp from './InlineHelp';
 
   extend('help_url', {
@@ -70,6 +71,7 @@ limitations under the License.
 
   export default {
     name: 'HelpUrlInput',
+    mixins: [ProjConfigMixin],
     components: {
       InlineHelp,
       ValidationProvider,
@@ -85,19 +87,16 @@ limitations under the License.
     },
     computed: {
       overrideRootHelpUrl() {
-        return this.rootHelpUrlSetting && this.internalValue && (this.internalValue.startsWith('http://') || this.internalValue.startsWith('https://'));
-      },
-      rootHelpUrlSetting() {
-        return this.$store.getters.projConfig && this.$store.getters.projConfig['help.url.root'];
+        return this.projConfigRootHelpUrl && this.internalValue && (this.internalValue.startsWith('http://') || this.internalValue.startsWith('https://'));
       },
       rootHelpUrl() {
-        if (!this.rootHelpUrlSetting) {
-          return this.rootHelpUrlSetting;
+        if (!this.projConfigRootHelpUrl) {
+          return this.projConfigRootHelpUrl;
         }
-        if (this.rootHelpUrlSetting.endsWith('/')) {
-          return this.rootHelpUrlSetting.substring(0, this.rootHelpUrlSetting.length - 1);
+        if (this.projConfigRootHelpUrl.endsWith('/')) {
+          return this.projConfigRootHelpUrl.substring(0, this.projConfigRootHelpUrl.length - 1);
         }
-        return this.rootHelpUrlSetting;
+        return this.projConfigRootHelpUrl;
       },
     },
     watch: {
