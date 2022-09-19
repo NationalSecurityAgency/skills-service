@@ -696,6 +696,12 @@ describe('Users Tests', () => {
             [{colIndex: 1, value: 'tagB'}],
             [{colIndex: 1, value: 'tagC'}]
         ], 5);
+
+        cy.get('[data-cy=usersTable_viewUserTagMetricLink]').eq(0).click()
+
+        cy.contains("Metrics");
+        cy.contains("Overall Levels for Org: tagA");
+        cy.contains("Users for Org: tagA");
     });
 
     it('do not show user tag in users table when not configured', () => {
