@@ -58,6 +58,7 @@ class ContactOwnerNotificationBuilder implements NotificationEmailBuilder {
     private Context buildThymeleafContext(Object parsed, Formatting formatting) {
         Context templateContext = new Context()
         templateContext.setVariable("body", parsed.body)
+        templateContext.setVariable("plaintextBody", parsed.rawBody)
         templateContext.setVariable("htmlHeader", formatting.htmlHeader)
         templateContext.setVariable("htmlFooter", formatting.htmlFooter)
         templateContext.setVariable("userDisplayName", parsed.userDisplay)
