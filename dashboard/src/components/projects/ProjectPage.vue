@@ -51,7 +51,7 @@ limitations under the License.
                     variant="outline-primary" :aria-label="'preview client display for project'+project.name">
             <span>Preview</span> <i class="fas fa-eye" style="font-size:1rem;" aria-hidden="true"/>
           </b-button>
-          <b-button v-if="isDiscoverable"
+          <b-button v-if="isProjConfigDiscoverable"
                     ref="shareProjectButton"
                     @click="copyAndDisplayShareProjInfo"
                     data-cy="shareProjBtn"
@@ -101,11 +101,13 @@ limitations under the License.
   import EditProject from '@/components/projects/EditProject';
   import ProjectService from '@/components/projects/ProjectService';
   import ProjectShareModal from '@/components/projects/ProjectShareModal';
+  import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
 
   const { mapActions, mapGetters, mapMutations } = createNamespacedHelpers('projects');
 
   export default {
     name: 'ProjectPage',
+    mixins: [ProjConfigMixin],
     components: {
       ProjectShareModal,
       ImportFinalizeAlert,
@@ -130,24 +132,18 @@ limitations under the License.
       ...mapGetters([
         'project',
       ]),
-      isInviteOnly() {
-        return this.$store.getters.projConfig && this.$store.getters.projConfig.invite_only === 'true';
-      },
-      isDiscoverable() {
-        return this.$store.getters.projConfig && this.$store.getters.projConfig['production.mode.enabled'] === 'true';
-      },
       headerOptions() {
-        if (!this.project || !this.$store.getters.projConfig) {
+        if (!this.project || !this.projConfig) {
           return {};
         }
         let visibilityIcon = 'fas fa-lock-open';
         let visibilityDescription = 'Not Discoverable';
         let visibilityType = 'PUBLIC';
-        if (this.isInviteOnly) {
+        if (this.isProjConfigInviteOnly) {
           visibilityDescription = 'Invite Only';
           visibilityIcon = 'fas fa-lock';
           visibilityType = 'PRIVATE';
-        } else if (this.isDiscoverable) {
+        } else if (this.isProjConfigDiscoverable) {
           visibilityDescription = 'Discoverable';
         }
 

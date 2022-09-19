@@ -413,12 +413,6 @@ describe('Accessibility Tests', () => {
             .as('getSubjects');
         cy.route('GET', '/admin/projects/MyNewtestProject/subjects/subj1/skills')
             .as('getSkills');
-        cy.route('GET', '/admin/projects/MyNewtestProject/subjects/subj1/levels')
-            .as('getLevels');
-        cy.route('GET', '/admin/projects/MyNewtestProject/subjects/subj1/users?**')
-            .as('getUsers');
-        cy.route('GET', '/admin/projects/MyNewtestProject/performedSkills/u1?**')
-            .as('getPerformedSkills');
 
         cy.visit('/administrator/');
         cy.injectAxe();
@@ -433,23 +427,25 @@ describe('Accessibility Tests', () => {
         cy.contains('This is 2');
         cy.customLighthouse();
         cy.customA11y();
+    });
 
-        //edit skill
+    it('subject - create skill', () => {
+        cy.visit('/administrator/projects/MyNewtestProject/subjects/subj1');
+        cy.injectAxe();
+
         cy.get('[aria-label="new skill"]')
             .click();
         cy.get('[data-cy=skillName]')
             .type('1');
         cy.contains('Skill Name cannot be less than 3 characters.');
-        // it seems like bootstrap vue has a bug where it assigns the dialog role to the outer_modal div with no aria-label
-        // or aria-labelledby and then assigns the role="dialog" to the inner div along with the required aria attributes
-        // there isn't anything we can do to fix that so we have to skip this check at this time
-        // cy.customA11y();
-        cy.get('[data-cy=closeSkillButton]')
-            .click();
+        cy.customA11y();
+    })
 
-        cy.get('[data-cy=nav-Levels]')
-            .click();
-        cy.wait('@getLevels');
+    it('subject - levels', () => {
+        cy.visit('/administrator/projects/MyNewtestProject/subjects/subj1/levels');
+        cy.injectAxe();
+
+        cy.get('[data-cy="levelsTable"]').contains('67')
         // cy.contains('Black Belt');r
         cy.customLighthouse();
         cy.customA11y();
@@ -470,38 +466,48 @@ describe('Accessibility Tests', () => {
         cy.customA11y();
         cy.get('[data-cy=cancelLevel]')
             .click();
+    })
 
-        cy.clickNav('Users')
-            .click();
+    it('subject - users', () => {
+        cy.visit('/administrator/projects/MyNewtestProject/subjects/subj1/users');
+        cy.injectAxe();
+
+        cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', '6')
         cy.contains('u1');
-        cy.wait('@getUsers');
         cy.customLighthouse();
         cy.customA11y();
-        cy.get('[data-cy="usersTable"] [data-cy="usersTable_viewDetailsBtn"]')
-            .first()
-            .click();
-        cy.wait(4000);
+    })
+
+    it('subject - user - client display', () => {
+        cy.visit('/administrator/projects/MyNewtestProject/subjects/subj1/users/u1');
+        cy.injectAxe();
+
         cy.contains('Client Display');
+        cy.wait(4000);
         cy.customLighthouse();
         // enable once a11y issues with client display are addressed, needs an H1 initially
         // also has contrast issues
         // cy.customA11y();
-        cy.get('[data-cy="nav-Performed Skills"]')
-            .click();
-        cy.wait('@getPerformedSkills');
-        cy.contains('skill1');
+    })
+
+    it('subject - user - performed skills', () => {
+        cy.visit('/administrator/projects/MyNewtestProject/subjects/subj1/users/u1/skillEvents');
+        cy.injectAxe();
+        cy.get('[data-cy="performedSkillsTable"]').contains('ID: skill1');
         cy.customLighthouse();
         cy.customA11y();
+    })
 
-        cy.get('[data-cy=breadcrumb-subj1]')
-            .click();
+    it('subject - metrics', () => {
+        cy.visit('/administrator/projects/MyNewtestProject/subjects/subj1');
+        cy.injectAxe();
         cy.get('[data-cy=nav-Metrics]')
             .click();
         cy.contains('This chart needs at least 2 days of user activity.');
         cy.contains('Level 2: 1 users');
         cy.customLighthouse();
         cy.customA11y();
-    });
+    })
 
     it('skills', () => {
         cy.visit('/administrator/');

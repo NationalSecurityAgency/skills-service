@@ -437,8 +437,16 @@ Cypress.Commands.add('customLighthouse', () => {
         extends: 'lighthouse:default',
         settings: {
             emulatedFormFactor:'desktop',
-            maxWaitForFcp: 15 * 1000,
-            maxWaitForLoad: 35 * 1000,
+            maxWaitForFcp: 35 * 1000,
+            maxWaitForLoad: 45 * 1000,
+            formFactor: 'desktop',
+            screenEmulation: {
+                mobile: false,
+                disable: false,
+                width: Cypress.config('viewportWidth'),
+                height: Cypress.config('viewportHeight'),
+                deviceScaleRatio: 1,
+            },
         },
     }
     cy.lighthouse({
