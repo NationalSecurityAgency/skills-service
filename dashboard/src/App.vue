@@ -160,6 +160,8 @@ limitations under the License.
 
   :root {
     --vs-search-input-placeholder-color: #adadad;
+    --vs-dropdown-option--active-bg: #264653;
+    --vs-dropdown-option--active-color: #FFFFFF;
   }
 
 </style>

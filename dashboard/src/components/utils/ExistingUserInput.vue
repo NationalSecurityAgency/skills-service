@@ -35,7 +35,7 @@ limitations under the License.
               :class="{'col': (userSuggestOptions && userSuggestOptions.length > 0)}">
       <template v-if="creatingTag" #option="{ userId }">
         <div class="position-relative">
-          <div class="h6">{{ userId }}</div>
+          <div class="h6 existing-user-id">{{ userId }}</div>
           <div v-if="userId == currentTagValue" class="position-absolute text-light small click-indicator" style="right: 5px; bottom: 0px;">
             Enter to Select
           </div>
@@ -262,4 +262,7 @@ limitations under the License.
 </script>
 
 <style>
+  .vs__dropdown-option--highlight .existing-user-id {
+    color: #FFFFFF !important;
+  }
 </style>
