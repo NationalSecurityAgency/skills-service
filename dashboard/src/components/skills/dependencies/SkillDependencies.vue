@@ -46,7 +46,7 @@ limitations under the License.
                   <strong class="mb-2"><span v-if="option.otherProjectId"
                                              class="">{{ option.otherProjectName }} : </span>
                     {{ option.name }}</strong>
-                  <div style="font-size: 0.95rem;" class="row text-secondary">
+                  <div style="font-size: 0.95rem;" class="row text-secondary skills-option-id">
                     <div class="col-md">
                       <span class="font-italic">ID:</span> <span class="ml-1" data-cy="skillsSelector-skillId">{{option.skillId}}</span>
                     </div>
@@ -265,5 +265,9 @@ limitations under the License.
 <style scoped>
   .dependencies-container {
     min-height: 800px;
+  }
+
+  .vs__dropdown-option--highlight .skills-option-id {
+    color: #FFFFFF !important;
   }
 </style>

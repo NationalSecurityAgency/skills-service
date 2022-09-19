@@ -26,8 +26,8 @@ limitations under the License.
               :loading="isLoading"
               :disabled="disabled">
       <template #option="{ name, projectId }">
-        <div class="h6">{{ name }}</div>
-        <div class="text-secondary">ID: {{ projectId }}</div>
+        <div class="h6 project-name">{{ name }}</div>
+        <div class="text-secondary project-id">ID: {{ projectId }}</div>
       </template>
     </v-select>
   </div>
@@ -94,5 +94,12 @@ limitations under the License.
   };
 </script>
 
-<style>
+<style scoped>
+  .vs__dropdown-option--highlight .project-name {
+    color: #FFFFFF !important;
+  }
+
+  .vs__dropdown-option--highlight .project-id {
+    color: #FFFFFF !important;
+  }
 </style>
