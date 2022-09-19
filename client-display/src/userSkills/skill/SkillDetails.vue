@@ -94,7 +94,6 @@ limitations under the License.
         this.skill = {};
         this.loadDependencies();
         this.loadSkillSummary();
-        this.updateLastViewed();
       },
       loadDependencies() {
         if (!this.$route.params.crossProjectId) {
@@ -114,6 +113,10 @@ limitations under the License.
           .then((res) => {
             this.skill = res;
             this.loading.skill = false;
+
+            if (skillId && this.skill.projectId) {
+              SkillHistoryUtil.updateSkillHistory(this.skill.projectId, skillId);
+            }
           });
       },
       onPointsEarned(pts) {
@@ -136,10 +139,6 @@ limitations under the License.
           name: 'skillDetails',
           params,
         });
-      },
-      updateLastViewed() {
-        const { projectId, skillId } = this.$route.params;
-        SkillHistoryUtil.updateSkillHistory(projectId, skillId);
       },
     },
   };
