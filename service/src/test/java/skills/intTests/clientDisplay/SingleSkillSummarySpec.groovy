@@ -1172,7 +1172,6 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
 
         when:
         def res = skillsService.getCrossProjectSkillSummaryWithSubject("user1", proj2.projectId, proj1.projectId, proj2_subj.subjectId, proj1_skills.get(1).skillId)
-        println JsonOutput.toJson(res)
 
         then:
         res
