@@ -23,6 +23,7 @@ import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.storage.repos.UserRepo
 import skills.utils.WaitFor
+import spock.lang.IgnoreRest
 
 class ContactOwnersSpec extends DefaultIntSpec {
 
@@ -139,5 +140,64 @@ class ContactOwnersSpec extends DefaultIntSpec {
         exception.message.contains("paragraphs may not contain jabberwocky")
     }
 
+    def "contact project administrators includes user supplied newlines"() {
+        def users = getRandomUsers(4, true)
+
+        Map<String, SkillsService.UseParams> params = [:]
+        users.each {
+            SkillsService.UseParams up = new SkillsService.UseParams(
+                    username: it,
+                    email: EmailUtils.generateEmaillAddressFor(it),
+                    firstName: "${it.toUpperCase()}_first",
+                    lastName: "${it.toUpperCase()}_last"
+            )
+            params[it] = up
+        }
+        SkillsService proj1Serv = createService(params[users[0]])
+
+        def proj1 = SkillsFactory.createProject(1)
+        def subj1 = SkillsFactory.createSubject()
+        def skill = SkillsFactory.createSkill()
+        skill.pointIncrement = 200
+
+        proj1Serv.createProject(proj1)
+        proj1Serv.createSubject(subj1)
+        proj1Serv.createSkill(skill)
+
+        //make sure the other users get created so that they can be added as admins
+        createService(params[users[1]])
+        createService(params[users[2]])
+
+        proj1Serv.addSkill(skill, users[1])
+        proj1Serv.addSkill(skill, users[2])
+
+        proj1Serv.addUserRole(users[1], proj1.projectId, "ROLE_PROJECT_ADMIN")
+        proj1Serv.addUserRole(users[2], proj1.projectId, "ROLE_PROJECT_ADMIN")
+        WaitFor.wait { greenMail.getReceivedMessages().length > 1 }
+        greenMail.getReceivedMessages()
+        greenMail.reset()
+
+        def userService = createService(params[users[3]])
+
+        when:
+        userService.contactProjectOwner(proj1.projectId, "a message\n\nthat has\n\nmultiple\n\nnewlines")
+
+        WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
+
+        def email = EmailUtils.getEmail(greenMail, 0)
+
+        then:
+        email.recipients.size() == 3
+        email.recipients.find { it.contains(users[1]) }
+        email.recipients.find { it.contains(users[2]) }
+        email.recipients.find { it.contains(users[0]) }
+        email.fromEmail.find { it.contains(users[3]) }
+        email.html.contains("You have received the following question from user ${users[3]} for display about SkillTree Project Test Project#1:")
+        email.html.contains("<p>a message</p>")
+        email.html.contains("<p>that has</p>")
+        email.html.contains("<p>multiple</p>")
+        email.html.contains("<p>newlines</p>")
+        email.subj == 'User Question regarding Test Project#1'
+    }
 
 }
