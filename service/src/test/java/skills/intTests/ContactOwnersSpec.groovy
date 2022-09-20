@@ -21,6 +21,7 @@ import skills.intTests.utils.EmailUtils
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import skills.storage.model.UserAttrs
 import skills.storage.repos.UserRepo
 import skills.utils.WaitFor
 import spock.lang.IgnoreRest
@@ -75,6 +76,8 @@ class ContactOwnersSpec extends DefaultIntSpec {
 
         when:
         userService.contactProjectOwner(proj1.projectId, "a message")
+        UserAttrs userAttrs = userAttrsRepo.findByUserId(users[3])
+        def displayName = userAttrs.getUserIdForDisplay()
 
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
@@ -86,9 +89,9 @@ class ContactOwnersSpec extends DefaultIntSpec {
         email.recipients.find { it.contains(users[2]) }
         email.recipients.find { it.contains(users[0]) }
         email.fromEmail.find { it.contains(users[3]) }
-        email.plainText.contains("You have received the following question from user ${users[3]} for display about SkillTree Project Test Project#1:")
+        email.plainText.contains("You have received the following question from user ${displayName} about SkillTree Project Test Project#1:")
         email.plainText.contains("a message")
-        email.html.contains("You have received the following question from user ${users[3]} for display about SkillTree Project Test Project#1:")
+        email.html.contains("You have received the following question from user ${displayName} about SkillTree Project Test Project#1:")
         email.html.contains("a message")
         email.subj == 'User Question regarding Test Project#1'
     }
@@ -181,6 +184,8 @@ class ContactOwnersSpec extends DefaultIntSpec {
 
         when:
         userService.contactProjectOwner(proj1.projectId, "a message\n\nthat has\n\nmultiple\n\nnewlines")
+        UserAttrs userAttrs = userAttrsRepo.findByUserId(users[3])
+        def displayName = userAttrs.getUserIdForDisplay()
 
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
@@ -192,7 +197,7 @@ class ContactOwnersSpec extends DefaultIntSpec {
         email.recipients.find { it.contains(users[2]) }
         email.recipients.find { it.contains(users[0]) }
         email.fromEmail.find { it.contains(users[3]) }
-        email.html.contains("You have received the following question from user ${users[3]} for display about SkillTree Project Test Project#1:")
+        email.html.contains("You have received the following question from user ${displayName} about SkillTree Project Test Project#1:")
         email.html.contains("<p>a message</p>")
         email.html.contains("<p>that has</p>")
         email.html.contains("<p>multiple</p>")
