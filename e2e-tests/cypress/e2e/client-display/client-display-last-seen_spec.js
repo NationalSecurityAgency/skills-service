@@ -34,6 +34,7 @@ describe('Client Display Skills Last Viewed', () => {
         cy.get('[data-cy=back]').click()
         cy.get('[data-cy="lastViewedIndicator"]').should('exist');
         cy.get('[data-cy="jumpToLastViewedButton"]').should('exist');
+        cy.get('[id=skillProgressTitle-skill1]').should('have.focus');
     });
 
     it('visiting a skill shows the Last Viewed indicator on the Badges page', () => {
@@ -57,5 +58,6 @@ describe('Client Display Skills Last Viewed', () => {
         cy.get('[data-cy=back]').click()
         cy.get('[data-cy="lastViewedIndicator"]').should('exist');
         cy.get('[data-cy="jumpToLastViewedButton"]').should('exist');
+        cy.get('[id=skillProgressTitle-skill1]').should('have.focus');
     });
 });
