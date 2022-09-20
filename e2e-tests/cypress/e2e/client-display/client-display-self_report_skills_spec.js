@@ -761,6 +761,62 @@ describe('Client Display Self Report Skills Tests', () => {
             .should('be.disabled');
     });
 
+    it('characters remaining formatted to include comma', () => {
+        cy.intercept('GET', '/public/clientDisplay/config?projectId=proj1', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.maxSelfReportMessageLength = 2500;
+                res.send(conf);
+            });
+        });
+
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+        cy.cdClickSkill(0);
+
+        const fifty = new Array(51).join('A');
+        const twentyFourHundy = new Array(2400).join('A');
+        const thirtyFiveHundy = new Array(3501).join('A');
+        cy.get('[data-cy="selfReportBtn"]')
+            .click();
+        cy.get('[data-cy="selfReportSkillMsg"]')
+            .contains('This skill requires approval. Submit with an optional message and it will enter an approval queue.');
+
+        cy.get('[data-cy="selfReportMsgInput"]')
+            .type(fifty);
+        cy.get('[data-cy=charactersRemaining]')
+            .contains('2,450 characters remaining');
+
+        cy.get('[data-cy="selfReportSubmitBtn"]')
+            .should('be.enabled');
+
+        cy.get('[data-cy="selfReportMsgInput"]')
+            .clear();
+        cy.get('[data-cy="selfReportSubmitBtn"]')
+            .should('be.enabled');
+        cy.get('[data-cy=charactersRemaining]')
+            .contains('2,500 characters remaining');
+
+        cy.get('[data-cy="selfReportMsgInput"]')
+            .type(twentyFourHundy);
+
+        cy.get('[data-cy="selfReportMsgInput"]')
+            .clear();
+        cy.get('[data-cy="selfReportSubmitBtn"]')
+            .should('be.enabled');
+        cy.get('[data-cy=charactersRemaining]')
+            .contains('2,500 characters remaining');
+
+        cy.get('[data-cy="selfReportMsgInput"]')
+            .type(thirtyFiveHundy);
+
+        cy.get('[data-cy=charactersRemaining]')
+            .contains('-1,000 characters remaining');
+        cy.get('[data-cy="selfReportSubmitBtn"]')
+            .should('be.disabled');
+    });
+
     it('clearly indicate which skills are self reportable', () => {
         cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
         cy.createSkill(1, 1, 2);

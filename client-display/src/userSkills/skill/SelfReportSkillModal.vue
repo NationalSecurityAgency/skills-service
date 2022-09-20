@@ -40,7 +40,7 @@ limitations under the License.
            aria-describedby="reportSkillMsg"
            :aria-label="isJustitificationRequired ? 'Optional request approval message' : 'Required request approval message'"
            class="form-control" :placeholder="`Message (${isJustitificationRequired ? 'required' : 'optional'})`"/>
-    <div v-if="isApprovalRequired" :class="{ 'float-right':true, 'text-small': true, 'text-danger': charactersRemaining < 0 }" data-cy="charactersRemaining">{{charactersRemaining}} characters remaining <i v-if="charactersRemaining < 0" class="fas fa-exclamation-circle"/></div>
+    <div v-if="isApprovalRequired" :class="{ 'float-right':true, 'text-small': true, 'text-danger': charactersRemaining < 0 }" data-cy="charactersRemaining">{{formattedRemaining}} characters remaining <i v-if="charactersRemaining < 0" class="fas fa-exclamation-circle"/></div>
     <span v-if="inputInvalid" class="text-small text-danger" data-cy="selfReportMsgInput_errMsg"><i class="fas fa-exclamation-circle"/> {{ inputInvalidExplanation }}</span>
     <template #modal-footer>
       <button type="button" class="btn btn-outline-danger text-uppercase" @click="cancel">
@@ -56,6 +56,7 @@ limitations under the License.
 
 <script>
   import debounce from 'lodash/debounce';
+  import FormatUtils from '@/common-components/utilities/FormatUtils';
   import UserSkillsService from '../service/UserSkillsService';
   import ModalPositioner from './ModalPositioner';
 
@@ -96,6 +97,9 @@ limitations under the License.
       },
       charactersRemaining() {
         return this.$store.getters.config.maxSelfReportMessageLength - this.approvalRequestedMsg.length;
+      },
+      formattedRemaining() {
+        return FormatUtils.commaifyNumber(this.charactersRemaining);
       },
     },
     methods: {
