@@ -18,7 +18,7 @@ limitations under the License.
         <div v-if="!loading.dependencies && !loading.skill">
             <skills-title>{{ skillDisplayName }} Overview</skills-title>
             <div class="card">
-              <div class="pageControl" v-if="skill && (skill.prevSkillId || skill.nextSkillId)">
+              <div class="pageControl" v-if="skill && (skill.prevSkillId || skill.nextSkillId) && !isCrossProject">
                 <button @click="prevButtonClicked" v-if="skill.prevSkillId" type="button" class="btn btn-outline-info skills-theme-btn m-0 prevButton" data-cy="prevSkill"
                   aria-label="previous skill">
                   <i class="fas fa-arrow-alt-circle-left"></i>
@@ -85,6 +85,10 @@ limitations under the License.
       skillDisplayName() {
         return store.getters.skillDisplayName;
       },
+      isCrossProject() {
+        const projectId = this.$route.params.crossProjectId ? this.$route.params.crossProjectId : this.skill.projectId;
+        return projectId && (projectId !== this.$route.params.projectId);
+      },
     },
     methods: {
       loadData() {
@@ -114,8 +118,9 @@ limitations under the License.
             this.skill = res;
             this.loading.skill = false;
 
-            if (skillId && this.skill.projectId) {
-              SkillHistoryUtil.updateSkillHistory(this.skill.projectId, skillId);
+            const projectId = this.$route.params.crossProjectId ? this.$route.params.crossProjectId : this.skill.projectId;
+            if (skillId && projectId && !this.isCrossProject) {
+              SkillHistoryUtil.updateSkillHistory(projectId, skillId);
             }
           });
       },
