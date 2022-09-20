@@ -14,9 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="project-description mb-3" data-cy="projectDescription">
+  <div class="project-description mb-3 text-left" data-cy="projectDescription">
     <div class="card">
-      <p class="skills-text-description project-description-text text-primary mt-3 pt-3" style="font-size: 0.9rem;">
+      <p class="skills-text-description project-description-text text-primary mt-3 pt-3 pl-3 pr-3" style="font-size: 0.9rem;">
         <markdown-text v-if="description" :text="description"/>
       </p>
     </div>
