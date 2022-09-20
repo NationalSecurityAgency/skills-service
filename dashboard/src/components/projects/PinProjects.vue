@@ -57,6 +57,7 @@ limitations under the License.
                        :current-page="result.paging.currentPage"
                        :sort-by.sync="sortBy"
                        :sort-desc.sync="sortDesc"
+                       @sort-changed="sortingChanged"
                        :no-sort-reset="true"
                        aria-label="Projects"
                        data-cy="pinProjectsSearchResults">
@@ -158,9 +159,11 @@ limitations under the License.
   import SkillsSpinner from '../utils/SkillsSpinner';
   import DateCell from '../utils/table/DateCell';
   import OptionalDateCell from '../utils/table/OptionalDateCell';
+  import PersistedSortMixin from '../utils/table/PersistedSortMixin';
 
   export default {
     name: 'PinProjects',
+    mixins: [PersistedSortMixin],
     components: { SkillsSpinner, OptionalDateCell, DateCell },
     props: {
       value: {
@@ -173,8 +176,7 @@ limitations under the License.
         show: this.value,
         isLoading: false,
         searchValue: '',
-        sortBy: 'name',
-        sortDesc: false,
+        id: 'PinProjects-table',
         result: {
           values: [],
           paging: {

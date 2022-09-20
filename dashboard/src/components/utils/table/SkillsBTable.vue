@@ -96,34 +96,26 @@ limitations under the License.
 </template>
 
 <script>
-  import TableStateUtil from '../TableStateUtil';
+  import PersistedSortMixin from './PersistedSortMixin';
 
   let uid = 0;
 
   export default {
     name: 'SkillsBTable',
     props: ['items', 'options', 'id'],
+    mixins: [PersistedSortMixin],
     beforeCreate() {
       this.uid = uid.toString();
       uid += 1;
     },
     mounted() {
       this.updateColumns();
-      if (this.id) {
-        const sorting = TableStateUtil.loadTableState(this.id);
-        if (sorting) {
-          this.sortBy = sorting.sortBy;
-          this.sortDesc = sorting.sortDesc;
-        }
-      }
     },
     data() {
       return {
         fieldsInternal: [],
         currentPageInternal: this.options.pagination.currentPage,
         pageSizeInternal: this.options.pagination.pageSize,
-        sortBy: this.options.sortBy,
-        sortDesc: this.options.sortDesc,
       };
     },
     computed: {
@@ -151,16 +143,6 @@ limitations under the License.
     methods: {
       isDisabled() {
         return !this.items || this.items.length === 0;
-      },
-      sortingChanged(ctx) {
-        if (this.id) {
-          TableStateUtil.saveTableSortState(this.id, ctx.sortBy, ctx.sortDesc);
-        }
-
-        // ctx.sortBy   ==> Field key for sorting by (or null for no sorting)
-        // ctx.sortDesc ==> true if sorting descending, false otherwise
-        this.currentPageInternal = 1;
-        this.$emit('sort-changed', ctx);
       },
       updateColumns() {
         const newFields = [];
