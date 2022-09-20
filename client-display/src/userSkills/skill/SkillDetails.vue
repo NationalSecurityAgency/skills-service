@@ -86,8 +86,8 @@ limitations under the License.
         return store.getters.skillDisplayName;
       },
       isCrossProject() {
-        const projectId = this.$route.params.crossProjectId ? this.$route.params.crossProjectId : this.skill.projectId;
-        return projectId && (projectId !== this.$route.params.projectId);
+        const routeName = this.$route.name;
+        return routeName === 'crossProjectSkillDetails';
       },
     },
     methods: {
@@ -118,9 +118,8 @@ limitations under the License.
             this.skill = res;
             this.loading.skill = false;
 
-            const projectId = this.$route.params.crossProjectId ? this.$route.params.crossProjectId : this.skill.projectId;
-            if (skillId && projectId && !this.isCrossProject) {
-              SkillHistoryUtil.updateSkillHistory(projectId, skillId);
+            if (skillId && this.skill.projectId && !this.isCrossProject) {
+              SkillHistoryUtil.updateSkillHistory(this.skill.projectId, skillId);
             }
           });
       },

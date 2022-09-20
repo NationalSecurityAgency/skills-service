@@ -490,7 +490,8 @@ class SkillsLoader {
         int totalSkills = 0;
         int orderInGroup = 0;
 
-        if(subjectId) {
+        boolean isCrossProjectSkill = crossProjectId && crossProjectId != projectId
+        if(subjectId && !isCrossProjectSkill) {
             List<DisplayOrderRes> skills = skillDefRepo.findDisplayOrderByProjectIdAndSubjectId(projectId, subjectId)?.sort({a, b -> sortByDisplayOrder(a, b)})
             def currentSkill = skills.find({ it -> it.getSkillId() == skillId })
             def orderedGroup = skills?.sort({a, b -> sortByDisplayOrder(a, b)});
