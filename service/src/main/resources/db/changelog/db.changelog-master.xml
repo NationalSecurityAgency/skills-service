@@ -1770,7 +1770,7 @@
     </changeSet>
 
 
-    <changeSet id="31" author="skills team">
+    <changeSet id="32" author="skills team">
         <createTable tableName="client_preferences">
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
