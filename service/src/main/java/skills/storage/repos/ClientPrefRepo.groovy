@@ -13,28 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.skillLoading.model
+package skills.storage.repos
 
-class SkillSummary extends SkillSummaryParent {
 
-    int pointIncrement
-    int pointIncrementInterval
-    int maxOccurrencesWithinIncrementInterval
+import org.springframework.data.repository.CrudRepository
+import org.springframework.lang.Nullable
+import skills.storage.model.ClientPref
 
-    SkillDescription description
+interface ClientPrefRepo extends CrudRepository<ClientPref, Integer> {
 
-    SkillDependencySummary dependencyInfo
-
-    // null if the skill is NOT achieved
-    Date achievedOn
-
-    SelfReportingInfo selfReporting
-
-    String subjectName
-    String subjectId
-    String nextSkillId
-    String prevSkillId
-    int totalSkills
-    int orderInGroup
-    Boolean isLastViewed
+    @Nullable
+    List<ClientPref> findAllByKeyAndUserIdAndProjectId(String key, String userId, String projectId)
 }

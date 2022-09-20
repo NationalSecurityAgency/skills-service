@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2020 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,28 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.skillLoading.model
+import axios from 'axios';
+import store from '@/store/store';
 
-class SkillSummary extends SkillSummaryParent {
-
-    int pointIncrement
-    int pointIncrementInterval
-    int maxOccurrencesWithinIncrementInterval
-
-    SkillDescription description
-
-    SkillDependencySummary dependencyInfo
-
-    // null if the skill is NOT achieved
-    Date achievedOn
-
-    SelfReportingInfo selfReporting
-
-    String subjectName
-    String subjectId
-    String nextSkillId
-    String prevSkillId
-    int totalSkills
-    int orderInGroup
-    Boolean isLastViewed
-}
+export default {
+    updateSkillHistory(projectId, skillId) {
+        return axios.post(`${store.state.serviceUrl}/api/projects/${projectId}/skills/visited/${skillId}`).then((res) => res.data);
+    },
+};

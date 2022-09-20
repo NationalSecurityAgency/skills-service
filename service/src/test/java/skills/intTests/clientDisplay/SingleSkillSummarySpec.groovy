@@ -1149,6 +1149,36 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         ]
     }
 
+    def "skills order is not supported for cross-project skills - loading prev/last skillIds"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(10, 1, 1)
+
+        def proj2 = SkillsFactory.createProject(2)
+        def proj2_subj = SkillsFactory.createSubject(2, 2)
+        List<Map> proj2_skills = SkillsFactory.createSkills(2, 2, 2)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        skillsService.createProject(proj2)
+        skillsService.createSubject(proj2_subj)
+        skillsService.createSkills(proj2_skills)
+
+        skillsService.shareSkill(proj1.projectId, proj1_skills.get(1).skillId, proj2.projectId)
+        skillsService.assignDependency([projectId         : proj2.projectId, skillId: proj2_skills.get(0).skillId,
+                                        dependentProjectId: proj1.projectId, dependentSkillId: proj1_skills.get(1).skillId,])
+
+        when:
+        def res = skillsService.getCrossProjectSkillSummaryWithSubject("user1", proj2.projectId, proj1.projectId, proj2_subj.subjectId, proj1_skills.get(1).skillId)
+
+        then:
+        res
+        res.prevSkillId == null
+        res.nextSkillId == null
+    }
+
     private String getSkillId(Integer skillRefId) {
         skillDefRepo.findById(skillRefId).get().skillId
     }

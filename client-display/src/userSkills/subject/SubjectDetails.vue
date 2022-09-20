@@ -39,8 +39,7 @@ limitations under the License.
                     </a>
               </div>
             </div>
-
-            <skills-progress-list @points-earned="refreshHeader" :subject="displayData.userSkills"/>
+            <skills-progress-list @points-earned="refreshHeader" :subject="displayData.userSkills" @scrollTo="scrollToLastViewedSkill" />
         </div>
     </section>
 </template>
@@ -62,6 +61,17 @@ limitations under the License.
       SkillsProgressList,
       SkillsSpinner,
     },
+    beforeRouteEnter(to, from, next) {
+      // console.log(`to.name: ${to.name}, from: ${from.name}`);
+      if (to.name === 'subjectDetails' && from.name === 'skillDetails') {
+        next((vm) => {
+          // eslint-disable-next-line no-param-reassign
+          vm.jumpToLastViewed = true;
+        });
+      } else {
+        next();
+      }
+    },
     watch: {
       $route: 'fetchData',
       displayData: {
@@ -73,6 +83,8 @@ limitations under the License.
     },
     data() {
       return {
+        jumpToLastViewed: false,
+        lastViewedSkillId: null,
         displayDataHeader: this.displayData,
       };
     },
@@ -82,7 +94,11 @@ limitations under the License.
     methods: {
       fetchData() {
         this.resetLoading();
-        this.loadSubject();
+        this.loadSubject().then((res) => {
+          const foundLastViewedSkill = res.skills.find((item) => item.isLastViewed === true);
+          this.lastViewedSkillId = foundLastViewedSkill ? foundLastViewedSkill.skillId : null;
+          setTimeout(() => { this.autoScrollToLastViewedSkill(); }, 400);
+        });
         this.loadUserSkillsRanking();
       },
       refreshHeader(event) {
@@ -95,6 +111,27 @@ limitations under the License.
               this.displayDataHeader = newDisplayData;
             });
           });
+        }
+      },
+      autoScrollToLastViewedSkill() {
+        if (this.jumpToLastViewed) {
+          this.$nextTick(() => {
+            this.scrollToLastViewedSkill();
+          });
+        }
+      },
+      scrollToLastViewedSkill() {
+        if (this.lastViewedSkillId) {
+          const element = document.getElementById(`skillProgressTitle-${this.lastViewedSkillId}`);
+          if (element) {
+            this.$nextTick(() => {
+              element.scrollIntoView({ behavior: 'smooth' });
+              this.$nextTick(() => {
+                const elementFocusOn = document.getElementById(`skillProgressTitle-${this.lastViewedSkillId}`);
+                elementFocusOn.focus({ preventScroll: true });
+              });
+            });
+          }
         }
       },
     },

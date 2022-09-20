@@ -181,6 +181,7 @@ router.beforeEach((to, from, next) => {
     const previousRoute = { ...from };
     const params = { ...to.params, ...{ previousRoute } };
     const updatedTo = { ...to, ...{ params }, replace: true };
+
     next(updatedTo);
   } else {
     next();

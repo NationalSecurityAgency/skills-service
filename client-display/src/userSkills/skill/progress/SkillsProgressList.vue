@@ -33,7 +33,20 @@ limitations under the License.
                   </div>
                 </div>
                 <div class="col-md text-left my-2 my-md-0 ml-md-0 pl-md-0">
-                  <skills-filter :counts="metaCounts" :filters="filters" @filter-selected="filterSkills" @clear-filter="clearFilters"/>
+                  <div class="d-flex">
+                    <div class="d-inline-block" style="min-width: 4rem;">
+                      <skills-filter :counts="metaCounts" :filters="filters" @filter-selected="filterSkills" @clear-filter="clearFilters"/>
+                    </div>
+                    <div  v-if="!loading.userSkills && hasLastViewedSkill" class="d-inline-block">
+                      <b-button @click.prevent="scrollToLastViewedSkill"
+                                class="skills-theme-btn d-inline" variant="outline-info"
+                                :aria-label="`Jump to Last Viewed Skill`"
+                                data-cy="jumpToLastViewedButton">
+                        <i class="fas fa-eye"></i>
+                        Last Viewed
+                      </b-button>
+                    </div>
+                  </div>
                 </div>
                 <div class="col-md-auto text-right skill-details-toggle" data-cy="skillDetailsToggle">
                     <span class="text-muted pr-1">{{ skillDisplayName }} Details:</span>
@@ -227,6 +240,11 @@ limitations under the License.
 
       this.skillsInternalOrig = this.skillsInternal.map((item) => ({ ...item, children: item.children?.map((child) => ({ ...child })) }));
     },
+    computed: {
+      hasLastViewedSkill() {
+        return this.skillsInternalOrig && this.skillsInternalOrig.find((item) => item.isLastViewed === true);
+      },
+    },
     methods: {
       updateMetaCountsForSkillRes(skillRes) {
         if (skillRes.isSkillsGroupType) {
@@ -270,6 +288,9 @@ limitations under the License.
               this.loading = false;
             });
         }
+      },
+      scrollToLastViewedSkill() {
+        this.$emit('scrollTo');
       },
       onPointsEarned(pts, skillId, childSkillId = null) {
         // childSkillId is only provided for SkillsGroup skills
