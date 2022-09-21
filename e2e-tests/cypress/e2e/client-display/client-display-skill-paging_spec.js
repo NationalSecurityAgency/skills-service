@@ -128,4 +128,34 @@ describe('Client Display Skills Navigation', () => {
         cy.get('[data-cy="prevSkill"]').should('exist');
         cy.get('[data-cy="nextSkill"]').should('not.exist');
     });
+
+    it('no paging on cross project dependency skill pages', () => {
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        const numSkills = 9;
+        for (let i = 0; i < numSkills; i += 1) {
+            cy.createSkill(1, 1, i);
+        }
+
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1);
+        cy.createSkill(2, 1, 2);
+
+        cy.assignDep(1, 1, 2);
+        cy.assignDep(1, 2, 3);
+        cy.assignDep(1, 3, 4);
+        cy.assignDep(1, 4, 5);
+        cy.assignDep(1, 5, 6);
+        cy.assignDep(1, 6, 7);
+        cy.assignDep(1, 7, 8);
+
+        cy.assignCrossProjectDep(1, 1, 2, 1);
+        cy.assignDep(2, 1, 2);
+
+        // Go to cross-project dependency page
+        cy.cdVisit('/subjects/subj1/skills/skill3/crossProject/proj2/skill1');
+        cy.get('[data-cy="prevSkill"]').should('not.exist');
+        cy.get('[data-cy="nextSkill"]').should('not.exist');
+    });
 });
