@@ -321,7 +321,7 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                     COALESCE(groups.groupCount, 0) AS numGroups,
                     pd.created, 
                     theSettings.myProjectId AS myProjectId,
-                    case when (pd.description is not null and pd.description <> '' )then true else false end as hasDescription
+                    case when (pd.description is not null and pd.description != '') then true else false end as hasDescription
                 FROM settings s, project_definition pd
                 LEFT JOIN (SELECT project_id, MAX(event_time) AS latest FROM user_events GROUP BY project_id) events ON events.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS skillCount, MAX(updated) AS skillUpdated FROM skill_definition WHERE type = 'Skill' and enabled = 'true' GROUP BY project_id) skills ON skills.project_id = pd.project_id

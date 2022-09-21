@@ -16,6 +16,7 @@
 package skills.controller
 
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.*
@@ -110,7 +111,7 @@ class ProjectController {
 
         projectRequest.projectId = InputSanitizer.sanitize(projectRequest.projectId)
         projectRequest.name = InputSanitizer.sanitize(projectRequest.name)?.trim()
-        projectRequest.description = InputSanitizer.sanitize(projectRequest.description)
+        projectRequest.description = StringUtils.trimToNull(InputSanitizer.sanitize(projectRequest.description))
 
         projAdminService.saveProject(null, projectRequest)
         return new RequestResult(success: true)
