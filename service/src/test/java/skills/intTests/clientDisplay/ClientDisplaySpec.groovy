@@ -277,7 +277,7 @@ class ClientDisplaySpec extends DefaultIntSpec {
 
     def "project summary includes description if set"() {
         def proj1 = SkillsFactory.createProject()
-        def desc = "description descraption despaption "
+        def desc = "description descraption despaption"
         proj1.description = desc
 
         skillsService.createProject(proj1)
