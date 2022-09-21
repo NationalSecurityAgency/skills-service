@@ -27,7 +27,11 @@ import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import skills.PublicProps
+import skills.auth.SkillsAuthorizationException
+import skills.auth.UserInfo
+import skills.auth.UserInfoService
 import skills.controller.exceptions.SkillExceptionBuilder
+import skills.controller.request.model.UserProjectSettingsRequest
 import skills.controller.result.model.AvailableProjectResult
 import skills.controller.result.model.GlobalBadgeLevelRes
 import skills.controller.result.model.SettingsResult
@@ -37,6 +41,9 @@ import skills.services.GlobalBadgesService
 import skills.services.LevelDefinitionStorageService
 import skills.services.admin.SkillsGroupAdminService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
+import skills.services.settings.ClientPrefKey
+import skills.services.settings.ClientPrefService
+import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.settings.CommonSettings
 import skills.skillLoading.model.*
@@ -107,6 +114,9 @@ class SkillsLoader {
     SettingsService settingsService
 
     @Autowired
+    ClientPrefService clientPrefService
+
+    @Autowired
     DependencyValidator dependencyValidator
 
     @Autowired
@@ -164,6 +174,7 @@ class SkillsLoader {
                     numBadges: summary.getNumBadges(),
                     created: summary.getCreated(),
                     isMyProject: myProjectId != null,
+                    hasDescription: summary.getHasDescription(),
             )
         }
 
@@ -283,7 +294,8 @@ class SkillsLoader {
                 levelPoints: levelPoints,
                 levelTotalPoints: levelTotalPoints,
                 subjects: subjects,
-                badges: new OverallSkillSummary.BadgeStats(numTotalBadges: numTotalBadges, numBadgesCompleted: numBadgesAchieved, enabled: numTotalBadges > 0)
+                badges: new OverallSkillSummary.BadgeStats(numTotalBadges: numTotalBadges, numBadgesCompleted: numBadgesAchieved, enabled: numTotalBadges > 0),
+                projectDescription: InputSanitizer.unsanitizeForMarkdown(projDef.description)
         )
 
         return res
@@ -478,7 +490,8 @@ class SkillsLoader {
         int totalSkills = 0;
         int orderInGroup = 0;
 
-        if(subjectId) {
+        boolean isCrossProjectSkill = crossProjectId && crossProjectId != projectId
+        if(subjectId && !isCrossProjectSkill) {
             List<DisplayOrderRes> skills = skillDefRepo.findDisplayOrderByProjectIdAndSubjectId(projectId, subjectId)?.sort({a, b -> sortByDisplayOrder(a, b)})
             def currentSkill = skills.find({ it -> it.getSkillId() == skillId })
             def orderedGroup = skills?.sort({a, b -> sortByDisplayOrder(a, b)});
@@ -550,6 +563,10 @@ class SkillsLoader {
                 copiedFromProjectId: isReusedSkill ? null : skillDef.copiedFromProjectId,
                 copiedFromProjectName: isReusedSkill ? null : InputSanitizer.unsanitizeName(copiedFromProjectName),
         )
+    }
+
+    void documentLastViewedSkillId(String projectId, String skillId) {
+        clientPrefService.saveOrUpdateProjPrefForCurrentUser(ClientPrefKey.LastViewedSkill, skillId, projectId)
     }
 
     @Profile
@@ -1017,6 +1034,7 @@ class SkillsLoader {
                         type: skillDef.type,
                         copiedFromProjectId: !isReusedSkill ? skillDef.copiedFromProjectId : null,
                         copiedFromProjectName: !isReusedSkill ? InputSanitizer.unsanitizeName(skillDefAndUserPoints.copiedFromProjectName) : null,
+                        isLastViewed: skillDefAndUserPoints.isLastViewed
                 )
             }
         }

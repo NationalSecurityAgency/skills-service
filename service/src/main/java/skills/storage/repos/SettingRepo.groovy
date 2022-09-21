@@ -27,6 +27,9 @@ interface SettingRepo extends CrudRepository<Setting, Integer> {
     Setting findByTypeAndUserRefIdAndProjectIdAndSettingGroupAndSetting(Setting.SettingType type, @Nullable Integer userRefId, @Nullable String projectId, @Nullable String settingGroup, String setting)
 
     @Nullable
+    List<Setting> findByTypeAndUserRefIdAndProjectIdAndSettingGroupAndSettingIn(Setting.SettingType type, @Nullable Integer userRefId, @Nullable String projectId, @Nullable String settingGroup, List<String> settings)
+
+    @Nullable
     List<Setting> findAllByTypeAndUserRefIdAndSettingGroup(Setting.SettingType type, Integer userRefId, String settingGroup)
 
     @Nullable
@@ -52,7 +55,15 @@ interface SettingRepo extends CrudRepository<Setting, Integer> {
                 s.type='User' ''')
     String findUserSettingValueByUserIdAndSettingAndProjectIdIsNull(String userId, String setting)
 
-
+    @Nullable
+    @Query('''select s.value from Setting s, User u 
+            where 
+                s.userRefId = u.id and
+                u.userId=?1 and
+                s.setting=?2 and 
+                s.projectId=?3 and 
+                s.type='UserProject' ''')
+    String findUserSettingValueByUserIdAndSettingAndProjectId(String userId, String setting, String projectId)
 
     @Nullable
     @Query('''select s from Setting s, User u 

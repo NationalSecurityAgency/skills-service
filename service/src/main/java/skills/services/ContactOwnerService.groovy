@@ -64,11 +64,14 @@ class ContactOwnerService {
         List<String> projectAdmins = accessSettingsStorageService.getProjectAdminIds(projectId)
         assert projectAdmins, "a project should never have zero admins"
 
+        def markdown = parser.parse(msg)
+        String parsedBody = renderer.render(markdown)
+
         Notifier.NotificationRequest request = new Notifier.NotificationRequest(
                 userIds: projectAdmins,
                 type: Notification.Type.ContactOwner,
                 keyValParams: [
-                        body    : msg,
+                        body    : parsedBody,
                         emailSubject: "User Question regarding ${projectName}",
                         rawBody     : msg,
                         userDisplay: displayName,

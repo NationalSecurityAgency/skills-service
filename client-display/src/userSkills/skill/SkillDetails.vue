@@ -18,14 +18,14 @@ limitations under the License.
         <div v-if="!loading.dependencies && !loading.skill">
             <skills-title>{{ skillDisplayName }} Overview</skills-title>
             <div class="card">
-              <div class="pageControl" v-if="skill && (skill.prevSkillId || skill.nextSkillId)">
+              <div class="pageControl" v-if="skill && (skill.prevSkillId || skill.nextSkillId) && !isCrossProject">
                 <button @click="prevButtonClicked" v-if="skill.prevSkillId" type="button" class="btn btn-outline-info skills-theme-btn m-0 prevButton" data-cy="prevSkill"
                   aria-label="previous skill">
                   <i class="fas fa-arrow-alt-circle-left"></i>
                   Previous
                   <span class="sr-only">Previous</span>
                 </button>
-                <span style="font-size: 0.9rem;" data-cy="skillOrder"><span class="font-italic">Skill</span> <b>{{ skill.orderInGroup }}</b> <span class="font-italic">of</span> <b>{{ skill.totalSkills }}</b></span>
+                <span style="font-size: 0.9rem;" data-cy="skillOrder"><span class="font-italic">{{ skillDisplayName }}</span> <b>{{ skill.orderInGroup }}</b> <span class="font-italic">of</span> <b>{{ skill.totalSkills }}</b></span>
                 <button @click="nextButtonClicked" v-if="skill.nextSkillId" type="button" class="btn btn-outline-info skills-theme-btn m-0 nextButton" data-cy="nextSkill"
                   aria-label="next skill">
                   Next
@@ -47,12 +47,14 @@ limitations under the License.
 </template>
 
 <script>
+  import store from '@/store/store';
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
   import SkillsSpinner from '@/common/utilities/SkillsSpinner';
   import SkillsTitle from '@/common/utilities/SkillsTitle';
   import SkillProgress2 from '@/userSkills/skill/progress/SkillProgress2';
   import NavigationErrorMixin from '@/common/utilities/NavigationErrorMixin';
   import SkillEnricherUtil from '../utils/SkillEnricherUtil';
+  import SkillHistoryUtil from '../utils/SkillHistoryUtil';
 
   export default {
     name: 'SkillDetails',
@@ -78,6 +80,15 @@ limitations under the License.
     },
     watch: {
       $route: 'loadData',
+    },
+    computed: {
+      skillDisplayName() {
+        return store.getters.skillDisplayName;
+      },
+      isCrossProject() {
+        const routeName = this.$route.name;
+        return routeName === 'crossProjectSkillDetails';
+      },
     },
     methods: {
       loadData() {
@@ -106,6 +117,10 @@ limitations under the License.
           .then((res) => {
             this.skill = res;
             this.loading.skill = false;
+
+            if (skillId && this.skill.projectId && !this.isCrossProject) {
+              SkillHistoryUtil.updateSkillHistory(this.skill.projectId, skillId);
+            }
           });
       },
       onPointsEarned(pts) {
@@ -116,14 +131,14 @@ limitations under the License.
         return routeName === 'dependentSkillDetails' || routeName === 'crossProjectSkillDetails';
       },
       prevButtonClicked() {
-        const params = { skillId: this.skill.prevSkillId };
+        const params = { skillId: this.skill.prevSkillId, projectId: this.$route.params.projectId };
         this.handlePush({
           name: 'skillDetails',
           params,
         });
       },
       nextButtonClicked() {
-        const params = { skillId: this.skill.nextSkillId };
+        const params = { skillId: this.skill.nextSkillId, projectId: this.$route.params.projectId };
         this.handlePush({
           name: 'skillDetails',
           params,

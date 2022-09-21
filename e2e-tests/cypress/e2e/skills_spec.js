@@ -1021,8 +1021,7 @@ describe('Skills Tests', () => {
     cy.visit('/administrator/projects/proj1/subjects/subj1/skills/areallylongsubjectnamethatmaywraptoosoonSkill/');
     cy.wait('@loadSkill1');
 
-    cy.get('[data-cy=pageHeader]').matchImageSnapshot('No Premature Name Wrap');
-
+    cy.matchSnapshotImageForElement('[data-cy=pageHeader]', 'No Premature Name Wrap')
   });
 
 
@@ -1430,6 +1429,21 @@ describe('Skills Tests', () => {
     cy.visit('/administrator/projects/proj1/subjects/subj1');
     cy.wait('@getSkills')
     cy.contains('Verylongandinterestingskill;Verylongandintere... >> more');
+  });
+
+  it('edit skill with version greater than 1', () => {
+    cy.createSkill(1,1,1);
+    cy.createSkill(1,1,2, { version: 1 });
+    cy.createSkill(1,1,3, { version: 2});
+
+    cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills').as('loadSkills');
+    cy.visit('/administrator/projects/proj1/subjects/subj1');
+    cy.wait('@loadSkills');
+    cy.get('[data-cy="editSkillButton_skill3"]').should('be.visible');
+    cy.get('[data-cy="editSkillButton_skill3"]').click();
+    cy.get('[data-cy="markdownEditorInput"').type('AABBCCDDEEFFGG');
+    cy.wait(500); //wait for validation debounce
+    cy.get('[data-cy="saveSkillButton"]').should('be.enabled');
   });
 
 

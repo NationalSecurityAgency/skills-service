@@ -47,5 +47,7 @@ class OverallSkillSummary {
         int numBadgesCompleted = 0
         boolean enabled = false
     }
+
+    String projectDescription
 }
 

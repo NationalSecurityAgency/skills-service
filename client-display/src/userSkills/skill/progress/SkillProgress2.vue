@@ -33,6 +33,7 @@ limitations under the License.
     <div class="row">
       <div class="col text-md-left">
         <div class="h4"
+             :id="`skillProgressTitle-${skill.skillId}`"
              @click="skillClicked"
              @keydown.enter="skillClicked"
              :class="{ 'skill-name-url' : allowDrillDown }" data-cy="skillProgressTitle"
@@ -67,6 +68,10 @@ limitations under the License.
                 <span class="">Requires </span> <b-badge variant="success">{{ skill.numSkillsRequired }}</b-badge> <span class="font-italic">out of</span> <b-badge variant="secondary">{{ skill.children.length }}</b-badge> skills
               </div>
 
+              <b-badge v-if="skill.isLastViewed" id="lastViewedIndicator" data-cy="lastViewedIndicator" variant="info" style="font-size: 0.9rem"
+                       class="ml-2 overflow-hidden">
+                <i class="fas fa-eye"></i> Last Viewed
+              </b-badge>
               <b-badge v-if="skill.selfReporting && skill.selfReporting.enabled"
                   variant="success" style="font-size: 0.9rem" class="ml-2 overflow-hidden"><i class="fas fa-check-circle"></i> Self Reportable</b-badge>
             </div>
@@ -278,6 +283,7 @@ limitations under the License.
         if (this.allowDrillDown) {
           const route = this.getSkillDetailsRoute();
           const params = this.getParams();
+
           this.handlePush({
             name: route,
             params,
@@ -295,6 +301,7 @@ limitations under the License.
         if (this.skill.crossProject && this.skill.projectId) {
           params.crossProjectId = this.skill.projectId;
         }
+        params.projectId = this.skill.projectId;
         return params;
       },
       getSkillDetailsRoute() {

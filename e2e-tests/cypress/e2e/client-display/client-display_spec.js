@@ -852,6 +852,25 @@ describe('Client Display Tests', () => {
             .find('span.fa.fa-star')
             .should('have.length', 6);
     });
+
+    it('description is rendered in client-display if configured on project', () => {
+        cy.request('POST', '/admin/projects/proj1', {
+            projectId: 'proj1',
+            name: 'proj1',
+            description: 'I am a description *italic* **bold** foo',
+        });
+        cy.request('POST', '/admin/projects/proj1/settings', [{
+            setting: 'show_project_description_everywhere',
+            value: 'true',
+            projectId: 'proj1'
+        }]);
+
+
+        cy.cdVisit('/');
+        cy.injectAxe();
+        cy.contains('I am a description');
+        cy.matchSnapshotImageForElement('.project-description', 'Project-Description', snapshotOptions);
+    });
 });
 
 

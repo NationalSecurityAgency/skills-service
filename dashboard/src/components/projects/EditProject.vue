@@ -55,6 +55,17 @@ limitations under the License.
                       @hidden="tooltipShowing=false"/>
           </div>
         </div>
+        <div class="row">
+          <div class="mt-2 col-12">
+            <label>Description</label>
+              <skills-spinner :is-loading="loadingDescription"/>
+              <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{errors}"
+                                  name="Project Description">
+                <markdown-editor v-model="internalProject.description" @input="updateDescription"></markdown-editor>
+                <small role="alert" class="form-text text-danger mb-3" data-cy="projectDescriptionError">{{ errors[0] }}</small>
+              </ValidationProvider>
+          </div>
+        </div>
 
         <p v-if="invalid && overallErrMsg" class="text-center text-danger mt-2" aria-live="polite"><small>***{{ overallErrMsg }}***</small></p>
       </b-container>
@@ -75,13 +86,15 @@ limitations under the License.
 
 <script>
   import { extend } from 'vee-validate';
+  import SkillsSpinner from '@/components/utils/SkillsSpinner';
+  import MarkdownEditor from '@/components/utils/MarkdownEditor';
   import ProjectService from './ProjectService';
   import IdInput from '../utils/inputForm/IdInput';
   import InputSanitizer from '../utils/InputSanitizer';
 
   export default {
     name: 'EditProject',
-    components: { IdInput },
+    components: { IdInput, MarkdownEditor, SkillsSpinner },
     props: ['project', 'isEdit', 'value', 'isCopy'],
     data() {
       return {
@@ -100,6 +113,7 @@ limitations under the License.
         currentFocus: null,
         previousFocus: null,
         tooltipShowing: false,
+        loadingDescription: false,
       };
     },
     created() {
@@ -110,6 +124,14 @@ limitations under the License.
         name: this.project.name,
         projectId: this.project.projectId,
       };
+      if (this.isEdit) {
+        this.loadingDescription = true;
+        ProjectService.loadDescription(this.project.projectId).then((data) => {
+          this.internalProject.description = data.description;
+        }).finally(() => {
+          this.loadingDescription = false;
+        });
+      }
       document.addEventListener('focusin', this.trackFocus);
     },
     computed: {
@@ -163,6 +185,9 @@ limitations under the License.
         } else {
           this.$emit('hidden', e);
         }
+      },
+      updateDescription(event) {
+        this.internalProject.description = event;
       },
       registerValidation() {
         const self = this;

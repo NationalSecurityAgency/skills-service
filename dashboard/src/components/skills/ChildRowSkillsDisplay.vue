@@ -121,6 +121,7 @@ limitations under the License.
 <script>
   import SkillReuseIdUtil from '@/components/utils/SkillReuseIdUtil';
   import LinkToSkillPage from '@/components/utils/LinkToSkillPage';
+  import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
   import LoadingContainer from '../utils/LoadingContainer';
   import SkillsService from './SkillsService';
   import MediaInfoCard from '../utils/cards/MediaInfoCard';
@@ -130,7 +131,7 @@ limitations under the License.
 
   export default {
     name: 'ChildRowSkillsDisplay',
-    mixins: [TimeWindowMixin],
+    mixins: [TimeWindowMixin, ProjConfigMixin],
     components: {
       LinkToSkillPage,
       MarkdownText,
@@ -199,17 +200,14 @@ limitations under the License.
 
         return this.skillInfo.selfReportingType;
       },
-      rootHelpUrlSetting() {
-        return this.$store.getters.projConfig && this.$store.getters.projConfig['help.url.root'];
-      },
       rootHelpUrl() {
-        if (!this.rootHelpUrlSetting || this.skillInfo?.helpUrl?.toLowerCase()?.startsWith('http')) {
+        if (!this.projConfigRootHelpUrl || this.skillInfo?.helpUrl?.toLowerCase()?.startsWith('http')) {
           return null;
         }
-        if (this.rootHelpUrlSetting.endsWith('/')) {
-          return this.rootHelpUrlSetting.substring(0, this.rootHelpUrlSetting.length - 1);
+        if (this.projConfigRootHelpUrl.endsWith('/')) {
+          return this.projConfigRootHelpUrl.substring(0, this.projConfigRootHelpUrl.length - 1);
         }
-        return this.rootHelpUrlSetting;
+        return this.projConfigRootHelpUrl;
       },
       helpUrl() {
         if (!this.skillInfo?.helpUrl) {

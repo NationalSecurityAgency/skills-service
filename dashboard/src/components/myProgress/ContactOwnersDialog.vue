@@ -37,7 +37,7 @@ limitations under the License.
                        data-cy="contactOwnersMsgInput"
                        :aria-label="'Contact Project Owners'"
                        class="form-control"/>
-        <div :class="{ 'float-right':true, 'text-small': true, 'text-danger': charactersRemaining < 0 }" data-cy="charactersRemaining">{{ charactersRemaining }} characters remaining <i v-if="charactersRemaining < 0" class="fas fa-exclamation-circle"/></div>
+        <div :class="{ 'float-right':true, 'text-small': true, 'text-danger': charactersRemaining < 0 }" data-cy="charactersRemaining">{{ charactersRemaining | number }} characters remaining <i v-if="charactersRemaining < 0" class="fas fa-exclamation-circle"/></div>
         <span v-if="msgInvalid" class="text-small text-danger pl-2" data-cy="contactOwnersInput_errMsg"><i class="fas fa-exclamation-circle"/> {{ msgInvalidMsg }}</span>
       </div>
       <div v-if="sendComplete" data-cy="contactOwnerSuccessMsg">

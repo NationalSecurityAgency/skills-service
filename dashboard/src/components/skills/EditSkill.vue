@@ -56,7 +56,7 @@ limitations under the License.
                     @hidden="tooltipShowing=false"
                     msg="An optional version for this skill to allow filtering of available skills for different versions of an application"/>
                 </label>
-                <ValidationProvider rules="optionalNumeric|min_value:0|maxSkillVersion|maxVersion" v-slot="{errors}" name="Version">
+                <ValidationProvider :rules="{ 'optionalNumeric':true,'min_value':0, 'maxSkillVersion':true, 'maxVersion': !isEdit }" v-slot="{errors}" name="Version">
                   <input class="form-control" type="text" id="skillVersion"
                          v-model="skillInternal.version" :disabled="isEdit"
                          data-cy="skillVersion" v-on:keydown.enter="handleSubmit(saveSkill)"

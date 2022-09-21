@@ -109,34 +109,54 @@ class PublicConfigController {
         res["skillDisplayName"] = 'Skill'
         res["levelDisplayName"] = 'Level'
         res["groupDescriptionsOn"] = false
+        res["displayProjectDescription"] = true
         if (Boolean.valueOf(uiConfigProperties.dbUpgradeInProgress)) {
             res["dbUpgradeInProgress"] = uiConfigProperties.dbUpgradeInProgress
         }
         if (projectId) {
-            String customProjectName = settingsService.getProjectSetting(projectId, 'project.displayName')?.value
+            Map<String, String> projectSettings = settingsService.getProjectSettings(projectId, [
+                    'project.displayName',
+                    'subject.displayName',
+                    'group.displayName',
+                    'skill.displayName',
+                    'level.displayName',
+                    Settings.GROUP_DESCRIPTIONS.settingName,
+                    Settings.SHOW_PROJECT_DESCRIPTION_EVERYWHERE.settingName
+            ])?.collectEntries {
+                [it.setting, it.value]
+            }
+
+            String customProjectName = projectSettings?['project.displayName']
             if (customProjectName) {
                 res["projectDisplayName"] = customProjectName
             }
-            String customSubjectName = settingsService.getProjectSetting(projectId, 'subject.displayName')?.value
+            String customSubjectName = projectSettings?['subject.displayName']
             if (customSubjectName) {
                 res["subjectDisplayName"] = customSubjectName
             }
-            String customGroupName = settingsService.getProjectSetting(projectId, 'group.displayName')?.value
+            String customGroupName = projectSettings?['group.displayName']
             if (customGroupName) {
                 res["groupDisplayName"] = customGroupName
             }
-            String customSkillName = settingsService.getProjectSetting(projectId, 'skill.displayName')?.value
+            String customSkillName = projectSettings?['skill.displayName']
             if (customSkillName) {
                 res["skillDisplayName"] = customSkillName
             }
-            String customLevelName = settingsService.getProjectSetting(projectId, 'level.displayName')?.value
+            String customLevelName = projectSettings?['level.displayName']
             if (customLevelName) {
                 res["levelDisplayName"] = customLevelName
             }
-            Boolean groupDescriptionsOn = settingsService.getProjectSetting(projectId, Settings.GROUP_DESCRIPTIONS.settingName)?.value
+            Boolean groupDescriptionsOn = Boolean.valueOf(projectSettings?[Settings.GROUP_DESCRIPTIONS.settingName])
             if (groupDescriptionsOn) {
                 res["groupDescriptionsOn"] = groupDescriptionsOn
             }
+            Boolean showDescription = Boolean.valueOf(projectSettings?[Settings.SHOW_PROJECT_DESCRIPTION_EVERYWHERE.settingName])
+            if (showDescription) {
+                res["displayProjectDescription"] = true
+            } else {
+                res["displayProjectDescription"] = false
+            }
+
         }
         res['enablePageVisitReporting'] = enablePageVisitReporting
         return res

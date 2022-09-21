@@ -1031,7 +1031,13 @@ describe('Self Report Skills Management Tests', () => {
         cy.reportSkill(1, 3, 'user1', '2020-09-17 11:00');
         cy.reportSkill(1, 1, 'user0', '2020-09-18 11:00');
 
+        cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice').as('featureSupported');
+        cy.intercept('GET', '/admin/projects/proj1/approvals?*').as('loadApprovals');
+        cy.intercept('GET', '/admin/projects/proj1/approvals/history?*').as('loadApprovalHistory');
         cy.visit('/administrator/projects/proj1/self-report');
+        cy.wait('@featureSupported');
+        cy.wait('@loadApprovalHistory');
+        cy.wait('@loadApprovals');
 
         cy.get('[data-cy="selectPageOfApprovalsBtn"]')
             .click();
@@ -1062,35 +1068,35 @@ describe('Self Report Skills Management Tests', () => {
                 colIndex: 0,
                 value: 'user0'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: '100'
             }],
             [{
                 colIndex: 0,
                 value: 'user1'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: '100'
             }],
             [{
                 colIndex: 0,
                 value: 'user2'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: '100'
             }],
             [{
                 colIndex: 0,
                 value: 'user3'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: '100'
             }],
             [{
                 colIndex: 0,
                 value: 'user4'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: '100'
             }],
         ]);
@@ -1114,7 +1120,13 @@ describe('Self Report Skills Management Tests', () => {
         cy.reportSkill(1, 3, 'user1', '2020-09-17 11:00');
         cy.reportSkill(1, 1, 'user0', '2020-09-18 11:00');
 
+        cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice').as('featureSupported');
+        cy.intercept('GET', '/admin/projects/proj1/approvals?*').as('loadApprovals');
+        cy.intercept('GET', '/admin/projects/proj1/approvals/history?*').as('loadApprovalHistory');
         cy.visit('/administrator/projects/proj1/self-report');
+        cy.wait('@featureSupported');
+        cy.wait('@loadApprovalHistory');
+        cy.wait('@loadApprovals');
 
         cy.get('[data-cy="selectPageOfApprovalsBtn"]')
             .click();

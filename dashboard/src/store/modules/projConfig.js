@@ -19,17 +19,24 @@ const getters = {
   projConfig(state) {
     return state.projConfig;
   },
+  loadingProjConfig(state) {
+    return state.loadingProjConfig;
+  },
 };
 
 const mutations = {
   setProjConfig(state, value) {
     state.projConfig = value;
   },
+  setLoadingProjConfig(state, value) {
+    state.loadingProjConfig = value;
+  },
 };
 
 const actions = {
   loadProjConfigState({ commit }, projectId) {
     return new Promise((resolve, reject) => {
+      commit('setLoadingProjConfig', true);
       SettingService.getSettingsForProject(projectId)
         .then((response) => {
           if (response && typeof response.reduce === 'function') {
@@ -42,13 +49,26 @@ const actions = {
           }
           resolve(response);
         })
+        .finally(() => {
+          commit('setLoadingProjConfig', false);
+        })
         .catch((error) => reject(error));
+    });
+  },
+  afterProjConfigStateLoaded({ state }) {
+    return new Promise((resolve) => {
+      (function waitForProjConfig() {
+        if (!state.loadingProjConfig) return resolve(state.projConfig);
+        setTimeout(waitForProjConfig, 100);
+        return state.projConfig;
+      }());
     });
   },
 };
 
 const state = {
   projConfig: null,
+  loadingProjConfig: true,
 };
 
 export default {

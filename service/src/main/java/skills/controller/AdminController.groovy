@@ -165,7 +165,7 @@ class AdminController {
 
     @RequestMapping(value = "/projects/{id}/copy", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
-    RequestResult copyProject(@PathVariable("id") String projectId, @RequestBody skills.controller.request.model.ProjectRequest projectRequest) {
+    RequestResult copyProject(@PathVariable("id") String projectId, @RequestBody ProjectRequest projectRequest) {
         projectRequest = controllerPropsValidatorAndSanitizer.validateAndSanitizeProjectRequest(projectRequest)
         projectId = controllerPropsValidatorAndSanitizer.validateAndSanitizeProjectId(projectId)
         projectCopyService.copyProject(projectId, projectRequest)
@@ -213,6 +213,13 @@ class AdminController {
     ProjectResult getProject(@PathVariable("id") String projectId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         return projAdminService.getProject(projectId)
+    }
+
+    @RequestMapping(value = "/projects/{id}/description", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    ProjectDescription getProjectDescription(@PathVariable("id") String projectId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        return projAdminService.getProjectDescription(projectId)
     }
 
     @RequestMapping(value = "/projects/{id}/projectSearch", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -827,7 +834,7 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
 
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
-        return adminUsersService.loadUsersPage(projectId, query, pageRequest)
+        return adminUsersService.loadUsersPageForProject(projectId, query, pageRequest)
     }
 
     @GetMapping(value="/projects/{projectId}/{userId}/canAccess", produces='application/json')
@@ -880,7 +887,7 @@ class AdminController {
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
 
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
-        return adminUsersService.loadUsersPage(projectId, Collections.singletonList(skillId), query, pageRequest)
+        return adminUsersService.loadUsersPageForSkills(projectId, Collections.singletonList(skillId), query, pageRequest)
     }
 
     @GetMapping(value = "/projects/{projectId}/badges/{badgeId}/users", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -901,7 +908,7 @@ class AdminController {
         if (!skillIds) {
             return new TableResult()
         }
-        return adminUsersService.loadUsersPage(projectId, skillIds, query, pageRequest)
+        return adminUsersService.loadUsersPageForSkills(projectId, skillIds, query, pageRequest)
     }
 
     @GetMapping(value = "/projects/{projectId}/userTags/{userTagKey}/{userTagValue}/users", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -919,7 +926,7 @@ class AdminController {
         SkillsValidator.isNotBlank(userTagValue, "Tag Value", projectId)
 
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
-        return adminUsersService.loadUsersPage(projectId, userTagKey, userTagValue, query, pageRequest)
+        return adminUsersService.loadUsersPageForUserTag(projectId, userTagKey, userTagValue, query, pageRequest)
     }
 
     @RequestMapping(value = "/projects/{projectId}/badge/{badgeId}/skills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

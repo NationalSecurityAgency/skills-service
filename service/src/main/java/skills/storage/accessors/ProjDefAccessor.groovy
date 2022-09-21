@@ -43,6 +43,14 @@ class ProjDefAccessor {
         return projDef
     }
 
+    @Transactional
+    String getProjDescription(String projectId) {
+        if (StringUtils.isBlank(projectId)) {
+            throw new SkillException("Bad project id parameter, [${projectId}] was provided", ErrorCode.BadParam)
+        }
+        return projDefRepo.getProjectDescription(projectId)
+    }
+
     @Transactional()
     ProjSummaryResult getProjSummaryResult(String projectId) {
         ProjSummaryResult projDef = projDefRepo.getSummaryByProjectId(projectId)

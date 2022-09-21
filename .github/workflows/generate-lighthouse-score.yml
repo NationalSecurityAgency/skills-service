@@ -15,6 +15,7 @@
 name: Generate Lighthouse Accessibility Score
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - master

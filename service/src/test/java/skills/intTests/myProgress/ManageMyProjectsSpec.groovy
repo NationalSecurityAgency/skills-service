@@ -21,6 +21,7 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import spock.lang.IgnoreRest
 
 @Slf4j
 class ManageMyProjectsSpec extends DefaultIntSpec {
@@ -493,6 +494,27 @@ class ManageMyProjectsSpec extends DefaultIntSpec {
         } == [ projects[1].projectId, projects[2].projectId, projects[3].projectId, projects[4].projectId, projects[5].projectId, projects[6].projectId]
 
         user3Sum2.projectSummaries.collect { it.projectId } == [projects[0].projectId, projects[2].projectId]
+    }
+
+    def "available projects with empty description return hasDescription of false"() {
+        def proj1 = SkillsFactory.createProject(1)
+        proj1.description = '';
+        def proj2 = SkillsFactory.createProject(2)
+        proj2.description = "foooo"
+
+        skillsService.createProject(proj1)
+        skillsService.createProject(proj2)
+        skillsService.enableProdMode(proj1)
+        skillsService.enableProdMode(proj2)
+
+        when:
+        def available = skillsService.getAvailableMyProjects()
+
+        then:
+        available[0].projectId == "TestProject1"
+        !available[0].hasDescription
+        available[1].projectId == "TestProject2"
+        available[1].hasDescription
     }
 
 }

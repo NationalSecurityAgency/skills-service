@@ -25,18 +25,19 @@ limitations under the License.
               v-on:option:selected="added"
               v-on:option:deselecting="considerRemoval"
               :loading="isLoading"
+              class="st-skills-selector"
               data-cy="skillsSelector">
       <template #option="option">
         <slot name="dropdown-item" :option="option">
           <div :data-cy="`skillsSelectionItem-${option.projectId}-${option.skillId}`">
-            <div class="h5 text-info" data-cy="skillsSelector-skillName">{{ option.name }}
+            <div class="h5 text-info skills-option-name" data-cy="skillsSelector-skillName">{{ option.name }}
               <b-badge v-if="option.isReused" variant="success" size="sm" class="text-uppercase"
                        data-cy="reusedBadge"
                        style="font-size: 0.85rem !important;"><i class="fas fa-recycle"></i> reused
               </b-badge>
             </div>
-            <div class="" style="font-size: 0.8rem;">
-              <span>
+            <div style="font-size: 0.8rem;">
+              <span class="skills-option-id">
                 <span v-if="showProject" data-cy="skillsSelectionItem-projectId"><span
                   class="text-uppercase mr-1 font-italic">Project ID:</span><span
                   class="font-weight-bold"
@@ -49,12 +50,12 @@ limitations under the License.
               </span>
               <span class="mx-2">|</span>
               <span class="text-uppercase mr-1 font-italic" data-cy="skillsSelectionItem-subjectId">Subject:</span><span
-              class="font-weight-bold"
+              class="font-weight-bold skills-option-subject-name"
               data-cy="skillsSelector-subjectName">{{ option.subjectName }}</span>
               <span v-if="option.groupName">
                 <span class="mx-2">|</span>
-                <span class="text-uppercase mr-1 font-italic" data-cy="skillsSelectionItem-group">Group:</span><span
-                class="font-weight-bold"
+                <span class="text-uppercase mr-1 font-italic skills-option-group-name" data-cy="skillsSelectionItem-group">Group:</span><span
+                class="font-weight-bold skills-id"
                 data-cy="skillsSelector-groupName">{{ option.groupName }}</span>
               </span>
             </div>
@@ -212,6 +213,25 @@ limitations under the License.
   .selected-tag {
     font-size: 14px;
   }
+
+  .vs__dropdown-option--highlight .skills-option-id {
+    color: #FFFFFF !important;
+  }
+
+  .vs__dropdown-option--highlight .skills-option-group-name {
+    color: #FFFFFF !important;
+  }
+
+  .vs__dropdown-option--highlight .skills-option-subject-name {
+    color: #FFFFFF !important;
+  }
+  .vs__dropdown-option--highlight .skills-option-name {
+    color: #FFFFFF !important;
+  }
+
+  /*.skills-id :hover {
+    color: #FFFFFF !important;
+  }*/
 </style>
 
 <style>

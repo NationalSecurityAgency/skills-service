@@ -17,7 +17,9 @@ limitations under the License.
   <div v-if="!loading.availableVersions && !loading.userInfo">
     <sub-page-header title="Client Display">
       <b-form class="float-right" inline>
-        <label class="pr-3 d-none d-sm-inline font-weight-bold" for="version-select">Version: </label>
+        <label class="pr-3 d-none d-sm-inline font-weight-bold"
+               aria-label="Select skill version"
+               for="version-select">Version: </label>
         <b-form-select
           id="version-select"
           class="version-select"
@@ -56,6 +58,7 @@ limitations under the License.
 <script>
   import { SkillsDisplay, SkillsReporter } from '@skilltree/skills-client-vue';
   import LoadingContainer from '@/components/utils/LoadingContainer';
+  import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
   import SkillsDisplayOptionsMixin from '../myProgress/SkillsDisplayOptionsMixin';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import UsersService from './UsersService';
@@ -63,7 +66,7 @@ limitations under the License.
 
   export default {
     name: 'ClientDisplayPreview',
-    mixins: [SkillsDisplayOptionsMixin],
+    mixins: [SkillsDisplayOptionsMixin, ProjConfigMixin],
     components: {
       InlineHelp,
       SubPageHeader,
@@ -73,6 +76,7 @@ limitations under the License.
     data() {
       return {
         projectId: '',
+        inviteOnly: false,
         userIdParam: '',
         canAccess: true,
         checkingAccess: true,
@@ -126,20 +130,19 @@ limitations under the License.
         });
     },
     mounted() {
-      if (this.isInviteOnly) {
-        this.canAccess = false;
-        UsersService.canAccess(this.projectId, this.userIdParam).then((res) => {
-          this.canAccess = res === true;
+      this.loadProjConfig().then((projConfigRes) => {
+        if (projConfigRes.invite_only === 'true') {
+          this.canAccess = false;
+          UsersService.canAccess(this.projectId, this.userIdParam).then((res) => {
+            this.canAccess = res === true;
+            this.checkingAccess = false;
+          });
+        } else {
           this.checkingAccess = false;
-        });
-      } else {
-        this.checkingAccess = false;
-      }
+        }
+      });
     },
     computed: {
-      isInviteOnly() {
-        return this.$store.getters.projConfig.invite_only === 'true';
-      },
       configuration() {
         return {
           projectId: this.projectId,

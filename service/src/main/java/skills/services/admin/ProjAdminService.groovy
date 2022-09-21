@@ -32,6 +32,7 @@ import skills.controller.exceptions.SkillException
 import skills.controller.request.model.*
 import skills.controller.result.model.CustomIconResult
 import skills.controller.result.model.LatestEvent
+import skills.controller.result.model.ProjectDescription
 import skills.controller.result.model.ProjectResult
 import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.SimpleProjectResult
@@ -151,7 +152,7 @@ class ProjAdminService {
             String clientSecret = new ClientSecretGenerator().generateClientSecret()
 
             projectDefinition = new ProjDef(projectId: projectRequest.projectId, name: projectRequest.name,
-                    clientSecret: clientSecret)
+                    clientSecret: clientSecret, description: projectRequest.description)
             log.debug("Created project [{}]", projectDefinition)
 
             if (!userInfoService.isCurrentUserASuperDuperUser()) {
@@ -390,6 +391,12 @@ class ProjAdminService {
         Integer order = sortingService.getProjectSortOrder(projectId)
         ProjectResult res = convert(projectDefinition, [(projectId): order])
         return res
+    }
+
+    @Transactional(readOnly = true)
+    ProjectDescription getProjectDescription(String projectId) {
+        String description = projDefAccessor.getProjDescription(projectId)
+        return new ProjectDescription(projectId: projectId, description: InputSanitizer.unsanitizeForMarkdown(description))
     }
 
     @Transactional(readOnly = true)

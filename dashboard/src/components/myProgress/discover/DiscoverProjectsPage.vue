@@ -99,9 +99,20 @@ aria-label="search for projects to pin"></b-input>
           </template>
 
           <template #cell(name)="data">
+            <span v-if="data.item.hasDescription">
+                <b-button size="sm" @click="data.toggleDetails" variant="outline-info"
+                          class="mr-2 py-0 px-1"
+                          :aria-label="`Show description for ${data.item.name}`"
+                          :data-cy="`expandDetailsBtn_${data.item.projectId}`">
+                  <i v-if="data.detailsShowing" class="fas fa-caret-up"/>
+                  <i v-else class="fas fa-caret-down"/>
+                </b-button>
+              </span>
             <span v-if="data.item.nameHtml" v-html="data.item.nameHtml"></span>
-            <span v-else>{{ data.item.name }}</span>
+            <span v-else>{{ data.item.name }}
+            </span>
           </template>
+
           <template #cell(isMyProject)="data">
             <div v-if="data.value">
               <b-badge  class="animate__bounceIn" variant="success"><i class="fas fa-heart" /> My Project</b-badge>
@@ -139,6 +150,14 @@ aria-label="search for projects to pin"></b-input>
           <template #empty="scope">
             <no-content2 class="my-4" :title="scope.emptyText" :message="`Please modify your search string: [${searchValue}]`" />
           </template>
+
+          <template #row-details="row">
+            <div class="row">
+              <div class="col-12 pl-5 mt-2 mb-2 pr-5">
+                <project-description-row :project-id="row.item.projectId" />
+              </div>
+            </div>
+          </template>
         </b-table>
           <b-row align-h="center" class="mt-3">
           <b-col>
@@ -169,6 +188,7 @@ aria-label="search for projects to pin"></b-input>
 </template>
 
 <script>
+  import ProjectDescriptionRow from '@/components/myProgress/discover/ProjectDescriptionRow';
   import SubPageHeader from '../../utils/pages/SubPageHeader';
   import ProjectService from '../../projects/ProjectService';
   import SkillsSpinner from '../../utils/SkillsSpinner';
@@ -184,6 +204,7 @@ aria-label="search for projects to pin"></b-input>
       MediaInfoCard,
       SkillsSpinner,
       SubPageHeader,
+      ProjectDescriptionRow,
     },
     props: [],
     mounted() {

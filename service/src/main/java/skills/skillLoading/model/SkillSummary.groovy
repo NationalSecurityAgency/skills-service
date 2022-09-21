@@ -36,4 +36,5 @@ class SkillSummary extends SkillSummaryParent {
     String prevSkillId
     int totalSkills
     int orderInGroup
+    Boolean isLastViewed
 }

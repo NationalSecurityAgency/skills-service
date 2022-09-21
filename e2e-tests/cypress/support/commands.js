@@ -78,15 +78,40 @@ function terminalLog(violations) {
 
 addMatchImageSnapshotCommand();
 
-Cypress.Commands.add("matchSnapshotImageForElement", (selector, subject, maybeName, commandOptions) => {
-    cy.closeToasts();
-    cy.wait(500);
-    cy.get(selector).matchImageSnapshot(subject, maybeName, commandOptions);
+Cypress.Commands.add("matchSnapshotImageForElement", (selector, maybeNameOtherwiseCommandOptions, commandOptions) => {
+    cy.doMatchSnapshotImage(maybeNameOtherwiseCommandOptions, commandOptions, selector)
 })
 
-Cypress.Commands.add("matchSnapshotImage", (subject, maybeName, commandOptions) => {
+Cypress.Commands.add("matchSnapshotImage", (maybeNameOtherwiseCommandOptions, commandOptions) => {
+    cy.doMatchSnapshotImage(maybeNameOtherwiseCommandOptions, commandOptions, null)
+})
+
+Cypress.Commands.add("doMatchSnapshotImage", (maybeNameOtherwiseCommandOptions, commandOptions, selector) => {
     cy.closeToasts();
-    cy.matchImageSnapshot(subject, maybeName, commandOptions);
+    cy.wait(500);
+
+    let options = commandOptions ? commandOptions :
+        ((maybeNameOtherwiseCommandOptions && typeof maybeNameOtherwiseCommandOptions === 'object') ? maybeNameOtherwiseCommandOptions : null);
+    const namePresent = maybeNameOtherwiseCommandOptions && typeof maybeNameOtherwiseCommandOptions === 'string'
+
+    const snapDir = Cypress.env('customSnapshotsDir');
+    if (snapDir) {
+        options = {...options, customSnapshotsDir: snapDir }
+    }
+
+    if (namePresent) {
+        if (selector) {
+            cy.get(selector).matchImageSnapshot(maybeNameOtherwiseCommandOptions, options);
+        } else {
+            cy.matchImageSnapshot(maybeNameOtherwiseCommandOptions, options);
+        }
+    } else {
+        if (selector) {
+            cy.get(selector).matchImageSnapshot(options);
+        } else {
+            cy.matchImageSnapshot(options);
+        }
+    }
 })
 
 Cypress.Commands.add("enableProdMode", (projNum) => {
@@ -412,8 +437,16 @@ Cypress.Commands.add('customLighthouse', () => {
         extends: 'lighthouse:default',
         settings: {
             emulatedFormFactor:'desktop',
-            maxWaitForFcp: 15 * 1000,
-            maxWaitForLoad: 35 * 1000,
+            maxWaitForFcp: 35 * 1000,
+            maxWaitForLoad: 45 * 1000,
+            formFactor: 'desktop',
+            screenEmulation: {
+                mobile: false,
+                disable: false,
+                width: Cypress.config('viewportWidth'),
+                height: Cypress.config('viewportHeight'),
+                deviceScaleRatio: 1,
+            },
         },
     }
     cy.lighthouse({

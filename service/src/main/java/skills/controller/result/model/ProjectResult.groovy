@@ -39,4 +39,6 @@ class ProjectResult extends SimpleProjectResult{
 
     int numSkillsReused
     int totalPointsReused
+
+    String description
 }

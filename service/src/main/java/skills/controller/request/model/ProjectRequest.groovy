@@ -21,4 +21,5 @@ import groovy.transform.Canonical
 class ProjectRequest {
     String projectId
     String name
+    String description
 }

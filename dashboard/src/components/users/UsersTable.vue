@@ -60,6 +60,17 @@ limitations under the License.
             </b-button>
           </b-button-group>
         </template>
+        <template v-slot:cell(userTag)="data">
+          <router-link
+            v-if="showUserTagColumn && data.item.userTag"
+            :to="{ name: 'UserTagMetrics', params: { projectId: projectId, tagKey: tagKey, tagFilter: data.item.userTag } }"
+            class="text-info mb-0 pb-0 preview-card-title"
+            :aria-label="`View metrics for ${data.item.userTag}`"
+            role="link"
+            data-cy="usersTable_viewUserTagMetricLink">
+            {{ data.item.userTag }}
+          </router-link>
+        </template>
         <template v-slot:cell(totalPoints)="data">
           <div :data-cy="`usr_progress-${data.item.userId}`">
             <div class="row">
@@ -153,7 +164,25 @@ limitations under the License.
       };
     },
     mounted() {
+      if (this.showUserTagColumn) {
+        this.table.options.fields.splice(1, 0, {
+          key: 'userTag',
+          label: this.$store.getters.config.usersTableAdditionalUserTagLabel,
+          sortable: true,
+        });
+      }
       this.loadData();
+    },
+    computed: {
+      showUserTagColumn() {
+        return !!(this.$store.getters.config.usersTableAdditionalUserTagKey && this.$store.getters.config.usersTableAdditionalUserTagLabel);
+      },
+      projectId() {
+        return this.$route.params.projectId;
+      },
+      tagKey() {
+        return this.$store.getters.config.usersTableAdditionalUserTagKey;
+      },
     },
     methods: {
       calcPercent(userPoints) {

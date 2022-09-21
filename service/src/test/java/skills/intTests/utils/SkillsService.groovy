@@ -707,6 +707,11 @@ class SkillsService {
         wsHelper.apiGet(url)
     }
 
+    def documentVisitedSkillId(String projectId, String skillId) {
+        String url = "/projects/${projectId}/skills/visited/${skillId}"
+        wsHelper.apiPost(url, [])
+    }
+
     def getSkillsSummaryForCurrentUser(String projId, int version = -1) {
         String url = "/projects/${projId}/summary"
         if (version >= 0) {
@@ -787,6 +792,15 @@ class SkillsService {
     def getCrossProjectSkillSummary(String userId, String projId, String otherProjectId, String skillId, int version = -1) {
         userId = getUserId(userId)
         String url = "/projects/${projId}/projects/${otherProjectId}/skills/${skillId}/summary?userId=${userId}"
+        if (version >= 0) {
+            url += "&version=${version}"
+        }
+        wsHelper.apiGet(url)
+    }
+
+    def getCrossProjectSkillSummaryWithSubject(String userId, String projId, String otherProjectId, String subject, String skillId, int version = -1) {
+        userId = getUserId(userId)
+        String url = "/projects/${projId}/projects/${otherProjectId}/subjects/${subject}/skills/${skillId}/summary?userId=${userId}"
         if (version >= 0) {
             url += "&version=${version}"
         }
@@ -1476,6 +1490,11 @@ class SkillsService {
 
     def contactProjectOwner(String projectId, String message) {
         def resp = wsHelper.apiPost("/projects/${projectId}/contact", ["message": message])
+    }
+
+    def getProjectDescription(String projectId) {
+        def resp = wsHelper.adminGet("/projects/${projectId}/description")
+        return resp
     }
 
     private String getProjectUrl(String project) {

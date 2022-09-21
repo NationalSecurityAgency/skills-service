@@ -240,6 +240,20 @@ class SettingsService {
         }
     }
 
+    @Transactional(readOnly = true)
+    List<SettingsResult> getProjectSettings(String projectId, List<String> settings) {
+        List<Setting> s = settingsDataAccessor.getProjectSettings(projectId, settings)
+        List<SettingsResult> res = []
+        if (s) {
+            s?.each {
+                res << convertToRes(it)
+            }
+        } else {
+            log.debug("No Project Settings found for projectId [{}], requested settings [{}]", projectId, settings)
+        }
+        return res
+    }
+
     @Transactional()
     List<SettingsResult> getProjectSettingsForAllProjects(String setting){
         List<Setting> settings = settingsDataAccessor.getProjectSettingsForAllProjectsBySettings(setting)
