@@ -97,9 +97,9 @@ limitations under the License.
         this.loadSubject().then((res) => {
           let foundLastViewedSkill;
           res.skills.forEach((item) => {
-            if (item.type === 'Skill' && item.isLastViewed === true) {
+            if (item.isLastViewed === true) {
               foundLastViewedSkill = item;
-            } else if (item.type === 'SkillsGroup') {
+            } else if (item.type === 'SkillsGroup' && !foundLastViewedSkill) {
               foundLastViewedSkill = item.children.find((childItem) => childItem.isLastViewed === true);
             }
           });

@@ -37,6 +37,41 @@ describe('Client Display Skills Last Viewed', () => {
         cy.get('[id=skillProgressTitle-skill1]').should('have.focus');
     });
 
+    it('visiting a skill shows the Last Viewed indicator on the Subject page with skills and groups', () => {
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+        cy.createSkillsGroup(1, 1, 1);
+        cy.addSkillToGroup(1, 1, 1, 2, {
+            pointIncrement: 10,
+            numPerformToCompletion: 5
+        });
+        cy.addSkillToGroup(1, 1, 1, 3, {
+            pointIncrement: 15,
+            numPerformToCompletion: 2
+        });
+        cy.addSkillToGroup(1, 1, 1, 4, {
+            pointIncrement: 15,
+            numPerformToCompletion: 2
+        });
+        cy.createSkill(1, 1, 5);
+        cy.createSkill(1, 1, 6);
+
+        cy.cdVisit('/?internalBackButton=true')
+        cy.cdClickSubj(0);
+
+        cy.get('[data-cy="lastViewedIndicator"]').should('not.exist');
+        cy.get('[data-cy="jumpToLastViewedButton"]').should('not.exist');
+        cy.get('[data-cy="skillProgress_index-0"]').should('exist');
+        cy.get('[data-cy="skillProgress_index-0"]').click();
+        cy.get('[data-cy="skillProgressTitle"').contains('Very Great Skill 1');
+
+        cy.get('[data-cy=back]').click()
+        cy.get('[data-cy="lastViewedIndicator"]').should('exist');
+        cy.get('[data-cy="jumpToLastViewedButton"]').should('exist');
+        cy.get('[id=skillProgressTitle-skill1]').should('have.focus');
+    });
+
     it('visiting a skill shows the Last Viewed indicator on the Subject page in a group', () => {
         cy.createProject(1);
         cy.createSubject(1, 1);
@@ -53,6 +88,8 @@ describe('Client Display Skills Last Viewed', () => {
             pointIncrement: 15,
             numPerformToCompletion: 2
         });
+        cy.createSkill(1, 1, 4);
+        cy.createSkill(1, 1, 5);
 
         cy.cdVisit('/?internalBackButton=true')
         cy.cdClickSubj(0);

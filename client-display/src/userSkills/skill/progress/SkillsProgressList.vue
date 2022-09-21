@@ -247,7 +247,7 @@ limitations under the License.
           this.skillsInternalOrig.forEach((item) => {
             if (item.isLastViewed === true) {
               lastViewedSkill = item;
-            } else if (item.type === 'SkillsGroup') {
+            } else if (item.type === 'SkillsGroup' && !lastViewedSkill) {
               lastViewedSkill = item.children.find((childItem) => childItem.isLastViewed === true);
             }
           });
