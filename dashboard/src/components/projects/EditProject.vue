@@ -180,7 +180,7 @@ limitations under the License.
         }
       },
       publishHidden(e) {
-        if (this.tooltipShowing) {
+        if (this.tooltipShowing && typeof e.preventDefault === 'function') {
           e.preventDefault();
         } else {
           this.$emit('hidden', e);
