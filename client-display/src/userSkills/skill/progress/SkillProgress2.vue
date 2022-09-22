@@ -68,12 +68,12 @@ limitations under the License.
                 <span class="">Requires </span> <b-badge variant="success">{{ skill.numSkillsRequired }}</b-badge> <span class="font-italic">out of</span> <b-badge variant="secondary">{{ skill.children.length }}</b-badge> skills
               </div>
 
+              <b-badge v-if="skill.selfReporting && skill.selfReporting.enabled"
+                  variant="success" style="font-size: 0.9rem" class="ml-2 overflow-hidden"><i class="fas fa-check-circle"></i> Self Reportable</b-badge>
               <b-badge v-if="skill.isLastViewed" id="lastViewedIndicator" data-cy="lastViewedIndicator" variant="info" style="font-size: 0.9rem"
                        class="ml-2 overflow-hidden">
                 <i class="fas fa-eye"></i> Last Viewed
               </b-badge>
-              <b-badge v-if="skill.selfReporting && skill.selfReporting.enabled"
-                  variant="success" style="font-size: 0.9rem" class="ml-2 overflow-hidden"><i class="fas fa-check-circle"></i> Self Reportable</b-badge>
             </div>
           </div>
         </div>
