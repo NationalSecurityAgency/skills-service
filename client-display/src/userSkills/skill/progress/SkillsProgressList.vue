@@ -242,7 +242,17 @@ limitations under the License.
     },
     computed: {
       hasLastViewedSkill() {
-        return this.skillsInternalOrig && this.skillsInternalOrig.find((item) => item.isLastViewed === true);
+        let lastViewedSkill = null;
+        if (this.skillsInternalOrig) {
+          this.skillsInternalOrig.forEach((item) => {
+            if (item.isLastViewed === true) {
+              lastViewedSkill = item;
+            } else if (item.type === 'SkillsGroup' && !lastViewedSkill) {
+              lastViewedSkill = item.children.find((childItem) => childItem.isLastViewed === true);
+            }
+          });
+        }
+        return lastViewedSkill;
       },
     },
     methods: {

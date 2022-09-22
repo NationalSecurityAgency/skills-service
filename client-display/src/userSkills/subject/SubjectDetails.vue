@@ -95,7 +95,14 @@ limitations under the License.
       fetchData() {
         this.resetLoading();
         this.loadSubject().then((res) => {
-          const foundLastViewedSkill = res.skills.find((item) => item.isLastViewed === true);
+          let foundLastViewedSkill;
+          res.skills.forEach((item) => {
+            if (item.isLastViewed === true) {
+              foundLastViewedSkill = item;
+            } else if (item.type === 'SkillsGroup' && !foundLastViewedSkill) {
+              foundLastViewedSkill = item.children.find((childItem) => childItem.isLastViewed === true);
+            }
+          });
           this.lastViewedSkillId = foundLastViewedSkill ? foundLastViewedSkill.skillId : null;
           setTimeout(() => { this.autoScrollToLastViewedSkill(); }, 400);
         });
