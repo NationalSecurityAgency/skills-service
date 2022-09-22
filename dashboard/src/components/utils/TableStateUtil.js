@@ -25,7 +25,7 @@ export default class TableStateUtil {
 
   static loadTableState(id) {
     const sorting = JSON.parse(localStorage.getItem('tableState'));
-    if (sorting[id]) {
+    if (sorting && sorting[id]) {
       return sorting[id];
     }
     return null;
