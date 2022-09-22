@@ -25,8 +25,8 @@ limitations under the License.
       };
     },
     mounted() {
-      if (this.id) {
-        const sorting = TableStateUtil.loadTableState(this.id);
+      if (this.tableId) {
+        const sorting = TableStateUtil.loadTableState(this.tableId);
         if (sorting) {
           this.sortBy = sorting.sortBy;
           this.sortDesc = sorting.sortDesc;
@@ -35,8 +35,8 @@ limitations under the License.
     },
     methods: {
       sortingChanged(ctx) {
-        if (this.id) {
-          TableStateUtil.saveTableSortState(this.id, ctx.sortBy, ctx.sortDesc);
+        if (this.tableId) {
+          TableStateUtil.saveTableSortState(this.tableId, ctx.sortBy, ctx.sortDesc);
         }
 
         // ctx.sortBy   ==> Field key for sorting by (or null for no sorting)

@@ -89,7 +89,7 @@ limitations under the License.
         </div>
 
         <skills-b-table class="mb-5" data-cy="achievementsNavigator-table"
-                        :items="items" :options="tableOptions" id="achievementsNavigator-table"
+                        :items="items" :options="tableOptions" tableId="achievementsNavigator-table"
                         @sort-changed="sortTable" @page-changed="pageChanged" @page-size-changed="pageSizeChanged">
           <template v-slot:cell(username)="data">
             <div class="row">

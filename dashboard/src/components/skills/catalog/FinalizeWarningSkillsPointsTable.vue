@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <b-card body-class="m-0 p-0">
-    <skills-b-table :options="options" :items="skillsWithOutOfBoundsPoints" id="skillsWithOutOfBoundsPoints"
+    <skills-b-table :options="options" :items="skillsWithOutOfBoundsPoints" tableId="skillsWithOutOfBoundsPoints"
                     data-cy="skillsWithOutOfBoundsPoints">
       <template #head(totalPoints)="data">
           <span class="text-danger"><i

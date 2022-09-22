@@ -219,7 +219,7 @@ aria-label="search for projects to pin"></b-input>
         searchValue: '',
         projects: [],
         originalProjects: [],
-        id: 'DiscoverProjects',
+        tableId: 'DiscoverProjects',
         counts: {
           all: 0,
           myProjects: 0,

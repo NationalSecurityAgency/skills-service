@@ -38,7 +38,7 @@ limitations under the License.
 
     <b-card body-class="p-0">
       <skills-spinner :is-loading="loading" />
-      <skills-b-table v-if="!loading" :options="table.options" :items="levels" id="levelsTable" data-cy="levelsTable">
+      <skills-b-table v-if="!loading" :options="table.options" :items="levels" tableId="levelsTable" data-cy="levelsTable">
         <template v-slot:cell(level)="data">
           {{ data.value }}
           <i v-if="data.item.achievable === false" class="icon-warning fa fa-exclamation-circle text-warning"

@@ -99,7 +99,7 @@ limitations under the License.
         </div>
       </div>
 
-      <skills-b-table :options="table.options" :items="skills" id="skillsTable"
+      <skills-b-table :options="table.options" :items="skills" tableId="skillsTable"
                       data-cy="skillsTable"
                       @sort-changed="handleColumnSort">
 

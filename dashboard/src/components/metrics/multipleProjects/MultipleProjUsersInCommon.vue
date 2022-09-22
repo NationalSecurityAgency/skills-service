@@ -94,7 +94,7 @@ limitations under the License.
                       @page-size-changed="pageSizeChanged"
                       tabindex="0"
                       aria-label="Find users across multiple projects results"
-                      id="usersInCommonResultTable"
+                      tableId="usersInCommonResultTable"
                       data-cy="usersInCommonResultTable">
         <template v-slot:cell(0)="data">
           <level-badge :level="data.value" />

@@ -33,7 +33,7 @@ limitations under the License.
         </div>
       </div>
 
-      <skills-b-table :options="table.options" :items="projectsInternal" id="projectsTable"
+      <skills-b-table :options="table.options" :items="projectsInternal" tableId="projectsTable"
                       data-cy="projectsTable">
 
         <template v-slot:cell(name)="data">

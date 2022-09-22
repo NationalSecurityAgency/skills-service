@@ -85,7 +85,7 @@ limitations under the License.
                       @page-size-changed="pageSizeChanged"
                       @page-changed="pageChanged"
                       @sort-changed="sortTable"
-                      id="importSkillsFromCatalogTable"
+                      tableId="importSkillsFromCatalogTable"
                       data-cy="importSkillsFromCatalogTable">
         <template #head(skillId)="data">
           <span class="text-primary"><i
