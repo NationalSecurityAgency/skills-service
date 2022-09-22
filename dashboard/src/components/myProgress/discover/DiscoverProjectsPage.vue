@@ -75,6 +75,7 @@ aria-label="search for projects to pin"></b-input>
                  :current-page="paging.currentPage"
                  :sort-by.sync="sortBy"
                  :sort-desc.sync="sortDesc"
+                 @sort-changed="sortingChanged"
                  :no-sort-reset="true"
                  :show-empty="true"
                  aria-label="Projects"
@@ -194,10 +195,12 @@ aria-label="search for projects to pin"></b-input>
   import SkillsSpinner from '../../utils/SkillsSpinner';
   import MediaInfoCard from '../../utils/cards/MediaInfoCard';
   import NoContent2 from '../../utils/NoContent2';
+  import PersistedSortMixin from '../../utils/table/PersistedSortMixin';
   import NoProjectsInProdMessage from './NoProjectsInProdMessage';
 
   export default {
     name: 'DiscoverProjectsPage',
+    mixins: [PersistedSortMixin],
     components: {
       NoProjectsInProdMessage,
       NoContent2,
@@ -216,6 +219,7 @@ aria-label="search for projects to pin"></b-input>
         searchValue: '',
         projects: [],
         originalProjects: [],
+        id: 'DiscoverProjects',
         counts: {
           all: 0,
           myProjects: 0,
@@ -252,8 +256,6 @@ aria-label="search for projects to pin"></b-input>
             label: 'Points',
             sortable: true,
           }],
-        sortBy: 'name',
-        sortDesc: false,
         paging: {
           totalRows: 1,
           currentPage: 1,
