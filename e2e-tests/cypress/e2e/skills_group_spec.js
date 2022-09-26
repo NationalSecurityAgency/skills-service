@@ -51,6 +51,7 @@ describe('Skills Group Tests', () => {
     const tableSelector = '[data-cy="skillsTable"]';
 
     it('create skills group', () => {
+        window.localStorage.setItem('tableState', JSON.stringify({'skillsTable': {'sortDesc': false, 'sortBy': 'name'}}))
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="noContent"]').contains('No Skills Yet');
         cy.createGroupViaUI('Blah');
@@ -124,9 +125,9 @@ describe('Skills Group Tests', () => {
         cy.addSkillToGroup(1, 1, 2, 6);
         cy.addSkillToGroup(1, 1, 2, 7);
         cy.createSkillsGroup(1, 1, 2, { enabled: true });
+        window.localStorage.setItem('tableState', JSON.stringify({'skillsTable': {'sortDesc': false, 'sortBy': 'displayOrder'}}))
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get(`${tableSelector} th`).contains('Display Order').click()
 
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'group1' },  { colIndex: 1, value: '1' }],
@@ -149,7 +150,7 @@ describe('Skills Group Tests', () => {
         cy.get(`${tableSelector} tbody tr`).should('have.length', 4);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get(`${tableSelector} th`).contains('Display Order').click()
+
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'group1' },  { colIndex: 1, value: '1' }],
             [{ colIndex: 0,  value: 'skill1' },  { colIndex: 1, value: '2' }],
@@ -165,11 +166,9 @@ describe('Skills Group Tests', () => {
         cy.createSkill(1, 1, 1);
         cy.createSkillsGroup(1, 1, 3);
         cy.createSkill(1, 1, 2);
+        window.localStorage.setItem('tableState', JSON.stringify({'skillsTable': {'sortDesc': false, 'sortBy': 'displayOrder'}}))
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get(`${tableSelector} th`)
-            .contains('Display Order')
-            .click()
         cy.get('[data-cy="orderMoveDown_group1"]').click();
         cy.get('[data-cy="orderMoveDown_group3"]').click();
         cy.validateTable(tableSelector, [
@@ -197,9 +196,6 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="orderMoveUp_skill2"]').should('be.enabled');
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get(`${tableSelector} th`)
-            .contains('Display Order')
-            .click()
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'Awesome Group 2' },  { colIndex: 1, value: '1' }],
             [{ colIndex: 0,  value: 'Awesome Group 1' },  { colIndex: 1, value: '2' }],
@@ -232,11 +228,12 @@ describe('Skills Group Tests', () => {
         cy.addSkillToGroup(1, 1, 1, 6);
 
         const groupId = 'group1'
+        window.localStorage.setItem('tableState', JSON.stringify({'skillsTable': {'sortDesc': false, 'sortBy': 'displayOrder'}}))
+        window.localStorage.setItem('tableState', JSON.stringify({'groupSkills_group1': {'sortDesc': false, 'sortBy': 'displayOrder'}}))
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
 
         const skillsTableSelector = '[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="skillsTable"]'
-        cy.get(`${skillsTableSelector} th`).contains('Display Order').click()
 
         cy.validateTable(skillsTableSelector, [
             [{ colIndex: 0,  value: 'skill4' }],
@@ -274,7 +271,6 @@ describe('Skills Group Tests', () => {
         // refresh and re-validate
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
-        cy.get(`${skillsTableSelector} th`).contains('Display Order').click()
         cy.validateTable(skillsTableSelector, [
             [{ colIndex: 0,  value: 'skill6' }],
             [{ colIndex: 0,  value: 'skill5' }],
