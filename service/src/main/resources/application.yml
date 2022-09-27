@@ -134,7 +134,7 @@ skills:
       maxNumPointIncrementMaxOccurrences: 999
       userSuggestOptions:
       pointHistoryInDays: 1825
-      rankingAndProgressViewsEnabled: false
+      rankingAndProgressViewsEnabled: true
       defaultLandingPage: "admin"
       maxSelfReportMessageLength: 250
       maxSelfReportRejectionMessageLength: 250
