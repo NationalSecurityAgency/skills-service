@@ -18,12 +18,14 @@ var moment = require('moment-timezone');
 describe('Export Skills to the Catalog Tests', () => {
 
     beforeEach(() => {
+
         cy.createProject(1);
         cy.createSubject(1, 1);
     });
     const tableSelector = '[data-cy="skillsTable"]';
 
     it('export 1 skill', () => {
+        window.localStorage.setItem('tableState', JSON.stringify({'skillsTable': {'sortDesc': true, 'sortBy': 'displayOrder'}}))
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
 
@@ -238,6 +240,8 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.get('[data-cy="skillActionsNumSelected"]')
             .should('have.text', '0');
 
+        cy.get('[data-cy="exportedBadge-skill1"');
+        cy.get('[data-cy="exportedBadge-skill2"');
         cy.get('[data-cy="exportedBadge-skill3"');
         cy.get('[data-cy="exportedBadge-skill4"');
         cy.get('[data-cy="exportedBadge-skill5"');
@@ -246,21 +250,21 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.get('[data-cy="exportedBadge-skill8"');
         cy.get('[data-cy="exportedBadge-skill9"');
         cy.get('[data-cy="exportedBadge-skill10"');
-        cy.get('[data-cy="exportedBadge-skill11"');
-        cy.get('[data-cy="exportedBadge-skill12"');
 
         cy.get('[data-cy="skillsBTablePaging"]')
             .contains('2')
             .click();
 
-        cy.get('[data-cy="exportedBadge-skill1"');
-        cy.get('[data-cy="exportedBadge-skill2"');
+        cy.get('[data-cy="exportedBadge-skill11"');
+        cy.get('[data-cy="exportedBadge-skill12"');
 
         // refresh and re-validate
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="skillActionsBtn"] button')
             .should('be.disabled');
 
+        cy.get('[data-cy="exportedBadge-skill1"');
+        cy.get('[data-cy="exportedBadge-skill2"');
         cy.get('[data-cy="exportedBadge-skill3"');
         cy.get('[data-cy="exportedBadge-skill4"');
         cy.get('[data-cy="exportedBadge-skill5"');
@@ -269,18 +273,17 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.get('[data-cy="exportedBadge-skill8"');
         cy.get('[data-cy="exportedBadge-skill9"');
         cy.get('[data-cy="exportedBadge-skill10"');
-        cy.get('[data-cy="exportedBadge-skill11"');
-        cy.get('[data-cy="exportedBadge-skill12"');
 
         cy.get('[data-cy="skillsBTablePaging"]')
             .contains('2')
             .click();
 
-        cy.get('[data-cy="exportedBadge-skill1"');
-        cy.get('[data-cy="exportedBadge-skill2"');
+        cy.get('[data-cy="exportedBadge-skill11"');
+        cy.get('[data-cy="exportedBadge-skill12"');
+
     });
 
-    it('export all skills ignores gorups', () => {
+    it('export all skills ignores groups', () => {
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
@@ -330,14 +333,14 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.get('[data-cy="skillActionsNumSelected"]')
             .should('have.text', '0');
 
+        cy.get('[data-cy="exportedBadge-skill1"');
+        cy.get('[data-cy="exportedBadge-skill2"');
+        cy.get('[data-cy="exportedBadge-skill3"');
+        cy.get('[data-cy="exportedBadge-skill4"');
         cy.get('[data-cy="exportedBadge-skill5"');
         cy.get('[data-cy="exportedBadge-skill6"');
         cy.get('[data-cy="exportedBadge-skill7"');
         cy.get('[data-cy="exportedBadge-skill8"');
-        cy.get('[data-cy="exportedBadge-skill9"');
-        cy.get('[data-cy="exportedBadge-skill10"');
-        cy.get('[data-cy="exportedBadge-skill11"');
-        cy.get('[data-cy="exportedBadge-skill12"');
         cy.get('[data-cy="exportedBadge-skill13"')
             .should('not.exist');
         cy.get('[data-cy="exportedBadge-skill14"')
@@ -347,10 +350,10 @@ describe('Export Skills to the Catalog Tests', () => {
             .contains('2')
             .click();
 
-        cy.get('[data-cy="exportedBadge-skill1"');
-        cy.get('[data-cy="exportedBadge-skill2"');
-        cy.get('[data-cy="exportedBadge-skill3"');
-        cy.get('[data-cy="exportedBadge-skill4"');
+        cy.get('[data-cy="exportedBadge-skill9"');
+        cy.get('[data-cy="exportedBadge-skill10"');
+        cy.get('[data-cy="exportedBadge-skill11"');
+        cy.get('[data-cy="exportedBadge-skill12"');
     });
 
     it('try to export skills that are already exported', () => {
@@ -741,6 +744,7 @@ describe('Export Skills to the Catalog Tests', () => {
     });
 
     it('additional columns - catalog', () => {
+        window.localStorage.setItem('tableState', JSON.stringify({'skillsTable': {'sortDesc': true, 'sortBy': 'displayOrder'}}))
         cy.createSkill(1, 1, 1); // 1
         cy.createSkill(1, 1, 2); // 2
         cy.createSkill(1, 1, 3); // 3 - exported
