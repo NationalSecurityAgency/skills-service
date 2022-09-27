@@ -37,7 +37,7 @@ limitations under the License.
                     <div class="d-inline-block" style="min-width: 4rem;">
                       <skills-filter :counts="metaCounts" :filters="filters" @filter-selected="filterSkills" @clear-filter="clearFilters"/>
                     </div>
-                    <div  v-if="!loading.userSkills && hasLastViewedSkill" class="d-inline-block">
+                    <div  v-if="!loading.userSkills && isLastViewedScrollSupported && hasLastViewedSkill" class="d-inline-block">
                       <b-button @click.prevent="scrollToLastViewedSkill"
                                 class="skills-theme-btn d-inline" variant="outline-info"
                                 :aria-label="`Jump to Last Viewed Skill`"
@@ -63,6 +63,7 @@ limitations under the License.
                 <div v-if="skillsInternal && skillsInternal.length > 0">
                   <div v-for="(skill, index) in skillsInternal"
                        :key="`skill-${skill.skillId}`"
+                       :id="`skillRow-${skill.skillId}`"
                        class="skills-theme-bottom-border-with-background-color"
                        :class="{
                          'separator-border-thick' : showDescriptionsInternal,
@@ -253,6 +254,10 @@ limitations under the License.
           });
         }
         return lastViewedSkill;
+      },
+      isLastViewedScrollSupported() {
+        const opts = this.$store.state.options;
+        return opts && Object.keys(opts).length > 0;
       },
     },
     methods: {

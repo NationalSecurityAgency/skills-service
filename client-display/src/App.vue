@@ -140,6 +140,10 @@ limitations under the License.
           this.$store.commit('projectId', parent.model.projectId);
           this.$store.commit('serviceUrl', parent.model.serviceUrl);
 
+          if (parent.model.options) {
+            this.$store.commit('options', parent.model.options);
+          }
+
           UserSkillsService.setVersion(parent.model.version);
           UserSkillsService.setUserId(parent.model.userId);
 

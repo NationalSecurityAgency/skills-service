@@ -48,6 +48,7 @@ export default new Vuex.Store({
     serviceUrl: null,
     authenticator: null,
     internalBackButton: true,
+    options: {},
   },
   modules: {
     themeModule,
@@ -94,6 +95,10 @@ export default new Vuex.Store({
     authenticator(state, authenticator) {
       // eslint-disable-next-line no-param-reassign
       state.authenticator = authenticator;
+    },
+    options(state, options) {
+      // eslint-disable-next-line no-param-reassign
+      state.options = options;
     },
   },
 });

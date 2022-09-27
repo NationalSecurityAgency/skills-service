@@ -136,6 +136,7 @@ limitations under the License.
     <div v-if="skill.isSkillsGroupType && childSkillsInternal" class="ml-4 mt-3">
       <div v-for="(childSkill, index) in childSkillsInternal"
            :key="`group-${skill.skillId}_skill-${childSkill.skillId}`"
+           :id="`skillRow-${childSkill.skillId}`"
            class="skills-theme-bottom-border-with-background-color"
            :class="{ 'separator-border-thick' : showDescription }"
       >
