@@ -51,6 +51,33 @@ describe('Client Display Dependencies Tests', () => {
         cy.viewport(1280, 1280);
     });
 
+    it('Deps Chart - drill down into deps from another subject via click', () => {
+        cy.createSkill(1, 1, 1);
+        cy.createSubject(1, 2);
+        cy.createSkill(1, 2, 3);
+        cy.assignDep(1, 1, 3, 2)
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.clickOnNode(550, 320);
+
+        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 3 Subj2')
+    })
+
+    it('Deps Chart - drill down into deps from another project and subject via click', () => {
+        cy.createSkill(1, 1, 1);
+
+        cy.createProject(2)
+        cy.createSubject(2, 2);
+        cy.createSkill(2, 2, 3);
+        cy.assignCrossProjectDep(1, 1, 2, 3, true, 2);
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.clickOnNode(550, 320);
+
+        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 3 Subj2')
+        cy.contains('This is a cross-project skill!');
+    })
+
     it('Deps Chart - make sure drill down via click works', () => {
         const numSkills = 9;
         for (let i = 0; i < numSkills; i += 1) {
@@ -63,8 +90,8 @@ describe('Client Display Dependencies Tests', () => {
         cy.createSkill(2, 1, 2);
 
         cy.assignDep(1, 1, 2);
-        cy.assignDep(1, 2, 3);
-        cy.assignDep(1, 3, 4);
+        cy.assignDep(1, 1, 3);
+        cy.assignDep(1, 1, 4);
         cy.assignDep(1, 4, 5);
         cy.assignDep(1, 5, 6);
         cy.assignDep(1, 6, 7);
