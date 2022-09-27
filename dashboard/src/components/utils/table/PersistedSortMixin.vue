@@ -20,7 +20,7 @@ limitations under the License.
     name: 'PersistedSortMixin',
     data() {
       return {
-        sortBy: 'name',
+        sortBy: '',
         sortDesc: false,
       };
     },
