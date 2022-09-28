@@ -18,6 +18,7 @@ var moment = require('moment-timezone');
 describe('Edit Imported Skill Tests', () => {
 
     beforeEach(() => {
+        window.localStorage.setItem('tableState', JSON.stringify({'skillsTable': {'sortDesc': true, 'sortBy': 'displayOrder'}}))
         cy.createProject(1);
         cy.createSubject(1, 1);
     });
