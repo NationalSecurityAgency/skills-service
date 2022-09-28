@@ -19,7 +19,7 @@ limitations under the License.
       <h6 class="card-title mb-0 float-left">Node Legend</h6>
     </div>
     <div class='card-body'>
-      <ul class='text-left p-0 mb-0'>
+      <ul class='text-left p-0 mb-0' data-cy="nodeLegend">
         <li v-for="item in items" v-bind:key="item.label" class="legend-list-item mb-0">
           <span v-bind:style=' {background: item.color }' class="mr-2 mb-0 border border-secondary rounded"></span>{{ item.label }}
         </li>

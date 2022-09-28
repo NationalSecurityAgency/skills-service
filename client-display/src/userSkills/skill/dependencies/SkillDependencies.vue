@@ -146,7 +146,7 @@ limitations under the License.
               this.handlePush({
                 name: 'crossProjectSkillDetails',
                 params: {
-                  subjectId: this.$route.params.subjectId,
+                  subjectId: skillItem.subjectId,
                   crossProjectId: skillItem.projectId,
                   skillId: this.$route.params.skillId,
                   dependentSkillId: skillItem.skillId,
@@ -156,7 +156,7 @@ limitations under the License.
               this.handlePush({
                 name: 'dependentSkillDetails',
                 params: {
-                  subjectId: this.$route.params.subjectId,
+                  subjectId: skillItem.subjectId,
                   skillId: this.$route.params.skillId,
                   dependentSkillId: skillItem.skillId,
                 },
