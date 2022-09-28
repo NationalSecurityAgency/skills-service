@@ -58,6 +58,7 @@ describe('Client Display Dependencies Tests', () => {
         cy.assignDep(1, 1, 3, 2)
 
         cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
         cy.clickOnNode(550, 320);
 
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 3 Subj2')
@@ -72,6 +73,7 @@ describe('Client Display Dependencies Tests', () => {
         cy.assignCrossProjectDep(1, 1, 2, 3, true, 2);
 
         cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
         cy.clickOnNode(550, 320);
 
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 3 Subj2')
@@ -101,21 +103,26 @@ describe('Client Display Dependencies Tests', () => {
         cy.assignDep(2, 1, 2);
 
         cy.cdVisit('/subjects/subj1/skills/skill1');
-        cy.clickOnNode(425, 460);
+        cy.get('[data-cy="skillProgressTitle"]').contains('This is a very long name. yet is it 1')
+        cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]').should('have.text', '8')
+        cy.clickOnNode(225, 455);
         cy.contains('Project: This is project 2');
-        cy.contains('Very Great Skill 1');
-        cy.contains('cross-project skill');
+        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1');
+        cy.get('[data-cy="crossProjAlert"]').contains('cross-project skill');
 
         cy.cdVisit('/subjects/subj1/skills/skill1');
-        cy.clickOnNode(550, 93);
-        cy.contains('This is a very long name. yet is it 2');
+        cy.get('[data-cy="skillProgressTitle"]').contains('This is a very long name. yet is it 1')
+        cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]').should('have.text', '8')
+        cy.clickOnNode(425, 460);
+        cy.get('[data-cy="skillProgressTitle"]').contains('This is a very long name. yet is it 2');
 
         // make sure that "this skill" node doesn't navigate away to another page
         cy.cdVisit('/subjects/subj1/skills/skill1');
-        cy.contains('This is a very long name. yet is it 1');
+        cy.get('[data-cy="skillProgressTitle"]').contains('This is a very long name. yet is it 1')
+        cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]').should('have.text', '8')
         cy.clickOnNode(500, 34);
         cy.wait(500);
-        cy.contains('This is a very long name. yet is it 1');
+        cy.get('[data-cy="skillProgressTitle"]').contains('This is a very long name. yet is it 1');
     });
 
     it('Deps Chart - clicking off of a node but inside the dependency graph does not cause an error', () => {

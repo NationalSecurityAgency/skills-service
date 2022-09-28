@@ -24,7 +24,7 @@ limitations under the License.
       </div>
     </div>
 
-    <div v-if="skill.crossProject && !isSkillComplete" class="alert alert-primary text-center" role="alert">
+    <div v-if="skill.crossProject && !isSkillComplete" class="alert alert-primary text-center" role="alert" data-cy="crossProjAlert">
       This is a cross-{{ projectDisplayName.toLowerCase() }} {{ skillDisplayName.toLowerCase() }}! In order to complete this {{ skillDisplayName.toLowerCase() }} please visit <strong>{{
         skill.projectName
       }}</strong> {{ projectDisplayName.toLowerCase() }}! Happy playing!!
