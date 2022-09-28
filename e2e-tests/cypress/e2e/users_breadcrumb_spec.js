@@ -220,45 +220,6 @@ describe('Users skills-display Breadcrumb Tests', () => {
         cy.dashboardCd().contains('Overall Points');
     });
 
-    it('test breadcrumbs with internal dependency', () => {
-        const proxyUser = Cypress.env('proxyUser');
-        cy.visit(`/administrator/projects/proj1/users/${proxyUser}/?skillsClientDisplayPath=/subjects/subj1/skills/skill4/dependency/skill2`);
-        cy.contains("Client Display");
-        cy.contains(`ID: ${Cypress.env('proxyUser')}`);
-        cy.dashboardCd().contains('Very Great Skill 2');
-
-        cy.get('[data-cy=breadcrumb-skill2]').should('exist');
-        cy.get('[data-cy=breadcrumb-skill2]').should('not.have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-subj1]').should('exist');
-        cy.get('[data-cy=breadcrumb-subj1]').should('have.attr', 'href');
-        cy.get(`[data-cy=breadcrumb-${proxyUser}]`).should('be.visible');
-        cy.get(`[data-cy=breadcrumb-${proxyUser}]`).should('exist');
-        cy.get(`[data-cy=breadcrumb-${proxyUser}]`).should('have.attr', 'href');
-        const pattern = `^Projects.*Project: proj1.*Users.*${proxyUser}.*Subject: subj1.*Skill: skill4.*Dependency: skill2$`
-        cy.get('[data-cy=breadcrumb-bar]').contains(new RegExp(pattern)).should('be.visible');
-
-        cy.get('[data-cy=breadcrumb-item]').its('length').should('eq', 7);
-        cy.get('[data-cy=breadcrumb-item]').eq(0).should('contain.text', 'Projects');
-        cy.get('[data-cy=breadcrumb-item]').eq(1).should('contain.text', 'Project: proj1');
-        cy.get('[data-cy=breadcrumb-item]').eq(2).should('contain.text', 'Users');
-        cy.get('[data-cy=breadcrumb-item]').eq(3).should('contain.text', `User: ${proxyUser}`);
-        cy.get('[data-cy=breadcrumb-item]').eq(4).should('contain.text', 'Subject: subj1');
-        cy.get('[data-cy=breadcrumb-item]').eq(5).should('contain.text', 'Skill: skill4');
-        cy.get('[data-cy=breadcrumb-item]').eq(6).should('contain.text', 'Dependency: skill2');
-
-        // back to skill page
-        cy.get('[data-cy=breadcrumb-skill4]').click();
-        cy.dashboardCd().contains('Very Great Skill 4');
-
-        // back to subject page
-        cy.get('[data-cy=breadcrumb-subj1]').click();
-        cy.dashboardCd().contains('Subject 1');
-
-        // back to home page
-        cy.get(`[data-cy=breadcrumb-${proxyUser}]`).click();
-        cy.dashboardCd().contains('Overall Points');
-    });
-
     it('test breadcrumbs with cross-project dependency', () => {
         const proxyUser = Cypress.env('proxyUser');
         cy.visit(`/administrator/projects/proj1/users/${proxyUser}/?skillsClientDisplayPath=/subjects/subj1/skills/skill3/crossProject/proj2/skill1`);
