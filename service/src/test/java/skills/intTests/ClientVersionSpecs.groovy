@@ -20,6 +20,8 @@ import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.services.VersionService
+import skills.storage.model.ProjectError
+import spock.lang.IgnoreRest
 
 class ClientVersionSpecs extends DefaultIntSpec {
 
@@ -87,5 +89,23 @@ class ClientVersionSpecs extends DefaultIntSpec {
         then:
         def errors = skillsService.getProjectErrors(proj.projectId, 10, 1, "errorType", true)
         errors.count == 3
+    }
+
+    def "Delete version error"() {
+        def proj = SkillsFactory.createProject(1)
+        skillsService.createProject(proj)
+
+        when:
+        def result = skillsService.reportClientVersion(proj.projectId, "@skilltree/skills-client-fake-1.0.0")
+        result = skillsService.reportClientVersion(proj.projectId, "@skilltree/skills-client-fake-1.2.3")
+        result = skillsService.reportClientVersion(proj.projectId, "@skilltree/skills-client-framework-1.0.0")
+        result = skillsService.reportClientVersion(proj.projectId, currentVersion)
+        def errors = skillsService.getProjectErrors(proj.projectId, 10, 1, "errorType", true)
+        skillsService.deleteSpecificProjectError(proj.projectId, errors.data[0].errorId)
+        def errors_after = skillsService.getProjectErrors(proj.projectId, 10, 1, "errorType", true)
+        then:
+        errors.count == 3
+        errors_after.count == 2
+        errors_after.data.errorId == [errors.data[1].errorId, errors.data[2].errorId]
     }
 }
