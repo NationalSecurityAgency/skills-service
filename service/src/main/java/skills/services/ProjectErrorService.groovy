@@ -22,6 +22,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.result.model.TableResult
 import skills.storage.model.ProjectError
@@ -75,20 +76,16 @@ class ProjectErrorService {
     }
 
     @Transactional
-    public void deleteError(String projectId, String errorType, String err) {
-        ProjectError.ErrorType type
-        try {
-            type = ProjectError.ErrorType.valueOf(errorType)
-        } catch (IllegalArgumentException illegalArgumentException) {
-            log.error("can't find ErrorType enum value for [${errorType}]", illegalArgumentException)
-            throw new SkillException("unrecognized errorType [${errorType}]")
-        }
-        ProjectError error = errorRepo.findByProjectIdAndErrorTypeAndError(projectId, type, err)
+    public void deleteError(String projectId, Integer errorId) {
+        ProjectError error = errorRepo.findById(errorId)?.get()
         if (error) {
-            log.info("deleting error for [${projectId}]-[${err}]")
+            if (error.projectId != projectId) {
+                throw new SkillException("Provided error id [${errorId}] does not belong to this project", projectId, null, ErrorCode.AccessDenied)
+            }
+            log.debug("deleting error for [{}]-[{}]", projectId, error.error)
             errorRepo.delete(error)
         } else {
-            log.warn("ProjectError does not exists for [${projectId}]-[${err}")
+            log.warn("ProjectError does not exists for [${projectId}]-[${errorId}]")
         }
     }
 
@@ -104,6 +101,7 @@ class ProjectErrorService {
         if (!res.isEmpty()) {
             res.forEach({
                 errs << new skills.controller.result.model.ProjectError(
+                        errorId: it.id,
                         projectId: it.projectId,
                         errorType: it.errorType.toString(),
                         error: it.error,

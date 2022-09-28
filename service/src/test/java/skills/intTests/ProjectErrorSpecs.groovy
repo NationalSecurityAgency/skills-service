@@ -111,14 +111,29 @@ class ProjectErrorSpecs extends DefaultIntSpec {
         }
 
         def errorsBeforeDelete = skillsService.getProjectErrors(proj.projectId, 10, 1, "lastSeen", false)
-        skillsService.deleteSpecificProjectError(proj.projectId, "SkillNotFound", "this is not a skill id")
+        skillsService.deleteSpecificProjectError(proj.projectId, errorsBeforeDelete.data[0].errorId)
         def errorsAfterDelete = skillsService.getProjectErrors(proj.projectId, 10, 1, "lastSeen", false)
 
         then:
         errorsBeforeDelete.totalCount == 2
         errorsBeforeDelete.data.size() == 2
         errorsAfterDelete.totalCount == 1
-        errorsAfterDelete.data.size() == 1
+        errorsAfterDelete.data.errorId == [errorsBeforeDelete.data[1].errorId]
+    }
+
+    def "attempt to delete error from another project"() {
+        def proj = SkillsFactory.createProject(1)
+        skillsService.createProject(proj)
+        def proj2 = SkillsFactory.createProject(2)
+        skillsService.createProject(proj2)
+        when:
+        skillsService.reportClientVersion(proj.projectId, "@skilltree/skills-client-fake-1.0.0")
+        def errorsBeforeDelete = skillsService.getProjectErrors(proj.projectId, 10, 1, "lastSeen", false)
+        skillsService.deleteSpecificProjectError(proj2.projectId, errorsBeforeDelete.data[0].errorId)
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("Provided error id [${errorsBeforeDelete.data[0].errorId}] does not belong to this project")
+        e.message.contains('errorCode:AccessDenied'.toString())
     }
 
     def 'project id is case sensitive - return project not found if projectId case does not match'() {

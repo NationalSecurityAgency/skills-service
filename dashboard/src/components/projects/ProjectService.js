@@ -56,8 +56,8 @@ export default {
   getProjectErrors(projectId, params) {
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/errors`, { params }).then((response) => response.data);
   },
-  deleteProjectError(projectId, errorType, reportedSkillid) {
-    return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}/errors/${errorType}/${encodeURIComponent(reportedSkillid)}`)
+  deleteProjectError(projectId, errorId) {
+    return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}/errors/${errorId}`)
       .then((response) => response.data);
   },
   deleteAllProjectErrors(projectId) {

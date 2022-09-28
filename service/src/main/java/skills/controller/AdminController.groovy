@@ -1126,10 +1126,10 @@ class AdminController {
         return RequestResult.success()
     }
 
-    @RequestMapping(value = "/projects/{projectId}/errors/{errorType}/{error}", method = [RequestMethod.DELETE], produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/errors/{errorId}", method = [RequestMethod.DELETE], produces = "application/json")
     @ResponseBody
-    RequestResult deleteProjectError(@PathVariable("projectId") String projectId, @PathVariable("errorType") String errorType, @PathVariable("error") String error){
-        errorService.deleteError(projectId, errorType, error)
+    RequestResult deleteProjectError(@PathVariable("projectId") String projectId, @PathVariable("errorId") Integer errorId){
+        errorService.deleteError(projectId, errorId)
         return RequestResult.success()
     }
 
