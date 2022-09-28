@@ -17,6 +17,8 @@
 describe('Import Skills under a Group Tests', () => {
 
     beforeEach(() => {
+        window.localStorage.setItem('tableState', JSON.stringify({'skillsTable': {'sortDesc': true, 'sortBy': 'displayOrder'},
+                                                                  'groupSkills_group5': {'sortDesc': true, 'sortBy': 'displayOrder'}}))
         cy.waitForBackendAsyncTasksToComplete();
 
         cy.createProject(1);
