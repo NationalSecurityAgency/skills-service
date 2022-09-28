@@ -140,7 +140,6 @@ limitations under the License.
         this.network = new Network(container, data, this.displayOptions);
         this.network.on('click', (params) => {
           const skillItem = this.locateSelectedSkill(params);
-          console.log(skillItem);
           if (skillItem && skillItem.skillId && !skillItem.isThisSkill) {
             if (skillItem.isCrossProject) {
               this.handlePush({
