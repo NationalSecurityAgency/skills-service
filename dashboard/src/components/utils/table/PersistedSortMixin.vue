@@ -30,6 +30,9 @@ limitations under the License.
         if (sorting) {
           this.sortBy = sorting.sortBy;
           this.sortDesc = sorting.sortDesc;
+        } else if (this.options) {
+          this.sortBy = this.options.sortBy;
+          this.sortDesc = this.options.sortDesc;
         }
       }
     },
