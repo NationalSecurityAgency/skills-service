@@ -53,15 +53,55 @@ describe('Client Display Dependencies Tests', () => {
 
     it('Deps Chart - drill down into deps from another subject via click', () => {
         cy.createSkill(1, 1, 1);
+
         cy.createSubject(1, 2);
         cy.createSkill(1, 2, 3);
         cy.assignDep(1, 1, 3, 2)
+
+        cy.createSubject(1, 3);
+        cy.createSkill(1, 3, 4);
+        cy.request('POST', `/admin/projects/proj1/skills/skill3Subj2/dependency/skill4Subj3`);
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
+        cy.clickOnNode(550, 262);
+
+        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 3 Subj2')
+
+        cy.get('[data-cy="breadcrumb-subj2"]').should('exist')
+        cy.get('[data-cy="breadcrumb-skill1"]').should('not.exist')
+
+        cy.clickOnNode(550, 320);
+        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 4 Subj3')
+        cy.get('[data-cy="breadcrumb-subj2"]').should('not.exist')
+        cy.get('[data-cy="breadcrumb-subj3"]').should('exist')
+    })
+
+    it('Deps Chart - drill down into deps from another subject via click - verify that prev/next works in the dep', () => {
+        cy.createSkill(1, 1, 1);
+        cy.createSubject(1, 2);
+        cy.createSkill(1, 2, 3);
+        cy.createSkill(1, 2, 4);
+        cy.createSkill(1, 2, 5);
+        cy.assignDep(1, 1, 3, 2)
+        cy.createSkill(1, 1, 6);
+        cy.createSkill(1, 1, 7);
+        cy.createSkill(1, 1, 8);
 
         cy.cdVisit('/subjects/subj1/skills/skill1');
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
         cy.clickOnNode(550, 320);
 
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 3 Subj2')
+        cy.get('[data-cy="breadcrumb-subj2"]').should('exist')
+        cy.get('[data-cy="nextSkill"]').click()
+        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 4 Subj2')
+
+        cy.get('[data-cy="prevSkill"]').click()
+        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 3 Subj2')
+
+        cy.get('[data-cy="breadcrumb-subj2"]').click()
+        cy.get('[data-cy="title"]').should('have.text', 'Subject 2');
     })
 
     it('Deps Chart - drill down into deps from another project and subject via click', () => {
@@ -77,6 +117,9 @@ describe('Client Display Dependencies Tests', () => {
         cy.clickOnNode(550, 320);
 
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 3 Subj2')
+        cy.get('[data-cy="breadcrumb-subj1"]').should('exist')
+        cy.get('[data-cy="breadcrumb-skill1"]').should('exist')
+        cy.get('[data-cy="breadcrumb-subj2"]').should('not.exist')
         cy.contains('This is a cross-project skill!');
     })
 
@@ -335,17 +378,17 @@ describe('Client Display Dependencies Tests', () => {
 
         cy.get('[data-cy="skillProgressTitle"]')
             .contains('Very Great Skill 3');
-        // should render dependencies section
-        cy.contains('Dependencies');
+        cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]').should('have.text', '2')
         cy.wait(4000);
         cy.matchSnapshotImage(`InProjectDependency-parent`, snapshotOptions);
 
         // Go to child dependency page
-        cy.cdVisit('/subjects/subj1/skills/skill3/dependency/skill2');
+        cy.clickOnNode(550, 262);
+        // cy.cdVisit('/subjects/subj1/skills/skill3/dependency/skill2');
         cy.get('[data-cy="skillProgressTitle"]')
             .contains('Very Great Skill 2');
         // should render dependencies section
-        cy.contains('Dependencies');
+        cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]').should('have.text', '1')
         cy.wait(4000);
         cy.matchSnapshotImage(`InProjectDependency-child`, snapshotOptions);
     });

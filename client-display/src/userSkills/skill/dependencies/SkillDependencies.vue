@@ -103,8 +103,7 @@ limitations under the License.
     },
     methods: {
       initInternalDeps() {
-        const skillId = this.isDependency() ? this.$route.params.dependentSkillId : this.$route.params.skillId;
-        const idForThisSkill = this.appendForId(this.$store.state.projectId, skillId);
+        const idForThisSkill = this.appendForId(this.$store.state.projectId, this.$route.params.skillId);
         this.dependenciesInternal = this.dependencies.map((item) => {
           const copy = { ...item };
           copy.dependsOn.id = this.getNodeId(copy.dependsOn);
@@ -141,12 +140,13 @@ limitations under the License.
         this.network = new Network(container, data, this.displayOptions);
         this.network.on('click', (params) => {
           const skillItem = this.locateSelectedSkill(params);
+          console.log(skillItem);
           if (skillItem && skillItem.skillId && !skillItem.isThisSkill) {
             if (skillItem.isCrossProject) {
               this.handlePush({
                 name: 'crossProjectSkillDetails',
                 params: {
-                  subjectId: skillItem.subjectId,
+                  subjectId: this.$route.params.subjectId,
                   crossProjectId: skillItem.projectId,
                   skillId: this.$route.params.skillId,
                   dependentSkillId: skillItem.skillId,
@@ -154,11 +154,10 @@ limitations under the License.
               });
             } else {
               this.handlePush({
-                name: 'dependentSkillDetails',
+                name: 'skillDetails',
                 params: {
                   subjectId: skillItem.subjectId,
-                  skillId: this.$route.params.skillId,
-                  dependentSkillId: skillItem.skillId,
+                  skillId: skillItem.skillId,
                 },
               });
             }
@@ -263,7 +262,7 @@ limitations under the License.
       },
       isDependency() {
         const routeName = this.$route.name;
-        return routeName === 'dependentSkillDetails' || routeName === 'crossProjectSkillDetails';
+        return routeName === 'crossProjectSkillDetails';
       },
     },
   };
