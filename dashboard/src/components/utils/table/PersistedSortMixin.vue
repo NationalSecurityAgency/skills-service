@@ -43,7 +43,6 @@ limitations under the License.
     },
     methods: {
       sortingChanged(ctx) {
-        console.log('Sorting changed for ', this.tableId);
         if (this.tableId) {
           TableStateUtil.saveTableSortState(this.tableId, ctx.sortBy, ctx.sortDesc);
         }
