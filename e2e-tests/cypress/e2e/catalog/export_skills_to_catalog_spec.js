@@ -193,6 +193,7 @@ describe('Export Skills to the Catalog Tests', () => {
     });
 
     it('export all skills', () => {
+        window.localStorage.setItem('tableState', JSON.stringify({'skillsTable': {'sortDesc': false, 'sortBy': 'name'}}))
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
@@ -284,6 +285,7 @@ describe('Export Skills to the Catalog Tests', () => {
     });
 
     it('export all skills ignores groups', () => {
+        window.localStorage.setItem('tableState', JSON.stringify({'skillsTable': {'sortDesc': false, 'sortBy': 'displayOrder'}}))
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
@@ -341,6 +343,7 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.get('[data-cy="exportedBadge-skill6"');
         cy.get('[data-cy="exportedBadge-skill7"');
         cy.get('[data-cy="exportedBadge-skill8"');
+        cy.get('[data-cy="exportedBadge-skill9"');
         cy.get('[data-cy="exportedBadge-skill13"')
             .should('not.exist');
         cy.get('[data-cy="exportedBadge-skill14"')
@@ -350,7 +353,6 @@ describe('Export Skills to the Catalog Tests', () => {
             .contains('2')
             .click();
 
-        cy.get('[data-cy="exportedBadge-skill9"');
         cy.get('[data-cy="exportedBadge-skill10"');
         cy.get('[data-cy="exportedBadge-skill11"');
         cy.get('[data-cy="exportedBadge-skill12"');
