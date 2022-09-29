@@ -372,7 +372,6 @@ describe('Users Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1/users');
         cy.wait('@getSubjectUsers')
 
-        cy.get(`${tableSelector}`).contains('User Id').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'usera@skills.org' }],
             [{ colIndex: 0,  value: 'userb@skills.org' }],
@@ -388,7 +387,6 @@ describe('Users Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/users');
         cy.wait('@getSkillsUsers')
 
-        cy.get(`${tableSelector}`).contains('User Id').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'usera@skills.org' }],
             [{ colIndex: 0,  value: 'userb@skills.org' }],
@@ -404,7 +402,6 @@ describe('Users Tests', () => {
         cy.visit('/administrator/projects/proj1/badges/badge1/users');
         cy.wait('@getBadgeUsers')
 
-        cy.get(`${tableSelector}`).contains('User Id').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'usera@skills.org' }],
             [{ colIndex: 0,  value: 'userb@skills.org' }],
