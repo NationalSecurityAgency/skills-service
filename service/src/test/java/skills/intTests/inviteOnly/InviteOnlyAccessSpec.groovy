@@ -34,7 +34,6 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         inviteOnlyProjectService.validateInviteEmail = false
     }
 
-    @IgnoreRest
     def "cannot access a project that has been configured for invite only without accepting invite"() {
         def proj = SkillsFactory.createProject(99)
         def subj = SkillsFactory.createSubject(99)
