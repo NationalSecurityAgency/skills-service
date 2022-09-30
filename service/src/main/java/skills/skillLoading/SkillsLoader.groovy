@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
+import org.springframework.data.util.Pair
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import skills.PublicProps
@@ -693,10 +694,26 @@ class SkillsLoader {
     SkillDependencyInfo loadSkillDependencyInfo(String projectId, String userId, String skillId) {
         List<GraphRelWithAchievement> graphDBRes = nativeQueriesRepo.getDependencyGraphWithAchievedIndicator(projectId, skillId, userId)
 
+        Map<String, Map<String,String>> subjectIdLookupByProjectIdThenBySkillId = [:]
+        Map<String, List<Pair<String,String>>> byProjectIds = graphDBRes.collect { Pair.of(it.childProjectId, it.childSkillId)}.groupBy { it.first }
+        byProjectIds.each {
+            String projectIdForLookup = it.key
+            List<String> skillIds = it.value.collect { it.second }
+            List<SkillRelDefRepo.SkillToSubjIds> res = skillRelDefRepo.findAllSubjectIdsByChildSkillId(projectIdForLookup, skillIds)
+            Map<String,String> subjectIdLookupBySkillId = [:]
+            res.each {
+                subjectIdLookupBySkillId[it.skillId] = it.subjectId
+            }
+            subjectIdLookupByProjectIdThenBySkillId[projectIdForLookup] = subjectIdLookupBySkillId
+        }
+
+
         List<SkillDependencyInfo.SkillRelationshipItem> deps = graphDBRes.collect {
+            Map<String,String> subjectIdLookup = subjectIdLookupByProjectIdThenBySkillId[it.childProjectId]
+            String childSubjectId = subjectIdLookup[it.childSkillId]
             new SkillDependencyInfo.SkillRelationship(
                     skill: new SkillDependencyInfo.SkillRelationshipItem(projectId: it.parentProjectId, projectName: InputSanitizer.unsanitizeName(it.parentProjectName), skillId: it.parentSkillId, skillName: InputSanitizer.unsanitizeName(it.parentName)),
-                    dependsOn: new SkillDependencyInfo.SkillRelationshipItem(projectId: it.childProjectId, projectName: InputSanitizer.unsanitizeName(it.childProjectName), skillId: it.childSkillId, skillName: InputSanitizer.unsanitizeName(it.childName)),
+                    dependsOn: new SkillDependencyInfo.SkillRelationshipItem(projectId: it.childProjectId, subjectId: childSubjectId, projectName: InputSanitizer.unsanitizeName(it.childProjectName), skillId: it.childSkillId, skillName: InputSanitizer.unsanitizeName(it.childName)),
                     achieved: it.achievementId != null,
                     crossProject: projectId != it.childProjectId
             )

@@ -141,7 +141,7 @@ describe('Project Errors Tests', () => {
             .as('getProject');
         cy.intercept('GET', '/admin/projects/proj1/errors**')
             .as('getErrors');
-        cy.intercept('DELETE', '/admin/projects/proj1/errors/SkillNotFound/skill42')
+        cy.intercept('DELETE', '/admin/projects/proj1/errors/*')
             .as('deleteError');
 
         cy.visit('/administrator/projects/proj1/');

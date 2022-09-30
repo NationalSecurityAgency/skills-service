@@ -24,6 +24,7 @@ class SkillDependencyInfo {
         String projectName
         String skillId
         String skillName
+        String subjectId
     }
 
     static class SkillRelationship {

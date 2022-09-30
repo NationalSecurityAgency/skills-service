@@ -114,14 +114,6 @@ const router = new VueRouter({
       },
     },
     {
-      path: '/subjects/:subjectId/skills/:skillId/dependency/:dependentSkillId',
-      component: SkillDetails,
-      name: 'dependentSkillDetails',
-      meta: {
-        title: `Dependant ${skillPlaceholder} Details`,
-      },
-    },
-    {
       path: '/badges/:badgeId/skills/:skillId',
       component: SkillDetails,
       name: 'badgeSkillDetails',

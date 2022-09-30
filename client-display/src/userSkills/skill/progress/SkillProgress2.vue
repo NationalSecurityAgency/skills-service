@@ -24,7 +24,7 @@ limitations under the License.
       </div>
     </div>
 
-    <div v-if="skill.crossProject && !isSkillComplete" class="alert alert-primary text-center" role="alert">
+    <div v-if="skill.crossProject && !isSkillComplete" class="alert alert-primary text-center" role="alert" data-cy="crossProjAlert">
       This is a cross-{{ projectDisplayName.toLowerCase() }} {{ skillDisplayName.toLowerCase() }}! In order to complete this {{ skillDisplayName.toLowerCase() }} please visit <strong>{{
         skill.projectName
       }}</strong> {{ projectDisplayName.toLowerCase() }}! Happy playing!!
@@ -68,12 +68,12 @@ limitations under the License.
                 <span class="">Requires </span> <b-badge variant="success">{{ skill.numSkillsRequired }}</b-badge> <span class="font-italic">out of</span> <b-badge variant="secondary">{{ skill.children.length }}</b-badge> skills
               </div>
 
+              <b-badge v-if="skill.selfReporting && skill.selfReporting.enabled"
+                  variant="success" style="font-size: 0.9rem" class="ml-2 overflow-hidden"><i class="fas fa-check-circle"></i> Self Reportable</b-badge>
               <b-badge v-if="skill.isLastViewed" id="lastViewedIndicator" data-cy="lastViewedIndicator" variant="info" style="font-size: 0.9rem"
                        class="ml-2 overflow-hidden">
                 <i class="fas fa-eye"></i> Last Viewed
               </b-badge>
-              <b-badge v-if="skill.selfReporting && skill.selfReporting.enabled"
-                  variant="success" style="font-size: 0.9rem" class="ml-2 overflow-hidden"><i class="fas fa-check-circle"></i> Self Reportable</b-badge>
             </div>
           </div>
         </div>
@@ -136,6 +136,7 @@ limitations under the License.
     <div v-if="skill.isSkillsGroupType && childSkillsInternal" class="ml-4 mt-3">
       <div v-for="(childSkill, index) in childSkillsInternal"
            :key="`group-${skill.skillId}_skill-${childSkill.skillId}`"
+           :id="`skillRow-${childSkill.skillId}`"
            class="skills-theme-bottom-border-with-background-color"
            :class="{ 'separator-border-thick' : showDescription }"
       >

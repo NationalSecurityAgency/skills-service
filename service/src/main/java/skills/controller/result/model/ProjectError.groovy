@@ -16,6 +16,8 @@
 package skills.controller.result.model
 
 class ProjectError {
+    Integer errorId
+
     String projectId
 
     String errorType

@@ -51,9 +51,10 @@ limitations under the License.
   import SkillsTitle from '@/common/utilities/SkillsTitle';
   import SkillsProgressList from '@/userSkills/skill/progress/SkillsProgressList';
   import SkillsSpinner from '@/common/utilities/SkillsSpinner';
+  import ScrollSkillIntoViewMixin from '@/userSkills/utils/ScrollSkillIntoViewMixin';
 
   export default {
-    mixins: [SkillDisplayDataLoadingMixin],
+    mixins: [SkillDisplayDataLoadingMixin, ScrollSkillIntoViewMixin],
     components: {
       MarkdownText,
       UserSkillsHeader,
@@ -62,7 +63,6 @@ limitations under the License.
       SkillsSpinner,
     },
     beforeRouteEnter(to, from, next) {
-      // console.log(`to.name: ${to.name}, from: ${from.name}`);
       if (to.name === 'subjectDetails' && from.name === 'skillDetails') {
         next((vm) => {
           // eslint-disable-next-line no-param-reassign
@@ -83,8 +83,6 @@ limitations under the License.
     },
     data() {
       return {
-        jumpToLastViewed: false,
-        lastViewedSkillId: null,
         displayDataHeader: this.displayData,
       };
     },
@@ -104,7 +102,7 @@ limitations under the License.
             }
           });
           this.lastViewedSkillId = foundLastViewedSkill ? foundLastViewedSkill.skillId : null;
-          setTimeout(() => { this.autoScrollToLastViewedSkill(); }, 400);
+          this.autoScrollToLastViewedSkill();
         });
         this.loadUserSkillsRanking();
       },
@@ -118,27 +116,6 @@ limitations under the License.
               this.displayDataHeader = newDisplayData;
             });
           });
-        }
-      },
-      autoScrollToLastViewedSkill() {
-        if (this.jumpToLastViewed) {
-          this.$nextTick(() => {
-            this.scrollToLastViewedSkill();
-          });
-        }
-      },
-      scrollToLastViewedSkill() {
-        if (this.lastViewedSkillId) {
-          const element = document.getElementById(`skillProgressTitle-${this.lastViewedSkillId}`);
-          if (element) {
-            this.$nextTick(() => {
-              element.scrollIntoView({ behavior: 'smooth' });
-              this.$nextTick(() => {
-                const elementFocusOn = document.getElementById(`skillProgressTitle-${this.lastViewedSkillId}`);
-                elementFocusOn.focus({ preventScroll: true });
-              });
-            });
-          }
         }
       },
     },

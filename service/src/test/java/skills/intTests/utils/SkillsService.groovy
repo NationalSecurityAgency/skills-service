@@ -268,8 +268,8 @@ class SkillsService {
         wsHelper.adminDelete("/projects/${projectId}/errors")
     }
 
-    def deleteSpecificProjectError(String projectId, String errorType, String error) {
-        wsHelper.adminDelete("/projects/${projectId}/errors/${errorType}/${error}")
+    def deleteSpecificProjectError(String projectId, Integer errorId) {
+        wsHelper.adminDelete("/projects/${projectId}/errors/${errorId}")
     }
 
     def deleteUserRole(String userId, String projectId, String role) {

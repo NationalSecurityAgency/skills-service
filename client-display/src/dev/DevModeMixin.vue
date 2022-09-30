@@ -41,12 +41,22 @@ limitations under the License.
           const isSummaryOnly = this.$route.query.isSummaryOnly ? this.$route.query.isSummaryOnly : false;
           this.$store.commit('isSummaryOnly', isSummaryOnly);
 
+          const options = {
+            disableAutoScroll: false,
+            autoScrollStrategy: 'top-of-frame',
+            scrollTopOffset: 0,
+            isSummaryOnly,
+            internalBackButton: false,
+          };
+
           // whether or not to use an internal back button as opposed to the browser back button
           if (this.$route.query.internalBackButton == null) {
             // default to true
             this.$store.commit('internalBackButton', true);
+            options.internalBackButton = true;
           } else {
             this.$store.commit('internalBackButton', this.$route.query.internalBackButton);
+            options.internalBackButton = this.$route.query.internalBackButton;
           }
 
           const isThemeEnabled = this.$route.query.enableTheme ? this.$route.query.enableTheme : false;
@@ -79,6 +89,14 @@ limitations under the License.
           if (theme) {
             this.handleTheming(theme);
           }
+
+          if (this.$route.query.autoScrollStrategy) {
+            options.autoScrollStrategy = this.$route.query.autoScrollStrategy;
+          }
+          if (this.$route.query.scrollTopOffset) {
+            options.autoScrollStrategy = this.$route.query.scrollTopOffset;
+          }
+          this.$store.commit('options', options);
         }
       },
       isValidDevelopmentMode() {

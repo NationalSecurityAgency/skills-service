@@ -211,7 +211,7 @@ limitations under the License.
           .then((res) => {
             if (res) {
               this.loading = true;
-              ProjectService.deleteProjectError(projectError.projectId, projectError.errorType, projectError.error).then(() => {
+              ProjectService.deleteProjectError(projectError.projectId, projectError.errorId).then(() => {
                 this.loadErrors();
                 this.loadProjectDetailsState({ projectId: this.$route.params.projectId });
               });
