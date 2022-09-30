@@ -113,12 +113,6 @@ class AccessSettingsStorageService {
     }
 
     @Transactional(readOnly = true)
-    boolean isProjectAdmin(String projectId, String userId) {
-        Integer id = userRoleRepository.findIdByProjectIdAndUserIdRoleName(projectId, userId, RoleName.ROLE_PROJECT_ADMIN)
-        return id != null;
-    }
-
-    @Transactional(readOnly = true)
     List<String> getProjectAdminIds(String projectId) {
         return userRoleRepository.findUserIdsByProjectIdAndRoleName(projectId, RoleName.ROLE_PROJECT_ADMIN)
     }

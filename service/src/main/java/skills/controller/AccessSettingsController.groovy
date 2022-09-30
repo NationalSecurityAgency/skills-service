@@ -48,6 +48,8 @@ import static org.springframework.data.domain.Sort.Direction.DESC
 @skills.profile.EnableCallStackProf
 class AccessSettingsController {
 
+    private static List<RoleName> projectSupportedRoles = [RoleName.ROLE_PROJECT_ADMIN, RoleName.ROLE_PROJECT_APPROVER]
+
     @Autowired
     skills.auth.UserInfoService userInfoService
 
@@ -122,6 +124,11 @@ class AccessSettingsController {
     RequestResult addUserRole(
             @PathVariable("projectId") String projectId,
             @PathVariable("userKey") String userKey, @PathVariable("roleName") RoleName roleName) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(userKey, "User Id")
+        if (!projectSupportedRoles.contains(roleName)){
+            throw new SkillException("Provided [${roleName}] is not a project role.", projectId, null, ErrorCode.BadParam)
+        }
         String userId = getUserId(userKey)
         accessSettingsStorageService.addUserRole(userId, projectId, roleName)
 

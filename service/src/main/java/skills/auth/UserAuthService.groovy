@@ -21,6 +21,7 @@ import org.apache.commons.collections4.CollectionUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Lazy
+import org.springframework.http.HttpMethod
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.GrantedAuthority
@@ -174,6 +175,14 @@ class UserAuthService {
             shouldAddRole = false
             String projectId = AuthUtils.getProjectIdFromRequest(servletRequest)
             if (projectId && projectId.equalsIgnoreCase(userRole.projectId)) {
+                shouldAddRole = true
+            }
+        }
+        if (userRole.roleName == RoleName.ROLE_PROJECT_APPROVER) {
+            shouldAddRole = false
+            String projectId = AuthUtils.getProjectIdFromRequest(servletRequest)
+            String method = servletRequest.method
+            if (projectId && projectId.equalsIgnoreCase(userRole.projectId) && method && method == HttpMethod.GET.toString()) {
                 shouldAddRole = true
             }
         }
