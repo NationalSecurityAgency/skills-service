@@ -15,13 +15,24 @@
  */
 package skills.auth.util
 
-class AccessDeniedExplanationGenerator {
+import org.springframework.security.access.AccessDeniedException
+import skills.auth.inviteOnly.InviteOnlyAccessDeniedException
 
-    AccessDeniedExplanation generateExplanation(String requestPath) {
+class AccessDeniedExplanationGenerator {
+    public static final String PRIVATE_PROJECT_CODE = "private_project"
+    public static final String ACCESS_DENIED_PROJECT_NOT_FOUND = "project_permission"
+    public static final String GLOBAL_BADGE_NOT_FOUND = "global_badge_permission"
+
+    AccessDeniedExplanation generateExplanation(String requestPath, AccessDeniedException accessDeniedException) {
+
+        if (accessDeniedException instanceof InviteOnlyAccessDeniedException) {
+            return new AccessDeniedExplanation(projectId: accessDeniedException.projectId, errorCode: PRIVATE_PROJECT_CODE, explanation: "This Project has been configured with Invite Only access requirements")
+        }
+
         if (requestPath?.startsWith("/admin/projects")) {
-            return new AccessDeniedExplanation(explanation: "You do not have permission to view/manage this Project OR this Project does not exist")
+            return new AccessDeniedExplanation(errorCode: ACCESS_DENIED_PROJECT_NOT_FOUND, explanation: "You do not have permission to view/manage this Project OR this Project does not exist")
         } else if (requestPath?.startsWith("/supervisor/badges")) {
-            return new AccessDeniedExplanation(explanation: "You do not have permission to view/manage this Global Badge OR this Global Badge does not exist")
+            return new AccessDeniedExplanation(errorCode: GLOBAL_BADGE_NOT_FOUND, xplanation: "You do not have permission to view/manage this Global Badge OR this Global Badge does not exist")
         } else {
             return null;
         }

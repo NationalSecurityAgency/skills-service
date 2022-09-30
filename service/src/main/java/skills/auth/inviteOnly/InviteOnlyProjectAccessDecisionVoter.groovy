@@ -57,6 +57,8 @@ class InviteOnlyProjectAccessDecisionVoter extends RoleVoter {
 
     private LoadingCache<String, Boolean> privateProjects
 
+    private static final Pattern CONTACT_EXCEPTION = ~/(?i)api\/projects\/[^\/]+\/contact/
+
     @Value('#{"${skills.config.privateProject.cache-expiration-time:PT5M}"}')
     String privateProjectsCacheExpirationTime="PT5M"
 
@@ -93,7 +95,7 @@ class InviteOnlyProjectAccessDecisionVoter extends RoleVoter {
             log.debug("filterInvocation.request [{}] should be protected", filterInvocation.getRequest().getRequestURI())
             String projectId = extractProjectId(filterInvocation)
             Boolean isInviteOnly = privateProjects.get(projectId)
-            if (isInviteOnly) {
+            if (isInviteOnly && !isContactUrl(filterInvocation)) {
                 log.debug("project id [{}] requires invite only access", projectId)
                 Collection<? extends GrantedAuthority> authorities = getAuthorities(authentication)
                 vote = ACCESS_DENIED;
@@ -104,6 +106,8 @@ class InviteOnlyProjectAccessDecisionVoter extends RoleVoter {
                     }
                 }
                 log.debug("user [{}] is not permitted to access project [{}]", authentication.getPrincipal(), projectId)
+
+                throw new InviteOnlyAccessDeniedException("Access is denied", projectId)
             }
         }
 
@@ -118,6 +122,17 @@ class InviteOnlyProjectAccessDecisionVoter extends RoleVoter {
         }
         return StringUtils.EMPTY
     }
+
+    private boolean isContactUrl(FilterInvocation filterInvocation) {
+        String url = filterInvocation.getRequestUrl()
+        log.debug("checking to see if url [{}] matches path [{}]", url, CONTACT_EXCEPTION.toString())
+        Matcher contact = CONTACT_EXCEPTION.matcher(url)
+        if (contact) {
+            return true
+        }
+        return false
+    }
+
 
     private Collection<? extends GrantedAuthority> getAuthorities(Authentication authentication) {
         Collection<? extends GrantedAuthority> grantedAuthorities = authentication.getAuthorities()

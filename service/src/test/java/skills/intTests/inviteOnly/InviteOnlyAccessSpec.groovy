@@ -34,6 +34,7 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         inviteOnlyProjectService.validateInviteEmail = false
     }
 
+    @IgnoreRest
     def "cannot access a project that has been configured for invite only without accepting invite"() {
         def proj = SkillsFactory.createProject(99)
         def subj = SkillsFactory.createSubject(99)
@@ -45,7 +46,6 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         skillsService.createSkill(skill)
 
         when:
-
         skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
         def user = getRandomUsers(1, true)[0]
         def newService = createService(user)
