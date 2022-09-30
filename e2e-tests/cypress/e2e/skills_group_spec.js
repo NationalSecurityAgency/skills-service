@@ -51,7 +51,6 @@ describe('Skills Group Tests', () => {
     const tableSelector = '[data-cy="skillsTable"]';
 
     it('create skills group', () => {
-        window.localStorage.setItem('tableState', JSON.stringify({'skillsTable': {'sortDesc': false, 'sortBy': 'name'}}))
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="noContent"]').contains('No Skills Yet');
         cy.createGroupViaUI('Blah');

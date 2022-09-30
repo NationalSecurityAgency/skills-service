@@ -37,7 +37,7 @@ describe('Projects Table Tests', () => {
     });
 
     it('When more than 10 projects then projects should be displayed in a table', () => {
-        window.localStorage.setItem('tableState', JSON.stringify({'projectsTable': {'sortDesc': true, 'sortBy': 'name'}}))
+
         // wait a second and create another project to help validate date order sorting
         cy.wait(1001);
         cy.createProject(11);
@@ -593,7 +593,6 @@ describe('Projects Table Tests', () => {
 
     const maxNumProjects = 25;
     it('projects table validation: user cannot create more than configured max projects', () => {
-        window.localStorage.setItem('tableState', JSON.stringify({'projectsTable': {'sortDesc': true, 'sortBy': 'name'}}))
         for (let i = numProjCreated + 1; i <= maxNumProjects; i += 1) {
             cy.createProject(i);
         }
@@ -611,7 +610,6 @@ describe('Projects Table Tests', () => {
     });
 
     it('root user can create unlimited number of projects', () => {
-        window.localStorage.setItem('tableState', JSON.stringify({'projectsTable': {'sortDesc': true, 'sortBy': 'created'}}))
         cy.logout();
         cy.fixture('vars.json')
             .then((vars) => {
