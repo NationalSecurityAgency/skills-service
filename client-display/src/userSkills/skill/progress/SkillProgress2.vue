@@ -70,6 +70,8 @@ limitations under the License.
 
               <b-badge v-if="skill.selfReporting && skill.selfReporting.enabled"
                   variant="success" style="font-size: 0.9rem" class="ml-2 overflow-hidden"><i class="fas fa-check-circle"></i> Self Reportable</b-badge>
+              <b-badge v-if="skill.selfReporting && skill.selfReporting.requestedOn"
+                  variant="info" style="font-size: 0.9rem" class="ml-2 overflow-hidden"><i class="fas fa-check-circle"></i> Approval Pending</b-badge>
               <b-badge v-if="skill.isLastViewed" id="lastViewedIndicator" data-cy="lastViewedIndicator" variant="info" style="font-size: 0.9rem"
                        class="ml-2 overflow-hidden">
                 <i class="fas fa-eye"></i> Last Viewed

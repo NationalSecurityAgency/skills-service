@@ -571,7 +571,7 @@ class SkillsLoader {
     }
 
     @Profile
-    private SelfReportingInfo loadSelfReporting(String userId, SkillDefWithExtra skillDef){
+    private SelfReportingInfo loadSelfReporting(String userId, SkillDefParent skillDef){
         boolean enabled = skillDef.selfReportingType != null
         Pageable oneRowPlease = PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "requestedOn"))
         String queryProjId = skillDef.copiedFrom ? skillDef.copiedFromProjectId : skillDef.projectId
@@ -1045,7 +1045,7 @@ class SkillsLoader {
                         maxOccurrencesWithinIncrementInterval: skillDef.numMaxOccurrencesIncrementInterval,
                         totalPoints: skillDef.totalPoints,
                         dependencyInfo: skillDefAndUserPoints.dependencyInfo,
-                        selfReporting: skillDef.selfReportingType ? new SelfReportingInfo(enabled: true, type: skillDef.selfReportingType, justificationRequired: Boolean.valueOf(skillDef.justificationRequired)) : null,
+                        selfReporting: loadSelfReporting(userId, skillDef),
                         subjectName: subjectName,
                         subjectId: subjectId,
                         type: skillDef.type,
