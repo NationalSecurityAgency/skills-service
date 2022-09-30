@@ -224,4 +224,23 @@ describe('Copy Project Tests', () => {
             .should('have.focus');
     });
 
+    it('pressing enter when enable skill id help icon is selected does not prevent saving of copied project', () => {
+        cy.createProject(3);
+        cy.intercept('POST', '/admin/projects/proj3/copy').as('copyProject');
+        cy.intercept('GET', '/app/projects').as('loadProjects');
+        cy.visit('/administrator/');
+        cy.get('[data-cy="copyProjBtn"]').eq(1)
+            .click();
+        cy.contains('Copy Project').should('be.visible');
+        cy.get('[data-cy="projectName"]').type('Lorem Ipsum');
+        cy.realPress('Tab');
+        cy.contains('Enable to override auto-generated value').should('be.visible');
+        cy.realPress('Enter');
+        cy.contains('Copying Project').should('be.visible');
+        cy.get('[data-cy="allDoneBtn"]').click();
+        cy.wait('@copyProject');
+        cy.wait('@loadProjects');
+        cy.get('[data-cy="projCard_LoremIpsum_manageLink"]').should('be.visible');
+    })
+
 });
