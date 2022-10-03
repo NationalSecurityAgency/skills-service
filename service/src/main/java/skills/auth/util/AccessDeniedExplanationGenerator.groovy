@@ -32,7 +32,7 @@ class AccessDeniedExplanationGenerator {
         if (requestPath?.startsWith("/admin/projects")) {
             return new AccessDeniedExplanation(errorCode: ACCESS_DENIED_PROJECT_NOT_FOUND, explanation: "You do not have permission to view/manage this Project OR this Project does not exist")
         } else if (requestPath?.startsWith("/supervisor/badges")) {
-            return new AccessDeniedExplanation(errorCode: GLOBAL_BADGE_NOT_FOUND, xplanation: "You do not have permission to view/manage this Global Badge OR this Global Badge does not exist")
+            return new AccessDeniedExplanation(errorCode: GLOBAL_BADGE_NOT_FOUND, explanation: "You do not have permission to view/manage this Global Badge OR this Global Badge does not exist")
         } else {
             return null;
         }

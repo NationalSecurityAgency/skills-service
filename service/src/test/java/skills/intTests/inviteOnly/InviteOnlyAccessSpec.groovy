@@ -490,7 +490,7 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         inviteOnlyProjectService.validateInviteEmail = false
     }
 
-    def "invite only project admins can't be contacted if current user has not been granted access"() {
+    def "invite only project admins can be contacted if current user has not been granted access"() {
         def proj = SkillsFactory.createProject(99)
         def subj = SkillsFactory.createSubject(99)
         def skill = SkillsFactory.createSkill(99, 1)
@@ -502,7 +502,7 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
 
         def user = getRandomUsers(1, true)[0]
-        def shouldNotBeAbleToContact = createService(new SkillsService.UseParams(
+        def shouldBeAbleToContact = createService(new SkillsService.UseParams(
                 username: user,
                 email: EmailUtils.generateEmaillAddressFor(user),
                 firstName: "${user.toUpperCase()}_first",
@@ -510,11 +510,17 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         ))
 
         when:
-        shouldNotBeAbleToContact.contactProjectOwner(proj.projectId, "this should fail")
+        shouldBeAbleToContact.contactProjectOwner(proj.projectId, "this should work")
+
+        WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
+
+        def contactEmail = EmailUtils.getEmail(greenMail, 0)
 
         then:
-        def ex = thrown(SkillsClientException)
-        ex.message.contains("HTTP Status 403 – Forbidden")
+        contactEmail
+        contactEmail.html.contains("should work")
+        contactEmail.plainText.contains("should work")
+        contactEmail.fromEmail == [EmailUtils.generateEmaillAddressFor(user)]
     }
 
     def "invite only project admins can be contacted if current user has access"() {
