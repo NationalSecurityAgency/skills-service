@@ -70,8 +70,6 @@ limitations under the License.
 
               <b-badge v-if="skill.selfReporting && skill.selfReporting.enabled"
                   variant="success" style="font-size: 0.9rem" class="ml-2 overflow-hidden"><i class="fas fa-check-circle"></i> Self Reportable</b-badge>
-              <b-badge v-if="skill.selfReporting && skill.selfReporting.requestedOn"
-                  variant="secondary" style="font-size: 0.9rem" class="ml-2 overflow-hidden"><i class="far fa-clock"></i> Approval Pending</b-badge>
               <b-badge v-if="skill.isLastViewed" id="lastViewedIndicator" data-cy="lastViewedIndicator" variant="info" style="font-size: 0.9rem"
                        class="ml-2 overflow-hidden">
                 <i class="fas fa-eye"></i> Last Viewed
@@ -91,6 +89,9 @@ limitations under the License.
         <div v-else class="d-inline">
           <animated-number :num="skill.points"/>
           / {{ skill.totalPoints | number }} Points
+        </div>
+        <div v-if="skill.selfReporting && skill.selfReporting.requestedOn && allowDrillDown">
+          <i class="far fa-clock"></i> Pending Approval
         </div>
       </div>
     </div>
