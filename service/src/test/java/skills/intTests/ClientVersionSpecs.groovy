@@ -106,6 +106,6 @@ class ClientVersionSpecs extends DefaultIntSpec {
         then:
         errors.count == 3
         errors_after.count == 2
-        errors_after.data.errorId == [errors.data[1].errorId, errors.data[2].errorId]
+        errors_after.data.errorId.sort() == [errors.data[1].errorId, errors.data[2].errorId].sort()
     }
 }
