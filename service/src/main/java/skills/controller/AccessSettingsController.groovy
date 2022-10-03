@@ -79,8 +79,15 @@ class AccessSettingsController {
 
     @RequestMapping(value = "/projects/{projectId}/userRoles", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    List<UserRoleRes> getProjectUserRoles(@PathVariable("projectId") String projectId) {
-        return accessSettingsStorageService.getUserRolesForProjectId(projectId)
+    TableResult getProjectUserRoles(
+            @PathVariable("projectId") String projectId,
+            @RequestParam List<RoleName> roles,
+            @RequestParam int limit,
+            @RequestParam int page,
+            @RequestParam String orderBy,
+            @RequestParam Boolean ascending) {
+        PageRequest pageRequest = createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending)
+        return accessSettingsStorageService.getUserRolesForProjectId(projectId, roles, pageRequest)
     }
 
     @RequestMapping(value = "/projects/{projectId}/userRoles/{roleName}", method = RequestMethod.GET, produces = "application/json")
@@ -108,6 +115,10 @@ class AccessSettingsController {
     RequestResult deleteUserRole(
             @PathVariable("projectId") String projectId,
             @PathVariable("userId") String userId, @PathVariable("roleName") RoleName roleName) {
+        String currentUser = userInfoService.getCurrentUser()
+        if (currentUser?.toLowerCase() == userId?.toLowerCase()) {
+            throw new SkillException("Cannot delete roles for myself. userId=[${userId}]", projectId, null, ErrorCode.AccessDenied)
+        }
         accessSettingsStorageService.deleteUserRole(userId?.toLowerCase(), projectId, roleName)
 
         if(roleName == RoleName.ROLE_PROJECT_ADMIN && accessSettingsStorageService.isRoot(userId)) {
@@ -130,6 +141,10 @@ class AccessSettingsController {
             throw new SkillException("Provided [${roleName}] is not a project role.", projectId, null, ErrorCode.BadParam)
         }
         String userId = getUserId(userKey)
+        String currentUser = userInfoService.getCurrentUser()
+        if (currentUser?.toLowerCase() == userId?.toLowerCase()) {
+            throw new SkillException("Cannot add roles to myself. userId=[${userId}]", projectId, null, ErrorCode.AccessDenied)
+        }
         accessSettingsStorageService.addUserRole(userId, projectId, roleName)
 
         if(roleName == RoleName.ROLE_PROJECT_ADMIN) {

@@ -19,6 +19,7 @@ limitations under the License.
 
     <metrics-card title="Root Users Management" :no-padding="true">
       <role-manager id="add-root-user" ref="rootUserRoleManager"
+                    :roles="['ROLE_SUPER_DUPER_USER']"
                     @role-added="handleRootRoleChanged"
                     @role-deleted="handleRootRoleChanged"
                     data-cy="rootrm" :role="root.role" :user-type="root.userType" :role-description="root.roleDescription" />
@@ -26,7 +27,8 @@ limitations under the License.
 
     <metrics-card title="Supervisor Users Management" :no-padding="true" class="mt-3">
       <role-manager id="add-supervisor-user" ref="supervisorRoleManager"
-                    data-cy="supervisorrm" :role="supervisor.role"
+                    data-cy="supervisorrm"
+                    :roles="['ROLE_SUPERVISOR']"
                     :user-type="supervisor.userType"
                     :role-description="supervisor.roleDescription"
                     @role-added="handleRoleAdded"

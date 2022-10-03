@@ -86,9 +86,15 @@ class AccessSettingsStorageService {
     String defaultLandingPage
 
     @Transactional(readOnly = true)
-    List<UserRoleRes> getUserRolesForProjectId(String projectId) {
-        List<UserRoleRepo.UserRoleWithAttrs> res = userRoleRepository.findRoleWithAttrsByProjectId(projectId)
-        return res.collect { convert(it) }
+    TableResult getUserRolesForProjectId(String projectId, List<RoleName> roles, PageRequest pageRequest) {
+        TableResult tableResult = new TableResult()
+        tableResult.totalCount = userRoleRepository.countUserRolesByProjectIdAndUserRoles(projectId, roles)
+        if (tableResult.totalCount > 0) {
+            List<UserRoleRepo.UserRoleWithAttrs> res = userRoleRepository.findRoleWithAttrsByProjectIdAndUserRoles(projectId, roles, pageRequest)
+            tableResult.data = res.collect { convert(it) }
+            tableResult.count = res?.size()
+        }
+        return tableResult
     }
 
     @Transactional(readOnly = true)
@@ -179,8 +185,8 @@ class AccessSettingsStorageService {
     @Transactional
     UserRoleRes addRoot(String userId) {
         UserRole userRole = addUserRoleInternal(userId, null, RoleName.ROLE_SUPER_DUPER_USER)
-        User user = userRepository.findByUserId(userId)
-        if (!(user?.roles?.find {it.projectId == null && it.roleName == RoleName.ROLE_SUPERVISOR})) {
+        UserRole supervisorRole = userRoleRepository.findByUserIdAndRoleNameAndProjectId(userId, RoleName.ROLE_SUPERVISOR, null)
+        if (!supervisorRole) {
             addUserRoleInternal(userId, null, RoleName.ROLE_SUPERVISOR)
         }
         inceptionProjectService.createInceptionAndAssignUser(userId)
@@ -192,8 +198,8 @@ class AccessSettingsStorageService {
         userId = userId?.toLowerCase()
         deleteUserRoleInternal(userId, null, RoleName.ROLE_SUPER_DUPER_USER)
 
-        User user = userRepository.findByUserId(userId)
-        if (user?.roles?.find {it.projectId == null && it.roleName == RoleName.ROLE_SUPERVISOR}) {
+        UserRole supervisorRole = userRoleRepository.findByUserIdAndRoleNameAndProjectId(userId, RoleName.ROLE_SUPERVISOR, null)
+        if (supervisorRole) {
             deleteUserRoleInternal(userId, null, RoleName.ROLE_SUPERVISOR)
         }
         inceptionProjectService.removeUser(userId)
@@ -217,11 +223,10 @@ class AccessSettingsStorageService {
     private void deleteUserRoleInternal(String userId, String projectId, RoleName roleName) {
         log.debug('Deleting user-role for userId [{}] and role [{}] on project [{}]', userId, roleName, projectId)
         User user = userRepository.findByUserId(userId?.toLowerCase())
-        UserRole userRole = user?.roles?.find {it.projectId == projectId && it.roleName == roleName}
+        UserRole userRole = userRoleRepository.findByUserIdAndRoleNameAndProjectId(userId, roleName, projectId)
         assert userRole, "DELETE FAILED -> no user-role with project id [$projectId], userId [$userId] and roleName [$roleName]"
 
-        assert user.roles.remove(userRole), "DELETE FAILED -> failed to remove user-role with project id [$projectId], userId [$userId] and roleName [$roleName]"
-        userRepository.save(user)
+        userRoleRepository.delete(userRole)
         log.debug("Deleted userRole [{}]", userRole)
     }
 
@@ -237,21 +242,39 @@ class AccessSettingsStorageService {
         return role
     }
 
+    private static List<List<RoleName>> mutuallyExclusiveRoles = [
+            [RoleName.ROLE_PROJECT_APPROVER, RoleName.ROLE_PROJECT_ADMIN],
+    ]
     private UserRole addUserRoleInternal(String userId, String projectId, RoleName roleName) {
         log.debug('Creating user-role for ID [{}] and role [{}] on project [{}]', userId, roleName, projectId)
         String userIdLower = userId?.toLowerCase()
         User user = userRepository.findByUserId(userIdLower)
         if (user) {
             // check that the new user role does not already exist
-            UserRole existingUserRole = user?.roles?.find {it.projectId == projectId && it.roleName == roleName}
+            UserRole existingUserRole = userRoleRepository.findByUserIdAndRoleNameAndProjectId(userId, roleName, projectId)
             assert !existingUserRole, "CREATE FAILED -> user-role with project id [$projectId], userIdLower [$userIdLower] and roleName [$roleName] already exists"
         } else {
             throw new SkillException("User [$userIdLower]  does not exist", (String) projectId ?: SkillException.NA, SkillException.NA, ErrorCode.UserNotFound)
         }
 
-        UserRole userRole = new UserRole(userId: userIdLower, roleName: roleName, projectId: projectId)
-        user.roles.add(userRole)
-        userRepository.save(user)
+        // remove mutually exclusive roles
+        mutuallyExclusiveRoles.each {List<RoleName> roles ->
+            if (roles.contains(roleName)) {
+                List<RoleName> rolesToRemove = roles.findAll { it != roleName}
+                if (rolesToRemove) {
+                    rolesToRemove.each { RoleName roleToRemove ->
+                        UserRole found = userRoleRepository.findByUserIdAndRoleNameAndProjectId(userId, roleToRemove, projectId)
+                        if (found) {
+                            log.info("Removing [{}] role for userId=[{}] and projectId=[{}]", found.roleName, userId, projectId)
+                            userRoleRepository.delete(found)
+                        }
+                    }
+                }
+            }
+        }
+
+        UserRole userRole = new UserRole(userRefId: user.id, userId: userIdLower, roleName: roleName, projectId: projectId)
+        userRoleRepository.save(userRole)
         log.debug("Created userRole [{}]", userRole)
 
         log.debug("setting sort order for user [{}] on project [{}]", userIdLower, projectId)
@@ -353,17 +376,17 @@ class AccessSettingsStorageService {
             throw exception
         }
         UserRole role = new UserRole(
+                userRefId: user.id,
                 userId: userId,
                 roleName: RoleName.ROLE_SUPER_DUPER_USER
         )
         UserRole supervisorRole = new UserRole(
+                userRefId: user.id,
                 userId: userId,
                 roleName: RoleName.ROLE_SUPERVISOR
         )
 
-        user.roles.add(role)
-        user.roles.add(supervisorRole)
-        userRepository.save(user)
+        userRoleRepository.saveAll([role, supervisorRole])
         return convert(role)
     }
 
@@ -378,9 +401,13 @@ class AccessSettingsStorageService {
         User user = new User(
                 userId: userId,
                 password: userInfo.password,
-                roles: getRoles(userInfo),
         )
         userRepository.save(user)
+
+        User savedUser = userRepository.findByUserId(user.userId)
+        List<UserRole> roles = getRoles(userInfo)
+        roles.each {it.userRefId = savedUser.id }
+        userRoleRepository.saveAll(roles)
 
         return user
     }

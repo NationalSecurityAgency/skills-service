@@ -16,16 +16,17 @@
 import axios from 'axios';
 
 export default {
-  getUserRoles(projectId, roleName, params) {
+  getUserRoles(projectId, roles, params) {
+    const strRoles = roles.map((r) => `roles=${encodeURIComponent(r)}`).join('&');
     if (projectId) {
-      return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/userRoles/${encodeURIComponent(roleName)}`, { params })
+      return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/userRoles?${strRoles}`, { params })
         .then((response) => response.data);
     }
-    if (roleName === 'ROLE_SUPER_DUPER_USER' || roleName === 'ROLE_SUPERVISOR') {
-      return axios.get(`/root/users/roles/${roleName}`, { params })
+    if (roles.length === 1 && (roles.includes('ROLE_SUPER_DUPER_USER') || roles.includes('ROLE_SUPERVISOR'))) {
+      return axios.get(`/root/users/roles/${roles[0]}`, { params })
         .then((response) => response.data);
     }
-    throw new Error(`unexpected user role [${roleName}]`);
+    throw new Error(`unexpected user roles [${params.roles}]`);
   },
   saveUserRole(projectId, userInfo, roleName, isPkiAuthenticated) {
     let { userId } = userInfo;

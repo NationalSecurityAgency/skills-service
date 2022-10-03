@@ -18,10 +18,11 @@ package skills.intTests
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import skills.storage.model.auth.RoleName
 
 class UserRoleSpecs extends DefaultIntSpec {
 
-    static String projAdminRole = "ROLE_PROJECT_ADMIN"
+    static String projAdminRole = RoleName.ROLE_PROJECT_ADMIN.toString()
 
     def "get user roles for a project" () {
         String user = "UserRoleSpecsUser1"
@@ -32,32 +33,57 @@ class UserRoleSpecs extends DefaultIntSpec {
         def proj = SkillsFactory.createProject(1)
         user1Seervice.createProject(proj)
         when:
-        def res = user1Seervice.getUserRolesForProject(proj.projectId)
-        user1Seervice.addUserRole(user2, proj.projectId, projAdminRole)
-        def res2 = user1Seervice.getUserRolesForProject(proj.projectId).sort { it.userId }
+        def res = user1Seervice.getUserRolesForProject(proj.projectId, [RoleName.ROLE_PROJECT_ADMIN, RoleName.ROLE_PROJECT_APPROVER])
+        user1Seervice.addUserRole(user2, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        def res2 = user1Seervice.getUserRolesForProject(proj.projectId, [RoleName.ROLE_PROJECT_ADMIN, RoleName.ROLE_PROJECT_APPROVER])
         then:
-        res.size() == 1
-        res.get(0).userId.contains(user.toLowerCase())
-        res.get(0).userIdForDisplay.contains(user)
-        res.get(0).firstName == "John"
-        res.get(0).lastName == "Smith"
-        res.get(0).projectId == proj.projectId
-        res.get(0).roleName == projAdminRole
+        res.count == 1
+        res.data.size() == 1
+        res.data.get(0).userId.contains(user.toLowerCase())
+        res.data.get(0).userIdForDisplay.contains(user)
+        res.data.get(0).firstName == "John"
+        res.data.get(0).lastName == "Smith"
+        res.data.get(0).projectId == proj.projectId
+        res.data.get(0).roleName == projAdminRole
 
-        res2.size() == 2
-        res2.get(0).userId.contains(user.toLowerCase())
-        res2.get(0).userIdForDisplay.equalsIgnoreCase("$user for display")
-        res2.get(0).firstName == "John"
-        res2.get(0).lastName == "Smith"
-        res2.get(0).projectId == proj.projectId
-        res2.get(0).roleName == projAdminRole
+        res2.count == 2
+        res2.data.size() == 2
+        res2.data.get(0).userId.contains(user.toLowerCase())
+        res2.data.get(0).userIdForDisplay.equalsIgnoreCase("$user for display")
+        res2.data.get(0).firstName == "John"
+        res2.data.get(0).lastName == "Smith"
+        res2.data.get(0).projectId == proj.projectId
+        res2.data.get(0).roleName == projAdminRole
 
-        res2.get(1).userId == user2.toLowerCase()
-        res2.get(1).userIdForDisplay.equalsIgnoreCase("$user2 for display")
-        res2.get(1).firstName == "Bob"
-        res2.get(1).lastName == "Cool"
-        res2.get(1).projectId == proj.projectId
-        res2.get(1).roleName == projAdminRole
+        res2.data.get(1).userId == user2.toLowerCase()
+        res2.data.get(1).userIdForDisplay.equalsIgnoreCase("$user2 for display")
+        res2.data.get(1).firstName == "Bob"
+        res2.data.get(1).lastName == "Cool"
+        res2.data.get(1).projectId == proj.projectId
+        res2.data.get(1).roleName == RoleName.ROLE_PROJECT_APPROVER.toString()
+    }
+
+    def "project admin and approver roles are mutually exclusive" () {
+        String user = "UserRoleSpecsUser1".toLowerCase()
+        String user2 = "UserRoleSpecsUser2".toLowerCase()
+        SkillsService user1Seervice = createService(user, "passefeafeaef", "John", "Smith")
+        createService(user2, "passefeafeaef", "Bob", "Cool")
+
+        def proj = SkillsFactory.createProject(1)
+        user1Seervice.createProject(proj)
+        user1Seervice.addUserRole(user2, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        when:
+        def res_t0 = user1Seervice.getUserRolesForProject(proj.projectId, [RoleName.ROLE_PROJECT_ADMIN, RoleName.ROLE_PROJECT_APPROVER])
+        user1Seervice.addUserRole(user2, proj.projectId, RoleName.ROLE_PROJECT_ADMIN.toString())
+        def res_t1 = user1Seervice.getUserRolesForProject(proj.projectId, [RoleName.ROLE_PROJECT_ADMIN, RoleName.ROLE_PROJECT_APPROVER])
+        then:
+        res_t0.count == 2
+        res_t0.data.size() == 2
+        res_t0.data.find { it.userId == user2 }.roleName == RoleName.ROLE_PROJECT_APPROVER.toString()
+
+        res_t1.count == 2
+        res_t1.data.size() == 2
+        res_t1.data.find { it.userId == user2 }.roleName == RoleName.ROLE_PROJECT_ADMIN.toString()
     }
 
     def "get user roles for a project and user" () {

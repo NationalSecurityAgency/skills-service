@@ -21,6 +21,7 @@ import groovy.util.logging.Slf4j
 import org.apache.commons.codec.net.URLCodec
 import org.springframework.core.io.Resource
 import skills.services.settings.Settings
+import skills.storage.model.auth.RoleName
 
 @Slf4j
 class SkillsService {
@@ -277,8 +278,9 @@ class SkillsService {
         wsHelper.adminDelete("/projects/${projectId}/users/${userId}/roles/${role}")
     }
 
-    def getUserRolesForProject(String projectId) {
-        wsHelper.adminGet("/projects/${projectId}/userRoles")
+    def getUserRolesForProject(String projectId, List<RoleName> roles, int limit=10, int page=1, String orderBy="userId", boolean ascending=true) {
+        String rolesStr = roles.collect { "roles=${it.toString()}" }.join("&")
+        wsHelper.adminGet("/projects/${projectId}/userRoles?${rolesStr}&limit=${limit}&page=${page}&orderBy=${orderBy}&ascending=${ascending}")
     }
 
     def getUserRolesForProjectAndUser(String projectId, String userId) {

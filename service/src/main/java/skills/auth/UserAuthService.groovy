@@ -40,6 +40,7 @@ import skills.storage.model.auth.User
 import skills.storage.model.auth.UserRole
 import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserRepo
+import skills.storage.repos.UserRoleRepo
 
 import javax.servlet.http.HttpServletRequest
 
@@ -51,6 +52,9 @@ class UserAuthService {
 
     @Autowired
     UserRepo userRepository
+
+    @Autowired
+    UserRoleRepo userRoleRepo
 
     @Autowired
     UserAttrsRepo userAttrsRepo
@@ -76,7 +80,8 @@ class UserAuthService {
 
     @Transactional(readOnly = true)
     Collection<GrantedAuthority> loadAuthorities(String userId) {
-        return convertRoles(userRepository.findByUserId(userId?.toLowerCase())?.roles)
+        List<UserRole> userRoles = userRoleRepo.findAllByUserId(userId?.toLowerCase())
+        return convertRoles(userRoles)
     }
 
     @Transactional(readOnly = true)
@@ -95,6 +100,7 @@ class UserAuthService {
     }
 
     private UserInfo createUserInfo(User user, UserAttrs userAttrs) {
+        List<UserRole> userRoles = userRoleRepo.findAllByUserId(user.userId.toLowerCase())
         return new UserInfo (
                 username: user.userId,
                 password: user.password,
@@ -104,7 +110,7 @@ class UserAuthService {
                 emailVerified: Boolean.valueOf(userAttrs.emailVerified),
                 userDn: userAttrs.dn,
                 nickname: userAttrs.nickname,
-                authorities: convertRoles(user.roles),
+                authorities: convertRoles(userRoles),
                 usernameForDisplay: userAttrs.userIdForDisplay,
         )
     }
@@ -119,13 +125,6 @@ class UserAuthService {
     @Profile
     UserInfo createOrUpdateUser(UserInfo userInfo) {
         AccessSettingsStorageService.UserAndUserAttrsHolder userAndUserAttrs = accessSettingsStorageService.createAppUser(userInfo, true)
-        return createUserInfo(userAndUserAttrs.user, userAndUserAttrs.userAttrs)
-    }
-
-    @Transactional
-    @Profile
-    UserInfo getOrCreate(UserInfo userInfo) {
-        AccessSettingsStorageService.UserAndUserAttrsHolder userAndUserAttrs = accessSettingsStorageService.getOrCreate(userInfo)
         return createUserInfo(userAndUserAttrs.user, userAndUserAttrs.userAttrs)
     }
 
