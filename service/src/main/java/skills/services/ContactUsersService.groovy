@@ -22,6 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.auth.UserInfo
+import skills.auth.UserInfoService
 import skills.controller.request.model.ContactUsersRequest
 import skills.controller.request.model.QueryUsersCriteriaRequest
 import skills.notify.EmailNotifier
@@ -29,6 +31,7 @@ import skills.notify.Notifier
 import skills.storage.model.Notification
 import skills.storage.model.QueryUsersCriteria
 import skills.storage.model.SubjectLevelCriteria
+import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.nativeSql.NativeQueriesRepo
 import skills.utils.Props
@@ -54,6 +57,12 @@ class ContactUsersService {
 
     @Value('#{"${skills.config.notifications.maxRecipients:50}"}')
     int batchSize
+
+    @Autowired
+    UserInfoService userInfoService
+
+    @Autowired
+    UserAttrsService userAttrsService
 
     @Transactional(readOnly = true)
     Long countAllProjectAdminsWithEmail() {
@@ -129,6 +138,10 @@ class ContactUsersService {
 
     @Transactional
     void contactUsers(ContactUsersRequest contactUsersRequest) {
+        UserInfo currentUser = userInfoService.getCurrentUser()
+        String sender = currentUser.getEmail()
+        List<String> otherAdminEmails = getProjectAdminEmails(contactUsersRequest.queryCriteria.projectId)
+        otherAdminEmails?.remove(sender)
 
         retrieveMatchingUserIds(contactUsersRequest.queryCriteria).withCloseable { Stream<String> userIds ->
             def markdown = parser.parse(contactUsersRequest.emailBody)
@@ -143,6 +156,8 @@ class ContactUsersService {
                                 htmlBody    : parsedBody,
                                 emailSubject: contactUsersRequest.emailSubject,
                                 rawBody     : contactUsersRequest.emailBody,
+                                replyTo     : sender,
+                                cc          : otherAdminEmails
                         ]
                 )
                 emailNotifier.sendNotification(request)
@@ -166,6 +181,20 @@ class ContactUsersService {
 
     private Stream<String> getAllProjectAdminsWithEmail() {
         return accessSettingsStorageService.getUsersIdsWithRoleAndEmail(RoleName.ROLE_PROJECT_ADMIN)
+    }
+
+    private List<String> getProjectAdminEmails(String projectId) {
+        List<String> adminEmails = []
+        List<String> projectAdminUserIds = accessSettingsStorageService.getProjectAdminIds(projectId)
+        projectAdminUserIds?.each {
+            UserAttrs attrs = userAttrsService.findByUserId(it)
+            String email = attrs.getEmail()
+            if (email) {
+                adminEmails.add(email)
+            }
+        }
+
+        return adminEmails
     }
 
     private QueryUsersCriteria convert(QueryUsersCriteriaRequest request) {

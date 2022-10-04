@@ -19,6 +19,7 @@ import com.icegreen.greenmail.util.GreenMail
 import com.icegreen.greenmail.util.GreenMailUtil
 
 import javax.mail.BodyPart
+import javax.mail.Message
 import javax.mail.internet.MimeMessage
 import javax.mail.internet.MimeMultipart
 
@@ -32,6 +33,8 @@ class EmailUtils {
         String plainText
 
         List<String> fromEmail
+
+        List<String> ccRecipients
     }
 
     static List<EmailRes> getEmails(GreenMail greenMail) {
@@ -71,6 +74,7 @@ class EmailUtils {
         }
 
         emailRes.fromEmail = msg.getReplyTo().collect { it.toString() }
+        emailRes.ccRecipients = msg.getRecipients(Message.RecipientType.CC)?.collect { it.toString() }
         return emailRes
     }
 

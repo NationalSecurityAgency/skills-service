@@ -30,6 +30,7 @@ interface NotificationEmailBuilder {
          * as opposed to sending one email per recipient
          */
         boolean singleEmailToAllRecipients
+        List<String> ccRecipients
     }
 
     String getId()

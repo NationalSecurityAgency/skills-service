@@ -42,11 +42,11 @@ class EmailSendingService {
     @Autowired
     SystemSettingsService systemSettingsService
 
-    void sendEmail(String subject, String to, String htmlBody, String plainTextBody = null, Date sentDate = null, JavaMailSender mailSender = null, String fromEmail = null) {
-        sendEmail(subject, [to], htmlBody, plainTextBody, sentDate, mailSender, fromEmail)
+    void sendEmail(String subject, String to, String htmlBody, String plainTextBody = null, Date sentDate = null, JavaMailSender mailSender = null, String fromEmail = null, List<String> ccRecipients) {
+        sendEmail(subject, [to], htmlBody, plainTextBody, sentDate, mailSender, fromEmail, ccRecipients)
     }
 
-    void sendEmail(String subject, List<String> to, String htmlBody, String plainTextBody = null, Date sentDate = null, JavaMailSender sender = null, String sendFrom = null) {
+    void sendEmail(String subject, List<String> to, String htmlBody, String plainTextBody = null, Date sentDate = null, JavaMailSender sender = null, String sendFrom = null, List<String> ccRecipients) {
 
         if (!sendFrom) {
             sendFrom = systemSettingsService.get()?.fromEmail
@@ -72,6 +72,9 @@ class EmailSendingService {
         helper.setTo(toArr)
         helper.setFrom(fromEmail)
         helper.setReplyTo(fromEmail)
+        ccRecipients?.each {
+           helper.addCc(it)
+        }
         if (sentDate) {
             helper.setSentDate(sentDate)
         }
