@@ -1033,6 +1033,7 @@ class SkillsLoader {
             } else if (skillDef.type == SkillDef.ContainerType.Skill) {
                 boolean isReusedSkill = SkillReuseIdUtil.isTagged(skillDef.skillId)
                 String unsanitizedName = InputSanitizer.unsanitizeName(skillDef.name)
+
                 skillsRes << new SkillSummary(
                         projectId: skillDef.projectId,
                         projectName: InputSanitizer.unsanitizeName(projDef.name),
@@ -1045,7 +1046,7 @@ class SkillsLoader {
                         maxOccurrencesWithinIncrementInterval: skillDef.numMaxOccurrencesIncrementInterval,
                         totalPoints: skillDef.totalPoints,
                         dependencyInfo: skillDefAndUserPoints.dependencyInfo,
-                        selfReporting: loadSelfReporting(userId, skillDef),
+                        selfReporting: skillDef.selfReportingType ? loadSelfReporting(userId, skillDef) : null,
                         subjectName: subjectName,
                         subjectId: subjectId,
                         type: skillDef.type,
