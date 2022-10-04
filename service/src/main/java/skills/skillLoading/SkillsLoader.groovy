@@ -841,7 +841,7 @@ class SkillsLoader {
 
         if (loadSkills) {
             SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef?.projectId, badgeDefinition, version, [SkillRelDef.RelationshipType.BadgeRequirement])
-            skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints, true)?.sort({ it.skill?.toLowerCase() })
+            skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints, true, userId)?.sort({ it.skill?.toLowerCase() })
         }
 
         String projectName = "";
@@ -885,7 +885,7 @@ class SkillsLoader {
 
         if (loadSkills) {
             SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, null, badgeDefinition, version, [SkillRelDef.RelationshipType.BadgeRequirement])
-            skillsRes = createSkillSummaries(null, groupChildrenMeta.childrenWithPoints)?.sort({ it.skill?.toLowerCase() })
+            skillsRes = createSkillSummaries(null, groupChildrenMeta.childrenWithPoints, userId)?.sort({ it.skill?.toLowerCase() })
             if (skillsRes) {
                 // all the skills are "cross-project" if they don't belong to the project that originated this reqest
                 skillsRes.each {
@@ -971,8 +971,8 @@ class SkillsLoader {
     }
 
     @Profile
-    private List<SkillSummaryParent> createSkillSummaries(ProjDef thisProjDef, List<SubjectDataLoader.SkillsAndPoints> childrenWithPoints, boolean populateSubjectInfo=false) {
-        return createSkillSummaries(thisProjDef, childrenWithPoints, populateSubjectInfo, null, null)
+    private List<SkillSummaryParent> createSkillSummaries(ProjDef thisProjDef, List<SubjectDataLoader.SkillsAndPoints> childrenWithPoints, boolean populateSubjectInfo=false, String userId) {
+        return createSkillSummaries(thisProjDef, childrenWithPoints, populateSubjectInfo, userId, null)
     }
 
     @Profile
