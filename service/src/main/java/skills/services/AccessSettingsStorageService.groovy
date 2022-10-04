@@ -86,6 +86,12 @@ class AccessSettingsStorageService {
     String defaultLandingPage
 
     @Transactional(readOnly = true)
+    List<UserRoleRes> getUserRolesByProjectIdAndRoles(String projectId, List<RoleName> roles) {
+        List<UserRoleRepo.UserRoleWithAttrs> res = userRoleRepository.findRoleWithAttrsByProjectIdAndUserRoles(projectId, roles, PageRequest.ofSize(Integer.MAX_VALUE))
+        return res.collect { convert(it) }
+    }
+
+    @Transactional(readOnly = true)
     TableResult getUserRolesForProjectId(String projectId, List<RoleName> roles, PageRequest pageRequest) {
         TableResult tableResult = new TableResult()
         tableResult.totalCount = userRoleRepository.countUserRolesByProjectIdAndUserRoles(projectId, roles)
