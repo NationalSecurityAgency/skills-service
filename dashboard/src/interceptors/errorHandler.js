@@ -36,6 +36,10 @@ const handlePush = (page) => {
 };
 
 function errorResponseHandler(error) {
+  if (axios.isCancel(error)) {
+    return Promise.resolve({ data: {} });
+  }
+
   // check if the caller wants to handle all errors
   if (Object.prototype.hasOwnProperty.call(error.config, 'handleError') && error.config.handleError === false) {
     return Promise.reject(error);
@@ -59,9 +63,9 @@ function errorResponseHandler(error) {
     }
   }
 
+  const path = window.location.pathname;
   if (errorCode === 401) {
     store.commit('clearAuthData');
-    const path = window.location.pathname;
     if (path !== '/skills-login') {
       let loginRoute = path !== '/' ? { name: 'Login', query: { redirect: path } } : { name: 'Login' };
       if (store.getters.isPkiAuthenticated) {
@@ -71,10 +75,21 @@ function errorResponseHandler(error) {
     }
   } else if (errorCode === 403) {
     let explanation;
+    let ec;
+    let projectId;
     if (error.response && error.response.data && error.response.data.explanation) {
-      ({ explanation } = error.response.data);
+      ({ explanation, errorCode: ec, projectId } = error.response.data);
     }
-    handlePush({ name: 'NotAuthorizedPage', params: { explanation } });
+    if (explanation && ec === 'private_project') {
+      // abort any in-flight requests
+      // eslint-disable-next-line no-undef
+      cancellationController.abort();
+      // eslint-disable-next-line no-undef
+      cancellationController = new AbortController(); // abort controller is consumed after use, need to re-create
+      handlePush({ name: 'PrivateProjectAccessRequestPage', params: { explanation, projectId } });
+    } else {
+      handlePush({ name: 'NotAuthorizedPage', params: { explanation } });
+    }
   } else if (errorCode === 404) {
     let explanation;
     if (error.response && error.response.data && error.response.data.explanation) {

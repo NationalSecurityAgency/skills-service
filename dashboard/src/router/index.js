@@ -23,6 +23,7 @@ import ProjectPage from '@/components/projects/ProjectPage';
 import ErrorPage from '@/components/utils/ErrorPage';
 import DbUpgradeInProgressPage from '@/components/utils/DbUpgradeInProgressPage';
 import NotAuthorizedPage from '@/components/utils/NotAuthorizedPage';
+import PrivateProjectAccessRequestPage from '@/components/utils/PrivateProjectAccessRequestPage';
 import NotFoundPage from '@/components/utils/NotFoundPage';
 import SubjectPage from '@/components/subjects/SubjectPage';
 import BadgePage from '@/components/badges/BadgePage';
@@ -298,6 +299,18 @@ const router = new Router({
         requiresAuth: false,
         announcer: {
           message: 'Not Authorized',
+        },
+      },
+    },
+    {
+      path: '/request-access',
+      name: 'PrivateProjectAccessRequestPage',
+      component: PrivateProjectAccessRequestPage,
+      props: true,
+      meta: {
+        requiresAuth: true,
+        announcer: {
+          message: 'Request Access to Private Project',
         },
       },
     },
