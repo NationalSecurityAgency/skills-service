@@ -23,10 +23,8 @@ import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.client.RestClientException
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
-import skills.controller.request.model.ContactUsersRequest
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.result.model.RequestResult
 import skills.controller.result.model.TableResult

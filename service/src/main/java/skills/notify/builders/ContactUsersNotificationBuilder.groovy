@@ -45,7 +45,9 @@ class ContactUsersNotificationBuilder  implements NotificationEmailBuilder {
             return new Res(
                     subject: parsed.emailSubject,
                     html: htmlBody,
-                    plainText: plainText
+                    plainText: plainText,
+                    replyToEmail: parsed.replyTo,
+                    ccRecipients: parsed.cc
             )
         } catch(Exception e) {
             e.printStackTrace()
