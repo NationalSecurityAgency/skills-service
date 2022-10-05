@@ -154,6 +154,7 @@ class SkillsMoveService {
             // make display order very high so the skills are added at the end of the display order
             // please note that display order will be reset at the end
             skillToMove.displayOrder = skillToMove.displayOrder + 10000 // no way someone has 10k skills
+            skillToMove.groupId = isGroupDest ? skillReuseRequest.groupId : null
             skillDefRepo.save(skillToMove)
 
             SkillDef parentSkill = ruleSetDefGraphService.getParentSkill(skillToMove.id)
