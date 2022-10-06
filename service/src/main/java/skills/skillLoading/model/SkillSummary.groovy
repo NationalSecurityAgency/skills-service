@@ -15,6 +15,9 @@
  */
 package skills.skillLoading.model
 
+import skills.storage.model.SimpleBadgeRes
+import skills.storage.model.SkillDef
+
 class SkillSummary extends SkillSummaryParent {
 
     int pointIncrement
@@ -37,4 +40,7 @@ class SkillSummary extends SkillSummaryParent {
     int totalSkills
     int orderInGroup
     Boolean isLastViewed
+
+    List<SimpleBadgeRes> badges
+    List<SkillBadgeSummary> badgeSummaries
 }

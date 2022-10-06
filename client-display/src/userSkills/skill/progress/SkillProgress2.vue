@@ -74,6 +74,11 @@ limitations under the License.
                        class="ml-2 overflow-hidden">
                 <i class="fas fa-eye"></i> Last Viewed
               </b-badge>
+
+              <b-badge v-for="badge in skill.badges" id="hasBadgesIndicator" data-cy="hasBadgesIndicator" variant="info" style="font-size: 0.9rem"
+                       class="ml-2 overflow-hidden" v-bind:key="badge.badgeId">
+                <i class="fa fa-award"></i> {{ badge.name }}
+              </b-badge>
             </div>
           </div>
         </div>

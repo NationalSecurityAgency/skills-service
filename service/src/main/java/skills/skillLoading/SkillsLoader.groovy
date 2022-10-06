@@ -486,6 +486,12 @@ class SkillsLoader {
         ProjDef projDef = getProjDef(userId, crossProjectId ?: projectId)
         SkillDefWithExtra skillDef = getSkillDefWithExtra(userId, crossProjectId ?: projectId, skillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
 
+        def badges = skillDefRepo.findAllBadgesForSkill([skillId], crossProjectId ?: projectId);
+        def badgeIds = badges.collect{ it.badgeId }
+        List<SkillBadgeSummary> badgeSummaries = loadBadgeSummaries(crossProjectId ?: projectId, userId, -1)
+        List<SkillGlobalBadgeSummary> globalBadgeSummaries = loadGlobalBadgeSummaries(crossProjectId ?: projectId, userId, -1)
+        def relevantBadges = badgeSummaries.findAll{ badgeIds.contains(it.badgeId)}
+
         String nextSkillId;
         String prevSkillId;
         int totalSkills = 0;
@@ -563,6 +569,7 @@ class SkillsLoader {
                 type: skillDef.type,
                 copiedFromProjectId: isReusedSkill ? null : skillDef.copiedFromProjectId,
                 copiedFromProjectName: isReusedSkill ? null : InputSanitizer.unsanitizeName(copiedFromProjectName),
+                badgeSummaries: relevantBadges,
         )
     }
 
@@ -979,6 +986,12 @@ class SkillsLoader {
     private List<SkillSummaryParent> createSkillSummaries(ProjDef thisProjDef, List<SubjectDataLoader.SkillsAndPoints> childrenWithPoints, boolean populateSubjectInfo, String userId, Integer version) {
         List<SkillSummaryParent> skillsRes = []
 
+        List<SimpleBadgeRes> badges = []
+        if(thisProjDef?.projectId) {
+            List<String> skillIds = childrenWithPoints.collect{ it -> it.skillDef.skillId }
+            badges = skillDefRepo.findAllBadgesForSkill(skillIds, thisProjDef?.projectId);
+        }
+
         Map<String,ProjDef> projDefMap = [:]
         childrenWithPoints.each { SubjectDataLoader.SkillsAndPoints skillDefAndUserPoints ->
             SkillDef skillDef = skillDefAndUserPoints.skillDef
@@ -1032,6 +1045,7 @@ class SkillsLoader {
                 skillsRes << skillsSummary
             } else if (skillDef.type == SkillDef.ContainerType.Skill) {
                 boolean isReusedSkill = SkillReuseIdUtil.isTagged(skillDef.skillId)
+
                 String unsanitizedName = InputSanitizer.unsanitizeName(skillDef.name)
                 skillsRes << new SkillSummary(
                         projectId: skillDef.projectId,
@@ -1051,7 +1065,8 @@ class SkillsLoader {
                         type: skillDef.type,
                         copiedFromProjectId: !isReusedSkill ? skillDef.copiedFromProjectId : null,
                         copiedFromProjectName: !isReusedSkill ? InputSanitizer.unsanitizeName(skillDefAndUserPoints.copiedFromProjectName) : null,
-                        isLastViewed: skillDefAndUserPoints.isLastViewed
+                        isLastViewed: skillDefAndUserPoints.isLastViewed,
+                        badges: badges.findAll{ it.skillId == skillDef.skillId },
                 )
             }
         }
