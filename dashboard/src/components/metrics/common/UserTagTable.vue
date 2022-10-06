@@ -34,7 +34,7 @@ limitations under the License.
       </div>
       <skills-b-table :options="table.options"
                       :items="table.items"
-                      tableId="userTagsTable"
+                      tableStoredStateId="userTagsTable"
                       @page-changed="pageChanged"
                       @sort-changed="sortTable"
                       data-cy="userTagsTable">

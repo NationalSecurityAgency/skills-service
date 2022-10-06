@@ -16,7 +16,7 @@ limitations under the License.
 <template>
   <div id="simple-levels-table" v-if="this.levels && this.levels">
 
-    <skills-b-table :options="table.options" :items="levels" tableId="simpleLevelsTable" data-cy="simpleLevelsTable">
+    <skills-b-table :options="table.options" :items="levels" tableStoredStateId="simpleLevelsTable" data-cy="simpleLevelsTable">
       <template #cell(edit)="data">
         <b-button-group size="sm" class="ml-1">
           <b-button @click="onEditLevel(data.item)"

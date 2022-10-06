@@ -50,14 +50,12 @@ describe('Test persistence of table sorting', () => {
         cy.get('[data-cy="skillsTable"]').contains('Skill').click();
         cy.validateTable('[data-cy="skillsTable"]', expected, 10);
 
-        cy.visit('/administrator/projects/proj1/subjects/');
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         cy.validateTable('[data-cy="skillsTable"]', expected, 10);
         cy.get('[data-cy="skillsTable"]').contains('Skill').click();
         cy.validateTable('[data-cy="skillsTable"]', expected.map((item) => item).reverse(), 10);
 
-        cy.visit('/administrator/projects/proj1/subjects/');
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.validateTable('[data-cy="skillsTable"]', expected.map((item) => item).reverse(), 10);
     });

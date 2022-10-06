@@ -176,7 +176,7 @@ limitations under the License.
         show: this.value,
         isLoading: false,
         searchValue: '',
-        tableId: 'PinProjects-table',
+        tableStoredStateId: 'PinProjects-table',
         result: {
           values: [],
           paging: {

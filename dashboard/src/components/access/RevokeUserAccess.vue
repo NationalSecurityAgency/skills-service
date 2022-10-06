@@ -37,7 +37,7 @@ limitations under the License.
                       @page-changed="pageChanged"
                       @page-size-changed="pageSizeChanged"
                       @sort-changed="sortTable"
-                      tableId="privateProjectUsersTable"
+                      tableStoredStateId="privateProjectUsersTable"
                       data-cy="privateProjectUsersTable">
         <template v-slot:cell(userId)="data">
           {{ getUserDisplay(data.item) }}

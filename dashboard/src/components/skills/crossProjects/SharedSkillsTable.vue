@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <div id="shared-skills-table" v-if="sharedSkills && sharedSkills.length" data-cy="sharedSkillsTableDiv">
-    <skills-b-table v-if="loaded" :options="table.options" :items="sharedSkills" data-cy="sharedSkillsTable" tableId="sharedSkillsTable">
+    <skills-b-table v-if="loaded" :options="table.options" :items="sharedSkills" data-cy="sharedSkillsTable" tableStoredStateId="sharedSkillsTable">
       <template v-slot:cell(skillName)="data">
         <div>{{ data.value }}</div>
         <div class="text-secondary" style="font-size: 0.9rem;">ID: {{ data.item.skillId }}</div>

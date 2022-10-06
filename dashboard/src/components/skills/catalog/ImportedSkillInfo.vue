@@ -19,7 +19,7 @@ limitations under the License.
     <div v-if="skill.importedProjectCount > 0">
       <skills-b-table :options="table.options"
                       :items="importedProjects"
-                      tableId="importedSkillsTable"
+                      tableStoredStateId="importedSkillsTable"
                       data-cy="importedSkillsTable">
         <template #head(importingProjectName)="data">
           <span class="text-primary"><i

@@ -37,7 +37,7 @@ limitations under the License.
 
       <skills-b-table :options="table.options"
                       :items="exportedSkills"
-                      tableId="exportedSkillsTable"
+                      tableStoredStateId="exportedSkillsTable"
                       data-cy="exportedSkillsTable"
                       @page-changed="pageChanged"
                       @page-size-changed="pageSizeChanged"

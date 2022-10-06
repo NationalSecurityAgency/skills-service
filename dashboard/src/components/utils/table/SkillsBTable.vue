@@ -102,7 +102,7 @@ limitations under the License.
 
   export default {
     name: 'SkillsBTable',
-    props: ['items', 'options', 'tableId'],
+    props: ['items', 'options', 'tableStoredStateId'],
     mixins: [PersistedSortMixin],
     beforeCreate() {
       this.uid = uid.toString();
