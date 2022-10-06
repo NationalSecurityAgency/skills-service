@@ -915,7 +915,7 @@ describe('Self Report Skills Management Tests', () => {
         cy.get('[data-cy="rejectBtn"]')
             .click();
         cy.get('[data-cy="rejectionTitle"]')
-            .contains('This will permanently reject user\'s request(s) to get points');
+            .contains('This will reject user\'s request(s) to get points');
         cy.get('[data-cy="rejectionInputMsg"]')
             .type('Rejection message!');
         cy.get('[data-cy="confirmRejectionBtn"]')
@@ -961,7 +961,7 @@ describe('Self Report Skills Management Tests', () => {
         cy.get('[data-cy="rejectBtn"]')
             .click();
         cy.get('[data-cy="rejectionTitle"]')
-            .contains('This will permanently reject user\'s request(s) to get points');
+            .contains('This will reject user\'s request(s) to get points');
 
         cy.get('[data-cy="rejectionInputMsgError"]')
             .contains('Rejection Message - paragraphs may not contain jabberwocky.')
