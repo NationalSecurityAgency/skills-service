@@ -41,6 +41,7 @@ limitations under the License.
               @copy-project="copyProject"
               @delete-project="deleteProject"
               @unpin-project="unpin"
+              :read-only-project="isReadOnlyProj"
               :is-delete-disabled="deleteProjectDisabled"
               :delete-disabled-text="deleteProjectToolTip"/>
           </div>
@@ -135,10 +136,11 @@ limitations under the License.
   import ProjectCardControls from '@/components/projects/ProjectCardControls';
   import ProjectCardFooter from '@/components/projects/ProjectCardFooter';
   import RemovalValidation from '@/components/utils/modal/RemovalValidation';
-  import EditProject from './EditProject';
-  import ProjectService from './ProjectService';
-  import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
-  import SettingsService from '../settings/SettingsService';
+  import EditProject from '@/components/projects/EditProject';
+  import ProjectService from '@/components/projects/ProjectService';
+  import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
+  import SettingsService from '@/components/settings/SettingsService';
+  import UserRolesUtil from '@/components/utils/UserRolesUtil';
 
   export default {
     name: 'MyProject',
@@ -188,6 +190,9 @@ limitations under the License.
         const gracePeriodInDays = this.$store.getters.config.expirationGracePeriod;
         const expires = dayjs(this.projectInternal.expirationTriggered).add(gracePeriodInDays, 'day').startOf('day');
         return expires.format('YYYY-MM-DD HH:mm');
+      },
+      isReadOnlyProj() {
+        return UserRolesUtil.isReadOnlyProjRole(this.projectInternal.userRole);
       },
     },
     methods: {

@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <div ref="mainFocus">
-    <sub-page-header ref="subPageHeader" title="Subjects" action="Subject" @add-action="openNewSubjectModal"
+    <sub-page-header ref="subPageHeader" title="Subjects" :action="isReadOnlyProj ? null : 'Subject'" @add-action="openNewSubjectModal"
                      :disabled="addSubjectDisabled" :disabled-msg="addSubjectsDisabledMsg"
                      :aria-label="'new subject'"/>
     <loading-container v-bind:is-loading="isLoading">
@@ -58,6 +58,7 @@ limitations under the License.
   import Sortable from 'sortablejs';
   import { createNamespacedHelpers } from 'vuex';
   import { SkillsReporter } from '@skilltree/skills-client-vue';
+  import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
   import Subject from './Subject';
   import EditSubject from './EditSubject';
   import LoadingContainer from '../utils/LoadingContainer';
@@ -71,6 +72,7 @@ limitations under the License.
 
   export default {
     name: 'Subjects',
+    mixins: [ProjConfigMixin],
     components: {
       JumpToSkill,
       NoContent2,

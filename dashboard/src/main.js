@@ -69,6 +69,7 @@ import 'matchmedia-polyfill/matchMedia.addListener';
 // import './filters/NumberFilter';
 import './filters/TruncateFilter';
 import './filters/DateFilter';
+import './filters/UserRoleFilter';
 // import './filters/TimeFromNowFilter';
 import './directives/SkillsOnMountDirective';
 import RegisterValidators from './validators/RegisterValidators';

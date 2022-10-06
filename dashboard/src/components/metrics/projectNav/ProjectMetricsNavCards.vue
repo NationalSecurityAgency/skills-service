@@ -25,7 +25,7 @@ limitations under the License.
 </template>
 
 <script>
-  import MetricNavCard from './MetricNavCard';
+  import MetricNavCard from '@/components/metrics/projectNav/MetricNavCard';
 
   export default {
     name: 'ProjectMetricsNavCards',

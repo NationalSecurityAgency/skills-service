@@ -63,17 +63,19 @@ limitations under the License.
   import { createNamespacedHelpers } from 'vuex';
   import { SkillsReporter } from '@skilltree/skills-client-vue';
 
-  import BadgesService from './BadgesService';
-  import Badge from './Badge';
-  import EditBadge from './EditBadge';
-  import LoadingContainer from '../utils/LoadingContainer';
-  import SubPageHeader from '../utils/pages/SubPageHeader';
-  import NoContent2 from '../utils/NoContent2';
+  import BadgesService from '@/components/badges/BadgesService';
+  import Badge from '@/components/badges/Badge';
+  import EditBadge from '@/components/badges/EditBadge';
+  import LoadingContainer from '@/components/utils/LoadingContainer';
+  import SubPageHeader from '@/components/utils/pages/SubPageHeader';
+  import NoContent2 from '@/components/utils/NoContent2';
+  import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
 
   const { mapActions } = createNamespacedHelpers('projects');
 
   export default {
     name: 'Badges',
+    mixins: [ProjConfigMixin],
     components: {
       NoContent2,
       SubPageHeader,

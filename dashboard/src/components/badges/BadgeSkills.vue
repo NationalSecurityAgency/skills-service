@@ -19,7 +19,7 @@ limitations under the License.
 
     <b-card body-class="p-0">
       <loading-container v-bind:is-loading="loading.availableSkills || loading.badgeSkills || loading.skillOp || loading.badgeInfo">
-        <skills-selector2 :options="availableSkills" class="mb-4 m-3"
+        <skills-selector2 v-if="!isReadOnlyProj" :options="availableSkills" class="mb-4 m-3"
                           v-on:added="skillAdded"
                           :onlySingleSelectedValue="true"></skills-selector2>
 
@@ -37,14 +37,15 @@ limitations under the License.
   import { createNamespacedHelpers } from 'vuex';
   import { SkillsReporter } from '@skilltree/skills-client-vue';
 
-  import SkillsService from '../skills/SkillsService';
-  import SkillsSelector2 from '../skills/SkillsSelector2';
-  import LoadingContainer from '../utils/LoadingContainer';
-  import SimpleSkillsTable from '../skills/SimpleSkillsTable';
-  import NoContent2 from '../utils/NoContent2';
-  import SubPageHeader from '../utils/pages/SubPageHeader';
-  import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
-  import BadgesService from './BadgesService';
+  import SkillsService from '@/components/skills/SkillsService';
+  import SkillsSelector2 from '@/components/skills/SkillsSelector2';
+  import LoadingContainer from '@/components/utils/LoadingContainer';
+  import SimpleSkillsTable from '@/components/skills/SimpleSkillsTable';
+  import NoContent2 from '@/components/utils/NoContent2';
+  import SubPageHeader from '@/components/utils/pages/SubPageHeader';
+  import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
+  import BadgesService from '@/components/badges/BadgesService';
+  import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
 
   const { mapActions } = createNamespacedHelpers('badges');
 
@@ -57,7 +58,7 @@ limitations under the License.
       LoadingContainer,
       SkillsSelector2,
     },
-    mixins: [MsgBoxMixin],
+    mixins: [MsgBoxMixin, ProjConfigMixin],
     data() {
       return {
         loading: {

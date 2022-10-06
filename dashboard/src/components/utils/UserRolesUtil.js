@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2020 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,33 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.controller.result.model
-
-class ProjectResult extends SimpleProjectResult{
-
-    int totalPoints
-
-    int numSubjects
-    int numSkills
-    int numSkillsDisabled
-    int numGroups
-    int numBadges
-
-    int displayOrder
-
-    boolean isFirst
-    boolean isLast
-
-    boolean pinned
-
-    int numErrors
-
-    boolean expiring
-    Date expirationTriggered
-
-    int numSkillsReused
-    int totalPointsReused
-
-    String description
-    String userRole
+export default class UserRolesUtil {
+  static isReadOnlyProjRole(role) {
+    return role === 'ROLE_PROJECT_APPROVER';
+  }
 }

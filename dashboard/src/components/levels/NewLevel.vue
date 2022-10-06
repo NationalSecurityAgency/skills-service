@@ -159,10 +159,6 @@ limitations under the License.
 
   export default {
     name: 'NewLevel',
-    // components: {
-    //   IconPicker,
-    //   'icon-manager': () => import(/* webpackChunkName: 'iconManager' */'../utils/iconPicker/IconManager'),
-    // },
     props: {
       levelAsPoints: Boolean,
       iconClass: String,

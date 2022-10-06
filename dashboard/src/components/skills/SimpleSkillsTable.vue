@@ -14,10 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div id="simple-skills-table" v-if="this.skills && this.skills.length">
+  <div id="simple-skills-table" v-if="this.skills && this.skills.length && this.projConfig">
     <skills-b-table :options="table.options" :items="skills" data-cy="simpleSkillsTable" tableStoredStateId="simpleSkillsTable">
       <template #cell(controls)="data">
-        <button v-on:click="onDeleteEvent(data.item)" class="btn btn-sm btn-outline-primary"
+        <button v-if="!isReadOnlyProj" v-on:click="onDeleteEvent(data.item)" class="btn btn-sm btn-outline-primary"
                 :data-cy="`deleteSkill_${data.item.skillId}`"
                 :aria-label="`remove dependency on ${data.item.skillId}`">
           <i class="text-warning fas fa-trash" aria-hidden="true"/>
@@ -26,7 +26,7 @@ limitations under the License.
                 params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
                      class="btn btn-sm btn-outline-hc ml-2"
                      :data-cy="`manage_${data.item.skillId}`">
-          Manage <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
+          {{ isReadOnlyProj ? 'View': 'Manage' }} <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
         </router-link>
       </template>
 
@@ -44,9 +44,11 @@ limitations under the License.
 <script>
   import ShowMore from '@/components/skills/selfReport/ShowMore';
   import SkillsBTable from '../utils/table/SkillsBTable';
+  import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
 
   export default {
     name: 'SimpleSkillsTable',
+    mixins: [ProjConfigMixin],
     components: { ShowMore, SkillsBTable },
     props: {
       skills: {
@@ -70,12 +72,15 @@ limitations under the License.
           label: 'Skill ID',
           sortable: true,
         },
-        {
+      ];
+
+      if (this.isReadOnlyProj) {
+        fields.push({
           key: 'controls',
           label: 'Delete',
           sortable: false,
-        },
-      ];
+        });
+      }
 
       if (this.showProject) {
         fields.splice(0, 0, {

@@ -33,7 +33,7 @@ limitations under the License.
                      message="Once a Skill has been reused, Dependencies may not be added."></no-content2>
 
         <div class="p-3" v-if="!skill.sharedToCatalog && !skill.thisSkillWasReusedElsewhere">
-          <skills-selector2 :options="allSkills" :selected="skills" v-on:added="skillAdded"
+          <skills-selector2 v-if="!isReadOnlyProj" :options="allSkills" :selected="skills" v-on:added="skillAdded"
                             v-on:removed="skillDeleted"
                             data-cy="depsSelector">
             <template #dropdown-item="{ option }">
@@ -104,17 +104,18 @@ limitations under the License.
 <script>
   import { SkillsReporter } from '@skilltree/skills-client-vue';
   import NoContent2 from '@/components/utils/NoContent2';
-  import SkillsService from '../SkillsService';
-  import DependantsGraph from './DependantsGraph';
-  import SkillsSelector2 from '../SkillsSelector2';
-  import SimpleSkillsTable from '../SimpleSkillsTable';
-  import SubPageHeader from '../../utils/pages/SubPageHeader';
-  import LoadingContainer from '../../utils/LoadingContainer';
-  import MsgBoxMixin from '../../utils/modal/MsgBoxMixin';
+  import SkillsService from '@/components/skills/SkillsService';
+  import DependantsGraph from '@/components/skills/dependencies/DependantsGraph';
+  import SkillsSelector2 from '@/components/skills/SkillsSelector2';
+  import SimpleSkillsTable from '@/components/skills/SimpleSkillsTable';
+  import SubPageHeader from '@/components/utils/pages/SubPageHeader';
+  import LoadingContainer from '@/components/utils/LoadingContainer';
+  import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
+  import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
 
   export default {
     name: 'SkillDependencies',
-    mixins: [MsgBoxMixin],
+    mixins: [MsgBoxMixin, ProjConfigMixin],
     components: {
       NoContent2,
       LoadingContainer,

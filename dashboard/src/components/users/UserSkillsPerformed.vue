@@ -84,18 +84,19 @@ limitations under the License.
   import StringHighlighter from '@/common-components/utilities/StringHighlighter';
   import dayjs from '@/common-components/DayJsCustomizer';
   import ShowMore from '@/components/skills/selfReport/ShowMore';
-  import SubPageHeader from '../utils/pages/SubPageHeader';
-  import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
-  import ToastSupport from '../utils/ToastSupport';
-  import UsersService from './UsersService';
-  import SkillsBTable from '../utils/table/SkillsBTable';
-  import DateCell from '../utils/table/DateCell';
+  import SubPageHeader from '@/components/utils/pages/SubPageHeader';
+  import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
+  import ToastSupport from '@/components/utils/ToastSupport';
+  import UsersService from '@/components/users/UsersService';
+  import SkillsBTable from '@/components/utils/table/SkillsBTable';
+  import DateCell from '@/components/utils/table/DateCell';
+  import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
 
   const { mapActions } = createNamespacedHelpers('users');
 
   export default {
     name: 'UserSkillsPerformed',
-    mixins: [MsgBoxMixin, ToastSupport],
+    mixins: [MsgBoxMixin, ToastSupport, ProjConfigMixin],
     components: {
       ShowMore,
       DateCell,
@@ -187,6 +188,15 @@ limitations under the License.
         this.loadData();
       },
       loadData() {
+        this.loadProjConfig()
+          .then(() => {
+            if (this.isReadOnlyProj) {
+              this.table.options.fields = this.table.options.fields.filter((f) => f.key !== 'control');
+            }
+            this.loadTableData();
+          });
+      },
+      loadTableData() {
         this.table.options.busy = true;
         const url = this.getUrl();
         UsersService.ajaxCall(url, {

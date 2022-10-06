@@ -22,9 +22,9 @@ limitations under the License.
 </template>
 
 <script>
-  import SubPageHeader from '@//components/utils/pages/SubPageHeader';
-  import LevelBreakdownMetric from '../common/LevelBreakdownMetric';
-  import NumUsersPerDay from '../common/NumUsersPerDay';
+  import SubPageHeader from '@/components/utils/pages/SubPageHeader';
+  import LevelBreakdownMetric from '@/components/metrics/common/LevelBreakdownMetric';
+  import NumUsersPerDay from '@/components/metrics/common/NumUsersPerDay';
 
   export default {
     name: 'MetricsOnSubjectPage',

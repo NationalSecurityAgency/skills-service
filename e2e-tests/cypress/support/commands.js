@@ -159,6 +159,7 @@ Cypress.Commands.add("register", (user, pass, grantRoot) => {
 });
 
 Cypress.Commands.add("login", (user, pass) => {
+    cy.log(`logging in as [${user}] with [${pass}]`);
     cy.request( {
         method: 'POST',
         url: '/performLogin',

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2020 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,33 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.controller.result.model
+import Vue from 'vue';
 
-class ProjectResult extends SimpleProjectResult{
+const userRoleFormatter = (value) => {
+  if (value === 'ROLE_PROJECT_APPROVER') {
+    return 'Approver';
+  }
+  if (value === 'ROLE_PROJECT_ADMIN') {
+    return 'Admin';
+  }
+  return value;
+};
+Vue.filter('userRole', userRoleFormatter);
 
-    int totalPoints
-
-    int numSubjects
-    int numSkills
-    int numSkillsDisabled
-    int numGroups
-    int numBadges
-
-    int displayOrder
-
-    boolean isFirst
-    boolean isLast
-
-    boolean pinned
-
-    int numErrors
-
-    boolean expiring
-    Date expirationTriggered
-
-    int numSkillsReused
-    int totalPointsReused
-
-    String description
-    String userRole
-}
+// this allows to call this function from an js code; to learn more about that read about javascript modules
+// import UserRoleFilter from 'src/UserRoleFilter.js'
+//    UserRoleFilter(myNumber)
+export default userRoleFormatter;

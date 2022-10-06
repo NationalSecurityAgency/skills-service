@@ -31,7 +31,7 @@ limitations under the License.
 
           <div class="row pl-3 mb-3">
             <div class="col-auto">
-              <b-button-group v-if="showSearch" class="pr-2 border-right mr-2 d-inline-block mt-2">
+              <b-button-group v-if="showSearch" class="d-inline-block mt-2">
                 <b-button variant="outline-primary" @click="applyFilters" data-cy="users-filterBtn"><i
                   class="fa fa-filter"/> Filter
                 </b-button>
@@ -40,7 +40,7 @@ limitations under the License.
                 </b-button>
               </b-button-group>
 
-              <b-button-group class="d-inline-block mt-2 text-right" :size="actionsBtnSize">
+              <b-button-group v-if="!isReadOnlyProj" class="d-inline-block mt-2 text-right border-left ml-2 pl-2" :size="actionsBtnSize">
                 <b-button :id="`selectAllBtn_${tableId}`" variant="outline-info" ref="selectAllBtn"
                           :size="actionsBtnSize"
                           @click="changeSelectionForAll(true)"
@@ -55,7 +55,7 @@ limitations under the License.
                 </b-button>
               </b-button-group>
             </div>
-            <div class="col text-right">
+            <div v-if="!isReadOnlyProj" class="col text-right">
               <b-dropdown :id="`tableActionsBtn_${tableId}`" :ref="`tableActionsBtn_${tableId}`"
                           right
                           variant="outline-info" class="mr-3 mt-2 skillActions"
@@ -120,7 +120,7 @@ limitations under the License.
               <div v-if="data.item.isSkillType">
                 <i class="fas fa-book mr-1 text-success"
                    v-if="data.item.isCatalogImportedSkills && !data.item.reusedSkill"/>
-                <b-form-checkbox v-if="!data.item.isCatalogImportedSkills"
+                <b-form-checkbox v-if="!data.item.isCatalogImportedSkills && !isReadOnlyProj"
                   :id="`${data.item.projectId}-${data.item.skillId}`"
                   v-model="data.item.selected"
                   :name="`checkbox_${data.item.projectId}_${data.item.skillId}`"
@@ -184,14 +184,14 @@ limitations under the License.
                                   params: { projectId: data.item.projectId, subjectId: subjectId, skillId: data.item.skillId }}"
                            :aria-label="`Manage skill ${data.item.name}`"
                            class="btn btn-outline-primary btn-sm">
-                <span v-if="data.item.isCatalogImportedSkills">
+                <span v-if="data.item.isCatalogImportedSkills || isReadOnlyProj">
                   <span class="d-none d-sm-inline">View </span> <i class="fas fa-eye" aria-hidden="true"/>
                 </span>
-                <span v-if="!data.item.isCatalogImportedSkills">
+                <span v-if="!data.item.isCatalogImportedSkills && !isReadOnlyProj">
                   <span class="d-none d-sm-inline">Manage </span> <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
                 </span>
               </router-link>
-              <b-button-group size="sm" class="ml-1">
+              <b-button-group v-if="!isReadOnlyProj" size="sm" class="ml-1">
                 <b-button v-if="!data.item.reusedSkill" @click="editSkill(data.item)"
                           variant="outline-primary"
                           :data-cy="`editSkillButton_${data.item.skillId}`"
@@ -222,7 +222,7 @@ limitations under the License.
                   </b-button>
                 </span>
               </b-button-group>
-              <b-tooltip :target="`deleteSkillButton-wrapper_${data.item.skillId}`">{{ deleteButtonsTooltip }}</b-tooltip>
+              <b-tooltip v-if="!isReadOnlyProj" :target="`deleteSkillButton-wrapper_${data.item.skillId}`">{{ deleteButtonsTooltip }}</b-tooltip>
             </div>
           </div>
         </template>
@@ -266,7 +266,7 @@ limitations under the License.
             <div class="col">
               <span>{{data.value}}</span>
             </div>
-            <div class="col-auto">
+            <div v-if="!isReadOnlyProj" class="col-auto">
               <b-button-group size="sm" class="ml-1"
                               :id="`mvBtnGrp_${data.item.skillId}`">
                 <b-popover :target="`mvBtnGrp_${data.item.skillId}`" triggers="hover">
@@ -362,26 +362,27 @@ limitations under the License.
   import ReuseOrMoveSkillsModal from '@/components/skills/reuseSkills/ReuseOrMoveSkillsModal';
   import SettingsService from '@/components/settings/SettingsService';
   import SkillRemovalValidation from '@/components/skills/SkillRemovalValidation';
-  import EditSkill from './EditSkill';
-  import NoContent2 from '../utils/NoContent2';
-  import ChildRowSkillsDisplay from './ChildRowSkillsDisplay';
-  import SkillsService from './SkillsService';
-  import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
-  import ToastSupport from '../utils/ToastSupport';
-  import LoadingContainer from '../utils/LoadingContainer';
-  import SkillsBTable from '../utils/table/SkillsBTable';
-  import TimeWindowMixin from './TimeWindowMixin';
-  import ChildRowSkillGroupDisplay from './skillsGroup/ChildRowSkillGroupDisplay';
-  import EditSkillGroup from './skillsGroup/EditSkillGroup';
-  import ShowMore from './selfReport/ShowMore';
-  import TableStateUtil from '../utils/TableStateUtil';
+  import EditSkill from '@/components/skills/EditSkill';
+  import NoContent2 from '@/components/utils/NoContent2';
+  import ChildRowSkillsDisplay from '@/components/skills/ChildRowSkillsDisplay';
+  import SkillsService from '@/components/skills/SkillsService';
+  import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
+  import ToastSupport from '@/components/utils/ToastSupport';
+  import LoadingContainer from '@/components/utils/LoadingContainer';
+  import SkillsBTable from '@/components/utils/table/SkillsBTable';
+  import TimeWindowMixin from '@/components/skills/TimeWindowMixin';
+  import ChildRowSkillGroupDisplay from '@/components/skills/skillsGroup/ChildRowSkillGroupDisplay';
+  import EditSkillGroup from '@/components/skills/skillsGroup/EditSkillGroup';
+  import ShowMore from '@/components/skills/selfReport/ShowMore';
+  import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
+  import TableStateUtil from '@/components/utils/TableStateUtil';
 
   const subjects = createNamespacedHelpers('subjects');
   const subjectSkills = createNamespacedHelpers('subjectSkills');
 
   export default {
     name: 'SkillsTable',
-    mixins: [MsgBoxMixin, ToastSupport, TimeWindowMixin],
+    mixins: [MsgBoxMixin, ToastSupport, TimeWindowMixin, ProjConfigMixin],
     props: {
       projectId: String,
       subjectId: String,

@@ -82,7 +82,7 @@ limitations under the License.
           <slot name="footer"></slot>
         </div>
 
-      <div v-if="!disableSortControl"
+      <div v-if="!disableSortControl && !isReadOnlyProj"
            ref="sortControl"
            @mouseover="overSortControl = true"
            @mouseleave="overSortControl = false"
@@ -98,8 +98,11 @@ limitations under the License.
 </template>
 
 <script>
+  import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
+
   export default {
     name: 'NavCardWithStatsAndControls',
+    mixins: [ProjConfigMixin],
     props: {
       options: {
         icon: String,
