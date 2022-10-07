@@ -328,7 +328,6 @@ describe('Projects Admin Management Tests', () => {
         cy.wait('@loadProject');
         // verify that table loaded
         cy.get(`${tableSelector} [data-cy="controlsCell_root@skills.org"] [data-cy="editUserBtn"]`)
-        cy.get(`${tableSelector} thead th`).contains('Role').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'skills@' }, { colIndex: 1,  value: 'Administrator' }],
             [{ colIndex: 0,  value: 'root@' }, { colIndex: 1,  value: 'Approver' }],

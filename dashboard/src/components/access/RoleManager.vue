@@ -23,6 +23,7 @@ limitations under the License.
       <div  v-if="!isOnlyOneRole" class="col">
         <b-form-select v-model="userRole.selected"
                        :options="userRole.options"
+                       aria-label="Please select user's Role"
                        data-cy="userRoleSelector">
           <template #first>
             <b-form-select-option :value="null" disabled>-- Please select user's Role --</b-form-select-option>

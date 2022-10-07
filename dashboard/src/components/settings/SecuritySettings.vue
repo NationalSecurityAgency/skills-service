@@ -22,7 +22,7 @@ limitations under the License.
                     :roles="['ROLE_SUPER_DUPER_USER']"
                     @role-added="handleRootRoleChanged"
                     @role-deleted="handleRootRoleChanged"
-                    data-cy="rootrm" :role="root.role" :user-type="root.userType" :role-description="root.roleDescription" />
+                    data-cy="rootrm" :user-type="root.userType" :role-description="root.roleDescription" />
     </metrics-card>
 
     <metrics-card title="Supervisor Users Management" :no-padding="true" class="mt-3">
