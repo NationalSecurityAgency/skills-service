@@ -27,6 +27,7 @@ import skills.intTests.utils.SkillsFactory
 import skills.services.ContactUsersService
 import skills.services.UserAttrsService
 import skills.utils.WaitFor
+import spock.lang.IgnoreRest
 
 class ContactUsersServiceSpec extends DefaultIntSpec {
 
@@ -462,7 +463,7 @@ class ContactUsersServiceSpec extends DefaultIntSpec {
         when:
         skillsService.contactProjectUsers(proj.projectId, emailSubject, emailBody, false, [skill6.skillId])
 
-        assert WaitFor.wait { greenMail.getReceivedMessages().size() >= 2 }
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() >= 8 }
 
         def messages = EmailUtils.getEmails(greenMail)
 
