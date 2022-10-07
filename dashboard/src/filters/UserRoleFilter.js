@@ -22,6 +22,9 @@ const userRoleFormatter = (value) => {
   if (value === 'ROLE_PROJECT_ADMIN') {
     return 'Admin';
   }
+  if (value === 'ROLE_SUPER_DUPER_USER') {
+    return 'Root';
+  }
   return value;
 };
 Vue.filter('userRole', userRoleFormatter);

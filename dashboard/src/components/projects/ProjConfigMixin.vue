@@ -40,7 +40,7 @@ limitations under the License.
         return this.$store.getters.projConfig && this.$store.getters.projConfig['help.url.root'];
       },
       isReadOnlyProj() {
-        return this.$store.getters.projConfig && UserRolesUtil.isReadOnlyProjRole(this.$store.getters.projConfig.userRole);
+        return this.$store.getters.projConfig && UserRolesUtil.isReadOnlyProjRole(this.$store.getters.projConfig.user_project_role);
       },
     },
   };

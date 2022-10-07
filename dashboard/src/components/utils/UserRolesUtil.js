@@ -15,6 +15,6 @@
  */
 export default class UserRolesUtil {
   static isReadOnlyProjRole(role) {
-    return role === 'ROLE_PROJECT_APPROVER';
+    return role && role === 'ROLE_PROJECT_APPROVER';
   }
 }

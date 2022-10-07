@@ -141,7 +141,7 @@ describe('Projects Tests', () => {
             .as('loadUserInfo');
         cy.intercept('GET', '/admin/projects/proj1')
             .as('loadProject');
-        cy.intercept('GET', '/admin/projects/proj1/userRoles/*')
+        cy.intercept('GET', '/admin/projects/proj1/userRoles**')
             .as('loadUserRoles');
 
         cy.visit('/administrator/projects/proj1/access');
@@ -150,7 +150,7 @@ describe('Projects Tests', () => {
         cy.wait('@loadProject');
         cy.wait('@loadUserRoles');
 
-        cy.contains('Project Administrators')
+        cy.contains('Project Management Users')
             .should('exist');
         cy.get('[data-cy="trusted-client-props-panel"]')
             .should('exist');

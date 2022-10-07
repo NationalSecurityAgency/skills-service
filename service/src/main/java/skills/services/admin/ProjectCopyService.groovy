@@ -155,7 +155,8 @@ class ProjectCopyService {
             // copied projects should not be discoverable by default therefore should not carry this setting forward
             boolean discoverableProject = fromSetting.setting == Settings.PRODUCTION_MODE.settingName && fromSetting.value == Boolean.TRUE.toString()
             boolean isLevelsAsPtsSetting = fromSetting.setting == Settings.LEVEL_AS_POINTS.settingName && fromSetting.value == Boolean.TRUE.toString()
-            if (!discoverableProject && !isLevelsAsPtsSetting) {
+            boolean isProjectRoleSetting = fromSetting.setting == Settings.USER_PROJECT_ROLE.settingName;
+            if (!discoverableProject && !isLevelsAsPtsSetting && !isProjectRoleSetting) {
                 ProjectSettingsRequest projectSettingsRequest = new ProjectSettingsRequest(
                         projectId: toProj.projectId,
                         settingGroup: fromSetting.settingGroup,

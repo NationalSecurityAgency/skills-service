@@ -18,7 +18,7 @@ limitations under the License.
     <sub-page-header title="Dependencies"/>
 
     <b-card body-class="p-0" class="dependencies-container">
-      <loading-container :is-loading="!loading.finishedAllSkills || !loading.finishedDependents">
+      <loading-container :is-loading="!loading.finishedAllSkills || !loading.finishedDependents || isLoadingProjConfig">
 
         <no-content2 v-if="skill.sharedToCatalog"
                      class="mt-5 pt-5"
@@ -85,7 +85,7 @@ limitations under the License.
           <dependants-graph :skill="skill" :dependent-skills="skills" :graph="graph" class="my-3"/>
         </div>
 
-        <simple-skills-table :skills="skills" v-on:skill-removed="deleteSkill">
+        <simple-skills-table v-if="projConfig" :skills="skills" v-on:skill-removed="deleteSkill" :is-read-only="isReadOnlyProj">
             <span slot="name-cell" slot-scope="row">
               <i v-if="row.props.isFromAnotherProject" class="fas fa-w-16 fa-handshake text-primary mr-1"></i>
               <i v-else class="fas fa-w-16 fa-list-alt text-hc mr-1"></i>

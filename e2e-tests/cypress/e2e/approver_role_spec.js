@@ -236,4 +236,65 @@ describe('Approver Role Tests', () => {
         runCheck(1, 'not.')
     });
 
+    it('/subj/skill page - approver role has no mutation controls', function () {
+        const runCheck = (projNum, assertChainPrepend = null) => {
+            const chainerPrepend = assertChainPrepend ? assertChainPrepend : '';
+            cy.visit(`/administrator/projects/proj${projNum}/subjects/subj1/skills/skill1`);
+            cy.wait(`@getSettingsProj${projNum}`);
+
+            cy.get('[data-cy="editSkillButton_skill1"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="nav-Add Event"]').should(`${chainerPrepend}exist`)
+        }
+        runCheck(2)
+        runCheck(1, 'not.')
+    });
+
+    it('/subj/skill/dependencies page - approver role has no mutation controls', function () {
+        const runCheck = (projNum, manageButtonTxt = 'Manage', assertChainPrepend = null) => {
+            const chainerPrepend = assertChainPrepend ? assertChainPrepend : '';
+            cy.visit(`/administrator/projects/proj${projNum}/subjects/subj1/skills/skill3/dependencies`);
+            cy.wait(`@getSettingsProj${projNum}`);
+
+            cy.get('[data-cy="editSkillButton_skill3"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="nav-Add Event"]').should(`${chainerPrepend}exist`)
+
+            cy.get('[data-cy="depsSelector"]').should(`${chainerPrepend}exist`)
+
+            cy.get('[data-cy="deleteSkill_skill1"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="deleteSkill_skill2"]').should(`${chainerPrepend}exist`)
+
+            cy.get('[data-cy="manage_skill1"]').contains(manageButtonTxt)
+            cy.get('[data-cy="manage_skill2"]').contains(manageButtonTxt)
+
+        }
+        runCheck(2)
+        runCheck(1, 'View','not.')
+    });
+
+    it('/subj/skill/users page - approver role has no mutation controls', function () {
+        const runCheck = (projNum, assertChainPrepend = null) => {
+            const chainerPrepend = assertChainPrepend ? assertChainPrepend : '';
+            cy.visit(`/administrator/projects/proj${projNum}/subjects/subj1/skills/skill1/users`);
+            cy.wait(`@getSettingsProj${projNum}`);
+
+            cy.get('[data-cy="editSkillButton_skill1"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="nav-Add Event"]').should(`${chainerPrepend}exist`)
+        }
+        runCheck(2)
+        runCheck(1, 'not.')
+    });
+
+    it('/subj/skill/metrics page - approver role has no mutation controls', function () {
+        const runCheck = (projNum, assertChainPrepend = null) => {
+            const chainerPrepend = assertChainPrepend ? assertChainPrepend : '';
+            cy.visit(`/administrator/projects/proj${projNum}/subjects/subj1/skills/skill1/metrics`);
+            cy.wait(`@getSettingsProj${projNum}`);
+
+            cy.get('[data-cy="editSkillButton_skill1"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="nav-Add Event"]').should(`${chainerPrepend}exist`)
+        }
+        runCheck(2)
+        runCheck(1, 'not.')
+    });
+
 });

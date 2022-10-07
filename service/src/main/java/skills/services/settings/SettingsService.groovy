@@ -200,11 +200,13 @@ class SettingsService {
 
         UserInfo currentUser = userInfoService.getCurrentUser()
         List<String> usrRoles = currentUser.authorities.collect { it.authority.toUpperCase() }
-        if (usrRoles.contains(RoleName.ROLE_PROJECT_APPROVER.toString())) {
-            res.add(new SettingsResult(setting: "userRole", value: RoleName.ROLE_PROJECT_APPROVER.toString()))
-        } else {
-            res.add(new SettingsResult(setting: "userRole", value: RoleName.ROLE_PROJECT_ADMIN.toString()))
-        }
+        RoleName usersRole = usrRoles.contains(RoleName.ROLE_PROJECT_APPROVER.toString()) ? RoleName.ROLE_PROJECT_APPROVER  : RoleName.ROLE_PROJECT_ADMIN
+        res.add(new SettingsResult(
+                setting: Settings.USER_PROJECT_ROLE.settingName,
+                projectId: projectId,
+                value: usersRole.toString(),
+                userId: currentUser.username?.toLowerCase()
+        ))
         return res
     }
 

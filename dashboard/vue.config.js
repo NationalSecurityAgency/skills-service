@@ -126,7 +126,7 @@ module.exports = {
       '^/supervisor/': proxyConf,
       '^/public/': proxyConf,
       '^/metrics/' : proxyConf,
-      '^/skills-websocket$' : proxyConf,
+      '^/skills-websocket/' : proxyConf,
       '^/resetPassword$' : proxyConf,
       '^/performPasswordReset$' : proxyConf,
       '^/isFeatureSupported$' : proxyConf,

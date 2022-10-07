@@ -29,7 +29,8 @@ public enum Settings {
     USER_VIEWED_USER_AGREEMENT("viewed_user_agreement"),
     INVITE_ONLY_PROJECT("invite_only"),
     GROUP_DESCRIPTIONS("group-descriptions"),
-    SHOW_PROJECT_DESCRIPTION_EVERYWHERE("show_project_description_everywhere");
+    SHOW_PROJECT_DESCRIPTION_EVERYWHERE("show_project_description_everywhere"),
+    USER_PROJECT_ROLE("user_project_role");
 
     private String settingName;
 
