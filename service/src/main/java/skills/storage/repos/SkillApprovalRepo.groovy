@@ -200,7 +200,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
     @Query('''SELECT sd.selfReportingType as type, count(sd) as count from SkillDef sd where sd.projectId = ?1 and sd.type = 'Skill' group by sd.selfReportingType''')
     List<SkillReportingTypeAndCount> skillCountsGroupedByApprovalType(String projectId)
 
-
+    @Nullable
     @Query('''SELECT sum(case when sa.approverUserId is null and sa.approverActionTakenOn is null and sa.rejectedOn is null then 1 else 0 end) as pending,
                     sum(case when sa.approverUserId is not null and sa.approverActionTakenOn is not null and sa.rejectedOn is null then 1 else 0 end) as approved,
                     sum(case when sa.approverUserId is not null and sa.rejectedOn is not null then 1 else 0 end) as rejected
