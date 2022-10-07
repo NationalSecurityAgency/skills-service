@@ -14,53 +14,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-    <span class="markdown">
-        <span v-html="parseMarkdown(text)"/>
-    </span>
+  <viewer :initialValue="text" height="500px" />
 </template>
 
 <script>
-  import { marked } from 'marked';
-  import emoji from 'node-emoji';
-  import DOMPurify from 'dompurify';
+
+  import '@toast-ui/editor/dist/toastui-editor-viewer.css';
+  import { Viewer } from '@toast-ui/vue-editor';
 
   export default {
     name: 'MarkdownText',
     props: {
       text: String,
     },
-    methods: {
-      parseMarkdown(text) {
-        const compiled = marked(text);
-        const onMissing = (name) => name;
-        const emojified = emoji.emojify(compiled, onMissing);
-        const sanitized = DOMPurify.sanitize(emojified, { ADD_ATTR: ['target'] });
-        return sanitized;
-      },
+    components: {
+      viewer: Viewer,
     },
   };
 </script>
 
 <style>
-    .markdown blockquote {
-        padding: 10px 20px;
-        margin: 0 0 20px;
-        font-size: 1rem;
-        border-left: 5px solid #eeeeee;
-        color: #888;
-        line-height: 1.5;
-    }
-
-    .markdown pre {
-        border: 1px solid #dddddd !important;
-        margin: 1rem;
-        padding: 1rem;
-        overflow: auto;
-        font-size: 85%;
-        border-radius: 6px;
-        background-color: #f6f8fa;
-    }
-    .markdown a {
-      text-decoration: underline;
-    }
 </style>

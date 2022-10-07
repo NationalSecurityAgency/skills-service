@@ -122,11 +122,11 @@ limitations under the License.
   import SkillReuseIdUtil from '@/components/utils/SkillReuseIdUtil';
   import LinkToSkillPage from '@/components/utils/LinkToSkillPage';
   import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
+  import MarkdownText from '@/common-components/utilities/MarkdownText';
   import LoadingContainer from '../utils/LoadingContainer';
   import SkillsService from './SkillsService';
   import MediaInfoCard from '../utils/cards/MediaInfoCard';
   import NumberFilter from '../../filters/NumberFilter';
-  import MarkdownText from '../utils/MarkdownText';
   import TimeWindowMixin from './TimeWindowMixin';
 
   export default {

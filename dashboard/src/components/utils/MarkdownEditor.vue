@@ -15,36 +15,29 @@ limitations under the License.
 */
 <template>
   <div id="markdown-editor">
-    <b-tabs class="h-100">
-      <b-tab active>
-        <template slot="title">
-          <i class="fa fa-edit mr-1" aria-hidden="true"/> <span id="markdownEditLabel" :aria-label="`Write ${name} using Markdown`">Write</span>
-        </template>
-        <div class="mt-2" :style="[!resizable ? {'height':markdownHeight} : {}]">
-          <b-form-textarea rows="5" max-rows="5" v-model="valueInternal" @input="dataChanged"
-                           :no-resize="!resizable"
-                           data-cy="markdownEditorInput" aria-labelledby="markdownEditLabel" @mouseup="wasResized"/>
-        </div>
-      </b-tab>
-      <b-tab>
-        <template slot="title">
-          <i class="fa fa-eye mr-1" aria-hidden="true"/> <span :aria-label="`Preview ${name} Markdown rendering`">Preview</span>
-        </template>
-        <div class="mt-2 border rounded p-3" :style="{'overflow-y':'scroll','height':markdownHeight}" data-cy="markdownEditor-preview">
-          <markdown-text v-if="valueInternal" :text="valueInternal"/>
-        </div>
-      </b-tab>
-    </b-tabs>
-    <div><small><b-link to="/markdown" target="_blank">Markdown</b-link> is supported</small></div>
+    <editor :style="resizable ? {resize: 'vertical', overflow: 'auto'} : {}"
+      ref="toastuiEditor"
+      initialEditType="wysiwyg"
+      :initialValue="valueInternal"
+      :options="editorOptions"
+      :height="markdownHeight"
+      @load="onEditorLoad"
+      @focus="onEditorFocus"
+      @blur="onEditorBlur"
+      @change="onEditorChange"
+      @caretChange="onEditorCaretChange"
+      @mouseup="wasResized"
+    ></editor>
   </div>
 </template>
 
 <script>
-  import MarkdownText from './MarkdownText';
+  import '@toast-ui/editor/dist/toastui-editor.css';
+  import { Editor } from '@toast-ui/vue-editor';
 
   export default {
     name: 'MarkdownEditor',
-    components: { MarkdownText },
+    components: { Editor },
     props: {
       value: String,
       resizable: {
@@ -59,7 +52,11 @@ limitations under the License.
     data() {
       return {
         valueInternal: this.value,
-        markdownHeight: '10rem',
+        markdownHeight: '15rem',
+        editorOptions: {
+          hideModeSwitch: true,
+          usageStatistics: false,
+        },
       };
     },
     watch: {
@@ -67,19 +64,15 @@ limitations under the License.
         this.valueInternal = newValue;
       },
     },
-    methods: {
-      dataChanged() {
-        this.$emit('input', this.valueInternal);
+    computed: {
+      markdownText() {
+        const markdown = this.$refs.toastuiEditor.invoke('getMarkdown');
+        return markdown;
       },
-      wasResized(e) {
-        if (this.resizable) {
-          const oneRem = parseFloat(getComputedStyle(document.documentElement).fontSize);
-          const targetHeight = e.target.clientHeight;
-          const inRem = `${targetHeight / oneRem}rem`;
-          if (inRem !== this.markdownHeight) {
-            this.markdownHeight = inRem;
-          }
-        }
+    },
+    methods: {
+      onEditorChange() {
+        this.$emit('input', this.markdownText);
       },
     },
   };
