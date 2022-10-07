@@ -48,6 +48,7 @@ limitations under the License.
                     @page-size-changed="pageSizeChanged"
                     @page-changed="pageChanged"
                     @sort-changed="sortTable"
+                    tableStoredStateId="selfReportApprovalHistoryTable"
                     data-cy="selfReportApprovalHistoryTable">
       <template #head(skillName)="data">
         <span class="text-primary"><i class="fas fa-graduation-cap skills-color-skills" /> {{ data.label }}</span>

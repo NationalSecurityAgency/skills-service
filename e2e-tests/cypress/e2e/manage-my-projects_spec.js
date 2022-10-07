@@ -250,6 +250,7 @@ describe('Manage My Projects Tests', () => {
     });
 
     it('search by name', function () {
+        window.localStorage.setItem('tableState', JSON.stringify({'DiscoverProjects': {'sortDesc': false, 'sortBy': 'name'}}))
         cy.createProject(1, { name: 'Very Neat project' });
         cy.createProject(2);
         cy.createProject(3);

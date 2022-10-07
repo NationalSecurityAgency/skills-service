@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <div id="simple-skills-table" v-if="this.skills && this.skills.length">
-    <skills-b-table :options="table.options" :items="skills" data-cy="simpleSkillsTable">
+    <skills-b-table :options="table.options" :items="skills" data-cy="simpleSkillsTable" tableStoredStateId="simpleSkillsTable">
       <template #cell(controls)="data">
         <button v-on:click="onDeleteEvent(data.item)" class="btn btn-sm btn-outline-primary"
                 :data-cy="`deleteSkill_${data.item.skillId}`"

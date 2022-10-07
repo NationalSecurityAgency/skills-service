@@ -99,7 +99,7 @@ limitations under the License.
         </div>
       </div>
 
-      <skills-b-table :options="table.options" :items="skills"
+      <skills-b-table :options="table.options" :items="skills" :tableStoredStateId="tableId"
                       data-cy="skillsTable"
                       @sort-changed="handleColumnSort">
 
@@ -374,6 +374,7 @@ limitations under the License.
   import ChildRowSkillGroupDisplay from './skillsGroup/ChildRowSkillGroupDisplay';
   import EditSkillGroup from './skillsGroup/EditSkillGroup';
   import ShowMore from './selfReport/ShowMore';
+  import TableStateUtil from '../utils/TableStateUtil';
 
   const subjects = createNamespacedHelpers('subjects');
   const subjectSkills = createNamespacedHelpers('subjectSkills');
@@ -553,6 +554,10 @@ limitations under the License.
         .then((setting) => {
           this.inviteOnlyProject = Boolean(setting?.enabled);
         });
+      const tableState = TableStateUtil.loadTableState(this.tableId);
+      if (tableState && tableState.sortBy === 'displayOrder' && tableState.sortDesc === false) {
+        this.sortButtonEnabled = true;
+      }
     },
     computed: {
       deleteButtonsDisabled() {

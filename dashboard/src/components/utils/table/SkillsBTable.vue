@@ -18,8 +18,8 @@ limitations under the License.
     <b-table striped head-variant="light" class="skills-b-table mb-0"
              :items="items"
              :busy="options.busy"
-             :sort-by.sync="options.sortBy"
-             :sort-desc.sync="options.sortDesc"
+             :sort-by.sync="sortBy"
+             :sort-desc.sync="sortDesc"
              :bordered="options.bordered"
              :outlined="options.outlined"
              :fields="this.fieldsInternal"
@@ -96,11 +96,14 @@ limitations under the License.
 </template>
 
 <script>
+  import PersistedSortMixin from './PersistedSortMixin';
+
   let uid = 0;
 
   export default {
     name: 'SkillsBTable',
-    props: ['items', 'options'],
+    props: ['items', 'options', 'tableStoredStateId'],
+    mixins: [PersistedSortMixin],
     beforeCreate() {
       this.uid = uid.toString();
       uid += 1;
@@ -140,12 +143,6 @@ limitations under the License.
     methods: {
       isDisabled() {
         return !this.items || this.items.length === 0;
-      },
-      sortingChanged(ctx) {
-        // ctx.sortBy   ==> Field key for sorting by (or null for no sorting)
-        // ctx.sortDesc ==> true if sorting descending, false otherwise
-        this.currentPageInternal = 1;
-        this.$emit('sort-changed', ctx);
       },
       updateColumns() {
         const newFields = [];
