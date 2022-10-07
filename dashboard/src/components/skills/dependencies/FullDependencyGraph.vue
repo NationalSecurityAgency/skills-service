@@ -50,7 +50,7 @@ limitations under the License.
     from '@/components/skills/crossProjects/SharedSkillsFromOtherProjects';
   import SkillsService from '@/components/skills/SkillsService';
   import LoadingContainer from '@/components/utils/LoadingContainer';
-  import GraphNodeSortMethodSelector from './GraphNodeSortMethodSelector';
+  import GraphNodeSortMethodSelector from '@/components/skills/dependencies/GraphNodeSortMethodSelector';
   import NoContent2 from '@/components/utils/NoContent2';
   import GraphUtils from '@/components/skills/dependencies/GraphUtils';
   import GraphLegend from '@/components/skills/dependencies/GraphLegend';

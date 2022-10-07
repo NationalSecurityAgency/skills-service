@@ -45,10 +45,10 @@ limitations under the License.
 <script>
   import { createNamespacedHelpers } from 'vuex';
   import ImportFinalizeAlert from '@/components/skills/catalog/ImportFinalizeAlert';
-  import Navigation from '../utils/Navigation';
-  import PageHeader from '../utils/pages/PageHeader';
-  import EditSubject from './EditSubject';
-  import SubjectsService from './SubjectsService';
+  import Navigation from '@/components/utils/Navigation';
+  import PageHeader from '@/components/utils/pages/PageHeader';
+  import EditSubject from '@/components/subjects/EditSubject';
+  import SubjectsService from '@/components/subjects/SubjectsService';
   import projConfigMixin from '@/components/projects/ProjConfigMixin';
 
   const { mapActions, mapGetters, mapMutations } = createNamespacedHelpers('subjects');

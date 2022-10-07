@@ -43,7 +43,7 @@ limitations under the License.
 
 <script>
   import ShowMore from '@/components/skills/selfReport/ShowMore';
-  import SkillsBTable from '../utils/table/SkillsBTable';
+  import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
 
   export default {
