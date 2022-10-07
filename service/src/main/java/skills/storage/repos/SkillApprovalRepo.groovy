@@ -213,24 +213,4 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             group by sa.skillRefId
                 ''')
     SkillRequestApprovalStats countSkillRequestApprovals(@Param("projectId") String projectId, @Param("skillId") String skillId)
-
-    @Query('''SELECT count(sa) from SkillApproval sa, SkillDef sd  
-            where 
-                sa.skillRefId = sd.id and 
-                sa.projectId = ?1 and
-                sd.projectId = ?1 and
-                sd.skillId = ?2 and
-                sa.rejectedOn is null and
-                sa.approverUserId is null and
-                sa.approverActionTakenOn is null''')
-    long countByProjectIdSkillIdAndRejectedOnIsNull(String projectId, String skillId)
-
-    @Query('''SELECT count(sa) from SkillApproval sa, SkillDef sd  
-            where 
-                sa.skillRefId = sd.id and 
-                sa.projectId = ?1 and
-                sd.projectId = ?1 and
-                sd.skillId = ?2 and
-                sa.rejectedOn is not null''')
-    long countByProjectIdSkillIdAndRejectedOnIsNotNull(String projectId, String skillId)
 }
