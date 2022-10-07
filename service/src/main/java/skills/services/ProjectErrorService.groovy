@@ -15,6 +15,7 @@
  */
 package skills.services
 
+
 import groovy.util.logging.Slf4j
 import org.jsoup.helper.Validate
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,6 +28,7 @@ import skills.controller.exceptions.SkillException
 import skills.controller.result.model.TableResult
 import skills.storage.model.ProjectError
 import skills.storage.repos.ProjectErrorRepo
+import skills.storage.repos.SkillDefRepo
 
 @Slf4j
 @Component
@@ -34,6 +36,9 @@ class ProjectErrorService {
 
     @Autowired
     ProjectErrorRepo errorRepo
+
+    @Autowired
+    SkillDefRepo skillDefRepo
 
     @Transactional
     public void invalidSkillReported(String projectId, String reportedSkillId) {
@@ -100,6 +105,7 @@ class ProjectErrorService {
         Page<ProjectError> res = errorRepo.findAllByProjectId(projectId, pageRequest);
         if (!res.isEmpty()) {
             res.forEach({
+
                 errs << new skills.controller.result.model.ProjectError(
                         errorId: it.id,
                         projectId: it.projectId,
@@ -119,5 +125,47 @@ class ProjectErrorService {
     @Transactional(readOnly = true)
     public long countOfErrorsForProject(String projectId) {
         return errorRepo.countByProjectId(projectId)
+    }
+
+    /**
+     * Creates ProjectErrors for all unachievable project and subject levels
+     * @return
+     */
+    @Transactional(readOnly = false)
+    void generateIssuesForUnachievableLevels() {
+        def errors = []
+        Date now = new Date()
+
+        skillDefRepo.findUnachievableProjectLevels()?.each {
+            def errMsg = "Level ${it.level} cannot be achieved based on the points available in the project"
+            ProjectError error = errorRepo.findByProjectIdAndErrorTypeAndError(it.projectId, ProjectError.ErrorType.UnachievableProjectLevel, errMsg)
+            if (!error) {
+                error = new ProjectError(count:0)
+                error.projectId = it.projectId
+                error.errorType = ProjectError.ErrorType.UnachievableProjectLevel
+                error.error = errMsg
+                error.created = now
+            }
+            error.count += 1
+            error.lastSeen = now
+            errors.add(error)
+        }
+
+        skillDefRepo.findUnachievableSubjectLevels()?.each {
+            def errMsg = "Level ${it.level} in ${it.name} cannot be achieved based on the points available in the subject"
+            ProjectError subjectLevel = errorRepo.findByProjectIdAndErrorTypeAndError(it.projectId, ProjectError.ErrorType.UnachievableSubjectLevel, errMsg)
+            if (!subjectLevel) {
+                subjectLevel = new ProjectError(count:0)
+                subjectLevel.projectId = it.projectId
+                subjectLevel.errorType = ProjectError.ErrorType.UnachievableSubjectLevel
+                subjectLevel.error = errMsg
+                subjectLevel.created = now
+            }
+            subjectLevel.count += 1
+            subjectLevel.lastSeen = now
+            errors.add(subjectLevel)
+        }
+
+        errorRepo.saveAll(errors)
     }
 }
