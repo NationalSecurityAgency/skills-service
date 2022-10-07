@@ -166,7 +166,6 @@ limitations under the License.
             this.selfReport.approvals.loading = true;
             SelfReportService.getSkillApprovalsStats(this.skill.projectId, this.skill.skillId)
               .then((res) => {
-                console.log('skillApprovalStats', res);
                 const pendingApprovalsRes = res.find((item) => item.value === 'SkillApprovalsRequests');
                 if (pendingApprovalsRes) {
                   this.selfReport.approvals.numPending = pendingApprovalsRes.count;
