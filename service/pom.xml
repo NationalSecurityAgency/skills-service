@@ -628,6 +628,7 @@
                         <exclude>src/main/resources/public/**</exclude>
                         <exclude>src/main/resources/templates/**</exclude>
                         <exclude>**/license/*.properties</exclude>
+                        <exclude>**/src/main/resources/client-version</exclude>
                     </excludes>
                 </configuration>
                 <executions>
