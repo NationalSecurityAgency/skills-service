@@ -85,7 +85,7 @@ limitations under the License.
     },
     data() {
       return {
-        isLoading: true,
+        isLoadingData: true,
         badges: [],
         displayNewBadgeModal: false,
         projectId: null,
@@ -100,6 +100,9 @@ limitations under the License.
       this.loadBadges();
     },
     computed: {
+      isLoading() {
+        return this.isLoadingData || this.isLoadingProjConfig;
+      },
       emptyNewBadge() {
         return {
           projectId: this.projectId,
@@ -127,7 +130,7 @@ limitations under the License.
       loadBadges(afterLoad) {
         return BadgesService.getBadges(this.projectId)
           .then((badgesResponse) => {
-            this.isLoading = false;
+            this.isLoadingData = false;
             this.badges = badgesResponse;
             if (this.badges && this.badges.length) {
               this.badges[0].isFirst = true;
@@ -140,8 +143,8 @@ limitations under the License.
             }
           })
           .finally(() => {
-            this.isLoading = false;
-            this.enableDropAndDrop();
+            this.isLoadingData = false;
+            this.enableDragAndDrop();
           });
       },
       updateSortAndReloadSubjects(updateInfo) {
@@ -157,12 +160,12 @@ limitations under the License.
         const currentIndex = sortedBadges.findIndex((item) => item.badgeId === updateInfo.id);
         const newIndex = updateInfo.direction === 'up' ? currentIndex - 1 : currentIndex + 1;
         if (newIndex >= 0 && (newIndex) < this.badges.length) {
-          this.isLoading = true;
+          this.isLoadingData = true;
           BadgesService.updateBadgeDisplaySortOrder(this.projectId, updateInfo.id, newIndex)
             .finally(() => {
               this.loadBadges()
                 .then(() => {
-                  this.isLoading = false;
+                  this.isLoadingData = false;
                   const foundRef = this.$refs[`badge_${updateInfo.id}`];
                   this.$nextTick(() => {
                     foundRef[0].focusSortControl();
@@ -172,7 +175,7 @@ limitations under the License.
         }
       },
       deleteBadge(badge) {
-        this.isLoading = true;
+        this.isLoadingData = true;
         BadgesService.deleteBadge(badge.projectId, badge.badgeId)
           .then(() => {
             this.$emit('badge-deleted', this.badge);
@@ -184,11 +187,11 @@ limitations under the License.
             setTimeout(() => this.$announcer.polite(`Badge ${badge.name} has been deleted`), 0);
           })
           .finally(() => {
-            this.isLoading = false;
+            this.isLoadingData = false;
           });
       },
       saveBadge(badge) {
-        this.isLoading = true;
+        this.isLoadingData = true;
         const requiredIds = badge.requiredSkills.map((item) => item.skillId);
         const badgeReq = { requiredSkillsIds: requiredIds, ...badge };
         const { isEdit } = badge;
@@ -229,8 +232,8 @@ limitations under the License.
           this.$refs.subPageHeader.$refs.actionButton.focus();
         });
       },
-      enableDropAndDrop() {
-        if (this.badges && this.badges.length > 0) {
+      enableDragAndDrop() {
+        if (this.badges && this.badges.length > 0 && this.projConfig && !this.isReadOnlyProj) {
           const self = this;
           this.$nextTick(() => {
             const cards = document.getElementById('badgeCards');

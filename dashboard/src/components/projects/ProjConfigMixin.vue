@@ -42,6 +42,9 @@ limitations under the License.
       isReadOnlyProj() {
         return this.$store.getters.projConfig && UserRolesUtil.isReadOnlyProjRole(this.$store.getters.projConfig.user_project_role);
       },
+      userProjRole() {
+        return this.$store.getters.projConfig && this.$store.getters.projConfig.user_project_role;
+      },
     },
   };
 </script>

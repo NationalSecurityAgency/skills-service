@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <loading-container class="child-row" v-bind:is-loading="loading.skills"
+  <loading-container class="child-row" v-bind:is-loading="isLoading"
                      :data-cy="`childRowDisplay_${skillInfo.skillId}`">
 
     <div v-if="isImported" class="mt-3 alert alert-info" header="Skill Catalog">
@@ -177,6 +177,9 @@ limitations under the License.
       },
     },
     computed: {
+      isLoading() {
+        return this.loading.skills || this.isLoadingProjConfig;
+      },
       skillId() {
         return SkillReuseIdUtil.removeTag(this.skillInfo.skillId);
       },

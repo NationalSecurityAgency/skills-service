@@ -75,6 +75,9 @@ class UserAuthService {
     @Autowired
     ProjAdminService projAdminService
 
+    @Autowired
+    ApproverRoleDecider approverRoleDecider
+
     @Value('#{"${skills.authorization.verifyEmailAddresses:false}"}')
     Boolean verifyEmailAddresses
 
@@ -178,12 +181,7 @@ class UserAuthService {
             }
         }
         if (userRole.roleName == RoleName.ROLE_PROJECT_APPROVER) {
-            shouldAddRole = false
-            String projectId = AuthUtils.getProjectIdFromRequest(servletRequest)
-            String method = servletRequest.method
-            if (projectId && projectId.equalsIgnoreCase(userRole.projectId) && method && method == HttpMethod.GET.toString()) {
-                shouldAddRole = true
-            }
+            shouldAddRole = approverRoleDecider.shouldGrantApproverRole(servletRequest, userRole)
         }
         return shouldAddRole
     }

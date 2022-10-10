@@ -41,12 +41,13 @@ describe('Approver Role Tests', () => {
 
         const createProj = (projNum) => {
             cy.createProject(projNum)
+            cy.enableProdMode(projNum);
             cy.createSubject(projNum, 1)
             cy.createSubject(projNum, 2)
             cy.createSkill(projNum, 1, 1)
-            cy.createSkill(projNum, 1, 2)
-            cy.createSkill(projNum, 1, 3)
-            cy.createSkill(projNum, 2, 4)
+            cy.createSkill(projNum, 1, 2, { selfReportingType: 'Approval' })
+            cy.createSkill(projNum, 1, 3, { selfReportingType: 'Approval' })
+            cy.createSkill(projNum, 2, 4, { selfReportingType: 'Approval' })
             cy.createSkill(projNum, 2, 5)
             cy.createBadge(projNum, 1)
             cy.createBadge(projNum, 2)
@@ -61,6 +62,9 @@ describe('Approver Role Tests', () => {
             cy.reportSkill(projNum, 1, 'user0', 'now');
             cy.reportSkill(projNum, 1, 'user1', 'now');
             cy.reportSkill(projNum, 1, 'user2', 'now');
+
+            cy.reportSkill(projNum, 2, 'user3', 'now');
+            cy.reportSkill(projNum, 2, 'user4', 'now');
         };
 
         createProj(1)
@@ -133,10 +137,12 @@ describe('Approver Role Tests', () => {
     });
 
     it('project page - approver role has no mutation controls', function () {
-        const runCheck = (projNum, manageButtonTxt = 'Manage', assertChainPrepend = null) => {
+        const runCheck = (projNum, manageButtonTxt = 'Manage', role = 'Admin', assertChainPrepend = null) => {
             const chainerPrepend = assertChainPrepend ? assertChainPrepend : '';
             cy.visit(`/administrator/projects/proj${projNum}`);
             cy.wait(`@getSettingsProj${projNum}`);
+
+            cy.get('[data-cy="userRole"]').should('have.text', role)
 
             cy.get('[data-cy="btn_edit-project"]').should(`${chainerPrepend}exist`)
             cy.get('[data-cy="projectPreview"]').should(`${chainerPrepend}exist`)
@@ -165,7 +171,7 @@ describe('Approver Role Tests', () => {
             cy.get('[data-cy="manageBtn_subj2"]').contains(manageButtonTxt)
         }
         runCheck(2)
-        runCheck(1, 'View', 'not.')
+        runCheck(1, 'View', 'Approver','not.')
     });
 
     it('/subj page - approver role has no mutation controls', function () {
@@ -296,5 +302,172 @@ describe('Approver Role Tests', () => {
         runCheck(2)
         runCheck(1, 'not.')
     });
+
+    it('/badges page - approver role has no mutation controls', function () {
+        const runCheck = (projNum, manageButtonTxt = 'Manage', assertChainPrepend = null) => {
+            const chainerPrepend = assertChainPrepend ? assertChainPrepend : '';
+            cy.visit(`/administrator/projects/proj${projNum}/badges`);
+            cy.wait(`@getSettingsProj${projNum}`);
+            cy.get('[data-cy="projectPreview"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="shareProjBtn"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="pageHeaderStat_Issues"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="btn_Badges"]').should(`${chainerPrepend}exist`)
+
+            cy.get('[data-cy="nav-Skill Catalog"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="nav-Levels"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="nav-Contact Users"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="nav-Issues"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="nav-Access"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="nav-Settings"]').should(`${chainerPrepend}exist`)
+
+
+            cy.get('[data-cy="badgeCard-badge1"] [data-cy="sortControlHandle"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="badgeCard-badge2"] [data-cy="sortControlHandle"]').should(`${chainerPrepend}exist`)
+
+            cy.get('[data-cy="manageBtn_badge1"]').contains(manageButtonTxt)
+            cy.get('[data-cy="manageBtn_badge2"]').contains(manageButtonTxt)
+
+            cy.get('[data-cy="badgeCard-badge1"] [data-cy="editBtn"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="badgeCard-badge2"] [data-cy="editBtn"]').should(`${chainerPrepend}exist`)
+
+            cy.get('[data-cy="badgeCard-badge1"] [data-cy="deleteBtn"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="badgeCard-badge2"] [data-cy="deleteBtn"]').should(`${chainerPrepend}exist`)
+
+            cy.get('[data-cy="badgeCard-badge2"] [data-cy="goLive"]').should(`${chainerPrepend}exist`)
+        }
+        runCheck(2)
+        runCheck(1, 'View','not.')
+    });
+
+    it('/dependencies page - approver role has no mutation controls', function () {
+        const runCheck = (projNum, manageButtonTxt = 'Manage', assertChainPrepend = null) => {
+            const chainerPrepend = assertChainPrepend ? assertChainPrepend : '';
+            cy.visit(`/administrator/projects/proj${projNum}/dependencies`);
+            cy.wait(`@getSettingsProj${projNum}`);
+            cy.get('[data-cy="projectPreview"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="shareProjBtn"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="pageHeaderStat_Issues"]').should(`${chainerPrepend}exist`)
+
+            cy.get('[data-cy="nav-Skill Catalog"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="nav-Levels"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="nav-Contact Users"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="nav-Issues"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="nav-Access"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="nav-Settings"]').should(`${chainerPrepend}exist`)
+        }
+        runCheck(2)
+        runCheck(1, 'View','not.')
+    });
+
+    it('/users page - approver role has no mutation controls', function () {
+        const runCheck = (projNum, manageButtonTxt = 'Manage', assertChainPrepend = null) => {
+            const chainerPrepend = assertChainPrepend ? assertChainPrepend : '';
+            cy.visit(`/administrator/projects/proj${projNum}/users`);
+            cy.wait(`@getSettingsProj${projNum}`);
+            cy.get('[data-cy="projectPreview"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="shareProjBtn"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="pageHeaderStat_Issues"]').should(`${chainerPrepend}exist`)
+
+            cy.get('[data-cy="nav-Skill Catalog"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="nav-Levels"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="nav-Contact Users"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="nav-Issues"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="nav-Access"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="nav-Settings"]').should(`${chainerPrepend}exist`)
+        }
+        runCheck(2)
+        runCheck(1, 'View','not.')
+    });
+
+    it('/users/user/skillEvents page - approver role has no mutation controls', function () {
+        const runCheck = (projNum, manageButtonTxt = 'Manage', assertChainPrepend = null) => {
+            const chainerPrepend = assertChainPrepend ? assertChainPrepend : '';
+            cy.visit(`/administrator/projects/proj${projNum}/users/user2/skillEvents`);
+            cy.wait(`@getSettingsProj${projNum}`);
+            cy.get('[data-cy="deleteEventBtn"]').should(`${chainerPrepend}exist`)
+        }
+        runCheck(2)
+        runCheck(1, 'View','not.')
+    });
+
+    it('/metrics page - approver role has no mutation controls', function () {
+        const runCheck = (projNum, manageButtonTxt = 'Manage', assertChainPrepend = null) => {
+            const chainerPrepend = assertChainPrepend ? assertChainPrepend : '';
+            cy.visit(`/administrator/projects/proj${projNum}/metrics`);
+            cy.wait(`@getSettingsProj${projNum}`);
+            cy.get('[data-cy="projectPreview"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="shareProjBtn"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="pageHeaderStat_Issues"]').should(`${chainerPrepend}exist`)
+
+            cy.get('[data-cy="nav-Skill Catalog"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="nav-Levels"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="nav-Contact Users"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="nav-Issues"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="nav-Access"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="nav-Settings"]').should(`${chainerPrepend}exist`)
+        }
+        runCheck(2)
+        runCheck(1, 'View','not.')
+    });
+
+    it('approval role can approve and reject skills', function () {
+        const runCheck = (projNum, manageButtonTxt = 'Manage', assertChainPrepend = null) => {
+            const chainerPrepend = assertChainPrepend ? assertChainPrepend : '';
+            cy.visit(`/administrator/projects/proj${projNum}/self-report`);
+            cy.wait(`@getSettingsProj${projNum}`);
+            cy.get('[data-cy="projectPreview"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="shareProjBtn"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="pageHeaderStat_Issues"]').should(`${chainerPrepend}exist`)
+
+            cy.get('[data-cy="nav-Skill Catalog"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="nav-Levels"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="nav-Contact Users"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="nav-Issues"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="nav-Access"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="nav-Settings"]').should(`${chainerPrepend}exist`)
+        }
+        // runCheck(2)
+        runCheck(1, 'View','not.')
+        const projNum = 1;
+
+        const approvalHistoryTableSelector = '[data-cy="selfReportApprovalHistoryTable"]';
+
+        cy.get('[data-cy="approvalSelect_user4-skill2"]')
+            .click({ force: true });
+        cy.get('[data-cy="approveBtn"]')
+            .click();
+        cy.validateTable(approvalHistoryTableSelector, [
+            [{
+                colIndex: 0,
+                value: 'user4'
+            }, {
+                colIndex: 1,
+                value: 'Approved'
+            },],
+        ]);
+
+        cy.get('[data-cy="approvalSelect_user3-skill2"]')
+            .click({ force: true });
+        cy.get('[data-cy="rejectBtn"]')
+            .click();
+        cy.get('[data-cy="confirmRejectionBtn"]').click();
+        cy.validateTable(approvalHistoryTableSelector, [
+            [{
+                colIndex: 0,
+                value: 'user3'
+            }, {
+                colIndex: 1,
+                value: 'Rejected'
+            },],
+            [{
+                colIndex: 0,
+                value: 'user4'
+            }, {
+                colIndex: 1,
+                value: 'Approved'
+            },],
+        ]);
+    });
+
 
 });

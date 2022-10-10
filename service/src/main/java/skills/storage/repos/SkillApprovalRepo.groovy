@@ -100,6 +100,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             s.userId = uAttrs.userId and
             s.approverUserId = approverUAttrs.userId and 
             s.approverUserId is not null and
+            (s.approverUserId = :optionalApproverUserIdOrKeywordAll or 'All' = :optionalApproverUserIdOrKeywordAll) and
             lower(sd.name) like lower(CONCAT('%', :skillNameFilter, '%')) and
             lower(uAttrs.userIdForDisplay) like lower(CONCAT('%', :userIdFilter, '%')) and
             lower(approverUAttrs.userIdForDisplay) like lower(CONCAT('%', :approverUserIdFilter, '%'))
@@ -108,6 +109,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
                                                    @Param("skillNameFilter") String skillNameFilter,
                                                    @Param("userIdFilter") String userIdFilter,
                                                    @Param("approverUserIdFilter") String approverUserIdFilter,
+                                                   @Param("optionalApproverUserIdOrKeywordAll") String optionalApproverUserIdOrKeywordAll,
                                                    Pageable pageable)
     @Query('''SELECT count(s)
         from SkillApproval s, SkillDef sd, UserAttrs uAttrs, UserAttrs approverUAttrs
@@ -117,6 +119,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             s.userId = uAttrs.userId and
             s.approverUserId = approverUAttrs.userId and 
             s.approverUserId is not null and
+            (s.approverUserId = :optionalApproverUserIdOrKeywordAll or 'All' = :optionalApproverUserIdOrKeywordAll) and
             lower(sd.name) like lower(CONCAT('%', :skillNameFilter, '%')) and
             lower(uAttrs.userIdForDisplay) like lower(CONCAT('%', :userIdFilter, '%')) and
             lower(approverUAttrs.userIdForDisplay) like lower(CONCAT('%', :approverUserIdFilter, '%'))
@@ -124,7 +127,8 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
     long countApprovalsHistory(@Param("projectId") String projectId,
                                @Param("skillNameFilter") String skillNameFilter,
                                @Param("userIdFilter") String userIdFilter,
-                               @Param("approverUserIdFilter") String approverUserIdFilter)
+                               @Param("approverUserIdFilter") String approverUserIdFilter,
+                               @Param("optionalApproverUserIdOrKeywordAll") String optionalApproverUserIdOrKeywordAll)
 
     long deleteByProjectIdAndSkillRefId(String projectId, Integer skillRefId)
 

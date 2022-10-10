@@ -25,6 +25,7 @@ limitations under the License.
           class="version-select"
           v-model="selectedVersion"
           :options="versionOptions"
+          data-cy="clientDisplaySkillVersionSelect"
           @change="versionChanged"/>
         <inline-help
           class="pl-2"

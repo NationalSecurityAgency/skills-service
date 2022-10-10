@@ -15,19 +15,27 @@
  */
 package skills.auth
 
+import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 
 import javax.servlet.http.HttpServletRequest
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 @Slf4j
+@CompileStatic
 class AuthUtils {
-    static final String PROJECT_ID_PATTERN = /\/\S+?\/projects\/([^\/]+).*$/
+    static final Pattern PROJECT_ID_PATTERN = Pattern.compile("/\\S+?/projects/([^/]+).*\$")
+
+    // Example: /admin/projects/{projectId}/approvals/approve
+    // Example: /admin/projects/{projectId}/approvals/reject
+    static final Pattern PROJECT_SELF_REPORT_APPROVE_OR_REJECT_PATTERN = Pattern.compile("^/admin/projects/[^/]+/approvals/(?:approve|reject)\$")
 
     static String getProjectIdFromRequest(HttpServletRequest servletRequest) {
         String projectId
         if (servletRequest) {
             String servletPath = servletRequest.getServletPath()
-            def matcher = (servletPath =~ PROJECT_ID_PATTERN)
+            Matcher matcher = PROJECT_ID_PATTERN.matcher(servletPath)
             if (matcher.matches()) {
                 if (matcher.hasGroup()) {
                     projectId = matcher.group(1)
@@ -37,5 +45,13 @@ class AuthUtils {
             }
         }
         return projectId
+    }
+
+    static boolean isSelfReportApproveOrRejectEndpoint(HttpServletRequest servletRequest) {
+        if (servletRequest) {
+            String servletPath = servletRequest.getServletPath()
+            return PROJECT_SELF_REPORT_APPROVE_OR_REJECT_PATTERN.matcher(servletPath).matches()
+        }
+        return false
     }
 }

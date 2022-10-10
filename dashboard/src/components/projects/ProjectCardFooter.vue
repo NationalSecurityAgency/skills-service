@@ -17,7 +17,7 @@ limitations under the License.
   <div class="text-right">
     <div class="row">
       <div class="col text-left small" data-cy="ProjectCardFooter_issues">
-        <i class="fas fa-user-shield text-success" style="font-size: 1.05rem;"></i> <i>Role:</i> <span data-cy="userRole">{{ project.userRole | userRole }}</span>
+        <i class="fas fa-user-shield text-success" style="font-size: 1.05rem;" aria-hidden="true"></i> <i>Role:</i> <span data-cy="userRole">{{ project.userRole | userRole }}</span>
         <span v-if="!isReadOnlyProj" class="ml-2">
           <span v-if="!hasIssues"><i class="fas fa-check-circle text-success" style="font-size: 1rem;"
                                      aria-hidden="true"></i> <span data-cy="noIssues">No Issues</span></span>

@@ -19,10 +19,11 @@ package skills.auth
 import spock.lang.Specification
 
 import javax.servlet.http.HttpServletRequest
+import java.nio.charset.StandardCharsets
 
 class AuthUtilsSpec extends Specification {
 
-    def "pick first project is if it appears twice in the url"(){
+    def "pick first project is if it appears twice in the url"() {
         HttpServletRequest httpServletRequest = Mock()
         httpServletRequest.getServletPath() >> "/admin/projects/test/skills/other1/shared/projects/testProj"
 
@@ -32,7 +33,7 @@ class AuthUtilsSpec extends Specification {
         res == "test"
     }
 
-    def "parse project name from url"(){
+    def "parse project name from url"() {
         HttpServletRequest httpServletRequest = Mock()
         httpServletRequest.getServletPath() >> url
 
@@ -43,6 +44,40 @@ class AuthUtilsSpec extends Specification {
         projectId | url
         "test"    | "/admin/projects/test/shared"
         "test"    | "/admin/projects/test/dependency/graph"
+    }
+
+    def "match self reporting approve or reject url only"() {
+        HttpServletRequest httpServletRequest = Mock()
+        httpServletRequest.getServletPath() >> url
+
+        expect:
+        AuthUtils.isSelfReportApproveOrRejectEndpoint(httpServletRequest) == matched
+
+        where:
+        matched | url
+        true    | "/admin/projects/proj1/approvals/approve"
+        true    | "/admin/projects/proj2/approvals/approve"
+        false   | "/admin/projects/proj2/approvals/approv"
+        false   | "/admin/projects/proj2/approvals/approve1"
+        false   | "/admin/bdea/projects/proj2/approvals/approve"
+        false   | "/admin/projects/pr/oj2/approvals/approve"
+        false   | "admin/projects/proj2/approvals/approve"
+        false   | "/admin/projects/proj2/approbals/approve"
+        false   | "/abmin/projects/proj2/approvals/approve"
+        false   | "/admin/projects/proj2/approvals/applove"
+        true    | "/admin/projects/${URLEncoder.encode("some fancy 23 id", StandardCharsets.UTF_8.toString())}/approvals/approve"
+
+        true    | "/admin/projects/proj1/approvals/reject"
+        true    | "/admin/projects/proj2/approvals/reject"
+        false   | "/admin/projects/proj2/approvals/rejec"
+        false   | "/admin/projects/proj2/approvals/reject1"
+        false   | "/admin/bdea/projects/proj2/approvals/rejecte"
+        false   | "/admin/projects/pr/oj2/approvals/reject"
+        false   | "admin/projects/proj2/approvals/reject"
+        false   | "/admin/projects/proj2/approbals/reject"
+        false   | "/abmin/projects/proj2/approvals/reject"
+        false   | "/admin/projects/proj2/approvals/rejept"
+        true    | "/admin/projects/${URLEncoder.encode("some fancy 23 id", StandardCharsets.UTF_8.toString())}/approvals/reject"
     }
 
 }

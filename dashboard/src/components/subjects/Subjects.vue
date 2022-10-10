@@ -83,7 +83,7 @@ limitations under the License.
     },
     data() {
       return {
-        isLoading: true,
+        isLoadingData: true,
         displayNewSubjectModal: false,
         projectId: null,
         sortOrder: {
@@ -115,18 +115,18 @@ limitations under the License.
       doLoadSubjects() {
         return this.loadSubjects({ projectId: this.$route.params.projectId })
           .finally(() => {
-            this.isLoading = false;
+            this.isLoadingData = false;
             this.enableDropAndDrop();
           });
       },
       deleteSubject(subject) {
-        this.isLoading = true;
+        this.isLoadingData = true;
         SubjectsService.deleteSubject(subject)
           .then(() => {
             this.loadProjectDetailsState({ projectId: this.projectId });
             this.loadSubjects({ projectId: this.$route.params.projectId })
               .then(() => {
-                this.isLoading = false;
+                this.isLoadingData = false;
                 this.$emit('subjects-changed', subject.subjectId);
                 this.$nextTick(() => {
                   this.$announcer.polite(`Subject ${subject.name} has been deleted`);
@@ -147,13 +147,13 @@ limitations under the License.
         const currentIndex = sortedSubjects.findIndex((item) => item.subjectId === updateInfo.id);
         const newIndex = updateInfo.direction === 'up' ? currentIndex - 1 : currentIndex + 1;
         if (newIndex >= 0 && (newIndex) < this.subjects.length) {
-          this.isLoading = true;
+          this.isLoadingData = true;
           const { projectId } = this.$route.params;
           SubjectsService.updateSubjectsDisplaySortOrder(projectId, updateInfo.id, newIndex)
             .finally(() => {
               this.doLoadSubjects()
                 .then(() => {
-                  this.isLoading = false;
+                  this.isLoadingData = false;
                   const foundRef = this.$refs[`subj${updateInfo.id}`];
                   this.$nextTick(() => {
                     foundRef[0].focusSortControl();
@@ -164,7 +164,7 @@ limitations under the License.
       },
       subjectAdded(subject) {
         this.displayNewSubjectModal = false;
-        this.isLoading = true;
+        this.isLoadingData = true;
         SubjectsService.saveSubject(subject)
           .then(() => {
             this.doLoadSubjects();
@@ -221,6 +221,9 @@ limitations under the License.
       ...subjectsStore.mapGetters([
         'subjects',
       ]),
+      isLoading() {
+        return this.isLoadingData || this.isLoadingProjConfig;
+      },
       emptyNewSubject() {
         return {
           projectId: this.$route.params.projectId,

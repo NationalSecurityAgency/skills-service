@@ -18,7 +18,7 @@ limitations under the License.
     <sub-page-header title="Dependencies"/>
 
     <b-card body-class="p-0" class="dependencies-container">
-      <loading-container :is-loading="!loading.finishedAllSkills || !loading.finishedDependents || isLoadingProjConfig">
+      <loading-container :is-loading="isLoading">
 
         <no-content2 v-if="skill.sharedToCatalog"
                      class="mt-5 pt-5"
@@ -154,6 +154,11 @@ limitations under the License.
     },
     mounted() {
       this.loadData();
+    },
+    computed: {
+      isLoading() {
+        return !this.loading.finishedAllSkills || !this.loading.finishedDependents || this.isLoadingProjConfig;
+      },
     },
     methods: {
       initData() {

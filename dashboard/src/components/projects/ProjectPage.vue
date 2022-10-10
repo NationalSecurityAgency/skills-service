@@ -33,10 +33,7 @@ limitations under the License.
         </b-button>
       </div>
       <div slot="subSubTitle" v-if="project">
-        <div data-cy="projectCreated">
-          <project-dates :created="project.created" :load-last-reported-date="true"/>
-        </div>
-        <b-button-group v-if="!isReadOnlyProj" class="mt-3" size="sm">
+        <b-button-group v-if="!isReadOnlyProj" class="mb-3" size="sm">
           <b-button @click="displayEditProject"
                     ref="editProjectButton"
                     class="btn btn-outline-primary"
@@ -60,6 +57,12 @@ limitations under the License.
             <span>Share</span> <i class="fas fa-share-alt" style="font-size:1rem;" aria-hidden="true"/>
           </b-button>
         </b-button-group>
+        <div data-cy="projectCreated">
+          <i class="fas fa-clock text-success header-status-icon" aria-hidden="true" /> <project-dates :created="project.created" :load-last-reported-date="true"/>
+        </div>
+        <div v-if="userProjRole">
+          <i class="fas fa-user-shield text-success header-status-icon" aria-hidden="true" /> <span class="text-secondary font-italic small">Role:</span> <span class="small text-primary" data-cy="userRole">{{ userProjRole | userRole }}</span>
+        </div>
       </div>
       <div slot="footer">
         <import-finalize-alert />
@@ -105,7 +108,7 @@ limitations under the License.
     },
     data() {
       return {
-        isLoading: true,
+        isLoadingData: true,
         cancellingExpiration: false,
         editProject: false,
         shareProjModal: false,
@@ -119,6 +122,9 @@ limitations under the License.
       ...mapGetters([
         'project',
       ]),
+      isLoading() {
+        return this.isLoadingData || this.isLoadingProjConfig;
+      },
       navItems() {
         const items = [
           { name: 'Subjects', iconClass: 'fa-cubes skills-color-subjects', page: 'Subjects' },
@@ -241,14 +247,14 @@ limitations under the License.
         this.editProject = true;
       },
       loadProjects() {
-        this.isLoading = true;
+        this.isLoadingData = true;
         if (this.$route.params.project) {
           this.setProject(this.$route.params.project);
-          this.isLoading = false;
+          this.isLoadingData = false;
         } else {
           this.loadProjectDetailsState({ projectId: this.$route.params.projectId })
             .finally(() => {
-              this.isLoading = false;
+              this.isLoadingData = false;
             });
         }
       },
@@ -295,5 +301,8 @@ limitations under the License.
 </script>
 
 <style scoped>
-
+.header-status-icon {
+  font-size: 0.9rem;
+  width: 1.2rem;
+}
 </style>

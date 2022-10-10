@@ -78,7 +78,7 @@ limitations under the License.
     },
     data() {
       return {
-        isLoading: true,
+        isLoadingData: true,
         subjectId: '',
         headerOptions: {},
         showEdit: false,
@@ -94,8 +94,11 @@ limitations under the License.
       ...skills.mapGetters([
         'skill',
       ]),
+      isLoading() {
+        return this.isLoadingData || this.isLoadingProjConfig;
+      },
       navItems() {
-        if (this.isLoading) {
+        if (this.isLoadingData) {
           return [];
         }
         const items = [];
@@ -153,7 +156,7 @@ limitations under the License.
         this.showEdit = true;
       },
       loadData() {
-        this.isLoading = true;
+        this.isLoadingData = true;
         const { projectId, subjectId } = this.$route.params;
         this.loadSkill({
           projectId: this.$route.params.projectId,
@@ -162,19 +165,19 @@ limitations under the License.
         }).then(() => {
           this.headerOptions = this.buildHeaderOptions(this.skill);
           if (this.subject) {
-            this.isLoading = false;
+            this.isLoadingData = false;
           } else {
             this.loadSubjectDetailsState({
               projectId,
               subjectId,
             }).then(() => {
-              this.isLoading = false;
+              this.isLoadingData = false;
             });
           }
         });
       },
       skillEdited(editedSkil) {
-        this.isLoading = true;
+        this.isLoadingData = true;
         SkillsService.saveSkill(editedSkil).then((res) => {
           const origId = this.skill.skillId;
           const edited = Object.assign(res, { subjectId: this.$route.params.subjectId });
@@ -196,7 +199,7 @@ limitations under the License.
           }
         })
         .finally(() => {
-          this.isLoading = false;
+          this.isLoadingData = false;
           this.handleFocus();
         });
       },

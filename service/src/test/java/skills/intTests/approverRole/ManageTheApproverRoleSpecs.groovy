@@ -147,6 +147,81 @@ class ManageTheApproverRoleSpecs extends DefaultIntSpec {
         skillsService.addOrUpdateProjectSetting(proj.projectId, "one", "two")
     }
 
+    def "approver can approve self reporting requests"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        List<String> users = getRandomUsers(2)
+        Date date = new Date() - 60
+
+        def approverRoleUser = createService(users[1].toString())
+        skillsService.addUserRole(approverRoleUser.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        when:
+        def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], date, "Please approve this!")
+        def approvals_t0 = approverRoleUser.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
+        def approvalHist_t0 = approverRoleUser.getApprovalsHistory(proj.projectId, 7, 1, 'requestedOn', false)
+
+        approverRoleUser.approve(proj.projectId, approvals_t0.data.collect { it.id })
+
+        def approvals_t1 = approverRoleUser.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
+        def approvalHist_t1 = approverRoleUser.getApprovalsHistory(proj.projectId, 7, 1, 'requestedOn', false)
+
+        then:
+        res.body.explanation == "Skill was submitted for approval"
+
+        !approvalHist_t0.data
+        approvalHist_t1.data.collect { it.userId } == [users[0]]
+        approvalHist_t1.data.collect { it.approverUserId } == [users[1]]
+        approvalHist_t1.data[0].approverActionTakenOn
+        !approvalHist_t1.data[0].rejectedOn
+
+        !approvals_t1.data
+    }
+
+    def "approver can reject self reporting requests"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        List<String> users = getRandomUsers(2)
+        Date date = new Date() - 60
+
+        def approverRoleUser = createService(users[1].toString())
+        skillsService.addUserRole(approverRoleUser.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        when:
+        def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], date, "Please approve this!")
+        def approvals_t0 = approverRoleUser.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
+        def approvalHist_t0 = approverRoleUser.getApprovalsHistory(proj.projectId, 7, 1, 'requestedOn', false)
+
+        approverRoleUser.rejectSkillApprovals(proj.projectId, approvals_t0.data.collect { it.id })
+
+        def approvals_t1 = approverRoleUser.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
+        def approvalHist_t1 = approverRoleUser.getApprovalsHistory(proj.projectId, 7, 1, 'requestedOn', false)
+
+        then:
+        res.body.explanation == "Skill was submitted for approval"
+
+        !approvalHist_t0.data
+        approvalHist_t1.data.collect { it.userId } == [users[0]]
+        approvalHist_t1.data.collect { it.approverUserId } == [users[1]]
+        approvalHist_t1.data[0].approverActionTakenOn
+        approvalHist_t1.data[0].rejectedOn
+
+        !approvals_t1.data
+    }
     boolean hasPermissionException(Closure c) {
         try {
             c.call()
