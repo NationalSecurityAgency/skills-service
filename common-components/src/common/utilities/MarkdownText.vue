@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <viewer :initialValue="text" height="500px" />
+  <viewer ref="toastuiViewer" data-cy="markdownViewer" :initialValue="text" height="500px" />
 </template>
 
 <script>
@@ -29,6 +29,11 @@ limitations under the License.
     },
     components: {
       viewer: Viewer,
+    },
+    watch: {
+      text(newVal) {
+        this.$refs.toastuiViewer.invoke('setMarkdown', newVal);
+      },
     },
   };
 </script>

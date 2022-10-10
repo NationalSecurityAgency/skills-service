@@ -16,17 +16,13 @@ limitations under the License.
 <template>
   <div id="markdown-editor">
     <editor :style="resizable ? {resize: 'vertical', overflow: 'auto'} : {}"
+      data-cy="markdownEditorInput"
       ref="toastuiEditor"
       initialEditType="wysiwyg"
       :initialValue="valueInternal"
       :options="editorOptions"
       :height="markdownHeight"
-      @load="onEditorLoad"
-      @focus="onEditorFocus"
-      @blur="onEditorBlur"
       @change="onEditorChange"
-      @caretChange="onEditorCaretChange"
-      @mouseup="wasResized"
     ></editor>
   </div>
 </template>
