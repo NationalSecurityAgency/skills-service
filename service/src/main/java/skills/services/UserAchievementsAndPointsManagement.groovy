@@ -63,9 +63,14 @@ class UserAchievementsAndPointsManagement {
         assert subject.type == SkillDef.ContainerType.Subject
         nativeQueriesRepo.decrementPointsForDeletedSkill(skillDef.projectId, skillDef.skillId, subject.skillId)
         userPointsRepo.deleteByProjectIdAndSkillId(skillDef.projectId, skillDef.skillId)
+        //decrement points in the step above can result in zero point entries if a user has only achieved the skill being deleted
+        //cleanup those entries to as not to pollute user metrics
+        userPointsRepo.deleteZeroPointEntries(skillDef.projectId) //crap this breaks user_achievements
 
         userPerformedSkillRepo.deleteByProjectIdAndSkillId(skillDef.projectId, skillDef.skillId)
         userAchievedLevelRepo.deleteByProjectIdAndSkillId(skillDef.projectId, skillDef.skillId)
+        //don't leave any achievements if a user no longer has any entries in user_points
+        userAchievedLevelRepo.deleteAchievementsWithNoPoints(skillDef.projectId)
     }
 
     @Transactional

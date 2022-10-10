@@ -19,6 +19,7 @@ import org.joda.time.DateTime
 import org.springframework.http.*
 import skills.controller.result.model.TableResult
 import skills.intTests.utils.*
+import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -1036,5 +1037,54 @@ class AdminEditSpecs extends DefaultIntSpec {
 
         user1_leve_t0 == 0
         user1_leve_t1 == 1
+    }
+
+    def "deleting a skill should remove ophaned points and achievements"() {
+        def project = SkillsFactory.createProject()
+        def subject = SkillsFactory.createSubject()
+        def skill1 = SkillsFactory.createSkill(1, 1, 1, 0, 5)
+        skill1.pointIncrement = 50
+        def skill2 = SkillsFactory.createSkill(1, 1, 2, 0, 5)
+
+        skillsService.createProject(project)
+        skillsService.createSubject(subject)
+        skillsService.createSkill(skill1)
+        skillsService.createSkill(skill2)
+
+        def users = getRandomUsers(2)
+        def user1 = users[0]
+        def user2 = users[1]
+
+        when:
+        skillsService.addSkill(skill1, user1, new Date().minus(5))
+        skillsService.addSkill(skill1, user1, new Date().minus(1))
+        skillsService.addSkill(skill1, user2, new Date())
+        skillsService.addSkill(skill2, user2, new Date())
+
+        def u1Level = skillsService.getUserLevel(project.projectId, user1)
+        assert u1Level == 2
+        def u2Level = skillsService.getUserLevel(project.projectId, user2)
+        assert u2Level == 1
+
+        def projectUsers = skillsService.getProjectUsers(project.projectId)
+        assert projectUsers.data.find { it.userId == user1 && it.totalPoints == 100 }
+        assert projectUsers.data.find { it.userId == user2 && it.totalPoints == 60 }
+        def subjectUsers = skillsService.getSubjectUsers(project.projectId, subject.subjectId)
+        assert subjectUsers.data.find { it.userId == user1 && it.totalPoints == 100 }
+        assert subjectUsers.data.find { it.userId == user2 && it.totalPoints == 60 }
+
+        skillsService.deleteSkill(skill1)
+        def projectUsersPostDelete = skillsService.getProjectUsers(project.projectId)
+        def subjectUsersPostDelete = skillsService.getSubjectUsers(project.projectId, subject.subjectId)
+        def u1LevelPostDelete = skillsService.getUserLevel(project.projectId, user1)
+        def u2LevelPostDelete = skillsService.getUserLevel(project.projectId, user2)
+
+        then:
+        !projectUsersPostDelete.data.find { it.userId == user1 }
+        projectUsersPostDelete.data.find { it.userId == user2 && it.totalPoints == 10 }
+        !subjectUsersPostDelete.data.find { it.userId == user1 }
+        subjectUsersPostDelete.data.find { it.userId == user2 && it.totalPoints == 10 }
+        !u1LevelPostDelete
+        u2LevelPostDelete == 1
     }
 }
