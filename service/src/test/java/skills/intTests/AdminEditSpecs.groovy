@@ -19,7 +19,6 @@ import org.joda.time.DateTime
 import org.springframework.http.*
 import skills.controller.result.model.TableResult
 import skills.intTests.utils.*
-import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
