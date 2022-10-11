@@ -23,6 +23,7 @@ limitations under the License.
       :options="editorOptions"
       :height="markdownHeight"
       @change="onEditorChange"
+      @focus="setLabelForMoreButton"
     ></editor>
   </div>
 </template>
@@ -55,6 +56,14 @@ limitations under the License.
         },
       };
     },
+    // mounted() {
+    //   console.log('mounted');
+    //   this.setLabelForMoreButton();
+    // },
+    // updated() {
+    //   console.log('updated');
+    //   this.setLabelForMoreButton();
+    // },
     watch: {
       value(newValue) {
         this.valueInternal = newValue;
@@ -69,6 +78,14 @@ limitations under the License.
     methods: {
       onEditorChange() {
         this.$emit('input', this.markdownText);
+      },
+      setLabelForMoreButton() {
+        this.$nextTick(() => {
+          const toolbarElem = document.getElementsByClassName('more toastui-editor-toolbar-icons')[0];
+          if (toolbarElem) {
+            toolbarElem.setAttribute('aria-label', 'More');
+          }
+        });
       },
     },
   };
