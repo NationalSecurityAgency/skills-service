@@ -36,10 +36,12 @@ import skills.tasks.data.CatalogFinalizeRequest
 import skills.tasks.data.CatalogSkillDefinitionUpdated
 import skills.tasks.data.ImportedSkillAchievement
 import skills.tasks.data.ProjectInviteCleanup
+import skills.tasks.data.UnachievableLevelIdentification
 import skills.tasks.executors.CatalogSkillUpdatedTaskExecutor
 import skills.tasks.executors.FinalizeCatalogSkillsImportExecutor
 import skills.tasks.executors.ImportedSkillAchievementTaskExecutor
 import skills.tasks.executors.ProjectInviteCleanupTaskExecutor
+import skills.tasks.executors.UnachievableLevelIdentificationTaskExecutor
 
 import java.time.Duration
 
@@ -58,6 +60,9 @@ class TaskConfig {
 
     @Value('#{"${skills.config.inviteCleanupSchedule:DAILY|23:30}"}')
     String projectInviteCleanupSchedule
+
+    @Value('#{"${skills.config.unachievableLevelIdentificationSchedule:DAILY|23:45}"}')
+    String unachievableLevelIdentificationSchedule
 
     @Bean
     DbSchedulerCustomizer customizer() {
@@ -135,6 +140,12 @@ class TaskConfig {
     RecurringTask<ProjectInviteCleanup> cleanupProjectInvitesTask(ProjectInviteCleanupTaskExecutor projectInviteCleanupTaskExecutor) {
         //recurring tasks are automatically picked up by the scheduler
         return Tasks.recurring("project-invite-cleanup", Schedules.parseSchedule(projectInviteCleanupSchedule)).execute(projectInviteCleanupTaskExecutor)
+    }
+
+    @Bean
+    RecurringTask<UnachievableLevelIdentification> identifyUnachievableLevels(UnachievableLevelIdentificationTaskExecutor unachievableLevelIdentificationTaskExecutor) {
+        //recurring tasks are automatically picked up by the scheduler
+        return Tasks.recurring("unachievable-level-identification", Schedules.parseSchedule(unachievableLevelIdentificationSchedule)).execute(unachievableLevelIdentificationTaskExecutor)
     }
 
 }

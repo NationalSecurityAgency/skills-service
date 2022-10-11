@@ -128,10 +128,14 @@ Vue.config.productionTip = false;
 window.dayjs = dayjs;
 
 window.axios = require('axios');
+
+window.cancellationController = new AbortController();
+
 require('./interceptors/errorHandler');
 require('./interceptors/clientVersionInterceptor');
 require('./interceptors/userAgreementInterceptor');
 require('./interceptors/upgradeInProgressInterceptor');
+require('./interceptors/globalCancelInterceptor');
 
 const isActiveProjectIdChange = (to, from) => to.params.projectId !== from.params.projectId;
 const isAdminPage = (route) => route.path.startsWith('/administrator');

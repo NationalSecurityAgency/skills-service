@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <b-modal id="contactProjectOwners"
-           :title="`Contact ${this.projectName}`"
+           :title="`Contact ${this.projectName ? this.projectName : 'Project'}`"
            ok-title="Submit"
            :no-close-on-backdrop="true"
            @hide="cancel"
@@ -42,7 +42,8 @@ limitations under the License.
       </div>
       <div v-if="sendComplete" data-cy="contactOwnerSuccessMsg">
         <p class="text-center text-success"><i class="fa fa-check" /> Message sent!</p>
-        <p class="text-center">The Project Administrator(s) of {{ projectName }} will be notified of your question via email.</p>
+        <p v-if="projectName" class="text-center">The Project Administrator(s) of {{ projectName }} will be notified of your question via email.</p>
+        <p v-else class="text-center">The Project Administrator(s) will be notified of your question via email.</p>
       </div>
     </loading-container>
     <template #modal-footer="{ ok, cancel }">
@@ -72,7 +73,7 @@ limitations under the License.
     props: {
       projectName: {
         type: String,
-        required: true,
+        required: false,
       },
       value: {
         type: Boolean,

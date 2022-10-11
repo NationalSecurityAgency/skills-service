@@ -40,6 +40,7 @@ limitations under the License.
                     @page-changed="pageChanged"
                     @page-size-changed="pageSizeChanged"
                     @sort-changed="sortTable"
+                    tableStoredStateId="roleManagerTable"
                     data-cy="roleManagerTable">
       <template v-slot:cell(userId)="data">
         <div :data-cy="`userCell_${data.value}`">

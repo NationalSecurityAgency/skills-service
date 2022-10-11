@@ -45,7 +45,7 @@ class RestAccessDeniedHandler implements AccessDeniedHandler {
     void handle(final HttpServletRequest request, final HttpServletResponse response, final AccessDeniedException ex) throws IOException, ServletException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         log.warn("Access Denied User [${authentication}], reqested resource [${request.getServletPath()}]")
-        AccessDeniedExplanation explanation = new AccessDeniedExplanationGenerator().generateExplanation(request.getServletPath())
+        AccessDeniedExplanation explanation = new AccessDeniedExplanationGenerator().generateExplanation(request.getServletPath(), ex)
         response.setStatus(HttpServletResponse.SC_FORBIDDEN)
         if(explanation) {
             String asJson = om.writeValueAsString(explanation)

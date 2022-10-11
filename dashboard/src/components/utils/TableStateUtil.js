@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2020 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.auth.util
+export default class TableStateUtil {
+  static saveTableSortState(id, sortBy, sortDesc) {
+    const sorting = {};
+    sorting[id] = {
+      sortBy,
+      sortDesc,
+    };
+    localStorage.setItem('tableState', JSON.stringify(sorting));
+  }
 
-class AccessDeniedExplanation {
-    String explanation;
-    String errorCode;
-    String projectId //this is only populated in the case of access attempts for an invite only project
+  static loadTableState(id) {
+    const sorting = JSON.parse(localStorage.getItem('tableState'));
+    if (sorting && sorting[id]) {
+      return sorting[id];
+    }
+    return null;
+  }
 }

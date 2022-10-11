@@ -891,6 +891,68 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         res2.find { it.value == 'SkillApprovalsRejected' }.count == 0
     }
 
+    def "skill approval stats should not include approval history as pending approvals"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(2,)
+        skills[0].pointIncrement = 200
+        skills[0].numPerformToCompletion = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+        skills[1].pointIncrement = 200
+        skills[1].numPerformToCompletion = 200
+        skills[1].selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        def proj1 = SkillsFactory.createProject(2)
+        def subj1 = SkillsFactory.createSubject(2)
+        def skills1 = SkillsFactory.createSkills(2,2)
+        skills1[1].pointIncrement = 200
+        skills1[1].numPerformToCompletion = 200
+        skills1[1].selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(subj1)
+        skillsService.createSkills(skills1)
+
+        List<String> users = getRandomUsers(10)
+        7.times {
+            Date date = new Date() - (10 + it)
+            def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[it], date, "Please approve this ${it}!")
+            assert res.body.explanation == "Skill was submitted for approval"
+        }
+
+        3.times {
+            Date date = new Date() - it
+
+            def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[it], date, "Please approve this ${it}!")
+            assert res.body.explanation == "Skill was submitted for approval"
+
+            def res1 = skillsService.addSkill([projectId: proj1.projectId, skillId: skills1[1].skillId], users[it], date, "Other reason ${it}!")
+            assert res1.body.explanation == "Skill was submitted for approval"
+        }
+
+        def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 50, 1, 'requestedOn', false)
+        def approvalsForSkill1 = approvalsEndpointRes.data.findAll { it.skillId == skills[0].skillId }
+        List<Integer> ids = approvalsForSkill1.collect { it.id }
+        skillsService.rejectSkillApprovals(proj.projectId, [ids[1], ids[2]], 'Just felt like it')
+        skillsService.approve(proj.projectId, [ids[3], ids[4]])
+
+        when:
+        def res1 = skillsService.getSkillApprovalsStats(proj.projectId, skills[0].skillId)
+        def res2 = skillsService.getSkillApprovalsStats(proj.projectId, skills[1].skillId)
+
+        then:
+        res1.find { it.value == 'SkillApprovalsRequests' }.count == 3
+        res1.find { it.value == 'SkillApprovalsApproved' }.count == 2
+        res1.find { it.value == 'SkillApprovalsRejected' }.count == 2
+
+        res2.find { it.value == 'SkillApprovalsRequests' }.count == 3
+        res2.find { it.value == 'SkillApprovalsRejected' }.count == 0
+    }
+
     void "requesting same skill over and over again will only add 1 approval"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()

@@ -202,7 +202,7 @@ class EmailNotifier implements Notifier {
                         String email = getEmail(it)
                         if (email) {
                             boolean failed = !dispatchState.doWithErrHandling(notification, {
-                                sendingService.sendEmail(emailRes.subject, email, emailRes.html, emailRes.plainText, notification.requestedOn, senderForBatch, fromEmail)
+                                sendingService.sendEmail(emailRes.subject, email, emailRes.html, emailRes.plainText, notification.requestedOn, senderForBatch, fromEmail, emailRes.ccRecipients)
                             })
                             if (failed) {
                                 failedUserIds.add(it)
@@ -213,7 +213,7 @@ class EmailNotifier implements Notifier {
                     List<String> emails = getEmails(userIds)
                     if (emails) {
                         boolean failed = !dispatchState.doWithErrHandling(notification, {
-                            sendingService.sendEmail(emailRes.subject, emails, emailRes.html, emailRes.plainText, notification.requestedOn, senderForBatch, fromEmail)
+                            sendingService.sendEmail(emailRes.subject, emails, emailRes.html, emailRes.plainText, notification.requestedOn, senderForBatch, fromEmail, emailRes.ccRecipients)
                         })
                         if (failed) {
                             failedUserIds = userIds

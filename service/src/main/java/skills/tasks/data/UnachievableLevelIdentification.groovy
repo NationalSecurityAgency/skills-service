@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.auth.util
+package skills.tasks.data
 
-class AccessDeniedExplanation {
-    String explanation;
-    String errorCode;
-    String projectId //this is only populated in the case of access attempts for an invite only project
+class UnachievableLevelIdentification {
+    // placeholder for future use
 }

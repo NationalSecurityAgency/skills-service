@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2020 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.auth.util
+import axios from 'axios';
 
-class AccessDeniedExplanation {
-    String explanation;
-    String errorCode;
-    String projectId //this is only populated in the case of access attempts for an invite only project
+function handleFunction(config) {
+  if (config.url && config.url.includes('isFeatureSupported')) {
+    // don't support cancellation of these requests
+    return config;
+  }
+  // eslint-disable-next-line
+  return { ...config, signal: cancellationController.signal };
 }
+
+axios.interceptors.request.use((config) => handleFunction(config));

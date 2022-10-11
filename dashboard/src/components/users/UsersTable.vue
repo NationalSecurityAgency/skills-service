@@ -36,6 +36,7 @@ limitations under the License.
                       @page-changed="pageChanged"
                       @page-size-changed="pageSizeChanged"
                       @sort-changed="sortTable"
+                      tableStoredStateId="usersTable"
                       data-cy="usersTable">
         <template #head(userId)="data">
           <span class="text-primary"><i class="fas fa-user skills-color-users" aria-hidden="true"></i> {{ data.label }}</span>
