@@ -341,14 +341,10 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
     def "load subject summary with approvals"(){
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)
-        proj1_subj.helpUrl = "http://foo.org"
-        proj1_subj.description = "This is a description"
         List<Map> allSkills = SkillsFactory.createSkills(2, 1, 1)
-        allSkills.forEach(it -> {
-            it.pointIncrement = 200
-            it.numPerformToCompletion = 200
-            it.selfReportingType = SkillDef.SelfReportingType.Approval
-        })
+        allSkills[0].pointIncrement = 200
+        allSkills[0].numPerformToCompletion = 200
+        allSkills[0].selfReportingType = SkillDef.SelfReportingType.Approval
 
         skillsService.createProject(proj1)
         skillsService.createSubject(proj1_subj)
@@ -363,7 +359,40 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         then:
         summary.skills.size() == 2
         summary.skills[0].selfReporting.requestedOn == requestedDate.time
-        summary.skills[1].selfReporting.requestedOn == null
+        summary.skills[1].selfReporting == null
     }
 
+    def "load subject summary, without approved and rejected approvals"(){
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> allSkills = SkillsFactory.createSkills(5, 1, 1)
+        allSkills.forEach{ it ->
+            it.pointIncrement = 200
+            it.numPerformToCompletion = 200
+            it.selfReportingType = SkillDef.SelfReportingType.Approval
+        }
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(allSkills)
+
+        List<String> users = getRandomUsers(1)
+        def requestedDate = new Date()
+        allSkills.forEach { it ->
+            skillsService.addSkill([projectId: proj1.projectId, skillId: it.skillId], users.first(), requestedDate, "Please approve this 1!")
+
+        }
+        skillsService.rejectSkillApprovals(proj1.projectId, [1, 3], null)
+        skillsService.approve(proj1.projectId, [2, 4])
+
+        when:
+        def summary = skillsService.getSkillSummary(users.first(), proj1.projectId, proj1_subj.subjectId)
+        then:
+        summary.skills.size() == 5
+        summary.skills[0].selfReporting.requestedOn == null
+        summary.skills[1].selfReporting.requestedOn == null
+        summary.skills[2].selfReporting.requestedOn == null
+        summary.skills[3].selfReporting.requestedOn == null
+        summary.skills[4].selfReporting.requestedOn == requestedDate.time
+    }
 }
