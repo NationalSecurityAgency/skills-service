@@ -570,6 +570,20 @@ class SkillsLoader {
         clientPrefService.saveOrUpdateProjPrefForCurrentUser(ClientPrefKey.LastViewedSkill, skillId, projectId)
     }
 
+    private SelfReportingInfo loadSelfReportingFromApproval(SkillApproval skillApproval, SkillDefParent skillDef) {
+        SelfReportingInfo selfReportingInfo = new SelfReportingInfo(
+                approvalId: skillApproval?.id,
+                enabled: skillDef.selfReportingType != null,
+                type: skillDef.selfReportingType,
+                justificationRequired: Boolean.valueOf(skillDef.justificationRequired),
+                requestedOn: skillApproval?.requestedOn?.time,
+                rejectedOn: skillApproval?.rejectedOn?.time,
+                rejectionMsg: skillApproval?.rejectionMsg
+        )
+
+        return selfReportingInfo
+    }
+
     @Profile
     private SelfReportingInfo loadSelfReporting(String userId, SkillDefParent skillDef){
         boolean enabled = skillDef.selfReportingType != null
@@ -1046,7 +1060,7 @@ class SkillsLoader {
                         maxOccurrencesWithinIncrementInterval: skillDef.numMaxOccurrencesIncrementInterval,
                         totalPoints: skillDef.totalPoints,
                         dependencyInfo: skillDefAndUserPoints.dependencyInfo,
-                        selfReporting: skillDef.selfReportingType ? loadSelfReporting(userId, skillDef) : null,
+                        selfReporting: skillDef.selfReportingType ? loadSelfReportingFromApproval(skillDefAndUserPoints?.approval, skillDef) : null,
                         subjectName: subjectName,
                         subjectId: subjectId,
                         type: skillDef.type,

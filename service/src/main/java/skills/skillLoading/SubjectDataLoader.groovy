@@ -26,6 +26,7 @@ import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.skillLoading.model.SkillDependencySummary
 import skills.storage.model.ClientPref
+import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefParent
 import skills.storage.model.SkillRelDef
@@ -69,6 +70,7 @@ class SubjectDataLoader {
         SkillDependencySummary dependencyInfo
 
         List<SkillsAndPoints> children = []
+        SkillApproval approval
     }
 
     static class SkillsData {
@@ -90,6 +92,7 @@ class SubjectDataLoader {
             UserPointsRepo.SkillRefIdWithPoints todaysPoints = todaysUserPoints.find({
                 it.skillRefId == skillDefAndUserPoints.skillDef.id
             })
+
             int todayPoints = todaysPoints?.points ? todaysPoints.points : 0
             int points = skillDefAndUserPoints?.points ? skillDefAndUserPoints.points.points : 0
 
@@ -113,7 +116,7 @@ class SubjectDataLoader {
                 ) : null
             }
             new SkillsAndPoints(skillDef: skillDefAndUserPoints.skillDef, points: points, todaysPoints: todayPoints, dependencyInfo: dependencyInfo,
-                    copiedFromProjectName: skillDefAndUserPoints.copiedFromProjectName)
+                    copiedFromProjectName: skillDefAndUserPoints.copiedFromProjectName, approval: skillDefAndUserPoints.approval)
         }
 
         updateLastViewedSkill(skillsAndPoints, userId, projectId)
@@ -191,6 +194,7 @@ class SubjectDataLoader {
         SkillDef skillDef
         UserPoints points
         String copiedFromProjectName
+        SkillApproval approval
     }
 
     @Profile
@@ -201,7 +205,7 @@ class SubjectDataLoader {
         List<SkillDefAndUserPoints> res = childrenWithUserPoints.collect {
             UserPoints userPoints = (it.length > 1 ? it[1] : null) as UserPoints
             return new SkillDefAndUserPoints(
-                    skillDef: it[0] as SkillDef, points: userPoints, copiedFromProjectName: it.length > 2 ? (String)it[2] : null
+                    skillDef: it[0] as SkillDef, points: userPoints, copiedFromProjectName: it.length > 2 ? (String)it[2] : null, approval: it[3] as SkillApproval
             )
         }
         return res?.findAll {it.skillDef.type != SkillDef.ContainerType.SkillsGroup || it.skillDef.totalPoints > 0 }.sort { it.skillDef.displayOrder }
