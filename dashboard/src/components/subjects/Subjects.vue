@@ -15,10 +15,10 @@ limitations under the License.
 */
 <template>
   <div ref="mainFocus">
-    <sub-page-header ref="subPageHeader" title="Subjects" :action="isReadOnlyProj ? null : 'Subject'" @add-action="openNewSubjectModal"
-                     :disabled="addSubjectDisabled" :disabled-msg="addSubjectsDisabledMsg"
-                     :aria-label="'new subject'"/>
     <loading-container v-bind:is-loading="isLoading">
+      <sub-page-header ref="subPageHeader" title="Subjects" :action="isReadOnlyProj ? null : 'Subject'" @add-action="openNewSubjectModal"
+                       :disabled="addSubjectDisabled" :disabled-msg="addSubjectsDisabledMsg"
+                       :aria-label="'new subject'"/>
       <jump-to-skill />
       <div v-if="subjects && subjects.length" class="row justify-content-center" id="subjectCards" data-cy="subjectCards">
           <div v-for="(subject) of subjects" :key="subject.subjectId" :id="subject.subjectId" class="col-lg-4 mb-3"

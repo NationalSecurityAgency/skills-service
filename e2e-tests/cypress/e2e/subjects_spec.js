@@ -955,6 +955,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="saveSettingsBtn"]').click();
 
         cy.clickNav('Subjects');
+        cy.get('[data-cy="manageBtn_subj2"]').should('exist')
         cy.get('[data-cy="btn_Subjects"]').click();
         cy.get('[data-cy="skillHelpUrl"]')
         cy.get('[data-cy="rootHelpUrlSetting"]').contains('https://someCoolWebsite.com')

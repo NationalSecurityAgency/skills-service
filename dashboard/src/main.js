@@ -183,7 +183,7 @@ router.beforeEach((to, from, next) => {
       if (isActiveProjectIdChange(to, from)) {
         store.commit('currentProjectId', to.params.projectId);
         if (isAdminPage(to) && to.params.projectId) {
-          store.dispatch('loadProjConfigState', to.params.projectId);
+          store.dispatch('loadProjConfigState', { projectId: to.params.projectId });
         }
       }
       if (to.matched.some((record) => record.meta.requiresAuth)) {

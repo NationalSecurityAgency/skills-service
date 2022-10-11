@@ -157,7 +157,7 @@ describe('Projects Tests', () => {
     });
 
     it('Project stats should all be the same size when they wrap', () => {
-        cy.setResolution([1440, 900]); //original issue presented when stat cards wrapped to another row
+        cy.viewport(1000, 1000); //original issue presented when stat cards wrapped to another row
 
         cy.request('POST', '/app/projects/abcdeghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxy', {
             projectId: 'abcdeghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxy',
@@ -177,7 +177,7 @@ describe('Projects Tests', () => {
         cy.wait(2000);
         cy.get('[data-cy="pageHeader"] .container-fluid')
             .should('have.length', 1);
-        cy.matchSnapshotImageForElement('[data-cy="pageHeader"] .container-fluid');
+        cy.matchSnapshotImageForElement('[data-cy="pageHeader"]');
 
         cy.get('[data-cy=pageHeaderStat]')
             .first()
