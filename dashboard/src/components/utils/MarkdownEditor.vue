@@ -50,7 +50,7 @@ limitations under the License.
         valueInternal: this.value,
         markdownHeight: '15rem',
         editorOptions: {
-          hideModeSwitch: true,
+          hideModeSwitch: false,
           usageStatistics: false,
         },
       };
