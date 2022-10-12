@@ -379,11 +379,12 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         List<String> users = getRandomUsers(1)
         def requestedDate = new Date()
         allSkills.forEach { it ->
-            skillsService.addSkill([projectId: proj1.projectId, skillId: it.skillId], users.first(), requestedDate, "Please approve this 1!")
-
+            def result = skillsService.addSkill([projectId: proj1.projectId, skillId: it.skillId], users.first(), requestedDate, "Please approve this 1!")
         }
-        skillsService.rejectSkillApprovals(proj1.projectId, [1, 3], null)
-        skillsService.approve(proj1.projectId, [2, 4])
+        def approvals = skillsService.getApprovals(proj1.projectId, 10, 1, "requestedOn", false)
+        def approvalIds = approvals.data.collect{ it.id }
+        skillsService.rejectSkillApprovals(proj1.projectId, approvalIds[0..1], null)
+        skillsService.approve(proj1.projectId, approvalIds[2..4])
 
         when:
         def summary = skillsService.getSkillSummary(users.first(), proj1.projectId, proj1_subj.subjectId)
@@ -393,6 +394,6 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         summary.skills[1].selfReporting.requestedOn == null
         summary.skills[2].selfReporting.requestedOn == null
         summary.skills[3].selfReporting.requestedOn == null
-        summary.skills[4].selfReporting.requestedOn == requestedDate.time
+        summary.skills[4].selfReporting.requestedOn == null
     }
 }

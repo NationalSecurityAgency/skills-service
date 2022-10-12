@@ -204,8 +204,9 @@ class SubjectDataLoader {
 
         List<SkillDefAndUserPoints> res = childrenWithUserPoints.collect {
             UserPoints userPoints = (it.length > 1 ? it[1] : null) as UserPoints
+            SkillApproval skillApproval = (it.length > 3 ? it[3] : null) as SkillApproval
             return new SkillDefAndUserPoints(
-                    skillDef: it[0] as SkillDef, points: userPoints, copiedFromProjectName: it.length > 2 ? (String)it[2] : null, approval: it[3] as SkillApproval
+                    skillDef: it[0] as SkillDef, points: userPoints, copiedFromProjectName: it.length > 2 ? (String)it[2] : null, approval: skillApproval
             )
         }
         return res?.findAll {it.skillDef.type != SkillDef.ContainerType.SkillsGroup || it.skillDef.totalPoints > 0 }.sort { it.skillDef.displayOrder }
