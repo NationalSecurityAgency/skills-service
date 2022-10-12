@@ -106,6 +106,27 @@ class SettingsSpecs extends DefaultIntSpec {
         res.value == ["true", "val2", "val3", RoleName.ROLE_PROJECT_ADMIN.toString()]
     }
 
+    def "get settings for a project - several settings - approver role"() {
+        def proj1 = SkillsFactory.createProject(1)
+        skillsService.createProject(proj1)
+        skillsService.changeSettings(proj1.projectId, [
+                [projectId: proj1.projectId, setting: "set1", value: "true"],
+                [projectId: proj1.projectId, setting: "set2", value: "val2"],
+                [projectId: proj1.projectId, setting: "set3", value: "val3"],
+        ])
+
+        def user1Service = createService(getRandomUsers(1, true)[0])
+        skillsService.addUserRole(user1Service.userName, proj1.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        when:
+        def res = user1Service.getSettings(proj1.projectId)
+        res = res.sort { it.setting}
+        then:
+        res.projectId == (1..4).collect { proj1.projectId }
+        res.setting == ["set1", "set2", "set3", Settings.USER_PROJECT_ROLE.settingName]
+        res.value == ["true", "val2", "val3", RoleName.ROLE_PROJECT_APPROVER.toString()]
+    }
+
     def "check validity of settings requests"(){
         def proj1 = SkillsFactory.createProject(1)
         skillsService.createProject(proj1)
