@@ -104,4 +104,19 @@ export default {
   getUserRolesForProject(projectId, roleName, params) {
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/userRoles/${encodeURIComponent(roleName)}`, { params }).then((resp) => resp.data);
   },
+  getInviteStatuses(projectId, recipientQuery, params) {
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/invites/status?query=${recipientQuery}`, { params }).then((resp) => resp.data);
+  },
+  extendInvite(projectId, recipientEmail, iso8601Duration) {
+    return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/invites/extend`, {
+      extensionDuration: iso8601Duration,
+      recipientEmail,
+    }).then((resp) => resp.data);
+  },
+  deleteInvite(projectId, recipientEmail) {
+    return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}/invites/${encodeURIComponent(recipientEmail)}`).then((resp) => resp.data);
+  },
+  remindInvitedUser(projectId, recipientEmail) {
+    return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/invites/${encodeURIComponent(recipientEmail)}/remind`).then((resp) => resp.data);
+  },
 };

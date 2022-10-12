@@ -23,10 +23,23 @@ limitations under the License.
 
     <metrics-card v-if="privateProject" title="Project User: Invite" data-cy="inviteUser" :no-padding="true" class="my-4">
       <b-overlay :show="!isEmailEnabled">
-          <div slot="overlay" class="alert alert-warning mt-2" data-cy="inviteUsers_emailServiceWarning">
-            <i class="fa fa-exclamation-triangle" aria-hidden="true"/> Please note that email notifications are currently disabled. Email configuration has not been performed on this instance of SkillTree. Please contact the root administrator.
+        <div slot="overlay" class="alert alert-warning mt-2" data-cy="inviteUsers_emailServiceWarning">
+          <i class="fa fa-exclamation-triangle" aria-hidden="true"/> Please note that email notifications are currently disabled. Email configuration has not been performed on this instance of SkillTree. Please contact the root administrator.
+        </div>
+        <div class="card h-100">
+          <div class="card-body">
+            <div class="media w-100">
+              <invite-users-to-project ref="inviteUsers" :project-id="projectId" @invites-sent="handleInviteSent"/>
+            </div>
           </div>
-        <invite-users-to-project ref="inviteUsers" :project-id="projectId"/>
+        </div>
+        <div class="card h-100">
+          <div class="card-body">
+            <div class="media w-100">
+              <invite-statuses ref="inviteStatuses" :project-id="projectId"/>
+            </div>
+          </div>
+        </div>
       </b-overlay>
     </metrics-card>
     <metrics-card v-if="privateProject" title="Project User: Revoke" data-cy="revokeAccess" :no-padding="true" class="my-4">
@@ -40,6 +53,7 @@ limitations under the License.
 <script>
   import { mapGetters } from 'vuex';
   import InviteUsersToProject from '@/components/access/InviteUsersToProject';
+  import InviteStatuses from '@/components/access/InviteStatuses';
   import RevokeUserAccess from '@/components/access/RevokeUserAccess';
   import MetricsCard from '../metrics/utils/MetricsCard';
   import RoleManager from './RoleManager';
@@ -58,6 +72,7 @@ limitations under the License.
       TrustedClientProps,
       InviteUsersToProject,
       RevokeUserAccess,
+      InviteStatuses,
     },
     data() {
       return {
@@ -105,6 +120,11 @@ limitations under the License.
         .finally(() => {
           this.isLoading = false;
         });
+    },
+    methods: {
+      handleInviteSent() {
+        this.$refs.inviteStatuses.loadData();
+      },
     },
   };
 </script>

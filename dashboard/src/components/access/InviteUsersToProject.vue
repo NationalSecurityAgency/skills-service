@@ -15,8 +15,8 @@ limitations under the License.
 */
 <template>
 
-  <loading-container :is-loading="loading">
-    <div class="m-3">
+  <loading-container :is-loading="loading" class="w-100">
+    <div class="">
       <div class="mb-3" data-cy="inviteExpiration">
         <label class="text-secondary" id="inviteExpirationLabel">
           Invite Expiration:
@@ -224,6 +224,7 @@ limitations under the License.
             setTimeout(() => {
               this.showSuccessMsg = false;
             }, 4000);
+            this.$emit('invites-sent');
           }
         }).finally(() => {
           this.sending = false;
