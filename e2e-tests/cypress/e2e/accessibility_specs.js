@@ -253,7 +253,7 @@ describe('Accessibility Tests', () => {
         cy.customA11y();
     });
 
-    it.only('project', () => {
+    it('project', () => {
         //report skills that dont' exist
         cy.reportSkill('MyNewtestProject', 42, 'user@skills.org', '2021-02-24 10:00', false);
         cy.reportSkill('MyNewtestProject', 75, 'user@skills.org', '2021-02-24 10:00', false);
@@ -590,7 +590,7 @@ describe('Accessibility Tests', () => {
         cy.customA11y();
     });
 
-    it.only('badges', () => {
+    it('badges', () => {
         cy.visit('/administrator/');
         cy.injectAxe();
 

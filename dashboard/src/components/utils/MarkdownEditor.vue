@@ -23,7 +23,6 @@ limitations under the License.
       :options="editorOptions"
       :height="markdownHeight"
       @change="onEditorChange"
-      @focus="setLabelForMoreButton"
     ></editor>
   </div>
 </template>
@@ -55,16 +54,22 @@ limitations under the License.
           usageStatistics: false,
           autofocus: false,
         },
+        intervalId: null,
+        intervalRuns: 0,
+        maxIntervalAttempts: 8,
       };
     },
-    // mounted() {
-    //   console.log('mounted');
-    //   this.setLabelForMoreButton();
-    // },
-    // updated() {
-    //   console.log('updated');
-    //   this.setLabelForMoreButton();
-    // },
+    mounted() {
+      this.intervalId = setInterval(() => {
+        this.intervalRuns += 1;
+        if (this.intervalRuns <= this.maxIntervalAttempts) {
+          this.setLabelForMoreButton();
+        } else {
+          clearInterval(this.intervalId);
+        }
+      }, 250);
+      this.setLabelForMoreButton();
+    },
     watch: {
       value(newValue) {
         this.valueInternal = newValue;
