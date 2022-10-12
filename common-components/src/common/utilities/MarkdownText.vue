@@ -15,10 +15,9 @@ limitations under the License.
 */
 <template>
   <span class="markdown">
-    <viewer ref="toastuiViewer" data-cy="markdownViewer" :initialValue="text" height="500px" />
+    <viewer ref="toastuiViewer" data-cy="markdownViewer" :initialValue="text" height="auto" />
   </span>
 </template>
-
 <script>
 
   import '@toast-ui/editor/dist/toastui-editor-viewer.css';
