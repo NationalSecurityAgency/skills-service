@@ -14,7 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <viewer ref="toastuiViewer" data-cy="markdownViewer" :initialValue="text" height="500px" />
+  <span class="markdown">
+    <viewer ref="toastuiViewer" data-cy="markdownViewer" :initialValue="text" height="500px" />
+  </span>
 </template>
 
 <script>
@@ -39,4 +41,29 @@ limitations under the License.
 </script>
 
 <style>
+    .markdown div.toastui-editor-contents p {
+      color: inherit !important;
+    }
+
+    .markdown blockquote {
+        padding: 10px 20px;
+        margin: 0 0 20px;
+        font-size: 1rem;
+        border-left: 5px solid #eeeeee;
+        color: #888;
+        line-height: 1.5;
+    }
+
+    .markdown pre {
+        border: 1px solid #dddddd !important;
+        margin: 1rem;
+        padding: 1rem;
+        overflow: auto;
+        font-size: 85%;
+        border-radius: 6px;
+        background-color: #f6f8fa;
+    }
+    .markdown a {
+      text-decoration: underline;
+    }
 </style>
