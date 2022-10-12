@@ -53,6 +53,7 @@ limitations under the License.
         editorOptions: {
           hideModeSwitch: false,
           usageStatistics: false,
+          autofocus: false,
         },
       };
     },
