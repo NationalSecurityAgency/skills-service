@@ -277,6 +277,9 @@ limitations under the License.
                 }
                 return user;
               });
+              this.$nextTick(() => {
+                this.$announcer.polite(`New ${newRole} was added to the user`);
+              });
             }).catch((e) => {
               this.handleError(e);
             });
@@ -336,6 +339,9 @@ limitations under the License.
             this.$emit('role-deleted', { userId: row.userId, role: row.roleName });
             this.table.options.busy = false;
             this.table.options.pagination.totalRows = this.data.length;
+            this.$nextTick(() => {
+              this.$announcer.polite(`${row.roleName} was removed from the user`);
+            });
           });
       },
       notCurrentUser(userId) {

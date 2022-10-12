@@ -167,15 +167,17 @@ limitations under the License.
         this.isLoadingData = true;
         SubjectsService.saveSubject(subject)
           .then(() => {
-            this.doLoadSubjects();
+            this.doLoadSubjects()
+              .then(() => {
+              this.handleFocus().then(() => {
+                this.$nextTick(() => {
+                  this.$announcer.polite(`Subject ${subject.name} has been saved`);
+                });
+              });
+            });
             this.loadProjectDetailsState({ projectId: this.projectId });
             this.$emit('subjects-changed', subject.subjectId);
             SkillsReporter.reportSkill('CreateSubject');
-            this.handleFocus().then(() => {
-              this.$nextTick(() => {
-                this.$announcer.polite(`Subject ${subject.name} has been saved`);
-              });
-            });
           });
       },
       handleHide(e) {
