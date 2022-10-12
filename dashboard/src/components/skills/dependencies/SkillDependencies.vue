@@ -18,7 +18,7 @@ limitations under the License.
     <sub-page-header title="Dependencies"/>
 
     <b-card body-class="p-0" class="dependencies-container">
-      <loading-container :is-loading="!loading.finishedAllSkills || !loading.finishedDependents">
+      <loading-container :is-loading="isLoading">
 
         <no-content2 v-if="skill.sharedToCatalog"
                      class="mt-5 pt-5"
@@ -33,7 +33,7 @@ limitations under the License.
                      message="Once a Skill has been reused, Dependencies may not be added."></no-content2>
 
         <div class="p-3" v-if="!skill.sharedToCatalog && !skill.thisSkillWasReusedElsewhere">
-          <skills-selector2 :options="allSkills" :selected="skills" v-on:added="skillAdded"
+          <skills-selector2 v-if="!isReadOnlyProj" :options="allSkills" :selected="skills" v-on:added="skillAdded"
                             v-on:removed="skillDeleted"
                             data-cy="depsSelector">
             <template #dropdown-item="{ option }">
@@ -85,7 +85,7 @@ limitations under the License.
           <dependants-graph :skill="skill" :dependent-skills="skills" :graph="graph" class="my-3"/>
         </div>
 
-        <simple-skills-table :skills="skills" v-on:skill-removed="deleteSkill">
+        <simple-skills-table v-if="projConfig" :skills="skills" v-on:skill-removed="deleteSkill" :is-read-only="isReadOnlyProj">
             <span slot="name-cell" slot-scope="row">
               <i v-if="row.props.isFromAnotherProject" class="fas fa-w-16 fa-handshake text-primary mr-1"></i>
               <i v-else class="fas fa-w-16 fa-list-alt text-hc mr-1"></i>
@@ -104,17 +104,18 @@ limitations under the License.
 <script>
   import { SkillsReporter } from '@skilltree/skills-client-vue';
   import NoContent2 from '@/components/utils/NoContent2';
-  import SkillsService from '../SkillsService';
-  import DependantsGraph from './DependantsGraph';
-  import SkillsSelector2 from '../SkillsSelector2';
-  import SimpleSkillsTable from '../SimpleSkillsTable';
-  import SubPageHeader from '../../utils/pages/SubPageHeader';
-  import LoadingContainer from '../../utils/LoadingContainer';
-  import MsgBoxMixin from '../../utils/modal/MsgBoxMixin';
+  import SkillsService from '@/components/skills/SkillsService';
+  import DependantsGraph from '@/components/skills/dependencies/DependantsGraph';
+  import SkillsSelector2 from '@/components/skills/SkillsSelector2';
+  import SimpleSkillsTable from '@/components/skills/SimpleSkillsTable';
+  import SubPageHeader from '@/components/utils/pages/SubPageHeader';
+  import LoadingContainer from '@/components/utils/LoadingContainer';
+  import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
+  import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
 
   export default {
     name: 'SkillDependencies',
-    mixins: [MsgBoxMixin],
+    mixins: [MsgBoxMixin, ProjConfigMixin],
     components: {
       NoContent2,
       LoadingContainer,
@@ -153,6 +154,11 @@ limitations under the License.
     },
     mounted() {
       this.loadData();
+    },
+    computed: {
+      isLoading() {
+        return !this.loading.finishedAllSkills || !this.loading.finishedDependents || this.isLoadingProjConfig;
+      },
     },
     methods: {
       initData() {

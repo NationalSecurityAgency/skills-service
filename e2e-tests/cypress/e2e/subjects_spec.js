@@ -391,23 +391,23 @@ describe('Subjects Tests', () => {
         });
 
         cy.visit('/administrator/projects/proj1');
-        cy.contains('Subjects').click();
-        cy.get('[aria-label="new subject"]').click();
+        cy.get('[data-cy="manageBtn_subj1"')
+        cy.get('[data-cy="btn_Subjects"]').click();
         cy.get('[data-cy=closeSubjectButton]').click();
-        cy.get('[aria-label="new subject"]').should('have.focus');
+        cy.get('[data-cy="btn_Subjects"]').should('have.focus');
 
-        cy.get('[aria-label="new subject"]').click();
+        cy.get('[data-cy="btn_Subjects"]').click();
         cy.get('body').type('{esc}');
-        cy.get('[aria-label="new subject"]').should('have.focus');
+        cy.get('[data-cy="btn_Subjects"]').should('have.focus');
 
-        cy.get('[aria-label="new subject"]').click();
+        cy.get('[data-cy="btn_Subjects"]').click();
         cy.get('[aria-label=Close]').click();
-        cy.get('[aria-label="new subject"]').should('have.focus');
+        cy.get('[data-cy="btn_Subjects"]').should('have.focus');
 
-        cy.get('[aria-label="new subject"]').click();
+        cy.get('[data-cy="btn_Subjects"]').click();
         cy.get('[data-cy=subjectNameInput]').type('foobarbaz');
         cy.get('[data-cy=saveSubjectButton]').click();
-        cy.get('[aria-label="new subject"]').should('have.focus');
+        cy.get('[data-cy="btn_Subjects"]').should('have.focus');
     });
 
     it('focus should be returned to subject edit button', () => {
@@ -955,6 +955,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="saveSettingsBtn"]').click();
 
         cy.clickNav('Subjects');
+        cy.get('[data-cy="manageBtn_subj2"]').should('exist')
         cy.get('[data-cy="btn_Subjects"]').click();
         cy.get('[data-cy="skillHelpUrl"]')
         cy.get('[data-cy="rootHelpUrlSetting"]').contains('https://someCoolWebsite.com')

@@ -16,7 +16,7 @@ limitations under the License.
 <template>
   <div ref="mainFocus">
     <page-header :loading="isLoading" :options="headerOptions">
-      <div slot="banner" v-if="project && project.expiring" data-cy="projectExpiration"
+      <div slot="banner" v-if="project && project.expiring && !isReadOnlyProj" data-cy="projectExpiration"
            class="w-100 text-center alert-danger p-2 mb-3">
           <span class="mr-2"
                 aria-label="This Project has not been used recently, it will  be deleted unless you explicitly retain it"
@@ -33,10 +33,7 @@ limitations under the License.
         </b-button>
       </div>
       <div slot="subSubTitle" v-if="project">
-        <div data-cy="projectCreated">
-          <project-dates :created="project.created" :load-last-reported-date="true"/>
-        </div>
-        <b-button-group class="mt-3" size="sm">
+        <b-button-group v-if="!isReadOnlyProj" class="mb-3" size="sm">
           <b-button @click="displayEditProject"
                     ref="editProjectButton"
                     class="btn btn-outline-primary"
@@ -60,26 +57,19 @@ limitations under the License.
             <span>Share</span> <i class="fas fa-share-alt" style="font-size:1rem;" aria-hidden="true"/>
           </b-button>
         </b-button-group>
+        <div data-cy="projectCreated">
+          <i class="fas fa-clock text-success header-status-icon" aria-hidden="true" /> <project-dates :created="project.created" :load-last-reported-date="true"/>
+        </div>
+        <div v-if="userProjRole">
+          <i class="fas fa-user-shield text-success header-status-icon" aria-hidden="true" /> <span class="text-secondary font-italic small">Role:</span> <span class="small text-primary" data-cy="userRole">{{ userProjRole | userRole }}</span>
+        </div>
       </div>
       <div slot="footer">
         <import-finalize-alert />
       </div>
     </page-header>
 
-    <navigation v-if="!isLoading" :nav-items="[
-          {name: 'Subjects', iconClass: 'fa-cubes skills-color-subjects', page: 'Subjects'},
-          {name: 'Badges', iconClass: 'fa-award skills-color-badges', page: 'Badges'},
-          {name: 'Self Report', iconClass: 'fa-laptop skills-color-selfreport', page: 'SelfReport'},
-          {name: 'Dependencies', iconClass: 'fa-project-diagram skills-color-dependencies', page: 'FullDependencyGraph'},
-          {name: 'Skill Catalog', iconClass: 'fa-book skills-color-skill-catalog', page: 'SkillsCatalog'},
-          {name: 'Levels', iconClass: 'fa-trophy skills-color-levels', page: 'ProjectLevels'},
-          {name: 'Users', iconClass: 'fa-users skills-color-users', page: 'ProjectUsers'},
-          {name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'ProjectMetrics'},
-          {name: 'Contact Users', iconClass: 'fas fa-mail-bulk', page: 'EmailUsers'},
-          {name: 'Issues', iconClass: 'fas fa-exclamation-triangle', page: 'ProjectErrorsPage'},
-          {name: 'Access', iconClass: 'fa-shield-alt skills-color-access', page: 'ProjectAccess'},
-          {name: 'Settings', iconClass: 'fa-cogs skills-color-settings', page: 'ProjectSettings'},
-        ]">
+    <navigation v-if="!isLoading" :nav-items="navItems">
     </navigation>
 
     <edit-project v-if="editProject" v-model="editProject" :project="project" :is-edit="true"
@@ -118,7 +108,7 @@ limitations under the License.
     },
     data() {
       return {
-        isLoading: true,
+        isLoadingData: true,
         cancellingExpiration: false,
         editProject: false,
         shareProjModal: false,
@@ -132,6 +122,34 @@ limitations under the License.
       ...mapGetters([
         'project',
       ]),
+      isLoading() {
+        return this.isLoadingData || this.isLoadingProjConfig;
+      },
+      navItems() {
+        const items = [
+          { name: 'Subjects', iconClass: 'fa-cubes skills-color-subjects', page: 'Subjects' },
+          { name: 'Badges', iconClass: 'fa-award skills-color-badges', page: 'Badges' },
+          { name: 'Self Report', iconClass: 'fa-laptop skills-color-selfreport', page: 'SelfReport' },
+          { name: 'Dependencies', iconClass: 'fa-project-diagram skills-color-dependencies', page: 'FullDependencyGraph' },
+        ];
+
+        if (!this.isReadOnlyProj) {
+          items.push({ name: 'Skill Catalog', iconClass: 'fa-book skills-color-skill-catalog', page: 'SkillsCatalog' });
+          items.push({ name: 'Levels', iconClass: 'fa-trophy skills-color-levels', page: 'ProjectLevels' });
+        }
+
+        items.push({ name: 'Users', iconClass: 'fa-users skills-color-users', page: 'ProjectUsers' });
+        items.push({ name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'ProjectMetrics' });
+
+        if (!this.isReadOnlyProj) {
+          items.push({ name: 'Contact Users', iconClass: 'fas fa-mail-bulk', page: 'EmailUsers' });
+          items.push({ name: 'Issues', iconClass: 'fas fa-exclamation-triangle', page: 'ProjectErrorsPage' });
+          items.push({ name: 'Access', iconClass: 'fa-shield-alt skills-color-access', page: 'ProjectAccess' });
+          items.push({ name: 'Settings', iconClass: 'fa-cogs skills-color-settings', page: 'ProjectSettings' });
+        }
+
+        return items;
+      },
       headerOptions() {
         if (!this.project || !this.projConfig) {
           return {};
@@ -147,47 +165,53 @@ limitations under the License.
           visibilityDescription = 'Discoverable';
         }
 
+        const stats = [{
+          label: 'Visibility',
+          preformatted: `<div class="h5 font-weight-bold mb-0">${visibilityType}</div>`,
+          secondaryPreformatted: `<div class="text-secondary text-uppercase text-truncate" style="font-size:0.8rem;margin-top:0.1em;">${visibilityDescription}</div>`,
+          icon: `${visibilityIcon} skills-color-visibility`,
+        }, {
+          label: 'Skills',
+          count: this.project.numSkills,
+          secondaryStats: [{
+            label: 'reused',
+            count: this.project.numSkillsReused,
+            badgeVariant: 'info',
+          }, {
+            label: 'disabled',
+            count: this.project.numSkillsDisabled,
+            badgeVariant: 'warning',
+          }],
+          icon: 'fas fa-graduation-cap skills-color-skills',
+        }, {
+          label: 'Points',
+          count: this.project.totalPoints,
+          warnMsg: this.project.totalPoints < this.minimumPoints ? 'Project has insufficient points assigned. Skills cannot be achieved until project has at least 100 points.' : null,
+          icon: 'far fa-arrow-alt-circle-up skills-color-points',
+          secondaryStats: [{
+            label: 'reused',
+            count: this.project.totalPointsReused,
+            badgeVariant: 'info',
+          }],
+        }, {
+          label: 'Badges',
+          count: this.project.numBadges,
+          icon: 'fas fa-award skills-color-badges',
+        }];
+
+        if (!this.isReadOnlyProj) {
+          stats.push({
+            label: 'Issues',
+            count: this.project.numErrors,
+            icon: 'fas fa-exclamation-triangle',
+          });
+        }
+
         return {
           icon: 'fas fa-list-alt skills-color-projects',
           title: `PROJECT: ${this.project.name}`,
           subTitle: `ID: ${this.project.projectId}`,
-          stats: [{
-            label: 'Visibility',
-            preformatted: `<div class="h5 font-weight-bold mb-0">${visibilityType}</div>`,
-            secondaryPreformatted: `<div class="text-secondary text-uppercase text-truncate" style="font-size:0.8rem;margin-top:0.1em;">${visibilityDescription}</div>`,
-            icon: `${visibilityIcon} skills-color-visibility`,
-          }, {
-            label: 'Skills',
-            count: this.project.numSkills,
-            secondaryStats: [{
-              label: 'reused',
-              count: this.project.numSkillsReused,
-              badgeVariant: 'info',
-            }, {
-              label: 'disabled',
-              count: this.project.numSkillsDisabled,
-              badgeVariant: 'warning',
-            }],
-            icon: 'fas fa-graduation-cap skills-color-skills',
-          }, {
-            label: 'Points',
-            count: this.project.totalPoints,
-            warnMsg: this.project.totalPoints < this.minimumPoints ? 'Project has insufficient points assigned. Skills cannot be achieved until project has at least 100 points.' : null,
-            icon: 'far fa-arrow-alt-circle-up skills-color-points',
-            secondaryStats: [{
-              label: 'reused',
-              count: this.project.totalPointsReused,
-              badgeVariant: 'info',
-            }],
-          }, {
-            label: 'Badges',
-            count: this.project.numBadges,
-            icon: 'fas fa-award skills-color-badges',
-          }, {
-            label: 'Issues',
-            count: this.project.numErrors,
-            icon: 'fas fa-exclamation-triangle',
-          }],
+          stats,
         };
       },
       minimumPoints() {
@@ -223,14 +247,14 @@ limitations under the License.
         this.editProject = true;
       },
       loadProjects() {
-        this.isLoading = true;
+        this.isLoadingData = true;
         if (this.$route.params.project) {
           this.setProject(this.$route.params.project);
-          this.isLoading = false;
+          this.isLoadingData = false;
         } else {
           this.loadProjectDetailsState({ projectId: this.$route.params.projectId })
             .finally(() => {
-              this.isLoading = false;
+              this.isLoadingData = false;
             });
         }
       },
@@ -277,5 +301,8 @@ limitations under the License.
 </script>
 
 <style scoped>
-
+.header-status-icon {
+  font-size: 0.9rem;
+  width: 1.2rem;
+}
 </style>

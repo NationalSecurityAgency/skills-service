@@ -20,7 +20,7 @@ limitations under the License.
     </div>
     <div class="col-sm-6 col-md-5 pt-0 text-sm-right" data-cy="subPageHeaderControls">
       <div v-if="!isLoading">
-        <slot>
+        <slot v-if="!isReadOnlyProj">
           <b-button ref="actionButton" v-if="action" type="button" size="sm" variant="outline-primary"
                     :class="{'btn':true, 'btn-outline-primary':true, 'disabled':disabledInternal}"
                     v-on:click="addClicked" :aria-label="ariaLabel ? ariaLabel : action"
@@ -38,8 +38,11 @@ limitations under the License.
 </template>
 
 <script>
+  import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
+
   export default {
     name: 'SubPageHeader',
+    mixins: [ProjConfigMixin],
     props: {
       title: {
         type: String,

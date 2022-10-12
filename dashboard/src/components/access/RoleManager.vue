@@ -15,24 +15,36 @@ limitations under the License.
 */
 <template>
   <div class="role-manager">
-    <div class="row p-3">
-      <div class="col-12">
-        <existing-user-input :suggest="true" :validate="true" :user-type="userType" :excluded-suggestions="userIds"
-                             v-model="selectedUser" data-cy="existingUserInput"/>
+    <div class="p-3">
+      <existing-user-input :suggest="true" :validate="true" :user-type="userType" :excluded-suggestions="userIds"
+                           v-model="selectedUser" data-cy="existingUserInput"/>
+    </div>
+    <div class="row px-3 pb-3">
+      <div  v-if="!isOnlyOneRole" class="col">
+        <b-form-select v-model="userRole.selected"
+                       :options="userRole.options"
+                       aria-label="Please select user's Role"
+                       data-cy="userRoleSelector">
+          <template #first>
+            <b-form-select-option :value="null" disabled>-- Please select user's Role --</b-form-select-option>
+          </template>
+        </b-form-select>
       </div>
-      <div class="col-12 pt-3">
-        <b-button variant="outline-hc" @click="addUserRole" :disabled="!selectedUser"
-                  class="h-100" v-skills="'AddAdmin'">
-          {{ addUserLabel }} <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"
+      <div class="col-auto">
+        <b-button variant="outline-hc" @click="addUserRole" :disabled="addUsrBtnDisabled"
+                  data-cy="addUserBtn"
+                  v-skills="'AddAdmin'">
+          Add User <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"
                  aria-hidden="true"></i>
         </b-button>
       </div>
-      <div class="col-12" v-if="errNotification.enable">
-        <b-alert data-cy="error-msg" variant="danger" class="mt-2" show dismissible>
-          <i class="fa fa-exclamation-circle mr-1" aria-hidden="true"></i> <strong>Error!</strong>
-          Request could not be completed! <strong>{{ errNotification.msg }}</strong>
-        </b-alert>
-      </div>
+    </div>
+
+    <div v-if="errNotification.enable">
+      <b-alert data-cy="error-msg" variant="danger" class="mt-2" show dismissible>
+        <i class="fa fa-exclamation-circle mr-1" aria-hidden="true"></i> <strong>Error!</strong>
+        Request could not be completed! <strong>{{ errNotification.msg }}</strong>
+      </b-alert>
     </div>
 
     <skills-b-table :options="table.options"
@@ -42,23 +54,48 @@ limitations under the License.
                     @sort-changed="sortTable"
                     tableStoredStateId="roleManagerTable"
                     data-cy="roleManagerTable">
+      <template #head(userId)="data">
+        <span class="text-primary"><i class="fas fa-user skills-color-users" aria-hidden="true"></i> {{ data.label }}</span>
+      </template>
+      <template #head(roleName)="data">
+        <span class="text-primary"><i class="fas fa-id-card text-danger" aria-hidden="true"></i> {{ data.label }}</span>
+      </template>
       <template v-slot:cell(userId)="data">
         <div :data-cy="`userCell_${data.value}`">
           {{ getUserDisplay(data.item) }}
+        </div>
+      </template>
+      <template v-slot:cell(roleName)="data">
+        <div v-if="!data.item.isEdited">{{ getRoleDisplay(data.value) }}</div>
+        <b-form-select v-else v-model="data.value"
+                       :options="userRole.options"
+                       :aria-label="`select new access role for user ${data.item.userId}`"
+                       :data-cy="`roleDropDown_${data.item.userId}`"
+                       @change="updateUserRole">
+        </b-form-select>
+      </template>
+      <template v-slot:cell(controls)="data">
 
-          <b-button-group class="float-right">
-            <b-button v-if="notCurrentUser(data.value)" @click="deleteUserRoleConfirm(data.item)"
-                      variant="outline-primary" :aria-label="`remove access role from user ${data.value}`"
+        <div class="float-right" :data-cy="`controlsCell_${data.item.userId}`">
+          <i v-if="!notCurrentUser(data.item.userId)"
+             data-cy="cannotRemoveWarning"
+             v-b-tooltip.hover="'Can not remove or edit myself. Sorry!!'"
+             class="text-warning fas fa-exclamation-circle mr-1"
+             aria-hidden="true"/>
+
+          <b-button-group class="">
+            <b-button v-if="!isOnlyOneRole" @click="editItem(data.item)"
+                      :disabled="!notCurrentUser(data.item.userId)"
+                      variant="outline-primary" :aria-label="`edit access role from user ${data.item.userId}`"
+                      data-cy="editUserBtn">
+              <i class="fas fa-edit" aria-hidden="true"/>
+            </b-button>
+            <b-button @click="deleteUserRoleConfirm(data.item)"
+                      :disabled="!notCurrentUser(data.item.userId)"
+                      variant="outline-primary" :aria-label="`remove access role from user ${data.item.userId}`"
                       data-cy="removeUserBtn">
               <i class="text-warning fas fa-trash" aria-hidden="true"/>
             </b-button>
-            <span v-else v-b-tooltip.hover="'Can not remove myself. Sorry!!'">
-                  <b-button variant="outline-primary" disabled
-                            data-cy="removeUserBtn"
-                            aria-label="cannot remove access role from yourself">
-                    <i class="text-warning fas fa-trash" aria-hidden="true"/>
-                  </b-button>
-            </span>
           </b-button-group>
         </div>
       </template>
@@ -79,6 +116,8 @@ limitations under the License.
   const ROLE_PROJECT_ADMIN = 'ROLE_PROJECT_ADMIN';
   const ROLE_SUPERVISOR = 'ROLE_SUPERVISOR';
   const ROLE_SUPER_DUPER_USER = 'ROLE_SUPER_DUPER_USER';
+  const ROLE_PROJECT_APPROVER = 'ROLE_PROJECT_APPROVER';
+  const ALL_ROLES = [ROLE_APP_USER, ROLE_PROJECT_ADMIN, ROLE_SUPERVISOR, ROLE_SUPER_DUPER_USER, ROLE_PROJECT_APPROVER];
 
   export default {
     name: 'RoleManager',
@@ -89,14 +128,14 @@ limitations under the License.
         type: String,
         default: null,
       },
-      role: {
-        type: String,
-        default: 'ROLE_PROJECT_ADMIN',
-        validator: (value) => ([ROLE_APP_USER, ROLE_PROJECT_ADMIN, ROLE_SUPERVISOR, ROLE_SUPER_DUPER_USER].indexOf(value) >= 0),
+      roles: {
+        type: Array,
+        default: () => [ROLE_PROJECT_ADMIN, ROLE_PROJECT_APPROVER],
+        validator: (value) => (value.every((v) => ALL_ROLES.includes(v))),
       },
       roleDescription: {
         type: String,
-        default: 'Project Administrator',
+        default: 'User',
       },
       userType: {
         type: String,
@@ -105,11 +144,6 @@ limitations under the License.
       id: {
         type: String,
         default: 'add-user-div',
-      },
-      addUserLabel: {
-        type: String,
-        required: false,
-        default: 'Add User',
       },
       addRoleConfirmation: {
         type: Object,
@@ -145,6 +179,16 @@ limitations under the License.
                 label: this.roleDescription,
                 sortable: true,
               },
+              {
+                key: 'roleName',
+                label: 'Role',
+                sortable: true,
+              },
+              {
+                key: 'controls',
+                label: '',
+                sortable: false,
+              },
             ],
             pagination: {
               hideUnnecessary: true,
@@ -157,12 +201,90 @@ limitations under the License.
             tableDescription: `${this.roleDescription} table`,
           },
         },
+        userRole: {
+          selected: null,
+          options: [
+            { value: ROLE_PROJECT_ADMIN, text: this.getRoleDisplay(ROLE_PROJECT_ADMIN) },
+            { value: ROLE_PROJECT_APPROVER, text: this.getRoleDisplay(ROLE_PROJECT_APPROVER) },
+          ],
+        },
       };
     },
     mounted() {
       this.loadData();
     },
+    computed: {
+      addUsrBtnDisabled() {
+        return !(this.selectedUser && (this.userRole.selected || this.roles.length === 1));
+      },
+      isOnlyOneRole() {
+        return this.roles.length === 1;
+      },
+    },
     methods: {
+      getRoleDisplay(roleName) {
+        if (roleName === ROLE_PROJECT_ADMIN) {
+          return 'Administrator';
+        }
+        if (roleName === ROLE_APP_USER) {
+          return 'Skills Display';
+        }
+        if (roleName === ROLE_SUPERVISOR) {
+          return 'Supervisor';
+        }
+        if (roleName === ROLE_SUPER_DUPER_USER) {
+          return 'Root';
+        }
+        if (roleName === ROLE_PROJECT_APPROVER) {
+          return 'Approver';
+        }
+        return 'Unknown';
+      },
+      editItem(item) {
+        this.data = this.data.map((user) => {
+          if (user.userId === item.userId) {
+            return ({ ...user, isEdited: true });
+          }
+          return ({ ...user, isEdited: false });
+        });
+      },
+      updateUserRole(newRole) {
+        const userRoleToUpdate = this.data.find((user) => user.isEdited);
+        if (userRoleToUpdate) {
+          // mark record as loading
+          this.data = this.data.map((user) => {
+            if (user.isEdited) {
+              return ({
+                ...user,
+                isLoading: true,
+              });
+            }
+            return user;
+          });
+
+          const pkiAuthenticated = this.$store.getters.isPkiAuthenticated;
+          AccessService.saveUserRole(this.projectId, { userId: userRoleToUpdate.userId }, newRole, pkiAuthenticated)
+            .then(() => {
+              this.data = this.data.map((user) => {
+                if (user.isEdited) {
+                  const copy = ({
+                    ...user,
+                    isEdited: false,
+                    isLoading: false,
+                    roleName: newRole,
+                  });
+                  return copy;
+                }
+                return user;
+              });
+              this.$nextTick(() => {
+                this.$announcer.polite(`New ${newRole} was added to the user`);
+              });
+            }).catch((e) => {
+              this.handleError(e);
+            });
+        }
+      },
       pageChanged(pageNum) {
         this.table.options.pagination.currentPage = pageNum;
         this.loadData();
@@ -187,7 +309,7 @@ limitations under the License.
           page: this.table.options.pagination.currentPage,
           orderBy: this.table.options.sortBy,
         };
-        AccessService.getUserRoles(this.projectId, this.role, pageParams)
+        AccessService.getUserRoles(this.projectId, this.roles, pageParams)
           .then((result) => {
             this.table.options.busy = false;
             this.data = result.data;
@@ -216,6 +338,10 @@ limitations under the License.
             this.userIds = this.userIds.filter((userId) => userId !== row.userIdForDisplay);
             this.$emit('role-deleted', { userId: row.userId, role: row.roleName });
             this.table.options.busy = false;
+            this.table.options.pagination.totalRows = this.data.length;
+            this.$nextTick(() => {
+              this.$announcer.polite(`${row.roleName} was removed from the user`);
+            });
           });
       },
       notCurrentUser(userId) {
@@ -237,23 +363,28 @@ limitations under the License.
         this.table.options.busy = true;
         const pkiAuthenticated = this.$store.getters.isPkiAuthenticated;
 
-        AccessService.saveUserRole(this.projectId, this.selectedUser, this.role, pkiAuthenticated)
+        const role = this.isOnlyOneRole ? this.roles[0] : this.userRole.selected;
+        AccessService.saveUserRole(this.projectId, this.selectedUser, role, pkiAuthenticated)
           .then(() => {
-            this.$emit('role-added', { userId: this.selectedUser.userId, role: this.role });
+            this.$emit('role-added', { userId: this.selectedUser.userId, role });
             this.loadData();
           }).catch((e) => {
-            if (e.response.data && e.response.data.errorCode && e.response.data.errorCode === 'UserNotFound') {
-              this.errNotification.msg = e.response.data.explanation;
-              this.errNotification.enable = true;
-            } else {
-              const errorMessage = (e.response && e.response.data && e.response.data.message) ? e.response.data.message : undefined;
-              this.handlePush({ name: 'ErrorPage', query: { errorMessage } });
-            }
+            this.handleError(e);
           })
           .finally(() => {
             this.isSaving = false;
             this.selectedUser = null;
+            this.userRole.selected = null;
           });
+      },
+      handleError(e) {
+        if (e.response.data && e.response.data.errorCode && e.response.data.errorCode === 'UserNotFound') {
+          this.errNotification.msg = e.response.data.explanation;
+          this.errNotification.enable = true;
+        } else {
+          const errorMessage = (e.response && e.response.data && e.response.data.message) ? e.response.data.message : undefined;
+          this.handlePush({ name: 'ErrorPage', query: { errorMessage } });
+        }
       },
       getUserDisplay(item) {
         return item.lastName && item.firstName ? `${item.firstName} ${item.lastName} (${item.userIdForDisplay})` : item.userIdForDisplay;

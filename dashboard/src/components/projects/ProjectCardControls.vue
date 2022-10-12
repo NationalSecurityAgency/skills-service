@@ -20,14 +20,14 @@ limitations under the License.
       variant="outline-primary" size="sm" class="mr-2"
       :data-cy="`projCard_${this.project.projectId}_manageBtn`"
       :aria-label="`manage project ${this.project.name}`">
-      Manage <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
+      <span v-if="readOnlyProject">View</span><span v-else>Manage</span> <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
     </b-button>
     <b-button v-if="isRootUser" class="mr-2" @click="$emit('unpin-project')" data-cy="unpin" size="sm"
               variant="outline-primary" :aria-label="'remove pin for project '+ project.name"
               :aria-pressed="project.pinned">
       <span class="d-none d-sm-inline">Unpin</span> <i class="fas fa-ban" style="font-size: 1rem;" aria-hidden="true"/>
     </b-button>
-    <div class="d-inline-block float-right">
+    <div v-if="!readOnlyProject" class="d-inline-block float-right">
       <b-button-group size="sm" class="buttons mr-2">
         <b-button ref="editBtn"
                   size="sm"
@@ -72,6 +72,7 @@ limitations under the License.
       project: Object,
       isDeleteDisabled: Boolean,
       deleteDisabledText: String,
+      readOnlyProject: Boolean,
     },
     computed: {
       isRootUser() {

@@ -174,16 +174,10 @@ describe('Settings Tests', () => {
         ], 5, true, null, false);
 
         // attempt to remove myself - no go
-        cy.get(`${rootUsrTableSelector} [data-cy="removeUserBtn"]`)
-            .eq(0)
+        cy.get(`[data-cy="controlsCell_root@skills.org"] [data-cy="removeUserBtn"]`)
             .should('be.disabled');
-        cy.get(`${rootUsrTableSelector} [data-cy="removeUserBtn"]`)
-            .eq(0)
-            .click({ force: true });
-        cy.contains('Can not remove myself');
-        // click away to remove tooltip
-        cy.contains('root@skills.org')
-            .click();
+        cy.get(`[data-cy="controlsCell_root@skills.org"] [data-cy="cannotRemoveWarning"]`).should('exist')
+
         cy.validateTable(rootUsrTableSelector, [
             [{
                 colIndex: 0,
@@ -460,7 +454,8 @@ describe('Settings Tests', () => {
         cy.get(`${supervisorTableSelector} [data-cy="removeUserBtn"]`)
             .eq(0)
             .click({ force: true });
-        cy.contains('Can not remove myself');
+        cy.get(`[data-cy="controlsCell_root@skills.org"] [data-cy="cannotRemoveWarning"]`).should('exist')
+
         // click away to remove tooltip
         cy.contains('SkillTree Dashboard')
             .click();

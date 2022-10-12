@@ -19,7 +19,7 @@ limitations under the License.
       <span slot="right-of-header">
         <i v-if="badge && badge.endDate" class="fas fa-gem ml-2" style="font-size: 1.6rem; color: purple;"></i>
       </span>
-      <div slot="subSubTitle" v-if="badge">
+      <div slot="subSubTitle" v-if="badge && !isReadOnlyProj">
         <b-button @click="displayEditBadge"
                   ref="editBadgeButton"
                   class="btn btn-outline-primary mr-1"
@@ -45,15 +45,17 @@ limitations under the License.
 <script>
   import { createNamespacedHelpers } from 'vuex';
 
-  import Navigation from '../utils/Navigation';
-  import PageHeader from '../utils/pages/PageHeader';
-  import EditBadge from './EditBadge';
-  import BadgesService from './BadgesService';
+  import Navigation from '@/components/utils/Navigation';
+  import PageHeader from '@/components/utils/pages/PageHeader';
+  import EditBadge from '@/components/badges/EditBadge';
+  import BadgesService from '@/components/badges/BadgesService';
+  import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
 
   const { mapActions, mapGetters, mapMutations } = createNamespacedHelpers('badges');
 
   export default {
     name: 'BadgePage',
+    mixins: [ProjConfigMixin],
     components: {
       PageHeader,
       Navigation,

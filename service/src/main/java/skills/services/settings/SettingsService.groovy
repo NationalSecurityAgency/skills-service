@@ -34,6 +34,7 @@ import skills.controller.result.model.SettingsResult
 import skills.services.LockingService
 import skills.services.settings.listeners.ValidationRes
 import skills.storage.model.Setting
+import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.User
 import skills.storage.repos.UserRepo
 import skills.utils.Props
@@ -195,7 +196,18 @@ class SettingsService {
     @Transactional(readOnly = true)
     List<SettingsResult> loadSettingsForProject(String projectId) {
         List<Setting> settings = settingsDataAccessor.getProjectSettings(projectId)
-        return convertToResList(settings)
+        List<SettingsResult> res = convertToResList(settings)
+
+        UserInfo currentUser = userInfoService.getCurrentUser()
+        List<String> usrRoles = currentUser.authorities.collect { it.authority.toUpperCase() }
+        RoleName usersRole = usrRoles.contains(RoleName.ROLE_PROJECT_APPROVER.toString()) ? RoleName.ROLE_PROJECT_APPROVER  : RoleName.ROLE_PROJECT_ADMIN
+        res.add(new SettingsResult(
+                setting: Settings.USER_PROJECT_ROLE.settingName,
+                projectId: projectId,
+                value: usersRole.toString(),
+                userId: currentUser.username?.toLowerCase()
+        ))
+        return res
     }
 
     @Transactional(readOnly = true)

@@ -34,9 +34,13 @@ const mutations = {
 };
 
 const actions = {
-  loadProjConfigState({ commit }, projectId) {
+  loadProjConfigState({ commit }, params) {
+    const { projectId } = params;
+    const { updateLoadingVar = true } = params;
     return new Promise((resolve, reject) => {
-      commit('setLoadingProjConfig', true);
+      if (updateLoadingVar) {
+        commit('setLoadingProjConfig', true);
+      }
       SettingService.getSettingsForProject(projectId)
         .then((response) => {
           if (response && typeof response.reduce === 'function') {
@@ -50,7 +54,9 @@ const actions = {
           resolve(response);
         })
         .finally(() => {
-          commit('setLoadingProjConfig', false);
+          if (updateLoadingVar) {
+            commit('setLoadingProjConfig', false);
+          }
         })
         .catch((error) => reject(error));
     });

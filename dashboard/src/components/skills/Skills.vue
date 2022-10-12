@@ -15,28 +15,29 @@ limitations under the License.
 */
 <template>
   <div>
-    <sub-page-header ref="subPageHeader" title="Skills" :is-loading="loadingSubjectSkills"
+    <sub-page-header ref="subPageHeader" title="Skills" :is-loading="isLoading"
                      :disabled="addSkillDisabled" :disabled-msg="addSkillsDisabledMsg" aria-label="new skill">
-      <i v-if="addSkillDisabled" class="fas fa-exclamation-circle text-warning ml-1 mr-1"
-         style="pointer-events: all; font-size: 1.5rem;"
-         :aria-label="addSkillsDisabledMsg"
-         v-b-tooltip.hover="addSkillsDisabledMsg"/>
-      <b-button id="importFromCatalogBtn" ref="importFromCatalogBtn" @click="importCatalog.show=true"
-                variant="outline-primary" size="sm"
-                aria-label="import from catalog"
-                data-cy="importFromCatalogBtn">
-        <span class="">Import</span> <i class="fas fa-book" aria-hidden="true"/>
-      </b-button>
-      <b-button id="newGroupBtn" ref="newGroupButton" @click="newGroup" variant="outline-primary" size="sm"
-                aria-label="new skills group" class="ml-1"
-                aria-describedby="newGroupSrText"
-                data-cy="newGroupButton" :aria-disabled="addSkillDisabled" :disabled="addSkillDisabled">
-        <span class="">Group</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
-        <span id="newGroupSrText" class="sr-only">
-            {{ addSkillDisabled ? addSkillDisabled : 'Create a new Skill Group'}}
-          </span>
-      </b-button>
-      <b-button id="newSkillBtn" ref="newSkillButton" @click="newSkill" variant="outline-primary" size="sm"
+      <div v-if="!isReadOnlyProj">
+        <i v-if="addSkillDisabled" class="fas fa-exclamation-circle text-warning ml-1 mr-1"
+           style="pointer-events: all; font-size: 1.5rem;"
+           :aria-label="addSkillsDisabledMsg"
+           v-b-tooltip.hover="addSkillsDisabledMsg"/>
+        <b-button id="importFromCatalogBtn" ref="importFromCatalogBtn" @click="importCatalog.show=true"
+                  variant="outline-primary" size="sm"
+                  aria-label="import from catalog"
+                  data-cy="importFromCatalogBtn">
+          <span class="">Import</span> <i class="fas fa-book" aria-hidden="true"/>
+        </b-button>
+        <b-button id="newGroupBtn" ref="newGroupButton" @click="newGroup" variant="outline-primary" size="sm"
+                  aria-label="new skills group" class="ml-1"
+                  aria-describedby="newGroupSrText"
+                  data-cy="newGroupButton" :aria-disabled="addSkillDisabled" :disabled="addSkillDisabled">
+          <span class="">Group</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
+          <span id="newGroupSrText" class="sr-only">
+              {{ addSkillDisabled ? addSkillDisabled : 'Create a new Skill Group'}}
+            </span>
+        </b-button>
+        <b-button id="newSkillBtn" ref="newSkillButton" @click="newSkill" variant="outline-primary" size="sm"
                 aria-label="new skill"
                 aria-describedby="newSkillSrText"
                 data-cy="newSkillButton" class="ml-1" :aria-disabled="addSkillDisabled" :disabled="addSkillDisabled">
@@ -45,6 +46,7 @@ limitations under the License.
             {{ addSkillDisabled ? addSkillDisabled : 'Create a new Skill'}}
           </span>
       </b-button>
+      </div>
     </sub-page-header>
 
     <loading-container v-bind:is-loading="loadingSubjectSkills">
@@ -70,12 +72,13 @@ limitations under the License.
 <script>
   import { createNamespacedHelpers } from 'vuex';
   import CatalogService from '@/components/skills/catalog/CatalogService';
-  import LoadingContainer from '../utils/LoadingContainer';
-  import SkillsTable from './SkillsTable';
-  import SubPageHeader from '../utils/pages/SubPageHeader';
-  import EditSkill from './EditSkill';
-  import EditSkillGroup from './skillsGroup/EditSkillGroup';
-  import ImportFromCatalog from './catalog/ImportFromCatalog';
+  import LoadingContainer from '@/components/utils/LoadingContainer';
+  import SkillsTable from '@/components/skills/SkillsTable';
+  import SubPageHeader from '@/components/utils/pages/SubPageHeader';
+  import EditSkill from '@/components/skills/EditSkill';
+  import EditSkillGroup from '@/components/skills/skillsGroup/EditSkillGroup';
+  import ImportFromCatalog from '@/components/skills/catalog/ImportFromCatalog';
+  import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
 
   const { mapActions, mapGetters } = createNamespacedHelpers('subjects');
   const subjectSkills = createNamespacedHelpers('subjectSkills');
@@ -83,6 +86,7 @@ limitations under the License.
 
   export default {
     name: 'Skills',
+    mixins: [ProjConfigMixin],
     components: {
       ImportFromCatalog,
       EditSkillGroup,
@@ -233,6 +237,9 @@ limitations under the License.
         'subjectSkills',
         'loadingSubjectSkills',
       ]),
+      isLoading() {
+        return this.loadingSubjectSkills || this.isLoadingProjConfig;
+      },
       numSubjectSkills() {
         return this.subject.numSkills;
       },

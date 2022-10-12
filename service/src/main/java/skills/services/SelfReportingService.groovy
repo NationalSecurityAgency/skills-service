@@ -182,8 +182,8 @@ class SelfReportingService {
             return
         }
 
-        List<UserRoleRes> userRoleRes = accessSettingsStorageService.getUserRolesForProjectId(skillDefinition.projectId)
-                .findAll { it.roleName == RoleName.ROLE_PROJECT_ADMIN }
+        List<UserRoleRes> userRoleRes =
+                accessSettingsStorageService.getUserRolesByProjectIdAndRoles(skillDefinition.projectId, [RoleName.ROLE_PROJECT_ADMIN])
 
         String projectId = skillDefinition.projectId
         userRoleRes = removeAdminsWhoHaveUnsubscribed(userRoleRes, projectId)

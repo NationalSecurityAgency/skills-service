@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2020 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,30 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.storage.model.auth
-
-import groovy.transform.Canonical
-import groovy.transform.ToString
-
-import javax.persistence.*
-
-@ToString
-@Entity
-@Table(name = 'user_roles')
-@Canonical
-class UserRole implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer id
-
-    Integer userRefId
-    String userId
-
-    String projectId
-
-    @Enumerated(EnumType.STRING)
-    RoleName roleName
+export default class UserRolesUtil {
+  static isReadOnlyProjRole(role) {
+    return role && role === 'ROLE_PROJECT_APPROVER';
+  }
 }

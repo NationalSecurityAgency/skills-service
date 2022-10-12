@@ -439,7 +439,7 @@ describe('Breadcrumb Navigation Tests', () => {
     });
 
     it('Access', () => {
-        cy.intercept('GET', '/admin/projects/proj1/userRoles/**')
+        cy.intercept('GET', '/admin/projects/proj1/userRoles**')
             .as('loadUserRoles');
         cy.visit('/administrator/projects/proj1/access');
         cy.wait('@loadUserRoles');

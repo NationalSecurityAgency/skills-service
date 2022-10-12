@@ -35,9 +35,9 @@ limitations under the License.
       <div v-if="showGraph" id="dependency-graph" style="height: 500px"></div>
     </simple-card>
 
-    <share-skills-with-other-projects :project-id="this.$route.params.projectId" class="mt-4"/>
+    <share-skills-with-other-projects v-if="!isReadOnlyProj" :project-id="this.$route.params.projectId" class="mt-4"/>
 
-    <shared-skills-from-other-projects :project-id="this.$route.params.projectId" class="my-4"/>
+    <shared-skills-from-other-projects v-if="!isReadOnlyProj" :project-id="this.$route.params.projectId" class="my-4"/>
   </div>
 </template>
 
@@ -48,17 +48,19 @@ limitations under the License.
     from '@/components/skills/crossProjects/ShareSkillsWithOtherProjects';
   import SharedSkillsFromOtherProjects
     from '@/components/skills/crossProjects/SharedSkillsFromOtherProjects';
-  import SkillsService from '../SkillsService';
-  import LoadingContainer from '../../utils/LoadingContainer';
-  import GraphNodeSortMethodSelector from './GraphNodeSortMethodSelector';
-  import NoContent2 from '../../utils/NoContent2';
-  import GraphUtils from './GraphUtils';
-  import GraphLegend from './GraphLegend';
-  import SubPageHeader from '../../utils/pages/SubPageHeader';
-  import SimpleCard from '../../utils/cards/SimpleCard';
+  import SkillsService from '@/components/skills/SkillsService';
+  import LoadingContainer from '@/components/utils/LoadingContainer';
+  import GraphNodeSortMethodSelector from '@/components/skills/dependencies/GraphNodeSortMethodSelector';
+  import NoContent2 from '@/components/utils/NoContent2';
+  import GraphUtils from '@/components/skills/dependencies/GraphUtils';
+  import GraphLegend from '@/components/skills/dependencies/GraphLegend';
+  import SubPageHeader from '@/components/utils/pages/SubPageHeader';
+  import SimpleCard from '@/components/utils/cards/SimpleCard';
+  import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
 
   export default {
     name: 'FullDependencyGraph',
+    mixins: [ProjConfigMixin],
     components: {
       SharedSkillsFromOtherProjects,
       ShareSkillsWithOtherProjects,

@@ -19,7 +19,8 @@ import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
-import spock.lang.IgnoreRest
+import skills.services.settings.Settings
+import skills.storage.model.auth.RoleName
 import spock.lang.Timeout
 
 class SettingsSpecs extends DefaultIntSpec {
@@ -69,7 +70,8 @@ class SettingsSpecs extends DefaultIntSpec {
         when:
         def res = skillsService.getSettings(proj1.projectId)
         then:
-        res.size() == 0
+        // user role is always returned
+        res.setting == [Settings.USER_PROJECT_ROLE.settingName]
     }
 
     def "get settings for a project - one setting was defined"() {
@@ -79,12 +81,11 @@ class SettingsSpecs extends DefaultIntSpec {
         String name = "set1"
         when:
         skillsService.changeSetting(proj1.projectId, name, [projectId: proj1.projectId, setting: name, value: "true"])
-        def res = skillsService.getSettings(proj1.projectId)
+        def res = skillsService.getSettings(proj1.projectId).sort { it.setting }
         then:
-        res.size() == 1
-        res.get(0).projectId == proj1.projectId
-        res.get(0).setting == name
-        res.get(0).value == "true"
+        res.projectId == [proj1.projectId, proj1.projectId]
+        res.setting == [name, Settings.USER_PROJECT_ROLE.settingName]
+        res.value == ["true", RoleName.ROLE_PROJECT_ADMIN.toString()]
     }
 
     def "get settings for a project - several settings"() {
@@ -100,18 +101,30 @@ class SettingsSpecs extends DefaultIntSpec {
         def res = skillsService.getSettings(proj1.projectId)
         res = res.sort { it.setting}
         then:
-        res.size() == 3
-        res.get(0).projectId == proj1.projectId
-        res.get(0).setting == "set1"
-        res.get(0).value == "true"
+        res.projectId == (1..4).collect { proj1.projectId }
+        res.setting == ["set1", "set2", "set3", Settings.USER_PROJECT_ROLE.settingName]
+        res.value == ["true", "val2", "val3", RoleName.ROLE_PROJECT_ADMIN.toString()]
+    }
 
-        res.get(1).projectId == proj1.projectId
-        res.get(1).setting == "set2"
-        res.get(1).value == "val2"
+    def "get settings for a project - several settings - approver role"() {
+        def proj1 = SkillsFactory.createProject(1)
+        skillsService.createProject(proj1)
+        skillsService.changeSettings(proj1.projectId, [
+                [projectId: proj1.projectId, setting: "set1", value: "true"],
+                [projectId: proj1.projectId, setting: "set2", value: "val2"],
+                [projectId: proj1.projectId, setting: "set3", value: "val3"],
+        ])
 
-        res.get(2).projectId == proj1.projectId
-        res.get(2).setting == "set3"
-        res.get(2).value == "val3"
+        def user1Service = createService(getRandomUsers(1, true)[0])
+        skillsService.addUserRole(user1Service.userName, proj1.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        when:
+        def res = user1Service.getSettings(proj1.projectId)
+        res = res.sort { it.setting}
+        then:
+        res.projectId == (1..4).collect { proj1.projectId }
+        res.setting == ["set1", "set2", "set3", Settings.USER_PROJECT_ROLE.settingName]
+        res.value == ["true", "val2", "val3", RoleName.ROLE_PROJECT_APPROVER.toString()]
     }
 
     def "check validity of settings requests"(){

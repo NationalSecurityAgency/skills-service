@@ -1169,7 +1169,7 @@ describe('Accessibility Tests', () => {
             .as('loadMetrics');
         cy.intercept('GET', '/admin/projects/MyNewtestProject/errors*')
             .as('loadErrors');
-        cy.intercept('GET', '/admin/projects/MyNewtestProject/userRoles/*')
+        cy.intercept('GET', '/admin/projects/MyNewtestProject/userRoles**')
             .as('loadAccess');
         cy.intercept('GET', '/admin/projects/MyNewtestProject/settings')
             .as('loadSettings');

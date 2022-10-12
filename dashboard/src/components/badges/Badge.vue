@@ -33,7 +33,8 @@ limitations under the License.
           <div class="col text-right small">
           <div v-if="!this.live" data-cy="badgeStatus" style="">
             <span class="text-secondary" style="height: 3rem;">Status: </span>
-            <span class="text-uppercase border-right pr-2 mr-2">Disabled <span class="far fa-stop-circle text-warning" aria-hidden="true"/></span><a href="#0" @click.stop="handlePublish" class="btn btn-outline-primary btn-sm" data-cy="goLive">Go Live</a>
+            <span class="text-uppercase" :class="{ 'border-right pr-2 mr-2' : !isReadOnlyProj }">Disabled <span class="far fa-stop-circle text-warning" aria-hidden="true"/></span>
+            <a href="#0" v-if="!isReadOnlyProj" @click.stop="handlePublish" class="btn btn-outline-primary btn-sm" data-cy="goLive">Go Live</a>
           </div>
           <div v-else data-cy="badgeStatus"  style="">
             <span class="text-secondary align-middle" style="height: 4rem;">Status: </span> <span class="text-uppercase align-middle" style="height: 4rem;">Live <span class="far fa-check-circle text-success" aria-hidden="true"/></span>
@@ -58,10 +59,11 @@ limitations under the License.
 
 <script>
   import RemovalValidation from '@/components/utils/modal/RemovalValidation';
-  import EditBadge from './EditBadge';
-  import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
-  import CardNavigateAndEditControls from '../utils/cards/CardNavigateAndEditControls';
-  import NavCardWithStatsAndControls from '../utils/cards/NavCardWithStatsAndControls';
+  import EditBadge from '@/components/badges/EditBadge';
+  import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
+  import CardNavigateAndEditControls from '@/components/utils/cards/CardNavigateAndEditControls';
+  import NavCardWithStatsAndControls from '@/components/utils/cards/NavCardWithStatsAndControls';
+  import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
 
   export default {
     name: 'Badge',
@@ -82,7 +84,7 @@ limitations under the License.
         default: false,
       },
     },
-    mixins: [MsgBoxMixin],
+    mixins: [MsgBoxMixin, ProjConfigMixin],
     data() {
       return {
         isLoading: false,

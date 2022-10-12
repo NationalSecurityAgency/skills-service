@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2020 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,30 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.storage.model.auth
+import Vue from 'vue';
 
-import groovy.transform.Canonical
-import groovy.transform.ToString
+const userRoleFormatter = (value) => {
+  if (value === 'ROLE_PROJECT_APPROVER') {
+    return 'Approver';
+  }
+  if (value === 'ROLE_PROJECT_ADMIN') {
+    return 'Admin';
+  }
+  if (value === 'ROLE_SUPER_DUPER_USER') {
+    return 'Root';
+  }
+  return value;
+};
+Vue.filter('userRole', userRoleFormatter);
 
-import javax.persistence.*
-
-@ToString
-@Entity
-@Table(name = 'user_roles')
-@Canonical
-class UserRole implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer id
-
-    Integer userRefId
-    String userId
-
-    String projectId
-
-    @Enumerated(EnumType.STRING)
-    RoleName roleName
-}
+// this allows to call this function from an js code; to learn more about that read about javascript modules
+// import UserRoleFilter from 'src/UserRoleFilter.js'
+//    UserRoleFilter(myNumber)
+export default userRoleFormatter;

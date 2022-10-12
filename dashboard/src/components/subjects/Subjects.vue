@@ -15,10 +15,10 @@ limitations under the License.
 */
 <template>
   <div ref="mainFocus">
-    <sub-page-header ref="subPageHeader" title="Subjects" action="Subject" @add-action="openNewSubjectModal"
-                     :disabled="addSubjectDisabled" :disabled-msg="addSubjectsDisabledMsg"
-                     :aria-label="'new subject'"/>
     <loading-container v-bind:is-loading="isLoading">
+      <sub-page-header ref="subPageHeader" title="Subjects" :action="isReadOnlyProj ? null : 'Subject'" @add-action="openNewSubjectModal"
+                       :disabled="addSubjectDisabled" :disabled-msg="addSubjectsDisabledMsg"
+                       :aria-label="'new subject'"/>
       <jump-to-skill />
       <div v-if="subjects && subjects.length" class="row justify-content-center" id="subjectCards" data-cy="subjectCards">
           <div v-for="(subject) of subjects" :key="subject.subjectId" :id="subject.subjectId" class="col-lg-4 mb-3"
@@ -58,6 +58,7 @@ limitations under the License.
   import Sortable from 'sortablejs';
   import { createNamespacedHelpers } from 'vuex';
   import { SkillsReporter } from '@skilltree/skills-client-vue';
+  import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
   import Subject from './Subject';
   import EditSubject from './EditSubject';
   import LoadingContainer from '../utils/LoadingContainer';
@@ -71,6 +72,7 @@ limitations under the License.
 
   export default {
     name: 'Subjects',
+    mixins: [ProjConfigMixin],
     components: {
       JumpToSkill,
       NoContent2,
@@ -81,7 +83,7 @@ limitations under the License.
     },
     data() {
       return {
-        isLoading: true,
+        isLoadingData: true,
         displayNewSubjectModal: false,
         projectId: null,
         sortOrder: {
@@ -113,18 +115,18 @@ limitations under the License.
       doLoadSubjects() {
         return this.loadSubjects({ projectId: this.$route.params.projectId })
           .finally(() => {
-            this.isLoading = false;
+            this.isLoadingData = false;
             this.enableDropAndDrop();
           });
       },
       deleteSubject(subject) {
-        this.isLoading = true;
+        this.isLoadingData = true;
         SubjectsService.deleteSubject(subject)
           .then(() => {
             this.loadProjectDetailsState({ projectId: this.projectId });
             this.loadSubjects({ projectId: this.$route.params.projectId })
               .then(() => {
-                this.isLoading = false;
+                this.isLoadingData = false;
                 this.$emit('subjects-changed', subject.subjectId);
                 this.$nextTick(() => {
                   this.$announcer.polite(`Subject ${subject.name} has been deleted`);
@@ -145,13 +147,13 @@ limitations under the License.
         const currentIndex = sortedSubjects.findIndex((item) => item.subjectId === updateInfo.id);
         const newIndex = updateInfo.direction === 'up' ? currentIndex - 1 : currentIndex + 1;
         if (newIndex >= 0 && (newIndex) < this.subjects.length) {
-          this.isLoading = true;
+          this.isLoadingData = true;
           const { projectId } = this.$route.params;
           SubjectsService.updateSubjectsDisplaySortOrder(projectId, updateInfo.id, newIndex)
             .finally(() => {
               this.doLoadSubjects()
                 .then(() => {
-                  this.isLoading = false;
+                  this.isLoadingData = false;
                   const foundRef = this.$refs[`subj${updateInfo.id}`];
                   this.$nextTick(() => {
                     foundRef[0].focusSortControl();
@@ -162,18 +164,20 @@ limitations under the License.
       },
       subjectAdded(subject) {
         this.displayNewSubjectModal = false;
-        this.isLoading = true;
+        this.isLoadingData = true;
         SubjectsService.saveSubject(subject)
           .then(() => {
-            this.doLoadSubjects();
+            this.doLoadSubjects()
+              .then(() => {
+              this.handleFocus().then(() => {
+                this.$nextTick(() => {
+                  this.$announcer.polite(`Subject ${subject.name} has been saved`);
+                });
+              });
+            });
             this.loadProjectDetailsState({ projectId: this.projectId });
             this.$emit('subjects-changed', subject.subjectId);
             SkillsReporter.reportSkill('CreateSubject');
-            this.handleFocus().then(() => {
-              this.$nextTick(() => {
-                this.$announcer.polite(`Subject ${subject.name} has been saved`);
-              });
-            });
           });
       },
       handleHide(e) {
@@ -219,6 +223,9 @@ limitations under the License.
       ...subjectsStore.mapGetters([
         'subjects',
       ]),
+      isLoading() {
+        return this.isLoadingData || this.isLoadingProjConfig;
+      },
       emptyNewSubject() {
         return {
           projectId: this.$route.params.projectId,

@@ -141,7 +141,7 @@ describe('Projects Tests', () => {
             .as('loadUserInfo');
         cy.intercept('GET', '/admin/projects/proj1')
             .as('loadProject');
-        cy.intercept('GET', '/admin/projects/proj1/userRoles/*')
+        cy.intercept('GET', '/admin/projects/proj1/userRoles**')
             .as('loadUserRoles');
 
         cy.visit('/administrator/projects/proj1/access');
@@ -150,14 +150,14 @@ describe('Projects Tests', () => {
         cy.wait('@loadProject');
         cy.wait('@loadUserRoles');
 
-        cy.contains('Project Administrators')
+        cy.contains('Project Management Users')
             .should('exist');
         cy.get('[data-cy="trusted-client-props-panel"]')
             .should('exist');
     });
 
     it('Project stats should all be the same size when they wrap', () => {
-        cy.setResolution([1440, 900]); //original issue presented when stat cards wrapped to another row
+        cy.viewport(1000, 1000); //original issue presented when stat cards wrapped to another row
 
         cy.request('POST', '/app/projects/abcdeghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxy', {
             projectId: 'abcdeghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxy',
@@ -177,7 +177,7 @@ describe('Projects Tests', () => {
         cy.wait(2000);
         cy.get('[data-cy="pageHeader"] .container-fluid')
             .should('have.length', 1);
-        cy.matchSnapshotImageForElement('[data-cy="pageHeader"] .container-fluid');
+        cy.matchSnapshotImageForElement('[data-cy="pageHeader"]');
 
         cy.get('[data-cy=pageHeaderStat]')
             .first()

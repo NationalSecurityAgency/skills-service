@@ -78,7 +78,8 @@ describe('Projects Admin Management Tests', () => {
         cy.get('[data-cy="existingUserInput"] .vs__dropdown-option')
             .eq(0)
             .click({ force: true });
-        cy.clickButton('Add');
+        cy.get('[data-cy="userRoleSelector"]') .select('Administrator');
+        cy.get('[data-cy="addUserBtn"]').click();
         cy.wait('@addAdmin');
         cy.get('.alert-danger')
             .contains('User was not found');
@@ -132,7 +133,8 @@ describe('Projects Admin Management Tests', () => {
         cy.get('[data-cy="existingUserInput"]')
             .click()
             .type('{enter}');
-        cy.clickButton('Add');
+        cy.get('[data-cy="userRoleSelector"]') .select('Administrator');
+        cy.get('[data-cy="addUserBtn"]').click();
         cy.wait('@addAdmin');
         cy.get('[data-cy="errorPage"]')
             .contains('Tiny-bit of an error!');
@@ -161,9 +163,11 @@ describe('Projects Admin Management Tests', () => {
         cy.get('[data-cy="existingUserInput"]')
             .type('{enter}');
         cy.wait('@suggest');
+        cy.wait(500);
         cy.contains('root@skills.org')
             .click();
-        cy.clickButton('Add');
+        cy.get('[data-cy="userRoleSelector"]') .select('Administrator');
+        cy.get('[data-cy="addUserBtn"]').click();
         cy.wait('@addAdmin');
 
         const rowSelector = '[data-cy=roleManagerTable] tbody tr';
@@ -227,9 +231,11 @@ describe('Projects Admin Management Tests', () => {
         cy.get('[data-cy="existingUserInput"]')
             .type('root');
         cy.wait('@suggest');
-        cy.contains('root@skills.org')
+        cy.wait(500);
+        cy.get('.vs__dropdown-option').contains('root@skills.org')
             .click();
-        cy.clickButton('Add');
+        cy.get('[data-cy="userRoleSelector"]') .select('Administrator');
+        cy.get('[data-cy="addUserBtn"]').click();
         cy.wait('@addAdmin');
 
         const tableSelector = '[data-cy=roleManagerTable]';
@@ -240,12 +246,12 @@ describe('Projects Admin Management Tests', () => {
             .should('have.length', 2)
             .as('cyRows');
 
-        cy.get(`${tableSelector} [data-cy="userCell_root@skills.org"] [data-cy="removeUserBtn"]`)
+        cy.get(`${tableSelector} [data-cy="controlsCell_root@skills.org"] [data-cy="removeUserBtn"]`)
             .click();
         cy.contains('YES, Delete It')
             .click();
 
-        cy.get(`${tableSelector} [data-cy="userCell_root@skills.org"]`).should('not.exist')
+        cy.get(`${tableSelector} [data-cy="controlsCell_root@skills.org"]`).should('not.exist')
         cy.get(rowSelector)
             .should('have.length', 1)
             .as('cyRows1');
@@ -276,5 +282,65 @@ describe('Projects Admin Management Tests', () => {
             .type('root/bar{enter}');
         cy.wait('@suggest');
     });
+
+    it('Add Approver role then upgrade to Admin', () => {
+        cy.request('POST', '/app/projects/proj1', {
+            projectId: 'proj1',
+            name: 'proj1'
+        });
+
+        cy.intercept('PUT', '/admin/projects/proj1/users/root@skills.org/roles/ROLE_PROJECT_APPROVER')
+            .as('addApprover');
+        cy.intercept('PUT', '/admin/projects/proj1/users/root@skills.org/roles/ROLE_PROJECT_ADMIN')
+            .as('addAdmin');
+
+        cy.intercept('POST', '*suggestDashboardUsers*')
+            .as('suggest');
+        cy.intercept('GET', '/app/userInfo')
+            .as('loadUserInfo');
+        cy.intercept('GET', '/admin/projects/proj1')
+            .as('loadProject');
+
+        cy.visit('/administrator/projects/proj1/access');
+        cy.wait('@loadUserInfo');
+        cy.wait('@loadProject');
+
+        cy.get('[data-cy="existingUserInput"]')
+            .type('root');
+        cy.wait('@suggest');
+        cy.wait(500);
+        cy.get('.vs__dropdown-menu').contains('root@skills.org')
+            .click();
+        cy.get('[data-cy="userRoleSelector"]').select('Approver');
+        cy.get('[data-cy="addUserBtn"]').click();
+        cy.wait('@addApprover');
+
+        const tableSelector = '[data-cy=roleManagerTable]';
+        cy.get(`${tableSelector} thead th`).contains('Role').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'skills@' }, { colIndex: 1,  value: 'Administrator' }],
+            [{ colIndex: 0,  value: 'root@' }, { colIndex: 1,  value: 'Approver' }],
+        ], 5, true, null, false);
+
+        // reload and retest
+        cy.visit('/administrator/projects/proj1/access');
+        cy.wait('@loadUserInfo');
+        cy.wait('@loadProject');
+        // verify that table loaded
+        cy.get(`${tableSelector} [data-cy="controlsCell_root@skills.org"] [data-cy="editUserBtn"]`)
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'skills@' }, { colIndex: 1,  value: 'Administrator' }],
+            [{ colIndex: 0,  value: 'root@' }, { colIndex: 1,  value: 'Approver' }],
+        ], 5, true, null, false);
+
+        cy.get(`${tableSelector} [data-cy="controlsCell_root@skills.org"] [data-cy="editUserBtn"]`).click();
+        cy.get('[data-cy="roleDropDown_root@skills.org"]').select('Administrator');
+        cy.wait('@addAdmin')
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'skills@' }, { colIndex: 1,  value: 'Administrator' }],
+            [{ colIndex: 0,  value: 'root@' }, { colIndex: 1,  value: 'Administrator' }],
+        ], 5, true, null, false);
+    });
+
 
 })

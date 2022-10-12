@@ -20,7 +20,9 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
+import skills.auth.UserInfo
 import skills.auth.UserInfoService
+import skills.auth.UserSkillsGrantedAuthority
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.result.model.LabelCountItem
@@ -33,6 +35,7 @@ import skills.services.events.SkillEventResult
 import skills.services.events.SkillEventsService
 import skills.services.settings.SettingsService
 import skills.storage.model.*
+import skills.storage.model.auth.RoleName
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.SkillDefRepo
@@ -84,10 +87,16 @@ class SkillApprovalService {
     }
 
     TableResult getApprovalsHistory(String projectId, String skillNameFilter, String userIdFilter, String approverUserIdFilter, PageRequest pageRequest) {
+        UserInfo userInfo = userInfoService.currentUser
+        boolean isApprover = userInfo.authorities?.find() {
+            it instanceof UserSkillsGrantedAuthority && RoleName.ROLE_PROJECT_APPROVER == it.role?.roleName
+        }
+        String optionalApproverUserIdOrKeywordAll = isApprover ? userInfo.username.toLowerCase() : "All"
+
         return buildApprovalsResult(projectId, pageRequest, {
-            skillApprovalRepo.findApprovalsHistory(projectId, skillNameFilter, userIdFilter, approverUserIdFilter, pageRequest)
+            skillApprovalRepo.findApprovalsHistory(projectId, skillNameFilter, userIdFilter, approverUserIdFilter, optionalApproverUserIdOrKeywordAll, pageRequest)
         }, {
-            skillApprovalRepo.countApprovalsHistory(projectId, skillNameFilter, userIdFilter, approverUserIdFilter)
+            skillApprovalRepo.countApprovalsHistory(projectId, skillNameFilter, userIdFilter, approverUserIdFilter, optionalApproverUserIdOrKeywordAll)
         })
     }
 

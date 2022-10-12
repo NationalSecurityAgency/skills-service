@@ -315,6 +315,7 @@ class ProjAdminService {
 
         List<ProjectResult> finalRes = projects?.unique({ it.projectId })?.collect({
             ProjectResult res = convert(it, projectIdSortOrder, pinnedProjectIds)
+            res.userRole = RoleName.ROLE_SUPER_DUPER_USER
             return res
         })
 
@@ -536,6 +537,7 @@ class ProjAdminService {
                 numSkillsDisabled: definition.getNumSkillsDisabled(),
                 numSkillsReused: definition.getNumSkillsReused() ?: 0,
                 totalPointsReused: definition.getTotalPointsReused() ?: 0,
+                userRole: definition.getUserRole(),
         )
         res.numBadges = definition.numBadges
         res.numSkills = definition.numSkills
