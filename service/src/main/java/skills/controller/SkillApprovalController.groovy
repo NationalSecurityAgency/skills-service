@@ -21,13 +21,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
-import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
+import skills.controller.request.model.SkillApproverConfRequest
 import skills.controller.request.model.SkillApprovalRejection
 import skills.controller.request.model.SkillApprovalRequest
-import skills.controller.request.model.UserProjectSettingsRequest
 import skills.controller.result.model.LabelCountItem
 import skills.controller.result.model.RequestResult
 import skills.controller.result.model.TableResult
@@ -153,6 +152,17 @@ class SkillApprovalController {
     Boolean isUserSubscribed(@PathVariable("projectId") String projectId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         selfReportingService.getApprovalRequestEmailSubscriptionStatus(projectId);
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/approverConf/{approverUserId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
+    RequestResult configureApprover(@PathVariable("projectId") String projectId,
+                                    @PathVariable("approverUserId") String approverUserId,
+                                    @RequestBody SkillApproverConfRequest approverConfRequest) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(approverUserId, "Approver User Id")
+        SkillsValidator.isTrue(approverConfRequest.userId || approverConfRequest.skillId || approverConfRequest.userTagValue, "Must provide one of the config params -> approvalConf.userId || approvalConf.skillId || approvalConf.userTagPattern")
+        skillApprovalService.configureApprover(projectId, approverUserId, approverConfRequest)
+        return RequestResult.success()
     }
 
 }

@@ -20,23 +20,29 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfo
 import skills.auth.UserInfoService
 import skills.auth.UserSkillsGrantedAuthority
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
+import skills.controller.exceptions.SkillsValidator
+import skills.controller.request.model.SkillApproverConfRequest
 import skills.controller.result.model.LabelCountItem
 import skills.controller.result.model.SkillApprovalResult
 import skills.controller.result.model.TableResult
+import skills.controller.result.model.UserRoleRes
 import skills.notify.EmailNotifier
 import skills.notify.Notifier
 import skills.services.admin.SkillCatalogService
 import skills.services.events.SkillEventResult
 import skills.services.events.SkillEventsService
 import skills.services.settings.SettingsService
+import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.*
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.ProjDefRepo
+import skills.storage.repos.SkillApprovalConfRepo
 import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAttrsRepo
@@ -56,6 +62,9 @@ class SkillApprovalService {
 
     @Autowired
     SkillDefRepo skillDefRepo
+
+    @Autowired
+    SkillDefAccessor skillDefAccessor
 
     @Autowired
     ProjDefRepo projDefRepo
@@ -78,11 +87,28 @@ class SkillApprovalService {
     @Autowired
     SkillCatalogService skillCatalogService
 
+    @Autowired
+    SkillApprovalConfRepo skillApprovalConfRepo
+
+    @Autowired
+    AccessSettingsStorageService accessSettingsStorageService
+
     TableResult getApprovals(String projectId, PageRequest pageRequest) {
+        String currentApproverId = userInfoService.currentUser.username
+        Boolean confExistForApprover = skillApprovalConfRepo.confExistForApprover(projectId, currentApproverId)
+
         return buildApprovalsResult(projectId, pageRequest, {
-            skillApprovalRepo.findToApproveByProjectIdAndNotRejectedOrApproved(projectId, pageRequest)
+            if (confExistForApprover) {
+                skillApprovalRepo.findToApproveWithApproverConf(projectId, currentApproverId, pageRequest)
+            } else {
+                skillApprovalRepo.findToApproveByProjectIdAndNotRejectedOrApproved(projectId, pageRequest)
+            }
         }, {
-            skillApprovalRepo.countByProjectIdAndApproverUserIdIsNull(projectId)
+            if (confExistForApprover) {
+                skillApprovalRepo.countToApproveWithApproverConf(projectId, currentApproverId)
+            } else {
+                skillApprovalRepo.countByProjectIdAndApproverUserIdIsNull(projectId)
+            }
         })
     }
 
@@ -259,5 +285,53 @@ class SkillApprovalService {
                 ],
         )
         notifier.sendNotification(request)
+    }
+
+    @Transactional
+    void configureApprover(String projectId, String approverId, SkillApproverConfRequest skillApproverConfRequest) {
+        validateApproverAccess(projectId, approverId)
+
+        if (skillApproverConfRequest.userId) {
+            String userId = skillApproverConfRequest.userId.toLowerCase()
+            SkillApprovalConf conf = skillApprovalConfRepo.findByProjectIdAndApproverUserIdAndUserId(projectId, approverId, userId)
+            if(!conf) {
+                conf = new SkillApprovalConf(projectId: projectId, approverUserId: approverId, userId: userId)
+            }
+            // update no matter what so the latest date is saved
+            skillApprovalConfRepo.save(conf)
+        }
+
+        if (skillApproverConfRequest.userTagKey) {
+            SkillsValidator.isNotBlank(skillApproverConfRequest.userTagValue, "userTagValue", projectId)
+
+            String userTagKey = skillApproverConfRequest.userTagKey.toLowerCase()
+            String userTagValue = skillApproverConfRequest.userTagValue.toLowerCase()
+            SkillApprovalConf conf = skillApprovalConfRepo.findByProjectIdAndApproverUserIdAndUserTagKeyAndUserTagValue(projectId, approverId, userTagKey, userTagValue)
+            if(!conf) {
+                conf = new SkillApprovalConf(projectId: projectId, approverUserId: approverId, userTagKey: userTagKey, userTagValue: userTagValue)
+            }
+            // update no matter what so the latest date is saved
+            skillApprovalConfRepo.save(conf)
+        }
+
+        if (skillApproverConfRequest.skillId) {
+            SkillDef skillDef = skillDefAccessor.getSkillDef(projectId, skillApproverConfRequest.skillId, [SkillDef.ContainerType.Skill])
+            SkillApprovalConf conf = skillApprovalConfRepo.findByProjectIdAndApproverUserIdAndSkillRefId(projectId, approverId, skillDef.id)
+            if(!conf) {
+                conf = new SkillApprovalConf(projectId: projectId, approverUserId: approverId, skillRefId: skillDef.id)
+            }
+            // update no matter what so the latest date is saved
+            skillApprovalConfRepo.save(conf)
+        }
+    }
+
+    @Profile
+    private void validateApproverAccess(String projectId, String approverId) {
+        List<UserRoleRes> requestedApproverRoles = accessSettingsStorageService.getUserRolesForProjectIdAndUserId(projectId, approverId)
+        List<RoleName> validRoleNames = [RoleName.ROLE_PROJECT_APPROVER, RoleName.ROLE_PROJECT_ADMIN, RoleName.ROLE_SUPER_DUPER_USER]
+        boolean hasValidRole = requestedApproverRoles?.find({ validRoleNames.contains(it.roleName) })
+        if (!hasValidRole) {
+            throw new SkillException("Approver [${approverId}] does not have permission to approve for the project [${projectId}]", projectId, null, ErrorCode.AccessDenied)
+        }
     }
 }

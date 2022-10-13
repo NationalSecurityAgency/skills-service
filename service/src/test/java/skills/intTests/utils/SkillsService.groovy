@@ -580,6 +580,18 @@ class SkillsService {
         return wsHelper.adminPost("/projects/${projectId}/approvals/approve", [skillApprovalIds: approvalId])
     }
 
+    def configureApproverForUser(String projectId, String approverUserId, String userId) {
+        return wsHelper.adminPost("/projects/${projectId}/approverConf/${approverUserId}", [userId: userId])
+    }
+
+    def configureApproverForSkillId(String projectId, String approverUserId, String skillId) {
+        return wsHelper.adminPost("/projects/${projectId}/approverConf/${approverUserId}", [skillId: skillId])
+    }
+
+    def configureApproverForUserTag(String projectId, String approverUserId, String userTagKey, String userTagValue) {
+        return wsHelper.adminPost("/projects/${projectId}/approverConf/${approverUserId}", [userTagKey: userTagKey, userTagValue: userTagValue])
+    }
+
     def rejectSkillApprovals(String projectId, List<Integer> approvalId, String msg = null) {
         return wsHelper.adminPost("/projects/${projectId}/approvals/reject", [skillApprovalIds: approvalId, rejectionMessage: msg])
     }
