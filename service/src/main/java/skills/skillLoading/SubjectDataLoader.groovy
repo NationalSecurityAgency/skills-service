@@ -204,7 +204,7 @@ class SubjectDataLoader {
 
         List<SkillDefAndUserPoints> res = childrenWithUserPoints.collect {
             UserPoints userPoints = (it.length > 1 ? it[1] : null) as UserPoints
-            SkillApproval skillApproval = (it.length > 3 ? it[3] : null) as SkillApproval
+            SkillApproval skillApproval = (projectId ? (it.length > 3 ? it[3] : null) : (it.length > 2 ? it[2] : null)) as SkillApproval
             return new SkillDefAndUserPoints(
                     skillDef: it[0] as SkillDef, points: userPoints, copiedFromProjectName: it.length > 2 ? (String)it[2] : null, approval: skillApproval
             )

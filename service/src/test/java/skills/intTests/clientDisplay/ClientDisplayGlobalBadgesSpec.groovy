@@ -21,6 +21,7 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import skills.storage.model.SkillDef
 
 @Slf4j
 class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
@@ -730,5 +731,34 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         } catch (SkillsClientException e) {
             log.error("Unabled to delete global badge with id [$badgeId]: ${e.message}")
         }
+    }
+
+    def "load global badge with approvals"(){
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> allSkills = SkillsFactory.createSkills(2, 1, 1)
+        allSkills[0].pointIncrement = 200
+        allSkills[0].numPerformToCompletion = 200
+        allSkills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(allSkills)
+
+        Map badge = [badgeId: "bid1", name: "global badge", description: "gbadge".toString(), iconClass: "fa fa-foo".toString(),]
+        supervisorSkillsService.createGlobalBadge(badge)
+        supervisorSkillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: "bid1", skillId: allSkills.get(0).skillId])
+        badge.enabled  = 'true'
+        supervisorSkillsService.updateGlobalBadge(badge)
+
+        List<String> users = getRandomUsers(1)
+        def requestedDate = new Date()
+        skillsService.addSkill([projectId: proj1.projectId, skillId: allSkills[0].skillId], users.first(), requestedDate, "Please approve this 1!")
+
+        when:
+        def summary = skillsService.getBadgeSummary(users[0], proj1.projectId, badge.badgeId, -1, true)
+        then:
+        summary.skills.size() == 1
+        summary.skills[0].selfReporting.requestedOn == requestedDate.time
     }
 }
