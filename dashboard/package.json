@@ -22,8 +22,8 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "5.15.3",
     "@skilltree/skills-client-vue": "3.5.0",
-    "@toast-ui/editor": "3.2.0",
-    "@toast-ui/vue-editor": "3.2.0",
+    "@toast-ui/editor": "3.2.1",
+    "@toast-ui/vue-editor": "3.2.2",
     "@vue-a11y/announcer": "2.1.0",
     "animate.css": "4.1.1",
     "apexcharts": "3.27.2",

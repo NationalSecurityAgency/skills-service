@@ -15,7 +15,11 @@ limitations under the License.
 */
 <template>
   <span class="markdown">
-    <viewer ref="toastuiViewer" data-cy="markdownViewer" :initialValue="text" height="auto" />
+    <viewer ref="toastuiViewer"
+            data-cy="markdownViewer"
+            :initialValue="text"
+            :options="viewerOptions"
+            height="auto" />
   </span>
 </template>
 <script>
@@ -30,6 +34,29 @@ limitations under the License.
     },
     components: {
       viewer: Viewer,
+    },
+    data() {
+      return {
+        viewerOptions: {
+          linkAttributes: {
+            target: '_blank',
+            rel: 'noopener noreferrer',
+          },
+          customHTMLRenderer: {
+            link(node, context) {
+              const { origin, entering } = context;
+              const result = origin();
+              if (!entering) {
+                return {
+                  type: 'html',
+                  content: ' <span class="fas fa-external-link-alt" style="font-size: 0.8rem"></span></a>',
+                };
+              }
+              return result;
+            },
+          },
+        },
+      };
     },
     watch: {
       text(newVal) {

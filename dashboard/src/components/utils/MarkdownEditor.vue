@@ -19,6 +19,7 @@ limitations under the License.
       data-cy="markdownEditorInput"
       ref="toastuiEditor"
       initialEditType="wysiwyg"
+      previewStyle="tab"
       :initialValue="valueInternal"
       :options="editorOptions"
       :height="markdownHeight"
@@ -53,6 +54,23 @@ limitations under the License.
           hideModeSwitch: false,
           usageStatistics: false,
           autofocus: false,
+          linkAttributes: {
+            target: '_blank',
+            rel: 'noopener noreferrer',
+          },
+          customHTMLRenderer: {
+            link(node, context) {
+              const { origin, entering } = context;
+              const result = origin();
+              if (!entering) {
+                return {
+                  type: 'html',
+                  content: ' <span class="fas fa-external-link-alt" style="font-size: 0.8rem"></span></a>',
+                };
+              }
+              return result;
+            },
+          },
         },
         intervalId: null,
         intervalRuns: 0,
