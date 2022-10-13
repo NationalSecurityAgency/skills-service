@@ -21,6 +21,7 @@ import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.storage.model.SkillDef
 import skills.storage.model.auth.RoleName
+import spock.lang.IgnoreIf
 
 class ManageTheApproverRoleSpecs extends DefaultIntSpec {
 
@@ -62,6 +63,8 @@ class ManageTheApproverRoleSpecs extends DefaultIntSpec {
         return false
     }
 
+    // every valid user in pki mode can become an approver
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "only valid dashboard users can have an approver role - reporting skill event is not enough"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
@@ -226,7 +229,8 @@ class ManageTheApproverRoleSpecs extends DefaultIntSpec {
         try {
             c.call()
         } catch (SkillsClientException sk) {
-            if (sk.message.contains("You do not have permission to view/manage this Project")) {
+            // pki and pass seem to emit different messages
+            if (sk.message.contains("You do not have permission to view/manage this Project") || sk.message.contains("HTTP Status 403 – Forbidden")) {
                 return true
             }
             throw sk

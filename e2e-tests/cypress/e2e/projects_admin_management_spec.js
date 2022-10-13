@@ -316,9 +316,10 @@ describe('Projects Admin Management Tests', () => {
         cy.wait('@addApprover');
 
         const tableSelector = '[data-cy=roleManagerTable]';
+        const expectedUserName = Cypress.env('oauthMode') ? 'foo bar' : 'skills@';
         cy.get(`${tableSelector} thead th`).contains('Role').click();
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'skills@' }, { colIndex: 1,  value: 'Administrator' }],
+            [{ colIndex: 0,  value: expectedUserName }, { colIndex: 1,  value: 'Administrator' }],
             [{ colIndex: 0,  value: 'root@' }, { colIndex: 1,  value: 'Approver' }],
         ], 5, true, null, false);
 
@@ -329,7 +330,7 @@ describe('Projects Admin Management Tests', () => {
         // verify that table loaded
         cy.get(`${tableSelector} [data-cy="controlsCell_root@skills.org"] [data-cy="editUserBtn"]`)
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'skills@' }, { colIndex: 1,  value: 'Administrator' }],
+            [{ colIndex: 0,  value: expectedUserName }, { colIndex: 1,  value: 'Administrator' }],
             [{ colIndex: 0,  value: 'root@' }, { colIndex: 1,  value: 'Approver' }],
         ], 5, true, null, false);
 
@@ -337,7 +338,7 @@ describe('Projects Admin Management Tests', () => {
         cy.get('[data-cy="roleDropDown_root@skills.org"]').select('Administrator');
         cy.wait('@addAdmin')
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'skills@' }, { colIndex: 1,  value: 'Administrator' }],
+            [{ colIndex: 0,  value: expectedUserName }, { colIndex: 1,  value: 'Administrator' }],
             [{ colIndex: 0,  value: 'root@' }, { colIndex: 1,  value: 'Administrator' }],
         ], 5, true, null, false);
     });
