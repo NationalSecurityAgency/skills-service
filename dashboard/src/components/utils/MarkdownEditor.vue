@@ -88,11 +88,6 @@ limitations under the License.
       }, 250);
       this.setLabelForMoreButton();
     },
-    watch: {
-      value(newValue) {
-        this.valueInternal = newValue;
-      },
-    },
     computed: {
       markdownText() {
         const markdown = this.$refs.toastuiEditor.invoke('getMarkdown');

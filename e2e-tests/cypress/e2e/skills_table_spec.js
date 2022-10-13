@@ -101,7 +101,7 @@ describe('Skills Table Tests', () => {
         ], 10, false, null, false);
         cy.get(`${tableSelector} tbody tr`).should('have.length', 3);
 
-        const makdownDivSelector = '#markdown-editor div.toastui-editor-main.toastui-editor-ww-mode > div > div.toastui-editor-ww-container'
+        const makdownDivSelector = '#markdown-editor div.toastui-editor-main.toastui-editor-ww-mode > div > div.toastui-editor-ww-container > div > div'
         cy.get('[data-cy="copySkillButton_skill2"]').click();
         cy.get(`${makdownDivSelector}`).should('have.text', 'generic description');
         cy.get('[data-cy=skillName]').should('have.value', 'Copy of Very Great Skill # 2');

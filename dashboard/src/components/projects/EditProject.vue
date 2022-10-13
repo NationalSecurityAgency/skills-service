@@ -61,7 +61,7 @@ limitations under the License.
               <skills-spinner :is-loading="loadingDescription"/>
               <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{errors}"
                                   name="Project Description">
-                <markdown-editor v-model="internalProject.description" @input="updateDescription"></markdown-editor>
+                <markdown-editor v-if="!isEdit || !loadingDescription" v-model="internalProject.description" @input="updateDescription"></markdown-editor>
                 <small role="alert" class="form-text text-danger mb-3" data-cy="projectDescriptionError">{{ errors[0] }}</small>
               </ValidationProvider>
           </div>
