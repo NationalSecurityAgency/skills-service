@@ -62,7 +62,7 @@ limitations under the License.
           <label class="label">Description</label>
           <div class="control">
             <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{errors}" name="Group Description">
-              <markdown-editor v-if="internalGroup"
+              <markdown-editor v-if="internalGroup && (!isEdit || !isLoading)"
                                v-model="internalGroup.description"
                                :aria-invalid="errors && errors.length > 0"
                                aria-errormessage="groupDescriptionError"
