@@ -422,6 +422,24 @@ Cypress.Commands.add("approveRequest", (projNum = 1, requestNum = 0) => {
         });
 });
 
+Cypress.Commands.add("configureApproverForSkillId", (projNum, approverUserId, skillNum) => {
+    const skillId = `skill${skillNum}`;
+    cy.request('POST', `/admin/projects/proj${projNum}/approverConf/${approverUserId}`, {
+        skillId
+    });
+});
+Cypress.Commands.add("configureApproverForUserTag", (projNum, approverUserId, userTagKey, userTagValue) => {
+    cy.request('POST', `/admin/projects/proj${projNum}/approverConf/${approverUserId}`, {
+        userTagKey,
+        userTagValue
+    });
+});
+Cypress.Commands.add("configureApproverForUser", (projNum, approverUserId, userId) => {
+    cy.request('POST', `/admin/projects/proj${projNum}/approverConf/${approverUserId}`, {
+        userId
+    });
+});
+
 Cypress.Commands.add("getLinkFromEmail", () => {
     cy.request({
         "method":"GET",

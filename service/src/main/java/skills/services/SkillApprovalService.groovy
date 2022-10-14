@@ -28,6 +28,7 @@ import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.SkillApproverConfRequest
+import skills.controller.result.model.ApproverConfResult
 import skills.controller.result.model.LabelCountItem
 import skills.controller.result.model.SkillApprovalResult
 import skills.controller.result.model.TableResult
@@ -333,5 +334,22 @@ class SkillApprovalService {
         if (!hasValidRole) {
             throw new SkillException("Approver [${approverId}] does not have permission to approve for the project [${projectId}]", projectId, null, ErrorCode.AccessDenied)
         }
+    }
+
+    List<ApproverConfResult> getProjectApproverConf(String projectId) {
+        List<SkillApprovalConfRepo.ApproverConfResult> approverConfResults = skillApprovalConfRepo.findAllByProjectId(projectId)
+        List<ApproverConfResult> res = approverConfResults.collect {
+            new ApproverConfResult(
+                    id: it.getId(),
+                    approverUserId: it.getApproverUserId(),
+                    userIdForDisplay: it.getUserIdForDisplay(),
+                    userId: it.getUserId(),
+                    userTagKey: it.getUserTagKey(),
+                    userTagValue: it.getUserTagValue(),
+                    skillName: it.getSkillName(),
+                    skillId: it.getSkillId(),
+            )
+        }
+        return res?.sort({ it.id })
     }
 }

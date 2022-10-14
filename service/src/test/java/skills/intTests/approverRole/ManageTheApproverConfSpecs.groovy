@@ -15,6 +15,7 @@
  */
 package skills.intTests.approverRole
 
+import groovy.json.JsonOutput
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
@@ -217,6 +218,50 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         e.message.contains("Approver [${user1Service.userName}] does not have permission to approve for the project [${proj.projectId}]")
     }
 
+    def "get approver conf"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(3, 1, 1, 100)
+        skills.each {
+            it.selfReportingType = SkillDef.SelfReportingType.Approval
+        }
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<String> users = getRandomUsers(4, true)
+        def user1Service = createService(users[0])
+        skillsService.addUserRole(user1Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        def user2Service = createService(users[1])
+        skillsService.addUserRole(user2Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[2], new Date(), "Please approve this!")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[3], new Date(), "Please approve this!")
+
+        SkillsService rootUser = createRootSkillService()
+        String userTagKey = "key1"
+        rootUser.saveUserTag(users[2], userTagKey, ["abcd"])
+        rootUser.saveUserTag(users[3], userTagKey, ["efgh"])
+
+        skillsService.configureApproverForUser(proj.projectId, user1Service.userName, users[2])
+        skillsService.configureApproverForSkillId(proj.projectId, user1Service.userName, skills[0].skillId)
+        skillsService.configureApproverForUser(proj.projectId, user2Service.userName, users[2])
+        skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, userTagKey, "abc")
+        skillsService.configureApproverForUserTag(proj.projectId, user2Service.userName, userTagKey, "nomatch")
+
+        String user2ForDisplay = userAttrsRepo.findByUserId(users[2]).userIdForDisplay
+
+        when:
+        def approverConf = user1Service.getApproverConf(proj.projectId)
+        println JsonOutput.prettyPrint(JsonOutput.toJson(approverConf))
+
+        then:
+        approverConf.approverUserId == [user1Service.userName, user1Service.userName, user2Service.userName, user1Service.userName, user2Service.userName]
+        approverConf.userId == [users[2], null, users[2], null, null]
+        approverConf.userIdForDisplay == [user2ForDisplay, null, user2ForDisplay, null, null]
+        approverConf.userTagKey == [null, null, null, userTagKey, userTagKey]
+        approverConf.userTagValue == [null, null, null, "abc", "nomatch"]
+        approverConf.skillName == [null, skills[0].name, null, null, null]
+        approverConf.skillId == [null, skills[0].skillId, null, null, null]
+    }
 
 
 }

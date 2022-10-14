@@ -85,6 +85,8 @@ import MyUsagePage from '@/components/myProgress/usage/MyUsagePage';
 import DiscoverProjectsPage from '@/components/myProgress/discover/DiscoverProjectsPage';
 import MyProjectSkillsPage from '@/components/myProgress/MyProjectSkillsPage';
 import ProjectErrorsPage from '@/components/projects/ProjectErrors';
+import SelfReportPageNav from '@/components/skills/selfReport/SelfReportPageNav';
+import SelfReportConfigurePage from '@/components/skills/selfReport/SelfReportConfigurePage';
 
 Vue.use(Router);
 
@@ -496,16 +498,31 @@ const router = new Router({
           },
         },
       }, {
-        name: 'SelfReport',
-        path: 'self-report',
-        component: SelfReportStatusPage,
-        meta: {
-          requiresAuth: true,
-          reportSkillId: 'VisitSelfReport',
-          announcer: {
-            message: 'Manage Project Skill Approval Requests',
+        path: '/administrator/projects/:projectId/self-report',
+        component: SelfReportPageNav,
+        meta: { requiresAuth: true },
+        children: [{
+          component: SelfReportStatusPage,
+          name: 'SelfReport',
+          path: '',
+          meta: {
+            requiresAuth: true,
+            reportSkillId: 'VisitSelfReport',
+            announcer: {
+              message: 'Manage Project Skill Approval Requests',
+            },
           },
-        },
+        }, {
+          component: SelfReportConfigurePage,
+          name: 'SelfReportConfigure',
+          path: 'configure',
+          meta: {
+            requiresAuth: true,
+            announcer: {
+              message: 'Self Approval Configuration Page',
+            },
+          },
+        }],
       }, {
         name: 'SkillsCatalog',
         path: '/administrator/projects/:projectId/skills-catalog',

@@ -55,4 +55,9 @@ export default {
   unsubscribeUserFromEmails(projectId) {
     return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/approvalEmails/unsubscribe`).then((response) => response.data);
   },
+  getApproverConf(projectId) {
+    const url = `/admin/projects/${encodeURIComponent(projectId)}/approverConf`;
+    return axios.get(url)
+      .then((response) => response.data);
+  },
 };

@@ -15,7 +15,6 @@ limitations under the License.
 */
 <template>
   <div id="cross-projects-panel" ref="mainFocus">
-    <sub-page-header title="Self Report"/>
     <skills-spinner :is-loading="loading" />
     <div v-if="!loading">
       <self-report-info-cards :self-report-stats="selfReportStats"/>
@@ -39,7 +38,6 @@ limitations under the License.
   import SelfReportService from '@/components/skills/selfReport/SelfReportService';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import NoContent2 from '@/components/utils/NoContent2';
-  import SubPageHeader from '../../utils/pages/SubPageHeader';
   import SelfReportInfoCards from './SelfReportInfoCards';
   import SelfReportApproval from './SelfReportApproval';
   import SelfReportApprovalHistory from './SelfReportApprovalHistory';
@@ -52,7 +50,6 @@ limitations under the License.
       SkillsSpinner,
       SelfReportApproval,
       SelfReportInfoCards,
-      SubPageHeader,
     },
     data() {
       return {

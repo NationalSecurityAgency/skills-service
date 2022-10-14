@@ -27,6 +27,7 @@ import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.SkillApproverConfRequest
 import skills.controller.request.model.SkillApprovalRejection
 import skills.controller.request.model.SkillApprovalRequest
+import skills.controller.result.model.ApproverConfResult
 import skills.controller.result.model.LabelCountItem
 import skills.controller.result.model.RequestResult
 import skills.controller.result.model.TableResult
@@ -163,6 +164,12 @@ class SkillApprovalController {
         SkillsValidator.isTrue(approverConfRequest.userId || approverConfRequest.skillId || approverConfRequest.userTagValue, "Must provide one of the config params -> approvalConf.userId || approvalConf.skillId || approvalConf.userTagPattern")
         skillApprovalService.configureApprover(projectId, approverUserId, approverConfRequest)
         return RequestResult.success()
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/approverConf", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    List<ApproverConfResult>  getProjectApproverConf(@PathVariable("projectId") String projectId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        return skillApprovalService.getProjectApproverConf(projectId);
     }
 
 }

@@ -584,6 +584,10 @@ class SkillsService {
         return wsHelper.adminPost("/projects/${projectId}/approverConf/${approverUserId}", [userId: userId])
     }
 
+    def getApproverConf(String projectId) {
+        return wsHelper.adminGet("/projects/${projectId}/approverConf")
+    }
+
     def configureApproverForSkillId(String projectId, String approverUserId, String skillId) {
         return wsHelper.adminPost("/projects/${projectId}/approverConf/${approverUserId}", [skillId: skillId])
     }
