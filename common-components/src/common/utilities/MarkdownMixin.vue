@@ -42,7 +42,6 @@ limitations under the License.
               const result = origin();
               const onMissing = (name) => name;
               const emojified = emoji.emojify(result.content, onMissing);
-              console.log('emojified: ', emojified);
               if (entering) {
                 return {
                   type: 'text',
