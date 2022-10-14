@@ -45,7 +45,7 @@ limitations under the License.
                       :display-project-name="false"
                       :badge="badge" class="pb-3"
                       :badgeRouterLinkGenerator="genLink"></badge-catalog-item>
-                  <div v-if="index !== skill.badges.length - 1">
+                  <div v-if="index !== skill.badgeSummaries.length - 1">
                     <hr/>
                   </div>
                 </div>

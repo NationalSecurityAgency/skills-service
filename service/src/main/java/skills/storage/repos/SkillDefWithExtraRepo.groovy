@@ -18,6 +18,8 @@ package skills.storage.repos
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.lang.Nullable
+import skills.skillLoading.model.SkillBadgeSummary
+import skills.storage.model.SimpleBadgeRes
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDef.ContainerType
 import skills.storage.model.SkillDefWithExtra
@@ -128,6 +130,13 @@ interface SkillDefWithExtraRepo extends PagingAndSortingRepository<SkillDefWithE
               sd.enabled  = 'true'
     ''', nativeQuery = true)
     Stream<SkillDefWithExtra> findAllMyBadgesForUser(String userId)
+
+    @Query(value='''select c
+        from SkillDef s, SkillRelDef r, SkillDef c 
+        where s.id = r.parent and c.id = r.child and r.type='BadgeRequirement' and (
+              (s.type='Badge' and s.projectId=?2) or s.type='GlobalBadge') and 
+              c.id = r.child and c.skillId in ?1 and c.type='Skill' ''')
+    List<SkillBadgeSummary> findAllBadgesForSkill(List<String> skillId, String projectId)
 
     @Nullable
     @Query('''select s from SkillDefWithExtra s where s.copiedFrom = ?1''')

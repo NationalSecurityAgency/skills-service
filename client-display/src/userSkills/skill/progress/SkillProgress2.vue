@@ -75,12 +75,16 @@ limitations under the License.
                 <i class="fas fa-eye"></i> Last Viewed
               </b-badge>
 
-              <b-badge v-for="badge in skill.badges" id="hasBadgesIndicator" data-cy="hasBadgesIndicator" variant="info" style="font-size: 0.9rem"
-                       class="ml-2 overflow-hidden" v-bind:key="badge.badgeId">
-                <i class="fa fa-award"></i> {{ badge.name }}
-              </b-badge>
             </div>
           </div>
+        </div>
+        <div v-if="skill.badges" style="padding-bottom: 5px;">
+          <span v-for="badge in skill.badges" data-cy="hasBadgesIndicator" variant="info" style="font-size: 0.9rem" class="ml-2 overflow-hidden"
+                   v-bind:key="badge.badgeId">
+            <router-link :to="genLink(badge)" class="btn btn-sm btn-outline-info skills-theme-btn mr-1">
+              <i class="fa fa-award"></i> {{ badge.name }}
+            </router-link>
+          </span>
         </div>
       </div>
       <div class="col-auto text-right"
@@ -318,6 +322,9 @@ limitations under the License.
           route = 'globalBadgeSkillDetails';
         }
         return route;
+      },
+      genLink(b) {
+        return { name: b.skillType === 'GlobalBadge' ? 'globalBadgeDetails' : 'badgeDetails', params: { badgeId: b.badgeId } };
       },
     },
   };

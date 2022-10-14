@@ -488,9 +488,9 @@ class SkillsLoader {
 
         def badges = skillDefRepo.findAllBadgesForSkill([skillId], crossProjectId ?: projectId);
         def badgeIds = badges.collect{ it.badgeId }
-        List<SkillBadgeSummary> badgeSummaries = loadBadgeSummaries(crossProjectId ?: projectId, userId, -1)
-        List<SkillGlobalBadgeSummary> globalBadgeSummaries = loadGlobalBadgeSummaries(crossProjectId ?: projectId, userId, -1)
-        def relevantBadges = badgeSummaries.findAll{ badgeIds.contains(it.badgeId)}
+        List<SkillBadgeSummary> relevantBadges = loadBadgeSummaries(crossProjectId ?: projectId, userId, 0)
+        relevantBadges.addAll(loadGlobalBadgeSummaries(userId, crossProjectId ?: projectId, 0));
+        relevantBadges = relevantBadges.findAll{ badgeIds.contains(it.badgeId) }
 
         String nextSkillId;
         String prevSkillId;
@@ -746,7 +746,14 @@ class SkillsLoader {
                     SkillRelDef.RelationshipType.GroupSkillToSubject, // skills under groups
             ]
             SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, subjectDefinition, version, relTypes)
-            skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints, false, userId, version)
+
+            List<SimpleBadgeRes> badges = []
+            if(projDef?.projectId) {
+                List<String> skillIds = groupChildrenMeta.childrenWithPoints.collect{ it -> it.skillDef.skillId }
+                badges = skillDefRepo.findAllBadgesForSkill(skillIds, projDef?.projectId);
+            }
+
+            skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints, false, userId, version, badges)
             totalPoints = skillsRes ? skillsRes.collect({it.totalPoints}).sum() as Integer : 0
 
         } else {
@@ -979,18 +986,12 @@ class SkillsLoader {
 
     @Profile
     private List<SkillSummaryParent> createSkillSummaries(ProjDef thisProjDef, List<SubjectDataLoader.SkillsAndPoints> childrenWithPoints, boolean populateSubjectInfo=false) {
-        return createSkillSummaries(thisProjDef, childrenWithPoints, populateSubjectInfo, null, null)
+        return createSkillSummaries(thisProjDef, childrenWithPoints, populateSubjectInfo, null, null, null)
     }
 
     @Profile
-    private List<SkillSummaryParent> createSkillSummaries(ProjDef thisProjDef, List<SubjectDataLoader.SkillsAndPoints> childrenWithPoints, boolean populateSubjectInfo, String userId, Integer version) {
+    private List<SkillSummaryParent> createSkillSummaries(ProjDef thisProjDef, List<SubjectDataLoader.SkillsAndPoints> childrenWithPoints, boolean populateSubjectInfo, String userId, Integer version, List<SimpleBadgeRes> badges) {
         List<SkillSummaryParent> skillsRes = []
-
-        List<SimpleBadgeRes> badges = []
-        if(thisProjDef?.projectId) {
-            List<String> skillIds = childrenWithPoints.collect{ it -> it.skillDef.skillId }
-            badges = skillDefRepo.findAllBadgesForSkill(skillIds, thisProjDef?.projectId);
-        }
 
         Map<String,ProjDef> projDefMap = [:]
         childrenWithPoints.each { SubjectDataLoader.SkillsAndPoints skillDefAndUserPoints ->
@@ -1038,7 +1039,7 @@ class SkillsLoader {
 
                 List<SubjectDataLoader.SkillsAndPoints> groupChildren = skillDefAndUserPoints.children
                 Integer numSkillsRequired = skillDef.numSkillsRequired == - 1 ?  groupChildren.size() : skillDef.numSkillsRequired
-                skillsSummary.children = createSkillSummaries(thisProjDef, groupChildren, false, userId, version)
+                skillsSummary.children = createSkillSummaries(thisProjDef, groupChildren, false, userId, version, null)
 
                 skillsSummary.points = skillsSummary.children ? skillsSummary.children.collect({it.points}).sort().takeRight(numSkillsRequired).sum() as Integer: 0
                 skillsSummary.todaysPoints = skillsSummary.children ? skillsSummary.children.collect({it.todaysPoints}).sort().takeRight(numSkillsRequired).sum() as Integer: 0
@@ -1066,7 +1067,7 @@ class SkillsLoader {
                         copiedFromProjectId: !isReusedSkill ? skillDef.copiedFromProjectId : null,
                         copiedFromProjectName: !isReusedSkill ? InputSanitizer.unsanitizeName(skillDefAndUserPoints.copiedFromProjectName) : null,
                         isLastViewed: skillDefAndUserPoints.isLastViewed,
-                        badges: badges.findAll{ it.skillId == skillDef.skillId },
+                        badges: badges?.findAll{ it.skillId == skillDef.skillId },
                 )
             }
         }
