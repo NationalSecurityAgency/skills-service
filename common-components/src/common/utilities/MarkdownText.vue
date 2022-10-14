@@ -19,62 +19,36 @@ limitations under the License.
             data-cy="markdownViewer"
             :initialValue="text"
             :options="viewerOptions"
-            height="auto" />
+            :height="markdownHeight" />
   </span>
 </template>
 <script>
 
   import '@toast-ui/editor/dist/toastui-editor-viewer.css';
-  import emoji from 'node-emoji';
   import { Viewer } from '@toast-ui/vue-editor';
+  import MarkdownMixin from './MarkdownMixin';
 
   export default {
     name: 'MarkdownText',
     props: {
       text: String,
+      markdownHeight: {
+        type: String,
+        default: '300px',
+      },
     },
     components: {
       viewer: Viewer,
     },
-    data() {
-      return {
-        viewerOptions: {
-          linkAttributes: {
-            target: '_blank',
-            rel: 'noopener noreferrer',
-          },
-          customHTMLRenderer: {
-            link(node, context) {
-              const { origin, entering } = context;
-              const result = origin();
-              if (!entering) {
-                return {
-                  type: 'html',
-                  content: ' <span class="fas fa-external-link-alt" style="font-size: 0.8rem"></span></a>',
-                };
-              }
-              return result;
-            },
-            text(node, context) {
-              const { origin, entering } = context;
-              const result = origin();
-              const onMissing = (name) => name;
-              const emojified = emoji.emojify(result.content, onMissing);
-              if (entering) {
-                return {
-                  type: 'text',
-                  content: emojified,
-                };
-              }
-              return result;
-            },
-          },
-        },
-      };
-    },
+    mixins: [MarkdownMixin],
     watch: {
       text(newVal) {
         this.$refs.toastuiViewer.invoke('setMarkdown', newVal);
+      },
+    },
+    computed: {
+      viewerOptions() {
+        return this.markdownOptions;
       },
     },
   };

@@ -30,12 +30,13 @@ limitations under the License.
 
 <script>
   import '@toast-ui/editor/dist/toastui-editor.css';
-  import emoji from 'node-emoji';
   import { Editor } from '@toast-ui/vue-editor';
+  import MarkdownMixin from '@/common-components/utilities/MarkdownMixin';
 
   export default {
     name: 'MarkdownEditor',
     components: { Editor },
+    mixins: [MarkdownMixin],
     props: {
       value: String,
       resizable: {
@@ -46,46 +47,14 @@ limitations under the License.
         type: String,
         default: 'Description',
       },
+      markdownHeight: {
+        type: String,
+        default: '300px',
+      },
     },
     data() {
       return {
         valueInternal: this.value,
-        markdownHeight: '15rem',
-        editorOptions: {
-          hideModeSwitch: false,
-          usageStatistics: false,
-          autofocus: false,
-          linkAttributes: {
-            target: '_blank',
-            rel: 'noopener noreferrer',
-          },
-          customHTMLRenderer: {
-            link(node, context) {
-              const { origin, entering } = context;
-              const result = origin();
-              if (!entering) {
-                return {
-                  type: 'html',
-                  content: ' <span class="fas fa-external-link-alt" style="font-size: 0.8rem"></span></a>',
-                };
-              }
-              return result;
-            },
-            text(node, context) {
-              const { origin, entering } = context;
-              const result = origin();
-              const onMissing = (name) => name;
-              const emojified = emoji.emojify(result.content, onMissing);
-              if (entering) {
-                return {
-                  type: 'text',
-                  content: emojified,
-                };
-              }
-              return result;
-            },
-          },
-        },
         intervalId: null,
         intervalRuns: 0,
         maxIntervalAttempts: 8,
@@ -106,6 +75,14 @@ limitations under the License.
       markdownText() {
         const markdown = this.$refs.toastuiEditor.invoke('getMarkdown');
         return markdown;
+      },
+      editorOptions() {
+        const options = {
+          hideModeSwitch: false,
+          usageStatistics: false,
+          autofocus: false,
+        };
+        return Object.assign(this.markdownOptions, options);
       },
     },
     methods: {
