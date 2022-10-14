@@ -33,6 +33,7 @@
     "lodash": "4.17.21",
     "lodash.debounce": "4.0.8",
     "material-icons": "1.9.1",
+    "node-emoji": "1.11.0",
     "number-format.js": "2.0.9",
     "postmate": "1.5.2",
     "q": "1.5.1",

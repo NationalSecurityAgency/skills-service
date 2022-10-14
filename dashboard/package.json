@@ -39,6 +39,7 @@
     "lodash.debounce": "4.0.8",
     "matchmedia-polyfill": "0.3.2",
     "material-icons": "0.7.6",
+    "node-emoji": "1.11.0",
     "number-format.js": "2.0.9",
     "sockjs-client": "1.5.1",
     "sortablejs": "1.14.0",

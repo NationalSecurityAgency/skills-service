@@ -30,6 +30,7 @@ limitations under the License.
 
 <script>
   import '@toast-ui/editor/dist/toastui-editor.css';
+  import emoji from 'node-emoji';
   import { Editor } from '@toast-ui/vue-editor';
 
   export default {
@@ -66,6 +67,19 @@ limitations under the License.
                 return {
                   type: 'html',
                   content: ' <span class="fas fa-external-link-alt" style="font-size: 0.8rem"></span></a>',
+                };
+              }
+              return result;
+            },
+            text(node, context) {
+              const { origin, entering } = context;
+              const result = origin();
+              const onMissing = (name) => name;
+              const emojified = emoji.emojify(result.content, onMissing);
+              if (entering) {
+                return {
+                  type: 'text',
+                  content: emojified,
                 };
               }
               return result;
