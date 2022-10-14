@@ -1063,11 +1063,11 @@ class AdminEditSpecs extends DefaultIntSpec {
 
         def u1Level = skillsService.getUserLevel(project.projectId, user1)
         assert u1Level == 2
-        def u1SubjLevel = skillsService.getSubjectSummaryForUser(project.projectId, subject.subjectId, user1)?.skillsLevel
+        def u1SubjLevel = skillsService.getSkillSummary(user1, project.projectId, subject.subjectId)?.skillsLevel
         assert u1SubjLevel == 2
         def u2Level = skillsService.getUserLevel(project.projectId, user2)
         assert u2Level == 1
-        def u2SubjLevel = skillsService.getSubjectSummaryForUser(project.projectId, subject.subjectId, user2)?.skillsLevel
+        def u2SubjLevel = skillsService.getSkillSummary(user2, project.projectId, subject.subjectId)?.skillsLevel
         assert u2SubjLevel == 1
 
         def projectUsers = skillsService.getProjectUsers(project.projectId)
@@ -1082,8 +1082,8 @@ class AdminEditSpecs extends DefaultIntSpec {
         def subjectUsersPostDelete = skillsService.getSubjectUsers(project.projectId, subject.subjectId)
         def u1LevelPostDelete = skillsService.getUserLevel(project.projectId, user1)
         def u2LevelPostDelete = skillsService.getUserLevel(project.projectId, user2)
-        def u1SubjLevelPostDelete = skillsService.getSubjectSummaryForUser(project.projectId, subject.subjectId, user1)?.skillsLevel
-        def u2SubjLevelPostDelete = skillsService.getSubjectSummaryForUser(project.projectId, subject.subjectId, user2)?.skillsLevel
+        def u1SubjLevelPostDelete = skillsService.getSkillSummary(user1, project.projectId, subject.subjectId)?.skillsLevel
+        def u2SubjLevelPostDelete = skillsService.getSkillSummary(user2, project.projectId, subject.subjectId)?.skillsLevel
 
         then:
         !projectUsersPostDelete.data.find { it.userId == user1 }

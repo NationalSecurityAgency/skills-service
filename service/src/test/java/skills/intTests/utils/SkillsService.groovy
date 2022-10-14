@@ -789,14 +789,6 @@ class SkillsService {
         wsHelper.apiGet(url)
     }
 
-    def getSubjectSummaryForUser(String projId, String subjectId, String userId, int version = -1) {
-        String url = "/projects/${projId}/subjects/${subjectId}/summary?userId=${userId}"
-        if (version >= 0) {
-            url += "&version=${version}"
-        }
-        wsHelper.apiGet(url)
-    }
-
     def getCrossProjectSkillSummary(String userId, String projId, String otherProjectId, String skillId, int version = -1) {
         userId = getUserId(userId)
         String url = "/projects/${projId}/projects/${otherProjectId}/skills/${skillId}/summary?userId=${userId}"
