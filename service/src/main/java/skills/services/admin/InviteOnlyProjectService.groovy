@@ -410,6 +410,10 @@ class InviteOnlyProjectService {
             throw new SkillException("No project invite exists for [${recipientEmail}]", projectId)
         }
 
+        if (existingToken.expires.before(new Date())) {
+            throw new SkillException("Project Invite for [${existingToken.recipientEmail}] is expired", projectId, null, ErrorCode.ExpiredProjectInvite)
+        }
+
         PrettyTime prettyTime = new PrettyTime()
         String relativeTime = prettyTime.format(existingToken.expires)
         Context templateContext = new Context()
@@ -421,7 +425,7 @@ class InviteOnlyProjectService {
         templateContext.setVariable("htmlHeader", htmlHeader)
         templateContext.setVariable("htmlFooter", htmlFooter)
 
-        emailService.sendEmailWithThymeleafTemplate("SkillTree Project Invitation", recipientEmail, INVITE_TEMPLATE, templateContext)
+        emailService.sendEmailWithThymeleafTemplate("SkillTree Project Invitation Reminder", recipientEmail, INVITE_REMINDER_TEMPLATE, templateContext)
     }
 
     private ProjectInviteStatus convert(ProjectAccessToken token) {

@@ -27,6 +27,7 @@ limitations under the License.
           <i class="fa fa-exclamation-triangle" aria-hidden="true"/> Please note that email notifications are currently disabled. Email configuration has not been performed on this instance of SkillTree. Please contact the root administrator.
         </div>
         <div class="card h-100">
+          <h5 class="card-title mt-4 ml-4">Send Invites</h5>
           <div class="card-body">
             <div class="media w-100">
               <invite-users-to-project ref="inviteUsers" :project-id="projectId" @invites-sent="handleInviteSent"/>
@@ -35,6 +36,7 @@ limitations under the License.
         </div>
         <div class="card h-100">
           <div class="card-body">
+            <h5 class="card-title">Invites Pending Acceptance</h5>
             <div class="media w-100">
               <invite-statuses ref="inviteStatuses" :project-id="projectId"/>
             </div>

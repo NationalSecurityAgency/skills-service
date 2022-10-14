@@ -15,12 +15,23 @@ limitations under the License.
 */
 <template>
   <div class="w-100">
-    <div v-if="showRefresh" class="text-info m-2">
-      Invite expiration has been extended,
-      <b-button variant="info" @click="refresh" class="text-uppercase" size="sm"
-                                                     data-cy="refreshInviteStatus"><i class="fas fa-redo-alt" aria-hidden="true"></i> refresh
-      </b-button> table?
+    <div class="row pt-3">
+      <div class="col-12">
+        <b-form-group label="Recipient Filter" label-class="text-muted">
+          <b-input v-model="recipientFilter" v-on:keydown.enter="loadData" data-cy="pendingInvite-recipientFilter" aria-label="recipient email filter"/>
+        </b-form-group>
+      </div>
+      <div class="col-md">
+      </div>
     </div>
+
+    <div class="row pb-3">
+      <div class="col">
+        <b-button variant="outline-info" @click="loadData" data-cy="pendingInvite-filterBtn"><i class="fa fa-filter"/> Filter</b-button>
+        <b-button variant="outline-info" @click="resetFilter" class="ml-1" data-cy="pendingInvite-resetBtn"><i class="fa fa-times"/> Reset</b-button>
+      </div>
+    </div>
+
     <skills-b-table :options="table.options"
                     :items="data"
                     @page-changed="pageChanged"
@@ -60,6 +71,7 @@ limitations under the License.
             </b-dropdown>
             <b-button variant="outline-primary" :aria-label="'remind user'"
                       data-cy="remindUser"
+                      :disabled="isExpired(data.item.expires)"
                       v-b-tooltip="`Send ${data.item.recipientEmail} a reminder`"
                       @click="remindUser(data.item.recipientEmail)">
               <i class="fas fa-paper-plane" aria-hidden="true"/>
@@ -74,6 +86,14 @@ limitations under the License.
         </div>
       </template>
     </skills-b-table>
+    <div id="accessNotificationPanel" class="text-info mt-2">
+      <div v-if="showNotificationSending">
+        <b-spinner small variant="outline-primary" label="Sending reminder notification"></b-spinner> Sending notification reminder
+      </div>
+      <div v-if="showNotificationSuccess">
+        <i class="fa fa-check" aria-hidden="true"/> Invite reminder sent!
+      </div>
+    </div>
 
     <removal-validation v-if="showDeleteDialog" v-model="showDeleteDialog" @do-remove="doDeletePendingInvite" @hidden="handleDeleteCancelled">
       <p>
@@ -92,7 +112,7 @@ limitations under the License.
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
   import NavigationErrorMixin from '../utils/NavigationErrorMixin';
 
-  const SHOW_REFRESH_DURATION = 8000;
+  const MESSAGE_DURATION = 8000;
 
   export default {
     name: 'InviteStatuses',
@@ -110,9 +130,8 @@ limitations under the License.
         showDeleteDialog: false,
         recipientFilter: '',
         isSaving: false,
-        extensionInProgress: false,
-        extensionDone: false,
-        showRefresh: false,
+        showNotificationSending: false,
+        showNotificationSuccess: false,
         recipientToDelete: '',
         deleteRecipientRef: null,
         table: {
@@ -197,21 +216,10 @@ limitations under the License.
           });
       },
       extendExpiration(recipientEmail, extension) {
-        this.extensionInProgress = true;
-        this.extensionDone = false;
         AccessService.extendInvite(this.projectId, recipientEmail, extension).then(() => {
-          this.showRefresh = true;
-          setTimeout(() => {
-            this.showRefresh = false;
-          }, SHOW_REFRESH_DURATION);
           this.$announcer.polite(`the expiration of project invite for ${recipientEmail} has been extended`);
-        }).finally(() => {
-          this.extensionInProgress = false;
+          this.loadData();
         });
-      },
-      refresh() {
-        this.showRefresh = false;
-        this.loadData();
       },
       deletePendingInvite(recipient, deleteBtnRef) {
         this.recipientToDelete = recipient;
@@ -230,16 +238,36 @@ limitations under the License.
       },
       handleDeleteCancelled() {
         this.$nextTick(() => {
-          this.$refs[this.deleteRecipientRef].focus();
+          if (this.$refs[this.deleteRecipientRef]) {
+            this.$refs[this.deleteRecipientRef].focus();
+          }
           this.deleteRecipientRef = null;
         });
       },
       remindUser(recipientEmail) {
-        //how are we going to indicate visually to the user that their button click caused something to happen?
-        //would need to set the userId as the
-        AccessService.remindInvitedUser(this.projectId, recipientEmail).finally(() => {
-
+        this.showNotificationSuccess = false;
+        this.showNotificationSending = true;
+        AccessService.remindInvitedUser(this.projectId, recipientEmail).then(() => {
+          this.$announcer.polite(`Invite reminder sent to ${recipientEmail}`);
+          this.showNotificationSending = false;
+          this.showNotificationSuccess = true;
+          setTimeout(() => {
+            this.showNotificationSuccess = false;
+          }, MESSAGE_DURATION);
+        }).catch((err) => {
+          if (err.response.data && err.response.data.errorCode && err.response.data.errorCode === 'ExpiredProjectInvite') {
+            this.msgOk(`The project invite for ${recipientEmail} has expired, reminders cannot be sent for expired invites, please extend the expiration for this invite and try again.`, 'Expired Invite');
+            this.loadData();
+          } else {
+            throw err;
+          }
+        }).finally(() => {
+          this.showNotificationSending = false;
         });
+      },
+      resetFilter() {
+        this.recipientFilter = '';
+        this.loadData();
       },
     },
   };

@@ -117,6 +117,6 @@ export default {
     return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}/invites/${encodeURIComponent(recipientEmail)}`).then((resp) => resp.data);
   },
   remindInvitedUser(projectId, recipientEmail) {
-    return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/invites/${encodeURIComponent(recipientEmail)}/remind`).then((resp) => resp.data);
+    return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/invites/${encodeURIComponent(recipientEmail)}/remind`, null, { handleError: false }).then((resp) => resp.data);
   },
 };

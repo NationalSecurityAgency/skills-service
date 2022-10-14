@@ -23,7 +23,7 @@ limitations under the License.
 </head>
 <body>
 <div th:remove="tag" th:utext="${htmlHeader}" th:if= "${htmlHeader != null}">[[${htmlHeader}]]</div>
-<p>This is a friendly reminder that you have been invited to join the [[${projectName}]] project. Please use the link below to accept the invitation. Your invitation will expire in approximately [[${relativeTime}]].</p>
+<p>This is a friendly reminder that you have been invited to join the [[${projectName}]] project. Please use the link below to accept the invitation. Your invitation will expire approximately [[${relativeTime}]].</p>
 <p><a th:href="@{${publicUrl}+'join-project/'+${projectId}+'/'+${inviteCode}+'?pn='+${projectName}}">Join [[${projectName}]]</a></p>
 <p>
     Always yours, <br/> -SkillTree Bot
