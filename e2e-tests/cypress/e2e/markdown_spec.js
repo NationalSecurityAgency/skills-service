@@ -39,6 +39,7 @@ describe('Markdown Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1/');
         cy.get('[data-cy=newSkillButton]')
             .click();
+        cy.get('#markdown-editor > div > div > div.toastui-editor-mode-switch').contains('Markdown').click()
         cy.get('[data-cy=skillName]')
             .type('skill1');
         cy.get('[data-cy=skillDescription]')
@@ -62,6 +63,7 @@ describe('Markdown Tests', () => {
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]')
             .click();
 
+        cy.get('#markdown-editor > div > div > div.toastui-editor-mode-switch').contains('Markdown').click()
         const validateMarkdown = (markdown, snapshotName, expectedText = null, clickWrite = true) => {
             if (clickWrite) {
                 cy.contains('Write')
@@ -79,7 +81,7 @@ describe('Markdown Tests', () => {
             if (expectedText) {
                 cy.contains(expectedText);
             }
-            cy.matchSnapshotImageForElement('[data-cy="markdownEditor-preview"]', snapshotName);
+            cy.matchSnapshotImageForElement('#markdown-editor div.toastui-editor-main-container', snapshotName);
         };
         validateMarkdown('# Title1\n## Title2\n### Title 3\n#### Title 4\n##### Title 5\nTitle 6\n\n', 'Markdown-Titles', null, false);
 
@@ -98,9 +100,9 @@ describe('Markdown Tests', () => {
             '```';
         validateMarkdown(multiLineCode, 'Markdown-MultiLineCode');
 
-        validateMarkdown('Some text:\n1. Item one\n1. Item two\n1. Item three (actual number does not matter)', 'Markdown-NumberedList');
+        validateMarkdown('Some text:\n1. Item one\nItem two\nItem three (actual number does not matter)', 'Markdown-NumberedList');
 
-        validateMarkdown('List:\n* Item\n* Item\n* Item\n', 'Markdown-UnorderedList');
+        validateMarkdown('List:\n* Item\nItem\nItem ', 'Markdown-UnorderedList');
 
         validateMarkdown('this is [in line link](https://www.somewebsite.com)', 'Markdown-Link');
 
@@ -164,8 +166,8 @@ describe('Markdown Tests', () => {
             '---\n\n' +
             'Separate me\n\n' +
             '***\n\n' +
-            '# Emojis\n' +
-            ':+1: :+1: :+1: :+1:\n' +
+            // '# Emojis\n' +
+            // ':+1: :+1: :+1: :+1:\n' +
             '';
         cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
             projectId: 'proj1',
@@ -183,8 +185,8 @@ describe('Markdown Tests', () => {
         cy.contains('Description');
         cy.wait('@inceptionLevel');
         cy.contains('Level');
-        cy.contains('Emojis');
-        cy.contains('👍 👍 👍 👍');
+        // cy.contains('Emojis');
+        // cy.contains('👍 👍 👍 👍');
         cy.matchSnapshotImageForElement('[data-cy="childRowDisplay_skill1"]', 'Markdown-SkillsPage-Overview', snapshotOptions);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
@@ -194,8 +196,8 @@ describe('Markdown Tests', () => {
         cy.get(selectorSkillsRowToggle)
             .click();
         cy.contains('Description');
-        cy.contains('Emojis');
-        cy.contains('👍 👍 👍 👍');
+        // cy.contains('Emojis');
+        // cy.contains('👍 👍 👍 👍');
         cy.matchSnapshotImageForElement('[data-cy="childRowDisplay_skill1"]', 'Markdown-SubjectPage-SkillPreview', snapshotOptions);
     });
 
