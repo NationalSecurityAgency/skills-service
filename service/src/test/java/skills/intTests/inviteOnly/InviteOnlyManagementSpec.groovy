@@ -16,6 +16,7 @@
 package skills.intTests.inviteOnly
 
 import skills.intTests.utils.EmailUtils
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.utils.WaitFor
 import spock.lang.IgnoreRest
@@ -24,6 +25,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalUnit
+import java.util.concurrent.TimeUnit
 
 class InviteOnlyManagementSpec extends InviteOnlyBaseSpec {
 
@@ -140,22 +142,128 @@ class InviteOnlyManagementSpec extends InviteOnlyBaseSpec {
         skillsService.remindUserOfPendingInvite(proj.projectId, "someemail@email.foo")
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
-        EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail, 1)
+        def email = greenMail.getReceivedMessages()[0]
 
         then:
-        emailRes.subj == "SkillTree Project Invitation Reminder"
-        emailRes.html.contains == "This is a friendly reminder that you have been invited to join the [[${proj.name}]] project. Please use the link below to accept the invitation. Your invitation will expire approximately"
+        email.subject == "SkillTree Project Invitation Reminder"
+        email.content.toString().contains("This is a friendly reminder that you have been invited to join the ${proj.name} project. Please use the link below to accept the invitation. Your invitation will expire approximately")
     }
 
     def "cannot remind user of pending invite if invite ie expired"() {
+        def proj = SkillsFactory.createProject(99)
+        def subj = SkillsFactory.createSubject(99)
+        subj.description = "subj descrip"
+        def skill = SkillsFactory.createSkill(99, 1)
+        skill.pointIncrement = 200
+        def badge = SkillsFactory.createBadge(99, 1)
+        badge.description = "badge descrip"
 
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skill)
+        skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skill.skillId])
+        badge.enabled = true
+        skillsService.createBadge(badge)
+
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT1S", recipients: ["someemail@email.foo"]])
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT10M", recipients: ["someemail2@email.foo"]])
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT15M", recipients: ["someemail3@email.foo"]])
+        WaitFor.wait { greenMail.getReceivedMessages().length > 2 }
+        greenMail.reset()
+
+        when:
+        Thread.sleep(TimeUnit.SECONDS.toMillis(1))
+        skillsService.remindUserOfPendingInvite(proj.projectId, "someemail@email.foo")
+
+        then:
+        def e = thrown(SkillsClientException)
+        e.message.contains("Project Invite for [someemail@email.foo] is expired, errorCode:ExpiredProjectInvite")
     }
 
     def "can delete pending invite"() {
+        def proj = SkillsFactory.createProject(99)
+        def subj = SkillsFactory.createSubject(99)
+        subj.description = "subj descrip"
+        def skill = SkillsFactory.createSkill(99, 1)
+        skill.pointIncrement = 200
+        def badge = SkillsFactory.createBadge(99, 1)
+        badge.description = "badge descrip"
 
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skill)
+        skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skill.skillId])
+        badge.enabled = true
+        skillsService.createBadge(badge)
+
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail@email.foo"]])
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT10M", recipients: ["someemail2@email.foo"]])
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT15M", recipients: ["someemail3@email.foo"]])
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT20M", recipients: ["someemail4@email.foo"]])
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT25M", recipients: ["someemail5@email.foo"]])
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT30M", recipients: ["someemail6@email.foo"]])
+        WaitFor.wait { greenMail.getReceivedMessages().length > 5 }
+
+        when:
+        def page1PreDelete = skillsService.getPendingProjectInvites(proj.projectId, 5, 1, "expires", true)
+        skillsService.deletePendingInvite(proj.projectId, "someemail@email.foo")
+        def page1PostDelete = skillsService.getPendingProjectInvites(proj.projectId, 5, 1, "expires", true)
+
+        then:
+        page1PreDelete.data.size() == 5
+        page1PreDelete.count == 5
+        page1PreDelete.totalCount == 6
+        page1PreDelete.data.find { it.recipientEmail == "someemail@email.foo" }
+        page1PostDelete.data.size() == 5
+        page1PostDelete.count == 5
+        page1PostDelete.totalCount == 5
+        !page1PostDelete.data.find { it.recipientEmail == "someemail@email.foo" }
     }
 
     def "can delete expired pending invite"() {
+        def proj = SkillsFactory.createProject(99)
+        def subj = SkillsFactory.createSubject(99)
+        subj.description = "subj descrip"
+        def skill = SkillsFactory.createSkill(99, 1)
+        skill.pointIncrement = 200
+        def badge = SkillsFactory.createBadge(99, 1)
+        badge.description = "badge descrip"
 
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skill)
+        skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skill.skillId])
+        badge.enabled = true
+        skillsService.createBadge(badge)
+
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT1S", recipients: ["someemail@email.foo"]])
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT10M", recipients: ["someemail2@email.foo"]])
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT15M", recipients: ["someemail3@email.foo"]])
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT20M", recipients: ["someemail4@email.foo"]])
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT25M", recipients: ["someemail5@email.foo"]])
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT30M", recipients: ["someemail6@email.foo"]])
+        WaitFor.wait { greenMail.getReceivedMessages().length > 5 }
+        Thread.sleep(TimeUnit.SECONDS.toMillis(1))
+
+        when:
+        def page1PreDelete = skillsService.getPendingProjectInvites(proj.projectId, 5, 1, "expires", true)
+        skillsService.deletePendingInvite(proj.projectId, "someemail@email.foo")
+        def page1PostDelete = skillsService.getPendingProjectInvites(proj.projectId, 5, 1, "expires", true)
+
+        then:
+        page1PreDelete.data.size() == 5
+        page1PreDelete.count == 5
+        page1PreDelete.totalCount == 6
+        page1PreDelete.data.find { it.recipientEmail == "someemail@email.foo" }
+        page1PostDelete.data.size() == 5
+        page1PostDelete.count == 5
+        page1PostDelete.totalCount == 5
+        !page1PostDelete.data.find { it.recipientEmail == "someemail@email.foo" }
     }
 }

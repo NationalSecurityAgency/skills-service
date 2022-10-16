@@ -1503,13 +1503,11 @@ class SkillsService {
     }
 
     def deletePendingInvite(String projectId, String recipientEmail) {
-        URLCodec codec = new URLCodec("UTF-8")
-        return wsHelper.adminDelete("/projects/${projectId}/invites/${codec.encode(recipientEmail)}")
+        return wsHelper.adminDelete("/projects/${projectId}/invites/${recipientEmail}")
     }
 
     def remindUserOfPendingInvite(String projectId, String recipientEmail) {
-        URLCodec codec = new URLCodec("UTF-8")
-       return wsHelper.adminPost("/projects/${projectId}/invites/${codec.encode(recipientEmail)}/remind", [:])
+       return wsHelper.adminPost("/projects/${projectId}/invites/${recipientEmail}/remind", [:])
     }
 
     def extendProjectInviteExpiration(String projectId, String recipientEmail, String isoDuration) {
