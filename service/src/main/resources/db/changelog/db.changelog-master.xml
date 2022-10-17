@@ -1841,7 +1841,7 @@
 
     <changeSet id="34" author="skills team">
         <createIndex indexName="index_project_access_token_recipient"
-                     tableName="project_access_token" unique="true">
+                     tableName="project_access_token" unique="false">
             <column name="recipient_email" type="varchar(255)"/>
         </createIndex>
     </changeSet>
