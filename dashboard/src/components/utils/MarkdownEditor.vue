@@ -25,6 +25,7 @@ limitations under the License.
       :height="markdownHeight"
       @change="onEditorChange"
     ></editor>
+    <div><small><b-link to="/markdown" target="_blank">Markdown</b-link> is supported</small></div>
   </div>
 </template>
 
