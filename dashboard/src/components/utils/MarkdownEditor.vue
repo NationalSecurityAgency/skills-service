@@ -16,6 +16,7 @@ limitations under the License.
 <template>
   <div id="markdown-editor">
     <editor :style="resizable ? {resize: 'vertical', overflow: 'auto'} : {}"
+      class="markdown"
       data-cy="markdownEditorInput"
       ref="toastuiEditor"
       initialEditType="wysiwyg"
@@ -120,4 +121,8 @@ limitations under the License.
 </script>
 
 <style scoped>
+  .markdown >>> .toastui-editor-mode-switch .tab-item {
+    color: #555 !important;
+  }
+
 </style>
