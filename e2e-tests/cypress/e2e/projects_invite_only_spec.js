@@ -501,4 +501,522 @@ describe('Projects Invite-Only Tests', () => {
 
         });
     }
+
+    it('Extend expired invite', () => {
+        cy.createProject(1);
+        cy.intercept('GET', '/admin/projects/proj1/settings')
+            .as('getSettings');
+        cy.intercept('POST', '/admin/projects/proj1/settings')
+            .as('saveSettings');
+        cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice')
+            .as('emailSupported');
+        cy.intercept('POST', '/admin/projects/proj1/invite', (req) => {
+            req.reply((res) => {
+                const result = res.body;
+                result.successful = ['abc@cba.org'];
+                result.unsuccessful = ['bsmith@fake.email'];
+                res.send(result);
+            });
+        })
+            .as('sendInvites');
+        cy.intercept('GET', '/api/myprojects/proj1/name')
+            .as('getName');
+        cy.intercept('GET', '/api/projects/proj1/token')
+            .as('getToken');
+        cy.intercept('GET', '/admin/projects/proj1/userRoles/ROLE_PRIVATE_PROJECT_USER*')
+            .as('getApprovedUsers');
+        cy.intercept('DELETE', '/admin/projects/proj1/users/*/roles/ROLE_PRIVATE_PROJECT_USER')
+            .as('removeAccess');
+        cy.intercept('GET', '/admin/projects/proj1/errors*')
+            .as('loadIssues');
+        cy.intercept('POST', '/admin/projects/proj1/invites/extend').as('extendInviteExpiration');
+
+        cy.intercept('GET', '/admin/projects/proj1/invites/status**').as('loadInviteStatus');
+
+        cy.visit('/administrator/projects/proj1/settings');
+        cy.wait('@getSettings');
+
+        cy.get('[data-cy="projectVisibilitySelector"]')
+            .select('pio');
+        cy.get('.modal-content')
+            .should('be.visible')
+        cy.clickButton('Ok');
+        cy.get('[data-cy="saveSettingsBtn"')
+            .click({ force: true });
+        cy.wait('@saveSettings');
+        cy.wait('@getSettings');
+
+        cy.request('POST', '/admin//projects/proj1/invite', {
+            recipients: ['abc@abc.org'],
+            validityDuration: 'PT1S'
+        });
+
+        cy.request('POST', '/admin//projects/proj1/invite', {
+            recipients: ['abc1@abc.org', 'cba1@cba.org', 'foo1@foo.org'],
+            validityDuration: 'PT55M'
+        });
+
+        cy.wait(1000); //wait for invite to expire
+
+        cy.get('[data-cy="nav-Access"')
+            .click();
+        cy.wait('@emailSupported');
+        cy.wait('@loadInviteStatus');
+        cy.contains('abc@abc.org').should('be.visible');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(0).should('contain.text', 'abc@abc.org');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(2).should('contain.text', 'expired');
+
+        cy.get('[id="extend-0"]').click();
+        cy.get('[data-cy="invite-0-extension"]').eq(0).click();
+        cy.wait('@extendInviteExpiration');
+        cy.wait('@loadInviteStatus');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(0).should('contain.text', 'abc@abc.org');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(2).should('contain.text', 'in 30 minutes');
+    });
+
+    it('Extend un-expired invite', () => {
+        cy.createProject(1);
+        cy.intercept('GET', '/admin/projects/proj1/settings')
+            .as('getSettings');
+        cy.intercept('POST', '/admin/projects/proj1/settings')
+            .as('saveSettings');
+        cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice')
+            .as('emailSupported');
+        cy.intercept('POST', '/admin/projects/proj1/invite', (req) => {
+            req.reply((res) => {
+                const result = res.body;
+                result.successful = ['abc@cba.org'];
+                result.unsuccessful = ['bsmith@fake.email'];
+                res.send(result);
+            });
+        })
+            .as('sendInvites');
+        cy.intercept('GET', '/api/myprojects/proj1/name')
+            .as('getName');
+        cy.intercept('GET', '/api/projects/proj1/token')
+            .as('getToken');
+        cy.intercept('GET', '/admin/projects/proj1/userRoles/ROLE_PRIVATE_PROJECT_USER*')
+            .as('getApprovedUsers');
+        cy.intercept('DELETE', '/admin/projects/proj1/users/*/roles/ROLE_PRIVATE_PROJECT_USER')
+            .as('removeAccess');
+        cy.intercept('GET', '/admin/projects/proj1/errors*')
+            .as('loadIssues');
+        cy.intercept('POST', '/admin/projects/proj1/invites/extend').as('extendInviteExpiration');
+
+        cy.intercept('GET', '/admin/projects/proj1/invites/status**').as('loadInviteStatus');
+
+        cy.visit('/administrator/projects/proj1/settings');
+        cy.wait('@getSettings');
+
+        cy.get('[data-cy="projectVisibilitySelector"]')
+            .select('pio');
+        cy.get('.modal-content')
+            .should('be.visible')
+        cy.clickButton('Ok');
+        cy.get('[data-cy="saveSettingsBtn"')
+            .click({ force: true });
+        cy.wait('@saveSettings');
+        cy.wait('@getSettings');
+
+        cy.request('POST', '/admin//projects/proj1/invite', {
+            recipients: ['abc@abc.org'],
+            validityDuration: 'P1D'
+        });
+
+        cy.request('POST', '/admin//projects/proj1/invite', {
+            recipients: ['abc1@abc.org', 'cba1@cba.org', 'foo1@foo.org'],
+            validityDuration: 'P90D'
+        });
+
+        cy.get('[data-cy="nav-Access"')
+            .click();
+        cy.wait('@emailSupported');
+        cy.wait('@loadInviteStatus');
+        cy.contains('abc@abc.org').should('be.visible');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(0).should('contain.text', 'abc@abc.org');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(2).should('contain.text', 'in a day');
+
+        cy.get('[id="extend-0"]').click();
+        cy.get('[data-cy="invite-0-extension"]').eq(3).click();
+        cy.wait('@extendInviteExpiration');
+        cy.wait('@loadInviteStatus');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(0).should('contain.text', 'abc@abc.org');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(2).should('contain.text', 'in 8 days');
+    });
+
+    it('delete expired invite', () => {
+        cy.createProject(1);
+        cy.intercept('GET', '/admin/projects/proj1/settings')
+            .as('getSettings');
+        cy.intercept('POST', '/admin/projects/proj1/settings')
+            .as('saveSettings');
+        cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice')
+            .as('emailSupported');
+        cy.intercept('POST', '/admin/projects/proj1/invite', (req) => {
+            req.reply((res) => {
+                const result = res.body;
+                result.successful = ['abc@cba.org'];
+                result.unsuccessful = ['bsmith@fake.email'];
+                res.send(result);
+            });
+        })
+            .as('sendInvites');
+        cy.intercept('GET', '/api/myprojects/proj1/name')
+            .as('getName');
+        cy.intercept('GET', '/api/projects/proj1/token')
+            .as('getToken');
+        cy.intercept('GET', '/admin/projects/proj1/userRoles/ROLE_PRIVATE_PROJECT_USER*')
+            .as('getApprovedUsers');
+        cy.intercept('DELETE', '/admin/projects/proj1/users/*/roles/ROLE_PRIVATE_PROJECT_USER')
+            .as('removeAccess');
+        cy.intercept('GET', '/admin/projects/proj1/errors*')
+            .as('loadIssues');
+        cy.intercept('POST', '/admin/projects/proj1/invites/extend').as('extendInviteExpiration');
+
+        cy.intercept('GET', '/admin/projects/proj1/invites/status**').as('loadInviteStatus');
+        cy.intercept('DELETE', '/admin/projects/proj1/invites/*').as('deleteInvite');
+
+        cy.visit('/administrator/projects/proj1/settings');
+        cy.wait('@getSettings');
+
+        cy.get('[data-cy="projectVisibilitySelector"]')
+            .select('pio');
+        cy.get('.modal-content')
+            .should('be.visible')
+        cy.clickButton('Ok');
+        cy.get('[data-cy="saveSettingsBtn"')
+            .click({ force: true });
+        cy.wait('@saveSettings');
+        cy.wait('@getSettings');
+
+        cy.request('POST', '/admin//projects/proj1/invite', {
+            recipients: ['abc@abc.org'],
+            validityDuration: 'PT1S'
+        });
+
+        cy.request('POST', '/admin//projects/proj1/invite', {
+            recipients: ['abc1@abc.org', 'cba1@cba.org', 'foo1@foo.org'],
+            validityDuration: 'P90D'
+        });
+
+        cy.wait(1000);
+
+        cy.get('[data-cy="nav-Access"')
+            .click();
+        cy.wait('@emailSupported');
+        cy.wait('@loadInviteStatus');
+        cy.contains('abc@abc.org').should('be.visible');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').should('have.length', 5); //account for header row
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(0).should('contain.text', 'abc@abc.org');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(2).should('contain.text', 'expired');
+        cy.get('[data-cy="deleteInvite"]').eq(0).click();
+        cy.contains('Removal Safety Check').should('be.visible');
+        cy.get('[data-cy="currentValidationText"]').type('Delete Me');
+        cy.get('[data-cy="removeButton"]').click();
+        cy.wait('@deleteInvite');
+        cy.wait('@loadInviteStatus');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(0).should('contain.text', 'abc1@abc.org');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(2).should('not.contain.text', 'expired');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').should('have.length', 4);
+    });
+
+    it('delete unexpired invite', () => {
+        cy.createProject(1);
+        cy.intercept('GET', '/admin/projects/proj1/settings')
+            .as('getSettings');
+        cy.intercept('POST', '/admin/projects/proj1/settings')
+            .as('saveSettings');
+        cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice')
+            .as('emailSupported');
+        cy.intercept('POST', '/admin/projects/proj1/invite', (req) => {
+            req.reply((res) => {
+                const result = res.body;
+                result.successful = ['abc@cba.org'];
+                result.unsuccessful = ['bsmith@fake.email'];
+                res.send(result);
+            });
+        })
+            .as('sendInvites');
+        cy.intercept('GET', '/api/myprojects/proj1/name')
+            .as('getName');
+        cy.intercept('GET', '/api/projects/proj1/token')
+            .as('getToken');
+        cy.intercept('GET', '/admin/projects/proj1/userRoles/ROLE_PRIVATE_PROJECT_USER*')
+            .as('getApprovedUsers');
+        cy.intercept('DELETE', '/admin/projects/proj1/users/*/roles/ROLE_PRIVATE_PROJECT_USER')
+            .as('removeAccess');
+        cy.intercept('GET', '/admin/projects/proj1/errors*')
+            .as('loadIssues');
+        cy.intercept('POST', '/admin/projects/proj1/invites/extend').as('extendInviteExpiration');
+
+        cy.intercept('GET', '/admin/projects/proj1/invites/status**').as('loadInviteStatus');
+        cy.intercept('DELETE', '/admin/projects/proj1/invites/*').as('deleteInvite');
+
+        cy.visit('/administrator/projects/proj1/settings');
+        cy.wait('@getSettings');
+
+        cy.get('[data-cy="projectVisibilitySelector"]')
+            .select('pio');
+        cy.get('.modal-content')
+            .should('be.visible')
+        cy.clickButton('Ok');
+        cy.get('[data-cy="saveSettingsBtn"')
+            .click({ force: true });
+        cy.wait('@saveSettings');
+        cy.wait('@getSettings');
+
+        cy.request('POST', '/admin//projects/proj1/invite', {
+            recipients: ['abc@abc.org'],
+            validityDuration: 'PT1H'
+        });
+
+        cy.request('POST', '/admin//projects/proj1/invite', {
+            recipients: ['abc1@abc.org', 'cba1@cba.org', 'foo1@foo.org'],
+            validityDuration: 'P90D'
+        });
+
+        cy.get('[data-cy="nav-Access"')
+            .click();
+        cy.wait('@emailSupported');
+        cy.wait('@loadInviteStatus');
+        cy.contains('abc@abc.org').should('be.visible');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').should('have.length', 5); //account for header row
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(0).should('contain.text', 'abc@abc.org');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(2).should('not.contain.text', 'expired');
+        cy.get('[data-cy="deleteInvite"]').eq(0).click();
+        cy.contains('Removal Safety Check').should('be.visible');
+        cy.get('[data-cy="currentValidationText"]').type('Delete Me');
+        cy.get('[data-cy="removeButton"]').click();
+        cy.wait('@deleteInvite');
+        cy.wait('@loadInviteStatus');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(0).should('contain.text', 'abc1@abc.org');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(2).should('not.contain.text', 'expired');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').should('have.length', 4);
+    });
+
+    it('remind user of invite', () => {
+        cy.createProject(1);
+        cy.intercept('GET', '/admin/projects/proj1/settings')
+            .as('getSettings');
+        cy.intercept('POST', '/admin/projects/proj1/settings')
+            .as('saveSettings');
+        cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice')
+            .as('emailSupported');
+        cy.intercept('POST', '/admin/projects/proj1/invite', (req) => {
+            req.reply((res) => {
+                const result = res.body;
+                result.successful = ['abc@cba.org'];
+                result.unsuccessful = ['bsmith@fake.email'];
+                res.send(result);
+            });
+        })
+            .as('sendInvites');
+        cy.intercept('GET', '/api/myprojects/proj1/name')
+            .as('getName');
+        cy.intercept('GET', '/api/projects/proj1/token')
+            .as('getToken');
+        cy.intercept('GET', '/admin/projects/proj1/userRoles/ROLE_PRIVATE_PROJECT_USER*')
+            .as('getApprovedUsers');
+        cy.intercept('DELETE', '/admin/projects/proj1/users/*/roles/ROLE_PRIVATE_PROJECT_USER')
+            .as('removeAccess');
+        cy.intercept('GET', '/admin/projects/proj1/errors*')
+            .as('loadIssues');
+        cy.intercept('POST', '/admin/projects/proj1/invites/extend').as('extendInviteExpiration');
+
+        cy.intercept('GET', '/admin/projects/proj1/invites/status**').as('loadInviteStatus');
+        cy.intercept('POST', '/admin/projects/proj1/invites/*/remind').as('remindUser');
+
+        cy.visit('/administrator/projects/proj1/settings');
+        cy.wait('@getSettings');
+
+        cy.get('[data-cy="projectVisibilitySelector"]')
+            .select('pio');
+        cy.get('.modal-content')
+            .should('be.visible')
+        cy.clickButton('Ok');
+        cy.get('[data-cy="saveSettingsBtn"')
+            .click({ force: true });
+        cy.wait('@saveSettings');
+        cy.wait('@getSettings');
+
+        cy.request('POST', '/admin//projects/proj1/invite', {
+            recipients: ['abc@abc.org'],
+            validityDuration: 'PT1H'
+        });
+
+        cy.request('POST', '/admin//projects/proj1/invite', {
+            recipients: ['abc1@abc.org', 'cba1@cba.org', 'foo1@foo.org'],
+            validityDuration: 'P90D'
+        });
+
+        cy.get('[data-cy="nav-Access"')
+            .click();
+        cy.wait('@emailSupported');
+        cy.wait('@loadInviteStatus');
+        cy.contains('abc@abc.org').should('be.visible');
+        cy.get('[data-cy="remindUser"]').eq(0).click();
+        cy.wait('@remindUser');
+        cy.get('[id="accessNotificationPanel"]').should('be.visible');
+        cy.get('[id=accessNotificationPanel]').should('contain.text', 'Invite reminder sent!');
+
+        cy.getEmails().then((emails) => {
+            expect(emails[0].subject).to.equal('SkillTree Project Invitation Reminder');
+            expect(emails[0].to.text).to.equal('abc@abc.org');
+            expect(emails[0].textAsHtml).to.contain('This is a friendly reminder that you have been invited to join');
+        });
+    });
+
+    it('cannot remind user if invite is expired without first extending', () => {
+        cy.createProject(1);
+        cy.intercept('GET', '/admin/projects/proj1/settings')
+            .as('getSettings');
+        cy.intercept('POST', '/admin/projects/proj1/settings')
+            .as('saveSettings');
+        cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice')
+            .as('emailSupported');
+        cy.intercept('POST', '/admin/projects/proj1/invite', (req) => {
+            req.reply((res) => {
+                const result = res.body;
+                result.successful = ['abc@cba.org'];
+                result.unsuccessful = ['bsmith@fake.email'];
+                res.send(result);
+            });
+        })
+            .as('sendInvites');
+        cy.intercept('GET', '/api/myprojects/proj1/name')
+            .as('getName');
+        cy.intercept('GET', '/api/projects/proj1/token')
+            .as('getToken');
+        cy.intercept('GET', '/admin/projects/proj1/userRoles/ROLE_PRIVATE_PROJECT_USER*')
+            .as('getApprovedUsers');
+        cy.intercept('DELETE', '/admin/projects/proj1/users/*/roles/ROLE_PRIVATE_PROJECT_USER')
+            .as('removeAccess');
+        cy.intercept('GET', '/admin/projects/proj1/errors*')
+            .as('loadIssues');
+        cy.intercept('POST', '/admin/projects/proj1/invites/extend').as('extendInviteExpiration');
+
+        cy.intercept('GET', '/admin/projects/proj1/invites/status**').as('loadInviteStatus');
+        cy.intercept('POST', '/admin/projects/proj1/invites/*/remind').as('remindUser');
+
+        cy.visit('/administrator/projects/proj1/settings');
+        cy.wait('@getSettings');
+
+        cy.get('[data-cy="projectVisibilitySelector"]')
+            .select('pio');
+        cy.get('.modal-content')
+            .should('be.visible')
+        cy.clickButton('Ok');
+        cy.get('[data-cy="saveSettingsBtn"')
+            .click({ force: true });
+        cy.wait('@saveSettings');
+        cy.wait('@getSettings');
+
+        cy.request('POST', '/admin//projects/proj1/invite', {
+            recipients: ['abc@abc.org'],
+            validityDuration: 'PT1S'
+        });
+
+        cy.request('POST', '/admin//projects/proj1/invite', {
+            recipients: ['abc1@abc.org', 'cba1@cba.org', 'foo1@foo.org'],
+            validityDuration: 'P90D'
+        });
+
+        cy.wait(1000);
+
+        cy.get('[data-cy="nav-Access"')
+            .click();
+        cy.wait('@emailSupported');
+        cy.wait('@loadInviteStatus');
+        cy.contains('abc@abc.org').should('be.visible');
+        cy.get('[data-cy="remindUser"]').eq(0).should('be.disabled');
+        cy.get('[id="extend-0"]').click();
+        cy.get('[data-cy="invite-0-extension"]').eq(0).click();
+        cy.wait('@loadInviteStatus')
+        cy.contains('abc@abc.org').should('be.visible');
+        cy.get('[data-cy="remindUser"]').eq(0).should('be.enabled').click();
+        cy.wait('@remindUser');
+        cy.get('[id="accessNotificationPanel"]').should('be.visible');
+        cy.get('[id=accessNotificationPanel]').should('contain.text', 'Invite reminder sent!');
+
+        cy.getEmails().then((emails) => {
+            expect(emails[0].subject).to.equal('SkillTree Project Invitation Reminder');
+            expect(emails[0].to.text).to.equal('abc@abc.org');
+            expect(emails[0].textAsHtml).to.contain('This is a friendly reminder that you have been invited to join');
+        });
+    });
+
+    it('cannot send reminder if invite expires after status table is loaded', () => {
+        cy.createProject(1);
+        cy.intercept('GET', '/admin/projects/proj1/settings')
+            .as('getSettings');
+        cy.intercept('POST', '/admin/projects/proj1/settings')
+            .as('saveSettings');
+        cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice')
+            .as('emailSupported');
+        cy.intercept('POST', '/admin/projects/proj1/invite', (req) => {
+            req.reply((res) => {
+                const result = res.body;
+                result.successful = ['abc@cba.org'];
+                result.unsuccessful = ['bsmith@fake.email'];
+                res.send(result);
+            });
+        })
+            .as('sendInvites');
+        cy.intercept('GET', '/api/myprojects/proj1/name')
+            .as('getName');
+        cy.intercept('GET', '/api/projects/proj1/token')
+            .as('getToken');
+        cy.intercept('GET', '/admin/projects/proj1/userRoles/ROLE_PRIVATE_PROJECT_USER*')
+            .as('getApprovedUsers');
+        cy.intercept('DELETE', '/admin/projects/proj1/users/*/roles/ROLE_PRIVATE_PROJECT_USER')
+            .as('removeAccess');
+        cy.intercept('GET', '/admin/projects/proj1/errors*')
+            .as('loadIssues');
+        cy.intercept('POST', '/admin/projects/proj1/invites/extend').as('extendInviteExpiration');
+
+        cy.intercept('GET', '/admin/projects/proj1/invites/status**').as('loadInviteStatus');
+        cy.intercept('POST', '/admin/projects/proj1/invites/*/remind').as('remindUser');
+
+        cy.visit('/administrator/projects/proj1/settings');
+        cy.wait('@getSettings');
+
+        cy.get('[data-cy="projectVisibilitySelector"]')
+            .select('pio');
+        cy.get('.modal-content')
+            .should('be.visible')
+        cy.clickButton('Ok');
+        cy.get('[data-cy="saveSettingsBtn"')
+            .click({ force: true });
+        cy.wait('@saveSettings');
+        cy.wait('@getSettings');
+
+        cy.request('POST', '/admin//projects/proj1/invite', {
+            recipients: ['abc@abc.org'],
+            validityDuration: 'PT5S'
+        });
+
+        cy.request('POST', '/admin//projects/proj1/invite', {
+            recipients: ['abc1@abc.org', 'cba1@cba.org', 'foo1@foo.org'],
+            validityDuration: 'P90D'
+        });
+
+        cy.get('[data-cy="nav-Access"')
+            .click();
+        cy.wait('@emailSupported');
+        cy.wait('@loadInviteStatus');
+        cy.contains('abc@abc.org').should('be.visible');
+        cy.wait(5000);
+
+        cy.get('[data-cy="projectInviteStatusTable"] tr').should('have.length', 5); //account for header row
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(0).should('contain.text', 'abc@abc.org');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(2).should('not.contain.text', 'expired');
+        cy.get('[data-cy="remindUser"]').eq(0).should('be.enabled');
+        cy.get('[data-cy="remindUser"]').eq(0).should('be.enabled').click();
+        cy.get('header.modal-header').should('be.visible').should('contain.text', 'Expired Invite');
+        cy.wait('@loadInviteStatus');
+        cy.clickButton('Ok');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').should('have.length', 5); //account for header row
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(0).should('contain.text', 'abc@abc.org');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(2).should('contain.text', 'expired');
+    });
 });

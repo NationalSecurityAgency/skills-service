@@ -63,11 +63,11 @@ limitations under the License.
               <b-dropdown-header>
                 Extend expiration by
               </b-dropdown-header>
-              <b-dropdown-item @click="extendExpiration(data.item.recipientEmail, 'PT30M')">30 minutes</b-dropdown-item>
-              <b-dropdown-item @click="extendExpiration(data.item.recipientEmail, 'PT8H')">8 hours</b-dropdown-item>
-              <b-dropdown-item @click="extendExpiration(data.item.recipientEmail, 'PT24H')">24 hours</b-dropdown-item>
-              <b-dropdown-item @click="extendExpiration(data.item.recipientEmail, 'P7D')">7 days</b-dropdown-item>
-              <b-dropdown-item @click="extendExpiration(data.item.recipientEmail, 'P30D')">30 days</b-dropdown-item>
+              <b-dropdown-item @click="extendExpiration(data.item.recipientEmail, 'PT30M')" :data-cy="`invite-${data.index}-extension`">30 minutes</b-dropdown-item>
+              <b-dropdown-item @click="extendExpiration(data.item.recipientEmail, 'PT8H')" :data-cy="`invite-${data.index}-extension`">8 hours</b-dropdown-item>
+              <b-dropdown-item @click="extendExpiration(data.item.recipientEmail, 'PT24H')" :data-cy="`invite-${data.index}-extension`">24 hours</b-dropdown-item>
+              <b-dropdown-item @click="extendExpiration(data.item.recipientEmail, 'P7D')" :data-cy="`invite-${data.index}-extension`">7 days</b-dropdown-item>
+              <b-dropdown-item @click="extendExpiration(data.item.recipientEmail, 'P30D')" :data-cy="`invite-${data.index}-extension`">30 days</b-dropdown-item>
             </b-dropdown>
             <b-button variant="outline-primary" :aria-label="'remind user'"
                       data-cy="remindUser"

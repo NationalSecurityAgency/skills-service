@@ -1844,6 +1844,11 @@
                      tableName="project_access_token" unique="false">
             <column name="recipient_email" type="varchar(255)"/>
         </createIndex>
+        <createIndex indexName="index_project_access_token_recipient_project_id"
+                     tableName="project_access_token" unique="true">
+            <column name="recipient_email" type="varchar(255)"/>
+            <column name="proj_ref_id" type="int"/>
+        </createIndex>
     </changeSet>
 
 
