@@ -18,6 +18,7 @@ package skills.intTests.clientDisplay
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import skills.storage.model.SkillDef
 
 class ClientDisplayBadgesSpec extends DefaultIntSpec {
 
@@ -741,5 +742,39 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         summary.skills.collect { it.skillId } == ['skill1', 'skill1subj2', 'skill2', 'skill2subj2', 'skill2subj3']
         summary.skills.collect { it.copiedFromProjectId } == ["TestProject1", null, "TestProject1", null, "TestProject3"]
         summary.skills.collect { it.copiedFromProjectName } == ["Test Project#1", null, "Test Project#1", null, "Test Project#3"]
+    }
+
+    def "load badge with approvals"(){
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> allSkills = SkillsFactory.createSkills(2, 1, 1)
+        allSkills[0].pointIncrement = 200
+        allSkills[0].numPerformToCompletion = 200
+        allSkills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(allSkills)
+
+        String badge1 = "badge1"
+        Map badge = [projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
+        skillsService.addBadge(badge)
+
+        allSkills.each {
+            skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: it.skillId])
+            badge.enabled  = 'true'
+            skillsService.updateBadge(badge, badge.badgeId)
+        }
+
+        List<String> users = getRandomUsers(1)
+        def requestedDate = new Date()
+        skillsService.addSkill([projectId: proj1.projectId, skillId: allSkills[0].skillId], users.first(), requestedDate, "Please approve this 1!")
+
+        when:
+        def summary = skillsService.getBadgeSummary(users[0], proj1.projectId, badge1)
+        then:
+        summary.skills.size() == 2
+        summary.skills[0].selfReporting.requestedOn == requestedDate.time
+        summary.skills[1].selfReporting == null
     }
 }

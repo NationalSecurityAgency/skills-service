@@ -570,8 +570,22 @@ class SkillsLoader {
         clientPrefService.saveOrUpdateProjPrefForCurrentUser(ClientPrefKey.LastViewedSkill, skillId, projectId)
     }
 
+    private SelfReportingInfo loadSelfReportingFromApproval(SkillApproval skillApproval, SkillDefParent skillDef) {
+        SelfReportingInfo selfReportingInfo = new SelfReportingInfo(
+                approvalId: skillApproval?.id,
+                enabled: skillDef.selfReportingType != null,
+                type: skillDef.selfReportingType,
+                justificationRequired: Boolean.valueOf(skillDef.justificationRequired),
+                requestedOn: skillApproval?.requestedOn?.time,
+                rejectedOn: skillApproval?.rejectedOn?.time,
+                rejectionMsg: skillApproval?.rejectionMsg
+        )
+
+        return selfReportingInfo
+    }
+
     @Profile
-    private SelfReportingInfo loadSelfReporting(String userId, SkillDefWithExtra skillDef){
+    private SelfReportingInfo loadSelfReporting(String userId, SkillDefParent skillDef){
         boolean enabled = skillDef.selfReportingType != null
         Pageable oneRowPlease = PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "requestedOn"))
         String queryProjId = skillDef.copiedFrom ? skillDef.copiedFromProjectId : skillDef.projectId
@@ -841,7 +855,7 @@ class SkillsLoader {
 
         if (loadSkills) {
             SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef?.projectId, badgeDefinition, version, [SkillRelDef.RelationshipType.BadgeRequirement])
-            skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints, true)?.sort({ it.skill?.toLowerCase() })
+            skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints, true, userId)?.sort({ it.skill?.toLowerCase() })
         }
 
         String projectName = "";
@@ -885,7 +899,7 @@ class SkillsLoader {
 
         if (loadSkills) {
             SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, null, badgeDefinition, version, [SkillRelDef.RelationshipType.BadgeRequirement])
-            skillsRes = createSkillSummaries(null, groupChildrenMeta.childrenWithPoints)?.sort({ it.skill?.toLowerCase() })
+            skillsRes = createSkillSummaries(null, groupChildrenMeta.childrenWithPoints, userId)?.sort({ it.skill?.toLowerCase() })
             if (skillsRes) {
                 // all the skills are "cross-project" if they don't belong to the project that originated this reqest
                 skillsRes.each {
@@ -971,8 +985,8 @@ class SkillsLoader {
     }
 
     @Profile
-    private List<SkillSummaryParent> createSkillSummaries(ProjDef thisProjDef, List<SubjectDataLoader.SkillsAndPoints> childrenWithPoints, boolean populateSubjectInfo=false) {
-        return createSkillSummaries(thisProjDef, childrenWithPoints, populateSubjectInfo, null, null)
+    private List<SkillSummaryParent> createSkillSummaries(ProjDef thisProjDef, List<SubjectDataLoader.SkillsAndPoints> childrenWithPoints, boolean populateSubjectInfo=false, String userId) {
+        return createSkillSummaries(thisProjDef, childrenWithPoints, populateSubjectInfo, userId, null)
     }
 
     @Profile
@@ -1033,6 +1047,7 @@ class SkillsLoader {
             } else if (skillDef.type == SkillDef.ContainerType.Skill) {
                 boolean isReusedSkill = SkillReuseIdUtil.isTagged(skillDef.skillId)
                 String unsanitizedName = InputSanitizer.unsanitizeName(skillDef.name)
+
                 skillsRes << new SkillSummary(
                         projectId: skillDef.projectId,
                         projectName: InputSanitizer.unsanitizeName(projDef.name),
@@ -1045,7 +1060,7 @@ class SkillsLoader {
                         maxOccurrencesWithinIncrementInterval: skillDef.numMaxOccurrencesIncrementInterval,
                         totalPoints: skillDef.totalPoints,
                         dependencyInfo: skillDefAndUserPoints.dependencyInfo,
-                        selfReporting: skillDef.selfReportingType ? new SelfReportingInfo(enabled: true, type: skillDef.selfReportingType, justificationRequired: Boolean.valueOf(skillDef.justificationRequired)) : null,
+                        selfReporting: skillDef.selfReportingType ? loadSelfReportingFromApproval(skillDefAndUserPoints?.approval, skillDef) : null,
                         subjectName: subjectName,
                         subjectId: subjectId,
                         type: skillDef.type,

@@ -90,6 +90,9 @@ limitations under the License.
           <animated-number :num="skill.points"/>
           / {{ skill.totalPoints | number }} Points
         </div>
+        <div v-if="skill.selfReporting && skill.selfReporting.requestedOn && allowDrillDown" data-cy="approvalPending">
+          <i class="far fa-clock"></i> Pending Approval
+        </div>
       </div>
     </div>
     <div class="row">
