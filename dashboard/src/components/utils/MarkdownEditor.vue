@@ -122,7 +122,7 @@ limitations under the License.
 
 <style scoped>
   .markdown >>> .toastui-editor-mode-switch .tab-item {
-    color: #555 !important;
+    color: #555;
   }
 
 </style>
